@@ -1,7 +1,5 @@
 "use client";
 // C-1: @/data/laws を import すると法令コーパス全体がバンドルに同梱されるため、
-// 件数は SITE_STATS の静的リテラル（テストで実データと突合）を使う。
-import { SITE_STATS } from "@/data/site-stats";
 
 /**
  * Inline panel that surfaces the next 1-2 logical steps based on the current
@@ -13,6 +11,8 @@ import { ArrowRight, Database, ListChecks, MessageSquare } from "lucide-react";
 import { useOptionalCopilot } from "@/components/copilot/CopilotProvider";
 import type { CopilotStepId } from "@/lib/copilot/types";
 import { INDUSTRY_LABELS_JA, type IndustrySlug } from "@/lib/industry-slugs";
+import { isPublicRouteAvailable } from "@/lib/public-content-policy";
+import { TransientChatLink } from "@/components/home-safety-cockpit/transient-chat-link";
 
 interface CopilotNextStepsProps {
   current: CopilotStepId;
@@ -35,6 +35,7 @@ interface NextCard {
   href: string;
   icon: React.ComponentType<{ className?: string }>;
   tone: "emerald" | "rose" | "violet" | "blue";
+  transientChatQuestion?: string;
 }
 
 const TONE_CLASS: Record<NextCard["tone"], string> = {
@@ -51,7 +52,7 @@ export function CopilotNextSteps({ current, industry, intro, extraCta }: Copilot
   const slug = industry ?? copilot?.state.industry;
   const lbl = slug ? INDUSTRY_LABELS_JA[slug] : undefined;
   const concerns = copilot?.state.keyConcerns ?? [];
-  const focusParam = concerns.length > 0 ? `&focus=${encodeURIComponent(concerns[0])}` : "";
+  const hasConcern = concerns.length > 0;
 
   const cards: NextCard[] = [];
 
@@ -73,7 +74,6 @@ export function CopilotNextSteps({ current, industry, intro, extraCta }: Copilot
   if (current !== "plan-generator") {
     const queryParts: string[] = [];
     if (slug) queryParts.push(`industry=${slug}`);
-    if (concerns[0]) queryParts.push(`focus=${encodeURIComponent(concerns[0])}`);
     const href = queryParts.length > 0 ? `/strategy/plan-generator?${queryParts.join("&")}` : "/strategy/plan-generator";
     cards.push({
       id: "to-plan",
@@ -91,16 +91,19 @@ export function CopilotNextSteps({ current, industry, intro, extraCta }: Copilot
 
   if (current !== "chatbot") {
     const seed = concerns[0] ?? lbl;
-    const q = seed ? `?q=${encodeURIComponent(`${lbl ?? ""}${seed ? ` ${seed}` : ""}の安全対策と関連法令`.trim())}` : "";
+    const question = seed
+      ? `${lbl ?? ""}${seed ? ` ${seed}` : ""}の安全対策と関連法令`.trim()
+      : undefined;
     cards.push({
       id: "to-chatbot",
       label: lbl
         ? `${lbl}の関連法令を安衛法AIで深掘りする`
         : "関連法令を安衛法AIで深掘りする",
-      description: `${SITE_STATS.lawSourceCount}法令等を根拠条文付きでAIが回答。具体的な選任要件・特別教育・健診を確認できます。`,
-      href: `/chatbot${q}`,
+      description: "法令本文から関連条文を検索します。",
+      href: "/chatbot",
       icon: MessageSquare,
       tone: "blue",
+      transientChatQuestion: question,
     });
   }
 
@@ -115,6 +118,9 @@ export function CopilotNextSteps({ current, industry, intro, extraCta }: Copilot
     });
   }
 
+  const publicCards = cards.filter((card) =>
+    isPublicRouteAvailable(card.href),
+  );
   const headlineExtras: string[] = [];
   if (lbl) headlineExtras.push(lbl);
   if (concerns.length > 0) headlineExtras.push(concerns.slice(0, 2).join("・"));
@@ -146,14 +152,11 @@ export function CopilotNextSteps({ current, industry, intro, extraCta }: Copilot
         <p className="mb-3 text-xs leading-relaxed text-slate-700 dark:text-slate-300">{intro}</p>
       )}
       <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-        {cards.map((c) => {
+        {publicCards.map((c) => {
           const Icon = c.icon;
-          return (
-            <Link
-              key={c.id}
-              href={c.href}
-              className={`group flex items-start gap-3 rounded-lg border-2 p-3 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 ${TONE_CLASS[c.tone]}`}
-            >
+          const className = `group flex items-start gap-3 rounded-lg border-2 p-3 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 ${TONE_CLASS[c.tone]}`;
+          const content = (
+            <>
               <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-white text-slate-700 shadow-sm dark:bg-slate-800 dark:text-slate-200">
                 <Icon className="h-4 w-4" aria-hidden="true" />
               </span>
@@ -169,12 +172,25 @@ export function CopilotNextSteps({ current, industry, intro, extraCta }: Copilot
                 className="h-4 w-4 shrink-0 text-slate-400 transition group-hover:translate-x-0.5"
                 aria-hidden="true"
               />
+            </>
+          );
+          return c.transientChatQuestion ? (
+            <TransientChatLink
+              key={c.id}
+              question={c.transientChatQuestion}
+              className={className}
+            >
+              {content}
+            </TransientChatLink>
+          ) : (
+            <Link key={c.id} href={c.href} className={className}>
+              {content}
             </Link>
           );
         })}
       </div>
       {/* Discoverability footer for users who haven't visited a step yet */}
-      {focusParam && (
+      {hasConcern && (
         <p className="mt-3 text-[11px] text-slate-500 dark:text-slate-500">
           ※ 重点関心事項「{concerns[0]}」が引き継がれます。
         </p>

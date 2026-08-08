@@ -8,15 +8,45 @@
  */
 import { describe, expect, it } from "vitest";
 import { NextRequest } from "next/server";
-import { GET } from "./route";
+import { GET, POST } from "./route";
 
 async function call(q: string) {
-  const req = new NextRequest(`http://localhost/api/chemical/legal-profile?q=${encodeURIComponent(q)}`);
-  const res = await GET(req);
+  const req = new NextRequest("http://localhost/api/chemical/legal-profile", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ q }),
+  });
+  const res = await POST(req);
   return res.json();
 }
 
 describe("legal-profile API", () => {
+  it("GET queryを405で拒否し、POSTだけを案内する", async () => {
+    const req = new NextRequest(
+      `http://localhost/api/chemical/legal-profile?q=${encodeURIComponent("山田太郎 新宿A現場")}`,
+    );
+    const res = await GET();
+    expect(res.status).toBe(405);
+    expect(res.headers.get("allow")).toBe("POST");
+    expect(await res.json()).toEqual({ error: "method_not_allowed" });
+    expect(res.headers.get("location")).toBeNull();
+    expect(req.url).toContain("q=");
+  });
+  it("POST bodyで解決し、化学物質入力をrequest URLへ含めない", async () => {
+    const req = new NextRequest("http://localhost/api/chemical/legal-profile", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ q: "トルエン" }),
+    });
+    const res = await POST(req);
+    const json = await res.json();
+
+    expect(req.url).toBe("http://localhost/api/chemical/legal-profile");
+    expect(req.url).not.toContain(encodeURIComponent("トルエン"));
+    expect(json.resolved).toBe(true);
+    expect(res.headers.get("cache-control")).toBe("private, no-store");
+  });
+
   it("溶接ヒューム: CASレス名称で解決し特化則第二類が根拠付きで返る", async () => {
     const j = await call("溶接ヒューム");
     expect(j.resolved).toBe(true);
@@ -27,8 +57,15 @@ describe("legal-profile API", () => {
     );
     expect(tokka.length).toBeGreaterThan(0);
     expect(JSON.stringify(tokka)).toContain("別表第3第2号34の2");
-    // 義務（対策案）に特化則の基本義務が含まれる
+    // 物質名から確認すべき候補は出すが、作業条件なしでは適用を確定しない
     expect(JSON.stringify(j.duties)).toContain("特定化学物質作業主任者");
+    expect(j.applicabilityDecision).toBe("undetermined");
+    expect(
+      j.duties.every(
+        (group: { applicability: string }) =>
+          group.applicability === "undetermined",
+      ),
+    ).toBe(true);
   });
 
   it("カプサイシン: 法令索引に無い＝未解決（特化則・有機則の偽陽性ゼロ）", async () => {
@@ -44,13 +81,28 @@ describe("legal-profile API", () => {
     }
   });
 
-  it("アセトン: 有機則第二種＋作業主任者・測定・健診の義務が返る", async () => {
+  it("アセトン: 有機則第二種の収載と義務候補を返すが、適用は判定不能", async () => {
     const j = await call("67-64-1");
     expect(j.oshaTags).toContain("yuki-2");
     const s = JSON.stringify(j.duties);
     expect(s).toContain("有機溶剤作業主任者");
     expect(s).toContain("作業環境測定");
     expect(j.raTarget).toBe(true);
+    expect(j.applicabilityDecision).toBe("undetermined");
+    expect(j.checkupApplicability).toBe("undetermined");
+    expect(j.applicabilityRequiredConditions).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining("成分"),
+        expect.stringContaining("作業内容"),
+        expect.stringContaining("適用除外"),
+      ]),
+    );
+    expect(
+      j.duties.every(
+        (group: { applicability: string }) =>
+          group.applicability === "undetermined",
+      ),
+    ).toBe(true);
   });
 
   it("索引未収載の実在CAS: resolved だが安衛法系は unverified（断定しない）", async () => {
@@ -103,5 +155,35 @@ describe("legal-profile API", () => {
       "3. 管理的対策",
       "4. 保護具",
     ]);
+  });
+
+  it("CASまたは名称だけで義務確定を返さない", async () => {
+    for (const q of ["67-64-1", "108-88-3", "溶接ヒューム"]) {
+      const j = await call(q);
+      expect(j.applicabilityDecision, q).toBe("undetermined");
+      expect(String(j.applicabilityNote), q).toContain("確定できません");
+      expect(
+        j.duties.every(
+          (group: { applicability: string }) =>
+            group.applicability === "undetermined",
+        ),
+        q,
+      ).toBe(true);
+    }
+  });
+
+  it("does not promote a legacy CWC mirror tag to a confirmed legal designation or duty", async () => {
+    const j = await call("102-71-6");
+    expect(j.resolved).toBe(true);
+
+    const cwcDesignations = (
+      j.designations as Array<{ domain: string; status: string }>
+    ).filter((designation) => designation.domain === "cwc");
+    expect(cwcDesignations).toEqual([]);
+    expect(
+      (j.duties as Array<{ group: string }>).some((duty) =>
+        /化学兵器|CWC/i.test(duty.group),
+      ),
+    ).toBe(false);
   });
 });

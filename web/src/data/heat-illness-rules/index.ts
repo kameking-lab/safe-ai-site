@@ -6,3 +6,7 @@ export {
   R7_EFFECTIVE_FROM,
   R7_EFFECTIVE_FROM_JP,
 } from "./r7-compliance";
+export {
+  HEAT_ILLNESS_2025_LEGAL_SOURCE,
+  HEAT_ILLNESS_PREVENTION_RECOMMENDATIONS,
+} from "./legal-source";

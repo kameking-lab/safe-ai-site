@@ -1,5 +1,5 @@
 /**
- * GET /api/chemical/legal-profile?q=<CAS または 名称>
+ * POST /api/chemical/legal-profile { q: <CAS または 名称> }
  *
  * 一窓化（2026-07-11）の法令結論API。物質のCAS番号または名称（溶接ヒューム等の
  * CASレス告示名・群指定名を含む）を受け、正本突合済みの法令プロファイル＋
@@ -38,8 +38,16 @@ function dutiesFor(
   tags: RegulationTag[],
   designations: readonly LegalDesignation[],
   raTarget: boolean,
-): { group: string; items: LegalDuty[] }[] {
-  const groups: { group: string; items: LegalDuty[] }[] = [];
+): {
+  group: string;
+  applicability: "undetermined";
+  items: LegalDuty[];
+}[] {
+  const groups: {
+    group: string;
+    applicability: "undetermined";
+    items: LegalDuty[];
+  }[] = [];
   const seenGroup = new Set<string>();
   for (const t of tags) {
     const d = DUTIES_BY_TAG[t];
@@ -61,24 +69,52 @@ function dutiesFor(
                   : t;
     if (seenGroup.has(label)) continue;
     seenGroup.add(label);
-    groups.push({ group: label, items: d });
+    groups.push({
+      group: label,
+      applicability: "undetermined",
+      items: d,
+    });
   }
   if (designations.some((x) => x.domain === "dokugeki" && x.status === "designated")) {
-    groups.push({ group: "毒物及び劇物取締法", items: DOKUGEKI_DUTIES });
+    groups.push({
+      group: "毒物及び劇物取締法",
+      applicability: "undetermined",
+      items: DOKUGEKI_DUTIES,
+    });
   }
   const prtr = designations.filter(
     (x) => x.domain === "kakanho-prtr" && x.status === "designated",
   );
   if (prtr.some((x) => x.classification === "第一種指定化学物質")) {
-    groups.push({ group: "化管法（PRTR 第一種）", items: KAKANHO_DUTIES[1] });
+    groups.push({
+      group: "化管法（PRTR 第一種）",
+      applicability: "undetermined",
+      items: KAKANHO_DUTIES[1],
+    });
   } else if (prtr.length > 0) {
-    groups.push({ group: "化管法（第二種指定化学物質）", items: KAKANHO_DUTIES[2] });
+    groups.push({
+      group: "化管法（第二種指定化学物質）",
+      applicability: "undetermined",
+      items: KAKANHO_DUTIES[2],
+    });
   }
   if (raTarget) {
-    groups.unshift({ group: "リスクアセスメント対象物（安衛法）", items: RA_TARGET_DUTIES });
+    groups.unshift({
+      group: "リスクアセスメント対象物（安衛法）",
+      applicability: "undetermined",
+      items: RA_TARGET_DUTIES,
+    });
   }
   return groups;
 }
+
+const APPLICABILITY_REQUIRED_CONDITIONS = [
+  "最新SDSの製品名・発行日・成分・各成分の含有率",
+  "作業内容、取扱量、年間取扱量、作業時間、頻度、使用温度",
+  "屋内外、密閉・タンク内、飛散・噴霧、局所排気・全体換気の状況",
+  "混合物としての裾切値、適用除外、用途・工程ごとの適用条件",
+  "事業者の業種・規模、作業者と監督者の立場、対象作業への従事状況",
+] as const;
 
 /** ラベル・SDS義務（リスクアセスメント対象物）該否を統合DBのフラグから引く */
 function raTargetFor(key: string, label: string): boolean {
@@ -89,13 +125,15 @@ function raTargetFor(key: string, label: string): boolean {
   return byName?.flags.label_sds ?? false;
 }
 
-export async function GET(req: NextRequest) {
-  const q = req.nextUrl.searchParams.get("q")?.slice(0, 120) ?? "";
+async function respondToLegalProfileQuery(
+  q: string,
+  cacheControl: string,
+) {
   const entity = resolveLegalEntity(q);
   if (!entity) {
     return NextResponse.json(
       { resolved: false },
-      { status: 200, headers: { "Cache-Control": "public, s-maxage=86400" } },
+      { status: 200, headers: { "Cache-Control": cacheControl } },
     );
   }
   const profile = buildSubstanceLegalProfile(entity.key);
@@ -146,11 +184,40 @@ export async function GET(req: NextRequest) {
       oshaTags: tags,
       specialControl: isSpecialControlSubstance(entity.key),
       raTarget,
+      applicabilityDecision: "undetermined",
+      applicabilityRequiredConditions: APPLICABILITY_REQUIRED_CONDITIONS,
+      applicabilityNote:
+        "CAS番号または物質名の収載状況だけでは、作業主任者、作業環境測定、特殊健康診断、PRTR届出その他の義務を確定できません。",
+      checkupApplicability: "undetermined",
       checkups,
       duties: dutiesFor(tags, designations, raTarget),
       hierarchy: HIERARCHY_OF_CONTROLS,
       hasIndexEntry: profile != null,
     },
-    { status: 200, headers: { "Cache-Control": "public, s-maxage=86400" } },
+    { status: 200, headers: { "Cache-Control": cacheControl } },
+  );
+}
+
+export async function POST(req: NextRequest) {
+  let body: unknown;
+  try {
+    body = await req.json();
+  } catch {
+    body = null;
+  }
+  const q =
+    body && typeof body === "object" && "q" in body && typeof body.q === "string"
+      ? body.q.slice(0, 120)
+      : "";
+  return respondToLegalProfileQuery(q, "private, no-store");
+}
+
+export function GET() {
+  return NextResponse.json(
+    { error: "method_not_allowed" },
+    {
+      status: 405,
+      headers: { Allow: "POST", "Cache-Control": "no-store" },
+    },
   );
 }

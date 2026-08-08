@@ -27,9 +27,9 @@ const NAV_ITEMS: {
 }[] = [
   { id: "law-navi", href: "/law-navi", label: "法令ナビ", icon: Compass, description: "分野別・現場の言葉（爪のやつ／35条／別表第3）から条文の原文へ最短で着地" },
   { id: "laws", href: "/laws", label: "法改正一覧", icon: CalendarClock, description: "施行日カウントダウン付きの改正カレンダー（時系列ビュー）" },
-  { id: "law-search", href: "/law-search", label: "条文検索", icon: Search, description: "条文番号・キーワードで安衛法・安衛則を全文検索" },
+  { id: "law-search", href: "/law-search", label: "条文検索", icon: Search, description: "サイト収録条文を検索し、e-Gov正本へ移動" },
   { id: "law-hierarchy", href: "/law-hierarchy", label: "法令体系", icon: Network, description: "法→政令→省令→告示の階層構造を俯瞰" },
-  { id: "circulars", href: "/circulars", label: "通達DB", icon: FileText, description: `厚労省 通達・告示・指針 ${SITE_STATS.mhlwNoticeCount} 件をキーワード+期間+種別で検索` },
+  { id: "circulars", href: "https://www.mhlw.go.jp/hourei/", label: "公式通達検索", icon: FileText, description: `個別原文確認済みは現在${SITE_STATS.mhlwNoticeCount}件。厚労省の正本検索を開く` },
   { id: "glossary", href: "/glossary", label: "用語集", icon: BookOpen, description: "労働安全衛生の用語を辞書形式で解説" },
   { id: "chatbot", href: "/chatbot", label: "AIチャット", icon: MessageSquare, description: "条文番号と出典付きで自然文の質問に回答" },
 ];
@@ -68,7 +68,7 @@ export function LawHubNav({ current }: LawHubNavProps) {
             title 属性のツールチップだけに頼らず、常時表示のキャプションでも明示する。 */}
         <p className="mt-2 text-[11px] leading-snug text-slate-500">
           <span className="font-semibold text-slate-600">使い分け：</span>
-          法令ナビ＝分野・現場ことばから読む／条文検索＝条文の全文検索／
+          法令ナビ＝分野・現場ことばから読む／条文検索＝収録条文から正本を探す／
           <a href="/search" className="text-blue-700 underline underline-offset-2 hover:text-blue-800">
             サイト内横断検索
           </a>

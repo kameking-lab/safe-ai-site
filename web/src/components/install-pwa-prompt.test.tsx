@@ -1,6 +1,11 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { InstallPwaPrompt } from "./install-pwa-prompt";
+
+const navigationState = vi.hoisted(() => ({ pathname: "/" }));
+vi.mock("next/navigation", () => ({
+  usePathname: () => navigationState.pathname,
+}));
 
 // 柱1是正: beforeinstallprompt が発火しない iOS でも
 // 「共有 → ホーム画面に追加」の手動手順が出ることの回帰ガード。
@@ -24,6 +29,7 @@ function setNavigator(userAgent: string, platform: string, maxTouchPoints: numbe
 
 beforeEach(() => {
   window.localStorage.clear();
+  navigationState.pathname = "/";
 });
 
 afterEach(() => {
@@ -39,6 +45,26 @@ describe("InstallPwaPrompt (iOS 手動案内)", () => {
     expect(screen.getByText("「ホーム画面に追加」を選ぶ")).toBeDefined();
     // iOS では prompt() が使えないので「追加する」ボタンは出さない
     expect(screen.queryByRole("button", { name: "追加する" })).toBeNull();
+  });
+
+  it("フォーム入力開始後は blur しても同じ画面滞在中に勧誘を再表示しない", async () => {
+    setNavigator(IPHONE_SAFARI_UA, "iPhone", 5);
+    window.localStorage.setItem(SCORE_KEY, "12");
+    render(<InstallPwaPrompt />);
+    expect(screen.getByRole("dialog", { name: "ホーム画面に追加" })).toBeDefined();
+
+    const form = document.createElement("form");
+    const input = document.createElement("input");
+    form.appendChild(input);
+    document.body.appendChild(form);
+    fireEvent.focusIn(input);
+    fireEvent.input(input, { target: { value: "入力途中" } });
+    fireEvent.focusOut(input);
+
+    await waitFor(() => {
+      expect(screen.queryByRole("dialog", { name: "ホーム画面に追加" })).toBeNull();
+    });
+    form.remove();
   });
 
   it("利用スコアが閾値未満なら iPhone でも表示しない", () => {
@@ -61,5 +87,15 @@ describe("InstallPwaPrompt (iOS 手動案内)", () => {
     window.localStorage.setItem(SCORE_KEY, "12");
     render(<InstallPwaPrompt />);
     expect(screen.queryByRole("dialog")).toBeNull();
+  });
+
+  it("安衛法AIでは利用スコアとiOS条件を満たしてもcomposerを覆わない", () => {
+    navigationState.pathname = "/chatbot";
+    setNavigator(IPHONE_SAFARI_UA, "iPhone", 5);
+    window.localStorage.setItem(SCORE_KEY, "30");
+
+    render(<InstallPwaPrompt />);
+
+    expect(screen.queryByRole("dialog", { name: "ホーム画面に追加" })).toBeNull();
   });
 });

@@ -6,6 +6,7 @@
  * 事故事例は質的記述のため、title / summary / mainCauses に物質名を含むものを抽出する。
  */
 import type { AccidentCase } from "@/lib/types/domain";
+import { isAccidentEligibleForOperationalEvidence } from "@/lib/accident-source";
 
 export interface AccidentMatch {
   id: string;
@@ -35,6 +36,7 @@ export function findAccidentsBySubstance(
 
   const out: AccidentMatch[] = [];
   for (const c of cases) {
+    if (!isAccidentEligibleForOperationalEvidence(c)) continue;
     const haystack = `${c.title}\n${c.summary}\n${(c.mainCauses ?? []).join("\n")}`;
     if (terms.some((t) => haystack.includes(t))) {
       out.push({

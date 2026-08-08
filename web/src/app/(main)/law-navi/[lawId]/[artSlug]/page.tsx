@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { TransientChatLink } from "@/components/home-safety-cockpit/transient-chat-link";
 import { notFound } from "next/navigation";
 import {
   ArrowLeft,
@@ -10,6 +11,7 @@ import {
   ExternalLink,
   MessageSquare,
   Search,
+  ShieldAlert,
 } from "lucide-react";
 import { JsonLd, legalDocumentSchema, breadcrumbSchema } from "@/components/json-ld";
 import { LawHubNav } from "@/components/law-hub-nav";
@@ -34,11 +36,14 @@ import {
   type ReadingOrderLink,
 } from "@/lib/law-navi/fulltext-navi";
 import { matchGlossaryTerms } from "@/lib/law-navi/glossary-match";
-import { isIndexableLawNaviEntry } from "@/lib/law-navi/seo-gate";
+import {
+  hasVerifiedPrimaryText,
+  isIndexableLawNaviEntry,
+} from "@/lib/law-navi/seo-gate";
 import { topicsForArticle } from "@/data/law-navi/topics";
 import { relatedCalculatorsForArticle } from "@/lib/construction-calc/related-articles";
-import { getLawMetadata } from "@/data/laws";
 import { ogImageUrl } from "@/lib/og-url";
+import { getVisualKyScenariosByLawArticle } from "@/data/visual-ky";
 
 const SITE_BASE = "https://www.anzen-ai-portal.jp";
 
@@ -87,12 +92,16 @@ export async function generateMetadata({
   if (!resolved) return {};
   const { entry } = resolved;
   const a = entry.article;
+  const sourceVerified = hasVerifiedPrimaryText(entry);
   const title = `${a.lawShort} ${a.articleNum}${a.articleTitle ? `（${a.articleTitle}）` : ""}｜法令ナビ`;
-  // 現場ことば版がある条は、条文引用よりも検索スニペットとして伝わる言い換えを説明文に使う
+  // e-Gov 収録スナップショットとの個別ハッシュ一致を確認できた条だけを
+  // 「本文」として検索スニペットに出す。未確認の収録条文は正本確認導線として扱う。
   const plain = getFreshPlainArticle(entry.egovLawId, a);
-  const description = plain
-    ? `${a.law} ${a.articleNum}の原文と現場ことば版。${plain.plainText.slice(0, 80)}…（正式には原文参照）`
-    : `${a.law} ${a.articleNum}の原文と現場向けAI解説。${a.text.slice(0, 70)}…`;
+  const description = sourceVerified
+    ? plain
+      ? `${a.law} ${a.articleNum}のサイト収録本文と現場ことば版。${plain.plainText.slice(0, 80)}…（正本・現在性はe-Govで確認）`
+      : `${a.law} ${a.articleNum}のサイト収録本文と一次資料への確認導線。${a.text.slice(0, 70)}…`
+    : `${a.law} ${a.articleNum}のサイト収録索引。本文の一致・現在性は未確認のため、e-Gov法令検索の正本で確認してください。`;
   // FT-D3 SEO ゲート（設計書 §5-3）: 付加価値条件を満たさない条（全文取込の生ミラー等）は
   // noindex,follow。ページ生成・内部導線・前後ナビは維持しつつ検索インデックスからのみ外す。
   // 条件を満たした時点（plain 執筆・topics 追加等）で seo-gate が自動的に index へ昇格する。
@@ -154,10 +163,14 @@ export default async function LawNaviArticlePage({
 
   const { entry, origin, isDeleted, revisionId } = resolved;
   const a = entry.article;
+  const sourceVerified = hasVerifiedPrimaryText(entry);
   const egovUrl = egovUrlForEntry(entry);
-  const meta = getLawMetadata(a.lawShort);
   const topics = topicsForArticle(a.lawShort, a.articleNum);
   const relatedCalcs = relatedCalculatorsForArticle(a.lawShort, a.articleNum);
+  const relatedVisualKy = getVisualKyScenariosByLawArticle(
+    a.law,
+    a.articleNum,
+  );
   const glossaryHits = matchGlossaryTerms(a.text);
   const chatQuery = `${a.lawShort}${a.articleNum}${a.articleTitle ? `（${a.articleTitle}）` : ""}について、現場でのポイントを教えてください`;
   const itemMap = a.itemNumberMap ? Object.entries(a.itemNumberMap) : [];
@@ -176,19 +189,34 @@ export default async function LawNaviArticlePage({
     if (adj.prev) prev = toLink(adj.prev);
     if (adj.next) next = toLink(adj.next);
   }
+  const publicBrowseEntries = [
+    ...LAW_NAVI_ENTRIES,
+    ...(await getAllFulltextNaviEntries()),
+  ]
+    .filter(isIndexableLawNaviEntry)
+    .sort((left, right) => left.path.localeCompare(right.path, "ja"));
+  const browseIndex = publicBrowseEntries.findIndex((candidate) => candidate.path === entry.path);
+  const nextBrowseEntry =
+    browseIndex >= 0
+      ? publicBrowseEntries[(browseIndex + 1) % publicBrowseEntries.length]
+      : null;
 
   return (
     <>
       <JsonLd
         schema={[
-          legalDocumentSchema({
-            url: `${SITE_BASE}${entry.path}`,
-            title: `${a.law} ${a.articleNum}${a.articleTitle ? `（${a.articleTitle}）` : ""}`,
-            noticeNumber: null,
-            issuer: "厚生労働省",
-            issuedDate: null,
-            description: a.text.slice(0, 120),
-          }),
+          ...(sourceVerified
+            ? [
+                legalDocumentSchema({
+                  url: `${SITE_BASE}${entry.path}`,
+                  title: `${a.law} ${a.articleNum}${a.articleTitle ? `（${a.articleTitle}）` : ""}`,
+                  noticeNumber: null,
+                  issuer: "e-Gov法令検索（収録元）",
+                  issuedDate: null,
+                  description: a.text.slice(0, 120),
+                }),
+              ]
+            : []),
           breadcrumbSchema([
             { name: "ホーム", url: `${SITE_BASE}/` },
             { name: "法令ナビ", url: `${SITE_BASE}/law-navi` },
@@ -212,25 +240,26 @@ export default async function LawNaviArticlePage({
 
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
           {/* ── 主役: 原文 ── */}
-          <main className="min-w-0 space-y-4">
+          <div className="min-w-0 space-y-4">
             <header>
               <div className="flex flex-wrap items-center gap-1.5">
                 <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-800">
                   {a.lawShort}
                 </span>
-                {origin === "curated" ? (
+                {sourceVerified ? (
                   <span
                     className="inline-flex items-center gap-0.5 rounded-full border border-emerald-300 bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-800"
-                    title={`本サイトのキュレーション条文。現行版（e-Gov準拠）の条番号・条文を採録しています。${meta ? `最終突合 ${meta.auditedAt}` : ""}`}
+                    title="コミット済みe-Gov収録スナップショットと、この条の本文ハッシュが一致しています。現行性や法的解釈の人手確認を意味しません。"
                   >
-                    <span aria-hidden>●</span> 現行（e-Gov準拠）
+                    <span aria-hidden>●</span> 収録スナップショットとハッシュ一致
                   </span>
                 ) : (
                   <span
-                    className="inline-flex items-center gap-0.5 rounded-full border border-sky-300 bg-sky-50 px-2 py-0.5 text-[10px] font-semibold text-sky-800"
-                    title={`e-Gov 法令API の全文収載条（機械取込）。${revisionId ? `収録リビジョン ${revisionId}` : ""}`}
+                    className="inline-flex items-center gap-0.5 rounded-full border border-amber-400 bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-950"
+                    title={`サイト収録データです。本文一致と現在性は未確認です。${revisionId ? `収録リビジョン ${revisionId}` : ""}`}
                   >
-                    <span aria-hidden>●</span> 全文収載（e-Gov準拠）
+                    <span aria-hidden>△</span>{" "}
+                    {origin === "curated" ? "サイト収録・正本要確認" : "機械収録・正本要確認"}
                   </span>
                 )}
                 {isDeleted && (
@@ -246,9 +275,9 @@ export default async function LawNaviArticlePage({
               <p className="mt-1 text-sm text-slate-500">{a.law}</p>
             </header>
 
-            {/* 原文（条間参照はO18リンカでタップ可能） */}
+            {/* サイト収録条文（条間参照はO18リンカでタップ可能） */}
             <section
-              aria-label="条文原文"
+              aria-label="サイト収録条文"
               className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
             >
               {isDeleted ? (
@@ -283,15 +312,17 @@ export default async function LawNaviArticlePage({
                   <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
                   e-Govで原文を確認（正本）
                 </a>
-                <CopyCitationButton
-                  text={formatArticleCitation({
-                    text: a.text,
-                    lawShort: a.lawShort,
-                    lawFull: a.law,
-                    articleNum: a.articleNum,
-                    egovUrl,
-                  })}
-                />
+                {sourceVerified ? (
+                  <CopyCitationButton
+                    text={formatArticleCitation({
+                      text: a.text,
+                      lawShort: a.lawShort,
+                      lawFull: a.law,
+                      articleNum: a.articleNum,
+                      egovUrl,
+                    })}
+                  />
+                ) : null}
                 <FavoriteButton
                   kind="article"
                   id={`${a.law}|${a.articleNum}`}
@@ -300,33 +331,48 @@ export default async function LawNaviArticlePage({
                   href={entry.path}
                 />
               </div>
-              {origin === "curated" ? (
+              {sourceVerified ? (
                 <p className="mt-2 text-[11px] leading-5 text-slate-500">
-                  本ページは現場で引きやすいよう主要条文を採録したものです。改正の反映・正式な条文は e-Gov 法令検索が正本です
-                  {meta?.latestRevision ? `（収録ベース: ${meta.latestRevision}）` : ""}。
+                  表示本文はコミット済みe-Gov収録スナップショットとのハッシュ一致を確認しています。
+                  これは現行性や法的解釈の確認ではありません。改正の反映・正式な条文は e-Gov 法令検索が正本です。
                 </p>
               ) : (
-                <p className="mt-2 text-[11px] leading-5 text-slate-500">
-                  本ページは e-Gov 法令検索の全文収載（機械取込）に基づく現行条文です
-                  {revisionId ? `（収録リビジョン: ${revisionId}）` : ""}。改正の反映・正式な条文は e-Gov 法令検索が正本です。
-                </p>
+                <div
+                  role="status"
+                  className="mt-3 rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs leading-5 text-amber-950"
+                >
+                  このサイト収録本文は、個別条文のハッシュ一致と現在性を確認できていません。
+                  引用・判断・帳票転記には使用せず、上のe-Gov正本を開いて確認してください。
+                  {revisionId ? ` 収録リビジョン: ${revisionId}。` : ""}
+                </div>
               )}
             </section>
 
             {/* 現場ことば版（原文の直下・検証済みのみ表示。未生成/staleは区画ごと非表示） */}
-            <PlainLanguageSection egovLawId={entry.egovLawId} article={a} />
+            {sourceVerified ? (
+              <PlainLanguageSection egovLawId={entry.egovLawId} article={a} />
+            ) : null}
 
-            {/* AI解説（原文の下・オンデマンド生成） */}
-            <ArticleAiExplain law={a.law} articleNum={a.articleNum} text={a.text} />
+            {/* 収載済み一次資料の抜粋（自動解説は行わない） */}
+            {sourceVerified ? (
+              <ArticleAiExplain law={a.law} articleNum={a.articleNum} text={a.text} />
+            ) : null}
 
             {/* チャット引き継ぎ */}
-            <Link
-              href={`/chatbot?q=${encodeURIComponent(chatQuery)}`}
+            {sourceVerified ? (
+            <TransientChatLink
+              question={chatQuery}
               className="flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-sky-300 bg-sky-50 px-4 py-3 text-sm font-bold text-sky-800 transition hover:bg-sky-100"
             >
               <MessageSquare className="h-4 w-4" aria-hidden="true" />
-              この条文についてAIチャットで質問する
-            </Link>
+              この収録条文についてAIチャットで質問する
+            </TransientChatLink>
+            ) : (
+              <p className="rounded-xl border border-slate-300 bg-slate-50 p-3 text-sm text-slate-700">
+                根拠未確認の本文をAIへ渡さないため、このページからのAI質問は停止しています。
+                e-Gov正本を確認するか、法令検索から一次資料を探してください。
+              </p>
+            )}
 
             {/* 前後条 */}
             {(prev || next) && (
@@ -335,7 +381,23 @@ export default async function LawNaviArticlePage({
                 {next && <AdjacentLink href={next.href} articleNum={next.articleNum} articleTitle={next.articleTitle} dir="next" />}
               </nav>
             )}
-          </main>
+            {nextBrowseEntry && nextBrowseEntry.path !== entry.path ? (
+              <nav aria-label="公開対象条文を順に読む">
+                <Link
+                  href={nextBrowseEntry.path}
+                  className="flex min-h-[44px] items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 hover:border-emerald-300 hover:bg-emerald-50"
+                >
+                  <span>
+                    <span className="block text-[11px] text-slate-500">公開対象条文を順に読む</span>
+                    <span className="font-semibold">
+                      {nextBrowseEntry.article.lawShort} {nextBrowseEntry.article.articleNum}
+                    </span>
+                  </span>
+                  <ArrowRight className="h-4 w-4 shrink-0 text-emerald-600" aria-hidden="true" />
+                </Link>
+              </nav>
+            ) : null}
+          </div>
 
           {/* ── 補助: 用語・分野・導線 ── */}
           <aside className="min-w-0 space-y-4">
@@ -409,6 +471,42 @@ export default async function LawNaviArticlePage({
                     </li>
                   ))}
                 </ul>
+              </section>
+            )}
+
+            {relatedVisualKy.length > 0 && (
+              <section
+                aria-label="この法令に関連するビジュアルKYT"
+                className="rounded-xl border border-teal-200 bg-teal-50/60 p-4"
+              >
+                <p className="mb-2 inline-flex items-center gap-1.5 text-xs font-bold text-teal-900">
+                  <ShieldAlert className="h-3.5 w-3.5" aria-hidden="true" />
+                  この法令に関連するKYT
+                </p>
+                <ul className="space-y-1.5">
+                  {relatedVisualKy.map((scenario) => (
+                    <li key={scenario.id}>
+                      <Link
+                        href={`/training/visual-ky/${scenario.slug}`}
+                        className="flex min-h-[44px] items-center justify-between rounded-lg border border-teal-200 bg-white px-3 py-2 text-sm font-semibold text-teal-900 transition hover:bg-teal-100"
+                      >
+                        <span>
+                          {scenario.shortTitle}
+                          <span className="ml-1 font-normal text-teal-700">
+                            （合成教材）
+                          </span>
+                        </span>
+                        <ArrowRight
+                          className="h-4 w-4 shrink-0 text-teal-600"
+                          aria-hidden="true"
+                        />
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-2 text-[11px] leading-5 text-teal-950">
+                  法令の適用判断ではなく、安全教育用の合成場面です。
+                </p>
               </section>
             )}
 

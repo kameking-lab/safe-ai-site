@@ -9,11 +9,12 @@
  *  4 件を出すだけで検索対象ではなく、「サイネージ」「KY」「作業環境測定」と機能名を打った現場
  *  ユーザーは目的の機能へ検索経由で着けなかった（サイドバー回遊のみが導線）。
  *
- * 単一ソース:
- *  収載元は {@link FLAGSHIP_FEATURES}（`@/config/flagship-nav`＝サイドバー・トップの主要機能ナビが
- *  参照する正本の機能定義）に一本化する。ハンド重複の登録簿を新設せず、機能追加が自動で検索へ載る
- *  （収載漏れは drift ガード `site-pages-search-source.test.ts` が CI で検知）。アイコン（絵文字）は
- *  検索に不要なため射影しない＝検索チャンクを軽く保つ。
+ * ポートフォリオ正本:
+ *  Tier・役割・運用状態・8検索群は {@link FEATURE_PORTFOLIO} を正本とする。ポートフォリオにある
+ *  検索可能な目的地を先に射影し、その後に既存 {@link FLAGSHIP_FEATURES} と
+ *  {@link EXTRA_DESTINATION_PAGES} を補完する。これにより /risk・Visual KYT・自動化サンプルのように
+ *  旧FLAGSHIP定義に無い主力/サンプルも検索でき、Tier 4 は検索へ混入しない。旧定義由来のページにも
+ *  ポートフォリオメタデータを付け、未登録の公開補助ページはTier 2として明示的にフォールバックする。
  *
  * 幽霊URL 0:
  *  各エントリの url はハッシュ・クエリを除いたベースパス。全 url が実在ルートへ解決することを
@@ -32,6 +33,20 @@
  *  0 件だった独立ハブに限る。
  */
 import { FLAGSHIP_FEATURES } from '@/config/flagship-nav';
+import {
+  FEATURE_ROLE_LABELS,
+  FEATURE_SEARCH_GROUP_LABELS,
+  FEATURE_STATUS_LABELS,
+  FEATURE_TIER_LABELS,
+  getFeaturePortfolioLabels,
+  getPortfolioFeatureByRoute,
+  getSearchablePortfolioFeatures,
+  type FeatureOperationalStatus,
+  type FeaturePortfolioRole,
+  type FeatureSearchGroup,
+  type FeatureTier,
+} from '@/config/feature-portfolio';
+import { isPublicRouteAvailable } from '@/lib/public-content-policy';
 
 /** 横断検索へ収載する目的地ページ 1 件（{@link SearchItem} と同形の軽量エントリ）。 */
 export interface SitePageSearchEntry {
@@ -40,11 +55,218 @@ export interface SitePageSearchEntry {
   subtitle: string;
   url: string;
   keywords: string[];
+  tier: FeatureTier;
+  role: FeaturePortfolioRole;
+  status: FeatureOperationalStatus;
+  searchGroup: FeatureSearchGroup;
+  tierLabel: string;
+  roleLabel: string;
+  statusLabel: string;
+  searchGroupLabel: string;
 }
+
+type SitePageSearchSeed = Pick<
+  SitePageSearchEntry,
+  'id' | 'title' | 'subtitle' | 'url' | 'keywords'
+>;
 
 /** ハッシュ（#section）・クエリ（?q=）を除いたベースパスを返す。 */
 function basePath(href: string): string {
   return href.replace(/[#?].*$/, '');
+}
+
+function inferSearchGroup(path: string): FeatureSearchGroup {
+  if (
+    path.startsWith('/law') ||
+    path.startsWith('/laws') ||
+    path.startsWith('/circular') ||
+    path === '/chatbot' ||
+    path === '/glossary'
+  ) {
+    return 'law';
+  }
+  if (path.startsWith('/accident') || path === '/whats-new') return 'accident';
+  if (
+    path.startsWith('/chemical') ||
+    path.startsWith('/work-environment') ||
+    path.startsWith('/asbestos')
+  ) {
+    return 'chemical';
+  }
+  if (path.startsWith('/education-certification')) return 'qualification';
+  if (
+    path.startsWith('/training/visual-ky') ||
+    path.startsWith('/ky') ||
+    path === '/pdf'
+  ) {
+    return 'kyt';
+  }
+  if (
+    path.startsWith('/education') ||
+    path.startsWith('/resources') ||
+    path.startsWith('/heat-illness-prevention')
+  ) {
+    return 'education';
+  }
+  if (
+    path.startsWith('/automation-examples') ||
+    path.startsWith('/site-records') ||
+    path.startsWith('/construction-calc')
+  ) {
+    return 'automation-sample';
+  }
+  return 'tool';
+}
+
+/**
+ * 旧ナビ/補充ソースを含む全エントリへ、ポートフォリオの分類ラベルを付与する。
+ * ポートフォリオ未登録の公開補助ページは Tier 2・実務支援・運用中として明示し、
+ * ラベルが undefined/unknown になる状態を作らない。
+ */
+function withPortfolioMetadata(seed: SitePageSearchSeed): SitePageSearchEntry {
+  const path = basePath(seed.url);
+  const feature = getPortfolioFeatureByRoute(path);
+  const tier: FeatureTier = feature?.tier ?? 2;
+  const role: FeaturePortfolioRole = feature?.role ?? 'practical-support';
+  const status: FeatureOperationalStatus =
+    feature?.operationalStatus ?? 'operational';
+  const searchGroup = feature?.searchGroup ?? inferSearchGroup(path);
+  const labels = feature
+    ? getFeaturePortfolioLabels(feature)
+    : {
+        tier: FEATURE_TIER_LABELS[tier],
+        role: FEATURE_ROLE_LABELS[role],
+        status: FEATURE_STATUS_LABELS[status],
+        searchGroup: FEATURE_SEARCH_GROUP_LABELS[searchGroup],
+      };
+
+  return {
+    ...seed,
+    url: path,
+    keywords: [
+      ...new Set([
+        ...seed.keywords,
+        labels.tier,
+        labels.role,
+        labels.status,
+        labels.searchGroup,
+      ]),
+    ],
+    tier,
+    role,
+    status,
+    searchGroup,
+    tierLabel: labels.tier,
+    roleLabel: labels.role,
+    statusLabel: labels.status,
+    searchGroupLabel: labels.searchGroup,
+  };
+}
+
+/** 現場で使われるタスク名を、該当する正規ツールURLだけに狭く付与する。 */
+function taskSynonyms(path: string): string[] {
+  return path === '/training/visual-ky'
+    ? [
+        '危険予知訓練',
+        '危険予知活動',
+        'KYT',
+        'KYT4ラウンド',
+        '4ラウンド',
+        '4R',
+        '1R',
+        '2R',
+        '3R',
+        '指差し呼称',
+        'イラストKYT',
+      ]
+    : path === '/ky/paper'
+    ? [
+        'KY用紙',
+        'KYシート',
+        '危険予知活動表',
+        '危険予知訓練',
+        'KYT',
+        'KYT4ラウンド',
+        '4ラウンド',
+        '4R',
+        '1R',
+        '2R',
+        '3R',
+        '指差し呼称',
+        'KY作成',
+        'KY印刷',
+      ]
+    : path === '/ky-examples'
+      ? [
+          'KY用紙',
+          'KYシート',
+          '危険予知活動表',
+          '危険予知訓練',
+          'KYT',
+          'KYT4ラウンド',
+          '4ラウンド',
+          '4R',
+          '1R',
+          '2R',
+          '3R',
+          '指差し呼称',
+          'KY例',
+          'KY事例',
+          'KYモデルケース',
+        ]
+    : path === '/accidents'
+      ? [
+          '労働災害事例',
+          '事故',
+          '事故の型',
+          '災害の種類',
+          '墜落',
+          '転落',
+          '墜落・転落',
+          '転倒',
+          'フォークリフト',
+          '無資格',
+          '公式事故検索',
+        ]
+    : path === '/education-certification/finder'
+      ? [
+          '資格',
+          '法定教育',
+          '特別教育',
+          '技能講習',
+          '職長教育',
+          '作業主任者',
+          '就業制限',
+          'フォークリフト',
+          '酸素欠乏危険作業',
+          'アーク溶接',
+        ]
+    : path === '/accident-news'
+      ? [
+          '重大災害速報',
+          '事故の型',
+          '災害の種類',
+          '墜落',
+          '転落',
+          '墜落・転落',
+          '速報',
+          '出典',
+          '出典区分',
+          '報道由来',
+          'データセット出典',
+        ]
+    : path === '/heat-illness-prevention'
+      ? [
+          '熱中症',
+          '熱中症予防',
+          '熱中症教育',
+          '熱中症 予防教育',
+          '暑さ指数',
+          'WBGT',
+          'クールワークキャンペーン',
+          '緊急時対応',
+        ]
+    : [];
 }
 
 /**
@@ -55,7 +277,7 @@ function basePath(href: string): string {
  * data を写経・捏造しない（例: 個別助成金の金額・条件は載せず、ページが自ら advertise する
  * 制度名のみ keyword 化）。全 url が sitemap に実在することを drift ガードで固定する。
  */
-export const EXTRA_DESTINATION_PAGES: SitePageSearchEntry[] = [
+export const EXTRA_DESTINATION_PAGES: SitePageSearchSeed[] = [
   {
     // 助成金・補助金ガイド（/subsidies）。中小企業/一人親方の安全投資に直結する高検索意図の
     // 独立ハブだが FLAGSHIP ナビ非掲載＝「助成金」「補助金」で横断検索が 0 件だった。
@@ -111,6 +333,21 @@ export const EXTRA_DESTINATION_PAGES: SitePageSearchEntry[] = [
     url: '/site-records',
     keywords: ['記録キット', '現場記録', '安全記録', '記録簿', '帳票', '現場帳票'],
   },
+  {
+    id: 'page-/guides/chemical-ra-create-simple',
+    title: 'SDSの読み方と化学物質リスクアセスメント準備ガイド',
+    subtitle: 'SDS、CAS番号、含有率、作業条件を整理し、公式CREATE-SIMPLEへ入力する前の不足を確認',
+    url: '/guides/chemical-ra-create-simple',
+    keywords: [
+      'SDS',
+      '安全データシート',
+      'SDSの読み方',
+      'SDS 読み方',
+      '16項目',
+      'CREATE-SIMPLE',
+      '化学物質リスクアセスメント',
+    ],
+  },
   // ペルソナ別 実務ポータル（/for/<persona>）。当サイトの対象ユーザー4類型（現場監督/一人親方/
   // 安全担当/労働安全コンサル）ごとに、その立場で必要な機能・法令・ツールを集約する高優先度
   // （sitemap priority 0.85〜0.9）の自己canonical・indexable な独立ハブ。FLAGSHIP ナビには載らず、
@@ -122,71 +359,111 @@ export const EXTRA_DESTINATION_PAGES: SitePageSearchEntry[] = [
   {
     id: 'page-/for/construction',
     title: '建設業の安全衛生ポータル',
-    subtitle: '職長・元請担当・現場代理人のための実務ポータル（KY用紙・朝礼ネタ・年次計画・法令早見）',
+    subtitle: '職長・元請担当・現場代理人が、今日のリスク、KY、法令、記録を確認する入口',
     url: '/for/construction',
     keywords: ['建設業', '建設', '職長', '元請', '現場代理人', '現場監督', '施工管理'],
   },
   {
     id: 'page-/for/solo',
     title: '一人親方の安全衛生ポータル',
-    subtitle: '特別加入・一人KY・資格・熱中症を一人で回すための実務ポータル',
+    subtitle: '一人親方が、今日のリスク、一人KY、資格条件、公式資料を確認する入口',
     url: '/for/solo',
     keywords: ['一人親方', '個人事業主', 'フリーランス', '特別加入', '一人KY'],
   },
   {
     id: 'page-/for/manager',
     title: '企業の安全衛生担当者ポータル',
-    subtitle: '体制づくり・委員会・ストレスチェック・年次計画を一気通貫で（規模別の義務早見つき）',
+    subtitle: '安全衛生担当者が、リスク、資格条件、記録、法令原文を確認する入口',
     url: '/for/manager',
     keywords: ['安全衛生担当', '安全衛生担当者', '衛生管理者', '総務', '人事', '安全委員会', '衛生委員会', '事業者'],
   },
   {
     id: 'page-/for/consultant',
     title: '専門家向けポータル',
-    subtitle: '労働安全コンサルタント・社労士・診断士のためのリサーチ&顧問先支援',
+    subtitle: '専門家が、法令原文、事故、化学物質、現場記録を横断確認する入口',
     url: '/for/consultant',
     keywords: ['労働安全コンサルタント', '社会保険労務士', '社労士', '中小企業診断士', '診断士', '顧問', '専門家'],
   },
 ];
 
 /**
- * {@link FLAGSHIP_FEATURES} を目的地ページの検索エントリへ射影する。
+ * ポートフォリオ、{@link FLAGSHIP_FEATURES}、補充ページを目的地検索へ射影する。
  *
+ * - ポートフォリオ: 検索可能なTier 1〜3を先勝ちで収載。Tier 4は収載しない。
  * - 主要機能: title=ナビ表示ラベル（現場が打つ機能名）、subtitle=カード見出し（cardTitle）。
  * - 配下機能（subItems）: title=配下ラベル、subtitle=配下説明（無ければ親の cardTitle）。
  * - ベースパスで重複除去（`/ky#presets` は `/ky` へ収斂）。**先勝ち**＝主要機能は subItems より
- *   先に走査されるため、自パスのタイトルは機能ラベルが優先される。
+ *   先に走査されるため、ポートフォリオの役割・状態・名称が優先される。
  */
 export function getSitePageSearchEntries(): SitePageSearchEntry[] {
   const byPath = new Map<string, SitePageSearchEntry>();
+
+  for (const feature of getSearchablePortfolioFeatures()) {
+    const p = basePath(feature.route);
+    if (!isPublicRouteAvailable(p) || byPath.has(p)) continue;
+    byPath.set(
+      p,
+      withPortfolioMetadata({
+        id: `page-${p}`,
+        title: feature.label,
+        subtitle: feature.userValue,
+        url: p,
+        keywords: [
+          feature.label,
+          feature.currentRole,
+          ...feature.keywords,
+          ...taskSynonyms(p),
+        ],
+      }),
+    );
+  }
+
   for (const f of FLAGSHIP_FEATURES) {
     const mainPath = basePath(f.href);
-    if (!byPath.has(mainPath)) {
-      byPath.set(mainPath, {
-        id: `page-${mainPath}`,
-        title: f.label,
-        subtitle: f.cardTitle,
-        url: mainPath,
-        keywords: [],
-      });
+    if (isPublicRouteAvailable(mainPath) && !byPath.has(mainPath)) {
+      byPath.set(
+        mainPath,
+        withPortfolioMetadata({
+          id: `page-${mainPath}`,
+          title: f.label,
+          subtitle: f.cardTitle,
+          url: mainPath,
+          keywords: [
+            f.label,
+            f.cardTitle,
+            f.cardDescription,
+            ...taskSynonyms(mainPath),
+          ],
+        }),
+      );
     }
     for (const sub of f.subItems) {
       const p = basePath(sub.href);
+      if (!isPublicRouteAvailable(p)) continue;
       if (byPath.has(p)) continue;
-      byPath.set(p, {
-        id: `page-${p}`,
-        title: sub.label,
-        subtitle: sub.description ?? f.cardTitle,
-        url: p,
-        keywords: [],
-      });
+      byPath.set(
+        p,
+        withPortfolioMetadata({
+          id: `page-${p}`,
+          title: sub.label,
+          subtitle: sub.description ?? f.cardTitle,
+          url: p,
+          keywords: [
+            sub.label,
+            sub.description ?? f.cardTitle,
+            f.label,
+            ...taskSynonyms(p),
+          ],
+        }),
+      );
     }
   }
-  // 補充分は FLAGSHIP 由来の後に載せ、パス衝突時はナビ正本を優先（先勝ち）。
+  // 補充分は最後に載せ、パス衝突時はポートフォリオ/ナビ正本を優先（先勝ち）。
   for (const extra of EXTRA_DESTINATION_PAGES) {
     const p = basePath(extra.url);
+    if (!isPublicRouteAvailable(p)) continue;
     if (byPath.has(p)) continue;
-    byPath.set(p, { ...extra, url: p });
+    byPath.set(p, withPortfolioMetadata({ ...extra, url: p }));
   }
   return [...byPath.values()];
 }

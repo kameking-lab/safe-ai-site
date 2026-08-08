@@ -1,43 +1,29 @@
 import { NextResponse } from "next/server";
-import { recommendEquipment, type RecommendInput } from "@/lib/equipment-recommendation";
+import { EQUIPMENT_CATALOG_QUARANTINE } from "@/lib/equipment-catalog-quarantine";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-// GET /api/equipment-finder?industry=construction&hazard=fall&season=summer&budget=50000
-export async function GET(req: Request) {
-  const url = new URL(req.url);
-  const industry = url.searchParams.get("industry") ?? undefined;
-  const hazard = url.searchParams.get("hazard") ?? undefined;
-  const season = url.searchParams.get("season") ?? undefined;
-  const budgetParam = url.searchParams.get("budget");
-  let budgetCap: number | undefined;
-  if (budgetParam !== null && budgetParam !== "" && budgetParam !== "any") {
-    const parsed = Number(budgetParam);
-    if (Number.isFinite(parsed) && parsed > 0) {
-      budgetCap = parsed;
-    }
-  }
-
-  const input: RecommendInput = {
-    industry: industry || undefined,
-    hazard: hazard || undefined,
-    season: season || undefined,
-    budgetCap,
-  };
-
-  const result = recommendEquipment(input);
+/**
+ * 商品レコードの一次資料確認が完了するまで fail-closed。
+ * 未検証レコードや件数をAPI利用者へ返さない。
+ */
+export async function GET() {
   return NextResponse.json(
     {
-      input,
-      totalCandidates: result.totalCandidates,
-      top: result.top,
-      others: result.others,
+      status: EQUIPMENT_CATALOG_QUARANTINE.status,
+      reasonCode: EQUIPMENT_CATALOG_QUARANTINE.reasonCode,
+      message: EQUIPMENT_CATALOG_QUARANTINE.note,
+      totalCandidates: 0,
+      top: [],
+      others: [],
     },
     {
+      status: 410,
       headers: {
-        "Cache-Control": "public, s-maxage=300, stale-while-revalidate=900",
+        "Cache-Control": "no-store",
+        "X-Data-Status": "quarantined",
       },
-    }
+    },
   );
 }

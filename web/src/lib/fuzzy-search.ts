@@ -8,11 +8,10 @@
  * - NFKC正規化（濁点分離・合成文字の統一）
  * - スペース・記号の正規化
  *
- * なお「ひらがな↔カタカナ」の畳み込みは、UIの部分一致マッチ（{@link fuzzyMatch} /
- * {@link fuzzyMatchAll}）でのみ {@link foldKana} を追加適用する。チャットボットRAG
- * （rag-search.ts）と横断検索スコアリング（cross-search/score.ts）が共有する
+ * なお「ひらがな↔カタカナ」の畳み込みは、UIの部分一致マッチと横断検索側で
+ * {@link foldKana} を追加適用する。チャットボットRAGも共有する
  * {@link normalizeSearchText} 自体は byte-identical に保ち、法令コーパスの
- * かな畳み込みでランキングが変わる回帰を避ける。
+ * ランキングは変更しない。
  */
 
 /** カタカナ小書き → 大文字の変換マップ */
@@ -73,10 +72,8 @@ export function normalizeSearchText(text: string): string {
  * 保護具・化学物質・標識・通達（フルハーネス/ベンゼン/クレーン等）を
  * 「ふるはーねす」等のひらがなでも引けるようにする（日本語検索の標準的なかな畳み込み）。
  *
- * これは UIの部分一致マッチ（{@link fuzzyMatch} / {@link fuzzyMatchAll}）専用の
- * 追加正規化。クエリ・ターゲット双方に対称適用するため recall を広げるだけで
- * false negative は生まない。RAG/横断検索スコアリングが共有する
- * {@link normalizeSearchText} には組み込まない（法令コーパスのランキング回帰回避）。
+ * UIの部分一致と横断検索がクエリ・対象の双方へ対称適用する追加正規化。
+ * RAGと共有する {@link normalizeSearchText} には組み込まない。
  */
 export function foldKana(text: string): string {
   return text.replace(/[ぁ-ゖ]/g, (c) =>

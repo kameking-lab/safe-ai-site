@@ -43,8 +43,8 @@ async function getAccessToken(credentials) {
   });
 
   if (!resp.ok) {
-    const text = await resp.text();
-    throw new Error(`Token exchange failed ${resp.status}: ${text}`);
+    // 外部エラー本文にはアカウント情報が含まれ得るため、ログへ反射しない。
+    throw new Error(`Token exchange failed (${resp.status})`);
   }
 
   const data = await resp.json();
@@ -64,8 +64,7 @@ async function sitesAdd(token) {
     return true;
   }
 
-  const text = await resp.text();
-  console.error(`sites.add: FAILED ${resp.status}: ${text}`);
+  console.error(`sites.add: FAILED (${resp.status})`);
   return false;
 }
 
@@ -75,8 +74,7 @@ async function sitesList(token) {
   });
 
   if (!resp.ok) {
-    const text = await resp.text();
-    console.error(`sites.list: FAILED ${resp.status}: ${text}`);
+    console.error(`sites.list: FAILED (${resp.status})`);
     return false;
   }
 
@@ -91,7 +89,6 @@ async function sitesList(token) {
   }
 
   console.warn(`sites.list: ${SITE_URL} NOT FOUND`);
-  console.log('Registered sites:', sites.map((s) => `${s.siteUrl}(${s.permissionLevel})`).join(', '));
   return false;
 }
 
@@ -112,8 +109,7 @@ async function searchAnalyticsQuery(token) {
     const data = await resp.json();
     console.log(`searchAnalytics.query: 200 OK rows=${(data.rows ?? []).length}`);
   } else {
-    const text = await resp.text();
-    console.warn(`searchAnalytics.query: ${resp.status} ${text}`);
+    console.warn(`searchAnalytics.query: FAILED (${resp.status})`);
   }
 }
 
@@ -132,7 +128,7 @@ async function main() {
     process.exit(1);
   }
 
-  console.log(`service_account: ${creds.client_email}`);
+  console.log('service_account: configured');
   console.log(`target_site: ${SITE_URL}`);
 
   const token = await getAccessToken(creds);

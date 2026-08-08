@@ -10,14 +10,24 @@ import {
   type AccidentType,
   type AccidentWorkCategory,
 } from "@/lib/types/domain";
-import { fuzzyMatchAll } from "@/lib/fuzzy-search";
-import { resolveAccidentSource } from "@/lib/accident-source";
+import { rankAccidents } from "@/lib/accidents/search-ranking";
+import {
+  ACCIDENT_PROVENANCE_INFO,
+  resolveAccidentProvenance,
+  resolveAccidentSource,
+} from "@/lib/accident-source";
 import { EasyJapaneseText } from "@/components/easy-japanese-text";
 import { EmptyState } from "@/components/empty-state";
 import { AccidentActionBar } from "@/components/accidents/action-bar";
 import { AccidentTypePictogram } from "@/components/accidents/accident-type-pictogram";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { SEVERITY_VISUAL } from "@/lib/accidents/accident-visual";
+import { compactAccidentSummary } from "@/lib/accidents/compact-summary";
+import {
+  ACCIDENT_TRANSIENT_SEARCH_EVENT,
+  getTransientAccidentKeyword,
+  readTransientAccidentKeyword,
+} from "@/lib/accidents/transient-search";
 import { Mascot } from "@/components/mascot";
 
 const PAGE_SIZE = 40;
@@ -115,20 +125,38 @@ export function AccidentDatabasePanel({
   const options = filterOptions(allCases);
   const categoryOptions = ["すべて", ...ALL_ACCIDENT_CATEGORIES] as const;
   const [page, setPage] = useState(0);
-  const [expandedId, setExpandedId] = useState<string | null>(null);
   const [selectedIndustries, setSelectedIndustriesState] = useState<Set<IndustryKey>>(new Set());
-  const [keyword, setKeyword] = useState("");
+  const [keyword, setKeyword] = useState(getTransientAccidentKeyword);
+  const keywordInputRef = useRef<HTMLInputElement>(null);
+  const previousKeywordRef = useRef(keyword);
   const [selectedWorkerAttribute, setSelectedWorkerAttribute] = useState<WorkerAttributeFilter>("すべて");
   const [selectedCompanySize, setSelectedCompanySize] = useState<CompanySizeFilter>("全規模");
 
+  useEffect(() => {
+    const input = keywordInputRef.current;
+    if (!input) return;
+    const domValue = input.value;
+    const previousValue = previousKeywordRef.current;
+    previousKeywordRef.current = keyword;
+    if (domValue !== previousValue && keyword === previousValue) {
+      const timer = window.setTimeout(() => {
+        setKeyword(domValue);
+        setPage(0);
+      }, 0);
+      return () => window.clearTimeout(timer);
+    }
+    if (domValue !== keyword) input.value = keyword;
+  }, [keyword]);
+
   // クライアントマウント後にURLパラメータを読み込む（SSR互換）
-  // P1-3: 業種に加えキーワード・労働者属性・事業所規模もURLから復元（共有可能な絞り込み）。
+  // 旧共有URLは読み取りだけ維持する。新しい任意入力はメモリ内に限定する。
   useEffect(() => {
     const sp = new URLSearchParams(window.location.search);
     const initial = parseIndustriesParam(sp.get("acc_industries"));
     /* eslint-disable react-hooks/set-state-in-effect */
     if (initial.size > 0) setSelectedIndustriesState(initial);
-    const kw = sp.get("acc_kw");
+    // Global search and older links use `q`; the database-native key is `acc_kw`.
+    const kw = sp.get("acc_kw") ?? sp.get("q");
     if (kw) setKeyword(kw);
     const attr = sp.get("acc_attr");
     if (attr && (WORKER_ATTRIBUTE_OPTIONS as readonly string[]).includes(attr)) {
@@ -138,10 +166,41 @@ export function AccidentDatabasePanel({
     if (size && (COMPANY_SIZE_OPTIONS as readonly string[]).includes(size)) {
       setSelectedCompanySize(size as CompanySizeFilter);
     }
+    const pageParam = Number.parseInt(sp.get("acc_page") ?? "", 10);
+    if (Number.isFinite(pageParam) && pageParam > 0) {
+      setPage(pageParam - 1);
+    }
     /* eslint-enable react-hooks/set-state-in-effect */
   }, []);
 
-  // P1-3: キーワード・属性・規模の変更をURLに同期（replace、初回はスキップ）。
+  useEffect(() => {
+    const applyTransientKeyword = (event: Event) => {
+      const nextKeyword = readTransientAccidentKeyword(event);
+      if (nextKeyword === null) return;
+      setKeyword(nextKeyword);
+      setPage(0);
+    };
+    window.addEventListener(
+      ACCIDENT_TRANSIENT_SEARCH_EVENT,
+      applyTransientKeyword,
+    );
+    const pendingKeyword = getTransientAccidentKeyword();
+    const pendingTimer = pendingKeyword
+      ? window.setTimeout(() => {
+          setKeyword(pendingKeyword);
+          setPage(0);
+        }, 0)
+      : null;
+    return () => {
+      if (pendingTimer !== null) window.clearTimeout(pendingTimer);
+      window.removeEventListener(
+        ACCIDENT_TRANSIENT_SEARCH_EVENT,
+        applyTransientKeyword,
+      );
+    };
+  }, []);
+
+  // 固定選択肢とページだけをURLに同期（初回はスキップ）。
   const filterHydrated = useRef(false);
   useEffect(() => {
     if (!filterHydrated.current) {
@@ -149,11 +208,25 @@ export function AccidentDatabasePanel({
       return;
     }
     const sp = new URLSearchParams(window.location.search);
-    if (keyword.trim()) sp.set("acc_kw", keyword.trim()); else sp.delete("acc_kw");
     if (selectedWorkerAttribute !== "すべて") sp.set("acc_attr", selectedWorkerAttribute); else sp.delete("acc_attr");
     if (selectedCompanySize !== "全規模") sp.set("acc_size", selectedCompanySize); else sp.delete("acc_size");
+    if (page > 0) sp.set("acc_page", String(page + 1)); else sp.delete("acc_page");
     router.replace(`?${sp.toString()}`, { scroll: false });
-  }, [keyword, selectedWorkerAttribute, selectedCompanySize, router]);
+  }, [selectedWorkerAttribute, selectedCompanySize, page, router]);
+
+  useEffect(() => {
+    const restoreFromHistory = () => {
+      const sp = new URLSearchParams(window.location.search);
+      const restoredPage = Number.parseInt(sp.get("acc_page") ?? "", 10);
+      setPage(
+        Number.isFinite(restoredPage) && restoredPage > 0
+          ? restoredPage - 1
+          : 0,
+      );
+    };
+    window.addEventListener("popstate", restoreFromHistory);
+    return () => window.removeEventListener("popstate", restoreFromHistory);
+  }, []);
 
   const updateIndustriesUrl = useCallback(
     (industries: Set<IndustryKey>) => {
@@ -185,34 +258,37 @@ export function AccidentDatabasePanel({
     setPage(0);
   }, [updateIndustriesUrl, setPage]);
 
-  const filteredByIndustry = useMemo(
-    () => cases.filter((c) => {
+  const filteredByIndustry = useMemo(() => {
+    const filtered = cases.filter((c) => {
       if (!matchesAnyIndustry(c.workCategory, selectedIndustries)) return false;
       if (selectedWorkerAttribute !== "すべて") {
-        const attrs = c.worker_attribute ?? ["一般"];
-        if (!attrs.includes(selectedWorkerAttribute) && !attrs.includes("一般")) return false;
+        const attrs = c.worker_attribute;
+        if (!attrs || !attrs.includes(selectedWorkerAttribute)) return false;
       }
       if (selectedCompanySize !== "全規模") {
-        const size = c.company_size ?? "全規模";
-        if (size !== "全規模" && size !== selectedCompanySize) return false;
-      }
-      if (keyword.trim()) {
-        const target = `${c.title} ${c.summary} ${c.type} ${c.workCategory}`;
-        if (!fuzzyMatchAll(keyword.trim(), target)) return false;
+        const size = c.company_size;
+        if (!size || (size !== "全規模" && size !== selectedCompanySize)) return false;
       }
       return true;
-    }),
-    [cases, selectedIndustries, selectedWorkerAttribute, selectedCompanySize, keyword]
-  );
-
-  const pageItems = useMemo(() => {
-    const start = page * PAGE_SIZE;
-    return filteredByIndustry.slice(start, start + PAGE_SIZE);
-  }, [filteredByIndustry, page]);
+    });
+    return rankAccidents(filtered, keyword);
+  }, [cases, selectedIndustries, selectedWorkerAttribute, selectedCompanySize, keyword]);
 
   const totalCasesForDisplay = filteredByIndustry.length;
-
   const totalPages = Math.max(1, Math.ceil(totalCasesForDisplay / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages - 1);
+  const pageItems = useMemo(() => {
+    const start = currentPage * PAGE_SIZE;
+    return filteredByIndustry.slice(start, start + PAGE_SIZE);
+  }, [filteredByIndustry, currentPage]);
+
+  const publishedCaseCount = allCases.filter((accident) => {
+    const provenance = resolveAccidentProvenance(accident);
+    return provenance === "mhlw" || provenance === "curated";
+  }).length;
+  const learningCaseCount = allCases.filter(
+    (accident) => resolveAccidentProvenance(accident) === "synthetic",
+  ).length;
 
   return (
     <section id="accident-results" className="scroll-mt-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5 overflow-hidden">
@@ -220,22 +296,30 @@ export function AccidentDatabasePanel({
         <div>
           <h2 className="text-base font-bold text-slate-900 sm:text-lg">事故データベース</h2>
           <p className="mt-1 text-xs text-slate-600">
-            厚労省「職場のあんぜんサイト」等の実事例 {allCases.length.toLocaleString("ja-JP")}
-            件を収録。業種・種別・作業カテゴリで絞り込み、再発防止をKY・朝礼に接続できます。
+            公式個票URLを持つ公表事例・公開情報からの編集再構成 {publishedCaseCount.toLocaleString("ja-JP")}件
+            {learningCaseCount > 0 &&
+              `、実事故ではない教材用の想定例 ${learningCaseCount.toLocaleString("ja-JP")}件`}
+            を出典区分付きで収録。業種・種別・作業カテゴリで絞り込めます。
           </p>
         </div>
         <Mascot variant="detective" size="md" alt="" className="hidden shrink-0 sm:block" />
       </div>
 
-      <div className="mt-3 space-y-3 print:hidden">
+      <details className="mt-3 rounded-xl border border-slate-200 px-3 print:hidden">
+        <summary className="flex min-h-[44px] cursor-pointer items-center text-sm font-bold text-slate-800">
+          業種・条件を絞る
+        </summary>
+        <div className="space-y-3 border-t border-slate-200 py-3">
         <div>
           <label htmlFor="accident-keyword" className="block text-xs font-semibold text-slate-700">
             キーワード検索
           </label>
           <input
+            ref={keywordInputRef}
             id="accident-keyword"
             type="text"
-            value={keyword}
+            defaultValue={keyword}
+            suppressHydrationWarning
             onChange={(e) => { setKeyword(e.target.value); setPage(0); }}
             placeholder="タイトル・概要・種別で検索（表記ゆれ対応）"
             className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-emerald-500 focus:outline-none"
@@ -362,12 +446,13 @@ export function AccidentDatabasePanel({
             ))}
           </select>
         </div>
-      </div>
+        </div>
+      </details>
 
       <p className="mt-2 text-xs text-slate-500">
         {totalCasesForDisplay === 0
           ? "0件"
-          : `表示: ${totalCasesForDisplay.toLocaleString("ja-JP")}件中 ${page * PAGE_SIZE + 1}〜${Math.min((page + 1) * PAGE_SIZE, totalCasesForDisplay)}件`}
+          : `表示: ${totalCasesForDisplay.toLocaleString("ja-JP")}件中 ${currentPage * PAGE_SIZE + 1}〜${Math.min((currentPage + 1) * PAGE_SIZE, totalCasesForDisplay)}件`}
       </p>
 
       <div className="mt-3 space-y-3" aria-live="polite" aria-atomic="false">
@@ -385,9 +470,12 @@ export function AccidentDatabasePanel({
             description="業種・事故の型・キーワードの絞り込みを見直してください。"
           />
         ) : (
-          pageItems.map((accident) => {
-            const isExpanded = expandedId === accident.id;
+          pageItems.map((searchResult) => {
+            const accident = searchResult.accident;
             const source = resolveAccidentSource(accident);
+            const provenance = resolveAccidentProvenance(accident);
+            const provenanceInfo = ACCIDENT_PROVENANCE_INFO[provenance];
+            const compactSummary = compactAccidentSummary(accident.summary);
             return (
               <article
                 key={accident.id}
@@ -410,22 +498,65 @@ export function AccidentDatabasePanel({
                   >
                     {accident.severity}
                   </StatusBadge>
-                  {accident.provenance === "preliminary" && (
-                    <span
-                      className="rounded-full border border-orange-300 bg-orange-50 px-2 py-0.5 text-[11px] font-semibold text-orange-700"
-                      title="厚労省速報集計値から統計的に導出した代表パターン事例です。実際の労働者死傷病報告（個票）ではありません。R07確定値の公開後に置換予定。"
-                      aria-label="想定例: 速報統計から導出した代表パターン事例。実報告ではありません。"
-                    >
-                      想定例(速報基準)
-                    </span>
-                  )}
+                  <span
+                    className="rounded-full border border-slate-300 bg-white px-2 py-0.5 text-[11px] font-semibold text-slate-700"
+                    title={provenanceInfo.description}
+                  >
+                    {provenanceInfo.label}
+                  </span>
                   <span className="text-xs text-slate-500">{accident.occurredOn}</span>
                 </div>
 
                 <h3 className="mt-2 text-sm font-semibold text-slate-900">{accident.title}</h3>
-                <p className="mt-1 text-sm text-slate-700"><EasyJapaneseText>{accident.summary}</EasyJapaneseText></p>
+                {searchResult.matchFields.length > 0 && (
+                  <div className="mt-2 rounded-md border border-sky-200 bg-sky-50 px-2 py-1.5 text-[11px] text-sky-950">
+                    <p className="font-bold">一致フィールド: {searchResult.matchFields.join("・")}</p>
+                    <ul className="mt-1 space-y-0.5">
+                      {searchResult.matchSnippets.slice(0, 3).map((item) => <li key={item}>{item}</li>)}
+                    </ul>
+                  </div>
+                )}
+                <p className="mt-1 line-clamp-2 text-sm text-slate-700"><EasyJapaneseText>{compactSummary}</EasyJapaneseText></p>
 
-                <dl className="mt-2 space-y-1 text-xs text-slate-700">
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  {provenance === "mhlw" ? (
+                    <Link
+                      href={`/accidents/${accident.id}`}
+                      className="inline-flex min-h-[44px] items-center text-xs font-semibold text-blue-700 underline decoration-blue-300 underline-offset-2 hover:text-blue-900"
+                    >
+                      詳細・関連事故
+                    </Link>
+                  ) : null}
+                  {source?.url ? (
+                    <a
+                      href={source.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex min-h-[44px] items-center text-xs font-semibold text-amber-800 underline decoration-amber-300 underline-offset-2"
+                    >
+                      出典: {source.site}
+                      {source.caseId ? `（No.${source.caseId}）` : ""} ↗
+                    </a>
+                  ) : source ? (
+                    <span className="text-xs font-semibold text-slate-500">
+                      出典: {source.site}
+                      {source.caseId ? `（No.${source.caseId}）` : ""}
+                    </span>
+                  ) : null}
+                </div>
+
+                <details className="group mt-2 rounded-lg border border-slate-200 bg-white">
+                  <summary className="flex min-h-[44px] cursor-pointer items-center px-3 text-xs font-semibold text-slate-700">
+                    原因・対策と関連操作
+                  </summary>
+                  <div className="space-y-3 border-t border-slate-200 p-3 text-xs text-slate-700">
+                {compactSummary !== accident.summary ? (
+                  <div>
+                    <p className="font-semibold text-slate-900">概要</p>
+                    <p className="mt-1 leading-5"><EasyJapaneseText>{accident.summary}</EasyJapaneseText></p>
+                  </div>
+                ) : null}
+                <dl className="space-y-1">
                   <div>
                     <dt className="inline font-semibold text-slate-900">主な原因:</dt>
                     <dd className="inline"> {accident.mainCauses.join(" / ")}</dd>
@@ -436,9 +567,7 @@ export function AccidentDatabasePanel({
                   </div>
                 </dl>
 
-                {/* 詳細展開 */}
-                {isExpanded && (
-                  <div className="mt-3 space-y-2 rounded-lg border border-slate-200 bg-white p-3 text-xs text-slate-700">
+                <div className="space-y-2">
                     {"description" in accident && accident.description ? (
                       <div>
                         <p className="font-semibold text-slate-900">発生状況</p>
@@ -463,23 +592,9 @@ export function AccidentDatabasePanel({
                         <p className="mt-1 leading-5">{String(accident.recurrencePrevention)}</p>
                       </div>
                     ) : null}
-                  </div>
-                )}
+                </div>
 
-                <div className="mt-2 flex flex-wrap items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setExpandedId(isExpanded ? null : accident.id)}
-                    className="inline-flex min-h-[44px] items-center text-xs font-semibold text-slate-500 underline decoration-slate-300 underline-offset-2 hover:text-slate-700"
-                  >
-                    {isExpanded ? "閉じる" : "詳細を見る"}
-                  </button>
-                  <Link
-                    href={`/accidents/${accident.id}`}
-                    className="inline-flex min-h-[44px] items-center text-xs font-semibold text-blue-700 underline decoration-blue-300 underline-offset-2 hover:text-blue-900"
-                  >
-                    → 詳細ページへ
-                  </Link>
+                <div className="flex flex-wrap items-center gap-3">
                   <Link
                     href="/e-learning"
                     className="inline-flex min-h-[44px] items-center text-xs font-semibold text-emerald-700 underline decoration-emerald-300 underline-offset-2"
@@ -488,37 +603,17 @@ export function AccidentDatabasePanel({
                   </Link>
                 </div>
 
-                {/* 9.3: 事故 → KY起票 / 必要保護具 / 関連法令 の固定アクションバー */}
                 <AccidentActionBar accident={accident} variant="inline" />
-                <div className="mt-2 flex flex-wrap gap-1.5">
+                <div className="flex flex-wrap gap-1.5">
                   <Link
                     href={`/safety-diary/new?q=${encodeURIComponent(accident.title)}`}
-                    className="inline-flex min-h-[44px] items-center rounded-full border border-amber-300 bg-white px-2.5 py-1 text-[11px] font-bold text-amber-800 hover:bg-amber-50"
+                    className="inline-flex min-h-[44px] items-center text-xs font-semibold text-amber-800 underline decoration-amber-300 underline-offset-2"
                   >
-                    → 日誌に記録
+                    日誌に記録
                   </Link>
                 </div>
-
-                <div className="mt-1 flex flex-wrap items-center gap-2">
-                  {source ? (
-                    source.url ? (
-                      <a
-                        href={source.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex min-h-[44px] items-center text-xs font-semibold text-amber-800 underline decoration-amber-300 underline-offset-2"
-                      >
-                        出典: {source.site}
-                        {source.caseId ? `（No.${source.caseId}）` : ""} ↗
-                      </a>
-                    ) : (
-                      <span className="text-xs font-semibold text-slate-500">
-                        出典: {source.site}
-                        {source.caseId ? `（No.${source.caseId}）` : ""}
-                      </span>
-                    )
-                  ) : null}
-                </div>
+                  </div>
+                </details>
               </article>
             );
           })
@@ -529,20 +624,20 @@ export function AccidentDatabasePanel({
         <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
           <button
             type="button"
-            disabled={page === 0}
-            onClick={() => setPage((p) => p - 1)}
+            disabled={currentPage === 0}
+            onClick={() => setPage(Math.max(0, currentPage - 1))}
             aria-label="前のページへ"
             className="inline-flex min-h-[44px] items-center rounded-lg border border-slate-300 px-3 py-1 text-xs font-semibold text-slate-700 disabled:opacity-40"
           >
             前へ
           </button>
           <span className="text-xs text-slate-600">
-            {page + 1} / {totalPages}
+            {currentPage + 1} / {totalPages}
           </span>
           <button
             type="button"
-            disabled={page >= totalPages - 1}
-            onClick={() => setPage((p) => p + 1)}
+            disabled={currentPage >= totalPages - 1}
+            onClick={() => setPage(Math.min(totalPages - 1, currentPage + 1))}
             aria-label="次のページへ"
             className="inline-flex min-h-[44px] items-center rounded-lg border border-slate-300 px-3 py-1 text-xs font-semibold text-slate-700 disabled:opacity-40"
           >

@@ -19,7 +19,7 @@ type Term = {
   source?: { label: string; url: string };
 };
 
-const BASE_TERMS: Term[] = [
+export const BASE_TERMS: Term[] = [
   { term: "KY活動", reading: "けーわいかつどう", definition: "危険予知活動の略。作業前に作業者全員でその作業に潜む危険を話し合い、対策を講じる安全活動。TBM（ツールボックスミーティング）と組み合わせて実施することが多い。", relatedPages: [{ href: "/ky", label: "KY用紙" }, { href: "/e-learning", label: "Eラーニング" }] },
   { term: "KYT", reading: "けーわいてぃー", definition: "危険予知トレーニングの略。イラストや写真を使って、潜む危険を発見・指摘する訓練。4ラウンド法（現状把握→本質追究→対策樹立→目標設定）が代表的手法。", relatedPages: [{ href: "/ky", label: "KY用紙" }] },
   { term: "安全衛生委員会", reading: "あんぜんえいせいいいんかい", definition: "常時50人以上の労働者を使用する事業場で設置義務がある委員会。安全委員会と衛生委員会を統合したもので、月1回以上開催が義務。議事録は3年間保存。", relatedPages: [{ href: "/laws", label: "法改正" }, { href: "/chatbot", label: "法令チャット" }] },
@@ -84,11 +84,11 @@ const BASE_TERMS: Term[] = [
   { term: "労働安全衛生法", reading: "ろうどうあんぜんえいせいほう", definition: "昭和47年制定の基本法。事業者の安全衛生措置義務・安全管理体制・健康保持増進等を定める。通称「安衛法」。労働安全衛生規則（安衛則）等の省令とセットで運用される。", relatedPages: [{ href: "/laws", label: "法改正" }, { href: "/chatbot", label: "法令チャット" }, { href: "/law-search", label: "法令検索" }], source: { label: "e-Gov 労働安全衛生法（昭47法57）", url: "https://laws.e-gov.go.jp/law/347AC0000000057" } },
   { term: "労働安全コンサルタント", reading: "ろうどうあんぜんこんさるたんと", definition: "安衛法に基づく国家資格。事業場の安全診断・安全教育等を行う専門家。試験科目は産業安全一般と産業安全関係法令。", relatedPages: [] },
   { term: "労働衛生コンサルタント", reading: "ろうどうえいせいこんさるたんと", definition: "安衛法に基づく国家資格。事業場の衛生診断・衛生教育等を行う専門家。試験科目は労働衛生一般と労働衛生関係法令。", relatedPages: [] },
-  { term: "リスクアセスメント", reading: "りすくあせすめんと", definition: "危険性・有害性の特定→リスクの見積もり→リスクの評価→リスク低減措置の決定・実施というプロセス。2006年から努力義務、化学物質等は義務化されている。", relatedPages: [{ href: "/chemical-ra", label: "化学物質RA" }, { href: "/risk-prediction", label: "リスク予測" }] },
+  { term: "リスクアセスメント", reading: "りすくあせすめんと", definition: "危険性・有害性の特定→リスクの見積もり→リスクの評価→リスク低減措置の決定・実施というプロセス。2006年から努力義務、化学物質等は義務化されている。", relatedPages: [{ href: "/chemical-ra", label: "化学物質RA" }, { href: "/risk", label: "今日の現場リスク" }] },
   { term: "玉掛け", reading: "たまがけ", definition: "クレーン等で荷物をつり上げる際に、ワイヤーロープ等を用いて荷物を掛ける作業。最大荷重1t以上のクレーン使用時は技能講習修了が必要。", relatedPages: [{ href: "/e-learning", label: "Eラーニング" }, { href: "/chatbot", label: "法令チャット" }] },
   { term: "TBM", reading: "てぃーびーえむ", definition: "ツールボックスミーティングの略。作業開始前に作業グループのメンバーが短時間（5〜10分）で行うミーティング。その日の作業内容・危険ポイント・対策を確認する。", relatedPages: [{ href: "/ky", label: "KY用紙" }] },
   { term: "MSDS/SDS", reading: "えむえすでぃーえす/えすでぃーえす", definition: "Material Safety Data Sheet → Safety Data Sheet。化学物質の安全情報を記載した文書。GHS対応で「SDS」に統一。16項目の記載が義務付けられている。", relatedPages: [{ href: "/chemical-ra", label: "化学物質RA" }] },
-  { term: "WBGT", reading: "だぶりゅーびーじーてぃー", definition: "湿球黒球温度（Wet Bulb Globe Temperature）。熱中症リスクを評価するための暑さ指数。気温・湿度・輻射熱を考慮して算出し、28℃以上で厳重警戒、31℃以上で危険とされる。厚労省の熱中症予防指針（「職場における熱中症の予防について」基発0618第1号等）でWBGT値に応じた対策の実施が求められる。", relatedPages: [{ href: "/laws", label: "法改正" }], source: { label: "厚労省 熱中症予防対策（WBGT管理）", url: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/roudoukijun/anzen/necchusyo/" } },
+  { term: "WBGT", reading: "だぶりゅーびーじーてぃー", definition: "湿球黒球温度（Wet Bulb Globe Temperature）。気温・湿度・輻射熱などを考慮して暑熱リスクを把握する指標。職場では地域の予測値を現場実測値として扱わず、作業強度、衣服、暑熱順化、健康状態なども合わせ、厚生労働省の現行ガイドライン（令和8年3月18日付け基発0318第1号）と事業場の手順を確認する。", relatedPages: [{ href: "/heat-illness-prevention", label: "熱中症予防" }, { href: "/laws", label: "法改正" }], source: { label: "厚生労働省 職場における熱中症防止対策のためのガイドライン（基発0318第1号）", url: "https://www.mhlw.go.jp/web/t_doc?dataId=00tc9896&dataType=1&pageNo=1" } },
   { term: "PDCA", reading: "ぴーでぃーしーえー", definition: "Plan（計画）→Do（実施）→Check（評価）→Act（改善）のサイクル。安全衛生管理においてOSHMS（労働安全衛生マネジメントシステム）の基本的枠組みとして活用される。", relatedPages: [] },
   { term: "OSHMS", reading: "おーえすえいちえむえす", definition: "労働安全衛生マネジメントシステム（Occupational Safety and Health Management System）。PDCAサイクルにより継続的に安全衛生水準を向上させる体系的管理手法。ISO 45001が国際規格。", relatedPages: [] },
   { term: "ISO 45001", reading: "あいえすおー45001", definition: "労働安全衛生マネジメントシステムの国際規格（2018年制定）。OHSAS 18001を後継し、働き方改革・サプライチェーン管理等の要求事項を盛り込んでいる。", relatedPages: [] },

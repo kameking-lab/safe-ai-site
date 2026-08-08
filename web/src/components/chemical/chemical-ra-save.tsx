@@ -10,11 +10,12 @@ import {
   isChemicalRaCloudEnabled,
   type ChemicalRaSavedRecord,
 } from "@/lib/chemical/ra-cloud";
+import { TransientChemicalLink } from "@/components/home-safety-cockpit/transient-chemical-link";
 
 /**
  * P1-5 RAクラウド保管 UI（既存RAパネルに非干渉の追加コンポーネント）。
  * - ChemicalRaSaveButton: RA結果の保存ボタン（localStorage即時＋クラウド背景同期）。
- * - SavedRaList: 保存済みRA一覧（クラウド＋ローカルマージ）。再実施は /chemical-ra?name= で再現。
+ * - SavedRaList: 保存済みRA一覧（クラウド＋ローカルマージ）。再実施時の物質名は同一タブの一時メモリで渡す。
  */
 export function ChemicalRaSaveButton(props: {
   chemicalName: string;
@@ -25,23 +26,31 @@ export function ChemicalRaSaveButton(props: {
 }) {
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+  const [cloudConsent, setCloudConsent] = useState(false);
 
   const onSave = useCallback(async () => {
     setBusy(true);
     setMsg(null);
     try {
-      await saveChemicalRaRecord({
+      const result = await saveChemicalRaRecord({
         substance: props.chemicalName,
         cas: props.cas,
         workContent: props.workContent,
         exposureBand: props.exposureBand,
         payload: props.payload,
+        cloudConsent,
       });
-      setMsg(
-        isChemicalRaCloudEnabled()
-          ? "保存しました（この端末＋クラウド）。下部「実施記録の台帳」から開けます。"
-          : "保存しました（この端末）。下部「実施記録の台帳」から開けます。"
-      );
+      if (result.localStatus === "failed") {
+        setMsg("端末内への保存に失敗しました。空き容量とブラウザ設定を確認してください。");
+      } else if (result.cloudStatus === "synced") {
+        setMsg("この端末に保存し、認証済みクラウドとの同期も完了しました。共有はされていません。");
+      } else if (result.cloudStatus === "failed") {
+        setMsg("この端末には保存しましたが、クラウド同期は失敗しました。再接続後に再度保存してください。");
+      } else if (result.cloudStatus === "not-configured") {
+        setMsg("この端末に保存しました。クラウドは運営側で未設定のため送信していません。");
+      } else {
+        setMsg("この端末に保存しました。クラウドへは送信していません。");
+      }
       // 同一ページ内の台帳一覧(SavedRaList)へ即時反映を通知
       try { window.dispatchEvent(new Event("chemical-ra:saved")); } catch { /* SSR等 */ }
     } catch {
@@ -49,20 +58,36 @@ export function ChemicalRaSaveButton(props: {
     } finally {
       setBusy(false);
     }
-  }, [props]);
+  }, [props, cloudConsent]);
 
   return (
     <span className="inline-flex flex-col items-end gap-1 print:hidden">
+      <label className="flex min-h-[44px] items-center gap-2 text-[11px] font-semibold text-slate-700">
+        <input
+          type="checkbox"
+          checked={cloudConsent}
+          onChange={(event) => setCloudConsent(event.target.checked)}
+          disabled={!isChemicalRaCloudEnabled()}
+          className="h-5 w-5"
+        />
+        認証済みクラウドへの送信を希望する（未認証・失敗時は同期済みにしません）
+      </label>
       <button
         type="button"
         onClick={() => void onSave()}
         disabled={busy}
-        className="inline-flex items-center gap-1 rounded-lg border border-emerald-300 bg-white px-3 py-1.5 text-xs font-bold text-emerald-700 shadow-sm hover:bg-emerald-50 disabled:opacity-50"
+        className="inline-flex min-h-[44px] items-center gap-1 rounded-lg border border-emerald-300 bg-white px-3 py-2 text-xs font-bold text-emerald-700 shadow-sm hover:bg-emerald-50 disabled:opacity-50"
       >
         {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
-        この結果を保存
+        {busy ? "保存中…" : "この結果を保存"}
       </button>
-      {msg && <span className="text-[10px] text-emerald-700">{msg}</span>}
+      <span aria-live="polite" className="text-[10px] text-emerald-800">
+        {busy
+          ? cloudConsent
+            ? "端末内へ保存し、クラウド同期の応答を確認中です。"
+            : "端末内へ保存中です。"
+          : msg ?? "未保存のローカル下書きです。クラウド同期・共有は行われていません。"}
+      </span>
     </span>
   );
 }
@@ -71,10 +96,11 @@ export function SavedRaList() {
   const [list, setList] = useState<ChemicalRaSavedRecord[] | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [cloudConsent, setCloudConsent] = useState(false);
 
   const reload = useCallback(() => {
-    void listChemicalRaRecords().then(setList);
-  }, []);
+    void listChemicalRaRecords(cloudConsent).then(setList);
+  }, [cloudConsent]);
 
   useEffect(() => {
     reload();
@@ -91,12 +117,12 @@ export function SavedRaList() {
       if (!ok) return;
       setDeleteError(null);
       setDeletingId(r.raId);
-      void deleteChemicalRaRecord(r.raId)
+      void deleteChemicalRaRecord(r.raId, cloudConsent)
         .then(() => reload())
         .catch(() => setDeleteError("削除に失敗しました。通信状況を確認してもう一度お試しください。"))
         .finally(() => setDeletingId(null));
     },
-    [reload]
+    [cloudConsent, reload]
   );
 
   if (list === null) return null;
@@ -105,16 +131,24 @@ export function SavedRaList() {
   return (
     <section className="mt-4 rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 print:hidden">
       <h2 className="flex items-center gap-2 text-base font-bold text-slate-900">
-        <FolderOpen className="h-5 w-5 text-emerald-600" aria-hidden="true" />
+        <FolderOpen className="h-5 w-5 text-emerald-700" aria-hidden="true" />
         実施記録の台帳（{list.length}）
       </h2>
       <p className="mt-1 text-[11px] text-slate-500">
         安衛法第57条の3の自律的管理では、リスクアセスメントの<strong className="font-semibold">記録の作成・保管</strong>が求められます。
         各記録は「記録を開く」から<strong className="font-semibold">実施当時の実施日のまま再印刷</strong>でき、監督署対応や年次見直しに使えます。
-        {isChemicalRaCloudEnabled()
-          ? "（この端末＋クラウドに保存）"
-          : "（この端末に保存）"}
+        （この一覧はこの端末の保存記録です。クラウド同期済みとは限りません）
       </p>
+      <label className="mt-3 flex min-h-[44px] cursor-pointer items-center gap-2 rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-800">
+        <input
+          type="checkbox"
+          checked={cloudConsent}
+          onChange={(event) => setCloudConsent(event.target.checked)}
+          disabled={!isChemicalRaCloudEnabled()}
+          className="h-5 w-5"
+        />
+        認証済みクラウドとの照合・未完了同期の再試行に同意する
+      </label>
       {deleteError && (
         <p role="alert" className="mt-2 text-[11px] font-semibold text-rose-600">
           {deleteError}
@@ -136,30 +170,37 @@ export function SavedRaList() {
                 {r.workContent && `${r.workContent} ／ `}
                 {new Date(r.savedAt).toLocaleString("ja-JP")}
               </span>
+              <span className="mt-1 block text-[11px] font-semibold text-slate-700">
+                {r.syncState === "synced" && "保存状態: クラウド同期済み（共有はしていません）"}
+                {r.syncState === "sync-pending" && "保存状態: 端末保存済み・同期確認待ち"}
+                {r.syncState === "failed" && "保存状態: 端末保存済み・クラウド同期失敗"}
+                {r.syncState === "shared" && "保存状態: 共有済み"}
+                {r.syncState === "saved-locally" && "保存状態: この端末だけに保存"}
+              </span>
             </span>
             <span className="flex shrink-0 flex-col items-end gap-1">
               <Link
                 href={`/chemical-ra?raId=${encodeURIComponent(r.raId)}`}
-                className="inline-flex items-center gap-1 rounded-lg border border-emerald-300 bg-emerald-600 px-2 py-1 text-[11px] font-bold text-white hover:bg-emerald-700"
+                className="inline-flex min-h-[44px] items-center gap-1 rounded-lg border border-emerald-700 bg-emerald-700 px-3 py-2 text-[11px] font-bold text-white hover:bg-emerald-800"
               >
                 記録を開く（印刷）
                 <FolderOpen className="h-3 w-3" aria-hidden="true" />
               </Link>
               {r.substance && (
-                <Link
-                  href={`/chemical-ra?name=${encodeURIComponent(r.substance)}`}
-                  className="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-500 hover:text-emerald-700 hover:underline"
+                <TransientChemicalLink
+                  query={r.cas || r.substance}
+                  className="inline-flex min-h-[44px] items-center gap-1 px-2 text-[10px] font-semibold text-slate-600 hover:text-emerald-700 hover:underline"
                 >
                   同じ物質で再実施
                   <ArrowRight className="h-3 w-3" aria-hidden="true" />
-                </Link>
+                </TransientChemicalLink>
               )}
               <button
                 type="button"
                 onClick={() => onDelete(r)}
                 disabled={deletingId === r.raId}
                 aria-label="削除"
-                className="inline-flex items-center rounded-lg border border-slate-300 bg-white px-2 py-1 text-slate-500 hover:bg-rose-50 hover:text-rose-600 disabled:opacity-50"
+                className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border border-slate-300 bg-white p-2 text-slate-600 hover:bg-rose-50 hover:text-rose-700 disabled:opacity-50"
               >
                 {deletingId === r.raId ? (
                   <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />

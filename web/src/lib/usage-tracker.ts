@@ -36,10 +36,19 @@ export const FEEDBACK_GATE_MIN_PAGE_VIEWS = 3;
 export const SNOOZE_DAYS_DEFAULT = 30;
 
 // 作業の最中に割り込んではいけない画面のパス接頭辞。
-// /ky 系（KY記入・朝礼）・/signage 系（サイネージ常時表示）では
-// フィードバック懇願を一切出さない（第三者レビュー §C 是正）。
+// 会話・入力・判定・朝礼表示の最中は、フィードバックや固定シェアを
+// 一切出さない（第三者レビュー §C 是正）。
 // 印刷ビューは別途 CSS（print:hidden）で抑止する。
-const WORK_CONTEXT_PREFIXES = ["/ky", "/signage"] as const;
+const WORK_CONTEXT_PREFIXES = [
+  "/chatbot",
+  "/chemical-ra",
+  "/ky",
+  "/law-search",
+  "/risk",
+  "/services/automation",
+  "/signage",
+  "/training/visual-ky",
+] as const;
 
 /**
  * いま見ている画面が「作業の文脈」で割込み禁止かを判定する純関数。

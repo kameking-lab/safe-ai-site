@@ -1,12 +1,14 @@
 /**
  * KY全面再設計 P1-C: クロスツール連携の復活。
- * 旧 /ky のクエリ起点取り込み（preset / industry+topic / fromAccident / fromDiary / import=risk-prediction）を
+ * 旧 /ky のクエリ起点取り込み（preset / industry+topic / fromAccident / fromDiary）と、
+ * allowlist済みIDによる旧リンクだけを
  * /ky/paper でも解釈できるよう、純関数として再実装（既存ヘルパを流用）。
  */
 import type { KyInstructionRecordState } from "@/lib/types/operations";
 import { getPresetById, type KyIndustryPreset } from "@/data/mock/ky-industry-presets";
 import { mapIndustryParamToPresetId, describeTopic } from "@/lib/ky-deep-link";
 import { getEntryById } from "@/lib/safety-diary/store";
+import { getVisualKyScenarioById } from "@/data/visual-ky/scenarios";
 
 /** プリセットを記録に適用（作業内容[0]＋危険行へ反映）。 */
 export function applyPresetToRecord(
@@ -52,38 +54,8 @@ function applyDiaryToRecord(
   return { ...record, workRows, riskRows };
 }
 
-type RiskPredictionPayload = { workContent?: string; risks?: { hazard?: string; reduction?: string }[] };
-
-export function applyRiskPredictionPayload(
-  record: KyInstructionRecordState,
-  payload: string | null
-): { record: KyInstructionRecordState; notice: string } {
-  if (!payload) {
-    return { record, notice: "AIリスク予測から起票しています（内容は手動で入力してください）。" };
-  }
-  try {
-    const parsed = JSON.parse(decodeURIComponent(payload)) as RiskPredictionPayload;
-    let r = record;
-    if (typeof parsed.workContent === "string" && parsed.workContent.trim()) {
-      const wc = parsed.workContent;
-      r = { ...r, workRows: r.workRows.map((row, i) => (i === 0 ? { ...row, workDetail: wc } : row)) };
-    }
-    if (Array.isArray(parsed.risks)) {
-      const risks = parsed.risks;
-      r = {
-        ...r,
-        riskRows: r.riskRows.map((row, i) => {
-          if (i === 0) return row;
-          const p = risks[i - 1];
-          if (!p) return row;
-          return { ...row, hazard: p.hazard ?? row.hazard, reduction: p.reduction ?? row.reduction };
-        }),
-      };
-    }
-    return { record: r, notice: "AIリスク予測から作業内容・危険を取り込みました。" };
-  } catch {
-    return { record, notice: "AIリスク予測データの読み込みに失敗しました。手動で入力してください。" };
-  }
+function limitedText(value: unknown, maxLength: number): string {
+  return typeof value === "string" ? value.trim().slice(0, maxLength) : "";
 }
 
 export type DeepLinkResult = { record: KyInstructionRecordState; notice: string | null; changed: boolean };
@@ -110,11 +82,8 @@ export function applyKyDeepLink(params: URLSearchParams, current: KyInstructionR
 
   const fromAccident = params.get("fromAccident");
   if (fromAccident) {
-    const q = params.get("q");
     changed = true;
-    notice = q
-      ? `事故事例「${q}」からKYを起票しています。${preset ? "テンプレ適用済み。" : "作業内容を入力してください。"}`
-      : "事故事例から起票しています。作業内容を入力してください。";
+    notice = `公開事故IDからKYを起票しています。${preset ? "テンプレ適用済み。" : "作業内容を入力してください。"}`;
   }
 
   const diaryId = params.get("fromDiary");
@@ -129,11 +98,62 @@ export function applyKyDeepLink(params: URLSearchParams, current: KyInstructionR
     }
   }
 
-  if (params.get("import") === "risk-prediction") {
-    const applied = applyRiskPredictionPayload(record, params.get("payload"));
-    record = applied.record;
-    notice = applied.notice;
+  if (params.get("import") === "visual-kyt") {
+    const scenarioId = limitedText(params.get("scenario"), 16);
+    const scenario = getVisualKyScenarioById(scenarioId);
+    if (
+      scenario &&
+      scenario.reviewStatus === "reviewed" &&
+      scenario.kyPrefill.humanReviewRequired
+    ) {
+      record = {
+        ...record,
+        workRows: record.workRows.map((row, index) =>
+          index === 0
+            ? { ...row, workDetail: scenario.kyPrefill.workDetail }
+            : row,
+        ),
+        riskRows: record.riskRows.map((row, index) => {
+          if (index === 0) return row;
+          const candidate = scenario.kyPrefill.risks[index - 1];
+          if (!candidate) return row;
+          return {
+            ...row,
+            hazard: candidate.hazard,
+            reduction: candidate.reduction,
+            candidateSource: {
+              kind: "rule",
+              label: `${scenario.id} ビジュアルKYTの未確認候補`,
+              basis: `安全教育用の合成場面から作成。根拠資料: ${scenario.officialSources
+                .map((source) => source.organization)
+                .join("、")}`,
+              grounded: true,
+              requiresHumanReview: true,
+            },
+          };
+        }),
+      };
+      notice = `${scenario.shortTitle}からKY候補を取り込みました。これは合成教育場面の候補で、自動確定されていません。設備・作業方法・人員・気象・メーカー手順と一次資料を人が確認するまで提出・承認できません。`;
+      changed = true;
+    } else {
+      notice =
+        "指定されたビジュアルKYTの公開済み・人手確認必須の候補を読み込めませんでした。内容を手動で入力してください。";
+    }
+  } else if (params.get("import") === "meeting-record") {
+    // 作業・危険・対策の自由文をURLへ載せる旧方式は拒否する。
+    // 現行画面は同一originの短期session handoffだけを使用する。
+    notice =
+      "工程打合せ書のURL取込は停止しました。現在のKY作成画面から、端末内の短期引継ぎを利用してください。";
+  } else if (params.get("import") === "risk-prediction") {
+    // 隔離した旧リスク予測からの任意JSON取込は、出所も確認状態も保持できないため拒否する。
+    notice =
+      "旧リスク予測からの自動取込は安全確認の境界を満たさないため停止しました。現場条件を確認して手動で入力してください。";
+  }
+
+  if (params.get("topic") === "heat-illness" && !notice) {
     changed = true;
+    notice =
+      "熱中症KYを開始しました。地域・日付・作業時間・現場実測WBGTまたは推定情報の区分・休憩・水分補給・体調確認・緊急連絡・役割分担を確認して入力してください。入力候補は自動確定していません。";
   }
 
   return { record, notice, changed };

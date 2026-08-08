@@ -29,7 +29,7 @@ const FINDINGS: Finding[] = [
     id: "F-001",
     priority: "P1",
     category: "Data integrity",
-    title: "未来日付の事故レコード mhlw-2026-001 (occurredOn: 2026-07-08)",
+    title: "教材用モデルの事故レコード synthetic-heat-2026-001 (occurredOn: 2026-07-01)",
     filePath: "web/src/data/mock/real-accident-cases-2024-2026.ts:143-162",
     prSource: [102, 104, 207],
     detail:

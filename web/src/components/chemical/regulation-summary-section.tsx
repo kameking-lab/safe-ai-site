@@ -76,27 +76,6 @@ function egovUrl(lawId?: string): string | undefined {
   return /^\d/.test(lawId) ? `https://laws.e-gov.go.jp/law/${lawId}` : undefined;
 }
 
-/** タグ → 法律ファミリー名（旧サマリーとの互換用グルーピング）。 */
-function lawFamily(tag: RegulationTag): string {
-  const cat = REGULATION_TAGS[tag].category;
-  switch (cat) {
-    case "osha":
-      return "労働安全衛生法 特別則";
-    case "nite":
-      return "GHS分類（NITE）";
-    case "prtr":
-      return "化管法（PRTR・SDS）";
-    case "chashin":
-      return "化審法";
-    case "poison-waste":
-      return tag === "waste" ? "廃棄物処理法" : "毒物及び劇物取締法";
-    case "cwc":
-      return "化学兵器禁止法";
-    default:
-      return REGULATION_TAGS[tag].fullLabel;
-  }
-}
-
 export function RegulationSummarySection({
   cas,
   regulationTags,
@@ -121,7 +100,8 @@ export function RegulationSummarySection({
     ...new Set(byStatus("unverified").map((d) => d.domain)),
   ] as LegalDomain[];
 
-  // 業務列挙型の特別則（鉛則・四アルキル鉛則・石綿則・酸欠則・粉じん則）は人手検証タグから
+  // 業務列挙型の特別則タグは旧ミラー由来で、物質単位の正本突合プロファイルではない。
+  // 法令該当の肯定バッジへ昇格させず、確認待ちとして分離する。
   const manualOshaTags = tags.filter((t) =>
     ["namari", "yonalkyl", "sekimen", "sankketsu", "funjin"].includes(t),
   );
@@ -136,27 +116,28 @@ export function RegulationSummarySection({
       badges.push({ key: label, label, className: badgeClassFor(d) });
     }
   }
-  for (const t of manualOshaTags) {
-    const info = REGULATION_TAGS[t];
-    const label = info.shortLabel;
-    if (!badges.some((b) => b.label === label)) {
-      badges.push({ key: label, label, className: info.badgeClass });
-    }
-  }
   if (soil) badges.push({ key: "soil", label: `土壌汚染対策法：特定有害物質（${soil.kind}）`, className: "bg-lime-100 text-lime-900 border-lime-300" });
   if (air) badges.push({ key: "air", label: `大気汚染防止法：${air.category}`, className: "bg-sky-100 text-sky-900 border-sky-300" });
   if (water) badges.push({ key: "water", label: "水質汚濁防止法：有害物質", className: "bg-blue-100 text-blue-900 border-blue-300" });
 
   // 未確認扱いのタグ（ミラー由来で正本未突合のもの）
   const unverifiedTagBadges: { label: string; note: string }[] = [];
+  const designatedDomains = new Set(designated.map((d) => d.domain));
   if (tags.includes("poison-control") && unverifiedDomains.includes("dokugeki")) {
     unverifiedTagBadges.push({
       label: "毒物及び劇物取締法",
       note: "収録データにタグはあるが正本（e-Gov別表・指定令）と未突合",
     });
   }
+  for (const t of manualOshaTags) {
+    unverifiedTagBadges.push({
+      label: REGULATION_TAGS[t].fullLabel,
+      note: "旧収録タグ。物質単位の公式一覧・適用条件との正本突合は未完了",
+    });
+  }
   for (const t of ["cwc", "waste"] as const) {
-    if (tags.includes(t)) {
+    const domain: LegalDomain = t === "cwc" ? "cwc" : "haiki";
+    if (tags.includes(t) && !designatedDomains.has(domain)) {
       unverifiedTagBadges.push({
         label: REGULATION_TAGS[t].fullLabel,
         note: "ミラー由来データ（正本突合は今後拡張）",
@@ -182,20 +163,15 @@ export function RegulationSummarySection({
     .filter((dm) => dm !== "shobo")
     .map((dm) => DOMAIN_LABEL[dm]);
 
-  // 旧互換: プロファイル未収載時も既存タグから該当ファミリーを出す（偽陰性防止）
-  const fallbackFamilies: string[] = [];
-  if (!profile) {
-    for (const t of tags) {
-      const f = lawFamily(t);
-      if (!fallbackFamilies.includes(f)) fallbackFamilies.push(f);
-    }
-  }
+  // プロファイル未収載時の旧タグは「該当」と表示しない。
+  // 誤った肯定よりも判定不能を優先し、公式資料とSDSの確認へ誘導する。
+  const legacyTagCount = profile ? 0 : tags.length;
 
   return (
     <section className="rounded-2xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50/60 dark:bg-emerald-950/30 p-5 sm:p-6 space-y-5">
       <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
         <ListChecks className="w-5 h-5 text-emerald-700 dark:text-emerald-300" aria-hidden="true" />
-        この物質に当てはまる法令（正本突合済み）
+        法令該当性の確認状態
       </h2>
 
       {/* 1. 結論: 該当法令バッジ一覧 */}
@@ -211,22 +187,20 @@ export function RegulationSummarySection({
               </li>
             ))}
           </ul>
-        ) : fallbackFamilies.length > 0 ? (
-          <ul className="flex flex-wrap gap-2">
-            {fallbackFamilies.map((f) => (
-              <li
-                key={f}
-                className="inline-flex items-center rounded-full border border-emerald-400 bg-white dark:bg-slate-900 px-3 py-1 text-xs font-semibold text-emerald-800 dark:text-emerald-200"
-              >
-                ✓ {f}
-              </li>
-            ))}
-          </ul>
         ) : (
           <p className="text-sm text-slate-600 dark:text-slate-400">
             正本と突合できた該当法令はありません（下記の「未確認」「要確認」を参照）。
           </p>
         )}
+        {legacyTagCount > 0 ? (
+          <p
+            role="status"
+            className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs leading-5 text-amber-950 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-100"
+          >
+            旧収録タグが{legacyTagCount}件ありますが、物質単位の一次資料との突合が完了していないため、
+            法令該当とは表示していません。SDSと各法令の公式一覧で確認してください。
+          </p>
+        ) : null}
         {unverifiedTagBadges.length > 0 && (
           <ul className="flex flex-wrap gap-2">
             {unverifiedTagBadges.map((b) => (

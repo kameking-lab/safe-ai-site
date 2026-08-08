@@ -14,6 +14,12 @@
 
 import type { AccidentCase, AccidentType } from "@/lib/types/domain";
 import { tokenize } from "@/lib/accidents/ai-relevant";
+import {
+  isAccidentEligibleForOperationalEvidence,
+  resolveAccidentProvenance,
+  resolveAccidentSource,
+} from "@/lib/accident-source";
+import type { KyRiskCandidateSourceKind } from "@/lib/types/operations";
 
 /**
  * 現場の作業語 → その作業で想起される事故の型。
@@ -124,6 +130,7 @@ export function findSimilarAccidentCasesForKy(
 
   const hits: SimilarAccidentHit[] = [];
   for (const c of cases) {
+    if (!isAccidentEligibleForOperationalEvidence(c)) continue;
     const haystack = `${c.title}\n${c.summary}\n${(c.mainCauses ?? []).join("\n")}`;
     let score = 0;
     const reasons: string[] = [];
@@ -144,7 +151,9 @@ export function findSimilarAccidentCasesForKy(
       if (haystack.includes(tok)) score += 1;
     }
 
-    if (score > 0) hits.push({ case: c, score, reasons });
+    // 事故型だけの一致（+3）では別作業の事例を混ぜるため、作業語または
+    // 複数の具体語も一致した候補だけを表示する。
+    if (score >= 4) hits.push({ case: c, score, reasons });
   }
 
   hits.sort((a, b) => {
@@ -161,6 +170,12 @@ export interface KyRiskDraftFromAccident {
   reduction: string;
   likelihood: KyLikertScale;
   severity: KyLikertScale;
+  source: {
+    kind: KyRiskCandidateSourceKind;
+    label: string;
+    referenceId: string;
+    referenceUrl?: string;
+  };
 }
 
 /**
@@ -169,12 +184,41 @@ export interface KyRiskDraftFromAccident {
  * 発生可能性は不明のため中位(2)固定、重大性は事例の severity から写す。
  */
 export function accidentCaseToRiskDraft(c: AccidentCase): KyRiskDraftFromAccident {
+  if (!isAccidentEligibleForOperationalEvidence(c)) {
+    throw new Error(
+      "Accident record is quarantined and cannot be transferred to KY.",
+    );
+  }
   const hazardBase = c.title?.trim() || c.summary?.trim() || c.type;
   const reduction = (c.preventionPoints ?? []).find((p) => p.trim()) ?? "";
+  const provenance = resolveAccidentProvenance(c);
+  const kind: KyRiskCandidateSourceKind =
+    provenance === "mhlw"
+      ? "officialAccident"
+      : provenance === "synthetic"
+        ? "syntheticCase"
+        : provenance === "preliminary"
+          ? "preliminaryCase"
+          : "curatedAccident";
+  const label =
+    provenance === "mhlw"
+      ? "公式個票URL付き事故例からの候補"
+      : provenance === "synthetic"
+        ? "synthetic教材例からの候補"
+        : provenance === "preliminary"
+          ? "速報統計ベース想定例からの候補"
+          : "編集再構成事例からの候補";
+  const source = resolveAccidentSource(c);
   return {
     hazard: `${c.type}（類似災害: ${hazardBase}）`,
     reduction,
     likelihood: 2 as KyLikertScale,
     severity: severityToKyScale(c.severity),
+    source: {
+      kind,
+      label,
+      referenceId: c.id,
+      ...(source?.url ? { referenceUrl: source.url } : {}),
+    },
   };
 }

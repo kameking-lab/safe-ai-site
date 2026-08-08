@@ -1,142 +1,274 @@
+import { createHash } from "node:crypto";
 import { NextResponse } from "next/server";
+import {
+  hasJsonContentType,
+  isValidAutomationConsultOrigin,
+} from "@/lib/automation-consult/origin";
+import {
+  fingerprintAutomationConsultInput,
+  isValidAutomationConsultIdempotencyKey,
+  parseAutomationConsultSubmissionDate,
+} from "@/lib/automation-consult/idempotency";
+import { getAutomationConsultClientIp } from "@/lib/automation-consult/rate-limit";
+import {
+  anonymizeAutomationConsultClient,
+  resolveAutomationConsultStateStore,
+} from "@/lib/automation-consult/state-store";
+import { inquirySchema, readInquiryJson } from "@/lib/inquiry/schema";
+import { sendEmailSafe } from "@/lib/external/resend-safe";
 
-export type InquiryPayload = {
-  name?: string;
-  email?: string;
-  industry?: string;
-  category: "question" | "improvement" | "data-error" | "feature-request" | "business" | "other";
-  subject: string;
-  message: string;
-  publishOk?: boolean;
-};
+const NO_STORE_HEADERS = { "Cache-Control": "no-store" };
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const HEADER_CONTROL_CHARACTERS = /[\r\n\u0000-\u001f\u007f]/;
 
-const VALID_CATEGORIES = new Set([
-  "question",
-  "improvement",
-  "data-error",
-  "feature-request",
-  "business",
-  "other",
-]);
-
-function isNonEmpty(v: unknown): v is string {
-  return typeof v === "string" && v.trim().length > 0;
+function errorResponse(
+  status: number,
+  code: string,
+  message: string,
+  headers?: Record<string, string>,
+) {
+  return NextResponse.json(
+    { ok: false, error: { code, message } },
+    { status, headers: { ...NO_STORE_HEADERS, ...headers } },
+  );
 }
 
-function isValidEmail(v: string): boolean {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+function isSafeMailbox(value: string): boolean {
+  if (value.length > 254 || HEADER_CONTROL_CHARACTERS.test(value)) return false;
+  const bracketMatch = value.match(/^[^<>]{1,100}<([^<>]+)>$/);
+  return EMAIL_PATTERN.test(bracketMatch?.[1]?.trim() ?? value.trim());
 }
 
-const RATE_LIMIT_WINDOW_MS = 60 * 1000;
-const RATE_LIMIT_MAX = 5;
-const rateBuckets = new Map<string, number[]>();
-
-function resolveClientIp(request: Request): string {
-  const xff = request.headers.get("x-forwarded-for");
-  if (xff) {
-    const first = xff.split(",")[0]?.trim();
-    if (first) return first;
-  }
-  return request.headers.get("x-real-ip")?.trim() ?? "unknown";
-}
-
-function isRateLimited(ip: string, now: number): boolean {
-  const windowStart = now - RATE_LIMIT_WINDOW_MS;
-  const bucket = rateBuckets.get(ip) ?? [];
-  const recent = bucket.filter((ts) => ts > windowStart);
-  if (recent.length >= RATE_LIMIT_MAX) {
-    rateBuckets.set(ip, recent);
-    return true;
-  }
-  recent.push(now);
-  rateBuckets.set(ip, recent);
-  if (rateBuckets.size > 2048) {
-    for (const [key, ts] of rateBuckets) {
-      if (ts.length === 0 || ts[ts.length - 1] < windowStart) rateBuckets.delete(key);
-    }
-  }
-  return false;
+function createInquiryReference(submissionDate: Date, key: string): string {
+  const date = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Tokyo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  })
+    .format(submissionDate)
+    .replaceAll("-", "");
+  const suffix = createHash("sha256")
+    .update(`inquiry\0${key}`)
+    .digest("hex")
+    .slice(0, 12)
+    .toUpperCase();
+  return `INQ-${date}-${suffix}`;
 }
 
 export async function POST(request: Request) {
-  const ip = resolveClientIp(request);
-  const now = Date.now();
-  if (isRateLimited(ip, now)) {
-    return NextResponse.json(
-      {
-        ok: false,
-        error: "rate_limited",
-        message: "短時間に多数の送信が行われました。1分ほどおいて再度お試しください。",
-      },
-      { status: 429, headers: { "Retry-After": String(Math.ceil(RATE_LIMIT_WINDOW_MS / 1000)) } }
+  if (!hasJsonContentType(request)) {
+    return errorResponse(415, "unsupported_media_type", "JSON形式で送信してください。");
+  }
+  if (!isValidAutomationConsultOrigin(request)) {
+    return errorResponse(403, "invalid_origin", "送信元を確認できませんでした。");
+  }
+
+  const stateResolution = resolveAutomationConsultStateStore();
+  if (!stateResolution.ok) {
+    return errorResponse(
+      503,
+      "shared_state_unavailable",
+      "現在、重複送信防止機能を確認できないため送信できません。",
+    );
+  }
+  const stateStore = stateResolution.store;
+  const clientIp = getAutomationConsultClientIp(request);
+  const anonymousClientKey =
+    stateStore.backend === "upstash"
+      ? anonymizeAutomationConsultClient(clientIp)
+      : clientIp;
+  if (!anonymousClientKey) {
+    return errorResponse(
+      503,
+      "shared_state_unavailable",
+      "現在、送信回数の安全確認ができないため送信できません。",
     );
   }
 
-  let body: InquiryPayload;
+  const rawBody = await readInquiryJson(request);
+  if (!rawBody.ok) {
+    return rawBody.reason === "payload_too_large"
+      ? errorResponse(413, "payload_too_large", "入力内容が長すぎます。")
+      : errorResponse(400, "invalid_json", "入力形式を確認してください。");
+  }
+  if (
+    typeof rawBody.value === "object" &&
+    rawBody.value !== null &&
+    "website" in rawBody.value &&
+    typeof rawBody.value.website === "string" &&
+    rawBody.value.website.trim().length > 0
+  ) {
+    return errorResponse(400, "invalid_submission", "入力内容を確認してください。");
+  }
+
+  const parsed = inquirySchema.safeParse(rawBody.value);
+  if (!parsed.success) {
+    return errorResponse(400, "validation_error", "入力内容を確認してください。");
+  }
+
+  const idempotencyKey = request.headers.get("idempotency-key");
+  if (!isValidAutomationConsultIdempotencyKey(idempotencyKey)) {
+    return errorResponse(
+      400,
+      "missing_idempotency_key",
+      "送信を安全に処理できませんでした。ページを再読み込みしてお試しください。",
+    );
+  }
+  const submissionDate = parseAutomationConsultSubmissionDate(idempotencyKey);
+  if (!submissionDate) {
+    return errorResponse(
+      400,
+      "missing_idempotency_key",
+      "送信を安全に処理できませんでした。ページを再読み込みしてお試しください。",
+    );
+  }
+
+  const fingerprint = fingerprintAutomationConsultInput({
+    route: "inquiry",
+    input: parsed.data,
+  });
+  if (!fingerprint) {
+    return errorResponse(
+      503,
+      "shared_state_unavailable",
+      "現在、重複送信防止の安全確認ができないため送信できません。",
+    );
+  }
+
+  let idempotency;
   try {
-    body = (await request.json()) as InquiryPayload;
+    idempotency = await stateStore.beginIdempotency(
+      idempotencyKey,
+      fingerprint,
+    );
   } catch {
-    return NextResponse.json({ ok: false, error: "invalid_json" }, { status: 400 });
+    return errorResponse(
+      503,
+      "shared_state_unavailable",
+      "現在、重複送信防止機能を確認できないため送信できません。",
+    );
   }
-
-  if (!isNonEmpty(body.subject) || !isNonEmpty(body.message)) {
-    return NextResponse.json({ ok: false, error: "missing_required_field" }, { status: 400 });
+  if (idempotency.state === "conflict") {
+    return errorResponse(
+      409,
+      "idempotency_conflict",
+      "同じ送信識別子で異なる内容は送信できません。",
+    );
   }
-
-  if (!VALID_CATEGORIES.has(body.category)) {
-    return NextResponse.json({ ok: false, error: "invalid_category" }, { status: 400 });
+  if (idempotency.state === "pending") {
+    return errorResponse(
+      409,
+      "request_in_progress",
+      "同じ内容を送信中です。しばらくお待ちください。",
+    );
   }
-
-  if (body.email && !isValidEmail(body.email.trim())) {
-    return NextResponse.json({ ok: false, error: "invalid_email" }, { status: 400 });
-  }
-
-  const receivedAt = new Date().toISOString();
-  const record = {
-    receivedAt,
-    name: body.name?.trim() ?? "",
-    email: body.email?.trim() ?? "",
-    industry: body.industry?.trim() ?? "",
-    category: body.category,
-    subject: body.subject.trim(),
-    messageLength: body.message.length,
-    publishOk: Boolean(body.publishOk),
-  };
-
-  // 受領は必ずログに残す（Resend 不通時の手動レスキューに必須）
-  console.warn("[inquiry]", JSON.stringify(record));
-
-  // Resend が設定されている場合のみメール通知。失敗してもユーザー応答は止めない。
-  const inboxAddress = process.env.INQUIRY_INBOX;
-  if (inboxAddress) {
-    const { sendEmailSafe } = await import("@/lib/external/resend-safe");
-    // 送信元は他の通知メール(notify/newsletter)と同じ NOTIFY_FROM 規約に統一。
-    // 以前は example.com のプレースホルダ固定で env 上書きも無く、実送信時に
-    // ドメイン未検証で配信失敗し得た（プレースホルダの是正）。
-    const fromAddress = process.env.NOTIFY_FROM ?? "安全AIポータル <noreply@anzen-ai.com>";
-    await sendEmailSafe({
-      tag: "inquiry",
-      from: fromAddress,
-      to: inboxAddress,
-      subject: `[安全AIポータル 相談] ${body.category} / ${body.subject.slice(0, 60)}`,
-      text:
-        `カテゴリ: ${body.category}\n` +
-        `名前: ${record.name || "（未記入）"}\n` +
-        `メール: ${record.email || "（未記入）"}\n` +
-        `業種: ${record.industry || "（未記入）"}\n` +
-        `公開Q&A掲載: ${record.publishOk ? "可" : "不可"}\n` +
-        `件名: ${record.subject}\n\n` +
-        `--- 内容 ---\n${body.message}\n`,
+  if (idempotency.state === "replay") {
+    return NextResponse.json(idempotency.response, {
+      status: 200,
+      headers: NO_STORE_HEADERS,
     });
   }
 
-  return NextResponse.json(
-    {
-      ok: true,
-      receivedAt,
-      message:
-        "ご意見・ご質問を受け付けました。メールアドレスをご記入いただいた場合は、原則3営業日以内に返信します。",
-    },
-    { status: 200 }
+  let rateLimit;
+  try {
+    rateLimit = await stateStore.consumeRateLimit(anonymousClientKey);
+  } catch {
+    await stateStore
+      .releaseIdempotency(idempotencyKey, fingerprint)
+      .catch(() => undefined);
+    return errorResponse(
+      503,
+      "shared_state_unavailable",
+      "現在、送信回数の安全確認ができないため送信できません。",
+    );
+  }
+  if (!rateLimit.allowed) {
+    await stateStore
+      .releaseIdempotency(idempotencyKey, fingerprint)
+      .catch(() => undefined);
+    return errorResponse(
+      429,
+      "rate_limited",
+      "短時間に複数回の送信がありました。時間をおいてお試しください。",
+      { "Retry-After": String(rateLimit.retryAfterSeconds) },
+    );
+  }
+
+  const inboxAddress = process.env.INQUIRY_INBOX?.trim() ?? "";
+  const fromAddress = process.env.NOTIFY_FROM?.trim() ?? "";
+  if (!isSafeMailbox(inboxAddress) || !isSafeMailbox(fromAddress)) {
+    await stateStore
+      .releaseIdempotency(idempotencyKey, fingerprint)
+      .catch(() => undefined);
+    return errorResponse(
+      503,
+      "delivery_not_configured",
+      "現在、お問い合わせを送信できません。時間をおいてお試しください。",
+    );
+  }
+
+  const referenceId = createInquiryReference(
+    submissionDate,
+    idempotencyKey,
   );
+  const receivedAt = new Date().toISOString();
+  const body = parsed.data;
+  const delivery = await sendEmailSafe({
+    tag: "inquiry",
+    from: fromAddress,
+    to: inboxAddress,
+    replyTo: body.email,
+    subject: `[安全AIポータル][ご意見] ${referenceId}`,
+    text: [
+      `受付番号: ${referenceId}`,
+      `カテゴリ: ${body.category}`,
+      `名前: ${body.name ?? "未記入"}`,
+      `メール: ${body.email ?? "未記入"}`,
+      `業種: ${body.industry ?? "未記入"}`,
+      `件名: ${body.subject}`,
+      "",
+      "--- 内容 ---",
+      body.message,
+    ].join("\n"),
+    idempotencyKey: `inquiry.${idempotencyKey}`,
+  });
+  if (!delivery.delivered) {
+    await stateStore
+      .releaseIdempotency(idempotencyKey, fingerprint)
+      .catch(() => undefined);
+    return errorResponse(
+      503,
+      delivery.reason === "not_configured"
+        ? "delivery_not_configured"
+        : "delivery_failed",
+      "現在、お問い合わせを送信できません。時間をおいてお試しください。",
+    );
+  }
+
+  const response = { ok: true as const, referenceId, receivedAt };
+  try {
+    const completed = await stateStore.completeIdempotency(
+      idempotencyKey,
+      fingerprint,
+      response,
+    );
+    return NextResponse.json(response, {
+      status: 200,
+      headers: completed
+        ? NO_STORE_HEADERS
+        : {
+            ...NO_STORE_HEADERS,
+            "X-Idempotency-State": "provider-protected",
+          },
+    });
+  } catch {
+    return NextResponse.json(response, {
+      status: 200,
+      headers: {
+        ...NO_STORE_HEADERS,
+        "X-Idempotency-State": "provider-protected",
+      },
+    });
+  }
 }

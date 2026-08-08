@@ -31,6 +31,7 @@ const SOURCE_LABEL = "e-Gov 法令API v2（政府標準利用規約2.0・出典�
 // 全文取込対象の登録簿。expectMax は「本則の最大基底条番号」の上限アンカー（改正差分の許容込み）。
 // 別表(AppdxTable)は本体級でも取込対象外＝§3-3（本則の条文本文のみを条ページ化する）。
 const LAW_REGISTRY: Record<string, { lawShort: string; expectMax: number }> = {
+  "335AC0000000139": { lawShort: "電気工事士法", expectMax: 20 }, // 本則 第1〜16条規模
   "347M50002000032": { lawShort: "安衛則", expectMax: 700 }, // FT-D1（本則 第1〜682条規模）
   "347AC0000000057": { lawShort: "安衛法", expectMax: 130 }, // FT-D5（本則 第1〜123条・第64条=削除）
   "347CO0000000318": { lawShort: "安衛令", expectMax: 40 }, // FT-D5（本則 第1〜27条・別表10表は §3-3 で本則外）
@@ -113,6 +114,24 @@ function collectSentences(block: string): string {
   return sentencesIn(block);
 }
 
+/**
+ * 本則の条文中に埋め込まれた表を、セル内の Sentence の出現順で平文化する。
+ *
+ * AppdxTable（別表）は従来どおり対象外だが、Article > Paragraph 配下の
+ * TableStruct は条文本体の一部である。これを落とすと、例えば事務所則
+ * 第10条の照度基準が本文から欠落するため、創作せず原文セルだけを収録する。
+ */
+function collectEmbeddedTables(block: string): string {
+  const tableRe = /<TableStruct\b[^>]*>([\s\S]*?)<\/TableStruct>/g;
+  const parts: string[] = [];
+  let m: RegExpExecArray | null;
+  while ((m = tableRe.exec(block)) !== null) {
+    const text = collectSentences(m[1]);
+    if (text) parts.push(text);
+  }
+  return parts.join("　");
+}
+
 function sentencesIn(block: string): string {
   const re = /<Sentence\b[^>]*>([\s\S]*?)<\/Sentence>/g;
   const parts: string[] = [];
@@ -180,6 +199,10 @@ function parseParagraphs(articleBody: string): {
     // 項本文（ParagraphSentence。Item より前の導入文）
     const psBlock = firstTag(body, "ParagraphSentence") ?? "";
     let lead = collectSentences(psBlock);
+    const embeddedTables = collectEmbeddedTables(body);
+    if (embeddedTables) {
+      lead = `${lead}${lead ? "　" : ""}${embeddedTables}`;
+    }
     if (caption) lead = `${caption}　${lead}`;
 
     // 号（Item）

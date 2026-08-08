@@ -98,7 +98,7 @@ export function NewsletterForm({ compact = false, onSuccess }: Props) {
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="example@company.jp"
+          placeholder="配信先メールアドレス"
           className="w-full min-h-[44px] rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100"
         />
       </div>

@@ -87,7 +87,8 @@ export const WORK_SCENARIOS: WorkScenario[] = [
     description: "つり上げ荷重5t以上のクレーン（移動式除く）の運転業務",
     category: "manufacturing",
     requiredCertIds: ["st-crane-5t", "lic-crane-derrick"],
-    legalNote: "安衛令第20条第7号 — 技能講習修了またはクレーン・デリック運転士免許",
+    legalNote:
+      "安衛令第20条第6号・クレーン則第22条 — 免許が原則。床上操作式（運転者が荷とともに移動する方式）に限り技能講習修了者も可。床上運転式・無線操作式は別区分",
   },
   {
     id: "ws-mobile-crane",

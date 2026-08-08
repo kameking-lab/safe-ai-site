@@ -14,7 +14,7 @@
  * vitest の結果を一次ソースにし、本スクリプトは集計と JSON 出力に専念する。
  */
 import { spawnSync } from "node:child_process";
-import { writeFileSync, readFileSync } from "node:fs";
+import { mkdirSync, writeFileSync, readFileSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -34,6 +34,12 @@ type EvalResult = {
   total: number;
   correct: number;
   accuracy: number;
+  retrieval_total?: number;
+  retrieval_correct?: number;
+  retrieval_accuracy?: number;
+  safe_hold_total?: number;
+  safe_hold_correct?: number;
+  safe_hold_rate?: number;
   target: number;
   passed: boolean;
   failures: Failure[];
@@ -58,47 +64,10 @@ const proc = spawnSync(
 );
 
 const out = (proc.stdout ?? "") + "\n" + (proc.stderr ?? "");
-
-// "[RAG 100Q] 正答 X/Y = Z%" 行を抽出
-const summary = out.match(/\[RAG 100Q\] 正答 (\d+)\/(\d+) = ([\d.]+)%/);
-if (!summary) {
-  console.error("[chatbot-eval] vitest 出力から集計行を抽出できませんでした:");
+if (proc.status !== 0) {
+  console.error("[chatbot-eval] 評価テストが失敗しました:");
   console.error(out.slice(-2000));
   process.exit(1);
-}
-const correct = Number(summary[1]);
-const total = Number(summary[2]);
-const accuracy = correct / total;
-
-// 失敗ケースを抽出
-const failures: Failure[] = [];
-const failBlock = out.split(/\[RAG 100Q\] 不正答 \d+ 件:/)[1] ?? "";
-const failLines = failBlock.split("\n");
-for (let i = 0; i < failLines.length; i++) {
-  const head = failLines[i].match(/Q(\d+) \[(.+?)\] (.+)/);
-  if (!head) continue;
-  const id = Number(head[1]);
-  const topic = head[2];
-  const question = head[3];
-  const expected = (failLines[i + 1] ?? "").replace(/^\s*期待:\s*/, "").trim();
-  const actual = (failLines[i + 2] ?? "").replace(/^\s*取得:\s*/, "").trim();
-  failures.push({ id, topic, question, expected, actual });
-}
-
-// fixture から topic ブレークダウン用の元データ取得
-const fixtureJsonPath = resolve(root, "test/chatbot-basic-100.json");
-const fixture = JSON.parse(readFileSync(fixtureJsonPath, "utf8")) as {
-  questions: Array<{ id: number; topic: string }>;
-};
-const failedIds = new Set(failures.map((f) => f.id));
-const topicBreakdown: Record<string, { total: number; correct: number; accuracy: number }> = {};
-for (const q of fixture.questions) {
-  const slot = (topicBreakdown[q.topic] ??= { total: 0, correct: 0, accuracy: 0 });
-  slot.total += 1;
-  if (!failedIds.has(q.id)) slot.correct += 1;
-}
-for (const t of Object.values(topicBreakdown)) {
-  t.accuracy = t.total === 0 ? 0 : t.correct / t.total;
 }
 
 // Phase 2 メトリクス抽出（vitest stdout から）
@@ -117,23 +86,35 @@ const phase2: Phase2Metrics = {
   hallucination_detection_rate: halDetectPct !== undefined ? halDetectPct / 100 : undefined,
 };
 
-const TARGET = 0.8;
-const result: EvalResult = {
-  generated_at: new Date().toISOString(),
-  total,
-  correct,
-  accuracy,
-  target: TARGET,
-  passed: accuracy >= TARGET,
-  failures,
-  topic_breakdown: topicBreakdown,
+const outPath = resolve(
+  root,
+  process.env.CHATBOT_EVAL_OUT || "src/data/chatbot-eval-results.json",
+);
+let result: EvalResult;
+try {
+  result = JSON.parse(readFileSync(outPath, "utf8")) as EvalResult;
+} catch {
+  console.error(
+    "[chatbot-eval] rag-100q.test が生成する実測JSONを読み取れませんでした。",
+  );
+  process.exit(1);
+}
+result = {
+  ...result,
   phase2,
+  passed:
+    result.passed &&
+    (result.safe_hold_total === undefined ||
+      result.safe_hold_correct === result.safe_hold_total),
 };
-
-const outPath = resolve(root, "src/data/chatbot-eval-results.json");
+mkdirSync(dirname(outPath), { recursive: true });
 writeFileSync(outPath, JSON.stringify(result, null, 2) + "\n", "utf8");
 console.log(
-  `[chatbot-eval] ${correct}/${total} = ${(accuracy * 100).toFixed(1)}% (target ${TARGET * 100}%) -> ${outPath}`
+  `[chatbot-eval] 条文検索 ${result.retrieval_correct ?? result.correct}/` +
+    `${result.retrieval_total ?? result.total} = ` +
+    `${((result.retrieval_accuracy ?? result.accuracy) * 100).toFixed(1)}%` +
+    ` / 安全保留 ${result.safe_hold_correct ?? 0}/${result.safe_hold_total ?? 0}` +
+    ` -> ${outPath}`,
 );
 if (phase2.citation_at1 !== undefined) {
   console.log(

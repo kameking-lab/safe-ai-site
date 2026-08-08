@@ -2,26 +2,30 @@ import { describe, it, expect } from "vitest";
 import { buildFinderConclusion } from "./finder-conclusion";
 
 describe("buildFinderConclusion", () => {
-  it("該当なし（0件）は無彩で条件変更を促す（偽の空状態にしない）", () => {
+  it("0件を資格不要とは解釈せず未判定にする", () => {
     const c = buildFinderConclusion(0, 0);
     expect(c.tone).toBe("neutral");
     expect(c.value).toBe(0);
-    expect(c.title).toBe("該当なし");
+    expect(c.title).toBe("条件不足・未判定");
+    expect(c.description).toContain("資格不要");
+    expect(c.description).toContain("判断できません");
   });
 
-  it("法令義務が1件でもあれば黄（要対応）でデカ数字は総件数", () => {
+  it("義務候補があっても確定せず条件確認を促す", () => {
     const c = buildFinderConclusion(3, 2);
     expect(c.tone).toBe("warning");
     expect(c.value).toBe(5);
-    expect(c.description).toContain("法令義務 3件");
-    expect(c.description).toContain("推奨 2件");
+    expect(c.title).toBe("資格候補を要確認");
+    expect(c.description).toContain("条件確認が必要な候補 3件");
+    expect(c.description).toContain("関連候補 2件");
+    expect(c.description).not.toContain("就業させられません");
   });
 
   it("法令義務ゼロ・推奨のみは青（案内）＝黄を乱発しない", () => {
     const c = buildFinderConclusion(0, 4);
     expect(c.tone).toBe("info");
     expect(c.value).toBe(4);
-    expect(c.title).toBe("推奨資格");
+    expect(c.title).toBe("関連資格候補");
     expect(c.description).toContain("4件");
   });
 

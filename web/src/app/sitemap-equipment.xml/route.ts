@@ -1,44 +1,19 @@
-import { NextResponse } from 'next/server';
-import { getAllEquipment } from '@/lib/equipment-recommendation';
-import { computeSitemapFreshness } from '@/lib/sitemap/freshness';
-import { SITE_URL } from '@/lib/seo-metadata';
+import { NextResponse } from "next/server";
 
-// 柱C-3 / S DRY: 絶対URLのオリジンは seo-metadata.ts の SITE_URL 単一ソース（末尾スラッシュ無し）。
-const BASE = SITE_URL;
-
-function escapeXml(str: string): string {
-  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-}
-
+/**
+ * 互換URLは残すが、未検証の商品レコードは1件も列挙しない。
+ * sitemap-index.xml からもこの子サイトマップを除外する。
+ */
 export async function GET() {
-  // 柱C-3-4 / A-3: lastmod は当日（new Date()）ではなく保護具DBの実生成日に追従させる。
-  // 当日打ちは中身不変でも毎日 lastmod が動く lastmod スパムで、Google に無視される。
-  const buildToday = new Date().toISOString().slice(0, 10);
-  const { equipmentDataUpdated } = computeSitemapFreshness(buildToday);
-
-  // 正本=getAllEquipment()(eq-NNNN・/equipment/[id] が generateStaticParams で実生成する正規ID)。
-  // 旧実装は safetyGoodsItems(/goods 用・ee-/fg-/hc- 等の別系統ID)を /equipment/<id> として
-  // 出力していたが、/equipment/[id] は eq-NNNN しか解決せず全URLが notFound()=幽霊URL(soft404)だった。
-  const urls = getAllEquipment()
-    .map(
-      (item) => `  <url>
-    <loc>${escapeXml(`${BASE}/equipment/${item.id}`)}</loc>
-    <lastmod>${equipmentDataUpdated}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>`
-    )
-    .join('\n');
-
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${urls}
 </urlset>`;
 
   return new NextResponse(xml, {
     headers: {
-      'Content-Type': 'application/xml; charset=utf-8',
-      'Cache-Control': 'public, max-age=3600, s-maxage=3600',
+      "Content-Type": "application/xml; charset=utf-8",
+      "Cache-Control": "no-store",
+      "X-Data-Status": "quarantined",
     },
   });
 }

@@ -21,37 +21,37 @@ const COLOR_MAP: Record<
   blue: {
     card: "border-blue-200 bg-blue-50",
     badge: "bg-blue-100 text-blue-700",
-    btn: "bg-blue-600 hover:bg-blue-700 text-white",
+    btn: "bg-blue-700 hover:bg-blue-800 text-white",
   },
   emerald: {
     card: "border-emerald-200 bg-emerald-50",
     badge: "bg-emerald-100 text-emerald-700",
-    btn: "bg-emerald-600 hover:bg-emerald-700 text-white",
+    btn: "bg-emerald-700 hover:bg-emerald-800 text-white",
   },
   orange: {
     card: "border-orange-200 bg-orange-50",
     badge: "bg-orange-100 text-orange-700",
-    btn: "bg-orange-600 hover:bg-orange-700 text-white",
+    btn: "bg-orange-700 hover:bg-orange-800 text-white",
   },
   sky: {
     card: "border-sky-200 bg-sky-50",
     badge: "bg-sky-100 text-sky-700",
-    btn: "bg-sky-600 hover:bg-sky-700 text-white",
+    btn: "bg-sky-700 hover:bg-sky-800 text-white",
   },
   amber: {
     card: "border-amber-200 bg-amber-50",
     badge: "bg-amber-100 text-amber-700",
-    btn: "bg-amber-600 hover:bg-amber-700 text-white",
+    btn: "bg-amber-800 hover:bg-amber-900 text-white",
   },
   purple: {
     card: "border-purple-200 bg-purple-50",
     badge: "bg-purple-100 text-purple-700",
-    btn: "bg-purple-600 hover:bg-purple-700 text-white",
+    btn: "bg-purple-700 hover:bg-purple-800 text-white",
   },
   rose: {
     card: "border-rose-200 bg-rose-50",
     badge: "bg-rose-100 text-rose-700",
-    btn: "bg-rose-600 hover:bg-rose-700 text-white",
+    btn: "bg-rose-700 hover:bg-rose-800 text-white",
   },
 };
 
@@ -75,7 +75,7 @@ export function RelatedPageCards({ pages, heading }: RelatedPageCardsProps) {
       : "関連機能";
   return (
     <section className="mx-auto max-w-7xl px-4 pb-8 pt-2" aria-label={resolvedHeading}>
-      <p className="mb-3 text-xs font-bold uppercase tracking-widest text-slate-400">
+      <p className="mb-3 text-xs font-bold uppercase tracking-widest text-slate-600 dark:text-slate-300">
         {resolvedHeading}
       </p>
       <div className={`grid grid-cols-1 gap-3 sm:grid-cols-${Math.min(pages.length, 3)}`}>
@@ -98,7 +98,7 @@ export function RelatedPageCards({ pages, heading }: RelatedPageCardsProps) {
               </div>
               <Link
                 href={page.href}
-                className={`mt-3 inline-block rounded-md px-3 py-2 text-center text-xs font-semibold transition-colors ${c.btn}`}
+                className={`mt-3 inline-flex min-h-11 items-center justify-center rounded-md px-3 py-2 text-center text-xs font-semibold transition-colors ${c.btn}`}
               >
                 {resolveText(page.cta, isEn)} →
               </Link>

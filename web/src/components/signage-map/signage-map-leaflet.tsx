@@ -1,18 +1,36 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
-import { CircleMarker, MapContainer, Marker, Popup, TileLayer, useMap, useMapEvents } from "react-leaflet";
+// 地図を使わないページのrender-blocking CSSへ混ぜず、この動的chunkと同時に読む。
+import "leaflet/dist/leaflet.css";
+import "leaflet.markercluster/dist/MarkerCluster.css";
+import "leaflet.markercluster/dist/MarkerCluster.Default.css";
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  CircleMarker,
+  MapContainer,
+  Marker,
+  Popup,
+  TileLayer,
+  useMap,
+  useMapEvents,
+} from "react-leaflet";
 import L from "leaflet";
 import { LEVEL_COLOR, levelLabel } from "@/lib/jma/jma-data";
-import type { JmaEarthquake, JmaMapLevel, JmaWeatherEntry } from "@/lib/jma/jma-data";
-import { PREFECTURE_CENTROIDS, centroidByIso } from "@/data/jma/prefecture-centroids";
+import type {
+  JmaEarthquake,
+  JmaMapLevel,
+  JmaWeatherEntry,
+} from "@/lib/jma/jma-data";
+import {
+  PREFECTURE_CENTROIDS,
+  centroidByIso,
+} from "@/data/jma/prefecture-centroids";
 
 export type SignagePin = {
   id: string;
   label: string;
   lat: number;
   lng: number;
-  email?: string | null;
   createdAt: string;
 };
 
@@ -85,7 +103,11 @@ function ViewSync({
   return null;
 }
 
-function PinCreator({ onPinAdd }: { onPinAdd?: (lat: number, lng: number) => void }) {
+function PinCreator({
+  onPinAdd,
+}: {
+  onPinAdd?: (lat: number, lng: number) => void;
+}) {
   useMapEvents({
     contextmenu: (e) => {
       onPinAdd?.(e.latlng.lat, e.latlng.lng);
@@ -105,12 +127,15 @@ export default function SignageMapLeaflet({
   onPinDelete,
   onViewChange,
 }: Props) {
+  const [tileStatus, setTileStatus] = useState<
+    "loading" | "loaded" | "partial"
+  >("loading");
+  const tileErrorSeen = useRef(false);
   const pinIcon = useMemo(
     () =>
       L.divIcon({
         className: "",
-        html:
-          '<div style="font-size:24px;line-height:24px;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.5));">📍</div>',
+        html: '<div style="font-size:24px;line-height:24px;filter:drop-shadow(0 1px 2px rgba(0,0,0,0.5));">📍</div>',
         iconSize: [24, 24],
         iconAnchor: [12, 22],
       }),
@@ -118,78 +143,136 @@ export default function SignageMapLeaflet({
   );
 
   return (
-    <MapContainer
-      center={initialCenter}
-      zoom={initialZoom}
-      style={{ height: "100%", width: "100%" }}
-      scrollWheelZoom
-      zoomControl
-    >
-      <TileLayer url={TILE_URL} attribution={ATTRIBUTION} />
+    <div className="relative h-full w-full">
+      <p id="signage-map-keyboard-help" className="sr-only">
+        地図にフォーカスして矢印キーで移動し、プラスキーとマイナスキーで拡大縮小できます。地図だけで安全判断を確定せず、表示された提供元の公式情報を確認してください。
+      </p>
+      <MapContainer
+        center={initialCenter}
+        zoom={initialZoom}
+        style={{ height: "100%", width: "100%" }}
+        scrollWheelZoom
+        zoomControl
+      >
+        <MapAccessibility />
+        <TileLayer
+          url={TILE_URL}
+          attribution={ATTRIBUTION}
+          eventHandlers={{
+            loading: () => {
+              tileErrorSeen.current = false;
+              setTileStatus("loading");
+            },
+            tileerror: () => {
+              tileErrorSeen.current = true;
+              setTileStatus("partial");
+            },
+            load: () => {
+              setTileStatus(tileErrorSeen.current ? "partial" : "loaded");
+            },
+          }}
+        />
 
-      <ViewSync initialCenter={initialCenter} initialZoom={initialZoom} onViewChange={onViewChange} />
-      <PinCreator onPinAdd={onPinAdd} />
+        <ViewSync
+          initialCenter={initialCenter}
+          initialZoom={initialZoom}
+          onViewChange={onViewChange}
+        />
+        <PinCreator onPinAdd={onPinAdd} />
 
-      {/* 警報レイヤー：都道府県中心点に色付き円マーカー */}
-      <WarningOverlay warningsByIso={warningsByIso} />
+        {/* 警報レイヤー：都道府県中心点に色付き円マーカー */}
+        <WarningOverlay warningsByIso={warningsByIso} />
 
-      {/* 天気アイコン：ズーム連動（県庁所在地のみ） */}
-      <WeatherOverlay weatherByIso={weatherByIso} />
+        {/* 天気アイコン：ズーム連動（県庁所在地のみ） */}
+        <WeatherOverlay weatherByIso={weatherByIso} />
 
-      {/* 地震マーカー */}
-      {earthquakes.map((eq, idx) => {
-        if (typeof eq.lat !== "number" || typeof eq.lng !== "number") return null;
-        const color = intensityColor(eq.maxIntensity);
-        return (
-          <CircleMarker
-            key={eq.eventId ?? idx}
-            center={[eq.lat, eq.lng]}
-            radius={Math.max(8, Number(eq.magnitude ?? 4) * 2)}
-            pathOptions={{ color, fillColor: color, fillOpacity: 0.55, weight: 2 }}
-          >
+        {/* 地震マーカー */}
+        {earthquakes.map((eq, idx) => {
+          if (typeof eq.lat !== "number" || typeof eq.lng !== "number")
+            return null;
+          const color = intensityColor(eq.maxIntensity);
+          return (
+            <CircleMarker
+              key={eq.eventId ?? idx}
+              center={[eq.lat, eq.lng]}
+              radius={Math.max(8, Number(eq.magnitude ?? 4) * 2)}
+              pathOptions={{
+                color,
+                fillColor: color,
+                fillOpacity: 0.55,
+                weight: 2,
+              }}
+            >
+              <Popup>
+                <div className="min-w-[200px]">
+                  <p className="text-sm font-bold text-slate-900">
+                    {eq.hypocenter ?? "震源不明"}
+                  </p>
+                  <p className="text-xs text-slate-700">
+                    最大震度{" "}
+                    <span className="font-bold">{eq.maxIntensity ?? "—"}</span>
+                    {eq.magnitude ? ` / M${eq.magnitude}` : ""}
+                  </p>
+                  <p className="text-xs text-slate-600">
+                    {eq.occurredAt ?? eq.reportDatetime ?? ""}
+                  </p>
+                  {eq.depth ? (
+                    <p className="text-xs text-slate-600">深さ: {eq.depth}</p>
+                  ) : null}
+                </div>
+              </Popup>
+            </CircleMarker>
+          );
+        })}
+
+        {/* ピン */}
+        {pins.map((p) => (
+          <Marker key={p.id} position={[p.lat, p.lng]} icon={pinIcon}>
             <Popup>
-              <div className="min-w-[200px]">
-                <p className="text-sm font-bold text-slate-900">{eq.hypocenter ?? "震源不明"}</p>
-                <p className="text-xs text-slate-700">
-                  最大震度 <span className="font-bold">{eq.maxIntensity ?? "—"}</span>
-                  {eq.magnitude ? ` / M${eq.magnitude}` : ""}
+              <div className="min-w-[180px]">
+                <p className="text-sm font-bold text-slate-900">{p.label}</p>
+                <p className="text-[11px] text-slate-600">
+                  {p.lat.toFixed(4)}, {p.lng.toFixed(4)}
                 </p>
-                <p className="text-xs text-slate-600">{eq.occurredAt ?? eq.reportDatetime ?? ""}</p>
-                {eq.depth ? <p className="text-xs text-slate-600">深さ: {eq.depth}</p> : null}
+                {onPinDelete ? (
+                  <button
+                    type="button"
+                    onClick={() => onPinDelete(p.id)}
+                    className="mt-2 inline-flex min-h-[44px] items-center rounded border border-rose-400 bg-rose-50 px-3 text-[11px] font-semibold text-rose-700 hover:bg-rose-100"
+                  >
+                    このピンを削除
+                  </button>
+                ) : null}
               </div>
             </Popup>
-          </CircleMarker>
-        );
-      })}
-
-      {/* ピン */}
-      {pins.map((p) => (
-        <Marker key={p.id} position={[p.lat, p.lng]} icon={pinIcon}>
-          <Popup>
-            <div className="min-w-[180px]">
-              <p className="text-sm font-bold text-slate-900">{p.label}</p>
-              <p className="text-[11px] text-slate-600">
-                {p.lat.toFixed(4)}, {p.lng.toFixed(4)}
-              </p>
-              {p.email ? <p className="text-[11px] text-slate-600">通知: {p.email}</p> : null}
-              {onPinDelete ? (
-                <button
-                  type="button"
-                  onClick={() => onPinDelete(p.id)}
-                  className="mt-2 inline-flex min-h-[44px] items-center rounded border border-rose-400 bg-rose-50 px-3 text-[11px] font-semibold text-rose-700 hover:bg-rose-100"
-                >
-                  このピンを削除
-                </button>
-              ) : null}
-            </div>
-          </Popup>
-        </Marker>
-      ))}
-    </MapContainer>
+          </Marker>
+        ))}
+      </MapContainer>
+      {tileStatus !== "loaded" ? (
+        <div
+          data-tile-status={tileStatus}
+          role={tileStatus === "partial" ? "alert" : "status"}
+          aria-live="polite"
+          className={`pointer-events-none absolute bottom-10 left-1/2 z-[1050] w-[min(92%,34rem)] -translate-x-1/2 rounded-lg border px-3 py-2 text-center text-xs font-bold shadow ${
+            tileStatus === "partial"
+              ? "border-rose-300 bg-rose-950/95 text-rose-100"
+              : "border-slate-500 bg-slate-950/90 text-slate-100"
+          }`}
+        >
+          {tileStatus === "partial"
+            ? "背景地図の一部または全部を取得できません。地図上の位置関係だけで判断せず、気象庁の公式情報を確認してください。"
+            : "背景地図を取得中です。読み込み完了まで地図上の位置関係で判断しないでください。"}
+        </div>
+      ) : null}
+    </div>
   );
 }
 
-function WarningOverlay({ warningsByIso }: { warningsByIso: Record<string, JmaMapLevel> }) {
+function WarningOverlay({
+  warningsByIso,
+}: {
+  warningsByIso: Record<string, JmaMapLevel>;
+}) {
   const map = useMap();
   const zoom = map.getZoom();
   return (
@@ -225,7 +308,11 @@ function WarningOverlay({ warningsByIso }: { warningsByIso: Record<string, JmaMa
   );
 }
 
-function WeatherOverlay({ weatherByIso }: { weatherByIso: Record<string, JmaWeatherEntry> }) {
+function WeatherOverlay({
+  weatherByIso,
+}: {
+  weatherByIso: Record<string, JmaWeatherEntry>;
+}) {
   const map = useMap();
   const zoom = map.getZoom();
   if (zoom < 6) return null;
@@ -247,8 +334,12 @@ function WeatherOverlay({ weatherByIso }: { weatherByIso: Record<string, JmaWeat
             <Popup>
               <div className="min-w-[160px]">
                 <p className="text-sm font-bold text-slate-900">{w.label}</p>
-                <p className="text-xs text-slate-700">{w.todayWeatherText ?? "—"}</p>
-                <p className="text-[10px] text-slate-500">{w.publishingOffice ?? ""}</p>
+                <p className="text-xs text-slate-700">
+                  {w.todayWeatherText ?? "—"}
+                </p>
+                <p className="text-[10px] text-slate-500">
+                  {w.publishingOffice ?? ""}
+                </p>
               </div>
             </Popup>
           </Marker>
@@ -256,4 +347,25 @@ function WeatherOverlay({ weatherByIso }: { weatherByIso: Record<string, JmaWeat
       })}
     </>
   );
+}
+function MapAccessibility() {
+  const map = useMap();
+
+  useEffect(() => {
+    const container = map.getContainer();
+    container.setAttribute("role", "region");
+    container.setAttribute(
+      "aria-label",
+      "気象警報・地震・現場ピンを確認する操作可能な地図",
+    );
+    container.setAttribute("aria-describedby", "signage-map-keyboard-help");
+
+    return () => {
+      container.removeAttribute("role");
+      container.removeAttribute("aria-label");
+      container.removeAttribute("aria-describedby");
+    };
+  }, [map]);
+
+  return null;
 }

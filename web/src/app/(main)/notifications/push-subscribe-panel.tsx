@@ -174,8 +174,10 @@ export function PushSubscribePanel() {
       if (existing) {
         const endpoint = existing.endpoint;
         await existing.unsubscribe().catch(() => undefined);
-        await fetch(`/api/push/subscribe?endpoint=${encodeURIComponent(endpoint)}`, {
+        await fetch("/api/push/subscribe", {
           method: "DELETE",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ endpoint }),
         }).catch(() => undefined);
       }
       setState("default");

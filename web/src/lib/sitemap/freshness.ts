@@ -15,7 +15,7 @@
  *
  * fallback 値は `sitemap.ts` の各 lastmod と一致させており、出力が乖離しないようにしている。
  */
-import { mhlwNotices } from "@/data/mhlw-notices";
+import { publicMhlwNotices as mhlwNotices } from "@/data/public-mhlw-notices";
 import { COURT_CASES } from "@/data/court-cases";
 import { lawRevisionCores } from "@/data/mock/law-revisions";
 import { SERIOUS_CASES_META } from "@/lib/accident-news/serious-cases";

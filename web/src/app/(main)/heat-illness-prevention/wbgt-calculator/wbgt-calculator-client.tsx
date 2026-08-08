@@ -1,26 +1,15 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import {
   Droplet,
   Wind,
   Sun,
   Activity,
-  Printer,
-  ClipboardCheck,
-  Clock,
-  OctagonX,
 } from "lucide-react";
-import { assess } from "@/lib/wbgt-engine";
-import { putHeatLogDraft } from "@/lib/heat-illness/log-store";
-import { WbgtConclusion } from "@/components/heat-illness/wbgt-conclusion";
+import { calculateWBGT } from "@/lib/wbgt-engine";
 import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
-import type {
-  AcclimatizationState,
-  Environment,
-  WorkIntensity,
-} from "@/types/heat-illness";
+import type { Environment } from "@/types/heat-illness";
 
 type FormState = {
   airTempC: number;
@@ -29,8 +18,6 @@ type FormState = {
   windSpeedMps: number;
   solarRadiationWm2: number;
   environment: Environment;
-  workIntensity: WorkIntensity;
-  acclimatization: AcclimatizationState;
 };
 
 const DEFAULTS: FormState = {
@@ -40,97 +27,40 @@ const DEFAULTS: FormState = {
   windSpeedMps: 1.5,
   solarRadiationWm2: 700,
   environment: "outdoor",
-  workIntensity: "moderate",
-  acclimatization: "acclimatized",
 };
 
 export function WbgtCalculatorClient() {
-  const router = useRouter();
   const [form, setForm] = useState<FormState>(DEFAULTS);
 
   const result = useMemo(() => {
     const globe = parseFloat(form.globeTempC);
-    return assess(
-      {
-        airTempC: form.airTempC,
-        humidity: form.humidity,
-        globeTempC: Number.isFinite(globe) ? globe : undefined,
-        windSpeedMps: form.windSpeedMps,
-        solarRadiationWm2: form.solarRadiationWm2,
-        environment: form.environment,
-      },
-      form.workIntensity,
-      form.acclimatization,
-    );
+    return calculateWBGT({
+      airTempC: form.airTempC,
+      humidity: form.humidity,
+      globeTempC: Number.isFinite(globe) ? globe : undefined,
+      windSpeedMps: form.windSpeedMps,
+      solarRadiationWm2: form.solarRadiationWm2,
+      environment: form.environment,
+    });
   }, [form]);
 
   function handleReset() {
     setForm(DEFAULTS);
   }
 
-  function handlePrint() {
-    if (typeof window !== "undefined") {
-      window.print();
-    }
-  }
-
-  function handleAddToLog() {
-    const globe = parseFloat(form.globeTempC);
-    putHeatLogDraft({
-      airTempC: form.airTempC,
-      humidity: form.humidity,
-      globeTempC: Number.isFinite(globe) ? globe : null,
-      environment: form.environment,
-      workIntensity: form.workIntensity,
-      acclimatization: form.acclimatization,
-      wbgt: result.wbgt.wbgt,
-      riskLevel: result.risk.level,
-      riskLabel: result.risk.label,
-      suggestedMeasures: [
-        `作業/休憩 ${result.recommendation.workRestRatio}`,
-        `水分 ${result.recommendation.fluidIntakeMlPerHour}`,
-      ].join("／"),
-    });
-    router.push("/heat-illness-prevention/log");
-  }
-
   return (
     <div className="space-y-6">
-      {/* 結論ファースト: WBGTデカ数字＋危険度色帯を画面の主役に（柱0） */}
-      <WbgtConclusion
-        wbgt={result.wbgt.wbgt}
-        level={result.risk.level}
-        heading="いまの危険度（入力条件で即時更新）"
-        summary={result.risk.summary}
-        workIntensity={form.workIntensity}
-        acclimatization={form.acclimatization}
-      >
-        {result.recommendation.suspendWork ? (
-          <span className="inline-flex min-h-[44px] items-center gap-2 rounded-xl bg-rose-800 px-4 py-2 text-base font-bold text-white">
-            <OctagonX className="h-5 w-5" aria-hidden="true" />
-            原則 作業中止
-          </span>
-        ) : (
-          <>
-            <span className="inline-flex min-h-[44px] items-center gap-1.5 rounded-xl border border-slate-300 bg-white/80 px-3 py-2 text-sm font-bold text-slate-800">
-              <Clock className="h-4 w-4 shrink-0 text-slate-500" aria-hidden="true" />
-              {result.recommendation.workRestRatio}
-            </span>
-            <span className="inline-flex min-h-[44px] items-center gap-1.5 rounded-xl border border-slate-300 bg-white/80 px-3 py-2 text-sm font-bold text-slate-800">
-              <Droplet className="h-4 w-4 shrink-0 text-sky-600" aria-hidden="true" />
-              水分 {result.recommendation.fluidIntakeMlPerHour}/時
-            </span>
-          </>
-        )}
-        <button
-          type="button"
-          onClick={handleAddToLog}
-          className="inline-flex min-h-[44px] items-center gap-1.5 rounded-xl bg-sky-700 px-4 py-2 text-sm font-bold text-white hover:bg-sky-800"
-        >
-          <ClipboardCheck className="h-4 w-4" aria-hidden="true" />
-          日次記録簿に追加
-        </button>
-      </WbgtConclusion>
+      <section role="status" className="rounded-2xl border-2 border-sky-300 bg-sky-50 p-5 text-sky-950">
+        <p className="text-sm font-bold">参考推定値（実測WBGTではありません）</p>
+        <p className="mt-1 text-4xl font-black tabular-nums">{result.wbgt.toFixed(1)} °C</p>
+        <p className="mt-3 text-sm leading-6">
+          気温・湿度から自然湿球温度を近似し、黒球温度が未入力の場合はさらに推定しています。
+          この値から作業中止、休憩時間、飲水量を決めたり、日次記録へ実測値として転記したりしないでください。
+        </p>
+        <a className="mt-3 inline-flex min-h-11 items-center font-bold underline" href="https://neccyusho.mhlw.go.jp/" target="_blank" rel="noopener noreferrer">
+          厚生労働省「職場における熱中症予防情報」で確認
+        </a>
+      </section>
 
       <section
         aria-labelledby="wbgt-input-heading"
@@ -144,7 +74,7 @@ export function WbgtCalculatorClient() {
           入力条件
         </h2>
         <p className="mt-1 text-xs text-slate-500">
-          現場で測定した気温・湿度・黒球温度を入力してください。黒球温度が未測定の場合は風速・日射量から推計します。
+          教育用の参考計算です。作業判断にはJIS適合のWBGT計による現場実測値を使用してください。
         </p>
 
         <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -231,48 +161,6 @@ export function WbgtCalculatorClient() {
               />
             </>
           )}
-          <div>
-            <label className="block text-xs font-semibold text-slate-700">
-              作業強度
-            </label>
-            <select
-              value={form.workIntensity}
-              onChange={(e) =>
-                setForm((s) => ({
-                  ...s,
-                  workIntensity: e.target.value as WorkIntensity,
-                }))
-              }
-              className="mt-1 h-11 w-full rounded-md border border-slate-300 px-2 text-base focus:border-orange-400 focus:outline-none focus:ring-1 focus:ring-orange-400"
-            >
-              <option value="light">軽作業（座位・軽手作業）</option>
-              <option value="moderate">中程度（立位・通常歩行）</option>
-              <option value="heavy">重作業（持続的肉体労働）</option>
-              <option value="very-heavy">非常に重い（最大努力・重量物）</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-xs font-semibold text-slate-700">
-              暑熱順化の状況
-            </label>
-            <select
-              value={form.acclimatization}
-              onChange={(e) =>
-                setForm((s) => ({
-                  ...s,
-                  acclimatization: e.target.value as AcclimatizationState,
-                }))
-              }
-              className="mt-1 h-11 w-full rounded-md border border-slate-300 px-2 text-base focus:border-orange-400 focus:outline-none focus:ring-1 focus:ring-orange-400"
-            >
-              <option value="acclimatized">
-                順化済み（直近7日以上連続で暑熱作業）
-              </option>
-              <option value="non-acclimatized">
-                未順化（新規・復帰・初日）
-              </option>
-            </select>
-          </div>
         </div>
 
         <div className="mt-4 flex flex-wrap gap-2">
@@ -283,92 +171,42 @@ export function WbgtCalculatorClient() {
           >
             初期値に戻す
           </button>
-          <button
-            type="button"
-            onClick={handlePrint}
-            className="inline-flex items-center gap-1 rounded-lg bg-orange-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-orange-700"
-          >
-            <Printer className="h-3.5 w-3.5" aria-hidden="true" />
-            結果を印刷
-          </button>
         </div>
       </section>
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <section className="rounded-2xl border border-amber-300 bg-amber-50 p-5 shadow-sm">
         <h2 className="flex items-center gap-2 text-base font-bold text-slate-900">
           <Droplet className="h-5 w-5 text-orange-600" aria-hidden="true" />
-          推奨対策
+          作業判断前に確認すること
         </h2>
-        <dl className="mt-4 space-y-3 text-sm">
-          <RecRow
-            label="作業／休憩サイクル"
-            value={result.recommendation.workRestRatio}
-          />
-          <RecRow
-            label="1時間あたりの水分補給"
-            value={result.recommendation.fluidIntakeMlPerHour}
-          />
-          <RecRow label="塩分補給" value={result.recommendation.saltIntake} />
-          {result.recommendation.suspendWork && (
-            <div className="rounded-lg border border-rose-300 bg-rose-50 p-3 text-sm font-semibold text-rose-900">
-              本リスクレベルでは原則として作業を中止してください。
-            </div>
-          )}
-        </dl>
-
-        <RecList
-          title="冷却・環境対策"
-          items={result.recommendation.coolingMeasures}
-        />
-        <RecList
-          title="モニタリング"
-          items={result.recommendation.monitoring}
-        />
-        <RecList
-          title="教育・周知事項"
-          items={result.recommendation.educationReminders}
-        />
+        <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-6 text-slate-800">
+          <li>作業場所でWBGT計を用いて実測し、測定時刻・場所・機器を記録する</li>
+          <li>作業強度、衣服、暑熱順化、持病・服薬・当日の体調を個別に確認する</li>
+          <li>熱中症のおそれがある者の報告体制と、悪化防止・救急対応手順を周知する</li>
+          <li>飲水・塩分は一律量を指示せず、公式指針と産業医等の助言を確認する</li>
+        </ul>
       </section>
 
-      <CollapsibleDetail summary="計算の内訳・式・出典（必要なときに開く）" className="print:hidden">
+      <CollapsibleDetail summary="参考推定の内訳（作業判断には使用不可）" className="print:hidden">
         <dl className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           <ResultStat
             label="自然湿球温度"
-            value={`${result.wbgt.naturalWetBulbC.toFixed(1)} °C`}
+            value={`${result.naturalWetBulbC.toFixed(1)} °C`}
           />
           <ResultStat
             label="使用した黒球温度"
-            value={`${result.wbgt.globeTempUsedC.toFixed(1)} °C`}
-          />
-          <ResultStat
-            label="作業強度別の閾値"
-            value={`≥ ${result.risk.thresholdC.toFixed(0)} °C`}
+            value={`${result.globeTempUsedC.toFixed(1)} °C`}
           />
         </dl>
-        <p className="mt-3">式：{result.wbgt.notes}</p>
+        <p className="mt-3">式：{result.notes}</p>
         <p className="mt-2">
           計算式の出典：JIS Z 8504 「暑熱環境－WBGT 指数に基づく作業者の熱ストレスの評価」、
           JSOH「許容濃度等の勧告（暑熱）」、厚生労働省「職場における熱中症予防対策マニュアル」。
         </p>
         <p className="mt-1">
-          本ツールはあくまで参考値です。最終的な作業可否判断は事業者・産業医・職長が実測値と現場状況を踏まえて行ってください。
+          本ツールは近似計算の教育用参考値です。自然湿球温度を実測していないため、WBGT実測値の代替にはなりません。
         </p>
       </CollapsibleDetail>
-
-      {/* 印刷時のみ: 計算内訳と出典を畳まずに出す（提出書類の正確性は不可侵） */}
-      <section className="hidden rounded-2xl border border-slate-200 bg-slate-50 p-4 text-xs leading-6 text-slate-600 print:block">
-        <p>
-          自然湿球温度 {result.wbgt.naturalWetBulbC.toFixed(1)} °C／使用した黒球温度{" "}
-          {result.wbgt.globeTempUsedC.toFixed(1)} °C／作業強度別の閾値 ≥{" "}
-          {result.risk.thresholdC.toFixed(0)} °C
-        </p>
-        <p className="mt-1">式：{result.wbgt.notes}</p>
-        <p className="mt-1">
-          計算式の出典：JIS Z 8504 「暑熱環境－WBGT 指数に基づく作業者の熱ストレスの評価」、
-          JSOH「許容濃度等の勧告（暑熱）」、厚生労働省「職場における熱中症予防対策マニュアル」。
-          本ツールはあくまで参考値です。最終的な作業可否判断は事業者・産業医・職長が実測値と現場状況を踏まえて行ってください。
-        </p>
-      </section>
     </div>
   );
 }
@@ -450,34 +288,6 @@ function ResultStat({ label, value }: { label: string; value: string }) {
         {label}
       </dt>
       <dd className="mt-0.5 font-semibold text-slate-900">{value}</dd>
-    </div>
-  );
-}
-
-function RecRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex flex-col gap-0.5 sm:flex-row sm:gap-2">
-      <dt className="text-xs font-semibold text-slate-500 sm:w-44">{label}</dt>
-      <dd className="text-sm leading-6 text-slate-800">{value}</dd>
-    </div>
-  );
-}
-
-function RecList({ title, items }: { title: string; items: string[] }) {
-  if (items.length === 0) return null;
-  return (
-    <div className="mt-4">
-      <h3 className="text-xs font-bold uppercase tracking-wide text-slate-500">
-        {title}
-      </h3>
-      <ul className="mt-2 space-y-1 text-sm leading-6 text-slate-800">
-        {items.map((it) => (
-          <li key={it} className="flex gap-2">
-            <span className="mt-1 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-orange-500" />
-            {it}
-          </li>
-        ))}
-      </ul>
     </div>
   );
 }

@@ -1,26 +1,20 @@
 import type { MetadataRoute } from "next";
 
-/**
- * Next.js App Router 規約準拠の dynamic manifest。
- * `public/manifest.json` を残したまま App Router 側で上書き配信することで、
- * ID_010 指摘の SEO 3 点セット（sitemap/robots/manifest）のうち manifest を
- * フレームワーク生成に統一する。
- */
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "安全AIポータル — 現場の安全情報ポータル",
-    short_name: "安全AIポータル",
+    name: "安全AIポータル",
+    short_name: "安全AI",
     description:
-      "法改正・事故DB・KY用紙・化学物質RA・Eラーニングを1つに。現場担当者の声を反映して継続的に改善される安全ポータル。",
+      "法令・事故・KY・化学物質・気象を、出典と確認状態を見ながら扱う労働安全衛生の現場運用ポータル。",
     start_url: "/",
     scope: "/",
     display: "standalone",
     orientation: "any",
-    theme_color: "#1a7a4c",
+    theme_color: "#0b5d4b",
     background_color: "#ffffff",
     lang: "ja",
     dir: "ltr",
-    categories: ["productivity", "utilities", "business", "education"],
+    categories: ["productivity", "utilities", "business"],
     icons: [
       {
         src: "/icon-192x192.png",
@@ -47,40 +41,30 @@ export default function manifest(): MetadataRoute.Manifest {
         purpose: "maskable",
       },
     ],
-    // ホーム画面ロングタップのクイックアクション。現場でよく使う順に並べる。
-    // 横断検索(/search)＝発見性の入口・AI質問(/chatbot)＝安衛法の即答をショートカット化し、
-    // インストール済みユーザーが1タップで到達できるようにする。URL は全て実在ルートで、
-    // manifest.test.ts が page.tsx の実在を回帰固定する（幽霊ショートカット防止）。
     shortcuts: [
       {
-        name: "今日のKY",
+        name: "今日の安全",
+        short_name: "今日の安全",
+        description: "地域を選び、警報と現場リスクを確認",
+        url: "/risk",
+      },
+      {
+        name: "KY用紙",
         short_name: "KY",
-        description: "KY用紙を開く",
-        url: "/ky",
+        description: "KY用紙を作成",
+        url: "/ky/paper",
       },
       {
         name: "横断検索",
         short_name: "検索",
-        description: "法令・通達・事故・用語をまとめて検索",
+        description: "法令・通達・事故・化学物質・ガイドを横断検索",
         url: "/search",
       },
       {
-        name: "AIに質問（安衛法）",
-        short_name: "AI質問",
-        description: "安衛法をその場でAIに質問",
-        url: "/chatbot",
-      },
-      {
-        name: "法改正",
-        short_name: "法改正",
-        description: "最新の法改正",
-        url: "/laws",
-      },
-      {
-        name: "事故DB",
-        short_name: "事故",
-        description: "事故データベース",
-        url: "/accidents",
+        name: "法令ナビ",
+        short_name: "法令",
+        description: "一次資料へ条件から到達",
+        url: "/law-navi",
       },
     ],
     screenshots: [
@@ -89,42 +73,28 @@ export default function manifest(): MetadataRoute.Manifest {
         sizes: "2560x1600",
         type: "image/png",
         form_factor: "wide",
-        label: "ホーム — 法改正・事故DB・KYへのクイックアクセス",
+        label: "安全AIポータルのホーム画面",
       },
       {
         src: "/screenshots/ky-desktop.png",
         sizes: "2560x1600",
         type: "image/png",
         form_factor: "wide",
-        label: "KY用紙 — 朝礼で使える危険予知シート",
-      },
-      {
-        src: "/screenshots/chatbot-desktop.png",
-        sizes: "2560x1600",
-        type: "image/png",
-        form_factor: "wide",
-        label: "AIチャットボット — 安衛法をその場で質問",
+        label: "KY用紙のデスクトップ画面",
       },
       {
         src: "/screenshots/home-mobile.png",
         sizes: "750x1334",
         type: "image/png",
         form_factor: "narrow",
-        label: "ホーム (モバイル)",
+        label: "安全AIポータルのモバイル画面",
       },
       {
         src: "/screenshots/ky-mobile.png",
         sizes: "750x1334",
         type: "image/png",
         form_factor: "narrow",
-        label: "KY用紙 (モバイル)",
-      },
-      {
-        src: "/screenshots/chatbot-mobile.png",
-        sizes: "750x1334",
-        type: "image/png",
-        form_factor: "narrow",
-        label: "AIチャットボット (モバイル)",
+        label: "KY用紙のモバイル画面",
       },
     ],
   };

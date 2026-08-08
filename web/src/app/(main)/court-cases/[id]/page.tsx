@@ -33,6 +33,12 @@ export default async function CourtCaseDetailPage({ params }: { params: Promise<
   const { id } = await params;
   const c = getCourtCaseById(id);
   if (!c) notFound();
+  const caseIndex = COURT_CASES.findIndex((candidate) => candidate.id === c.id);
+  const previousCase = caseIndex > 0 ? COURT_CASES[caseIndex - 1] : null;
+  const nextCase =
+    caseIndex >= 0 && caseIndex < COURT_CASES.length - 1
+      ? COURT_CASES[caseIndex + 1]
+      : null;
 
   // 同じ争点・分野を共有する関連判例（共有数の多い順に最大5件）。学習・回遊性を高める。
   const related = COURT_CASES
@@ -88,7 +94,7 @@ export default async function CourtCaseDetailPage({ params }: { params: Promise<
             </p>
             <p className="mt-2 text-sm font-medium text-emerald-900 dark:text-emerald-200">{c.oneLine}</p>
             <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-              監修: <SupervisorByline className="text-emerald-700 hover:underline dark:text-emerald-300" />
+              編集・確認: <SupervisorByline className="text-emerald-700 hover:underline dark:text-emerald-300" />
             </p>
           </header>
 
@@ -191,6 +197,27 @@ export default async function CourtCaseDetailPage({ params }: { params: Promise<
               </ul>
             </section>
           )}
+
+          <nav aria-label="判例詳細の前後移動" className="mt-6 grid gap-2 print:hidden sm:grid-cols-2">
+            {previousCase ? (
+              <Link
+                href={`/court-cases/${previousCase.id}`}
+                className="min-h-[44px] rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm hover:border-emerald-300 dark:border-slate-700 dark:bg-slate-900"
+              >
+                <span className="block text-[11px] text-slate-500">前の収録判例</span>
+                <span className="font-semibold text-slate-800 dark:text-slate-100">{previousCase.name}</span>
+              </Link>
+            ) : <span />}
+            {nextCase ? (
+              <Link
+                href={`/court-cases/${nextCase.id}`}
+                className="min-h-[44px] rounded-xl border border-slate-200 bg-white px-4 py-3 text-right text-sm hover:border-emerald-300 dark:border-slate-700 dark:bg-slate-900"
+              >
+                <span className="block text-[11px] text-slate-500">次の収録判例</span>
+                <span className="font-semibold text-slate-800 dark:text-slate-100">{nextCase.name}</span>
+              </Link>
+            ) : null}
+          </nav>
         </div>
       </PageContainer>
     </>

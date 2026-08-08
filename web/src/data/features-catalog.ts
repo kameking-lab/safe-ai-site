@@ -9,6 +9,7 @@
  */
 
 import { SITE_STATS } from "@/data/site-stats";
+import { isPublicRouteAvailable } from "@/lib/public-content-policy";
 
 export type FeatureCategoryId =
   | "ai-chat"
@@ -51,33 +52,33 @@ export const FEATURE_CATEGORIES: FeatureCategory[] = [
   {
     id: "ai-chat",
     title: "AI機能",
-    summary: "安衛法の解釈・現場質問にAIが即回答",
+    summary: "公式法令の根拠候補を検索し、人の確認を支援",
     description:
-      "労働安全衛生法・通達・告示を学習したAIが、現場の質問に根拠つきで回答します。チャットボット、リスク予測、化学物質RAなど、判断に時間がかかる業務をAIで支援します。",
+      "生成AIによる自由回答は停止中です。e-Gov取得スナップショットから根拠候補を検索し、公式原文と対象時点を人が確認するための支援機能を案内します。",
     accent: "blue",
   },
   {
     id: "chemical-ra",
     title: "化学物質リスクアセスメント",
-    summary: "改正安衛法（2024年4月施行）対応のRA一式",
+    summary: "CAS・SDS記載名と作業条件の確認を支援",
     description:
-      "GHS分類・SDS取込・CREATE-SIMPLE互換のばく露見積もり・記録保管まで、改正安衛法に準拠した化学物質リスクアセスメントを一貫支援します。",
+      "CAS番号による同一性確認、GHS分類・SDS・作業条件の整理、公式CREATE-SIMPLEへの案内、確認記録の作成を支援します。公式評価ロジックの代替ではありません。",
     accent: "violet",
   },
   {
     id: "ky",
     title: "KY（危険予知）",
-    summary: "現場で5分、AI補助つきKYミーティング",
+    summary: "現場条件と人手確認を残すKY用紙",
     description:
-      "業種別プリセット、AIによるリスク抽出、署名つき記録、PDF出力までスマホ完結。ベテラン不在の現場でも質の高いKYが回せます。",
+      "作業場所、設備、重機、人員、天候、同時作業、変更点を記録し、候補は人が確認してから提出・承認します。未確認版は下書き表示付きで印刷でき、承認済みとは区別します。",
     accent: "amber",
   },
   {
     id: "construction-calc",
     title: "建設計算",
-    summary: "玉掛け・足場・掘削勾配を法令根拠つきで即計算",
+    summary: "検証済みの公開計算機だけを案内",
     description:
-      "玉掛けワイヤの安全荷重、単管足場の基準チェック、掘削面の勾配判定など、建設現場の計算を安衛則・クレーン則の条文根拠つきで実行できます。計算は検証済みの計算式が行い、AIは自由記述からの計算機案内と結果の解説を担当します。",
+      "公開allowlistで検証済みの単位換算・数量計算だけを案内します。安全可否や法令適合を判定する旧計算機は再検証中で、自由記述AI案内も公開していません。",
     accent: "amber",
   },
   {
@@ -99,17 +100,17 @@ export const FEATURE_CATEGORIES: FeatureCategory[] = [
   {
     id: "education",
     title: "教育・学習",
-    summary: "Eラーニング・特別教育・資格試験",
+    summary: "公開テーマは再検証中（検証済み0件）",
     description:
-      "業種別カリキュラム、進捗管理、修了証発行までEラーニングで完結。労働安全衛生法に基づく特別教育・資格試験対策も用意しています。",
+      "旧教材とクイズは一次資料との照合をやり直すため停止中です。検証済みの一般公開テーマは現在0件で、正式な法定教育・受講記録・修了証を代替しません。",
     accent: "emerald",
   },
   {
     id: "management",
     title: "管理ツール",
-    summary: "多拠点・点検・打合せ書・診断を一元管理",
+    summary: "端末内の帳票作成と確認状態を管理",
     description:
-      "LMS（多拠点管理）、安全工程打合せ書、コンプライアンス診断、助成金シミュレーターなど、安全担当者の管理業務を一元化します。",
+      "安全工程打合せ書など、現在公開中の帳票で確認状態と印刷状態を管理します。認証・多拠点LMS・DB本接続が必要な機能を利用可能とは案内しません。",
     accent: "indigo",
   },
   {
@@ -117,19 +118,19 @@ export const FEATURE_CATEGORIES: FeatureCategory[] = [
     title: "サイネージ",
     summary: "現場掲示用フルスクリーン表示",
     description:
-      "事務所モニター・現場サイネージで自動巡回表示。気象警報・注意喚起・KSD注意点をリアルタイムに表示できます。",
+      "事務所モニター・現場サイネージ向けに、気象庁の取得状態・対象地域・取得時刻と安全情報を表示します。取得不能を警報なしとは表示しません。",
     accent: "slate",
   },
 ];
 
-export const FEATURES: FeatureItem[] = [
+const ALL_FEATURES: FeatureItem[] = [
   // AI機能
   {
     slug: "chatbot",
     title: "安衛法チャットボット",
-    summary: "労働安全衛生法を学習したAIに質問できる",
+    summary: "作業条件から法令本文と公式根拠を確認",
     description:
-      "労働安全衛生法・施行令・規則・告示・通達を学習したAIが、自然言語の質問に根拠条文つきで回答します。",
+      "普段の言葉で質問すると、法令本文から結論・条件・公式原文を確認できます。",
     href: "/chatbot",
     category: "ai-chat",
     tags: ["AI", "法令", "Q&A"],
@@ -147,9 +148,9 @@ export const FEATURES: FeatureItem[] = [
   {
     slug: "chemical-ra",
     title: "化学物質リスクアセスメント",
-    summary: "GHS分類とCREATE-SIMPLE互換のRA",
+    summary: "公式CREATE-SIMPLEを利用する前の入力整理支援",
     description:
-      "化学物質の有害性区分・ばく露見積もり・対策レベルの判定を、改正安衛法対応で実施できます。",
+      "CAS・SDS記載名と作業条件を整理します。ばく露濃度やリスクレベルは本サイトで判定せず、厚生労働省のCREATE-SIMPLEによる公式評価へ案内します。",
     href: "/chemical-ra",
     category: "chemical-ra",
     tags: ["化学物質", "RA"],
@@ -168,9 +169,9 @@ export const FEATURES: FeatureItem[] = [
   {
     slug: "ky",
     title: "KY用紙（危険予知）",
-    summary: "業種別プリセット＋AI補助＋署名記録",
+    summary: "現場条件＋候補の人手確認＋状態付き印刷",
     description:
-      "建設・製造・林業など業種別プリセット、AIによるリスク提案、参加者署名、PDF出力を備えたKYツール。",
+      "作業場所・設備・人員・変更点等を記録し、候補の人手確認と提出・承認条件を表示するKY用紙です。入力名は電子署名ではなく、未確認版の印刷には下書き状態を表示します。",
     href: "/ky",
     category: "ky",
     tags: ["KY", "現場"],
@@ -178,7 +179,7 @@ export const FEATURES: FeatureItem[] = [
   {
     slug: "safety-diary",
     title: "安全工程打合せ書",
-    summary: "元請が前日5分で各社の作業・指示を1枚に",
+    summary: "元請が各社の作業・指示を1枚に整理",
     description:
       "各社の作業・使用機械・予想災害・リスク評価・指示を1枚に集約。点検項目8カテゴリ・使用機械自動集計・月次まとめ・印刷・KY転記に対応します。",
     href: "/safety-diary",
@@ -513,8 +514,8 @@ export const FEATURES: FeatureItem[] = [
     title: "事故データベース",
     summary: "死傷災害事例を業種・原因で検索",
     description:
-      "厚労省「労働災害事例」を構造化したデータベース。業種・起因物・原因から検索でき、KYの参考事例として活用できます。",
-    href: "/accidents",
+      "厚労省の死亡災害データ（2019〜2023年）を業種・事故型・起因物分類で検索。出典はデータセット単位で、個別行の逆引きは未整備です。",
+    href: "/accident-news",
     category: "databases",
     tags: ["事故", "DB"],
   },
@@ -580,6 +581,16 @@ export const FEATURES: FeatureItem[] = [
   },
   // 教育
   {
+    slug: "visual-ky",
+    title: "5分でできる ビジュアルKYT",
+    summary: "現場イラストから危険と優先対策を学ぶ15問",
+    description:
+      "日本の建設・製造・物流現場を想定した合成イラストから危険箇所を探し、事故の理由、対策の優先順位、作業中止条件を5分で学びます。画像なし教材、朝礼用進行、KY用紙連携にも対応します。",
+    href: "/training/visual-ky",
+    category: "education",
+    tags: ["KYT", "危険予知訓練", "安全教育", "朝礼", "KY"],
+  },
+  {
     slug: "education",
     title: "特別教育",
     summary: "安衛法の特別教育・能力向上教育",
@@ -592,9 +603,9 @@ export const FEATURES: FeatureItem[] = [
   {
     slug: "e-learning",
     title: "Eラーニング",
-    summary: "業種別カリキュラム・進捗管理",
+    summary: "一次資料再検証のため公開停止中",
     description:
-      "建設・製造・林業・運輸・医療福祉など業種別の安全教育カリキュラム。進捗管理・修了証発行まで対応。",
+      "旧教材・クイズ・進捗機能は一次資料再検証のため停止中です。正式な法定教育、受講記録、修了証を提供しません。",
     href: "/e-learning",
     category: "education",
     tags: ["Eラーニング"],
@@ -602,9 +613,9 @@ export const FEATURES: FeatureItem[] = [
   {
     slug: "hazard-slides",
     title: "災害の型別 安全教育スライド",
-    summary: "21分類×統計から自動生成する教育スライド",
+    summary: "外部レビュー完了まで公開停止中",
     description:
-      "厚労省「事故の型」21分類ごとに、統計→多い原因→対策チェック（根拠条文付き）→確認クイズのスライドを実データから自動生成。投影（16:9）とA4横印刷に対応し、朝礼・職長教育・サイネージで使えます。",
+      "旧スライドは一次資料、対象時点、対策根拠を再確認中です。外部レビュー完了まで教育用途での公開・配布を停止しています。",
     href: "/education/hazard-slides",
     category: "education",
     tags: ["教育", "スライド"],
@@ -612,9 +623,9 @@ export const FEATURES: FeatureItem[] = [
   {
     slug: "edu-pack",
     title: "法定教育スライドパック（無償）",
-    summary: "申請不要・編集可・法定対応表つきの無償教材",
+    summary: "法定科目との照合をやり直すため公開停止中",
     description:
-      "特別教育の学科・労働衛生教育に使える無償の教育スライド（申請不要・編集可）。告示正本から構造化したカリキュラムレジストリとの機械照合（CI）で法定科目の網羅を検証し、法定対応表を同梱。統計は最新の災害データに自動追従。投影（16:9）とA4横印刷に対応。第1弾はフルハーネス・熱中症。教材の提供は教育の実施ではありません。",
+      "旧教材は法定科目、講師要件、対象時点、外部レビューの再確認中です。検証済みの一般公開教材は現在0件です。",
     href: "/education/pack",
     category: "education",
     tags: ["特別教育", "無償教材", "スライド", "熱中症", "フルハーネス"],
@@ -646,7 +657,7 @@ export const FEATURES: FeatureItem[] = [
     title: "通知センター・配信設定",
     summary: "気象警報・法改正・重大災害情報を見逃さない",
     description:
-      "ヘッダーの通知センター（ベル）、画面表示中のOS通知、メール配信、RSS購読の4経路で気象警報・法改正・重大災害情報を通知します。",
+      "ヘッダーの通知センター（ベル）、画面表示中のOS通知、RSS購読を提供します。気象警報メール配信は、重複防止と配信監視の整備中です。",
     href: "/notifications",
     category: "management",
     tags: ["通知", "配信"],
@@ -654,9 +665,9 @@ export const FEATURES: FeatureItem[] = [
   {
     slug: "stats",
     title: "サイト統計・運営者情報",
-    summary: "労働安全衛生コンサルタント（登録番号260022）監修",
+    summary: "運営方針と各ページの確認状態を公開",
     description:
-      "本サイトは労働安全衛生コンサルタント（登録番号260022）が個人で監修。利用統計・監修方針を公開しています。",
+      "個人運営の研究プロジェクトとして、利用統計、出典の確認方針、ページごとのレビュー状態と限界を公開しています。",
     href: "/about",
     category: "management",
     tags: ["運営者"],
@@ -667,7 +678,7 @@ export const FEATURES: FeatureItem[] = [
     title: "サイネージ",
     summary: "現場掲示用フルスクリーン表示",
     description:
-      "事務所モニター・現場用サイネージで自動巡回表示。気象警報・注意喚起・KSD注意点を表示できます。",
+      "事務所モニター・現場用のフルスクリーン表示です。気象情報は取得状態・対象地域・取得時刻を併記し、取得不能時は未確認として表示します。",
     href: "/signage",
     category: "signage",
     tags: ["サイネージ", "現場"],
@@ -693,6 +704,16 @@ export const FEATURES: FeatureItem[] = [
     tags: ["ポータル"],
   },
 ];
+
+/**
+ * The public feature catalog must never advertise a quarantined destination as
+ * an operational tool. The full legacy list remains above for audit history.
+ */
+export const FEATURES: FeatureItem[] = ALL_FEATURES.filter(
+  (feature) =>
+    feature.slug !== "construction-calc" &&
+    isPublicRouteAvailable(feature.href),
+);
 
 export function getFeaturesByCategory(categoryId: FeatureCategoryId): FeatureItem[] {
   return FEATURES.filter((f) => f.category === categoryId);

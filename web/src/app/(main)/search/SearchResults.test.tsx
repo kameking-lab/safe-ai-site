@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { render, screen, cleanup } from '@testing-library/react';
+import { render, screen, cleanup, fireEvent } from '@testing-library/react';
 import { SearchResults } from './SearchResults';
 import { EGOV_LAW_SEARCH_URL } from '@/lib/cross-search';
 
@@ -19,6 +19,30 @@ afterEach(cleanup);
 const WAIT = { timeout: 20000 };
 
 describe('/search 0件フォールバック（S6 T4）', () => {
+  it('自由入力をURL・履歴・リンクへ載せず、同じ画面で結果を更新する', async () => {
+    window.history.replaceState({}, '', '/search?cat=law');
+    const marker = '山田太郎-現場A-健康情報';
+    render(<SearchResults />);
+    const input = screen.getByRole('searchbox');
+    fireEvent.change(input, { target: { value: marker } });
+    fireEvent.submit(input.closest('form')!);
+
+    expect(await screen.findByText(new RegExp(marker), {}, WAIT)).toBeTruthy();
+    expect(window.location.search).toBe('?cat=law');
+    for (const link of screen.getAllByRole('link')) {
+      expect(link.getAttribute('href') ?? '').not.toContain(marker);
+      expect(link.getAttribute('href') ?? '').not.toContain(encodeURIComponent(marker));
+    }
+  });
+
+  it('320pxでも検索語入力が縮み、クリア・送信ボタンを画面外へ押し出さない', () => {
+    render(<SearchResults />);
+    expect(screen.getByRole('searchbox').className).toContain('min-w-0');
+    expect(screen.getByRole('button', { name: '検索' }).className).toContain(
+      'shrink-0',
+    );
+  });
+
   it('0件時に e-Gov 法令検索へのリンク（到達可能なポータルトップ）を表示する', async () => {
     render(<SearchResults />);
     const egov = await screen.findByRole('link', { name: /e-Gov法令検索で調べる/ }, WAIT);

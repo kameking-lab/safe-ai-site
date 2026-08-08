@@ -265,7 +265,7 @@ export const warehouseContent: IndustryContent = {
       name: "腰痛予防の労働衛生教育",
       type: "労働衛生教育",
       target: "ピッキング・荷役・配送従事者",
-      href: "/education-certification/finder?q=腰痛",
+      href: "/education/roudoueisei/youtsu-yobou",
     },
     {
       name: "フルハーネス型墜落制止用器具特別教育",

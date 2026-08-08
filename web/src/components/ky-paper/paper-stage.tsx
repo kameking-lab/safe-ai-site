@@ -97,7 +97,7 @@ export const PaperStage = forwardRef<
   return (
     <div
       ref={wrapperRef}
-      className={`relative w-full overflow-hidden bg-slate-200 ${stageHeightPx === null ? heightClassName : ""}`}
+      className={`relative w-full overflow-hidden bg-slate-200 print:hidden ${stageHeightPx === null ? heightClassName : ""}`}
       style={stageHeightPx !== null ? { height: `${stageHeightPx}px` } : undefined}
     >
       <div

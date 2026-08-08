@@ -143,18 +143,23 @@ export async function fetchLaborTrendItems(maxTotal: number, nowMs: number = Dat
   const headers = {
     "User-Agent": "safe-ai-site-signage/1.0 (labor-trend; +https://github.com/kameking-lab/safe-ai-site)",
   };
-  const merged: LaborRssItem[] = [];
-  for (const url of urls) {
-    try {
-      // 6h: トレンド表示用 news (docs/perf/isr-followup.md)
-      const res = await fetch(url, { headers, next: { revalidate: 21600 } });
-      if (!res.ok) continue;
-      const xml = await res.text();
-      merged.push(...parseLaborRssItems(xml, 14));
-    } catch {
-      continue;
-    }
-  }
+  const batches = await Promise.all(
+    urls.map(async (url): Promise<LaborRssItem[]> => {
+      try {
+        // 6h: トレンド表示用 news (docs/perf/isr-followup.md)
+        const res = await fetch(url, {
+          headers,
+          next: { revalidate: 21600 },
+          signal: AbortSignal.timeout(4_500),
+        });
+        if (!res.ok) return [];
+        return parseLaborRssItems(await res.text(), 14);
+      } catch {
+        return [];
+      }
+    }),
+  );
+  const merged = batches.flat();
 
   return selectLaborTrendItems(merged, maxTotal, nowMs);
 }

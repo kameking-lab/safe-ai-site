@@ -12,17 +12,17 @@ datasource db {
 }
 
 model User {
-  id            String        @id @default(cuid())
+  id            String    @id @default(cuid())
   name          String?
-  email         String?       @unique
+  email         String?   @unique
   emailVerified DateTime?
   image         String?
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
-  accounts      Account[]
-  sessions      Session[]
-  subscription  Subscription?
+  accounts     Account[]
+  sessions     Session[]
+  subscription Subscription?
 }
 
 model Account {
@@ -78,20 +78,20 @@ model Subscription {
 
 /// 資格別100問クイズの問題（モックデータからシード可能）。
 model ExamQuestion {
-  id            String   @id @default(cuid())
+  id            String  @id @default(cuid())
   /// 資格スラッグ（例: "health-1st"）
   examSlug      String
   /// 問題番号（資格内の連番）
   number        Int
-  question      String   @db.Text
+  question      String  @db.Text
   /// 4択選択肢（["...","...","...","..."]）
   choices       Json
   /// 正解インデックス（0..3）
   correctAnswer Int
-  explanation   String   @db.Text
+  explanation   String  @db.Text
   /// 法令根拠等（["安衛則36条","..."]）
   lawRefs       Json?
-  difficulty    String   @default("標準")
+  difficulty    String  @default("標準")
   topic         String?
 
   @@unique([examSlug, number])
@@ -114,10 +114,10 @@ model ExamAttempt {
 
 /// Stripe Webhookイベントの処理済み記録。冪等性確保のために使用。
 model StripeEvent {
-  id           String   @id @default(cuid())
-  stripeEventId String  @unique
-  eventType    String
-  processedAt  DateTime @default(now())
+  id            String   @id @default(cuid())
+  stripeEventId String   @unique
+  eventType     String
+  processedAt   DateTime @default(now())
 
   @@index([stripeEventId])
 }
@@ -141,4 +141,579 @@ model SdsSearch {
   createdAt     DateTime @default(now())
 
   @@index([userId, createdAt])
+}
+
+/// 自動化相談のmulti-instance冪等性状態。
+/// 相談本文・氏名・メールアドレス・会社名・生IPは保存しない。
+model AutomationConsultState {
+  key         String   @id @db.VarChar(128)
+  fingerprint String   @db.VarChar(128)
+  status      String   @db.VarChar(16)
+  response    Json?
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([expiresAt])
+}
+
+/// 自動化相談の固定窓rate limit。
+/// clientKeyはserver-side HMACであり、生IPや利用者識別子ではない。
+model AutomationConsultRateBucket {
+  clientKey   String   @db.VarChar(128)
+  windowStart DateTime
+  count       Int
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@id([clientKey, windowStart])
+  @@index([expiresAt])
+}
+
+/// 同意後・allowlist-onlyのWeb Vitals。完全URL、query、PII、入力本文は保存しない。
+model RumMetric {
+  id              BigInt   @id @default(autoincrement())
+  routeTemplate   String   @db.VarChar(120)
+  metric          String   @db.VarChar(8)
+  value           Float
+  rating          String   @db.VarChar(24)
+  navigationType  String   @db.VarChar(24)
+  deviceClass     String   @db.VarChar(12)
+  connectionClass String   @db.VarChar(12)
+  buildId         String   @db.VarChar(80)
+  anonymousBucket String   @db.VarChar(64)
+  createdAt       DateTime @default(now())
+  expiresAt       DateTime
+
+  @@index([expiresAt])
+  @@index([routeTemplate, metric, createdAt])
+}
+
+/// RUM collectorのmulti-instance rate limit。
+/// clientKeyは専用secretでHMAC化し、生IPは保存しない。
+model RumRateBucket {
+  clientKey   String   @db.VarChar(128)
+  windowStart DateTime
+  count       Int
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@id([clientKey, windowStart])
+  @@index([expiresAt])
+}
+
+/// 明示同意後の自動化相談ファネル。分類済みの粗い値だけを保持し、
+/// 氏名・メール・会社名・相談本文・受付番号・完全URL・query・IP・UAは列として持たない。
+model AutomationFunnelEvent {
+  id                   BigInt   @id @default(autoincrement())
+  event                String   @db.VarChar(48)
+  routeTemplate        String   @db.VarChar(120)
+  ctaPosition          String?  @db.VarChar(48)
+  consultationCategory String?  @db.VarChar(48)
+  budgetBucket         String?  @db.VarChar(32)
+  deviceClass          String   @db.VarChar(12)
+  eventDate            DateTime @db.Date
+  anonymousBucket      String   @db.VarChar(64)
+  consentState         String   @db.VarChar(12)
+  deployment           String   @db.VarChar(80)
+  createdAt            DateTime @default(now())
+  expiresAt            DateTime
+
+  @@index([expiresAt])
+  @@index([eventDate, event])
+  @@index([routeTemplate, eventDate])
+  @@index([deployment, eventDate])
+}
+
+/// 全高リスクAPI共通のmulti-instance固定窓rate limit。
+/// subjectHashはserver-only HMACであり、raw IP・user ID・session IDは保存しない。
+model SharedRateBucket {
+  namespace   String   @db.VarChar(48)
+  routeKey    String   @db.VarChar(96)
+  subjectHash String   @db.VarChar(64)
+  windowStart DateTime
+  count       Int
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@id([namespace, routeKey, subjectHash, windowStart])
+  @@index([expiresAt])
+  @@index([namespace, routeKey, windowStart])
+}
+
+/// 共有のatomic idempotency lease。keyHashのみ保存し、生のIdempotency-Keyは保存しない。
+model SharedIdempotency {
+  namespace   String   @db.VarChar(48)
+  routeKey    String   @db.VarChar(96)
+  keyHash     String   @db.VarChar(64)
+  requestHash String   @db.VarChar(128)
+  status      String   @db.VarChar(16)
+  response    Json?
+  leaseToken  String   @db.VarChar(64)
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@id([namespace, routeKey, keyHash])
+  @@index([expiresAt])
+}
+
+/// 組織運用機能（化学物質RA・教育・サイネージ）の共通テナント境界。
+model SafetyOrganization {
+  id        String   @id @db.VarChar(64)
+  name      String   @db.VarChar(160)
+  status    String   @default("active") @db.VarChar(24)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+}
+
+/// 組織内の拠点。すべての組織運用データはorganizationIdとsiteIdで分離する。
+model SafetySite {
+  id             String   @id @db.VarChar(64)
+  organizationId String   @db.VarChar(64)
+  code           String   @db.VarChar(64)
+  name           String   @db.VarChar(160)
+  timezone       String   @default("Asia/Tokyo") @db.VarChar(64)
+  status         String   @default("active") @db.VarChar(24)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([organizationId, code])
+  @@index([organizationId, status])
+}
+
+/// サーバー側認可の正本。クライアントから渡されたroleは使用しない。
+model SafetyMembership {
+  organizationId String   @db.VarChar(64)
+  userId         String   @db.VarChar(64)
+  role           String   @db.VarChar(24)
+  status         String   @default("active") @db.VarChar(24)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@id([organizationId, userId])
+  @@index([userId, status])
+}
+
+/// 組織運用機能の追記専用監査イベント。本文・健康情報・生IPは格納しない。
+model GovernanceAuditLog {
+  id             BigInt   @id @default(autoincrement())
+  organizationId String   @db.VarChar(64)
+  siteId         String?  @db.VarChar(64)
+  actorUserId    String   @db.VarChar(64)
+  scope          String   @db.VarChar(40)
+  entityType     String   @db.VarChar(48)
+  entityId       String   @db.VarChar(64)
+  action         String   @db.VarChar(64)
+  fromStatus     String?  @db.VarChar(32)
+  toStatus       String?  @db.VarChar(32)
+  metadata       Json?
+  createdAt      DateTime @default(now())
+
+  @@index([organizationId, scope, createdAt])
+  @@index([entityType, entityId, createdAt])
+}
+
+/// 組織用化学物質RA台帳のヘッダー。匿名簡易スクリーニングとは別物。
+model ChemicalRaAssessment {
+  id                   String    @id @db.VarChar(64)
+  organizationId       String    @db.VarChar(64)
+  siteId               String    @db.VarChar(64)
+  assessmentNumber     String    @db.VarChar(80)
+  chemicalIdentity     String    @db.VarChar(240)
+  casNumber            String?   @db.VarChar(32)
+  identityConfirmed    Boolean   @default(false)
+  mixtureConfirmed     Boolean   @default(false)
+  currentVersionNumber Int       @default(1)
+  status               String    @default("draft") @db.VarChar(32)
+  ownerUserId          String    @db.VarChar(64)
+  reviewerUserId       String?   @db.VarChar(64)
+  approverUserId       String?   @db.VarChar(64)
+  dueDate              DateTime?
+  reassessmentDate     DateTime?
+  approvedAt           DateTime?
+  supersededAt         DateTime?
+  archivedAt           DateTime?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  @@unique([organizationId, assessmentNumber])
+  @@index([organizationId, siteId, status])
+  @@index([organizationId, reassessmentDate])
+}
+
+/// SDSの版を保持する。最新版への上書きではなく、issueDate/versionLabel単位で履歴化する。
+model ChemicalSdsRecord {
+  id               String    @id @db.VarChar(64)
+  organizationId   String    @db.VarChar(64)
+  siteId           String    @db.VarChar(64)
+  chemicalIdentity String    @db.VarChar(240)
+  casNumber        String?   @db.VarChar(32)
+  mixtureConfirmed Boolean   @default(false)
+  versionLabel     String    @db.VarChar(120)
+  issueDate        DateTime
+  sourceUrl        String?   @db.Text
+  evidence         Json
+  supersededAt     DateTime?
+  createdByUserId  String    @db.VarChar(64)
+  createdAt        DateTime  @default(now())
+
+  @@unique([organizationId, siteId, chemicalIdentity, versionLabel, issueDate])
+  @@index([organizationId, siteId, casNumber])
+}
+
+/// RA入力・判断の不変版。承認後の変更は新versionを作成する。
+model ChemicalRaVersion {
+  id                     String    @id @db.VarChar(64)
+  assessmentId           String    @db.VarChar(64)
+  versionNumber          Int
+  chemicalIdentity       String    @db.VarChar(240)
+  casNumber              String?   @db.VarChar(32)
+  identityConfirmed      Boolean   @default(false)
+  mixtureComponents      Json?
+  mixtureConfirmed       Boolean   @default(false)
+  sdsRecordId            String?   @db.VarChar(64)
+  sdsVersionLabel        String?   @db.VarChar(120)
+  sdsIssueDate           DateTime?
+  processName            String?   @db.VarChar(240)
+  taskName               String?   @db.VarChar(240)
+  quantity               String?   @db.VarChar(120)
+  concentration          String?   @db.VarChar(120)
+  exposureDuration       String?   @db.VarChar(120)
+  frequency              String?   @db.VarChar(120)
+  temperature            String?   @db.VarChar(120)
+  ventilation            String?   @db.VarChar(240)
+  localExhaust           String?   @db.VarChar(240)
+  skinExposure           String?   @db.VarChar(240)
+  ppe                    Json?
+  existingControl        Json?
+  additionalControl      Json?
+  ownerUserId            String?   @db.VarChar(64)
+  reviewerUserId         String?   @db.VarChar(64)
+  approverUserId         String?   @db.VarChar(64)
+  status                 String    @default("draft") @db.VarChar(32)
+  dueDate                DateTime?
+  reassessmentDate       DateTime?
+  aiCandidatesReviewed   Boolean   @default(false)
+  sources                Json?
+  evidence               Json?
+  unresolvedWarnings     Json?
+  unresolvedWarningCount Int       @default(0)
+  changeReason           String    @db.Text
+  createdByUserId        String    @db.VarChar(64)
+  createdAt              DateTime  @default(now())
+
+  @@unique([assessmentId, versionNumber])
+  @@index([assessmentId, status])
+  @@index([sdsRecordId])
+}
+
+/// reviewer本人が版単位で行う独立判断。approver操作とは分離する。
+model ChemicalRaReviewDecision {
+  id             String   @id @db.VarChar(64)
+  assessmentId   String   @db.VarChar(64)
+  versionId      String   @unique(map: "ChemicalRaReviewDecision_version_key") @db.VarChar(64)
+  reviewerUserId String   @db.VarChar(64)
+  decision       String   @db.VarChar(32)
+  comment        String?  @db.Text
+  decidedAt      DateTime @default(now())
+  createdAt      DateTime @default(now())
+
+  @@index([assessmentId, decidedAt], map: "ChemicalRaReviewDecision_assessment_decided_idx")
+}
+
+/// reviewerとapproverの判断を分離して記録する。
+model ChemicalRaApproval {
+  id             String    @id @db.VarChar(64)
+  assessmentId   String    @db.VarChar(64)
+  versionId      String    @db.VarChar(64)
+  reviewerUserId String    @db.VarChar(64)
+  approverUserId String    @db.VarChar(64)
+  decision       String    @db.VarChar(32)
+  comment        String?   @db.Text
+  reviewedAt     DateTime
+  approvedAt     DateTime?
+  createdAt      DateTime  @default(now())
+
+  @@unique([versionId, decision])
+  @@index([assessmentId, createdAt])
+}
+
+/// SDS・工程・換気・PPE・法令・事故等による再評価トリガー。
+model ChemicalReassessmentTrigger {
+  id           String    @id @db.VarChar(64)
+  assessmentId String    @db.VarChar(64)
+  triggerType  String    @db.VarChar(48)
+  reason       String    @db.Text
+  sourceRef    String?   @db.Text
+  detectedAt   DateTime  @default(now())
+  resolvedAt   DateTime?
+  resolvedBy   String?   @db.VarChar(64)
+
+  @@index([assessmentId, resolvedAt, detectedAt])
+}
+
+/// 組織内の受講者。本名等は認証された管理画面だけで扱い、identityStatusを明示する。
+model TrainingLearner {
+  id                 String    @id @db.VarChar(64)
+  organizationId     String    @db.VarChar(64)
+  siteId             String    @db.VarChar(64)
+  externalRefHash    String?   @db.VarChar(128)
+  displayName        String    @db.VarChar(160)
+  identityStatus     String    @default("unverified") @db.VarChar(32)
+  identityVerifiedAt DateTime?
+  identityVerifierId String?   @db.VarChar(64)
+  identityEvidence   Json?
+  status             String    @default("active") @db.VarChar(24)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@index([organizationId, siteId, status])
+  @@index([externalRefHash])
+}
+
+model TrainingCourse {
+  id                           String   @id @db.VarChar(64)
+  organizationId               String   @db.VarChar(64)
+  courseCode                   String   @db.VarChar(80)
+  title                        String   @db.VarChar(240)
+  classification               String   @db.VarChar(48)
+  legalCategory                String   @db.VarChar(48)
+  source                       Json
+  instructorRequirement        String   @db.Text
+  practicalTrainingRequirement String   @db.Text
+  status                       String   @default("draft") @db.VarChar(24)
+  createdAt                    DateTime @default(now())
+  updatedAt                    DateTime @updatedAt
+
+  @@unique([organizationId, courseCode])
+  @@index([organizationId, legalCategory, status])
+}
+
+model TrainingCourseVersion {
+  id                                String    @id @db.VarChar(64)
+  courseId                          String    @db.VarChar(64)
+  versionNumber                     Int
+  versionLabel                      String    @db.VarChar(120)
+  title                             String    @db.VarChar(240)
+  classification                    String    @db.VarChar(48)
+  legalCategory                     String    @db.VarChar(48)
+  courseSource                      Json
+  instructorRequirementLabel        String    @db.Text
+  practicalTrainingRequirementLabel String    @db.Text
+  requiredMinutes                   Int
+  assessmentRequirement             Json?
+  attendanceRequirement             Json?
+  practicalRequirement              Json?
+  instructorRequirement             Json?
+  effectiveFrom                     DateTime
+  effectiveTo                       DateTime?
+  sourceSnapshot                    Json
+  createdByUserId                   String    @db.VarChar(64)
+  createdAt                         DateTime  @default(now())
+
+  @@unique([courseId, versionNumber])
+  @@index([courseId, effectiveFrom])
+}
+
+model TrainingEnrollment {
+  id              String    @id @db.VarChar(64)
+  organizationId  String    @db.VarChar(64)
+  siteId          String    @db.VarChar(64)
+  learnerId       String    @db.VarChar(64)
+  courseVersionId String    @db.VarChar(64)
+  status          String    @default("enrolled") @db.VarChar(32)
+  progressPercent Int       @default(0)
+  learningMinutes Int       @default(0)
+  enrolledAt      DateTime  @default(now())
+  dueDate         DateTime?
+  completedAt     DateTime?
+  renewalDueAt    DateTime?
+  evidence        Json?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@unique([learnerId, courseVersionId])
+  @@index([organizationId, siteId, status, dueDate])
+}
+
+model TrainingAttendance {
+  id                 String   @id @db.VarChar(64)
+  enrollmentId       String   @db.VarChar(64)
+  attendanceType     String   @db.VarChar(32)
+  attendedMinutes    Int
+  instructorUserId   String?  @db.VarChar(64)
+  practicalCompleted Boolean  @default(false)
+  verifiedByUserId   String?  @db.VarChar(64)
+  evidence           Json?
+  occurredAt         DateTime
+  createdAt          DateTime @default(now())
+
+  @@index([enrollmentId, occurredAt])
+}
+
+model TrainingAssessment {
+  id               String    @id @db.VarChar(64)
+  enrollmentId     String    @db.VarChar(64)
+  assessmentType   String    @db.VarChar(32)
+  score            Float?
+  passed           Boolean?
+  assessedAt       DateTime
+  assessorUserId   String?   @db.VarChar(64)
+  verifiedAt       DateTime?
+  verifiedByUserId String?   @db.VarChar(64)
+  evidence         Json?
+  createdAt        DateTime  @default(now())
+
+  @@index([enrollmentId, assessedAt])
+}
+
+/// completionLevelは自己確認・学習完了・社内受講記録・正式法定教育を区別する。
+model TrainingCompletion {
+  id                  String    @id @db.VarChar(64)
+  enrollmentId        String    @unique @db.VarChar(64)
+  completionLevel     String    @db.VarChar(40)
+  displayLabel        String    @db.VarChar(120)
+  identitySatisfied   Boolean   @default(false)
+  timeSatisfied       Boolean   @default(false)
+  practicalSatisfied  Boolean   @default(false)
+  instructorSatisfied Boolean   @default(false)
+  examSatisfied       Boolean   @default(false)
+  verifierUserId      String?   @db.VarChar(64)
+  verifiedAt          DateTime?
+  approverUserId      String?   @db.VarChar(64)
+  approvedAt          DateTime?
+  expiresAt           DateTime?
+  renewalDueAt        DateTime?
+  evidence            Json?
+  revokedAt           DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+}
+
+/// サイネージ端末。deviceTokenHashのみを保存し、生tokenは保存しない。
+model SignageFleetDevice {
+  id                   String    @id @db.VarChar(64)
+  organizationId       String    @db.VarChar(64)
+  siteId               String    @db.VarChar(64)
+  name                 String    @db.VarChar(160)
+  deviceTokenHash      String    @unique @db.VarChar(128)
+  tokenVersion         Int       @default(1)
+  tokenRotatedAt       DateTime
+  status               String    @default("unknown") @db.VarChar(24)
+  lastSeenAt           DateTime?
+  softwareVersion      String?   @db.VarChar(80)
+  configurationVersion Int?
+  assignedLayout       String?   @db.VarChar(120)
+  staleThresholdSec    Int       @default(300)
+  registrationStatus   String    @default("unverified") @db.VarChar(24)
+  registeredAt         DateTime  @default(now())
+  verifiedAt           DateTime?
+  maintenanceAt        DateTime?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  @@index([organizationId, siteId, status])
+  @@index([lastSeenAt])
+}
+
+model SignageFleetConfiguration {
+  id                String    @id @db.VarChar(64)
+  organizationId    String    @db.VarChar(64)
+  siteId            String?   @db.VarChar(64)
+  versionNumber     Int
+  assignedLayout    String    @db.VarChar(120)
+  schedule          Json
+  emergencyOverride Json?
+  contentSource     Json
+  weatherSource     Json
+  configChecksum    String    @db.VarChar(128)
+  signature         String    @db.Text
+  signingKeyVersion Int
+  status            String    @default("draft") @db.VarChar(24)
+  createdByUserId   String    @db.VarChar(64)
+  createdAt         DateTime  @default(now())
+  publishedAt       DateTime?
+  supersededAt      DateTime?
+
+  @@unique([organizationId, versionNumber])
+  @@index([organizationId, siteId, status])
+}
+
+model SignageFleetRollout {
+  id                    String    @id @db.VarChar(64)
+  organizationId        String    @db.VarChar(64)
+  deviceId              String    @db.VarChar(64)
+  configurationId       String    @db.VarChar(64)
+  previousConfiguration String?   @db.VarChar(64)
+  rolloutStage          String    @db.VarChar(24)
+  status                String    @default("pending") @db.VarChar(24)
+  scheduledAt           DateTime?
+  deployedAt            DateTime?
+  acknowledgedAt        DateTime?
+  rolledBackAt          DateTime?
+  createdByUserId       String    @db.VarChar(64)
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([organizationId, rolloutStage, status])
+  @@index([deviceId, createdAt])
+}
+
+model SignageFleetHeartbeat {
+  id                   BigInt   @id @default(autoincrement())
+  deviceId             String   @db.VarChar(64)
+  nonceHash            String   @db.VarChar(128)
+  observedAt           DateTime
+  receivedAt           DateTime @default(now())
+  status               String   @db.VarChar(24)
+  softwareVersion      String   @db.VarChar(80)
+  configurationVersion Int?
+  configChecksum       String?  @db.VarChar(128)
+  diagnostics          Json?
+
+  @@unique([deviceId, nonceHash])
+  @@index([deviceId, receivedAt])
+}
+
+model SignageFleetAcknowledgement {
+  id              String   @id @db.VarChar(64)
+  deviceId        String   @db.VarChar(64)
+  rolloutId       String   @db.VarChar(64)
+  configChecksum  String   @db.VarChar(128)
+  acknowledgement String   @db.VarChar(32)
+  acknowledgedAt  DateTime
+  createdAt       DateTime @default(now())
+
+  @@unique([deviceId, rolloutId])
+}
+
+/// メールprovider未準備時にも使える最小受付キュー。本文はserver-side暗号文のみ。
+model AutomationConsultTicket {
+  id                    String    @id @db.VarChar(64)
+  referenceId           String    @unique @db.VarChar(80)
+  idempotencyKeyHash    String    @unique @db.VarChar(128)
+  organizationId        String?   @db.VarChar(64)
+  siteId                String?   @db.VarChar(64)
+  requesterHash         String    @db.VarChar(128)
+  encryptedPayload      String    @db.Text
+  encryptionKeyVersion  Int
+  status                String    @default("queued") @db.VarChar(32)
+  assignedUserId        String?   @db.VarChar(64)
+  encryptedInternalNote String?   @db.Text
+  emailDeliveryStatus   String    @default("waiting-provider") @db.VarChar(32)
+  providerMessageIdHash String?   @db.VarChar(128)
+  retentionUntil        DateTime
+  deletedAt             DateTime?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([status, createdAt])
+  @@index([retentionUntil])
+  @@index([organizationId, status])
 }

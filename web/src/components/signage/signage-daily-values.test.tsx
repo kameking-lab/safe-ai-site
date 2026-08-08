@@ -1,8 +1,9 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 
 import { SignageDailyValues } from "./signage-daily-values";
 import { DAILY_SLOGANS } from "@/lib/signage/daily-values";
+import { setNoAccidentStartDate } from "@/lib/signage/no-accident-store";
 
 const NOW = new Date(2026, 6, 3, 9, 0, 0);
 
@@ -11,18 +12,14 @@ afterEach(() => {
 });
 
 describe("SignageDailyValues", () => {
-  it("起点日未設定では無災害日数の代わりに設定ボタンを表示する", () => {
+  it("起点日未設定では無災害日数を未設定と表示する", () => {
     render(<SignageDailyValues now={NOW} />);
-    expect(screen.getByText("起点日を設定")).toBeDefined();
+    expect(screen.getByText("未設定")).toBeDefined();
   });
 
-  it("起点日を保存すると無災害日数が表示される", () => {
+  it("保存済みの起点日から無災害日数を表示する", () => {
+    setNoAccidentStartDate("2026-07-01");
     render(<SignageDailyValues now={NOW} />);
-    fireEvent.click(screen.getByText("起点日を設定"));
-    fireEvent.change(screen.getByLabelText("無災害日数の起点日"), {
-      target: { value: "2026-07-01" },
-    });
-    fireEvent.click(screen.getByText("保存"));
     expect(screen.getByText("3")).toBeDefined();
   });
 
@@ -41,26 +38,23 @@ describe("SignageDailyValues", () => {
     expect(day1).not.toBe(day2);
   });
 
-  it("気温・湿度がない場合はWBGT取得中と表示する", () => {
+  it("気温・湿度がない場合もWBGTを推定せず実測確認を促す", () => {
     render(<SignageDailyValues now={NOW} />);
-    expect(screen.getByText("湿度データ取得中…")).toBeDefined();
+    expect(screen.getByText("実測計で確認")).toBeDefined();
+    expect(screen.queryByText("気温・湿度からは自動推定しません")).toBeNull();
   });
 
-  it("気温・湿度があればWBGT値とリスクラベルを表示する", () => {
+  it("気温・湿度があってもWBGT値やリスクラベルを推定表示しない", () => {
     render(<SignageDailyValues now={NOW} currentTempC={33} currentHumidityPct={70} />);
-    expect(screen.queryByText("湿度データ取得中…")).toBeNull();
-    expect(screen.getByText("℃", { exact: false })).toBeDefined();
+    expect(screen.getByText("実測計で確認")).toBeDefined();
+    expect(screen.queryByText("気温・湿度からは自動推定しません")).toBeNull();
+    expect(screen.queryByText("℃", { exact: false })).toBeNull();
+    expect(screen.queryByText(/安全|注意|警戒|厳重警戒|危険/)).toBeNull();
   });
 
-  it("起点日変更フォームの入力欄・保存ボタン・変更リンクが44pxタップ標的を満たす", () => {
+  it("常掲値カードへ設定ボタンを重ねない", () => {
     render(<SignageDailyValues now={NOW} />);
-    fireEvent.click(screen.getByText("起点日を設定"));
-    expect(screen.getByLabelText("無災害日数の起点日").className).toContain("min-h-[44px]");
-    expect(screen.getByText("保存").className).toContain("min-h-[44px]");
-    fireEvent.change(screen.getByLabelText("無災害日数の起点日"), {
-      target: { value: "2026-07-01" },
-    });
-    fireEvent.click(screen.getByText("保存"));
-    expect(screen.getByText("起点日を変更").className).toContain("min-h-[44px]");
+    expect(screen.queryByRole("button")).toBeNull();
+    expect(screen.queryByRole("textbox")).toBeNull();
   });
 });

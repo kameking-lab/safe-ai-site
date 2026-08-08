@@ -17,7 +17,7 @@ const WORK_KEYWORDS: readonly string[] = [
 export interface AccidentWorkHint {
   matched: boolean;
   keywords: string[];
-  /** /accidents?work=… 用のクエリ（作業内容そのもの、トリム済み）。 */
+  /** URLへ載せてもよい、許可済み分類語だけのクエリ。自由本文は入れない。 */
   query: string;
 }
 
@@ -29,11 +29,20 @@ export function detectAccidentWork(text: string | null | undefined): AccidentWor
   const t = typeof text === "string" ? text.trim() : "";
   if (t.length < 2) return { matched: false, keywords: [], query: "" };
   const keywords = WORK_KEYWORDS.filter((k) => t.includes(k));
-  // 代表キーワードが無くても、作業内容があれば類似事例検索は有用なので matched=true。
-  return { matched: true, keywords, query: t.slice(0, 60) };
+  // 代表語が無い作業も事故一覧へ案内するが、自由本文はURLへ一切載せない。
+  // 複数一致時も検索語は許可リストの先頭1分類だけに限定する。
+  return { matched: true, keywords, query: keywords[0] ?? "" };
 }
 
-/** /accidents への誘導URL（work クエリで AI注意喚起プリフィル）。 */
+/** サイト内検索URL。URLへ載せるのは上の許可済み分類語だけ。 */
 export function accidentsHref(hint: AccidentWorkHint): string {
-  return hint.query ? `/accidents?work=${encodeURIComponent(hint.query)}` : "/accidents";
+  if (!hint.query) return "/accidents?tab=list";
+  const params = new URLSearchParams({
+    tab: "list",
+    acc_kw: hint.query,
+  });
+  return `/accidents?${params.toString()}#accident-results`;
 }
+
+export const OFFICIAL_ACCIDENT_SEARCH_URL =
+  "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_FND.aspx";

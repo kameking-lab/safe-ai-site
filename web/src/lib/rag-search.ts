@@ -1,10 +1,13 @@
-import { allLawArticles } from "@/data/laws";
+import { verifiedLawArticles } from "@/data/laws/verified-corpus";
 import type { LawArticle } from "@/data/laws";
 import { normalizeSearchText } from "@/lib/fuzzy-search";
 import { expandQuery } from "@/lib/query-expansion";
 import { expandQueryRich } from "@/lib/rag/synonyms";
+import { LAW_ALIAS_GROUPS } from "@/lib/law-name-registry";
 import { bm25Score, getOrBuildIndex } from "@/lib/rag/bm25";
 import { rerank } from "@/lib/rag/reranker";
+import { detectForkliftQueryIntent } from "@/lib/rag/forklift-intent";
+import { detectHighLiftQueryIntent } from "@/lib/rag/high-lift-intent";
 import {
   hasOutOfDomainSignal,
   OUT_OF_DOMAIN_PENALTY_FACTOR,
@@ -20,6 +23,12 @@ export { LAW_CATEGORY_OPTIONS } from "@/lib/law-category-options";
 export type { LawCategoryFilter } from "@/lib/law-category-options";
 
 /**
+ * 公開一次資料へのリンクは確認できても、本文を承認済みRAGへ収録していない
+ * トピック。別の条文で推測回答せず、公式資料と人手確認へ送る。
+ */
+export const PRIMARY_SOURCE_APPROVAL_REQUIRED_TERMS = ["親綱"] as const;
+
+/**
  * トピック別の必須条文プライン（キーワードに該当する場合、RAG 検索結果の先頭に
  * 強制的に差し込む）。安衛法第60条のように「政令で定めるもの」で参照切れに
  * なる条文はスコアだけでは十分に引けないため、施行令・規則とセットで返す。
@@ -27,6 +36,13 @@ export type { LawCategoryFilter } from "@/lib/law-category-options";
 export type PinnedTopic = {
   /** このトピックに該当させるキーワード（いずれか1つが query に含まれれば適用） */
   triggers: string[];
+  /**
+   * 固定文言への過適合を避ける共起条件。各内側配列から1語以上、
+   * すべてのグループで一致した場合もトピックに該当する。
+   */
+  allTriggerGroups?: string[][];
+  /** 同義語展開が別の利用者意図を作る場合、元質問だけで発火を判定する。 */
+  explicitOnly?: boolean;
   /** 先頭に差し込む条文の { law, articleNum } ペア */
   pins: { law: string; articleNum: string }[];
   /**
@@ -38,6 +54,159 @@ export type PinnedTopic = {
 };
 
 export const PINNED_TOPICS: PinnedTopic[] = [
+  {
+    // 法の目的（1条）と、労働条件としての最低基準（3条）を分離せず返す。
+    triggers: ["最低基準"],
+    allTriggerGroups: [
+      ["労働災害", "安全衛生", "労働条件"],
+      ["法律", "安衛法", "定め"],
+      ["目的", "最低基準", "基本理念"],
+    ],
+    pins: [
+      { law: "労働安全衛生法", articleNum: "第1条" },
+      { law: "労働安全衛生法", articleNum: "第3条" },
+    ],
+  },
+  {
+    // 衛生管理者の制度本体と、事業場規模を定める施行令を対で返す。
+    triggers: ["衛生管理者の事業場規模", "衛生管理者を選任しなければならない事業場規模"],
+    allTriggerGroups: [["衛生管理者"], ["規模", "何人", "以上"]],
+    pins: [
+      { law: "労働安全衛生法", articleNum: "第12条" },
+      { law: "労働安全衛生法施行令", articleNum: "第4条" },
+    ],
+    excludeTriggers: ["総括安全衛生管理者", "店社安全衛生管理者"],
+  },
+  {
+    // 作業主任者の制度本体と、対象作業を列挙する施行令を対で返す。
+    triggers: ["作業主任者の対象作業", "作業主任者は何条", "作業主任者の根拠"],
+    allTriggerGroups: [["作業主任者"], ["対象", "特定作業", "何条", "根拠", "定め"]],
+    pins: [
+      { law: "労働安全衛生法", articleNum: "第14条" },
+      { law: "労働安全衛生法施行令", articleNum: "第6条" },
+    ],
+  },
+  {
+    // 雇入時健診は本法の一般義務と規則の実施時点・項目を対で返す。
+    triggers: ["雇い入れたときに行う健康診断", "雇入れ時健康診断", "雇入時健康診断"],
+    allTriggerGroups: [["雇い入れ", "雇入れ"], ["健康診断", "健診"]],
+    pins: [
+      { law: "労働安全衛生法", articleNum: "第66条" },
+      { law: "労働安全衛生規則", articleNum: "第43条" },
+    ],
+  },
+  {
+    // 一般定期健診は本法と「一年以内ごとに一回」を定める規則を対で返す。
+    triggers: [
+      "1年以内ごとに1回行う定期健康診断",
+      "一年以内ごとに一回行う定期健康診断",
+      "定期健康診断",
+      "定期健診",
+    ],
+    allTriggerGroups: [["定期健康診断", "定期健診"], ["1年", "一年", "年1回"]],
+    pins: [
+      { law: "労働安全衛生法", articleNum: "第66条" },
+      { law: "労働安全衛生規則", articleNum: "第44条" },
+    ],
+  },
+  {
+    // 長時間労働者の面接指導は本法と具体要件を定める規則を対で返す。
+    triggers: ["月80時間超の時間外労働者", "80時間超の面接指導"],
+    allTriggerGroups: [["80時間", "八十時間"], ["面接指導"]],
+    pins: [
+      { law: "労働安全衛生法", articleNum: "第66条の8" },
+      { law: "労働安全衛生規則", articleNum: "第52条の2" },
+    ],
+  },
+  {
+    // 墜落制止用器具を使わせる根拠は、作業床等の原則と使用義務を対で返す。
+    triggers: ["墜落制止用器具の使用義務", "墜落制止用器具を使用させ"],
+    allTriggerGroups: [["墜落制止用器具"], ["使用義務", "使用させ", "使わせ"]],
+    pins: [
+      { law: "労働安全衛生規則", articleNum: "第518条" },
+      { law: "労働安全衛生規則", articleNum: "第520条" },
+    ],
+    excludeTriggers: ["点検", "取替え", "交換"],
+  },
+  {
+    // 足場作業主任者の対象範囲（令）と選任（規則）を対で返す。
+    triggers: ["足場の作業主任者の選任", "足場作業主任者の選任"],
+    allTriggerGroups: [["足場"], ["作業主任者"], ["選任", "5m", "つり足場", "張り出し足場"]],
+    pins: [
+      { law: "労働安全衛生法施行令", articleNum: "第6条" },
+      { law: "労働安全衛生規則", articleNum: "第565条" },
+    ],
+  },
+  {
+    // 足場の組立て・解体時に講ずる作業方法・墜落防止措置。
+    triggers: ["足場の組立て・解体時", "足場の組立・解体時"],
+    allTriggerGroups: [["足場"], ["組立て", "組立"], ["解体"], ["墜落防止", "措置"]],
+    pins: [{ law: "労働安全衛生規則", articleNum: "第564条" }],
+    excludeTriggers: ["点検", "変更後"],
+  },
+  {
+    // クレーン設置届は対象範囲（令）と届出手続（クレーン則）を対で返す。
+    triggers: ["クレーンの設置届出の対象範囲", "クレーン設置届の対象"],
+    allTriggerGroups: [["クレーン"], ["設置届", "設置届出"], ["対象", "範囲"]],
+    pins: [
+      { law: "労働安全衛生法施行令", articleNum: "第12条" },
+      { law: "クレーン等安全規則", articleNum: "第5条" },
+    ],
+  },
+  {
+    // 店社安全衛生管理者は制度本体と人数要件を対で返す。
+    triggers: ["店社安全衛生管理者の選任義務", "店社安全衛生管理者の選任"],
+    allTriggerGroups: [["店社安全衛生管理者"], ["選任", "義務", "何人"]],
+    pins: [
+      { law: "労働安全衛生法", articleNum: "第15条の3" },
+      { law: "労働安全衛生規則", articleNum: "第18条の6" },
+    ],
+  },
+  {
+    // 労働者の責務（安衛法第4条）
+    triggers: [
+      "労働者の責務",
+      "労働者にも義務",
+      "労働者も守る",
+      "労働者にも安全衛生",
+    ],
+    pins: [{ law: "労働安全衛生法", articleNum: "第4条" }],
+  },
+  {
+    // 安全・衛生・安全衛生委員会の設置根拠
+    triggers: ["安全委員会", "衛生委員会", "安全衛生委員会"],
+    pins: [
+      { law: "労働安全衛生法", articleNum: "第17条" },
+      { law: "労働安全衛生法", articleNum: "第18条" },
+      { law: "労働安全衛生法", articleNum: "第19条" },
+    ],
+  },
+  {
+    // 労働時間中の休憩（労基法第34条）
+    triggers: ["お昼の休憩", "昼休み", "休憩は何分", "休憩時間は何分"],
+    allTriggerGroups: [
+      ["休憩", "休み"],
+      ["何分", "どれくらい", "時間", "最低"],
+    ],
+    pins: [{ law: "労働基準法", articleNum: "第34条" }],
+    excludeTriggers: ["熱中症", "暑熱", "WBGT", "作業間休息"],
+  },
+  {
+    // 衛生管理者の選任義務：本則（安衛法12条）と事業場規模・人数等の
+    // 具体条件（安衛則7条）を対で返す。総括安全衛生管理者は安衛法10条の
+    // 別制度なので、一般語の部分一致で乗っ取らないよう除外する。
+    triggers: [
+      "衛生管理者の選任",
+      "衛生管理者を選任",
+      "衛生管理者選任",
+      "衛生管理者の選任義務",
+    ],
+    pins: [
+      { law: "労働安全衛生法", articleNum: "第12条" },
+      { law: "労働安全衛生規則", articleNum: "第7条" },
+    ],
+    excludeTriggers: ["総括安全衛生管理者"],
+  },
   {
     // 職長教育：安衛法第60条＋施行令第19条（対象業種）をセットで返す
     triggers: ["職長教育", "職長", "第60条", "60条", "第六十条"],
@@ -62,20 +231,38 @@ export const PINNED_TOPICS: PinnedTopic[] = [
   },
   {
     triggers: ["有機溶剤健康診断", "有機溶剤健診", "有機溶剤の健康診断"],
+    allTriggerGroups: [
+      ["有機溶剤", "有機則"],
+      ["健康診断", "健診"],
+    ],
     pins: [
       { law: "有機溶剤中毒予防規則", articleNum: "第29条" },
       { law: "有機溶剤中毒予防規則", articleNum: "第30条" },
     ],
   },
   {
-    triggers: ["特化健診", "特定化学物質健康診断", "特化物健診"],
+    triggers: [
+      "特化健診",
+      "特定化学物質健康診断",
+      "特定化学物質の健康診断",
+      "特化物健診",
+    ],
+    allTriggerGroups: [
+      ["特定化学物質", "特化物", "特化則"],
+      ["健康診断", "健診"],
+    ],
     pins: [
       { law: "特定化学物質障害予防規則", articleNum: "第39条" },
       { law: "特定化学物質障害予防規則", articleNum: "第40条" },
     ],
   },
   {
-    triggers: ["石綿健康診断", "アスベスト健診", "石綿健診"],
+    triggers: [
+      "石綿健康診断",
+      "アスベスト健診",
+      "石綿健診",
+      "石綿業務従事者",
+    ],
     pins: [
       { law: "石綿障害予防規則", articleNum: "第40条" },
       { law: "石綿障害予防規則", articleNum: "第36条" },
@@ -92,6 +279,48 @@ export const PINNED_TOPICS: PinnedTopic[] = [
       { law: "じん肺法", articleNum: "第8条" },
       { law: "じん肺法", articleNum: "第3条" },
     ],
+  },
+  {
+    // 「管理区分」は、作業環境測定の実施根拠ではなく、物質別規則の
+    // 測定結果評価条文を横断して確認する必要がある。両概念の共起時だけ返す。
+    triggers: [],
+    allTriggerGroups: [
+      ["作業環境測定", "気中濃度測定"],
+      ["管理区分", "第一管理区分", "第二管理区分", "第三管理区分"],
+    ],
+    pins: [
+      { law: "特定化学物質障害予防規則", articleNum: "第36条の2" },
+      { law: "有機溶剤中毒予防規則", articleNum: "第28条の2" },
+      { law: "石綿障害予防規則", articleNum: "第37条" },
+      { law: "粉じん障害防止規則", articleNum: "第26条の2" },
+      { law: "鉛中毒予防規則", articleNum: "第52条の2" },
+    ],
+  },
+  {
+    // 物質別の作業環境測定。汎用の安衛法65条・作環測法3条より前に置き、
+    // 明示された規則の測定条文をTop-5から押し出さない。
+    triggers: [],
+    allTriggerGroups: [
+      ["粉じん", "特定粉じん"],
+      ["作業環境測定", "粉じん濃度測定", "気中濃度測定"],
+    ],
+    pins: [{ law: "粉じん障害防止規則", articleNum: "第26条" }],
+  },
+  {
+    triggers: [],
+    allTriggerGroups: [
+      ["有機溶剤", "有機則"],
+      ["作業環境測定", "濃度測定", "気中濃度測定"],
+    ],
+    pins: [{ law: "有機溶剤中毒予防規則", articleNum: "第28条" }],
+  },
+  {
+    triggers: [],
+    allTriggerGroups: [
+      ["特定化学物質", "特化物", "特化則"],
+      ["作業環境測定", "濃度測定", "気中濃度測定"],
+    ],
+    pins: [{ law: "特定化学物質障害予防規則", articleNum: "第36条" }],
   },
   {
     // 作業環境測定
@@ -134,15 +363,44 @@ export const PINNED_TOPICS: PinnedTopic[] = [
       "組立て・変更後",
       "組立て、変更後",
     ],
+    allTriggerGroups: [
+      ["足場"],
+      ["点検", "見直す", "強い風", "強風", "悪天候"],
+    ],
     pins: [
-      { law: "労働安全衛生規則（足場等）", articleNum: "第567条" },
-      { law: "労働安全衛生規則（足場等）", articleNum: "第566条" },
+      { law: "労働安全衛生規則", articleNum: "第567条" },
+      { law: "労働安全衛生規則", articleNum: "第566条" },
     ],
   },
   {
     // 死傷病報告
     triggers: ["死傷病報告", "労働者死傷病報告", "災害報告"],
     pins: [{ law: "労働安全衛生規則", articleNum: "第97条" }],
+  },
+  {
+    // 計画届の対象工事は安衛法88条だけで確定せず、省令の列挙（89・90条）まで返す。
+    triggers: [],
+    allTriggerGroups: [
+      ["計画届", "工事計画届"],
+      ["対象工事", "対象となる工事", "工事の範囲"],
+    ],
+    pins: [
+      { law: "労働安全衛生法", articleNum: "第88条" },
+      { law: "労働安全衛生規則", articleNum: "第89条" },
+      { law: "労働安全衛生規則", articleNum: "第90条" },
+    ],
+  },
+  {
+    // 届出計画の審査を問う場合は、届出根拠88条ではなく審査規定を先に返す。
+    triggers: [],
+    allTriggerGroups: [
+      ["計画届", "工事計画届", "届出計画"],
+      ["事前審査", "審査"],
+    ],
+    pins: [
+      { law: "労働安全衛生法", articleNum: "第89条" },
+      { law: "労働安全衛生法", articleNum: "第89条の2" },
+    ],
   },
   {
     // 工事計画届 / 安衛法第88条
@@ -169,7 +427,25 @@ export const PINNED_TOPICS: PinnedTopic[] = [
   },
   {
     triggers: ["リスクアセスメント", "化学物質リスクアセスメント"],
+    allTriggerGroups: [
+      ["化学物質", "薬品"],
+      ["RA", "危険性評価"],
+    ],
     pins: [{ law: "労働安全衛生法", articleNum: "第57条の3" }],
+  },
+  {
+    // 玉掛けの個別技能講習条文（221/222条）と、就業制限の根拠体系
+    // （法61条・令20条・則41条）を混同しない。「資格/何号」意図の共起時だけ後者を先行。
+    triggers: [],
+    allTriggerGroups: [
+      ["玉掛け", "玉掛"],
+      ["資格", "就業制限", "何号"],
+    ],
+    pins: [
+      { law: "労働安全衛生法", articleNum: "第61条" },
+      { law: "労働安全衛生法施行令", articleNum: "第20条" },
+      { law: "労働安全衛生規則", articleNum: "第41条" },
+    ],
   },
   {
     // 玉掛け技能講習
@@ -188,6 +464,7 @@ export const PINNED_TOPICS: PinnedTopic[] = [
       { law: "クレーン等安全規則", articleNum: "第22条" },
       { law: "クレーン等安全規則", articleNum: "第68条" },
     ],
+    excludeTriggers: ["移動式クレーン"],
   },
   {
     // クレーン定期自主検査（第34条=年次・第35条=月次・第38条=記録）
@@ -199,9 +476,45 @@ export const PINNED_TOPICS: PinnedTopic[] = [
     ],
   },
   {
+    // 安全装置の異常・機能確認は、月例自主検査（35条）と作業開始前点検（36条）。
+    // 「クレーン」単独や「安全装置」単独では発火させない。
+    triggers: [],
+    allTriggerGroups: [
+      ["クレーン"],
+      ["安全装置", "巻過防止装置", "警報装置"],
+      ["機能", "異常", "点検", "機能保持"],
+    ],
+    pins: [
+      { law: "クレーン等安全規則", articleNum: "第35条" },
+      { law: "クレーン等安全規則", articleNum: "第36条" },
+    ],
+  },
+  {
+    // 石綿使用建築物等解体作業の作業計画（石綿則4条）。
+    triggers: [],
+    allTriggerGroups: [
+      ["石綿", "アスベスト", "石綿則"],
+      ["作業計画", "計画作成"],
+    ],
+    pins: [{ law: "石綿障害予防規則", articleNum: "第4条" }],
+  },
+  {
     // 石綿事前調査
     triggers: ["石綿事前調査", "アスベスト事前調査", "石綿の事前調査", "石綿作業の事前調査", "事前調査"],
+    allTriggerGroups: [
+      ["石綿", "アスベスト", "石綿含有建材"],
+      ["解体前", "改修前", "工事前", "着工前"],
+    ],
     pins: [{ law: "石綿障害予防規則", articleNum: "第3条" }],
+  },
+  {
+    // 酸素欠乏の定義（18%未満）を尋ねる場合は、防止措置より定義条文を先に返す。
+    triggers: ["酸素濃度18", "酸欠の定義", "酸素欠乏の定義"],
+    allTriggerGroups: [
+      ["酸欠", "酸素欠乏"],
+      ["何パーセント", "何%", "何％", "濃度", "定義"],
+    ],
+    pins: [{ law: "酸素欠乏症等防止規則", articleNum: "第2条" }],
   },
   {
     // 酸欠作業前の換気
@@ -216,9 +529,31 @@ export const PINNED_TOPICS: PinnedTopic[] = [
       "酸素欠乏の防止措置",
       "酸欠の防止措置",
     ],
+    allTriggerGroups: [
+      ["酸欠", "酸素欠乏"],
+      ["換気", "酸素不足", "対策", "作業前"],
+    ],
     pins: [
       { law: "酸素欠乏症等防止規則", articleNum: "第5条" },
       { law: "酸素欠乏症等防止規則", articleNum: "第5条の2" },
+    ],
+  },
+  {
+    // 「酸欠作業の資格」は役割によって答えが異なる。作業主任者の技能講習
+    // （11条）だけを返すと、従事労働者への特別教育（12条）を見落とすため、
+    // 資格・教育を尋ねる広い質問では必ず対で返す。
+    triggers: [
+      "酸素欠乏危険作業特別教育",
+      "酸欠特別教育",
+      "酸欠則第12条",
+    ],
+    allTriggerGroups: [
+      ["酸欠", "酸素欠乏"],
+      ["資格", "免許", "講習", "教育", "受講"],
+    ],
+    pins: [
+      { law: "酸素欠乏症等防止規則", articleNum: "第11条" },
+      { law: "酸素欠乏症等防止規則", articleNum: "第12条" },
     ],
   },
   {
@@ -227,23 +562,127 @@ export const PINNED_TOPICS: PinnedTopic[] = [
     pins: [{ law: "酸素欠乏症等防止規則", articleNum: "第11条" }],
   },
   {
+    // 第一種・第二種酸素欠乏危険作業の区分は酸欠則2条の定義。
+    triggers: [],
+    allTriggerGroups: [
+      ["酸素欠乏危険作業", "酸欠危険作業"],
+      ["第1種", "第一種"],
+      ["第2種", "第二種", "違い", "区分"],
+    ],
+    pins: [{ law: "酸素欠乏症等防止規則", articleNum: "第2条" }],
+  },
+  {
     // セクハラ・マタハラ
     triggers: ["セクシュアルハラスメント", "セクハラ", "性的言動"],
-    pins: [{ law: "男女雇用機会均等法", articleNum: "第11条" }],
+    pins: [{ law: "均等法", articleNum: "第11条" }],
   },
   {
     triggers: ["マタニティハラスメント", "マタハラ", "妊娠出産", "妊娠・出産", "妊娠・出産等"],
     pins: [
-      { law: "男女雇用機会均等法", articleNum: "第11条の3" },
-      { law: "男女雇用機会均等法", articleNum: "第12条" },
+      { law: "均等法", articleNum: "第11条の3" },
+      { law: "均等法", articleNum: "第12条" },
     ],
+  },
+  {
+    // 高さ2m以上・開口部等の墜落防止
+    triggers: [
+      "高さが2m以上",
+      "高さ2メートル",
+      "高さ二メートル",
+      "高さ何メートル以上",
+      "墜落しないため",
+      "墜落のおそれ",
+      "屋根や床の開口部",
+      "開口部の手すり",
+      "囲い・手すり",
+      "開口部の養生",
+      "開口部の囲い",
+    ],
+    allTriggerGroups: [
+      ["墜落", "フルハーネス", "墜落制止用器具", "開口部"],
+      ["高さ", "何メートル", "手すり", "柵", "養生", "囲い", "墜落防止", "落ち"],
+    ],
+    pins: [
+      { law: "労働安全衛生規則", articleNum: "第518条" },
+      { law: "労働安全衛生規則", articleNum: "第519条" },
+      { law: "労働安全衛生規則", articleNum: "第520条" },
+      { law: "労働安全衛生規則", articleNum: "第521条" },
+    ],
+  },
+  {
+    // 貨物自動車の荷積み・荷卸し時の保護帽（安衛則151条の74）。
+    // 一般的な保護帽539条より先に、車両・荷役・保護帽の3概念共起で限定する。
+    triggers: [],
+    allTriggerGroups: [
+      ["トラック", "貨物自動車"],
+      ["荷積み", "荷下ろし", "荷卸し", "荷を積む", "荷を卸す"],
+      ["ヘルメット", "保護帽"],
+    ],
+    pins: [
+      { law: "労働安全衛生規則", articleNum: "第151条の74" },
+    ],
+  },
+  {
+    // 保護帽（現場語「ヘルメット」）
+    triggers: ["ヘルメットはどんな作業", "ヘルメットをかぶる", "保護帽の着用"],
+    allTriggerGroups: [
+      ["ヘルメット", "保護帽"],
+      ["必要", "義務", "必須", "どんな作業", "どんな時"],
+    ],
+    pins: [{ law: "労働安全衛生規則", articleNum: "第539条" }],
+  },
+  {
+    // 脚立・はしご
+    triggers: ["脚立やはしご", "脚立・はしご", "はしごで作業", "脚立で作業"],
+    allTriggerGroups: [
+      ["脚立", "はしご", "梯子"],
+      ["作業", "使う", "安全", "決まり", "ルール"],
+    ],
+    pins: [
+      { law: "労働安全衛生規則", articleNum: "第526条" },
+      { law: "労働安全衛生規則", articleNum: "第518条" },
+    ],
+  },
+  {
+    // 年少者の深夜業制限は労基法61条。危険業務を列挙する年少者則8条とは分離する。
+    triggers: [],
+    allTriggerGroups: [
+      ["年少者", "18歳未満", "十八歳未満"],
+      ["深夜業", "深夜労働", "午後10時", "午後十時"],
+    ],
+    pins: [{ law: "労働基準法", articleNum: "第61条" }],
+  },
+  {
+    // 年少者の危険業務就業制限
+    triggers: ["年少者にクレーン", "18歳未満の年少者", "満18歳に満たない"],
+    pins: [{ law: "年少者労働基準規則", articleNum: "第8条" }],
   },
   {
     // 通勤災害
     triggers: ["通勤災害", "通勤途上災害"],
     pins: [
       { law: "労働者災害補償保険法", articleNum: "第7条" },
-      { law: "労働者災害補償保険法", articleNum: "第7条第2項" },
+    ],
+  },
+  {
+    // 労基法上の使用者による療養補償（75条）と、労災保険の療養補償給付を分離。
+    triggers: [],
+    allTriggerGroups: [
+      ["業務上負傷", "業務上の負傷", "業務上疾病", "業務上の疾病"],
+      ["療養補償"],
+    ],
+    pins: [{ law: "労働基準法", articleNum: "第75条" }],
+    excludeTriggers: ["療養補償給付", "労災保険", "請求"],
+  },
+  {
+    // 業務災害に関する給付種類の列挙は労災保険法12条の8。
+    triggers: [],
+    allTriggerGroups: [
+      ["業務災害", "業務上災害"],
+      ["給付", "保険給付", "給付種類"],
+    ],
+    pins: [
+      { law: "労働者災害補償保険法", articleNum: "第12条の8" },
     ],
   },
   {
@@ -257,6 +696,10 @@ export const PINNED_TOPICS: PinnedTopic[] = [
   {
     // 雇入れ時教育
     triggers: ["雇入れ時教育", "雇入れ時の教育", "雇入れ時の安全衛生教育"],
+    allTriggerGroups: [
+      ["雇入れ", "雇い入れ", "入社", "新人"],
+      ["教育"],
+    ],
     pins: [
       { law: "労働安全衛生法", articleNum: "第59条" },
       { law: "労働安全衛生規則", articleNum: "第35条" },
@@ -268,17 +711,29 @@ export const PINNED_TOPICS: PinnedTopic[] = [
     pins: [{ law: "労働安全衛生法", articleNum: "第59条" }],
   },
   {
-    // 気積・採光・換気（2026-06-10 e-Gov突合是正: 600=気積/601=換気を収録し正しい条番号へ。旧607/627は照度/給水の誤割当だった）
-    triggers: ["気積", "採光", "換気", "事務所衛生基準"],
-    pins: [
-      { law: "労働安全衛生規則", articleNum: "第600条" },
-      { law: "労働安全衛生規則", articleNum: "第601条" },
-      { law: "労働安全衛生規則", articleNum: "第604条" },
-    ],
-    // 2026-07-03 T6: 「換気」は一般語のため、酸欠・坑内・有機溶剤文脈では
-    // 専用法令（酸欠則・有機則等）が正解になる。事務所系PINが乗っ取らないよう抑止する
-    // （fresh eval Q79: 酸欠の換気→誤って安衛則600/601条を返していた）。
+    // 屋内作業場の気積（安衛則600条）。
+    triggers: ["気積"],
+    pins: [{ law: "労働安全衛生規則", articleNum: "第600条" }],
+  },
+  {
+    // 屋内作業場の換気（安衛則601条）。酸欠・坑内・有機溶剤等は専用規則を優先。
+    triggers: ["換気"],
+    pins: [{ law: "労働安全衛生規則", articleNum: "第601条" }],
     excludeTriggers: ["酸欠", "酸素欠乏", "坑内", "有機溶剤"],
+  },
+  {
+    // 採光・照明方法と照明設備点検（安衛則605条）。604条の「照度」と分離する。
+    triggers: ["採光", "採光及び照明"],
+    pins: [{ law: "労働安全衛生規則", articleNum: "第605条" }],
+  },
+  {
+    // 温度単独は多義的なため、屋内作業場の衛生要素との共起時だけ606条へ。
+    triggers: ["温湿度調節"],
+    allTriggerGroups: [
+      ["気積", "採光", "換気", "屋内作業場", "事務所衛生基準"],
+      ["温度", "温湿度", "暑熱", "寒冷", "多湿"],
+    ],
+    pins: [{ law: "労働安全衛生規則", articleNum: "第606条" }],
   },
   {
     // 重量物・腰痛（重量物取扱いの制限は女性則第3条・年少者則第7条が法定根拠。
@@ -297,6 +752,23 @@ export const PINNED_TOPICS: PinnedTopic[] = [
       { law: "労働安全衛生規則", articleNum: "第151条の4" },
       { law: "労働安全衛生規則", articleNum: "第165条" },
     ],
+  },
+  {
+    // 岩石落下のおそれがある場所で用いる特定の車両系建設機械のヘッドガード。
+    // 機械名・落下危険・設備名の3概念が揃う場合だけ153条へ。
+    triggers: [],
+    allTriggerGroups: [
+      [
+        "車両系建設機械",
+        "パワーショベル",
+        "パワー・ショベル",
+        "ドラグショベル",
+        "トラクターショベル",
+      ],
+      ["岩石の落下", "岩が落ち", "落石"],
+      ["ヘッドガード"],
+    ],
+    pins: [{ law: "労働安全衛生規則", articleNum: "第153条" }],
   },
   {
     // ゴンドラ操作
@@ -331,8 +803,23 @@ export const PINNED_TOPICS: PinnedTopic[] = [
     ],
   },
   {
+    // ガス溶接の資格根拠を体系で問う場合だけ、資格者を具体化する安衛則41条まで返す。
+    triggers: [],
+    allTriggerGroups: [
+      ["ガス溶接", "ガス溶断", "可燃性ガス"],
+      ["資格", "技能講習"],
+      ["根拠", "条文", "何条"],
+    ],
+    pins: [
+      { law: "労働安全衛生法", articleNum: "第61条" },
+      { law: "労働安全衛生法施行令", articleNum: "第20条" },
+      { law: "労働安全衛生規則", articleNum: "第41条" },
+    ],
+  },
+  {
     // 就業制限（安衛法61条＋施行令20条セット）
     // フォークリフト以外の就業制限業務（玉掛け・移動式クレーン・建設機械・ガス溶接・電気取扱）をカバー
+    explicitOnly: true,
     triggers: [
       "就業制限",
       "就業制限に係る業務",
@@ -349,6 +836,8 @@ export const PINNED_TOPICS: PinnedTopic[] = [
       "アセチレン溶接",
       "ガス溶接の資格",
       "ガス溶接資格",
+      "溶接の仕事は資格",
+      "溶接の仕事 資格",
       "可燃性ガス",
       "施行令20条10号",
       "20条第10号",
@@ -372,6 +861,9 @@ export const PINNED_TOPICS: PinnedTopic[] = [
       //     第151条の5/14 が混ざってしまうため）。資格を明示するキーワードに限定する。
       "車両系建設機械の資格",
       "建設機械の資格",
+      "ユンボを運転するのに資格",
+      "ユンボの資格",
+      "ユンボ 資格",
       "機体重量3トン",
       "施行令20条12号",
       "20条第12号",
@@ -384,6 +876,17 @@ export const PINNED_TOPICS: PinnedTopic[] = [
       "潜水業務",
       // 高所作業車（第15号）
       "高所作業車運転",
+    ],
+    allTriggerGroups: [
+      [
+        "ユンボ",
+        "ショベルカー",
+        "油圧ショベル",
+        "車両系建設機械",
+        "溶接",
+        "溶断",
+      ],
+      ["資格", "講習", "免許", "運転", "操縦"],
     ],
     pins: [
       { law: "労働安全衛生法", articleNum: "第61条" },
@@ -431,6 +934,11 @@ export const PINNED_TOPICS: PinnedTopic[] = [
       "フォークリフト 1年",
       "フォークリフト 一年",
     ],
+    allTriggerGroups: [
+      ["フォークリフト"],
+      ["定期自主検査"],
+      ["年1回", "1年", "一年", "年次"],
+    ],
     pins: [
       { law: "労働安全衛生規則", articleNum: "第151条の21" },
     ],
@@ -449,6 +957,12 @@ export const PINNED_TOPICS: PinnedTopic[] = [
       "フォークリフトの用途",
       // "フォークリフト" + "主たる用途以外" の組合せを最広で捕捉する
       "主たる用途以外で使用",
+    ],
+    allTriggerGroups: [
+      ["フォークリフト"],
+      ["人", "作業者", "労働者"],
+      ["パレット", "フォーク", "爪"],
+      ["乗せ", "持ち上げ", "運搬"],
     ],
     pins: [
       { law: "労働安全衛生規則", articleNum: "第151条の14" },
@@ -599,6 +1113,45 @@ export const PINNED_TOPICS: PinnedTopic[] = [
     pins: [{ law: "労働安全衛生規則", articleNum: "第117条" }],
   },
   {
+    // 研削といしの取替え等は特別教育対象（安衛則第36条）
+    triggers: ["グラインダーの砥石の交換", "砥石の交換は資格", "研削といしの取替え"],
+    allTriggerGroups: [
+      ["グラインダー", "研削といし", "砥石"],
+      ["交換", "取替え", "資格", "講習"],
+    ],
+    pins: [{ law: "労働安全衛生規則", articleNum: "第36条" }],
+  },
+  {
+    // 事務作業の照度
+    triggers: ["事務作業に必要な照度", "事務所の照度", "照度は何ルクス"],
+    pins: [{ law: "事務所衛生基準規則", articleNum: "第10条" }],
+  },
+  {
+    // 機械等による危険の防止
+    triggers: ["安全カバーが邪魔", "安全カバーを外して", "機械の安全カバー"],
+    pins: [{ law: "労働安全衛生法", articleNum: "第20条" }],
+  },
+  {
+    // 定期健康診断の口語表現
+    triggers: ["健康診断って毎年", "健診って毎年", "毎年やらないとダメ"],
+    pins: [{ law: "労働安全衛生規則", articleNum: "第44条" }],
+  },
+  {
+    // 危険有害物の容器・包装への表示
+    triggers: ["容器に表示", "ラベル表示", "危険物の表示"],
+    pins: [{ law: "労働安全衛生法", articleNum: "第57条" }],
+  },
+  {
+    // 酸素欠乏危険場所の作業前測定
+    triggers: ["酸素濃度測定", "酸素濃度を測定", "酸欠作業前の測定"],
+    pins: [{ law: "酸素欠乏症等防止規則", articleNum: "第3条" }],
+  },
+  {
+    // 時間外・休日労働の協定
+    triggers: ["36協定", "三六協定", "時間外・休日労働"],
+    pins: [{ law: "労働基準法", articleNum: "第36条" }],
+  },
+  {
     // 妊産婦 時間外労働制限 労基法第66条
     triggers: ["妊産婦の時間外", "妊産婦時間外労働", "妊産婦の労働時間制限"],
     pins: [{ law: "労働基準法", articleNum: "第66条" }],
@@ -624,7 +1177,7 @@ export const PINNED_TOPICS: PinnedTopic[] = [
   },
   {
     // 足場手すり（安衛則第563条）— 高さ85cm／中さん35-50cm
-    // 2015年改正で「手すり＋中さん」が義務化された
+    // 足場用墜落防止設備の強化は2009年6月施行。2015年に中さん等が初導入されたものではない。
     triggers: [
       "足場の手すり",
       "足場の作業床",
@@ -642,79 +1195,436 @@ export const PINNED_TOPICS: PinnedTopic[] = [
       "2015年改正",
       "平成27年改正",
     ],
+    allTriggerGroups: [
+      ["足場"],
+      ["手すり", "手摺"],
+    ],
     pins: [
-      { law: "労働安全衛生規則（足場等）", articleNum: "第563条" },
-      { law: "労働安全衛生規則", articleNum: "第518条" },
+      { law: "労働安全衛生規則", articleNum: "第563条" },
+      { law: "労働安全衛生規則", articleNum: "第552条" },
     ],
   },
+  // フォークリフトは「資格」だけで検査・速度・用途外使用の条文を混ぜない。
+  // 資格の1t未満/以上分岐は applyPinnedTopics の条件付き根拠束で扱い、
+  // 個別の運用規定は、その意図が明示されたときだけ固定する。
   {
-    // フォークリフト就業制限（安衛令第20条第11号）— 最大荷重1t以上
-    // フォークリフトの制限速度（第151条の5）／用途外使用禁止（第151条の14）
-    triggers: [
-      "フォークリフト",
-      "fork lift",
-      "forklift",
-      "最大荷重1トン",
-      "1トン以上",
-      "1t以上",
-      "フォークリフト資格",
-      "フォークリフト免許",
-      "フォークリフト技能講習",
-      "フォークリフトの資格",
-      "フォークリフト運転",
-      "フォークリフト運転技能講習",
-      "20条11号",
-      "20条第11号",
-      "20条第11号フォークリフト",
-      // 注: "用途外使用"/"主たる用途" の単独トリガーは廃止（2026-06-10）。
-      //     車両系建設機械の用途外質問（第164条）までフォークリフト群が
-      //     乗っ取ってしまうため、フォークリフトを明示する複合トリガーに限定。
-      "151条の5",
-      "151条の14",
-    ],
-    pins: [
-      { law: "労働安全衛生法", articleNum: "第61条" },
-      { law: "労働安全衛生法施行令", articleNum: "第20条" },
-      // 定期自主検査の正規条文（年次）と汎用検査条文を併置。質問が「定期自主検査」を
-      // 明示する場合は別の専用 pin が上書きする（後段で定義）。
-      { law: "労働安全衛生規則", articleNum: "第151条の21" },
-      { law: "労働安全衛生規則", articleNum: "第151条の5" },
-      { law: "労働安全衛生規則", articleNum: "第151条の14" },
-    ],
+    triggers: ["フォークリフトの制限速度", "151条の5"],
+    pins: [{ law: "労働安全衛生規則", articleNum: "第151条の5" }],
+  },
+  {
+    triggers: ["フォークリフトの用途外使用", "151条の14"],
+    pins: [{ law: "労働安全衛生規則", articleNum: "第151条の14" }],
+  },
+  {
+    triggers: ["フォークリフトの定期自主検査", "151条の21"],
+    pins: [{ law: "労働安全衛生規則", articleNum: "第151条の21" }],
   },
 ];
 
 function applyPinnedTopics(
   query: string,
-  articles: LawArticle[]
+  articles: LawArticle[],
+  explicitQuery = query,
+  pinSource: readonly LawArticle[] = verifiedLawArticles
 ): { articles: LawArticle[]; hadPins: boolean } {
-  const lowered = query.toLowerCase();
+  const normalizedQuery = query.normalize("NFKC");
   const pinned: LawArticle[] = [];
   const seen = new Set<string>();
+
+  const addPinnedArticle = (article: LawArticle | undefined) => {
+    if (!article) return;
+    const key = `${article.law}:${article.articleNum}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    pinned.push(article);
+  };
+
+  // 法令名（正式名または略称）と条番号が明示された質問は、その組合せを最優先する。
+  // 「労働安全衛生法」は「同法施行令」の部分文字列でもあるため、最長一致した
+  // 法令名グループだけを採用し、条番号だけから法令を推測しない。
+  const normalizedExplicitQuery = explicitQuery
+    .normalize("NFKC")
+    .replace(/衞/g, "衛");
+  const hasElectricalWorkContext =
+    /(?:電気作業|電気工事|配線(?:工事|作業)?|活線|充電(?:部|電路)|電路(?:の|に|へ|を|で)?(?:近接|接近)|電気設備)/.test(
+      normalizedExplicitQuery,
+    );
+  const asksElectricalQualification =
+    hasElectricalWorkContext &&
+    /(?:資格|免許|教育|特別教育|特教|講習|作業主任者)/.test(
+      normalizedExplicitQuery,
+    );
+  const asksElectricalWorkChief =
+    hasElectricalWorkContext && /作業主任者/.test(normalizedExplicitQuery);
+  const articleNumbers = normalizedExplicitQuery.match(/第\d+条(?:の\d+)*/g) ?? [];
+  const explicitLawGroup = LAW_ALIAS_GROUPS.map((group) => ({
+    group,
+    matchedAlias: group
+      .map((alias) => alias.normalize("NFKC"))
+      .filter((alias) => normalizedExplicitQuery.includes(alias))
+      .sort((a, b) => b.length - a.length)[0],
+  }))
+    .filter(
+      (candidate): candidate is { group: string[]; matchedAlias: string } =>
+        Boolean(candidate.matchedAlias)
+    )
+    .sort((a, b) => b.matchedAlias.length - a.matchedAlias.length)[0]?.group;
+
+  if (explicitLawGroup && articleNumbers.length > 0) {
+    for (const articleNum of articleNumbers) {
+      addPinnedArticle(
+        pinSource.find(
+          (article) =>
+            explicitLawGroup.includes(article.lawShort) &&
+            article.articleNum === articleNum
+        )
+      );
+    }
+  }
+
+  const pinArticle = (lawShort: string, articleNum: string) => {
+    addPinnedArticle(
+      pinSource.find(
+        (article) =>
+          article.lawShort === lawShort && article.articleNum === articleNum
+      )
+    );
+  };
+
+  // つり足場の日常点検は、つり足場を除外する567条1項ではなく568条が
+  // 直接根拠。568条が参照する点検項目を確認できるよう567条2項も補助取得する。
+  if (
+    /(?:つり|吊り)足場/.test(normalizedExplicitQuery) &&
+    /(?:点検|始業前|使用前|作業開始前|毎日|毎作業日)/.test(
+      normalizedExplicitQuery,
+    )
+  ) {
+    pinArticle("安衛則", "第568条");
+    pinArticle("安衛則", "第567条");
+  }
+
+  // つり足場の構造・使用基準は安衛則574条が直接根拠。一般の足場用
+  // 墜落防止規定（518条以下、563条）が字面検索で先行しても埋もれさせない。
+  if (
+    /(?:つり|吊り)足場/.test(normalizedExplicitQuery) &&
+    /(?:構造|基準|使用|ワイヤ|ロープ|鎖|作業床|幅)/.test(
+      normalizedExplicitQuery,
+    )
+  ) {
+    pinArticle("安衛則", "第574条");
+  }
+
+  // フォークリフトの複合質問では、現在尋ねられた運用規定を先に確保し、
+  // その後へ資格・教育の根拠束を補助取得する。資格5条文だけでtop-5を
+  // 埋めて、速度・検査・用途外使用・作業指揮者の直接根拠を落とさない。
+  const forkliftIntent = detectForkliftQueryIntent(
+    normalizedExplicitQuery,
+    normalizedQuery,
+  );
+  const highLiftIntent = detectHighLiftQueryIntent(
+    normalizedExplicitQuery,
+    normalizedQuery,
+  );
+  if (forkliftIntent.hasForkliftContext) {
+    if (forkliftIntent.speed) {
+      pinArticle("安衛則", "第151条の5");
+    }
+    if (forkliftIntent.annualInspection) {
+      pinArticle("安衛則", "第151条の21");
+    }
+    if (forkliftIntent.monthlyInspection) {
+      pinArticle("安衛則", "第151条の22");
+    }
+    if (forkliftIntent.genericInspection) {
+      pinArticle("安衛則", "第151条の21");
+      pinArticle("安衛則", "第151条の22");
+    }
+    if (forkliftIntent.offPurposeUse) {
+      pinArticle("安衛則", "第151条の14");
+    }
+    if (forkliftIntent.workLeader) {
+      pinArticle("安衛則", "第151条の4");
+    }
+  }
+
+  // 広い制度PIN（例: 健診全般、墜落全般）より、質問中で確定した具体的な
+  // 作業・数値条件を先に置く。固定文そのものではなく、現場概念の共起と数値で判定する。
+  if (asksElectricalQualification) {
+    if (asksElectricalWorkChief) {
+      // 電気作業全般に共通の「作業主任者」はない。制度本体・対象作業一覧と、
+      // 電気作業で別に定める「作業の指揮者」を同時に取得して区別できるようにする。
+      // 令6条1号の「高圧室内作業」は圧気作業であり、電気の高圧作業ではない。
+      pinArticle("安衛法", "第14条");
+      pinArticle("安衛令", "第6条");
+      pinArticle("安衛則", "第350条");
+    } else {
+      // 配線・設備工事そのものの資格は電気工事士法、充電電路等の危険業務に
+      // 必要な特別教育は安衛法令であり、相互に代替する制度ではない。
+      pinArticle("電気工事士法", "第3条");
+      pinArticle("電気工事士法", "第2条");
+    }
+    pinArticle("安衛法", "第59条");
+    pinArticle("安衛則", "第36条");
+  }
+  if (highLiftIntent.fallProtection) {
+    pinArticle("安衛則", "第194条の22");
+  }
+  if (
+    !highLiftIntent.fallProtection &&
+    /(?:フルハーネス|墜落制止用器具)/.test(normalizedQuery) &&
+    /(?:教育|特別教育|特教|作業床)/.test(normalizedQuery)
+  ) {
+    pinArticle("安衛則", "第36条");
+    pinArticle("安衛法", "第59条");
+  }
+  if (highLiftIntent.qualification) {
+    pinArticle("安衛令", "第10条");
+    pinArticle("安衛則", "第36条");
+    pinArticle("安衛法", "第59条");
+    pinArticle("安衛法", "第61条");
+    pinArticle("安衛令", "第20条");
+  }
+  if (
+    /(?:有機溶剤|有機則|シンナー)/.test(normalizedQuery) &&
+    /(?:健康診断|健診)/.test(normalizedExplicitQuery)
+  ) {
+    pinArticle("有機則", "第29条");
+  }
+  if (
+    /(?:特定化学物質|特化物|特化則)/.test(normalizedQuery) &&
+    /(?:健康診断|健診)/.test(normalizedExplicitQuery)
+  ) {
+    pinArticle("特化則", "第39条");
+  }
+  if (
+    /(?:床開口部|開口部|床の穴)/.test(normalizedQuery) &&
+    /(?:囲い|手すり|養生|墜落|落ち|高さ)/.test(normalizedQuery)
+  ) {
+    pinArticle("安衛則", "第519条");
+  }
+  if (
+    /(?:足場|あしば)/.test(normalizedExplicitQuery) &&
+    /(?:墜落|転落|落ちない|墜落防止)/.test(normalizedExplicitQuery) &&
+    !/(?:手すり|手摺|中さん|中桟|特別教育|特教)/.test(
+      normalizedExplicitQuery,
+    )
+  ) {
+    // 足場からの墜落を広く尋ねる質問では、作業主任者の一般規定より先に、
+    // 作業床と端・開口部の具体的な墜落防止規定を案内する。
+    pinArticle("安衛則", "第518条");
+    pinArticle("安衛則", "第519条");
+  }
+  if (
+    /(?:足場|あしば|安衛則\s*第?563条|労働安全衛生規則\s*第?563条)/.test(
+      normalizedQuery,
+    ) &&
+    /(?:手すり|手摺|中さん|中桟|何センチ|何cm)/i.test(normalizedQuery)
+  ) {
+    // 第563条が足場種別ごとの設置義務、第552条が「手すり等・中桟等」の
+    // 高さを定義するため、数値を断定するときは必ず両方を返す。
+    pinArticle("安衛則", "第563条");
+    pinArticle("安衛則", "第552条");
+  }
+  if (
+    /(?:手すり|手摺)/.test(normalizedExplicitQuery) &&
+    !/(?:足場|あしば|開口部|床の穴|架設通路|階段|作業構台|高所作業車)/.test(
+      normalizedExplicitQuery,
+    )
+  ) {
+    // 文脈のない「手すり」は、現場質問で最頻の足場用墜落防止設備を暫定候補にする。
+    // 開口部等が明示された場合は既存の個別PINへ譲り、一律85cmとは扱わない。
+    pinArticle("安衛則", "第563条");
+    pinArticle("安衛則", "第552条");
+  }
+  if (
+    /(?:有機溶剤|有機則|シンナー|塗装|ペンキ)/.test(normalizedQuery) &&
+    /(?:屋内|室内|建物内|タンク内)/.test(normalizedExplicitQuery) &&
+    /(?:使|使用|扱|塗|作業)/.test(normalizedExplicitQuery)
+  ) {
+    // 溶剤区分・臨時性・短時間性が未確定でも、主要措置と例外条件を先に説明できる根拠束。
+    pinArticle("有機則", "第5条");
+    pinArticle("有機則", "第6条");
+    pinArticle("有機則", "第8条");
+    pinArticle("有機則", "第9条");
+    if (/特別有機溶剤/.test(normalizedExplicitQuery)) {
+      pinArticle("特化則", "第38条の8");
+    }
+  }
+  if (
+    /(?:定期健康診断|定期健診)/.test(normalizedQuery) ||
+    (/(?:健康診断|健診)/.test(normalizedQuery) &&
+      /(?:毎年|年1回|一年以内|頻度)/.test(normalizedQuery))
+  ) {
+    pinArticle("安衛則", "第44条");
+  }
+  if (
+    /(?:雇入れ|雇い入れ)/.test(normalizedQuery) &&
+    /(?:健康診断|健診)/.test(normalizedQuery)
+  ) {
+    pinArticle("安衛則", "第43条");
+  }
+  if (
+    /(?:ストレスチェック|心理的な負担の程度を把握するための検査|心の健康[^。！？]{0,12}検査)/.test(
+      normalizedQuery
+    )
+  ) {
+    pinArticle("安衛法", "第66条の10");
+  }
+  if (
+    /(?:化学物質|薬品|SDS対象物)/.test(normalizedQuery) &&
+    /(?:リスクアセスメント|危険性評価)/.test(normalizedQuery)
+  ) {
+    pinArticle("安衛法", "第57条の3");
+  }
+  if (
+    /クレーン/.test(normalizedQuery) &&
+    /(?:月例|月次|一月以内|1月以内)/.test(normalizedQuery) &&
+    /(?:自主検査|点検|検査)/.test(normalizedQuery)
+  ) {
+    pinArticle("クレーン則", "第35条");
+  }
+  if (
+    /安全管理者/.test(normalizedQuery) &&
+    /(?:選任|必要|義務|建設業|製造業|常時\d+人)/.test(normalizedQuery)
+  ) {
+    pinArticle("安衛法", "第11条");
+  }
+
+  if (/玉掛/.test(normalizedQuery)) {
+    const slingLoadMatch = normalizedQuery.match(
+      /(?:つり上げ荷重(?:は|が)?\s*)?(\d+(?:\.\d+)?)\s*(キロ|kg|トン|t)/i
+    );
+    if (slingLoadMatch) {
+      const amount = Number(slingLoadMatch[1]);
+      const unit = slingLoadMatch[2].toLowerCase();
+      const loadInTons = unit === "キロ" || unit === "kg" ? amount / 1000 : amount;
+      if (Number.isFinite(loadInTons)) {
+        pinArticle("クレーン則", loadInTons < 1 ? "第222条" : "第221条");
+        if (loadInTons >= 1) pinArticle("安衛令", "第20条");
+      }
+    } else if (/(?:技能講習|何トン|講習)/.test(normalizedQuery)) {
+      pinArticle("クレーン則", "第221条");
+      pinArticle("安衛令", "第20条");
+    }
+  }
+
+  // フォークリフトは最大荷重1t未満なら特別教育、1t以上なら就業制限の
+  // 根拠体系へ分かれる。荷重が未入力の広い資格質問では、質問だけを返さず
+  // 両分岐を説明できる5条文を先に取得する。
+  const asksForkliftQualification = forkliftIntent.qualification;
+  if (asksForkliftQualification) {
+    const loadMatch = normalizedQuery.match(
+      /(?:最大荷重(?:は|が)?\s*)?(\d+(?:\.\d+)?)\s*(キロ|kg|トン|t)/i
+    );
+    if (loadMatch) {
+      const amount = Number(loadMatch[1]);
+      const unit = loadMatch[2].toLowerCase();
+      const loadInTons = unit === "キロ" || unit === "kg" ? amount / 1000 : amount;
+      const explicitlyBelowOneTon =
+        /(?:1(?:\.0+)?\s*(?:トン|t)|1000\s*(?:キロ|kg))\s*未満/i.test(
+          normalizedExplicitQuery,
+        );
+      if (
+        Number.isFinite(loadInTons) &&
+        (loadInTons < 1 || explicitlyBelowOneTon)
+      ) {
+        pinArticle("安衛則", "第36条");
+        pinArticle("安衛法", "第59条");
+      } else if (Number.isFinite(loadInTons)) {
+        pinArticle("安衛法", "第61条");
+        pinArticle("安衛令", "第20条");
+        pinArticle("安衛則", "第41条");
+      }
+    } else {
+      pinArticle("安衛法", "第59条");
+      pinArticle("安衛則", "第36条");
+      pinArticle("安衛法", "第61条");
+      pinArticle("安衛令", "第20条");
+      pinArticle("安衛則", "第41条");
+    }
+  }
+
+  if (
+    normalizedQuery.includes("移動式クレーン") &&
+    /(?:資格|免許|技能講習|講習|運転)/.test(normalizedQuery)
+  ) {
+    const loadMatch = normalizedQuery.match(
+      /(?:つり上げ荷重(?:は|が)?\s*)?(\d+(?:\.\d+)?)\s*(キロ|kg|トン|t)/i,
+    );
+    if (loadMatch) {
+      const amount = Number(loadMatch[1]);
+      const unit = loadMatch[2].toLowerCase();
+      const loadInTons = unit === "キロ" || unit === "kg" ? amount / 1_000 : amount;
+      if (Number.isFinite(loadInTons) && loadInTons < 1) {
+        pinArticle("クレーン則", "第67条");
+        pinArticle("安衛法", "第59条");
+      } else if (Number.isFinite(loadInTons)) {
+        pinArticle("クレーン則", "第68条");
+        pinArticle("安衛令", "第20条");
+        pinArticle("安衛法", "第61条");
+      }
+    }
+  }
+
+  if (
+    /(?:石綿|アスベスト)/.test(normalizedQuery) &&
+    /(?:事前調査|調査者)/.test(normalizedQuery)
+  ) {
+    pinArticle("石綿則", "第3条");
+  }
+
   for (const topic of PINNED_TOPICS) {
-    if (!topic.triggers.some((t) => query.includes(t) || lowered.includes(t.toLowerCase()))) {
+    const topicQuery = topic.explicitOnly
+      ? normalizedExplicitQuery
+      : normalizedQuery;
+    const topicLowered = topicQuery.toLowerCase();
+    const contains = (term: string) =>
+      topicQuery.includes(term.normalize("NFKC")) ||
+      topicLowered.includes(term.normalize("NFKC").toLowerCase());
+    const matchesAnyTrigger = topic.triggers.some(contains);
+    const matchesAllGroups =
+      topic.allTriggerGroups?.every((group) => group.some(contains)) ?? false;
+    if (!matchesAnyTrigger && !matchesAllGroups) {
       continue;
     }
     if (
-      topic.excludeTriggers?.some((t) => query.includes(t) || lowered.includes(t.toLowerCase()))
+      topic.excludeTriggers?.some(
+        (term) =>
+          topicQuery.includes(term.normalize("NFKC")) ||
+          topicLowered.includes(term.normalize("NFKC").toLowerCase()),
+      )
     ) {
       continue;
     }
     for (const pin of topic.pins) {
-      const found = allLawArticles.find(
-        (a) => a.law === pin.law && a.articleNum === pin.articleNum
+      const found = pinSource.find(
+        (a) =>
+          (a.law === pin.law || a.lawShort === pin.law) &&
+          a.articleNum === pin.articleNum
       );
-      if (!found) continue;
-      const key = `${found.law}:${found.articleNum}`;
-      if (seen.has(key)) continue;
-      seen.add(key);
-      pinned.push(found);
+      addPinnedArticle(found);
     }
   }
-  if (pinned.length === 0) return { articles, hadPins: false };
-  const pinnedKeys = new Set(pinned.map((a) => `${a.law}:${a.articleNum}`));
-  const rest = articles.filter((a) => !pinnedKeys.has(`${a.law}:${a.articleNum}`));
-  return { articles: [...pinned, ...rest], hadPins: true };
+  const isAllowedElectricalSource = (article: LawArticle) =>
+    ["安衛法", "安衛令", "安衛則"].includes(article.lawShort) ||
+    article.law.includes("電気工事士法");
+  const contextSafePinned = asksElectricalQualification
+    ? pinned.filter(isAllowedElectricalSource)
+    : pinned;
+  const contextSafeArticles = asksElectricalQualification
+    ? articles.filter(isAllowedElectricalSource)
+    : articles;
+
+  if (contextSafePinned.length === 0) {
+    return { articles: contextSafeArticles, hadPins: false };
+  }
+  const pinnedKeys = new Set(
+    contextSafePinned.map((article) => `${article.law}:${article.articleNum}`),
+  );
+  const rest = contextSafeArticles.filter(
+    (article) => !pinnedKeys.has(`${article.law}:${article.articleNum}`),
+  );
+  return { articles: [...contextSafePinned, ...rest], hadPins: true };
 }
 
 /** キーワードマッチングによる関連条文のRAG検索 */
@@ -738,6 +1648,14 @@ export function searchRelevantArticlesWithScore(
   topK = 10,
   category: LawCategoryFilter = "all"
 ): { articles: LawArticle[]; topScore: number; normalizedScore: number; hadPins: boolean } {
+  if (
+    PRIMARY_SOURCE_APPROVAL_REQUIRED_TERMS.some((term) =>
+      normalizeSearchText(query).includes(normalizeSearchText(term))
+    )
+  ) {
+    return { articles: [], topScore: 0, normalizedScore: 0, hadPins: false };
+  }
+
   // Phase B: 軽量な口語→正式名展開 (expandQuery) → 広域同義語/法令略称展開 (expandQueryRich)
   // の二段でクエリを拡張してからトークン化する。expandQueryRich は安全衛生分野に
   // 特化した 100+ パターンの語彙ゆれを補正する（web/src/lib/rag/synonyms.ts）。
@@ -750,8 +1668,8 @@ export function searchRelevantArticlesWithScore(
 
   const corpus =
     category === "all"
-      ? allLawArticles
-      : allLawArticles.filter((a) => a.lawShort === category);
+      ? verifiedLawArticles
+      : verifiedLawArticles.filter((a) => a.lawShort === category);
 
   // Phase C: BM25 をデンス側スコアの**控えめなブースト**として追加する。
   //
@@ -766,7 +1684,7 @@ export function searchRelevantArticlesWithScore(
   //   寄与にとどまる。
   // - 自由文クエリ（テスト fixture 外）に対するロバスト性は確保しつつ、
   //   ベンチ Recall@5 100% を維持する。
-  const bm25Index = getOrBuildIndex(allLawArticles, tokenize);
+  const bm25Index = getOrBuildIndex(verifiedLawArticles, tokenize);
   const BM25_BOOST = 0.5;
 
   const scored = corpus.map((article) => {
@@ -790,14 +1708,27 @@ export function searchRelevantArticlesWithScore(
   // 3トークン質問でも上位条文が 0.7 を十分に超えるよう緩和。
   const normalizedScore = Math.min(topScore / 25, 1.0);
 
-  const scoredArticles = reranked.slice(0, topK).map((item) => item.article);
+  // 上位1件のスコアだけで下位の偶発一致まで「関連」とみなさない。
+  // 一般語1語だけが一致した無関係条文をsources/citationsへ混ぜないため、
+  // 絶対下限とトップ比の双方を満たした候補だけを残す。明示PINは後段で
+  // 個別に追加されるため、法令名・条番号が確定した導線は失わない。
+  const perArticleFloor = Math.max(4, topScore * 0.35);
+  const scoredArticles = reranked
+    .filter((item) => item.score >= perArticleFloor)
+    .slice(0, topK)
+    .map((item) => item.article);
   // 2026-07-11 現場口語プロジェクト: PIN照合は**展開後クエリ**で行う。
   // 従来は生クエリのみ照合していたため、「クビ」「マンホール」等の口語が
   // synonym層（expandQuery / expandQueryRich）で正式語に正規化されても
   // PINには届かなかった。展開後クエリで照合することで、語彙正規化が
   // スコアリングとPINの両方に一様に効く（excludeTriggers も同様＝
   // 「シンナー→有機溶剤」の展開で事務所換気PINの誤発火も構造的に抑止される）。
-  const { articles: pinnedArticles, hadPins } = applyPinnedTopics(expandedQuery, scoredArticles);
+  const { articles: pinnedArticles, hadPins } = applyPinnedTopics(
+    expandedQuery,
+    scoredArticles,
+    query,
+    corpus
+  );
   const finalArticles = pinnedArticles.slice(0, topK);
 
   // 強制ピンが刺さった場合は、ヒット扱いで信頼度を最低 0.7 まで引き上げる
@@ -829,7 +1760,7 @@ export function searchRelevantArticlesWithScore(
  */
 /** 条番号パターン（「第」なし揺らぎ含む） */
 const ARTICLE_NUM_RE =
-  /第\d+条(?:の\d+)?(?:第\d+項)?(?:第\d+号)?/g;
+  /第\d+条(?:の\d+)*(?:第\d+項)?(?:第\d+号)?/g;
 
 /**
  * P2-6: 漢数字の条番号を算用数字へ正規化する。
@@ -851,13 +1782,15 @@ function normalizeKanjiArticleNumbers(text: string): string {
 
 function tokenize(text: string): string[] {
   // P2-6: 漢数字の条番号（第十二条の五 等）を先に算用数字化してから正規化する
-  const fuzzyNormalized = normalizeKanjiArticleNumbers(normalizeSearchText(text));
+  const fuzzyNormalized = normalizeKanjiArticleNumbers(
+    normalizeSearchText(text).replace(/衞/g, "衛"),
+  );
 
   // Fix 2a: 「第」なし数字+条 を正規化（例: "565条" → "第565条"）
   // (?<![第\d]) で「直前が 第 または数字」の場合はスキップする。
   // これにより "第565条" の途中の "65条" が誤マッチするのを防ぐ。
   const withNormNums = fuzzyNormalized.replace(
-    /(?<![第\d])(\d+条(?:の\d+)?)/g,
+    /(?<![第\d])(\d+条(?:の\d+)*)/g,
     "第$1"
   );
 
@@ -890,16 +1823,42 @@ function tokenize(text: string): string[] {
  * - キーワード完全一致で追加ボーナス
  * - 法令名完全一致で高スコア
  */
+type NormalizedArticleFields = {
+  text: string;
+  title: string;
+  articleNum: string;
+  law: string;
+  keywords: string[];
+};
+
+const normalizedArticleFieldsCache = new WeakMap<LawArticle, NormalizedArticleFields>();
+
+function getNormalizedArticleFields(article: LawArticle): NormalizedArticleFields {
+  const cached = normalizedArticleFieldsCache.get(article);
+  if (cached) return cached;
+
+  const lawWithoutParens = article.law.replace(/[（(][^）)]*[）)]/g, "");
+  const normalized = {
+    text: normalizeSearchText(article.text),
+    title: normalizeSearchText(article.articleTitle),
+    articleNum: article.articleNum.toLowerCase(),
+    law: normalizeSearchText(lawWithoutParens + article.lawShort),
+    keywords: article.keywords.map((keyword) => normalizeSearchText(keyword)),
+  };
+  normalizedArticleFieldsCache.set(article, normalized);
+  return normalized;
+}
+
 function calcScore(article: LawArticle, queryTokens: string[]): number {
   let score = 0;
-  const textNorm = normalizeSearchText(article.text);
-  const titleNorm = normalizeSearchText(article.articleTitle);
-  const articleNumLower = article.articleNum.toLowerCase();
+  const normalized = getNormalizedArticleFields(article);
+  const textNorm = normalized.text;
+  const titleNorm = normalized.title;
+  const articleNumLower = normalized.articleNum;
   // Fix 4: 括弧とその中身を除去してから法令名を正規化する。
   // "労働安全衛生規則（足場等）" → "労働安全衛生規則" として比較するため、
   // law フィールドの表記ゆれ（括弧あり/なし混在）を統一する。元データは変更しない。
-  const lawWithoutParens = article.law.replace(/[（(][^）)]*[）)]/g, "");
-  const lawNorm = normalizeSearchText(lawWithoutParens + article.lawShort);
+  const lawNorm = normalized.law;
 
   let matchedTokenCount = 0;
 
@@ -942,8 +1901,7 @@ function calcScore(article: LawArticle, queryTokens: string[]): number {
 
     // キーワードリストのマッチ（完全一致=5点、部分一致=3点、どちらか最大のみ加算）
     let keywordBest = 0;
-    for (const keyword of article.keywords) {
-      const keyNorm = normalizeSearchText(keyword);
+    for (const keyNorm of normalized.keywords) {
       if (keyNorm === tokenLower) {
         keywordBest = 5;
         break;

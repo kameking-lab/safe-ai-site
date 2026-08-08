@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 import { checkAllServices, type ServiceHealth } from "@/lib/external/health";
 
 export const metadata: Metadata = {
@@ -8,8 +7,6 @@ export const metadata: Metadata = {
 };
 
 export const dynamic = "force-dynamic";
-
-const VALID_KEY = process.env.ADMIN_HEALTH_KEY ?? "";
 
 const STATUS_BADGE: Record<ServiceHealth["status"], { label: string; bg: string; fg: string }> = {
   ok: { label: "OK", bg: "bg-emerald-100", fg: "text-emerald-800" },
@@ -25,16 +22,7 @@ const CIRCUIT_BADGE: Record<ServiceHealth["circuit"]["state"], { label: string; 
   unknown: { label: "—", bg: "bg-slate-50 text-slate-500" },
 };
 
-interface Props {
-  searchParams: Promise<{ key?: string }>;
-}
-
-export default async function AdminHealthPage({ searchParams }: Props) {
-  const params = await searchParams;
-  if (!VALID_KEY || params.key !== VALID_KEY) {
-    notFound();
-  }
-
+export default async function AdminHealthPage() {
   const services = await checkAllServices();
   const generatedAt = new Date().toISOString();
   const okCount = services.filter((s) => s.status === "ok").length;
@@ -62,7 +50,7 @@ export default async function AdminHealthPage({ searchParams }: Props) {
             <strong>OK</strong> 以外のサービスは「フォールバック挙動」列に書かれた挙動でサイトの利用は継続します。
           </p>
           <p className="mt-2 text-xs text-slate-500">
-            JSON が必要な場合: <code>/api/admin/health?key=...</code>
+            JSON API は <code>Authorization: Bearer</code> ヘッダーでのみ認証します（URLへ秘密値を含めないでください）。
           </p>
         </div>
 

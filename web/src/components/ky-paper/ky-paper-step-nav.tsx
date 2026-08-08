@@ -3,7 +3,7 @@ import type { KyPaperStep } from "@/lib/ky/paper-status";
 import { SAFETY_TONE } from "@/lib/design/safety-tone";
 
 /**
- * 柱C-9・A2: KY記入の進行ナビ（基本情報→危険→対策→確認）。
+ * KY記入の進行ナビ（作業条件→危険→対策→人が確認→保存・印刷）。
  *
  * 用紙ファースト設計は不変。用紙の上に「いま何段目・のこり何項目」を
  * 色の文法（緑=記入済み / 青=いまここ / 灰=未着手）で一目化し、各段は
@@ -22,12 +22,12 @@ export function KyPaperStepNav({ steps }: { steps: KyPaperStep[] }) {
           {steps.length} 段 完了
         </p>
       </div>
-      <ol className="flex items-stretch gap-1.5">
+      <ol className="grid grid-cols-5 items-stretch gap-1 sm:gap-1.5">
         {steps.map((step, i) => {
           const tone = step.done ? "safe" : step.current ? "info" : "neutral";
           const t = SAFETY_TONE[tone];
           return (
-            <li key={step.key} className="flex-1">
+            <li key={step.key} className="min-w-0">
               <a
                 href={step.anchor}
                 aria-current={step.current ? "step" : undefined}
@@ -41,9 +41,9 @@ export function KyPaperStepNav({ steps }: { steps: KyPaperStep[] }) {
                 >
                   {step.done ? <Check className="h-3.5 w-3.5" strokeWidth={3} /> : i + 1}
                 </span>
-                <span className={`text-[11px] font-bold leading-tight ${t.text}`}>{step.label}</span>
+                <span className={`text-[10px] font-bold leading-tight sm:text-[11px] ${t.text}`}>{step.label}</span>
                 {step.remaining > 0 ? (
-                  <span className="text-[10px] font-semibold text-slate-500">のこり{step.remaining}</span>
+                  <span className="text-[10px] font-semibold text-slate-600">のこり{step.remaining}</span>
                 ) : (
                   <span className="text-[10px] font-semibold text-emerald-700">記入済み</span>
                 )}

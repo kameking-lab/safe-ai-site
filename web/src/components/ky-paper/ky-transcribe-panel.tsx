@@ -111,7 +111,7 @@ export function KyTranscribePanel({
           元請指定のExcel様式・帳票に書き写す代わりに、項目ごとにコピーして貼り付けられます。
         </p>
         <p className="mb-3 text-[11px] text-slate-500">
-          ExcelがPCにある場合は、PCでこのページを開いて「クラウド最新取得」または「別端末で共有」の6桁コードでこのKYを呼び出してからコピーしてください。
+          ExcelがPCにある場合は、この端末でページを開くか、任意クラウドを明示的に有効にした認証済み利用者だけ「クラウド最新取得」でKYを読み込んでからコピーしてください。短いコードによる匿名共有は停止中です。
         </p>
 
         {/* 一括出力 */}
@@ -119,7 +119,7 @@ export function KyTranscribePanel({
           <button
             type="button"
             onClick={handleCsv}
-            className="min-h-[44px] rounded-lg bg-emerald-600 px-4 py-1.5 text-xs font-bold text-white shadow hover:bg-emerald-700"
+            className="min-h-[44px] rounded-lg bg-emerald-700 px-4 py-1.5 text-xs font-bold text-white shadow hover:bg-emerald-800"
           >
             CSVをダウンロード（控え・集計用）
           </button>
@@ -146,7 +146,7 @@ export function KyTranscribePanel({
                 {f.value ? (
                   <p className="whitespace-pre-wrap break-words text-xs text-slate-800">{f.value}</p>
                 ) : (
-                  <p className="text-xs text-slate-400">未記入</p>
+                  <p className="text-xs text-slate-600">未記入</p>
                 )}
               </div>
               <button

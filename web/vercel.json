@@ -1,0 +1,33 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nextjs",
+  "installCommand": "npm ci",
+  "buildCommand": "npm run build",
+  "ignoreCommand": "bash -c '[[ \"$VERCEL_GIT_COMMIT_MESSAGE\" == *\"[skip ci]\"* ]] && exit 0; git diff HEAD~1 --quiet -- src public prisma scripts package.json package-lock.json next.config.ts tsconfig.json vercel.json'",
+  "crons": [
+    {
+      "path": "/api/seo/notify-search-console",
+      "schedule": "0 2 * * *"
+    },
+    {
+      "path": "/api/cron/notice-url-health?sample=100",
+      "schedule": "0 18 1 * *"
+    },
+    {
+      "path": "/api/cron/signage-jma-health",
+      "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/rum-retention",
+      "schedule": "30 3 * * *"
+    },
+    {
+      "path": "/api/cron/search-console-operations",
+      "schedule": "0 4 1 * *"
+    },
+    {
+      "path": "/api/cron/automation-consult-state-probe",
+      "schedule": "15 4 1 * *"
+    }
+  ]
+}

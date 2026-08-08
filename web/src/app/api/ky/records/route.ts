@@ -4,8 +4,8 @@
  *  - POST: KY記録を1件追加（履歴行として insert）。
  *  - GET ?deviceId=...: 端末の最新KY記録＋直近一覧サマリーを返す（別端末からの引き継ぎ用）。
  */
-import { NextResponse } from "next/server";
 import { getServiceSupabase } from "@/lib/supabase/server";
+import { cloudAuthRequired, getCloudOwnerId, privateJson, readBoundedJson, requireCloudConsent } from "@/lib/server/cloud-owner";
 import { buildKyRecordSummary, normalizeKyInstructionRecord } from "@/lib/services/operations-service";
 import type { KyRecordSummary } from "@/lib/types/operations";
 
@@ -18,22 +18,22 @@ function pad(s: string): string {
 }
 
 function cloudNotConfigured() {
-  return NextResponse.json({ ok: false, reason: "cloud_not_configured" }, { status: 503 });
+  return privateJson({ ok: false, reason: "cloud_not_configured" }, 503);
 }
 
 export async function POST(request: Request) {
+  const deviceId = await getCloudOwnerId();
+  if (!deviceId) return cloudAuthRequired();
+  const consentError = requireCloudConsent(request, "ky-v1");
+  if (consentError) return consentError;
   const supabase = getServiceSupabase();
   if (!supabase) return cloudNotConfigured();
 
-  let body: { deviceId?: unknown; record?: unknown };
-  try {
-    body = (await request.json()) as typeof body;
-  } catch {
-    return NextResponse.json({ ok: false, reason: "invalid_json" }, { status: 400 });
-  }
-  const deviceId = typeof body.deviceId === "string" ? body.deviceId.trim() : "";
-  if (!deviceId || !body.record || typeof body.record !== "object") {
-    return NextResponse.json({ ok: false, reason: "missing_field" }, { status: 400 });
+  const parsed = await readBoundedJson(request);
+  if (!parsed.ok) return privateJson({ ok: false, reason: parsed.reason }, parsed.reason === "payload_too_large" ? 413 : 400);
+  const body = parsed.value as { record?: unknown };
+  if (!body.record || typeof body.record !== "object") {
+    return privateJson({ ok: false, reason: "missing_field" }, 400);
   }
 
   const record = normalizeKyInstructionRecord(body.record);
@@ -48,21 +48,22 @@ export async function POST(request: Request) {
     payload: record,
   });
   if (error) {
-    return NextResponse.json({ ok: false, reason: "db_error", detail: error.message }, { status: 502 });
+    return privateJson({ ok: false, reason: "storage_unavailable" }, 502);
   }
-  return NextResponse.json({ ok: true });
+  return privateJson({ ok: true });
 }
 
 export async function GET(request: Request) {
+  const deviceId = await getCloudOwnerId();
+  if (!deviceId) return cloudAuthRequired();
+  const consentError = requireCloudConsent(request, "ky-v1");
+  if (consentError) return consentError;
   const supabase = getServiceSupabase();
   if (!supabase) return cloudNotConfigured();
 
   const params = new URL(request.url).searchParams;
-  const deviceId = params.get("deviceId")?.trim() ?? "";
   const id = params.get("id")?.trim() ?? "";
-  if (!deviceId) {
-    return NextResponse.json({ ok: false, reason: "missing_field" }, { status: 400 });
-  }
+  if (id.length > 128) return privateJson({ ok: false, reason: "invalid_field" }, 400);
 
   // P0-A: id 指定時は単一KYの full payload を返す（一覧から再編集で開くため）。
   if (id) {
@@ -73,10 +74,10 @@ export async function GET(request: Request) {
       .eq("id", id)
       .maybeSingle();
     if (error) {
-      return NextResponse.json({ ok: false, reason: "db_error", detail: error.message }, { status: 502 });
+      return privateJson({ ok: false, reason: "storage_unavailable" }, 502);
     }
     const record = data ? normalizeKyInstructionRecord((data as { payload: unknown }).payload) : null;
-    return NextResponse.json({ ok: true, record });
+    return privateJson({ ok: true, record });
   }
 
   const { data, error } = await supabase
@@ -86,7 +87,7 @@ export async function GET(request: Request) {
     .order("updated_at", { ascending: false })
     .limit(MAX_LIST);
   if (error) {
-    return NextResponse.json({ ok: false, reason: "db_error", detail: error.message }, { status: 502 });
+    return privateJson({ ok: false, reason: "storage_unavailable" }, 502);
   }
 
   const rows = Array.isArray(data) ? data : [];
@@ -98,22 +99,25 @@ export async function GET(request: Request) {
       savedAt: r.updated_at,
     });
   });
-  return NextResponse.json({ ok: true, latest, list });
+  return privateJson({ ok: true, latest, list });
 }
 
 export async function DELETE(request: Request) {
+  const deviceId = await getCloudOwnerId();
+  if (!deviceId) return cloudAuthRequired();
+  const consentError = requireCloudConsent(request, "ky-v1");
+  if (consentError) return consentError;
   const supabase = getServiceSupabase();
   if (!supabase) return cloudNotConfigured();
 
   const params = new URL(request.url).searchParams;
-  const deviceId = params.get("deviceId")?.trim() ?? "";
   const id = params.get("id")?.trim() ?? "";
-  if (!deviceId || !id) {
-    return NextResponse.json({ ok: false, reason: "missing_field" }, { status: 400 });
+  if (!id || id.length > 128) {
+    return privateJson({ ok: false, reason: "missing_field" }, 400);
   }
   const { error } = await supabase.from("ky_records").delete().eq("device_id", deviceId).eq("id", id);
   if (error) {
-    return NextResponse.json({ ok: false, reason: "db_error", detail: error.message }, { status: 502 });
+    return privateJson({ ok: false, reason: "storage_unavailable" }, 502);
   }
-  return NextResponse.json({ ok: true });
+  return privateJson({ ok: true });
 }

@@ -3,7 +3,7 @@
  * 純粋ヘルパー（Phase B / 化学物質RA監査 P0-1 統合動線）。
  *
  * 目的: KY・打合せ書の作業内容に化学物質を扱う作業（塗装・溶接・洗浄等）が含まれるとき、
- * 「この作業で扱う化学物質の規制・ばく露注意を見る」リンク（/chemical-ra?name=...）を提示する。
+ * 「この作業で扱う化学物質の規制・ばく露注意を見る」導線を提示する。
  * 社長コンセプト「現場のめんどくさいを解決」「KY/打合せ書と一体運用」に直結。
  *
  * 重要（創作禁止の遵守）:
@@ -71,10 +71,7 @@ export function detectChemicalWork(text: string | null | undefined): ChemicalWor
   };
 }
 
-/** /chemical-ra へのプリフィルURL（suggestedQuery があれば name= を付与）。 */
-export function chemicalRaHref(hint: ChemicalWorkHint): string {
-  if (hint.suggestedQuery) {
-    return `/chemical-ra?name=${encodeURIComponent(hint.suggestedQuery)}`;
-  }
+/** 自由入力をURLへ含めない /chemical-ra の固定遷移先。 */
+export function chemicalRaHref(_hint: ChemicalWorkHint): string {
   return "/chemical-ra";
 }

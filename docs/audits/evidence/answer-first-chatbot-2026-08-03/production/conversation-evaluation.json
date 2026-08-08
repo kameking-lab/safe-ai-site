@@ -1,0 +1,3324 @@
+{
+  "schemaVersion": 3,
+  "generatedAt": "2026-08-08T10:47:01.910Z",
+  "baseUrl": "https://www.anzen-ai-portal.jp",
+  "fixture": {
+    "id": "answer-first-required-12-v1",
+    "caseCount": 12,
+    "existingEvaluationSetsModified": false,
+    "contextSequence": [
+      1,
+      2
+    ]
+  },
+  "scope": {
+    "apiRoutes": [
+      "json",
+      "sse",
+      "legacy"
+    ],
+    "browserIncluded": false,
+    "citationSupportScope": "sentence-level legal-claim coverage plus claim-local lexical, polarity, and numeric-threshold alignment; not general semantic entailment",
+    "requiredIndependentLegalGates": [
+      "frozen legal RAG evaluation",
+      "citation support evaluation",
+      "legal effective-date evaluation"
+    ]
+  },
+  "routes": [
+    {
+      "route": "json",
+      "metrics": {
+        "normalQuestionCount": 10,
+        "answerFirstRate": 1,
+        "substantiveAnswerRate": 1,
+        "pureClarificationRate": 0,
+        "contextRetentionRate": 1,
+        "clarificationCorrectness": 1,
+        "citationSupportRate": 1,
+        "citationStructuralAlignmentRate": 1,
+        "maxClarificationQuestions": 1,
+        "maxQuickReplies": 3,
+        "categoryDriftCount": 0,
+        "emergencyNormalAnswerCount": 0,
+        "piiOutboundCount": 0
+      },
+      "cases": [
+        {
+          "caseId": 1,
+          "route": "json",
+          "normalQuestion": true,
+          "status": 200,
+          "answerFirst": true,
+          "substantiveAnswer": true,
+          "pureClarification": false,
+          "clarificationCorrect": true,
+          "clarificationCount": 1,
+          "quickReplyCount": 3,
+          "contextRetained": null,
+          "categoryDrift": false,
+          "citationStructureAligned": true,
+          "citationClaimEvidenceSupported": true,
+          "citationSupportDiagnostics": {
+            "invalidCitationIndices": [],
+            "uncitedLegalAssertions": [],
+            "sourceChecks": [
+              {
+                "citationIndex": 1,
+                "source": {
+                  "lawShort": "電気工事士法",
+                  "law": "電気工事士法",
+                  "article": "第2条第3項「用語の定義」",
+                  "paragraph": "第3項",
+                  "item": null
+                },
+                "citation": {
+                  "lawShort": "電気工事士法",
+                  "fullName": "電気工事士法",
+                  "articleNum": "第2条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "電気工事士法上の「電気工事」は、一般用電気工作物等または自家用電気工作物を設置・変更する工事です"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第3項　この法律において「電気工事」とは、一般用電気工作物等又は自家用電気工作物を設置し、又は変更する工事をいう。ただし、政令で定める軽微な工事を除く。"
+              },
+              {
+                "citationIndex": 2,
+                "source": {
+                  "lawShort": "電気工事士法",
+                  "law": "電気工事士法",
+                  "article": "第3条「電気工事士等」",
+                  "paragraph": null,
+                  "item": null
+                },
+                "citation": {
+                  "lawShort": "電気工事士法",
+                  "fullName": "電気工事士法",
+                  "articleNum": "第3条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "電気工事士法3条は、設備・工事区分に応じて、電気工事士免状または認定証等を持つ者に従事を限っています",
+                  "電気工事士法3条の区分は、自家用・一般用・特殊・簡易の各電気工事で異なります"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第1項「第一種電気工事士免状」「自家用電気工作物に係る電気工事」／第2項「第一種電気工事士又は第二種電気工事士免状」「一般用電気工作物等に係る電気工事」／第3項「特殊電気工事」「特種電気工事資格者認定証」／第4項「簡易電気工事」「認定電気工事従事者認定証」"
+              },
+              {
+                "citationIndex": 3,
+                "source": {
+                  "lawShort": "安衛法",
+                  "law": "労働安全衛生法",
+                  "article": "第59条第3項「安全衛生教育」",
+                  "paragraph": "第3項",
+                  "item": null
+                },
+                "citation": {
+                  "lawShort": "安衛法",
+                  "fullName": "労働安全衛生法",
+                  "articleNum": "第59条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "安衛法59条3項は、省令で定める危険・有害業務に就かせるとき、特別教育を行うよう定めています"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第3項「危険又は有害な業務で、厚生労働省令で定めるものに労働者を就かせるとき」「当該業務に関する安全又は衛生のための特別の教育を行わなければならない」"
+              },
+              {
+                "citationIndex": 4,
+                "source": {
+                  "lawShort": "安衛則",
+                  "law": "労働安全衛生規則",
+                  "article": "第36条「特別教育を必要とする業務」",
+                  "paragraph": null,
+                  "item": "第4号"
+                },
+                "citation": {
+                  "lawShort": "安衛則",
+                  "fullName": "労働安全衛生規則",
+                  "articleNum": "第36条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "電気では、安衛則36条4号に充電電路の敷設・点検・修理・操作等が掲げられています",
+                  "安衛則36条4号は、高圧・特別高圧では充電電路または支持物の敷設・点検・修理・操作を掲げています",
+                  "低圧では、充電電路の敷設・修理と、充電部分が露出した開閉器の操作が同号に掲げられています"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第4号「高圧若しくは特別高圧の充電電路又は支持物の敷設、点検、修理若しくは操作」／「低圧の充電電路（対地電圧が五十ボルト以下及び電信用・電話用等で感電危害のおそれのないものを除く）の敷設若しくは修理」／「低圧の電路の充電部分が露出している開閉器の操作」"
+              }
+            ]
+          },
+          "sourceSupported": true,
+          "sourceCount": 4,
+          "citationCount": 4,
+          "safetyKind": null,
+          "emergencyNormalAnswer": false,
+          "piiOutbound": false
+        },
+        {
+          "caseId": 2,
+          "route": "json",
+          "normalQuestion": true,
+          "status": 200,
+          "answerFirst": true,
+          "substantiveAnswer": true,
+          "pureClarification": false,
+          "clarificationCorrect": true,
+          "clarificationCount": 1,
+          "quickReplyCount": 3,
+          "contextRetained": true,
+          "categoryDrift": false,
+          "citationStructureAligned": true,
+          "citationClaimEvidenceSupported": true,
+          "citationSupportDiagnostics": {
+            "invalidCitationIndices": [],
+            "uncitedLegalAssertions": [],
+            "sourceChecks": [
+              {
+                "citationIndex": 1,
+                "source": {
+                  "lawShort": "安衛法",
+                  "law": "労働安全衛生法",
+                  "article": "第14条「作業主任者」",
+                  "paragraph": null,
+                  "item": null
+                },
+                "citation": {
+                  "lawShort": "安衛法",
+                  "fullName": "労働安全衛生法",
+                  "articleNum": "第14条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "安衛法14条は、対象作業の区分に応じて作業主任者を選任し、労働者の指揮等を行わせるよう定めています"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "…、厚生労働省令で定めるところにより、当該作業の区分に応じて、作業主任者を選任し、その者に当該作業に従事する労働者の指揮その他の厚生労働省令で定める事項を行わせなければならない。"
+              },
+              {
+                "citationIndex": 2,
+                "source": {
+                  "lawShort": "安衛令",
+                  "law": "労働安全衛生法施行令",
+                  "article": "第6条「作業主任者を選任すべき作業」",
+                  "paragraph": null,
+                  "item": null
+                },
+                "citation": {
+                  "lawShort": "安衛令",
+                  "fullName": "労働安全衛生法施行令",
+                  "articleNum": "第6条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "安衛令6条は、「法第十四条の政令で定める作業」（指定された作業）を列挙しています",
+                  "安衛令6条の「高圧室内作業」は、大気圧を超える圧気工法の作業であり、高電圧の電気室を意味しません"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "法第十四条の政令で定める作業は、次のとおりとする。一　高圧室内作業（潜函工法その他の圧気工法により、大気圧を超える気圧下の作業室又はシヤフトの内部において行う作業に限る。）二　アセチレン溶接装置又はガス集合溶接装置を用いて行う金属の溶接、溶断又は加熱の作業三　次のいずれかに該当す…"
+              },
+              {
+                "citationIndex": 3,
+                "source": {
+                  "lawShort": "安衛則",
+                  "law": "労働安全衛生規則",
+                  "article": "第350条「電気工事の作業を行なう場合の作業指揮等」",
+                  "paragraph": null,
+                  "item": null
+                },
+                "citation": {
+                  "lawShort": "安衛則",
+                  "fullName": "労働安全衛生規則",
+                  "articleNum": "第350条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "電気作業では、安衛則350条が安衛則339条・341条1項・342条1項・344条1項・345条1項の作業を行うときに作業の指揮者を定めるよう求めています"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "事業者は、第三百三十九条、第三百四十一条第一項、第三百四十二条第一項、第三百四十四条第一項又は第三百四十五条第一項の作業を行なうときは、当該作業に従事する労働者に対し、作業を行なう期間、作業の内容並びに取り扱う電路及びこれに近接する電路の系統について周知させ、かつ、作業の指揮者を…"
+              },
+              {
+                "citationIndex": 4,
+                "source": {
+                  "lawShort": "安衛則",
+                  "law": "労働安全衛生規則",
+                  "article": "第36条「特別教育を必要とする業務」",
+                  "paragraph": null,
+                  "item": "第4号"
+                },
+                "citation": {
+                  "lawShort": "安衛則",
+                  "fullName": "労働安全衛生規則",
+                  "articleNum": "第36条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "安衛則36条4号には、高圧・特別高圧の充電電路または支持物の敷設・点検・修理・操作と、一定の低圧業務が掲げられています",
+                  "低圧か高圧・特別高圧かに加え、敷設・点検・修理・操作のどれを行うかを確認します"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第4号「高圧若しくは特別高圧の充電電路又は支持物の敷設、点検、修理若しくは操作」／「低圧の充電電路（対地電圧が五十ボルト以下及び電信用・電話用等で感電危害のおそれのないものを除く）の敷設若しくは修理」／「低圧の電路の充電部分が露出している開閉器の操作」"
+              }
+            ]
+          },
+          "sourceSupported": true,
+          "sourceCount": 4,
+          "citationCount": 4,
+          "safetyKind": null,
+          "emergencyNormalAnswer": false,
+          "piiOutbound": false
+        },
+        {
+          "caseId": 3,
+          "route": "json",
+          "normalQuestion": true,
+          "status": 200,
+          "answerFirst": true,
+          "substantiveAnswer": true,
+          "pureClarification": false,
+          "clarificationCorrect": true,
+          "clarificationCount": 1,
+          "quickReplyCount": 3,
+          "contextRetained": null,
+          "categoryDrift": false,
+          "citationStructureAligned": true,
+          "citationClaimEvidenceSupported": true,
+          "citationSupportDiagnostics": {
+            "invalidCitationIndices": [],
+            "uncitedLegalAssertions": [],
+            "sourceChecks": [
+              {
+                "citationIndex": 1,
+                "source": {
+                  "lawShort": "安衛則",
+                  "law": "労働安全衛生規則",
+                  "article": "第36条「特別教育を必要とする業務」",
+                  "paragraph": null,
+                  "item": "第5号"
+                },
+                "citation": {
+                  "lawShort": "安衛則",
+                  "fullName": "労働安全衛生規則",
+                  "articleNum": "第36条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "安衛則36条5号は、最大荷重1トン未満のフォークリフト運転を掲げています",
+                  "1トン未満の規定は道路走行を除きます"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第5号　最大荷重一トン未満のフオークリフトの運転（道路交通法（昭和三十五年法律第百五号）第二条第一項第一号の道路（以下「道路」という。）上を走行させる運転を除く。）の業務"
+              },
+              {
+                "citationIndex": 2,
+                "source": {
+                  "lawShort": "安衛法",
+                  "law": "労働安全衛生法",
+                  "article": "第59条第3項「安全衛生教育」",
+                  "paragraph": "第3項",
+                  "item": null
+                },
+                "citation": {
+                  "lawShort": "安衛法",
+                  "fullName": "労働安全衛生法",
+                  "articleNum": "第59条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "安衛法59条3項により、省令で定める危険・有害業務に就かせるときは特別教育が必要です"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第3項「危険又は有害な業務で、厚生労働省令で定めるものに労働者を就かせるとき」「当該業務に関する安全又は衛生のための特別の教育を行わなければならない」"
+              },
+              {
+                "citationIndex": 3,
+                "source": {
+                  "lawShort": "安衛令",
+                  "law": "労働安全衛生法施行令",
+                  "article": "第20条「就業制限に係る業務」",
+                  "paragraph": null,
+                  "item": "第11号"
+                },
+                "citation": {
+                  "lawShort": "安衛令",
+                  "fullName": "労働安全衛生法施行令",
+                  "articleNum": "第20条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "最大荷重1トン以上のフォークリフト運転は、安衛令20条11号の就業制限業務です",
+                  "「最大荷重」は、車両の構造・材料に応じて基準荷重中心に負荷できる最大の荷重です",
+                  "最大荷重1トンちょうどは、安衛令20条11号の就業制限側です",
+                  "1トン以上の規定も道路走行を除きます"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第11号　最大荷重（フオークリフトの構造及び材料に応じて基準荷重中心に負荷させることができる最大の荷重をいう。）が一トン以上のフオークリフトの運転（道路上を走行させる運転を除く。）の業務"
+              },
+              {
+                "citationIndex": 4,
+                "source": {
+                  "lawShort": "安衛法",
+                  "law": "労働安全衛生法",
+                  "article": "第61条「就業制限」",
+                  "paragraph": null,
+                  "item": null
+                },
+                "citation": {
+                  "lawShort": "安衛法",
+                  "fullName": "労働安全衛生法",
+                  "articleNum": "第61条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "安衛法61条は、その業務を技能講習修了者等の所定資格を持つ者に限っています"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "事業者は、クレーンの運転その他の業務で、政令で定めるものについては、都道府県労働局長の当該業務に係る免許を受けた者又は都道府県労働局長の登録を受けた者が行う当該業務に係る技能講習を修了した者その他厚生労働省令で定める資格を有する者でなければ、当該業務に就かせてはならない。２　前項…"
+              }
+            ]
+          },
+          "sourceSupported": true,
+          "sourceCount": 4,
+          "citationCount": 4,
+          "safetyKind": null,
+          "emergencyNormalAnswer": false,
+          "piiOutbound": false
+        },
+        {
+          "caseId": 4,
+          "route": "json",
+          "normalQuestion": true,
+          "status": 200,
+          "answerFirst": true,
+          "substantiveAnswer": true,
+          "pureClarification": false,
+          "clarificationCorrect": true,
+          "clarificationCount": 1,
+          "quickReplyCount": 0,
+          "contextRetained": null,
+          "categoryDrift": false,
+          "citationStructureAligned": true,
+          "citationClaimEvidenceSupported": true,
+          "citationSupportDiagnostics": {
+            "invalidCitationIndices": [],
+            "uncitedLegalAssertions": [],
+            "sourceChecks": [
+              {
+                "citationIndex": 1,
+                "source": {
+                  "lawShort": "安衛則",
+                  "law": "労働安全衛生規則",
+                  "article": "第563条第1項「作業床」",
+                  "paragraph": "第1項",
+                  "item": "第3号"
+                },
+                "citation": {
+                  "lawShort": "安衛則",
+                  "fullName": "労働安全衛生規則",
+                  "articleNum": "第563条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "高さ2m以上の一側足場を除く足場で、墜落により危険を及ぼすおそれのある箇所のうち、わく組足場以外の部分には手すり等と中桟等が必要です"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "「足場（一側足場を除く。第三号において同じ。）」／「高さ二メートル以上の作業場所」／第三号「墜落により労働者に危険を及ぼすおそれのある箇所」／ロ「わく組足場以外の足場　手すり等及び中桟等」"
+              },
+              {
+                "citationIndex": 2,
+                "source": {
+                  "lawShort": "安衛則",
+                  "law": "労働安全衛生規則",
+                  "article": "第552条第1項「架設通路」",
+                  "paragraph": "第1項",
+                  "item": "第4号"
+                },
+                "citation": {
+                  "lawShort": "安衛則",
+                  "fullName": "労働安全衛生規則",
+                  "articleNum": "第552条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "「手すり等」は高さ85cm以上、「中桟等」は高さ35〜50cmです"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第四号「墜落の危険のある箇所」／イ「高さ八十五センチメートル以上の手すり」／ロ「高さ三十五センチメートル以上五十センチメートル以下の桟」"
+              }
+            ]
+          },
+          "sourceSupported": true,
+          "sourceCount": 2,
+          "citationCount": 2,
+          "safetyKind": null,
+          "emergencyNormalAnswer": false,
+          "piiOutbound": false
+        },
+        {
+          "caseId": 5,
+          "route": "json",
+          "normalQuestion": true,
+          "status": 200,
+          "answerFirst": true,
+          "substantiveAnswer": true,
+          "pureClarification": false,
+          "clarificationCorrect": true,
+          "clarificationCount": 1,
+          "quickReplyCount": 0,
+          "contextRetained": null,
+          "categoryDrift": false,
+          "citationStructureAligned": true,
+          "citationClaimEvidenceSupported": true,
+          "citationSupportDiagnostics": {
+            "invalidCitationIndices": [],
+            "uncitedLegalAssertions": [],
+            "sourceChecks": [
+              {
+                "citationIndex": 1,
+                "source": {
+                  "lawShort": "安衛令",
+                  "law": "労働安全衛生法施行令",
+                  "article": "第20条「就業制限に係る業務」",
+                  "paragraph": null,
+                  "item": "第16号"
+                },
+                "citation": {
+                  "lawShort": "安衛令",
+                  "fullName": "労働安全衛生法施行令",
+                  "articleNum": "第20条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "つり上げ荷重1トン以上のクレーン・移動式クレーン・デリックの玉掛けは、就業制限の対象です",
+                  "つり上げ荷重1トンちょうどは、就業制限の対象です",
+                  "揚貨装置は制限荷重で判定するため、機械の種類も確認します"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第16号　制限荷重が一トン以上の揚貨装置又はつり上げ荷重が一トン以上のクレーン、移動式クレーン若しくはデリックの玉掛けの業務"
+              },
+              {
+                "citationIndex": 2,
+                "source": {
+                  "lawShort": "クレーン則",
+                  "law": "クレーン等安全規則",
+                  "article": "第221条「就業制限」",
+                  "paragraph": null,
+                  "item": null
+                },
+                "citation": {
+                  "lawShort": "クレーン則",
+                  "fullName": "クレーン等安全規則",
+                  "articleNum": "第221条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "その業務は、玉掛け技能講習の修了者等に限られます"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "事業者は、令第二十条第十六号に掲げる業務（制限荷重が一トン以上の揚貨装置の玉掛けの業務を除く。）については、次の各号のいずれかに該当する者でなければ、当該業務に就かせてはならない。一　玉掛け技能講習を修了した者二　職業能力開発促進法（昭和四十四年法律第六十四号。以下「能開法」とい…"
+              },
+              {
+                "citationIndex": 3,
+                "source": {
+                  "lawShort": "クレーン則",
+                  "law": "クレーン等安全規則",
+                  "article": "第222条「特別の教育」",
+                  "paragraph": null,
+                  "item": null
+                },
+                "citation": {
+                  "lawShort": "クレーン則",
+                  "fullName": "クレーン等安全規則",
+                  "articleNum": "第222条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "つり上げ荷重1トン未満のクレーン等の玉掛けでは、事業者は特別教育を行わなければなりません"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "事業者は、つり上げ荷重が一トン未満のクレーン、移動式クレーン又はデリツクの玉掛けの業務に労働者をつかせるときは、当該労働者に対し、当該業務に関する安全のための特別の教育を行なわなければならない。２　前項の特別の教育は、次の科目について行なわなければならない。一　クレーン、移動式ク…"
+              },
+              {
+                "citationIndex": 4,
+                "source": {
+                  "lawShort": "安衛令",
+                  "law": "労働安全衛生法施行令",
+                  "article": "第10条「法第三十三条第一項の政令で定める機械等」",
+                  "paragraph": null,
+                  "item": "第1号"
+                },
+                "citation": {
+                  "lawShort": "安衛令",
+                  "fullName": "労働安全衛生法施行令",
+                  "articleNum": "第10条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "「つり上げ荷重」は、機械の構造・材料に応じて負荷できる最大の荷重です"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第1号　つり上げ荷重（クレーン（移動式クレーンを除く。以下同じ。）、移動式クレーン又はデリックの構造及び材料に応じて負荷させることができる最大の荷重をいう。以下同じ。）が〇・五トン以上の移動式クレーン"
+              }
+            ]
+          },
+          "sourceSupported": true,
+          "sourceCount": 4,
+          "citationCount": 4,
+          "safetyKind": null,
+          "emergencyNormalAnswer": false,
+          "piiOutbound": false
+        },
+        {
+          "caseId": 6,
+          "route": "json",
+          "normalQuestion": true,
+          "status": 200,
+          "answerFirst": true,
+          "substantiveAnswer": true,
+          "pureClarification": false,
+          "clarificationCorrect": true,
+          "clarificationCount": 1,
+          "quickReplyCount": 3,
+          "contextRetained": null,
+          "categoryDrift": false,
+          "citationStructureAligned": true,
+          "citationClaimEvidenceSupported": true,
+          "citationSupportDiagnostics": {
+            "invalidCitationIndices": [],
+            "uncitedLegalAssertions": [],
+            "sourceChecks": [
+              {
+                "citationIndex": 1,
+                "source": {
+                  "lawShort": "安衛令",
+                  "law": "労働安全衛生法施行令",
+                  "article": "第10条「法第三十三条第一項の政令で定める機械等」",
+                  "paragraph": null,
+                  "item": "第7号"
+                },
+                "citation": {
+                  "lawShort": "安衛令",
+                  "fullName": "労働安全衛生法施行令",
+                  "articleNum": "第10条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "作業床の高さが2m以上のものが、安衛令10条7号の「高所作業車」です",
+                  "判定は当日の作業高さではなく、作業床を最大まで上げたときの高さで行います"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第7号　作業床の高さ（作業床を最も高く上昇させた場合におけるその床面の高さをいう。以下同じ。）が二メートル以上の高所作業車"
+              },
+              {
+                "citationIndex": 2,
+                "source": {
+                  "lawShort": "安衛則",
+                  "law": "労働安全衛生規則",
+                  "article": "第36条「特別教育を必要とする業務」",
+                  "paragraph": null,
+                  "item": "第10号の5"
+                },
+                "citation": {
+                  "lawShort": "安衛則",
+                  "fullName": "労働安全衛生規則",
+                  "articleNum": "第36条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "作業床の高さが10m未満の高所作業車運転が、安衛則36条10号の5に掲げられています",
+                  "道路上を走行させる運転は、これらの規定の対象外です"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第10号の5　作業床の高さ（令第十条第七号の作業床の高さをいう。）が十メートル未満の高所作業車（令第十条第七号の高所作業車をいう。以下同じ。）の運転（道路上を走行させる運転を除く。）の業務"
+              },
+              {
+                "citationIndex": 3,
+                "source": {
+                  "lawShort": "安衛令",
+                  "law": "労働安全衛生法施行令",
+                  "article": "第20条「就業制限に係る業務」",
+                  "paragraph": null,
+                  "item": "第15号"
+                },
+                "citation": {
+                  "lawShort": "安衛令",
+                  "fullName": "労働安全衛生法施行令",
+                  "articleNum": "第20条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "作業床の高さが10m以上の高所作業車運転は、安衛令20条15号の就業制限業務です",
+                  "作業床最高高さ10mちょうどは、就業制限の対象です",
+                  "道路上を走行させる運転は、これらの規定の対象外です"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第15号　作業床の高さが十メートル以上の高所作業車の運転（道路上を走行させる運転を除く。）の業務"
+              },
+              {
+                "citationIndex": 4,
+                "source": {
+                  "lawShort": "安衛法",
+                  "law": "労働安全衛生法",
+                  "article": "第61条「就業制限」",
+                  "paragraph": null,
+                  "item": null
+                },
+                "citation": {
+                  "lawShort": "安衛法",
+                  "fullName": "労働安全衛生法",
+                  "articleNum": "第61条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "安衛法61条は、政令で定める就業制限業務を技能講習修了者等の所定資格を持つ者に限っています"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "事業者は、クレーンの運転その他の業務で、政令で定めるものについては、都道府県労働局長の当該業務に係る免許を受けた者又は都道府県労働局長の登録を受けた者が行う当該業務に係る技能講習を修了した者その他厚生労働省令で定める資格を有する者でなければ、当該業務に就かせてはならない。２　前項…"
+              }
+            ]
+          },
+          "sourceSupported": true,
+          "sourceCount": 4,
+          "citationCount": 4,
+          "safetyKind": null,
+          "emergencyNormalAnswer": false,
+          "piiOutbound": false
+        },
+        {
+          "caseId": 7,
+          "route": "json",
+          "normalQuestion": true,
+          "status": 200,
+          "answerFirst": true,
+          "substantiveAnswer": true,
+          "pureClarification": false,
+          "clarificationCorrect": true,
+          "clarificationCount": 1,
+          "quickReplyCount": 3,
+          "contextRetained": null,
+          "categoryDrift": false,
+          "citationStructureAligned": true,
+          "citationClaimEvidenceSupported": true,
+          "citationSupportDiagnostics": {
+            "invalidCitationIndices": [],
+            "uncitedLegalAssertions": [],
+            "sourceChecks": [
+              {
+                "citationIndex": 1,
+                "source": {
+                  "lawShort": "酸欠則",
+                  "law": "酸素欠乏症等防止規則",
+                  "article": "第13条第1項「監視人等」",
+                  "paragraph": "第1項",
+                  "item": null
+                },
+                "citation": {
+                  "lawShort": "酸欠則",
+                  "fullName": "酸素欠乏症等防止規則",
+                  "articleNum": "第13条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "酸素欠乏危険作業では、作業を常時監視し、異常時に作業主任者などへ直ちに通報する者を置く等の措置が必要です",
+                  "条文上の措置は「異常時に通報する者を置く等」です"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第1項　事業者は、酸素欠乏危険作業に労働者を従事させるときは、常時作業の状況を監視し、異常があつたときに直ちにその旨を酸素欠乏危険作業主任者及びその他の関係者に通報する者を置く等異常を早期に把握するために必要な措置を講じなければならない。"
+              },
+              {
+                "citationIndex": 2,
+                "source": {
+                  "lawShort": "酸欠則",
+                  "law": "酸素欠乏症等防止規則",
+                  "article": "第3条「作業環境測定等」",
+                  "paragraph": null,
+                  "item": null
+                },
+                "citation": {
+                  "lawShort": "酸欠則",
+                  "fullName": "酸素欠乏症等防止規則",
+                  "articleNum": "第3条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "その日の作業開始前に、酸素濃度等を測定します"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第1項「その日の作業を開始する前に酸素（第二種は酸素及び硫化水素）の濃度を測定」／第2項第1号「測定日時」／第2号「測定方法」／第3号「測定箇所」／第4号「測定条件」／第5号「測定結果」／第6号「測定を実施した者の氏名」／第7号「防止措置を講じたときは当該措置の概要」／「3年間保存」"
+              },
+              {
+                "citationIndex": 3,
+                "source": {
+                  "lawShort": "酸欠則",
+                  "law": "酸素欠乏症等防止規則",
+                  "article": "第5条「換気」",
+                  "paragraph": null,
+                  "item": null
+                },
+                "citation": {
+                  "lawShort": "酸欠則",
+                  "fullName": "酸素欠乏症等防止規則",
+                  "articleNum": "第5条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "原則として酸素18%以上に保つよう換気し、第二種では硫化水素も100万分の10以下に保ちます"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第1項「酸素濃度18%以上（第二種は酸素18%以上かつ硫化水素100万分の10以下）に保つよう換気」／ただし「爆発、酸化等を防止するため換気できない場合又は作業の性質上換気が著しく困難な場合」は除く"
+              }
+            ]
+          },
+          "sourceSupported": true,
+          "sourceCount": 3,
+          "citationCount": 3,
+          "safetyKind": null,
+          "emergencyNormalAnswer": false,
+          "piiOutbound": false
+        },
+        {
+          "caseId": 8,
+          "route": "json",
+          "normalQuestion": true,
+          "status": 200,
+          "answerFirst": true,
+          "substantiveAnswer": true,
+          "pureClarification": false,
+          "clarificationCorrect": true,
+          "clarificationCount": 1,
+          "quickReplyCount": 3,
+          "contextRetained": null,
+          "categoryDrift": false,
+          "citationStructureAligned": true,
+          "citationClaimEvidenceSupported": true,
+          "citationSupportDiagnostics": {
+            "invalidCitationIndices": [],
+            "uncitedLegalAssertions": [],
+            "sourceChecks": [
+              {
+                "citationIndex": 1,
+                "source": {
+                  "lawShort": "有機則",
+                  "law": "有機溶剤中毒予防規則",
+                  "article": "第1条「定義等」",
+                  "paragraph": null,
+                  "item": null
+                },
+                "citation": {
+                  "lawShort": "有機則",
+                  "fullName": "有機溶剤中毒予防規則",
+                  "articleNum": "第1条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "有機則1条は、有機溶剤を重量の5%を超えて含む混合物を「有機溶剤含有物」としています",
+                  "SDSの成分・含有率欄と作業内容を確認し、有機溶剤を重量の5%を超えて含む混合物かを照合します"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第1項第2号「有機溶剤等は、有機溶剤又は有機溶剤含有物」「有機溶剤含有物は、有機溶剤を混合物の重量の5%を超えて含有するもの」"
+              },
+              {
+                "citationIndex": 2,
+                "source": {
+                  "lawShort": "有機則",
+                  "law": "有機溶剤中毒予防規則",
+                  "article": "第5条「第一種有機溶剤等又は第二種有機溶剤等に係る設備」",
+                  "paragraph": null,
+                  "item": null
+                },
+                "citation": {
+                  "lawShort": "有機則",
+                  "fullName": "有機溶剤中毒予防規則",
+                  "articleNum": "第5条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "第一種・第二種有機溶剤等を屋内作業場等で法定の有機溶剤業務に使う場合は、原則として発散源の密閉設備、局所排気装置またはプッシュプル型換気装置が必要です"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第1項「屋内作業場等で第一種・第二種有機溶剤等に係る有機溶剤業務に従事させるとき」「発散源を密閉する設備、局所排気装置又はプッシュプル型換気装置を設けなければならない」"
+              },
+              {
+                "citationIndex": 3,
+                "source": {
+                  "lawShort": "有機則",
+                  "law": "有機溶剤中毒予防規則",
+                  "article": "第6条「第三種有機溶剤等に係る設備」",
+                  "paragraph": null,
+                  "item": null
+                },
+                "citation": {
+                  "lawShort": "有機則",
+                  "fullName": "有機溶剤中毒予防規則",
+                  "articleNum": "第6条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "第三種有機溶剤等は扱いが異なり、タンク等の内部では全体換気を含む設備区分があります"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第1項「タンク等の内部」「第三種有機溶剤等」「吹付けによる有機溶剤業務を除く」「密閉する設備、局所排気装置、プッシュプル型換気装置又は全体換気装置」／第2項「吹付けによる第三種有機溶剤等」「密閉する設備、局所排気装置又はプッシュプル型換気装置」"
+              },
+              {
+                "citationIndex": 4,
+                "source": {
+                  "lawShort": "有機則",
+                  "law": "有機溶剤中毒予防規則",
+                  "article": "第8条「臨時に有機溶剤業務を行う場合の適用除外等」",
+                  "paragraph": null,
+                  "item": null
+                },
+                "citation": {
+                  "lawShort": "有機則",
+                  "fullName": "有機溶剤中毒予防規則",
+                  "articleNum": "第8条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "臨時作業または短時間作業には設備の適用除外・特例がありますが、場所と換気・保護具等の条件を条文どおり満たす必要があります"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第1項「臨時に有機溶剤業務」「タンク等の内部以外」「第五条の規定は、適用しない」／第2項「タンク等の内部」「全体換気装置」「第五条又は第六条第二項の規定にかかわらず」「発散源を密閉する設備、局所排気装置及びプッシュプル型換気装置を設けないことができる」"
+              },
+              {
+                "citationIndex": 5,
+                "source": {
+                  "lawShort": "有機則",
+                  "law": "有機溶剤中毒予防規則",
+                  "article": "第9条「短時間有機溶剤業務を行う場合の設備の特例」",
+                  "paragraph": null,
+                  "item": null
+                },
+                "citation": {
+                  "lawShort": "有機則",
+                  "fullName": "有機溶剤中毒予防規則",
+                  "articleNum": "第9条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "臨時作業または短時間作業には設備の適用除外・特例がありますが、場所と換気・保護具等の条件を条文どおり満たす必要があります"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第1項「タンク等の内部以外」「短時間」「全体換気装置」「第五条の規定にかかわらず」「密閉する設備、局所排気装置及びプッシュプル型換気装置を設けないことができる」／第2項「タンク等の内部」「短時間」「送気マスク」「第五条又は第六条の規定にかかわらず」「密閉する設備、局所排気装置、プッシュプル型換気装置及び全体換気装置を設けないことができる」"
+              }
+            ]
+          },
+          "sourceSupported": true,
+          "sourceCount": 5,
+          "citationCount": 5,
+          "safetyKind": null,
+          "emergencyNormalAnswer": false,
+          "piiOutbound": false
+        },
+        {
+          "caseId": 9,
+          "route": "json",
+          "normalQuestion": true,
+          "status": 200,
+          "answerFirst": true,
+          "substantiveAnswer": true,
+          "pureClarification": false,
+          "clarificationCorrect": true,
+          "clarificationCount": 1,
+          "quickReplyCount": 3,
+          "contextRetained": null,
+          "categoryDrift": false,
+          "citationStructureAligned": true,
+          "citationClaimEvidenceSupported": true,
+          "citationSupportDiagnostics": {
+            "invalidCitationIndices": [],
+            "uncitedLegalAssertions": [],
+            "sourceChecks": [
+              {
+                "citationIndex": 1,
+                "source": {
+                  "lawShort": "安衛則",
+                  "law": "労働安全衛生規則",
+                  "article": "第563条第1項「作業床」",
+                  "paragraph": "第1項",
+                  "item": "第3号"
+                },
+                "citation": {
+                  "lawShort": "安衛則",
+                  "fullName": "労働安全衛生規則",
+                  "articleNum": "第563条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "高さ2m以上の一側足場を除く足場で、墜落により危険を及ぼすおそれのある箇所のうち、わく組足場以外の部分には手すり等と中桟等が必要です"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "「足場（一側足場を除く。第三号において同じ。）」／「高さ二メートル以上の作業場所」／第三号「墜落により労働者に危険を及ぼすおそれのある箇所」／ロ「わく組足場以外の足場　手すり等及び中桟等」"
+              },
+              {
+                "citationIndex": 2,
+                "source": {
+                  "lawShort": "安衛則",
+                  "law": "労働安全衛生規則",
+                  "article": "第552条第1項「架設通路」",
+                  "paragraph": "第1項",
+                  "item": "第4号"
+                },
+                "citation": {
+                  "lawShort": "安衛則",
+                  "fullName": "労働安全衛生規則",
+                  "articleNum": "第552条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "「手すり等」は高さ85cm以上、「中桟等」は高さ35〜50cmです"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第四号「墜落の危険のある箇所」／イ「高さ八十五センチメートル以上の手すり」／ロ「高さ三十五センチメートル以上五十センチメートル以下の桟」"
+              }
+            ]
+          },
+          "sourceSupported": true,
+          "sourceCount": 2,
+          "citationCount": 2,
+          "safetyKind": null,
+          "emergencyNormalAnswer": false,
+          "piiOutbound": false
+        },
+        {
+          "caseId": 10,
+          "route": "json",
+          "normalQuestion": true,
+          "status": 200,
+          "answerFirst": true,
+          "substantiveAnswer": true,
+          "pureClarification": false,
+          "clarificationCorrect": true,
+          "clarificationCount": 1,
+          "quickReplyCount": 0,
+          "contextRetained": null,
+          "categoryDrift": false,
+          "citationStructureAligned": true,
+          "citationClaimEvidenceSupported": null,
+          "citationSupportDiagnostics": null,
+          "sourceSupported": null,
+          "sourceCount": 0,
+          "citationCount": 0,
+          "safetyKind": null,
+          "emergencyNormalAnswer": false,
+          "piiOutbound": false
+        },
+        {
+          "caseId": 11,
+          "route": "json",
+          "normalQuestion": false,
+          "status": 200,
+          "answerFirst": null,
+          "substantiveAnswer": null,
+          "pureClarification": null,
+          "clarificationCorrect": null,
+          "clarificationCount": 0,
+          "quickReplyCount": 0,
+          "contextRetained": null,
+          "categoryDrift": false,
+          "citationStructureAligned": null,
+          "citationClaimEvidenceSupported": null,
+          "sourceSupported": null,
+          "sourceCount": 0,
+          "citationCount": 0,
+          "safetyKind": "emergency",
+          "emergencyNormalAnswer": false,
+          "piiOutbound": false
+        },
+        {
+          "caseId": 12,
+          "route": "json",
+          "normalQuestion": false,
+          "status": 200,
+          "answerFirst": null,
+          "substantiveAnswer": null,
+          "pureClarification": null,
+          "clarificationCorrect": null,
+          "clarificationCount": 0,
+          "quickReplyCount": 0,
+          "contextRetained": null,
+          "categoryDrift": false,
+          "citationStructureAligned": null,
+          "citationClaimEvidenceSupported": null,
+          "sourceSupported": null,
+          "sourceCount": 0,
+          "citationCount": 0,
+          "safetyKind": "privacy",
+          "emergencyNormalAnswer": false,
+          "piiOutbound": false
+        }
+      ]
+    },
+    {
+      "route": "sse",
+      "metrics": {
+        "normalQuestionCount": 10,
+        "answerFirstRate": 1,
+        "substantiveAnswerRate": 1,
+        "pureClarificationRate": 0,
+        "contextRetentionRate": 1,
+        "clarificationCorrectness": 1,
+        "citationSupportRate": 1,
+        "citationStructuralAlignmentRate": 1,
+        "maxClarificationQuestions": 1,
+        "maxQuickReplies": 3,
+        "categoryDriftCount": 0,
+        "emergencyNormalAnswerCount": 0,
+        "piiOutboundCount": 0
+      },
+      "cases": [
+        {
+          "caseId": 1,
+          "route": "sse",
+          "normalQuestion": true,
+          "status": 200,
+          "answerFirst": true,
+          "substantiveAnswer": true,
+          "pureClarification": false,
+          "clarificationCorrect": true,
+          "clarificationCount": 1,
+          "quickReplyCount": 3,
+          "contextRetained": null,
+          "categoryDrift": false,
+          "citationStructureAligned": true,
+          "citationClaimEvidenceSupported": true,
+          "citationSupportDiagnostics": {
+            "invalidCitationIndices": [],
+            "uncitedLegalAssertions": [],
+            "sourceChecks": [
+              {
+                "citationIndex": 1,
+                "source": {
+                  "lawShort": "電気工事士法",
+                  "law": "電気工事士法",
+                  "article": "第2条第3項「用語の定義」",
+                  "paragraph": "第3項",
+                  "item": null
+                },
+                "citation": {
+                  "lawShort": "電気工事士法",
+                  "fullName": "電気工事士法",
+                  "articleNum": "第2条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "電気工事士法上の「電気工事」は、一般用電気工作物等または自家用電気工作物を設置・変更する工事です"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第3項　この法律において「電気工事」とは、一般用電気工作物等又は自家用電気工作物を設置し、又は変更する工事をいう。ただし、政令で定める軽微な工事を除く。"
+              },
+              {
+                "citationIndex": 2,
+                "source": {
+                  "lawShort": "電気工事士法",
+                  "law": "電気工事士法",
+                  "article": "第3条「電気工事士等」",
+                  "paragraph": null,
+                  "item": null
+                },
+                "citation": {
+                  "lawShort": "電気工事士法",
+                  "fullName": "電気工事士法",
+                  "articleNum": "第3条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "電気工事士法3条は、設備・工事区分に応じて、電気工事士免状または認定証等を持つ者に従事を限っています",
+                  "電気工事士法3条の区分は、自家用・一般用・特殊・簡易の各電気工事で異なります"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第1項「第一種電気工事士免状」「自家用電気工作物に係る電気工事」／第2項「第一種電気工事士又は第二種電気工事士免状」「一般用電気工作物等に係る電気工事」／第3項「特殊電気工事」「特種電気工事資格者認定証」／第4項「簡易電気工事」「認定電気工事従事者認定証」"
+              },
+              {
+                "citationIndex": 3,
+                "source": {
+                  "lawShort": "安衛法",
+                  "law": "労働安全衛生法",
+                  "article": "第59条第3項「安全衛生教育」",
+                  "paragraph": "第3項",
+                  "item": null
+                },
+                "citation": {
+                  "lawShort": "安衛法",
+                  "fullName": "労働安全衛生法",
+                  "articleNum": "第59条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "安衛法59条3項は、省令で定める危険・有害業務に就かせるとき、特別教育を行うよう定めています"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第3項「危険又は有害な業務で、厚生労働省令で定めるものに労働者を就かせるとき」「当該業務に関する安全又は衛生のための特別の教育を行わなければならない」"
+              },
+              {
+                "citationIndex": 4,
+                "source": {
+                  "lawShort": "安衛則",
+                  "law": "労働安全衛生規則",
+                  "article": "第36条「特別教育を必要とする業務」",
+                  "paragraph": null,
+                  "item": "第4号"
+                },
+                "citation": {
+                  "lawShort": "安衛則",
+                  "fullName": "労働安全衛生規則",
+                  "articleNum": "第36条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "電気では、安衛則36条4号に充電電路の敷設・点検・修理・操作等が掲げられています",
+                  "安衛則36条4号は、高圧・特別高圧では充電電路または支持物の敷設・点検・修理・操作を掲げています",
+                  "低圧では、充電電路の敷設・修理と、充電部分が露出した開閉器の操作が同号に掲げられています"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第4号「高圧若しくは特別高圧の充電電路又は支持物の敷設、点検、修理若しくは操作」／「低圧の充電電路（対地電圧が五十ボルト以下及び電信用・電話用等で感電危害のおそれのないものを除く）の敷設若しくは修理」／「低圧の電路の充電部分が露出している開閉器の操作」"
+              }
+            ]
+          },
+          "sourceSupported": true,
+          "sourceCount": 4,
+          "citationCount": 4,
+          "safetyKind": null,
+          "emergencyNormalAnswer": false,
+          "piiOutbound": false
+        },
+        {
+          "caseId": 2,
+          "route": "sse",
+          "normalQuestion": true,
+          "status": 200,
+          "answerFirst": true,
+          "substantiveAnswer": true,
+          "pureClarification": false,
+          "clarificationCorrect": true,
+          "clarificationCount": 1,
+          "quickReplyCount": 3,
+          "contextRetained": true,
+          "categoryDrift": false,
+          "citationStructureAligned": true,
+          "citationClaimEvidenceSupported": true,
+          "citationSupportDiagnostics": {
+            "invalidCitationIndices": [],
+            "uncitedLegalAssertions": [],
+            "sourceChecks": [
+              {
+                "citationIndex": 1,
+                "source": {
+                  "lawShort": "安衛法",
+                  "law": "労働安全衛生法",
+                  "article": "第14条「作業主任者」",
+                  "paragraph": null,
+                  "item": null
+                },
+                "citation": {
+                  "lawShort": "安衛法",
+                  "fullName": "労働安全衛生法",
+                  "articleNum": "第14条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "安衛法14条は、対象作業の区分に応じて作業主任者を選任し、労働者の指揮等を行わせるよう定めています"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "…、厚生労働省令で定めるところにより、当該作業の区分に応じて、作業主任者を選任し、その者に当該作業に従事する労働者の指揮その他の厚生労働省令で定める事項を行わせなければならない。"
+              },
+              {
+                "citationIndex": 2,
+                "source": {
+                  "lawShort": "安衛令",
+                  "law": "労働安全衛生法施行令",
+                  "article": "第6条「作業主任者を選任すべき作業」",
+                  "paragraph": null,
+                  "item": null
+                },
+                "citation": {
+                  "lawShort": "安衛令",
+                  "fullName": "労働安全衛生法施行令",
+                  "articleNum": "第6条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "安衛令6条は、「法第十四条の政令で定める作業」（指定された作業）を列挙しています",
+                  "安衛令6条の「高圧室内作業」は、大気圧を超える圧気工法の作業であり、高電圧の電気室を意味しません"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "法第十四条の政令で定める作業は、次のとおりとする。一　高圧室内作業（潜函工法その他の圧気工法により、大気圧を超える気圧下の作業室又はシヤフトの内部において行う作業に限る。）二　アセチレン溶接装置又はガス集合溶接装置を用いて行う金属の溶接、溶断又は加熱の作業三　次のいずれかに該当す…"
+              },
+              {
+                "citationIndex": 3,
+                "source": {
+                  "lawShort": "安衛則",
+                  "law": "労働安全衛生規則",
+                  "article": "第350条「電気工事の作業を行なう場合の作業指揮等」",
+                  "paragraph": null,
+                  "item": null
+                },
+                "citation": {
+                  "lawShort": "安衛則",
+                  "fullName": "労働安全衛生規則",
+                  "articleNum": "第350条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "電気作業では、安衛則350条が安衛則339条・341条1項・342条1項・344条1項・345条1項の作業を行うときに作業の指揮者を定めるよう求めています"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "事業者は、第三百三十九条、第三百四十一条第一項、第三百四十二条第一項、第三百四十四条第一項又は第三百四十五条第一項の作業を行なうときは、当該作業に従事する労働者に対し、作業を行なう期間、作業の内容並びに取り扱う電路及びこれに近接する電路の系統について周知させ、かつ、作業の指揮者を…"
+              },
+              {
+                "citationIndex": 4,
+                "source": {
+                  "lawShort": "安衛則",
+                  "law": "労働安全衛生規則",
+                  "article": "第36条「特別教育を必要とする業務」",
+                  "paragraph": null,
+                  "item": "第4号"
+                },
+                "citation": {
+                  "lawShort": "安衛則",
+                  "fullName": "労働安全衛生規則",
+                  "articleNum": "第36条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "安衛則36条4号には、高圧・特別高圧の充電電路または支持物の敷設・点検・修理・操作と、一定の低圧業務が掲げられています",
+                  "低圧か高圧・特別高圧かに加え、敷設・点検・修理・操作のどれを行うかを確認します"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第4号「高圧若しくは特別高圧の充電電路又は支持物の敷設、点検、修理若しくは操作」／「低圧の充電電路（対地電圧が五十ボルト以下及び電信用・電話用等で感電危害のおそれのないものを除く）の敷設若しくは修理」／「低圧の電路の充電部分が露出している開閉器の操作」"
+              }
+            ]
+          },
+          "sourceSupported": true,
+          "sourceCount": 4,
+          "citationCount": 4,
+          "safetyKind": null,
+          "emergencyNormalAnswer": false,
+          "piiOutbound": false
+        },
+        {
+          "caseId": 3,
+          "route": "sse",
+          "normalQuestion": true,
+          "status": 200,
+          "answerFirst": true,
+          "substantiveAnswer": true,
+          "pureClarification": false,
+          "clarificationCorrect": true,
+          "clarificationCount": 1,
+          "quickReplyCount": 3,
+          "contextRetained": null,
+          "categoryDrift": false,
+          "citationStructureAligned": true,
+          "citationClaimEvidenceSupported": true,
+          "citationSupportDiagnostics": {
+            "invalidCitationIndices": [],
+            "uncitedLegalAssertions": [],
+            "sourceChecks": [
+              {
+                "citationIndex": 1,
+                "source": {
+                  "lawShort": "安衛則",
+                  "law": "労働安全衛生規則",
+                  "article": "第36条「特別教育を必要とする業務」",
+                  "paragraph": null,
+                  "item": "第5号"
+                },
+                "citation": {
+                  "lawShort": "安衛則",
+                  "fullName": "労働安全衛生規則",
+                  "articleNum": "第36条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "安衛則36条5号は、最大荷重1トン未満のフォークリフト運転を掲げています",
+                  "1トン未満の規定は道路走行を除きます"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第5号　最大荷重一トン未満のフオークリフトの運転（道路交通法（昭和三十五年法律第百五号）第二条第一項第一号の道路（以下「道路」という。）上を走行させる運転を除く。）の業務"
+              },
+              {
+                "citationIndex": 2,
+                "source": {
+                  "lawShort": "安衛法",
+                  "law": "労働安全衛生法",
+                  "article": "第59条第3項「安全衛生教育」",
+                  "paragraph": "第3項",
+                  "item": null
+                },
+                "citation": {
+                  "lawShort": "安衛法",
+                  "fullName": "労働安全衛生法",
+                  "articleNum": "第59条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "安衛法59条3項により、省令で定める危険・有害業務に就かせるときは特別教育が必要です"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第3項「危険又は有害な業務で、厚生労働省令で定めるものに労働者を就かせるとき」「当該業務に関する安全又は衛生のための特別の教育を行わなければならない」"
+              },
+              {
+                "citationIndex": 3,
+                "source": {
+                  "lawShort": "安衛令",
+                  "law": "労働安全衛生法施行令",
+                  "article": "第20条「就業制限に係る業務」",
+                  "paragraph": null,
+                  "item": "第11号"
+                },
+                "citation": {
+                  "lawShort": "安衛令",
+                  "fullName": "労働安全衛生法施行令",
+                  "articleNum": "第20条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "最大荷重1トン以上のフォークリフト運転は、安衛令20条11号の就業制限業務です",
+                  "「最大荷重」は、車両の構造・材料に応じて基準荷重中心に負荷できる最大の荷重です",
+                  "最大荷重1トンちょうどは、安衛令20条11号の就業制限側です",
+                  "1トン以上の規定も道路走行を除きます"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第11号　最大荷重（フオークリフトの構造及び材料に応じて基準荷重中心に負荷させることができる最大の荷重をいう。）が一トン以上のフオークリフトの運転（道路上を走行させる運転を除く。）の業務"
+              },
+              {
+                "citationIndex": 4,
+                "source": {
+                  "lawShort": "安衛法",
+                  "law": "労働安全衛生法",
+                  "article": "第61条「就業制限」",
+                  "paragraph": null,
+                  "item": null
+                },
+                "citation": {
+                  "lawShort": "安衛法",
+                  "fullName": "労働安全衛生法",
+                  "articleNum": "第61条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "安衛法61条は、その業務を技能講習修了者等の所定資格を持つ者に限っています"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "事業者は、クレーンの運転その他の業務で、政令で定めるものについては、都道府県労働局長の当該業務に係る免許を受けた者又は都道府県労働局長の登録を受けた者が行う当該業務に係る技能講習を修了した者その他厚生労働省令で定める資格を有する者でなければ、当該業務に就かせてはならない。２　前項…"
+              }
+            ]
+          },
+          "sourceSupported": true,
+          "sourceCount": 4,
+          "citationCount": 4,
+          "safetyKind": null,
+          "emergencyNormalAnswer": false,
+          "piiOutbound": false
+        },
+        {
+          "caseId": 4,
+          "route": "sse",
+          "normalQuestion": true,
+          "status": 200,
+          "answerFirst": true,
+          "substantiveAnswer": true,
+          "pureClarification": false,
+          "clarificationCorrect": true,
+          "clarificationCount": 1,
+          "quickReplyCount": 0,
+          "contextRetained": null,
+          "categoryDrift": false,
+          "citationStructureAligned": true,
+          "citationClaimEvidenceSupported": true,
+          "citationSupportDiagnostics": {
+            "invalidCitationIndices": [],
+            "uncitedLegalAssertions": [],
+            "sourceChecks": [
+              {
+                "citationIndex": 1,
+                "source": {
+                  "lawShort": "安衛則",
+                  "law": "労働安全衛生規則",
+                  "article": "第563条第1項「作業床」",
+                  "paragraph": "第1項",
+                  "item": "第3号"
+                },
+                "citation": {
+                  "lawShort": "安衛則",
+                  "fullName": "労働安全衛生規則",
+                  "articleNum": "第563条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "高さ2m以上の一側足場を除く足場で、墜落により危険を及ぼすおそれのある箇所のうち、わく組足場以外の部分には手すり等と中桟等が必要です"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "「足場（一側足場を除く。第三号において同じ。）」／「高さ二メートル以上の作業場所」／第三号「墜落により労働者に危険を及ぼすおそれのある箇所」／ロ「わく組足場以外の足場　手すり等及び中桟等」"
+              },
+              {
+                "citationIndex": 2,
+                "source": {
+                  "lawShort": "安衛則",
+                  "law": "労働安全衛生規則",
+                  "article": "第552条第1項「架設通路」",
+                  "paragraph": "第1項",
+                  "item": "第4号"
+                },
+                "citation": {
+                  "lawShort": "安衛則",
+                  "fullName": "労働安全衛生規則",
+                  "articleNum": "第552条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "「手すり等」は高さ85cm以上、「中桟等」は高さ35〜50cmです"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第四号「墜落の危険のある箇所」／イ「高さ八十五センチメートル以上の手すり」／ロ「高さ三十五センチメートル以上五十センチメートル以下の桟」"
+              }
+            ]
+          },
+          "sourceSupported": true,
+          "sourceCount": 2,
+          "citationCount": 2,
+          "safetyKind": null,
+          "emergencyNormalAnswer": false,
+          "piiOutbound": false
+        },
+        {
+          "caseId": 5,
+          "route": "sse",
+          "normalQuestion": true,
+          "status": 200,
+          "answerFirst": true,
+          "substantiveAnswer": true,
+          "pureClarification": false,
+          "clarificationCorrect": true,
+          "clarificationCount": 1,
+          "quickReplyCount": 0,
+          "contextRetained": null,
+          "categoryDrift": false,
+          "citationStructureAligned": true,
+          "citationClaimEvidenceSupported": true,
+          "citationSupportDiagnostics": {
+            "invalidCitationIndices": [],
+            "uncitedLegalAssertions": [],
+            "sourceChecks": [
+              {
+                "citationIndex": 1,
+                "source": {
+                  "lawShort": "安衛令",
+                  "law": "労働安全衛生法施行令",
+                  "article": "第20条「就業制限に係る業務」",
+                  "paragraph": null,
+                  "item": "第16号"
+                },
+                "citation": {
+                  "lawShort": "安衛令",
+                  "fullName": "労働安全衛生法施行令",
+                  "articleNum": "第20条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "つり上げ荷重1トン以上のクレーン・移動式クレーン・デリックの玉掛けは、就業制限の対象です",
+                  "つり上げ荷重1トンちょうどは、就業制限の対象です",
+                  "揚貨装置は制限荷重で判定するため、機械の種類も確認します"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第16号　制限荷重が一トン以上の揚貨装置又はつり上げ荷重が一トン以上のクレーン、移動式クレーン若しくはデリックの玉掛けの業務"
+              },
+              {
+                "citationIndex": 2,
+                "source": {
+                  "lawShort": "クレーン則",
+                  "law": "クレーン等安全規則",
+                  "article": "第221条「就業制限」",
+                  "paragraph": null,
+                  "item": null
+                },
+                "citation": {
+                  "lawShort": "クレーン則",
+                  "fullName": "クレーン等安全規則",
+                  "articleNum": "第221条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "その業務は、玉掛け技能講習の修了者等に限られます"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "事業者は、令第二十条第十六号に掲げる業務（制限荷重が一トン以上の揚貨装置の玉掛けの業務を除く。）については、次の各号のいずれかに該当する者でなければ、当該業務に就かせてはならない。一　玉掛け技能講習を修了した者二　職業能力開発促進法（昭和四十四年法律第六十四号。以下「能開法」とい…"
+              },
+              {
+                "citationIndex": 3,
+                "source": {
+                  "lawShort": "クレーン則",
+                  "law": "クレーン等安全規則",
+                  "article": "第222条「特別の教育」",
+                  "paragraph": null,
+                  "item": null
+                },
+                "citation": {
+                  "lawShort": "クレーン則",
+                  "fullName": "クレーン等安全規則",
+                  "articleNum": "第222条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "つり上げ荷重1トン未満のクレーン等の玉掛けでは、事業者は特別教育を行わなければなりません"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "事業者は、つり上げ荷重が一トン未満のクレーン、移動式クレーン又はデリツクの玉掛けの業務に労働者をつかせるときは、当該労働者に対し、当該業務に関する安全のための特別の教育を行なわなければならない。２　前項の特別の教育は、次の科目について行なわなければならない。一　クレーン、移動式ク…"
+              },
+              {
+                "citationIndex": 4,
+                "source": {
+                  "lawShort": "安衛令",
+                  "law": "労働安全衛生法施行令",
+                  "article": "第10条「法第三十三条第一項の政令で定める機械等」",
+                  "paragraph": null,
+                  "item": "第1号"
+                },
+                "citation": {
+                  "lawShort": "安衛令",
+                  "fullName": "労働安全衛生法施行令",
+                  "articleNum": "第10条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "「つり上げ荷重」は、機械の構造・材料に応じて負荷できる最大の荷重です"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第1号　つり上げ荷重（クレーン（移動式クレーンを除く。以下同じ。）、移動式クレーン又はデリックの構造及び材料に応じて負荷させることができる最大の荷重をいう。以下同じ。）が〇・五トン以上の移動式クレーン"
+              }
+            ]
+          },
+          "sourceSupported": true,
+          "sourceCount": 4,
+          "citationCount": 4,
+          "safetyKind": null,
+          "emergencyNormalAnswer": false,
+          "piiOutbound": false
+        },
+        {
+          "caseId": 6,
+          "route": "sse",
+          "normalQuestion": true,
+          "status": 200,
+          "answerFirst": true,
+          "substantiveAnswer": true,
+          "pureClarification": false,
+          "clarificationCorrect": true,
+          "clarificationCount": 1,
+          "quickReplyCount": 3,
+          "contextRetained": null,
+          "categoryDrift": false,
+          "citationStructureAligned": true,
+          "citationClaimEvidenceSupported": true,
+          "citationSupportDiagnostics": {
+            "invalidCitationIndices": [],
+            "uncitedLegalAssertions": [],
+            "sourceChecks": [
+              {
+                "citationIndex": 1,
+                "source": {
+                  "lawShort": "安衛令",
+                  "law": "労働安全衛生法施行令",
+                  "article": "第10条「法第三十三条第一項の政令で定める機械等」",
+                  "paragraph": null,
+                  "item": "第7号"
+                },
+                "citation": {
+                  "lawShort": "安衛令",
+                  "fullName": "労働安全衛生法施行令",
+                  "articleNum": "第10条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "作業床の高さが2m以上のものが、安衛令10条7号の「高所作業車」です",
+                  "判定は当日の作業高さではなく、作業床を最大まで上げたときの高さで行います"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第7号　作業床の高さ（作業床を最も高く上昇させた場合におけるその床面の高さをいう。以下同じ。）が二メートル以上の高所作業車"
+              },
+              {
+                "citationIndex": 2,
+                "source": {
+                  "lawShort": "安衛則",
+                  "law": "労働安全衛生規則",
+                  "article": "第36条「特別教育を必要とする業務」",
+                  "paragraph": null,
+                  "item": "第10号の5"
+                },
+                "citation": {
+                  "lawShort": "安衛則",
+                  "fullName": "労働安全衛生規則",
+                  "articleNum": "第36条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "作業床の高さが10m未満の高所作業車運転が、安衛則36条10号の5に掲げられています",
+                  "道路上を走行させる運転は、これらの規定の対象外です"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第10号の5　作業床の高さ（令第十条第七号の作業床の高さをいう。）が十メートル未満の高所作業車（令第十条第七号の高所作業車をいう。以下同じ。）の運転（道路上を走行させる運転を除く。）の業務"
+              },
+              {
+                "citationIndex": 3,
+                "source": {
+                  "lawShort": "安衛令",
+                  "law": "労働安全衛生法施行令",
+                  "article": "第20条「就業制限に係る業務」",
+                  "paragraph": null,
+                  "item": "第15号"
+                },
+                "citation": {
+                  "lawShort": "安衛令",
+                  "fullName": "労働安全衛生法施行令",
+                  "articleNum": "第20条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "作業床の高さが10m以上の高所作業車運転は、安衛令20条15号の就業制限業務です",
+                  "作業床最高高さ10mちょうどは、就業制限の対象です",
+                  "道路上を走行させる運転は、これらの規定の対象外です"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第15号　作業床の高さが十メートル以上の高所作業車の運転（道路上を走行させる運転を除く。）の業務"
+              },
+              {
+                "citationIndex": 4,
+                "source": {
+                  "lawShort": "安衛法",
+                  "law": "労働安全衛生法",
+                  "article": "第61条「就業制限」",
+                  "paragraph": null,
+                  "item": null
+                },
+                "citation": {
+                  "lawShort": "安衛法",
+                  "fullName": "労働安全衛生法",
+                  "articleNum": "第61条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "安衛法61条は、政令で定める就業制限業務を技能講習修了者等の所定資格を持つ者に限っています"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "事業者は、クレーンの運転その他の業務で、政令で定めるものについては、都道府県労働局長の当該業務に係る免許を受けた者又は都道府県労働局長の登録を受けた者が行う当該業務に係る技能講習を修了した者その他厚生労働省令で定める資格を有する者でなければ、当該業務に就かせてはならない。２　前項…"
+              }
+            ]
+          },
+          "sourceSupported": true,
+          "sourceCount": 4,
+          "citationCount": 4,
+          "safetyKind": null,
+          "emergencyNormalAnswer": false,
+          "piiOutbound": false
+        },
+        {
+          "caseId": 7,
+          "route": "sse",
+          "normalQuestion": true,
+          "status": 200,
+          "answerFirst": true,
+          "substantiveAnswer": true,
+          "pureClarification": false,
+          "clarificationCorrect": true,
+          "clarificationCount": 1,
+          "quickReplyCount": 3,
+          "contextRetained": null,
+          "categoryDrift": false,
+          "citationStructureAligned": true,
+          "citationClaimEvidenceSupported": true,
+          "citationSupportDiagnostics": {
+            "invalidCitationIndices": [],
+            "uncitedLegalAssertions": [],
+            "sourceChecks": [
+              {
+                "citationIndex": 1,
+                "source": {
+                  "lawShort": "酸欠則",
+                  "law": "酸素欠乏症等防止規則",
+                  "article": "第13条第1項「監視人等」",
+                  "paragraph": "第1項",
+                  "item": null
+                },
+                "citation": {
+                  "lawShort": "酸欠則",
+                  "fullName": "酸素欠乏症等防止規則",
+                  "articleNum": "第13条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "酸素欠乏危険作業では、作業を常時監視し、異常時に作業主任者などへ直ちに通報する者を置く等の措置が必要です",
+                  "条文上の措置は「異常時に通報する者を置く等」です"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第1項　事業者は、酸素欠乏危険作業に労働者を従事させるときは、常時作業の状況を監視し、異常があつたときに直ちにその旨を酸素欠乏危険作業主任者及びその他の関係者に通報する者を置く等異常を早期に把握するために必要な措置を講じなければならない。"
+              },
+              {
+                "citationIndex": 2,
+                "source": {
+                  "lawShort": "酸欠則",
+                  "law": "酸素欠乏症等防止規則",
+                  "article": "第3条「作業環境測定等」",
+                  "paragraph": null,
+                  "item": null
+                },
+                "citation": {
+                  "lawShort": "酸欠則",
+                  "fullName": "酸素欠乏症等防止規則",
+                  "articleNum": "第3条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "その日の作業開始前に、酸素濃度等を測定します"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第1項「その日の作業を開始する前に酸素（第二種は酸素及び硫化水素）の濃度を測定」／第2項第1号「測定日時」／第2号「測定方法」／第3号「測定箇所」／第4号「測定条件」／第5号「測定結果」／第6号「測定を実施した者の氏名」／第7号「防止措置を講じたときは当該措置の概要」／「3年間保存」"
+              },
+              {
+                "citationIndex": 3,
+                "source": {
+                  "lawShort": "酸欠則",
+                  "law": "酸素欠乏症等防止規則",
+                  "article": "第5条「換気」",
+                  "paragraph": null,
+                  "item": null
+                },
+                "citation": {
+                  "lawShort": "酸欠則",
+                  "fullName": "酸素欠乏症等防止規則",
+                  "articleNum": "第5条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "原則として酸素18%以上に保つよう換気し、第二種では硫化水素も100万分の10以下に保ちます"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第1項「酸素濃度18%以上（第二種は酸素18%以上かつ硫化水素100万分の10以下）に保つよう換気」／ただし「爆発、酸化等を防止するため換気できない場合又は作業の性質上換気が著しく困難な場合」は除く"
+              }
+            ]
+          },
+          "sourceSupported": true,
+          "sourceCount": 3,
+          "citationCount": 3,
+          "safetyKind": null,
+          "emergencyNormalAnswer": false,
+          "piiOutbound": false
+        },
+        {
+          "caseId": 8,
+          "route": "sse",
+          "normalQuestion": true,
+          "status": 200,
+          "answerFirst": true,
+          "substantiveAnswer": true,
+          "pureClarification": false,
+          "clarificationCorrect": true,
+          "clarificationCount": 1,
+          "quickReplyCount": 3,
+          "contextRetained": null,
+          "categoryDrift": false,
+          "citationStructureAligned": true,
+          "citationClaimEvidenceSupported": true,
+          "citationSupportDiagnostics": {
+            "invalidCitationIndices": [],
+            "uncitedLegalAssertions": [],
+            "sourceChecks": [
+              {
+                "citationIndex": 1,
+                "source": {
+                  "lawShort": "有機則",
+                  "law": "有機溶剤中毒予防規則",
+                  "article": "第1条「定義等」",
+                  "paragraph": null,
+                  "item": null
+                },
+                "citation": {
+                  "lawShort": "有機則",
+                  "fullName": "有機溶剤中毒予防規則",
+                  "articleNum": "第1条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "有機則1条は、有機溶剤を重量の5%を超えて含む混合物を「有機溶剤含有物」としています",
+                  "SDSの成分・含有率欄と作業内容を確認し、有機溶剤を重量の5%を超えて含む混合物かを照合します"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第1項第2号「有機溶剤等は、有機溶剤又は有機溶剤含有物」「有機溶剤含有物は、有機溶剤を混合物の重量の5%を超えて含有するもの」"
+              },
+              {
+                "citationIndex": 2,
+                "source": {
+                  "lawShort": "有機則",
+                  "law": "有機溶剤中毒予防規則",
+                  "article": "第5条「第一種有機溶剤等又は第二種有機溶剤等に係る設備」",
+                  "paragraph": null,
+                  "item": null
+                },
+                "citation": {
+                  "lawShort": "有機則",
+                  "fullName": "有機溶剤中毒予防規則",
+                  "articleNum": "第5条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "第一種・第二種有機溶剤等を屋内作業場等で法定の有機溶剤業務に使う場合は、原則として発散源の密閉設備、局所排気装置またはプッシュプル型換気装置が必要です"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第1項「屋内作業場等で第一種・第二種有機溶剤等に係る有機溶剤業務に従事させるとき」「発散源を密閉する設備、局所排気装置又はプッシュプル型換気装置を設けなければならない」"
+              },
+              {
+                "citationIndex": 3,
+                "source": {
+                  "lawShort": "有機則",
+                  "law": "有機溶剤中毒予防規則",
+                  "article": "第6条「第三種有機溶剤等に係る設備」",
+                  "paragraph": null,
+                  "item": null
+                },
+                "citation": {
+                  "lawShort": "有機則",
+                  "fullName": "有機溶剤中毒予防規則",
+                  "articleNum": "第6条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "第三種有機溶剤等は扱いが異なり、タンク等の内部では全体換気を含む設備区分があります"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第1項「タンク等の内部」「第三種有機溶剤等」「吹付けによる有機溶剤業務を除く」「密閉する設備、局所排気装置、プッシュプル型換気装置又は全体換気装置」／第2項「吹付けによる第三種有機溶剤等」「密閉する設備、局所排気装置又はプッシュプル型換気装置」"
+              },
+              {
+                "citationIndex": 4,
+                "source": {
+                  "lawShort": "有機則",
+                  "law": "有機溶剤中毒予防規則",
+                  "article": "第8条「臨時に有機溶剤業務を行う場合の適用除外等」",
+                  "paragraph": null,
+                  "item": null
+                },
+                "citation": {
+                  "lawShort": "有機則",
+                  "fullName": "有機溶剤中毒予防規則",
+                  "articleNum": "第8条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "臨時作業または短時間作業には設備の適用除外・特例がありますが、場所と換気・保護具等の条件を条文どおり満たす必要があります"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第1項「臨時に有機溶剤業務」「タンク等の内部以外」「第五条の規定は、適用しない」／第2項「タンク等の内部」「全体換気装置」「第五条又は第六条第二項の規定にかかわらず」「発散源を密閉する設備、局所排気装置及びプッシュプル型換気装置を設けないことができる」"
+              },
+              {
+                "citationIndex": 5,
+                "source": {
+                  "lawShort": "有機則",
+                  "law": "有機溶剤中毒予防規則",
+                  "article": "第9条「短時間有機溶剤業務を行う場合の設備の特例」",
+                  "paragraph": null,
+                  "item": null
+                },
+                "citation": {
+                  "lawShort": "有機則",
+                  "fullName": "有機溶剤中毒予防規則",
+                  "articleNum": "第9条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "臨時作業または短時間作業には設備の適用除外・特例がありますが、場所と換気・保護具等の条件を条文どおり満たす必要があります"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第1項「タンク等の内部以外」「短時間」「全体換気装置」「第五条の規定にかかわらず」「密閉する設備、局所排気装置及びプッシュプル型換気装置を設けないことができる」／第2項「タンク等の内部」「短時間」「送気マスク」「第五条又は第六条の規定にかかわらず」「密閉する設備、局所排気装置、プッシュプル型換気装置及び全体換気装置を設けないことができる」"
+              }
+            ]
+          },
+          "sourceSupported": true,
+          "sourceCount": 5,
+          "citationCount": 5,
+          "safetyKind": null,
+          "emergencyNormalAnswer": false,
+          "piiOutbound": false
+        },
+        {
+          "caseId": 9,
+          "route": "sse",
+          "normalQuestion": true,
+          "status": 200,
+          "answerFirst": true,
+          "substantiveAnswer": true,
+          "pureClarification": false,
+          "clarificationCorrect": true,
+          "clarificationCount": 1,
+          "quickReplyCount": 3,
+          "contextRetained": null,
+          "categoryDrift": false,
+          "citationStructureAligned": true,
+          "citationClaimEvidenceSupported": true,
+          "citationSupportDiagnostics": {
+            "invalidCitationIndices": [],
+            "uncitedLegalAssertions": [],
+            "sourceChecks": [
+              {
+                "citationIndex": 1,
+                "source": {
+                  "lawShort": "安衛則",
+                  "law": "労働安全衛生規則",
+                  "article": "第563条第1項「作業床」",
+                  "paragraph": "第1項",
+                  "item": "第3号"
+                },
+                "citation": {
+                  "lawShort": "安衛則",
+                  "fullName": "労働安全衛生規則",
+                  "articleNum": "第563条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "高さ2m以上の一側足場を除く足場で、墜落により危険を及ぼすおそれのある箇所のうち、わく組足場以外の部分には手すり等と中桟等が必要です"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "「足場（一側足場を除く。第三号において同じ。）」／「高さ二メートル以上の作業場所」／第三号「墜落により労働者に危険を及ぼすおそれのある箇所」／ロ「わく組足場以外の足場　手すり等及び中桟等」"
+              },
+              {
+                "citationIndex": 2,
+                "source": {
+                  "lawShort": "安衛則",
+                  "law": "労働安全衛生規則",
+                  "article": "第552条第1項「架設通路」",
+                  "paragraph": "第1項",
+                  "item": "第4号"
+                },
+                "citation": {
+                  "lawShort": "安衛則",
+                  "fullName": "労働安全衛生規則",
+                  "articleNum": "第552条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "「手すり等」は高さ85cm以上、「中桟等」は高さ35〜50cmです"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第四号「墜落の危険のある箇所」／イ「高さ八十五センチメートル以上の手すり」／ロ「高さ三十五センチメートル以上五十センチメートル以下の桟」"
+              }
+            ]
+          },
+          "sourceSupported": true,
+          "sourceCount": 2,
+          "citationCount": 2,
+          "safetyKind": null,
+          "emergencyNormalAnswer": false,
+          "piiOutbound": false
+        },
+        {
+          "caseId": 10,
+          "route": "sse",
+          "normalQuestion": true,
+          "status": 200,
+          "answerFirst": true,
+          "substantiveAnswer": true,
+          "pureClarification": false,
+          "clarificationCorrect": true,
+          "clarificationCount": 1,
+          "quickReplyCount": 0,
+          "contextRetained": null,
+          "categoryDrift": false,
+          "citationStructureAligned": true,
+          "citationClaimEvidenceSupported": null,
+          "citationSupportDiagnostics": null,
+          "sourceSupported": null,
+          "sourceCount": 0,
+          "citationCount": 0,
+          "safetyKind": null,
+          "emergencyNormalAnswer": false,
+          "piiOutbound": false
+        },
+        {
+          "caseId": 11,
+          "route": "sse",
+          "normalQuestion": false,
+          "status": 200,
+          "answerFirst": null,
+          "substantiveAnswer": null,
+          "pureClarification": null,
+          "clarificationCorrect": null,
+          "clarificationCount": 0,
+          "quickReplyCount": 0,
+          "contextRetained": null,
+          "categoryDrift": false,
+          "citationStructureAligned": null,
+          "citationClaimEvidenceSupported": null,
+          "sourceSupported": null,
+          "sourceCount": 0,
+          "citationCount": 0,
+          "safetyKind": "emergency",
+          "emergencyNormalAnswer": false,
+          "piiOutbound": false
+        },
+        {
+          "caseId": 12,
+          "route": "sse",
+          "normalQuestion": false,
+          "status": 200,
+          "answerFirst": null,
+          "substantiveAnswer": null,
+          "pureClarification": null,
+          "clarificationCorrect": null,
+          "clarificationCount": 0,
+          "quickReplyCount": 0,
+          "contextRetained": null,
+          "categoryDrift": false,
+          "citationStructureAligned": null,
+          "citationClaimEvidenceSupported": null,
+          "sourceSupported": null,
+          "sourceCount": 0,
+          "citationCount": 0,
+          "safetyKind": "privacy",
+          "emergencyNormalAnswer": false,
+          "piiOutbound": false
+        }
+      ]
+    },
+    {
+      "route": "legacy",
+      "metrics": {
+        "normalQuestionCount": 10,
+        "answerFirstRate": 1,
+        "substantiveAnswerRate": 1,
+        "pureClarificationRate": 0,
+        "contextRetentionRate": 1,
+        "clarificationCorrectness": 1,
+        "citationSupportRate": 1,
+        "citationStructuralAlignmentRate": 1,
+        "maxClarificationQuestions": 1,
+        "maxQuickReplies": 3,
+        "categoryDriftCount": 0,
+        "emergencyNormalAnswerCount": 0,
+        "piiOutboundCount": 0
+      },
+      "cases": [
+        {
+          "caseId": 1,
+          "route": "legacy",
+          "normalQuestion": true,
+          "status": 200,
+          "answerFirst": true,
+          "substantiveAnswer": true,
+          "pureClarification": false,
+          "clarificationCorrect": true,
+          "clarificationCount": 1,
+          "quickReplyCount": 3,
+          "contextRetained": null,
+          "categoryDrift": false,
+          "citationStructureAligned": true,
+          "citationClaimEvidenceSupported": true,
+          "citationSupportDiagnostics": {
+            "invalidCitationIndices": [],
+            "uncitedLegalAssertions": [],
+            "sourceChecks": [
+              {
+                "citationIndex": 1,
+                "source": {
+                  "lawShort": "電気工事士法",
+                  "law": "電気工事士法",
+                  "article": "第2条第3項「用語の定義」",
+                  "paragraph": "第3項",
+                  "item": null
+                },
+                "citation": {
+                  "lawShort": "電気工事士法",
+                  "fullName": "電気工事士法",
+                  "articleNum": "第2条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "電気工事士法上の「電気工事」は、一般用電気工作物等または自家用電気工作物を設置・変更する工事です"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第3項　この法律において「電気工事」とは、一般用電気工作物等又は自家用電気工作物を設置し、又は変更する工事をいう。ただし、政令で定める軽微な工事を除く。"
+              },
+              {
+                "citationIndex": 2,
+                "source": {
+                  "lawShort": "電気工事士法",
+                  "law": "電気工事士法",
+                  "article": "第3条「電気工事士等」",
+                  "paragraph": null,
+                  "item": null
+                },
+                "citation": {
+                  "lawShort": "電気工事士法",
+                  "fullName": "電気工事士法",
+                  "articleNum": "第3条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "電気工事士法3条は、設備・工事区分に応じて、電気工事士免状または認定証等を持つ者に従事を限っています",
+                  "電気工事士法3条の区分は、自家用・一般用・特殊・簡易の各電気工事で異なります"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第1項「第一種電気工事士免状」「自家用電気工作物に係る電気工事」／第2項「第一種電気工事士又は第二種電気工事士免状」「一般用電気工作物等に係る電気工事」／第3項「特殊電気工事」「特種電気工事資格者認定証」／第4項「簡易電気工事」「認定電気工事従事者認定証」"
+              },
+              {
+                "citationIndex": 3,
+                "source": {
+                  "lawShort": "安衛法",
+                  "law": "労働安全衛生法",
+                  "article": "第59条第3項「安全衛生教育」",
+                  "paragraph": "第3項",
+                  "item": null
+                },
+                "citation": {
+                  "lawShort": "安衛法",
+                  "fullName": "労働安全衛生法",
+                  "articleNum": "第59条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "安衛法59条3項は、省令で定める危険・有害業務に就かせるとき、特別教育を行うよう定めています"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第3項「危険又は有害な業務で、厚生労働省令で定めるものに労働者を就かせるとき」「当該業務に関する安全又は衛生のための特別の教育を行わなければならない」"
+              },
+              {
+                "citationIndex": 4,
+                "source": {
+                  "lawShort": "安衛則",
+                  "law": "労働安全衛生規則",
+                  "article": "第36条「特別教育を必要とする業務」",
+                  "paragraph": null,
+                  "item": "第4号"
+                },
+                "citation": {
+                  "lawShort": "安衛則",
+                  "fullName": "労働安全衛生規則",
+                  "articleNum": "第36条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "電気では、安衛則36条4号に充電電路の敷設・点検・修理・操作等が掲げられています",
+                  "安衛則36条4号は、高圧・特別高圧では充電電路または支持物の敷設・点検・修理・操作を掲げています",
+                  "低圧では、充電電路の敷設・修理と、充電部分が露出した開閉器の操作が同号に掲げられています"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第4号「高圧若しくは特別高圧の充電電路又は支持物の敷設、点検、修理若しくは操作」／「低圧の充電電路（対地電圧が五十ボルト以下及び電信用・電話用等で感電危害のおそれのないものを除く）の敷設若しくは修理」／「低圧の電路の充電部分が露出している開閉器の操作」"
+              }
+            ]
+          },
+          "sourceSupported": true,
+          "sourceCount": 4,
+          "citationCount": 4,
+          "safetyKind": null,
+          "emergencyNormalAnswer": false,
+          "piiOutbound": false
+        },
+        {
+          "caseId": 2,
+          "route": "legacy",
+          "normalQuestion": true,
+          "status": 200,
+          "answerFirst": true,
+          "substantiveAnswer": true,
+          "pureClarification": false,
+          "clarificationCorrect": true,
+          "clarificationCount": 1,
+          "quickReplyCount": 3,
+          "contextRetained": true,
+          "categoryDrift": false,
+          "citationStructureAligned": true,
+          "citationClaimEvidenceSupported": true,
+          "citationSupportDiagnostics": {
+            "invalidCitationIndices": [],
+            "uncitedLegalAssertions": [],
+            "sourceChecks": [
+              {
+                "citationIndex": 1,
+                "source": {
+                  "lawShort": "安衛法",
+                  "law": "労働安全衛生法",
+                  "article": "第14条「作業主任者」",
+                  "paragraph": null,
+                  "item": null
+                },
+                "citation": {
+                  "lawShort": "安衛法",
+                  "fullName": "労働安全衛生法",
+                  "articleNum": "第14条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "安衛法14条は、対象作業の区分に応じて作業主任者を選任し、労働者の指揮等を行わせるよう定めています"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "…、厚生労働省令で定めるところにより、当該作業の区分に応じて、作業主任者を選任し、その者に当該作業に従事する労働者の指揮その他の厚生労働省令で定める事項を行わせなければならない。"
+              },
+              {
+                "citationIndex": 2,
+                "source": {
+                  "lawShort": "安衛令",
+                  "law": "労働安全衛生法施行令",
+                  "article": "第6条「作業主任者を選任すべき作業」",
+                  "paragraph": null,
+                  "item": null
+                },
+                "citation": {
+                  "lawShort": "安衛令",
+                  "fullName": "労働安全衛生法施行令",
+                  "articleNum": "第6条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "安衛令6条は、「法第十四条の政令で定める作業」（指定された作業）を列挙しています",
+                  "安衛令6条の「高圧室内作業」は、大気圧を超える圧気工法の作業であり、高電圧の電気室を意味しません"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "法第十四条の政令で定める作業は、次のとおりとする。一　高圧室内作業（潜函工法その他の圧気工法により、大気圧を超える気圧下の作業室又はシヤフトの内部において行う作業に限る。）二　アセチレン溶接装置又はガス集合溶接装置を用いて行う金属の溶接、溶断又は加熱の作業三　次のいずれかに該当す…"
+              },
+              {
+                "citationIndex": 3,
+                "source": {
+                  "lawShort": "安衛則",
+                  "law": "労働安全衛生規則",
+                  "article": "第350条「電気工事の作業を行なう場合の作業指揮等」",
+                  "paragraph": null,
+                  "item": null
+                },
+                "citation": {
+                  "lawShort": "安衛則",
+                  "fullName": "労働安全衛生規則",
+                  "articleNum": "第350条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "電気作業では、安衛則350条が安衛則339条・341条1項・342条1項・344条1項・345条1項の作業を行うときに作業の指揮者を定めるよう求めています"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "事業者は、第三百三十九条、第三百四十一条第一項、第三百四十二条第一項、第三百四十四条第一項又は第三百四十五条第一項の作業を行なうときは、当該作業に従事する労働者に対し、作業を行なう期間、作業の内容並びに取り扱う電路及びこれに近接する電路の系統について周知させ、かつ、作業の指揮者を…"
+              },
+              {
+                "citationIndex": 4,
+                "source": {
+                  "lawShort": "安衛則",
+                  "law": "労働安全衛生規則",
+                  "article": "第36条「特別教育を必要とする業務」",
+                  "paragraph": null,
+                  "item": "第4号"
+                },
+                "citation": {
+                  "lawShort": "安衛則",
+                  "fullName": "労働安全衛生規則",
+                  "articleNum": "第36条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "安衛則36条4号には、高圧・特別高圧の充電電路または支持物の敷設・点検・修理・操作と、一定の低圧業務が掲げられています",
+                  "低圧か高圧・特別高圧かに加え、敷設・点検・修理・操作のどれを行うかを確認します"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第4号「高圧若しくは特別高圧の充電電路又は支持物の敷設、点検、修理若しくは操作」／「低圧の充電電路（対地電圧が五十ボルト以下及び電信用・電話用等で感電危害のおそれのないものを除く）の敷設若しくは修理」／「低圧の電路の充電部分が露出している開閉器の操作」"
+              }
+            ]
+          },
+          "sourceSupported": true,
+          "sourceCount": 4,
+          "citationCount": 4,
+          "safetyKind": null,
+          "emergencyNormalAnswer": false,
+          "piiOutbound": false
+        },
+        {
+          "caseId": 3,
+          "route": "legacy",
+          "normalQuestion": true,
+          "status": 200,
+          "answerFirst": true,
+          "substantiveAnswer": true,
+          "pureClarification": false,
+          "clarificationCorrect": true,
+          "clarificationCount": 1,
+          "quickReplyCount": 3,
+          "contextRetained": null,
+          "categoryDrift": false,
+          "citationStructureAligned": true,
+          "citationClaimEvidenceSupported": true,
+          "citationSupportDiagnostics": {
+            "invalidCitationIndices": [],
+            "uncitedLegalAssertions": [],
+            "sourceChecks": [
+              {
+                "citationIndex": 1,
+                "source": {
+                  "lawShort": "安衛則",
+                  "law": "労働安全衛生規則",
+                  "article": "第36条「特別教育を必要とする業務」",
+                  "paragraph": null,
+                  "item": "第5号"
+                },
+                "citation": {
+                  "lawShort": "安衛則",
+                  "fullName": "労働安全衛生規則",
+                  "articleNum": "第36条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "安衛則36条5号は、最大荷重1トン未満のフォークリフト運転を掲げています",
+                  "1トン未満の規定は道路走行を除きます"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第5号　最大荷重一トン未満のフオークリフトの運転（道路交通法（昭和三十五年法律第百五号）第二条第一項第一号の道路（以下「道路」という。）上を走行させる運転を除く。）の業務"
+              },
+              {
+                "citationIndex": 2,
+                "source": {
+                  "lawShort": "安衛法",
+                  "law": "労働安全衛生法",
+                  "article": "第59条第3項「安全衛生教育」",
+                  "paragraph": "第3項",
+                  "item": null
+                },
+                "citation": {
+                  "lawShort": "安衛法",
+                  "fullName": "労働安全衛生法",
+                  "articleNum": "第59条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "安衛法59条3項により、省令で定める危険・有害業務に就かせるときは特別教育が必要です"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第3項「危険又は有害な業務で、厚生労働省令で定めるものに労働者を就かせるとき」「当該業務に関する安全又は衛生のための特別の教育を行わなければならない」"
+              },
+              {
+                "citationIndex": 3,
+                "source": {
+                  "lawShort": "安衛令",
+                  "law": "労働安全衛生法施行令",
+                  "article": "第20条「就業制限に係る業務」",
+                  "paragraph": null,
+                  "item": "第11号"
+                },
+                "citation": {
+                  "lawShort": "安衛令",
+                  "fullName": "労働安全衛生法施行令",
+                  "articleNum": "第20条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "最大荷重1トン以上のフォークリフト運転は、安衛令20条11号の就業制限業務です",
+                  "「最大荷重」は、車両の構造・材料に応じて基準荷重中心に負荷できる最大の荷重です",
+                  "最大荷重1トンちょうどは、安衛令20条11号の就業制限側です",
+                  "1トン以上の規定も道路走行を除きます"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第11号　最大荷重（フオークリフトの構造及び材料に応じて基準荷重中心に負荷させることができる最大の荷重をいう。）が一トン以上のフオークリフトの運転（道路上を走行させる運転を除く。）の業務"
+              },
+              {
+                "citationIndex": 4,
+                "source": {
+                  "lawShort": "安衛法",
+                  "law": "労働安全衛生法",
+                  "article": "第61条「就業制限」",
+                  "paragraph": null,
+                  "item": null
+                },
+                "citation": {
+                  "lawShort": "安衛法",
+                  "fullName": "労働安全衛生法",
+                  "articleNum": "第61条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "安衛法61条は、その業務を技能講習修了者等の所定資格を持つ者に限っています"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "事業者は、クレーンの運転その他の業務で、政令で定めるものについては、都道府県労働局長の当該業務に係る免許を受けた者又は都道府県労働局長の登録を受けた者が行う当該業務に係る技能講習を修了した者その他厚生労働省令で定める資格を有する者でなければ、当該業務に就かせてはならない。２　前項…"
+              }
+            ]
+          },
+          "sourceSupported": true,
+          "sourceCount": 4,
+          "citationCount": 4,
+          "safetyKind": null,
+          "emergencyNormalAnswer": false,
+          "piiOutbound": false
+        },
+        {
+          "caseId": 4,
+          "route": "legacy",
+          "normalQuestion": true,
+          "status": 200,
+          "answerFirst": true,
+          "substantiveAnswer": true,
+          "pureClarification": false,
+          "clarificationCorrect": true,
+          "clarificationCount": 1,
+          "quickReplyCount": 0,
+          "contextRetained": null,
+          "categoryDrift": false,
+          "citationStructureAligned": true,
+          "citationClaimEvidenceSupported": true,
+          "citationSupportDiagnostics": {
+            "invalidCitationIndices": [],
+            "uncitedLegalAssertions": [],
+            "sourceChecks": [
+              {
+                "citationIndex": 1,
+                "source": {
+                  "lawShort": "安衛則",
+                  "law": "労働安全衛生規則",
+                  "article": "第563条第1項「作業床」",
+                  "paragraph": "第1項",
+                  "item": "第3号"
+                },
+                "citation": {
+                  "lawShort": "安衛則",
+                  "fullName": "労働安全衛生規則",
+                  "articleNum": "第563条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "高さ2m以上の一側足場を除く足場で、墜落により危険を及ぼすおそれのある箇所のうち、わく組足場以外の部分には手すり等と中桟等が必要です"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "「足場（一側足場を除く。第三号において同じ。）」／「高さ二メートル以上の作業場所」／第三号「墜落により労働者に危険を及ぼすおそれのある箇所」／ロ「わく組足場以外の足場　手すり等及び中桟等」"
+              },
+              {
+                "citationIndex": 2,
+                "source": {
+                  "lawShort": "安衛則",
+                  "law": "労働安全衛生規則",
+                  "article": "第552条第1項「架設通路」",
+                  "paragraph": "第1項",
+                  "item": "第4号"
+                },
+                "citation": {
+                  "lawShort": "安衛則",
+                  "fullName": "労働安全衛生規則",
+                  "articleNum": "第552条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "「手すり等」は高さ85cm以上、「中桟等」は高さ35〜50cmです"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第四号「墜落の危険のある箇所」／イ「高さ八十五センチメートル以上の手すり」／ロ「高さ三十五センチメートル以上五十センチメートル以下の桟」"
+              }
+            ]
+          },
+          "sourceSupported": true,
+          "sourceCount": 2,
+          "citationCount": 2,
+          "safetyKind": null,
+          "emergencyNormalAnswer": false,
+          "piiOutbound": false
+        },
+        {
+          "caseId": 5,
+          "route": "legacy",
+          "normalQuestion": true,
+          "status": 200,
+          "answerFirst": true,
+          "substantiveAnswer": true,
+          "pureClarification": false,
+          "clarificationCorrect": true,
+          "clarificationCount": 1,
+          "quickReplyCount": 0,
+          "contextRetained": null,
+          "categoryDrift": false,
+          "citationStructureAligned": true,
+          "citationClaimEvidenceSupported": true,
+          "citationSupportDiagnostics": {
+            "invalidCitationIndices": [],
+            "uncitedLegalAssertions": [],
+            "sourceChecks": [
+              {
+                "citationIndex": 1,
+                "source": {
+                  "lawShort": "安衛令",
+                  "law": "労働安全衛生法施行令",
+                  "article": "第20条「就業制限に係る業務」",
+                  "paragraph": null,
+                  "item": "第16号"
+                },
+                "citation": {
+                  "lawShort": "安衛令",
+                  "fullName": "労働安全衛生法施行令",
+                  "articleNum": "第20条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "つり上げ荷重1トン以上のクレーン・移動式クレーン・デリックの玉掛けは、就業制限の対象です",
+                  "つり上げ荷重1トンちょうどは、就業制限の対象です",
+                  "揚貨装置は制限荷重で判定するため、機械の種類も確認します"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第16号　制限荷重が一トン以上の揚貨装置又はつり上げ荷重が一トン以上のクレーン、移動式クレーン若しくはデリックの玉掛けの業務"
+              },
+              {
+                "citationIndex": 2,
+                "source": {
+                  "lawShort": "クレーン則",
+                  "law": "クレーン等安全規則",
+                  "article": "第221条「就業制限」",
+                  "paragraph": null,
+                  "item": null
+                },
+                "citation": {
+                  "lawShort": "クレーン則",
+                  "fullName": "クレーン等安全規則",
+                  "articleNum": "第221条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "その業務は、玉掛け技能講習の修了者等に限られます"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "事業者は、令第二十条第十六号に掲げる業務（制限荷重が一トン以上の揚貨装置の玉掛けの業務を除く。）については、次の各号のいずれかに該当する者でなければ、当該業務に就かせてはならない。一　玉掛け技能講習を修了した者二　職業能力開発促進法（昭和四十四年法律第六十四号。以下「能開法」とい…"
+              },
+              {
+                "citationIndex": 3,
+                "source": {
+                  "lawShort": "クレーン則",
+                  "law": "クレーン等安全規則",
+                  "article": "第222条「特別の教育」",
+                  "paragraph": null,
+                  "item": null
+                },
+                "citation": {
+                  "lawShort": "クレーン則",
+                  "fullName": "クレーン等安全規則",
+                  "articleNum": "第222条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "つり上げ荷重1トン未満のクレーン等の玉掛けでは、事業者は特別教育を行わなければなりません"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "事業者は、つり上げ荷重が一トン未満のクレーン、移動式クレーン又はデリツクの玉掛けの業務に労働者をつかせるときは、当該労働者に対し、当該業務に関する安全のための特別の教育を行なわなければならない。２　前項の特別の教育は、次の科目について行なわなければならない。一　クレーン、移動式ク…"
+              },
+              {
+                "citationIndex": 4,
+                "source": {
+                  "lawShort": "安衛令",
+                  "law": "労働安全衛生法施行令",
+                  "article": "第10条「法第三十三条第一項の政令で定める機械等」",
+                  "paragraph": null,
+                  "item": "第1号"
+                },
+                "citation": {
+                  "lawShort": "安衛令",
+                  "fullName": "労働安全衛生法施行令",
+                  "articleNum": "第10条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "「つり上げ荷重」は、機械の構造・材料に応じて負荷できる最大の荷重です"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第1号　つり上げ荷重（クレーン（移動式クレーンを除く。以下同じ。）、移動式クレーン又はデリックの構造及び材料に応じて負荷させることができる最大の荷重をいう。以下同じ。）が〇・五トン以上の移動式クレーン"
+              }
+            ]
+          },
+          "sourceSupported": true,
+          "sourceCount": 4,
+          "citationCount": 4,
+          "safetyKind": null,
+          "emergencyNormalAnswer": false,
+          "piiOutbound": false
+        },
+        {
+          "caseId": 6,
+          "route": "legacy",
+          "normalQuestion": true,
+          "status": 200,
+          "answerFirst": true,
+          "substantiveAnswer": true,
+          "pureClarification": false,
+          "clarificationCorrect": true,
+          "clarificationCount": 1,
+          "quickReplyCount": 3,
+          "contextRetained": null,
+          "categoryDrift": false,
+          "citationStructureAligned": true,
+          "citationClaimEvidenceSupported": true,
+          "citationSupportDiagnostics": {
+            "invalidCitationIndices": [],
+            "uncitedLegalAssertions": [],
+            "sourceChecks": [
+              {
+                "citationIndex": 1,
+                "source": {
+                  "lawShort": "安衛令",
+                  "law": "労働安全衛生法施行令",
+                  "article": "第10条「法第三十三条第一項の政令で定める機械等」",
+                  "paragraph": null,
+                  "item": "第7号"
+                },
+                "citation": {
+                  "lawShort": "安衛令",
+                  "fullName": "労働安全衛生法施行令",
+                  "articleNum": "第10条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "作業床の高さが2m以上のものが、安衛令10条7号の「高所作業車」です",
+                  "判定は当日の作業高さではなく、作業床を最大まで上げたときの高さで行います"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第7号　作業床の高さ（作業床を最も高く上昇させた場合におけるその床面の高さをいう。以下同じ。）が二メートル以上の高所作業車"
+              },
+              {
+                "citationIndex": 2,
+                "source": {
+                  "lawShort": "安衛則",
+                  "law": "労働安全衛生規則",
+                  "article": "第36条「特別教育を必要とする業務」",
+                  "paragraph": null,
+                  "item": "第10号の5"
+                },
+                "citation": {
+                  "lawShort": "安衛則",
+                  "fullName": "労働安全衛生規則",
+                  "articleNum": "第36条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "作業床の高さが10m未満の高所作業車運転が、安衛則36条10号の5に掲げられています",
+                  "道路上を走行させる運転は、これらの規定の対象外です"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第10号の5　作業床の高さ（令第十条第七号の作業床の高さをいう。）が十メートル未満の高所作業車（令第十条第七号の高所作業車をいう。以下同じ。）の運転（道路上を走行させる運転を除く。）の業務"
+              },
+              {
+                "citationIndex": 3,
+                "source": {
+                  "lawShort": "安衛令",
+                  "law": "労働安全衛生法施行令",
+                  "article": "第20条「就業制限に係る業務」",
+                  "paragraph": null,
+                  "item": "第15号"
+                },
+                "citation": {
+                  "lawShort": "安衛令",
+                  "fullName": "労働安全衛生法施行令",
+                  "articleNum": "第20条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "作業床の高さが10m以上の高所作業車運転は、安衛令20条15号の就業制限業務です",
+                  "作業床最高高さ10mちょうどは、就業制限の対象です",
+                  "道路上を走行させる運転は、これらの規定の対象外です"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第15号　作業床の高さが十メートル以上の高所作業車の運転（道路上を走行させる運転を除く。）の業務"
+              },
+              {
+                "citationIndex": 4,
+                "source": {
+                  "lawShort": "安衛法",
+                  "law": "労働安全衛生法",
+                  "article": "第61条「就業制限」",
+                  "paragraph": null,
+                  "item": null
+                },
+                "citation": {
+                  "lawShort": "安衛法",
+                  "fullName": "労働安全衛生法",
+                  "articleNum": "第61条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "安衛法61条は、政令で定める就業制限業務を技能講習修了者等の所定資格を持つ者に限っています"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "事業者は、クレーンの運転その他の業務で、政令で定めるものについては、都道府県労働局長の当該業務に係る免許を受けた者又は都道府県労働局長の登録を受けた者が行う当該業務に係る技能講習を修了した者その他厚生労働省令で定める資格を有する者でなければ、当該業務に就かせてはならない。２　前項…"
+              }
+            ]
+          },
+          "sourceSupported": true,
+          "sourceCount": 4,
+          "citationCount": 4,
+          "safetyKind": null,
+          "emergencyNormalAnswer": false,
+          "piiOutbound": false
+        },
+        {
+          "caseId": 7,
+          "route": "legacy",
+          "normalQuestion": true,
+          "status": 200,
+          "answerFirst": true,
+          "substantiveAnswer": true,
+          "pureClarification": false,
+          "clarificationCorrect": true,
+          "clarificationCount": 1,
+          "quickReplyCount": 3,
+          "contextRetained": null,
+          "categoryDrift": false,
+          "citationStructureAligned": true,
+          "citationClaimEvidenceSupported": true,
+          "citationSupportDiagnostics": {
+            "invalidCitationIndices": [],
+            "uncitedLegalAssertions": [],
+            "sourceChecks": [
+              {
+                "citationIndex": 1,
+                "source": {
+                  "lawShort": "酸欠則",
+                  "law": "酸素欠乏症等防止規則",
+                  "article": "第13条第1項「監視人等」",
+                  "paragraph": "第1項",
+                  "item": null
+                },
+                "citation": {
+                  "lawShort": "酸欠則",
+                  "fullName": "酸素欠乏症等防止規則",
+                  "articleNum": "第13条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "酸素欠乏危険作業では、作業を常時監視し、異常時に作業主任者などへ直ちに通報する者を置く等の措置が必要です",
+                  "条文上の措置は「異常時に通報する者を置く等」です"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第1項　事業者は、酸素欠乏危険作業に労働者を従事させるときは、常時作業の状況を監視し、異常があつたときに直ちにその旨を酸素欠乏危険作業主任者及びその他の関係者に通報する者を置く等異常を早期に把握するために必要な措置を講じなければならない。"
+              },
+              {
+                "citationIndex": 2,
+                "source": {
+                  "lawShort": "酸欠則",
+                  "law": "酸素欠乏症等防止規則",
+                  "article": "第3条「作業環境測定等」",
+                  "paragraph": null,
+                  "item": null
+                },
+                "citation": {
+                  "lawShort": "酸欠則",
+                  "fullName": "酸素欠乏症等防止規則",
+                  "articleNum": "第3条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "その日の作業開始前に、酸素濃度等を測定します"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第1項「その日の作業を開始する前に酸素（第二種は酸素及び硫化水素）の濃度を測定」／第2項第1号「測定日時」／第2号「測定方法」／第3号「測定箇所」／第4号「測定条件」／第5号「測定結果」／第6号「測定を実施した者の氏名」／第7号「防止措置を講じたときは当該措置の概要」／「3年間保存」"
+              },
+              {
+                "citationIndex": 3,
+                "source": {
+                  "lawShort": "酸欠則",
+                  "law": "酸素欠乏症等防止規則",
+                  "article": "第5条「換気」",
+                  "paragraph": null,
+                  "item": null
+                },
+                "citation": {
+                  "lawShort": "酸欠則",
+                  "fullName": "酸素欠乏症等防止規則",
+                  "articleNum": "第5条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "原則として酸素18%以上に保つよう換気し、第二種では硫化水素も100万分の10以下に保ちます"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第1項「酸素濃度18%以上（第二種は酸素18%以上かつ硫化水素100万分の10以下）に保つよう換気」／ただし「爆発、酸化等を防止するため換気できない場合又は作業の性質上換気が著しく困難な場合」は除く"
+              }
+            ]
+          },
+          "sourceSupported": true,
+          "sourceCount": 3,
+          "citationCount": 3,
+          "safetyKind": null,
+          "emergencyNormalAnswer": false,
+          "piiOutbound": false
+        },
+        {
+          "caseId": 8,
+          "route": "legacy",
+          "normalQuestion": true,
+          "status": 200,
+          "answerFirst": true,
+          "substantiveAnswer": true,
+          "pureClarification": false,
+          "clarificationCorrect": true,
+          "clarificationCount": 1,
+          "quickReplyCount": 3,
+          "contextRetained": null,
+          "categoryDrift": false,
+          "citationStructureAligned": true,
+          "citationClaimEvidenceSupported": true,
+          "citationSupportDiagnostics": {
+            "invalidCitationIndices": [],
+            "uncitedLegalAssertions": [],
+            "sourceChecks": [
+              {
+                "citationIndex": 1,
+                "source": {
+                  "lawShort": "有機則",
+                  "law": "有機溶剤中毒予防規則",
+                  "article": "第1条「定義等」",
+                  "paragraph": null,
+                  "item": null
+                },
+                "citation": {
+                  "lawShort": "有機則",
+                  "fullName": "有機溶剤中毒予防規則",
+                  "articleNum": "第1条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "有機則1条は、有機溶剤を重量の5%を超えて含む混合物を「有機溶剤含有物」としています",
+                  "SDSの成分・含有率欄と作業内容を確認し、有機溶剤を重量の5%を超えて含む混合物かを照合します"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第1項第2号「有機溶剤等は、有機溶剤又は有機溶剤含有物」「有機溶剤含有物は、有機溶剤を混合物の重量の5%を超えて含有するもの」"
+              },
+              {
+                "citationIndex": 2,
+                "source": {
+                  "lawShort": "有機則",
+                  "law": "有機溶剤中毒予防規則",
+                  "article": "第5条「第一種有機溶剤等又は第二種有機溶剤等に係る設備」",
+                  "paragraph": null,
+                  "item": null
+                },
+                "citation": {
+                  "lawShort": "有機則",
+                  "fullName": "有機溶剤中毒予防規則",
+                  "articleNum": "第5条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "第一種・第二種有機溶剤等を屋内作業場等で法定の有機溶剤業務に使う場合は、原則として発散源の密閉設備、局所排気装置またはプッシュプル型換気装置が必要です"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第1項「屋内作業場等で第一種・第二種有機溶剤等に係る有機溶剤業務に従事させるとき」「発散源を密閉する設備、局所排気装置又はプッシュプル型換気装置を設けなければならない」"
+              },
+              {
+                "citationIndex": 3,
+                "source": {
+                  "lawShort": "有機則",
+                  "law": "有機溶剤中毒予防規則",
+                  "article": "第6条「第三種有機溶剤等に係る設備」",
+                  "paragraph": null,
+                  "item": null
+                },
+                "citation": {
+                  "lawShort": "有機則",
+                  "fullName": "有機溶剤中毒予防規則",
+                  "articleNum": "第6条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "第三種有機溶剤等は扱いが異なり、タンク等の内部では全体換気を含む設備区分があります"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第1項「タンク等の内部」「第三種有機溶剤等」「吹付けによる有機溶剤業務を除く」「密閉する設備、局所排気装置、プッシュプル型換気装置又は全体換気装置」／第2項「吹付けによる第三種有機溶剤等」「密閉する設備、局所排気装置又はプッシュプル型換気装置」"
+              },
+              {
+                "citationIndex": 4,
+                "source": {
+                  "lawShort": "有機則",
+                  "law": "有機溶剤中毒予防規則",
+                  "article": "第8条「臨時に有機溶剤業務を行う場合の適用除外等」",
+                  "paragraph": null,
+                  "item": null
+                },
+                "citation": {
+                  "lawShort": "有機則",
+                  "fullName": "有機溶剤中毒予防規則",
+                  "articleNum": "第8条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "臨時作業または短時間作業には設備の適用除外・特例がありますが、場所と換気・保護具等の条件を条文どおり満たす必要があります"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第1項「臨時に有機溶剤業務」「タンク等の内部以外」「第五条の規定は、適用しない」／第2項「タンク等の内部」「全体換気装置」「第五条又は第六条第二項の規定にかかわらず」「発散源を密閉する設備、局所排気装置及びプッシュプル型換気装置を設けないことができる」"
+              },
+              {
+                "citationIndex": 5,
+                "source": {
+                  "lawShort": "有機則",
+                  "law": "有機溶剤中毒予防規則",
+                  "article": "第9条「短時間有機溶剤業務を行う場合の設備の特例」",
+                  "paragraph": null,
+                  "item": null
+                },
+                "citation": {
+                  "lawShort": "有機則",
+                  "fullName": "有機溶剤中毒予防規則",
+                  "articleNum": "第9条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "臨時作業または短時間作業には設備の適用除外・特例がありますが、場所と換気・保護具等の条件を条文どおり満たす必要があります"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第1項「タンク等の内部以外」「短時間」「全体換気装置」「第五条の規定にかかわらず」「密閉する設備、局所排気装置及びプッシュプル型換気装置を設けないことができる」／第2項「タンク等の内部」「短時間」「送気マスク」「第五条又は第六条の規定にかかわらず」「密閉する設備、局所排気装置、プッシュプル型換気装置及び全体換気装置を設けないことができる」"
+              }
+            ]
+          },
+          "sourceSupported": true,
+          "sourceCount": 5,
+          "citationCount": 5,
+          "safetyKind": null,
+          "emergencyNormalAnswer": false,
+          "piiOutbound": false
+        },
+        {
+          "caseId": 9,
+          "route": "legacy",
+          "normalQuestion": true,
+          "status": 200,
+          "answerFirst": true,
+          "substantiveAnswer": true,
+          "pureClarification": false,
+          "clarificationCorrect": true,
+          "clarificationCount": 1,
+          "quickReplyCount": 3,
+          "contextRetained": null,
+          "categoryDrift": false,
+          "citationStructureAligned": true,
+          "citationClaimEvidenceSupported": true,
+          "citationSupportDiagnostics": {
+            "invalidCitationIndices": [],
+            "uncitedLegalAssertions": [],
+            "sourceChecks": [
+              {
+                "citationIndex": 1,
+                "source": {
+                  "lawShort": "安衛則",
+                  "law": "労働安全衛生規則",
+                  "article": "第563条第1項「作業床」",
+                  "paragraph": "第1項",
+                  "item": "第3号"
+                },
+                "citation": {
+                  "lawShort": "安衛則",
+                  "fullName": "労働安全衛生規則",
+                  "articleNum": "第563条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "高さ2m以上の一側足場を除く足場で、墜落により危険を及ぼすおそれのある箇所のうち、わく組足場以外の部分には手すり等と中桟等が必要です"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "「足場（一側足場を除く。第三号において同じ。）」／「高さ二メートル以上の作業場所」／第三号「墜落により労働者に危険を及ぼすおそれのある箇所」／ロ「わく組足場以外の足場　手すり等及び中桟等」"
+              },
+              {
+                "citationIndex": 2,
+                "source": {
+                  "lawShort": "安衛則",
+                  "law": "労働安全衛生規則",
+                  "article": "第552条第1項「架設通路」",
+                  "paragraph": "第1項",
+                  "item": "第4号"
+                },
+                "citation": {
+                  "lawShort": "安衛則",
+                  "fullName": "労働安全衛生規則",
+                  "articleNum": "第552条"
+                },
+                "metadataAligned": true,
+                "claims": [
+                  "「手すり等」は高さ85cm以上、「中桟等」は高さ35〜50cmです"
+                ],
+                "unsupportedClaims": [],
+                "unsupportedClaimDiagnostics": [],
+                "evidencePresent": true,
+                "evidenceExcerpt": "第四号「墜落の危険のある箇所」／イ「高さ八十五センチメートル以上の手すり」／ロ「高さ三十五センチメートル以上五十センチメートル以下の桟」"
+              }
+            ]
+          },
+          "sourceSupported": true,
+          "sourceCount": 2,
+          "citationCount": 2,
+          "safetyKind": null,
+          "emergencyNormalAnswer": false,
+          "piiOutbound": false
+        },
+        {
+          "caseId": 10,
+          "route": "legacy",
+          "normalQuestion": true,
+          "status": 200,
+          "answerFirst": true,
+          "substantiveAnswer": true,
+          "pureClarification": false,
+          "clarificationCorrect": true,
+          "clarificationCount": 1,
+          "quickReplyCount": 0,
+          "contextRetained": null,
+          "categoryDrift": false,
+          "citationStructureAligned": true,
+          "citationClaimEvidenceSupported": null,
+          "citationSupportDiagnostics": null,
+          "sourceSupported": null,
+          "sourceCount": 0,
+          "citationCount": 0,
+          "safetyKind": null,
+          "emergencyNormalAnswer": false,
+          "piiOutbound": false
+        },
+        {
+          "caseId": 11,
+          "route": "legacy",
+          "normalQuestion": false,
+          "status": 422,
+          "answerFirst": null,
+          "substantiveAnswer": null,
+          "pureClarification": null,
+          "clarificationCorrect": null,
+          "clarificationCount": 0,
+          "quickReplyCount": 0,
+          "contextRetained": null,
+          "categoryDrift": false,
+          "citationStructureAligned": null,
+          "citationClaimEvidenceSupported": null,
+          "sourceSupported": null,
+          "sourceCount": 0,
+          "citationCount": 0,
+          "safetyKind": "emergency",
+          "emergencyNormalAnswer": false,
+          "piiOutbound": false
+        },
+        {
+          "caseId": 12,
+          "route": "legacy",
+          "normalQuestion": false,
+          "status": 422,
+          "answerFirst": null,
+          "substantiveAnswer": null,
+          "pureClarification": null,
+          "clarificationCorrect": null,
+          "clarificationCount": 0,
+          "quickReplyCount": 0,
+          "contextRetained": null,
+          "categoryDrift": false,
+          "citationStructureAligned": null,
+          "citationClaimEvidenceSupported": null,
+          "sourceSupported": null,
+          "sourceCount": 0,
+          "citationCount": 0,
+          "safetyKind": "privacy",
+          "emergencyNormalAnswer": false,
+          "piiOutbound": false
+        }
+      ]
+    }
+  ],
+  "browser": null,
+  "overall": {
+    "normalQuestionCount": 30,
+    "answerFirstRate": 1,
+    "substantiveAnswerRate": 1,
+    "pureClarificationRate": 0,
+    "contextRetentionRate": 1,
+    "clarificationCorrectness": 1,
+    "citationSupportRate": 1,
+    "citationStructuralAlignmentRate": 1,
+    "maxClarificationQuestions": 1,
+    "maxQuickReplies": 3,
+    "categoryDriftCount": 0,
+    "emergencyNormalAnswerCount": 0,
+    "piiOutboundCount": 0
+  },
+  "passed": true,
+  "failures": []
+}

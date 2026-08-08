@@ -1,581 +1,167 @@
 import type { Metadata } from "next";
-import {
-  JsonLd,
-  webPageSchema,
-  breadcrumbSchema,
-} from "@/components/json-ld";
-import Image from "next/image";
 import Link from "next/link";
 import {
-  FileText,
-  AlertCircle,
-  BookOpen,
-  GraduationCap,
-  Scale,
-  Handshake,
-  Users2,
-  Sparkles,
-  Check,
-  Minus,
+  BookOpenCheck,
+  CircleAlert,
   ExternalLink,
+  SearchCheck,
+  ShieldCheck,
 } from "lucide-react";
-import { TranslatedPageHeader } from "@/components/translated-page-header";
-import { MHLW_MERGED_CHEMICAL_COUNT } from "@/lib/mhlw-chemicals";
-import { SITE_STATS } from "@/data/site-stats";
-import { LAW_SOURCE_COUNT } from "@/data/laws";
-import { PAID_MODE } from "@/lib/paid-mode";
-import { AboutContactBlock, AboutResearchDeclaration, AboutDisclaimer } from "./AboutBody";
-import { withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
 import { PageContainer } from "@/components/layout";
+import { PageJsonLd } from "@/components/page-json-ld";
+
+const DESCRIPTION =
+  "安全AIポータルの目的、一次資料の扱い、AIの限界、公開基準、修正報告先を説明します。";
 
 export const metadata: Metadata = {
-  title: "研究・実証プロジェクトについて",
-  description:
-    "安全AIポータル は労働安全衛生分野における AI・DX 活用の研究・実証を目的とした個人プロジェクトです。一次ソース付きで通達・事故事例・化学物質情報を無料公開。",
-  keywords: ["安全AIポータル", "研究プロジェクト", "労働安全コンサルタント", "AI", "DX", "労働安全衛生"],
+  title: "安全AIポータルについて",
+  description: DESCRIPTION,
   alternates: { canonical: "/about" },
-  openGraph: withSiteOpenGraph("/about", {
-    title: "研究・実証プロジェクトについて",
-    description:
-      "安全AIポータル は労働安全衛生分野における AI・DX 活用の研究・実証を目的とした個人プロジェクト。",
-  }),
-  twitter: withSiteTwitter({
-    title: "研究・実証プロジェクトについて",
-    description:
-      "安全AIポータル は労働安全衛生分野における AI・DX 活用の研究・実証を目的とした個人プロジェクト。",
-  }),
 };
 
-const STATS = [
-  { icon: AlertCircle, label: "死亡事故（10年統合）", value: `${SITE_STATS.accidents10yCount}件`, color: "red" },
-  { icon: AlertCircle, label: "死亡災害DB（6年分）", value: `${SITE_STATS.mhlwDeathsCount}件`, color: "red" },
-  { icon: FileText, label: "法令条文", value: `${SITE_STATS.lawArticleCount}条文`, color: "emerald" },
-  { icon: Scale, label: "化学物質", value: `${MHLW_MERGED_CHEMICAL_COUNT.toLocaleString()}物質`, color: "sky" },
-  { icon: GraduationCap, label: "演習問題", value: "1,000問+", color: "amber" },
-  { icon: BookOpen, label: "Eラーニング", value: "200問+", color: "violet" },
+const OFFICIAL_DESTINATIONS = [
+  {
+    title: "厚生労働省",
+    href: "https://www.mhlw.go.jp/",
+    note: "制度、通達、統計、職場の安全衛生に関する一次情報",
+  },
+  {
+    title: "e-Gov法令検索",
+    href: "https://elaws.e-gov.go.jp/",
+    note: "現行法令の正本確認",
+  },
+  {
+    title: "気象庁",
+    href: "https://www.jma.go.jp/bosai/",
+    note: "防災気象情報・警報の公式確認",
+  },
 ] as const;
-
-const COLOR_MAP = {
-  sky: {
-    bg: "bg-sky-50",
-    border: "border-sky-200",
-    icon: "bg-sky-100 text-sky-600",
-    label: "text-sky-800",
-    value: "text-sky-900",
-  },
-  red: {
-    bg: "bg-red-50",
-    border: "border-red-200",
-    icon: "bg-red-100 text-red-600",
-    label: "text-red-800",
-    value: "text-red-900",
-  },
-  amber: {
-    bg: "bg-amber-50",
-    border: "border-amber-200",
-    icon: "bg-amber-100 text-amber-600",
-    label: "text-amber-800",
-    value: "text-amber-900",
-  },
-  emerald: {
-    bg: "bg-emerald-50",
-    border: "border-emerald-200",
-    icon: "bg-emerald-100 text-emerald-600",
-    label: "text-emerald-800",
-    value: "text-emerald-900",
-  },
-  violet: {
-    bg: "bg-violet-50",
-    border: "border-violet-200",
-    icon: "bg-violet-100 text-violet-600",
-    label: "text-violet-800",
-    value: "text-violet-900",
-  },
-} as const;
-
-const TOKUSHO_ROWS: { label: string; value: React.ReactNode }[] = [
-  {
-    label: "販売業者名",
-    value: "個人事業主（氏名は請求により開示）",
-  },
-  {
-    label: "運営責任者",
-    value: "個人事業主・労働安全衛生コンサルタント（登録番号260022）（氏名は請求により開示）",
-  },
-  {
-    label: "所在地",
-    value: (
-      <>
-        東京都内（請求により詳細開示）。消費者からのご請求があれば遅滞なく書面にて開示いたします。
-        <Link href="/contact" className="ml-1 underline hover:text-slate-800">
-          お問い合わせフォーム
-        </Link>
-        よりご連絡ください。
-      </>
-    ),
-  },
-  {
-    label: "電話番号",
-    value: (
-      <>
-        請求により開示（原則メール対応）。通常のご連絡は
-        <Link href="/contact" className="mx-1 underline hover:text-slate-800">
-          お問い合わせフォーム
-        </Link>
-        からお願いいたします（原則3営業日以内に返信）。
-      </>
-    ),
-  },
-  {
-    label: "メールアドレス",
-    value: (
-      <>
-        お問い合わせは
-        <Link href="/contact" className="mx-1 underline hover:text-slate-800">
-          お問い合わせフォーム
-        </Link>
-        よりご連絡ください。メールアドレスは消費者からのご請求により遅滞なく開示いたします。
-      </>
-    ),
-  },
-  {
-    label: "販売価格",
-    value: "各サービスページに記載（税抜表示／受託業務は別途お問い合わせ）",
-  },
-  {
-    label: "支払方法",
-    value: "クレジットカード（Visa／Mastercard／American Express／JCB、Stripeにて処理）／銀行振込（受託業務）",
-  },
-  {
-    label: "支払時期",
-    value: "受託業務：請求書発行月の翌月末払い／サブスク：お申し込み時",
-  },
-  {
-    label: "サービス提供時期",
-    value: "受託業務：契約書記載の納期／サブスク：お申し込み完了後、即時提供",
-  },
-  {
-    label: "返品・キャンセル",
-    value:
-      "デジタルコンテンツおよび役務提供の性質上、原則として返金はお受けできません。ただし、初回課金日から8日以内に「サービス内容が広告と著しく相違する」等の合理的理由がある場合は個別審査のうえ返金に応じます。月額サブスクの中途解約は当該請求期間末日まで利用可能ですが日割り返金は行いません。詳細は利用規約 第7条をご参照ください。",
-  },
-  {
-    label: "適格請求書発行事業者番号",
-    value:
-      "受託業務で適格請求書（インボイス）が必要な場合は、契約時にご請求ください。本サイトは個人事業主が運営しており、登録状況および登録番号は別途開示いたします（未登録の場合はその旨を明示）。",
-  },
-  {
-    label: "動作環境",
-    value:
-      "Google Chrome／Safari／Microsoft Edge の最新版を推奨。Internet Explorer は非対応。スマートフォン・タブレット・PCで動作確認済（一部機能はPC推奨）。",
-  },
-];
 
 export default function AboutPage() {
   return (
-    <PageContainer width="narrow">
-      <JsonLd
-        schema={[
-          webPageSchema({
-            name: "研究・実証プロジェクトについて",
-            description:
-              "安全AIポータル は労働安全衛生分野における AI・DX 活用の研究・実証を目的とした個人プロジェクトです。一次ソース付きで通達・事故事例・化学物質情報を無料公開。",
-            url: "https://www.anzen-ai-portal.jp/about",
-          }),
-          breadcrumbSchema([
-            { name: "ホーム", url: "https://www.anzen-ai-portal.jp" },
-            { name: "プロジェクトについて", url: "https://www.anzen-ai-portal.jp/about" },
-          ]),
-        ]}
-      />
-      <TranslatedPageHeader
-        titleJa="研究・実証プロジェクトについて"
-        titleEn="About 安全AIポータル Research Project"
-        descriptionJa="個人運営の労働安全 × AI・DX 研究プロジェクト"
-        descriptionEn="An independent research project on AI/DX in occupational safety"
-        iconName="Info"
-        iconColor="emerald"
+    <PageContainer width="wide">
+      <PageJsonLd
+        name="安全AIポータルについて"
+        description={DESCRIPTION}
+        path="/about"
       />
 
-      {/* 研究プロジェクト宣言（最上部） */}
-      <AboutResearchDeclaration />
+      <header className="max-w-4xl">
+        <p className="text-sm font-bold tracking-wide text-emerald-800">
+          ABOUT &amp; LIMITS
+        </p>
+        <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950 dark:text-white">
+          安全AIポータルについて
+        </h1>
+        <p className="mt-4 text-base leading-8 text-slate-700 dark:text-slate-200">
+          公的機関の一次情報を置き換えるサイトではありません。現場の言葉から必要な情報へ到達し、
+          今日の安全行動、KY、法令、事故、化学物質、気象を一連の作業として扱いやすくするための補助ポータルです。
+        </p>
+      </header>
 
-      <div className="mt-6 space-y-6">
-        {/* One Big Thing — サイトの独自価値宣言（ID_060・ID_002・ID_048） */}
-        <section
-          aria-labelledby="one-big-thing-heading"
-          className="rounded-2xl border-2 border-emerald-300 bg-gradient-to-br from-emerald-50 via-white to-amber-50 p-5 shadow-sm"
-        >
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-emerald-800">
-            <Sparkles className="h-4 w-4 text-amber-500" aria-hidden="true" />
-            安全AIポータル の One Big Thing
-          </div>
-          <h2
-            id="one-big-thing-heading"
-            className="mt-2 text-xl font-bold leading-snug text-slate-900 sm:text-2xl"
-          >
-            現場の声を反映して継続的に進化する、公開PDCA型の安全ポータル
+      <div className="mt-8 grid gap-5 lg:grid-cols-3">
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-900">
+          <BookOpenCheck
+            className="h-7 w-7 text-emerald-700"
+            aria-hidden="true"
+          />
+          <h2 className="mt-3 text-lg font-bold text-slate-950 dark:text-white">
+            一次資料を正本とする
           </h2>
-          <p className="mt-3 text-sm leading-6 text-slate-700">
-            私たちの差別化は、機能の数ではありません。
-            <strong className="font-bold text-emerald-900">
-              現場担当者・安全管理者・外国人労働者など多様な立場からのフィードバックを公開 PDCA で回し続ける運営
-            </strong>
-            そのものです。
-            運営者（労働安全衛生コンサルタント・登録番号260022）が、ユーザーの指摘を全件確認し、短いサイクルで実装・検証を繰り返します。
-          </p>
-          <div className="mt-4 grid gap-3 sm:grid-cols-3">
-            <Pill
-              k="更新頻度"
-              v="週次"
-              note="法改正・事故DB・UIを継続改善"
-            />
-            <Pill
-              k="透明性"
-              v="公開PDCA"
-              note="指摘と対応はコミット履歴で追跡可能"
-            />
-            <Pill
-              k="出典必須"
-              v={`RAG ${LAW_SOURCE_COUNT}法令等`}
-              note="法令・規則・指針・通達。e-Gov直リンク・判例併記"
-            />
-          </div>
-          <p className="mt-3 text-[11px] leading-5 text-slate-500">
-            ※ 批判を隠さず受け止めて前進する運用速度そのものが、サイト全体の一次差別化軸です。
+          <p className="mt-2 text-sm leading-6 text-slate-700 dark:text-slate-200">
+            法令、警報、事故、公的指針は発行主体の公開資料を優先します。リンク先、対象時点、取得日、確認状態を可能な範囲で表示します。
           </p>
         </section>
-
-        {/* 運営チームプロフィール */}
-        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <h2 className="mb-4 text-base font-bold text-slate-900">
-            運営者プロフィール
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-900">
+          <SearchCheck
+            className="h-7 w-7 text-sky-700"
+            aria-hidden="true"
+          />
+          <h2 className="mt-3 text-lg font-bold text-slate-950 dark:text-white">
+            現場語から探す
           </h2>
-          <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-start">
-            {/* マスコット */}
-            <div className="flex-shrink-0">
-              <Image
-                src="/mascot/mascot-chihuahua-4.webp"
-                alt="安全AIポータル マスコット"
-                width={100}
-                height={100}
-                className="drop-shadow-md"
-              />
-            </div>
-            <div className="flex-1 text-center sm:text-left">
-              <p className="text-2xl font-bold text-slate-900 sm:text-3xl">
-                安全AIポータル
-              </p>
-              <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-1.5 text-sm font-semibold text-emerald-700 border border-emerald-200">
-                <Scale className="h-4 w-4" />
-                労働安全衛生コンサルタント（登録番号260022）が個人で運営
-              </div>
-              <p className="mt-3 text-sm leading-6 text-slate-600">
-                大型インフラ施工管理の実務経験を持つ労働安全衛生コンサルタント（登録番号260022）が、個人プロジェクトとして本サイトを運営しています。
-                AI・DX を活用した現場安全業務の効率化を研究・実証する場として、安全AIポータル を公開しています。
-              </p>
-              <div className="mt-4 rounded-lg border border-emerald-100 bg-emerald-50/60 p-3 text-left">
-                <p className="text-xs font-semibold text-emerald-800">監修者によるレビュー範囲</p>
-                <ul className="mt-1 list-disc pl-4 text-xs leading-5 text-slate-700">
-                  <li>法令・法改正情報の選定および要約方針のレビュー</li>
-                  <li>KY用紙・リスクアセスメント様式の適合性確認</li>
-                  <li>事故データベース掲載基準および出典の取扱い</li>
-                  <li>Eラーニング・演習問題の内容整合性のスポットチェック</li>
-                </ul>
-                <p className="mt-2 text-[11px] leading-5 text-slate-500">
-                  ※ AI生成の要約・回答は最新法令や個別事案の判断を保証するものではありません。具体的な判断は必ず一次資料・専門家をご確認ください。
-                </p>
-              </div>
-
-              {/* 資格・経歴 */}
-              <div className="mt-4 grid gap-3 sm:grid-cols-2 text-left">
-                <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-                  <p className="text-xs font-semibold text-slate-700 mb-1">取得資格</p>
-                  <ul className="text-xs leading-5 text-slate-600 space-y-0.5">
-                    <li>・ 労働安全コンサルタント</li>
-                    <li>・ 1級土木施工管理技士</li>
-                    <li>・ 監理技術者</li>
-                  </ul>
-                </div>
-                <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-                  <p className="text-xs font-semibold text-slate-700 mb-1">実務経験</p>
-                  <ul className="text-xs leading-5 text-slate-600 space-y-0.5">
-                    <li>・ スーパーゼネコンでの施工管理</li>
-                    <li>・ 大型インフラ工事の安全管理</li>
-                    <li>・ 下請・協力会社を含む現場統括</li>
-                  </ul>
-                </div>
-                <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-                  <p className="text-xs font-semibold text-slate-700 mb-1">AI・DX 活用</p>
-                  <ul className="text-xs leading-5 text-slate-600 space-y-0.5">
-                    <li>・ Python / OpenAI API による安全業務自動化</li>
-                    <li>・ Excel VBA で帳票・KY・安全書類をデジタル化</li>
-                    <li>・ Next.js / TypeScript による Web 開発</li>
-                  </ul>
-                </div>
-                <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-                  <p className="text-xs font-semibold text-slate-700 mb-1">専門分野</p>
-                  <ul className="text-xs leading-5 text-slate-600 space-y-0.5">
-                    <li>・ 建設・製造業の労働安全衛生</li>
-                    <li>・ リスクアセスメント・KY の仕組み化</li>
-                    <li>・ 安全衛生教育・特別教育の企画運営</li>
-                  </ul>
-                </div>
-                <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-                  <p className="text-xs font-semibold text-slate-700 mb-1">表彰実績</p>
-                  <ul className="text-xs leading-5 text-slate-600 space-y-0.5">
-                    <li>・ 大規模プロジェクトで表彰実績あり</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* サイトの実績 */}
-        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <h2 className="mb-4 text-base font-bold text-slate-900">
-            サイトの実績
-          </h2>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-            {STATS.map((stat) => {
-              const c = COLOR_MAP[stat.color];
-              const Icon = stat.icon;
-              return (
-                <div
-                  key={stat.label}
-                  className={`flex flex-col items-center gap-2 rounded-xl border p-3 text-center ${c.bg} ${c.border}`}
-                >
-                  <span
-                    className={`inline-flex h-9 w-9 items-center justify-center rounded-full ${c.icon}`}
-                  >
-                    <Icon className="h-5 w-5" />
-                  </span>
-                  <p className={`text-lg font-bold leading-none ${c.value}`}>
-                    {stat.value}
-                  </p>
-                  <p className={`text-xs font-medium ${c.label}`}>
-                    {stat.label}
-                  </p>
-                </div>
-              );
-            })}
-          </div>
-        </section>
-
-        {/* パートナー／連携先 */}
-        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <h2 className="mb-2 flex items-center gap-2 text-base font-bold text-slate-900">
-            <Handshake className="h-4 w-4 text-emerald-600" aria-hidden="true" />
-            パートナー／連携先
-          </h2>
-          <p className="mb-4 text-xs leading-5 text-slate-500">
-            当サイトは下記の公的機関・団体が公開する一次資料を引用・参照しています。
-            連携・相互リンク等のご提案はお問い合わせフォームよりご連絡ください。
-          </p>
-          <ul className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
-            {[
-              { name: "厚生労働省 労働基準局", url: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/roudoukijun/index.html", role: "法令・通達・統計の一次出典" },
-              { name: "e-Gov 法令検索", url: "https://laws.e-gov.go.jp/", role: "条文の原文リンク先" },
-              { name: "中央労働災害防止協会（中災防）", url: "https://www.jisha.or.jp/", role: "RST・安全大会・OSHMS資料" },
-              { name: "建設業労働災害防止協会（建災防）", url: "https://www.kensaibou.or.jp/", role: "建設業の講習・安全衛生計画" },
-              { name: "独立行政法人 労働者健康安全機構", url: "https://www.johas.go.jp/", role: "労災認定・エイジフレンドリー補助金" },
-              { name: "外国人技能実習機構（OTIT）", url: "https://www.otit.go.jp/", role: "技能実習生相談窓口（多言語）" },
-            ].map((p) => (
-              <li
-                key={p.name}
-                className="rounded-lg border border-slate-200 bg-slate-50/60 p-3"
-              >
-                <a
-                  href={p.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-sm font-semibold text-slate-800 hover:text-emerald-700"
-                >
-                  {p.name}
-                  <ExternalLink className="h-3 w-3" aria-hidden="true" />
-                </a>
-                <p className="mt-0.5 text-[11px] leading-5 text-slate-500">{p.role}</p>
-              </li>
-            ))}
-          </ul>
-          <p className="mt-3 text-[11px] leading-5 text-slate-400">
-            ※ 上記は公開資料の参照・リンク関係であり、各団体との公式な業務提携・推薦関係を意味するものではありません。
+          <p className="mt-2 text-sm leading-6 text-slate-700 dark:text-slate-200">
+            正式名称だけでなく、略語・現場語・表記揺れから検索できます。検索結果は一次資料、サイト解説、事故、ツールなどに分類します。
           </p>
         </section>
-
-        {/* 競合比較 */}
-        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <h2 className="mb-2 flex items-center gap-2 text-base font-bold text-slate-900">
-            <Sparkles className="h-4 w-4 text-amber-500" aria-hidden="true" />
-            競合比較
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-900">
+          <ShieldCheck
+            className="h-7 w-7 text-violet-700"
+            aria-hidden="true"
+          />
+          <h2 className="mt-3 text-lg font-bold text-slate-950 dark:text-white">
+            AIを補助に限定する
           </h2>
-          <p className="mb-4 text-xs leading-5 text-slate-500">
-            他の労働安全情報サイト・公的資源と比較した本サイトの位置づけです。
-            それぞれに得意領域があるため、目的に応じて併用されることを推奨します。
-          </p>
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[540px] text-xs sm:text-sm">
-              <thead className="bg-slate-50 text-slate-600">
-                <tr>
-                  <th className="px-3 py-2 text-left font-semibold">機能・特徴</th>
-                  <th className="px-3 py-2 text-center font-semibold">安全AIポータル</th>
-                  <th className="px-3 py-2 text-center font-semibold">厚労省<br />e-Gov</th>
-                  <th className="px-3 py-2 text-center font-semibold">中災防</th>
-                  <th className="px-3 py-2 text-center font-semibold">大手有料LMS</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 text-slate-700">
-                {[
-                  { label: "法令条文の一次出典", self: true, egov: true, jisha: true, lms: false },
-                  { label: "事故DBのグラフ可視化", self: true, egov: false, jisha: false, lms: true },
-                  { label: "KY用紙（シンプル/詳細切替）", self: true, egov: false, jisha: false, lms: true },
-                  { label: "化学物質RA入力ツール", self: true, egov: false, jisha: false, lms: false },
-                  { label: "演習問題1,000問超", self: true, egov: false, jisha: true, lms: true },
-                  { label: "Eラーニング（業種別250問+）", self: true, egov: false, jisha: true, lms: true },
-                  { label: "助成金早見（中小向け）", self: true, egov: false, jisha: false, lms: false },
-                  { label: "現場向けスマホ導線", self: true, egov: false, jisha: false, lms: false },
-                  { label: "無料で全機能試せる", self: true, egov: true, jisha: false, lms: false },
-                  { label: "多言語（やさしい日本語以外）", self: false, egov: false, jisha: false, lms: false },
-                  { label: "SCORM/xAPI対応", self: false, egov: false, jisha: false, lms: true },
-                ].map((r) => (
-                  <tr key={r.label}>
-                    <td className="px-3 py-2 font-medium">{r.label}</td>
-                    <td className="px-3 py-2 text-center">
-                      {r.self ? <Check className="mx-auto h-4 w-4 text-emerald-600" aria-label="対応" /> : <Minus className="mx-auto h-4 w-4 text-slate-300" aria-label="未対応" />}
-                    </td>
-                    <td className="px-3 py-2 text-center">
-                      {r.egov ? <Check className="mx-auto h-4 w-4 text-emerald-600" aria-label="対応" /> : <Minus className="mx-auto h-4 w-4 text-slate-300" aria-label="未対応" />}
-                    </td>
-                    <td className="px-3 py-2 text-center">
-                      {r.jisha ? <Check className="mx-auto h-4 w-4 text-emerald-600" aria-label="対応" /> : <Minus className="mx-auto h-4 w-4 text-slate-300" aria-label="未対応" />}
-                    </td>
-                    <td className="px-3 py-2 text-center">
-                      {r.lms ? <Check className="mx-auto h-4 w-4 text-emerald-600" aria-label="対応" /> : <Minus className="mx-auto h-4 w-4 text-slate-300" aria-label="未対応" />}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <p className="mt-3 text-[11px] leading-5 text-slate-400">
-            ※ 2026年4月時点の各サービス公開情報をもとに比較。機能は随時変更されます。多言語・SCORM対応は今後の開発課題として認識しています。
+          <p className="mt-2 text-sm leading-6 text-slate-700 dark:text-slate-200">
+            AI回答やAI候補は確定情報ではありません。根拠不足では保留し、公式資料と人による確認へつなぎます。
           </p>
         </section>
-
-        {/* サイト設計思想 */}
-        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <h2 className="mb-2 flex items-center gap-2 text-base font-bold text-slate-900">
-            <Users2 className="h-4 w-4 text-sky-600" aria-hidden="true" />
-            誰のためのサイトか
-          </h2>
-          <p className="text-sm leading-6 text-slate-700">
-            労働安全は、建設業の男性ベテランのためだけにある領域ではありません。
-            外国人実習生・女性施工管理・高齢パート・在宅フリーランス・障害者・LGBTQ当事者の労働者にも、等しく届く情報ポータルを目指しています。
-          </p>
-          <ul className="mt-3 grid grid-cols-2 gap-2 text-xs sm:grid-cols-3">
-            {[
-              "建設・製造の現場職長",
-              "中小企業の経営者",
-              "新人安全衛生担当者",
-              "外国人技能実習の指導員",
-              "医療・介護の管理職",
-              "行政・協会・士業",
-              "高齢・非正規労働者",
-              "女性施工管理・現場監督",
-              "障害者雇用の担当者",
-            ].map((u) => (
-              <li
-                key={u}
-                className="rounded-lg bg-sky-50 px-2.5 py-1.5 text-center font-medium text-sky-800"
-              >
-                {u}
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        {/* プロジェクト関連ページ */}
-        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <h2 className="mb-3 flex items-center gap-2 text-base font-bold text-slate-900">
-            <BookOpen className="h-4 w-4 text-sky-600" aria-hidden="true" />
-            運営・研究の補足資料
-          </h2>
-          <ul className="grid gap-3 sm:grid-cols-2">
-            {[
-              { href: "/guides", title: "検索意図ガイド（4キーワード）", desc: "安衛法AIチャット・業種別事故レポート・年次計画・化学物質RAの検索意図別解説", color: "sky" as const },
-              { href: "/about/cases", title: "導入事例・利用シーン", desc: "建設・製造・医療福祉の現場での具体的な使われ方", color: "emerald" as const },
-              { href: "/about/chatbot-eval", title: "AIチャット 精度評価レポート", desc: "Recall@5・回答正確性のベンチマーク結果と方法論", color: "violet" as const },
-              { href: "/about/data-sources", title: "データソース一覧", desc: "厚労省・e-Gov・気象庁ほか参照している一次ソースを網羅" , color: "amber" as const },
-              { href: "/organization", title: "組織・チーム管理", desc: "管理者向けのメンバー・部署・権限の運用画面", color: "rose" as const },
-            ].map((p) => {
-              const c = {
-                emerald: "border-emerald-200 bg-emerald-50 text-emerald-900 hover:bg-emerald-100",
-                violet: "border-violet-200 bg-violet-50 text-violet-900 hover:bg-violet-100",
-                amber: "border-amber-200 bg-amber-50 text-amber-900 hover:bg-amber-100",
-                sky: "border-sky-200 bg-sky-50 text-sky-900 hover:bg-sky-100",
-                blue: "border-blue-200 bg-blue-50 text-blue-900 hover:bg-blue-100",
-                rose: "border-rose-200 bg-rose-50 text-rose-900 hover:bg-rose-100",
-              }[p.color];
-              return (
-                <li key={p.href}>
-                  <Link href={p.href} className={`block min-h-[68px] rounded-xl border px-4 py-3 text-sm font-semibold ${c}`}>
-                    {p.title}
-                    <span className="mt-0.5 block text-[11px] font-normal opacity-80">{p.desc}</span>
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </section>
-
-        {/* お問い合わせ */}
-        <AboutContactBlock />
-
-        {/* 特定商取引法（PAID_MODE時のみ表示） */}
-        {PAID_MODE ? (
-        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <h2 className="mb-4 text-base font-bold text-slate-900">
-            特定商取引法に基づく表記
-          </h2>
-          <dl className="divide-y divide-slate-100">
-            {TOKUSHO_ROWS.map((row) => (
-              <div
-                key={row.label}
-                className="grid grid-cols-1 gap-1 py-3 sm:grid-cols-[160px_1fr] sm:gap-4"
-              >
-                <dt className="text-xs font-semibold text-slate-500 sm:text-sm">
-                  {row.label}
-                </dt>
-                <dd className="text-sm leading-6 text-slate-700">
-                  {row.value}
-                </dd>
-              </div>
-            ))}
-          </dl>
-          <p className="mt-4 rounded-lg border border-blue-100 bg-blue-50 px-3 py-2 text-xs text-blue-800 leading-5">
-            プラン詳細・解約方法は
-            <Link href="/pricing" className="underline hover:text-blue-900">料金プランページ</Link>
-            および
-            <Link href="/terms" className="underline hover:text-blue-900">利用規約</Link>
-            をご確認ください。
-          </p>
-        </section>
-        ) : null}
-
-        {/* 免責事項 */}
-        <AboutDisclaimer />
       </div>
-    </PageContainer>
-  );
-}
 
-function Pill({ k, v, note }: { k: string; v: string; note: string }) {
-  return (
-    <div className="rounded-xl border border-emerald-200 bg-white px-3 py-2 text-center shadow-sm">
-      <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-700">{k}</p>
-      <p className="mt-1 text-lg font-bold leading-tight text-slate-900">{v}</p>
-      <p className="mt-0.5 text-[10px] leading-4 text-slate-500">{note}</p>
-    </div>
+      <section
+        role="note"
+        aria-labelledby="about-boundary-title"
+        className="mt-8 rounded-2xl border-2 border-amber-400 bg-amber-50 p-5 text-amber-950 dark:border-amber-500 dark:bg-amber-950/30 dark:text-amber-100"
+      >
+        <h2
+          id="about-boundary-title"
+          className="flex items-center gap-2 text-lg font-bold"
+        >
+          <CircleAlert className="h-5 w-5" aria-hidden="true" />
+          公開停止と判定保留
+        </h2>
+        <p className="mt-2 leading-7">
+          一次資料、数値、法的位置付け、実在性、監修状態を再確認できない機能は、検索・ナビゲーション・サイトマップから除外します。
+          データ取得に失敗した場合も、安全、警報なし、資格不要、使用可とは判定しません。
+        </p>
+        <Link
+          href="/about/quality"
+          className="mt-3 inline-flex min-h-11 items-center font-bold underline underline-offset-4"
+        >
+          公開基準・更新状態・既知の制約を確認する
+        </Link>
+      </section>
+
+      <section aria-labelledby="official-destinations-title" className="mt-10">
+        <h2
+          id="official-destinations-title"
+          className="text-xl font-bold text-slate-950 dark:text-white"
+        >
+          正本を確認する
+        </h2>
+        <div className="mt-4 grid gap-3 md:grid-cols-3">
+          {OFFICIAL_DESTINATIONS.map((destination) => (
+            <a
+              key={destination.href}
+              href={destination.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-xl border border-slate-200 bg-white p-4 text-slate-950 hover:border-emerald-400 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+            >
+              <span className="flex min-h-11 items-center gap-2 font-bold">
+                {destination.title}
+                <ExternalLink className="h-4 w-4" aria-hidden="true" />
+              </span>
+              <span className="mt-1 block text-sm leading-6 text-slate-600 dark:text-slate-300">
+                {destination.note}
+              </span>
+            </a>
+          ))}
+        </div>
+      </section>
+
+      <section className="mt-10 rounded-2xl border border-sky-300 bg-sky-50 p-5 text-sky-950 dark:border-sky-700 dark:bg-sky-950/30 dark:text-sky-100">
+        <h2 className="text-xl font-bold">誤り・不足を報告する</h2>
+        <p className="mt-2 text-sm leading-6">
+          出典切れ、古い情報、アクセシビリティ上の問題を報告できます。相談フォームへ健康情報、個人情報、現場機密を入力しないでください。
+        </p>
+        <Link
+          href="/contact?category=data-correction"
+          className="mt-4 inline-flex min-h-11 items-center rounded-xl bg-sky-900 px-5 font-bold text-white"
+        >
+          修正・不具合を報告する
+        </Link>
+      </section>
+    </PageContainer>
   );
 }

@@ -2,34 +2,82 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { AlertTriangle, Coffee, Map as MapIcon, Mic, Monitor, Smartphone, Sunrise, Sunset, X } from "lucide-react";
+import dynamic from "next/dynamic";
+import { AlertTriangle, Coffee, Map as MapIcon, Mic, Monitor, Smartphone, Sunrise, Sunset } from "lucide-react";
+import { AutomationConsultCta } from "@/components/automation/automation-consult-cta";
 import { AutoRefreshStatus } from "@/components/signage/auto-refresh-status";
 import { SignageConclusionStrip } from "@/components/signage/signage-conclusion-strip";
 import { SignageDailyValues } from "@/components/signage/signage-daily-values";
 import { SignageDangerAlert } from "@/components/signage/signage-danger-alert";
+import { SignageHeatSpecial } from "@/components/signage/signage-heat-special";
 import { SignageOsNotifier } from "@/components/signage/signage-os-notifier";
-import { JapanPrefectureWarningMap } from "@/components/signage/japan-prefecture-warning-map";
-import { HazardOfTheDay } from "@/components/hazard-slides/hazard-of-the-day";
-import { SignageFloorPlanEditor } from "@/components/signage/signage-floor-plan-editor";
 import { SignageHeader } from "@/components/signage/signage-header";
 import { SignageHourlyStrip } from "@/components/signage/signage-hourly-strip";
-import { SignageMorningScript } from "@/components/signage/signage-morning-script";
 import { SignageRiskPrediction } from "@/components/signage/signage-risk-prediction";
 import { SignageRotator } from "@/components/signage/signage-rotator";
 import { SignageShell } from "@/components/signage/signage-shell";
+import { SignagePresentationBoard } from "@/components/signage/signage-presentation-board";
 import { SignageSiteSafety, useSignageSiteSafetyData } from "@/components/signage/signage-site-safety";
-import { SignageTodayDocuments } from "@/components/signage/signage-today-documents";
 import { getSignageLocationById, signageLocations } from "@/data/signage-locations";
 import { buildSignageConclusion } from "@/lib/signage/signage-conclusion";
+import { selectSignageJmaPresentation } from "@/lib/signage/signage-jma-presentation";
 import { resolveWeatherWarningPanelState } from "@/lib/signage/weather-warning-panel-state";
 import { formatRelativeTimeJa, isDataTimeStale } from "@/lib/signage/relative-time";
+import {
+  resolveSignageHeatSpecialState,
+  type SignageHeatOperationalMode,
+} from "@/lib/signage/heat-special-state";
 import { levelFromWarningCode } from "@/lib/jma/parse-jma-warning";
 import { levelLabel } from "@/lib/jma/jma-data";
-import { computeTodayRisks } from "@/lib/utils/risk-search";
-import { createServices } from "@/lib/services/service-factory";
+import { isHeatIllnessCampaignSeason } from "@/lib/heat-illness/campaign-season";
+import { createSignageServices } from "@/lib/services/signage-service-factory";
 import type { SignageDataApiResponse } from "@/lib/types/signage-data";
 import type { LawRevision, SiteRiskWeather } from "@/lib/types/domain";
 import type { ApiMode, ServiceStatus } from "@/lib/types/api";
+import { useClientReady } from "@/lib/use-client-ready";
+
+const SignageDialog = dynamic(
+  () =>
+    import("@/components/signage/signage-dialog").then(
+      (module) => module.SignageDialog,
+    ),
+  { ssr: false },
+);
+const JapanPrefectureWarningMap = dynamic(
+  () =>
+    import("@/components/signage/japan-prefecture-warning-map").then(
+      (module) => module.JapanPrefectureWarningMap,
+    ),
+  { ssr: false },
+);
+const HazardOfTheDay = dynamic(
+  () =>
+    import("@/components/hazard-slides/hazard-of-the-day").then(
+      (module) => module.HazardOfTheDay,
+    ),
+  { ssr: false },
+);
+const SignageFloorPlanEditor = dynamic(
+  () =>
+    import("@/components/signage/signage-floor-plan-editor").then(
+      (module) => module.SignageFloorPlanEditor,
+    ),
+  { ssr: false },
+);
+const SignageMorningScript = dynamic(
+  () =>
+    import("@/components/signage/signage-morning-script").then(
+      (module) => module.SignageMorningScript,
+    ),
+  { ssr: false },
+);
+const SignageTodayDocuments = dynamic(
+  () =>
+    import("@/components/signage/signage-today-documents").then(
+      (module) => module.SignageTodayDocuments,
+    ),
+  { ssr: false },
+);
 
 /**
  * 気象庁コードの表示ラベル。以前は6件のみの手書き辞書（フォールバックは「コード XX」）で
@@ -67,7 +115,8 @@ type DashboardState = {
 };
 
 export default function SignagePage() {
-  const services = useMemo(() => createServices(), []);
+  const isClientReady = useClientReady();
+  const services = useMemo(() => createSignageServices(), []);
   const [selectedLocationId, setSelectedLocationId] = useState(() => {
     if (typeof window !== "undefined") {
       const stored = window.localStorage.getItem(LOCATION_STORAGE_KEY);
@@ -79,6 +128,11 @@ export default function SignagePage() {
   });
   const [bundle, setBundle] = useState<SignageDataApiResponse | null>(null);
   const [bundleStatus, setBundleStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [networkStatus, setNetworkStatus] = useState<
+    "unknown" | "online" | "offline"
+  >("unknown");
+  const [heatOperationalMode, setHeatOperationalMode] =
+    useState<SignageHeatOperationalMode>("automatic");
   // 中央メインエリア: 図面 / 地図 / 作業資料 の3モード切替
   const [displayMode, setDisplayMode] = useState<DisplayMode>("floorplan");
   // 縦長/横長の切替: 縦置きTV対応
@@ -93,6 +147,8 @@ export default function SignagePage() {
   const [zoomedTrendIndex, setZoomedTrendIndex] = useState<number | null>(null);
   // 朝礼スクリプト（読み上げ）モーダル
   const [showMorningScript, setShowMorningScript] = useState(false);
+  const [showPresentationSettings, setShowPresentationSettings] = useState(false);
+  const [floorPlanReady, setFloorPlanReady] = useState(false);
   // キオスクモード（常掲用）: ?kiosk=1 でナビ・シナリオ操作等の運用UIを隠し、本文の視認性を優先する
   const [isKiosk] = useState(() => {
     if (typeof window === "undefined") return false;
@@ -151,6 +207,19 @@ export default function SignagePage() {
     }, 1000);
 
     return () => window.clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    const updateNetworkStatus = () => {
+      setNetworkStatus(window.navigator.onLine ? "online" : "offline");
+    };
+    updateNetworkStatus();
+    window.addEventListener("online", updateNetworkStatus);
+    window.addEventListener("offline", updateNetworkStatus);
+    return () => {
+      window.removeEventListener("online", updateNetworkStatus);
+      window.removeEventListener("offline", updateNetworkStatus);
+    };
   }, []);
 
   useEffect(() => {
@@ -220,10 +289,14 @@ export default function SignagePage() {
         const nowText = formatter.format(new Date());
         next.lastUpdatedText = nowText;
 
-        if (riskResult.ok) {
-          next.riskStatus = "success";
-          next.riskData = riskResult.data;
-          next.regionLabel = riskResult.data.regionName;
+      if (
+        riskResult.ok &&
+        riskResult.data.dataOrigin === "live" &&
+        riskResult.data.officialWarning?.status === "live"
+      ) {
+        next.riskStatus = "success";
+        next.riskData = riskResult.data;
+        next.regionLabel = riskResult.data.regionName;
         } else {
           next.riskStatus = "error";
           next.riskData = null;
@@ -303,46 +376,193 @@ export default function SignagePage() {
     });
   };
 
-  const trendItems = bundle?.laborTrend ?? [];
+  const laborRssDegraded = bundle?.degradedSources?.includes("labor-rss") ?? false;
+  const openMeteoDegraded = bundle?.degradedSources?.includes("open-meteo") ?? false;
+  const partialSourceFailure =
+    bundleStatus === "success" && (bundle?.degradedSources?.length ?? 0) > 0;
+  const trendItems = laborRssDegraded ? [] : (bundle?.laborTrend ?? []);
   const zoomedTrend = zoomedTrendIndex !== null ? trendItems[zoomedTrendIndex] ?? null : null;
   // 朝礼の読み上げ用に、ニュース見出し末尾の媒体名（｜/ | 以降）を落として読みやすくする
   const topAccidentTitle = trendItems[0]?.title
     ? trendItems[0].title.split(/[｜|]/)[0].trim()
     : null;
 
-  const prefectureLevels = bundle?.prefectureLevels ?? {};
   const jmaLink = `https://www.jma.go.jp/bosai/warning/#area_type=class20s&area_code=${selectedLocation.jmaCityCode ?? "130000"}`;
+  const jmaPresentation = selectSignageJmaPresentation(bundle, bundleStatus);
+  const jmaDegraded = jmaPresentation.datasetDegraded;
+  const selectedJmaIsLive = jmaPresentation.selectedRegionLive;
+  const prefectureLevels = jmaPresentation.prefectureLevels;
+  const jmaBundleStatus = jmaPresentation.warningPanelStatus;
+  const trustedJmaHeadline = jmaPresentation.headline;
+  const trustedSelectedWarnings = jmaPresentation.selectedWarnings;
   // 取得失敗(error)を「警報なし」と取り違えないよう状態を明示分岐（無人運用の誤った安心を防ぐ）。
   // 判定は県ヘッドラインではなく選択地点(市区町村)の selectedWarnings を主軸にする（T3是正）。
-  const warningPanel = resolveWeatherWarningPanelState(bundleStatus, bundle?.selectedWarnings, bundle?.jmaHeadline);
+  const warningPanel = resolveWeatherWarningPanelState(jmaBundleStatus, trustedSelectedWarnings, trustedJmaHeadline);
   // データ時刻の人間化＋2h超stale黄帯（S4）: 生ISO文字列のままだと現場は鮮度を判断できない。
-  const jmaDataTimeText = bundle?.jmaReportTime ? formatRelativeTimeJa(bundle.jmaReportTime, state.nowMs) : null;
-  const jmaDataTimeStale = bundle?.jmaReportTime ? isDataTimeStale(bundle.jmaReportTime, state.nowMs) : false;
+  const jmaReportTimeText = bundle?.jmaReportTime ? formatRelativeTimeJa(bundle.jmaReportTime, state.nowMs) : "不明";
+  const jmaFetchedTimeText = bundle?.jmaSourceFetchedAt
+    ? formatRelativeTimeJa(bundle.jmaSourceFetchedAt, state.nowMs)
+    : "不明";
+  const jmaDataTimeStale = bundle?.jmaSourceFetchedAt
+    ? isDataTimeStale(bundle.jmaSourceFetchedAt, state.nowMs, 0.25)
+    : bundleStatus === "success";
+  const openMeteoDataTimeStale = bundle?.openMeteoFetchedAt
+    ? isDataTimeStale(bundle.openMeteoFetchedAt, state.nowMs)
+    : false;
+  const openMeteoForecastFromMs = bundle?.openMeteoForecastFrom
+    ? Date.parse(bundle.openMeteoForecastFrom)
+    : Number.NaN;
+  const openMeteoForecastThroughMs = bundle?.openMeteoForecastThrough
+    ? Date.parse(bundle.openMeteoForecastThrough)
+    : Number.NaN;
+  const hasOpenMeteoForecastWindow =
+    state.nowMs > 0 &&
+    Number.isFinite(openMeteoForecastFromMs) &&
+    Number.isFinite(openMeteoForecastThroughMs) &&
+    state.nowMs >= openMeteoForecastFromMs &&
+    state.nowMs <= openMeteoForecastThroughMs + 60 * 60 * 1000;
+  const heatDisplayState = resolveSignageHeatSpecialState({
+    operationalMode: heatOperationalMode,
+    networkStatus,
+    bundleStatus,
+    jmaDataTimeStale,
+    openMeteoDataTimeStale,
+    jmaDegraded,
+    openMeteoDegraded,
+    hasJmaReportTime: Boolean(bundle?.jmaReportTime),
+    hasJmaFetchedAt: Boolean(bundle?.jmaSourceFetchedAt),
+    hasOpenMeteoFetchedAt: Boolean(bundle?.openMeteoFetchedAt),
+    hasOpenMeteoForecastWindow,
+    hasHourlyData: Boolean(bundle?.hourly?.length),
+  });
+  const isHeatCampaignSeason =
+    state.nowMs > 0 && isHeatIllnessCampaignSeason(new Date(state.nowMs));
+  const prefectureMapStatus =
+    bundleStatus === "idle" || bundleStatus === "loading"
+      ? ("loading" as const)
+      : bundleStatus === "error" || (bundle?.jmaVerifiedPrefectureCount ?? 0) === 0
+        ? ("error" as const)
+        : jmaDataTimeStale
+          ? ("stale" as const)
+          : !jmaDegraded && Object.keys(prefectureLevels).length === 47
+            ? ("fresh" as const)
+            : ("partial" as const);
 
-  // 結論ストリップ（柱0）: 気象・リスク予測・記録キットの要対応を1本の色帯に集約。
-  // リスク予測パネルと同一データを使うため、ここで一度だけ計算して両方へ渡す。
+  // 独自の事故・WBGT・強風予測は、入力条件と根拠の独立検証が終わるまで停止する。
+  // 結論ストリップには公式警報と利用者が保存した現場記録だけを渡す。
   const siteSafety = useSignageSiteSafetyData();
-  const todayRisks = useMemo(
-    () =>
-      computeTodayRisks({
-        date: new Date(),
-        temperatureCelsius: state.riskData?.temperatureCelsius,
-        precipitationMm: state.riskData?.precipitationMm,
-      }),
-    [state.riskData],
-  );
   const conclusion = buildSignageConclusion({
     warningPanel,
-    risks: todayRisks,
+    risks: [],
     siteSafety: siteSafety?.hasRecords
       ? { overdueCount: siteSafety.overdueCount, alertCount: siteSafety.alertCount }
       : null,
   });
 
   const isPortrait = orientation === "portrait";
+  const presentationStateTone =
+    conclusion.tone === "red"
+      ? ("danger" as const)
+      : conclusion.tone === "amber"
+        ? ("caution" as const)
+        : conclusion.tone === "green"
+          ? ("confirmed" as const)
+          : ("pending" as const);
+  const presentationFreshnessLabel =
+    bundleStatus === "idle" || bundleStatus === "loading"
+      ? "取得中・判定保留"
+      : bundleStatus === "error"
+        ? "取得できません"
+        : partialSourceFailure
+          ? "一部を確認できません"
+        : jmaDataTimeStale || openMeteoDataTimeStale
+          ? "古いデータ・再確認が必要"
+          : "取得済み・時刻を確認";
+  const presentationFreshnessTone =
+    bundleStatus === "idle" || bundleStatus === "loading"
+      ? ("pending" as const)
+      : bundleStatus === "error" || partialSourceFailure || jmaDataTimeStale || openMeteoDataTimeStale
+        ? ("caution" as const)
+        : ("confirmed" as const);
+  const presentationFreshnessDetail =
+    partialSourceFailure && jmaDegraded && selectedJmaIsLive
+      ? "一部を確認できません。気象庁で確認してください。"
+      : partialSourceFailure
+        ? "一部を確認できません。公式情報を確認してください。"
+        : `気象庁 取得: ${jmaFetchedTimeText}／発表対象: ${jmaReportTimeText}`;
+  const presentationWarningTone =
+    warningPanel.kind === "special" || warningPanel.kind === "warning"
+      ? ("danger" as const)
+      : warningPanel.kind === "advisory" || warningPanel.kind === "error"
+        ? ("caution" as const)
+        : warningPanel.kind === "none"
+          ? ("confirmed" as const)
+          : ("pending" as const);
+  const presentationWarningLabel =
+    warningPanel.kind === "special"
+      ? "特別警報 発表中"
+      : warningPanel.kind === "warning"
+        ? "警報 発表中"
+        : warningPanel.kind === "advisory"
+          ? "注意報 発表中"
+          : warningPanel.kind === "error"
+            ? "警報の有無を確認不能"
+            : warningPanel.kind === "loading"
+              ? "公式データを取得中"
+              : "選択地点に発表中なし";
+  const presentationWarningDetail =
+    warningPanel.headline ??
+    (warningPanel.kind === "error"
+      ? "取得できません。気象庁で確認してください。"
+      : warningPanel.kind === "loading"
+        ? "取得中です。"
+        : warningPanel.kind === "none"
+          ? "取得時点の気象警報状態です。現場の作業可否を示すものではありません。"
+          : trustedSelectedWarnings.length > 0
+            ? trustedSelectedWarnings.map((warning) => hintForJmaCode(warning.code)).join("・")
+            : "気象庁公式の発表内容を確認してください。");
+  const presentationMorningPoints = [
+    warningPanel.kind === "none"
+      ? "気象警報は取得時点で発表中なし。現場実測と変化を継続確認"
+      : `${presentationWarningLabel}。中止・退避基準を責任者が確認`,
+    topAccidentTitle
+      ? `報道労災（未確認見出し）: ${topAccidentTitle}`
+      : laborRssDegraded || bundleStatus === "error"
+        ? "報道労災を取得できません"
+        : "表示できる報道労災見出しなし。事故なしを意味しません",
+    topLaws[0]
+      ? `法改正: ${topLaws[0].title}（原文・施行日を確認）`
+      : state.lawStatus === "error"
+        ? "法改正を取得できません"
+        : "法改正を確認中。原文確認前に運用へ確定しない",
+  ];
+  const presentationOfficialLinks = [
+    { label: "気象庁 警報・注意報", href: jmaLink },
+    { label: "環境省 WBGT", href: "https://www.wbgt.env.go.jp/" },
+    ...(topLaws[0]?.source?.url
+      ? [{ label: "法改正の一次資料", href: topLaws[0].source.url }]
+      : []),
+  ];
 
   return (
-    <SignageShell>
+    <SignageShell clientReady={isClientReady}>
+      <noscript>
+        <style>{`[data-signage-live]{display:none!important}`}</style>
+        <section className="mx-auto flex min-h-[70vh] w-full max-w-3xl flex-col justify-center rounded-2xl border-2 border-amber-400 bg-slate-950 p-6 text-white">
+          <h1 className="text-3xl font-black">安全サイネージ</h1>
+          <p className="mt-4 text-xl font-black text-amber-200" role="status">
+            最新情報を取得できません
+          </p>
+          <p className="mt-2 text-base">気象庁の発表を確認してください。</p>
+          <a
+            href="https://www.jma.go.jp/bosai/warning/"
+            className="mt-5 inline-flex min-h-11 w-fit items-center font-black text-sky-200 underline underline-offset-4"
+          >
+            気象庁の警報・注意報を確認
+          </a>
+        </section>
+      </noscript>
+      <div data-signage-live="" className="contents">
       <SignageHeader
         compact
         hideNav={isKiosk}
@@ -351,29 +571,127 @@ export default function SignagePage() {
         lastUpdatedText={state.lastUpdatedText}
       />
 
+      <SignagePresentationBoard
+        regionLabel={state.regionLabel}
+        stateLabel={conclusion.label}
+        stateDetail={
+          conclusion.sub ??
+          "気象警報と端末内記録の状態です。"
+        }
+        stateTone={presentationStateTone}
+        freshnessLabel={presentationFreshnessLabel}
+        freshnessDetail={presentationFreshnessDetail}
+        freshnessTone={presentationFreshnessTone}
+        warningLabel={presentationWarningLabel}
+        warningDetail={presentationWarningDetail}
+        warningTone={presentationWarningTone}
+        morningPoints={presentationMorningPoints}
+        officialLinks={presentationOfficialLinks}
+        onOpenSettings={
+          isKiosk ? undefined : () => setShowPresentationSettings(true)
+        }
+      />
+
+      <div className="contents min-[1024px]:hidden">
+
+      {!isKiosk ? (
+        <section
+          aria-label="サイネージの開始と現在状態"
+          className="relative shrink-0 overflow-clip rounded-2xl border-2 border-sky-400 bg-[linear-gradient(115deg,#082f49_0%,#020617_46%,#172554_100%)] p-3 shadow-xl"
+        >
+          <div
+            className="pointer-events-none absolute -right-12 -top-24 h-48 w-48 rounded-full bg-cyan-300/20 blur-3xl forced-colors:hidden"
+            aria-hidden="true"
+          />
+          <div className="relative grid gap-3 lg:grid-cols-[minmax(170px,.65fr)_minmax(190px,.7fr)_auto] lg:items-center">
+            <div>
+              <p className="text-[10px] font-black tracking-[.16em] text-cyan-300">
+                {state.regionLabel}
+              </p>
+              <h2 className="mt-1 text-lg font-black leading-tight text-white">
+                現在の状態
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-2 gap-1.5">
+              <div className="rounded-lg border border-slate-600 bg-slate-950/70 px-3 py-2">
+                <p className="text-[10px] font-bold text-slate-400">現在の状態</p>
+                <p className="mt-0.5 text-xs font-black text-white">{conclusion.label}</p>
+              </div>
+              <div className="rounded-lg border border-slate-600 bg-slate-950/70 px-3 py-2">
+                <p className="text-[10px] font-bold text-slate-400">データ鮮度</p>
+                <p className="mt-0.5 text-xs font-black text-white">
+                  {bundleStatus === "idle" || bundleStatus === "loading"
+                    ? "取得中"
+                    : bundleStatus === "error"
+                      ? "取得できません"
+                      : jmaDataTimeStale || openMeteoDataTimeStale
+                        ? "情報が古い"
+                        : "取得済み"}
+                </p>
+              </div>
+            </div>
+
+            <Link
+              href="/signage?kiosk=1"
+              data-primary-action="true"
+              className="inline-flex min-h-12 items-center justify-center rounded-lg bg-sky-800 px-5 py-3 text-sm font-black text-white hover:bg-sky-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky-300 forced-colors:border"
+            >
+              表示を開始
+            </Link>
+          </div>
+        </section>
+      ) : null}
+
       {/* 結論ストリップ（柱0）: 3秒で「いまの状態」が分かるデカ色帯。説明より先に結論 */}
       <SignageConclusionStrip conclusion={conclusion} />
 
       {/* 常掲価値3項目（Fable診断01 T10）: 無災害日数・今日の一言・WBGT。毎日内容が変わり「見る理由」を作る */}
       <SignageDailyValues
-        now={new Date()}
+        now={new Date(state.nowMs)}
         currentTempC={bundle?.hourly?.[0]?.tempC}
         currentHumidityPct={bundle?.hourly?.[0]?.humidityPct}
       />
 
-      {/* スマホ向け注意バナー */}
-      <div className="xl:hidden rounded-lg border border-amber-500/50 bg-amber-950/70 px-3 py-2.5">
-        <p className="text-sm font-bold text-amber-100">この画面はPC・大画面TV表示用です</p>
-        <p className="mt-1 text-xs text-amber-200">
-          スマホでは縦スクロールで全セクションを確認できます。PC/大画面TVで開くと本来のサイネージレイアウトが表示されます。
-        </p>
-        <p className="mt-1.5 text-xs text-amber-200">
-          スマホで記録の作成・確認をするなら{" "}
-          <Link href="/site-records" className="font-bold text-amber-100 underline">
-            現場の安全記録キット →
-          </Link>
-        </p>
-      </div>
+      <SignageHeatSpecial
+        state={heatDisplayState}
+        emphasis={isHeatCampaignSeason ? "seasonal" : "standard"}
+      />
+
+      {!isKiosk && (
+        <fieldset className="rounded-lg border border-slate-600 bg-slate-950/60 px-3 py-2 text-xs text-slate-100">
+          <legend className="px-2 font-bold">
+            熱中症カードの運用状態（手動）
+          </legend>
+          <p className="mb-2 leading-5 text-slate-300">
+            緊急・保守・訓練は自動検知ではありません。運用者が現場手順に基づいて明示的に切り替えます。
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {([
+              ["automatic", "自動（取得状態）"],
+              ["emergency", "緊急対応中"],
+              ["maintenance", "保守中"],
+              ["drill", "訓練モード"],
+            ] as const).map(([mode, label]) => (
+              <button
+                key={mode}
+                type="button"
+                aria-pressed={heatOperationalMode === mode}
+                onClick={() => setHeatOperationalMode(mode)}
+                className={`min-h-[44px] rounded-lg border-2 px-3 py-2 font-bold focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white ${
+                  heatOperationalMode === mode
+                    ? mode === "emergency"
+                      ? "border-red-200 bg-red-700 text-white"
+                      : "border-white bg-slate-100 text-slate-950"
+                    : "border-slate-500 bg-slate-900 text-slate-100 hover:bg-slate-800"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </fieldset>
+      )}
 
       {/* C-003: scenario presets — set display mode for common use cases。キオスクモードでは運用UIとして隠す */}
       {!isKiosk && (
@@ -418,7 +736,7 @@ export default function SignagePage() {
             title={s.title}
             className={`rounded border px-2.5 py-1 text-[11px] font-bold transition min-h-[44px] ${
               s.active
-                ? "border-sky-400 bg-sky-600 text-white"
+                ? "border-sky-300 bg-sky-700 text-white"
                 : "border-sky-700 bg-sky-900/60 text-sky-200 hover:bg-sky-800/60"
             }`}
           >
@@ -431,11 +749,18 @@ export default function SignagePage() {
           <button
             type="button"
             onClick={() => setShowMorningScript(true)}
-            className="min-h-[44px] rounded border border-sky-400 bg-sky-600 px-2.5 py-1 text-[11px] font-bold text-white hover:bg-sky-500"
+            data-signage-morning-trigger
+            className="min-h-[44px] rounded border border-sky-300 bg-sky-700 px-2.5 py-1 text-[11px] font-bold text-white hover:bg-sky-600"
             title="本日の気象・類似事故・法改正から朝礼の読み上げ原稿を生成します"
           >
             <Mic className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />朝礼スクリプト
           </button>
+          <AutomationConsultCta
+            position="signage"
+            className="min-h-[44px] rounded border border-emerald-400 bg-emerald-800 px-2.5 py-1 text-[11px] text-white hover:bg-emerald-700"
+          >
+            安全サイネージの導入を相談する
+          </AutomationConsultCta>
           <button
             type="button"
             onClick={toggleOrientation}
@@ -464,7 +789,7 @@ export default function SignagePage() {
       {/* 危険イベント全画面アラート: 高リスク警報(特別警報/暴風/大雨/落雷/地震/津波)の検知で全画面赤表示＋音声。
           バー自体は薄い1行。オーバーレイは fixed inset-0 のため通常レイアウト(1画面フィット)に影響しない。 */}
       <div className="shrink-0">
-        <SignageDangerAlert jmaHeadline={bundle?.jmaHeadline} warnings={bundle?.selectedWarnings} />
+        <SignageDangerAlert jmaHeadline={trustedJmaHeadline} warnings={trustedSelectedWarnings} />
       </div>
 
       <div className={`grid grid-cols-1 gap-2 xl:min-h-0 xl:flex-1 xl:gap-3 xl:overflow-hidden ${isPortrait ? "" : "xl:grid-cols-12"}`}>
@@ -500,7 +825,7 @@ export default function SignagePage() {
                         ? "災害の型別 安全教育（本日の型）"
                         : "本日の作業資料"}
                 </p>
-                <p className="mt-0.5 text-[9px] text-slate-400 sm:text-[10px] xl:text-sm">
+                <p className="mt-0.5 text-[9px] text-slate-300 sm:text-[10px] xl:text-sm">
                   {displayMode === "floorplan" && (
                     <>図面サンプルを表示中。気象警報は右サイドパネルで確認できます。</>
                   )}
@@ -510,7 +835,7 @@ export default function SignagePage() {
                       <a href="https://www.jma.go.jp/bosai/warning/" className="text-emerald-400 underline" target="_blank" rel="noreferrer">
                         気象庁 警報・注意報
                       </a>
-                      の公開JSONを約1時間キャッシュして描画しています。
+                      の発表を地図で確認できます。
                     </>
                   )}
                   {displayMode === "workdocs" && (
@@ -522,7 +847,10 @@ export default function SignagePage() {
                 </p>
               </div>
               {!isKiosk && (
-              <div className="flex shrink-0 items-center gap-1">
+              <div
+                data-signage-mode-actions=""
+                className="grid w-full shrink-0 grid-cols-2 gap-1 sm:flex sm:w-auto sm:flex-wrap sm:items-center"
+              >
                 <button
                   type="button"
                   onClick={() => setDisplayMode("floorplan")}
@@ -571,7 +899,7 @@ export default function SignagePage() {
                 >
                   教育
                 </button>
-                <SignageOsNotifier warnings={bundle?.selectedWarnings} regionLabel={bundle?.locationLabel ?? selectedLocation.label} />
+                <SignageOsNotifier warnings={trustedSelectedWarnings} regionLabel={bundle?.locationLabel ?? selectedLocation.label} />
                 <a
                   href={jmaLink}
                   target="_blank"
@@ -629,7 +957,7 @@ export default function SignagePage() {
                   </p>
                 ) : warningPanel.kind === "error" ? (
                   <p className="mt-1 text-[10px] font-semibold leading-snug text-rose-200 sm:text-xs xl:text-xl">
-                    <AlertTriangle className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />気象データの取得に失敗しました。警報の有無を確認できません。
+                    <AlertTriangle className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />取得できません。
                     <a href={jmaLink} target="_blank" rel="noreferrer" className="ml-1 text-rose-100 underline">
                       気象庁で確認 →
                     </a>
@@ -641,16 +969,21 @@ export default function SignagePage() {
                     ✓ 現在、選択地点に発表中の警報はありません。
                   </p>
                 )}
-                {selectedLocation.jmaCityCode && bundle?.selectedWarnings && bundle.selectedWarnings.length > 0 ? (
+                {selectedLocation.jmaCityCode && trustedSelectedWarnings.length > 0 ? (
                   <ul className="mt-2 space-y-0.5 text-[10px] text-amber-100 sm:text-xs xl:text-lg">
-                    {bundle.selectedWarnings.map((w, i) => (
+                    {trustedSelectedWarnings.map((w, i) => (
                       <li key={`${w.code}-${i}`}>
                         ・{hintForJmaCode(w.code)}（{w.status}）
                       </li>
                     ))}
                   </ul>
                 ) : null}
-                {jmaDataTimeText ? (
+                {jmaDegraded && selectedJmaIsLive ? (
+                  <p className="mt-2 rounded border border-amber-300 bg-amber-950/70 px-2 py-1 text-[10px] font-semibold text-amber-100 sm:text-xs xl:text-lg">
+                    一部を確認できません。気象庁で確認してください。
+                  </p>
+                ) : null}
+                {bundleStatus !== "idle" ? (
                   <p
                     className={`mt-2 text-[9px] xl:text-sm ${
                       jmaDataTimeStale
@@ -658,7 +991,7 @@ export default function SignagePage() {
                         : "text-amber-300/70"
                     }`}
                   >
-                    気象庁データ時刻: {jmaDataTimeText}
+                    気象庁（出典）／取得: {jmaFetchedTimeText} ／ 発表対象時刻: {jmaReportTimeText}
                     {jmaDataTimeStale ? "（データが古い可能性）" : ""}
                   </p>
                 ) : null}
@@ -679,13 +1012,13 @@ export default function SignagePage() {
             ) : null}
             {displayMode === "map" && warningPanel.kind === "error" ? (
               <p className="shrink-0 text-[11px] font-semibold leading-snug text-rose-200 sm:text-sm xl:text-xl">
-                <AlertTriangle className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />気象データの取得に失敗しました。警報の有無を確認できません。
+                <AlertTriangle className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />取得できません。
                 <a href={jmaLink} target="_blank" rel="noreferrer" className="ml-1 text-rose-100 underline">
                   気象庁で確認 →
                 </a>
               </p>
             ) : null}
-            {displayMode === "map" && jmaDataTimeText ? (
+            {displayMode === "map" && bundleStatus !== "idle" ? (
               <p
                 className={`text-[9px] xl:text-sm ${
                   jmaDataTimeStale
@@ -693,13 +1026,13 @@ export default function SignagePage() {
                     : "text-slate-500"
                 }`}
               >
-                気象庁データ時刻: {jmaDataTimeText}
+                気象庁（出典）／取得: {jmaFetchedTimeText} ／ 発表対象時刻: {jmaReportTimeText}
                 {jmaDataTimeStale ? "（データが古い可能性）" : ""}
               </p>
             ) : null}
-            {displayMode === "map" && selectedLocation.jmaCityCode && bundle?.selectedWarnings && bundle.selectedWarnings.length > 0 ? (
+            {displayMode === "map" && selectedLocation.jmaCityCode && trustedSelectedWarnings && trustedSelectedWarnings.length > 0 ? (
               <ul className="shrink-0 space-y-0.5 text-[10px] text-slate-200 xl:text-lg">
-                {bundle.selectedWarnings.map((w, i) => (
+                {trustedSelectedWarnings.map((w, i) => (
                   <li key={`${w.code}-${i}`}>
                     {hintForJmaCode(w.code)}（{w.status}）
                   </li>
@@ -707,9 +1040,32 @@ export default function SignagePage() {
               </ul>
             ) : null}
 
-            {displayMode === "floorplan" && <SignageFloorPlanEditor />}
+            {displayMode === "floorplan" &&
+              (floorPlanReady ? (
+                <SignageFloorPlanEditor />
+              ) : (
+                <div
+                  role="status"
+                  className="flex min-h-48 flex-col items-center justify-center gap-3 rounded-xl border border-slate-600 bg-slate-900/70 p-6 text-center text-sm text-slate-200"
+                >
+                  <p>
+                    現場図面は必要なときだけ読み込みます。警報・気象・WBGTは周囲の状態欄で確認してください。
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setFloorPlanReady(true)}
+                    className="min-h-[44px] rounded-lg border border-emerald-500 bg-emerald-800 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+                  >
+                    現場図面を表示する
+                  </button>
+                </div>
+              ))}
             {displayMode === "map" && (
-              <JapanPrefectureWarningMap levelsByIso={prefectureLevels} highlightIso={selectedLocation.prefectureIso} />
+              <JapanPrefectureWarningMap
+                levelsByIso={prefectureLevels}
+                status={prefectureMapStatus}
+                highlightIso={selectedLocation.prefectureIso}
+              />
             )}
             {displayMode === "workdocs" && <SignageTodayDocuments />}
             {displayMode === "education" && (
@@ -721,7 +1077,14 @@ export default function SignagePage() {
             <SignageHourlyStrip
               hourly={bundle?.hourly ?? []}
               locationLabel={bundle?.locationLabel ?? selectedLocation.label}
-              status={bundleStatus}
+              status={
+                bundleStatus === "success" && openMeteoDegraded
+                  ? "error"
+                  : bundleStatus
+              }
+              fetchedAt={bundle?.openMeteoFetchedAt}
+              forecastFrom={bundle?.openMeteoForecastFrom}
+              forecastThrough={bundle?.openMeteoForecastThrough}
             />
 
             {state.riskData?.riskEvidences && state.riskData.riskEvidences.length > 0 && (
@@ -747,20 +1110,28 @@ export default function SignagePage() {
         </div>
 
         <div className={`flex flex-col gap-2 xl:min-h-0 xl:overflow-hidden ${isPortrait ? "" : "xl:col-span-5"}`}>
-          {/* 本日のリスク予測: 気象（気温・降水）から熱中症等の当日リスクを自動判定（朝礼前の確認用） */}
-          <SignageRiskPrediction weatherData={state.riskData} precomputedRisks={todayRisks} />
+          {/* 未検証の独自予測は停止し、一次情報・現場実測へ案内する。 */}
+          <SignageRiskPrediction
+            weatherData={state.riskData}
+            status={state.riskStatus}
+          />
 
           {/* 現場の安全状態: この端末の /site-records 記録キット（未是正指摘・要対策ヒヤリ等）を掲示。記録のない端末では非表示 */}
           <SignageSiteSafety data={siteSafety} />
 
-          <section className="flex flex-col rounded-xl border border-slate-600 bg-slate-900/90 p-2 sm:rounded-2xl sm:p-3 xl:min-h-0 xl:flex-1 xl:overflow-hidden">
-            <h2 className="shrink-0 text-xs font-bold tracking-wide text-slate-100 sm:text-sm lg:text-base xl:text-xl">
+          <section className="flex flex-col rounded-xl border border-slate-600 bg-slate-900/90 p-2 sm:rounded-2xl sm:p-3 xl:min-h-0 xl:flex-1 xl:overflow-hidden xl:p-2">
+            <h2 className="shrink-0 text-xs font-bold tracking-wide text-slate-100 sm:text-sm lg:text-base">
               トレンド（労働災害・建設事故）
             </h2>
-            <p className="mt-0.5 shrink-0 text-[9px] text-slate-400 sm:text-[10px] xl:text-sm">
-              GoogleニュースのRSSから取得（サーバー側で約1時間キャッシュ）。記事元へ直接リンクします。
+            <p className="mt-0.5 shrink-0 text-[9px] leading-tight text-slate-300 sm:text-[10px]">
+              <span>記事元を確認できます。</span>
             </p>
-            {bundleStatus === "success" && bundle && bundle.laborTrend.length === 0 ? (
+            {bundleStatus === "success" && laborRssDegraded ? (
+              <p className="mt-2 rounded-lg border border-amber-500/60 bg-amber-950/50 p-2 text-xs font-bold text-amber-100 xl:text-lg">
+                事故報道を取得できません。「事故報道なし」ではありません。
+              </p>
+            ) : null}
+            {bundleStatus === "success" && bundle && !laborRssDegraded && bundle.laborTrend.length === 0 ? (
               <p className="mt-2 text-xs text-slate-400 xl:text-lg">現在取得できるニュースがありません。</p>
             ) : null}
             {(bundleStatus === "loading" || bundleStatus === "idle") && trendItems.length === 0 ? (
@@ -768,15 +1139,17 @@ export default function SignagePage() {
             ) : null}
             {trendItems.length > 0 && (
               // 1件ずつ大きく表示して15〜20秒周期で全件を自動周回（T5: 隠れていたニュース2件目以降を露出）
-              <div className="mt-2 min-h-0 flex-1">
+              <div className="mt-2 flex min-h-0 flex-1 overflow-hidden">
                 <SignageRotator
                   items={trendItems}
                   ariaLabel="トレンドニュース"
+                  compactAtWide
                   getKey={(item, idx) => `${item.link}-${idx}`}
                   renderItem={(item, idx) => (
                     <button
                       type="button"
                       onClick={() => setZoomedTrendIndex(idx)}
+                      data-signage-trend-trigger
                       className="h-full w-full rounded-lg border border-slate-700 bg-slate-950/60 p-2 text-left transition hover:border-emerald-600/80 hover:bg-slate-900 sm:rounded-xl sm:p-3 xl:p-4"
                     >
                       <p className="text-[9px] text-slate-300 sm:text-[10px] xl:text-base">{item.pubDate || "日時不明"}</p>
@@ -789,7 +1162,7 @@ export default function SignagePage() {
             )}
           </section>
 
-          <section className="flex flex-col rounded-xl border border-slate-600 bg-slate-900/90 p-2 sm:rounded-2xl sm:p-3 xl:min-h-0 xl:flex-1 xl:overflow-hidden">
+          <section className="flex flex-col rounded-xl border border-slate-600 bg-slate-900/90 p-2 sm:rounded-2xl sm:p-3 xl:min-h-0 xl:flex-1 xl:overflow-hidden xl:p-2">
             <div className="flex shrink-0 flex-wrap items-center justify-between gap-2">
               <h2 className="text-xs font-bold tracking-wide text-slate-100 sm:text-sm lg:text-base xl:text-xl">直近の法改正（5件・要約）</h2>
               <Link
@@ -815,15 +1188,16 @@ export default function SignagePage() {
             )}
             {topLaws.length > 0 && (
               // 1件ずつ大きく表示して周回（T5: 隠れていた法改正2件目以降を露出）
-              <div className="mt-2 min-h-0 flex-1">
+              <div className="mt-2 flex min-h-0 flex-1 overflow-hidden">
                 <SignageRotator
                   items={topLaws}
                   ariaLabel="直近の法改正"
+                  compactAtWide
                   getKey={(rev) => rev.id}
                   renderItem={(rev) => (
                     <div className="h-full rounded-lg border border-slate-700 bg-slate-950/50 p-2 sm:rounded-xl sm:p-3 xl:p-4">
                       <div className="flex flex-wrap items-center gap-1.5 text-[9px] text-slate-400 sm:text-xs xl:text-lg">
-                        <span className="rounded-full bg-sky-600/90 px-2 py-0.5 font-semibold text-white">{rev.kind}</span>
+                        <span className="rounded-full bg-sky-800 px-2 py-0.5 font-semibold text-white">{rev.kind}</span>
                         <span>{rev.publishedAt}</span>
                         <span>{rev.issuer}</span>
                       </div>
@@ -850,75 +1224,144 @@ export default function SignagePage() {
       </div>
 
       <AutoRefreshStatus intervalMinutes={REFRESH_INTERVAL_MS / 60000} lastUpdatedText={state.lastUpdatedText} />
+      </div>
+
+      {showPresentationSettings && !isKiosk ? (
+        <SignageDialog
+          labelledBy="presentation-settings-title"
+          onClose={() => setShowPresentationSettings(false)}
+          panelClassName="ml-auto h-[calc(100dvh-2rem)] max-w-xl overflow-y-auto border-sky-700 p-5 sm:p-6"
+          returnFocusSelector="[data-signage-settings-trigger]"
+        >
+          <h2 id="presentation-settings-title" className="pr-24 text-2xl font-black text-white">
+            サイネージ設定・詳細
+          </h2>
+          <p className="mt-2 text-sm leading-6 text-slate-300">
+            表示中の地点、手動運用状態、全国の警報地図、編集・管理画面をここで確認します。
+          </p>
+          <label htmlFor="presentation-location" className="mt-6 block text-sm font-black text-white">
+            表示地点
+          </label>
+          <select
+            id="presentation-location"
+            value={selectedLocationId}
+            onChange={(event) => onLocationChange(event.target.value)}
+            className="mt-2 min-h-12 w-full rounded-xl border-2 border-slate-500 bg-slate-900 px-3 text-base text-white focus-visible:ring-4 focus-visible:ring-sky-300"
+          >
+            {signageLocations.map((location) => (
+              <option key={location.id} value={location.id}>
+                {location.label}
+              </option>
+            ))}
+          </select>
+
+          <fieldset className="mt-6 rounded-xl border border-slate-600 p-4">
+            <legend className="px-2 text-sm font-black text-white">熱中症カードの手動運用状態</legend>
+            <p className="mt-1 text-sm leading-6 text-slate-300">
+              緊急・保守・訓練は自動検知ではありません。現場手順に基づいて明示的に切り替えてください。
+            </p>
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              {([
+                ["automatic", "自動（取得状態）"],
+                ["emergency", "緊急対応中"],
+                ["maintenance", "保守中"],
+                ["drill", "訓練モード"],
+              ] as const).map(([mode, label]) => (
+                <button
+                  key={mode}
+                  type="button"
+                  aria-pressed={heatOperationalMode === mode}
+                  onClick={() => setHeatOperationalMode(mode)}
+                  className={`min-h-11 rounded-lg border-2 px-3 py-2 text-sm font-black ${
+                    heatOperationalMode === mode
+                      ? "border-white bg-white text-slate-950"
+                      : "border-slate-500 bg-slate-900 text-white"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </fieldset>
+
+          <section aria-labelledby="presentation-map-title" className="mt-6 rounded-xl border border-slate-600 bg-white p-3 text-slate-950">
+            <h3 id="presentation-map-title" className="text-lg font-black">全国の警報・注意報地図</h3>
+            <p className="mt-1 text-sm">未確認地域は斜線で表示し、警報なしとは扱いません。</p>
+            <div className="mt-3 max-h-[55vh] overflow-y-auto">
+              <JapanPrefectureWarningMap
+                levelsByIso={prefectureLevels}
+                status={prefectureMapStatus}
+                highlightIso={selectedLocation.prefectureIso}
+              />
+            </div>
+          </section>
+
+          <nav aria-label="サイネージの編集と管理" className="mt-6 grid gap-2 sm:grid-cols-2">
+            <Link href="/signage/map" className="inline-flex min-h-11 items-center justify-center rounded-lg border border-sky-400 bg-sky-900 px-3 text-sm font-black text-white">
+              詳細地図を開く
+            </Link>
+            <Link href="/signage/manage" className="inline-flex min-h-11 items-center justify-center rounded-lg border border-slate-500 bg-slate-800 px-3 text-sm font-black text-white">
+              多拠点・端末管理
+            </Link>
+            <Link href="/about/usage-notes" prefetch={false} className="inline-flex min-h-11 items-center text-sm font-black text-sky-200 underline underline-offset-4">
+              注意事項
+            </Link>
+          </nav>
+        </SignageDialog>
+      ) : null}
 
       {/* 朝礼スクリプト（読み上げ）モーダル */}
       {showMorningScript && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 sm:p-8"
-          role="dialog"
-          aria-modal="true"
-          aria-label="朝礼スクリプト"
-          onClick={() => setShowMorningScript(false)}
+        <SignageDialog
+          labelledBy="morning-script-dialog-title"
+          onClose={() => setShowMorningScript(false)}
+          panelClassName="max-w-2xl border-emerald-700 p-4 sm:p-6"
+          returnFocusSelector="[data-signage-morning-trigger]"
         >
-          <div
-            className="relative w-full max-w-2xl rounded-2xl border border-emerald-700 bg-slate-950 p-4 shadow-2xl sm:p-6"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              type="button"
-              onClick={() => setShowMorningScript(false)}
-              className="absolute right-3 top-3 flex min-h-[44px] items-center rounded-full border border-slate-600 bg-slate-800 px-3 py-1.5 text-xs font-bold text-slate-200 hover:bg-slate-700"
-              aria-label="閉じる"
-            >
-              <X className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />閉じる
-            </button>
-            <div className="mt-8">
-              <SignageMorningScript
-                jmaHeadline={bundle?.jmaHeadline}
-                warnings={bundle?.selectedWarnings}
-                topAccidentTitle={topAccidentTitle}
-                topLawTitle={topLaws[0]?.title ?? null}
-              />
-            </div>
+          <div className="mt-8">
+            <h2 id="morning-script-dialog-title" className="sr-only">
+              朝礼スクリプト
+            </h2>
+            <SignageMorningScript
+              jmaHeadline={trustedJmaHeadline}
+              warnings={trustedSelectedWarnings}
+              topAccidentTitle={topAccidentTitle}
+              topLawTitle={topLaws[0]?.title ?? null}
+            />
           </div>
-        </div>
+        </SignageDialog>
       )}
 
       {/* トレンドニュース拡大モーダル */}
       {zoomedTrend && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 sm:p-8"
-          role="dialog"
-          aria-modal="true"
-          onClick={() => setZoomedTrendIndex(null)}
+        <SignageDialog
+          labelledBy="trend-dialog-title"
+          onClose={() => setZoomedTrendIndex(null)}
+          panelClassName="max-w-4xl"
+          returnFocusSelector="[data-signage-trend-trigger]"
         >
-          <div
-            className="relative w-full max-w-4xl rounded-2xl border border-slate-700 bg-slate-950 p-6 shadow-2xl sm:p-10"
-            onClick={(e) => e.stopPropagation()}
+          <p className="text-xs text-slate-300 sm:text-sm">{zoomedTrend.pubDate || "日時不明"}</p>
+          <h2 id="trend-dialog-title" className="mt-2 text-2xl font-bold leading-snug text-slate-50 sm:text-3xl lg:text-4xl">
+            {zoomedTrend.title}
+          </h2>
+          <a
+            href={zoomedTrend.link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-6 inline-flex min-h-[44px] items-center rounded-lg border border-emerald-500 bg-emerald-700 px-5 py-2.5 text-sm font-bold text-white hover:bg-emerald-600 sm:text-base"
           >
-            <button
-              type="button"
-              onClick={() => setZoomedTrendIndex(null)}
-              className="absolute right-3 top-3 flex min-h-[44px] items-center rounded-full border border-slate-600 bg-slate-800 px-3 py-1.5 text-xs font-bold text-slate-200 hover:bg-slate-700"
-              aria-label="閉じる"
-            >
-              <X className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />閉じる
-            </button>
-            <p className="text-xs text-slate-400 sm:text-sm">{zoomedTrend.pubDate || "日時不明"}</p>
-            <h3 className="mt-2 text-2xl font-bold leading-snug text-slate-50 sm:text-3xl lg:text-4xl">
-              {zoomedTrend.title}
-            </h3>
-            <a
-              href={zoomedTrend.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-6 inline-flex min-h-[44px] items-center rounded-lg border border-emerald-500 bg-emerald-700 px-5 py-2.5 text-sm font-bold text-white hover:bg-emerald-600 sm:text-base"
-            >
-              記事を開く →
-            </a>
-          </div>
-        </div>
+            記事を開く →
+          </a>
+        </SignageDialog>
       )}
+      <Link
+        href="/about/usage-notes"
+        prefetch={false}
+        className="mx-auto mb-2 block w-fit text-xs font-bold text-sky-200 underline underline-offset-4"
+      >
+        注意事項
+      </Link>
+      </div>
     </SignageShell>
   );
 }

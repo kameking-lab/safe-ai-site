@@ -1,5 +1,4 @@
 import { Resend } from "resend";
-import { createHmac } from "crypto";
 
 export type Industry = "建設" | "製造" | "医療福祉" | "運輸" | "IT" | "その他";
 
@@ -23,12 +22,21 @@ export const memSendHistory: SendRecord[] = [];
 // ── token helpers ────────────────────────────────────────────
 
 export function generateUnsubscribeToken(email: string): string {
-  const secret = process.env.AUTH_SECRET ?? "dev-newsletter-secret";
-  return createHmac("sha256", secret).update(email.toLowerCase()).digest("hex");
+  void email;
+  throw new Error(
+    "opaque, expiring newsletter unsubscribe tokens are not configured",
+  );
 }
 
 export function verifyUnsubscribeToken(email: string, token: string): boolean {
-  return generateUnsubscribeToken(email) === token;
+  void email;
+  void token;
+  return false;
+}
+
+export function buildUnsubscribeUrl(email: string): string | null {
+  void email;
+  return null;
 }
 
 // ── Resend helpers ───────────────────────────────────────────
@@ -41,12 +49,8 @@ function getResend(): { resend: Resend; audienceId: string } | null {
   return { resend: new Resend(apiKey), audienceId };
 }
 
-function siteUrl(): string {
-  return process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.anzen-ai-portal.jp";
-}
-
-function fromAddress(): string {
-  return process.env.NOTIFY_FROM ?? "安全AIポータル <noreply@anzen-ai.com>";
+function fromAddress(): string | null {
+  return process.env.NOTIFY_FROM?.trim() || null;
 }
 
 // ── subscribe ────────────────────────────────────────────────
@@ -62,37 +66,37 @@ export async function addSubscriber(
   memSubscribers.set(emailKey, sub);
 
   const r = getResend();
-  if (!r) {
-    console.log("[newsletter:subscribe] no Resend — stored in memory. industry:", sub.industry);
-    return { ok: true };
+  const unsubUrl = buildUnsubscribeUrl(sub.email);
+  const from = fromAddress();
+  if (!r?.audienceId || !unsubUrl || !from) {
+    memSubscribers.delete(emailKey);
+    return { ok: false, error: "購読登録は現在利用できません。" };
   }
 
   try {
-    if (r.audienceId) {
-      await r.resend.contacts.create({
-        email: sub.email,
-        firstName: sub.industry,
-        unsubscribed: false,
-        audienceId: r.audienceId,
-      });
+    const contactResult = await r.resend.contacts.create({
+      email: sub.email,
+      firstName: sub.industry,
+      unsubscribed: false,
+      audienceId: r.audienceId,
+    });
+    if (contactResult.error) {
+      throw new Error("contact persistence failed");
     }
 
-    const unsubToken = generateUnsubscribeToken(sub.email);
-    const unsubUrl = `${siteUrl()}/api/newsletter/unsubscribe?email=${encodeURIComponent(sub.email)}&token=${unsubToken}`;
-
-    await r.resend.emails.send({
-      from: fromAddress(),
+    const mailResult = await r.resend.emails.send({
+      from,
       to: sub.email,
       subject: "【安全AIポータル】週間安全情報メルマガの登録が完了しました",
       html: buildWelcomeEmail(sub, unsubUrl),
     });
+    if (mailResult.error) throw new Error("confirmation delivery failed");
 
     return { ok: true };
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : "登録に失敗しました。";
-    console.error("[newsletter:subscribe:error]", msg);
-    // Still return ok if memory write succeeded
-    return { ok: true };
+  } catch {
+    memSubscribers.delete(emailKey);
+    console.error("[newsletter:subscribe:error] provider operation failed");
+    return { ok: false, error: "購読登録に失敗しました。時間をおいて再度お試しください。" };
   }
 }
 
@@ -106,23 +110,21 @@ export async function removeSubscriber(email: string): Promise<boolean> {
   }
 
   const r = getResend();
-  if (!r) {
-    console.log("[newsletter:unsubscribe] no Resend — updated in memory");
-    return true;
+  if (!r?.audienceId) {
+    return Boolean(sub);
   }
 
   try {
-    if (r.audienceId) {
-      // Re-create with unsubscribed:true updates the existing contact
-      await r.resend.contacts.create({
-        email,
-        unsubscribed: true,
-        audienceId: r.audienceId,
-      });
-    }
+    // Re-create with unsubscribed:true updates the existing contact
+    const result = await r.resend.contacts.create({
+      email,
+      unsubscribed: true,
+      audienceId: r.audienceId,
+    });
+    if (result.error) return false;
     return true;
   } catch {
-    return true; // best-effort
+    return false;
   }
 }
 
@@ -184,7 +186,7 @@ function buildWelcomeEmail(sub: NewsletterSubscriber, unsubUrl: string): string 
   </div>
   <p style="font-size:11px;color:#94a3b8;margin:16px 0 0;text-align:center;">
     <a href="${unsubUrl}" style="color:#6b7280;">配信停止</a>
-    ｜ 安全AIポータル ─ 現場の安全を、AIで変える。
+    ｜ 安全AIポータル ─ 根拠から、現場の行動へ
   </p>
 </body>
 </html>`;
@@ -250,7 +252,7 @@ export function buildDigestEmail(opts: {
   </div>
   <p style="font-size:11px;color:#94a3b8;margin:16px 0 0;text-align:center;">
     <a href="${opts.unsubUrl}" style="color:#6b7280;">配信停止</a>
-    ｜ 安全AIポータル ─ 現場の安全を、AIで変える。
+    ｜ 安全AIポータル ─ 根拠から、現場の行動へ
   </p>
 </body>
 </html>`;

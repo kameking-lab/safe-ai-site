@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { estimateQualifications, inferChecklist } from "@/lib/meeting/inference";
+import {
+  estimateQualifications,
+  inferChecklist,
+  inferChecklistCandidates,
+} from "@/lib/meeting/inference";
 import { buildDefaultChecklist } from "@/lib/meeting/schema";
 
 describe("estimateQualifications", () => {
@@ -19,23 +23,27 @@ describe("estimateQualifications", () => {
 });
 
 describe("inferChecklist", () => {
-  it("掘削作業で 掘削カテゴリと一般事項が ok 候補に", () => {
-    const cl = inferChecklist(buildDefaultChecklist(), "バックホウで掘削、土留");
-    const excavation = cl.find((c) => c.key === "excavation")!;
-    const general = cl.find((c) => c.key === "general")!;
-    const crane = cl.find((c) => c.key === "crane")!;
-    expect(excavation.items.every((i) => i.status === "ok")).toBe(true);
-    expect(general.items.every((i) => i.status === "ok")).toBe(true);
-    // 無関係カテゴリは na のまま
-    expect(crane.items.every((i) => i.status === "na")).toBe(true);
+  it("掘削作業では掘削・機械・一般を確認候補にする", () => {
+    const keys = inferChecklistCandidates(
+      buildDefaultChecklist(),
+      "バックホウで掘削、土留"
+    );
+    expect(keys).toEqual(expect.arrayContaining(["excavation", "machine", "general"]));
+    expect(keys).not.toContain("crane");
   });
-  it("user設定の ng は尊重（na のみ ok 化）", () => {
+
+  it("候補抽出だけでは未確認をokへ変えず、user設定も保持する", () => {
     const base = buildDefaultChecklist();
     const ex = base.find((c) => c.key === "excavation")!;
     ex.items[0].status = "ng";
     const cl = inferChecklist(base, "掘削");
     const after = cl.find((c) => c.key === "excavation")!;
     expect(after.items[0].status).toBe("ng");
-    expect(after.items[1].status).toBe("ok");
+    expect(after.items.slice(1).every((item) => item.status === "unreviewed")).toBe(true);
+    expect(cl).not.toBe(base);
+  });
+
+  it("作業条件が空なら確認候補を作らない", () => {
+    expect(inferChecklistCandidates(buildDefaultChecklist(), "  ")).toEqual([]);
   });
 });

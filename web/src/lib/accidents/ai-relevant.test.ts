@@ -28,19 +28,19 @@ describe("tokenize", () => {
 });
 
 describe("findRelevantAccidents", () => {
-  it("作業キーワードでスコアリング抽出", () => {
+  it("一次個票との本文一致を再検証中は、作業キーワード一致でも返さない", () => {
     const r = findRelevantAccidents({ workContent: "外壁塗装 足場" }, CASES);
-    expect(r[0].case.id).toBe("a"); // 足場・塗装で最高スコア
+    expect(r).toEqual([]);
   });
 
-  it("業種カテゴリ一致は加点", () => {
+  it("業種カテゴリ一致だけで未検証事故を運用根拠へ昇格させない", () => {
     const r = findRelevantAccidents({ workContent: "プレス", category: "製造業" as AccidentCase["workCategory"] }, CASES);
-    expect(r[0].case.id).toBe("b");
+    expect(r).toEqual([]);
   });
 
-  it("mainCausesのキーワードもヒット", () => {
+  it("未検証の原因欄が一致しても返さない", () => {
     const r = findRelevantAccidents({ workContent: "塗装" }, CASES);
-    expect(r.map((h) => h.case.id)).toContain("c"); // mainCausesに"塗装区画"
+    expect(r).toEqual([]);
   });
 
   it("スコア0（無関係）は除外", () => {
@@ -48,9 +48,22 @@ describe("findRelevantAccidents", () => {
     expect(r).toEqual([]);
   });
 
-  it("limitで件数制限・スコア降順", () => {
+  it("limitを指定しても隔離レコードを漏らさない", () => {
     const r = findRelevantAccidents({ workContent: "塗装 足場 はさまれ 接触", category: "建設業" as AccidentCase["workCategory"] }, CASES, 2);
-    expect(r.length).toBeLessThanOrEqual(2);
-    expect(r[0].score).toBeGreaterThanOrEqual(r[r.length - 1].score);
+    expect(r).toEqual([]);
+  });
+
+  it("curated・synthetic・preliminaryをすべて再検証済みallowlist外として除外する", () => {
+    const mixed = [
+      mk({ id: "curated-1", title: "足場から墜落", provenance: "curated" }),
+      mk({ id: "synthetic-1", title: "足場から墜落", provenance: "synthetic" }),
+      mk({ id: "preliminary-1", title: "足場から墜落", provenance: "preliminary" }),
+    ];
+
+    expect(
+      findRelevantAccidents({ workContent: "足場 墜落" }, mixed).map(
+        (hit) => hit.case.id,
+      ),
+    ).toEqual([]);
   });
 });

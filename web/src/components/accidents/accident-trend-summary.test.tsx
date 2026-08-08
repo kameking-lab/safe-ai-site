@@ -30,9 +30,9 @@ describe("AccidentTrendSummary 柱0（44pxタップ標的）", () => {
     );
 
     render(<AccidentTrendSummary />);
-    fireEvent.click(screen.getByRole("button", { name: /AIで要約/ }));
+    fireEvent.click(screen.getByRole("button", { name: /集計を表示/ }));
 
-    const link = await waitFor(() => screen.getByRole("link", { name: /厚労省 速報 原典を見る/ }));
+    const link = await waitFor(() => screen.getByRole("link", { name: /厚生労働省の速報原文を開く/ }));
     expect(link.className).toContain("min-h-[44px]");
     expect(link.className).toContain("items-center");
   });
@@ -40,6 +40,6 @@ describe("AccidentTrendSummary 柱0（44pxタップ標的）", () => {
   it("集計期間セレクト・AIで要約ボタンが 44px タップ標的を満たす", () => {
     render(<AccidentTrendSummary />);
     expect(screen.getByLabelText("集計期間").className).toContain("min-h-[44px]");
-    expect(screen.getByRole("button", { name: /AIで要約/ }).className).toContain("min-h-[44px]");
+    expect(screen.getByRole("button", { name: /集計を表示/ }).className).toContain("min-h-[44px]");
   });
 });

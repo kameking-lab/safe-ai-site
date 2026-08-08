@@ -58,7 +58,7 @@ const FILTERS: {
   { value: "all", label: "すべて", icon: LayoutGrid, selected: "bg-slate-700 text-white", idle: "border border-slate-300 bg-white text-slate-700" },
   { value: "law-revision", label: "法改正", icon: Scale, selected: "bg-indigo-600 text-white", idle: "border border-indigo-200 bg-white text-indigo-800" },
   { value: "accident", label: "事故速報", icon: Siren, selected: "bg-rose-600 text-white", idle: "border border-rose-200 bg-white text-rose-800" },
-  { value: "serious-case", label: "重大災害", icon: AlertTriangle, selected: "bg-orange-600 text-white", idle: "border border-orange-200 bg-white text-orange-800" },
+  { value: "serious-case", label: "重大災害", icon: AlertTriangle, selected: "bg-orange-700 text-white", idle: "border border-orange-200 bg-white text-orange-800" },
   { value: "notice", label: "通達告示", icon: FileText, selected: "bg-sky-700 text-white", idle: "border border-sky-200 bg-white text-sky-800" },
   { value: "media", label: "報道", icon: Newspaper, selected: "bg-slate-600 text-white", idle: "border border-slate-300 bg-white text-slate-700" },
 ];
@@ -178,12 +178,12 @@ export function WhatsNewClient({ items }: { items: NewsHubItem[] }) {
           aria-pressed={newOnly}
           className={`inline-flex min-h-[44px] items-center gap-1 rounded-full px-4 text-xs font-bold transition ${
             newOnly
-              ? "bg-emerald-600 text-white shadow-sm"
+              ? "bg-semantic-success-solid text-white shadow-sm"
               : "border border-emerald-300 bg-white text-emerald-700 hover:bg-emerald-50"
           }`}
         >
           🆕 新着のみ
-          <span className={newOnly ? "text-emerald-50" : "text-emerald-600"}>({newCount})</span>
+          <span className={newOnly ? "text-emerald-50" : "text-semantic-success"}>({newCount})</span>
         </button>
         {(newOnly || selected !== "all" || industry !== "all") && (
           <button
@@ -236,7 +236,7 @@ export function WhatsNewClient({ items }: { items: NewsHubItem[] }) {
           role="group"
           aria-label="業種フィルタ"
         >
-          <span className="shrink-0 text-xs font-semibold text-slate-500">業種:</span>
+          <span className="shrink-0 text-xs font-semibold text-portal-muted">業種:</span>
           <button
             type="button"
             onClick={() => selectIndustry("all")}
@@ -274,7 +274,7 @@ export function WhatsNewClient({ items }: { items: NewsHubItem[] }) {
       )}
 
       {industry !== "all" && (
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-portal-muted">
           「{INDUSTRY_META[industry].label}」に関係する法改正＋業種を問わない速報・通達を表示中（次回も記憶されます）。
         </p>
       )}
@@ -296,11 +296,11 @@ export function WhatsNewClient({ items }: { items: NewsHubItem[] }) {
                 </span>
               )}
               {isNewSince(item, lastVisit) && (
-                <span className="rounded-full bg-emerald-600 px-2 py-0.5 text-[10px] font-bold text-white">
+                <span className="rounded-full bg-semantic-success-solid px-2 py-0.5 text-[10px] font-bold text-white">
                   新着
                 </span>
               )}
-              <span className="text-[11px] text-slate-500">{item.date}</span>
+              <span className="text-[11px] text-portal-muted">{item.date}</span>
             </div>
             <h2 className="mt-1 text-sm font-bold text-slate-900">{item.title}</h2>
             {item.summary && <p className="mt-0.5 text-xs leading-relaxed text-slate-600">{item.summary}</p>}

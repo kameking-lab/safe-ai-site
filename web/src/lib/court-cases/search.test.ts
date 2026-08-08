@@ -27,17 +27,15 @@ describe("court-cases search 基盤（フェーズB）", () => {
   });
 
   it("filterCourtCases: 争点・分野・裁判所種別・年代・自由ワードのAND", () => {
-    // 最高裁のみ
+    expect(COURT_CASES).toEqual([]);
     const sup = filterCourtCases(COURT_CASES, { courtType: "最高裁" });
-    expect(sup.length).toBeGreaterThan(0);
+    expect(sup).toEqual([]);
     expect(sup.every((c) => courtTypeOf(c.court) === "最高裁")).toBe(true);
-    // 分野=過労・メンタル
     const mental = filterCourtCases(COURT_CASES, { field: "過労・メンタル" });
+    expect(mental).toEqual([]);
     expect(mental.every((c) => c.field === "過労・メンタル")).toBe(true);
-    // 自由ワード
     const pawahara = filterCourtCases(COURT_CASES, { query: "パワーハラスメント" });
-    expect(pawahara.length).toBeGreaterThan(0);
-    // 該当なしの組合せは空
+    expect(pawahara).toEqual([]);
     expect(filterCourtCases(COURT_CASES, { query: "___存在しない語___" })).toHaveLength(0);
   });
 
@@ -70,20 +68,16 @@ describe("court-cases URLクエリ ⇄ フィルタ（一覧⇄印刷の引き�
   it("courtFilterToQuery: 空の条件は出さない", () => {
     expect(courtFilterToQuery({})).toBe("");
     expect(courtFilterToQuery({ field: "建設・墜落" })).toBe("field=%E5%BB%BA%E8%A8%AD%E3%83%BB%E5%A2%9C%E8%90%BD");
-    expect(courtFilterToQuery({ query: "  " })).toBe(""); // 空白のみは無視
+    expect(courtFilterToQuery({ query: "山田太郎 健康情報" })).toBe("");
   });
 
-  it("round-trip: query→parse→filter が一覧の絞り込みと一致", () => {
+  it("round-trip: 固定選択肢だけを印刷へ引き継ぎ、自由入力は除外する", () => {
     const filter = { field: "建設・墜落" as const, query: "墜落" };
     const q = courtFilterToQuery(filter);
     const parsed = courtFilterFromParams(getter(q));
     expect(parsed.field).toBe("建設・墜落");
-    expect(parsed.query).toBe("墜落");
-    // 同じ純関数で絞ると同件数（印刷ページが一覧と同じ結果を出せる保証）
-    const viaBrowser = filterCourtCases(COURT_CASES, filter);
-    const viaPrint = filterCourtCases(COURT_CASES, parsed);
-    expect(viaPrint.map((c) => c.id)).toEqual(viaBrowser.map((c) => c.id));
-    expect(viaPrint.length).toBeLessThan(COURT_CASES.length);
+    expect(parsed.query).toBe("");
+    expect(q).not.toContain("q=");
   });
 
   it("courtFilterFromParams: 不正値・未知の年代/裁判所は未選択扱い", () => {
@@ -91,10 +85,10 @@ describe("court-cases URLクエリ ⇄ フィルタ（一覧⇄印刷の引き�
     expect(parsed).toEqual({ query: "", issue: "", field: "", courtType: "", decade: "" });
   });
 
-  it("courtFilterFromParams: 実在する年代・裁判所種別は通す", () => {
+  it("courtFilterFromParams: 裁判所種別は通すが、公開allowlistにない旧年代は未選択扱い", () => {
     const parsed = courtFilterFromParams(getter("court=最高裁&decade=1970年代"));
     expect(parsed.courtType).toBe("最高裁");
-    expect(parsed.decade).toBe("1970年代");
+    expect(parsed.decade).toBe("");
   });
 
   it("describeCourtFilter: 絞り込みの説明文（未絞り込みは空）", () => {

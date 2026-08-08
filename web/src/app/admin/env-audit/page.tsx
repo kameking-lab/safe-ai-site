@@ -1,5 +1,4 @@
 ﻿import { Metadata } from "next";
-import { notFound } from "next/navigation";
 import { readFile } from "fs/promises";
 import path from "path";
 
@@ -8,19 +7,7 @@ export const metadata: Metadata = {
   title: "環境変数 棚卸し | Admin",
 };
 
-const VALID_KEY = process.env.STRATEGY_AUTH_PASSWORD ?? "";
-
-interface Props {
-  searchParams: Promise<{ key?: string }>;
-}
-
-export default async function EnvAuditPage({ searchParams }: Props) {
-  const { key } = await searchParams;
-
-  if (key !== VALID_KEY) {
-    notFound();
-  }
-
+export default async function EnvAuditPage() {
   const reportPath = path.join(
     process.cwd(),
     "..",

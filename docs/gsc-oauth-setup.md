@@ -1,7 +1,7 @@
 # Google Search Console — User OAuth Setup Guide
 
 **Status:** Required after merging the user-OAuth migration PR.
-**Audience:** Site owner (`kenshi.ycc@gmail.com`).
+**Audience:** Site owner (`[redacted-private-email]`).
 **Why this exists:** Service-account access to GSC failed (Google rejects the
 service-account email at the "Add user" step), and Workspace-only alternatives
 (Group membership, Domain-wide Delegation) are unavailable on a personal Gmail
@@ -16,10 +16,10 @@ owner via user OAuth with a long-lived refresh token.
    configure it first:
    - User type: **External**.
    - App name: `ANZEN AI GSC`.
-   - User support email + developer email: `kenshi.ycc@gmail.com`.
+   - User support email + developer email: `[redacted-private-email]`.
    - Scopes: leave empty on the consent screen (we request the scope at
      authorization time).
-   - Test users: add `kenshi.ycc@gmail.com`.
+   - Test users: add `[redacted-private-email]`.
    - You can leave the app in **Testing** mode. Refresh tokens issued to a
      Testing app expire after 7 days unless the app is published — see
      section 5 below for the Production-mode step that removes that limit.
@@ -61,7 +61,7 @@ What the script does:
   `https://www.googleapis.com/auth/webmasters.readonly` scope and
   `access_type=offline` + `prompt=consent` (so a refresh token is always
   returned).
-- After you sign in as **`kenshi.ycc@gmail.com`** and approve, Google redirects
+- After you sign in as **`[redacted-private-email]`** and approve, Google redirects
   to `http://localhost:8765/oauth2/callback?code=...`.
 - The script exchanges the code for `{ access_token, refresh_token }` and
   prints the refresh token to the terminal.
@@ -109,7 +109,7 @@ production**:
 ## 6. Property identifier
 
 The runtime calls the URL-prefix property `https://www.anzen-ai-portal.jp/`
-because the OAuth user (`kenshi.ycc@gmail.com`) is the verified owner of that
+because the OAuth user (`[redacted-private-email]`) is the verified owner of that
 property. The previous `GSC_SITE_URL` override (used by the service-account
 path) is still honoured if set — leave it unset to use the URL-prefix default.
 
@@ -126,6 +126,6 @@ been migrated to user OAuth.
 | ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
 | `source: "mock"`, note: `credentials missing`                    | One or more of `GSC_OAUTH_CLIENT_ID` / `GSC_OAUTH_CLIENT_SECRET` / `GSC_OAUTH_REFRESH_TOKEN` is unset in the deployed env.    |
 | `source: "mock"`, note: `GSC 401: invalid_grant`                 | Refresh token was revoked (7-day Testing-mode expiry, password change, or manual revocation). Re-run the init script.        |
-| `source: "mock"`, note: `GSC 403`                                | The OAuth user is not the owner of the property identifier in `siteUrl`. Confirm `kenshi.ycc@gmail.com` is listed in GSC UI. |
+| `source: "mock"`, note: `GSC 403`                                | The OAuth user is not the owner of the property identifier in `siteUrl`. Confirm `[redacted-private-email]` is listed in GSC UI. |
 | Init script: `redirect_uri_mismatch`                             | Redirect URI in the OAuth client does not match `http://localhost:8765/oauth2/callback` exactly.                             |
 | Init script: token response has no `refresh_token`               | Google only returns it on first consent. The script forces `prompt=consent` so this should not happen — re-run it.           |

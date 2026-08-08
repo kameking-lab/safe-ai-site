@@ -1,47 +1,28 @@
 {
-  "fetchedAt": "2026-08-03T03:16:49.634Z",
+  "fetchedAt": "2026-07-06T03:50:37.208Z",
   "source": "e-Gov 法令API v2（政府標準利用規約2.0・出典明示）",
   "total": 20,
   "skipped": 0,
   "skippedLaws": [],
   "revisions": [
     {
-      "id": "lr-egov-322AC0000000049-20260717",
-      "title": "労働基準法（労働者災害補償保険法等の一部を改正する法律）",
-      "publishedAt": "2026-07-17",
-      "revisionNumber": "令和八年法律第六十号",
+      "id": "lr-egov-322AC0000000049-20260624",
+      "title": "労働基準法（民法等の一部を改正する法律の施行に伴う関係法律の整備等に関する法律）",
+      "publishedAt": "2026-06-24",
+      "revisionNumber": "令和八年法律第四十六号",
       "kind": "law",
       "category": "法律",
       "issuer": "厚生労働省",
-      "summary": "労基法の最新改正（出典: e-Gov法令検索の構造データ）。改正法令「労働者災害補償保険法等の一部を改正する法律」。公布 2026-07-17、施行日 2026-07-17。改正内容の詳細はe-Govの原文で必ずご確認ください。",
+      "summary": "労基法の最新改正（出典: e-Gov法令検索の構造データ）。改正法令「民法等の一部を改正する法律の施行に伴う関係法律の整備等に関する法律」。公布 2026-06-24、施行日 2026-06-24。改正内容の詳細はe-Govの原文で必ずご確認ください。",
       "source": {
         "url": "https://laws.e-gov.go.jp/law/322AC0000000049",
         "label": "e-Gov 労働基準法"
       },
       "official_notice_number": "",
-      "publication_date": "2026-07-17",
-      "enforcement_date": "2026-07-17",
+      "publication_date": "2026-06-24",
+      "enforcement_date": "2026-06-24",
       "enforcement_status": "enforced",
       "source_url": "https://laws.e-gov.go.jp/law/322AC0000000049"
-    },
-    {
-      "id": "lr-egov-347M50002000032-20260801",
-      "title": "労働安全衛生規則（労働安全衛生規則の一部を改正する省令）",
-      "publishedAt": "2026-04-28",
-      "revisionNumber": "令和八年厚生労働省令第八十六号",
-      "kind": "ordinance",
-      "category": "省令",
-      "issuer": "厚生労働省",
-      "summary": "安衛則の最新改正（出典: e-Gov法令検索の構造データ）。改正法令「労働安全衛生規則の一部を改正する省令」。公布 2026-04-28、施行日 2026-08-01。改正内容の詳細はe-Govの原文で必ずご確認ください。",
-      "source": {
-        "url": "https://laws.e-gov.go.jp/law/347M50002000032",
-        "label": "e-Gov 労働安全衛生規則"
-      },
-      "official_notice_number": "",
-      "publication_date": "2026-04-28",
-      "enforcement_date": "2026-08-01",
-      "enforcement_status": "enforced",
-      "source_url": "https://laws.e-gov.go.jp/law/347M50002000032"
     },
     {
       "id": "lr-egov-322M40000100023-20260401",
@@ -393,6 +374,25 @@
         "chemical",
         "manufacturing"
       ]
+    },
+    {
+      "id": "lr-egov-347M50002000032-20260701",
+      "title": "労働安全衛生規則（労働安全衛生規則の一部を改正する省令）",
+      "publishedAt": "2024-04-25",
+      "revisionNumber": "令和六年厚生労働省令第七十九号",
+      "kind": "ordinance",
+      "category": "省令",
+      "issuer": "厚生労働省",
+      "summary": "安衛則の最新改正（出典: e-Gov法令検索の構造データ）。改正法令「労働安全衛生規則の一部を改正する省令」。公布 2024-04-25、施行日 2026-07-01。改正内容の詳細はe-Govの原文で必ずご確認ください。",
+      "source": {
+        "url": "https://laws.e-gov.go.jp/law/347M50002000032",
+        "label": "e-Gov 労働安全衛生規則"
+      },
+      "official_notice_number": "",
+      "publication_date": "2024-04-25",
+      "enforcement_date": "2026-07-01",
+      "enforcement_status": "enforced",
+      "source_url": "https://laws.e-gov.go.jp/law/347M50002000032"
     },
     {
       "id": "lr-egov-347M50002000043-20221201",

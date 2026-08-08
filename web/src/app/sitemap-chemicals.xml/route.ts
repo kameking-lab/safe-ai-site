@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { CONCENTRATION_LIMITS } from '@/lib/mhlw-chemicals';
 import { computeSitemapFreshness } from '@/lib/sitemap/freshness';
 import { SITE_URL } from '@/lib/seo-metadata';
+import { isIndexableChemical } from '@/lib/seo/index-quality';
 
 // 柱C-3 / S DRY: 絶対URLのオリジンは seo-metadata.ts の SITE_URL 単一ソース（末尾スラッシュ無し）。
 const BASE = SITE_URL;
@@ -24,7 +25,9 @@ export async function GET() {
   // 全URLが必ず解決し（幽霊URL 0）、データ追加にも自動追従する。キーは既にノーマライズ済み
   // （数字とハイフンのみ・全角/空白なし）で URL 安全なため、詳細ページの canonical
   // `/chemical-database/${cas}`（decodeURIComponent(param)）と 1:1 一致する。
-  const casKeys = Object.keys(CONCENTRATION_LIMITS.substances);
+  const casKeys = Object.entries(CONCENTRATION_LIMITS.substances)
+    .filter(([cas, entry]) => isIndexableChemical(cas, entry))
+    .map(([cas]) => cas);
 
   // lastmod は当日（new Date()）ではなく濃度基準DBスナップショットの実生成日（generatedAt）に
   // 追従させる。当日打ちは中身不変でも毎日 lastmod が動く lastmod スパムで Google に無視される。

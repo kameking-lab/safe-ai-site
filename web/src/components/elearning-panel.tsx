@@ -418,7 +418,7 @@ export function ELearningPanel() {
                     ? `shadow-sm hover:opacity-90 ${t.solid}`
                     : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50")
                 }
-                href="/ky"
+                href="/ky/paper"
               >
                 KY用紙へ
               </Link>

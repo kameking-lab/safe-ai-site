@@ -6,7 +6,6 @@ import { Globe, Maximize2, Minus, Pencil, Play, Printer, Siren } from "lucide-re
 import { useFitToScreen } from "@/lib/signage/use-fit-to-screen";
 import { normalizeKyInstructionRecord } from "@/lib/services/operations-service";
 import type { KyInstructionRecordState } from "@/lib/types/operations";
-import { cloudGetSignageSession } from "@/lib/ky/storage-adapter";
 import { useWakeLock } from "@/lib/signage/use-wake-lock";
 import {
   SIGNAGE_LANGS,
@@ -25,9 +24,6 @@ const COUNTDOWN_SEC = 10;
 export function KyMorningSignage() {
   const [record, setRecord] = useState<KyInstructionRecordState | null>(null);
   const [countdown, setCountdown] = useState<number | null>(null);
-  const [remoteCode, setRemoteCode] = useState<string | null>(null);
-  const [remoteError, setRemoteError] = useState<string | null>(null);
-  const [codeInput, setCodeInput] = useState("");
   // Phase C: 表示言語（既定 ja、localStorage 保持）と全画面状態。
   const [lang, setLang] = useState<SignageLang>("ja");
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -113,50 +109,27 @@ export function KyMorningSignage() {
     }
   }, []);
 
-  // 初回: URLの ?code= があれば別端末共有モード（クラウド取得）。無ければ端末内 ky-record。
+  // 初回: この端末に保存されたKYだけを復元する。別端末共有は安全性の
+  // 再検証中であり、URLパラメータや短い共有コードからは読み込まない。
   useEffect(() => {
-    let code: string | null = null;
-    try {
-      code = new URLSearchParams(window.location.search).get("code");
-    } catch {
-      code = null;
-    }
-    if (code && /^\d{6}$/.test(code)) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setRemoteCode(code);
-      return;
-    }
+    let cancelled = false;
     try {
       const saved = localStorage.getItem("ky-record");
       if (saved) {
-        setRecord(normalizeKyInstructionRecord(JSON.parse(saved) as unknown));
+        const restored = normalizeKyInstructionRecord(
+          JSON.parse(saved) as unknown,
+        );
+        queueMicrotask(() => {
+          if (!cancelled) setRecord(restored);
+        });
       }
     } catch {
       /* 端末内データ無し */
     }
-  }, []);
-
-  // 別端末共有モード: コードでクラウドから取得し、約8秒ごとに自動更新（ポーリング）。
-  useEffect(() => {
-    if (!remoteCode) return;
-    let cancelled = false;
-    const load = async () => {
-      const r = await cloudGetSignageSession(remoteCode);
-      if (cancelled) return;
-      if (r) {
-        setRecord(r);
-        setRemoteError(null);
-      } else {
-        setRemoteError("共有コードのKYが見つからないか、有効期限が切れています。");
-      }
-    };
-    void load();
-    const timer = setInterval(() => void load(), 8000);
     return () => {
       cancelled = true;
-      clearInterval(timer);
     };
-  }, [remoteCode]);
+  }, []);
 
   useEffect(() => {
     if (countdown === null) return;
@@ -264,50 +237,20 @@ export function KyMorningSignage() {
 
         {!record ? (
           <div className="mt-20 rounded-2xl bg-white/10 p-8 text-center print:bg-white">
-            <p className="text-2xl font-bold">
-              {remoteCode ? (remoteError ?? "共有KYを読み込み中…") : L.noData}
-            </p>
-            {remoteCode ? (
-              <p className="mt-2 text-base text-white/70 print:text-slate-600">
-                発行された6桁コードをご確認ください。作成端末で「別端末で共有」した直後に有効になります。
-              </p>
-            ) : (
-              /* 柱0: 段落を読ませず、次にやることをデカいボタンで提示 */
-              <Link
-                href="/ky/paper"
-                className="mx-auto mt-6 flex min-h-[44px] max-w-md items-center justify-center rounded-2xl bg-emerald-500 px-6 py-4 text-xl font-bold text-white shadow-lg hover:bg-emerald-400 print:hidden"
-              >
-                <Pencil className="mr-1.5 h-5 w-5" aria-hidden="true" />この端末でKY用紙を作る
-              </Link>
-            )}
-            {/* 別端末から6桁コードで開く入力フォーム */}
-            <form
-              className="mx-auto mt-6 flex max-w-xs items-center gap-2 print:hidden"
-              onSubmit={(e) => {
-                e.preventDefault();
-                if (/^\d{6}$/.test(codeInput)) {
-                  window.location.href = `/ky/morning?code=${codeInput}`;
-                }
-              }}
+            <p className="text-2xl font-bold">{L.noData}</p>
+            <Link
+              href="/ky/paper"
+              className="mx-auto mt-6 flex min-h-[44px] max-w-md items-center justify-center rounded-2xl bg-emerald-500 px-6 py-4 text-xl font-bold text-white shadow-lg hover:bg-emerald-400 print:hidden"
             >
-              <input
-                inputMode="numeric"
-                pattern="\d{6}"
-                maxLength={6}
-                value={codeInput}
-                onChange={(e) => setCodeInput(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                placeholder="6桁の共有コード"
-                aria-label="共有コード"
-                className="w-44 rounded-lg border border-white/30 bg-white/10 px-3 py-2 text-center text-lg tracking-widest text-white placeholder:text-white/40"
-              />
-              <button
-                type="submit"
-                disabled={!/^\d{6}$/.test(codeInput)}
-                className="min-h-[44px] rounded-lg bg-emerald-500 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-400 disabled:opacity-40"
-              >
-                表示
-              </button>
-            </form>
+              <Pencil className="mr-1.5 h-5 w-5" aria-hidden="true" />
+              この端末でKY用紙を作る
+            </Link>
+            <p
+              role="status"
+              className="mx-auto mt-5 max-w-xl rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm font-semibold leading-6 text-amber-950 print:text-slate-800"
+            >
+              別端末共有は、共有権限と不正照会対策の再検証が完了するまで停止しています。
+            </p>
           </div>
         ) : (
           <div
@@ -442,9 +385,7 @@ export function KyMorningSignage() {
               </div>
 
               <p className="pt-4 text-center text-xs text-white/50 print:hidden">
-                {remoteCode
-                  ? `※ 共有コード ${remoteCode} のKYを表示中（約8秒ごとに自動更新）。`
-                  : "※ この端末で保存したKY記録を表示しています。別端末で映すには、KY用紙の「別端末で共有」から6桁コードを発行してください。"}
+                ※ この端末で保存したKY記録を表示しています。別端末共有は安全性の再検証中です。
               </p>
             </div>
           </div>

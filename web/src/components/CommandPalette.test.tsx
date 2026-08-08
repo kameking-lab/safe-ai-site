@@ -13,10 +13,11 @@ const NO_HIT_QUERY = 'zzxq存在しない語句qxzz';
 // 安衛則は curated 収載があるが第9999条は存在せず 0 件 → egovArticleAnchor が当該法令の
 // e-Gov 条アンカーへ解決する。⌘K でも /search 同様に原文へ 1 タップ着地させる（T4 後段パリティ）。
 const LAW_ARTICLE_NO_HIT = '安衛則 第9999条';
+const routerPush = vi.hoisted(() => vi.fn());
 
 // next/navigation はクライアントフックなのでモック。
 vi.mock('next/navigation', () => ({
-  useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
+  useRouter: () => ({ push: routerPush, replace: vi.fn() }),
 }));
 
 // jsdom は scrollIntoView 未実装（選択ハイライトの追従で呼ばれる）。no-op で差す。
@@ -24,7 +25,10 @@ if (!Element.prototype.scrollIntoView) {
   Element.prototype.scrollIntoView = vi.fn();
 }
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  routerPush.mockClear();
+});
 
 // buildSearchIndex は多数のデータモジュールを import するため初回構築が重い。
 // 0件フォールバックはインデックス読込＋デバウンス(200ms)後に描画されるので待機を長めに取る。
@@ -40,6 +44,14 @@ async function renderPaletteWithQuery(query: string) {
 const renderPaletteWithNoHitQuery = () => renderPaletteWithQuery(NO_HIT_QUERY);
 
 describe('CommandPalette (⌘K) 0件フォールバック（/search T4 とのパリティ）', () => {
+  it('自由入力をURLへ渡さず検索ページを開く', async () => {
+    const marker = '山田太郎-現場A-健康情報';
+    await renderPaletteWithQuery(marker);
+    fireEvent.click(await screen.findByRole('button', { name: /検索ページを開く/ }, WAIT));
+    expect(routerPush).toHaveBeenCalledWith('/search');
+    expect(routerPush).not.toHaveBeenCalledWith(expect.stringContaining(marker));
+  });
+
   it('0件時に e-Gov 法令検索へのリンク（到達可能なポータルトップ）を表示する', async () => {
     await renderPaletteWithNoHitQuery();
     const egov = await screen.findByRole('link', { name: /e-Gov法令検索で調べる/ }, WAIT);

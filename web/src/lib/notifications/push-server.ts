@@ -8,13 +8,18 @@
  *    設定不備は呼び出し側 API Route が 501/503 の正直な応答を返し、鍵・テーブルが
  *    揃えば追加コードなしで自動的に機能する（Path A: スキーマ変更はオーナー実施）。
  *
- * 必要な環境変数（本番Vercelへ投入済み。手順: docs/vapid-push-setup-guide-2026-07-11.md）:
+ * 必要な環境変数（本番設定は外部確認待ち。手順: docs/vapid-push-setup-guide-2026-07-11.md）:
  *   NEXT_PUBLIC_VAPID_PUBLIC_KEY - 公開鍵（クライアントの applicationServerKey と共通）
  *   VAPID_PRIVATE_KEY            - 秘密鍵（サーバー専用・ブラウザへ渡さない）
  *   VAPID_SUBJECT               - 連絡先（mailto:... または https://...）
+ *   PUSH_DELIVERY_ENABLED        - ownerが実配信を承認した場合だけ true
  */
+import "server-only";
+
 import webpush from "web-push";
 import type { SiteNotification } from "@/lib/notifications/feed-types";
+import { validatePushEndpoint } from "@/lib/notifications/push-subscription-validation";
+import { externalCredentialedServicesAllowed } from "@/lib/server/deployment-safety";
 
 /** `push_subscriptions` の1行（service_role で読み書きするサーバー内部表現）。 */
 export type PushSubscriptionRow = {
@@ -29,6 +34,8 @@ let vapidConfigured: boolean | undefined;
 /** VAPID鍵の3点が揃っているか（クライアント公開鍵は別途 NEXT_PUBLIC_ で参照）。 */
 export function isWebPushConfigured(): boolean {
   return Boolean(
+    externalCredentialedServicesAllowed() &&
+    process.env.PUSH_DELIVERY_ENABLED?.trim().toLowerCase() === "true" &&
     process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY?.trim() &&
       process.env.VAPID_PRIVATE_KEY?.trim() &&
       process.env.VAPID_SUBJECT?.trim()
@@ -79,6 +86,15 @@ export async function sendPushToSubscription(
   row: PushSubscriptionRow,
   notification: SiteNotification
 ): Promise<PushSendResult> {
+  const endpoint = validatePushEndpoint(row.endpoint);
+  if (!endpoint) {
+    return {
+      ok: false,
+      expired: true,
+      statusCode: null,
+      detail: "invalid_subscription_endpoint",
+    };
+  }
   if (!ensureVapid()) {
     return { ok: false, expired: false, statusCode: null, detail: "web_push_not_configured" };
   }
@@ -91,7 +107,7 @@ export async function sendPushToSubscription(
   });
   try {
     const res = await webpush.sendNotification(
-      { endpoint: row.endpoint, keys: { p256dh: row.p256dh, auth: row.auth } },
+      { endpoint, keys: { p256dh: row.p256dh, auth: row.auth } },
       payload,
       { TTL: 3600 }
     );

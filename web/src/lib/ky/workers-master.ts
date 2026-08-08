@@ -5,8 +5,8 @@
  * 一度登録した作業員を再利用することで、毎朝の氏名手入力をなくす（「現場に何かさせる」
  * のではなく、職長がマスターから選ぶ効率化）。
  *
- * 保存はまず端末内(localStorage)。Phase 4 でクラウド同期に拡張する想定だが、
- * クラウド失敗時も端末内で動き続けられるよう、ここは純粋なローカル実装に保つ。
+ * 保存は端末内(localStorage)だけ。最終利用から31日で期限切れにし、
+ * 新しいKYメンバー台帳へ移行できた時は旧台帳を削除する。
  */
 
 export type WorkerAffiliation = "self" | "coop1" | "coop2" | "coop3";
@@ -25,6 +25,10 @@ export type Worker = {
   /** 退職等で一覧から隠す（ハード削除と別に非表示も可能に） */
   hidden: boolean;
   createdAt: number;
+  /** 端末内保持期限を更新した最後の利用時刻。 */
+  lastUsedAt?: number;
+  /** 最終利用から31日後。旧データは読み込み時に補完・期限切れ削除する。 */
+  expiresAt?: number;
 };
 
 export const WORKER_AFFILIATION_LABELS: Record<WorkerAffiliation, string> = {
@@ -35,6 +39,10 @@ export const WORKER_AFFILIATION_LABELS: Record<WorkerAffiliation, string> = {
 };
 
 export const WORKERS_STORAGE_KEY = "safe-ai:ky-workers:v1";
+export const WORKER_RETENTION_DAYS = 31;
+export const WORKER_MAX_RECORDS = 80;
+
+const WORKER_RETENTION_MS = WORKER_RETENTION_DAYS * 24 * 60 * 60 * 1000;
 
 const VALID_AFFILIATIONS: readonly WorkerAffiliation[] = ["self", "coop1", "coop2", "coop3"];
 
@@ -43,7 +51,10 @@ function genId(now: number = Date.now()): string {
 }
 
 /** 任意の入力を Worker 形に正規化（壊れたデータ・旧データ対策） */
-export function normalizeWorker(raw: unknown): Worker | null {
+export function normalizeWorker(
+  raw: unknown,
+  now: number = Date.now(),
+): Worker | null {
   if (!raw || typeof raw !== "object") return null;
   const r = raw as Record<string, unknown>;
   const name = typeof r.name === "string" ? r.name.trim() : "";
@@ -51,6 +62,18 @@ export function normalizeWorker(raw: unknown): Worker | null {
   const affiliation = VALID_AFFILIATIONS.includes(r.affiliation as WorkerAffiliation)
     ? (r.affiliation as WorkerAffiliation)
     : "self";
+  const createdAt =
+    typeof r.createdAt === "number" && Number.isFinite(r.createdAt)
+      ? r.createdAt
+      : now;
+  const lastUsedAt =
+    typeof r.lastUsedAt === "number" && Number.isFinite(r.lastUsedAt)
+      ? r.lastUsedAt
+      : createdAt;
+  const expiresAt =
+    typeof r.expiresAt === "number" && Number.isFinite(r.expiresAt)
+      ? r.expiresAt
+      : lastUsedAt + WORKER_RETENTION_MS;
   return {
     id: typeof r.id === "string" && r.id ? r.id : genId(),
     name,
@@ -59,18 +82,28 @@ export function normalizeWorker(raw: unknown): Worker | null {
     qualNo: typeof r.qualNo === "string" ? r.qualNo : "",
     isRegular: r.isRegular === true,
     hidden: r.hidden === true,
-    createdAt: typeof r.createdAt === "number" ? r.createdAt : Date.now(),
+    createdAt,
+    lastUsedAt,
+    expiresAt,
   };
 }
 
-export function normalizeWorkers(raw: unknown): Worker[] {
+export function normalizeWorkers(
+  raw: unknown,
+  now: number = Date.now(),
+): Worker[] {
   if (!Array.isArray(raw)) return [];
   const out: Worker[] = [];
   for (const item of raw) {
-    const w = normalizeWorker(item);
-    if (w) out.push(w);
+    const w = normalizeWorker(item, now);
+    if (w && (w.expiresAt ?? 0) > now) out.push(w);
   }
-  return out;
+  return out
+    .sort(
+      (a, b) =>
+        (b.lastUsedAt ?? b.createdAt) - (a.lastUsedAt ?? a.createdAt),
+    )
+    .slice(0, WORKER_MAX_RECORDS);
 }
 
 export type NewWorkerInput = {
@@ -94,8 +127,10 @@ export function addWorker(list: Worker[], input: NewWorkerInput, now: number = D
     isRegular: input.isRegular ?? false,
     hidden: false,
     createdAt: now,
+    lastUsedAt: now,
+    expiresAt: now + WORKER_RETENTION_MS,
   };
-  return [...list, worker];
+  return normalizeWorkers([...list, worker], now);
 }
 
 export function updateWorker(list: Worker[], id: string, patch: Partial<Omit<Worker, "id">>): Worker[] {
@@ -122,23 +157,63 @@ export function visibleWorkers(list: Worker[]): Worker[] {
     });
 }
 
+/** 編集・明示利用した台帳を最終利用から31日へ更新する。 */
+export function touchWorkers(
+  list: Worker[],
+  now: number = Date.now(),
+): Worker[] {
+  return normalizeWorkers(
+    list.map((worker) => ({
+      ...worker,
+      lastUsedAt: now,
+      expiresAt: now + WORKER_RETENTION_MS,
+    })),
+    now,
+  );
+}
+
 // ── localStorage 連携 ───────────────────────────────────────────
-export function loadWorkers(): Worker[] {
+export function loadWorkers(now: number = Date.now()): Worker[] {
   if (typeof window === "undefined") return [];
   try {
     const raw = window.localStorage.getItem(WORKERS_STORAGE_KEY);
     if (!raw) return [];
-    return normalizeWorkers(JSON.parse(raw));
+    const workers = normalizeWorkers(JSON.parse(raw), now);
+    if (workers.length > 0) {
+      window.localStorage.setItem(WORKERS_STORAGE_KEY, JSON.stringify(workers));
+    } else {
+      window.localStorage.removeItem(WORKERS_STORAGE_KEY);
+    }
+    return workers;
   } catch {
+    try {
+      window.localStorage.removeItem(WORKERS_STORAGE_KEY);
+    } catch {
+      // storage利用不能時もKY作成を継続する。
+    }
     return [];
   }
 }
 
-export function saveWorkers(list: Worker[]): void {
+export function saveWorkers(list: Worker[], now: number = Date.now()): void {
   if (typeof window === "undefined") return;
   try {
-    window.localStorage.setItem(WORKERS_STORAGE_KEY, JSON.stringify(list));
+    const workers = normalizeWorkers(list, now);
+    if (workers.length > 0) {
+      window.localStorage.setItem(WORKERS_STORAGE_KEY, JSON.stringify(workers));
+    } else {
+      window.localStorage.removeItem(WORKERS_STORAGE_KEY);
+    }
   } catch {
     // 保存失敗（容量・プライベートモード）は黙って無視
+  }
+}
+
+export function clearWorkers(): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.removeItem(WORKERS_STORAGE_KEY);
+  } catch {
+    // storage利用不能時もKY作成を継続する。
   }
 }

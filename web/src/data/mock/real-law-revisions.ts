@@ -5,6 +5,7 @@
  * モックではなく、公開情報に基づく実データです。
  */
 import type { LawRevisionCore } from "@/lib/types/domain";
+import { HEAT_ILLNESS_2025_LEGAL_SOURCE } from "@/data/heat-illness-rules/legal-source";
 
 export const realLawRevisions: LawRevisionCore[] = [
   // ── 2016年 ──────────────────────────────────────────
@@ -558,21 +559,20 @@ export const realLawRevisions: LawRevisionCore[] = [
   {
     id: "lr-real-2025-003",
     title: "熱中症対策の義務化（安衛則改正）",
-    publishedAt: "2025-04-15",
-    revisionNumber: "令和7年厚生労働省令第13号",
+    publishedAt: HEAT_ILLNESS_2025_LEGAL_SOURCE.promulgatedAt,
+    revisionNumber: HEAT_ILLNESS_2025_LEGAL_SOURCE.ordinanceNumber,
     kind: "ordinance",
     category: "省令",
     issuer: "厚生労働省",
     impact: "高",
-    summary:
-      "WBGT28以上または気温31度以上の環境での作業において、暑さ指数の測定・休憩場所の設置・水分塩分の提供等を義務化。違反には罰則（6月以下の懲役又は50万円以下の罰金）。",
+    summary: `${HEAT_ILLNESS_2025_LEGAL_SOURCE.targetGuidance} 法定義務は、異常時の報告体制の整備・周知と、作業離脱・身体冷却・必要に応じた医療連携等の悪化防止手順作成・周知の2項目。`,
     source: {
       url: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000116133.html",
       label: "厚生労働省 熱中症対策",
     },
-    official_notice_number: "厚生労働省令第13号",
-    publication_date: "2025-04-15",
-    enforcement_date: "2025-06-01",
+    official_notice_number: HEAT_ILLNESS_2025_LEGAL_SOURCE.officialNoticeNumber,
+    publication_date: HEAT_ILLNESS_2025_LEGAL_SOURCE.promulgatedAt,
+    enforcement_date: HEAT_ILLNESS_2025_LEGAL_SOURCE.effectiveFrom,
     source_url: "https://laws.e-gov.go.jp/law/347M50002000032",
   },
   {
@@ -639,15 +639,15 @@ export const realLawRevisions: LawRevisionCore[] = [
   },
   {
     id: "lr-real-2026-003",
-    title: "化学物質の自律的管理（第3段階・約850物質追加予定）",
+    title: "化学物質の自律的管理（第3段階・約800物質追加）",
     publishedAt: "2026-04-01",
-    revisionNumber: "令和7年厚生労働省令（予定）",
+    revisionNumber: "2026年4月1日施行",
     kind: "ordinance",
     category: "省令",
     issuer: "厚生労働省",
     impact: "高",
     summary:
-      "SDS交付・ラベル表示・リスクアセスメント義務の対象にさらに約850物質を追加予定。対象物質は合計約2,900物質に拡大。",
+      "SDS交付・ラベル表示・リスクアセスメント義務の対象に約800物質を追加し、対象物質は合計約2,900物質に拡大。2026年4月1日に施行済み。個別物質の該当性は厚生労働省の対象物質一覧で確認が必要。",
     source: {
       url: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000099121_00005.html",
       label: "厚生労働省 化学物質の自律的管理",
@@ -662,7 +662,7 @@ export const realLawRevisions: LawRevisionCore[] = [
   {
     id: "lr-real-2027-001",
     title: "ストレスチェック制度の全事業場への拡大（予定）",
-    publishedAt: "2027-01-01",
+    publishedAt: "2028-04-01",
     revisionNumber: "令和7年法律第33号（施行予定）",
     kind: "law",
     category: "労働安全衛生法",
@@ -676,13 +676,13 @@ export const realLawRevisions: LawRevisionCore[] = [
     },
     official_notice_number: "",
     publication_date: "2025-05-14",
-    enforcement_date: "2027-01-01",
+    enforcement_date: "2028-04-01",
     source_url: "https://laws.e-gov.go.jp/law/347AC0000000057",
   },
   {
     id: "lr-real-2027-002",
     title: "個人事業者の災害報告義務化（予定）",
-    publishedAt: "2027-04-01",
+    publishedAt: "2027-01-01",
     revisionNumber: "令和7年法律第33号（施行予定）",
     kind: "law",
     category: "労働安全衛生法",
@@ -696,7 +696,7 @@ export const realLawRevisions: LawRevisionCore[] = [
     },
     official_notice_number: "",
     publication_date: "2025-05-14",
-    enforcement_date: "2027-04-01",
+    enforcement_date: "2027-01-01",
     source_url: "https://laws.e-gov.go.jp/law/347AC0000000057",
   },
 ];

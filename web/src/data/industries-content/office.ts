@@ -226,13 +226,13 @@ export const officeContent: IndustryContent = {
       name: "ストレスチェック実施者研修",
       type: "労働衛生教育",
       target: "医師・保健師等のストレスチェック実施者",
-      href: "/education-certification/finder?q=ストレスチェック",
+      href: "/mental-health-management/stress-check",
     },
     {
       name: "メンタルヘルス・ラインケア教育",
       type: "労働衛生教育",
       target: "管理監督者（4つのケアのうちラインケア）",
-      href: "/education-certification/finder?q=メンタルヘルス",
+      href: "/mental-health-management",
     },
     {
       name: "ハラスメント防止研修",

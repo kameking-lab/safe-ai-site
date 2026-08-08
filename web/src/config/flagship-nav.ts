@@ -1,5 +1,7 @@
 /** 主要機能ナビゲーション定義 */
 
+import { isPublicRouteAvailable } from "@/lib/public-content-policy";
+
 export type FlagshipSubItem = {
   label: string;
   href: string;
@@ -25,7 +27,34 @@ export type FlagshipFeature = {
   subItems: FlagshipSubItem[];
 };
 
-export const FLAGSHIP_FEATURES: FlagshipFeature[] = [
+const ALL_FLAGSHIP_FEATURES: FlagshipFeature[] = [
+  {
+    id: "automation-service",
+    label: "業務自動化・講習相談",
+    icon: "⚙️",
+    cardTitle: "業務自動化・講習・資料作成の相談",
+    cardDescription:
+      "Excel・CSV・通知などの小さな自動化から、AI活用講習、安全教育資料、マニュアル作成まで、料金目安と現在の受付状態を確認できます。",
+    href: "/services/automation",
+    subItems: [
+      {
+        label: "業務自動化の料金・受付状況を見る",
+        href: "/services/automation",
+      },
+      {
+        label: "Excel・定型業務の自動化例を見る",
+        href: "/services/automation#automation-examples",
+      },
+      {
+        label: "AI講習・研修の料金を見る",
+        href: "/services/automation#pricing",
+      },
+      {
+        label: "講習会資料の料金・受付状況を見る",
+        href: "/services/automation#pricing",
+      },
+    ],
+  },
   {
     id: "safety-diary",
     label: "安全工程打合せ書",
@@ -33,7 +62,7 @@ export const FLAGSHIP_FEATURES: FlagshipFeature[] = [
     iconSrc: "/icons/icon-meeting.webp",
     cardTitle: "安全工程打合せ書・安全衛生指示書",
     cardDescription:
-      "元請が前日5分で各社の作業・使用機械・予想災害・リスク・指示を1枚に。AI提案・点検項目・印刷・KY転記。",
+      "各社の作業・使用機械・予想災害・リスク・指示を1枚に整理。候補提案・点検項目・印刷・KY転記。",
     href: "/safety-diary",
     subItems: [
       { label: "打合せ書を作成", href: "/safety-diary" },
@@ -51,7 +80,12 @@ export const FLAGSHIP_FEATURES: FlagshipFeature[] = [
     href: "/ky/paper",
     subItems: [
       { label: "新規KY作成", href: "/ky/paper" },
-      { label: "KY事例データベース", href: "/ky-examples", description: "5業種×10作業150件の危険予知実例。作業別に検索してKY用紙作成に活用" },
+      {
+        label: "KYモデルケース",
+        href: "/ky-examples",
+        description:
+          "架空の学習例・一次資料未確認の参考ケース。転記前に現場と公式資料を確認",
+      },
       { label: "PDFエクスポート", href: "/pdf" },
       { label: "業種別プリセット", href: "/ky#presets" },
     ],
@@ -63,7 +97,7 @@ export const FLAGSHIP_FEATURES: FlagshipFeature[] = [
     iconSrc: "/icons/icon-chemical.webp",
     cardTitle: "化学物質リスクアセスメント",
     cardDescription:
-      "CREATE-SIMPLEに準拠した簡易RA。化学物質DB・SDS連携で、一般工業薬品から有機溶剤まで評価できます。",
+      "CAS番号を正本に化学物質DB・SDS・作業条件を照合し、公式CREATE-SIMPLEで評価する前の不足情報を確認できます。",
     href: "/chemical-ra",
     subItems: [
       { label: "新規アセスメント", href: "/chemical-ra" },
@@ -81,8 +115,18 @@ export const FLAGSHIP_FEATURES: FlagshipFeature[] = [
       "事務所モニター・現場掲示用。気象警報・本日のリスク・現場の安全状態（この端末の記録）・法改正・ニュースを自動更新。",
     href: "/signage",
     subItems: [
-      { label: "朝礼・常設ダッシュボード", href: "/signage", description: "気象・リスク予測・現場の安全状態・ニュース・法改正を1画面で常時掲示" },
-      { label: "サイネージ地図（全国の警報・地震）", href: "/signage/map", description: "台風・地震時の防災監視用の詳細地図。TVの全画面表示は地図内から切替" },
+      {
+        label: "朝礼・常設ダッシュボード",
+        href: "/signage",
+        description:
+          "気象・リスク予測・現場の安全状態・ニュース・法改正を1画面で常時掲示",
+      },
+      {
+        label: "サイネージ地図（全国の警報・地震）",
+        href: "/signage/map",
+        description:
+          "台風・地震時の防災監視用の詳細地図。TVの全画面表示は地図内から切替",
+      },
     ],
   },
   {
@@ -98,12 +142,40 @@ export const FLAGSHIP_FEATURES: FlagshipFeature[] = [
       { label: "法改正一覧", href: "/laws" },
       { label: "通達・判例", href: "/circulars" },
       { label: "条文検索", href: "/law-search" },
-      { label: "法令体系マップ", href: "/law-hierarchy", description: "法→政令→省令→告示の階層構造を俯瞰" },
-      { label: "年次安全衛生計画ジェネレーター", href: "/strategy/plan-generator", description: "業種・規模別の39テンプレートから年次計画書を自動生成" },
-      { label: "健康診断スケジューラ", href: "/health-checkup-scheduler", description: "業種・職種・物質・作業条件から必要健診と年間スケジュールを自動判定" },
-      { label: "治療と仕事の両立支援", href: "/treatment-work-balance", description: "6疾患カテゴリの病態別労務配慮と両立支援プラン・主治医意見書テンプレ" },
-      { label: "熱中症対策ハブ", href: "/heat-illness-prevention", description: "WBGT計算機・業種別リスク判定・R7安衛則改正チェックリストと社内文書テンプレ" },
-      { label: "メンタルヘルス対策", href: "/mental-health-management", description: "ストレスチェック義務・産業医面接指導・小規模事業場向けの実務ガイドと書式" },
+      {
+        label: "法令体系マップ",
+        href: "/law-hierarchy",
+        description: "法→政令→省令→告示の階層構造を俯瞰",
+      },
+      {
+        label: "年次安全衛生計画ジェネレーター",
+        href: "/strategy/plan-generator",
+        description: "業種・規模別の39テンプレートから年次計画書を自動生成",
+      },
+      {
+        label: "健康診断スケジューラ",
+        href: "/health-checkup-scheduler",
+        description:
+          "業種・職種・物質・作業条件から必要健診と年間スケジュールを自動判定",
+      },
+      {
+        label: "治療と仕事の両立支援",
+        href: "/treatment-work-balance",
+        description:
+          "6疾患カテゴリの病態別労務配慮と両立支援プラン・主治医意見書テンプレ",
+      },
+      {
+        label: "熱中症対策ハブ",
+        href: "/heat-illness-prevention",
+        description:
+          "厚生労働省・環境省の一次情報、暑さ指数、緊急時対応を確認する入口",
+      },
+      {
+        label: "メンタルヘルス対策",
+        href: "/mental-health-management",
+        description:
+          "ストレスチェック義務・産業医面接指導・小規模事業場向けの実務ガイドと書式",
+      },
     ],
   },
   {
@@ -118,25 +190,56 @@ export const FLAGSHIP_FEATURES: FlagshipFeature[] = [
     subItems: [
       { label: "AIに質問する", href: "/chatbot" },
       { label: "用語集", href: "/glossary" },
-      { label: "FAQ 200問", href: "/faq", description: "法令・管理体制・化学物質・健康管理の200問を法令根拠付きで解説" },
-      { label: "ご意見・改善提案", href: "/contact", description: "サイトへの要望・追加してほしい機能はこちらからお寄せください" },
+      {
+        label: "FAQ 200問",
+        href: "/faq",
+        description:
+          "法令・管理体制・化学物質・健康管理の200問を法令根拠付きで解説",
+      },
+      {
+        label: "ご意見・改善提案",
+        href: "/contact",
+        description:
+          "サイトへの要望・追加してほしい機能はこちらからお寄せください",
+      },
     ],
   },
   {
     id: "accidents",
-    label: "事故事例・分析",
+    label: "重大災害情報",
     icon: "🚨",
     iconSrc: "/icons/icon-accident.webp",
-    cardTitle: "事故事例データベース・分析",
+    cardTitle: "重大災害情報",
     cardDescription:
-      "厚労省の事例検索・業種別の自動分析レポート・統計ダッシュボード（約5,000件）・重大災害事例を横断できます。",
-    href: "/accidents",
+      "公表事実・匿名の重大災害情報を検索できます。データセット単位の出典、対象年、個別追跡の限界を確認してください。",
+    href: "/accident-news",
     subItems: [
-      { label: "事故DB検索（事例・出典付き）", href: "/accidents", description: "厚労省の死傷・死亡災害事例を業種・原因・作業区分で検索" },
-      { label: "業種別 事故分析レポート", href: "/accidents-reports", description: "5業種の事故型・原因・対策・関連法令を自動集計" },
-      { label: "事故統計ダッシュボード", href: "/accidents-analytics", description: "事故型・業種・経年の傾向をグラフで把握" },
-      { label: "重大災害事例（死亡災害）", href: "/accident-news", description: "公表事実・匿名・出典付きで業種・事故型・原因から類型検索" },
-      { label: "業種別 安全管理ポータル", href: "/industries", description: "10業種の重点課題・関連法令・通達・推奨機能への動線をワンページに集約" },
+      {
+        label: "事故DB検索（事例・出典付き）",
+        href: "/accidents",
+        description: "厚労省の死傷・死亡災害事例を業種・原因・作業区分で検索",
+      },
+      {
+        label: "業種別 事故分析レポート",
+        href: "/accidents-reports",
+        description: "5業種の事故型・原因・対策・関連法令を自動集計",
+      },
+      {
+        label: "事故統計ダッシュボード",
+        href: "/accidents-analytics",
+        description: "事故型・業種・経年の傾向をグラフで把握",
+      },
+      {
+        label: "重大災害事例（死亡災害）",
+        href: "/accident-news",
+        description: "公表事実・匿名のデータを業種・事故型・起因物分類から検索",
+      },
+      {
+        label: "業種別 安全管理ポータル",
+        href: "/industries",
+        description:
+          "10業種の重点課題・関連法令・通達・推奨機能への動線をワンページに集約",
+      },
       // P1-J: /stats はサンプル表示が露出するため主要機能ナビから除外
       { label: "リスク予測", href: "/risk-prediction" },
     ],
@@ -148,23 +251,23 @@ export const FLAGSHIP_FEATURES: FlagshipFeature[] = [
     iconSrc: "/icons/icon-education.webp",
     cardTitle: "特別教育・技能講習DB",
     cardDescription:
-      "安衛則第36条の特別教育（約60種）・技能講習（約40種）を完全収録。業種・作業から必要資格を即時判定。根拠条文付き。",
+      "特別教育・技能講習・作業主任者等を区別し、業種・作業条件から確認候補と根拠を表示。条件不足・未確認資料は判定を保留。",
     href: "/education-certification",
     subItems: [
       {
-        label: "資格判定ツール",
+        label: "資格・教育の候補検索",
         href: "/education-certification/finder",
-        description: "業種・作業を選んで必要資格を自動判定",
+        description: "業種・作業・能力・役割から候補と不足条件を確認",
       },
       {
         label: "特別教育一覧（安衛則第36条）",
-        href: "/education-certification#special",
-        description: "約60種の特別教育を根拠条文付きで確認",
+        href: "/education-certification#sec-special",
+        description: "収録候補と検証状態を確認し、公式資料へ進む",
       },
       {
         label: "技能講習一覧（就業制限）",
-        href: "/education-certification#skill",
-        description: "約40種の技能講習・就業制限業務",
+        href: "/education-certification#sec-skill",
+        description: "技能講習・就業制限の候補を区別して確認",
       },
       {
         label: "Eラーニング・受講申込",
@@ -174,7 +277,8 @@ export const FLAGSHIP_FEATURES: FlagshipFeature[] = [
       {
         label: "石綿（アスベスト）対応支援",
         href: "/asbestos-management",
-        description: "R4.4施行の事前調査結果報告義務に対応した判定ツール・届出書類自動生成・作業計画テンプレ",
+        description:
+          "R4.4施行の事前調査結果報告義務に対応した判定ツール・届出書類自動生成・作業計画テンプレ",
       },
     ],
   },
@@ -191,62 +295,74 @@ export const FLAGSHIP_FEATURES: FlagshipFeature[] = [
       {
         label: "建設業",
         href: "/industries/construction",
-        description: "足場・重機・高所作業・石綿の安全管理。事故レポート・KY例・必要資格を10セクションで網羅。",
+        description:
+          "足場・重機・高所作業・石綿の安全管理。事故レポート・KY例・必要資格を10セクションで網羅。",
       },
       {
         label: "製造業",
         href: "/industries/manufacturing",
-        description: "機械・化学物質・粉じん・ロボットのリスク管理。化学物質RAと特別教育を業種別に整理。",
+        description:
+          "機械・化学物質・粉じん・ロボットのリスク管理。化学物質RAと特別教育を業種別に整理。",
       },
       {
         label: "運輸交通業",
         href: "/industries/transport",
-        description: "改善基準告示・荷役・腰痛・健康起因事故対策。陸災防5大災害ベースの事故事例と年次計画。",
+        description:
+          "改善基準告示・荷役・腰痛・健康起因事故対策。陸災防5大災害ベースの事故事例と年次計画。",
       },
       {
         label: "医療・福祉",
         href: "/industries/healthcare",
-        description: "腰痛・感染症・暴力・メンタル対応。ノーリフトケア・ストレスチェック・健診スケジュール。",
+        description:
+          "腰痛・感染症・暴力・メンタル対応。ノーリフトケア・ストレスチェック・健診スケジュール。",
       },
       {
         label: "サービス業（宿泊・清掃・教育）",
         href: "/industries/service",
-        description: "転倒・ロープ高所・カスハラ・防火管理。雇入れ時教育と業種別KYテンプレートを活用。",
+        description:
+          "転倒・ロープ高所・カスハラ・防火管理。雇入れ時教育と業種別KYテンプレートを活用。",
       },
       {
         label: "小売業（スーパー・コンビニ）",
         href: "/industries/retail",
-        description: "品出し腰痛・転倒・カスハラ・深夜業健診。学生アルバイト教育と防火管理を集約。",
+        description:
+          "品出し腰痛・転倒・カスハラ・深夜業健診。学生アルバイト教育と防火管理を集約。",
       },
       {
         label: "飲食業（レストラン・居酒屋）",
         href: "/industries/food",
-        description: "厨房切創・やけど・熱中症・HACCP対応。年少者就業制限と若年労働者教育を業種別に整理。",
+        description:
+          "厨房切創・やけど・熱中症・HACCP対応。年少者就業制限と若年労働者教育を業種別に整理。",
       },
       {
         label: "卸売業",
         href: "/industries/wholesale",
-        description: "フォークリフト・荷役腰痛・配送中事故。改善基準告示と腰痛予防教育を集約。",
+        description:
+          "フォークリフト・荷役腰痛・配送中事故。改善基準告示と腰痛予防教育を集約。",
       },
       {
         label: "倉庫業（物流・3PL）",
         href: "/industries/warehouse",
-        description: "自動倉庫・AGV・ピッキング・冷凍庫凍傷。物流DX対応の特別教育とリスクアセスメント。",
+        description:
+          "自動倉庫・AGV・ピッキング・冷凍庫凍傷。物流DX対応の特別教育とリスクアセスメント。",
       },
       {
         label: "事務系（情報通信・金融・士業）",
         href: "/industries/office",
-        description: "メンタルヘルス・VDT・長時間労働・テレワーク・ハラスメント。ストレスチェック実務を集約。",
+        description:
+          "メンタルヘルス・VDT・長時間労働・テレワーク・ハラスメント。ストレスチェック実務を集約。",
       },
       {
         label: "安全衛生標識データベース",
         href: "/safety-signs",
-        description: "JIS Z 9101準拠の110標識・業種別の必須／推奨セット・設置位置ガイド。",
+        description:
+          "JIS Z 9101準拠の110標識・業種別の必須／推奨セット・設置位置ガイド。",
       },
       {
         label: "外国人労働者支援",
         href: "/foreign-workers",
-        description: "在留資格別の安全衛生義務・多言語教材・技能実習生対応ガイド。",
+        description:
+          "在留資格別の安全衛生義務・多言語教材・技能実習生対応ガイド。",
       },
     ],
   },
@@ -273,6 +389,22 @@ export const FLAGSHIP_FEATURES: FlagshipFeature[] = [
     ],
   },
 ];
+
+/**
+ * Quarantined features remain in the legacy source list for audit history but
+ * are not advertised as working tools in navigation or site search.
+ */
+export const FLAGSHIP_FEATURES: FlagshipFeature[] =
+  ALL_FLAGSHIP_FEATURES.filter(
+    (feature) =>
+      feature.id !== "construction-calc" &&
+      isPublicRouteAvailable(feature.href),
+  ).map((feature) => ({
+    ...feature,
+    subItems: feature.subItems.filter((item) =>
+      isPublicRouteAvailable(item.href),
+    ),
+  }));
 
 export function getFlagshipById(id: string): FlagshipFeature | undefined {
   return FLAGSHIP_FEATURES.find((f) => f.id === id);

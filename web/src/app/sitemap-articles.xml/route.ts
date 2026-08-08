@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server';
-import { getPublishedArticleIndex } from '@/lib/articles';
+import {
+  getPublishedArticleIndex,
+  isArticleIndexable,
+} from '@/lib/articles';
 import { SITE_URL } from '@/lib/seo-metadata';
 
 // 柱C-3 / S DRY: 絶対URLのオリジンは seo-metadata.ts の SITE_URL 単一ソース（末尾スラッシュ無し）。
@@ -15,7 +18,7 @@ export async function GET() {
   // それらは記事ルート（/articles/[slug]）に存在せず notFound() = 404 になる
   // 幽霊URL（soft404群）だった。記事の正本データは lib/articles に一本化する。
   // getPublishedArticleIndex は publishedAt > now() の時限記事を自動除外する。
-  const articles = getPublishedArticleIndex();
+  const articles = getPublishedArticleIndex().filter(isArticleIndexable);
 
   const urls = articles
     .map(

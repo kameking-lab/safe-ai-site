@@ -51,6 +51,16 @@ describe("GET /api/summaries — 一覧に出る全改正が要約404になら�
     expect(body.ok).toBe(true);
   });
 
+  it("未作成要約のfallbackは対象業種や現場措置を推測しない", async () => {
+    const target = egovLawRevisions.find((item) => !item.id.startsWith("lr-001"))!;
+    const res = await GET(requestFor(target.id));
+    const body = (await res.json()) as {
+      data?: { summary?: { workplaceActions?: string[]; targetIndustries?: string[] } };
+    };
+    expect(body.data?.summary?.workplaceActions).toEqual([]);
+    expect(body.data?.summary?.targetIndustries).toEqual([]);
+  });
+
   it("実在しないIDは従来どおり404", async () => {
     const res = await GET(requestFor("lr-no-such-id"));
     expect(res.status).toBe(404);

@@ -8,7 +8,9 @@
  * 設計（月次速報ETLパターン踏襲）:
  * - 形式検証: 法令名＋公布日(YYYY-MM-DD)が取れない法令はスキップし skipped に計上（未確認明記）
  * - 推測値禁止: 欠損は空のまま。日付の創作はしない
- * - diff-only: fetchedAt を除く実データに差分が無ければ書き込まない（ビルドコスト削減）
+ * - fail-closed: 取得成功率が最低基準を下回る試行は非0終了し、既存snapshotを一切変更しない
+ * - 時刻分離: lastAttemptAt（開始）と lastSuccessAt（品質基準を満たした完了）を分ける
+ * - 原子的更新: 同一ディレクトリの一時ファイルを書き切ってからrenameし、途中書込みを公開しない
  * - 出典明示: 政府標準利用規約2.0（商用可・出典明示）。各レコードに e-Gov URL を付与
  * - APIキー不要（新規env追加なし）
  *
@@ -16,14 +18,28 @@
  * 出力: web/src/data/law-revisions/egov-revisions.json
  */
 
-import { writeFileSync, readFileSync, existsSync, mkdirSync } from "node:fs";
-import { dirname, join } from "node:path";
+import {
+  existsSync,
+  mkdirSync,
+  renameSync,
+  unlinkSync,
+  writeFileSync,
+} from "node:fs";
+import { randomUUID } from "node:crypto";
+import { basename, dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const API_BASE = "https://laws.e-gov.go.jp/api/2/laws";
 const OUT_PATH = join(process.cwd(), "src/data/law-revisions/egov-revisions.json");
 
+/**
+ * 20本の中核法令のうち最低80%を有効な構造データとして取得できた場合だけsnapshotを更新する。
+ * 一時的な数件の欠落は skipped として可視化しつつ、全面・高率障害による空/大幅欠落を拒否する。
+ */
+export const MINIMUM_SUCCESS_RATE = 0.8;
+
 // 労働安全衛生の中核法令（law_id は e-Gov で実在性を確認済）。すべて厚生労働省所管。
-const TARGET_LAWS: { lawId: string; lawShort: string }[] = [
+export const TARGET_LAWS: { lawId: string; lawShort: string }[] = [
   { lawId: "347AC0000000057", lawShort: "安衛法" },
   { lawId: "347CO0000000318", lawShort: "安衛令" },
   { lawId: "347M50002000032", lawShort: "安衛則" },
@@ -66,7 +82,7 @@ const INDUSTRY_TAGS_BY_LAW: Record<string, string[]> = {
   // 安衛法/安衛令/安衛則/労基法/労基則/事務所則 は全業種に関わるためタグ無し（UIで「全業種」）。
 };
 
-type LawRevisionRecord = {
+export type LawRevisionRecord = {
   id: string;
   title: string;
   publishedAt: string;
@@ -108,7 +124,9 @@ function normalizeStatus(raw: unknown): LawRevisionRecord["enforcement_status"] 
   return undefined;
 }
 
-async function fetchLaw(lawId: string): Promise<Record<string, unknown> | null> {
+export async function fetchLawFromEgov(
+  lawId: string,
+): Promise<Record<string, unknown> | null> {
   const res = await fetch(`${API_BASE}?law_id=${encodeURIComponent(lawId)}`, {
     headers: { Accept: "application/json" },
   });
@@ -117,7 +135,7 @@ async function fetchLaw(lawId: string): Promise<Record<string, unknown> | null> 
   return json.laws?.[0] ?? null;
 }
 
-function buildRecord(
+export function buildRecord(
   lawShort: string,
   law: Record<string, unknown>,
 ): LawRevisionRecord | null {
@@ -171,72 +189,223 @@ function buildRecord(
   };
 }
 
-function stripFetchedAt(json: string): string {
-  try {
-    const obj = JSON.parse(json) as Record<string, unknown>;
-    delete obj.fetchedAt;
-    return JSON.stringify(obj);
-  } catch {
-    return json;
+export type EgovRevisionSnapshot = {
+  /** 後方互換用。品質基準を満たした取得完了時刻と同じ値。 */
+  fetchedAt: string;
+  /** このsnapshotを生成した取得試行の開始時刻。拒否された試行はsnapshotへ書かない。 */
+  lastAttemptAt: string;
+  /** 最低成功率を満たし、全レコードの検証を終えた時刻。 */
+  lastSuccessAt: string;
+  source: string;
+  total: number;
+  skipped: number;
+  skippedLaws: string[];
+  successRate: number;
+  minimumSuccessRate: number;
+  revisions: LawRevisionRecord[];
+};
+
+export type EgovRevisionRunOptions = {
+  outputPath?: string;
+  targets?: ReadonlyArray<{ lawId: string; lawShort: string }>;
+  minimumSuccessRate?: number;
+  fetchLaw?: (lawId: string) => Promise<Record<string, unknown> | null>;
+  now?: () => Date;
+  delayMs?: number;
+  wait?: (milliseconds: number) => Promise<void>;
+  logger?: Pick<Console, "log" | "error">;
+};
+
+export type EgovRevisionRunResult = {
+  outputPath: string;
+  lastAttemptAt: string;
+  lastSuccessAt: string;
+  total: number;
+  failed: number;
+  successRate: number;
+};
+
+type FailedLaw = {
+  lawId: string;
+  lawShort: string;
+  reason: "fetch-failed" | "invalid-structure" | "exception";
+};
+
+export class EgovRevisionQualityError extends Error {
+  readonly code = "EGOV_REVISION_MINIMUM_SUCCESS_RATE";
+
+  constructor(
+    readonly lastAttemptAt: string,
+    readonly succeeded: number,
+    readonly targetCount: number,
+    readonly minimumSuccessRate: number,
+    readonly failedLaws: ReadonlyArray<FailedLaw>,
+  ) {
+    const successRate = targetCount === 0 ? 0 : succeeded / targetCount;
+    super(
+      `e-Gov取得成功率が最低基準未満です (${succeeded}/${targetCount}, ` +
+        `${(successRate * 100).toFixed(1)}% < ${(minimumSuccessRate * 100).toFixed(1)}%)`,
+    );
+    this.name = "EgovRevisionQualityError";
   }
 }
 
-async function main() {
-  const records: LawRevisionRecord[] = [];
-  let skipped = 0;
-  const skippedLaws: string[] = [];
+/**
+ * 出力先と同じディレクトリに排他的な一時ファイルを作成し、書込み完了後にrenameする。
+ * 失敗時は一時ファイルだけを除去し、既存snapshotへ触れない。
+ */
+export function writeUtf8Atomic(outputPath: string, contents: string): void {
+  const outputDirectory = dirname(outputPath);
+  mkdirSync(outputDirectory, { recursive: true });
+  const temporaryPath = join(
+    outputDirectory,
+    `.${basename(outputPath)}.${process.pid}.${randomUUID()}.tmp`,
+  );
+  let temporaryExists = false;
 
-  for (const { lawId, lawShort } of TARGET_LAWS) {
+  try {
+    writeFileSync(temporaryPath, contents, { encoding: "utf-8", flag: "wx" });
+    temporaryExists = true;
+    renameSync(temporaryPath, outputPath);
+    temporaryExists = false;
+  } finally {
+    if (temporaryExists && existsSync(temporaryPath)) {
+      unlinkSync(temporaryPath);
+    }
+  }
+}
+
+function assertMinimumSuccessRate(rate: number): void {
+  if (!Number.isFinite(rate) || rate <= 0 || rate > 1) {
+    throw new RangeError("minimumSuccessRate must be greater than 0 and at most 1");
+  }
+}
+
+export async function runEgovRevisionFetch(
+  options: EgovRevisionRunOptions = {},
+): Promise<EgovRevisionRunResult> {
+  const outputPath = options.outputPath ?? OUT_PATH;
+  const targets = options.targets ?? TARGET_LAWS;
+  const minimumSuccessRate = options.minimumSuccessRate ?? MINIMUM_SUCCESS_RATE;
+  const fetchLaw = options.fetchLaw ?? fetchLawFromEgov;
+  const now = options.now ?? (() => new Date());
+  const delayMs = options.delayMs ?? 200;
+  const wait = options.wait ?? ((milliseconds) => new Promise((done) => setTimeout(done, milliseconds)));
+  const logger = options.logger ?? console;
+  const lastAttemptAt = now().toISOString();
+
+  assertMinimumSuccessRate(minimumSuccessRate);
+  if (targets.length === 0) {
+    throw new EgovRevisionQualityError(
+      lastAttemptAt,
+      0,
+      0,
+      minimumSuccessRate,
+      [],
+    );
+  }
+
+  const records: LawRevisionRecord[] = [];
+  const failedLaws: FailedLaw[] = [];
+
+  for (const [index, { lawId, lawShort }] of targets.entries()) {
     try {
       const law = await fetchLaw(lawId);
       if (!law) {
-        skipped += 1;
-        skippedLaws.push(lawShort);
-        continue;
-      }
-      const rec = buildRecord(lawShort, law);
-      if (rec) records.push(rec);
-      else {
-        skipped += 1;
-        skippedLaws.push(lawShort);
+        failedLaws.push({ lawId, lawShort, reason: "fetch-failed" });
+      } else {
+        const record = buildRecord(lawShort, law);
+        if (record) records.push(record);
+        else failedLaws.push({ lawId, lawShort, reason: "invalid-structure" });
       }
     } catch {
-      skipped += 1;
-      skippedLaws.push(lawShort);
+      failedLaws.push({ lawId, lawShort, reason: "exception" });
     }
-    // 公的APIへの配慮で軽くウェイト
-    await new Promise((r) => setTimeout(r, 200));
+
+    // 公的APIへの配慮で軽くウェイト（最後の対象の後は待たない）。
+    if (delayMs > 0 && index < targets.length - 1) {
+      await wait(delayMs);
+    }
+  }
+
+  const successRate = records.length / targets.length;
+  if (records.length === 0 || successRate < minimumSuccessRate) {
+    // ここでは出力ディレクトリ作成も書込みも行わない。既存snapshotをバイト単位で保持する。
+    throw new EgovRevisionQualityError(
+      lastAttemptAt,
+      records.length,
+      targets.length,
+      minimumSuccessRate,
+      failedLaws,
+    );
   }
 
   records.sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
 
-  const payload = {
-    fetchedAt: new Date().toISOString(),
+  const lastSuccessAt = now().toISOString();
+  const payload: EgovRevisionSnapshot = {
+    fetchedAt: lastSuccessAt,
+    lastAttemptAt,
+    lastSuccessAt,
     source: "e-Gov 法令API v2（政府標準利用規約2.0・出典明示）",
     total: records.length,
-    skipped,
-    skippedLaws,
+    skipped: failedLaws.length,
+    skippedLaws: failedLaws.map(({ lawShort }) => lawShort),
+    successRate: Number(successRate.toFixed(4)),
+    minimumSuccessRate,
     revisions: records,
   };
-  const nextJson = JSON.stringify(payload, null, 2);
-
-  if (existsSync(OUT_PATH)) {
-    const prev = readFileSync(OUT_PATH, "utf-8");
-    if (stripFetchedAt(prev) === stripFetchedAt(nextJson)) {
-      console.log(`[egov-revisions] no change (total=${records.length}, skipped=${skipped})`);
-      return;
-    }
-  } else {
-    mkdirSync(dirname(OUT_PATH), { recursive: true });
-  }
-
-  writeFileSync(OUT_PATH, nextJson + "\n", "utf-8");
-  console.log(
-    `[egov-revisions] wrote ${records.length} revisions (skipped ${skipped}${skippedLaws.length ? ": " + skippedLaws.join(",") : ""})`,
+  writeUtf8Atomic(outputPath, JSON.stringify(payload, null, 2) + "\n");
+  logger.log(
+    `[egov-revisions] wrote ${records.length} revisions ` +
+      `(skipped ${failedLaws.length}${failedLaws.length ? ": " + failedLaws.map(({ lawShort }) => lawShort).join(",") : ""}, ` +
+      `successRate=${(successRate * 100).toFixed(1)}%, lastSuccessAt=${lastSuccessAt})`,
   );
+
+  return {
+    outputPath,
+    lastAttemptAt,
+    lastSuccessAt,
+    total: records.length,
+    failed: failedLaws.length,
+    successRate,
+  };
 }
 
-main().catch((e) => {
-  console.error("[egov-revisions] fatal:", e);
-  process.exit(1);
-});
+export async function runCli(
+  options: EgovRevisionRunOptions = {},
+): Promise<number> {
+  const logger = options.logger ?? console;
+  try {
+    await runEgovRevisionFetch({ ...options, logger });
+    return 0;
+  } catch (error) {
+    if (error instanceof EgovRevisionQualityError) {
+      const failures = error.failedLaws
+        .map(({ lawShort, reason }) => `${lawShort}:${reason}`)
+        .join(",");
+      logger.error(
+        `[egov-revisions] rejected attempt ` +
+          `(lastAttemptAt=${error.lastAttemptAt}, succeeded=${error.succeeded}/${error.targetCount}, ` +
+          `minimum=${(error.minimumSuccessRate * 100).toFixed(1)}%, failed=${failures || "none"}); ` +
+          "existing snapshot preserved",
+      );
+    } else {
+      logger.error(
+        `[egov-revisions] fatal: ${error instanceof Error ? error.message : "unknown error"}; ` +
+          "existing snapshot preserved",
+      );
+    }
+    return 1;
+  }
+}
+
+const isDirectRun =
+  typeof process.argv[1] === "string" &&
+  resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+
+if (isDirectRun) {
+  void runCli().then((exitCode) => {
+    process.exitCode = exitCode;
+  });
+}

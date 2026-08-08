@@ -19,14 +19,17 @@ type AccidentTypeGridProps = {
 
 export function AccidentTypeGrid({ counts }: AccidentTypeGridProps) {
   if (counts.length === 0) return null;
+  const visibleCounts = counts.slice(0, 4);
+  const otherCounts = counts.slice(4);
   return (
     <section aria-label="事故の型から探す" data-testid="accident-type-grid" className="mt-3">
       <h2 className="text-sm font-bold text-slate-900">事故の型から探す</h2>
       <div className="mt-2 grid grid-cols-3 gap-1.5 sm:grid-cols-4 lg:grid-cols-6">
-        {counts.map(({ type, count }) => (
+        {visibleCounts.map(({ type, count }) => (
           <a
             key={type}
             href={accidentTypeHref(type)}
+            data-accident-type-chip="true"
             className="flex min-h-[44px] flex-col items-center gap-1 rounded-xl border border-slate-200 bg-white p-2 text-center shadow-sm transition hover:border-amber-400 hover:bg-amber-50"
           >
             <AccidentTypePictogram type={type} size="md" />
@@ -40,6 +43,29 @@ export function AccidentTypeGrid({ counts }: AccidentTypeGridProps) {
           </a>
         ))}
       </div>
+      {otherCounts.length > 0 ? (
+        <details className="mt-2 rounded-xl border border-slate-200 bg-white px-3">
+          <summary className="flex min-h-11 cursor-pointer items-center text-sm font-bold text-slate-800">
+            他の事故型
+          </summary>
+          <div className="grid grid-cols-2 gap-1.5 border-t border-slate-200 py-3 sm:grid-cols-4">
+            {otherCounts.map(({ type, count }) => (
+              <a
+                key={type}
+                href={accidentTypeHref(type)}
+                data-accident-type-overflow="true"
+                className="flex min-h-[44px] items-center gap-2 rounded-xl border border-slate-200 bg-white p-2 text-sm font-bold text-slate-800 hover:border-amber-400 hover:bg-amber-50"
+              >
+                <AccidentTypePictogram type={type} size="sm" />
+                <span>{ACCIDENT_TYPE_SHORT[type]}</span>
+                <span className="ml-auto text-xs text-slate-600">
+                  {count.toLocaleString("ja-JP")}件
+                </span>
+              </a>
+            ))}
+          </div>
+        </details>
+      ) : null}
       <p className="mt-2 text-xs">
         <Link
           href="/education/hazard-slides"

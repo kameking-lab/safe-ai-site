@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { render, screen } from "@testing-library/react";
 import { DistributedInputBar } from "./distributed-input-bar";
 
 vi.mock("@/lib/meeting/cloud", () => ({
@@ -11,6 +11,7 @@ vi.mock("@/lib/meeting/cloud", () => ({
 import { cloudCreateMeetingShare, cloudFetchMeetingContributions } from "@/lib/meeting/cloud";
 
 const baseProps = {
+  cloudConsent: true,
   meetingId: "m1",
   siteName: "テスト現場",
   workDate: "2026-07-04",
@@ -18,42 +19,42 @@ const baseProps = {
   onImport: vi.fn(),
 };
 
-describe("DistributedInputBar 色文法（柱0-0）", () => {
+describe("DistributedInputBar fail-closed boundary", () => {
   beforeEach(() => {
     vi.mocked(cloudCreateMeetingShare).mockReset();
     vi.mocked(cloudFetchMeetingContributions).mockReset();
+    baseProps.onImport.mockReset();
     localStorage.clear();
   });
 
-  it("共有リンク発行の失敗メッセージは危険色(rose)で表示する", async () => {
-    vi.mocked(cloudCreateMeetingShare).mockResolvedValue(null);
-    render(<DistributedInputBar {...baseProps} />);
-    fireEvent.click(screen.getByRole("button", { name: /協力会社に入力を依頼/ }));
-    const msg = await screen.findByText("共有リンクの発行に失敗しました。時間をおいて再度お試しください。");
-    expect(msg.className).toContain("text-rose-700");
-    expect(msg.className).not.toContain("text-emerald-700");
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
-  it("共有リンク発行の成功メッセージは安全色(emerald)で表示する", async () => {
-    vi.mocked(cloudCreateMeetingShare).mockResolvedValue("token-abc");
-    render(<DistributedInputBar {...baseProps} />);
-    fireEvent.click(screen.getByRole("button", { name: /協力会社に入力を依頼/ }));
-    const msg = await screen.findByText("共有リンクを発行しました。各協力会社にLINE等で送ってください。");
-    expect(msg.className).toContain("text-emerald-700");
-  });
+  it.each([true, false])(
+    "cloudConsent=%sでも保守中表示だけを示し、通信・操作導線を出さない",
+    (cloudConsent) => {
+      const fetchSpy = vi.spyOn(globalThis, "fetch");
 
-  it("取り込み失敗メッセージは危険色(rose)で表示する", async () => {
-    vi.mocked(cloudFetchMeetingContributions).mockResolvedValue(null);
-    render(<DistributedInputBar {...baseProps} />);
-    fireEvent.click(screen.getByRole("button", { name: /協力会社の入力を取り込む/ }));
-    const msg = await screen.findByText("取り込みに失敗しました。");
-    expect(msg.className).toContain("text-rose-700");
-  });
+      render(
+        <DistributedInputBar
+          {...baseProps}
+          cloudConsent={cloudConsent}
+        />,
+      );
 
-  it("使い方を閉じるボタンとトグルボタンは44px以上を確保する", () => {
-    render(<DistributedInputBar {...baseProps} />);
-    const closeBtn = screen.getByRole("button", { name: "使い方を閉じる" });
-    expect(closeBtn.className).toContain("min-h-[44px]");
-    expect(closeBtn.className).toContain("min-w-[44px]");
-  });
+      const notice = screen.getByRole("note");
+      expect(notice.textContent?.trim().length).toBeGreaterThan(0);
+      expect(notice.className).toContain("border-amber-300");
+      expect(
+        notice.querySelector("button, a, input, select, textarea"),
+      ).toBeNull();
+      expect(screen.queryByRole("button")).toBeNull();
+      expect(screen.queryByRole("link")).toBeNull();
+      expect(fetchSpy).not.toHaveBeenCalled();
+      expect(cloudCreateMeetingShare).not.toHaveBeenCalled();
+      expect(cloudFetchMeetingContributions).not.toHaveBeenCalled();
+      expect(baseProps.onImport).not.toHaveBeenCalled();
+    },
+  );
 });

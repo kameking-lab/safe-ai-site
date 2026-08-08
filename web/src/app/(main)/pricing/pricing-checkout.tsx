@@ -42,7 +42,7 @@ export function PricingCheckout({ planId, planName, label, variant }: Props) {
       });
       if (res.status === 401) {
         const next = encodeURIComponent("/pricing");
-        window.location.href = `/api/auth/signin?callbackUrl=${next}`;
+        window.location.href = `/auth/signin?callbackUrl=${next}`;
         return;
       }
       const data = (await res.json()) as { url?: string; error?: string };

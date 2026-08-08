@@ -38,7 +38,7 @@ const PERSONAS: Persona[] = [
     desc: "朝礼のKY・墜落/重機リスク・元請対応を一台で。音声入力＆PDF出力対応。",
     links: [
       { label: "KY用紙を作る", href: "/ky" },
-      { label: "リスク予測", href: "/risk-prediction" },
+      { label: "今日の現場リスク", href: "/risk" },
     ],
     accent: {
       iconBg: "bg-amber-100 dark:bg-amber-500/15",

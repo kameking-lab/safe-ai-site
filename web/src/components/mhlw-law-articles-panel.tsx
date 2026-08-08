@@ -88,7 +88,7 @@ export function MhlwLawArticlesPanel() {
     >
       <header className="rounded-2xl border border-emerald-200 bg-gradient-to-r from-emerald-50 to-sky-50 p-4 shadow-sm">
         <div className="flex items-start gap-3">
-          <span className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-white">
+          <span className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-700 text-white">
             <FileText className="h-4 w-4" />
           </span>
           <div className="flex-1 min-w-0">
@@ -134,7 +134,7 @@ export function MhlwLawArticlesPanel() {
             onClick={() => setSelectedLaw("all")}
             className={`min-h-[44px] inline-flex items-center justify-center rounded-full px-3 py-1 text-xs font-semibold transition ${
               selectedLaw === "all"
-                ? "bg-emerald-600 text-white"
+                ? "bg-emerald-700 text-white"
                 : "bg-slate-100 text-slate-700 hover:bg-slate-200"
             }`}
           >
@@ -149,7 +149,7 @@ export function MhlwLawArticlesPanel() {
                 onClick={() => setSelectedLaw(name)}
                 className={`min-h-[44px] inline-flex items-center justify-center rounded-full px-3 py-1 text-xs font-semibold transition ${
                   selectedLaw === name
-                    ? "bg-emerald-600 text-white"
+                    ? "bg-emerald-700 text-white"
                     : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                 }`}
                 title={name}
@@ -208,7 +208,7 @@ export function MhlwLawArticlesPanel() {
                 {a.keywords.slice(0, 8).map((kw) => (
                   <span
                     key={kw}
-                    className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] text-slate-500"
+                    className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] text-slate-700"
                   >
                     {kw}
                   </span>

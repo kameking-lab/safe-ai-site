@@ -4,8 +4,14 @@
  */
 export const SIGNAGE_CODE_TTL_MS = 24 * 60 * 60 * 1000;
 
-/** 000000〜999999 の6桁コードを生成（rand 差し替えでテスト可能）。 */
-export function generateSignageCode(rand: () => number = Math.random): string {
+function secureRandomFraction(): number {
+  const value = new Uint32Array(1);
+  globalThis.crypto.getRandomValues(value);
+  return value[0] / 0x1_0000_0000;
+}
+
+/** 000000〜999999 の6桁コードを暗号学的乱数で生成（rand 差し替えでテスト可能）。 */
+export function generateSignageCode(rand: () => number = secureRandomFraction): string {
   const n = Math.floor(rand() * 1_000_000);
   return String(Math.min(999_999, Math.max(0, n))).padStart(6, "0");
 }

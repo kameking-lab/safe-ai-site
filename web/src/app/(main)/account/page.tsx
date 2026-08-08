@@ -30,7 +30,7 @@ interface Props {
 export default async function AccountPage({ searchParams }: Props) {
   const session = await auth();
   if (!session?.user) {
-    redirect("/api/auth/signin?callbackUrl=%2Faccount");
+    redirect("/auth/signin?callbackUrl=%2Faccount");
   }
 
   const { portal_return } = await searchParams;

@@ -9,6 +9,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: etl-egov-revisions
+  cancel-in-progress: false
+
 jobs:
   fetch:
     runs-on: ubuntu-latest
@@ -30,6 +34,9 @@ jobs:
 
       - name: Install deps (tsx)
         run: npm ci
+
+      - name: Verify fail-closed ETL guards (synthetic fixtures only)
+        run: npx vitest run src/data/law-revisions/egov-revisions-fetch.test.ts
 
       - name: Fetch e-Gov law revisions (structural data only)
         run: npx tsx scripts/etl/egov-revisions-fetch.ts

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   ASBESTOS_WORK_LEVEL_LABELS_JA,
@@ -15,6 +15,7 @@ import {
 import { buildPreWorkSummary } from "@/lib/asbestos-engine";
 import {
   asbestosScopeFromParams,
+  consumeAsbestosScopeHandoff,
   hasAsbestosScopeParams,
   type AsbestosScopeFormValues,
 } from "@/lib/asbestos-scope-query";
@@ -52,9 +53,8 @@ export function NotificationBuilder() {
     () => asbestosScopeFromParams((k) => searchParams.get(k), DEFAULT_SCOPE),
     [searchParams],
   );
-  const carriedFromStep1 = useMemo(
-    () => hasAsbestosScopeParams((k) => searchParams.get(k)),
-    [searchParams],
+  const [carriedFromStep1, setCarriedFromStep1] = useState(() =>
+    hasAsbestosScopeParams((k) => searchParams.get(k)),
   );
 
   const [buildingCategory, setBuildingCategory] = useState<BuildingCategory>(
@@ -70,10 +70,28 @@ export function NotificationBuilder() {
   const [constructionStartYear, setConstructionStartYear] = useState<number>(
     initial.constructionStartYear,
   );
-  const [asbestosKnownPresent] = useState<boolean>(initial.asbestosKnownPresent);
+  const [asbestosKnownPresent, setAsbestosKnownPresent] = useState<boolean>(
+    initial.asbestosKnownPresent,
+  );
   const [workLevel, setWorkLevel] = useState<AsbestosWorkLevel | "">(
     initial.workLevel,
   );
+
+  useEffect(() => {
+    const transient = consumeAsbestosScopeHandoff();
+    if (!transient) return;
+    const frame = window.requestAnimationFrame(() => {
+      setBuildingCategory(transient.buildingCategory);
+      setProjectCategory(transient.projectCategory);
+      setConstructionStartYear(transient.constructionStartYear);
+      setContractValueJpyMan(transient.contractValueJpyMan);
+      setWorkAreaSqm(transient.workAreaSqm);
+      setAsbestosKnownPresent(transient.asbestosKnownPresent);
+      setWorkLevel(transient.workLevel);
+      setCarriedFromStep1(true);
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
 
   const scope: ProjectScope = useMemo(
     () => ({

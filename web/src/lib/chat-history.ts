@@ -1,48 +1,40 @@
 /**
- * Chatbot 進行中の会話を localStorage に永続化するユーティリティ。
+ * Chatbot 進行中の会話を同一タブのメモリだけに保持するユーティリティ。
  *
- * 既存の `chatbot_history_v2`（複数の保存済みセッション一覧）とは別物で、
- * こちらは「ページを再読込しても直前の会話が残る」ための
- * 単一の現在進行形セッション用。
+ * 再読込やタブ終了で破棄し、URL・履歴・Web Storageへ会話本文を残さない。
+ * 過去バージョンが保存した値は、クリア時に削除だけ行う。
  *
- * - SSR 安全（typeof window で常にガード）
- * - localStorage が使えない環境（プライベートブラウジング・容量超過等）では
- *   memory フォールバックに切り替え、UI 側はそのまま使える
  * - 保存上限はメッセージ数 50（古い user/assistant ペアから順に切り詰め）
  */
 
-const STORAGE_KEY = "anzen_chatbot_active_session_v1";
+import { migrateChatbotHistory } from "@/lib/chatbot-safety";
+
+const LEGACY_STORAGE_KEYS = [
+  "anzen_chatbot_active_session_v1",
+  "chatbot_history_v2",
+] as const;
 const MAX_MESSAGES = 50;
 
-// localStorage が使えない場合の memory フォールバック（同一タブ内のみ有効）
+// モジュールインスタンスは現在のタブに閉じる。会話本文は永続化しない。
 let memoryFallback: string | null = null;
 
 function safeGet(): string | null {
-  if (typeof window === "undefined") return null;
-  try {
-    return window.localStorage.getItem(STORAGE_KEY);
-  } catch {
-    return memoryFallback;
-  }
+  return memoryFallback;
 }
 
 function safeSet(value: string): void {
-  if (typeof window === "undefined") return;
-  try {
-    window.localStorage.setItem(STORAGE_KEY, value);
-  } catch {
-    // QuotaExceededError / SecurityError 等。memory フォールバックに切替
-    memoryFallback = value;
-  }
+  memoryFallback = value;
 }
 
 function safeRemove(): void {
   memoryFallback = null;
   if (typeof window === "undefined") return;
-  try {
-    window.localStorage.removeItem(STORAGE_KEY);
-  } catch {
-    // ignore
+  for (const key of LEGACY_STORAGE_KEYS) {
+    try {
+      window.localStorage.removeItem(key);
+    } catch {
+      // 保存領域へアクセスできない場合も、メモリ上の履歴は削除済み。
+    }
   }
 }
 
@@ -58,7 +50,7 @@ export type StoredChatMessage = {
 };
 
 export type ChatHistoryPayload<T extends StoredChatMessage = StoredChatMessage> = {
-  version: 1;
+  version: 1 | 2;
   updatedAt: number;
   messages: T[];
 };
@@ -71,8 +63,14 @@ export function loadChatHistory<T extends StoredChatMessage = StoredChatMessage>
   if (!raw) return null;
   try {
     const parsed = JSON.parse(raw) as ChatHistoryPayload<T>;
-    if (!parsed || parsed.version !== 1 || !Array.isArray(parsed.messages)) return null;
-    return parsed.messages.filter((m) => m && (m.role === "user" || m.role === "assistant"));
+    if (!parsed || ![1, 2].includes(parsed.version) || !Array.isArray(parsed.messages)) return null;
+    const valid = parsed.messages.filter((m) => m && (m.role === "user" || m.role === "assistant"));
+    const migrated = migrateChatbotHistory(valid);
+    if (parsed.version === 1 || migrated.removedCount > 0) {
+      if (migrated.messages.length === 0) safeRemove();
+      else saveChatHistory(migrated.messages);
+    }
+    return migrated.messages;
   } catch {
     return null;
   }
@@ -87,9 +85,15 @@ export function saveChatHistory<T extends StoredChatMessage = StoredChatMessage>
     safeRemove();
     return;
   }
-  const trimmed = messages.length > MAX_MESSAGES ? messages.slice(-MAX_MESSAGES) : messages;
+  const migrated = migrateChatbotHistory(messages);
+  const safeMessages = migrated.messages;
+  if (safeMessages.length === 0) {
+    safeRemove();
+    return;
+  }
+  const trimmed = safeMessages.length > MAX_MESSAGES ? safeMessages.slice(-MAX_MESSAGES) : safeMessages;
   const payload: ChatHistoryPayload<T> = {
-    version: 1,
+    version: 2,
     updatedAt: Date.now(),
     messages: trimmed,
   };

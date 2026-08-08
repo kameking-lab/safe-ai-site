@@ -9,6 +9,7 @@ import Link from "next/link";
 import { Check, MessageSquare, Database, ListChecks, ArrowRight } from "lucide-react";
 import { useOptionalCopilot } from "@/components/copilot/CopilotProvider";
 import type { CopilotStepId } from "@/lib/copilot/types";
+import { isPublicRouteAvailable } from "@/lib/public-content-policy";
 
 interface StepDef {
   id: CopilotStepId;
@@ -65,6 +66,9 @@ export function CopilotStepNav({ current, industry, className = "" }: CopilotSte
     if (step.id === "plan-generator") return `/strategy/plan-generator?industry=${effectiveIndustry}`;
     return step.href;
   };
+  const publicSteps = STEPS.filter((step) =>
+    isPublicRouteAvailable(buildHref(step)),
+  );
 
   return (
     <nav
@@ -76,11 +80,11 @@ export function CopilotStepNav({ current, industry, className = "" }: CopilotSte
           安全Copilot
         </p>
         <span className="text-[11px] text-slate-500 dark:text-slate-400">
-          メイン3機能を連続して使うと、業種・関心事項が自動で引き継がれます
+          現在公開中の確認手順だけを表示しています
         </span>
       </div>
       <ol className="flex flex-col gap-2 sm:flex-row sm:items-stretch sm:gap-3">
-        {STEPS.map((step, idx) => {
+        {publicSteps.map((step, idx) => {
           const isCurrent = step.id === current;
           const isDone = completed[step.id];
           const Icon = step.icon;
@@ -139,7 +143,7 @@ export function CopilotStepNav({ current, industry, className = "" }: CopilotSte
                   {Inner}
                 </Link>
               )}
-              {idx < STEPS.length - 1 && (
+              {idx < publicSteps.length - 1 && (
                 <ArrowRight
                   className="hidden h-4 w-4 shrink-0 text-emerald-400 sm:block dark:text-emerald-600"
                   aria-hidden="true"

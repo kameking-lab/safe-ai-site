@@ -10,6 +10,10 @@ import { describe, expect, it } from "vitest";
  */
 
 const SOURCE = readFileSync(resolve(process.cwd(), "src/app/signage/page.tsx"), "utf8");
+const DIALOG_SOURCE = readFileSync(
+  resolve(process.cwd(), "src/components/signage/signage-dialog.tsx"),
+  "utf8",
+);
 
 describe("サイネージ /signage の鮮度・自動復旧の定数", () => {
   it("自動更新間隔は15分（60分では現場休憩所TVの鮮度が悪すぎる）", () => {
@@ -41,13 +45,12 @@ describe("サイネージ /signage の鮮度・自動復旧の定数", () => {
   });
 
   it("朝礼スクリプト・トレンド拡大モーダルの「閉じる」ボタンが44pxタップ標的を満たす", () => {
-    // 視覚刷新（2026-07-12）で「✕」テキストは lucide <X> アイコンに置換。
-    // aria-label="閉じる" を持つ button ブロックで44px標的を検査する
-    const closeButtonBlocks = [...SOURCE.matchAll(/<button[\s\S]{0,600}?aria-label="閉じる"[\s\S]{0,300}?<\/button>/g)];
-    expect(closeButtonBlocks.length).toBeGreaterThanOrEqual(2);
-    for (const block of closeButtonBlocks) {
-      expect(block[0]).toMatch(/min-h-\[44px\]/);
-    }
+    expect((SOURCE.match(/<SignageDialog/g) ?? []).length).toBeGreaterThanOrEqual(2);
+    const closeButton = DIALOG_SOURCE.match(
+      /<button[\s\S]{0,600}?aria-label="閉じる"[\s\S]{0,300}?<\/button>/,
+    );
+    expect(closeButton).not.toBeNull();
+    expect(closeButton![0]).toMatch(/min-h-\[44px\]/);
   });
 
   it("トレンド拡大モーダルの「記事を開く →」リンクが44pxタップ標的を満たす", () => {

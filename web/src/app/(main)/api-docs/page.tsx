@@ -55,7 +55,7 @@ export default function ApiDocsPage() {
               </li>
               <li className="flex items-start gap-2">
                 <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-500" />
-                RAG問い合わせ API（安衛法チャットボット）
+                法令本文検索 API（安衛法AI）
               </li>
               <li className="flex items-start gap-2">
                 <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-500" />

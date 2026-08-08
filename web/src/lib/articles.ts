@@ -1,5 +1,6 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { isArticleQuarantined } from "@/lib/article-quarantine";
 
 export type ArticleSection = {
   heading: string;
@@ -20,7 +21,12 @@ export type Article = {
   tags: string[];
   keywords?: string[];
   publishedAt: string;
+  /** 編集・データ更新日。人手による内容確認日とは限らない。 */
   lastReviewedAt: string;
+  /** 公式URLの取得先・到達を確認した日。本文の専門確認とは分離する。 */
+  sourceRetrievedAt?: string;
+  /** 内容を人が確認した日。未確認はnull、旧記事の不明状態はundefined。 */
+  humanReviewedAt?: string | null;
   author: { name: string; url: string };
   sections: ArticleSection[];
   sources: ArticleSource[];
@@ -29,7 +35,16 @@ export type Article = {
 
 export type ArticleIndexEntry = Pick<
   Article,
-  "slug" | "title" | "description" | "publishedAt" | "lastReviewedAt" | "category" | "industry" | "tags"
+  | "slug"
+  | "title"
+  | "description"
+  | "publishedAt"
+  | "lastReviewedAt"
+  | "sourceRetrievedAt"
+  | "humanReviewedAt"
+  | "category"
+  | "industry"
+  | "tags"
 >;
 
 const ARTICLES_DIR = join(process.cwd(), "src", "data", "articles");
@@ -58,7 +73,14 @@ function loadAll(): Article[] {
     // 一部 .json ファイルが UTF-8 BOM 付きで保存されており JSON.parse が失敗する。
     // 入口で剥がす（BOM が無ければそのまま）。
     const stripped = raw.charCodeAt(0) === 0xfeff ? raw.slice(1) : raw;
-    return JSON.parse(stripped) as Article;
+    const parsed = JSON.parse(stripped) as Article;
+    return {
+      ...parsed,
+      author: {
+        name: "安全AIポータル編集部（専門家監修：未確認）",
+        url: "https://www.anzen-ai-portal.jp/about/quality",
+      },
+    };
   });
   cached = articles;
   return articles;
@@ -69,8 +91,21 @@ function loadAll(): Article[] {
  */
 export function getPublishedArticles(now = new Date()): Article[] {
   return loadAll()
-    .filter((a) => isPublished(a.publishedAt, now))
+    .filter(
+      (a) => !isArticleQuarantined(a.slug) && isPublished(a.publishedAt, now),
+    )
     .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
+}
+
+/**
+ * Explicitly pending human content review is not eligible for search-engine
+ * indexing or sitemap inclusion. Legacy records without the new field keep
+ * their existing treatment until their status is migrated deliberately.
+ */
+export function isArticleIndexable(
+  article: Pick<Article, "humanReviewedAt">,
+): boolean {
+  return article.humanReviewedAt !== null;
 }
 
 /**
@@ -83,6 +118,8 @@ export function getPublishedArticleIndex(now = new Date()): ArticleIndexEntry[] 
     description: a.description,
     publishedAt: a.publishedAt,
     lastReviewedAt: a.lastReviewedAt,
+    sourceRetrievedAt: a.sourceRetrievedAt,
+    humanReviewedAt: a.humanReviewedAt,
     category: a.category,
     industry: a.industry,
     tags: a.tags,
@@ -95,6 +132,7 @@ export function getPublishedArticleIndex(now = new Date()): ArticleIndexEntry[] 
 export function getPublishedArticleBySlug(slug: string, now = new Date()): Article | null {
   const article = loadAll().find((a) => a.slug === slug);
   if (!article) return null;
+  if (isArticleQuarantined(article.slug)) return null;
   if (!isPublished(article.publishedAt, now)) return null;
   return article;
 }

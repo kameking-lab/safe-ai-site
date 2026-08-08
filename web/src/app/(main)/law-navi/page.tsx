@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, Compass, Search, Table2 } from "lucide-react";
+import { ArrowRight, Compass, Table2 } from "lucide-react";
 import { JsonLd, breadcrumbSchema } from "@/components/json-ld";
 import { PageJsonLd } from "@/components/page-json-ld";
 import { LawHubNav } from "@/components/law-hub-nav";
@@ -8,14 +8,17 @@ import { RelatedPageCards } from "@/components/related-page-cards";
 import { LAW_NAVI_TOPICS } from "@/data/law-navi/topics";
 import { BEPPYO_ENTRIES } from "@/data/law-navi/beppyo";
 import { LAW_NAVI_ENTRIES } from "@/lib/law-navi/permalink";
+import { getAllFulltextNaviEntries } from "@/lib/law-navi/fulltext-navi";
+import { isIndexableLawNaviEntry } from "@/lib/law-navi/seo-gate";
 import { ogImageUrl } from "@/lib/og-url";
 import { Mascot } from "@/components/mascot";
+import { LawNaviSearch } from "./LawNaviSearch";
 
 const SITE_BASE = "https://www.anzen-ai-portal.jp";
 
 const _title = "法令ナビ — 現場の言葉から安衛法の原文へ";
 const _desc =
-  `安衛法体系（法律→政令→省令→通達）を分野別・現場の言葉で引ける条文ナビ。「フォークリフト」でも「35条」でも「別表第3」でも、該当条文の原文に最短で着地。条文ページではAI解説と用語解説が読解を補助します（収録${LAW_NAVI_ENTRIES.length}条）。`;
+  `安衛法体系（法律→政令→省令→通達）を分野別・現場の言葉で引ける条文ナビ。「フォークリフト」でも「35条」でも「別表第3」でも、該当条文の原文に最短で着地。条文ページでは一次資料の抜粋と用語解説で確認を補助します（収録${LAW_NAVI_ENTRIES.length}条）。`;
 
 export const metadata: Metadata = {
   title: _title,
@@ -29,11 +32,20 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", images: [ogImageUrl(_title)] },
 };
 
-export default function LawNaviHubPage() {
+export default async function LawNaviHubPage() {
   // 分野をグループ（荷役運搬機械等…）ごとにまとめる
   const groups = new Map<string, typeof LAW_NAVI_TOPICS>();
   for (const t of LAW_NAVI_TOPICS) {
     groups.set(t.fieldGroup, [...(groups.get(t.fieldGroup) ?? []), t]);
+  }
+  const fulltextEntries = await getAllFulltextNaviEntries();
+  const firstIndexableByLaw = new Map<string, (typeof LAW_NAVI_ENTRIES)[number]>();
+  for (const entry of [...LAW_NAVI_ENTRIES, ...fulltextEntries]
+    .filter(isIndexableLawNaviEntry)
+    .sort((a, b) => a.path.localeCompare(b.path, "ja"))) {
+    if (!firstIndexableByLaw.has(entry.egovLawId)) {
+      firstIndexableByLaw.set(entry.egovLawId, entry);
+    }
   }
 
   return (
@@ -60,34 +72,13 @@ export default function LawNaviHubPage() {
             <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
               安衛法の体系（法律→政令→省令→通達）を、<strong>分野</strong>からも<strong>現場の言葉</strong>からも
               <strong>条番号</strong>からも引けるナビです。どの入口からでも原文に最短で着地し、読みづらければ
-              AI解説・用語解説が補助します（原文が正・解説は補助）。
+              一次資料の抜粋・用語解説が確認を補助します（e-Govの原文が正本です）。
             </p>
           </div>
           <Mascot variant="law-reading" size="lg" alt="" className="hidden shrink-0 sm:block" />
         </header>
 
-        {/* 検索窓（JS不要のGETフォーム＝横断検索へ合流。「爪のやつ」「三十五条」「別表第3」なんでも） */}
-        <form action="/search" method="get" className="mb-8" role="search" aria-label="法令を検索">
-          <div className="flex gap-2">
-            <input
-              type="search"
-              name="q"
-              required
-              placeholder="例: フォークリフト ／ 爪のやつ ／ 35条 ／ 別表第3"
-              className="min-h-[48px] w-full rounded-xl border border-slate-300 px-4 text-sm text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
-            />
-            <button
-              type="submit"
-              className="inline-flex min-h-[48px] items-center gap-1.5 rounded-xl bg-emerald-600 px-5 text-sm font-bold text-white transition hover:bg-emerald-700"
-            >
-              <Search className="h-4 w-4" aria-hidden="true" />
-              検索
-            </button>
-          </div>
-          <p className="mt-1.5 text-[11px] text-slate-500">
-            俗称（爪のやつ）・漢数字（三十五条）・枝番（151条の67）・別表の意味（特化物の表）いずれでも探せます。
-          </p>
-        </form>
+        <LawNaviSearch />
 
         {/* 分野インデックス */}
         <section aria-label="分野から引く" className="mb-8">
@@ -127,6 +118,26 @@ export default function LawNaviHubPage() {
             </Link>
             をご利用ください。
           </p>
+        </section>
+
+        <section aria-label="法令別の条文入口" className="mb-8">
+          <h2 className="mb-3 text-lg font-bold text-slate-900">法令別の条文入口</h2>
+          <p className="mb-3 text-xs leading-5 text-slate-600">
+            付加価値を確認できた条文の先頭から、同じ法令内を前後に移動できます。正式な判断では各ページのe-Gov原文を確認してください。
+          </p>
+          <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            {[...firstIndexableByLaw.values()].map((entry) => (
+              <li key={entry.egovLawId}>
+                <Link
+                  href={entry.path}
+                  className="flex min-h-[44px] items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 hover:border-emerald-300 hover:bg-emerald-50"
+                >
+                  <span>{entry.article.lawShort} {entry.article.articleNum}</span>
+                  <ArrowRight className="h-4 w-4 shrink-0 text-emerald-600" aria-hidden="true" />
+                </Link>
+              </li>
+            ))}
+          </ul>
         </section>
 
         {/* 別表インデックス */}

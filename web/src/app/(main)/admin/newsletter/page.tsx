@@ -100,7 +100,7 @@ export default function AdminNewsletterPage() {
       {/* トークン入力（NEWSLETTER_ADMIN_TOKEN設定時に必要） */}
       <div className="mb-6 rounded-xl border border-slate-200 bg-white p-4">
         <label htmlFor="admin-token" className="mb-1.5 block text-xs font-semibold text-slate-600">
-          管理者トークン（NEWSLETTER_ADMIN_TOKEN 未設定時は空欄でOK）
+          管理者トークン（NEWSLETTER_ADMIN_TOKEN。未設定時はAPIがfail-closed）
         </label>
         <input
           id="admin-token"

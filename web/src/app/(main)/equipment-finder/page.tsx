@@ -1,83 +1,121 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
-import { EquipmentFinderClient } from "@/components/equipment-finder-client";
-import { RelatedPageCards } from "@/components/related-page-cards";
-import { EquipmentFinderHeader } from "@/components/equipment-finder-header";
+import Link from "next/link";
+import {
+  AlertTriangle,
+  ArrowRight,
+  FlaskConical,
+  ShoppingBag,
+} from "lucide-react";
 import { PageContainer } from "@/components/layout";
-import { PanelSkeleton } from "@/components/skeleton";
-import { ogImageUrl } from "@/lib/og-url";
-import { SITE_URL } from "@/lib/seo-metadata";
-import { getAllEquipment } from "@/lib/equipment-recommendation";
-import { JsonLd, webPageSchema, breadcrumbSchema, productCollectionSchema } from "@/components/json-ld";
+import { EQUIPMENT_CATALOG_QUARANTINE } from "@/lib/equipment-catalog-quarantine";
+
 export const metadata: Metadata = {
-  title: "保護具AIファインダー｜種類選択→絞り込みで最適保護具を提案",
+  title: "保護具商品検索（一次資料確認中）",
   description:
-    "フルハーネス・防毒/防塵マスク・ヘルメット・安全靴・保護メガネ・防音・手袋・保護衣・救命胴衣・視認性ベストなど12カテゴリから、種類別の絞り込み質問で最適な保護具をレコメンド。JIS規格・国家検定品も明示。",
+    "商品名、メーカー、規格適合、価格等の一次資料確認が完了していないため、商品単位の検索・推薦を停止しています。",
   alternates: { canonical: "/equipment-finder" },
-  openGraph: {
-    title: "保護具AIファインダー",
-    description: "保護具の種類を選んで、種類別の絞り込み質問でおすすめ商品を表示。",
-    images: [{ url: ogImageUrl("保護具AIファインダー", "12カテゴリから種類別に絞り込み"), width: 1200, height: 630 }],
+  robots: {
+    index: false,
+    follow: false,
+    googleBot: { index: false, follow: false },
   },
 };
 
 export default function EquipmentFinderPage() {
-  const url = `${SITE_URL}/equipment-finder`;
-  const title = "保護具AIファインダー｜種類選択→絞り込みで最適保護具を提案";
-  const description = "12カテゴリから保護具の種類を選び、種類別の絞り込み質問で最適な装備をレコメンド。JIS規格・国家検定品も明示。";
   return (
     <PageContainer width="prose">
-      <JsonLd
-        schema={[
-          webPageSchema({ name: title, description, url }),
-          breadcrumbSchema([
-            { name: "ホーム", url: SITE_URL },
-            { name: "保護具AIファインダー", url },
-          ]),
-          productCollectionSchema({
-            name: title,
-            url,
-            products: getAllEquipment().slice(0, 20).map((item) => ({
-              name: item.name,
-              url: `${SITE_URL}/equipment/${item.id}`,
-              description: item.spec,
-              brand: item.maker,
-            })),
-          }),
-        ]}
-      />
-      <EquipmentFinderHeader />
+      <div className="py-6 sm:py-10">
+        <div
+          className="rounded-2xl border-2 border-amber-500 bg-amber-50 p-5 text-amber-950 sm:p-7"
+          role="status"
+          aria-labelledby="equipment-quarantine-title"
+        >
+          <div className="flex items-start gap-3">
+            <AlertTriangle
+              className="mt-0.5 h-6 w-6 shrink-0"
+              aria-hidden="true"
+            />
+            <div>
+              <p className="text-sm font-bold">データ状態: 隔離・公開停止</p>
+              <h1
+                id="equipment-quarantine-title"
+                className="mt-1 text-2xl font-black tracking-tight sm:text-3xl"
+              >
+                商品単位の検索・推薦は利用できません
+              </h1>
+              <p className="mt-3 text-sm leading-7">
+                {EQUIPMENT_CATALOG_QUARANTINE.note}
+                商品の適合性は、対象作業・有害要因・使用条件に応じて、メーカーの最新資料、
+                SDS、法令・公的資料と、保護具に詳しい担当者による確認が必要です。
+              </p>
+              <p className="mt-2 text-xs leading-6">
+                隔離日: {EQUIPMENT_CATALOG_QUARANTINE.quarantinedAt} /
+                公開商品件数: {EQUIPMENT_CATALOG_QUARANTINE.publicItemCount}件
+              </p>
+            </div>
+          </div>
+        </div>
 
-      <Suspense fallback={<PanelSkeleton rows={4} label="保護具レコメンドを読み込み中" />}>
-        <EquipmentFinderClient />
-      </Suspense>
+        <section className="mt-6" aria-labelledby="equipment-safe-next">
+          <h2
+            id="equipment-safe-next"
+            className="text-lg font-bold text-slate-950"
+          >
+            代わりに確認できること
+          </h2>
+          <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            <Link
+              href="/chemical-ra"
+              className="group min-h-11 rounded-xl border border-emerald-300 bg-white p-4 text-slate-900 shadow-sm hover:border-emerald-500"
+            >
+              <span className="flex items-center gap-2 font-bold">
+                <FlaskConical
+                  className="h-5 w-5 text-emerald-700"
+                  aria-hidden="true"
+                />
+                化学物質リスクを整理する
+              </span>
+              <span className="mt-2 block text-sm leading-6 text-slate-600">
+                SDS、作業条件、換気、皮膚接触等を確認し、必要な対策項目を整理します。
+              </span>
+              <span className="mt-2 inline-flex items-center gap-1 text-sm font-bold text-emerald-800">
+                化学物質RAへ
+                <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              </span>
+            </Link>
+            <Link
+              href="/goods"
+              className="group min-h-11 rounded-xl border border-sky-300 bg-white p-4 text-slate-900 shadow-sm hover:border-sky-500"
+            >
+              <span className="flex items-center gap-2 font-bold">
+                <ShoppingBag
+                  className="h-5 w-5 text-sky-700"
+                  aria-hidden="true"
+                />
+                安全用品のカテゴリを見る
+              </span>
+              <span className="mt-2 block text-sm leading-6 text-slate-600">
+                商品適合を断定しないカテゴリ案内です。購入前に最新仕様を確認してください。
+              </span>
+              <span className="mt-2 inline-flex items-center gap-1 text-sm font-bold text-sky-800">
+                安全グッズへ
+                <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              </span>
+            </Link>
+          </div>
+        </section>
 
-      <RelatedPageCards
-        heading="合わせて使う"
-        pages={[
-          {
-            href: "/chemical-database",
-            label: "化学物質検索DB",
-            description: "化学物質名・CAS番号から必要な保護具の種類を逆引き。濃度基準値も同時確認。",
-            color: "blue",
-            cta: "物質から選ぶ",
-          },
-          {
-            href: "/chemical-ra",
-            label: "化学物質RA",
-            description: "リスクアセスメント結果をもとに保護具・換気設備の優先度を判定。",
-            color: "emerald",
-            cta: "RAから判定",
-          },
-          {
-            href: "/accidents",
-            label: "事故データベース",
-            description: "保護具未着用・選定誤りが要因となった事故事例を業種別に検索。",
-            color: "orange",
-            cta: "事故から学ぶ",
-          },
-        ]}
-      />
+        <p className="mt-6 text-sm leading-7 text-slate-600">
+          データ品質、隔離、訂正の考え方は
+          <Link
+            href="/about/quality"
+            className="mx-1 font-bold text-sky-800 underline"
+          >
+            品質と出典の方針
+          </Link>
+          で確認できます。
+        </p>
+      </div>
     </PageContainer>
   );
 }

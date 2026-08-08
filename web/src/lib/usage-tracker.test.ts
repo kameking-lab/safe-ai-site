@@ -117,6 +117,21 @@ describe("isWorkContextPath（作業画面ではフィードバック懇願を�
     expect(isWorkContextPath("/signage/map")).toBe(true);
   });
 
+  it("会話・入力・判定を続ける主力画面では割込み禁止", () => {
+    for (const pathname of [
+      "/chatbot",
+      "/chatbot/share/example",
+      "/chemical-ra",
+      "/law-search",
+      "/risk",
+      "/services/automation",
+      "/training/visual-ky",
+      "/training/visual-ky/example",
+    ]) {
+      expect(isWorkContextPath(pathname), pathname).toBe(true);
+    }
+  });
+
   it("接頭辞が一致するだけの別ルート（/ky-examples 等）は対象外＝閲覧は許可", () => {
     expect(isWorkContextPath("/ky-examples")).toBe(false);
     expect(isWorkContextPath("/signage-guide")).toBe(false);

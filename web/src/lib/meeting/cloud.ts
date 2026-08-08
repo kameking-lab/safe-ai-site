@@ -8,18 +8,26 @@ import { getDeviceId, isKyCloudEnabled } from "@/lib/ky/storage-adapter";
 import { normalizeMeetingRecord, type MeetingRecord } from "@/lib/meeting/schema";
 import type { MeetingSummary } from "@/lib/meeting/store";
 import type { MeetingContribution, ContributionPayload } from "@/lib/meeting/distributed";
+import { hasCloudConsent } from "@/lib/cloud-consent";
 
 export function isMeetingCloudEnabled(): boolean {
   return isKyCloudEnabled();
 }
 
+export function isMeetingCloudAuthorized(): boolean {
+  return isMeetingCloudEnabled() && hasCloudConsent();
+}
+
 export async function cloudPushMeeting(rec: MeetingRecord): Promise<boolean> {
-  if (!isKyCloudEnabled()) return false;
+  if (!isMeetingCloudAuthorized()) return false;
   try {
     const res = await fetch("/api/meeting/records", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ deviceId: getDeviceId(), record: rec }),
+      headers: {
+        "Content-Type": "application/json",
+        "x-cloud-consent": "meeting-v1",
+      },
+      body: JSON.stringify({ record: rec }),
     });
     return res.ok;
   } catch {
@@ -28,9 +36,11 @@ export async function cloudPushMeeting(rec: MeetingRecord): Promise<boolean> {
 }
 
 export async function cloudPullMeetings(): Promise<MeetingSummary[] | null> {
-  if (!isKyCloudEnabled()) return null;
+  if (!isMeetingCloudAuthorized()) return null;
   try {
-    const res = await fetch(`/api/meeting/records?deviceId=${encodeURIComponent(getDeviceId())}`);
+    const res = await fetch("/api/meeting/records", {
+      headers: { "x-cloud-consent": "meeting-v1" },
+    });
     if (!res.ok) return null;
     const data = (await res.json()) as { ok?: boolean; list?: MeetingSummary[] };
     return Array.isArray(data.list) ? data.list : null;
@@ -40,9 +50,11 @@ export async function cloudPullMeetings(): Promise<MeetingSummary[] | null> {
 }
 
 export async function cloudGetMeetingById(id: string): Promise<MeetingRecord | null> {
-  if (!isKyCloudEnabled()) return null;
+  if (!isMeetingCloudAuthorized()) return null;
   try {
-    const res = await fetch(`/api/meeting/records?deviceId=${encodeURIComponent(getDeviceId())}&id=${encodeURIComponent(id)}`);
+    const res = await fetch(`/api/meeting/records?id=${encodeURIComponent(id)}`, {
+      headers: { "x-cloud-consent": "meeting-v1" },
+    });
     if (!res.ok) return null;
     const data = (await res.json()) as { record?: unknown };
     return data.record ? normalizeMeetingRecord(data.record) : null;
@@ -52,11 +64,14 @@ export async function cloudGetMeetingById(id: string): Promise<MeetingRecord | n
 }
 
 export async function cloudDeleteMeeting(id: string): Promise<boolean> {
-  if (!isKyCloudEnabled()) return false;
+  if (!isMeetingCloudAuthorized()) return false;
   try {
     const res = await fetch(
-      `/api/meeting/records?deviceId=${encodeURIComponent(getDeviceId())}&id=${encodeURIComponent(id)}`,
-      { method: "DELETE" }
+      `/api/meeting/records?id=${encodeURIComponent(id)}`,
+      {
+        method: "DELETE",
+        headers: { "x-cloud-consent": "meeting-v1" },
+      }
     );
     return res.ok;
   } catch {
@@ -72,7 +87,7 @@ export async function cloudCreateMeetingShare(
   siteName: string,
   workDate: string
 ): Promise<string | null> {
-  if (!isKyCloudEnabled()) return null;
+  if (!isMeetingCloudAuthorized()) return null;
   try {
     const res = await fetch("/api/meeting/share", {
       method: "POST",
@@ -91,7 +106,7 @@ export async function cloudCreateMeetingShare(
 export async function cloudFetchMeetingContributions(
   meetingId: string
 ): Promise<MeetingContribution[] | null> {
-  if (!isKyCloudEnabled()) return null;
+  if (!isMeetingCloudAuthorized()) return null;
   try {
     const res = await fetch(
       `/api/meeting/share?deviceId=${encodeURIComponent(getDeviceId())}&meetingId=${encodeURIComponent(meetingId)}`

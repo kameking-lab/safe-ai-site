@@ -8,8 +8,10 @@
  *
  * 出典の錨（anti-circularity / F2と同じ思想）:
  * 各ケースの正解（結論キーフレーズ・gold条文）は e-Gov 法令検索の正本を根拠とし、
- * corpusEvidence.anchor に法令番号＋条＋正本上の事実を明記する。コーパス
- * （web/src/data/laws/）はこの正解定義と突合される側であり、正解の出所ではない。
+ * corpusEvidence.anchor に法令番号＋条＋正本上の事実を明記する。ただし anchor
+ * 自体を支持資料には使わない。高リスク主張は sourceRequirements からfixture外の
+ * chatbot-genquality-source-records.tsへ解決し、一次本文・locator・hashを照合する。
+ * コーパス（web/src/data/laws/）はこの正解定義と突合される側であり、正解の出所ではない。
  * コーパス側の要約がこの事実を失う編集（例: 派遣法45条から「派遣元」が消える）は
  * chatbot-genquality.test.ts のコーパス突合ゲートでCIが落ちる。
  *
@@ -46,6 +48,19 @@ export type CorpusEvidence = {
   anchor: string;
 };
 
+export type ClaimSourceRequirement = {
+  /** Stable claim group. A citation to another claim does not satisfy this one. */
+  claimId: string;
+  label: string;
+  /** ID in chatbot-genquality-source-records.ts (kept outside this fixture). */
+  sourceId: string;
+  /**
+   * Exact fragments that must exist in the independently stored primary-source
+   * excerpt. These are never checked against this fixture's anchor string.
+   */
+  sourceMustContain: string[];
+};
+
 export type GenQualityCase = {
   /** GQ01〜GQ23（診断04 §2.1 の Q1〜Q23）＋GQ24〜GQ51（2026-07-11拡張） */
   id: string;
@@ -64,6 +79,8 @@ export type GenQualityCase = {
   goldCitations: GoldCitation[];
   /** コーパス正本突合ゲート（CIで常時検証） */
   corpusEvidence?: CorpusEvidence[];
+  /** 主張ごとに一次資料・引用箇所・支持関係を要求する高リスクケース用ゲート */
+  sourceRequirements?: ClaimSourceRequirement[];
   /** 範囲外質問: 条文引用なし・断定なし・公式誘導のno-hit対応を正とする */
   expectOutOfScope?: boolean;
   /** RAG検索(top10)のホワイトリストにgoldが入ることをCIで要求 */
@@ -131,7 +148,7 @@ const RAW_CASES: RawGenQualityCase[] = [
     category: "in-scope",
     diagVerdict: "○",
     question: "労働者1人に必要な気積の基準を教えてください。",
-    mustInclude: [["10立方メートル", "10m³", "10m3", "10 m3", "１０立方メートル"]],
+    mustInclude: [["十立方メートル", "10立方メートル", "10m³", "10m3", "10 m3", "１０立方メートル"]],
     goldCitations: [
       { lawShort: "安衛則", articleNum: "第600条" },
       { lawShort: "事務所則", articleNum: "第2条" },
@@ -140,14 +157,14 @@ const RAW_CASES: RawGenQualityCase[] = [
       {
         lawShort: "安衛則",
         articleNum: "第600条",
-        mustContain: ["10立方メートル"],
+        mustContain: ["十立方メートル"],
         anchor:
           "安衛則（昭和47年労働省令第32号）第600条: 屋内作業場の気積は設備・床面から4mを超える高さの空間を除き労働者1人について10立方メートル以上",
       },
       {
         lawShort: "事務所則",
         articleNum: "第2条",
-        mustContain: ["10立方メートル"],
+        mustContain: ["十立方メートル"],
         anchor: "事務所衛生基準規則（昭和47年労働省令第43号）第2条: 気積・労働者1人について10立方メートル以上",
       },
     ],
@@ -167,7 +184,7 @@ const RAW_CASES: RawGenQualityCase[] = [
       {
         lawShort: "安衛令",
         articleNum: "第20条",
-        mustContain: ["フォークリフト", "1トン"],
+        mustContain: ["フオークリフト", "一トン"],
         anchor:
           "安衛令（昭和47年政令第318号）第20条第11号: 最大荷重1トン以上のフォークリフトの運転業務は就業制限業務（技能講習）。1トン未満は安衛則第36条第5号の特別教育",
       },
@@ -178,18 +195,68 @@ const RAW_CASES: RawGenQualityCase[] = [
     id: "GQ05",
     category: "in-scope",
     diagVerdict: "○",
-    question: "熱中症対策が義務になるWBGT基準値はいくつですか？",
-    mustInclude: [["28度", "28℃"], ["31度", "31℃"]],
+    question:
+      "安衛則第612条の2の対象作業の目安として、施行通達が示すWBGT・気温と作業時間の条件は何ですか？",
+    mustInclude: [
+      ["28度", "28℃", "２８度", "２８℃"],
+      ["31度", "31℃", "３１度", "３１℃"],
+      ["連続1時間以上", "継続して1時間以上", "連続して1時間以上"],
+      [
+        "1日4時間を超",
+        "1日当たり4時間を超",
+        "一日4時間を超",
+        "一日当たり4時間を超",
+      ],
+      ["対象作業の目安", "対象の目安", "目安として"],
+      ["基発0520第6号", "施行通達"],
+      [
+        "第612条の2の条文本文ではなく",
+        "条文本文の数値基準ではありません",
+        "条文本文に数値はありません",
+        "条文に定めた数値基準ではありません",
+        "条文本文に置かれた一律の法定閾値ではありません",
+      ],
+      ["報告体制"],
+      ["悪化防止手順", "悪化を防止するための手順", "手順の整備"],
+    ],
+    mustExclude: [
+      "第612条の2[^。]{0,40}(28|２８|二十八)[^。]{0,30}(定められている|規定されている|定めています|規定しています)",
+      "(28|２８)度[^。]{0,30}(一律の)?法定(基準|閾値)",
+      "(31|３１)度[^。]{0,30}(一律の)?法定(基準|閾値)",
+      "(28|２８)度以上[^。]{0,30}(必ず|一律に)[^。]{0,20}(義務|作業中止)",
+    ],
     goldCitations: [{ lawShort: "安衛則", articleNum: "第612条の2" }],
     corpusEvidence: [
       {
         lawShort: "安衛則",
         articleNum: "第612条の2",
-        mustContain: ["28度", "31度"],
+        mustContain: ["報告をさせる体制", "手順"],
         anchor:
-          "安衛則第612条の2（令和7年厚生労働省令改正・R7.6.1施行）: WBGT28度以上または気温31度以上の作業場所で連続1時間以上・1日4時間超の作業が対象",
+          "安衛則第612条の2（令和7年厚生労働省令第57号・R7.6.1施行）: 法定義務は、熱中症のおそれがある作業での報告体制と症状悪化防止手順の整備・周知。対象作業の数値目安は条文本文ではなく関係通達で確認する",
       },
     ],
+    sourceRequirements: [
+      {
+        claimId: "gq05-statutory-duties",
+        label: "第612条の2の法定2項目",
+        sourceId: "egov-osh-rule-612-2",
+        sourceMustContain: ["報告をさせる体制", "手順"],
+      },
+      {
+        claimId: "gq05-notice-target-guidance",
+        label: "WBGT・気温・時間条件を含む対象作業の目安",
+        sourceId: "mhlw-heat-notice-0520-6",
+        sourceMustContain: [
+          "WBGT",
+          "28",
+          "31",
+          "1時間",
+          "4時間",
+        ],
+      },
+    ],
+    notes:
+      "第612条の2は法定2項目、数値・時間条件は基発0520第6号の対象作業目安として分離する。通達の一次本文snapshot/hashが未登録の間はsource-gapで保留。",
   },
   {
     id: "GQ06",
@@ -205,7 +272,7 @@ const RAW_CASES: RawGenQualityCase[] = [
       {
         lawShort: "安衛則",
         articleNum: "第44条",
-        mustContain: ["1年以内ごとに1回"],
+        mustContain: ["一年以内ごとに一回"],
         anchor:
           "安衛則（昭和47年労働省令第32号）第44条第1項: 常時使用する労働者に対し1年以内ごとに1回、定期に健康診断を実施",
       },
@@ -245,7 +312,7 @@ const RAW_CASES: RawGenQualityCase[] = [
       {
         lawShort: "安衛則",
         articleNum: "第12条の5",
-        mustContain: ["講習", "14日"],
+        mustContain: ["講習", "十四日"],
         anchor:
           "安衛則（昭和47年労働省令第32号）第12条の5（令和4年省令改正で新設）: リスクアセスメント対象物を製造・取扱う事業場ごとに化学物質管理者を選任（事由発生から14日以内）。製造事業場は厚生労働大臣告示の講習修了者等から選任",
       },
@@ -291,7 +358,7 @@ const RAW_CASES: RawGenQualityCase[] = [
       {
         lawShort: "クレーン則",
         articleNum: "第21条",
-        mustContain: ["5トン未満", "特別の教育"],
+        mustContain: ["五トン未満", "特別の教育"],
         anchor:
           "クレーン則（昭和47年労働省令第34号）第21条: つり上げ荷重5トン未満のクレーン運転業務は特別の教育",
       },
@@ -320,7 +387,7 @@ const RAW_CASES: RawGenQualityCase[] = [
       {
         lawShort: "安衛令",
         articleNum: "第20条",
-        mustContain: ["玉掛け", "1トン"],
+        mustContain: ["玉掛け", "一トン"],
         anchor:
           "安衛令第20条第16号: つり上げ荷重1トン以上のクレーン等の玉掛け業務は就業制限業務（技能講習）。1トン未満はクレーン則第222条の特別教育",
       },
@@ -341,9 +408,9 @@ const RAW_CASES: RawGenQualityCase[] = [
       {
         lawShort: "安衛則",
         articleNum: "第52条の21",
-        mustContain: ["50人", "努力義務"],
+        mustContain: ["五十人"],
         anchor:
-          "安衛法第66条の10＋附則（平成26年法律第82号）第4条: 検査実施義務・常時50人未満の事業場は当分の間努力義務。安衛則（昭和47年労働省令第32号）第52条の21: 結果報告義務＝常時50人以上",
+          "安衛則（昭和47年労働省令第32号）第52条の21: 検査・面接指導結果の所轄労働基準監督署長への報告対象は常時50人以上。ストレスチェック実施義務の適用範囲は安衛法第66条の10と施行・経過措置を別途確認する",
       },
     ],
     notes: "診断04では根拠未収録で「特定できず」（×）。#639でコーパス補強済",
@@ -365,14 +432,14 @@ const RAW_CASES: RawGenQualityCase[] = [
       {
         lawShort: "安衛令",
         articleNum: "第8条",
-        mustContain: ["安全委員会", "50人"],
+        mustContain: ["五十人"],
         anchor:
           "安衛令第8条: 安全委員会を設けるべき事業場＝業種区分に応じ常時50人以上または100人以上",
       },
       {
         lawShort: "安衛令",
         articleNum: "第9条",
-        mustContain: ["衛生委員会", "50人"],
+        mustContain: ["五十人"],
         anchor: "安衛令第9条: 衛生委員会を設けるべき事業場＝全業種で常時50人以上",
       },
     ],
@@ -417,7 +484,7 @@ const RAW_CASES: RawGenQualityCase[] = [
       {
         lawShort: "安衛則",
         articleNum: "第518条",
-        mustContain: ["2メートル", "墜落"],
+        mustContain: ["二メートル", "墜落"],
         anchor:
           "安衛則（昭和47年労働省令第32号）第518条: 高さ2メートル以上で作業床を設けることが困難なときは墜落制止用器具の使用等の墜落防止措置",
       },
@@ -438,7 +505,7 @@ const RAW_CASES: RawGenQualityCase[] = [
       {
         lawShort: "安衛則",
         articleNum: "第590条",
-        mustContain: ["等価騒音レベル", "6月以内"],
+        mustContain: ["等価騒音レベル", "六月以内"],
         anchor:
           "安衛則（昭和47年労働省令第32号）第590条: 著しい騒音を発する屋内作業場（第588条）は6月以内ごとに1回等価騒音レベルを測定し記録を3年間保存",
       },
@@ -577,15 +644,23 @@ const RAW_CASES: RawGenQualityCase[] = [
     mustInclude: [["50人", "５０人"]],
     goldCitations: [
       { lawShort: "安衛法", articleNum: "第13条" },
+      { lawShort: "安衛令", articleNum: "第5条" },
       { lawShort: "安衛則", articleNum: "第13条" },
     ],
     corpusEvidence: [
       {
         lawShort: "安衛則",
         articleNum: "第13条",
-        mustContain: ["50人", "14日"],
+        mustContain: ["十四日"],
         anchor:
           "安衛則（昭和47年労働省令第32号）第13条: 産業医の選任は常時50人以上の労働者を使用する事業場ごと・事由発生から14日以内（規模の政令根拠は安衛令第5条）。常時3,000人超は2人以上",
+      },
+      {
+        lawShort: "安衛令",
+        articleNum: "第5条",
+        mustContain: ["五十人"],
+        anchor:
+          "安衛令（昭和47年政令第318号）第5条: 産業医を選任すべき事業場の規模は常時50人以上",
       },
     ],
   },
@@ -603,7 +678,7 @@ const RAW_CASES: RawGenQualityCase[] = [
       {
         lawShort: "安衛則",
         articleNum: "第7条",
-        mustContain: ["衛生管理者", "50人"],
+        mustContain: ["衛生管理者", "五十人"],
         anchor:
           "安衛則（昭和47年労働省令第32号）第7条: 衛生管理者の選任（14日以内・規模区分に応じた人数）。選任義務の規模＝常時50人以上（安衛令第4条）",
       },
@@ -617,15 +692,23 @@ const RAW_CASES: RawGenQualityCase[] = [
     mustInclude: [["50人", "５０人"]],
     goldCitations: [
       { lawShort: "安衛法", articleNum: "第11条" },
+      { lawShort: "安衛令", articleNum: "第3条" },
       { lawShort: "安衛則", articleNum: "第4条" },
     ],
     corpusEvidence: [
       {
         lawShort: "安衛則",
         articleNum: "第4条",
-        mustContain: ["安全管理者", "14日", "50人"],
+        mustContain: ["安全管理者", "十四日"],
         anchor:
           "安衛則（昭和47年労働省令第32号）第4条: 安全管理者の選任は事由発生から14日以内・専属。対象は安衛令第3条の業種（建設業・製造業・運送業等）で常時50人以上",
+      },
+      {
+        lawShort: "安衛令",
+        articleNum: "第3条",
+        mustContain: ["五十人"],
+        anchor:
+          "安衛令（昭和47年政令第318号）第3条: 安全管理者を選任すべき業種・事業場規模を定める",
       },
     ],
   },
@@ -643,7 +726,7 @@ const RAW_CASES: RawGenQualityCase[] = [
       {
         lawShort: "安衛則",
         articleNum: "第2条",
-        mustContain: ["14日"],
+        mustContain: ["十四日"],
         anchor:
           "安衛則（昭和47年労働省令第32号）第2条: 総括安全衛生管理者の選任は事由発生日から14日以内・遅滞なく所轄労働基準監督署長へ報告（規模は安衛令第2条＝業種別に常時100人/300人/1,000人以上）",
       },
@@ -696,7 +779,7 @@ const RAW_CASES: RawGenQualityCase[] = [
       {
         lawShort: "安衛法",
         articleNum: "第57条の3",
-        mustContain: ["リスクアセスメント", "調査"],
+        mustContain: ["危険性又は有害性等を調査", "しなければならない"],
         anchor:
           "安衛法（昭和47年法律第57号）第57条の3（平成26年法律第82号改正で新設・平成28年6月1日施行）: 表示対象物・通知対象物の危険性又は有害性等の調査（リスクアセスメント）実施義務",
       },
@@ -750,7 +833,7 @@ const RAW_CASES: RawGenQualityCase[] = [
       {
         lawShort: "有機則",
         articleNum: "第20条",
-        mustContain: ["1年以内ごとに1回"],
+        mustContain: ["一年以内ごとに一回"],
         anchor:
           "有機則（昭和47年労働省令第36号）第20条: 有機溶剤業務に係る局所排気装置の定期自主検査は1年以内ごとに1回、記録を3年間保存",
       },
@@ -769,7 +852,7 @@ const RAW_CASES: RawGenQualityCase[] = [
       {
         lawShort: "酸欠則",
         articleNum: "第2条",
-        mustContain: ["18パーセント", "硫化水素"],
+        mustContain: ["十八パーセント", "硫化水素"],
         anchor:
           "酸欠則（昭和47年労働省令第42号）第2条: 酸素欠乏＝空気中の酸素濃度18パーセント未満の状態。酸素欠乏等＝硫化水素濃度100万分の10超を含む",
       },
@@ -789,7 +872,7 @@ const RAW_CASES: RawGenQualityCase[] = [
       {
         lawShort: "安衛則",
         articleNum: "第52条の2",
-        mustContain: ["80時間"],
+        mustContain: ["八十時間"],
         anchor:
           "安衛則（昭和47年労働省令第32号）第52条の2（令和元年省令改正で100時間→80時間）: 医師による面接指導（安衛法第66条の8）の対象＝月80時間超の時間外・休日労働＋疲労蓄積＋申出",
       },
@@ -866,7 +949,7 @@ const RAW_CASES: RawGenQualityCase[] = [
       {
         lawShort: "年少者則",
         articleNum: "第8条",
-        mustContain: ["満18歳", "クレーン"],
+        mustContain: ["満十八歳", "クレーン"],
         anchor:
           "年少者労働基準規則（昭和29年労働省令第13号）第8条: 満18歳に満たない者を就かせてはならない業務（第3号: クレーン・デリック・揚貨装置の運転。労基法第62条）",
       },
@@ -886,7 +969,7 @@ const RAW_CASES: RawGenQualityCase[] = [
       {
         lawShort: "電離則",
         articleNum: "第4条",
-        mustContain: ["100ミリシーベルト", "50ミリシーベルト"],
+        mustContain: ["百ミリシーベルト", "五十ミリシーベルト"],
         anchor:
           "電離則（昭和47年労働省令第41号）第4条: 放射線業務従事者の実効線量限度＝5年間100ミリシーベルトかつ1年間50ミリシーベルト",
       },
@@ -920,7 +1003,7 @@ const RAW_CASES: RawGenQualityCase[] = [
       {
         lawShort: "事務所則",
         articleNum: "第10条",
-        mustContain: ["300ルクス", "150ルクス"],
+        mustContain: ["三百ルクス", "百五十ルクス"],
         anchor:
           "事務所衛生基準規則（昭和47年労働省令第43号）第10条（令和3年厚生労働省令第188号改正）: 一般的な事務作業300ルクス以上・付随的な事務作業150ルクス以上",
       },
@@ -956,7 +1039,8 @@ const RAW_CASES: RawGenQualityCase[] = [
       {
         lawShort: "労基法",
         articleNum: "第39条",
-        mustContain: ["10労働日", "8割"],
+        // e-Gov逐語スナップショットの現行本文表記で照合する。
+        mustContain: ["十労働日", "八割"],
         anchor:
           "労働基準法（昭和22年法律第49号）第39条: 6箇月継続勤務・全労働日の8割以上出勤の労働者に10労働日の年次有給休暇（勤続で加算・年5日の時季指定義務は平成30年法律第71号改正）",
       },
@@ -1016,7 +1100,7 @@ const RAW_CASES: RawGenQualityCase[] = [
       {
         lawShort: "安衛則",
         articleNum: "第44条",
-        mustContain: ["1年以内ごとに1回"],
+        mustContain: ["一年以内ごとに一回"],
         anchor:
           "安衛則（昭和47年労働省令第32号）第44条第1項: 常時使用する労働者に対し1年以内ごとに1回、定期に健康診断を実施",
       },

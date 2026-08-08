@@ -4,14 +4,17 @@ import { ArrowLeft, Library, AlertTriangle } from "lucide-react";
 import { ResourcesClient } from "@/components/resources-client";
 import { PageContainer } from "@/components/layout";
 import { LegalDocBadgeLegend } from "@/components/LegalDocBadge";
-import { mhlwNotices } from "@/data/mhlw-notices";
+import {
+  publicMhlwNotices as secondaryNoticeIndex,
+  verifiedMhlwNotices as mhlwNotices,
+} from "@/data/public-mhlw-notices";
 import { mhlwLeaflets } from "@/data/mhlw-leaflets";
 
 import { PageJsonLd } from "@/components/page-json-ld";
 import { ogImageUrl } from "@/lib/og-url";
-const TITLE = "厚労省一次資料DB（通達・告示・指針・リーフレット）";
+const TITLE = "厚労省資料への確認導線（通達・告示・指針・リーフレット）";
 const DESCRIPTION =
-  `厚生労働省・安全衛生情報センターが公開している労働安全衛生関係の通達・告示・指針・リーフレット計${(mhlwNotices.length + mhlwLeaflets.length).toLocaleString()}件を分類・検索できる一次資料データベース。各エントリは原文ページへ直リンクで一次ソースを担保。`;
+  `個別原文確認済みの通達等${mhlwNotices.length}件とリーフレット索引${mhlwLeaflets.length}件を確認できます。二次索引候補${secondaryNoticeIndex.length}件は本文確認が終わるまで判断画面から隔離しています。`;
 
 export const metadata: Metadata = {
   alternates: { canonical: "/resources" },
@@ -60,15 +63,14 @@ export default function ResourcesPage() {
       <header className="mb-6">
         <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-emerald-700">
           <Library className="h-4 w-4" aria-hidden="true" />
-          厚労省一次資料DB
+          厚労省資料への確認導線
         </div>
         <h1 className="mt-2 text-2xl font-bold text-slate-900 sm:text-3xl">
-          通達・告示・指針・リーフレット {total.toLocaleString()}件
+          確認済み通達等・リーフレット索引 {total.toLocaleString()}件
         </h1>
         <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slate-700 sm:text-base">
-          厚生労働省と中央労働災害防止協会（安全衛生情報センター）が公開する労働安全衛生関係の
-          一次資料を網羅収集。各レコードは原文ページへの直リンクを含み、AI 生成・要約は一切行っていません。
-          法的拘束力（告示・通達・参考）の区分も付しています。
+          個別原文まで確認できた通達等と、厚生労働省等が公開するリーフレットへの索引を分けて表示します。
+          このサイトの索引は正本ではありません。法的位置付け・適用日・後継資料はリンク先の公式資料で確認してください。
         </p>
         <div className="mt-3 grid grid-cols-2 gap-2 text-xs sm:grid-cols-4">
           <Stat label="通達" value={counts.notice} color="bg-blue-50 text-blue-900 border-blue-200" />
@@ -78,8 +80,8 @@ export default function ResourcesPage() {
         </div>
         <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
           <AlertTriangle className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />
-          本ページの全エントリは一次ソース（厚労省／安全衛生情報センター）からの自動収集です。
-          実務適用前に必ず原文を確認してください。
+          二次索引候補{secondaryNoticeIndex.length}件は、個別本文・文書番号・発出日・後継関係が未確認のため表示していません。
+          リーフレットは資料への索引であり、法的義務の判定には使えません。実務適用前に公式原文を確認してください。
         </div>
         <LegalDocBadgeLegend />
       </header>
@@ -87,7 +89,7 @@ export default function ResourcesPage() {
       <ResourcesClient notices={mhlwNotices} leaflets={mhlwLeaflets} />
 
       <section aria-label="関連リソース" className="mt-10 border-t border-slate-200 pt-6">
-        <h2 className="mb-3 text-base font-bold text-slate-900">関連の一次資料ハブ</h2>
+        <h2 className="mb-3 text-base font-bold text-slate-900">関連する公式資料・検索</h2>
         <ul className="grid gap-3 sm:grid-cols-2">
           <li>
             <Link
@@ -105,9 +107,9 @@ export default function ResourcesPage() {
               href="/circulars"
               className="block min-h-[64px] rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm font-semibold text-sky-900 hover:bg-sky-100"
             >
-              通達・告示の本文閲覧
+              個別確認済み通達・告示
               <span className="mt-0.5 block text-[11px] font-normal text-sky-700">
-                重要通達の本文を縦長スクロールで読める閲覧モード
+                確認済みレコードだけを表示。未確認の二次索引候補は隔離
               </span>
             </Link>
           </li>
@@ -116,9 +118,9 @@ export default function ResourcesPage() {
               href="/laws"
               className="block min-h-[64px] rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-900 hover:bg-amber-100"
             >
-              法改正一覧（年表＋AI要約）
+              法改正情報の確認導線
               <span className="mt-0.5 block text-[11px] font-normal text-amber-700">
-                100件超の改正を時系列で。施行日カウントダウン付き
+                施行日と一次資料を確認してから実務判断
               </span>
             </Link>
           </li>
@@ -127,9 +129,9 @@ export default function ResourcesPage() {
               href="/law-search"
               className="block min-h-[64px] rounded-xl border border-violet-200 bg-violet-50 px-4 py-3 text-sm font-semibold text-violet-900 hover:bg-violet-100"
             >
-              条文検索（安衛法・関係省令）
+              サイト収録条文検索（安衛法・関係省令）
               <span className="mt-0.5 block text-[11px] font-normal text-violet-700">
-                キーワード・条番号から原文へ。e-Gov 直リンク
+                キーワード・条番号からe-Gov正本への確認導線へ
               </span>
             </Link>
           </li>

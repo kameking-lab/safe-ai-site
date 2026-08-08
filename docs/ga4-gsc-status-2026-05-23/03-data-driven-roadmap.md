@@ -80,7 +80,7 @@ GSC で impressions あるが LP 未整備のクエリを抽出 → ランディ
 
 ### 3.2 アラート条件
 
-- 主要クエリ TOP 10 のうち position が前週比 +5 以上悪化したクエリが出たら通知（Resend で `kenshi.ycc@gmail.com` へ）
+- 主要クエリ TOP 10 のうち position が前週比 +5 以上悪化したクエリが出たら通知（Resend で `[redacted-private-email]` へ）
 - 主要 LP の clicks が前週比 -30% 以下なら通知
 - 404 系の検索流入が発生したら通知
 

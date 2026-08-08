@@ -15,13 +15,16 @@
  * 実行: npx tsx web/scripts/etl/mhlw-monthly-fetch.ts
  * 出力: web/src/data/accidents/monthly-sokuhou.json（差分があるときのみ更新）
  */
-import * as XLSX from "xlsx";
+import readXlsxFile from "read-excel-file/node";
 import { writeFileSync, readFileSync, existsSync, mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
+import { resolveOfficialMhlwExcelUrl } from "@/lib/etl/official-excel-source";
 
 const SOKUHOU_PAGE = "https://anzeninfo.mhlw.go.jp/information/sokuhou.html";
-const INFO_BASE = "https://anzeninfo.mhlw.go.jp/information/";
 const OUT_PATH = resolve(process.cwd(), "src/data/accidents/monthly-sokuhou.json");
+const MAX_INDEX_BYTES = 2 * 1024 * 1024;
+const MAX_XLSX_BYTES = 20 * 1024 * 1024;
+const FETCH_TIMEOUT_MS = 15_000;
 
 interface IndustryRow {
   bigCode: number;
@@ -46,33 +49,49 @@ function log(msg: string) {
   console.log(`[mhlw-etl] ${msg}`);
 }
 
+async function fetchWithLimit(url: string, maxBytes: number): Promise<ArrayBuffer> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  try {
+    const res = await fetch(url, { signal: controller.signal, redirect: "error" });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const declaredSize = Number(res.headers.get("content-length"));
+    if (Number.isFinite(declaredSize) && declaredSize > maxBytes) {
+      throw new Error(`response too large (${declaredSize} bytes)`);
+    }
+    const data = await res.arrayBuffer();
+    if (data.byteLength > maxBytes) throw new Error(`response too large (${data.byteLength} bytes)`);
+    return data;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 /** 速報ページから最新の bunseki Excel URL（死亡・死傷）を特定。 */
 async function findLatestBunsekiUrls(): Promise<{ sibou?: string; sisyou?: string }> {
-  const res = await fetch(SOKUHOU_PAGE);
-  if (!res.ok) throw new Error(`sokuhou page HTTP ${res.status}`);
-  const html = await res.text();
+  const html = new TextDecoder().decode(await fetchWithLimit(SOKUHOU_PAGE, MAX_INDEX_BYTES));
   const re = /href="([^"]*?r(\d+)_(\d+)_(sibou|sisyou)_bunseki\.xlsx)"/g;
   let m: RegExpExecArray | null;
   const best: Record<string, { url: string; rank: number }> = {};
   while ((m = re.exec(html)) !== null) {
     const [, href, year, month, kind] = m;
     const rank = Number(year) * 100 + Number(month);
-    const url = href.startsWith("http") ? href : INFO_BASE + href.replace(/^information\//, "");
+    const url = resolveOfficialMhlwExcelUrl(href);
+    if (!url) continue;
     if (!best[kind] || rank > best[kind].rank) best[kind] = { url, rank };
   }
   return { sibou: best.sibou?.url, sisyou: best.sisyou?.url };
 }
 
 /** Excel(ArrayBuffer)からシート①を厳格検証し、業種小 leaf 行を抽出。 */
-function parseBunseki(buf: ArrayBuffer, sourceUrl: string): SokuhouSet | null {
-  const wb = XLSX.read(buf, { type: "array" });
-  const sheetName = wb.SheetNames.find((n) => n.includes("業種") && n.includes("局")) ?? wb.SheetNames[0];
-  const ws = wb.Sheets[sheetName];
-  if (!ws) {
+async function parseBunseki(buf: ArrayBuffer, sourceUrl: string): Promise<SokuhouSet | null> {
+  const sheets = await readXlsxFile(Buffer.from(buf));
+  const sheet = sheets.find((candidate) => candidate.sheet.includes("業種") && candidate.sheet.includes("局")) ?? sheets[0];
+  if (!sheet) {
     log(`SKIP ${sourceUrl}: sheet① not found`);
     return null;
   }
-  const grid = XLSX.utils.sheet_to_json<unknown[]>(ws, { header: 1, blankrows: false });
+  const grid = sheet.data;
   // ヘッダは行3（0-indexed 2）想定。タイトル/サブタイトルのズレに備え±2行を探索。
   let headerIdx = -1;
   for (let i = 0; i < Math.min(grid.length, 6); i += 1) {
@@ -129,13 +148,8 @@ function parseBunseki(buf: ArrayBuffer, sourceUrl: string): SokuhouSet | null {
 async function fetchAndParse(url: string | undefined): Promise<SokuhouSet | null> {
   if (!url) return null;
   try {
-    const res = await fetch(url);
-    if (!res.ok) {
-      log(`SKIP ${url}: HTTP ${res.status}`);
-      return null;
-    }
-    const buf = await res.arrayBuffer();
-    return parseBunseki(buf, url);
+    const buf = await fetchWithLimit(url, MAX_XLSX_BYTES);
+    return await parseBunseki(buf, url);
   } catch (e) {
     log(`SKIP ${url}: ${e instanceof Error ? e.message : "error"}`);
     return null;

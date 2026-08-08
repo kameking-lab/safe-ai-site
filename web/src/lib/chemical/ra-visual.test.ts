@@ -11,7 +11,7 @@ import type { CreateSimpleAssessment } from "@/app/api/chemical-ra/route";
 // 化学物質RA結論ビジュアル（柱0）の回帰ガード。
 // 1) I〜IVすべてに完全なクラスセットがあること
 // 2) チップがWCAG AA(4.5:1)不適合の組み合わせ（amber/orange-500系+白文字）に退行しないこと
-// 3) 結論の決定順位（CREATE-SIMPLE > GHS注意喚起語 > 参考）が崩れないこと
+// 3) 旧独自判定を無視し、検証済みGHS注意喚起語を優先すること
 
 const cs = (level: RaLevel): CreateSimpleAssessment => ({
   level,
@@ -53,22 +53,19 @@ describe("RA_LEVEL_VISUAL トークン", () => {
 });
 
 describe("computeRaConclusion 決定順位", () => {
-  it("CREATE-SIMPLE 判定があれば常にレベルが主役（GHSの注意喚起語より優先）", () => {
+  it("旧CREATE-SIMPLE値を安全判断に使わずGHS注意喚起語を優先する", () => {
     const c = computeRaConclusion({
       createSimple: cs("IV"),
       ghsHazards: [{ category: "引火性液体", classification: "区分2", signal: "危険" }],
     });
-    expect(c.kind).toBe("level");
-    expect(c.big).toBe("IV");
-    expect(c.title).toBe("直ちに改善");
-    expect(c.shortAction).toContain("作業中止");
+    expect(c.kind).toBe("signal");
+    expect(c.big).toBe("危険");
   });
 
-  it("レベルI=緑（現状維持）/ II=黄 / III=橙 / IV=深紅 のトーン", () => {
-    expect(computeRaConclusion({ createSimple: cs("I"), ghsHazards: [] }).visual.soft).toContain("emerald");
-    expect(computeRaConclusion({ createSimple: cs("II"), ghsHazards: [] }).visual.soft).toContain("amber");
-    expect(computeRaConclusion({ createSimple: cs("III"), ghsHazards: [] }).visual.soft).toContain("orange");
-    expect(computeRaConclusion({ createSimple: cs("IV"), ghsHazards: [] }).visual.soft).toContain("rose");
+  it("旧レベル値しかない場合は安全を断定せず参考情報にする", () => {
+    const conclusion = computeRaConclusion({ createSimple: cs("I"), ghsHazards: [] });
+    expect(conclusion.kind).toBe("info");
+    expect(conclusion.shortAction).toContain("最新SDS");
   });
 
   it("判定なし・GHSに「危険」あり → 赤の注意喚起語が主役", () => {
@@ -91,11 +88,11 @@ describe("computeRaConclusion 決定順位", () => {
     expect(c.visual.soft).toContain("amber");
   });
 
-  it("判定もGHSも無し → 青（参考情報・作業条件の入力を促す）", () => {
+  it("GHSなし → 青（参考情報・最新SDSの確認を促す）", () => {
     const c = computeRaConclusion({ ghsHazards: [] });
     expect(c.kind).toBe("info");
     expect(c.visual.soft).toContain("sky");
-    expect(c.shortAction).toContain("作業条件");
+    expect(c.shortAction).toContain("最新SDS");
   });
 });
 

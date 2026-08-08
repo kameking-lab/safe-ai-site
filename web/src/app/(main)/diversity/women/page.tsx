@@ -186,7 +186,7 @@ export default function WomenPage() {
   const toggleLaw = (id: string) => setExpandedLaw((prev) => (prev === id ? null : id));
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-6 sm:px-6">
+    <div className="mx-auto max-w-3xl px-4 py-6 sm:px-6">
       <Breadcrumb
         items={[
           { name: "多様性と安全", href: "/diversity" },
@@ -388,6 +388,6 @@ export default function WomenPage() {
           ))}
         </div>
       </nav>
-    </main>
+    </div>
   );
 }

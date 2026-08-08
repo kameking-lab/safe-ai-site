@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { BookOpen, ExternalLink, Sparkles, Wrench } from "lucide-react";
 import { Breadcrumb } from "@/components/breadcrumb";
+import { JsonLd } from "@/components/json-ld";
 
 export type ScaffoldLink = {
   label: string;
@@ -76,10 +77,7 @@ export function ScaffoldPage({
   return (
     <main className="mx-auto w-full max-w-3xl px-4 py-6 sm:px-6">
       {breadcrumbLd && (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
-        />
+        <JsonLd schema={breadcrumbLd} />
       )}
       <div className="mb-4">
         <Breadcrumb items={breadcrumbItems} />

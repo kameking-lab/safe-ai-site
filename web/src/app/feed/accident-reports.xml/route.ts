@@ -10,7 +10,7 @@ export function GET() {
   const xml = buildRssXml(items, {
     title: "安全AIポータル 事故速報・労災ニュース",
     description: "労働災害の月次速報と関連報道。厚労省・公式出典リンク付き。無料・登録不要。",
-    selfPath: "/accidents-reports",
+    selfPath: "/accidents",
     feedPath: "/feed/accident-reports.xml",
   });
   return new Response(xml, { headers: RSS_HEADERS });

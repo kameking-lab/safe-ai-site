@@ -15,6 +15,7 @@ const ORIG = {
   pub: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
   priv: process.env.VAPID_PRIVATE_KEY,
   subj: process.env.VAPID_SUBJECT,
+  enabled: process.env.PUSH_DELIVERY_ENABLED,
 };
 
 function setVapid(on: boolean) {
@@ -22,10 +23,12 @@ function setVapid(on: boolean) {
     process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY = "pub";
     process.env.VAPID_PRIVATE_KEY = "priv";
     process.env.VAPID_SUBJECT = "mailto:test@example.com";
+    process.env.PUSH_DELIVERY_ENABLED = "true";
   } else {
     delete process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
     delete process.env.VAPID_PRIVATE_KEY;
     delete process.env.VAPID_SUBJECT;
+    delete process.env.PUSH_DELIVERY_ENABLED;
   }
 }
 
@@ -58,6 +61,8 @@ afterEach(() => {
   process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY = ORIG.pub;
   process.env.VAPID_PRIVATE_KEY = ORIG.priv;
   process.env.VAPID_SUBJECT = ORIG.subj;
+  if (ORIG.enabled === undefined) delete process.env.PUSH_DELIVERY_ENABLED;
+  else process.env.PUSH_DELIVERY_ENABLED = ORIG.enabled;
 });
 
 describe("POST /api/notify/push-weather-alert auth", () => {
@@ -84,11 +89,13 @@ describe("POST /api/notify/push-weather-alert auth", () => {
 describe("POST /api/notify/push-weather-alert dryRun", () => {
   it("counts warning-level alerts without sending", async () => {
     setVapid(true);
+    const fetchedAt = new Date().toISOString();
     mockSupabase.mockReturnValue(
       subsStub([{ endpoint: "https://push/1", p256dh: "p", auth: "a", prefecture: "JP-13" }])
     );
     mockWarnings.mockResolvedValue({
-      fetchedAt: "2026-07-12T00:00:00Z",
+      fetchedAt,
+      quality: { status: "live", attempted: 1, succeeded: 1, failed: 0 },
       byIso: {
         "JP-13": {
           level: "warning",
@@ -97,7 +104,7 @@ describe("POST /api/notify/push-weather-alert dryRun", () => {
               sourceCode: "130000",
               level: "warning",
               headline: "大雨警報",
-              reportDatetime: "2026-07-12T00:00:00Z",
+              reportDatetime: fetchedAt,
               publishingOffice: "気象庁",
               warnings: [],
             },
@@ -117,11 +124,13 @@ describe("POST /api/notify/push-weather-alert dryRun", () => {
 
   it("returns 0 alerts when only advisory-level (注意報) is active", async () => {
     setVapid(true);
+    const fetchedAt = new Date().toISOString();
     mockSupabase.mockReturnValue(
       subsStub([{ endpoint: "https://push/1", p256dh: "p", auth: "a", prefecture: "JP-13" }])
     );
     mockWarnings.mockResolvedValue({
-      fetchedAt: "2026-07-12T00:00:00Z",
+      fetchedAt,
+      quality: { status: "live", attempted: 1, succeeded: 1, failed: 0 },
       byIso: {
         "JP-13": {
           level: "advisory",
@@ -130,7 +139,7 @@ describe("POST /api/notify/push-weather-alert dryRun", () => {
               sourceCode: "130000",
               level: "advisory",
               headline: "大雨注意報",
-              reportDatetime: "2026-07-12T00:00:00Z",
+              reportDatetime: fetchedAt,
               publishingOffice: "気象庁",
               warnings: [],
             },
@@ -141,6 +150,36 @@ describe("POST /api/notify/push-weather-alert dryRun", () => {
     const res = await POST(req("Bearer secret", { dryRun: true }));
     const body = await res.json();
     expect(body.alerts).toBe(0);
+  });
+
+  it("does not push a warning from a stale fallback snapshot", async () => {
+    setVapid(true);
+    mockSupabase.mockReturnValue(
+      subsStub([{ endpoint: "https://push/1", p256dh: "p", auth: "a", prefecture: "JP-13" }])
+    );
+    mockWarnings.mockResolvedValue({
+      fetchedAt: "2026-07-13T00:00:00Z",
+      quality: { status: "fallback", attempted: 1, succeeded: 0, failed: 1 },
+      byIso: {
+        "JP-13": {
+          level: "warning",
+          entries: [
+            {
+              sourceCode: "130000",
+              level: "warning",
+              headline: "過去の大雨警報",
+              reportDatetime: "2026-05-28T00:00:00Z",
+              publishingOffice: "気象庁",
+              warnings: [],
+            },
+          ],
+        },
+      },
+    });
+
+    const res = await POST(req("Bearer secret", { dryRun: true }));
+    expect(res.status).toBe(200);
+    expect((await res.json()).alerts).toBe(0);
   });
 
   it("501 table_not_ready when subscriptions table is missing", async () => {

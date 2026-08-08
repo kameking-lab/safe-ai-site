@@ -3,7 +3,6 @@
  * 「毎日見る理由」を作るため、日付が変われば内容が変わることを保証する純関数群。
  */
 
-import { calculateWBGT, determineRiskLevel } from "@/lib/wbgt-engine";
 import type { RiskAssessment } from "@/types/heat-illness";
 
 /** 端末ローカル時刻での今日の日付 (yyyy-mm-dd)。 */
@@ -72,22 +71,9 @@ export type SignageWbgtReading = {
 };
 
 /**
- * 現在気温・湿度からWBGT概算値を求める（屋外・黒球温度未計測=推定式）。
- * 作業強度は「中程度（moderate）」・順化状態は「順化済み」を既定値とする一般的な目安表示。
- * 個人の作業内容に応じた正式判定は /heat-illness-prevention/wbgt-calculator を案内する。
- * 湿度が取得できない場合は null（捏造防止）。
+ * 気温・湿度だけからの独自推定をWBGT実測値として表示しない。
+ * 実測WBGTの安全な入力経路を実装するまで常にnullを返す。
  */
-export function computeSignageWbgt(tempC: number, humidityPct: number | undefined): SignageWbgtReading | null {
-  if (typeof humidityPct !== "number" || Number.isNaN(humidityPct)) return null;
-  try {
-    const result = calculateWBGT({
-      airTempC: tempC,
-      humidity: humidityPct,
-      environment: "outdoor",
-    });
-    const risk = determineRiskLevel(result.wbgt, "moderate", "acclimatized");
-    return { wbgt: result.wbgt, risk };
-  } catch {
-    return null;
-  }
+export function computeSignageWbgt(_tempC: number, _humidityPct: number | undefined): SignageWbgtReading | null {
+  return null;
 }

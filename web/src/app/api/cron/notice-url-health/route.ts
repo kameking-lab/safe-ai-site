@@ -16,6 +16,7 @@
 import { NextResponse } from "next/server";
 import { mhlwNotices } from "@/data/mhlw-notices";
 import { mhlwLeaflets } from "@/data/mhlw-leaflets";
+import { bearerAuthError, verifyBearerSecret } from "@/lib/server/bearer-auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -78,12 +79,8 @@ function buildTargets(sampleSize: number | null): Target[] {
 }
 
 export async function GET(request: Request) {
-  // CRON_SECRET 認証（Vercel Cron は Authorization: Bearer <CRON_SECRET> を送る）
-  const cronSecret = process.env.CRON_SECRET;
-  const auth = request.headers.get("authorization");
-  if (cronSecret && auth !== `Bearer ${cronSecret}`) {
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-  }
+  const auth = verifyBearerSecret(request, process.env.CRON_SECRET);
+  if (!auth.ok) return bearerAuthError(auth);
 
   const url = new URL(request.url);
   const sampleParam = url.searchParams.get("sample");

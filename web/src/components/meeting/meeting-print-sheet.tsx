@@ -13,11 +13,17 @@
 import type { ReactNode } from "react";
 import { CONTRACTOR_TYPES, PRIORITY_LABEL, type MeetingRecord, type ContractorType } from "@/lib/meeting/schema";
 import { checklistFieldKey, contractorFieldKey, deliveryFieldKey, getMeetingPaperFieldDef, type MeetingPaperFieldKey } from "@/lib/meeting/paper-fields";
+import { getMeetingDocumentState } from "@/lib/meeting/document-state";
 
 const th = "border border-black bg-slate-100 px-1 py-0.5 text-center align-middle font-bold";
 const td = "border border-black px-1 py-0.5 align-top";
 /** 点検項目のステータス表示マーク。canvas第六弾のエディタ内tri-stateボタンとも共有。 */
-export const STATUS_MARK = { ok: "○", ng: "×", na: "－" } as const;
+export const STATUS_MARK = {
+  unreviewed: "未",
+  ok: "○",
+  ng: "×",
+  na: "－",
+} as const;
 const TYPE_PAD: Record<ContractorType, string> = { 元請: "0", "1次": "6px", "2次": "12px", "3次": "18px" };
 
 export type MeetingPrintSheetEditing = {
@@ -79,8 +85,17 @@ function EditableCell({
 
 export function MeetingPrintSheet({ record, editing }: { record: MeetingRecord; editing?: MeetingPrintSheetEditing }) {
   const date = `${record.workDateYear}年${record.workDateMonth}月${record.workDateDay}日`;
+  const cleanPrint = getMeetingDocumentState(record).canPrint;
   return (
     <div className="mx-auto bg-white text-[7.5pt] leading-tight text-black print:text-black" style={{ width: "277mm", maxWidth: "100%" }}>
+      {!cleanPrint ? (
+        <div
+          role="status"
+          className="mb-1 border-4 border-dashed border-black px-3 py-1 text-center text-[16pt] font-black tracking-[0.2em]"
+        >
+          下書き・未確認版
+        </div>
+      ) : null}
       <div className="mb-1 flex items-end justify-between">
         {/* 正式書式の表題。画面側の見出し(top barのh1)と二重h1にしないため、印刷帳票では非見出し要素として描画（見た目は12pt太字のまま）。 */}
         <p className="text-[12pt] font-bold">安全工程打合せ書及び安全衛生指示書</p>
@@ -261,6 +276,41 @@ export function MeetingPrintSheet({ record, editing }: { record: MeetingRecord; 
           <tbody><tr><td className={`${td} whitespace-pre-wrap`} style={{ height: "20mm" }}><EditableCell editing={editing} fieldKey="supervisorComment">{record.supervisorComment}</EditableCell></td></tr></tbody>
         </table>
       </div>
+
+      {/* 承認対象となる工程調整条件。空欄は未回答であり「該当なし」とは扱わない。 */}
+      <table className="mt-1 w-full table-fixed border-collapse">
+        <caption className="sr-only">工程調整条件と人手確認対象</caption>
+        <tbody>
+          <tr>
+            <th scope="row" className={th}>同時作業</th>
+            <td className={td}>{record.coordination.simultaneousWork}</td>
+            <th scope="row" className={th}>搬入</th>
+            <td className={td}>{record.coordination.deliveries}</td>
+            <th scope="row" className={th}>火気</th>
+            <td className={td}>{record.coordination.fireWork}</td>
+            <th scope="row" className={th}>高所</th>
+            <td className={td}>{record.coordination.heightWork}</td>
+          </tr>
+          <tr>
+            <th scope="row" className={th}>電気</th>
+            <td className={td}>{record.coordination.electricalWork}</td>
+            <th scope="row" className={th}>化学物質</th>
+            <td className={td}>{record.coordination.chemicalWork}</td>
+            <th scope="row" className={th}>天候</th>
+            <td className={td}>{record.coordination.weather}</td>
+            <th scope="row" className={th}>変更点</th>
+            <td className={td}>{record.coordination.changes}</td>
+          </tr>
+          <tr>
+            <th scope="row" className={th}>新規入場者</th>
+            <td className={td}>{record.coordination.newEntrants}</td>
+            <th scope="row" className={th}>夜間</th>
+            <td className={td}>{record.coordination.nightWork}</td>
+            <th scope="row" className={th}>役割</th>
+            <td className={td} colSpan={3}>{record.coordination.roles}</td>
+          </tr>
+        </tbody>
+      </table>
 
       {/* 点検項目8カテゴリ */}
       <table className="mt-1 w-full table-fixed border-collapse">

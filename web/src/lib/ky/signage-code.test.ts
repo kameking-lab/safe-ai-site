@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { generateSignageCode, isValidSignageCode, SIGNAGE_CODE_TTL_MS } from "@/lib/ky/signage-code";
 
 describe("signage-code", () => {
@@ -13,10 +13,18 @@ describe("signage-code", () => {
     expect(generateSignageCode(() => 0.9999999)).toBe("999999");
   });
 
-  it("既定の Math.random でも常に6桁", () => {
+  it("既定の暗号学的乱数でも常に6桁", () => {
     for (let i = 0; i < 50; i += 1) {
       expect(generateSignageCode()).toMatch(/^\d{6}$/);
     }
+  });
+
+  it("既定生成はMath.randomに依存しない", () => {
+    const random = vi.spyOn(Math, "random").mockImplementation(() => {
+      throw new Error("Math.random must not be used");
+    });
+    expect(generateSignageCode()).toMatch(/^\d{6}$/);
+    random.mockRestore();
   });
 
   it("isValidSignageCode は6桁数字のみ true", () => {

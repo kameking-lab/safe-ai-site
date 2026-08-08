@@ -36,6 +36,7 @@ function buildProfileQuery(profile: CompanyProfile): string {
 
 function CrossTab() {
   const [all, setAll] = useState<AccidentCase[]>([]);
+  const [loadStatus, setLoadStatus] = useState<"pending" | "success" | "error">("pending");
   // C-1: クロス集計はファーストビューの下にあるため、マウント直後ではなく
   // セクションが画面に近づいた時にデータチャンク(生約340KB)をロードする。
   // IntersectionObserver 非対応環境では従来どおり即ロードにフォールバック。
@@ -62,9 +63,15 @@ function CrossTab() {
   useEffect(() => {
     if (!nearViewport) return;
     let active = true;
-    void loadAccidentCases().then((cases) => {
-      if (active) setAll(cases);
-    });
+    void loadAccidentCases()
+      .then((cases) => {
+        if (!active) return;
+        setAll(cases);
+        setLoadStatus("success");
+      })
+      .catch(() => {
+        if (active) setLoadStatus("error");
+      });
     return () => {
       active = false;
     };
@@ -92,94 +99,75 @@ function CrossTab() {
   return (
     <section ref={rootRef} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
       <h3 className="text-sm font-bold text-slate-900">業種 × 事故型 クロス集計（収録事例ベース）</h3>
-      <p className="mt-1 text-[11px] text-slate-500">
-        サイト収録の{all.length}件を業種と事故型の2軸で集計。クリックで該当条件のフィルタへ。
+      <p className="mt-1 text-[11px] text-slate-500" aria-live="polite">
+        {loadStatus === "success" && all.length > 0
+          ? `サイト収録の${all.length}件を業種と事故型の2軸で集計。`
+          : loadStatus === "error"
+            ? "集計を読み込めません。"
+            : loadStatus === "success"
+              ? "収録事例を確認できません。"
+              : "集計は読み込み後に表示します。"}
       </p>
-      <div className="mt-3 overflow-auto">
-        <table className="min-w-full text-xs">
-          <thead>
-            <tr>
-              <th className="border-b border-slate-200 bg-slate-50 px-2 py-1 text-left">業種＼事故型</th>
-              {matrix.types.map((t) => (
-                <th key={t} className="border-b border-slate-200 bg-slate-50 px-2 py-1 text-center">
-                  {t}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {matrix.categories.map((cat) => (
-              <tr key={cat}>
-                <th className="border-b border-slate-100 px-2 py-1 text-left font-semibold text-slate-700">
-                  {cat}
-                </th>
-                {matrix.types.map((t) => {
-                  const n = matrix.counts.get(cat)?.get(t) ?? 0;
-                  return (
-                    <td
-                      key={t}
-                      className={`border-b border-slate-100 px-2 py-1 text-center ${
-                        n > 0 ? "bg-amber-50/60 font-bold text-amber-800" : "text-slate-300"
-                      }`}
-                    >
-                      {n || "—"}
-                    </td>
-                  );
-                })}
+      {loadStatus === "success" && all.length > 0 ? (
+        <div className="mt-3 overflow-auto">
+          <table className="min-w-full text-xs">
+            <thead>
+              <tr>
+                <th className="border-b border-slate-200 bg-slate-50 px-2 py-1 text-left">業種＼事故型</th>
+                {matrix.types.map((t) => (
+                  <th key={t} className="border-b border-slate-200 bg-slate-50 px-2 py-1 text-center">
+                    {t}
+                  </th>
+                ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {matrix.categories.map((cat) => (
+                <tr key={cat}>
+                  <th className="border-b border-slate-100 px-2 py-1 text-left font-semibold text-slate-700">
+                    {cat}
+                  </th>
+                  {matrix.types.map((t) => {
+                    const n = matrix.counts.get(cat)?.get(t) ?? 0;
+                    return (
+                      <td
+                        key={t}
+                        className={`border-b border-slate-100 px-2 py-1 text-center ${
+                          n > 0 ? "bg-amber-50/60 font-bold text-amber-800" : "text-slate-300"
+                        }`}
+                      >
+                        {n || "—"}
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : null}
     </section>
   );
 }
 
 /**
- * MHLW 死亡災害ケースに「最も近い」サイト収録事例（詳細ページあり）を探す。
- * 段階的フォールバック: 事故型一致 → 業種一致 → 説明テキスト部分一致 → 業種カテゴリ近接 → 任意の1件。
- * Top5 カードを必ず詳細ページに遷移可能にするため、null を返さず常に1件返す。
+ * MHLW 死亡災害ケースと事故型・業種の両方が一致する収録事例だけを返す。
+ * 単一フィールド、部分キーワード、任意レコードへのフォールバックは、
+ * 無関係な事故を「関連事例」と誤認させるため使用しない。
  */
 function findRelatedCuratedCase(
   mhlw: ScoredMhlwCase,
   curated: AccidentCase[]
-): { case: AccidentCase; matchLevel: "type" | "industry" | "keyword" | "loose" | "fallback" } | null {
-  if (curated.length === 0) return null;
-
-  // 1. 事故型 厳密一致
-  if (mhlw.type) {
-    const byType = curated.find((c) => c.type && mhlw.type?.includes(c.type.slice(0, 2)));
-    if (byType) return { case: byType, matchLevel: "type" };
-  }
-
-  // 2. 業種 厳密一致
-  if (mhlw.industry) {
-    const byIndustry = curated.find((c) => c.workCategory && mhlw.industry?.includes(c.workCategory));
-    if (byIndustry) return { case: byIndustry, matchLevel: "industry" };
-  }
-
-  // 3. 事故説明テキストとサマリーのキーワード部分一致
-  if (mhlw.description) {
-    const tokens = mhlw.description
-      .replace(/[、。\s]+/g, " ")
-      .split(" ")
-      .filter((t) => t.length >= 2)
-      .slice(0, 6);
-    const byKeyword = curated.find((c) =>
-      tokens.some((t) => c.summary.includes(t) || c.title.includes(t))
-    );
-    if (byKeyword) return { case: byKeyword, matchLevel: "keyword" };
-  }
-
-  // 4. 業種カテゴリの先頭2文字で部分一致（製造業/建設業など）
-  if (mhlw.industry) {
-    const prefix = mhlw.industry.slice(0, 2);
-    const byLoose = curated.find((c) => c.workCategory.includes(prefix));
-    if (byLoose) return { case: byLoose, matchLevel: "loose" };
-  }
-
-  // 5. 最終フォールバック: 任意の1件（ユーザーを少なくとも事故DB内のページへ）
-  return { case: curated[0], matchLevel: "fallback" };
+): { case: AccidentCase; matchLevel: "type-industry" } | null {
+  if (!mhlw.type?.trim() || !mhlw.industry?.trim()) return null;
+  const strict = curated.find(
+    (candidate) =>
+      Boolean(candidate.type?.trim()) &&
+      Boolean(candidate.workCategory?.trim()) &&
+      mhlw.type === candidate.type &&
+      mhlw.industry === candidate.workCategory,
+  );
+  return strict ? { case: strict, matchLevel: "type-industry" } : null;
 }
 
 function ProfileRecommend({ profile }: { profile: CompanyProfile | null }) {
@@ -221,7 +209,7 @@ function ProfileRecommend({ profile }: { profile: CompanyProfile | null }) {
           href="/profile"
           className="mt-2 inline-flex min-h-[44px] items-center rounded-full border border-emerald-400 bg-white px-3 text-xs font-bold text-emerald-800 hover:bg-emerald-100"
         >
-          /profile を開く →
+          自社条件を設定
         </Link>
       </section>
     );
@@ -264,16 +252,7 @@ function ProfileRecommend({ profile }: { profile: CompanyProfile | null }) {
               : `/accidents?q=${encodeURIComponent([c.type, c.industry].filter(Boolean).join(" "))}`;
             const linkLabel = (() => {
               if (!related) return "→ 類似事例を事故DBで探す";
-              switch (related.matchLevel) {
-                case "type":
-                case "industry":
-                  return "→ 関連事例の詳細を見る";
-                case "keyword":
-                  return "→ 近い事例の詳細を見る";
-                case "loose":
-                case "fallback":
-                  return "→ 近接業種の事例を見る";
-              }
+              return "→ 事故型・業種が一致する事例を見る";
             })();
             return (
               <li key={c.id} className="rounded-lg border border-rose-100 bg-white p-3 text-xs shadow-sm">
@@ -294,18 +273,9 @@ function ProfileRecommend({ profile }: { profile: CompanyProfile | null }) {
                   <span className="text-[10px] text-slate-400">
                     {c.year}{c.month ? `-${String(c.month).padStart(2, "0")}` : ""}
                   </span>
-                  {related && (related.matchLevel === "loose" || related.matchLevel === "fallback" || related.matchLevel === "keyword") && (
-                    <span
-                      className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-800"
-                      title={
-                        related.matchLevel === "fallback"
-                          ? "厳密一致なし。サイト収録事例から代表例を表示"
-                          : related.matchLevel === "loose"
-                          ? "近接業種の収録事例を表示"
-                          : "キーワード部分一致の収録事例を表示"
-                      }
-                    >
-                      {related.matchLevel === "keyword" ? "近い" : "近接"}
+                  {related && (
+                    <span className="rounded-full bg-sky-100 px-2 py-0.5 text-[10px] font-bold text-sky-900">
+                      事故型・業種一致
                     </span>
                   )}
                 </div>

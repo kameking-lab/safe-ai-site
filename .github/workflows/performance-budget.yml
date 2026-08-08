@@ -1,0 +1,100 @@
+name: performance-budget
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "30 18 * * 1"
+  pull_request:
+    paths:
+      - "web/src/components/**"
+      - "web/src/app/**"
+      - "web/src/lib/**"
+      - "web/src/data/**"
+      - "web/scripts/audit/best-in-class-lighthouse.mjs"
+      - "web/scripts/audit/performance-budget.mjs"
+      - "web/config/performance-budgets.json"
+      - ".github/workflows/performance-budget.yml"
+
+concurrency:
+  group: performance-budget-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  safety-before-performance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - name: Safety, privacy, legal, chemical, qualification and weather gates
+        run: npm run test
+      - name: Lint
+        run: npm run lint
+      - name: Production build
+        run: npm run build
+      - name: Preserve build
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-production-build
+          path: web/.next
+          include-hidden-files: true
+          retention-days: 3
+
+  performance-budget:
+    needs: safety-before-performance
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - uses: actions/download-artifact@v4
+        with:
+          name: performance-production-build
+          path: web/.next
+      - name: Start isolated production server
+        env:
+          LOCAL_AUDIT_EVIDENCE_ROOT: ../.ci-performance-evidence/server
+          LOCAL_AUDIT_PORT: "3320"
+        run: node scripts/audit/start-local-production-server.mjs
+      - name: Record server identity
+        run: |
+          echo "LIGHTHOUSE_SERVER_PID=$(cat ../.ci-performance-evidence/server/production-server.pid)" >> "$GITHUB_ENV"
+          echo "LIGHTHOUSE_SERVER_COMMAND=node node_modules/next/dist/bin/next start --hostname 127.0.0.1 --port 3320" >> "$GITHUB_ENV"
+      - name: Three-run sequential mobile Lighthouse
+        env:
+          LIGHTHOUSE_RUN_KIND: final
+          LIGHTHOUSE_PROFILES: mobile
+          LIGHTHOUSE_RUNS_PER_PROFILE: "3"
+          LIGHTHOUSE_ENFORCE_TARGETS: "0"
+          LIGHTHOUSE_EVIDENCE_ROOT: ../.ci-performance-evidence/lighthouse-runs
+        run: npm run audit:best-in-class:lighthouse
+      - name: Performance budget
+        env:
+          LIGHTHOUSE_EVIDENCE_ROOT: ../.ci-performance-evidence/lighthouse-runs
+          PERFORMANCE_BUDGET_OUTPUT: ../.ci-performance-evidence/performance-budget-result.json
+          PERFORMANCE_BUDGET_BASE_URL: http://127.0.0.1:3320
+        run: npm run audit:performance-budget
+      - name: Upload immutable raw evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-budget-evidence
+          path: .ci-performance-evidence
+          include-hidden-files: true
+          retention-days: 14

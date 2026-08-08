@@ -1,17 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { ExternalLink, Shield } from "lucide-react";
-import { safetyGoodsCategories, safetyGoodsItems, type SafetyGoodsItem } from "@/data/mock/safety-goods";
-import { relatedSafetyGoodsByText } from "@/lib/related-safety-goods";
+import { ShieldAlert } from "lucide-react";
 import { useLanguage } from "@/contexts/language-context";
 
 type Translatable = string | { ja: string; en: string };
 
-/**
- * 「この場面で必要な保護具」セクション。通達／事故／化学物質ページなど
- * 文脈ページの下部に置き、本文に沿った保護具を 3〜4 点提示する。
- */
 interface ContextualPpePicksProps {
   context: string;
   fallbackCategoryIds?: string[];
@@ -20,118 +14,60 @@ interface ContextualPpePicksProps {
   description?: Translatable;
 }
 
-function pickFallback(categoryIds: string[], limit: number): SafetyGoodsItem[] {
-  if (categoryIds.length === 0) return [];
-  const matched = safetyGoodsItems.filter((g) => categoryIds.includes(g.categoryId));
-  return matched.slice(0, limit);
-}
-
-function resolveText(value: Translatable | undefined, fallback: { ja: string; en: string }, isEn: boolean): string {
-  if (value === undefined) return isEn ? fallback.en : fallback.ja;
-  if (typeof value === "string") return value;
-  return isEn ? value.en : value.ja;
-}
-
+/**
+ * 未検証SKUを文脈語だけで推薦していた旧関連表示は停止した。
+ * 作業条件を確定し、一次資料を確認するカテゴリ入口だけを案内する。
+ */
 export function ContextualPpePicks({
   context,
-  fallbackCategoryIds = [],
-  limit = 4,
+  fallbackCategoryIds,
+  limit,
   heading,
   description,
 }: ContextualPpePicksProps) {
   const { language } = useLanguage();
   const isEn = language === "en";
-  const matched = relatedSafetyGoodsByText(context, { limit });
-  const items = matched.length > 0 ? matched : pickFallback(fallbackCategoryIds, limit);
-  if (items.length === 0) return null;
-
-  const resolvedHeading = resolveText(
-    heading,
-    { ja: "この場面で必要な保護具", en: "PPE for this situation" },
-    isEn,
-  );
-  const resolvedDescription = resolveText(
-    description,
-    {
-      ja: "本ページの内容に関連する保護具をピックアップ。Amazon / 楽天のアフィリエイトリンク（発生報酬は研究プロジェクト運営費に充当）。",
-      en: "Curated PPE related to this page's content. Amazon / Rakuten affiliate links — any commissions go toward research-project operating costs.",
-    },
-    isEn,
-  );
+  void context;
+  void fallbackCategoryIds;
+  void limit;
+  void heading;
+  void description;
 
   return (
     <section
-      className="mt-6 rounded-2xl border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-white p-5 shadow-sm"
-      aria-label={resolvedHeading}
+      className="mt-6 rounded-2xl border-2 border-amber-300 bg-amber-50 p-5"
+      aria-label={
+        isEn
+          ? "Check conditions before choosing PPE"
+          : "保護具を選ぶ前の確認"
+      }
     >
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex items-start gap-3">
+        <ShieldAlert
+          className="mt-0.5 h-5 w-5 shrink-0 text-amber-800"
+          aria-hidden="true"
+        />
         <div>
-          <h3 className="text-sm font-bold text-amber-900 sm:text-base"><Shield className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />{resolvedHeading}</h3>
-          <p className="mt-1 text-[11px] leading-5 text-slate-600">{resolvedDescription}</p>
+          <h3 className="font-bold text-amber-950">
+            {isEn
+              ? "Do not choose PPE from a related-item recommendation"
+              : "関連表示だけで保護具を選定しないでください"}
+          </h3>
+          <p className="mt-1 text-xs leading-6 text-amber-950">
+            {isEn
+              ? "The previous unverified product recommendations are unavailable. Confirm the hazard, task conditions, applicable rules, product label, fit, and compatibility first."
+              : "未検証の商品候補表示は停止しました。危険源、作業条件、適用法令、製品ラベル、装着者への適合、他装備との干渉を先に確認してください。"}
+          </p>
+          <Link
+            href="/goods"
+            className="mt-3 inline-flex min-h-12 items-center justify-center rounded-lg border border-amber-500 bg-white px-4 py-2 text-sm font-bold text-amber-950 hover:bg-amber-100"
+          >
+            {isEn
+              ? "Open the pre-purchase checklist"
+              : "購入前確認とカテゴリ検索を開く"}
+          </Link>
         </div>
-        <Link
-          href="/equipment-finder"
-          className="inline-flex min-h-[44px] shrink-0 items-center justify-center rounded-lg border border-emerald-300 bg-white px-3 py-1.5 text-xs font-bold text-emerald-700 hover:bg-emerald-50"
-        >
-          {isEn ? "AI finder →" : "AI診断 →"}
-        </Link>
       </div>
-
-      <ul className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {items.map((item) => {
-          const cat = safetyGoodsCategories.find((c) => c.id === item.categoryId);
-          return (
-            <li
-              key={item.id}
-              className="flex flex-col rounded-xl border border-slate-200 bg-white p-3 shadow-sm"
-            >
-              <div className="flex items-center gap-1.5">
-                {cat?.icon ? (
-                  <span className="text-base" aria-hidden="true">
-                    {cat.icon}
-                  </span>
-                ) : (
-                  <Shield className="h-4 w-4 text-slate-500" aria-hidden="true" />
-                )}
-                <span className="text-[10px] font-bold uppercase tracking-wide text-slate-500">
-                  {cat?.name ?? (isEn ? "PPE" : "保護具")}
-                </span>
-              </div>
-              <p className="mt-1.5 line-clamp-2 text-xs font-bold text-slate-900">{item.name}</p>
-              <p className="mt-1 line-clamp-2 text-[11px] leading-5 text-slate-600">
-                {item.description}
-              </p>
-              <p className="mt-2 text-xs font-bold text-emerald-700">{item.price}</p>
-              <div className="mt-2 flex flex-wrap gap-1.5">
-                <a
-                  href={item.amazonUrl}
-                  target="_blank"
-                  rel="noopener noreferrer sponsored"
-                  className="inline-flex min-h-[44px] items-center gap-1 rounded-md bg-amber-500 px-2.5 py-1 text-[11px] font-bold text-white hover:bg-amber-600"
-                >
-                  Amazon
-                  <ExternalLink className="h-2.5 w-2.5" />
-                </a>
-                <a
-                  href={item.rakutenUrl}
-                  target="_blank"
-                  rel="noopener noreferrer sponsored"
-                  className="inline-flex min-h-[44px] items-center gap-1 rounded-md bg-rose-500 px-2.5 py-1 text-[11px] font-bold text-white hover:bg-rose-600"
-                >
-                  {isEn ? "Rakuten" : "楽天"}
-                  <ExternalLink className="h-2.5 w-2.5" />
-                </a>
-              </div>
-            </li>
-          );
-        })}
-      </ul>
-
-      <p className="mt-3 text-[10px] leading-5 text-slate-500">
-        {isEn
-          ? "* Product links use the Amazon Associates / moshimo affiliate program. Commissions go toward accident-DB expansion, AI inference costs, and law-data updates."
-          : "※ 商品リンクは Amazon アソシエイト / もしもアフィリエイト経由で生成。発生報酬は事故DB拡充・AI推論コスト・法令データ更新に充てます。"}
-      </p>
     </section>
   );
 }

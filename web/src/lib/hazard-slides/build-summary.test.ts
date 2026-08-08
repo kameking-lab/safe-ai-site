@@ -12,7 +12,7 @@ import { getHazardTypeSummaries, getHazardTypeSummary } from "./build-summary";
 
 // 死亡個票にもcurated事例にも実データが無い型（捏造禁止のため事例枠は
 // 「収載事例なし」の正直表示で運用）。データ拡充で事例が入ったらここから外す。
-const ALLOWED_EMPTY_CASES = new Set(["stepping-through"]);
+const ALLOWED_EMPTY_CASES = new Set(["stepping-through", "overexertion"]);
 // 死亡個票に1件も無い型（起因物・時間帯の分布が空になる）
 const ALLOWED_EMPTY_DEATHS = new Set(["stepping-through", "overexertion"]);
 
@@ -49,6 +49,13 @@ describe("getHazardTypeSummaries", () => {
       for (const c of s.featuredCases) {
         expect(c.sourceLabel, `${s.slug}/${c.id} sourceLabel`).toBeTruthy();
         expect(c.summary, `${s.slug}/${c.id} summary`).toBeTruthy();
+        expect(
+          ["official-case", "mhlw-deaths"],
+          `${s.slug}/${c.id} origin`,
+        ).toContain(c.origin);
+        if (c.origin === "official-case") {
+          expect(c.sourceUrl).toMatch(/^https:\/\/anzeninfo\.mhlw\.go\.jp\//u);
+        }
       }
       expect(s.featuredCases.length).toBeLessThanOrEqual(2);
     }
@@ -97,7 +104,7 @@ describe("getHazardTypeSummaries", () => {
     // buildFeaturedCases 内でフィルタ済みだが、出口でも確認（教材の捏造防止）
     for (const s of summaries) {
       for (const c of s.featuredCases) {
-        expect(["curated", "mhlw-deaths"]).toContain(c.origin);
+        expect(["official-case", "curated", "mhlw-deaths"]).toContain(c.origin);
       }
     }
   });

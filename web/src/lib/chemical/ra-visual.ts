@@ -2,8 +2,7 @@
  * 化学物質RAの結論ビジュアル（柱0・ビジュアルファースト）
  *
  * 判定結果画面の最上部に置く「いまの状態」1メッセージを純関数で組み立てる。
- * - CREATE-SIMPLE 判定あり → リスクレベル I〜IV をデカ表示（I=緑/II=黄/III=橙/IV=深紅）
- * - 判定なし・GHSあり → 注意喚起語（危険/警告）をデカ表示
+ * - 検証済みGHSあり → 注意喚起語（危険/警告）をデカ表示
  * - どちらも無し → 青（参考情報）の文法
  *
  * 色の並びは heat-illness/risk-visual.ts と同じ設計（JIS安全色の文法＋
@@ -114,24 +113,12 @@ const INFO_VISUAL = {
 
 /**
  * 判定結果から結論カードの内容を決める。
- * CREATE-SIMPLE のレベルが最優先（作業条件込みの判定）、無ければ GHS の
- * 注意喚起語（物質固有の危険有害性）、それも無ければ参考情報の青。
+ * 旧版のcreateSimple値は独自計算だったため安全判断に使用しない。GHSの
+ * 注意喚起語（物質固有の危険有害性）がなければ参考情報の青。
  */
 export function computeRaConclusion(
   result: Pick<ChemicalRaResponse, "createSimple" | "ghsHazards">,
 ): RaConclusion {
-  const cs = result.createSimple;
-  if (cs) {
-    const v = RA_LEVEL_VISUAL[cs.level];
-    return {
-      kind: "level",
-      level: cs.level,
-      big: cs.level,
-      title: v.label,
-      shortAction: v.shortAction,
-      visual: v,
-    };
-  }
   const signals = (result.ghsHazards ?? []).map((h) => h.signal);
   if (signals.includes("危険")) {
     return {
@@ -155,7 +142,7 @@ export function computeRaConclusion(
     kind: "info",
     big: "参考",
     title: "参考情報",
-    shortAction: "作業条件を入力すると判定",
+    shortAction: "最新SDSを確認",
     visual: INFO_VISUAL,
   };
 }

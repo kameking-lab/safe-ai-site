@@ -31,30 +31,9 @@ const AccidentDatabasePanel = dynamic(
   { ssr: false, loading: () => <div className="h-64 animate-pulse rounded-lg bg-slate-100" /> }
 );
 
-const AccidentAnalysisPanel = dynamic(
-  () => import("@/components/accident-analysis-panel").then((m) => m.AccidentAnalysisPanel),
-  { ssr: false, loading: () => <div className="h-48 animate-pulse rounded-lg bg-slate-100" /> }
-);
-const MhlwAccidentAnalysisPanel = dynamic(
-  () =>
-    import("@/components/mhlw-accident-analysis-panel").then(
-      (m) => m.MhlwAccidentAnalysisPanel
-    ),
-  { ssr: false, loading: () => <div className="h-48 animate-pulse rounded-lg bg-slate-100" /> }
-);
-const IndustryRiskRanking = dynamic(
-  () =>
-    import("@/components/industry-risk-ranking").then((m) => m.IndustryRiskRanking),
-  { ssr: false, loading: () => <div className="h-40 animate-pulse rounded-lg bg-slate-100" /> }
-);
-
 const MhlwDeathsPanel = dynamic(
   () => import("@/components/mhlw-deaths-panel").then((m) => m.MhlwDeathsPanel),
   { ssr: false, loading: () => <div className="h-48 animate-pulse rounded-lg bg-slate-100" /> }
-);
-const MhlwDisasterDatabasesPanel = dynamic(
-  () => import("@/components/mhlw-disaster-databases-panel").then((m) => m.MhlwDisasterDatabasesPanel),
-  { ssr: false, loading: () => <div className="h-40 animate-pulse rounded-lg bg-slate-100" /> }
 );
 const SummaryPanel = dynamic(
   () => import("@/components/summary-panel").then((m) => m.SummaryPanel),
@@ -62,6 +41,10 @@ const SummaryPanel = dynamic(
 );
 import { SITE_STATS } from "@/data/site-stats";
 import { createServices } from "@/lib/services/service-factory";
+import { runClientAiAction } from "@/lib/client-ai-action";
+import {
+  ACCIDENT_TRANSIENT_SEARCH_EVENT,
+} from "@/lib/accidents/transient-search";
 import type { ServiceError, ServiceStatus } from "@/lib/types/api";
 import {
   ALL_ACCIDENT_TYPES,
@@ -81,6 +64,8 @@ export type HomeScreenVariant = "laws" | "accidents";
 
 type HomeScreenProps = {
   children: React.ReactNode;
+  /** 事故一覧の後でだけ表示する、サーバー描画済みの補助情報。 */
+  accidentSupplement?: React.ReactNode;
   variant?: HomeScreenVariant;
   initialLawTab?: TabId;
   /**
@@ -95,11 +80,7 @@ type HomeScreenProps = {
 
 const ACCIDENT_TABS = [
   "list",
-  "mhlw-search",
   "mhlw-deaths",
-  "mhlw",
-  "industry",
-  "analysis",
 ] as const;
 type AccidentTab = (typeof ACCIDENT_TABS)[number];
 
@@ -111,7 +92,14 @@ function readAccidentTabFromUrl(
     : null;
 }
 
-export function HomeScreen({ children, variant: variantProp, initialLawTab, initialRevisions, LawsListComponent }: HomeScreenProps) {
+export function HomeScreen({
+  children,
+  accidentSupplement,
+  variant: variantProp,
+  initialLawTab,
+  initialRevisions,
+  LawsListComponent,
+}: HomeScreenProps) {
   const variant = variantProp ?? "laws";
   const router = useRouter();
   const pathname = usePathname();
@@ -147,7 +135,7 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab, init
   // window.location から一度だけ読む。SSR/初回描画は既定タブで確定させる。
   const [selectedAccidentType, setSelectedAccidentType] = useState<AccidentType | "すべて">("すべて");
   const [selectedAccidentCategory, setSelectedAccidentCategory] = useState<AccidentWorkCategory | "すべて">("すべて");
-  const [accidentActiveTab, setAccidentActiveTab] = useState<AccidentTab>("mhlw-search");
+  const [accidentActiveTab, setAccidentActiveTab] = useState<AccidentTab>("list");
 
   // マウント時にURLクエリから状態を復元（?tab= / ?acc_type=。laws は ?tab=chat|summary）
   useEffect(() => {
@@ -166,6 +154,27 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab, init
     // eslint-disable-next-line react-hooks/exhaustive-deps -- 初回マウント時のみURLを読む
   }, []);
 
+  useEffect(() => {
+    if (variant !== "accidents") return;
+    const showAccidentResults = () => {
+      setAccidentActiveTab("list");
+      window.setTimeout(() => {
+        document.getElementById("accident-results")?.scrollIntoView?.({
+          block: "start",
+        });
+      }, 0);
+    };
+    window.addEventListener(
+      ACCIDENT_TRANSIENT_SEARCH_EVENT,
+      showAccidentResults,
+    );
+    return () =>
+      window.removeEventListener(
+        ACCIDENT_TRANSIENT_SEARCH_EVENT,
+        showAccidentResults,
+      );
+  }, [variant]);
+
   // Sync /accidents tab state -> URL (replace, scroll preserved)
   // 初回実行はスキップ（既定state でURLの ?tab=/?acc_type= を消さないため。
   // URL復元エフェクトが state を更新すれば、その再実行で正しく同期される）
@@ -177,7 +186,7 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab, init
       return;
     }
     const params = new URLSearchParams(window.location.search);
-    if (accidentActiveTab === "mhlw-search") {
+    if (accidentActiveTab === "list") {
       params.delete("tab");
     } else {
       params.set("tab", accidentActiveTab);
@@ -320,12 +329,10 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab, init
     chatListRef.current.scrollTop = chatListRef.current.scrollHeight;
   }, [chatMessages, activeTab, variant]);
 
-  // 全件データ（リスト件数表示・分析タブ用）。
-  // C-1: 消費者は「サイト収録事例(list)」「詳細事例(analysis)」タブのみ。
-  // 既定タブ(mhlw-search)のままならデータチャンク(生約340KB)を一切ロードしない。
+  // サイト収録事例タブを開いたときだけ事例データを取得する。
   useEffect(() => {
     if (variant !== "accidents") return;
-    if (accidentActiveTab !== "list" && accidentActiveTab !== "analysis") return;
+    if (accidentActiveTab !== "list") return;
     let active = true;
     void services.accident.getAllAccidentCases().then((cases) => {
       if (active) setAllAccidentCases(cases);
@@ -368,16 +375,44 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab, init
     if (!trimmed || isChatSending) {
       return;
     }
-
-    setIsChatSending(true);
-    setChatStatus("loading");
-    setChatError(null);
-
     const userMessageId = `user-${Date.now()}`;
-    const response = await services.chat.sendMessage({
-      revision: selectedRevision,
-      question: trimmed,
-    });
+    const priorUserTurns = chatMessages
+      .filter((message) => message.role === "user")
+      .slice(-10);
+    const guardedResponse = await runClientAiAction(
+      {
+        purpose: "legacy-law-chat-client",
+        texts: [trimmed, ...priorUserTurns.map((message) => message.content)],
+        consent: true,
+        maxChars: 2_000,
+        contextPolicy: "approved-server-corpus",
+      },
+      () => {
+        setIsChatSending(true);
+        setChatStatus("loading");
+        setChatError(null);
+        return services.chat.sendMessage({
+          revision: selectedRevision,
+          question: trimmed,
+          privacyConfirmed: true,
+          history: priorUserTurns,
+          context: [...chatMessages]
+            .reverse()
+            .find((message) => message.role === "assistant" && message.context)
+            ?.context,
+        });
+      },
+    );
+    if (!guardedResponse.sent) {
+      setChatStatus("error");
+      setChatError({
+        code: "VALIDATION",
+        message: guardedResponse.decision.message,
+        retryable: false,
+      });
+      return;
+    }
+    const response = guardedResponse.value;
 
     if (!response.ok) {
       setChatStatus("error");
@@ -414,61 +449,87 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab, init
     setRevisionError(null);
   };
 
+  const accidentViewSelector = (
+    <details className="w-fit rounded-xl border border-slate-200 bg-white px-3">
+      <summary className="flex min-h-[44px] cursor-pointer items-center text-sm font-semibold text-slate-800">
+        {accidentActiveTab === "list"
+          ? `表示：サイト収録事例（${SITE_STATS.siteCuratedCaseCount}件）`
+          : "表示：死亡災害（収録済み期間）"}
+      </summary>
+      <div className="flex flex-wrap gap-1 border-t border-slate-200 py-2">
+        {(
+          [
+            {
+              id: "list",
+              label: `サイト収録事例 (${SITE_STATS.siteCuratedCaseCount}件)`,
+            },
+            { id: "mhlw-deaths", label: "死亡災害（収録済み期間）" },
+          ] as const
+        ).map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            onClick={(event) => {
+              setAccidentActiveTab(tab.id);
+              event.currentTarget.closest("details")?.removeAttribute("open");
+            }}
+            className={`inline-flex min-h-[44px] items-center rounded-lg px-4 py-1.5 text-sm font-semibold transition-colors ${
+              accidentActiveTab === tab.id
+                ? "bg-white text-slate-900 shadow-sm"
+                : "text-slate-600 hover:text-slate-800"
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+    </details>
+  );
+
   return (
     <>
       {variant === "accidents" ? (
         <>
           <section className="px-4 pt-4 lg:px-8">{children}</section>
-          {/* タブ切り替え */}
-          <div className="px-4 pt-4 lg:px-8">
-            <div className="flex flex-wrap gap-1 rounded-xl bg-slate-100 p-1 w-fit">
-              {(
-                [
-                  { id: "mhlw-search", label: `全件検索 (${SITE_STATS.accidentDbCount}件)` },
-                  { id: "mhlw-deaths", label: `死亡災害 (${SITE_STATS.mhlwDeathsCount}件)` },
-                  { id: "industry", label: "業種別ランキング" },
-                  { id: "mhlw", label: "MHLW実データ分析" },
-                  { id: "list", label: `サイト収録事例 (${SITE_STATS.siteCuratedCaseCount}件)` },
-                  { id: "analysis", label: "詳細事例（参考）" },
-                ] as const
-              ).map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setAccidentActiveTab(tab.id)}
-                  className={`inline-flex min-h-[44px] items-center rounded-lg px-4 py-1.5 text-sm font-semibold transition-colors ${
-                    accidentActiveTab === tab.id
-                      ? "bg-white text-slate-900 shadow-sm"
-                      : "text-slate-500 hover:text-slate-700"
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
-          </div>
-          <section id="section-accidents" className="space-y-4 px-4 pt-4 lg:px-8">
+          <section
+            id="section-accidents"
+            data-accidents-client-only
+            className="space-y-4 px-4 pt-4 lg:px-8"
+          >
             {accidentActiveTab === "list" && (
               <>
-                <AccidentExtrasPanel />
-                <AccidentDatabasePanel
-                  cases={accidentCases}
-                  allCases={allAccidentCases}
-                  selectedCategory={selectedAccidentCategory}
-                  selectedType={selectedAccidentType}
-                  onSelectCategory={setSelectedAccidentCategory}
-                  onSelectType={setSelectedAccidentType}
-                  status={accidentStatus}
-                  errorMessage={accidentError?.message ?? null}
-                />
-                <MhlwDisasterDatabasesPanel />
+                <div data-accident-results-first>
+                  <AccidentDatabasePanel
+                    cases={accidentCases}
+                    allCases={allAccidentCases}
+                    selectedCategory={selectedAccidentCategory}
+                    selectedType={selectedAccidentType}
+                    onSelectCategory={setSelectedAccidentCategory}
+                    onSelectType={setSelectedAccidentType}
+                    status={accidentStatus}
+                    errorMessage={accidentError?.message ?? null}
+                  />
+                </div>
+                <div>{accidentViewSelector}</div>
+                <details
+                  data-accidents-supporting-info
+                  className="rounded-xl border border-slate-200 bg-white px-3"
+                >
+                  <summary className="flex min-h-11 cursor-pointer items-center text-sm font-bold text-slate-800">
+                    関連情報・集計
+                  </summary>
+                  <div className="space-y-4 border-t border-slate-200 py-4">
+                    <AccidentExtrasPanel />
+                    {accidentSupplement}
+                  </div>
+                </details>
               </>
             )}
-            {accidentActiveTab === "mhlw-search" && <AccidentExtrasPanel />}
-            {accidentActiveTab === "mhlw-deaths" && <MhlwDeathsPanel />}
-            {accidentActiveTab === "industry" && <IndustryRiskRanking />}
-            {accidentActiveTab === "mhlw" && <MhlwAccidentAnalysisPanel />}
-            {accidentActiveTab === "analysis" && (
-              <AccidentAnalysisPanel cases={allAccidentCases} />
+            {accidentActiveTab === "mhlw-deaths" && (
+              <>
+                <div>{accidentViewSelector}</div>
+                <MhlwDeathsPanel />
+              </>
             )}
           </section>
         </>

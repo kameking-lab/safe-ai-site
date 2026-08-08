@@ -2,7 +2,7 @@
 
 const tabs = [
   { id: "laws", label: "法改正一覧" },
-  { id: "summary", label: "AI要約" },
+  { id: "summary", label: "収録要点" },
   { id: "chat", label: "質問チャット" },
  ] as const;
 

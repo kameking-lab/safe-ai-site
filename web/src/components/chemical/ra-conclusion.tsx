@@ -1,4 +1,4 @@
-import { Shield, AlertTriangle } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 import type { ChemicalRaResponse } from "@/app/api/chemical-ra/route";
 import type { ChemicalKeyPoints } from "@/lib/chemical/key-points";
 import {
@@ -13,18 +13,16 @@ import { GhsPictogram } from "@/components/chemical/ghs-pictogram";
 /**
  * RA結果の結論カード（柱0・1画面1メッセージ）。
  * 本文を読まずに3秒で「いまの危険度」と「次にやること」が分かることが役目:
- * リスクレベルのデカ表示＋I〜IV色帯＋GHS絵表示＋まず行う対策＋保護具への動線。
+ * 検証済みGHSの注意喚起語＋絵表示＋一次資料確認への動線。
  * A4印刷では文字情報は出し、装飾的な帯と絵の列は出さない（正式書式を保つ）。
  */
 
 type RaConclusionCardProps = {
   result: ChemicalRaResponse;
   keyPoints: ChemicalKeyPoints;
-  /** 保護具AIファインダーへのリンク（必要保護具の動線） */
-  equipmentHref: string;
 };
 
-export function RaConclusionCard({ result, keyPoints, equipmentHref }: RaConclusionCardProps) {
+export function RaConclusionCard({ result, keyPoints }: RaConclusionCardProps) {
   const conclusion = computeRaConclusion(result);
   const symbols = collectGhsSymbols(result.ghsHazards ?? []);
   const v = conclusion.visual;
@@ -60,12 +58,12 @@ export function RaConclusionCard({ result, keyPoints, equipmentHref }: RaConclus
           <p className="truncate text-sm font-bold">{result.chemicalName}</p>
           {conclusion.kind === "level" && result.createSimple && (
             <p className="text-[11px] opacity-80">
-              CREATE-SIMPLE 簡易判定・ばく露指数 {result.createSimple.exposureRatio.toFixed(2)}
+              独自の簡易スクリーニング参考値 {result.createSimple.exposureRatio.toFixed(2)}
             </p>
           )}
           {conclusion.kind === "info" && (
             <p className="text-[11px] opacity-80">
-              上の「作業の状況」で換気・取扱量を選ぶとリスクレベル（I〜IV）を判定します
+              自動リスク判定は行いません。製品固有の最新SDSと公式ツールで確認してください
             </p>
           )}
         </div>
@@ -152,16 +150,14 @@ export function RaConclusionCard({ result, keyPoints, equipmentHref }: RaConclus
         </div>
       )}
 
-      {/* 保護具への動線（44px以上）＋法規制タグ */}
+      {/* 製品適合性を確認できないため、商品導線は出さず選定境界を表示する。 */}
       <div className="mt-3 flex flex-wrap items-center gap-2 print:hidden">
-        <a
-          href={equipmentHref}
-          data-testid="ra-equipment-link"
-          className={`inline-flex min-h-[44px] items-center gap-1.5 rounded-xl px-4 py-2.5 text-sm font-bold shadow-sm transition hover:opacity-90 ${v.chip}`}
+        <p
+          data-testid="ra-ppe-boundary"
+          className="rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs font-semibold leading-5 text-amber-950"
         >
-          <Shield className="h-4 w-4" aria-hidden="true" />
-          必要な保護具を見る →
-        </a>
+          保護具は、製品固有の最新SDS、ばく露経路、濃度、作業時間、規格、フィットを確認して人が選定してください。商品適合は自動判定していません。
+        </p>
         {keyPoints.regulations.map((r) => (
           <span
             key={r}

@@ -249,7 +249,7 @@ export const wholesaleContent: IndustryContent = {
       name: "腰痛予防の労働衛生教育",
       type: "労働衛生教育",
       target: "ピッキング・荷役・配送従事者",
-      href: "/education-certification/finder?q=腰痛",
+      href: "/education/roudoueisei/youtsu-yobou",
     },
     {
       name: "雇入れ時教育（安衛則第35条）",
@@ -324,7 +324,7 @@ export const wholesaleContent: IndustryContent = {
     {
       icon: "🌡",
       title: "熱中症予防ハブ（WBGT計算機）",
-      reason: "屋外仕分け・配送・冷凍庫前作業の暑熱対策（R7義務化対応）",
+      reason: "対象作業の目安、第612条の2の法定2項目、WBGT等の予防策を区分して確認",
       href: "/heat-illness-prevention",
       cta: "熱中症対策へ",
     },

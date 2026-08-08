@@ -15,6 +15,11 @@ type SignageRotatorProps<T> = {
   getKey: (item: T, index: number) => string;
   ariaLabel: string;
   intervalMs?: number;
+  /**
+   * 16:9サイネージの高さが限られる場合、10個以上の進捗ボタンを本文の下へ
+   * 押し込まず、44pxの前後ボタンを本文の左右へ配置する。
+   */
+  compactAtWide?: boolean;
 };
 
 export function SignageRotator<T>({
@@ -23,6 +28,7 @@ export function SignageRotator<T>({
   getKey,
   ariaLabel,
   intervalMs = DEFAULT_INTERVAL_MS,
+  compactAtWide = false,
 }: SignageRotatorProps<T>) {
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -49,18 +55,24 @@ export function SignageRotator<T>({
 
   return (
     <div
-      className="flex min-h-0 flex-1 flex-col"
+      className="flex min-h-0 w-full flex-1 flex-col overflow-hidden"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onFocus={() => setPaused(true)}
       onBlur={() => setPaused(false)}
     >
-      <div className="min-h-0 flex-1" role="group" aria-label={`${ariaLabel}（${safeIndex + 1}/${items.length}件目）`}>
+      <div
+        className={`min-h-0 flex-1 ${compactAtWide ? "xl:hidden" : ""}`}
+        role="group"
+        aria-label={`${ariaLabel}（${safeIndex + 1}/${items.length}件目）`}
+      >
         {renderItem(current, safeIndex)}
       </div>
       {items.length > 1 && (
         <div
-          className="mt-1.5 flex shrink-0 flex-wrap items-center justify-center gap-1"
+          className={`mt-1.5 flex shrink-0 flex-wrap items-center justify-center gap-1 ${
+            compactAtWide ? "xl:hidden" : ""
+          }`}
           role="tablist"
           aria-label={`${ariaLabel}の切替`}
         >
@@ -80,6 +92,35 @@ export function SignageRotator<T>({
               />
             </button>
           ))}
+        </div>
+      )}
+      {compactAtWide && (
+        <div className="hidden min-h-[44px] min-w-0 flex-1 grid-cols-[44px_minmax(0,1fr)_44px] items-stretch gap-1 xl:grid">
+          <button
+            type="button"
+            onClick={() => setIndex((safeIndex - 1 + items.length) % items.length)}
+            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border border-slate-600 bg-slate-900 text-xl font-bold text-slate-100 hover:bg-slate-800"
+            aria-label={`${ariaLabel}の前の項目`}
+            disabled={items.length <= 1}
+          >
+            ‹
+          </button>
+          <div
+            className="min-h-0 min-w-0 overflow-hidden"
+            role="group"
+            aria-label={`${ariaLabel}（${safeIndex + 1}/${items.length}件目）`}
+          >
+            {renderItem(current, safeIndex)}
+          </div>
+          <button
+            type="button"
+            onClick={() => setIndex((safeIndex + 1) % items.length)}
+            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg border border-slate-600 bg-slate-900 text-xl font-bold text-slate-100 hover:bg-slate-800"
+            aria-label={`${ariaLabel}の次の項目`}
+            disabled={items.length <= 1}
+          >
+            ›
+          </button>
         </div>
       )}
     </div>

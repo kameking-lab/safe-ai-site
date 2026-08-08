@@ -34,7 +34,7 @@ Vercel ダッシュボード → safe-ai-site → Settings → Environment Varia
 |---|---|
 | `NEXT_PUBLIC_VAPID_PUBLIC_KEY` | 手順1の Public Key |
 | `VAPID_PRIVATE_KEY` | 手順1の Private Key |
-| `VAPID_SUBJECT` | `mailto:kenshi.ycc@gmail.com`（通知の連絡先。変更可） |
+| `VAPID_SUBJECT` | `mailto:[redacted-private-email]`（通知の連絡先。変更可） |
 
 ### 3. Supabase に購読テーブルを作る（1分）
 

@@ -1,5 +1,9 @@
 import type { ReactNode } from "react";
-import { Mascot, type MascotVariant } from "@/components/mascot";
+import {
+  MascotGuide,
+  type MascotGuideVariant,
+} from "@/components/mascot-guide";
+import type { MascotVariant } from "@/components/mascot";
 
 type EmptyStateProps = {
   /** 状態の一言（例: 「まだ記録がありません」） */
@@ -10,6 +14,8 @@ type EmptyStateProps = {
   action?: ReactNode;
   /** マスコットのポーズ。空状態は thinking が既定 */
   variant?: MascotVariant;
+  /** 案内の意味と配色。専用ポーズとは分けて指定できる。 */
+  guideVariant?: MascotGuideVariant;
   className?: string;
 };
 
@@ -23,20 +29,23 @@ export function EmptyState({
   description,
   action,
   variant = "thinking",
+  guideVariant,
   className = "",
 }: EmptyStateProps) {
+  const resolvedGuideVariant =
+    guideVariant ??
+    (variant === "water-break" || variant === "seasonal-summer"
+      ? "heat"
+      : "default");
+
   return (
-    <div
-      className={`flex flex-col items-center justify-center rounded-2xl border border-dashed border-emerald-200 bg-[radial-gradient(ellipse_60%_60%_at_50%_38%,rgba(21,153,104,0.07),transparent)] bg-slate-50/60 px-6 py-10 text-center dark:border-slate-700 dark:bg-slate-900/40 ${className}`}
-    >
-      <Mascot variant={variant} size="lg" alt="" />
-      <p className="mt-3 text-sm font-semibold text-slate-700 dark:text-slate-200">{title}</p>
-      {description ? (
-        <p className="mt-1 max-w-sm text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-          {description}
-        </p>
-      ) : null}
-      {action ? <div className="mt-4">{action}</div> : null}
-    </div>
+    <MascotGuide
+      variant={resolvedGuideVariant}
+      imageVariant={variant}
+      title={title}
+      message={description}
+      action={action}
+      className={`border-dashed ${className}`}
+    />
   );
 }

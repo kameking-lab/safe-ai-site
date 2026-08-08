@@ -1,58 +1,102 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
-import { KyPaperView } from "@/components/ky-paper/ky-paper-view";
-import { PageSkeleton } from "@/components/skeleton";
-import { ogImageUrl } from "@/lib/og-url";
 import { JsonLd, howToSchema } from "@/components/json-ld";
+import { KyZeroFrictionBuilder } from "@/components/ky-paper/ky-zero-friction-builder";
 import { PageJsonLd } from "@/components/page-json-ld";
+import { ogImageUrl } from "@/lib/og-url";
+import { withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
 
-const TITLE = "KY用紙 作成ツール｜危険予知活動表（用紙ファースト）";
+const TITLE = "KYを作る｜危険・対策候補とKY用紙PDF";
 const DESC =
-  "完成形のKY用紙を見ながら、ズームで確認し、音声またはキーボードで入力。日付・天気は自動取得、参加者は作業員マスターから選ぶだけ。AIが危険箇所を提案し、朝礼サイネージにそのまま映せます。";
+  "作業内容から検証済みの危険・対策候補を提示。地域の気象・WBGT、メンバー、端末内31日保存、A4 PDFに対応した無料KY作成ツールです。";
 
 export const metadata: Metadata = {
   title: TITLE,
   description: DESC,
-  // 一本化により /ky/paper が KY 入力の正規ページ。検索インデックス対象にする。
   alternates: { canonical: "/ky/paper" },
   robots: { index: true, follow: true },
-  openGraph: {
+  openGraph: withSiteOpenGraph("/ky/paper", {
     title: TITLE,
     description: DESC,
     images: [{ url: ogImageUrl(TITLE, DESC), width: 1200, height: 630 }],
-  },
-  twitter: {
-    card: "summary_large_image",
+  }),
+  twitter: withSiteTwitter({
+    title: TITLE,
+    description: DESC,
     images: [ogImageUrl(TITLE, DESC)],
-  },
+  }),
 };
 
 const KY_HOWTO = howToSchema({
-  name: "KY（危険予知）活動の進め方",
-  description: "建設・製造現場で行うKY（危険予知）活動を4ラウンド法でデジタル記録する手順。",
+  name: "KY（危険予知）を短時間で作成する手順",
+  description:
+    "作業内容から危険と対策の候補を選び、人が現場条件を確認してKY用紙をPDF保存する手順。",
   url: "https://www.anzen-ai-portal.jp/ky/paper",
-  totalTime: "PT15M",
   steps: [
-    { name: "1R: 現状の把握", text: "作業内容・場所・人員・使用機械を整理し『どんな危険があるか』を全員で出し合う。" },
-    { name: "2R: 本質追究", text: "出た危険のうち最も重要な要因（危険のポイント）を選定する。" },
-    { name: "3R: 対策の樹立", text: "危険のポイントに対し具体的な対策案を3つ以上挙げる。" },
-    { name: "4R: 目標設定", text: "本日の行動目標を1つに絞り、唱和して全員で確認する。" },
+    {
+      name: "作業を入力",
+      text: "日時・地域・メンバー・作業内容を入力する。地域確定後は気象とWBGTを確認する。",
+    },
+    {
+      name: "危険を選択",
+      text: "作業内容と気象から表示された検証済み候補を確認して選ぶ。必要な危険は手入力する。",
+    },
+    {
+      name: "対策を選択",
+      text: "危険ごとの具体的な対策候補を確認して選び、現場条件に合わせて編集または追加する。",
+    },
+    {
+      name: "人が確認してPDF保存",
+      text: "未確認項目を確認し、確認者を入力して確定する。下書きまたは確認済みのA4 PDFを端末内で保存する。",
+    },
   ],
 });
 
 export default function KyPaperPage() {
+  const initialNowIso = new Date().toISOString();
   return (
     <>
       <PageJsonLd
         name={TITLE}
         description={DESC}
         path="/ky/paper"
-        keywords={["KYT 4ラウンド法 やり方", "建設業 KY 例 作業前確認", "KY用紙 作成 テンプレート", "危険予知活動 手順"]}
+        keywords={[
+          "KY用紙 作成",
+          "危険予知 対策",
+          "KY PDF",
+          "建設業 KY",
+        ]}
       />
       <JsonLd schema={KY_HOWTO} />
-      <Suspense fallback={<PageSkeleton label="KY用紙ビューを読み込み中" />}>
-        <KyPaperView />
-      </Suspense>
+      <KyZeroFrictionBuilder initialNowIso={initialNowIso} />
+      <noscript>
+        <style>{`#ky-paper-start { display: none !important; }`}</style>
+        <section className="mx-auto max-w-4xl p-6">
+          <h1 className="text-2xl font-bold">KYを作る（印刷用HTML）</h1>
+          <p>JavaScriptが無効です。この用紙を印刷し、印刷後に空欄を手書きしてください。</p>
+          <table className="mt-4 w-full border-collapse border border-slate-900 text-sm">
+            <tbody>
+              {[
+                "作業日・時間",
+                "場所",
+                "メンバー",
+                "作業内容",
+                "気象・気温・湿度・WBGT（区分・対象時刻・取得時刻・提供元）",
+                "危険",
+                "対策",
+                "確認者",
+                "備考",
+              ].map((label) => (
+                <tr key={label}>
+                  <th scope="row" className="w-1/3 border border-slate-900 p-3 text-left">{label}</th>
+                  <td className="h-16 border border-slate-900 p-3">　</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <p className="mt-3 font-bold">下書き・未確認</p>
+          <p className="text-sm">候補と気象値は利用できません。現場条件と公式情報を人が確認してください。</p>
+        </section>
+      </noscript>
     </>
   );
 }

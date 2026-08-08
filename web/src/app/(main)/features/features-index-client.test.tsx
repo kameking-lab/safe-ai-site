@@ -2,7 +2,11 @@ import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { LanguageProvider } from "@/contexts/language-context";
 import { FeaturesIndexClient } from "./features-index-client";
-import { FEATURES } from "@/data/features-catalog";
+import { FEATURE_PORTFOLIO } from "@/config/feature-portfolio";
+
+const VISIBLE_FEATURES = FEATURE_PORTFOLIO.filter(
+  (feature) => feature.tier !== 4 && feature.searchable,
+);
 
 function renderClient() {
   return render(
@@ -15,35 +19,49 @@ function renderClient() {
 describe("/features 機能一覧クライアント", () => {
   it("ヒーロー見出しを描画", () => {
     renderClient();
-    expect(screen.getByText("安全AIポータルの全機能を、1ページで。")).toBeDefined();
+    expect(
+      screen.getByRole("heading", {
+        level: 1,
+        name: "目的と運用状態から機能を選ぶ",
+      }),
+    ).toBeDefined();
   });
 
-  it("全機能カードを描画（カタログ件数と一致）", () => {
+  it("Tier 1〜3の公開入口を描画し、Tier 4を主力一覧へ混ぜない", () => {
     renderClient();
-    // 各カードの主CTA「機能を試す →」がカタログ件数ぶん存在
-    const tryLinks = screen.getAllByText("機能を試す →");
-    expect(tryLinks).toHaveLength(FEATURES.length);
+    const links = [
+      ...screen.getAllByText("機能を開く"),
+      ...screen.getAllByText("サンプルを確認"),
+    ];
+    expect(links).toHaveLength(VISIBLE_FEATURES.length);
+    expect(screen.queryByText("外部API")).toBeNull();
   });
 
-  it("カテゴリフィルタのチップが 44px タップ標的を満たす", () => {
+  it("Tierフィルタが44pxタップ標的とpressed状態を持つ", () => {
     renderClient();
-    // 「すべて（N）」ボタン
-    const allBtn = screen.getByRole("button", { name: `すべて（${FEATURES.length}）` });
-    expect(allBtn.className).toContain("min-h-[44px]");
+    const allBtn = screen.getByRole("button", {
+      name: `すべて（${VISIBLE_FEATURES.length}）`,
+    });
+    expect(allBtn.className).toContain("portal-button-secondary");
     expect(allBtn.className).toContain("items-center");
+    expect(allBtn.getAttribute("aria-pressed")).toBe("true");
   });
 
-  it("主CTA・副CTAともに 44px タップ標的を満たす", () => {
+  it("機能リンクは44px以上のタップ標的を維持する", () => {
     renderClient();
-    const tryLink = screen.getAllByText("機能を試す →")[0]?.closest("a");
-    const moreLink = screen.getAllByText("詳しく見る")[0]?.closest("a");
-    expect(tryLink?.className).toContain("min-h-[44px]");
-    expect(moreLink?.className).toContain("min-h-[44px]");
+    const tryLink = screen.getAllByText("機能を開く")[0]?.closest("a");
+    expect(tryLink?.className).toContain("min-h-11");
   });
 
-  it("クイックリンク（5分ツアー等）が 44px タップ標的を満たす", () => {
+  it("主力・実務・サンプルを見分けられ、Safety Labsへ移動できる", () => {
     renderClient();
-    const tour = screen.getByRole("link", { name: "5分ツアー" });
-    expect(tour.className).toContain("min-h-[44px]");
+    expect(screen.getByText("Tier 1：主力機能")).toBeTruthy();
+    expect(screen.getByText("Tier 2：実務支援")).toBeTruthy();
+    expect(screen.getByText("Tier 3：自動化サンプル")).toBeTruthy();
+    expect(
+      screen
+        .getByRole("link", { name: "Safety Labsを見る" })
+        .getAttribute("href"),
+    ).toBe("/automation-examples");
   });
 });

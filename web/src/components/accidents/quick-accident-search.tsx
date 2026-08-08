@@ -2,45 +2,19 @@
 
 import { useState, type FormEvent } from "react";
 import { Search } from "lucide-react";
-import type { AccidentType } from "@/lib/types/domain";
-import { accidentTypeHref } from "@/lib/accidents/accident-visual";
-import { ACCIDENT_TYPE_SHORT } from "@/lib/accidents/accident-pictogram-map";
-import { AccidentTypePictogram } from "@/components/accidents/accident-type-pictogram";
-
-/**
- * 事故DBの最上部に置く「クイック事例検索」。
- *
- * 多忙な労働安全コンサル目線レビュー(docs/third-party-reviews/accidents-busy-consultant-2026-06-08.md)で、
- * 既存の検索/絞り込みタブはページ先頭から約5,500px下（モバイルで約6.5画面）にあり、
- * 既定タブ「全件検索」にはキーワード入力欄が無いことが判明。
- * ここでは1タップ/1検索で、収録事例タブ(tab=list)へ acc_kw 付きで直行し、
- * #section-accidents へスクロールして即・絞り込み結果を見せる。
- *
- * 遷移先のURLパラメータ(tab=list / acc_kw / acc_industries)は
- * AccidentDatabasePanel が既にマウント時に復元する実装済み・テスト済みの導線を再利用している。
- */
-
-// 厚労省「事故の型」のうち現場で頻出する代表型。
-// タップで型の正確な絞り込み（acc_type）に直行。ピクトグラム＝柱0の視覚言語。
-const QUICK_TYPES: AccidentType[] = ["墜落", "転倒", "はさまれ・巻き込まれ", "飛来・落下", "熱中症", "感電"];
-
-function buildHref(kw: string): string {
-  const params = new URLSearchParams();
-  params.set("tab", "list");
-  const trimmed = kw.trim();
-  if (trimmed) params.set("acc_kw", trimmed);
-  // #accident-results = AccidentDatabasePanel(キーワード欄＋絞り込み結果)の先頭。
-  // 区画先頭(#section-accidents)だと自社Top5・クロス集計の下に結果が埋もれるため直接結果へ。
-  return `/accidents?${params.toString()}#accident-results`;
-}
+import { setTransientAccidentKeyword } from "@/lib/accidents/transient-search";
 
 export function QuickAccidentSearch() {
   const [keyword, setKeyword] = useState("");
 
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // フル遷移で HomeScreen を再マウント→tab=list 選択＋acc_kw 復元＋結果へスクロール。
-    window.location.href = buildHref(keyword);
+    setTransientAccidentKeyword(keyword);
+    window.setTimeout(() => {
+      document.getElementById("accident-results")?.scrollIntoView?.({
+        block: "start",
+      });
+    }, 0);
   };
 
   return (
@@ -70,18 +44,6 @@ export function QuickAccidentSearch() {
           検索
         </button>
       </form>
-      <div className="mt-2 flex flex-wrap gap-1.5">
-        {QUICK_TYPES.map((t) => (
-          <a
-            key={t}
-            href={accidentTypeHref(t)}
-            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-rose-300 bg-white py-1 pl-1.5 pr-3 text-xs font-semibold text-rose-800 hover:bg-rose-100"
-          >
-            <AccidentTypePictogram type={t} size="sm" />
-            {ACCIDENT_TYPE_SHORT[t]}
-          </a>
-        ))}
-      </div>
     </section>
   );
 }

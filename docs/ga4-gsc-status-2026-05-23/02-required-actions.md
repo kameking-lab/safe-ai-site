@@ -58,7 +58,7 @@ curl -s "https://www.anzen-ai-portal.jp/api/admin/health?key=${ADMIN_HEALTH_KEY}
 |---|------|
 | 1 | GCP Console → APIs & Credentials → OAuth クライアント ID 作成（Web application） |
 | 2 | Authorized redirect URI に **`http://localhost:8765/oauth2/callback`** を完全一致で追加 |
-| 3 | OAuth consent screen を External / Testing で構成（テストユーザーに `kenshi.ycc@gmail.com` を追加） |
+| 3 | OAuth consent screen を External / Testing で構成（テストユーザーに `[redacted-private-email]` を追加） |
 
 ### 2.2 Vercel 環境変数 2本を先に登録
 
@@ -75,7 +75,7 @@ export GSC_OAUTH_CLIENT_SECRET=<step 2.2 と同じ値>
 node scripts/etl/gsc-oauth-init.mjs
 ```
 
-ブラウザが開き `kenshi.ycc@gmail.com` で同意 → ターミナルに refresh token が出力される（ファイルには書き出されない）。
+ブラウザが開き `[redacted-private-email]` で同意 → ターミナルに refresh token が出力される（ファイルには書き出されない）。
 
 ### 2.4 Vercel に3本目を登録 + 再デプロイ
 
@@ -98,7 +98,7 @@ Production 公開を選ばない場合、週次で 2.3 を再実行する運用�
 | GSC 側で過去データ蓄積 | サイトを既に GSC に登録済なら過去16ヶ月分が即取得可能 |
 | サイト未登録の場合 | プロパティ登録 → 所有権確認 → 約2-3日で impressions 集計開始（クリック実数は検索流入が発生してから） |
 
-GSC プロパティ `https://www.anzen-ai-portal.jp/` が `kenshi.ycc@gmail.com` で**所有権確認済み**かは GSC コンソール上で要確認（未確認なら `GOOGLE_SITE_VERIFICATION` を Vercel 環境変数に追加して再デプロイ → GSC で「メタタグ」方式で確認）。
+GSC プロパティ `https://www.anzen-ai-portal.jp/` が `[redacted-private-email]` で**所有権確認済み**かは GSC コンソール上で要確認（未確認なら `GOOGLE_SITE_VERIFICATION` を Vercel 環境変数に追加して再デプロイ → GSC で「メタタグ」方式で確認）。
 
 ## 4. 作業件数サマリ
 
@@ -117,6 +117,6 @@ GSC プロパティ `https://www.anzen-ai-portal.jp/` が `kenshi.ycc@gmail.com`
 |------|-------------|
 | `/api/search-console` が `source: "mock"`、`note: "credentials missing"` | 環境変数3本のいずれかが Production スコープに未登録 |
 | `/api/search-console` が `source: "mock"`、`note: "GSC 401: invalid_grant"` | refresh token 失効（7日 Testing 制限 / パスワード変更 / 手動 revoke）→ 2.3 を再実行 |
-| `/api/search-console` が `source: "mock"`、`note: "GSC 403"` | OAuth ユーザーが該当プロパティの所有者ではない。GSC で `kenshi.ycc@gmail.com` の所有権確認状況を確認 |
+| `/api/search-console` が `source: "mock"`、`note: "GSC 403"` | OAuth ユーザーが該当プロパティの所有者ではない。GSC で `[redacted-private-email]` の所有権確認状況を確認 |
 | init script で `redirect_uri_mismatch` | OAuth クライアントの redirect URI が `http://localhost:8765/oauth2/callback` と完全一致していない |
 | GA4 リアルタイムに自セッションが出ない | (a) ブラウザに広告ブロッカー (b) `NEXT_PUBLIC_GA_MEASUREMENT_ID` が typo (c) ビルドキャッシュにより未反映 → 強制再デプロイ |

@@ -21,11 +21,15 @@ describe("MeetingPrintSheet (A4横印刷レイアウト)", () => {
 
   it("ヘッダー7欄と業者行を表示", () => {
     render(<MeetingPrintSheet record={rec} />);
+    expect(screen.getByText("下書き・未確認版")).toBeTruthy();
     expect(screen.getByText("2026年7月4日")).toBeTruthy();
     expect(screen.getByText("○○ビル新築工事")).toBeTruthy();
     expect(screen.getByText("山田太郎")).toBeTruthy();
     expect(screen.getByText(/打合せ日: 2026-07-03/)).toBeTruthy();
     expect(screen.getByText("○○建設")).toBeTruthy();
+    expect(screen.getByText("同時作業")).toBeTruthy();
+    expect(screen.getByText("化学物質")).toBeTruthy();
+    expect(screen.getByText("役割")).toBeTruthy();
   });
 
   it("editing 未指定ではタップ標的（role=button）が一切出ない", () => {

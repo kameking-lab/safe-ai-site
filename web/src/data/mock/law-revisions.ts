@@ -1,57 +1,39 @@
-import { realLawRevisions } from "@/data/mock/real-law-revisions";
-import { realLawRevisionsExtra } from "@/data/mock/real-law-revisions-extra";
 import { egovLawRevisions } from "@/data/law-revisions/egov-revisions-loaded";
-import { loadRealRevisionsFromPayload, loadSampleRevisions, type RevisionsIngestSource } from "@/lib/revisions-ingest";
 import type { LawRevisionCore } from "@/lib/types/domain";
 
-// 将来の外部データ取込に備え、ingest 済みデータとの統合口を維持する。
-const fallbackLawRevisions: LawRevisionCore[] = [
-  {
-    id: "lr-fallback-001",
-    title: "データ読み込みエラー",
-    publishedAt: "1970-01-01",
-    revisionNumber: "未設定",
-    kind: "notice",
-    category: "通達",
-    issuer: "発出元未設定",
-    summary: "法改正データの読み込みに失敗しました。設定を確認してください。",
-    source: {
-      url: "",
-      label: "参照元",
-    },
-  },
-];
+const YMD = /^\d{4}-\d{2}-\d{2}$/;
 
-export const lawRevisionCores = (() => {
-  const source = toIngestSource(process.env.NEXT_PUBLIC_REVISIONS_INGEST_SOURCE);
-
-  if (source === "real") {
-    const realPayload = process.env.REVISIONS_REAL_SOURCE_PAYLOAD_JSON;
-    if (realPayload) {
-      try {
-        const loadedFromRealPayload = loadRealRevisionsFromPayload(JSON.parse(realPayload));
-        if (loadedFromRealPayload.length > 0) {
-          return loadedFromRealPayload;
-        }
-        return fallbackLawRevisions;
-      } catch {
-        return fallbackLawRevisions;
-      }
-    }
+/**
+ * 公開可能な法改正一覧の最小境界。
+ *
+ * 旧 `real-law-revisions*.ts` と sample payload には、改正番号と説明が一次資料に
+ * 対応しないレコードが複数確認されたため公開統合しない。ここでは e-Gov 法令APIの
+ * 構造データから生成され、法令ID・改正法令番号・日付を持つレコードだけを通す。
+ * URLは現行法令ページであり、改正箇所を支持する個別改正文URLではないことをUIで明示する。
+ */
+export function isPublishableEgovRevision(
+  revision: LawRevisionCore,
+): boolean {
+  if (!revision.id.startsWith("lr-egov-")) return false;
+  if (!YMD.test(revision.publishedAt)) return false;
+  if (!revision.revisionNumber?.trim()) return false;
+  if (!revision.title.trim() || !revision.summary.trim()) return false;
+  const sourceUrl = revision.source_url ?? revision.source?.url ?? "";
+  try {
+    const parsed = new URL(sourceUrl);
+    return (
+      parsed.protocol === "https:" &&
+      parsed.hostname === "laws.e-gov.go.jp" &&
+      parsed.pathname.startsWith("/law/")
+    );
+  } catch {
+    return false;
   }
-
-  // 実データ（厚労省・官報・e-Gov等の公開情報に基づく）を基本とし、
-  // sample revisions（ingest経由）＋ e-Gov法令API自動取込（構造データ）を統合する。
-  const loaded = loadSampleRevisions();
-  const merged = [...loaded, ...egovLawRevisions, ...realLawRevisions, ...realLawRevisionsExtra].sort(
-    (a, b) => b.publishedAt.localeCompare(a.publishedAt),
-  );
-  return merged.length > 0 ? merged : fallbackLawRevisions;
-})();
-
-function toIngestSource(value: string | undefined): RevisionsIngestSource {
-  return value === "real" ? "real" : "sample";
 }
+
+export const lawRevisionCores: LawRevisionCore[] = egovLawRevisions
+  .filter(isPublishableEgovRevision)
+  .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
 
 export function getLawRevisionById(revisionId: string) {
   return lawRevisionCores.find((revision) => revision.id === revisionId) ?? null;

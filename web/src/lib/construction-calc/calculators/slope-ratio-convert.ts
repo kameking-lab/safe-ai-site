@@ -5,7 +5,7 @@
  * - 割 n（1:n、n=水平距離÷垂直距離）→ 角度 θ = atan(1/n)、百分率 = 100/n。
  * - 高低差 H からのすりつけ長（水平距離）L = H × n。
  * - 掘削面の法定上限勾配（地山の種類・高さで区分）は別の基準であり、本計算機では判定しない。
- *   「掘削面の勾配チェック」計算機（excavation-slope・安衛則第356条・第357条）で判定すること。
+ *   必ず一次資料と現場条件を確認する。
  *
  * 計算は決定論的な換算のみ（AIは使わない）。
  */
@@ -58,7 +58,7 @@ function computeSlopeRatioConvert(values: CalcValues): CalcOutcome {
         : `百分率 ${formatNumber(percentValue, 1)}%`;
 
   const warnings: string[] = [
-    "本計算は幾何学的な換算のみです。掘削面の法定上限勾配は地山の種類・掘削面の高さで区分されるため、「掘削面の勾配チェック」計算機（安衛則第356条・第357条）で別途判定してください。",
+    "本計算は幾何学的な換算のみです。掘削面の法定上限勾配は地山の種類・掘削面の高さ等で条件が分かれるため、e-Gov法令検索の現行条文と現場条件を人が確認してください。",
   ];
   if (outAngle >= 45) {
     warnings.push("角度45°（1:1）を超える急勾配です。法面保護・土留め等の措置の要否を確認してください。");
@@ -165,13 +165,13 @@ export const slopeRatioConvertCalculator: ConstructionCalculator = {
     {
       label: "労働安全衛生規則 第356条・第357条（掘削面の勾配の基準）との関係",
       description:
-        "本計算機は勾配表記の換算のみを行います。掘削面の法定上限勾配（地山の種類・掘削面の高さで区分）は「掘削面の勾配チェック」計算機（excavation-slope）で別途判定してください。",
+        "本計算機は勾配表記の換算のみを行い、掘削面の法令適合性は判定しません。一次資料の現行条文と、地山の種類・掘削面の高さ等の現場条件を人が確認してください。",
       lawNaviPath: "/law-navi/347M50002000032/356",
       egovUrl: "https://laws.e-gov.go.jp/law/347M50002000032#Mp-At_356",
     },
   ],
   cautions: [
-    "本計算機は勾配表記の換算のみで、法定上限勾配の適合判定は行いません。掘削面については「掘削面の勾配チェック」計算機で判定してください。",
+    "本計算機は勾配表記の換算のみで、法定上限勾配の適合判定は行いません。掘削面についてはe-Gov法令検索の現行条文と現場条件を人が確認してください。",
     "すりつけ長は高低差と勾配（割n）から求めた水平距離の概算です。実際の取付けは現地の起伏・既存構造物との干渉を確認してください。",
   ],
   examples: [
@@ -192,6 +192,6 @@ export const slopeRatioConvertCalculator: ConstructionCalculator = {
     "すりつけ長",
     "傾斜",
   ],
-  relatedSlugs: ["excavation-slope"],
+  relatedSlugs: [],
   compute: computeSlopeRatioConvert,
 };

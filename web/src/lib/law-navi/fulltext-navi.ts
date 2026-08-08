@@ -7,7 +7,7 @@
  * 表示・URL 生成へ橋渡しする。表示の正本解決順は **fulltext > curated ではなく
  * curated > fulltext**（＝既存 curated 条を正本に据え置き、全文は curated に無い条の
  * ギャップだけを埋める）。これにより:
- *   - 既存 717 URL は 1 件も変わらない（追加のみ・§5-2「既存712 URL は不変」）。
+ *   - 既存 717 URL は 1 件も変えず、確認済み7条を追加する（§5-2「既存URLは不変」）。
  *   - curated 条の表示本文・plain 鮮度・itemNumberMap 等の付加価値が一切後退しない
  *     （plain の sourceTextHash は curated 抄録に対して計算されているため、curated 条を
  *      全文本文へ差し替えると全 stale する。差し替えず据え置くことで stale 増分 0）。

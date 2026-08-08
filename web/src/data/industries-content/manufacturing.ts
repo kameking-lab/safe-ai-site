@@ -332,7 +332,7 @@ export const manufacturingContent: IndustryContent = {
     {
       icon: "⚗️",
       title: "化学物質リスクアセスメント",
-      reason: "CREATE-SIMPLE準拠でリスクレベル算定。化学物質管理者の選任義務に対応",
+      reason: "CAS番号・SDS・作業条件を照合し、公式CREATE-SIMPLEで評価する前の不足情報を確認",
       href: "/chemical-ra",
       cta: "化学物質RAを実施",
     },

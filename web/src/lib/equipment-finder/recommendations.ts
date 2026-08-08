@@ -1,4 +1,8 @@
-import type { EquipmentCategory, RefineAnswers } from "@/config/equipment-categories";
+import type {
+  EquipmentCategory,
+  RefineAnswers,
+} from "@/config/equipment-categories";
+import { EQUIPMENT_CATALOG_QUARANTINED } from "@/lib/equipment-catalog-quarantine";
 import { budgetCap, getItemsByCategory, type EquipmentItem } from "./filters";
 
 export type ScoredItem = EquipmentItem & {
@@ -19,10 +23,10 @@ const HARNESS_SUBCATEGORY_MARKER = "ハーネス";
 /** 形状質問に「問わない」以外が選択されているか（＝フルハーネス固有属性での検索か）。 */
 export function isShapeSelected(
   category: EquipmentCategory,
-  answers: RefineAnswers
+  answers: RefineAnswers,
 ): boolean {
   const hasShapeQuestion = category.refineQuestions.some(
-    (q) => q.id === SHAPE_QUESTION_ID
+    (q) => q.id === SHAPE_QUESTION_ID,
   );
   if (!hasShapeQuestion) return false;
   const ans = answers[SHAPE_QUESTION_ID];
@@ -48,75 +52,83 @@ export function classTier(item: EquipmentItem, shapeSelected: boolean): number {
 export function recommendItems(
   category: EquipmentCategory,
   answers: RefineAnswers,
-  limit = 12
+  limit = 12,
 ): ScoredItem[] {
+  if (EQUIPMENT_CATALOG_QUARANTINED) return [];
   const items = getItemsByCategory(category);
   const shapeSelected = isShapeSelected(category, answers);
-  const scored: Array<{ item: ScoredItem; tier: number }> = items.map((item) => {
-    let score = 0;
-    const matched: string[] = [];
+  const scored: Array<{ item: ScoredItem; tier: number }> = items.map(
+    (item) => {
+      let score = 0;
+      const matched: string[] = [];
 
-    for (const q of category.refineQuestions) {
-      const ans = answers[q.id];
-      if (!ans || ans === "any") continue;
+      for (const q of category.refineQuestions) {
+        const ans = answers[q.id];
+        if (!ans || ans === "any") continue;
 
-      // 予算質問は別ロジック
-      if (q.id === "budget") {
-        const cap = budgetCap(ans);
-        if (cap !== undefined && item.priceMin !== undefined) {
-          if (item.priceMin <= cap) {
-            score += 15;
-            matched.push(`予算: ${ans}`);
+        // 予算質問は別ロジック
+        if (q.id === "budget") {
+          const cap = budgetCap(ans);
+          if (cap !== undefined && item.priceMin !== undefined) {
+            if (item.priceMin <= cap) {
+              score += 15;
+              matched.push(`予算: ${ans}`);
+            }
           }
-        }
-        continue;
-      }
-
-      // 業種質問（useCase で industries 照合する場合がある）
-      const industryMap: Record<string, string> = {
-        construction: "construction",
-        manufacturing: "manufacturing",
-        forestry: "forestry",
-        建設: "construction",
-        製造: "manufacturing",
-        林業: "forestry",
-      };
-      if (q.id === "useCase" && industryMap[ans]) {
-        if (item.industries?.includes(industryMap[ans])) {
-          score += 30;
-          matched.push(`業種: ${ans}`);
           continue;
         }
-      }
 
-      // 文字列マッチ（subCategory・spec・name に含まれるかで判定）
-      const haystack = [item.subCategory, item.spec, item.name, item.recommendReason]
-        .filter(Boolean)
-        .join(" ");
-      if (haystack.includes(ans)) {
-        score += 30;
-        matched.push(`${q.label}: ${ans}`);
-      } else {
-        // 部分一致: 半角/全角や同義語の簡易対応
-        const normalized = ans.replace(/[（）()・/\-\s]/g, "");
-        const normalizedHay = haystack.replace(/[（）()・/\-\s]/g, "");
-        if (normalized && normalizedHay.includes(normalized)) {
-          score += 15;
-          matched.push(`${q.label}: ${ans}（部分一致）`);
+        // 業種質問（useCase で industries 照合する場合がある）
+        const industryMap: Record<string, string> = {
+          construction: "construction",
+          manufacturing: "manufacturing",
+          forestry: "forestry",
+          建設: "construction",
+          製造: "manufacturing",
+          林業: "forestry",
+        };
+        if (q.id === "useCase" && industryMap[ans]) {
+          if (item.industries?.includes(industryMap[ans])) {
+            score += 30;
+            matched.push(`業種: ${ans}`);
+            continue;
+          }
+        }
+
+        // 文字列マッチ（subCategory・spec・name に含まれるかで判定）
+        const haystack = [
+          item.subCategory,
+          item.spec,
+          item.name,
+          item.recommendReason,
+        ]
+          .filter(Boolean)
+          .join(" ");
+        if (haystack.includes(ans)) {
+          score += 30;
+          matched.push(`${q.label}: ${ans}`);
+        } else {
+          // 部分一致: 半角/全角や同義語の簡易対応
+          const normalized = ans.replace(/[（）()・/\-\s]/g, "");
+          const normalizedHay = haystack.replace(/[（）()・/\-\s]/g, "");
+          if (normalized && normalizedHay.includes(normalized)) {
+            score += 15;
+            matched.push(`${q.label}: ${ans}（部分一致）`);
+          }
         }
       }
-    }
 
-    // レビュー高評価
-    if ((item.rating ?? 0) >= 4.5) {
-      score += 10;
-    }
+      // レビュー高評価
+      if ((item.rating ?? 0) >= 4.5) {
+        score += 10;
+      }
 
-    return {
-      item: { ...item, score, matchedAnswers: matched },
-      tier: classTier(item, shapeSelected),
-    };
-  });
+      return {
+        item: { ...item, score, matchedAnswers: matched },
+        tier: classTier(item, shapeSelected),
+      };
+    },
+  );
 
   // クラス優先（形状指定時のみ有効）→ スコア降順 → レビュー数降順 でソート
   scored.sort((a, b) => {

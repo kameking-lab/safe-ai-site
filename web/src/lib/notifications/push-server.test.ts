@@ -1,5 +1,9 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { isMissingTableError, isWebPushConfigured } from "./push-server";
+import {
+  isMissingTableError,
+  isWebPushConfigured,
+  sendPushToSubscription,
+} from "./push-server";
 
 describe("isMissingTableError", () => {
   it("detects PostgREST schema-cache miss (PGRST205)", () => {
@@ -29,11 +33,18 @@ describe("isWebPushConfigured", () => {
     pub: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
     priv: process.env.VAPID_PRIVATE_KEY,
     subj: process.env.VAPID_SUBJECT,
+    enabled: process.env.PUSH_DELIVERY_ENABLED,
   };
   afterEach(() => {
-    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY = ORIG.pub;
-    process.env.VAPID_PRIVATE_KEY = ORIG.priv;
-    process.env.VAPID_SUBJECT = ORIG.subj;
+    for (const [name, value] of [
+      ["NEXT_PUBLIC_VAPID_PUBLIC_KEY", ORIG.pub],
+      ["VAPID_PRIVATE_KEY", ORIG.priv],
+      ["VAPID_SUBJECT", ORIG.subj],
+      ["PUSH_DELIVERY_ENABLED", ORIG.enabled],
+    ] as const) {
+      if (value === undefined) delete process.env[name];
+      else process.env[name] = value;
+    }
   });
 
   it("false when any key is missing", () => {
@@ -50,6 +61,42 @@ describe("isWebPushConfigured", () => {
     process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY = "pub";
     process.env.VAPID_PRIVATE_KEY = "priv";
     process.env.VAPID_SUBJECT = "mailto:test@example.com";
+    process.env.PUSH_DELIVERY_ENABLED = "true";
     expect(isWebPushConfigured()).toBe(true);
+  });
+
+  it("keys alone do not enable delivery without the explicit release flag", () => {
+    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY = "pub";
+    process.env.VAPID_PRIVATE_KEY = "priv";
+    process.env.VAPID_SUBJECT = "mailto:test@example.com";
+    delete process.env.PUSH_DELIVERY_ENABLED;
+    expect(isWebPushConfigured()).toBe(false);
+  });
+});
+
+describe("sendPushToSubscription", () => {
+  it("rejects an unapproved stored endpoint before outbound delivery", async () => {
+    const result = await sendPushToSubscription(
+      {
+        endpoint: "https://127.0.0.1/internal",
+        p256dh: "synthetic-key",
+        auth: "synthetic-auth",
+        prefecture: "JP-13",
+      },
+      {
+        id: "synthetic-notice",
+        category: "weather",
+        title: "Synthetic notification",
+        date: "2026-07-22",
+        severity: "warning",
+      },
+    );
+
+    expect(result).toEqual({
+      ok: false,
+      expired: true,
+      statusCode: null,
+      detail: "invalid_subscription_endpoint",
+    });
   });
 });

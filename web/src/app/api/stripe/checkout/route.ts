@@ -4,12 +4,13 @@
 // 必要な環境変数:
 //   STRIPE_SECRET_KEY    - Stripeシークレットキー
 //   NEXT_PUBLIC_SITE_URL - サイトのベースURL
-//   DATABASE_URL         - 省略可。未設定時はDB保存をスキップ
+//   DATABASE_URL         - 必須。未設定時は決済をfail-closed
 
-import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { isPaidModeReady, resolveStripePlan } from "@/lib/stripe-price-policy";
+import { privateJson, readBoundedJson } from "@/lib/server/cloud-owner";
 
 function getStripe(): Stripe | null {
   const key = process.env.STRIPE_SECRET_KEY;
@@ -18,36 +19,37 @@ function getStripe(): Stripe | null {
 }
 
 export async function POST(req: Request) {
+  if (!isPaidModeReady() || !prisma) {
+    return privateJson({ error: "決済機能は現在ご利用いただけません。" }, 503);
+  }
   const stripe = getStripe();
   if (!stripe) {
-    return NextResponse.json(
-      { error: "決済機能は現在ご利用いただけません。" },
-      { status: 503 },
-    );
+    return privateJson({ error: "決済機能は現在ご利用いただけません。" }, 503);
   }
 
   const session = await auth();
   if (!session?.user) {
-    return NextResponse.json({ error: "ログインが必要です" }, { status: 401 });
+    return privateJson({ error: "ログインが必要です" }, 401);
   }
   const userId = (session.user as { id?: string }).id;
   const email = session.user.email ?? undefined;
   const name = session.user.name ?? undefined;
   if (!userId) {
-    return NextResponse.json({ error: "ユーザーIDを取得できません" }, { status: 401 });
+    return privateJson({ error: "ユーザーIDを取得できません" }, 401);
   }
 
-  const { priceId, planName } = (await req.json()) as {
-    priceId?: string;
-    planName?: string;
-  };
-  if (!priceId) {
-    return NextResponse.json({ error: "priceIdが必要です。" }, { status: 400 });
+  const parsed = await readBoundedJson(req, 8 * 1024);
+  if (!parsed.ok) {
+    return privateJson({ error: "リクエスト形式が不正です。" }, parsed.reason === "payload_too_large" ? 413 : 400);
+  }
+  const { priceId } = parsed.value as { priceId?: unknown };
+  const planName = typeof priceId === "string" ? resolveStripePlan(priceId) : null;
+  if (!planName || typeof priceId !== "string") {
+    return privateJson({ error: "選択されたプランは利用できません。" }, 400);
   }
 
   let customerId: string | undefined;
-  if (prisma) {
-    try {
+  try {
       const sub = await prisma.subscription.findUnique({ where: { userId } });
       if (sub?.stripeCustomerId) {
         customerId = sub.stripeCustomerId;
@@ -69,9 +71,9 @@ export async function POST(req: Request) {
           update: { stripeCustomerId: customerId },
         });
       }
-    } catch (err) {
-      console.error("[stripe/checkout] customer mapping failed", err);
-    }
+  } catch {
+    console.error("[stripe/checkout] customer mapping failed");
+    return privateJson({ error: "決済の準備に失敗しました。時間をおいて再試行してください。" }, 503);
   }
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
@@ -86,15 +88,14 @@ export async function POST(req: Request) {
       success_url: `${siteUrl}/pricing/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${siteUrl}/pricing`,
       locale: "ja",
-      metadata: { userId, planName: planName ?? "" },
+      metadata: { userId, planName },
       subscription_data: {
-        metadata: { userId, planName: planName ?? "" },
+        metadata: { userId, planName },
       },
     });
 
-    return NextResponse.json({ url: checkoutSession.url });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "決済セッションの作成に失敗しました。";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return privateJson({ url: checkoutSession.url });
+  } catch {
+    return privateJson({ error: "決済セッションの作成に失敗しました。" }, 502);
   }
 }

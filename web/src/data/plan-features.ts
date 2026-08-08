@@ -71,7 +71,7 @@ export const FEATURE_MATRIX: FeatureCategory[] = [
       {
         labelJa: "気象リスク通知",
         labelEn: "Weather risk alert",
-        values: { free: "1地域", standard: true, pro: true, business: true, custom: true },
+        values: { free: "画面表示", standard: "メール準備中", pro: "メール準備中", business: "メール準備中", custom: "要相談" },
       },
     ],
   },

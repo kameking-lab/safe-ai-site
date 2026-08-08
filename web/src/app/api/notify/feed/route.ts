@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PREFECTURE_CENTROIDS } from "@/data/jma/prefecture-centroids";
 import { getJmaWarningsRuntime } from "@/lib/jma/fetch-jma-runtime";
+import { isCurrentJmaWarningRegion } from "@/lib/jma/jma-region-trust";
 import { buildNewsHubItems } from "@/lib/news-hub";
 import { buildWeatherNotifications } from "@/lib/notifications/weather-notifications";
 import type { NotificationFeedResponse, SiteNotification } from "@/lib/notifications/feed-types";
@@ -30,11 +31,25 @@ export async function GET(req: NextRequest) {
   const prefectureIso = isValidIso(prefParam) ? prefParam : null;
 
   const items: SiteNotification[] = [];
+  let weatherSource: NotificationFeedResponse["weatherSource"] = {
+    status: prefectureIso ? "unavailable" : "not-requested",
+    fetchedAt: null,
+    sourceUrl: "https://www.jma.go.jp/bosai/warning/",
+  };
 
   // 1) 気象警報（対象都道府県のみ。注意報以上を通知にする）。判定は閉端末Pushと共通。
   if (prefectureIso) {
     try {
       const warnings = await getJmaWarningsRuntime();
+      const regionIsCurrent = isCurrentJmaWarningRegion(
+        warnings,
+        prefectureIso,
+      );
+      weatherSource = {
+        status: regionIsCurrent ? "live" : "degraded",
+        fetchedAt: warnings.byIso[prefectureIso]?.sourceFetchedAt ?? warnings.fetchedAt,
+        sourceUrl: "https://www.jma.go.jp/bosai/warning/",
+      };
       items.push(...buildWeatherNotifications(prefectureIso, warnings));
     } catch {
       // 気象データ取得失敗時は気象分を欠いたフィードを返す（新着分は生きる）
@@ -61,6 +76,7 @@ export async function GET(req: NextRequest) {
   const body: NotificationFeedResponse = {
     generatedAt: new Date().toISOString(),
     prefectureIso,
+    weatherSource,
     items,
   };
 

@@ -5,7 +5,8 @@ export const metadata: Metadata = {
   alternates: { canonical: "/features/comparison" },
   title: "他の方法との比較 | 機能紹介",
   description:
-    "安全AIポータルと従来の安全管理ソフト・紙ベース運用を、機能・コスト・運用負荷で比較します。事実ベースで公平に整理しています。",
+    "比較表の提供状態と根拠を再検証しています。調達・法令対応の判断には利用せず、各機能の状態表示を確認してください。",
+  robots: { index: false, follow: true },
 };
 
 type Method = "anzen" | "legacy" | "paper";
@@ -22,7 +23,7 @@ const COMPARISON_ROWS: Row[] = [
     category: "導入",
     item: "初期導入コスト",
     values: {
-      anzen: "クラウド型のため低コスト",
+      anzen: "公開機能は無料。受託・相談は個別料金",
       legacy: "サーバ・ライセンス費用がかかる",
       paper: "用紙・ファイル等の物品費のみ",
     },
@@ -31,7 +32,7 @@ const COMPARISON_ROWS: Row[] = [
     category: "導入",
     item: "セットアップ期間",
     values: {
-      anzen: "アカウント発行で即日利用可",
+      anzen: "公開機能はアカウント不要。認証・組織導入機能は未提供",
       legacy: "数週間〜数ヶ月",
       paper: "即日（運用ルール整備が必要）",
     },
@@ -49,7 +50,7 @@ const COMPARISON_ROWS: Row[] = [
     category: "機能",
     item: "AIアシスタント",
     values: {
-      anzen: "○ 安衛法・通達を学習したAI",
+      anzen: "△ 検証済み収録資料の根拠候補を表示。生成法令回答は停止中",
       legacy: "△ 製品により搭載／非搭載",
       paper: "× 人手のみ",
     },
@@ -58,7 +59,7 @@ const COMPARISON_ROWS: Row[] = [
     category: "機能",
     item: "化学物質RA（改正安衛法対応）",
     values: {
-      anzen: "○ SDS取込〜記録保管まで一貫",
+      anzen: "△ 名称・CAS・作業条件の簡易整理。SDS自動取込・確定評価は未提供",
       legacy: "△ 専用製品があれば対応",
       paper: "△ Excel + 手作業",
     },
@@ -67,7 +68,7 @@ const COMPARISON_ROWS: Row[] = [
     category: "機能",
     item: "事故事例DB（厚労省データ）",
     values: {
-      anzen: "○ 検索・横断分析",
+      anzen: "△ サイト内候補検索と公式DBへの引継ぎ。架空の学習例は明示",
       legacy: "△ 製品により付属",
       paper: "× 都度収集",
     },
@@ -76,7 +77,7 @@ const COMPARISON_ROWS: Row[] = [
     category: "機能",
     item: "Eラーニング・特別教育",
     values: {
-      anzen: "○ 業種別カリキュラム + 修了証",
+      anzen: "△ 自習用HTML教材と理解度確認。修了証・正式教育記録は未提供",
       legacy: "別途LMS製品が必要",
       paper: "集合研修・テキスト配布",
     },
@@ -85,7 +86,7 @@ const COMPARISON_ROWS: Row[] = [
     category: "現場運用",
     item: "KY記録",
     values: {
-      anzen: "スマホで音声入力 + 署名 + PDF",
+      anzen: "スマホ入力・ブラウザ下書き・状態表示つき印刷。本人署名認証は未提供",
       legacy: "PC入力中心、現場往復が発生",
       paper: "手書き・押印・ファイリング",
     },
@@ -94,7 +95,7 @@ const COMPARISON_ROWS: Row[] = [
     category: "現場運用",
     item: "サイネージ表示",
     values: {
-      anzen: "○ 自動巡回・気象連動",
+      anzen: "△ 選択地域の公開気象データを表示。取得不能は縮退表示",
       legacy: "△ 別ツールで連携",
       paper: "ホワイトボード・掲示物",
     },
@@ -103,7 +104,7 @@ const COMPARISON_ROWS: Row[] = [
     category: "現場運用",
     item: "多拠点・多店舗管理",
     values: {
-      anzen: "LMSで一元管理",
+      anzen: "× 組織LMS・多拠点クラウド集計は未提供",
       legacy: "拠点別ライセンス管理が必要",
       paper: "拠点ごとに独立、本部での集計が困難",
     },
@@ -112,7 +113,7 @@ const COMPARISON_ROWS: Row[] = [
     category: "コンプライアンス",
     item: "法改正への追従",
     values: {
-      anzen: "通達・改正を即時反映",
+      anzen: "△ 収録時点と確認状態を表示。即時・完全反映は保証しない",
       legacy: "バージョンアップ待ち",
       paper: "担当者による情報収集次第",
     },
@@ -121,7 +122,7 @@ const COMPARISON_ROWS: Row[] = [
     category: "コンプライアンス",
     item: "監査・労基対応の記録性",
     values: {
-      anzen: "ログ・PDF出力で証跡化",
+      anzen: "△ 状態つき印刷・ローカル記録。認証付き監査ログは未提供",
       legacy: "○ 製品仕様による",
       paper: "原本保管、検索性が低い",
     },
@@ -130,7 +131,7 @@ const COMPARISON_ROWS: Row[] = [
     category: "コスト",
     item: "ランニングコスト",
     values: {
-      anzen: "サブスク（事業所規模で従量／定額）",
+      anzen: "公開機能は無料。業務自動化・研修等は税込料金を別ページに明示",
       legacy: "保守料 + バージョンアップ費",
       paper: "用紙・印刷・保管スペース",
     },
@@ -139,7 +140,7 @@ const COMPARISON_ROWS: Row[] = [
     category: "コスト",
     item: "運用工数",
     values: {
-      anzen: "デジタル完結で工数削減",
+      anzen: "入力整理を支援。工数削減は保証せず、人手確認が必要",
       legacy: "システム管理者が必要",
       paper: "記録・保管・集計に常時工数",
     },
@@ -148,7 +149,7 @@ const COMPARISON_ROWS: Row[] = [
     category: "サポート",
     item: "コンサル相談",
     values: {
-      anzen: "労働安全コンサルタントが直接対応",
+      anzen: "相談受付は環境設定に連動。準備中はフォームを表示しない",
       legacy: "別途コンサル契約が必要",
       paper: "顧問契約・スポット相談を別途",
     },
@@ -158,7 +159,7 @@ const COMPARISON_ROWS: Row[] = [
 const METHOD_META: Record<Method, { label: string; sub: string; accent: string }> = {
   anzen: {
     label: "安全AIポータル",
-    sub: "クラウド型・AI搭載",
+    sub: "公開Webポータル・補助機能",
     accent: "from-emerald-500 to-emerald-700",
   },
   legacy: {
@@ -197,12 +198,22 @@ export default function ComparisonPage() {
         </h1>
         <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-slate-600 sm:text-base">
           安全AIポータルと従来の安全管理ソフト・紙ベース運用を、機能とコストの観点で並べました。
-          特定製品名は出さず、事実ベースで整理しています。検討材料としてお使いください。
+          特定製品名は出さず、現在確認できた提供状態を限定的に整理しています。
         </p>
         <p className="mx-auto mt-2 max-w-2xl text-xs text-slate-500">
-          ※ 各製品・運用形態にメリット・デメリットがあり、業種規模や既存資産により最適解は異なります。本ページは一般的な傾向を示すものです。
+          ※ 各製品・運用形態の仕様や料金は個別に確認が必要です。本ページだけで選定・法令判断・費用対効果の判断をしないでください。
         </p>
       </header>
+
+      <aside
+        className="mx-auto mt-6 max-w-4xl rounded-2xl border-2 border-amber-400 bg-amber-50 p-4 text-sm leading-relaxed text-amber-950"
+        aria-label="比較表の検証状態"
+      >
+        <p className="font-bold">比較内容の根拠と提供状態を再検証中です</p>
+        <p className="mt-1">
+          本表は調達判断、効果保証、法令適合の証明ではありません。認証・クラウド同期・正式な教育記録・修了証・SDS自動取込・監査ログ・実相談受付を、未提供のまま利用可能とは表示しません。
+        </p>
+      </aside>
 
       {/* 列ヘッダ */}
       <section className="mx-auto mt-8 max-w-6xl">
@@ -286,12 +297,12 @@ export default function ComparisonPage() {
         <h2 className="text-lg font-bold text-slate-900 sm:text-xl">どれを選べばよいか</h2>
         <div className="mt-3 grid grid-cols-1 gap-4 md:grid-cols-3">
           <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-            <p className="text-sm font-bold text-emerald-800">安全AIポータルが向く場合</p>
+            <p className="text-sm font-bold text-emerald-800">公開Web機能の試用が向く場合</p>
             <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-emerald-900">
-              <li>多拠点・多店舗で安全管理を一元化したい</li>
-              <li>改正安衛法対応の化学物質RAが必要</li>
-              <li>現場でスマホ完結のKYを回したい</li>
-              <li>労働安全コンサルタント監修のツールが欲しい</li>
+              <li>アカウントなしで公開情報と状態表示を確認したい</li>
+              <li>KY・工程書の入力と下書き印刷を端末内で試したい</li>
+              <li>法令・事故・化学物質の公式確認先を探したい</li>
+              <li>クラウド一元管理や正式記録を前提としない</li>
             </ul>
           </div>
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
@@ -306,11 +317,11 @@ export default function ComparisonPage() {
             <p className="text-sm font-bold text-amber-800">紙ベースが向く場合</p>
             <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-amber-900">
               <li>従業員数が少なく機材を増やせない</li>
-              <li>法令上の最低限の記録だけで十分</li>
+              <li>承認済みの紙様式・押印・原本保管が必要</li>
               <li>デジタル投資の意思決定が難しい</li>
             </ul>
             <p className="mt-2 text-[11px] text-amber-700">
-              ※ いずれは少しずつデジタル化する前提が望ましい。
+              ※ 法定保存・承認・個人情報管理の要件に合う方式を選んでください。
             </p>
           </div>
         </div>

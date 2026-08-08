@@ -1,7 +1,9 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import {
   __resetChatbotCacheForTests,
+  CHATBOT_CACHE_SCHEMA_VERSION,
   cacheKey,
+  chatbotAnswerDateJst,
   getCacheStats,
   getCachedResponse,
   normalizeChatbotQuery,
@@ -27,13 +29,50 @@ describe("normalizeChatbotQuery", () => {
   });
 
   it("produces identical keys for equivalent questions", () => {
-    const a = cacheKey("高所作業の資格は？ ", "all");
-    const b = cacheKey("　高所作業の資格は？", "all");
+    const now = new Date("2026-08-02T03:00:00Z");
+    const a = cacheKey("高所作業の資格は？ ", "all", now, "source-a");
+    const b = cacheKey("　高所作業の資格は？", "all", now, "source-a");
     expect(a).toBe(b);
   });
 
+  it("does not retain the normalized question text in the process-local key", () => {
+    const question = "足場の手すり高さは？";
+    const key = cacheKey(
+      question,
+      "all",
+      new Date("2026-08-02T03:00:00Z"),
+      "source-a",
+    );
+
+    expect(key).not.toContain(question);
+    expect(key).not.toContain(normalizeChatbotQuery(question));
+  });
+
   it("keeps law category as part of the key", () => {
-    expect(cacheKey("Q", "all")).not.toBe(cacheKey("Q", "anzen"));
+    const now = new Date("2026-08-02T03:00:00Z");
+    expect(cacheKey("Q", "all", now)).not.toBe(
+      cacheKey("Q", "anzen", now),
+    );
+  });
+
+  it("rotates at JST midnight even while the 24-hour entry remains live", () => {
+    const beforeMidnight = new Date("2026-08-02T14:59:59.999Z");
+    const afterMidnight = new Date("2026-08-02T15:00:00.000Z");
+
+    expect(chatbotAnswerDateJst(beforeMidnight)).toBe("2026-08-02");
+    expect(chatbotAnswerDateJst(afterMidnight)).toBe("2026-08-03");
+    expect(cacheKey("同じ質問", "all", beforeMidnight, "source-a")).not.toBe(
+      cacheKey("同じ質問", "all", afterMidnight, "source-a"),
+    );
+  });
+
+  it("separates schema and verified-source generations", () => {
+    const now = new Date("2026-08-02T03:00:00Z");
+    const current = cacheKey("同じ質問", "all", now, "source-b");
+
+    expect(current).toContain(CHATBOT_CACHE_SCHEMA_VERSION);
+    expect(current).not.toContain("evidence-v2");
+    expect(current).not.toBe(cacheKey("同じ質問", "all", now, "source-a"));
   });
 });
 

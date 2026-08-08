@@ -75,7 +75,7 @@ async function probeOne(tc: GenQualityCase): Promise<{ status: number; resp: Gen
     res = await fetch(`${BASE_URL}/api/chatbot`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: tc.question }),
+      body: JSON.stringify({ message: tc.question, privacyConfirmed: true }),
     });
     if (res.status !== 429 || attempt >= RATE_LIMIT_RETRIES) break;
     // IPレート制限: Retry-After（秒）を待ってから1回だけ再試行
@@ -91,10 +91,28 @@ async function probeOne(tc: GenQualityCase): Promise<{ status: number; resp: Gen
       confidence: body.confidence,
       confidenceScore: body.confidenceScore,
       source_type: body.source_type,
-      sources: (body.sources ?? []).map((s) => ({ law: s.law, article: s.article })),
+      sources: (body.sources ?? []).map((s) => ({
+        law: s.law,
+        article: s.article,
+        text: s.text,
+        snippet: s.snippet,
+        fullText: s.fullText,
+        url: s.url,
+        verificationStatus: s.verificationStatus,
+        sourceKind: s.sourceKind,
+        sourceFetchedAt: s.sourceFetchedAt,
+        humanReviewStatus: s.humanReviewStatus,
+      })),
       citations: (body.citations ?? []).map((c) => ({
         lawShort: c.lawShort,
         articleNum: c.articleNum,
+      })),
+      attachedNotices: (body.attachedNotices ?? []).map((notice) => ({
+        id: notice.id,
+        title: notice.title,
+        noticeNumber: notice.noticeNumber,
+        detailUrl: notice.detailUrl,
+        source: notice.source,
       })),
       scopeWarnings: body.scopeWarnings,
     },

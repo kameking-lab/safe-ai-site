@@ -44,26 +44,29 @@ describe("FT-D3 SEO ゲート: 付加価値条件の判定", () => {
     const thin = makeFulltextOnlyEntry({});
     const r = assessValueAdd(thin);
     expect(r.curated).toBe(false);
+    expect(r.primarySourceVerified).toBe(false);
     expect(r.signals).toEqual([]);
     expect(r.indexable).toBe(false);
     expect(isIndexableLawNaviEntry(thin)).toBe(false);
   });
 
-  it("(c) 号マップ注釈がある fulltext 由来条は index へ自動昇格する", () => {
+  it("(c) 号マップ注釈だけでは一次資料完全性がないため昇格しない", () => {
     const withItemMap = makeFulltextOnlyEntry({ itemNumberMap: { 一: "テスト対象業務" } });
     const r = assessValueAdd(withItemMap);
     expect(r.signals).toContain("itemNumberMap");
-    expect(r.indexable).toBe(true);
+    expect(r.primarySourceVerified).toBe(false);
+    expect(r.indexable).toBe(false);
   });
 
-  it("(c) 用語集にマッチする本文の fulltext 由来条は index へ自動昇格する", () => {
+  it("(c) 用語集一致だけでは一次資料完全性がないため昇格しない", () => {
     // 用語集 EXTRA_TERMS に確実に載る語「定期自主検査」を含む本文（現場ことば版・分野・号なし）。
     const withGlossary = makeFulltextOnlyEntry({
       text: "事業者は、定期自主検査を行わなければならない。",
     });
     const r = assessValueAdd(withGlossary);
     expect(r.signals).toContain("glossary");
-    expect(r.indexable).toBe(true);
+    expect(r.primarySourceVerified).toBe(false);
+    expect(r.indexable).toBe(false);
   });
 
   it("空 itemNumberMap（{}）は付加価値シグナルとして数えない", () => {
@@ -73,14 +76,20 @@ describe("FT-D3 SEO ゲート: 付加価値条件の判定", () => {
   });
 });
 
-describe("FT-D3 SEO ゲート: 既収載 curated の後退防止（§5-3 末尾）", () => {
-  it("既存 LAW_NAVI_ENTRIES は全て curated 由来＝全件収載を維持（後退0）", () => {
-    // 現状は生成集合＝curated 由来のみ。1件でも indexable=false になったら既収載が後退する。
+describe("FT-D3 SEO ゲート: curatedを検証済みと推定しない", () => {
+  it("一次資料hash未検証のcurated条をnoindexへ落とす", () => {
     const dropped = LAW_NAVI_ENTRIES.filter((e) => !isIndexableLawNaviEntry(e));
+    expect(dropped.length).toBeGreaterThan(0);
+    expect(INDEXABLE_LAW_NAVI_ENTRIES.length).toBeLessThan(
+      LAW_NAVI_ENTRIES.length,
+    );
     expect(
-      dropped.map((e) => `${e.article.lawShort} ${e.article.articleNum}`),
-    ).toEqual([]);
-    expect(INDEXABLE_LAW_NAVI_ENTRIES.length).toBe(LAW_NAVI_ENTRIES.length);
+      INDEXABLE_LAW_NAVI_ENTRIES.every(
+        (entry) =>
+          assessValueAdd(entry).primarySourceVerified &&
+          assessValueAdd(entry).signals.length > 0,
+      ),
+    ).toBe(true);
   });
 
   it("収載集合は生成集合の部分集合＝幽霊URL0（載る条は全て解決する）", () => {
@@ -90,16 +99,14 @@ describe("FT-D3 SEO ゲート: 既収載 curated の後退防止（§5-3 末尾�
     }
   });
 
-  it("付加価値シグナルが空でも curated 由来なら grandfather で収載する", () => {
-    // 実データに「シグナル0だが curated 由来」の条が存在すること自体を固定し、
-    // grandfather 分岐が実際に効いていること（＝curated 判定が常時 true の飾りでない）を担保。
-    const grandfathered = LAW_NAVI_ENTRIES.filter((e) => {
+  it("付加価値シグナルがあっても一次資料hash未検証なら収載しない", () => {
+    const unverifiedValueAdded = LAW_NAVI_ENTRIES.filter((e) => {
       const r = assessValueAdd(e);
-      return r.curated && r.signals.length === 0;
+      return r.curated && !r.primarySourceVerified && r.signals.length > 0;
     });
-    expect(grandfathered.length).toBeGreaterThan(0);
-    for (const e of grandfathered) {
-      expect(isIndexableLawNaviEntry(e)).toBe(true);
+    expect(unverifiedValueAdded.length).toBeGreaterThan(0);
+    for (const e of unverifiedValueAdded) {
+      expect(isIndexableLawNaviEntry(e)).toBe(false);
     }
   });
 });

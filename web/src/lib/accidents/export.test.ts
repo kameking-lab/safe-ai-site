@@ -20,8 +20,8 @@ describe("accidentsSummaryToCsv", () => {
   it("集計値を改変せずそのまま出力する（捏造・水増しなし）", () => {
     const csv = accidentsSummaryToCsv(FIXTURE);
     expect(csv).toContain("総収録件数,1234");
-    expect(csv).toContain("厚労省データ（件）,900");
-    expect(csv).toContain("curated詳細事例（件）,300");
+    expect(csv).toContain("一次資料照合済み個票（件）,900");
+    expect(csv).toContain("curated事例・一次資料未照合を含む（件）,300");
     expect(csv).toContain("想定例・速報基準（件）,20");
     expect(csv).toContain("合成（件）,14");
     expect(csv).toContain("墜落,500");
@@ -42,13 +42,14 @@ describe("accidentsSummaryToText", () => {
   it("総収録件数・内訳・事故の型TOP3を含む", () => {
     const text = accidentsSummaryToText(FIXTURE);
     expect(text).toContain("総収録件数：1,234件");
-    expect(text).toContain("厚労省 900件");
-    expect(text).toContain("curated 300件");
+    expect(text).toContain("一次資料照合済み個票 900件");
+    expect(text).toContain("curated（一次資料未照合を含む） 300件");
     expect(text).toContain("想定例(速報基準) 20件");
     expect(text).toContain("合成 14件");
     expect(text).toContain("1.墜落(500件)");
     expect(text).toContain("2.転倒(300件)");
     expect(text).toContain("3.はさまれ・巻き込まれ(200件)");
+    expect(text).toContain("公式個票の正本ではありません");
   });
 
   it("TOP3のみ（4件目以降は含まない）", () => {

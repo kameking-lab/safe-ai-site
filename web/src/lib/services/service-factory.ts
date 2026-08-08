@@ -37,13 +37,23 @@ export type AppServices = {
 };
 
 function resolveApiMode(): ApiMode {
-  // 将来、NEXT_PUBLIC_API_MODE=live で本番接続へ切替できる設計。
-  return process.env.NEXT_PUBLIC_API_MODE === "live" ? "live" : "mock";
+  if (process.env.NEXT_PUBLIC_API_MODE === "live") return "live";
+  if (
+    process.env.NEXT_PUBLIC_API_MODE === "mock" &&
+    process.env.NODE_ENV !== "production"
+  ) {
+    return "mock";
+  }
+  // 本番の未設定をsyntheticデータへfail-openさせない。
+  return process.env.NODE_ENV === "production" ? "live" : "mock";
 }
 
 function resolveWeatherMode(defaultMode: ApiMode): ApiMode {
   const override = process.env.NEXT_PUBLIC_WEATHER_API_MODE;
-  if (override === "live" || override === "mock") {
+  if (
+    override === "live" ||
+    (override === "mock" && process.env.NODE_ENV !== "production")
+  ) {
     return override;
   }
   return defaultMode;
@@ -64,8 +74,10 @@ function toForceErrorTransport(value: string | null | undefined): ForceErrorTran
 }
 
 export function createServices(mode: ApiMode = resolveApiMode()): AppServices {
+  const effectiveMode: ApiMode =
+    process.env.NODE_ENV === "production" && mode === "mock" ? "live" : mode;
   const resolveErrorInjectionOptions = (): ServiceErrorInjectionOptions => {
-    if (typeof window === "undefined") {
+    if (typeof window === "undefined" || process.env.NODE_ENV === "production") {
       return {};
     }
     const current = new URL(window.location.href);
@@ -86,23 +98,6 @@ export function createServices(mode: ApiMode = resolveApiMode()): AppServices {
     };
   };
 
-  const resolveIngestOptions = () => {
-    if (typeof window === "undefined") {
-      return {
-        ingestSource: undefined as "sample" | "real" | undefined,
-        realSourcePayload: undefined as string | undefined,
-      };
-    }
-    const current = new URL(window.location.href);
-    const ingestSource = current.searchParams.get("ingestSource");
-    return {
-      ingestSource: ingestSource === "real" ? "real" : ingestSource === "sample" ? "sample" : undefined,
-      realSourcePayload: current.searchParams.get("realSourcePayload") ?? undefined,
-      realSourceFormat: current.searchParams.get("realSourceFormat") ?? undefined,
-      realSourceUrl: current.searchParams.get("realSourceUrl") ?? undefined,
-    };
-  };
-
   const scopedFetch: typeof fetch = (input, init) => {
     if (typeof window === "undefined") {
       return fetch(input, init);
@@ -115,7 +110,6 @@ export function createServices(mode: ApiMode = resolveApiMode()): AppServices {
           : new URL(input.url);
 
     const options = resolveErrorInjectionOptions();
-    const ingestOptions = resolveIngestOptions();
     const sharedForceError = options.envForceError;
     const useHeaderTransport = options.useHeaderTransport === true;
     const nextHeaders = new Headers(init?.headers);
@@ -156,21 +150,6 @@ export function createServices(mode: ApiMode = resolveApiMode()): AppServices {
     if (passThroughRevisionsDelay && url.pathname === "/api/revisions") {
       url.searchParams.set("delayMs", passThroughRevisionsDelay);
     }
-    if (url.pathname === "/api/revisions") {
-      if (ingestOptions.ingestSource) {
-        url.searchParams.set("ingestSource", ingestOptions.ingestSource);
-      }
-      if (ingestOptions.realSourcePayload) {
-        url.searchParams.set("realSourcePayload", ingestOptions.realSourcePayload);
-      }
-      if (ingestOptions.realSourceFormat) {
-        url.searchParams.set("realSourceFormat", ingestOptions.realSourceFormat);
-      }
-      if (ingestOptions.realSourceUrl) {
-        url.searchParams.set("realSourceUrl", ingestOptions.realSourceUrl);
-      }
-    }
-
     return fetch(url.toString(), {
       ...init,
       headers: nextHeaders,
@@ -178,14 +157,14 @@ export function createServices(mode: ApiMode = resolveApiMode()): AppServices {
   };
 
   const revision =
-    mode === "live" ? createApiRevisionService(scopedFetch) : createMockRevisionService();
-  const summary = mode === "live" ? createApiSummaryService(scopedFetch) : createMockSummaryService();
-  const chat = mode === "live" ? createApiChatService(scopedFetch) : createMockChatService();
-  const weatherMode = resolveWeatherMode(mode);
+    effectiveMode === "live" ? createApiRevisionService(scopedFetch) : createMockRevisionService();
+  const summary = effectiveMode === "live" ? createApiSummaryService(scopedFetch) : createMockSummaryService();
+  const chat = effectiveMode === "live" ? createApiChatService(scopedFetch) : createMockChatService();
+  const weatherMode = resolveWeatherMode(effectiveMode);
   const weatherRisk =
     weatherMode === "live" ? createApiWeatherRiskService(scopedFetch) : createMockWeatherRiskService();
   const accident = createMockAccidentService();
   const operations = createOperationsService();
 
-  return { mode, revision, summary, chat, weatherRisk, accident, operations };
+  return { mode: effectiveMode, revision, summary, chat, weatherRisk, accident, operations };
 }

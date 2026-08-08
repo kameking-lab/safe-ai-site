@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   filterSeriousCases,
+  filterSeriousCasesPage,
   getSeriousCaseFilters,
   getSeriousCaseById,
   findSimilarSeriousCases,
@@ -8,10 +9,15 @@ import {
   SERIOUS_CASES_META,
 } from "@/lib/accident-news/serious-cases";
 
-describe("P0-1 重大災害事例ブラウザ（匿名・出典付き）", () => {
-  it("メタは出典（あんぜんサイト）と件数を持つ", () => {
+describe("P0-1 重大災害事例ブラウザ（匿名・データセット出典）", () => {
+  it("メタは公式データセットURL・対象年・生成日時・追跡限界を持つ", () => {
     expect(SERIOUS_CASES_META.total).toBeGreaterThan(0);
-    expect(SERIOUS_CASES_META.sourceUrl).toMatch(/anzeninfo\.mhlw\.go\.jp/);
+    expect(SERIOUS_CASES_META.sourceUrl).toBe(
+      "https://anzeninfo.mhlw.go.jp/anzen_pg/SIB_FND.html",
+    );
+    expect(SERIOUS_CASES_META.years).toEqual([2019, 2020, 2021, 2022, 2023]);
+    expect(SERIOUS_CASES_META.generatedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+    expect(SERIOUS_CASES_META.traceability).toBe("dataset-only");
   });
 
   it("フィルタ選択肢（業種/事故型/年）を件数付きで返す", () => {
@@ -60,6 +66,16 @@ describe("P0-1 重大災害事例ブラウザ（匿名・出典付き）", () =>
       expect(cases[i - 1].year >= cases[i].year).toBe(true);
     }
   });
+
+  it("SSRページングでも総件数を保持し、隣接ページを重複させない", () => {
+    const first = filterSeriousCasesPage({ limit: 30, offset: 0 });
+    const second = filterSeriousCasesPage({ limit: 30, offset: 30 });
+    expect(first.total).toBe(SERIOUS_CASES_META.total);
+    expect(first.cases).toHaveLength(30);
+    expect(second.cases).toHaveLength(30);
+    const firstIds = new Set(first.cases.map((item) => item.id));
+    expect(second.cases.some((item) => firstIds.has(item.id))).toBe(false);
+  });
 });
 
 describe("P2-2 類似事例サジェスト・補助", () => {
@@ -72,7 +88,7 @@ describe("P2-2 類似事例サジェスト・補助", () => {
     expect(similar.length).toBeGreaterThan(0);
     // seed自身は含まない
     expect(similar.every((c) => c.id !== seed.id)).toBe(true);
-    // 型・業種・原因のいずれかが一致（スコア0は除外される設計）
+    // 型・業種・起因物分類のいずれかが一致（スコア0は除外される設計）
     expect(
       similar.every(
         (c) => c.type === seed.type || c.industry === seed.industry || c.cause === seed.cause,

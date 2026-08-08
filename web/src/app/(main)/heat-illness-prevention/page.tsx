@@ -1,376 +1,281 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import {
-  Thermometer,
-  Sun,
-  ShieldAlert,
-  ListChecks,
-  AlertCircle,
-  Building2,
-  FileText,
-  ClipboardCheck,
-  CalendarCheck,
-  Megaphone,
-  ExternalLink,
-} from "lucide-react";
-import { PageContainer } from "@/components/layout";
-import { PageHeader } from "@/components/page-header";
-import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
+import { AutomationConsultCta } from "@/components/automation/automation-consult-cta";
 import { PageJsonLd } from "@/components/page-json-ld";
-import { JsonLd } from "@/components/json-ld";
+import { PageContainer } from "@/components/layout";
+import { UsageNotesLink } from "@/components/usage-notes-link";
+import { HEAT_PRIMARY_LINKS } from "@/data/heat-illness-campaign";
+import { getAutomationConsultAvailability } from "@/lib/automation-consult/availability";
 import { ogImageUrl } from "@/lib/og-url";
-import { INDUSTRY_HEAT_RULES, R7_EFFECTIVE_FROM, R7_EFFECTIVE_FROM_JP, R7_SOURCES } from "@/data/heat-illness-rules";
+import { withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
 
-const _title =
-  "熱中症対策ハブ｜WBGT計算機・業種別リスク判定・R7安衛則改正チェックリスト";
-const _desc =
-  "熱中症 安衛則612条の2（R7.6.1施行）完全対応 — 職場・建設現場の熱中症対策に必要なWBGT計算機・10業種別暑熱リスク判定・R7改正コンプライアンスチェックリスト・社内文書テンプレートをまとめて提供します。";
+const PAGE_PATH = "/heat-illness-prevention";
+const TITLE = "職場の熱中症対策・予防｜WBGT・KY・教育・緊急対応";
+const DESCRIPTION =
+  "地域を選び、WBGTと警戒状態を確認して、今日の休憩・水分・KYへ進める職場向け熱中症対策ページです。";
 
 export const metadata: Metadata = {
-  title: _title,
-  description: _desc,
-  alternates: { canonical: "/heat-illness-prevention" },
-  openGraph: {
-    title: _title,
-    description: _desc,
+  title: TITLE,
+  description: DESCRIPTION,
+  alternates: { canonical: PAGE_PATH },
+  openGraph: withSiteOpenGraph(PAGE_PATH, {
+    title: TITLE,
+    description: DESCRIPTION,
     type: "website",
-    images: [{ url: ogImageUrl(_title, _desc), width: 1200, height: 630 }],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: _title,
-    description: _desc,
-    images: [ogImageUrl(_title, _desc)],
-  },
+    images: [
+      {
+        url: ogImageUrl("職場の熱中症対策", "WBGT・KY・教育・緊急対応"),
+        width: 1200,
+        height: 630,
+      },
+    ],
+  }),
+  twitter: withSiteTwitter({
+    title: TITLE,
+    description: DESCRIPTION,
+    images: [ogImageUrl("職場の熱中症対策", "WBGT・KY・教育・緊急対応")],
+  }),
+  robots: { index: false, follow: true },
 };
 
-const FRAMEWORK_STEPS = [
-  {
-    no: 1,
-    title: "暑熱環境の見える化",
-    body: "WBGT測定器（または推計値）で作業現場のWBGTを把握。1時間ごと、超過時は30分ごとに記録します。",
-  },
-  {
-    no: 2,
-    title: "リスクレベル判定と作業調整",
-    body: "JSOH/厚労省基準により4段階（注意／警戒／厳重警戒／危険）に分類し、休憩時間・水分補給・作業中止を判断します。",
-  },
-  {
-    no: 3,
-    title: "暑熱順化と教育",
-    body: "新規入場者・復帰者は7日以上かけて段階的に負荷を上げます。年1回以上の熱中症予防教育を全員に実施します。",
-  },
-  {
-    no: 4,
-    title: "発症時の初期対応",
-    body: "現場掲示の対応フローに従い、冷却・経口補水・救急通報を行います。バディ制で単独作業を避けます。",
-  },
-];
+const primaryButton =
+  "inline-flex min-h-[44px] items-center justify-center rounded-xl bg-orange-700 px-5 py-3 text-center text-sm font-black text-white hover:bg-orange-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-orange-300 forced-colors:border-2 forced-colors:border-[LinkText] forced-colors:bg-[Canvas] forced-colors:text-[LinkText]";
+const secondaryButton =
+  "inline-flex min-h-[44px] items-center justify-center rounded-xl border-2 border-slate-700 bg-white px-5 py-3 text-center text-sm font-black text-slate-950 hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-slate-300 forced-colors:border-[LinkText] forced-colors:bg-[Canvas] forced-colors:text-[LinkText]";
+const textLink =
+  "inline-flex min-h-11 items-center font-bold text-sky-900 underline underline-offset-4 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky-300";
 
-const RELATED_LINKS = [
-  {
-    href: "/education/roudoueisei/necchu",
-    label: "Eラーニング：熱中症予防",
-    description: "現場作業者向けの基本教材。暑熱順化・症状・対応をテスト付きで学習できます。",
-  },
-  {
-    href: "/health-checkup-scheduler",
-    label: "健康診断スケジューラ",
-    description: "暑熱作業者の年2回健診（特殊健康診断）の対象判定にも活用できます。",
-  },
-  {
-    href: "/treatment-work-balance",
-    label: "治療と仕事の両立支援",
-    description: "循環器疾患・糖尿病など熱中症ハイリスク労働者の労務配慮を整理しています。",
-  },
-  {
-    href: "/strategy/plan-generator",
-    label: "年次安全衛生計画ジェネレーター",
-    description: "熱中症予防対策を年間計画書の『健康管理』セクションに反映できます。",
-  },
-  {
-    href: "/accidents-reports/construction",
-    label: "建設業の事故分析レポート",
-    description: "熱中症が頻発する建設業の労働災害統計・原因分析をまとめています。",
-  },
-];
+const HEAT_AUTOMATION_CONSULTATIONS = [
+  ["熱中症講習の資料作成", "heat-illness-training"],
+  ["安全教育資料", "safety-education-materials"],
+  ["WBGT・気象通知", "wbgt-weather-notifications"],
+  ["熱中症サイネージ", "heat-signage"],
+  ["KY・帳票", "ky-document-automation"],
+] as const;
 
-export default function HeatIllnessPreventionHubPage() {
+export default function HeatIllnessPreventionPage() {
+  const consultAvailability = getAutomationConsultAvailability();
+
   return (
-    <PageContainer width="prose">
+    <PageContainer width="wide">
       <PageJsonLd
-        name={_title}
-        description={_desc}
-        path="/heat-illness-prevention"
-        keywords={["熱中症 安衛則612条の2 R7.6.1", "熱中症 建設現場 対策 チェックリスト", "WBGT計算機 職場", "熱中症予防 業種別リスク判定"]}
-      />
-      <JsonLd
-        schema={{
-          "@context": "https://schema.org",
-          "@type": "WebPage",
-          name: _title,
-          url: "https://www.anzen-ai-portal.jp/heat-illness-prevention",
-          description: _desc,
-          about: {
-            "@type": "Thing",
-            name: "労働安全衛生 熱中症予防対策",
+        name={TITLE}
+        description={DESCRIPTION}
+        path={PAGE_PATH}
+        breadcrumbs={[
+          { name: "ホーム", url: "https://www.anzen-ai-portal.jp" },
+          {
+            name: "職場の熱中症対策",
+            url: `https://www.anzen-ai-portal.jp${PAGE_PATH}`,
           },
-        }}
-      />
-      <PageHeader
-        title="熱中症対策ハブ"
-        description="WBGT計算機・業種別リスク判定・R7安衛則改正対応をまとめた現場運用ポータル"
-        icon={Sun}
-        iconColor="amber"
+        ]}
       />
 
-      {/* 位置付けの段落は折りたたみへ（柱0・文字ダイエット）。施行済みの事実だけチップで見せる */}
-      <div className="mt-6 space-y-2">
-        <p className="flex flex-wrap items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 px-3 py-1 text-xs font-bold text-amber-900">
-            <AlertCircle className="h-3.5 w-3.5" aria-hidden="true" />
-            安衛則612条の2 対応
-          </span>
-          <span className="inline-flex items-center rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-bold text-slate-700">
-            {R7_EFFECTIVE_FROM_JP}施行済み
-          </span>
+      <header className="max-w-4xl">
+        <h1 className="text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
+          職場の熱中症対策
+        </h1>
+        <p className="mt-2 text-base leading-7 text-slate-700">
+          地域を選び、WBGTと行動を確認します。
         </p>
-        <CollapsibleDetail summary="本ページの位置付け・参照資料">
-          <p>
-            本ページは
-            <strong className="font-semibold">
-              労働安全衛生規則第612条の2（令和7年6月1日施行）
-            </strong>
-            に対応した職場の熱中症対策ガイドです。
-            JIS Z 8504準拠のWBGT計算式と厚労省「職場における熱中症予防対策マニュアル」を参照しています。
-            個別作業の安全判断は事業者・産業医・職長が現場状況を踏まえて行ってください。
-          </p>
-          <p className="mt-2">
-            改正施行日：{R7_EFFECTIVE_FROM}（{R7_EFFECTIVE_FROM_JP}）— 厚生労働省令第86号
-          </p>
-        </CollapsibleDetail>
-      </div>
+      </header>
 
-      <section className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <Link
-          href="/heat-illness-prevention/wbgt-calculator"
-          className="group rounded-2xl border border-orange-200 bg-white p-5 shadow-sm transition hover:border-orange-400 hover:bg-orange-50/40"
-        >
-          <Thermometer className="h-7 w-7 text-orange-600" aria-hidden="true" />
-          <h2 className="mt-3 text-base font-bold text-slate-900">
-            WBGT計算機
-          </h2>
-          <p className="mt-1 text-sm leading-6 text-slate-600">
-            気温・湿度・黒球温度を入力すると、JIS Z 8504式でWBGTとリスクレベル・推奨対策を瞬時に算出。
-          </p>
-          <p className="mt-3 text-xs font-semibold text-orange-700 group-hover:underline">
-            計算機を開く →
-          </p>
-        </Link>
-        <Link
-          href="/heat-illness-prevention/industry-risk"
-          className="group rounded-2xl border border-amber-200 bg-white p-5 shadow-sm transition hover:border-amber-400 hover:bg-amber-50/40"
-        >
-          <Building2 className="h-7 w-7 text-amber-600" aria-hidden="true" />
-          <h2 className="mt-3 text-base font-bold text-slate-900">
-            業種別リスク判定
-          </h2>
-          <p className="mt-1 text-sm leading-6 text-slate-600">
-            建設・製造・運輸・農業ほか10業種ごとの暴露作業・リスク要因・標準対策・関連法令を一覧化。
-          </p>
-          <p className="mt-3 text-xs font-semibold text-amber-700 group-hover:underline">
-            業種を選んで見る →
-          </p>
-        </Link>
-        <Link
-          href="/heat-illness-prevention/r7-compliance"
-          className="group rounded-2xl border border-rose-200 bg-white p-5 shadow-sm transition hover:border-rose-400 hover:bg-rose-50/40"
-        >
-          <ShieldAlert className="h-7 w-7 text-rose-600" aria-hidden="true" />
-          <h2 className="mt-3 text-base font-bold text-slate-900">
-            R7改正コンプライアンス
-          </h2>
-          <p className="mt-1 text-sm leading-6 text-slate-600">
-            安衛則第612条の2 改正対応チェックリスト8項目と、社内文書テンプレート4種を印刷可能形式で提供。
-          </p>
-          <p className="mt-3 text-xs font-semibold text-rose-700 group-hover:underline">
-            チェックリストへ →
-          </p>
-        </Link>
-        <Link
-          href="/heat-illness-prevention/log"
-          className="group rounded-2xl border border-emerald-200 bg-white p-5 shadow-sm transition hover:border-emerald-400 hover:bg-emerald-50/40"
-        >
-          <ClipboardCheck className="h-7 w-7 text-emerald-600" aria-hidden="true" />
-          <h2 className="mt-3 text-base font-bold text-slate-900">
-            WBGT日次記録簿
-          </h2>
-          <p className="mt-1 text-sm leading-6 text-slate-600">
-            作業前・日中のWBGTと実施した対策を時刻別に記録。最高WBGT・最悪リスクを自動集計し、提出用に印刷・CSV保存（令和7年改正の証跡づくり）。
-          </p>
-          <p className="mt-3 text-xs font-semibold text-emerald-700 group-hover:underline">
-            記録簿を開く →
-          </p>
-        </Link>
-        <Link
-          href="/heat-illness-prevention/acclimatization"
-          className="group rounded-2xl border border-teal-200 bg-white p-5 shadow-sm transition hover:border-teal-400 hover:bg-teal-50/40"
-        >
-          <CalendarCheck className="h-7 w-7 text-teal-600" aria-hidden="true" />
-          <h2 className="mt-3 text-base font-bold text-slate-900">
-            暑熱順化 計画・進捗管理
-          </h2>
-          <p className="mt-1 text-sm leading-6 text-slate-600">
-            新規入場者・復帰者向けに7日間以上の暑熱順化プログラムを自動作成し、日々の実施・体調を記録。印刷・CSV保存に対応（計画的な暑熱順化）。
-          </p>
-          <p className="mt-3 text-xs font-semibold text-teal-700 group-hover:underline">
-            順化計画を作る →
-          </p>
-        </Link>
-        <Link
-          href="/heat-illness-prevention/poster"
-          className="group rounded-2xl border border-rose-200 bg-white p-5 shadow-sm transition hover:border-rose-400 hover:bg-rose-50/40"
-        >
-          <Megaphone className="h-7 w-7 text-rose-600" aria-hidden="true" />
-          <h2 className="mt-3 text-base font-bold text-slate-900">
-            緊急時対応 現場掲示ポスター
-          </h2>
-          <p className="mt-1 text-sm leading-6 text-slate-600">
-            現場名と緊急連絡先を入れるだけで、発見→通報→冷却→医療連携の対応フローをA4掲示用に印刷。令和7年改正の「対応手順の周知（掲示）」に対応。
-          </p>
-          <p className="mt-3 text-xs font-semibold text-rose-700 group-hover:underline">
-            掲示ポスターを作る →
-          </p>
-        </Link>
-      </section>
-
-      <section className="mt-10">
-        <h2 className="flex items-center gap-2 text-lg font-bold text-slate-900">
-          <ListChecks className="h-5 w-5 text-amber-600" aria-hidden="true" />
-          熱中症対策の基本フロー（4ステップ）
+      <section
+        aria-labelledby="heat-current-title"
+        className="mt-5 rounded-2xl border border-slate-300 bg-white p-4 sm:p-5"
+      >
+        <h2 id="heat-current-title" className="text-lg font-black text-slate-950">
+          現在値
         </h2>
-        <p className="mt-1 text-xs text-slate-500">
-          職場のPDCAサイクルに組み込むための標準ステップ。WBGT実測 → 作業調整 → 暑熱順化 → 初期対応の順で運用します。
-        </p>
-        <ol className="mt-4 space-y-3">
-          {FRAMEWORK_STEPS.map((s) => (
-            <li
-              key={s.no}
-              className="flex gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
-            >
-              <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-amber-600 text-xs font-bold text-white">
-                {s.no}
-              </span>
-              <div>
-                <h3 className="text-sm font-bold text-slate-900">{s.title}</h3>
-                <p className="mt-1 text-sm leading-6 text-slate-700">{s.body}</p>
-              </div>
-            </li>
-          ))}
-        </ol>
-      </section>
-
-      <section className="mt-10">
-        <h2 className="flex items-center gap-2 text-lg font-bold text-slate-900">
-          <FileText className="h-5 w-5 text-amber-600" aria-hidden="true" />
-          R7改正の要点
-        </h2>
-        <p className="mt-1 text-xs text-slate-500">
-          安衛則第612条の2が令和7年6月1日に施行されました。事業者に求められる主要4項目を要約します。
-        </p>
-        <ul className="mt-4 space-y-2 text-sm leading-6 text-slate-800">
-          <li className="rounded-lg border border-slate-200 bg-white p-3">
-            <strong className="font-semibold text-slate-900">①WBGT実測・記録の体制</strong>
-            ：屋内・屋外を問わずWBGT基準値を超えるおそれのある作業について、測定または推計と記録の体制整備が求められます。
-          </li>
-          <li className="rounded-lg border border-slate-200 bg-white p-3">
-            <strong className="font-semibold text-slate-900">②暑熱順化期間の確保</strong>
-            ：新規入場者・復帰者には7日以上の段階的負荷計画を作成し、実施状況を記録します。
-          </li>
-          <li className="rounded-lg border border-slate-200 bg-white p-3">
-            <strong className="font-semibold text-slate-900">③予防教育の実施</strong>
-            ：暑熱作業者全員に年1回以上、症状・予防・初期対応・救急通報を含む教育を実施します。
-          </li>
-          <li className="rounded-lg border border-slate-200 bg-white p-3">
-            <strong className="font-semibold text-slate-900">④初期対応と緊急体制</strong>
-            ：発見→冷却→搬送→救急要請の手順を文書化し、現場掲示と緊急冷却装備の配備を行います。
-          </li>
-        </ul>
-        <p className="mt-3 text-xs text-slate-500">
-          詳細：
+        <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-3 sm:grid-cols-4">
+          <div>
+            <dt className="text-xs font-bold text-slate-600">地域</dt>
+            <dd className="mt-1 font-black text-slate-950">未選択</dd>
+          </div>
+          <div>
+            <dt className="text-xs font-bold text-slate-600">WBGT</dt>
+            <dd className="mt-1 font-black text-slate-950">未取得</dd>
+          </div>
+          <div>
+            <dt className="text-xs font-bold text-slate-600">情報種別</dt>
+            <dd className="mt-1 font-black text-slate-950">未取得</dd>
+          </div>
+          <div>
+            <dt className="text-xs font-bold text-slate-600">警戒状態</dt>
+            <dd className="mt-1 font-black text-slate-950">未判定</dd>
+          </div>
+        </dl>
+        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
           <Link
-            href="/heat-illness-prevention/r7-compliance"
-            className="font-semibold text-rose-700 underline hover:text-rose-800"
+            href="/risk"
+            data-primary-action=""
+            className={primaryButton}
           >
-            R7コンプライアンスチェックリストと社内文書テンプレ →
+            地域を選んで確認
           </Link>
-        </p>
-      </section>
-
-      <section className="mt-10">
-        <h2 className="flex items-center gap-2 text-lg font-bold text-slate-900">
-          <Building2 className="h-5 w-5 text-amber-600" aria-hidden="true" />
-          対応業種（10業種）
-        </h2>
-        <p className="mt-1 text-xs text-slate-500">
-          MHLW統計で熱中症発生が多い業種を中心に、業種別の暴露作業・リスク要因・標準対策を整理しています。
-        </p>
-        <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
-          {INDUSTRY_HEAT_RULES.map((r) => (
-            <Link
-              key={r.id}
-              href={`/heat-illness-prevention/industry-risk?industry=${r.id}`}
-              className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-amber-300 hover:bg-amber-50 hover:text-amber-800"
-            >
-              {r.label}
-            </Link>
-          ))}
+          <Link
+            href="/ky/paper?topic=heat-illness"
+            className={secondaryButton}
+          >
+            熱中症KYを作る
+          </Link>
         </div>
       </section>
 
-      <section className="mt-10">
-        <h2 className="text-base font-bold text-slate-900">関連機能</h2>
-        <ul className="mt-3 space-y-2 text-sm leading-6 text-slate-800">
-          {RELATED_LINKS.map((r) => (
-            <li key={r.href}>
-              <Link
-                href={r.href}
-                className="inline-flex items-center gap-1 font-semibold text-amber-700 underline hover:text-amber-800"
-              >
-                {r.label} →
-              </Link>
-              <span className="ml-1 text-slate-600">— {r.description}</span>
-            </li>
-          ))}
-        </ul>
+      <section aria-labelledby="today-actions" className="mt-8">
+        <h2 id="today-actions" className="text-2xl font-black text-slate-950">
+          今日行うこと
+        </h2>
+        <ol className="mt-3 grid gap-3 sm:grid-cols-2">
+          <li className="rounded-xl border border-orange-300 bg-orange-50 p-4 font-bold text-orange-950">
+            1. 地域・時刻・WBGT種別・取得時刻を確認
+          </li>
+          <li className="rounded-xl border border-orange-300 bg-orange-50 p-4 font-bold text-orange-950">
+            2. 休憩・水分・緊急連絡の担当を決定
+          </li>
+        </ol>
       </section>
 
-      <section className="mt-10 rounded-2xl border border-slate-200 bg-slate-50 p-5">
-        <h2 className="text-base font-bold text-slate-900">公的資料・出典</h2>
-        <ul className="mt-3 space-y-2 text-sm leading-6 text-slate-800">
-          {R7_SOURCES.map((s) => (
-            <li key={s.url}>
-              <a
-                href={s.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 font-semibold underline hover:text-amber-700"
-              >
-                {s.label}
-                <ExternalLink className="h-3 w-3" aria-hidden="true" />
-              </a>
-            </li>
-          ))}
-        </ul>
+      <section aria-labelledby="heat-tools" className="mt-8">
+        <h2 id="heat-tools" className="text-2xl font-black text-slate-950">
+          KY・教育
+        </h2>
+        <nav
+          aria-label="熱中症対策ツール"
+          className="mt-3 grid gap-3 sm:grid-cols-3"
+        >
+          <Link href="/ky/paper?topic=heat-illness" className={secondaryButton}>
+            熱中症KY
+          </Link>
+          <Link href="/heat-illness-prevention/slides" className={secondaryButton}>
+            14枚の教育スライド
+          </Link>
+          <Link
+            href="/heat-illness-prevention/elearning"
+            className={secondaryButton}
+          >
+            7問のeラーニング
+          </Link>
+        </nav>
+        <Link href="/signage" className={`${textLink} mt-2`}>
+          サイネージで表示
+        </Link>
       </section>
 
-      <p className="mt-8 text-center text-xs leading-6 text-slate-500">
-        最終更新：2026年5月。本ページは法令・指針の要点解説と現場運用ガイドです。
-        <strong className="text-slate-600">
-          個別作業の安全判断は事業者・産業医・職長の責任で行ってください。
-        </strong>
-        WBGT計算はあくまで参考値であり、現場の実測と専門家判断を最優先してください。
-      </p>
+      <section id="emergency" aria-labelledby="emergency-title" className="mt-8">
+        <h2 id="emergency-title" className="text-2xl font-black text-slate-950">
+          緊急時
+        </h2>
+        <p className="mt-3 border-l-4 border-red-700 pl-4 font-bold leading-7 text-slate-950">
+          反応・意識に異常がある、または判断できない場合は119。一人にせず冷却。
+        </p>
+        <a
+          href={HEAT_PRIMARY_LINKS.emergency}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`${textLink} mt-2`}
+        >
+          厚生労働省の対応手順
+        </a>
+      </section>
+
+      <section aria-labelledby="heat-details-title" className="mt-8">
+        <h2 id="heat-details-title" className="text-2xl font-black text-slate-950">
+          詳細
+        </h2>
+        <details className="mt-3 rounded-xl border border-slate-300 px-4">
+          <summary className="flex min-h-11 cursor-pointer items-center font-bold text-slate-900">
+            WBGTの情報種別
+          </summary>
+          <dl className="space-y-2 pb-4 text-sm leading-6 text-slate-700">
+            <div>
+              <dt className="inline font-black text-slate-900">実測値：</dt>
+              <dd className="inline">測定器の値</dd>
+            </div>
+            <div>
+              <dt className="inline font-black text-slate-900">実況推定値：</dt>
+              <dd className="inline">気象データによる現在付近の推定</dd>
+            </div>
+            <div>
+              <dt className="inline font-black text-slate-900">予測値：</dt>
+              <dd className="inline">将来時刻の予測</dd>
+            </div>
+          </dl>
+        </details>
+        <details className="mt-3 rounded-xl border border-slate-300 px-4">
+          <summary className="flex min-h-11 cursor-pointer items-center font-bold text-slate-900">
+            公式情報
+          </summary>
+          <nav className="flex flex-wrap gap-x-5 gap-y-1 pb-4" aria-label="熱中症の公式情報">
+            <a
+              href="https://www.wbgt.env.go.jp/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={textLink}
+            >
+              環境省WBGT
+            </a>
+            <a
+              href="https://www.jma.go.jp/bosai/warning/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={textLink}
+            >
+              気象庁の警報・注意報
+            </a>
+            <a
+              href={HEAT_PRIMARY_LINKS.law}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={textLink}
+            >
+              安衛則第612条の2
+            </a>
+          </nav>
+        </details>
+      </section>
+
+      <section aria-labelledby="heat-consult-title" className="mt-8">
+        <h2 id="heat-consult-title" className="text-2xl font-black text-slate-950">
+          講習・資料作成
+        </h2>
+        <p className="mt-2 text-sm font-bold text-slate-700" role="status">
+          {consultAvailability.label}
+        </p>
+        <AutomationConsultCta
+          position="heat_hub"
+          consultationType="heat-illness-training"
+          href="/services/automation?consultationType=heat-illness-training#consult-form"
+          className="mt-3 border-2 border-slate-700 bg-white text-slate-950"
+        >
+          熱中症講習の料金を見る
+        </AutomationConsultCta>
+        <details className="mt-3 rounded-xl border border-slate-300 px-4">
+          <summary className="flex min-h-11 cursor-pointer items-center font-bold text-slate-900">
+            その他の相談種別
+          </summary>
+          <nav className="grid gap-1 pb-4 sm:grid-cols-2" aria-label="熱中症関連の相談種別">
+            {HEAT_AUTOMATION_CONSULTATIONS.slice(1).map(([label, type]) => (
+              <AutomationConsultCta
+                key={type}
+                position="heat_hub"
+                consultationType={type}
+                href={`/services/automation?consultationType=${type}#consult-form`}
+                className="justify-start px-0 text-left text-sky-900 underline underline-offset-4"
+              >
+                {label}
+              </AutomationConsultCta>
+            ))}
+          </nav>
+        </details>
+      </section>
+
+      <footer className="mt-10 flex flex-wrap gap-x-5 gap-y-1 border-t border-slate-200 pt-5">
+        <UsageNotesLink className="text-sky-900" />
+        <Link href="/about/data-sources" className={textLink}>
+          データの出典
+        </Link>
+      </footer>
     </PageContainer>
   );
 }

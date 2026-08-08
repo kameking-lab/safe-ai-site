@@ -36,8 +36,8 @@ export async function fetchStats(period: StatsPeriod): Promise<StatsResponse> {
             }
             try {
                           return await fetchFromGa4(period);
-            } catch (e) {
-                          console.error("[stats] GA4 fetch failed, falling back to mock", e);
+            } catch {
+                          console.error("[stats] GA4 fetch failed");
                           const fallback = buildMockStatsResponse(period);
                           return { ...fallback, source: "mock" };
             }
@@ -52,8 +52,8 @@ async function fetchFromGa4(period: StatsPeriod): Promise<StatsResponse> {
             let parsedCredentials: { client_email?: string; private_key?: string; project_id?: string } = {};
             try {
                           parsedCredentials = JSON.parse(credentialsJsonStr);
-            } catch (parseError) {
-                          console.error("[stats] credentials JSON parse failed:", parseError);
+            } catch {
+                          console.error("[stats] credentials JSON parse failed");
             }
 
   const client = new BetaAnalyticsDataClient({

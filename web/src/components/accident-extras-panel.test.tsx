@@ -51,10 +51,17 @@ afterEach(() => {
 });
 
 describe("AccidentExtrasPanel", () => {
-  it("プロファイル未設定時「/profile を開く →」リンクが44pxタップ標的を満たす", async () => {
+  it("プロファイル未設定時「自社条件を設定」リンクが44pxタップ標的を満たす", async () => {
     render(<AccidentExtrasPanel />);
-    const link = await screen.findByText("/profile を開く →");
+    const link = await screen.findByText("自社条件を設定");
     expect(link.className).toContain("min-h-[44px]");
+  });
+
+  it("集計データの未読込・空配列をサイト収録0件と表示しない", async () => {
+    render(<AccidentExtrasPanel />);
+
+    await screen.findByText("収録事例を確認できません。");
+    expect(screen.queryByText(/サイト収録の0件/)).toBeNull();
   });
 
   it("プロファイル設定済み時「自社設定 →」と類似事例リンクが44pxタップ標的を満たす", async () => {

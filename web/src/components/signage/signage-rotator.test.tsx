@@ -89,6 +89,24 @@ describe("SignageRotator", () => {
     }
   });
 
+  it("16:9省スペース表示でも44×44pxの前後操作を提供する", () => {
+    render(
+      <SignageRotator
+        items={ITEMS}
+        ariaLabel="テストパネル"
+        compactAtWide
+        getKey={(item) => item.id}
+        renderItem={(item) => <p>{item.label}</p>}
+      />,
+    );
+    const previous = screen.getByRole("button", { name: "テストパネルの前の項目" });
+    const next = screen.getByRole("button", { name: "テストパネルの次の項目" });
+    expect(previous.className).toContain("min-h-[44px]");
+    expect(next.className).toContain("min-w-[44px]");
+    fireEvent.click(next);
+    expect(screen.getAllByText("2件目")).toHaveLength(2);
+  });
+
   it("マウスホバー中は自動切替を一時停止する", () => {
     const { container } = renderRotator();
     const root = container.firstElementChild as HTMLElement;

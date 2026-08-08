@@ -198,17 +198,40 @@ export function ResourcesClient({
     <div>
       {/* Tabs */}
       <div role="tablist" className="mb-4 flex flex-wrap gap-2 border-b border-slate-200">
-        {TABS.map(({ id, icon: Icon, activeCls }) => {
+        {TABS.map(({ id, icon: Icon, activeCls }, index) => {
           const active = tab === id;
           return (
             <button
               key={id}
+              id={`resources-tab-${index}`}
               role="tab"
               aria-selected={active}
+              aria-controls="resources-tabpanel"
+              tabIndex={active ? 0 : -1}
               onClick={() => {
                 setTab(id);
                 setCategory("");
                 setBinding("");
+              }}
+              onKeyDown={(event) => {
+                const currentIndex = TABS.findIndex((item) => item.id === id);
+                let nextIndex = currentIndex;
+                if (event.key === "ArrowRight") {
+                  nextIndex = (currentIndex + 1) % TABS.length;
+                } else if (event.key === "ArrowLeft") {
+                  nextIndex = (currentIndex - 1 + TABS.length) % TABS.length;
+                } else if (event.key === "Home") {
+                  nextIndex = 0;
+                } else if (event.key === "End") {
+                  nextIndex = TABS.length - 1;
+                } else {
+                  return;
+                }
+                event.preventDefault();
+                setTab(TABS[nextIndex]!.id);
+                setCategory("");
+                setBinding("");
+                document.getElementById(`resources-tab-${nextIndex}`)?.focus();
               }}
               className={`inline-flex min-h-[44px] items-center gap-2 rounded-t-lg border-b-2 px-4 py-2 text-sm font-semibold transition ${
                 active ? activeCls : "border-transparent text-slate-600 hover:bg-slate-50"
@@ -224,16 +247,23 @@ export function ResourcesClient({
         })}
       </div>
 
+      <div
+        id="resources-tabpanel"
+        role="tabpanel"
+        aria-labelledby={`resources-tab-${TABS.findIndex((item) => item.id === tab)}`}
+      >
+      <h2 className="sr-only">{tab}一覧</h2>
       {/* Filters */}
       <div className="mb-4 rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
         <div className="flex flex-wrap items-end gap-2">
           <div className="flex-1 min-w-[180px]">
-            <label className="block text-xs font-semibold text-slate-700">
+            <label htmlFor="resources-query" className="block text-xs font-semibold text-slate-700">
               キーワード検索
             </label>
             <div className="relative mt-1">
               <Search className="pointer-events-none absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <input
+                id="resources-query"
                 type="search"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
@@ -244,10 +274,11 @@ export function ResourcesClient({
           </div>
 
           <div className="min-w-[160px]">
-            <label className="block text-xs font-semibold text-slate-700">
+            <label htmlFor="resources-category" className="block text-xs font-semibold text-slate-700">
               カテゴリ
             </label>
             <select
+              id="resources-category"
               value={category}
               onChange={(e) => setCategory(e.target.value)}
               className="mt-1 block min-h-[44px] w-full rounded-md border border-slate-300 bg-white py-2 px-2 text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500"
@@ -263,10 +294,11 @@ export function ResourcesClient({
 
           {tab !== "リーフレット" && (
             <div className="min-w-[180px]">
-              <label className="block text-xs font-semibold text-slate-700">
+              <label htmlFor="resources-binding" className="block text-xs font-semibold text-slate-700">
                 法的拘束力
               </label>
               <select
+                id="resources-binding"
                 value={binding}
                 onChange={(e) => setBinding(e.target.value)}
                 className="mt-1 block min-h-[44px] w-full rounded-md border border-slate-300 bg-white py-2 px-2 text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500"
@@ -280,10 +312,11 @@ export function ResourcesClient({
           )}
 
           <div className="min-w-[120px]">
-            <label className="block text-xs font-semibold text-slate-700">
+            <label htmlFor="resources-year" className="block text-xs font-semibold text-slate-700">
               年度
             </label>
             <select
+              id="resources-year"
               value={year}
               onChange={(e) => setYear(e.target.value)}
               className="mt-1 block min-h-[44px] w-full rounded-md border border-slate-300 bg-white py-2 px-2 text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500"
@@ -320,6 +353,7 @@ export function ResourcesClient({
       ) : (
         <NoticeList items={filteredNotices} />
       )}
+      </div>
     </div>
   );
 }

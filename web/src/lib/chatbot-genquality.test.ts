@@ -19,7 +19,7 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { allLawArticles } from "@/data/laws";
+import { verifiedLawArticles } from "@/data/laws/verified-corpus";
 import { searchRelevantArticlesWithScore } from "@/lib/rag-search";
 import { buildAllowedCitations } from "@/lib/chatbot-prompt-builder";
 import { buildFallbackDecision } from "@/lib/chatbot-fallback-logic";
@@ -33,12 +33,15 @@ import {
   scorableCases,
   type CorpusEvidence,
 } from "@/lib/chatbot-genquality.fixture";
+import {
+  findGenQualitySourceRecord,
+} from "@/lib/chatbot-genquality-source-records";
 
 const TOP_K = 10; // route.ts の searchRelevantArticlesWithScore(message, 10) と同一
 const ROUTE_CONFIDENCE_THRESHOLD = 0.5; // route.ts の CONFIDENCE_THRESHOLD と同一
 
 function findCorpusArticles(ev: Pick<CorpusEvidence, "lawShort" | "articleNum">) {
-  return allLawArticles.filter(
+  return verifiedLawArticles.filter(
     (a) =>
       a.articleNum === ev.articleNum &&
       (a.lawShort === ev.lawShort || isLawShortEquivalent(a.lawShort, ev.lawShort))
@@ -101,6 +104,110 @@ describe("生成品質eval A: fixture整合性（正本アンカー）", () => {
       expect(tc.goldCitations.length, tc.id).toBe(0);
       expect(tc.expectRetrievable, tc.id).toBe(false);
     }
+  });
+
+  it("主張単位source要件はfixture外の独立recordへ解決し、自己記述anchorを根拠にしない", () => {
+    const problems: string[] = [];
+    for (const tc of GEN_QUALITY_CASES) {
+      for (const requirement of tc.sourceRequirements ?? []) {
+        const record = findGenQualitySourceRecord(requirement.sourceId);
+        if (!record) {
+          problems.push(
+            `${tc.id}: source record missing (${requirement.sourceId})`,
+          );
+          continue;
+        }
+        expect(record).toHaveProperty("documentNumber");
+        expect(record).toHaveProperty("url");
+        expect(record).toHaveProperty("locator");
+        expect(record).toHaveProperty("excerpt");
+        expect(record).toHaveProperty("hash");
+        expect(record).toHaveProperty("status");
+
+        if (
+          record.status === "snapshot-hash-verified" ||
+          record.status === "human-content-verified"
+        ) {
+          if (!record.locator || !record.excerpt || !record.hash) {
+            problems.push(
+              `${tc.id}: verified record lacks locator/excerpt/hash (${record.id})`,
+            );
+            continue;
+          }
+          const normalized = record.excerpt.normalize("NFKC").replace(/\s+/g, "");
+          const missing = requirement.sourceMustContain.filter(
+            (fragment) =>
+              !normalized.includes(
+                fragment.normalize("NFKC").replace(/\s+/g, ""),
+              ),
+          );
+          if (missing.length > 0) {
+            problems.push(
+              `${tc.id}: independent record does not support claim ${requirement.claimId} [${missing.join("・")}]`,
+            );
+          }
+        }
+      }
+    }
+    expect(problems, problems.join("\n")).toEqual([]);
+  });
+
+  it("GQ05は612条の2と基発0520第6号を別recordへ割り当て、各snapshot/hashを固定する", () => {
+    const tc = GEN_QUALITY_CASES.find((entry) => entry.id === "GQ05");
+    expect(tc?.sourceRequirements?.map((entry) => entry.sourceId)).toEqual([
+      "egov-osh-rule-612-2",
+      "mhlw-heat-notice-0520-6",
+    ]);
+    expect(tc?.mustInclude).toEqual(
+      expect.arrayContaining([
+        expect.arrayContaining(["28度"]),
+        expect.arrayContaining(["31度"]),
+        expect.arrayContaining(["連続1時間以上"]),
+        expect.arrayContaining(["1日4時間を超"]),
+        expect.arrayContaining(["対象作業の目安"]),
+        expect.arrayContaining(["基発0520第6号"]),
+        expect.arrayContaining(["第612条の2の条文本文ではなく"]),
+      ]),
+    );
+
+    const lawRecord = findGenQualitySourceRecord("egov-osh-rule-612-2");
+    const noticeRecord = findGenQualitySourceRecord(
+      "mhlw-heat-notice-0520-6",
+    );
+    const corpusArticle = verifiedLawArticles.find(
+      (article) =>
+        article.lawShort === "安衛則" &&
+        article.articleNum === "第612条の2",
+    );
+    expect(lawRecord).toMatchObject({
+      url: corpusArticle?.sourceUrl,
+      locator: corpusArticle?.articleNum,
+      excerpt: corpusArticle?.text,
+      hash: corpusArticle?.contentHash,
+      status: "snapshot-hash-verified",
+    });
+    expect(noticeRecord).toMatchObject({
+      documentNumber: "基発0520第6号",
+      url: "https://www.mhlw.go.jp/content/11303000/001490911.pdf",
+      locator: "PDF 2ページ 第3 1(1)イ",
+      hash:
+        "73f5bd365128cf6a033293b6d2e64bbbd469bf38bed1a3e0e73a2a9d3d688615",
+      status: "snapshot-hash-verified",
+      humanReviewStatus: "not-reviewed",
+      independentPrimarySourceReview: {
+        reviewedAt: "2026-08-02",
+        status: "matched",
+        method: "独立一次資料照合",
+        humanLegalReviewStatus: "not-reviewed",
+      },
+    });
+    expect(noticeRecord?.independentPrimarySourceReview?.scope).toContain(
+      "32頁",
+    );
+    expect(noticeRecord?.excerpt).toContain("湿球黒球温度（WBGT）が28度以上");
+    expect(noticeRecord?.excerpt).toContain("気温が31度以上");
+    expect(noticeRecord?.excerpt).toContain("継続して１時間以上");
+    expect(noticeRecord?.excerpt).toContain("１日当たり４時間を超えて");
   });
 });
 
@@ -253,7 +360,7 @@ describe("生成品質eval D: テンプレ層回帰（診断04 T1/T3/T8/T9）", 
     const problems: string[] = [];
     for (const tc of scorableCases()) {
       for (const g of tc.goldCitations) {
-        const corpusArticle = allLawArticles.find(
+        const corpusArticle = verifiedLawArticles.find(
           (a) =>
             a.articleNum === g.articleNum &&
             (a.lawShort === g.lawShort || isLawShortEquivalent(a.lawShort, g.lawShort))
@@ -293,7 +400,7 @@ describe("生成品質eval D: テンプレ層回帰（診断04 T1/T3/T8/T9）", 
         'from "@/lib/rag/out-of-domain"'
       );
       expect(src, `${p} のno-hit関連条文選定に hasOutOfDomainSignal ガードがない`).toMatch(
-        /NO_HIT_NOISE_FLOOR && !hasOutOfDomainSignal\(message\)/
+        /NO_HIT_NOISE_FLOOR && !hasOutOfDomainSignal\(retrievalQuery\)/
       );
     }
   });

@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Plus, Trash2, ClipboardList } from "lucide-react";
 import { loadProfile, saveProfile } from "@/lib/company-profile";
 import { useLanguage } from "@/contexts/language-context";
+import { TransientChemicalLink } from "@/components/home-safety-cockpit/transient-chemical-link";
 
 const SITE_LIST_KEY = "chemical-ra:site-list-v1";
 
@@ -55,7 +56,7 @@ export function ChemicalRaExtras() {
           name: c,
           addedAt: new Date().toISOString(),
         }));
-         
+
         setList(initial);
         saveSiteList(initial);
       }
@@ -65,7 +66,11 @@ export function ChemicalRaExtras() {
   const addItem = () => {
     if (!name.trim()) return;
     const next = [
-      { name: name.trim(), cas: cas.trim() || undefined, addedAt: new Date().toISOString() },
+      {
+        name: name.trim(),
+        cas: cas.trim() || undefined,
+        addedAt: new Date().toISOString(),
+      },
       ...list.filter((c) => c.name !== name.trim()),
     ];
     setList(next);
@@ -73,7 +78,10 @@ export function ChemicalRaExtras() {
     // プロファイルの chemicals にも追加
     const profile = loadProfile();
     if (!profile.chemicals.includes(name.trim())) {
-      saveProfile({ ...profile, chemicals: [...profile.chemicals, name.trim()] });
+      saveProfile({
+        ...profile,
+        chemicals: [...profile.chemicals, name.trim()],
+      });
     }
     setName("");
     setCas("");
@@ -91,7 +99,10 @@ export function ChemicalRaExtras() {
       <section className="rounded-2xl border border-emerald-200 bg-white p-4 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-sm font-bold text-emerald-900">
-            <ClipboardList className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />
+            <ClipboardList
+              className="mr-1 inline h-3.5 w-3.5 align-[-2px]"
+              aria-hidden="true"
+            />
             {isEn
               ? "Site chemicals list (saved on this device)"
               : "現場の化学物質リスト（端末内に保存）"}
@@ -130,8 +141,7 @@ export function ChemicalRaExtras() {
         {list.length > 0 ? (
           <ul className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
             {list.map((c) => {
-              const raLink = `/chemical-ra?${c.cas ? `cas=${encodeURIComponent(c.cas)}` : `name=${encodeURIComponent(c.name)}`}`;
-              const ppeLink = `/equipment-finder?chemical=${encodeURIComponent(c.name)}`;
+              const ppeLink = "/goods";
               return (
                 <li
                   key={c.name}
@@ -139,20 +149,22 @@ export function ChemicalRaExtras() {
                 >
                   <div>
                     <p className="font-bold text-slate-900">{c.name}</p>
-                    {c.cas && <p className="text-[10px] text-slate-500">CAS: {c.cas}</p>}
+                    {c.cas && (
+                      <p className="text-[10px] text-slate-500">CAS: {c.cas}</p>
+                    )}
                   </div>
                   <div className="flex gap-1">
-                    <Link
-                      href={raLink}
+                    <TransientChemicalLink
+                      query={c.cas || c.name}
                       className="rounded border border-emerald-300 bg-white px-2 py-1 text-[11px] font-semibold text-emerald-800 hover:bg-emerald-50"
                     >
                       {isEn ? "Re-assess" : "RA再評価"}
-                    </Link>
+                    </TransientChemicalLink>
                     <Link
                       href={ppeLink}
                       className="rounded border border-sky-300 bg-white px-2 py-1 text-[11px] font-semibold text-sky-800 hover:bg-sky-50"
                     >
-                      {isEn ? "Find PPE →" : "保護具を探す →"}
+                      {isEn ? "PPE categories →" : "用品カテゴリを見る →"}
                     </Link>
                     <button
                       type="button"

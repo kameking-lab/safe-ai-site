@@ -3,13 +3,14 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Scale, ExternalLink, ShieldCheck, HelpCircle, ClipboardList, ArrowDownWideNarrow } from "lucide-react";
+import { fetchChemicalLegalProfile } from "@/lib/chemical/legal-profile-client";
 
 /**
- * 該当法令の結論カード（一窓化 2026-07-11・柱0=結論ファースト）
+ * 物質名から確認できる法令区分候補カード。
  *
  * /api/chemical/legal-profile から正本突合済みプロファイルを取得し、
- * designated / not-designated / unverified を3秒で読める形で断定表示する。
- * 続けて「その区分で必要になる主な義務（対策案）」と、全物質共通の
+ * designated / not-designated / unverified は物質リスト上の収載状態として表示する。
+ * 作業条件なしで義務は確定せず、「該当時に確認する候補」と、全物質共通の
  * リスク低減の優先順位（代替→工学→管理→保護具）まで一続きで出す。
  */
 
@@ -34,7 +35,15 @@ type ProfileResponse = {
   specialControl?: boolean;
   raTarget?: boolean;
   checkups?: { key: string; name: string; basis: string; frequency: string; officialUrl: string }[];
-  duties?: { group: string; items: Duty[] }[];
+  duties?: {
+    group: string;
+    applicability: "undetermined";
+    items: Duty[];
+  }[];
+  applicabilityDecision?: "undetermined";
+  applicabilityRequiredConditions?: string[];
+  applicabilityNote?: string;
+  checkupApplicability?: "undetermined";
   hierarchy?: { step: string; detail: string }[];
   hasIndexEntry?: boolean;
 };
@@ -75,12 +84,17 @@ export function LegalConclusionCard({ q }: { q: string }) {
 
   useEffect(() => {
     if (!q) return;
-    const ac = new AbortController();
-    fetch(`/api/chemical/legal-profile?q=${encodeURIComponent(q)}`, { signal: ac.signal })
-      .then((r) => r.json())
-      .then((j: ProfileResponse) => setFetched({ q, data: j }))
-      .catch(() => setFetched({ q, data: null }));
-    return () => ac.abort();
+    let active = true;
+    fetchChemicalLegalProfile<ProfileResponse>(q)
+      .then((j: ProfileResponse) => {
+        if (active) setFetched({ q, data: j });
+      })
+      .catch(() => {
+        if (active) setFetched({ q, data: null });
+      });
+    return () => {
+      active = false;
+    };
   }, [q]);
 
   const data = fetched?.q === q ? fetched.data : null;
@@ -115,14 +129,16 @@ export function LegalConclusionCard({ q }: { q: string }) {
     const l = OSHA_TAG_LABEL[t];
     if (l && !badges.includes(l)) badges.push(l);
   }
-  if (data.specialControl) badges.push("特別管理物質（記録30年保存）");
+  if (data.specialControl)
+    badges.push("特別管理物質リスト収載（記録要件は作業条件確認）");
   for (const d of designated) {
     if (d.domain === "anei-tokka" || d.domain === "anei-yuki") continue; // タグで表示済み
     if (d.domain === "anei-ra") continue; // raTarget バッジで表示済み（重複させない）
     const l = `${DOMAIN_LABEL[d.domain] ?? d.domain}${d.classification ? `：${d.classification}` : ""}`;
     if (!badges.includes(l)) badges.push(l);
   }
-  if (data.raTarget) badges.push("リスクアセスメント対象物（SDS交付義務）");
+  if (data.raTarget)
+    badges.push("表示・通知対象物質リスト収載（適用条件要確認）");
 
   const basisItems = designated.filter((d) => d.basis);
   const noneDesignated = badges.length === 0;
@@ -131,7 +147,8 @@ export function LegalConclusionCard({ q }: { q: string }) {
     <section className="space-y-4 rounded-2xl border-2 border-emerald-300 bg-white p-4 shadow-sm sm:p-5">
       <h3 className="flex items-center gap-2 text-base font-bold text-slate-900">
         <Scale className="h-5 w-5 text-emerald-700" aria-hidden="true" />
-        該当法令の結論{data.label ? `：${data.label}` : ""}
+        物質名から確認できる法令区分候補
+        {data.label ? `：${data.label}` : ""}
         {data.casless && (
           <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
             CAS番号なし（告示名）
@@ -139,16 +156,39 @@ export function LegalConclusionCard({ q }: { q: string }) {
         )}
       </h3>
 
+      <div
+        role="status"
+        className="rounded-xl border-2 border-amber-300 bg-amber-50 p-3 text-sm leading-6 text-amber-950"
+      >
+        <p className="font-bold">
+          義務の適用は判定不能です。物質名・CAS番号だけでは確定できません。
+        </p>
+        <p className="mt-1 text-xs">
+          {data.applicabilityNote ??
+            "製品SDSと実際の作業条件を確認してから、公式条文・所轄署・専門家で判断してください。"}
+        </p>
+        {(data.applicabilityRequiredConditions ?? []).length > 0 && (
+          <>
+            <p className="mt-2 text-xs font-bold">判定前に必要な条件</p>
+            <ul className="mt-1 list-disc space-y-0.5 pl-5 text-xs">
+              {(data.applicabilityRequiredConditions ?? []).map((condition) => (
+                <li key={condition}>{condition}</li>
+              ))}
+            </ul>
+          </>
+        )}
+      </div>
+
       {/* 結論バッジ */}
       {noneDesignated ? (
         <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5">
           <p className="text-sm font-semibold text-slate-800">
             {data.hasIndexEntry
-              ? "特化則・有機則など主要な特別規制への該当は確認されませんでした"
-              : "主要法令リストへの収載は確認できませんでした（正本未突合の法令域あり）"}
+              ? "確認した物質リストでは、特化則・有機則などの収載を確認できませんでした"
+              : "確認対象の物質リストに収載を確認できませんでした（未突合の法令域あり）"}
           </p>
           <p className="mt-1 text-[11px] text-slate-500">
-            下の「未確認」も確認してください。該当が無くてもリスクアセスメント（安衛法28条の2・57条の3）の対象になりえます。
+            非収載は「義務なし」を意味しません。混合物濃度、用途、数量、作業条件、適用除外を確認してください。
           </p>
         </div>
       ) : (
@@ -158,7 +198,7 @@ export function LegalConclusionCard({ q }: { q: string }) {
               key={b}
               className="inline-flex items-center rounded-full border border-rose-300 bg-rose-50 px-3 py-1 text-xs font-bold text-rose-900"
             >
-              ✓ {b}
+              収載情報: {b}
             </li>
           ))}
         </ul>
@@ -210,7 +250,7 @@ export function LegalConclusionCard({ q }: { q: string }) {
         {notDesignated.length > 0 && (
           <p className="flex flex-wrap items-center gap-1 text-slate-600">
             <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" aria-hidden="true" />
-            <span className="font-semibold">非該当を確認済み:</span>
+            <span className="font-semibold">確認した物質リストでは非収載:</span>
             {notDesignated.map((d) => DOMAIN_LABEL[d.domain] ?? d.domain).join("・")}
           </p>
         )}
@@ -226,12 +266,12 @@ export function LegalConclusionCard({ q }: { q: string }) {
         )}
       </div>
 
-      {/* 対策案①: 法定義務 */}
+      {/* 法定義務は作業条件未入力のため候補としてのみ表示 */}
       {(data.duties ?? []).length > 0 && (
         <div className="space-y-2">
-          <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-rose-800">
+          <p className="flex items-center gap-1.5 text-xs font-bold tracking-wide text-rose-900">
             <ClipboardList className="h-4 w-4" aria-hidden="true" />
-            この区分で必要になる主な義務（対策案）
+            該当時に確認する義務候補（全件、適用条件の確認が必要）
           </p>
           {(data.duties ?? []).map((g) => (
             <details
@@ -240,7 +280,7 @@ export function LegalConclusionCard({ q }: { q: string }) {
               className="rounded-xl border border-rose-200 bg-rose-50/50 px-3 py-2"
             >
               <summary className="cursor-pointer text-sm font-semibold text-rose-900">
-                {g.group}（{g.items.length}項目）
+                {g.group}（候補{g.items.length}項目・判定不能）
               </summary>
               <ul className="mt-2 space-y-1.5">
                 {g.items.map((it) => (
@@ -265,7 +305,7 @@ export function LegalConclusionCard({ q }: { q: string }) {
             </details>
           ))}
           <p className="text-[10px] text-slate-500">
-            ※ 広く適用される基本義務の要約です。適用の細部（適用除外・裾切り等）は必ず条文・所轄署で確認してください。
+            ※ ここに表示されるのは義務の確定結果ではありません。最新SDS、成分濃度、用途、数量、工程、作業時間、換気、適用除外・裾切値を確認し、公式条文・所轄署・専門家で判断してください。
           </p>
         </div>
       )}

@@ -30,6 +30,7 @@ import kyPaperlessImplementation from "@/data/articles/ky-paperless-implementati
 import scaffold3rdRail2024 from "@/data/articles/scaffold-3rd-rail-2024.json";
 import stressCheck50Employee from "@/data/articles/stress-check-50-employee.json";
 import vibrationIsohazardForestry from "@/data/articles/vibration-isohazard-forestry.json";
+import { isArticleQuarantined } from "@/lib/article-quarantine";
 
 /** 記事本文（sections/sources 等）を除いた検索用の軽量射影。 */
 export interface ArticleSearchEntry {
@@ -85,6 +86,7 @@ export const ARTICLE_SEARCH_ENTRIES: ArticleSearchEntry[] = RAW_ARTICLES.map((a)
 export function getPublishedArticleSearchEntries(now: Date = new Date()): ArticleSearchEntry[] {
   const nowMs = now.getTime();
   return ARTICLE_SEARCH_ENTRIES.filter((a) => {
+    if (isArticleQuarantined(a.slug)) return false;
     const pub = new Date(a.publishedAt).getTime();
     return !Number.isNaN(pub) && pub <= nowMs;
   });

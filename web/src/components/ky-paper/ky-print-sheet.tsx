@@ -12,6 +12,7 @@ import type { ReactNode } from "react";
 import { evalScore, riskGrade } from "@/lib/ky/pulldown-options";
 import { KY_APPROVAL_LABEL } from "@/lib/ky/approval";
 import { getKyPaperFieldDef, riskFieldKey, type KyPaperFieldKey } from "@/lib/ky/paper-fields";
+import { isKyCleanPrintAllowed } from "@/lib/ky/readiness";
 
 const th = "border border-black bg-slate-100 px-1.5 py-1 text-left align-top font-bold whitespace-nowrap";
 const td = "border border-black px-1.5 py-1 align-top";
@@ -86,14 +87,64 @@ export function KyPrintSheet({
   const temp = record.temperature ? `${record.temperature}℃` : "";
   const approval = record.approval;
   const lastApprove = (approval?.history ?? []).slice().reverse().find((h) => h.action === "approve");
+  const cleanPrint = isKyCleanPrintAllowed(record);
 
   return (
     <div className="mx-auto bg-white text-[9pt] text-black print:text-black" style={{ width: "186mm", maxWidth: "100%" }}>
+      {!cleanPrint ? (
+        <div
+          role="status"
+          className="mb-2 border-4 border-dashed border-black px-3 py-2 text-center text-[18pt] font-black tracking-[0.2em]"
+        >
+          下書き・未確認版
+        </div>
+      ) : null}
       <div className="mb-1 flex items-end justify-between">
         {/* A4正式書式の見た目(14pt太字)を保ったまま、ページ唯一のh1(画面ヘッダー)と競合させないため非見出し(p)で描画 */}
         <p className="text-[14pt] font-bold tracking-wide">作業前 危険予知活動表（KY）</p>
         <span className="text-[9pt] text-slate-600">4ラウンド法</span>
       </div>
+
+      <table className="mb-1 w-full table-fixed border-collapse">
+        <caption className="sr-only">KY適用条件と人手確認状態</caption>
+        <tbody>
+          <tr>
+            <th scope="row" className={th}>作業場所</th>
+            <td className={td}>{record.context.workLocation}</td>
+            <th scope="row" className={th}>使用設備</th>
+            <td className={td}>{record.context.equipment}</td>
+            <th scope="row" className={th}>重機</th>
+            <td className={td}>{record.context.heavyEquipment}</td>
+          </tr>
+          <tr>
+            <th scope="row" className={th}>作業人数</th>
+            <td className={td}>{record.context.plannedPeopleCount}</td>
+            <th scope="row" className={th}>天候</th>
+            <td className={td}>{record.context.weather}</td>
+            <th scope="row" className={th}>同時作業</th>
+            <td className={td}>{record.context.simultaneousWork}</td>
+          </tr>
+          <tr>
+            <th scope="row" className={th}>変更点</th>
+            <td className={td}>{record.context.changes}</td>
+            <th scope="row" className={th}>新規入場者</th>
+            <td className={td}>{record.context.newEntrants}</td>
+            <th scope="row" className={th}>夜間</th>
+            <td className={td}>{record.context.nightWork}</td>
+          </tr>
+          <tr>
+            <th scope="row" className={th}>化学物質</th>
+            <td className={td}>{record.context.chemicals}</td>
+            <th scope="row" className={th}>熱中症条件</th>
+            <td className={td}>{record.context.heatStress}</td>
+            <th scope="row" className={th}>条件確認者</th>
+            <td className={td}>
+              {record.context.reviewerName}
+              {record.context.reviewedAt ? "（確認済み）" : "（未確認）"}
+            </td>
+          </tr>
+        </tbody>
+      </table>
 
       {/* 管理情報 */}
       <table className="w-full table-fixed border-collapse">

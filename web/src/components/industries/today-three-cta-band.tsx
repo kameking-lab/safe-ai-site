@@ -55,7 +55,7 @@ function buildReportHref(slug: IndustryContentSlug, analysisSlug?: IndustrySlug)
 
 export function TodayThreeCtaBand({ content }: TodayThreeCtaBandProps) {
   const reportHref = buildReportHref(content.slug, content.accidentAnalysisSlug);
-  const kyHref = `/ky?industry=${encodeURIComponent(content.slug)}`;
+  const kyHref = `/ky/paper?industry=${encodeURIComponent(content.slug)}`;
   const planIndustry = CONTENT_TO_PLAN_INDUSTRY[content.slug];
   const planHref = `/strategy/plan-generator?industry=${encodeURIComponent(planIndustry)}`;
   const label = content.label;

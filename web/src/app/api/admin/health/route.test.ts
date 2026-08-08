@@ -31,11 +31,11 @@ describe("GET /api/admin/health auth", () => {
     }
   });
 
-  it("returns 401 when ADMIN_HEALTH_KEY is unset (fail closed)", async () => {
+  it("returns 503 when ADMIN_HEALTH_KEY is unset (fail closed and distinguish configuration)", async () => {
     const res = await GET(new Request("https://example.test/api/admin/health?key=anything"));
-    expect(res.status).toBe(401);
+    expect(res.status).toBe(503);
     const body = await res.json();
-    expect(body.ok).toBe(false);
+    expect(body.error).toBe("auth_not_configured");
   });
 
   it("returns 401 when key is missing", async () => {
@@ -52,15 +52,12 @@ describe("GET /api/admin/health auth", () => {
     expect(res.status).toBe(401);
   });
 
-  it("returns 200 with the correct ?key= value", async () => {
+  it("rejects query-string credentials so they cannot leak through URLs", async () => {
     process.env.ADMIN_HEALTH_KEY = "expected-secret";
     const res = await GET(
       new Request("https://example.test/api/admin/health?key=expected-secret")
     );
-    expect(res.status).toBe(200);
-    const body = await res.json();
-    expect(body.ok).toBe(true);
-    expect(body.summary.ok).toBe(1);
+    expect(res.status).toBe(401);
   });
 
   it("returns 200 with a matching Authorization: Bearer header", async () => {
@@ -73,7 +70,7 @@ describe("GET /api/admin/health auth", () => {
     expect(res.status).toBe(200);
   });
 
-  it("prefers Authorization header over query string when both present", async () => {
+  it("accepts a valid header even when an unrelated query parameter is present", async () => {
     process.env.ADMIN_HEALTH_KEY = "expected-secret";
     const res = await GET(
       new Request("https://example.test/api/admin/health?key=wrong", {

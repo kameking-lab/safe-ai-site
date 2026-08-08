@@ -11,7 +11,7 @@ import {
   type ProjectScope,
 } from "@/types/asbestos";
 import { buildPreWorkSummary } from "@/lib/asbestos-engine";
-import { asbestosScopeToQuery } from "@/lib/asbestos-scope-query";
+import { putAsbestosScopeHandoff } from "@/lib/asbestos-scope-query";
 import { computeAsbestosConclusion } from "@/lib/asbestos-conclusion";
 import { ConclusionCard } from "@/components/ui/conclusion-card";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -66,26 +66,6 @@ export function InvestigationCheckerForm() {
 
   // Step 1 → Step 2 へ入力条件を引き継ぐためのクエリ。石綿レベルは事前調査前で
   // 未確定のため付けない（届出書類リスト側で選択する）。
-  const carryQuery = useMemo(
-    () =>
-      asbestosScopeToQuery({
-        buildingCategory,
-        projectCategory,
-        constructionStartYear,
-        contractValueJpyMan,
-        workAreaSqm,
-        asbestosKnownPresent,
-      }),
-    [
-      buildingCategory,
-      projectCategory,
-      constructionStartYear,
-      contractValueJpyMan,
-      workAreaSqm,
-      asbestosKnownPresent,
-    ],
-  );
-
   return (
     <div className="space-y-6">
       {/* 結論ファースト: 法令上やることが何件あるか（義務=指示の青・対象外=緑）。
@@ -272,7 +252,18 @@ export function InvestigationCheckerForm() {
 
         <div className="mt-5 flex flex-wrap gap-2">
           <Link
-            href={`/asbestos-management/notification-builder?${carryQuery}`}
+            href="/asbestos-management/notification-builder"
+            onClick={() =>
+              putAsbestosScopeHandoff({
+                buildingCategory,
+                projectCategory,
+                constructionStartYear,
+                contractValueJpyMan,
+                workAreaSqm,
+                asbestosKnownPresent,
+                workLevel: "",
+              })
+            }
             className="inline-flex min-h-[44px] items-center gap-1 rounded-lg bg-stone-700 px-4 py-2 text-sm font-semibold text-white hover:bg-stone-800"
           >
             この条件で届出書類リストを作成 →

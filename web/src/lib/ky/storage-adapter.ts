@@ -14,10 +14,11 @@
 import type { KyInstructionRecordState, KyRecordSummary } from "@/lib/types/operations";
 import { normalizeKyInstructionRecord } from "@/lib/services/operations-service";
 import { normalizeWorkers, type Worker } from "@/lib/ky/workers-master";
-import { fetchWithTimeout } from "@/lib/external/fetch-with-timeout";
+import { hasCloudConsent } from "@/lib/cloud-consent";
 
 const DEVICE_ID_KEY = "safe-ai:ky-device-id:v1";
 const SYNC_QUEUE_KEY = "safe-ai:ky-sync-queue:v1";
+let volatileDeviceId: string | null = null;
 
 export type KyCloudPull = {
   latest: KyInstructionRecordState | null;
@@ -47,35 +48,56 @@ export function isKyCloudEnabled(): boolean {
 }
 
 /** 端末ごとの匿名ID（RLS/所有権の簡易キー）。初回に生成し localStorage に保存。 */
+function createDeviceId(): string {
+  if (typeof window.crypto?.randomUUID === "function") return window.crypto.randomUUID();
+  const bytes = new Uint8Array(24);
+  window.crypto.getRandomValues(bytes);
+  return `dev_${Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("")}`;
+}
+
+/** Technical availability plus the user's explicit, versioned opt-in. */
+export function isKyCloudAuthorized(): boolean {
+  return isKyCloudEnabled() && hasCloudConsent();
+}
+
+export function isKySignageSharingAuthorized(): false {
+  return false;
+}
+
 export function getDeviceId(): string {
   if (typeof window === "undefined") return "server";
   try {
     let id = window.localStorage.getItem(DEVICE_ID_KEY);
     if (!id) {
-      id =
-        typeof window.crypto?.randomUUID === "function"
-          ? window.crypto.randomUUID()
-          : `dev_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
+      id = createDeviceId();
       window.localStorage.setItem(DEVICE_ID_KEY, id);
     }
     return id;
   } catch {
-    return "anonymous";
+    // Storage may be disabled. Preserve a per-page high-entropy capability
+    // instead of merging every restricted browser into one shared owner.
+    volatileDeviceId ??= createDeviceId();
+    return volatileDeviceId;
   }
 }
 
 // ── 既定トランスポート（fetch → /api/ky/*） ──────────────────────
 const fetchTransport: KyCloudTransport = {
-  async putKyRecord(deviceId, record) {
+  async putKyRecord(_deviceId, record) {
     const res = await fetch("/api/ky/records", {
       method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ deviceId, record }),
+      headers: {
+        "content-type": "application/json",
+        "x-cloud-consent": "ky-v1",
+      },
+      body: JSON.stringify({ record }),
     });
     return res.ok;
   },
-  async getKyRecords(deviceId) {
-    const res = await fetch(`/api/ky/records?deviceId=${encodeURIComponent(deviceId)}`);
+  async getKyRecords(_deviceId) {
+    const res = await fetch("/api/ky/records", {
+      headers: { "x-cloud-consent": "ky-v1" },
+    });
     if (!res.ok) return null;
     const data: unknown = await res.json();
     if (!data || typeof data !== "object") return null;
@@ -85,16 +107,21 @@ const fetchTransport: KyCloudTransport = {
       list: Array.isArray(d.list) ? (d.list as KyRecordSummary[]) : [],
     };
   },
-  async putWorkers(deviceId, workers) {
+  async putWorkers(_deviceId, workers) {
     const res = await fetch("/api/ky/workers", {
       method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ deviceId, workers }),
+      headers: {
+        "content-type": "application/json",
+        "x-cloud-consent": "ky-v1",
+      },
+      body: JSON.stringify({ workers }),
     });
     return res.ok;
   },
-  async getWorkers(deviceId) {
-    const res = await fetch(`/api/ky/workers?deviceId=${encodeURIComponent(deviceId)}`);
+  async getWorkers(_deviceId) {
+    const res = await fetch("/api/ky/workers", {
+      headers: { "x-cloud-consent": "ky-v1" },
+    });
     if (!res.ok) return null;
     const data: unknown = await res.json();
     if (!data || typeof data !== "object") return null;
@@ -119,19 +146,23 @@ const fetchTransport: KyCloudTransport = {
     const rec = (data as { record?: unknown })?.record;
     return rec ? normalizeKyInstructionRecord(rec) : null;
   },
-  async getKyRecordById(deviceId, id) {
+  async getKyRecordById(_deviceId, id) {
     const res = await fetch(
-      `/api/ky/records?deviceId=${encodeURIComponent(deviceId)}&id=${encodeURIComponent(id)}`
+      `/api/ky/records?id=${encodeURIComponent(id)}`,
+      { headers: { "x-cloud-consent": "ky-v1" } },
     );
     if (!res.ok) return null;
     const data: unknown = await res.json();
     const rec = (data as { record?: unknown })?.record;
     return rec ? normalizeKyInstructionRecord(rec) : null;
   },
-  async deleteKyRecord(deviceId, id) {
+  async deleteKyRecord(_deviceId, id) {
     const res = await fetch(
-      `/api/ky/records?deviceId=${encodeURIComponent(deviceId)}&id=${encodeURIComponent(id)}`,
-      { method: "DELETE" }
+      `/api/ky/records?id=${encodeURIComponent(id)}`,
+      {
+        method: "DELETE",
+        headers: { "x-cloud-consent": "ky-v1" },
+      }
     );
     return res.ok;
   },
@@ -186,7 +217,7 @@ export function hasPendingKyCloudSync(): boolean {
 // ── 公開API（UIが使う） ─────────────────────────────────────────
 /** KY記録をクラウドへ送信。失敗時はキューに退避して false を返す（例外は投げない）。 */
 export async function cloudPushKyRecord(record: KyInstructionRecordState): Promise<boolean> {
-  if (!isKyCloudEnabled()) return false;
+  if (!isKyCloudAuthorized()) return false;
   try {
     const ok = await transport.putKyRecord(getDeviceId(), record);
     if (!ok) enqueue({ record });
@@ -199,7 +230,7 @@ export async function cloudPushKyRecord(record: KyInstructionRecordState): Promi
 
 /** クラウドから最新KY記録＋一覧を取得。未設定・失敗時は null。 */
 export async function cloudPullKyRecords(): Promise<KyCloudPull | null> {
-  if (!isKyCloudEnabled()) return null;
+  if (!isKyCloudAuthorized()) return null;
   try {
     return await transport.getKyRecords(getDeviceId());
   } catch {
@@ -209,7 +240,7 @@ export async function cloudPullKyRecords(): Promise<KyCloudPull | null> {
 
 /** 作業員マスターをクラウドへ送信。失敗時はキューに退避。 */
 export async function cloudPushWorkers(workers: Worker[]): Promise<boolean> {
-  if (!isKyCloudEnabled()) return false;
+  if (!isKyCloudAuthorized()) return false;
   try {
     const ok = await transport.putWorkers(getDeviceId(), workers);
     if (!ok) enqueue({ workers });
@@ -222,7 +253,7 @@ export async function cloudPushWorkers(workers: Worker[]): Promise<boolean> {
 
 /** クラウドから作業員マスターを取得。未設定・失敗時は null。 */
 export async function cloudPullWorkers(): Promise<Worker[] | null> {
-  if (!isKyCloudEnabled()) return null;
+  if (!isKyCloudAuthorized()) return null;
   try {
     return await transport.getWorkers(getDeviceId());
   } catch {
@@ -232,7 +263,7 @@ export async function cloudPullWorkers(): Promise<Worker[] | null> {
 
 /** Phase 6: サイネージ共有セッションを作成し6桁コードを返す（クラウド未設定なら null）。 */
 export async function cloudCreateSignageSession(record: KyInstructionRecordState): Promise<string | null> {
-  if (!isKyCloudEnabled()) return null;
+  if (!isKySignageSharingAuthorized()) return null;
   try {
     return await transport.createSignageSession(record);
   } catch {
@@ -250,40 +281,25 @@ export async function cloudCreateSignageSession(record: KyInstructionRecordState
  */
 export type SignageShareResult =
   | { ok: true; code: string }
-  | { ok: false; reason: "cloud_not_configured" | "server_error" | "busy" | "network" };
+  | {
+      ok: false;
+      reason:
+        | "not_operationally_verified"
+        | "cloud_not_configured"
+        | "server_error"
+        | "busy"
+        | "network";
+    };
 
 export async function cloudCreateSignageSessionDetailed(
-  record: KyInstructionRecordState
+  _record: KyInstructionRecordState
 ): Promise<SignageShareResult> {
-  if (!isKyCloudEnabled()) return { ok: false, reason: "cloud_not_configured" };
-  try {
-    const res = await fetchWithTimeout("/api/ky/signage", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ record }),
-      timeoutMs: 12000,
-    });
-    const data: unknown = await res.json().catch(() => ({}));
-    const code = (data as { code?: unknown })?.code;
-    if (res.ok && typeof code === "string") return { ok: true, code };
-    const reason = (data as { reason?: unknown })?.reason;
-    if (res.status === 503 && reason === "cloud_not_configured") {
-      return { ok: false, reason: "cloud_not_configured" };
-    }
-    if (reason === "code_collision" || res.status === 503) {
-      return { ok: false, reason: "busy" };
-    }
-    // db_error(502, Supabase権限不足等) や 5xx はサーバー側の問題。
-    return { ok: false, reason: "server_error" };
-  } catch {
-    // TimeoutError / ネットワーク例外。
-    return { ok: false, reason: "network" };
-  }
+  return { ok: false, reason: "not_operationally_verified" };
 }
 
 /** Phase 6: 6桁コードから共有KYを取得（クラウド未設定・期限切れ・失敗は null）。 */
 export async function cloudGetSignageSession(code: string): Promise<KyInstructionRecordState | null> {
-  if (!isKyCloudEnabled()) return null;
+  if (!isKySignageSharingAuthorized()) return null;
   try {
     return await transport.getSignageSession(code);
   } catch {
@@ -293,7 +309,7 @@ export async function cloudGetSignageSession(code: string): Promise<KyInstructio
 
 /** P0-A: クラウドの単一KYを id で取得（未設定・失敗は null）。 */
 export async function cloudGetKyRecordById(id: string): Promise<KyInstructionRecordState | null> {
-  if (!isKyCloudEnabled()) return null;
+  if (!isKyCloudAuthorized()) return null;
   try {
     return await transport.getKyRecordById(getDeviceId(), id);
   } catch {
@@ -303,7 +319,7 @@ export async function cloudGetKyRecordById(id: string): Promise<KyInstructionRec
 
 /** P0-A: クラウドのKYを id で削除（未設定・失敗は false）。 */
 export async function cloudDeleteKyRecord(id: string): Promise<boolean> {
-  if (!isKyCloudEnabled()) return false;
+  if (!isKyCloudAuthorized()) return false;
   try {
     return await transport.deleteKyRecord(getDeviceId(), id);
   } catch {
@@ -313,7 +329,7 @@ export async function cloudDeleteKyRecord(id: string): Promise<boolean> {
 
 /** 保留キューの再送（オンライン復帰時・マウント時に呼ぶ）。成功した分だけキューから消す。 */
 export async function flushKyCloudQueue(): Promise<void> {
-  if (!isKyCloudEnabled()) return;
+  if (!isKyCloudAuthorized()) return;
   const q = readQueue();
   if (!q.record && !q.workers) return;
   const deviceId = getDeviceId();

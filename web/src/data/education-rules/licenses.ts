@@ -17,7 +17,7 @@ export const LICENSES: EducationCert[] = [
     relatedLaw: "安衛法第61条・安衛令第20条第6号・クレーン則第223条",
     duration: "国家試験（学科＋実技）合格 — 受験資格に実務経験または訓練修了が必要",
     workCategories: ["construction", "manufacturing", "logistics", "shipbuilding"],
-    keywords: ["クレーン運転士", "クレーン免許", "天井クレーン", "橋形クレーン", "デリック", "限定なし"],
+    keywords: ["クレーン", "クレーン運転士", "クレーン免許", "天井クレーン", "橋形クレーン", "デリック", "床上運転式", "無線操作", "限定なし"],
     relatedCertIds: ["st-crane-5t", "se-36-15-crane-under5t"],
     notes: "クレーン限定免許・床上運転式クレーン限定免許あり。移動式クレーンは別免許",
   },
@@ -29,7 +29,7 @@ export const LICENSES: EducationCert[] = [
     relatedLaw: "安衛法第61条・安衛令第20条第7号・クレーン則第229条",
     duration: "国家試験（学科＋実技）合格",
     workCategories: ["construction", "manufacturing", "logistics"],
-    keywords: ["移動式クレーン運転士", "ラフター", "トラッククレーン", "オールテレーン", "免許"],
+    keywords: ["移動式クレーン", "移動式クレーン運転士", "ラフター", "トラッククレーン", "オールテレーン", "免許"],
     relatedCertIds: ["st-mobile-crane", "se-36-16-mobile-crane"],
     notes: "5t未満は小型移動式クレーン運転技能講習修了で可",
   },
@@ -75,11 +75,11 @@ export const LICENSES: EducationCert[] = [
     certType: "license",
     targetWork: "水面下での潜水業務（土木・建設・調査・救助等）",
     relatedLaw: "安衛法第61条・安衛令第20条第9号・高圧則第52条",
-    duration: "国家試験（学科）合格 — 実務経験または訓練修了が必要",
+    duration: "国家試験（学科）合格 — 受験資格の制限なし（免許申請要件は公式案内を確認）",
     workCategories: ["construction", "general"],
     keywords: ["潜水士", "潜水", "水中作業", "水中溶接", "海中", "免許"],
     relatedCertIds: ["se-36-23-sensui-soki"],
-    notes: "水深10m以上の潜水業務は免許が必須。送気式（ヘルメット潜水）も含む",
+    notes: "水深を問わず潜水業務には潜水士免許が必要。送気式の送気・調節等は別途特別教育の対象",
   },
   // === ガス溶接・放射線系免許 ===
   {
@@ -103,7 +103,7 @@ export const LICENSES: EducationCert[] = [
     duration: "国家試験（学科）合格",
     workCategories: ["manufacturing", "construction"],
     keywords: ["エックス線", "X線", "非破壊検査", "放射線作業主任者", "免許"],
-    relatedCertIds: ["se-36-28-xray-gamma", "st-radiation-chief"],
+    relatedCertIds: ["se-36-28-xray-gamma"],
   },
   {
     id: "lic-gamma-chief",
@@ -139,7 +139,6 @@ export const LICENSES: EducationCert[] = [
     duration: "国家試験（学科＋実技）合格",
     workCategories: ["mining", "construction"],
     keywords: ["発破", "爆薬", "火薬", "ダイナマイト", "爆破", "発破技士", "免許"],
-    relatedCertIds: ["st-hakkaku-chief"],
     notes: "火薬類の取扱いには火薬類取締法に基づく火薬類取扱保安責任者免状（経産省）も必要な場合あり",
   },
 ];

@@ -4,6 +4,23 @@
 
 export type JmaMapLevel = "none" | "advisory" | "warning" | "special";
 
+export type JmaSourceIssue =
+  | "fetch-failed"
+  | "schema-mismatch"
+  | "future-datetime"
+  | "abnormal-datetime"
+  | "stale"
+  | "unverified";
+
+export type JmaFetchQuality = {
+  status: "live" | "degraded" | "fallback";
+  attempted: number;
+  succeeded: number;
+  failed: number;
+  /** Distinct fail-closed reasons; never infer "no warning" from these. */
+  issues?: JmaSourceIssue[];
+};
+
 export type JmaWarningEntry = {
   sourceCode: string;
   level: JmaMapLevel;
@@ -18,14 +35,28 @@ export type JmaWarningEntry = {
   }>;
 };
 
+export type JmaWarningRegionSource = "live" | "fallback";
+
 export type JmaWarningsByIso = Record<
   string,
-  { level: JmaMapLevel; entries: JmaWarningEntry[] }
+  {
+    level: JmaMapLevel;
+    entries: JmaWarningEntry[];
+    /**
+     * Runtime acquisition provenance for this prefecture.
+     * Omitted in legacy/static snapshots, which must not be treated as current
+     * when the dataset quality is degraded or fallback.
+     */
+    sourceStatus?: JmaWarningRegionSource;
+    sourceFetchedAt?: string | null;
+    sourceIssue?: JmaSourceIssue;
+  }
 >;
 
 export type JmaWarningsFile = {
   fetchedAt: string;
   byIso: JmaWarningsByIso;
+  quality?: JmaFetchQuality;
 };
 
 export type JmaWeatherEntry = {
@@ -39,6 +70,7 @@ export type JmaWeatherEntry = {
 export type JmaWeatherFile = {
   fetchedAt: string;
   byIso: Record<string, JmaWeatherEntry>;
+  quality?: JmaFetchQuality;
 };
 
 export type JmaEarthquake = {
@@ -58,6 +90,7 @@ export type JmaEarthquake = {
 export type JmaEarthquakesFile = {
   fetchedAt: string;
   items: JmaEarthquake[];
+  quality?: JmaFetchQuality;
 };
 
 export type JmaIndexFile = {

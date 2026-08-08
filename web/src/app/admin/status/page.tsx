@@ -1,7 +1,6 @@
 ﻿import fs from "node:fs";
 import path from "node:path";
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 
 export const metadata: Metadata = {
@@ -9,19 +8,9 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false, nocache: true, noarchive: true },
 };
 
-const VALID_KEY = process.env.STRATEGY_AUTH_PASSWORD ?? "";
 const REPORT_FILENAME = "comprehensive-status-report-2026-05-01.md";
 
-interface Props {
-  searchParams: Promise<{ key?: string }>;
-}
-
-export default async function AdminStatusPage({ searchParams }: Props) {
-  const params = await searchParams;
-  if (params.key !== VALID_KEY) {
-    notFound();
-  }
-
+export default async function AdminStatusPage() {
   const md = readReport();
   const blocks = parseMarkdown(md);
   const toc = blocks
@@ -84,21 +73,23 @@ export default async function AdminStatusPage({ searchParams }: Props) {
 }
 
 function readReport(): string {
-  // 本番ビルドでの配置を優先（web/ 内コピー）。なければ開発時の docs/ オリジナルにフォールバック
-  // 実ファイルは next.config.ts の outputFileTracingIncludes で明示トレース
-  const candidates = [
-    path.join(process.cwd(), "src", "app", "admin", "status", "report.md"),
-    path.join(process.cwd(), "..", "docs", REPORT_FILENAME),
-    path.join(process.cwd(), "docs", REPORT_FILENAME),
-  ];
-  for (const p of candidates) {
-    try {
-      return fs.readFileSync(p, "utf-8");
-    } catch {
-      // 次の候補へ
-    }
+  // Runtimeで読む正本はweb配下の同梱コピーだけに限定する。
+  // リポジトリ上位のdocs/をprocess.cwd()起点で探索すると、NFTがプロジェクト
+  // 全体をfunction依存としてtraceするため禁止する。配置はnext.config.tsの
+  // outputFileTracingIncludesで明示している。
+  const reportPath = path.join(
+    process.cwd(),
+    "src",
+    "app",
+    "admin",
+    "status",
+    "report.md",
+  );
+  try {
+    return fs.readFileSync(reportPath, "utf-8");
+  } catch {
+    return "# レポート未取得\n\n本番ビルドにレポートファイルが含まれていない可能性があります。";
   }
-  return "# レポート未取得\n\n本番ビルドにレポートファイルが含まれていない可能性があります。";
 }
 
 type HeadingBlock = { type: "heading"; level: 1 | 2 | 3 | 4; text: string; id: string };

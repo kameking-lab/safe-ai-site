@@ -1,10 +1,8 @@
 name: newsletter-weekly
 
 on:
-  # 毎週月曜日 9:00 JST (= UTC 00:00)
-  schedule:
-    - cron: "0 0 * * 1"
-  # 手動実行（dry-run オプション付き）
+  # 一次資料で検証済みの週次コンテンツ生成が整うまでは自動配信しない。
+  # 手動実行も既定はdry-runで、明示的にfalseを選んだ場合だけ送信可能。
   workflow_dispatch:
     inputs:
       dry_run:
@@ -20,6 +18,9 @@ jobs:
   send:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    concurrency:
+      group: newsletter-weekly
+      cancel-in-progress: false
 
     steps:
       - name: Checkout
@@ -37,9 +38,10 @@ jobs:
           AUTH_SECRET: ${{ secrets.AUTH_SECRET }}
           NOTIFY_FROM: ${{ secrets.NOTIFY_FROM }}
           NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
+          ALLOW_NEWSLETTER_SEND: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.dry_run == 'false' && 'true' || 'false' }}
         run: |
-          DRY_FLAG=""
-          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
-            DRY_FLAG="--dry-run"
+          SEND_FLAG="--dry-run"
+          if [ "${{ github.event.inputs.dry_run }}" = "false" ]; then
+            SEND_FLAG="--send"
           fi
-          node scripts/send-newsletter.mjs $DRY_FLAG
+          node scripts/send-newsletter.mjs "$SEND_FLAG"

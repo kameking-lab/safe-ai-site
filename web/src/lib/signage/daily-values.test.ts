@@ -63,20 +63,9 @@ describe("computeSignageWbgt", () => {
     expect(computeSignageWbgt(30, undefined)).toBeNull();
   });
 
-  it("気温・湿度からWBGTとリスク評価を返す", () => {
-    const reading = computeSignageWbgt(33, 70);
-    expect(reading).not.toBeNull();
-    expect(reading!.wbgt).toBeGreaterThan(20);
-    expect(reading!.risk.level).toBeDefined();
-  });
-
-  it("高温高湿では危険寄りのリスクレベルになる", () => {
-    const reading = computeSignageWbgt(38, 80);
-    expect(["warning", "severe-warning", "danger"]).toContain(reading!.risk.level);
-  });
-
-  it("涼しい気温では安全寄りのリスクレベルになる", () => {
-    const reading = computeSignageWbgt(10, 40);
-    expect(reading!.risk.level).toBe("safe");
+  it("気温・湿度だけの推定値は高温でも低温でも表示しない", () => {
+    expect(computeSignageWbgt(33, 70)).toBeNull();
+    expect(computeSignageWbgt(38, 80)).toBeNull();
+    expect(computeSignageWbgt(10, 40)).toBeNull();
   });
 });

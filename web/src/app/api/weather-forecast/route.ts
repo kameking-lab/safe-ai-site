@@ -6,6 +6,10 @@
 import { NextResponse } from "next/server";
 import { withCircuitBreaker, CircuitOpenError } from "@/lib/external/circuit-breaker";
 import { fetchWithTimeout } from "@/lib/external/fetch-with-timeout";
+import {
+  hasExpectedTokyoMetadata,
+  parseOpenMeteoTargetTime,
+} from "@/lib/weather/open-meteo-hourly";
 
 export type ForecastDay = {
   date: string;          // "2026-04-11"
@@ -30,9 +34,12 @@ export type WeatherForecastApiResponse = {
   /** Open-Meteo 取得に失敗してフォールバック挙動になった場合 true */
   degraded?: boolean;
   degradedReason?: string;
+  unavailableRegions?: string[];
 };
 
 type DailyPayload = {
+  timezone?: string;
+  utc_offset_seconds?: number;
   daily?: {
     time?: string[];
     weather_code?: number[];
@@ -86,13 +93,36 @@ async function fetchRegionForecast(region: (typeof REGIONS)[number]): Promise<Re
 
   const res = await fetchWithTimeout(u.toString(), {
     headers: { Accept: "application/json" },
-    next: { revalidate: 21600 }, // 6h: 日次予報は次日精度に影響なし (docs/perf/isr-followup.md)
+    cache: "no-store",
     timeoutMs: 6000,
   });
   if (!res.ok) throw new Error(`open-meteo HTTP ${res.status} for ${region.id}`);
   const payload = (await res.json()) as DailyPayload;
   const daily = payload.daily;
-  const times = daily?.time ?? [];
+  const times = daily?.time;
+  const numericSeries = [
+    daily?.weather_code,
+    daily?.temperature_2m_max,
+    daily?.temperature_2m_min,
+    daily?.precipitation_sum,
+    daily?.wind_speed_10m_max,
+  ];
+  if (
+    !hasExpectedTokyoMetadata(payload) ||
+    !Array.isArray(times) ||
+    times.length === 0 ||
+    numericSeries.some(
+      (series) =>
+        !Array.isArray(series) ||
+        series.length < times.length ||
+        series.slice(0, times.length).some((value) => !Number.isFinite(value)),
+    )
+  ) {
+    throw new Error(`open-meteo invalid daily payload for ${region.id}`);
+  }
+  if (times.some((time) => !parseOpenMeteoTargetTime(time, payload, { allowDateOnly: true }))) {
+    throw new Error(`open-meteo invalid daily time for ${region.id}`);
+  }
 
   const days: ForecastDay[] = times.map((date, i) => {
     const code = daily?.weather_code?.[i] ?? 0;
@@ -116,54 +146,61 @@ async function fetchRegionForecast(region: (typeof REGIONS)[number]): Promise<Re
   return { regionId: region.id, regionLabel: region.label, days };
 }
 
-function buildDegradedForecast(reason: string): WeatherForecastApiResponse {
-  const days: ForecastDay[] = Array.from({ length: 7 }).map((_, i) => {
-    const d = new Date();
-    d.setDate(d.getDate() + i);
-    return {
-      date: d.toISOString().slice(0, 10),
-      weatherLabel: "情報なし",
-      weatherCode: 0,
-      maxTempC: 0,
-      minTempC: 0,
-      precipMm: 0,
-      maxWindMs: 0,
-      alertLevel: "none",
-    };
-  });
-  return {
-    regions: REGIONS.map((r) => ({ regionId: r.id, regionLabel: r.label, days })),
-    fetchedAt: new Date().toISOString(),
-    degraded: true,
-    degradedReason: reason,
-  };
-}
-
 export async function GET() {
   try {
-    const regions = await withCircuitBreaker(
+    const settled = await withCircuitBreaker(
       "open-meteo",
-      () => Promise.all(REGIONS.map(fetchRegionForecast)),
+      async () => {
+        const results = await Promise.allSettled(
+          REGIONS.map(fetchRegionForecast),
+        );
+        if (results.every((result) => result.status === "rejected")) {
+          throw new Error("all Open-Meteo regions unavailable");
+        }
+        return results;
+      },
       { failureThreshold: 5, cooldownMs: 120_000 }
     );
+    const regions = settled.flatMap((result) =>
+      result.status === "fulfilled" ? [result.value] : [],
+    );
+    const unavailableRegions = settled.flatMap((result, index) =>
+      result.status === "rejected" ? [REGIONS[index]!.id] : [],
+    );
+    const degraded = unavailableRegions.length > 0;
     const body: WeatherForecastApiResponse = {
       regions,
       fetchedAt: new Date().toISOString(),
+      ...(degraded
+        ? {
+            degraded: true,
+            degradedReason: "partial_region_failure",
+            unavailableRegions,
+          }
+        : {}),
     };
     return NextResponse.json(body, {
-      status: 200,
-      headers: { "x-weather-source": "open-meteo" },
+      status: degraded ? 206 : 200,
+      headers: {
+        "Cache-Control": "no-store",
+        "x-weather-source": degraded ? "open-meteo-partial" : "open-meteo",
+      },
     });
   } catch (err) {
-    const reason = err instanceof CircuitOpenError
-      ? "Open-Meteoが連続失敗中（自動復旧待ち）"
-      : err instanceof Error
-        ? err.message
-        : "天気予報の取得に失敗";
-    console.error("[weather-forecast] degraded:", reason);
-    return NextResponse.json(buildDegradedForecast(reason), {
-      status: 200,
-      headers: { "x-weather-source": "fallback" },
+    const failureKind = err instanceof CircuitOpenError ? "circuit_open" : "source_error";
+    console.error("[weather-forecast] source unavailable", { failureKind });
+    return NextResponse.json<WeatherForecastApiResponse>({
+      regions: [],
+      fetchedAt: new Date().toISOString(),
+      degraded: true,
+      degradedReason: "weather_source_unavailable",
+    }, {
+      status: 503,
+      headers: {
+        "Cache-Control": "no-store",
+        "Retry-After": "60",
+        "x-weather-source": "unavailable",
+      },
     });
   }
 }

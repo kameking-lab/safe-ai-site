@@ -1,38 +1,46 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import ContactForm from "./ContactForm";
-import InquiryForm from "./InquiryForm";
-import { PAID_MODE } from "@/lib/paid-mode";
-import { withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
-
+import { PageContainer } from "@/components/layout";
 import { PageJsonLd } from "@/components/page-json-ld";
+import { withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
+import InquiryForm from "./InquiryForm";
+
+const title = "ご意見・ご質問・お問い合わせ";
+const description =
+  "安全AIポータルのデータ訂正、機能改善、ご質問を受け付ける窓口です。業務自動化・講習・資料作成の相談は保護された専用フォームへ案内します。";
+
 export const metadata: Metadata = {
-  title: PAID_MODE ? "お問い合わせ" : "ご意見・ご質問・改善提案",
-  description: PAID_MODE
-    ? "安全AIポータルへのお問い合わせはこちらから。機能のご要望・バグ報告・ご質問をお待ちしています。"
-    : "安全AIポータル（労働安全 × AI/DX 研究プロジェクト）へのご意見・ご質問・改善提案・データ誤りの指摘を受け付けています。匿名でも投稿できます。",
+  title,
+  description,
   alternates: { canonical: "/contact" },
-  openGraph: withSiteOpenGraph("/contact", {
-    title: PAID_MODE ? "お問い合わせ" : "ご意見・改善提案",
-    description: PAID_MODE
-      ? "安全AIポータルへのお問い合わせはこちらから。機能のご要望・バグ報告・ご質問をお待ちしています。"
-      : "個人運営の研究プロジェクトへのご意見・ご質問・改善提案を受け付けています。",
-  }),
-  twitter: withSiteTwitter({
-    card: "summary",
-    title: PAID_MODE ? "お問い合わせ" : "ご意見・改善提案",
-    description: PAID_MODE
-      ? "安全AIポータルへのお問い合わせはこちらから。"
-      : "安全AIポータル（研究プロジェクト）へのご意見・ご質問を受け付けています。",
-  }),
+  openGraph: withSiteOpenGraph("/contact", { title, description }),
+  twitter: withSiteTwitter({ card: "summary", title, description }),
 };
+
+function ContactFallback() {
+  return (
+    <PageContainer width="narrow" className="space-y-4">
+      <header className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <p className="text-sm font-semibold text-emerald-700">お問い合わせ窓口</p>
+        <h1 className="mt-2 text-2xl font-bold text-slate-950 sm:text-3xl">
+          {title}
+        </h1>
+        <p className="mt-3 text-sm leading-7 text-slate-700">{description}</p>
+      </header>
+      <p role="status" className="text-sm text-slate-600">
+        入力フォームを読み込んでいます。
+      </p>
+    </PageContainer>
+  );
+}
 
 export default function ContactPage() {
   return (
-    <Suspense fallback={null}>
-      {/* SEO: WebPage + BreadcrumbList */}
-      <PageJsonLd name="お問い合わせ" description="安全AIポータル へのお問い合わせフォーム。法人案内・取材依頼・OEM/再販相談などをこちらから。" path="/contact" />
-      {PAID_MODE ? <ContactForm /> : <InquiryForm />}
-    </Suspense>
+    <>
+      <PageJsonLd name={title} description={description} path="/contact" />
+      <Suspense fallback={<ContactFallback />}>
+        <InquiryForm />
+      </Suspense>
+    </>
   );
 }

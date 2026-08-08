@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
-import { FlaskConical, Plus, X, Loader2, Save, Sparkles, Printer, AlertTriangle } from "lucide-react";
+import { FlaskConical, Plus, X, Loader2, Save, Printer, AlertTriangle } from "lucide-react";
 import type { MergedChemical } from "@/lib/mhlw-chemicals";
 import { searchMergedChemicalsSlim as searchMergedChemicals } from "@/lib/mhlw-chemicals-slim";
 import { REGULATION_TAGS, normalizeTags } from "@/lib/regulation-tag-labels";
@@ -15,12 +15,12 @@ import {
   hazardsFromFlags,
   type MixtureComponentInput,
 } from "@/lib/chemical/mixture-ra";
-import { saveChemicalRaRecord, isChemicalRaCloudEnabled } from "@/lib/chemical/ra-cloud";
+import { saveChemicalRaRecord } from "@/lib/chemical/ra-cloud";
 
 /**
  * P2-4 混合物RA。複数成分を選び濃度を入力 → 各成分の実データ（規制法・有害性）を和集合で集約し、
- * AI（Gemini）で混合時の注意を提案。数値ばく露計算は行わない（創作回避）。
- * 既存単成分RAパネルには非干渉のスタンドアロン・セクション。クラウド保管（type=mixture）・印刷対応。
+ * 成分の入力整理と収録済み規制情報の和集合だけを表示する。作業条件を検証できないため、
+ * 外部AIによる換気・PPE・混触助言は行わない。保存内容も評価結果ではなく入力整理メモ。
  */
 const CATEGORY_FAMILY: Record<string, string> = {
   osha: "労働安全衛生法 特別則",
@@ -63,10 +63,9 @@ function resolveComponent(chem: MergedChemical, percent: string): MixtureCompone
 export function MixtureRaPanel() {
   const [query, setQuery] = useState("");
   const [rows, setRows] = useState<Row[]>([]);
-  const [advice, setAdvice] = useState<string | null>(null);
-  const [aiBusy, setAiBusy] = useState(false);
-  const [aiError, setAiError] = useState<string | null>(null);
   const [saveMsg, setSaveMsg] = useState<string | null>(null);
+  const [saveBusy, setSaveBusy] = useState(false);
+  const [humanReviewConfirmed, setHumanReviewConfirmed] = useState(false);
 
   const candidates = useMemo(() => (query.trim().length >= 1 ? searchMergedChemicals(query.trim(), 6) : []), [query]);
 
@@ -77,51 +76,58 @@ export function MixtureRaPanel() {
       return [...prev, { key, chem, percent: "" }];
     });
     setQuery("");
-    setAdvice(null);
   }, []);
 
   const components = useMemo(() => rows.map((r) => resolveComponent(r.chem, r.percent)), [rows]);
   const agg = useMemo(() => aggregateMixture(components), [components]);
-
-  const askAi = useCallback(async () => {
-    setAiBusy(true);
-    setAiError(null);
-    setAdvice(null);
-    try {
-      const res = await fetch("/api/chemical/mixture-suggest", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          components: components.map((c) => ({ name: c.name, cas: c.cas, weightPercent: c.weightPercent })),
-          lawFamilies: agg.lawFamilies,
-          hazards: agg.hazards,
-        }),
-      });
-      const data: unknown = await res.json();
-      if (!res.ok || !(data as { ok?: boolean })?.ok) {
-        setAiError("AI提案を取得できませんでした（時間をおいて再試行）。");
-        return;
-      }
-      setAdvice((data as { advice: string }).advice);
-    } catch {
-      setAiError("通信エラーが発生しました。");
-    } finally {
-      setAiBusy(false);
-    }
-  }, [components, agg]);
+  const completeForReview =
+    rows.length >= 2 &&
+    components.every((component) =>
+      Boolean(component.cas) &&
+      typeof component.weightPercent === "number" &&
+      Number.isFinite(component.weightPercent) &&
+      component.weightPercent > 0 &&
+      component.weightPercent <= 100
+    ) &&
+    Math.abs(agg.totalPercent - 100) <= 0.01;
 
   const onSave = useCallback(async () => {
     setSaveMsg(null);
-    const label = `混合物: ${rows.map((r) => r.chem.primaryName).join(" + ")}`.slice(0, 120);
-    await saveChemicalRaRecord({
-      substance: label,
-      cas: "",
-      workContent: "混合物RA",
-      exposureBand: agg.hasCarcinogen ? "発がん性成分あり" : "",
-      payload: { type: "mixture", components, aggregate: agg, advice },
-    });
-    setSaveMsg(isChemicalRaCloudEnabled() ? "保存しました（端末＋クラウド）。" : "保存しました（端末）。");
-  }, [rows, components, agg, advice]);
+    if (!completeForReview || !humanReviewConfirmed) {
+      setSaveMsg("全成分・合計100%と最新SDSを人が確認してから保存してください。");
+      return;
+    }
+    setSaveBusy(true);
+    try {
+      const label = `混合物: ${rows.map((r) => r.chem.primaryName).join(" + ")}`.slice(0, 120);
+      const result = await saveChemicalRaRecord({
+        substance: label,
+        cas: "",
+        workContent: "混合物RA",
+        exposureBand: agg.hasCarcinogen ? "発がん性成分あり" : "",
+        payload: {
+          type: "mixture",
+          components: components.map((component) => ({
+            name: component.name,
+            cas: component.cas,
+            concentration: component.weightPercent,
+            unit: "wt%",
+          })),
+          humanReviewConfirmed: true,
+          humanReviewAt: new Date().toISOString(),
+        },
+      });
+      setSaveMsg(
+        result.localStatus === "saved-locally"
+          ? "この端末だけに保存しました。クラウドへは送信していません。"
+          : "端末内への保存に失敗しました。空き容量とブラウザ設定を確認してください。",
+      );
+    } catch {
+      setSaveMsg("保存に失敗しました。");
+    } finally {
+      setSaveBusy(false);
+    }
+  }, [rows, components, agg, completeForReview, humanReviewConfirmed]);
 
   return (
     <section className="rounded-2xl border border-violet-200 bg-violet-50/60 p-4 sm:p-5 space-y-4 print:border-slate-300">
@@ -135,15 +141,17 @@ export function MixtureRaPanel() {
             <button
               type="button"
               onClick={() => void onSave()}
-              className="inline-flex items-center gap-1 rounded-lg border border-emerald-300 bg-white px-3 py-1.5 text-xs font-bold text-emerald-700 hover:bg-emerald-50"
+              disabled={saveBusy || !completeForReview || !humanReviewConfirmed}
+              className="inline-flex min-h-[44px] items-center gap-1 rounded-lg border border-emerald-300 bg-white px-3 py-2 text-xs font-bold text-emerald-700 hover:bg-emerald-50 disabled:opacity-50"
             >
-              <Save className="h-3 w-3" /> 保存
+              {saveBusy ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />} {saveBusy ? "保存中…" : "保存"}
             </button>
             {saveMsg && <span className="text-[10px] text-emerald-700">{saveMsg}</span>}
             <button
               type="button"
               onClick={() => window.print()}
-              className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50"
+              disabled={!completeForReview || !humanReviewConfirmed}
+              className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
             >
               <Printer className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />印刷
             </button>
@@ -153,6 +161,9 @@ export function MixtureRaPanel() {
       <p className="text-xs text-slate-600">
         塗料・洗浄剤・接着剤など複数成分を扱う作業向け。各成分の規制法・有害性を集約します。
         ばく露濃度の数値計算は行いません（最終分類は公式SDS・専門家に従ってください）。
+      </p>
+      <p className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs leading-relaxed text-amber-950">
+        営業秘密の配合、未公開製品名、会社名・現場名は入力しないでください。成分不明の製品は評価せず、製品固有の最新SDSを入手してください。単位は質量%として扱い、体積%・ppmを暗黙変換しません。
       </p>
 
       {/* 成分追加 */}
@@ -171,11 +182,11 @@ export function MixtureRaPanel() {
                 <button
                   type="button"
                   onClick={() => addChem(m)}
-                  className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-violet-50"
+                  className="flex min-h-[44px] w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-violet-50"
                 >
                   <Plus className="h-3 w-3 text-violet-500" />
                   {m.primaryName}
-                  {m.cas && <span className="text-xs text-slate-400">CAS {m.cas}</span>}
+                  {m.cas && <span className="text-xs text-slate-600">CAS {m.cas}</span>}
                 </button>
               </li>
             ))}
@@ -190,7 +201,7 @@ export function MixtureRaPanel() {
             <li key={r.key} className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white p-2">
               <span className="flex-1 text-sm font-medium text-slate-800">
                 {r.chem.primaryName}
-                {r.chem.cas && <span className="ml-1 text-xs text-slate-400">CAS {r.chem.cas}</span>}
+                {r.chem.cas && <span className="ml-1 text-xs text-slate-600">CAS {r.chem.cas}</span>}
               </span>
               <input
                 inputMode="decimal"
@@ -200,14 +211,14 @@ export function MixtureRaPanel() {
                 }
                 placeholder="%"
                 aria-label={`${r.chem.primaryName} の濃度%`}
-                className="w-16 rounded border border-slate-300 px-2 py-1 text-right text-sm print:border-0"
+                className="min-h-[44px] w-20 rounded border border-slate-300 px-2 py-2 text-right text-sm print:border-0"
               />
-              <span className="text-xs text-slate-500">%</span>
+              <span className="text-xs text-slate-500">wt%</span>
               <button
                 type="button"
                 onClick={() => setRows((prev) => prev.filter((x) => x.key !== r.key))}
                 aria-label="削除"
-                className="rounded p-1 text-slate-400 hover:bg-rose-50 hover:text-rose-600 print:hidden"
+                className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded p-2 text-slate-500 hover:bg-rose-50 hover:text-rose-700 print:hidden"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -253,28 +264,23 @@ export function MixtureRaPanel() {
             )}
           </div>
 
-          {/* AI提案 */}
-          <div className="print:hidden">
-            <button
-              type="button"
-              onClick={() => void askAi()}
-              disabled={aiBusy || rows.length < 2}
-              className="inline-flex items-center gap-1 rounded-lg bg-violet-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-violet-700 disabled:opacity-50"
-            >
-              {aiBusy ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
-              AIに混合時の注意を尋ねる
-            </button>
-            {rows.length < 2 && <span className="ml-2 text-[11px] text-slate-500">2成分以上で利用できます</span>}
-            {aiError && <p className="mt-1 text-xs text-rose-700">{aiError}</p>}
+          <div className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs leading-6 text-amber-950">
+            この画面は成分、CAS、質量%と収録済み規制情報の入力整理メモです。取扱量、時間、頻度、
+            換気、温度、飛散、皮膚接触、保護具を評価していないため、安全ランクや換気・PPEの助言は出しません。
+            製品固有の最新SDSを確認し、公式CREATE-SIMPLE等の公式手順と実測値を用いて、化学物質管理者または専門家が最終評価してください。
           </div>
-          {advice && (
-            <div className="rounded-lg bg-slate-50 p-3 text-xs leading-relaxed text-slate-700 whitespace-pre-wrap">
-              {advice}
-            </div>
-          )}
-          <p className="text-[11px] text-slate-400">
+          <p className="text-[11px] text-slate-600">
             ※ 集約は各成分の収録データの和集合です。混合物としての正式なGHS分類・ばく露評価は公式SDS・専門家の判断によります。
           </p>
+          <label className="flex min-h-[44px] items-center gap-2 rounded border border-slate-300 bg-slate-50 px-3 text-xs font-semibold text-slate-900 print:hidden">
+            <input
+              type="checkbox"
+              checked={humanReviewConfirmed}
+              onChange={(event) => setHumanReviewConfirmed(event.target.checked)}
+              className="h-5 w-5"
+            />
+            製品固有の最新SDS、全成分、質量%合計100%を人が確認しました（評価完了の確認ではありません）
+          </label>
         </div>
       )}
     </section>

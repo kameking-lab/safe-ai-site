@@ -1,65 +1,100 @@
 import type { Metadata } from "next";
-import { ogImageUrl } from "@/lib/og-url";
-import { ChatbotBody } from "./ChatbotBody";
-import { withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
-import { SITE_URL } from "@/lib/seo-metadata";
 import {
   JsonLd,
-  webPageSchema,
   breadcrumbSchema,
-  qaPageSchema,
   webApplicationSchema,
-  COPILOT_FEATURE_PEERS,
+  webPageSchema,
 } from "@/components/json-ld";
-import { LAW_SOURCE_COUNT } from "@/data/laws";
-const _title = `安衛法AIチャットボット｜${LAW_SOURCE_COUNT}法令等を根拠条文付きで即答（無料）`;
-const _desc =
-  `安衛法 AI チャットボット（無料）— 労働安全衛生法・安衛則・特化則・有機則・酸欠則・粉じん則・石綿則・じん肺法など${LAW_SOURCE_COUNT}の法令・規則・指針等を根拠条文付きで即答。RAG方式・出典必須。元方事業者の統括責任から化学物質 自律的管理まで幅広く対応。使い方ガイドは /guides/anzeneho-ai-chatbot を参照。`;
+import { ogImageUrl } from "@/lib/og-url";
+import {
+  SITE_URL,
+  withSiteOpenGraph,
+  withSiteTwitter,
+} from "@/lib/seo-metadata";
+import { ChatbotBody } from "./ChatbotBody";
 
-export const metadata: Metadata = {
-  title: _title,
-  description: _desc,
-  alternates: { canonical: "/chatbot" },
-  openGraph: withSiteOpenGraph("/chatbot", {
-    title: _title,
-    description: _desc,
-    images: [{ url: ogImageUrl(_title, _desc), width: 1200, height: 630 }],
-  }),
-  twitter: withSiteTwitter({
-    images: [ogImageUrl(_title, _desc)],
-  }),
-};
+const TITLE = "安衛法AI｜現場の言葉で法令を確認";
+const DESCRIPTION =
+  "作業や設備を普段の言葉で質問し、労働安全衛生法令の結論・適用条件・施行状態と公式根拠を一つの会話で確認できます。";
+
+type SearchParams = Record<string, string | string[] | undefined>;
+
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}): Promise<Metadata> {
+  const params = await searchParams;
+  const hasQuestionVariant = Object.keys(params).length > 0;
+  return {
+    title: TITLE,
+    description: DESCRIPTION,
+    alternates: { canonical: "/chatbot" },
+    referrer: hasQuestionVariant ? "no-referrer" : undefined,
+    robots: hasQuestionVariant
+      ? {
+          index: false,
+          follow: true,
+          noarchive: true,
+          googleBot: { index: false, follow: true, noarchive: true },
+        }
+      : undefined,
+    openGraph: withSiteOpenGraph("/chatbot", {
+      title: TITLE,
+      description: DESCRIPTION,
+      images: [
+        {
+          url: ogImageUrl(TITLE, DESCRIPTION),
+          width: 1200,
+          height: 630,
+        },
+      ],
+    }),
+    twitter: withSiteTwitter({
+      images: [ogImageUrl(TITLE, DESCRIPTION)],
+    }),
+  };
+}
 
 export default function ChatbotPage() {
   const url = `${SITE_URL}/chatbot`;
   return (
     <>
+      <style>{`body:has([data-chatbot-page]) [data-site-footer] { display: none !important; }`}</style>
       <JsonLd
         schema={[
-          webPageSchema({ name: _title, description: _desc, url, keywords: ["安衛法 AI チャットボット 無料", "労働安全衛生法 条文 即答", `${LAW_SOURCE_COUNT}法令等 根拠条文付き`, "元方事業者 統括責任 Q&A", "化学物質 自律的管理 法令"] }),
+          webPageSchema({
+            name: TITLE,
+            description: DESCRIPTION,
+            url,
+            keywords: [
+              "労働安全衛生法",
+              "安衛則",
+              "法令相談",
+              "e-Gov",
+            ],
+          }),
           breadcrumbSchema([
             { name: "ホーム", url: SITE_URL },
-            { name: "AIチャットボット", url },
+            { name: "安衛法AI", url },
           ]),
-          qaPageSchema({ name: _title, description: _desc, url }),
           webApplicationSchema({
-            name: "安衛法AIチャットボット",
-            description:
-              `労働安全衛生法・関連規則など${LAW_SOURCE_COUNT}の法令・規則・指針等に対応した RAG 方式の安衛法AIチャットボット。根拠条文付きで回答します。`,
+            name: "安衛法AI",
+            description: DESCRIPTION,
             url,
             applicationCategory: "BusinessApplication",
-            mentions: [COPILOT_FEATURE_PEERS.accidentsReports, COPILOT_FEATURE_PEERS.planGenerator],
-            searchUrlTemplate: `${SITE_URL}/chatbot?q={search_term_string}`,
             featureList: [
-              `労働安全衛生法・関連規則など${LAW_SOURCE_COUNT}法令等に対応`,
-              "根拠条文付き回答（RAG 方式）",
-              "業種別 事故レポートへの自動誘導",
-              "年次安全衛生計画ジェネレーターへの連携",
+              "現場の言葉による法令検索",
+              "会話中の作業条件を踏まえた回答",
+              "公式原文と該当箇所の表示",
+              "条件不足時の確認質問",
             ],
           }),
         ]}
       />
-      <ChatbotBody />
+      <div data-chatbot-page>
+        <ChatbotBody />
+      </div>
     </>
   );
 }

@@ -9,7 +9,7 @@ import { PrintButton } from "./print-button";
 
 export const metadata: Metadata = {
   title: "重大災害事例 説明資料（印刷用）",
-  description: "重大災害事例をA4印刷用にまとめた説明資料ビュー（匿名・公表事実・出典付き）。",
+  description: "重大災害事例をA4印刷用にまとめた説明資料ビュー。データセット単位の出典と追跡上の限界を表示します。",
   alternates: { canonical: "/accident-news/print" },
   robots: { index: false },
 };
@@ -88,7 +88,7 @@ export default async function AccidentNewsPrintPage({
             </div>
             <p className="mt-1 leading-snug">{c.description}</p>
             <div className="mt-1 text-[12px] text-slate-600">
-              {c.cause && <span>原因: {c.cause}　</span>}
+              {c.cause && <span>起因物分類: {c.cause}　</span>}
               {c.type && c.sameTypeTotal > 0 && (
                 <span className="font-semibold text-rose-700">同種事故 収録{c.sameTypeTotal}件</span>
               )}
@@ -106,7 +106,10 @@ export default async function AccidentNewsPrintPage({
       {/* 出典・免責フッタ */}
       <footer className="mt-4 border-t border-slate-300 pt-2 text-[11px] leading-relaxed text-slate-500">
         出典: {SERIOUS_CASES_META.sourceLabel}（{SERIOUS_CASES_META.sourceUrl}）。
+        対象: {SERIOUS_CASES_META.yearRange}。生成日時: {SERIOUS_CASES_META.generatedAt ?? "不明"}。
+        出典はデータセット単位で、ローカルIDから公式Excelの個別行へは逆引きできません。
         本資料は公表事実の引用であり、会社名・発注者名・被災者氏名は含みません。
+        「起因物分類」は直接原因・背景要因・管理要因ではなく、それらを本データから推測していません。
         「対策の考え方」は事故型に対する一般原則の参考であり、個別の対策判断は該当法令・公式情報の確認および労働安全コンサルタント等の専門家へご相談ください。
       </footer>
     </div>

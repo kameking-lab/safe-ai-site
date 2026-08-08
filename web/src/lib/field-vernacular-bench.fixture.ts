@@ -36,9 +36,18 @@ export type FieldVernacularCase = {
    */
   goldCitations: { lawShort: string; articleNum: string }[];
   /**
+   * 一次資料本文が承認済みRAGに未収録のため、別資料で推測せず保留すべき質問。
+   */
+  ragDisposition?: "primary-source-approval-required";
+  /**
    * 横断検索着地判定: top10 の title または url にいずれか1つが含まれれば着地。
    */
   searchExpect: string[];
+  /**
+   * 条件不足のため横断検索で直接着地させない方が安全な質問。
+   * `clarification-required` は0件を合格条件にし、通常の着地率とは別に測る。
+   */
+  searchDisposition?: "clarification-required";
   /** true = 範囲外質問。RAG は score < 0.5（no-hit）が正。横断検索は判定対象外。 */
   outOfScope?: boolean;
 };
@@ -185,7 +194,8 @@ export const FIELD_VERNACULAR_CASES: FieldVernacularCase[] = [
     label: "親綱→安全帯取付設備",
     chatQuery: "親綱はどこに張ればいいですか？",
     searchQuery: "親綱",
-    goldCitations: [{ lawShort: "建災防規程", articleNum: "第11条" }],
+    goldCitations: [],
+    ragDisposition: "primary-source-approval-required",
     searchExpect: ["建災防規程 第11条", "親綱"],
   },
   {
@@ -260,7 +270,7 @@ export const FIELD_VERNACULAR_CASES: FieldVernacularCase[] = [
       { lawShort: "安衛法", articleNum: "第61条" },
       { lawShort: "安衛令", articleNum: "第20条" },
     ],
-    searchExpect: ["フォークリフト", "安衛法 第61条"],
+    searchExpect: ["フォークリフト", "安衛法 第61条", "安衛則 第36条"],
   },
   {
     id: "FV22",
@@ -349,8 +359,11 @@ export const FIELD_VERNACULAR_CASES: FieldVernacularCase[] = [
     chatQuery: "一人親方でも健康診断は受けないとダメですか？",
     searchQuery: "一人親方 健康診断",
     goldCitations: [{ lawShort: "安衛法", articleNum: "第66条" }],
-    // 個人事業者への安全衛生規制適用（法改正レコード）は一人親方質問の最適着地
-    searchExpect: ["安衛法 第66条", "健康診断", "個人事業者", "フリーランス"],
+    // 一人親方本人が「労働者」に当たるか、注文者・雇用関係・業務の有害性等が
+    // 不明なまま安衛法66条の事業者義務へ直結させると適用を誤解させる。
+    // 専用の人手確認済み解説ができるまでは、横断検索は直接回答を保留する。
+    searchExpect: [],
+    searchDisposition: "clarification-required",
   },
   {
     id: "FV31",
@@ -443,8 +456,8 @@ export const FIELD_VERNACULAR_CASES: FieldVernacularCase[] = [
     label: "グラインダー→研削といし",
     chatQuery: "グラインダーの砥石の交換は資格がいりますか？",
     searchQuery: "グラインダー 交換",
-    goldCitations: [{ lawShort: "安衛則", articleNum: "第117条" }],
-    searchExpect: ["研削といし", "安衛則 第117条"],
+    goldCitations: [{ lawShort: "安衛則", articleNum: "第36条" }],
+    searchExpect: ["研削といし", "安衛則 第36条"],
   },
   {
     id: "FV41",
@@ -485,7 +498,7 @@ export const FIELD_VERNACULAR_CASES: FieldVernacularCase[] = [
       { lawShort: "安衛則", articleNum: "第36条" },
       { lawShort: "安衛則", articleNum: "第518条" },
     ],
-    searchExpect: ["フルハーネス", "特別教育"],
+    searchExpect: ["フルハーネス", "特別教育", "安衛則 第36条"],
   },
 
   // ── 足場の現場語 ─────────────────────────────────────────────

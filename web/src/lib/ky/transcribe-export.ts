@@ -46,7 +46,12 @@ function filledRisks(record: KyInstructionRecordState): KyInstructionRiskRow[] {
 }
 
 function riskNo(r: KyInstructionRiskRow, i: number): string {
-  return s(r.targetLabel) || String(i + 1);
+  const label = s(r.targetLabel);
+  // 既定行の「上記」や追加操作用の「+」は、元帳票上の参照表示であり
+  // Excel転記用のNoではない。番号列には安定した行番号を出す。
+  return label && label !== "上記" && label !== "+"
+    ? label
+    : String(i + 1);
 }
 
 function numberedLines(record: KyInstructionRecordState, pick: (r: KyInstructionRiskRow) => string): string {

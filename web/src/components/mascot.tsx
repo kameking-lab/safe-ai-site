@@ -8,7 +8,7 @@ const SIZE_MAP = {
   xl: 192,
 } as const;
 
-type MascotSize = keyof typeof SIZE_MAP;
+export type MascotSize = keyof typeof SIZE_MAP;
 
 /**
  * バリアント別マスコット画像（正: docs/mascot-style-guide-2026-07-12.md）。
@@ -63,7 +63,11 @@ const VARIANT_MAP = {
   /** 印鑑: 現場記録・打合せ書用 */
   "stamp-doc": { src: "/mascot/mascot-stamp-doc.webp", width: 281, height: 320 },
   /** 空を見上げる: 防災・気象用 */
-  "weather-look": { src: "/mascot/mascot-weather-look.webp", width: 264, height: 320 },
+  "weather-look": {
+    src: "/mascot/mascot-weather-look-v2.webp",
+    width: 768,
+    height: 882,
+  },
   /** タブレット: AI・DX系用 */
   "tablet-dx": { src: "/mascot/mascot-tablet-dx.webp", width: 274, height: 320 },
   /** 電卓: 建設計算（結果）用 */
@@ -74,21 +78,29 @@ const VARIANT_MAP = {
   "ppe-check": { src: "/mascot/mascot-ppe-check.webp", width: 316, height: 320 },
   /** 救急箱（緑十字）: 両立支援・応急手当用 */
   "first-aid": { src: "/mascot/mascot-first-aid.webp", width: 308, height: 320 },
+  /** 緊急時の真剣な案内: 笑顔・コミカルな表現を避けた専用素材 */
+  "emergency-serious": {
+    src: "/mascot/mascot-emergency-serious.webp",
+    width: 640,
+    height: 640,
+  },
   /** おやすみ: オフライン・メンテ画面用 */
   sleeping: { src: "/mascot/mascot-sleeping.webp", width: 320, height: 235 },
   /** 地球儀: 外国人労働者向けページ用 */
   "world-friends": { src: "/mascot/mascot-world-friends.webp", width: 301, height: 320 },
-  /** 手帳に計画: 年次計画ジェネレータ用 */
-  "calendar-plan": { src: "/mascot/mascot-calendar-plan.webp", width: 302, height: 320 },
+  /** 書類を確認: 年次計画ジェネレータ用（同一犬の書類ポーズへ統一） */
+  "calendar-plan": { src: "/mascot/mascot-stamp-doc.webp", width: 281, height: 320 },
 } as const;
 
 export type MascotVariant = keyof typeof VARIANT_MAP;
 
-type MascotProps = {
+export type MascotProps = {
   size?: MascotSize;
   variant?: MascotVariant;
   className?: string;
   alt?: string;
+  /** 固定表示幅に合わせた responsive image の選択条件。 */
+  sizes?: string;
   /** ファーストビュー配置でLCP要素になり得る場合はtrue（lazyだとLCPを遅らせる） */
   eager?: boolean;
 };
@@ -98,22 +110,27 @@ export function Mascot({
   variant = "default",
   className = "",
   alt = "安全AIポータル マスコット",
+  sizes,
   eager = false,
 }: MascotProps) {
   const px = SIZE_MAP[size];
   const v = VARIANT_MAP[variant];
-  const scale = px / Math.max(v.width, v.height);
-  const w = Math.round(v.width * scale);
-  const h = Math.round(v.height * scale);
+  const landscape = v.width >= v.height;
   return (
     <Image
       src={v.src}
       alt={alt}
-      width={w}
-      height={h}
+      width={v.width}
+      height={v.height}
       loading={eager ? "eager" : "lazy"}
+      fetchPriority={eager ? "high" : "auto"}
+      sizes={sizes ?? `${px}px`}
       className={className}
-      style={{ objectFit: "contain", width: w, height: h }}
+      style={{
+        objectFit: "contain",
+        width: landscape ? px : "auto",
+        height: landscape ? "auto" : px,
+      }}
     />
   );
 }

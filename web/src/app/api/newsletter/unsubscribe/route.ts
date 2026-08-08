@@ -1,63 +1,38 @@
 import { NextResponse } from "next/server";
-import { verifyUnsubscribeToken, removeSubscriber } from "@/lib/newsletter";
 
-export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url);
-  const email = searchParams.get("email")?.trim().toLowerCase() ?? "";
-  const token = searchParams.get("token") ?? "";
+const headers = {
+  "Content-Type": "text/html; charset=utf-8",
+  "Cache-Control": "no-store",
+  "Referrer-Policy": "no-referrer",
+  "X-Robots-Tag": "noindex, nofollow",
+};
 
-  if (!email || !token) {
-    return new NextResponse(errorHtml("パラメータが不正です。"), {
-      status: 400,
-      headers: { "Content-Type": "text/html; charset=utf-8" },
-    });
-  }
-
-  if (!verifyUnsubscribeToken(email, token)) {
-    return new NextResponse(errorHtml("リンクが無効または期限切れです。"), {
-      status: 400,
-      headers: { "Content-Type": "text/html; charset=utf-8" },
-    });
-  }
-
-  await removeSubscriber(email);
-  console.log("[newsletter:unsubscribe]", email);
-
-  return new NextResponse(successHtml(email), {
-    status: 200,
-    headers: { "Content-Type": "text/html; charset=utf-8" },
-  });
+function unavailable() {
+  return new NextResponse(
+    `<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="robots" content="noindex,nofollow">
+    <title>配信停止機能は再設計中です</title>
+  </head>
+  <body style="font-family:system-ui,sans-serif;max-width:42rem;margin:4rem auto;padding:0 1rem;line-height:1.8;color:#172033">
+    <main>
+      <h1>配信停止機能は現在利用できません</h1>
+      <p>メールアドレスをURLへ含めない、期限付きの不透明トークン方式へ移行するまで自動処理を停止しています。新規配信も停止中です。</p>
+      <p><a href="https://www.anzen-ai-portal.jp/contact">運営へ連絡する</a></p>
+    </main>
+  </body>
+</html>`,
+    { status: 410, headers },
+  );
 }
 
-function successHtml(email: string): string {
-  return `<!DOCTYPE html>
-<html lang="ja">
-<head><meta charset="utf-8"><title>配信停止完了｜安全AIポータル</title>
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<style>body{font-family:sans-serif;max-width:480px;margin:80px auto;padding:0 16px;color:#1e293b;text-align:center;}</style>
-</head>
-<body>
-  <p style="font-size:40px;margin:0 0 16px;">✅</p>
-  <h1 style="font-size:20px;margin:0 0 8px;">配信停止が完了しました</h1>
-  <p style="font-size:14px;color:#64748b;margin:0 0 24px;">${email} への週間安全情報の配信を停止しました。</p>
-  <a href="https://www.anzen-ai-portal.jp/newsletter" style="font-size:13px;color:#2563eb;">再度登録する</a>
-  <p style="font-size:12px;color:#94a3b8;margin-top:32px;">安全AIポータル ─ 現場の安全を、AIで変える。</p>
-</body>
-</html>`;
+export async function GET() {
+  return unavailable();
 }
 
-function errorHtml(msg: string): string {
-  return `<!DOCTYPE html>
-<html lang="ja">
-<head><meta charset="utf-8"><title>エラー｜安全AIポータル</title>
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<style>body{font-family:sans-serif;max-width:480px;margin:80px auto;padding:0 16px;color:#1e293b;text-align:center;}</style>
-</head>
-<body>
-  <p style="font-size:40px;margin:0 0 16px;">⚠️</p>
-  <h1 style="font-size:20px;margin:0 0 8px;">配信停止に失敗しました</h1>
-  <p style="font-size:14px;color:#64748b;margin:0 0 24px;">${msg}</p>
-  <a href="https://www.anzen-ai-portal.jp" style="font-size:13px;color:#2563eb;">トップへ戻る</a>
-</body>
-</html>`;
+export async function POST() {
+  return unavailable();
 }

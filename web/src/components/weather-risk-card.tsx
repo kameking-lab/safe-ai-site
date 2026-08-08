@@ -1,5 +1,6 @@
 "use client";
 
+import { OfficialAreaCombobox } from "@/components/official-area-combobox";
 import type { SiteRiskWeather, WeatherAlert } from "@/lib/types/domain";
 
 type WorkType = "高所作業" | "電気作業" | "足場作業" | "一般作業";
@@ -22,7 +23,7 @@ function riskStyle(level: SiteRiskWeather["riskLevel"]) {
     };
   }
   return {
-    badge: "bg-emerald-600 text-white",
+    badge: "bg-emerald-800 text-white",
     border: "border-emerald-300",
     bg: "bg-emerald-50/80",
     title: "text-emerald-900",
@@ -48,11 +49,30 @@ function riskMessage(level: SiteRiskWeather["riskLevel"]) {
   };
 }
 
-function formatAlertList(alerts: WeatherAlert[]) {
+function formatForecastSignalList(alerts: WeatherAlert[]) {
   if (alerts.length === 0) {
-    return "警報・注意報なし";
+    return "独自目安の該当なし（気象庁の警報・注意報なしを意味しません）";
   }
   return alerts.map((alert) => alert.type).join(" / ");
+}
+
+function formatOfficialWarning(data: SiteRiskWeather) {
+  const official = data.officialWarning;
+  if (!official || official.status === "unavailable") {
+    return "確認不能（取得失敗または応答不明）";
+  }
+  if (official.status === "degraded") {
+    return "確認不能（取得データが古い、または一部取得失敗）";
+  }
+  if (official.status === "unresolved") {
+    return "地点単位の確認未対応。気象庁公式ページで地域を選択してください";
+  }
+  if (official.warnings.length === 0) {
+    return "取得成功・選択地域に発表中の警報等なし";
+  }
+  return official.warnings
+    .map((warning) => `気象庁コード${warning.code}（${warning.status}）`)
+    .join(" / ");
 }
 
 function buildBriefingPoints(
@@ -105,13 +125,8 @@ type WeatherRiskCardProps = {
   data: SiteRiskWeather | null;
   status: "idle" | "loading" | "success" | "error";
   errorMessage?: string | null;
-  availableRegions: {
-    id: string;
-    label: string;
-    regionName: string;
-  }[];
-  selectedRegionName: string;
-  onRegionChange: (regionName: string) => void;
+  selectedAreaId: string | null;
+  onAreaChange: (areaId: string) => void;
   workType: WorkType;
   onWorkTypeChange: (workType: WorkType) => void;
 };
@@ -120,9 +135,8 @@ export function WeatherRiskCard({
   data,
   status,
   errorMessage,
-  availableRegions,
-  selectedRegionName,
-  onRegionChange,
+  selectedAreaId,
+  onAreaChange,
   workType,
   onWorkTypeChange,
 }: WeatherRiskCardProps) {
@@ -141,21 +155,12 @@ export function WeatherRiskCard({
           </span>
         </div>
         <div className="mt-3 space-y-3">
-          <label htmlFor="region-select-loading" className="block text-xs font-semibold text-slate-600">
-            現場の地域を選択
-          </label>
-          <select
-            id="region-select-loading"
-            value={selectedRegionName}
-            onChange={(event) => onRegionChange(event.target.value)}
-            className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-3 text-base text-slate-900"
-          >
-            {availableRegions.map((region) => (
-              <option key={region.id} value={region.regionName}>
-                {region.label}
-              </option>
-            ))}
-          </select>
+          <OfficialAreaCombobox
+            id="region-search-loading"
+            label="現場の地域を検索"
+            selectedAreaId={selectedAreaId}
+            onSelect={(candidate) => onAreaChange(candidate.id)}
+          />
         </div>
         <div>
           <label htmlFor="worktype-select-loading" className="block text-xs font-semibold text-slate-600">
@@ -186,21 +191,12 @@ export function WeatherRiskCard({
         <h2 className="text-base font-bold text-rose-900 sm:text-lg">今日の現場リスク</h2>
         <p className="mt-1 text-xs text-rose-800">地域を変えると再取得されます。</p>
         <div className="mt-3 space-y-3">
-          <label htmlFor="region-select-error" className="block text-xs font-semibold text-rose-700">
-            現場の地域を選択
-          </label>
-          <select
-            id="region-select-error"
-            value={selectedRegionName}
-            onChange={(event) => onRegionChange(event.target.value)}
-            className="mt-1 w-full rounded-lg border border-rose-300 bg-white px-3 py-3 text-base text-slate-900"
-          >
-            {availableRegions.map((region) => (
-              <option key={region.id} value={region.regionName}>
-                {region.label}
-              </option>
-            ))}
-          </select>
+          <OfficialAreaCombobox
+            id="region-search-error"
+            label="現場の地域を検索"
+            selectedAreaId={selectedAreaId}
+            onSelect={(candidate) => onAreaChange(candidate.id)}
+          />
         </div>
         <div>
           <label htmlFor="worktype-select-error" className="block text-xs font-semibold text-rose-700">
@@ -227,23 +223,13 @@ export function WeatherRiskCard({
     return (
       <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5" aria-label="今日の現場リスク">
         <h2 className="text-base font-bold text-slate-900 sm:text-lg">今日の現場リスク</h2>
-        <p className="mt-1 text-xs text-slate-600">朝礼・KYで使う今日の注意点を表示します。</p>
         <div className="mt-3 space-y-3">
-          <label htmlFor="region-select-empty" className="block text-xs font-semibold text-slate-600">
-            現場の地域を選択
-          </label>
-          <select
-            id="region-select-empty"
-            value={selectedRegionName}
-            onChange={(event) => onRegionChange(event.target.value)}
-            className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-3 text-base text-slate-900"
-          >
-            {availableRegions.map((region) => (
-              <option key={region.id} value={region.regionName}>
-                {region.label}
-              </option>
-            ))}
-          </select>
+          <OfficialAreaCombobox
+            id="region-search-empty"
+            label="現場の地域を検索"
+            selectedAreaId={selectedAreaId}
+            onSelect={(candidate) => onAreaChange(candidate.id)}
+          />
         </div>
         <div>
           <label htmlFor="worktype-select-empty" className="block text-xs font-semibold text-slate-600">
@@ -261,14 +247,35 @@ export function WeatherRiskCard({
             <option value="一般作業">一般作業</option>
           </select>
         </div>
-        <p className="mt-2 text-sm text-slate-500">表示できるデータがありません。</p>
       </section>
     );
   }
 
-  const style = riskStyle(data.riskLevel);
-  const message = riskMessage(data.riskLevel);
-  const briefingPoints = buildBriefingPoints(data, workType);
+  const decisionReady =
+    data.dataOrigin === "live" && data.officialWarning?.status === "live";
+  const style = decisionReady
+    ? riskStyle(data.riskLevel)
+    : {
+        badge: "bg-slate-700 text-white",
+        border: "border-amber-400",
+        bg: "bg-amber-50/80",
+        title: "text-amber-950",
+      };
+  const message = decisionReady
+    ? riskMessage(data.riskLevel)
+    : {
+        title: "公式情報を確認してください",
+        description:
+          data.dataOrigin === "synthetic"
+            ? "開発用の架空データです。"
+            : "一部を確認できません。",
+      };
+  const briefingPoints = decisionReady
+    ? buildBriefingPoints(data, workType)
+    : [
+        "気象庁の公式情報を確認",
+        "現場の測定値を確認",
+      ];
 
   return (
     <section
@@ -281,13 +288,15 @@ export function WeatherRiskCard({
           <p className="mt-1 text-xs text-slate-700">法改正チェック前に、まず現場の当日リスクを確認できます。</p>
         </div>
         <span className={`rounded-full px-3 py-1.5 text-xs font-semibold ${style.badge}`}>
-          リスク {data.riskLevel}
+          {decisionReady ? `リスク ${data.riskLevel}` : "一部を確認できません"}
         </span>
       </div>
 
       <div
         className={`mt-3 rounded-xl border px-3 py-2.5 ${
-          data.riskLevel === "高"
+          !decisionReady
+            ? "border-amber-400 bg-amber-100/80"
+            : data.riskLevel === "高"
             ? "border-rose-300 bg-rose-100/80"
             : data.riskLevel === "中"
               ? "border-amber-300 bg-amber-100/80"
@@ -300,24 +309,13 @@ export function WeatherRiskCard({
 
       <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
         <div>
-          <label htmlFor="region-select" className="block text-xs font-semibold text-slate-600">
-            現場の地域
-          </label>
-          <p className="mt-1 text-xs text-slate-600">
-            選んだ地域の天気・警報にもとづいて、注意点と行動指示が変わります。
-          </p>
-          <select
-            id="region-select"
-            value={selectedRegionName}
-            onChange={(event) => onRegionChange(event.target.value)}
-            className="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-3 py-3 text-base text-slate-900 focus:border-sky-500 focus:outline-none"
-          >
-            {availableRegions.map((region) => (
-              <option key={region.id} value={region.regionName}>
-                {region.label}
-              </option>
-            ))}
-          </select>
+          <OfficialAreaCombobox
+            id="region-search"
+            label="現場の地域を検索"
+            selectedAreaId={selectedAreaId}
+            onSelect={(candidate) => onAreaChange(candidate.id)}
+            helpText="選んだ地域の天気・警報にもとづいて、注意点と行動指示が変わります。"
+          />
         </div>
         <div>
           <label htmlFor="worktype-select" className="block text-xs font-semibold text-slate-600">
@@ -351,15 +349,43 @@ export function WeatherRiskCard({
           <span className="font-semibold">天気:</span> {data.overview}
         </p>
         <p className="text-xs text-slate-600">
-          気温 {data.temperatureCelsius}℃ / 風 {data.windSpeedMs}m/s / 雨 {data.precipitationMm}mm
+          本日の予想最高気温 {data.temperatureCelsius}℃ / 予想最大風速 {data.windSpeedMs}m/s /
+          予想降水量合計 {data.precipitationMm}mm
         </p>
         <p className="text-xs text-slate-600">
-          警報・注意報: {formatAlertList(data.alerts)}
+          Open-Meteo予報からの独自目安: {formatForecastSignalList(data.alerts)}
+        </p>
+        <div className="mt-2 rounded-lg border border-sky-300 bg-sky-50 p-2.5 text-xs leading-5 text-slate-800">
+          <p>
+            <span className="font-bold">気象庁の公式警報:</span>{" "}
+            {formatOfficialWarning(data)}
+          </p>
+          <p className="mt-1 text-slate-600">
+            公式取得: {data.officialWarning?.fetchedAt ?? "未取得"} ／
+            対象発表: {data.officialWarning?.reportAt ?? "未確認"}
+          </p>
+          <a
+            href={
+              data.officialWarning?.sourceUrl ??
+              "https://www.jma.go.jp/bosai/warning/"
+            }
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-1 inline-flex min-h-11 items-center font-bold text-sky-900 underline"
+          >
+            気象庁で最新の警報・注意報を確認
+          </a>
+        </div>
+        <p className="mt-2 text-xs text-slate-600">
+          予報提供元: {data.forecastProvider === "open-meteo" ? "Open-Meteo" : "架空サンプル"}
+          {" ／ "}取得: {data.forecastFetchedAt ?? "未取得"}
         </p>
       </div>
 
       <div className="mt-4 rounded-xl border border-slate-200 bg-white/70 p-3">
-        <p className="text-sm font-semibold text-slate-900">主な注意点（何に気をつけるか）</p>
+        <p className="text-sm font-semibold text-slate-900">
+          {decisionReady ? "主な注意点（何に気をつけるか）" : "予報からの参考注意点（公式警報確認前）"}
+        </p>
         <ul className="mt-1 list-disc space-y-1 pl-5 text-sm text-slate-700">
           {data.primaryCautions.map((caution) => (
             <li key={caution}>{caution}</li>
@@ -368,7 +394,9 @@ export function WeatherRiskCard({
       </div>
 
       <div className="mt-3 rounded-xl border border-slate-200 bg-white/70 p-3">
-        <p className="text-sm font-semibold text-slate-900">判定根拠（なぜこのリスクか）</p>
+        <p className="text-sm font-semibold text-slate-900">
+          {decisionReady ? "判定根拠（なぜこのリスクか）" : "独自予報の参考情報"}
+        </p>
         <ul className="mt-1 list-disc space-y-1 pl-5 text-sm text-slate-700">
           {data.riskEvidences.slice(0, 3).map((evidence) => (
             <li key={evidence}>{evidence}</li>
@@ -377,7 +405,9 @@ export function WeatherRiskCard({
       </div>
 
       <div className="mt-3 rounded-xl border border-slate-200 bg-white/70 p-3">
-        <p className="text-sm font-semibold text-slate-900">推奨アクション（今すぐやること）</p>
+        <p className="text-sm font-semibold text-slate-900">
+          {decisionReady ? "推奨アクション（今すぐやること）" : "公式確認までに行うこと"}
+        </p>
         <ul className="mt-1 list-disc space-y-1 pl-5 text-sm text-slate-700">
           {data.recommendedActions.map((action) => (
             <li key={action}>{action}</li>

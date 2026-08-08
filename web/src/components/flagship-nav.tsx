@@ -1,68 +1,104 @@
-"use client";
+import {
+  AlertTriangle,
+  FlaskConical,
+  GraduationCap,
+  MessageSquareText,
+  Newspaper,
+  Sparkles,
+  Workflow,
+  type LucideIcon,
+} from "lucide-react";
+import { isHeatIllnessCampaignSeason } from "@/lib/heat-illness/campaign-season";
+import { AppShellNavLink } from "@/components/app-shell-nav-link";
 
-import Link from "next/link";
-import Image from "next/image";
-import { ChevronDown } from "lucide-react";
-import { FLAGSHIP_FEATURES } from "@/config/flagship-nav";
+type PrimaryNavItem = {
+  label: string;
+  href: string;
+  icon: LucideIcon;
+  heat?: boolean;
+  prefetch: false;
+};
 
-function FlagshipNavDesktop() {
+export const PRIMARY_NAV: readonly PrimaryNavItem[] = [
+  {
+    label: "今日の安全",
+    href: "/risk",
+    icon: AlertTriangle,
+    heat: true,
+    prefetch: false,
+  },
+  {
+    label: "法令AI",
+    href: "/chatbot",
+    icon: MessageSquareText,
+    prefetch: false,
+  },
+  {
+    label: "化学物質",
+    href: "/chemical-ra",
+    icon: FlaskConical,
+    prefetch: false,
+  },
+  {
+    label: "事故・法改正",
+    href: "/whats-new",
+    icon: Newspaper,
+    prefetch: false,
+  },
+  {
+    label: "学ぶ・資格",
+    href: "/education-certification",
+    icon: GraduationCap,
+    prefetch: false,
+  },
+  {
+    label: "KYT・実務",
+    href: "/training/visual-ky",
+    icon: Sparkles,
+    prefetch: false,
+  },
+  {
+    label: "自動化相談",
+    href: "/services/automation",
+    icon: Workflow,
+    prefetch: false,
+  },
+];
+
+export function FlagshipNav() {
+  const summer = isHeatIllnessCampaignSeason(new Date());
   return (
-    <nav aria-label="主要機能ナビゲーション" className="hidden border-b border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900 lg:block">
-      <ul className="mx-auto flex max-w-7xl items-stretch gap-1 px-4 py-1.5">
-        {FLAGSHIP_FEATURES.map((f) => (
-          <li key={f.id} className="group relative">
-            <Link
-              href={f.href}
-              className="flex items-center gap-1 rounded-md px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-emerald-50 hover:text-emerald-800 dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-emerald-300"
+    <nav
+      aria-label="主要機能ナビゲーション"
+      data-primary-navigation
+      className="hidden border-b border-portal-border bg-portal-surface dark:bg-portal-surface lg:block"
+    >
+      <ul className="mx-auto grid max-w-7xl grid-cols-7 gap-1 px-4 py-1.5">
+        {PRIMARY_NAV.map(({ label, href, icon: Icon, heat, prefetch }) => (
+          <li key={label} className="min-w-0">
+            <AppShellNavLink
+              href={href}
+              prefetch={prefetch}
+              className="group flex min-h-12 min-w-0 items-center justify-center gap-1.5 rounded-[var(--radius-sm)] px-2 py-2 text-center text-xs font-extrabold text-brand-secondary hover:bg-portal-surface-emphasis hover:text-brand-primary focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-primary/25 data-[nav-active=true]:bg-portal-surface-emphasis data-[nav-active=true]:text-brand-primary dark:text-slate-100"
             >
-              {f.iconSrc ? (
-                <Image src={f.iconSrc} alt="" width={18} height={18} loading="lazy" aria-hidden style={{ width: 18, height: 18 }} />
-              ) : (
-                <span aria-hidden>{f.icon}</span>
-              )}
-              {f.label}
-              {f.subItems.length > 0 && (
-                <ChevronDown className="h-3 w-3 opacity-60 transition group-hover:rotate-180" aria-hidden />
-              )}
-            </Link>
-            {f.subItems.length > 0 && (
-              <div
-                className="invisible absolute left-0 top-full z-30 mt-0.5 w-64 rounded-xl border border-slate-200 bg-white p-2 opacity-0 shadow-lg transition group-hover:visible group-hover:opacity-100 dark:border-slate-700 dark:bg-slate-900"
-                role="menu"
-              >
-                <p className="px-2 pt-1 text-[10px] font-bold uppercase tracking-widest text-emerald-700 dark:text-emerald-300">
-                  {f.label}
-                </p>
-                <ul>
-                  {f.subItems.map((s) => (
-                    <li key={`${s.label}-${s.href}`}>
-                      <Link
-                        href={s.href}
-                        className="block rounded-md px-2 py-2 text-xs text-slate-700 hover:bg-emerald-50 hover:text-emerald-800 dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-emerald-300"
-                      >
-                        {s.label}
-                        {s.description && (
-                          <span className="mt-0.5 block text-[10px] text-slate-500 dark:text-slate-400">
-                            {s.description}
-                          </span>
-                        )}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+              <Icon
+                className={`h-4 w-4 shrink-0 ${
+                  heat && summer
+                    ? "text-brand-accent"
+                    : "text-brand-primary"
+                }`}
+                aria-hidden="true"
+              />
+              <span className="truncate">{label}</span>
+              {heat && summer ? (
+                <span className="portal-light-ink rounded-full bg-brand-accent px-1.5 py-0.5 text-[9px] font-black text-slate-950 forced-colors:border">
+                  夏季
+                </span>
+              ) : null}
+            </AppShellNavLink>
           </li>
         ))}
       </ul>
     </nav>
   );
-}
-
-/** 主要機能ナビ（デスクトップ：横並び＋ホバーPopover、モバイル：右からスライドインドロワー） */
-export function FlagshipNav() {
-  // R3: モバイルは bottom nav(5+もっとシート) + ヘッダー「メニュー」ドロワー(全機能) で
-  // 主要機能へ到達できるため、重複していた FlagshipNav モバイルドロワーは廃止し
-  // 3重ナビ(「どのメニュー?」迷子)とチャム量を解消。デスクトップの横並びナビは維持。
-  return <FlagshipNavDesktop />;
 }

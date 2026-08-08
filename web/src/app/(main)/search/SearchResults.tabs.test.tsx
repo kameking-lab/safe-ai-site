@@ -1,7 +1,9 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, cleanup } from '@testing-library/react';
-import { SearchResults } from './SearchResults';
-import { SEARCH_CATEGORIES } from '@/lib/search-index';
+import {
+  SEARCH_MACRO_CATEGORIES,
+  SearchResults,
+} from './SearchResults';
 
 // 現場語彙で一部カテゴリだけヒットするクエリ（化学物質/保護具/教育/判例/用語/記事/機能は0件）。
 const HIT_QUERY = 'アーク溶接';
@@ -31,13 +33,14 @@ describe('/search カテゴリタブ（ヒット0のカテゴリは畳む）', (
     const tabs = screen.getAllByRole('tab');
     // 「すべて」＋ヒットカテゴリのみ＝最低2つ。
     expect(tabs.length).toBeGreaterThanOrEqual(2);
-    // 全カテゴリ（13）＋「すべて」の14タブ全部は出さない＝空ファセットが畳まれている証明。
-    expect(tabs.length).toBeLessThan(SEARCH_CATEGORIES.length + 1);
+    // 8つの利用者向けカテゴリ＋「すべて」の全タブは出さず、空ファセットを畳む。
+    expect(tabs.length).toBeLessThan(SEARCH_MACRO_CATEGORIES.length + 1);
     // 「すべて」は常設。
     expect(tabs.some((t) => t.textContent?.includes('すべて'))).toBe(true);
     // 描画された全タブが件数>0＝0件タブは一つも残っていない（active でない限り畳む規約）。
     for (const t of tabs) {
       expect(tabCount(t)).toBeGreaterThan(0);
+      expect(t.className).toContain('min-h-11');
     }
   });
 });

@@ -81,11 +81,10 @@ export function CourtCasesBrowser() {
   const visible = filtered.slice(0, visibleCount);
   const remaining = filtered.length - visible.length;
 
-  // 絞り込みをURLに書き戻す（共有・ブラウザ戻る対応／印刷ページへ条件を引き継ぐため）。
-  // 既存の accidents hub-filter と同じ作法: scroll:false・テキストはデバウンス。
+  // 選択肢だけをURLへ書き戻す。自由入力は氏名・健康情報等を含み得るためメモリ内に限定する。
   const query = useMemo(
-    () => courtFilterToQuery({ issue, field, courtType, decade, query: q }),
-    [issue, field, courtType, decade, q],
+    () => courtFilterToQuery({ issue, field, courtType, decade, query: "" }),
+    [issue, field, courtType, decade],
   );
   useEffect(() => {
     const handle = window.setTimeout(() => {
@@ -219,7 +218,7 @@ export function CourtCasesBrowser() {
             </button>
           )}
         </p>
-        {/* 顧問先説明: 絞り込んだ結果だけをA4にまとめて配れる導線（条件を印刷ページへ引き継ぐ） */}
+        {/* 固定選択肢だけを印刷ページへ引き継ぎ、自由入力はURLへ載せない。 */}
         {hasFilter && filtered.length > 0 && (
           <Link
             href={printHref}

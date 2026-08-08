@@ -3,7 +3,7 @@ import Link from "next/link";
 import { PageJsonLd } from "@/components/page-json-ld";
 
 const SITE = "https://www.anzen-ai-portal.jp";
-const _title = "データソース一覧 | 安全AIポータル";
+const _title = "データソース一覧";
 const _desc =
   "本サイトで利用している外部データの出典・更新頻度・利用条件を一覧で公開しています（気象庁、厚生労働省、国土地理院ほか）。";
 
@@ -101,11 +101,11 @@ const SOURCES: Source[] = [
     provider: "日本放送協会",
     updateFreq: "日次（GitHub Actions cron 06:00 JST）",
     license:
-      "見出しと出典URLのみ取得。本文は転載せず、AIが独自要約（50字以内）を生成。著作権法32条の引用要件（主従関係・必要最小限・出典明示）を遵守。",
+      "見出しと出典URLのみ取得し、本文・画像は転載しません。掲載範囲と出典を人が確認した項目だけを公開します。",
     url: "https://www3.nhk.or.jp/rss/",
     description:
-      "労働災害関連の見出しをキーワードフィルタで抽出し、Gemini 2.5 Flash の AI 判定ゲートを通過したもののみを /accidents に自動公開（完全自動運用）。",
-    usedFor: ["事故データベース（報道・自動収集セクション）"],
+      "労働災害関連の見出しを固定ルールで事前整理し、確認待ちキューへ保存します。出典・関連性・誤認可能性を運営者が確認し、humanReviewed と approved を明示した項目だけを /accidents に公開します。外部生成AIによる自動公開は行いません。",
+    usedFor: ["事故データベース（報道RSS・人手確認済みセクション）"],
   },
   {
     id: "news-auto-mhlw",
@@ -116,14 +116,14 @@ const SOURCES: Source[] = [
       "政府著作物（著作権法 13 条準拠、政府標準利用規約 2.0 / CC BY 4.0 互換）。",
     url: "https://www.mhlw.go.jp/stf/news.rdf",
     description:
-      "労働安全衛生に関連する記者発表（協議会・審議会の開催案内、災害発生注意喚起等）の見出しを自動収集。",
-    usedFor: ["事故データベース（報道・自動収集セクション）"],
+      "労働安全衛生に関連する記者発表の見出しを収集し、確認待ちキューへ保存します。公開前に一次情報と関連性を人が確認します。",
+    usedFor: ["事故データベース（報道RSS・人手確認済みセクション）"],
   },
 ];
 
 export default function DataSourcesPage() {
   return (
-    <main className="mx-auto max-w-4xl px-4 py-10 text-slate-900">
+    <div className="mx-auto max-w-4xl px-4 py-10 text-slate-900">
       <PageJsonLd
         name={_title}
         description={_desc}
@@ -135,7 +135,7 @@ export default function DataSourcesPage() {
         ]}
       />
       <header className="mb-6">
-        <p className="text-sm text-slate-500">
+        <p className="text-sm text-portal-muted">
           <Link href="/" className="underline hover:text-slate-800">
             トップ
           </Link>{" "}
@@ -145,7 +145,52 @@ export default function DataSourcesPage() {
         <p className="mt-2 text-sm leading-relaxed text-slate-700">
           本サイトおよびサイネージ機能で利用している外部データの出典・更新頻度・利用条件を公開しています。各データの利用条件に従い、適切な出典表記を行っています。
         </p>
+        <p className="mt-2 text-xs font-semibold text-slate-600">
+          運用状態の基準日: 2026-07-29 JST
+        </p>
       </header>
+
+      <section className="mb-6 rounded-2xl border border-sky-300 bg-sky-50 p-5">
+        <h2 className="text-lg font-bold text-sky-950">
+          取得障害・古い情報の表示方針
+        </h2>
+        <dl className="mt-3 grid gap-3 text-sm sm:grid-cols-2">
+          <div>
+            <dt className="font-bold text-sky-950">stale</dt>
+            <dd className="mt-1 leading-6 text-slate-800">
+              定めた鮮度期限を超えた状態です。最新値とみなさず、公式ページや現場計測へ案内します。
+            </dd>
+          </div>
+          <div>
+            <dt className="font-bold text-sky-950">quarantine</dt>
+            <dd className="mt-1 leading-6 text-slate-800">
+              出典・形式・整合性の確認が終わらず、検索・自動転記・サイトマップから隔離した状態です。
+            </dd>
+          </div>
+          <div>
+            <dt className="font-bold text-sky-950">synthetic</dt>
+            <dd className="mt-1 leading-6 text-slate-800">
+              教育用の仮想事例です。公式事故・実在個票・公式統計と分けて表示します。
+            </dd>
+          </div>
+          <div>
+            <dt className="font-bold text-sky-950">取得不能・部分障害</dt>
+            <dd className="mt-1 leading-6 text-slate-800">
+              欠けた値を推測で補わず、取得不能または部分障害と表示します。「警報なし」へ置き換えません。
+            </dd>
+          </div>
+        </dl>
+        <p className="mt-3 text-sm leading-6 text-sky-950">
+          AIは検索・要約・候補整理を補助しますが、情報源の公開判断や安全判断を自動承認しません。詳細な確認状態と訂正履歴は{" "}
+          <Link
+            href="/about/quality"
+            className="font-bold underline underline-offset-4"
+          >
+            情報品質ページ
+          </Link>
+          で公開しています。
+        </p>
+      </section>
 
       <ul className="space-y-4">
         {SOURCES.map((s) => (
@@ -189,6 +234,6 @@ export default function DataSourcesPage() {
           本サイトに表示する気象・地震情報は気象庁の公式データを15分間隔で取得していますが、ネットワーク状況等により遅延・取得失敗が発生する場合があります。重要な防災判断は必ず気象庁公式サイトおよび自治体の発表をご確認ください。
         </p>
       </section>
-    </main>
+    </div>
   );
 }

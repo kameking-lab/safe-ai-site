@@ -3,7 +3,7 @@ import { resolveWeatherWarningPanelState } from "./weather-warning-panel-state";
 
 const advisoryWarning = [{ code: "12", status: "発表" }];
 const warningWarning = [{ code: "03", status: "発表" }];
-const specialWarning = [{ code: "31", status: "発表" }];
+const specialWarning = [{ code: "32", status: "発表" }];
 
 describe("resolveWeatherWarningPanelState", () => {
   it("取得失敗(error)は警報の有無に関わらず error（誤った安心を与えない）", () => {

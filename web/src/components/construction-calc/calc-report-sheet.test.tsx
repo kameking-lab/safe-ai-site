@@ -53,12 +53,22 @@ describe("CalcReportSheet: 提出用計算書の必須項目（全計算機共�
   }
 
   it("入力条件は select の value ではなく label で表示する（提出書の可読性）", () => {
-    const sling = CONSTRUCTION_CALCULATORS.find((c) => c.slug === "sling-wire-load")!;
-    const { values } = normalizeValues(sling, {});
-    const outcome = sling.compute(values);
-    render(<CalcReportSheet calc={sling} values={values} outcome={outcome} printedAt="2026年07月12日 09:30" />);
+    const slope = CONSTRUCTION_CALCULATORS.find(
+      (calculator) => calculator.slug === "slope-ratio-convert",
+    );
+    expect(slope).toBeDefined();
+    const { values } = normalizeValues(slope!, {});
+    const outcome = slope!.compute(values);
+    render(
+      <CalcReportSheet
+        calc={slope!}
+        values={values}
+        outcome={outcome}
+        printedAt="2026年07月12日 09:30"
+      />,
+    );
     // select フィールドの既定値ラベルが本文に出る（value 文字列そのままではない）
-    for (const f of sling.fields) {
+    for (const f of slope!.fields) {
       if (f.kind === "select") {
         const opt = f.options.find((o) => o.value === String(values[f.id]));
         if (opt) expect(screen.getAllByText(new RegExp(opt.label.slice(0, 2))).length).toBeGreaterThan(0);

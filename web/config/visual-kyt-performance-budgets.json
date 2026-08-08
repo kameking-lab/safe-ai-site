@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "method": {
+    "minimumRuns": 3,
+    "aggregation": "median",
+    "notes": "Visual KY release gate: home priority, SSR hub, and one complete scenario. Existing unrelated routes are not re-measured."
+  },
+  "shared": {
+    "commonClientJsBytesMax": 218000
+  },
+  "routes": {
+    "home": {
+      "totalClientJsBytesMax": 218000,
+      "routeSpecificJsBytesMax": 4096,
+      "routePayloadBytesMax": 56000,
+      "cssBytesMax": 39000,
+      "lcpMsMax": 3850,
+      "clsMax": 0.1,
+      "tbtMsMax": 200
+    },
+    "visual-ky": {
+      "totalClientJsBytesMax": 230000,
+      "routeSpecificJsBytesMax": 14000,
+      "routePayloadBytesMax": 90000,
+      "cssBytesMax": 39000,
+      "lcpMsMax": 3500,
+      "clsMax": 0.1,
+      "tbtMsMax": 200
+    },
+    "visual-ky-scenario": {
+      "totalClientJsBytesMax": 275000,
+      "routeSpecificJsBytesMax": 56000,
+      "routePayloadBytesMax": 100000,
+      "cssBytesMax": 39000,
+      "lcpMsMax": 3800,
+      "clsMax": 0.1,
+      "tbtMsMax": 200
+    }
+  },
+  "inventory": {
+    "sitemapUrlCountBaseline": 3492,
+    "staticPageCountBaseline": 3091,
+    "allowedChangeFraction": 0.02
+  }
+}

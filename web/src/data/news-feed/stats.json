@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-08-07T21:34:35.619Z",
+  "generatedAt": "2026-07-12T21:43:43.027Z",
   "counts": {
-    "approved": 46,
-    "rejected": 101,
-    "total": 147,
-    "approvalRate": 0.313
+    "approved": 29,
+    "rejected": 35,
+    "total": 64,
+    "approvalRate": 0.453
   },
   "byDay": [
     {
@@ -265,227 +265,45 @@
       "rejected": 1,
       "total": 1,
       "approvalRate": 0
-    },
-    {
-      "date": "2026-07-14",
-      "approved": 0,
-      "rejected": 2,
-      "total": 2,
-      "approvalRate": 0
-    },
-    {
-      "date": "2026-07-15",
-      "approved": 2,
-      "rejected": 1,
-      "total": 3,
-      "approvalRate": 0.667
-    },
-    {
-      "date": "2026-07-16",
-      "approved": 1,
-      "rejected": 1,
-      "total": 2,
-      "approvalRate": 0.5
-    },
-    {
-      "date": "2026-07-17",
-      "approved": 1,
-      "rejected": 1,
-      "total": 2,
-      "approvalRate": 0.5
-    },
-    {
-      "date": "2026-07-18",
-      "approved": 1,
-      "rejected": 0,
-      "total": 1,
-      "approvalRate": 1
-    },
-    {
-      "date": "2026-07-19",
-      "approved": 0,
-      "rejected": 2,
-      "total": 2,
-      "approvalRate": 0
-    },
-    {
-      "date": "2026-07-20",
-      "approved": 0,
-      "rejected": 4,
-      "total": 4,
-      "approvalRate": 0
-    },
-    {
-      "date": "2026-07-21",
-      "approved": 1,
-      "rejected": 3,
-      "total": 4,
-      "approvalRate": 0.25
-    },
-    {
-      "date": "2026-07-22",
-      "approved": 0,
-      "rejected": 2,
-      "total": 2,
-      "approvalRate": 0
-    },
-    {
-      "date": "2026-07-23",
-      "approved": 1,
-      "rejected": 3,
-      "total": 4,
-      "approvalRate": 0.25
-    },
-    {
-      "date": "2026-07-24",
-      "approved": 0,
-      "rejected": 2,
-      "total": 2,
-      "approvalRate": 0
-    },
-    {
-      "date": "2026-07-25",
-      "approved": 0,
-      "rejected": 1,
-      "total": 1,
-      "approvalRate": 0
-    },
-    {
-      "date": "2026-07-26",
-      "approved": 0,
-      "rejected": 2,
-      "total": 2,
-      "approvalRate": 0
-    },
-    {
-      "date": "2026-07-28",
-      "approved": 0,
-      "rejected": 1,
-      "total": 1,
-      "approvalRate": 0
-    },
-    {
-      "date": "2026-07-29",
-      "approved": 1,
-      "rejected": 8,
-      "total": 9,
-      "approvalRate": 0.111
-    },
-    {
-      "date": "2026-07-30",
-      "approved": 0,
-      "rejected": 8,
-      "total": 8,
-      "approvalRate": 0
-    },
-    {
-      "date": "2026-07-31",
-      "approved": 0,
-      "rejected": 3,
-      "total": 3,
-      "approvalRate": 0
-    },
-    {
-      "date": "2026-08-01",
-      "approved": 1,
-      "rejected": 4,
-      "total": 5,
-      "approvalRate": 0.2
-    },
-    {
-      "date": "2026-08-02",
-      "approved": 1,
-      "rejected": 3,
-      "total": 4,
-      "approvalRate": 0.25
-    },
-    {
-      "date": "2026-08-03",
-      "approved": 0,
-      "rejected": 3,
-      "total": 3,
-      "approvalRate": 0
-    },
-    {
-      "date": "2026-08-04",
-      "approved": 0,
-      "rejected": 2,
-      "total": 2,
-      "approvalRate": 0
-    },
-    {
-      "date": "2026-08-05",
-      "approved": 3,
-      "rejected": 3,
-      "total": 6,
-      "approvalRate": 0.5
-    },
-    {
-      "date": "2026-08-06",
-      "approved": 1,
-      "rejected": 3,
-      "total": 4,
-      "approvalRate": 0.25
-    },
-    {
-      "date": "2026-08-07",
-      "approved": 2,
-      "rejected": 1,
-      "total": 3,
-      "approvalRate": 0.667
-    },
-    {
-      "date": "2026-08-08",
-      "approved": 1,
-      "rejected": 3,
-      "total": 4,
-      "approvalRate": 0.25
     }
   ],
   "byPublisher": [
     {
       "publisher": "厚生労働省",
-      "approved": 34,
+      "approved": 25,
       "rejected": 2,
-      "total": 36,
-      "approvalRate": 0.944
+      "total": 27,
+      "approvalRate": 0.926
     },
     {
       "publisher": "日本放送協会",
-      "approved": 12,
-      "rejected": 99,
-      "total": 111,
+      "approved": 4,
+      "rejected": 33,
+      "total": 37,
       "approvalRate": 0.108
     }
   ],
   "byEstimatedWorkCategory": [
     {
-      "category": "製造業",
-      "approved": 1,
-      "rejected": 0,
-      "total": 1,
-      "approvalRate": 1
-    },
-    {
       "category": "建設業",
-      "approved": 5,
+      "approved": 4,
       "rejected": 2,
-      "total": 7,
-      "approvalRate": 0.714
-    },
-    {
-      "category": "運輸交通業",
-      "approved": 2,
-      "rejected": 1,
-      "total": 3,
+      "total": 6,
       "approvalRate": 0.667
     },
     {
+      "category": "運輸交通業",
+      "approved": 0,
+      "rejected": 1,
+      "total": 1,
+      "approvalRate": 0
+    },
+    {
       "category": "その他の事業",
-      "approved": 2,
-      "rejected": 3,
-      "total": 5,
-      "approvalRate": 0.4
+      "approved": 0,
+      "rejected": 1,
+      "total": 1,
+      "approvalRate": 0
     }
   ],
   "byEstimatedAccidentType": [
@@ -497,13 +315,6 @@
       "approvalRate": 1
     },
     {
-      "type": "墜落",
-      "approved": 1,
-      "rejected": 1,
-      "total": 2,
-      "approvalRate": 0.5
-    },
-    {
       "type": "有害物質",
       "approved": 1,
       "rejected": 2,
@@ -511,25 +322,25 @@
       "approvalRate": 0.333
     },
     {
-      "type": "交通事故",
-      "approved": 1,
-      "rejected": 4,
-      "total": 5,
-      "approvalRate": 0.2
-    },
-    {
       "type": "熱中症",
-      "approved": 8,
-      "rejected": 44,
-      "total": 52,
-      "approvalRate": 0.154
+      "approved": 4,
+      "rejected": 13,
+      "total": 17,
+      "approvalRate": 0.235
     },
     {
       "type": "崩壊・倒壊",
-      "approved": 1,
-      "rejected": 15,
-      "total": 16,
-      "approvalRate": 0.063
+      "approved": 0,
+      "rejected": 3,
+      "total": 3,
+      "approvalRate": 0
+    },
+    {
+      "type": "交通事故",
+      "approved": 0,
+      "rejected": 2,
+      "total": 2,
+      "approvalRate": 0
     },
     {
       "type": "車両",
@@ -539,14 +350,7 @@
       "approvalRate": 0
     },
     {
-      "type": "溺水",
-      "approved": 0,
-      "rejected": 1,
-      "total": 1,
-      "approvalRate": 0
-    },
-    {
-      "type": "飛来・落下",
+      "type": "墜落",
       "approved": 0,
       "rejected": 1,
       "total": 1,
@@ -574,17 +378,17 @@
         0,
         0,
         0,
+        0,
         1,
-        3,
-        10,
-        32
+        5,
+        23
       ],
       "rejected": [
-        6,
-        21,
-        62,
-        6,
         3,
+        9,
+        18,
+        1,
+        1,
         0,
         1,
         0,
@@ -607,8 +411,8 @@
       ],
       "approved": [
         3,
-        32,
-        11,
+        18,
+        8,
         0,
         0,
         0,
@@ -618,9 +422,9 @@
         0
       ],
       "rejected": [
-        8,
-        89,
-        4,
+        5,
+        29,
+        1,
         0,
         0,
         0,
@@ -644,8 +448,8 @@
         "90-100"
       ],
       "approved": [
-        37,
-        9,
+        23,
+        6,
         0,
         0,
         0,
@@ -656,8 +460,8 @@
         0
       ],
       "rejected": [
-        64,
-        37,
+        24,
+        11,
         0,
         0,
         0,
@@ -683,8 +487,8 @@
       ],
       "approved": [
         0,
-        43,
-        3,
+        28,
+        1,
         0,
         0,
         0,
@@ -694,13 +498,13 @@
         0
       ],
       "rejected": [
-        6,
-        84,
-        2,
-        0,
-        0,
-        1,
         3,
+        25,
+        0,
+        0,
+        0,
+        0,
+        2,
         4,
         1,
         0
@@ -710,19 +514,15 @@
   "rejectionReasonRanks": [
     {
       "reason": "relevance",
-      "count": 93
+      "count": 30
     },
     {
       "reason": "duplication",
-      "count": 8
+      "count": 7
     },
     {
       "reason": "prefilter:school-context",
-      "count": 4
-    },
-    {
-      "reason": "prefilter:home-context",
-      "count": 1
+      "count": 2
     },
     {
       "reason": "prefilter:sports-context",
@@ -745,19 +545,6 @@
         "publisher": "日本放送協会"
       },
       {
-        "headline": "全国の熱中症搬送急増 1週間でことし初1万人超  前週の2倍以上",
-        "aiSummary": "全国で熱中症による救急搬送が急増し、1週間で1万人超を記録した。",
-        "score": {
-          "relevance": 85,
-          "copyrightRisk": 15,
-          "misinformationRisk": 5,
-          "duplication": 10,
-          "judgedAt": "2026-07-22T22:01:12.285Z",
-          "model": "gemini-2.5-flash"
-        },
-        "publisher": "日本放送協会"
-      },
-      {
         "headline": "労働局が建設現場での熱中症対策を呼びかけ【企業の対策QAも】",
         "aiSummary": "労働局が建設現場での熱中症対策を強化するよう呼びかけ、企業向けQ&Aも公開。",
         "score": {
@@ -766,19 +553,6 @@
           "misinformationRisk": 10,
           "duplication": 15,
           "judgedAt": "2026-05-20T22:22:59.495Z",
-          "model": "gemini-2.5-flash"
-        },
-        "publisher": "日本放送協会"
-      },
-      {
-        "headline": "熊本 震度5強程度以上の地震注意 復旧作業の際は熱中症対策を",
-        "aiSummary": "熊本での地震復旧作業において、熱中症予防の徹底を呼びかける注意喚起。",
-        "score": {
-          "relevance": 80,
-          "copyrightRisk": 15,
-          "misinformationRisk": 5,
-          "duplication": 10,
-          "judgedAt": "2026-08-04T22:07:44.827Z",
           "model": "gemini-2.5-flash"
         },
         "publisher": "日本放送協会"
@@ -797,152 +571,98 @@
         "publisher": "日本放送協会"
       },
       {
-        "headline": "熱中症搬送 全国で4500人超 前週の3倍以上に 総務省消防庁",
-        "aiSummary": "総務省消防庁発表、全国の熱中症搬送者が前週比3倍超の4500人以上に増加。",
-        "score": {
-          "relevance": 65,
-          "copyrightRisk": 15,
-          "misinformationRisk": 5,
-          "duplication": 10,
-          "judgedAt": "2026-07-14T21:54:20.067Z",
-          "model": "gemini-2.5-flash"
-        },
-        "publisher": "日本放送協会"
-      },
-      {
-        "headline": "熱中症搬送者数 8月2日までの1週間 全国で9180人 熊本で309人",
-        "aiSummary": "8月2日までの1週間で全国の熱中症搬送者は9180人、熊本県は309人。",
-        "score": {
-          "relevance": 75,
-          "copyrightRisk": 10,
-          "misinformationRisk": 5,
-          "duplication": 10,
-          "judgedAt": "2026-08-04T22:07:51.753Z",
-          "model": "gemini-2.5-flash"
-        },
-        "publisher": "日本放送協会"
-      },
-      {
-        "headline": "精神障害の労災認定1086人 過去最多",
-        "aiSummary": "精神障害による労災認定件数が1086件で過去最多を更新。",
+        "headline": "改正労災保険法が成立 遺族補償年金の支給 性別の差を解消へ",
+        "aiSummary": "労災保険法が改正され、遺族補償年金の性別による支給格差が解消される。",
         "score": {
           "relevance": 90,
-          "copyrightRisk": 10,
-          "misinformationRisk": 5,
-          "duplication": 10,
-          "judgedAt": "2026-07-16T22:00:07.369Z",
-          "model": "gemini-2.5-flash"
-        },
-        "publisher": "日本放送協会"
-      },
-      {
-        "headline": "経産省 日本製紙の煙突倒壊受け自家発事業者に報告求める通知",
-        "aiSummary": "経産省が日本製紙の煙突倒壊事故を受け、自家発電事業者へ安全報告を通知。",
-        "score": {
-          "relevance": 90,
-          "copyrightRisk": 15,
+          "copyrightRisk": 20,
           "misinformationRisk": 10,
           "duplication": 10,
-          "judgedAt": "2026-08-07T01:00:08.381Z",
+          "judgedAt": "2026-07-10T21:57:33.498Z",
           "model": "gemini-2.5-flash"
         },
         "publisher": "日本放送協会"
       },
       {
-        "headline": "愛知 犬山 航空自衛隊練習機墜落事故 直接的な原因特定できず",
-        "aiSummary": "航空自衛隊の練習機が墜落したが、事故の直接原因は不明と発表された。",
+        "headline": "第６回「労働基準法における「労働者」に関する研究会」を開催します",
+        "aiSummary": "厚生労働省が労働基準法における労働者の定義を議論する研究会を開催。",
         "score": {
           "relevance": 85,
           "copyrightRisk": 10,
           "misinformationRisk": 5,
-          "duplication": 20,
-          "judgedAt": "2026-08-01T21:51:25.063Z",
+          "duplication": 10,
+          "judgedAt": "2026-07-10T21:57:54.707Z",
           "model": "gemini-2.5-flash"
         },
-        "publisher": "日本放送協会"
+        "publisher": "厚生労働省"
+      },
+      {
+        "headline": "令和８年度第６回「石綿に係る疾病の業務上外に関する検討会」を開催します",
+        "aiSummary": "厚生労働省が石綿関連疾病の業務上外を議論する検討会を開催予定。",
+        "score": {
+          "relevance": 90,
+          "copyrightRisk": 10,
+          "misinformationRisk": 5,
+          "duplication": 10,
+          "judgedAt": "2026-07-10T21:57:50.417Z",
+          "model": "gemini-2.5-flash"
+        },
+        "publisher": "厚生労働省"
+      },
+      {
+        "headline": "労働基準監督官採用試験広報HP",
+        "aiSummary": "厚生労働省が労働基準監督官採用試験の広報サイトを開設。",
+        "score": {
+          "relevance": 85,
+          "copyrightRisk": 10,
+          "misinformationRisk": 5,
+          "duplication": 10,
+          "judgedAt": "2026-07-03T22:01:35.487Z",
+          "model": "gemini-2.5-flash"
+        },
+        "publisher": "厚生労働省"
+      },
+      {
+        "headline": "第36回特定石綿被害建設業務労働者等認定審査会専門委員会　開催案内",
+        "aiSummary": "厚生労働省が石綿被害建設業務労働者の認定審査会専門委員会を開催する。",
+        "score": {
+          "relevance": 90,
+          "copyrightRisk": 10,
+          "misinformationRisk": 5,
+          "duplication": 10,
+          "judgedAt": "2026-07-02T22:03:24.402Z",
+          "model": "gemini-2.5-flash"
+        },
+        "publisher": "厚生労働省"
+      },
+      {
+        "headline": "第187回労働政策審議会安全衛生分科会（開催案内）",
+        "aiSummary": "厚生労働省が労働政策審議会安全衛生分科会の開催を案内。",
+        "score": {
+          "relevance": 90,
+          "copyrightRisk": 10,
+          "misinformationRisk": 5,
+          "duplication": 10,
+          "judgedAt": "2026-07-06T22:10:27.163Z",
+          "model": "gemini-2.5-flash"
+        },
+        "publisher": "厚生労働省"
+      },
+      {
+        "headline": "「第３回　労働安全衛生法に基づく一般健康診断の検査項目等に関する検討会」を開催します",
+        "aiSummary": "厚生労働省が労働安全衛生法に基づく一般健康診断の検査項目に関する検討会を開催。",
+        "score": {
+          "relevance": 90,
+          "copyrightRisk": 20,
+          "misinformationRisk": 10,
+          "duplication": 10,
+          "judgedAt": "2026-06-30T22:13:34.810Z",
+          "model": "gemini-2.5-flash"
+        },
+        "publisher": "厚生労働省"
       }
     ],
     "rejected": [
-      {
-        "headline": "【29日】熊本で震度7 同程度地震に1週間ほど注意 熱中症対策を",
-        "aiSummary": "熊本県で震度7の地震が発生。同程度の余震と熱中症への警戒を呼びかけ。",
-        "score": {
-          "relevance": 15,
-          "copyrightRisk": 15,
-          "misinformationRisk": 5,
-          "duplication": 10,
-          "judgedAt": "2026-07-29T21:56:48.178Z",
-          "model": "gemini-2.5-flash",
-          "rejectionReasons": [
-            "relevance 15 < 70 (not labor-safety related for type=general_news)"
-          ]
-        },
-        "publisher": "日本放送協会"
-      },
-      {
-        "headline": "高市首相「イオンモール熊本で発生した建物崩壊で3人死亡」",
-        "aiSummary": "熊本の商業施設で建物崩壊、3名死亡と首相が発表。",
-        "score": {
-          "relevance": 25,
-          "copyrightRisk": 15,
-          "misinformationRisk": 5,
-          "duplication": 10,
-          "judgedAt": "2026-07-29T21:56:55.802Z",
-          "model": "gemini-2.5-flash",
-          "rejectionReasons": [
-            "relevance 25 < 70 (not labor-safety related for type=general_news)"
-          ]
-        },
-        "publisher": "日本放送協会"
-      },
-      {
-        "headline": "真夏の避難生活 熱中症対策のポイントとは？【詳しく】",
-        "aiSummary": "災害時の避難生活における熱中症予防策を解説。",
-        "score": {
-          "relevance": 15,
-          "copyrightRisk": 10,
-          "misinformationRisk": 5,
-          "duplication": 10,
-          "judgedAt": "2026-07-29T21:57:02.625Z",
-          "model": "gemini-2.5-flash",
-          "rejectionReasons": [
-            "relevance 15 < 70 (not labor-safety related for type=general_news)"
-          ]
-        },
-        "publisher": "日本放送協会"
-      },
-      {
-        "headline": "九州で危険な暑さ 熊本も猛暑日に 熱中症対策の徹底を",
-        "aiSummary": "九州地方で猛暑が続き、熱中症対策の徹底が呼びかけられている。",
-        "score": {
-          "relevance": 20,
-          "copyrightRisk": 10,
-          "misinformationRisk": 5,
-          "duplication": 10,
-          "judgedAt": "2026-07-29T21:57:08.467Z",
-          "model": "gemini-2.5-flash",
-          "rejectionReasons": [
-            "relevance 20 < 70 (not labor-safety related for type=general_news)"
-          ]
-        },
-        "publisher": "日本放送協会"
-      },
-      {
-        "headline": "熊本 氷川町 住宅倒壊で2人心肺停止の状態",
-        "aiSummary": "熊本県氷川町で住宅が倒壊し、2名が心肺停止状態。",
-        "score": {
-          "relevance": 20,
-          "copyrightRisk": 10,
-          "misinformationRisk": 10,
-          "duplication": 10,
-          "judgedAt": "2026-07-29T21:57:15.058Z",
-          "model": "gemini-2.5-flash",
-          "rejectionReasons": [
-            "relevance 20 < 70 (not labor-safety related for type=general_news)"
-          ]
-        },
-        "publisher": "日本放送協会"
-      },
       {
         "headline": "山形県 クマ「特別警報」新設を検討 死亡事故など受け",
         "aiSummary": "山形県はクマによる死亡事故を受け、新たな特別警報制度の導入を検討している。",
@@ -960,54 +680,6 @@
         "publisher": "日本放送協会"
       },
       {
-        "headline": "暑さ連続で“脱水蓄積” 熱中症リスク高まる可能性 専門家指摘",
-        "aiSummary": "連日の猛暑で体内の水分不足が進み、熱中症の危険性が高まると専門家が注意喚起。",
-        "score": {
-          "relevance": 25,
-          "copyrightRisk": 15,
-          "misinformationRisk": 10,
-          "duplication": 10,
-          "judgedAt": "2026-07-22T22:01:17.942Z",
-          "model": "gemini-2.5-flash",
-          "rejectionReasons": [
-            "relevance 25 < 70 (not labor-safety related for type=general_news)"
-          ]
-        },
-        "publisher": "日本放送協会"
-      },
-      {
-        "headline": "熱中症疑いで21日に287人搬送 都内でことし最多",
-        "aiSummary": "都内で熱中症疑い搬送が21日に287人、今年最多を記録。",
-        "score": {
-          "relevance": 25,
-          "copyrightRisk": 15,
-          "misinformationRisk": 10,
-          "duplication": 10,
-          "judgedAt": "2026-07-22T22:01:31.845Z",
-          "model": "gemini-2.5-flash",
-          "rejectionReasons": [
-            "relevance 25 < 70 (not labor-safety related for type=general_news)"
-          ]
-        },
-        "publisher": "日本放送協会"
-      },
-      {
-        "headline": "関東と東海「酷暑日」予想 熱中症に厳重警戒 東北では激しい雨",
-        "aiSummary": "関東・東海で酷暑日予想、熱中症に厳重警戒。東北は激しい雨。",
-        "score": {
-          "relevance": 20,
-          "copyrightRisk": 15,
-          "misinformationRisk": 10,
-          "duplication": 10,
-          "judgedAt": "2026-07-21T22:00:39.045Z",
-          "model": "gemini-2.5-flash",
-          "rejectionReasons": [
-            "relevance 20 < 70 (not labor-safety related for type=general_news)"
-          ]
-        },
-        "publisher": "日本放送協会"
-      },
-      {
         "headline": "エアコン使用でも熱中症で死亡 周囲が高齢者などに声かけを",
         "aiSummary": "エアコン使用環境下でも熱中症で死亡する事例が発生。高齢者などへの注意喚起を促す。",
         "score": {
@@ -1020,6 +692,134 @@
           "rejectionReasons": [
             "relevance 20 < 70 (not labor-safety related)",
             "duplication 70 > 50 (already covered in accident DB)"
+          ]
+        },
+        "publisher": "日本放送協会"
+      },
+      {
+        "headline": "新名神高速6人死亡事故の初公判 検察「スマホ13秒脇見」",
+        "aiSummary": "新名神高速6人死亡事故の初公判で、検察は運転手のスマホ脇見が原因と主張した。",
+        "score": {
+          "relevance": 30,
+          "copyrightRisk": 10,
+          "misinformationRisk": 10,
+          "duplication": 10,
+          "judgedAt": "2026-06-10T22:50:12.629Z",
+          "model": "gemini-2.5-flash",
+          "rejectionReasons": [
+            "relevance 30 < 70 (not labor-safety related for type=general_news)"
+          ]
+        },
+        "publisher": "日本放送協会"
+      },
+      {
+        "headline": "ベネズエラ地震被災地 大雨で土砂崩れや建物倒壊のおそれも",
+        "aiSummary": "ベネズエラ地震被災地で大雨、土砂崩れや建物倒壊の危険増大。",
+        "score": {
+          "relevance": 15,
+          "copyrightRisk": 15,
+          "misinformationRisk": 5,
+          "duplication": 10,
+          "judgedAt": "2026-07-01T22:15:14.726Z",
+          "model": "gemini-2.5-flash",
+          "rejectionReasons": [
+            "relevance 15 < 70 (not labor-safety related for type=general_news)"
+          ]
+        },
+        "publisher": "日本放送協会"
+      },
+      {
+        "headline": "和歌山 タンクローリー海転落 救助の81歳男性らに感謝状",
+        "aiSummary": "和歌山でタンクローリーが海に転落した事故で、救助活動を行った市民に感謝状が贈呈された。",
+        "score": {
+          "relevance": 25,
+          "copyrightRisk": 10,
+          "misinformationRisk": 5,
+          "duplication": 10,
+          "judgedAt": "2026-06-30T22:13:29.115Z",
+          "model": "gemini-2.5-flash",
+          "rejectionReasons": [
+            "relevance 25 < 70 (not labor-safety related for type=general_news)"
+          ]
+        },
+        "publisher": "日本放送協会"
+      },
+      {
+        "headline": "熱中症 搬送者数 全国で1100人余1人死亡（5月18日～24日）",
+        "aiSummary": "5月18～24日の全国熱中症搬送者は1100人超、1名死亡。",
+        "score": {
+          "relevance": 25,
+          "copyrightRisk": 10,
+          "misinformationRisk": 5,
+          "duplication": 10,
+          "judgedAt": "2026-05-26T22:17:47.080Z",
+          "model": "gemini-2.5-flash",
+          "rejectionReasons": [
+            "relevance 25 < 70 (not labor-safety related for type=general_news)"
+          ]
+        },
+        "publisher": "日本放送協会"
+      },
+      {
+        "headline": "熱中症 搬送者数 5月11～17日に全国で1000人以上 1人死亡",
+        "aiSummary": "全国で5月11日から17日までに熱中症で1000人以上が搬送され、1人が死亡した。",
+        "score": {
+          "relevance": 25,
+          "copyrightRisk": 10,
+          "misinformationRisk": 10,
+          "duplication": 10,
+          "judgedAt": "2026-05-19T22:12:48.966Z",
+          "model": "gemini-2.5-flash",
+          "rejectionReasons": [
+            "relevance 25 < 70 (not labor-safety related for type=general_news)"
+          ]
+        },
+        "publisher": "日本放送協会"
+      },
+      {
+        "headline": "きょうも季節外れの暑さ続く 猛暑日予想も 熱中症対策を",
+        "aiSummary": "季節外れの高温が続き、猛暑日も予想されるため、熱中症対策を呼びかけ。",
+        "score": {
+          "relevance": 20,
+          "copyrightRisk": 10,
+          "misinformationRisk": 10,
+          "duplication": 10,
+          "judgedAt": "2026-05-18T22:00:23.529Z",
+          "model": "gemini-2.5-flash",
+          "rejectionReasons": [
+            "relevance 20 < 70 (not labor-safety related for type=general_news)"
+          ]
+        },
+        "publisher": "日本放送協会"
+      },
+      {
+        "headline": "「嵐」最終公演の東京ドームに作業員など装い侵入か 3人逮捕",
+        "aiSummary": "東京ドーム「嵐」公演に作業員を装い侵入、3人逮捕。",
+        "score": {
+          "relevance": 10,
+          "copyrightRisk": 15,
+          "misinformationRisk": 10,
+          "duplication": 10,
+          "judgedAt": "2026-06-02T22:59:39.283Z",
+          "model": "gemini-2.5-flash",
+          "rejectionReasons": [
+            "relevance 10 < 70 (not labor-safety related for type=general_news)"
+          ]
+        },
+        "publisher": "日本放送協会"
+      },
+      {
+        "headline": "大分 九重町 土砂崩れ 住宅1棟巻き込まれ 住人の女性大けが",
+        "aiSummary": "大分県九重町で土砂崩れが発生し、住宅が巻き込まれ住人女性が重傷。",
+        "score": {
+          "relevance": 10,
+          "copyrightRisk": 10,
+          "misinformationRisk": 10,
+          "duplication": 10,
+          "judgedAt": "2026-06-18T22:54:28.248Z",
+          "model": "gemini-2.5-flash",
+          "rejectionReasons": [
+            "relevance 10 < 70 (not labor-safety related for type=general_news)"
           ]
         },
         "publisher": "日本放送協会"

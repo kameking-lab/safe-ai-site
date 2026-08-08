@@ -7,7 +7,7 @@ import { LawHubNav } from "@/components/law-hub-nav";
 import { LAW_NAVI_TOPICS, findLawNaviTopic } from "@/data/law-navi/topics";
 import { getFreshPlainArticle } from "@/data/plain";
 import { findEntryByShort } from "@/lib/law-navi/permalink";
-import { mhlwNotices } from "@/data/mhlw-notices";
+import { publicMhlwNotices as mhlwNotices } from "@/data/public-mhlw-notices";
 import { ogImageUrl } from "@/lib/og-url";
 
 const SITE_BASE = "https://www.anzen-ai-portal.jp";
@@ -132,7 +132,7 @@ export default async function LawNaviTopicPage({
                               href={entry.path}
                               className="inline-flex min-h-[44px] items-center gap-1 rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-800 transition hover:bg-emerald-100"
                             >
-                              原文・AI解説
+                              原文・一次資料の抜粋
                               <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
                             </Link>
                           )}

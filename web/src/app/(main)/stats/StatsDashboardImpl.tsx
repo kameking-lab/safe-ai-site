@@ -32,7 +32,7 @@ const PERIODS: Array<{ id: StatsPeriod; label: string }> = [
 ];
 
 const PIE_COLORS = [
-  "#1a7a4c",
+  "#0b5d4b",
   "#0f766e",
   "#0891b2",
   "#7c3aed",

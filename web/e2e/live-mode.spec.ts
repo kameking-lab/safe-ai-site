@@ -1,6 +1,39 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
 test.describe.configure({ mode: "serial" });
+
+async function openFirstRevisionActions(page: Page) {
+  const details = page
+    .getByRole("region", { name: "法改正一覧" })
+    .locator("li")
+    .first()
+    .locator("[data-law-revision-actions]");
+  if (!(await details.evaluate((element) => (element as HTMLDetailsElement).open))) {
+    await details.locator("summary").click();
+  }
+}
+
+async function mockApiFailure(
+  page: Page,
+  path: "/api/revisions" | "/api/summaries" | "/api/chat",
+  status: number,
+  message: string,
+  retryable: boolean,
+) {
+  await page.route(`**${path}**`, (route) =>
+    route.fulfill({
+      status,
+      contentType: "application/json",
+      body: JSON.stringify({
+        error: {
+          code: status >= 500 ? "UNAVAILABLE" : "VALIDATION",
+          message,
+          retryable,
+        },
+      }),
+    }),
+  );
+}
 
 test.describe("live mode", () => {
   test.beforeEach(async ({ page }) => {
@@ -19,28 +52,121 @@ test.describe("live mode", () => {
     const revisionList = page.getByRole("region", { name: "法改正一覧" });
     await expect(revisionList.locator("li").first()).toBeVisible();
 
-    // 先頭カードの「AIで要約」をクリック（クリックで自動的にAI要約タブへ切り替わる）
-    await revisionList.locator("li").first().getByRole("button", { name: "AIで要約" }).click();
+    // 先頭カードの収録要点を開く（生成AIの出力とは表示しない）
+    await openFirstRevisionActions(page);
+    await revisionList.locator("li").first().getByRole("button", { name: "収録要点を見る" }).click();
     await expect(page.getByRole("heading", { name: "3行要約" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "現場でやること" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "対象業種", exact: true })).toBeVisible();
     await page.waitForTimeout(700);
 
     await page.getByRole("button", { name: "質問チャット" }).click();
-    await page.getByLabel("質問入力").fill("施行日はいつですか");
+    await expect(page.getByText("個人情報は入力しない", { exact: true })).toBeVisible();
+    await page.getByRole("textbox", { name: "質問入力", exact: true }).fill("施行日はいつですか");
+    const chatbotResponsePromise = page.waitForResponse(
+      (response) =>
+        new URL(response.url()).pathname === "/api/chat" &&
+        response.request().method() === "POST",
+    );
     await page.getByRole("button", { name: "送信" }).click();
+    const chatbotResponse = await chatbotResponsePromise;
+    expect(chatbotResponse.status()).toBe(200);
+    expect(chatbotResponse.headers()["content-type"]).toContain("application/json");
+    expect(chatbotResponse.headers()["x-ai-used"]).toBe("false");
+    const chatbotPayload = (await chatbotResponse.json()) as { reply?: unknown };
+    expect(typeof chatbotPayload.reply).toBe("string");
+    expect((chatbotPayload.reply as string).trim().length).toBeGreaterThan(0);
 
     // 質問文がチャット履歴に表示されること
     await expect(page.getByText("施行日はいつですか")).toBeVisible();
   });
 
-  test("正常系: 気象警報マップが表示される @smoke", async ({ page }) => {
-    await page.goto("/risk");
-    await expect(page.getByRole("heading", { name: "気象警報マップ" })).toBeVisible();
-    await expect(page.getByText("都道府県別 気象警報・注意報")).toBeVisible();
+  test("正常系: 今日の安全で公式警報・予報・KY導線を確認できる @smoke", async ({ page }) => {
+    const now = new Date().toISOString();
+    const todayJst = new Intl.DateTimeFormat("sv-SE", {
+      timeZone: "Asia/Tokyo",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(new Date());
+    await page.route("**/api/weather-risk?area=tokyo-shinjuku", (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          snapshot: {
+            regionName: "東京都 新宿区",
+            date: todayJst,
+            overview: "晴れ",
+            temperatureCelsius: 30,
+            windSpeedMs: 4,
+            precipitationMm: 0,
+            alerts: [],
+          },
+          provider: "open-meteo",
+          fetchedAt: now,
+          officialWarning: {
+            status: "live",
+            warnings: [],
+            headline: null,
+            fetchedAt: now,
+            reportAt: now,
+            sourceUrl: "https://www.jma.go.jp/bosai/warning/",
+          },
+          current: {
+            temperatureCelsius: 30,
+            relativeHumidityPercent: 60,
+            targetAt: now,
+          },
+        }),
+      }),
+    );
+    await page.route("**/api/wbgt?area=tokyo-shinjuku", (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          areaId: "tokyo-shinjuku",
+          areaLabel: "東京都 新宿区",
+          prefectureIso: "JP-13",
+          scopeLabel:
+            "東京都内の提供地点最大。作業地点のJIS適合計による実測ではありません。",
+          wbgt: {
+            status: "estimated",
+            mode: "official-estimated-current",
+            valueCelsius: 28.5,
+            targetAt: now,
+            createdAt: null,
+            stationCount: 11,
+            expectedStationCount: 11,
+            stale: false,
+            label: "公式提供・実況推定（都道府県内最大）",
+          },
+          alerts: {
+            heatAlert: "inactive",
+            specialHeatAlert: "inactive",
+            targetDate: todayJst,
+            reportAt: now,
+          },
+          retrievedAt: now,
+          degraded: false,
+          provider: "環境省 熱中症予防情報サイト",
+          sourceUrl: "https://www.wbgt.env.go.jp/",
+          dataServiceUrl: "https://www.wbgt.env.go.jp/data_service.php",
+        }),
+      }),
+    );
+    await page.goto("/risk?area=tokyo-shinjuku");
+    await expect(page.getByRole("heading", { name: "今日の安全を確認" })).toBeVisible();
+    await expect(page.getByLabel("現場の地域")).toBeVisible();
+    await expect(page.getByText(/予報提供元: Open-Meteo/)).toBeVisible();
+    await expect(
+      page.getByText(/取得成功・選択地域に発表中の警報等なし/),
+    ).toBeVisible();
+    await expect(page.getByRole("link", { name: "この条件でKYを作る" })).toBeVisible();
   });
 
-  test("正常系: source 未設定レコード混在でも一覧表示が壊れない @smoke", async ({ page }) => {
+  test("安全系: URL の任意 ingest payload を無視し、検証済み収録データだけを返す @smoke", async ({ page }) => {
     const payload = encodeURIComponent(
       JSON.stringify([
         {
@@ -68,16 +194,24 @@ test.describe("live mode", () => {
       ])
     );
 
+    const responsePromise = page.waitForResponse((response) =>
+      response.url().includes("/api/revisions"),
+    );
     await page.goto(`/laws?ingestSource=real&realSourcePayload=${payload}`);
+    const response = await responsePromise;
+
+    expect(response.headers()["x-revisions-ingest-source"]).toBe("egov-structured");
+    expect(response.headers()["x-revisions-verification-state"]).toBe(
+      "machine-validated-human-review-pending",
+    );
     await page.getByRole("button", { name: "法改正一覧" }).click();
 
-    await expect(page.getByText("sourceなしレコード")).toBeVisible();
-    await expect(page.getByText("sourceありレコード")).toBeVisible();
-    await expect(page.getByText("出典: 検証用発出元")).toBeVisible();
-    await expect(page.getByRole("link", { name: "厚生労働省" })).toBeVisible();
+    await expect(page.getByText("sourceなしレコード")).toHaveCount(0);
+    await expect(page.getByText("sourceありレコード")).toHaveCount(0);
+    await expect(page.getByRole("heading", { name: "法改正一覧" }).first()).toBeVisible();
   });
 
-  test("正常系: real ingest official-db payload でも一覧表示が壊れない @smoke", async ({ page }) => {
+  test("安全系: URL の official-db payload を収録データへ混入させない @smoke", async ({ page }) => {
     const officialPayload = encodeURIComponent(
       JSON.stringify([
         {
@@ -92,16 +226,26 @@ test.describe("live mode", () => {
       ])
     );
 
+    const responsePromise = page.waitForResponse((response) =>
+      response.url().includes("/api/revisions"),
+    );
     await page.goto(
       `/laws?ingestSource=real&realSourceFormat=official-db&realSourcePayload=${officialPayload}`
     );
+    const response = await responsePromise;
+
+    expect(response.headers()["x-revisions-ingest-source"]).toBe("egov-structured");
+    expect(response.headers()["x-revisions-verification-state"]).toBe(
+      "machine-validated-human-review-pending",
+    );
     await page.getByRole("button", { name: "法改正一覧" }).click();
-    await expect(page.getByText("公式DB形式の法改正")).toBeVisible();
-    await expect(page.getByRole("link", { name: "e-Gov法令検索" })).toBeVisible();
+    await expect(page.getByText("公式DB形式の法改正")).toHaveCount(0);
+    await expect(page.getByRole("heading", { name: "法改正一覧" }).first()).toBeVisible();
   });
 
   test("失敗系: 一覧API 5xx でエラー通知表示 @failure", async ({ page }) => {
-    await page.goto("/laws?forceRevisionsError=5xx");
+    await mockApiFailure(page, "/api/revisions", 503, "法改正一覧APIが一時的に利用できません。", true);
+    await page.goto("/laws");
     await page.getByRole("button", { name: "法改正一覧" }).click();
     await expect(page.getByText("一覧の取得に失敗しました")).toBeVisible();
     await expect(page.getByText("法改正一覧APIが一時的に利用できません。")).toBeVisible();
@@ -111,7 +255,8 @@ test.describe("live mode", () => {
   });
 
   test("失敗系: 一覧API timeout でエラー通知表示 @failure", async ({ page }) => {
-    await page.goto("/laws?forceRevisionsError=timeout");
+    await mockApiFailure(page, "/api/revisions", 504, "法改正一覧の取得がタイムアウトしました。再試行してください。", true);
+    await page.goto("/laws");
     await page.getByRole("button", { name: "法改正一覧" }).click();
     await expect(page.getByText("一覧の取得に失敗しました")).toBeVisible();
     await expect(page.getByText("法改正一覧の取得がタイムアウトしました。再試行してください。")).toBeVisible();
@@ -119,7 +264,8 @@ test.describe("live mode", () => {
   });
 
   test("失敗系: 一覧API validation で再試行なし表示 @failure", async ({ page }) => {
-    await page.goto("/laws?forceRevisionsError=validation");
+    await mockApiFailure(page, "/api/revisions", 400, "法改正一覧APIの入力検証エラーです。", false);
+    await page.goto("/laws");
     await page.getByRole("button", { name: "法改正一覧" }).click();
     await expect(page.getByText("一覧の取得に失敗しました")).toBeVisible();
     await expect(page.getByText("法改正一覧APIの入力検証エラーです。")).toBeVisible();
@@ -127,67 +273,82 @@ test.describe("live mode", () => {
     await expect(page.getByRole("button", { name: "一覧を再取得" })).toHaveCount(0);
   });
 
-  test("失敗系: real ingest 失敗時に fallback reason header が返る @failure", async ({ page }) => {
+  test("安全系: URL 指定の外部 ingest endpoint を参照しない @failure", async ({ page }) => {
     const responsePromise = page.waitForResponse((response) => response.url().includes("/api/revisions"));
     await page.goto("/laws?ingestSource=real&realSourceUrl=https%3A%2F%2Fevil.com%2Frevisions.json");
     const response = await responsePromise;
-    const fallbackReason = response.headers()["x-revisions-ingest-fallback-reason"];
-    expect(fallbackReason).toBe("endpoint_not_allowed");
+    expect(response.headers()["x-revisions-ingest-source"]).toBe("egov-structured");
+    expect(response.headers()["x-revisions-verification-state"]).toBe(
+      "machine-validated-human-review-pending",
+    );
+    expect(response.headers()["x-revisions-ingest-fallback-reason"]).toBeUndefined();
     await page.getByRole("button", { name: "法改正一覧" }).click();
     await expect(page.getByRole("heading", { name: "法改正一覧" }).first()).toBeVisible();
   });
 
   test("失敗系: 要約API 5xx で ErrorNotice と再試行表示 @failure", async ({ page }) => {
-    await page.goto("/laws?forceSummaryError=5xx");
-    await page.getByRole("button", { name: "AI要約" }).click();
-    await page.getByRole("button", { name: "AIで要約" }).first().click();
+    await mockApiFailure(page, "/api/summaries", 503, "要約APIが一時的に利用できません。", true);
+    await page.goto("/laws");
+    await page.getByRole("button", { name: "収録要点", exact: true }).click();
+    await openFirstRevisionActions(page);
+    await page.getByRole("button", { name: "収録要点を見る" }).first().click();
     await expect(page.getByText("要約の取得に失敗しました")).toBeVisible();
     await expect(page.getByText("要約APIが一時的に利用できません。")).toBeVisible();
     await expect(page.getByRole("button", { name: "要約を再取得" })).toBeVisible();
   });
 
   test("失敗系: 要約API timeout で ErrorNotice 表示 @failure", async ({ page }) => {
-    await page.goto("/laws?forceSummaryError=timeout");
-    await page.getByRole("button", { name: "AI要約" }).click();
-    await page.getByRole("button", { name: "AIで要約" }).first().click();
+    await mockApiFailure(page, "/api/summaries", 504, "要約API応答がタイムアウトしました。", true);
+    await page.goto("/laws");
+    await page.getByRole("button", { name: "収録要点", exact: true }).click();
+    await openFirstRevisionActions(page);
+    await page.getByRole("button", { name: "収録要点を見る" }).first().click();
     await expect(page.getByText("要約API応答がタイムアウトしました。")).toBeVisible({ timeout: 12000 });
     await expect(page.getByRole("button", { name: "要約を再取得" })).toBeVisible();
   });
 
   test("失敗系: 要約API validation で再試行なし表示 @failure", async ({ page }) => {
-    await page.goto("/laws?forceSummaryError=validation");
-    await page.getByRole("button", { name: "AI要約" }).click();
-    await page.getByRole("button", { name: "AIで要約" }).first().click();
+    await mockApiFailure(page, "/api/summaries", 400, "要約APIの入力検証エラーです。", false);
+    await page.goto("/laws");
+    await page.getByRole("button", { name: "収録要点", exact: true }).click();
+    await openFirstRevisionActions(page);
+    await page.getByRole("button", { name: "収録要点を見る" }).first().click();
     await expect(page.getByText("要約APIの入力検証エラーです。")).toBeVisible();
     await expect(page.getByText("このエラーは再試行対象外です。")).toBeVisible();
     await expect(page.getByRole("button", { name: "要約を再取得" })).toHaveCount(0);
   });
 
   test("失敗系: チャットAPI validation で再試行なし表示 @failure", async ({ page }) => {
-    await page.goto("/laws?forceChatError=validation");
+    await mockApiFailure(page, "/api/chat", 400, "チャットの入力形式が不正です。", false);
+    await page.goto("/laws");
     await page.getByRole("button", { name: "質問チャット" }).click();
+    await openFirstRevisionActions(page);
     await page.getByRole("button", { name: "質問する" }).first().click();
-    await page.getByLabel("質問入力").fill("施行日はいつですか");
+    await page.getByRole("textbox", { name: "質問入力", exact: true }).fill("施行日はいつですか");
     await page.getByRole("button", { name: "送信" }).click();
     await expect(page.getByText("チャットの入力形式が不正です。")).toBeVisible();
     await expect(page.getByText("このエラーは再試行対象外です。")).toBeVisible();
   });
 
   test("失敗系: チャットAPI 5xx で再試行表示 @failure", async ({ page }) => {
-    await page.goto("/laws?forceChatError=5xx");
+    await mockApiFailure(page, "/api/chat", 503, "チャットAPIが一時的に利用できません。", true);
+    await page.goto("/laws");
     await page.getByRole("button", { name: "質問チャット" }).click();
+    await openFirstRevisionActions(page);
     await page.getByRole("button", { name: "質問する" }).first().click();
-    await page.getByLabel("質問入力").fill("施行日はいつですか");
+    await page.getByRole("textbox", { name: "質問入力", exact: true }).fill("施行日はいつですか");
     await page.getByRole("button", { name: "送信" }).click();
     await expect(page.getByText("チャットAPIが一時的に利用できません。")).toBeVisible();
     await expect(page.getByRole("button", { name: "同じ質問を再送" })).toBeVisible();
   });
 
   test("失敗系: チャットAPI timeout で再試行表示 @failure", async ({ page }) => {
-    await page.goto("/laws?forceChatError=timeout");
+    await mockApiFailure(page, "/api/chat", 504, "チャット応答がタイムアウトしました。再試行してください。", true);
+    await page.goto("/laws");
     await page.getByRole("button", { name: "質問チャット" }).click();
+    await openFirstRevisionActions(page);
     await page.getByRole("button", { name: "質問する" }).first().click();
-    await page.getByLabel("質問入力").fill("施行日はいつですか");
+    await page.getByRole("textbox", { name: "質問入力", exact: true }).fill("施行日はいつですか");
     await page.getByRole("button", { name: "送信" }).click();
     await expect(page.getByText("チャット応答がタイムアウトしました。再試行してください。")).toBeVisible({
       timeout: 12000,
@@ -196,31 +357,63 @@ test.describe("live mode", () => {
   });
 
   test("回復系: 要約API 5xx から再試行で回復 @recovery", async ({ page }) => {
-    await page.goto("/laws?forceSummaryError=5xx");
-    await page.getByRole("button", { name: "AI要約" }).click();
-    await page.getByRole("button", { name: "AIで要約" }).first().click();
+    let attempts = 0;
+    await page.route("**/api/summaries**", (route) => {
+      attempts += 1;
+      if (attempts === 1) {
+        return route.fulfill({
+          status: 503,
+          contentType: "application/json",
+          body: JSON.stringify({
+            error: {
+              code: "UNAVAILABLE",
+              message: "要約APIが一時的に利用できません。",
+              retryable: true,
+            },
+          }),
+        });
+      }
+      return route.continue();
+    });
+    await page.goto("/laws");
+    await page.getByRole("button", { name: "収録要点", exact: true }).click();
     await expect(page.getByText("要約の取得に失敗しました")).toBeVisible();
 
-    await page.goto("/laws");
-    await page.getByRole("button", { name: "AI要約" }).click();
-    await page.getByRole("button", { name: "AIで要約" }).first().click();
+    await page.getByRole("button", { name: "要約を再取得" }).click();
     await expect(page.getByText("3行要約")).toBeVisible();
+    expect(attempts).toBe(2);
   });
 
   test("回復系: チャットAPI 5xx から再送で回復 @recovery", async ({ page }) => {
-    await page.goto("/laws?forceChatError=5xx");
+    let attempts = 0;
+    await page.route("**/api/chat**", (route) => {
+      attempts += 1;
+      if (attempts === 1) {
+        return route.fulfill({
+          status: 503,
+          contentType: "application/json",
+          body: JSON.stringify({
+            error: {
+              code: "UNAVAILABLE",
+              message: "チャットAPIが一時的に利用できません。",
+              retryable: true,
+            },
+          }),
+        });
+      }
+      return route.continue();
+    });
+    await page.goto("/laws");
     await page.getByRole("button", { name: "質問チャット" }).click();
+    await openFirstRevisionActions(page);
     await page.getByRole("button", { name: "質問する" }).first().click();
-    await page.getByLabel("質問入力").fill("施行日はいつですか");
+    await page.getByRole("textbox", { name: "質問入力", exact: true }).fill("施行日はいつですか");
     await page.getByRole("button", { name: "送信" }).click();
     await expect(page.getByText("チャットAPIが一時的に利用できません。")).toBeVisible();
 
-    await page.goto("/laws");
-    await page.getByRole("button", { name: "質問チャット" }).click();
-    await page.getByRole("button", { name: "質問する" }).first().click();
-    await page.getByLabel("質問入力").fill("施行日はいつですか");
-    await page.getByRole("button", { name: "送信" }).click();
+    await page.getByRole("button", { name: "同じ質問を再送" }).click();
     // 施行日はいつですかという質問文がチャット履歴に表示されること（送信成功確認）
     await expect(page.getByText("施行日はいつですか").last()).toBeVisible();
+    expect(attempts).toBe(2);
   });
 });

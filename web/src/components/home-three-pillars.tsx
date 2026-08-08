@@ -1,19 +1,14 @@
-"use client";
-
-import { useState } from "react";
 import Link from "next/link";
-import { AlertTriangle, CloudRain, Scale, Sparkles, Loader2, ExternalLink, RefreshCw, LifeBuoy } from "lucide-react";
+import { AlertTriangle, CloudRain, Scale, ExternalLink } from "lucide-react";
 // C-1（モバイル実速度の構造是正）: 事故データセット・法改正データ・JMA警報JSONの
 // 静的 import とクライアント側選定を廃止。選定は lib/home-three-pillars-data.ts
 // （server）が行い、page.tsx から小さな結果だけを props で受け取る。
 // "/" は全ページからリンクされるため、RSC プリフェッチで全ページが
 // このデータチャンク（生約340KB+）を落とす構造になっていた。
 import type { AccidentCase, LawRevisionCore } from "@/lib/types/domain";
-import type { WarningEntry } from "@/lib/home-three-pillars-data";
-import { useLanguage } from "@/contexts/language-context";
+import type { HomeWeatherState } from "@/lib/home-three-pillars-data";
 import { StatusBadge } from "@/components/ui/status-badge";
-
-type AlertKind = "fatal-accident" | "weather" | "law-revision";
+import { HomeSafetyAlertGenerator } from "@/components/home-safety-alert-generator";
 
 function extractAccidentSourceUrl(c: AccidentCase): string | null {
   if (c.source?.url) return c.source.url.startsWith("http") ? c.source.url : `https://${c.source.url}`;
@@ -22,18 +17,16 @@ function extractAccidentSourceUrl(c: AccidentCase): string | null {
   const url = m[1];
   return url.startsWith("http") ? url : `https://${url}`;
 }
-
 export function HomeThreePillars({
   fatal,
   lawRevisions,
-  warnings,
+  weather,
 }: {
   fatal: AccidentCase | null;
   lawRevisions: LawRevisionCore[];
-  warnings: WarningEntry[];
+  weather: HomeWeatherState;
 }) {
-  const { language } = useLanguage();
-  const isEn = language === "en";
+  const isEn = false;
 
   return (
     <section className="space-y-4">
@@ -43,24 +36,22 @@ export function HomeThreePillars({
         </h2>
         <p className="mt-0.5 text-xs text-slate-500">
           {isEn
-            ? "Latest fatal accident, weather warnings, and law amendments at a glance. Generate a morning-briefing alert from each item using AI."
-            : "直近の死亡事故・気象警報・法改正の3項目をまとめて把握。各項目から朝礼用の注意喚起文をAIで生成できます。"}
+            ? "Review source-labelled accident, weather trust state, and verified law updates before a briefing."
+            : "出典区分付き事故・気象の信頼状態・確認済み法改正を見て、朝礼で扱う前の確認手順へ進めます。"}
         </p>
       </header>
 
       <div className="grid gap-4 lg:grid-cols-3">
         <PillarFatalAccident fatal={fatal} />
-        <PillarWeather warnings={warnings} />
+        <PillarWeather weather={weather} />
         <PillarLawRevisions revisions={lawRevisions} />
       </div>
     </section>
   );
 }
-
 function PillarFatalAccident({ fatal }: { fatal: AccidentCase | null }) {
   const sourceUrl = fatal ? extractAccidentSourceUrl(fatal) : null;
-  const { language } = useLanguage();
-  const isEn = language === "en";
+  const isEn = false;
   return (
     <article className="flex flex-col rounded-2xl border border-rose-200 bg-rose-50/40 p-4 shadow-sm">
       <div className="flex items-start gap-2">
@@ -104,7 +95,7 @@ function PillarFatalAccident({ fatal }: { fatal: AccidentCase | null }) {
             </a>
           )}
 
-          <AlertGenerator
+          <HomeSafetyAlertGenerator
             kind="fatal-accident"
             title={fatal.title}
             context={`業種: ${fatal.workCategory} / 種別: ${fatal.type} / 主因: ${(fatal.mainCauses ?? []).join("、")}`}
@@ -113,27 +104,48 @@ function PillarFatalAccident({ fatal }: { fatal: AccidentCase | null }) {
         </>
       )}
 
-      {/* メイン3機能: 業種別事故分析レポートを主動線とし、10年DB一覧はセカンダリに格下げ */}
-      <Link
-        href="/accidents-reports"
-        className="mt-3 inline-flex min-h-[44px] items-center justify-center rounded-lg border border-rose-200 bg-white px-3 py-2 text-xs font-bold text-rose-700 hover:bg-rose-50"
-      >
-        {isEn ? "Industry accident reports →" : "業種別 事故分析レポートへ →"}
-      </Link>
       <Link
         href="/accidents"
-        className="mt-1.5 inline-flex min-h-[44px] items-center justify-center px-2 text-[11px] font-semibold text-rose-700/80 hover:text-rose-800 hover:underline"
+        className="mt-3 inline-flex min-h-[44px] items-center justify-center rounded-lg border border-rose-200 bg-white px-3 py-2 text-xs font-bold text-rose-700 hover:bg-rose-50"
       >
-        {isEn ? "10-year accident DB list →" : "10年事故DB一覧へ →"}
+        {isEn ? "Search source-labelled cases →" : "出典区分付き事故検索へ →"}
       </Link>
     </article>
   );
 }
 
-function PillarWeather({ warnings }: { warnings: WarningEntry[] }) {
+function formatJst(value: string | null): string {
+  if (!value) return "確認できません";
+  const timestamp = Date.parse(value);
+  if (!Number.isFinite(timestamp)) return "確認できません";
+  return new Intl.DateTimeFormat("ja-JP", {
+    timeZone: "Asia/Tokyo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(timestamp);
+}
+
+function PillarWeather({ weather }: { weather: HomeWeatherState }) {
+  const isLive = weather.status === "live";
+  const warnings = isLive ? weather.warnings : [];
   const hasWarning = warnings.some((w) => w.level === "warning");
-  const { language } = useLanguage();
-  const isEn = language === "en";
+  const isEn = false;
+  const unavailableLabel =
+    weather.status === "stale"
+      ? "古いデータ・判断停止"
+      : weather.status === "partial"
+        ? "一部欠落・判断停止"
+        : "取得不能・判断停止";
+  const unavailableHeading =
+    weather.status === "stale"
+      ? "保存データが古いため、現在の警報状態は判断できません"
+      : weather.status === "partial"
+        ? "地域データが不完全なため、警報状態は判断できません"
+        : "気象データを確認できないため、警報状態は判断できません";
   return (
     <article className="flex flex-col rounded-2xl border border-amber-200 bg-amber-50/40 p-4 shadow-sm">
       <div className="flex items-start gap-2">
@@ -142,15 +154,25 @@ function PillarWeather({ warnings }: { warnings: WarningEntry[] }) {
         </div>
         <div className="flex-1">
           <p className="text-[11px] font-bold uppercase tracking-widest text-amber-700">
-            {isEn ? "B. Severe weather this week" : "B. 1週間の警報級悪天候"}
+            {isEn ? "B. JMA warnings and advisories" : "B. 気象庁の警報・注意報"}
           </p>
           {/* 共通視覚言語（柱0-0）: 気象庁の色文法と同じく 警報=赤 / 注意報=黄 / なし=緑 */}
           <StatusBadge
-            tone={hasWarning ? "danger" : warnings.length > 0 ? "warning" : "safe"}
+            tone={
+              !isLive
+                ? "warning"
+                : hasWarning
+                  ? "danger"
+                  : warnings.length > 0
+                    ? "warning"
+                    : "safe"
+            }
             size="sm"
             className="mt-1"
           >
-            {hasWarning
+            {!isLive
+              ? unavailableLabel
+              : hasWarning
               ? isEn
                 ? "Warning in effect"
                 : "警報 発表中"
@@ -163,7 +185,9 @@ function PillarWeather({ warnings }: { warnings: WarningEntry[] }) {
                   : "警報・注意報なし"}
           </StatusBadge>
           <h3 className="mt-1 text-sm font-bold leading-snug text-slate-900">
-            {hasWarning
+            {!isLive
+              ? unavailableHeading
+              : hasWarning
               ? isEn
                 ? "Warning-level severe weather in effect"
                 : "警報級の悪天候が発表中"
@@ -178,7 +202,22 @@ function PillarWeather({ warnings }: { warnings: WarningEntry[] }) {
         </div>
       </div>
 
-      {warnings.length > 0 && (
+      <dl className="mt-3 grid gap-1 rounded-lg border border-amber-200 bg-white p-2 text-[11px] text-slate-700">
+        <div className="flex flex-wrap justify-between gap-2">
+          <dt className="font-semibold">データ取得時刻（JST）</dt>
+          <dd>{formatJst(weather.fetchedAt)}</dd>
+        </div>
+        <div className="flex flex-wrap justify-between gap-2">
+          <dt className="font-semibold">対象時刻（JST）</dt>
+          <dd>{formatJst(weather.targetAt)}</dd>
+        </div>
+        <div className="flex flex-wrap justify-between gap-2">
+          <dt className="font-semibold">この表示の確認時刻（JST）</dt>
+          <dd>{formatJst(weather.checkedAt)}</dd>
+        </div>
+      </dl>
+
+      {isLive && warnings.length > 0 && (
         <ul className="mt-3 space-y-1.5">
           {warnings.map((w) => (
             <li key={w.iso} className="text-xs leading-5 text-slate-700">
@@ -204,8 +243,8 @@ function PillarWeather({ warnings }: { warnings: WarningEntry[] }) {
         </ul>
       )}
 
-      {warnings.length > 0 && (
-        <AlertGenerator
+      {isLive && warnings.length > 0 && (
+        <HomeSafetyAlertGenerator
           kind="weather"
           title={
             hasWarning
@@ -217,9 +256,18 @@ function PillarWeather({ warnings }: { warnings: WarningEntry[] }) {
         />
       )}
 
+      <a
+        href={weather.sourceUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="mt-3 inline-flex min-h-[44px] items-center justify-center gap-1 rounded-lg border border-amber-300 bg-white px-3 py-2 text-xs font-bold text-amber-800 hover:bg-amber-50"
+      >
+        <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+        気象庁の警報・注意報を確認
+      </a>
       <Link
         href="/risk"
-        className="mt-3 inline-flex min-h-[44px] items-center justify-center rounded-lg border border-amber-200 bg-white px-3 py-2 text-xs font-bold text-amber-700 hover:bg-amber-50"
+        className="mt-1.5 inline-flex min-h-[44px] items-center justify-center rounded-lg border border-amber-200 bg-white px-3 py-2 text-xs font-bold text-amber-700 hover:bg-amber-50"
       >
         {isEn ? "Weather risk detail →" : "気象リスク詳細を見る →"}
       </Link>
@@ -228,8 +276,7 @@ function PillarWeather({ warnings }: { warnings: WarningEntry[] }) {
 }
 
 function PillarLawRevisions({ revisions }: { revisions: LawRevisionCore[] }) {
-  const { language } = useLanguage();
-  const isEn = language === "en";
+  const isEn = false;
   return (
     <article className="flex flex-col rounded-2xl border border-emerald-200 bg-emerald-50/40 p-4 shadow-sm">
       <div className="flex items-start gap-2">
@@ -260,7 +307,7 @@ function PillarLawRevisions({ revisions }: { revisions: LawRevisionCore[] }) {
               <p className="mt-0.5 text-[11px] text-slate-500">
                 {isEn ? "Effective" : "施行日"}: {r.enforcement_date || r.publishedAt} / {r.issuer}
               </p>
-              <AlertGenerator
+              <HomeSafetyAlertGenerator
                 kind="law-revision"
                 title={r.title}
                 context={`施行日: ${r.enforcement_date || r.publishedAt} / 概要: ${r.summary}`}
@@ -279,116 +326,5 @@ function PillarLawRevisions({ revisions }: { revisions: LawRevisionCore[] }) {
         {isEn ? "Law amendments list →" : "法改正一覧を見る →"}
       </Link>
     </article>
-  );
-}
-
-function AlertGenerator({
-  kind,
-  title,
-  context,
-  accent,
-  compact = false,
-}: {
-  kind: AlertKind;
-  title: string;
-  context?: string;
-  accent: "rose" | "amber" | "emerald";
-  compact?: boolean;
-}) {
-  const [loading, setLoading] = useState(false);
-  const [alert, setAlert] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [failureCount, setFailureCount] = useState(0);
-  const { language } = useLanguage();
-  const isEn = language === "en";
-
-  const accentClasses: Record<typeof accent, string> = {
-    rose: "border-rose-300 bg-white text-rose-800 hover:bg-rose-50",
-    amber: "border-amber-300 bg-white text-amber-800 hover:bg-amber-50",
-    emerald: "border-emerald-300 bg-white text-emerald-800 hover:bg-emerald-50",
-  };
-
-  async function handleGenerate() {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch("/api/safety-alert", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ kind, title, context }),
-      });
-      const data = (await res.json().catch(() => ({}))) as {
-        alert?: string;
-        error?: string;
-      };
-      if (!res.ok || !data.alert) {
-        setError(data.error ?? (isEn ? "Generation failed." : "生成に失敗しました。"));
-        setFailureCount((c) => c + 1);
-      } else {
-        setAlert(data.alert);
-        setFailureCount(0);
-      }
-    } catch {
-      setError(isEn ? "Network error occurred." : "ネットワークエラーが発生しました。");
-      setFailureCount((c) => c + 1);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  const showContactCta = failureCount >= 3;
-
-  return (
-    <div className={compact ? "mt-2" : "mt-3"}>
-      <button
-        type="button"
-        onClick={handleGenerate}
-        disabled={loading}
-        className={`inline-flex min-h-[44px] items-center gap-1 rounded-full border px-3 py-1 text-[11px] font-semibold ${accentClasses[accent]} disabled:cursor-not-allowed disabled:opacity-60`}
-      >
-        {loading ? (
-          <Loader2 className="h-3 w-3 animate-spin" />
-        ) : (
-          <Sparkles className="h-3 w-3" />
-        )}
-        {loading ? (isEn ? "Generating…" : "生成中…") : (isEn ? "Generate alert text" : "注意喚起文を作成")}
-      </button>
-
-      {alert && (
-        <div className="mt-2 rounded-lg border border-slate-200 bg-white p-2.5 text-[11px] leading-5 text-slate-700">
-          <pre className="whitespace-pre-wrap font-sans">{alert}</pre>
-        </div>
-      )}
-      {error && (
-        <div className="mt-1.5 rounded-md border border-rose-200 bg-rose-50/60 p-2 text-[11px] leading-5 text-rose-800" role="alert">
-          <p className="font-semibold">{error}</p>
-          <p className="mt-1 text-rose-700/90">
-            {isEn
-              ? "Possible causes: API rate limit, temporary network issue, or upstream service unavailable."
-              : "考えられる原因: AI APIの利用上限、一時的なネットワーク不調、サービス側の停止。"}
-          </p>
-          <div className="mt-2 flex flex-wrap items-center gap-2">
-            <button
-              type="button"
-              onClick={handleGenerate}
-              disabled={loading}
-              className="inline-flex min-h-[44px] items-center gap-1 rounded-full border border-rose-300 bg-white px-3 py-1 text-[11px] font-semibold text-rose-800 hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              <RefreshCw className="h-3 w-3" />
-              {isEn ? "Retry" : "再試行"}
-            </button>
-            {showContactCta && (
-              <Link
-                href="/contact"
-                className="inline-flex min-h-[44px] items-center gap-1 rounded-full border border-rose-300 bg-rose-100 px-3 py-1 text-[11px] font-semibold text-rose-900 hover:bg-rose-200"
-              >
-                <LifeBuoy className="h-3 w-3" />
-                {isEn ? "Contact administrator" : "管理者に連絡（3回連続失敗）"}
-              </Link>
-            )}
-          </div>
-        </div>
-      )}
-    </div>
   );
 }

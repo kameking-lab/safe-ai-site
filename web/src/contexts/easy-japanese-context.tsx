@@ -1,58 +1,70 @@
 "use client";
 
 import {
-  createContext,
-  useContext,
-  useState,
   useCallback,
-  useEffect,
+  useSyncExternalStore,
 } from "react";
 
 const STORAGE_KEY = "easy-japanese-enabled";
+const CHANGE_EVENT = "anzen:easy-japanese-change";
+let memoryEnabled = false;
+let memoryFallbackActive = false;
 
 interface EasyJapaneseContextValue {
   easyJapaneseEnabled: boolean;
   toggleEasyJapanese: () => void;
 }
 
-const EasyJapaneseContext = createContext<EasyJapaneseContextValue | null>(null);
+function readEnabled(): boolean {
+  if (typeof window === "undefined") return false;
+  if (memoryFallbackActive) return memoryEnabled;
+  try {
+    memoryEnabled = localStorage.getItem(STORAGE_KEY) === "true";
+    return memoryEnabled;
+  } catch {
+    memoryFallbackActive = true;
+    return memoryEnabled;
+  }
+}
+
+function subscribe(listener: () => void): () => void {
+  if (typeof window === "undefined") return () => {};
+  const onStorage = (event: StorageEvent) => {
+    if (event.key === STORAGE_KEY) {
+      memoryEnabled = event.newValue === "true";
+      memoryFallbackActive = false;
+      listener();
+    }
+  };
+  window.addEventListener(CHANGE_EVENT, listener);
+  window.addEventListener("storage", onStorage);
+  return () => {
+    window.removeEventListener(CHANGE_EVENT, listener);
+    window.removeEventListener("storage", onStorage);
+  };
+}
 
 export function EasyJapaneseProvider({ children }: { children: React.ReactNode }) {
-  // SSR/hydration対策: 初期値はfalseで統一し、マウント後にlocalStorageから読む
-  const [easyJapaneseEnabled, setEasyJapaneseEnabled] = useState<boolean>(false);
-
-  useEffect(() => {
-    try {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- マウント直後の一度きりのlocalStorage hydration
-      if (localStorage.getItem(STORAGE_KEY) === "true") setEasyJapaneseEnabled(true);
-    } catch {
-      // localStorage unavailable
-    }
-  }, []);
-
-  const toggleEasyJapanese = useCallback(() => {
-    setEasyJapaneseEnabled((prev) => {
-      const next = !prev;
-      try {
-        localStorage.setItem(STORAGE_KEY, String(next));
-      } catch {
-        // localStorage利用不可の場合は無視
-      }
-      return next;
-    });
-  }, []);
-
-  return (
-    <EasyJapaneseContext.Provider value={{ easyJapaneseEnabled, toggleEasyJapanese }}>
-      {children}
-    </EasyJapaneseContext.Provider>
-  );
+  // 後方互換用。状態は外部storeで共有するため、ページ本文をClient境界で包まない。
+  return children;
 }
 
 export function useEasyJapanese(): EasyJapaneseContextValue {
-  const ctx = useContext(EasyJapaneseContext);
-  if (!ctx) {
-    throw new Error("useEasyJapanese must be used within EasyJapaneseProvider");
-  }
-  return ctx;
+  const easyJapaneseEnabled = useSyncExternalStore(
+    subscribe,
+    readEnabled,
+    () => false,
+  );
+  const toggleEasyJapanese = useCallback(() => {
+    const next = !readEnabled();
+    memoryEnabled = next;
+    try {
+      localStorage.setItem(STORAGE_KEY, String(next));
+      memoryFallbackActive = false;
+    } catch {
+      memoryFallbackActive = true;
+    }
+    window.dispatchEvent(new Event(CHANGE_EVENT));
+  }, []);
+  return { easyJapaneseEnabled, toggleEasyJapanese };
 }

@@ -9,6 +9,18 @@ import {
 } from "@/lib/meeting/schema";
 
 describe("meeting schema", () => {
+  it("指定したID生成器と時刻でhydration-safeな初期レコードを再現できる", () => {
+    const build = () => {
+      let sequence = 0;
+      return buildDefaultMeetingRecord({
+        idFactory: () => `stable-${sequence++}`,
+        now: new Date("2026-07-22T00:00:00.000Z"),
+      });
+    };
+    expect(build()).toEqual(build());
+    expect(build().contractors[0]?.id).toBe("stable-0");
+  });
+
   it("computePriority: 重大性×可能性 を 1-4 に写像", () => {
     expect(computePriority(1, 1)).toBe(1); // 1
     expect(computePriority(3, 1)).toBe(2); // 3
@@ -28,11 +40,13 @@ describe("meeting schema", () => {
     expect(agg.find((m) => m.name === "ダンプ")?.count).toBe(1);
   });
 
-  it("buildDefaultChecklist: 8カテゴリ・全項目 na 初期化", () => {
+  it("PF-006: buildDefaultChecklist は全項目を未確認で初期化する", () => {
     const cl = buildDefaultChecklist();
     expect(cl).toHaveLength(8);
     expect(cl.every((c) => c.items.length > 0)).toBe(true);
-    expect(cl.flatMap((c) => c.items).every((i) => i.status === "na")).toBe(true);
+    expect(
+      cl.flatMap((c) => c.items).every((i) => i.status === "unreviewed"),
+    ).toBe(true);
   });
 
   it("normalizeMeetingRecord: 壊れた入力を既定化し machines を自動集計", () => {
@@ -55,5 +69,60 @@ describe("meeting schema", () => {
     const norm = normalizeMeetingRecord(JSON.parse(JSON.stringify(def)));
     expect(norm.checklist[0].items[0].status).toBe("ok");
     expect(norm.checklist[0].items[0].key).toBe(firstKey);
+  });
+
+  it("新規記録は未承認・未印刷のdocumentControlで始まる", () => {
+    const rec = buildDefaultMeetingRecord();
+    expect(rec.documentControl).toEqual({
+      schemaVersion: 2,
+      legacyImported: false,
+      approval: null,
+      lastPrint: null,
+      history: [],
+    });
+  });
+
+  it("旧形式の記録を承認済み・印刷済みと推定せず明示する", () => {
+    const rec = normalizeMeetingRecord({
+      id: "legacy",
+      siteName: "旧現場",
+      contractors: [
+        {
+          companyName: "旧会社",
+          workContent: "旧作業",
+          predictedDisasters: ["旧災害"],
+          safetyInstructions: "旧指示",
+        },
+      ],
+    });
+    expect(rec.documentControl).toEqual({
+      schemaVersion: 2,
+      legacyImported: true,
+      approval: null,
+      lastPrint: null,
+      history: [],
+    });
+  });
+
+  it("壊れた承認・印刷状態をfail-closedで破棄する", () => {
+    const rec = normalizeMeetingRecord({
+      documentControl: {
+        schemaVersion: 1,
+        approval: {
+          reviewerName: "",
+          approvedAt: "not-a-date",
+          contentRevision: "",
+        },
+        lastPrint: {
+          printedAt: "not-a-date",
+          contentRevision: "",
+          approvalRevision: "",
+        },
+        history: [{ action: "approved", at: "invalid", contentRevision: "" }],
+      },
+    });
+    expect(rec.documentControl.approval).toBeNull();
+    expect(rec.documentControl.lastPrint).toBeNull();
+    expect(rec.documentControl.history).toEqual([]);
   });
 });

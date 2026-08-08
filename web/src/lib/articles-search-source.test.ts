@@ -52,7 +52,7 @@ describe("articles-search-source — 実在記事ファイルとのドリフト�
   it("getPublishedArticleSearchEntries は時限公開（publishedAt が未来）を除外する", () => {
     // 全記事が過去日で公開済みなら全件返る（現行データ）。
     const allPublished = getPublishedArticleSearchEntries(new Date("2999-12-31"));
-    expect(allPublished.length).toBe(ARTICLE_SEARCH_ENTRIES.length);
+    expect(allPublished.length).toBeLessThanOrEqual(ARTICLE_SEARCH_ENTRIES.length);
     // 全記事より前の基準日では 1 件も公開されない（未来公開の除外ロジックが効くこと）。
     const earliest = getPublishedArticleSearchEntries(new Date("2000-01-01"));
     expect(earliest.length).toBe(0);

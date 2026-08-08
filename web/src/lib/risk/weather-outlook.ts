@@ -1,4 +1,5 @@
 import type { SafetyTone } from "@/lib/design/safety-tone";
+import { addDaysToDateKey, jstDateKey, relativeJstDateLabel } from "@/lib/time/jst-date";
 
 /**
  * /risk リスク管理ハブの「明日以降の見通し」ストリップ判定（柱0・柱3）。
@@ -27,6 +28,8 @@ export type RiskWeatherOutlookDay = {
   date: string;
   /** 何日後か（1 = 明日） */
   offset: number;
+  /** 表示元配列の位置。日付の欠落があっても offset と混同しない。 */
+  sourceIndex: number;
   /** 明日/明後日（それ以降は空文字＝日付のみで示す） */
   dayLabel: string;
   /** 色帯トーン（赤=警報・黄=注意報・緑=なし） */
@@ -49,18 +52,16 @@ export type RiskWeatherOutlookDay = {
   worstRegions: string[];
 };
 
-const RELATIVE_LABELS: Record<number, string> = { 1: "明日", 2: "明後日" };
-
 function levelToTone(level: OutlookAlertLevel): SafetyTone {
   if (level === "warning") return "danger";
   if (level === "advisory") return "warning";
-  return "safe";
+  return "neutral";
 }
 
 function levelToLabel(level: OutlookAlertLevel): string {
-  if (level === "warning") return "警報相当";
-  if (level === "advisory") return "注意報相当";
-  return "概ね良好";
+  if (level === "warning") return "独自目安・警戒";
+  if (level === "advisory") return "独自目安・注意";
+  return "独自目安・顕著な値なし";
 }
 
 /**
@@ -71,24 +72,27 @@ function levelToLabel(level: OutlookAlertLevel): string {
  */
 export function buildRiskWeatherOutlook(
   regions: RiskWeatherOutlookInput[],
-  opts: { startOffset?: number; days?: number } = {}
+  opts: { startOffset?: number; days?: number; now?: Date } = {}
 ): RiskWeatherOutlookDay[] {
   const startOffset = opts.startOffset ?? 1;
   const span = opts.days ?? 3;
   const base = regions[0]?.days ?? [];
   const out: RiskWeatherOutlookDay[] = [];
+  const today = jstDateKey(opts.now ?? new Date());
+  const firstDate = addDaysToDateKey(today, startOffset);
+  const eligible = base
+    .map((day, sourceIndex) => ({ day, sourceIndex }))
+    .filter(({ day }) => day.date >= firstDate)
+    .slice(0, span);
 
-  for (let k = 0; k < span; k++) {
-    const idx = startOffset + k;
-    const baseDay = base[idx];
-    if (!baseDay) break;
+  for (const { day: baseDay, sourceIndex } of eligible) {
 
     let warningCount = 0;
     let advisoryCount = 0;
     const warningRegions: string[] = [];
     const advisoryRegions: string[] = [];
     for (const region of regions) {
-      const lvl = region.days[idx]?.alertLevel;
+      const lvl = region.days.find((day) => day.date === baseDay.date)?.alertLevel;
       if (lvl === "warning") {
         warningCount += 1;
         if (region.regionLabel) warningRegions.push(region.regionLabel);
@@ -107,8 +111,9 @@ export function buildRiskWeatherOutlook(
 
     out.push({
       date: baseDay.date,
-      offset: idx,
-      dayLabel: RELATIVE_LABELS[idx] ?? "",
+      offset: Math.round((Date.parse(`${baseDay.date}T00:00:00Z`) - Date.parse(`${today}T00:00:00Z`)) / 86_400_000),
+      sourceIndex,
+      dayLabel: relativeJstDateLabel(baseDay.date, opts.now),
       tone: levelToTone(level),
       level,
       levelLabel: levelToLabel(level),

@@ -10,10 +10,12 @@
  * RAG ほど精緻ではないが、ETL が走らないクライアント生成 SSG ページでも軽量に動く。
  */
 
-import { mhlwNotices, type MhlwNotice } from "@/data/mhlw-notices";
+import type { MhlwNotice } from "@/data/mhlw-notices";
+import { publicMhlwNotices as mhlwNotices } from "@/data/public-mhlw-notices";
 import { getAccidentCasesDataset } from "@/data/mock/accident-cases";
 import { getAllEquipment, type EquipmentItem } from "@/lib/equipment-recommendation";
 import type { AccidentCase } from "@/lib/types/domain";
+import { isIndexableAccident } from "@/lib/seo/index-quality";
 
 export type RelatedContentItem = {
   /** 内部URL */
@@ -177,6 +179,7 @@ export function relatedFromNotice(
     }));
 
   const accidentHits = getAccidentCasesDataset()
+    .filter(isIndexableAccident)
     .map((c) => ({ c, s: scoreAccident(c, tokens, hazardKeywords, []) }))
     .filter((x) => x.s > 0)
     .sort((a, b) => b.s - a.s)
@@ -234,7 +237,7 @@ export function relatedFromAccident(
   const hazardKeywords = hazardKeywordsFor(hazardGuess);
 
   const similarAccidents = getAccidentCasesDataset()
-    .filter((x) => x.id !== c.id)
+    .filter((x) => x.id !== c.id && isIndexableAccident(x))
     .map((x) => {
       let s = scoreAccident(x, tokens, hazardKeywords, []);
       if (x.type === c.type) s += 5;
@@ -303,6 +306,7 @@ export function relatedFromEquipment(
   const industryKeywords = industryKeywordsFor(item.industries);
 
   const accidentHits = getAccidentCasesDataset()
+    .filter(isIndexableAccident)
     .map((c) => ({ c, s: scoreAccident(c, tokens, hazardKeywords, industryKeywords) }))
     .filter((x) => x.s > 0)
     .sort((a, b) => b.s - a.s)

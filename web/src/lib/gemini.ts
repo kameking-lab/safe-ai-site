@@ -20,6 +20,10 @@ export const AI_DISCLAIMER_SYSTEM_INSTRUCTION = `
 export const AI_LEGAL_DISCLAIMER =
   "本回答はAIによる情報提供であり、法的助言・法令解釈の確定ではありません。具体的な法的判断・実務対応は、労働安全コンサルタント・弁護士等の専門家にご相談ください。";
 
+/** 生成AIを使わず、収録済み法令本文の検索・定型文だけを返す経路の説明。 */
+export const RAG_LEGAL_DISCLAIMER =
+  "この案内は収録済み法令本文の機械検索と定型文による確認候補で、法的助言・適用判断ではありません。最新の公式現行法令と適用条件を確認し、個別判断は所轄機関または適切な専門家へ相談してください。";
+
 /**
  * 出典の拘束力レベル定義
  * notice-search.ts の MhlwNotice["bindingLevel"] と同一値

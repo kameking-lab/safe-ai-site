@@ -9,7 +9,10 @@ import {
   type KyIndustryId,
   type KyWorkTypeId,
 } from "@/types/ky-example";
-import { KY_EXAMPLES, filterKyExamples } from "@/data/ky-examples";
+import {
+  KY_EXAMPLES,
+  filterKyExamples,
+} from "@/data/ky-examples";
 import { ConclusionCard } from "@/components/ui/conclusion-card";
 
 export function KyExamplesBrowser() {
@@ -22,19 +25,27 @@ export function KyExamplesBrowser() {
         industry: industry || undefined,
         workType: workType || undefined,
       }),
-    [industry, workType]
+    [industry, workType],
   );
 
   return (
     <div className="pb-16">
       <div className="mx-auto max-w-7xl px-4 py-6 lg:px-8">
         <header className="mb-4">
-          <h1 className="text-2xl font-bold text-slate-900">KY事例データベース</h1>
+          <h1 className="text-2xl font-bold text-slate-900">
+            KY事例データベース
+          </h1>
           <p className="mt-1 text-sm text-slate-600">
-            建設・製造・運輸・医療福祉・サービスの5業種×10作業別に整理した {KY_EXAMPLES.length} 件の参考KY事例。
-            出典は厚労省・中災防・建災防の公開教材を独自要約しています。
+            建設・製造・運輸・医療福祉・サービスの5業種×10作業別に整理した
+            {KY_EXAMPLES.length}件のサイト独自モデルケースです。
           </p>
         </header>
+
+        <p className="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-950">
+          <span className="font-bold">架空の学習例</span>
+          <span aria-hidden="true"> ・ </span>
+          現場条件に合わせて編集してください。
+        </p>
 
         <Filters
           industry={industry}
@@ -109,8 +120,8 @@ export function KyExamplesBrowser() {
                   ))}
                 </ul>
               </section>
-              <footer className="mt-auto pt-2 text-[10px] text-slate-500">
-                出典: {ex.source.label}
+              <footer className="mt-auto border-t border-amber-200 pt-2 text-[10px] leading-5 text-amber-900">
+                区分: {ex.source.label} / 検証状態: 未確認 / AI根拠利用: 不可
               </footer>
             </li>
           ))}
@@ -130,7 +141,9 @@ function Filters(props: {
   return (
     <div className="space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
       <div>
-        <p className="mb-1.5 text-[11px] font-bold text-slate-700">業種で絞り込む</p>
+        <p className="mb-1.5 text-[11px] font-bold text-slate-700">
+          業種で絞り込む
+        </p>
         <div className="flex flex-wrap gap-1.5">
           <Chip selected={industry === ""} onClick={() => onIndustry("")}>
             すべて
@@ -147,7 +160,9 @@ function Filters(props: {
         </div>
       </div>
       <div>
-        <p className="mb-1.5 text-[11px] font-bold text-slate-700">作業種別で絞り込む</p>
+        <p className="mb-1.5 text-[11px] font-bold text-slate-700">
+          作業種別で絞り込む
+        </p>
         <div className="flex flex-wrap gap-1.5">
           <Chip selected={workType === ""} onClick={() => onWorkType("")}>
             すべて

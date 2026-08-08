@@ -1,0 +1,277 @@
+{
+  "generatedAt": "2026-08-08T09:55:21.425Z",
+  "mode": "full",
+  "policy": "高リスクゲートが1件でも失敗した場合は、ローカルリリース可能・本番公開可能と判定しない。",
+  "suitesByGate": {
+    "source-and-legal": [
+      "src/data/source-registry.test.ts",
+      "src/components/evidence/evidence-card.test.tsx",
+      "src/data/laws/law-metadata-sync.test.ts",
+      "src/data/laws/heat-notice-currency.test.ts",
+      "src/data/laws/egov-verified-excerpts.test.ts",
+      "src/data/laws/mhlw-extras-quarantine.test.ts",
+      "src/data/law-navi/topics-integrity.test.ts",
+      "src/lib/article-registry-pin-integrity.test.ts"
+    ],
+    "ai-emergency-pii-citations": [
+      "src/app/api/chat/route.test.ts",
+      "src/app/api/chatbot/route-safety.test.ts",
+      "src/app/api/chatbot/stream/route-safety.test.ts",
+      "src/app/api/pii-logging.test.ts",
+      "src/app/api/ai-outbound-route-guards.test.ts",
+      "src/lib/server/ai-outbound-safety.test.ts",
+      "src/lib/client-bundle-email.test.ts",
+      "src/lib/chatbot-citation-validator.test.ts",
+      "src/lib/chatbot-safety.test.ts",
+      "src/lib/chatbot-no-hit-response.test.ts",
+      "src/lib/chatbot-genquality.test.ts",
+      "src/lib/chatbot-genquality-scorer.test.ts",
+      "src/lib/rag-100q.test.ts",
+      "src/lib/rag-100q-fresh.test.ts",
+      "src/lib/rag-100q.fixture-integrity.test.ts",
+      "src/lib/rag-100q-fresh.fixture-integrity.test.ts",
+      "src/lib/field-vernacular-bench.test.ts",
+      "src/lib/chatbot-share-fragment.test.ts",
+      "src/app/api/construction-calc/route.test.ts",
+      "src/lib/ky/gemini-suggest.test.ts",
+      "src/lib/ky-suggestion.test.ts"
+    ],
+    "chemical-fail-closed": [
+      "src/lib/chemical/response-safety.test.ts",
+      "src/lib/chemical/mixture-ra.test.ts",
+      "src/lib/chemical/mixture-server-validation.test.ts",
+      "src/lib/cross-search/chemical-detail-cas.test.ts",
+      "src/lib/chemical/ra-cloud.test.ts",
+      "src/app/api/chemical-ra/route.test.ts",
+      "src/app/api/chemical/legal-profile/route.test.ts",
+      "src/components/chemical/ra-conclusion.legal-badges.test.tsx",
+      "src/lib/chemical/official-source-url.test.ts",
+      "src/lib/chemical/create-simple-copy-policy.test.ts",
+      "src/lib/chemical/accident-cross-search.test.ts"
+    ],
+    "qualification-boundaries": [
+      "src/data/education-rules/licenses.test.ts",
+      "src/data/education-rules/skill-training.test.ts",
+      "src/data/education-rules/special-education.test.ts",
+      "src/data/education-rules/job-chief.test.ts",
+      "src/lib/education/qualification-context.test.ts",
+      "src/lib/education/finder-conclusion.test.ts",
+      "src/lib/education/qualification-finder-query.test.ts",
+      "src/app/(main)/education-certification/finder/CertFinderClient.test.tsx",
+      "src/app/(main)/education-certification/finder/qualification-finder-links.test.ts"
+    ],
+    "accident-provenance-relevance": [
+      "src/lib/accidents/search-ranking.test.ts",
+      "src/lib/accidents/ai-relevant.test.ts",
+      "src/lib/accident-source.test.ts",
+      "src/data/mock/accident-provenance-integrity.test.ts",
+      "src/lib/accidents/education-pick.test.ts",
+      "src/lib/accident-news/serious-cases.test.ts",
+      "src/app/api/accidents/analyze/route.test.ts",
+      "src/app/api/accidents/estat/route.test.ts",
+      "src/app/api/mhlw/search/route.test.ts",
+      "src/lib/seo/index-quality.test.ts"
+    ],
+    "weather-time-stale-failure": [
+      "src/app/api/weather-risk/route.test.ts",
+      "src/app/api/weather-forecast/route.test.ts",
+      "src/components/risk/today-safety-panel.test.tsx",
+      "src/lib/services/weather-risk-safety.test.ts",
+      "src/lib/signage/weather-warning-panel-state.test.ts",
+      "src/lib/jma/jma-data-trust.test.ts",
+      "src/lib/jma/data-freshness.test.ts"
+    ],
+    "ky-meeting-approval": [
+      "src/lib/ky/approval.test.ts",
+      "src/lib/ky/paper-status.test.ts",
+      "src/lib/ky/risk-source.test.ts",
+      "src/lib/ky/deep-link-prefill.test.ts",
+      "src/app/api/ky-assist/route.test.ts",
+      "src/app/api/ky/signage/route.activation.test.ts",
+      "src/lib/ky/storage-adapter.test.ts",
+      "src/lib/meeting/document-state.test.ts",
+      "src/lib/meeting/paper-status.test.ts",
+      "src/components/meeting/meeting-print-sheet.test.tsx"
+    ],
+    "search-gold-and-safe-zero": [
+      "src/lib/search-quality-evaluator.test.ts",
+      "src/lib/search-safety-quality.test.ts",
+      "src/lib/search-index.test.ts",
+      "src/lib/equipment-catalog-quarantine.test.ts",
+      "src/data/site-stats.test.ts"
+    ],
+    "privacy-shared-state-cache-csp": [
+      "src/app/api/automation-consult/route.test.ts",
+      "src/lib/automation-consult/state-store.test.ts",
+      "src/lib/automation-consult/idempotency.test.ts",
+      "src/lib/service-worker-privacy.test.ts",
+      "src/lib/next-config-security.test.ts",
+      "src/app/api/signage/pins/route.test.ts",
+      "src/app/api/stripe/portal/route.test.ts",
+      "src/components/signage-map/use-signage-pins.test.ts",
+      "src/auth-privacy.test.ts",
+      "src/lib/gsc-oauth-secret-output.test.ts",
+      "src/lib/root-script-privacy.test.ts"
+    ],
+    "heat-illness-campaign": [
+      "src/data/heat-illness-rules/legal-source.test.ts",
+      "src/data/heat-illness-learning/integrity.test.ts",
+      "src/data/heat-illness-campaign.test.ts",
+      "src/data/industries-content/heat-illness-boundary.test.ts",
+      "src/lib/heat-illness/campaign-season.test.ts",
+      "src/components/heat-illness/heat-safety-special.test.tsx",
+      "src/app/(main)/heat-illness-prevention/page.test.tsx",
+      "src/app/(main)/heat-illness-prevention/slides/page.test.tsx",
+      "src/app/(main)/heat-illness-prevention/elearning/page.test.tsx",
+      "src/lib/signage/heat-special-state.test.ts",
+      "src/components/signage/signage-heat-special.test.tsx",
+      "src/components/ky-paper/heat-illness-ky-start.test.tsx",
+      "src/lib/ky/deep-link-prefill.test.ts",
+      "src/lib/automation-consult/prefill.test.ts",
+      "src/app/(main)/services/automation/AutomationConsultForm.test.tsx",
+      "src/app/(main)/services/automation/AutomationServiceContent.test.tsx",
+      "src/components/automation/automation-entry-points.test.ts"
+    ],
+    "seo-indexability-structured-data": [
+      "src/app/sitemap.test.ts",
+      "src/app/sitemap-index.xml/route.test.ts",
+      "src/app/sitemap-laws.xml/route.test.ts",
+      "src/app/sitemap-circulars.xml/route.test.ts",
+      "src/app/sitemap-chemicals.xml/route.test.ts",
+      "src/app/sitemap-accidents.xml/route.test.ts",
+      "src/app/sitemap-equipment.xml/route.test.ts",
+      "src/app/sitemap-articles.xml/route.test.ts",
+      "src/app/layout-metadata-single-source.test.ts",
+      "src/app/(main)/articles/article-review-status.test.tsx",
+      "src/app/(main)/articles/[slug]/heat-article-indexability.test.ts",
+      "src/components/json-ld-security.test.tsx"
+    ],
+    "accessibility-contract": [
+      "src/lib/global-accessibility-contract.test.ts",
+      "src/components/app-shell-security-performance.test.ts",
+      "src/lib/voice-permissions-policy.test.ts"
+    ]
+  },
+  "criticalSuiteCount": 123,
+  "checks": [
+    {
+      "id": "typescript",
+      "command": "C:\\Program Files\\nodejs\\node.exe C:\\Users\\kanet\\20260522\\safe-ai-site\\web\\node_modules\\typescript\\bin\\tsc --noEmit",
+      "exitCode": 0,
+      "passed": true,
+      "log": "C:\\Users\\kanet\\20260522\\safe-ai-site\\docs\\audits\\evidence\\answer-first-chatbot-2026-08-03\\full-gate-final\\typescript.log",
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "git-diff-check",
+      "command": "git diff --check",
+      "exitCode": 0,
+      "passed": true,
+      "log": "C:\\Users\\kanet\\20260522\\safe-ai-site\\docs\\audits\\evidence\\answer-first-chatbot-2026-08-03\\full-gate-final\\git-diff-check.log",
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "source-safety-inventory",
+      "command": "C:\\Program Files\\nodejs\\node.exe C:\\Users\\kanet\\20260522\\safe-ai-site\\web\\scripts\\audit\\source-safety-inventory.mjs",
+      "exitCode": 0,
+      "passed": true,
+      "log": "C:\\Users\\kanet\\20260522\\safe-ai-site\\docs\\audits\\evidence\\answer-first-chatbot-2026-08-03\\full-gate-final\\source-safety-inventory.log",
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "ky-zero-friction-static-gate",
+      "command": "C:\\Program Files\\nodejs\\node.exe C:\\Users\\kanet\\20260522\\safe-ai-site\\web\\scripts\\audit\\ky-zero-friction-static-gate.mjs",
+      "exitCode": 0,
+      "passed": true,
+      "log": "C:\\Users\\kanet\\20260522\\safe-ai-site\\docs\\audits\\evidence\\answer-first-chatbot-2026-08-03\\full-gate-final\\ky-zero-friction-static-gate.log",
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "eslint-full",
+      "command": "C:\\Program Files\\nodejs\\node.exe C:\\Users\\kanet\\20260522\\safe-ai-site\\web\\node_modules\\eslint\\bin\\eslint.js .",
+      "exitCode": 0,
+      "passed": true,
+      "log": "C:\\Users\\kanet\\20260522\\safe-ai-site\\docs\\audits\\evidence\\answer-first-chatbot-2026-08-03\\full-gate-final\\eslint-full.log",
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "vitest-full",
+      "command": "C:\\Program Files\\nodejs\\node.exe C:\\Users\\kanet\\20260522\\safe-ai-site\\web\\node_modules\\vitest\\vitest.mjs run",
+      "exitCode": 0,
+      "passed": true,
+      "log": "C:\\Users\\kanet\\20260522\\safe-ai-site\\docs\\audits\\evidence\\answer-first-chatbot-2026-08-03\\full-gate-final\\vitest-full.log",
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "production-build",
+      "command": "C:\\Program Files\\nodejs\\node.exe C:\\Users\\kanet\\20260522\\safe-ai-site\\web\\node_modules\\next\\dist\\bin\\next build",
+      "exitCode": 0,
+      "passed": true,
+      "log": "C:\\Users\\kanet\\20260522\\safe-ai-site\\docs\\audits\\evidence\\answer-first-chatbot-2026-08-03\\full-gate-final\\production-build.log",
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "client-bundle-email-scan",
+      "command": "C:\\Program Files\\nodejs\\node.exe C:\\Users\\kanet\\20260522\\safe-ai-site\\web\\scripts\\audit\\client-bundle-email-scan.mjs",
+      "exitCode": 0,
+      "passed": true,
+      "log": "C:\\Users\\kanet\\20260522\\safe-ai-site\\docs\\audits\\evidence\\answer-first-chatbot-2026-08-03\\full-gate-final\\client-bundle-email-scan.log",
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "trust-boundary-inventory",
+      "command": "C:\\Program Files\\nodejs\\node.exe C:\\Users\\kanet\\20260522\\safe-ai-site\\web\\scripts\\audit\\trust-boundary-inventory.mjs",
+      "exitCode": 0,
+      "passed": true,
+      "log": "C:\\Users\\kanet\\20260522\\safe-ai-site\\docs\\audits\\evidence\\answer-first-chatbot-2026-08-03\\full-gate-final\\trust-boundary-inventory.log",
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "playwright-full",
+      "command": "C:\\Program Files\\nodejs\\node.exe C:\\Users\\kanet\\20260522\\safe-ai-site\\web\\node_modules\\playwright\\cli.js test",
+      "exitCode": 0,
+      "passed": true,
+      "log": "C:\\Users\\kanet\\20260522\\safe-ai-site\\docs\\audits\\evidence\\answer-first-chatbot-2026-08-03\\full-gate-final\\playwright-full.log",
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "playwright-privacy",
+      "command": "C:\\Program Files\\nodejs\\node.exe C:\\Users\\kanet\\20260522\\safe-ai-site\\web\\node_modules\\playwright\\cli.js test --config=playwright.privacy.config.ts",
+      "exitCode": 0,
+      "passed": true,
+      "log": "C:\\Users\\kanet\\20260522\\safe-ai-site\\docs\\audits\\evidence\\answer-first-chatbot-2026-08-03\\full-gate-final\\playwright-privacy.log",
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "npm-audit-production",
+      "command": "C:\\WINDOWS\\system32\\cmd.exe /d /s /c npm audit --omit=dev",
+      "exitCode": 0,
+      "passed": true,
+      "log": "C:\\Users\\kanet\\20260522\\safe-ai-site\\docs\\audits\\evidence\\answer-first-chatbot-2026-08-03\\full-gate-final\\npm-audit-production.log",
+      "signal": null,
+      "error": null
+    },
+    {
+      "id": "npm-audit-all",
+      "command": "C:\\WINDOWS\\system32\\cmd.exe /d /s /c npm audit",
+      "exitCode": 0,
+      "passed": true,
+      "log": "C:\\Users\\kanet\\20260522\\safe-ai-site\\docs\\audits\\evidence\\answer-first-chatbot-2026-08-03\\full-gate-final\\npm-audit-all.log",
+      "signal": null,
+      "error": null
+    }
+  ],
+  "passed": true,
+  "failedCheckIds": []
+}

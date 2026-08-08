@@ -96,7 +96,12 @@ describe("article-notice-map: トピック別カバレッジ", () => {
   it("熱中症（安衛則612条の2・624条）が登録されている", () => {
     const r612 = getNoticeMappingForArticle("安衛則", "第612条の2");
     expect(r612).toBeDefined();
-    expect(r612?.notices?.length).toBeGreaterThanOrEqual(3);
+    expect(r612?.notices).toContain("mhlw-notice-0014");
+    const verifiedNotice = resolveNoticeById("mhlw-notice-0014");
+    expect(verifiedNotice?.noticeNumber).toBe("基発0520第6号");
+    expect(verifiedNotice?.pdfUrl).toBe(
+      "https://www.mhlw.go.jp/content/11303000/001490911.pdf",
+    );
     expect(getNoticeMappingForArticle("安衛則", "第624条")).toBeDefined();
   });
 

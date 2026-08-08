@@ -11,7 +11,10 @@
  * 無いためタッチ操作のみで完結し、他の型と異なりオートフォーカス対象外）を追加。
  */
 
-import Link from "next/link";
+import {
+  KyHandoffLink,
+  type KyHandoffInput,
+} from "@/components/ky-handoff-link";
 import { useEffect, useRef } from "react";
 import { Sparkles } from "lucide-react";
 import { InputWithVoice, TextareaWithVoice } from "@/components/voice-input-field";
@@ -41,6 +44,7 @@ import {
 import { MONTH_OPTIONS, dayOptions, yearOptions } from "@/lib/ky/pulldown-options";
 
 const CHECKLIST_STATUS_OPTIONS: { status: ChecklistStatus; label: string; on: string }[] = [
+  { status: "unreviewed", label: "未確認", on: "bg-amber-500 text-black" },
   { status: "ok", label: "該当・実施", on: "bg-emerald-600 text-white" },
   { status: "ng", label: "要是正", on: "bg-rose-600 text-white" },
   { status: "na", label: "該当無", on: "bg-slate-400 text-white" },
@@ -60,12 +64,12 @@ export type MeetingFieldEditorSheetProps = {
   /** S1（第九弾）: 会社名エディタ内の行操作（クラシックの＋下位/削除/KYを作成と同じ挙動） */
   onAddChildRow?: (row: MeetingContractorRow) => void;
   onRemoveRow?: (id: string) => void;
-  kyHrefForRow?: (row: MeetingContractorRow) => string;
+  kyHandoffForRow?: (row: MeetingContractorRow) => KyHandoffInput;
 };
 
 const selectCls = "min-h-[44px] rounded-lg border border-slate-300 bg-white px-2 text-base text-slate-900";
 
-export function MeetingFieldEditorSheet({ fieldKey, record, patch, onClose, onSelectField, onSuggestRow, suggestBusyId, onAddChildRow, onRemoveRow, kyHrefForRow }: MeetingFieldEditorSheetProps) {
+export function MeetingFieldEditorSheet({ fieldKey, record, patch, onClose, onSelectField, onSuggestRow, suggestBusyId, onAddChildRow, onRemoveRow, kyHandoffForRow }: MeetingFieldEditorSheetProps) {
   const def = getMeetingPaperFieldDef(fieldKey);
   const next = nextMeetingPaperFieldKey(fieldKey, record);
   const sheetRef = useRef<HTMLDivElement | null>(null);
@@ -165,8 +169,7 @@ export function MeetingFieldEditorSheet({ fieldKey, record, patch, onClose, onSe
           />
         )}
 
-        {/* S1（続き・第七弾）: 作業内容欄でのAI提案。従来UI（クラシック表示）と同じ /api/meeting/suggest を共有し、
-            編集中のその行に直接反映（予想災害・安全衛生指示事項・必要資格・リスクをまとめて自動入力）。 */}
+        {/* 候補は帳票へ直接反映せず、出典・採否履歴を保持できる場合だけ確認欄へ表示する。 */}
         {workContentContractorId && onSuggestRow && (
           <button
             type="button"
@@ -174,7 +177,7 @@ export function MeetingFieldEditorSheet({ fieldKey, record, patch, onClose, onSe
             onClick={() => onSuggestRow(workContentContractorId)}
             className="mt-2 min-h-[44px] w-full rounded-lg border border-indigo-300 bg-indigo-50 px-3 text-sm font-bold text-indigo-700 hover:bg-indigo-100 disabled:opacity-50"
           >
-            {suggestBusyId === workContentContractorId ? "AI提案中…" : <><Sparkles className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />AI提案（予想災害・指示・資格・リスクを自動入力）</>}
+            {suggestBusyId === workContentContractorId ? "候補を確認中…" : <><Sparkles className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />未反映の確認候補を表示</>}
           </button>
         )}
 
@@ -283,13 +286,13 @@ export function MeetingFieldEditorSheet({ fieldKey, record, patch, onClose, onSe
                   ＋下位の会社を追加
                 </button>
               )}
-              {kyHrefForRow && (
-                <Link
-                  href={kyHrefForRow(contractorRow)}
+              {kyHandoffForRow && (
+                <KyHandoffLink
+                  handoff={kyHandoffForRow(contractorRow)}
                   className="inline-flex min-h-[44px] items-center rounded-lg border border-emerald-300 bg-emerald-50 px-3 text-xs font-bold text-emerald-700 hover:bg-emerald-100"
                 >
                   KYを作成
-                </Link>
+                </KyHandoffLink>
               )}
               {onRemoveRow && (
                 <button

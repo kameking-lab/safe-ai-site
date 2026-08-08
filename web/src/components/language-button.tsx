@@ -1,144 +1,95 @@
 "use client";
 
 import { useState } from "react";
-import { Globe, Loader2 } from "lucide-react";
+import { Globe, ShieldAlert } from "lucide-react";
 import {
   SUPPORTED_LANGUAGES,
   type LanguageCode,
-  getCached,
-  setCached,
 } from "@/lib/translation-cache";
 
 type LanguageButtonProps = {
-  /** 翻訳対象テキスト（タイトル+本文を改行連結） */
   sourceText: string;
-  /** リソース種別（記事 / 通達 など） */
   resource: string;
-  /** リソースID */
   resourceId: string;
-  /** 事前生成済みタイトル（あれば即座に使用） */
   prebuiltTitles?: Partial<Record<LanguageCode, string>>;
 };
 
-export function LanguageButton({
-  sourceText,
-  resource,
-  resourceId,
-  prebuiltTitles,
-}: LanguageButtonProps) {
+export function LanguageButton(props: LanguageButtonProps) {
+  const { prebuiltTitles } = props;
   const [open, setOpen] = useState(false);
   const [activeLang, setActiveLang] = useState<LanguageCode>("ja");
-  const [translation, setTranslation] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [notice, setNotice] = useState<string | null>(null);
 
-  async function selectLanguage(lang: LanguageCode) {
-    setActiveLang(lang);
-    setNotice(null);
-
-    if (lang === "ja") {
-      setTranslation(null);
-      return;
-    }
-
-    // 事前生成済みタイトル（即時表示用）があれば先に出す
-    if (prebuiltTitles?.[lang]) {
-      setTranslation(prebuiltTitles[lang] ?? null);
-    }
-
-    // キャッシュ確認
-    const cached = getCached(resource, resourceId, lang);
-    if (cached) {
-      setTranslation(cached);
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const res = await fetch("/api/translate/article", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          text: sourceText,
-          targetLang: lang,
-          resource,
-          resourceId,
-        }),
-      });
-      const data = (await res.json()) as { text: string; source: string; notice?: string };
-      setTranslation(data.text);
-      if (data.notice) setNotice(data.notice);
-      if (data.source === "gemini") {
-        setCached(resource, resourceId, lang, data.text);
-      }
-    } catch {
-      setNotice("翻訳に失敗しました。もう一度お試しください。");
-    } finally {
-      setLoading(false);
-    }
-  }
+  const prebuiltTitle =
+    activeLang === "ja" ? null : prebuiltTitles?.[activeLang] ?? null;
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+    <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
       <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
-          <Globe className="h-4 w-4 text-slate-500" />
-          <span className="text-sm font-bold text-slate-900">他の言語で読む</span>
-        </div>
+        <h2 className="flex items-center gap-2 text-sm font-bold text-slate-950">
+          <Globe className="h-4 w-4 text-slate-600" aria-hidden="true" />
+          他の言語で読む
+        </h2>
         <button
           type="button"
-          onClick={() => setOpen((v) => !v)}
-          className="text-xs font-semibold text-emerald-700 hover:underline"
+          onClick={() => setOpen((value) => !value)}
+          className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg px-3 text-xs font-bold text-emerald-800 hover:bg-emerald-50"
+          aria-expanded={open}
         >
           {open ? "閉じる" : "開く"}
         </button>
       </div>
 
-      {open && (
-        <>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {SUPPORTED_LANGUAGES.map((l) => (
+      {open ? (
+        <div className="mt-3">
+          <div className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs leading-5 text-amber-950">
+            <p className="flex items-start gap-2 font-bold">
+              <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+              未監修の本文機械翻訳は停止しています
+            </p>
+            <p className="mt-1">
+              誤訳による安全上の判断を防ぐため、本文は日本語原文を正本として表示します。必要な場合は通訳者・安全衛生担当者と公式資料を確認してください。
+            </p>
+          </div>
+
+          <div className="mt-3 flex flex-wrap gap-2" aria-label="表示言語">
+            {SUPPORTED_LANGUAGES.map((language) => (
               <button
-                key={l.code}
+                key={language.code}
                 type="button"
-                onClick={() => selectLanguage(l.code)}
-                className={`rounded-full border px-3 py-1 text-xs font-semibold transition ${
-                  activeLang === l.code
-                    ? "border-emerald-500 bg-emerald-600 text-white"
-                    : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                onClick={() => setActiveLang(language.code)}
+                className={`inline-flex min-h-[44px] items-center rounded-full border px-3 py-2 text-xs font-semibold ${
+                  activeLang === language.code
+                    ? "border-emerald-700 bg-emerald-700 text-white"
+                    : "border-slate-300 bg-white text-slate-800 hover:bg-slate-50"
                 }`}
-                aria-pressed={activeLang === l.code}
+                aria-pressed={activeLang === language.code}
               >
                 <span className="mr-1" aria-hidden="true">
-                  {l.flag}
+                  {language.flag}
                 </span>
-                {l.label}
+                {language.label}
               </button>
             ))}
           </div>
 
-          {loading && (
-            <p className="mt-3 inline-flex items-center gap-2 text-xs text-slate-500">
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              翻訳中...
-            </p>
-          )}
-
-          {notice && (
-            <p className="mt-2 rounded-md bg-amber-50 px-3 py-2 text-[11px] text-amber-900">
-              {notice}
-            </p>
-          )}
-
-          {translation && activeLang !== "ja" && (
-            <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
-              <p className="whitespace-pre-wrap text-xs leading-6 text-slate-700">
-                {translation}
-              </p>
+          {activeLang !== "ja" ? (
+            <div className="mt-3 rounded-lg border border-slate-300 bg-slate-50 p-3">
+              {prebuiltTitle ? (
+                <>
+                  <p className="text-[11px] font-bold text-slate-700">
+                    事前収載タイトル（本文訳ではありません）
+                  </p>
+                  <p className="mt-1 text-sm text-slate-900">{prebuiltTitle}</p>
+                </>
+              ) : (
+                <p className="text-xs leading-5 text-slate-700">
+                  この言語の確認済み表示はありません。日本語原文を参照してください。
+                </p>
+              )}
             </div>
-          )}
-        </>
-      )}
-    </div>
+          ) : null}
+        </div>
+      ) : null}
+    </section>
   );
 }

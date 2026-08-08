@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import robots from "./robots";
 
 /**
@@ -44,6 +44,29 @@ function isAllowAll(r: Rule): boolean {
 function isDisallowAll(r: Rule): boolean {
   return toArray(r.disallow).includes("/");
 }
+
+afterEach(() => {
+  vi.unstubAllEnvs();
+});
+
+describe("robots.txt（Preview安全境界）", () => {
+  it("Vercel Previewは全体no-crawlかつsitemapを公開しない", () => {
+    vi.stubEnv("VERCEL_ENV", "preview");
+    const result = robots();
+    const rules = (Array.isArray(result.rules)
+      ? result.rules
+      : [result.rules]) as Rule[];
+    expect(rules).toEqual([{ userAgent: "*", disallow: "/" }]);
+    expect(result.sitemap).toBeUndefined();
+  });
+
+  it("queryや任意の非信頼環境変数ではPreviewへ切り替わらない", () => {
+    vi.stubEnv("VERCEL_ENV", "production");
+    vi.stubEnv("dryRun", "true");
+    expect(ruleFor("*")?.allow).toBe("/");
+    expect(robots().sitemap).toBeTruthy();
+  });
+});
 
 describe("robots.txt（決裁A SNSリンクプレビュー復活）", () => {
   it("facebookexternalhit は Allow:/ 扱いになっている", () => {

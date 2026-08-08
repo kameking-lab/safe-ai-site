@@ -210,9 +210,8 @@ export async function fetchSearchConsole(
       countries: countryRows.map(rowToCountry),
       devices: deviceRows.map(rowToDevice),
     };
-  } catch (e) {
-    const message = e instanceof Error ? e.message : String(e);
-    console.error("[search-console] live fetch failed, falling back to mock:", message);
-    return buildMockSearchConsoleResponse(period, message);
+  } catch {
+    console.error("[search-console] live fetch failed");
+    return buildMockSearchConsoleResponse(period, "source_unavailable");
   }
 }

@@ -1,5 +1,8 @@
 import type { AccidentType, AccidentWorkCategory } from "@/lib/types/domain";
-import type { CourtCaseField } from "@/data/court-cases";
+import {
+  COURT_CASES,
+  type CourtCaseField,
+} from "@/data/court-cases";
 
 /**
  * 事故事例（事故の型・業種）→ 労災裁判例の分野カテゴリ への対応付け。
@@ -34,7 +37,11 @@ export function courtCaseFieldForAccident(
   type: AccidentType,
   workCategory: AccidentWorkCategory
 ): CourtCaseField | null {
-  return TYPE_TO_FIELD[type] ?? CATEGORY_TO_FIELD[workCategory] ?? null;
+  const field = TYPE_TO_FIELD[type] ?? CATEGORY_TO_FIELD[workCategory] ?? null;
+  if (!field) return null;
+  return COURT_CASES.some((courtCase) => courtCase.field === field)
+    ? field
+    : null;
 }
 
 /** 事故事例から労災裁判例コーナーへの分野フィルタ付きディープリンク（対応が無ければ null）。 */

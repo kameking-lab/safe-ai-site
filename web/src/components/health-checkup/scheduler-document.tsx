@@ -62,7 +62,10 @@ export function buildTrackerData(
     eventDriven: Boolean(rule.frequency.eventDriven),
     frequencyHuman: rule.frequency.humanReadable,
   }));
-  const storageKey = `safe-ai:hc-tracker:v1:${profile.industry}|${[...profile.jobIds].sort().join(",")}|${[...profile.substances].sort().join(",")}|${[...profile.workConditions].sort().join(",")}|${profile.hireDate}`;
+  // Never persist health/work-condition inputs in a Web Storage key. The
+  // current result handoff itself is memory-only; only generic checklist state
+  // may remain on this device.
+  const storageKey = "safe-ai:hc-tracker:v2:current";
   return { entries, storageKey };
 }
 

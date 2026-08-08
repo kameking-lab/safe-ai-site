@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import InquiryForm from "./InquiryForm";
 import { LanguageProvider } from "@/contexts/language-context";
 import { FuriganaProvider } from "@/contexts/furigana-context";
@@ -46,32 +46,69 @@ describe("/contact 柱C-10 コンサル相談CVパス（2タブ化）", () => {
     expect(screen.getByText(/コンサル・受託開発・教育コンテンツ制作のご相談/)).toBeDefined();
   });
 
-  it("法人・コンサル相談タブではお名前・メールが必須になり、同一エンドポイント(/api/inquiry)へ送信する", async () => {
-    const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue({
-      ok: true,
-      json: async () => ({ ok: true }),
-    } as Response);
-
+  it("法人・コンサル相談は堅牢な正規フォームへ統合し旧APIを呼ばない", () => {
+    const fetchSpy = vi.spyOn(globalThis, "fetch");
     renderForm();
     fireEvent.click(screen.getByRole("tab", { name: "法人・コンサルのご相談" }));
-    const nameInput = screen.getByLabelText(/お名前・会社名/);
-    const emailInput = screen.getByLabelText(/メールアドレス/);
-    expect((nameInput as HTMLInputElement).required).toBe(true);
-    expect((emailInput as HTMLInputElement).required).toBe(true);
+    const link = screen.getByRole("link", {
+      name: "専用の相談フォームを開く",
+    });
+    expect(link.getAttribute("href")).toBe("/services/automation#consult-form");
+    expect(screen.queryByLabelText(/件名/)).toBeNull();
+    expect(fetchSpy).not.toHaveBeenCalled();
+    fetchSpy.mockRestore();
+  });
 
-    fireEvent.change(screen.getByLabelText(/件名/), { target: { value: "テスト相談" } });
-    fireEvent.change(screen.getByLabelText(/内容/), { target: { value: "テスト内容" } });
-    fireEvent.change(nameInput, { target: { value: "山田太郎" } });
-    fireEvent.change(emailInput, { target: { value: "yamada@example.co.jp" } });
+  it("一般送信は機密情報の注意と明示同意を必須にし、未実装の公開Q&Aを表示しない", () => {
+    renderForm();
+    expect(screen.getByText(/健康情報、第三者の氏名/)).toBeDefined();
+    expect(
+      screen.getByRole("checkbox", {
+        name: /プライバシーポリシーを確認し/,
+      }),
+    ).toBeDefined();
+    expect(screen.queryByText(/公開Q&A/)).toBeNull();
+    expect(screen.getByRole("button", { name: "送信する" })).toHaveProperty(
+      "disabled",
+      true,
+    );
+  });
+
+  it("一般送信はIdempotency-Keyを付け、受付番号だけを成功表示する", async () => {
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          ok: true,
+          referenceId: "INQ-20260724-ABCDEF123456",
+          receivedAt: "2026-07-24T00:00:00.000Z",
+        }),
+        { status: 200, headers: { "content-type": "application/json" } },
+      ),
+    );
+    renderForm();
+    fireEvent.change(screen.getByLabelText(/件名/), {
+      target: { value: "出典URLの訂正提案" },
+    });
+    fireEvent.change(screen.getByRole("textbox", { name: /^内容/ }), {
+      target: { value: "確認した一次資料URLを記載します。" },
+    });
+    fireEvent.click(
+      screen.getByRole("checkbox", {
+        name: /プライバシーポリシーを確認し/,
+      }),
+    );
     fireEvent.click(screen.getByRole("button", { name: "送信する" }));
 
-    expect(fetchSpy).toHaveBeenCalledWith(
-      "/api/inquiry",
-      expect.objectContaining({ method: "POST" }),
+    await waitFor(() => expect(fetchSpy).toHaveBeenCalledTimes(1));
+    const [, init] = fetchSpy.mock.calls[0] ?? [];
+    expect(init?.method).toBe("POST");
+    const headers = new Headers(init?.headers);
+    expect(headers.get("idempotency-key")).toMatch(
+      /^[a-z0-9]{8,12}\.[A-Za-z0-9-]{16,80}$/,
     );
-    const body = JSON.parse(String(fetchSpy.mock.calls[0][1]?.body));
-    expect(body.category).toBe("business");
-
+    expect(
+      await screen.findByText("受付番号: INQ-20260724-ABCDEF123456"),
+    ).toBeDefined();
     fetchSpy.mockRestore();
   });
 });

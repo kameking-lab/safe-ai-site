@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { SITE_STATS } from "@/data/site-stats";
-import { allLawArticles, LAW_SOURCE_COUNT } from "@/data/laws";
-import { mhlwNotices } from "@/data/mhlw-notices";
+import { egovVerifiedExcerpts } from "@/data/laws";
+import { verifiedLawArticles } from "@/data/laws/verified-corpus";
+import {
+  publicMhlwNotices as noticeIndexCandidates,
+  verifiedMhlwNotices as mhlwNotices,
+} from "@/data/public-mhlw-notices";
 import { MHLW_MERGED_CHEMICAL_COUNT } from "@/lib/mhlw-chemicals";
 import { LAW_NAVI_ENTRIES } from "@/lib/law-navi/permalink";
 import { getAllFulltextNaviEntries } from "@/lib/law-navi/fulltext-navi";
@@ -32,25 +36,54 @@ describe("SITE_STATS リテラルと実データの整合", () => {
       realAccidentCasesDiverseIndustries.length +
       realAccidentCases20242026.length +
       realAccidentCases2025Preliminary.length;
-    expect(SITE_STATS.siteCuratedCaseCount).toBe(curated.toLocaleString("en-US"));
+    expect(SITE_STATS.siteCuratedCaseCount).toBe(
+      curated.toLocaleString("en-US"),
+    );
   });
 
-  it("mhlwNoticeCount = mhlw-notices.ts の件数", () => {
-    expect(SITE_STATS.mhlwNoticeCount).toBe(mhlwNotices.length.toLocaleString("en-US"));
+  it("mhlwNoticeCount = 個別一次資料照合済みレコードだけの件数", () => {
+    expect(SITE_STATS.mhlwNoticeCount).toBe(
+      mhlwNotices.length.toLocaleString("en-US"),
+    );
+    expect(SITE_STATS.mhlwNoticeCount).toBe("1");
   });
 
-  it("equipmentItemCount = safety-equipment-db.json の items 数", () => {
-    const count = (equipmentDb as { items?: unknown[] }).items?.length ?? 0;
-    expect(SITE_STATS.equipmentItemCount).toBe(count.toLocaleString("en-US"));
+  it("mhlwNoticeIndexCount = 二次索引候補件数で、公開確認済み件数と混同しない", () => {
+    expect(SITE_STATS.mhlwNoticeIndexCount).toBe(
+      noticeIndexCandidates.length.toLocaleString("en-US"),
+    );
+    expect(Number(SITE_STATS.mhlwNoticeIndexCount)).toBeGreaterThan(
+      Number(SITE_STATS.mhlwNoticeCount),
+    );
   });
 
-  it("lawArticleCount / ragArticleCount = allLawArticles の件数", () => {
-    expect(SITE_STATS.lawArticleCount).toBe(allLawArticles.length.toLocaleString("en-US"));
-    expect(SITE_STATS.ragArticleCount).toBe(allLawArticles.length.toLocaleString("en-US"));
+  it("equipmentItemCount は公開確認済み0件で、未検証の生データ件数をKPIにしない", () => {
+    const quarantinedCount =
+      (equipmentDb as { items?: unknown[] }).items?.length ?? 0;
+    expect(quarantinedCount).toBeGreaterThan(0);
+    expect(SITE_STATS.equipmentItemCount).toBe("0");
   });
 
-  it("lawSourceCount = data/laws の LAW_SOURCE_COUNT", () => {
-    expect(SITE_STATS.lawSourceCount).toBe(LAW_SOURCE_COUNT.toLocaleString("en-US"));
+  it("lawArticleCount = 公開hash検証済み抜粋、ragArticleCount = hash検証済み全文", () => {
+    expect(SITE_STATS.lawArticleCount).toBe(
+      egovVerifiedExcerpts.length.toLocaleString("en-US"),
+    );
+    expect(SITE_STATS.ragArticleCount).toBe(
+      verifiedLawArticles.length.toLocaleString("en-US"),
+    );
+    expect(SITE_STATS.ragSourceCount).toBe(
+      new Set(verifiedLawArticles.map((article) => article.sourceLawId)).size.toLocaleString(
+        "en-US",
+      ),
+    );
+  });
+
+  it("lawSourceCount = 公開hash検証済み抜粋の法源数", () => {
+    expect(SITE_STATS.lawSourceCount).toBe(
+      new Set(egovVerifiedExcerpts.map((article) => article.sourceLawId)).size.toLocaleString(
+        "en-US",
+      ),
+    );
   });
 
   it("mhlwMergedChemicalCount = lib/mhlw-chemicals の MHLW_MERGED_CHEMICAL_COUNT", () => {
@@ -62,29 +95,43 @@ describe("SITE_STATS リテラルと実データの整合", () => {
   it("lawNaviTotalArticleCount = LAW_NAVI_ENTRIES + 全文由来ギャップ の合算", async () => {
     const fulltext = await getAllFulltextNaviEntries();
     const total = LAW_NAVI_ENTRIES.length + fulltext.length;
-    expect(SITE_STATS.lawNaviTotalArticleCount).toBe(total.toLocaleString("en-US"));
+    expect(SITE_STATS.lawNaviTotalArticleCount).toBe(
+      total.toLocaleString("en-US"),
+    );
   });
 
-  it("mhlwCircularCount / mhlwKokujiCount / mhlwShishinCount = mhlw-notices.ts の docType別件数", () => {
+  it("mhlwCircularCount / mhlwKokujiCount / mhlwShishinCount = 公開対象の docType別件数", () => {
     const byType = { 通達: 0, 告示: 0, 指針: 0 } as Record<string, number>;
     for (const n of mhlwNotices) {
       byType[n.docType] = (byType[n.docType] ?? 0) + 1;
     }
-    expect(SITE_STATS.mhlwCircularCount).toBe(byType["通達"].toLocaleString("en-US"));
-    expect(SITE_STATS.mhlwKokujiCount).toBe(byType["告示"].toLocaleString("en-US"));
-    expect(SITE_STATS.mhlwShishinCount).toBe(byType["指針"].toLocaleString("en-US"));
+    expect(SITE_STATS.mhlwCircularCount).toBe(
+      byType["通達"].toLocaleString("en-US"),
+    );
+    expect(SITE_STATS.mhlwKokujiCount).toBe(
+      byType["告示"].toLocaleString("en-US"),
+    );
+    expect(SITE_STATS.mhlwShishinCount).toBe(
+      byType["指針"].toLocaleString("en-US"),
+    );
   });
 
   it("mhlwLeafletCount = mhlw-leaflets.ts の件数", () => {
-    expect(SITE_STATS.mhlwLeafletCount).toBe(mhlwLeaflets.length.toLocaleString("en-US"));
+    expect(SITE_STATS.mhlwLeafletCount).toBe(
+      mhlwLeaflets.length.toLocaleString("en-US"),
+    );
   });
 
   it("mhlwResourcesTotalCount = mhlwNoticeCount + mhlwLeafletCount", () => {
     const total = mhlwNotices.length + mhlwLeaflets.length;
-    expect(SITE_STATS.mhlwResourcesTotalCount).toBe(total.toLocaleString("en-US"));
+    expect(SITE_STATS.mhlwResourcesTotalCount).toBe(
+      total.toLocaleString("en-US"),
+    );
   });
 
   it("courtPrecedentCount = data/mock/notices-and-precedents.ts の件数", () => {
-    expect(SITE_STATS.courtPrecedentCount).toBe(courtPrecedents.length.toLocaleString("en-US"));
+    expect(SITE_STATS.courtPrecedentCount).toBe(
+      courtPrecedents.length.toLocaleString("en-US"),
+    );
   });
 });

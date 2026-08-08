@@ -28,7 +28,7 @@ export function SignageHeader({
           <Mascot size="xs" alt="" className="shrink-0 rounded" />
           安全AIポータル サイネージ
         </p>
-        <h1 className="mt-0.5 text-xl font-bold leading-tight text-white sm:text-2xl lg:text-4xl">
+        <h1 className="mt-0.5 text-3xl font-bold leading-tight text-white lg:text-4xl">
           今日の現場リスクと安全要点
         </h1>
         {!compact && (
@@ -37,33 +37,34 @@ export function SignageHeader({
           </p>
         )}
         {!hideNav && (
-          <div className="mt-2 flex flex-wrap gap-1.5 text-[10px] sm:text-xs">
-            <Link className="inline-flex min-h-[44px] items-center rounded-full border border-slate-500/60 px-3 py-1 text-slate-100 hover:bg-slate-800" href="/">
-              ポータルへ戻る
-            </Link>
-            <Link
-              className="inline-flex min-h-[44px] items-center rounded-full border border-emerald-600/70 bg-emerald-900/40 px-3 py-1 font-semibold text-emerald-100 hover:bg-emerald-900/60"
-              href="/laws"
-            >
-              法改正一覧へ
-            </Link>
-            <Link className="inline-flex min-h-[44px] items-center rounded-full border border-slate-500/60 px-3 py-1 text-slate-100 hover:bg-slate-800" href="/ky">
-              KY用紙へ
-            </Link>
-            <Link
-              className="inline-flex min-h-[44px] items-center rounded-full border border-slate-500/60 px-3 py-1 text-slate-100 hover:bg-slate-800"
-              href="/site-records"
-              title="パトロール・ヒヤリ・点検などの記録の作成・管理はこちら。記録の要対応はこの画面の「現場の安全状態」に自動掲示されます"
-            >
-              記録キットへ
-            </Link>
-            <Link
-              className="inline-flex min-h-[44px] items-center rounded-full border border-slate-500/60 px-3 py-1 text-slate-100 hover:bg-slate-800"
-              href="/notifications"
-            >
-              通知設定へ
-            </Link>
-          </div>
+          <details className="mt-2 text-[10px] sm:text-xs min-[1024px]:hidden">
+            <summary className="inline-flex min-h-11 cursor-pointer items-center rounded-full border border-slate-500/60 px-3 py-1 font-semibold text-slate-100">
+              メニュー
+            </summary>
+            <nav aria-label="サイネージの関連操作" className="mt-1 flex flex-wrap gap-1.5">
+              <Link className="inline-flex min-h-[44px] items-center rounded-full border border-slate-500/60 px-3 py-1 text-slate-100 hover:bg-slate-800" href="/">
+                ポータルへ戻る
+              </Link>
+              <Link
+                className="inline-flex min-h-[44px] items-center rounded-full border border-emerald-600/70 bg-emerald-900/40 px-3 py-1 font-semibold text-emerald-100 hover:bg-emerald-900/60"
+                href="/ky/paper"
+              >
+                KY用紙へ
+              </Link>
+              <Link
+                className="inline-flex min-h-[44px] items-center rounded-full border border-slate-500/60 px-3 py-1 text-slate-100 hover:bg-slate-800"
+                href="/guides/safety-signage"
+              >
+                表示・異常時の運用ガイド
+              </Link>
+              <Link
+                className="inline-flex min-h-[44px] items-center rounded-full border border-slate-500/60 px-3 py-1 text-slate-100 hover:bg-slate-800"
+                href="/signage/manage"
+              >
+                多拠点・端末管理
+              </Link>
+            </nav>
+          </details>
         )}
       </div>
       <div className="flex flex-wrap items-end gap-2 text-xs sm:gap-3 sm:text-sm">

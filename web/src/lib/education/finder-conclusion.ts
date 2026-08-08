@@ -2,9 +2,8 @@
  * 業務別 必要資格判定の結論ビジュアル（柱0・ビジュアルファースト）
  *
  * 判定結果画面の最上部に置く「いまの状態」1メッセージを純関数で組み立てる。
- * 該当した資格の件数をデカ数字、法令義務の有無を色の文法で表す。
- * - 法令義務あり = 黄（注意・要対応＝取得しないと就業させられない資格がある）
- * - 推奨のみ     = 青（指示・案内＝義務はないが関連資格を確認）
+ * 該当した候補の件数を表示する。現行エンジンは能力・方式等の条件分岐を
+ * すべて入力できないため、法令義務を確定せず「要条件確認」とする。
  * - 該当なし     = 無彩（参考＝条件変更を促す。偽の空状態にしない）
  *
  * 色の文法は他の柱0結論カードと同じ設計（warning は「ユーザーが対応すべきこと」が
@@ -39,8 +38,8 @@ export function buildFinderConclusion(
     return {
       tone: "neutral",
       value: 0,
-      title: "該当なし",
-      description: "別の業種・作業内容で検索してください",
+      title: "条件不足・未判定",
+      description: "現在の入力条件と収録候補では一致を特定できず、資格不要とは判断できません。作業内容・能力・高さ・機械・電圧・役割を確認してください。",
     };
   }
 
@@ -48,15 +47,15 @@ export function buildFinderConclusion(
     return {
       tone: "warning",
       value: total,
-      title: "要取得資格あり",
-      description: `法令義務 ${requiredCount}件 — 修了前は就業させられません（推奨 ${recommendedCount}件）`,
+      title: "資格候補を要確認",
+      description: `条件確認が必要な候補 ${requiredCount}件、関連候補 ${recommendedCount}件。機械能力・作業方式等を公式窓口で確認してください`,
     };
   }
 
   return {
     tone: "info",
     value: total,
-    title: "推奨資格",
-    description: `法令義務の該当なし。関連・推奨 ${recommendedCount}件を確認してください`,
+    title: "関連資格候補",
+    description: `関連候補 ${recommendedCount}件。該当義務の有無は作業条件と公式情報で確認してください`,
   };
 }

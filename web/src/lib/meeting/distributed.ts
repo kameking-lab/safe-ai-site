@@ -133,6 +133,7 @@ function clampRisk(r: unknown): MeetingRiskEval {
     severity: num(o.severity, 1, 3, 1),
     likelihood: num(o.likelihood, 1, 3, 1),
     priority: num(o.priority, 1, 4, 1),
+    reviewed: o.reviewed === true,
   };
 }
 

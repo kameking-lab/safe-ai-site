@@ -59,6 +59,30 @@ const colorMap = {
 } as const;
 
 export default function NewsletterPage() {
+  const automatedDeliveryOperationallyVerified = false;
+  if (!automatedDeliveryOperationallyVerified) {
+    return (
+      <PageContainer width="narrow" paddingY="none" className="py-8 sm:py-12">
+        <PageJsonLd name="安全情報メールの運用状況" description="自動配信の運用確認中" path="/newsletter" />
+        <div className="text-center">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-100">
+            <Mail className="h-7 w-7 text-amber-700" aria-hidden="true" />
+          </div>
+          <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">安全情報メールは運用確認中です</h1>
+        </div>
+        <section role="alert" className="mt-6 rounded-2xl border-2 border-amber-300 bg-amber-50 p-5 text-amber-950">
+          <h2 className="font-bold">新規メール登録を一時停止しています</h2>
+          <p className="mt-2 text-sm leading-7">
+            配信事業者、定期実行、重複防止、失敗時の再送、配信停止、監視の本番確認が完了するまで、
+            メールアドレスを受け付けず、毎週配信を約束しません。最新情報はRSSまたはサイト内で確認してください。
+          </p>
+          <a href="/notifications" className="mt-4 inline-flex min-h-[44px] items-center rounded-lg border border-amber-400 bg-white px-4 py-2 text-sm font-bold text-amber-950">
+            RSSと端末通知の状況を見る
+          </a>
+        </section>
+      </PageContainer>
+    );
+  }
   return (
     <PageContainer width="narrow" paddingY="none" className="py-8 sm:py-12">
       {/* SEO: WebPage + BreadcrumbList */}
@@ -103,7 +127,7 @@ export default function NewsletterPage() {
         個人情報は配信目的のみに使用し、第三者には提供しません。
         配信停止はメール内のリンク1クリック。
         <br />
-        安全AIポータル ─ 現場の安全を、AIで変える。
+        安全AIポータル ─ 根拠から、現場の行動へ
       </p>
     </PageContainer>
   );

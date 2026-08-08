@@ -1,71 +1,30 @@
 import { NextResponse } from "next/server";
-import { buildKyAssistText, buildRiskAssessmentTable, type KyAssistField } from "@/data/mock/ky-assist-responses";
-import { AI_LEGAL_DISCLAIMER } from "@/lib/gemini";
-import { cdnCacheHeaders, noStoreHeaders } from "@/lib/api-cache";
+import { noStoreHeaders } from "@/lib/api-cache";
 
-// F-005: seedベースの確率的応答だが、同一(workContext, industryId)で繰り返される
-// 連続呼び出しを5分間吸収。
-const SUCCESS_CACHE = cdnCacheHeaders("REALTIME");
+export const dynamic = "force-dynamic";
 
-type Body = {
-  /** "table" を指定するとリスクアセスメント表を一括生成。未指定時は単項目補完。 */
-  mode?: "single" | "table";
-  field?: KyAssistField;
-  targetLabel?: string;
-  workContext?: string;
-  hazardSoFar?: string;
-  reductionSoFar?: string;
-  likelihood?: number;
-  severity?: number;
-  reLikelihood?: number;
-  reSeverity?: number;
-  seed?: number;
-  /** 業種プリセットID（建設/製造/物流/医療/介護施設…） */
-  industryId?: string;
-};
-
-export async function POST(request: Request) {
-  let body: Body;
-  try {
-    body = (await request.json()) as Body;
-  } catch {
-    return NextResponse.json({ error: "JSONが不正です" }, { status: 400, headers: noStoreHeaders() });
-  }
-
-  // モード: リスクアセスメント表の一括生成
-  if (body.mode === "table") {
-    const result = buildRiskAssessmentTable({
-      workContext: body.workContext?.trim() || "",
-      industryId: body.industryId,
-    });
-    return NextResponse.json(
-      { ...result, disclaimer: AI_LEGAL_DISCLAIMER },
-      { status: 200, headers: SUCCESS_CACHE }
-    );
-  }
-
-  // モード: 単一項目（hazard/reduction/rereduction）の補完
-  const field = body.field;
-  if (field !== "hazard" && field !== "reduction" && field !== "rereduction") {
-    return NextResponse.json({ error: "field が不正です" }, { status: 400, headers: noStoreHeaders() });
-  }
-
-  const text = buildKyAssistText({
-    field,
-    targetLabel: body.targetLabel?.trim() || "—",
-    workContext: body.workContext?.trim() || "",
-    hazardSoFar: body.hazardSoFar,
-    reductionSoFar: body.reductionSoFar,
-    likelihood: body.likelihood,
-    severity: body.severity,
-    reLikelihood: body.reLikelihood,
-    reSeverity: body.reSeverity,
-    seed: typeof body.seed === "number" ? body.seed : Date.now(),
-    industryId: body.industryId,
-  });
-
+/**
+ * Retired legacy endpoint.
+ *
+ * It previously accepted arbitrary work context and returned ungrounded risk
+ * scores without the consent, provenance, and human-approval gates used by
+ * /api/ky/suggest. Do not parse, log, retain, score, or echo the request body.
+ */
+export async function POST(_request: Request) {
   return NextResponse.json(
-    { text, disclaimer: AI_LEGAL_DISCLAIMER },
-    { status: 200, headers: SUCCESS_CACHE }
+    {
+      ok: false,
+      reason: "legacy_ky_assist_retired",
+      replacement: "/api/ky/suggest",
+      message:
+        "旧KY補助APIは停止しました。KY用紙の確認付き候補機能を利用してください。",
+    },
+    {
+      status: 410,
+      headers: {
+        ...noStoreHeaders(),
+        "X-Feature-Status": "retired",
+      },
+    },
   );
 }

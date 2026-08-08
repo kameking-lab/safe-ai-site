@@ -14,6 +14,7 @@ import { PageHeader } from "@/components/page-header";
 import { PageJsonLd } from "@/components/page-json-ld";
 import { JsonLd } from "@/components/json-ld";
 import { ogImageUrl } from "@/lib/og-url";
+import { isPublicRouteAvailable } from "@/lib/public-content-policy";
 import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
 import { ConclusionCard } from "@/components/ui/conclusion-card";
 import { ILLNESS_CATEGORIES } from "@/data/illness-considerations";
@@ -132,8 +133,8 @@ export default function TreatmentWorkBalanceHubPage() {
         value={FRAMEWORK_STEPS.length}
         unit="ステップ"
         title="支援フロー"
-        description="申出→プラン作成→就業上の措置→定期見直し。プラン作成ツールで配慮事項を自動生成できます。"
-        action={{ href: "/treatment-work-balance/plan-builder", label: "プランを作成する" }}
+        description="申出→主治医の意見→産業医等の確認→本人との協議→就業上の措置→定期見直し。個別の就業可否や勤務条件は自動判定できません。"
+        action={{ href: "#official-sources", label: "公式様式と相談先を確認" }}
         className="mt-6"
       />
 
@@ -280,20 +281,23 @@ export default function TreatmentWorkBalanceHubPage() {
         </div>
       </section>
 
-      {/* プラン作成ツールへの動線 */}
+      {/* 個別判断を自動化しない安全境界 */}
       <section className="mt-10 rounded-2xl border border-emerald-300 bg-emerald-600/95 p-6 text-white shadow-md">
-        <h2 className="text-lg font-bold">両立支援プラン作成ツール</h2>
+        <h2 className="text-lg font-bold">個別プランは関係者で確認</h2>
         <p className="mt-2 text-sm leading-6 text-emerald-50">
-          病態・職種・希望勤務形態を選択するだけで、配慮事項・段階的復職プラン・主治医意見書テンプレートを生成します。
-          作成結果は印刷してそのまま社内回覧・主治医依頼に使えます。
+          疾患名や自己申告の重症度だけで、復職時期、業務量、残業・夜勤・運転の可否を決めることはできません。
+          厚生労働省の公式様式を使い、本人、主治医、産業医等、事業者で必要条件を確認してください。
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
-          <Link
-            href="/treatment-work-balance/plan-builder"
+          <a
+            href="https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000115300.html"
+            target="_blank"
+            rel="noopener noreferrer"
             className="inline-flex items-center gap-1 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-50"
           >
-            プランを作成する →
-          </Link>
+            厚生労働省の公式様式を確認
+            <ExternalLink className="h-3 w-3" aria-hidden="true" />
+          </a>
           <Link
             href="/treatment-work-balance/illness-guide/cancer"
             className="inline-flex items-center gap-1 rounded-lg border border-white px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
@@ -307,7 +311,7 @@ export default function TreatmentWorkBalanceHubPage() {
       <section className="mt-10">
         <h2 className="text-base font-bold text-slate-900">関連機能</h2>
         <ul className="mt-3 space-y-2 text-sm leading-6 text-slate-800">
-          {RELATED_LINKS.map((r) => (
+          {RELATED_LINKS.filter((r) => isPublicRouteAvailable(r.href)).map((r) => (
             <li key={r.href}>
               <Link
                 href={r.href}
@@ -322,7 +326,7 @@ export default function TreatmentWorkBalanceHubPage() {
       </section>
 
       {/* 公的資料 */}
-      <section className="mt-10 rounded-2xl border border-slate-200 bg-slate-50 p-5">
+      <section id="official-sources" className="mt-10 scroll-mt-24 rounded-2xl border border-slate-200 bg-slate-50 p-5">
         <h2 className="text-base font-bold text-slate-900">公的資料・相談窓口</h2>
         <ul className="mt-3 space-y-2 text-sm leading-6 text-slate-800">
           <li>

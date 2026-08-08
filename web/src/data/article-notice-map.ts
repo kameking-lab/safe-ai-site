@@ -19,7 +19,7 @@
  * - 当面 80+ 条文 × 平均 3-4 = 250+ マッピングを初期収録
  */
 
-import { mhlwNotices } from "@/data/mhlw-notices";
+import { publicMhlwNotices as mhlwNotices } from "@/data/public-mhlw-notices";
 import { mhlwLeaflets } from "@/data/mhlw-leaflets";
 import { mlitResources } from "@/data/mlit-resources";
 import { normalizeArticleNumToKey } from "@/lib/article-number-normalize";
@@ -252,6 +252,7 @@ export const articleNoticeMap: Record<string, ArticleNoticeMapEntry> = {
   "安衛則|第612条の2": {
     // 暑熱な場所での作業（R7改正で新設・拡充）
     notices: [
+      "mhlw-notice-0014",
       "mhlw-notice-0001",
       "mhlw-notice-0101",
       "mhlw-notice-0130",

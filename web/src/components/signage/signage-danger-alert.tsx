@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { AlertOctagon, AlertTriangle, CircleDot, Siren, Volume2, X } from "lucide-react";
+import { maxLevelFromSelectedWarnings } from "@/lib/jma/parse-jma-warning";
 
 type Props = {
   jmaHeadline?: string | null;
@@ -20,7 +21,12 @@ function speak(text: string) {
   synth.speak(utter);
 }
 
-const HIGH_RISK_KEYWORDS = ["特別警報", "警報", "暴風", "大雨", "落雷", "地震", "津波"];
+export function hasActiveHighRiskWarning(
+  warnings: Props["warnings"],
+): boolean {
+  const level = maxLevelFromSelectedWarnings(warnings ?? []);
+  return level === "warning" || level === "special";
+}
 
 // 無人運用(1日流しっぱなし)で、ブラウザ再読込後も自動発動の設定を保持するためのキー。
 // 再起動で黙って監視OFFになると安全機能が無効化されたことに誰も気づけないため永続化する。
@@ -40,10 +46,10 @@ export function SignageDangerAlert({ jmaHeadline, warnings }: Props) {
     }
   };
 
-  const isHighRisk = (() => {
-    const text = `${jmaHeadline ?? ""} ${(warnings ?? []).map((w) => w.status).join(" ")}`;
-    return HIGH_RISK_KEYWORDS.some((k) => text.includes(k));
-  })();
+  // 自動発動は選択地点に一致する発表中の警報コードだけで判定する。
+  // 県ヘッドライン単独や、解除・発表なし・注意報は赤警報へ昇格させない。
+  const isHighRisk = hasActiveHighRiskWarning(warnings);
+  const activeHeadline = isHighRisk ? jmaHeadline : null;
 
   // 自動発話: 警報レベルに到達したら自動的に画面+音声を起動
   useEffect(() => {
@@ -51,13 +57,13 @@ export function SignageDangerAlert({ jmaHeadline, warnings }: Props) {
     if (!isHighRisk) return;
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setOverlay(true);
-    const text = `重要警報。${jmaHeadline ?? "気象庁から警報が発表されています"}。屋外作業を中断し、安全確保を優先してください。`;
+    const text = `重要警報。${activeHeadline ?? "気象庁から警報が発表されています"}。屋外作業を中断し、安全確保を優先してください。`;
     speak(text);
-  }, [autoSpeak, isHighRisk, jmaHeadline]);
+  }, [activeHeadline, autoSpeak, isHighRisk]);
 
   const handleManualAlert = () => {
     setOverlay(true);
-    const text = `危険イベント発生。${jmaHeadline ?? "現場で危険事象が発生しました"}。直ちに作業を中断し、安全な場所に避難してください。`;
+    const text = `危険イベント発生。${activeHeadline ?? "現場で危険事象が発生しました"}。直ちに作業を中断し、安全な場所に避難してください。`;
     speak(text);
   };
 
@@ -124,13 +130,13 @@ export function SignageDangerAlert({ jmaHeadline, warnings }: Props) {
           <AlertOctagon className="h-32 w-32 animate-pulse" />
           <p className="mt-6 text-5xl font-extrabold sm:text-7xl"><AlertTriangle className="mr-3 inline h-[1em] w-[1em] align-[-0.1em]" aria-hidden="true" />危険イベント</p>
           <p className="mt-4 max-w-3xl px-6 text-center text-2xl font-bold leading-snug sm:text-4xl">
-            {jmaHeadline ?? "現場で危険事象が発生しました。直ちに作業を中断してください。"}
+            {activeHeadline ?? "現場で危険事象が発生しました。直ちに作業を中断してください。"}
           </p>
           <button
             type="button"
             onClick={(e) => {
               e.stopPropagation();
-              const text = `重要警報。${jmaHeadline ?? "気象庁から警報が発表されています"}。屋外作業を中断し、安全確保を優先してください。`;
+              const text = `重要警報。${activeHeadline ?? "気象庁から警報が発表されています"}。屋外作業を中断し、安全確保を優先してください。`;
               speak(text);
             }}
             className="mt-8 inline-flex items-center gap-2 rounded-2xl bg-white px-6 py-4 text-2xl font-bold text-rose-700 shadow-lg hover:bg-rose-50"

@@ -1,0 +1,311 @@
+/*
+ * Print-only portal styles.
+ *
+ * RootLayout loads this file with media="print" so screen rendering does not
+ * wait for print layout rules.
+ */
+@media print {
+  .mobile-bottom-nav {
+    display: none !important;
+  }
+
+  /* Dark mode is a screen preference; printed documents use a light palette. */
+  html.dark {
+    --background: #ffffff;
+    --foreground: #000000;
+    --surface-card: #ffffff;
+    --surface-muted: #ffffff;
+    --border-subtle: #cbd5e1;
+    color-scheme: light;
+  }
+
+  @page {
+    size: A4;
+    margin: 15mm 12mm;
+  }
+
+  header,
+  nav,
+  aside,
+  footer,
+  .no-print,
+  [role="navigation"],
+  .print\:hidden {
+    display: none !important;
+  }
+
+  /* Printed documents can contain their own header and footer inside main. */
+  #main-content header:not(.print\:hidden),
+  #main-content footer:not(.print\:hidden) {
+    display: revert !important;
+  }
+
+  html,
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 10pt;
+    line-height: 1.5;
+    height: auto !important;
+    min-height: 0 !important;
+  }
+
+  .min-h-full,
+  .min-h-screen {
+    height: auto !important;
+    min-height: 0 !important;
+  }
+
+  h1 {
+    font-size: 14pt;
+    page-break-after: avoid;
+  }
+
+  h2,
+  h3 {
+    font-size: 12pt;
+    page-break-after: avoid;
+  }
+
+  a {
+    color: black !important;
+    text-decoration: none !important;
+  }
+
+  a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 8pt;
+    color: #333;
+  }
+
+  .print\:text-black {
+    color: black !important;
+  }
+
+  button {
+    display: none !important;
+  }
+
+  input,
+  textarea,
+  select {
+    border: 1px solid #999 !important;
+    background: white !important;
+    color: black !important;
+  }
+
+  input[type="date"]::-webkit-calendar-picker-indicator,
+  input[type="date"]::-webkit-inner-spin-button {
+    display: none !important;
+  }
+
+  .shadow,
+  .shadow-sm,
+  .shadow-md,
+  .shadow-lg {
+    box-shadow: none !important;
+  }
+
+  ul,
+  ol {
+    page-break-inside: avoid;
+  }
+
+  #main-content,
+  #main-content > div {
+    flex: none !important;
+    min-height: 0 !important;
+  }
+
+  table {
+    page-break-inside: auto;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  tr {
+    page-break-inside: avoid;
+  }
+
+  .print-footer {
+    position: fixed;
+    bottom: 5mm;
+    left: 12mm;
+    right: 12mm;
+    font-size: 8pt;
+    color: #666;
+    border-top: 1px solid #999;
+    padding-top: 2mm;
+    display: flex !important;
+    justify-content: space-between;
+  }
+
+  .plan-print-root,
+  .plan-print-root header,
+  .plan-print-root footer,
+  .plan-print-root nav,
+  .plan-print-root section {
+    display: block !important;
+  }
+
+  .plan-print-root .plan-cover {
+    page-break-after: always;
+  }
+
+  .plan-print-root .plan-toc {
+    page-break-after: always;
+  }
+
+  .plan-print-root section {
+    page-break-inside: auto;
+  }
+
+  .plan-print-root section + section {
+    page-break-before: auto;
+  }
+
+  .plan-print-root section > h2 {
+    page-break-after: avoid;
+  }
+
+  .plan-print-root .plan-toc a[href^="#"]::after {
+    content: "" !important;
+  }
+
+  .plan-print-root {
+    color: black !important;
+  }
+
+  .plan-print-root h1 {
+    font-size: 16pt;
+  }
+
+  .plan-print-root h2 {
+    font-size: 13pt;
+    page-break-after: avoid;
+    margin-top: 10mm;
+  }
+
+  .plan-print-root h3 {
+    font-size: 11pt;
+    page-break-after: avoid;
+  }
+
+  .plan-print-root table {
+    page-break-inside: auto;
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+  .plan-print-root table th,
+  .plan-print-root table td {
+    border: 1px solid #999 !important;
+    padding: 4pt 6pt !important;
+  }
+
+  .plan-print-root tr,
+  .plan-print-root li {
+    page-break-inside: avoid;
+  }
+
+  .plan-print-root a[href^="http"]::after {
+    content: "" !important;
+  }
+
+  .accident-report-print-root {
+    color: black !important;
+  }
+
+  .accident-report-print-root header,
+  .accident-report-print-root section {
+    display: block !important;
+  }
+
+  .accident-report-print-root h1 {
+    font-size: 16pt;
+    page-break-after: avoid;
+  }
+
+  .accident-report-print-root h2 {
+    font-size: 12pt;
+    page-break-after: avoid;
+    margin-top: 6mm;
+  }
+
+  .accident-report-print-root h3 {
+    font-size: 10pt;
+    page-break-after: avoid;
+  }
+
+  .accident-report-print-root ol,
+  .accident-report-print-root ul,
+  .accident-report-print-root li,
+  .accident-report-print-root .recharts-wrapper,
+  .accident-report-print-root section > div {
+    page-break-inside: avoid;
+  }
+
+  .accident-report-print-root a[href^="http"]::after {
+    content: "" !important;
+  }
+
+  .accident-report-print-root .report-print-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #475569;
+    padding-bottom: 3mm;
+    margin-bottom: 4mm;
+  }
+
+  .accident-report-print-root .report-print-header img {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .accident-report-print-root .report-print-footer {
+    position: fixed;
+    bottom: 4mm;
+    left: 12mm;
+    right: 12mm;
+    border-top: 1px solid #94a3b8;
+    padding-top: 1.5mm;
+    font-size: 7.5pt;
+    color: #334155;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .accident-report-print-root .report-print-pagenum::after {
+    content: "ページ " counter(page);
+  }
+
+  .accident-report-print-root table {
+    page-break-inside: auto;
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 8.5pt;
+  }
+
+  .accident-report-print-root table th,
+  .accident-report-print-root table td {
+    border: 1px solid #94a3b8 !important;
+    padding: 2pt 4pt !important;
+    word-break: break-word;
+  }
+
+  .accident-report-print-root table tr {
+    page-break-inside: avoid;
+  }
+
+  .accident-report-print-root .overflow-x-auto {
+    overflow: visible !important;
+  }
+
+  .accident-report-print-root table.min-w-\[640px\],
+  .accident-report-print-root table.min-w-\[520px\] {
+    min-width: 0 !important;
+  }
+}

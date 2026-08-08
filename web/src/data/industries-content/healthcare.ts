@@ -250,7 +250,7 @@ export const healthcareContent: IndustryContent = {
       name: "腰痛予防の労働衛生教育",
       type: "労働衛生教育",
       target: "介護・看護・移乗作業従事者",
-      href: "/education-certification/finder?q=腰痛",
+      href: "/education/roudoueisei/youtsu-yobou",
     },
     {
       name: "感染症対策教育（職業感染防止）",
@@ -262,7 +262,7 @@ export const healthcareContent: IndustryContent = {
       name: "メンタルヘルス・ラインケア教育",
       type: "労働衛生教育",
       target: "管理監督者（職場のメンタルヘルス4つのケア）",
-      href: "/education-certification/finder?q=メンタルヘルス",
+      href: "/mental-health-management",
     },
     {
       name: "衛生管理者免許（第一種）",
@@ -274,7 +274,7 @@ export const healthcareContent: IndustryContent = {
       name: "ストレスチェック実施者研修",
       type: "労働衛生教育",
       target: "医師・保健師等のストレスチェック実施者",
-      href: "/education-certification/finder?q=ストレスチェック",
+      href: "/mental-health-management/stress-check",
     },
     {
       name: "認知症介護基礎研修",

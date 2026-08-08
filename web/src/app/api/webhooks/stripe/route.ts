@@ -14,9 +14,15 @@ import {
   handleSubscriptionDeleted,
   handleSubscriptionUpdated,
 } from "@/lib/stripe-webhook-handlers";
+import { sharedRateLimitGuard } from "@/lib/security/shared-state";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+const MAX_WEBHOOK_BYTES = 1024 * 1024;
+
+function json(payload: unknown, status = 200) {
+  return NextResponse.json(payload, { status, headers: { "Cache-Control": "no-store" } });
+}
 
 function getStripe(): Stripe | null {
   const key = process.env.STRIPE_SECRET_KEY;
@@ -25,7 +31,7 @@ function getStripe(): Stripe | null {
 }
 
 export async function GET() {
-  return NextResponse.json({ error: "Method Not Allowed" }, { status: 405 });
+  return json({ error: "Method Not Allowed" }, 405);
 }
 
 export async function POST(req: Request) {
@@ -33,24 +39,36 @@ export async function POST(req: Request) {
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
   if (!stripe || !webhookSecret) {
-    return NextResponse.json({ error: "Stripe未設定" }, { status: 503 });
+    return json({ error: "Stripe未設定" }, 503);
   }
   if (!prisma) {
-    return NextResponse.json({ error: "Database not configured" }, { status: 503 });
+    return json({ error: "Database not configured" }, 503);
   }
+  const limited = await sharedRateLimitGuard(req, {
+    routeKey: "stripe-webhook",
+    limit: 600,
+    windowMs: 10 * 60 * 1_000,
+  });
+  if (limited) return limited;
 
+  const declaredSize = Number(req.headers.get("content-length"));
+  if (Number.isFinite(declaredSize) && declaredSize > MAX_WEBHOOK_BYTES) {
+    return json({ error: "payload too large" }, 413);
+  }
   const body = await req.text();
+  if (new TextEncoder().encode(body).byteLength > MAX_WEBHOOK_BYTES) {
+    return json({ error: "payload too large" }, 413);
+  }
   const sig = req.headers.get("stripe-signature");
   if (!sig) {
-    return NextResponse.json({ error: "署名なし" }, { status: 400 });
+    return json({ error: "署名なし" }, 400);
   }
 
   let event: Stripe.Event;
   try {
     event = stripe.webhooks.constructEvent(body, sig, webhookSecret);
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : "署名検証失敗";
-    return NextResponse.json({ error: msg }, { status: 400 });
+  } catch {
+    return json({ error: "署名検証失敗" }, 400);
   }
 
   // 冪等性チェック: 同じイベントIDが既に処理済みならスキップ
@@ -59,51 +77,52 @@ export async function POST(req: Request) {
       where: { stripeEventId: event.id },
     });
     if (existing) {
-      return NextResponse.json({ received: true, idempotent: true });
+      return json({ received: true, idempotent: true });
     }
-  } catch (err) {
-    // StripeEventテーブルが未作成の場合は警告のみ（DB push前）
-    console.warn("[stripe/webhook] idempotency check failed (table not ready?)", err);
+  } catch {
+    // 冪等性を確認できない状態で副作用を実行しない。
+    console.error("[stripe/webhook] idempotency check unavailable");
+    return json({ error: "temporarily unavailable" }, 503);
   }
 
   try {
-    switch (event.type) {
-      case "checkout.session.completed":
-        await handleCheckoutCompleted(prisma, event.data.object as Stripe.Checkout.Session);
-        break;
-      case "customer.subscription.created":
-      case "customer.subscription.updated":
-        await handleSubscriptionUpdated(prisma, event.data.object as Stripe.Subscription);
-        break;
-      case "customer.subscription.deleted":
-        await handleSubscriptionDeleted(prisma, event.data.object as Stripe.Subscription);
-        break;
-      case "invoice.payment_failed":
-        await handleInvoicePaymentFailed(prisma, event.data.object as Stripe.Invoice);
-        break;
-      case "invoice.payment_succeeded":
-        await handleInvoicePaymentSucceeded(prisma, event.data.object as Stripe.Invoice);
-        break;
-      default:
-        break;
-    }
+    // イベント記録と副作用を同じトランザクションへ入れ、並行配送でも
+    // unique制約に負けた側の更新をロールバックする。
+    await prisma.$transaction(
+      async (tx) => {
+        switch (event.type) {
+          case "checkout.session.completed":
+            await handleCheckoutCompleted(tx, event.data.object as Stripe.Checkout.Session);
+            break;
+          case "customer.subscription.created":
+          case "customer.subscription.updated":
+            await handleSubscriptionUpdated(tx, event.data.object as Stripe.Subscription);
+            break;
+          case "customer.subscription.deleted":
+            await handleSubscriptionDeleted(tx, event.data.object as Stripe.Subscription);
+            break;
+          case "invoice.payment_failed":
+            await handleInvoicePaymentFailed(tx, event.data.object as Stripe.Invoice);
+            break;
+          case "invoice.payment_succeeded":
+            await handleInvoicePaymentSucceeded(tx, event.data.object as Stripe.Invoice);
+            break;
+          default:
+            break;
+        }
+        await tx.stripeEvent.create({
+          data: { stripeEventId: event.id, eventType: event.type },
+        });
+      },
+      { maxWait: 5_000, timeout: 15_000 },
+    );
   } catch (err) {
-    console.error("[stripe/webhook] handler error:", event.type, err);
-    return NextResponse.json({ error: "handler error" }, { status: 500 });
-  }
-
-  // 処理済みイベントIDを記録（冪等性保証）
-  try {
-    await prisma.stripeEvent.create({
-      data: { stripeEventId: event.id, eventType: event.type },
-    });
-  } catch (err) {
-    // 重複INSERT（競合）は無視、その他は警告
+    // unique競合は、別トランザクションが同じイベントを完了済み。
     const code = (err as { code?: string }).code;
-    if (code !== "P2002") {
-      console.warn("[stripe/webhook] failed to record event id", event.id, err);
-    }
+    if (code === "P2002") return json({ received: true, idempotent: true });
+    console.error("[stripe/webhook] processing failed", { eventType: event.type });
+    return json({ error: "temporarily unavailable" }, 503);
   }
 
-  return NextResponse.json({ received: true });
+  return json({ received: true });
 }

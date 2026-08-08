@@ -221,22 +221,22 @@ export const officialNotices: LawRevisionCore[] = [
   },
   {
     id: "nt-2025-customer-harassment",
-    title: "カスタマーハラスメント対策の事業者指針（2025年4月施行）",
-    publishedAt: "2024-12-25",
-    revisionNumber: "基発1225第1号",
+    title: "職場におけるカスタマーハラスメント防止指針（2026年10月1日適用）",
+    publishedAt: "2026-02-26",
+    revisionNumber: "令和8年厚生労働省告示第51号",
     kind: "notice",
-    category: "通達",
-    issuer: "厚生労働省労働基準局",
+    category: "告示",
+    issuer: "厚生労働省",
     impact: "高",
     summary:
-      "改正労働施策総合推進法に伴うカスハラ対策の事業者義務化（2025年4月）。相談体制・従業員保護措置・従業員教育・事後対応の4本柱を示す。",
-    source: { url: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/koyoukintou/customer-harassment.html", label: "厚労省 カスハラ対策" },
-    official_notice_number: "基発1225第1号",
-    notice_no: "基発1225第1号",
-    notice_link: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/koyoukintou/customer-harassment.html",
-    publication_date: "2024-12-25",
-    enforcement_date: "2025-04-01",
-    source_url: "https://laws.e-gov.go.jp/law/341AC0000000132",
+      "令和7年法律第63号による労働施策総合推進法の改正を受け、事業主が講ずべき方針の明確化、相談体制、事後対応、悪質事案の抑止、プライバシー保護等を示す指針。防止措置義務は2026年10月1日施行。",
+    source: { url: "https://www.mhlw.go.jp/web/t_doc?dataId=75ac0814&dataType=0&pageNo=1", label: "厚生労働省 令和8年告示第51号" },
+    official_notice_number: "令和8年厚生労働省告示第51号",
+    notice_no: "令和8年厚生労働省告示第51号",
+    notice_link: "https://www.mhlw.go.jp/web/t_doc?dataId=75ac0814&dataType=0&pageNo=1",
+    publication_date: "2026-02-26",
+    enforcement_date: "2026-10-01",
+    source_url: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/koyoukintou/seisaku06/",
   },
   {
     id: "nt-2023-heat-stress",
@@ -297,7 +297,7 @@ export const officialNotices: LawRevisionCore[] = [
   },
 ];
 
-export const courtPrecedents: LawRevisionCore[] = [
+const quarantinedCourtPrecedents: LawRevisionCore[] = [
   {
     id: "cc-1984-kawayoshi",
     title: "川義事件（宿直中の強盗殺人事件と安全配慮義務）",
@@ -569,6 +569,18 @@ export const courtPrecedents: LawRevisionCore[] = [
     publication_date: "2023-07-11",
   },
 ];
+
+/**
+ * 旧判例データには事件・裁判日・判例誌・裁判所の誤対応が確認された。
+ * 裁判所の個別判決URL、事件番号、裁判年月日、支持箇所、人手確認日を持つ
+ * allowlistへ移行するまで公開・検索・JSON-LD・AI根拠へ渡さない。
+ */
+export const courtPrecedents: LawRevisionCore[] = [];
+
+/** 監査用の隔離件数。隔離レコード本文は公開UIへ渡さない。 */
+export function getQuarantinedCourtPrecedentCount(): number {
+  return quarantinedCourtPrecedents.length;
+}
 
 export const noticesAndPrecedents: LawRevisionCore[] = [
   ...officialNotices,

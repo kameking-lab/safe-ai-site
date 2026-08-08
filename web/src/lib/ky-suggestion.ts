@@ -1,9 +1,5 @@
 import { KY_EXAMPLES } from "@/data/ky-examples";
-import type {
-  KyExample,
-  KyIndustryId,
-  KyWorkTypeId,
-} from "@/types/ky-example";
+import type { KyExample, KyIndustryId, KyWorkTypeId } from "@/types/ky-example";
 
 const HISTORY_KEY = "ky-suggestion-history-v1";
 const HISTORY_MAX = 20;
@@ -41,15 +37,9 @@ export type SuggestKyOptions = {
  * whole dataset — callers should require at least one signal.
  */
 export function suggestKyByIndustryAndWork(
-  options: SuggestKyOptions
+  options: SuggestKyOptions,
 ): KySuggestionResult[] {
-  const {
-    industry,
-    workType,
-    freeText,
-    history = [],
-    limit = 12,
-  } = options;
+  const { industry, workType, freeText, history = [], limit = 12 } = options;
 
   const noSignal =
     !industry && !workType && !freeText?.trim() && history.length === 0;
@@ -58,7 +48,7 @@ export function suggestKyByIndustryAndWork(
   const keywords = extractKeywords(freeText ?? "");
   const historyIds = new Set(history.map((h) => h.exampleId));
   const historyMostRecent = new Map(
-    history.map((h, idx) => [h.exampleId, history.length - idx])
+    history.map((h, idx) => [h.exampleId, history.length - idx]),
   );
 
   const results: KySuggestionResult[] = [];
@@ -119,6 +109,23 @@ export function suggestKyByIndustryAndWork(
   return results.slice(0, limit);
 }
 
+/**
+ * AIへ渡せる根拠候補だけを返す。
+ * 機関名ラベルだけでは足りず、個別URL・人手確認・grounding許可がすべて必要。
+ */
+export function suggestVerifiedKyEvidence(
+  options: SuggestKyOptions,
+): KySuggestionResult[] {
+  return suggestKyByIndustryAndWork(options).filter(
+    ({ example }) =>
+      example.source.provenance === "official" &&
+      example.source.verification === "verified" &&
+      example.source.useForAiGrounding === true &&
+      Boolean(example.source.referenceUrl) &&
+      Boolean(example.source.lastHumanReviewedAt),
+  );
+}
+
 function scoreKeywords(ex: KyExample, keywords: string[]): number {
   const haystack = [
     ex.title,
@@ -151,9 +158,11 @@ function extractKeywords(text: string): string[] {
 // cached "nothing in storage" snapshot. useSyncExternalStore compares the
 // returned reference with Object.is; returning a fresh [] on every call
 // would trigger React error #185 (Maximum update depth exceeded).
-const EMPTY_HISTORY_SNAPSHOT: readonly KySuggestionHistoryEntry[] = Object.freeze([]);
+const EMPTY_HISTORY_SNAPSHOT: readonly KySuggestionHistoryEntry[] =
+  Object.freeze([]);
 let cachedRaw: string | null = null;
-let cachedSnapshot: KySuggestionHistoryEntry[] | readonly KySuggestionHistoryEntry[] =
+let cachedSnapshot:
+  KySuggestionHistoryEntry[] | readonly KySuggestionHistoryEntry[] =
   EMPTY_HISTORY_SNAPSHOT;
 
 export function loadKySuggestionHistory(): KySuggestionHistoryEntry[] {
@@ -187,7 +196,7 @@ export function loadKySuggestionHistory(): KySuggestionHistoryEntry[] {
           typeof entry === "object" &&
           entry !== null &&
           typeof (entry as Record<string, unknown>).exampleId === "string" &&
-          typeof (entry as Record<string, unknown>).at === "number"
+          typeof (entry as Record<string, unknown>).at === "number",
       )
       .slice(0, HISTORY_MAX);
     return cachedSnapshot as KySuggestionHistoryEntry[];
@@ -200,7 +209,7 @@ export function loadKySuggestionHistory(): KySuggestionHistoryEntry[] {
 export function recordKySuggestionUsage(exampleId: string): void {
   if (typeof window === "undefined") return;
   const existing = loadKySuggestionHistory().filter(
-    (e) => e.exampleId !== exampleId
+    (e) => e.exampleId !== exampleId,
   );
   const next: KySuggestionHistoryEntry[] = [
     { exampleId, at: Date.now() },

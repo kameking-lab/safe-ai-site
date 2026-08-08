@@ -2,12 +2,12 @@ import approvedJson from "@/data/news-feed/approved/index.json";
 import type { NewsFeedDataset, NewsFeedEntry } from "@/lib/types/domain";
 
 /**
- * Loader for autonomous news-feed entries that passed the AI judge gate.
+ * Loader for news-feed entries that passed explicit human review.
  *
  * The dataset is produced by the daily GitHub Actions workflow
  * (`.github/workflows/news-feed-daily.yml`) which runs:
  *   1. scripts/etl/fetch-news-feed.mjs  — RSS fetch + keyword pre-filter
- *   2. scripts/etl/news-ai-judge.mjs    — Gemini 2.5 Flash 4-score gate
+ *   2. scripts/etl/news-ai-judge.mjs    — deterministic filter + review queue
  *
  * UI surfaces:
  *   - /accidents 「報道・自動収集」 section (warning-styled box)
@@ -20,7 +20,11 @@ import type { NewsFeedDataset, NewsFeedEntry } from "@/lib/types/domain";
 const dataset = approvedJson as NewsFeedDataset;
 
 export function getNewsFeedEntries(): readonly NewsFeedEntry[] {
-  return dataset.entries ?? [];
+  return (dataset.entries ?? []).filter(
+    (entry) =>
+      entry.approved === true &&
+      (entry as NewsFeedEntry & { humanReviewed?: boolean }).humanReviewed === true,
+  );
 }
 
 export function getNewsFeedUpdatedAt(): string {
@@ -28,7 +32,7 @@ export function getNewsFeedUpdatedAt(): string {
 }
 
 export function getNewsFeedCount(): number {
-  return (dataset.entries ?? []).length;
+  return getNewsFeedEntries().length;
 }
 
 /**
@@ -36,5 +40,5 @@ export function getNewsFeedCount(): number {
  * Caller is expected to cap further if the section is tighter than 20.
  */
 export function getRecentNewsFeedEntries(limit = 20): readonly NewsFeedEntry[] {
-  return (dataset.entries ?? []).slice(0, limit);
+  return getNewsFeedEntries().slice(0, limit);
 }

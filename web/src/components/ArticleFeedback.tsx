@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { FeedbackPayload } from "@/app/api/feedback/route";
 
 type Props = {
@@ -24,6 +24,7 @@ export function ArticleFeedback({ articleSlug, className = "" }: Props) {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<Status>("idle");
   const [errorMsg, setErrorMsg] = useState("");
+  const idempotencyKeyRef = useRef<string | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -33,9 +34,15 @@ export function ArticleFeedback({ articleSlug, className = "" }: Props) {
     setErrorMsg("");
 
     try {
+      const idempotencyKey =
+        idempotencyKeyRef.current ?? crypto.randomUUID();
+      idempotencyKeyRef.current = idempotencyKey;
       const res = await fetch("/api/feedback", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Idempotency-Key": idempotencyKey,
+        },
         body: JSON.stringify({
           articleSlug,
           errorType,
@@ -60,6 +67,7 @@ export function ArticleFeedback({ articleSlug, className = "" }: Props) {
       setStatus("success");
       setDescription("");
       setEmail("");
+      idempotencyKeyRef.current = null;
     } catch {
       setErrorMsg("通信エラーが発生しました。");
       setStatus("error");
@@ -72,6 +80,7 @@ export function ArticleFeedback({ articleSlug, className = "" }: Props) {
     setErrorMsg("");
     setDescription("");
     setEmail("");
+    idempotencyKeyRef.current = null;
   }
 
   return (
@@ -120,7 +129,10 @@ export function ArticleFeedback({ articleSlug, className = "" }: Props) {
             <select
               id="fb-error-type"
               value={errorType}
-              onChange={(e) => setErrorType(e.target.value as FeedbackPayload["errorType"])}
+              onChange={(e) => {
+                setErrorType(e.target.value as FeedbackPayload["errorType"]);
+                idempotencyKeyRef.current = null;
+              }}
               className="w-full rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               {ERROR_TYPE_OPTIONS.map((opt) => (
@@ -138,7 +150,10 @@ export function ArticleFeedback({ articleSlug, className = "" }: Props) {
             <textarea
               id="fb-description"
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={(e) => {
+                setDescription(e.target.value);
+                idempotencyKeyRef.current = null;
+              }}
               placeholder="どの部分が誤りかを具体的にご記入ください（例: 第○条の番号が間違っています）"
               rows={3}
               maxLength={1000}
@@ -155,8 +170,11 @@ export function ArticleFeedback({ articleSlug, className = "" }: Props) {
               id="fb-email"
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="example@example.com"
+              onChange={(e) => {
+                setEmail(e.target.value);
+                idempotencyKeyRef.current = null;
+              }}
+              placeholder="返信先メールアドレス"
               className="w-full rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>

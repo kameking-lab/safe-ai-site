@@ -2,10 +2,11 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { PageJsonLd } from "@/components/page-json-ld";
 import { SearchResults } from "./SearchResults";
+import { SearchFallback, SearchPageHeader } from "./search-page-components";
 
-const _title = "サイト内 横断検索";
+const _title = "安全情報を横断検索";
 const _desc =
-  "法令条文・法改正記事・労災判例・厚労省通達・化学物質・特別教育・事故事例をまとめて横断検索。キーワード1つで安全衛生の必要情報へ最短到達。";
+  "法令、事故、化学物質、資格、教育、KYT、実務ツール、自動化サンプルを横断検索。主力機能・公式情報・サンプルを区別して表示します。";
 
 export const metadata: Metadata = {
   title: _title,
@@ -24,17 +25,12 @@ export default function SearchPage() {
         description={_desc}
         path="/search"
       />
-      <Suspense
-        fallback={
-          <div className="mx-auto w-full max-w-4xl space-y-3 px-4 py-6 sm:px-6">
-            <div className="h-8 w-1/2 animate-pulse rounded bg-slate-200" />
-            <div className="h-11 animate-pulse rounded-xl bg-slate-100" />
-            <div className="h-40 animate-pulse rounded-lg bg-slate-100" />
-          </div>
-        }
-      >
-        <SearchResults />
-      </Suspense>
+      <div className="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6">
+        <SearchPageHeader />
+        <Suspense fallback={<SearchFallback />}>
+          <SearchResults />
+        </Suspense>
+      </div>
     </>
   );
 }

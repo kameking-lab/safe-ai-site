@@ -6,7 +6,7 @@
  * 設計参照: docs/chatbot-quality-research-2026-05-23/06-notice-attachment-design.md §7
  *
  * 表示内容:
- * - 通達名 / noticeNumber / 発出日 / 発出機関 / bindingLevel バッジ
+ * - 通達名 / noticeNumber / 発出日 / 発出機関 / 文書位置付けの確認バッジ
  * - 「原文を見る」ボタン（detailUrl を新タブで開く）
  * - 本文要約は表示しない（JAISH 編集解説の置換リスク回避）
  */
@@ -15,9 +15,9 @@ import { ExternalLink } from "lucide-react";
 import type { AttachedNotice } from "@/lib/chatbot-notice-attachment";
 
 const BINDING_LABEL: Record<AttachedNotice["bindingLevel"], string> = {
-  binding: "拘束力あり",
-  indirect: "通達（行政解釈）",
-  reference: "参考",
+  binding: "効力を個別確認",
+  indirect: "行政運用資料",
+  reference: "参考資料",
 };
 
 const BINDING_TONE: Record<

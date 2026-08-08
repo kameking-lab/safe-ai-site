@@ -1,8 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type MouseEvent } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Sparkles, Loader2, ChevronRight, HelpCircle } from "lucide-react";
+import { inspectAiOutbound } from "@/lib/ai-outbound-safety";
+import { putConstructionCalcHandoff } from "@/lib/construction-calc/transient-handoff";
 
 /**
  * 建設計算 AI入口ワンボックス（化学一窓と同じ思想）。
@@ -35,14 +38,28 @@ const EXAMPLE_PROMPTS = [
 ];
 
 export function CalcAiOnebox() {
+  const router = useRouter();
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<RouteResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [aiProviderConsent, setAiProviderConsent] = useState(false);
 
   const submit = async (input: string) => {
     const trimmed = input.trim();
     if (!trimmed || loading) return;
+    const outboundSafety = inspectAiOutbound({
+      purpose: "construction-calculator-routing-client",
+      texts: [trimmed],
+      consent: aiProviderConsent,
+      maxChars: 2_000,
+      contextPolicy: "no-context",
+    });
+    if (!outboundSafety.allowed) {
+      setError(outboundSafety.message);
+      setResult(null);
+      return;
+    }
     setLoading(true);
     setError(null);
     setResult(null);
@@ -50,7 +67,7 @@ export function CalcAiOnebox() {
       const res = await fetch("/api/construction-calc", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: trimmed }),
+        body: JSON.stringify({ text: trimmed, aiProviderConsent: true }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       setResult((await res.json()) as RouteResponse);
@@ -61,11 +78,25 @@ export function CalcAiOnebox() {
     }
   };
 
-  const matchedHref = (m: NonNullable<RouteResponse["matched"]>) => {
-    const qs = new URLSearchParams();
-    for (const [k, v] of Object.entries(m.values)) qs.set(k, String(v));
-    const q = qs.toString();
-    return `/construction-calc/${m.slug}${q ? `?${q}` : ""}`;
+  const openMatchedCalculator = (
+    event: MouseEvent<HTMLAnchorElement>,
+    matched: NonNullable<RouteResponse["matched"]>,
+  ) => {
+    if (
+      event.button !== 0 ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey
+    ) {
+      return;
+    }
+    event.preventDefault();
+    putConstructionCalcHandoff({
+      slug: matched.slug,
+      values: matched.values,
+    });
+    router.push(`/construction-calc/${matched.slug}`);
   };
 
   return (
@@ -112,6 +143,15 @@ export function CalcAiOnebox() {
           計算機を探す
         </button>
       </form>
+      <label className="mt-2 flex min-h-[44px] items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-200">
+        <input
+          type="checkbox"
+          checked={aiProviderConsent}
+          onChange={(event) => setAiProviderConsent(event.target.checked)}
+          className="h-5 w-5"
+        />
+        個人・会社・現場を特定できる情報を除き、入力を外部AIへ送信することを確認しました
+      </label>
       <div className="mt-2 flex flex-wrap gap-1.5">
         {EXAMPLE_PROMPTS.map((p) => (
           <button
@@ -121,7 +161,8 @@ export function CalcAiOnebox() {
               setText(p);
               void submit(p);
             }}
-            className="inline-flex min-h-[44px] items-center rounded-full border border-sky-200 bg-white px-3 py-1 text-xs text-sky-800 transition hover:bg-sky-50 dark:border-sky-800 dark:bg-slate-800 dark:text-sky-300"
+            disabled={loading}
+            className="inline-flex min-h-[44px] items-center rounded-full border border-sky-200 bg-white px-3 py-1 text-xs text-sky-800 transition hover:bg-sky-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-sky-800 dark:bg-slate-800 dark:text-sky-300"
           >
             {p}
           </button>
@@ -158,7 +199,10 @@ export function CalcAiOnebox() {
                 </ul>
               )}
               <Link
-                href={matchedHref(result.matched)}
+                href={`/construction-calc/${result.matched.slug}`}
+                onClick={(event) =>
+                  openMatchedCalculator(event, result.matched!)
+                }
                 className="mt-3 inline-flex min-h-[44px] items-center gap-1 rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-800"
               >
                 {result.matched.title.split("（")[0]}を開く

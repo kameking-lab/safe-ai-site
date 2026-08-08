@@ -1,8 +1,17 @@
-@import "tailwindcss";
-@import "leaflet/dist/leaflet.css";
-@import "leaflet.markercluster/dist/MarkerCluster.css";
-@import "leaflet.markercluster/dist/MarkerCluster.Default.css";
+@import "tailwindcss" source(none);
+@import "./tailwind-route-source-exclusions.css";
 
+/* Generate utilities from shipped application sources only. Test files and
+   snapshots must not grow the production stylesheet. */
+@source "../";
+@source not "../test";
+@source not "../**/*.test.*";
+@source not "../**/*.spec.*";
+@source not "../**/__tests__";
+@source not "../**/__snapshots__";
+/* Admin utilities are emitted by the two admin layouts, not sent to public routes. */
+@source not "../app/admin";
+@source not "../app/(main)/admin";
 /**
  * ダークモード: html.dark を起点にする class 戦略
  * Tailwind v4 では @custom-variant でクラス戦略を宣言する。
@@ -10,36 +19,157 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-  --surface-card: #ffffff;
-  --surface-muted: #f8fafc; /* slate-50 */
-  --border-subtle: #e2e8f0; /* slate-200 */
+  /* Brand foundation: one primary, one secondary, and two controlled accents. */
+  --background: #f7f8f6;
+  --foreground: #132238;
+  --surface: #ffffff;
+  --surface-emphasis: #edf6f2;
+  --surface-inverse: #142d4c;
+  --surface-card: var(--surface);
+  --surface-muted: #f1f4f2;
+  --text: var(--foreground);
+  --muted: #526173;
+  --border: #d7dfdc;
+  --border-subtle: var(--border);
+  --primary: #0b5d4b;
+  --primary-hover: #08483b;
+  --primary-solid: #0b5d4b;
+  --primary-solid-hover: #08483b;
+  --secondary: #142d4c;
+  --secondary-solid: #142d4c;
+  --accent: #f59e0b;
+  --accent-cool: #0891b2;
+  --accent-ink: #7a3d00;
+  --accent-cool-ink: #075985;
+  --accent-cool-on-dark: #a5f3fc;
+
+  /* Semantic colors are meaning-bearing, not page decoration. */
+  --success: #087a55;
+  --success-solid: #087a55;
+  --success-solid-hover: #065f46;
+  --caution: #a84f08;
+  --caution-solid: #a84f08;
+  --caution-solid-hover: #843d06;
+  --danger: #b42318;
+  --info: #075985;
+  --ai: #6d28d9;
+  --ai-solid: #6d28d9;
+  --ai-solid-hover: #5b21b6;
+  --official: #1d4ed8;
+  --synthetic: #795548;
+  --stale: #667085;
+  --offline: #475467;
+  --pending: #9a6700;
+
+  --shadow-xs: 0 1px 2px rgba(20, 45, 76, 0.08);
+  --shadow-sm: 0 8px 24px -18px rgba(20, 45, 76, 0.42);
+  --shadow-md: 0 20px 48px -30px rgba(20, 45, 76, 0.5);
+  --radius-sm: 0.625rem;
+  --radius-md: 1rem;
+  --radius-lg: 1.5rem;
+  --radius-xl: 2rem;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --type-xs: 0.75rem;
+  --type-sm: 0.875rem;
+  --type-body: 1rem;
+  --type-lead: clamp(1.05rem, 1rem + 0.25vw, 1.25rem);
+  --type-h3: clamp(1.125rem, 1rem + 0.5vw, 1.5rem);
+  --type-h2: clamp(1.5rem, 1.2rem + 1vw, 2.25rem);
+  --type-h1: clamp(2rem, 1.45rem + 2vw, 3.5rem);
 }
 
 html.dark {
-  /* ダーク背景: slate-900 / カード: slate-800 / 文字: slate-100 / 境界: slate-700 */
-  --background: #0f172a;
-  --foreground: #f1f5f9;
-  --surface-card: #1e293b;
-  --surface-muted: #0b1220;
-  --border-subtle: #334155;
+  --background: #0b1726;
+  --foreground: #eef5f2;
+  --surface: #132238;
+  --surface-emphasis: #12352f;
+  --surface-inverse: #07111e;
+  --surface-card: var(--surface);
+  --surface-muted: #0e1c2e;
+  --text: var(--foreground);
+  --muted: #b7c3cf;
+  --border: #34465a;
+  --border-subtle: var(--border);
+  --primary: #65d6b4;
+  --primary-hover: #8be3c8;
+  --primary-solid: #0b5d4b;
+  --primary-solid-hover: #08705a;
+  --secondary: #b8cee8;
+  --secondary-solid: #142d4c;
+  --accent: #fbbf24;
+  --accent-cool: #67e8f9;
+  --accent-ink: #fde68a;
+  --accent-cool-ink: #a5f3fc;
+  --accent-cool-on-dark: #a5f3fc;
+  --success: #6ee7b7;
+  --success-solid: #087a55;
+  --success-solid-hover: #0b6b4e;
+  --caution: #fbbf24;
+  --caution-solid: #a84f08;
+  --caution-solid-hover: #934407;
+  --danger: #fda29b;
+  --info: #7dd3fc;
+  --ai: #c4b5fd;
+  --ai-solid: #6d28d9;
+  --ai-solid-hover: #7c3aed;
+  --official: #93c5fd;
+  --synthetic: #d7b6a4;
+  --stale: #cbd5e1;
+  --offline: #b8c4d4;
+  --pending: #fde68a;
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.28);
+  --shadow-sm: 0 8px 24px -18px rgba(0, 0, 0, 0.82);
+  --shadow-md: 0 20px 48px -30px rgba(0, 0, 0, 0.9);
   color-scheme: dark;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  /* 欧文・数字=Geist、日本語=各OSの高品質ゴシック（WindowsはUDフォント優先）。
-     Webフォント追加なし＝LCP影響ゼロで日本語UIの質感を上げる */
-  --font-sans: var(--font-geist-sans), -apple-system, BlinkMacSystemFont,
+  /* 日本語・欧文ともOS標準フォントを使う。全ページ共通のWebフォント取得と
+     読み込み後の字幅変化を避け、低速回線のLCPとCLSを安定させる。 */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI",
     "Hiragino Kaku Gothic ProN", "Hiragino Sans", "BIZ UDPGothic", "Yu Gothic UI",
     Meiryo, sans-serif;
-  --font-mono: var(--font-geist-mono);
-  /* 安全AIポータル brand colors */
-  --color-brand-primary: #1a7a4c;
-  --color-brand-accent: #e67e22;
-  --color-brand-danger: #e74c3c;
+  --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  /* 安全AIポータル brand / semantic colors */
+  --color-brand-primary: var(--primary);
+  --color-brand-primary-hover: var(--primary-hover);
+  --color-brand-primary-solid: var(--primary-solid);
+  --color-brand-primary-solid-hover: var(--primary-solid-hover);
+  --color-brand-secondary: var(--secondary);
+  --color-brand-secondary-solid: var(--secondary-solid);
+  --color-brand-accent: var(--accent);
+  --color-brand-accent-cool: var(--accent-cool);
+  --color-brand-accent-ink: var(--accent-ink);
+  --color-brand-accent-cool-ink: var(--accent-cool-ink);
+  --color-brand-accent-cool-on-dark: var(--accent-cool-on-dark);
+  --color-brand-danger: var(--danger);
+  --color-portal-surface: var(--surface);
+  --color-portal-surface-emphasis: var(--surface-emphasis);
+  --color-portal-muted: var(--muted);
+  --color-portal-border: var(--border);
+  --color-semantic-success: var(--success);
+  --color-semantic-success-solid: var(--success-solid);
+  --color-semantic-success-solid-hover: var(--success-solid-hover);
+  --color-semantic-caution: var(--caution);
+  --color-semantic-caution-solid: var(--caution-solid);
+  --color-semantic-caution-solid-hover: var(--caution-solid-hover);
+  --color-semantic-danger: var(--danger);
+  --color-semantic-info: var(--info);
+  --color-semantic-ai: var(--ai);
+  --color-semantic-ai-solid: var(--ai-solid);
+  --color-semantic-ai-solid-hover: var(--ai-solid-hover);
+  --color-semantic-official: var(--official);
+  --color-semantic-synthetic: var(--synthetic);
+  --color-semantic-stale: var(--stale);
+  --color-semantic-offline: var(--offline);
+  --color-semantic-pending: var(--pending);
 }
 
 body {
@@ -50,6 +180,412 @@ body {
   /* PWAプルリフレッシュを有効にする */
   overscroll-behavior-y: auto;
   transition: background-color 200ms ease, color 200ms ease;
+}
+
+/*
+ * Dark-theme compatibility for legacy utility combinations.
+ *
+ * Older pages sometimes pair a fixed light surface (for example `bg-white`)
+ * with an inherited portal token, or place a fixed light-mode text utility
+ * directly on the dark canvas. Keep the explicit `dark:*` utilities in
+ * control, while giving legacy combinations a readable dark equivalent.
+ */
+@media screen and (forced-colors: none) {
+  html.dark :where(.bg-white):not([class*="dark:bg-"]) {
+    background-color: var(--surface);
+  }
+
+  html.dark
+    :where(
+      .bg-slate-50,
+      .bg-slate-100,
+      .bg-slate-200,
+      .bg-gray-50,
+      .bg-gray-100,
+      .bg-gray-200,
+      .bg-zinc-50,
+      .bg-zinc-100,
+      .bg-zinc-200
+    ):not([class*="dark:bg-"]) {
+    background-color: var(--surface-muted);
+  }
+
+  html.dark
+    :where(
+      .bg-emerald-50,
+      .bg-emerald-100,
+      .bg-emerald-200,
+      .bg-teal-50,
+      .bg-teal-100,
+      .bg-teal-200,
+      [class^="bg-emerald-50/"],
+      [class*=" bg-emerald-50/"],
+      [class^="bg-teal-50/"],
+      [class*=" bg-teal-50/"]
+    ):not([class*="dark:bg-"]) {
+    background-color: color-mix(in srgb, var(--success-solid) 22%, var(--surface));
+  }
+
+  html.dark
+    :where(
+      .bg-sky-50,
+      .bg-sky-100,
+      .bg-sky-200,
+      .bg-blue-50,
+      .bg-blue-100,
+      .bg-blue-200,
+      .bg-cyan-50,
+      .bg-cyan-100,
+      .bg-cyan-200,
+      [class^="bg-sky-50/"],
+      [class*=" bg-sky-50/"],
+      [class^="bg-blue-50/"],
+      [class*=" bg-blue-50/"],
+      [class^="bg-cyan-50/"],
+      [class*=" bg-cyan-50/"]
+    ):not([class*="dark:bg-"]) {
+    background-color: color-mix(in srgb, var(--info) 18%, var(--surface));
+  }
+
+  html.dark
+    :where(
+      .bg-amber-50,
+      .bg-amber-100,
+      .bg-amber-200,
+      .bg-orange-50,
+      .bg-orange-100,
+      .bg-orange-200,
+      .bg-yellow-50,
+      .bg-yellow-100,
+      .bg-yellow-200,
+      [class^="bg-amber-50/"],
+      [class*=" bg-amber-50/"],
+      [class^="bg-orange-50/"],
+      [class*=" bg-orange-50/"],
+      [class^="bg-yellow-50/"],
+      [class*=" bg-yellow-50/"]
+    ):not([class*="dark:bg-"]) {
+    background-color: color-mix(in srgb, var(--caution-solid) 24%, var(--surface));
+  }
+
+  html.dark
+    :where(
+      .bg-red-50,
+      .bg-red-100,
+      .bg-red-200,
+      .bg-rose-50,
+      .bg-rose-100,
+      .bg-rose-200,
+      [class^="bg-red-50/"],
+      [class*=" bg-red-50/"],
+      [class^="bg-rose-50/"],
+      [class*=" bg-rose-50/"]
+    ):not([class*="dark:bg-"]) {
+    background-color: color-mix(in srgb, var(--danger) 22%, var(--surface));
+  }
+
+  html.dark
+    :where(
+      .bg-indigo-50,
+      .bg-indigo-100,
+      .bg-indigo-200,
+      .bg-violet-50,
+      .bg-violet-100,
+      .bg-violet-200,
+      .bg-purple-50,
+      .bg-purple-100,
+      .bg-purple-200,
+      [class^="bg-indigo-50/"],
+      [class*=" bg-indigo-50/"],
+      [class^="bg-violet-50/"],
+      [class*=" bg-violet-50/"],
+      [class^="bg-purple-50/"],
+      [class*=" bg-purple-50/"]
+    ):not([class*="dark:bg-"]) {
+    background-color: color-mix(in srgb, var(--ai-solid) 20%, var(--surface));
+  }
+
+  html.dark
+    :where(.text-slate-950, .text-slate-900, .text-slate-800):not(
+      [class*="dark:text-"]
+    ) {
+    color: #f8fafc;
+  }
+
+  html.dark
+    :where(.text-slate-700, .text-slate-600, .text-slate-500):not(
+      [class*="dark:text-"]
+    ) {
+    color: #cbd5e1;
+  }
+
+  html.dark
+    :where(
+      .text-emerald-950,
+      .text-emerald-900,
+      .text-emerald-800,
+      .text-emerald-700,
+      .text-emerald-600,
+      .text-teal-950,
+      .text-teal-900,
+      .text-teal-800,
+      .text-teal-700,
+      .text-teal-600
+    ):not([class*="dark:text-"]) {
+    color: #6ee7b7;
+  }
+
+  html.dark
+    :where(
+      .text-sky-950,
+      .text-sky-900,
+      .text-sky-800,
+      .text-sky-700,
+      .text-sky-600,
+      .text-blue-950,
+      .text-blue-900,
+      .text-blue-800,
+      .text-blue-700,
+      .text-blue-600
+    ):not([class*="dark:text-"]) {
+    color: #7dd3fc;
+  }
+
+  html.dark
+    :where(
+      .text-amber-950,
+      .text-amber-900,
+      .text-amber-800,
+      .text-amber-700,
+      .text-amber-600,
+      .text-orange-950,
+      .text-orange-900,
+      .text-orange-800,
+      .text-orange-700,
+      .text-orange-600
+    ):not([class*="dark:text-"]) {
+    color: #fde68a;
+  }
+
+  html.dark
+    :where(
+      .text-red-950,
+      .text-red-900,
+      .text-red-800,
+      .text-red-700,
+      .text-red-600,
+      .text-rose-950,
+      .text-rose-900,
+      .text-rose-800,
+      .text-rose-700,
+      .text-rose-600
+    ):not([class*="dark:text-"]) {
+    color: #fda29b;
+  }
+
+  html.dark
+    :where(
+      .text-indigo-950,
+      .text-indigo-900,
+      .text-indigo-800,
+      .text-indigo-700,
+      .text-indigo-600,
+      .text-violet-950,
+      .text-violet-900,
+      .text-violet-800,
+      .text-violet-700,
+      .text-violet-600,
+      .text-purple-950,
+      .text-purple-900,
+      .text-purple-800,
+      .text-purple-700,
+      .text-purple-600
+    ):not([class*="dark:text-"]) {
+    color: #c4b5fd;
+  }
+
+  html.dark .portal-light-ink,
+  html.dark .portal-light-ink * {
+    color: #020617;
+  }
+
+  html.dark
+    :where(
+      [class^="text-rose-800/"],
+      [class*=" text-rose-800/"]
+    ):not([class*="dark:text-"]) {
+    color: #fecdd3;
+  }
+}
+
+/* Shared visual grammar. Layouts may vary; color, radius, shadow, CTA and status do not. */
+.portal-surface {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-sm);
+}
+
+.portal-surface-emphasis {
+  border: 1px solid color-mix(in srgb, var(--primary) 25%, var(--border));
+  border-radius: var(--radius-lg);
+  background: var(--surface-emphasis);
+  color: var(--text);
+}
+
+.portal-button-primary {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--primary-solid);
+  padding: 0.75rem 1rem;
+  color: #ffffff;
+  font-weight: 800;
+  line-height: 1.25;
+  box-shadow: var(--shadow-xs);
+}
+
+.portal-button-primary:hover {
+  background: var(--primary-solid-hover);
+}
+
+.portal-button-ai {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--ai-solid);
+  padding: 0.75rem 1rem;
+  color: #ffffff;
+  font-weight: 800;
+  line-height: 1.25;
+  box-shadow: var(--shadow-xs);
+}
+
+.portal-button-ai:hover {
+  background: var(--ai-solid-hover);
+}
+
+.portal-button-secondary {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  padding: 0.75rem 1rem;
+  color: var(--secondary);
+  font-weight: 750;
+}
+
+.portal-button-secondary:hover {
+  border-color: color-mix(in srgb, var(--primary) 55%, var(--border));
+  background: var(--surface-emphasis);
+}
+
+.portal-badge {
+  display: inline-flex;
+  min-height: 1.75rem;
+  align-items: center;
+  gap: var(--space-1);
+  border: 1px solid color-mix(in srgb, currentColor 30%, transparent);
+  border-radius: 999px;
+  padding: 0.2rem 0.65rem;
+  background: var(--surface);
+  color: var(--primary);
+  font-size: var(--type-xs);
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.portal-section-kicker {
+  color: var(--primary);
+  font-size: var(--type-xs);
+  font-weight: 850;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.portal-status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  padding: 0.25rem 0.65rem;
+  color: var(--muted);
+  font-size: var(--type-xs);
+  font-weight: 800;
+}
+
+.portal-status-sample {
+  border-color: color-mix(in srgb, var(--ai) 55%, var(--border));
+  color: var(--ai);
+}
+
+.portal-evidence-card {
+  border-left: 0.3rem solid var(--official);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  padding: var(--space-4);
+  color: var(--text);
+  box-shadow: var(--shadow-xs);
+}
+
+.portal-callout-caution {
+  border: 1px solid color-mix(in srgb, var(--caution) 48%, var(--border));
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--caution) 9%, var(--surface));
+  color: var(--text);
+}
+
+.portal-feature-tile {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-xs);
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.portal-feature-tile:hover {
+  border-color: color-mix(in srgb, var(--primary) 45%, var(--border));
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.mascot-bubble {
+  position: relative;
+  border: 1px solid color-mix(in srgb, var(--primary) 32%, var(--border));
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow-sm);
+}
+
+.mascot-bubble::before {
+  position: absolute;
+  left: -0.45rem;
+  bottom: 1rem;
+  width: 0.8rem;
+  height: 0.8rem;
+  border-left: 1px solid color-mix(in srgb, var(--primary) 32%, var(--border));
+  border-bottom: 1px solid color-mix(in srgb, var(--primary) 32%, var(--border));
+  background: var(--surface);
+  content: "";
+  transform: rotate(45deg);
 }
 
 /* スクロールバー非表示（モバイルタブ等） */
@@ -114,11 +650,35 @@ body {
   select {
     font-size: 16px;
   }
-  /* 横スクロール抑止（密集を防ぐ） */
-  html,
-  body {
-    overflow-x: hidden;
-  }
+}
+
+/* キーボード利用時は、部品ごとのTailwind指定がなくても現在位置を失わない。 */
+:where(
+  a[href],
+  button,
+  input,
+  select,
+  textarea,
+  summary,
+  [tabindex]:not([tabindex="-1"])
+):focus-visible {
+  outline: 3px solid #047857;
+  outline-offset: 3px;
+}
+
+/* 400%拡大・320px表示で固定幅メディアが本文を押し出さない。表とコードは
+   二次元情報なので自身の領域内で横スクロールを許し、本文全体は隠さない。 */
+img,
+video,
+canvas {
+  max-width: 100%;
+  height: auto;
+}
+pre {
+  max-width: 100%;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 /**
@@ -143,12 +703,6 @@ body {
     --mobile-bottom-nav-h: 56px;
   }
 }
-@media print {
-  .mobile-bottom-nav {
-    display: none !important;
-  }
-}
-
 /* 文字大モード */
 html.large-font {
   font-size: 18px;
@@ -167,18 +721,6 @@ html.large-font li,
 html.large-font span,
 html.large-font button {
   font-size: 1.05em;
-}
-
-/* ダークモード: 印刷時は強制ライトに戻す（ID_003 印刷リーフレット対応との両立） */
-@media print {
-  html.dark {
-    --background: #ffffff;
-    --foreground: #000000;
-    --surface-card: #ffffff;
-    --surface-muted: #ffffff;
-    --border-subtle: #cbd5e1;
-    color-scheme: light;
-  }
 }
 
 /* 屋外視認性向上：ハイコントラストモード（ID_11・ID_93対応） */
@@ -336,294 +878,72 @@ table {
   }
 }
 
-/* a11y案内バナー（app-shell）: 既読ユーザーは <head> の A11Y_HINT_INIT_SCRIPT が
-   first paint 前に html へ属性を立て、ここで隠す。マウント後の挿入/削除による
-   layout shift（全ページ共通 CLS）を構造的に無くす（C-1）。 */
-html[data-a11y-hint-dismissed="1"] [data-a11y-hint] {
+/* Windows High Contrast / forced-colors。状態は色だけに依存せず、境界・下線・
+   aria属性に対応する輪郭を残す。OSのsystem colorを優先する。 */
+@media (forced-colors: active) {
+  :where(a[href]) {
+    color: LinkText;
+    text-decoration: underline;
+    text-decoration-thickness: 0.12em;
+  }
+  :where(button, input, select, textarea, summary, [role="button"]) {
+    border: 2px solid ButtonText;
+    background: Canvas;
+    color: CanvasText;
+  }
+  :where(
+    [aria-current="page"],
+    [aria-selected="true"],
+    [aria-pressed="true"],
+    [aria-invalid="true"],
+    [role="alert"]
+  ) {
+    outline: 3px solid Highlight;
+    outline-offset: 2px;
+  }
+  :where(
+    a[href],
+    button,
+    input,
+    select,
+    textarea,
+    summary,
+    [tabindex]:not([tabindex="-1"])
+  ):focus-visible {
+    outline: 4px solid Highlight !important;
+    outline-offset: 3px !important;
+  }
+  [data-home-safety-cockpit]
+    :where(
+      a[href],
+      button,
+      input,
+      select,
+      textarea,
+      summary,
+      [tabindex]
+    ):focus-visible {
+    outline: 4px solid Highlight !important;
+    outline-offset: 3px !important;
+  }
+  svg {
+    forced-color-adjust: auto;
+  }
+}
+
+/* App Router may briefly retain a route fallback while the page-level
+   Suspense fallback streams in. Never show both accident loading shells. */
+main:has(#accident-news-search [data-accident-news-loading-shell])
+  [data-accident-news-route-loading] {
   display: none;
 }
 
-/* 印刷 A4 1 枚リーフレット対応（ID_003/072） */
-@media print {
-  @page {
-    size: A4;
-    margin: 15mm 12mm;
-  }
-  header,
-  nav,
-  aside,
-  footer,
-  .no-print,
-  [role="navigation"],
-  .print\:hidden {
-    display: none !important;
-  }
-  /* 印刷ドキュメント本体(#main-content 配下)の <header>/<footer> は、サイト共通
-     chrome ではなく成果物そのもの（資料タイトル・作成日・出典・免責）。上の一括
-     非表示から除外して再表示する。サイトの共通ヘッダ/フッタは #main-content の外側
-     に配置されているため影響しない。明示的に print:hidden を付けた操作バー等は
-     :not(.print\:hidden) により引き続き非表示のまま。 */
-  #main-content header:not(.print\:hidden),
-  #main-content footer:not(.print\:hidden) {
-    display: revert !important;
-  }
-  html,
-  body {
-    background: white !important;
-    color: black !important;
-    font-size: 10pt;
-    line-height: 1.5;
-  }
-  h1 {
-    font-size: 14pt;
-    page-break-after: avoid;
-  }
-  h2,
-  h3 {
-    font-size: 12pt;
-    page-break-after: avoid;
-  }
-  a {
-    color: black !important;
-    text-decoration: none !important;
-  }
-  /* URL を脚注のように表示（外部リンクのみ） */
-  a[href^="http"]::after {
-    content: " (" attr(href) ")";
-    font-size: 8pt;
-    color: #333;
-  }
-  .print\:text-black {
-    color: black !important;
-  }
-  button {
-    display: none !important;
-  }
-  input,
-  textarea,
-  select {
-    border: 1px solid #999 !important;
-    background: white !important;
-    color: black !important;
-  }
-  /* 日付入力のカレンダー/スピナーは印刷の清書帳票では不要。値（日付文字列）だけ残す */
-  input[type="date"]::-webkit-calendar-picker-indicator,
-  input[type="date"]::-webkit-inner-spin-button {
-    display: none !important;
-  }
-  /* カード影・背景・ボーダーを印刷向けに単純化 */
-  .shadow,
-  .shadow-sm,
-  .shadow-md,
-  .shadow-lg {
-    box-shadow: none !important;
-  }
-  ul,
-  ol {
-    page-break-inside: avoid;
-  }
-  /* 印刷時、(main)レイアウトのコンテンツラッパーは flex-1 / min-h-full で
-     画面の縦いっぱいに引き伸ばされる。その末尾の空白がそのまま印刷され、
-     コンテンツが1ページに収まっていても余分な2ページ目（ほぼ白紙）が
-     排出される。印刷時はストレッチを解除しコンテンツ高に縮める。 */
-  #main-content,
-  #main-content > div {
-    flex: none !important;
-    min-height: 0 !important;
-  }
-  /* 表（順化計画など）の行が改ページ位置で上下に切れない（枠線切れ防止）。
-     見出し行は各ページ先頭で繰り返す。 */
-  table {
-    page-break-inside: auto;
-  }
-  thead {
-    display: table-header-group;
-  }
-  tr {
-    page-break-inside: avoid;
-  }
-  /* 全ページ共通 A4 フッター情報（`.print-footer` を各ページで追記可能） */
-  .print-footer {
-    position: fixed;
-    bottom: 5mm;
-    left: 12mm;
-    right: 12mm;
-    font-size: 8pt;
-    color: #666;
-    border-top: 1px solid #999;
-    padding-top: 2mm;
-    display: flex !important;
-    justify-content: space-between;
-  }
+/* JS無効時は送信可能なnoscriptフォームだけを残す。headのnonce付き
+   bootstrapがfirst paint前にjs-enabledを付けるため、通常時のちらつきはない。 */
+.chatbot-client-enhanced {
+  display: none;
+}
 
-  /**
-   * 安全衛生計画書プレビュー（/strategy/plan-generator/preview/*）の印刷スタイル。
-   * グローバルでは <header>/<footer>/<nav> を非表示にしているが、計画書本体は
-   * <article class="plan-print-root"> 内なので、その配下では再表示する。
-   *
-   * A4 縦・上下15mm / 左右12mm のマージンで A4 印刷向けに最適化。表紙と目次の
-   * 直後でページ分割し、各セクション見出しはページ先頭に来るよう page-break を
-   * 制御する。
-   */
-  .plan-print-root,
-  .plan-print-root header,
-  .plan-print-root footer,
-  .plan-print-root nav,
-  .plan-print-root section {
-    display: block !important;
-  }
-  .plan-print-root .plan-cover {
-    page-break-after: always;
-  }
-  .plan-print-root .plan-toc {
-    page-break-after: always;
-  }
-  .plan-print-root section {
-    page-break-inside: auto;
-  }
-  .plan-print-root section + section {
-    page-break-before: auto;
-  }
-  .plan-print-root section > h2 {
-    page-break-after: avoid;
-  }
-  /* TOC のリンクは PDF 出力時に URL を表示しない */
-  .plan-print-root .plan-toc a[href^="#"]::after {
-    content: "" !important;
-  }
-  .plan-print-root {
-    color: black !important;
-  }
-  .plan-print-root h1 {
-    font-size: 16pt;
-  }
-  .plan-print-root h2 {
-    font-size: 13pt;
-    page-break-after: avoid;
-    margin-top: 10mm;
-  }
-  .plan-print-root h3 {
-    font-size: 11pt;
-    page-break-after: avoid;
-  }
-  .plan-print-root section {
-    page-break-inside: auto;
-  }
-  .plan-print-root table {
-    page-break-inside: auto;
-    border-collapse: collapse;
-    width: 100%;
-  }
-  .plan-print-root table th,
-  .plan-print-root table td {
-    border: 1px solid #999 !important;
-    padding: 4pt 6pt !important;
-  }
-  .plan-print-root tr,
-  .plan-print-root li {
-    page-break-inside: avoid;
-  }
-  /* URL 脚注は計画書プレビューでは不要（参照は本文に明記済み） */
-  .plan-print-root a[href^="http"]::after {
-    content: "" !important;
-  }
-
-  /**
-   * 業種別事故分析レポート（/accidents-reports/[industry]）の印刷スタイル。
-   * - A4 縦・15mm/12mm マージン
-   * - 固定ヘッダー（社名・発行日）と固定フッター（出典・ページ番号）
-   * - 30 項目チェックリストはカテゴリ単位でページ分割
-   * - URL の脚注付与は無効化（PDF 配布時のノイズを排除）
-   */
-  .accident-report-print-root {
-    color: black !important;
-  }
-  .accident-report-print-root header,
-  .accident-report-print-root section {
-    display: block !important;
-  }
-  .accident-report-print-root h1 {
-    font-size: 16pt;
-    page-break-after: avoid;
-  }
-  .accident-report-print-root h2 {
-    font-size: 12pt;
-    page-break-after: avoid;
-    margin-top: 6mm;
-  }
-  .accident-report-print-root h3 {
-    font-size: 10pt;
-    page-break-after: avoid;
-  }
-  .accident-report-print-root ol,
-  .accident-report-print-root ul,
-  .accident-report-print-root li,
-  .accident-report-print-root .recharts-wrapper,
-  .accident-report-print-root section > div {
-    page-break-inside: avoid;
-  }
-  /* リーフレット用の URL 脚注はレポートでは不要 */
-  .accident-report-print-root a[href^="http"]::after {
-    content: "" !important;
-  }
-
-  /* ヘッダー帯（最初のページ上部に表示。固定にすると重なるため流し込み） */
-  .accident-report-print-root .report-print-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid #475569;
-    padding-bottom: 3mm;
-    margin-bottom: 4mm;
-  }
-  .accident-report-print-root .report-print-header img {
-    print-color-adjust: exact;
-    -webkit-print-color-adjust: exact;
-  }
-
-  /* フッター（全ページに固定表示、ページ番号入り） */
-  .accident-report-print-root .report-print-footer {
-    position: fixed;
-    bottom: 4mm;
-    left: 12mm;
-    right: 12mm;
-    border-top: 1px solid #94a3b8;
-    padding-top: 1.5mm;
-    font-size: 7.5pt;
-    color: #334155;
-    display: flex;
-    justify-content: space-between;
-  }
-  /* CSS counter ベースのページ番号。@page で auto-increment される */
-  .accident-report-print-root .report-print-pagenum::after {
-    content: "ページ " counter(page);
-  }
-
-  /**
-   * 業種比較ビュー（/accidents-reports/compare）固有の印刷補強。
-   * Matrix テーブルは横スクロール前提で組まれているが、印刷時は
-   * 折り返しを許容して A4 幅に収まるようにする。
-   */
-  .accident-report-print-root table {
-    page-break-inside: auto;
-    border-collapse: collapse;
-    width: 100%;
-    font-size: 8.5pt;
-  }
-  .accident-report-print-root table th,
-  .accident-report-print-root table td {
-    border: 1px solid #94a3b8 !important;
-    padding: 2pt 4pt !important;
-    word-break: break-word;
-  }
-  .accident-report-print-root table tr {
-    page-break-inside: avoid;
-  }
-  .accident-report-print-root .overflow-x-auto {
-    overflow: visible !important;
-  }
-  .accident-report-print-root table.min-w-\[640px\],
-  .accident-report-print-root table.min-w-\[520px\] {
-    min-width: 0 !important;
-  }
+html.js-enabled .chatbot-client-enhanced {
+  display: block;
 }

@@ -1,21 +1,23 @@
 /**
  * KY全面再設計 Phase 5: Gemini 本接続による危険箇所の提案。
  *
- * 入力: 作業内容（自由記述）＋ 過去の類似KY事例（RAG: ky-suggestion で150件から検索）。
+ * 入力: 作業内容（自由記述）＋ 個別一次資料まで確認済みの類似事例。
  * 出力: 危険のポイント・対策・可能性(1-3)・重大性(1-3)・評価値・根拠 の構造化提案。
  *
  * 設計:
  *  - 既存擬似AI（buildRiskAssessmentTable）を二段フォールバックの2段目に温存。
- *  - ハルシネーション対策: 各提案が過去事例に裏付けられるか（grounded）を判定して明示。
+ *  - 語句一致を根拠支持とは扱わず、独立した引用支持検証が無い限り grounded=false。
  *  - SDK 呼び出しは generate を差し替え可能にし、純ロジック（プロンプト/パース/検証）を単体テスト可能に。
  */
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenAI } from "@google/genai";
 import { evalScore, riskGrade } from "@/lib/ky/pulldown-options";
 import { buildRiskAssessmentTable } from "@/data/mock/ky-assist-responses";
 import { AI_LEGAL_DISCLAIMER } from "@/lib/gemini";
+import { GEMINI_FLASH_MODEL } from "@/lib/gemini-model";
 import type { KySuggestionResult } from "@/lib/ky-suggestion";
+import { externalGenerativeAiAllowed } from "@/lib/server/deployment-safety";
 
-const MODEL = "gemini-2.5-flash";
+const GEMINI_REQUEST_TIMEOUT_MS = 12_000;
 
 export type KyHazardSuggestion = {
   /** 危険のポイント（1R） */
@@ -30,8 +32,14 @@ export type KyHazardSuggestion = {
   riskLabel: string;
   /** 根拠（なぜこの危険か。事例番号や一般的知見の別を明記） */
   basis: string;
-  /** 過去の類似事例に裏付けがあるか（ハルシネーション対策の目印） */
+  /** 主張単位の引用支持を人が確認済みか。現在は常にfalse。 */
   grounded: boolean;
+  /** 検索で取得した確認済み事例ID。主張支持を意味しない。 */
+  retrievedExampleIds: string[];
+  /** 検索で取得した確認済み一次資料URL。主張支持を意味しない。 */
+  sourceUrls: string[];
+  /** APIが候補を生成した時刻。 */
+  generatedAt?: string;
 };
 
 export type HazardSuggestionResponse = {
@@ -44,6 +52,7 @@ export type HazardSuggestionResponse = {
 export type GeminiGenerate = (system: string, user: string) => Promise<string>;
 
 function resolveApiKey(): string | null {
+  if (!externalGenerativeAiAllowed()) return null;
   const k = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
   return k && k.trim() && k !== "dummy" ? k : null;
 }
@@ -72,22 +81,22 @@ function formatExample(r: KySuggestionResult, idx: number): string {
 /** Gemini へ渡すシステム/ユーザープロンプトを組み立てる（純関数・テスト可能）。 */
 export function buildHazardPrompt(
   workContent: string,
-  examples: KySuggestionResult[]
+  examples: KySuggestionResult[],
 ): { system: string; user: string } {
   const system = [
     "あなたは日本の建設・製造現場の労働安全の専門家です。",
     "作業内容から、危険予知活動(KY)の「危険のポイント」と「対策」を提案します。",
     "必ず日本語で答え、出力は厳密なJSONのみとし、前後に説明文やmarkdownのコードフェンスを付けないこと。",
-    "JSON形式: {\"hazards\":[{\"hazard\":string,\"reduction\":string,\"likelihood\":1|2|3,\"severity\":1|2|3,\"basis\":string}]}",
+    'JSON形式: {"hazards":[{"hazard":string,"reduction":string,"likelihood":1|2|3,"severity":1|2|3,"basis":string}]}',
     "hazardsは3〜5件。likelihood=可能性(1低〜3高)、severity=重大性(1軽微〜3重大)。",
-    "提供された過去の類似事例を最優先の根拠とし、basisにどの事例に基づくかを書くこと。",
-    "事例に無い一般的な危険を挙げる場合は、basisに「一般的知見」と明記すること（憶測で断定しない）。",
+    "提供された確認済み資料は参考候補であり、語句一致だけで提案が資料に支持されたと断定しないこと。",
+    "basisには、モデルが生成した理由であり出典支持は未確認であることを明記すること。",
   ].join("\n");
 
   const exampleBlock =
     examples.length > 0
       ? examples.slice(0, 6).map(formatExample).join("\n")
-      : "（該当する過去事例は見つかりませんでした。一般的な建設安全の知見で補ってよいが、basisに『一般的知見』と明記すること）";
+      : "（AIへ渡せる確認済み一次資料はありません。すべて出典支持未確認の候補として生成すること）";
 
   const user = [
     `作業内容:\n${workContent.trim() || "（未入力）"}`,
@@ -103,7 +112,7 @@ export function buildHazardPrompt(
 /** モデル出力テキストから危険提案を抽出・検証する（純関数・テスト可能）。 */
 export function parseHazardSuggestions(
   text: string,
-  examples: KySuggestionResult[]
+  examples: KySuggestionResult[],
 ): KyHazardSuggestion[] {
   const json = extractJsonObject(text);
   if (!json) return [];
@@ -115,6 +124,18 @@ export function parseHazardSuggestions(
   }
   const hazardsRaw = (parsed as { hazards?: unknown })?.hazards;
   if (!Array.isArray(hazardsRaw)) return [];
+  const eligibleExamples = examples.filter(
+    ({ example }) =>
+      example.source?.provenance === "official" &&
+      example.source?.verification === "verified" &&
+      example.source?.useForAiGrounding === true &&
+      Boolean(example.source?.referenceUrl) &&
+      Boolean(example.source?.lastHumanReviewedAt),
+  );
+  const retrievedExampleIds = eligibleExamples.map(({ example }) => example.id);
+  const sourceUrls = eligibleExamples
+    .map(({ example }) => example.source?.referenceUrl)
+    .filter((url): url is string => Boolean(url));
 
   const out: KyHazardSuggestion[] = [];
   for (const item of hazardsRaw) {
@@ -132,8 +153,13 @@ export function parseHazardSuggestions(
       severity,
       evaluation,
       riskLabel: riskGrade(evaluation).label,
-      basis: typeof o.basis === "string" ? o.basis.trim() : "",
-      grounded: isGrounded(hazard, examples),
+      basis:
+        typeof o.basis === "string" && o.basis.trim()
+          ? `AI生成理由（出典支持未確認）: ${o.basis.trim()}`
+          : "AI生成理由（出典支持未確認）: 根拠説明なし",
+      grounded: false,
+      retrievedExampleIds,
+      sourceUrls,
     });
     if (out.length >= 5) break;
   }
@@ -151,25 +177,22 @@ function extractJsonObject(text: string): string | null {
   return body.slice(start, end + 1);
 }
 
-/** 危険文が過去事例のいずれかと語句を共有するか（ハルシネーション対策）。 */
-function isGrounded(hazard: string, examples: KySuggestionResult[]): boolean {
-  const hay = hazard.toLowerCase();
-  for (const r of examples) {
-    for (const h of [...r.example.hazards, ...r.example.keywords]) {
-      const tokens = h.split(/[、・,（）()\s/]+/).filter((t) => t.length >= 2);
-      if (tokens.some((t) => hay.includes(t.toLowerCase()))) return true;
-    }
-  }
-  return false;
-}
-
 const defaultGenerate: GeminiGenerate = async (system, user) => {
   const key = resolveApiKey();
   if (!key) throw new Error("gemini_not_configured");
-  const genAI = new GoogleGenerativeAI(key);
-  const model = genAI.getGenerativeModel({ model: MODEL, systemInstruction: system });
-  const result = await model.generateContent(user);
-  return result.response.text();
+  const genAI = new GoogleGenAI({
+    apiKey: key,
+    httpOptions: { timeout: GEMINI_REQUEST_TIMEOUT_MS },
+  });
+  const result = await genAI.models.generateContent({
+    model: GEMINI_FLASH_MODEL,
+    contents: user,
+    config: {
+      systemInstruction: system,
+      abortSignal: AbortSignal.timeout(GEMINI_REQUEST_TIMEOUT_MS),
+    },
+  });
+  return result.text ?? "";
 };
 
 /**
@@ -179,7 +202,7 @@ const defaultGenerate: GeminiGenerate = async (system, user) => {
 export async function generateHazardsWithGemini(
   workContent: string,
   examples: KySuggestionResult[],
-  generate: GeminiGenerate = defaultGenerate
+  generate: GeminiGenerate = defaultGenerate,
 ): Promise<KyHazardSuggestion[]> {
   const { system, user } = buildHazardPrompt(workContent, examples);
   const text = await generate(system, user);
@@ -189,8 +212,14 @@ export async function generateHazardsWithGemini(
 }
 
 /** 擬似AI（業種プリセット）による提案。Gemini 不可・失敗時の2段目フォールバック。 */
-export function fallbackHazardSuggestions(workContent: string, industryId?: string): KyHazardSuggestion[] {
-  const { rows } = buildRiskAssessmentTable({ workContext: workContent, industryId });
+export function fallbackHazardSuggestions(
+  workContent: string,
+  industryId?: string,
+): KyHazardSuggestion[] {
+  const { rows } = buildRiskAssessmentTable({
+    workContext: workContent,
+    industryId,
+  });
   return rows.map((row) => {
     const likelihood = clampLevel(row.likelihood);
     const severity = clampLevel(row.severity);
@@ -202,8 +231,11 @@ export function fallbackHazardSuggestions(workContent: string, industryId?: stri
       severity,
       evaluation,
       riskLabel: riskGrade(evaluation).label,
-      basis: "定型提案（業種プリセット）。AIキー未設定または応答不可のためのフォールバック。",
+      basis:
+        "定型提案（業種プリセット）。AIキー未設定または応答不可のためのフォールバック。",
       grounded: false,
+      retrievedExampleIds: [],
+      sourceUrls: [],
     };
   });
 }

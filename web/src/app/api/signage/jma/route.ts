@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getJmaEarthquakesRuntime, getJmaWarningsRuntime, getJmaWeatherRuntime } from "@/lib/jma/fetch-jma-runtime";
+import { assessJmaDataTrust } from "@/lib/jma/jma-data-trust";
 
 // 気象庁 bosai JSON をリクエスト時に直接 fetch（30分キャッシュ）。旧実装は
 // @/data/jma/*.json を静的 import(force-static) していたため、Vercel が
@@ -20,7 +21,20 @@ export async function GET() {
     getJmaEarthquakesRuntime(),
   ]);
 
-  const fetchedAt = [warnings.fetchedAt, weather.fetchedAt, earthquakes.fetchedAt].sort().at(-1) ?? new Date().toISOString();
+  const now = new Date();
+  const assessments = [
+    assessJmaDataTrust({ fetchedAt: warnings.fetchedAt, quality: warnings.quality, actualCoverage: Object.keys(warnings.byIso).length, expectedCoverage: 47, now }),
+    assessJmaDataTrust({ fetchedAt: weather.fetchedAt, quality: weather.quality, actualCoverage: Object.keys(weather.byIso).length, expectedCoverage: 7, now }),
+    assessJmaDataTrust({ fetchedAt: earthquakes.fetchedAt, quality: earthquakes.quality, now }),
+  ];
+  const timestamps = [warnings.fetchedAt, weather.fetchedAt, earthquakes.fetchedAt]
+    .map((value) => Date.parse(value))
+    .filter(Number.isFinite);
+  // 一部が欠落・不正ならnull。全件有効でも最古時刻を採用し、新鮮に見せかけない。
+  const fetchedAt = timestamps.length === 3
+    ? new Date(Math.min(...timestamps)).toISOString()
+    : null;
+  const degraded = assessments.some((assessment) => assessment.status !== "live");
 
   const body = {
     fetchedAt,
@@ -30,13 +44,20 @@ export async function GET() {
     warnings,
     weather,
     earthquakes,
+    trust: {
+      warnings: assessments[0],
+      weather: assessments[1],
+      earthquakes: assessments[2],
+    },
+    degraded,
   };
 
   return NextResponse.json(body, {
     status: 200,
     headers: {
-      "Cache-Control": "public, s-maxage=300, stale-while-revalidate=900",
-      "x-data-source": "jma-runtime",
+      // upstream の10分キャッシュだけを使う。CDN SWRで15分上限を越えさせない。
+      "Cache-Control": "no-store",
+      "x-data-source": degraded ? "jma-runtime-degraded" : "jma-runtime",
     },
   });
 }

@@ -1,50 +1,105 @@
-import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
-
-import AccidentDetailPage from "./page";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import AccidentCorpusQuarantineLayout from "../layout";
+import AccidentDetailQuarantineLayout, {
+  dynamic as accidentDetailDynamicMode,
+} from "./layout";
+import AccidentDetailPage, {
+  dynamic as accidentDetailPageDynamicMode,
+  generateMetadata,
+} from "./page";
 import { getAccidentCasesDataset } from "@/data/mock/accident-cases";
+import { isIndexableAccident } from "@/lib/seo/index-quality";
+import { isPublicRouteAvailable } from "@/lib/public-content-policy";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 
-// 事故詳細は async サーバーコンポーネント。await して得た JSX を描画して検証する。
-// 「類似する事故事例」セクションは similar.length > 0 の場合のみ描画されるため、
-// 同じ type または workCategory を持つ事故が他に存在するものを選ぶ。
+const navigationMocks = vi.hoisted(() => ({
+  notFound: vi.fn(() => {
+    throw new Error("NEXT_NOT_FOUND");
+  }),
+}));
+vi.mock("next/navigation", () => ({
+  notFound: navigationMocks.notFound,
+}));
+
 const all = getAccidentCasesDataset();
-const target = all.find(
-  (c) => all.filter((o) => o.id !== c.id && (o.type === c.type || o.workCategory === c.workCategory)).length > 0
-)!;
-const targetWithSourceUrl = all.find((c) => /^mhlw-\d+$/.test(c.id))!;
 
-describe("/accidents/[id] 柱0 44pxタップ標的", () => {
-  it("「事故DBに戻る →」リンクが 44px タップ標的を満たす", async () => {
-    render(await AccidentDetailPage({ params: Promise.resolve({ id: target.id }) }));
-    const back = screen.getByRole("link", { name: /事故DBに戻る/ });
-    expect(back.className).toContain("min-h-[44px]");
-    expect(back.className).toContain("items-center");
+describe("/accidents/[id] 事故個票の公開境界", () => {
+  beforeEach(() => {
+    navigationMocks.notFound.mockClear();
   });
 
-  it("最上部パンくずの「事故データベース」リンクが 44px タップ標的を満たす", async () => {
-    render(await AccidentDetailPage({ params: Promise.resolve({ id: target.id }) }));
-    const crumb = screen.getByRole("link", { name: /事故データベース/ });
-    expect(crumb.className).toContain("min-h-[44px]");
-    expect(crumb.className).toContain("items-center");
+  it("PF-009: layoutは表示を通し、pageの一次資料境界で未確認IDを隔離する", () => {
+    expect(accidentDetailDynamicMode).toBe("force-dynamic");
+    expect(accidentDetailPageDynamicMode).toBe("force-dynamic");
+    expect(
+      AccidentCorpusQuarantineLayout({ children: <div>事故検索</div> }),
+    ).toEqual(<div>事故検索</div>);
+    expect(
+      AccidentDetailQuarantineLayout({ children: <div>事故詳細</div> }),
+    ).toEqual(<div>事故詳細</div>);
+    expect(navigationMocks.notFound).not.toHaveBeenCalled();
   });
 
-  it("類似する事故事例のタイトルリンクが 44px タップ標的を満たす", async () => {
-    render(await AccidentDetailPage({ params: Promise.resolve({ id: target.id }) }));
-    const heading = screen.getByRole("heading", { name: /類似する事故事例/ });
-    const section = heading.closest("section")!;
-    const titleLinks = section.querySelectorAll('a[href^="/accidents/"]');
-    expect(titleLinks.length).toBeGreaterThan(0);
-    for (const link of Array.from(titleLinks)) {
-      if (link.textContent?.includes("事故DBに戻る")) continue;
-      expect(link.className).toContain("min-h-[44px]");
-      expect(link.className).toContain("items-center");
-    }
+  it("公開可否ポリシーは照合済み100620だけを許可し、任意の詳細IDを拒否する", () => {
+    expect(isPublicRouteAvailable("/accidents")).toBe(true);
+    expect(isPublicRouteAvailable("/accidents/mhlw-100620")).toBe(true);
+    expect(isPublicRouteAvailable("/accidents/mhlw-102021")).toBe(false);
   });
 
-  it("「出典元を開く」外部リンクが 44px タップ標的を満たす", async () => {
-    render(await AccidentDetailPage({ params: Promise.resolve({ id: targetWithSourceUrl.id }) }));
-    const sourceLink = screen.getByRole("link", { name: /出典元を開く/ });
-    expect(sourceLink.className).toContain("min-h-[44px]");
-    expect(sourceLink.className).toContain("items-center");
+  it("事故個票は照合済みを含めてindex対象外を維持する", () => {
+    expect(all.length).toBeGreaterThan(0);
+    expect(all.every((record) => !isIndexableAccident(record))).toBe(true);
+  });
+
+  it("MHLW形式のIDだけでは確認済み個票へ昇格しない", () => {
+    const mhlwLike = all.filter((record) => /^mhlw-\d+$/.test(record.id));
+    expect(mhlwLike.length).toBeGreaterThan(0);
+    expect(mhlwLike.every((record) => !isIndexableAccident(record))).toBe(
+      true,
+    );
+  });
+
+  it.each(["mhlw-102021", "synthetic-heat-2026-001", "unknown-case"])(
+    "未確認・synthetic・未知事故はmetadata生成前にnotFound: %s",
+    async (id) => {
+      await expect(
+        generateMetadata({ params: Promise.resolve({ id }) }),
+      ).rejects.toThrow("NEXT_NOT_FOUND");
+      expect(navigationMocks.notFound).toHaveBeenCalledTimes(1);
+    },
+  );
+
+  it("未確認事故は本文・JSON-LD・KY CTAを構築せずnotFound", async () => {
+    await expect(
+      AccidentDetailPage({
+        params: Promise.resolve({ id: "synthetic-heat-2026-001" }),
+      }),
+    ).rejects.toThrow("NEXT_NOT_FOUND");
+  });
+
+  it("照合済み事故だけcanonical付きmetadataを返す", async () => {
+    const metadata = await generateMetadata({
+      params: Promise.resolve({ id: "mhlw-100620" }),
+    });
+    expect(metadata.alternates).toEqual({
+      canonical: "/accidents/mhlw-100620",
+    });
+    expect(metadata.robots).toMatchObject({ index: false, follow: true });
+  });
+
+  it("出典状態を一度だけ示し、通常時に重複注意カードを並べない", () => {
+    const source = readFileSync(
+      join(process.cwd(), "src", "app", "(main)", "accidents", "[id]", "page.tsx"),
+      "utf8",
+    );
+    expect(source).not.toContain("データ種別の要約");
+    expect(source).not.toContain("このページのデータ種別");
+    expect(source).not.toContain("保護具の商品候補は表示していません");
+    expect(source).not.toContain("公表事故そのものの再現ではありません");
+    expect(source.indexOf("事故概要")).toBeLessThan(
+      source.indexOf("<EvidenceCard"),
+    );
+    expect(source).toContain("<details");
   });
 });

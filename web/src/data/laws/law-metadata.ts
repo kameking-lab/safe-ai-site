@@ -25,40 +25,53 @@ export type LawMetadata = {
 };
 
 export const LAW_METADATA: Record<string, LawMetadata> = {
+  電気工事士法: {
+    fullName: "電気工事士法",
+    promulgation: "昭和35年法律第139号",
+    latestRevision:
+      "令和4年法律第68号（2025-06-01施行・2026-08-03現在施行中）",
+    eGovUrl: "https://laws.e-gov.go.jp/law/335AC0000000139",
+    auditedAt: "2026-08-03",
+  },
   安衛法: {
     fullName: "労働安全衛生法",
     promulgation: "昭和47年法律第57号",
-    latestRevision: "令和6年改正",
+    latestRevision:
+      "令和7年法律第33号（2026-04-01施行・2026-08-03現在施行中）",
     eGovUrl: "https://laws.e-gov.go.jp/law/347AC0000000057",
-    auditedAt: "2026-05-17",
+    auditedAt: "2026-08-03",
   },
   安衛令: {
     fullName: "労働安全衛生法施行令",
     promulgation: "昭和47年政令第318号",
-    latestRevision: "令和7年改正",
+    latestRevision:
+      "令和7年政令第361号（2026-04-01施行・2026-08-03現在施行中）",
     eGovUrl: "https://laws.e-gov.go.jp/law/347CO0000000318",
-    auditedAt: "2026-05-17",
+    auditedAt: "2026-08-03",
   },
   安衛則: {
     fullName: "労働安全衛生規則",
     promulgation: "昭和47年労働省令第32号",
-    latestRevision: "令和7年改正（熱中症対策 第612条の2 新設）",
+    latestRevision:
+      "令和8年厚生労働省令第86号（2026-08-01施行・2026-08-03現在施行中）",
     eGovUrl: "https://laws.e-gov.go.jp/law/347M50002000032",
-    auditedAt: "2026-05-17",
+    auditedAt: "2026-08-03",
   },
   クレーン則: {
     fullName: "クレーン等安全規則",
     promulgation: "昭和47年労働省令第34号",
-    latestRevision: "令和5年改正",
+    latestRevision:
+      "令和8年厚生労働省令第3号（2026-04-01施行・2026-08-03現在施行中）",
     eGovUrl: "https://laws.e-gov.go.jp/law/347M50002000034",
-    auditedAt: "2026-07-03",
+    auditedAt: "2026-08-03",
   },
   有機則: {
     fullName: "有機溶剤中毒予防規則",
     promulgation: "昭和47年労働省令第36号",
-    latestRevision: "令和5年改正",
+    latestRevision:
+      "令和8年厚生労働省令第3号（2026-04-01施行・2026-08-03現在施行中）",
     eGovUrl: "https://laws.e-gov.go.jp/law/347M50002000036",
-    auditedAt: "2026-05-17",
+    auditedAt: "2026-08-03",
   },
   特化則: {
     fullName: "特定化学物質障害予防規則",
@@ -70,9 +83,10 @@ export const LAW_METADATA: Record<string, LawMetadata> = {
   酸欠則: {
     fullName: "酸素欠乏症等防止規則",
     promulgation: "昭和47年労働省令第42号",
-    latestRevision: "令和3年改正",
+    latestRevision:
+      "令和8年厚生労働省令第3号（2026-04-01施行・2026-08-03現在施行中）",
     eGovUrl: "https://laws.e-gov.go.jp/law/347M50002000042",
-    auditedAt: "2026-05-17",
+    auditedAt: "2026-08-03",
   },
   電離則: {
     fullName: "電離放射線障害防止規則",
@@ -392,6 +406,14 @@ export const LAW_METADATA: Record<string, LawMetadata> = {
     eGovUrl: "https://www.mhlw.go.jp/content/001080091.pdf",
     auditedAt: "2026-06-10",
   },
+};
+
+/**
+ * Metadata retained for audit only. The corresponding prose records are
+ * quarantined because their document identity/currentness has not been
+ * independently reverified against an exact primary-source snapshot.
+ */
+export const QUARANTINED_LAW_METADATA: Record<string, LawMetadata> = {
   熱中症通達: {
     fullName: "職場における熱中症予防基本対策要綱",
     promulgation: "令和3年4月20日 基発0420第3号",
@@ -402,16 +424,23 @@ export const LAW_METADATA: Record<string, LawMetadata> = {
   },
   騒音指針: {
     fullName: "騒音障害防止のためのガイドライン",
-    promulgation: "平成4年策定・令和5年4月20日 基発0420第2号で全面改訂",
-    latestRevision: "令和5年改訂（騒音障害防止対策の管理者選任・個人ばく露測定等）",
-    eGovUrl: "https://www.mhlw.go.jp/web/t_doc?dataId=00tc7618&dataType=1&pageNo=1",
+    promulgation:
+      "平成4年策定・令和5年4月20日 基発0420第2号で全面改訂",
+    latestRevision:
+      "令和5年改訂（騒音障害防止対策の管理者選任・個人ばく露測定等）",
+    eGovUrl:
+      "https://www.mhlw.go.jp/web/t_doc?dataId=00tc7618&dataType=1&pageNo=1",
     auditedAt: "2026-06-10",
   },
   振動指針: {
-    fullName: "チェーンソー以外の振動工具の取扱い業務に係る振動障害予防対策指針",
-    promulgation: "平成21年7月10日 基発0710第2号（チェーンソーは同日 基発0710第1号）",
-    latestRevision: "平成21年策定（日振動ばく露量A(8)に基づく対策へ全面改正）",
-    eGovUrl: "https://www.mhlw.go.jp/web/t_doc?dataId=00tb5544&dataType=1&pageNo=1",
+    fullName:
+      "チェーンソー以外の振動工具の取扱い業務に係る振動障害予防対策指針",
+    promulgation:
+      "平成21年7月10日 基発0710第2号（チェーンソーは同日 基発0710第1号）",
+    latestRevision:
+      "平成21年策定（日振動ばく露量A(8)に基づく対策へ全面改正）",
+    eGovUrl:
+      "https://www.mhlw.go.jp/web/t_doc?dataId=00tb5544&dataType=1&pageNo=1",
     auditedAt: "2026-06-10",
   },
 };

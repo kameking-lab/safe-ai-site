@@ -1,108 +1,145 @@
 import Link from "next/link";
-import { HardHat, UserRound, Building2, Scale, ArrowRight } from "lucide-react";
+import {
+  ArrowRight,
+  BriefcaseBusiness,
+  Building2,
+  HardHat,
+  Scale,
+  UserPlus,
+  UserRound,
+} from "lucide-react";
 
-/**
- * トップページのペルソナ選択バンド。
- * 初見の訪問者が「自分の立場」から1タップで実務エントリ (/for/*) に入れるようにする。
- * 各カードは中身の伴う専用ランディングへ誘導する（thin template ではない）。
- */
 type Persona = {
   href: string;
   icon: React.ComponentType<{ className?: string }>;
   label: string;
-  desc: string;
-  tags: string[];
-  /** Tailwind の色トークン (border/bg/text 用) */
-  ring: string;
-  iconBg: string;
+  description: string;
+  accent: string;
+  surface: string;
 };
 
 const PERSONAS: Persona[] = [
   {
-    href: "/for/construction",
+    href: "/risk",
     icon: HardHat,
-    label: "建設業の現場",
-    desc: "職長・元請担当・現場代理人。足場・墜落・KY・統括管理を当日から。",
-    tags: ["KY用紙", "朝礼サイネージ", "統括管理"],
-    ring: "border-emerald-300 hover:border-emerald-500 hover:bg-emerald-50",
-    iconBg: "bg-emerald-600",
+    label: "職長・現場代理人",
+    description: "今日の警報・予報と朝礼要点へ",
+    accent: "bg-emerald-800",
+    surface: "border-emerald-300 bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-950/40",
   },
   {
-    href: "/for/solo",
+    href: "/ky/paper",
     icon: UserRound,
     label: "一人親方",
-    desc: "個人事業主。特別加入・一人KY・必要な資格・熱中症を自分で回す。",
-    tags: ["特別加入", "一人KY", "資格判定"],
-    ring: "border-orange-300 hover:border-orange-500 hover:bg-orange-50",
-    iconBg: "bg-orange-600",
+    description: "一人KYを作り、危険と対策を確認",
+    accent: "bg-orange-700",
+    surface: "border-orange-300 bg-orange-50 dark:border-orange-800 dark:bg-orange-950/40",
   },
   {
-    href: "/for/manager",
+    href: "/safety-diary",
     icon: Building2,
-    label: "企業の安全衛生担当者",
-    desc: "総務・人事。体制づくり・委員会・ストレスチェック・年次計画まで。",
-    tags: ["規模別義務", "年次計画", "委員会"],
-    ring: "border-sky-300 hover:border-sky-500 hover:bg-sky-50",
-    iconBg: "bg-sky-600",
+    label: "安全衛生担当",
+    description: "工程・人員・対策を帳票に整理",
+    accent: "bg-sky-800",
+    surface: "border-sky-300 bg-sky-50 dark:border-sky-800 dark:bg-sky-950/40",
   },
   {
-    href: "/for/consultant",
+    href: "/services/automation",
+    icon: BriefcaseBusiness,
+    label: "経営者",
+    description: "料金と事例を見て改善相談を準備",
+    accent: "bg-violet-800",
+    surface: "border-violet-300 bg-violet-50 dark:border-violet-800 dark:bg-violet-950/40",
+  },
+  {
+    href: "/law-search",
     icon: Scale,
-    label: "専門家・コンサル",
-    desc: "コンサル・社労士・診断士。法令リサーチ・事故分析・顧問先支援を1画面で。",
-    tags: ["法令検索", "通達判例", "顧問先支援"],
-    ring: "border-indigo-300 hover:border-indigo-500 hover:bg-indigo-50",
-    iconBg: "bg-indigo-600",
+    label: "専門家",
+    description: "条文と一次資料を条件から検索",
+    accent: "bg-indigo-800",
+    surface: "border-indigo-300 bg-indigo-50 dark:border-indigo-800 dark:bg-indigo-950/40",
+  },
+  {
+    href: "/education-certification/finder",
+    icon: UserPlus,
+    label: "作業員・新入社員",
+    description: "作業内容から必要な教育・資格を確認",
+    accent: "bg-teal-800",
+    surface: "border-teal-300 bg-teal-50 dark:border-teal-800 dark:bg-teal-950/40",
   },
 ];
 
 export function HomePersonaEntry() {
   return (
-    <section aria-labelledby="home-persona-title" className="mx-auto max-w-7xl px-4 pt-6">
-      <div className="mb-3 flex items-end justify-between gap-4">
-        <div>
-          <p className="text-xs font-bold tracking-widest text-emerald-700">FOR YOU</p>
-          <h2 id="home-persona-title" className="mt-1 text-lg font-bold text-slate-900 sm:text-xl">
-            あなたの立場から始める
+    <section
+      aria-labelledby="home-persona-title"
+      className="mx-auto max-w-7xl px-4 py-12 sm:py-16"
+    >
+      <div className="relative min-h-[300px] overflow-hidden rounded-[2rem] border-2 border-sky-800 bg-slate-950 shadow-2xl sm:min-h-[380px]">
+        {/* eslint-disable-next-line @next/next/no-img-element -- 画面外の既最適化WebPはnative lazy-loadを使う */}
+        <img
+          src="/visual-refresh/safety-operations-panorama-768.webp"
+          srcSet="/visual-refresh/safety-operations-panorama-768.webp 768w, /visual-refresh/safety-operations-panorama-1200.webp 1200w"
+          alt="建設、製造、物流、事務、教育を安全確認の流れでつなぐ現場運用のイラスト"
+          width={1200}
+          height={675}
+          sizes="(max-width: 1280px) 100vw, 1280px"
+          loading="lazy"
+          decoding="async"
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/75 to-transparent" />
+        <div className="relative z-10 flex min-h-[300px] max-w-xl flex-col justify-end p-6 text-white sm:min-h-[380px] sm:p-10">
+          <p className="text-xs font-black tracking-[.12em] text-cyan-300">
+            あなたの立場を選ぶ
+          </p>
+          <h2
+            id="home-persona-title"
+            aria-label="あなたの立場を選ぶ"
+            className="mt-3 text-3xl font-black leading-tight sm:text-5xl"
+          >
+            あなたの立場から、
+            <span className="block text-yellow-300">次の一手へ。</span>
           </h2>
-          <p className="mt-0.5 text-xs leading-snug text-slate-500 sm:text-sm">
-            立場に合わせた実務エントリへ。迷ったら下の主要機能・3分ツアーからどうぞ。
+          <p className="mt-4 max-w-lg text-sm font-semibold leading-7 text-slate-100 sm:text-base">
+            現場、管理、経営、専門実務。役割ごとに最初に必要な画面へ案内します。
           </p>
         </div>
       </div>
-      {/* 柱0/柱3: モバイルは2列。先頭=建設業を左上(読み順1番目)に温存しつつ、
-          一人親方を初手の同一行(右上)へ引き上げ＝「自分の立場」への最短到達を短縮。
-          狭い2列では説明文を畳み、アイコン+役割名+タグ(機能の一目signal)で3秒スキャン可能にする。 */}
-      <ul className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        {PERSONAS.map((p) => {
-          const Icon = p.icon;
-          return (
-            <li key={p.href}>
-              <Link
-                href={p.href}
-                className={`group flex h-full min-h-[44px] flex-col rounded-2xl border-2 bg-white p-3 shadow-sm transition sm:p-4 ${p.ring}`}
-              >
-                <div className="flex items-center gap-2">
-                  <span className={`rounded-full p-2 ${p.iconBg}`}>
-                    <Icon className="h-5 w-5 text-white" />
-                  </span>
-                  <p className="text-sm font-bold leading-tight text-slate-900 sm:text-base">{p.label}</p>
-                </div>
-                <p className="mt-2 hidden flex-1 text-xs leading-relaxed text-slate-600 sm:block sm:text-sm">{p.desc}</p>
-                <div className="mt-2 flex flex-1 flex-wrap content-start gap-1 sm:flex-none">
-                  {p.tags.map((t) => (
-                    <span key={t} className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
-                      {t}
-                    </span>
-                  ))}
-                </div>
-                <span className="mt-3 inline-flex items-center gap-0.5 text-xs font-bold text-slate-700 group-hover:gap-1.5">
-                  実務エントリを開く <ArrowRight className="h-3.5 w-3.5" />
+      <ul className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-3">
+        {PERSONAS.map(({ href, icon: Icon, label, description, accent, surface }, index) => (
+          <li key={label}>
+            <Link
+              href={href}
+              prefetch={false}
+              className={`group relative flex h-full min-h-[132px] flex-col overflow-hidden rounded-2xl border-2 p-3 shadow-sm transition-[transform,box-shadow] hover:-translate-y-1 hover:shadow-lg focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-300 motion-reduce:transform-none motion-reduce:transition-none sm:p-4 ${surface}`}
+            >
+              <span className="absolute right-3 top-2 text-4xl font-black text-slate-900/60 dark:text-white/60" aria-hidden="true">
+                0{index + 1}
+              </span>
+              <div className="flex items-center gap-2">
+                <span
+                  className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white forced-colors:border ${accent}`}
+                >
+                  <Icon className="h-5 w-5" aria-hidden="true" />
                 </span>
-              </Link>
-            </li>
-          );
-        })}
+                <h3 className="text-sm font-black leading-tight text-slate-950 dark:text-white sm:text-base">
+                  {label}
+                </h3>
+              </div>
+              <p className="mt-3 flex-1 text-xs font-medium leading-5 text-slate-700 dark:text-slate-200 sm:text-sm">
+                {description}
+              </p>
+              <span className="mt-2 inline-flex items-center gap-1 text-xs font-black text-emerald-900 dark:text-emerald-200">
+                機能を開く
+                <ArrowRight
+                  className="h-4 w-4 motion-safe:transition-transform motion-safe:group-hover:translate-x-1"
+                  aria-hidden="true"
+                />
+              </span>
+            </Link>
+          </li>
+        ))}
       </ul>
     </section>
   );

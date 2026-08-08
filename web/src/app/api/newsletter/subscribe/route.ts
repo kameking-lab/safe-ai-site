@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { addSubscriber, type Industry } from "@/lib/newsletter";
+import { sharedRateLimitGuard } from "@/lib/security/shared-state";
 
 const VALID_INDUSTRIES: Industry[] = [
   "建設",
@@ -16,6 +17,18 @@ interface SubscribeRequest {
 }
 
 export async function POST(req: Request) {
+  if (process.env.AUTOMATED_NOTIFICATION_DELIVERY_ENABLED !== "true") {
+    return NextResponse.json(
+      { ok: false, error: "delivery_not_operationally_verified" },
+      { status: 503, headers: { "Cache-Control": "no-store" } },
+    );
+  }
+  const limited = await sharedRateLimitGuard(req, {
+    routeKey: "newsletter-subscribe",
+    limit: 5,
+    windowMs: 60 * 60 * 1_000,
+  });
+  if (limited) return limited;
   let body: SubscribeRequest;
   try {
     body = (await req.json()) as SubscribeRequest;
@@ -46,5 +59,5 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: result.error }, { status: 409 });
   }
 
-  return NextResponse.json({ ok: true, email });
+  return NextResponse.json({ ok: true }, { headers: { "Cache-Control": "no-store" } });
 }

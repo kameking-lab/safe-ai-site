@@ -1,95 +1,25 @@
-import { NextRequest, NextResponse } from "next/server";
-import { cdnCacheHeaders } from "@/lib/api-cache";
+import { NextResponse } from "next/server";
+import { noStoreHeaders } from "@/lib/api-cache";
 
-// F-005: 同一問題(questionText+choices+correctAnswer)は同一AI解説に収束。
-const SUCCESS_CACHE = cdnCacheHeaders("INDUSTRY");
-
-interface QuizExplainRequest {
-  questionText: string;
-  choices: { label: string; text: string }[];
-  correctAnswer: string;
-  selectedAnswer: string | null;
-  relatedLaw?: string;
-  fallbackExplanation?: string;
-}
-
-export async function POST(req: NextRequest) {
-  const body = (await req.json()) as QuizExplainRequest;
-  const { questionText, choices, correctAnswer, relatedLaw, fallbackExplanation } = body;
-
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    return NextResponse.json(
-      {
-        explanation: fallbackExplanation ?? "AI解説は現在ご利用いただけません。",
-        source: "fallback",
+/**
+ * 旧経路は呼び出し元が正答と法令根拠を任意に指定でき、approved corpus として
+ * 検証できなかった。サーバー側の問題IDから正答・根拠を解決する方式へ移行するまで廃止する。
+ */
+export async function POST() {
+  return NextResponse.json(
+    {
+      error: "この解説生成経路は廃止されました。",
+      code: "ROUTE_RETIRED",
+      explanation: null,
+      source: "withheld",
+      aiUsed: false,
+    },
+    {
+      status: 410,
+      headers: {
+        ...noStoreHeaders(),
+        "X-AI-Used": "false",
       },
-      { headers: SUCCESS_CACHE }
-    );
-  }
-
-  const choicesText = choices
-    .map((c) => `${c.label}. ${c.text}`)
-    .join("\n");
-
-  const prompt = `以下は労働安全コンサルタント試験の問題です。
-
-【問題】
-${questionText}
-
-【選択肢】
-${choicesText}
-
-【正答】${correctAnswer}
-${relatedLaw ? `【関連法令】${relatedLaw}` : ""}
-
-以下の点を含めて、わかりやすく解説してください（200〜300字程度）：
-1. なぜ正答が正しいのか
-2. 誤りやすい選択肢の解説
-3. 試験で覚えるべきポイント`;
-
-  try {
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 0.3, maxOutputTokens: 512 },
-        }),
-      }
-    );
-
-    if (!res.ok) {
-      return NextResponse.json(
-        {
-          explanation: fallbackExplanation ?? "AI解説は現在ご利用いただけません。",
-          source: "fallback",
-        },
-        { headers: SUCCESS_CACHE }
-      );
-    }
-
-    const data = (await res.json()) as {
-      candidates?: { content?: { parts?: { text?: string }[] } }[];
-    };
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
-
-    return NextResponse.json(
-      {
-        explanation: text || fallbackExplanation || "AI解説は現在ご利用いただけません。",
-        source: text ? "ai" : "fallback",
-      },
-      { headers: SUCCESS_CACHE }
-    );
-  } catch {
-    return NextResponse.json(
-      {
-        explanation: fallbackExplanation ?? "AI解説は現在ご利用いただけません。",
-        source: "fallback",
-      },
-      { headers: SUCCESS_CACHE }
-    );
-  }
+    },
+  );
 }

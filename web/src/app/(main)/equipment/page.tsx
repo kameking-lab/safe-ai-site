@@ -1,9 +1,8 @@
 import { redirect } from "next/navigation";
 
 // CR2-H3a: /equipment はインデックスページを持たず 404 だった（横断検索は
-// /equipment/[id] の個別詳細へのみ深リンクする。/equipment 単体への導線は本来
-// 存在しないが、手打ちナビゲーション等での到達に備えて保護具AIファインダーへ
-// 恒久リダイレクトする）。
+// 個別商品カタログは隔離中。手打ちナビゲーションは、商品適合を断定しない
+// 安全用品カテゴリへ送る。
 export default function EquipmentIndexPage(): never {
-  redirect("/equipment-finder");
+  redirect("/goods");
 }

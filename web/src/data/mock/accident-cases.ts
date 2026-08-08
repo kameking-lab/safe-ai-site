@@ -6,6 +6,7 @@ import { realAccidentCasesExtra3 } from "@/data/mock/real-accident-cases-extra3"
 import { realAccidentCasesDiverseIndustries } from "@/data/mock/real-accident-cases-diverse-industries";
 import { realAccidentCases20242026 } from "@/data/mock/real-accident-cases-2024-2026";
 import { realAccidentCases2025Preliminary } from "@/data/mock/real-accident-cases-2025-preliminary";
+import { resolveAccidentProvenance } from "@/lib/accident-source";
 
 /**
  * 実データ（厚労省「職場のあんぜんサイト」労働災害事例）と、編集部 curated 事例を収録。
@@ -53,7 +54,15 @@ export function getAccidentCasesDataset(): AccidentCase[] {
       ...realAccidentCasesDiverseIndustries,
       ...realAccidentCases20242026,
       ...realAccidentCases2025Preliminary,
-    ].map((c) => ({ ...c, provenance: inferProvenance(c) }));
+    ].map((c) => {
+      const declared = { ...c, provenance: inferProvenance(c) };
+      return {
+        ...declared,
+        // ID・URL形式だけで公式個票へ昇格させない。確認済み集合と一致しない
+        // mhlw 宣言は、集計・CSV・関連機能を含めて curated へ降格する。
+        provenance: resolveAccidentProvenance(declared),
+      };
+    });
     merged.sort((a, b) => toSortKey(b.occurredOn) - toSortKey(a.occurredOn));
     cachedAccidents = merged;
   }

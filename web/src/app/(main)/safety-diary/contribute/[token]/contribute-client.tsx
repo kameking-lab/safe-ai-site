@@ -16,7 +16,7 @@ const emptyPayload = (): ContributionPayload => ({
   qualifications: [],
   plannedCount: "",
   predictedDisasters: [],
-  risk: { severity: 1, likelihood: 1, priority: 1 },
+  risk: { severity: 1, likelihood: 1, priority: 1, reviewed: false },
   safetyInstructions: "",
   responsibleName: "",
 });

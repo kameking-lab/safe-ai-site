@@ -1,8 +1,10 @@
-import { RelatedPageCards, type RelatedPage } from "@/components/related-page-cards";
+import {
+  RelatedPageCards,
+  type RelatedPage,
+} from "@/components/related-page-cards";
 import type { IndustrySlug } from "@/lib/industry-slugs";
+import { isPublicRouteAvailable } from "@/lib/public-content-policy";
 // C-1: @/data/laws を import すると法令コーパス全体がバンドルに同梱されるため、
-// 件数は SITE_STATS の静的リテラル（テストで実データと突合）を使う。
-import { SITE_STATS } from "@/data/site-stats";
 import {
   HEALTH_CHECKUP_TO_SLUG,
   SAFETY_PLAN_TO_SLUG,
@@ -30,14 +32,19 @@ export type CrossToolId =
   | "faq"
   | "safety-signs";
 
-function buildPracticeTools(industry?: IndustrySlug, exclude?: CrossToolId): RelatedPage[] {
+function buildPracticeTools(
+  industry?: IndustrySlug,
+  exclude?: CrossToolId,
+): RelatedPage[] {
   const lbl = industry ? INDUSTRY_LABELS[industry] : undefined;
 
   const all: Array<{ id: CrossToolId; page: RelatedPage }> = [
     {
       id: "accidents-reports",
       page: {
-        href: industry ? `/accidents-reports/${industry}` : "/accidents-reports",
+        href: industry
+          ? `/accidents-reports/${industry}`
+          : "/accidents-reports",
         label: "業種別事故レポート",
         description: lbl
           ? `${lbl}の労働災害を自動分析。事故型ランキング・原因・推奨対策を業種特有パターンで確認。`
@@ -50,12 +57,12 @@ function buildPracticeTools(industry?: IndustrySlug, exclude?: CrossToolId): Rel
       id: "ky-examples",
       page: {
         href: "/ky-examples",
-        label: "KY事例DB",
+        label: "KYモデルケース",
         description: lbl
-          ? `${lbl}を含む5業種150件の危険予知実例。リスク・対策を作業別に検索して KY 用紙に活用。`
-          : "5業種×10作業の危険予知実例150件。KY 用紙作成の出発点として活用できます。",
+          ? `${lbl}を含む架空の学習例です。`
+          : "5業種×10作業の架空の学習例です。",
         color: "amber",
-        cta: "KY事例を確認する",
+        cta: "モデルケースを確認",
       },
     },
     {
@@ -64,8 +71,8 @@ function buildPracticeTools(industry?: IndustrySlug, exclude?: CrossToolId): Rel
         href: "/education-certification/finder",
         label: "特別教育・技能講習",
         description: lbl
-          ? `${lbl}で必要な特別教育・技能講習を根拠条文・講習時間付きで自動判定。`
-          : "安衛則第36条の特別教育・技能講習約100種。業種・作業から必要資格を自動判定。",
+          ? `${lbl}に関係する特別教育・技能講習の候補と不足条件を確認し、公式資料へ進みます。`
+          : "特別教育・技能講習・作業主任者・免許を区別し、業種・作業条件から候補を絞り込みます。",
         color: "blue",
         cta: "必要資格を確認",
       },
@@ -85,7 +92,9 @@ function buildPracticeTools(industry?: IndustrySlug, exclude?: CrossToolId): Rel
     {
       id: "plan-generator",
       page: {
-        href: industry ? `/strategy/plan-generator?industry=${industry}` : "/strategy/plan-generator",
+        href: industry
+          ? `/strategy/plan-generator?industry=${industry}`
+          : "/strategy/plan-generator",
         label: "年次安全衛生計画",
         description: lbl
           ? `${lbl}向けテンプレートから基本方針・重点目標・月別スケジュールを含む計画書を自動生成。`
@@ -100,8 +109,8 @@ function buildPracticeTools(industry?: IndustrySlug, exclude?: CrossToolId): Rel
         href: "/chatbot",
         label: "安衛法AIチャットボット",
         description: lbl
-          ? `${lbl}の計画書・事故事例に関する条文確認をAIに質問。${SITE_STATS.lawSourceCount}法令等を根拠条文付きで即答。`
-          : `労働安全衛生法・安衛則・特化則など${SITE_STATS.lawSourceCount}法令等を根拠条文付きでAIが回答。出典必須・無料。`,
+          ? `${lbl}に関する法令本文を検索します。`
+          : "法令本文から関連条文を検索します。",
         color: "blue",
         cta: "AIに質問する",
       },
@@ -178,10 +187,18 @@ function buildPracticeTools(industry?: IndustrySlug, exclude?: CrossToolId): Rel
     },
   ];
 
-  return all.filter(({ id }) => id !== exclude).map(({ page }) => page);
+  return all
+    .filter(
+      ({ id, page }) =>
+        id !== exclude && isPublicRouteAvailable(page.href),
+    )
+    .map(({ page }) => page);
 }
 
-function buildGuideTools(industry?: IndustrySlug, exclude?: CrossToolId): RelatedPage[] {
+function buildGuideTools(
+  industry?: IndustrySlug,
+  exclude?: CrossToolId,
+): RelatedPage[] {
   const lbl = industry ? INDUSTRY_LABELS[industry] : undefined;
 
   const all: Array<{ id: CrossToolId; page: RelatedPage }> = [
@@ -233,7 +250,11 @@ interface CrossToolLinksProps {
   heading?: string;
 }
 
-export function CrossToolLinks({ industry, exclude, heading }: CrossToolLinksProps) {
+export function CrossToolLinks({
+  industry,
+  exclude,
+  heading,
+}: CrossToolLinksProps) {
   const practicePages = buildPracticeTools(industry, exclude);
   const guidePages = buildGuideTools(industry, exclude);
   return (
@@ -243,10 +264,7 @@ export function CrossToolLinks({ industry, exclude, heading }: CrossToolLinksPro
         pages={practicePages}
       />
       {guidePages.length > 0 && (
-        <RelatedPageCards
-          heading="対象者別ガイド"
-          pages={guidePages}
-        />
+        <RelatedPageCards heading="対象者別ガイド" pages={guidePages} />
       )}
     </>
   );

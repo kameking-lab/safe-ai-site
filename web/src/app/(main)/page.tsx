@@ -1,62 +1,121 @@
 import type { Metadata } from "next";
-import { HomeQuickAccess } from "@/components/home-quick-access";
-import { NewHomeHero } from "@/components/new-home-hero";
-import { FlagshipGrid } from "@/components/flagship-grid";
-import { HomeThreePillars } from "@/components/home-three-pillars";
-// C-1: 3本柱のデータ選定は server で行い、小さな結果だけを client へ渡す
-// （事故/法改正/警報データのバンドル同梱と "/" プリフェッチ汚染の排除）
-import { getHomeThreePillarsData } from "@/lib/home-three-pillars-data";
-import { HomePersonaEntry } from "@/components/home-persona-entry";
-import { SectionWave } from "@/components/section-wave";
+import { cookies, headers } from "next/headers";
+import { HomeAutomationService } from "@/components/home/home-automation-service";
+import { HomeAutomationSamples } from "@/components/home/home-automation-samples";
+import { HomeCoreFeatures } from "@/components/home/home-core-features";
+import { HomeLearningOverview } from "@/components/home/home-learning-overview";
+import { HomeSafetyUpdates } from "@/components/home/home-safety-updates";
 import { PageJsonLd } from "@/components/page-json-ld";
+import {
+  JsonLd,
+  organizationSchema,
+  webSiteSchema,
+} from "@/components/json-ld";
 import { ogImageUrl } from "@/lib/og-url";
 import { withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
+import {
+  HomeDirectChatSection,
+  HomeDirectChemicalSection,
+  HomeHeatSection,
+} from "@/components/home-safety-cockpit/home-safety-cockpit";
+import { getAutomationConsultAvailability } from "@/lib/automation-consult/availability";
+import {
+  HOME_COARSE_AREA_COOKIE,
+  resolveVercelCoarseArea,
+} from "@/lib/area/coarse-location";
+import { officialAreaCandidateById } from "@/lib/area/official-area-resolver";
+import { loadHomeHeatInitialData } from "@/lib/home/home-heat-server";
+import { loadHomeLatestAccidentNews } from "@/lib/home/home-accident-server";
 
-const _title = "安全AIポータル｜現場の安全を、AIで変える。";
+// 今日のKYTと夏季特集をJST日付境界で切り替える。
+export const dynamic = "force-dynamic";
+
+const _title = "安全AIポータル｜根拠から、現場の行動へ";
 const _desc =
-  "労働安全衛生のAI・DX活用研究プロジェクト。安衛法AIチャット・法令検索・KY活動・労働災害防止・事故事例DB・年次安全衛生計画など、建設・製造・医療福祉向け現場安全管理機能を集約。無料。";
+  "今日の現場リスク、安衛法AI、化学物質RA、労災事故、法改正、教育・資格、ビジュアルKYTを、出典と更新状態を確認しながら使える労働安全ポータルです。";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/" },
   title: { absolute: _title },
   description: _desc,
+  keywords: [
+    "安全AIポータル",
+    "安全AI",
+    "労働安全AI",
+    "安全管理AI",
+    "安全衛生AI",
+  ],
   openGraph: withSiteOpenGraph("/", {
     title: { absolute: _title },
-    description:
-      "労働安全衛生のAI・DX活用研究プロジェクト。安衛法AIチャット・法令検索・KY活動・事故事例DBなど建設・製造・医療福祉向け現場安全管理機能を集約。無料。",
-    images: [{ url: ogImageUrl("現場の安全を、AIで変える。"), width: 1200, height: 630 }],
+    description: _desc,
+    images: [{ url: ogImageUrl("根拠から、現場の行動へ"), width: 1200, height: 630 }],
   }),
   twitter: withSiteTwitter({
-    images: [ogImageUrl("現場の安全を、AIで変える。")],
+    images: [ogImageUrl("根拠から、現場の行動へ")],
   }),
 };
 
-export default function HomePage() {
-  const threePillars = getHomeThreePillarsData();
+export default async function HomePage() {
+  const automationConsultAvailability = getAutomationConsultAvailability();
+  const [requestHeaders, cookieStore] = await Promise.all([
+    headers(),
+    cookies(),
+  ]);
+  const previousArea = officialAreaCandidateById(
+    cookieStore.get(HOME_COARSE_AREA_COOKIE)?.value ?? "",
+  );
+  const ipCoarseArea = resolveVercelCoarseArea({
+    country: requestHeaders.get("x-vercel-ip-country"),
+    countryRegion: requestHeaders.get("x-vercel-ip-country-region"),
+  });
+  const coarseArea = previousArea ?? ipCoarseArea;
+  const [initialHeat, latestAccidentNews] = await Promise.all([
+    loadHomeHeatInitialData(coarseArea?.id ?? null),
+    loadHomeLatestAccidentNews(),
+  ]);
   return (
-    <main>
-      <PageJsonLd name={_title} description={_desc} path="/" />
-      {/* exp-r8: トップ最上部に主要機能への直接導線（0スクロール・1タップ）。
-          社長の不満「すぐ機能に行かない」の是正。Hero(h1/キャッチ/統計＝SEO)は直下に温存。 */}
-      <HomeQuickAccess />
-      <NewHomeHero />
-
-      {/* exp-01 (autonomous-loop 2026-05-30): 単独の建設業バナーを 4 ペルソナ
-          選択バンドへ拡張。初見の訪問者が「自分の立場」(建設現場/一人親方/
-          企業の安全衛生担当者/専門家) から 1 タップで実務エントリに入れる。
-          建設業は引き続き先頭カードとして最も目立つ位置を確保。 */}
-      <div className="bg-gradient-to-b from-white to-emerald-50/50 pb-8 [content-visibility:auto] [contain-intrinsic-size:auto_420px] dark:from-slate-950 dark:to-emerald-950/20">
-        <HomePersonaEntry />
-      </div>
-      <SectionWave tone="white" flip className="bg-emerald-50/50 dark:bg-emerald-950/20" />
-
-      <div className="mx-auto max-w-7xl px-4 pt-6 [content-visibility:auto] [contain-intrinsic-size:auto_600px]">
-        <HomeThreePillars {...threePillars} />
-      </div>
-      <SectionWave tone="emerald" className="mt-8" />
-      <div className="bg-emerald-50/80 px-4 py-8 [content-visibility:auto] [contain-intrinsic-size:auto_900px] dark:bg-emerald-950/30 sm:py-10">
-        <FlagshipGrid />
-      </div>
-    </main>
+    <div>
+      <JsonLd schema={[organizationSchema(), webSiteSchema()]} />
+      <PageJsonLd
+        name={_title}
+        description={_desc}
+        path="/"
+        hideVisibleBreadcrumb
+      />
+      <noscript>
+        <nav
+          aria-label="JavaScriptなしで利用できる機能"
+          className="border-b border-amber-300 bg-amber-50 px-4 py-3 text-amber-950"
+        >
+          <p className="mx-auto max-w-7xl text-sm font-bold">
+            JavaScriptなしでも実情報を読めます。入力や地域変更は各ページの通常リンクから利用してください。
+          </p>
+          <ul className="mx-auto mt-2 flex max-w-7xl flex-wrap gap-x-4 gap-y-2 text-sm font-black underline underline-offset-4">
+            <li>
+              <a href="/risk">WBGT・現場リスク</a>
+            </li>
+            <li>
+              <a href="/heat-illness-prevention/slides">熱中症スライド</a>
+            </li>
+          </ul>
+        </nav>
+      </noscript>
+      <HomeHeatSection
+        initialAreaId={coarseArea?.id ?? null}
+        initialAreaLabel={coarseArea?.label ?? null}
+        initialLocationSource={
+          previousArea ? "previous" : ipCoarseArea ? "ip-coarse" : "national"
+        }
+        initialWbgt={initialHeat.wbgt}
+        nationalSummary={initialHeat.national}
+      />
+      <HomeDirectChatSection />
+      <HomeSafetyUpdates latestNews={latestAccidentNews} />
+      <HomeDirectChemicalSection />
+      <HomeLearningOverview />
+      <HomeCoreFeatures />
+      <HomeAutomationSamples />
+      <HomeAutomationService availability={automationConsultAvailability} />
+    </div>
   );
 }

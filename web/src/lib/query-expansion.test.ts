@@ -27,7 +27,8 @@ describe("expandQuery", () => {
   it("複数のルールが同時に適用される", () => {
     const expanded = expandQuery("ヘルメットと足場の関係");
     expect(expanded).toContain("保護帽");
-    expect(expanded).toContain("特別教育");
+    expect(expanded).toContain("作業床");
+    expect(expanded).not.toContain("特別教育");
   });
 });
 
@@ -83,6 +84,6 @@ describe("expandQuery — 荷役運搬機械の現場俗称", () => {
     const allText = articles
       .map((a) => `${a.articleTitle} ${a.text} ${a.keywords.join(" ")}`)
       .join("\n");
-    expect(allText).toMatch(/フォークリフト|車両系荷役運搬機械/);
+    expect(allText).toMatch(/フ[ォオ]ークリフト|車両系荷役運搬機械/);
   });
 });

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 
 import { ResourcesClient } from "./resources-client";
 import type { MhlwNotice } from "@/data/mhlw-notices";
@@ -81,5 +81,31 @@ describe("/resources 厚労省一次資料DB 柱0 44pxタップ標的", () => {
     expect(pdf.className).toContain("min-h-[44px]");
     const list = screen.getByRole("link", { name: /^一覧$/ });
     expect(list.className).toContain("min-h-[44px]");
+  });
+
+  it("検索・カテゴリ・拘束力・年度のラベルを入力へ関連付ける", () => {
+    render(<ResourcesClient notices={notices} leaflets={leaflets} />);
+    expect(screen.getByRole("searchbox", { name: "キーワード検索" })).toBeTruthy();
+    expect(screen.getByRole("combobox", { name: "カテゴリ" })).toBeTruthy();
+    expect(screen.getByRole("combobox", { name: "法的拘束力" })).toBeTruthy();
+    expect(screen.getByRole("combobox", { name: "年度" })).toBeTruthy();
+  });
+
+  it("タブとtabpanelを関連付け、矢印キーでも切り替えられる", () => {
+    render(<ResourcesClient notices={notices} leaflets={leaflets} />);
+    const noticeTab = screen.getByRole("tab", { name: /通達/ });
+    const alertTab = screen.getByRole("tab", { name: /告示/ });
+    const panel = screen.getByRole("tabpanel");
+
+    expect(noticeTab.getAttribute("aria-controls")).toBe(panel.id);
+    expect(panel.getAttribute("aria-labelledby")).toBe(noticeTab.id);
+    fireEvent.keyDown(noticeTab, { key: "ArrowRight" });
+    expect(alertTab.getAttribute("aria-selected")).toBe("true");
+    expect(screen.getByRole("tabpanel").getAttribute("aria-labelledby")).toBe(
+      alertTab.id,
+    );
+    expect(
+      screen.getByRole("heading", { level: 2, name: "告示一覧" }),
+    ).toBeTruthy();
   });
 });

@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-07T21:34:35.557Z",
+  "updatedAt": "2026-07-12T21:43:42.907Z",
   "entries": [
     {
       "id": "b02353d74cdda5c4",
@@ -22,34 +22,6 @@
         "model": "gemini-2.5-flash",
         "rejectionReasons": [
           "relevance 65 < 70 (not labor-safety related for type=administrative_notice)"
-        ]
-      },
-      "approved": false,
-      "provenance": "news_auto"
-    },
-    {
-      "id": "450e7e427d15a0ed",
-      "headline": "プロ野球2軍公式戦がノーゲームに 複数選手が熱中症の症状訴え",
-      "aiSummary": "プロ野球2軍戦で複数選手が熱中症を発症し、試合が中止された。",
-      "source": {
-        "name": "NHK NEWS WEB（社会）",
-        "url": "http://www3.nhk.or.jp/news/html/20260722/k10015182781000.html",
-        "publisher": "日本放送協会",
-        "publishedAt": "Wed, 22 Jul 2026 17:36:05 +0900",
-        "fetchedAt": "2026-07-27T22:01:49.231Z"
-      },
-      "estimatedAccidentType": "熱中症",
-      "estimatedWorkCategory": "その他の事業",
-      "newsType": "accident_report",
-      "score": {
-        "relevance": 90,
-        "copyrightRisk": 20,
-        "misinformationRisk": 10,
-        "duplication": 70,
-        "judgedAt": "2026-07-27T22:02:16.965Z",
-        "model": "gemini-2.5-flash",
-        "rejectionReasons": [
-          "duplication 70 > 50 (already covered in accident DB)"
         ]
       },
       "approved": false,
@@ -140,89 +112,6 @@
       "provenance": "news_auto"
     },
     {
-      "id": "53511843b61d02f6",
-      "headline": "熊本地震 熱中症対策やガソリン供給など重点的に取り組む 政府",
-      "aiSummary": "政府は熊本地震の復旧支援として、熱中症対策や燃料供給を重点的に実施する方針を示した。",
-      "source": {
-        "name": "NHK NEWS WEB（社会）",
-        "url": "http://www3.nhk.or.jp/news/html/20260730/k10015190321000.html",
-        "publisher": "日本放送協会",
-        "publishedAt": "Thu, 30 Jul 2026 05:13:41 +0900",
-        "fetchedAt": "2026-07-29T21:56:12.737Z"
-      },
-      "estimatedAccidentType": "熱中症",
-      "newsType": "general_news",
-      "score": {
-        "relevance": 50,
-        "copyrightRisk": 10,
-        "misinformationRisk": 5,
-        "duplication": 10,
-        "judgedAt": "2026-07-29T21:56:41.884Z",
-        "model": "gemini-2.5-flash",
-        "rejectionReasons": [
-          "relevance 50 < 70 (not labor-safety related for type=general_news)"
-        ]
-      },
-      "approved": false,
-      "provenance": "news_auto"
-    },
-    {
-      "id": "ef7a59a063b7cfa1",
-      "headline": "和歌山 草刈り中の男性2人がため池に転落 病院搬送も死亡",
-      "aiSummary": "和歌山で草刈り作業中の男性2名がため池に転落し死亡。",
-      "source": {
-        "name": "NHK NEWS WEB（社会）",
-        "url": "http://www3.nhk.or.jp/news/html/20260723/k10015183481000.html",
-        "publisher": "日本放送協会",
-        "publishedAt": "Thu, 23 Jul 2026 19:55:11 +0900",
-        "fetchedAt": "2026-07-28T21:59:17.073Z"
-      },
-      "estimatedAccidentType": "溺水",
-      "estimatedWorkCategory": "その他の事業",
-      "newsType": "accident_report",
-      "score": {
-        "relevance": 90,
-        "copyrightRisk": 15,
-        "misinformationRisk": 5,
-        "duplication": 70,
-        "judgedAt": "2026-07-28T22:00:22.809Z",
-        "model": "gemini-2.5-flash",
-        "rejectionReasons": [
-          "duplication 70 > 50 (already covered in accident DB)"
-        ]
-      },
-      "approved": false,
-      "provenance": "news_auto"
-    },
-    {
-      "id": "67474a75d9ceaf52",
-      "headline": "川崎クレーン事故 遺体は行方不明の作業員と確認 死者4人に",
-      "aiSummary": "川崎のクレーン事故で、行方不明の作業員が死亡確認され、死者計4人に。",
-      "source": {
-        "name": "NHK NEWS WEB（社会）",
-        "url": "http://www3.nhk.or.jp/news/html/20260723/k10015184251000.html",
-        "publisher": "日本放送協会",
-        "publishedAt": "Thu, 23 Jul 2026 19:41:55 +0900",
-        "fetchedAt": "2026-07-28T21:59:17.073Z"
-      },
-      "estimatedAccidentType": "崩壊・倒壊",
-      "estimatedWorkCategory": "建設業",
-      "newsType": "accident_report",
-      "score": {
-        "relevance": 90,
-        "copyrightRisk": 20,
-        "misinformationRisk": 10,
-        "duplication": 65,
-        "judgedAt": "2026-07-28T22:00:31.981Z",
-        "model": "gemini-2.5-flash",
-        "rejectionReasons": [
-          "duplication 65 > 50 (already covered in accident DB)"
-        ]
-      },
-      "approved": false,
-      "provenance": "news_auto"
-    },
-    {
       "id": "fc2fa1d9d83278e5",
       "headline": "タンクローリー転落 81歳男性が海に飛び込み運転手救出 和歌山",
       "aiSummary": "和歌山でタンクローリーが転落し、運転手が海に落ちたが、一般男性により救助された。",
@@ -301,32 +190,6 @@
         "model": "gemini-2.5-flash",
         "rejectionReasons": [
           "duplication 70 > 50 (already covered in accident DB)"
-        ]
-      },
-      "approved": false,
-      "provenance": "news_auto"
-    },
-    {
-      "id": "4965ced4edccbded",
-      "headline": "熱中症対策閣僚会議 避難所の良好な環境整備を指示 高市首相",
-      "aiSummary": "政府の熱中症対策会議で、首相が避難所の環境改善を指示。",
-      "source": {
-        "name": "NHK NEWS WEB（社会）",
-        "url": "http://www3.nhk.or.jp/news/html/20260731/k10015192301000.html",
-        "publisher": "日本放送協会",
-        "publishedAt": "Fri, 31 Jul 2026 18:52:01 +0900",
-        "fetchedAt": "2026-08-03T22:04:10.505Z"
-      },
-      "newsType": "administrative_notice",
-      "score": {
-        "relevance": 60,
-        "copyrightRisk": 10,
-        "misinformationRisk": 5,
-        "duplication": 10,
-        "judgedAt": "2026-08-03T22:04:31.487Z",
-        "model": "gemini-2.5-flash",
-        "rejectionReasons": [
-          "relevance 60 < 70 (not labor-safety related for type=administrative_notice)"
         ]
       },
       "approved": false,

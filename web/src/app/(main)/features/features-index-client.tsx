@@ -1,202 +1,219 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { useMemo, useState } from "react";
 import {
-  FEATURES,
-  FEATURE_CATEGORIES,
-  categoryColorClasses,
-  type FeatureCategoryId,
-} from "@/data/features-catalog";
-import { useLanguage } from "@/contexts/language-context";
+  ArrowRight,
+  FlaskConical,
+  LayoutGrid,
+  Search,
+  ShieldCheck,
+  Wrench,
+} from "lucide-react";
+import {
+  FEATURE_PORTFOLIO,
+  FEATURE_SEARCH_GROUP_LABELS,
+  FEATURE_STATUS_LABELS,
+  FEATURE_TIER_LABELS,
+  type FeatureTier,
+} from "@/config/feature-portfolio";
 import { Mascot } from "@/components/mascot";
-import { HardHat, Printer, Scale, Timer, type LucideIcon } from "lucide-react";
 
-const QUICK_LINKS_JA: { href: string; label: string; icon: LucideIcon }[] = [
-  { href: "/features/quick-tour", label: "5分ツアー", icon: Timer },
-  { href: "/features/use-cases", label: "業種別の使い方", icon: HardHat },
-  { href: "/features/comparison", label: "従来比較", icon: Scale },
-  { href: "/features/print", label: "印刷用一覧", icon: Printer },
-];
+type VisibleTier = 1 | 2 | 3;
+type TierFilter = "all" | VisibleTier;
 
-const QUICK_LINKS_EN: { href: string; label: string; icon: LucideIcon }[] = [
-  { href: "/features/quick-tour", label: "5-min tour", icon: Timer },
-  { href: "/features/use-cases", label: "Use cases by industry", icon: HardHat },
-  { href: "/features/comparison", label: "Comparison", icon: Scale },
-  { href: "/features/print", label: "Printable list", icon: Printer },
-];
+const TIER_SUMMARY: Record<
+  VisibleTier,
+  { title: string; description: string; icon: typeof ShieldCheck }
+> = {
+  1: {
+    title: "主力機能",
+    description: "情報収集・公式データ・教育を中心に、日常利用する入口です。",
+    icon: ShieldCheck,
+  },
+  2: {
+    title: "実務支援",
+    description: "主力機能から使う、帳票・印刷・検索などの補助ツールです。",
+    icon: Wrench,
+  },
+  3: {
+    title: "自動化サンプル",
+    description: "本番サービスと区別した、業務改善の試作・モデルケースです。",
+    icon: FlaskConical,
+  },
+};
+
+const VISIBLE_FEATURES = FEATURE_PORTFOLIO.filter(
+  (feature) => feature.tier !== 4 && feature.searchable,
+);
 
 export function FeaturesIndexClient() {
-  const [activeCategory, setActiveCategory] = useState<FeatureCategoryId | "all">("all");
-  const { language } = useLanguage();
-  const isEn = language === "en";
-  const QUICK_LINKS = isEn ? QUICK_LINKS_EN : QUICK_LINKS_JA;
-
-  const filteredFeatures = useMemo(() => {
-    if (activeCategory === "all") return FEATURES;
-    return FEATURES.filter((f) => f.category === activeCategory);
-  }, [activeCategory]);
+  const [activeTier, setActiveTier] = useState<TierFilter>("all");
+  const filtered = useMemo(
+    () =>
+      activeTier === "all"
+        ? VISIBLE_FEATURES
+        : VISIBLE_FEATURES.filter((feature) => feature.tier === activeTier),
+    [activeTier],
+  );
 
   return (
-    <div className="px-4 py-6 sm:py-10">
-      {/* Hero */}
-      <section className="mx-auto max-w-5xl text-center rounded-2xl bg-gradient-to-br from-emerald-50/80 via-white to-transparent p-4 dark:from-emerald-950/25 dark:via-slate-900 sm:p-5">
-        <div className="flex justify-center">
-          <Mascot variant="tablet-dx" size="lg" alt="" />
-        </div>
-        <p className="mt-2 text-xs font-bold tracking-widest text-emerald-700">FEATURES</p>
-        <h1 className="mt-2 text-2xl font-bold leading-tight text-slate-900 sm:text-3xl md:text-4xl">
-          {isEn ? "All Anzen AI Portal features, on one page." : "安全AIポータルの全機能を、1ページで。"}
-        </h1>
-        <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-slate-600 sm:text-base">
-          {isEn
-            ? `${FEATURES.length} features spanning OSH-Act compliance, field tools, AI assistants, and training content. Browse by category or use case alongside screenshots.`
-            : `労働安全衛生法対応・現場運用ツール・AIアシスタント・教育コンテンツを${FEATURES.length}機能で提供しています。スクリーンショットと一緒に、用途やカテゴリから探せます。`}
-        </p>
-        <div className="mt-5 flex flex-wrap justify-center gap-2">
-          {QUICK_LINKS.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-emerald-200 bg-white px-4 py-2 text-sm font-semibold text-emerald-700 shadow-sm transition hover:bg-emerald-50"
-            >
-              <link.icon className="h-4 w-4" aria-hidden="true" />
-              {link.label}
+    <div className="mx-auto max-w-7xl px-4 py-6 sm:py-10">
+      <header className="portal-surface-emphasis grid gap-5 p-5 sm:p-7 lg:grid-cols-[minmax(0,1fr)_13rem] lg:items-center">
+        <div>
+          <p className="portal-section-kicker">FEATURE PORTFOLIO</p>
+          <h1 className="mt-2 text-3xl font-black tracking-tight text-brand-secondary sm:text-4xl dark:text-white">
+            目的と運用状態から機能を選ぶ
+          </h1>
+          <p className="mt-3 max-w-3xl text-sm leading-7 text-portal-muted sm:text-base">
+            主力、実務支援、自動化サンプルを分けて表示します。出典・対象時点・確認状態を見てから利用してください。
+          </p>
+          <div className="mt-5 flex flex-wrap gap-2">
+            <Link href="/search" className="portal-button-primary">
+              <Search className="h-4 w-4" aria-hidden="true" />
+              横断検索する
             </Link>
+            <Link href="/automation-examples" className="portal-button-secondary">
+              Safety Labsを見る
+            </Link>
+          </div>
+        </div>
+        <div className="flex items-end justify-center">
+          <Mascot
+            variant="pointing"
+            size="xl"
+            alt="機能の選び方を案内するチワワ"
+          />
+        </div>
+      </header>
+
+      <section aria-labelledby="tier-guide-heading" className="mt-7">
+        <h2 id="tier-guide-heading" className="sr-only">
+          機能区分
+        </h2>
+        <div className="grid gap-3 md:grid-cols-3">
+          {([1, 2, 3] as const).map((tier) => {
+            const summary = TIER_SUMMARY[tier];
+            const Icon = summary.icon;
+            const count = VISIBLE_FEATURES.filter(
+              (feature) => feature.tier === tier,
+            ).length;
+            return (
+              <button
+                key={tier}
+                type="button"
+                onClick={() => setActiveTier(tier)}
+                aria-pressed={activeTier === tier}
+                className="portal-surface min-h-28 p-4 text-left aria-pressed:border-brand-primary aria-pressed:bg-portal-surface-emphasis"
+              >
+                <span className="flex items-center gap-2">
+                  <Icon className="h-5 w-5 text-brand-primary" aria-hidden="true" />
+                  <strong className="text-brand-secondary dark:text-white">
+                    Tier {tier}：{summary.title}
+                  </strong>
+                  <span className="portal-status ml-auto">{count}件</span>
+                </span>
+                <span className="mt-2 block text-sm leading-6 text-portal-muted">
+                  {summary.description}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="mt-3 flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => setActiveTier("all")}
+            aria-pressed={activeTier === "all"}
+            className="portal-button-secondary min-h-11 items-center aria-pressed:border-brand-primary aria-pressed:bg-portal-surface-emphasis"
+          >
+            <LayoutGrid className="h-4 w-4" aria-hidden="true" />
+            すべて（{VISIBLE_FEATURES.length}）
+          </button>
+          {([1, 2, 3] as const).map((tier) => (
+            <button
+              key={tier}
+              type="button"
+              onClick={() => setActiveTier(tier)}
+              aria-pressed={activeTier === tier}
+              className="portal-button-secondary min-h-11 items-center aria-pressed:border-brand-primary aria-pressed:bg-portal-surface-emphasis"
+            >
+              Tier {tier}
+            </button>
           ))}
         </div>
       </section>
 
-      {/* Category filter */}
-      <section className="mx-auto mt-8 max-w-6xl">
-        <div className="overflow-x-auto">
-          <div className="flex gap-2 pb-2">
-            <button
-              type="button"
-              onClick={() => setActiveCategory("all")}
-              className={`inline-flex min-h-[44px] shrink-0 items-center justify-center rounded-full px-4 py-2 text-sm font-semibold transition ${
-                activeCategory === "all"
-                  ? "bg-slate-900 text-white shadow"
-                  : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
-              }`}
+      <section aria-labelledby="feature-list-heading" className="mt-6">
+        <div className="flex flex-wrap items-end justify-between gap-2">
+          <div>
+            <p className="portal-section-kicker">
+              {activeTier === "all"
+                ? "ALL AVAILABLE"
+                : FEATURE_TIER_LABELS[activeTier as FeatureTier]}
+            </p>
+            <h2
+              id="feature-list-heading"
+              className="mt-1 text-2xl font-black text-brand-secondary dark:text-white"
             >
-              {isEn ? `All (${FEATURES.length})` : `すべて（${FEATURES.length}）`}
-            </button>
-            {FEATURE_CATEGORIES.map((cat) => {
-              const count = FEATURES.filter((f) => f.category === cat.id).length;
-              const colors = categoryColorClasses(cat.accent);
-              const active = activeCategory === cat.id;
-              return (
-                <button
-                  key={cat.id}
-                  type="button"
-                  onClick={() => setActiveCategory(cat.id)}
-                  className={`inline-flex min-h-[44px] shrink-0 items-center justify-center rounded-full px-4 py-2 text-sm font-semibold transition ${
-                    active
-                      ? `bg-gradient-to-r ${colors.gradient} text-white shadow`
-                      : `border ${colors.border} ${colors.bg} ${colors.text} hover:opacity-90`
-                  }`}
-                >
-                  {cat.title}（{count}）
-                </button>
-              );
-            })}
+              利用できる入口
+            </h2>
           </div>
+          <p role="status" className="text-sm font-bold text-portal-muted">
+            {filtered.length}件を表示
+          </p>
         </div>
-      </section>
 
-      {/* Feature grid */}
-      <section className="mx-auto mt-6 max-w-6xl">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {filteredFeatures.map((feature) => {
-            const cat = FEATURE_CATEGORIES.find((c) => c.id === feature.category);
-            const colors = categoryColorClasses(cat?.accent || "emerald");
-            return (
-              <article
-                key={feature.slug}
-                className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-              >
-                <div className="relative aspect-[16/10] w-full overflow-hidden bg-slate-100">
-                  <Image
-                    src={`/screenshots/${feature.slug}-desktop.svg`}
-                    alt={`${feature.title}のスクリーンショット`}
-                    width={640}
-                    height={400}
-                    className="h-full w-full object-cover transition group-hover:scale-[1.02]"
-                    unoptimized
-                  />
-                  <span
-                    className={`absolute left-3 top-3 rounded-full ${colors.bg} ${colors.text} ${colors.border} border px-2.5 py-0.5 text-[11px] font-bold`}
-                  >
-                    {cat?.title}
+        <ul className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {filtered.map((feature) => (
+            <li
+              key={feature.id}
+              data-feature-tier={feature.tier}
+              data-feature-role={feature.role}
+              className="portal-feature-tile flex min-w-0 flex-col"
+            >
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="portal-status">Tier {feature.tier}</span>
+                <span className="portal-status">
+                  {FEATURE_SEARCH_GROUP_LABELS[feature.searchGroup]}
+                </span>
+                {feature.tier === 3 ? (
+                  <span className="portal-status border-semantic-ai text-semantic-ai">
+                    サンプル
                   </span>
-                </div>
-                <div className="flex flex-1 flex-col gap-2 p-4">
-                  <h2 className="text-base font-bold leading-snug text-slate-900">
-                    {feature.title}
-                  </h2>
-                  <p className="line-clamp-2 text-sm leading-relaxed text-slate-600">
-                    {feature.summary}
-                  </p>
-                  {feature.tags && feature.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1">
-                      {feature.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-600"
-                        >
-                          #{tag}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                  <div className="mt-auto flex items-center justify-between gap-2 pt-2">
-                    <Link
-                      href={feature.href}
-                      className={`inline-flex min-h-[44px] flex-1 items-center justify-center rounded-lg bg-gradient-to-r ${colors.gradient} px-3 py-2 text-sm font-semibold text-white shadow-sm transition hover:opacity-90`}
-                    >
-                      {isEn ? "Try it →" : "機能を試す →"}
-                    </Link>
-                    <Link
-                      href={`/features/${feature.category}`}
-                      className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-                    >
-                      {isEn ? "Learn more" : "詳しく見る"}
-                    </Link>
-                  </div>
-                </div>
-              </article>
-            );
-          })}
-        </div>
+                ) : null}
+              </div>
+              <h3 className="mt-3 text-lg font-black text-brand-secondary dark:text-white">
+                {feature.label}
+              </h3>
+              <p className="mt-1 flex-1 text-sm leading-6 text-portal-muted">
+                {feature.userValue}
+              </p>
+              <div className="mt-3 flex items-center justify-between gap-3 text-xs text-portal-muted">
+                <span>{FEATURE_STATUS_LABELS[feature.operationalStatus]}</span>
+                <span>{feature.indexability === "index" ? "公開ページ" : "制限あり"}</span>
+              </div>
+              <Link
+                href={feature.route}
+                className="mt-4 inline-flex min-h-11 items-center gap-2 font-black text-brand-primary underline decoration-2 underline-offset-4"
+              >
+                {feature.tier === 3 ? "サンプルを確認" : "機能を開く"}
+                <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              </Link>
+            </li>
+          ))}
+        </ul>
       </section>
 
-      {/* CTA */}
-      <section className="mx-auto mt-12 max-w-5xl rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-white p-6 text-center sm:p-8">
-        <h2 className="text-xl font-bold text-emerald-900 sm:text-2xl">
-          {isEn ? "Something you'd like to try?" : "試したい機能はありますか？"}
-        </h2>
-        <p className="mt-2 text-sm text-emerald-800">
-          {isEn
-            ? "Feedback, improvement ideas, and feature requests go directly to a safety consultant."
-            : "ご意見・改善提案・追加機能の要望は、安全コンサルタントが直接対応します。"}
+      <details className="portal-surface mt-8 p-4">
+        <summary className="min-h-11 cursor-pointer py-2 font-black text-brand-secondary focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-primary/25 dark:text-white">
+          統合・非表示中の機能について
+        </summary>
+        <p className="mt-2 max-w-3xl text-sm leading-6 text-portal-muted">
+          重複、未完成、再検証中の機能はTier 4として主力導線から外しています。既存URLは被リンクやブックマークを考慮し、統合・noindex・隔離・リダイレクトを個別に選びます。
         </p>
-        <div className="mt-4 flex flex-col items-center justify-center gap-2 sm:flex-row">
-          <Link
-            href="/contact"
-            className="inline-flex min-h-[44px] items-center justify-center gap-1 rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white shadow hover:bg-emerald-700"
-          >
-            {isEn ? "Send feedback →" : "ご意見・改善提案を送る →"}
-          </Link>
-          <Link
-            href="/features/quick-tour"
-            className="inline-flex min-h-[44px] items-center justify-center gap-1 rounded-lg border border-emerald-300 bg-white px-5 py-2.5 text-sm font-bold text-emerald-700 hover:bg-emerald-50"
-          >
-            {isEn ? "Take the 5-min tour" : "5分ツアーを見る"}
-          </Link>
-        </div>
-      </section>
+      </details>
     </div>
   );
 }

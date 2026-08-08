@@ -1,120 +1,69 @@
-/**
- * Phase 6: 打合せ書の各社行AI提案。作業内容 → 予想災害・安全衛生指示事項・リスク(重大性/可能性)。
- * KY Phase5 の Gemini パイプライン（RAG＋本物Gemini＋2段フォールバック）をそのまま流用する。
- */
 import { NextResponse } from "next/server";
-import { suggestKyByIndustryAndWork } from "@/lib/ky-suggestion";
+import { noStoreHeaders } from "@/lib/api-cache";
 import {
-  generateHazardsWithGemini,
-  fallbackHazardSuggestions,
-  isGeminiConfigured,
-  KY_SUGGEST_DISCLAIMER,
-  type KyHazardSuggestion,
-} from "@/lib/ky/gemini-suggest";
-import { withCircuitBreaker } from "@/lib/external/circuit-breaker";
-import { KY_INDUSTRY_IDS, type KyIndustryId } from "@/types/ky-example";
+  aiOutboundBlockedJson,
+  inspectAiOutbound,
+} from "@/lib/server/ai-outbound-safety";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const MEETING_SUGGESTIONS_ENABLED = false;
 
-const RATE_LIMIT_WINDOW_MS = 60 * 1000;
-const RATE_LIMIT_MAX = 10;
-const rateBuckets = new Map<string, number[]>();
-
-function resolveClientIp(request: Request): string {
-  const xff = request.headers.get("x-forwarded-for");
-  if (xff) {
-    const first = xff.split(",")[0]?.trim();
-    if (first) return first;
-  }
-  return request.headers.get("x-real-ip")?.trim() || "unknown";
-}
-
-function isRateLimited(ip: string, now: number): boolean {
-  const windowStart = now - RATE_LIMIT_WINDOW_MS;
-  const recent = (rateBuckets.get(ip) ?? []).filter((ts) => ts > windowStart);
-  if (recent.length >= RATE_LIMIT_MAX) {
-    rateBuckets.set(ip, recent);
-    return true;
-  }
-  recent.push(now);
-  rateBuckets.set(ip, recent);
-  if (rateBuckets.size > 2048) {
-    for (const [key, ts] of rateBuckets) {
-      if (ts.length === 0 || ts[ts.length - 1] < windowStart) rateBuckets.delete(key);
-    }
-  }
-  return false;
-}
-
-function isIndustry(v: unknown): v is KyIndustryId {
-  return typeof v === "string" && (KY_INDUSTRY_IDS as readonly string[]).includes(v);
-}
-
-function aggregate(suggestions: KyHazardSuggestion[], source: "gemini" | "fallback", note?: string) {
-  const disasters = [...new Set(suggestions.map((s) => s.hazard).filter(Boolean))].slice(0, 6);
-  const instructions = suggestions
-    .map((s) => s.reduction?.trim())
-    .filter((x): x is string => !!x)
-    .slice(0, 6)
-    .join("\n");
-  const severity = Math.max(1, ...suggestions.map((s) => s.severity || 1));
-  const likelihood = Math.max(1, ...suggestions.map((s) => s.likelihood || 1));
-  return {
-    source,
-    disasters,
-    instructions,
-    severity,
-    likelihood,
-    grounded: suggestions.some((s) => s.grounded),
-    disclaimer: KY_SUGGEST_DISCLAIMER,
-    ...(note ? { note } : {}),
-  };
-}
-
+/**
+ * 各主張の出典・採否・確認時刻を帳票へ保持できるまでは、生成候補を返さない。
+ * 旧実装の aggregate grounded は一部一致を全候補の根拠ありと誤認させ得たため廃止した。
+ */
 export async function POST(request: Request) {
-  const now = Date.now();
-  if (isRateLimited(resolveClientIp(request), now)) {
+  let body: Record<string, unknown>;
+  try {
+    body = (await request.json()) as Record<string, unknown>;
+  } catch {
     return NextResponse.json(
-      { error: "rate_limited", message: "短時間に多数のリクエストがありました。少し待って再度お試しください。" },
-      { status: 429, headers: { "Retry-After": String(RATE_LIMIT_WINDOW_MS / 1000) } }
+      { error: "invalid_json", message: "入力形式を確認できません。" },
+      { status: 400, headers: noStoreHeaders() },
     );
   }
-
-  let body: { workContent?: unknown; industry?: unknown };
-  try {
-    body = (await request.json()) as typeof body;
-  } catch {
-    return NextResponse.json({ error: "invalid_json" }, { status: 400 });
+  const outboundSafety = inspectAiOutbound({
+    purpose: "meeting-suggestion",
+    texts: [
+      body.workContent ?? "",
+      body.workLocation ?? "",
+      body.machines ?? "",
+      String(body.plannedCount ?? ""),
+      body.weather ?? "",
+      body.changes ?? "",
+    ],
+    consent: true,
+    maxChars: 5_000,
+    contextPolicy: "no-context",
+  });
+  if (!outboundSafety.allowed) {
+    return NextResponse.json(aiOutboundBlockedJson(outboundSafety), {
+      status: outboundSafety.status,
+      headers: {
+        ...noStoreHeaders(),
+        "X-AI-Used": "false",
+        "X-Suggestion-Status": "blocked",
+      },
+    });
   }
-  const workContent = typeof body.workContent === "string" ? body.workContent.trim() : "";
-  if (!workContent) {
-    return NextResponse.json({ error: "workContent が必要です" }, { status: 400 });
-  }
-  const industry = isIndustry(body.industry) ? body.industry : undefined;
-  const examples = suggestKyByIndustryAndWork({ freeText: workContent, industry, limit: 6 });
-
-  if (isGeminiConfigured()) {
-    try {
-      const suggestions = await withCircuitBreaker(
-        "gemini",
-        () => generateHazardsWithGemini(workContent, examples),
-        { failureThreshold: 4, cooldownMs: 60_000 }
-      );
-      return NextResponse.json(aggregate(suggestions, "gemini"));
-    } catch {
-      /* フォールバックへ */
-    }
-  }
-
-  const suggestions = fallbackHazardSuggestions(workContent, industry);
   return NextResponse.json(
-    aggregate(
-      suggestions,
-      "fallback",
-      isGeminiConfigured()
-        ? "AI応答が得られなかったため、定型の提案を表示しています。"
-        : "AI未設定のため、定型の提案を表示しています（設定すると本物のAI提案になります）。"
-    )
+    {
+      error: "suggestion_provenance_unavailable",
+      message:
+        "候補ごとの出典と確認履歴を帳票に保持できないため、自動提案を停止しています。予想災害と指示事項を入力し、一次資料と現場条件で確認してください。",
+      suggestions: [],
+      source: "withheld",
+      aiUsed: false,
+      requiresHumanReview: true,
+    },
+    {
+      status: 422,
+      headers: {
+        ...noStoreHeaders(),
+        "X-AI-Used": "false",
+        "X-Suggestion-Status": "withheld",
+      },
+    },
   );
 }

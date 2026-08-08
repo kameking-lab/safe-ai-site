@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/seo-metadata";
+import { isPreviewSafetyMode } from "@/lib/server/deployment-safety";
 
 // 一般向け非公開パス（UA:* と AI検索系の両方に適用）
 const COMMON_DISALLOW = ["/admin/", "/api/", "/auth/", "/dev/", "/handover", "/lms", "/api-docs", "/dpa"];
@@ -64,6 +65,14 @@ const SOCIAL_LINK_PREVIEW_BOTS = [
 ];
 
 export default function robots(): MetadataRoute.Robots {
+  if (isPreviewSafetyMode()) {
+    return {
+      rules: {
+        userAgent: "*",
+        disallow: "/",
+      },
+    };
+  }
   const trainingRules: MetadataRoute.Robots["rules"] = AI_TRAINING_CRAWLERS.map((ua) => ({
     userAgent: ua,
     disallow: "/",

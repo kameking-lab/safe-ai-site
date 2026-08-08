@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import manifest from "./manifest";
+import { isPublicRouteAvailable } from "@/lib/public-content-policy";
 
 /**
  * PWA マニフェスト回帰テスト。
@@ -51,10 +52,17 @@ describe("manifest.ts（PWA ショートカット実在ガード）", () => {
     expect(new Set(urls).size).toBe(urls.length);
   });
 
-  it("発見性の入口（横断検索 /search・AI質問 /chatbot）をショートカットに含む", () => {
+  it("現場タスクと一次資料確認の入口を含み、隔離ルートをショートカットに出さない", () => {
     const urls = new Set(m.shortcuts!.map((s) => s.url));
-    expect(urls.has("/search")).toBe(true);
-    expect(urls.has("/chatbot")).toBe(true);
+    for (const required of ["/risk", "/ky/paper", "/search", "/law-navi"]) {
+      expect(urls.has(required), `${required} がショートカットにない`).toBe(true);
+    }
+    for (const url of urls) {
+      expect(
+        isPublicRouteAvailable(url),
+        `${url} は公開可否ポリシーで隔離されている`,
+      ).toBe(true);
+    }
   });
 
   it("start_url もアプリ内の実在ルートを指す", () => {

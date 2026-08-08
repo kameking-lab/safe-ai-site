@@ -7,7 +7,12 @@
  * - BYID_KEY: 再編集用に full record を id 別保持
  * Phase 7 でこの上に Supabase 同期（storage-adapter パターン）を載せる。
  */
-import { normalizeMeetingRecord, newMeetingId, type MeetingRecord } from "./schema";
+import {
+  createDefaultMeetingDocumentControl,
+  normalizeMeetingRecord,
+  newMeetingId,
+  type MeetingRecord,
+} from "./schema";
 
 const CURRENT_KEY = "meeting-record";
 const LIST_KEY = "safe-ai:meeting-list:v1";
@@ -182,7 +187,28 @@ export function duplicateForNextDay(rec: MeetingRecord): MeetingRecord {
     meetingDate: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`,
     supervisorComment: "",
     contractors: rec.contractors.map((c) => ({ ...c, actualCount: "", appendNote: "" })),
-    checklist: rec.checklist.map((cat) => ({ ...cat, items: cat.items.map((i) => ({ ...i, status: "na" as const })) })),
+    checklist: rec.checklist.map((cat) => ({
+      ...cat,
+      items: cat.items.map((i) => ({
+        ...i,
+        status: "unreviewed" as const,
+      })),
+    })),
+    coordination: {
+      simultaneousWork: "",
+      deliveries: "",
+      fireWork: "",
+      heightWork: "",
+      electricalWork: "",
+      chemicalWork: "",
+      weather: "",
+      changes: "",
+      newEntrants: "",
+      nightWork: "",
+      roles: "",
+    },
+    // 前日の人手確認・印刷実績を翌日の帳票へ持ち越さない。
+    documentControl: createDefaultMeetingDocumentControl(),
     savedAt: new Date().toISOString(),
   });
 }

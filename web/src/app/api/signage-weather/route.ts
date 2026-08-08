@@ -3,8 +3,14 @@ import type { JapanRegionId, MapAlertLevel } from "@/data/mock/japan-weather-map
 import type { SignageHourlyPoint, SignageWeatherApiResponse } from "@/lib/types/signage-weather";
 import { withCircuitBreaker, CircuitOpenError } from "@/lib/external/circuit-breaker";
 import { fetchWithTimeout } from "@/lib/external/fetch-with-timeout";
+import {
+  hasExpectedTokyoMetadata,
+  parseOpenMeteoTargetTime,
+} from "@/lib/weather/open-meteo-hourly";
 
 type HourlyPayload = {
+  timezone?: string;
+  utc_offset_seconds?: number;
   hourly?: {
     time?: string[];
     temperature_2m?: number[];
@@ -15,6 +21,8 @@ type HourlyPayload = {
 };
 
 type DailyPayload = {
+  timezone?: string;
+  utc_offset_seconds?: number;
   daily?: {
     time?: string[];
     weather_code?: number[];
@@ -90,21 +98,33 @@ function levelFromDailyPayload(payload: DailyPayload): MapAlertLevel {
   return levelFromMetrics(windKmhToMs(maxWind), maxPrecip, maxCode);
 }
 
-function levelFromHourlyToday(payload: HourlyPayload, now: Date): MapAlertLevel {
+function tokyoYmd(date: Date): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Tokyo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(date);
+}
+
+export function levelFromHourlyToday(payload: HourlyPayload, now: Date): MapAlertLevel {
   const hourly = payload.hourly;
   const times = hourly?.time ?? [];
-  if (times.length === 0) return "none";
-
-  const endOfDay = new Date(now);
-  endOfDay.setHours(23, 59, 59, 999);
+  if (times.length === 0 || !hasExpectedTokyoMetadata(payload)) return "none";
+  const today = tokyoYmd(now);
 
   let maxWindMs = 0;
   let sumPrecip = 0;
   let maxCode = 0;
 
   for (let i = 0; i < times.length; i += 1) {
-    const t = new Date(times[i]!);
-    if (t < now || t > endOfDay) continue;
+    const t = parseOpenMeteoTargetTime(times[i]!, payload, {
+      referenceNow: now,
+      maxPastMs: 36 * 60 * 60 * 1_000,
+      maxFutureMs: 80 * 60 * 60 * 1_000,
+    });
+    if (!t) return "none";
+    if (t < now || tokyoYmd(t) !== today) continue;
     const w = hourly?.wind_speed_10m?.[i];
     const p = hourly?.precipitation?.[i];
     const c = hourly?.weather_code?.[i];
@@ -116,23 +136,6 @@ function levelFromHourlyToday(payload: HourlyPayload, now: Date): MapAlertLevel 
     if (typeof c === "number" && c > maxCode) maxCode = c;
   }
 
-  if (maxWindMs === 0 && sumPrecip === 0 && maxCode === 0) {
-    for (let i = 0; i < times.length; i += 1) {
-      const t = new Date(times[i]!);
-      if (t < now) continue;
-      const w = hourly?.wind_speed_10m?.[i];
-      const p = hourly?.precipitation?.[i];
-      const c = hourly?.weather_code?.[i];
-      if (typeof w === "number") {
-        const ms = windKmhToMs(w);
-        if (ms > maxWindMs) maxWindMs = ms;
-      }
-      if (typeof p === "number") sumPrecip += p;
-      if (typeof c === "number" && c > maxCode) maxCode = c;
-      if (i > 24) break;
-    }
-  }
-
   return levelFromMetrics(maxWindMs, sumPrecip, maxCode);
 }
 
@@ -140,15 +143,22 @@ function buildHourlySeries(payload: HourlyPayload, now: Date, maxSlots = 48): Si
   const hourly = payload.hourly;
   const times = hourly?.time ?? [];
   const out: SignageHourlyPoint[] = [];
+  if (!hasExpectedTokyoMetadata(payload)) return out;
   const formatter = new Intl.DateTimeFormat("ja-JP", {
     month: "numeric",
     day: "numeric",
     hour: "numeric",
     hour12: false,
+    timeZone: "Asia/Tokyo",
   });
 
   for (let i = 0; i < times.length && out.length < maxSlots; i += 1) {
-    const t = new Date(times[i]!);
+    const t = parseOpenMeteoTargetTime(times[i]!, payload, {
+      referenceNow: now,
+      maxPastMs: 36 * 60 * 60 * 1_000,
+      maxFutureMs: 80 * 60 * 60 * 1_000,
+    });
+    if (!t) return [];
     if (t < now) continue;
     const temp = hourly?.temperature_2m?.[i];
     const precip = hourly?.precipitation?.[i];
@@ -156,7 +166,7 @@ function buildHourlySeries(payload: HourlyPayload, now: Date, maxSlots = 48): Si
     const wind = hourly?.wind_speed_10m?.[i];
     if (typeof temp !== "number" || typeof wind !== "number" || typeof precip !== "number") continue;
     out.push({
-      time: times[i]!,
+      time: t.toISOString(),
       hourLabel: formatter.format(t),
       tempC: Math.round(temp * 10) / 10,
       precipMm: Math.round(precip * 10) / 10,
@@ -177,7 +187,7 @@ function resolveRegionId(regionName: string | null): JapanRegionId {
   return hit ?? "kanto";
 }
 
-async function fetchHourly(lat: number, lon: number) {
+async function fetchHourly(lat: number, lon: number, referenceNow = new Date()) {
   const u = new URL("https://api.open-meteo.com/v1/forecast");
   u.searchParams.set("latitude", String(lat));
   u.searchParams.set("longitude", String(lon));
@@ -190,10 +200,44 @@ async function fetchHourly(lat: number, lon: number) {
     timeoutMs: 6000,
   });
   if (!res.ok) throw new Error(`open-meteo hourly HTTP ${res.status}`);
-  return (await res.json()) as HourlyPayload;
+  const payload = (await res.json()) as HourlyPayload;
+  const hourly = payload.hourly;
+  const times = hourly?.time;
+  const series = [
+    hourly?.temperature_2m,
+    hourly?.precipitation,
+    hourly?.weather_code,
+    hourly?.wind_speed_10m,
+  ];
+  if (
+    !hasExpectedTokyoMetadata(payload) ||
+    !Array.isArray(times) ||
+    times.length === 0 ||
+    series.some(
+      (values) =>
+        !Array.isArray(values) ||
+        values.length < times.length ||
+        values.slice(0, times.length).some((value) => !Number.isFinite(value)),
+    )
+  ) {
+    throw new Error("open-meteo hourly payload invalid");
+  }
+  if (
+    times.some(
+      (time) =>
+        !parseOpenMeteoTargetTime(time, payload, {
+          referenceNow,
+          maxPastMs: 36 * 60 * 60 * 1_000,
+          maxFutureMs: 80 * 60 * 60 * 1_000,
+        }),
+    )
+  ) {
+    throw new Error("open-meteo hourly time invalid");
+  }
+  return payload;
 }
 
-async function fetchDailyWeek(lat: number, lon: number) {
+async function fetchDailyWeek(lat: number, lon: number, referenceNow = new Date()) {
   const u = new URL("https://api.open-meteo.com/v1/forecast");
   u.searchParams.set("latitude", String(lat));
   u.searchParams.set("longitude", String(lon));
@@ -206,26 +250,51 @@ async function fetchDailyWeek(lat: number, lon: number) {
     timeoutMs: 6000,
   });
   if (!res.ok) throw new Error(`open-meteo daily HTTP ${res.status}`);
-  return (await res.json()) as DailyPayload;
+  const payload = (await res.json()) as DailyPayload;
+  const daily = payload.daily;
+  const times = daily?.time;
+  const series = [daily?.weather_code, daily?.wind_speed_10m_max, daily?.precipitation_sum];
+  if (
+    !hasExpectedTokyoMetadata(payload) ||
+    !Array.isArray(times) ||
+    times.length === 0 ||
+    series.some(
+      (values) =>
+        !Array.isArray(values) ||
+        values.length < times.length ||
+        values.slice(0, times.length).some((value) => !Number.isFinite(value)),
+    )
+  ) {
+    throw new Error("open-meteo daily payload invalid");
+  }
+  if (
+    times.some(
+      (time) =>
+        !parseOpenMeteoTargetTime(time, payload, {
+          allowDateOnly: true,
+          referenceNow,
+          maxPastMs: 36 * 60 * 60 * 1_000,
+          maxFutureMs: 8 * 24 * 60 * 60 * 1_000,
+        }),
+    )
+  ) {
+    throw new Error("open-meteo daily time invalid");
+  }
+  return payload;
 }
 
-function buildDegradedSignageWeather(
+function buildUnavailableSignageWeather(
   selectedId: JapanRegionId,
   mapMode: "today" | "week"
 ): SignageWeatherApiResponse {
-  const mapLevels = REGION_ORDER.reduce(
-    (acc, id) => {
-      acc[id] = "none";
-      return acc;
-    },
-    {} as Record<JapanRegionId, MapAlertLevel>
-  );
   return {
-    mapLevels,
+    mapLevels: {},
     hourly: [],
     mapMode,
     sourceRegionName: REGION_POINTS[selectedId].representativeName,
     fetchedAt: new Date().toISOString(),
+    degraded: true,
+    degradedReason: "weather_source_unavailable",
   };
 }
 
@@ -244,7 +313,9 @@ export async function GET(request: NextRequest) {
 
         if (mapMode === "today") {
           const hourlyPayloads = await Promise.all(
-            REGION_ORDER.map((id) => fetchHourly(REGION_POINTS[id].lat, REGION_POINTS[id].lon))
+            REGION_ORDER.map((id) =>
+              fetchHourly(REGION_POINTS[id].lat, REGION_POINTS[id].lon, now),
+            )
           );
           REGION_ORDER.forEach((id, idx) => {
             mapLevels[id] = levelFromHourlyToday(hourlyPayloads[idx]!, now);
@@ -253,22 +324,29 @@ export async function GET(request: NextRequest) {
           selectedHourlyPayload = hourlyPayloads[selectedIdx] ?? hourlyPayloads[2]!;
         } else {
           const dailyPayloads = await Promise.all(
-            REGION_ORDER.map((id) => fetchDailyWeek(REGION_POINTS[id].lat, REGION_POINTS[id].lon))
+            REGION_ORDER.map((id) =>
+              fetchDailyWeek(REGION_POINTS[id].lat, REGION_POINTS[id].lon, now),
+            )
           );
           REGION_ORDER.forEach((id, idx) => {
             mapLevels[id] = levelFromDailyPayload(dailyPayloads[idx]!);
           });
           const { lat, lon } = REGION_POINTS[selectedId];
-          selectedHourlyPayload = await fetchHourly(lat, lon);
+          selectedHourlyPayload = await fetchHourly(lat, lon, now);
         }
 
         const hourly = buildHourlySeries(selectedHourlyPayload, now, 48);
+        if (hourly.length === 0) throw new Error("open-meteo target time unavailable");
         return {
           mapLevels,
           hourly,
           mapMode,
           sourceRegionName: REGION_POINTS[selectedId].representativeName,
           fetchedAt: new Date().toISOString(),
+          sourceTimezone: "Asia/Tokyo",
+          sourceUtcOffsetSeconds: 32400,
+          forecastFrom: hourly[0]?.time,
+          forecastThrough: hourly.at(-1)?.time,
         } satisfies SignageWeatherApiResponse;
       },
       { failureThreshold: 5, cooldownMs: 120_000 }
@@ -279,15 +357,15 @@ export async function GET(request: NextRequest) {
       headers: { "x-signage-weather": "open-meteo" },
     });
   } catch (err) {
-    const reason = err instanceof CircuitOpenError
-      ? "open-meteo circuit open"
-      : err instanceof Error
-        ? err.message
-        : "unknown";
-    console.warn("[signage-weather] degraded:", reason);
-    return NextResponse.json(buildDegradedSignageWeather(selectedId, mapMode), {
-      status: 200,
-      headers: { "x-signage-weather": "degraded" },
+    const failureKind = err instanceof CircuitOpenError ? "circuit_open" : "source_error";
+    console.warn("[signage-weather] source unavailable", { failureKind });
+    return NextResponse.json(buildUnavailableSignageWeather(selectedId, mapMode), {
+      status: 503,
+      headers: {
+        "Cache-Control": "no-store",
+        "Retry-After": "60",
+        "x-signage-weather": "unavailable",
+      },
     });
   }
 }

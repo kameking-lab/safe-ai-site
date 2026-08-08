@@ -28,12 +28,13 @@ test.describe("KY用紙（Phase 7: /ky → /ky/paper 一本化）", () => {
     expect(types).toContain("HowTo");
   });
 
-  test("KY関連機能（作業員マスター/サイネージ）へのリンクがある", async ({ page }) => {
+  test("入力と候補を先に示し、通常時は警告や関連ボタンを増やさない", async ({ page }) => {
     await page.goto("/ky/paper");
-    await page.waitForLoadState("networkidle");
-    const linkCount = await page
-      .locator('a[href="/ky/workers"], a[href="/ky/morning"]')
-      .count();
-    expect(linkCount).toBeGreaterThan(0);
+    await expect(page.getByRole("heading", { level: 1, name: "KYを作る" })).toHaveCount(1);
+    await expect(page.locator('[data-primary-action="true"] #ky-work-description')).toBeVisible();
+    await expect(page.locator('#ky-paper-start [role="alert"]')).toHaveCount(0);
+    await expect(
+      page.locator('a[href="/ky/workers"], a[href="/ky/morning"]'),
+    ).toHaveCount(0);
   });
 });

@@ -2,46 +2,49 @@ import { describe, expect, it } from "vitest";
 import { pickEducationAccidents } from "@/lib/accidents/education-pick";
 import type { AccidentCase } from "@/lib/types/domain";
 
-const mk = (id: string, sev: AccidentCase["severity"], type: string, cat = "建設業"): AccidentCase => ({
-  id, title: `事故${id}`, occurredOn: "2025-01-01",
-  type: type as AccidentCase["type"], workCategory: cat as AccidentCase["workCategory"],
-  severity: sev, summary: "", mainCauses: [], preventionPoints: [`対策${id}`],
-});
+function makeCase(
+  id: string,
+  provenance?: AccidentCase["provenance"],
+): AccidentCase {
+  return {
+    id,
+    title: `未検証事故 ${id}`,
+    occurredOn: "2025-01-01",
+    type: "墜落",
+    workCategory: "建設業",
+    severity: "死亡",
+    summary: "足場から墜落したという未検証の説明",
+    mainCauses: ["未検証の原因"],
+    preventionPoints: ["未検証の対策"],
+    provenance,
+  };
+}
 
-const CASES: AccidentCase[] = [
-  mk("a", "軽傷", "転倒"),
-  mk("b", "死亡", "墜落・転落"),
-  mk("c", "重傷", "はさまれ・巻き込まれ"),
-  mk("d", "死亡", "墜落・転落"),
-  mk("e", "中等傷", "感電"),
-];
+describe("pickEducationAccidents source boundary", () => {
+  it("一次資料との個別対応が未確認の事故を朝礼教材へ出さない", () => {
+    const records = [
+      makeCase("curated-1", "curated"),
+      makeCase("synthetic-1", "synthetic"),
+      makeCase("preliminary-1", "preliminary"),
+    ];
 
-describe("pickEducationAccidents", () => {
-  it("重大度優先で選択（死亡が先頭）", () => {
-    const r = pickEducationAccidents(CASES, { count: 3, seed: 1 });
-    expect(r[0].severity).toBe("死亡");
-    expect(r).toHaveLength(3);
+    expect(
+      pickEducationAccidents(records, { count: 3, seed: 1 }),
+    ).toEqual([]);
   });
 
-  it("事故型の多様性（同型重複を避ける）", () => {
-    const r = pickEducationAccidents(CASES, { count: 3, seed: 1 });
-    const types = r.map((x) => x.type);
-    expect(new Set(types).size).toBe(types.length);
-  });
+  it("mhlwラベルだけでは検証済みと扱わない", () => {
+    const relabeled = [
+      makeCase("mhlw-12345", "mhlw"),
+      makeCase("mhlw-67890", "mhlw"),
+    ];
 
-  it("業種で絞れる（製造業指定で不足なら全体補完）", () => {
-    const r = pickEducationAccidents(CASES, { category: "製造業", count: 2 });
-    expect(r).toHaveLength(2); // 製造業0件→全体から補完
-  });
-
-  it("seed違いで順序が変わりうる・同seedは安定", () => {
-    const r1 = pickEducationAccidents(CASES, { count: 3, seed: 5 });
-    const r2 = pickEducationAccidents(CASES, { count: 3, seed: 5 });
-    expect(r1.map((x) => x.id)).toEqual(r2.map((x) => x.id));
-  });
-
-  it("preventionPoint を含む", () => {
-    const r = pickEducationAccidents(CASES, { count: 1, seed: 0 });
-    expect(r[0].preventionPoint).toMatch(/対策/);
+    expect(
+      pickEducationAccidents(relabeled, {
+        category: "建設業",
+        count: 2,
+        seed: 5,
+      }),
+    ).toEqual([]);
   });
 });

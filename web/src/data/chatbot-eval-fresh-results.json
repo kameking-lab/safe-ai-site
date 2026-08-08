@@ -1,9 +1,18 @@
 {
-  "generated_at": "2026-07-11T17:34:18.544Z",
+  "generated_at": "2026-08-08T09:42:33.384Z",
   "source": "test/chatbot-fresh-100.json",
   "total": 100,
   "correct": 100,
   "accuracy": 1,
+  "retrieval_total": 76,
+  "retrieval_correct": 76,
+  "retrieval_accuracy": 1,
+  "precision5": 0.24999999999999964,
+  "mrr": 0.8346491228070176,
+  "quality_metrics_generated_at": "2026-08-08T09:42:33.384Z",
+  "safe_hold_total": 24,
+  "safe_hold_correct": 24,
+  "safe_hold_rate": 1,
   "target": 0.9,
   "passed": true,
   "failures": [],
@@ -14,23 +23,23 @@
       "accuracy": 1
     },
     "組織": {
-      "total": 6,
-      "correct": 6,
+      "total": 5,
+      "correct": 5,
       "accuracy": 1
     },
     "教育": {
-      "total": 10,
-      "correct": 10,
+      "total": 7,
+      "correct": 7,
       "accuracy": 1
     },
     "健診": {
-      "total": 10,
-      "correct": 10,
+      "total": 8,
+      "correct": 8,
       "accuracy": 1
     },
     "墜落": {
-      "total": 5,
-      "correct": 5,
+      "total": 3,
+      "correct": 3,
       "accuracy": 1
     },
     "足場": {
@@ -39,18 +48,18 @@
       "accuracy": 1
     },
     "化学物質": {
-      "total": 10,
-      "correct": 10,
+      "total": 5,
+      "correct": 5,
       "accuracy": 1
     },
     "機械": {
-      "total": 10,
-      "correct": 10,
+      "total": 9,
+      "correct": 9,
       "accuracy": 1
     },
     "労災": {
-      "total": 5,
-      "correct": 5,
+      "total": 3,
+      "correct": 3,
       "accuracy": 1
     },
     "労基": {
@@ -64,16 +73,11 @@
       "accuracy": 1
     },
     "クレーン": {
-      "total": 3,
-      "correct": 3,
+      "total": 2,
+      "correct": 2,
       "accuracy": 1
     },
     "ゴンドラ": {
-      "total": 1,
-      "correct": 1,
-      "accuracy": 1
-    },
-    "ボイラー": {
       "total": 1,
       "correct": 1,
       "accuracy": 1
@@ -84,21 +88,6 @@
       "accuracy": 1
     },
     "事故報告": {
-      "total": 2,
-      "correct": 2,
-      "accuracy": 1
-    },
-    "熱中症": {
-      "total": 2,
-      "correct": 2,
-      "accuracy": 1
-    },
-    "騒音": {
-      "total": 2,
-      "correct": 2,
-      "accuracy": 1
-    },
-    "振動": {
       "total": 1,
       "correct": 1,
       "accuracy": 1

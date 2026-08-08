@@ -23,27 +23,32 @@ describe("GET /sitemap-index.xml", () => {
     expect(res.headers.get("Content-Type")).toContain("application/xml");
     const xml = await res.text();
     expect(xml).toContain("<sitemapindex");
-    expect(xml).toContain('xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"');
+    expect(xml).toContain(
+      'xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"',
+    );
   });
 
-  it("は7つの子サイトマップ（本体/記事/事故/通達/保護具/化学物質/法令ナビ条文）を順に列挙する", async () => {
+  it("は公開可能な5つの子サイトマップを順に列挙し、隔離中の事故・保護具を除外する", async () => {
     const xml = await getXml();
     const locs = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
     expect(locs).toEqual([
       `${BASE}/sitemap.xml`,
       `${BASE}/sitemap-articles.xml`,
-      `${BASE}/sitemap-accidents.xml`,
       `${BASE}/sitemap-circulars.xml`,
-      `${BASE}/sitemap-equipment.xml`,
       `${BASE}/sitemap-chemicals.xml`,
       `${BASE}/sitemap-laws.xml`,
     ]);
+    expect(locs).not.toContain(`${BASE}/sitemap-accidents.xml`);
+    expect(locs).toContain(`${BASE}/sitemap-circulars.xml`);
+    expect(locs).not.toContain(`${BASE}/sitemap-equipment.xml`);
   });
 
-  it("の全 lastmod は YYYY-MM-DD 形式で7件", async () => {
+  it("の全 lastmod は YYYY-MM-DD 形式で5件", async () => {
     const xml = await getXml();
-    const mods = [...xml.matchAll(/<lastmod>([^<]+)<\/lastmod>/g)].map((m) => m[1]);
-    expect(mods.length).toBe(7);
+    const mods = [...xml.matchAll(/<lastmod>([^<]+)<\/lastmod>/g)].map(
+      (m) => m[1],
+    );
+    expect(mods.length).toBe(5);
     for (const m of mods) expect(m).toMatch(ISO);
   });
 
@@ -57,9 +62,9 @@ describe("GET /sitemap-index.xml", () => {
     const map = Object.fromEntries(pairs);
     expect(map[`${BASE}/sitemap.xml`]).toBe(f.siteFreshest);
     expect(map[`${BASE}/sitemap-articles.xml`]).toBe(f.freshestArticle);
-    expect(map[`${BASE}/sitemap-accidents.xml`]).toBe(f.accidentsDataUpdated);
-    expect(map[`${BASE}/sitemap-circulars.xml`]).toBe(f.freshestNotice);
-    expect(map[`${BASE}/sitemap-equipment.xml`]).toBe(f.equipmentDataUpdated);
+    expect(map[`${BASE}/sitemap-accidents.xml`]).toBeUndefined();
+    expect(map[`${BASE}/sitemap-circulars.xml`]).toBe("2026-08-02");
+    expect(map[`${BASE}/sitemap-equipment.xml`]).toBeUndefined();
     expect(map[`${BASE}/sitemap-chemicals.xml`]).toBe(f.chemicalsDataUpdated);
     // 法令ナビ条文はコーパス e-Gov 突合日ベースの固定日（sitemap-laws.xml/route.ts CORPUS_LASTMOD と同値）
     expect(map[`${BASE}/sitemap-laws.xml`]).toBe("2026-07-11");
@@ -100,13 +105,24 @@ describe("sitemap-index.xml（逆カバレッジガード: 実在する子サイ
         .map((f) => join(APP_DIR, e.name, f))
         .find((p) => existsSync(p));
       if (!routeFile) continue;
-      if (!/export\s+(?:async\s+)?function\s+GET\b/.test(readFileSync(routeFile, "utf8"))) continue;
+      if (
+        !/export\s+(?:async\s+)?function\s+GET\b/.test(
+          readFileSync(routeFile, "utf8"),
+        )
+      )
+        continue;
       out.push(`/${e.name}`);
     }
     return out;
   }
 
   const childRoutes = collectChildSitemapRoutes();
+  const intentionallyUnlisted = new Set([
+    // 一次個票との本文一致を再検証中の事故データは空urlsetで維持し、indexから外す。
+    "/sitemap-accidents.xml",
+    // 未検証の商品データを含むため空urlsetで維持し、indexからは明示的に外す。
+    "/sitemap-equipment.xml",
+  ]);
 
   it("実在する子サイトマップルートを十分に検出できている（走査のサニティ）", () => {
     // 既知の5本（記事/事故/通達/保護具/化学物質）以上を機械検出できていること。
@@ -117,14 +133,25 @@ describe("sitemap-index.xml（逆カバレッジガード: 実在する子サイ
   it("実在する全子サイトマップが sitemap-index.xml に登録されている＝孤立サイトマップ0", async () => {
     const xml = await getXml();
     const registered = new Set(
-      [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => new URL(m[1]).pathname),
+      [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(
+        (m) => new URL(m[1]).pathname,
+      ),
     );
-    const missing = childRoutes.filter((r) => !registered.has(r));
+    const missing = childRoutes.filter(
+      (r) => !intentionallyUnlisted.has(r) && !registered.has(r),
+    );
     expect(
       missing,
       `実在するのに sitemap-index.xml へ未登録の子サイトマップ（route.ts を新設したら ` +
         `sitemap-index.xml/route.ts の children にも追加すること。未登録の子は robots.ts の ` +
         `sitemap: が指す index から参照されず、配下ページ群がクローラに発見されない）: ${missing.join(", ")}`,
     ).toEqual([]);
+  });
+
+  it("個別確認済み通達sitemapを登録し、隔離中の事故・保護具は登録しない", async () => {
+    const xml = await getXml();
+    expect(xml).not.toContain(`${BASE}/sitemap-accidents.xml`);
+    expect(xml).toContain(`${BASE}/sitemap-circulars.xml`);
+    expect(xml).not.toContain(`${BASE}/sitemap-equipment.xml`);
   });
 });

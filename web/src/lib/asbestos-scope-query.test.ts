@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
   asbestosScopeFromParams,
-  asbestosScopeToQuery,
+  clearAsbestosScopeHandoffForTest,
+  consumeAsbestosScopeHandoff,
   hasAsbestosScopeParams,
+  putAsbestosScopeHandoff,
   type AsbestosScopeFormValues,
 } from "./asbestos-scope-query";
 
@@ -22,9 +24,10 @@ function getterFor(query: string): (k: string) => string | null {
   return (k) => params.get(k);
 }
 
-describe("asbestosScopeToQuery", () => {
-  it("emits all scalar fields and the level/known flags when set", () => {
-    const q = asbestosScopeToQuery({
+describe("asbestos scope transient handoff", () => {
+  it("carries the scope once without creating a query string", () => {
+    clearAsbestosScopeHandoffForTest();
+    const scope: AsbestosScopeFormValues = {
       buildingCategory: "residential-multi",
       projectCategory: "renovation",
       constructionStartYear: 1990,
@@ -32,52 +35,14 @@ describe("asbestosScopeToQuery", () => {
       workAreaSqm: 300,
       asbestosKnownPresent: true,
       workLevel: "level-1",
-    });
-    const params = new URLSearchParams(q);
-    expect(params.get("b")).toBe("residential-multi");
-    expect(params.get("p")).toBe("renovation");
-    expect(params.get("y")).toBe("1990");
-    expect(params.get("c")).toBe("800");
-    expect(params.get("a")).toBe("300");
-    expect(params.get("k")).toBe("1");
-    expect(params.get("l")).toBe("level-1");
-  });
-
-  it("omits k when not known and l when level is unset", () => {
-    const q = asbestosScopeToQuery({
-      buildingCategory: "non-residential",
-      projectCategory: "demolition",
-      constructionStartYear: 1995,
-      contractValueJpyMan: 500,
-      workAreaSqm: 150,
-      asbestosKnownPresent: false,
-      workLevel: "",
-    });
-    const params = new URLSearchParams(q);
-    expect(params.has("k")).toBe(false);
-    expect(params.has("l")).toBe(false);
-    expect(params.get("b")).toBe("non-residential");
+    };
+    putAsbestosScopeHandoff(scope);
+    expect(consumeAsbestosScopeHandoff()).toEqual(scope);
+    expect(consumeAsbestosScopeHandoff()).toBeNull();
   });
 });
 
 describe("asbestosScopeFromParams", () => {
-  it("round-trips the exact scope a user entered in Step 1", () => {
-    const original = {
-      buildingCategory: "residential-multi" as const,
-      projectCategory: "renovation" as const,
-      constructionStartYear: 1990,
-      contractValueJpyMan: 800,
-      workAreaSqm: 300,
-      asbestosKnownPresent: true,
-      workLevel: "level-1" as const,
-    };
-    const parsed = asbestosScopeFromParams(
-      getterFor(asbestosScopeToQuery(original)),
-      DEFAULTS,
-    );
-    expect(parsed).toEqual(original);
-  });
-
   it("falls back to defaults when no params are present (direct visit)", () => {
     const parsed = asbestosScopeFromParams(getterFor(""), DEFAULTS);
     expect(parsed).toEqual(DEFAULTS);

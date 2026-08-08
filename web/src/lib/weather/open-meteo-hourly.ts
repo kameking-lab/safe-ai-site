@@ -1,6 +1,8 @@
 import type { SignageHourlyPoint } from "@/lib/types/signage-weather";
 
 type HourlyPayload = {
+  timezone?: string;
+  utc_offset_seconds?: number;
   hourly?: {
     time?: string[];
     temperature_2m?: number[];
@@ -9,6 +11,11 @@ type HourlyPayload = {
     wind_speed_10m?: number[];
     relative_humidity_2m?: number[];
   };
+};
+
+export type OpenMeteoTimeMetadata = {
+  timezone?: unknown;
+  utc_offset_seconds?: unknown;
 };
 
 export function codeToOverview(code: number) {
@@ -25,11 +32,94 @@ function windKmhToMs(kmh: number) {
 }
 
 /** Open-Meteo（timezone=Asia/Tokyo）の時刻文字列を JST の瞬間として解釈する */
-function parseOpenMeteoLocalTime(iso: string): Date {
-  if (/Z$|[+-]\d{2}:?\d{2}$/.test(iso)) return new Date(iso);
-  if (/T\d{2}:\d{2}$/.test(iso)) return new Date(`${iso}:00+09:00`);
-  if (/T\d{2}:\d{2}:\d{2}$/.test(iso)) return new Date(`${iso}+09:00`);
-  return new Date(iso);
+export function hasExpectedTokyoMetadata(metadata: OpenMeteoTimeMetadata): boolean {
+  return metadata.timezone === "Asia/Tokyo" && metadata.utc_offset_seconds === 9 * 60 * 60;
+}
+
+/**
+ * Parse Open-Meteo target time without depending on the Node/browser local TZ.
+ * Offset-less values are accepted only with explicit Asia/Tokyo/+09:00
+ * metadata. Date-only values are accepted only when the caller opts in.
+ */
+export function parseOpenMeteoTargetTime(
+  value: string,
+  metadata: OpenMeteoTimeMetadata,
+  options: {
+    allowDateOnly?: boolean;
+    referenceNow?: Date;
+    maxPastMs?: number;
+    maxFutureMs?: number;
+  } = {}
+): Date | null {
+  const parts = value.match(
+    /^(\d{4})-(\d{2})-(\d{2})(?:T(\d{2}):(\d{2})(?::(\d{2}))?(?:Z|[+-]\d{2}:\d{2})?)?$/,
+  );
+  if (!parts) return null;
+  const [, yearText, monthText, dayText, hourText, minuteText, secondText] = parts;
+  const year = Number(yearText);
+  const month = Number(monthText);
+  const day = Number(dayText);
+  const hour = hourText === undefined ? 0 : Number(hourText);
+  const minute = minuteText === undefined ? 0 : Number(minuteText);
+  const second = secondText === undefined ? 0 : Number(secondText);
+  if (
+    year < 1970 ||
+    year > 2100 ||
+    month < 1 ||
+    month > 12 ||
+    day < 1 ||
+    hour < 0 ||
+    hour > 23 ||
+    minute < 0 ||
+    minute > 59 ||
+    second < 0 ||
+    second > 59
+  ) {
+    return null;
+  }
+  const calendarCheck = new Date(Date.UTC(year, month - 1, day));
+  if (
+    calendarCheck.getUTCFullYear() !== year ||
+    calendarCheck.getUTCMonth() !== month - 1 ||
+    calendarCheck.getUTCDate() !== day
+  ) {
+    return null;
+  }
+
+  // The requested upstream contract is timezone=Asia/Tokyo.  Accepting a
+  // different explicit offset together with Tokyo metadata would silently
+  // reinterpret inconsistent data, so every representation must satisfy both.
+  if (!hasExpectedTokyoMetadata(metadata)) return null;
+
+  let candidate = "";
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2})?\+09:00$/.test(value)) {
+    candidate = value;
+  } else if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2})?$/.test(value)) {
+    candidate = `${value}${value.length === 16 ? ":00" : ""}+09:00`;
+  } else if (options.allowDateOnly && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    candidate = `${value}T00:00:00+09:00`;
+  } else {
+    return null;
+  }
+  const parsed = new Date(candidate);
+  if (!Number.isFinite(parsed.getTime())) return null;
+  if (options.referenceNow) {
+    const nowMs = options.referenceNow.getTime();
+    if (!Number.isFinite(nowMs)) return null;
+    if (
+      typeof options.maxPastMs === "number" &&
+      parsed.getTime() < nowMs - options.maxPastMs
+    ) {
+      return null;
+    }
+    if (
+      typeof options.maxFutureMs === "number" &&
+      parsed.getTime() > nowMs + options.maxFutureMs
+    ) {
+      return null;
+    }
+  }
+  return parsed;
 }
 
 function tokyoYmd(d: Date): string {
@@ -77,6 +167,7 @@ export function buildSignageHourlyFromPayload(
 ): SignageHourlyPoint[] {
   const hourly = payload.hourly;
   const times = hourly?.time ?? [];
+  if (!hasExpectedTokyoMetadata(payload)) return [];
   const out: SignageHourlyPoint[] = [];
   // ja-JP の numeric hour は "14時" を返すため、末尾の「時」を付けると「14時時」と
   // 二重表示になる。en-US で純粋な数値に寄せる。
@@ -97,10 +188,15 @@ export function buildSignageHourlyFromPayload(
 
   for (let i = 0; i < times.length && out.length < maxSlots; i += 1) {
     const iso = times[i]!;
-    const t = parseOpenMeteoLocalTime(iso);
+    const t = parseOpenMeteoTargetTime(iso, payload, {
+      referenceNow: now,
+      maxPastMs: 36 * 60 * 60 * 1_000,
+      maxFutureMs: 80 * 60 * 60 * 1_000,
+    });
+    if (!t) return [];
     if (t < startHour) continue;
 
-    const slotYmd = iso.slice(0, 10);
+    const slotYmd = tokyoYmd(t);
     if (slotYmd > tomorrowYmd) break;
 
     const temp = hourly?.temperature_2m?.[i];
@@ -117,7 +213,7 @@ export function buildSignageHourlyFromPayload(
     }
 
     out.push({
-      time: iso,
+      time: t.toISOString(),
       hourLabel: `${dayPrefix}${hourFmt.format(t)}時`.trim(),
       tempC: Math.round(temp * 10) / 10,
       precipMm: Math.round(precip * 10) / 10,
