@@ -1,5 +1,6 @@
 /**
- * 安全工程打合せ書及び安全衛生指示書（北海道労働局公式版ベース＋独自拡張）のデータモデル。
+ * 安全工程打合せ書及び安全衛生指示書の作成補助用データモデル。
+ * 特定機関の公式様式との項目対応・版互換は独立検証していない。
  * KYの設計（手書き normalize・1-3評価・evalScore流用）を踏襲。zod非依存で全制御する。
  *
  * 注: 点検項目は建設現場で一般的な標準項目を初期値として用意（カスタマイズで増減可）。
@@ -16,7 +17,7 @@ export const MEETING_WEATHER_OPTIONS: readonly string[] = ["晴れ", "曇り", "
 /** 予定人員プルダウンの選択肢（クラシック表示・canvas第四弾の予定人員エディタで共有）。 */
 export const MEETING_COUNT_OPTIONS: readonly string[] = ["", ...Array.from({ length: 30 }, (_, i) => String(i + 1)), "30+"];
 
-export type ChecklistStatus = "ok" | "ng" | "na"; // ○ / × / 該当無
+export type ChecklistStatus = "unreviewed" | "ok" | "ng" | "na"; // 未 / ○ / × / 該当無
 
 export type MeetingRiskEval = {
   /** 重大性 1-3 */
@@ -25,6 +26,22 @@ export type MeetingRiskEval = {
   likelihood: number;
   /** 優先度 1(低)-4(最優先)。既定は重大性×可能性から自動、手動上書き可 */
   priority: number;
+  /** Default false. Numbers are not treated as a human risk review. */
+  reviewed: boolean;
+};
+
+export type MeetingCoordinationConditions = {
+  simultaneousWork: string;
+  deliveries: string;
+  fireWork: string;
+  heightWork: string;
+  electricalWork: string;
+  chemicalWork: string;
+  weather: string;
+  changes: string;
+  newEntrants: string;
+  nightWork: string;
+  roles: string;
 };
 
 export type MeetingContractorRow = {
@@ -65,7 +82,43 @@ export type MeetingTomorrowEvents = {
 
 export type MeetingMachine = { name: string; count: number };
 
+export type MeetingDocumentApproval = {
+  /** 入力された確認者名。認証済み本人であることを保証する値ではない。 */
+  reviewerName: string;
+  approvedAt: string;
+  /** 承認時点の帳票本文revision。電子署名ではなく変更検知専用。 */
+  contentRevision: string;
+};
+
+export type MeetingDocumentPrint = {
+  printedAt: string;
+  /** 印刷時点の帳票本文revision。 */
+  contentRevision: string;
+  /** 印刷の根拠にした承認revision。 */
+  approvalRevision: string;
+};
+
+export type MeetingDocumentHistoryEntry = {
+  action: "approved" | "printed";
+  at: string;
+  contentRevision: string;
+  reviewerName?: string;
+};
+
+export type MeetingDocumentControl = {
+  schemaVersion: 2;
+  /**
+   * 旧形式から読み込んだ記録か。旧記録に承認・印刷実績があったとは推定しない。
+   * 新たに承認しても、元データが旧形式だったという監査事実は保持する。
+   */
+  legacyImported: boolean;
+  approval: MeetingDocumentApproval | null;
+  lastPrint: MeetingDocumentPrint | null;
+  history: MeetingDocumentHistoryEntry[];
+};
+
 export type MeetingRecord = {
+  schemaVersion: 2;
   id: string;
   workDateYear: string;
   workDateMonth: string;
@@ -83,6 +136,9 @@ export type MeetingRecord = {
   supervisorComment: string; // 統括安全責任者コメント
   checklist: MeetingChecklistCategory[];
   machines: MeetingMachine[]; // 使用機械リスト（自動集計）
+  /** Explicit values, including "なし", distinguish reviewed-none from blank. */
+  coordination: MeetingCoordinationConditions;
+  documentControl: MeetingDocumentControl;
   savedAt: string;
 };
 
@@ -98,7 +154,12 @@ export const DEFAULT_CHECKLIST: { key: string; label: string; items: string[] }[
   { key: "hazmat", label: "危険物", items: ["火気使用の許可", "消火器の配置", "保管・表示", "換気"] },
 ];
 
-const VALID_STATUS: readonly ChecklistStatus[] = ["ok", "ng", "na"];
+const VALID_STATUS: readonly ChecklistStatus[] = [
+  "unreviewed",
+  "ok",
+  "ng",
+  "na",
+];
 
 export function newMeetingId(): string {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) return crypto.randomUUID();
@@ -109,13 +170,33 @@ export function buildDefaultChecklist(): MeetingChecklistCategory[] {
   return DEFAULT_CHECKLIST.map((c) => ({
     key: c.key,
     label: c.label,
-    items: c.items.map((label, i) => ({ key: `${c.key}-${i}`, label, status: "na" as ChecklistStatus })),
+    items: c.items.map((label, i) => ({
+      key: `${c.key}-${i}`,
+      label,
+      status: "unreviewed" as ChecklistStatus,
+    })),
   }));
 }
 
-export function emptyContractorRow(type: ContractorType = "1次", parentId: string | null = null): MeetingContractorRow {
+export function createDefaultMeetingDocumentControl(
+  legacyImported = false,
+): MeetingDocumentControl {
   return {
-    id: newMeetingId(),
+    schemaVersion: 2,
+    legacyImported,
+    approval: null,
+    lastPrint: null,
+    history: [],
+  };
+}
+
+export function emptyContractorRow(
+  type: ContractorType = "1次",
+  parentId: string | null = null,
+  id = newMeetingId(),
+): MeetingContractorRow {
+  return {
+    id,
     type,
     parentId,
     companyName: "",
@@ -124,7 +205,7 @@ export function emptyContractorRow(type: ContractorType = "1次", parentId: stri
     qualifications: [],
     plannedCount: "",
     predictedDisasters: [],
-    risk: { severity: 1, likelihood: 1, priority: 1 },
+    risk: { severity: 1, likelihood: 1, priority: 1, reviewed: false },
     safetyInstructions: "",
     responsibleName: "",
     actualCount: "",
@@ -132,8 +213,8 @@ export function emptyContractorRow(type: ContractorType = "1次", parentId: stri
   };
 }
 
-export function emptyDeliveryRow(): MeetingDeliveryRow {
-  return { id: newMeetingId(), item: "", time: "", place: "" };
+export function emptyDeliveryRow(id = newMeetingId()): MeetingDeliveryRow {
+  return { id, item: "", time: "", place: "" };
 }
 
 /** 重大性×可能性 → 優先度（1-4）。KYの evalScore（Phase5）を流用して整合させる */
@@ -164,12 +245,17 @@ export function aggregateMachines(contractors: MeetingContractorRow[]): MeetingM
   return [...map.entries()].map(([name, count]) => ({ name, count }));
 }
 
-export function buildDefaultMeetingRecord(): MeetingRecord {
-  const d = new Date();
+export function buildDefaultMeetingRecord(options?: {
+  idFactory?: () => string;
+  now?: Date;
+}): MeetingRecord {
+  const nextId = options?.idFactory ?? newMeetingId;
+  const d = options?.now ? new Date(options.now) : new Date();
   const tomorrow = new Date(d.getTime() + 24 * 60 * 60 * 1000);
-  const firstRow = emptyContractorRow("元請", null);
+  const firstRow = emptyContractorRow("元請", null, nextId());
   return {
-    id: newMeetingId(),
+    schemaVersion: 2,
+    id: nextId(),
     workDateYear: String(tomorrow.getFullYear()),
     workDateMonth: String(tomorrow.getMonth() + 1),
     workDateDay: String(tomorrow.getDate()),
@@ -182,11 +268,25 @@ export function buildDefaultMeetingRecord(): MeetingRecord {
     meetingDate: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`,
     contractors: [firstRow],
     tomorrowEvents: { safetyMeeting: "", inspection: "", patrol: "", tomorrowGoal: "", free: "" },
-    deliveries: [emptyDeliveryRow()],
+    deliveries: [emptyDeliveryRow(nextId())],
     supervisorComment: "",
     checklist: buildDefaultChecklist(),
     machines: [],
-    savedAt: new Date().toISOString(),
+    coordination: {
+      simultaneousWork: "",
+      deliveries: "",
+      fireWork: "",
+      heightWork: "",
+      electricalWork: "",
+      chemicalWork: "",
+      weather: "",
+      changes: "",
+      newEntrants: "",
+      nightWork: "",
+      roles: "",
+    },
+    documentControl: createDefaultMeetingDocumentControl(),
+    savedAt: d.toISOString(),
   };
 }
 
@@ -207,7 +307,7 @@ function normalizeRisk(raw: unknown): MeetingRiskEval {
   const severity = clamp(Number(r.severity ?? 1), 1, 3);
   const likelihood = clamp(Number(r.likelihood ?? 1), 1, 3);
   const priority = clamp(Number(r.priority ?? computePriority(severity, likelihood)), 1, 4);
-  return { severity, likelihood, priority };
+  return { severity, likelihood, priority, reviewed: r.reviewed === true };
 }
 
 function normalizeContractor(raw: unknown): MeetingContractorRow {
@@ -231,7 +331,10 @@ function normalizeContractor(raw: unknown): MeetingContractorRow {
   };
 }
 
-function normalizeChecklist(raw: unknown): MeetingChecklistCategory[] {
+function normalizeChecklist(
+  raw: unknown,
+  legacyChecklist: boolean,
+): MeetingChecklistCategory[] {
   const def = buildDefaultChecklist();
   if (!Array.isArray(raw)) return def;
   // 既存の status を key で引き継ぎつつ、定義済みカテゴリ構造を保つ
@@ -242,7 +345,12 @@ function normalizeChecklist(raw: unknown): MeetingChecklistCategory[] {
     for (const it of items) {
       const o = (it && typeof it === "object" ? it : {}) as Record<string, unknown>;
       if (typeof o.key === "string" && VALID_STATUS.includes(o.status as ChecklistStatus)) {
-        savedStatus.set(o.key, o.status as ChecklistStatus);
+        savedStatus.set(
+          o.key,
+          legacyChecklist && o.status === "na"
+            ? "unreviewed"
+            : (o.status as ChecklistStatus),
+        );
       }
     }
   }
@@ -260,7 +368,11 @@ function normalizeChecklist(raw: unknown): MeetingChecklistCategory[] {
                 .map((i, idx) => ({
                   key: str(i.key) || `${String(c.key)}-${idx}`,
                   label: str(i.label),
-                  status: VALID_STATUS.includes(i.status as ChecklistStatus) ? (i.status as ChecklistStatus) : "na",
+                  status: VALID_STATUS.includes(i.status as ChecklistStatus)
+                    ? legacyChecklist && i.status === "na"
+                      ? "unreviewed"
+                      : (i.status as ChecklistStatus)
+                    : "unreviewed",
                 }))
             : [],
         }))
@@ -269,6 +381,93 @@ function normalizeChecklist(raw: unknown): MeetingChecklistCategory[] {
     ...def.map((c) => ({ ...c, items: c.items.map((it) => ({ ...it, status: savedStatus.get(it.key) ?? it.status })) })),
     ...customCats,
   ];
+}
+
+function isIsoTimestamp(value: unknown): value is string {
+  return (
+    typeof value === "string" &&
+    value.trim() !== "" &&
+    Number.isFinite(Date.parse(value))
+  );
+}
+
+function normalizeDocumentControl(raw: unknown): MeetingDocumentControl {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
+    // 旧形式に承認・印刷実績があったとは推定しない。
+    return createDefaultMeetingDocumentControl(true);
+  }
+  const r = raw as Record<string, unknown>;
+  const approvalRaw =
+    r.approval && typeof r.approval === "object" && !Array.isArray(r.approval)
+      ? (r.approval as Record<string, unknown>)
+      : null;
+  const approval =
+    approvalRaw &&
+    typeof approvalRaw.reviewerName === "string" &&
+    approvalRaw.reviewerName.trim() !== "" &&
+    isIsoTimestamp(approvalRaw.approvedAt) &&
+    typeof approvalRaw.contentRevision === "string" &&
+    approvalRaw.contentRevision.trim() !== ""
+      ? {
+          reviewerName: approvalRaw.reviewerName.trim(),
+          approvedAt: approvalRaw.approvedAt,
+          contentRevision: approvalRaw.contentRevision,
+        }
+      : null;
+
+  const printRaw =
+    r.lastPrint && typeof r.lastPrint === "object" && !Array.isArray(r.lastPrint)
+      ? (r.lastPrint as Record<string, unknown>)
+      : null;
+  const lastPrint =
+    printRaw &&
+    isIsoTimestamp(printRaw.printedAt) &&
+    typeof printRaw.contentRevision === "string" &&
+    printRaw.contentRevision.trim() !== "" &&
+    typeof printRaw.approvalRevision === "string" &&
+    printRaw.approvalRevision.trim() !== ""
+      ? {
+          printedAt: printRaw.printedAt,
+          contentRevision: printRaw.contentRevision,
+          approvalRevision: printRaw.approvalRevision,
+        }
+      : null;
+
+  const history = Array.isArray(r.history)
+    ? r.history
+        .flatMap((entry): MeetingDocumentHistoryEntry[] => {
+          if (!entry || typeof entry !== "object" || Array.isArray(entry)) return [];
+          const value = entry as Record<string, unknown>;
+          if (
+            (value.action !== "approved" && value.action !== "printed") ||
+            !isIsoTimestamp(value.at) ||
+            typeof value.contentRevision !== "string" ||
+            value.contentRevision.trim() === ""
+          ) {
+            return [];
+          }
+          return [
+            {
+              action: value.action,
+              at: value.at,
+              contentRevision: value.contentRevision,
+              ...(typeof value.reviewerName === "string" &&
+              value.reviewerName.trim() !== ""
+                ? { reviewerName: value.reviewerName.trim() }
+                : {}),
+            },
+          ];
+        })
+        .slice(-100)
+    : [];
+
+  return {
+    schemaVersion: 2,
+    legacyImported: r.schemaVersion !== 2 || r.legacyImported === true,
+    approval,
+    lastPrint,
+    history,
+  };
 }
 
 export function normalizeMeetingRecord(raw: unknown): MeetingRecord {
@@ -286,7 +485,18 @@ export function normalizeMeetingRecord(raw: unknown): MeetingRecord {
       })
     : base.deliveries;
   const ev = (r.tomorrowEvents && typeof r.tomorrowEvents === "object" ? r.tomorrowEvents : {}) as Record<string, unknown>;
+  const coordinationRaw =
+    r.coordination &&
+    typeof r.coordination === "object" &&
+    !Array.isArray(r.coordination)
+      ? (r.coordination as Record<string, unknown>)
+      : {};
+  const legacyChecklist =
+    !r.documentControl ||
+    typeof r.documentControl !== "object" ||
+    (r.documentControl as Record<string, unknown>).schemaVersion !== 2;
   return {
+    schemaVersion: 2,
     id: str(r.id) || base.id,
     workDateYear: str(r.workDateYear, base.workDateYear),
     workDateMonth: str(r.workDateMonth, base.workDateMonth),
@@ -308,8 +518,22 @@ export function normalizeMeetingRecord(raw: unknown): MeetingRecord {
     },
     deliveries,
     supervisorComment: str(r.supervisorComment),
-    checklist: normalizeChecklist(r.checklist),
+    checklist: normalizeChecklist(r.checklist, legacyChecklist),
     machines: aggregateMachines(contractors),
+    coordination: {
+      simultaneousWork: str(coordinationRaw.simultaneousWork),
+      deliveries: str(coordinationRaw.deliveries),
+      fireWork: str(coordinationRaw.fireWork),
+      heightWork: str(coordinationRaw.heightWork),
+      electricalWork: str(coordinationRaw.electricalWork),
+      chemicalWork: str(coordinationRaw.chemicalWork),
+      weather: str(coordinationRaw.weather),
+      changes: str(coordinationRaw.changes),
+      newEntrants: str(coordinationRaw.newEntrants),
+      nightWork: str(coordinationRaw.nightWork),
+      roles: str(coordinationRaw.roles),
+    },
+    documentControl: normalizeDocumentControl(r.documentControl),
     savedAt: str(r.savedAt) || new Date().toISOString(),
   };
 }

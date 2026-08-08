@@ -1,0 +1,5 @@
+/**
+ * The root layout runs this static literal with its CSP nonce before body HTML
+ * is parsed. It stores only an interaction marker; it never reads input text.
+ */
+export const PREHYDRATION_INTERACTIONS_SCRIPT = `(function(){document.documentElement.classList.add('js-enabled');if(window.__safeAiPrehydrationInteractionsInstalled)return;window.__safeAiPrehydrationInteractionsInstalled=true;document.addEventListener('keydown',function(event){if(event.defaultPrevented)return;var target=event.target;if(event.key==='Enter'&&!event.shiftKey&&!event.isComposing&&target instanceof HTMLTextAreaElement&&target.closest('[data-chatbot-composer]')&&target.dataset.chatbotHydrated!=='true'){event.preventDefault();target.dataset.chatbotPrehydrationSubmit='true';return;}if(event.key!=='Escape')return;var details=document.querySelector('details[data-mobile-site-menu]');if(!(details instanceof HTMLDetailsElement)||!details.open||details.dataset.appShellHydrated==='true')return;event.preventDefault();details.open=false;var summary=details.querySelector('summary');if(summary)summary.focus();},true);}());`;

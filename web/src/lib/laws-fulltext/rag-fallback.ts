@@ -15,32 +15,34 @@
  * 【クライアントバンドル不可侵】loader.ts（server-only・dynamic import）経由でのみ全文を読む。
  * Route Handler からのみ import すること（`server-only` 未導入のため規約で担保＝loader.ts と同方針）。
  */
+import { createHash } from "node:crypto";
 import { LAW_METADATA } from "@/data/law-metadata";
-import { allLawArticles, mhlwLawArticles, type LawArticle } from "@/data/laws";
+import type { LawArticle } from "@/data/laws";
+import { verifiedLawArticles } from "@/data/laws/verified-corpus";
 import { normalizeFullwidthAlnum, normalizeKanjiNumbers } from "@/lib/article-number-normalize";
 import { normalizeArticleQuery, expandLawAliases } from "@/lib/cross-search";
-import { FULLTEXT_LAW_IDS, resolveFulltextArticle } from "@/lib/laws-fulltext/loader";
+import {
+  loadFulltextLaw,
+  resolveFulltextArticle,
+} from "@/lib/laws-fulltext/loader";
 
-/** 全文収載法令（FULLTEXT_LAW_IDS）の名前索引（略称・正式名称→egovLawId）。 */
-type FulltextLawName = { egovLawId: string; lawShort: string; fullName: string };
+/** 公式法令メタデータの名前索引（略称・正式名称→egovLawId）。 */
+type LawName = { egovLawId: string; lawShort: string; fullName: string };
 
-const FULLTEXT_LAW_NAMES: readonly FulltextLawName[] = (() => {
-  const idSet = new Set<string>(FULLTEXT_LAW_IDS as readonly string[]);
-  const out: FulltextLawName[] = [];
+const LAW_NAMES: readonly LawName[] = (() => {
+  const out: LawName[] = [];
   for (const meta of Object.values(LAW_METADATA)) {
-    if (meta.egovLawId && idSet.has(meta.egovLawId)) {
+    if (meta.egovLawId) {
       out.push({ egovLawId: meta.egovLawId, lawShort: meta.lawShort, fullName: meta.fullName });
     }
   }
   return out;
 })();
 
-/** curated（mhlw 補完除外）に (lawShort|fullName, articleNum) が在るか。 */
-const CURATED_KEY_SET: ReadonlySet<string> = (() => {
-  const mhlw = new Set<unknown>(mhlwLawArticles);
+/** すでにhash確認済みのRAG本文に (lawShort|fullName, articleNum) が在るか。 */
+const VERIFIED_KEY_SET: ReadonlySet<string> = (() => {
   const set = new Set<string>();
-  for (const a of allLawArticles) {
-    if (mhlw.has(a)) continue;
+  for (const a of verifiedLawArticles) {
     set.add(`${a.lawShort}|${a.articleNum}`);
     set.add(`${a.law}|${a.articleNum}`);
   }
@@ -101,7 +103,7 @@ export async function resolveFulltextRagArticles(
   // 候補法令の決定: クエリに名前が出ている全文法令 ∪（lawCategory が全文法令ならそれ）。
   const expanded = expandLawAliases(normalizeArticleQuery(query));
   const rawNorm = normalizeKanjiNumbers(normalizeFullwidthAlnum(query));
-  const candidates = FULLTEXT_LAW_NAMES.filter((l) => {
+  const candidates = LAW_NAMES.filter((l) => {
     if (lawCategory !== "all" && lawCategory === l.lawShort) return true;
     return [l.fullName, l.lawShort].some((n) => expanded.includes(n) || rawNorm.includes(n));
   });
@@ -117,15 +119,50 @@ export async function resolveFulltextRagArticles(
   const emitted = new Set<string>();
   for (const law of candidates) {
     for (const articleNum of articleNums) {
-      // curated に在る・既ヒット・多重は触らない（curated 母集団に委ねる／重複防止）。
-      if (CURATED_KEY_SET.has(`${law.lawShort}|${articleNum}`)) continue;
-      if (CURATED_KEY_SET.has(`${law.fullName}|${articleNum}`)) continue;
       if (hitKeys.has(`${law.lawShort}|${articleNum}`)) continue;
+      if (hitKeys.has(`${law.fullName}|${articleNum}`)) continue;
       const emitKey = `${law.egovLawId}|${articleNum}`;
       if (emitted.has(emitKey)) continue;
 
+      // 複数条を明示した比較質問では、通常検索が片方だけを返した場合に限り、
+      // 検証済み収録本文から不足条を補う。単一条の通常検索順位は変えない。
+      const curatedArticle =
+        articleNums.length > 1
+          ? verifiedLawArticles.find(
+              (article) =>
+                article.articleNum === articleNum &&
+                (article.lawShort === law.lawShort ||
+                  article.law === law.fullName),
+            )
+          : undefined;
+      if (curatedArticle) {
+        emitted.add(emitKey);
+        out.push(curatedArticle);
+        if (out.length >= 4) return out;
+        continue;
+      }
+
+      // 検証済みRAG本文に在る条は、単一条のフォールバックでは重複注入しない。
+      if (VERIFIED_KEY_SET.has(`${law.lawShort}|${articleNum}`)) continue;
+      if (VERIFIED_KEY_SET.has(`${law.fullName}|${articleNum}`)) continue;
+
       const fa = await resolveFulltextArticle(law.egovLawId, articleNum);
       if (!fa) continue;
+      const snapshot = await loadFulltextLaw(law.egovLawId);
+      if (!snapshot || !/^[a-f0-9]{64}$/.test(snapshot.sha256)) continue;
+      const contentHash = createHash("sha256")
+        .update(
+          JSON.stringify({
+            articleNum: fa.articleNum,
+            caption: fa.caption,
+            isDeleted: fa.isDeleted,
+            paragraphs: fa.paragraphs,
+            text: fa.text,
+            sortKey: fa.sortKey,
+          }),
+          "utf8",
+        )
+        .digest("hex");
 
       emitted.add(emitKey);
       out.push({
@@ -135,6 +172,15 @@ export async function resolveFulltextRagArticles(
         articleTitle: captionToTitle(fa.caption),
         text: fa.text,
         keywords: [],
+        sourceKind: "egov-fulltext-snapshot",
+        sourceUrl: `https://laws.e-gov.go.jp/law/${law.egovLawId}`,
+        sourceLawId: law.egovLawId,
+        sourceRevisionId: snapshot.revisionId,
+        sourceFetchedAt: snapshot.fetchedAt,
+        sourceHash: snapshot.sha256,
+        contentHash,
+        verificationStatus: "snapshot-hash-verified",
+        humanReviewStatus: "not-reviewed",
       });
       if (out.length >= 4) return out; // 直指定条の注入は少数に留める（文脈の希釈防止）。
     }

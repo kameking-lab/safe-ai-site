@@ -7,6 +7,9 @@ import {
   removeWorker,
   setWorkerHidden,
   visibleWorkers,
+  touchWorkers,
+  WORKER_MAX_RECORDS,
+  WORKER_RETENTION_DAYS,
   type Worker,
 } from "./workers-master";
 
@@ -36,6 +39,27 @@ describe("normalizeWorkers", () => {
     const out = normalizeWorkers([{ name: "A" }, { name: "" }, null, { name: "B" }]);
     expect(out.map((w) => w.name)).toEqual(["A", "B"]);
   });
+  it("最終利用から31日で期限切れになりcleanupは冪等", () => {
+    const now = Date.UTC(2026, 7, 1);
+    const day = 24 * 60 * 60 * 1000;
+    const raw = [
+      { name: "期限内", createdAt: now - (WORKER_RETENTION_DAYS * day - 1) },
+      { name: "期限切れ", createdAt: now - WORKER_RETENTION_DAYS * day },
+    ];
+    const once = normalizeWorkers(raw, now);
+    const twice = normalizeWorkers(once, now);
+    expect(once.map((worker) => worker.name)).toEqual(["期限内"]);
+    expect(twice).toEqual(once);
+  });
+  it("新しい順で安全上限までに制限する", () => {
+    const now = Date.UTC(2026, 7, 1);
+    const raw = Array.from({ length: WORKER_MAX_RECORDS + 5 }, (_, index) => ({
+      id: `w-${index}`,
+      name: `作業員${index}`,
+      createdAt: now - index,
+    }));
+    expect(normalizeWorkers(raw, now)).toHaveLength(WORKER_MAX_RECORDS);
+  });
 });
 
 describe("addWorker", () => {
@@ -44,9 +68,23 @@ describe("addWorker", () => {
     expect(list).toHaveLength(1);
     expect(list[0].name).toBe("山田");
     expect(list[0].id).toContain("w_");
+    expect(list[0].lastUsedAt).toBe(1000);
+    expect(list[0].expiresAt).toBeGreaterThan(1000);
   });
   it("氏名空は無視", () => {
     expect(addWorker([], { name: "  " })).toEqual([]);
+  });
+});
+
+describe("touchWorkers", () => {
+  it("明示利用時に全件を31日後まで更新する", () => {
+    const now = Date.UTC(2026, 7, 1);
+    const list = addWorker([], { name: "山田" }, now - 1000);
+    const touched = touchWorkers(list, now);
+    expect(touched[0].lastUsedAt).toBe(now);
+    expect(touched[0].expiresAt).toBe(
+      now + WORKER_RETENTION_DAYS * 24 * 60 * 60 * 1000,
+    );
   });
 });
 

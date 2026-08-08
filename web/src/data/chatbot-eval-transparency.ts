@@ -14,7 +14,8 @@
  * 3. 下記 CHATBOT_EVAL_TRANSPARENCY の数値・measuredAt・sourceDoc を更新
  * 4. 既知の重大欠陥が出た場合は knownDefects に1行で追記（空配列＝現時点で既知欠陥なし）
  *
- * 誇張禁止の約束: strictAccuracy は「自作の公開評価セット」での値。第三者検証はない。
+ * 誇張禁止の約束: strictAccuracy は「自作セットでの機械ルール一致率」であり、
+ * 回答の意味的正確性や全主張と引用の整合を示さない。第三者検証はない。
  * 網（質問数）を広げれば下がり得る（23問→51問拡張で一時95.7%へ低下→retrieval是正で
  * 100%回復の実績あり）。数字より「検出網＋ratchet台帳がある」ことが本質差。
  */
@@ -24,7 +25,7 @@ export interface ChatbotEvalTransparency {
   totalQuestions: number;
   /** うち採点対象（範囲内で正誤を採点した問） */
   scorableQuestions: number;
-  /** 採点対象のうち完全正答 */
+  /** 採点対象のうち機械採点ルールに一致した件数 */
   correct: number;
   /** strictAccuracy（correct / scorable、0〜1） */
   strictAccuracy: number;
@@ -37,7 +38,7 @@ export interface ChatbotEvalTransparency {
   baseUrl: string;
   /** 一次記録ドキュメントのパス */
   sourceDoc: string;
-  /** 既知の重大欠陥（ratchet台帳）。空＝現時点で既知欠陥なし。 */
+  /** 既知の重大欠陥（ratchet台帳）。 */
   knownDefects: readonly string[];
 }
 
@@ -51,7 +52,11 @@ export const CHATBOT_EVAL_TRANSPARENCY: ChatbotEvalTransparency = {
   measuredAt: "2026-07-11T16:48:57.181Z",
   baseUrl: "https://www.anzen-ai-portal.jp",
   sourceDoc: "docs/chatbot-genquality-51q-final-2026-07-11.json",
-  knownDefects: [],
+  knownDefects: [
+    "引用検証前のストリーム表示（2026-07-22是正）",
+    "条文別施行日のない場合に法令制定日を表示（2026-07-22是正）",
+    "機械採点が全主張と全引用の意味的支持を評価しない（評価方法の残課題）",
+  ],
 };
 
 /** strictAccuracy を百分率整数（丸め）で返す。 */

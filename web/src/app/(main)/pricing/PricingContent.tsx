@@ -82,7 +82,7 @@ const PLAN_FEATURES = {
       { ja: "法改正AI要約（無制限）", en: "Law update AI summaries (unlimited)" },
       { ja: "KY用紙 詳細モード・PDF出力", en: "KY form detailed mode + PDF export" },
       { ja: "特別教育 演習問題クイズ（全種）", en: "Special education quizzes (all types)" },
-      { ja: "気象リスク警報メール通知", en: "Weather alert email notifications" },
+      { ja: "気象リスク警報メール通知（準備中・料金対象外）", en: "Weather alert email notifications (coming soon; not billed)" },
       { ja: "メールサポート", en: "Email support" },
     ],
     limitations: [
@@ -171,7 +171,7 @@ const ANNUAL_PLANS: NewPlanCard[] = [
       { ja: "AIチャット・リスク予測（無制限）", en: "AI chat & risk prediction (unlimited)" },
       { ja: "KY用紙 詳細モード・PDF出力", en: "KY form detailed mode + PDF export" },
       { ja: "法改正AI要約（無制限）", en: "Law update AI summaries (unlimited)" },
-      { ja: "気象リスク警報メール通知", en: "Weather alert email notifications" },
+      { ja: "気象リスク警報メール通知（準備中・料金対象外）", en: "Weather alert email notifications (coming soon; not billed)" },
       { ja: "メールサポート", en: "Email support" },
       { ja: "年間一括払いで15%お得", en: "Save 15% with annual upfront billing" },
     ],
@@ -461,7 +461,7 @@ export function PricingContent() {
   const [activeTab, setActiveTab] = useState<PricingTab>("monthly");
 
   return (
-    <main className="mx-auto max-w-7xl px-4 py-8">
+    <div className="mx-auto max-w-7xl px-4 py-8">
       {/* Header */}
       <div className="text-center mb-10">
         <h1 className="text-2xl font-bold text-slate-900 dark:text-white sm:text-3xl">
@@ -590,7 +590,7 @@ export function PricingContent() {
                   <div className="mt-5">
                     {isFree ? (
                       <Link
-                        href="/api/auth/signin?callbackUrl=%2F"
+                        href="/auth/signin?callbackUrl=%2F"
                         className="block w-full rounded-xl bg-slate-800 dark:bg-slate-600 py-2.5 text-center text-sm font-bold text-white transition hover:bg-slate-700 dark:hover:bg-slate-500 active:scale-[0.98]"
                       >
                         {t("pricing.plan.free.cta")}
@@ -719,6 +719,6 @@ export function PricingContent() {
       <p className="mt-6 text-center text-xs text-slate-400 dark:text-slate-500">
         {t("pricing.note")}
       </p>
-    </main>
+    </div>
   );
 }

@@ -67,8 +67,13 @@ describe("slope-ratio-convert: compute", () => {
     expect(out.warnings.join("\n")).toContain("急勾配");
   });
 
-  it("常に掘削勾配チェック計算機への相互リンク注意を含む", () => {
+  it("隔離中の法令適合判定へ誘導せず、一次資料と現場条件の確認を促す", () => {
     const out = run({ from: "ratio", ratioN: 1.5 });
-    expect(out.warnings.join("\n")).toContain("掘削面の勾配チェック");
+    expect(out.warnings.join("\n")).toContain("e-Gov法令検索");
+    expect(out.warnings.join("\n")).toContain("現場条件");
+    expect(out.warnings.join("\n")).not.toContain("掘削面の勾配チェック");
+    expect(slopeRatioConvertCalculator.relatedSlugs).not.toContain(
+      "excavation-slope",
+    );
   });
 });

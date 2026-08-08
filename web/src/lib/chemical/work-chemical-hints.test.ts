@@ -40,9 +40,9 @@ describe("detectChemicalWork", () => {
     expect(detectChemicalWork("基板のはんだ付け").suggestedQuery).toBe("鉛");
   });
 
-  it("chemicalRaHref は suggestedQuery を name= に付与", () => {
+  it("chemicalRaHref は suggestedQuery をURLへ付与しない", () => {
     const h = detectChemicalWork("塗装作業");
-    expect(chemicalRaHref(h)).toBe("/chemical-ra?name=%E6%9C%89%E6%A9%9F%E6%BA%B6%E5%89%A4");
+    expect(chemicalRaHref(h)).toBe("/chemical-ra");
     expect(chemicalRaHref({ matched: false, keywords: [], suggestedQuery: null })).toBe("/chemical-ra");
   });
 });

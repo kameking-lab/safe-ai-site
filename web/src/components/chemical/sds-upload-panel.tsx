@@ -4,6 +4,7 @@ import { useCallback, useEffect, useId, useRef, useState } from "react";
 import Link from "next/link";
 import { Upload, FileText, Loader2, ArrowRight, Globe } from "lucide-react";
 import type { SdsExtraction } from "@/lib/chemical/sds-extraction";
+import { TransientChemicalLink } from "@/components/home-safety-cockpit/transient-chemical-link";
 import {
   CHEM_LANGS,
   CHEM_LANG_LABELS,
@@ -16,20 +17,9 @@ import {
 /**
  * P2-1 SDS取込み（Gemini Vision）UI。
  * SDSのPDF/画像をドラッグ&ドロップ → /api/chemical/sds-extract で抽出 → 要点を表示し、
- * /chemical-ra?name=… や物質DBへ誘導。抽出はAI生成のため「参考」（免責明示）。
+ * 同一タブの一時メモリで /chemical-ra や物質DBへ誘導。抽出はAI生成のため「参考」（免責明示）。
  * 既存RAパネルには非干渉のスタンドアロン・セクション。
  */
-async function fileToBase64(file: File): Promise<{ base64: string; mimeType: string }> {
-  const buf = await file.arrayBuffer();
-  let binary = "";
-  const bytes = new Uint8Array(buf);
-  const chunk = 0x8000;
-  for (let i = 0; i < bytes.length; i += chunk) {
-    binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
-  }
-  return { base64: btoa(binary), mimeType: file.type || "application/pdf" };
-}
-
 export function SdsUploadPanel() {
   const inputId = useId();
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -42,7 +32,8 @@ export function SdsUploadPanel() {
   const L = chemSdsLabels(lang);
 
   useEffect(() => {
-    setLang(readStoredChemLang());
+    const timer = window.setTimeout(() => setLang(readStoredChemLang()), 0);
+    return () => window.clearTimeout(timer);
   }, []);
 
   const handleFile = useCallback(async (file: File) => {
@@ -53,40 +44,17 @@ export function SdsUploadPanel() {
       setError("PDFまたは画像(PNG/JPEG/WebP)を選んでください。");
       return;
     }
-    setLoading(true);
-    try {
-      const { base64, mimeType } = await fileToBase64(file);
-      const res = await fetch("/api/chemical/sds-extract", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ pdfBase64: base64, mimeType }),
-      });
-      const data: unknown = await res.json();
-      if (!res.ok || !(data as { ok?: boolean })?.ok) {
-        const reason = (data as { reason?: string })?.reason ?? "error";
-        const msg: Record<string, string> = {
-          ai_not_configured: "AI未設定のため抽出できません。物質名で手入力してください。",
-          rate_limited: "短時間に多数の取込みがありました。少し待って再試行してください。",
-          file_too_large: "ファイルが大きすぎます（約6MBまで）。",
-          unsupported_type: "対応していない形式です（PDF/PNG/JPEG/WebP）。",
-          extract_failed: "SDSから情報を読み取れませんでした。鮮明なファイルでお試しください。",
-        };
-        setError(msg[reason] ?? "抽出に失敗しました。");
-        return;
-      }
-      setResult((data as { extracted: SdsExtraction }).extracted);
-    } catch {
-      setError("通信エラーが発生しました。");
-    } finally {
-      setLoading(false);
-    }
+    setLoading(false);
+    setError(
+      "SDSには担当者名・連絡先・署名等が含まれ得るため、送信前に内容を検査・匿名化できる機能が整うまで外部AIへのファイル送信を停止しています。製品名またはCAS番号で検索し、最新SDSを人が確認してください。"
+    );
   }, []);
 
   return (
     <section className="rounded-2xl border border-sky-200 bg-sky-50/60 p-4 sm:p-5 space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="flex items-center gap-2 text-base font-bold text-slate-900">
-          <FileText className="h-5 w-5 text-sky-600" aria-hidden="true" />
+          <FileText className="h-5 w-5 text-sky-700" aria-hidden="true" />
           {L.sdsTitle}
         </h2>
         <label className="flex items-center gap-1 text-xs text-slate-500">
@@ -110,6 +78,9 @@ export function SdsUploadPanel() {
         </label>
       </div>
       <p className="text-xs text-slate-600">{L.sdsDesc}</p>
+      <p className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs font-semibold leading-relaxed text-amber-950">
+        プライバシー保護のため、選択したファイルは現在サーバーや外部AIへ送信しません。会社名、担当者名、連絡先、署名を含むSDSはアップロードせず、下の検索導線をご利用ください。
+      </p>
 
       <label
         htmlFor={inputId}
@@ -128,7 +99,7 @@ export function SdsUploadPanel() {
           dragOver ? "border-sky-500 bg-sky-100" : "border-sky-300 bg-white/70 hover:bg-sky-50"
         }`}
       >
-        <Upload className="h-6 w-6 text-sky-500" aria-hidden="true" />
+        <Upload className="h-6 w-6 text-sky-700" aria-hidden="true" />
         <span className="text-sm font-semibold text-slate-700">
           {L.dropHint}
         </span>
@@ -188,24 +159,24 @@ export function SdsUploadPanel() {
           )}
           <div className="flex flex-wrap gap-2 pt-1">
             {(result.productName || result.cas) && (
-              <Link
-                href={`/chemical-ra?name=${encodeURIComponent(result.productName || result.cas)}`}
-                className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-700"
+              <TransientChemicalLink
+                query={result.productName || result.cas}
+                className="inline-flex items-center gap-1 rounded-lg bg-emerald-700 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-800"
               >
                 {L.runRa}
                 <ArrowRight className="h-3 w-3" aria-hidden="true" />
-              </Link>
+              </TransientChemicalLink>
             )}
             {result.cas && (
               <Link
-                href={`/chemical-database/${encodeURIComponent(result.cas)}`}
+                href="/chemical-database"
                 className="inline-flex items-center gap-1 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
               >
                 {L.seeRegs}
               </Link>
             )}
           </div>
-          <p className="text-[11px] leading-relaxed text-slate-400">
+          <p className="text-[11px] leading-relaxed text-slate-600">
             {L.aiDisclaimer}
           </p>
         </div>

@@ -2,7 +2,10 @@ import { AlertTriangle, ExternalLink, BarChart3 } from "lucide-react";
 import type { EducationContext } from "@/data/education-context";
 import type { AccidentCase } from "@/lib/types/domain";
 import { getAccidentCasesDataset } from "@/data/mock/accident-cases";
-import { resolveAccidentSource } from "@/lib/accident-source";
+import {
+  isAccidentEligibleForOperationalEvidence,
+  resolveAccidentSource,
+} from "@/lib/accident-source";
 
 type Props = {
   context: EducationContext;
@@ -37,7 +40,9 @@ function matchAccident(c: AccidentCase, ctx: EducationContext): number {
 
 export function AccidentsByCategory({ context, limit = 4 }: Props) {
   const colors = COLOR_MAP[context.color] ?? COLOR_MAP.amber;
-  const all = getAccidentCasesDataset();
+  const all = getAccidentCasesDataset().filter(
+    isAccidentEligibleForOperationalEvidence,
+  );
   const matched = all
     .map((c) => ({ c, score: matchAccident(c, context) }))
     .filter((x) => x.score > 0)

@@ -5,12 +5,13 @@
  *   新規env追加なし。Res.end Audience の購読者へ Broadcast 配信する。
  * - 個人情報保護: メアドのみ（Audienceで管理）。Resend の List-Unsubscribe による
  *   ワンクリック解除＋コンタクト削除に対応。本文末尾にも解除導線を必ず含める。
- * - 安全側設計: RESEND未設定 or ?preview=1 のときは送信せずダイジェスト内容を返す（検証用）。
- *   送信失敗時もダイジェスト内容を返し、例外でCronを落とさない。
+ * - 自動cronは停止中。送信には当月の明示的な運用許可が必要。
+ * - 同じ月名のBroadcastが既に存在する場合はfail-closedで重複作成しない。
  */
 import { NextResponse } from "next/server";
 import { buildNewsHubItems } from "@/lib/news-hub";
 import { buildMonthlyDigest } from "@/lib/news-digest";
+import { bearerAuthError, verifyBearerSecret } from "@/lib/server/bearer-auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -19,17 +20,13 @@ function currentMonthLabel(now = new Date()): string {
   return `${now.getFullYear()}年${now.getMonth() + 1}月`;
 }
 
+function currentPeriodKey(now = new Date()): string {
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+}
+
 export async function GET(request: Request) {
-  const cronSecret = process.env.CRON_SECRET;
-  const auth = request.headers.get("authorization");
-  // CRON_SECRET 設定時は Bearer 一致を要求
-  if (cronSecret && auth !== `Bearer ${cronSecret}`) {
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-  }
-  // 送信を許可するのは「CRON_SECRET が設定され、かつ Bearer 一致」の正規Cronのみ。
-  // CRON_SECRET 未設定や未認証の公開アクセスでは、メール送信せず内容プレビューのみ返す
-  // （公開エンドポイントからの一斉配信トリガを防止）。
-  const authed = Boolean(cronSecret) && auth === `Bearer ${cronSecret}`;
+  const auth = verifyBearerSecret(request, process.env.CRON_SECRET);
+  if (!auth.ok) return bearerAuthError(auth);
 
   const preview = new URL(request.url).searchParams.get("preview") === "1";
   const items = buildNewsHubItems();
@@ -38,37 +35,61 @@ export async function GET(request: Request) {
   const apiKey = process.env.RESEND_API_KEY;
   const audienceId = process.env.RESEND_AUDIENCE_ID;
   const from = process.env.NOTIFY_FROM;
+  const periodKey = currentPeriodKey();
 
-  // 送信できない/未認証/プレビュー時は内容のみ返す（個人情報を扱わない安全経路）
-  if (preview || !authed || !apiKey || !audienceId || !from) {
+  // 送信できない/プレビュー時は内容のみ返す（認証済み運用者専用）。
+  if (preview || !apiKey || !audienceId || !from) {
     return NextResponse.json({
       ok: true,
       sent: false,
-      reason: preview ? "preview" : !authed ? "unauthenticated_preview" : "resend_not_configured",
+      reason: preview ? "preview" : "resend_not_configured",
       subject: digest.subject,
       itemCount: items.length,
       textPreview: digest.text.slice(0, 600),
     });
   }
 
+  if (
+    process.env.NEWS_DIGEST_SEND_ENABLED !== "true" ||
+    process.env.NEWS_DIGEST_PERIOD !== periodKey
+  ) {
+    return NextResponse.json(
+      { ok: false, sent: false, reason: "delivery_disabled", periodKey },
+      { status: 503, headers: { "Cache-Control": "no-store" } },
+    );
+  }
+
   try {
     const { Resend } = await import("resend");
     const resend = new Resend(apiKey);
-    // Resend Broadcast: Audience 宛に作成して送信（List-Unsubscribe 自動付与）
+    const broadcastName = `anzen-ai-monthly-${periodKey}`;
+    const listed = await resend.broadcasts.list({ limit: 100 });
+    if (listed.error) throw new Error("broadcast_list_failed");
+    const existing = listed.data?.data.find((broadcast) => broadcast.name === broadcastName);
+    if (existing) {
+      return NextResponse.json(
+        { ok: false, sent: false, reason: "broadcast_already_exists", periodKey },
+        { status: 409, headers: { "Cache-Control": "no-store" } },
+      );
+    }
+
+    // Create+sendを1リクエストにまとめる。Broadcast API自体にIdempotency-Keyは
+    // ないため、定名照会と手動単発運用を併用する。
     const created = await resend.broadcasts.create({
       audienceId,
+      name: broadcastName,
       from,
       subject: digest.subject,
       html: digest.html,
+      send: true,
     });
-    const broadcastId = (created as { data?: { id?: string } }).data?.id;
-    if (broadcastId) {
-      await resend.broadcasts.send(broadcastId);
-    }
-    return NextResponse.json({ ok: true, sent: Boolean(broadcastId), broadcastId, subject: digest.subject });
-  } catch (e) {
-    // 送信失敗でもCronは成功扱い（次回再送）。内容は返す。
-    console.error("[news-digest] send failed:", e instanceof Error ? e.message : String(e));
-    return NextResponse.json({ ok: true, sent: false, reason: "send_error", subject: digest.subject });
+    if (created.error || !created.data?.id) throw new Error("broadcast_create_failed");
+    return NextResponse.json({ ok: true, sent: true, broadcastId: created.data.id, subject: digest.subject });
+  } catch {
+    console.error("[news-digest] delivery failed", { periodKey });
+    return NextResponse.json(
+      { ok: false, sent: false, reason: "send_error", subject: digest.subject },
+      { status: 502, headers: { "Cache-Control": "no-store" } },
+    );
   }
 }

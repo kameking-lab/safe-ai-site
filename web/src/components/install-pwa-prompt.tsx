@@ -1,8 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { HardHat } from "lucide-react";
-import { getUsageScore } from "@/lib/usage-tracker";
+import { getUsageScore, isWorkContextPath } from "@/lib/usage-tracker";
 import {
   detectInstallGuideKind,
   isStandaloneDisplay,
@@ -41,12 +42,19 @@ function isDismissedRecently(): boolean {
 }
 
 export function InstallPwaPrompt() {
+  const pathname = usePathname();
+  const workContext = isWorkContextPath(pathname);
   const [deferred, setDeferred] = useState<BeforeInstallPromptEvent | null>(null);
   // iOS は beforeinstallprompt が永久に発火しないため、UA判定で手動手順を案内する。
   const [iosGuide, setIosGuide] = useState<InstallGuideKind>("none");
   const [visible, setVisible] = useState(false);
+  const [interactionSuppressed, setInteractionSuppressed] = useState(false);
 
   useEffect(() => {
+    if (workContext) {
+      setVisible(false);
+      return;
+    }
     if (isDismissedRecently()) return;
     if (isStandaloneDisplay(window)) return; // すでにホーム画面起動なら不要
 
@@ -92,7 +100,45 @@ export function InstallPwaPrompt() {
       window.removeEventListener("appinstalled", installedHandler);
       window.clearInterval(interval);
     };
-  }, [deferred, iosGuide, visible]);
+  }, [deferred, iosGuide, visible, workContext]);
+
+  // 404/エラー/緊急表示とフォーム操作中は、作業を遮るPWA勧誘を表示しない。
+  useEffect(() => {
+    let formInteractionStarted = false;
+    const isFormControl = (target: EventTarget | null): target is HTMLElement =>
+      target instanceof HTMLElement &&
+      (target.matches("input, textarea, select, [contenteditable='true']") || Boolean(target.closest("form")));
+    const inspectBlockingUi = () => {
+      const blockingUi = document.querySelector(
+        "[data-suppress-pwa='true'], [data-next-error-h1], main [role='alert'], meta[name='robots'][content*='noindex']"
+      );
+      setInteractionSuppressed(
+        formInteractionStarted || Boolean(blockingUi) || isFormControl(document.activeElement)
+      );
+    };
+    const suppressForFormSession = (event: Event) => {
+      if (!isFormControl(event.target)) return;
+      // 入力開始後に blur しても、同じ画面滞在中は再表示しない。
+      // 入力途中の内容を覆う勧誘を防ぎ、次回のページ表示時だけ再判定する。
+      formInteractionStarted = true;
+      setInteractionSuppressed(true);
+    };
+    const onFocusOut = () => window.setTimeout(inspectBlockingUi, 0);
+    inspectBlockingUi();
+    const observer = new MutationObserver(inspectBlockingUi);
+    observer.observe(document.body, { childList: true, subtree: true });
+    document.addEventListener("focusin", suppressForFormSession);
+    document.addEventListener("input", suppressForFormSession);
+    document.addEventListener("change", suppressForFormSession);
+    document.addEventListener("focusout", onFocusOut);
+    return () => {
+      observer.disconnect();
+      document.removeEventListener("focusin", suppressForFormSession);
+      document.removeEventListener("input", suppressForFormSession);
+      document.removeEventListener("change", suppressForFormSession);
+      document.removeEventListener("focusout", onFocusOut);
+    };
+  }, []);
 
   const dismiss = useCallback(() => {
     setVisible(false);
@@ -120,7 +166,7 @@ export function InstallPwaPrompt() {
     }
   }, [deferred, dismiss]);
 
-  if (!visible) return null;
+  if (workContext || !visible || interactionSuppressed) return null;
 
   // iOS: prompt() が使えないため「共有 → ホーム画面に追加」の手動手順を案内する。
   if (!deferred && iosGuide !== "none") {

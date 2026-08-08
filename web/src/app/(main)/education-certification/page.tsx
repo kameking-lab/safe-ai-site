@@ -1,19 +1,17 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { LucideIcon } from "lucide-react";
-import { GraduationCap, BookOpen, ChevronRight, HardHat, Users, Award } from "lucide-react";
-import { PageHeader } from "@/components/page-header";
+import { BookOpen, HardHat, Users, Award } from "lucide-react";
 import { PageJsonLd } from "@/components/page-json-ld";
-import { CrossToolLinks } from "@/components/cross-tool-links";
-import { ConclusionCard } from "@/components/ui/conclusion-card";
 import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
 import { ogImageUrl } from "@/lib/og-url";
 import { getCertsByType, CERT_TYPE_LABELS, CERT_TYPE_COLORS } from "@/lib/education-cert-engine";
 import type { EducationCert } from "@/types/education-cert";
+import { UsageNotesLink } from "@/components/usage-notes-link";
 
-const TITLE = "特別教育・技能講習データベース｜業務別必要資格を自動判定";
+const TITLE = "特別教育・技能講習の候補検索｜適用条件を公式資料で確認";
 const DESCRIPTION =
-  "特別教育 60種類 一覧＆技能講習 40種データベース — フルハーネス・足場・低圧電気など安衛則第36条の特別教育と安衛法第76条の技能講習を業種・作業から即時判定。作業主任者 選任 種類・根拠条文・講習時間付き。";
+  "作業条件から特別教育、技能講習、作業主任者、免許の候補と講習時間を確認できます。";
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -81,8 +79,19 @@ function CertCard({ cert }: { cert: EducationCert }) {
       </div>
       <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">{cert.relatedLaw}</p>
       <p className="mt-1 text-xs text-slate-600 dark:text-slate-300">
-        <span className="font-medium">時間:</span> {cert.duration}
+        <span className="font-medium">講習時間:</span> {cert.duration}
       </p>
+      {cert.primarySources?.slice(0, 1).map((source) => (
+        <a
+          key={`${cert.id}-${source.url}`}
+          href={source.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-1 inline-flex min-h-[44px] items-center text-xs font-semibold text-blue-700 underline underline-offset-2 dark:text-blue-300"
+        >
+          公式原文
+        </a>
+      ))}
     </div>
   );
 }
@@ -126,85 +135,65 @@ export default function EducationCertificationPage() {
   return (
     <>
       <PageJsonLd
-        name="特別教育・技能講習データベース"
+        name="特別教育・技能講習の候補検索"
         description={DESCRIPTION}
         path="/education-certification"
-        keywords={["特別教育 60種類 一覧", "技能講習 40種 データベース", "フルハーネス 義務化 特別教育", "作業主任者 選任 種類", "安衛則第36条 特別教育"]}
+        keywords={["特別教育 候補検索", "技能講習 確認", "フルハーネス 特別教育", "作業主任者 適用条件", "資格 公式資料"]}
       />
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
-        <PageHeader
-          title="特別教育・技能講習データベース"
-          description="安衛則第36条・安衛法第76条に基づく全種目。業種・作業から必要資格を判定。"
-          icon={GraduationCap}
-          iconColor="blue"
-          badge="主要法令に対応"
-        />
-
-        <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
-          {/* 結論カード: いまの状態（収録数）＋次にやること（判定ツール） */}
-          <ConclusionCard
-            tone="info"
-            value={total}
-            unit="種"
-            title="必要資格データベース"
-            description="業種・作業を選ぶと必要な特別教育・技能講習・職長教育を自動判定。"
-            action={{ href: "/education-certification/finder", label: "資格を判定" }}
-            className="mb-6"
-          />
-
-          {/* デカ数字＋区分ピクトグラムのカウントタイル（タップで各一覧へ） */}
-          <section aria-label="資格区分別の収録数" className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
-            <CertCountTile certs={specialEd} type="special_education" />
-            <CertCountTile certs={skillTr} type="skill_training" />
-            <CertCountTile certs={jobChief} type="job_chief" />
-            <CertCountTile certs={licenses} type="license" />
-          </section>
-
-          {/* 法的根拠（文字ダイエット: 折りたたみへ格納・内容は不変＝法令正確性は不可侵） */}
-          <CollapsibleDetail summary="法的根拠について（特別教育・技能講習・職長教育・免許の違い）" className="mb-8">
-            <ul className="space-y-1.5">
-              <li><strong>特別教育</strong>（安衛法第59条第3項・安衛則第36条）: 危険有害業務に従事させる前に事業者が実施義務。修了証発行。</li>
-              <li><strong>技能講習（就業制限）</strong>（安衛法第61条・安衛令第20条）: 修了者または免許取得者のみが従事できる業務（就業制限）。</li>
-              <li><strong>職長教育</strong>（安衛法第60条・安衛則第40条）: 製造業等で新たに職長等となる者への義務教育。</li>
-              <li><strong>免許（国家試験）</strong>（安衛法第61条・安衛令第20条）: 国家試験合格が必要な最上位資格。技能講習修了では代替不可の業務（5t以上クレーン・潜水士等）。</li>
-              <li className="mt-2 font-semibold">本データは参考情報です。最新情報は各都道府県労働局・厚生労働省で必ずご確認ください。</li>
-            </ul>
-          </CollapsibleDetail>
-
-          {/* 区分別 一覧（ピクトグラム＋3色区分） */}
-          <CertSection type="special_education" certs={specialEd} />
-          <CertSection type="skill_training" certs={skillTr} />
-          <CertSection type="job_chief" certs={jobChief} />
-          <CertSection
-            type="license"
-            certs={licenses}
-            note="国家試験合格または都道府県労働局長による交付が必要。技能講習修了では代替できない就業制限業務の最上位資格。"
-          />
-
-          {/* Link to related pages */}
-          <section className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800">
-            <h3 className="mb-3 text-sm font-bold text-slate-800 dark:text-slate-200">関連ページ</h3>
-            <div className="flex flex-wrap gap-2">
-              {[
-                { href: "/education", label: "Eラーニング・法定教育コース" },
-                { href: "/law-search", label: "条文検索（安衛法・安衛則）" },
-                { href: "/chatbot", label: "安衛法AIチャット" },
-                { href: "/education-certification/finder", label: "業務別資格判定ツール" },
-              ].map((l) => (
-                <Link
-                  key={l.href}
-                  href={l.href}
-                  className="inline-flex min-h-[44px] items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-800 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:hover:border-blue-500 dark:hover:bg-blue-900/30 dark:hover:text-blue-300"
-                >
-                  {l.label}
-                  <ChevronRight className="h-3.5 w-3.5" aria-hidden />
-                </Link>
-              ))}
+        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
+          <header>
+            <div className="flex flex-wrap items-center gap-2">
+              <h1 className="text-3xl font-black tracking-tight text-slate-950 sm:text-4xl dark:text-white">作業から資格を確認</h1>
+              <span data-status-badge className="rounded-full bg-sky-100 px-2.5 py-1 text-xs font-bold text-sky-950">{total}種</span>
             </div>
-          </section>
-        </main>
+            <p data-page-description className="mt-2 text-sm leading-6 text-slate-700 dark:text-slate-200">作業条件から特別教育・技能講習・免許の候補を絞ります。</p>
+            <Link href="/education-certification/finder" prefetch={false} data-primary-action="true" className="mt-4 inline-flex min-h-11 items-center rounded-xl bg-blue-700 px-5 py-3 text-sm font-black text-white">資格候補を確認する</Link>
+          </header>
+
+          {/* 区分ピクトグラムから各一覧へ直接移動する。 */}
+          <details className="mb-8 mt-5 rounded-xl border border-slate-200 bg-white px-3 dark:border-slate-700 dark:bg-slate-900">
+            <summary className="flex min-h-11 cursor-pointer items-center text-sm font-bold">制度別一覧</summary>
+            <section id="certification-types" aria-label="資格区分別の収録数" className="grid scroll-mt-24 grid-cols-2 gap-3 border-t border-slate-200 py-3 sm:grid-cols-4 sm:gap-4">
+              <CertCountTile certs={specialEd} type="special_education" />
+              <CertCountTile certs={skillTr} type="skill_training" />
+              <CertCountTile certs={jobChief} type="job_chief" />
+              <CertCountTile certs={licenses} type="license" />
+            </section>
+            <div className="border-t border-slate-200 pt-5">
+              <CertSection type="special_education" certs={specialEd} />
+              <CertSection type="skill_training" certs={skillTr} />
+              <CertSection type="job_chief" certs={jobChief} />
+              <CertSection
+                type="license"
+                certs={licenses}
+                note="国家試験合格または都道府県労働局長による交付が必要。技能講習修了では代替できない就業制限業務の最上位資格。"
+              />
+            </div>
+            {/* 制度差と公式確認先は一覧を開いた人だけが必要時に読む。 */}
+            <CollapsibleDetail
+              summary="制度の違いと公式確認"
+              className="mb-4"
+            >
+              <ul className="space-y-1.5">
+                <li><strong>特別教育</strong>（安衛法第59条第3項・安衛則第36条）: 対象業務と実施内容を現行条文で確認します。</li>
+                <li><strong>技能講習（就業制限）</strong>（安衛法第61条・安衛令第20条）: 修了者または免許取得者のみが従事できる業務（就業制限）。</li>
+                <li><strong>職長教育</strong>（安衛法第60条・安衛則第40条）: 製造業等で新たに職長等となる者への義務教育。</li>
+                <li><strong>免許・就業制限</strong>（安衛法第61条・安衛令第20条）: 業務、能力、方式ごとの区分を現行条文と公式案内で確認します。</li>
+              </ul>
+              <nav aria-label="関連情報" className="mt-4 flex flex-wrap gap-x-5 gap-y-1 border-t border-slate-200 pt-3">
+                <Link href="/law-search" className="inline-flex min-h-11 items-center text-sm font-semibold text-blue-700 underline underline-offset-4">
+                  条文検索
+                </Link>
+                <Link href="/chatbot" className="inline-flex min-h-11 items-center text-sm font-semibold text-blue-700 underline underline-offset-4">
+                  安衛法AI
+                </Link>
+              </nav>
+            </CollapsibleDetail>
+          </details>
+          <UsageNotesLink className="mb-6 inline-flex min-h-11 items-center text-blue-700" />
+        </div>
       </div>
-      <CrossToolLinks exclude="education-certification" />
     </>
   );
 }

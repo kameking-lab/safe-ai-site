@@ -1,4 +1,5 @@
-export type { LawArticle } from "./law-types";
+export type { LawAmendmentHistoryEntry, LawArticle } from "./law-types";
+export { egovVerifiedExcerpts } from "./egov-verified-excerpts.generated";
 export { LAW_METADATA, getLawMetadata, type LawMetadata } from "./law-metadata";
 export { rodoAnzenEiseiHo } from "./rodo-anzen-eisei-ho";
 export { rodoAnzenEiseiHoSikokiregu } from "./rodo-anzen-eisei-ho-sikokiregu";
@@ -56,8 +57,6 @@ export { kensetsuRosaiBoshiKitei } from "./kensetsu-rosai-boshi-kitei";
 export { kowanRodoHo } from "./kowan-rodo-ho";
 export { seninAnzenEiseiKisoku } from "./senin-anzen-eisei-kisoku";
 
-import { mhlwLawArticles } from "./mhlw-extras";
-import { corpusGapFillArticles } from "./corpus-gaps-fill";
 import { enKisoku } from "./en-kisoku";
 import { shiAlkylEnKisoku } from "./shi-alkyl-en-kisoku";
 import { jimushoEiseiKijunKisoku } from "./jimusho-eisei-kijun-kisoku";
@@ -109,9 +108,10 @@ import { shokuhinEiseiHo } from "./shokuhin-eisei-ho";
 import { kensetsuRosaiBoshiKitei } from "./kensetsu-rosai-boshi-kitei";
 import { kowanRodoHo } from "./kowan-rodo-ho";
 import { seninAnzenEiseiKisoku } from "./senin-anzen-eisei-kisoku";
+import { egovVerifiedExcerpts } from "./egov-verified-excerpts.generated";
 
 /** 全法令条文をまとめた配列（50法令体制） */
-export const allLawArticles = [
+const curatedLawArticles = [
   ...rodoAnzenEiseiHo,
   ...rodoAnzenEiseiHoSikokiregu,
   ...anzenEiseiKisoku,
@@ -146,13 +146,16 @@ export const allLawArticles = [
   ...ashibaSagyoKisoku,
   ...kajuRodoTaisaku,
   ...koyoKintoHo,
-  ...mhlwLawArticles,
+  // mhlw-extras はPDF OCR断片384件の文書種別・条番号・本文一致を人手検証
+  // できていないため、公開検索・RAG共通コーパスには混ぜない。データは
+  // mhlw-extras.ts から監査用にのみexportし、検証済みallowlistができるまで隔離する。
   ...enKisoku,
   ...shiAlkylEnKisoku,
   ...jimushoEiseiKijunKisoku,
   ...kikaiKenteiKisoku,
   ...hakenAnzenEisei,
-  ...corpusGapFillArticles,
+  // corpus-gaps-fill は逐語条文ではなく評価不足を補う要旨として作成されたため、
+  // 公開法令検索・RAG引用コーパスには混ぜない。監査用exportのみ維持する。
   ...karoshiBoshiHo,
   ...rosaiBoshiDantaiHo,
   ...kenkoZoshinHo,
@@ -167,18 +170,37 @@ export const allLawArticles = [
   ...seninAnzenEiseiKisoku,
 ];
 
+const verifiedLawArticleKeys = new Set(
+  egovVerifiedExcerpts.map(
+    (article) => `${article.lawShort}|${article.articleNum}`,
+  ),
+);
+
+/**
+ * 公開検索用の収録集合。未確認curated条文は検索索引として残すが、同じ条番号に
+ * hash確認済み本文がある場合は必ず確認済み側を優先する。
+ *
+ * 注意: この配列全体をAI回答・引用の根拠にしてはならない。AI経路は
+ * `@/data/laws/verified-corpus` の `verifiedLawArticles` だけを使うこと。
+ */
+export const allLawArticles = [
+  ...curatedLawArticles.filter(
+    (article) =>
+      !verifiedLawArticleKeys.has(`${article.lawShort}|${article.articleNum}`),
+  ),
+  ...egovVerifiedExcerpts,
+];
+
 /**
  * RAG コーパスの「curated 中核」法令・規則・指針の数（distinct `law` 値）。
  * 実データから算出するためドリフトしない。
  *
  * 算出方針（捏造防止・水増し防止）:
  *   - 専用の curated 法令データファイルの distinct `law` を数える。
- *   - mhlw-extras（compact.json = 厚労省PDF抽出の補完ソース）は除外。RAG検索の補完用で
- *     `law` 値が「化学物質管理関連通達」等の文書バンドル名のため、個別法令としては数えない。
+ *   - mhlw-extras（compact.json = 厚労省PDF OCR断片）は公開コーパス自体から隔離。
  * 内訳(2026-05 実測): 法令・規則(命令) 47 ＋ 指針/ガイドライン/通達 8 = 計 55。
  * 表記は「法令・規則・指針等」と総称する（全てが狭義の「法令」ではないため）。
  */
-const _mhlwExtraSet = new Set<unknown>(mhlwLawArticles);
 export const LAW_SOURCE_COUNT: number = new Set(
-  allLawArticles.filter((a) => !_mhlwExtraSet.has(a)).map((a) => a.law)
+  allLawArticles.map((a) => a.law)
 ).size;

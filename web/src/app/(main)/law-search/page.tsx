@@ -1,19 +1,23 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { LawSearchPanel } from "@/components/law-search-panel";
-import { RelatedPageCards } from "@/components/related-page-cards";
-import { LawHubNav } from "@/components/law-hub-nav";
 import { ogImageUrl } from "@/lib/og-url";
+import Link from "next/link";
 
 import { PageJsonLd } from "@/components/page-json-ld";
-import { LAW_SOURCE_COUNT } from "@/data/laws";
-import { SITE_STATS } from "@/data/site-stats";
-const _title = "安全衛生法令 条文全文検索（厚労省公式PDF対応）";
+import { PageContainer } from "@/components/layout/page-container";
+import {
+  NoScriptLawSearch,
+  safeArticleParam,
+  safeLawParam,
+} from "./law-search-noscript";
+const _title = "安全衛生法令 条文検索（e-Gov正本確認付き）";
 const _desc =
-  `安衛則・特化則・有機則など全${LAW_SOURCE_COUNT}の法令・規則・指針等の条文を全文検索 — 熱中症対策（安衛則612条の2）・フルハーネス義務化・化学物質 自律的管理の改正条文も含む。条番号・キーワード・法令名で絞り込み可能。厚労省公式PDF対応。`;
+  "収録済みの安全衛生法令索引を、条番号・キーワード・法令名で検索できます。結果ごとの検証状態を確認し、判断前にe-Gov法令検索で現行条文と施行日を確認します。";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/law-search" },
+  referrer: "no-referrer",
   title: _title,
   description: _desc,
   openGraph: {
@@ -27,48 +31,64 @@ export const metadata: Metadata = {
   },
 };
 
-export default function LawSearchPage() {
+type LawSearchPageProps = {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
+
+export default async function LawSearchPage({
+  searchParams,
+}: LawSearchPageProps) {
+  const params = await searchParams;
+  // 自由質問や現場情報をURLから入力欄へ復元しない。構造化値だけを扱う。
+  const initialQuery = "";
+  const initialArticleNumQuery = safeArticleParam(params.art);
+  const initialSelectedLaw = safeLawParam(params.law);
+
   return (
     <>
-      <PageJsonLd name="法令条文検索" description="労働安全衛生法・関連政令・省令の条文を全文検索。条文間の参照リンクも追跡。" path="/law-search" />
-      <LawHubNav current="law-search" />
+      <PageJsonLd name="法令収録条文検索" description="サイトに収録した労働安全衛生法・関連政令・省令の条文索引を検索し、e-Gov正本へ案内します。" path="/law-search" />
+      <PageContainer>
+        <header className="pb-4 pt-6 sm:pt-9">
+          <p className="text-xs font-black tracking-[.14em] text-emerald-800">法令・資格</p>
+          <h1 className="mt-1 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">法令・条文を検索</h1>
+          <p className="mt-2 text-sm leading-6 text-slate-700">キーワード、条番号、法令名で検索できます。</p>
+        </header>
+      </PageContainer>
+      <noscript>
+        <style>{`#law-search-js { display: none !important; }`}</style>
+        <NoScriptLawSearch
+          selectedLaw={initialSelectedLaw}
+          articleNumber={initialArticleNumQuery}
+        />
+      </noscript>
+      <div id="law-search-js">
       <Suspense
         fallback={
-          <div className="mx-auto max-w-7xl space-y-3 px-4 py-6">
+          <div
+            className="mx-auto min-h-[70vh] max-w-7xl space-y-3 px-4 py-6"
+            aria-busy="true"
+            aria-label="法令収録条文検索を読み込み中"
+          >
             <div className="h-8 w-2/3 animate-pulse rounded bg-slate-200" />
             <div className="h-10 animate-pulse rounded-lg bg-slate-100" />
             <div className="h-40 animate-pulse rounded-lg bg-slate-100" />
           </div>
         }
       >
-        <LawSearchPanel />
+        <LawSearchPanel
+          initialQuery={initialQuery}
+          initialArticleNumQuery={initialArticleNumQuery}
+          initialSelectedLaw={initialSelectedLaw}
+        />
       </Suspense>
-      <RelatedPageCards
-        heading="合わせて使う"
-        pages={[
-          {
-            href: "/circulars",
-            label: "通達・判例 解説",
-            description: `条文を補完する行政解釈 ${SITE_STATS.mhlwNoticeCount}件 と最高裁判例 ${SITE_STATS.courtPrecedentCount}件の統合一覧。`,
-            color: "amber",
-            cta: "通達と判例",
-          },
-          {
-            href: "/laws/glossary",
-            label: "法令用語集",
-            description: "公布／施行／告示／通達／指針の違いと拘束力を一次出典付きで解説。",
-            color: "purple",
-            cta: "用語を確認",
-          },
-          {
-            href: "/resources",
-            label: "厚労省一次資料DB",
-            description: `条文を補強する告示・指針・リーフレットを ${SITE_STATS.mhlwResourcesTotalCount}件横断検索。`,
-            color: "emerald",
-            cta: "一次資料を開く",
-          },
-        ]}
-      />
+      </div>
+      <PageContainer>
+        <nav aria-label="法令検索の関連操作" className="mt-20 flex flex-wrap gap-x-5 gap-y-1">
+          <a href="https://laws.e-gov.go.jp/" target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center text-sm font-bold text-brand-primary underline underline-offset-4">e-Govで原文を開く</a>
+          <Link href="/chatbot" prefetch={false} className="inline-flex min-h-11 items-center text-sm font-bold text-brand-primary underline underline-offset-4">条件を含めて質問する</Link>
+          <Link href="/about/usage-notes" prefetch={false} className="inline-flex min-h-11 items-center text-sm font-bold text-brand-primary underline underline-offset-4">注意事項</Link>
+        </nav>
+      </PageContainer>
     </>
   );
 }

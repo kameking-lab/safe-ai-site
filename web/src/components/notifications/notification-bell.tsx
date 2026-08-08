@@ -27,6 +27,11 @@ import { maybeShowOsNotifications } from "@/lib/notifications/os-notify";
  */
 
 const POLL_INTERVAL_MS = 15 * 60 * 1000;
+/**
+ * 通知フィードは主要見出しの描画に不要で、全ページ共通の約20KB応答になる。
+ * ベルを開いた場合は待たずに取得し、未操作時だけ初期描画・hydrationの後へ回す。
+ */
+const INITIAL_REFRESH_DELAY_MS = 10 * 1000;
 /** app-shell はモバイル/PC用に本コンポーネントを2箇所マウントするため、
  *  同一ページ内の重複フェッチをモジュールキャッシュで1本化する（60秒共有）。 */
 const FETCH_SHARE_MS = 60 * 1000;
@@ -65,35 +70,70 @@ function formatDate(date: string): string {
   return `${Number(m[2])}/${Number(m[3])}`;
 }
 
-export function NotificationBell() {
-  const [open, setOpen] = useState(false);
+export function NotificationBell({
+  initialOpen = false,
+}: {
+  initialOpen?: boolean;
+}) {
+  const [open, setOpen] = useState(initialOpen);
   const [items, setItems] = useState<SiteNotification[]>([]);
+  const [weatherSource, setWeatherSource] =
+    useState<NotificationFeedResponse["weatherSource"] | null>(null);
   const [readIds, setReadIds] = useState<Set<string>>(new Set());
   const [loaded, setLoaded] = useState(false);
   const panelRef = useRef<HTMLDivElement | null>(null);
+  const initialRefreshStartedRef = useRef(false);
 
   const refresh = useCallback(async () => {
     const settings = loadNotificationSettings();
     const data = await fetchFeedShared(settings.prefectureIso);
-    if (!data) return; // オフライン等は次回ポーリングに任せる
+    if (!data) {
+      setItems([]);
+      setWeatherSource({
+        status: settings.prefectureIso ? "unavailable" : "not-requested",
+        fetchedAt: null,
+        sourceUrl: "https://www.jma.go.jp/bosai/warning/",
+      });
+      setLoaded(true);
+      return;
+    }
     const list = Array.isArray(data.items) ? data.items : [];
     setItems(list);
+    setWeatherSource(data.weatherSource);
     setLoaded(true);
     // 警報級の新着はOS通知（設定ON＋許可済みのときのみ。既読・通知済みは除外）
     maybeShowOsNotifications(list);
   }, []);
 
+  const startInitialRefresh = useCallback(() => {
+    if (initialRefreshStartedRef.current) return;
+    initialRefreshStartedRef.current = true;
+    void refresh();
+  }, [refresh]);
+
+  useEffect(() => {
+    if (!initialOpen) return;
+    const timer = window.setTimeout(startInitialRefresh, 0);
+    return () => window.clearTimeout(timer);
+  }, [initialOpen, startInitialRefresh]);
+
   useEffect(() => {
     // 初期既読状態（SSRでは空→マウント後に実値。バッジはマウント後のみ描画）
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setReadIds(loadReadIds());
-    void refresh();
+    const initialTimer = window.setTimeout(
+      startInitialRefresh,
+      INITIAL_REFRESH_DELAY_MS,
+    );
     const timer = window.setInterval(() => {
       if (document.visibilityState === "hidden") return;
       void refresh();
     }, POLL_INTERVAL_MS);
-    return () => window.clearInterval(timer);
-  }, [refresh]);
+    return () => {
+      window.clearTimeout(initialTimer);
+      window.clearInterval(timer);
+    };
+  }, [refresh, startInitialRefresh]);
 
   // パネル外クリックで閉じる
   useEffect(() => {
@@ -129,7 +169,11 @@ export function NotificationBell() {
     <div className="relative" ref={panelRef}>
       <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => {
+          const next = !open;
+          setOpen(next);
+          if (next && !loaded) startInitialRefresh();
+        }}
         aria-haspopup="dialog"
         aria-expanded={open}
         aria-label={`通知センター${loaded && unread.length > 0 ? `（未読${unread.length}件）` : ""}`}
@@ -171,6 +215,30 @@ export function NotificationBell() {
           </div>
           <ul className="max-h-[52vh] overflow-y-auto">
             {!loaded && <li className="p-4 text-xs text-slate-500">読み込み中…</li>}
+            {loaded &&
+              weatherSource &&
+              (weatherSource.status === "degraded" ||
+                weatherSource.status === "unavailable") && (
+                <li
+                  role="alert"
+                  className="border-l-4 border-amber-500 bg-amber-50 p-3 text-xs leading-5 text-amber-950 dark:bg-amber-950/40 dark:text-amber-100"
+                >
+                  <p className="font-bold">
+                    気象庁の警報状態を現在値として確認できません
+                  </p>
+                  <p>
+                    警報なしとは判断せず、気象庁の公式ページで確認してください。
+                  </p>
+                  <a
+                    href={weatherSource.sourceUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex min-h-11 items-center font-bold underline"
+                  >
+                    気象庁の警報・注意報を確認する
+                  </a>
+                </li>
+              )}
             {loaded && items.length === 0 && <li className="p-4 text-xs text-slate-500">新しい通知はありません。</li>}
             {items.slice(0, 30).map((n) => {
               const isRead = readIds.has(n.id);

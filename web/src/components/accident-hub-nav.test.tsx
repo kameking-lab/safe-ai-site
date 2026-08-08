@@ -1,21 +1,28 @@
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { AccidentHubNav } from "./accident-hub-nav";
+import { isPublicRouteAvailable } from "@/lib/public-content-policy";
 
 describe("AccidentHubNav", () => {
-  it("4つの事故系ルートを全て表示", () => {
-    render(<AccidentHubNav current="accidents" />);
+  it("重大災害情報だけを表示し、全面隔離中の事故DB・分析ルートを出さない", () => {
+    render(<AccidentHubNav current="accident-news" />);
     const links = screen.getAllByRole("link").map((a) => a.getAttribute("href"));
-    expect(links).toContain("/accidents");
-    expect(links).toContain("/accidents-reports");
-    expect(links).toContain("/accidents-analytics");
-    expect(links).toContain("/accident-news");
+    expect(links).toEqual(["/accident-news"]);
+    expect(links).not.toContain("/accidents");
+    expect(links).not.toContain("/accidents-reports");
+    expect(links).not.toContain("/accidents-analytics");
+    expect(isPublicRouteAvailable("/accidents")).toBe(true);
+    expect(isPublicRouteAvailable("/accidents/example-id")).toBe(false);
+    for (const href of links) {
+      expect(href).not.toBeNull();
+      expect(isPublicRouteAvailable(href!)).toBe(true);
+    }
   });
 
   it("現在ページに aria-current=page を付与", () => {
-    render(<AccidentHubNav current="accidents-analytics" />);
+    render(<AccidentHubNav current="accident-news" />);
     const current = screen.getByRole("link", { current: "page" });
-    expect(current.getAttribute("href")).toBe("/accidents-analytics");
+    expect(current.getAttribute("href")).toBe("/accident-news");
   });
 
   it("現在ページの役割説明を表示", () => {
@@ -23,25 +30,19 @@ describe("AccidentHubNav", () => {
     expect(screen.getAllByText(/公表事実・匿名・出典付き/).length).toBeGreaterThan(0);
   });
 
-  // r2-01: 件数表記の正確化ガード。「約5,000件」は統計ダッシュボードに帰属し、
-  // /accidents(詳細事例292件)を「約5,000件」と過大表現しないこと。
-  it("事故DB検索(/accidents)の説明は約5,000件と過大表現しない", () => {
-    const { container } = render(<AccidentHubNav current="accidents" />);
+  it("公開情報の出典区分を示し、事故DB名や未検証件数を表示しない", () => {
+    const { container } = render(<AccidentHubNav current="accident-news" />);
     expect(container.textContent).not.toMatch(/5,000/);
-    expect(screen.getByText(/出典付き/)).toBeDefined();
-  });
-
-  it("統計ダッシュボードの説明が約5,000件の可視化を明示", () => {
-    render(<AccidentHubNav current="accidents-analytics" />);
-    expect(screen.getByText(/約5,000件.*可視化/)).toBeDefined();
+    expect(container.textContent).not.toContain("事故DB検索");
+    expect(screen.getAllByText(/公表事実・匿名・出典付き/).length).toBeGreaterThan(0);
   });
 
   // 柱0: 事故系ナビは初訪の現場ペルソナが最上部でタップする入口。
   // 全リンクが 44px タップ標的を満たす（px-3 py-1 ≈28px への退行を防ぐ）。
-  it("4ルートのナビチップが全て min-h-[44px] タップ標的", () => {
-    render(<AccidentHubNav current="accidents" />);
+  it("公開中ルートのナビチップが min-h-[44px] タップ標的", () => {
+    render(<AccidentHubNav current="accident-news" />);
     const links = screen.getAllByRole("link");
-    expect(links).toHaveLength(4);
+    expect(links).toHaveLength(1);
     for (const a of links) {
       expect(a.className).toContain("min-h-[44px]");
     }

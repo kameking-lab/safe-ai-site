@@ -4,11 +4,12 @@ import { ogImageUrl } from "@/lib/og-url";
 
 const TITLE = "KY 朝礼サイネージ表示";
 const DESC =
-  "KY用紙の内容を全画面・大型フォントで表示し、朝礼での唱和に使うためのサイネージモード。6桁の共有コードで別端末からも映せます。";
+  "この端末に保存したKY用紙の内容を全画面・大型フォントで表示し、朝礼での唱和に使うためのサイネージモードです。別端末共有は安全性の再検証中です。";
 
 export const metadata: Metadata = {
   title: TITLE,
   description: DESC,
+  robots: { index: false, follow: true },
   alternates: { canonical: "/ky/morning" },
   // 兄弟ページ（/ky/paper・/ky/workers）と揃え、LINE等で共有した際のプレビューを整える。
   openGraph: {

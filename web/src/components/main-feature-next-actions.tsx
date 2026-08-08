@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, BookOpen, ClipboardCheck, FileText, MessageSquare } from "lucide-react";
+import { isPublicRouteAvailable } from "@/lib/public-content-policy";
 
 /**
  * メイン3機能 (chatbot / chemical-ra / plan-generator) の結果画面下部に共通配置する
@@ -51,7 +52,7 @@ export function MainFeatureNextActions({
       key: "chemical-ra",
       href: "/chemical-ra",
       label: "化学物質RAを実施",
-      desc: "CREATE-SIMPLE 簡易判定",
+      desc: "公的情報・SDS確認",
       icon: BookOpen,
       color: "border-amber-300 bg-amber-50 text-amber-900",
     },
@@ -64,7 +65,9 @@ export function MainFeatureNextActions({
       color: "border-rose-300 bg-rose-50 text-rose-900",
     },
   ];
-  const visible = actions.filter((a) => a.key !== exclude);
+  const visible = actions.filter(
+    (a) => a.key !== exclude && isPublicRouteAvailable(a.href),
+  );
   return (
     <section
       aria-labelledby="next-actions-heading"

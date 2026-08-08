@@ -1,51 +1,135 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { AlertTriangle, BookOpen, Database, FileText, FlaskConical, FolderOpen, Gauge, Printer, Shield, ShoppingBag } from "lucide-react";
+import { AlertTriangle, BookOpen, Database, FileText, FlaskConical, FolderOpen, Gauge, Printer } from "lucide-react";
 import { TextareaWithVoice } from "@/components/voice-input-field";
-import { generateAmazonAffiliateUrl, generateRakutenSearchUrl } from "@/lib/affiliate-url";
-import { MhlwChemicalInfoCard } from "@/components/mhlw-chemical-info-card";
-import { SimpleMarkdown } from "@/components/simple-markdown";
-import { ContextualPpePicks } from "@/components/ContextualPpePicks";
 import { getChemicalKeyPoints, hasKeyPoints } from "@/lib/chemical/key-points";
 import { auditedRegulationTags, type LegalProfileTagSource } from "@/lib/chemical/legal-profile-tags";
 import { ChemicalRaReportHeader, ChemicalRaSignoffBoxes } from "@/components/chemical/chemical-ra-report-print";
-import { ChemicalRaSaveButton } from "@/components/chemical/chemical-ra-save";
-import { getChemicalRaRecord } from "@/lib/chemical/ra-cloud";
+import {
+  createChemicalRaRecordPayload,
+  getChemicalRaRecord,
+  inspectChemicalRaRecordPayload,
+  type ChemicalRaDispersion,
+  type ChemicalRaFrequency,
+  type ChemicalRaPayloadInspection,
+  type ChemicalRaPpeSuitability,
+  type ChemicalRaSdsStatus,
+  type ChemicalRaSnapshotMissingField,
+  type ChemicalRaSubstitutionStatus,
+  type ChemicalRaTriState,
+} from "@/lib/chemical/ra-cloud";
 import { MainFeatureNextActions } from "@/components/main-feature-next-actions";
 import type { MergedChemical } from "@/lib/mhlw-chemicals";
 import { UnifiedChemicalSearch, type LegalNameHit } from "@/components/chemical/unified-chemical-search";
-import { LegalConclusionCard } from "@/components/chemical/legal-conclusion-card";
+import { TransientChatLink } from "@/components/home-safety-cockpit/transient-chat-link";
+import { useTransientQueryBridge } from "@/components/home-safety-cockpit/transient-query-bridge";
 import {
-  findByCasSlim as findByCas,
-  searchMergedChemicalsSlim as searchMergedChemicals,
-} from "@/lib/mhlw-chemicals-slim";
-import { getSupplementalInfo } from "@/lib/chemical/supplemental-info";
-import { findChemicalEquipmentProfile } from "@/lib/chemical-equipment-mapping";
+  findChemicalByCas,
+  searchChemicalCatalog,
+} from "@/lib/chemical/search-client";
 import type {
   ChemicalRaResponse,
   GhsHazard,
-  PpeRecommendation,
   SafetyMeasure,
 } from "@/app/api/chemical-ra/route";
 import { trackEvent } from "@/components/Analytics";
-import { RaConclusionCard } from "@/components/chemical/ra-conclusion";
 import { GhsPictogram } from "@/components/chemical/ghs-pictogram";
 import { resolveGhsSymbol } from "@/lib/chemical/ghs-pictogram-map";
-import { PpePictogram } from "@/components/equipment/ppe-pictogram";
-import { resolvePpeItemIcon } from "@/lib/equipment/ppe-pictogram-map";
-import { Mascot } from "@/components/mascot";
+import { UsageNotesLink } from "@/components/usage-notes-link";
+import { sanitizeChemicalRaResponse } from "@/lib/chemical/response-safety";
+import { parseExposureLimit } from "@/lib/chemical/concentration-comparison";
+import { inspectChemicalNavigationQuery } from "@/lib/chemical/query-safety";
+import { fetchChemicalLegalProfile } from "@/lib/chemical/legal-profile-client";
+import { KyHandoffLink } from "@/components/ky-handoff-link";
 
-// 保護具AIファインダーへの連携URL（必要保護具のカテゴリ・ハザードを引き継ぐ）
-function buildEquipmentHref(chemicalName: string): string {
-  const profile = findChemicalEquipmentProfile(chemicalName);
-  const params = new URLSearchParams({ chemical: chemicalName });
-  if (profile) {
-    params.set("hazards", profile.hazards.join(","));
-    params.set("categories", profile.recommendedCategories.join(","));
-  }
-  return `/equipment-finder?${params.toString()}`;
-}
+const ChemicalRaSaveButton = dynamic(
+  () =>
+    import("@/components/chemical/chemical-ra-save").then((module) => ({
+      default: module.ChemicalRaSaveButton,
+    })),
+  {
+    ssr: false,
+    loading: () => (
+      <span className="inline-flex min-h-[44px] items-center rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-xs font-bold text-slate-600">
+        保存機能を読み込み中…
+      </span>
+    ),
+  },
+);
+
+const ChemicalPpeSelectionBoundary = dynamic(
+  () =>
+    import("@/components/chemical/chemical-ppe-selection-boundary").then(
+      (module) => module.ChemicalPpeSelectionBoundary,
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <p
+        role="status"
+        className="rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-700"
+      >
+        保護具選定の安全境界を読み込んでいます。
+      </p>
+    ),
+  },
+);
+
+const MhlwChemicalInfoCard = dynamic(
+  () =>
+    import("@/components/mhlw-chemical-info-card").then(
+      (module) => module.MhlwChemicalInfoCard,
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <p
+        role="status"
+        className="rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-700"
+      >
+        収録済みの公的物質情報を読み込んでいます。
+      </p>
+    ),
+  },
+);
+
+const LegalConclusionCard = dynamic(
+  () =>
+    import("@/components/chemical/legal-conclusion-card").then(
+      (module) => module.LegalConclusionCard,
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <p
+        role="status"
+        className="rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-700"
+      >
+        法的位置付けと一次資料リンクを確認しています。
+      </p>
+    ),
+  },
+);
+
+const RaConclusionCard = dynamic(
+  () =>
+    import("@/components/chemical/ra-conclusion").then(
+      (module) => module.RaConclusionCard,
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <p
+        role="status"
+        className="rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-700"
+      >
+        評価結果の安全境界を読み込んでいます。
+      </p>
+    ),
+  },
+);
 
 // ────────────────────────────────────────────────────────────
 // GHSピクトグラム（絵文字ベース）
@@ -94,41 +178,6 @@ function GhsHazardCard({ hazard }: { hazard: GhsHazard }) {
   );
 }
 
-function PpeCard({ ppe }: { ppe: PpeRecommendation }) {
-  const icon = resolvePpeItemIcon(ppe.item) ?? "shield";
-  return (
-    <div className="rounded-lg border border-emerald-100 bg-emerald-50 p-3">
-      <div className="flex items-start gap-2.5">
-        <PpePictogram icon={icon} className="print:hidden" />
-        <div className="min-w-0 flex-1">
-          <p className="text-sm font-bold text-slate-900">{ppe.item}</p>
-          <p className="mt-0.5 text-xs text-slate-600">{ppe.specification}</p>
-          <div className="mt-2 flex gap-1.5">
-            <a
-              href={generateAmazonAffiliateUrl(ppe.searchQuery)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1 rounded-md bg-amber-500 px-2 py-1 text-[10px] font-bold text-white hover:bg-amber-600"
-            >
-              <ShoppingBag className="h-2.5 w-2.5" />
-              Amazon
-            </a>
-            <a
-              href={generateRakutenSearchUrl(ppe.searchQuery)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1 rounded-md bg-rose-500 px-2 py-1 text-[10px] font-bold text-white hover:bg-rose-600"
-            >
-              <ShoppingBag className="h-2.5 w-2.5" />
-              楽天
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 const MEASURE_CATEGORY_STYLE: Record<string, string> = {
   工学的対策: "bg-blue-100 text-blue-800",
   管理的対策: "bg-purple-100 text-purple-800",
@@ -158,13 +207,6 @@ function MeasureItem({ measure }: { measure: SafetyMeasure }) {
   );
 }
 
-const LEVEL_BADGE: Record<"I" | "II" | "III" | "IV", string> = {
-  I: "bg-emerald-100 text-emerald-800 border-emerald-200",
-  II: "bg-amber-100 text-amber-800 border-amber-200",
-  III: "bg-orange-100 text-orange-800 border-orange-200",
-  IV: "bg-rose-100 text-rose-900 border-rose-300",
-};
-
 // ────────────────────────────────────────────────────────────
 // クイック検索候補
 // ────────────────────────────────────────────────────────────
@@ -173,17 +215,38 @@ const QUICK_CHEMICALS = [
   "トルエン",
   "溶接ヒューム",
   "キシレン",
-  "ノルマルヘキサン",
-  "アセトン",
-  "水酸化ナトリウム（苛性ソーダ）",
-  "塩酸（塩化水素）",
-  "硫酸",
-  "アクリル酸",
-  "ホルムアルデヒド",
-  "アンモニア",
-  "メタノール",
-  "二酸化チタン（ナノ粒子）",
 ];
+
+const SNAPSHOT_MISSING_LABEL: Record<
+  ChemicalRaSnapshotMissingField,
+  string
+> = {
+  "work-content": "作業内容",
+  "sds-confirmation": "SDS確認",
+  "sds-issued-on": "SDS発行日",
+  "component-version": "成分・製品版",
+  ventilation: "換気",
+  "general-ventilation": "全体換気の有無",
+  "local-exhaust": "局所排気の有無",
+  amount: "取扱量",
+  "duration-hours": "作業時間",
+  frequency: "作業頻度",
+  "use-temperature": "使用温度",
+  dispersion: "飛散・噴霧の状態",
+  "skin-contact": "皮膚接触の可能性",
+  ppe: "使用する保護具",
+  "ppe-suitability": "保護具の適合性確認",
+  substitution: "代替物質の検討",
+  "existing-controls": "既存措置",
+  "additional-controls": "追加措置",
+  "action-owner": "追加措置の担当",
+  "action-due-on": "追加措置の期限",
+  "reassessment-on": "再評価日",
+  "measured-concentration": "測定濃度",
+  "measured-unit": "測定単位",
+  "rule-version": "記録ルール版",
+  "captured-at": "保存時刻",
+};
 
 // ────────────────────────────────────────────────────────────
 // メインパネル
@@ -194,7 +257,7 @@ type ErrorKind = "validation" | "ratelimit" | "apikey" | "timeout" | "network" |
 function categorizeError(message: string): { kind: ErrorKind; hint: string } {
   const lower = message.toLowerCase();
   if (lower.includes("api key") || lower.includes("apikey") || message.includes("APIキー") || message.includes("未設定")) {
-    return { kind: "apikey", hint: "GEMINI_API_KEYが未設定のようです。厚労省データによる結果を表示します。" };
+    return { kind: "apikey", hint: "AI回答を利用できません。公的データによる結果を表示します。" };
   }
   if (lower.includes("rate") || lower.includes("429") || message.includes("制限")) {
     return { kind: "ratelimit", hint: "AIのレート制限に達しました。時間を置いて再試行してください。" };
@@ -211,19 +274,18 @@ function categorizeError(message: string): { kind: ErrorKind; hint: string } {
   return { kind: "unknown", hint: "原因不明のエラー。厚労省データによる結果のみ表示します。" };
 }
 
-function parseLimitValue(limitStr: string | undefined): { value: number; unit: string } | null {
-  if (!limitStr) return null;
-  const normalized = limitStr
-    .replace(/[０-９．]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0xfee0));
-  const m = normalized.match(/([\d.]+)\s*([^\d\s]+)?/);
-  if (!m) return null;
-  const value = parseFloat(m[1]);
-  if (!Number.isFinite(value) || value <= 0) return null;
-  const unit = (m[2] ?? "ppm").replace(/[()（）]/g, "").trim();
-  return { value, unit };
-}
-
-export function ChemicalRaPanel() {
+export function ChemicalRaPanel({
+  initialQuery = "",
+}: {
+  initialQuery?: string;
+} = {}) {
+  const {
+    revision: transientQueryRevision,
+    peekChemicalQuery,
+    consumeChemicalQuery,
+    discardChemicalQuery,
+  } = useTransientQueryBridge();
+  const initialPendingChemicalQueryRef = useRef(peekChemicalQuery());
   // CR2-T3(LCP): useSearchParams() は静的プリレンダーを Suspense フォールバックへ落とし、
   // 本パネル（STEP1 フォーム＝LCP要素）が「スケルトン先行→$RCスワップ」でしか描画されず
   // LCP 4.1s の主因になっていた（/laws C-1 と同じ構造）。マウント後に window.location から
@@ -232,12 +294,37 @@ export function ChemicalRaPanel() {
   useEffect(() => {
     setUrlParams(new URLSearchParams(window.location.search));
   }, []);
-  const [chemicalName, setChemicalName] = useState("");
+  const [chemicalName, setChemicalName] = useState(
+    initialQuery || initialPendingChemicalQueryRef.current?.query || "",
+  );
   const [workContent, setWorkContent] = useState("");
   const [measuredConc, setMeasuredConc] = useState("");
+  const [measuredUnit, setMeasuredUnit] = useState("");
   const [ventilation, setVentilation] = useState<"none" | "general" | "local" | "">("");
   const [amount, setAmount] = useState<"small" | "medium" | "large" | "">("");
   const [durationHours, setDurationHours] = useState<string>("");
+  const [sdsStatus, setSdsStatus] = useState<ChemicalRaSdsStatus>("unknown");
+  const [sdsIssuedOn, setSdsIssuedOn] = useState("");
+  const [componentVersion, setComponentVersion] = useState("");
+  const [generalVentilation, setGeneralVentilation] =
+    useState<ChemicalRaTriState>("unknown");
+  const [localExhaust, setLocalExhaust] =
+    useState<ChemicalRaTriState>("unknown");
+  const [frequency, setFrequency] = useState<ChemicalRaFrequency>(null);
+  const [useTemperatureC, setUseTemperatureC] = useState("");
+  const [dispersion, setDispersion] = useState<ChemicalRaDispersion>(null);
+  const [skinContact, setSkinContact] =
+    useState<ChemicalRaTriState>("unknown");
+  const [ppeDescription, setPpeDescription] = useState("");
+  const [ppeSuitability, setPpeSuitability] =
+    useState<ChemicalRaPpeSuitability>("unknown");
+  const [substitution, setSubstitution] =
+    useState<ChemicalRaSubstitutionStatus>("unknown");
+  const [existingControls, setExistingControls] = useState("");
+  const [additionalControls, setAdditionalControls] = useState("");
+  const [actionOwner, setActionOwner] = useState("");
+  const [actionDueOn, setActionDueOn] = useState("");
+  const [reassessmentOn, setReassessmentOn] = useState("");
   const [loading, setLoading] = useState(false);
   const [retryStatus, setRetryStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -251,9 +338,11 @@ export function ChemicalRaPanel() {
   const [legalSelected, setLegalSelected] = useState<LegalNameHit | null>(null);
   // 台帳から保存済み記録を再表示しているときの実施日(ISO)。新規実施時は null（=当日）。
   const [restoredAt, setRestoredAt] = useState<string | null>(null);
-  // 既定は2ステップウィザード（物質検索→作業方法）。詳細モードを ON にすると
-  // CREATE-SIMPLE 用の換気・取扱量・作業時間・測定濃度の入力欄が表示される。
+  const [restoredPayloadState, setRestoredPayloadState] =
+    useState<ChemicalRaPayloadInspection | null>(null);
+  // 詳細モードでは作業条件と測定値の記録欄を表示する。独自のばく露推定には使わない。
   const [detailedMode, setDetailedMode] = useState(false);
+  const conditionsAnchorRef = useRef<HTMLDivElement | null>(null);
   const resultAnchorRef = useRef<HTMLDivElement | null>(null);
   // ?run=1 付きで遷移してきた時に判定を一度だけ自動実行するためのガード。
   const autoRanRef = useRef(false);
@@ -263,7 +352,9 @@ export function ChemicalRaPanel() {
   useEffect(() => {
     if (result && !loading && resultAnchorRef.current) {
       const node = resultAnchorRef.current;
-      node.scrollIntoView({ behavior: "smooth", block: "start" });
+      if (typeof node.scrollIntoView === "function") {
+        node.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
       // スクロール後にフォーカス。preventScroll でスクロール挙動を二重発火させない。
       window.setTimeout(() => {
         try {
@@ -275,15 +366,14 @@ export function ChemicalRaPanel() {
     }
   }, [result, loading]);
 
-  // 物質名から自動MHLW検索（セレクター選択が優先）
-  const autoMhlw = useMemo(() => {
-    if (mhlwSelected) return null;
-    if (!chemicalName.trim()) return null;
-    const results = searchMergedChemicals(chemicalName.trim(), 1);
-    return results.length > 0 ? results[0] : null;
-  }, [chemicalName, mhlwSelected]);
+  useEffect(() => {
+    if (!detailedMode || !conditionsAnchorRef.current) return;
+    const node = conditionsAnchorRef.current;
+    node.scrollIntoView?.({ behavior: "smooth", block: "start" });
+    window.requestAnimationFrame(() => node.focus({ preventScroll: true }));
+  }, [detailedMode]);
 
-  const displayedMhlw = mhlwSelected ?? autoMhlw;
+  const displayedMhlw = mhlwSelected;
 
   // P0是正: RA結果が出たら、その物質の監査済み法令プロファイルを取得してバッジ源にする。
   // クエリの優先順位は法令名称選択 → DB選択のCAS → AI応答のCAS → 入力名
@@ -300,14 +390,19 @@ export function ChemicalRaPanel() {
 
   useEffect(() => {
     if (!legalTagQuery) return;
-    const ac = new AbortController();
-    fetch(`/api/chemical/legal-profile?q=${encodeURIComponent(legalTagQuery)}`, { signal: ac.signal })
-      .then((r) => r.json())
+    let active = true;
+    fetchChemicalLegalProfile<LegalProfileTagSource>(legalTagQuery)
       .then((j: LegalProfileTagSource) =>
-        setLegalTags({ q: legalTagQuery, tags: auditedRegulationTags(j) }),
+        active
+          ? setLegalTags({ q: legalTagQuery, tags: auditedRegulationTags(j) })
+          : undefined,
       )
-      .catch(() => setLegalTags({ q: legalTagQuery, tags: [] }));
-    return () => ac.abort();
+      .catch(() => {
+        if (active) setLegalTags({ q: legalTagQuery, tags: [] });
+      });
+    return () => {
+      active = false;
+    };
   }, [legalTagQuery]);
 
   // 軸I: 結果の冒頭に「まず押さえる要点」を出すための抽出（GHS・対策の再構成＋監査済み規制タグ）。
@@ -319,41 +414,74 @@ export function ChemicalRaPanel() {
     [result, legalTags, legalTagQuery],
   );
 
-  // 判定ロジック: MHLW 8h 基準値 → 特化則・有機則 管理濃度 → AI exposureLimit の順で採用
+  // 数値比較は、APIが厚労省一次資料URLまで確認して返した値だけに限定する。
+  // ローカル補助表やURL未確認の収録値を、安全判断へ昇格させない。
   const activeLimit = useMemo(() => {
-    const mhlwLimit = displayedMhlw?.details?.limit8h;
-    const oelSupplement = getSupplementalInfo(displayedMhlw?.cas ?? null)?.oel;
-    const aiLimit = result?.exposureLimit;
-    return mhlwLimit || oelSupplement || aiLimit || null;
-  }, [displayedMhlw, result]);
+    return result?.exposureLimit ?? null;
+  }, [result]);
 
-  const concentrationVerdict = useMemo(() => {
-    if (!measuredConc.trim() || !activeLimit) return null;
-    const parsed = parseLimitValue(activeLimit);
-    if (!parsed) return null;
-    const measuredNum = parseFloat(measuredConc.replace(/[^\d.]/g, ""));
-    if (!Number.isFinite(measuredNum)) return null;
-    const ratio = measuredNum / parsed.value;
-    if (measuredNum > parsed.value) {
-      return {
-        level: "danger" as const,
-        label: `基準値超過（${ratio.toFixed(2)}倍）`,
-        detail: `測定値 ${measuredNum}${parsed.unit} > 基準値 ${parsed.value}${parsed.unit}。直ちに作業改善が必要です。`,
-      };
-    }
-    if (ratio >= 0.5) {
-      return {
-        level: "warn" as const,
-        label: `基準値の ${Math.round(ratio * 100)}%`,
-        detail: "余裕は小さく、改善の検討が推奨されます。",
-      };
-    }
-    return {
-      level: "safe" as const,
-      label: `基準値の ${Math.round(ratio * 100)}%`,
-      detail: "現時点で基準値内ですが、継続的な測定が必要です。",
-    };
-  }, [measuredConc, activeLimit]);
+  const untraceableStoredLimit = Boolean(
+    displayedMhlw?.details?.limit8h && !activeLimit,
+  );
+
+  const activeLimitUnit = useMemo(() => parseExposureLimit(activeLimit)?.unit ?? "", [activeLimit]);
+
+  const savePayload = useMemo(
+    () =>
+      result
+        ? createChemicalRaRecordPayload(result, {
+            workContent,
+            sdsStatus,
+            sdsIssuedOn,
+            componentVersion,
+            ventilation,
+            generalVentilation,
+            localExhaust,
+            amount,
+            durationHours,
+            frequency: frequency ?? "",
+            useTemperatureC,
+            dispersion: dispersion ?? "",
+            skinContact,
+            ppeDescription,
+            ppeSuitability,
+            substitution,
+            existingControls,
+            additionalControls,
+            actionOwner,
+            actionDueOn,
+            reassessmentOn,
+            measuredConcentration: measuredConc,
+            measuredUnit,
+          })
+        : null,
+    [
+      result,
+      workContent,
+      sdsStatus,
+      sdsIssuedOn,
+      componentVersion,
+      ventilation,
+      generalVentilation,
+      localExhaust,
+      amount,
+      durationHours,
+      frequency,
+      useTemperatureC,
+      dispersion,
+      skinContact,
+      ppeDescription,
+      ppeSuitability,
+      substitution,
+      existingControls,
+      additionalControls,
+      actionOwner,
+      actionDueOn,
+      reassessmentOn,
+      measuredConc,
+      measuredUnit,
+    ],
+  );
 
   // /chemical-ra?raId=... は台帳から保存済み実施記録を再表示（原本を再印刷するため、API再実行はしない）。
   // /chemical-ra?cas=... / ?name=... は新規実施の物質プリセット。
@@ -361,15 +489,80 @@ export function ChemicalRaPanel() {
     const raId = urlParams?.get("raId");
     if (raId) {
       let cancelled = false;
-      void getChemicalRaRecord(raId).then((rec) => {
+      void getChemicalRaRecord(raId).then(async (rec) => {
         if (cancelled || !rec) return;
-        // 保存時の payload（ChemicalRaResponse）をそのまま結果として復元（再判定しない）
-        setResult(rec.payload as ChemicalRaResponse);
+        const inspected = inspectChemicalRaRecordPayload(rec.payload);
+        setRestoredPayloadState(inspected);
+        if (
+          !inspected.result ||
+          typeof inspected.result !== "object" ||
+          Array.isArray(inspected.result)
+        ) {
+          setError(
+            "保存記録の結果本文を確認できません。条件を再入力し、最新SDSと公式ツールで再評価してください。",
+          );
+          setResult(null);
+          setLoading(false);
+          return;
+        }
+        // 旧版の独自判定・未検証AI応答は再表示時に隔離する。
+        setResult(
+          sanitizeChemicalRaResponse(
+            inspected.result as ChemicalRaResponse,
+          ),
+        );
         setRestoredAt(rec.savedAt);
+        const snapshot = inspected.assessmentSnapshot;
+        if (snapshot) {
+          setWorkContent(snapshot.workContent);
+          setSdsStatus(snapshot.sds.status);
+          setSdsIssuedOn(snapshot.sds.issuedOn ?? "");
+          setComponentVersion(snapshot.sds.componentVersion ?? "");
+          setVentilation(snapshot.ventilation ?? "");
+          setGeneralVentilation(
+            snapshot.engineeringControls.generalVentilation,
+          );
+          setLocalExhaust(snapshot.engineeringControls.localExhaust);
+          setAmount(snapshot.amount ?? "");
+          setDurationHours(
+            snapshot.durationHours === null
+              ? ""
+              : String(snapshot.durationHours),
+          );
+          setFrequency(snapshot.frequency);
+          setUseTemperatureC(
+            snapshot.useTemperatureC === null
+              ? ""
+              : String(snapshot.useTemperatureC),
+          );
+          setDispersion(snapshot.dispersion);
+          setSkinContact(snapshot.skinContact);
+          setPpeDescription(snapshot.ppe.description);
+          setPpeSuitability(snapshot.ppe.suitability);
+          setSubstitution(snapshot.substitution);
+          setExistingControls(snapshot.controls.existing);
+          setAdditionalControls(snapshot.controls.additional);
+          setActionOwner(snapshot.action.owner);
+          setActionDueOn(snapshot.action.dueOn ?? "");
+          setReassessmentOn(snapshot.action.reassessmentOn ?? "");
+          setMeasuredConc(snapshot.measuredConcentration.value ?? "");
+          setMeasuredUnit(snapshot.measuredConcentration.unit ?? "");
+          setDetailedMode(true);
+        } else {
+          setWorkContent(rec.workContent);
+        }
         if (rec.substance) setChemicalName(rec.substance);
         if (rec.cas) {
-          const found = findByCas(rec.cas);
-          if (found) setMhlwSelected(found);
+          try {
+            const found = await findChemicalByCas(rec.cas);
+            if (!cancelled && found) setMhlwSelected(found);
+          } catch {
+            if (!cancelled) {
+              setErrorHint(
+                "化学物質データベースを現在検索できません。保存済み評価の物質情報は、最新SDSとCAS番号で再確認してください。",
+              );
+            }
+          }
         }
         setError(null);
         setLoading(false);
@@ -380,15 +573,38 @@ export function ChemicalRaPanel() {
     }
     const cas = urlParams?.get("cas");
     if (cas) {
-      const found = findByCas(cas);
-      if (found) {
-        setMhlwSelected(found);
-        setChemicalName(found.primaryName);
-        return;
-      }
+      const ac = new AbortController();
+      void findChemicalByCas(cas, ac.signal)
+        .then((found) => {
+          if (!found || ac.signal.aborted) return;
+          setMhlwSelected(found);
+          setChemicalName(found.primaryName);
+        })
+        .catch((error: unknown) => {
+          if (
+            ac.signal.aborted ||
+            (error instanceof DOMException && error.name === "AbortError")
+          ) {
+            return;
+          }
+          setErrorHint(
+            "化学物質データベースを現在検索できないため、CAS番号の収載有無を判定できません。最新SDSと公式ツールで確認してください。",
+          );
+        });
+      return () => ac.abort();
     }
     const name = urlParams?.get("name");
-    if (name) setChemicalName(name);
+    if (name) {
+      const inspection = inspectChemicalNavigationQuery(name);
+      if (inspection.allowed) {
+        setChemicalName(inspection.normalized);
+      } else {
+        setChemicalName("");
+        setErrorHint(
+          "URLの入力は安全確認を通過しなかったため使用していません。物質名またはCAS番号だけを入力してください。",
+        );
+      }
+    }
   }, [urlParams]);
 
   const handleSelectMhlw = (m: MergedChemical | null) => {
@@ -405,13 +621,19 @@ export function ChemicalRaPanel() {
     setChemicalName(hit.label);
   };
 
-  // よく検索される物質チップ等から「1タップで判定まで実行」する。
-  // 紙派/IT不慣れなユーザーが物質名を押した時点で結果が出るようにする（入力欄に名前が
-  // 入るだけで何も起きない、という離脱要因の解消）。
+  // クイック候補は物質を選ぶところまで。判定前に作業条件を入力できる状態を保つ。
   const runQuickSearch = (name: string) => {
     setChemicalName(name);
     setMhlwSelected(null);
-    void handleSearch(name);
+    void searchChemicalCatalog(name, 1)
+      .then((items) => {
+        if (items[0]) setMhlwSelected(items[0]);
+      })
+      .catch(() => {
+        setErrorHint(
+          "化学物質データベースを現在検索できないため、収載有無を判定できません。最新SDSとCAS番号を確認してください。",
+        );
+      });
   };
 
   const handleSearch = async (overrideName?: string) => {
@@ -424,17 +646,11 @@ export function ChemicalRaPanel() {
     setErrorHint(null);
     setResult(null);
     setRestoredAt(null); // 新規実施なので実施日は当日
+    setRestoredPayloadState(null);
 
     const flowStartAt = Date.now();
     const MAX_RETRIES = 3;
-    // 作業時間未入力でも換気+取扱量が選ばれていれば8時間（1日TWA相当の保守側既定）で
-    // 判定する。簡易モード（STEP 2）には作業時間欄が無く、これが無いと
-    // 「選ぶだけで反映」のはずのリスクレベル（I〜IV）が永遠に算出されないため。
-    const dur = durationHours.trim()
-      ? parseFloat(durationHours)
-      : ventilation && amount
-        ? 8
-        : undefined;
+    const dur = durationHours.trim() ? parseFloat(durationHours) : undefined;
     // overrideName が来ているときは mhlwSelected が古い可能性があるため CAS は名称一致時のみ採用。
     const casForBody =
       overrideName && mhlwSelected?.primaryName !== nameToUse ? undefined : mhlwSelected?.cas;
@@ -467,16 +683,14 @@ export function ChemicalRaPanel() {
           setError(data.error.message);
           setErrorHint(hint);
         } else {
-          setResult(data);
+          setResult(sanitizeChemicalRaResponse(data));
           trackEvent("flow_complete", { flow_type: "chemical-ra", duration: Math.round((Date.now() - flowStartAt) / 1000) });
-          if (data.aiStatus && data.aiStatus !== "ok") {
-            const statusLabel: Record<string, string> = {
-              apikey_missing: "GEMINI_API_KEY未設定",
-              ai_failed: "AI生成失敗",
-              demo: "デモモード",
-            };
-            const detail = data.aiErrorDetail ? `（${data.aiErrorDetail}）` : "";
-            setErrorHint(`${statusLabel[data.aiStatus] ?? data.aiStatus}${detail}：厚労省データによるフォールバック表示です。`);
+          if (
+            data.aiStatus &&
+            data.aiStatus !== "ok" &&
+            data.aiStatus !== "disabled_for_safety"
+          ) {
+            setErrorHint("一部を確認できません。公的データによる結果を表示します。");
           }
         }
         break;
@@ -497,6 +711,47 @@ export function ChemicalRaPanel() {
     setLoading(false);
   };
 
+  useEffect(() => {
+    const pending = peekChemicalQuery();
+    if (!pending) return;
+    const inspection = inspectChemicalNavigationQuery(pending.query);
+    if (!inspection.allowed) {
+      discardChemicalQuery(pending.id);
+      setChemicalName("");
+      setErrorHint(
+        "受け渡された入力は安全確認を通過しなかったため使用していません。物質名またはCAS番号だけを入力してください。",
+      );
+      return;
+    }
+    autoRanRef.current = true;
+    consumeChemicalQuery(pending.id);
+    setChemicalName(inspection.normalized);
+    if (pending.confirmedCas) {
+      void findChemicalByCas(pending.confirmedCas)
+        .then((found) => {
+          if (!found) {
+            setErrorHint(
+              "確認済みCAS番号の収載情報を再取得できません。最新SDSとCAS番号を確認してください。",
+            );
+            return;
+          }
+          setMhlwSelected(found);
+          setChemicalName(found.primaryName);
+          void handleSearch(found.primaryName);
+        })
+        .catch(() => {
+          setErrorHint(
+            "化学物質データベースを現在検索できません。通信回復後に再確認してください。",
+          );
+        });
+    } else {
+      void handleSearch(inspection.normalized);
+    }
+    // The pending value is an in-memory, single-use snapshot. The non-sensitive
+    // revision also lets an already-open /chemical-ra consume a same-page link.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [transientQueryRevision]);
+
   // 職種別クイックスタート等が ?name=…&run=1 / ?cas=…&run=1 で遷移してきた場合、
   // 着地時に判定を自動実行する（押した先で「何も起きない」を解消。raId 再表示時は実行しない）。
   useEffect(() => {
@@ -505,60 +760,49 @@ export function ChemicalRaPanel() {
     if (urlParams?.get("raId")) return;
     const cas = urlParams?.get("cas");
     const nameParam = urlParams?.get("name");
-    const nameToRun = cas ? findByCas(cas)?.primaryName ?? null : nameParam;
-    if (!nameToRun) return;
+    if (cas) {
+      void findChemicalByCas(cas)
+        .then((found) => {
+          if (!found || autoRanRef.current) return;
+          autoRanRef.current = true;
+          setMhlwSelected(found);
+          setChemicalName(found.primaryName);
+          void handleSearch(found.primaryName);
+        })
+        .catch(() => {
+          setErrorHint(
+            "化学物質データベースを現在検索できないため、CAS番号の収載有無を判定できません。通信回復後に再試行してください。",
+          );
+        });
+      return;
+    }
+    if (!nameParam) return;
+    const inspection = inspectChemicalNavigationQuery(nameParam);
+    if (!inspection.allowed) {
+      setChemicalName("");
+      setErrorHint(
+        "URLの入力は安全確認を通過しなかったため使用していません。物質名またはCAS番号だけを入力してください。",
+      );
+      return;
+    }
     autoRanRef.current = true;
-    void handleSearch(nameToRun);
+    void handleSearch(inspection.normalized);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [urlParams]);
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 lg:px-8">
-      {/* ヘッダー（画面用イントロ。A4記録には ChemicalRaReportHeader が出るので印刷時は隠す）。
-          ページ側 PageHeader が h1 を持つため、ここは h2（多重h1の是正・文言/見た目は不変）。 */}
-      <div className="flex items-start justify-between gap-4 print:hidden">
-        <div>
-          <div className="flex items-center gap-2">
-            <FlaskConical className="h-6 w-6 text-emerald-600" />
-            <h2 className="text-xl font-bold text-slate-900 lg:text-2xl">化学物質リスクアセスメント</h2>
-            <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-700">Gemini AI</span>
-          </div>
-          <p className="mt-2 text-sm text-slate-600">
-            化学物質名を入力すると、SDS情報・GHS分類・必要保護具・安全対策チェックリストを表示します。
-          </p>
-          <p className="mt-1 text-xs text-slate-500">
-            参考: 厚労省「職場のあんぜんサイト」・化管法SDS制度・労働安全衛生法 第57条の3
-          </p>
-        </div>
-        <Mascot variant="chemical-lab" size="lg" alt="" className="hidden shrink-0 sm:block" />
-      </div>
-
       {/* 検索フォーム（入力UI。印刷=A4実施記録では不要なので隠す） */}
-      <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm print:hidden">
-        <div className="mb-3 flex items-center justify-between gap-2 border-b border-slate-100 pb-3">
-          <div>
-            {/* P1-F: 「2ステップウィザード」では入口が3つ並ぶ実態と乖離するため、
-                「物質を選ぶ → 作業方法 → A4結果表」の3ステップで実態を表現する。 */}
-            <p className="text-xs font-bold text-emerald-700">入力窓1つで判定まで</p>
-            <p className="text-[11px] text-slate-500">
-              物質名か製品名を入れる → 該当法令の結論 → 作業状況を選ぶ → A4実施記録
-            </p>
-          </div>
-          <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700">
-            <input
-              type="checkbox"
-              checked={detailedMode}
-              onChange={(e) => setDetailedMode(e.target.checked)}
-              className="h-4 w-4"
-            />
-            詳細モード（数値入力を表示）
-          </label>
-        </div>
+      <div
+        data-primary-task=""
+        className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm print:hidden"
+      >
         <div className="space-y-4">
           {/* 一窓化 (2026-07-11): 入力窓は1つ。物質名・CAS・法令名称（溶接ヒューム等）・
               製品名らしき入力を1つの窓で受け、収載外は正直に明示して次の一歩を出す */}
           <UnifiedChemicalSearch
             query={chemicalName}
+            selectedChemical={mhlwSelected}
             onQueryChange={(v) => {
               setChemicalName(v);
               if (mhlwSelected && v !== mhlwSelected.primaryName) setMhlwSelected(null);
@@ -569,6 +813,7 @@ export function ChemicalRaPanel() {
             onAiSearch={() => void handleSearch()}
             loading={loading}
           />
+          <UsageNotesLink className="text-brand-primary" />
 
           {/* 該当法令の結論カード（結論ファースト: 物質が決まった瞬間に一窓の直下へ） */}
           {(displayedMhlw || legalSelected) && (
@@ -577,62 +822,74 @@ export function ChemicalRaPanel() {
             />
           )}
 
-          {/* STEP 2 作業方法の逆質問（簡易モード・物質を決めると表示） */}
-          {!detailedMode && chemicalName.trim() !== "" && (
-            <div className="rounded-lg border border-emerald-200 bg-emerald-50/40 p-3">
-              <p className="text-xs font-bold text-emerald-900">STEP 2 作業の状況を選んでください</p>
-              <p className="mt-0.5 text-[11px] text-slate-600">
-                2つ選ぶとリスクレベル（I〜IV）を判定します（作業時間は8時間=1日として判定。変更や測定濃度の入力は上の「詳細モード」をON）。
-              </p>
-              <div className="mt-2">
-                <label htmlFor="chemical-ra-work-content" className="block text-[11px] font-semibold text-slate-700 mb-1">
-                  作業内容（任意）— より精度の高い保護具推奨のために入力
-                </label>
-                <TextareaWithVoice
-                  id="chemical-ra-work-content"
-                  className="min-h-14 bg-white"
-                  value={workContent}
-                  onChange={(e) => setWorkContent(e.target.value)}
-                  placeholder="例: 塗装作業（局所排気なし）、溶接、配管洗浄など"
-                />
-              </div>
-              <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
-                <label className="text-[11px] text-slate-700">
-                  換気の状況
-                  <select
-                    value={ventilation}
-                    onChange={(e) => setVentilation(e.target.value as "none" | "general" | "local" | "")}
-                    className="mt-1 w-full rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs"
-                  >
-                    <option value="">選んでください</option>
-                    <option value="none">屋内・換気なし</option>
-                    <option value="general">全体換気あり（窓・扇風機）</option>
-                    <option value="local">局所排気装置あり</option>
-                  </select>
-                </label>
-                <label className="text-[11px] text-slate-700">
-                  1日の取扱量の目安
-                  <select
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value as "small" | "medium" | "large" | "")}
-                    className="mt-1 w-full rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs"
-                  >
-                    <option value="">選んでください</option>
-                    <option value="small">少量（コップ1杯以下）</option>
-                    <option value="medium">中量（バケツ1杯まで）</option>
-                    <option value="large">大量（ドラム缶以上）</option>
-                  </select>
-                </label>
-              </div>
-            </div>
-          )}
-
-          {/* ③ CREATE-SIMPLE 入力（詳細モードのみ） */}
+          {/* ③ 作業条件メモ（詳細モードのみ） */}
           {detailedMode && (
-          <div className="rounded-lg border border-blue-200 bg-blue-50/40 p-3">
+          <div
+            ref={conditionsAnchorRef}
+            id="chemical-ra-work-conditions"
+            tabIndex={-1}
+            className="scroll-mt-24 rounded-lg border border-blue-200 bg-blue-50/40 p-3 focus:outline-none focus-visible:ring-4 focus-visible:ring-blue-300"
+          >
             <p className="text-xs font-semibold text-blue-900">
-              ③ CREATE-SIMPLE 簡易判定（任意）— 4段階リスクレベル（I〜IV）を算出
+              作業条件
             </p>
+            <label className="mt-2 block text-[11px] font-semibold text-blue-950">
+              作業内容（任意）— 最新SDS・公式ツール確認用のメモ
+              <TextareaWithVoice
+                rows={2}
+                value={workContent}
+                onChange={(event) => setWorkContent(event.target.value)}
+                placeholder="例: 屋内で刷毛塗り、1日2時間"
+                className="mt-1 text-xs"
+              />
+            </label>
+            <fieldset className="mt-2 rounded-lg border border-blue-200 bg-white/70 p-3">
+              <legend className="px-1 text-[11px] font-bold text-blue-950">
+                製品固有SDSの確認記録
+              </legend>
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                <label className="text-[11px] text-slate-700">
+                  SDS確認状況
+                  <select
+                    value={sdsStatus}
+                    onChange={(event) =>
+                      setSdsStatus(
+                        event.target.value as ChemicalRaSdsStatus,
+                      )
+                    }
+                    className="mt-1 w-full rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs"
+                  >
+                    <option value="unknown">未選択・不明</option>
+                    <option value="not-confirmed">未確認</option>
+                    <option value="confirmed">製品固有のSDSを確認済み</option>
+                  </select>
+                </label>
+                <label className="text-[11px] text-slate-700">
+                  SDS発行日
+                  <input
+                    type="date"
+                    value={sdsIssuedOn}
+                    onChange={(event) => setSdsIssuedOn(event.target.value)}
+                    className="mt-1 min-h-[44px] w-full rounded-md border border-slate-300 bg-white px-2 text-xs"
+                  />
+                </label>
+                <label className="text-[11px] text-slate-700">
+                  成分・製品版
+                  <input
+                    type="text"
+                    value={componentVersion}
+                    onChange={(event) =>
+                      setComponentVersion(event.target.value)
+                    }
+                    placeholder="例: 製品A / 第3版"
+                    className="mt-1 min-h-[44px] w-full rounded-md border border-slate-300 bg-white px-2 text-xs"
+                  />
+                </label>
+              </div>
+              <p className="mt-2 text-[10px] leading-4 text-slate-600">
+                「確認済み」は、使用する製品と成分版が一致するSDSを人が確認した場合だけ選んでください。
+              </p>
+            </fieldset>
             <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
               <label className="text-[11px] text-slate-700">
                 換気
@@ -674,18 +931,266 @@ export function ChemicalRaPanel() {
                 />
               </label>
             </div>
+            <fieldset className="mt-3 rounded-lg border border-blue-200 bg-white/70 p-3">
+              <legend className="px-1 text-[11px] font-bold text-blue-950">
+                使用条件
+              </legend>
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+                <label className="text-[11px] text-slate-700">
+                  使用温度（℃）
+                  <input
+                    type="number"
+                    min="-50"
+                    max="200"
+                    step="0.1"
+                    value={useTemperatureC}
+                    onChange={(event) =>
+                      setUseTemperatureC(event.target.value)
+                    }
+                    placeholder="例: 25"
+                    className="mt-1 min-h-[44px] w-full rounded-md border border-slate-300 bg-white px-2 text-xs"
+                  />
+                </label>
+                <label className="text-[11px] text-slate-700">
+                  作業頻度
+                  <select
+                    value={frequency ?? ""}
+                    onChange={(event) =>
+                      setFrequency(
+                        (event.target.value || null) as ChemicalRaFrequency,
+                      )
+                    }
+                    className="mt-1 min-h-[44px] w-full rounded-md border border-slate-300 bg-white px-2 text-xs"
+                  >
+                    <option value="">未選択</option>
+                    <option value="one-off">単発</option>
+                    <option value="daily">毎日</option>
+                    <option value="weekly">毎週</option>
+                    <option value="monthly">毎月</option>
+                    <option value="less-than-monthly">月1回未満</option>
+                  </select>
+                </label>
+                <label className="text-[11px] text-slate-700">
+                  飛散・噴霧の状態
+                  <select
+                    value={dispersion ?? ""}
+                    onChange={(event) =>
+                      setDispersion(
+                        (event.target.value || null) as ChemicalRaDispersion,
+                      )
+                    }
+                    className="mt-1 min-h-[44px] w-full rounded-md border border-slate-300 bg-white px-2 text-xs"
+                  >
+                    <option value="">未選択</option>
+                    <option value="none">飛散なし</option>
+                    <option value="dust">粉じん</option>
+                    <option value="mist">ミスト</option>
+                    <option value="spray">スプレー・噴霧</option>
+                    <option value="vapor">蒸気</option>
+                    <option value="other">その他</option>
+                  </select>
+                </label>
+                <label className="text-[11px] text-slate-700">
+                  皮膚接触の可能性
+                  <select
+                    value={skinContact}
+                    onChange={(event) =>
+                      setSkinContact(
+                        event.target.value as ChemicalRaTriState,
+                      )
+                    }
+                    className="mt-1 min-h-[44px] w-full rounded-md border border-slate-300 bg-white px-2 text-xs"
+                  >
+                    <option value="unknown">不明・未確認</option>
+                    <option value="yes">あり</option>
+                    <option value="no">なし</option>
+                  </select>
+                </label>
+              </div>
+            </fieldset>
+            <fieldset className="mt-3 rounded-lg border border-blue-200 bg-white/70 p-3">
+              <legend className="px-1 text-[11px] font-bold text-blue-950">
+                換気設備
+              </legend>
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <label className="text-[11px] text-slate-700">
+                  全体換気
+                  <select
+                    value={generalVentilation}
+                    onChange={(event) => {
+                      const next = event.target.value as ChemicalRaTriState;
+                      setGeneralVentilation(next);
+                      if (next === "yes" && localExhaust !== "yes") {
+                        setVentilation("general");
+                      } else if (next === "no" && localExhaust === "no") {
+                        setVentilation("none");
+                      }
+                    }}
+                    className="mt-1 min-h-[44px] w-full rounded-md border border-slate-300 bg-white px-2 text-xs"
+                  >
+                    <option value="unknown">不明・未確認</option>
+                    <option value="yes">あり</option>
+                    <option value="no">なし</option>
+                  </select>
+                </label>
+                <label className="text-[11px] text-slate-700">
+                  局所排気
+                  <select
+                    value={localExhaust}
+                    onChange={(event) => {
+                      const next = event.target.value as ChemicalRaTriState;
+                      setLocalExhaust(next);
+                      if (next === "yes") {
+                        setVentilation("local");
+                      } else if (next === "no" && generalVentilation === "yes") {
+                        setVentilation("general");
+                      } else if (
+                        next === "no" &&
+                        generalVentilation === "no"
+                      ) {
+                        setVentilation("none");
+                      }
+                    }}
+                    className="mt-1 min-h-[44px] w-full rounded-md border border-slate-300 bg-white px-2 text-xs"
+                  >
+                    <option value="unknown">不明・未確認</option>
+                    <option value="yes">あり</option>
+                    <option value="no">なし</option>
+                  </select>
+                </label>
+              </div>
+              <p className="mt-2 text-[10px] leading-4 text-slate-600">
+                「あり」は設備の存在だけでなく、対象作業で稼働し、点検状態と捕捉位置を人が確認した場合に選択してください。
+              </p>
+            </fieldset>
+            <fieldset className="mt-3 rounded-lg border border-blue-200 bg-white/70 p-3">
+              <legend className="px-1 text-[11px] font-bold text-blue-950">
+                保護具・代替物質
+              </legend>
+              <div className="grid grid-cols-1 gap-2 lg:grid-cols-2">
+                <label className="text-[11px] text-slate-700">
+                  使用する保護具
+                  <TextareaWithVoice
+                    value={ppeDescription}
+                    onChange={(event) =>
+                      setPpeDescription(event.target.value)
+                    }
+                    placeholder="例: SDSと作業条件に基づき選定した防毒マスク、耐薬品手袋、保護眼鏡"
+                    className="mt-1 min-h-20 bg-white"
+                  />
+                </label>
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  <label className="text-[11px] text-slate-700">
+                    保護具の適合性
+                    <select
+                      value={ppeSuitability}
+                      onChange={(event) =>
+                        setPpeSuitability(
+                          event.target.value as ChemicalRaPpeSuitability,
+                        )
+                      }
+                      className="mt-1 min-h-[44px] w-full rounded-md border border-slate-300 bg-white px-2 text-xs"
+                    >
+                      <option value="unknown">不明・未確認</option>
+                      <option value="not-confirmed">未確認</option>
+                      <option value="confirmed">
+                        SDS・作業条件・製品仕様で確認済み
+                      </option>
+                    </select>
+                  </label>
+                  <label className="text-[11px] text-slate-700">
+                    代替物質の検討
+                    <select
+                      value={substitution}
+                      onChange={(event) =>
+                        setSubstitution(
+                          event.target.value as ChemicalRaSubstitutionStatus,
+                        )
+                      }
+                      className="mt-1 min-h-[44px] w-full rounded-md border border-slate-300 bg-white px-2 text-xs"
+                    >
+                      <option value="unknown">不明・未確認</option>
+                      <option value="considered">検討済み</option>
+                      <option value="not-considered">未検討</option>
+                      <option value="not-applicable">該当なし（理由を記録）</option>
+                    </select>
+                  </label>
+                </div>
+              </div>
+            </fieldset>
+            <fieldset className="mt-3 rounded-lg border border-blue-200 bg-white/70 p-3">
+              <legend className="px-1 text-[11px] font-bold text-blue-950">
+                措置・担当・期限
+              </legend>
+              <div className="grid grid-cols-1 gap-2 lg:grid-cols-2">
+                <label className="text-[11px] text-slate-700">
+                  既存措置
+                  <TextareaWithVoice
+                    value={existingControls}
+                    onChange={(event) =>
+                      setExistingControls(event.target.value)
+                    }
+                    placeholder="現在実施している代替、密閉、換気、作業手順、教育、保護具など"
+                    className="mt-1 min-h-20 bg-white"
+                  />
+                </label>
+                <label className="text-[11px] text-slate-700">
+                  追加措置
+                  <TextareaWithVoice
+                    value={additionalControls}
+                    onChange={(event) =>
+                      setAdditionalControls(event.target.value)
+                    }
+                    placeholder="追加で実施する措置。不要の場合も、その理由を記録してください"
+                    className="mt-1 min-h-20 bg-white"
+                  />
+                </label>
+              </div>
+              <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
+                <label className="text-[11px] text-slate-700">
+                  担当
+                  <input
+                    type="text"
+                    value={actionOwner}
+                    onChange={(event) => setActionOwner(event.target.value)}
+                    placeholder="例: 化学物質管理者"
+                    className="mt-1 min-h-[44px] w-full rounded-md border border-slate-300 bg-white px-2 text-xs"
+                  />
+                </label>
+                <label className="text-[11px] text-slate-700">
+                  期限
+                  <input
+                    type="date"
+                    value={actionDueOn}
+                    onChange={(event) => setActionDueOn(event.target.value)}
+                    className="mt-1 min-h-[44px] w-full rounded-md border border-slate-300 bg-white px-2 text-xs"
+                  />
+                </label>
+                <label className="text-[11px] text-slate-700">
+                  再評価日
+                  <input
+                    type="date"
+                    value={reassessmentOn}
+                    onChange={(event) =>
+                      setReassessmentOn(event.target.value)
+                    }
+                    className="mt-1 min-h-[44px] w-full rounded-md border border-slate-300 bg-white px-2 text-xs"
+                  />
+                </label>
+              </div>
+            </fieldset>
             <p className="mt-1 text-[10px] text-slate-500">
-              ※ CREATE-SIMPLE は厚労省「化学物質リスクアセスメント支援ツール」を参考にした簡略判定です。最終判断は公式版または専門家（労働衛生コンサルタント等）の判断によること。
+              ※ 本サイトではこの条件から判定値を算出しません。製品固有の最新SDSと厚生労働省の公式CREATE-SIMPLEへ入力し、化学物質管理者または専門家が確認してください。
             </p>
           </div>
           )}
 
-          {/* ④ 測定濃度入力と判定（詳細モードのみ） */}
+          {/* ④ 測定濃度は記録のみ。時間基準・採取法・代表性を確認できないため自動比較しない。 */}
           {detailedMode && (
           <div className="rounded-lg border border-amber-200 bg-amber-50/50 p-3">
             <label className="flex items-center gap-1.5 text-xs font-semibold text-amber-900">
               <Gauge className="h-3.5 w-3.5" />
-              ④ 作業環境の測定濃度（任意）— 基準値との判定
+              ④ 作業環境の測定値メモ（任意）— 自動判定しません
             </label>
             <div className="mt-2 flex flex-wrap items-center gap-2">
               <input
@@ -695,47 +1200,51 @@ export function ChemicalRaPanel() {
                 onChange={(e) => setMeasuredConc(e.target.value)}
                 placeholder="例: 15"
                 className="w-32 rounded-md border border-amber-300 bg-white px-2.5 py-1.5 text-sm"
+                aria-label="測定濃度の数値"
               />
+              <label className="text-xs font-semibold text-amber-900">
+                単位
+                <select
+                  value={measuredUnit}
+                  onChange={(event) => setMeasuredUnit(event.target.value)}
+                  className="ml-1 min-h-[44px] rounded-md border border-amber-300 bg-white px-2 text-sm"
+                >
+                  <option value="">選択必須</option>
+                  <option value="ppm">ppm</option>
+                  <option value="mg/m3">mg/m³</option>
+                  {activeLimitUnit && !["ppm", "mg/m3"].includes(activeLimitUnit) && (
+                    <option value={activeLimitUnit}>{activeLimitUnit}</option>
+                  )}
+                </select>
+              </label>
               <span className="text-xs text-amber-800">
                 {activeLimit ? (
                   <>
-                    基準値: <span className="font-bold">{activeLimit}</span>（同じ単位で入力）
+                    参照値: <span className="font-bold">{activeLimit}</span>（自動比較には使用しません）
                   </>
                 ) : (
-                  "物質を選択すると基準値が表示されます"
+                  untraceableStoredLimit
+                    ? "一次資料URLを個別確認できない収録値のため、数値比較を停止しています"
+                    : "物質を選択し、追跡可能な基準値がある場合だけ比較できます"
                 )}
               </span>
             </div>
-            {concentrationVerdict && (
-              <div
-                className={`mt-2 rounded-md px-3 py-2 text-xs ${
-                  concentrationVerdict.level === "danger"
-                    ? "bg-rose-100 text-rose-900"
-                    : concentrationVerdict.level === "warn"
-                      ? "bg-amber-100 text-amber-900"
-                      : "bg-emerald-100 text-emerald-900"
-                }`}
-              >
-                <p className="font-bold">
-                  
-                  {concentrationVerdict.label}
-                </p>
-                <p className="mt-0.5">{concentrationVerdict.detail}</p>
-              </div>
-            )}
+            <p className="mt-2 text-xs font-semibold leading-5 text-amber-950">
+              8時間TWA・短時間値・天井値と測定値は、時間基準、採取法、単位、代表性を確認しないと比較できません。
+              ここでは測定メモだけを保存し、超過／非超過は判定しません。公式CREATE-SIMPLE、作業環境測定機関または専門家で確認してください。
+            </p>
           </div>
           )}
         </div>
 
-        {/* クイック検索: 1タップで判定まで実行（物質名を押すだけで結果が出る） */}
+        {/* 初期表示の候補は3件まで。自由入力も常に使える。 */}
         <div className="mt-4">
-          <p className="text-xs font-semibold text-slate-500 mb-2">
-            よく扱う物質はこちら（押すとすぐに判定します）
-          </p>
+          <p className="mb-2 text-xs font-semibold text-slate-500">よく扱う物質</p>
           <div className="flex flex-wrap gap-1.5">
             {QUICK_CHEMICALS.map((chem) => (
               <button
                 key={chem}
+                data-chemical-quick-substance="true"
                 type="button"
                 disabled={loading}
                 onClick={() => runQuickSearch(chem)}
@@ -747,13 +1256,17 @@ export function ChemicalRaPanel() {
           </div>
         </div>
 
-        {/* STEP3 トリガ: ①(厚労省選択)/②(直接入力)/クイック検索 のどの経路でも、ここから
-            「判定 → A4実施記録(確認印枠つき)」に到達できるようにする明確な主導線。
-            第三者実機確認で「A4記録・印刷ボタン・確認印枠に辿り着けない」と報告された問題の是正。 */}
         <div className="mt-4 border-t border-slate-100 pt-4">
           <button
             type="button"
-            onClick={() => void handleSearch()}
+            data-primary-action="true"
+            onClick={() => {
+              if (detailedMode) {
+                void handleSearch();
+                return;
+              }
+              setDetailedMode(true);
+            }}
             disabled={!chemicalName.trim() || loading}
             aria-busy={loading}
             className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-3 text-sm font-bold text-white shadow hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
@@ -761,20 +1274,15 @@ export function ChemicalRaPanel() {
             {loading ? (
               <>
                 <span aria-hidden="true" className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                判定中…
+                確認中…
               </>
             ) : (
               <>
                 <FileText className="h-4 w-4" aria-hidden="true" />
-                STEP 3：リスクを判定して A4実施記録（確認印枠つき）を作成
+                {detailedMode ? "公的情報を確認" : "作業条件へ進む"}
               </>
             )}
           </button>
-          <p className="mt-1.5 text-center text-[11px] text-slate-500">
-            {chemicalName.trim()
-              ? "判定後、結果の下に「A4実施レポート印刷 / PDF保存」ボタンと、厚労省様式相当（実施日・事業場名・確認印枠3つ）の記録が表示されます。"
-              : "STEP 1 で物質を選ぶ（または名称を入力する）と、ここから判定して記録を作成できます。"}
-          </p>
         </div>
       </div>
 
@@ -806,7 +1314,7 @@ export function ChemicalRaPanel() {
           <div className="flex items-start gap-2">
             <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
             <div className="flex-1">
-              <p className="font-semibold">AIによる生成に失敗しました</p>
+              <p className="font-semibold">化学物質情報を取得できませんでした</p>
               <p className="mt-1 text-xs">{error}</p>
               {errorHint && <p className="mt-1 text-xs text-rose-700">{errorHint}</p>}
             </div>
@@ -831,39 +1339,112 @@ export function ChemicalRaPanel() {
         <div
           ref={resultAnchorRef}
           tabIndex={-1}
-          aria-label="AI調査結果"
+          aria-label="化学物質情報"
           className="space-y-6 scroll-mt-20 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 print:space-y-3"
         >
           {/* 柱0: 結論カード（1画面1メッセージ）— リスクレベルのデカ表示＋I〜IV色帯＋
               GHS絵表示＋まず行う対策＋保護具動線。旧「まず押さえる要点」の内容を統合
               （hazards/actions/regulations は keyPoints から表示・正確性は不変）。
               下の詳細（GHS分類・濃度基準・保護具・規制）は、この結論の根拠。 */}
-          {keyPoints && (hasKeyPoints(keyPoints) || result.createSimple) && (
+          {keyPoints && hasKeyPoints(keyPoints) && (
             <RaConclusionCard
               result={result}
               keyPoints={keyPoints}
-              equipmentHref={buildEquipmentHref(result.chemicalName)}
             />
           )}
+          {mhlwSelected?.cas &&
+          result.casNumber === mhlwSelected.cas ? (
+            <div className="rounded-xl border-2 border-emerald-700 bg-emerald-50 p-4 print:hidden">
+              <h2 className="text-sm font-black text-emerald-950">
+                確認済み物質条件をKY候補へ
+              </h2>
+              <p className="mt-1 text-xs leading-5 text-emerald-950">
+                CASと作業下書きを同一originの一時領域で渡します。危険・対策はKY側で人が選択してください。
+              </p>
+              <KyHandoffLink
+                handoff={{
+                  source: "chemical-ra",
+                  chemicalId: `cas:${mhlwSelected.cas}`,
+                  cas: mhlwSelected.cas,
+                  workCategory: "chemical",
+                  hazardIds: ["chemical-exposure", "chemical-splash"],
+                  measureIds: [
+                    "chemical-substitute",
+                    "chemical-local-exhaust",
+                    "chemical-sds",
+                  ],
+                  ...(workContent.trim() ? { workDraft: workContent } : {}),
+                }}
+                className="mt-3 inline-flex min-h-11 items-center rounded-lg bg-emerald-800 px-4 py-2 text-sm font-black text-white"
+              >
+                この作業条件をKYへ
+              </KyHandoffLink>
+            </div>
+          ) : null}
           {restoredAt && (
             <div className="flex flex-wrap items-center gap-2 rounded-xl border border-sky-200 bg-sky-50 px-4 py-2.5 text-xs text-sky-900 print:hidden">
               <FolderOpen className="h-4 w-4 shrink-0 text-sky-600" aria-hidden="true" />
               <span>
-                <strong className="font-semibold">保存済みの実施記録を表示中</strong>（実施日: {new Date(restoredAt).toLocaleDateString("ja-JP")}）。
-                このまま「A4実施レポート印刷 / PDF保存」で<strong className="font-semibold">原本を再発行</strong>できます（実施日は保存当時のまま）。
+                <strong className="font-semibold">保存済みの参考情報記録を表示中</strong>（保存日: {new Date(restoredAt).toLocaleDateString("ja-JP")}）。
+                結果は再計算せず、安全判断用ではない内容を隔離して表示しています。
               </span>
             </div>
           )}
+          {restoredPayloadState?.status === "complete" && (
+            <div
+              role="note"
+              className="rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-xs text-emerald-950 print:hidden"
+            >
+              保存時のSDS確認状況・作業条件・測定値・単位・記録ルール版を復元しています。
+              現在のSDSや現場条件と一致するか人が再確認してください。
+            </div>
+          )}
+          {restoredPayloadState &&
+            restoredPayloadState.status !== "complete" && (
+              <div
+                role="note"
+                className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-xs text-amber-950 print:hidden"
+              >
+                <p className="font-bold">
+                  {restoredPayloadState.status === "legacy-missing"
+                    ? "旧形式のため、保存時の評価条件を復元できません"
+                    : "保存時の評価条件が不完全です"}
+                </p>
+                <p className="mt-1 leading-5">
+                  この記録を条件まで再現した原本とは扱わず、最新SDSと公式CREATE-SIMPLEで再評価してください。
+                  不足:{" "}
+                  {restoredPayloadState.missingFields
+                    .map((field) => SNAPSHOT_MISSING_LABEL[field])
+                    .join("、")}
+                </p>
+              </div>
+            )}
+          {savePayload &&
+            savePayload.assessmentSnapshot.completeness === "incomplete" &&
+            !restoredAt && (
+              <div
+                role="note"
+                className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-xs text-amber-950 print:hidden"
+              >
+                <p className="font-bold">保存条件はまだ不完全です</p>
+                <p className="mt-1 leading-5">
+                  保存はできますが、不完全記録として残ります。不足:{" "}
+                  {savePayload.assessmentSnapshot.missingFields
+                    .map((field) => SNAPSHOT_MISSING_LABEL[field])
+                    .join("、")}
+                </p>
+              </div>
+            )}
           <div className="flex flex-wrap items-center justify-between gap-2 print:hidden">
-            <p className="text-xs font-bold text-emerald-700">A4 実施記録（ブラウザ印刷で厚労省様式相当の記録に。会社名・実施者・確認印は印刷時に出ます）</p>
+            <p className="text-xs font-bold text-emerald-700">A4 参考情報記録（正式なリスクアセスメント様式ではありません）</p>
             <div className="flex items-center gap-2">
               {/* P1-5: RA結果のクラウド保管（localStorage即時＋クラウド背景同期） */}
               <ChemicalRaSaveButton
                 chemicalName={result.chemicalName}
                 cas={result.casNumber ?? ""}
                 workContent={workContent}
-                exposureBand={result.createSimple?.label ?? ""}
-                payload={result}
+                exposureBand=""
+                payload={savePayload ?? result}
               />
               <button
                 type="button"
@@ -892,60 +1473,34 @@ export function ChemicalRaPanel() {
             )}
             {result.exposureLimit && (
               <p className="mt-1 text-sm text-slate-700">
-                <span className="font-semibold">許容濃度:</span> {result.exposureLimit}
+                <span className="font-semibold">収録済み濃度基準値:</span> {result.exposureLimit}
               </p>
-            )}
-            {result.rawReply && (
-              <div className="mt-3 rounded-lg bg-slate-50 p-3">
-                <SimpleMarkdown content={result.rawReply} />
-              </div>
             )}
           </div>
 
-          {/* CREATE-SIMPLE 4段階判定 */}
-          {result.createSimple && (
-            <div className={`rounded-xl border p-5 shadow-sm ${LEVEL_BADGE[result.createSimple.level]}`}>
-              <div className="flex items-center justify-between gap-3 flex-wrap">
-                <h2 className="flex items-center gap-2 text-base font-bold">
-                  <Gauge className="h-5 w-5" />
-                  CREATE-SIMPLE 判定: {result.createSimple.label}
-                </h2>
-                <span className="rounded-full bg-white/80 px-3 py-0.5 text-xs font-bold">
-                  ばく露指数: {result.createSimple.exposureRatio.toFixed(2)}
-                </span>
-              </div>
-              <p className="mt-2 text-xs">
-                換気: <span className="font-semibold">{result.createSimple.inputSummary.ventilation}</span> /
-                {" "}取扱量: <span className="font-semibold">{result.createSimple.inputSummary.amount}</span> /
-                {" "}作業時間: <span className="font-semibold">{result.createSimple.inputSummary.durationHours}h</span>
-                {result.createSimple.limit8h && (
-                  <> / 8h基準値: <span className="font-semibold">{result.createSimple.limit8h}</span></>
-                )}
+          {result.assessmentNotice && (
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-900">
+              <p>
+                <span className="font-bold">判定値</span>
+                <span className="ml-2 text-slate-600">未算出</span>
               </p>
-              <details className="mt-2">
-                <summary className="cursor-pointer text-[11px] font-semibold underline-offset-2 hover:underline">
-                  判定根拠
-                </summary>
-                <ul className="mt-1 space-y-0.5 text-[11px]">
-                  {result.createSimple.rationale.map((r, i) => (
-                    <li key={i}>・{r}</li>
-                  ))}
-                </ul>
-              </details>
-              {result.createSimple.level === "IV" && (
-                <p className="mt-2 rounded-md bg-white/90 px-2 py-1 text-xs font-bold text-rose-900">
-                  <AlertTriangle className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />直ちに作業を中止し、代替化・密閉化・局所排気装置の即時設置が必要です
-                </p>
-              )}
+              <a
+                href="https://anzeninfo.mhlw.go.jp/user/anzen/kag/ankgc07_3.htm"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-h-11 items-center font-bold text-emerald-800 underline underline-offset-2"
+              >
+                公式CREATE-SIMPLEで判定
+              </a>
             </div>
           )}
 
-          {/* 関連ハザード情報の自動引用 */}
+          {/* 関連する有害性 */}
           {result.relatedHazards && result.relatedHazards.length > 0 && (
             <div className="rounded-xl border border-amber-200 bg-amber-50/60 p-4">
               <h3 className="flex items-center gap-2 text-sm font-bold text-amber-900">
                 <Database className="h-4 w-4" />
-                関連ハザード情報（厚労省データから自動引用）
+                関連する有害性
               </h3>
               <ul className="mt-2 space-y-1">
                 {result.relatedHazards.map((h, i) => (
@@ -973,26 +1528,11 @@ export function ChemicalRaPanel() {
             </div>
           )}
 
-          {/* 保護具推奨 */}
+          {/* 旧生成PPEが混入した場合も商品へ誘導せず隔離する。 */}
           {result.ppeRecommendations.length > 0 && (
-            <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-              <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-                <h2 className="flex items-center gap-2 text-sm font-bold text-slate-900">
-                  <Shield className="h-4 w-4 text-emerald-600" />
-                  必要保護具 ({result.ppeRecommendations.length}件)
-                </h2>
-                <a
-                  href={buildEquipmentHref(result.chemicalName)}
-                  className="inline-flex items-center gap-1 rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-800 hover:bg-emerald-100"
-                >
-                  → この物質に必要な保護具を見る
-                </a>
-              </div>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                {result.ppeRecommendations.map((ppe, i) => (
-                  <PpeCard key={i} ppe={ppe} />
-                ))}
-              </div>
+            <div className="rounded-xl border border-rose-300 bg-rose-50 p-5 text-xs leading-6 text-rose-950">
+              旧版の未検証PPE候補 {result.ppeRecommendations.length}
+              件を隔離しました。商品名・購入リンクは表示せず、最新SDSと作業条件から再選定してください。
             </div>
           )}
 
@@ -1035,11 +1575,13 @@ export function ChemicalRaPanel() {
           {/* 法規制 */}
           {result.regulatoryNotes.length > 0 && (
             <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-              <h2 className="mb-3 text-sm font-bold text-slate-900">適用法規制・規制区分</h2>
+              <h2 className="mb-2 text-sm font-bold text-slate-900">
+                法規制の確認候補
+              </h2>
               <ul className="space-y-1.5">
                 {result.regulatoryNotes.map((note, i) => (
                   <li key={i} className="flex items-start gap-2 text-sm text-slate-700">
-                    <span className="mt-0.5 shrink-0 text-emerald-500">✓</span>
+                    <span aria-hidden="true" className="mt-0.5 shrink-0 text-amber-700">・</span>
                     {note}
                   </li>
                 ))}
@@ -1051,17 +1593,17 @@ export function ChemicalRaPanel() {
           <div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
             <h3 className="text-sm font-bold text-blue-900">この物質の法令取扱いを確認</h3>
             <p className="mt-1 text-xs text-blue-900/80">
-              特化則・有機則・酸欠則など、業務で必要な取扱基準・作業主任者選任・作業環境測定の要件を法令チャットで確認できます。
+              SDS名・CAS・作業条件を添えて、関連条文を確認します。
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
-              <a
-                href={`/chatbot?q=${encodeURIComponent(`${result.chemicalName} の取扱い基準と関連する特化則・有機則の条文を教えて`)}`}
+              <TransientChatLink
+                question={`${result.chemicalName} の取扱い基準と関連する特化則・有機則の条文を教えて`}
                 className="inline-flex min-h-[44px] items-center gap-1 rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white hover:bg-blue-500"
               >
                 法令チャットで質問する →
-              </a>
+              </TransientChatLink>
               <a
-                href={`/law-search?q=${encodeURIComponent(result.chemicalName)}`}
+                href="/law-search"
                 className="inline-flex min-h-[44px] items-center gap-1 rounded-lg border border-blue-300 bg-white px-3 py-2 text-xs font-semibold text-blue-700 hover:bg-blue-100"
               >
                 法令全文検索で調べる →
@@ -1074,33 +1616,23 @@ export function ChemicalRaPanel() {
               汎用裁判例(石綿等に偏る)へのリンクは行き止まり回避のため張らない。 */}
           <div className="rounded-xl border border-rose-200 bg-rose-50 p-4">
             <h3 className="text-sm font-bold text-rose-900">この物質を扱う作業の事故事例を確認</h3>
-            <p className="mt-1 text-xs text-rose-900/80">
-              {result.chemicalName} を取り扱う作業で実際に起きた労働災害を、AIが過去の事例から抽出し注意点を提示します。
-            </p>
             <div className="mt-3">
               <a
-                href={`/accidents?work=${encodeURIComponent(`${result.chemicalName}を取り扱う作業`)}`}
+                href="https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_FND.aspx"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex min-h-[44px] items-center gap-1 rounded-lg bg-rose-600 px-3 py-2 text-xs font-semibold text-white hover:bg-rose-500"
               >
-                類似の労災事例をAIで調べる →
+                厚生労働省の公式事故検索で確認 →
               </a>
             </div>
           </div>
 
-          {/* この場面で必要な保護具: 化学物質名から関連 PPE を絞り込み（フォールバックは呼吸器系） */}
-          <ContextualPpePicks
-            context={`${result.chemicalName} 化学物質 SDS 防塵 防毒 マスク 保護メガネ 耐薬品 手袋 保護衣`}
-            fallbackCategoryIds={["respiratory", "eye-ear-protection", "hand-foot"]}
-            heading={`${result.chemicalName} 取扱い時に推奨される保護具`}
-            description="GHS 分類・SDS の指示に沿って選定する候補。最終判断は公式 SDS と専門家の指導に従ってください。"
+          <ChemicalPpeSelectionBoundary
+            chemicalName={result.chemicalName}
+            sdsConfirmed={sdsStatus === "confirmed"}
+            suitabilityConfirmed={ppeSuitability === "confirmed"}
           />
-
-          {/* 免責事項 */}
-          <p className="text-[11px] leading-relaxed text-slate-400">
-            ※ 本情報はAIが一般的なSDS・GHSデータに基づいて生成した参考情報です。
-            実際の作業においては、製品の公式SDS・最新の法令・専門家の指導に従ってください。
-            保護具購入リンクはアフィリエイトプログラムを利用しています。
-          </p>
 
           {/* P1-1: 印刷時のみ確認印枠（実施者・化学物質管理者・統括安全衛生責任者）。 */}
           <ChemicalRaSignoffBoxes />

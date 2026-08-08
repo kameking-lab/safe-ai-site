@@ -18,7 +18,7 @@
 import { describe, it, expect } from "vitest";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { allLawArticles } from "@/data/laws";
+import { verifiedLawArticles } from "@/data/laws/verified-corpus";
 import { searchRelevantArticlesWithScore } from "@/lib/rag-search";
 import { buildAllowedCitations } from "@/lib/chatbot-prompt-builder";
 import { isLawShortEquivalent } from "@/lib/rag/synonyms";
@@ -43,10 +43,18 @@ const SEARCH_LANDING_FLOOR = 1.0;
 type CaseResult = {
   id: string;
   label: string;
-  rag: "landed" | "missed" | "no-hit" | "rejected-ok" | "leaked" | "n/a";
+  rag:
+    | "landed"
+    | "missed"
+    | "no-hit"
+    | "held-ok"
+    | "unsafe-hit"
+    | "rejected-ok"
+    | "leaked"
+    | "n/a";
   ragScore: number | null;
   ragTop5: string[];
-  search: "landed" | "missed" | "n/a";
+  search: "landed" | "missed" | "held-ok" | "unsafe-hit" | "n/a";
   searchTop5: string[];
 };
 
@@ -55,6 +63,16 @@ function ragResult(tc: FieldVernacularCase): Pick<CaseResult, "rag" | "ragScore"
   const { articles, normalizedScore } = searchRelevantArticlesWithScore(tc.chatQuery, TOP_K);
   const allowed = buildAllowedCitations(articles);
   const top5 = allowed.slice(0, 5).map((a) => `${a.lawShort}${a.articleNum}`);
+  if (tc.ragDisposition === "primary-source-approval-required") {
+    return {
+      rag:
+        normalizedScore < CONFIDENCE_THRESHOLD && allowed.length === 0
+          ? "held-ok"
+          : "unsafe-hit",
+      ragScore: normalizedScore,
+      ragTop5: top5,
+    };
+  }
   if (tc.outOfScope) {
     return {
       rag: normalizedScore < CONFIDENCE_THRESHOLD ? "rejected-ok" : "leaked",
@@ -81,7 +99,7 @@ describe("現場口語ベンチ（チャットボットRAG × 横断検索）", 
     const problems: string[] = [];
     for (const tc of FIELD_VERNACULAR_CASES) {
       for (const g of tc.goldCitations) {
-        const found = allLawArticles.some(
+        const found = verifiedLawArticles.some(
           (a) =>
             a.articleNum === g.articleNum &&
             (a.lawShort === g.lawShort || isLawShortEquivalent(a.lawShort, g.lawShort))
@@ -110,29 +128,59 @@ describe("現場口語ベンチ（チャットボットRAG × 横断検索）", 
         const rag = ragResult(tc);
         let search: CaseResult["search"] = "n/a";
         let searchTop5: string[] = [];
-        if (tc.searchQuery && tc.searchExpect.length > 0) {
+        if (
+          tc.searchQuery &&
+          (tc.searchExpect.length > 0 ||
+            tc.searchDisposition === "clarification-required")
+        ) {
           const hits = searchItems(index, tc.searchQuery, "all", TOP_K);
           searchTop5 = hits.slice(0, 5).map((h) => `[${h.category}]${h.title}`);
-          search = hits.some((h) =>
-            tc.searchExpect.some((s) => h.title.includes(s) || h.url.includes(s))
-          )
-            ? "landed"
-            : "missed";
+          if (tc.searchDisposition === "clarification-required") {
+            search = hits.length === 0 ? "held-ok" : "unsafe-hit";
+          } else {
+            search = hits.some((h) =>
+              tc.searchExpect.some((s) => h.title.includes(s) || h.url.includes(s))
+            )
+              ? "landed"
+              : "missed";
+          }
         }
         results.push({ id: tc.id, label: tc.label, ...rag, search, searchTop5 });
       }
 
       const ragScored = results.filter((r) => r.rag === "landed" || r.rag === "missed" || r.rag === "no-hit");
       const ragLanded = results.filter((r) => r.rag === "landed");
-      const searchScored = results.filter((r) => r.search !== "n/a");
+      const ragHeld = results.filter(
+        (r) => r.rag === "held-ok" || r.rag === "unsafe-hit",
+      );
+      const ragHeldOk = results.filter((r) => r.rag === "held-ok");
+      const searchScored = results.filter(
+        (r) => r.search === "landed" || r.search === "missed",
+      );
       const searchLanded = results.filter((r) => r.search === "landed");
+      const searchHeld = results.filter(
+        (r) => r.search === "held-ok" || r.search === "unsafe-hit",
+      );
+      const searchHeldOk = results.filter((r) => r.search === "held-ok");
       const oos = results.filter((r) => r.rag === "rejected-ok" || r.rag === "leaked");
       const oosOk = results.filter((r) => r.rag === "rejected-ok");
 
       const summary = {
         generatedAt: "see git log / docs (テスト決定性のため時刻は記録しない)",
-        rag: { landed: ragLanded.length, total: ragScored.length, rate: ragLanded.length / ragScored.length },
-        search: { landed: searchLanded.length, total: searchScored.length, rate: searchLanded.length / searchScored.length },
+        rag: {
+          landed: ragLanded.length,
+          total: ragScored.length,
+          rate: ragLanded.length / ragScored.length,
+          safeHeld: ragHeldOk.length,
+          holdTotal: ragHeld.length,
+        },
+        search: {
+          landed: searchLanded.length,
+          total: searchScored.length,
+          rate: searchLanded.length / searchScored.length,
+          safeHeld: searchHeldOk.length,
+          holdTotal: searchHeld.length,
+        },
         outOfScope: { rejected: oosOk.length, total: oos.length },
         results,
       };
@@ -144,10 +192,20 @@ describe("現場口語ベンチ（チャットボットRAG × 横断検索）", 
       // eslint-disable-next-line no-console
       console.log(
         `[field-vernacular-bench] RAG ${ragLanded.length}/${ragScored.length}` +
+          ` / RAG安全保留 ${ragHeldOk.length}/${ragHeld.length}` +
           ` / 検索 ${searchLanded.length}/${searchScored.length}` +
+          ` / 安全保留 ${searchHeldOk.length}/${searchHeld.length}` +
           ` / 範囲外 ${oosOk.length}/${oos.length}` +
           ` / 未着地: ${results
-            .filter((r) => r.rag === "missed" || r.rag === "no-hit" || r.rag === "leaked" || r.search === "missed")
+            .filter(
+              (r) =>
+                r.rag === "missed" ||
+                r.rag === "no-hit" ||
+                r.rag === "unsafe-hit" ||
+                r.rag === "leaked" ||
+                r.search === "missed" ||
+                r.search === "unsafe-hit",
+            )
             .map((r) => r.id)
             .join(",")}`
       );
@@ -158,9 +216,17 @@ describe("現場口語ベンチ（チャットボットRAG × 横断検索）", 
         `RAG着地率が下限を割った（${ragLanded.length}/${ragScored.length}）`
       ).toBeGreaterThanOrEqual(RAG_LANDING_FLOOR);
       expect(
+        ragHeldOk.length,
+        `一次資料未承認質問を安全に保留できていない（${ragHeldOk.length}/${ragHeld.length}）`,
+      ).toBe(ragHeld.length);
+      expect(
         searchLanded.length / searchScored.length,
         `横断検索着地率が下限を割った（${searchLanded.length}/${searchScored.length}）`
       ).toBeGreaterThanOrEqual(SEARCH_LANDING_FLOOR);
+      expect(
+        searchHeldOk.length,
+        `条件不足質問を安全に保留できていない（${searchHeldOk.length}/${searchHeld.length}）`,
+      ).toBe(searchHeld.length);
       // 範囲外は全問 no-hit 経路（GQ51型リークの再発防止）
       expect(
         oos.filter((r) => r.rag === "leaked").map((r) => r.id),

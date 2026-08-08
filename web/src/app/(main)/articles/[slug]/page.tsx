@@ -2,22 +2,32 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ChevronLeft, ExternalLink } from "lucide-react";
-import { JsonLd, breadcrumbSchema, newsArticleSchema } from "@/components/json-ld";
+import {
+  JsonLd,
+  breadcrumbSchema,
+  newsArticleSchema,
+} from "@/components/json-ld";
 import { LanguageButton } from "@/components/language-button";
-import { RelatedContent, type RelatedContentGroup } from "@/components/RelatedContent";
+import {
+  RelatedContent,
+  type RelatedContentGroup,
+} from "@/components/RelatedContent";
 import {
   getPublishedArticleBySlug,
   getPublishedArticleSlugs,
+  isArticleIndexable,
 } from "@/lib/articles";
-import { mhlwNotices } from "@/data/mhlw-notices";
+import { publicMhlwNotices as mhlwNotices } from "@/data/public-mhlw-notices";
 import { getAccidentCasesDataset } from "@/data/mock/accident-cases";
-import { getAllEquipment } from "@/lib/equipment-recommendation";
 import type { LanguageCode } from "@/lib/translation-cache";
 import multilingualTitles from "@/data/translations/multilingual-titles.json";
 import { ogImageUrl } from "@/lib/og-url";
+import { isIndexableAccident } from "@/lib/seo/index-quality";
 
 function tokenizeJa(text: string): string[] {
-  return (text.match(/[一-龥ぁ-んァ-ヶa-zA-Z0-9]{2,}/g) ?? []).filter((t) => t.length >= 2);
+  return (text.match(/[一-龥ぁ-んァ-ヶa-zA-Z0-9]{2,}/g) ?? []).filter(
+    (t) => t.length >= 2,
+  );
 }
 
 const SITE_BASE = "https://www.anzen-ai-portal.jp";
@@ -34,30 +44,29 @@ export async function generateMetadata({
   const { slug } = await params;
   const article = getPublishedArticleBySlug(slug);
   if (!article) return {};
+  const indexable = isArticleIndexable(article);
   return {
     title: article.title,
     description: article.description,
     alternates: {
       canonical: `/articles/${slug}`,
-      languages: {
-        ja: `${SITE_BASE}/articles/${slug}`,
-        en: `${SITE_BASE}/articles/${slug}`,
-        "x-default": `${SITE_BASE}/articles/${slug}`,
-      },
     },
     keywords: article.keywords,
+    robots: { index: indexable, follow: true },
     openGraph: {
       title: `${article.title}`,
       description: article.description,
       images: [{ url: ogImageUrl(article.title), width: 1200, height: 630 }],
       type: "article",
       locale: "ja_JP",
-      alternateLocale: ["en_US"],
       publishedTime: article.publishedAt,
       modifiedTime: article.lastReviewedAt,
       authors: [article.author.url],
     },
-    twitter: { card: "summary_large_image", images: [ogImageUrl(article.title)] },
+    twitter: {
+      card: "summary_large_image",
+      images: [ogImageUrl(article.title)],
+    },
   };
 }
 
@@ -72,15 +81,17 @@ export default async function ArticleDetailPage({
 
   const url = `${SITE_BASE}/articles/${slug}`;
 
-  const titleEntry = (multilingualTitles.entries as Array<{
-    resourceType: string;
-    id: string;
-    en: string;
-    zh: string;
-    vi: string;
-    pt: string;
-    tl: string;
-  }>).find((e) => e.resourceType === "article" && e.id === slug);
+  const titleEntry = (
+    multilingualTitles.entries as Array<{
+      resourceType: string;
+      id: string;
+      en: string;
+      zh: string;
+      vi: string;
+      pt: string;
+      tl: string;
+    }>
+  ).find((e) => e.resourceType === "article" && e.id === slug);
   const prebuiltTitles: Partial<Record<LanguageCode, string>> = titleEntry
     ? {
         en: titleEntry.en,
@@ -112,11 +123,15 @@ export default async function ArticleDetailPage({
     return s;
   };
   const relatedNotices = mhlwNotices
-    .map((n) => ({ n, s: matchScore(`${n.title} ${n.category} ${n.lawRef ?? ""}`) }))
+    .map((n) => ({
+      n,
+      s: matchScore(`${n.title} ${n.category} ${n.lawRef ?? ""}`),
+    }))
     .filter((x) => x.s > 0)
     .sort((a, b) => b.s - a.s)
     .slice(0, 6);
   const relatedAccidents = getAccidentCasesDataset()
+    .filter(isIndexableAccident)
     .map((c) => ({
       c,
       s: matchScore(`${c.title} ${c.summary} ${c.workCategory} ${c.type}`),
@@ -124,15 +139,6 @@ export default async function ArticleDetailPage({
     .filter((x) => x.s > 0)
     .sort((a, b) => b.s - a.s)
     .slice(0, 6);
-  const relatedEquipment = getAllEquipment()
-    .map((it) => ({
-      it,
-      s: matchScore(`${it.name} ${it.spec} ${it.recommendReason ?? ""}`),
-    }))
-    .filter((x) => x.s > 0)
-    .sort((a, b) => b.s - a.s)
-    .slice(0, 6);
-
   const relatedGroups: RelatedContentGroup[] = [
     {
       heading: "関連する厚労省 通達・告示",
@@ -143,14 +149,15 @@ export default async function ArticleDetailPage({
         href: `/circulars/${n.id}`,
         category: `${n.docType}・${n.category}`,
         title: n.title,
-        description: `${n.noticeNumber ?? ""} ${n.issuer ?? ""} ${n.issuedDateRaw ?? ""}`.trim(),
+        description:
+          `${n.noticeNumber ?? ""} ${n.issuer ?? ""} ${n.issuedDateRaw ?? ""}`.trim(),
         kind: "notice" as const,
         badge:
-          n.bindingLevel === "binding"
-            ? "拘束力あり"
-            : n.bindingLevel === "indirect"
-              ? "間接的拘束"
-              : "参考",
+          n.docType === "告示"
+            ? "根拠法令・効力を確認"
+            : n.docType === "通達"
+              ? "行政内部の解釈・運用資料"
+              : "位置付けを個別確認",
       })),
     },
     {
@@ -167,24 +174,10 @@ export default async function ArticleDetailPage({
         badge: c.severity,
       })),
     },
-    {
-      heading: "推奨保護具",
-      accent: "emerald",
-      moreHref: "/equipment-finder",
-      moreLabel: "保護具AI",
-      items: relatedEquipment.map(({ it }) => ({
-        href: `/equipment/${it.id}`,
-        category: `${it.categoryIcon} ${it.categoryName}`,
-        title: it.name,
-        description: it.recommendReason ?? it.spec,
-        kind: "equipment" as const,
-        badge: it.priceLabel,
-      })),
-    },
   ];
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-6 sm:py-8">
+    <div className="mx-auto max-w-3xl px-4 py-6 sm:py-8">
       <JsonLd
         schema={[
           newsArticleSchema({
@@ -224,15 +217,27 @@ export default async function ArticleDetailPage({
         </h1>
         <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-slate-500">
           <span>{article.publishedAt} 公開</span>
-          <span>・最終確認 {article.lastReviewedAt}</span>
+          <span>・編集更新 {article.lastReviewedAt}</span>
+          {article.sourceRetrievedAt ? (
+            <span>・公式URL取得確認 {article.sourceRetrievedAt}</span>
+          ) : null}
+          <span>
+            ・人手内容確認{" "}
+            {article.humanReviewedAt ? article.humanReviewedAt : "未完了"}
+          </span>
           <span>
             ・著者:{" "}
-            <Link href={article.author.url} className="text-emerald-700 hover:underline">
+            <Link
+              href={article.author.url}
+              className="text-emerald-700 hover:underline"
+            >
               {article.author.name}
             </Link>
           </span>
         </div>
-        <p className="mt-3 text-sm leading-6 text-slate-700">{article.description}</p>
+        <p className="mt-3 text-sm leading-6 text-slate-700">
+          {article.description}
+        </p>
       </header>
 
       <article className="space-y-5">
@@ -273,8 +278,12 @@ export default async function ArticleDetailPage({
 
         {/* CTA */}
         <section className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-center">
-          <p className="text-sm font-bold text-emerald-800">{article.ctaSlot.title}</p>
-          <p className="mt-1 text-xs text-slate-700">{article.ctaSlot.description}</p>
+          <p className="text-sm font-bold text-emerald-800">
+            {article.ctaSlot.title}
+          </p>
+          <p className="mt-1 text-xs text-slate-700">
+            {article.ctaSlot.description}
+          </p>
           <Link
             href={article.ctaSlot.href}
             className="mt-3 inline-block rounded-lg bg-emerald-600 px-5 py-2 text-sm font-bold text-white hover:bg-emerald-700"
@@ -288,6 +297,6 @@ export default async function ArticleDetailPage({
         title="関連コンテンツ — 通達・事故・保護具で深掘り"
         groups={relatedGroups}
       />
-    </main>
+    </div>
   );
 }

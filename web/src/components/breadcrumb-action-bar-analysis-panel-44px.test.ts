@@ -39,19 +39,34 @@ describe("breadcrumb.tsx の各リンクが44pxタップ標的を満たす", () 
   });
 });
 
-describe("accidents/action-bar.tsx の5リンクが44pxタップ標的を満たす", () => {
+describe("accidents/action-bar.tsx の公開中2リンクが44pxタップ標的を満たす", () => {
   const SOURCE = readSource("src/components/accidents/action-bar.tsx");
   const returnStart = SOURCE.indexOf("return (");
   const cases: Array<[string, string]> = [
-    ["<Link", "KYを起票"],
-    ["<Link", "必要保護具を見る"],
-    ["<Link", "関連法令"],
-    ["<Link", "関連裁判例"],
-    ["<Link", "問われる責任"],
+    ["<KyHandoffLink", "この事故を参考にKYを作る"],
+    ["<Link", "空のKYを作る"],
+    ["<Link", "法令検索を開く"],
   ];
 
   it.each(cases)("%s %s", (tag, label) => {
     expect(elementBlock(SOURCE, tag, label, returnStart)).toMatch(/min-h-\[44px\]/);
+  });
+
+  it("公開時はKY分岐のどちらかと法令検索だけを表示する", () => {
+    const renderedSource = SOURCE.slice(returnStart);
+    expect(renderedSource.match(/<KyHandoffLink\b/g)).toHaveLength(1);
+    expect(renderedSource.match(/<Link\b/g)).toHaveLength(2);
+    expect(SOURCE).toContain("isAccidentEligibleForOperationalEvidence");
+    expect(renderedSource).toContain("eligibleForHandoff ? (");
+    expect(renderedSource).toContain("この事故を参考にKYを作る");
+    expect(renderedSource).toContain("空のKYを作る");
+    expect(renderedSource).toContain("法令検索を開く");
+    expect(renderedSource).not.toContain("問われる責任");
+    expect(renderedSource).not.toContain("必要保護具を見る");
+    expect(renderedSource).not.toContain("関連裁判例");
+    expect(renderedSource).not.toContain(
+      "事故類型だけでは対策や適用法令を決められません",
+    );
   });
 });
 

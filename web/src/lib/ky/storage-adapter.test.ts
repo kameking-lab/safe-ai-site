@@ -16,11 +16,25 @@ import {
 } from "@/lib/ky/storage-adapter";
 import { normalizeKyInstructionRecord } from "@/lib/services/operations-service";
 import type { Worker } from "@/lib/ky/workers-master";
+import { grantCloudConsent, revokeCloudConsent } from "@/lib/cloud-consent";
 
 const ENV_URL = "NEXT_PUBLIC_SUPABASE_URL";
+const SIGNAGE_FLAG = "NEXT_PUBLIC_KY_SIGNAGE_SHARING_ENABLED";
+const WORKER_NOW = Date.now();
 
 const SAMPLE_WORKERS: Worker[] = [
-  { id: "w1", name: "山田太郎", affiliation: "self", company: "", qualNo: "1,10", isRegular: true, hidden: false, createdAt: 1 },
+  {
+    id: "w1",
+    name: "山田太郎",
+    affiliation: "self",
+    company: "",
+    qualNo: "1,10",
+    isRegular: true,
+    hidden: false,
+    createdAt: WORKER_NOW,
+    lastUsedAt: WORKER_NOW,
+    expiresAt: WORKER_NOW + 31 * 24 * 60 * 60 * 1000,
+  },
 ];
 
 function makeTransport(overrides: Partial<KyCloudTransport> = {}): KyCloudTransport {
@@ -39,14 +53,35 @@ function makeTransport(overrides: Partial<KyCloudTransport> = {}): KyCloudTransp
 
 beforeEach(() => {
   localStorage.clear();
+  grantCloudConsent();
   process.env[ENV_URL] = "https://test.supabase.co";
+  process.env[SIGNAGE_FLAG] = "true";
   __setKyCloudTransport(makeTransport());
 });
 
 afterEach(() => {
   delete process.env[ENV_URL];
+  delete process.env[SIGNAGE_FLAG];
   __setKyCloudTransport(null);
   vi.restoreAllMocks();
+});
+
+describe("storage-adapter explicit cloud consent", () => {
+  it("does not call any owner cloud transport before consent", async () => {
+    revokeCloudConsent();
+    const t = makeTransport();
+    __setKyCloudTransport(t);
+
+    await expect(cloudPushKyRecord(normalizeKyInstructionRecord({}))).resolves.toBe(false);
+    await expect(cloudPullKyRecords()).resolves.toBeNull();
+    await expect(cloudPushWorkers(SAMPLE_WORKERS)).resolves.toBe(false);
+    await expect(cloudPullWorkers()).resolves.toBeNull();
+
+    expect(t.putKyRecord).not.toHaveBeenCalled();
+    expect(t.getKyRecords).not.toHaveBeenCalled();
+    expect(t.putWorkers).not.toHaveBeenCalled();
+    expect(t.getWorkers).not.toHaveBeenCalled();
+  });
 });
 
 describe("storage-adapter: クラウド有効判定・端末ID", () => {
@@ -60,6 +95,16 @@ describe("storage-adapter: クラウド有効判定・端末ID", () => {
     const id1 = getDeviceId();
     expect(id1).toBeTruthy();
     expect(getDeviceId()).toBe(id1);
+  });
+
+  it("localStorage 利用不可でも共有 anonymous ID にフォールバックしない", () => {
+    vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => {
+      throw new DOMException("blocked", "SecurityError");
+    });
+    const id = getDeviceId();
+    expect(id).not.toBe("anonymous");
+    expect(id.length).toBeGreaterThanOrEqual(32);
+    expect(getDeviceId()).toBe(id);
   });
 });
 
@@ -169,75 +214,26 @@ describe("storage-adapter: 再送キュー（オフライン耐性・最新優�
   });
 });
 
-describe("storage-adapter: サイネージ共有（Phase 6）", () => {
-  it("作成でコードを返す", async () => {
-    __setKyCloudTransport(makeTransport({ createSignageSession: vi.fn(async () => "654321") }));
-    expect(await cloudCreateSignageSession(normalizeKyInstructionRecord({}))).toBe("654321");
-  });
-
-  it("クラウド未設定なら作成は null（共有不可）", async () => {
-    delete process.env[ENV_URL];
-    const t = makeTransport();
-    __setKyCloudTransport(t);
-    expect(await cloudCreateSignageSession(normalizeKyInstructionRecord({}))).toBeNull();
-    expect(t.createSignageSession).not.toHaveBeenCalled();
-  });
-
-  it("コードからKYを取得する", async () => {
-    const rec = normalizeKyInstructionRecord({ siteName: "共有現場" });
-    __setKyCloudTransport(makeTransport({ getSignageSession: vi.fn(async () => rec) }));
-    const got = await cloudGetSignageSession("123456");
-    expect(got?.siteName).toBe("共有現場");
-  });
-
-  it("取得失敗(例外)でも throw せず null", async () => {
-    __setKyCloudTransport(
-      makeTransport({
-        getSignageSession: vi.fn(async () => {
-          throw new Error("network");
-        }),
-      })
-    );
-    await expect(cloudGetSignageSession("123456")).resolves.toBeNull();
-  });
-});
-
-describe("cloudCreateSignageSessionDetailed: 6桁共有の失敗理由マッピング（R2 resilience）", () => {
+describe("storage-adapter: サイネージ共有の隔離境界", () => {
   const rec = normalizeKyInstructionRecord({});
 
-  it("env未設定なら cloud_not_configured", async () => {
-    delete process.env[ENV_URL];
-    const r = await cloudCreateSignageSessionDetailed(rec);
-    expect(r).toEqual({ ok: false, reason: "cloud_not_configured" });
-  });
+  it("legacy public flags and a fake transport cannot enable creation or lookup", async () => {
+    process.env.NEXT_PUBLIC_KY_SIGNAGE_SHARING_ENABLED = "true";
+    const transport = makeTransport({
+      createSignageSession: vi.fn(async () => "654321"),
+      getSignageSession: vi.fn(async () =>
+        normalizeKyInstructionRecord({ siteName: "非公開現場" }),
+      ),
+    });
+    __setKyCloudTransport(transport);
 
-  it("成功時は code を返す", async () => {
-    vi.stubGlobal("fetch", vi.fn(async () => ({ ok: true, status: 200, json: async () => ({ ok: true, code: "654321" }) })));
-    const r = await cloudCreateSignageSessionDetailed(rec);
-    expect(r).toEqual({ ok: true, code: "654321" });
-  });
-
-  it("502 db_error（Supabase権限不足等）は server_error にマップ（通信状況のせいにしない）", async () => {
-    vi.stubGlobal("fetch", vi.fn(async () => ({ ok: false, status: 502, json: async () => ({ ok: false, reason: "db_error" }) })));
-    const r = await cloudCreateSignageSessionDetailed(rec);
-    expect(r).toEqual({ ok: false, reason: "server_error" });
-  });
-
-  it("code_collision は busy にマップ", async () => {
-    vi.stubGlobal("fetch", vi.fn(async () => ({ ok: false, status: 503, json: async () => ({ ok: false, reason: "code_collision" }) })));
-    const r = await cloudCreateSignageSessionDetailed(rec);
-    expect(r).toEqual({ ok: false, reason: "busy" });
-  });
-
-  it("503 cloud_not_configured（サーバー側env欠落）も cloud_not_configured", async () => {
-    vi.stubGlobal("fetch", vi.fn(async () => ({ ok: false, status: 503, json: async () => ({ ok: false, reason: "cloud_not_configured" }) })));
-    const r = await cloudCreateSignageSessionDetailed(rec);
-    expect(r).toEqual({ ok: false, reason: "cloud_not_configured" });
-  });
-
-  it("通信例外・タイムアウトは network にマップ", async () => {
-    vi.stubGlobal("fetch", vi.fn(async () => { throw new Error("network down"); }));
-    const r = await cloudCreateSignageSessionDetailed(rec);
-    expect(r).toEqual({ ok: false, reason: "network" });
+    await expect(cloudCreateSignageSession(rec)).resolves.toBeNull();
+    await expect(cloudGetSignageSession("123456")).resolves.toBeNull();
+    await expect(cloudCreateSignageSessionDetailed(rec)).resolves.toEqual({
+      ok: false,
+      reason: "not_operationally_verified",
+    });
+    expect(transport.createSignageSession).not.toHaveBeenCalled();
+    expect(transport.getSignageSession).not.toHaveBeenCalled();
   });
 });

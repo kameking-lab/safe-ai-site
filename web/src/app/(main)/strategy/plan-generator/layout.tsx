@@ -1,5 +1,7 @@
-import { CopilotProvider } from "@/components/copilot/CopilotProvider";
+import { permanentRedirect } from "next/navigation";
 
-export default function PlanGeneratorLayout({ children }: { children: React.ReactNode }) {
-  return <CopilotProvider>{children}</CopilotProvider>;
+export default function PlanGeneratorLayout() {
+  // An explicit empty fragment prevents user-supplied fragments on the
+  // quarantined URL from being inherited by the browser after the redirect.
+  permanentRedirect("/about/quality#");
 }

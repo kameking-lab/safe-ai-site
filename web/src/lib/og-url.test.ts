@@ -153,7 +153,9 @@ describe("og route — 過長テキストの縦溢れ防止が配線されてい
     expect(src).toMatch(/import\s*\{[^}]*\bclampOgText\b[^}]*\}\s*from\s*["']@\/lib\/og-url["']/);
     // title・desc 双方がクランプを通ること
     expect(src).toMatch(/clampOgText\(\s*searchParams\.get\("title"\)[^)]*OG_TITLE_MAX\)/);
-    expect(src).toMatch(/clampOgText\(\s*searchParams\.get\("desc"\)[^)]*OG_DESC_MAX\)/);
+    expect(src).toMatch(
+      /clampOgText\(\s*searchParams\.get\("desc"\)[^)]*OG_DESC_MAX\s*,?\s*\)/,
+    );
   });
 
   it("title フォントサイズは ogTitleFontSize 経由（生の三項ハードコードを撤去）", () => {

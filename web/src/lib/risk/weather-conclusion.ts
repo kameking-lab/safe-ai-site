@@ -49,12 +49,6 @@ const LEVEL_RANK: Record<RiskWeatherLevel, number> = {
   special: 3,
 };
 
-function regionLevel(region: RiskRegionInput): RiskWeatherLevel {
-  const forecast: RiskWeatherLevel = region.forecastLevel ?? "none";
-  const jma: RiskWeatherLevel = region.jmaLevel ?? "none";
-  return LEVEL_RANK[forecast] >= LEVEL_RANK[jma] ? forecast : jma;
-}
-
 function joinLabels(labels: string[]): string {
   return labels.join("・");
 }
@@ -62,21 +56,23 @@ function joinLabels(labels: string[]): string {
 export function buildRiskWeatherConclusion(input: RiskWeatherInput): RiskWeatherConclusion {
   const { forecastStatus, jmaStatus, regions } = input;
 
-  const special = regions.filter((r) => regionLevel(r) === "special");
-  const warning = regions.filter((r) => LEVEL_RANK[regionLevel(r)] >= LEVEL_RANK.warning);
-  const advisory = regions.filter((r) => regionLevel(r) === "advisory");
+  const special = regions.filter((r) => r.jmaLevel === "special");
+  const officialWarning = regions.filter((r) => LEVEL_RANK[r.jmaLevel ?? "none"] >= LEVEL_RANK.warning);
+  const officialAdvisory = regions.filter((r) => r.jmaLevel === "advisory");
+  const forecastWarning = regions.filter((r) => r.forecastLevel === "warning");
+  const forecastAdvisory = regions.filter((r) => r.forecastLevel === "advisory");
 
   // 1) 警報・特別警報は取得途中・片方失敗でも検知できた時点で最優先で出す
-  if (warning.length > 0) {
+  if (officialWarning.length > 0) {
     const isSpecial = special.length > 0;
     return {
       tone: "danger",
-      value: warning.length,
+      value: officialWarning.length,
       unit: "地域",
-      title: isSpecial ? "特別警報あり" : "警報相当あり",
-      description: `${joinLabels(warning.map((r) => r.label))}で${
-        isSpecial ? "特別警報級" : "警報相当"
-      }。屋外作業は中止判断を。`,
+      title: isSpecial ? "気象庁 特別警報あり" : "気象庁 警報あり",
+      description: `${joinLabels(officialWarning.map((r) => r.label))}で${
+        isSpecial ? "特別警報" : "警報"
+      }が発表されています。公式情報と現場手順を確認してください。`,
     };
   }
 
@@ -94,17 +90,14 @@ export function buildRiskWeatherConclusion(input: RiskWeatherInput): RiskWeather
     return { tone: "neutral", title: "気象情報 確認中" };
   }
 
-  // 4) 注意報相当（片方失敗でも、取れている情報は出す方が有用）
-  if (advisory.length > 0) {
-    const partialFail = forecastStatus === "error" || jmaStatus === "error";
+  // 4) 気象庁の注意報。独自しきい値とは表示を混ぜない。
+  if (officialAdvisory.length > 0) {
     return {
       tone: "warning",
-      value: advisory.length,
+      value: officialAdvisory.length,
       unit: "地域",
-      title: "注意報相当あり",
-      description: `${joinLabels(advisory.map((r) => r.label))}で注意報相当。${
-        partialFail ? "一部データ取得失敗のため気象庁公式サイトでも確認を。" : "作業前に風・雨を確認。"
-      }`,
+      title: "気象庁 注意報あり",
+      description: `${joinLabels(officialAdvisory.map((r) => r.label))}で注意報が発表されています。気象庁公式情報を確認してください。`,
     };
   }
 
@@ -117,10 +110,23 @@ export function buildRiskWeatherConclusion(input: RiskWeatherInput): RiskWeather
     };
   }
 
-  // 6) 全ソース取得成功・全ブロック異常なし = 緑
+  // 6) Open-Meteo の独自しきい値は、公式警報・注意報と明確に分離する。
+  if (forecastWarning.length > 0 || forecastAdvisory.length > 0) {
+    const severe = forecastWarning.length > 0;
+    const targets = severe ? forecastWarning : forecastAdvisory;
+    return {
+      tone: severe ? "danger" : "warning",
+      value: targets.length,
+      unit: "地域",
+      title: severe ? "独自目安・強い雨風" : "独自目安・雨風に注意",
+      description: `${joinLabels(targets.map((r) => r.label))}がOpen-Meteo予報の独自しきい値に該当。気象庁の警報・注意報を意味しません。`,
+    };
+  }
+
+  // 7) 全ソース取得成功。安全宣言ではなく、発表状況だけを示す。
   return {
-    tone: "safe",
-    title: "警報・注意報なし",
-    description: "全国8ブロックで警報・注意報相当の予報はありません。",
+    tone: "neutral",
+    title: "気象庁の警報・注意報 発表なし",
+    description: "取得時点の47都道府県データでは発表を検知していません。現場条件と最新の公式情報は別途確認してください。",
   };
 }

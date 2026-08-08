@@ -136,4 +136,6 @@ export const signageMeteoRegions = signageLocations.map((l) => ({
   regionName: l.regionName,
   latitude: l.latitude,
   longitude: l.longitude,
+  prefectureIso: l.prefectureIso,
+  jmaCityCode: l.jmaCityCode,
 }));

@@ -1,5 +1,3 @@
-import { appendAmazonTag, generateRakutenAffiliateUrl } from "@/lib/affiliate-url";
-
 export type SafetyGoodsCategory = {
   id: string;
   name: string;
@@ -129,7 +127,7 @@ const rawSafetyGoodsItems: SafetyGoodsItem[] = [
     id: "rm-001",
     categoryId: "respiratory",
     name: "DS2防塵マスク（使い捨て・20枚入）",
-    description: "溶接ヒューム・粉塵・アスベスト除去作業対応のDS2規格マスク。排気弁付きで息苦しさを軽減。",
+    description: "DS2区分の検索カテゴリ例。石綿作業への使用可否は作業区分で異なり、この一覧では判定しません。型式・国家検定・作業区分を厚生労働省の公式資料で確認してください。",
     price: "¥2,500〜¥4,000",
     imageAlt: "DS2防塵マスクの製品イメージ",
     signageFeatured: true,
@@ -141,7 +139,7 @@ const rawSafetyGoodsItems: SafetyGoodsItem[] = [
     id: "rm-002",
     categoryId: "respiratory",
     name: "防毒マスク（直結式小型・有機ガス用）",
-    description: "塗装作業・有機溶剤取扱いに。吸収缶交換式で繰り返し使用可能。JIS T 8152適合。",
+    description: "有機ガス用・直結式小型の検索カテゴリ例。対象物質、濃度、酸素濃度、吸収缶の種類・使用限度、型式検定は商品ごとに確認が必要です。",
     price: "¥3,000〜¥6,000",
     imageAlt: "防毒マスクの製品イメージ",
     amazonUrl: "https://www.amazon.co.jp/s?k=%E9%98%B2%E6%AF%92%E3%83%9E%E3%82%B9%E3%82%AF+%E6%9C%89%E6%A9%9F%E3%82%AC%E3%82%B9",
@@ -152,7 +150,7 @@ const rawSafetyGoodsItems: SafetyGoodsItem[] = [
     id: "rm-003",
     categoryId: "respiratory",
     name: "電動ファン付き呼吸用保護具（PAPR）",
-    description: "電動ファンで給気し、長時間作業でも負担が少ない。溶接・解体・トンネル工事に最適。",
+    description: "電動ファン付き呼吸用保護具の検索カテゴリ例。作業区分、粒子・ガスの種類、指定防護係数、型式検定、面体への適合を確認してください。",
     price: "¥30,000〜¥80,000",
     imageAlt: "電動ファン付き呼吸用保護具の製品イメージ",
     signageFeatured: true,
@@ -213,7 +211,7 @@ const rawSafetyGoodsItems: SafetyGoodsItem[] = [
     id: "ho-002",
     categoryId: "harmful-organisms",
     name: "ポイズンリムーバー（応急処置用吸引器）",
-    description: "蜂・蛇・蜘蛛の刺咬傷に。ポンプ式で毒液を吸引。救急箱に1つは常備したい必須アイテム。",
+    description: "応急器具カテゴリの一例。119番・医療機関・現場の救急手順を優先し、治療の代替には使用しないでください。刺咬傷への有効性や適用可否は確認が必要です。",
     price: "¥1,000〜¥2,000",
     imageAlt: "ポイズンリムーバーの製品イメージ",
     amazonUrl: "https://www.amazon.co.jp/s?k=%E3%83%9D%E3%82%A4%E3%82%BA%E3%83%B3%E3%83%AA%E3%83%A0%E3%83%BC%E3%83%90%E3%83%BC",
@@ -349,7 +347,7 @@ const rawSafetyGoodsItems: SafetyGoodsItem[] = [
     id: "rm-004",
     categoryId: "respiratory",
     name: "溶接フューム対応 防塵マスク（DS3規格）",
-    description: "溶接ヒューム規制（2023年）対応のDS3マスク。遊離珪酸・石綿除去作業にも対応。",
+    description: "DS3区分の検索カテゴリ例。石綿・遊離けい酸・溶接ヒュームへの適用は作業区分と型式で異なり、この一覧では判定しません。公式資料と国家検定の表示を確認してください。",
     price: "¥3,000〜¥6,000",
     imageAlt: "DS3防塵マスクの製品イメージ",
     amazonUrl: "https://www.amazon.co.jp/s?k=DS3+%E9%98%B2%E5%A1%B5%E3%83%9E%E3%82%B9%E3%82%AF+%E6%BA%B6%E6%8E%A5",
@@ -559,14 +557,21 @@ const rawSafetyGoodsItems: SafetyGoodsItem[] = [
 // JSON 内の amazonUrl / rakutenUrl は生の検索URL。
 // NEXT_PUBLIC_AMAZON_AFFILIATE_ID / NEXT_PUBLIC_RAKUTEN_AFFILIATE_ID が設定されていれば
 // データ層でアソシエイトタグ／hb.afl リダイレクトに包み、未設定時は原URLが返る。
-export const safetyGoodsItems: SafetyGoodsItem[] = rawSafetyGoodsItems.map((item) => ({
-  ...item,
-  amazonUrl: appendAmazonTag(item.amazonUrl),
-  rakutenUrl: generateRakutenAffiliateUrl(item.rakutenUrl),
-}));
+/**
+ * 2026-07-24 fail-closed:
+ * 旧データは特定SKUを確認せずに規格、性能、価格帯を付したレコードを含むため、
+ * 公開UI・関連表示・サイネージへ一件も渡さない。独立した型式・仕様・一次資料の
+ * 人手照合が完了したレコードだけを、将来の明示的な公開allowlistへ移す。
+ */
+export const safetyGoodsItems: SafetyGoodsItem[] = [];
+
+/** 監査用。件数だけを返し、レコード本文は公開経路へ渡さない。 */
+export function getQuarantinedSafetyGoodsCount(): number {
+  return rawSafetyGoodsItems.length;
+}
 
 /** サイネージ向け：おすすめフラグ付きをカテゴリ横断で返す */
 export function getSignageFeaturedSafetyGoods(limit = 12): SafetyGoodsItem[] {
-  const picked = safetyGoodsItems.filter((i) => i.signageFeatured);
-  return picked.slice(0, limit);
+  void limit;
+  return [];
 }

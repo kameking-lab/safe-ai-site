@@ -8,7 +8,7 @@ import { ogImageUrl } from "@/lib/og-url";
 
 const _title = "SDS製品検索＋自動リスクアセスメント";
 const _desc =
-  "製品名・メーカー名から含有化学物質を検索し、CREATE-SIMPLE準拠の簡略リスクアセスメントを自動実行。換気・取扱量・作業時間からI〜IVのリスクレベルを判定し、対策を提示します。";
+  "製品名・メーカー名から内蔵SDSデータと含有成分を検索し、製品固有の最新SDSと収録済み公的情報の確認を支援します。自動ばく露推定やリスクレベル判定は行いません。";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/chemical-ra/product-search" },
@@ -44,7 +44,8 @@ export default function ProductSearchPage() {
           {
             href: "/chemical-ra",
             label: "化学物質RA（手入力）",
-            description: "成分名・CAS番号がわかっている場合の直接入力フォーム。",
+            description:
+              "成分名・CAS番号がわかっている場合の直接入力フォーム。",
             color: "emerald",
             cta: "手入力で評価",
           },
@@ -56,11 +57,12 @@ export default function ProductSearchPage() {
             cta: "物質を調べる",
           },
           {
-            href: "/equipment-finder",
-            label: "保護具AIファインダー",
-            description: "検出された化学物質に対応する保護手袋・呼吸器を選定。",
+            href: "/goods",
+            label: "安全用品カテゴリ",
+            description:
+              "SDSとRAで必要な種類を確認した後、購入候補のカテゴリを確認。",
             color: "amber",
-            cta: "保護具を選ぶ",
+            cta: "カテゴリを見る",
           },
         ]}
       />

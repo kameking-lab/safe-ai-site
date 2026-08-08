@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import {
   PageContainer,
   Section,
@@ -46,6 +47,10 @@ function ViewportHint() {
 }
 
 export default function LayoutPreviewPage() {
+  if (process.env.VERCEL_ENV === "production") {
+    notFound();
+  }
+
   return (
     <PageContainer>
       <Stack gap="lg">

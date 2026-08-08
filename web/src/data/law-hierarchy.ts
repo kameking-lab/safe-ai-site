@@ -1,5 +1,5 @@
 import { allLawArticles } from "@/data/laws";
-import { mhlwNotices } from "@/data/mhlw-notices";
+import { publicMhlwNotices as mhlwNotices } from "@/data/public-mhlw-notices";
 
 /**
  * 階層レベル。

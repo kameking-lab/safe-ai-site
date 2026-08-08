@@ -1,64 +1,64 @@
-import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 
-import CourtCaseDetailPage from "./page";
-import { COURT_CASES } from "@/data/court-cases";
-
-// 判例詳細は async サーバーコンポーネント。await して得た JSX を描画して検証する。
-const id = COURT_CASES[0].id;
-
-describe("/court-cases/[id] 柱0 44pxタップ標的", () => {
-  it("最上部の「労災裁判例コーナーに戻る」戻りリンクが 44px タップ標的を満たす", async () => {
-    render(await CourtCaseDetailPage({ params: Promise.resolve({ id }) }));
-    const back = screen.getByRole("link", { name: /労災裁判例コーナーに戻る/ });
-    expect(back.className).toContain("min-h-[44px]");
-    expect(back.className).toContain("items-center");
-  });
-
-  it("最上部の「この判例を印刷／PDF」リンクが 44px タップ標的を満たす", async () => {
-    render(await CourtCaseDetailPage({ params: Promise.resolve({ id }) }));
-    const print = screen.getByRole("link", { name: /この判例を印刷／PDF/ });
-    expect(print.className).toContain("min-h-[44px]");
-    expect(print.className).toContain("items-center");
-  });
-
-  it("現場の実務へつなげる3カード（KY用紙・重大災害事例・安衛法質問）が 44px タップ標的を満たす", async () => {
-    render(await CourtCaseDetailPage({ params: Promise.resolve({ id }) }));
-    for (const name of [/KY用紙で危険予知/, /重大災害事例を見る/, /安衛法を質問する/]) {
-      const card = screen.getByRole("link", { name });
-      expect(card.className).toContain("min-h-[44px]");
-      expect(card.className).toContain("items-center");
-    }
-  });
+const navigation = vi.hoisted(() => {
+  const notFoundError = new Error("NEXT_NOT_FOUND");
+  return {
+    notFoundError,
+    notFound: vi.fn((): never => {
+      throw notFoundError;
+    }),
+  };
 });
 
-describe("/court-cases/[id] 争点タグ色の一覧/詳細不整合是正", () => {
-  it("旧・詳細ページ側マップに未収載だった争点(解雇・雇止め)も一覧と同じ色で表示される（灰色フォールバック無し）", async () => {
-    render(await CourtCaseDetailPage({ params: Promise.resolve({ id: "nihon-shoen-seizo" }) }));
-    const tags = screen.getAllByText("解雇・雇止め");
-    expect(tags.length).toBeGreaterThan(0);
-    for (const tag of tags) {
-      expect(tag.className).toContain("bg-red-100");
-      expect(tag.className).not.toContain("bg-slate-100");
-    }
-  });
-});
+vi.mock("next/navigation", () => ({
+  notFound: navigation.notFound,
+}));
 
-describe("/court-cases/[id] E-E-A-T監修者バイライン", () => {
-  it("監修者バイライン（労働安全衛生コンサルタント登録260022）が/aboutへのリンクとして表示される", async () => {
-    render(await CourtCaseDetailPage({ params: Promise.resolve({ id }) }));
-    const byline = screen.getByRole("link", { name: /労働安全衛生コンサルタント（登録番号260022）/ });
-    expect(byline.getAttribute("href")).toBe("/about");
+import CourtCaseDetailPage, {
+  dynamicParams,
+  generateMetadata,
+  generateStaticParams,
+} from "./page";
+
+describe("/court-cases/[id] 公開隔離境界", () => {
+  it("公開allowlistが空の間は静的詳細URLを1件も生成しない", () => {
+    expect(generateStaticParams()).toEqual([]);
+    expect(dynamicParams).toBe(false);
   });
 
-  it("Person contributor が JSON-LD (WebPage) に配線されている", async () => {
-    const { container } = render(await CourtCaseDetailPage({ params: Promise.resolve({ id }) }));
-    const script = container.querySelector('script[type="application/ld+json"]');
-    expect(script).not.toBeNull();
-    const parsed = JSON.parse(script!.innerHTML) as Array<Record<string, unknown>>;
-    const webPage = parsed.find((s) => s["@type"] === "WebPage");
-    expect((webPage?.contributor as { name?: string })?.name).toBe(
-      "労働安全衛生コンサルタント（登録番号260022）"
-    );
+  it.each([
+    "rikujou-jieitai-hachinohe",
+    "nihon-shoen-seizo",
+    "___unknown-court-case___",
+  ])("旧ID・未知ID %s はnotFoundで停止する", async (id) => {
+    navigation.notFound.mockClear();
+    await expect(
+      CourtCaseDetailPage({ params: Promise.resolve({ id }) }),
+    ).rejects.toBe(navigation.notFoundError);
+    expect(navigation.notFound).toHaveBeenCalledTimes(1);
+  });
+
+  it("未知IDのmetadataに詳細canonicalやOGを生成しない", async () => {
+    const metadata = await generateMetadata({
+      params: Promise.resolve({ id: "___unknown-court-case___" }),
+    });
+    expect(metadata).toEqual({
+      title: "労災裁判例｜安全AIポータル",
+    });
+    expect(metadata.alternates).toBeUndefined();
+    expect(metadata.openGraph).toBeUndefined();
+  });
+
+  it.each([
+    "nihon-shoen-seizo",
+    "shibuya-siespa-explosion-criminal",
+  ])("隔離した旧ID %s にも詳細metadataを復活させない", async (id) => {
+    const metadata = await generateMetadata({
+      params: Promise.resolve({ id }),
+    });
+    expect(metadata.title).toBe("労災裁判例｜安全AIポータル");
+    expect(metadata.alternates).toBeUndefined();
+    expect(metadata.description).toBeUndefined();
+    expect(metadata.openGraph).toBeUndefined();
   });
 });

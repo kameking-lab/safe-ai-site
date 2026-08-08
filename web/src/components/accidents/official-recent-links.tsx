@@ -36,22 +36,19 @@ const LINKS: { label: string; freshness: string; url: string }[] = [
 
 export function OfficialRecentLinks() {
   return (
-    <section className="mt-4 rounded-2xl border border-sky-200 bg-sky-50/50 p-4 sm:p-5 space-y-2">
-      <h2 className="flex items-center gap-2 text-base font-bold text-slate-900">
+    <details className="mt-4 rounded-xl border border-slate-200 bg-white px-3">
+      <summary className="flex min-h-11 cursor-pointer items-center gap-2 text-sm font-bold text-slate-800">
         <CalendarClock className="h-5 w-5 text-sky-600" aria-hidden="true" />
-        直近の労働災害（厚労省・公式データ）
-      </h2>
-      <p className="text-xs text-slate-600">
-        最新の労災発生状況は厚労省・e-Statの公式データが一次情報です（出典明示でリンク）。本サイトの事例DBは過去事例の分析用です。
-      </p>
-      <ul className="space-y-1.5">
+        公式の事故データ
+      </summary>
+      <ul className="space-y-1 border-t border-slate-200 py-3">
         {LINKS.map((l) => (
           <li key={l.url}>
             <a
               href={l.url}
               target="_blank"
               rel="noreferrer"
-              className="flex items-start gap-2 rounded-lg border border-slate-200 bg-white p-2.5 hover:border-sky-300"
+              className="flex min-h-11 items-start gap-2 py-2 text-sky-800 underline underline-offset-4"
             >
               <span className="flex-1">
                 <span className="block text-sm font-semibold text-slate-800">{l.label}</span>
@@ -62,9 +59,6 @@ export function OfficialRecentLinks() {
           </li>
         ))}
       </ul>
-      <p className="text-[11px] text-slate-400">
-        ※ 出典: 厚生労働省・職場のあんぜんサイト・政府統計の総合窓口(e-Stat)。政府標準利用規約2.0に基づき出典明示で利用。公表時期は調査時点。
-      </p>
-    </section>
+    </details>
   );
 }

@@ -64,7 +64,7 @@ export function SignageConclusionStrip({ conclusion }: Props) {
         </ul>
       )}
       {conclusion.sub && (
-        <p className="line-clamp-2 w-full text-xs font-semibold leading-snug opacity-90 sm:text-sm xl:w-auto xl:flex-1 xl:text-lg">
+        <p className="hidden w-full font-semibold leading-snug opacity-90 sm:line-clamp-2 sm:text-sm xl:w-auto xl:flex-1 xl:text-lg">
           {conclusion.sub}
         </p>
       )}

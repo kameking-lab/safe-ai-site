@@ -6,6 +6,7 @@
 import { NextResponse } from "next/server";
 import { searchProducts } from "@/lib/sds-fetcher";
 import { cdnCacheHeaders, noStoreHeaders } from "@/lib/api-cache";
+import { sharedRateLimitGuard } from "@/lib/security/shared-state";
 
 // F-005: SDS検索は同一(productName, manufacturer)で同一結果に収束。
 // ただし内蔵DB追加が頻繁にあり得るので5分のみ。
@@ -17,6 +18,13 @@ export type SdsSearchRequest = {
 };
 
 export async function POST(request: Request) {
+  const limited = await sharedRateLimitGuard(request, {
+    routeKey: "sds-search",
+    limit: 60,
+    windowMs: 10 * 60 * 1_000,
+  });
+  if (limited) return limited;
+
   let body: SdsSearchRequest | null = null;
   try {
     body = (await request.json()) as SdsSearchRequest;

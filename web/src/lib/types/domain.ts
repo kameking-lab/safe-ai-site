@@ -1,3 +1,8 @@
+import type {
+  ChatbotQuickReply,
+  ChatbotSource,
+} from "@/lib/chatbot-contract";
+
 export type RevisionKind = "law" | "ordinance" | "notice" | "guideline" | "other";
 
 export type RevisionCategory =
@@ -93,6 +98,11 @@ export type ChatMessage = {
   id: string;
   role: "user" | "assistant";
   content: string;
+  conditions?: string[];
+  clarificationQuestion?: string | null;
+  quickReplies?: ChatbotQuickReply[];
+  sources?: ChatbotSource[];
+  context?: import("@/lib/legal-conversation-context").LegalConversationContext;
 };
 
 export type ChatReplyRule = {
@@ -106,6 +116,19 @@ export type WeatherRiskLevel = "低" | "中" | "高";
 export type WeatherAlert = {
   type: string;
   level: WeatherAlertLevel;
+};
+
+export type OfficialWeatherWarningState = {
+  status: "live" | "degraded" | "unresolved" | "unavailable";
+  warnings: Array<{
+    code: string;
+    status: string;
+    level: "advisory" | "warning" | "special";
+  }>;
+  headline: string | null;
+  fetchedAt: string | null;
+  reportAt: string | null;
+  sourceUrl: string;
 };
 
 export type WeatherSnapshot = {
@@ -123,6 +146,10 @@ export type SiteRiskWeather = {
   date: string;
   overview: string;
   temperatureCelsius: number;
+  /** Open-Meteo current grid value。現場実測ではない。 */
+  currentTemperatureCelsius?: number;
+  relativeHumidityPercent?: number;
+  weatherTargetAt?: string;
   windSpeedMs: number;
   precipitationMm: number;
   alerts: WeatherAlert[];
@@ -130,6 +157,12 @@ export type SiteRiskWeather = {
   primaryCautions: string[];
   riskEvidences: string[];
   recommendedActions: string[];
+  /** Open-Meteoの実取得か、開発用syntheticデータか。未設定は未検証扱い。 */
+  dataOrigin?: "live" | "synthetic";
+  forecastProvider?: "open-meteo" | "synthetic";
+  forecastFetchedAt?: string | null;
+  /** 気象庁の公式警報状態。Open-Meteo由来の独自目安とは別に扱う。 */
+  officialWarning?: OfficialWeatherWarningState;
 };
 
 /**
@@ -263,7 +296,7 @@ export type RevisionSummary = LawRevisionSummary;
 export type SummaryContent = LawRevisionSummary;
 
 /**
- * 報道RSS自動収集エントリの来源マーカー。完全自動運用（人的レビューなし）で
+ * 報道RSS収集エントリの由来マーカー。公開前に人手確認を必須とし、
  * 取得・判定・公開されたエントリであることを明示し、UI上で公的データ
  * （mhlw / curated）と区別するために独立した provenance を割り当てる。
  */
@@ -283,7 +316,8 @@ export type NewsFeedSource = {
 };
 
 /**
- * Gemini 2.5 Flash による自動判定スコア。承認基準:
+ * 旧データ互換の参考スコア。現在の公開判定には使用せず、
+ * `humanReviewed === true` と `approved === true` を必須とする。
  *  - relevance >= 70（労働災害関連性）
  *  - copyrightRisk <= 30（引用法32条遵守可否、低いほど安全）
  *  - misinformationRisk <= 30（一次ソース整合性、低いほど安全）
@@ -297,7 +331,7 @@ export type NewsFeedAiScore = {
   duplication: number;
   /** 判定日時 ISO 8601 */
   judgedAt: string;
-  /** 判定モデル名（例: "gemini-2.5-flash"） */
+  /** 実行時の判定モデルID。保存済みの履歴値は上書きしない。 */
   model: string;
   /** 却下時のみ: 却下理由（人間可読、運用分析用） */
   rejectionReasons?: string[];

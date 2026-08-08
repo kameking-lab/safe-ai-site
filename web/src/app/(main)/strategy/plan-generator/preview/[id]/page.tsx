@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PageContainer } from "@/components/layout";
 import { PageJsonLd } from "@/components/page-json-ld";
-import { PlanDocument } from "@/components/safety-plan/plan-document";
+import { TransientPlanPreview } from "@/components/safety-plan/transient-plan-preview";
 import { PrintButton } from "@/components/safety-plan/print-button";
 import { CrossToolLinks, SAFETY_PLAN_TO_SLUG } from "@/components/cross-tool-links";
 import { CopilotStepNav } from "@/components/copilot/CopilotStepNav";
@@ -11,7 +11,6 @@ import { CopilotMemo } from "@/components/copilot/CopilotMemo";
 import { MainFeatureNextActions } from "@/components/main-feature-next-actions";
 import { CopilotNextSteps } from "@/components/copilot/CopilotNextSteps";
 import { CopilotPlanSync } from "@/components/copilot/CopilotPlanSync";
-import { PlanHistorySaver } from "@/components/safety-plan/plan-history-saver";
 import { PlanHistoryPicker } from "@/components/safety-plan/plan-history-picker";
 import type { CopilotScale } from "@/lib/copilot/types";
 import { findTemplateById } from "@/data/safety-plan-templates";
@@ -173,25 +172,16 @@ export default async function PreviewPage({ params, searchParams }: PageProps) {
     plan.template.scale === "large"
       ? plan.template.scale
       : undefined;
-  // Compose a query string that preserves the user's selections so the link
-  // round-trips back to a regenerated preview if they want to tweak inputs.
-  const previewSearch = (() => {
-    const params = new URLSearchParams();
-    const focus = readFocus(sp);
-    const special = readSpecialWork(sp);
-    const overwork = readOverwork(sp);
-    const org = readString(sp, "org");
-    const notes = readString(sp, "notes");
-    if (org) params.set("org", org);
-    params.set("year", String(plan.fiscalYear));
-    if (focus.length > 0) params.set("focus", focus.join(","));
-    if (special.length > 0) params.set("special", special.join(","));
-    if (readOverseas(sp)) params.set("overseas", "1");
-    if (overwork && overwork !== "normal") params.set("overwork", overwork);
-    if (notes) params.set("notes", notes);
-    return params.toString();
-  })();
-  const fullPreviewHref = `${previewPath}${previewSearch ? `?${previewSearch}` : ""}`;
+  const fallbackInput = {
+    templateId: id,
+    fiscalYear: plan.fiscalYear,
+    organizationName: readString(sp, "org"),
+    focusAreas: readFocus(sp),
+    specialWork: readSpecialWork(sp),
+    hasOverseasAssignment: readOverseas(sp),
+    overworkPriority: readOverwork(sp) ?? "normal",
+    notes: readString(sp, "notes"),
+  } as const;
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -200,20 +190,7 @@ export default async function PreviewPage({ params, searchParams }: PageProps) {
         scale={planScale}
         fiscalYear={plan.fiscalYear}
         templateId={id}
-        href={fullPreviewHref}
-        organizationName={plan.organizationName || undefined}
-      />
-      {/* P0-006 (usability-audit-day2): プレビュー表示時に過去計画 履歴 に追加。
-          最大3件を端末内に保持し、PDCA運用 (昨年比較・前年流用) に対応。 */}
-      <PlanHistorySaver
-        id={id}
-        previewHref={fullPreviewHref}
-        industry={plan.template.industry}
-        industryLabel={plan.template.industryLabel}
-        scale={plan.template.scale}
-        scaleLabel={plan.template.scaleLabel}
-        fiscalYear={plan.fiscalYear}
-        organizationName={plan.organizationName || null}
+        href={previewPath}
       />
       <div className="print:hidden">
         <PageJsonLd
@@ -251,7 +228,7 @@ export default async function PreviewPage({ params, searchParams }: PageProps) {
           <PrintButton />
         </div>
 
-        <PlanDocument plan={plan} />
+        <TransientPlanPreview templateId={id} fallback={fallbackInput} />
 
         {/* P0-006: 過去計画ピッカー (最大3件、表示中はバッジ付き) */}
         <PlanHistoryPicker currentId={id} variant="full" />

@@ -23,12 +23,19 @@ import {
   resolveLeafletById,
   resolveNoticeById,
 } from "@/data/article-notice-map";
+import { isNoticeIndividuallyVerified } from "@/data/public-mhlw-notices";
+import { MHLW_HEAT_NOTICE_0520_6_SNAPSHOT } from "@/data/source-snapshots/mhlw-heat-notice-0520-6";
 import { detectAndMatchNotices } from "@/lib/chatbot-notice-detector";
 import { searchRelevantNotices, type NoticeHit } from "@/lib/notice-search";
 
 export type AttachedNotice = NoticeHit & {
   /** 検出経路: A=条文紐付け, B=応答中引用照合, C=クエリキーワード */
   source: "A" | "B" | "C";
+  /** 法令本文そのものではなく、条文の施行・運用に関する関連資料。 */
+  evidenceRole: "related-material";
+  locator: string | null;
+  excerpt: string | null;
+  independentlyCheckedAt: string | null;
 };
 
 export type AttachedLeaflet = {
@@ -61,6 +68,7 @@ const BINDING_ORDER: Record<MhlwNotice["bindingLevel"], number> = {
 };
 
 function toNoticeHit(n: MhlwNotice, source: "A" | "B" | "C"): AttachedNotice {
+  const isHeatNotice = n.id === "mhlw-notice-0014";
   return {
     id: n.id,
     docType: n.docType,
@@ -70,9 +78,34 @@ function toNoticeHit(n: MhlwNotice, source: "A" | "B" | "C"): AttachedNotice {
     issuer: n.issuer,
     bindingLevel: n.bindingLevel,
     detailUrl: n.detailUrl,
+    sourceUrl: n.sourceUrl,
+    pdfUrl: n.pdfUrl,
     category: n.category,
     source,
+    evidenceRole: "related-material",
+    locator: isHeatNotice ? MHLW_HEAT_NOTICE_0520_6_SNAPSHOT.locator : null,
+    excerpt: isHeatNotice ? MHLW_HEAT_NOTICE_0520_6_SNAPSHOT.excerpt : null,
+    independentlyCheckedAt: isHeatNotice
+      ? MHLW_HEAT_NOTICE_0520_6_SNAPSHOT.independentPrimarySourceReview.reviewedAt
+      : null,
   };
+}
+
+function attachEvidenceToHit(
+  hit: NoticeHit,
+  source: "A" | "B" | "C",
+): AttachedNotice {
+  const notice = resolveNoticeById(hit.id);
+  return notice
+    ? toNoticeHit(notice, source)
+    : {
+        ...hit,
+        source,
+        evidenceRole: "related-material",
+        locator: null,
+        excerpt: null,
+        independentlyCheckedAt: null,
+      };
 }
 
 function toLeaflet(l: MhlwLeaflet): AttachedLeaflet {
@@ -118,7 +151,7 @@ export function attachNoticesAndLeaflets(args: {
     for (const nid of mapping.notices ?? []) {
       if (seenNoticeIds.has(nid)) continue;
       const n = resolveNoticeById(nid);
-      if (!n) continue;
+      if (!n || !isNoticeIndividuallyVerified(n)) continue;
       seenNoticeIds.add(nid);
       aNotices.push(toNoticeHit(n, "A"));
     }
@@ -136,6 +169,7 @@ export function attachNoticesAndLeaflets(args: {
   if (answer) {
     const detection = detectAndMatchNotices(answer);
     for (const m of detection.matched) {
+      if (!isNoticeIndividuallyVerified(m.notice)) continue;
       if (seenNoticeIds.has(m.notice.id)) continue;
       seenNoticeIds.add(m.notice.id);
       bNotices.push(toNoticeHit(m.notice, "B"));
@@ -149,7 +183,7 @@ export function attachNoticesAndLeaflets(args: {
     for (const h of hits) {
       if (seenNoticeIds.has(h.id)) continue;
       seenNoticeIds.add(h.id);
-      cNotices.push({ ...h, source: "C" });
+      cNotices.push(attachEvidenceToHit(h, "C"));
     }
   }
 

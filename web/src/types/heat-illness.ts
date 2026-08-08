@@ -5,7 +5,8 @@
  * not medical guidance. Sources are JIS Z 8504 (WBGT measurement),
  * MHLW "Heat Illness Prevention Guidelines for the Workplace" (R5),
  * and the R7 (2025) amendment to the Industrial Safety and Health
- * Regulations Article 612-2 mandating WBGT-driven controls.
+ * Regulations Article 612-2. The statutory duties are reporting and an
+ * escalation procedure; WBGT controls are presented separately as guidance.
  *
  * The WBGT thresholds follow the Japan Sports Association / JSOH
  * occupational classification ("Caution" through "Critical Danger").
@@ -98,7 +99,7 @@ export interface RiskAssessment {
 }
 
 export interface Recommendation {
-  /** Mandatory rest cycle suggestion ("25 min work / 5 min rest" etc.). */
+  /** Example rest cycle for local review ("25 min work / 5 min rest" etc.). */
   workRestRatio: string;
   /** Recommended fluid intake per hour, in milliliters (range). */
   fluidIntakeMlPerHour: string;
@@ -110,7 +111,7 @@ export interface Recommendation {
   coolingMeasures: string[];
   /** Monitoring requirements (buddy system, vitals). */
   monitoring: string[];
-  /** Educational reminders linked to R7 Article 612-2 §3. */
+  /** Educational reminders from prevention guidance (not Article 612-2 §3). */
   educationReminders: string[];
 }
 

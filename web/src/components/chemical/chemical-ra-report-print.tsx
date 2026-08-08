@@ -39,7 +39,7 @@ export function ChemicalRaReportHeader({ recordDateIso }: { recordDateIso?: stri
         <p>対象作業場所: ________________________</p>
       </div>
       <p className="mt-1 text-[10px] text-slate-600">
-        ※ 本様式は安衛法第57条の3に基づくリスクアセスメント結果の記録用です。CREATE-SIMPLE準拠の簡易評価を含みます。
+        ※ 本様式は収録済み公的情報の参考記録であり、正式なリスクアセスメント結果ではありません。最新SDS・実測値・公式CREATE-SIMPLEで確認してください。
       </p>
     </div>
   );

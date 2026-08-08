@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { LAW_METADATA as LAW_NAVI_METADATA } from "../law-metadata";
 import { allLawArticles } from "./index";
 import { LAW_METADATA } from "./law-metadata";
 import { mhlwLawArticles } from "./mhlw-extras";
@@ -36,5 +37,31 @@ describe("LAW_METADATA とコーパスの lawShort 同期", () => {
       expect(meta.eGovUrl, `${key} の eGovUrl`).toMatch(/^https:\/\//);
       expect(meta.auditedAt, `${key} の auditedAt`).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     }
+  });
+
+  it("answer-first対象法令は2026-08-03時点の施行中改正を保持する", () => {
+    expect(LAW_METADATA.電気工事士法).toMatchObject({
+      eGovUrl: "https://laws.e-gov.go.jp/law/335AC0000000139",
+      auditedAt: "2026-08-03",
+    });
+    for (const lawShort of [
+      "電気工事士法",
+      "安衛法",
+      "安衛令",
+      "安衛則",
+      "クレーン則",
+      "有機則",
+      "酸欠則",
+    ] as const) {
+      expect(LAW_METADATA[lawShort].latestRevision).toContain("現在施行中");
+      expect(LAW_METADATA[lawShort].auditedAt).toBe("2026-08-03");
+    }
+    expect(LAW_NAVI_METADATA.電気工事士法).toEqual({
+      lawShort: "電気工事士法",
+      fullName: "電気工事士法",
+      issuer: "経済産業省",
+      enactedOn: "昭和35年10月1日施行",
+      egovLawId: "335AC0000000139",
+    });
   });
 });

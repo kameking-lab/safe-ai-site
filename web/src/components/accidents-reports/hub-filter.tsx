@@ -3,9 +3,8 @@
 /**
  * Client-side filter for the /accidents-reports hub.
  *
- * State source-of-truth is the URL (q, type, month). We mirror that to
- * local state for input responsiveness, then router.replace() with
- * scroll: false on change so back/forward and shareable URLs work.
+ * 任意キーワードはタブ内メモリだけに保持する。事故型と月は固定選択肢なので、
+ * 戻る・進むと共有に使えるURLへ同期する。
  */
 
 import Link from "next/link";
@@ -64,20 +63,16 @@ export function HubFilter({
   const [typeDraft, setTypeDraft] = useState<AccidentTypeFilter>(initial.type);
   const [monthDraft, setMonthDraft] = useState<number>(initial.month);
 
-  // Keep local state in sync if the URL changes from outside (e.g. browser
-  // back/forward). Codebase pattern: see accident-extras-panel.tsx for the
-  // same URL-sync style. React only commits when a value actually changes.
+  // 戻る・進むでは固定選択肢だけを復元する。任意キーワードはURLから新たに書き戻さない。
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setQDraft(initial.q);
     setTypeDraft(initial.type);
     setMonthDraft(initial.month);
-  }, [initial.q, initial.type, initial.month]);
+  }, [initial.type, initial.month]);
 
   const syncUrl = useCallback(
     (next: HubFilterState) => {
       const params = new URLSearchParams();
-      if (next.q.trim()) params.set("q", next.q.trim());
       if (next.type !== "all") params.set("type", next.type);
       if (next.month !== 0) params.set("month", String(next.month));
       const query = params.toString();
@@ -87,16 +82,6 @@ export function HubFilter({
     },
     [router],
   );
-
-  // Debounce text input so typing doesn't push a URL update on every keystroke.
-  useEffect(() => {
-    const handle = window.setTimeout(() => {
-      if (qDraft !== initial.q) {
-        syncUrl({ q: qDraft, type: typeDraft, month: monthDraft });
-      }
-    }, 250);
-    return () => window.clearTimeout(handle);
-  }, [qDraft, initial.q, typeDraft, monthDraft, syncUrl]);
 
   const handleTypeChange = useCallback(
     (value: AccidentTypeFilter) => {
@@ -206,7 +191,7 @@ export function HubFilter({
           </div>
         ) : (
           <p className="mt-3 text-[11px] text-slate-500 dark:text-slate-400">
-            キーワード・事故型・月で 5 業種を絞り込めます。条件はURLに反映され、共有・ブックマークできます。
+            キーワード・事故型・月で 5 業種を絞り込めます。
           </p>
         )}
       </div>

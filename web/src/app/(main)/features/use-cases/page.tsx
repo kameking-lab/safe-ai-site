@@ -17,7 +17,8 @@ export const metadata: Metadata = {
   alternates: { canonical: "/features/use-cases" },
   title: "業種別の使い方 | 機能紹介",
   description:
-    "建設・製造・医療福祉・運輸・IT・化学・林業・食品・サービス業向けに、安全AIポータルの活用シナリオを紹介します。",
+    "業種別モデルケースの提供可否を再検証しています。現在使える機能は各リンク先の状態表示で確認してください。",
+  robots: { index: false, follow: true },
 };
 
 type UseCase = { title: string; problem: string; solution: string; relatedFeatures: { label: string; href: string }[] };
@@ -40,7 +41,7 @@ const INDUSTRIES: Industry[] = [
       {
         title: "毎朝のKYを5分で",
         problem: "ベテランが現場ごと違い、KYの質にバラつきがある。",
-        solution: "業種別プリセットとAIリスク提案で、新人でも一定品質のKYが回せる。署名つきPDFで記録保管も。",
+        solution: "KYの入力・人手確認・下書き印刷を支援します。AI候補は未確認のまま承認できず、正式記録への採用は現場責任者の確認が必要です。",
         relatedFeatures: [
           { label: "KY用紙", href: "/ky" },
           { label: "AIリスク予測", href: "/risk-prediction" },
@@ -49,16 +50,15 @@ const INDUSTRIES: Industry[] = [
       {
         title: "フルハーネス特別教育",
         problem: "外注研修の調整が手間で、未受講者が出やすい。",
-        solution: "オンライン教材＋修了証発行で、現場ごとに受講可能。LMSで全社受講状況を一元管理。",
+        solution: "自習用HTML教材と理解度確認を提供します。法定教育の実施、本人確認、受講時間、講師要件、修了証、正式な教育記録を代替しません。",
         relatedFeatures: [
           { label: "特別教育", href: "/education" },
-          { label: "LMS", href: "/lms" },
         ],
       },
       {
         title: "事故事例の朝礼共有",
         problem: "類似工種の他社事故事例を入手しにくい。",
-        solution: "事故DBから工種・起因物で検索し、サイネージで朝礼掲示。10年分の厚労省データを収録。",
+        solution: "サイト内の事故候補を検索し、公式データベースへ引き継げます。架空の学習例と一次資料照合済み事例は区別して表示します。",
         relatedFeatures: [
           { label: "事故データベース", href: "/accidents" },
           { label: "サイネージ", href: "/signage" },
@@ -75,7 +75,7 @@ const INDUSTRIES: Industry[] = [
       {
         title: "化学物質RAを工場内で完結",
         problem: "SDS取込・GHS分類・ばく露見積もりを Excel 管理しており追跡が困難。",
-        solution: "化学物質RA機能で SDS 取込から作業別ばく露見積もりまで一気通貫。記録は監査対応にも。",
+        solution: "名称・CAS・作業条件の整理と簡易スクリーニングを支援します。SDS自動取込、ばく露濃度推定、CREATE-SIMPLE、監査用の確定記録を代替しません。",
         relatedFeatures: [
           { label: "化学物質RA", href: "/chemical-ra" },
           { label: "化学物質検索DB", href: "/chemical-database" },
@@ -84,16 +84,15 @@ const INDUSTRIES: Industry[] = [
       {
         title: "新人安全教育の標準化",
         problem: "ライン別に教育内容がバラバラ、担当者が口頭で指導。",
-        solution: "業種別Eラーニングを配信し、進捗・修了状況をLMSで管理。新人着任日から受講開始。",
+        solution: "自習用教材と理解度確認を利用できます。個人認証、全社配信、進捗・修了管理、正式な教育記録は現在提供していません。",
         relatedFeatures: [
           { label: "Eラーニング", href: "/e-learning" },
-          { label: "LMS", href: "/lms" },
         ],
       },
       {
         title: "助成金で導入コストをカバー",
         problem: "安全投資の予算確保が難しい。",
-        solution: "助成金シミュレーターで、エイジフレンドリー補助金等の申請可否と試算額を即提示。",
+        solution: "助成制度の検討項目を整理し、厚生労働省・労働局の最新公募要領へつなぎます。申請可否や受給額を確定しません。",
         relatedFeatures: [
           { label: "助成金シミュレーター", href: "/subsidies/calculator" },
           { label: "年次安全衛生計画", href: "/strategy/plan-generator" },
@@ -128,7 +127,7 @@ const INDUSTRIES: Industry[] = [
       {
         title: "薬剤・消毒液のRA",
         problem: "消毒薬・抗がん剤など化学物質のばく露管理。",
-        solution: "化学物質RAで SDS 取込・ばく露見積もり。改正安衛法に準拠した記録保管。",
+        solution: "名称・CAS・作業条件を整理する簡易スクリーニングです。製品固有の最新SDS、公式ツール、専門家による評価と記録を別途確認します。",
         relatedFeatures: [
           { label: "化学物質RA", href: "/chemical-ra" },
         ],
@@ -162,7 +161,7 @@ const INDUSTRIES: Industry[] = [
       {
         title: "助成金活用",
         problem: "デジタコ・追加機材の投資判断。",
-        solution: "助成金シミュレーターで対象助成金を試算、年次安全衛生計画で必須対応を可視化。",
+        solution: "助成制度と年次計画の検討項目を整理します。対象可否・金額・法的義務は公式要領と専門家が確認します。",
         relatedFeatures: [
           { label: "助成金シミュレーター", href: "/subsidies/calculator" },
         ],
@@ -196,10 +195,9 @@ const INDUSTRIES: Industry[] = [
       {
         title: "災害時BCP",
         problem: "拠点分散時の安全管理体制。",
-        solution: "サイネージで拠点別の気象警報を表示。LMSで分散教育の進捗を一元管理。",
+        solution: "サイネージで選択地域の気象状態を確認できます。多拠点統合や教育進捗の一元管理は現在提供していません。",
         relatedFeatures: [
           { label: "サイネージ", href: "/signage" },
-          { label: "LMS", href: "/lms" },
         ],
       },
     ],
@@ -213,7 +211,7 @@ const INDUSTRIES: Industry[] = [
       {
         title: "改正安衛法に対応",
         problem: "リスクアセスメント対象物質の拡大、ばく露濃度測定の必須化。",
-        solution: "化学物質RA＋検索DBで法令対応。記録は監査・労基対応にそのまま提出可能。",
+        solution: "化学物質RA＋検索DBで入力整理を支援。簡易スクリーニングの記録であり、そのまま提出できません。最終評価は公式CREATE-SIMPLE、製品固有の最新SDS、専門家による確認が必要です。",
         relatedFeatures: [
           { label: "化学物質RA", href: "/chemical-ra" },
           { label: "化学物質検索DB", href: "/chemical-database" },
@@ -248,7 +246,7 @@ const INDUSTRIES: Industry[] = [
       {
         title: "伐木作業のKY",
         problem: "山中で電波が弱く、紙KYが定着。",
-        solution: "オフライン入力可能なKYと業種別プリセット。署名・写真添付つきPDFで記録保管。",
+        solution: "ブラウザ内でKYを入力・下書き保存し、確認状態つきで印刷できます。署名認証、写真添付、クラウド保管を提供中とは表示しません。",
         relatedFeatures: [
           { label: "KY用紙", href: "/ky" },
         ],
@@ -256,7 +254,7 @@ const INDUSTRIES: Industry[] = [
       {
         title: "チェーンソー特別教育",
         problem: "従業員数が少なく集合研修が組みづらい。",
-        solution: "オンライン特別教育で個別受講。修了証発行と監督署提出資料の準備までサポート。",
+        solution: "自習用教材と理解度確認を利用できます。法定特別教育、修了証発行、監督署提出書類の完成を代替しません。",
         relatedFeatures: [
           { label: "特別教育", href: "/education" },
         ],
@@ -290,7 +288,7 @@ const INDUSTRIES: Industry[] = [
       {
         title: "化学物質（洗浄剤）RA",
         problem: "洗浄剤・消毒液の混合事故リスク。",
-        solution: "化学物質RAでSDS取込し、混合危険を含めたリスク評価を実施。",
+        solution: "名称・CAS・作業条件を整理します。SDS自動取込や混合危険の確定判定は行わず、製品SDSと専門家の確認へつなぎます。",
         relatedFeatures: [
           { label: "化学物質RA", href: "/chemical-ra" },
         ],
@@ -306,7 +304,7 @@ const INDUSTRIES: Industry[] = [
       {
         title: "カスハラ対応研修",
         problem: "現場任せで対応がバラつき、離職要因にも。",
-        solution: "メンタル・カスハラ専用コンテンツで管理職・現場の双方を教育。Eラーニング修了管理。",
+        solution: "参考コンテンツで論点を確認できます。正式な研修実施、受講者認証、修了管理を代替しません。",
         relatedFeatures: [
           { label: "メンタル・カスハラ", href: "/mental-health" },
           { label: "Eラーニング", href: "/e-learning" },
@@ -315,16 +313,15 @@ const INDUSTRIES: Industry[] = [
       {
         title: "店舗ごとのKY・点検",
         problem: "多店舗展開で安全管理状況が見えない。",
-        solution: "LMSで店舗横断の点検・KY実績を一元管理。本部から実施率を可視化。",
+        solution: "各端末でKYや点検項目を確認できます。店舗横断のクラウド同期、実績集計、実施率管理は現在提供していません。",
         relatedFeatures: [
-          { label: "LMS", href: "/lms" },
           { label: "KY用紙", href: "/ky" },
         ],
       },
       {
         title: "安全衛生委員会の運営",
         problem: "議題と前年フォローの引継ぎ漏れ。",
-        solution: "安全工程打合せ書と通達・法改正情報で議題を構築。法令検索で根拠を即提示。",
+        solution: "安全工程打合せ書と通達・法改正情報から確認候補を整理します。法令検索は根拠候補を示し、適用判断は公式正本と人が確認します。",
         relatedFeatures: [
           { label: "安全工程打合せ書", href: "/safety-diary" },
           { label: "通達・法改正", href: "/laws" },
@@ -360,6 +357,16 @@ export default function UseCasesPage() {
           建設・製造・医療福祉・運輸・IT・化学・林業・食品・サービス業の{INDUSTRIES.length}業種について、安全AIポータルをどう使うかを具体的なシナリオで紹介します。
         </p>
       </header>
+
+      <aside
+        className="mx-auto mt-6 max-w-4xl rounded-2xl border-2 border-amber-400 bg-amber-50 p-4 text-left text-sm leading-relaxed text-amber-950"
+        aria-label="モデルケースの提供状態"
+      >
+        <p className="font-bold">提供可否を再検証中のモデルケースです</p>
+        <p className="mt-1">
+          このページは現在の利用可能機能を保証する一覧ではありません。修了証・正式な教育記録・LMSによる進捗管理・クラウド共有・SDS自動取込・ばく露推定は提供中と表示しません。各リンク先の状態表示と公式一次資料を確認してください。
+        </p>
+      </aside>
 
       {/* 業種ジャンプ */}
       <nav aria-label="業種ジャンプ" className="mx-auto mt-6 max-w-5xl">
@@ -429,14 +436,14 @@ export default function UseCasesPage() {
       <section className="mx-auto mt-12 max-w-5xl rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-white p-6 text-center sm:p-8">
         <h2 className="text-xl font-bold text-emerald-900 sm:text-2xl">あなたの業種は載っていましたか？</h2>
         <p className="mt-2 text-sm text-emerald-800">
-          上記以外の業種・特殊作業についても、安全コンサルタントが個別にご相談に応じます。
+          料金、モデルケース、相談受付の現在状態は業務自動化サービスページで確認できます。
         </p>
         <div className="mt-4 flex flex-col items-center justify-center gap-2 sm:flex-row">
           <Link
-            href="/contact"
+            href="/services/automation"
             className="inline-flex min-h-[44px] items-center rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white shadow hover:bg-emerald-700"
           >
-            業種別の相談を送る →
+            相談受付の準備状況を見る →
           </Link>
           <Link
             href="/features"

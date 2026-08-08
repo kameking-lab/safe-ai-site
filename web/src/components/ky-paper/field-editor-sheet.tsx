@@ -13,9 +13,17 @@
 import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { Sparkles, Star } from "lucide-react";
-import { InputWithVoice, TextareaWithVoice } from "@/components/voice-input-field";
+import {
+  InputWithVoice,
+  TextareaWithVoice,
+} from "@/components/voice-input-field";
 import type { KyInstructionRecordState } from "@/lib/types/operations";
-import { getKyPaperFieldDef, nextKyPaperFieldKey, parseRiskFieldKey, type KyPaperFieldKey } from "@/lib/ky/paper-fields";
+import {
+  getKyPaperFieldDef,
+  nextKyPaperFieldKey,
+  parseRiskFieldKey,
+  type KyPaperFieldKey,
+} from "@/lib/ky/paper-fields";
 import {
   MONTH_OPTIONS,
   dayOptions,
@@ -29,6 +37,10 @@ import type { Worker } from "@/lib/ky/workers-master";
 import type { WorkerGroup } from "@/lib/ky/participant-select";
 import type { KyHazardSuggestion } from "@/lib/ky/gemini-suggest";
 import { StatusBadge } from "@/components/ui/status-badge";
+import {
+  KY_RISK_SOURCE_LABELS,
+  setKyCandidateConfirmation,
+} from "@/lib/ky/risk-source";
 
 export type FieldEditorSheetProps = {
   fieldKey: KyPaperFieldKey;
@@ -83,6 +95,7 @@ export function FieldEditorSheet({
   const sheetRef = useRef<HTMLDivElement | null>(null);
   // 危険のポイント欄（risk.N.hazard）のときだけAI提案を出す。対策/評価欄では出さない。
   const riskMeta = parseRiskFieldKey(fieldKey);
+  const riskRow = riskMeta ? record.riskRows[riskMeta.index] : undefined;
   const showAi = ai !== undefined && riskMeta?.part === "hazard";
 
   // 開く直前にフォーカスがあった要素（タップしたセル）を記憶し、シートが閉じたら復帰。
@@ -112,7 +125,7 @@ export function FieldEditorSheet({
       }
       if (e.key !== "Tab") return;
       const focusables = sheetRef.current?.querySelectorAll<HTMLElement>(
-        'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])'
+        'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])',
       );
       if (!focusables || focusables.length === 0) return;
       const first = focusables[0];
@@ -130,13 +143,20 @@ export function FieldEditorSheet({
   }, [onClose]);
 
   const years = yearOptions();
-  const days = dayOptions(Number(record.workDateYear) || new Date().getFullYear(), Number(record.workDateMonth) || 1);
+  const days = dayOptions(
+    Number(record.workDateYear) || new Date().getFullYear(),
+    Number(record.workDateMonth) || 1,
+  );
   const temps = temperatureOptions();
 
   return (
     <>
       {/* 背面タップで閉じる（用紙の見え方は変えないよう薄め） */}
-      <div className="fixed inset-0 z-40 bg-black/20" aria-hidden onClick={onClose} />
+      <div
+        className="fixed inset-0 z-40 bg-black/20"
+        aria-hidden
+        onClick={onClose}
+      />
       <div
         ref={sheetRef}
         role="dialog"
@@ -176,6 +196,50 @@ export function FieldEditorSheet({
           />
         )}
 
+        {riskMeta && riskRow?.candidateSource ? (
+          <div className="mt-2 rounded-lg border border-amber-400 bg-amber-50 p-2 text-xs leading-5 text-amber-950">
+            <p className="font-bold">
+              出所: {KY_RISK_SOURCE_LABELS[riskRow.candidateSource.kind]}
+            </p>
+            {riskRow.candidateSource.referenceUrl ? (
+              <a
+                href={riskRow.candidateSource.referenceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-h-11 items-center font-bold text-sky-900 underline"
+              >
+                出典を開く
+              </a>
+            ) : null}
+            {riskRow.candidateSource.basis ? (
+              <p className="mt-1">生成理由: {riskRow.candidateSource.basis}</p>
+            ) : null}
+            <p className="mt-1 font-bold">
+              引用支持:{" "}
+              {riskRow.candidateSource.grounded === true
+                ? "確認済み"
+                : "未確認（公式資料による支持を示しません）"}
+            </p>
+            <label className="mt-1 flex min-h-11 cursor-pointer items-center gap-2 rounded border border-amber-500 bg-white px-2 font-bold">
+              <input
+                type="checkbox"
+                checked={Boolean(riskRow.humanConfirmedAt)}
+                onChange={(event) =>
+                  patch({
+                    riskRows: record.riskRows.map((row, index) =>
+                      index === riskMeta.index
+                        ? setKyCandidateConfirmation(row, event.target.checked)
+                        : row,
+                    ),
+                  })
+                }
+                className="h-5 w-5"
+              />
+              現場条件・候補内容・対策を人が確認した
+            </label>
+          </div>
+        ) : null}
+
         {/* O10（第四弾）: 危険のポイント欄でのAI提案。従来UI（クラシック表示）と同じ /api/ky/suggest を共有。 */}
         {showAi && ai && (
           <div className="mt-2">
@@ -188,24 +252,47 @@ export function FieldEditorSheet({
               {ai.busy ? (
                 "AIが分析中…"
               ) : (
-                <><Sparkles className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />AIに危険箇所を提案させる</>
+                <>
+                  <Sparkles
+                    className="mr-1 inline h-3.5 w-3.5 align-[-2px]"
+                    aria-hidden="true"
+                  />
+                  AIに危険箇所を提案させる
+                </>
               )}
             </button>
             {ai.source && ai.suggestions.length > 0 && (
               <div className="mt-2 space-y-1.5 rounded-lg border border-indigo-200 bg-indigo-50/40 p-2">
                 <p className="text-[11px] font-semibold text-indigo-900">
-                  {ai.source === "gemini" ? "本物のAI（Gemini）の提案" : "定型提案（AI未設定/応答不可のフォールバック）"}
+                  {ai.source === "gemini"
+                    ? "外部AI生成の未確認候補"
+                    : "定型ルール候補（AI未設定/応答不可）"}
                   ：気になる項目を「反映」でこの欄へ取り込めます
                 </p>
                 {ai.suggestions.map((s, i) => (
-                  <div key={i} className="flex items-start justify-between gap-2 rounded border border-indigo-200 bg-white p-1.5">
+                  <div
+                    key={i}
+                    className="flex items-start justify-between gap-2 rounded border border-indigo-200 bg-white p-1.5"
+                  >
                     <div className="min-w-0">
                       <p className="text-xs font-semibold text-slate-800">
                         {s.hazard}
-                        <span className="ml-1 rounded bg-slate-100 px-1 text-[10px] text-slate-600">評価値{s.evaluation}（{s.riskLabel}）</span>
-                        {!s.grounded && <StatusBadge tone="warning" size="sm" className="ml-1">要確認</StatusBadge>}
+                        <span className="ml-1 rounded bg-slate-100 px-1 text-[10px] text-slate-600">
+                          評価値{s.evaluation}（{s.riskLabel}）
+                        </span>
+                        {!s.grounded && (
+                          <StatusBadge
+                            tone="warning"
+                            size="sm"
+                            className="ml-1"
+                          >
+                            要確認
+                          </StatusBadge>
+                        )}
                       </p>
-                      <p className="text-[11px] text-slate-600">対策: {s.reduction || "—"}</p>
+                      <p className="text-[11px] text-slate-600">
+                        対策: {s.reduction || "—"}
+                      </p>
                     </div>
                     <button
                       type="button"
@@ -230,7 +317,9 @@ export function FieldEditorSheet({
               className={selectCls}
             >
               {years.map((y) => (
-                <option key={y} value={String(y)}>{y}</option>
+                <option key={y} value={String(y)}>
+                  {y}
+                </option>
               ))}
             </select>
             <span className="text-sm">年</span>
@@ -241,7 +330,9 @@ export function FieldEditorSheet({
               className={selectCls}
             >
               {MONTH_OPTIONS.map((m) => (
-                <option key={m} value={String(m)}>{m}</option>
+                <option key={m} value={String(m)}>
+                  {m}
+                </option>
               ))}
             </select>
             <span className="text-sm">月</span>
@@ -252,7 +343,9 @@ export function FieldEditorSheet({
               className={selectCls}
             >
               {days.map((d) => (
-                <option key={d} value={String(d)}>{d}</option>
+                <option key={d} value={String(d)}>
+                  {d}
+                </option>
               ))}
             </select>
             <span className="text-sm">日</span>
@@ -269,12 +362,20 @@ export function FieldEditorSheet({
                 onChange={(e) => {
                   const idx = def.riskIndex!;
                   const v = Number(e.target.value) as 1 | 2 | 3;
-                  patch({ riskRows: record.riskRows.map((row, i) => (i === idx ? { ...row, likelihood: v } : row)) });
+                  patch({
+                    riskRows: record.riskRows.map((row, i) =>
+                      i === idx
+                        ? { ...row, likelihood: v, humanConfirmedAt: undefined }
+                        : row,
+                    ),
+                  });
                 }}
                 className={selectCls}
               >
                 {LIKELIHOOD_OPTIONS.map((o) => (
-                  <option key={o.value} value={String(o.value)}>{o.label}</option>
+                  <option key={o.value} value={String(o.value)}>
+                    {o.label}
+                  </option>
                 ))}
               </select>
             </label>
@@ -286,12 +387,20 @@ export function FieldEditorSheet({
                 onChange={(e) => {
                   const idx = def.riskIndex!;
                   const v = Number(e.target.value) as 1 | 2 | 3;
-                  patch({ riskRows: record.riskRows.map((row, i) => (i === idx ? { ...row, severity: v } : row)) });
+                  patch({
+                    riskRows: record.riskRows.map((row, i) =>
+                      i === idx
+                        ? { ...row, severity: v, humanConfirmedAt: undefined }
+                        : row,
+                    ),
+                  });
                 }}
                 className={selectCls}
               >
                 {SEVERITY_OPTIONS.map((o) => (
-                  <option key={o.value} value={String(o.value)}>{o.label}</option>
+                  <option key={o.value} value={String(o.value)}>
+                    {o.label}
+                  </option>
                 ))}
               </select>
             </label>
@@ -308,7 +417,9 @@ export function FieldEditorSheet({
                 className={selectCls}
               >
                 {WEATHER_REGIONS.map((r) => (
-                  <option key={r.id} value={r.id}>{r.label}</option>
+                  <option key={r.id} value={r.id}>
+                    {r.label}
+                  </option>
                 ))}
               </select>
               <button
@@ -335,7 +446,9 @@ export function FieldEditorSheet({
               >
                 <option value="">—</option>
                 {temps.map((t) => (
-                  <option key={t} value={String(t)}>{t}</option>
+                  <option key={t} value={String(t)}>
+                    {t}
+                  </option>
                 ))}
               </select>
               <span className="text-sm">℃</span>
@@ -350,7 +463,10 @@ export function FieldEditorSheet({
             </p>
             {participants.workers.length === 0 ? (
               <p className="text-sm text-slate-500">
-                <Link href="/ky/workers" className="font-semibold text-emerald-700 underline">
+                <Link
+                  href="/ky/workers"
+                  className="font-semibold text-emerald-700 underline"
+                >
                   作業員マスター
                 </Link>
                 に登録すると、ここでタップするだけで参加者を選べます。
@@ -361,11 +477,17 @@ export function FieldEditorSheet({
                   {participants.regularWorkers.length > 0 && (
                     <button
                       type="button"
-                      onClick={() => participants.addWorkers(participants.regularWorkers)}
+                      onClick={() =>
+                        participants.addWorkers(participants.regularWorkers)
+                      }
                       title="常用（毎日来る）作業員をまとめて参加者に追加します"
                       className="min-h-[44px] rounded-full border border-amber-400 bg-amber-50 px-3.5 py-1.5 text-xs font-bold text-amber-800 hover:bg-amber-100"
                     >
-                      <Star className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />常用{participants.regularWorkers.length}名をまとめて選ぶ
+                      <Star
+                        className="mr-1 inline h-3.5 w-3.5 align-[-2px]"
+                        aria-hidden="true"
+                      />
+                      常用{participants.regularWorkers.length}名をまとめて選ぶ
                     </button>
                   )}
                   {participants.workerGroups.length > 1 &&
@@ -393,9 +515,12 @@ export function FieldEditorSheet({
                 </div>
                 <div className="space-y-1.5">
                   {participants.workerGroups.map((g) => (
-                    <div key={g.affiliation} className="flex flex-wrap items-center gap-1.5">
+                    <div
+                      key={g.affiliation}
+                      className="flex flex-wrap items-center gap-1.5"
+                    >
                       {participants.workerGroups.length > 1 && (
-                        <span className="w-full text-[11px] font-semibold text-slate-400 sm:w-auto sm:pr-1">
+                        <span className="w-full text-[11px] font-semibold text-slate-600 sm:w-auto sm:pr-1">
                           {g.label}
                         </span>
                       )}
@@ -405,10 +530,12 @@ export function FieldEditorSheet({
                           <button
                             key={w.id}
                             type="button"
-                            onClick={() => participants.toggleWorker(w, !checked)}
+                            onClick={() =>
+                              participants.toggleWorker(w, !checked)
+                            }
                             className={`min-h-[44px] rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
                               checked
-                                ? "border-emerald-600 bg-emerald-600 text-white"
+                                ? "border-emerald-700 bg-emerald-700 text-white"
                                 : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
                             }`}
                           >
@@ -432,7 +559,7 @@ export function FieldEditorSheet({
             <button
               type="button"
               onClick={() => onSelectField(next)}
-              className="min-h-[44px] rounded-lg bg-sky-600 px-4 text-sm font-bold text-white hover:bg-sky-700"
+              className="min-h-[44px] rounded-lg bg-sky-700 px-4 text-sm font-bold text-white hover:bg-sky-800"
             >
               次の欄へ →
             </button>
@@ -440,7 +567,7 @@ export function FieldEditorSheet({
             <button
               type="button"
               onClick={onClose}
-              className="min-h-[44px] rounded-lg bg-emerald-600 px-4 text-sm font-bold text-white hover:bg-emerald-700"
+              className="min-h-[44px] rounded-lg bg-emerald-700 px-4 text-sm font-bold text-white hover:bg-emerald-800"
             >
               完了
             </button>

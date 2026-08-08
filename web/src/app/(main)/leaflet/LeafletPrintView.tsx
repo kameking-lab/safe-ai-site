@@ -20,7 +20,7 @@ const FEATURES: { icon: LucideIcon; title: string; desc: string }[] = [
   {
     icon: ClipboardList,
     title: "通達・法令の即時参照",
-    desc: `労働安全衛生関連 ${SITE_STATS.lawArticleCount} 条文と通達を一次出典付きで横断検索。RAG型チャットボットで条文根拠を提示。`,
+    desc: `労働安全衛生関連 ${SITE_STATS.lawArticleCount} 条文と通達を一次出典付きで横断検索。法令本文から条文根拠を提示。`,
   },
   {
     icon: FolderOpen,
@@ -92,9 +92,9 @@ export function LeafletPrintView() {
               </p>
             </div>
             <div className="shrink-0 text-right">
-              <p className="text-[10px] uppercase tracking-widest text-slate-400">監修</p>
-              <p className="text-sm font-bold text-slate-900">労働安全コンサルタント</p>
-              <p className="text-[11px] text-slate-500">安全AIポータル 有資格者</p>
+              <p className="text-[10px] uppercase tracking-widest text-slate-400">編集</p>
+              <p className="text-sm font-bold text-slate-900">安全AIポータル編集部</p>
+              <p className="text-[11px] text-slate-500">確認状態は本文に表示</p>
             </div>
           </header>
 
@@ -201,7 +201,7 @@ export function LeafletPrintView() {
 
           <footer className="border-t border-slate-200 pt-3 text-center">
             <p className="text-[10px] text-slate-500">
-              © 2026 安全AIポータル / 監修：労働安全衛生コンサルタント（登録番号260022）
+              © 2026 安全AIポータル / 編集・確認状態は本文に表示
             </p>
           </footer>
         </article>

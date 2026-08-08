@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { capEntries, MAX_DIARY_ENTRIES } from "./store";
+import { capEntries, MAX_DIARY_ENTRIES, newId } from "./store";
 import type { SafetyDiaryEntry } from "./schema";
 
 function makeEntry(updatedAt: string): SafetyDiaryEntry {
@@ -86,5 +86,29 @@ describe("capEntries (localStorage 肥大化対策)", () => {
     const capped = capEntries(entries);
     expect(capped[0].updatedAt).toBe("2026-04-01T00:00:00.000Z");
     expect(capped[2].updatedAt).toBe("2026-01-15T00:00:00.000Z");
+  });
+
+  it("randomUUID非対応環境でもschema互換のUUID v4を返す", () => {
+    const descriptor = Object.getOwnPropertyDescriptor(globalThis, "crypto");
+    Object.defineProperty(globalThis, "crypto", {
+      configurable: true,
+      value: {
+        getRandomValues: (bytes: Uint8Array) => {
+          bytes.fill(0x11);
+          return bytes;
+        },
+      },
+    });
+    try {
+      expect(newId()).toMatch(
+        /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/,
+      );
+    } finally {
+      if (descriptor) {
+        Object.defineProperty(globalThis, "crypto", descriptor);
+      } else {
+        Reflect.deleteProperty(globalThis, "crypto");
+      }
+    }
   });
 });

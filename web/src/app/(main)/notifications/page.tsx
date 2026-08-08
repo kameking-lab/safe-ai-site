@@ -37,7 +37,50 @@ const FEEDS = [
   { href: "/feed/serious-cases.xml", label: "重大災害事例" },
 ] as const;
 
+// Enable only after provider, distributed queue/dedupe, retry, alerting and
+// unsubscribe smoke checks have been attested in the release checklist.
+const AUTOMATED_DELIVERY_OPERATIONALLY_VERIFIED = false;
+
 export default function NotificationsPage() {
+  if (!AUTOMATED_DELIVERY_OPERATIONALLY_VERIFIED) {
+    return (
+      <PageContainer width="wide" paddingY="tight">
+        <PageJsonLd name={_title} description={_desc} path="/notifications" />
+        <PageHeader
+          title="通知センター・配信設定"
+          description="RSSと画面表示中の端末通知を利用できます。自動メール・Web Pushは運用確認中です。"
+          icon={Bell}
+          iconColor="blue"
+          mascotVariant="weather-look"
+        />
+        <section role="alert" className="mt-4 rounded-2xl border-2 border-amber-300 bg-amber-50 p-5 text-amber-950">
+          <h2 className="font-bold">自動メール・Web Pushの新規登録を一時停止しています</h2>
+          <p className="mt-2 text-sm leading-7">
+            外部配信事業者、分散キュー、重複防止、部分失敗の再送、監視・アラートの本番確認が完了していません。
+            登録完了や即時配信を保証できないため、確認が終わるまでメールアドレスやPush購読情報を受け付けません。
+          </p>
+        </section>
+        <div className="mt-6">
+          <NotificationSettingsPanel />
+        </div>
+        <section className="mt-6 rounded-2xl border border-orange-200 bg-white p-5 shadow-sm sm:p-6">
+          <div className="mb-3 flex items-center gap-2">
+            <Rss className="h-5 w-5 text-orange-600" aria-hidden="true" />
+            <h2 className="text-sm font-bold text-slate-800">RSSで購読する</h2>
+          </div>
+          <ul className="space-y-1.5">
+            {FEEDS.map((feed) => (
+              <li key={feed.href}>
+                <a href={feed.href} className="inline-flex min-h-[44px] items-center gap-2 text-xs font-semibold text-orange-700 underline">
+                  <Rss className="h-3.5 w-3.5" aria-hidden="true" />{feed.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      </PageContainer>
+    );
+  }
   return (
     <PageContainer width="wide" paddingY="tight">
       {/* SEO: WebPage + BreadcrumbList */}

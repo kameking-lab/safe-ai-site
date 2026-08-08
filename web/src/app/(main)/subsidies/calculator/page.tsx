@@ -182,7 +182,7 @@ export default function SubsidyCalculatorPage() {
   const canCalculate = input.measures.length > 0 && input.investmentManten > 0;
 
   return (
-    <main className="mx-auto max-w-7xl px-4 py-6 sm:py-8">
+    <div className="mx-auto max-w-7xl px-4 py-6 sm:py-8">
       <PageHeader
         title="助成金 支給額試算ツール"
         description="業種・人数・施策を入力して、申請できる助成金と概算支給額を確認"
@@ -432,6 +432,6 @@ export default function SubsidyCalculatorPage() {
         申請前に必ず各所管庁の最新公募要領をご確認ください。
         出典：厚生労働省「事業主の方へ」各助成金公式ページ・独立行政法人労働者健康安全機構（2026年4月確認）
       </p>
-    </main>
+    </div>
   );
 }

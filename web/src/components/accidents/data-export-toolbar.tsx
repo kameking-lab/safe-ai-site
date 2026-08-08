@@ -113,8 +113,8 @@ export function DataExportToolbar({
       className={`flex flex-wrap items-center gap-2 print:hidden ${className}`}
       aria-label="この集計データの出力"
     >
-      <span className="text-xs font-semibold text-slate-500">会議資料に：</span>
-      <button type="button" onClick={handleCsv} className={btn}>
+      <span className="text-xs font-semibold text-portal-muted">会議資料に：</span>
+      <button type="button" onClick={handleCsv} className={btn} data-export-primary-action="true">
         {feedback === "csv" ? (
           <Check className="h-4 w-4 text-emerald-600" aria-hidden="true" />
         ) : (
@@ -122,7 +122,7 @@ export function DataExportToolbar({
         )}
         CSVダウンロード
       </button>
-      <button type="button" onClick={handleCopy} className={btn}>
+      <button type="button" onClick={handleCopy} className={btn} data-export-primary-action="true">
         {feedback === "copy" ? (
           <Check className="h-4 w-4 text-emerald-600" aria-hidden="true" />
         ) : (
@@ -130,18 +130,23 @@ export function DataExportToolbar({
         )}
         要点をコピー
       </button>
-      <button type="button" onClick={handleShare} className={btn}>
-        {feedback === "share" ? (
-          <Check className="h-4 w-4 text-emerald-600" aria-hidden="true" />
-        ) : (
-          <Share2 className="h-4 w-4" aria-hidden="true" />
-        )}
-        共有
-      </button>
-      <button type="button" onClick={() => window.print()} className={btn}>
-        <Printer className="h-4 w-4" aria-hidden="true" />
-        印刷
-      </button>
+      <details className="relative">
+        <summary className={`${btn} cursor-pointer list-none`}>その他</summary>
+        <div className="absolute right-0 top-full z-20 mt-1 flex min-w-40 flex-col gap-1 rounded-xl border border-slate-200 bg-white p-2 shadow-xl">
+          <button type="button" onClick={handleShare} className={btn}>
+            {feedback === "share" ? (
+              <Check className="h-4 w-4 text-emerald-600" aria-hidden="true" />
+            ) : (
+              <Share2 className="h-4 w-4" aria-hidden="true" />
+            )}
+            共有
+          </button>
+          <button type="button" onClick={() => window.print()} className={btn}>
+            <Printer className="h-4 w-4" aria-hidden="true" />
+            印刷
+          </button>
+        </div>
+      </details>
       {/* 操作結果をスクリーンリーダーへ通知 */}
       <span role="status" aria-live="polite" className="sr-only">
         {message}

@@ -2,7 +2,10 @@
 // prismaがnull（DATABASE_URL未設定）の場合は呼び出し側でskipする想定。
 
 import type Stripe from "stripe";
-import type { PrismaClient } from "@prisma/client";
+import type { Prisma, PrismaClient } from "@prisma/client";
+import { resolveStripePlan } from "@/lib/stripe-price-policy";
+
+type StripeDb = PrismaClient | Prisma.TransactionClient;
 
 // 最大3回、指数バックオフでリトライ（DBの一時障害に対応）
 async function withRetry<T>(
@@ -24,13 +27,6 @@ async function withRetry<T>(
   throw lastErr;
 }
 
-function priceToPlanName(priceId: string | null | undefined): string {
-  if (!priceId) return "free";
-  if (priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO) return "pro";
-  if (priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_PREMIUM) return "standard";
-  return "standard";
-}
-
 function periodEnd(sub: Stripe.Subscription): Date | null {
   // Stripe APIバージョンによりcurrent_period_end位置が異なる可能性に対応
   const top = (sub as unknown as { current_period_end?: number }).current_period_end;
@@ -43,12 +39,12 @@ function periodEnd(sub: Stripe.Subscription): Date | null {
 }
 
 export async function handleCheckoutCompleted(
-  prisma: PrismaClient,
+  prisma: StripeDb,
   session: Stripe.Checkout.Session,
 ): Promise<void> {
   const userId = session.metadata?.userId;
   if (!userId) {
-    console.warn("[stripe/webhook] checkout.completed without userId metadata", session.id);
+    console.warn("[stripe/webhook] checkout.completed without userId metadata");
     return;
   }
 
@@ -69,12 +65,14 @@ export async function handleCheckoutCompleted(
         priceId = sub.items.data[0]?.price.id ?? null;
         currentPeriodEnd = periodEnd(sub);
       }
-    } catch (err) {
-      console.error("[stripe/webhook] failed to retrieve subscription", err);
+    } catch {
+      console.error("[stripe/webhook] failed to retrieve subscription");
+      throw new Error("Stripe subscription lookup failed");
     }
   }
 
-  const planName = priceToPlanName(priceId);
+  const planName = resolveStripePlan(priceId);
+  if (!planName) throw new Error("unrecognized Stripe price");
 
   await withRetry(() =>
     prisma.subscription.upsert({
@@ -101,11 +99,12 @@ export async function handleCheckoutCompleted(
 }
 
 export async function handleSubscriptionUpdated(
-  prisma: PrismaClient,
+  prisma: StripeDb,
   sub: Stripe.Subscription,
 ): Promise<void> {
   const priceId = sub.items.data[0]?.price.id ?? null;
-  const planName = priceToPlanName(priceId);
+  const planName = resolveStripePlan(priceId);
+  if (!planName) throw new Error("unrecognized Stripe price");
   const currentPeriodEnd = periodEnd(sub);
 
   const result = await withRetry(() =>
@@ -125,7 +124,7 @@ export async function handleSubscriptionUpdated(
     const customerId =
       typeof sub.customer === "string" ? sub.customer : (sub.customer as { id: string } | null)?.id ?? null;
     if (!customerId) {
-      console.warn("[stripe/webhook] subscription not found, no customerId to recover", sub.id);
+      console.warn("[stripe/webhook] subscription not found and cannot recover");
       return;
     }
     const recovered = await withRetry(() =>
@@ -141,15 +140,15 @@ export async function handleSubscriptionUpdated(
       }),
     );
     if (recovered.count === 0) {
-      console.warn("[stripe/webhook] self-heal failed: no record for customer", customerId, sub.id);
+      console.warn("[stripe/webhook] self-heal found no matching record");
     } else {
-      console.info("[stripe/webhook] self-healed subscription", sub.id, "via customer", customerId);
+      console.info("[stripe/webhook] self-healed subscription mapping");
     }
   }
 }
 
 export async function handleSubscriptionDeleted(
-  prisma: PrismaClient,
+  prisma: StripeDb,
   sub: Stripe.Subscription,
 ): Promise<void> {
   await withRetry(() =>
@@ -164,7 +163,7 @@ export async function handleSubscriptionDeleted(
 }
 
 export async function handleInvoicePaymentFailed(
-  prisma: PrismaClient,
+  prisma: StripeDb,
   invoice: Stripe.Invoice,
 ): Promise<void> {
   const subId =
@@ -182,7 +181,7 @@ export async function handleInvoicePaymentFailed(
 
 // 支払い回復時にactive状態へ復元（past_due → active の自己修復）
 export async function handleInvoicePaymentSucceeded(
-  prisma: PrismaClient,
+  prisma: StripeDb,
   invoice: Stripe.Invoice,
 ): Promise<void> {
   const subId =

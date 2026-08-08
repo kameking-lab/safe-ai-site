@@ -74,14 +74,13 @@ describe("normalizeNoticeNumber", () => {
   });
 });
 
-describe("detectAndMatchNotices - mhlw-notices.ts との照合", () => {
-  it("実在する通達番号は matched に入る", () => {
-    // 基発0318第1号 は mhlw-notice-0001（熱中症ガイドライン）として実在
+describe("detectAndMatchNotices - 個別確認済み通達との照合", () => {
+  it("公開索引に存在しても個別未確認の通達番号は unmatched に入る", () => {
     const r = detectAndMatchNotices(
       "「職場における熱中症防止対策のためのガイドライン」(基発0318第1号)を参照"
     );
-    expect(r.matched.length).toBeGreaterThanOrEqual(1);
-    expect(r.matched[0].notice.id).toBe("mhlw-notice-0001");
+    expect(r.matched).toEqual([]);
+    expect(r.unmatched).toHaveLength(1);
   });
 
   it("架空の通達番号は unmatched に入る（採用しない）", () => {
@@ -90,12 +89,12 @@ describe("detectAndMatchNotices - mhlw-notices.ts との照合", () => {
     expect(r.unmatched.length).toBeGreaterThanOrEqual(1);
   });
 
-  it("実在 + 架空 混在は適切に分離される", () => {
+  it("個別未確認 + 架空の混在はどちらも unmatched にする", () => {
     const r = detectAndMatchNotices(
       "基発0318第1号（実在）と基発9999第999号（架空）"
     );
-    expect(r.matched.length).toBeGreaterThanOrEqual(1);
-    expect(r.unmatched.length).toBeGreaterThanOrEqual(1);
+    expect(r.matched).toEqual([]);
+    expect(r.unmatched).toHaveLength(2);
   });
 
   it("引用ゼロの応答は全て空配列", () => {
@@ -105,12 +104,12 @@ describe("detectAndMatchNotices - mhlw-notices.ts との照合", () => {
     expect(r.unmatched).toEqual([]);
   });
 
-  it("空白入り通達番号も照合できる（基発 0726 第 2 号 = mhlw-notice-0130）", () => {
+  it("空白入りでも個別未確認なら採用しない", () => {
     const r = detectAndMatchNotices(
       "熱中症基本対策要綱は基発 0726 第 2 号 を参照。"
     );
-    expect(r.matched.length).toBeGreaterThanOrEqual(1);
-    expect(r.matched[0].notice.id).toBe("mhlw-notice-0130");
+    expect(r.matched).toEqual([]);
+    expect(r.unmatched).toHaveLength(1);
   });
 });
 
@@ -120,6 +119,7 @@ describe("detectAndMatchNotices - 重複・分離", () => {
       "基発0318第1号によれば…再度基発0318第1号"
     );
     expect(r.extracted.length).toBe(1);
-    expect(r.matched.length).toBe(1);
+    expect(r.matched).toEqual([]);
+    expect(r.unmatched).toHaveLength(1);
   });
 });

@@ -27,6 +27,13 @@ export type LawMetadata = {
  * 該当しないものは LAW_METADATA_FALLBACK を返す。
  */
 export const LAW_METADATA: Record<string, LawMetadata> = {
+  電気工事士法: {
+    lawShort: "電気工事士法",
+    fullName: "電気工事士法",
+    issuer: "経済産業省",
+    enactedOn: "昭和35年10月1日施行",
+    egovLawId: "335AC0000000139",
+  },
   安衛法: {
     lawShort: "安衛法",
     fullName: "労働安全衛生法",
@@ -396,7 +403,7 @@ export function getLawMetadata(lawShort: string): LawMetadata {
  */
 export const ARTICLE_EFFECTIVE_DATES: Record<string, string> = {
   "安衛則|第612条の2": "令和7年6月1日施行（熱中症対策の義務規定）",
-  "安衛則|第563条": "平成27年7月1日施行（足場手すり中さん義務化）",
+  "安衛則|第563条": "平成21年6月1日施行（足場用墜落防止設備の強化。平成27年改正による新設ではない）",
   "安衛法|第57条の2": "平成28年6月1日施行（SDS交付義務）",
   "安衛法|第57条の3": "平成28年6月1日施行（化学物質リスクアセスメント義務）",
   "安衛法|第28条の2": "平成18年4月1日施行（事業者の自主的リスクアセスメント）",
@@ -406,9 +413,37 @@ export const ARTICLE_EFFECTIVE_DATES: Record<string, string> = {
   "特化則|第38条の8": "令和5年4月1日改正（化学物質管理者制度）",
 };
 
+/**
+ * An article can contain duties introduced on different dates. These entries
+ * prevent a current article snapshot from being presented as the law at an
+ * earlier target date. Only officially confirmed, high-risk units belong here.
+ */
+export const PROVISION_EFFECTIVE_DATES: Record<string, string> = {
+  "安衛則|第36条|第41号":
+    "平成31年2月1日施行（フルハーネス型墜落制止用器具の特別教育）",
+  "石綿則|第3条|第4項":
+    "令和5年10月1日施行（建築物の事前調査者要件）",
+};
+
+export function getProvisionEffectiveDate(
+  lawShort: string,
+  articleNum: string,
+  unit?: { paragraph?: string; item?: string },
+): string | undefined {
+  const unitKeys = [unit?.item, unit?.paragraph].filter(
+    (value): value is string => Boolean(value),
+  );
+  for (const unitKey of unitKeys) {
+    const effective =
+      PROVISION_EFFECTIVE_DATES[`${lawShort}|${articleNum}|${unitKey}`];
+    if (effective) return effective;
+  }
+  return ARTICLE_EFFECTIVE_DATES[`${lawShort}|${articleNum}`];
+}
+
 export function getArticleEffectiveDate(
   lawShort: string,
   articleNum: string
 ): string | undefined {
-  return ARTICLE_EFFECTIVE_DATES[`${lawShort}|${articleNum}`];
+  return getProvisionEffectiveDate(lawShort, articleNum);
 }

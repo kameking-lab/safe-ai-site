@@ -356,7 +356,7 @@ function CtaSlide({ slide, deck, contactHref, pageUrl }: { slide: EduSlide; deck
     <div className="flex h-full flex-col justify-center p-6 sm:p-10">
       <h3 className="text-xl font-bold text-slate-900 sm:text-2xl">{slide.title}</h3>
       <p className="mt-3 text-sm leading-6 text-slate-700">
-        この教材は貴社の現場・機械・事例に合わせてカスタマイズできます。労働安全コンサルタント（登録番号260022）による出張講習・講師派遣も承ります。
+        この教材の個別カスタマイズ・講習受付は準備中です。利用条件と受付状態は公式の案内ページで確認してください。
       </p>
       <p className="mt-2 text-xs text-slate-500">
         教材の利用は教育の「実施」ではありません。実技・記録・実施は事業者の責任で行ってください。

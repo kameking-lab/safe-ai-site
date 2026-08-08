@@ -2,28 +2,9 @@ type AccidentHubNavProps = {
   current: "accidents" | "accidents-reports" | "accidents-analytics" | "accident-news";
 };
 
-// exp-02 (autonomous-loop 2026-05-30): 事故系4ルートが「どれが何のためのツールか」
-// 初見で分からない問題を、LawHubNav と同じ section sub-nav パターンで解消する。
-// 各ページ最上部に配置し、現在ページを強調＋他3ツールの役割を1行で提示する。
+// 一次資料との本文一致を再検証中の事故DB・分析系ルートはここへ置かない。
+// 公開中の重大災害情報だけを明示し、隔離機能への復活導線を作らない。
 const NAV_ITEMS = [
-  {
-    id: "accidents" as const,
-    href: "/accidents",
-    label: "事故DB検索",
-    description: "厚労省の死傷・死亡災害事例を業種・原因・作業区分で検索（出典付き）",
-  },
-  {
-    id: "accidents-reports" as const,
-    href: "/accidents-reports",
-    label: "業種別 分析レポート",
-    description: "5業種の事故型・原因・対策・関連法令を自動集計したレポート",
-  },
-  {
-    id: "accidents-analytics" as const,
-    href: "/accidents-analytics",
-    label: "統計ダッシュボード",
-    description: "約5,000件を事故型・業種・経年など多軸で可視化（傾向把握・提案資料に）",
-  },
   {
     id: "accident-news" as const,
     href: "/accident-news",
@@ -32,9 +13,12 @@ const NAV_ITEMS = [
   },
 ];
 
-/** 事故情報まわりの section サブナビ（4ルートの役割を明示し現在地を強調） */
+/** 公開確認済みの事故情報だけを示す section サブナビ。 */
 export function AccidentHubNav({ current }: AccidentHubNavProps) {
-  const active = NAV_ITEMS.find((it) => it.id === current);
+  const publicItems = NAV_ITEMS.filter((item) =>
+    isPublicRouteAvailable(item.href),
+  );
+  const active = publicItems.find((it) => it.id === current);
   return (
     <nav aria-label="事故情報ナビ" className="mx-auto max-w-7xl px-4 pt-4 sm:px-6 lg:px-8">
       <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-900/60">
@@ -42,7 +26,7 @@ export function AccidentHubNav({ current }: AccidentHubNavProps) {
           <span className="mr-1 self-center text-[11px] font-bold text-slate-500 dark:text-slate-400">
             事故情報：
           </span>
-          {NAV_ITEMS.map((item) => (
+          {publicItems.map((item) => (
             <a
               key={item.id}
               href={item.href}
@@ -68,3 +52,4 @@ export function AccidentHubNav({ current }: AccidentHubNavProps) {
     </nav>
   );
 }
+import { isPublicRouteAvailable } from "@/lib/public-content-policy";

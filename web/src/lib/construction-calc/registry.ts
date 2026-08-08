@@ -9,6 +9,7 @@
  */
 
 import type { ConstructionCalculator } from "./schema";
+import { isPublicConstructionCalculatorSlug } from "@/lib/public-content-policy";
 import { slingWireLoadCalculator } from "./calculators/sling-wire-load";
 import { excavationSlopeCalculator } from "./calculators/excavation-slope";
 import { scaffoldTankanCheckCalculator } from "./calculators/scaffold-tankan-check";
@@ -39,7 +40,7 @@ import { fiberSlingLoadCalculator } from "./calculators/fiber-sling-load";
 import { riggingHardwareCheckCalculator } from "./calculators/rigging-hardware-check";
 import { hoistRatedCheckCalculator } from "./calculators/hoist-rated-check";
 
-export const CONSTRUCTION_CALCULATORS: ConstructionCalculator[] = [
+const ALL_CONSTRUCTION_CALCULATORS: ConstructionCalculator[] = [
   slingWireLoadCalculator,
   scaffoldTankanCheckCalculator,
   excavationSlopeCalculator,
@@ -70,6 +71,23 @@ export const CONSTRUCTION_CALCULATORS: ConstructionCalculator[] = [
   riggingHardwareCheckCalculator,
   hoistRatedCheckCalculator,
 ];
+
+/**
+ * Public calculators are intentionally restricted to low-risk quantity and
+ * notation arithmetic. Legacy calculators that return legal compliance,
+ * structural adequacy, electrical capacity or rigging suitability remain in
+ * source control for re-verification, but are not routable, searchable or
+ * included in the sitemap.
+ */
+export const CONSTRUCTION_CALCULATORS: ConstructionCalculator[] =
+  ALL_CONSTRUCTION_CALCULATORS.filter((calculator) =>
+    isPublicConstructionCalculatorSlug(calculator.slug),
+  );
+
+export const QUARANTINED_CONSTRUCTION_CALCULATORS: ConstructionCalculator[] =
+  ALL_CONSTRUCTION_CALCULATORS.filter(
+    (calculator) => !isPublicConstructionCalculatorSlug(calculator.slug),
+  );
 
 const BY_SLUG: ReadonlyMap<string, ConstructionCalculator> = new Map(
   CONSTRUCTION_CALCULATORS.map((c) => [c.slug, c]),

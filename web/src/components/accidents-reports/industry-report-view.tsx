@@ -690,7 +690,7 @@ export function IndustryReportView({ report }: { report: IndustryReport }) {
         <Section title="次のアクション" spacing="tight" className="mt-8 print:hidden">
           <CardGrid cols={2} gap="md">
             <Link
-              href="/ky"
+              href="/ky/paper"
               className="group rounded-lg border-2 border-emerald-300 bg-emerald-50 p-4 transition hover:border-emerald-500 hover:shadow-sm dark:border-emerald-700 dark:bg-emerald-950/40"
             >
               <p className="text-sm font-bold text-emerald-900 dark:text-emerald-100"><ClipboardList className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />KY用紙を起票</p>

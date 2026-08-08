@@ -79,9 +79,10 @@ describe("PageJsonLd — サイトURL単一ソース化と絶対URL整合", () =
     );
     const [webPage] = extractJsonLd(container);
     expect(webPage.keywords).toBe("安全, 衛生");
-    // 監修者は contributor（Person）として付与される
+    // 未検証の個人資格を主張せず、編集組織を contributor として付与する
     const contributor = webPage.contributor as { "@type": string; name: string } | undefined;
-    expect(contributor?.["@type"]).toBe("Person");
+    expect(contributor?.["@type"]).toBe("Organization");
+    expect(contributor?.name).toBe(SITE_NAME);
     // isPartOf のサイト名も単一ソース由来
     const isPartOf = webPage.isPartOf as { name: string; url: string };
     expect(isPartOf.name).toBe(SITE_NAME);

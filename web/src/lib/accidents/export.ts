@@ -29,8 +29,8 @@ export function accidentsSummaryToCsv(s: AccidentsSummary): string {
       headers: ["項目", "値"],
       rows: [
         ["総収録件数", s.total],
-        ["厚労省データ（件）", s.mhlw],
-        ["curated詳細事例（件）", s.curated],
+        ["一次資料照合済み個票（件）", s.mhlw],
+        ["curated事例・一次資料未照合を含む（件）", s.curated],
         ["想定例・速報基準（件）", s.preliminary],
         ["合成（件）", s.synthetic],
       ],
@@ -51,8 +51,8 @@ export function accidentsSummaryToText(s: AccidentsSummary): string {
     .join("　");
   return [
     `【事故データベース サマリー】総収録件数：${jp(s.total)}件`,
-    `内訳：厚労省 ${jp(s.mhlw)}件／curated ${jp(s.curated)}件／想定例(速報基準) ${jp(s.preliminary)}件／合成 ${jp(s.synthetic)}件`,
+    `内訳：一次資料照合済み個票 ${jp(s.mhlw)}件／curated（一次資料未照合を含む） ${jp(s.curated)}件／想定例(速報基準) ${jp(s.preliminary)}件／合成 ${jp(s.synthetic)}件`,
     `事故の型TOP3：${top3}`,
-    `出典：安全AIポータル 労働災害 事故事例データベース（厚労省データ＋curated事例）`,
+    `出典：安全AIポータル 労働災害 事故事例データベース。公式個票の正本ではありません。公式検索で一次資料を確認してください。`,
   ].join("\n");
 }

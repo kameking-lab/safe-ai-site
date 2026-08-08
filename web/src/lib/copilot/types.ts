@@ -8,6 +8,7 @@
  * off" links without forcing the user to re-state context.
  */
 import type { IndustrySlug } from "@/lib/industry-slugs";
+import { evaluateChatbotSafety } from "@/lib/chatbot-safety";
 
 export type CopilotScale = "small" | "medium" | "large";
 
@@ -95,6 +96,10 @@ export function normalizeSafetyContext(raw: unknown): SafetyContextState {
     keyConcerns: Array.isArray(obj.keyConcerns)
       ? obj.keyConcerns
           .filter((c): c is string => typeof c === "string" && c.trim().length > 0)
+          .filter((c) => {
+            const decision = evaluateChatbotSafety(c);
+            return !decision || decision.kind === "ambiguous";
+          })
           .slice(0, SAFETY_CONTEXT_MAX_CONCERNS)
       : [],
     recentQueries: Array.isArray(obj.recentQueries)
@@ -109,7 +114,11 @@ export function normalizeSafetyContext(raw: unknown): SafetyContextState {
               at: typeof r.at === "number" ? r.at : Date.now(),
             } satisfies CopilotRecentQuery;
           })
-          .filter((q): q is CopilotRecentQuery => q !== null)
+          .filter((q): q is CopilotRecentQuery => {
+            if (q === null) return false;
+            const decision = evaluateChatbotSafety(q.query);
+            return !decision || decision.kind === "ambiguous";
+          })
           .slice(0, SAFETY_CONTEXT_MAX_QUERIES)
       : [],
     activePlan: normalizePlan(obj.activePlan),
@@ -145,7 +154,9 @@ function normalizePlan(value: unknown): CopilotPlanSnapshot | undefined {
     href: typeof v.href === "string" && v.href.startsWith("/") ? v.href.slice(0, 1024) : undefined,
     generatedAt: typeof v.generatedAt === "string" ? v.generatedAt.slice(0, 32) : undefined,
     organizationName:
-      typeof v.organizationName === "string" ? v.organizationName.slice(0, 64) : undefined,
+      typeof v.organizationName === "string" && !evaluateChatbotSafety(v.organizationName)
+        ? v.organizationName.slice(0, 64)
+        : undefined,
   };
 }
 

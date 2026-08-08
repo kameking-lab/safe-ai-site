@@ -1,5 +1,9 @@
 import { describe, it, expect } from "vitest";
 import type { LawArticle } from "@/data/laws";
+import {
+  isNoticeIndividuallyVerified,
+  verifiedMhlwNotices,
+} from "@/data/public-mhlw-notices";
 import { attachNoticesAndLeaflets } from "./chatbot-notice-attachment";
 
 const ART_563: LawArticle = {
@@ -30,16 +34,30 @@ const ART_UNMAPPED: LawArticle = {
 };
 
 describe("attachNoticesAndLeaflets - Layer A 条文紐付け", () => {
-  it("足場（第563条）→ 通達+リーフレットが取れる", () => {
+  it("足場（第563条）→ 未確認通達を除外し、リーフレットは維持する", () => {
     const r = attachNoticesAndLeaflets({ articles: [ART_563] });
-    expect(r.notices.length).toBeGreaterThan(0);
+    expect(r.notices).toEqual([]);
     expect(r.leaflets.length).toBeGreaterThan(0);
-    expect(r.notices.every((n) => n.source === "A")).toBe(true);
   });
 
-  it("熱中症（第612条の2）→ 通達 3 件以上", () => {
+  it("熱中症（第612条の2）→ 個別照合済みの基発0520第6号だけを関連資料にする", () => {
     const r = attachNoticesAndLeaflets({ articles: [ART_612_2] });
-    expect(r.notices.length).toBeGreaterThanOrEqual(3);
+    expect(verifiedMhlwNotices).toHaveLength(1);
+    expect(r.notices).toHaveLength(1);
+    expect(r.notices[0]).toMatchObject({
+      id: "mhlw-notice-0014",
+      noticeNumber: "基発0520第6号",
+      issuedDateRaw: "令和7年5月20日",
+      source: "A",
+      evidenceRole: "related-material",
+      detailUrl:
+        "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000116133.html",
+      pdfUrl: "https://www.mhlw.go.jp/content/11303000/001490911.pdf",
+      locator: "PDF 2ページ 第3 1(1)イ",
+      independentlyCheckedAt: "2026-08-02",
+    });
+    expect(r.notices[0]?.excerpt).toContain("WBGT");
+    expect(r.notices[0]?.excerpt).toContain("１日当たり４時間を超えて");
   });
 
   it("マッピング未登録条文 → Layer A は空", () => {
@@ -56,14 +74,27 @@ describe("attachNoticesAndLeaflets - Layer A 条文紐付け", () => {
 });
 
 describe("attachNoticesAndLeaflets - Layer B 応答内引用照合", () => {
-  it("応答内の実在通達番号を Layer B として採用する", () => {
-    // 基発0318第1号 = mhlw-notice-0001 (熱中症ガイドライン)
+  it("番号が公開索引に存在しても、個別未確認なら Layer B に採用しない", () => {
+    expect(isNoticeIndividuallyVerified("mhlw-notice-0001")).toBe(false);
     const r = attachNoticesAndLeaflets({
       articles: [],
       answer: "基発0318第1号 によれば…",
     });
-    const b = r.notices.find((n) => n.source === "B");
-    expect(b).toBeDefined();
+    expect(r.notices).toEqual([]);
+  });
+
+  it("基発0520第6号の明示引用は公式PDF付きの関連資料として採用する", () => {
+    const r = attachNoticesAndLeaflets({
+      articles: [],
+      answer: "基発0520第6号の対象作業の目安です。",
+    });
+    expect(r.notices).toHaveLength(1);
+    expect(r.notices[0]).toMatchObject({
+      id: "mhlw-notice-0014",
+      source: "B",
+      evidenceRole: "related-material",
+      pdfUrl: "https://www.mhlw.go.jp/content/11303000/001490911.pdf",
+    });
   });
 
   it("応答内の架空通達番号は採用しない", () => {
@@ -74,27 +105,34 @@ describe("attachNoticesAndLeaflets - Layer B 応答内引用照合", () => {
     expect(r.notices).toEqual([]);
   });
 
-  it("Layer A と B で同じ通達が出たら B 側は排除", () => {
-    // 第563条 経由で Layer A、応答中も Layer A の通達番号を引用
+  it("Layer A と B の双方に現れる未確認通達も採用しない", () => {
     const r = attachNoticesAndLeaflets({
       articles: [ART_563],
-      answer: "基発0314第2号 によれば…", // mhlw-notice-0082 と一致（A 側にも含まれる）
+      answer: "基発0314第2号 によれば…",
     });
-    // 同じ通達は1件のみ、Layer A 側
-    const dupCount = r.notices.filter((n) => n.id === "mhlw-notice-0082").length;
-    expect(dupCount).toBeLessThanOrEqual(1);
+    expect(r.notices).toEqual([]);
   });
 });
 
 describe("attachNoticesAndLeaflets - Layer C クエリ", () => {
-  it("クエリベース検索で関連通達を補完する", () => {
+  it("クエリ検索も個別確認済み通達だけを返す", () => {
     const r = attachNoticesAndLeaflets({
       articles: [],
       query: "石綿の事前調査の方法",
     });
-    // Layer A/B には無いが C で何か取れる可能性あり
-    const c = r.notices.filter((n) => n.source === "C");
-    expect(c.length + r.notices.filter((n) => n.source !== "C").length).toBeGreaterThanOrEqual(0);
+    expect(
+      r.notices.every((notice) => isNoticeIndividuallyVerified(notice.id)),
+    ).toBe(true);
+  });
+
+  it("熱中症の現場語検索から基発0520第6号へ到達する", () => {
+    const r = attachNoticesAndLeaflets({
+      articles: [],
+      query: "熱中症の報告体制は義務？",
+    });
+    expect(r.notices.map((notice) => [notice.id, notice.source])).toEqual([
+      ["mhlw-notice-0014", "C"],
+    ]);
   });
 });
 
@@ -121,13 +159,15 @@ describe("attachNoticesAndLeaflets - マージ・制限", () => {
     expect(r.leaflets).toEqual([]);
   });
 
-  it("Layer A は B/C より先に並ぶ", () => {
+  it("未確認の Layer A/B を混ぜず、個別確認済みLayer Cだけを返す", () => {
     const r = attachNoticesAndLeaflets({
       articles: [ART_563],
       answer: "基発0318第1号", // Layer B
       query: "熱中症", // Layer C
     });
-    // 出力先頭は Layer A の通達のはず
-    expect(r.notices[0]?.source).toBe("A");
+    expect(r.notices.map((notice) => [notice.id, notice.source])).toEqual([
+      ["mhlw-notice-0014", "C"],
+    ]);
+    expect(r.leaflets.length).toBeGreaterThan(0);
   });
 });

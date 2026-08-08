@@ -1,32 +1,69 @@
 import type { Metadata } from "next";
-import { ogImageUrl } from "@/lib/og-url";
-import { EducationContent } from "./EducationContent";
+import Link from "next/link";
+import { ExternalLink } from "lucide-react";
+import { PageContainer } from "@/components/layout";
+import { JsonLd, breadcrumbSchema, webPageSchema } from "@/components/json-ld";
+import { SITE_URL } from "@/lib/seo-metadata";
+import { AutomationServicePromo } from "@/components/automation/automation-service-promo";
+import { getAutomationConsultAvailability } from "@/lib/automation-consult/availability";
+import { UsageNotesLink } from "@/components/usage-notes-link";
 
-import { PageJsonLd } from "@/components/page-json-ld";
-const TITLE = "特別教育・安全衛生教育｜12種 対応教育＋要相談多数";
-const DESCRIPTION =
-  "労働安全衛生法に基づく特別教育・法定教育・労働衛生教育12種に対応。フルハーネス・足場・低圧電気・職長教育など。オンデマンド配信・カスタマイズ研修・講師派遣。修了証発行まで一括対応。";
+const TITLE = "安全衛生教育";
+const DESCRIPTION = "5分KYT、資格検索、厚生労働省の教育情報を利用できます。";
 
 export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
   alternates: { canonical: "/education" },
-  openGraph: {
-    title: `${TITLE}`,
-    description: DESCRIPTION,
-    images: [{ url: ogImageUrl(TITLE, DESCRIPTION), width: 1200, height: 630 }],
-  },
-  twitter: {
-    card: "summary_large_image",
-    images: [ogImageUrl(TITLE, DESCRIPTION)],
+  robots: {
+    index: false,
+    follow: true,
+    googleBot: { index: false, follow: true },
   },
 };
 
 export default function EducationPage() {
+  const url = `${SITE_URL}/education`;
   return (
     <>
-      <PageJsonLd name="Eラーニング・教育・特別教育" description="労働安全衛生法に基づく特別教育・職長教育・労働衛生教育のEラーニングコース。修了テスト付き。" path="/education" />
-      <EducationContent />
+      <PageContainer width="wide">
+        <JsonLd
+          schema={[
+            webPageSchema({ name: TITLE, description: DESCRIPTION, url }),
+            breadcrumbSchema([
+              { name: "ホーム", url: SITE_URL },
+              { name: TITLE, url },
+            ]),
+          ]}
+        />
+        <header>
+          <h1 className="text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">安全衛生教育</h1>
+          <p data-page-description className="mt-2 text-sm leading-6 text-slate-700">5分KYT、資格検索、厚生労働省の教育情報を利用できます。</p>
+        </header>
+        <nav aria-label="教育コンテンツ" className="mt-5 flex flex-wrap gap-3">
+          <Link href="/training/visual-ky" prefetch={false} data-primary-action="true" className="inline-flex min-h-11 items-center rounded-xl bg-emerald-800 px-5 py-3 text-sm font-black text-white">5分KYTを始める</Link>
+          <Link href="/education-certification/finder" prefetch={false} data-secondary-action="true" className="inline-flex min-h-11 items-center text-sm font-bold text-brand-primary underline underline-offset-4">必要な資格・教育を探す</Link>
+          <a
+            href="https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/roudoukijun/anzen/anzeneisei05.html"
+            target="_blank"
+            rel="noopener noreferrer"
+            data-secondary-action="true"
+            className="inline-flex min-h-11 items-center gap-2 text-sm font-bold text-brand-primary underline underline-offset-4"
+          >
+            厚生労働省の安全衛生教育情報
+            <ExternalLink className="h-4 w-4" aria-hidden="true" />
+          </a>
+        </nav>
+        <UsageNotesLink className="mt-2 text-brand-primary" />
+      </PageContainer>
+      <AutomationServicePromo
+        position="education"
+        availability={getAutomationConsultAvailability()}
+        title="社内教育の資料作成を相談"
+        description="作業内容と対象者を伺い、講習・資料作成の対応可否をご案内します。"
+        cta="講習・資料作成を相談する"
+        href="/services/automation#training"
+      />
     </>
   );
 }

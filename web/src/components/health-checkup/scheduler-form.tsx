@@ -13,6 +13,7 @@ import {
 } from "@/types/health-checkup";
 import { ALL_JOB_PROFILES, getJobsByIndustry } from "@/data/health-checkup-rules";
 import { SAFETY_TONE } from "@/lib/design/safety-tone";
+import { putHealthCheckupHandoff } from "@/lib/transient-navigation-handoff";
 
 const TODAY = new Date().toISOString().slice(0, 10);
 
@@ -48,13 +49,14 @@ export function SchedulerForm() {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const params = new URLSearchParams();
-    params.set("industry", industry);
-    if (jobIds.length) params.set("jobs", jobIds.join(","));
-    if (substances.length) params.set("substances", substances.join(","));
-    if (workConditions.length) params.set("conditions", workConditions.join(","));
-    params.set("hire", hireDate);
-    router.push(`/health-checkup-scheduler/result?${params.toString()}`);
+    putHealthCheckupHandoff({
+      industry,
+      jobIds,
+      substances,
+      workConditions,
+      hireDate,
+    });
+    router.push("/health-checkup-scheduler/result");
   };
 
   const handleReset = () => {

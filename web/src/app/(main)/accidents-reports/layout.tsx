@@ -1,5 +1,5 @@
-import { CopilotProvider } from "@/components/copilot/CopilotProvider";
+import { permanentRedirect } from "next/navigation";
 
-export default function AccidentsReportsLayout({ children }: { children: React.ReactNode }) {
-  return <CopilotProvider>{children}</CopilotProvider>;
+export default function AccidentsReportsLayout() {
+  permanentRedirect("/accidents");
 }

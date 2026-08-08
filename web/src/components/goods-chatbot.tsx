@@ -1,222 +1,128 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { Bot, Send, ShoppingBag } from "lucide-react";
+import { useState } from "react";
+import Link from "next/link";
+import { ClipboardCheck, Send, ShieldCheck } from "lucide-react";
 import { TextareaWithVoice } from "@/components/voice-input-field";
-import { generateAmazonAffiliateUrl, generateRakutenSearchUrl } from "@/lib/affiliate-url";
-import type { GoodsRecommendation, GoodsChatResponse } from "@/app/api/goods-chat/route";
-
-type Message = {
-  id: string;
-  role: "user" | "assistant";
-  text: string;
-  recommendations?: GoodsRecommendation[];
-};
-
-const EXAMPLE_QUESTIONS = [
-  "高さ10mの鉄骨建方作業をします。どんな保護具が必要ですか？",
-  "有機溶剤を使った塗装作業。必要な保護具を教えてください",
-  "グラインダーで金属を研削する作業をします",
-  "騒音の激しい工場で溶接作業をしています",
-];
-
-function RecommendationCard({ item }: { item: GoodsRecommendation }) {
-  return (
-    <div className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
-      <div className="flex items-start gap-2">
-        <ShoppingBag className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
-        <div className="min-w-0 flex-1">
-          <p className="text-sm font-bold text-slate-900">{item.item}</p>
-          <p className="mt-0.5 text-xs text-slate-600">{item.reason}</p>
-          {item.lawBasis && (
-            <p className="mt-1 text-[10px] font-medium text-emerald-700">法令: {item.lawBasis}</p>
-          )}
-          <div className="mt-2 flex gap-1.5">
-            <a
-              href={generateAmazonAffiliateUrl(item.searchQuery)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="rounded-md bg-amber-500 px-2 py-1 text-[10px] font-bold text-white hover:bg-amber-600"
-            >
-              Amazonで探す
-            </a>
-            <a
-              href={generateRakutenSearchUrl(item.searchQuery)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="rounded-md bg-rose-500 px-2 py-1 text-[10px] font-bold text-white hover:bg-rose-600"
-            >
-              楽天で探す
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
+import type { GoodsChatResponse } from "@/app/api/goods-chat/route";
+import { evaluateChatbotSafety } from "@/lib/chatbot-safety";
 
 export function GoodsChatbot() {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "intro",
-      role: "assistant",
-      text: "こんにちは！作業内容や作業環境を教えていただくと、必要な保護具を法令根拠とともにご提案します。\n\n例: 「高所作業（10m）で鉄骨組立てをします。必要な保護具は？」",
-    },
-  ]);
   const [input, setInput] = useState("");
+  const [result, setResult] = useState<GoodsChatResponse | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
-  const listRef = useRef<HTMLDivElement>(null);
 
-  const scrollToBottom = () => {
-    setTimeout(() => {
-      listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: "smooth" });
-    }, 100);
-  };
-
-  const sendMessage = async (text: string) => {
-    if (!text.trim() || sending) return;
-    const userMsg: Message = { id: Date.now().toString(), role: "user", text: text.trim() };
-    setMessages((prev) => [...prev, userMsg]);
-    setInput("");
+  async function showSelectionBoundary() {
+    const question = input.trim();
+    if (!question || sending) return;
+    const safety = evaluateChatbotSafety(question);
+    if (safety) {
+      setResult(null);
+      setError(safety.response);
+      return;
+    }
     setSending(true);
-    scrollToBottom();
-
+    setError(null);
     try {
-      const res = await fetch("/api/goods-chat", {
+      const response = await fetch("/api/goods-chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: text.trim() }),
+        body: JSON.stringify({ question }),
       });
-      const data = (await res.json()) as GoodsChatResponse | { error: { message: string } };
-      if ("error" in data) {
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: Date.now().toString(),
-            role: "assistant",
-            text: `エラー: ${data.error.message}`,
-          },
-        ]);
-      } else {
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: Date.now().toString(),
-            role: "assistant",
-            text: data.reply,
-            recommendations: data.recommendations,
-          },
-        ]);
+      const data = (await response.json()) as
+        | GoodsChatResponse
+        | { error?: { message?: string } };
+      if ("error" in data || !response.ok || !("selectionStatus" in data)) {
+        setError(
+          "error" in data && data.error?.message
+            ? data.error.message
+            : "確認項目を表示できませんでした。",
+        );
+        return;
       }
+      setResult(data);
     } catch {
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: Date.now().toString(),
-          role: "assistant",
-          text: "通信エラーが発生しました。しばらく経ってから再試行してください。",
-        },
-      ]);
+      setError("通信に失敗しました。時間をおいて再度お試しください。");
     } finally {
       setSending(false);
-      scrollToBottom();
     }
-  };
+  }
 
   return (
-    <div className="mt-8 rounded-2xl border border-emerald-200 bg-gradient-to-b from-emerald-50 to-white p-5 shadow-sm">
-      {/* ヘッダー */}
-      <div className="flex items-center gap-2 mb-4">
-        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-600">
-          <Bot className="h-4 w-4 text-white" />
-        </div>
+    <section
+      className="mt-8 rounded-2xl border border-emerald-200 bg-emerald-50/50 p-5 shadow-sm"
+      aria-labelledby="ppe-selection-boundary-title"
+    >
+      <div className="flex items-start gap-3">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-700">
+          <ShieldCheck className="h-5 w-5 text-white" aria-hidden="true" />
+        </span>
         <div>
-          <h2 className="text-base font-bold text-slate-900">保護具選定AIアシスタント</h2>
-          <p className="text-xs text-slate-500">作業内容を入力すると、必要な保護具を法令根拠付きで提案します</p>
+          <h2 id="ppe-selection-boundary-title" className="text-base font-bold text-slate-950">
+            保護具選定の条件確認
+          </h2>
+          <p className="mt-1 text-sm leading-6 text-slate-700">
+            入力は外部AIへ送信しません。商品名や法令適合を自動判定せず、選定前に必要な確認条件だけを整理します。
+          </p>
         </div>
-        <span className="ml-auto rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-700">Gemini AI</span>
       </div>
 
-      {/* メッセージ一覧 */}
-      <div
-        ref={listRef}
-        className="mb-4 max-h-96 space-y-3 overflow-y-auto rounded-xl border border-slate-200 bg-white p-4 shadow-inner"
-      >
-        {messages.map((msg) => (
-          <div key={msg.id} className={`flex flex-col gap-2 ${msg.role === "user" ? "items-end" : "items-start"}`}>
-            <div
-              className={`max-w-[90%] rounded-xl px-4 py-2.5 text-sm leading-relaxed ${
-                msg.role === "user"
-                  ? "bg-emerald-600 text-white"
-                  : "border border-slate-200 bg-slate-50 text-slate-800"
-              }`}
-              style={{ whiteSpace: "pre-wrap" }}
-            >
-              {msg.text}
-            </div>
-            {msg.recommendations && msg.recommendations.length > 0 && (
-              <div className="w-full max-w-lg space-y-2">
-                <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wide">推奨保護具 ({msg.recommendations.length}件)</p>
-                {msg.recommendations.map((rec, i) => (
-                  <RecommendationCard key={i} item={rec} />
-                ))}
-              </div>
-            )}
-          </div>
-        ))}
-        {sending && (
-          <div className="flex items-start gap-2">
-            <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-500">
-              <span className="animate-pulse">回答を生成中…</span>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* サンプル質問 */}
-      <div className="mb-3 flex flex-wrap gap-1.5">
-        {EXAMPLE_QUESTIONS.map((q) => (
-          <button
-            key={q}
-            type="button"
-            onClick={() => sendMessage(q)}
-            disabled={sending}
-            className="inline-flex min-h-[44px] items-center justify-center rounded-full border border-emerald-200 bg-white px-2.5 py-1 text-[11px] text-emerald-700 hover:bg-emerald-50 disabled:opacity-50"
-          >
-            {q.length > 20 ? q.slice(0, 20) + "…" : q}
-          </button>
-        ))}
-      </div>
-
-      {/* 入力欄 */}
-      <div className="flex gap-2">
+      <div className="mt-4 flex flex-col gap-2 sm:flex-row">
         <TextareaWithVoice
-          className="min-h-12 flex-1 resize-none"
           value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault();
-              void sendMessage(input);
-            }
-          }}
-          placeholder="作業内容・環境を入力（例：地上15mの外壁塗装作業）"
+          onChange={(event) => setInput(event.target.value)}
+          placeholder="例：有機溶剤を使う塗装作業。屋内、局所排気あり、1日2時間"
+          aria-label="作業内容と作業条件"
+          className="min-h-[88px] flex-1 resize-y"
+          maxLength={2_000}
           disabled={sending}
         />
         <button
           type="button"
-          onClick={() => void sendMessage(input)}
+          onClick={() => void showSelectionBoundary()}
           disabled={!input.trim() || sending}
-          className="shrink-0 rounded-xl bg-emerald-600 p-3 text-white shadow hover:bg-emerald-700 disabled:opacity-50"
-          aria-label="送信"
+          className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-emerald-700 px-4 py-3 text-sm font-bold text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          <Send className="h-4 w-4" />
+          <Send className="h-4 w-4" aria-hidden="true" />
+          {sending ? "確認中…" : "確認項目を表示"}
         </button>
       </div>
-      <p className="mt-2 text-[10px] text-slate-400">
-        ※ AI回答は参考情報です。実際の保護具選定は専門家・安全管理者にご確認ください。
-        商品リンクはアフィリエイトプログラムを利用しています。
-      </p>
-    </div>
+
+      {error ? (
+        <p className="mt-3 rounded-lg border border-rose-300 bg-rose-50 p-3 text-sm text-rose-900" role="alert">
+          {error}
+        </p>
+      ) : null}
+
+      {result ? (
+        <div className="mt-4 rounded-xl border border-amber-300 bg-amber-50 p-4">
+          <p className="font-bold text-amber-950">商品推薦は保留されています</p>
+          <p className="mt-1 text-sm leading-6 text-amber-950">{result.reply}</p>
+          <ul className="mt-3 space-y-2">
+            {result.checklist.map((item) => (
+              <li key={item} className="flex items-start gap-2 text-sm leading-6 text-slate-800">
+                <ClipboardCheck className="mt-1 h-4 w-4 shrink-0 text-emerald-700" aria-hidden="true" />
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Link
+              href="/chemical-ra"
+              className="inline-flex min-h-[44px] items-center rounded-lg border border-emerald-700 bg-white px-3 py-2 text-sm font-bold text-emerald-800 hover:bg-emerald-50"
+            >
+              化学物質RAで条件を整理
+            </Link>
+            <Link
+              href="/about/quality"
+              className="inline-flex min-h-[44px] items-center rounded-lg border border-slate-400 bg-white px-3 py-2 text-sm font-bold text-slate-800 hover:bg-slate-50"
+            >
+              情報品質の方針
+            </Link>
+          </div>
+        </div>
+      ) : null}
+    </section>
   );
 }

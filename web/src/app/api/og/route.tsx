@@ -24,19 +24,24 @@ export async function GET(req: NextRequest) {
   const lang = searchParams.get("lang") === "en" ? "en" : "ja";
   const defaults = lang === "en"
     ? {
-        title: "Reshape workplace safety with AI.",
-        desc: "Law updates, accident DB, KY forms, chemical RA, and e-learning — one portal for site safety.",
-        tagline: "Anzen AI Portal — Supervised by an OSH Consultant",
+        title: "Trace sources. Confirm conditions. Act safely.",
+        tagline: "Anzen AI Portal — official-source navigation and field checks",
       }
     : {
-        title: "現場の安全を、AIで変える。",
-        desc: "法改正・現場リスク・事故DB・KY用紙・Eラーニングを一つのポータルに集約",
-        tagline: "安全AIポータル — 労働安全衛生コンサルタント監修",
+        title: "出典をたどり、条件を確認し、安全行動へ。",
+        tagline: "安全AIポータル — 一次資料への到達と現場確認を支援",
       };
+  const safeDefaultDescription =
+    lang === "en"
+      ? "Trace official sources and handle today’s risk, KY, laws, incidents, chemicals, and weather with visible verification status."
+      : "公式資料への到達と、今日のリスク・KY・法令・事故・化学物質・気象の確認を支援します。AIは補助であり、人による確認が必要です。";
   // data 由来（記事/事故/通達…）の title/desc は長さ不定。Satori は overflow を
   // クリップしないため、安全長へ畳んでから描画し 630px キャンバスの縦溢れを防ぐ。
   const title = clampOgText(searchParams.get("title") ?? defaults.title, OG_TITLE_MAX);
-  const desc = clampOgText(searchParams.get("desc") ?? defaults.desc, OG_DESC_MAX);
+  const desc = clampOgText(
+    searchParams.get("desc") ?? safeDefaultDescription,
+    OG_DESC_MAX,
+  );
 
   return new ImageResponse(
     (
@@ -49,7 +54,7 @@ export async function GET(req: NextRequest) {
           alignItems: "center",
           justifyContent: "center",
           background:
-            "linear-gradient(135deg, #1a7a4c 0%, #166640 60%, #0f4d2e 100%)",
+            "linear-gradient(135deg, #0b5d4b 0%, #142d4c 68%, #071c31 100%)",
           padding: "60px",
         }}
       >

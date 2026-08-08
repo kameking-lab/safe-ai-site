@@ -138,7 +138,7 @@ export async function POST(req: Request) {
     const unique = [...new Set(expiredEndpoints)];
     const { error: delErr } = await supabase.from(TABLE).delete().in("endpoint", unique);
     if (!delErr) cleaned = unique.length;
-    else console.warn("[push-weather-alert] cleanup failed:", delErr.message);
+    else console.warn("[push-weather-alert] cleanup failed");
   }
 
   return NextResponse.json({

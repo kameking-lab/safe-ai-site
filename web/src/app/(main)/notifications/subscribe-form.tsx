@@ -72,7 +72,7 @@ export function SubscribeForm() {
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="example@company.jp"
+          placeholder="通知先メールアドレス"
           className="min-h-[44px] w-full rounded-lg border border-slate-200 px-3 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
         />
       </div>

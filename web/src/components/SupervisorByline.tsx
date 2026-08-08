@@ -1,7 +1,11 @@
 import Link from "next/link";
 
-/** E-E-A-T監修者表記。氏名は開示せず資格・登録番号で信頼性を示す（/about運用方針に準拠）。 */
-export const SUPERVISOR_NAME = "労働安全衛生コンサルタント（登録番号260022）";
+/**
+ * 公開ページの編集主体表記。第三者が検証できる資格台帳・個別の確認記録が
+ * そろうまでは、個人資格や「監修済み」を権威シグナルとして表示しない。
+ */
+export const SUPERVISOR_NAME =
+  "安全AIポータル編集部（確認状態は各ページに表示）";
 
 export function SupervisorByline({
   className = "text-emerald-700 hover:underline",

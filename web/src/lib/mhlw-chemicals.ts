@@ -185,7 +185,7 @@ export type MhlwChemicalDetails = {
   limitShort?: string;
   /** モデル SDS の推奨用途 */
   uses?: string;
-  /** 厚労省 公式 SDS PDF リンク */
+  /** 厚労省の濃度基準値等に関する公表資料。製品SDSとは限らない。 */
   link?: string;
   /** 濃度・発がん性の構造化データ（concentration-limits.json）*/
   limits?: ConcentrationLimitEntry;
@@ -228,7 +228,7 @@ export type MergedChemical = {
   appliedDates: Partial<Record<MhlwChemicalCategory, string>>;
   /** カテゴリ別の備考（あれば） */
   notes: string[];
-  /** 詳細値（濃度基準値・推奨用途・SDS リンクなど） */
+  /** 詳細値（濃度基準値・推奨用途・公表資料リンクなど） */
   details?: MhlwChemicalDetails;
   /** 元データの件数（デバッグ用） */
   entryCount: number;

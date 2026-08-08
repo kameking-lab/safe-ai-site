@@ -266,7 +266,7 @@ export const transportContent: IndustryContent = {
       name: "腰痛予防の労働衛生教育",
       type: "労働衛生教育",
       target: "重量物取扱い・運転業務従事者",
-      href: "/education-certification/finder?q=腰痛",
+      href: "/education/roudoueisei/youtsu-yobou",
     },
     {
       name: "運行管理者試験（貨物・旅客）",

@@ -5,10 +5,11 @@
 //   STRIPE_SECRET_KEY    - Stripeシークレットキー
 //   NEXT_PUBLIC_SITE_URL - return_url のベース
 
-import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { isPaidModeReady } from "@/lib/stripe-price-policy";
+import { privateJson } from "@/lib/server/cloud-owner";
 
 function getStripe(): Stripe | null {
   const key = process.env.STRIPE_SECRET_KEY;
@@ -17,28 +18,34 @@ function getStripe(): Stripe | null {
 }
 
 export async function POST() {
+  if (!isPaidModeReady() || !prisma) {
+    return privateJson(
+      { error: "決済機能は現在ご利用いただけません。" },
+      503,
+    );
+  }
   const stripe = getStripe();
   if (!stripe) {
-    return NextResponse.json({ error: "決済機能未設定" }, { status: 503 });
+    return privateJson(
+      { error: "決済機能は現在ご利用いただけません。" },
+      503,
+    );
   }
   const session = await auth();
   if (!session?.user) {
-    return NextResponse.json({ error: "ログインが必要です" }, { status: 401 });
-  }
-  if (!prisma) {
-    return NextResponse.json({ error: "Database not configured" }, { status: 503 });
+    return privateJson({ error: "ログインが必要です" }, 401);
   }
 
   const userId = (session.user as { id?: string }).id;
   if (!userId) {
-    return NextResponse.json({ error: "ユーザーIDを取得できません" }, { status: 401 });
+    return privateJson({ error: "ユーザーIDを取得できません" }, 401);
   }
 
   const sub = await prisma.subscription.findUnique({ where: { userId } });
   if (!sub?.stripeCustomerId) {
-    return NextResponse.json(
+    return privateJson(
       { error: "Stripeカスタマー情報がありません。先にプランへお申し込みください。" },
-      { status: 400 },
+      400,
     );
   }
 
@@ -48,9 +55,12 @@ export async function POST() {
       customer: sub.stripeCustomerId,
       return_url: `${siteUrl}/account?portal_return=1`,
     });
-    return NextResponse.json({ url: portal.url });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "ポータルURL生成に失敗しました。";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return privateJson({ url: portal.url });
+  } catch {
+    console.error("[stripe/portal] session creation failed");
+    return privateJson(
+      { error: "ポータルの準備に失敗しました。時間をおいて再試行してください。" },
+      502,
+    );
   }
 }

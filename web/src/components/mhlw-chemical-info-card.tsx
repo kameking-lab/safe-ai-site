@@ -1,12 +1,11 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import { AlertTriangle, BookOpen, Database, ExternalLink, Gauge, ArrowRight } from "lucide-react";
+import { BookOpen, Database, ExternalLink, Gauge, ArrowRight } from "lucide-react";
 import type { MergedChemical, ConcentrationLimitEntry } from "@/lib/mhlw-chemicals";
 import { regulatoryLabels, relatedLawTexts, EXTERNAL_REF_LABEL } from "@/lib/chemical/mhlw-labels";
 import { getSupplementalInfo } from "@/lib/chemical/supplemental-info";
-import { MHLW_MERGED_CHEMICAL_COUNT_SLIM as MHLW_MERGED_CHEMICAL_COUNT } from "@/lib/mhlw-chemicals-slim";
+import { SITE_STATS } from "@/data/site-stats";
 import { RegulationTagBadgeList } from "@/components/regulation-tag-badge";
 import { RegulationTagsSection } from "@/components/regulation-tags-section";
 import {
@@ -17,9 +16,9 @@ import {
 } from "@/lib/regulation-tag-labels";
 
 /**
- * 厚労省由来の物質詳細カード。
- * 濃度基準値・SDS義務・皮膚等障害・がん原性・規制区分・関連法令を表示。
- * 任意で測定濃度を入力すると 8h 基準値との比較を表示する。
+ * 厚労省・NITE等の公的資料を統合した物質詳細カード。
+ * 収録フラグは法的な非該当判定に使わず、未収録は「未確認」と表示する。
+ * 測定条件・単位・平均時間を検証できないため、濃度の自動適否判定は行わない。
  */
 export function MhlwChemicalInfoCard({ chemical }: { chemical: MergedChemical }) {
   const reg = regulatoryLabels(chemical.flags);
@@ -37,14 +36,11 @@ export function MhlwChemicalInfoCard({ chemical }: { chemical: MergedChemical })
   const isCarcinogenic =
     chemical.flags.carcinogenic || supplemental?.carcinogenic === true;
 
-  const [measured, setMeasured] = useState("");
-  const verdict = evaluateConcentration(measured, limit8h);
-
   return (
     <div className="rounded-xl border border-emerald-200 bg-emerald-50/40 p-4">
       <div className="flex items-center gap-2 text-xs font-semibold text-emerald-800">
         <Database className="h-3.5 w-3.5" aria-hidden="true" />
-        厚生労働省データ（MHLW {MHLW_MERGED_CHEMICAL_COUNT.toLocaleString()} 物質）
+        公的化学物質統合データ（MHLW・NITE等／{SITE_STATS.mhlwMergedChemicalCount} 物質）
       </div>
       <h3 className="mt-1 text-base font-bold text-slate-900">{chemical.primaryName}</h3>
       <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px] text-slate-600">
@@ -193,35 +189,12 @@ export function MhlwChemicalInfoCard({ chemical }: { chemical: MergedChemical })
       {limit8h && (
         <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3">
           <p className="text-xs font-semibold text-amber-900">
-            測定濃度を入力して 8 時間基準値（{limit8h}）と比較
+            測定値との自動比較は行いません
           </p>
-          <div className="mt-2 flex flex-wrap items-center gap-2">
-            <input
-              type="text"
-              inputMode="decimal"
-              value={measured}
-              onChange={(e) => setMeasured(e.target.value)}
-              placeholder={`例: ${limit8h.replace(/[^\d.]/g, "") || "10"}`}
-              className="min-h-[36px] w-32 rounded-md border border-amber-300 bg-white px-2 py-1 text-sm"
-            />
-            <span className="text-xs text-amber-900">
-              {limit8h.replace(/[\d.\s－]/g, "") || "ppm"}（基準値と同じ単位で入力）
-            </span>
-          </div>
-          {verdict && (
-            <p
-              className={`mt-2 inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-bold ${
-                verdict.exceeded
-                  ? "bg-rose-100 text-rose-800"
-                  : "bg-emerald-100 text-emerald-800"
-              }`}
-            >
-              {verdict.exceeded ? (
-                <AlertTriangle className="h-3.5 w-3.5" aria-hidden="true" />
-              ) : null}
-              {verdict.message}
-            </p>
-          )}
+          <p className="mt-1 text-xs leading-5 text-amber-950">
+            表示値は {limit8h} です。適否には単位、測定方法、平均時間、混合ばく露等の確認が必要です。
+            最新の製品SDS、厚生労働省・NITEの公式資料、作業環境測定の担当者で確認してください。
+          </p>
         </div>
       )}
 
@@ -233,7 +206,7 @@ export function MhlwChemicalInfoCard({ chemical }: { chemical: MergedChemical })
           className="mt-4 inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
         >
           <ExternalLink className="h-3 w-3" aria-hidden="true" />
-          厚労省 公式 SDS PDF
+          厚生労働省 濃度基準値等の公表資料（製品SDSではありません）
         </a>
       )}
     </div>
@@ -357,41 +330,9 @@ function FlagBadge({ label, on }: { label: string; on: boolean }) {
       }`}
     >
       <span className="text-xs font-semibold">{label}</span>
-      <span className="text-xs font-bold">{on ? "該当" : "非該当"}</span>
+      <span className="text-xs font-bold">
+        {on ? "収録データで該当" : "収録データ上未確認"}
+      </span>
     </div>
   );
-}
-
-function evaluateConcentration(
-  measuredRaw: string,
-  limit8h: string | undefined
-): { exceeded: boolean; message: string } | null {
-  if (!measuredRaw.trim() || !limit8h) return null;
-  const measured = parseFloat(measuredRaw.replace(/[^\d.]/g, ""));
-  if (!Number.isFinite(measured)) return null;
-  // 全角数字 / カタカナ数字を半角化して数値抽出
-  const normalized = limit8h
-    .replace(/[０-９．]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0xfee0))
-    .replace(/[一二三四五六七八九〇]/g, (c) => "一二三四五六七八九〇".indexOf(c).toString());
-  const m = normalized.match(/[\d.]+/);
-  if (!m) return null;
-  const limit = parseFloat(m[0]);
-  if (!Number.isFinite(limit) || limit <= 0) return null;
-  const ratio = measured / limit;
-  if (measured > limit) {
-    return {
-      exceeded: true,
-      message: `基準値超過 (${ratio.toFixed(2)}倍) ／ 直ちに作業改善が必要`,
-    };
-  }
-  if (ratio >= 0.5) {
-    return {
-      exceeded: false,
-      message: `基準値の ${(ratio * 100).toFixed(0)}% ／ 余裕は小さめ。改善検討を`,
-    };
-  }
-  return {
-    exceeded: false,
-    message: `基準値の ${(ratio * 100).toFixed(0)}% ／ 基準値内`,
-  };
 }

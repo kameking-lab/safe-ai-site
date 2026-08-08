@@ -27,10 +27,10 @@ export function SummaryPanel({
   if (isLoading) {
     return (
       <section
-        aria-label="AI要約"
+        aria-label="収録要点"
         className="rounded-2xl border border-slate-200 bg-white/95 p-4 shadow-sm lg:sticky lg:top-24"
       >
-        <h2 className="text-base font-bold text-slate-900 sm:text-lg">AI要約</h2>
+        <h2 className="text-base font-bold text-slate-900 sm:text-lg">収録要点</h2>
         <div className="mt-3 space-y-3">
           <div className="h-4 w-1/2 animate-pulse rounded bg-slate-200" />
           <div className="h-4 w-full animate-pulse rounded bg-slate-200" />
@@ -44,10 +44,10 @@ export function SummaryPanel({
   if (status === "error" && error) {
     return (
       <section
-        aria-label="AI要約"
+        aria-label="収録要点"
         className="rounded-2xl border border-rose-200 bg-rose-50/60 p-4 shadow-sm lg:sticky lg:top-24"
       >
-        <h2 className="text-base font-bold text-rose-900 sm:text-lg">AI要約</h2>
+        <h2 className="text-base font-bold text-rose-900 sm:text-lg">収録要点</h2>
         <ErrorNotice
           title="要約の取得に失敗しました"
           error={error}
@@ -59,7 +59,7 @@ export function SummaryPanel({
           href="/law-search"
           className="mt-3 inline-flex items-center gap-1 rounded-lg border border-rose-300 bg-white px-3 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-50"
         >
-          /law-search のAI要約を試す →
+          法令検索で一次資料を確認する →
         </a>
       </section>
     );
@@ -68,12 +68,12 @@ export function SummaryPanel({
   if (!selectedRevisionId || !summaryContent) {
     return (
       <section
-        aria-label="AI要約"
+        aria-label="収録要点"
         className="rounded-2xl border border-slate-200 bg-white/95 p-4 shadow-sm lg:sticky lg:top-24"
       >
-        <h2 className="text-base font-bold text-slate-900 sm:text-lg">AI要約</h2>
+        <h2 className="text-base font-bold text-slate-900 sm:text-lg">収録要点</h2>
         <p className="mt-3 text-sm leading-6 text-slate-600">
-          法改正カードの「AIで要約」ボタンを押すと、ここに要約が表示されます。
+          法改正カードの「収録要点を見る」を押すと、登録済みの要点が表示されます。
         </p>
       </section>
     );
@@ -81,10 +81,10 @@ export function SummaryPanel({
 
   return (
     <section
-      aria-label="AI要約"
+      aria-label="収録要点"
       className="rounded-2xl border border-slate-200 bg-white/95 p-4 shadow-sm lg:sticky lg:top-24"
     >
-      <h2 className="text-base font-bold text-slate-900 sm:text-lg">AI要約</h2>
+      <h2 className="text-base font-bold text-slate-900 sm:text-lg">収録要点</h2>
       <p className="mt-1 text-sm font-medium text-slate-700">{selectedRevisionTitle}</p>
 
       <div className="mt-4 rounded-xl border border-slate-100 bg-slate-50/70 p-3">

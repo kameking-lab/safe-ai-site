@@ -18,5 +18,6 @@ export function jmaWarningJsonCodesForIso2(iso3166_2: string): string[] {
 }
 
 export function jmaWarningJsonUrl(code: string) {
-  return `https://www.jma.go.jp/bosai/warning/data/warning/${code}.json`;
+  // 気象庁は2026-05-29に新体系へ移行した。旧 data/warning は更新停止済み。
+  return `https://www.jma.go.jp/bosai/warning/data/r8/${code}.json`;
 }

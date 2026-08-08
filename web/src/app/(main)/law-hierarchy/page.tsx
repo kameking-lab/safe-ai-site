@@ -25,7 +25,7 @@ import {
 } from "@/data/law-hierarchy";
 
 const PAGE_PATH = "/law-hierarchy";
-const PAGE_TITLE = "労働安全衛生法 階層構造マップ | 安全AIポータル";
+const PAGE_TITLE = "労働安全衛生法 階層構造マップ";
 const PAGE_DESC =
   "労働安全衛生法を頂点とした政令・省令・告示・通達の階層構造を一枚で俯瞰。各法令から e-Gov 公式条文・本サイトの条文検索・関連通達一覧へ直接遷移できます。";
 const PAGE_URL = `${SITE_URL}${PAGE_PATH}`;
@@ -451,7 +451,7 @@ export default function LawHierarchyPage() {
                   条文の根拠を提示する対話
                 </p>
                 <p className="mt-1 text-xs leading-5 text-slate-600">
-                  RAGコーパス {SITE_STATS.ragArticleCount}条文超を背景に、根拠付きで回答。
+                  確認済み法令本文 {SITE_STATS.ragArticleCount}条文から根拠候補を提示。
                 </p>
               </Link>
             </div>

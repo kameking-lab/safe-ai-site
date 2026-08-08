@@ -76,9 +76,9 @@ export const serviceContent: IndustryContent = {
       href: "/law-search?q=年少者%20就業制限",
     },
     {
-      name: "職場における熱中症予防基本対策要綱",
+      name: "労働安全衛生規則第612条の2・施行通達（基発0520第6号）",
       articles: "屋外・厨房作業",
-      note: "WBGTの計測、暑熱順化、休憩、緊急時対応（2025年6月義務化）",
+      note: "対象作業での報告体制・悪化防止手順が法定2項目。WBGT把握、暑熱順化、休憩等はガイドライン上の予防策として分離",
       href: "/law-search?q=熱中症予防",
     },
     {
@@ -134,18 +134,11 @@ export const serviceContent: IndustryContent = {
   ],
   circulars: [
     {
-      id: "mhlw-notice-0920",
-      title: "労働安全衛生規則等の一部改正（職場における熱中症防止強化措置）の施行について（令和7年6月1日施行）",
+      id: "mhlw-notice-0014",
+      title: "労働安全衛生規則の一部を改正する省令の施行等について（基発0520第6号）",
       issuer: "厚生労働省労働基準局長",
       date: "2025年",
-      relevance: "サービス業の屋外・厨房を含む全業種に熱中症予防義務を強化（R7.6.1施行）。",
-    },
-    {
-      id: "mhlw-notice-0921",
-      title: "WBGT（暑さ指数）の活用による熱中症予防対策の強化について（R7.6.1義務化）",
-      issuer: "厚生労働省労働基準局",
-      date: "2025年",
-      relevance: "屋内厨房・テラス席等の作業環境でのWBGT測定義務化。",
+      relevance: "対象作業に該当する場合の報告体制・悪化防止手順と、その対象作業の目安を確認。",
     },
     {
       id: "mhlw-notice-0930",
@@ -257,8 +250,8 @@ export const serviceContent: IndustryContent = {
     {
       name: "熱中症予防の労働衛生教育",
       type: "労働衛生教育",
-      target: "屋外・厨房作業従事者（R7.6.1義務化対応）",
-      href: "/education-certification/finder?q=熱中症",
+      target: "屋外・厨房作業従事者向け（ガイドラインに基づく予防教育。特別教育ではない）",
+      href: "/heat-illness-prevention",
     },
     {
       name: "サービス・接遇マナー（カスハラ対応）",
@@ -281,7 +274,7 @@ export const serviceContent: IndustryContent = {
     {
       label: "法令・制度",
       category: "law-system",
-      rationale: "パワハラ防止法・熱中症R7義務化・消防法",
+      rationale: "パワハラ防止法・安衛則第612条の2・消防法",
     },
   ],
   recommendations: [
@@ -302,7 +295,7 @@ export const serviceContent: IndustryContent = {
     {
       icon: "🌡",
       title: "熱中症予防ハブ（WBGT計算機）",
-      reason: "屋外・厨房作業向けのWBGT管理と緊急時対応（R7義務化対応）",
+      reason: "第612条の2の法定2項目と、WBGT等のガイドライン上の予防策を分けて確認",
       href: "/heat-illness-prevention",
       cta: "熱中症対策へ",
     },
@@ -377,7 +370,7 @@ export const serviceContent: IndustryContent = {
     "警備業 交通事故",
     "サービス業 転倒予防 4S",
     "サービス業 床面 すべり止め",
-    "サービス業 熱中症 R7義務化",
+    "サービス業 熱中症 第612条の2",
     "サービス業 WBGT 屋内",
     "サービス業 雇入れ時教育 学生",
     "サービス業 短時間労働者 教育",

@@ -38,10 +38,9 @@ export async function fetchPageAnalytics(
   }
   try {
     return await fetchFromGa4(period);
-  } catch (e) {
-    const message = e instanceof Error ? e.message : String(e);
-    console.error("[page-analytics] GA4 fetch failed, falling back to mock:", message);
-    return buildMockPageAnalyticsResponse(period, message);
+  } catch {
+    console.error("[page-analytics] GA4 fetch failed");
+    return buildMockPageAnalyticsResponse(period, "source_unavailable");
   }
 }
 
@@ -51,8 +50,8 @@ async function fetchFromGa4(period: StatsPeriod): Promise<PageAnalyticsResponse>
   let parsed: { client_email?: string; private_key?: string; project_id?: string } = {};
   try {
     parsed = JSON.parse(raw);
-  } catch (e) {
-    console.error("[page-analytics] credentials JSON parse failed:", e);
+  } catch {
+    console.error("[page-analytics] credentials JSON parse failed");
   }
 
   const client = new BetaAnalyticsDataClient({

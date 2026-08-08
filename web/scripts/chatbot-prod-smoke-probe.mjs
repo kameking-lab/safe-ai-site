@@ -67,7 +67,7 @@ async function probeOne(q) {
   const res = await fetch(`${BASE_URL}/api/chatbot`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ message: q.question }),
+    body: JSON.stringify({ message: q.question, privacyConfirmed: true }),
   });
   const status = res.status;
   let body = null;
@@ -151,7 +151,7 @@ async function main() {
   console.log(`[chatbot-prod-smoke] ${BASE_URL} に${results.length}問プローブ`);
   for (const r of results) {
     const mark = r.flags.length === 0 ? "OK" : "NG";
-    console.log(`  [${mark}] ${r.id}: ${r.question}`);
+    console.log(`  [${mark}] ${r.id}`);
     for (const f of r.flags) console.log(`        - ${f}`);
   }
   console.log(`合計フラグ: ${totalFlags}件 → ${OUT_PATH}`);

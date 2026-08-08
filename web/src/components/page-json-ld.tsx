@@ -22,6 +22,7 @@ export function PageJsonLd({
   breadcrumbs,
   keywords,
   contributor,
+  hideVisibleBreadcrumb = false,
 }: {
   name: string;
   description: string;
@@ -30,6 +31,8 @@ export function PageJsonLd({
   keywords?: string[];
   /** E-E-A-T監修者をcontributorとして付与するか（法令隣接コンテンツ向け） */
   contributor?: boolean;
+  /** JSON-LDは維持し、ルートなど視覚上重複するパンくずだけ省略する。 */
+  hideVisibleBreadcrumb?: boolean;
 }) {
   const url = `${SITE_BASE}${path}`;
   const crumbs: Crumb[] = breadcrumbs ?? [
@@ -51,9 +54,11 @@ export function PageJsonLd({
           breadcrumbSchema(crumbs),
         ]}
       />
-      <div className="px-4 pt-3 sm:px-6">
-        <Breadcrumb items={visibleItems} />
-      </div>
+      {hideVisibleBreadcrumb ? null : (
+        <div className="px-4 pt-3 sm:px-6">
+          <Breadcrumb items={visibleItems} />
+        </div>
+      )}
     </>
   );
 }

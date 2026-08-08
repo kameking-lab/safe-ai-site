@@ -1,6 +1,6 @@
-import { NextResponse } from 'next/server';
-import { computeSitemapFreshness } from '@/lib/sitemap/freshness';
-import { SITE_URL } from '@/lib/seo-metadata';
+import { NextResponse } from "next/server";
+import { computeSitemapFreshness } from "@/lib/sitemap/freshness";
+import { SITE_URL } from "@/lib/seo-metadata";
 
 // 柱C-3 / S DRY: 絶対URLのオリジンは seo-metadata.ts の SITE_URL 単一ソース（末尾スラッシュ無し）。
 const BASE = SITE_URL;
@@ -13,9 +13,6 @@ export async function GET() {
   const {
     siteFreshest,
     freshestArticle,
-    freshestNotice,
-    accidentsDataUpdated,
-    equipmentDataUpdated,
     chemicalsDataUpdated,
   } = computeSitemapFreshness(buildToday);
 
@@ -24,17 +21,16 @@ export async function GET() {
     { loc: `${BASE}/sitemap.xml`, lastmod: siteFreshest },
     // 記事個別ページ。公開記事の publishedAt / lastReviewedAt の最大値。
     { loc: `${BASE}/sitemap-articles.xml`, lastmod: freshestArticle },
-    // 事故事例 個別ページ。事故DBスナップショットの生成日。
-    { loc: `${BASE}/sitemap-accidents.xml`, lastmod: accidentsDataUpdated },
-    // 通達個別ページ。通達の最新発出日。
-    { loc: `${BASE}/sitemap-circulars.xml`, lastmod: freshestNotice },
-    // 保護具個別ページ。保護具DBの生成日。
-    { loc: `${BASE}/sitemap-equipment.xml`, lastmod: equipmentDataUpdated },
+    // ローカル事故個票は一次資料との本文一致を再検証中のため、空の互換
+    // sitemap は維持するが index からは列挙しない。
+    // 個別に一次資料照合した通達詳細だけを列挙する。
+    { loc: `${BASE}/sitemap-circulars.xml`, lastmod: "2026-08-02" },
+    // 未検証の商品レコードは隔離中のため、保護具子サイトマップを列挙しない。
     // 化学物質 個別ページ（約3,515物質）。濃度基準DBスナップショットの生成日。
     { loc: `${BASE}/sitemap-chemicals.xml`, lastmod: chemicalsDataUpdated },
     // 法令ナビ 条文パーマリンク（約480条）。コーパスの e-Gov 突合日ベースの固定日
     //（sitemap-laws.xml/route.ts の CORPUS_LASTMOD と同値。条文データ更新PRで更新）。
-    { loc: `${BASE}/sitemap-laws.xml`, lastmod: '2026-07-11' },
+    { loc: `${BASE}/sitemap-laws.xml`, lastmod: "2026-07-11" },
   ];
 
   const entries = children
@@ -44,7 +40,7 @@ export async function GET() {
     <lastmod>${c.lastmod}</lastmod>
   </sitemap>`,
     )
-    .join('\n');
+    .join("\n");
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -53,8 +49,8 @@ ${entries}
 
   return new NextResponse(xml, {
     headers: {
-      'Content-Type': 'application/xml; charset=utf-8',
-      'Cache-Control': 'public, max-age=86400, s-maxage=86400',
+      "Content-Type": "application/xml; charset=utf-8",
+      "Cache-Control": "public, max-age=86400, s-maxage=86400",
     },
   });
 }

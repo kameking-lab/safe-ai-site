@@ -15,7 +15,6 @@ export const SITE_DISPLAY_HOST = SITE_URL
   .replace(/^www\./, "")
   .replace(/\/+$/, "");
 export const SITE_LOCALE = "ja_JP";
-export const SITE_ALTERNATE_LOCALES = ["en_US"] as const;
 
 /**
  * サイト共通の OGP 画像（動的生成 `/api/og`、1200x630）。
@@ -33,7 +32,7 @@ export const DEFAULT_OG_IMAGE = {
   url: DEFAULT_OG_IMAGE_URL,
   width: 1200,
   height: 630,
-  alt: "安全AIポータル — 現場の安全を、AIで変える。",
+  alt: "安全AIポータル — 根拠から、現場の行動へ",
 } as const;
 
 type Override<T> = T extends object ? Partial<T> : T;
@@ -42,11 +41,12 @@ type OpenGraphOverride = Override<NonNullable<Metadata["openGraph"]>>;
 type TwitterOverride = Override<NonNullable<Metadata["twitter"]>>;
 
 /**
- * Build the `alternates` block with canonical + hreflang language map.
- * Pass the relative path (`/foo`) — both languages and x-default point
- * at the same canonical URL because the site uses client-side language
- * switching with no URL prefix; this is the form Google accepts for
- * single-URL multilingual content.
+ * Build the self-canonical `alternates` block.
+ *
+ * The language switcher changes client-side presentation without creating
+ * independently crawlable language URLs. A same-URL `ja` / `en` hreflang
+ * cluster does not identify alternate pages, so no `languages` map is
+ * emitted until distinct, reciprocal locale URLs exist.
  */
 export function withSiteAlternates(
   path: string,
@@ -55,11 +55,6 @@ export function withSiteAlternates(
   const canonical = `${SITE_URL}${normalisedPath === "/" ? "" : normalisedPath}`;
   return {
     canonical,
-    languages: {
-      ja: canonical,
-      en: canonical,
-      "x-default": canonical,
-    },
   };
 }
 
@@ -82,7 +77,6 @@ export function withSiteOpenGraph(
   return {
     type: "website",
     locale: SITE_LOCALE,
-    alternateLocale: [...SITE_ALTERNATE_LOCALES],
     siteName: SITE_NAME,
     url: `${SITE_URL}${normalisedPath === "/" ? "" : normalisedPath}`,
     images: [DEFAULT_OG_IMAGE],

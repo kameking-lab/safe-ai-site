@@ -1,10 +1,14 @@
 import { SITE_NAME, SITE_URL } from "@/lib/seo-metadata";
-import { SUPERVISOR_NAME } from "@/components/SupervisorByline";
+import { JsonLdClient } from "@/components/json-ld-client";
 
 type Schema = Record<string, unknown>;
 
 /** ロゴ画像（180x180）への絶対URL。複数スキーマの logo/ImageObject で共有。 */
 const LOGO_URL = `${SITE_URL}/apple-touch-icon.png`;
+const SAFE_ORGANIZATION_DESCRIPTION =
+  "労働安全衛生の一次資料、現場リスク、KY、事故、化学物質を、出典と確認状態を示しながら扱う運用ポータル。AIは補助であり、公式資料と人による確認を優先します。";
+const SAFE_WEBSITE_DESCRIPTION =
+  "法令・事故・KY・化学物質・気象を横断し、一次資料と確認状態へ到達するための労働安全衛生ポータル。";
 
 /**
  * サイトの主要エンティティ（Organization / WebSite）の安定 @id。
@@ -17,17 +21,22 @@ const LOGO_URL = `${SITE_URL}/apple-touch-icon.png`;
 export const ORG_ID = `${SITE_URL}/#organization`;
 export const WEBSITE_ID = `${SITE_URL}/#website`;
 
+/** JSON-LD内の文字列でscript要素を閉じられないようHTML-significant文字をUnicode escapeする。 */
+export function serializeJsonLd(schema: unknown): string {
+  return JSON.stringify(schema)
+    .replace(/</g, "\\u003c")
+    .replace(/>/g, "\\u003e")
+    .replace(/&/g, "\\u0026")
+    .replace(/\u2028/g, "\\u2028")
+    .replace(/\u2029/g, "\\u2029");
+}
+
 export function JsonLd({ schema }: { schema: Schema | Schema[] }) {
-  return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
-    />
-  );
+  return <JsonLdClient serialized={serializeJsonLd(schema)} />;
 }
 
 export function organizationSchema(): Schema {
-  return {
+  const schema: Schema = {
     "@context": "https://schema.org",
     "@type": "Organization",
     "@id": ORG_ID,
@@ -53,14 +62,16 @@ export function organizationSchema(): Schema {
     // 列挙するプロパティ。自サイト URL を指す自己参照は同定価値ゼロ（バリデータの smell）で、
     // 外部プロフィールが未整備の現状は付与しない（将来の公式アカウント整備時に追加する）。
   };
+  return { ...schema, description: SAFE_ORGANIZATION_DESCRIPTION };
 }
 
 export function webSiteSchema(): Schema {
-  return {
+  const schema: Schema = {
     "@context": "https://schema.org",
     "@type": "WebSite",
     "@id": WEBSITE_ID,
     name: SITE_NAME,
+    alternateName: "安全AI",
     url: SITE_URL,
     description:
       "労働安全衛生の現場運用ポータル。法改正・リスク管理・KY用紙・Eラーニングをまとめて確認。",
@@ -70,15 +81,8 @@ export function webSiteSchema(): Schema {
     // author も別 url（/about）のインライン Organization ではなく正準 @id 参照へ集約し、
     // publisher と同一の Organization ノードへ同定する（別ノードへの分裂を防ぐ）。
     author: { "@id": ORG_ID },
-    potentialAction: {
-      "@type": "SearchAction",
-      target: {
-        "@type": "EntryPoint",
-        urlTemplate: `${SITE_URL}/search?q={search_term_string}`,
-      },
-      "query-input": "required name=search_term_string",
-    },
   };
+  return { ...schema, description: SAFE_WEBSITE_DESCRIPTION };
 }
 
 // Article / NewsArticle / WebApplication が author・publisher・provider として共有する
@@ -310,21 +314,9 @@ export function breadcrumbSchema(items: { name: string; url: string }[]): Schema
   };
 }
 
-/**
- * サイト監修者（労働安全衛生コンサルタント）のPerson表現。
- * 通達の発出者（author/publisher=Organization）とは別軸のE-E-A-T表記のため
- * contributor（schema.org公式プロパティ＝二次的な寄与者）として付与する。
- */
-const SUPERVISOR_PERSON: Schema = {
-  "@type": "Person",
-  name: SUPERVISOR_NAME,
-  url: `${SITE_URL}/about`,
-  hasOccupation: {
-    "@type": "Occupation",
-    name: "労働安全衛生コンサルタント",
-    occupationLocation: { "@type": "Country", name: "Japan" },
-  },
-};
+// 個別の編集確認記録がある場合も、第三者検証できない個人資格を推測せず、
+// 発行主体である編集組織への参照だけを付ける。
+const EDITORIAL_CONTRIBUTOR: Schema = ORG_REF;
 
 export function legalDocumentSchema(input: {
   url: string;
@@ -334,6 +326,8 @@ export function legalDocumentSchema(input: {
   issuedDate: string | null;
   description: string;
   legislationApplies?: string;
+  /** 個別文書の監修記録が存在する場合だけ true にする。 */
+  reviewedBySupervisor?: boolean;
 }): Schema {
   return {
     "@context": "https://schema.org",
@@ -359,7 +353,9 @@ export function legalDocumentSchema(input: {
     ...(input.legislationApplies
       ? { legislationApplies: input.legislationApplies }
       : {}),
-    contributor: SUPERVISOR_PERSON,
+    ...(input.reviewedBySupervisor
+      ? { contributor: EDITORIAL_CONTRIBUTOR }
+      : {}),
     inLanguage: "ja",
   };
 }
@@ -376,7 +372,7 @@ export function webPageSchema(input: {
   datePublished?: string;
   dateModified?: string;
   keywords?: string[];
-  /** E-E-A-T監修者をcontributorとして付与するか（法令隣接コンテンツ向け） */
+  /** 個別の編集確認記録がある場合に編集組織をcontributorとして付与する。 */
   contributor?: boolean;
 }): Schema {
   const { name, description, url, inLanguage = "ja", datePublished, dateModified, keywords, contributor } = input;
@@ -392,7 +388,7 @@ export function webPageSchema(input: {
     ...(datePublished ? { datePublished } : {}),
     ...(dateModified ? { dateModified } : {}),
     ...(keywords && keywords.length ? { keywords: keywords.join(", ") } : {}),
-    ...(contributor ? { contributor: SUPERVISOR_PERSON } : {}),
+    ...(contributor ? { contributor: EDITORIAL_CONTRIBUTOR } : {}),
   };
 }
 
@@ -414,7 +410,7 @@ export function faqPageSchema(
         text: it.answer,
       },
     })),
-    ...(opts?.contributor ? { contributor: SUPERVISOR_PERSON } : {}),
+    ...(opts?.contributor ? { contributor: EDITORIAL_CONTRIBUTOR } : {}),
   };
 }
 
@@ -606,7 +602,8 @@ export function dataCatalogSchema(input: {
  * flagship features to:
  *  - declare they are a free, web-based application
  *  - link to each other via `mentions` so search engines see the journey
- *  - expose a SearchAction (chatbot prefill) where applicable
+ * Free-text actions are intentionally omitted because questions and search
+ * terms must never be serialized into a URL.
  */
 export function webApplicationSchema(input: {
   name: string;
@@ -615,7 +612,7 @@ export function webApplicationSchema(input: {
   applicationCategory?: string;
   /** Cross-feature mentions — peer Copilot features */
   mentions?: { name: string; url: string }[];
-  /** Optional SearchAction url template (e.g. /chatbot?q={search_term_string}) */
+  /** Deprecated compatibility input. It is never emitted into JSON-LD. */
   searchUrlTemplate?: string;
   featureList?: string[];
 }): Schema {
@@ -642,16 +639,6 @@ export function webApplicationSchema(input: {
       name: m.name,
       url: m.url,
     }));
-  }
-  if (input.searchUrlTemplate) {
-    schema.potentialAction = {
-      "@type": "SearchAction",
-      target: {
-        "@type": "EntryPoint",
-        urlTemplate: input.searchUrlTemplate,
-      },
-      "query-input": "required name=search_term_string",
-    };
   }
   if (input.featureList && input.featureList.length > 0) {
     schema.featureList = input.featureList;

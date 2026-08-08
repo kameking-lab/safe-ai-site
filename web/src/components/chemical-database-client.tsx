@@ -25,8 +25,9 @@ import {
 } from "@/data/mock/chemical-substances-db";
 import type { MergedChemical } from "@/lib/mhlw-chemicals";
 import { getAllMergedChemicalsSlim as getAllMergedChemicals, MHLW_MERGED_CHEMICAL_COUNT_SLIM } from "@/lib/mhlw-chemicals-slim";
-import { ContextualPpePicks } from "@/components/ContextualPpePicks";
+import { ChemicalPpeSelectionBoundary } from "@/components/chemical/chemical-ppe-selection-boundary";
 import { ChemicalNotFoundRescue } from "@/components/chemical/chemical-not-found-rescue";
+import { TransientChemicalLink } from "@/components/home-safety-cockpit/transient-chemical-link";
 import {
   ALL_REGULATION_TAGS,
   REGULATION_TAGS,
@@ -159,7 +160,6 @@ export function ChemicalDatabaseClient() {
   // このときアフィリエイト保護具枠は隠し、RAと同じ脱出路（AI調査/SDS読取/製品名検索）を出す。
   const activeEmpty = mode === "mhlw" ? filteredMhlw.length === 0 : filtered.length === 0;
   const isZeroHit = activeEmpty && query.trim().length >= 2;
-  const raDeepLink = `/chemical-ra?name=${encodeURIComponent(query.trim())}&run=1`;
   const conclusion: {
     tone: SafetyTone;
     value?: string;
@@ -172,8 +172,8 @@ export function ChemicalDatabaseClient() {
           tone: "info",
           value: chemicalSubstances.length.toLocaleString(),
           unit: "物質",
-          title: "専門解説",
-          description: "労働安全コンサルタントによる解説付きの主要物質。",
+          title: "サイト独自解説",
+          description: "一次資料と区別した、主要物質のサイト独自解説。",
         }
       : mhlwHasFilter
         ? filteredMhlw.length > 0
@@ -220,7 +220,7 @@ export function ChemicalDatabaseClient() {
         </h1>
         <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slate-700">
           厚生労働省の公開 4 リスト（皮膚等障害・SDS交付義務・がん原性・濃度基準値）を CAS 番号で統合した
-          {mhlwCount.toLocaleString()} 物質を CAS・物質名で横断検索。労働安全コンサルタントによる専門解説 50 物質も併読できます。
+          {mhlwCount.toLocaleString()} 物質を CAS・物質名で横断検索。一次資料と区別したサイト独自解説 50 物質も併読できます。
         </p>
         <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
           <AlertTriangle className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />最終判断は必ず厚生労働省 <Link href="https://anzeninfo.mhlw.go.jp/" className="font-semibold underline" target="_blank" rel="noopener noreferrer">職場のあんぜんサイト</Link>
@@ -365,7 +365,7 @@ export function ChemicalDatabaseClient() {
             query.trim().length >= 2 ? (
               <ChemicalNotFoundRescue
                 query={query}
-                ai={{ href: raDeepLink }}
+                ai={{ query }}
                 catalogNote={`統合DB ${MHLW_MERGED_CHEMICAL_COUNT_SLIM.toLocaleString()}物質に見つかりません`}
               />
             ) : (
@@ -501,7 +501,7 @@ export function ChemicalDatabaseClient() {
         </h2>
         {filtered.length === 0 ? (
           query.trim().length >= 2 ? (
-            <ChemicalNotFoundRescue query={query} ai={{ href: raDeepLink }} />
+            <ChemicalNotFoundRescue query={query} ai={{ query }} />
           ) : (
             <p className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-6 text-center text-sm text-slate-500">
               該当する物質が見つかりませんでした。別の語句や区分でお試しください。
@@ -588,17 +588,23 @@ export function ChemicalDatabaseClient() {
                     </dl>
 
                     <div className="mt-3 flex flex-wrap gap-2">
-                      <Link
-                        href={
-                          s.cas
-                            ? `/chemical-ra?cas=${encodeURIComponent(s.cas)}`
-                            : `/chemical-ra?name=${encodeURIComponent(s.name)}`
-                        }
-                        className="inline-flex min-h-[44px] items-center gap-1 rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white shadow hover:bg-emerald-700"
-                      >
-                        <ClipboardCheck className="h-3.5 w-3.5" aria-hidden="true" />
-                        この物質のリスクアセスメントを実施
-                      </Link>
+                      {s.cas ? (
+                        <Link
+                          href={`/chemical-ra?cas=${encodeURIComponent(s.cas)}`}
+                          className="inline-flex min-h-[44px] items-center gap-1 rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white shadow hover:bg-emerald-700"
+                        >
+                          <ClipboardCheck className="h-3.5 w-3.5" aria-hidden="true" />
+                          この物質のリスクアセスメントを実施
+                        </Link>
+                      ) : (
+                        <TransientChemicalLink
+                          query={s.name}
+                          className="inline-flex min-h-[44px] items-center gap-1 rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white shadow hover:bg-emerald-700"
+                        >
+                          <ClipboardCheck className="h-3.5 w-3.5" aria-hidden="true" />
+                          この物質のリスクアセスメントを実施
+                        </TransientChemicalLink>
+                      )}
                       {s.sds_url && (
                         <a
                           href={s.sds_url}
@@ -621,16 +627,9 @@ export function ChemicalDatabaseClient() {
 
       </>)}
 
-      {/* この場面で必要な保護具: 化学物質 → 防塵防毒マスク・保護メガネ・保護手袋・保護衣
-          CR2-T1: ゼロヒット時は「調べ物に失敗したら物を売られた」体験を避けるため非表示にし、
-          救済動線（AI調査/SDS読取/製品名検索）を優先する。 */}
+      {/* SDS・作業条件・製品仕様がそろわない検索結果では商品をfail-closedで保留する。 */}
       {!isZeroHit && (
-        <ContextualPpePicks
-          context="化学物質 有機溶剤 特化則 防塵 防毒 マスク 保護メガネ 保護手袋"
-          fallbackCategoryIds={["respiratory", "eye-ear-protection", "hand-foot"]}
-          heading="化学物質作業で必要な保護具"
-          description="呼吸用保護具・保護メガネ・耐薬品手袋など、SDS の指示に沿って選定するための候補。"
-        />
+        <ChemicalPpeSelectionBoundary />
       )}
 
       <aside className="mt-6 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">

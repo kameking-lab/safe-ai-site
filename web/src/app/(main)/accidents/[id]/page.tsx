@@ -3,10 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
   ChevronLeft,
-  ExternalLink,
   AlertTriangle,
   FileText,
-  Library,
   RotateCcw,
   ShieldCheck,
   Building2,
@@ -14,10 +12,12 @@ import {
 } from "lucide-react";
 import { JsonLd, breadcrumbSchema } from "@/components/json-ld";
 import { AccidentActionBar } from "@/components/accidents/action-bar";
-import { ContextualPpePicks } from "@/components/ContextualPpePicks";
 import { getAccidentCasesDataset } from "@/data/mock/accident-cases";
-import { resolveAccidentSource } from "@/lib/accident-source";
-import { getAccidentRelated } from "@/lib/accident-related";
+import {
+  ACCIDENT_PROVENANCE_INFO,
+  resolveAccidentProvenance,
+  resolveAccidentSource,
+} from "@/lib/accident-source";
 import { ogImageUrl } from "@/lib/og-url";
 import type { AccidentCase } from "@/lib/types/domain";
 import { PageContainer } from "@/components/layout/page-container";
@@ -25,20 +25,32 @@ import { FavoriteButton } from "@/components/favorites/favorite-button";
 import { AccidentTypePictogram } from "@/components/accidents/accident-type-pictogram";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { SEVERITY_VISUAL } from "@/lib/accidents/accident-visual";
+import { isIndexableAccident } from "@/lib/seo/index-quality";
+import { EvidenceCard } from "@/components/evidence/evidence-card";
+import type { EvidenceRecord } from "@/lib/evidence/types";
+import { getVisualKyScenariosByAccidentId } from "@/data/visual-ky";
 
 const SITE_BASE = "https://www.anzen-ai-portal.jp";
+
+// Only manually verified MHLW records are reachable. Keep this request-bound so
+// quarantined IDs fail closed without a static nonce/not-found conflict.
+export const dynamic = "force-dynamic";
 
 function findAccident(id: string): AccidentCase | undefined {
   return getAccidentCasesDataset().find((c) => c.id === id);
 }
 
-export function generateStaticParams() {
-  // 件数が多いため、SSGは行わずオンデマンド（ISR/Dynamic）で生成する。
-  // generateStaticParams は空配列を返すと Next が dynamicParams で扱う。
-  return [];
+/**
+ * 詳細本文・metadata・JSON-LD・CTAが同じ公開境界を通るようにする。
+ * ID形式だけでは公開せず、個票を一次資料と照合済みのMHLW事例だけを返す。
+ */
+function findPublicAccident(id: string): AccidentCase {
+  const accident = findAccident(id);
+  if (!accident || resolveAccidentProvenance(accident) !== "mhlw") {
+    notFound();
+  }
+  return accident;
 }
-
-export const dynamicParams = true;
 
 export async function generateMetadata({
   params,
@@ -46,14 +58,16 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const { id } = await params;
-  const accident = findAccident(id);
-  if (!accident) return {};
+  const accident = findPublicAccident(id);
   const title = `${accident.title}｜事故事例詳細`;
   const description = `${accident.workCategory} ${accident.severity}「${accident.title}」（${accident.occurredOn}）の事故概要・原因・再発防止策と関連する保護具・KY起票・関連法令を確認できます。`;
   return {
     title,
     description,
     alternates: { canonical: `/accidents/${id}` },
+    robots: isIndexableAccident(accident)
+      ? { index: true, follow: true }
+      : { index: false, follow: true },
     openGraph: {
       title: `${title}`,
       description,
@@ -65,8 +79,90 @@ export async function generateMetadata({
 
 function pickSimilarAccidents(target: AccidentCase, all: AccidentCase[], limit = 3): AccidentCase[] {
   return all
-    .filter((c) => c.id !== target.id && (c.type === target.type || c.workCategory === target.workCategory))
+    .filter(
+      (c) =>
+        c.id !== target.id &&
+        c.type === target.type &&
+        c.workCategory === target.workCategory &&
+        isIndexableAccident(c),
+    )
     .slice(0, limit);
+}
+
+function buildAccidentEvidence(
+  accident: AccidentCase,
+  source: ReturnType<typeof resolveAccidentSource>,
+): EvidenceRecord {
+  const provenance = resolveAccidentProvenance(accident);
+  const sourceEntry = source?.url
+    ? {
+        registryId: provenance === "mhlw" ? "mhlw-anzeninfo" : undefined,
+        title: source.site,
+        publisher: provenance === "mhlw" ? "厚生労働省" : undefined,
+        documentNumber: source.caseId ?? null,
+        url: source.url,
+        role:
+          provenance === "mhlw"
+            ? "個別公表事例への参照URL。内容は公式ページで再確認してください。"
+            : "編集再構成に用いた公開資料。表示内容は原資料そのものではありません。",
+      }
+    : null;
+  const isModel = provenance === "synthetic" || provenance === "preliminary";
+
+  return {
+    id: `accident-${accident.id}`,
+    informationKind:
+      provenance === "mhlw"
+        ? "officialAccident"
+        : provenance === "curated"
+          ? "curatedAccident"
+          : "syntheticCase",
+    primarySources:
+      provenance === "mhlw" && sourceEntry ? [sourceEntry] : [],
+    secondarySources:
+      provenance === "curated" && sourceEntry ? [sourceEntry] : [],
+    legalPosition:
+      provenance === "mhlw"
+        ? "公表された事故情報。法令本文・行政処分・裁判判断そのものではありません。"
+        : isModel
+          ? "教育検討用の架空・集計ベースモデル。法令判断や実在事故の根拠には使えません。"
+          : "公開情報をもとにしたサイト編集事例。原資料と同一の個票ではありません。",
+    asOf: accident.occurredOn || null,
+    promulgatedAt: null,
+    effectiveAt: null,
+    retrievedAt: null,
+    humanReviewedAt: null,
+    dataVersion: "accident-cases-2026-07-24",
+    scope: `${accident.workCategory}における${accident.type}の学習・再発防止検討`,
+    exclusions: [
+      "個別事業場の法令適合性の確定",
+      "関係者・事業者の責任認定",
+      "現場確認なしでのKY・教育資料への確定転記",
+    ],
+    aiGenerated: false,
+    humanReviewRequired: true,
+    freshness: isModel ? "quarantined" : "unknown",
+    verification:
+      isModel
+        ? "quarantined"
+        : sourceEntry
+          ? "sourceLocated"
+          : "unverified",
+    supersededBy: null,
+    corrections:
+      accident.id === "synthetic-heat-2026-001"
+        ? [
+            {
+              correctedAt: "2026-07-24",
+              summary:
+                "公式個別事故に見える識別子と未検証の法的断定を廃止し、架空モデルとして隔離表示しました。",
+              previousState:
+                "mhlw-2026-001 の識別子で、集計資料からは確認できない個別日付・法的義務を含む表示",
+              affectedArea: "事故詳細、検索、KY候補、AI根拠、sitemap",
+            },
+          ]
+        : [],
+  };
 }
 
 export default async function AccidentDetailPage({
@@ -75,13 +171,14 @@ export default async function AccidentDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const accident = findAccident(id);
-  if (!accident) notFound();
-
+  const accident = findPublicAccident(id);
+  const provenance = resolveAccidentProvenance(accident);
   const source = resolveAccidentSource(accident);
-  const related = getAccidentRelated(accident.type);
+  const provenanceInfo = ACCIDENT_PROVENANCE_INFO[provenance];
+  const evidence = buildAccidentEvidence(accident, source);
   const url = `${SITE_BASE}/accidents/${accident.id}`;
   const similar = pickSimilarAccidents(accident, getAccidentCasesDataset());
+  const relatedVisualKy = getVisualKyScenariosByAccidentId(accident.id)[0];
 
   return (
     <PageContainer width="prose">
@@ -120,8 +217,8 @@ export default async function AccidentDetailPage({
               >
                 {accident.severity}
               </StatusBadge>
-              <span className="rounded-full bg-sky-100 px-2.5 py-1 text-[11px] font-bold text-sky-800">
-                {accident.workCategory}
+              <span className="rounded-full border border-slate-300 bg-white px-2.5 py-1 text-[11px] font-bold text-slate-700">
+                {provenanceInfo.label}
               </span>
             </div>
           </div>
@@ -160,6 +257,15 @@ export default async function AccidentDetailPage({
         <p className="mt-2 text-sm leading-7 text-slate-700">{accident.summary}</p>
       </section>
 
+      <details className="mt-4 rounded-xl border border-slate-200 bg-white p-3">
+        <summary className="flex min-h-11 cursor-pointer items-center text-sm font-bold text-slate-800">
+          出典と記録
+        </summary>
+        <div className="mt-3">
+          <EvidenceCard evidence={evidence} />
+        </div>
+      </details>
+
       {/* 原因 */}
       <section className="mt-5 rounded-2xl border border-amber-200 bg-amber-50/40 p-5 shadow-sm">
         <h2 className="flex items-center gap-1.5 text-sm font-bold text-amber-900">
@@ -195,40 +301,22 @@ export default async function AccidentDetailPage({
       {/* 固定アクションバー（PCはinline、モバイルはsticky） */}
       <section className="mt-5">
         <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-          <p className="text-xs font-bold text-slate-700">この事故から次のアクションへ</p>
-          <p className="mt-1 text-[11px] text-slate-500">{related.rationale}</p>
+          <h2 className="text-sm font-bold text-slate-900">次に行うこと</h2>
           <AccidentActionBar accident={accident} variant="inline" />
+          <Link
+            href={
+              relatedVisualKy
+                ? `/training/visual-ky/${relatedVisualKy.slug}`
+                : "/training/visual-ky"
+            }
+            className="mt-3 inline-flex min-h-11 items-center justify-center rounded-xl border-2 border-teal-700 bg-teal-50 px-4 py-3 text-sm font-bold text-teal-950 hover:bg-teal-100 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300"
+          >
+            {relatedVisualKy
+              ? "この事故に近いKYTを学ぶ"
+              : "事故類型からビジュアルKYTを選ぶ"}
+          </Link>
         </div>
       </section>
-
-      {/* 出典 */}
-      {source && (
-        <section className="mt-5 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-          <h2 className="text-sm font-bold text-slate-900"><Library className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />出典</h2>
-          <div className="mt-2 flex flex-wrap gap-2">
-            <span className="text-xs text-slate-600">出典: {source.site}</span>
-            {source.url && (
-              <a
-                href={source.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex min-h-[44px] items-center gap-1 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50"
-              >
-                出典元を開く
-                <ExternalLink className="h-3 w-3" />
-              </a>
-            )}
-          </div>
-        </section>
-      )}
-
-      {/* 推奨保護具（コンテキスト連動） */}
-      <ContextualPpePicks
-        context={`${accident.title} ${accident.type} ${accident.workCategory}`}
-        fallbackCategoryIds={related.categories.length > 0 ? related.categories.slice(0, 3) : ["head-protection", "fall-protection", "hand-foot"]}
-        heading="この事故の再発防止に有効な保護具"
-        description="事故タイプ・業種から推奨される保護具カテゴリを抽出しました。"
-      />
 
       {/* 類似事例 */}
       {similar.length > 0 && (
@@ -269,12 +357,6 @@ export default async function AccidentDetailPage({
       {/* モバイル用sticky action bar */}
       <AccidentActionBar accident={accident} variant="sticky" />
 
-      <footer className="mt-8 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-[11px] leading-5 text-slate-600">
-        <p>
-          ※ 本ページは厚生労働省・労働基準局の公開情報をもとに、安全AIポータル が一覧化した労働災害事例です。
-          実務適用は本文（出典元）と所管省庁の最新公表内容を必ずご確認ください。
-        </p>
-      </footer>
     </PageContainer>
   );
 }

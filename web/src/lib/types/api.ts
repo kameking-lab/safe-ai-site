@@ -1,6 +1,14 @@
 import type { RevisionSummary } from "@/lib/types/domain";
 import type { LawRevision } from "@/lib/types/domain";
-import type { WeatherSnapshot } from "@/lib/types/domain";
+import type {
+  ChatbotQuickReply,
+  ChatbotSource,
+} from "@/lib/chatbot-contract";
+import type {
+  OfficialWeatherWarningState,
+  WeatherSnapshot,
+} from "@/lib/types/domain";
+import type { LegalConversationContext } from "@/lib/legal-conversation-context";
 
 export type ApiMode = "mock" | "live";
 
@@ -49,10 +57,20 @@ export type ChatApiRequest = {
   revisionId: string;
   revisionTitle: string;
   question: string;
+  privacyConfirmed: boolean;
+  /** 同一画面の直近ターン。サーバーでは許可済み作業条件だけへ縮約する。 */
+  history?: Array<{ role: "user" | "assistant"; content: string }>;
+  context?: LegalConversationContext;
 };
 
 export type ChatApiResponse = {
   reply: string;
+  substantiveAnswer?: string;
+  conditions?: string[];
+  clarificationQuestion?: string | null;
+  quickReplies?: ChatbotQuickReply[];
+  sources?: ChatbotSource[];
+  context?: LegalConversationContext;
 };
 
 export type RevisionListApiResponse = {
@@ -65,6 +83,20 @@ export type SummaryApiRouteResponse =
 
 export type WeatherRiskApiResponse = {
   snapshot: WeatherSnapshot;
-  provider: "open-meteo" | "mock-fallback";
+  provider: "open-meteo";
   fetchedAt: string;
+  officialWarning: OfficialWeatherWarningState;
+  /** Open-Meteo current conditions. This is an estimated grid value, not JMA. */
+  current?: {
+    temperatureCelsius: number;
+    relativeHumidityPercent: number;
+    targetAt: string;
+  };
+};
+
+export type WeatherRiskPartialApiResponse = ApiErrorResponse & {
+  partial: true;
+  fetchedAt: string;
+  officialWarning: OfficialWeatherWarningState;
+  unavailableSources: ["open-meteo"];
 };

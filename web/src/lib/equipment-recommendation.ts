@@ -5,6 +5,7 @@
 
 import equipmentDb from "@/data/safety-equipment-db.json";
 import { appendAmazonTag, generateRakutenAffiliateUrl } from "./affiliate-url";
+import { EQUIPMENT_CATALOG_QUARANTINED } from "./equipment-catalog-quarantine";
 
 export type EquipmentItem = {
   id: string;
@@ -60,17 +61,22 @@ export type RecommendResult = {
 // JSON のアフィリエイトURLは生のAmazon/楽天検索URL。NEXT_PUBLIC_*_AFFILIATE_ID が
 // 設定されていれば、ここで一度だけアソシエイトタグ／hb.afl リダイレクトに包む。
 // （未設定なら原URLが返るため、開発環境でも動作する）
-const allItems: EquipmentItem[] = (equipmentDb.items as EquipmentItem[]).map((item) => ({
-  ...item,
-  affiliate: {
-    ...item.affiliate,
-    amazonUrl: appendAmazonTag(item.affiliate.amazonUrl),
-    rakutenUrl: generateRakutenAffiliateUrl(item.affiliate.rakutenUrl),
-  },
-}));
+const allItems: EquipmentItem[] = (equipmentDb.items as EquipmentItem[]).map(
+  (item) => ({
+    ...item,
+    affiliate: {
+      ...item.affiliate,
+      amazonUrl: appendAmazonTag(item.affiliate.amazonUrl),
+      rakutenUrl: generateRakutenAffiliateUrl(item.affiliate.rakutenUrl),
+    },
+  }),
+);
 
 /** 単一商品の各軸スコアを返す（0〜各軸満点） */
-export function scoreItem(item: EquipmentItem, input: RecommendInput): ScoredEquipment["scoreBreakdown"] & { total: number } {
+export function scoreItem(
+  item: EquipmentItem,
+  input: RecommendInput,
+): ScoredEquipment["scoreBreakdown"] & { total: number } {
   // 業種マッチ: 30点満点
   let industry = 0;
   if (!input.industry) {
@@ -130,6 +136,9 @@ export function scoreItem(item: EquipmentItem, input: RecommendInput): ScoredEqu
  * 予算オーバー商品は除外（スコア計算では budget=0）。
  */
 export function recommendEquipment(input: RecommendInput): RecommendResult {
+  if (EQUIPMENT_CATALOG_QUARANTINED) {
+    return { top: [], others: [], totalCandidates: 0 };
+  }
   const scored: ScoredEquipment[] = allItems
     .map((item) => {
       const breakdown = scoreItem(item, input);
@@ -147,7 +156,8 @@ export function recommendEquipment(input: RecommendInput): RecommendResult {
     })
     // 予算オーバー商品は表示候補から除外
     .filter((it) => {
-      if (input.budgetCap === undefined || !Number.isFinite(input.budgetCap)) return true;
+      if (input.budgetCap === undefined || !Number.isFinite(input.budgetCap))
+        return true;
       return it.priceMin <= input.budgetCap;
     });
 
@@ -186,6 +196,7 @@ export function recommendEquipment(input: RecommendInput): RecommendResult {
 
 /** 同カテゴリの近接商品を取得（商品詳細ページの「同カテゴリ他商品」表示用） */
 export function relatedInCategory(itemId: string, n = 3): EquipmentItem[] {
+  if (EQUIPMENT_CATALOG_QUARANTINED) return [];
   const target = allItems.find((it) => it.id === itemId);
   if (!target) return [];
   return allItems
@@ -196,10 +207,17 @@ export function relatedInCategory(itemId: string, n = 3): EquipmentItem[] {
 
 /** ID から商品取得 */
 export function getEquipmentById(id: string): EquipmentItem | undefined {
+  if (EQUIPMENT_CATALOG_QUARANTINED) return undefined;
   return allItems.find((it) => it.id === id);
 }
 
 /** 全商品（generateStaticParams 等で利用） */
 export function getAllEquipment(): EquipmentItem[] {
+  if (EQUIPMENT_CATALOG_QUARANTINED) return [];
   return allItems;
+}
+
+/** 監査用の件数だけを返す。未検証レコード本体を公開経路へ渡さない。 */
+export function getQuarantinedEquipmentCount(): number {
+  return allItems.length;
 }

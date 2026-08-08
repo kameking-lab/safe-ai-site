@@ -97,8 +97,8 @@ export default async function IllnessGuidePage({
         value={conditions.length}
         unit="病態"
         title="配慮ガイド"
-        description="典型病態ごとの労務配慮を整理。プラン作成ツールで配慮事項を自動生成できます。"
-        action={{ href: "/treatment-work-balance/plan-builder", label: "プランビルダーを開く" }}
+        description="一般的な確認観点を整理します。個別の就業可否・勤務条件は、本人、主治医、産業医等、事業者で確認してください。"
+        action={{ href: "/treatment-work-balance#official-sources", label: "公式様式と相談先を確認" }}
         className="mt-6"
       />
 
@@ -207,18 +207,18 @@ export default async function IllnessGuidePage({
         </div>
       </section>
 
-      {/* CTA */}
+      {/* 個別判断を自動化しない安全境界 */}
       <section className="mt-10 rounded-2xl border border-emerald-300 bg-emerald-600/95 p-5 text-white">
-        <h2 className="text-base font-bold">この内容で両立支援プランを作成</h2>
+        <h2 className="text-base font-bold">個別プランは関係者で確認</h2>
         <p className="mt-1 text-sm leading-6 text-emerald-50">
-          病態・職務・症状の重さを指定するだけで、配慮事項・段階的復職プラン・主治医意見書テンプレートを生成できます。
+          疾患名や自己申告の重症度だけでは、復職時期や残業・夜勤・運転の可否を決められません。公式様式を使い、本人、主治医、産業医等、事業者で確認してください。
         </p>
         <div className="mt-3 flex flex-wrap gap-2">
           <Link
-            href="/treatment-work-balance/plan-builder"
+            href="/treatment-work-balance#official-sources"
             className="inline-flex items-center gap-1 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-50"
           >
-            プランビルダーを開く →
+            公式様式と相談先を確認 →
           </Link>
           <Link
             href="/treatment-work-balance"

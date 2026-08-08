@@ -1,18 +1,10 @@
 import { NextResponse } from "next/server";
 import { listSubscribers, memSendHistory } from "@/lib/newsletter";
-
-// Simple token gate: set NEWSLETTER_ADMIN_TOKEN in env
-function isAuthorized(req: Request): boolean {
-  const adminToken = process.env.NEWSLETTER_ADMIN_TOKEN;
-  if (!adminToken) return true; // open in dev if not configured
-  const auth = req.headers.get("authorization") ?? "";
-  return auth === `Bearer ${adminToken}`;
-}
+import { bearerAuthError, verifyBearerSecret } from "@/lib/server/bearer-auth";
 
 export async function GET(req: Request) {
-  if (!isAuthorized(req)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const auth = verifyBearerSecret(req, process.env.NEWSLETTER_ADMIN_TOKEN);
+  if (!auth.ok) return bearerAuthError(auth);
 
   const subscribers = await listSubscribers();
   const active = subscribers.filter((s) => s.active);

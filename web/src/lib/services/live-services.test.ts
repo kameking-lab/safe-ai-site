@@ -125,6 +125,7 @@ describe("live services", () => {
     const result = await service.sendMessage({
       revision: null,
       question: "いつからですか？",
+      privacyConfirmed: true,
     });
     expect(result.ok).toBe(false);
     if (!result.ok) {
@@ -151,6 +152,7 @@ describe("live services", () => {
     const result = await service.sendMessage({
       revision: null,
       question: "   ",
+      privacyConfirmed: true,
     });
     expect(result.ok).toBe(false);
     if (!result.ok) {
@@ -159,7 +161,7 @@ describe("live services", () => {
     }
   });
 
-  it("service-factory: ingestSource/realSourcePayload を revisions API へ透過する", async () => {
+  it("service-factory: URL内の任意payloadを revisions API へ転送しない", async () => {
     const originalUrl = window.location.href;
     window.history.replaceState(
       {},
@@ -179,14 +181,14 @@ describe("live services", () => {
     expect(fetchSpy).toHaveBeenCalled();
     const calledUrl = String(fetchSpy.mock.calls[0]?.[0]);
     expect(calledUrl).toContain("/api/revisions");
-    expect(calledUrl).toContain("ingestSource=real");
-    expect(calledUrl).toContain("realSourcePayload=");
+    expect(calledUrl).not.toContain("ingestSource=");
+    expect(calledUrl).not.toContain("realSourcePayload=");
 
     fetchSpy.mockRestore();
     window.history.replaceState({}, "", originalUrl);
   });
 
-  it("service-factory: realSourceFormat/realSourceUrl を revisions API へ透過する", async () => {
+  it("service-factory: URL内の任意外部URLを revisions API へ転送しない", async () => {
     const originalUrl = window.location.href;
     window.history.replaceState(
       {},
@@ -206,8 +208,8 @@ describe("live services", () => {
     expect(fetchSpy).toHaveBeenCalled();
     const calledUrl = String(fetchSpy.mock.calls[0]?.[0]);
     expect(calledUrl).toContain("/api/revisions");
-    expect(calledUrl).toContain("realSourceFormat=official-db");
-    expect(calledUrl).toContain("realSourceUrl=");
+    expect(calledUrl).not.toContain("realSourceFormat=");
+    expect(calledUrl).not.toContain("realSourceUrl=");
 
     fetchSpy.mockRestore();
     window.history.replaceState({}, "", originalUrl);

@@ -1,4 +1,5 @@
-import { mhlwNotices, type MhlwNotice } from "@/data/mhlw-notices";
+import type { MhlwNotice } from "@/data/mhlw-notices";
+import { verifiedMhlwNotices as mhlwNotices } from "@/data/public-mhlw-notices";
 
 // トピック語のシノニム展開表。1つのグループ内のどれか1語がクエリに含まれれば、
 // その全語をトークンに加える（双方向展開）。現場・一人親方が使う「うろ覚え／口語／
@@ -92,8 +93,6 @@ function scoreNotice(n: MhlwNotice, tokens: string[]): number {
     const y = parseInt(n.issuedDate.slice(0, 4), 10);
     if (!Number.isNaN(y) && y >= 2020) score += 0.2;
   }
-  // 告示 (binding) gets a small boost so legally binding sources surface first
-  if (n.bindingLevel === "binding") score += 0.3;
   return score;
 }
 
@@ -106,6 +105,8 @@ export type NoticeHit = {
   issuer: string | null;
   bindingLevel: MhlwNotice["bindingLevel"];
   detailUrl: string;
+  sourceUrl: string;
+  pdfUrl: string | null;
   category: string;
 };
 
@@ -126,13 +127,15 @@ export function searchRelevantNotices(query: string, k = 3): NoticeHit[] {
       issuer: n.issuer,
       bindingLevel: n.bindingLevel,
       detailUrl: n.detailUrl,
+      sourceUrl: n.sourceUrl,
+      pdfUrl: n.pdfUrl,
       category: n.category,
     }));
   return ranked;
 }
 
 export const NOTICE_BINDING_LABELS: Record<MhlwNotice["bindingLevel"], string> = {
-  binding: "告示（拘束力あり）",
-  indirect: "通達（行政解釈・間接拘束）",
-  reference: "指針（参考）",
+  binding: "告示（根拠法令・効力を個別確認）",
+  indirect: "通達（行政内部の解釈・運用資料）",
+  reference: "指針・参考資料（位置付けを個別確認）",
 };

@@ -9,19 +9,27 @@ import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
+import { externalCredentialedServicesAllowed } from "@/lib/server/deployment-safety";
 
 // AUTH_SECRET 未設定時はスタブを返してコンソールエラーを抑制する
 const noopHandler = () => new Response(null, { status: 404 });
 const noopAuth = async () => null;
 
-const initialized = process.env.AUTH_SECRET
+export const isAuthConfigured = Boolean(
+  externalCredentialedServicesAllowed() &&
+  process.env.AUTH_SECRET &&
+  process.env.AUTH_GOOGLE_ID &&
+  process.env.AUTH_GOOGLE_SECRET,
+);
+
+const initialized = isAuthConfigured
   ? NextAuth({
       adapter: prisma ? PrismaAdapter(prisma) : undefined,
       session: { strategy: "jwt" },
       providers: [
         Google({
-          clientId: process.env.AUTH_GOOGLE_ID,
-          clientSecret: process.env.AUTH_GOOGLE_SECRET,
+          clientId: process.env.AUTH_GOOGLE_ID!,
+          clientSecret: process.env.AUTH_GOOGLE_SECRET!,
         }),
       ],
       pages: {
@@ -39,8 +47,10 @@ const initialized = process.env.AUTH_SECRET
                 status: "active",
               },
             });
-          } catch (err) {
-            console.error("[auth] failed to create subscription for user", user.id, err);
+          } catch {
+            console.error("[auth] failed to create subscription", {
+              operation: "create-default-subscription",
+            });
           }
         },
       },
@@ -55,13 +65,19 @@ const initialized = process.env.AUTH_SECRET
                 where: { userId: token.sub },
               });
               if (sub) {
-                (session.user as { planName?: string; status?: string }).planName = sub.planName;
-                (session.user as { planName?: string; status?: string }).status = sub.status;
+                (
+                  session.user as { planName?: string; status?: string }
+                ).planName = sub.planName;
+                (
+                  session.user as { planName?: string; status?: string }
+                ).status = sub.status;
               } else {
                 (session.user as { planName?: string }).planName = "free";
               }
-            } catch (err) {
-              console.error("[auth] failed to load subscription:", err);
+            } catch {
+              console.error("[auth] failed to load subscription", {
+                operation: "load-session-subscription",
+              });
               (session.user as { planName?: string }).planName = "free";
             }
           } else {

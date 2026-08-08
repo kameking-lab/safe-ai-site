@@ -40,7 +40,7 @@ function row(overrides: Partial<MeetingContractorRow> & { id: string }): Meeting
     qualifications: [],
     plannedCount: "",
     predictedDisasters: [],
-    risk: { severity: 1, likelihood: 1, priority: 1 },
+    risk: { severity: 1, likelihood: 1, priority: 1, reviewed: false },
     safetyInstructions: "",
     responsibleName: "",
     actualCount: "",
@@ -523,9 +523,9 @@ describe("S1（第六弾）: 点検項目8カテゴリ（カテゴリ単位の�
     const updatedCat = patch.checklist!.find((c) => c.key === cat.key)!;
     expect(updatedCat.items.find((i) => i.key === item.key)!.status).toBe("ng");
     // 他項目・他カテゴリは不変
-    expect(updatedCat.items.find((i) => i.key !== item.key)!.status).toBe("na");
+    expect(updatedCat.items.find((i) => i.key !== item.key)!.status).toBe("unreviewed");
     expect(patch.checklist!.find((c) => c.key !== cat.key)).toEqual(record.checklist.find((c) => c.key !== cat.key));
-    expect(record.checklist[0]!.items[0]!.status).toBe("na");
+    expect(record.checklist[0]!.items[0]!.status).toBe("unreviewed");
   });
 
   it("記入順チェーン: 統括安全責任者コメント(supervisorComment)の次は1カテゴリ目→…→最終カテゴリの次は次欄なし", () => {

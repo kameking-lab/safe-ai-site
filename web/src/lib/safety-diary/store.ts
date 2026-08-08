@@ -78,8 +78,27 @@ export function getEntriesByMonth(yearMonth: string): SafetyDiaryEntry[] {
 
 /** UUID 生成（crypto.randomUUID 互換） */
 export function newId(): string {
-  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
-    return crypto.randomUUID();
+  const webCrypto: Partial<Crypto> | undefined = globalThis.crypto;
+  if (typeof webCrypto?.randomUUID === "function") {
+    return webCrypto.randomUUID();
   }
-  return `id-${Date.now()}-${Math.floor(Math.random() * 1e9).toString(36)}`;
+  const bytes = new Uint8Array(16);
+  if (typeof webCrypto?.getRandomValues === "function") {
+    webCrypto.getRandomValues(bytes);
+  } else {
+    // 永続化レコードの識別子用途。暗号用途ではないが、schema互換のUUIDを必ず返す。
+    for (let index = 0; index < bytes.length; index += 1) {
+      bytes[index] = Math.floor(Math.random() * 256);
+    }
+  }
+  bytes[6] = (bytes[6] & 0x0f) | 0x40;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  const hex = [...bytes].map((value) => value.toString(16).padStart(2, "0"));
+  return [
+    hex.slice(0, 4).join(""),
+    hex.slice(4, 6).join(""),
+    hex.slice(6, 8).join(""),
+    hex.slice(8, 10).join(""),
+    hex.slice(10, 16).join(""),
+  ].join("-");
 }

@@ -1,27 +1,96 @@
 import { NextRequest, NextResponse } from "next/server";
-import { signageMeteoRegions } from "@/data/signage-locations";
-import type { ApiErrorResponse, WeatherRiskApiResponse } from "@/lib/types/api";
-import type { WeatherAlert, WeatherSnapshot } from "@/lib/types/domain";
+import { getSignageLocationById } from "@/data/signage-locations";
+import type {
+  ApiErrorResponse,
+  WeatherRiskApiResponse,
+  WeatherRiskPartialApiResponse,
+} from "@/lib/types/api";
+import type {
+  OfficialWeatherWarningState,
+  WeatherSnapshot,
+} from "@/lib/types/domain";
 import { withCircuitBreaker, CircuitOpenError } from "@/lib/external/circuit-breaker";
 import { fetchWithTimeout, TimeoutError } from "@/lib/external/fetch-with-timeout";
-
-type OpenMeteoDailyResponse = {
-  daily?: {
-    time?: string[];
-    weather_code?: number[];
-    temperature_2m_max?: number[];
-    wind_speed_10m_max?: number[];
-    precipitation_sum?: number[];
-  };
-};
+import { getJmaWarningsRuntime } from "@/lib/jma/fetch-jma-runtime";
+import { buildSignageJmaSnapshot } from "@/lib/signage/signage-jma-snapshot";
+import {
+  isActiveWarningStatus,
+  levelFromWarningCode,
+} from "@/lib/jma/parse-jma-warning";
+import { resolveForecastTargetDate } from "@/lib/weather/forecast-target-date";
+import {
+  isOpenMeteoCurrentFresh,
+  toOpenMeteoCurrent,
+  toOpenMeteoSnapshot,
+  type OpenMeteoDailyResponse,
+} from "@/lib/weather/open-meteo-risk";
 
 type RegionDefinition = {
   regionName: string;
   latitude: number;
   longitude: number;
+  prefectureIso: string;
+  jmaCityCode?: string;
 };
 
-const WEATHER_REGIONS: RegionDefinition[] = signageMeteoRegions;
+const JMA_WARNING_URL = "https://www.jma.go.jp/bosai/warning/";
+const MAX_FORECAST_DAYS = 6;
+function unavailableOfficialWarning(
+  status: OfficialWeatherWarningState["status"] = "unavailable",
+): OfficialWeatherWarningState {
+  return {
+    status,
+    warnings: [],
+    headline: null,
+    fetchedAt: null,
+    reportAt: null,
+    sourceUrl: JMA_WARNING_URL,
+  };
+}
+
+async function loadOfficialWarning(
+  region: RegionDefinition,
+): Promise<OfficialWeatherWarningState> {
+  // 市区町村コードが未登録の地点は、県内の別地域の警報を「当該地点なし」と
+  // 誤認させない。公式ページでの地点確認が必要な unresolved とする。
+  if (!region.jmaCityCode) {
+    return unavailableOfficialWarning("unresolved");
+  }
+
+  try {
+    const warnings = await getJmaWarningsRuntime();
+    const snapshot = buildSignageJmaSnapshot(
+      warnings,
+      region.prefectureIso,
+      region.jmaCityCode,
+    );
+    const activeWarnings = snapshot.selectedWarnings
+      .filter((warning) => isActiveWarningStatus(warning.status))
+      .flatMap((warning) => {
+        // 新体系の「警報から注意報」は発表中の注意報として扱う。
+        // 元コードが警報・特別警報でも、切替後を強い警報のまま表示しない。
+        const level = warning.status.includes("警報から注意報")
+          ? "advisory"
+          : levelFromWarningCode(warning.code);
+        if (!level || level === "none") return [];
+        return [{ ...warning, level }];
+      });
+
+    return {
+      status:
+        snapshot.selectedWarningState === "live"
+          ? "live"
+          : "degraded",
+      warnings: activeWarnings,
+      headline: snapshot.jmaHeadline,
+      fetchedAt: snapshot.sourceFetchedAt || null,
+      reportAt: snapshot.jmaReportTime,
+      sourceUrl: JMA_WARNING_URL,
+    };
+  } catch {
+    return unavailableOfficialWarning();
+  }
+}
 
 function errorResponse(
   status: number,
@@ -41,99 +110,34 @@ function errorResponse(
   );
 }
 
+async function partialWeatherErrorResponse(
+  status: number,
+  message: string,
+  officialWarningPromise: Promise<OfficialWeatherWarningState>,
+) {
+  const body: WeatherRiskPartialApiResponse = {
+    partial: true,
+    fetchedAt: new Date().toISOString(),
+    unavailableSources: ["open-meteo"],
+    officialWarning: await officialWarningPromise,
+    error: {
+      code: "UNAVAILABLE",
+      message,
+      retryable: true,
+    },
+  };
+  return NextResponse.json(body, {
+    status,
+    headers: {
+      "Cache-Control": "no-store",
+      "x-weather-source": "partial:jma",
+    },
+  });
+}
+
 function resolveRegion(request: NextRequest): RegionDefinition | null {
-  const input = request.nextUrl.searchParams.get("regionName");
-  if (!input) {
-    return WEATHER_REGIONS[0];
-  }
-  const exact = WEATHER_REGIONS.find((item) => item.regionName === input);
-  if (exact) {
-    return exact;
-  }
-  const partial = WEATHER_REGIONS.find((item) => item.regionName.includes(input));
-  return partial ?? null;
-}
-
-function codeToOverview(code: number) {
-  if (code <= 1) {
-    return "晴れ";
-  }
-  if (code <= 3) {
-    return "くもり";
-  }
-  if (code >= 51 && code <= 67) {
-    return "雨";
-  }
-  if (code >= 71 && code <= 77) {
-    return "雪";
-  }
-  if (code >= 95) {
-    return "雷雨";
-  }
-  return "天気変化あり";
-}
-
-function buildAlerts(
-  precipitationMm: number,
-  windSpeedMs: number,
-  weatherCode: number
-): WeatherAlert[] {
-  const alerts: WeatherAlert[] = [];
-  if (windSpeedMs >= 15) {
-    alerts.push({ type: "強風警報相当", level: "warning" });
-  } else if (windSpeedMs >= 10) {
-    alerts.push({ type: "強風注意報相当", level: "advisory" });
-  }
-  if (precipitationMm >= 20 || weatherCode >= 95) {
-    alerts.push({ type: "大雨警報相当", level: "warning" });
-  } else if (precipitationMm >= 10) {
-    alerts.push({ type: "大雨注意報相当", level: "advisory" });
-  }
-  return alerts;
-}
-
-function toSnapshot(regionName: string, payload: OpenMeteoDailyResponse): WeatherSnapshot | null {
-  const daily = payload.daily;
-  const date = daily?.time?.[0];
-  const temperature = daily?.temperature_2m_max?.[0];
-  const windKmh = daily?.wind_speed_10m_max?.[0];
-  const precipitation = daily?.precipitation_sum?.[0];
-  const weatherCode = daily?.weather_code?.[0] ?? 0;
-
-  if (
-    typeof date !== "string" ||
-    typeof temperature !== "number" ||
-    typeof windKmh !== "number" ||
-    typeof precipitation !== "number"
-  ) {
-    return null;
-  }
-
-  const windSpeedMs = Math.round((windKmh / 3.6) * 10) / 10;
-  const precipitationMm = Math.round(precipitation * 10) / 10;
-  const alerts = buildAlerts(precipitationMm, windSpeedMs, weatherCode);
-
-  return {
-    regionName,
-    date,
-    overview: codeToOverview(weatherCode),
-    temperatureCelsius: Math.round(temperature * 10) / 10,
-    windSpeedMs,
-    precipitationMm,
-    alerts,
-  };
-}
-
-function buildFallbackSnapshot(regionName: string): WeatherSnapshot {
-  return {
-    regionName,
-    date: new Date().toISOString().slice(0, 10),
-    overview: "情報なし",
-    temperatureCelsius: 0,
-    windSpeedMs: 0,
-    precipitationMm: 0,
-    alerts: [],
-  };
+  const areaId = request.nextUrl.searchParams.get("area");
+  return areaId ? (getSignageLocationById(areaId) ?? null) : null;
 }
 
 export async function GET(request: NextRequest) {
@@ -141,19 +145,38 @@ export async function GET(request: NextRequest) {
   if (!region) {
     return errorResponse(400, "VALIDATION", "指定された地域には現在対応していません。", false);
   }
+  const target = resolveForecastTargetDate(request.nextUrl.searchParams.get("date"));
+  if (!target) {
+    return errorResponse(
+      400,
+      "VALIDATION",
+      `予報はJSTの今日から${MAX_FORECAST_DAYS}日先まで指定できます。現在値で代用しません。`,
+      false,
+    );
+  }
 
   const endpoint = new URL("https://api.open-meteo.com/v1/forecast");
   endpoint.searchParams.set("latitude", String(region.latitude));
   endpoint.searchParams.set("longitude", String(region.longitude));
   endpoint.searchParams.set("timezone", "Asia/Tokyo");
-  endpoint.searchParams.set("forecast_days", "1");
+  if (target.daysAhead === 0) {
+    endpoint.searchParams.set("forecast_days", "1");
+    endpoint.searchParams.set(
+      "current",
+      "temperature_2m,relative_humidity_2m",
+    );
+  } else {
+    endpoint.searchParams.set("start_date", target.date);
+    endpoint.searchParams.set("end_date", target.date);
+  }
   endpoint.searchParams.set(
     "daily",
     "weather_code,temperature_2m_max,wind_speed_10m_max,precipitation_sum"
   );
 
   let snapshot: WeatherSnapshot | null = null;
-  let provider: WeatherRiskApiResponse["provider"] = "open-meteo";
+  let current: WeatherRiskApiResponse["current"];
+  const officialWarningPromise = loadOfficialWarning(region);
 
   try {
     const payload = await withCircuitBreaker(
@@ -171,33 +194,54 @@ export async function GET(request: NextRequest) {
       },
       { failureThreshold: 5, cooldownMs: 120_000 }
     );
-    snapshot = toSnapshot(region.regionName, payload);
+    snapshot = toOpenMeteoSnapshot(region.regionName, payload);
+    const parsedCurrent = target.daysAhead === 0 ? toOpenMeteoCurrent(payload) : null;
+    current =
+      parsedCurrent && isOpenMeteoCurrentFresh(parsedCurrent)
+        ? parsedCurrent
+        : undefined;
   } catch (err) {
-    const reason = err instanceof CircuitOpenError
-      ? "open-meteo circuit open"
+    const failureKind = err instanceof CircuitOpenError
+      ? "circuit_open"
       : err instanceof TimeoutError
-        ? "open-meteo timeout"
-        : err instanceof Error
-          ? err.message
-          : "open-meteo unknown error";
-    console.error("[weather-risk] degraded:", reason);
-    snapshot = buildFallbackSnapshot(region.regionName);
-    provider = "mock-fallback";
+        ? "timeout"
+        : "source_unavailable";
+    console.error("[weather-risk] degraded", { failureKind });
+    return partialWeatherErrorResponse(
+      503,
+      "Open-Meteoの気象予測を取得できません。数値を0や「注意なし」とみなさず、気象庁の公式情報と現場計測を確認してください。",
+      officialWarningPromise,
+    );
   }
 
   if (!snapshot) {
-    snapshot = buildFallbackSnapshot(region.regionName);
-    provider = "mock-fallback";
+    return partialWeatherErrorResponse(
+      502,
+      "Open-Meteoの応答に必要な対象日・気温・風速・降水量・天気コードがありません。安全判断には使用できません。",
+      officialWarningPromise,
+    );
+  }
+  if (snapshot.date !== target.date) {
+    return partialWeatherErrorResponse(
+      502,
+      "Open-Meteoの予報対象日が指定したJST作業日と一致しません。別日の値で代用しません。",
+      officialWarningPromise,
+    );
   }
 
   const body: WeatherRiskApiResponse = {
     snapshot,
-    provider,
+    provider: "open-meteo",
     fetchedAt: new Date().toISOString(),
+    officialWarning: await officialWarningPromise,
+    ...(current ? { current } : {}),
   };
 
   return NextResponse.json(body, {
     status: 200,
-    headers: { "x-weather-source": provider },
+    headers: {
+      "Cache-Control": "no-store",
+      "x-weather-source": "open-meteo",
+    },
   });
 }

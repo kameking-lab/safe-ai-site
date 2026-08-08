@@ -1,36 +1,67 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import { WifiOff } from "lucide-react";
 
-export function ServiceWorkerRegistrar() {
-  const [isOffline, setIsOffline] = useState<boolean>(() => {
-    if (typeof window === "undefined") return false;
-    return !navigator.onLine;
-  });
+function subscribeToNetworkState(onStoreChange: () => void) {
+  window.addEventListener("online", onStoreChange);
+  window.addEventListener("offline", onStoreChange);
+  return () => {
+    window.removeEventListener("online", onStoreChange);
+    window.removeEventListener("offline", onStoreChange);
+  };
+}
+
+function getNetworkSnapshot() {
+  return !navigator.onLine;
+}
+
+export function ServiceWorkerRegistrar({
+  enabled = true,
+  showNetworkStatus = true,
+}: {
+  enabled?: boolean;
+  showNetworkStatus?: boolean;
+}) {
+  // server snapshot は常に online(false)。初期client renderも同じ値を使い、
+  // hydration完了後に実際の navigator.onLine へ同期するため、offline起動でも
+  // ルートlayout全体をhydration mismatchで失わない。
+  const isOffline = useSyncExternalStore(
+    subscribeToNetworkState,
+    getNetworkSnapshot,
+    () => false,
+  );
 
   useEffect(() => {
-    const handleOnline = () => setIsOffline(false);
-    const handleOffline = () => setIsOffline(true);
-    window.addEventListener("online", handleOnline);
-    window.addEventListener("offline", handleOffline);
-
-    // Service Worker の登録
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker
-        .register("/sw.js", { scope: "/" })
-        .catch((err) => {
-          console.warn("[SW] registration failed:", err);
-        });
+    if (!("serviceWorker" in navigator)) return;
+    if (!enabled) {
+      // Previewのbranch URLを再利用しても旧workerを残さない。originが異なる
+      // productionのregistration/cacheにはブラウザー仕様上アクセスできない。
+      void navigator.serviceWorker
+        .getRegistrations()
+        .then((registrations) =>
+          Promise.all(registrations.map((registration) => registration.unregister())),
+        )
+        .then(async () => {
+          if (!("caches" in window)) return;
+          const keys = await window.caches.keys();
+          await Promise.all(
+            keys
+              .filter((key) => key.startsWith("anzen-ai-"))
+              .map((key) => window.caches.delete(key)),
+          );
+        })
+        .catch(() => undefined);
+      return;
     }
+    navigator.serviceWorker
+      .register("/sw.js", { scope: "/", updateViaCache: "none" })
+      .catch((err) => {
+        console.warn("[SW] registration failed:", err);
+      });
+  }, [enabled]);
 
-    return () => {
-      window.removeEventListener("online", handleOnline);
-      window.removeEventListener("offline", handleOffline);
-    };
-  }, []);
-
-  if (!isOffline) return null;
+  if (!isOffline || !showNetworkStatus) return null;
 
   return (
     <div

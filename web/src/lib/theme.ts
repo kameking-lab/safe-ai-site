@@ -1,12 +1,9 @@
 "use client";
 
 import {
-  createContext,
-  createElement,
   useCallback,
-  useContext,
   useEffect,
-  useState,
+  useSyncExternalStore,
   type ReactNode,
 } from "react";
 
@@ -22,7 +19,9 @@ interface ThemeContextValue {
   cycleTheme: () => void;
 }
 
-const ThemeContext = createContext<ThemeContextValue | null>(null);
+const THEME_CHANGE_EVENT = "anzen:theme-change";
+let memoryTheme: ThemeMode = "system";
+let memoryFallbackActive = false;
 
 function readSystemTheme(): ResolvedTheme {
   if (typeof window === "undefined") return "light";
@@ -41,72 +40,85 @@ function applyHtmlClass(resolved: ResolvedTheme) {
   }
 }
 
+function readStoredTheme(): ThemeMode {
+  if (typeof window === "undefined") return "system";
+  if (memoryFallbackActive) return memoryTheme;
+  try {
+    const raw = localStorage.getItem(THEME_STORAGE_KEY);
+    memoryTheme =
+      raw === "light" || raw === "dark" || raw === "system" ? raw : "system";
+    return memoryTheme;
+  } catch {
+    memoryFallbackActive = true;
+    return memoryTheme;
+  }
+}
+
+function readResolvedTheme(): ResolvedTheme {
+  const theme = readStoredTheme();
+  return theme === "system" ? readSystemTheme() : theme;
+}
+
+function subscribeTheme(listener: () => void): () => void {
+  if (typeof window === "undefined") return () => {};
+  const media = window.matchMedia("(prefers-color-scheme: dark)");
+  const onStorage = (event: StorageEvent) => {
+    if (event.key === THEME_STORAGE_KEY) {
+      memoryTheme =
+        event.newValue === "light" ||
+        event.newValue === "dark" ||
+        event.newValue === "system"
+          ? event.newValue
+          : "system";
+      memoryFallbackActive = false;
+      listener();
+    }
+  };
+  window.addEventListener(THEME_CHANGE_EVENT, listener);
+  window.addEventListener("storage", onStorage);
+  media.addEventListener("change", listener);
+  return () => {
+    window.removeEventListener(THEME_CHANGE_EVENT, listener);
+    window.removeEventListener("storage", onStorage);
+    media.removeEventListener("change", listener);
+  };
+}
+
+function setThemeStore(next: ThemeMode): void {
+  memoryTheme = next;
+  try {
+    localStorage.setItem(THEME_STORAGE_KEY, next);
+    memoryFallbackActive = false;
+  } catch {
+    memoryFallbackActive = true;
+  }
+  applyHtmlClass(next === "system" ? readSystemTheme() : next);
+  window.dispatchEvent(new Event(THEME_CHANGE_EVENT));
+}
+
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  // SSR/hydration: 初期値は "system" 統一。マウント後に localStorage を反映
-  const [theme, setThemeState] = useState<ThemeMode>("system");
-  const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>("light");
-
-  useEffect(() => {
-    let stored: ThemeMode = "system";
-    try {
-      const raw = localStorage.getItem(THEME_STORAGE_KEY);
-      if (raw === "light" || raw === "dark" || raw === "system") stored = raw;
-    } catch {
-      // localStorage unavailable
-    }
-    const resolved = stored === "system" ? readSystemTheme() : stored;
-    applyHtmlClass(resolved);
-    // SSR/hydration: localStorage 反映のため、初回のみ state を同期する
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setThemeState(stored);
-    setResolvedTheme(resolved);
-  }, []);
-
-  // system 選択時、OS 設定変更を追従
-  useEffect(() => {
-    if (theme !== "system" || typeof window === "undefined") return;
-    const mql = window.matchMedia("(prefers-color-scheme: dark)");
-    const onChange = () => {
-      const resolved: ResolvedTheme = mql.matches ? "dark" : "light";
-      setResolvedTheme(resolved);
-      applyHtmlClass(resolved);
-    };
-    mql.addEventListener("change", onChange);
-    return () => mql.removeEventListener("change", onChange);
-  }, [theme]);
-
-  const setTheme = useCallback((next: ThemeMode) => {
-    setThemeState(next);
-    try {
-      localStorage.setItem(THEME_STORAGE_KEY, next);
-    } catch {
-      // localStorage unavailable
-    }
-    const resolved = next === "system" ? readSystemTheme() : next;
-    setResolvedTheme(resolved);
-    applyHtmlClass(resolved);
-  }, []);
-
-  const cycleTheme = useCallback(() => {
-    const order: ThemeMode[] = ["light", "dark", "system"];
-    const idx = order.indexOf(theme);
-    const next = order[(idx + 1) % order.length];
-    setTheme(next);
-  }, [theme, setTheme]);
-
-  return createElement(
-    ThemeContext.Provider,
-    { value: { theme, resolvedTheme, setTheme, cycleTheme } },
-    children,
-  );
+  // 後方互換用。状態は外部storeで共有し、ページ全体をClient境界にしない。
+  return children;
 }
 
 export function useTheme(): ThemeContextValue {
-  const ctx = useContext(ThemeContext);
-  if (!ctx) {
-    throw new Error("useTheme must be used within ThemeProvider");
-  }
-  return ctx;
+  const theme = useSyncExternalStore(
+    subscribeTheme,
+    readStoredTheme,
+    () => "system" as ThemeMode,
+  );
+  const resolvedTheme = useSyncExternalStore(
+    subscribeTheme,
+    readResolvedTheme,
+    () => "light" as ResolvedTheme,
+  );
+  useEffect(() => applyHtmlClass(resolvedTheme), [resolvedTheme]);
+  const setTheme = useCallback((next: ThemeMode) => setThemeStore(next), []);
+  const cycleTheme = useCallback(() => {
+    const order: ThemeMode[] = ["light", "dark", "system"];
+    setThemeStore(order[(order.indexOf(theme) + 1) % order.length]);
+  }, [theme]);
+  return { theme, resolvedTheme, setTheme, cycleTheme };
 }
 
 /**

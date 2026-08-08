@@ -22,14 +22,9 @@ describe("withSiteAlternates", () => {
     expect(withSiteAlternates("insurance").canonical).toBe(`${SITE_URL}/insurance`);
   });
 
-  it("ja / en / x-default を同一 canonical に向ける（単一URL多言語）", () => {
+  it("実在する別言語URLがない間は same-URL hreflang を出さない", () => {
     const alt = withSiteAlternates("/faq");
-    const canonical = `${SITE_URL}/faq`;
-    expect(alt.languages).toEqual({
-      ja: canonical,
-      en: canonical,
-      "x-default": canonical,
-    });
+    expect(alt.languages).toBeUndefined();
   });
 });
 
@@ -40,7 +35,7 @@ describe("withSiteOpenGraph", () => {
     expect(og.locale).toBe("ja_JP");
     expect(og.siteName).toBe(SITE_NAME);
     expect(og.url).toBe(`${SITE_URL}/bcp`);
-    expect(og.alternateLocale).toEqual(["en_US"]);
+    expect(og.alternateLocale).toBeUndefined();
   });
 
   it("画像未指定でも /api/og フォールバックを残す（openGraph 浅マージで og:image が消える退行の防止）", () => {

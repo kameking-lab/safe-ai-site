@@ -5,7 +5,6 @@
  */
 export type ServiceId =
   | "gemini"
-  | "formspree"
   | "resend"
   | "stripe"
   | "vercel-blob"
@@ -37,14 +36,6 @@ export const SERVICE_REGISTRY: Record<ServiceId, ServiceDescriptor> = {
       "RAG hits and pre-curated MHLW data are returned without AI generation; existing templated answers are surfaced for safety alerts and quiz explanations.",
     envVars: ["GEMINI_API_KEY"],
     criticality: "important",
-  },
-  formspree: {
-    id: "formspree",
-    label: "Formspree",
-    fallbackBehavior:
-      "Contact form posts still succeed against the in-house /api/contact endpoint; Formspree email archival is fire-and-forget and silently retried.",
-    envVars: ["NEXT_PUBLIC_FORMSPREE_ID"],
-    criticality: "best-effort",
   },
   resend: {
     id: "resend",

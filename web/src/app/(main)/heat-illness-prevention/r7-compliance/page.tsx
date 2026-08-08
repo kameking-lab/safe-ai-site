@@ -7,9 +7,9 @@ import { ogImageUrl } from "@/lib/og-url";
 import { R7ComplianceClient } from "./r7-compliance-client";
 
 const _title =
-  "R7安衛則改正 熱中症対策チェックリスト｜第612条の2 改正8項目と社内文書テンプレ";
+  "R7安衛則改正 熱中症対策チェックリスト｜第612条の2 法定2項目と予防用テンプレ";
 const _desc =
-  "労働安全衛生規則第612条の2（令和7年6月1日改正）に対応した職場の熱中症予防対策チェックリスト8項目と、WBGT測定手順書・暑熱順化計画書・緊急対応フロー・予防教育カリキュラムの社内文書テンプレートを提供。印刷・コピー可能形式。";
+  "労働安全衛生規則第612条の2（令和7年6月1日施行）の法定2項目と、法的義務とは区別したWBGT測定・暑熱順化・緊急対応・予防教育の社内文書テンプレートを提供。";
 
 export const metadata: Metadata = {
   title: _title,
@@ -44,7 +44,7 @@ export default function R7CompliancePage() {
       />
       <PageHeader
         title="R7安衛則改正 熱中症対策チェックリスト"
-        description="安衛則第612条の2 改正（令和7年6月1日適用）の8項目チェックと、4種の社内文書テンプレート。"
+        description="安衛則第612条の2（令和7年6月1日施行）の法定2項目チェックと、別枠の予防対策用テンプレート。"
         icon={ShieldAlert}
         iconColor="red"
       />

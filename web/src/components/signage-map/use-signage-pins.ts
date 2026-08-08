@@ -1,36 +1,45 @@
 "use client";
 
-import { useCallback, useState, useSyncExternalStore } from "react";
+import { useCallback, useSyncExternalStore } from "react";
 import type { SignagePin } from "./signage-map-leaflet";
 
 const PIN_STORAGE_KEY = "signage-map-pins";
-const TOKEN_STORAGE_KEY = "signage-map-browser-token";
 const PIN_LIMIT = 10;
-
-function loadToken(): string {
-  if (typeof window === "undefined") return "";
-  let t = window.localStorage.getItem(TOKEN_STORAGE_KEY);
-  if (!t) {
-    t = `bt_${crypto.randomUUID().replace(/-/g, "")}`;
-    window.localStorage.setItem(TOKEN_STORAGE_KEY, t);
-  }
-  return t;
-}
 
 function loadPins(): SignagePin[] {
   if (typeof window === "undefined") return [];
   try {
     const raw = window.localStorage.getItem(PIN_STORAGE_KEY);
     if (!raw) return [];
-    const parsed = JSON.parse(raw);
+    const parsed: unknown = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
-    return parsed.filter(
-      (p): p is SignagePin =>
-        typeof p?.id === "string" &&
-        typeof p?.label === "string" &&
-        typeof p?.lat === "number" &&
-        typeof p?.lng === "number",
-    );
+
+    // 旧形式にメールが残っていても読み戻さず、次回保存時に削除する。
+    return parsed.flatMap((value): SignagePin[] => {
+      if (!value || typeof value !== "object") return [];
+      const pin = value as Record<string, unknown>;
+      if (
+        typeof pin.id !== "string" ||
+        typeof pin.label !== "string" ||
+        typeof pin.lat !== "number" ||
+        typeof pin.lng !== "number"
+      ) {
+        return [];
+      }
+      return [
+        {
+          id: pin.id,
+          label: pin.label.slice(0, 60),
+          lat: pin.lat,
+          lng: pin.lng,
+          createdAt:
+            typeof pin.createdAt === "string" &&
+            Number.isFinite(Date.parse(pin.createdAt))
+              ? pin.createdAt
+              : "1970-01-01T00:00:00.000Z",
+        },
+      ];
+    });
   } catch {
     return [];
   }
@@ -41,29 +50,28 @@ function persistPins(pins: SignagePin[]) {
   window.localStorage.setItem(PIN_STORAGE_KEY, JSON.stringify(pins));
 }
 
-// localStorage を購読する外部ストア（useSyncExternalStore 用）
 const subscribers = new Set<() => void>();
-function subscribe(cb: () => void) {
-  subscribers.add(cb);
+function subscribe(callback: () => void) {
+  subscribers.add(callback);
   if (typeof window !== "undefined") {
-    const handler = () => cb();
+    const handler = () => callback();
     window.addEventListener("storage", handler);
     return () => {
-      subscribers.delete(cb);
+      subscribers.delete(callback);
       window.removeEventListener("storage", handler);
     };
   }
-  return () => {
-    subscribers.delete(cb);
-  };
+  return () => subscribers.delete(callback);
 }
+
 function notify() {
-  subscribers.forEach((cb) => cb());
+  subscribers.forEach((callback) => callback());
 }
 
 let cachedPinsJson = "";
 let cachedPins: SignagePin[] = [];
 const EMPTY_PINS: SignagePin[] = [];
+
 function getPinsSnapshot(): SignagePin[] {
   if (typeof window === "undefined") return EMPTY_PINS;
   const raw = window.localStorage.getItem(PIN_STORAGE_KEY) ?? "";
@@ -72,71 +80,43 @@ function getPinsSnapshot(): SignagePin[] {
   cachedPins = loadPins();
   return cachedPins;
 }
+
 function getServerPinsSnapshot(): SignagePin[] {
   return EMPTY_PINS;
 }
 
 export function useSignagePins() {
-  const pins = useSyncExternalStore(subscribe, getPinsSnapshot, getServerPinsSnapshot);
-  const [token] = useState<string>(() => loadToken());
+  const pins = useSyncExternalStore(
+    subscribe,
+    getPinsSnapshot,
+    getServerPinsSnapshot,
+  );
 
   const addPin = useCallback(
-    async (input: { label: string; lat: number; lng: number; email: string | null }) => {
-      if (!token) throw new Error("token not ready");
-      const limited = (prev: SignagePin[]) => {
-        if (prev.length >= PIN_LIMIT) {
-          throw new Error(`ピンは${PIN_LIMIT}件までです。`);
-        }
-        return prev;
-      };
-      // 上限チェック（同期）
-      limited(pins);
-
-      // サーバ側にも送る（失敗してもローカルは保存）
-      let serverPin: SignagePin | null = null;
-      try {
-        const res = await fetch("/api/signage/pins", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "x-browser-token": token },
-          body: JSON.stringify(input),
-        });
-        if (res.ok) {
-          const json = (await res.json()) as { pin: SignagePin };
-          serverPin = json.pin;
-        }
-      } catch {
-        // ネットワーク失敗時はローカルのみ保存
+    async (input: { label: string; lat: number; lng: number }) => {
+      if (pins.length >= PIN_LIMIT) {
+        throw new Error(`ピンは${PIN_LIMIT}件までです。`);
       }
-
-      const next: SignagePin = serverPin ?? {
+      const nextPin: SignagePin = {
         id: crypto.randomUUID(),
-        label: input.label,
+        label: input.label.trim().slice(0, 60),
         lat: input.lat,
         lng: input.lng,
-        email: input.email,
         createdAt: new Date().toISOString(),
       };
-      const merged = [...pins, next];
-      persistPins(merged);
+      persistPins([...pins, nextPin]);
       notify();
     },
-    [pins, token],
+    [pins],
   );
 
   const deletePin = useCallback(
     (id: string) => {
-      const next = pins.filter((p) => p.id !== id);
-      persistPins(next);
+      persistPins(pins.filter((pin) => pin.id !== id));
       notify();
-      if (token) {
-        void fetch(`/api/signage/pins?id=${encodeURIComponent(id)}`, {
-          method: "DELETE",
-          headers: { "x-browser-token": token },
-        }).catch(() => {});
-      }
     },
-    [pins, token],
+    [pins],
   );
 
-  return { pins, token, addPin, deletePin, limit: PIN_LIMIT };
+  return { pins, addPin, deletePin, limit: PIN_LIMIT };
 }

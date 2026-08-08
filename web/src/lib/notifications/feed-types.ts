@@ -33,6 +33,12 @@ export type NotificationFeedResponse = {
   generatedAt: string;
   /** リクエストされた都道府県ISO（気象警報の対象。未指定は null） */
   prefectureIso: string | null;
+  /** 気象通知の取得状態。degraded/unavailableを「警報なし」と扱わない。 */
+  weatherSource: {
+    status: "not-requested" | "live" | "degraded" | "unavailable";
+    fetchedAt: string | null;
+    sourceUrl: string;
+  };
   items: SiteNotification[];
 };
 

@@ -36,7 +36,7 @@ const TARO: Seed = {
   qualNo: "1",
   isRegular: true,
   hidden: false,
-  createdAt: 1_700_000_000_000,
+  createdAt: Date.now(),
 };
 
 describe("WorkersMasterClient 結論カード（無読テスト）", () => {

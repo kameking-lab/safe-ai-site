@@ -21,7 +21,7 @@ export default function PrivacyPage() {
       <PageJsonLd name="プライバシーポリシー" description="安全AIポータルのプライバシーポリシー。個人情報の取り扱いについて説明しています。" path="/privacy" />
         <div>
           <h1 className="text-xl font-bold text-slate-900">プライバシーポリシー</h1>
-          <p className="mt-2 text-sm text-slate-500">最終更新日: 2026年5月17日</p>
+          <p className="mt-2 text-sm text-slate-500">最終更新日: 2026年7月28日</p>
         </div>
 
         <section className="space-y-3">
@@ -45,12 +45,16 @@ export default function PrivacyPage() {
               から取得する情報：会社名、担当者氏名、メールアドレス、電話番号（任意）、相談カテゴリ、ご予算感、希望相談方法、相談内容、希望機能、料金プランの選択（任意）
             </li>
             <li className="list-disc">
+              <span className="font-semibold text-slate-700">業務自動化相談フォーム（/services/automation）</span>
+              から取得する情報：相談種別、氏名・担当者名、返信用メールアドレス、会社・組織名（任意）、現在困っていること、希望する支援、現在使っているツール（任意）、希望時期、予算帯（任意）、オンライン・現地等の希望（任意）、送信元ページ。受付基盤が準備中のときは個人情報入力欄を表示せず、取得しません
+            </li>
+            <li className="list-disc">
               <span className="font-semibold text-slate-700">アクセスログ</span>
               ：IPアドレス、ユーザーエージェント、アクセス日時、参照元URL、リクエストパス
             </li>
             <li className="list-disc">
               <span className="font-semibold text-slate-700">Cookie・ローカルストレージ</span>
-              ：表示言語、表示サイズ、ふりがな表示設定、KY用紙のドラフト、選択地点、テーマ設定などの利用者設定
+              ：表示言語、表示サイズ、ふりがな表示設定、KY用紙・打合せ・安全記録のドラフト、選択地点、テーマ設定などの利用者設定・現場記録
             </li>
             <li className="list-disc">
               <span className="font-semibold text-slate-700">AI 機能の入力内容</span>
@@ -70,16 +74,17 @@ export default function PrivacyPage() {
           <h2 className="text-base font-bold text-slate-900">3. 利用目的</h2>
           <ul className="ml-4 space-y-1 text-sm text-slate-600">
             <li className="list-disc">お問い合わせ・導入相談への返信、見積り、打合せ調整</li>
+            <li className="list-disc">業務自動化、AI活用、講習・研修、講習会資料、マニュアル・手順書作成の相談受付、返信、見積り、打合せ調整</li>
             <li className="list-disc">AI機能（法令チャットボット、化学物質リスクアセスメント、KY支援、業種別Eラーニング要約、事故事例分析）の提供</li>
             <li className="list-disc">気象警報・安全情報のメール通知配信（購読者のみ）</li>
-            <li className="list-disc">月次メールダイジェスト（法改正・労災速報のまとめ）の配信（購読者のみ・メールアドレスのみ取得）。各メールのワンクリック解除リンクからいつでも配信停止でき、解除時はコンタクト情報を削除します</li>
+            <li className="list-disc">月次メールダイジェスト（法改正・労災速報のまとめ）の配信（購読者のみ）。解除時は配信停止状態に変更します。コンタクト情報自体の削除は、お問い合わせ窓口から別途請求できます</li>
             <li className="list-disc">サービスの安定運用・障害調査・不正アクセス防止・セキュリティ確保</li>
             <li className="list-disc">利用傾向の統計分析、機能改善、品質向上</li>
             <li className="list-disc">法令・行政機関・裁判所の要請に応じた対応</li>
           </ul>
         </section>
 
-        <section className="space-y-3">
+        <section id="external-services" className="scroll-mt-24 space-y-3">
           <h2 className="text-base font-bold text-slate-900">4. 第三者提供・委託先（越境移転を含む）</h2>
           <p className="text-sm leading-7 text-slate-600">
             当方は、利用目的の達成に必要な範囲で、以下の外部事業者に情報の取扱いを委託しています。
@@ -104,7 +109,11 @@ export default function PrivacyPage() {
             </li>
             <li className="list-disc">
               <span className="font-semibold text-slate-700">メール送信</span>
-              ：Resend, Inc.（米国）／Formspree, Inc.（米国）— 通知メール・お問い合わせ転送（設定済みの場合のみ）
+              ：Resend, Inc.（米国）— 通知メール・お問い合わせ転送（サーバー側の配信設定が有効な場合のみ）
+            </li>
+            <li className="list-disc">
+              <span className="font-semibold text-slate-700">クラウドデータ保存</span>
+              ：Supabase, Inc. — 構成済み環境では、認証済み利用者からサーバー側で導出した非可逆識別子とともに KY、作業員、打合せ、化学物質RA、Web Push購読等を同期する場合があります。未認証時のクラウド同期は無効で、端末内のみの保存とは別に取り扱われます
             </li>
             <li className="list-disc">
               <span className="font-semibold text-slate-700">アフィリエイト</span>
@@ -127,11 +136,11 @@ export default function PrivacyPage() {
           <ul className="ml-4 space-y-1 text-sm text-slate-600">
             <li className="list-disc">
               <span className="font-semibold text-slate-700">モデル学習への非利用</span>
-              ：Gemini API（有料 API 経由）への入力は、Google のポリシーに従い、Google のモデル学習には利用されません。コンシューマ向け Gemini アプリとは扱いが異なります。
+              ：Google の有料サービスとして構成された Gemini API は、Google の当該サービス条件に従って処理されます。契約・課金状態により条件が異なるため、本サービスだけで学習利用の有無を一律に保証するものではありません。
             </li>
             <li className="list-disc">
               <span className="font-semibold text-slate-700">ログ保持期間</span>
-              ：当方が保有するプロンプト・応答ログは、不正アクセス調査・品質改善目的のため最大 30 日間保持し、その後自動削除されます。Google 側の処理ログは
+              ：本アプリケーションはプロンプト・応答を永続ログへ保存しません。一部チャット応答は同一質問の負荷軽減のためプロセス内で最大24時間キャッシュされる場合があります。ホスティング事業者・Google 側の処理ログは
               <a
                 className="ml-0.5 underline hover:text-emerald-700"
                 href="https://ai.google.dev/gemini-api/terms"
@@ -143,10 +152,9 @@ export default function PrivacyPage() {
               に従って取り扱われます。
             </li>
             <li className="list-disc">
-              <span className="font-semibold text-slate-700">個人情報の入力に関する注意</span>
-              ：氏名・住所・電話番号・社員番号・契約金額等の個人情報、および顧客先・現場の機密情報は、
-              <strong>入力前に伏字（◯◯）等でマスキング</strong>
-              することを強く推奨します。AI入力欄にも注意書きを表示しています。
+              <span className="font-semibold text-slate-700">個人情報・機密情報の入力禁止</span>
+              ：氏名・住所・電話番号・メールアドレス・社員番号・健康情報、および顧客先・現場の機密情報は入力しないでください。
+              AI機能では疑いを検知した場合に外部送信を止めますが、検知をすり抜ける可能性があるため、利用者による入力回避が前提です。
             </li>
             <li className="list-disc">
               <span className="font-semibold text-slate-700">越境移転</span>
@@ -168,9 +176,10 @@ export default function PrivacyPage() {
           <h2 className="text-base font-bold text-slate-900">5. 保有期間</h2>
           <ul className="ml-4 space-y-1 text-sm text-slate-600">
             <li className="list-disc">お問い合わせ情報：対応終了後 3 年間</li>
+            <li className="list-disc">業務自動化相談情報：受付が完了した場合、対応・契約管理のため対応終了後3年間。受付未完了またはdry-runでは本サイトの相談DBへ保存せず、正式受付として扱いません</li>
             <li className="list-disc">アクセスログ：Vercel の保持設定に準じて最大 30 日（セキュリティ調査中は延長）</li>
             <li className="list-disc">Cookie・ローカルストレージ：利用者の端末に保存。ブラウザ設定より削除可能</li>
-            <li className="list-disc">メール通知の購読情報：購読解除時に削除</li>
+            <li className="list-disc">メール通知の購読情報：解除後は配信停止状態として保持される場合があります。情報自体の削除はお問い合わせ窓口から請求できます</li>
           </ul>
         </section>
 
@@ -192,7 +201,7 @@ export default function PrivacyPage() {
               <span className="font-semibold text-slate-700">分析（Analytics）</span>
               ：本サービスでは、利用傾向の把握および機能改善のため、環境変数
               <code className="mx-1 rounded bg-slate-100 px-1 text-xs text-slate-700">NEXT_PUBLIC_GA_MEASUREMENT_ID</code>
-              が設定されている場合に Google Analytics 4（GA4）を導入することがあります。GA4 が有効な場合、`_ga` 等の Cookie によりページ閲覧の統計情報（匿名化された利用者識別子、ページパス、滞在時間など）が Google LLC（米国）へ送信されます。IP匿名化を有効化し、個人を直接特定する情報は送信しません。導入の有無は本ページ末尾の「現在の Cookie 利用状況」で確認できます。GA4 のデータ取扱いは
+              が設定されている場合に Google Analytics 4（GA4）を導入することがあります。GA4 は利用者が任意 Cookie を許可した後にだけ読み込まれ、`_ga` 等の Cookie によりページ閲覧の統計情報（匿名化された利用者識別子、ページパス、滞在時間など）が Google LLC（米国）へ送信されます。URLの検索語・クエリ文字列は送信せず、検索・AI・アカウント等の機微な入力画面は計測対象外です。業務自動化相談ページでは、同意後に限り、サービス・料金の閲覧、モデルケースの選択、CTA、フォーム開始・受付完了・受付停止表示の大分類だけを計測します。名前、メール、会社名、相談本文、受付番号および入力したツール名は送信しません。導入の有無は本ページ末尾の「現在の Cookie 利用状況」で確認できます。GA4 のデータ取扱いは
               <a className="ml-0.5 underline hover:text-emerald-700" href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Google プライバシーポリシー</a>
               に従います。
             </li>
@@ -200,10 +209,14 @@ export default function PrivacyPage() {
               <span className="font-semibold text-slate-700">広告（Advertising）</span>
               ：本サービス自体は広告トラッキング目的の Cookie を設定していません。ただし、ページ内のアフィリエイトリンク（Amazon・楽天等）をクリックして遷移した先では、各事業者のポリシーに基づき Cookie が設定される場合があります。これらは本サービスの管理外です。
             </li>
+            <li className="list-disc">
+              <span className="font-semibold text-slate-700">匿名Web Vitals（RUM）</span>
+              ：送信先、30日以下の保持期間、データ処理条件、本番レート制御が確認・設定された場合だけ、任意計測への同意後にページ種別、指標名、値、評価、遷移種別、端末・接続の大分類、ビルド識別子、セッション中だけ使う無作為bucketを送信します。完全URL、クエリ、氏名、メール、会社名、相談・健康・KY・化学物質・AI質問の本文、利用者ID、記録IDは送りません。Preview、機微な入力ルート、DNT/GPC有効時、設定未完了時は送信しません。有効時の保存先は既存のserver-side Postgresで、期限切れデータは日次で削除します。
+            </li>
           </ul>
           <p className="text-sm leading-7 text-slate-600">
             <span className="font-semibold text-slate-700">分析 Cookie のオプトアウト：</span>
-            分析 Cookie の送信を停止したい場合、(a) ブラウザの設定から Cookie をブロック、または (b)
+            画面左下の「Cookie設定」から拒否・撤回できます。加えて、(a) ブラウザの設定から Cookie をブロック、または (b)
             <a className="ml-0.5 underline hover:text-emerald-700" href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener noreferrer">Google アナリティクス オプトアウト アドオン</a>
             の導入により、本サービスでの GA4 計測を無効化できます。
           </p>
@@ -218,9 +231,7 @@ export default function PrivacyPage() {
           </p>
           <p className="text-sm leading-7 text-slate-600">
             <span className="font-semibold text-slate-700">同意管理バナーについて：</span>
-            個別 Cookie 種類ごとに事前同意を取得する同意管理バナー（CMP）の導入は、
-            2026年下期の対応予定項目として整備中です。当面の対応として、本ページで Cookie 種別ごとの利用目的・送信先・オプトアウト手段を明示し、
-            利用者が自己決定できる情報を提供する方針としています。
+            任意の分析・広告スクリプトは初期状態では読み込まず、同意管理バナーで「許可する」を選んだ場合のみ有効化します。「拒否する」を選んでも必須機能は利用できます。選択後も画面左下の「Cookie設定」からいつでも変更できます。
           </p>
         </section>
 

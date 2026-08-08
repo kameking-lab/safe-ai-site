@@ -22,7 +22,7 @@ const contrib = (id: string, over: Partial<MeetingContribution["payload"]> = {})
   payload: {
     companyName: "○○建設", type: "1次", workContent: "型枠", machines: "クレーン",
     qualifications: ["玉掛け"], plannedCount: "5", predictedDisasters: ["墜落"],
-    risk: { severity: 2, likelihood: 2, priority: 3 }, safetyInstructions: "親綱使用", responsibleName: "山田",
+    risk: { severity: 2, likelihood: 2, priority: 3, reviewed: false }, safetyInstructions: "親綱使用", responsibleName: "山田",
     ...over,
   },
 });
@@ -97,7 +97,7 @@ describe("mergeContributionsIntoContractors（集約・元請欄保護）", () =
     const manual: MeetingContractorRow = {
       id: "manual-1", type: "元請", parentId: null, companyName: "元請社", workContent: "統括",
       machines: "", qualifications: [], plannedCount: "", predictedDisasters: [],
-      risk: { severity: 1, likelihood: 1, priority: 1 }, safetyInstructions: "", responsibleName: "所長",
+      risk: { severity: 1, likelihood: 1, priority: 1, reviewed: false }, safetyInstructions: "", responsibleName: "所長",
       actualCount: "", appendNote: "",
     };
     const out = mergeContributionsIntoContractors([manual], [contrib("c1")]);

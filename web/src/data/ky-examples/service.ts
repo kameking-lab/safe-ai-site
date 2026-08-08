@@ -1,16 +1,16 @@
 import type { KyExample } from "@/types/ky-example";
 
 const MHLW: KyExample["source"] = {
-  category: "mhlw",
-  label: "厚生労働省「第三次産業の労働災害防止」",
+  category: "general",
+  label: "サイト独自のsyntheticモデルケース（一次資料未確認）",
 };
 const JISHA: KyExample["source"] = {
-  category: "jisha",
-  label: "中災防「ゼロ災運動 KY実施例（小売・サービス）」",
+  category: "general",
+  label: "サイト独自のsyntheticモデルケース（一次資料未確認）",
 };
 const GENERAL: KyExample["source"] = {
   category: "general",
-  label: "一般公開の安全衛生教育資料",
+  label: "サイト独自のsyntheticモデルケース（一次資料未確認）",
 };
 
 export const SERVICE_EXAMPLES: KyExample[] = [
@@ -25,10 +25,7 @@ export const SERVICE_EXAMPLES: KyExample[] = [
       "通路でのお客様接触",
       "床面の水濡れによる脚立不安定",
     ],
-    risks: [
-      "脚立転倒・墜落",
-      "お客様の二次被災",
-    ],
+    risks: ["脚立転倒・墜落", "お客様の二次被災"],
     countermeasures: [
       "脚立は天板2段下まで",
       "周囲を区画し通路を制限",
@@ -48,10 +45,7 @@ export const SERVICE_EXAMPLES: KyExample[] = [
       "中継器具の取付不良",
       "強風での煽り",
     ],
-    risks: [
-      "墜落事故",
-      "重大災害",
-    ],
+    risks: ["墜落事故", "重大災害"],
     countermeasures: [
       "メインロープとライフラインを独立して2本設置",
       "ロープ高所作業特別教育修了者のみ",
@@ -66,15 +60,8 @@ export const SERVICE_EXAMPLES: KyExample[] = [
     industry: "service",
     workType: "fall-work",
     title: "ホテル・宴会場の高所装飾設置",
-    hazards: [
-      "脚立・足場の不安定",
-      "重量装飾の落下",
-      "天井設備との干渉",
-    ],
-    risks: [
-      "墜落事故",
-      "装飾落下",
-    ],
+    hazards: ["脚立・足場の不安定", "重量装飾の落下", "天井設備との干渉"],
+    risks: ["墜落事故", "装飾落下"],
     countermeasures: [
       "可搬式作業台または足場を使用",
       "装飾の取付金具を耐荷重表示と照合",
@@ -96,10 +83,7 @@ export const SERVICE_EXAMPLES: KyExample[] = [
       "段差・スロープでの台車操作",
       "通路の整理不良",
     ],
-    risks: [
-      "腰痛",
-      "つまずき転倒",
-    ],
+    risks: ["腰痛", "つまずき転倒"],
     countermeasures: [
       "20kg超は台車運搬を必須化",
       "腰痛予防体操を始業前に実施",
@@ -119,10 +103,7 @@ export const SERVICE_EXAMPLES: KyExample[] = [
       "エレベーター乗降時の段差",
       "階段運搬での躓き",
     ],
-    risks: [
-      "腰痛・転倒骨折",
-      "備品落下",
-    ],
+    risks: ["腰痛・転倒骨折", "備品落下"],
     countermeasures: [
       "専用台車・布団リフトを使用",
       "階段運搬時は2人体制",
@@ -142,10 +123,7 @@ export const SERVICE_EXAMPLES: KyExample[] = [
       "湿潤衣類の重量増加",
       "繰返し作業による疲労",
     ],
-    risks: [
-      "腰痛・肩腱板障害",
-      "つまずき転倒",
-    ],
+    risks: ["腰痛・肩腱板障害", "つまずき転倒"],
     countermeasures: [
       "20kg超は台車・コンベヤを使用",
       "腰痛予防体操を始業前に実施",
@@ -167,10 +145,7 @@ export const SERVICE_EXAMPLES: KyExample[] = [
       "押し込み時の手指挟まれ",
       "ガード取外し作業",
     ],
-    risks: [
-      "手指切断・切創",
-      "重度負傷",
-    ],
+    risks: ["手指切断・切創", "重度負傷"],
     countermeasures: [
       "押し棒の必須使用",
       "ガード取外しは電源遮断後",
@@ -185,15 +160,8 @@ export const SERVICE_EXAMPLES: KyExample[] = [
     industry: "service",
     workType: "machine",
     title: "コインランドリー・大型洗濯機の保守",
-    hazards: [
-      "回転ドラムへの接触",
-      "電源未遮断状態の整備",
-      "高温・蒸気曝露",
-    ],
-    risks: [
-      "巻き込まれ災害",
-      "熱傷",
-    ],
+    hazards: ["回転ドラムへの接触", "電源未遮断状態の整備", "高温・蒸気曝露"],
+    risks: ["巻き込まれ災害", "熱傷"],
     countermeasures: [
       "整備前に主電源を遮断・施錠",
       "ドラム停止後の余熱冷却を確認",
@@ -213,11 +181,7 @@ export const SERVICE_EXAMPLES: KyExample[] = [
       "湿潤環境での感電",
       "繰返し作業の手首障害",
     ],
-    risks: [
-      "切創",
-      "感電",
-      "腱鞘炎",
-    ],
+    risks: ["切創", "感電", "腱鞘炎"],
     countermeasures: [
       "刃物点検と定期交換",
       "湿潤エリアでは絶縁・防滴機器を使用",
@@ -234,15 +198,8 @@ export const SERVICE_EXAMPLES: KyExample[] = [
     industry: "service",
     workType: "electrical",
     title: "店舗内照明・看板の電気保守",
-    hazards: [
-      "活線作業による感電",
-      "脚立転倒",
-      "夜間営業中の作業",
-    ],
-    risks: [
-      "感電",
-      "墜落",
-    ],
+    hazards: ["活線作業による感電", "脚立転倒", "夜間営業中の作業"],
+    risks: ["感電", "墜落"],
     countermeasures: [
       "停電作業を原則化",
       "脚立は2段下まで・スポッター配置",
@@ -257,15 +214,8 @@ export const SERVICE_EXAMPLES: KyExample[] = [
     industry: "service",
     workType: "electrical",
     title: "ホテル・旅館客室の配線変更",
-    hazards: [
-      "活線接続",
-      "他客室への影響",
-      "アース不良",
-    ],
-    risks: [
-      "感電",
-      "宿泊客への影響",
-    ],
+    hazards: ["活線接続", "他客室への影響", "アース不良"],
+    risks: ["感電", "宿泊客への影響"],
     countermeasures: [
       "計画停止枠で実施",
       "対象区画のみブレーカー遮断",
@@ -280,16 +230,8 @@ export const SERVICE_EXAMPLES: KyExample[] = [
     industry: "service",
     workType: "electrical",
     title: "屋外イベント設営での電源工事",
-    hazards: [
-      "雨天時の感電",
-      "通路上のケーブル",
-      "発電機からの一酸化炭素",
-    ],
-    risks: [
-      "感電",
-      "つまずき転倒",
-      "一酸化炭素中毒",
-    ],
+    hazards: ["雨天時の感電", "通路上のケーブル", "発電機からの一酸化炭素"],
+    risks: ["感電", "つまずき転倒", "一酸化炭素中毒"],
     countermeasures: [
       "屋外接続部に防雨カバー",
       "通路横断部はケーブルプロテクター",
@@ -306,15 +248,8 @@ export const SERVICE_EXAMPLES: KyExample[] = [
     industry: "service",
     workType: "chemical",
     title: "クリーニング店でのドライ溶剤取扱",
-    hazards: [
-      "有機溶剤蒸気の吸入",
-      "皮膚接触",
-      "火気近接での引火",
-    ],
-    risks: [
-      "有機溶剤中毒",
-      "火災",
-    ],
+    hazards: ["有機溶剤蒸気の吸入", "皮膚接触", "火気近接での引火"],
+    risks: ["有機溶剤中毒", "火災"],
     countermeasures: [
       "局所排気装置の作動を毎日確認",
       "防毒マスク・耐薬品手袋を着用",
@@ -329,15 +264,8 @@ export const SERVICE_EXAMPLES: KyExample[] = [
     industry: "service",
     workType: "chemical",
     title: "ビル清掃での酸性・アルカリ性洗剤の取扱",
-    hazards: [
-      "誤混合による塩素ガス発生",
-      "皮膚接触",
-      "閉所での換気不足",
-    ],
-    risks: [
-      "急性中毒",
-      "化学熱傷",
-    ],
+    hazards: ["誤混合による塩素ガス発生", "皮膚接触", "閉所での換気不足"],
+    risks: ["急性中毒", "化学熱傷"],
     countermeasures: [
       "酸性とアルカリ性洗剤の混用厳禁を表示",
       "保護メガネ・耐薬品手袋・マスクを着用",
@@ -352,15 +280,8 @@ export const SERVICE_EXAMPLES: KyExample[] = [
     industry: "service",
     workType: "chemical",
     title: "美容室での薬剤（カラー剤・パーマ液）取扱",
-    hazards: [
-      "皮膚アレルギー",
-      "アンモニア蒸気",
-      "目への飛散",
-    ],
-    risks: [
-      "接触性皮膚炎",
-      "呼吸器障害",
-    ],
+    hazards: ["皮膚アレルギー", "アンモニア蒸気", "目への飛散"],
+    risks: ["接触性皮膚炎", "呼吸器障害"],
     countermeasures: [
       "施術者用手袋・保護メガネを着用",
       "換気を確保し局所排気を併用",
@@ -377,15 +298,8 @@ export const SERVICE_EXAMPLES: KyExample[] = [
     industry: "service",
     workType: "forklift",
     title: "ホームセンター・大型店舗バックヤード荷役",
-    hazards: [
-      "来店客との接触",
-      "曲がり角の見通し不良",
-      "段差での荷崩れ",
-    ],
-    risks: [
-      "来店客との衝突",
-      "荷崩れ",
-    ],
+    hazards: ["来店客との接触", "曲がり角の見通し不良", "段差での荷崩れ"],
+    risks: ["来店客との衝突", "荷崩れ"],
     countermeasures: [
       "営業時間内のフォーク使用エリアを区画化",
       "ミラー・回転灯を曲がり角に設置",
@@ -400,15 +314,8 @@ export const SERVICE_EXAMPLES: KyExample[] = [
     industry: "service",
     workType: "forklift",
     title: "屋外駐車場・搬入口でのトラック荷役",
-    hazards: [
-      "車両逸走",
-      "ドックレベラー誤操作",
-      "歩行客の侵入",
-    ],
-    risks: [
-      "フォーク転落",
-      "歩行客との接触",
-    ],
+    hazards: ["車両逸走", "ドックレベラー誤操作", "歩行客の侵入"],
+    risks: ["フォーク転落", "歩行客との接触"],
     countermeasures: [
       "輪止め・駐車ブレーキ確認",
       "ドックレベラーのロック確認",
@@ -423,15 +330,8 @@ export const SERVICE_EXAMPLES: KyExample[] = [
     industry: "service",
     workType: "forklift",
     title: "イベント会場での資材搬入フォーク作業",
-    hazards: [
-      "来場者との接触",
-      "仮設構造物への接触",
-      "急な進路変更",
-    ],
-    risks: [
-      "来場者との衝突",
-      "構造物損傷",
-    ],
+    hazards: ["来場者との接触", "仮設構造物への接触", "急な進路変更"],
+    risks: ["来場者との衝突", "構造物損傷"],
     countermeasures: [
       "搬入時間帯を非開場時間に限定",
       "進路を事前計画し警備員配置",
@@ -448,15 +348,8 @@ export const SERVICE_EXAMPLES: KyExample[] = [
     industry: "service",
     workType: "excavation",
     title: "店舗外構の植栽・配管埋設工事",
-    hazards: [
-      "既設埋設物損傷",
-      "通行客の侵入",
-      "土砂崩壊",
-    ],
-    risks: [
-      "停電・断水",
-      "通行客の被災",
-    ],
+    hazards: ["既設埋設物損傷", "通行客の侵入", "土砂崩壊"],
+    risks: ["停電・断水", "通行客の被災"],
     countermeasures: [
       "事前に図面・探査機で埋設物確認",
       "工事区画をバリケードで囲い迂回路表示",
@@ -471,15 +364,8 @@ export const SERVICE_EXAMPLES: KyExample[] = [
     industry: "service",
     workType: "excavation",
     title: "ホテル・旅館の浴場配管メンテナンス用掘削",
-    hazards: [
-      "硫化水素・酸欠",
-      "高温配管接触",
-      "土砂崩壊",
-    ],
-    risks: [
-      "酸欠・中毒",
-      "熱傷",
-    ],
+    hazards: ["硫化水素・酸欠", "高温配管接触", "土砂崩壊"],
+    risks: ["酸欠・中毒", "熱傷"],
     countermeasures: [
       "事前ガス測定と換気",
       "高温配管は冷却後に作業",
@@ -494,15 +380,8 @@ export const SERVICE_EXAMPLES: KyExample[] = [
     industry: "service",
     workType: "excavation",
     title: "屋外イベントでの仮設構造物基礎掘削",
-    hazards: [
-      "来場者の立入",
-      "夜間の視認低下",
-      "既設埋設物損傷",
-    ],
-    risks: [
-      "来場者の転落",
-      "停電・通信不通",
-    ],
+    hazards: ["来場者の立入", "夜間の視認低下", "既設埋設物損傷"],
+    risks: ["来場者の転落", "停電・通信不通"],
     countermeasures: [
       "工事区画を全周バリケード＋警告灯",
       "事前に埋設物確認",
@@ -519,15 +398,8 @@ export const SERVICE_EXAMPLES: KyExample[] = [
     industry: "service",
     workType: "welding",
     title: "店舗看板・什器の補修溶接",
-    hazards: [
-      "スパッタによる火災",
-      "通行客への火花飛散",
-      "ヒューム吸入",
-    ],
-    risks: [
-      "店舗火災",
-      "通行客火傷",
-    ],
+    hazards: ["スパッタによる火災", "通行客への火花飛散", "ヒューム吸入"],
+    risks: ["店舗火災", "通行客火傷"],
     countermeasures: [
       "溶接遮へい囲いで通行帯を分離",
       "周囲5m以内可燃物撤去・消火器配置",
@@ -542,15 +414,8 @@ export const SERVICE_EXAMPLES: KyExample[] = [
     industry: "service",
     workType: "welding",
     title: "厨房ダクト・排気フードの補修溶接",
-    hazards: [
-      "ダクト内残留油の引火",
-      "酸欠（閉所）",
-      "アーク光",
-    ],
-    risks: [
-      "厨房火災",
-      "酸欠",
-    ],
+    hazards: ["ダクト内残留油の引火", "酸欠（閉所）", "アーク光"],
+    risks: ["厨房火災", "酸欠"],
     countermeasures: [
       "事前にダクト内清掃・油除去",
       "酸素濃度を測定し送風機で換気",
@@ -565,16 +430,8 @@ export const SERVICE_EXAMPLES: KyExample[] = [
     industry: "service",
     workType: "welding",
     title: "イベント仮設ステージの溶接組立",
-    hazards: [
-      "スパッタによる火災",
-      "高所での溶接作業",
-      "来場者への火花",
-    ],
-    risks: [
-      "火災",
-      "墜落",
-      "来場者被災",
-    ],
+    hazards: ["スパッタによる火災", "高所での溶接作業", "来場者への火花"],
+    risks: ["火災", "墜落", "来場者被災"],
     countermeasures: [
       "溶接遮へい囲いで分離",
       "高所作業は親綱＋フルハーネス",
@@ -591,15 +448,8 @@ export const SERVICE_EXAMPLES: KyExample[] = [
     industry: "service",
     workType: "rigging",
     title: "屋外大型看板の設置・撤去",
-    hazards: [
-      "強風による振れ",
-      "下方歩行者の立入",
-      "玉掛け位置のずれ",
-    ],
-    risks: [
-      "落下事故",
-      "歩行者被災",
-    ],
+    hazards: ["強風による振れ", "下方歩行者の立入", "玉掛け位置のずれ"],
+    risks: ["落下事故", "歩行者被災"],
     countermeasures: [
       "風速10m/s超で作業中止",
       "下方立入禁止区域を警備員で確保",
@@ -614,15 +464,8 @@ export const SERVICE_EXAMPLES: KyExample[] = [
     industry: "service",
     workType: "rigging",
     title: "イベント機材（照明トラス等）の吊り込み",
-    hazards: [
-      "つり点の摩耗",
-      "観客席への落下",
-      "重心ずれ",
-    ],
-    risks: [
-      "落下事故",
-      "観客被災",
-    ],
+    hazards: ["つり点の摩耗", "観客席への落下", "重心ずれ"],
+    risks: ["落下事故", "観客被災"],
     countermeasures: [
       "つり点（シャックル等）を作業前点検",
       "観客入場前に作業完了",
@@ -637,15 +480,8 @@ export const SERVICE_EXAMPLES: KyExample[] = [
     industry: "service",
     workType: "rigging",
     title: "ホテル屋外プール・設備のクレーン搬入",
-    hazards: [
-      "強風による振れ",
-      "宿泊客の立入",
-      "建物との干渉",
-    ],
-    risks: [
-      "落下・転倒",
-      "宿泊客被災",
-    ],
+    hazards: ["強風による振れ", "宿泊客の立入", "建物との干渉"],
+    risks: ["落下・転倒", "宿泊客被災"],
     countermeasures: [
       "風速10m/s超で中止",
       "立入禁止区域を警備員配置で明示",
@@ -667,10 +503,7 @@ export const SERVICE_EXAMPLES: KyExample[] = [
       "長時間対応によるメンタル疲弊",
       "単独対応",
     ],
-    risks: [
-      "従業員のメンタル不調",
-      "離職",
-    ],
+    risks: ["従業員のメンタル不調", "離職"],
     countermeasures: [
       "カスハラ対応マニュアル・録音録画機器を整備",
       "複数名対応の体制と上司エスカレーション",
@@ -685,15 +518,8 @@ export const SERVICE_EXAMPLES: KyExample[] = [
     industry: "service",
     workType: "other",
     title: "深夜営業店舗での強盗・防犯対策",
-    hazards: [
-      "深夜単独勤務",
-      "現金取扱",
-      "外部からの侵入",
-    ],
-    risks: [
-      "強盗被害",
-      "身体的危害",
-    ],
+    hazards: ["深夜単独勤務", "現金取扱", "外部からの侵入"],
+    risks: ["強盗被害", "身体的危害"],
     countermeasures: [
       "夜間は最低2名体制",
       "防犯カメラ・非常通報装置の設置",
@@ -708,16 +534,8 @@ export const SERVICE_EXAMPLES: KyExample[] = [
     industry: "service",
     workType: "other",
     title: "ビル清掃の長時間立ち・反復作業",
-    hazards: [
-      "立ち姿勢の長時間継続",
-      "床清掃時の中腰反復",
-      "化学薬品との接触",
-    ],
-    risks: [
-      "下肢静脈瘤",
-      "腰痛",
-      "皮膚障害",
-    ],
+    hazards: ["立ち姿勢の長時間継続", "床清掃時の中腰反復", "化学薬品との接触"],
+    risks: ["下肢静脈瘤", "腰痛", "皮膚障害"],
     countermeasures: [
       "立ち作業マットを使用し疲労軽減",
       "ストレッチと作業ローテーション",

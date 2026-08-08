@@ -5,12 +5,13 @@
  *
  * 目的:
  * - 応答に出てきた「基発第○号」「事務連絡」等の noticeNumber 引用を全件抽出
- * - mhlw-notices.ts 1,069件と機械照合
+ * - 出典検証待ち範囲を除いた公開対象レコードと機械照合
  * - 実在通達のみを採用し、架空通達は除外（ハルシネーション抑止）
  * - 一致した noticeId を /api/chatbot レスポンスメタに付与
  */
 
-import { mhlwNotices, type MhlwNotice } from "@/data/mhlw-notices";
+import type { MhlwNotice } from "@/data/mhlw-notices";
+import { verifiedMhlwNotices as mhlwNotices } from "@/data/public-mhlw-notices";
 import { normalizeFullwidthAlnum, normalizeKanjiNumbers } from "@/lib/article-number-normalize";
 
 export type ExtractedNoticeRef = {

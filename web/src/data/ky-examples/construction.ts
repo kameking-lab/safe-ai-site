@@ -1,16 +1,16 @@
 import type { KyExample } from "@/types/ky-example";
 
 const MHLW: KyExample["source"] = {
-  category: "mhlw",
-  label: "厚生労働省「職場のあんぜんサイト 労働災害事例」",
+  category: "general",
+  label: "サイト独自のsyntheticモデルケース（一次資料未確認）",
 };
 const JISHA: KyExample["source"] = {
-  category: "jisha",
-  label: "中災防「ゼロ災運動 KY実施例」",
+  category: "general",
+  label: "サイト独自のsyntheticモデルケース（一次資料未確認）",
 };
 const KENSAIBOU: KyExample["source"] = {
-  category: "kensaibou",
-  label: "建設業労働災害防止協会「安全衛生教育資料」",
+  category: "general",
+  label: "サイト独自のsyntheticモデルケース（一次資料未確認）",
 };
 
 export const CONSTRUCTION_EXAMPLES: KyExample[] = [
@@ -48,10 +48,7 @@ export const CONSTRUCTION_EXAMPLES: KyExample[] = [
       "幅木が外れた状態での歩行",
       "建地への昇降時に足場板が滑る",
     ],
-    risks: [
-      "足場端部から墜落・転落",
-      "解体部材の落下による頭部外傷",
-    ],
+    risks: ["足場端部から墜落・転落", "解体部材の落下による頭部外傷"],
     countermeasures: [
       "手すり先行工法（後解体）を徹底",
       "幅木設置完了まで作業者立入を禁止",
@@ -71,10 +68,7 @@ export const CONSTRUCTION_EXAMPLES: KyExample[] = [
       "天窓・採光材への踏み抜き",
       "強風で資材が飛散し体勢を崩す",
     ],
-    risks: [
-      "屋根から地上への墜落",
-      "採光材踏み抜きによる屋内への落下",
-    ],
+    risks: ["屋根から地上への墜落", "採光材踏み抜きによる屋内への落下"],
     countermeasures: [
       "勾配屋根は屋根足場または親綱＋ハーネスを必須化",
       "採光材上には踏み抜き防止用の歩み板を敷設",
@@ -96,10 +90,7 @@ export const CONSTRUCTION_EXAMPLES: KyExample[] = [
       "資材の端部が突出し他作業員と接触",
       "運搬路の段差で躓く",
     ],
-    risks: [
-      "腰痛・椎間板ヘルニアの発症",
-      "落下物による足部負傷",
-    ],
+    risks: ["腰痛・椎間板ヘルニアの発症", "落下物による足部負傷"],
     countermeasures: [
       "1人当たり25kg超は2人組または台車運搬を原則化",
       "運搬路の段差は事前に解消し養生材で覆う",
@@ -119,10 +110,7 @@ export const CONSTRUCTION_EXAMPLES: KyExample[] = [
       "資材が傾いて指を挟む",
       "湿潤な合板で手が滑る",
     ],
-    risks: [
-      "手指の挟まれ・打撲",
-      "落下による足部骨折",
-    ],
+    risks: ["手指の挟まれ・打撲", "落下による足部骨折"],
     countermeasures: [
       "持ち上げ・降ろしは『せーの』の声掛けで同調",
       "持ち手位置にマーキングを行い保持位置を統一",
@@ -142,10 +130,7 @@ export const CONSTRUCTION_EXAMPLES: KyExample[] = [
       "ロープのキンクや素線切れの見落とし",
       "巻過防止装置の不調",
     ],
-    risks: [
-      "吊り荷の落下による頭部外傷",
-      "ワイヤー切断による飛来災害",
-    ],
+    risks: ["吊り荷の落下による頭部外傷", "ワイヤー切断による飛来災害"],
     countermeasures: [
       "作業前にロープ・フックの目視点検と巻過テストを実施",
       "吊り荷下立入禁止区域をバリケードで明示",
@@ -167,10 +152,7 @@ export const CONSTRUCTION_EXAMPLES: KyExample[] = [
       "アタッチメントの脱落",
       "オペレーターの死角に作業員が入る",
     ],
-    risks: [
-      "旋回時の挟まれ・激突",
-      "アタッチメント落下による負傷",
-    ],
+    risks: ["旋回時の挟まれ・激突", "アタッチメント落下による負傷"],
     countermeasures: [
       "旋回半径内立入禁止区域をテープで囲い表示",
       "合図者と運転者の意思疎通を双方向に確認",
@@ -190,10 +172,7 @@ export const CONSTRUCTION_EXAMPLES: KyExample[] = [
       "上昇中の天井・電線との接触",
       "搭乗者がガード外に身を乗り出す",
     ],
-    risks: [
-      "高所作業車の横転による墜落",
-      "電線接触による感電",
-    ],
+    risks: ["高所作業車の横転による墜落", "電線接触による感電"],
     countermeasures: [
       "アウトリガーは取扱説明書記載長を全脚張り出し",
       "上空障害物の事前確認（電線・配管・天井設備）",
@@ -213,10 +192,7 @@ export const CONSTRUCTION_EXAMPLES: KyExample[] = [
       "切粉スラリーで床面が滑る",
       "粉じん吸入と騒音曝露",
     ],
-    risks: [
-      "ブレード飛散による顔面・頸部負傷",
-      "じん肺・難聴の長期発症",
-    ],
+    risks: ["ブレード飛散による顔面・頸部負傷", "じん肺・難聴の長期発症"],
     countermeasures: [
       "ブレードの種類・回転数・摩耗を作業前確認",
       "湿式工法とし粉じんを抑制、スラリーは都度回収",
@@ -238,10 +214,7 @@ export const CONSTRUCTION_EXAMPLES: KyExample[] = [
       "湿った手・濡れた床での作業",
       "漏電遮断器の不作動",
     ],
-    risks: [
-      "感電による心室細動・心停止",
-      "短絡によるアークフラッシュ熱傷",
-    ],
+    risks: ["感電による心室細動・心停止", "短絡によるアークフラッシュ熱傷"],
     countermeasures: [
       "原則停電作業とし、検電器で無電圧確認",
       "電気取扱業務特別教育修了者のみ実施",
@@ -261,10 +234,7 @@ export const CONSTRUCTION_EXAMPLES: KyExample[] = [
       "梯子からの墜落と感電の複合災害",
       "他作業の振動でケーブルが動く",
     ],
-    risks: [
-      "感電による墜落・死亡",
-      "アーク発生による火災",
-    ],
+    risks: ["感電による墜落・死亡", "アーク発生による火災"],
     countermeasures: [
       "可能な限り停電作業へ切り替え",
       "充電部に防護用絶縁シート・絶縁管を取付",
@@ -284,10 +254,7 @@ export const CONSTRUCTION_EXAMPLES: KyExample[] = [
       "巻取り未開放での過熱",
       "通行帯のケーブルに躓く",
     ],
-    risks: [
-      "感電・漏電火災",
-      "つまずき転倒",
-    ],
+    risks: ["感電・漏電火災", "つまずき転倒"],
     countermeasures: [
       "屋外接続部は防雨カバーまたは屋根下に集約",
       "コードリールは必ず全長を引き出して使用（過熱防止）",
@@ -304,11 +271,7 @@ export const CONSTRUCTION_EXAMPLES: KyExample[] = [
     industry: "construction",
     workType: "chemical",
     title: "防水工事でのウレタン系塗膜材の塗布",
-    hazards: [
-      "有機溶剤蒸気の屋内滞留",
-      "皮膚への直接接触",
-      "近接火気での引火",
-    ],
+    hazards: ["有機溶剤蒸気の屋内滞留", "皮膚への直接接触", "近接火気での引火"],
     risks: [
       "有機溶剤中毒・頭痛・めまい",
       "皮膚炎・化学熱傷",
@@ -333,10 +296,7 @@ export const CONSTRUCTION_EXAMPLES: KyExample[] = [
       "破砕による石綿粉じんの飛散",
       "湿潤化措置の不徹底",
     ],
-    risks: [
-      "中皮腫・石綿肺などの遅発性疾患",
-      "周辺住民への二次曝露",
-    ],
+    risks: ["中皮腫・石綿肺などの遅発性疾患", "周辺住民への二次曝露"],
     countermeasures: [
       "石綿事前調査者（有資格者）による調査と結果掲示",
       "湿潤化と隔離養生（負圧除じん装置設置）",
@@ -356,10 +316,7 @@ export const CONSTRUCTION_EXAMPLES: KyExample[] = [
       "剥離剤の油類による滑り",
       "誤飲・誤吸入",
     ],
-    risks: [
-      "眼の化学熱傷・角膜障害",
-      "転倒・打撲",
-    ],
+    risks: ["眼の化学熱傷・角膜障害", "転倒・打撲"],
     countermeasures: [
       "保護メガネ・耐薬品手袋を着用",
       "剥離剤こぼれは吸着材で速やかに除去",
@@ -381,10 +338,7 @@ export const CONSTRUCTION_EXAMPLES: KyExample[] = [
       "視界を遮る高積み",
       "急ブレーキによる荷崩れ",
     ],
-    risks: [
-      "歩行者との衝突・轢過",
-      "荷崩れによる二次災害",
-    ],
+    risks: ["歩行者との衝突・轢過", "荷崩れによる二次災害"],
     countermeasures: [
       "歩車分離ラインを地面に明示",
       "視界を確保できる積み方（マスト下げて走行）",
@@ -404,10 +358,7 @@ export const CONSTRUCTION_EXAMPLES: KyExample[] = [
       "玉掛けワイヤーがフォークから外れる",
       "資材の振れ",
     ],
-    risks: [
-      "落下による作業員被災",
-      "フォークリフト転倒",
-    ],
+    risks: ["落下による作業員被災", "フォークリフト転倒"],
     countermeasures: [
       "フォークでの吊り作業は原則禁止（パレット運搬に限定）",
       "やむを得ない場合はパレットフォーク用専用治具を使用",
@@ -427,10 +378,7 @@ export const CONSTRUCTION_EXAMPLES: KyExample[] = [
       "雨天時の路面スリップ",
       "歩行者のヘッドライト直射による眩惑",
     ],
-    risks: [
-      "歩行者との衝突",
-      "フォーク横転・荷崩れ",
-    ],
+    risks: ["歩行者との衝突", "フォーク横転・荷崩れ"],
     countermeasures: [
       "作業エリア照度を150ルクス以上確保",
       "雨天時は速度を半減し急ハンドル禁止",
@@ -452,10 +400,7 @@ export const CONSTRUCTION_EXAMPLES: KyExample[] = [
       "地下水・降雨による土砂緩み",
       "重機運転による振動",
     ],
-    risks: [
-      "土砂崩壊による埋没事故",
-      "周辺構造物の沈下",
-    ],
+    risks: ["土砂崩壊による埋没事故", "周辺構造物の沈下"],
     countermeasures: [
       "深さ1.5m超は土止め支保工を設置",
       "勾配・地質に応じた法切りを実施",
@@ -470,15 +415,8 @@ export const CONSTRUCTION_EXAMPLES: KyExample[] = [
     industry: "construction",
     workType: "excavation",
     title: "埋設管近接掘削（電気・ガス・水道）",
-    hazards: [
-      "図面外の埋設物の損傷",
-      "ガス漏れによる引火",
-      "感電",
-    ],
-    risks: [
-      "ガス爆発・火災",
-      "感電・断水・通信障害",
-    ],
+    hazards: ["図面外の埋設物の損傷", "ガス漏れによる引火", "感電"],
+    risks: ["ガス爆発・火災", "感電・断水・通信障害"],
     countermeasures: [
       "事前に試掘または管路探査機で位置確認",
       "重機掘削は近接1m手前から人力切り替え",
@@ -493,15 +431,8 @@ export const CONSTRUCTION_EXAMPLES: KyExample[] = [
     industry: "construction",
     workType: "excavation",
     title: "シールド工事の発進立坑内作業",
-    hazards: [
-      "立坑内への墜落",
-      "酸素欠乏空気の滞留",
-      "重機からの落下物",
-    ],
-    risks: [
-      "墜落による重大災害",
-      "酸欠による意識喪失",
-    ],
+    hazards: ["立坑内への墜落", "酸素欠乏空気の滞留", "重機からの落下物"],
+    risks: ["墜落による重大災害", "酸欠による意識喪失"],
     countermeasures: [
       "立坑開口部に手すり・幅木を全周設置",
       "酸素濃度18%以上を測定し記録",
@@ -523,11 +454,7 @@ export const CONSTRUCTION_EXAMPLES: KyExample[] = [
       "アーク光による眼障害",
       "溶接ヒュームの吸入",
     ],
-    risks: [
-      "可燃物への引火・火災",
-      "電気性眼炎",
-      "じん肺・肺がん",
-    ],
+    risks: ["可燃物への引火・火災", "電気性眼炎", "じん肺・肺がん"],
     countermeasures: [
       "周囲5m以内の可燃物を撤去し不燃シートで養生",
       "火気使用許可を取得し消火器を即時使用可能位置に配置",
@@ -547,10 +474,7 @@ export const CONSTRUCTION_EXAMPLES: KyExample[] = [
       "逆火による爆発",
       "切断片の落下による下方災害",
     ],
-    risks: [
-      "ボンベ爆発・火災",
-      "落下物による被災",
-    ],
+    risks: ["ボンベ爆発・火災", "落下物による被災"],
     countermeasures: [
       "ボンベは専用台車で固定し直射日光を避ける",
       "逆火防止器を全ホースに取付",
@@ -570,10 +494,7 @@ export const CONSTRUCTION_EXAMPLES: KyExample[] = [
       "酸素濃度の低下",
       "感電（湿潤環境）",
     ],
-    risks: [
-      "酸欠・中毒",
-      "感電死",
-    ],
+    risks: ["酸欠・中毒", "感電死"],
     countermeasures: [
       "送風機による局所換気と酸素濃度連続測定",
       "電撃防止装置付き溶接機を使用",
@@ -595,10 +516,7 @@ export const CONSTRUCTION_EXAMPLES: KyExample[] = [
       "玉掛けワイヤーの外れ",
       "風による荷の振れ",
     ],
-    risks: [
-      "ワイヤー破断による落下",
-      "建方中の挟まれ",
-    ],
+    risks: ["ワイヤー破断による落下", "建方中の挟まれ"],
     countermeasures: [
       "吊角度60度以下を厳守",
       "吊り具は使用前に目視点検（素線切れ・キンク）",
@@ -618,10 +536,7 @@ export const CONSTRUCTION_EXAMPLES: KyExample[] = [
       "オペレーターと玉掛け者の合図不一致",
       "吊り荷下作業員の立入",
     ],
-    risks: [
-      "鉄筋落下による下方被災",
-      "クレーン転倒",
-    ],
+    risks: ["鉄筋落下による下方被災", "クレーン転倒"],
     countermeasures: [
       "重心マーキングをユニット製作時に実施",
       "合図はJIS手合図または無線で統一し合図者を1名固定",
@@ -641,10 +556,7 @@ export const CONSTRUCTION_EXAMPLES: KyExample[] = [
       "玉掛けワイヤーが鋼材角で損傷",
       "ねじれ・回転",
     ],
-    risks: [
-      "周辺構造物への激突",
-      "ワイヤー破断による落下",
-    ],
+    risks: ["周辺構造物への激突", "ワイヤー破断による落下"],
     countermeasures: [
       "鋼材角部に当て物（ゴム・革）を挟みワイヤー保護",
       "長尺物には介錯ロープ2本（両端）で姿勢制御",
@@ -666,10 +578,7 @@ export const CONSTRUCTION_EXAMPLES: KyExample[] = [
       "水分・塩分補給の不足",
       "新規入場者の暑熱順化不足",
     ],
-    risks: [
-      "熱射病による意識障害・死亡",
-      "脱水によるめまい・転倒",
-    ],
+    risks: ["熱射病による意識障害・死亡", "脱水によるめまい・転倒"],
     countermeasures: [
       "WBGT値を作業場所で測定し休憩頻度を決定",
       "経口補水液・塩飴を常備し1時間ごとに補給",
@@ -689,10 +598,7 @@ export const CONSTRUCTION_EXAMPLES: KyExample[] = [
       "コードや配管の床面横断",
       "鉄筋切片・釘の散乱",
     ],
-    risks: [
-      "つまずき転倒",
-      "釘踏み抜きによる足部負傷",
-    ],
+    risks: ["つまずき転倒", "釘踏み抜きによる足部負傷"],
     countermeasures: [
       "毎日終業前の通路点検をチェックリストで実施",
       "床面ケーブルはカバーまたは天井配線へ変更",
@@ -712,10 +618,7 @@ export const CONSTRUCTION_EXAMPLES: KyExample[] = [
       "立入禁止区域への侵入",
       "緊急時連絡先・避難経路を知らない",
     ],
-    risks: [
-      "重機・落下物との接触災害",
-      "緊急時の対応遅れ",
-    ],
+    risks: ["重機・落下物との接触災害", "緊急時の対応遅れ"],
     countermeasures: [
       "新規入場者教育の動画＋現場確認を必須化",
       "ヘルメットステッカーで新規期間を識別",

@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   title: "ページが見つかりません",
   description: "お探しのページは見つかりませんでした。",
   robots: { index: false, follow: false },
+  alternates: { canonical: null as unknown as string },
 };
 
 export default function MainNotFound() {

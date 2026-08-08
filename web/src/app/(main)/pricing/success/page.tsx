@@ -3,6 +3,7 @@ import Link from "next/link";
 import Stripe from "stripe";
 import { CheckCircle } from "lucide-react";
 import { Mascot } from "@/components/mascot";
+import { externalCredentialedServicesAllowed } from "@/lib/server/deployment-safety";
 
 export const metadata: Metadata = {
   title: "決済完了",
@@ -29,6 +30,7 @@ function priceIdToPlanName(priceId: string | null | undefined): string {
 
 async function fetchPlan(sessionId: string | undefined): Promise<string | null> {
   if (!sessionId) return null;
+  if (!externalCredentialedServicesAllowed()) return null;
   const key = process.env.STRIPE_SECRET_KEY;
   if (!key) return null;
   try {
@@ -49,7 +51,7 @@ export default async function PricingSuccessPage({ searchParams }: Props) {
   const plan = await fetchPlan(session_id);
 
   return (
-    <main className="mx-auto max-w-lg px-4 py-16 text-center">
+    <div className="mx-auto max-w-lg px-4 py-16 text-center">
       <div className="mx-auto mb-4 flex justify-center">
         <Mascot variant="salute" size="lg" alt="敬礼するマスコット" />
       </div>
@@ -94,6 +96,6 @@ export default async function PricingSuccessPage({ searchParams }: Props) {
           トップへ戻る
         </Link>
       </div>
-    </main>
+    </div>
   );
 }

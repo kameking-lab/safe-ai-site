@@ -7,7 +7,7 @@ import { PageContainer } from "@/components/layout";
 
 import { PageJsonLd } from "@/components/page-json-ld";
 const _title = "労働安全 解説記事一覧";
-const _desc = "労働安全衛生に関する法改正・運用ガイド・業種別のSEO記事を労働安全コンサルタント監修で公開。";
+const _desc = "労働安全衛生に関する法改正・運用ガイド・業種別の記事。一次資料、編集更新日、人手内容確認、適用範囲を区別して公開します。";
 
 export const metadata: Metadata = {
   title: _title,
@@ -42,13 +42,13 @@ export default function ArticlesIndexPage() {
   return (
     <PageContainer width="prose">
       {/* SEO: WebPage + BreadcrumbList */}
-      <PageJsonLd name="労働安全 解説記事一覧" description="労働安全衛生に関する法改正・運用ガイド・業種別のSEO記事を労働安全コンサルタント監修で公開。" path="/articles" />
+      <PageJsonLd name="労働安全 解説記事一覧" description="労働安全衛生に関する法改正・運用ガイド・業種別の記事。一次資料と監修状態を区別して公開します。" path="/articles" />
       <header className="mb-5">
         <h1 className="text-xl font-bold text-slate-900 sm:text-2xl">
           労働安全 解説記事
         </h1>
         <p className="mt-2 text-sm text-slate-600">
-          公開済み <strong>{articles.length}</strong> 本。法改正・運用ガイド・業種別の記事を労働安全衛生コンサルタント（登録番号260022）監修で公開しています。
+          公開済み <strong>{articles.length}</strong> 本。一次資料、編集更新日、公式URL取得確認、人手内容確認を区別し、確認できない記事は検索・sitemapから隔離します。
         </p>
       </header>
 
@@ -77,7 +77,14 @@ export default function ArticlesIndexPage() {
                   )}
                 </span>
                 <span>{a.publishedAt} 公開</span>
-                <span>・最終確認 {a.lastReviewedAt}</span>
+                <span>・編集更新 {a.lastReviewedAt}</span>
+                {a.sourceRetrievedAt ? (
+                  <span>・公式URL取得確認 {a.sourceRetrievedAt}</span>
+                ) : null}
+                <span>
+                  ・人手内容確認{" "}
+                  {a.humanReviewedAt ? a.humanReviewedAt : "未完了"}
+                </span>
               </div>
               <Link
                 href={`/articles/${a.slug}`}

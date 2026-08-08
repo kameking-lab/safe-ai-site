@@ -13,6 +13,11 @@ import {
   type ServiceDescriptor,
   type ServiceId,
 } from "./service-registry";
+import {
+  externalCredentialedServicesAllowed,
+  externalGenerativeAiAllowed,
+} from "@/lib/server/deployment-safety";
+import { GEMINI_FLASH_MODEL } from "@/lib/gemini-model";
 
 export type HealthStatus = "ok" | "degraded" | "down" | "not_configured";
 
@@ -32,6 +37,8 @@ export type ServiceHealth = {
 };
 
 const PROBE_TIMEOUT_MS = 4000;
+const PREVIEW_CREDENTIAL_DETAIL =
+  "Preview safety mode; credentialed live probe is disabled.";
 
 async function timeIt<T>(fn: () => Promise<T>): Promise<{ result: T; ms: number }> {
   const start = Date.now();
@@ -40,6 +47,15 @@ async function timeIt<T>(fn: () => Promise<T>): Promise<{ result: T; ms: number 
 }
 
 async function probeGemini(): Promise<{ status: HealthStatus; detail: string; latencyMs: number | null }> {
+  if (!externalGenerativeAiAllowed()) {
+    return {
+      status: "not_configured",
+      detail: externalCredentialedServicesAllowed()
+        ? "External AI release flag is disabled; RAG/static fallback in use."
+        : PREVIEW_CREDENTIAL_DETAIL,
+      latencyMs: null,
+    };
+  }
   const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
   if (!apiKey || apiKey === "dummy") {
     return { status: "not_configured", detail: "GEMINI_API_KEY unset; RAG-only fallback in use.", latencyMs: null };
@@ -47,12 +63,22 @@ async function probeGemini(): Promise<{ status: HealthStatus; detail: string; la
   try {
     const { result, ms } = await timeIt(async () => {
       const res = await fetchWithTimeout(
-        `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`,
-        { method: "GET", timeoutMs: PROBE_TIMEOUT_MS }
+        `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_FLASH_MODEL}`,
+        {
+          method: "GET",
+          headers: { "x-goog-api-key": apiKey },
+          timeoutMs: PROBE_TIMEOUT_MS,
+        }
       );
       return res;
     });
-    if (result.ok) return { status: "ok", detail: `models endpoint ${result.status}`, latencyMs: ms };
+    if (result.ok) {
+      return {
+        status: "ok",
+        detail: `${GEMINI_FLASH_MODEL} endpoint ${result.status}`,
+        latencyMs: ms,
+      };
+    }
     if (result.status === 429) return { status: "degraded", detail: "quota / rate limit", latencyMs: ms };
     return { status: "down", detail: `HTTP ${result.status}`, latencyMs: ms };
   } catch (err) {
@@ -60,24 +86,10 @@ async function probeGemini(): Promise<{ status: HealthStatus; detail: string; la
   }
 }
 
-async function probeFormspree(): Promise<{ status: HealthStatus; detail: string; latencyMs: number | null }> {
-  const id = process.env.NEXT_PUBLIC_FORMSPREE_ID;
-  if (!id) {
-    return { status: "not_configured", detail: "NEXT_PUBLIC_FORMSPREE_ID unset; contact form uses /api/contact only.", latencyMs: null };
-  }
-  try {
-    const { result, ms } = await timeIt(() =>
-      fetchWithTimeout("https://formspree.io/", { method: "HEAD", timeoutMs: PROBE_TIMEOUT_MS })
-    );
-    // 200 or 405 (HEAD not allowed) both prove TCP+TLS is healthy.
-    if (result.ok || result.status === 405) return { status: "ok", detail: `reachable (${result.status})`, latencyMs: ms };
-    return { status: "degraded", detail: `HTTP ${result.status}`, latencyMs: ms };
-  } catch (err) {
-    return { status: "down", detail: err instanceof Error ? err.message : String(err), latencyMs: null };
-  }
-}
-
 async function probeResend(): Promise<{ status: HealthStatus; detail: string; latencyMs: number | null }> {
+  if (!externalCredentialedServicesAllowed()) {
+    return { status: "not_configured", detail: PREVIEW_CREDENTIAL_DETAIL, latencyMs: null };
+  }
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
     return { status: "not_configured", detail: "RESEND_API_KEY unset; submissions are logged for manual handling.", latencyMs: null };
@@ -101,6 +113,9 @@ async function probeResend(): Promise<{ status: HealthStatus; detail: string; la
 }
 
 async function probeStripe(): Promise<{ status: HealthStatus; detail: string; latencyMs: number | null }> {
+  if (!externalCredentialedServicesAllowed()) {
+    return { status: "not_configured", detail: PREVIEW_CREDENTIAL_DETAIL, latencyMs: null };
+  }
   const key = process.env.STRIPE_SECRET_KEY;
   if (!key) {
     return { status: "not_configured", detail: "STRIPE_SECRET_KEY unset; checkout returns 503.", latencyMs: null };
@@ -121,6 +136,9 @@ async function probeStripe(): Promise<{ status: HealthStatus; detail: string; la
 }
 
 async function probeVercelBlob(): Promise<{ status: HealthStatus; detail: string; latencyMs: number | null }> {
+  if (!externalCredentialedServicesAllowed()) {
+    return { status: "not_configured", detail: PREVIEW_CREDENTIAL_DETAIL, latencyMs: null };
+  }
   const token = process.env.BLOB_READ_WRITE_TOKEN;
   if (!token) {
     return { status: "not_configured", detail: "BLOB_READ_WRITE_TOKEN unset; MHLW search uses bundled data.", latencyMs: null };
@@ -138,6 +156,9 @@ async function probeVercelBlob(): Promise<{ status: HealthStatus; detail: string
 }
 
 async function probeGa4(): Promise<{ status: HealthStatus; detail: string; latencyMs: number | null }> {
+  if (!externalCredentialedServicesAllowed()) {
+    return { status: "not_configured", detail: PREVIEW_CREDENTIAL_DETAIL, latencyMs: null };
+  }
   if (!process.env.GA4_PROPERTY_ID || !process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
     return { status: "not_configured", detail: "GA4 credentials unset; mock dashboard data is used.", latencyMs: null };
   }
@@ -146,6 +167,9 @@ async function probeGa4(): Promise<{ status: HealthStatus; detail: string; laten
 }
 
 async function probeGsc(): Promise<{ status: HealthStatus; detail: string; latencyMs: number | null }> {
+  if (!externalCredentialedServicesAllowed()) {
+    return { status: "not_configured", detail: PREVIEW_CREDENTIAL_DETAIL, latencyMs: null };
+  }
   if (!process.env.INDEXNOW_KEY) {
     return { status: "not_configured", detail: "INDEXNOW_KEY unset; sitemap pings are skipped.", latencyMs: null };
   }
@@ -196,6 +220,9 @@ async function probeGoogleNewsRss(): Promise<{ status: HealthStatus; detail: str
 }
 
 async function probeSupabase(): Promise<{ status: HealthStatus; detail: string; latencyMs: number | null }> {
+  if (!externalCredentialedServicesAllowed()) {
+    return { status: "not_configured", detail: PREVIEW_CREDENTIAL_DETAIL, latencyMs: null };
+  }
   if (!process.env.DATABASE_URL) {
     return { status: "not_configured", detail: "DATABASE_URL unset; subscription persistence is skipped.", latencyMs: null };
   }
@@ -206,7 +233,6 @@ async function probeSupabase(): Promise<{ status: HealthStatus; detail: string; 
 
 const PROBES: Record<ServiceId, () => Promise<{ status: HealthStatus; detail: string; latencyMs: number | null }>> = {
   gemini: probeGemini,
-  formspree: probeFormspree,
   resend: probeResend,
   stripe: probeStripe,
   "vercel-blob": probeVercelBlob,

@@ -14,7 +14,7 @@ import { isIndexableLawNaviEntry } from "./seo-gate";
  * FT-D2 表示統合（設計書 docs/corpus-fulltext-architecture-2026-07-12.md §2-4・§5-2）の機械固定。
  *
  * 全文層（FT-D1・安衛則1,182条）を法令ナビの URL/表示へ橋渡しするとき、
- *   - 既存 curated 717 URL は 1 件も壊さない（追加のみ）
+ *   - 既存 curated 717 URL は 1 件も壊さず、確認済み7条を追加する
  *   - 全文由来は curated に無い条だけを埋める（dual-exclusion）
  *   - 枝番（多段含む）・削除条を正しく slug 化・収載する
  * を恒久固定する。
@@ -31,9 +31,9 @@ describe("fulltextArtSlug — sortKey 由来の slug（全階層枝番保持）"
 });
 
 describe("getFulltextNaviEntries — 安衛則ギャップ充填（dual-exclusion）", () => {
-  it("curated に無い条だけを 1,065 件埋める（116 curated収録 + 1 slug占有 を除外）", async () => {
+  it("curated に無い条だけを 1,063 件埋める（118 curated収録 + 1 slug占有 を除外）", async () => {
     const gap = await getFulltextNaviEntries(EGOV);
-    expect(gap.length).toBe(1065);
+    expect(gap.length).toBe(1063);
     expect(gap.every((e) => e.origin === "fulltext")).toBe(true);
   });
 
@@ -81,8 +81,8 @@ describe("getFulltextNaviEntries — 安衛則ギャップ充填（dual-exclusio
 });
 
 describe("既存 URL 不変（追加のみ・§5-2）", () => {
-  it("生成集合 LAW_NAVI_ENTRIES は 717 件のまま（permalink 側は不変）", () => {
-    expect(LAW_NAVI_ENTRIES.length).toBe(717);
+  it("生成集合は既存717件を維持したまま確認済み7条を追加する", () => {
+    expect(LAW_NAVI_ENTRIES.length).toBe(724);
   });
 
   it("ギャップ slug は既存 (egovLawId, artSlug) と 1 件も衝突しない", async () => {

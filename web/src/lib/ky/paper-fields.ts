@@ -192,7 +192,12 @@ function riskRowGet(index: number, part: "hazard" | "reduction") {
 
 function riskRowSet(index: number, part: "hazard" | "reduction") {
   return (r: KyInstructionRecordState, v: string): Partial<KyInstructionRecordState> => ({
-    riskRows: r.riskRows.map((row, i): KyInstructionRiskRow => (i === index ? { ...row, [part]: v } : row)),
+    riskRows: r.riskRows.map(
+      (row, i): KyInstructionRiskRow =>
+        i === index
+          ? { ...row, [part]: v, humanConfirmedAt: undefined }
+          : row,
+    ),
   });
 }
 

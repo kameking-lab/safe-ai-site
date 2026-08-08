@@ -1,11 +1,11 @@
 /**
  * R7 (2025) amendment to the Industrial Safety and Health Regulations.
- * Centered on Article 612-2 ("Prevention of heat disorders"), which was
- * tightened to mandate WBGT-driven controls, recognition training, and
- * documented early-response procedures.
+ * Centered on Article 612-2 ("Measures at workplaces where heat illness may
+ * occur").  The article has two duties: establish/report a reporting system,
+ * and establish/communicate an escalation procedure.
  *
- * Effective date: 2025-06-01 (令和7年6月1日) — per 厚生労働省令第86号
- * (令和6年改正). The effective date is unified across the site; see
+ * Effective date: 2025-06-01 (令和7年6月1日) — per 令和7年厚生労働省令第57号.
+ * The effective date is unified across the site; see
  * `web/src/data/laws/anzen-eisei-kisoku.ts` (第612条の2) for the
  * authoritative article text.
  *
@@ -14,111 +14,35 @@
  */
 
 import type { R7ComplianceItem } from "@/types/heat-illness";
+import { HEAT_ILLNESS_2025_LEGAL_SOURCE } from "./legal-source";
 
-export const R7_EFFECTIVE_FROM = "2025-06-01";
+export const R7_EFFECTIVE_FROM = HEAT_ILLNESS_2025_LEGAL_SOURCE.effectiveFrom;
 export const R7_EFFECTIVE_FROM_JP = "令和7年6月1日";
 
 export const R7_COMPLIANCE_ITEMS: R7ComplianceItem[] = [
   {
-    id: "wbgt-measurement",
-    title: "WBGT実測の体制整備",
+    id: "reporting-system",
+    title: "異常を報告できる体制の整備と周知",
     articleRef: "安衛則第612条の2 第1項",
     requirement:
-      "気温・湿度を踏まえてWBGT基準値を超えるおそれがある屋内・屋外作業について、WBGT値の測定または推計と記録を行う体制を整備する。",
+      "作業者が熱中症の自覚症状を感じた場合、又は周囲が熱中症の疑いを発見した場合に、あらかじめ定めた担当者へ直ちに報告できる体制を整備し、作業者へ周知する。",
     evidenceExpected: [
-      "WBGT測定機器の保有台数と配備場所一覧",
-      "測定頻度・地点を定めた手順書",
-      "直近1か月分の測定記録（時刻・地点・WBGT値）",
+      "報告先・連絡方法・代替連絡先を定めた文書",
+      "作業者への周知記録又は現場掲示",
+      "報告を受けた後の責任者・連絡網",
     ],
     effectiveFrom: R7_EFFECTIVE_FROM,
   },
   {
-    id: "acclimatization",
-    title: "暑熱順化期間の確保",
+    id: "response-procedure",
+    title: "症状悪化を防ぐ手順の作成と周知",
     articleRef: "安衛則第612条の2 第2項",
     requirement:
-      "新規入場者・長期休暇明け・配置転換直後の作業者について、7日以上をかけて段階的に作業負荷を増やす計画を作成し、その実施状況を記録する。",
+      "作業場ごとに、作業からの離脱、身体の冷却、必要に応じた医師の診察・処置その他の症状悪化防止措置と実施手順を定め、作業者へ周知する。",
     evidenceExpected: [
-      "個人別暑熱順化計画（日別の作業時間・休憩計画）",
-      "本人・職長による日々のチェック記録",
-      "発症リスクの高い作業者の屋内補助業務への配置記録",
-    ],
-    effectiveFrom: R7_EFFECTIVE_FROM,
-  },
-  {
-    id: "education-training",
-    title: "熱中症予防教育の実施",
-    articleRef: "安衛則第612条の2 第3項",
-    requirement:
-      "暑熱作業に従事する全労働者に対し、熱中症の症状・予防・初期対応・救急通報手順を含む教育を年1回以上実施し、内容と参加者を記録する。",
-    evidenceExpected: [
-      "教育カリキュラムと教材",
-      "実施日・受講者一覧（署名簿）",
-      "理解度確認テストまたは振返り記録",
-    ],
-    effectiveFrom: R7_EFFECTIVE_FROM,
-  },
-  {
-    id: "early-response",
-    title: "初期対応・救急体制の整備",
-    articleRef: "安衛則第612条の2 第4項",
-    requirement:
-      "熱中症が疑われる場合の発見・通報・冷却・救急要請までの手順を文書化し、現場掲示・全員周知する。緊急時冷却装備（冷水・氷嚢等）を作業現場に配置する。",
-    evidenceExpected: [
-      "現場掲示用の初期対応フローチャート",
-      "氷嚢・経口補水液・冷却ベスト等の在庫リスト",
-      "緊急連絡網（119・産業医・家族連絡先）の整備",
-    ],
-    effectiveFrom: R7_EFFECTIVE_FROM,
-  },
-  {
-    id: "buddy-monitoring",
-    title: "バディ制・単独作業者の確認",
-    articleRef: "安衛則第612条の2 第4項（運用通達）",
-    requirement:
-      "WBGT基準値超過下では、原則として2名以上での作業またはバディによる相互観察を実施する。単独作業が避けられない場合は、定時の安否確認手段を確保する。",
-    evidenceExpected: [
-      "バディ編成表または単独作業時の安否確認ログ",
-      "無線・通報装置の配備状況",
-      "監視カメラ・センサー等のテクノロジー活用記録",
-    ],
-    effectiveFrom: R7_EFFECTIVE_FROM,
-  },
-  {
-    id: "ppe-correction",
-    title: "防護具・作業服のWBGT補正",
-    articleRef: "安衛則第612条の2（運用通達 §3）",
-    requirement:
-      "化学防護服・耐熱服・墜落制止用器具など発汗を阻害する装備を着用する作業については、WBGT実測値に補正値（+1〜+3 °C）を加えてリスク判定する。",
-    evidenceExpected: [
-      "着用装備とWBGT補正値の対応表",
-      "補正後のWBGTに基づく作業中止判断記録",
-    ],
-    effectiveFrom: R7_EFFECTIVE_FROM,
-  },
-  {
-    id: "manager-responsibility",
-    title: "管理監督者の責任明確化",
-    articleRef: "安衛則第612条の2（運用通達 §4）",
-    requirement:
-      "現場の管理監督者（職長等）に対し、WBGT値の確認・作業中止権限・救急通報義務を含む役割を明示する。職長教育に熱中症対応の章を含める。",
-    evidenceExpected: [
-      "職長教育カリキュラムでの熱中症章の有無",
-      "現場別の安全責任者一覧",
-      "作業中止判断ログ（誰がどの基準で中止したか）",
-    ],
-    effectiveFrom: R7_EFFECTIVE_FROM,
-  },
-  {
-    id: "incident-recording",
-    title: "熱中症発症の届出・記録",
-    articleRef: "安衛則第97条／第612条の2",
-    requirement:
-      "業務上の熱中症で休業4日以上となった場合は労働者死傷病報告を提出する。発症事案は社内でも記録・原因分析し、再発防止策をPDCAに組み込む。",
-    evidenceExpected: [
-      "労働者死傷病報告の提出状況",
-      "社内インシデント記録と原因分析書",
-      "再発防止策の実施記録（教育・設備等）",
+      "作業離脱・冷却・医療連携を含む作業場別手順",
+      "緊急連絡先と搬送先の確認記録",
+      "作業者への周知記録又は現場掲示",
     ],
     effectiveFrom: R7_EFFECTIVE_FROM,
   },
@@ -135,7 +59,7 @@ export const R7_TEMPLATE_BLOCKS = [
     title: "WBGT測定手順書（社内文書ひな形）",
     description: "誰が・どこで・どの頻度で測定し、どこに記録するかを定めた手順書のひな形。",
     body: `【WBGT測定手順書】
-1. 目的：労働安全衛生規則第612条の2に基づき、暑熱職場のWBGT実測を行い熱中症を予防する。
+1. 目的：厚生労働省の熱中症予防対策を参考に、暑熱職場のWBGTを把握して熱中症を予防する。本手順は安衛則第612条の2の法定2項目とは区別して運用する。
 2. 適用範囲：[対象現場・作業エリアを列挙]
 3. 測定責任者：[職長名・代行者名]
 4. 測定機器：[機種名／校正日／配備場所]
@@ -174,7 +98,7 @@ export const R7_TEMPLATE_BLOCKS = [
   {
     id: "education-curriculum",
     title: "熱中症予防教育カリキュラム（30分版ひな形）",
-    description: "新規入場時・年次教育で使える30分カリキュラム。",
+    description: "法定2項目とは別に、予防教育として使える30分カリキュラム。",
     body: `【熱中症予防教育 30分カリキュラム】
 0:00 導入：当該事業場の昨夏発生件数と業界統計 [3分]
 0:03 メカニズム：体温調節と発汗、熱中症Ⅰ〜Ⅲ度の症状 [7分]
@@ -192,10 +116,7 @@ export const R7_TEMPLATE_BLOCKS = [
  * do not embed verbatim content from them.
  */
 export const R7_SOURCES = [
-  {
-    label: "労働安全衛生規則 第612条の2（e-Gov 法令検索）",
-    url: "https://laws.e-gov.go.jp/law/347M50002000032",
-  },
+  ...HEAT_ILLNESS_2025_LEGAL_SOURCE.sources,
   {
     label: "厚生労働省「職場における熱中症予防対策マニュアル」",
     url: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/roudoukijun/anzen/0000045998.html",

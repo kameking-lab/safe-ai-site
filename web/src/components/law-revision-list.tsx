@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { AlertTriangle, MessageSquare, Pencil, RotateCcw, Sparkles, Zap } from "lucide-react";
+import { MessageSquare, Pencil, RotateCcw, Sparkles, Zap } from "lucide-react";
 import type { IndustryTag, LawRevision, RevisionImpact } from "@/lib/types/domain";
 import type { ServiceError } from "@/lib/types/api";
 import { fuzzyMatchAll, fuzzyMatch } from "@/lib/fuzzy-search";
@@ -12,6 +12,7 @@ import { InputWithVoice } from "@/components/voice-input-field";
 import { Cluster } from "@/components/layout";
 import { loadProfile, profileIndustryToTag, relevanceScore, type CompanyProfile } from "@/lib/company-profile";
 import { buildEnforcementBadge, getEnforcementStatus, type EnforcementStatus } from "@/lib/law-revision-status";
+import { compactLawRevisionSummary } from "@/lib/laws/revision-summary";
 
 function formatDate(value: string) {
   if (!value) return null;
@@ -69,7 +70,7 @@ const INITIAL_LIST_COUNT = 30;
 const IMPACT_BADGE_CLASS: Record<RevisionImpact, string> = {
   高: "bg-red-100 text-red-700",
   中: "bg-amber-100 text-amber-700",
-  低: "bg-slate-100 text-slate-500",
+  低: "bg-slate-100 text-portal-muted",
 };
 
 // 業種マルチセレクトフィルタ
@@ -149,7 +150,7 @@ function SourceInfoBox({ revision }: { revision: LawRevision }) {
               rel="noopener noreferrer"
               className="inline-flex min-h-[44px] items-center gap-1 rounded bg-blue-600 px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-blue-700 transition"
             >
-              e-Govで原文を確認 →
+              e-Govで現行法令を確認 →
             </a>
           </div>
         )}
@@ -296,7 +297,6 @@ export function LawRevisionList({
   const [selectedWorkerAttribute, setSelectedWorkerAttribute] = useState<WorkerAttributeFilter>("すべて");
   const [selectedCompanySize, setSelectedCompanySize] = useState<CompanySizeFilter>("全規模");
   // 詳細展開中のカードID
-  const [expandedDetailId, setExpandedDetailId] = useState<string | null>(null);
 
   // 自社プロファイル連動（5.2 / 5.3）
   const [profile, setProfile] = useState<CompanyProfile | null>(null);
@@ -522,7 +522,7 @@ export function LawRevisionList({
             aria-pressed={onlyRelevant}
             className={`inline-flex min-h-[44px] items-center justify-center rounded-full px-3 py-1 text-xs font-bold transition ${
               onlyRelevant
-                ? "border border-emerald-400 bg-emerald-600 text-white"
+                ? "border border-brand-primary bg-brand-primary-solid text-white"
                 : "border border-emerald-300 bg-white text-emerald-800 hover:bg-emerald-50"
             }`}
           >
@@ -530,12 +530,6 @@ export function LawRevisionList({
           </button>
         )}
       </div>
-      <p className="mt-1 text-xs text-slate-500 sm:text-sm">
-        直近10年の主要な労働安全衛生関連の改正を収録。キーワード・年で絞り込みできます（音声入力対応）。
-      </p>
-      <p className="mt-1 text-[11px] leading-5 text-amber-700">
-        <AlertTriangle className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />要約・条番号は<strong>施行当時</strong>のものです。現行条文は各カードの「e-Govで原文を確認」から最新版をご確認ください。
-      </p>
       {relevanceFallback && (
         <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-[11px] leading-5 text-amber-900 print:hidden">
           <p className="font-bold">業種厳密一致の改正は見つかりませんでした</p>
@@ -633,7 +627,12 @@ export function LawRevisionList({
           </label>
         </div>
       </div>
-      <div className="mt-3 print:hidden">
+      <details className="mt-3 rounded-xl border border-slate-200 bg-slate-50 print:hidden">
+        <summary className="flex min-h-[44px] cursor-pointer items-center px-3 py-2 text-sm font-semibold text-slate-800">
+          詳しく絞り込む
+        </summary>
+        <div className="border-t border-slate-200 p-3">
+      <div>
         <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="text-xs font-semibold text-slate-700">
             業種フィルタ（複数選択可）
@@ -671,7 +670,7 @@ export function LawRevisionList({
         </div>
       </div>
       {/* 属性・規模フィルタ */}
-      <div className="mt-3 flex flex-wrap gap-x-6 gap-y-3 print:hidden">
+      <div className="mt-3 flex flex-wrap gap-x-6 gap-y-3">
         <div>
           <p className="text-xs font-semibold text-slate-700">対象属性</p>
           <div className="mt-1 flex flex-wrap gap-1.5">
@@ -701,7 +700,7 @@ export function LawRevisionList({
                 onClick={() => setSelectedCompanySize(size)}
                 className={`inline-flex min-h-[44px] items-center justify-center rounded-full px-3 py-1 text-xs font-semibold transition ${
                   selectedCompanySize === size
-                    ? "bg-teal-600 text-white"
+                    ? "bg-semantic-success-solid text-white"
                     : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                 }`}
               >
@@ -711,7 +710,7 @@ export function LawRevisionList({
           </div>
         </div>
       </div>
-      <div className="mt-3 print:hidden">
+      <div className="mt-3">
         <p className="text-xs font-semibold text-slate-700">種別フィルタ</p>
         <Cluster gap="sm" className="mt-1">
           {["すべて", "法律", "省令", "通達", "告示", "ガイドライン"].map((k) => (
@@ -721,7 +720,7 @@ export function LawRevisionList({
               onClick={() => setSelectedKind(k)}
               className={`inline-flex min-h-[44px] items-center justify-center rounded-full px-3 py-1 text-xs font-semibold transition ${
                 selectedKind === k
-                  ? "bg-emerald-600 text-white"
+                  ? "bg-semantic-success-solid text-white"
                   : "bg-slate-100 text-slate-700 hover:bg-slate-200"
               }`}
             >
@@ -732,7 +731,7 @@ export function LawRevisionList({
       </div>
 
       {/* 影響度フィルタ + 施行日ソート */}
-      <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-2 print:hidden">
+      <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-2">
         <div>
           <p className="text-xs font-semibold text-slate-700">影響度</p>
           <div className="mt-1 flex flex-wrap gap-2">
@@ -762,7 +761,7 @@ export function LawRevisionList({
                 onClick={() => setSelectedStatus(s.value)}
                 className={`inline-flex min-h-[44px] items-center justify-center rounded-full px-3 py-1 text-xs font-semibold transition ${
                   selectedStatus === s.value
-                    ? "bg-amber-600 text-white"
+                    ? "bg-semantic-caution-solid text-white"
                     : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                 }`}
               >
@@ -799,12 +798,14 @@ export function LawRevisionList({
           </div>
         </div>
       </div>
+        </div>
+      </details>
 
       {error && (
         <ErrorNotice title="一覧の取得に失敗しました" error={error} onRetry={onRetry} retryLabel={retryLabel} />
       )}
       {status === "loading" && (
-        <p className="mt-2 text-xs text-slate-500">法改正一覧を読み込み中です...</p>
+        <p className="mt-2 text-xs text-portal-muted">法改正一覧を読み込み中です...</p>
       )}
       {showEmptyState && (
         <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
@@ -826,7 +827,7 @@ export function LawRevisionList({
                 setSelectedCompanySize("全規模");
                 setOnlyRelevant(false);
               }}
-              className="inline-flex min-h-[44px] items-center justify-center rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-amber-700"
+              className="inline-flex min-h-[44px] items-center justify-center rounded-lg bg-semantic-caution-solid px-3 py-1.5 text-xs font-bold text-white hover:bg-semantic-caution-solid-hover"
             >
               <RotateCcw className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />条件を全て解除して再検索
             </button>
@@ -852,7 +853,6 @@ export function LawRevisionList({
         {visibleRevisions.map((revision) => {
           const isSelected = selectedRevisionId === revision.id;
           const isLoadingSummary = loadingRevisionId === revision.id;
-          const isDetailExpanded = expandedDetailId === revision.id;
           const hasEnfDate = revision.enforcement_date && revision.enforcement_date !== "";
           const hasPubDate = revision.publication_date && revision.publication_date !== "";
           const hasNoticeNum = revision.official_notice_number && revision.official_notice_number !== "";
@@ -876,29 +876,24 @@ export function LawRevisionList({
                   {isArticleMatch && (
                     <span
                       className="mr-2 inline-flex items-center rounded-full bg-violet-600 px-2 py-0.5 align-middle text-[10px] font-bold text-white"
-                      title="事故由来 articles と一致した改正"
+                      title="事故記事と関連する改正"
                     >
                       <Zap className="mr-0.5 h-3 w-3" aria-hidden="true" />該当
                     </span>
                   )}
                   {revision.title}
-                  {profile?.wizardCompleted && scoreFor(revision) >= 36 && (
+                  {profile?.wizardCompleted && scoreFor(revision) >= 18 && (
                     <span
                       className="ml-2 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800"
-                      title="自社プロファイルに合致する改正"
+                      title="登録した自社条件に関連する改正"
                     >
-                      自社スコア {scoreFor(revision)}
-                    </span>
-                  )}
-                  {profile?.wizardCompleted && scoreFor(revision) >= 18 && scoreFor(revision) < 36 && (
-                    <span className="ml-2 rounded-full bg-sky-100 px-2 py-0.5 text-[10px] font-bold text-sky-700">
-                      自社スコア {scoreFor(revision)}
+                      自社条件に関連
                     </span>
                   )}
                 </h3>
 
                 {/* 日付行：公布日 / 施行日 / 施行ステータスバッジ（P0-1） */}
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500">
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-portal-muted">
                   {hasPubDate ? (
                     <span>公布日: {formatDate(revision.publication_date!)}</span>
                   ) : (
@@ -924,7 +919,7 @@ export function LawRevisionList({
 
                 {/* 種別・影響度・法令番号バッジ行 */}
                 {(revision.kind || revision.revisionNumber || revision.impact) && (
-                  <p className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                  <p className="flex flex-wrap items-center gap-2 text-xs text-portal-muted">
                     {revision.kind && (
                       <span
                         className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${
@@ -949,13 +944,23 @@ export function LawRevisionList({
 
                 {/* 告示番号 */}
                 {hasNoticeNum && (
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-portal-muted">
                     <span className="font-medium">告示番号:</span> {revision.official_notice_number}
                   </p>
                 )}
 
-                <p className="text-sm leading-6 text-slate-700">{revision.summary}</p>
+                <p className="text-sm leading-6 text-slate-700">
+                  {compactLawRevisionSummary(revision.summary)}
+                </p>
 
+                <details
+                  data-law-revision-actions
+                  className="rounded-lg border border-slate-200 bg-slate-50 px-3 print:hidden"
+                >
+                  <summary className="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-slate-800">
+                    詳細・原文
+                  </summary>
+                  <div className="space-y-3 border-t border-slate-200 py-3">
                 {/* 5.3 自社版書き換え */}
                 {profile?.wizardCompleted && (
                   <div className="space-y-1">
@@ -992,7 +997,7 @@ export function LawRevisionList({
 
                 {/* 出典リンク */}
                 {resolveSourceLabel(revision) && (
-                  <div className="text-xs text-slate-500">
+                  <div className="text-xs text-portal-muted">
                     出典:{" "}
                     {revision.source?.url ? (
                       <a
@@ -1017,22 +1022,12 @@ export function LawRevisionList({
                     rel="noopener noreferrer"
                     className="inline-flex min-h-[44px] items-center gap-1 text-xs font-semibold text-blue-600 underline decoration-blue-200 underline-offset-2 hover:text-blue-800"
                   >
-                    e-Govで原文を確認 →
+                    e-Govで現行法令を確認 →
                   </a>
                 )}
               </div>
 
-              {/* 詳細展開ボタン */}
-              <button
-                type="button"
-                onClick={() => setExpandedDetailId(isDetailExpanded ? null : revision.id)}
-                className="mt-2 text-xs font-medium text-slate-500 hover:text-slate-700 transition"
-              >
-                {isDetailExpanded ? "▲ 出典情報を閉じる" : "▼ 出典情報を表示"}
-              </button>
-
-              {/* 詳細展開パネル */}
-              {isDetailExpanded && <SourceInfoBox revision={revision} />}
+              <SourceInfoBox revision={revision} />
 
               <div className="mt-4 flex flex-col gap-2 sm:flex-row">
                 <button
@@ -1042,10 +1037,10 @@ export function LawRevisionList({
                   className={`inline-flex min-h-[44px] items-center justify-center rounded-lg px-3 py-2 text-sm font-medium text-white transition ${
                     isLoadingSummary
                       ? "cursor-not-allowed bg-emerald-300"
-                      : "bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99]"
+                      : "bg-semantic-success-solid hover:bg-semantic-success-solid-hover active:scale-[0.99]"
                   }`}
                 >
-                  {isLoadingSummary ? "AIが要約中..." : "AIで要約"}
+                  {isLoadingSummary ? "要点を確認中..." : "収録要点を見る"}
                 </button>
                 <button
                   type="button"
@@ -1054,6 +1049,8 @@ export function LawRevisionList({
                 >
                   質問する
                 </button>
+              </div>
+                </details>
               </div>
             </li>
           );

@@ -73,29 +73,25 @@ function parseBoundedInt(
 }
 
 /**
- * Serialise scope form values into a `URLSearchParams` string. All scalar
- * fields are always emitted (they always have a concrete value); the boolean
- * `k` and the optional `l` (level) are emitted only when meaningful, to keep
- * the URL short.
+ * New navigation uses a one-shot memory handoff. Legacy query parsing below
+ * remains read-only for bookmarked URLs.
  */
-export function asbestosScopeToQuery(v: {
-  buildingCategory: BuildingCategory;
-  projectCategory: ProjectCategory;
-  constructionStartYear: number;
-  contractValueJpyMan: number;
-  workAreaSqm: number;
-  asbestosKnownPresent: boolean;
-  workLevel?: AsbestosWorkLevel | "";
-}): string {
-  const params = new URLSearchParams();
-  params.set("b", v.buildingCategory);
-  params.set("p", v.projectCategory);
-  params.set("y", String(v.constructionStartYear));
-  params.set("c", String(v.contractValueJpyMan));
-  params.set("a", String(v.workAreaSqm));
-  if (v.asbestosKnownPresent) params.set("k", "1");
-  if (v.workLevel) params.set("l", v.workLevel);
-  return params.toString();
+let transientScope: AsbestosScopeFormValues | null = null;
+
+/** Keep project conditions in same-tab module memory for one navigation only. */
+export function putAsbestosScopeHandoff(v: AsbestosScopeFormValues): void {
+  transientScope = structuredClone(v);
+}
+
+export function consumeAsbestosScopeHandoff(): AsbestosScopeFormValues | null {
+  if (!transientScope) return null;
+  const value = transientScope;
+  transientScope = null;
+  return structuredClone(value);
+}
+
+export function clearAsbestosScopeHandoffForTest(): void {
+  transientScope = null;
 }
 
 /**

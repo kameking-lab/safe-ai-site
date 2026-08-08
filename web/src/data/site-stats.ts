@@ -36,39 +36,42 @@ export const SITE_STATS = {
   chemicalsMhlwCount: "3,984",
   /** 化学物質検索DBの収録物質数（厚労省取込＋curated DB のマージ後 distinct） */
   mhlwMergedChemicalCount: "3,695",
-  /** チャットボット/条文検索が根拠にする法令・規則・指針等のソース数 */
-  lawSourceCount: "55",
-  /** /law-search に収録された全条文件数（curated 50法令体制） */
-  lawArticleCount: "1,076",
+  /** 公開条文検索へ出すhash検証済みe-Gov抜粋の法源数。 */
+  lawSourceCount: "25",
+  /** /law-searchへ出すhash検証済みe-Gov抜粋条文数。 */
+  lawArticleCount: "63",
+  /** AIが根拠候補として使うhash検証済みe-Govスナップショット法源数。 */
+  ragSourceCount: "25",
   /**
-   * RAG 検索（chatbot/法令要約）対応の全条文数。
-   * 現時点では allLawArticles と同一ソース。将来、厚労省PDF抽出分を追加すると diverge する。
+   * RAG 検索（chatbot/法令要約）対応のhash検証済み全条文数。
    */
-  ragArticleCount: "1,076",
+  ragArticleCount: "2,933",
   /** 対応教育の種類数（特別教育・法定・労働衛生、要相談含む） */
   specialEdKinds: "12+",
-  /** 厚労省 通達・告示・指針の収録件数（mhlw-notices.ts） */
-  mhlwNoticeCount: "1,069",
-  /** 保護具AIファインダーが扱う商品点数（safety-equipment-db.json） */
-  equipmentItemCount: "1,050",
+  /** 公式一次資料との文書同一性と該当抜粋を個別照合した通達・告示・指針件数 */
+  mhlwNoticeCount: "1",
+  /** 二次索引に収録された候補件数。本文未確認のため判断根拠・公開KPIには使わない。 */
+  mhlwNoticeIndexCount: "869",
+  /** 一次資料確認済みで公開できる商品点数（未検証レコードは隔離し数えない） */
+  equipmentItemCount: "0",
   /**
    * 法令ナビ（/law-navi）の収載条文総数（curated 収載集合 LAW_NAVI_ENTRIES ＋
    * 全文由来ギャップ getAllFulltextNaviEntries、非indexable分含む「全文含め」の総数）。
    * sitemap-laws.xml の掲載件数（indexableのみ）とは異なる。
    */
-  lawNaviTotalArticleCount: "1,961",
-  /** mhlw-notices.ts のうち docType==="通達" の件数 */
-  mhlwCircularCount: "682",
-  /** mhlw-notices.ts のうち docType==="告示" の件数 */
-  mhlwKokujiCount: "277",
-  /** mhlw-notices.ts のうち docType==="指針" の件数 */
-  mhlwShishinCount: "110",
+  lawNaviTotalArticleCount: "1,965",
+  /** 個別原文確認済みレコードのうち docType==="通達" の件数 */
+  mhlwCircularCount: "1",
+  /** 個別原文確認済みレコードのうち docType==="告示" の件数 */
+  mhlwKokujiCount: "0",
+  /** 個別原文確認済みレコードのうち docType==="指針" の件数 */
+  mhlwShishinCount: "0",
   /** 厚労省リーフレット収録件数（mhlw-leaflets.ts） */
   mhlwLeafletCount: "289",
-  /** /resources の総件数（通達+告示+指針+リーフレット = mhlwNoticeCount + mhlwLeafletCount） */
-  mhlwResourcesTotalCount: "1,358",
-  /** 安全配慮義務に関する最高裁判例の収録件数（data/mock/notices-and-precedents.ts） */
-  courtPrecedentCount: "15",
+  /** 個別確認済み通達等 + リーフレット索引の合計（内訳と確認状態を分離表示する） */
+  mhlwResourcesTotalCount: "290",
+  /** 一次資料・事件番号・支持箇所の確認を完了した公開判例件数 */
+  courtPrecedentCount: "0",
 } as const;
 
 /**
@@ -82,22 +85,26 @@ export const SITE_STATS_META: Record<
   { source: string; sourceUrl?: string; asOf: string }
 > = {
   accidentDbCount: {
-    source: "厚労省 職場のあんぜんサイト 死傷災害データベース（2006〜2021・月別集計）",
+    source:
+      "厚労省 職場のあんぜんサイト 死傷災害データベース（2006〜2021・月別集計）",
     sourceUrl: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx",
     asOf: "2026-01",
   },
   mhlwDeathsCount: {
-    source: "厚労省 死亡災害DB（2019〜2023）＋死傷病報告オープンデータR06（2024確定値・739件）",
+    source:
+      "厚労省 死亡災害DB（2019〜2023）＋死傷病報告オープンデータR06（2024確定値・739件）",
     sourceUrl: "https://anzeninfo.mhlw.go.jp/user/anzen/tok/anst00.html",
     asOf: "2026-05",
   },
   accidents10yCount: {
-    source: "安全AIポータル ETL: 厚労省死亡災害DB 2019-2024（確定値）＋curated事例 2015-2026＋速報パターン事例 2025-2026（厚労省月次速報集計値ベース）統合",
+    source:
+      "安全AIポータル ETL: 厚労省死亡災害DB 2019-2024（確定値）＋curated事例 2015-2026＋速報パターン事例 2025-2026（厚労省月次速報集計値ベース）統合",
     sourceUrl: "https://anzeninfo.mhlw.go.jp/information/sokuhou.html",
     asOf: "2026-05",
   },
   lawUpdates10yCount: {
-    source: "安全AIポータル ETL: data/law-updates-10years.jsonl（e-Gov・厚労省通達の10年統合）",
+    source:
+      "安全AIポータル ETL: data/law-updates-10years.jsonl（e-Gov・厚労省通達の10年統合）",
     sourceUrl: "https://laws.e-gov.go.jp/",
     asOf: "2026-04",
   },
@@ -107,7 +114,8 @@ export const SITE_STATS_META: Record<
     asOf: "2024-05",
   },
   siteCuratedCaseCount: {
-    source: "安全AIポータル 編集部による厚労省事例DBから curated した詳細事例集",
+    source:
+      "安全AIポータル 編集部による厚労省事例DBから curated した詳細事例集",
     asOf: "2026-04",
   },
   chemicalsMhlwCount: {
@@ -116,54 +124,70 @@ export const SITE_STATS_META: Record<
     asOf: "2026-04",
   },
   mhlwMergedChemicalCount: {
-    source: "厚労省 化学物質情報＋サイト curated 物質DB のマージ後件数（lib/mhlw-chemicals.ts）",
+    source:
+      "厚労省 化学物質情報＋サイト curated 物質DB のマージ後件数（lib/mhlw-chemicals.ts）",
     sourceUrl: "https://anzeninfo.mhlw.go.jp/anzen/kag/kag_index.html",
     asOf: "2026-06",
   },
   lawSourceCount: {
-    source: "data/laws curated 法令データの distinct law 数（法令・規則47＋指針/通達等8）",
+    source:
+      "公開検索用hash検証済みe-Gov抜粋のdistinct法源数",
     sourceUrl: "https://laws.e-gov.go.jp/",
     asOf: "2026-06",
   },
   lawArticleCount: {
-    source: "e-Gov 法令検索（curated 主要50法令）",
+    source: "公開検索用hash検証済みe-Gov抜粋条文",
     sourceUrl: "https://laws.e-gov.go.jp/",
-    asOf: "2026-06",
+    asOf: "2026-08",
+  },
+  ragSourceCount: {
+    source: "hash検証済みe-Gov法令APIスナップショットのdistinct法源数",
+    sourceUrl: "https://laws.e-gov.go.jp/",
+    asOf: "2026-07",
   },
   ragArticleCount: {
-    source: "安全AIポータル RAG（curated 50法令 + 厚労省PDF抽出フィルタ後インデックス）",
-    asOf: "2026-06",
+    source:
+      "hash検証済みe-Gov法令APIスナップショットの非削除条文（AI根拠候補）",
+    sourceUrl: "https://laws.e-gov.go.jp/",
+    asOf: "2026-07",
   },
   specialEdKinds: {
     source: "安衛則第36条／酸欠則／粉じん則ほか（要相談含む）",
     asOf: "2026-04",
   },
   mhlwNoticeCount: {
-    source: "厚労省・中央労働災害防止協会 安全衛生情報センター（mhlw-notices.ts 自動生成）",
+    source: "公式一次資料との文書同一性・固定PDF・該当抜粋の個別照合allowlist",
+    sourceUrl: "https://www.mhlw.go.jp/hourei/",
+    asOf: "2026-08",
+  },
+  mhlwNoticeIndexCount: {
+    source:
+      "安全衛生情報センターの二次索引候補（本文・一次資料との個別対応は未確認、判断利用不可）",
     sourceUrl: "https://www.jaish.gr.jp/user/anzen/hor/tsutatsu.html",
-    asOf: "2026-05",
+    asOf: "2026-07",
   },
   equipmentItemCount: {
-    source: "保護具AIファインダー DB（safety-equipment-db.json）",
-    asOf: "2026-05",
+    source: "公開可能商品レコード（未検証データは隔離）",
+    asOf: "2026-07",
   },
   lawNaviTotalArticleCount: {
-    source: "法令ナビ curated 収載集合 ＋ 全文由来ギャップ（lib/law-navi/permalink.ts, fulltext-navi.ts）",
+    source:
+      "法令ナビ curated 収載集合 ＋ 全文由来ギャップ（lib/law-navi/permalink.ts, fulltext-navi.ts）",
     asOf: "2026-07",
   },
   mhlwCircularCount: {
-    source: "厚労省・中央労働災害防止協会 安全衛生情報センター（mhlw-notices.ts 自動生成、docType===\"通達\"）",
-    sourceUrl: "https://www.jaish.gr.jp/user/anzen/hor/tsutatsu.html",
-    asOf: "2026-07",
+    source: '個別一次資料照合済みallowlistのうち docType==="通達"',
+    sourceUrl: "https://www.mhlw.go.jp/hourei/",
+    asOf: "2026-08",
   },
   mhlwKokujiCount: {
-    source: "厚労省・中央労働災害防止協会 安全衛生情報センター（mhlw-notices.ts 自動生成、docType===\"告示\"）",
-    sourceUrl: "https://www.jaish.gr.jp/user/anzen/hor/tsutatsu.html",
+    source: '個別原文確認済みallowlistのうち docType==="告示"',
+    sourceUrl: "https://www.mhlw.go.jp/hourei/",
     asOf: "2026-07",
   },
   mhlwShishinCount: {
-    source: "厚労省・中央労働災害防止協会 安全衛生情報センター（mhlw-notices.ts 自動生成、docType===\"指針\"）",
-    sourceUrl: "https://www.jaish.gr.jp/user/anzen/hor/tsutatsu.html",
+    source: '個別原文確認済みallowlistのうち docType==="指針"',
+    sourceUrl: "https://www.mhlw.go.jp/hourei/",
     asOf: "2026-07",
   },
   mhlwLeafletCount: {
@@ -171,11 +195,12 @@ export const SITE_STATS_META: Record<
     asOf: "2026-07",
   },
   mhlwResourcesTotalCount: {
-    source: "mhlwNoticeCount + mhlwLeafletCount（/resources 掲載総件数）",
-    asOf: "2026-07",
+    source:
+      "個別一次資料照合済み通達等 + リーフレット索引。両者の確認状態は個別表示する。",
+    asOf: "2026-08",
   },
   courtPrecedentCount: {
-    source: "安全配慮義務に関する最高裁判例 curated 集（data/mock/notices-and-precedents.ts）",
+    source: "公開可能判例allowlist（旧データは出典誤対応のため隔離）",
     asOf: "2026-07",
   },
 };

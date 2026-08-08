@@ -40,6 +40,15 @@ const ARTICLE_20: LawArticle = {
   },
 };
 
+const ARTICLE_151_74: LawArticle = {
+  law: "労働安全衛生規則",
+  lawShort: "安衛則",
+  articleNum: "第151条の74",
+  articleTitle: "保護帽の着用",
+  text: "貨物自動車に荷を積む作業又は卸す作業に関する規定。",
+  keywords: ["貨物自動車", "保護帽"],
+};
+
 describe("extractCitations", () => {
   it("法令名+条文番号を抽出する", () => {
     const out = extractCitations("根拠は安衛則第563条です。");
@@ -171,6 +180,16 @@ describe("validateCitations - 正常系", () => {
     const result = validateCitations("条文番号を含まない一般論の応答。", allowed);
     expect(result.extracted).toEqual([]);
     expect(result.findings).toEqual([]);
+  });
+
+  it("旧レジストリ外でもhash検証済みe-Govコーパス内の条文は架空扱いしない", () => {
+    const allowed = buildAllowedCitations([ARTICLE_151_74]);
+    const result = validateCitations(
+      "貨物自動車の荷卸しでは安衛則第151条の74を確認します。",
+      allowed,
+    );
+    expect(result.findings).toEqual([]);
+    expect(result.retryRecommended).toBe(false);
   });
 });
 

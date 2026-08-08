@@ -1,11 +1,18 @@
-import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
+
+const { permanentRedirect } = vi.hoisted(() => ({
+  permanentRedirect: vi.fn((destination: string) => {
+    throw new Error(`redirect:${destination}`);
+  }),
+}));
+
+vi.mock("next/navigation", () => ({ permanentRedirect }));
+
 import FAQSearchPage from "./page";
 
-describe("/faq/search 検索input 柱0 44pxタップ標的", () => {
-  it("検索inputが min-h-[44px] を満たす", () => {
-    render(<FAQSearchPage />);
-    const input = screen.getByPlaceholderText(/ストレスチェック/);
-    expect(input.className).toContain("min-h-[44px]");
+describe("/faq/search quarantine boundary", () => {
+  it("redirects the retired FAQ search to the noindex status hub", () => {
+    expect(() => FAQSearchPage()).toThrow("redirect:/faq");
+    expect(permanentRedirect).toHaveBeenCalledWith("/faq");
   });
 });

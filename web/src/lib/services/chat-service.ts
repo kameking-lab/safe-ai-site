@@ -7,10 +7,14 @@ import type {
   ServiceResult,
 } from "@/lib/types/api";
 import type { ChatMessage, LawRevision } from "@/lib/types/domain";
+import type { LegalConversationContext } from "@/lib/legal-conversation-context";
 
 export type SendChatMessageInput = {
   revision: LawRevision | null;
   question: string;
+  privacyConfirmed: boolean;
+  history?: ChatMessage[];
+  context?: LegalConversationContext;
 };
 
 export type ChatService = {
@@ -26,25 +30,43 @@ function createInitialMessages(): ChatMessage[] {
     {
       id: "assistant-initial",
       role: "assistant",
-      content:
-        "選択中の法改正についてご質問ください。労働安全衛生法の条文をRAG検索して、Gemini AIが根拠条文付きで回答します。",
+      content: "選択中の法改正について質問できます。",
     },
   ];
 }
 
-function createMessage(content: string): ChatMessage {
+function createMessage(
+  content: string,
+  structured: Pick<
+    ChatMessage,
+    "conditions" | "clarificationQuestion" | "quickReplies" | "sources" | "context"
+  > = {},
+): ChatMessage {
   return {
     id: `assistant-${Date.now() + 1}`,
     role: "assistant",
     content,
+    ...structured,
   };
 }
 
 function toApiRequest(input: SendChatMessageInput): ChatApiRequest {
+  const history = (input.history ?? [])
+    .filter(
+      (message) =>
+        message.role === "user" &&
+        message.content.trim().length > 0 &&
+        message.content.length <= 4_000,
+    )
+    .slice(-10)
+    .map((message) => ({ role: message.role, content: message.content.trim() }));
   return {
     revisionId: input.revision?.id ?? "",
     revisionTitle: input.revision?.title ?? "選択中の法改正",
     question: input.question.trim(),
+    privacyConfirmed: input.privacyConfirmed,
+    ...(history.length > 0 ? { history } : {}),
+    ...(input.context ? { context: input.context } : {}),
   };
 }
 
@@ -145,7 +167,16 @@ export class ApiChatService implements ChatService {
       const payload = (await response.json()) as ChatApiResponse;
       return {
         ok: true,
-        data: createMessage(payload.reply),
+        data: createMessage(
+          payload.substantiveAnswer?.trim() || payload.reply,
+          {
+            conditions: payload.conditions?.slice(0, 3),
+            clarificationQuestion: payload.clarificationQuestion,
+            quickReplies: payload.quickReplies?.slice(0, 3),
+            sources: payload.sources,
+            context: payload.context,
+          },
+        ),
       };
     } catch (error) {
       if (error instanceof Error && error.name === "AbortError") {

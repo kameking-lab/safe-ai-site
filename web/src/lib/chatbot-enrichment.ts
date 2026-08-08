@@ -3,6 +3,7 @@ import { getLawMetadata, getArticleEffectiveDate } from "@/data/law-metadata";
 import { LAW_SHORT_SET, LAW_FULL_NAME_SET } from "@/lib/law-name-registry";
 import { getFreshPlainArticle } from "@/data/plain";
 import { articlePermalink } from "@/lib/law-navi/permalink";
+import { isPublicRouteAvailable } from "@/lib/public-content-policy";
 
 /**
  * Structured citation for a single law article, exposing the
@@ -14,7 +15,8 @@ export type StructuredCitation = {
   articleNum: string;
   articleTitle: string;
   issuer: string;
-  effectiveDate: string;
+  /** 当該条文について一次資料で確認済みの場合だけ設定する。 */
+  effectiveDate?: string;
   /** /law-search deep link */
   searchHref: string;
   /** e-Gov 法令本文へのリンク（取得できる場合） */
@@ -225,27 +227,27 @@ export function suggestDigDeeperLinks(
   const out: DigDeeperLink[] = [];
   const q = normalize(query);
 
-  // 事故事例: トピックマッチがあれば該当クエリ、なければ汎用 /accidents
+  // 重大災害データ: トピックマッチがあれば公開中の /accident-news を検索する。
   let accidentAdded = false;
   for (const topic of TOPIC_TO_ACCIDENT_QUERY) {
     if (topic.triggers.some((t) => q.includes(normalize(t)))) {
       out.push({
         kind: "accidents",
         label: topic.label,
-        href: `/accidents?q=${encodeURIComponent(topic.query)}`,
-        description: `関連する厚労省「職場のあんぜんサイト」事例を一覧表示します。`,
+        href: "/accident-news",
+        description: `厚労省死亡災害DBの収録範囲から関連語を検索します。個別出典は公式DBで確認してください。`,
       });
       accidentAdded = true;
       break;
     }
   }
   if (!accidentAdded && articles.length > 0) {
-    const fallback = articles[0]?.articleTitle || query.slice(0, 20);
+    const fallback = articles[0]?.articleTitle || "関連作業";
     out.push({
       kind: "accidents",
       label: `「${fallback}」関連の事故事例`,
-      href: `/accidents?q=${encodeURIComponent(fallback)}`,
-      description: `この条文に関連する事故事例を検索します。`,
+      href: "/accident-news",
+      description: `この語で重大災害データを検索します。関連性や原因関係を示すものではありません。`,
     });
   }
 
@@ -287,12 +289,15 @@ export function suggestDigDeeperLinks(
     });
   }
 
-  return out.slice(0, 4);
+  return out
+    .filter((link) => isPublicRouteAvailable(link.href))
+    .slice(0, 4);
 }
 
 /**
  * RAG ヒット条文を構造化シティション（条文番号＋施行日＋発出機関）に変換する。
- * 重複（同一 lawShort + articleNum）は除外し、最大 5 件まで。
+ * 重複（同一 lawShort + articleNum）は除外する。入力は retrieval と
+ * source-pruning で既に有界であり、本文が参照した根拠を件数上限で欠落させない。
  */
 export function buildStructuredCitations(articles: LawArticle[]): StructuredCitation[] {
   const seen = new Set<string>();
@@ -302,8 +307,7 @@ export function buildStructuredCitations(articles: LawArticle[]): StructuredCita
     if (seen.has(key)) continue;
     seen.add(key);
     const meta = getLawMetadata(a.lawShort);
-    const effective =
-      getArticleEffectiveDate(a.lawShort, a.articleNum) ?? meta.enactedOn;
+    const effective = getArticleEffectiveDate(a.lawShort, a.articleNum);
     const plain = meta.egovLawId ? getFreshPlainArticle(meta.egovLawId, a) : undefined;
     out.push({
       lawShort: a.lawShort,
@@ -318,7 +322,6 @@ export function buildStructuredCitations(articles: LawArticle[]): StructuredCita
         : undefined,
       plainHref: plain ? articlePermalink(a) ?? undefined : undefined,
     });
-    if (out.length >= 5) break;
   }
   return out;
 }

@@ -14,13 +14,13 @@ import { deriveDangerAlertInput } from "@/lib/signage/danger-alert-source";
 import type { SignagePin } from "./signage-map-leaflet";
 import type {
   JmaEarthquakesFile,
-  JmaIndexFile,
   JmaWarningsFile,
   JmaWeatherFile,
   JmaMapLevel,
   JmaWeatherEntry,
 } from "@/lib/jma/jma-data";
 import { isSevereIntensity } from "@/lib/jma/jma-data";
+import { dataFreshness } from "@/lib/time/jst-date";
 
 const SignageMapLeaflet = dynamic(() => import("./signage-map-leaflet"), {
   ssr: false,
@@ -32,21 +32,22 @@ const SignageMapLeaflet = dynamic(() => import("./signage-map-leaflet"), {
 });
 
 type ApiBundle = {
-  fetchedAt: string;
+  fetchedAt: string | null;
+  degraded: boolean;
   source: string;
   sourceUrl: string;
   license: string;
   warnings: JmaWarningsFile;
   weather: JmaWeatherFile;
   earthquakes: JmaEarthquakesFile;
-} & Pick<JmaIndexFile, "fetchedAt">;
+};
 
 type ViewState = { lat: number; lng: number; zoom: number };
 const VIEW_STORAGE_KEY = "signage-map-view";
 const SEEN_QUAKE_STORAGE_KEY = "signage-map-seen-quakes";
 // 30分: Vercel Edge Requests 削減 (docs/perf/edge-isr-followup-2026-05-19.md)。
 // 上流 /api/signage/jma の revalidate=3600 / CDN s-maxage=300 と整合。
-const REFRESH_INTERVAL_MS = 30 * 60 * 1000;
+const REFRESH_INTERVAL_MS = 10 * 60 * 1000;
 // 取得失敗時は30分の定期更新を待たず短間隔で再試行し、無人表示の「古いまま放置」を縮める。
 const ERROR_RETRY_INTERVAL_MS = 3 * 60 * 1000;
 const DEFAULT_VIEW: ViewState = { lat: 36.5, lng: 138.0, zoom: 5 };
@@ -73,16 +74,6 @@ function readPersistedView(): ViewState | null {
   return null;
 }
 
-function readUrlView(): ViewState | null {
-  if (typeof window === "undefined") return null;
-  const params = new URLSearchParams(window.location.search);
-  const lat = Number(params.get("lat"));
-  const lng = Number(params.get("lng"));
-  const zoom = Number(params.get("zoom"));
-  const candidate = { lat, lng, zoom };
-  return isValidView(candidate) ? candidate : null;
-}
-
 // 外部ストア化（useSyncExternalStore で SSR/CSR 整合）
 let viewStore: ViewState = DEFAULT_VIEW;
 let viewInitialized = false;
@@ -90,11 +81,6 @@ const viewSubscribers = new Set<() => void>();
 function ensureInitialView(): ViewState {
   if (viewInitialized || typeof window === "undefined") return viewStore;
   viewInitialized = true;
-  const fromUrl = readUrlView();
-  if (fromUrl) {
-    viewStore = fromUrl;
-    return viewStore;
-  }
   const persisted = readPersistedView();
   if (persisted) {
     viewStore = persisted;
@@ -170,6 +156,9 @@ export function SignageMapClient({ initialFullscreen = false }: { initialFullscr
         const res = await fetch("/api/signage/jma", { cache: "no-store" });
         if (!res.ok) throw new Error(`http ${res.status}`);
         const json = (await res.json()) as ApiBundle;
+        if (json.degraded || dataFreshness(json.fetchedAt) !== "fresh") {
+          throw new Error("untrusted JMA data");
+        }
         if (cancelled) return;
         setBundle(json);
         setBundleStatus("success");
@@ -190,6 +179,7 @@ export function SignageMapClient({ initialFullscreen = false }: { initialFullscr
         }
       } catch {
         if (!cancelled) {
+          setBundle(null);
           setBundleStatus("error");
           // 失敗時は30分の定期更新を待たず短間隔で再試行（無人表示が古いまま放置されるのを防ぐ）
           window.clearTimeout(retryTimer);
@@ -213,17 +203,11 @@ export function SignageMapClient({ initialFullscreen = false }: { initialFullscr
     };
   }, []);
 
-  // ビュー変更 → URL & localStorage 同期（debounce）
+  // ビュー変更は端末内だけに保持する。精密座標はURL・履歴へ書き込まない。
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (view === DEFAULT_VIEW) return; // 初期は書き込まない
     const t = window.setTimeout(() => {
-      const params = new URLSearchParams(window.location.search);
-      params.set("lat", view.lat.toFixed(4));
-      params.set("lng", view.lng.toFixed(4));
-      params.set("zoom", String(view.zoom));
-      const url = `${window.location.pathname}?${params.toString()}`;
-      window.history.replaceState(null, "", url);
       window.localStorage.setItem(VIEW_STORAGE_KEY, JSON.stringify(view));
     }, 400);
     return () => window.clearTimeout(t);
@@ -258,7 +242,9 @@ export function SignageMapClient({ initialFullscreen = false }: { initialFullscr
   async function copyShareUrl() {
     if (typeof window === "undefined") return;
     try {
-      await navigator.clipboard.writeText(window.location.href);
+      await navigator.clipboard.writeText(
+        `${window.location.origin}${window.location.pathname}`,
+      );
       setShareCopied(true);
       window.setTimeout(() => setShareCopied(false), 1500);
     } catch {
@@ -294,9 +280,17 @@ export function SignageMapClient({ initialFullscreen = false }: { initialFullscr
   const dangerAlert = useMemo(() => deriveDangerAlertInput(bundle?.warnings.byIso), [bundle]);
 
   return (
-    <div className={`relative ${initialFullscreen ? "h-screen w-screen" : "min-h-[640px] h-[calc(100vh-80px)] w-full"} bg-slate-900 text-slate-100`}>
+    <main
+      id="main-content"
+      className={`relative ${initialFullscreen ? "h-screen w-screen" : "h-[100svh] min-h-[640px] w-full"} bg-slate-900 text-slate-100`}
+    >
+      <h1 className="sr-only">サイネージ地図 — 全国の気象警報・地震情報</h1>
       <div className="absolute inset-0 flex">
-        <div className="relative flex-1">
+        <div
+          className="relative flex-1"
+          role="region"
+          aria-label="全国の気象警報・地震地図"
+        >
           <SignageMapLeaflet
             warningsByIso={warningLevels}
             weatherByIso={weatherEntries}
@@ -336,7 +330,7 @@ export function SignageMapClient({ initialFullscreen = false }: { initialFullscr
 
         {/* 右サイドパネル */}
         {sidePanelOpen ? (
-          <aside className="z-[450] w-[320px] shrink-0 overflow-y-auto border-l border-slate-700 bg-slate-950/95 p-4 backdrop-blur-sm xl:w-[360px]">
+          <aside className="absolute inset-y-0 right-0 z-[1050] w-full overflow-y-auto border-l border-slate-700 bg-slate-950/95 px-4 pb-4 pt-40 backdrop-blur-sm sm:relative sm:z-[450] sm:w-[320px] sm:shrink-0 sm:p-4 xl:w-[360px]">
             <div className="flex items-center justify-between">
               <h2 className="text-base font-extrabold text-slate-50">サイネージ地図</h2>
               <button
@@ -372,12 +366,12 @@ export function SignageMapClient({ initialFullscreen = false }: { initialFullscr
               <button
                 type="button"
                 onClick={copyShareUrl}
-                className="inline-flex min-h-[44px] items-center justify-center rounded bg-sky-600 px-3 text-xs font-bold text-white hover:bg-sky-500"
+                className="inline-flex min-h-[44px] items-center justify-center rounded bg-sky-700 px-3 text-xs font-bold text-white hover:bg-sky-800"
               >
                 {shareCopied ? "コピーしました ✓" : "現在のURLをコピー"}
               </button>
               <Link
-                href={`/signage/display?fullscreen=true&lat=${view.lat.toFixed(4)}&lng=${view.lng.toFixed(4)}&zoom=${view.zoom}`}
+                href="/signage/display?fullscreen=true"
                 className="inline-flex min-h-[44px] items-center justify-center rounded border border-emerald-500 px-3 text-center text-xs font-bold text-emerald-300 hover:bg-emerald-950/40"
               >
                 フルスクリーン表示 →
@@ -442,6 +436,6 @@ export function SignageMapClient({ initialFullscreen = false }: { initialFullscr
       </div>
 
       <EarthquakeAlertModal earthquake={alertedQuake} onClose={dismissEarthquakeModal} />
-    </div>
+    </main>
   );
 }

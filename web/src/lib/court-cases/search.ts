@@ -95,15 +95,12 @@ export function computeFacets(cases: CourtCase[]): CourtCaseFacets {
 }
 
 // --- URLクエリ ⇄ フィルタ（一覧ブラウザと印刷ページで共有・対称） ---
-// 顧問先説明で使うコンサル目線レビュー(2026-06-09)で、絞り込み結果がURL/印刷へ
-// 引き継がれない欠点を是正。検索条件をクエリにシリアライズし、印刷ページが同じ
-// パラメータ名で同じ純関数を使って「絞り込んだN件だけ」をA4に出せるようにする。
+// 固定選択肢だけを一覧・印刷間で共有する。自由入力は個人情報等を含み得るためURL化しない。
 const COURT_TYPE_VALUES: CourtType[] = ["最高裁", "高裁", "地裁", "その他"];
 
 /** フィルタを URLSearchParams 文字列に（空の条件は出さない）。 */
 export function courtFilterToQuery(f: CourtCaseFilter): string {
   const params = new URLSearchParams();
-  if (f.query?.trim()) params.set("q", f.query.trim());
   if (f.issue) params.set("issue", f.issue);
   if (f.field) params.set("field", f.field);
   if (f.courtType) params.set("court", f.courtType);

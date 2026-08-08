@@ -31,6 +31,7 @@ import {
 import type { IndustrySlug } from "@/lib/industry-slugs";
 import { detectConcerns, detectFocusAreas, detectIndustry } from "@/lib/copilot/keyword-routing";
 import type { MeasureCategory } from "@/types/safety-plan";
+import { evaluateChatbotSafety } from "@/lib/chatbot-safety";
 
 interface CopilotContextValue {
   state: SafetyContextState;
@@ -67,7 +68,14 @@ export function CopilotProvider({ children }: { children: React.ReactNode }) {
       if (raw) {
         const parsed = JSON.parse(raw);
         const normalized = normalizeSafetyContext(parsed);
-        setState(normalized);
+        // Chat questions are no longer persisted as cross-feature context.
+        // Keep derived, allowlisted concerns but remove legacy raw questions.
+        setState({
+          ...normalized,
+          recentQueries: normalized.recentQueries.filter(
+            (query) => query.source !== "chatbot",
+          ),
+        });
       }
     } catch {
       // ignore malformed storage; keep empty state
@@ -114,7 +122,11 @@ export function CopilotProvider({ children }: { children: React.ReactNode }) {
 
   const recordQuery = useCallback((query: string, source: CopilotStepId) => {
     const trimmed = query.trim();
-    if (!trimmed) return;
+    // Chat questions are memory-only and must never enter the persisted
+    // cross-feature recent-query list.
+    if (!trimmed || source === "chatbot") return;
+    const safety = evaluateChatbotSafety(trimmed);
+    if (safety && safety.kind !== "ambiguous") return;
     setState((prev) => {
       const next = [
         { query: trimmed.slice(0, 240), source, at: Date.now() },
@@ -151,6 +163,10 @@ export function CopilotProvider({ children }: { children: React.ReactNode }) {
 
   const ingestText = useCallback(
     (text: string, source: CopilotStepId) => {
+      const safety = evaluateChatbotSafety(text);
+      if (safety && safety.kind !== "ambiguous") {
+        return { detectedIndustry: undefined, detectedConcerns: [], detectedFocus: [] };
+      }
       const detectedIndustryMatch = detectIndustry(text);
       const detectedConcerns = detectConcerns(text);
       const detectedFocus = detectFocusAreas(text);
@@ -164,7 +180,7 @@ export function CopilotProvider({ children }: { children: React.ReactNode }) {
         const concerns = Array.from(concernSet).slice(0, SAFETY_CONTEXT_MAX_CONCERNS);
         const trimmed = text.trim();
         const recent =
-          trimmed.length > 0
+          source !== "chatbot" && trimmed.length > 0
             ? [
                 { query: trimmed.slice(0, 240), source, at: Date.now() },
                 ...prev.recentQueries.filter((q) => q.query !== trimmed),

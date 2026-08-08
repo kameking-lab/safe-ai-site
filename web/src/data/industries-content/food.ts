@@ -42,7 +42,7 @@ export const foodContent: IndustryContent = {
     {
       icon: "🌡",
       title: "厨房の熱中症",
-      body: "夏季の厨房は気温・湿度ともに高くWBGT基準値超過が常態。R7.6.1の熱中症義務化対応、空調・換気・休憩シフト見直し。",
+      body: "夏季の厨房は高温多湿になり得ます。現場のWBGTと作業条件を確認し、空調・換気・休憩シフトを見直します。",
     },
     {
       icon: "👊",
@@ -77,7 +77,7 @@ export const foodContent: IndustryContent = {
     {
       name: "労働安全衛生規則 第612条の2",
       articles: "暑熱な場所での作業",
-      note: "WBGTの測定と熱中症予防対策（R7.6.1義務化）",
+      note: "対象作業での報告体制と悪化防止手順の整備・周知が法定2項目。WBGT把握等の予防策はガイドラインと分けて確認",
       href: "/law-search?q=熱中症",
     },
     {
@@ -140,11 +140,11 @@ export const foodContent: IndustryContent = {
       relevance: "飲食・食品製造の機械・化学物質・熱中症の3課題を整理。",
     },
     {
-      id: "mhlw-notice-0920",
-      title: "労働安全衛生規則等の一部改正（職場における熱中症防止強化措置）の施行について（令和7年6月1日施行）",
+      id: "mhlw-notice-0014",
+      title: "労働安全衛生規則の一部を改正する省令の施行等について（基発0520第6号）",
       issuer: "厚生労働省労働基準局長",
       date: "2025年",
-      relevance: "厨房を含む全業種で熱中症予防の体制整備・通報・救急対応が義務化。",
+      relevance: "対象作業に該当する場合の報告体制・悪化防止手順と、その対象作業の目安を確認。",
     },
     {
       id: "mhlw-notice-1034",
@@ -254,8 +254,8 @@ export const foodContent: IndustryContent = {
     {
       name: "熱中症予防の労働衛生教育",
       type: "労働衛生教育",
-      target: "厨房・配送従事者（R7.6.1義務化対応）",
-      href: "/education-certification/finder?q=熱中症",
+      target: "厨房・配送従事者向け（ガイドラインに基づく予防教育。特別教育ではない）",
+      href: "/heat-illness-prevention",
     },
     {
       name: "サービス・接遇マナー（カスハラ対応）",
@@ -298,7 +298,7 @@ export const foodContent: IndustryContent = {
     {
       icon: "🌡",
       title: "熱中症予防ハブ（WBGT計算機）",
-      reason: "厨房・テラス・配送向けのWBGT管理（R7義務化対応）",
+      reason: "第612条の2の法定2項目と、WBGT等のガイドライン上の予防策を分けて確認",
       href: "/heat-illness-prevention",
       cta: "熱中症対策へ",
     },
@@ -345,7 +345,7 @@ export const foodContent: IndustryContent = {
     {
       question: "厨房のWBGT測定は2025年6月から本当に必要？",
       answer:
-        "はい。2025年6月1日施行の改正安衛則により、暑熱な作業を行う全ての事業場で（1）通報体制整備、（2）救急対応体制、（3）作業計画とWBGT測定が義務化されました。厨房もWBGT 28℃超の作業環境では作業時間短縮等の措置が必要です。",
+        "一律に「WBGT測定そのものが第612条の2で義務化された」とは扱いません。2025年6月1日施行の同条の法定2項目は、対象作業での（1）報告体制の整備・周知と（2）作業離脱・身体冷却・医療につなぐ悪化防止手順の整備・周知です。施行通達（基発0520第6号）はWBGT28度以上又は気温31度以上で、連続1時間以上又は1日4時間を超えることが見込まれる作業を対象の目安としています。WBGT把握、作業時間の調整、空調・休憩等は重要なガイドライン上の予防策として、厨房の熱源・換気・作業強度と合わせて確認してください。",
     },
     {
       question: "HACCPの取組みは全飲食店に義務？",
@@ -373,7 +373,7 @@ export const foodContent: IndustryContent = {
     "厨房 熱中症 WBGT",
     "厨房 熱中症 換気 空調",
     "厨房 熱中症 休憩シフト",
-    "飲食店 R7義務化 熱中症",
+    "飲食店 熱中症 第612条の2",
     "飲食店 カスハラ 酔客",
     "飲食店 カスハラ 録音",
     "飲食店 カスハラ 警察連携",

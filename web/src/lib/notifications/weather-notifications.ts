@@ -8,6 +8,7 @@
  */
 import { PREFECTURE_CENTROIDS } from "@/data/jma/prefecture-centroids";
 import type { JmaWarningsFile } from "@/lib/jma/jma-data";
+import { isCurrentJmaWarningRegion } from "@/lib/jma/jma-region-trust";
 import type { SiteNotification } from "@/lib/notifications/feed-types";
 
 const PREF_NAME = new Map(PREFECTURE_CENTROIDS.map((p) => [p.iso, p.name]));
@@ -18,8 +19,10 @@ const PREF_NAME = new Map(PREFECTURE_CENTROIDS.map((p) => [p.iso, p.name]));
  */
 export function buildWeatherNotifications(
   prefectureIso: string,
-  warnings: JmaWarningsFile
+  warnings: JmaWarningsFile,
+  now: Date = new Date(),
 ): SiteNotification[] {
+  if (!isCurrentJmaWarningRegion(warnings, prefectureIso, now)) return [];
   const entry = warnings.byIso?.[prefectureIso];
   if (!entry?.entries?.length) return [];
   const prefName = PREF_NAME.get(prefectureIso) ?? prefectureIso;

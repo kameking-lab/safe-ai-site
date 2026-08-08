@@ -7,7 +7,11 @@ import {
   EXTRA_DESTINATION_PAGES,
 } from './site-pages-search-source';
 import { FLAGSHIP_FEATURES } from '@/config/flagship-nav';
-import { INDUSTRY_CONTENT_SLUGS } from '@/data/industries-content';
+import {
+  isPublicRouteAvailable,
+  isQuarantinedPublicPath,
+} from '@/lib/public-content-policy';
+import { FEATURE_SEARCH_GROUPS } from '@/config/feature-portfolio';
 import sitemap from '../app/sitemap';
 
 /**
@@ -62,25 +66,24 @@ describe('site-pages-search-source（機能ページ射影の drift ガード）
     expect(unresolved, `実在ルートへ解決しない url: ${unresolved.join(', ')}`).toEqual([]);
   });
 
-  it('/industries/<slug> は generateStaticParams（INDUSTRY_CONTENT_SLUGS）へ解決する', () => {
-    const slugs = new Set<string>(INDUSTRY_CONTENT_SLUGS);
+  it('quarantine中の業種ページを検索へ収載しない', () => {
     const industryUrls = entries
       .map((e) => e.url)
       .filter((url) => url.startsWith('/industries/'));
-    // 構造解決だけでは動的スラッグの実在まで保証できないため、明示的に台帳一致を固定する。
-    expect(industryUrls.length).toBeGreaterThan(0);
-    for (const url of industryUrls) {
-      const slug = url.slice('/industries/'.length);
-      expect(slugs.has(slug), `未収載の業種スラッグ: ${slug}`).toBe(true);
-    }
+    expect(industryUrls).toEqual([]);
   });
 
-  it('全 FLAGSHIP 主要機能のトップ href が収載されている（収載漏れ 0）', () => {
+  it('公開可能なFLAGSHIPだけを収載し、quarantine先を漏らさない', () => {
     const covered = new Set(entries.map((e) => e.url));
-    const missing = FLAGSHIP_FEATURES.map((f) => f.href.replace(/[#?].*$/, '')).filter(
-      (href) => !covered.has(href),
+    const paths = FLAGSHIP_FEATURES.map((f) =>
+      f.href.replace(/[#?].*$/, ''),
     );
+    const missing = paths
+      .filter(isPublicRouteAvailable)
+      .filter((href) => !covered.has(href));
+    const leaked = [...covered].filter(isQuarantinedPublicPath);
     expect(missing, `検索未収載の主要機能: ${missing.join(', ')}`).toEqual([]);
+    expect(leaked, `quarantine URLが検索へ混入: ${leaked.join(', ')}`).toEqual([]);
   });
 
   it('url に重複が無い（同一ページの二重描画を防止）', () => {
@@ -94,6 +97,62 @@ describe('site-pages-search-source（機能ページ射影の drift ガード）
       expect(e.subtitle.trim().length, `subtitle of ${e.id}`).toBeGreaterThan(0);
       expect(e.url, `url of ${e.id}`).toMatch(/^\//);
     }
+  });
+
+  it('KY用紙intentは正規作成ツールを先頭候補にし、公開中のモデルケースも関連語で発見できる', () => {
+    const paper = entries.find((entry) => entry.url === '/ky/paper');
+    const examples = entries.find((entry) => entry.url === '/ky-examples');
+    expect(paper?.keywords).toContain('KY用紙');
+    expect(examples?.keywords).toContain('KY用紙');
+    expect(examples?.subtitle).toContain('架空の学習例');
+    expect(examples?.subtitle).not.toContain('synthetic');
+  });
+
+  it('全エントリがTier・role・status・8検索群の表示ラベルを保持する', () => {
+    for (const e of entries) {
+      expect([1, 2, 3], `tier of ${e.url}`).toContain(e.tier);
+      expect(e.roleLabel.trim(), `roleLabel of ${e.url}`).not.toBe('');
+      expect(e.statusLabel.trim(), `statusLabel of ${e.url}`).not.toBe('');
+      expect(e.tierLabel, `tierLabel of ${e.url}`).toContain(`Tier ${e.tier}`);
+      expect(FEATURE_SEARCH_GROUPS, `searchGroup of ${e.url}`).toContain(
+        e.searchGroup,
+      );
+      expect(e.searchGroupLabel.trim(), `searchGroupLabel of ${e.url}`).not.toBe('');
+      expect(e.keywords, `${e.url} にTierラベルがない`).toContain(e.tierLabel);
+      expect(e.keywords, `${e.url} にroleラベルがない`).toContain(e.roleLabel);
+      expect(e.keywords, `${e.url} にstatusラベルがない`).toContain(e.statusLabel);
+    }
+    expect(new Set(entries.map((e) => e.searchGroup))).toEqual(
+      new Set(FEATURE_SEARCH_GROUPS),
+    );
+  });
+
+  it('旧FLAGSHIP外の /risk・Visual KYT・自動化サンプル集約をportfolioから収載する', () => {
+    const byUrl = new Map(entries.map((e) => [e.url, e]));
+    expect(byUrl.get('/risk')).toMatchObject({
+      tier: 1,
+      role: 'flagship',
+      searchGroup: 'tool',
+    });
+    expect(byUrl.get('/training/visual-ky')).toMatchObject({
+      tier: 1,
+      role: 'flagship',
+      searchGroup: 'kyt',
+    });
+    expect(byUrl.get('/automation-examples')).toMatchObject({
+      tier: 3,
+      role: 'automation-sample',
+      searchGroup: 'automation-sample',
+    });
+  });
+
+  it('Tier 4・quarantineを検索へ収載しない', () => {
+    expect(entries.some((entry) => entry.tier === 4)).toBe(false);
+    expect(entries.some((entry) => entry.url === '/e-learning')).toBe(false);
+    expect(entries.some((entry) => entry.url === '/risk-prediction')).toBe(false);
+    expect(entries.some((entry) => entry.url === '/work-environment-measurement')).toBe(
+      false,
+    );
   });
 
   /**
@@ -156,7 +215,7 @@ describe('site-pages-search-source（機能ページ射影の drift ガード）
     });
 
     it('対象ユーザー4類型のペルソナ別ポータル /for/<persona> が立場名 keyword で結線されている', () => {
-      // サイトの唯一のゴール（対象4類型が日本一使いやすい）に直結する入口ハブ。立場名で 0 件
+      // 対象4類型の実務入口。立場名で 0 件
       // だった発見性の穴を塞ぐため、各ポータルが「その立場を名指す語」で引けることを機械固定する。
       const byUrl = new Map(entries.map((e) => [e.url, e]));
       const personaKeyword: Record<string, string> = {

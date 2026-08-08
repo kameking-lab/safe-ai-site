@@ -1,21 +1,24 @@
 /**
  * PIN-構造化DB 整合性チェック。
  *
- * PINNED_TOPICS で参照される全 (law, articleNum) が allLawArticles 内に
+ * PINNED_TOPICS で参照される全 (law または lawShort, articleNum) が
+ * hash 検証済み e-Gov コーパス内に
  * 実在することを検証する。 PIN 追加時に typo / 抜け漏れがあると、
  * applyPinnedTopics() がランタイムで silent fail（found === undefined → skip）
  * するため、ビルド／テストの時点で検出する仕組みを用意する。
  *
- * 注意: PIN は law（正式名）で照合され、構造化レジストリは lawShort で
- * インデックスされるため、ここでは allLawArticles を直接走査する。
+ * 正式名称が長い法令は lawShort でも指定できるため、実装と同じ照合を行う。
  */
 import { describe, it, expect } from "vitest";
 import { PINNED_TOPICS } from "@/lib/rag-search";
-import { allLawArticles } from "@/data/laws";
+import { verifiedLawArticles } from "@/data/laws/verified-corpus";
 
-describe("PIN integrity: every PINNED_TOPICS reference exists in allLawArticles", () => {
+describe("PIN integrity: every PINNED_TOPICS reference exists in verified corpus", () => {
   const articleSet = new Set(
-    allLawArticles.map((a) => `${a.law}|${a.articleNum}`)
+    verifiedLawArticles.flatMap((a) => [
+      `${a.law}|${a.articleNum}`,
+      `${a.lawShort}|${a.articleNum}`,
+    ])
   );
 
   const missing: { law: string; articleNum: string; triggers: string[] }[] = [];
@@ -42,7 +45,7 @@ describe("PIN integrity: every PINNED_TOPICS reference exists in allLawArticles"
         )
         .join("\n");
       throw new Error(
-        `PIN integrity failure: ${missing.length} pin(s) not found in allLawArticles\n${report}`
+        `PIN integrity failure: ${missing.length} pin(s) not found in verified corpus\n${report}`
       );
     }
     expect(missing).toEqual([]);

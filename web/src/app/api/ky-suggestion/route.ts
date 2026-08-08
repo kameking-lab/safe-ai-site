@@ -6,24 +6,46 @@ import {
   type KyIndustryId,
   type KyWorkTypeId,
 } from "@/types/ky-example";
+import { evaluateChatbotSafety } from "@/lib/chatbot-safety";
 
 export const runtime = "nodejs";
 
-export async function GET(request: Request) {
-  const url = new URL(request.url);
-  const industryRaw = url.searchParams.get("industry");
-  const workTypeRaw = url.searchParams.get("workType");
-  const freeText = url.searchParams.get("q") ?? undefined;
-  const limitRaw = url.searchParams.get("limit");
+export async function POST(request: Request) {
+  let body: Record<string, unknown>;
+  try {
+    body = (await request.json()) as Record<string, unknown>;
+  } catch {
+    body = {};
+  }
+  const industryRaw = typeof body.industry === "string" ? body.industry : null;
+  const workTypeRaw = typeof body.workType === "string" ? body.workType : null;
+  const freeText =
+    typeof body.q === "string" ? body.q.slice(0, 500) : undefined;
+  const limitRaw = typeof body.limit === "number" ? body.limit : null;
 
   const industry = isIndustry(industryRaw) ? industryRaw : undefined;
   const workType = isWorkType(workTypeRaw) ? workTypeRaw : undefined;
 
+  const safety = freeText ? evaluateChatbotSafety(freeText) : null;
+  if (safety) {
+    return NextResponse.json(
+      {
+        results: [],
+        reason: safety.kind,
+        message: safety.response,
+        query: { industry, workType, freeText: null, limit: 0 },
+      },
+      {
+        status: 422,
+        headers: { "Cache-Control": "no-store" },
+      },
+    );
+  }
+
   let limit = 12;
-  if (limitRaw) {
-    const parsed = Number.parseInt(limitRaw, 10);
-    if (Number.isFinite(parsed) && parsed > 0) {
-      limit = Math.min(parsed, 30);
+  if (limitRaw !== null) {
+    if (Number.isFinite(limitRaw) && limitRaw > 0) {
+      limit = Math.min(Math.trunc(limitRaw), 30);
     }
   }
 
@@ -51,7 +73,17 @@ export async function GET(request: Request) {
       })),
       query: { industry, workType, freeText, limit },
     },
-    { status: 200 }
+    { status: 200, headers: { "Cache-Control": "private, no-store" } }
+  );
+}
+
+export function GET() {
+  return NextResponse.json(
+    { error: "method_not_allowed" },
+    {
+      status: 405,
+      headers: { Allow: "POST", "Cache-Control": "no-store" },
+    },
   );
 }
 

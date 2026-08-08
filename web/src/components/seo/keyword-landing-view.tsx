@@ -16,6 +16,80 @@ import type { KeywordLanding } from "@/data/seo/keyword-landing";
  * Markup-only — content is provided by data/seo/keyword-landing.ts.
  */
 export function KeywordLandingView({ data }: { data: KeywordLanding }) {
+  const isServiceFirstChatbotGuide = data.slug === "anzeneho-ai-chatbot";
+  const scopeCards =
+    data.audience || data.canDo || data.cannotDo || data.dataHandling ? (
+      <div className="grid gap-4 sm:grid-cols-2">
+        {data.audience ? (
+          <section className="rounded-xl border border-slate-200 bg-white p-4">
+            <h2 className="text-sm font-bold text-slate-900">対象者</h2>
+            <ul className="mt-2 list-disc space-y-1 pl-5 text-sm leading-6 text-slate-700">
+              {data.audience.map((item) => <li key={item}>{item}</li>)}
+            </ul>
+          </section>
+        ) : null}
+        {data.canDo ? (
+          <section className="rounded-xl border border-emerald-200 bg-emerald-50/60 p-4">
+            <h2 className="text-sm font-bold text-emerald-900">できること</h2>
+            <ul className="mt-2 list-disc space-y-1 pl-5 text-sm leading-6 text-slate-700">
+              {data.canDo.map((item) => <li key={item}>{item}</li>)}
+            </ul>
+          </section>
+        ) : null}
+        {data.cannotDo ? (
+          <section className="rounded-xl border border-amber-200 bg-amber-50/60 p-4">
+            <h2 className="text-sm font-bold text-amber-950">できないこと・限界</h2>
+            <ul className="mt-2 list-disc space-y-1 pl-5 text-sm leading-6 text-slate-700">
+              {data.cannotDo.map((item) => <li key={item}>{item}</li>)}
+            </ul>
+          </section>
+        ) : null}
+        {data.dataHandling ? (
+          <section className="rounded-xl border border-sky-200 bg-sky-50/60 p-4">
+            <h2 className="text-sm font-bold text-sky-950">データの扱い</h2>
+            <ul className="mt-2 list-disc space-y-1 pl-5 text-sm leading-6 text-slate-700">
+              {data.dataHandling.map((item) => <li key={item}>{item}</li>)}
+            </ul>
+          </section>
+        ) : null}
+      </div>
+    ) : null;
+  const faqCards = (
+    <Stack gap="md">
+      {data.longTail.map((qa) => (
+        <article
+          key={qa.query}
+          className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
+        >
+          <h2 className="text-base font-bold leading-snug text-slate-900 sm:text-lg">
+            {qa.query}
+          </h2>
+          <p className="mt-2 text-sm leading-7 text-slate-700">{qa.answer}</p>
+        </article>
+      ))}
+    </Stack>
+  );
+  const aboutCopy = (
+    <>
+      <p className="text-xs font-semibold uppercase tracking-widest text-emerald-700">
+        このページについて
+      </p>
+      <p className="mt-2 text-sm leading-7 text-slate-700">
+        本ガイドは、個人運営の研究プロジェクト
+        <Link href="/about" className="underline hover:text-emerald-700">
+          「安全AIポータル」
+        </Link>
+        の編集部が、検索者の質問に最短で答えることを目的に作成した解説ページです。個人資格による監修済みとは表示しません。AIによる回答や本ガイドの記述は最新法令や個別事案の判断を保証するものではありません。具体的な判断は必ず原典（e-Gov・厚労省・所轄労働基準監督署・専門家）でご確認ください。
+      </p>
+      <p className="mt-3 text-[11px] leading-5 text-slate-500">
+        フィードバックは
+        <Link href="/contact" className="underline hover:text-emerald-700">
+          お問い合わせフォーム
+        </Link>
+        までお願いします。指摘事項はコミット履歴で公開PDCAの対象として反映します。
+      </p>
+    </>
+  );
   return (
     <PageContainer width="prose" className="py-8 md:py-10">
       <Breadcrumb
@@ -45,14 +119,34 @@ export function KeywordLandingView({ data }: { data: KeywordLanding }) {
             href="/about"
             className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
           >
-            運営者プロフィール（労働安全コンサルタント）
+            運営・確認方針
           </Link>
         </Cluster>
         <p className="mt-4 text-[11px] leading-5 text-slate-500">
           公開日 {data.datePublished}　最終更新 {data.dateModified}　・
-          監修：労働安全衛生コンサルタント（登録番号260022）が個人で運営する研究プロジェクト
+          編集：安全AIポータル編集部。確認状態は本文に表示
         </p>
       </header>
+
+      {scopeCards ? (
+        isServiceFirstChatbotGuide ? (
+          <details className="mt-8 rounded-xl border border-slate-200 bg-white px-4">
+            <summary className="flex min-h-11 cursor-pointer items-center py-3 text-sm font-semibold text-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700">
+              対象と注意事項
+            </summary>
+            <div className="pb-4">{scopeCards}</div>
+          </details>
+        ) : (
+          <Section
+            title="対象者・できること・限界"
+            description="ツールを使う前に、適用範囲と人による確認が必要な境界を確認してください。"
+            spacing="default"
+            className="mt-8"
+          >
+            {scopeCards}
+          </Section>
+        )
+      ) : null}
 
       <Section
         title={
@@ -94,31 +188,29 @@ export function KeywordLandingView({ data }: { data: KeywordLanding }) {
         </ol>
       </Section>
 
-      <Section
-        title={
-          <span className="flex items-center gap-2">
+      {isServiceFirstChatbotGuide ? (
+        <details className="mt-10 rounded-xl border border-slate-200 bg-white px-4">
+          <summary className="flex min-h-11 cursor-pointer items-center gap-2 py-3 text-sm font-semibold text-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-700">
             <BookOpen className="h-4 w-4 text-sky-700" aria-hidden="true" />
-            よくある質問（ロングテール）
-          </span>
-        }
-        description="関連する周辺キーワードを Q&A 形式で解説します。各回答は条文・通達など一次資料の参照前提です。"
-        spacing="default"
-        className="mt-10"
-      >
-        <Stack gap="md">
-          {data.longTail.map((qa) => (
-            <article
-              key={qa.query}
-              className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
-            >
-              <h2 className="text-base font-bold leading-snug text-slate-900 sm:text-lg">
-                {qa.query}
-              </h2>
-              <p className="mt-2 text-sm leading-7 text-slate-700">{qa.answer}</p>
-            </article>
-          ))}
-        </Stack>
-      </Section>
+            よくある質問
+          </summary>
+          <div className="pb-4">{faqCards}</div>
+        </details>
+      ) : (
+        <Section
+          title={
+            <span className="flex items-center gap-2">
+              <BookOpen className="h-4 w-4 text-sky-700" aria-hidden="true" />
+              よくある質問（ロングテール）
+            </span>
+          }
+          description="関連する周辺キーワードを Q&A 形式で解説します。各回答は条文・通達など一次資料の参照前提です。"
+          spacing="default"
+          className="mt-10"
+        >
+          {faqCards}
+        </Section>
+      )}
 
       <Section
         title={
@@ -179,25 +271,18 @@ export function KeywordLandingView({ data }: { data: KeywordLanding }) {
         </ul>
       </Section>
 
-      <section className="mt-10 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-        <p className="text-xs font-semibold uppercase tracking-widest text-emerald-700">
-          このページについて
-        </p>
-        <p className="mt-2 text-sm leading-7 text-slate-700">
-          本ガイドは、労働安全衛生コンサルタント（登録番号260022）が個人で運営する研究プロジェクト
-          <Link href="/about" className="underline hover:text-emerald-700">
-            「安全AIポータル」
-          </Link>
-          が、検索者の質問に最短で答えることを目的に作成した解説ページです。AIによる回答や本ガイドの記述は最新法令や個別事案の判断を保証するものではありません。具体的な判断は必ず原典（e-Gov・厚労省・所轄労働基準監督署・専門家）でご確認ください。
-        </p>
-        <p className="mt-3 text-[11px] leading-5 text-slate-500">
-          フィードバックは
-          <Link href="/contact" className="underline hover:text-emerald-700">
-            お問い合わせフォーム
-          </Link>
-          までお願いします。指摘事項はコミット履歴で公開PDCAの対象として反映します。
-        </p>
-      </section>
+      {isServiceFirstChatbotGuide ? (
+        <details className="mt-10 rounded-xl border border-slate-200 bg-white px-4 shadow-sm">
+          <summary className="flex min-h-11 cursor-pointer items-center py-3 text-sm font-semibold text-slate-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700">
+            このページについて
+          </summary>
+          <div className="pb-4">{aboutCopy}</div>
+        </details>
+      ) : (
+        <section className="mt-10 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+          {aboutCopy}
+        </section>
+      )}
     </PageContainer>
   );
 }

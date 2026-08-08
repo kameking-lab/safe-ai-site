@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { mhlwNotices } from "@/data/mhlw-notices";
-import { courtPrecedents } from "@/data/mock/notices-and-precedents";
+import {
+  publicMhlwNotices as secondaryNoticeIndex,
+  verifiedMhlwNotices as mhlwNotices,
+} from "@/data/public-mhlw-notices";
 import { PageContainer } from "@/components/layout";
 import { LawHubNav } from "@/components/law-hub-nav";
 import { ogImageUrl } from "@/lib/og-url";
@@ -12,14 +14,14 @@ import { SITE_STATS } from "@/data/site-stats";
 
 import { PageJsonLd } from "@/components/page-json-ld";
 export const metadata: Metadata = {
-  title: "厚労省通達・告示・指針 + 判例 一覧",
+  title: "厚労省通達・告示・指針 一覧",
   description:
-    `労働安全衛生に関する厚生労働省の通達・告示・指針を全件横断検索 (${mhlwNotices.length}件) + 安全配慮義務に関する最高裁判例 ${courtPrecedents.length}件。各通達ごとに概要・関連事故事例・推奨保護具をまとめています。`,
+    `労働安全衛生に関する通達・告示・指針の個別原文確認済みレコード (${mhlwNotices.length}件)。二次索引候補${secondaryNoticeIndex.length}件と未確認判例は判断画面から隔離しています。`,
   alternates: { canonical: "/circulars" },
   openGraph: {
-    title: "厚労省通達・告示・指針 + 判例 一覧",
+    title: "厚労省通達・告示・指針 一覧",
     description:
-      `労働安全衛生に関する通達 ${mhlwNotices.length}件 + 安全配慮義務判例 ${courtPrecedents.length}件。法的拘束力バッジ・最終確認日付き。`,
+      `労働安全衛生に関する個別原文確認済みの通達等 ${mhlwNotices.length}件。未確認の二次索引と判例は隔離中です。`,
     images: [{ url: ogImageUrl("厚労省通達・判例 一覧"), width: 1200, height: 630 }],
   },
 };
@@ -35,15 +37,27 @@ export default function CircularsIndexPage() {
     <>
     <LawHubNav current="circulars" />
     <PageContainer width="wide">
-      <PageJsonLd name="厚労省通達・告示・指針 一覧" description="労働安全衛生に関する厚生労働省の通達・告示・指針を全件横断検索。各通達ごとに概要・関連事故事例・推奨保護具をまとめています。" path="/circulars" />
+      <PageJsonLd name="厚労省通達・告示・指針 一覧" description={`個別原文・文書番号・発出日の確認済みレコード${mhlwNotices.length}件を表示。二次索引候補${secondaryNoticeIndex.length}件と未確認判例は隔離しています。`} path="/circulars" />
       <CircularsHeader total={mhlwNotices.length} shown={sorted.length} />
+
+      <div className="mb-5 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm leading-6 text-amber-950">
+        現在、個別原文まで確認済みの公開レコードは{mhlwNotices.length}件です。
+        二次索引候補{secondaryNoticeIndex.length}件は、本文・文書番号・発出日・後継文書の確認が終わるまで検索結果へ出しません。
+        通達等は
+        <a
+          href="https://www.mhlw.go.jp/hourei/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mx-1 font-semibold underline underline-offset-2"
+        >
+          厚生労働省 法令等データベースサービス
+        </a>
+        で確認してください。
+      </div>
 
       <CircularsFilterableList all={sorted} />
 
-      {/* P0-011 (usability-audit-day2): /laws/notices-precedents から
-          判例30件を統合。通達 (行政解釈) と判例 (司法解釈) を同一ページで
-          参照できる構成に。 */}
-      <CourtPrecedentsList precedents={courtPrecedents} />
+      <CourtPrecedentsList precedents={[]} />
 
       <CircularsFooter />
 
@@ -51,8 +65,8 @@ export default function CircularsIndexPage() {
         <h2 className="mb-3 text-base font-bold text-slate-900">補助ハブ</h2>
         <div className="grid gap-3 sm:grid-cols-1">
           <Link href="/resources" className="block min-h-[64px] rounded-xl border border-violet-200 bg-violet-50 px-4 py-3 text-sm font-semibold text-violet-900 hover:bg-violet-100">
-            厚労省一次資料DB
-            <span className="mt-0.5 block text-[11px] font-normal text-violet-700">告示・指針・リーフレットを含む {SITE_STATS.mhlwResourcesTotalCount}件</span>
+            厚労省資料への確認導線
+            <span className="mt-0.5 block text-[11px] font-normal text-violet-700">個別確認済み通達等とリーフレット索引を確認（計 {SITE_STATS.mhlwResourcesTotalCount}件）</span>
           </Link>
         </div>
       </section>

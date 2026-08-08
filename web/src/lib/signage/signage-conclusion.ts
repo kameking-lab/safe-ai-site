@@ -2,10 +2,10 @@
  * サイネージ最上部「結論ストリップ」の表示状態を決める純関数（柱0 ビジュアルファースト）。
  *
  * 現場のTVを数メートル先から3秒見ただけで「いまの状態」と「次にやること」が
- * 分かるよう、ページ内に散らばる状態（気象警報・本日のリスク予測・記録キットの
+ * 分かるよう、ページ内に散らばる状態（気象警報・検証済み外部判定・記録キットの
  * 要対応）を1本の色帯に集約する。色はJIS安全色の文法に従う:
  *   赤   = 危険・停止級（特別警報・警報発表中 / 是正期日の超過）
- *   黄   = 注意（注意報発表中 / 気象の取得失敗=確認不能 / 高リスク予測 / 要対応の記録）
+ *   黄   = 注意（注意報発表中 / 気象の取得失敗=確認不能 / 検証済み高リスク / 要対応の記録）
  *   緑   = 安全・OK（警報なし・停止級なし）
  *   無彩 = 確認中（取得完了前。誤った安心も誤った警告も出さない）
  *
@@ -32,7 +32,7 @@ export type SignageConclusionRisk = {
 export type SignageConclusionInput = {
   /** 気象警報パネルの状態（resolveWeatherWarningPanelState の結果）。 */
   warningPanel: WeatherWarningPanelState;
-  /** computeTodayRisks の結果（level と label のみ参照）。 */
+  /** 独立検証済みの判定だけを渡す。未検証の独自推定は空配列にする。 */
   risks: ReadonlyArray<SignageConclusionRisk>;
   /** この端末の記録キット集計。記録が1件も無い端末では null。 */
   siteSafety: { overdueCount: number; alertCount: number } | null;
@@ -55,7 +55,7 @@ type Condition = {
 
 /**
  * 状態の優先順位: 特別警報/警報発表中 > 期限超過 > 注意報発表中 > 気象取得失敗 >
- * 高リスク予測 > 要対応 > 確認中 > 警報なし。最上位が主文（デカ表示）、残りはチップになる。
+ * 検証済み高リスク > 要対応 > 確認中 > 警報なし。最上位が主文（デカ表示）、残りはチップになる。
  */
 export function buildSignageConclusion(input: SignageConclusionInput): SignageConclusion {
   const { warningPanel, risks, siteSafety } = input;

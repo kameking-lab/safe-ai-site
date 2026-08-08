@@ -11,6 +11,9 @@
 import type { KyInstructionRecordState } from "@/lib/types/operations";
 import type { SafetyTone } from "@/lib/design/safety-tone";
 import { DEFAULT_APPROVAL } from "@/lib/ky/approval";
+import { kyContentRevision } from "@/lib/ky/revision";
+import { isKyCleanPrintAllowed } from "@/lib/ky/readiness";
+import { validateKyForTransition } from "@/lib/ky/readiness";
 
 export type KyPaperMissingItem = {
   key: "work" | "hazard" | "reduction" | "goal" | "participants";
@@ -21,7 +24,13 @@ export type KyPaperMissingItem = {
 };
 
 export type KyPaperStatus = {
-  kind: "rejected" | "submitted" | "approved" | "incomplete" | "complete";
+  kind:
+    | "rejected"
+    | "submitted"
+    | "approved"
+    | "incomplete"
+    | "human-review-required"
+    | "ready-for-approval";
   tone: SafetyTone;
   /** 体言止めの短ラベル */
   title: string;
@@ -64,7 +73,12 @@ function isFilled(record: KyInstructionRecordState, key: KyPaperMissingItem["key
  * 各段の done/remaining は computeKyPaperStatus と同じ isFilled で判定するため、
  * 全段の remaining 合計＝結論カードの「記入のこりN」と必ず一致する（整合保証）。
  */
-export type KyPaperStepKey = "basic" | "hazard" | "reduction" | "confirm";
+export type KyPaperStepKey =
+  | "conditions"
+  | "hazard"
+  | "reduction"
+  | "human-review"
+  | "output";
 
 export type KyPaperStep = {
   key: KyPaperStepKey;
@@ -81,20 +95,20 @@ export type KyPaperStep = {
 };
 
 const STEP_DEFS: readonly { key: KyPaperStepKey; label: string; items: KyPaperMissingItem["key"][] }[] = [
-  { key: "basic", label: "基本情報", items: ["work"] },
+  { key: "conditions", label: "作業条件", items: ["work"] },
   { key: "hazard", label: "危険", items: ["hazard"] },
   { key: "reduction", label: "対策", items: ["reduction"] },
-  { key: "confirm", label: "確認", items: ["goal", "participants"] },
+  { key: "human-review", label: "人が確認", items: ["goal", "participants"] },
 ];
 
 function anchorOf(key: KyPaperMissingItem["key"]): string {
   return ESSENTIALS.find((e) => e.key === key)!.anchor;
 }
 
-/** 記入の4段（基本情報→危険→対策→確認）それぞれの進み具合を返す。 */
+/** 作業条件→危険→対策→人が確認→保存・印刷の5段を返す。 */
 export function computeKyPaperSteps(record: KyInstructionRecordState): KyPaperStep[] {
   let currentAssigned = false;
-  return STEP_DEFS.map((def) => {
+  const inputSteps = STEP_DEFS.map((def) => {
     const unfilled = def.items.filter((k) => !isFilled(record, k));
     const done = unfilled.length === 0;
     const current = !done && !currentAssigned;
@@ -108,11 +122,24 @@ export function computeKyPaperSteps(record: KyInstructionRecordState): KyPaperSt
       anchor: anchorOf(unfilled[0] ?? def.items[0]),
     };
   });
+  const outputDone = isKyCleanPrintAllowed(record);
+  return [
+    ...inputSteps,
+    {
+      key: "output",
+      label: "保存・印刷",
+      remaining: outputDone ? 0 : 1,
+      done: outputDone,
+      current: !outputDone && !currentAssigned,
+      anchor: "#ky-approval",
+    },
+  ];
 }
 
 /** KY用紙の現在状態を結論カード1メッセージに要約する。 */
 export function computeKyPaperStatus(record: KyInstructionRecordState): KyPaperStatus {
   const approval = record.approval ?? DEFAULT_APPROVAL;
+  const transitionIssues = validateKyForTransition(record);
 
   if (approval.status === "rejected") {
     return {
@@ -124,6 +151,18 @@ export function computeKyPaperStatus(record: KyInstructionRecordState): KyPaperS
     };
   }
   if (approval.status === "submitted") {
+    if (
+      transitionIssues.length > 0 ||
+      approval.submittedRevision !== kyContentRevision(record)
+    ) {
+      return {
+        kind: "human-review-required",
+        tone: "warning",
+        title: "提出状態は無効・再確認が必要",
+        missing: [],
+        action: { href: "#ky-approval", label: "未確認項目を見る" },
+      };
+    }
     return {
       kind: "submitted",
       tone: "info",
@@ -133,6 +172,15 @@ export function computeKyPaperStatus(record: KyInstructionRecordState): KyPaperS
     };
   }
   if (approval.status === "approved") {
+    if (!isKyCleanPrintAllowed(record)) {
+      return {
+        kind: "human-review-required",
+        tone: "warning",
+        title: "承認状態は無効・再確認が必要",
+        missing: [],
+        action: { href: "#ky-approval", label: "未確認項目を見る" },
+      };
+    }
     return {
       kind: "approved",
       tone: "safe",
@@ -144,12 +192,21 @@ export function computeKyPaperStatus(record: KyInstructionRecordState): KyPaperS
 
   const missing = ESSENTIALS.filter((item) => !isFilled(record, item.key));
   if (missing.length === 0) {
+    if (transitionIssues.length > 0) {
+      return {
+        kind: "human-review-required",
+        tone: "warning",
+        title: "人手確認が必要",
+        missing: [],
+        action: { href: "#ky-approval", label: "提出条件を確認" },
+      };
+    }
     return {
-      kind: "complete",
+      kind: "ready-for-approval",
       tone: "safe",
-      title: "記入完了",
+      title: "承認準備完了",
       missing: [],
-      action: { href: "/ky/morning", label: "朝礼サイネージへ" },
+      action: { href: "#ky-approval", label: "提出・承認へ" },
     };
   }
   const next = missing[0];

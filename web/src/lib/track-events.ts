@@ -1,4 +1,10 @@
 // 解析イベント送信（GA4 / gtag）。GA_MEASUREMENT_ID 未設定時は no-op。
+import {
+  hasOptionalTrackingConsent,
+  hasPrivacySignalOptOut,
+  isOptionalTrackingUrl,
+  sanitizeAnalyticsParams,
+} from "@/lib/analytics-privacy";
 //
 // 使い方（クライアントコンポーネント）:
 //   import { trackAffiliateClick } from "@/lib/track-events";
@@ -6,7 +12,7 @@
 
 declare global {
   interface Window {
-    gtag?: (command: string, target: string, params?: Record<string, unknown>) => void;
+    gtag?: (...args: unknown[]) => void;
   }
 }
 
@@ -20,7 +26,10 @@ export function trackEvent(action: string, params?: Record<string, unknown>): vo
   if (!GA_ID) return;
   if (typeof window === "undefined") return;
   if (typeof window.gtag !== "function") return;
-  window.gtag("event", action, params);
+  if (!hasOptionalTrackingConsent()) return;
+  if (hasPrivacySignalOptOut()) return;
+  if (!isOptionalTrackingUrl(window.location.href)) return;
+  window.gtag("event", action, sanitizeAnalyticsParams(params));
 }
 
 /** アフィリエイトリンククリックを GA4 に送信。GA未読み込み時は no-op。 */

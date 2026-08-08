@@ -1,14 +1,19 @@
 import type { Metadata } from "next";
 import { ogImageUrl } from "@/lib/og-url";
 
-const _title = "労働安全衛生FAQ 200問";
+const _title = "労働安全衛生FAQの検証状況";
 const _desc =
-  "安全管理者 選任 義務・衛生管理者 人数など労働安全衛生法・特別教育 60種類 FAQ 200問を法令根拠付きで解説。ストレスチェック・化学物質 自律的管理・健康診断の4カテゴリ別に検索可能。";
+  "旧FAQは法令番号・資格・制度境界の誤対応が確認されたため公開停止中です。検証済みの検索と公式一次資料をご利用ください。";
 
 export const metadata: Metadata = {
   title: _title,
   description: _desc,
   alternates: { canonical: "/faq" },
+  robots: {
+    index: false,
+    follow: true,
+    googleBot: { index: false, follow: true },
+  },
   openGraph: {
     title: _title,
     description: _desc,

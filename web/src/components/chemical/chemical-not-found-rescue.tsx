@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { HelpCircle, PackageSearch, Search, Upload } from "lucide-react";
+import { TransientChemicalLink } from "@/components/home-safety-cockpit/transient-chemical-link";
 
 /**
  * CR2-T1: 化学物質のゼロヒット（収載外）を「見つかりません＋広告」で終わらせないための
@@ -40,7 +41,9 @@ export function isLikelyProductName(q: string): boolean {
 }
 
 /** AI詳細調査ボタンの振る舞い: RAは同一ページ内の action、他画面は /chemical-ra への遷移。 */
-type AiAction = { onClick: () => void; loading?: boolean } | { href: string };
+type AiAction =
+  | { onClick: () => void; loading?: boolean }
+  | { query: string; confirmedCas?: string | null };
 
 const BTN_PRIMARY =
   "inline-flex min-h-[44px] items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-bold text-white shadow hover:bg-emerald-700 disabled:opacity-60";
@@ -85,10 +88,14 @@ export function ChemicalNotFoundRescue({
             この名前でAI詳細調査
           </button>
         ) : (
-          <Link href={ai.href} className={BTN_PRIMARY}>
+          <TransientChemicalLink
+            query={ai.query}
+            confirmedCas={ai.confirmedCas}
+            className={BTN_PRIMARY}
+          >
             <Search className="h-4 w-4" aria-hidden="true" />
             この名前でAI詳細調査
-          </Link>
+          </TransientChemicalLink>
         )}
         {sdsIsHash ? (
           <a href={sdsHref} className={BTN_SECONDARY}>

@@ -58,7 +58,7 @@ export default async function EduPackDeckPage({ params }: { params: Params }) {
     .map((h) => getHazardTypeSummary(h))
     .filter((s): s is HazardTypeSummary => Boolean(s));
 
-  const contactHref = `/contact?tab=business&course=${deck.slug}&topic=edu-pack`;
+  const contactHref = "/services/automation#consult-form";
   const pageUrl = `${SITE}/education/pack/${deck.slug}`;
 
   return (
@@ -135,7 +135,7 @@ export default async function EduPackDeckPage({ params }: { params: Params }) {
       <div className="no-print mt-8 rounded-2xl border border-amber-200 bg-amber-50 p-4">
         <p className="text-sm font-bold text-amber-900">貴社向けカスタマイズ・出張講習</p>
         <p className="mt-1 text-xs text-amber-800">
-          現場・機械・自社事例に合わせた教材のカスタマイズ、労働安全コンサルタント（登録番号260022）による出張講習・講師派遣を承ります。
+          個別カスタマイズ・出張講習・講師派遣の受付は準備中です。受付状態と利用条件を確認してください。
         </p>
         <Link
           href={contactHref}

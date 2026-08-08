@@ -1,10 +1,7 @@
 import type { KyApproval } from "@/lib/ky/approval";
 
 export type NotificationSettingKey =
-  | "weatherAlerts"
-  | "lawRevisions"
-  | "accidentUpdates"
-  | "morningReminder";
+  "weatherAlerts" | "lawRevisions" | "accidentUpdates" | "morningReminder";
 
 export type NotificationSettings = {
   weatherAlerts: boolean;
@@ -102,6 +99,34 @@ export type KyInstructionWorkRow = {
   primeSign: string;
 };
 
+export type KyRiskCandidateSourceKind =
+  | "ai"
+  | "rule"
+  | "workflowImport"
+  | "officialAccident"
+  | "curatedAccident"
+  | "syntheticCase"
+  | "preliminaryCase";
+
+export type KyRiskCandidateSource = {
+  kind: KyRiskCandidateSourceKind;
+  label: string;
+  referenceId?: string;
+  referenceUrl?: string;
+  /** AIが生成した理由。一次資料による主張支持とは区別する。 */
+  basis?: string;
+  /** 主張単位の引用支持を確認済みか。 */
+  grounded?: boolean;
+  /** retrievalで取得した例ID。主張支持を意味しない。 */
+  retrievedExampleIds?: string[];
+  /** retrievalで取得した一次資料URL。主張支持を意味しない。 */
+  sourceUrls?: string[];
+  /** 候補生成時刻。 */
+  generatedAt?: string;
+  /** 候補を帳票へ確定する前に、現場条件と根拠を人が確認する。 */
+  requiresHumanReview: true;
+};
+
 export type KyInstructionRiskRow = {
   targetLabel: string;
   hazard: string;
@@ -113,6 +138,10 @@ export type KyInstructionRiskRow = {
   reSeverity: 1 | 2 | 3;
   reducedBelow2: string;
   primeSign: string;
+  /** AI・定型・事故DBから採用した候補の出所。利用者の直接入力では省略。 */
+  candidateSource?: KyRiskCandidateSource;
+  /** 候補について現場条件と根拠を確認した時刻。電子署名ではない。 */
+  humanConfirmedAt?: string;
 };
 
 export type KyInstructionParticipant = {
@@ -128,7 +157,31 @@ export type KyInstructionFallCheck = {
   done: string;
 };
 
+export type KyInstructionContext = {
+  workLocation: string;
+  equipment: string;
+  heavyEquipment: string;
+  plannedPeopleCount: string;
+  weather: string;
+  simultaneousWork: string;
+  changes: string;
+  newEntrants: string;
+  nightWork: string;
+  chemicals: string;
+  heatStress: string;
+  reviewerName: string;
+  reviewedAt?: string;
+};
+
 export type KyInstructionRecordState = {
+  /** Authoritative local/cloud/export schema. */
+  schemaVersion: 2;
+  /** ISO creation time. Blank legacy values remain unreviewed until confirmed. */
+  createdAt: string;
+  /** YYYY-MM-DD date on which this KY applies. */
+  applicableDate: string;
+  /** Shared by input, persistence, AI preflight, print and export. */
+  context: KyInstructionContext;
   reportStamps: [string, string, string, string, string];
   /** 現場名（紙KY用紙の標準項目。全面再設計で追加） */
   siteName: string;

@@ -19,9 +19,11 @@ export function AccidentsMetaInfo({ total, mhlw, curated, synthetic, preliminary
       <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-2.5 py-0.5 text-[11px] text-slate-600">
         {isEn ? `${total} cases (` : `収録 ${total} 件（`}
         <span className="font-semibold text-emerald-700">
-          {isEn ? `MHLW ${mhlw}` : `厚労省 ${mhlw}`}
+          {isEn
+            ? `primary-source verified ${mhlw}`
+            : `一次資料照合済み ${mhlw}`}
         </span>
-        ／<span className="font-semibold text-sky-700">curated {curated}</span>
+        ／<span className="font-semibold text-sky-700">編集済み {curated}</span>
         {preliminary > 0 ? (
           <>
             ／
@@ -41,7 +43,7 @@ export function AccidentsMetaInfo({ total, mhlw, curated, synthetic, preliminary
           <>
             ／
             <span className="font-semibold text-amber-700">
-              {isEn ? `synthetic ${synthetic}` : `合成 ${synthetic}`}
+              {isEn ? `learning examples ${synthetic}` : `架空の学習例 ${synthetic}`}
             </span>
           </>
         ) : null}
@@ -61,11 +63,14 @@ export function AccidentsMetaCaption() {
         <a href="/about/data-sources" className="underline hover:text-slate-700">
           Data sources
         </a>
-        . <strong>MHLW</strong> = re-curated from the workplace-safety site,{" "}
-        <strong>curated</strong> = open data restructured by the editorial team (proper nouns anonymized),{" "}
+        . <strong>primary-source verified</strong> = the local record and an
+        official individual case have been checked as the same material,{" "}
+        <strong>edited</strong> = public information restructured by the
+        editorial team, including records whose individual primary source has
+        not yet been verified,{" "}
         <span className="font-semibold text-orange-700">representative (preliminary-based)</span>{" "}
-        = synthetic example cases derived from MHLW monthly preliminary tallies — NOT real individual reports. Will be replaced with mhlw/curated once the R07 worker injury/illness open dataset is released,{" "}
-        <strong>synthetic</strong> = training-coverage supplements.
+        = example cases derived from MHLW monthly preliminary tallies — NOT real individual reports. Will be replaced after the R07 worker injury/illness open dataset is released,{" "}
+        <strong>learning examples</strong> = fictional training supplements.
       </p>
     );
   }
@@ -75,11 +80,13 @@ export function AccidentsMetaCaption() {
       <a href="/about/data-sources" className="underline hover:text-slate-700">
         データソース一覧
       </a>{" "}
-      を参照。<strong>厚労省</strong> = 職場のあんぜんサイト由来の再収録、
-      <strong>curated</strong> = 公開情報・統計を編集部が再構成（固有名詞匿名化）、
+      を参照。<strong>一次資料照合済み</strong> =
+      ローカル本文と公式個票が同一資料であることを確認できたもの、
+      <strong>編集済み</strong> =
+      公開情報・統計を編集部が再構成したもの（個別の一次資料を未照合の記録を含む）、
       <span className="font-semibold text-orange-700">想定例(速報基準)</span>{" "}
-      = 厚労省月次速報集計値から統計的に導出した代表パターン事例（実報告ではない合成事例）。確定個票（R07労働者死傷病報告オープンデータ）公開後に mhlw/curated へ置換予定、
-      <strong>合成</strong> = 教材用カバレッジ補完事例。
+      = 厚労省月次速報集計値から導出した代表パターン事例（実報告ではない架空例）。確定個票（R07労働者死傷病報告オープンデータ）公開後に置換予定、
+      <strong>架空の学習例</strong> = 実事故ではない教材用事例。
     </p>
   );
 }

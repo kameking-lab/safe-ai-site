@@ -1,53 +1,171 @@
 import Link from "next/link";
-import Image from "next/image";
-import { buildNewsHubItems } from "@/lib/news-hub";
-import { WhatsNewTileBadge } from "@/components/whats-new-tile-badge";
+import {
+  AlertTriangle,
+  ArrowRight,
+  ClipboardList,
+  Database,
+  Scale,
+} from "lucide-react";
 
-/**
- * トップ最上部の「現場ですぐ使う」直接導線（exp-r8）。
- * 社長の不満「すぐ機能に行かない」への是正＝トップを開いて0スクロールで主要機能へ1タップ。
- * モバイル(390px)で3列＝主要機能がファーストビューに収まる。Heroのキャッチ/h1/統計(SEO)はこの下に温存。
- * 柱0: 「新着」タイルには前回閲覧以降の未読件数バッジ（/whats-new と同一基準）。
- * アイコンは統一タッチの生成アイコンセット（視覚刷新 2026-07-12・/icons/）。
- */
-type Tool = { href: string; iconSrc: string; label: string; sub: string };
-
-const TOOLS: Tool[] = [
-  { href: "/ky/paper", iconSrc: "/icons/icon-ky.webp", label: "KY用紙", sub: "3分で起票" },
-  { href: "/safety-diary", iconSrc: "/icons/icon-meeting.webp", label: "打合せ書", sub: "各社を1枚に" },
-  { href: "/chemical-ra", iconSrc: "/icons/icon-chemical.webp", label: "化学物質RA", sub: "物質→記録" },
-  { href: "/chatbot", iconSrc: "/icons/icon-chat.webp", label: "AIに質問", sub: "条文・出典付" },
-  { href: "/accidents", iconSrc: "/icons/icon-accident.webp", label: "事故事例DB", sub: "業種で検索" },
-  { href: "/laws", iconSrc: "/icons/icon-law.webp", label: "法改正", sub: "施行日・要約" },
-  { href: "/signage", iconSrc: "/icons/icon-signage.webp", label: "サイネージ", sub: "朝礼掲示" },
-  { href: "/court-cases", iconSrc: "/icons/icon-court.webp", label: "労災裁判例", sub: "判例＋出典" },
-  { href: "/whats-new", iconSrc: "/icons/icon-new.webp", label: "新着", sub: "法改正・速報" },
-  { href: "/site-records", iconSrc: "/icons/icon-records.webp", label: "現場記録", sub: "今日やること" },
-];
+const TASKS = [
+  {
+    title: "今日の安全",
+    description: "地域と作業を選び、朝礼要点を確認",
+    href: "/risk",
+    cta: "今日の安全を見る",
+    icon: AlertTriangle,
+    secondary: null,
+    number: "01",
+    kicker: "NOW / MORNING",
+    surface: "border-orange-300 bg-gradient-to-br from-orange-100 via-amber-50 to-yellow-100 dark:border-orange-700 dark:from-orange-950/60 dark:via-slate-900 dark:to-amber-950/50",
+    visual: "bg-orange-950 text-orange-300",
+    button: "bg-orange-700 text-white hover:bg-orange-800",
+  },
+  {
+    title: "KY・工程書を作る",
+    description: "危険と対策を選び、確認・印刷へ",
+    href: "/ky/paper",
+    cta: "KYを作成する",
+    icon: ClipboardList,
+    secondary: { href: "/safety-diary", label: "工程書を作る" },
+    number: "02",
+    kicker: "MAKE / CONFIRM",
+    surface: "border-sky-300 bg-gradient-to-br from-sky-100 via-white to-emerald-100 dark:border-sky-700 dark:from-sky-950/60 dark:via-slate-900 dark:to-emerald-950/50",
+    visual: "bg-sky-950 text-cyan-300",
+    button: "bg-sky-800 text-white hover:bg-sky-900",
+  },
+  {
+    title: "資格・法令を調べる",
+    description: "作業条件や条文から必要情報へ",
+    href: "/law-search",
+    cta: "法令を検索する",
+    icon: Scale,
+    secondary: {
+      href: "/education-certification/finder",
+      label: "資格を確認する",
+    },
+    number: "03",
+    kicker: "FIND / VERIFY",
+    surface: "border-indigo-300 bg-gradient-to-br from-indigo-100 via-white to-emerald-100 dark:border-indigo-700 dark:from-indigo-950/60 dark:via-slate-900 dark:to-emerald-950/50",
+    visual: "bg-indigo-950 text-emerald-300",
+    button: "bg-indigo-800 text-white hover:bg-indigo-900",
+  },
+  {
+    title: "事故・化学物質を調べる",
+    description: "事例やSDSから対策の根拠を確認",
+    href: "/accidents",
+    cta: "事故例を探す",
+    icon: Database,
+    secondary: { href: "/chemical-ra", label: "物質を評価する" },
+    number: "04",
+    kicker: "LEARN / PREVENT",
+    surface: "border-amber-300 bg-gradient-to-br from-amber-100 via-white to-teal-100 dark:border-amber-700 dark:from-amber-950/60 dark:via-slate-900 dark:to-teal-950/50",
+    visual: "bg-[#29251f] text-yellow-300",
+    button: "bg-teal-800 text-white hover:bg-teal-900",
+  },
+] as const;
 
 export function HomeQuickAccess() {
-  // サーバー側で新着ハブの日付列だけ取り出してバッジへ渡す（クライアントへは日付配列のみ）
-  const newsDates = buildNewsHubItems().map((i) => i.date);
   return (
-    <section aria-label="現場ですぐ使う主要機能" className="mx-auto max-w-5xl px-4 pt-4 sm:pt-6">
-      <div className="flex items-baseline justify-between">
-        <h2 className="text-sm font-bold text-slate-800 dark:text-slate-100">現場ですぐ使う</h2>
-        <span className="text-[11px] text-slate-500 dark:text-slate-400">タップですぐ起動・登録不要</span>
+    <section
+      aria-labelledby="home-primary-tasks"
+      className="relative mx-auto max-w-7xl overflow-hidden px-4 py-10 [content-visibility:auto] [contain-intrinsic-size:auto_720px] sm:py-14"
+    >
+      <div
+        className="pointer-events-none absolute -right-20 top-0 h-64 w-64 rounded-full bg-emerald-200/30 blur-3xl dark:bg-emerald-800/15 forced-colors:hidden"
+        aria-hidden="true"
+      />
+      <div className="flex flex-wrap items-end justify-between gap-2">
+        <div>
+          <p className="text-xs font-black tracking-[.18em] text-emerald-800 dark:text-emerald-200">
+            START HERE · 4 TASKS
+          </p>
+          <h2
+            id="home-primary-tasks"
+            aria-label="やることを選ぶ"
+            className="mt-2 text-3xl font-black tracking-tight text-slate-950 dark:text-white sm:text-4xl"
+          >
+            今日やることから、すぐ始める
+          </h2>
+          <p className="mt-2 text-sm font-medium text-slate-600 dark:text-slate-300">
+            迷ったら、目的にいちばん近いシーンを選んでください。
+          </p>
+        </div>
+        <Link
+          href="/search"
+          prefetch={false}
+          className="inline-flex min-h-11 items-center rounded-lg px-3 py-2 text-sm font-bold text-emerald-900 underline underline-offset-4 focus-visible:ring-4 focus-visible:ring-emerald-300 dark:text-emerald-200"
+        >
+          名前から検索する
+        </Link>
       </div>
-      <ul className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-5 lg:grid-cols-10">
-        {TOOLS.map((t) => (
-          <li key={t.href} className="relative">
-            <Link
-              href={t.href}
-              className="flex h-full min-h-[78px] flex-col items-center justify-center gap-1 rounded-xl border border-emerald-200 bg-white px-1.5 py-2 text-center shadow-sm transition hover:-translate-y-0.5 hover:border-emerald-400 hover:shadow-md hover:shadow-emerald-600/10 dark:border-emerald-500/30 dark:bg-slate-900"
+
+      <ul className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        {TASKS.map(
+          ({
+            title,
+            description,
+            href,
+            cta,
+            icon: Icon,
+            secondary,
+            number,
+            kicker,
+            surface,
+            visual,
+            button,
+          }) => (
+            <li
+              key={title}
+              className={`group relative flex min-w-0 flex-col overflow-hidden rounded-[1.75rem] border-2 shadow-[0_24px_55px_-35px_rgba(15,23,42,.65)] transition-[transform,box-shadow] hover:-translate-y-1 hover:shadow-[0_32px_65px_-35px_rgba(15,23,42,.75)] motion-reduce:transform-none motion-reduce:transition-none ${surface}`}
             >
-              <Image src={t.iconSrc} alt="" width={28} height={28} aria-hidden style={{ width: 28, height: 28 }} />
-              <span className="text-[12px] font-bold leading-tight text-slate-800 dark:text-slate-100">{t.label}</span>
-              <span className="text-[10px] leading-tight text-slate-500 dark:text-slate-400">{t.sub}</span>
-            </Link>
-            {t.href === "/whats-new" && <WhatsNewTileBadge dates={newsDates} />}
-          </li>
-        ))}
+              <div className={`relative flex min-h-32 items-center justify-between overflow-hidden p-5 ${visual}`}>
+                <span className="absolute -bottom-14 -right-3 text-[9rem] font-black leading-none text-white/45" aria-hidden="true">
+                  {number}
+                </span>
+                <span>
+                  <span className="block text-[10px] font-black tracking-[.18em] text-current opacity-80">
+                    {kicker}
+                  </span>
+                  <span className="mt-3 inline-flex h-16 w-16 items-center justify-center rounded-2xl border border-white/20 bg-white/10 shadow-lg">
+                    <Icon className="h-8 w-8" aria-hidden="true" />
+                  </span>
+                </span>
+                <span className="relative z-10 text-5xl font-black text-white/80">{number}</span>
+              </div>
+              <div className="flex flex-1 flex-col p-5">
+                <h3 className="text-xl font-black leading-tight text-slate-950 dark:text-white">
+                  {title}
+                </h3>
+                <p className="mt-2 flex-1 text-sm font-medium leading-6 text-slate-700 dark:text-slate-200">
+                  {description}
+                </p>
+                <Link
+                  href={href}
+                  prefetch={false}
+                  className={`mt-5 inline-flex min-h-12 items-center justify-between gap-2 rounded-xl px-4 py-3 text-sm font-black shadow-lg focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-300 ${button}`}
+                >
+                  {cta}
+                  <ArrowRight
+                    className="h-4 w-4 motion-safe:transition-transform motion-safe:group-hover:translate-x-1"
+                    aria-hidden="true"
+                  />
+                </Link>
+                {secondary ? (
+                  <Link
+                    href={secondary.href}
+                    prefetch={false}
+                    className="mt-1 inline-flex min-h-11 items-center justify-center rounded-lg px-3 py-2 text-sm font-black text-slate-800 underline decoration-2 underline-offset-4 focus-visible:ring-4 focus-visible:ring-emerald-300 dark:text-slate-100"
+                  >
+                    {secondary.label}
+                  </Link>
+                ) : (
+                  <span className="mt-1 min-h-11" aria-hidden="true" />
+                )}
+              </div>
+            </li>
+          ),
+        )}
       </ul>
     </section>
   );

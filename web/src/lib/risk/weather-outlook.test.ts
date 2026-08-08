@@ -1,132 +1,187 @@
 import { describe, expect, it } from "vitest";
-import {
-  buildRiskWeatherOutlook,
-  type OutlookAlertLevel,
-  type RiskWeatherOutlookInput,
-} from "./weather-outlook";
+import { buildRiskWeatherOutlook, type OutlookAlertLevel } from "./weather-outlook";
 
-/** 8地域 × N日分の予報を組み立てるヘルパー。levels[regionIdx][dayIdx] = レベル。
- *  labels[regionIdx] を渡すと地域名（worstRegions 検証用）を付与する。 */
-function build(levels: OutlookAlertLevel[][], labels?: string[]): RiskWeatherOutlookInput[] {
-  return levels.map((dayLevels, regionIdx) => ({
-    regionLabel: labels?.[regionIdx],
-    days: dayLevels.map((alertLevel, i) => ({
-      date: `2026-06-${String(14 + i).padStart(2, "0")}`,
-      alertLevel,
-    })),
+const NOW = new Date("2026-07-23T03:00:00.000Z"); // 2026-07-23 JST
+
+function regions(levels: OutlookAlertLevel[][], dates = ["2026-07-23", "2026-07-24", "2026-07-25", "2026-07-26"]) {
+  return levels.map((row, index) => ({
+    regionLabel: `region-${index + 1}`,
+    days: dates.map((date, dayIndex) => ({ date, alertLevel: row[dayIndex] ?? "none" })),
   }));
 }
 
-/** 全地域・全日「異常なし」の8ブロック雛形（days日分） */
-function calm(days: number): RiskWeatherOutlookInput[] {
-  return build(Array.from({ length: 8 }, () => Array.from({ length: days }, () => "none")));
-}
-
-describe("buildRiskWeatherOutlook: 明日以降の見通しストリップ", () => {
-  it("既定で明日起点・3日分を返す（今日は含めない＝結論カードと重複させない）", () => {
-    const out = buildRiskWeatherOutlook(calm(7));
-    expect(out).toHaveLength(3);
-    expect(out[0].offset).toBe(1);
-    expect(out[0].dayLabel).toBe("明日");
-    expect(out[1].dayLabel).toBe("明後日");
-    expect(out[2].dayLabel).toBe(""); // 3日後は相対語なし
-    // 明日の日付は配列の index1（今日の翌日）
-    expect(out[0].date).toBe("2026-06-15");
+describe("buildRiskWeatherOutlook", () => {
+  it("既定でJSTの明日起点から3日分を返し、今日を重複表示しない", () => {
+    const result = buildRiskWeatherOutlook(
+      regions([["none", "none", "none", "none"]]),
+      { now: NOW },
+    );
+    expect(result).toHaveLength(3);
+    expect(result.map((day) => day.date)).toEqual([
+      "2026-07-24",
+      "2026-07-25",
+      "2026-07-26",
+    ]);
+    expect(result[0]).toMatchObject({ offset: 1, dayLabel: "明日", sourceIndex: 1 });
+    expect(result[1].dayLabel).toBe("明後日");
+    expect(result[2].dayLabel).toBe("2026-07-26");
   });
 
-  it("全国おおむね良好 = 緑・警報/注意報0件", () => {
-    const out = buildRiskWeatherOutlook(calm(7));
-    expect(out[0].tone).toBe("safe");
-    expect(out[0].level).toBe("none");
-    expect(out[0].levelLabel).toBe("概ね良好");
-    expect(out[0].warningCount).toBe(0);
-    expect(out[0].advisoryCount).toBe(0);
-    expect(out[0].totalRegions).toBe(8);
+  it("derives tomorrow from the actual JST date instead of the array index", () => {
+    const input = regions([["none", "advisory", "none", "none"]]);
+    const result = buildRiskWeatherOutlook(input, { now: NOW });
+    expect(result.map((day) => day.date)).toEqual(["2026-07-24", "2026-07-25", "2026-07-26"]);
+    expect(result[0]).toMatchObject({ offset: 1, sourceIndex: 1, level: "advisory" });
   });
 
-  it("明日に1地域でも警報相当があれば赤・該当数を数える（台風前日の本命ケース）", () => {
-    const levels = Array.from({ length: 8 }, () => ["none", "none", "none"] as OutlookAlertLevel[]);
-    levels[2][1] = "warning"; // 関東相当・明日
-    levels[4][1] = "warning"; // 近畿相当・明日
-    const out = buildRiskWeatherOutlook(build(levels));
-    expect(out[0].tone).toBe("danger");
-    expect(out[0].level).toBe("warning");
-    expect(out[0].levelLabel).toBe("警報相当");
-    expect(out[0].warningCount).toBe(2);
+  it("matches every region by date when source arrays are misaligned", () => {
+    const result = buildRiskWeatherOutlook([
+      { regionLabel: "A", days: [{ date: "2026-07-24", alertLevel: "warning" }] },
+      { regionLabel: "B", days: [{ date: "2026-07-23", alertLevel: "none" }, { date: "2026-07-24", alertLevel: "advisory" }] },
+    ], { now: NOW, days: 1 });
+    expect(result[0]).toMatchObject({ warningCount: 1, advisoryCount: 1, worstRegions: ["A"] });
   });
 
-  it("注意報相当のみ = 黄（警報には昇格しない）", () => {
-    const levels = Array.from({ length: 8 }, () => ["none", "none", "none"] as OutlookAlertLevel[]);
-    levels[0][1] = "advisory";
-    const out = buildRiskWeatherOutlook(build(levels));
-    expect(out[0].tone).toBe("warning");
-    expect(out[0].level).toBe("advisory");
-    expect(out[0].advisoryCount).toBe(1);
-    expect(out[0].warningCount).toBe(0);
-  });
-
-  it("警報と注意報が混在する日は最悪レベル（警報=赤）を採る・両方の地域数を保持", () => {
-    const levels = Array.from({ length: 8 }, () => ["none", "none", "none"] as OutlookAlertLevel[]);
-    levels[0][1] = "warning";
-    levels[1][1] = "advisory";
-    levels[2][1] = "advisory";
-    const out = buildRiskWeatherOutlook(build(levels));
-    expect(out[0].tone).toBe("danger");
-    expect(out[0].warningCount).toBe(1);
-    expect(out[0].advisoryCount).toBe(2);
-  });
-
-  it("startOffset=0 で今日を含められる（テスト/将来用途）", () => {
-    const out = buildRiskWeatherOutlook(calm(7), { startOffset: 0, days: 2 });
-    expect(out).toHaveLength(2);
-    expect(out[0].offset).toBe(0);
-    expect(out[0].dayLabel).toBe(""); // 今日は相対語マップ外
-    expect(out[0].date).toBe("2026-06-14");
-  });
-
-  it("予報日数が足りなければ取れる分だけ返す（範囲外で打ち切り）", () => {
-    const out = buildRiskWeatherOutlook(calm(2)); // 今日+明日のみ
-    expect(out).toHaveLength(1); // 明日(index1)だけ
-    expect(out[0].offset).toBe(1);
-  });
-
-  it("地域配列が空なら空配列（クラッシュしない）", () => {
-    expect(buildRiskWeatherOutlook([])).toEqual([]);
-  });
-
-  describe("worstRegions: 該当地域名の明示（台風前日に自現場の該否を3秒で）", () => {
-    const LABELS = ["北海道", "東北", "関東", "中部", "近畿", "中国", "四国", "九州"];
-
-    it("警報日は警報相当の地域名のみを並べる（注意報地域は混ぜない）", () => {
-      const levels = Array.from({ length: 8 }, () => ["none", "none", "none"] as OutlookAlertLevel[]);
-      levels[7][1] = "warning"; // 九州・明日
-      levels[6][1] = "warning"; // 四国・明日
-      levels[2][1] = "advisory"; // 関東・明日（最悪レベルは警報なので除外される）
-      const out = buildRiskWeatherOutlook(build(levels, LABELS));
-      expect(out[0].level).toBe("warning");
-      expect(out[0].worstRegions).toEqual(["四国", "九州"]); // region配列の順序を保持
-      expect(out[0].worstRegions).not.toContain("関東");
+  it("does not present a no-threshold result as a safe declaration", () => {
+    const result = buildRiskWeatherOutlook(regions([["none", "none", "none", "none"]]), { now: NOW });
+    expect(result[0].tone).toBe("neutral");
+    expect(result[0].levelLabel).toContain("独自目安");
+    expect(result[0].levelLabel).not.toMatch(/安全|良好/);
+    expect(result[0]).toMatchObject({
+      level: "none",
+      warningCount: 0,
+      advisoryCount: 0,
+      totalRegions: 1,
     });
+  });
 
-    it("注意報のみの日は注意報相当の地域名を並べる", () => {
-      const levels = Array.from({ length: 8 }, () => ["none", "none", "none"] as OutlookAlertLevel[]);
-      levels[4][1] = "advisory"; // 近畿
-      const out = buildRiskWeatherOutlook(build(levels, LABELS));
-      expect(out[0].level).toBe("advisory");
-      expect(out[0].worstRegions).toEqual(["近畿"]);
-    });
+  it("returns no stale dates when the feed ends before tomorrow", () => {
+    const stale = regions([["none", "warning"]], ["2026-07-21", "2026-07-22"]);
+    expect(buildRiskWeatherOutlook(stale, { now: NOW })).toEqual([]);
+  });
 
-    it("おおむね良好の日は worstRegions 空", () => {
-      const out = buildRiskWeatherOutlook(build(Array.from({ length: 8 }, () => ["none", "none", "none"] as OutlookAlertLevel[]), LABELS));
-      expect(out[0].worstRegions).toEqual([]);
+  it("警報相当が複数地域にあればdangerとして全件を数える", () => {
+    const result = buildRiskWeatherOutlook(
+      [
+        {
+          regionLabel: "関東",
+          days: [{ date: "2026-07-24", alertLevel: "warning" }],
+        },
+        {
+          regionLabel: "近畿",
+          days: [{ date: "2026-07-24", alertLevel: "warning" }],
+        },
+      ],
+      { now: NOW, days: 1 },
+    );
+    expect(result[0]).toMatchObject({
+      tone: "danger",
+      level: "warning",
+      warningCount: 2,
+      advisoryCount: 0,
+      worstRegions: ["関東", "近畿"],
     });
+  });
 
-    it("地域名が無い入力では worstRegions は空（件数表示にフォールバック）", () => {
-      const levels = Array.from({ length: 8 }, () => ["none", "none", "none"] as OutlookAlertLevel[]);
-      levels[0][1] = "warning";
-      const out = buildRiskWeatherOutlook(build(levels)); // labels なし
-      expect(out[0].warningCount).toBe(1);
-      expect(out[0].worstRegions).toEqual([]);
+  it("注意相当だけならwarningのまま警報へ昇格しない", () => {
+    const result = buildRiskWeatherOutlook(
+      [
+        {
+          regionLabel: "北海道",
+          days: [{ date: "2026-07-24", alertLevel: "advisory" }],
+        },
+      ],
+      { now: NOW, days: 1 },
+    );
+    expect(result[0]).toMatchObject({
+      tone: "warning",
+      level: "advisory",
+      warningCount: 0,
+      advisoryCount: 1,
+      worstRegions: ["北海道"],
     });
+  });
+
+  it("警戒と注意が混在する日は最悪レベルと両件数を保持する", () => {
+    const result = buildRiskWeatherOutlook(
+      [
+        {
+          regionLabel: "A",
+          days: [{ date: "2026-07-24", alertLevel: "warning" }],
+        },
+        {
+          regionLabel: "B",
+          days: [{ date: "2026-07-24", alertLevel: "advisory" }],
+        },
+        {
+          regionLabel: "C",
+          days: [{ date: "2026-07-24", alertLevel: "advisory" }],
+        },
+      ],
+      { now: NOW, days: 1 },
+    );
+    expect(result[0]).toMatchObject({
+      tone: "danger",
+      level: "warning",
+      warningCount: 1,
+      advisoryCount: 2,
+      worstRegions: ["A"],
+    });
+  });
+
+  it("startOffset=0ではJST当日を含められる", () => {
+    const result = buildRiskWeatherOutlook(
+      regions([["none", "none", "none", "none"]]),
+      { now: NOW, startOffset: 0, days: 2 },
+    );
+    expect(result).toHaveLength(2);
+    expect(result[0]).toMatchObject({
+      date: "2026-07-23",
+      offset: 0,
+      sourceIndex: 0,
+      dayLabel: "今日",
+    });
+  });
+
+  it("予報日数が不足する場合は利用できる将来日だけを返す", () => {
+    const result = buildRiskWeatherOutlook(
+      regions([["none", "none"]], ["2026-07-23", "2026-07-24"]),
+      { now: NOW },
+    );
+    expect(result).toHaveLength(1);
+    expect(result[0]).toMatchObject({ date: "2026-07-24", offset: 1 });
+  });
+
+  it("地域配列が空ならクラッシュせず空配列を返す", () => {
+    expect(buildRiskWeatherOutlook([], { now: NOW })).toEqual([]);
+  });
+
+  it("最悪レベルの地域名だけを保持し、ラベル欠落時は件数へフォールバックする", () => {
+    const withLabels = buildRiskWeatherOutlook(
+      [
+        {
+          regionLabel: "四国",
+          days: [{ date: "2026-07-24", alertLevel: "warning" }],
+        },
+        {
+          regionLabel: "九州",
+          days: [{ date: "2026-07-24", alertLevel: "warning" }],
+        },
+        {
+          regionLabel: "関東",
+          days: [{ date: "2026-07-24", alertLevel: "advisory" }],
+        },
+      ],
+      { now: NOW, days: 1 },
+    );
+    expect(withLabels[0].worstRegions).toEqual(["四国", "九州"]);
+    expect(withLabels[0].worstRegions).not.toContain("関東");
+
+    const withoutLabels = buildRiskWeatherOutlook(
+      [{ days: [{ date: "2026-07-24", alertLevel: "warning" }] }],
+      { now: NOW, days: 1 },
+    );
+    expect(withoutLabels[0].warningCount).toBe(1);
+    expect(withoutLabels[0].worstRegions).toEqual([]);
   });
 });

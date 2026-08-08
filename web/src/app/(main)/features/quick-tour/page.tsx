@@ -48,7 +48,7 @@ const STEPS: Step[] = [
     step: 4,
     slug: "chemical-ra",
     title: "化学物質RAを改正安衛法対応で",
-    body: "SDS取込からGHS分類、ばく露見積もり、対策レベル判定までを一気通貫。記録は監査・労基対応にそのまま提出できます。",
+    body: "CAS・SDS・作業条件の入力整理を支援します。簡易スクリーニングであり、正式な評価・提出資料ではありません。最終評価は公式CREATE-SIMPLE、製品固有の最新SDS、専門家による確認が必要です。",
     href: "/chemical-ra",
     hrefLabel: "化学物質RAを開く",
   },

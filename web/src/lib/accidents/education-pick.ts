@@ -6,6 +6,7 @@
  * 創作はせず既存事例のみ。seed で日替わり等の安定ローテーションが可能。
  */
 import type { AccidentCase } from "@/lib/types/domain";
+import { isAccidentEligibleForOperationalEvidence } from "@/lib/accident-source";
 
 const SEVERITY_RANK: Record<AccidentCase["severity"], number> = {
   死亡: 3,
@@ -34,10 +35,11 @@ export function pickEducationAccidents(
   opts: { category?: string; count?: number; seed?: number } = {}
 ): EducationCase[] {
   const count = opts.count ?? 3;
+  const eligibleCases = cases.filter(isAccidentEligibleForOperationalEvidence);
   const pool = opts.category
-    ? cases.filter((c) => c.workCategory === opts.category)
-    : cases.slice();
-  const base = pool.length >= count ? pool : cases.slice();
+    ? eligibleCases.filter((c) => c.workCategory === opts.category)
+    : eligibleCases;
+  const base = pool.length >= count ? pool : eligibleCases;
 
   // 重大度降順 → 同点はseedで安定シャッフル。
   const seed = opts.seed ?? 0;

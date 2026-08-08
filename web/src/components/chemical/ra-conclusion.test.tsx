@@ -5,7 +5,7 @@ import type { ChemicalRaResponse } from "@/app/api/chemical-ra/route";
 import { getChemicalKeyPoints } from "@/lib/chemical/key-points";
 
 // RA結論カード（柱0）の回帰ガード。
-// 無読テストの前提＝デカ表示・I〜IV色帯・GHS絵表示・保護具動線が確実に描画されること。
+// GHS絵表示・注意喚起語・確認動線が確実に描画されること。
 
 const baseResult: ChemicalRaResponse = {
   chemicalName: "トルエン",
@@ -41,33 +41,31 @@ function renderCard(result: ChemicalRaResponse) {
     <RaConclusionCard
       result={result}
       keyPoints={getChemicalKeyPoints(result)}
-      equipmentHref="/equipment-finder?chemical=%E3%83%88%E3%83%AB%E3%82%A8%E3%83%B3"
     />,
   );
 }
 
 describe("RaConclusionCard", () => {
-  it("CREATE-SIMPLE判定あり: レベルをデカ表示（text-6xl）＋I〜IVの4セグメント色帯＋▼マーカー", () => {
+  it("旧CREATE-SIMPLE判定を表示せずGHS注意喚起語を表示する", () => {
     const { container } = renderCard(withLevel("IV"));
     const big = screen.getByTestId("ra-big-value");
-    expect(big.textContent).toBe("IV");
-    expect(big.className).toContain("text-6xl");
+    expect(big.textContent).toBe("危険");
     const segs = container.querySelectorAll("[data-testid^='ra-band-seg-']");
-    expect(segs).toHaveLength(4);
+    expect(segs).toHaveLength(0);
     expect(screen.getByRole("status")).toBeDefined();
   });
 
-  it("レベルIV: 深紅トーン＋「原則 作業中止」の最前面バナー", () => {
+  it("旧レベルIVから作業中止を断定しない", () => {
     renderCard(withLevel("IV"));
     const card = screen.getByTestId("ra-conclusion");
     expect(card.className).toContain("rose");
-    expect(card.textContent).toContain("原則 作業中止");
+    expect(card.textContent).not.toContain("原則 作業中止");
   });
 
-  it("レベルI: 緑トーンで作業中止バナーは出ない", () => {
+  it("旧レベルIでもGHSの危険表示を優先する", () => {
     renderCard(withLevel("I"));
     const card = screen.getByTestId("ra-conclusion");
-    expect(card.className).toContain("emerald");
+    expect(card.className).toContain("rose");
     expect(card.textContent).not.toContain("原則 作業中止");
   });
 
@@ -77,14 +75,12 @@ describe("RaConclusionCard", () => {
     expect(container.querySelector("[data-testid='ra-level-band']")).toBeNull();
   });
 
-  it("GHS絵表示の列（引火性=炎・標的臓器=健康有害性・刺激=感嘆符）と保護具動線（44px級）を描画", () => {
+  it("GHS絵表示と、商品推薦を行わない保護具選定境界を描画", () => {
     renderCard(baseResult);
     expect(screen.getByTestId("ghs-picto-flame")).toBeDefined();
     expect(screen.getByTestId("ghs-picto-health-hazard")).toBeDefined();
     expect(screen.getByTestId("ghs-picto-exclamation")).toBeDefined();
-    const link = screen.getByTestId("ra-equipment-link");
-    expect(link.getAttribute("href")).toContain("/equipment-finder");
-    expect(link.className).toContain("min-h-[44px]");
+    expect(screen.getByTestId("ra-ppe-boundary").textContent).toContain("商品適合は自動判定していません");
   });
 
   it("まず行う対策は優先度順に表示される", () => {

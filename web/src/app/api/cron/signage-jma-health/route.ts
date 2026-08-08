@@ -14,6 +14,7 @@
 import { NextResponse } from "next/server";
 import { getJmaEarthquakesRuntime, getJmaWarningsRuntime, getJmaWeatherRuntime } from "@/lib/jma/fetch-jma-runtime";
 import { ageHours, isDataStale } from "@/lib/jma/data-freshness";
+import { bearerAuthError, verifyBearerSecret } from "@/lib/server/bearer-auth";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -21,11 +22,8 @@ export const maxDuration = 60;
 const STALE_THRESHOLD_HOURS = 24;
 
 export async function GET(request: Request) {
-  const cronSecret = process.env.CRON_SECRET;
-  const auth = request.headers.get("authorization");
-  if (cronSecret && auth !== `Bearer ${cronSecret}`) {
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-  }
+  const auth = verifyBearerSecret(request, process.env.CRON_SECRET);
+  if (!auth.ok) return bearerAuthError(auth);
 
   const now = new Date();
   const [warnings, weather, earthquakes] = await Promise.all([
@@ -35,29 +33,30 @@ export async function GET(request: Request) {
   ]);
 
   const sources = [
-    { name: "warnings", fetchedAt: warnings.fetchedAt },
-    { name: "weather", fetchedAt: weather.fetchedAt },
-    { name: "earthquakes", fetchedAt: earthquakes.fetchedAt },
+    { name: "warnings", fetchedAt: warnings.fetchedAt, quality: warnings.quality },
+    { name: "weather", fetchedAt: weather.fetchedAt, quality: weather.quality },
+    { name: "earthquakes", fetchedAt: earthquakes.fetchedAt, quality: earthquakes.quality },
   ];
 
   const report = sources.map((s) => ({
     ...s,
     ageHours: ageHours(s.fetchedAt, now),
     stale: isDataStale(s.fetchedAt, STALE_THRESHOLD_HOURS, now),
+    degraded: s.quality?.status !== "live",
   }));
 
-  const staleSources = report.filter((r) => r.stale);
-  if (staleSources.length > 0) {
+  const unhealthySources = report.filter((r) => r.stale || r.degraded);
+  if (unhealthySources.length > 0) {
     console.error(
-      `[signage-jma-health] stale data detected (>${STALE_THRESHOLD_HOURS}h):`,
-      staleSources.map((s) => `${s.name}=${s.fetchedAt}`).join(", ")
+      "[signage-jma-health] unhealthy data detected",
+      unhealthySources.map((s) => ({ name: s.name, stale: s.stale, quality: s.quality?.status ?? "unknown" })),
     );
   }
 
   return NextResponse.json(
     { checkedAt: now.toISOString(), thresholdHours: STALE_THRESHOLD_HOURS, sources: report },
     {
-      status: staleSources.length > 0 ? 503 : 200,
+      status: unhealthySources.length > 0 ? 503 : 200,
       headers: { "Cache-Control": "no-store" },
     }
   );

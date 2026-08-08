@@ -8,7 +8,7 @@
  * - 1 語のスコアは field 重み（title > keywords > subtitle）の最大値。シノニム一致は減点。
  * - 同点は カテゴリ優先度 → タイトル短さ → id で決定（テスト安定のための決定的タイブレーク）。
  */
-import { normalizeSearchText } from '../fuzzy-search';
+import { foldKana, normalizeSearchText } from '../fuzzy-search';
 import { expandQuery } from '../query-expansion';
 import { expandFieldTermsForSearch } from '../rag/field-terms';
 
@@ -21,6 +21,8 @@ export interface ScorableItem {
   id: string;
   title: string;
   subtitle: string;
+  /** 条文見出し等。タイトルと本文要約の中間の検索意図として扱う。 */
+  headings?: string[];
   keywords?: string[];
   category: string;
   url: string;
@@ -46,6 +48,9 @@ const DEFAULT_CATEGORY_PRIORITY: readonly string[] = [
 const W_TITLE_EXACT = 100;
 const W_TITLE_PREFIX = 65;
 const W_TITLE_INCLUDES = 45;
+const W_HEADING_EXACT = 75;
+const W_HEADING_PREFIX = 50;
+const W_HEADING_INCLUDES = 35;
 const W_KEYWORD_EXACT = 55;
 const W_KEYWORD_PARTIAL = 30;
 const W_SUBTITLE_INCLUDES = 18;
@@ -55,6 +60,7 @@ const SYNONYM_FACTOR = 0.6;
 interface Scorable<T extends ScorableItem> {
   item: T;
   nTitle: string;
+  nHeadings: string[];
   nSubtitle: string;
   nKeywords: string[];
 }
@@ -62,15 +68,25 @@ interface Scorable<T extends ScorableItem> {
 /** 配列の同一性をキーに正規化済みフィールドをメモ化（キー入力ごとの再計算を避ける）。 */
 const scorableCache = new WeakMap<object, Scorable<ScorableItem>[]>();
 
+/** 横断検索だけに対称適用するかな畳み込み。RAGコーパスの順位は変更しない。 */
+function normalizeCrossSearchText(value: string): string {
+  // 旧字体「衞」はNFKCでは「衛」へ畳み込まれないため、現場で残る
+  // 「安衞則」表記だけ検索用に正規化する（表示原文は変更しない）。
+  return foldKana(normalizeSearchText(value).replace(/衞/g, '衛'));
+}
+
 function getScorables<T extends ScorableItem>(items: T[]): Scorable<T>[] {
   const cached = scorableCache.get(items);
   if (cached) return cached as Scorable<T>[];
   const built: Scorable<T>[] = items.map((item) => ({
     item,
     // 実データに null/undefined が混じってもクラッシュしないよう coerce
-    nTitle: normalizeSearchText(item.title ?? ''),
-    nSubtitle: normalizeSearchText(item.subtitle ?? ''),
-    nKeywords: (item.keywords ?? []).map((k) => normalizeSearchText(k ?? '')).filter(Boolean),
+    nTitle: normalizeCrossSearchText(item.title ?? ''),
+    nHeadings: (item.headings ?? [])
+      .map((heading) => normalizeCrossSearchText(heading ?? ''))
+      .filter(Boolean),
+    nSubtitle: normalizeCrossSearchText(item.subtitle ?? ''),
+    nKeywords: (item.keywords ?? []).map((k) => normalizeCrossSearchText(k ?? '')).filter(Boolean),
   }));
   scorableCache.set(items, built as Scorable<ScorableItem>[]);
   return built;
@@ -101,10 +117,10 @@ interface TermSpec {
  * 語そのものは概念を持たないため、未マッチ時のみ無視する。
  */
 const SOFT_TERM_RE =
-  /^(何[分日人回年円歳条件個台時間キロメートルセンチトンｍmMkKgG]*(前|後|まで|ごと|以内)?|いくら|いくつ|いつ(から|まで)?|どこ(で|に|まで)?|誰が?|だれ|なぜ|どう(する|やって|なる|すれば)?|[0-9０-９]+(年|ヶ月|か月|カ月|日|回|人|歳|センチ|メートル|キロ|トン|分|時間)(ごと|以上|以下|以内|未満)?|ルール|決まり|きまり|やり方|方法|日数|回数|人数)$/;
+  /^(何[分日人回年円歳条件個台時間キロメートルセンチトンｍmMkKgG]*(前|後|まで|ごと|以内)?|いくら|いくつ|いつ(から|まで)?|どこ(で|に|まで)?|誰が?|だれ|なぜ|どう(する|やって|なる|すれば)?|[0-9０-９]+(年|ヶ月|か月|カ月|日|回|人|歳|センチ|メートル|キロ|トン|分|時間)(ごと|以上|以下|以内|未満)?|ルール|決まり|きまり|やり方|方法|日数|回数|人数|上限|義務|対策)$/;
 
 function buildTermSpec(term: string): TermSpec | null {
-  const literal = normalizeSearchText(term);
+  const literal = normalizeCrossSearchText(term);
   if (!literal) return null;
   // 正規表現ルール（query-expansion）＋現場語彙辞書（rag/field-terms＝RAGと共有）
   // の二段でシノニムを集める。後者は 2026-07-11 に配線＝「ユンボ」「残業」「有給」等の
@@ -113,7 +129,7 @@ function buildTermSpec(term: string): TermSpec | null {
     ...expandQuery(term).split(/\s+/),
     ...expandFieldTermsForSearch(term),
   ]
-    .map((p) => normalizeSearchText(p))
+    .map((p) => normalizeCrossSearchText(p))
     .filter((p) => p && p !== literal);
   return { literal, synonyms: Array.from(new Set(expanded)), soft: SOFT_TERM_RE.test(literal) };
 }
@@ -125,6 +141,17 @@ function variantScore(variant: string, s: Scorable<ScorableItem>): number {
   if (s.nTitle === variant) best = Math.max(best, W_TITLE_EXACT);
   else if (s.nTitle.startsWith(variant)) best = Math.max(best, W_TITLE_PREFIX);
   else if (s.nTitle.includes(variant)) best = Math.max(best, W_TITLE_INCLUDES);
+  for (const heading of s.nHeadings) {
+    if (heading === variant) {
+      best = Math.max(best, W_HEADING_EXACT);
+      break;
+    }
+    if (heading.startsWith(variant)) {
+      best = Math.max(best, W_HEADING_PREFIX);
+    } else if (heading.includes(variant) || variant.includes(heading)) {
+      best = Math.max(best, W_HEADING_INCLUDES);
+    }
+  }
   for (const k of s.nKeywords) {
     if (k === variant) {
       best = Math.max(best, W_KEYWORD_EXACT);
@@ -171,7 +198,17 @@ export function searchCrossIndex<T extends ScorableItem>(
   const terms = queryTerms(query);
   if (terms.length === 0) return [];
 
-  const specs = terms.map(buildTermSpec).filter((s): s is TermSpec => s !== null);
+  const rawSpecs = terms.map(buildTermSpec).filter((s): s is TermSpec => s !== null);
+  // 利用者が明示した別の検索語を、同義語展開だけで重複充足させない。
+  // 例: 「足場 作業床」で「足場」→「作業床」と展開した結果、作業床しか
+  // 含まない文書が2語とも満たした扱いになると、AND検索の意味が崩れる。
+  const explicitLiterals = new Set(rawSpecs.map((spec) => spec.literal));
+  const specs = rawSpecs.map((spec) => ({
+    ...spec,
+    synonyms: spec.synonyms.filter(
+      (synonym) => synonym === spec.literal || !explicitLiterals.has(synonym),
+    ),
+  }));
   if (specs.length === 0) return [];
 
   const scorables = getScorables(items);

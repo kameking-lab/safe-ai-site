@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { ShieldCheck } from "lucide-react";
 import { TranslatedPageHeader } from "@/components/translated-page-header";
 import { PageContainer } from "@/components/layout";
@@ -64,6 +65,14 @@ const INDUSTRY_OPTIONS_EN = [
   "Other",
 ];
 
+function createInquiryIdempotencyKey(): string {
+  const prefix = Date.now().toString(36);
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return `${prefix}.${crypto.randomUUID()}`;
+  }
+  return `${prefix}.inquiry-${Math.random().toString(36).slice(2, 20)}`;
+}
+
 export default function InquiryForm() {
   const { language } = useLanguage();
   const isEn = language === "en";
@@ -100,41 +109,77 @@ export default function InquiryForm() {
     category: (initialTab === "business" ? "business" : "question") as Category,
     subject: initialSubject,
     message: "",
-    publishOk: false,
+    privacyConsent: false,
+    website: "",
   });
   const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
   const [resultMsg, setResultMsg] = useState<string | null>(null);
+  const idempotencyKeyRef = useRef<string | null>(null);
 
   function handleTabChange(next: Tab) {
     setTab(next);
     setForm((f) => ({
       ...f,
       category: next === "business" ? "business" : "question",
-      publishOk: next === "business" ? false : f.publishOk,
     }));
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!form.privacyConsent) {
+      setStatus("error");
+      setResultMsg(
+        isEn
+          ? "Confirm the privacy notice before submitting."
+          : "個人情報の取扱いを確認し、同意欄にチェックしてください。",
+      );
+      return;
+    }
     setStatus("sending");
     setResultMsg(null);
     try {
-      // 同一エンドポイント（/api/inquiry）に送信し、category(business/それ以外)が
-      // 件名プレフィックスとして送信先メールに反映される（柱C-10: 2タブ化の受け皿を分岐させない）
+      idempotencyKeyRef.current ??= createInquiryIdempotencyKey();
       const res = await fetch("/api/inquiry", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Idempotency-Key": idempotencyKeyRef.current,
+        },
         body: JSON.stringify(form),
       });
-      const data = (await res.json().catch(() => ({}))) as { ok?: boolean; message?: string };
+      const data = (await res.json().catch(() => ({}))) as {
+        ok?: boolean;
+        referenceId?: string;
+        error?: { message?: string };
+      };
       if (!res.ok || !data.ok) {
         setStatus("error");
+        setResultMsg(
+          data.error?.message ??
+            (isEn
+              ? "Submission failed. Please try again later."
+              : "送信に失敗しました。時間をおいて再度お試しください。"),
+        );
         return;
       }
-      setResultMsg(data.message ?? (isEn ? "Submission complete." : "送信が完了しました。"));
+      setResultMsg(
+        data.referenceId
+          ? isEn
+            ? `Reference: ${data.referenceId}`
+            : `受付番号: ${data.referenceId}`
+          : isEn
+            ? "Submission complete."
+            : "送信が完了しました。",
+      );
       setStatus("success");
+      idempotencyKeyRef.current = null;
     } catch {
       setStatus("error");
+      setResultMsg(
+        isEn
+          ? "Submission failed. Please try again later."
+          : "送信に失敗しました。時間をおいて再度お試しください。",
+      );
     }
   }
 
@@ -182,8 +227,8 @@ export default function InquiryForm() {
           </p>
           <p className="mt-1 text-xs leading-5 text-emerald-800">
             {isEn
-              ? "This portal is built and maintained by a licensed labor safety consultant with hands-on construction site management experience. Company/organization inquiries about safety consulting, KY/safety workflow automation, or training material production are welcome here."
-              : "本ポータルは労働安全コンサルタント（土木）の資格を持つ運営者が実務経験をもとに開発しています。労働安全コンサル・KY/安全業務の自動化、教育コンテンツ制作などの法人・団体からのご相談を承ります。"}
+              ? "The Safety AI Portal editorial team maintains this research project using public primary sources and the review status shown on each page. Check the service page for the current availability of business automation, KY/safety workflow, and training-material requests."
+              : "本ポータルは安全AIポータル編集部が、公開一次資料と各ページに示す確認状態を基に運営する研究プロジェクトです。KY・安全業務の自動化や教育コンテンツ制作の現在の受付状態は、サービスページで確認できます。"}
           </p>
         </div>
       ) : (
@@ -199,7 +244,26 @@ export default function InquiryForm() {
         </div>
       )}
 
-      {status === "success" ? (
+      {tab === "business" ? (
+        <div className="rounded-xl border-2 border-emerald-300 bg-white p-5 text-sm text-slate-800">
+          <p className="font-bold text-emerald-900">
+            {isEn
+              ? "Business inquiries use the protected consultation form"
+              : "法人・自動化・講習相談は保護された専用フォームへ統合しました"}
+          </p>
+          <p className="mt-2 text-xs leading-6 text-slate-700">
+            {isEn
+              ? "The dedicated route provides shared rate limiting, idempotency, origin checks, body limits, and fail-closed delivery."
+              : "共有レート制限、冪等性、Origin検査、本文上限、配信設定未完了時のfail-closedを備えた正規経路です。相談本文や連絡先をanalyticsへ送信しません。"}
+          </p>
+          <Link
+            href="/services/automation#consult-form"
+            className="mt-4 inline-flex min-h-[44px] items-center justify-center rounded-lg bg-emerald-700 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-800"
+          >
+            {isEn ? "Open protected consultation form" : "専用の相談フォームを開く"}
+          </Link>
+        </div>
+      ) : status === "success" ? (
         <div
           role="status"
           aria-live="polite"
@@ -259,16 +323,14 @@ export default function InquiryForm() {
             <input
               id="inquiry-subject"
               required
+              minLength={3}
+              maxLength={160}
               value={form.subject}
               onChange={(e) => setForm((f) => ({ ...f, subject: e.target.value }))}
               placeholder={
-                tab === "business"
-                  ? isEn
-                    ? "e.g. Safety consulting for a construction site"
-                    : "例: 建設現場の労働安全コンサルについて"
-                  : isEn
-                    ? "e.g. Can't find this article in law search"
-                    : "例: 法令検索でこの条文が見つからない"
+                isEn
+                  ? "e.g. Can't find this article in law search"
+                  : "例: 法令検索でこの条文が見つからない"
               }
               className={inputClass}
             />
@@ -283,16 +345,14 @@ export default function InquiryForm() {
               id="inquiry-message"
               required
               rows={7}
+              minLength={5}
+              maxLength={4000}
               value={form.message}
               onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))}
               placeholder={
-                tab === "business"
-                  ? isEn
-                    ? "Company/organization, current challenges, desired timeline, budget range, etc."
-                    : "会社名・団体名、現状の課題、希望スケジュール、ご予算感などをお書きください。"
-                  : isEn
-                    ? "Which page/section, expected behavior, actual behavior, etc."
-                    : "どのページのどの箇所か・期待する動作・現状の動作などをお書きください。"
+                isEn
+                  ? "Which page/section, expected behavior, actual behavior, etc."
+                  : "どのページのどの箇所か・期待する動作・現状の動作などをお書きください。"
               }
               className={inputClass}
             />
@@ -302,26 +362,17 @@ export default function InquiryForm() {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label htmlFor="inquiry-name" className="block text-sm font-semibold text-slate-700">
-                {tab === "business" ? (isEn ? "Name / Company" : "お名前・会社名") : isEn ? "Name" : "お名前"}{" "}
+                {isEn ? "Name" : "お名前"}{" "}
                 <span className="text-xs text-slate-500">
-                  {tab === "business" ? "" : isEn ? "(optional)" : "（任意）"}
+                  {isEn ? "(optional)" : "（任意）"}
                 </span>
-                {tab === "business" && <span className="text-red-500">*</span>}
               </label>
               <input
                 id="inquiry-name"
-                required={tab === "business"}
+                maxLength={100}
                 value={form.name}
                 onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-                placeholder={
-                  tab === "business"
-                    ? isEn
-                      ? "e.g. Yamada Construction Co., Ltd."
-                      : "例: 株式会社〇〇建設 山田"
-                    : isEn
-                      ? "Anonymous is fine"
-                      : "匿名でも構いません"
-                }
+                placeholder={isEn ? "Anonymous is fine" : "匿名でも構いません"}
                 className={inputClass}
               />
             </div>
@@ -329,17 +380,16 @@ export default function InquiryForm() {
               <label htmlFor="inquiry-email" className="block text-sm font-semibold text-slate-700">
                 {isEn ? "Email" : "メールアドレス"}{" "}
                 <span className="text-xs text-slate-500">
-                  {tab === "business" ? "" : isEn ? "(optional, for reply)" : "（任意・返信希望時）"}
+                  {isEn ? "(optional, for reply)" : "（任意・返信希望時）"}
                 </span>
-                {tab === "business" && <span className="text-red-500">*</span>}
               </label>
               <input
                 id="inquiry-email"
                 type="email"
-                required={tab === "business"}
+                maxLength={254}
                 value={form.email}
                 onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-                placeholder="example@example.com"
+                placeholder="返信先メールアドレス"
                 className={inputClass}
               />
             </div>
@@ -364,44 +414,59 @@ export default function InquiryForm() {
             </select>
           </div>
 
-          {/* 公開Q&Aチェック（法人・コンサル相談は個別対応のため対象外） */}
-          {tab === "general" && (
-            <label className="flex items-start gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm">
-              <input
-                type="checkbox"
-                checked={form.publishOk}
-                onChange={(e) => setForm((f) => ({ ...f, publishOk: e.target.checked }))}
-                className="mt-1 h-4 w-4"
-              />
-              <span className="text-slate-700">
-                {isEn ? (
-                  <>
-                    This content may be posted anonymously to the <strong>public Q&amp;A</strong>.
-                    <span className="block text-[11px] text-slate-500">
-                      Only when checked may we publish your message alongside a reply. Name and email are never shared.
-                    </span>
-                  </>
-                ) : (
-                  <>
-                    この内容を <strong>公開Q&amp;A</strong> として匿名で掲載しても構いません。
-                    <span className="block text-[11px] text-slate-500">
-                      チェックを入れた場合のみ、回答とともに公開する場合があります。氏名・メールは公開しません。
-                    </span>
-                  </>
-                )}
-              </span>
-            </label>
-          )}
+          <div className="sr-only" aria-hidden="true">
+            <label htmlFor="inquiry-website">Website</label>
+            <input
+              id="inquiry-website"
+              tabIndex={-1}
+              autoComplete="off"
+              value={form.website}
+              onChange={(event) =>
+                setForm((current) => ({
+                  ...current,
+                  website: event.target.value,
+                }))
+              }
+            />
+          </div>
+
+          <div className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs leading-5 text-amber-950">
+            {isEn
+              ? "Do not enter health information, names of other people, customer data, site secrets, or unredacted incident reports. This form is not an emergency channel."
+              : "健康情報、第三者の氏名、顧客情報、現場機密、未匿名化の事故報告は入力しないでください。このフォームは緊急連絡には使えません。"}
+          </div>
+          <label className="flex min-h-11 items-start gap-3 rounded-lg border border-slate-300 bg-slate-50 p-3 text-sm">
+            <input
+              type="checkbox"
+              required
+              checked={form.privacyConsent}
+              onChange={(event) =>
+                setForm((current) => ({
+                  ...current,
+                  privacyConsent: event.target.checked,
+                }))
+              }
+              className="mt-1 h-5 w-5 shrink-0"
+            />
+            <span className="text-slate-700">
+              {isEn
+                ? "I have read the privacy policy and consent to server-side processing and email delivery of this submission."
+                : "プライバシーポリシーを確認し、この内容がサーバー側で処理され、設定済みのメール配信先へ送られることに同意します。"}
+            </span>
+          </label>
 
           {status === "error" && (
-            <p className="text-sm text-red-600" role="alert">
-              {isEn ? "Submission failed. Please try again later." : "送信に失敗しました。時間をおいて再度お試しください。"}
+            <p className="rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-800" role="alert">
+              {resultMsg ??
+                (isEn
+                  ? "Submission failed. Please try again later."
+                  : "送信に失敗しました。時間をおいて再度お試しください。")}
             </p>
           )}
 
           <button
             type="submit"
-            disabled={status === "sending"}
+            disabled={status === "sending" || !form.privacyConsent}
             className="w-full rounded-xl bg-emerald-600 py-3.5 text-sm font-bold text-white transition hover:bg-emerald-700 disabled:opacity-60"
           >
             {status === "sending" ? (isEn ? "Sending..." : "送信中...") : (isEn ? "Submit" : "送信する")}
@@ -414,11 +479,9 @@ export default function InquiryForm() {
             {isEn ? "." : "をご確認ください。"}
           </p>
           <p className="text-[11px] text-slate-500">
-            {isEn ? "If the form is unavailable, contact us directly at " : "フォームが使えない場合は "}
-            <a href="mailto:kenshi.ycc@gmail.com" className="underline hover:text-slate-700">
-              kenshi.ycc@gmail.com
-            </a>
-            {isEn ? "." : " まで直接ご連絡ください。"}
+            {isEn
+              ? "If the form is unavailable, wait a while and try again. Contact addresses are not published to reduce misuse."
+              : "フォームが使えない場合は、時間をおいて再度お試しください。迷惑利用防止のため連絡先メールアドレスは公開していません。"}
           </p>
         </form>
       )}

@@ -21,8 +21,16 @@ export const revalidate = 2592000;
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
-function buildCanonical(slugs: string): string {
-  return `${SITE_URL}/accidents-reports/compare?industries=${slugs}`;
+function comparisonPath(slugs: string, hasExplicitSelection: boolean): string {
+  return hasExplicitSelection
+    ? `/accidents-reports/compare?industries=${slugs}`
+    : "/accidents-reports/compare";
+}
+
+function hasExplicitIndustries(value: string | string[] | undefined): boolean {
+  return Array.isArray(value)
+    ? value.some((item) => item.trim().length > 0)
+    : typeof value === "string" && value.trim().length > 0;
 }
 
 function titleFor(labels: string[]): string {
@@ -43,17 +51,18 @@ export async function generateMetadata({
   const dataset = buildComparisonDataset(slugs);
   const labels = dataset.rows.map((r) => r.config.label);
   const canonicalKey = canonicalIndustryKey(slugs);
-  const canonical = buildCanonical(canonicalKey);
+  const path = comparisonPath(canonicalKey, hasExplicitIndustries(params.industries));
+  const canonical = `${SITE_URL}${path}`;
   const title = titleFor(labels);
   const description = descriptionFor(labels, dataset.totalCases);
   return {
     title,
     description,
     alternates: {
-      canonical: `/accidents-reports/compare?industries=${canonicalKey}`,
+      canonical: path,
     },
     openGraph: withSiteOpenGraph(
-      `/accidents-reports/compare?industries=${canonicalKey}`,
+      path,
       {
         title,
         description,
@@ -90,7 +99,10 @@ export default async function CompareIndustriesPage({
 
   const labels = dataset.rows.map((r) => r.config.label);
   const canonicalKey = canonicalIndustryKey(slugs);
-  const url = buildCanonical(canonicalKey);
+  const url = `${SITE_URL}${comparisonPath(
+    canonicalKey,
+    hasExplicitIndustries(params.industries),
+  )}`;
   const title = titleFor(labels);
   const description = descriptionFor(labels, dataset.totalCases);
 
@@ -134,7 +146,6 @@ export default async function CompareIndustriesPage({
               dataset.yearRange.min && dataset.yearRange.max
                 ? `${dataset.yearRange.min}/${dataset.yearRange.max}`
                 : undefined,
-            license: "https://creativecommons.org/licenses/by/4.0/",
             variableMeasured: [
               `比較業種数 ${dataset.rows.length}`,
               `累計事例 ${dataset.totalCases}件`,

@@ -28,33 +28,9 @@ export function KeywordLandingJsonLd({ data }: { data: KeywordLanding }) {
     inLanguage: "ja",
     keywords: data.keywords.join(", "),
     author: {
-      "@type": "Person",
-      name: "労働安全衛生コンサルタント（登録番号260022）",
-      url: `${SITE_URL}/about`,
-      hasOccupation: {
-        "@type": "Occupation",
-        name: "労働安全衛生コンサルタント",
-        occupationLocation: {
-          "@type": "Country",
-          name: "Japan",
-        },
-        qualifications: "労働安全衛生コンサルタント（登録番号260022）／1級土木施工管理技士／監理技術者",
-      },
-      knowsAbout: [
-        "労働安全衛生法",
-        "労働安全衛生規則",
-        "化学物質リスクアセスメント",
-        "リスクアセスメント",
-        "KY活動",
-        "安全衛生計画",
-        "建設業安全管理",
-        "製造業安全管理",
-      ],
-      affiliation: {
-        "@type": "Organization",
-        name: "安全AIポータル（個人運営研究プロジェクト）",
-        url: SITE_URL,
-      },
+      "@type": "Organization",
+      name: "安全AIポータル編集部",
+      url: SITE_URL,
     },
     publisher: {
       "@type": "Organization",

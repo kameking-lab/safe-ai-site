@@ -1,9 +1,19 @@
 {
-  "generated_at": "2026-05-24T07:31:13.385Z",
-  "total": 115,
-  "correct": 115,
+  "generated_at": "2026-08-08T04:37:15.356Z",
+  "source": "src/lib/rag-100q.fixture.ts",
+  "total": 124,
+  "correct": 124,
   "accuracy": 1,
-  "target": 0.8,
+  "retrieval_total": 102,
+  "retrieval_correct": 102,
+  "retrieval_accuracy": 1,
+  "precision5": 0.23921568627450945,
+  "mrr": 0.8756535947712418,
+  "quality_metrics_generated_at": "2026-08-08T04:37:15.356Z",
+  "safe_hold_total": 22,
+  "safe_hold_correct": 22,
+  "safe_hold_rate": 1,
+  "target": 0.85,
   "passed": true,
   "failures": [],
   "topic_breakdown": {
@@ -13,33 +23,33 @@
       "accuracy": 1
     },
     "組織": {
-      "total": 6,
-      "correct": 6,
+      "total": 4,
+      "correct": 4,
       "accuracy": 1
     },
     "教育": {
-      "total": 10,
-      "correct": 10,
+      "total": 9,
+      "correct": 9,
       "accuracy": 1
     },
     "健診": {
-      "total": 10,
-      "correct": 10,
+      "total": 8,
+      "correct": 8,
       "accuracy": 1
     },
     "墜落": {
-      "total": 6,
-      "correct": 6,
+      "total": 5,
+      "correct": 5,
       "accuracy": 1
     },
     "足場": {
-      "total": 8,
-      "correct": 8,
+      "total": 7,
+      "correct": 7,
       "accuracy": 1
     },
     "クレーン": {
-      "total": 8,
-      "correct": 8,
+      "total": 7,
+      "correct": 7,
       "accuracy": 1
     },
     "有機溶剤": {
@@ -48,8 +58,8 @@
       "accuracy": 1
     },
     "局排": {
-      "total": 2,
-      "correct": 2,
+      "total": 1,
+      "correct": 1,
       "accuracy": 1
     },
     "特化物": {
@@ -78,8 +88,8 @@
       "accuracy": 1
     },
     "電離": {
-      "total": 2,
-      "correct": 2,
+      "total": 1,
+      "correct": 1,
       "accuracy": 1
     },
     "熱中症": {
@@ -87,27 +97,7 @@
       "correct": 2,
       "accuracy": 1
     },
-    "騒音": {
-      "total": 1,
-      "correct": 1,
-      "accuracy": 1
-    },
-    "ボイラー": {
-      "total": 1,
-      "correct": 1,
-      "accuracy": 1
-    },
-    "VDT": {
-      "total": 1,
-      "correct": 1,
-      "accuracy": 1
-    },
-    "重量物": {
-      "total": 1,
-      "correct": 1,
-      "accuracy": 1
-    },
-    "高圧": {
+    "衛生基準": {
       "total": 1,
       "correct": 1,
       "accuracy": 1
@@ -118,13 +108,8 @@
       "accuracy": 1
     },
     "報告": {
-      "total": 4,
-      "correct": 4,
-      "accuracy": 1
-    },
-    "罰則": {
-      "total": 1,
-      "correct": 1,
+      "total": 3,
+      "correct": 3,
       "accuracy": 1
     },
     "労基": {
@@ -137,19 +122,9 @@
       "correct": 2,
       "accuracy": 1
     },
-    "賃金": {
-      "total": 1,
-      "correct": 1,
-      "accuracy": 1
-    },
     "労災": {
       "total": 2,
       "correct": 2,
-      "accuracy": 1
-    },
-    "契約": {
-      "total": 3,
-      "correct": 3,
       "accuracy": 1
     },
     "ハラスメント": {
@@ -158,20 +133,40 @@
       "accuracy": 1
     },
     "フォークリフト": {
-      "total": 4,
-      "correct": 4,
+      "total": 6,
+      "correct": 6,
       "accuracy": 1
     },
     "就業制限": {
-      "total": 4,
-      "correct": 4,
+      "total": 5,
+      "correct": 5,
+      "accuracy": 1
+    },
+    "貨物自動車": {
+      "total": 2,
+      "correct": 2,
+      "accuracy": 1
+    },
+    "荷役": {
+      "total": 1,
+      "correct": 1,
+      "accuracy": 1
+    },
+    "建設機械": {
+      "total": 3,
+      "correct": 3,
+      "accuracy": 1
+    },
+    "派遣": {
+      "total": 1,
+      "correct": 1,
       "accuracy": 1
     }
   },
   "phase2": {
-    "citation_at1": 0.6779999999999999,
-    "layer1_avg_whitelist": 4.8,
-    "layer2_fp_rate": 0.0174,
+    "citation_at1": 0.804,
+    "layer1_avg_whitelist": 4.6,
+    "layer2_fp_rate": 0,
     "hallucination_detection_rate": 1
   }
 }

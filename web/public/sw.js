@@ -1,21 +1,13 @@
 // 安全AIポータル Service Worker
 // Cache-first: static assets / Network-first: API calls
-// v2: モバイル LCP 改善のため主要ページをプリキャッシュ
+// 安全・法令ページはオフライン時に最新表示と誤認させないためHTMLを保存しない。
 
-const CACHE_NAME = "anzen-ai-v3";
+const CACHE_NAME = "anzen-ai-v6";
 const OFFLINE_URL = "/offline.html";
 
-// 山田職長レベルのモバイルでも初回以降サクサク動くよう、
-// ボトムナビからの 5 ページ + ホーム関連を先読みキャッシュ。
 const PRECACHE_URLS = [
   OFFLINE_URL,
-  // オフライン画面のマスコット（おやすみ）。offline.htmlとセットでキャッシュ必須
   "/mascot/mascot-sleeping.webp",
-  "/",
-  "/ky",
-  "/law-search",
-  "/chatbot",
-  "/account",
   "/manifest.json",
 ];
 
@@ -26,8 +18,15 @@ self.addEventListener("install", (event) => {
       // 個別に addAll せず Promise.allSettled で 1 件失敗しても継続
       await Promise.allSettled(
         PRECACHE_URLS.map((url) =>
-          fetch(url, { credentials: "same-origin" })
-            .then((res) => (res.ok ? cache.put(url, res.clone()) : undefined))
+          fetch(url, { credentials: "omit", cache: "no-cache" })
+            .then((res) => {
+              const cacheControl = res.headers.get("cache-control") ?? "";
+              return res.ok &&
+                !/\b(?:no-store|private)\b/i.test(cacheControl) &&
+                !res.headers.has("set-cookie")
+                ? cache.put(url, res.clone())
+                : undefined;
+            })
             .catch(() => undefined)
         )
       );
@@ -43,7 +42,7 @@ self.addEventListener("activate", (event) => {
     caches.keys().then((keys) =>
       Promise.all(
         keys
-          .filter((key) => key !== CACHE_NAME)
+          .filter((key) => key.startsWith("anzen-ai-") && key !== CACHE_NAME)
           .map((key) => caches.delete(key))
       )
     )
@@ -56,20 +55,26 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   const { request } = event;
   const url = new URL(request.url);
+  const sameOrigin = url.origin === self.location.origin;
 
   // chrome-extension や非http(s)スキームは無視
   if (!url.protocol.startsWith("http")) return;
 
-  // /api/ への呼び出し → Network-first（失敗時はエラーをそのまま返す）
-  if (url.pathname.startsWith("/api/")) {
-    event.respondWith(networkFirst(request, false));
+  // API・認証/管理画面は個人情報を含み得るため、Service Workerへ保存しない。
+  if (
+    !sameOrigin ||
+    url.pathname.startsWith("/api/") ||
+    url.pathname.startsWith("/account") ||
+    url.pathname.startsWith("/admin") ||
+    url.pathname.startsWith("/auth")
+  ) {
+    event.respondWith(networkOnly(request));
     return;
   }
 
   // _next/static, fonts, images → Cache-first
   if (
     url.pathname.startsWith("/_next/static/") ||
-    url.pathname.startsWith("/_next/image/") ||
     /\.(js|css|woff2?|ttf|otf|png|jpg|jpeg|gif|svg|ico|webp)$/.test(url.pathname)
   ) {
     event.respondWith(cacheFirst(request));
@@ -78,12 +83,12 @@ self.addEventListener("fetch", (event) => {
 
   // ナビゲーションリクエスト（HTMLページ） → Network-first、オフライン時は /offline.html
   if (request.mode === "navigate") {
-    event.respondWith(networkFirst(request, true));
+    event.respondWith(navigationNetworkFirst(request));
     return;
   }
 
-  // その他 → Network-first
-  event.respondWith(networkFirst(request, false));
+  // その他の動的レスポンスも永続化しない。
+  event.respondWith(networkOnly(request));
 });
 
 /**
@@ -94,7 +99,13 @@ async function cacheFirst(request) {
   if (cached) return cached;
   try {
     const response = await fetch(request);
-    if (response.ok) {
+    const cacheControl = response.headers.get("cache-control") ?? "";
+    if (
+      response.ok &&
+      request.method === "GET" &&
+      !/\b(?:no-store|private)\b/i.test(cacheControl) &&
+      !response.headers.has("set-cookie")
+    ) {
       const cache = await caches.open(CACHE_NAME);
       cache.put(request, response.clone());
     }
@@ -105,27 +116,31 @@ async function cacheFirst(request) {
 }
 
 /**
- * Network-first: ネットワーク優先。失敗した場合はキャッシュ、
- * キャッシュもなければ offline.html（navigateのみ）を返す。
+ * Navigation: network only. On failure, always show an explicit offline shell.
+ * Cached safety/legal HTML must never look like a current response.
  */
-async function networkFirst(request, fallbackToOffline) {
+async function navigationNetworkFirst(request) {
   try {
-    const response = await fetch(request);
-    if (response.ok && request.method === "GET") {
-      const cache = await caches.open(CACHE_NAME);
-      cache.put(request, response.clone());
-    }
-    return response;
+    return await fetch(request);
   } catch {
-    const cached = await caches.match(request);
-    if (cached) return cached;
-    if (fallbackToOffline) {
-      return caches.match(OFFLINE_URL);
-    }
-    return new Response(
-      JSON.stringify({ error: "オフライン中です。インターネット接続を確認してください。" }),
-      { status: 503, headers: { "Content-Type": "application/json" } }
+    return (
+      (await caches.match(OFFLINE_URL)) ??
+      new Response("オフライン中です。", {
+        status: 503,
+        headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" },
+      })
     );
+  }
+}
+
+async function networkOnly(request) {
+  try {
+    return await fetch(request);
+  } catch {
+    return new Response("オフライン中です。インターネット接続を確認してください。", {
+      status: 503,
+      headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" },
+    });
   }
 }
 
@@ -163,7 +178,7 @@ self.addEventListener("push", (event) => {
 // タップが無反応にならないようにする。data.url が無ければトップへ。
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-  const url = event.notification.data?.url ?? "/notifications";
+  const url = safeNotificationPath(event.notification.data?.url);
   event.waitUntil(
     self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
       for (const client of clients) {
@@ -177,3 +192,16 @@ self.addEventListener("notificationclick", (event) => {
     })
   );
 });
+
+function safeNotificationPath(value) {
+  if (typeof value !== "string" || !value.startsWith("/") || value.startsWith("//")) {
+    return "/notifications";
+  }
+  try {
+    const parsed = new URL(value, self.location.origin);
+    if (parsed.origin !== self.location.origin) return "/notifications";
+    return `${parsed.pathname}${parsed.search}${parsed.hash}`;
+  } catch {
+    return "/notifications";
+  }
+}

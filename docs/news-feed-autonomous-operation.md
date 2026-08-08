@@ -1,222 +1,76 @@
-# Autonomous news-feed operation guide
+# 報道RSS収集・人手確認 運用手順
 
-Phase B.2 ships an autonomous RSS → AI-judge → publish pipeline for labor-accident
-reporting. **There is no human in the loop**: Gemini 2.5 Flash both judges the
-entries and gates publication. This document covers the operational surface so
-the system can be reasoned about, debugged, and tuned without re-reading the
-code.
+最終更新: 2026-07-23 JST
 
-## Pipeline overview
+## 原則
 
-```
-                      cron: 06:00 JST daily
-                              │
-                              ▼
-        ┌───────────────────────────────────────────┐
-        │  scripts/etl/fetch-news-feed.mjs          │
-        │  • fetch RSS  (NHK 社会 / NHK 経済 / 厚労省)│
-        │  • keyword pre-filter  (~25 regexes)       │
-        │  • dedupe vs. approved+rejected           │
-        │  → scripts/etl/data/news-feed-candidates.json
-        └───────────────────────────────────────────┘
-                              │
-                              ▼
-        ┌───────────────────────────────────────────┐
-        │  scripts/etl/news-ai-judge.mjs            │
-        │  • Gemini 2.5 Flash, one call / candidate │
-        │  • 4 scores + AI summary (≤50 chars)      │
-        │  • threshold gate → approved | rejected   │
-        │  → web/src/data/news-feed/{approved,rejected}/index.json
-        └───────────────────────────────────────────┘
-                              │
-                              ▼
-        ┌───────────────────────────────────────────┐
-        │  git commit + push to main                │
-        │  (`[skip ci]` to avoid recursive runs)    │
-        └───────────────────────────────────────────┘
-                              │
-                              ▼
-        ┌───────────────────────────────────────────┐
-        │  Vercel deploys → /accidents shows the    │
-        │  「報道・自動収集」 section                │
-        └───────────────────────────────────────────┘
-```
+報道フィードは、RSSの取得と公開承認を分離する。
 
-Workflow: [`.github/workflows/news-feed-daily.yml`](../.github/workflows/news-feed-daily.yml).
+- RSS取得と明らかな対象外項目の除外は自動化する。
+- 残った項目は `pending` の人手確認待ちキューへ入れる。
+- 外部生成AIへ見出し、本文、URLを送信しない。
+- `approved === true` かつ `humanReviewed === true` の項目だけを公開する。
+- 判定不能、出典不明、著作権上の掲載範囲が不明な項目は公開しない。
+- 公開項目は事故統計、RAG、公式事故件数へ含めない。
 
-## Source list and the legal call
+## データフロー
 
-| ID | Source | License | Why included |
-| --- | --- | --- | --- |
-| `nhk-shakai` | NHK NEWS WEB 社会 RSS | Headline + URL only under Copyright Act art. 32 quotation | Largest single source of labor-accident headlines |
-| `nhk-keizai` | NHK NEWS WEB 経済 RSS | Same as above | Catches industrial / chemical / supply-chain accidents that the social desk skips |
-| `mhlw-houdou` | 厚労省 報道発表資料 RSS | Public-sector work (art. 13) / 政府標準利用規約 2.0 | Authoritative for council notices and asbestos certification updates |
+1. `.github/workflows/news-feed-daily.yml` がRSS取得処理を実行する。
+2. `scripts/etl/fetch-news-feed.mjs` が見出し、URL、配信元、配信日時だけを取得する。
+3. `scripts/etl/news-ai-judge.mjs` が固定ルールで重複と明らかな対象外項目を除外する。
+4. 残った項目を `web/src/data/news-feed/pending/index.json` に保存する。
+5. 運営者が一次情報、関連性、誤認可能性、掲載範囲を確認する。
+6. 人手確認済みの項目だけに `humanReviewed: true` と `approved: true` を明示する。
+7. `web/src/lib/news-feed.ts` が両方のフラグを検証して公開する。
 
-**Explicitly excluded** (and why):
+`news-ai-judge.mjs` という既存ファイル名はワークフロー互換のため残しているが、現在は外部AIを呼ばない。今後、誤解のないファイル名へ変更する場合は、ワークフロー、テスト、運用文書を同時に更新する。
 
-- **Kyodo / Jiji** — commercial redistribution licence required.
-- **MHLW 職場のあんぜんサイト accident DB** — terms forbid redistribution; the
-  contents are already mirrored under our `mhlw` provenance via a separate ETL.
-- **Industry papers** (建設工業新聞, 労働新聞) — ToS ambiguity; the AI judge's
-  copyrightRisk score would likely fail them anyway. Skipping the fetch saves
-  Gemini calls.
-- **Police press releases** — labor accidents are sparse in those feeds and
-  the ones that appear duplicate NHK headlines.
+## 取得元と保存範囲
 
-If a new source is added later, the legal questions to answer are, in order:
-
-1. Is the feed publicly accessible without authentication?
-2. Are the ToS explicit about RSS redistribution?
-3. Does our usage (headline + URL + independent ≤50-char summary) satisfy
-   art. 32 quotation requirements?
-4. Will the AI judge's `copyrightRisk` score realistically pass at the 30
-   threshold for typical entries?
-
-If any answer is "no" or "unclear," do not add the source.
-
-## AI judge prompt and thresholds
-
-Prompt: [`scripts/etl/news-ai-judge.mjs`](../scripts/etl/news-ai-judge.mjs)
-(`JUDGE_INSTRUCTION` constant).
-
-The model is asked to return JSON with four numeric scores plus an independent
-summary. The thresholds (also defined in the same file) are:
-
-| Score | Direction | Pass criterion |
+| 取得元 | 保存する情報 | 保存しない情報 |
 | --- | --- | --- |
-| `relevance` | higher = more relevant | `≥ 70` |
-| `copyrightRisk` | lower = safer | `≤ 30` |
-| `misinformationRisk` | lower = safer | `≤ 30` |
-| `duplication` | higher = more duplicate | `≤ 50` |
+| NHK NEWS WEB 公開RSS | 見出し、記事URL、配信元、配信日時 | 記事本文、画像 |
+| 厚生労働省 報道発表RSS | 見出し、一次情報URL、配信元、配信日時 | ページ本文、添付資料本文 |
 
-**An entry passes the gate only if *all four* are satisfied.** Failures are
-recorded in `web/src/data/news-feed/rejected/index.json` with
-`score.rejectionReasons` populated so operators can audit them.
+新しい取得元を追加する前に、公開RSSであること、利用条件、出典表示方法、見出し掲載の必要性を人が確認する。条件が不明な場合は追加しない。
 
-### Why these thresholds
+## 人手確認チェック
 
-- `relevance ≥ 70` — the NHK feeds carry a lot of non-labor news that
-  shares keywords ("墜落" can be a plane crash, "崩壊" can be a building
-  collapse with no workers). The 70 cutoff was chosen so single-keyword
-  false positives without a labor framing get rejected.
-- `copyrightRisk ≤ 30` — headlines from public-sector feeds and the
-  major news outlets tend to score 10–20. A score over 30 typically means
-  the headline is itself long, highly creative, or implies that the body
-  text would need to be quoted to make sense — all things we cannot do
-  with only a headline.
-- `misinformationRisk ≤ 30` — primary-source-clear reporting from NHK
-  and 厚労省 sits at 5–15. A score over 30 means the headline does not
-  identify the source incident (e.g., "ある工場で死亡事故"), which we
-  cannot publish without misleading readers.
-- `duplication ≤ 50` — entries that overlap the existing 5,000-row
-  accident DB add nothing to readers and risk double-counting in
-  third-party analyses.
+- 一次情報URLがHTTPSで到達可能か
+- 労働災害または安全衛生との関連が見出しと一次情報から確認できるか
+- 公表事故、学習用synthetic事例、一般ニュースを混同しない表示になっているか
+- 見出しだけで事実関係を誤認させないか
+- 記事本文や画像を複製していないか
+- 短い要約や参考分類がある場合、運営者が内容を確認したか
+- 公開日と確認日を記録したか
 
-If a tuning round shows systematic false positives or false negatives,
-the thresholds (not the prompt) should be moved first — they are the cheaper
-lever.
+一つでも確認できない項目は `pending` のままにするか、理由を付けて `rejected` へ移す。
 
-## Expected misjudgement patterns
+## 障害時
 
-### False approvals (the harder case)
+- RSS取得失敗: 既存の人手確認済み項目だけを表示し、新規公開しない。
+- JSON形式異常: fail-closedで処理を停止し、公開データを書き換えない。
+- 人手確認が未完了: `pending` のままとし、公開件数へ含めない。
+- 誤公開を発見: 公開一覧から除外し、必要なら訂正文を追加する。
 
-- A non-labor accident sharing a keyword (e.g., a private aviation crash
-  scoring high on "墜落" but low on labor framing). **Mitigation**: the
-  prompt is explicit that non-labor crashes/disasters should be relevance
-  20–40, not 80+. If they leak through, raise `relevanceMin` to 75.
-- An overly creative MHLW press-release headline ("ご注意ください！" style).
-  These tend to score high on `misinformationRisk` because the headline
-  alone doesn't carry the news, and they get auto-rejected. Confirmed in
-  test fetches.
+エラーログにはRSS取得元ID、HTTPステータス、処理段階だけを記録し、取得本文を出さない。
 
-### False rejections (the easier case)
+## ローカル確認
 
-- Long, descriptive labor-accident headlines that score 30–40 on
-  `copyrightRisk` because the model thinks the headline is itself
-  creative enough to need fair-use analysis. We treat these as acceptable
-  losses — losing a headline costs less than misjudging copyright. If a
-  pattern of valuable losses emerges, prefer raising `copyrightRiskMax`
-  to 35 over editing the prompt.
-- Council / committee notices that the model decides are too procedural
-  (relevance < 70). This is the intended behavior; we are not a calendar.
-
-### Catastrophic model errors
-
-- Gemini occasionally returns a non-JSON payload despite the
-  `responseMimeType: application/json` request. The judge falls back to
-  inserting the entry in `rejected/` with `score.rejectionReasons = ["judge call failed: ..."]`,
-  so it is visible and not silently dropped. A pattern of these means
-  the prompt or the SDK has drifted; investigate before tuning thresholds.
-
-## Disaster recovery
-
-### `GEMINI_API_KEY` missing
-
-The judge script logs a clear warning and exits 0 without touching the
-approved/rejected files. The fetch stage still runs and writes the
-candidates file, so an operator can run stage 2 manually after re-adding
-the secret:
-
-```sh
+```powershell
+node scripts/etl/fetch-news-feed.mjs
 node scripts/etl/news-ai-judge.mjs
 ```
 
-### Fetch step intermittently fails
+この処理は外部生成AIや有料APIを呼ばない。RSS取得はネットワークアクセスを伴うため、テストではfixtureを使う。
 
-Each source is wrapped in a try/catch; one bad source does not block the
-others. Persistent failures should be triaged at the source level (RSS URL
-change, TLS issue, rate limit) before disabling — `stats[<source>].error`
-in the candidates file pinpoints the exact failure mode.
+## 公開面の要件
 
-### Bad approval in production
+報道項目を表示するすべての画面で、次を守る。
 
-1. Re-run the workflow with `workflow_dispatch` after editing the
-   thresholds or the prompt, **or**
-2. Manually edit `web/src/data/news-feed/approved/index.json` (remove the
-   offending entry by `id`) and commit. The dedupe set will keep it from
-   coming back next run (it is hashed by URL).
-
-### Rollback
-
-A revert of the news-feed commits restores the previous approved/rejected
-snapshots; the page degrades gracefully (the section hides itself when
-`entries.length === 0`).
-
-## Manual / dev usage
-
-```sh
-# Stage 1 only (offline-safe, no API key needed):
-node scripts/etl/fetch-news-feed.mjs
-
-# Stage 2 (requires GEMINI_API_KEY in environment):
-GEMINI_API_KEY=... node scripts/etl/news-ai-judge.mjs
-```
-
-The fetch stage writes `scripts/etl/data/news-feed-candidates.json` —
-this file is intentionally not committed (it is the inter-stage handoff)
-but it is useful to inspect locally when debugging keyword coverage.
-
-## Capacity / API spend
-
-- Daily fetch volume: typically 5–15 candidates per run after the keyword
-  filter and dedupe; 200–400 calls/month at the median.
-- Gemini 2.5 Flash pricing is well under $0.001 per call at this prompt
-  size, so even an outlier 50-candidate day is under $0.10.
-- Approved cap: 200 most-recent entries (older entries drop off).
-- Rejected cap: 500 most-recent entries (older drop off). Rejected log is
-  the operational analysis surface — keep enough history to spot
-  threshold-tuning opportunities.
-
-## Adding the autonomous operation note to a new surface
-
-Whenever a new page surfaces these entries, it must:
-
-1. Use a distinct badge or color to separate from `mhlw` / `curated`
-   provenance.
-2. Link to `/about/news-feed`.
-3. Make the headline itself the link to the primary source (target=
-   `_blank`, `rel="noopener noreferrer nofollow"`).
-4. Display the AI-generated summary, not a quote of the article body.
-
-These four constraints together preserve the Article 32 quotation
-framing that the legal review (Draft PR #99) rested on.
+1. 「人手確認済み」と明示する。
+2. 見出しを一次情報へのリンクにする。
+3. 出典名と日付を表示する。
+4. 公表事故、synthetic事故、報道項目を別の由来として表示する。
+5. 一次情報の再確認を促す。
+6. `humanReviewed` のない旧データを表示しない。

@@ -1,10 +1,8 @@
 /**
  * KY (Kiken Yochi / Hazard Identification) example record schema.
  *
- * Sourced from publicly released safety education materials such as MHLW
- * (厚生労働省), JISHA (中央労働災害防止協会), and 建設業労働災害防止協会.
- * All `risks[]` / `countermeasures[]` text in the dataset is independently
- * summarized, not transcribed verbatim from the source material.
+ * 既存レコードは個別一次資料との対応を確認できていないため、公開時は
+ * syntheticモデルケースとして正規化する。発行主体名だけでは出典確認済みとしない。
  */
 export type KyIndustryId =
   | "construction"
@@ -33,8 +31,15 @@ export type KySourceCategory =
 
 export type KyExampleSource = {
   category: KySourceCategory;
-  /** Short label shown in UI (e.g. "厚生労働省「労働災害事例」"). */
+  /** UI表示用。個別URLを確認できない機関名は出典として表示しない。 */
   label: string;
+  provenance?: "official" | "curated" | "synthetic";
+  verification?: "verified" | "unverified" | "quarantined";
+  referenceUrl?: string;
+  documentNumber?: string;
+  lastHumanReviewedAt?: string;
+  /** true は個別一次資料URLと内容支持を人が確認した場合に限る。 */
+  useForAiGrounding?: boolean;
 };
 
 export type KyExample = {

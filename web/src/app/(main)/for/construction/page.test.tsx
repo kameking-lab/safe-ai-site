@@ -1,84 +1,124 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
-import ForConstructionPage from "./page";
+import ForConstructionPage, { metadata } from "./page";
 
-// RoleAnchorScroller は client、useSearchParams を mock
-vi.mock("next/navigation", () => ({
-  useSearchParams: () => ({ get: () => null }),
-}));
+const FORBIDDEN = [
+  "/accidents-reports",
+  "/accidents-analytics",
+  "/strategy/plan-generator",
+  "/faq",
+  "/e-learning",
+] as const;
 
-describe("/for/construction page", () => {
-  it("Hero に建設業の見出しを描画", () => {
-    render(<ForConstructionPage />);
-    expect(screen.getAllByText(/建設現場の安全衛生、ここに集約/).length).toBeGreaterThan(0);
+function renderedHrefs(): Array<string | null> {
+  return screen
+    .getAllByRole("link")
+    .map((link) => link.getAttribute("href"));
+}
+
+describe("/for/construction 正規機能ランチャー", () => {
+  it("職長・現場代理人向けmetadataとcanonicalを固定する", () => {
+    expect(metadata).toMatchObject({
+      title: "職長・現場代理人向け安全行動入口",
+      description:
+        "職長・現場代理人が、今日の気象確認、KY、安全工程打合せ書、事故検索、資格確認を現場条件付きで始める入口。",
+      alternates: { canonical: "/for/construction" },
+    });
   });
 
-  it("役職別 3 セクションのアンカーが存在", () => {
+  it("役割ラベルと単一H1を表示する", () => {
     render(<ForConstructionPage />);
-    const foreman = document.getElementById("for-foreman");
-    const manager = document.getElementById("for-manager");
-    const supervisor = document.getElementById("for-supervisor");
-    expect(foreman).toBeTruthy();
-    expect(manager).toBeTruthy();
-    expect(supervisor).toBeTruthy();
+    expect(
+      screen.getByText("職長・現場代理人・元請安全担当向け"),
+    ).toBeTruthy();
+    expect(
+      screen.getByRole("heading", {
+        level: 1,
+        name: "今日の条件を確認し、KYと工程打合せへ。",
+      }),
+    ).toBeTruthy();
+    expect(document.querySelectorAll("h1")).toHaveLength(1);
   });
 
-  it("9セクション (today/foreman/manager/supervisor/monthly/laws/chemical/stats/circulars) のアンカー", () => {
+  it("建設現場向け6アクションを正規URLへ直接つなぐ", () => {
     render(<ForConstructionPage />);
-    for (const id of ["today", "for-foreman", "for-manager", "for-supervisor", "monthly", "laws", "chemical", "stats", "circulars"]) {
-      expect(document.getElementById(id), `#${id} が見つからない`).toBeTruthy();
+    expect(renderedHrefs()).toEqual(
+      expect.arrayContaining([
+        "/risk?work=construction",
+        "/ky/paper?industry=construction",
+        "/safety-diary?industry=construction",
+        "/accident-news",
+        "/education-certification/finder?industry=construction",
+        "/signage?industry=construction",
+      ]),
+    );
+  });
+
+  it("共通の今日の安全・横断検索・品質・相談導線を持つ", () => {
+    render(<ForConstructionPage />);
+    expect(renderedHrefs()).toEqual(
+      expect.arrayContaining([
+        "/risk",
+        "/search",
+        "/about/quality",
+        "/services/automation#consult-form",
+      ]),
+    );
+  });
+
+  it("e-Gov公式検索を安全な外部リンクで開く", () => {
+    render(<ForConstructionPage />);
+    const link = screen.getByRole("link", { name: "e-Gov法令検索" });
+    expect(link.getAttribute("href")).toBe("https://elaws.e-gov.go.jp/");
+    expect(link.getAttribute("target")).toBe("_blank");
+    expect(link.getAttribute("rel")).toContain("noopener");
+    expect(link.getAttribute("rel")).toContain("noreferrer");
+  });
+
+  it("DOM内の全リンクが44px以上の操作標的を持つ", () => {
+    render(<ForConstructionPage />);
+    for (const link of screen.getAllByRole("link")) {
+      expect(link.className).toMatch(/\bmin-h-(?:11|32)\b/);
     }
   });
 
-  it("建設業 KY プリセット3作業を表示 (鉄骨建方/型枠解体/コンクリート打設)", () => {
+  it("隔離URLを完全一致・子URL・queryのいずれでも出さない", () => {
     render(<ForConstructionPage />);
-    expect(screen.getByText(/鉄骨建方作業/)).toBeDefined();
-    expect(screen.getByText(/型枠解体作業/)).toBeDefined();
-    expect(screen.getByText(/コンクリート打設/)).toBeDefined();
+    const hrefs = renderedHrefs();
+    for (const forbidden of FORBIDDEN) {
+      expect(
+        hrefs.some(
+          (href) =>
+            href === forbidden ||
+            href?.startsWith(`${forbidden}/`) ||
+            href?.startsWith(`${forbidden}?`),
+        ),
+      ).toBe(false);
+    }
   });
 
-  it("建設業労災実数値 (厚労省データ) を表示", () => {
-    render(<ForConstructionPage />);
-    expect(screen.getByText(/66,713/)).toBeDefined();
+  it("未検証の件数・テンプレ数・自動集計主張を表示しない", () => {
+    const { container } = render(<ForConstructionPage />);
+    expect(container.textContent).not.toMatch(
+      /5[,.]?000件|39\s*テンプレ|自動集計/,
+    );
   });
 
-  it("化学物質 20 物質クイックリンク (CONSTRUCTION_PRIORITY_CAS の代表物質)", () => {
+  it("公式情報の代替ではなく、原文と現場条件の確認が必要と明示する", () => {
     render(<ForConstructionPage />);
-    expect(screen.getByText(/トルエン/)).toBeDefined();
-    expect(screen.getAllByText(/石綿/).length).toBeGreaterThan(0); // 物質名 + 通達名で複数出る
-    expect(screen.getByText(/ジクロロメタン/)).toBeDefined();
+    expect(screen.getByText(/公式情報の代替ではありません/)).toBeTruthy();
+    expect(
+      screen.getByText(/根拠を再確認できない機能は公開導線から停止しています/),
+    ).toBeTruthy();
   });
 
-  it("主要内部リンク (KY/chatbot/signage/plan-generator/chemical-database) を含む", () => {
+  it("相談情報をanalyticsへ送らず、受信設定不完全時は停止すると明示する", () => {
     render(<ForConstructionPage />);
-    const links = screen.getAllByRole("link").map((a) => a.getAttribute("href"));
-    expect(links).toContain("/ky?industry=construction");
-    expect(links).toContain("/signage");
-    expect(links).toContain("/strategy/plan-generator?industry=construction");
-    expect(links).toContain("/chemical-ra");
-    expect(links).toContain("/chemical-database");
-    expect(links).toContain("/accidents-reports/construction");
-    expect(links).toContain("/chatbot");
-    expect(links).toContain("/industries/construction"); // 既存ハブへの相互リンク
-  });
-
-  it("「個人運営研究プロジェクト」「登録番号260022」を明示", () => {
-    render(<ForConstructionPage />);
-    expect(screen.getByText(/個人運営の研究プロジェクト/)).toBeDefined();
-    expect(screen.getAllByText(/260022/).length).toBeGreaterThan(0);
-  });
-
-  it("月次運用テーブル (4月/5〜9月/通年 等) を表示", () => {
-    render(<ForConstructionPage />);
-    expect(screen.getByText(/新規入場者教育/)).toBeDefined();
-    expect(screen.getAllByText(/熱中症/).length).toBeGreaterThan(0); // 月次 + 通達セクション
-  });
-
-  it("関連通達5件を含む", () => {
-    render(<ForConstructionPage />);
-    expect(screen.getAllByText(/フルハーネス/).length).toBeGreaterThan(0);
-    expect(screen.getByText(/足場からの墜落防止措置/)).toBeDefined();
-    expect(screen.getByText(/石綿事前調査結果の電子報告/)).toBeDefined();
-    expect(screen.getByText(/一人親方/)).toBeDefined();
+    expect(
+      screen.getByText(/相談本文や連絡先をanalyticsへ送信せず/),
+    ).toBeTruthy();
+    expect(
+      screen.getByText(/受信設定が不完全な場合は送信を停止します/),
+    ).toBeTruthy();
   });
 });

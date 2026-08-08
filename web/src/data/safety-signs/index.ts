@@ -9,7 +9,7 @@ import { MANDATORY_SIGNS } from "./mandatory";
 import { SAFE_CONDITION_SIGNS } from "./safe-condition";
 import { FIRE_SAFETY_SIGNS } from "./fire-safety";
 
-export const SAFETY_SIGNS: SafetySign[] = [
+const quarantinedSafetySigns: SafetySign[] = [
   ...PROHIBITION_SIGNS,
   ...WARNING_SIGNS,
   ...MANDATORY_SIGNS,
@@ -33,7 +33,7 @@ export interface CategoryDescriptor {
   reference: string;
 }
 
-export const SIGN_CATEGORIES: CategoryDescriptor[] = [
+const quarantinedSignCategories: CategoryDescriptor[] = [
   {
     id: "prohibition",
     label: "禁止標識",
@@ -86,6 +86,21 @@ export const SIGN_CATEGORIES: CategoryDescriptor[] = [
   },
 ];
 
+/**
+ * 旧110件は法令上の義務・指針・JIS・独自推奨の区別と、規格の引用範囲を
+ * 独立検証できていないため公開停止する。検証済みallowlistは現時点で空。
+ */
+export const SAFETY_SIGNS: SafetySign[] = [];
+export const SIGN_CATEGORIES: CategoryDescriptor[] = [];
+
+export function getQuarantinedSafetySignCount(): number {
+  return quarantinedSafetySigns.length;
+}
+
+export function getQuarantinedSafetySignCategoryCount(): number {
+  return quarantinedSignCategories.length;
+}
+
 export function getCategoryDescriptor(id: SignCategory): CategoryDescriptor {
   const descriptor = SIGN_CATEGORIES.find((c) => c.id === id);
   if (!descriptor) {
@@ -111,9 +126,9 @@ export function getSignsForIndustry(industry: IndustryId): SafetySign[] {
 export const SIGN_TOTAL_COUNT = SAFETY_SIGNS.length;
 
 export const SIGN_COUNT_BY_CATEGORY: Record<SignCategory, number> = {
-  prohibition: PROHIBITION_SIGNS.length,
-  warning: WARNING_SIGNS.length,
-  mandatory: MANDATORY_SIGNS.length,
-  "safe-condition": SAFE_CONDITION_SIGNS.length,
-  "fire-safety": FIRE_SAFETY_SIGNS.length,
+  prohibition: 0,
+  warning: 0,
+  mandatory: 0,
+  "safe-condition": 0,
+  "fire-safety": 0,
 };

@@ -1,40 +1,124 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
-import ForConsultantPage from "./page";
+import ForConsultantPage, { metadata } from "./page";
 
-vi.mock("next/navigation", () => ({
-  useSearchParams: () => ({ get: () => null }),
-}));
+const FORBIDDEN = [
+  "/accidents-reports",
+  "/accidents-analytics",
+  "/strategy/plan-generator",
+  "/faq",
+  "/e-learning",
+] as const;
 
-describe("/for/consultant page (専門家向け)", () => {
-  it("Hero に専門家向けの見出しを描画", () => {
-    render(<ForConsultantPage />);
-    expect(screen.getAllByText(/下調べと顧問先支援を、1画面で/).length).toBeGreaterThan(0);
+function renderedHrefs(): Array<string | null> {
+  return screen
+    .getAllByRole("link")
+    .map((link) => link.getAttribute("href"));
+}
+
+describe("/for/consultant 正規機能ランチャー", () => {
+  it("専門家向けmetadataとcanonicalを固定する", () => {
+    expect(metadata).toMatchObject({
+      title: "専門家向け安全衛生リサーチ入口",
+      description:
+        "法令・通達・事故・化学物質を出典区分付きで確認し、公式一次資料へ到達するための専門家向け入口。",
+      alternates: { canonical: "/for/consultant" },
+    });
   });
 
-  it("3カテゴリのアンカーが存在 (research/analysis/support/evidence)", () => {
+  it("役割ラベルと単一H1を表示する", () => {
     render(<ForConsultantPage />);
-    for (const id of ["research", "analysis", "support", "evidence"]) {
-      expect(document.getElementById(id), `#${id} が見つからない`).toBeTruthy();
+    expect(
+      screen.getByText("労働安全衛生の専門家・支援者向け"),
+    ).toBeTruthy();
+    expect(
+      screen.getByRole("heading", {
+        level: 1,
+        name: "原典へ戻れる下調べを、短い導線で。",
+      }),
+    ).toBeTruthy();
+    expect(document.querySelectorAll("h1")).toHaveLength(1);
+  });
+
+  it("専門家向け6アクションを正規URLへ直接つなぐ", () => {
+    render(<ForConsultantPage />);
+    expect(renderedHrefs()).toEqual(
+      expect.arrayContaining([
+        "/law-search",
+        "/circulars",
+        "/law-search?q=安全配慮義務",
+        "/accident-news",
+        "/chemical-database",
+        "/services/automation",
+      ]),
+    );
+  });
+
+  it("共通の今日の安全・横断検索・品質・相談導線を持つ", () => {
+    render(<ForConsultantPage />);
+    expect(renderedHrefs()).toEqual(
+      expect.arrayContaining([
+        "/risk",
+        "/search",
+        "/about/quality",
+        "/services/automation#consult-form",
+      ]),
+    );
+  });
+
+  it("e-Gov公式検索を安全な外部リンクで開く", () => {
+    render(<ForConsultantPage />);
+    const link = screen.getByRole("link", { name: "e-Gov法令検索" });
+    expect(link.getAttribute("href")).toBe("https://elaws.e-gov.go.jp/");
+    expect(link.getAttribute("target")).toBe("_blank");
+    expect(link.getAttribute("rel")).toContain("noopener");
+    expect(link.getAttribute("rel")).toContain("noreferrer");
+  });
+
+  it("DOM内の全リンクが44px以上の操作標的を持つ", () => {
+    render(<ForConsultantPage />);
+    for (const link of screen.getAllByRole("link")) {
+      expect(link.className).toMatch(/\bmin-h-(?:11|32)\b/);
     }
   });
 
-  it("リサーチ・分析・支援ツールへの実在リンクを含む", () => {
+  it("隔離URLを完全一致・子URL・queryのいずれでも出さない", () => {
     render(<ForConsultantPage />);
-    const links = screen.getAllByRole("link").map((a) => a.getAttribute("href"));
-    expect(links).toContain("/law-search");
-    expect(links).toContain("/circulars");
-    expect(links).toContain("/law-hierarchy");
-    expect(links).toContain("/accidents-reports");
-    expect(links).toContain("/accidents-analytics");
-    expect(links).toContain("/chemical-database");
-    expect(links).toContain("/strategy/plan-generator");
-    expect(links).toContain("/about");
+    const hrefs = renderedHrefs();
+    for (const forbidden of FORBIDDEN) {
+      expect(
+        hrefs.some(
+          (href) =>
+            href === forbidden ||
+            href?.startsWith(`${forbidden}/`) ||
+            href?.startsWith(`${forbidden}?`),
+        ),
+      ).toBe(false);
+    }
   });
 
-  it("エビデンス・出典の明示と登録番号260022", () => {
+  it("未検証の件数・テンプレ数・自動集計主張を表示しない", () => {
+    const { container } = render(<ForConsultantPage />);
+    expect(container.textContent).not.toMatch(
+      /5[,.]?000件|39\s*テンプレ|自動集計/,
+    );
+  });
+
+  it("公式情報の代替ではなく、原文と現場条件の確認が必要と明示する", () => {
     render(<ForConsultantPage />);
-    expect(screen.getByText(/エビデンスと出典/)).toBeDefined();
-    expect(screen.getAllByText(/260022/).length).toBeGreaterThan(0);
+    expect(screen.getByText(/公式情報の代替ではありません/)).toBeTruthy();
+    expect(
+      screen.getByText(/根拠を再確認できない機能は公開導線から停止しています/),
+    ).toBeTruthy();
+  });
+
+  it("相談情報をanalyticsへ送らず、受信設定不完全時は停止すると明示する", () => {
+    render(<ForConsultantPage />);
+    expect(
+      screen.getByText(/相談本文や連絡先をanalyticsへ送信せず/),
+    ).toBeTruthy();
+    expect(
+      screen.getByText(/受信設定が不完全な場合は送信を停止します/),
+    ).toBeTruthy();
   });
 });

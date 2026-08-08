@@ -1,11 +1,16 @@
 import type { Metadata } from "next";
 import { PageJsonLd } from "@/components/page-json-ld";
 import { ogImageUrl } from "@/lib/og-url";
+import {
+  parseQualificationFinderQuery,
+  type QualificationFinderSearchParams,
+} from "@/lib/education/qualification-finder-query";
 import { CertFinderClient } from "./CertFinderClient";
+import { PUBLIC_VISUAL_KY_SCENARIOS } from "@/data/visual-ky";
 
-const TITLE = "業務別 必要資格判定ツール｜特別教育・技能講習・職長教育";
+const TITLE = "業務別の資格・教育候補検索｜不足条件と公式資料を確認";
 const DESCRIPTION =
-  "業種と作業内容を選ぶだけで、必要な特別教育・技能講習・職長教育を自動判定。根拠条文・講習時間・注意事項を一覧表示。安衛則第36条・安衛法第61条対応。";
+  "業種、作業、機械能力、高さ、電圧、役割から特別教育・技能講習・作業主任者・免許の候補を絞り込みます。条件不足は判定不能とし、公式資料と人間確認へ案内します。";
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -22,15 +27,45 @@ export const metadata: Metadata = {
   },
 };
 
-export default function CertFinderPage() {
+type CertFinderPageProps = {
+  searchParams: Promise<QualificationFinderSearchParams>;
+};
+
+export default async function CertFinderPage({
+  searchParams,
+}: CertFinderPageProps) {
+  const initialState = parseQualificationFinderQuery(await searchParams);
+  const visualKyLinksByQualification: Record<
+    string,
+    { id: string; label: string; href: string }[]
+  > = {};
+  for (const scenario of PUBLIC_VISUAL_KY_SCENARIOS) {
+    for (const qualification of scenario.relatedQualifications) {
+      const links =
+        visualKyLinksByQualification[qualification.id] ?? [];
+      if (!links.some((link) => link.id === scenario.id)) {
+        links.push({
+          id: scenario.id,
+          label: scenario.shortTitle,
+          href: `/training/visual-ky/${scenario.slug}`,
+        });
+      }
+      visualKyLinksByQualification[qualification.id] = links;
+    }
+  }
+
   return (
     <>
       <PageJsonLd
-        name="業務別 必要資格判定ツール"
+        name="業務別の資格・教育候補検索"
         description={DESCRIPTION}
         path="/education-certification/finder"
       />
-      <CertFinderClient />
+      <CertFinderClient
+        key={initialState.stateKey}
+        initialState={initialState}
+        visualKyLinksByQualification={visualKyLinksByQualification}
+      />
     </>
   );
 }

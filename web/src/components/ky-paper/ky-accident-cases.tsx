@@ -22,6 +22,10 @@ import {
   accidentCaseToRiskDraft,
   type KyRiskDraftFromAccident,
 } from "@/lib/ky/accident-similar";
+import {
+  ACCIDENT_PROVENANCE_INFO,
+  resolveAccidentProvenance,
+} from "@/lib/accident-source";
 
 const SEVERITY_TONE: Record<string, string> = {
   死亡: "bg-rose-100 text-rose-800",
@@ -57,10 +61,10 @@ export function KyAccidentCasesPanel({
           <span className="flex items-center gap-2">
             <AlertTriangle className="h-4 w-4 text-rose-600" aria-hidden="true" />
             <span id="ky-accident-cases-heading" className="text-sm font-bold text-rose-800">
-              この作業に似た労災事例 {hits.length}件
+              この作業に関連する事故・教材例 {hits.length}件
             </span>
             <span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-semibold text-rose-600">
-              実在事例・危険予知の裏取りに
+              出典区分付き・人の確認必須
             </span>
           </span>
           <ChevronDown
@@ -72,10 +76,12 @@ export function KyAccidentCasesPanel({
         {open && (
           <div className="space-y-2.5 px-3 pb-3">
             <p className="px-1 text-[11px] text-slate-500">
-              作業内容から関連の高い実在事例を提示しています。「危険のポイントへ取り込む」で危険予知の欄に下書きできます（現場に合わせて修正してください）。
+              関連する保有事例です。取り込む候補を選んでください。
             </p>
             {hits.map(({ case: c }) => {
               const draft = accidentCaseToRiskDraft(c);
+              const provenance = resolveAccidentProvenance(c);
+              const provenanceInfo = ACCIDENT_PROVENANCE_INFO[provenance];
               const prevention = (c.preventionPoints ?? []).filter((p) => p.trim()).slice(0, 2);
               return (
                 <article key={c.id} className="rounded-lg border border-slate-200 bg-white p-3">
@@ -84,8 +90,11 @@ export function KyAccidentCasesPanel({
                     <span className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${SEVERITY_TONE[c.severity] ?? "bg-slate-100 text-slate-700"}`}>
                       {c.severity}
                     </span>
-                    <span className="text-[10px] text-slate-400">{c.occurredOn}</span>
-                    <span className="text-[10px] text-slate-400">・{c.workCategory}</span>
+                    <span className="text-[10px] text-slate-600">{c.occurredOn}</span>
+                    <span className="text-[10px] text-slate-600">・{c.workCategory}</span>
+                    <span className="rounded border border-slate-300 bg-slate-50 px-1.5 py-0.5 text-[10px] font-bold text-slate-800">
+                      出典区分: {provenanceInfo.label}
+                    </span>
                   </div>
                   <h4 className="mt-1.5 text-sm font-bold text-slate-900">{c.title}</h4>
                   <p className="mt-1 text-xs leading-relaxed text-slate-600">
@@ -95,20 +104,20 @@ export function KyAccidentCasesPanel({
                     <ul className="mt-1.5 space-y-0.5">
                       {prevention.map((p, i) => (
                         <li key={i} className="flex gap-1 text-xs text-emerald-800">
-                          <span className="font-semibold text-emerald-600">対策:</span>
+                          <span className="font-semibold text-emerald-700">対策:</span>
                           <span>{p}</span>
                         </li>
                       ))}
                     </ul>
                   )}
                   <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
-                    <span className="text-[10px] text-slate-400">
-                      出典: {c.source?.site ?? "編集部 curated（公開情報の再構成）"}
+                    <span className="text-[10px] text-slate-600">
+                      出典: {c.source?.site ?? provenanceInfo.description}
                       {c.source?.url && (
                         <>
                           {" "}
-                          <Link href={c.source.url} target="_blank" rel="noopener noreferrer" className="text-sky-600 underline">
-                            元記事
+                          <Link href={c.source.url} target="_blank" rel="noopener noreferrer" className="text-sky-700 underline">
+                            出典ページ
                           </Link>
                         </>
                       )}
@@ -125,9 +134,9 @@ export function KyAccidentCasesPanel({
                 </article>
               );
             })}
-            <p className="px-1 text-[10px] text-slate-400">
-              類似事例は保有する実在労災事例から決定論的に抽出しています（AIによる創作ではありません）。
-              <Link href="/accidents" className="ml-1 text-sky-600 underline">
+            <p className="px-1 text-[10px] text-slate-600">
+              他の事例も検索できます。
+              <Link href="/accidents" className="ml-1 text-sky-700 underline">
                 事故データベースをすべて見る →
               </Link>
             </p>

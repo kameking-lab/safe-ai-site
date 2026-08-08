@@ -1,16 +1,16 @@
 import type { KyExample } from "@/types/ky-example";
 
 const MHLW: KyExample["source"] = {
-  category: "mhlw",
-  label: "厚生労働省「医療・介護現場の安全衛生」",
+  category: "general",
+  label: "サイト独自のsyntheticモデルケース（一次資料未確認）",
 };
 const JISHA: KyExample["source"] = {
-  category: "jisha",
-  label: "中災防「ゼロ災運動 KY実施例（医療・福祉）」",
+  category: "general",
+  label: "サイト独自のsyntheticモデルケース（一次資料未確認）",
 };
 const GENERAL: KyExample["source"] = {
   category: "general",
-  label: "一般公開の医療・介護安全衛生資料",
+  label: "サイト独自のsyntheticモデルケース（一次資料未確認）",
 };
 
 export const MEDICAL_WELFARE_EXAMPLES: KyExample[] = [
@@ -25,10 +25,7 @@ export const MEDICAL_WELFARE_EXAMPLES: KyExample[] = [
       "病棟通路で患者と接触",
       "脚立直近を歩行者が通過",
     ],
-    risks: [
-      "脚立転倒で職員が墜落",
-      "患者の二次被災",
-    ],
+    risks: ["脚立転倒で職員が墜落", "患者の二次被災"],
     countermeasures: [
       "天板2段下まで作業に限定",
       "脚立使用中は周囲を区画し患者通行を一時制限",
@@ -43,15 +40,8 @@ export const MEDICAL_WELFARE_EXAMPLES: KyExample[] = [
     industry: "medical-welfare",
     workType: "fall-work",
     title: "施設屋上設備（給湯・換気）の保守巡回",
-    hazards: [
-      "屋上端部での墜落",
-      "勾配屋根の踏み外し",
-      "強風で姿勢を崩す",
-    ],
-    risks: [
-      "屋上からの墜落事故",
-      "重大災害",
-    ],
+    hazards: ["屋上端部での墜落", "勾配屋根の踏み外し", "強風で姿勢を崩す"],
+    risks: ["屋上からの墜落事故", "重大災害"],
     countermeasures: [
       "屋上端部に手すりまたは親綱を設置",
       "雨天・強風時の中止基準を運用",
@@ -66,15 +56,8 @@ export const MEDICAL_WELFARE_EXAMPLES: KyExample[] = [
     industry: "medical-welfare",
     workType: "fall-work",
     title: "天井裏設備（医療ガス配管等）の点検",
-    hazards: [
-      "天井点検口からの墜落",
-      "脚立転倒",
-      "酸欠空間（密閉天井裏）",
-    ],
-    risks: [
-      "墜落骨折",
-      "酸欠事故",
-    ],
+    hazards: ["天井点検口からの墜落", "脚立転倒", "酸欠空間（密閉天井裏）"],
+    risks: ["墜落骨折", "酸欠事故"],
     countermeasures: [
       "脚立は2人作業でスポッター配置",
       "天井点検口に転落防止カバーを併用",
@@ -91,15 +74,8 @@ export const MEDICAL_WELFARE_EXAMPLES: KyExample[] = [
     industry: "medical-welfare",
     workType: "heavy-load",
     title: "ベッドから車椅子への移乗介助",
-    hazards: [
-      "中腰姿勢の繰返し",
-      "患者の急な体動",
-      "床面のぬれ・滑り",
-    ],
-    risks: [
-      "介護者の腰痛・椎間板障害",
-      "患者の転倒・骨折",
-    ],
+    hazards: ["中腰姿勢の繰返し", "患者の急な体動", "床面のぬれ・滑り"],
+    risks: ["介護者の腰痛・椎間板障害", "患者の転倒・骨折"],
     countermeasures: [
       "ノーリフトポリシーを徹底しスライディングボード使用",
       "リフト・天井走行リフトの導入",
@@ -114,15 +90,8 @@ export const MEDICAL_WELFARE_EXAMPLES: KyExample[] = [
     industry: "medical-welfare",
     workType: "heavy-load",
     title: "入浴介助（リフト浴・チェア浴）",
-    hazards: [
-      "浴室床滑り",
-      "湯温管理不足での熱傷",
-      "リフト機器の操作ミス",
-    ],
-    risks: [
-      "職員・利用者の転倒",
-      "熱傷",
-    ],
+    hazards: ["浴室床滑り", "湯温管理不足での熱傷", "リフト機器の操作ミス"],
+    risks: ["職員・利用者の転倒", "熱傷"],
     countermeasures: [
       "浴室には滑り止めマットを敷設",
       "湯温は40℃以下を介助者の手で確認",
@@ -142,10 +111,7 @@ export const MEDICAL_WELFARE_EXAMPLES: KyExample[] = [
       "急ブレーキで患者転落",
       "ストレッチャー操作の握り損ね",
     ],
-    risks: [
-      "患者の二次外傷",
-      "介護者の腰痛",
-    ],
+    risks: ["患者の二次外傷", "介護者の腰痛"],
     countermeasures: [
       "ストレッチャーは2人搬送を原則化",
       "段差では速度を落とし患者を保持",
@@ -162,15 +128,8 @@ export const MEDICAL_WELFARE_EXAMPLES: KyExample[] = [
     industry: "medical-welfare",
     workType: "machine",
     title: "電動ベッド・電動車椅子の保守整備",
-    hazards: [
-      "可動部への挟まれ",
-      "誤起動",
-      "感電",
-    ],
-    risks: [
-      "手指の挟まれ・骨折",
-      "感電",
-    ],
+    hazards: ["可動部への挟まれ", "誤起動", "感電"],
+    risks: ["手指の挟まれ・骨折", "感電"],
     countermeasures: [
       "整備前に電源を遮断・施錠",
       "可動部にはガード・センサ式停止",
@@ -185,15 +144,8 @@ export const MEDICAL_WELFARE_EXAMPLES: KyExample[] = [
     industry: "medical-welfare",
     workType: "machine",
     title: "厨房での食材スライサー・ミキサー操作",
-    hazards: [
-      "回転刃への接触",
-      "押し込み時の手指挟まれ",
-      "ガード取外し作業",
-    ],
-    risks: [
-      "手指の切断・切創",
-      "重度負傷",
-    ],
+    hazards: ["回転刃への接触", "押し込み時の手指挟まれ", "ガード取外し作業"],
+    risks: ["手指の切断・切創", "重度負傷"],
     countermeasures: [
       "刃物機器は専用押し棒を必須使用",
       "ガード取外しは電源遮断・抜栓後",
@@ -208,15 +160,8 @@ export const MEDICAL_WELFARE_EXAMPLES: KyExample[] = [
     industry: "medical-welfare",
     workType: "machine",
     title: "MRI・CT等の医療機器周辺作業",
-    hazards: [
-      "強磁場による金属物の吸着",
-      "電磁波曝露",
-      "造影剤の漏えい",
-    ],
-    risks: [
-      "金属物吸着による傷害",
-      "造影剤接触",
-    ],
+    hazards: ["強磁場による金属物の吸着", "電磁波曝露", "造影剤の漏えい"],
+    risks: ["金属物吸着による傷害", "造影剤接触"],
     countermeasures: [
       "MRI室内に持ち込む物品の磁性チェックを徹底",
       "造影剤取扱は保護具と緊急対応手順を整備",
@@ -233,15 +178,8 @@ export const MEDICAL_WELFARE_EXAMPLES: KyExample[] = [
     industry: "medical-welfare",
     workType: "electrical",
     title: "医療機器（人工呼吸器・除細動器等）の電源工事",
-    hazards: [
-      "活線作業による感電",
-      "予期せぬ停電による医療事故",
-      "アース不良",
-    ],
-    risks: [
-      "感電",
-      "患者の生命リスク",
-    ],
+    hazards: ["活線作業による感電", "予期せぬ停電による医療事故", "アース不良"],
+    risks: ["感電", "患者の生命リスク"],
     countermeasures: [
       "工事前に診療部門と停止計画を協議",
       "UPS・予備電源の動作確認",
@@ -256,15 +194,8 @@ export const MEDICAL_WELFARE_EXAMPLES: KyExample[] = [
     industry: "medical-welfare",
     workType: "electrical",
     title: "病室コンセント増設・配線工事",
-    hazards: [
-      "活線接続による感電",
-      "夜間照明不足",
-      "患者・家族との接触",
-    ],
-    risks: [
-      "感電",
-      "工事中の患者事故",
-    ],
+    hazards: ["活線接続による感電", "夜間照明不足", "患者・家族との接触"],
+    risks: ["感電", "工事中の患者事故"],
     countermeasures: [
       "停電作業を原則化し患者影響を最小化",
       "工事区画を仕切りで明示し立入制限",
@@ -284,10 +215,7 @@ export const MEDICAL_WELFARE_EXAMPLES: KyExample[] = [
       "弱電配線と動力配線の混触",
       "病室稼働中の作業",
     ],
-    risks: [
-      "墜落",
-      "通信不通による医療事故",
-    ],
+    risks: ["墜落", "通信不通による医療事故"],
     countermeasures: [
       "高所作業は脚立2段下まで・スポッター配置",
       "弱電と動力の混触防止のため配線セパレータを使用",
@@ -309,10 +237,7 @@ export const MEDICAL_WELFARE_EXAMPLES: KyExample[] = [
       "皮膚・粘膜への接触",
       "換気不足",
     ],
-    risks: [
-      "急性中毒",
-      "化学熱傷",
-    ],
+    risks: ["急性中毒", "化学熱傷"],
     countermeasures: [
       "酸性洗剤との混用厳禁を表示",
       "保護メガネ・耐薬品手袋・マスクを着用",
@@ -327,15 +252,8 @@ export const MEDICAL_WELFARE_EXAMPLES: KyExample[] = [
     industry: "medical-welfare",
     workType: "chemical",
     title: "ホルマリン・グルタラール等の検体・器具消毒",
-    hazards: [
-      "蒸気吸入",
-      "皮膚接触",
-      "発がん性物質曝露",
-    ],
-    risks: [
-      "呼吸器・皮膚障害",
-      "長期曝露による発がん",
-    ],
+    hazards: ["蒸気吸入", "皮膚接触", "発がん性物質曝露"],
+    risks: ["呼吸器・皮膚障害", "長期曝露による発がん"],
     countermeasures: [
       "局所排気装置付きキャビネット内で取扱",
       "防毒マスク・耐薬品手袋・保護衣を着用",
@@ -350,15 +268,8 @@ export const MEDICAL_WELFARE_EXAMPLES: KyExample[] = [
     industry: "medical-welfare",
     workType: "chemical",
     title: "抗がん剤調製・投与時の曝露防止",
-    hazards: [
-      "薬剤エアロゾルの吸入",
-      "皮膚・粘膜接触",
-      "こぼれ時の二次曝露",
-    ],
-    risks: [
-      "発がん・催奇形性リスク",
-      "急性反応",
-    ],
+    hazards: ["薬剤エアロゾルの吸入", "皮膚・粘膜接触", "こぼれ時の二次曝露"],
+    risks: ["発がん・催奇形性リスク", "急性反応"],
     countermeasures: [
       "バイオロジカルセーフティキャビネット内で調製",
       "閉鎖式調製器具（CSTD）を使用",
@@ -375,15 +286,8 @@ export const MEDICAL_WELFARE_EXAMPLES: KyExample[] = [
     industry: "medical-welfare",
     workType: "forklift",
     title: "病院倉庫での医療物品搬送",
-    hazards: [
-      "歩行者との接触",
-      "曲がり角の見通し不良",
-      "段差での荷崩れ",
-    ],
-    risks: [
-      "職員との衝突",
-      "物品落下",
-    ],
+    hazards: ["歩行者との接触", "曲がり角の見通し不良", "段差での荷崩れ"],
+    risks: ["職員との衝突", "物品落下"],
     countermeasures: [
       "歩車分離レーンを明示",
       "曲がり角にミラー設置",
@@ -398,15 +302,8 @@ export const MEDICAL_WELFARE_EXAMPLES: KyExample[] = [
     industry: "medical-welfare",
     workType: "forklift",
     title: "施設受入れトラックからの物資積み下ろし",
-    hazards: [
-      "車両逸走",
-      "ドックレベラー誤操作",
-      "荷の偏り",
-    ],
-    risks: [
-      "フォーク転落",
-      "車両との挟まれ",
-    ],
+    hazards: ["車両逸走", "ドックレベラー誤操作", "荷の偏り"],
+    risks: ["フォーク転落", "車両との挟まれ"],
     countermeasures: [
       "輪止め・駐車ブレーキ確認",
       "ドックレベラーのロック確認",
@@ -426,10 +323,7 @@ export const MEDICAL_WELFARE_EXAMPLES: KyExample[] = [
       "見通し不良時の患者接触",
       "感染リネンからの曝露",
     ],
-    risks: [
-      "職員・患者の接触事故",
-      "感染リスク",
-    ],
+    risks: ["職員・患者の接触事故", "感染リスク"],
     countermeasures: [
       "カート操作は低速・両手保持",
       "感染リネンは密閉袋＋専用カート",
@@ -446,15 +340,8 @@ export const MEDICAL_WELFARE_EXAMPLES: KyExample[] = [
     industry: "medical-welfare",
     workType: "excavation",
     title: "施設敷地内の排水管・浄化槽周辺掘削",
-    hazards: [
-      "硫化水素・酸欠空気",
-      "土砂崩壊",
-      "感染性廃液の接触",
-    ],
-    risks: [
-      "酸欠・中毒",
-      "感染リスク",
-    ],
+    hazards: ["硫化水素・酸欠空気", "土砂崩壊", "感染性廃液の接触"],
+    risks: ["酸欠・中毒", "感染リスク"],
     countermeasures: [
       "事前ガス測定（H2S・O2）",
       "土止め支保工を設置",
@@ -474,10 +361,7 @@ export const MEDICAL_WELFARE_EXAMPLES: KyExample[] = [
       "既設埋設物（電気・通信）損傷",
       "通行者の転落",
     ],
-    risks: [
-      "通行者・車両の事故",
-      "停電・通信不通",
-    ],
+    risks: ["通行者・車両の事故", "停電・通信不通"],
     countermeasures: [
       "工事区画をバリケードで囲い迂回路を表示",
       "事前に図面・探査機で埋設物確認",
@@ -497,10 +381,7 @@ export const MEDICAL_WELFARE_EXAMPLES: KyExample[] = [
       "粉じんの建物内侵入",
       "クレーン旋回半径内立入",
     ],
-    risks: [
-      "患者の体調影響",
-      "重機接触事故",
-    ],
+    risks: ["患者の体調影響", "重機接触事故"],
     countermeasures: [
       "稼働時間帯と作業時間を調整",
       "粉じん抑制のため湿潤散水・防じんシート",
@@ -522,10 +403,7 @@ export const MEDICAL_WELFARE_EXAMPLES: KyExample[] = [
       "酸素濃度低下（厨房・ダクト内）",
       "アーク光眼障害",
     ],
-    risks: [
-      "施設火災",
-      "酸欠",
-    ],
+    risks: ["施設火災", "酸欠"],
     countermeasures: [
       "周囲5m以内可燃物撤去・消火器配置",
       "ダクト内は換気と酸素測定を継続",
@@ -540,15 +418,8 @@ export const MEDICAL_WELFARE_EXAMPLES: KyExample[] = [
     industry: "medical-welfare",
     workType: "welding",
     title: "施設外構フェンス・手すりの補修溶接",
-    hazards: [
-      "通行者への火花飛散",
-      "通学路近接",
-      "騒音・臭気",
-    ],
-    risks: [
-      "通行者の火傷",
-      "苦情・トラブル",
-    ],
+    hazards: ["通行者への火花飛散", "通学路近接", "騒音・臭気"],
+    risks: ["通行者の火傷", "苦情・トラブル"],
     countermeasures: [
       "溶接遮へい囲いを設置し通行帯を分離",
       "実施時間帯を通学・通勤時間を避けて設定",
@@ -563,15 +434,8 @@ export const MEDICAL_WELFARE_EXAMPLES: KyExample[] = [
     industry: "medical-welfare",
     workType: "welding",
     title: "厨房給湯設備の補修ガス溶断",
-    hazards: [
-      "ガスボンベの転倒",
-      "可燃残留物への引火",
-      "閉所での酸欠",
-    ],
-    risks: [
-      "ボンベ爆発・火災",
-      "酸欠",
-    ],
+    hazards: ["ガスボンベの転倒", "可燃残留物への引火", "閉所での酸欠"],
+    risks: ["ボンベ爆発・火災", "酸欠"],
     countermeasures: [
       "ガスボンベは専用台車固定・直射日光回避",
       "可燃物・残留油を事前除去",
@@ -588,15 +452,8 @@ export const MEDICAL_WELFARE_EXAMPLES: KyExample[] = [
     industry: "medical-welfare",
     workType: "rigging",
     title: "大型医療機器（MRI・CT）の搬入・据付",
-    hazards: [
-      "重量物の重心ずれ",
-      "搬入経路の梁・天井との干渉",
-      "床耐荷重不足",
-    ],
-    risks: [
-      "落下・転倒事故",
-      "建物損傷",
-    ],
+    hazards: ["重量物の重心ずれ", "搬入経路の梁・天井との干渉", "床耐荷重不足"],
+    risks: ["落下・転倒事故", "建物損傷"],
     countermeasures: [
       "メーカー指定の搬入手順書を遵守",
       "搬入経路の事前測定と養生",
@@ -611,15 +468,8 @@ export const MEDICAL_WELFARE_EXAMPLES: KyExample[] = [
     industry: "medical-welfare",
     workType: "rigging",
     title: "屋上設備（空調室外機等）のクレーン揚重",
-    hazards: [
-      "強風による振れ",
-      "下方歩行者の立入",
-      "屋上設置時の墜落",
-    ],
-    risks: [
-      "落下・墜落",
-      "歩行者被災",
-    ],
+    hazards: ["強風による振れ", "下方歩行者の立入", "屋上設置時の墜落"],
+    risks: ["落下・墜落", "歩行者被災"],
     countermeasures: [
       "風速10m/s超で作業中止",
       "下方立入禁止区域を警備員配置で確保",
@@ -634,15 +484,8 @@ export const MEDICAL_WELFARE_EXAMPLES: KyExample[] = [
     industry: "medical-welfare",
     workType: "rigging",
     title: "施設物資のホイスト玉掛け（倉庫から各階搬送）",
-    hazards: [
-      "つり点摩耗",
-      "荷の偏荷重",
-      "操作中の挟まれ",
-    ],
-    risks: [
-      "落下事故",
-      "挟まれ災害",
-    ],
+    hazards: ["つり点摩耗", "荷の偏荷重", "操作中の挟まれ"],
+    risks: ["落下事故", "挟まれ災害"],
     countermeasures: [
       "つり点（アイボルト等）を定期点検",
       "荷の重心マーキングと吊り具選定",
@@ -664,10 +507,7 @@ export const MEDICAL_WELFARE_EXAMPLES: KyExample[] = [
       "鋭利物廃棄ボックス満杯",
       "急患対応時の慌て",
     ],
-    risks: [
-      "B型/C型肝炎・HIV感染",
-      "切創",
-    ],
+    risks: ["B型/C型肝炎・HIV感染", "切創"],
     countermeasures: [
       "リキャップ禁止を徹底し安全機構付き針を採用",
       "鋭利物廃棄ボックスの満杯前交換ルール",
@@ -687,10 +527,7 @@ export const MEDICAL_WELFARE_EXAMPLES: KyExample[] = [
       "家族・利用者からの暴力",
       "単独勤務での助けを呼びにくい状況",
     ],
-    risks: [
-      "職員の負傷・精神的被害",
-      "業務継続困難",
-    ],
+    risks: ["職員の負傷・精神的被害", "業務継続困難"],
     countermeasures: [
       "ナースコール・緊急通報ボタンの携帯",
       "夜勤2名以上の体制を可能な限り確保",
@@ -710,10 +547,7 @@ export const MEDICAL_WELFARE_EXAMPLES: KyExample[] = [
       "PPE着脱手順の誤り",
       "N95マスクの密着不良",
     ],
-    risks: [
-      "院内感染",
-      "職員発症",
-    ],
+    risks: ["院内感染", "職員発症"],
     countermeasures: [
       "N95マスクのフィットテスト年1回実施",
       "PPE着脱手順の訓練と監督者ダブルチェック",

@@ -3,6 +3,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { searchRelevantArticlesWithScore } from "@/lib/rag-search";
 import { isLawShortEquivalent } from "@/lib/rag/synonyms";
+import { evaluateChatbotSafety } from "@/lib/chatbot-safety";
 
 /**
  * RAG 検索 100 問ベンチマーク（fresh セット）。
@@ -26,6 +27,12 @@ type FreshQuestion = {
   topic: string;
   question: string;
   gold: { lawShort: string; articleNum: string }[];
+  disposition?:
+    | "clarification-required"
+    | "wrong-premise"
+    | "source-gap";
+  /** 複数の根拠を質問が同時に要求する場合、全件の着地を必須にする。 */
+  requiredAll?: boolean;
 };
 
 type FreshFixture = {
@@ -34,19 +41,39 @@ type FreshFixture = {
   questions: FreshQuestion[];
 };
 
-function isMatch(
+function evaluateMatch(
   results: { law: string; lawShort: string; articleNum: string }[],
-  gold: { lawShort: string; articleNum: string }[]
-): boolean {
-  return gold.some((g) =>
-    results.some(
-      (r) =>
-        r.articleNum === g.articleNum &&
-        (r.lawShort === g.lawShort ||
-          r.law === g.lawShort ||
-          isLawShortEquivalent(r.lawShort, g.lawShort))
-    )
-  );
+  gold: { lawShort: string; articleNum: string }[],
+  requiredAll = false,
+): {
+  hitRank: number | null;
+  firstRelevantRank: number | null;
+  matchCount: number;
+} {
+  const matchedRanks = gold
+    .map((g) => {
+      const index = results.findIndex(
+        (r) =>
+          r.articleNum === g.articleNum &&
+          (r.lawShort === g.lawShort ||
+            r.law === g.lawShort ||
+            isLawShortEquivalent(r.lawShort, g.lawShort)),
+      );
+      return index < 0 ? null : index + 1;
+    })
+    .filter((rank): rank is number => rank !== null);
+  const firstRelevantRank =
+    matchedRanks.length > 0 ? Math.min(...matchedRanks) : null;
+  const hitRank = requiredAll
+    ? matchedRanks.length === gold.length && matchedRanks.length > 0
+      ? Math.max(...matchedRanks)
+      : null
+    : firstRelevantRank;
+  return {
+    hitRank,
+    firstRelevantRank,
+    matchCount: new Set(matchedRanks).size,
+  };
 }
 
 const fixturePath = resolve(process.cwd(), "test/chatbot-fresh-100.json");
@@ -59,6 +86,11 @@ describe("RAG 100問ベンチマーク (fresh)", () => {
   // 実時間オーバーで失敗扱いになるのを防ぐのが目的。
   it(`fresh セットの正答率が ${TARGET_ACCURACY * 100}% 以上であること`, { timeout: 30000 }, () => {
     let correct = 0;
+    let retrievalTotal = 0;
+    let safeHoldCorrect = 0;
+    let safeHoldTotal = 0;
+    let precisionSum = 0;
+    let mrrSum = 0;
     const failures: Array<{
       id: number;
       topic: string;
@@ -68,8 +100,36 @@ describe("RAG 100問ベンチマーク (fresh)", () => {
     }> = [];
 
     for (const tc of fixture.questions) {
+      if (tc.disposition) {
+        safeHoldTotal += 1;
+        const decision = evaluateChatbotSafety(tc.question);
+        const expectedKind =
+          tc.disposition === "clarification-required"
+            ? "ambiguous"
+            : tc.disposition;
+        if (decision?.kind === expectedKind) {
+          safeHoldCorrect += 1;
+        } else {
+          failures.push({
+            id: tc.id,
+            topic: tc.topic,
+            question: tc.question,
+            expected: `安全保留: ${expectedKind}`,
+            actual: decision?.kind ?? "保留なし",
+          });
+        }
+        continue;
+      }
+      retrievalTotal += 1;
       const { articles } = searchRelevantArticlesWithScore(tc.question, TOP_K);
-      const ok = isMatch(articles, tc.gold);
+      const { hitRank, firstRelevantRank, matchCount } = evaluateMatch(
+        articles,
+        tc.gold,
+        tc.requiredAll,
+      );
+      precisionSum += matchCount / TOP_K;
+      if (firstRelevantRank !== null) mrrSum += 1 / firstRelevantRank;
+      const ok = hitRank !== null;
       if (ok) {
         correct++;
       } else {
@@ -84,11 +144,17 @@ describe("RAG 100問ベンチマーク (fresh)", () => {
     }
 
     const total = fixture.questions.length;
-    const accuracy = correct / total;
+    const retrievalAccuracy =
+      retrievalTotal === 0 ? 0 : correct / retrievalTotal;
+    const precision5 =
+      retrievalTotal === 0 ? 0 : precisionSum / retrievalTotal;
+    const mrr = retrievalTotal === 0 ? 0 : mrrSum / retrievalTotal;
+    const overallCorrect = correct + safeHoldCorrect;
+    const overallAccuracy = total === 0 ? 0 : overallCorrect / total;
 
     const topicBreakdown: Record<string, { total: number; correct: number; accuracy: number }> = {};
     const failedIds = new Set(failures.map((f) => f.id));
-    for (const q of fixture.questions) {
+    for (const q of fixture.questions.filter((question) => !question.disposition)) {
       const slot = (topicBreakdown[q.topic] ??= { total: 0, correct: 0, accuracy: 0 });
       slot.total += 1;
       if (!failedIds.has(q.id)) slot.correct += 1;
@@ -97,19 +163,35 @@ describe("RAG 100問ベンチマーク (fresh)", () => {
       t.accuracy = t.total === 0 ? 0 : t.correct / t.total;
     }
 
+    const generatedAt = new Date().toISOString();
     const result = {
-      generated_at: new Date().toISOString(),
+      generated_at: generatedAt,
       source: "test/chatbot-fresh-100.json",
       total,
-      correct,
-      accuracy,
+      correct: overallCorrect,
+      accuracy: overallAccuracy,
+      retrieval_total: retrievalTotal,
+      retrieval_correct: correct,
+      retrieval_accuracy: retrievalAccuracy,
+      precision5,
+      mrr,
+      quality_metrics_generated_at: generatedAt,
+      safe_hold_total: safeHoldTotal,
+      safe_hold_correct: safeHoldCorrect,
+      safe_hold_rate:
+        safeHoldTotal === 0 ? 1 : safeHoldCorrect / safeHoldTotal,
       target: TARGET_ACCURACY,
-      passed: accuracy >= TARGET_ACCURACY,
+      passed:
+        retrievalAccuracy >= TARGET_ACCURACY &&
+        safeHoldCorrect === safeHoldTotal,
       failures,
       topic_breakdown: topicBreakdown,
     };
 
-    const outPath = resolve(process.cwd(), "src/data/chatbot-eval-fresh-results.json");
+    const outPath = resolve(
+      process.env.RAG_100Q_FRESH_REPORT_PATH ??
+        "src/data/chatbot-eval-fresh-results.json",
+    );
     try {
       writeFileSync(outPath, JSON.stringify(result, null, 2) + "\n", "utf8");
     } catch {
@@ -117,7 +199,8 @@ describe("RAG 100問ベンチマーク (fresh)", () => {
     }
 
     console.log(
-      `\n[RAG 100Q fresh] 正答 ${correct}/${total} = ${(accuracy * 100).toFixed(1)}%`
+      `\n[RAG 100Q fresh] 条文検索 ${correct}/${retrievalTotal} = ${(retrievalAccuracy * 100).toFixed(1)}%` +
+        ` / 安全保留 ${safeHoldCorrect}/${safeHoldTotal}`
     );
     if (failures.length > 0) {
       console.log(`[RAG 100Q fresh] 不正答 ${failures.length} 件:`);
@@ -128,6 +211,7 @@ describe("RAG 100問ベンチマーク (fresh)", () => {
       }
     }
 
-    expect(accuracy).toBeGreaterThanOrEqual(TARGET_ACCURACY);
+    expect(retrievalAccuracy).toBeGreaterThanOrEqual(TARGET_ACCURACY);
+    expect(safeHoldCorrect).toBe(safeHoldTotal);
   });
 });

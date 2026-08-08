@@ -1,6 +1,6 @@
 /**
- * Phase 6: 作業内容からの決定的な推論（必要資格・点検項目）。
- * Gemini を使わず規則ベースで「無料・即時・安定」に当てる（誤提案リスク低）。
+ * Phase 6: 作業内容からの決定的な候補抽出（必要資格・点検項目）。
+ * Gemini を使わず規則ベースで候補を示すが、所持・適合・点検完了は確定しない。
  * 予想災害・指示事項・リスク評価は Gemini（/api/meeting/suggest）側で生成する。
  */
 import type { MeetingChecklistCategory } from "@/lib/meeting/schema";
@@ -21,7 +21,7 @@ const QUAL_RULES: { re: RegExp; q: string }[] = [
   { re: /(型枠支保工)/, q: "型枠支保工の組立て等作業主任者" },
 ];
 
-/** 作業内容から必要資格を推定（重複なし） */
+/** 作業内容から確認すべき資格候補を抽出（重複なし。必要・所持を確定しない） */
 export function estimateQualifications(workContent: string): string[] {
   const out = new Set<string>();
   for (const r of QUAL_RULES) if (r.re.test(workContent)) out.add(r.q);
@@ -39,15 +39,28 @@ const CATEGORY_KEYWORDS: Record<string, RegExp> = {
 };
 
 /**
- * 作業文（全業者の作業内容＋機械）から該当点検カテゴリを推論し、
- * 「未設定(na)」の項目だけ「該当(ok)」候補に切り替える（user設定の ok/ng は尊重）。
- * 一般事項は常に該当。
+ * 作業文（全業者の作業内容＋機械）から、確認すべき点検カテゴリのkeyを抽出する。
+ * 返り値は候補表示専用で、点検項目のstatusを変更してはならない。
  */
-export function inferChecklist(checklist: MeetingChecklistCategory[], workText: string): MeetingChecklistCategory[] {
-  return checklist.map((cat) => {
+export function inferChecklistCandidates(
+  checklist: MeetingChecklistCategory[],
+  workText: string
+): string[] {
+  if (!workText.trim()) return [];
+  return checklist.flatMap((cat) => {
     const re = CATEGORY_KEYWORDS[cat.key];
     const matched = cat.key === "general" || (re ? re.test(workText) : false);
-    if (!matched) return cat;
-    return { ...cat, items: cat.items.map((it) => (it.status === "na" ? { ...it, status: "ok" as const } : it)) };
+    return matched ? [cat.key] : [];
   });
+}
+
+/**
+ * 後方互換用。旧実装は候補抽出時に未確認(na)を実施済み(ok)へ変えていた。
+ * 安全境界としてstatusを一切変更せず、コピーだけを返す。
+ */
+export function inferChecklist(checklist: MeetingChecklistCategory[], _workText: string): MeetingChecklistCategory[] {
+  return checklist.map((category) => ({
+    ...category,
+    items: category.items.map((item) => ({ ...item })),
+  }));
 }

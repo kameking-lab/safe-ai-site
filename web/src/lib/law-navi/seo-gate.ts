@@ -9,23 +9,18 @@
  * 前後ナビ・検索着地のため）が、index/sitemap 収載は付加価値のある条のみ」とし、
  * 条件未満は `robots: noindex,follow`＋sitemap 非収載にする（＝防波堤を先に建てる）。
  *
- * 収載可否 = 次のどちらかを満たすこと:
+ * 収載可否 = 次の両方を満たすこと:
  *
- *   1. 付加価値シグナル（§5-3 の (a)(b)(c)。いずれか1つでも満たせば indexable）:
+ *   1. 個別条文が、コミット済みe-Govスナップショットのhashで完全性検証済み。
+ *      人手で選んだcurated集合であることだけでは、現行性・原文一致を意味しない。
+ *
+ *   2. 付加価値シグナル（§5-3 の (a)(b)(c)。いずれか1つ以上）:
  *      (a) plain: 検証済み現場ことば版がある（getFreshPlainArticle が返す）
  *      (b) topics: 分野インデックスのメンバー（topicsForArticle が非空）
  *      (c) 注釈シグナル: itemNumberMap（号解説）または glossary マッチ（用語解説）がある
  *
- *   2. curated（人手収録）由来であること＝既収載の後退防止（§5-3 末尾「既収載712条は
- *      現状の収載を維持（後退させない）」）。curated 条は人手で選び keywords・引用整形・
- *      号マップ等の注釈を載せた集合で、e-Gov 原文の単純ミラーではない。全文取込で
- *      LAW_NAVI_ENTRIES が「curated 由来 ∪ fulltext 由来」へ広がっても、fulltext 由来
- *      **のみ**の条（curated に対応の無い生ミラー）が付加価値シグナル無しで流入したときに
- *      限り noindex になる。既存の curated 条は grandfather で常に収載を維持する。
- *
- * 自動昇格: 判定は生成集合 LAW_NAVI_ENTRIES に対して都度計算される純関数なので、
- * plain 執筆・topics 追加・itemNumberMap 採録が進むほど fulltext 由来条の indexable が
- * 自動で増える（「コンテンツで裏づけてから開く」＝収載を後から手で足す必要がない）。
+ * 自動昇格: e-Gov完全性検証と付加価値の両方が揃った時だけ昇格する。過去URLの維持より、
+ * 検証できない法令本文を検索流入へ出さないことを優先する。
  */
 import { allLawArticles, mhlwLawArticles, type LawArticle } from "@/data/laws";
 import { getFreshPlainArticle } from "@/data/plain";
@@ -38,7 +33,7 @@ export type ValueAddSignal = "plain" | "topics" | "itemNumberMap" | "glossary";
 
 /** 1条文の付加価値評価。 */
 export type ValueAddAssessment = {
-  /** index/sitemap 収載してよいか（付加価値シグナル or curated 由来）。 */
+  /** index/sitemap 収載してよいか（一次資料完全性 + 付加価値）。 */
   readonly indexable: boolean;
   /** 満たしている付加価値シグナルの内訳（内容ベース。空＝原文ミラーのみ）。 */
   readonly signals: readonly ValueAddSignal[];
@@ -47,6 +42,8 @@ export type ValueAddAssessment = {
    * （既収載の後退防止）。fulltext 由来のみの条は false になり、シグナルで判定される。
    */
   readonly curated: boolean;
+  /** 個別条文がe-Govスナップショットhashで完全性検証済みか。 */
+  readonly primarySourceVerified: boolean;
 };
 
 /**
@@ -81,7 +78,25 @@ export function assessValueAdd(entry: LawNaviEntry): ValueAddAssessment {
   if (matchGlossaryTerms(a.text).length > 0) signals.push("glossary");
 
   const curated = CURATED_SET.has(a);
-  return { indexable: curated || signals.length > 0, signals, curated };
+  const primarySourceVerified =
+    a.sourceKind === "egov-fulltext-snapshot" &&
+    a.verificationStatus === "snapshot-hash-verified" &&
+    typeof a.sourceHash === "string" &&
+    a.sourceHash.length === 64 &&
+    typeof a.contentHash === "string" &&
+    a.contentHash.length === 64 &&
+    a.sourceLawId === entry.egovLawId;
+  return {
+    indexable: primarySourceVerified && signals.length > 0,
+    signals,
+    curated,
+    primarySourceVerified,
+  };
+}
+
+/** JSON-LD、AI根拠、引用コピーに使える個別一次資料完全性。 */
+export function hasVerifiedPrimaryText(entry: LawNaviEntry): boolean {
+  return assessValueAdd(entry).primarySourceVerified;
 }
 
 /** 付加価値条件を満たすか（index/sitemap 収載可否の単一判定）。 */

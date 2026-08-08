@@ -154,11 +154,11 @@ export const retailContent: IndustryContent = {
       relevance: "品出し・在庫整理の重量物取扱いに係る基本指針。",
     },
     {
-      id: "mhlw-notice-0921",
-      title: "WBGT（暑さ指数）の活用による熱中症予防対策の強化について（R7.6.1義務化）",
-      issuer: "厚生労働省労働基準局",
+      id: "mhlw-notice-0014",
+      title: "労働安全衛生規則の一部を改正する省令の施行等について（基発0520第6号）",
+      issuer: "厚生労働省労働基準局長",
       date: "2025年",
-      relevance: "屋外駐車場警備・配送・倉庫等の小売業務もR7義務化対象。",
+      relevance: "屋外駐車場警備・配送・倉庫で対象作業の目安に該当する場合は、第612条の2の報告体制と悪化防止手順を確認。",
     },
   ],
   workTypes: [
@@ -231,7 +231,7 @@ export const retailContent: IndustryContent = {
       name: "腰痛予防の労働衛生教育",
       type: "労働衛生教育",
       target: "品出し・配送・在庫整理従事者",
-      href: "/education-certification/finder?q=腰痛",
+      href: "/education/roudoueisei/youtsu-yobou",
     },
     {
       name: "防火管理者講習（甲種・乙種）",
@@ -300,7 +300,7 @@ export const retailContent: IndustryContent = {
     {
       icon: "🌡",
       title: "熱中症予防ハブ",
-      reason: "屋外駐車場警備・配送・倉庫の暑熱対策（R7義務化対応）",
+      reason: "対象作業の目安、第612条の2の法定2項目、WBGT等の予防策を区分して確認",
       href: "/heat-illness-prevention",
       cta: "熱中症対策へ",
     },

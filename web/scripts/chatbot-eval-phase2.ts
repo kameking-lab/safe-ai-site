@@ -89,7 +89,7 @@ if (kinds.length > 0) {
   console.log(`  失敗分類: ${kinds.map(([k, n]) => `${k}=${n}`).join(", ")}`);
 }
 for (const r of report.results.filter((r) => r.verdict !== "correct")) {
-  console.log(`  [${r.verdict === "incorrect" ? "×" : "△"}] ${r.id} ${r.question}`);
+  console.log(`  [${r.verdict === "incorrect" ? "×" : "△"}] ${r.id}`);
   for (const f of r.failures) console.log(`      - ${f}`);
 }
 console.log(`  レポート: ${outPath}`);

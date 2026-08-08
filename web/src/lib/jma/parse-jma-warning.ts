@@ -23,20 +23,63 @@ export type JmaWarningPayload = {
   areaTypes?: JmaAreaType[];
 };
 
-function isActiveWarningStatus(status: string | undefined): boolean {
+export function isActiveWarningStatus(status: string | undefined): boolean {
   if (!status) return false;
-  if (status.includes("なし")) return false;
+  if (status.includes("発表警報・注意報はなし") || status === "なし") return false;
   if (status.includes("解除")) return false;
-  return status === "発表" || status === "継続";
+  // 新体系の「警報から注意報」は、注意報としては引き続き発表中。
+  return (
+    status === "発表" ||
+    status === "継続" ||
+    status.includes("警報から注意報")
+  );
 }
 
 function levelFromCode(code: string | undefined): JmaMapLevel | null {
   if (!code || code.length === 0) return null;
-  const head = code[0]!;
-  if (head === "3") return "special";
-  if (head === "0") return "warning";
-  if (head === "1" || head === "2") return "advisory";
-  return "advisory";
+  // 2026年の新体系と旧体系の双方を明示的に扱う。未知コードを
+  // 「注意報らしい」と推測せず null にして未確認へ倒す。
+  const specialCodes = new Set(["32", "33", "35", "36", "38"]);
+  const warningCodes = new Set([
+    "02",
+    "03",
+    "04",
+    "05",
+    "06",
+    "07",
+    "08",
+    "43",
+    "44",
+    "45",
+    "46",
+    "48",
+    "49",
+  ]);
+  const advisoryCodes = new Set([
+    "10",
+    "12",
+    "13",
+    "14",
+    "15",
+    "16",
+    "17",
+    "18",
+    "19",
+    "20",
+    "21",
+    "22",
+    "23",
+    "24",
+    "25",
+    "26",
+    "27",
+    "28",
+    "29",
+  ]);
+  if (specialCodes.has(code)) return "special";
+  if (warningCodes.has(code)) return "warning";
+  if (advisoryCodes.has(code)) return "advisory";
+  return null;
 }
 
 /** 気象庁コードの警報/注意報/特別警報区分（先頭桁）を公開版として提供 */
@@ -88,10 +131,15 @@ export type SelectedAreaWarning = {
  * ベースの区分を主軸にする（離島の注意報などで現場と無関係に赤くなるのを防ぐ）。
  */
 export function maxLevelFromSelectedWarnings(
-  warnings: ReadonlyArray<{ code: string }>
+  warnings: ReadonlyArray<{ code: string; status?: string }>
 ): JmaMapLevel {
   let out: JmaMapLevel = "none";
   for (const w of warnings) {
+    if (w.status !== undefined && !isActiveWarningStatus(w.status)) continue;
+    if (w.status?.includes("警報から注意報")) {
+      out = maxLevel(out, "advisory");
+      continue;
+    }
     const lv = levelFromCode(w.code);
     if (lv) out = maxLevel(out, lv);
   }

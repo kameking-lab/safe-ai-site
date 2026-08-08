@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect } from "react";
-import { Mascot } from "@/components/mascot";
+import { MascotBadge } from "@/components/mascot-badge";
 
 export default function GlobalError({
   error,
@@ -20,7 +20,12 @@ export default function GlobalError({
       <div className="mx-auto max-w-xl">
         <div className="rounded-2xl border border-rose-200 bg-white p-6 shadow-sm dark:border-rose-900/60 dark:bg-slate-900">
           <div className="flex items-start gap-4">
-            <Mascot variant="bow" size="lg" className="shrink-0" alt="お辞儀するマスコット" />
+            <MascotBadge
+              variant="bow"
+              size={96}
+              className="shrink-0"
+              alt="お辞儀するマスコット"
+            />
             <div>
               <p className="text-xs font-semibold uppercase tracking-wider text-rose-600 dark:text-rose-400">
                 予期しないエラー

@@ -9,6 +9,7 @@ import {
   detectUngroundedAssertions,
   sanitizePlaceholderCitations,
 } from "@/lib/chatbot-enrichment";
+import { isPublicRouteAvailable } from "@/lib/public-content-policy";
 
 const article: LawArticle = {
   law: "労働安全衛生規則",
@@ -35,12 +36,19 @@ describe("buildStructuredCitations", () => {
     expect(result).toHaveLength(1);
   });
 
-  it("caps at 5 entries", () => {
+  it("does not mislabel a law enactment date as an unmapped article effective date", () => {
+    const result = buildStructuredCitations([
+      { ...article, articleNum: "第9999条（監査用未収録）" },
+    ]);
+    expect(result[0]?.effectiveDate).toBeUndefined();
+  });
+
+  it("preserves every distinct source supplied by bounded retrieval", () => {
     const many: LawArticle[] = Array.from({ length: 10 }, (_, i) => ({
       ...article,
       articleNum: `第${i + 100}条`,
     }));
-    expect(buildStructuredCitations(many)).toHaveLength(5);
+    expect(buildStructuredCitations(many)).toHaveLength(10);
   });
 
   // CR2-T2（酷評01縫い目3）: 現場ことば版がある条は参照条文カードに
@@ -83,17 +91,32 @@ describe("suggestRelatedLaws", () => {
 });
 
 describe("suggestDigDeeperLinks", () => {
-  it("returns accidents link for 熱中症 query", () => {
+  it("隔離中の事故個票・分析レポート導線を返さず、公開可能な一次資料導線だけを返す", () => {
     const result = suggestDigDeeperLinks("熱中症対策を教えて", [article]);
-    const accidentLink = result.find((d) => d.kind === "accidents");
-    expect(accidentLink).toBeDefined();
-    expect(decodeURIComponent(accidentLink?.href ?? "")).toContain("熱中症");
+    expect(
+      result
+        .filter((d) => d.kind === "accidents")
+        .every((d) => d.href === "/accident-news"),
+    ).toBe(true);
+    expect(result.some((d) => d.href.startsWith("/accidents?"))).toBe(false);
+    expect(result.some((d) => d.href.startsWith("/accidents/"))).toBe(false);
+    expect(result.some((d) => d.kind === "report")).toBe(false);
+    expect(result.every((d) => isPublicRouteAvailable(d.href))).toBe(true);
+    expect(result.some((d) => d.kind === "law-search")).toBe(true);
   });
 
-  it("returns industry report link for construction keywords", () => {
+  it("建設キーワードでも隔離中の業種事故レポートへ誘導しない", () => {
     const result = suggestDigDeeperLinks("足場の墜落事故", [article]);
-    const reportLink = result.find((d) => d.kind === "report");
-    expect(reportLink?.href).toBe("/accidents-reports/construction");
+    expect(
+      result
+        .filter((d) => d.kind === "accidents")
+        .every((d) => d.href === "/accident-news"),
+    ).toBe(true);
+    expect(result.some((d) => d.href.startsWith("/accidents?"))).toBe(false);
+    expect(result.some((d) => d.href.startsWith("/accidents/"))).toBe(false);
+    expect(result.some((d) => d.kind === "report")).toBe(false);
+    expect(result.every((d) => isPublicRouteAvailable(d.href))).toBe(true);
+    expect(result.some((d) => d.kind === "law-search")).toBe(true);
   });
 });
 

@@ -64,7 +64,7 @@ export type EducationContext = {
 };
 
 const SUPERVISOR_LABEL =
-  "労働安全衛生コンサルタント（登録番号260022）監修";
+  "編集：安全AIポータル編集部。一次資料との照合・外部レビュー状態は各教材に表示";
 
 export const EDUCATION_CONTEXTS: Record<EducationSlug, EducationContext> = {
   "hoteikyoiku/chemical-ra": {

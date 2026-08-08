@@ -64,22 +64,13 @@ describe("organizationSchema / webSiteSchema", () => {
     expect(s.author).toEqual({ "@id": ORG_ID });
   });
 
-  it("WebSite の SearchAction は /search に正規化されている", () => {
+  it("WebSite は自由入力をURL化する SearchAction を出力しない", () => {
     const s = webSiteSchema();
     expect(s["@type"]).toBe("WebSite");
     expect(s.name).toBe(SITE_NAME);
-    const action = s.potentialAction as {
-      "@type": string;
-      target: { urlTemplate: string };
-      "query-input": string;
-    };
-    expect(action["@type"]).toBe("SearchAction");
-    expect(action.target.urlTemplate).toBe(
-      `${SITE_URL}/search?q={search_term_string}`,
-    );
-    expect(action.target.urlTemplate).toContain("/search?q=");
-    expect(action.target.urlTemplate).not.toContain("/law-search");
-    expect(action["query-input"]).toBe("required name=search_term_string");
+    expect(s.alternateName).toBe("安全AI");
+    expect(s.potentialAction).toBeUndefined();
+    expect(JSON.stringify(s)).not.toContain("search_term_string");
   });
 });
 
@@ -306,8 +297,8 @@ describe("legalDocumentSchema", () => {
     expect(full.author).toMatchObject({ "@type": "Organization", name: "厚生労働省" });
   });
 
-  it("監修者（労働安全衛生コンサルタント）をcontributorとして常に出力する", () => {
-    const schema = legalDocumentSchema({
+  it("個別確認記録がない文書へcontributorを出力しない", () => {
+    const unreviewed = legalDocumentSchema({
       url: `${SITE_URL}/circulars/3`,
       title: "通達3",
       noticeNumber: null,
@@ -315,10 +306,21 @@ describe("legalDocumentSchema", () => {
       issuedDate: null,
       description: "説明",
     });
-    expect(schema.contributor).toMatchObject({
-      "@type": "Person",
-      name: "労働安全衛生コンサルタント（登録番号260022）",
-      url: `${SITE_URL}/about`,
+    expect(unreviewed.contributor).toBeUndefined();
+
+    const reviewed = legalDocumentSchema({
+      url: `${SITE_URL}/circulars/4`,
+      title: "編集確認記録あり",
+      noticeNumber: null,
+      issuer: null,
+      issuedDate: null,
+      description: "説明",
+      reviewedBySupervisor: true,
+    });
+    expect(reviewed.contributor).toMatchObject({
+      "@type": "Organization",
+      name: SITE_NAME,
+      url: SITE_URL,
     });
   });
 });
@@ -343,7 +345,7 @@ describe("webPageSchema", () => {
     expect(withKw.keywords).toBe("a, b");
   });
 
-  it("contributor は明示的に true を渡した時だけ監修者Personを出力する", () => {
+  it("contributor は明示的に true を渡した時だけ編集組織を出力する", () => {
     const withoutContributor = webPageSchema({
       name: "ページ",
       description: "説明",
@@ -358,9 +360,9 @@ describe("webPageSchema", () => {
       contributor: true,
     });
     expect(withContributor.contributor).toMatchObject({
-      "@type": "Person",
-      name: "労働安全衛生コンサルタント（登録番号260022）",
-      url: `${SITE_URL}/about`,
+      "@type": "Organization",
+      name: SITE_NAME,
+      url: SITE_URL,
     });
   });
 });
@@ -382,13 +384,13 @@ describe("faqPageSchema / productCollectionSchema / definedTermSetSchema / quizS
     expect(main[0].acceptedAnswer).toEqual({ "@type": "Answer", text: "A0" });
   });
 
-  it("FAQPage は opts.contributor=true の時だけ監修者Personを出力する", () => {
+  it("FAQPage は opts.contributor=true の時だけ編集組織を出力する", () => {
     const qa = [{ question: "Q", answer: "A" }];
     expect(faqPageSchema(qa).contributor).toBeUndefined();
     expect(faqPageSchema(qa, { contributor: false }).contributor).toBeUndefined();
     expect(faqPageSchema(qa, { contributor: true }).contributor).toMatchObject({
-      "@type": "Person",
-      name: "労働安全衛生コンサルタント（登録番号260022）",
+      "@type": "Organization",
+      name: SITE_NAME,
     });
   });
 
@@ -560,15 +562,16 @@ describe("webApplicationSchema", () => {
     expect(s.potentialAction).toBeUndefined();
   });
 
-  it("mentions と searchUrlTemplate は与えられた時のみ出力", () => {
+  it("mentions は出力し、旧searchUrlTemplateはURLへ出力しない", () => {
     const s = webApplicationSchema({
       ...base,
       mentions: [{ name: "他機能", url: `${SITE_URL}/other` }],
-      searchUrlTemplate: `${SITE_URL}/chatbot?q={search_term_string}`,
+      searchUrlTemplate: `${SITE_URL}/search?q={search_term_string}`,
       featureList: ["f1"],
     });
     expect((s.mentions as unknown[]).length).toBe(1);
-    expect((s.potentialAction as { "@type": string })["@type"]).toBe("SearchAction");
+    expect(s.potentialAction).toBeUndefined();
+    expect(JSON.stringify(s)).not.toContain("search_term_string");
     expect(s.featureList).toEqual(["f1"]);
   });
 });

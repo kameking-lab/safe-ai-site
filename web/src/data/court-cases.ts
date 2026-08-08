@@ -1,10 +1,8 @@
 /**
  * 労災裁判例コーナー（レベルA：キュレーション型）のデータ。
  *
- * 【捏造防止・最優先ルール】
- * - ここに載せる判例は、裁判所「裁判例検索」・厚生労働省・法務省・判例集（民集/労判 等）の
- *   複数の信頼できる出典で実在を裏取りした「実在する確定判例」のみ。
- * - 架空の事件名・架空の判決年月日・架空の判断内容は一切含めない。
+ * 2026-07-24監査で、初回監査対象外のレコードに裁判所・法廷等の誤対応を確認した。
+ * 旧データは以下の配列へ隔離し、公開用allowlistはこのファイル末尾で空集合にしている。
  * - 判決文の長文転載はせず、当サイトによる要約 + 出典リンク（/accident-news と同じ作法）。
  * - 「裁判所は〜と判断した」（事実）のみ記載。「だからあなたは〜すべき」（個別の法的助言の断定）は書かない。
  * - 当事者の特定情報は載せない（裁判所の裁判例検索は当事者匿名化済み。事件名は実務・学術で
@@ -86,10 +84,9 @@ export type CourtCase = {
 };
 
 /**
- * 採用判例（全件実在確認済み。件数は COURT_CASE_COUNT を参照）。
- * 詳細な裏取り出典は docs/court-cases-audit-2026-05-30/README.md の一覧表を参照。
+ * 隔離中の旧判例候補。公開用 `COURT_CASES` とは異なる。
  */
-export const COURT_CASES: CourtCase[] = [
+const quarantinedCourtCases: CourtCase[] = [
   {
     id: "rikujou-jieitai-hachinohe",
     name: "陸上自衛隊八戸車両整備工場事件",
@@ -2127,6 +2124,17 @@ export const COURT_CASES: CourtCase[] = [
     ],
   },
 ];
+
+/**
+ * 公開可能判例allowlist。
+ * 裁判所個別URL、事件番号、裁判年月日、支持箇所、確認日、reviewerを照合した
+ * 新レコードだけをここへ移す。現時点では0件。
+ */
+export const COURT_CASES: CourtCase[] = [];
+
+export function getQuarantinedCourtCaseCount(): number {
+  return quarantinedCourtCases.length;
+}
 
 /** ID から判例を取得。 */
 export function getCourtCaseById(id: string): CourtCase | undefined {

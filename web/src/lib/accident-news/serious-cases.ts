@@ -5,7 +5,8 @@
  * 被災者氏名を含まない）。死亡＝重大災害として、業種/事故型/年で類型検索し、同種事故頻度を
  * 添える。会社名・発注者は扱わない（法的リスク回避、docs/accident-news-deep-audit-2026-05-26/04）。
  *
- * 出典は厚労省 職場のあんぜんサイト 死亡災害DB。全カードに出典を明示する。
+ * 出典は厚労省 職場のあんぜんサイト 死亡災害DB。ただしローカルIDから公式Excelの
+ * 行へ逆引きする対応表は未整備であり、追跡性はデータセット単位に限る。
  */
 import deathsCompact from "@/data/deaths-mhlw/compact.json";
 
@@ -16,6 +17,7 @@ export type DeathRecord = {
   description: string;
   industry: string | null;
   industryMedium: string | null;
+  /** 原データ cause.majorName。直接原因ではなく、厚労省の「起因物」大分類。 */
   cause: string | null;
   type: string | null;
   workplaceSize: string | null;
@@ -33,12 +35,19 @@ type Compact = {
 };
 
 const compact = deathsCompact as unknown as Compact;
+const compactYears = [...(compact.years ?? [])].sort((a, b) => a - b);
 
 export const SERIOUS_CASES_META = {
   total: compact.total ?? compact.entries?.length ?? 0,
   generatedAt: compact.generatedAt ?? null,
+  years: compactYears,
+  yearRange:
+    compactYears.length > 0
+      ? `${compactYears[0]}〜${compactYears[compactYears.length - 1]}年`
+      : "対象年不明",
   sourceLabel: "厚生労働省 職場のあんぜんサイト 死亡災害データベース",
-  sourceUrl: "https://anzeninfo.mhlw.go.jp/",
+  sourceUrl: "https://anzeninfo.mhlw.go.jp/anzen_pg/SIB_FND.html",
+  traceability: "dataset-only",
 } as const;
 
 function countMap(records: readonly DeathRecord[], key: "type" | "industry"): Record<string, number> {
@@ -90,6 +99,7 @@ export type SeriousCaseQuery = {
   year?: number;
   q?: string;
   limit?: number;
+  offset?: number;
 };
 
 function matchesQuery(r: DeathRecord, q: string): boolean {
@@ -146,7 +156,7 @@ export function getSeriousCaseById(id: string): SeriousCase | null {
 }
 
 /**
- * P2-2: 類似事例サジェスト。事故型(+3)・業種(+2)・原因一致(+2)・本文トークン重なり(+1/語)で
+ * P2-2: 類似事例サジェスト。事故型(+3)・業種(+2)・起因物分類一致(+2)・本文トークン重なり(+1/語)で
  * スコアし、seed を除く上位を返す。会社名等は扱わない（匿名）。
  */
 export function findSimilarSeriousCases(
@@ -163,7 +173,7 @@ export function findSimilarSeriousCases(
     if (seed.type && r.type === seed.type) s += 3;
     if (seed.industry && r.industry === seed.industry) s += 2;
     if (seed.cause && r.cause && r.cause === seed.cause) s += 2;
-    if (s === 0) continue; // 型・業種・原因のいずれも一致しないものは除外
+    if (s === 0) continue; // 型・業種・起因物分類のいずれも一致しないものは除外
     let overlap = 0;
     const toks = (r.description ?? "").match(/[一-龥々]{2,6}|[ァ-ヴー]{2,8}/g) ?? [];
     for (const t of toks) if (seedTokens.has(t)) overlap += 1;
@@ -178,9 +188,19 @@ export function findSimilarSeriousCases(
   }));
 }
 
-/** 条件で重大災害事例を絞り込み、同種頻度を付与して新しい順に返す。 */
-export function filterSeriousCases(query: SeriousCaseQuery = {}): SeriousCase[] {
-  const { industry, type, year, q, limit = 120 } = query;
+export type SeriousCasePage = {
+  cases: SeriousCase[];
+  total: number;
+};
+
+/**
+ * 条件で重大災害事例を絞り込み、総件数と指定範囲を返す。
+ * SSRで全件カードを送らずにページングしても、該当総数は失わない。
+ */
+export function filterSeriousCasesPage(
+  query: SeriousCaseQuery = {},
+): SeriousCasePage {
+  const { industry, type, year, q, limit = 120, offset = 0 } = query;
   const qTrim = (q ?? "").trim();
   const filtered = (compact.entries ?? []).filter((r) => {
     if (industry && r.industry !== industry) return false;
@@ -190,9 +210,23 @@ export function filterSeriousCases(query: SeriousCaseQuery = {}): SeriousCase[] 
     return true;
   });
   filtered.sort((a, b) => b.year - a.year || (b.month ?? 0) - (a.month ?? 0));
-  return filtered.slice(0, limit).map((r) => ({
-    ...r,
-    sameTypeTotal: r.type ? (TYPE_COUNTS[r.type] ?? 0) : 0,
-    sameIndustryTotal: r.industry ? (INDUSTRY_COUNTS[r.industry] ?? 0) : 0,
-  }));
+  const safeOffset = Math.max(0, Math.trunc(offset));
+  const safeLimit = Math.max(0, Math.trunc(limit));
+  return {
+    total: filtered.length,
+    cases: filtered
+      .slice(safeOffset, safeOffset + safeLimit)
+      .map((r) => ({
+        ...r,
+        sameTypeTotal: r.type ? (TYPE_COUNTS[r.type] ?? 0) : 0,
+        sameIndustryTotal: r.industry
+          ? (INDUSTRY_COUNTS[r.industry] ?? 0)
+          : 0,
+      })),
+  };
+}
+
+/** 後方互換: 条件に一致する先頭範囲だけを返す。 */
+export function filterSeriousCases(query: SeriousCaseQuery = {}): SeriousCase[] {
+  return filterSeriousCasesPage(query).cases;
 }

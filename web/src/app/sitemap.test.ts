@@ -1,11 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import sitemap from "./sitemap";
 import robots from "./robots";
 import { COURT_CASES } from "@/data/court-cases";
-import { latestIsoDate, isIsoDate } from "@/lib/sitemap/lastmod";
+import { isIsoDate } from "@/lib/sitemap/lastmod";
+import { computeSitemapFreshness } from "@/lib/sitemap/freshness";
+import { isQuarantinedPublicPath } from "@/lib/public-content-policy";
 
 /**
  * 柱C-3-3 回帰テスト: どの sitemap にも収載されていなかった実在 indexable ページの
@@ -28,9 +30,9 @@ describe("sitemap.xml（柱C-3-3 欠落ページ追加）", () => {
     expect(has("/whats-new")).toBe(true);
   });
 
-  it("労災裁判例の一覧・責任解説ページを収載する", () => {
-    expect(has("/court-cases")).toBe(true);
-    expect(has("/court-cases/employer-liability")).toBe(true);
+  it("未検証の労災裁判例一覧・責任解説をすべて除外する", () => {
+    expect(has("/court-cases")).toBe(false);
+    expect(has("/court-cases/employer-liability")).toBe(false);
   });
 
   it("印刷専用ページ /court-cases/print は robots noindex のため収載しない", () => {
@@ -90,20 +92,39 @@ describe("sitemap.xml（柱C-3-3 追補2: 追加した孤立ページと非収�
   const urls = entries.map((e) => e.url);
   const urlSet = new Set(urls);
   const has = (path: string) => urlSet.has(`${BASE}${path}`);
-  const entryFor = (path: string) => entries.find((e) => e.url === `${BASE}${path}`);
+  const entryFor = (path: string) =>
+    entries.find((e) => e.url === `${BASE}${path}`);
 
   it("重大災害事例ブラウザ /accident-news を収載する", () => {
     expect(has("/accident-news")).toBe(true);
   });
 
-  it("熱中症対策ハブの実在サブページ3本を収載する", () => {
-    expect(has("/heat-illness-prevention/acclimatization")).toBe(true);
-    expect(has("/heat-illness-prevention/log")).toBe(true);
-    expect(has("/heat-illness-prevention/poster")).toBe(true);
+  it("外部レビュー待ちの熱中症ハブと学習資産をsitemapから除外する", () => {
+    expect(has("/heat-illness-prevention")).toBe(false);
+    expect(has("/heat-illness-prevention/acclimatization")).toBe(false);
+    expect(has("/heat-illness-prevention/log")).toBe(false);
+    expect(has("/heat-illness-prevention/poster")).toBe(false);
+    expect(has("/heat-illness-prevention/slides")).toBe(false);
+    expect(has("/heat-illness-prevention/elearning")).toBe(false);
+  });
+
+  it("PF-013-P2: 能力表現を再検証中のfeaturesページをsitemapから除外する", () => {
+    expect(has("/features/use-cases")).toBe(false);
+    expect(has("/features/comparison")).toBe(false);
+    expect(has("/features/quick-tour")).toBe(false);
+    expect(has("/features/print")).toBe(false);
+  });
+
+  it("reviewed Visual KYを含むeducationカテゴリをsitemapへ収載する", () => {
+    expect(has("/features/education")).toBe(true);
   });
 
   it("KY入力の正規ページ /ky/paper を収載する（robots index:true の実在ページ）", () => {
     expect(has("/ky/paper")).toBe(true);
+  });
+
+  it("非収載境界: /ky は /ky/paper への permanentRedirect スタブのため収載しない", () => {
+    expect(has("/ky")).toBe(false);
   });
 
   it("非収載境界: /pdf は /ky/paper への permanentRedirect スタブのため収載しない", () => {
@@ -111,12 +132,14 @@ describe("sitemap.xml（柱C-3-3 追補2: 追加した孤立ページと非収�
     expect(has("/pdf")).toBe(false);
   });
 
-  it("/accident-news の lastmod が死亡災害DBの更新日（/accidents と同一）に追従する", () => {
+  it("/accident-news の lastmod は公開中の重大災害スナップショット更新日に追従し、隔離DBは収載しない", () => {
     const accidentNews = entryFor("/accident-news");
-    const accidents = entryFor("/accidents");
+    const expected = computeSitemapFreshness(
+      new Date().toISOString().slice(0, 10),
+    ).accidentsDataUpdated;
     expect(accidentNews?.lastModified).toBeDefined();
-    // 死亡災害DB由来のため /accidents と同一の accidentsDataUpdated を共有する
-    expect(accidentNews?.lastModified).toBe(accidents?.lastModified);
+    expect(accidentNews?.lastModified).toBe(expected);
+    expect(entryFor("/accidents")).toBeUndefined();
   });
 
   it("非収載境界: redirect スタブ・リリース前デモ・印刷専用は収載しない", () => {
@@ -142,7 +165,8 @@ describe("sitemap.xml（柱C-3-3 追補4: /ky/workers 追加と KY配下の非�
   const entries = sitemap();
   const urlSet = new Set(entries.map((e) => e.url));
   const has = (path: string) => urlSet.has(`${BASE}${path}`);
-  const entryFor = (path: string) => entries.find((e) => e.url === `${BASE}${path}`);
+  const entryFor = (path: string) =>
+    entries.find((e) => e.url === `${BASE}${path}`);
 
   it("作業員マスター /ky/workers を収載する（robots index:true の実在ツールページ）", () => {
     expect(has("/ky/workers")).toBe(true);
@@ -155,13 +179,17 @@ describe("sitemap.xml（柱C-3-3 追補4: /ky/workers 追加と KY配下の非�
   it("非収載境界: /ky/list（保存済みKY一覧）は robots index:false のため収載しない", () => {
     expect(has("/ky/list")).toBe(false);
   });
+
+  it("非収載境界: /ky/morning は端末内保存状態に依存するため収載しない", () => {
+    expect(has("/ky/morning")).toBe(false);
+  });
 });
 
 /**
- * A-3 回帰テスト: サイトマップの役割分担。個別の通達/保護具/記事ページは専用の
- * 子サイトマップ（sitemap-circulars/-equipment/-articles.xml）が正本として出力するため、
+ * A-3 回帰テスト: サイトマップの役割分担。個別の通達/記事ページは専用の
+ * 子サイトマップ（sitemap-circulars/-articles.xml）が正本として出力するため、
  * 本体 sitemap.xml には直書きしない（同一URLの二重掲載＝役割崩壊を防止）。
- * セクションのランディングページ（/circulars・/equipment-finder）は本体に残す。
+ * 保護具商品は隔離中のため、一覧・個別とも収載しない。
  */
 describe("sitemap.xml（A-3 役割分担: 子サイトマップとの二重掲載なし）", () => {
   const entries = sitemap();
@@ -183,9 +211,9 @@ describe("sitemap.xml（A-3 役割分担: 子サイトマップとの二重掲�
     expect(equipmentDetails).toEqual([]);
   });
 
-  it("セクションのランディングページは本体に残す", () => {
+  it("公開セクションだけを本体に残し、隔離中の保護具一覧を除外する", () => {
     expect(has("/circulars")).toBe(true);
-    expect(has("/equipment-finder")).toBe(true);
+    expect(has("/equipment-finder")).toBe(false);
   });
 });
 
@@ -195,8 +223,13 @@ describe("sitemap.xml（A-3 役割分担: 子サイトマップとの二重掲�
  */
 describe("sitemap.xml（柱C-3-4 lastmod 動的化）", () => {
   const entries = sitemap();
-  const today = new Date().toISOString().slice(0, 10);
-  const find = (path: string) => entries.find((e) => e.url === `${BASE}${path}`);
+  // サイトの基準時刻はJST。UTCの前日17時以降にJST当日の更新を
+  // 「未来日」と誤判定しないよう、同じ時刻基準で比較する。
+  const today = new Date(Date.now() + 9 * 60 * 60 * 1_000)
+    .toISOString()
+    .slice(0, 10);
+  const find = (path: string) =>
+    entries.find((e) => e.url === `${BASE}${path}`);
   const lastmodOf = (path: string) => {
     const lm = find(path)?.lastModified;
     return typeof lm === "string" ? lm : String(lm);
@@ -204,7 +237,10 @@ describe("sitemap.xml（柱C-3-4 lastmod 動的化）", () => {
 
   it("全エントリの lastmod が YYYY-MM-DD 形式である", () => {
     for (const e of entries) {
-      expect(isIsoDate(e.lastModified), `${e.url} -> ${String(e.lastModified)}`).toBe(true);
+      expect(
+        isIsoDate(e.lastModified),
+        `${e.url} -> ${String(e.lastModified)}`,
+      ).toBe(true);
     }
   });
 
@@ -214,26 +250,42 @@ describe("sitemap.xml（柱C-3-4 lastmod 動的化）", () => {
     }
   });
 
-  it("/court-cases 一覧の lastmod が判例の最新判決日に一致する", () => {
-    const expected = latestIsoDate(
-      COURT_CASES.map((c) => c.date),
-      "2026-06-06",
-      today,
-    );
-    expect(lastmodOf("/court-cases")).toBe(expected);
+  it("/court-cases 一覧と個別判例は隔離中のため lastmod を公開しない", () => {
+    expect(COURT_CASES).toEqual([]);
+    expect(lastmodOf("/court-cases")).toBe("undefined");
+    expect(
+      entries.some(
+        (entry) =>
+          entry.url.startsWith(`${BASE}/court-cases/`) &&
+          entry.url !== `${BASE}/court-cases/employer-liability`,
+      ),
+    ).toBe(false);
   });
 
-  it("個別判例の lastmod が各判例の判決日に追従する", () => {
-    for (const c of COURT_CASES) {
-      const expected = latestIsoDate([c.date], "2026-06-06", today);
-      expect(lastmodOf(`/court-cases/${c.id}`)).toBe(expected);
-    }
+  it("個別判例URLを1件も収載しない境界を明示する", () => {
+    const detailUrls = entries.filter(
+      (entry) =>
+        /^https:\/\/www\.anzen-ai-portal\.jp\/court-cases\/[^/]+$/.test(
+          entry.url,
+        ) &&
+        entry.url !== `${BASE}/court-cases/employer-liability`,
+    );
+    expect(COURT_CASES).toEqual([]);
+    expect(detailUrls).toEqual([]);
   });
 
   it("トップ / の lastmod が主要データ源ページの lastmod 以上（全体の最大値）", () => {
     const top = lastmodOf("/");
-    for (const path of ["/laws", "/circulars", "/court-cases", "/accidents", "/whats-new"]) {
-      expect(top >= lastmodOf(path), `top(${top}) < ${path}(${lastmodOf(path)})`).toBe(true);
+    for (const path of [
+      "/laws",
+      "/circulars",
+      "/accident-news",
+      "/whats-new",
+    ]) {
+      expect(
+        top >= lastmodOf(path),
+        `top(${top}) < ${path}(${lastmodOf(path)})`,
+      ).toBe(true);
     }
   });
 
@@ -264,7 +316,10 @@ describe("sitemap.xml（ゴーストURL回帰ガード: 全URLが実在ルート
   const APP_DIR = dirname(fileURLToPath(import.meta.url)); // = src/app（本テストの所在）
 
   /** app 配下を走査し、page.* を持つルートのセグメント列（route group 除去・動的[x]保持）を集める */
-  function collectRoutePatterns(dir: string = APP_DIR, segs: string[] = []): string[][] {
+  function collectRoutePatterns(
+    dir: string = APP_DIR,
+    segs: string[] = [],
+  ): string[][] {
     const entries = readdirSync(dir, { withFileTypes: true });
     const patterns: string[][] = [];
     if (entries.some((e) => e.isFile() && e.name.startsWith("page."))) {
@@ -276,7 +331,12 @@ describe("sitemap.xml（ゴーストURL回帰ガード: 全URLが実在ルート
       // 並列ルート(@slot)・プライベート(_folder)・route group( (x) ) はURLセグメントに寄与しない
       if (name.startsWith("@") || name.startsWith("_")) continue;
       const isGroup = name.startsWith("(") && name.endsWith(")");
-      patterns.push(...collectRoutePatterns(join(dir, name), isGroup ? segs : [...segs, name]));
+      patterns.push(
+        ...collectRoutePatterns(
+          join(dir, name),
+          isGroup ? segs : [...segs, name],
+        ),
+      );
     }
     return patterns;
   }
@@ -287,7 +347,9 @@ describe("sitemap.xml（ゴーストURL回帰ガード: 全URLが実在ルート
     return patterns.some(
       (pat) =>
         pat.length === segs.length &&
-        pat.every((p, i) => p === segs[i] || (p.startsWith("[") && p.endsWith("]"))),
+        pat.every(
+          (p, i) => p === segs[i] || (p.startsWith("[") && p.endsWith("]")),
+        ),
     );
   }
 
@@ -304,12 +366,17 @@ describe("sitemap.xml（ゴーストURL回帰ガード: 全URLが実在ルート
     const unresolved = entries
       .map((e) => new URL(e.url).pathname)
       .filter((pathname) => !resolvesToRoute(pathname, patterns));
-    expect(unresolved, `実在ルートへ解決しないURL: ${unresolved.join(", ")}`).toEqual([]);
+    expect(
+      unresolved,
+      `実在ルートへ解決しないURL: ${unresolved.join(", ")}`,
+    ).toEqual([]);
   });
 
   it("解決ロジックが偽陽性を出さない（構造的に存在しないパスは未解決）", () => {
     // トップレベルの動的ルートは存在しないため、未知の1階層パスは解決しない
-    expect(resolvesToRoute("/this-route-does-not-exist-xyz", patterns)).toBe(false);
+    expect(resolvesToRoute("/this-route-does-not-exist-xyz", patterns)).toBe(
+      false,
+    );
     // court-cases 配下に3階層のルートは無いため未解決
     expect(resolvesToRoute("/court-cases/foo/bar", patterns)).toBe(false);
     // 逆に、実在の動的ルート配下は構造一致で解決する（ガードの土台確認）
@@ -346,10 +413,15 @@ describe("sitemap.xml（逆カバレッジガード: 実在 indexable ページ�
   const APP_DIR = dirname(fileURLToPath(import.meta.url)); // = src/app
 
   /** app 配下を走査し、静的ルート（動的[x]を含まない）を [URLパス, page.*の絶対パス] で集める。 */
-  function collectStaticRoutes(dir: string = APP_DIR, segs: string[] = []): Array<[string, string]> {
+  function collectStaticRoutes(
+    dir: string = APP_DIR,
+    segs: string[] = [],
+  ): Array<[string, string]> {
     const entries = readdirSync(dir, { withFileTypes: true });
     const out: Array<[string, string]> = [];
-    const pageFile = entries.find((e) => e.isFile() && /^page\.(t|j)sx?$/.test(e.name));
+    const pageFile = entries.find(
+      (e) => e.isFile() && /^page\.(t|j)sx?$/.test(e.name),
+    );
     if (pageFile) out.push(["/" + segs.join("/"), join(dir, pageFile.name)]);
     for (const e of entries) {
       if (!e.isDirectory()) continue;
@@ -358,7 +430,12 @@ describe("sitemap.xml（逆カバレッジガード: 実在 indexable ページ�
       if (name === "api" || name === "signage") continue;
       if (name.startsWith("@") || name.startsWith("_")) continue; // 並列/プライベート
       const isGroup = name.startsWith("(") && name.endsWith(")");
-      out.push(...collectStaticRoutes(join(dir, name), isGroup ? segs : [...segs, name]));
+      out.push(
+        ...collectStaticRoutes(
+          join(dir, name),
+          isGroup ? segs : [...segs, name],
+        ),
+      );
     }
     return out;
   }
@@ -369,7 +446,9 @@ describe("sitemap.xml（逆カバレッジガード: 実在 indexable ページ�
     const rules = Array.isArray(star) ? star : star ? [star] : [];
     const wildcard = rules.find((r) => r.userAgent === "*");
     const dis = wildcard?.disallow;
-    return (Array.isArray(dis) ? dis : dis ? [dis] : []).filter((d): d is string => typeof d === "string");
+    return (Array.isArray(dis) ? dis : dis ? [dis] : []).filter(
+      (d): d is string => typeof d === "string",
+    );
   })();
 
   /** ルートが robots Disallow 配下か（"/admin/"→/admin 自身と配下、"/dpa"→/dpa と配下）。 */
@@ -395,7 +474,19 @@ describe("sitemap.xml（逆カバレッジガード: 実在 indexable ページ�
   function isExcludedBySource(file: string): boolean {
     const src = readFileSync(file, "utf8");
     if (/robots:\s*\{[^}]*index:\s*false/.test(src)) return true; // 明示 noindex
-    if (/\b(?:permanentRedirect|redirect)\s*\(\s*["'`]/.test(src)) return true; // redirect スタブ
+    if (/\b(?:permanentRedirect|redirect)\s*\(/.test(src)) return true; // 動的遷移先を含む redirect スタブ
+    // App Router では client page の metadata を最寄りの server layout に置く。
+    // page.tsx だけを見ると実際の noindex を見落とすため、祖先 layout も評価する。
+    let dir = dirname(file);
+    while (dir.startsWith(APP_DIR)) {
+      const layout = join(dir, "layout.tsx");
+      if (existsSync(layout)) {
+        const layoutSrc = readFileSync(layout, "utf8");
+        if (/robots:\s*\{[^}]*index:\s*false/.test(layoutSrc)) return true;
+      }
+      if (dir === APP_DIR) break;
+      dir = dirname(dir);
+    }
     return false;
   }
 
@@ -416,6 +507,7 @@ describe("sitemap.xml（逆カバレッジガード: 実在 indexable ページ�
       .filter(([route]) => !sitemapPaths.has(route))
       .filter(([route]) => !isDisallowed(route))
       .filter(([route]) => !SEO_INTENTIONALLY_EXCLUDED.has(route))
+      .filter(([route]) => !isQuarantinedPublicPath(route))
       .filter(([, file]) => !isExcludedBySource(file))
       .map(([route]) => route);
     expect(
@@ -431,8 +523,10 @@ describe("sitemap.xml（逆カバレッジガード: 実在 indexable ページ�
     // (b) noindex 宣言と (c) redirect スタブが実ファイルで検知できる
     const byRoute = new Map(staticRoutes);
     const search = byRoute.get("/search");
+    const ky = byRoute.get("/ky");
     const pdf = byRoute.get("/pdf");
     expect(search && isExcludedBySource(search)).toBe(true); // /search は index:false
+    expect(ky && isExcludedBySource(ky)).toBe(true); // /ky はクエリを維持する permanentRedirect
     expect(pdf && isExcludedBySource(pdf)).toBe(true); // /pdf は permanentRedirect スタブ
     // 本ガード新設で収載した /profile は sitemap 側に載っている（回帰固定）。
     expect(sitemapPaths.has("/profile")).toBe(true);

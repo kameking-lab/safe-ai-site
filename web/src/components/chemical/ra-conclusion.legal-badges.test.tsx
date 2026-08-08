@@ -60,7 +60,6 @@ function renderWithAuditedPath(q: string, result: ChemicalRaResponse) {
     <RaConclusionCard
       result={result}
       keyPoints={getChemicalKeyPoints(result, tags)}
-      equipmentHref="/equipment-finder"
     />,
   );
 }
@@ -76,23 +75,27 @@ describe("RA結論カードの法規制バッジ＝監査済み経路のみ（P0
     const text = container.textContent ?? "";
     expect(text).not.toContain("特化則");
     expect(text).not.toContain("有機則");
-    // 危険有害性カード自体（GHS・対策・保護具動線）は引き続き表示される
+    // 危険有害性カード自体（GHS・対策・選定境界）は引き続き表示される
     expect(text).toContain("急性毒性-経口");
-    expect(text).toContain("必要な保護具を見る");
+    expect(text).toContain("商品適合は自動判定していません");
   });
 
-  it("正例: 溶接ヒューム（CASレス告示名）は特化則タグが監査経路から導出される", () => {
+  it("正例: 溶接ヒューム（CASレス告示名）は特化則収載候補が監査経路から導出される", () => {
     const tags = auditedRegulationTags(profileFor("溶接ヒューム"));
-    expect(tags).toContain("特化則");
-    expect(tags).not.toContain("有機則");
+    expect(tags).toContain("特化則収載候補");
+    expect(tags).not.toContain("有機則収載候補");
   });
 
-  it("正例: マンガン及びその化合物（群指定）は特化則、トルエンは有機則", () => {
-    expect(auditedRegulationTags(profileFor("マンガン及びその化合物"))).toContain("特化則");
-    expect(auditedRegulationTags(profileFor("108-88-3"))).toContain("有機則");
+  it("正例: マンガン及びその化合物は特化則、トルエンは有機則の収載候補", () => {
+    expect(
+      auditedRegulationTags(profileFor("マンガン及びその化合物")),
+    ).toContain("特化則収載候補");
+    expect(auditedRegulationTags(profileFor("108-88-3"))).toContain(
+      "有機則収載候補",
+    );
   });
 
-  it("正例カード表示: トルエンのカードに有機則バッジが出る（正例が消える回帰の検知）", () => {
+  it("正例カード表示: トルエンのカードに有機則収載候補バッジが出る", () => {
     const tolueneResult: ChemicalRaResponse = {
       ...capsaicinResult,
       chemicalName: "トルエン",
@@ -100,6 +103,6 @@ describe("RA結論カードの法規制バッジ＝監査済み経路のみ（P0
       regulatoryNotes: [],
     };
     const { container } = renderWithAuditedPath("108-88-3", tolueneResult);
-    expect(container.textContent).toContain("有機則");
+    expect(container.textContent).toContain("有機則収載候補");
   });
 });

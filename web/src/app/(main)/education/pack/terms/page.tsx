@@ -39,7 +39,7 @@ export default function EduPackTermsPage() {
           「ご自由にお使いください」の範囲を明確にするため、以下の6条を確認のうえご利用ください。
         </p>
         <p className="mt-1 text-xs text-slate-400">
-          ※ 文言は最終確定前の起案です（労働安全コンサルタント監修のもとで確定します）。
+          ※ 文言は最終確定前の起案です（一次資料との照合・外部レビュー完了後に確定します）。
         </p>
       </header>
 

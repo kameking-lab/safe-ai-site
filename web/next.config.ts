@@ -4,49 +4,70 @@ import type { NextConfig } from "next";
 // www.google-analytics.com / *.analytics.google.com. AdSense loads from
 // pagead2.googlesyndication.com and renders ad iframes from
 // googleads.g.doubleclick.net and tpc.googlesyndication.com.
-const CSP = [
-  "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://pagead2.googlesyndication.com",
-  "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https:",
-  "font-src 'self' data:",
-  "connect-src 'self' https://formspree.io https://generativelanguage.googleapis.com https://www.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://pagead2.googlesyndication.com",
-  "frame-src https://googleads.g.doubleclick.net https://tpc.googlesyndication.com",
-  "frame-ancestors 'none'",
-  "object-src 'none'",
-  "base-uri 'self'",
-  "form-action 'self' https://formspree.io",
-  "upgrade-insecure-requests",
-].join("; ");
+// Vercel Previewまたは明示したローカルstagingでは、検索流入と外部副作用を
+// productionから分離する。SAFE_AI_STAGING_MODEは権限を減らす方向にしか働かない。
+const PREVIEW_SAFETY_MODE =
+  process.env.VERCEL_ENV === "preview" ||
+  process.env.SAFE_AI_STAGING_MODE?.trim().toLowerCase() === "true";
 
 const nextConfig: NextConfig = {
+  // Long-running local visual audits may keep the default .next dev server
+  // alive. Final gates can opt into an isolated, ignored build directory
+  // without changing Vercel/CI defaults.
+  distDir: process.env.NEXT_DIST_DIR?.trim() || ".next",
+  // 4,000超の静的ページ生成で論理CPU数をそのままworker化すると、
+  // ローカル/CIのメモリ上限でbuild workerが不安定終了するため上限を固定する。
+  experimental: {
+    cpus: 4,
+  },
+  // Browser privacy regression tests use a registrable local domain so host-only
+  // and root-domain cookies can be exercised through the real dev server.
+  allowedDevOrigins:
+    process.env.NODE_ENV === "production" ? [] : ["app.localtest.me"],
   // pdfjs-dist はブラウザ専用。canvas モジュールを無効化してSSRビルドエラーを防ぐ
   webpack: (config) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (config.resolve as any).alias["canvas"] = false;
     return config;
   },
-  // Turbopack のルートディレクトリを明示（monorepo/worktree 環境での誤検知防止）
-  turbopack: {
-    root: process.cwd(),
-  },
+  // Vercel側がmonorepo rootをoutputFileTracingRootとして注入する。
+  // turbopack.rootをweb/へ固定すると両者が不一致になり、whole-project trace
+  // 警告と過剰なfunction同梱を招くため、root選択はNext/Vercelへ委ねる。
+  // 既存webpack aliasとNext 16を併用する宣言として空設定は必要。
+  turbopack: {},
   // /admin/status が同階層の report.md をサーバ読込するため明示的にトレース
   outputFileTracingIncludes: {
     "/admin/status": ["./src/app/admin/status/report.md"],
+  },
+  // Prisma clientはengineType=libraryかつdatasource=PostgreSQL。native library
+  // engine（.prisma/client/query_engine-* / libquery_engine-*）は必ず保持し、
+  // 使用しないWASM query engine/compilerの全DB方言だけをfunctionから除外する。
+  // 認証・DB routeのnative runtimeを壊さず、traceの反復同梱を抑える。
+  outputFileTracingExcludes: {
+    "/*": [
+      "./node_modules/.prisma/client/query_engine_bg.*",
+      "./node_modules/.prisma/client/wasm-*.mjs",
+      "./node_modules/@prisma/client/runtime/query_engine_bg.*",
+      "./node_modules/@prisma/client/runtime/query_compiler_bg.*",
+      "./node_modules/@prisma/client/runtime/wasm-compiler-edge.*",
+      "./node_modules/@prisma/client/runtime/wasm-engine-edge.*",
+    ],
   },
   // 画像最適化（AVIF/WebP）
   images: {
     formats: ["image/avif", "image/webp"],
   },
-  // 本番ビルドでconsole.logを除去してJSサイズを削減
+  // 本番では通常ログだけ除去し、障害検知に必要なwarn/errorは残す。
+  // 各呼出し側はPII・秘密値を含めない構造化メタデータだけを渡す。
   compiler: {
-    removeConsole: process.env.NODE_ENV === "production",
+    removeConsole:
+      process.env.NODE_ENV === "production"
+        ? { exclude: ["error", "warn"] }
+        : false,
   },
-  // Ship browser source maps in production so error reports group by original
-  // file/line. Lighthouse audit 2026-05-14 (B-14) flagged 32x missing source
-  // maps; this also makes future React #418-style hydration errors traceable
-  // (B-2 took manual repro work because of the missing maps).
-  productionBrowserSourceMaps: true,
+  // Browser向けsource mapはソース本文と内部パスを公開するため配信しない。
+  // 本番シンボリケーションは、将来、非公開アップロード方式で導入する。
+  productionBrowserSourceMaps: false,
   // 直感URL（短い・単数形・別表記・日英両パターン）から正規ページへの恒久リダイレクト
   async redirects() {
     return [
@@ -66,7 +87,11 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       // フィードバック → コンテクスト付きお問い合わせ
-      { source: "/feedback", destination: "/contact?category=demo", permanent: true },
+      {
+        source: "/feedback",
+        destination: "/contact?category=demo",
+        permanent: true,
+      },
       // 廃止・移動ページ
       { source: "/cases", destination: "/", permanent: true },
       { source: "/cases/:slug", destination: "/", permanent: true },
@@ -75,7 +100,11 @@ const nextConfig: NextConfig = {
       { source: "/chat", destination: "/chatbot", permanent: true },
       { source: "/law", destination: "/laws", permanent: true },
       { source: "/accident", destination: "/accidents", permanent: true },
-      { source: "/equipment-search", destination: "/equipment-finder", permanent: true },
+      {
+        source: "/equipment-search",
+        destination: "/equipment-finder",
+        permanent: true,
+      },
       // /quiz is now served by a real page that re-renders the /exam-quiz
       // component with a canonical pointing at /exam-quiz. Lighthouse B-10
       // (PR #135) measured ~316 ms wasted on the 308 redirect; the re-export
@@ -87,8 +116,16 @@ const nextConfig: NextConfig = {
       { source: "/price", destination: "/pricing", permanent: true },
       // /faq now has its own page — redirect removed
       // 安全日誌（日本語2パターン）
-      { source: "/anzen-nisshi", destination: "/safety-diary", permanent: true },
-      { source: "/anzen-eisei-nisshi", destination: "/safety-diary", permanent: true },
+      {
+        source: "/anzen-nisshi",
+        destination: "/safety-diary",
+        permanent: true,
+      },
+      {
+        source: "/anzen-eisei-nisshi",
+        destination: "/safety-diary",
+        permanent: true,
+      },
       // 法改正（英語・日本語）
       { source: "/regulations", destination: "/laws", permanent: true },
       { source: "/houkaisei", destination: "/laws", permanent: true },
@@ -96,8 +133,16 @@ const nextConfig: NextConfig = {
       { source: "/news", destination: "/accidents", permanent: true },
       { source: "/jiko", destination: "/accidents", permanent: true },
       // 化学物質DB
-      { source: "/chemical-search-db", destination: "/chemical-database", permanent: true },
-      { source: "/kagaku-bushitsu", destination: "/chemical-ra", permanent: true },
+      {
+        source: "/chemical-search-db",
+        destination: "/chemical-database",
+        permanent: true,
+      },
+      {
+        source: "/kagaku-bushitsu",
+        destination: "/chemical-ra",
+        permanent: true,
+      },
       // サイネージ
       { source: "/safety-signage", destination: "/signage", permanent: true },
       // KY（危険予知の日本語フルネーム）
@@ -108,12 +153,28 @@ const nextConfig: NextConfig = {
       // docs/content-quality-audit-2026-05-16.md). The 4-step compliance
       // wizard overlapped with /strategy/plan-generator. compliance-matrix.json
       // is preserved in data/ for future reuse by the plan generator.
-      { source: "/wizard", destination: "/strategy/plan-generator", permanent: true },
-      { source: "/wizard/result", destination: "/strategy/plan-generator", permanent: true },
+      {
+        source: "/wizard",
+        destination: "/strategy/plan-generator",
+        permanent: true,
+      },
+      {
+        source: "/wizard/result",
+        destination: "/strategy/plan-generator",
+        permanent: true,
+      },
       // F-010 B縮小: 詳細/月次/印刷ページ → 一覧へ301 (LMS拡張時に再設計)
       // /safety-diary/[id] と /safety-diary/[id]/print は component-level permanentRedirect で対応
-      { source: "/safety-diary/new/detail", destination: "/safety-diary", permanent: true },
-      { source: "/safety-diary/monthly/:ym", destination: "/safety-diary", permanent: true },
+      {
+        source: "/safety-diary/new/detail",
+        destination: "/safety-diary",
+        permanent: true,
+      },
+      {
+        source: "/safety-diary/monthly/:ym",
+        destination: "/safety-diary",
+        permanent: true,
+      },
       // P0-008 (usability-audit-2026-05-24): /qa-knowledge を /faq に統合。
       // 投稿募集ランディング(119行・実投稿0件・コンサル監修コメント無し)を削除し、
       // 同一意図(=Q&Aで疑問解決)を満たす /faq 200問 (法令タグ付き) へ恒久転送。
@@ -122,12 +183,24 @@ const nextConfig: NextConfig = {
       // サーバメモリのみで投稿が永続化されない実装不全 + サイト中核コンセプト
       // 「現場のめんどくさいを解決する(現場に投稿させるのは禁止)」と矛盾するため
       // 機能ごと廃止。シード4件は事故事例DB(/accidents)に相当するため恒久転送。
-      { source: "/community-cases", destination: "/accidents", permanent: true },
-      { source: "/community-cases/:path*", destination: "/accidents", permanent: true },
+      {
+        source: "/community-cases",
+        destination: "/accidents",
+        permanent: true,
+      },
+      {
+        source: "/community-cases/:path*",
+        destination: "/accidents",
+        permanent: true,
+      },
       // P0-011 (usability-audit-day2): /laws/notices-precedents (通達+判例30件)を
       // /circulars (1069通達 DB) に統合。判例30件は court-precedents-list で
       // /circulars 下部に表示するように移植済み。
-      { source: "/laws/notices-precedents", destination: "/circulars", permanent: true },
+      {
+        source: "/laws/notices-precedents",
+        destination: "/circulars",
+        permanent: true,
+      },
     ];
   },
   // セキュリティ・キャッシュヘッダー
@@ -136,7 +209,6 @@ const nextConfig: NextConfig = {
       {
         source: "/(.*)",
         headers: [
-          { key: "Content-Security-Policy", value: CSP },
           // 2 years + includeSubDomains + preload is the canonical config
           // required by hstspreload.org for the Chrome HSTS Preload List.
           // Site owner must submit the domain at https://hstspreload.org/
@@ -148,16 +220,63 @@ const nextConfig: NextConfig = {
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "X-Frame-Options", value: "DENY" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+          {
+            key: "Permissions-Policy",
+            value: "camera=(), microphone=(self), geolocation=(self)",
+          },
         ],
       },
+      // The no-JavaScript chatbot response is a self-contained form. Its
+      // question and memory-only conditions must never be sent as a referrer;
+      // keep this path-specific rule after the site-wide default.
+      {
+        source: "/api/chatbot/no-script",
+        headers: [
+          { key: "Referrer-Policy", value: "no-referrer" },
+          {
+            key: "Cache-Control",
+            value: "private, no-store, max-age=0, must-revalidate",
+          },
+          { key: "X-Robots-Tag", value: "noindex, follow, noarchive" },
+        ],
+      },
+      ...(PREVIEW_SAFETY_MODE
+        ? [
+            {
+              source: "/(.*)",
+              headers: [
+                {
+                  key: "X-Robots-Tag",
+                  value: "noindex, nofollow, noarchive",
+                },
+                {
+                  key: "X-Safe-AI-Preview-Mode",
+                  value: "dry-run",
+                },
+              ],
+            },
+            {
+              source: "/sw.js",
+              headers: [
+                {
+                  key: "Cache-Control",
+                  value: "private, no-store, max-age=0",
+                },
+              ],
+            },
+          ]
+        : []),
       // robots.txt: PR #233 で s-maxage=0 (即時反映目的) を強制していたが、
       // Disallow ルールは安定したため通常の 24h CDN キャッシュへ復元。
       // クローラ毎回の Function Invocation を抑制（docs/perf/edge-isr-followup-2026-05-19.md）。
       {
         source: "/robots.txt",
         headers: [
-          { key: "Cache-Control", value: "public, max-age=3600, s-maxage=86400, stale-while-revalidate=3600" },
+          {
+            key: "Cache-Control",
+            value:
+              "public, max-age=3600, s-maxage=86400, stale-while-revalidate=3600",
+          },
         ],
       },
       // /audits/* (公開維持の読み物 6フォルダ) は静的レポートページ。CDNに24時間キャッシュ。
@@ -165,41 +284,74 @@ const nextConfig: NextConfig = {
       {
         source: "/audits/:path*",
         headers: [
-          { key: "Cache-Control", value: "public, s-maxage=86400, stale-while-revalidate=3600" },
+          {
+            key: "Cache-Control",
+            value: "public, s-maxage=86400, stale-while-revalidate=3600",
+          },
+        ],
+      },
+      // すべての管理画面は認証応答を共有キャッシュへ保存せず、検索対象にしない。
+      {
+        source: "/admin/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "private, no-store, max-age=0, must-revalidate",
+          },
+          { key: "X-Robots-Tag", value: "noindex, nofollow, noarchive" },
+        ],
+      },
+      // メール相談はserver-only宛先から下書きを生成するため、共有cache・referrer・検索登録を止める。
+      {
+        source: "/contact/automation-email/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "private, no-store, max-age=0, must-revalidate",
+          },
+          { key: "Referrer-Policy", value: "no-referrer" },
+          { key: "X-Robots-Tag", value: "noindex, nofollow, noarchive" },
         ],
       },
       // /admin/audits/* — 内部監査資料 (noindex 必須)。CDN キャッシュは短時間 (頻繁更新)
       {
         source: "/admin/audits/:path*",
         headers: [
-          { key: "Cache-Control", value: "private, max-age=0, must-revalidate" },
+          {
+            key: "Cache-Control",
+            value: "private, max-age=0, must-revalidate",
+          },
           { key: "X-Robots-Tag", value: "noindex, nofollow, noarchive" },
         ],
       },
       // サイネージAPIは /signage 画面から頻繁ポーリングされるため短時間CDNキャッシュで重複呼び出しを削減
       {
         source: "/api/signage-data",
-        headers: [
-          { key: "Cache-Control", value: "public, s-maxage=60, stale-while-revalidate=30" },
-        ],
+        headers: [{ key: "Cache-Control", value: "no-store" }],
       },
       {
         source: "/api/signage-weather",
         headers: [
-          { key: "Cache-Control", value: "public, s-maxage=300, stale-while-revalidate=60" },
+          {
+            key: "Cache-Control",
+            value: "public, s-maxage=300, stale-while-revalidate=60",
+          },
         ],
       },
       {
         source: "/api/signage/jma",
-        headers: [
-          { key: "Cache-Control", value: "public, s-maxage=300, stale-while-revalidate=60" },
-        ],
+        headers: [{ key: "Cache-Control", value: "no-store" }],
       },
       // Note: /_next/static/* は Next.js が自動的に immutable な Cache-Control を設定するため
       // 明示的なオーバーライドは不要（指定すると build 警告が出る）
     ];
   },
-    serverExternalPackages: ["@google-analytics/data", "@grpc/grpc-js", "google-gax", "google-auth-library"],
+  serverExternalPackages: [
+    "@google-analytics/data",
+    "@grpc/grpc-js",
+    "google-gax",
+    "google-auth-library",
+  ],
 };
 
 // build-trigger: include audit page from PR #235 (2026-05-17)

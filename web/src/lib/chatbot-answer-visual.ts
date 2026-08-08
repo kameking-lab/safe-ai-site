@@ -77,7 +77,7 @@ function cutAt(text: string, index: number): AnswerConclusion {
 }
 
 export type AnswerEvidenceInput = {
-  sourceType?: "rag" | "ai_inference";
+  sourceType?: "rag" | "ai_inference" | "safety";
   confidence?: "high" | "medium" | "low";
   scopeWarningCount?: number;
 };
@@ -106,6 +106,9 @@ export type EvidenceBadge = {
  */
 export function evidenceBadge(input: AnswerEvidenceInput): EvidenceBadge | null {
   if (!input.sourceType) return null;
+  if (input.sourceType === "safety") {
+    return { tone: "warning", label: "安全案内（AI未使用）" };
+  }
   if (input.sourceType === "rag") {
     return { tone: "safe", label: "法令DB根拠" };
   }

@@ -1,17 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { lawRevisionCores } from "@/data/mock/law-revisions";
-import { loadRealRevisionsWithMeta } from "@/lib/revisions-ingest/load-real";
-import { loadSampleRevisions } from "@/lib/revisions-ingest/load-sample";
-import type { RevisionListApiResponse, ServiceErrorResponse } from "@/lib/types/api";
-import type { LawRevision } from "@/lib/types/domain";
-
-function parseDelay(value: string | null, fallbackMs: number): number {
-  const parsed = Number(value);
-  if (Number.isNaN(parsed) || parsed < 0) {
-    return fallbackMs;
-  }
-  return parsed;
-}
+import type {
+  RevisionListApiResponse,
+  ServiceErrorResponse,
+} from "@/lib/types/api";
+import {
+  resolveDiagnosticDelay,
+  resolveDiagnosticError,
+} from "@/lib/server/diagnostic-controls";
 
 async function wait(ms: number) {
   await new Promise((resolve) => setTimeout(resolve, ms));
@@ -21,63 +17,53 @@ function errorResponse(
   status: number,
   message: string,
   code: "UNAVAILABLE" | "VALIDATION" | "NETWORK",
-  retryable = status >= 500
+  retryable = status >= 500,
 ) {
   return NextResponse.json<ServiceErrorResponse>(
-    {
-      error: {
-        code,
-        message,
-        retryable,
-      },
-    },
-    { status }
+    { error: { code, message, retryable } },
+    { status, headers: { "Cache-Control": "no-store" } },
   );
 }
 
+/**
+ * 公開一覧はコミット済みe-Gov構造データの品質ゲート通過分だけを返す。
+ * request/env指定の任意payload・sample・手入力レガシーデータへはフォールバックしない。
+ */
 export async function GET(request: NextRequest) {
-  const delayMs = parseDelay(request.nextUrl.searchParams.get("delayMs"), 0);
-  const forceError =
-    request.nextUrl.searchParams.get("forceError") ?? request.headers.get("x-force-error");
+  const delayMs = resolveDiagnosticDelay(
+    request.nextUrl.searchParams.get("delayMs"),
+  );
+  const forceError = resolveDiagnosticError(request);
 
   if (forceError === "timeout") {
     await wait(5000);
-    return errorResponse(504, "法改正一覧API応答がタイムアウトしました。", "NETWORK", true);
+    return errorResponse(
+      504,
+      "法改正一覧API応答がタイムアウトしました。",
+      "NETWORK",
+      true,
+    );
   }
-
-  if (delayMs > 0) {
-    await wait(delayMs);
-  }
-
+  if (delayMs > 0) await wait(delayMs);
   if (forceError === "5xx") {
-    return errorResponse(503, "法改正一覧APIが一時的に利用できません。", "UNAVAILABLE", true);
+    return errorResponse(
+      503,
+      "法改正一覧APIが一時的に利用できません。",
+      "UNAVAILABLE",
+      true,
+    );
   }
-
   if (forceError === "validation") {
-    return errorResponse(400, "法改正一覧APIの入力検証エラーです。", "VALIDATION", false);
+    return errorResponse(
+      400,
+      "法改正一覧APIの入力検証エラーです。",
+      "VALIDATION",
+      false,
+    );
   }
-
-  const ingestSource = resolveIngestSource(request.nextUrl.searchParams.get("ingestSource"));
-  const realSourcePayload = request.nextUrl.searchParams.get("realSourcePayload");
-  const realSourceFormat =
-    request.nextUrl.searchParams.get("realSourceFormat") ??
-    process.env.REVISIONS_REAL_SOURCE_FORMAT ??
-    "default";
-  const realSourceUrl = request.nextUrl.searchParams.get("realSourceUrl") ?? process.env.REVISIONS_REAL_SOURCE_URL;
-  const realAllowHosts = resolveAllowHosts(
-    request.nextUrl.searchParams.get("realSourceAllowHosts"),
-    process.env.REVISIONS_REAL_SOURCE_ALLOW_HOSTS
-  );
-  const revisionsResult = await resolveRevisions({
-    ingestSource,
-    realSourcePayload,
-    realSourceFormat,
-    realSourceUrl,
-    realAllowHosts,
-  });
 
   const body: RevisionListApiResponse = {
-    revisions: revisionsResult.revisions.map((revision) => ({
+    revisions: lawRevisionCores.map((revision) => ({
       id: revision.id,
       title: revision.title,
       publishedAt: revision.publishedAt,
@@ -94,131 +80,12 @@ export async function GET(request: NextRequest) {
       publication_date: revision.publication_date,
     })),
   };
-  const response = NextResponse.json(body);
-  if (revisionsResult.source === "real") {
-    response.headers.set("x-revisions-ingest-source", "real");
-    response.headers.set("x-revisions-ingest-status", revisionsResult.meta.status);
-    response.headers.set("x-revisions-ingest-record-count", String(revisionsResult.meta.recordCount));
-    response.headers.set("x-revisions-ingest-source-format", revisionsResult.meta.sourceFormat);
-    if (revisionsResult.meta.endpointHost) {
-      response.headers.set("x-revisions-ingest-endpoint-host", revisionsResult.meta.endpointHost);
-    }
-    if (revisionsResult.meta.reason) {
-      response.headers.set("x-revisions-ingest-fallback-reason", revisionsResult.meta.reason);
-    }
-  } else {
-    response.headers.set("x-revisions-ingest-source", "sample");
-  }
-  return response;
-}
-
-async function resolveRevisions(options: {
-  ingestSource: "sample" | "real";
-  realSourcePayload: string | null;
-  realSourceFormat: string;
-  realSourceUrl?: string;
-  realAllowHosts: string[];
-}): Promise<{
-  revisions: LawRevision[];
-  source: "sample" | "real";
-  meta: {
-    status: "ok" | "fallback";
-    reason: string | null;
-    recordCount: number;
-    sourceFormat: string;
-    endpointHost: string | null;
-  };
-}> {
-  if (options.ingestSource === "real") {
-    const payload = options.realSourcePayload ? safeJsonParse(options.realSourcePayload) : undefined;
-    const loaded = await loadRealRevisionsWithMeta(
-      payload !== undefined
-        ? {
-            payload,
-            sourceFormat: options.realSourceFormat,
-            allowHosts: options.realAllowHosts,
-          }
-        : {
-            endpoint: options.realSourceUrl,
-            sourceFormat: options.realSourceFormat,
-            allowHosts: options.realAllowHosts,
-          }
-    );
-    if (loaded.revisions.length > 0) {
-      return {
-        revisions: loaded.revisions,
-        source: "real",
-        meta: {
-          status: loaded.meta.status,
-          reason: loaded.meta.reason,
-          recordCount: loaded.meta.recordCount,
-          sourceFormat: loaded.meta.sourceFormat,
-          endpointHost: loaded.meta.endpointHost,
-        },
-      };
-    }
-    return {
-      revisions: lawRevisionCores,
-      source: "real",
-      meta: {
-        status: "fallback",
-        reason: loaded.meta.reason,
-        recordCount: lawRevisionCores.length,
-        sourceFormat: loaded.meta.sourceFormat,
-        endpointHost: loaded.meta.endpointHost,
-      },
-    };
-  }
-
-  if (options.ingestSource === "sample") {
-    const sampleLoaded = loadSampleRevisions();
-    if (sampleLoaded.length > 0) {
-      return {
-        revisions: sampleLoaded,
-        source: "sample",
-        meta: {
-          status: "ok",
-          reason: null,
-          recordCount: sampleLoaded.length,
-          sourceFormat: "default",
-          endpointHost: null,
-        },
-      };
-    }
-  }
-
-  return {
-    revisions: lawRevisionCores,
-    source: "sample",
-    meta: {
-      status: "fallback",
-      reason: "sample_fallback",
-      recordCount: lawRevisionCores.length,
-      sourceFormat: "default",
-      endpointHost: null,
+  return NextResponse.json(body, {
+    headers: {
+      "Cache-Control": "public, max-age=0, s-maxage=3600",
+      "x-revisions-ingest-source": "egov-structured",
+      "x-revisions-verification-state": "machine-validated-human-review-pending",
+      "x-revisions-record-count": String(lawRevisionCores.length),
     },
-  };
-}
-
-function safeJsonParse(input: string): unknown {
-  try {
-    return JSON.parse(input);
-  } catch {
-    return undefined;
-  }
-}
-
-function resolveIngestSource(value: string | null): "sample" | "real" {
-  if (value === "real" || value === "sample") {
-    return value;
-  }
-  return process.env.NEXT_PUBLIC_REVISIONS_INGEST_SOURCE === "real" ? "real" : "sample";
-}
-
-function resolveAllowHosts(queryValue: string | null, envValue: string | undefined): string[] {
-  const source = queryValue ?? envValue ?? "";
-  return source
-    .split(",")
-    .map((item) => item.trim().toLowerCase())
-    .filter((item) => item.length > 0);
+  });
 }

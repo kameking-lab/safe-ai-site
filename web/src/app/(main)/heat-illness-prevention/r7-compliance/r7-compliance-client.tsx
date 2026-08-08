@@ -85,7 +85,7 @@ export function R7ComplianceClient() {
           id="checklist-heading"
           className="text-base font-bold text-slate-900"
         >
-          R7改正コンプライアンス チェックリスト（8項目）
+          R7改正コンプライアンス チェックリスト（法定2項目）
         </h2>
         <ul className="mt-4 space-y-3">
           {R7_COMPLIANCE_ITEMS.map((item) => {
@@ -191,11 +191,11 @@ export function R7ComplianceClient() {
 
       <section className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-xs leading-6 text-slate-600">
         <p>
-          出典：労働安全衛生規則第612条の2 改正（令和7年6月1日施行、厚生労働省令第86号）、
+          出典：労働安全衛生規則第612条の2（令和7年6月1日施行、令和7年厚生労働省令第57号）、
           厚生労働省「職場における熱中症予防対策マニュアル」。
         </p>
         <p className="mt-1">
-          本チェックリストは自主点検用です。労働基準監督署の指導は個別事業場の実態を踏まえて行われます。
+          法定義務は上記2項目です。下のテンプレートに含まれるWBGT測定、暑熱順化、教育等は重要な予防策ですが、第612条の2の追加の項として表示していません。本チェックリストは自主点検用です。
           詳細な解釈は所轄監督署・産業医・社労士にご確認ください。
         </p>
       </section>

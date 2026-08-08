@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 export default function AuthErrorPage() {
   return (
-    <main className="mx-auto max-w-sm px-4 py-16 text-center">
+    <div className="mx-auto max-w-sm px-4 py-16 text-center">
       <div className="rounded-2xl border border-red-100 bg-white p-8 shadow-sm">
         <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
           <AlertTriangle className="h-6 w-6 text-red-500" />
@@ -28,6 +28,6 @@ export default function AuthErrorPage() {
           ログインに戻る
         </Link>
       </div>
-    </main>
+    </div>
   );
 }

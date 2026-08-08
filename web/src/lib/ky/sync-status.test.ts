@@ -2,22 +2,29 @@ import { describe, expect, it } from "vitest";
 import { computeKySyncStatus, KY_SYNC_LABEL } from "@/lib/ky/sync-status";
 
 describe("computeKySyncStatus", () => {
-  it("クラウド未設定が最優先", () => {
-    expect(computeKySyncStatus({ cloudEnabled: false, online: true, pending: true })).toBe("cloud-disabled");
-    expect(computeKySyncStatus({ cloudEnabled: false, online: false, pending: false })).toBe("cloud-disabled");
+  it("returns local-only when cloud transport is not configured", () => {
+    expect(computeKySyncStatus({ cloudEnabled: false, online: true, pending: true })).toBe("local-only");
+    expect(computeKySyncStatus({ cloudEnabled: false, online: false, pending: false })).toBe("local-only");
   });
-  it("クラウド有効でオフラインなら offline", () => {
-    expect(computeKySyncStatus({ cloudEnabled: true, online: false, pending: true })).toBe("offline");
+
+  it("does not claim cloud readiness before explicit consent", () => {
+    expect(computeKySyncStatus({ cloudEnabled: true, online: true, pending: false })).toBe("consent-required");
   });
-  it("オンラインで未送信があれば pending", () => {
-    expect(computeKySyncStatus({ cloudEnabled: true, online: true, pending: true })).toBe("pending");
+
+  it("reports transport state only after consent", () => {
+    expect(computeKySyncStatus({ cloudEnabled: true, consentGranted: true, online: false, pending: true })).toBe("offline");
+    expect(computeKySyncStatus({ cloudEnabled: true, consentGranted: true, online: true, pending: true })).toBe("pending");
   });
-  it("オンライン・未送信なしなら synced", () => {
-    expect(computeKySyncStatus({ cloudEnabled: true, online: true, pending: false })).toBe("synced");
+
+  it("claims synced only after an actual successful transfer", () => {
+    expect(computeKySyncStatus({ cloudEnabled: true, consentGranted: true, online: true, pending: false })).toBe("ready");
+    expect(computeKySyncStatus({ cloudEnabled: true, consentGranted: true, online: true, pending: false, lastTransfer: "success" })).toBe("synced");
+    expect(computeKySyncStatus({ cloudEnabled: true, consentGranted: true, online: true, pending: false, lastTransfer: "failed" })).toBe("failed");
   });
-  it("全ステータスにラベルがある", () => {
-    for (const s of ["cloud-disabled", "offline", "pending", "synced"] as const) {
-      expect(KY_SYNC_LABEL[s]).toBeTruthy();
+
+  it("has a label for every state", () => {
+    for (const status of ["local-only", "consent-required", "ready", "offline", "pending", "synced", "failed"] as const) {
+      expect(KY_SYNC_LABEL[status]).toBeTruthy();
     }
   });
 });

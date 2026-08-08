@@ -3,11 +3,33 @@ import {
   loadKySuggestionHistory,
   recordKySuggestionUsage,
   suggestKyByIndustryAndWork,
+  suggestVerifiedKyEvidence,
 } from "./ky-suggestion";
-import { KY_EXAMPLES } from "@/data/ky-examples";
+import { KY_EXAMPLES, KY_EXAMPLES_DATA_STATUS } from "@/data/ky-examples";
 import type { KyExample } from "@/types/ky-example";
 
 describe("suggestKyByIndustryAndWork", () => {
+  it("公開モデルは全件synthetic・未確認で、AI grounding対象を0件にする", () => {
+    expect(KY_EXAMPLES_DATA_STATUS.verifiedPrimarySourceCount).toBe(0);
+    expect(KY_EXAMPLES_DATA_STATUS.aiGroundingEligibleCount).toBe(0);
+    expect(KY_EXAMPLES.length).toBeGreaterThan(0);
+    expect(
+      KY_EXAMPLES.every(
+        (example) =>
+          example.source.provenance === "synthetic" &&
+          example.source.verification === "unverified" &&
+          example.source.useForAiGrounding === false &&
+          !example.source.referenceUrl,
+      ),
+    ).toBe(true);
+    expect(
+      suggestVerifiedKyEvidence({
+        industry: "construction",
+        freeText: "足場",
+      }),
+    ).toEqual([]);
+  });
+
   it("returns empty array when no signal is provided", () => {
     const result = suggestKyByIndustryAndWork({});
     expect(result).toEqual([]);

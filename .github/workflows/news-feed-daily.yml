@@ -1,4 +1,4 @@
-name: News feed (autonomous RSS + AI judge)
+name: News feed (RSS + human review queue)
 
 on:
   schedule:
@@ -34,11 +34,10 @@ jobs:
         env:
           NODE_OPTIONS: "--no-warnings"
 
-      - name: Stage 2 — AI judge gate (Gemini 2.5 Flash, per-type thresholds)
+      - name: Stage 2 — deterministic filter + human review queue
         run: node scripts/etl/news-ai-judge.mjs
         env:
           NODE_OPTIONS: "--no-warnings"
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
 
       - name: Stage 3 — recompute audit dashboard stats
         run: node scripts/etl/news-feed-stats.mjs

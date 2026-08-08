@@ -39,6 +39,40 @@ export function CourtPrecedentsList({ precedents }: CourtPrecedentsListProps) {
   const visible = sorted.slice(0, shown);
   const hasMore = shown < sorted.length;
 
+  if (sorted.length === 0) {
+    return (
+      <section
+        aria-labelledby="circulars-precedents-heading"
+        className="mt-12 rounded-2xl border-2 border-amber-300 bg-amber-50 p-5"
+      >
+        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-amber-800">
+          <Gavel className="h-4 w-4" aria-hidden="true" />
+          判例・quarantine
+        </div>
+        <h2
+          id="circulars-precedents-heading"
+          className="mt-2 text-xl font-bold text-amber-950"
+        >
+          判例要旨は出典再検証のため公開停止中です
+        </h2>
+        <p className="mt-3 max-w-3xl text-sm leading-7 text-amber-950">
+          旧データで事件名、裁判年月日、裁判所、判例誌の誤対応が確認されました。
+          裁判所の個別判決URL、事件番号、支持箇所、人手確認日を照合できた判例だけを
+          allowlistで復帰します。公開停止は、関連判例が存在しないという意味ではありません。
+        </p>
+        <a
+          href="https://www.courts.go.jp/app/hanrei_jp/search1"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-4 inline-flex min-h-12 items-center gap-2 rounded-lg border border-amber-500 bg-white px-4 py-2 text-sm font-bold text-amber-950 hover:bg-amber-100"
+        >
+          <ExternalLink className="h-4 w-4" aria-hidden="true" />
+          裁判所の裁判例検索を開く
+        </a>
+      </section>
+    );
+  }
+
   return (
     <section
       aria-labelledby="circulars-precedents-heading"

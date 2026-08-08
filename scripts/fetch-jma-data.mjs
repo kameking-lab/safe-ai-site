@@ -13,12 +13,13 @@
  *   web/src/data/jma/earthquakes.json  直近の地震（震度3以上）
  *   web/src/data/jma/index.json        メタ（取得日時、出典）
  *
- * 取得失敗時は既存JSONを残し、index.json に error を追記して継続。
+ * 取得失敗時は既存JSONを残し、index.json に試行結果を記録して終了コード1を返す。
  */
 
-import { mkdir, writeFile, readFile } from "node:fs/promises";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { randomUUID } from "node:crypto";
+import { mkdir, readFile, rename, rm, writeFile } from "node:fs/promises";
+import { dirname, join, resolve } from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = join(__dirname, "..");
@@ -26,6 +27,8 @@ const OUT_DIR = join(REPO_ROOT, "web", "src", "data", "jma");
 
 const USER_AGENT = "safe-ai-site-jma-batch/1.0 (+contact: ops@example.com)";
 const FETCH_TIMEOUT_MS = 15_000;
+export const FETCH_CONCURRENCY = 8;
+const EXPECTED_PREFECTURE_COUNT = 47;
 
 const PREFECTURE_CODES = [
   // 北海道は複数細分（特殊）、46/47も特殊だが、最大レベル算出だけなら 010000～470000 で代表させる
@@ -57,24 +60,63 @@ function isoFromWarningCode(code) {
   return null;
 }
 
-async function fetchJson(url) {
-  const ac = new AbortController();
-  const timer = setTimeout(() => ac.abort(), FETCH_TIMEOUT_MS);
-  try {
-    const res = await fetch(url, {
-      headers: { Accept: "application/json", "User-Agent": USER_AGENT },
-      signal: ac.signal,
-    });
-    if (!res.ok) {
-      return { ok: false, status: res.status, error: `HTTP ${res.status}` };
-    }
-    const json = await res.json();
-    return { ok: true, data: json };
-  } catch (err) {
-    return { ok: false, error: String(err?.message ?? err) };
-  } finally {
-    clearTimeout(timer);
+function compactError(err) {
+  return String(err?.message ?? err)
+    .replace(/\s+/g, " ")
+    .slice(0, 300);
+}
+
+export function createConcurrencyLimiter(maxConcurrency) {
+  if (!Number.isInteger(maxConcurrency) || maxConcurrency < 1) {
+    throw new TypeError("maxConcurrency must be a positive integer");
   }
+
+  let active = 0;
+  const queue = [];
+
+  return async function limit(task) {
+    if (active >= maxConcurrency) {
+      await new Promise((resume) => queue.push(resume));
+    }
+    active += 1;
+    try {
+      return await task();
+    } finally {
+      active -= 1;
+      queue.shift()?.();
+    }
+  };
+}
+
+export function createJsonFetcher({
+  fetchImpl = globalThis.fetch,
+  timeoutMs = FETCH_TIMEOUT_MS,
+  maxConcurrency = FETCH_CONCURRENCY,
+} = {}) {
+  if (typeof fetchImpl !== "function") {
+    throw new TypeError("fetchImpl must be a function");
+  }
+  const limit = createConcurrencyLimiter(maxConcurrency);
+
+  return (url) => limit(async () => {
+    const ac = new AbortController();
+    const timer = setTimeout(() => ac.abort(), timeoutMs);
+    try {
+      const res = await fetchImpl(url, {
+        headers: { Accept: "application/json", "User-Agent": USER_AGENT },
+        signal: ac.signal,
+      });
+      if (!res.ok) {
+        return { ok: false, status: res.status, error: `HTTP ${res.status}` };
+      }
+      const json = await res.json();
+      return { ok: true, data: json };
+    } catch (err) {
+      return { ok: false, error: compactError(err) };
+    } finally {
+      clearTimeout(timer);
+    }
+  });
 }
 
 function isActiveWarning(status) {
@@ -124,20 +166,34 @@ function summarizeWarningPayload(payload) {
   };
 }
 
-async function fetchWarnings() {
+function isWarningPayload(payload) {
+  return Boolean(payload) && typeof payload === "object" && Array.isArray(payload.areaTypes);
+}
+
+async function fetchWarnings(fetchJson) {
   const byIso = {};
   const errors = [];
+  const successfulCodes = [];
 
-  for (const code of PREFECTURE_CODES) {
+  const results = await Promise.all(PREFECTURE_CODES.map(async (code) => {
     const url = `https://www.jma.go.jp/bosai/warning/data/warning/${code}.json`;
     const r = await fetchJson(url);
+    return { code, ...r };
+  }));
+
+  for (const r of results) {
+    const { code } = r;
     const iso = isoFromWarningCode(code);
     if (!iso) continue;
     if (!r.ok) {
-      errors.push({ code, error: r.error });
-      if (!byIso[iso]) byIso[iso] = { level: "none", entries: [] };
+      errors.push({ code, status: r.status ?? null, error: r.error });
       continue;
     }
+    if (!isWarningPayload(r.data)) {
+      errors.push({ code, status: null, error: "invalid payload" });
+      continue;
+    }
+    successfulCodes.push(code);
     const summary = summarizeWarningPayload(r.data);
     if (!byIso[iso]) byIso[iso] = { level: "none", entries: [] };
     byIso[iso].level = maxLevel(byIso[iso].level, summary.level);
@@ -151,7 +207,12 @@ async function fetchWarnings() {
     });
   }
 
-  return { byIso, errors };
+  return {
+    byIso,
+    errors,
+    successfulCodes,
+    totalRequests: PREFECTURE_CODES.length,
+  };
 }
 
 // 代表7地域（地方区分の天気予報）。気象庁 forecast/data/forecast/{office}.json
@@ -165,39 +226,66 @@ const FORECAST_OFFICES = [
   { code: "400000", label: "福岡県", iso: "JP-40" },
 ];
 
-async function fetchForecast() {
+function buildForecastEntry(office, payload) {
+  if (!Array.isArray(payload) || !payload[0]) return null;
+  const today = payload[0]?.timeSeries?.[0];
+  const weatherCodes = today?.areas?.[0]?.weatherCodes;
+  const weathers = today?.areas?.[0]?.weathers;
+  if (!Array.isArray(weatherCodes) || !Array.isArray(weathers)) return null;
+
+  return {
+    label: office.label,
+    reportDatetime: payload[0]?.reportDatetime ?? null,
+    publishingOffice: payload[0]?.publishingOffice ?? null,
+    todayWeatherCode: weatherCodes[0] ?? null,
+    todayWeatherText: weathers[0] ?? null,
+  };
+}
+
+async function fetchForecast(fetchJson) {
   const byIso = {};
   const errors = [];
-  for (const o of FORECAST_OFFICES) {
-    const url = `https://www.jma.go.jp/bosai/forecast/data/forecast/${o.code}.json`;
+  const successfulCodes = [];
+
+  const results = await Promise.all(FORECAST_OFFICES.map(async (office) => {
+    const url = `https://www.jma.go.jp/bosai/forecast/data/forecast/${office.code}.json`;
     const r = await fetchJson(url);
+    return { office, ...r };
+  }));
+
+  for (const r of results) {
+    const o = r.office;
     if (!r.ok) {
-      errors.push({ code: o.code, error: r.error });
+      errors.push({ code: o.code, status: r.status ?? null, error: r.error });
       continue;
     }
-    const arr = r.data;
-    const today = arr?.[0]?.timeSeries?.[0];
-    const weatherCodes = today?.areas?.[0]?.weatherCodes ?? [];
-    const weathers = today?.areas?.[0]?.weathers ?? [];
-    byIso[o.iso] = {
-      label: o.label,
-      reportDatetime: arr?.[0]?.reportDatetime ?? null,
-      publishingOffice: arr?.[0]?.publishingOffice ?? null,
-      todayWeatherCode: weatherCodes[0] ?? null,
-      todayWeatherText: weathers[0] ?? null,
-    };
+    const entry = buildForecastEntry(o, r.data);
+    if (!entry) {
+      errors.push({ code: o.code, status: null, error: "invalid payload" });
+      continue;
+    }
+    successfulCodes.push(o.code);
+    byIso[o.iso] = entry;
   }
-  return { byIso, errors };
+  return {
+    byIso,
+    errors,
+    successfulCodes,
+    totalRequests: FORECAST_OFFICES.length,
+  };
 }
 
 const QUAKE_LIST_URL = "https://www.jma.go.jp/bosai/quake/data/list.json";
 
-async function fetchEarthquakes() {
+async function fetchEarthquakes(fetchJson) {
   const r = await fetchJson(QUAKE_LIST_URL);
   if (!r.ok) {
-    return { items: [], error: r.error };
+    return { items: [], error: r.error, status: r.status ?? null, validPayload: false };
   }
-  const list = Array.isArray(r.data) ? r.data : [];
+  if (!Array.isArray(r.data)) {
+    return { items: [], error: "invalid payload", status: null, validPayload: false };
+  }
+  const list = r.data;
   // 直近30件、震度3以上のみ抽出（list.json は概要のみ）
   const items = list
     .filter((q) => {
@@ -215,14 +303,14 @@ async function fetchEarthquakes() {
       maxIntensity: q?.maxInt ?? null,
       title: q?.ttl ?? null,
     }));
-  return { items, error: null };
+  return { items, error: null, status: null, validPayload: true };
 }
 
 async function ensureDir(p) {
   await mkdir(p, { recursive: true });
 }
 
-async function readExistingMock(file) {
+async function readJson(file) {
   try {
     const buf = await readFile(file, "utf8");
     return JSON.parse(buf);
@@ -231,75 +319,283 @@ async function readExistingMock(file) {
   }
 }
 
-async function main() {
-  await ensureDir(OUT_DIR);
+function jsonText(value) {
+  return `${JSON.stringify(value, null, 2)}\n`;
+}
 
-  const useMock = process.argv.includes("--mock") || process.env.JMA_MOCK === "1";
-  const fetchedAt = new Date().toISOString();
+async function stageJson(target, value) {
+  const temporary = `${target}.${process.pid}.${randomUUID()}.tmp`;
+  await writeFile(temporary, jsonText(value), { encoding: "utf8", flag: "wx" });
+  return { target, temporary };
+}
 
-  let warnings = { byIso: {}, errors: [] };
-  let forecast = { byIso: {}, errors: [] };
-  let earthquakes = { items: [], error: null };
-
-  if (useMock) {
-    console.log("[fetch-jma-data] MOCK mode — using bundled mock data only");
-    warnings = await readExistingMock(join(OUT_DIR, "warnings.json")) ?? warnings;
-    forecast = await readExistingMock(join(OUT_DIR, "weather.json")) ?? forecast;
-    earthquakes = await readExistingMock(join(OUT_DIR, "earthquakes.json")) ?? earthquakes;
-  } else {
-    console.log("[fetch-jma-data] fetching from jma.go.jp …");
-    [warnings, forecast, earthquakes] = await Promise.all([
-      fetchWarnings(),
-      fetchForecast(),
-      fetchEarthquakes(),
-    ]);
+export async function atomicWriteJson(target, value) {
+  const staged = await stageJson(target, value);
+  try {
+    await rename(staged.temporary, staged.target);
+  } catch (err) {
+    await rm(staged.temporary, { force: true }).catch(() => {});
+    throw err;
   }
+}
 
-  const indexMeta = {
-    fetchedAt,
-    source: "気象庁 (Japan Meteorological Agency)",
-    sourceUrl: "https://www.jma.go.jp/bosai/",
-    license: "気象庁ホームページ コンテンツ利用ルール（出典明記）",
-    counts: {
-      warningsPrefectures: Object.keys(warnings.byIso).length,
-      forecastOffices: Object.keys(forecast.byIso).length,
-      earthquakes: earthquakes.items.length,
+async function atomicWriteJsonBundle(entries) {
+  const staged = [];
+  try {
+    for (const [target, value] of entries) {
+      staged.push(await stageJson(target, value));
+    }
+    // index.json is deliberately last: readers never see new metadata before data files.
+    for (const item of staged) {
+      await rename(item.temporary, item.target);
+    }
+  } catch (err) {
+    await Promise.all(staged.map((item) => rm(item.temporary, { force: true }).catch(() => {})));
+    throw err;
+  }
+}
+
+function failureRate(failed, total) {
+  return total > 0 ? Number((failed / total).toFixed(4)) : 1;
+}
+
+export function assessFetchQuality(warnings, forecast, earthquakes) {
+  const warningSuccesses = warnings.successfulCodes?.length ?? 0;
+  const forecastSuccesses = forecast.successfulCodes?.length ?? 0;
+  const warningFailures = Math.max(0, warnings.totalRequests - warningSuccesses);
+  const forecastFailures = Math.max(0, forecast.totalRequests - forecastSuccesses);
+  const effectivePrefectures = Object.keys(warnings.byIso ?? {}).length;
+  const effectiveForecastOffices = Object.keys(forecast.byIso ?? {}).length;
+
+  const quality = {
+    warnings: {
+      expectedRequests: warnings.totalRequests,
+      successfulRequests: warningSuccesses,
+      failedRequests: warningFailures,
+      failureRate: failureRate(warningFailures, warnings.totalRequests),
+      maximumFailureRate: 0,
+      expectedPrefectures: EXPECTED_PREFECTURE_COUNT,
+      effectivePrefectures,
     },
-    errors: {
-      warnings: warnings.errors ?? [],
-      forecast: forecast.errors ?? [],
-      earthquakes: earthquakes.error ?? null,
+    forecast: {
+      expectedRequests: forecast.totalRequests,
+      successfulRequests: forecastSuccesses,
+      failedRequests: forecastFailures,
+      failureRate: failureRate(forecastFailures, forecast.totalRequests),
+      maximumFailureRate: 0,
+      expectedOffices: FORECAST_OFFICES.length,
+      effectiveOffices: effectiveForecastOffices,
+    },
+    earthquakes: {
+      expectedRequests: 1,
+      successfulRequests: earthquakes.validPayload ? 1 : 0,
+      failedRequests: earthquakes.validPayload ? 0 : 1,
+      failureRate: earthquakes.validPayload ? 0 : 1,
+      validPayload: Boolean(earthquakes.validPayload),
+      matchingItems: Array.isArray(earthquakes.items) ? earthquakes.items.length : 0,
     },
   };
 
-  await writeFile(
-    join(OUT_DIR, "warnings.json"),
-    JSON.stringify({ fetchedAt, byIso: warnings.byIso }, null, 2),
-    "utf8",
-  );
-  await writeFile(
-    join(OUT_DIR, "weather.json"),
-    JSON.stringify({ fetchedAt, byIso: forecast.byIso }, null, 2),
-    "utf8",
-  );
-  await writeFile(
-    join(OUT_DIR, "earthquakes.json"),
-    JSON.stringify({ fetchedAt, items: earthquakes.items }, null, 2),
-    "utf8",
-  );
-  await writeFile(
-    join(OUT_DIR, "index.json"),
-    JSON.stringify(indexMeta, null, 2),
-    "utf8",
-  );
+  const failures = [];
+  if (quality.warnings.failureRate > quality.warnings.maximumFailureRate) {
+    failures.push(`warnings request failures ${warningFailures}/${warnings.totalRequests}`);
+  }
+  if (effectivePrefectures !== EXPECTED_PREFECTURE_COUNT) {
+    failures.push(`warnings effective prefectures ${effectivePrefectures}/${EXPECTED_PREFECTURE_COUNT}`);
+  }
+  if (quality.forecast.failureRate > quality.forecast.maximumFailureRate) {
+    failures.push(`forecast request failures ${forecastFailures}/${forecast.totalRequests}`);
+  }
+  if (effectiveForecastOffices !== FORECAST_OFFICES.length) {
+    failures.push(`forecast effective offices ${effectiveForecastOffices}/${FORECAST_OFFICES.length}`);
+  }
+  if (!earthquakes.validPayload) {
+    failures.push("earthquakes response unavailable or invalid");
+  }
 
-  console.log(
-    `[fetch-jma-data] done: warnings=${indexMeta.counts.warningsPrefectures} ` +
-    `forecast=${indexMeta.counts.forecastOffices} eq=${indexMeta.counts.earthquakes}`,
+  return { ok: failures.length === 0, failures, quality };
+}
+
+function storedCounts(previous) {
+  return {
+    warningsPrefectures: Object.keys(previous.warnings?.byIso ?? {}).length,
+    forecastOffices: Object.keys(previous.weather?.byIso ?? {}).length,
+    earthquakes: Array.isArray(previous.earthquakes?.items) ? previous.earthquakes.items.length : 0,
+  };
+}
+
+function inferLastSuccessfulAt(previous) {
+  if (previous.index?.lastSuccessfulAt) return previous.index.lastSuccessfulAt;
+  if (previous.index?.fetchedAt) return previous.index.fetchedAt;
+  const snapshotTimes = [
+    previous.warnings?.fetchedAt,
+    previous.weather?.fetchedAt,
+    previous.earthquakes?.fetchedAt,
+  ].filter(Boolean);
+  return snapshotTimes.length === 3 && new Set(snapshotTimes).size === 1 ? snapshotTimes[0] : null;
+}
+
+function indexMetadata({
+  attemptedAt,
+  lastSuccessfulAt,
+  status,
+  counts,
+  quality,
+  errors,
+}) {
+  return {
+    // Kept for existing consumers. It always means the last complete successful snapshot.
+    fetchedAt: lastSuccessfulAt,
+    lastSuccessfulAt,
+    lastAttemptAt: attemptedAt,
+    status,
+    source: "気象庁 (Japan Meteorological Agency)",
+    sourceUrl: "https://www.jma.go.jp/bosai/",
+    license: "気象庁ホームページ コンテンツ利用ルール（出典明記）",
+    counts,
+    quality,
+    errors,
+  };
+}
+
+function storedSnapshotIsUsable(previous) {
+  return (
+    Object.keys(previous.warnings?.byIso ?? {}).length === EXPECTED_PREFECTURE_COUNT &&
+    Object.keys(previous.weather?.byIso ?? {}).length === FORECAST_OFFICES.length &&
+    Array.isArray(previous.earthquakes?.items)
   );
 }
 
-main().catch((err) => {
-  console.error("[fetch-jma-data] fatal:", err);
-  process.exit(1);
-});
+export async function runJmaUpdate({
+  outDir = OUT_DIR,
+  fetchImpl = globalThis.fetch,
+  timeoutMs = FETCH_TIMEOUT_MS,
+  maxConcurrency = FETCH_CONCURRENCY,
+  now = () => new Date(),
+  logger = console,
+  useMock = false,
+} = {}) {
+  await ensureDir(outDir);
+
+  const paths = {
+    warnings: join(outDir, "warnings.json"),
+    weather: join(outDir, "weather.json"),
+    earthquakes: join(outDir, "earthquakes.json"),
+    index: join(outDir, "index.json"),
+  };
+  const [previousWarnings, previousWeather, previousEarthquakes, previousIndex] = await Promise.all([
+    readJson(paths.warnings),
+    readJson(paths.weather),
+    readJson(paths.earthquakes),
+    readJson(paths.index),
+  ]);
+  const previous = {
+    warnings: previousWarnings,
+    weather: previousWeather,
+    earthquakes: previousEarthquakes,
+    index: previousIndex,
+  };
+
+  if (useMock) {
+    if (!storedSnapshotIsUsable(previous)) {
+      logger.error("[fetch-jma-data] MOCK mode rejected: bundled snapshot is incomplete");
+      return { ok: false, status: "failed", reason: "incomplete mock snapshot" };
+    }
+    // A fixture read is not a successful network refresh; do not falsify freshness timestamps.
+    logger.log("[fetch-jma-data] MOCK mode validated bundled snapshot; no files changed");
+    return { ok: true, status: "mock", published: false };
+  }
+
+  const attemptedAt = now().toISOString();
+  const lastSuccessfulAt = inferLastSuccessfulAt(previous);
+  logger.log(`[fetch-jma-data] fetching from jma.go.jp (concurrency=${maxConcurrency}) …`);
+  const fetchJson = createJsonFetcher({ fetchImpl, timeoutMs, maxConcurrency });
+  const [warnings, forecast, earthquakes] = await Promise.all([
+    fetchWarnings(fetchJson),
+    fetchForecast(fetchJson),
+    fetchEarthquakes(fetchJson),
+  ]);
+  const assessment = assessFetchQuality(warnings, forecast, earthquakes);
+  const errors = {
+    warnings: warnings.errors,
+    forecast: forecast.errors,
+    earthquakes: earthquakes.error
+      ? { status: earthquakes.status ?? null, error: earthquakes.error }
+      : null,
+  };
+
+  if (!assessment.ok) {
+    const failedIndex = indexMetadata({
+      attemptedAt,
+      lastSuccessfulAt,
+      status: "failed",
+      counts: storedCounts(previous),
+      quality: assessment.quality,
+      errors,
+    });
+    // Only attempt metadata changes. Successful warning/weather/quake snapshots stay byte-for-byte intact.
+    await atomicWriteJson(paths.index, failedIndex);
+    logger.error(`[fetch-jma-data] rejected snapshot: ${assessment.failures.join("; ")}`);
+    return {
+      ok: false,
+      status: "failed",
+      published: false,
+      failures: assessment.failures,
+      quality: assessment.quality,
+    };
+  }
+
+  const warningSnapshot = { fetchedAt: attemptedAt, byIso: warnings.byIso };
+  const weatherSnapshot = { fetchedAt: attemptedAt, byIso: forecast.byIso };
+  const earthquakeSnapshot = { fetchedAt: attemptedAt, items: earthquakes.items };
+  const counts = {
+    warningsPrefectures: Object.keys(warnings.byIso).length,
+    forecastOffices: Object.keys(forecast.byIso).length,
+    earthquakes: earthquakes.items.length,
+  };
+  const successIndex = indexMetadata({
+    attemptedAt,
+    lastSuccessfulAt: attemptedAt,
+    status: "success",
+    counts,
+    quality: assessment.quality,
+    errors,
+  });
+
+  await atomicWriteJsonBundle([
+    [paths.warnings, warningSnapshot],
+    [paths.weather, weatherSnapshot],
+    [paths.earthquakes, earthquakeSnapshot],
+    [paths.index, successIndex],
+  ]);
+
+  logger.log(
+    `[fetch-jma-data] done: warnings=${counts.warningsPrefectures} ` +
+    `forecast=${counts.forecastOffices} eq=${counts.earthquakes}`,
+  );
+  return { ok: true, status: "success", published: true, quality: assessment.quality };
+}
+
+export async function runCli(options = {}) {
+  const {
+    args = process.argv.slice(2),
+    env = process.env,
+    logger = console,
+    ...runOptions
+  } = options;
+  const useMock = runOptions.useMock ?? (args.includes("--mock") || env.JMA_MOCK === "1");
+  try {
+    const result = await runJmaUpdate({ ...runOptions, useMock, logger });
+    return result.ok ? 0 : 1;
+  } catch (err) {
+    logger.error("[fetch-jma-data] fatal:", compactError(err));
+    return 1;
+  }
+}
+
+const directInvocation = process.argv[1]
+  ? pathToFileURL(resolve(process.argv[1])).href === import.meta.url
+  : false;
+if (directInvocation) {
+  process.exitCode = await runCli();
+}

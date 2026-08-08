@@ -12,10 +12,11 @@ export type BreadcrumbItem = {
  */
 export function Breadcrumb({ items }: { items: BreadcrumbItem[] }) {
   return (
-    <nav aria-label="パンくずリスト" className="mb-3 flex flex-wrap items-center gap-1 text-xs text-slate-500">
+    <nav aria-label="パンくずリスト" className="mb-3 flex flex-wrap items-center gap-1 text-xs text-portal-muted">
       <Link
         href="/"
-        className="flex min-h-[44px] items-center gap-0.5 rounded px-1 py-0.5 hover:text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+        prefetch={false}
+        className="flex min-h-[44px] min-w-11 items-center justify-center gap-0.5 rounded-[var(--radius-sm)] px-1 py-0.5 hover:bg-portal-surface-emphasis hover:text-brand-primary focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-primary/25"
         aria-label="ホーム"
       >
         <Home className="h-3 w-3" aria-hidden="true" />
@@ -32,7 +33,8 @@ export function Breadcrumb({ items }: { items: BreadcrumbItem[] }) {
             ) : (
               <Link
                 href={item.href}
-                className="inline-flex min-h-[44px] items-center rounded px-1 py-0.5 hover:text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+                prefetch={false}
+                className="inline-flex min-h-[44px] items-center rounded-[var(--radius-sm)] px-2 py-0.5 hover:bg-portal-surface-emphasis hover:text-brand-primary focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-primary/25"
               >
                 {item.name}
               </Link>

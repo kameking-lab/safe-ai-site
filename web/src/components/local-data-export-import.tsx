@@ -2,33 +2,21 @@
 
 import { useState } from "react";
 import { AlertTriangle, Download, Upload, Trash2 } from "lucide-react";
+import {
+  collectAppLocalStorageKeys,
+  isAppLocalStorageKey,
+} from "@/lib/local-data-registry";
+import { sanitizeImportedLocalDataValue } from "@/lib/local-data-import-safety";
+import { removeGoogleOptionalCookies } from "@/lib/google-cookie-privacy";
 
 /**
  * 端末内（localStorage）保存データのエクスポート / インポート / 全削除パネル。
  *
  * 当サイトの大半の状態（KY記録・自社プロファイル・サイネージ設定・チャット履歴・
- * 言語/フォントサイズ等）は端末の localStorage に保存される。サーバ同期は無い。
- * 端末を変える・ブラウザデータを消すとデータは失われる。利用者にその仕様を明示し、
+ * 言語/フォントサイズ等）は端末の localStorage に保存される。構成済み機能では
+ * Supabase 等へクラウド同期される場合があるため、端末削除とクラウド削除は区別する。
  * 自分でバックアップ取得・他端末へ移行できる導線を提供する。
  */
-
-const APP_KEY_PREFIXES = [
-  "ky-",
-  "chemical-ra:",
-  "chatbot_",
-  "anzen-",
-  "elearning",
-  "company-profile",
-  "language",
-  "easy-japanese",
-  "furigana",
-  "first-visit-",
-  "high-contrast",
-  "large-font",
-  "onboarding",
-  "signage",
-  "company_profile_skip",
-];
 
 type Snapshot = {
   exported_at: string;
@@ -38,13 +26,7 @@ type Snapshot = {
 };
 
 function collectKeys(): string[] {
-  const out: string[] = [];
-  for (let i = 0; i < window.localStorage.length; i++) {
-    const k = window.localStorage.key(i);
-    if (!k) continue;
-    if (APP_KEY_PREFIXES.some((p) => k.startsWith(p))) out.push(k);
-  }
-  return out;
+  return collectAppLocalStorageKeys(window.localStorage);
 }
 
 export function LocalDataExportImport() {
@@ -87,13 +69,17 @@ export function LocalDataExportImport() {
     setInfo(null);
     try {
       const txt = await file.text();
+      if (txt.length > 5_000_000) {
+        setError("バックアップファイルが大きすぎます（上限5MB）。");
+        return;
+      }
       const parsed = JSON.parse(txt) as Partial<Snapshot>;
-      if (parsed.source !== "anzen-ai-localstorage" || !parsed.data) {
+      if (parsed.source !== "anzen-ai-localstorage" || parsed.schema_version !== 1 || !parsed.data) {
         setError("安全AIポータル のバックアップファイルではありません。source 不一致。");
         return;
       }
       const entries = Object.entries(parsed.data).filter(
-        ([k]) => APP_KEY_PREFIXES.some((p) => k.startsWith(p))
+        ([k, value]) => isAppLocalStorageKey(k) && typeof value === "string"
       );
       if (entries.length === 0) {
         setError("インポート可能なキーが見つかりませんでした。");
@@ -103,25 +89,71 @@ export function LocalDataExportImport() {
         `${entries.length} 件のキーを上書きインポートします。よろしいですか？`
       );
       if (!ok) return;
+      let removedCount = 0;
       for (const [k, v] of entries) {
-        if (typeof v === "string") window.localStorage.setItem(k, v);
+        if (typeof v !== "string") continue;
+        const sanitized = sanitizeImportedLocalDataValue(k, v);
+        removedCount += sanitized.removedCount;
+        if (sanitized.value === null) window.localStorage.removeItem(k);
+        else window.localStorage.setItem(k, sanitized.value);
       }
-      setInfo(`${entries.length} 件のキーをインポートしました。ページを再読み込みしてください。`);
+      setInfo(
+        `${entries.length} 件のキーをインポートしました。` +
+          (removedCount > 0 ? ` 旧チャット/Copilot履歴から機微候補 ${removedCount} 件を破棄しました。` : "") +
+          "ページを再読み込みしてください。",
+      );
     } catch (e) {
       setError(`インポート失敗: ${e instanceof Error ? e.message : String(e)}`);
     }
   }
 
-  function handleClearAll() {
+  async function handleClearAll() {
     setError(null);
     setInfo(null);
     const ok = window.confirm(
-      "この端末に保存されている 安全AIポータル のデータをすべて削除します。元に戻せません。よろしいですか？"
+      "この端末のローカルデータ、任意Cookie、キャッシュ、プッシュ購読、Service Workerを削除します。クラウド保存とHttpOnly認証Cookieは別操作です。元に戻せません。続けますか？"
     );
     if (!ok) return;
     const keys = collectKeys();
     for (const k of keys) window.localStorage.removeItem(k);
-    setInfo(`${keys.length} 件のキーを削除しました。ページを再読み込みしてください。`);
+    let cacheCount = 0;
+    if ("caches" in window) {
+      const cacheKeys = await window.caches.keys();
+      const ownedCaches = cacheKeys.filter((key) => key.startsWith("anzen-ai-"));
+      await Promise.all(ownedCaches.map((key) => window.caches.delete(key)));
+      cacheCount = ownedCaches.length;
+    }
+    const cookieCount = removeGoogleOptionalCookies().length;
+    let pushRemoved = false;
+    let workerCount = 0;
+    if ("serviceWorker" in navigator) {
+      const registrations = await navigator.serviceWorker
+        .getRegistrations()
+        .catch(() => []);
+      const subscription = registrations[0]
+        ? await registrations[0].pushManager.getSubscription().catch(() => null)
+        : null;
+      if (subscription) {
+        const endpoint = subscription.endpoint;
+        pushRemoved = await subscription.unsubscribe().catch(() => false);
+        await fetch("/api/push/subscribe", {
+          method: "DELETE",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ endpoint }),
+        }).catch(() => undefined);
+      }
+      const unregistered = await Promise.all(
+        registrations.map((registration) =>
+          registration.unregister().catch(() => false),
+        ),
+      );
+      workerCount = unregistered.filter(Boolean).length;
+    }
+    setInfo(
+      `${keys.length}件のローカルキー、${cacheCount}件のキャッシュ、${cookieCount}件の任意Cookie、` +
+        `${workerCount}件のService Workerを削除しました。プッシュ購読: ${pushRemoved ? "解除" : "購読なし／解除未確認"}。` +
+        "クラウド保存データとHttpOnly認証Cookieは削除していません。ページを再読み込みしてください。",
+    );
   }
 
   return (
@@ -132,8 +164,10 @@ export function LocalDataExportImport() {
           <span>このサイトのデータは「この端末」のブラウザにのみ保存されます</span>
         </p>
         <ul className="ml-5 mt-1 list-disc space-y-0.5 leading-5">
-          <li>サーバー同期はありません。端末を変える・シークレットモードで開く・ブラウザデータを消すと失われます。</li>
+          <li>この操作は端末内データ、任意Cookie、キャッシュ、プッシュ購読、Service Workerが対象です。</li>
+          <li>クラウド上の記録とHttpOnly認証Cookieは対象外です。クラウド記録の削除は各一覧またはお問い合わせ、認証Cookieはログアウトを利用してください。</li>
           <li>他端末へ持ち出す場合や万一に備え、定期的にエクスポートしてください。</li>
+          <li>エクスポートJSONは暗号化されません。個人名・健康・事故情報を含み得るため、安全な場所で保管してください。</li>
           <li>対象: KY記録・自社プロファイル・サイネージ設定・チャット履歴・言語/フォントなど</li>
         </ul>
       </div>
@@ -163,11 +197,11 @@ export function LocalDataExportImport() {
         </label>
         <button
           type="button"
-          onClick={handleClearAll}
+          onClick={() => void handleClearAll()}
           className="inline-flex items-center gap-1.5 rounded-lg border border-rose-300 bg-rose-50 px-3 py-1.5 text-xs font-bold text-rose-800 hover:bg-rose-100"
         >
           <Trash2 className="h-3.5 w-3.5" />
-          すべて削除
+          端末内データを削除
         </button>
       </div>
 

@@ -10,9 +10,9 @@ import { withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
 import { ogImageUrl } from "@/lib/og-url";
 
 const SITE = "https://www.anzen-ai-portal.jp";
-const _title = "AIチャットボット精度評価（Recall@5 100問ベンチマーク）";
+const _title = "AIチャットボット評価（根拠検索と安全保留）";
 const _desc =
-  "労働安全衛生 AI チャットボットの根拠条文 検索ヒット率（Recall@5）を 100 問ベンチマークで定量公開。RAG 検索結果の上位 5 件に gold 条文が含まれるかを判定し、トピック別の Recall@5 と全失敗問の期待/取得値を開示します。";
+  "労働安全衛生AIチャットボットについて、hash検証済み法令本文のRecall@5と、条件不足・誤前提・未収録資料を回答保留できた割合を分けて公開します。法的正答率ではありません。";
 
 export const metadata: Metadata = {
   title: _title,
@@ -36,6 +36,15 @@ type EvalResult = {
   total: number;
   correct: number;
   accuracy: number;
+  retrieval_total?: number;
+  retrieval_correct?: number;
+  retrieval_accuracy?: number;
+  precision5?: number;
+  mrr?: number;
+  quality_metrics_generated_at?: string;
+  safe_hold_total?: number;
+  safe_hold_correct?: number;
+  safe_hold_rate?: number;
   target: number;
   passed: boolean;
   failures: Array<{
@@ -61,7 +70,7 @@ function formatDate(iso: string): string {
   }
 }
 
-// 生成回答の正答率（本番23問・機械採点）。Recall@5（検索ヒット率）とは別レンズ。
+// 生成回答の限定機械チェック。Recall@5（検索ヒット率）とは別レンズ。
 // 実測値は loop-eval-nightly.ps1 が本番へ23問投げて更新する追跡スナップショットから読む。
 // スナップショット欠損・破損時は 2026-07-03 のベースライン（19/21 = 90.5%）へ静的フォールバック
 // （docs/chatbot-genquality-eval-2026-07-03.md）。
@@ -120,15 +129,20 @@ function loadGenQuality(): GenQuality {
 export default function ChatbotEvalPage() {
   const gq = loadGenQuality();
   const r = results as EvalResult;
+  const retrievalTotal = r.retrieval_total ?? r.total;
+  const retrievalCorrect = r.retrieval_correct ?? r.correct;
+  const retrievalAccuracy = r.retrieval_accuracy ?? r.accuracy;
+  const safeHoldTotal = r.safe_hold_total ?? 0;
+  const safeHoldCorrect = r.safe_hold_correct ?? 0;
   const sortedTopics = Object.entries(r.topic_breakdown).sort(
     ([, a], [, b]) => b.total - a.total
   );
 
   return (
-    <main className="mx-auto max-w-5xl px-4 py-8 sm:py-10">
+    <div className="mx-auto max-w-5xl px-4 py-8 sm:py-10">
       <PageJsonLd
-        name="AIチャットボット精度評価（Recall@5 100問ベンチマーク）"
-        description="労働安全衛生 AI チャットボットの根拠条文 検索ヒット率（Recall@5）を 100 問ベンチマークで定量公開。"
+        name="AIチャットボット評価（根拠検索と安全保留）"
+        description="根拠条文の検索ヒット率と、危険な誤前提等を回答保留できた割合を分離して公開します。"
         path="/about/chatbot-eval"
         breadcrumbs={[
           { name: "ホーム", url: SITE },
@@ -141,44 +155,62 @@ export default function ChatbotEvalPage() {
           研究・実証プロジェクトについて
         </Link>
         <span className="mx-2">/</span>
-        <span>AIチャットボット Recall@5 評価</span>
+        <span>AIチャットボット評価</span>
       </nav>
 
       <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">
-        AIチャットボット Recall@5 評価（100問ベンチマーク）
+        AIチャットボット評価：根拠検索と安全保留
       </h1>
       <p className="mt-2 text-sm leading-6 text-slate-600">
-        労働安全衛生 AI チャットボットが「正しい根拠条文を検索できているか」を 100 問のクローズドセットで評価し、
-        結果を全件公開しています。各問は <code className="rounded bg-slate-100 px-1">{`{question, gold[]}`}</code>{" "}
-        の組で、RAG 検索の上位 5 件に gold（期待される条文）のいずれか 1 件以上が含まれた割合を Recall@5（検索ヒット率）として算出します。
+        hash検証済みe-Gov法令本文から期待条文を検索できたかと、条件不足・誤前提・未収録の通達や指針を
+        無関係な条文で代用せず回答保留できたかを、別の指標で測定しています。Recall@5は検索上位5件への
+        期待条文の着地率であり、生成回答の法的正しさ、現在の個別案件への適用、引用の意味的支持を示す正答率ではありません。
       </p>
 
       {/* サマリ */}
-      <section className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Stat label="Recall@5（件数）" value={`${r.correct} / ${r.total}`} accent />
-        <Stat label="Recall@5（検索ヒット率）" value={formatPct(r.accuracy)} accent />
-        <Stat label="目標値" value={formatPct(r.target)} />
+      <section className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
+        <Stat label="条文検索ヒット" value={`${retrievalCorrect} / ${retrievalTotal}`} accent />
+        <Stat label="Recall@5" value={formatPct(retrievalAccuracy)} accent />
         <Stat
-          label="判定"
+          label="Precision@5"
+          value={r.precision5 === undefined ? "未計測" : formatPct(r.precision5)}
+        />
+        <Stat
+          label="MRR"
+          value={r.mrr === undefined ? "未計測" : r.mrr.toFixed(3)}
+        />
+        <Stat
+          label="安全保留"
+          value={`${safeHoldCorrect} / ${safeHoldTotal}`}
+          accent={safeHoldTotal > 0 && safeHoldCorrect === safeHoldTotal}
+        />
+        <Stat
+          label="検索到達ゲート"
           value={
             r.passed ? (
-              <><CheckCircle2 className="mr-1 inline h-5 w-5 align-[-3px] text-emerald-600" aria-hidden="true" />達成</>
+              <><CheckCircle2 className="mr-1 inline h-5 w-5 align-[-3px] text-emerald-600" aria-hidden="true" />到達</>
             ) : (
-              <><XCircle className="mr-1 inline h-5 w-5 align-[-3px] text-rose-600" aria-hidden="true" />未達</>
+              <><XCircle className="mr-1 inline h-5 w-5 align-[-3px] text-rose-600" aria-hidden="true" />未到達</>
             )
           }
           accent={r.passed}
         />
       </section>
       <p className="mt-3 text-xs text-slate-500">
-        ※ 本ページの「Recall@5」は RAG 検索の根拠条文 検索ヒット率です。Gemini が生成する回答文そのものの正答率は下記「生成回答の正答率」で別途公開しています。<br />
+        ※ 総ケース数は {r.total} 件（条文検索 {retrievalTotal} 件、安全保留 {safeHoldTotal} 件）です。
+        Precision@5は上位5候補の純度、MRRは最初の期待根拠が現れる順位を示します。
+        「検索到達ゲート」はRecallと安全保留だけの限定判定であり、低いPrecisionを打ち消す総合PASSではありません。
+        生成回答は下記の自作・限定的な機械チェックで別途確認していますが、意味的正確性の評価ではありません。<br />
         最終評価: {formatDate(r.generated_at)} ／ ソース:{" "}
-        <code className="rounded bg-slate-100 px-1">test/chatbot-basic-100.json</code>
+        <code className="rounded bg-slate-100 px-1">src/lib/rag-100q.fixture.ts</code>
         ／ 実行コマンド:{" "}
         <code className="rounded bg-slate-100 px-1">npm run eval:chatbot</code>
+        {r.quality_metrics_generated_at ? (
+          <> ／ 純度・順位指標: {formatDate(r.quality_metrics_generated_at)}</>
+        ) : null}
       </p>
 
-      {/* 生成回答の正答率（本番23問・機械採点） */}
+      {/* 生成回答の限定機械チェック */}
       <GenQualitySection g={gq} />
 
       {/* トピック別 */}
@@ -193,7 +225,7 @@ export default function ChatbotEvalPage() {
               <tr>
                 <th className="px-3 py-2 text-left font-semibold">トピック</th>
                 <th className="px-3 py-2 text-right font-semibold">問数</th>
-                <th className="px-3 py-2 text-right font-semibold">正答</th>
+                <th className="px-3 py-2 text-right font-semibold">検索ヒット</th>
                 <th className="px-3 py-2 text-right font-semibold">Recall@5</th>
               </tr>
             </thead>
@@ -219,10 +251,11 @@ export default function ChatbotEvalPage() {
 
       {/* 失敗ケース */}
       <section className="mt-8">
-        <h2 className="text-lg font-bold text-slate-900">不正答ケース（{r.failures.length} 件）</h2>
+        <h2 className="text-lg font-bold text-slate-900">未達ケース（{r.failures.length} 件）</h2>
         {r.failures.length === 0 ? (
           <p className="mt-2 text-sm text-emerald-700">
-            <CheckCircle2 className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />100 問すべての RAG 検索で期待条文が上位 5 件に含まれました。
+            <CheckCircle2 className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />
+            今回の評価対象では、条文検索の失敗と安全保留の見逃しは記録されませんでした。
           </p>
         ) : (
           <ul className="mt-3 space-y-3">
@@ -259,14 +292,15 @@ export default function ChatbotEvalPage() {
         <ul className="mt-2 space-y-1 text-xs leading-6 text-slate-700">
           <li>
             ・テストセットは{" "}
-            <code className="rounded bg-white px-1">web/test/chatbot-basic-100.json</code>{" "}
-            に固定。トピックは労働安全衛生の主要 33 法令から横断選定。
+            <code className="rounded bg-white px-1">src/lib/rag-100q.fixture.ts</code>{" "}
+            に固定。条文検索ケースと、安全上回答を保留すべきケースを分離しています。
           </li>
           <li>
-            ・本セクションの評価対象は <strong>RAG 検索の根拠条文ヒット率</strong>。Gemini の生成回答そのものの正答率は上記「生成回答の正答率（本番23問・機械採点）」で公開。
+            ・本セクションの評価対象は <strong>RAG 検索の根拠条文ヒット率</strong>。生成回答は上記の限定機械チェックで公開していますが、第三者による正確性評価ではありません。
           </li>
           <li>
-            ・上位 5 件のうち gold 1 件でも含まれれば検索ヒットとみなす（Recall@5 ベース）。
+            ・単一根拠のケースは期待条文が上位5件に含まれるかを確認し、複数の条文が結論に不可欠なケースは
+            <code className="rounded bg-white px-1">requiredAll</code> として全条文の取得を必須にします。
           </li>
           <li>
             ・本ベンチマークは検索段階の代理指標であり、実際の回答精度はモデル生成・プロンプト設計にも依存します。
@@ -300,7 +334,7 @@ export default function ChatbotEvalPage() {
           </a>
         </div>
       </section>
-    </main>
+    </div>
   );
 }
 
@@ -334,41 +368,29 @@ function Stat({
 }
 
 function GenQualitySection({ g }: { g: GenQuality }) {
-  const passed = g.strictAccuracy >= g.target;
   return (
-    <section className="mt-8 rounded-xl border border-emerald-200 bg-emerald-50/60 p-5">
+    <section className="mt-8 rounded-xl border border-amber-200 bg-amber-50/50 p-5">
       <div className="flex flex-wrap items-baseline gap-2">
         <h2 className="text-lg font-bold text-slate-900">
-          生成回答の正答率（本番23問・機械採点）
+          生成回答の自作機械チェック（限定セット）
         </h2>
-        <span className="rounded-full border border-emerald-300 bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-800">
-          回答文の中身を採点
+        <span className="rounded-full border border-amber-300 bg-white px-2 py-0.5 text-[10px] font-semibold text-amber-900">
+          第三者検証なし
         </span>
       </div>
       <p className="mt-2 text-xs leading-6 text-slate-600">
-        上の Recall@5 は「正しい条文を<strong>検索</strong>できたか」の指標です。こちらは本番同一エンドポイントに
-        23 問の golden 質問を投げ、<strong>Gemini が実際に生成した回答文</strong>を機械採点（完全正答／部分正答／誤答）した
-        「回答の中身」の正答率です。数値は本番を毎晩測定したスナップショットを読み出しています。
+        自作の23問へ回答を生成し、うち採点可能な {g.scorable} 問を限定されたキーワード・引用ルールで照合した結果です。
+        <strong>回答の意味的正確性、各主張と引用の対応、実運用での安全性を採点したものではありません。</strong>
+        第三者検証・専門家レビューは未実施で、質問や採点網を広げると数値は下がり得ます。
       </p>
       <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Stat label="完全正答率" value={formatPct(g.strictAccuracy)} accent />
+        <Stat label="機械ルール完全一致率" value={formatPct(g.strictAccuracy)} />
         <Stat
-          label="完全正答数"
+          label="全ルール一致数"
           value={`${g.correct} / ${g.scorable}`}
-          accent
         />
-        <Stat label="有用回答率" value={formatPct(g.usefulRate)} />
-        <Stat
-          label="判定"
-          value={
-            passed ? (
-              <><CheckCircle2 className="mr-1 inline h-5 w-5 align-[-3px] text-emerald-600" aria-hidden="true" />達成</>
-            ) : (
-              <><XCircle className="mr-1 inline h-5 w-5 align-[-3px] text-rose-600" aria-hidden="true" />未達</>
-            )
-          }
-          accent={passed}
-        />
+        <Stat label="部分一致" value={`${g.partial} 問`} />
+        <Stat label="外部レビュー" value="未実施" />
       </div>
       <p className="mt-3 text-xs text-slate-500">
         測定日: {g.date}
@@ -377,7 +399,7 @@ function GenQualitySection({ g }: { g: GenQuality }) {
             （公開ベースライン・スナップショット未配備時のフォールバック）
           </>
         ) : (
-          <>（本番23問の夜間自動測定・実測値）</>
+          <>（限定セットの夜間自動チェック値）</>
         )}
         {" "}／ 目標値: {formatPct(g.target)}
         {" "}／ 採点器:{" "}
@@ -386,14 +408,19 @@ function GenQualitySection({ g }: { g: GenQuality }) {
         <code className="rounded bg-slate-100 px-1">npm run eval:chatbot-gen</code>
       </p>
       <p className="mt-2 text-xs text-slate-500">
-        ※ 部分正答（要点は正しいが一部不足）は完全正答率には数えず、有用回答率（完全＋部分）に含みます。
-        誤結論・条番号誤り・ハルシネーションは誤答として減点します。
+        ※ 「全ルール一致」「部分一致」は自作した機械ルール上の分類です。「正答」「不具合なし」を意味しません。
+        未検出の誤結論、条番号誤り、引用の意味的不一致、ハルシネーションが残る可能性があります。
       </p>
     </section>
   );
 }
 
 function FreshResultsSection({ r }: { r: EvalResult }) {
+  const retrievalTotal = r.retrieval_total ?? r.total;
+  const retrievalCorrect = r.retrieval_correct ?? r.correct;
+  const retrievalAccuracy = r.retrieval_accuracy ?? r.accuracy;
+  const safeHoldTotal = r.safe_hold_total ?? 0;
+  const safeHoldCorrect = r.safe_hold_correct ?? 0;
   const sortedTopics = Object.entries(r.topic_breakdown).sort(
     ([, a], [, b]) => b.total - a.total
   );
@@ -408,20 +435,32 @@ function FreshResultsSection({ r }: { r: EvalResult }) {
         </span>
       </div>
       <p className="mt-2 text-xs leading-6 text-slate-600">
-        既存の 100 問とは別の言い回し・観点で同じ法令論点をカバーする 100 問の追加セット。
-        質問の表現が変わっても同じ条文を取れるかを観測する。
+        既存セットとは別の言い回し・観点で、条文検索と安全保留を合わせて {r.total} ケース確認します。
+        Recall@5は法的正答率ではなく、監査済みの期待根拠へ上位5件で到達できた割合です。
       </p>
-      <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Stat label="正答数（Recall@5）" value={`${r.correct} / ${r.total}`} accent />
-        <Stat label="Recall@5" value={formatPct(r.accuracy)} accent />
-        <Stat label="目標値" value={formatPct(r.target)} />
+      <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+        <Stat label="条文検索ヒット" value={`${retrievalCorrect} / ${retrievalTotal}`} accent />
+        <Stat label="Recall@5" value={formatPct(retrievalAccuracy)} accent />
         <Stat
-          label="判定"
+          label="Precision@5"
+          value={r.precision5 === undefined ? "未計測" : formatPct(r.precision5)}
+        />
+        <Stat
+          label="MRR"
+          value={r.mrr === undefined ? "未計測" : r.mrr.toFixed(3)}
+        />
+        <Stat
+          label="安全保留"
+          value={`${safeHoldCorrect} / ${safeHoldTotal}`}
+          accent={safeHoldTotal > 0 && safeHoldCorrect === safeHoldTotal}
+        />
+        <Stat
+          label="検索到達ゲート"
           value={
             r.passed ? (
-              <><CheckCircle2 className="mr-1 inline h-5 w-5 align-[-3px] text-emerald-600" aria-hidden="true" />達成</>
+              <><CheckCircle2 className="mr-1 inline h-5 w-5 align-[-3px] text-emerald-600" aria-hidden="true" />到達</>
             ) : (
-              <><XCircle className="mr-1 inline h-5 w-5 align-[-3px] text-rose-600" aria-hidden="true" />未達</>
+              <><XCircle className="mr-1 inline h-5 w-5 align-[-3px] text-rose-600" aria-hidden="true" />未到達</>
             )
           }
           accent={r.passed}
@@ -432,6 +471,9 @@ function FreshResultsSection({ r }: { r: EvalResult }) {
         <code className="rounded bg-slate-100 px-1">test/chatbot-fresh-100.json</code>
         ／ 実行コマンド:{" "}
         <code className="rounded bg-slate-100 px-1">npm test -- rag-100q-fresh</code>
+        {r.quality_metrics_generated_at ? (
+          <> ／ 純度・順位指標: {formatDate(r.quality_metrics_generated_at)}</>
+        ) : null}
       </p>
       <div className="mt-4 overflow-hidden rounded-lg border border-slate-200">
         <table className="w-full text-sm">
@@ -439,7 +481,7 @@ function FreshResultsSection({ r }: { r: EvalResult }) {
             <tr>
               <th className="px-3 py-2 text-left font-semibold">トピック</th>
               <th className="px-3 py-2 text-right font-semibold">問数</th>
-              <th className="px-3 py-2 text-right font-semibold">正答</th>
+              <th className="px-3 py-2 text-right font-semibold">検索ヒット</th>
               <th className="px-3 py-2 text-right font-semibold">Recall@5</th>
             </tr>
           </thead>
@@ -464,7 +506,7 @@ function FreshResultsSection({ r }: { r: EvalResult }) {
       {r.failures.length > 0 ? (
         <details className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs">
           <summary className="cursor-pointer font-semibold text-slate-700">
-            不正答ケースを表示（{r.failures.length} 件）
+            未達ケースを表示（{r.failures.length} 件）
           </summary>
           <ul className="mt-3 space-y-2">
             {r.failures.map((f) => (

@@ -6,6 +6,10 @@ import { MEASURES_BY_TYPE } from "@/data/hazard-slides/measures-by-type";
 import { findEntryByShort } from "@/lib/law-navi/permalink";
 import { QUIZ_BY_TYPE } from "@/data/hazard-slides/quiz-by-type";
 import { getAccidentCasesDataset } from "@/data/mock/accident-cases";
+import {
+  isAccidentEligibleForOperationalEvidence,
+  resolveAccidentProvenance,
+} from "@/lib/accident-source";
 import { loadCombinedCases, type CombinedCase } from "@/lib/accidents-analytics/loader";
 import {
   ACCIDENT_TYPE_TO_HAZARD_SLUG,
@@ -73,7 +77,7 @@ export type FeaturedHazardCase = {
   sourceUrl?: string;
   occurredOn?: string;
   severity?: string;
-  origin: "curated" | "mhlw-deaths";
+  origin: "official-case" | "curated" | "mhlw-deaths";
 };
 
 export type HazardTypeSummary = CanonicalHazardType & {
@@ -231,8 +235,10 @@ function buildFeaturedCases(slug: HazardTypeSlug, compactEntries: CompactEntry[]
   // 1) curated事例（provenance mhlw/curated のみ。synthetic/preliminaryは教材の事例枠に使わない）
   const curated = getAccidentCasesDataset()
     .filter((c) => {
-      const p = c.provenance ?? "curated";
-      return (p === "mhlw" || p === "curated") && ACCIDENT_TYPE_TO_HAZARD_SLUG[c.type] === slug;
+      return (
+        isAccidentEligibleForOperationalEvidence(c) &&
+        ACCIDENT_TYPE_TO_HAZARD_SLUG[c.type] === slug
+      );
     })
     // 重篤度→新しさの順（教材価値の高い順・決定的）
     .sort((a, b) => {
@@ -250,7 +256,10 @@ function buildFeaturedCases(slug: HazardTypeSlug, compactEntries: CompactEntry[]
       sourceUrl: c.source?.url,
       occurredOn: c.occurredOn,
       severity: c.severity,
-      origin: "curated",
+      origin:
+        resolveAccidentProvenance(c) === "mhlw"
+          ? "official-case"
+          : "curated",
     });
   }
   if (out.length >= 2) return out;

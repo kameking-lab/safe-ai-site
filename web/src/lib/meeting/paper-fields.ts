@@ -604,7 +604,7 @@ export function setContractorRiskField(
   return {
     contractors: record.contractors.map((c) => {
       if (c.id !== id) return c;
-      const risk = { ...c.risk, [field]: value };
+      const risk = { ...c.risk, [field]: value, reviewed: true };
       risk.priority = computePriority(risk.severity, risk.likelihood);
       return { ...c, risk };
     }),

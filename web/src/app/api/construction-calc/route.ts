@@ -1,15 +1,29 @@
 import { NextResponse } from "next/server";
 import { fetchWithTimeout } from "@/lib/external/fetch-with-timeout";
-import { withCircuitBreaker, CircuitOpenError } from "@/lib/external/circuit-breaker";
-import { cdnCacheHeaders } from "@/lib/api-cache";
-import { AI_LEGAL_DISCLAIMER } from "@/lib/gemini";
-import { getCalculator, CONSTRUCTION_CALCULATORS } from "@/lib/construction-calc/registry";
+import {
+  withCircuitBreaker,
+  CircuitOpenError,
+} from "@/lib/external/circuit-breaker";
+import { noStoreHeaders } from "@/lib/api-cache";
+import {
+  getCalculator,
+  CONSTRUCTION_CALCULATORS,
+} from "@/lib/construction-calc/registry";
 import {
   routeByKeywords,
   validateExtraction,
   calculatorManifest,
 } from "@/lib/construction-calc/ai-router";
-import { normalizeValues, CALC_DISCLAIMER } from "@/lib/construction-calc/schema";
+import {
+  normalizeValues,
+  CALC_DISCLAIMER,
+} from "@/lib/construction-calc/schema";
+import {
+  inspectAiOutbound,
+  logAiOutboundFailure,
+} from "@/lib/server/ai-outbound-safety";
+import { externalGenerativeAiAllowed } from "@/lib/server/deployment-safety";
+import { GEMINI_FLASH_MODEL } from "@/lib/gemini-model";
 
 /**
  * 建設計算コーナーの AI 入口/出口。
@@ -21,29 +35,37 @@ import { normalizeValues, CALC_DISCLAIMER } from "@/lib/construction-calc/schema
  *       採用せず質問として返す（勝手に埋めない）。
  *   (b) 出口 = 計算結果の平易な解説（GET）。サーバー側で compute() を再実行した
  *       決定論的結果だけを材料に解説させ、新しい数値の生成は禁止する。
- * 既存 Gemini 経路（GEMINI_API_KEY・gemini-2.5-flash・サーキットブレーカ共有）を
- * 再利用し、新規 env は追加しない（Path A）。キー未設定・失敗時は決定論
+ * 既存 Gemini 経路（GEMINI_API_KEY・最新GA Flash・サーキットブレーカ共有）を
+ * 再利用する。キーまたは明示的な本番AI flagが未設定・失敗時は決定論
  * フォールバック（キーワードルーティング / テンプレ解説）へ落ちる。
  */
 
 const GEMINI_TIMEOUT_MS = 12_000;
-const SUCCESS_CACHE = cdnCacheHeaders("INDUSTRY");
 const MAX_TEXT_LENGTH = 400;
 
-async function callGemini(prompt: string, json: boolean): Promise<string | null> {
+async function callGemini(
+  prompt: string,
+  json: boolean,
+): Promise<string | null> {
+  if (!externalGenerativeAiAllowed()) return null;
   const apiKey = process.env.GEMINI_API_KEY?.trim();
   if (!apiKey || apiKey === "dummy") return null;
   const data = await withCircuitBreaker(
     "gemini",
     async () => {
       const res = await fetchWithTimeout(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_FLASH_MODEL}:generateContent`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "x-goog-api-key": apiKey,
+          },
           body: JSON.stringify({
             contents: [{ parts: [{ text: prompt }] }],
-            ...(json ? { generationConfig: { responseMimeType: "application/json" } } : {}),
+            ...(json
+              ? { generationConfig: { responseMimeType: "application/json" } }
+              : {}),
           }),
           timeoutMs: GEMINI_TIMEOUT_MS,
         },
@@ -93,7 +115,9 @@ function fallbackRoute(text: string): RouteResponse {
   const { questions } = validateExtraction(top, {});
   return {
     matched: { slug: top.slug, title: top.title, values: {}, questions },
-    candidates: matches.slice(1, 3).map((m) => ({ slug: m.slug, title: m.title })),
+    candidates: matches
+      .slice(1, 3)
+      .map((m) => ({ slug: m.slug, title: m.title })),
     message: `「${top.title}」が使えそうです（キーワード判定）。条件を入力してください。`,
     source: "fallback",
   };
@@ -101,14 +125,35 @@ function fallbackRoute(text: string): RouteResponse {
 
 export async function POST(req: Request) {
   let text: string;
+  let aiProviderConsent = false;
   try {
-    const body = (await req.json()) as { text?: unknown };
+    const body = (await req.json()) as {
+      text?: unknown;
+      aiProviderConsent?: unknown;
+    };
     text = String(body.text ?? "").trim();
+    aiProviderConsent = body.aiProviderConsent === true;
   } catch {
-    return NextResponse.json({ error: "リクエスト形式が不正です" }, { status: 400 });
+    return NextResponse.json(
+      { error: "リクエスト形式が不正です" },
+      { status: 400 },
+    );
   }
   if (!text) {
     return NextResponse.json({ error: "text は必須です" }, { status: 400 });
+  }
+  const outboundSafety = inspectAiOutbound({
+    purpose: "construction-calculator-routing",
+    texts: [text],
+    consent: aiProviderConsent,
+    maxChars: MAX_TEXT_LENGTH,
+    contextPolicy: "approved-server-corpus",
+  });
+  if (!outboundSafety.allowed) {
+    return NextResponse.json(
+      { error: outboundSafety.message, reason: outboundSafety.reason },
+      { status: outboundSafety.status },
+    );
   }
   if (text.length > MAX_TEXT_LENGTH) {
     return NextResponse.json(
@@ -135,7 +180,10 @@ export async function POST(req: Request) {
     if (!raw) {
       return NextResponse.json(fallbackRoute(text));
     }
-    const parsed = JSON.parse(raw) as { slug?: unknown; values?: Record<string, unknown> };
+    const parsed = JSON.parse(raw) as {
+      slug?: unknown;
+      values?: Record<string, unknown>;
+    };
     const slug = typeof parsed.slug === "string" ? parsed.slug : null;
     const calc = slug ? getCalculator(slug) : undefined;
     if (!calc) {
@@ -143,7 +191,9 @@ export async function POST(req: Request) {
       const kw = routeByKeywords(text);
       return NextResponse.json({
         matched: null,
-        candidates: kw.slice(0, 2).map((m) => ({ slug: m.slug, title: m.title })),
+        candidates: kw
+          .slice(0, 2)
+          .map((m) => ({ slug: m.slug, title: m.title })),
         message:
           "この内容に対応する計算機はまだありません。近い計算機の候補と一覧からお選びください。",
         source: "ai",
@@ -161,34 +211,51 @@ export async function POST(req: Request) {
     } satisfies RouteResponse);
   } catch (err) {
     if (!(err instanceof CircuitOpenError)) {
-      console.error(
-        "[construction-calc] AI routing failed:",
-        err instanceof Error ? err.message : err,
-      );
+      logAiOutboundFailure("construction-calc-routing", err);
     }
     return NextResponse.json(fallbackRoute(text));
   }
 }
 
 /* ------------------------------------------------------------------ */
-/* GET = AI出口: 決定論的な計算結果の平易な解説                            */
+/* GET = 決定論的な計算結果の整形（外部AIへ送信しない）                    */
 /* ------------------------------------------------------------------ */
 
 function fallbackExplanation(
   calcTitle: string,
   outcome: ReturnType<NonNullable<ReturnType<typeof getCalculator>>["compute"]>,
+  basisLabels: string[],
 ): string {
   return (
+    `【計算機】${calcTitle}\n\n` +
     `【結論】${outcome.headline} — ${outcome.summary}\n\n` +
+    `【明細】\n${outcome.items.map((item) => `・${item.label}: ${item.value}`).join("\n")}\n\n` +
     `【計算の流れ】\n${outcome.steps.map((s) => `・${s}`).join("\n")}\n\n` +
     `【注意】\n${outcome.warnings.map((w) => `・${w}`).join("\n")}\n\n` +
-    `（AI解説は現在利用できないため、${calcTitle}の計算結果をそのまま表示しています）`
+    `【参照資料】\n${basisLabels.map((label) => `・${label}`).join("\n")}\n\n` +
+    "この文章は計算機の検証済み出力を定型整形したものです。新しい法的判断や安全判断を追加していません。現場条件、製品資料、最新の公式資料を人が確認してください。"
   );
 }
 
-export async function GET(req: Request) {
-  const url = new URL(req.url);
-  const slug = url.searchParams.get("slug")?.trim() ?? "";
+export async function PUT(req: Request) {
+  let slug = "";
+  let raw: Record<string, unknown> = {};
+  try {
+    const body = (await req.json()) as {
+      slug?: unknown;
+      values?: unknown;
+    };
+    slug = typeof body.slug === "string" ? body.slug.trim() : "";
+    raw =
+      body.values && typeof body.values === "object" && !Array.isArray(body.values)
+        ? (body.values as Record<string, unknown>)
+        : {};
+  } catch {
+    return NextResponse.json(
+      { error: "リクエスト形式が不正です" },
+      { status: 400, headers: noStoreHeaders() },
+    );
+  }
   const calc = getCalculator(slug);
   if (!calc) {
     return NextResponse.json(
@@ -196,77 +263,39 @@ export async function GET(req: Request) {
         error: `計算機が見つかりません: ${slug}`,
         available: CONSTRUCTION_CALCULATORS.map((c) => c.slug),
       },
-      { status: 404 },
+      { status: 404, headers: noStoreHeaders() },
     );
   }
 
-  // クエリから入力値を正規化（不正値は既定値へ・決定論）
-  const raw: Record<string, unknown> = {};
-  for (const f of calc.fields) {
-    const v = url.searchParams.get(f.id);
-    if (v !== null) raw[f.id] = v;
-  }
   const { values } = normalizeValues(calc, raw);
   // 計算は必ずサーバー側の決定論エンジンで実行（クライアントの数値は信用しない）
   const outcome = calc.compute(values);
 
-  const inputSummary = calc.fields
-    .map((f) => {
-      const v = values[f.id];
-      if (f.kind === "number") return `${f.label}: ${v}${f.unit}`;
-      const opt = f.options.find((o) => o.value === String(v));
-      return `${f.label}: ${opt?.label ?? String(v)}`;
-    })
-    .join(" / ");
-
-  const prompt =
-    `以下は建設現場向け計算機「${calc.title}」の決定論的な計算結果です。` +
-    `現場の作業者向けに、平易な日本語で解説してください。\n\n` +
-    `【厳守ルール】\n` +
-    `- 新しい数値を計算・追加しない。以下に書かれた数値・条文のみ言及できる\n` +
-    `- 最初に結論を1文で言い切る\n` +
-    `- なぜその結果になるのかを2〜3文で説明する\n` +
-    `- 現場で気をつけることを2〜3点、箇条書きで示す\n` +
-    `- 全体で300字程度。断定的な法解釈は避け、根拠条文名を添える\n\n` +
-    `【入力】${inputSummary}\n` +
-    `【結論】${outcome.headline} — ${outcome.summary}\n` +
-    `【明細】\n${outcome.items.map((i) => `- ${i.label}: ${i.value}`).join("\n")}\n` +
-    `【計算過程】\n${outcome.steps.map((s) => `- ${s}`).join("\n")}\n` +
-    `【注意事項】\n${outcome.warnings.map((w) => `- ${w}`).join("\n")}\n` +
-    `【根拠】${calc.basis.map((b) => b.label).join(" / ")}\n\n` +
-    `回答の最後に必ず「※${AI_LEGAL_DISCLAIMER}」を付記してください。`;
-
-  try {
-    const explanation = await callGemini(prompt, false);
-    if (!explanation) {
-      return NextResponse.json(
-        {
-          explanation: fallbackExplanation(calc.title, outcome),
-          source: "fallback",
-          disclaimer: CALC_DISCLAIMER,
-        },
-        { headers: SUCCESS_CACHE },
-      );
-    }
-    return NextResponse.json(
-      { explanation, source: "ai", disclaimer: CALC_DISCLAIMER },
-      { headers: SUCCESS_CACHE },
-    );
-  } catch (err) {
-    if (!(err instanceof CircuitOpenError)) {
-      console.error(
-        "[construction-calc] AI explanation failed:",
-        err instanceof Error ? err.message : err,
-      );
-    }
-    // フォールバックも同一入力なら同一出力なのでキャッシュ可
-    return NextResponse.json(
-      {
-        explanation: fallbackExplanation(calc.title, outcome),
-        source: "fallback",
-        disclaimer: CALC_DISCLAIMER,
+  return NextResponse.json(
+    {
+      explanation: fallbackExplanation(
+        calc.title,
+        outcome,
+        calc.basis.map((basis) => basis.label),
+      ),
+      source: "deterministic",
+      disclaimer: CALC_DISCLAIMER,
+    },
+    {
+      headers: {
+        ...noStoreHeaders(),
+        "X-AI-Used": "false",
       },
-      { headers: SUCCESS_CACHE },
-    );
-  }
+    },
+  );
+}
+
+export async function GET(_request: Request) {
+  return NextResponse.json(
+    { error: "method_not_allowed" },
+    {
+      status: 405,
+      headers: { ...noStoreHeaders(), Allow: "POST, PUT" },
+    },
+  );
 }

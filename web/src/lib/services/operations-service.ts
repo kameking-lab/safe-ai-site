@@ -1,14 +1,18 @@
 import type { ServiceResult } from "@/lib/types/api";
 import type {
   KyInstructionRecordState,
+  KyInstructionRiskRow,
   KyPaperFormState,
   KyRecordSummary,
   KySheetDraft,
   MailDeliverySettings,
   NotificationSettings,
   PdfExportTarget,
+  KyRiskCandidateSourceKind,
 } from "@/lib/types/operations";
 import { normalizeApproval } from "@/lib/ky/approval";
+import { validateKyForTransition } from "@/lib/ky/readiness";
+import { kyContentRevision } from "@/lib/ky/revision";
 
 const STORAGE_KEYS = {
   notification: "safe-ai:notification-settings:v1",
@@ -104,8 +108,19 @@ function emptyWorkRow(): KyInstructionRecordState["workRows"][number] {
 }
 
 const RISK_ROW_LABELS = ["上記", "①", "②", "③", "④"];
+const KY_RISK_SOURCE_KINDS = new Set<KyRiskCandidateSourceKind>([
+  "ai",
+  "rule",
+  "officialAccident",
+  "curatedAccident",
+  "syntheticCase",
+  "preliminaryCase",
+  "workflowImport",
+]);
 
-function emptyRiskRow(label: string): KyInstructionRecordState["riskRows"][number] {
+function emptyRiskRow(
+  label: string,
+): KyInstructionRecordState["riskRows"][number] {
   return {
     targetLabel: label,
     hazard: "",
@@ -121,8 +136,91 @@ function emptyRiskRow(label: string): KyInstructionRecordState["riskRows"][numbe
 }
 
 /** O10（続き）: 危険行の「＋行追加」ホットスポット用。既定5行を超えた行にも同じ採番規則を適用する。 */
-export function makeEmptyKyRiskRow(index: number): KyInstructionRecordState["riskRows"][number] {
+export function makeEmptyKyRiskRow(
+  index: number,
+): KyInstructionRecordState["riskRows"][number] {
   return emptyRiskRow(RISK_ROW_LABELS[index] ?? `(${index})`);
+}
+
+function normalizeKyRiskRow(
+  value: KyInstructionRiskRow,
+  index: number,
+): KyInstructionRiskRow {
+  const row = {
+    ...emptyRiskRow(RISK_ROW_LABELS[index] ?? `(${index})`),
+    ...value,
+  };
+  const source =
+    value.candidateSource && typeof value.candidateSource === "object"
+      ? value.candidateSource
+      : null;
+  const sourceKind = source?.kind as KyRiskCandidateSourceKind | undefined;
+  const referenceUrl =
+    typeof source?.referenceUrl === "string" &&
+    source.referenceUrl.startsWith("https://")
+      ? source.referenceUrl
+      : undefined;
+  const basis =
+    typeof source?.basis === "string" && source.basis.trim()
+      ? source.basis.trim().slice(0, 1_000)
+      : undefined;
+  const retrievedExampleIds = Array.isArray(source?.retrievedExampleIds)
+    ? source.retrievedExampleIds
+        .filter(
+          (id): id is string => typeof id === "string" && id.trim().length > 0,
+        )
+        .slice(0, 10)
+        .map((id) => id.trim().slice(0, 100))
+    : [];
+  const sourceUrls = Array.isArray(source?.sourceUrls)
+    ? source.sourceUrls
+        .filter(
+          (url): url is string =>
+            typeof url === "string" && url.startsWith("https://"),
+        )
+        .slice(0, 10)
+    : [];
+  const generatedAt =
+    typeof source?.generatedAt === "string" &&
+    Number.isFinite(Date.parse(source.generatedAt))
+      ? source.generatedAt
+      : undefined;
+  const candidateSource =
+    sourceKind &&
+    KY_RISK_SOURCE_KINDS.has(sourceKind) &&
+    typeof source?.label === "string" &&
+    source.label.trim()
+      ? {
+          kind: sourceKind,
+          label: source.label.trim(),
+          ...(typeof source.referenceId === "string" &&
+          source.referenceId.trim()
+            ? { referenceId: source.referenceId.trim() }
+            : {}),
+          ...(referenceUrl ? { referenceUrl } : {}),
+          ...(basis ? { basis } : {}),
+          ...(typeof source.grounded === "boolean"
+            ? { grounded: source.grounded }
+            : {}),
+          ...(retrievedExampleIds.length > 0 ? { retrievedExampleIds } : {}),
+          ...(sourceUrls.length > 0 ? { sourceUrls } : {}),
+          ...(generatedAt ? { generatedAt } : {}),
+          requiresHumanReview: true as const,
+        }
+      : undefined;
+  const humanConfirmedAt =
+    candidateSource &&
+    typeof value.humanConfirmedAt === "string" &&
+    Number.isFinite(Date.parse(value.humanConfirmedAt))
+      ? value.humanConfirmedAt
+      : undefined;
+  return {
+    ...row,
+    ...(candidateSource ? { candidateSource } : { candidateSource: undefined }),
+    ...(humanConfirmedAt
+      ? { humanConfirmedAt }
+      : { humanConfirmedAt: undefined }),
+  };
 }
 
 function emptyParticipant(): KyInstructionRecordState["participants"][number] {
@@ -132,6 +230,23 @@ function emptyParticipant(): KyInstructionRecordState["participants"][number] {
 function buildDefaultKyInstructionRecord(): KyInstructionRecordState {
   const d = new Date();
   return {
+    schemaVersion: 2,
+    createdAt: "",
+    applicableDate: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`,
+    context: {
+      workLocation: "",
+      equipment: "",
+      heavyEquipment: "",
+      plannedPeopleCount: "",
+      weather: "",
+      simultaneousWork: "",
+      changes: "",
+      newEntrants: "",
+      nightWork: "",
+      chemicals: "",
+      heatStress: "",
+      reviewerName: "",
+    },
     reportStamps: ["", "", "", "", ""],
     siteName: "",
     projectName: "",
@@ -190,39 +305,142 @@ function ensureArray<T>(value: unknown, fallback: T[]): T[] {
   return fallback;
 }
 
-export function normalizeKyInstructionRecord(raw: unknown): KyInstructionRecordState {
-  const base = (raw && typeof raw === "object" ? (raw as Record<string, unknown>) : {}) as Partial<KyInstructionRecordState>;
-  const merged: KyInstructionRecordState = { ...buildDefaultKyInstructionRecord(), ...base };
-  const workRows = ensureArray<KyInstructionRecordState["workRows"][number]>(merged.workRows, []);
+export function normalizeKyInstructionRecord(
+  raw: unknown,
+): KyInstructionRecordState {
+  const base = (
+    raw && typeof raw === "object" ? (raw as Record<string, unknown>) : {}
+  ) as Partial<KyInstructionRecordState>;
+  const merged: KyInstructionRecordState = {
+    ...buildDefaultKyInstructionRecord(),
+    ...base,
+  };
+  const workRows = ensureArray<KyInstructionRecordState["workRows"][number]>(
+    merged.workRows,
+    [],
+  ).map((row) => ({ ...emptyWorkRow(), ...row }));
   if (workRows.length < 4) {
     while (workRows.length < 4) workRows.push(emptyWorkRow());
   }
-  const riskRows = ensureArray<KyInstructionRecordState["riskRows"][number]>(merged.riskRows, []);
+  const riskRows = ensureArray<KyInstructionRecordState["riskRows"][number]>(
+    merged.riskRows,
+    [],
+  ).map(normalizeKyRiskRow);
   if (riskRows.length < 5) {
-    while (riskRows.length < 5) riskRows.push(emptyRiskRow(RISK_ROW_LABELS[riskRows.length] ?? `(${riskRows.length})`));
+    while (riskRows.length < 5)
+      riskRows.push(
+        emptyRiskRow(
+          RISK_ROW_LABELS[riskRows.length] ?? `(${riskRows.length})`,
+        ),
+      );
   }
-  const participants = ensureArray<KyInstructionRecordState["participants"][number]>(merged.participants, []);
+  const participants = ensureArray<
+    KyInstructionRecordState["participants"][number]
+  >(merged.participants, []);
   if (participants.length < 6) {
     while (participants.length < 6) participants.push(emptyParticipant());
   }
-  const fallChecks = ensureArray<KyInstructionRecordState["fallChecks"][number]>(merged.fallChecks, []);
+  const fallChecks = ensureArray<
+    KyInstructionRecordState["fallChecks"][number]
+  >(merged.fallChecks, []);
   if (fallChecks.length < 3) {
-    while (fallChecks.length < 3) fallChecks.push({ good: "", bad: "", done: "" });
+    while (fallChecks.length < 3)
+      fallChecks.push({ good: "", bad: "", done: "" });
   }
   const breaks = ensureArray<string>(merged.breaks, ["", "", "", "", ""]);
   while (breaks.length < 5) breaks.push("");
-  const reportStamps = ensureArray<string>(merged.reportStamps, ["", "", "", "", ""]);
+  const reportStamps = ensureArray<string>(merged.reportStamps, [
+    "",
+    "",
+    "",
+    "",
+    "",
+  ]);
   while (reportStamps.length < 5) reportStamps.push("");
-  return {
+  const rawContext =
+    base.context && typeof base.context === "object"
+      ? (base.context as Partial<KyInstructionRecordState["context"]>)
+      : {};
+  const firstWorkRow = workRows.find(
+    (row) => row.workPlace?.trim() || row.machinery?.trim(),
+  );
+  const safeContextValue = (value: unknown, fallback = "") =>
+    typeof value === "string" ? value.slice(0, 1_000) : fallback;
+  const context: KyInstructionRecordState["context"] = {
+    workLocation: safeContextValue(
+      rawContext.workLocation,
+      firstWorkRow?.workPlace ?? "",
+    ),
+    equipment: safeContextValue(
+      rawContext.equipment,
+      firstWorkRow?.machinery ?? "",
+    ),
+    heavyEquipment: safeContextValue(rawContext.heavyEquipment),
+    plannedPeopleCount: safeContextValue(
+      rawContext.plannedPeopleCount,
+      merged.participantTotal,
+    ),
+    weather: safeContextValue(rawContext.weather, merged.weather),
+    simultaneousWork: safeContextValue(rawContext.simultaneousWork),
+    changes: safeContextValue(rawContext.changes),
+    newEntrants: safeContextValue(rawContext.newEntrants),
+    nightWork: safeContextValue(rawContext.nightWork),
+    chemicals: safeContextValue(rawContext.chemicals),
+    heatStress: safeContextValue(rawContext.heatStress),
+    reviewerName: safeContextValue(rawContext.reviewerName),
+    ...(typeof rawContext.reviewedAt === "string" &&
+    Number.isFinite(Date.parse(rawContext.reviewedAt))
+      ? { reviewedAt: rawContext.reviewedAt }
+      : {}),
+  };
+  const normalized: KyInstructionRecordState = {
     ...merged,
+    schemaVersion: 2,
+    createdAt:
+      typeof base.createdAt === "string" &&
+      Number.isFinite(Date.parse(base.createdAt))
+        ? base.createdAt
+        : "",
+    applicableDate:
+      typeof base.applicableDate === "string" &&
+      /^\d{4}-\d{2}-\d{2}$/.test(base.applicableDate)
+        ? base.applicableDate
+        : merged.applicableDate,
+    context,
     workRows,
     riskRows,
     participants,
     fallChecks,
     breaks,
-    reportStamps: reportStamps.slice(0, 5) as [string, string, string, string, string],
+    reportStamps: reportStamps.slice(0, 5) as [
+      string,
+      string,
+      string,
+      string,
+      string,
+    ],
     approval: normalizeApproval(merged.approval),
   };
+  const approvalRevisionCurrent =
+    normalized.approval?.status === "submitted"
+      ? normalized.approval.submittedRevision ===
+        kyContentRevision(normalized)
+      : normalized.approval?.status === "approved"
+        ? normalized.approval.approvedRevision ===
+          kyContentRevision(normalized)
+        : true;
+  if (
+    (normalized.approval?.status === "submitted" ||
+      normalized.approval?.status === "approved") &&
+    (validateKyForTransition(normalized).length > 0 ||
+      !approvalRevisionCurrent)
+  ) {
+    normalized.approval = {
+      status: "draft",
+      history: normalized.approval.history,
+    };
+  }
+  return normalized;
 }
 
 /**
@@ -232,14 +450,18 @@ export function normalizeKyInstructionRecord(raw: unknown): KyInstructionRecordS
  */
 export function buildKyRecordSummary(
   record: KyInstructionRecordState,
-  opts: { id?: string; savedAt?: string } = {}
+  opts: { id?: string; savedAt?: string } = {},
 ): KyRecordSummary {
   const normalized = normalizeKyInstructionRecord(record);
   const pad = (s: string) => String(s ?? "").padStart(2, "0");
   return {
     id: opts.id ?? Date.now().toString(),
     workDate: `${normalized.workDateYear}-${pad(normalized.workDateMonth)}-${pad(normalized.workDateDay)}`,
-    companyName: normalized.coop1Name || normalized.coop2Name || normalized.coop3Name || "未入力",
+    companyName:
+      normalized.coop1Name ||
+      normalized.coop2Name ||
+      normalized.coop3Name ||
+      "未入力",
     siteName: normalized.siteName || "",
     projectName: normalized.projectName || "",
     foremanName: normalized.foremanName || "",
@@ -256,7 +478,10 @@ function readFromStorage<T>(key: string, fallback: T): T {
   try {
     const parsed = JSON.parse(raw);
     if (Array.isArray(fallback)) {
-      return ensureArray(parsed, fallback as unknown as unknown[]) as unknown as T;
+      return ensureArray(
+        parsed,
+        fallback as unknown as unknown[],
+      ) as unknown as T;
     }
     if (parsed && typeof parsed === "object") {
       return { ...fallback, ...(parsed as Record<string, unknown>) } as T;
@@ -274,17 +499,29 @@ function writeToStorage<T>(key: string, value: T) {
 
 export type OperationsService = {
   getNotificationSettings: () => Promise<ServiceResult<NotificationSettings>>;
-  saveNotificationSettings: (value: NotificationSettings) => Promise<ServiceResult<NotificationSettings>>;
+  saveNotificationSettings: (
+    value: NotificationSettings,
+  ) => Promise<ServiceResult<NotificationSettings>>;
   getMailSettings: () => Promise<ServiceResult<MailDeliverySettings>>;
-  saveMailSettings: (value: MailDeliverySettings) => Promise<ServiceResult<MailDeliverySettings>>;
+  saveMailSettings: (
+    value: MailDeliverySettings,
+  ) => Promise<ServiceResult<MailDeliverySettings>>;
   getKyDraft: () => Promise<ServiceResult<KySheetDraft>>;
   saveKyDraft: (value: KySheetDraft) => Promise<ServiceResult<KySheetDraft>>;
   getKyPaperForm: () => Promise<ServiceResult<KyPaperFormState>>;
-  saveKyPaperForm: (value: KyPaperFormState) => Promise<ServiceResult<KyPaperFormState>>;
-  getKyInstructionRecord: () => Promise<ServiceResult<KyInstructionRecordState>>;
-  saveKyInstructionRecord: (value: KyInstructionRecordState) => Promise<ServiceResult<KyInstructionRecordState>>;
+  saveKyPaperForm: (
+    value: KyPaperFormState,
+  ) => Promise<ServiceResult<KyPaperFormState>>;
+  getKyInstructionRecord: () => Promise<
+    ServiceResult<KyInstructionRecordState>
+  >;
+  saveKyInstructionRecord: (
+    value: KyInstructionRecordState,
+  ) => Promise<ServiceResult<KyInstructionRecordState>>;
   getKyRecordList: () => Promise<ServiceResult<KyRecordSummary[]>>;
-  getKyRecordById: (id: string) => Promise<ServiceResult<KyInstructionRecordState | null>>;
+  getKyRecordById: (
+    id: string,
+  ) => Promise<ServiceResult<KyInstructionRecordState | null>>;
   deleteKyRecord: (id: string) => Promise<ServiceResult<KyRecordSummary[]>>;
   buildMailPreview: (input: {
     notification: NotificationSettings;
@@ -300,35 +537,53 @@ export type OperationsService = {
 export function createOperationsService(): OperationsService {
   return {
     async getNotificationSettings() {
-      return { ok: true, data: readFromStorage(STORAGE_KEYS.notification, defaultNotificationSettings) };
+      return {
+        ok: true,
+        data: readFromStorage(
+          STORAGE_KEYS.notification,
+          defaultNotificationSettings,
+        ),
+      };
     },
     async saveNotificationSettings(value) {
       writeToStorage(STORAGE_KEYS.notification, value);
       return { ok: true, data: value };
     },
     async getMailSettings() {
-      return { ok: true, data: readFromStorage(STORAGE_KEYS.mail, defaultMailSettings) };
+      return {
+        ok: true,
+        data: readFromStorage(STORAGE_KEYS.mail, defaultMailSettings),
+      };
     },
     async saveMailSettings(value) {
       writeToStorage(STORAGE_KEYS.mail, value);
       return { ok: true, data: value };
     },
     async getKyDraft() {
-      return { ok: true, data: readFromStorage(STORAGE_KEYS.ky, buildDefaultKySheetDraft()) };
+      return {
+        ok: true,
+        data: readFromStorage(STORAGE_KEYS.ky, buildDefaultKySheetDraft()),
+      };
     },
     async saveKyDraft(value) {
       writeToStorage(STORAGE_KEYS.ky, value);
       return { ok: true, data: value };
     },
     async getKyPaperForm() {
-      return { ok: true, data: readFromStorage(STORAGE_KEYS.kyPaper, buildDefaultKyPaperForm()) };
+      return {
+        ok: true,
+        data: readFromStorage(STORAGE_KEYS.kyPaper, buildDefaultKyPaperForm()),
+      };
     },
     async saveKyPaperForm(value) {
       writeToStorage(STORAGE_KEYS.kyPaper, value);
       return { ok: true, data: value };
     },
     async getKyInstructionRecord() {
-      const raw = readFromStorage(STORAGE_KEYS.kyInstruction, buildDefaultKyInstructionRecord());
+      const raw = readFromStorage(
+        STORAGE_KEYS.kyInstruction,
+        buildDefaultKyInstructionRecord(),
+      );
       return { ok: true, data: normalizeKyInstructionRecord(raw) };
     },
     async saveKyInstructionRecord(value) {
@@ -336,14 +591,23 @@ export function createOperationsService(): OperationsService {
         const normalized = normalizeKyInstructionRecord(value);
         writeToStorage(STORAGE_KEYS.kyInstruction, normalized);
         // 一覧に追加
-        const list = readFromStorage<KyRecordSummary[]>(STORAGE_KEYS.kyList, []);
+        const list = readFromStorage<KyRecordSummary[]>(
+          STORAGE_KEYS.kyList,
+          [],
+        );
         const safeList = Array.isArray(list) ? list : [];
         const summary = buildKyRecordSummary(normalized);
         const updated = [summary, ...safeList].slice(0, MAX_KY_LIST);
         writeToStorage(STORAGE_KEYS.kyList, updated);
         // P0-A: 個別の再編集・複製用に full record を id 別マップへ保存（一覧の id に合わせて剪定）。
-        const byId = readFromStorage<Record<string, KyInstructionRecordState>>(STORAGE_KEYS.kyById, {});
-        const safeById = byId && typeof byId === "object" && !Array.isArray(byId) ? { ...byId } : {};
+        const byId = readFromStorage<Record<string, KyInstructionRecordState>>(
+          STORAGE_KEYS.kyById,
+          {},
+        );
+        const safeById =
+          byId && typeof byId === "object" && !Array.isArray(byId)
+            ? { ...byId }
+            : {};
         safeById[summary.id] = normalized;
         const keepIds = new Set(updated.map((s) => s.id));
         const prunedById: Record<string, KyInstructionRecordState> = {};
@@ -368,8 +632,14 @@ export function createOperationsService(): OperationsService {
       return { ok: true, data: Array.isArray(data) ? data : [] };
     },
     async getKyRecordById(id) {
-      const byId = readFromStorage<Record<string, KyInstructionRecordState>>(STORAGE_KEYS.kyById, {});
-      const rec = byId && typeof byId === "object" && !Array.isArray(byId) ? byId[id] : undefined;
+      const byId = readFromStorage<Record<string, KyInstructionRecordState>>(
+        STORAGE_KEYS.kyById,
+        {},
+      );
+      const rec =
+        byId && typeof byId === "object" && !Array.isArray(byId)
+          ? byId[id]
+          : undefined;
       return { ok: true, data: rec ? normalizeKyInstructionRecord(rec) : null };
     },
     async deleteKyRecord(id) {
@@ -377,8 +647,16 @@ export function createOperationsService(): OperationsService {
       const safeList = Array.isArray(list) ? list : [];
       const updated = safeList.filter((r) => r.id !== id);
       writeToStorage(STORAGE_KEYS.kyList, updated);
-      const byId = readFromStorage<Record<string, KyInstructionRecordState>>(STORAGE_KEYS.kyById, {});
-      if (byId && typeof byId === "object" && !Array.isArray(byId) && id in byId) {
+      const byId = readFromStorage<Record<string, KyInstructionRecordState>>(
+        STORAGE_KEYS.kyById,
+        {},
+      );
+      if (
+        byId &&
+        typeof byId === "object" &&
+        !Array.isArray(byId) &&
+        id in byId
+      ) {
         const next = { ...byId };
         delete next[id];
         writeToStorage(STORAGE_KEYS.kyById, next);
@@ -416,7 +694,10 @@ export function createOperationsService(): OperationsService {
       }
       return {
         ok: true,
-        data: ["朝礼要点（PDF出力プレビュー）", ...briefingLines.map((line) => `- ${line}`)].join("\n"),
+        data: [
+          "朝礼要点（PDF出力プレビュー）",
+          ...briefingLines.map((line) => `- ${line}`),
+        ].join("\n"),
       };
     },
   };

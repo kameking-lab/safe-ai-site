@@ -1,58 +1,49 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { headers } from "next/headers";
 import "./globals.css";
-import { FuriganaProvider } from "@/contexts/furigana-context";
-import { EasyJapaneseProvider } from "@/contexts/easy-japanese-context";
-import { JsonLd, organizationSchema, webSiteSchema } from "@/components/json-ld";
-import {
-  SITE_URL,
-  SITE_NAME,
-  SITE_LOCALE,
-  SITE_ALTERNATE_LOCALES,
-} from "@/lib/seo-metadata";
-import { ServiceWorkerRegistrar } from "@/components/service-worker-registrar";
-import { InstallPwaPrompt } from "@/components/install-pwa-prompt";
-import { CommandPaletteProvider } from "@/components/CommandPaletteProvider";
-import { ThemeProvider, THEME_INIT_SCRIPT } from "@/lib/theme";
-import { A11Y_HINT_INIT_SCRIPT } from "@/lib/a11y-hint";
-import Analytics from "@/components/Analytics";
-import AdSenseScript from "@/components/AdSenseScript";
+import { SITE_URL, SITE_NAME, SITE_LOCALE } from "@/lib/seo-metadata";
+import { THEME_INIT_SCRIPT } from "@/lib/theme";
+import { APP_SHELL_INTERACTIONS_SCRIPT } from "@/lib/app-shell-interactions-script";
+import { PREHYDRATION_INTERACTIONS_SCRIPT } from "@/lib/prehydration-interactions";
 import { rssAlternateTypes } from "@/lib/seo/feeds";
 import { isGaEnabled } from "@/lib/analytics-env";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-  display: "swap",
-  // C-1: Geist は latin 専用で、日本語UIの本文・見出し（CJK）はシステムフォントで
-  // 描画される。preload すると 30KB の woff2 が全ページの LCP クリティカル窓に
-  // 入るため preload しない（数字・英字は swap で置き換わる）。
-  preload: false,
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-  display: "swap",
-  preload: false,
-});
+import { isPreviewSafetyMode } from "@/lib/server/deployment-safety";
+import { getRumServerReadiness } from "@/lib/rum/server-readiness";
+import { DeferredGlobalEnhancements } from "@/components/deferred-global-enhancements";
+import { CspNonceProvider } from "@/components/csp-nonce-context";
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#1a7a4c",
+  themeColor: "#0b5d4b",
 };
 
-export const metadata: Metadata = {
+const PORTAL_DESCRIPTION =
+  "労働安全衛生の一次資料へ到達し、今日の現場リスク、KY、法令、事故、化学物質を出典と確認状態つきで扱うための運用ポータルです。AIは補助であり、最終判断には公式資料と人による確認が必要です。";
+const PREVIEW_SAFETY_MODE = isPreviewSafetyMode();
+const FIRST_PAINT_INTERACTIONS_SCRIPT =
+  APP_SHELL_INTERACTIONS_SCRIPT + PREHYDRATION_INTERACTIONS_SCRIPT;
+const PREVIEW_ROBOTS: NonNullable<Metadata["robots"]> = {
+  index: false,
+  follow: false,
+  nocache: true,
+  googleBot: {
+    index: false,
+    follow: false,
+    noimageindex: true,
+  },
+};
+
+const metadataDefinition: Metadata = {
   manifest: "/manifest.json",
   icons: {
     icon: [
-      { url: "/favicon.ico", sizes: "16x16 32x32 48x48", type: "image/x-icon" },
+      { url: "/favicon-32.png", sizes: "32x32", type: "image/png" },
     ],
     apple: { url: "/apple-touch-icon.png", sizes: "180x180" },
   },
   title: {
-    default: "安全AIポータル｜現場の安全を、AIで変える。",
+    default: "安全AIポータル｜根拠から、現場の行動へ",
     template: "%s｜安全AIポータル",
   },
   ...(process.env.GOOGLE_SITE_VERIFICATION
@@ -60,6 +51,11 @@ export const metadata: Metadata = {
     : {}),
   description:
     "労働安全衛生分野のAI・DX活用研究プロジェクト。通達・事故事例・化学物質情報を一次ソース付きで無料公開。",
+  ...(PREVIEW_SAFETY_MODE
+    ? {
+        robots: PREVIEW_ROBOTS,
+      }
+    : {}),
   // 柱C-3 / S DRY: ルート metadata の絶対URLオリジン（metadataBase・サイトルート
   // canonical）も seo-metadata.ts の SITE_URL 単一ソースへ集約する。sitemap/robots/
   // og-image/json-ld/page-json-ld は既に SITE_URL 集約済みで、ルート layout.tsx の
@@ -69,83 +65,132 @@ export const metadata: Metadata = {
   // 直書き値と同値のため出力は byte-identical。
   metadataBase: new URL(SITE_URL),
   alternates: {
-    canonical: SITE_URL,
     // 実在する公開RSSフィード（/feed/*.xml）を全ページ <head> で広告し、RSSリーダー・
     // ブラウザ・クローラからの自動発見を有効化する。登録簿は lib/seo/feeds.ts が単一ソース。
     types: rssAlternateTypes(),
   },
   openGraph: {
     type: "website",
-    // locale/alternateLocale/siteName も seo-metadata.ts の単一ソースへ集約
-    //（SITE_LOCALE="ja_JP" / SITE_ALTERNATE_LOCALES=["en_US"] / SITE_NAME="安全AIポータル"
-    // ＝従来の直書き値と同値のため出力は byte-identical）。
+    // 実在する別言語URLはまだないため alternateLocale / hreflang は出力しない。
+    // locale/siteName は seo-metadata.ts の単一ソースへ集約する。
     locale: SITE_LOCALE,
-    alternateLocale: [...SITE_ALTERNATE_LOCALES],
     siteName: SITE_NAME,
     title: {
-      default: "安全AIポータル｜現場の安全を、AIで変える。",
+      default: "安全AIポータル｜根拠から、現場の行動へ",
       template: "%s｜安全AIポータル",
     },
-    description: "法改正・現場リスク・事故データベース・KY用紙・化学物質RA・Eラーニングをまとめた労働安全ポータル。",
+    description:
+      "法改正・現場リスク・事故データベース・KY用紙・化学物質RA・Eラーニングをまとめた労働安全ポータル。",
     images: [
       {
         url: "/api/og",
         width: 1200,
         height: 630,
-        alt: "安全AIポータル — 現場の安全を、AIで変える。",
+        alt: "安全AIポータル — 根拠から、現場の行動へ",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
     title: {
-      default: "安全AIポータル｜現場の安全を、AIで変える。",
+      default: "安全AIポータル｜根拠から、現場の行動へ",
       template: "%s｜安全AIポータル",
     },
-    description: "法改正・現場リスク・事故データベース・KY用紙・化学物質RA・Eラーニングをまとめた労働安全ポータル。",
+    description:
+      "法改正・現場リスク・事故データベース・KY用紙・化学物質RA・Eラーニングをまとめた労働安全ポータル。",
     images: ["/api/og"],
   },
 };
 
-export default function RootLayout({
+export const metadata: Metadata = {
+  ...metadataDefinition,
+  description: PORTAL_DESCRIPTION,
+  openGraph: metadataDefinition.openGraph
+    ? {
+        ...metadataDefinition.openGraph,
+        description: PORTAL_DESCRIPTION,
+      }
+    : undefined,
+  twitter: metadataDefinition.twitter
+    ? {
+        ...metadataDefinition.twitter,
+        description: PORTAL_DESCRIPTION,
+      }
+    : undefined,
+};
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const nonce = (await headers()).get("x-nonce") ?? "";
+  const analyticsEnabled = isGaEnabled();
+  const rumReadiness = getRumServerReadiness();
+  const rawRumBuildId =
+    process.env.VERCEL_DEPLOYMENT_ID ??
+    process.env.VERCEL_GIT_COMMIT_SHA ??
+    "production-build";
+  const rumBuildId =
+    rawRumBuildId.replace(/[^A-Za-z0-9_-]/g, "").slice(0, 80) ||
+    "production-build";
+  const adsEnabled =
+    !PREVIEW_SAFETY_MODE && Boolean(process.env.NEXT_PUBLIC_ADSENSE_PUB_ID);
   return (
-    <html
-      lang="ja"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-      suppressHydrationWarning
-    >
+    <html lang="ja" className="h-full antialiased" suppressHydrationWarning>
       <head>
         {/* FOUC 抑止: hydration 前に html.dark を確定させる */}
-        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
-        {/* CLS抑止: a11y案内バナーの既読判定を first paint 前に確定させる（C-1） */}
-        <script dangerouslySetInnerHTML={{ __html: A11Y_HINT_INIT_SCRIPT }} />
-        {/* Warm up TCP/TLS for third-party origins before they're requested (B-15) */}
-        <link rel="preconnect" href="https://www.googletagmanager.com" />
-        <link rel="preconnect" href="https://pagead2.googlesyndication.com" />
-        <link rel="dns-prefetch" href="https://www.google-analytics.com" />
-        <link rel="dns-prefetch" href="https://generativelanguage.googleapis.com" />
-        <link rel="dns-prefetch" href="https://formspree.io" />
+        <script
+          nonce={nonce}
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }}
+        />
+        {/* CLS抑止とhydration前のEnter/Escapeをnonce付きで確定させる。 */}
+        <script
+          nonce={nonce}
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{ __html: FIRST_PAINT_INTERACTIONS_SCRIPT }}
+        />
+        <link rel="stylesheet" href="/print.css" media="print" />
       </head>
       <body className="min-h-full bg-slate-50 font-sans text-slate-900 dark:bg-slate-900 dark:text-slate-100">
-        {isGaEnabled() && <Analytics />}
-        <AdSenseScript />
-        <JsonLd schema={organizationSchema()} />
-        <JsonLd schema={webSiteSchema()} />
-        <ServiceWorkerRegistrar />
-        <InstallPwaPrompt />
-        <ThemeProvider>
-          <FuriganaProvider>
-            <EasyJapaneseProvider>
-              <CommandPaletteProvider>
-                {children}
-              </CommandPaletteProvider>
-            </EasyJapaneseProvider>
-          </FuriganaProvider>
-        </ThemeProvider>
+        <noscript>
+          <style>{`[data-display-settings]{display:none!important}`}</style>
+          <div className="border-b-4 border-amber-700 bg-amber-50 px-4 py-4 text-sm leading-7 text-amber-950">
+            <p className="font-bold">
+              JavaScriptが無効です。動的な安全判定・保存・通知は動作していません。
+            </p>
+            <p>
+              画面の「読み込み中」を安全情報として扱わず、
+              <a
+                className="mx-1 font-bold underline"
+                href="https://www.jma.go.jp/bosai/warning/"
+              >
+                気象庁の警報・注意報
+              </a>
+              と
+              <a
+                className="mx-1 font-bold underline"
+                href="https://laws.e-gov.go.jp/"
+              >
+                e-Gov現行法令
+              </a>
+              を直接確認してください。緊急時は現場の安全を確認し119番通報を優先してください。
+            </p>
+          </div>
+        </noscript>
+        <CspNonceProvider nonce={nonce}>
+          <DeferredGlobalEnhancements
+            analyticsEnabled={analyticsEnabled}
+            adsEnabled={adsEnabled}
+            rumReady={rumReadiness.ready}
+            rumBuildId={rumBuildId}
+            rumSampleRate={rumReadiness.sampleRate}
+            previewSafetyMode={PREVIEW_SAFETY_MODE}
+            nonce={nonce}
+          />
+          {children}
+        </CspNonceProvider>
       </body>
     </html>
   );

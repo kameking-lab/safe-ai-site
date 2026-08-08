@@ -18,12 +18,15 @@ describe("KyPrintSheet (A4印刷レイアウト)", () => {
 
   it("現場名・作業・危険・対策・目標を表示", () => {
     render(<KyPrintSheet record={rec} />);
+    expect(screen.getByText("下書き・未確認版")).toBeTruthy();
     expect(screen.getByText("○○ビル新築")).toBeTruthy();
     expect(screen.getByText("3工区")).toBeTruthy();
     expect(screen.getByText("鉄骨建方")).toBeTruthy();
     expect(screen.getByText("墜落")).toBeTruthy();
     expect(screen.getByText("親綱使用")).toBeTruthy();
     expect(screen.getByText("親綱に掛けてから移動しよう")).toBeTruthy();
+    expect(screen.getByText("作業場所")).toBeTruthy();
+    expect(screen.getByText("条件確認者")).toBeTruthy();
   });
 
   it("3つの確認印枠（職長・元方・元請）を持つ", () => {

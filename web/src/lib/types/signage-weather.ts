@@ -14,9 +14,15 @@ export type SignageHourlyPoint = {
 };
 
 export type SignageWeatherApiResponse = {
-  mapLevels: Record<JapanRegionId, MapAlertLevel>;
+  mapLevels: Partial<Record<JapanRegionId, MapAlertLevel>>;
   hourly: SignageHourlyPoint[];
   mapMode: "today" | "week";
   sourceRegionName: string;
   fetchedAt: string;
+  sourceTimezone?: "Asia/Tokyo";
+  sourceUtcOffsetSeconds?: 32400;
+  forecastFrom?: string;
+  forecastThrough?: string;
+  degraded?: boolean;
+  degradedReason?: string;
 };

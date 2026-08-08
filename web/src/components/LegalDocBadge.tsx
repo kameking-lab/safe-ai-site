@@ -4,7 +4,7 @@
 
 import type { MhlwNoticeBindingLevel } from "@/data/mhlw-notices";
 
-// ── 法的拘束力バッジ ─────────────────────────────────────────────
+// ── 文書種別バッジ（効力は個別確認） ─────────────────────────────
 // "law" extends the data-layer type to cover statutes cited by notices
 export type BindingLevel = "law" | MhlwNoticeBindingLevel;
 
@@ -15,22 +15,22 @@ const BINDING_CONFIG: Record<
   law: {
     label: "法令",
     cls: "bg-red-100 text-red-900 border-red-300",
-    title: "法令（最高法規）",
+    title: "法律・政令・省令等。現行条文と対象を個別確認",
   },
   binding: {
     label: "告示",
     cls: "bg-amber-100 text-amber-900 border-amber-300",
-    title: "告示（法的拘束力あり）",
+    title: "告示。根拠法令、委任、対象、効力を個別確認",
   },
   indirect: {
     label: "通達",
     cls: "bg-blue-100 text-blue-900 border-blue-300",
-    title: "通達（行政解釈・間接拘束）",
+    title: "通達。行政内部の解釈・運用資料で、事業者への義務を自動判定しない",
   },
   reference: {
     label: "参考",
     cls: "bg-slate-100 text-slate-600 border-slate-300",
-    title: "参考（指針・ガイドライン）",
+    title: "指針・ガイドライン等。根拠法令と位置付けを個別確認",
   },
 };
 
@@ -54,19 +54,19 @@ const FRESHNESS_CONFIG: Record<
   { label: string; cls: string; title: string }
 > = {
   latest: {
-    label: "最新",
+    label: "発出2年以内",
     cls: "bg-emerald-100 text-emerald-900 border-emerald-300",
-    title: "直近2年以内の発出（最新）",
+    title: "発出日が直近2年以内。現行性・改廃・内容確認済みを意味しません",
   },
   verified: {
-    label: "確認済",
+    label: "発出5年以内",
     cls: "bg-sky-100 text-sky-900 border-sky-300",
-    title: "一次ソースで存在確認済み",
+    title: "発出日が5年以内。一次資料確認済み・現行有効を意味しません",
   },
   needsCheck: {
     label: "要確認",
     cls: "bg-amber-100 text-amber-900 border-amber-300",
-    title: "5年以上前の発出。一次ソースで最新性を確認してください",
+    title: "5年以上前または発出日不明。一次資料で現行性を確認してください",
   },
   broken: {
     label: "リンク切れ",
@@ -94,7 +94,7 @@ export function freshnessFromDate(issuedDate: string | null): FreshnessLevel {
   if (Number.isNaN(year)) return "needsCheck";
   // 2024+ = within 2 years of 2026
   if (year >= 2024) return "latest";
-  // 2020-2023 = recent enough to treat as verified
+  // 内部互換名 verified は残すが、UIでは日付範囲としてのみ表示する。
   if (year >= 2020) return "verified";
   return "needsCheck";
 }
@@ -118,7 +118,7 @@ const REVISION_CONFIG: Record<
   },
   abolished: {
     label: "廃止",
-    cls: "bg-slate-100 text-slate-500 border-slate-300",
+    cls: "bg-slate-100 text-slate-600 border-slate-300",
     title: "廃止・失効",
   },
 };
@@ -142,14 +142,14 @@ export function LegalDocBadgeLegend() {
       <p className="mb-2 font-semibold text-slate-800">バッジ凡例</p>
       <div className="flex flex-wrap gap-x-6 gap-y-2">
         <div className="flex items-center gap-1.5">
-          <span className="font-medium text-slate-600">法的拘束力：</span>
+          <span className="font-medium text-slate-600">文書種別：</span>
           <BindingBadge level="law" />
           <BindingBadge level="binding" />
           <BindingBadge level="indirect" />
           <BindingBadge level="reference" />
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="font-medium text-slate-600">鮮度：</span>
+          <span className="font-medium text-slate-600">発出日の目安：</span>
           <FreshnessBadge level="latest" />
           <FreshnessBadge level="verified" />
           <FreshnessBadge level="needsCheck" />

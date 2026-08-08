@@ -17,11 +17,12 @@ import {
 } from "@/lib/mhlw-chemicals";
 import { RegulationTagsSection } from "@/components/regulation-tags-section";
 import { RegulationSummarySection } from "@/components/chemical/regulation-summary-section";
-import { AccidentCrossSection } from "@/components/chemical/accident-cross-section";
 import { RegulationTagBadgeList } from "@/components/regulation-tag-badge";
 import { CONSTRUCTION_PRIORITY_CAS_SET } from "@/lib/regulation-tag-labels";
 import { OshaRegulationsSection } from "@/components/chemical/osha-regulations-section";
 import { ReportPrintButton } from "@/components/accidents-reports/report-print-button";
+import { isIndexableChemical } from "@/lib/seo/index-quality";
+import { verifiedMhlwPublicDocumentUrl } from "@/lib/chemical/official-source-url";
 
 type Params = Promise<{ cas: string }>;
 
@@ -44,6 +45,9 @@ export async function generateMetadata({
     title: `${name} (CAS ${cas}) | 化学物質データベース | 安全AI`,
     description: `${name} の濃度基準値・GHS 区分・関連法令 (化管法/PRTR・化審法・毒劇法等) を出典付きで確認できます。`,
     alternates: { canonical: `/chemical-database/${cas}` },
+    robots: isIndexableChemical(normalizeCas(cas), entry)
+      ? { index: true, follow: true }
+      : { index: false, follow: true },
   };
 }
 
@@ -113,7 +117,6 @@ export default async function ChemicalDetailPage({
         <RegulationTagsSection entry={entry} variant="page" />
 
         {/* P1-3: この物質に関連する過去の労働災害事例（事故DBクロス検索）。 */}
-        <AccidentCrossSection substanceName={name} aliases={entry.nameEn ? [entry.nameEn] : undefined} />
 
         <CrossLinksBlock cas={cas} name={name} />
       </div>
@@ -126,8 +129,10 @@ function ConcentrationLimitsBlock({
 }: {
   entry: NonNullable<(typeof CONCENTRATION_LIMITS.substances)[string]>;
 }) {
+  const mhlwLimitUrl = verifiedMhlwPublicDocumentUrl(entry.mhlwSdsUrl);
+  const hasConcentrationValue = Boolean(entry.twa || entry.stel || entry.ceiling);
   const has =
-    entry.twa || entry.stel || entry.ceiling || entry.carcinogenicity?.iarc;
+    hasConcentrationValue || entry.carcinogenicity?.iarc;
   if (!has) return null;
   return (
     <section className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-6 space-y-3">
@@ -135,37 +140,33 @@ function ConcentrationLimitsBlock({
         濃度基準値・発がん性分類
       </h2>
       <dl className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-        {entry.twa && (
+        {mhlwLimitUrl && entry.twa && (
           <div>
             <dt className="text-xs text-slate-500 dark:text-slate-400">
               八時間時間加重平均 (TWA)
             </dt>
             <dd className="font-medium">
               {entry.twa.value} {entry.twa.unit}
-              {entry.twa.source && (
-                <span className="ml-2 text-xs text-slate-500">
-                  出典: {entry.twa.source}
-                </span>
-              )}
+              <span className="ml-2 text-xs text-slate-500">
+                一次資料リンクあり
+              </span>
             </dd>
           </div>
         )}
-        {entry.stel && (
+        {mhlwLimitUrl && entry.stel && (
           <div>
             <dt className="text-xs text-slate-500 dark:text-slate-400">
               短時間ばく露限界値 (STEL)
             </dt>
             <dd className="font-medium">
               {entry.stel.value} {entry.stel.unit}
-              {entry.stel.source && (
-                <span className="ml-2 text-xs text-slate-500">
-                  出典: {entry.stel.source}
-                </span>
-              )}
+              <span className="ml-2 text-xs text-slate-500">
+                一次資料リンクあり
+              </span>
             </dd>
           </div>
         )}
-        {entry.ceiling && (
+        {mhlwLimitUrl && entry.ceiling && (
           <div>
             <dt className="text-xs text-slate-500 dark:text-slate-400">
               天井値 (Ceiling)
@@ -199,14 +200,23 @@ function ConcentrationLimitsBlock({
           </div>
         )}
       </dl>
-      {entry.mhlwSdsUrl && (
+      {hasConcentrationValue && !mhlwLimitUrl && (
+        <p
+          role="status"
+          className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm font-semibold leading-6 text-amber-950 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-100"
+        >
+          濃度数値に対応する個別の厚生労働省一次資料URLを確認できないため、数値は表示していません。
+          製品固有の最新SDSと厚生労働省の公表資料で確認してください。
+        </p>
+      )}
+      {mhlwLimitUrl && (
         <a
-          href={entry.mhlwSdsUrl}
+          href={mhlwLimitUrl}
           target="_blank"
           rel="noreferrer"
           className="inline-flex items-center gap-1 text-sm text-amber-700 dark:text-amber-300 underline hover:no-underline"
         >
-          厚労省 SDS (PDF) を開く
+          厚生労働省 濃度基準値等の公表資料を開く（製品SDSではありません）
           <ExternalLink className="w-3 h-3" aria-hidden="true" />
         </a>
       )}

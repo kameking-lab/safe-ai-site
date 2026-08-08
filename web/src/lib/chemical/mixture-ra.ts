@@ -32,6 +32,101 @@ export interface MixtureAggregate {
   warnings: string[];
 }
 
+export type MixtureConcentrationUnit = "wt%" | "vol%" | "ppm";
+
+export type ValidatedMixtureComponent = {
+  name: string;
+  cas: string;
+  concentration: number;
+  unit: MixtureConcentrationUnit;
+};
+
+export type MixtureValidationResult =
+  | { ok: true; components: ValidatedMixtureComponent[]; totalConcentration: number }
+  | {
+      ok: false;
+      reason:
+        | "invalid_components"
+        | "invalid_cas"
+        | "unknown_cas"
+        | "name_cas_mismatch"
+        | "invalid_concentration"
+        | "unsupported_unit"
+        | "mixed_units"
+        | "duplicate_component"
+        | "invalid_total";
+    };
+
+function normalizeChemicalName(value: string): string {
+  return value.normalize("NFKC").replace(/[\s・･（）()_-]/g, "").toLowerCase();
+}
+
+function looksLikeCas(value: string): boolean {
+  const match = /^(\d{2,7})-(\d{2})-(\d)$/.exec(value);
+  if (!match) return false;
+  const digits = `${match[1]}${match[2]}`;
+  let sum = 0;
+  for (let i = 0; i < digits.length; i += 1) {
+    sum += Number(digits[digits.length - 1 - i]) * (i + 1);
+  }
+  return sum % 10 === Number(match[3]);
+}
+
+/**
+ * Complete server-side mixture validation. `resolveCas` must use the approved
+ * repository corpus; caller-provided names, hazards and law labels are never
+ * treated as authoritative.
+ */
+export function validateMixtureComponents(
+  raw: unknown,
+  resolveCas: (cas: string) => { primaryName: string; aliases?: string[] } | undefined
+): MixtureValidationResult {
+  if (!Array.isArray(raw) || raw.length < 2 || raw.length > 10) {
+    return { ok: false, reason: "invalid_components" };
+  }
+  const out: ValidatedMixtureComponent[] = [];
+  const seen = new Set<string>();
+  for (const item of raw) {
+    if (!item || typeof item !== "object") return { ok: false, reason: "invalid_components" };
+    const value = item as Record<string, unknown>;
+    const name = typeof value.name === "string" ? value.name.trim() : "";
+    const cas = typeof value.cas === "string" ? value.cas.trim() : "";
+    const concentration = value.concentration;
+    const unit = value.unit;
+    if (!looksLikeCas(cas)) return { ok: false, reason: "invalid_cas" };
+    if (seen.has(cas)) return { ok: false, reason: "duplicate_component" };
+    seen.add(cas);
+    const approved = resolveCas(cas);
+    if (!approved) return { ok: false, reason: "unknown_cas" };
+    const approvedNames = [approved.primaryName, ...(approved.aliases ?? [])].map(normalizeChemicalName);
+    if (!name || !approvedNames.includes(normalizeChemicalName(name))) {
+      return { ok: false, reason: "name_cas_mismatch" };
+    }
+    if (unit !== "wt%" && unit !== "vol%" && unit !== "ppm") {
+      return { ok: false, reason: "unsupported_unit" };
+    }
+    if (typeof concentration !== "number" || !Number.isFinite(concentration) || concentration <= 0) {
+      return { ok: false, reason: "invalid_concentration" };
+    }
+    const max = unit === "ppm" ? 1_000_000 : 100;
+    if (concentration > max) return { ok: false, reason: "invalid_concentration" };
+    out.push({ name: approved.primaryName, cas, concentration, unit });
+  }
+  if (new Set(out.map((item) => item.unit)).size !== 1) {
+    return { ok: false, reason: "mixed_units" };
+  }
+  const unit = out[0]!.unit;
+  const total = out.reduce((sum, item) => sum + item.concentration, 0);
+  const expected = unit === "ppm" ? 1_000_000 : 100;
+  // Decimal entry may introduce only machine-level floating point drift.
+  // A business tolerance (for example 0.01 percentage points) would let a
+  // mixture whose declared total is outside the legal range pass silently.
+  if (Math.abs(total - expected) > 1e-6) {
+    return { ok: false, reason: "invalid_total" };
+  }
+  return { ok: true, components: out, totalConcentration: total };
+}
+
 function uniqInOrder(values: Iterable<string>): string[] {
   const out: string[] = [];
   for (const v of values) {

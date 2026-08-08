@@ -5,7 +5,7 @@ import type { AccidentCase } from "@/lib/types/domain";
 import { EasyJapaneseProvider } from "@/contexts/easy-japanese-context";
 
 vi.mock("next/navigation", () => ({
-  useRouter: () => ({ replace: vi.fn() }),
+  useRouter: () => ({ replace: vi.fn(), push: vi.fn() }),
 }));
 
 const mockCase: AccidentCase = {
@@ -19,6 +19,17 @@ const mockCase: AccidentCase = {
   mainCauses: ["足場の固定不良"],
   preventionPoints: ["日常点検の徹底"],
   source: { site: "職場のあんぜんサイト", url: "https://example.jp/case/test-001" },
+};
+
+const verifiedMhlwCase: AccidentCase = {
+  ...mockCase,
+  id: "mhlw-100620",
+  provenance: "mhlw",
+  source: {
+    site: "職場のあんぜんサイト",
+    caseId: "100620",
+    url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=100620",
+  },
 };
 
 function renderPanel(cases: AccidentCase[] = [mockCase]) {
@@ -72,12 +83,24 @@ describe("AccidentDatabasePanel 44pxタップ標的", () => {
     expect(screen.queryByText("フィルタをリセット")).toBeNull();
   });
 
-  it("カード内の詳細トグル・詳細ページへ・学習リンク・日誌記録リンクが min-h-[44px]", () => {
-    renderPanel();
-    expect(screen.getByRole("button", { name: "詳細を見る" }).className).toContain("min-h-[44px]");
-    expect(screen.getByRole("link", { name: "→ 詳細ページへ" }).className).toContain("min-h-[44px]");
+  it("再構成事例は存在しない詳細ページへのリンクを出さない", () => {
+    const { container } = renderPanel();
+    expect(container.querySelector("summary")?.className).toContain("min-h-[44px]");
+    expect(screen.queryByRole("link", { name: "詳細・関連事故" })).toBeNull();
     expect(screen.getByRole("link", { name: "この事例で学習する" }).className).toContain("min-h-[44px]");
-    expect(screen.getByRole("link", { name: "→ 日誌に記録" }).className).toContain("min-h-[44px]");
+    expect(screen.getByRole("link", { name: "日誌に記録" }).className).toContain("min-h-[44px]");
+  });
+
+  it("照合済み厚労省事例だけが詳細ページへ進める", () => {
+    renderPanel([verifiedMhlwCase]);
+    const detailLink = screen.getByRole("link", { name: "詳細・関連事故" });
+    expect(detailLink.getAttribute("href")).toBe("/accidents/mhlw-100620");
+    expect(detailLink.className).toContain("min-h-[44px]");
+  });
+
+  it("教材用の想定例は詳細ページへのリンクを出さない", () => {
+    renderPanel([{ ...mockCase, id: "synthetic-test-001", provenance: "synthetic" }]);
+    expect(screen.queryByRole("link", { name: "詳細・関連事故" })).toBeNull();
   });
 
   it("出典リンクが min-h-[44px]", () => {

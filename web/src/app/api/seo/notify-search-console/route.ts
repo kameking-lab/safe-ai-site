@@ -1,16 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { bearerAuthError, verifyBearerSecret } from "@/lib/server/bearer-auth";
 
 const SITE_BASE = "https://www.anzen-ai-portal.jp";
 const SITEMAP_URL = `${SITE_BASE}/sitemap-index.xml`;
-
-// Vercel Cron は Authorization: Bearer ${CRON_SECRET} を付与する。
-// CRON_SECRET 未設定時は誰でも叩けるため、本番では必ず設定する。
-function isAuthorized(req: NextRequest): boolean {
-  const expected = process.env.CRON_SECRET;
-  if (!expected) return true;
-  const auth = req.headers.get("authorization") ?? "";
-  return auth === `Bearer ${expected}`;
-}
 
 type PingResult = {
   target: string;
@@ -75,9 +67,8 @@ async function submitIndexNow(): Promise<PingResult | null> {
 }
 
 export async function GET(req: NextRequest) {
-  if (!isAuthorized(req)) {
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-  }
+  const auth = verifyBearerSecret(req, process.env.CRON_SECRET);
+  if (!auth.ok) return bearerAuthError(auth);
 
   const tasks: Array<Promise<PingResult | null>> = [checkSitemap(), submitIndexNow()];
   const results = (await Promise.all(tasks)).filter((r): r is PingResult => r !== null);

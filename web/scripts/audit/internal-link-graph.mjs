@@ -225,6 +225,33 @@ async function main() {
   const orphans = summary.filter((s) => s.incomingFromPages === 0 && !s.route.includes('['));
   const lowIncoming = summary.filter((s) => s.incomingFromPages > 0 && s.incomingFromPages < 2 && !s.route.includes('['));
   const lowOutgoing = summary.filter((s) => s.outgoing < 2 && !s.route.includes('[') && s.route !== '/');
+  let indexableAudit = null;
+
+  if (process.env.SITEMAP_RUNTIME_AUDIT_IN) {
+    const sitemapAuditPath = path.resolve(process.env.SITEMAP_RUNTIME_AUDIT_IN);
+    const sitemapAudit = JSON.parse(await fs.readFile(sitemapAuditPath, 'utf8'));
+    const sitemapPaths = new Set(
+      (sitemapAudit.urls ?? []).map((value) => {
+        const pathname = new URL(value).pathname.replace(/\/$/, '');
+        return pathname || '/';
+      }),
+    );
+    const exactStaticRoutes = summary
+      .filter((item) => !item.route.includes('[') && sitemapPaths.has(item.route))
+      .map((item) => ({
+        ...item,
+        totalIncoming: item.incomingFromPages + item.incomingFromShared,
+      }));
+    indexableAudit = {
+      definition:
+        'sitemap runtime URL と静的ルートが完全一致し、ページ本文または共通導線からのリンクが0件のものを orphan とする',
+      sitemapUrlCount: sitemapPaths.size,
+      exactStaticRouteCount: exactStaticRoutes.length,
+      orphanCount: exactStaticRoutes.filter((item) => item.totalIncoming === 0).length,
+      orphans: exactStaticRoutes.filter((item) => item.totalIncoming === 0),
+      routes: exactStaticRoutes,
+    };
+  }
 
   console.log('=== ROUTES TOTAL:', routes.length, '===');
   console.log('\n=== ORPHANS (no page-level incoming, excluding dynamic) ===');
@@ -243,6 +270,12 @@ async function main() {
   console.log('\n=== TOP 20 AUTHORITY (by incoming) ===');
   [...summary].sort((a, b) => b.incomingFromPages - a.incomingFromPages).slice(0, 20)
     .forEach((s) => console.log(`  ${s.route}  in=${s.incomingFromPages} sh=${s.incomingFromShared} out=${s.outgoing}`));
+  if (indexableAudit) {
+    console.log(
+      `\n=== INDEXABLE STATIC ORPHANS: ${indexableAudit.orphanCount} / ${indexableAudit.exactStaticRouteCount} ===`,
+    );
+    for (const orphan of indexableAudit.orphans) console.log(`  ${orphan.route}`);
+  }
 
   // also dump per-route incoming/outgoing for the JSON
   const detail = {};
@@ -253,8 +286,18 @@ async function main() {
     };
   }
 
-  const outFile = path.join(__dirname, 'internal-link-graph.json');
-  await fs.writeFile(outFile, JSON.stringify({ summary, detail, generatedAt: new Date().toISOString() }, null, 2));
+  const outFile = process.env.INTERNAL_LINK_AUDIT_OUT
+    ? path.resolve(process.env.INTERNAL_LINK_AUDIT_OUT)
+    : path.join(__dirname, 'internal-link-graph.json');
+  await fs.mkdir(path.dirname(outFile), { recursive: true });
+  await fs.writeFile(
+    outFile,
+    JSON.stringify(
+      { summary, detail, indexableAudit, generatedAt: new Date().toISOString() },
+      null,
+      2,
+    ),
+  );
   console.log(`\n[wrote ${outFile}]`);
 }
 

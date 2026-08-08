@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { GET } from "./route";
-import { getPublishedArticleIndex, getPublishedArticleBySlug } from "@/lib/articles";
+import {
+  getPublishedArticleIndex,
+  getPublishedArticleBySlug,
+  isArticleIndexable,
+} from "@/lib/articles";
 import sitemap from "../sitemap";
 import { realLawRevisions } from "@/data/mock/real-law-revisions";
 
@@ -20,9 +24,15 @@ describe("sitemap-articles.xml（柱C-3-1 soft404是正）", () => {
     expect(xml).not.toContain("lr-real-");
 
     const locs = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
-    expect(locs.length).toBeGreaterThan(0);
+    expect(xml).not.toContain(
+      "/articles/heat-stroke-2025-mandatory",
+    );
 
-    const realSlugs = new Set(getPublishedArticleIndex().map((a) => a.slug));
+    const realSlugs = new Set(
+      getPublishedArticleIndex()
+        .filter(isArticleIndexable)
+        .map((a) => a.slug),
+    );
     for (const loc of locs) {
       const slug = loc.replace(/^.*\/articles\//, "");
       // sitemap の全URLが実在の公開済み記事に解決すること

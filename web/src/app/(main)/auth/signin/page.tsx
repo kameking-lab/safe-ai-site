@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { LogIn } from "lucide-react";
-import { signIn } from "@/auth";
+import { isAuthConfigured, signIn } from "@/auth";
 import { withSiteOpenGraph } from "@/lib/seo-metadata";
 
 export const metadata: Metadata = {
@@ -16,26 +16,42 @@ export const metadata: Metadata = {
 
 export default function SignInPage() {
   return (
-    <main className="mx-auto max-w-sm px-4 py-16">
+    <div className="mx-auto max-w-sm px-4 py-16">
       <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm text-center">
         <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100">
           <LogIn className="h-6 w-6 text-emerald-600" />
         </div>
         <h1 className="text-xl font-bold text-slate-900 mb-2">ログイン</h1>
-        <p className="text-sm text-slate-500 mb-8 leading-6">
-          アカウントにログインして、KY用紙・チャット履歴・お気に入り条文などのログイン限定機能をご利用ください。
-        </p>
-
-        <form
-          action={async () => {
-            "use server";
-            await signIn("google", { redirectTo: "/" });
-          }}
-        >
-          <button
-            type="submit"
-            className="flex w-full items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 active:scale-[0.98]"
-          >
+        {isAuthConfigured ? (
+          <>
+            <p className="text-sm text-slate-500 mb-8 leading-6">
+              アカウントにログインして、ログイン対応機能をご利用ください。
+            </p>
+            <div className="mb-5 rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-left text-xs leading-5 text-sky-900">
+              <p className="font-semibold">Googleから受け取る情報と用途</p>
+              <ul className="mt-1 list-disc space-y-1 pl-5">
+                <li>氏名、メールアドレス、プロフィール画像（Googleの標準ログイン範囲）</li>
+                <li>本人確認と、対応するクラウドデータの所有者識別に使用</li>
+                <li>Google Drive、連絡先、カレンダーの権限は要求しません</li>
+              </ul>
+              <p className="mt-2">
+                ログインしなくても端末内保存の主要機能を利用できます。登録情報の削除は
+                <a href="/contact" className="font-semibold underline">問い合わせ窓口</a>
+                から依頼できます。詳しくは
+                <a href="/privacy#external-services" className="font-semibold underline">データの取扱い</a>
+                をご確認ください。
+              </p>
+            </div>
+            <form
+              action={async () => {
+                "use server";
+                await signIn("google", { redirectTo: "/" });
+              }}
+            >
+              <button
+                type="submit"
+                className="flex w-full items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 active:scale-[0.98]"
+              >
             <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
               <path
                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -54,9 +70,15 @@ export default function SignInPage() {
                 fill="#EA4335"
               />
             </svg>
-            Googleでログイン
-          </button>
-        </form>
+                Googleでログイン
+              </button>
+            </form>
+          </>
+        ) : (
+          <div role="status" className="mb-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-left text-sm leading-6 text-amber-900">
+            現在、ログイン機能は準備中です。KY・打合せ書等は端末内保存で利用できますが、クラウド同期は行われません。
+          </div>
+        )}
 
         <p className="mt-6 text-xs text-slate-400 leading-5">
           ログインすることで
@@ -66,6 +88,6 @@ export default function SignInPage() {
           に同意したものとみなします。
         </p>
       </div>
-    </main>
+    </div>
   );
 }

@@ -5,7 +5,6 @@ import {
   SITE_URL,
   SITE_NAME,
   SITE_LOCALE,
-  SITE_ALTERNATE_LOCALES,
 } from "@/lib/seo-metadata";
 
 /**
@@ -35,13 +34,21 @@ describe("ルート layout.tsx metadata のドメイン/ロケール単一ソー
     expect(src).not.toContain(bareDomain);
     expect(src).toContain("@/lib/seo-metadata");
     expect(src).toContain("new URL(SITE_URL)");
-    expect(src).toContain("canonical: SITE_URL");
+    expect(src).not.toContain("canonical: SITE_URL");
   });
 
-  it("locale/alternateLocale/siteName も直書きせず単一ソース定数を使う", () => {
+  it("root canonical と root JSON-LD を404へ継承させない", () => {
+    expect(src).not.toMatch(/alternates:\s*\{\s*canonical:/);
+    expect(src).not.toContain("<JsonLd");
+    expect(src).not.toContain("organizationSchema()");
+    expect(src).not.toContain("webSiteSchema()");
+  });
+
+  it("locale/siteName は単一ソースを使い、架空の別言語URLを広告しない", () => {
     expect(src).toContain("locale: SITE_LOCALE");
-    expect(src).toContain("alternateLocale: [...SITE_ALTERNATE_LOCALES]");
     expect(src).toContain("siteName: SITE_NAME");
+    expect(src).not.toContain("alternateLocale:");
+    expect(src).not.toContain("SITE_ALTERNATE_LOCALES");
     // 旧直書きリテラルが残っていないこと（byte-identical 集約の副産物）。
     expect(src).not.toContain('locale: "ja_JP"');
     expect(src).not.toContain('siteName: "安全AIポータル"');
@@ -52,6 +59,11 @@ describe("ルート layout.tsx metadata のドメイン/ロケール単一ソー
     expect(SITE_URL).toBe("https://www.anzen-ai-portal.jp");
     expect(SITE_NAME).toBe("安全AIポータル");
     expect(SITE_LOCALE).toBe("ja_JP");
-    expect([...SITE_ALTERNATE_LOCALES]).toEqual(["en_US"]);
+  });
+
+  it("Preview safety modeではAdSenseを環境設定に関係なく無効化する", () => {
+    expect(src).toMatch(
+      /const adsEnabled =\s*!PREVIEW_SAFETY_MODE\s*&&\s*Boolean\(process\.env\.NEXT_PUBLIC_ADSENSE_PUB_ID\)/,
+    );
   });
 });

@@ -5,6 +5,7 @@
  * AIに渡す根拠（実データ）を選ぶための決定論的ロジック。創作は一切せず、既存ケースのみ返す。
  */
 import type { AccidentCase, AccidentWorkCategory } from "@/lib/types/domain";
+import { isAccidentEligibleForOperationalEvidence } from "@/lib/accident-source";
 
 export interface RelevantQuery {
   workContent?: string;
@@ -39,6 +40,7 @@ export function findRelevantAccidents(
 
   const hits: RelevantHit[] = [];
   for (const c of cases) {
+    if (!isAccidentEligibleForOperationalEvidence(c)) continue;
     const haystack = `${c.title}\n${c.summary}\n${(c.mainCauses ?? []).join("\n")}`;
     let score = 0;
     for (const t of tokens) {

@@ -16,10 +16,12 @@ import {
   type SpecialWorkId,
 } from "@/types/safety-plan";
 import { useOptionalCopilot } from "@/components/copilot/CopilotProvider";
+import { TransientChatLink } from "@/components/home-safety-cockpit/transient-chat-link";
 import type { IndustrySlug } from "@/lib/industry-slugs";
 import { detectFocusAreas } from "@/lib/copilot/keyword-routing";
 import { PlanHistoryPicker } from "@/components/safety-plan/plan-history-picker";
 import { loadLatestPlan } from "@/lib/safety-plan/history";
+import { putSafetyPlanHandoff } from "@/lib/transient-navigation-handoff";
 
 // Canonical accidents-reports IndustrySlug → plan-generator IndustryId
 const SLUG_TO_INDUSTRY: Record<IndustrySlug, IndustryId> = {
@@ -165,16 +167,17 @@ export function PlanGeneratorForm() {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const params = new URLSearchParams();
-    if (organizationName) params.set("org", organizationName);
-    params.set("year", String(fiscalYear));
-    if (focusAreas.length > 0) params.set("focus", focusAreas.join(","));
-    if (specialWork.length > 0) params.set("special", specialWork.join(","));
-    if (hasOverseas) params.set("overseas", "1");
-    if (overworkPriority !== "normal") params.set("overwork", overworkPriority);
-    if (notes) params.set("notes", notes);
-    const qs = params.toString();
-    const href = `/strategy/plan-generator/preview/${templateId}${qs ? `?${qs}` : ""}`;
+    putSafetyPlanHandoff({
+      templateId,
+      fiscalYear,
+      organizationName,
+      focusAreas,
+      specialWork,
+      hasOverseasAssignment: hasOverseas,
+      overworkPriority,
+      notes,
+    });
+    const href = `/strategy/plan-generator/preview/${templateId}`;
 
     // Record the about-to-be-generated plan in the Copilot SafetyContext.
     // The preview page also records on mount, but doing it here lets the
@@ -190,7 +193,6 @@ export function PlanGeneratorForm() {
       fiscalYear,
       templateId,
       href,
-      organizationName: organizationName || undefined,
     });
 
     router.push(href);
@@ -288,7 +290,11 @@ export function PlanGeneratorForm() {
             placeholder="例: 株式会社 安全工業"
             className="mt-1 w-full rounded border border-slate-300 px-3 py-2 text-base focus:border-emerald-600 focus:outline-none focus:ring-1 focus:ring-emerald-600"
             maxLength={64}
+            aria-describedby="plan-data-handling"
           />
+          <span className="mt-1 block text-xs leading-5 text-slate-500">
+            個人名・顧客名は入力せず、「A社」「第1事業場」などに匿名化してください。
+          </span>
         </label>
         <label className="block">
           <span className="block text-sm font-semibold text-slate-700">計画年度 <span className="text-red-600">*</span></span>
@@ -410,8 +416,21 @@ export function PlanGeneratorForm() {
           placeholder="例: 当社固有の取組（5S大会、KYT道場など）を記入してください。"
           className="mt-1 w-full rounded border border-slate-300 px-3 py-2 text-base focus:border-emerald-600 focus:outline-none focus:ring-1 focus:ring-emerald-600"
           maxLength={2000}
+          aria-describedby="plan-data-handling"
         />
+        <span className="mt-1 block text-xs leading-5 text-slate-500">
+          氏名、健康情報、事故当事者を特定できる情報、顧客の機密情報は入力しないでください。
+        </span>
       </label>
+
+      <div
+        id="plan-data-handling"
+        className="text-xs leading-5 text-slate-600"
+      >
+        <p>
+          入力内容はこのタブのプレビューだけに引き継ぎ、URLや履歴には残しません。
+        </p>
+      </div>
 
       {reportSlug && (
         <div className="rounded-lg border border-rose-200 bg-rose-50/60 px-3 py-2 text-xs text-rose-900">
@@ -430,12 +449,12 @@ export function PlanGeneratorForm() {
           </p>
           <p className="mt-1 leading-relaxed">
             個別の法令確認は
-            <a
-              href={`/chatbot?q=${encodeURIComponent(`${INDUSTRY_LABELS[industry]}で必要な安全衛生管理の根拠法令`)}`}
-              className="ml-1 font-semibold underline hover:text-rose-700"
-            >
-              安衛法AIで深掘り
-            </a>
+              <TransientChatLink
+                question={`${INDUSTRY_LABELS[industry]}で必要な安全衛生管理の根拠法令`}
+                className="ml-1 font-semibold underline hover:text-rose-700"
+              >
+                安衛法AIで深掘り
+              </TransientChatLink>
             できます。
           </p>
         </div>
@@ -466,10 +485,9 @@ function RebuildFromLastButton() {
     const latest = loadLatestPlan();
     if (!latest) return;
     // eslint-disable-next-line react-hooks/set-state-in-effect -- localStorage は外部システム、初回マウントでの hydration として setState は正当
-    setLatestHref(latest.previewHref);
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setLatestHref(`/strategy/plan-generator/preview/${encodeURIComponent(latest.id)}`);
     setLatestLabel(
-      `${latest.fiscalYear}年度 ${latest.industryLabel} / ${latest.scaleLabel}${latest.organizationName ? ` ・ ${latest.organizationName}` : ""}`,
+      `${latest.fiscalYear}年度 ${latest.industryLabel} / ${latest.scaleLabel}`,
     );
   }, []);
 

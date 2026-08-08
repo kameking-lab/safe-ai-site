@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { fetchStats } from "@/lib/stats/ga4-client";
 import type { StatsPeriod } from "@/lib/stats/types";
+import { hasAdminPageAccess } from "@/lib/server/admin-access";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic"; // ルートを完全動的化（毎回Function実行）
@@ -11,6 +12,12 @@ function parsePeriod(raw: string | null): StatsPeriod {
 }
 
 export async function GET(request: Request) {
+        if (!(await hasAdminPageAccess())) {
+                  return NextResponse.json(
+                            { error: "not_found" },
+                            { status: 404, headers: { "Cache-Control": "no-store" } },
+                  );
+        }
         const url = new URL(request.url);
         const period = parsePeriod(url.searchParams.get("period"));
         const data = await fetchStats(period);

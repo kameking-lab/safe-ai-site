@@ -5,9 +5,9 @@
  *  - GET ?deviceId=&id=: 単一 full payload / 一覧サマリー。
  *  - DELETE ?deviceId=&id=
  */
-import { NextResponse } from "next/server";
 import { getServiceSupabase } from "@/lib/supabase/server";
 import { normalizeMeetingRecord } from "@/lib/meeting/schema";
+import { cloudAuthRequired, getCloudOwnerId, privateJson, readBoundedJson, requireCloudConsent } from "@/lib/server/cloud-owner";
 
 export const dynamic = "force-dynamic";
 const MAX_LIST = 50;
@@ -16,22 +16,22 @@ function pad(s: string): string {
   return String(s ?? "").padStart(2, "0");
 }
 function cloudNotConfigured() {
-  return NextResponse.json({ ok: false, reason: "cloud_not_configured" }, { status: 503 });
+  return privateJson({ ok: false, reason: "cloud_not_configured" }, 503);
 }
 
 export async function POST(request: Request) {
+  const deviceId = await getCloudOwnerId();
+  if (!deviceId) return cloudAuthRequired();
+  const consentError = requireCloudConsent(request, "meeting-v1");
+  if (consentError) return consentError;
   const supabase = getServiceSupabase();
   if (!supabase) return cloudNotConfigured();
 
-  let body: { deviceId?: unknown; record?: unknown };
-  try {
-    body = (await request.json()) as typeof body;
-  } catch {
-    return NextResponse.json({ ok: false, reason: "invalid_json" }, { status: 400 });
-  }
-  const deviceId = typeof body.deviceId === "string" ? body.deviceId.trim() : "";
-  if (!deviceId || !body.record || typeof body.record !== "object") {
-    return NextResponse.json({ ok: false, reason: "missing_field" }, { status: 400 });
+  const parsed = await readBoundedJson(request);
+  if (!parsed.ok) return privateJson({ ok: false, reason: parsed.reason }, parsed.reason === "payload_too_large" ? 413 : 400);
+  const body = parsed.value as { record?: unknown };
+  if (!body.record || typeof body.record !== "object") {
+    return privateJson({ ok: false, reason: "missing_field" }, 400);
   }
   const record = normalizeMeetingRecord(body.record);
   const workDate = `${record.workDateYear}-${pad(record.workDateMonth)}-${pad(record.workDateDay)}`;
@@ -51,21 +51,22 @@ export async function POST(request: Request) {
       { onConflict: "device_id,meeting_id" }
     );
   if (error) {
-    return NextResponse.json({ ok: false, reason: "db_error", detail: error.message }, { status: 502 });
+    return privateJson({ ok: false, reason: "storage_unavailable" }, 502);
   }
-  return NextResponse.json({ ok: true });
+  return privateJson({ ok: true });
 }
 
 export async function GET(request: Request) {
+  const deviceId = await getCloudOwnerId();
+  if (!deviceId) return cloudAuthRequired();
+  const consentError = requireCloudConsent(request, "meeting-v1");
+  if (consentError) return consentError;
   const supabase = getServiceSupabase();
   if (!supabase) return cloudNotConfigured();
 
   const params = new URL(request.url).searchParams;
-  const deviceId = params.get("deviceId")?.trim() ?? "";
   const id = params.get("id")?.trim() ?? "";
-  if (!deviceId) {
-    return NextResponse.json({ ok: false, reason: "missing_field" }, { status: 400 });
-  }
+  if (id.length > 128) return privateJson({ ok: false, reason: "invalid_field" }, 400);
 
   if (id) {
     const { data, error } = await supabase
@@ -74,9 +75,9 @@ export async function GET(request: Request) {
       .eq("device_id", deviceId)
       .eq("meeting_id", id)
       .maybeSingle();
-    if (error) return NextResponse.json({ ok: false, reason: "db_error", detail: error.message }, { status: 502 });
+    if (error) return privateJson({ ok: false, reason: "storage_unavailable" }, 502);
     const record = data ? normalizeMeetingRecord((data as { payload: unknown }).payload) : null;
-    return NextResponse.json({ ok: true, record });
+    return privateJson({ ok: true, record });
   }
 
   const { data, error } = await supabase
@@ -85,7 +86,7 @@ export async function GET(request: Request) {
     .eq("device_id", deviceId)
     .order("updated_at", { ascending: false })
     .limit(MAX_LIST);
-  if (error) return NextResponse.json({ ok: false, reason: "db_error", detail: error.message }, { status: 502 });
+  if (error) return privateJson({ ok: false, reason: "storage_unavailable" }, 502);
 
   const list = (data ?? []).map((row) => {
     const r = row as { meeting_id: string; payload: unknown; updated_at: string };
@@ -99,20 +100,23 @@ export async function GET(request: Request) {
       contractorCount: rec.contractors.length,
     };
   });
-  return NextResponse.json({ ok: true, list });
+  return privateJson({ ok: true, list });
 }
 
 export async function DELETE(request: Request) {
+  const deviceId = await getCloudOwnerId();
+  if (!deviceId) return cloudAuthRequired();
+  const consentError = requireCloudConsent(request, "meeting-v1");
+  if (consentError) return consentError;
   const supabase = getServiceSupabase();
   if (!supabase) return cloudNotConfigured();
 
   const params = new URL(request.url).searchParams;
-  const deviceId = params.get("deviceId")?.trim() ?? "";
   const id = params.get("id")?.trim() ?? "";
-  if (!deviceId || !id) {
-    return NextResponse.json({ ok: false, reason: "missing_field" }, { status: 400 });
+  if (!id || id.length > 128) {
+    return privateJson({ ok: false, reason: "missing_field" }, 400);
   }
   const { error } = await supabase.from("meeting_records").delete().eq("device_id", deviceId).eq("meeting_id", id);
-  if (error) return NextResponse.json({ ok: false, reason: "db_error", detail: error.message }, { status: 502 });
-  return NextResponse.json({ ok: true });
+  if (error) return privateJson({ ok: false, reason: "storage_unavailable" }, 502);
+  return privateJson({ ok: true });
 }

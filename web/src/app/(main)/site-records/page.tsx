@@ -26,10 +26,11 @@ import { PageJsonLd } from "@/components/page-json-ld";
 import { ogImageUrl } from "@/lib/og-url";
 import { RecordsOverview } from "./records-overview";
 import { RecordsBackup } from "./records-backup";
+import { isPublicRouteAvailable } from "@/lib/public-content-policy";
 
-const _title = "現場の安全記録キット｜受入教育・KY・打合せ書・WBGT記録を無料で作成・印刷・保存";
+const _title = "現場の安全記録キット｜公開中の受入教育・KY・打合せ書を作成・印刷・保存";
 const _desc =
-  "中小ゼネコンの現場監督・安全担当・一人親方が、現場で日々・定期に作成する安全記録をまとめて作れる無料ツール集。新規入場者の受入教育記録、KY用紙、安全工程打合せ書、WBGT日次記録簿・暑熱順化計画など、法令で求められる記録をこの端末に保存し、印刷・CSV出力できます。登録不要。";
+  "現場監督・安全担当・一人親方が使える、公開中の安全記録作成ツールだけを一覧表示します。受入教育記録、KY用紙、安全工程打合せ書などを端末内へ保存し、対応する機能では印刷・CSV出力できます。正式記録としての採用は社内手順と管理者確認が必要です。";
 
 export const metadata: Metadata = {
   title: _title,
@@ -58,7 +59,7 @@ const GROUPS: ToolGroup[] = [
     heading: "日々・都度に作成する記録",
     tools: [
       { href: "/ky/paper", title: "KY用紙（危険予知）", desc: "4ラウンド法の危険予知活動シート。AI提案・音声入力・印刷・保存に対応。", icon: ClipboardList, color: "sky" },
-      { href: "/safety-diary", title: "安全工程打合せ書", desc: "北海道労働局公式版ベース。各社マトリクス・点検8カテゴリ・翌日複製・印刷。", icon: FileSpreadsheet, color: "indigo" },
+      { href: "/safety-diary", title: "安全工程打合せ書", desc: "各社マトリクス・点検8カテゴリ・翌日複製・印刷に対応する独自の作成補助。", icon: FileSpreadsheet, color: "indigo" },
       { href: "/site-records/induction", title: "新規入場者 受入教育 記録", desc: "安衛法59条・安衛則35条の教育項目＋現場ルールをチェックして実施記録を作成。名簿CSV・受講記録の印刷に対応。", icon: UserPlus, color: "emerald", badge: "NEW" },
       { href: "/site-records/procedure", title: "作業手順書 作成", desc: "手順×危険（急所）×対策の3列で作業手順書を作成。使用機械・必要資格も記載し、印刷・CSV。", icon: ListOrdered, color: "indigo", badge: "NEW" },
       { href: "/site-records/inspection", title: "作業開始前点検 記録", desc: "建設機械・クレーン・フォークリフト・高所作業車・電動工具の始業前点検を機種別項目で記録。使用可否・印刷・CSV。", icon: Wrench, color: "sky", badge: "NEW" },
@@ -98,6 +99,11 @@ const GROUPS: ToolGroup[] = [
   },
 ];
 
+const PUBLIC_GROUPS = GROUPS.map((group) => ({
+  ...group,
+  tools: group.tools.filter((tool) => isPublicRouteAvailable(tool.href)),
+})).filter((group) => group.tools.length > 0);
+
 const COLOR: Record<string, string> = {
   emerald: "border-emerald-200 hover:border-emerald-400 hover:bg-emerald-50/40 text-emerald-600",
   sky: "border-sky-200 hover:border-sky-400 hover:bg-sky-50/40 text-sky-600",
@@ -129,7 +135,7 @@ export default function SiteRecordsPage() {
       <PageJsonLd name="現場の安全記録キット" description={_desc} path="/site-records" />
       <PageHeader
         title="現場の安全記録キット"
-        description="現場で日々・定期に作成する安全記録を、まとめて作成・印刷・保存。法令で求められる記録づくりを無料・登録不要で。"
+        description="公開中の安全記録作成ツールを一覧表示。法令・社内ルールに沿った記録づくりを補助します。正式記録として採用する前に管理者が確認してください。"
         icon={ClipboardList}
         iconColor="emerald"
         mascotVariant="stamp-doc"
@@ -157,7 +163,7 @@ export default function SiteRecordsPage() {
         </Link>
       </section>
 
-      {GROUPS.map((g) => (
+      {PUBLIC_GROUPS.map((g) => (
         <section key={g.heading} className="mt-8">
           <h2 className="mb-2 text-sm font-bold text-slate-700">{g.heading}</h2>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -170,7 +176,7 @@ export default function SiteRecordsPage() {
 
       {/* 文字ダイエット（柱0-0）: 注意書きは消さず折りたたみ詳細へ格納 */}
       <CollapsibleDetail summary="保存先とご利用上の注意" className="mt-8">
-        各ツールの記録はお使いの端末（ブラウザ）に保存され、サーバーには送信されません。印刷・CSV出力で社内提出・監督指導時の証跡としてご利用ください。
+        各ツールの記録はお使いの端末（ブラウザ）に保存され、サーバーには送信されません。対応する機能では印刷・CSV出力により社内確認用の控えを作れます。
         記載内容は一般的な情報提供であり、個別の法令適用は所轄労働基準監督署・専門家にご確認ください。
       </CollapsibleDetail>
 

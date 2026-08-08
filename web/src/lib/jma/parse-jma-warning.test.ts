@@ -102,4 +102,24 @@ describe("maxLevelFromSelectedWarnings", () => {
     expect(maxLevelFromSelectedWarnings([{ code: "12" }, { code: "03" }])).toBe("warning");
     expect(maxLevelFromSelectedWarnings([{ code: "12" }, { code: "03" }, { code: "33" }])).toBe("special");
   });
+
+  it("PF-003: 2026新体系の警報・特別警報と警報から注意報を分類する", () => {
+    expect(maxLevelFromSelectedWarnings([{ code: "43" }])).toBe("warning");
+    expect(maxLevelFromSelectedWarnings([{ code: "49" }])).toBe("warning");
+    expect(maxLevelFromSelectedWarnings([{ code: "38" }])).toBe("special");
+    const summary = summarizeWarningPayload({
+      areaTypes: [
+        {
+          areas: [
+            {
+              code: "1310100",
+              warnings: [{ code: "15", status: "警報から注意報" }],
+            },
+          ],
+        },
+      ],
+    });
+    expect(summary.level).toBe("advisory");
+    expect(summary.warnings).toHaveLength(1);
+  });
 });

@@ -34,12 +34,19 @@ const LAW_ALIASES: string[][] = LAW_ALIAS_GROUPS;
  */
 const COOCCURRENCE_EXPANSIONS: { groupA: string[]; groupB: string[]; additions: string[] }[] = [
   {
-    // 酸欠系語 × 資格系語 → 酸素欠乏危険作業主任者（酸欠則第11条）
+    // 酸欠系語 × 資格系語 → 役割別の根拠（作業主任者=11条、従事者の特別教育=12条）
     // マンホール/下水管/ピット等の現場語は query-expansion.ts が「酸素欠乏」へ
     // 正規化するため、この共起はそれらの言い回しにも効く（GQ49・2026-07-11）。
     groupA: ["酸欠", "酸素欠乏", "第1種酸欠", "第2種酸欠"],
     groupB: ["資格", "免許", "講習", "技能講習", "作業主任者", "受講"],
-    additions: ["酸素欠乏危険作業主任者", "技能講習", "酸欠則第11条"],
+    additions: [
+      "酸素欠乏危険作業主任者",
+      "技能講習",
+      "酸素欠乏危険作業特別教育",
+      "特別教育",
+      "酸欠則第11条",
+      "酸欠則第12条",
+    ],
   },
   {
     // 玉掛け × ワイヤ/ロープ系 → 玉掛用具（クレーン則第213〜215条）
@@ -90,30 +97,40 @@ function dedup(values: string[]): string[] {
  * 元クエリは保持し、追加語は末尾にスペース区切りで連結する。
  */
 export function expandQueryRich(query: string): string {
-  const lower = query.toLowerCase();
+  // 全角英数字・互換文字を検索前だけ正規化する。入力本文そのものは保存しない。
+  // 例: 「ＳＤＳ」→「SDS」。辞書側も同じ形にそろえて照合する。
+  const normalizedQuery = query.normalize("NFKC");
+  const lower = normalizedQuery.toLowerCase();
   const additions: string[] = [];
 
   for (const [key, vals] of Object.entries(TERM_EXPANSIONS)) {
-    if (query.includes(key) || lower.includes(key.toLowerCase())) {
+    const normalizedKey = key.normalize("NFKC");
+    if (
+      normalizedQuery.includes(normalizedKey) ||
+      lower.includes(normalizedKey.toLowerCase())
+    ) {
       additions.push(...vals);
     }
   }
 
   for (const group of LAW_ALIASES) {
-    if (group.some((g) => query.includes(g))) {
+    if (group.some((g) => normalizedQuery.includes(g.normalize("NFKC")))) {
       additions.push(...group);
     }
   }
 
   for (const { groupA, groupB, additions: coAdditions } of COOCCURRENCE_EXPANSIONS) {
-    if (groupA.some((a) => query.includes(a)) && groupB.some((b) => query.includes(b))) {
+    if (
+      groupA.some((a) => normalizedQuery.includes(a.normalize("NFKC"))) &&
+      groupB.some((b) => normalizedQuery.includes(b.normalize("NFKC")))
+    ) {
       additions.push(...coAdditions);
     }
   }
 
   const unique = dedup(additions);
-  if (unique.length === 0) return query;
-  return `${query} ${unique.join(" ")}`;
+  if (unique.length === 0) return normalizedQuery;
+  return `${normalizedQuery} ${unique.join(" ")}`;
 }
 
 /**

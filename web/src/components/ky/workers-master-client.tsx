@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import {
   loadWorkers,
@@ -9,62 +9,29 @@ import {
   updateWorker,
   removeWorker,
   setWorkerHidden,
+  touchWorkers,
   visibleWorkers,
   WORKER_AFFILIATION_LABELS,
   type Worker,
   type WorkerAffiliation,
 } from "@/lib/ky/workers-master";
-import {
-  isKyCloudEnabled,
-  cloudPullWorkers,
-  cloudPushWorkers,
-  flushKyCloudQueue,
-} from "@/lib/ky/storage-adapter";
 import { ConclusionCard } from "@/components/ui/conclusion-card";
 
 const AFFILIATIONS: WorkerAffiliation[] = ["self", "coop1", "coop2", "coop3"];
 
 export function WorkersMasterClient() {
-  const [workers, setWorkers] = useState<Worker[]>([]);
+  const [workers, setWorkers] = useState<Worker[]>(() => loadWorkers());
   const [showHidden, setShowHidden] = useState(false);
   const [draftName, setDraftName] = useState("");
   const [draftAff, setDraftAff] = useState<WorkerAffiliation>("self");
   const [draftCompany, setDraftCompany] = useState("");
   const [draftQual, setDraftQual] = useState("");
   const [draftRegular, setDraftRegular] = useState(true);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const local = loadWorkers();
-    setWorkers(local);
-    // Phase 4: クラウド同期（背景・任意）。ローカルが空のときだけ別端末の登録を引き継ぐ。
-    if (!isKyCloudEnabled() || local.length > 0) {
-      setLoading(false);
-      return;
-    }
-    let cancelled = false;
-    void (async () => {
-      try {
-        await flushKyCloudQueue();
-        const cloud = await cloudPullWorkers();
-        if (!cancelled && cloud && cloud.length > 0) {
-          saveWorkers(cloud);
-          setWorkers(cloud);
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   const commit = (next: Worker[]) => {
-    setWorkers(next);
-    saveWorkers(next);
-    // Phase 4: 背景でクラウド同期（失敗時はキューに退避し次回再送）。
-    void cloudPushWorkers(next);
+    const touched = touchWorkers(next);
+    setWorkers(touched);
+    saveWorkers(touched);
   };
 
   const handleAdd = () => {
@@ -110,9 +77,7 @@ export function WorkersMasterClient() {
       {/* 結論カード（柱0）: いまの状態＝登録人数を3秒で。次にやること＝0名は追加へ／登録済みはKY用紙で使うへ。
           読込中（別端末のクラウド履歴を確認中）は「登録なし」と誤読させないよう確認中の状態を出す（ky-list-client.tsxと同型）。 */}
       <div className="mt-4">
-        {loading ? (
-          <ConclusionCard tone="neutral" title="確認中" description="登録済みの作業員を確認しています…" />
-        ) : registeredCount === 0 ? (
+        {registeredCount === 0 ? (
           <ConclusionCard
             tone="info"
             title="登録なし"
@@ -132,7 +97,7 @@ export function WorkersMasterClient() {
       </div>
 
       <p className="mt-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-500">
-        ※ データはこの端末に保存され、クラウド設定時は自動でバックアップ・別端末同期されます（未設定でも端末内で完結して動作）。
+        ※ 氏名はこの端末だけに最終利用から31日保存します。サーバーや分析へ送信しません。
       </p>
 
       {/* 新規追加 */}

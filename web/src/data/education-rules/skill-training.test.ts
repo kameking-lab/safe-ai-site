@@ -16,7 +16,7 @@
 import { describe, expect, it } from "vitest";
 import { SKILL_TRAINING } from "./skill-training";
 import { LICENSES } from "./licenses";
-import { ALL_CERTS } from "./index";
+import { ALL_CERTS, QUARANTINED_CERTS } from "./index";
 import { WORK_TAGS } from "@/lib/work-certification-mapper";
 
 describe("技能講習・免許DBの資格区分整合", () => {
@@ -81,6 +81,73 @@ describe("技能講習・免許DBの資格区分整合", () => {
       for (const rid of cert.relatedCertIds ?? []) {
         expect(allIds.has(rid), `${cert.id} -> ${rid}`).toBe(true);
       }
+    }
+  });
+});
+
+describe("クレーン資格と未確認講習の公開境界（2026-07-24）", () => {
+  it("一般5t以上ではなく床上操作式だけを技能講習として収録する", () => {
+    const floorOperated = SKILL_TRAINING.find(
+      (cert) => cert.id === "st-crane-5t",
+    );
+    expect(floorOperated?.name).toBe(
+      "床上操作式クレーン運転技能講習",
+    );
+    expect(floorOperated?.targetWork).toContain(
+      "運転者が荷の移動とともに移動",
+    );
+    expect(floorOperated?.relatedLaw).toContain("安衛令第20条第6号");
+    expect(floorOperated?.relatedLaw).toContain("クレーン則第22条");
+    expect(floorOperated?.relatedLaw).not.toContain("第20条第7号");
+    expect(floorOperated?.duration).toContain(
+      "20時間（学科13h＋実技7h",
+    );
+    expect(floorOperated?.notes).toContain("床上運転式");
+    expect(floorOperated?.notes).toContain("無線操作式");
+    expect(floorOperated?.notes).toContain("2027-04-01施行");
+  });
+
+  it("木材加工用機械・プレス機械の作業主任者の号を固定する", () => {
+    expect(
+      SKILL_TRAINING.find((cert) => cert.id === "st-timber-chief")
+        ?.relatedLaw,
+    ).toContain("安衛令第6条第6号");
+    expect(
+      SKILL_TRAINING.find((cert) => cert.id === "st-press-chief")
+        ?.relatedLaw,
+    ).toContain("安衛令第6条第7号");
+  });
+
+  it("公式現行技能講習一覧で確認できない名称を公開候補から隔離する", () => {
+    const quarantinedIds = new Set(
+      QUARANTINED_CERTS.map((cert) => cert.id),
+    );
+    const publicIds = new Set(ALL_CERTS.map((cert) => cert.id));
+    for (const id of [
+      "st-electrical-chief",
+      "st-roof-chief",
+      "st-hakkaku-chief",
+      "st-gangway-chief",
+      "st-radiation-chief",
+      "st-noise-chief",
+      "st-forestry-cable-chief",
+      "st-transfer-chief",
+    ]) {
+      expect(quarantinedIds.has(id), `${id} は隔離対象`).toBe(true);
+      expect(publicIds.has(id), `${id} は公開候補に含めない`).toBe(false);
+    }
+  });
+
+  it("全公開候補が法的位置付け・一次資料確認状態・基準日を持つ", () => {
+    for (const cert of ALL_CERTS) {
+      expect(cert.legalStatus, `${cert.id} legalStatus`).toBeDefined();
+      expect(
+        cert.sourceVerification,
+        `${cert.id} sourceVerification`,
+      ).toBeDefined();
+      expect(cert.sourceCheckedAt, `${cert.id} sourceCheckedAt`).toBe(
+        "2026-07-24",
+      );
     }
   });
 });

@@ -1,4 +1,5 @@
 import type { JmaWarningsByIso, JmaMapLevel } from "@/lib/jma/jma-data";
+import { isActiveWarningStatus } from "@/lib/jma/parse-jma-warning";
 
 export type DangerAlertInput = {
   jmaHeadline: string | null;
@@ -31,10 +32,15 @@ export function deriveDangerAlertInput(byIso: JmaWarningsByIso | undefined): Dan
     for (const entry of region.entries) {
       // 個別の警報項目のうち、警報・特別警報レベルだけを採用（注意報は除外）
       for (const w of entry.warnings) {
-        if (!w.status) continue;
+        const status = w.status ?? "";
+        const legacyActiveLabel =
+          !/(?:解除|発表警報・注意報はなし|発表なし)/.test(status) &&
+          status !== "なし" &&
+          /(?:特別警報|警報)$/.test(status);
+        if (!isActiveWarningStatus(status) && !legacyActiveLabel) continue;
         const rank = LEVEL_RANK[w.level ?? "none"] ?? 0;
         if (rank < LEVEL_RANK.warning) continue;
-        warnings.push({ code: w.code ?? "", status: w.status });
+        warnings.push({ code: w.code ?? "", status });
       }
       // ヘッドラインは最も深刻なレベルの発表見出しを採用（警報レベル以上のみ）
       const entryRank = LEVEL_RANK[entry.level] ?? 0;

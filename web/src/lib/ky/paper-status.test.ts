@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { normalizeKyInstructionRecord } from "@/lib/services/operations-service";
 import type { KyInstructionRecordState } from "@/lib/types/operations";
 import { computeKyPaperStatus, computeKyPaperSteps } from "./paper-status";
+import { submitKy, approveKy } from "@/lib/ky/approval";
 
 function blank(): KyInstructionRecordState {
   return normalizeKyInstructionRecord({});
@@ -13,6 +14,23 @@ function filled(): KyInstructionRecordState {
   rec.riskRows[0] = { ...rec.riskRows[0], hazard: "開口部からの墜落", reduction: "親綱使用" };
   rec.teamGoal = "親綱に掛けてから移動しよう";
   rec.participants[0] = { name: "山田", qualNo: "", preWork: "", onExit: "" };
+  rec.createdAt = "2026-07-28T00:00:00.000Z";
+  rec.applicableDate = "2026-07-29";
+  rec.context = {
+    workLocation: "3階南側",
+    equipment: "親綱",
+    heavyEquipment: "なし",
+    plannedPeopleCount: "1人",
+    weather: "晴",
+    simultaneousWork: "なし",
+    changes: "なし",
+    newEntrants: "なし",
+    nightWork: "なし",
+    chemicals: "なし",
+    heatStress: "WBGT確認",
+    reviewerName: "確認者A",
+    reviewedAt: "2026-07-28T00:10:00.000Z",
+  };
   return rec;
 }
 
@@ -43,17 +61,33 @@ describe("computeKyPaperStatus（KY用紙の結論カード状態）", () => {
     expect(s.action?.label).toBe("対策を記入");
   });
 
-  it("必須5項目が埋まると緑の『記入完了』→サイネージへ", () => {
+  it("全必須項目と人手確認が揃うと『承認準備完了』", () => {
     const s = computeKyPaperStatus(filled());
-    expect(s.kind).toBe("complete");
+    expect(s.kind).toBe("ready-for-approval");
     expect(s.tone).toBe("safe");
     expect(s.remaining).toBeUndefined();
-    expect(s.action?.href).toBe("/ky/morning");
+    expect(s.action?.href).toBe("#ky-approval");
+  });
+
+  it("PF-005: 従来の5項目だけでは人手確認が必要で完了扱いしない", () => {
+    const rec = blank();
+    rec.workRows[0] = { ...rec.workRows[0], workDetail: "3F鉄骨建方" };
+    rec.riskRows[0] = {
+      ...rec.riskRows[0],
+      hazard: "開口部からの墜落",
+      reduction: "親綱使用",
+    };
+    rec.teamGoal = "親綱に掛けてから移動しよう";
+    rec.participants[0] = { name: "山田", qualNo: "", preWork: "", onExit: "" };
+    expect(computeKyPaperStatus(rec).kind).toBe("human-review-required");
   });
 
   it("提出中は青の『元請の確認待ち』（記入状況より承認フロー優先）", () => {
     const rec = filled();
-    rec.approval = { status: "submitted", history: [] };
+    const submitted = submitKy(rec, "山田");
+    expect(submitted.ok).toBe(true);
+    if (!submitted.ok) return;
+    rec.approval = submitted.approval;
     const s = computeKyPaperStatus(rec);
     expect(s.kind).toBe("submitted");
     expect(s.tone).toBe("info");
@@ -61,7 +95,14 @@ describe("computeKyPaperStatus（KY用紙の結論カード状態）", () => {
 
   it("承認済みは緑→サイネージへ", () => {
     const rec = filled();
-    rec.approval = { status: "approved", history: [] };
+    const submitted = submitKy(rec, "山田");
+    expect(submitted.ok).toBe(true);
+    if (!submitted.ok) return;
+    rec.approval = submitted.approval;
+    const approved = approveKy(rec, "元請確認者");
+    expect(approved.ok).toBe(true);
+    if (!approved.ok) return;
+    rec.approval = approved.approval;
     const s = computeKyPaperStatus(rec);
     expect(s.kind).toBe("approved");
     expect(s.tone).toBe("safe");
@@ -78,53 +119,81 @@ describe("computeKyPaperStatus（KY用紙の結論カード状態）", () => {
   });
 });
 
-describe("computeKyPaperSteps（柱C-9・A2 記入の4段進行ナビ）", () => {
-  it("段は基本情報→危険→対策→確認の4段・順序固定", () => {
+describe("computeKyPaperSteps（記入から保存・印刷までの5段進行ナビ）", () => {
+  it("作業条件→危険→対策→人が確認→保存・印刷の5段・順序固定", () => {
     const steps = computeKyPaperSteps(blank());
-    expect(steps.map((s) => s.key)).toEqual(["basic", "hazard", "reduction", "confirm"]);
-    expect(steps.map((s) => s.label)).toEqual(["基本情報", "危険", "対策", "確認"]);
+    expect(steps.map((s) => s.key)).toEqual([
+      "conditions",
+      "hazard",
+      "reduction",
+      "human-review",
+      "output",
+    ]);
+    expect(steps.map((s) => s.label)).toEqual([
+      "作業条件",
+      "危険",
+      "対策",
+      "人が確認",
+      "保存・印刷",
+    ]);
   });
 
-  it("空のKYは全段未完了・先頭(基本情報)だけが current＝いまここ", () => {
+  it("空のKYは全段未完了・先頭の作業条件だけがcurrent", () => {
     const steps = computeKyPaperSteps(blank());
     expect(steps.every((s) => !s.done)).toBe(true);
-    expect(steps.filter((s) => s.current).map((s) => s.key)).toEqual(["basic"]);
+    expect(steps.filter((s) => s.current).map((s) => s.key)).toEqual(["conditions"]);
   });
 
-  it("全段の remaining 合計＝結論カードの記入のこりN（整合保証）", () => {
+  it("入力4段のremaining合計は結論カードと一致し、出力段を別に保留する", () => {
     const rec = blank();
     rec.workRows[0] = { ...rec.workRows[0], workDetail: "資材搬入" };
     rec.riskRows[0] = { ...rec.riskRows[0], hazard: "吊荷の落下", reduction: "" };
     const status = computeKyPaperStatus(rec);
     const steps = computeKyPaperSteps(rec);
-    const total = steps.reduce((n, s) => n + s.remaining, 0);
+    const total = steps
+      .filter((step) => step.key !== "output")
+      .reduce((n, s) => n + s.remaining, 0);
     expect(total).toBe(status.remaining);
+    expect(steps.find((step) => step.key === "output")?.remaining).toBe(1);
   });
 
-  it("確認段は行動目標と参加者の2項目＝両方未記入なら remaining 2", () => {
-    const confirm = computeKyPaperSteps(blank()).find((s) => s.key === "confirm")!;
+  it("人が確認段は行動目標と参加者の2項目を要求する", () => {
+    const confirm = computeKyPaperSteps(blank()).find((s) => s.key === "human-review")!;
     expect(confirm.remaining).toBe(2);
     expect(confirm.done).toBe(false);
   });
 
-  it("作業内容を記入すると基本情報段が done になり current は危険へ移る", () => {
+  it("作業内容を記入すると作業条件がdoneになりcurrentは危険へ移る", () => {
     const rec = blank();
     rec.workRows[0] = { ...rec.workRows[0], workDetail: "3F鉄骨建方" };
     const steps = computeKyPaperSteps(rec);
-    expect(steps.find((s) => s.key === "basic")!.done).toBe(true);
+    expect(steps.find((s) => s.key === "conditions")!.done).toBe(true);
     expect(steps.filter((s) => s.current).map((s) => s.key)).toEqual(["hazard"]);
   });
 
-  it("全項目記入で全段 done・current は無し", () => {
-    const steps = computeKyPaperSteps(filled());
+  it("入力完了後は保存・印刷がcurrentになり、承認後に全段doneになる", () => {
+    const rec = filled();
+    let steps = computeKyPaperSteps(rec);
+    expect(steps.slice(0, 4).every((s) => s.done)).toBe(true);
+    expect(steps.find((s) => s.key === "output")?.current).toBe(true);
+    const submitted = submitKy(rec, "山田");
+    expect(submitted.ok).toBe(true);
+    if (!submitted.ok) return;
+    rec.approval = submitted.approval;
+    const approved = approveKy(rec, "元請確認者");
+    expect(approved.ok).toBe(true);
+    if (!approved.ok) return;
+    rec.approval = approved.approval;
+    steps = computeKyPaperSteps(rec);
     expect(steps.every((s) => s.done)).toBe(true);
     expect(steps.some((s) => s.current)).toBe(false);
   });
 
   it("未記入段のアンカーは最初の未記入欄を指す（タップでその欄へ）", () => {
     const steps = computeKyPaperSteps(blank());
-    expect(steps.find((s) => s.key === "basic")!.anchor).toBe("#ky-work");
+    expect(steps.find((s) => s.key === "conditions")!.anchor).toBe("#ky-work");
     expect(steps.find((s) => s.key === "hazard")!.anchor).toBe("#ky-risks");
-    expect(steps.find((s) => s.key === "confirm")!.anchor).toBe("#ky-goal");
+    expect(steps.find((s) => s.key === "human-review")!.anchor).toBe("#ky-goal");
+    expect(steps.find((s) => s.key === "output")!.anchor).toBe("#ky-approval");
   });
 });

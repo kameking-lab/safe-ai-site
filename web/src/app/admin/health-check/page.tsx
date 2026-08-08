@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 import {
   CRITICAL_PERCENT,
   fetchUsageSnapshot,
@@ -33,17 +32,7 @@ const TRENDABLE_QUOTAS: QuotaKey[] = [
   "bandwidth",
 ];
 
-interface Props {
-  searchParams: Promise<{ key?: string }>;
-}
-
-export default async function HealthCheckPage({ searchParams }: Props) {
-  const params = await searchParams;
-  const validKey = process.env.STRATEGY_AUTH_PASSWORD ?? "";
-  if (!validKey || params.key !== validKey) {
-    notFound();
-  }
-
+export default async function HealthCheckPage() {
   const snapshot = await fetchUsageSnapshot();
   const readiness = judgeHobbyReadiness(snapshot);
   const alerts = summarizeAlerts(snapshot.samples);

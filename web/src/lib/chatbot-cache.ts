@@ -1,11 +1,13 @@
+import { createHash } from "node:crypto";
+
 /**
  * In-memory LRU cache for /api/chatbot responses.
  *
  * Why: Gemini calls dominate latency and cost on the chatbot route. Many
  * users ask the same canonical questions ("フォークリフトの資格は？",
  * "高所作業の墜落防止" 等), and the answer is fully deterministic once
- * the question + lawCategory are fixed (we don't pass history into cache —
- * see `cacheKey` below). A small process-local LRU is the simplest way to
+ * the question + lawCategory + answer date + source version are fixed (we
+ * don't pass history into cache — see `cacheKey` below). A small process-local LRU is the simplest way to
  * remove the duplicate Gemini call without standing up Redis/KV.
  *
  * Constraints:
@@ -49,9 +51,32 @@ export function normalizeChatbotQuery(raw: string): string {
     .replace(/[？?！!。、.,\s]+$/u, "");
 }
 
-/** Cache key combines normalized query + law category. */
-export function cacheKey(message: string, lawCategory: string): string {
-  return `${lawCategory}::${normalizeChatbotQuery(message)}`;
+export const CHATBOT_CACHE_SCHEMA_VERSION = "legal-answer-v4";
+
+/** The answer's calendar date in Japan. JST has no daylight-saving shift. */
+export function chatbotAnswerDateJst(now: Date): string {
+  return new Date(now.getTime() + 9 * 60 * 60 * 1000)
+    .toISOString()
+    .slice(0, 10);
+}
+
+/** Cache key combines public metadata with a one-way digest of the query. */
+export function cacheKey(
+  message: string,
+  lawCategory: string,
+  answerNow: Date = new Date(),
+  sourceVersion = "source-unspecified-v1",
+): string {
+  const queryDigest = createHash("sha256")
+    .update(normalizeChatbotQuery(message), "utf8")
+    .digest("base64url");
+  return [
+    CHATBOT_CACHE_SCHEMA_VERSION,
+    sourceVersion,
+    chatbotAnswerDateJst(answerNow),
+    lawCategory,
+    queryDigest,
+  ].join("::");
 }
 
 class LruTtlCache<V> {

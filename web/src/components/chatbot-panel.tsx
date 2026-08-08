@@ -1,62 +1,51 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { History, Mic, Trash2, Link2, FileText, FileType, FileJson, Check, Copy, AlertTriangle, BookOpen, Paperclip, Library, Search, Square, RotateCcw, Lightbulb, X, Download, Upload } from "lucide-react";
-import { useSearchParams } from "next/navigation";
-import type { ChatbotSource, FollowupSuggestion } from "@/app/api/chatbot/route";
+import { Check, Copy, RotateCcw, Send, Square, X } from "lucide-react";
+import type {
+  ChatbotQuickReply,
+  ChatbotResponse,
+  ChatbotSource,
+  FollowupSuggestion,
+} from "@/lib/chatbot-contract";
 import type { NoticeHit } from "@/lib/notice-search";
 import type {
-  StructuredCitation,
-  RelatedLawLink,
   DigDeeperLink,
+  RelatedLawLink,
+  StructuredCitation,
 } from "@/lib/chatbot-enrichment";
-// Phase 4: 通達/リーフレット添付カード
 import type {
   AttachedLeaflet,
   AttachedNotice,
 } from "@/lib/chatbot-notice-attachment";
-import {
-  ChatbotLeafletList,
-  ChatbotNoticeList,
-} from "@/components/chatbot/notice-leaflet-list";
-// C-1: rag-search から import すると法令コーパス全体（チャンク生約1.4MB）が client
-// バンドルに同梱され、/chatbot 本体と「/chatbot へ Link する全ページ」のプリフェッチ
-// を直撃するため、UI 選択肢は独立モジュールから取る。
-import { LAW_CATEGORY_OPTIONS, type LawCategoryFilter } from "@/lib/law-category-options";
-import { buildContextPrefill } from "@/lib/chatbot-context-prefill";
-import { VoiceMicButton, describeVoiceError } from "@/components/voice-input-field";
-import { BindingBadge } from "@/components/AIResponseCard";
-import { Mascot } from "@/components/mascot";
-import {
-  CHAT_HISTORY_MAX_MESSAGES,
-  clearChatHistory,
-  loadChatHistory,
-  saveChatHistory,
-  type StoredChatMessage,
-} from "@/lib/chat-history";
+import type { LawCategoryFilter } from "@/lib/law-category-options";
+import { VoiceMicButton } from "@/components/voice-input-field";
+import { clearChatHistory } from "@/lib/chat-history";
 import { trackEvent } from "@/components/Analytics";
-import { useOptionalCopilot } from "@/components/copilot/CopilotProvider";
-import { MainFeatureNextActions } from "@/components/main-feature-next-actions";
+import { formatAnswerForDisplay } from "@/lib/chatbot-answer-format";
 import {
-  answerCardTone,
-  evidenceBadge,
-  splitAnswerConclusion,
-} from "@/lib/chatbot-answer-visual";
-import { AnswerConclusionCard } from "@/components/chatbot/answer-conclusion-card";
-import { StatusBadge } from "@/components/ui/status-badge";
-import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
-// ごちゃごちゃブロック根絶（2026-07-11）: 旧形式の追記テール除去＋markdown記号の正規化。
-// 新しいAPI応答はサーバー側で除去済みだが、保存済みセッション・キャッシュ応答の
-// 後方互換のため表示直前にも同じ整形を通す。
-import { formatAnswerForDisplay, stripAnswerTailBlocks } from "@/lib/chatbot-answer-format";
-import { AI_LEGAL_DISCLAIMER } from "@/lib/gemini";
+  CHATBOT_PRIVACY_RESPONSE,
+  evaluateChatbotSafety,
+  inspectChatbotHistory,
+  migrateChatbotHistory,
+  type ChatbotSafetyKind,
+} from "@/lib/chatbot-safety";
+import { inspectAiOutbound } from "@/lib/ai-outbound-safety";
+import {
+  sanitizeLegalConversationContext,
+  type LegalClarification,
+  type LegalConversationContext,
+} from "@/lib/legal-conversation-context";
 
 type ChatMessage = {
   id: string;
   role: "user" | "assistant";
   content: string;
+  substantiveAnswer?: string;
+  assumptions?: string[];
+  conditions?: string[];
   sources?: ChatbotSource[];
-  source_type?: "rag" | "ai_inference";
+  source_type?: "rag" | "ai_inference" | "safety";
   confidence?: "high" | "medium" | "low";
   confidenceScore?: number;
   followups?: FollowupSuggestion[];
@@ -65,379 +54,399 @@ type ChatMessage = {
   relatedLaws?: RelatedLawLink[];
   digDeeperLinks?: DigDeeperLink[];
   scopeWarnings?: string[];
-  /** Phase 4: 3層統合された通達リスト（条文紐付け+応答引用+クエリ） */
   attachedNotices?: AttachedNotice[];
-  /** Phase 4: 条文紐付けで取得した厚労省リーフレット */
   attachedLeaflets?: AttachedLeaflet[];
-};
-
-
-type SavedSession = {
-  id: string;
-  title: string;
-  savedAt: number;
-  messages: ChatMessage[];
-};
-
-const STORAGE_KEY = "chatbot_history_v2";
-const MAX_SESSIONS = 15;
-
-const EGOV_LAW_NUMBERS: Record<string, string> = {
-  "労働安全衛生法": "347AC0000000057",
-  "労働基準法": "322AC0000000049",
-  "じん肺法": "335AC0000000030",
-  "労働安全衛生規則": "347M50002000032",
-  "クレーン等安全規則": "347M50002000034",
-  "有機溶剤中毒予防規則": "347M50002000036",
-  "特定化学物質障害予防規則": "347M50002000039",
-  "酸素欠乏症等防止規則": "347M50002000042",
+  safetyKind?: ChatbotSafetyKind;
+  requiresHumanReview?: boolean;
+  clarification?: LegalClarification;
+  clarificationQuestion?: string | null;
+  quickReplies?: ChatbotQuickReply[];
 };
 
 const EXAMPLE_QUESTIONS = [
-  "足場の手すり高さは？",
-  "墜落防止のフルハーネス着用義務は？",
-  "統括安全衛生責任者の選任要件は？",
-  "KYT 4ラウンド法とは？",
-  "有機溶剤作業主任者の選任が必要な場合は？",
-  "定期健康診断の実施頻度は？",
-];
+  "電気作業の資格は？",
+  "フォークリフトの資格は？",
+  "足場の手すりは？",
+] as const;
 
-function loadSessions(): SavedSession[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as SavedSession[]) : [];
-  } catch {
-    return [];
-  }
+function createMessage(
+  role: ChatMessage["role"],
+  content: string,
+  extra: Partial<ChatMessage> = {},
+): ChatMessage {
+  return { id: crypto.randomUUID(), role, content, ...extra };
 }
 
-function saveSessions(sessions: SavedSession[]) {
+function scrollConversation(ref: React.RefObject<HTMLDivElement | null>) {
   if (typeof window === "undefined") return;
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions.slice(0, MAX_SESSIONS)));
-  } catch {
-    // ignore storage errors
-  }
-}
-
-function messagesToMarkdown(messages: ChatMessage[]): string {
-  const body = messages
-    .map((m) => {
-      const role = m.role === "user" ? "**あなた**" : "**安全AIポータル**";
-      // 旧形式の追記テール（出典・通達等）は構造化フィールド由来の参照条文行と
-      // 二重になるため除去してからエクスポートする
-      const content = m.role === "assistant" ? stripAnswerTailBlocks(m.content) : m.content;
-      const sources =
-        m.sources && m.sources.length > 0
-          ? "\n\n> 参照条文: " + m.sources.map((s) => `${s.law} ${s.article}`).join(" / ")
-          : "";
-      return `${role}\n\n${content}${sources}`;
-    })
-    .join("\n\n---\n\n");
-  return `${body}\n\n---\n\n> ⚠️ ${AI_LEGAL_DISCLAIMER}`;
-}
-
-function messagesToText(messages: ChatMessage[]): string {
-  const body = messages
-    .map((m) => {
-      const role = m.role === "user" ? "あなた" : "安全AIポータル";
-      const content = m.role === "assistant" ? formatAnswerForDisplay(m.content) : m.content;
-      return `[${role}]\n${content}`;
-    })
-    .join("\n\n");
-  return `${body}\n\n⚠️ ${AI_LEGAL_DISCLAIMER}`;
-}
-
-function downloadFile(content: string, filename: string, mimeType: string) {
-  const blob = new Blob([content], { type: mimeType });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-/** 回答中の **太字** マーカーだけを描画する既存ミニレンダラ（本文は一字も変えない） */
-function renderBold(text: string) {
-  return text.split(/(\*\*[^*]+\*\*)/).map((part, idx) => {
-    if (part.startsWith("**") && part.endsWith("**")) {
-      return <strong key={idx}>{part.slice(2, -2)}</strong>;
-    }
-    return part;
+  window.requestAnimationFrame(() => {
+    const node = ref.current;
+    node?.scrollTo({
+      top: node.scrollHeight,
+      // Streaming can schedule several updates in quick succession. Jumping to
+      // the committed end avoids stacked animations and keeps the latest answer
+      // controls immediately reachable for keyboard and screen-reader users.
+      behavior: "auto",
+    });
   });
 }
 
-function encodeShare(messages: ChatMessage[]): string {
-  const data = messages.map((m) => ({
-    r: m.role === "user" ? "u" : "a",
-    // 共有ビューはプレーンテキスト表示のため、表示用整形（テール除去＋markdown正規化）を通す
-    c: m.role === "assistant" ? formatAnswerForDisplay(m.content) : m.content,
-    s: m.sources?.map((src) => ({ l: src.law, a: src.article })),
-  }));
-  return btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+function displayAnswer(content: string): { visible: string; rest: string } {
+  const formatted = formatAnswerForDisplay(content).trim();
+  if (formatted.length <= 600) return { visible: formatted, rest: "" };
+  const boundary = formatted.lastIndexOf("\n", 600);
+  const end = boundary >= 420 ? boundary : 600;
+  return {
+    visible: `${formatted.slice(0, end).trimEnd()}…`,
+    rest: formatted.slice(end).trim(),
+  };
 }
 
-export function ChatbotPanel() {
+const ANSWER_SECTION_RE =
+  /^(?:\*\*)?(結論|条件|根拠|適用時点|次の質問)(?:\*\*)?[：:]?$/;
+
+function AnswerContent({ text }: { text: string }) {
+  const blocks: Array<
+    | { type: "heading"; text: string }
+    | { type: "body"; text: string }
+  > = [];
+  let bodyLines: string[] = [];
+  const flushBody = () => {
+    const body = bodyLines.join("\n").trim();
+    if (body) blocks.push({ type: "body", text: body });
+    bodyLines = [];
+  };
+
+  for (const line of text.split("\n")) {
+    const heading = ANSWER_SECTION_RE.exec(line.trim());
+    if (heading) {
+      flushBody();
+      blocks.push({ type: "heading", text: heading[1] });
+    } else {
+      bodyLines.push(line);
+    }
+  }
+  flushBody();
+
+  return (
+    <div className="space-y-1">
+      {blocks.map((block, index) =>
+        block.type === "heading" ? (
+          <h3
+            key={`heading-${index}`}
+            className="mt-3 text-sm font-bold first:mt-0"
+          >
+            {block.text}
+          </h3>
+        ) : (
+          <p key={`body-${index}`} className="whitespace-pre-wrap">
+            {block.text}
+          </p>
+        ),
+      )}
+    </div>
+  );
+}
+
+function structuredConditions(message: ChatMessage): string[] {
+  return [...(message.assumptions ?? []), ...(message.conditions ?? [])]
+    .map((item) => item.trim())
+    .filter(
+      (item, index, items) =>
+        Boolean(item) && items.findIndex((candidate) => candidate === item) === index,
+    )
+    .slice(0, 3);
+}
+
+function quickRepliesFor(message: ChatMessage): ChatbotQuickReply[] {
+  const replies = message.quickReplies?.length
+    ? message.quickReplies
+    : (message.clarification?.options ?? []).map((option) => ({
+        label: option,
+        prompt: option,
+      }));
+  return replies
+    .filter((reply) => reply.label.trim() && reply.prompt.trim())
+    .slice(0, 3);
+}
+
+export function ChatbotPanel({
+  onSafetyStateChange,
+  onTransferBlockedChange,
+  initialQuestion,
+  onInitialQuestionConsumed,
+  onInitialQuestionRejected,
+}: {
+  onSafetyStateChange?: (kind: ChatbotSafetyKind | null) => void;
+  onTransferBlockedChange?: (blocked: boolean) => void;
+  initialQuestion?: string;
+  onInitialQuestionConsumed?: () => void;
+  onInitialQuestionRejected?: () => void;
+} = {}) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState(initialQuestion ?? "");
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showHistory, setShowHistory] = useState(false);
-  const [sessions, setSessions] = useState<SavedSession[]>([]);
-  const [copyStates, setCopyStates] = useState<Record<string, boolean>>({});
-  const [shareToast, setShareToast] = useState<string | null>(null);
-  const [exportOpen, setExportOpen] = useState(false);
-  const [voiceMode, setVoiceMode] = useState(false);
-  const [voiceInputError, setVoiceInputError] = useState<string | null>(null);
-  const [lawCategory, setLawCategory] = useState<LawCategoryFilter>("all");
-  // P1-2: 生成停止（AbortController）と失敗時の再試行
   const [retryableQuestion, setRetryableQuestion] = useState<string | null>(null);
+  const [copyStates, setCopyStates] = useState<Record<string, boolean>>({});
+  const [localSafetyNotice, setLocalSafetyNotice] = useState<{
+    kind: "emergency" | "privacy";
+    message: string;
+  } | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const requestPendingRef = useRef(false);
+  const requestGenerationRef = useRef(0);
+  const conversationContextRef = useRef<LegalConversationContext>({});
   const listRef = useRef<HTMLDivElement>(null);
-  const searchParams = useSearchParams();
-  const prefillAppliedRef = useRef(false);
-  const copilot = useOptionalCopilot();
+  const composerRef = useRef<HTMLTextAreaElement>(null);
+  const previousInputValueRef = useRef(input);
+  const initialQuestionConsumedRef = useRef(false);
+  const lawCategory: LawCategoryFilter = "all";
 
-  // 音声完結モード: 新しいAI回答が来たら読み上げ
   useEffect(() => {
-    if (!voiceMode) return;
-    if (messages.length === 0) return;
-    const last = messages[messages.length - 1];
-    if (last.role !== "assistant") return;
-    if (typeof window === "undefined" || !window.speechSynthesis) return;
-    // 読み上げも表示と同じ整形後テキストを使う（markdown記号・出典テールを読み上げない）
-    const utter = new SpeechSynthesisUtterance(formatAnswerForDisplay(last.content).slice(0, 400));
-    utter.lang = "ja-JP";
-    utter.rate = 1.0;
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(utter);
-  }, [messages, voiceMode]);
+    clearChatHistory();
+  }, []);
 
-  // 音声完結モード: 起動時に音声入力を促す
-  const startVoiceInput = useCallback(() => {
-    if (typeof window === "undefined") return;
-    type SR = { new (): {
-      lang: string;
-      interimResults: boolean;
-      onresult: (e: { results: { 0: { transcript: string } }[] }) => void;
-      onerror: (event: { error?: string }) => void;
-      start: () => void;
-    } };
-    const w = window as unknown as { webkitSpeechRecognition?: SR; SpeechRecognition?: SR };
-    const Ctor = w.webkitSpeechRecognition ?? w.SpeechRecognition;
-    if (!Ctor) {
-      setVoiceInputError(describeVoiceError("not-supported"));
-      return;
-    }
-    setVoiceInputError(null);
-    try {
-      const recog = new Ctor();
-      recog.lang = "ja-JP";
-      recog.interimResults = false;
-      recog.onresult = (e) => {
-        const text = e.results[0]?.[0]?.transcript ?? "";
-        if (text) {
-          setInput(text);
-          // 自動送信（音声完結モード）
-          setTimeout(() => void handleSend(text), 200);
+  useEffect(() => {
+    const composer = composerRef.current;
+    if (!composer) return;
+    const domValue = composer.value;
+    const previousValue = previousInputValueRef.current;
+    const submitAfterHydration =
+      composer.dataset.chatbotPrehydrationSubmit === "true";
+    composer.dataset.chatbotHydrated = "true";
+    previousInputValueRef.current = input;
+
+    const typedBeforeHydration =
+      domValue !== previousValue && input === previousValue;
+    if (typedBeforeHydration || submitAfterHydration) {
+      const timer = window.setTimeout(() => {
+        if (typedBeforeHydration) setInput(domValue);
+        if (submitAfterHydration) {
+          delete composer.dataset.chatbotPrehydrationSubmit;
+          if (domValue.trim()) composer.form?.requestSubmit();
         }
-      };
-      recog.onerror = (event) => {
-        setVoiceInputError(describeVoiceError(event?.error));
-      };
-      recog.start();
-    } catch (err) {
-      const name = err instanceof Error ? err.name : undefined;
-      setVoiceInputError(describeVoiceError(name));
+      }, 0);
+      return () => window.clearTimeout(timer);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if (domValue !== input) composer.value = input;
+  }, [input]);
 
   useEffect(() => {
-    setSessions(loadSessions());
-    // ページ再読込時に進行中の会話を復元（最大 50 件）
-    const restored = loadChatHistory<ChatMessage>();
-    if (restored && restored.length > 0) {
-      setMessages(restored);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (prefillAppliedRef.current) return;
-    const q = searchParams?.get("q");
-    if (q && q.trim()) {
-      prefillAppliedRef.current = true;
-      setInput(q.trim());
-      return;
-    }
-    // P1-3完: 他機能からの文脈プリフィル（?context=ky&work=... / ?substance=...）
-    const contextQuery = buildContextPrefill({
-      context: searchParams?.get("context"),
-      work: searchParams?.get("work"),
-      substance: searchParams?.get("substance"),
-      industry: searchParams?.get("industry"),
-    });
-    if (contextQuery) {
-      prefillAppliedRef.current = true;
-      setInput(contextQuery);
-    }
-  }, [searchParams]);
-
-  // メッセージ更新時に進行中セッションを localStorage に永続化
-  useEffect(() => {
-    saveChatHistory<StoredChatMessage>(messages as unknown as StoredChatMessage[]);
-  }, [messages]);
-
-  function saveCurrentSession(msgs: ChatMessage[]) {
-    if (msgs.length < 2) return;
-    const firstUser = msgs.find((m) => m.role === "user");
-    const title = firstUser ? firstUser.content.slice(0, 40) : "チャット";
-    const session: SavedSession = {
-      id: crypto.randomUUID(),
-      title,
-      savedAt: Date.now(),
-      messages: msgs,
-    };
-    const updated = [session, ...loadSessions().filter((s) => s.title !== title)].slice(
-      0,
-      MAX_SESSIONS
+    const lastAssistant = [...messages]
+      .reverse()
+      .find((message) => message.role === "assistant");
+    const kind = localSafetyNotice?.kind ?? lastAssistant?.safetyKind ?? null;
+    onSafetyStateChange?.(kind);
+    onTransferBlockedChange?.(
+      Boolean(localSafetyNotice || lastAssistant?.requiresHumanReview),
     );
-    saveSessions(updated);
-    setSessions(updated);
-  }
+  }, [localSafetyNotice, messages, onSafetyStateChange, onTransferBlockedChange]);
 
   async function handleSend(question?: string) {
     const text = (question ?? input).trim();
-    if (!text || isSending) return;
+    if (!text || requestPendingRef.current) return;
+    const history = messages.slice(-8).map((message) => ({
+      role: message.role,
+      content: message.content,
+    }));
 
-    trackEvent("chatbot_message", { message_length: text.length });
-    // Feed the Copilot SafetyContext so /accidents-reports and
-    // /strategy/plan-generator can pre-fill industry & concerns.
-    copilot?.ingestText(text, "chatbot");
+    const safety = evaluateChatbotSafety(text);
+    if (safety?.kind === "emergency" || safety?.kind === "privacy") {
+      setLocalSafetyNotice({ kind: safety.kind, message: safety.response });
+      setInput("");
+      setError(null);
+      setRetryableQuestion(null);
+      return;
+    }
+    const outboundPreflight = inspectAiOutbound({
+      purpose: "chatbot-client-preflight",
+      texts: [text],
+      consent: true,
+      maxChars: 4_000,
+      contextPolicy: "approved-server-corpus",
+    });
+    if (!outboundPreflight.allowed) {
+      setLocalSafetyNotice({
+        kind:
+          outboundPreflight.reason === "emergency" ? "emergency" : "privacy",
+        message: outboundPreflight.message,
+      });
+      setInput("");
+      return;
+    }
 
-    const userMsg: ChatMessage = {
-      id: crypto.randomUUID(),
-      role: "user",
-      content: text,
-    };
+    const historyInspection = inspectChatbotHistory(
+      history.filter((turn) => turn.role === "user"),
+    );
+    const unsafeHistoryIds = new Set(
+      messages
+        .filter((message) => {
+          if (message.role !== "user") return false;
+          const decision = inspectAiOutbound({
+            purpose: "chatbot-client-history-preflight",
+            texts: [message.content],
+            consent: true,
+            maxChars: 4_000,
+            contextPolicy: "approved-server-corpus",
+          });
+          return !decision.allowed;
+        })
+        .map((message) => message.id),
+    );
+    if (!historyInspection.safe || unsafeHistoryIds.size > 0) {
+      const migrated = migrateChatbotHistory(messages).messages.filter(
+        (message) => !unsafeHistoryIds.has(message.id),
+      );
+      setMessages(migrated);
+      setLocalSafetyNotice({
+        kind: "privacy",
+        message: CHATBOT_PRIVACY_RESPONSE,
+      });
+      setError(null);
+      return;
+    }
 
-    const nextMessages = [...messages, userMsg];
-    setMessages(nextMessages);
-    setInput("");
+    requestPendingRef.current = true;
+    const requestGeneration = ++requestGenerationRef.current;
     setIsSending(true);
     setError(null);
     setRetryableQuestion(null);
-    // P1-2: このターン用の AbortController（停止ボタンから abort する）
-    const controller = new AbortController();
-    abortRef.current = controller;
+    setLocalSafetyNotice(null);
+    setInput("");
 
-    // rAF defers the scroll-height read until after the browser has flushed
-    // the message-list re-render, avoiding a forced synchronous layout.
-    // Lighthouse audit 2026-05-14 (B-13) flagged forced-reflow on 11 pages.
-    requestAnimationFrame(() => {
-      const el = listRef.current;
-      if (el) el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
-    });
-
-    // P0-001 (usability-audit-day2): SSE ストリーミング応答に対応。
-    // 「送信→10秒沈黙→ドット3つ」状態を解消し、最初の文字を1秒以内に表示。
-    // 失敗時は従来 JSON 応答に自動 fallback して互換性を確保する。
+    const userMessage = createMessage("user", text);
     const assistantId = crypto.randomUUID();
-    const placeholderAssistant: ChatMessage = {
+    const placeholder: ChatMessage = {
       id: assistantId,
       role: "assistant",
       content: "",
+      requiresHumanReview: true,
     };
-    setMessages([...nextMessages, placeholderAssistant]);
+    const nextMessages = [...messages, userMessage, placeholder];
+    setMessages(nextMessages);
+    scrollConversation(listRef);
 
-    const history = messages.slice(-8).map((m) => ({ role: m.role, content: m.content }));
-    const requestBody = JSON.stringify({ message: text, history, lawCategory });
-
-    // catch 節からも参照できるよう try の外で宣言（停止時に途中までの本文を残す）
+    const controller = new AbortController();
+    abortRef.current = controller;
+    const requestBody = JSON.stringify({
+      message: text,
+      history,
+      context: sanitizeLegalConversationContext(conversationContextRef.current),
+      lawCategory,
+      // The client and server have both run the same PII/emergency gate.
+      privacyConfirmed: true,
+    });
     let streamedContent = "";
+    const timeoutId = window.setTimeout(
+      () => controller.abort("timeout"),
+      30_000,
+    );
 
     try {
-      const res = await fetch("/api/chatbot/stream", {
+      const response = await fetch("/api/chatbot/stream", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: requestBody,
         signal: controller.signal,
       });
 
-      if (!res.ok || !res.body) {
-        // Fallback to non-stream endpoint
-        throw new Error("stream-fallback");
+      if (!response.ok && (response.status === 422 || response.status === 428)) {
+        const blocked = (await response.json().catch(() => null)) as
+          | { error?: string; message?: string }
+          | null;
+        setMessages((previous) =>
+          previous.filter(
+            (message) =>
+              message.id !== userMessage.id && message.id !== assistantId,
+          ),
+        );
+        setLocalSafetyNotice({
+          kind: "privacy",
+          message:
+            blocked?.message ??
+            blocked?.error ??
+            "個人情報を除いて、もう一度入力してください。",
+        });
+        return;
+      }
+      if (!response.ok || !response.body) {
+        throw new Error("response-unavailable");
       }
 
-      const reader = res.body.getReader();
+      const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let buffer = "";
-      let finalMeta: {
-        sources?: ChatbotSource[];
-        source_type?: "rag" | "ai_inference";
-        confidence?: "high" | "medium" | "low";
-        confidenceScore?: number;
-        followups?: FollowupSuggestion[];
-        notices?: NoticeHit[];
-        citations?: StructuredCitation[];
-        relatedLaws?: RelatedLawLink[];
-        digDeeperLinks?: DigDeeperLink[];
-        scopeWarnings?: string[];
-        attachedNotices?: AttachedNotice[];
-        attachedLeaflets?: AttachedLeaflet[];
-        answer?: string;
-      } = {};
+      let finalMeta: Partial<ChatbotResponse> = {};
 
       while (true) {
         const { done, value } = await reader.read();
+        if (requestGenerationRef.current !== requestGeneration) {
+          await reader.cancel().catch(() => undefined);
+          return;
+        }
         if (done) break;
         buffer += decoder.decode(value, { stream: true });
-        // SSE は \n\n でフレーム区切り
-        let sep: number;
-        while ((sep = buffer.indexOf("\n\n")) >= 0) {
-          const frame = buffer.slice(0, sep);
-          buffer = buffer.slice(sep + 2);
-          if (!frame.trim()) continue;
+        let separator = buffer.indexOf("\n\n");
+        while (separator >= 0) {
+          const frame = buffer.slice(0, separator);
+          buffer = buffer.slice(separator + 2);
           const lines = frame.split("\n");
           let event = "message";
           let data = "";
           for (const line of lines) {
             if (line.startsWith("event:")) event = line.slice(6).trim();
-            else if (line.startsWith("data:")) data += line.slice(5).trim();
+            if (line.startsWith("data:")) data += line.slice(5).trim();
           }
-          if (!data) continue;
-          try {
-            const parsed = JSON.parse(data) as Record<string, unknown>;
-            if (event === "text" && typeof parsed.chunk === "string") {
-              streamedContent += parsed.chunk;
-              setMessages((prev) =>
-                prev.map((m) => (m.id === assistantId ? { ...m, content: streamedContent } : m)),
-              );
-              requestAnimationFrame(() => {
-                const el = listRef.current;
-                if (el) el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
-              });
-            } else if (event === "meta") {
-              finalMeta = parsed as typeof finalMeta;
-            } else if (event === "error") {
-              throw new Error(typeof parsed.message === "string" ? parsed.message : "ストリーミングエラー");
+          if (data) {
+            try {
+              const parsed = JSON.parse(data) as Record<string, unknown>;
+              if (event === "text" && typeof parsed.chunk === "string") {
+                streamedContent += parsed.chunk;
+                setMessages((previous) =>
+                  previous.map((message) =>
+                    message.id === assistantId
+                      ? { ...message, content: streamedContent }
+                      : message,
+                  ),
+                );
+                scrollConversation(listRef);
+              } else if (event === "meta") {
+                finalMeta = parsed as Partial<ChatbotResponse>;
+              } else if (event === "error") {
+                throw new Error("stream-error");
+              }
+            } catch (parseError) {
+              if (
+                parseError instanceof Error &&
+                parseError.message === "stream-error"
+              ) {
+                throw parseError;
+              }
             }
-          } catch (parseErr) {
-            if ((parseErr as Error).message.startsWith("ストリーミング")) throw parseErr;
-            // 不正フレームは黙って skip
           }
+          separator = buffer.indexOf("\n\n");
         }
       }
 
-      // ストリーミング完了 — meta を反映してセッション保存
-      setMessages((prev) => {
-        const next = prev.map((m) =>
-          m.id === assistantId
+      if (typeof finalMeta.answer !== "string" || !finalMeta.answer.trim()) {
+        throw new Error("stream-incomplete");
+      }
+
+      conversationContextRef.current = sanitizeLegalConversationContext(
+        finalMeta.context,
+      );
+
+      trackEvent("chatbot_message", { message_length: text.length });
+      setMessages((previous) =>
+        previous.map((message) =>
+          message.id === assistantId
             ? {
-                ...m,
+                ...message,
                 content: finalMeta.answer ?? streamedContent,
+                substantiveAnswer: finalMeta.substantiveAnswer,
+                assumptions: finalMeta.assumptions,
+                conditions: finalMeta.conditions,
                 sources: finalMeta.sources,
                 source_type: finalMeta.source_type,
                 confidence: finalMeta.confidence,
@@ -450,965 +459,636 @@ export function ChatbotPanel() {
                 scopeWarnings: finalMeta.scopeWarnings,
                 attachedNotices: finalMeta.attachedNotices,
                 attachedLeaflets: finalMeta.attachedLeaflets,
+                safetyKind: finalMeta.safetyKind,
+                clarification: finalMeta.clarification,
+                clarificationQuestion: finalMeta.clarificationQuestion,
+                quickReplies: finalMeta.quickReplies,
+                requiresHumanReview: finalMeta.requiresHumanReview ?? true,
               }
-            : m,
+            : message,
+        ),
+      );
+    } catch (streamError) {
+      if (requestGenerationRef.current !== requestGeneration) return;
+      setMessages((previous) =>
+        previous.filter(
+          (message) =>
+            message.id !== userMessage.id && message.id !== assistantId,
+        ),
+      );
+      if (
+        controller.signal.aborted ||
+        (streamError instanceof Error && streamError.name === "AbortError")
+      ) {
+        setError(
+          controller.signal.reason === "timeout"
+            ? "回答がタイムアウトしました。再試行できます。"
+            : "応答を停止しました。再試行できます。",
         );
-        saveCurrentSession(next);
-        return next;
-      });
-    } catch (streamErr) {
-      // P1-2: ユーザーが停止した場合は fallback せず、途中までの本文を残して終了
-      if (streamErr instanceof Error && (streamErr.name === "AbortError" || controller.signal.aborted)) {
-        setMessages((prev) => {
-          const next = streamedContent.trim()
-            ? prev.map((m) =>
-                m.id === assistantId ? { ...m, content: streamedContent + "\n\n（生成を停止しました）" } : m,
-              )
-            : prev.filter((m) => m.id !== assistantId);
-          if (streamedContent.trim()) saveCurrentSession(next);
-          return next;
-        });
-        return;
+      } else {
+        setError("回答を取得できませんでした。自動再送はしていません。");
       }
-      // P0-001: ストリーミング失敗時は従来 /api/chatbot で同期 JSON 応答に fallback
-      try {
-        const res = await fetch("/api/chatbot", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: requestBody,
-          signal: controller.signal,
-        });
-        if (!res.ok) {
-          const errBody = (await res.json()) as { error: string };
-          throw new Error(errBody.error ?? "エラーが発生しました");
-        }
-        const data = (await res.json()) as {
-          answer: string;
-          sources: ChatbotSource[];
-          source_type: "rag" | "ai_inference";
-          confidence: "high" | "medium" | "low";
-          confidenceScore?: number;
-          followups?: FollowupSuggestion[];
-          notices?: NoticeHit[];
-          citations?: StructuredCitation[];
-          relatedLaws?: RelatedLawLink[];
-          digDeeperLinks?: DigDeeperLink[];
-          scopeWarnings?: string[];
-          attachedNotices?: AttachedNotice[];
-          attachedLeaflets?: AttachedLeaflet[];
-        };
-        setMessages((prev) => {
-          const next = prev.map((m) =>
-            m.id === assistantId
-              ? {
-                  ...m,
-                  content: data.answer,
-                  sources: data.sources,
-                  source_type: data.source_type,
-                  confidence: data.confidence,
-                  confidenceScore: data.confidenceScore,
-                  followups: data.followups,
-                  notices: data.notices,
-                  citations: data.citations,
-                  relatedLaws: data.relatedLaws,
-                  digDeeperLinks: data.digDeeperLinks,
-                  scopeWarnings: data.scopeWarnings,
-                  attachedNotices: data.attachedNotices,
-                  attachedLeaflets: data.attachedLeaflets,
-                }
-              : m,
-          );
-          saveCurrentSession(next);
-          return next;
-        });
-      } catch (fallbackErr) {
-        // P1-2: fallback 中の停止は静かに終了
-        if (fallbackErr instanceof Error && (fallbackErr.name === "AbortError" || controller.signal.aborted)) {
-          setMessages((prev) => prev.filter((m) => m.id !== assistantId));
-          return;
-        }
-        const message =
-          fallbackErr instanceof Error ? fallbackErr.message : "通信エラーが発生しました";
-        setError(message);
-        // P1-2: 失敗した質問を保持し「再試行」を可能にする
-        setRetryableQuestion(text);
-        // 失敗時は placeholder を残さず除去
-        setMessages((prev) => prev.filter((m) => m.id !== assistantId));
-      }
-      // streamErr の original cause はログのみ
-      if (streamErr instanceof Error && streamErr.message !== "stream-fallback") {
-        console.warn("[chatbot] stream error, fell back to JSON:", streamErr.message);
+      setRetryableQuestion(text);
+      if (streamError instanceof Error) {
+        console.warn("[chatbot] request failed", { kind: streamError.name });
       }
     } finally {
-      setIsSending(false);
-      abortRef.current = null;
-      requestAnimationFrame(() => {
-        const el = listRef.current;
-        if (el) el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
-      });
+      window.clearTimeout(timeoutId);
+      if (requestGenerationRef.current === requestGeneration) {
+        requestPendingRef.current = false;
+        setIsSending(false);
+        abortRef.current = null;
+        scrollConversation(listRef);
+      }
     }
   }
 
-  // P1-2: 生成停止
-  function handleStop() {
-    abortRef.current?.abort();
-  }
+  useEffect(() => {
+    if (
+      initialQuestionConsumedRef.current ||
+      !initialQuestion ||
+      !initialQuestion.trim()
+    ) {
+      return;
+    }
+    initialQuestionConsumedRef.current = true;
+    const question = initialQuestion.trim();
+    onInitialQuestionConsumed?.();
+    void handleSend(question).catch(() => onInitialQuestionRejected?.());
+    // The one-shot handoff is consumed before network access and passes the
+    // same local and server safety gates as typed input.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialQuestion]);
 
-  const handleCopyMessage = useCallback(async (id: string, text: string) => {
-    await navigator.clipboard.writeText(text);
-    setCopyStates((prev) => ({ ...prev, [id]: true }));
-    setTimeout(() => setCopyStates((prev) => ({ ...prev, [id]: false })), 1500);
+  const handleCopy = useCallback(async (id: string, content: string) => {
+    const formatted = formatAnswerForDisplay(content);
+    let copied = false;
+    try {
+      await navigator.clipboard.writeText(formatted);
+      copied = true;
+    } catch {
+      const fallback = document.createElement("textarea");
+      fallback.value = formatted;
+      fallback.setAttribute("readonly", "");
+      fallback.className = "fixed left-[-9999px] top-0";
+      document.body.appendChild(fallback);
+      fallback.select();
+      copied = document.execCommand?.("copy") ?? false;
+      fallback.remove();
+    }
+    if (!copied) return;
+    setCopyStates((previous) => ({ ...previous, [id]: true }));
+    window.setTimeout(
+      () => setCopyStates((previous) => ({ ...previous, [id]: false })),
+      1_500,
+    );
   }, []);
 
-  function handleShare() {
-    if (messages.length === 0) return;
-    const encoded = encodeShare(messages);
-    const url = `${window.location.origin}/chatbot/share/${encoded}`;
-    navigator.clipboard.writeText(url).then(() => {
-      setShareToast("共有URLをコピーしました");
-      setTimeout(() => setShareToast(null), 2500);
-    });
-  }
-
-  function handleExportMD() {
-    downloadFile(messagesToMarkdown(messages), "chatbot-session.md", "text/markdown;charset=utf-8");
-    setExportOpen(false);
-  }
-
-  function handleExportTXT() {
-    downloadFile(messagesToText(messages), "chatbot-session.txt", "text/plain;charset=utf-8");
-    setExportOpen(false);
-  }
-
-  function handleExportJSON() {
-    downloadFile(JSON.stringify(messages, null, 2), "chatbot-session.json", "application/json");
-    setExportOpen(false);
-  }
-
-  function handleLoadSession(session: SavedSession) {
-    setMessages(session.messages);
-    setShowHistory(false);
-  }
-
-  function handleDeleteSession(id: string, e: React.MouseEvent) {
-    e.stopPropagation();
-    const ok =
-      typeof window === "undefined"
-        ? true
-        : window.confirm("この保存済み会話を削除します。元に戻せません。よろしいですか？");
-    if (!ok) return;
-    const updated = sessions.filter((s) => s.id !== id);
-    saveSessions(updated);
-    setSessions(updated);
-  }
-
-  function handleClearCurrent() {
-    if (messages.length === 0) return;
-    const ok =
-      typeof window === "undefined"
-        ? true
-        : window.confirm(
-            "進行中の会話履歴を削除します。よろしいですか？（保存済みセッションは残ります）"
-          );
-    if (!ok) return;
+  function handleClear() {
+    requestGenerationRef.current += 1;
+    abortRef.current?.abort();
+    abortRef.current = null;
+    requestPendingRef.current = false;
+    setIsSending(false);
+    conversationContextRef.current = {};
     setMessages([]);
-    clearChatHistory();
+    setInput("");
     setError(null);
-  }
-
-  function handleImportJSON(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      try {
-        const parsed = JSON.parse(ev.target?.result as string) as ChatMessage[];
-        if (Array.isArray(parsed) && parsed[0]?.role) {
-          setMessages(parsed);
-          setExportOpen(false);
-        }
-      } catch {
-        // ignore parse errors
-      }
-    };
-    reader.readAsText(file);
+    setRetryableQuestion(null);
+    setLocalSafetyNotice(null);
+    clearChatHistory();
+    window.requestAnimationFrame(() => composerRef.current?.focus());
   }
 
   const isEmpty = messages.length === 0;
-  const hasMessages = messages.length > 0;
+  const lastMessage = messages[messages.length - 1];
+  const activeReplyMessage =
+    !isSending &&
+    lastMessage?.role === "assistant" &&
+    quickRepliesFor(lastMessage).length > 0
+      ? lastMessage
+      : null;
+  const completedAnswerCount = messages.filter(
+    (message) => message.role === "assistant" && message.content.trim(),
+  ).length;
 
   return (
-    <div className="flex h-full flex-col gap-4">
-      {/* ツールバー */}
-      <div className="flex items-center justify-between gap-2 flex-wrap">
-        <div className="flex items-center gap-2">
-          {/* 履歴ボタン */}
-          <button
-            type="button"
-            onClick={() => setShowHistory((v) => !v)}
-            className="flex min-h-[44px] items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
-            aria-label="保存済み会話を開く"
-            title="保存済みの会話セッションを一覧表示します"
-          >
-            <History className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />保存した会話{sessions.length > 0 && <span className="text-blue-600">({sessions.length})</span>}
-          </button>
-          {/* 6.3: 音声完結モード */}
-          <button
-            type="button"
-            onClick={() => {
-              setVoiceMode((v) => !v);
-              setVoiceInputError(null);
-            }}
-            aria-pressed={voiceMode}
-            className={`flex min-h-[44px] items-center gap-1 rounded-lg border px-3 py-1.5 text-xs font-bold ${
-              voiceMode
-                ? "border-emerald-400 bg-emerald-600 text-white"
-                : "border-emerald-300 bg-white text-emerald-800 hover:bg-emerald-50"
-            }`}
-            title="音声で質問→AI回答を自動読み上げ (Web Speech API)。タップで切替"
-          >
-            <Mic className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />{voiceMode ? "音声で会話中 (タップで終了)" : "音声で会話する"}
-          </button>
-          {voiceMode && (
-            <button
-              type="button"
-              onClick={startVoiceInput}
-              className="flex min-h-[44px] items-center gap-1 rounded-lg border border-emerald-400 bg-white px-3 py-1.5 text-xs font-bold text-emerald-800 hover:bg-emerald-50"
-            >
-              <Mic className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />話して質問する
-            </button>
-          )}
-          {voiceMode && voiceInputError && (
-            <span
-              role="alert"
-              className="max-w-[240px] text-xs font-semibold leading-snug text-rose-600"
-            >
-              {voiceInputError}
-            </span>
-          )}
-        </div>
-        {hasMessages && (
-          <div className="flex items-center gap-2 flex-wrap">
-            {/* 履歴クリアボタン: 進行中の会話を削除（保存済みセッションは残る） */}
-            <button
-              type="button"
-              onClick={handleClearCurrent}
-              className="flex min-h-[44px] items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-500 hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700"
-              title={`進行中の会話を削除（最大${CHAT_HISTORY_MAX_MESSAGES}件まで自動保存）`}
-            >
-              <Trash2 className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />履歴をクリア
-            </button>
-            {/* 共有ボタン */}
-            <button
-              type="button"
-              onClick={handleShare}
-              className="flex min-h-[44px] items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
-            >
-              <Link2 className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />共有URL
-            </button>
-            {/* エクスポートドロップダウン */}
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => setExportOpen((v) => !v)}
-                aria-haspopup="true"
-                aria-expanded={exportOpen}
-                className="flex min-h-[44px] items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
-              >
-                <Download className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />エクスポート ▾
-              </button>
-              {exportOpen && (
-                <div className="absolute right-0 top-full z-20 mt-1 w-44 rounded-lg border border-slate-200 bg-white shadow-lg">
-                  <button
-                    type="button"
-                    onClick={handleExportMD}
-                    className="flex min-h-[44px] w-full items-center px-4 py-2 text-left text-xs text-slate-700 hover:bg-slate-50"
-                  >
-                    <FileText className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />Markdown (.md)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleExportTXT}
-                    className="flex min-h-[44px] w-full items-center px-4 py-2 text-left text-xs text-slate-700 hover:bg-slate-50"
-                  >
-                    <FileType className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />テキスト (.txt)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleExportJSON}
-                    className="flex min-h-[44px] w-full items-center px-4 py-2 text-left text-xs text-slate-700 hover:bg-slate-50"
-                  >
-                    <FileJson className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />JSON (.json)
-                  </button>
-                  <label className="flex min-h-[44px] w-full cursor-pointer items-center px-4 py-2 text-left text-xs text-slate-700 hover:bg-slate-50 border-t border-slate-100">
-                    <Upload className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />JSONをインポート
-                    <input type="file" accept=".json" className="sr-only" onChange={handleImportJSON} />
-                  </label>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
+    <section
+      className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-950"
+      aria-label="安衛法AIとの会話"
+      aria-busy={isSending}
+      data-ui-box={isEmpty ? "" : undefined}
+      data-chatbot-panel-state={isEmpty ? "empty" : "conversation"}
+    >
+      <div
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        className="sr-only"
+        data-chatbot-live-region=""
+      >
+        {completedAnswerCount > 0
+          ? `安衛法AIの回答 ${completedAnswerCount} を表示しました。`
+          : ""}
       </div>
-
-      {/* 履歴サイドバー */}
-      {showHistory && (
-        <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-          <p className="mb-2 text-xs font-bold text-slate-600">保存された会話履歴</p>
-          {sessions.length === 0 ? (
-            <p className="text-xs text-slate-400">まだ履歴がありません</p>
-          ) : (
-            <ul className="space-y-1 max-h-48 overflow-y-auto">
-              {sessions.map((s) => (
-                <li key={s.id}>
-                  <button
-                    type="button"
-                    onClick={() => handleLoadSession(s)}
-                    className="flex min-h-[44px] w-full items-center justify-between rounded-lg border border-slate-200 bg-white px-3 py-2 text-left text-xs text-slate-700 hover:bg-blue-50 hover:border-blue-200"
-                  >
-                    <span className="truncate max-w-[200px]">{s.title}</span>
-                    <span className="flex items-center gap-2 shrink-0">
-                      <span className="text-slate-400">
-                        {new Date(s.savedAt).toLocaleDateString("ja-JP")}
-                      </span>
-                      <span
-                        role="button"
-                        tabIndex={0}
-                        onClick={(e) => handleDeleteSession(s.id, e)}
-                        onKeyDown={(e) => e.key === "Enter" && handleDeleteSession(s.id, e as unknown as React.MouseEvent)}
-                        className="flex min-h-[44px] min-w-[44px] items-center justify-center text-slate-300 hover:text-red-500"
-                        aria-label="削除"
-                      >
-                        <X className="h-4 w-4" aria-hidden="true" />
-                      </span>
-                    </span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
+      {(messages.length > 0 || localSafetyNotice) && (
+        <div className="flex min-h-11 items-center justify-end border-b border-slate-100 px-3 dark:border-slate-800">
+          <button
+            type="button"
+            onClick={handleClear}
+            className="inline-flex min-h-11 items-center gap-1 px-2 text-xs font-medium text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+          >
+            <X className="h-3.5 w-3.5" aria-hidden="true" />
+            新しい相談
+          </button>
         </div>
       )}
 
-      {/* 免責は入力欄直下の常時表示1本に集約（柱0・文字ダイエット: 同文の二重掲示を解消。
-          内容は削っていない — 下部バナーが上位互換で常時表示） */}
-
-      {/* チャット履歴 */}
       <div
         ref={listRef}
-        className="min-h-[320px] flex-1 overflow-y-auto rounded-xl border border-slate-200 bg-slate-50/80 p-4"
+        className="min-h-0 flex-1 overflow-y-auto px-3 py-3 sm:px-5 sm:py-4"
+        role="log"
+        aria-live="off"
+        aria-relevant="additions text"
+        aria-label="会話履歴"
+        data-chatbot-history=""
       >
         {isEmpty ? (
-          <div className="flex h-full flex-col items-center justify-center gap-6 py-8">
-            <div className="text-center">
-              <div className="mb-3 flex justify-center">
-                <Mascot variant="chat-talk" size="lg" alt="" eager />
-              </div>
-              <p className="text-sm font-semibold text-slate-700">
-                労働安全衛生法についてご質問ください
-              </p>
-              <p className="mt-1 text-xs text-slate-500">
-                安衛法・安衛則・クレーン則・有機則・特化則・酸欠則に対応
-              </p>
-            </div>
-            <div className="grid w-full grid-cols-1 gap-2 sm:grid-cols-2">
-              {EXAMPLE_QUESTIONS.map((q) => (
+          <div className="mx-auto flex max-w-xl flex-col items-center gap-2 text-center">
+            <p className="text-xs font-medium text-slate-600 dark:text-slate-300">
+              質問例
+            </p>
+            <div
+              className="flex w-full flex-wrap justify-center gap-2"
+              role="group"
+              aria-label="質問例"
+            >
+              {EXAMPLE_QUESTIONS.map((question) => (
                 <button
-                  key={q}
+                  key={question}
                   type="button"
-                  onClick={() => handleSend(q)}
-                  className="flex min-h-[44px] items-center rounded-lg border border-slate-200 bg-white px-3 py-2 text-left text-sm font-semibold text-slate-700 transition hover:border-blue-300 hover:bg-blue-50 active:scale-[0.98]"
+                  data-chatbot-question-chip=""
+                  disabled={isSending}
+                  onClick={() => void handleSend(question)}
+                  className="min-h-11 rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-medium leading-4 text-slate-700 hover:border-blue-300 hover:bg-blue-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
                 >
-                  {q}
+                  {question}
                 </button>
               ))}
             </div>
           </div>
         ) : (
-          <div className="space-y-4">
-            {messages.map((msg, idx) => {
-              // 柱0・結論ファースト: 完了済みのAI回答は冒頭1〜2文(verbatim)を結論カードで
-              // デカ表示し、残りは折りたたみへ。ストリーミング中はそのまま流す（手応え優先）。
-              const isStreamingMsg =
-                msg.role === "assistant" && isSending && idx === messages.length - 1;
-              // 表示用整形: 旧形式の追記テール除去＋markdown記号の正規化（内容の語句は不変）
-              const displayContent =
-                msg.role === "assistant" ? formatAnswerForDisplay(msg.content) : msg.content;
-              const conclusionView =
-                msg.role === "assistant" && !isStreamingMsg && displayContent.trim().length > 0
-                  ? splitAnswerConclusion(displayContent)
+          <div className="space-y-5">
+            {messages.map((message, index) => {
+              const assistantAnswerNumber =
+                message.role === "assistant"
+                  ? messages
+                      .slice(0, index + 1)
+                      .filter((item) => item.role === "assistant").length
+                  : 0;
+              const isStreaming =
+                message.role === "assistant" &&
+                isSending &&
+                index === messages.length - 1;
+              const hasStructuredAnswer = Boolean(
+                message.role === "assistant" &&
+                  message.substantiveAnswer?.trim(),
+              );
+              const answer =
+                message.role === "assistant" && !hasStructuredAnswer
+                  ? displayAnswer(message.content)
                   : null;
-              const cardTone = conclusionView
-                ? answerCardTone({
-                    sourceType: msg.source_type,
-                    confidence: msg.confidence,
-                    scopeWarningCount: msg.scopeWarnings?.length ?? 0,
-                  })
-                : null;
-              const badge = conclusionView
-                ? evidenceBadge({ sourceType: msg.source_type, confidence: msg.confidence })
-                : null;
+              const conditionItems =
+                message.role === "assistant"
+                  ? structuredConditions(message)
+                  : [];
+              const clarificationQuestion =
+                message.role === "assistant"
+                  ? message.clarificationQuestion ??
+                    message.clarification?.question ??
+                    null
+                  : null;
+              const quickReplies =
+                message.role === "assistant" ? quickRepliesFor(message) : [];
+              const hasEvidence =
+                message.role === "assistant" &&
+                ((message.sources?.length ?? 0) > 0 ||
+                  (message.citations?.length ?? 0) > 0 ||
+                  (message.attachedNotices?.length ?? 0) > 0);
               return (
-              <div key={msg.id}>
-                {conclusionView && cardTone ? (
-                  <div className="flex items-start gap-2">
-                    <Mascot size="sm" className="mt-1 shrink-0" alt="AI回答" />
-                    <div className="min-w-0 max-w-[88%] flex-1 space-y-2">
-                      <AnswerConclusionCard
-                        tone={cardTone}
-                        conclusion={renderBold(conclusionView.conclusion)}
+                <article
+                  key={message.id}
+                  className={message.role === "user" ? "ml-auto max-w-[88%]" : "max-w-2xl"}
+                  aria-label={
+                    message.role === "user" ? "あなたの質問" : "安衛法AIの回答"
+                  }
+                  data-chatbot-answer={message.role === "assistant" ? "" : undefined}
+                >
+                  {message.role === "user" ? (
+                    <p className="rounded-2xl rounded-br-md bg-blue-700 px-4 py-2.5 text-sm leading-6 text-white">
+                      {message.content}
+                    </p>
+                  ) : (
+                    <div className="text-sm leading-7 text-slate-900 dark:text-slate-100">
+                      <h2
+                        id={`chatbot-answer-heading-${message.id}`}
+                        className="sr-only"
                       >
-                        {badge && (
-                          <StatusBadge tone={badge.tone} size="sm">
-                            {badge.label}
-                            {/* %は high/medium のみ（旧UIと同じ）。low で 100% と出すと過大表示になる */}
-                            {typeof msg.confidenceScore === "number" &&
-                              msg.source_type === "rag" &&
-                              msg.confidence !== "low" &&
-                              ` ${Math.round(msg.confidenceScore * 100)}%`}
-                          </StatusBadge>
-                        )}
-                        {msg.sources && msg.sources.length > 0 && (
-                          <StatusBadge tone="neutral" size="sm">
-                            出典 {msg.sources.length}件（下に表示）
-                          </StatusBadge>
-                        )}
-                      </AnswerConclusionCard>
-                      {conclusionView.rest && (
-                        <CollapsibleDetail
-                          summary={`詳しい説明（全文 ${displayContent.length}字）`}
-                        >
-                          <div className="whitespace-pre-wrap text-sm leading-6 text-slate-700 dark:text-slate-300">
-                            {renderBold(conclusionView.rest)}
+                        安衛法AIの回答 {assistantAnswerNumber}
+                      </h2>
+                      {hasStructuredAnswer ? (
+                        <div className="space-y-3" data-chatbot-structured-answer="">
+                          <section aria-label="結論">
+                            <h3 className="text-sm font-bold">結論</h3>
+                            <p className="mt-1 whitespace-pre-wrap">
+                              {message.substantiveAnswer}
+                            </p>
+                          </section>
+                          {conditionItems.length > 0 && (
+                            <section aria-label="条件で変わる点">
+                              <h3 className="text-sm font-bold">条件で変わる点</h3>
+                              <ul className="mt-1 space-y-1 pl-5">
+                                {conditionItems.map((condition) => (
+                                  <li key={condition} className="list-disc">
+                                    {condition}
+                                  </li>
+                                ))}
+                              </ul>
+                            </section>
+                          )}
+                          {clarificationQuestion && (
+                            <section aria-label="確認">
+                              <h3 className="text-sm font-bold">確認</h3>
+                              <p className="mt-1">{clarificationQuestion}</p>
+                            </section>
+                          )}
+                        </div>
+                      ) : answer?.visible ? (
+                        <AnswerContent text={answer.visible} />
+                      ) : (
+                        <span className="sr-only">回答を作成中</span>
+                      )}
+                      {answer?.rest && (
+                        <details className="mt-2 text-sm">
+                          <summary className="min-h-11 cursor-pointer py-2 font-medium text-blue-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 dark:text-blue-300">
+                            詳しく読む
+                          </summary>
+                          <div className="pb-1 text-slate-700 dark:text-slate-300">
+                            <AnswerContent text={answer.rest} />
                           </div>
-                        </CollapsibleDetail>
+                        </details>
                       )}
                     </div>
-                  </div>
-                ) : (
-                <div className={msg.role === "assistant" ? "flex items-start gap-2" : ""}>
-                  {msg.role === "assistant" && (
-                    <Mascot size="sm" className="mt-1 shrink-0" alt="AI回答" />
                   )}
-                  <div
-                    className={`max-w-[88%] rounded-xl px-4 py-3 text-sm leading-6 ${
-                      msg.role === "user"
-                        ? "ml-auto bg-blue-600 text-white"
-                        : "border border-slate-200 bg-white text-slate-800"
-                    }`}
-                    aria-live={isStreamingMsg ? "polite" : undefined}
-                    aria-atomic={isStreamingMsg ? "false" : undefined}
-                  >
-                    {msg.role === "assistant" ? (
-                      <div className="whitespace-pre-wrap">{renderBold(displayContent)}</div>
-                    ) : (
-                      <p className="whitespace-pre-wrap">{msg.content}</p>
-                    )}
-                  </div>
-                </div>
-                )}
 
-                {/* コピーボタン */}
-                <div className={`mt-1 flex items-center gap-2 ${msg.role === "assistant" ? "ml-10" : ""}`}>
-                  <button
-                    type="button"
-                    onClick={() => handleCopyMessage(msg.id, displayContent)}
-                    className="rounded border border-slate-200 bg-white px-2 py-0.5 text-[10px] text-slate-400 hover:text-slate-600 transition"
-                    aria-label="コピー"
-                  >
-                    {copyStates[msg.id] ? <><Check className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />コピー済</> : <><Copy className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />コピー</>}
-                  </button>
-                </div>
-
-                {/* 範囲外参照の警告（ハルシネーション抑制） */}
-                {msg.role === "assistant" && msg.scopeWarnings && msg.scopeWarnings.length > 0 && (
-                  <div className="mt-2 ml-10 max-w-[88%] rounded-lg border border-rose-200 bg-rose-50 p-3">
-                    <p className="text-[11px] font-bold text-rose-800"><AlertTriangle className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />提供データ範囲外の参照を検出</p>
-                    <ul className="mt-1 space-y-0.5 text-[11px] text-rose-700 leading-5">
-                      {msg.scopeWarnings.map((w, i) => (
-                        <li key={i}>・{w}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {/* 根拠の確かさ（法令DB/AI推論/信頼度）は結論カード内のチップに統合済み（柱0）。
-                    条文・出典は「詳細層」= 初期は折りたたみ（正確性不可侵: 内容は不変・タップで全文）。 */}
-                {msg.role === "assistant" && msg.sources && msg.sources.length > 0 && (
-                  <details className="mt-2 ml-10 max-w-[88%] rounded-lg border border-slate-200 bg-white p-3">
-                    <summary className="flex min-h-[44px] cursor-pointer items-center text-xs font-semibold text-slate-500 hover:text-slate-700">
-                      <BookOpen className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />参照条文 ({msg.sources.length}件) — タップで全文
-                    </summary>
-                    <div className="mt-2 space-y-2">
-                      {msg.sources.map((src, i) => (
-                        <ChatbotSourceCard key={i} src={src} />
-                      ))}
-                    </div>
-                  </details>
-                )}
-
-                {/* 構造化出典: 条文番号 + 施行日 + 発出機関 — 詳細層（初期は折りたたみ） */}
-                {msg.role === "assistant" && msg.citations && msg.citations.length > 0 && (
-                  <details
-                    className="mt-2 ml-10 max-w-[88%] rounded-lg border border-emerald-200 bg-emerald-50/60 p-3"
-                  >
-                    <summary className="flex min-h-[44px] cursor-pointer items-center text-xs font-semibold text-emerald-900 hover:text-emerald-700">
-                      <Paperclip className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />出典（条文番号＋施行日＋発出機関）{msg.citations.length}件
-                    </summary>
-                    <ul className="mt-2 space-y-1.5">
-                      {msg.citations.map((c, i) => (
-                        <li key={i} className="rounded-md bg-white p-2 text-[11px] leading-5">
-                          <div className="flex flex-wrap items-center gap-1.5">
-                            <span className="font-bold text-emerald-800">
-                              {c.lawShort}
-                              {c.articleNum}
-                            </span>
-                            {c.articleTitle && (
-                              <span className="text-slate-600">「{c.articleTitle}」</span>
-                            )}
-                          </div>
-                          <div className="mt-0.5 text-slate-700">
-                            <span className="font-semibold">所管：</span>
-                            {c.issuer}
-                            {c.effectiveDate && (
-                              <>
-                                <span className="mx-1 text-slate-400">／</span>
-                                <span className="font-semibold">施行：</span>
-                                {c.effectiveDate}
-                              </>
-                            )}
-                          </div>
-                          <div className="mt-1 flex flex-wrap gap-1.5">
-                            <a
-                              href={c.searchHref}
-                              className="rounded border border-emerald-300 bg-white px-2 py-0.5 text-[10px] font-semibold text-emerald-700 hover:bg-emerald-100"
-                            >
-                              法令検索で条文を見る
-                            </a>
-                            {c.egovHref && (
-                              <a
-                                href={c.egovHref}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="rounded border border-slate-300 bg-white px-2 py-0.5 text-[10px] font-semibold text-slate-600 hover:bg-slate-50"
-                              >
-                                e-Govで原文を見る
-                              </a>
-                            )}
-                            {c.plainHref && (
-                              <a
-                                href={c.plainHref}
-                                className="rounded border border-amber-300 bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-800 hover:bg-amber-100"
-                              >
-                                現場ことば版で読む
-                              </a>
-                            )}
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  </details>
-                )}
-
-                {/* P0-019 (usability-audit-day3): 関連系 (合わせて法令 + もっと深く知る)
-                    を「関連=スカイ」で統一し、初期は折りたたみ。1 回答に 17 色が
-                    並んでいた問題を「出典=エメラルド / 関連=スカイ / 警告=ロゼ」の
-                    3 色体系に絞り込んで視線誘導を整理する。 */}
-                {msg.role === "assistant" && msg.relatedLaws && msg.relatedLaws.length > 0 && (
-                  <details className="mt-2 ml-10 max-w-[88%] rounded-lg border border-sky-200 bg-sky-50/70 p-3">
-                    <summary className="cursor-pointer text-xs font-semibold text-sky-900 hover:text-sky-700">
-                      <Library className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />合わせて確認すべき法令 ({msg.relatedLaws.length}件)
-                    </summary>
-                    <ul className="mt-2 space-y-1">
-                      {msg.relatedLaws.map((r, i) => (
-                        <li key={i} className="text-[11px] leading-5">
-                          <a
-                            href={r.searchHref}
-                            className="font-bold text-sky-800 underline-offset-2 hover:underline"
+                  {message.role === "assistant" &&
+                    message.id === activeReplyMessage?.id &&
+                    quickReplies.length > 0 && (
+                      <div
+                        className="mt-3 flex flex-wrap gap-2"
+                        role="group"
+                        aria-label="確認する条件"
+                      >
+                        {quickReplies.map((reply) => (
+                          <button
+                            key={`${reply.label}-${reply.prompt}`}
+                            type="button"
+                            data-chatbot-question-chip=""
+                            data-chatbot-quick-reply=""
+                            onClick={() => void handleSend(reply.prompt)}
+                            className="min-h-11 rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-xs font-semibold text-blue-800 hover:bg-blue-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-200"
                           >
-                            {r.lawShort}（{r.fullName}）
-                          </a>
-                          <span className="ml-1 text-slate-600">— {r.reason}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </details>
-                )}
-
-                {/* もっと深く知る: 事故事例・通達・業種別レポート — 関連系=スカイに統一 */}
-                {msg.role === "assistant" && msg.digDeeperLinks && msg.digDeeperLinks.length > 0 && (
-                  <details className="mt-2 ml-10 max-w-[88%] rounded-lg border border-sky-200 bg-sky-50/50 p-3">
-                    <summary className="cursor-pointer text-xs font-semibold text-sky-900 hover:text-sky-700">
-                      <Search className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />もっと深く知る ({msg.digDeeperLinks.length}件)
-                    </summary>
-                    <ul className="mt-2 space-y-1.5">
-                      {msg.digDeeperLinks.map((d, i) => (
-                        <li key={i} className="text-[11px] leading-5">
-                          <a
-                            href={d.href}
-                            className="font-bold text-sky-800 underline-offset-2 hover:underline"
-                          >
-                            {d.label}
-                          </a>
-                          <span className="ml-1 text-slate-600">— {d.description}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </details>
-                )}
-
-                {/* Phase 4: 通達・告示・リーフレットカード（条文紐付け+応答引用+クエリの3層統合） */}
-                {msg.role === "assistant" && msg.attachedNotices && msg.attachedNotices.length > 0 && (
-                  <div className="ml-10 max-w-[88%]">
-                    <ChatbotNoticeList notices={msg.attachedNotices} />
-                    <p className="mt-1 text-[10px] text-amber-800 dark:text-amber-300">
-                      ※ 出典: 厚労省・中央労働災害防止協会 安全衛生情報センター。
-                      <a href="/resources" className="ml-1 underline">一次資料DB</a> も参照ください。
-                    </p>
-                  </div>
-                )}
-                {msg.role === "assistant" && msg.attachedLeaflets && msg.attachedLeaflets.length > 0 && (
-                  <div className="ml-10 max-w-[88%]">
-                    <ChatbotLeafletList leaflets={msg.attachedLeaflets} />
-                  </div>
-                )}
-                {/* 旧 notices フィールド（attachedNotices が無い古いキャッシュ応答用、後方互換） */}
-                {msg.role === "assistant" &&
-                  (!msg.attachedNotices || msg.attachedNotices.length === 0) &&
-                  msg.notices &&
-                  msg.notices.length > 0 && (
-                  <details className="mt-2 ml-10 max-w-[88%] rounded-lg border border-amber-200 bg-amber-50 p-3" open>
-                    <summary className="cursor-pointer text-xs font-semibold text-amber-900 hover:text-amber-700">
-                      関連通達・告示 ({msg.notices.length}件・拘束力レベル付き)
-                    </summary>
-                    <div className="mt-2 space-y-2">
-                      {msg.notices.map((n) => {
-                        return (
-                          <div key={n.id} className="rounded-md bg-white p-2 text-xs">
-                            <div className="flex flex-wrap items-center gap-1.5">
-                              <span className="rounded bg-slate-200 px-1.5 py-0.5 text-[10px] font-mono font-bold text-slate-700">
-                                {n.docType}
-                              </span>
-                              {n.noticeNumber && (
-                                <span className="rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-mono font-semibold text-blue-900">
-                                  {n.noticeNumber}
-                                </span>
-                              )}
-                              <BindingBadge level={n.bindingLevel} />
-                              {n.issuedDateRaw && (
-                                <span className="text-[10px] text-slate-500">{n.issuedDateRaw}</span>
-                              )}
-                            </div>
-                            <p className="mt-1 font-semibold text-slate-900 leading-snug">{n.title}</p>
-                            {n.issuer && (
-                              <p className="mt-0.5 text-[11px] text-slate-600">発出: {n.issuer}</p>
-                            )}
-                            <a
-                              href={n.detailUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="mt-1 inline-flex items-center gap-1 rounded border border-amber-300 bg-white px-2 py-0.5 text-[10px] font-semibold text-amber-700 hover:bg-amber-50"
-                            >
-                              原文（安全衛生情報センター）
-                            </a>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </details>
-                )}
-
-                {/* フォローアップ質問サジェスト */}
-                {msg.role === "assistant" && msg.followups && msg.followups.length > 0 && !isSending && (
-                  <div className="mt-2 ml-10 max-w-[88%]">
-                    <p className="mb-1 text-[11px] text-slate-500">続けて質問する：</p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {msg.followups.map((fu, i) => (
-                        <button
-                          key={i}
-                          type="button"
-                          onClick={() => handleSend(fu.prompt)}
-                          className="inline-flex min-h-[44px] items-center rounded-full border border-blue-200 bg-blue-50 px-4 py-1 text-xs font-semibold text-blue-700 transition hover:bg-blue-100 active:scale-[0.98]"
-                        >
-                          {fu.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* 6.2: 横断アクション — KY/RA/法改正へ遷移
-                    + Copilot深化：業種別レポート・年次計画への直接遷移 */}
-                {msg.role === "assistant" && !isSending && (
-                  <div className="mt-2 ml-10 max-w-[88%]">
-                    <p className="mb-1 text-[11px] text-slate-500">この内容を活用：</p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {/* Copilot連携: 業種が検出済みなら業種別レポートへ、
-                          そうでなければハブへフォールバック */}
-                      <a
-                        href={
-                          copilot?.state.industry
-                            ? `/accidents-reports/${copilot.state.industry}`
-                            : `/accidents-reports`
-                        }
-                        className="inline-flex min-h-[44px] items-center rounded-full border border-rose-300 bg-rose-50 px-4 py-1 text-xs font-bold text-rose-800 hover:bg-rose-100"
-                      >
-                        → 業種別 事故レポート
-                      </a>
-                      <a
-                        href={(() => {
-                          const params = new URLSearchParams();
-                          if (copilot?.state.industry)
-                            params.set("industry", copilot.state.industry);
-                          if (copilot?.state.keyConcerns?.[0])
-                            params.set("focus", copilot.state.keyConcerns[0]);
-                          const qs = params.toString();
-                          return `/strategy/plan-generator${qs ? `?${qs}` : ""}`;
-                        })()}
-                        className="inline-flex min-h-[44px] items-center rounded-full border border-violet-300 bg-violet-50 px-4 py-1 text-xs font-bold text-violet-800 hover:bg-violet-100"
-                      >
-                        → 年次計画に反映
-                      </a>
-                      {/* P1-4: プレフィルは回答本文の途中切れではなく直前のユーザ質問を使う */}
-                      <a
-                        href={`/ky?q=${encodeURIComponent(
-                          (messages[idx - 1]?.role === "user" ? messages[idx - 1].content : msg.content).slice(0, 80),
-                        )}`}
-                        className="inline-flex min-h-[44px] items-center rounded-full border border-emerald-300 bg-emerald-50 px-4 py-1 text-xs font-bold text-emerald-800 hover:bg-emerald-100"
-                      >
-                        → KYで確認
-                      </a>
-                      <a
-                        href={`/chemical-ra?name=${encodeURIComponent(
-                          (messages[idx - 1]?.role === "user" ? messages[idx - 1].content : msg.content).slice(0, 40),
-                        )}`}
-                        className="inline-flex min-h-[44px] items-center rounded-full border border-violet-300 bg-violet-50 px-4 py-1 text-xs font-bold text-violet-800 hover:bg-violet-100"
-                      >
-                        → 化学物質RA
-                      </a>
-                      <a
-                        href={`/laws?q=${encodeURIComponent(
-                          (messages[idx - 1]?.role === "user" ? messages[idx - 1].content : msg.content).slice(0, 40),
-                        )}`}
-                        className="inline-flex min-h-[44px] items-center rounded-full border border-sky-300 bg-sky-50 px-4 py-1 text-xs font-bold text-sky-800 hover:bg-sky-100"
-                      >
-                        → 法改正一覧
-                      </a>
-                      <a
-                        href="/signage"
-                        className="inline-flex min-h-[44px] items-center rounded-full border border-amber-300 bg-amber-50 px-4 py-1 text-xs font-bold text-amber-800 hover:bg-amber-100"
-                        title="朝礼・現場の常時表示画面で活用"
-                      >
-                        → サイネージで掲示
-                      </a>
-                    </div>
-                    {/* P2項目9: 統一CTA — 結果画面下部の次アクション (最後のメッセージのみ表示) */}
-                    {idx === messages.length - 1 && (
-                      <div className="mt-3">
-                        <MainFeatureNextActions exclude="chatbot" />
+                            {reply.label}
+                          </button>
+                        ))}
                       </div>
                     )}
-                  </div>
-                )}
-              </div>
+
+                  {message.role === "assistant" &&
+                    !isStreaming &&
+                    hasEvidence && (
+                      <SourceDetails message={message} />
+                    )}
+
+                  {message.role === "assistant" &&
+                    !isStreaming && (
+                    <div
+                      className="mt-2 flex min-h-11 items-center gap-3"
+                      data-chatbot-answer-actions=""
+                    >
+                      <button
+                        type="button"
+                        onClick={() =>
+                          void handleCopy(
+                            message.id,
+                            message.substantiveAnswer ?? message.content,
+                          )
+                        }
+                        className="inline-flex min-h-11 items-center gap-1 px-1 text-xs font-medium text-slate-500 hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 dark:text-slate-400 dark:hover:text-white"
+                      >
+                        {copyStates[message.id] ? (
+                          <Check className="h-3.5 w-3.5" aria-hidden="true" />
+                        ) : (
+                          <Copy className="h-3.5 w-3.5" aria-hidden="true" />
+                        )}
+                        {copyStates[message.id] ? "コピー済み" : "コピー"}
+                      </button>
+                      {!message.safetyKind && !(answer?.rest && hasEvidence) && (
+                        <button
+                          type="button"
+                          onClick={() => composerRef.current?.focus()}
+                          className="min-h-11 px-1 text-xs font-medium text-slate-500 hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 dark:text-slate-400 dark:hover:text-white"
+                        >
+                          条件を追加
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </article>
               );
             })}
-
-            {/* 送信中インジケータ＋停止ボタン (P1-2) */}
-            {isSending && (
-              <div className="flex items-center gap-2 border border-slate-200 bg-white rounded-xl px-4 py-3 max-w-[88%]">
-                <span className="inline-flex gap-1">
-                  <span className="h-2 w-2 rounded-full bg-slate-400 animate-bounce [animation-delay:0ms]" />
-                  <span className="h-2 w-2 rounded-full bg-slate-400 animate-bounce [animation-delay:150ms]" />
-                  <span className="h-2 w-2 rounded-full bg-slate-400 animate-bounce [animation-delay:300ms]" />
-                </span>
-                <span className="text-xs text-slate-500">回答を生成中...</span>
-                <button
-                  type="button"
-                  onClick={handleStop}
-                  className="ml-2 rounded-full border border-slate-300 bg-white px-3 py-1 text-[11px] font-semibold text-slate-600 transition hover:bg-slate-100 active:scale-[0.98]"
-                  aria-label="生成を停止"
-                >
-                  <Square className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />停止
-                </button>
-              </div>
-            )}
           </div>
         )}
       </div>
 
-      {/* エラー表示＋再試行 (P1-2) */}
+      {localSafetyNotice && (
+        <div
+          role="alert"
+          data-safety-kind={localSafetyNotice.kind}
+          className={`mx-3 mb-2 rounded-xl border px-3 py-2 text-sm font-semibold leading-6 sm:mx-5 ${
+            localSafetyNotice.kind === "emergency"
+              ? "border-red-500 bg-red-50 text-red-950 dark:bg-red-950 dark:text-red-100"
+              : "border-amber-300 bg-amber-50 text-amber-950 dark:bg-amber-950 dark:text-amber-100"
+          }`}
+        >
+          {localSafetyNotice.message}
+        </div>
+      )}
+
       {error && (
         <div
           role="alert"
-          className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700"
+          className="mx-3 mb-2 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800 sm:mx-5 dark:border-red-900 dark:bg-red-950 dark:text-red-100"
         >
           <span>{error}</span>
           {retryableQuestion && !isSending && (
             <button
               type="button"
               onClick={() => {
-                const q = retryableQuestion;
+                const question = retryableQuestion;
                 setRetryableQuestion(null);
                 setError(null);
-                if (q) handleSend(q);
+                void handleSend(question);
               }}
-              className="rounded-full border border-red-300 bg-white px-3 py-1 text-xs font-semibold text-red-700 transition hover:bg-red-100 active:scale-[0.98]"
+              className="inline-flex min-h-11 items-center gap-1 rounded-full border border-red-300 bg-white px-3 py-2 text-xs font-semibold text-red-800 dark:bg-red-950 dark:text-red-100"
             >
-              <RotateCcw className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />再試行
+              <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
+              再試行
             </button>
           )}
         </div>
       )}
 
-      {/* 法令カテゴリセレクタ */}
-      <div className="flex flex-wrap items-center gap-2">
-        <label className="text-xs font-semibold text-slate-700" htmlFor="law-category-select">
-          検索対象
-        </label>
-        <select
-          id="law-category-select"
-          value={lawCategory}
-          onChange={(e) => setLawCategory(e.target.value as LawCategoryFilter)}
-          className="rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
-        >
-          {LAW_CATEGORY_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>
-              {o.label}
-            </option>
-          ))}
-        </select>
-        <span className="text-[11px] text-slate-500">
-          {lawCategory === "all" ? "全法令から検索" : `${lawCategory}に絞って検索`}
-        </span>
-      </div>
-
-      {/* C-001 / 柱C-6: quick-question chips above textarea — always visible for beginners.
-          会話開始後（履歴あり）はこの行が「打たずにタップで追質問」の唯一の動線になるため、
-          指タップで誤爆なく押せるよう最小タップ標的を 44px に統一（空状態の質問例ボタンと同基準）。 */}
-      <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="クイック質問例">
-        <span className="text-[11px] font-semibold text-slate-500">質問例：</span>
-        {EXAMPLE_QUESTIONS.slice(0, 3).map((q) => (
-          <button
-            key={q}
-            type="button"
+      <form
+        className="sticky bottom-0 z-20 mt-auto shrink-0 scroll-mb-[calc(var(--mobile-bottom-nav-h,0px)+env(safe-area-inset-bottom,0px)+1rem)] border-t border-slate-100 bg-white/95 px-3 pb-2 pt-2 backdrop-blur sm:px-5 dark:border-slate-800 dark:bg-slate-950/95"
+        data-chatbot-composer=""
+        onSubmit={(event) => {
+          event.preventDefault();
+          void handleSend(composerRef.current?.value);
+        }}
+      >
+        <div className="flex items-end gap-2 rounded-2xl border border-slate-300 bg-white p-2 shadow-sm focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 dark:border-slate-700 dark:bg-slate-900 dark:focus-within:ring-blue-950">
+          <textarea
+            ref={composerRef}
+            rows={1}
+            defaultValue={input}
+            suppressHydrationWarning
             disabled={isSending}
-            onClick={() => handleSend(q)}
-            className="inline-flex min-h-[44px] items-center rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-xs font-semibold text-blue-700 transition hover:bg-blue-100 active:scale-[0.98] disabled:opacity-40"
-          >
-            {q}
-          </button>
-        ))}
-      </div>
-
-      {/* 入力エリア */}
-      <div className="flex gap-2">
-        <textarea
-          rows={3}
-          value={input}
-          disabled={isSending}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => {
-            if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
-              e.preventDefault();
-              handleSend();
-            }
-          }}
-          placeholder={"安衛法について質問を入力…\nCmd/Ctrl+Enter で送信"}
-          className="min-w-0 flex-1 resize-none rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-base text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 disabled:opacity-60 sm:text-sm"
-          aria-label="質問入力"
-        />
-        <div className="flex flex-col gap-2">
-          <VoiceMicButton
-            onFinalText={(text) => setInput((prev) => (prev ? `${prev} ${text}` : text))}
-            className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40"
+            onChange={(event) => {
+              setInput(event.target.value);
+              setLocalSafetyNotice(null);
+            }}
+            onKeyDown={(event) => {
+              if (
+                event.key === "Enter" &&
+                !event.shiftKey &&
+                !event.nativeEvent.isComposing
+              ) {
+                event.preventDefault();
+                void handleSend(event.currentTarget.value);
+              }
+            }}
+            placeholder="作業や設備を質問"
+            aria-label="質問入力"
+            aria-describedby="chatbot-input-hint"
+            className="max-h-28 min-h-11 min-w-0 flex-1 resize-none bg-transparent px-2 py-2 text-base leading-6 text-slate-950 outline-none placeholder:text-slate-500 disabled:opacity-60 sm:text-sm dark:text-white"
+            data-primary-focus=""
           />
-          <button
-            type="button"
-            disabled={isSending || !input.trim()}
-            onClick={() => handleSend()}
-            className="shrink-0 rounded-lg bg-blue-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            送信
-          </button>
+          <VoiceMicButton
+            onFinalText={(text) => {
+              setInput((previous) => (previous ? `${previous} ${text}` : text));
+              setLocalSafetyNotice(null);
+            }}
+            className="min-h-11 min-w-11 shrink-0 rounded-full text-slate-500 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+          />
+          {isSending ? (
+            <button
+              type="button"
+              onClick={() => abortRef.current?.abort()}
+              aria-label="生成を停止"
+              className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-full bg-slate-900 text-white hover:bg-slate-700 dark:bg-white dark:text-slate-950"
+            >
+              <Square className="h-4 w-4" aria-hidden="true" />
+            </button>
+          ) : (
+            <button
+              type="submit"
+              disabled={!input.trim()}
+              aria-label="送信"
+              className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-full bg-blue-700 text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <Send className="h-4 w-4" aria-hidden="true" />
+            </button>
+          )}
         </div>
-      </div>
-
-      {/* C-005: disclaimer directly below send button, always visible on all viewports */}
-      <p className="text-xs text-amber-800 leading-5 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2">
-        <span className="font-bold"><AlertTriangle className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />本回答は法的助言ではありません。</span>
-        　具体的な判断は必ず専門家（労働安全コンサルタント等）にご相談ください。
-        最新の法令は{" "}
-        <a
-          href="https://laws.e-gov.go.jp/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="underline hover:text-amber-900"
+        <p
+          id="chatbot-input-hint"
+          className="mt-1 px-2 text-[11px] leading-4 text-slate-500 dark:text-slate-400"
         >
-          e-Gov法令検索
-        </a>
-        {" "}でご確認ください。
-      </p>
-
-      {/* 共有URLコピー完了トースト */}
-      {shareToast && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 rounded-full bg-slate-800 px-5 py-2.5 text-sm font-semibold text-white shadow-lg z-50">
-          {shareToast}
-        </div>
-      )}
-    </div>
+          個人情報は入力しない
+          <span className="sr-only">
+            。Enterで送信、Shift+Enterで改行します。
+          </span>
+        </p>
+      </form>
+    </section>
   );
 }
 
-/**
- * 参照条文 1 件分のカード。
- * 200 字でトリミングしたダイジェストと、トグルで表示する条文全文を持つ。
- * fullText が無い（MLIT 資料等の）場合は従来どおり text のみ表示。
- */
-function ChatbotSourceCard({ src }: { src: ChatbotSource }) {
-  const [showFull, setShowFull] = useState(false);
-  const lawName = src.law.replace(/（[^）]+）$/, "");
-  const egovHref = EGOV_LAW_NUMBERS[lawName]
-    ? `https://laws.e-gov.go.jp/law/${EGOV_LAW_NUMBERS[lawName]}`
-    : `https://laws.e-gov.go.jp/search?keyword=${encodeURIComponent(src.law)}`;
-  const hasFull =
-    typeof src.fullText === "string" &&
-    src.fullText.length > 0 &&
-    src.fullText !== src.text;
-
+function SourceDetails({ message }: { message: ChatMessage }) {
+  const citations = message.citations ?? [];
+  const sources = message.sources ?? [];
+  const relatedNotices = (message.attachedNotices ?? []).filter(
+    (notice) => notice.evidenceRole === "related-material",
+  );
+  const matchedCitationIndexes = new Set<number>();
+  const entries: Array<{
+    source?: ChatbotSource;
+    citation?: StructuredCitation;
+  }> = sources.map((source) => {
+    const citationIndex = citations.findIndex(
+      (citation, index) =>
+        !matchedCitationIndexes.has(index) &&
+        source.article.includes(citation.articleNum) &&
+        (source.law.includes(citation.lawShort) ||
+          source.law.includes(citation.fullName)),
+    );
+    if (citationIndex >= 0) matchedCitationIndexes.add(citationIndex);
+    return {
+      source,
+      citation: citationIndex >= 0 ? citations[citationIndex] : undefined,
+    };
+  });
+  if (sources.length === 0) {
+    citations.forEach((citation) => entries.push({ citation }));
+  }
+  const statusLabel: Record<
+    NonNullable<ChatbotSource["applicationStatus"]>,
+    string
+  > = {
+    current: "現在施行中",
+    future: "将来施行",
+    past: "過去時点",
+    unknown: "確認不能",
+  };
+  const count = entries.length;
+  const summary = [
+    `根拠 ${count}件`,
+    relatedNotices.length > 0 ? `関連資料 ${relatedNotices.length}件` : null,
+  ]
+    .filter(Boolean)
+    .join("・");
   return (
-    <div className="rounded-md bg-slate-50 p-2 text-xs">
-      <div className="flex flex-wrap items-center justify-between gap-1">
-        <p className="font-semibold text-blue-700">
-          {src.law} {src.article}
-        </p>
-        <a
-          href={src.url ?? egovHref}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="shrink-0 rounded border border-blue-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-blue-600 hover:bg-blue-50"
+    <details
+      className="mt-3 border-y border-slate-200 py-1 dark:border-slate-800"
+      data-chatbot-source-details=""
+    >
+      <summary className="flex min-h-11 cursor-pointer items-center py-2 text-xs font-semibold text-slate-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 dark:text-slate-200">
+        {summary}
+      </summary>
+      {entries.length > 0 && <ol className="space-y-3 pb-3">
+        {entries.map(({ source, citation }, index) => {
+          const officialUrl = citation?.egovHref ?? source?.url;
+          const excerpt = (source?.snippet ?? source?.text ?? "該当箇所を取得できません").slice(
+            0,
+            240,
+          );
+          const applicationStatus = source?.applicationStatus ?? "unknown";
+          return (
+            <li key={`${citation?.lawShort ?? source?.law ?? "source"}-${index}`} className="text-xs leading-5">
+              <p className="font-semibold text-slate-900 dark:text-white">
+                ［{index + 1}］{citation?.fullName ?? source?.law} {citation?.articleNum ?? source?.article}
+              </p>
+              {(source?.paragraph || source?.item) && (
+                <p className="text-slate-600 dark:text-slate-300">
+                  {[source.paragraph, source.item].filter(Boolean).join("・")}
+                </p>
+              )}
+              {citation?.articleTitle && (
+                <p className="text-slate-600 dark:text-slate-300">
+                  {citation.articleTitle}
+                </p>
+              )}
+              {source?.lawNumber && (
+                <p className="text-slate-600 dark:text-slate-300">
+                  法令番号: {source.lawNumber}
+                </p>
+              )}
+              <p className="mt-1 text-slate-600 dark:text-slate-300">
+                施行状態: {statusLabel[applicationStatus]}
+                {source?.effectiveOn ? `（${source.effectiveOn}）` : ""}
+                {source?.asOf ? `・対象 ${source.asOf}` : ""}
+              </p>
+              <p className="mt-1 text-slate-700 dark:text-slate-200">
+                該当箇所: {excerpt}
+              </p>
+              {officialUrl && (
+                <a
+                  href={officialUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-1 inline-flex min-h-11 items-center font-semibold text-blue-800 underline-offset-4 hover:underline dark:text-blue-300"
+                >
+                  公式原文
+                </a>
+              )}
+            </li>
+          );
+        })}
+      </ol>}
+      {relatedNotices.length > 0 && (
+        <section
+          aria-labelledby={`chatbot-related-notices-heading-${message.id}`}
+          className="border-t border-slate-200 pb-3 pt-3 dark:border-slate-800"
         >
-          {src.url ? "原文を確認" : "e-Gov で確認"}
-        </a>
-      </div>
-      {src.snippet && src.snippet !== src.text && (
-        <p className="mt-1 rounded bg-yellow-50 px-1.5 py-1 text-[11px] text-amber-900 leading-5">
-          <Lightbulb className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />該当箇所: {src.snippet}
-        </p>
+          <h3
+            id={`chatbot-related-notices-heading-${message.id}`}
+            className="text-xs font-semibold text-slate-900 dark:text-white"
+          >
+            関連資料（条文本文とは別）
+          </h3>
+          <ul className="mt-2 space-y-3">
+            {relatedNotices.map((notice) => (
+              <li
+                key={notice.id}
+                className="text-xs leading-5 text-slate-700 dark:text-slate-200"
+                data-chatbot-related-notice=""
+                data-evidence-role={notice.evidenceRole}
+              >
+                <p className="font-semibold text-slate-900 dark:text-white">
+                  {notice.title}
+                </p>
+                <p className="text-slate-600 dark:text-slate-300">
+                  {[notice.noticeNumber, notice.issuedDateRaw, notice.issuer]
+                    .filter(Boolean)
+                    .join("・")}
+                </p>
+                {notice.locator && (
+                  <p className="mt-1">該当箇所: {notice.locator}</p>
+                )}
+                {notice.excerpt && (
+                  <p className="mt-1">該当抜粋: {notice.excerpt}</p>
+                )}
+                {notice.independentlyCheckedAt && (
+                  <p className="mt-1 text-slate-500 dark:text-slate-400">
+                    一次資料照合: {notice.independentlyCheckedAt}
+                  </p>
+                )}
+                <div className="mt-1 flex flex-wrap gap-x-4">
+                  {notice.pdfUrl && (
+                    <a
+                      href={notice.pdfUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex min-h-11 items-center font-semibold text-blue-800 underline-offset-4 hover:underline dark:text-blue-300"
+                    >
+                      公式PDF
+                    </a>
+                  )}
+                  <a
+                    href={notice.sourceUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex min-h-11 items-center font-semibold text-blue-800 underline-offset-4 hover:underline dark:text-blue-300"
+                  >
+                    掲載ページ
+                  </a>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
-      <p className="mt-1 whitespace-pre-wrap text-slate-600 leading-5">
-        {showFull && src.fullText ? src.fullText : src.text}
-      </p>
-      {hasFull && (
-        <button
-          type="button"
-          onClick={() => setShowFull((v) => !v)}
-          className="mt-1.5 inline-flex items-center gap-1 rounded-full border border-blue-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-blue-700 hover:bg-blue-50"
-          aria-expanded={showFull}
-        >
-          {showFull ? "▲ 全文を閉じる" : "▼ 条文全文を表示"}
-        </button>
-      )}
-    </div>
+    </details>
   );
 }

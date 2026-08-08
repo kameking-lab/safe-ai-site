@@ -6,7 +6,7 @@ import {
   weatherSchema,
 } from "./schema";
 
-describe("safety-diary zod schemas", () => {
+describe("safety-diary browser-safe schemas", () => {
   describe("industryPresetSchema", () => {
     it("有効な業種を受理する", () => {
       expect(industryPresetSchema.parse("construction")).toBe("construction");
@@ -16,6 +16,7 @@ describe("safety-diary zod schemas", () => {
 
     it("未定義の業種を拒否する", () => {
       expect(() => industryPresetSchema.parse("unknown")).toThrow();
+      expect(industryPresetSchema.safeParse("unknown").success).toBe(false);
     });
   });
 

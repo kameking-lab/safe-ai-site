@@ -127,4 +127,28 @@ describe("deriveDangerAlertInput", () => {
     };
     expect(deriveDangerAlertInput(byIso).warnings).toEqual([]);
   });
+
+  it("警報レベルでも解除・発表なしは自動警報入力へ残さない", () => {
+    const byIso: JmaWarningsByIso = {
+      "JP-13": {
+        level: "warning",
+        entries: [
+          entry({
+            level: "warning",
+            headline: "伊豆諸島の暴風警報を解除しました",
+            warnings: [
+              { areaCode: "a", code: "03", status: "解除", level: "warning" },
+              {
+                areaCode: "a",
+                code: "04",
+                status: "発表警報・注意報はなし",
+                level: "warning",
+              },
+            ],
+          }),
+        ],
+      },
+    };
+    expect(deriveDangerAlertInput(byIso).warnings).toEqual([]);
+  });
 });

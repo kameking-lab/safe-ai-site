@@ -83,7 +83,7 @@ export function LadderStatsCard() {
 
       <div className="mt-3 flex flex-wrap items-center gap-2">
         <Link
-          href="/ky?preset=ladder"
+          href="/ky/paper?preset=ladder"
           className="inline-flex items-center gap-1 rounded-lg bg-amber-700 px-3 py-2 text-xs font-semibold text-white hover:bg-amber-800"
         >
           <Hammer className="h-3.5 w-3.5" aria-hidden="true" />

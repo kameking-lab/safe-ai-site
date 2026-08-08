@@ -22,18 +22,21 @@ function elementBlock(source: string, tagStart: string, label: string, fromIndex
   return source.slice(tagIndex, labelIndex);
 }
 
-describe("signage-header.tsx のナビ5リンクが44pxタップ標的を満たす", () => {
+describe("signage-header.tsx の簡潔なナビ3リンクが44pxタップ標的を満たす", () => {
   const SOURCE = readSource("src/components/signage/signage-header.tsx");
   const labels = [
     "ポータルへ戻る",
-    "法改正一覧へ",
     "KY用紙へ",
-    "記録キットへ",
-    "通知設定へ",
+    "表示・異常時の運用ガイド",
+    "多拠点・端末管理",
   ];
 
   it.each(labels)("%s", (label) => {
     expect(elementBlock(SOURCE, "<Link", label)).toMatch(/min-h-\[44px\]/);
+  });
+
+  it("関連操作メニューが44pxタップ標的を満たす", () => {
+    expect(elementBlock(SOURCE, "<summary", "メニュー")).toMatch(/min-h-11/);
   });
 });
 
@@ -52,10 +55,10 @@ describe("signage-morning-script.tsx の操作ボタン3個が44pxタップ標�
   });
 });
 
-describe("signage-risk-prediction.tsx の「詳細予測 →」リンクが44pxタップ標的を満たす", () => {
+describe("signage-risk-prediction.tsx の「気象・地域リスクを確認 →」リンクが44pxタップ標的を満たす", () => {
   it("min-h-[44px]を含む", () => {
     const SOURCE = readSource("src/components/signage/signage-risk-prediction.tsx");
-    expect(elementBlock(SOURCE, "<a", "詳細予測 →")).toMatch(/min-h-\[44px\]/);
+    expect(elementBlock(SOURCE, "<a", "気象・地域リスクを確認 →")).toMatch(/min-h-\[44px\]/);
   });
 });
 

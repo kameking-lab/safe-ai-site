@@ -184,7 +184,7 @@ const TERMS: Term[] = [
 export default function LawsGlossaryPage() {
   const url = `${SITE_URL}/laws/glossary`;
   return (
-    <main className="mx-auto max-w-4xl px-4 py-8">
+    <div className="mx-auto max-w-4xl px-4 py-8">
       <JsonLd
         schema={[
           webPageSchema({ name: _title, description: _desc, url }),
@@ -292,6 +292,6 @@ export default function LawsGlossaryPage() {
           </li>
         </ul>
       </section>
-    </main>
+    </div>
   );
 }

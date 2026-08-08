@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { GET } from "./route";
 import { CONCENTRATION_LIMITS } from "@/lib/mhlw-chemicals";
 import { computeSitemapFreshness } from "@/lib/sitemap/freshness";
+import { isIndexableChemical } from "@/lib/seo/index-quality";
 
 // 柱C-3-3 追補5 / A-3: 化学物質 個別詳細 /chemical-database/[cas] のサイトマップ収載の回帰テスト。
 // 濃度基準DB（約3,515物質）はサイト最大級の独自コンテンツだが、本体 sitemap.xml には一覧
@@ -30,15 +31,29 @@ describe("GET /sitemap-chemicals.xml", () => {
     expect(xml).toContain('xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"');
   });
 
-  it("は正本 CONCENTRATION_LIMITS.substances の全CASキーを /chemical-database/<cas> として出力する", async () => {
+  it("は品質ゲートを満たすCASだけを /chemical-database/<cas> として出力する", async () => {
     const xml = await getXml();
     const cas = extractCas(xml);
-    const expected = new Set(Object.keys(CONCENTRATION_LIMITS.substances));
+    const expected = new Set(
+      Object.entries(CONCENTRATION_LIMITS.substances)
+        .filter(([key, entry]) => isIndexableChemical(key, entry))
+        .map(([key]) => key),
+    );
     // データ規模の非空虚性（サイト最大級の独自コンテンツ）。
     expect(cas.length).toBeGreaterThan(1000);
-    // 出力CAS集合＝正本のキー集合と完全一致（欠落・幽霊URLともにゼロ）。
+    // 出力CAS集合＝正本に品質ゲートを適用した集合と完全一致。
     expect(new Set(cas)).toEqual(expected);
     expect(cas.length).toBe(expected.size);
+  });
+
+  it("薄い・出典未検証のレコードはサイトマップへ含めない", async () => {
+    const xml = await getXml();
+    const actual = new Set(extractCas(xml));
+    const excluded = Object.entries(CONCENTRATION_LIMITS.substances)
+      .filter(([cas, entry]) => !isIndexableChemical(cas, entry))
+      .map(([cas]) => cas);
+    expect(excluded.length).toBeGreaterThan(0);
+    for (const cas of excluded) expect(actual.has(cas)).toBe(false);
   });
 
   it("の各URLは一覧トップ /chemical-database ではなく個別詳細へ深リンクする（裸 /chemical-database 不在）", async () => {

@@ -1,18 +1,16 @@
 #!/usr/bin/env node
 /**
- * Autonomous RSS news-feed fetcher for labor-accident reporting.
+ * RSS news-feed fetcher for the human-reviewed labor-accident queue.
  *
  * Stage 1 of the B.2 pipeline:
  *   fetch-news-feed.mjs  -> emits scripts/etl/data/news-feed-candidates.json
- *   news-ai-judge.mjs    -> reads that file, judges with Gemini, writes
- *                            web/src/data/news-feed/{approved,rejected}/index.json
+ *   news-ai-judge.mjs    -> deterministic prefilter; writes the pending
+ *                            human-review queue (no external AI call)
  *
  * Design notes
  * ------------
  *  - Only headline + source URL is retained. No verbatim body text.
- *  - Independent AI summaries are produced in stage 2 (news-ai-judge.mjs),
- *    not here, so this script is offline-friendly when the Gemini key is
- *    unset.
+ *  - This stage and the prefilter do not send fetched data to generative AI.
  *  - Sources are restricted to outlets whose redistribution status is
  *    unambiguous:
  *       * NHK NEWS WEB RSS  - public RSS, headline citation under Article 32
@@ -63,8 +61,8 @@ const FETCH_TIMEOUT_MS = 15_000;
  *   - kind: "rss"  – standard RSS 2.0 with <item><title><link><pubDate>
  *   - kind: "atom" – Atom feed with <entry><title><link href="..">
  *
- * The matchKeywords pass is strictly a coarse pre-filter; the AI judge gate
- * is the authoritative relevance check.
+ * The matchKeywords pass is strictly a coarse pre-filter. A human reviewer
+ * is the final publication gate.
  */
 const SOURCES = [
   {
@@ -219,10 +217,9 @@ function matchesKeywords(title) {
 }
 
 /**
- * Collect every URL the pipeline has ever seen so we never re-judge an entry.
+ * Collect every URL the pipeline has ever seen so we do not duplicate an entry.
  * Approved + rejected are merged here; if a URL was rejected once it stays
- * rejected (the AI gate is deterministic enough at the score threshold that
- * re-rolling the dice would just waste API quota).
+ * rejected. Reconsidering a rejected item requires an explicit human action.
  */
 async function loadSeenIds() {
   const approved = await readJsonOrDefault(APPROVED_PATH, { entries: [] });

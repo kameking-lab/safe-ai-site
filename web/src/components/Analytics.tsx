@@ -1,12 +1,19 @@
 'use client';
 
 import Script from 'next/script';
-import { usePathname, useSearchParams } from 'next/navigation';
-import { useEffect, Suspense } from 'react';
+import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import {
+  hasOptionalTrackingConsent,
+  hasPrivacySignalOptOut,
+  isOptionalTrackingUrl,
+  sanitizedAnalyticsLocation,
+  sanitizeAnalyticsParams,
+} from '@/lib/analytics-privacy';
 
 declare global {
   interface Window {
-    gtag?: (command: string, targetId: string, params?: Record<string, unknown>) => void;
+    gtag?: (...args: unknown[]) => void;
     dataLayer?: unknown[];
   }
 }
@@ -14,39 +21,56 @@ declare global {
 const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 
 export function trackEvent(action: string, params?: Record<string, unknown>) {
-  if (!GA_ID || typeof window === 'undefined' || !window.gtag) return;
-  window.gtag('event', action, params);
+  if (
+    !GA_ID ||
+    typeof window === 'undefined' ||
+    !window.gtag ||
+    !hasOptionalTrackingConsent() ||
+    hasPrivacySignalOptOut() ||
+    !isOptionalTrackingUrl(window.location.href)
+  ) return;
+  window.gtag('event', action, sanitizeAnalyticsParams(params));
 }
 
-function PageviewTracker() {
+function PageviewTracker({ ready }: { ready: boolean }) {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
 
   useEffect(() => {
-    if (!GA_ID || typeof window === 'undefined' || !window.gtag) return;
-    const query = searchParams.toString();
-    const url = pathname + (query ? `?${query}` : '');
-    window.gtag('config', GA_ID, { page_path: url });
-  }, [pathname, searchParams]);
+    if (!ready || !GA_ID || typeof window === 'undefined' || !window.gtag || !hasOptionalTrackingConsent() || hasPrivacySignalOptOut()) return;
+    const location = sanitizedAnalyticsLocation(window.location.href);
+    if (!location) return;
+    window.gtag('consent', 'update', {
+      analytics_storage: 'granted',
+      ad_storage: 'denied',
+      ad_user_data: 'denied',
+      ad_personalization: 'denied',
+    });
+    window.gtag('event', 'page_view', { ...location, send_to: GA_ID });
+  }, [pathname, ready]);
 
   return null;
 }
 
-export default function Analytics() {
+export default function Analytics({ nonce }: { nonce?: string }) {
+  const [ready, setReady] = useState(false);
   if (!GA_ID) return null;
 
   return (
     <>
       <Script
+        nonce={nonce}
         src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
         strategy="lazyOnload"
       />
-      <Script id="gtag-init" strategy="lazyOnload">
-        {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${GA_ID}');`}
+      <Script
+        nonce={nonce}
+        id="gtag-init"
+        strategy="lazyOnload"
+        onReady={() => setReady(true)}
+      >
+        {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('consent','default',{'analytics_storage':'denied','ad_storage':'denied','ad_user_data':'denied','ad_personalization':'denied'});gtag('set',{'allow_google_signals':false,'allow_ad_personalization_signals':false});gtag('config','${GA_ID}',{'send_page_view':false,'anonymize_ip':true,'allow_google_signals':false,'allow_ad_personalization_signals':false});`}
       </Script>
-      <Suspense fallback={null}>
-        <PageviewTracker />
-      </Suspense>
+      <PageviewTracker ready={ready} />
     </>
   );
 }

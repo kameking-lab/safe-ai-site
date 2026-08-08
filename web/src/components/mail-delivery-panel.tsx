@@ -36,7 +36,7 @@ export function MailDeliveryPanel({
             id="mail-email"
             className="mt-1 w-full"
             onChange={(event) => update({ email: event.target.value })}
-            placeholder="safety-team@example.com"
+            placeholder="配信先メールアドレス"
             type="email"
             value={value.email}
           />

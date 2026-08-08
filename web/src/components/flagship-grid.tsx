@@ -13,7 +13,7 @@ const FEATURE_CTA_JA: Record<string, string> = {
   laws: "法改正を確認",
   chatbot: "AIに質問する",
   accidents: "事故事例を検索",
-  "education-certification": "必要資格を判定",
+  "education-certification": "資格候補を確認",
   industries: "業種から探す",
   "work-environment": "管理区分を判定",
 };
@@ -26,7 +26,7 @@ const FEATURE_CTA_EN: Record<string, string> = {
   laws: "View updates",
   chatbot: "Ask the AI",
   accidents: "Search incidents",
-  "education-certification": "Find required licenses",
+  "education-certification": "Review qualification candidates",
   industries: "Browse by sector",
   "work-environment": "Classify environment",
 };
@@ -45,7 +45,7 @@ const EN_FEATURE_COPY: Record<string, { title: string; description: string }> = 
   "chemical-ra": {
     title: "Chemical Risk Assessment",
     description:
-      "CREATE-SIMPLE compliant lite RA. Linked to chemical DB and SDS — covers general industrial chemicals to organic solvents.",
+      "Public chemical-data lookup linked to SDS and the official assessment workflow — no automated exposure score.",
   },
   signage: {
     title: "Workplace Signage",
@@ -63,14 +63,14 @@ const EN_FEATURE_COPY: Record<string, { title: string; description: string }> = 
       "Chatbot specialized in the Occupational Safety & Health Act, related ordinances, and notices. Answers cite article numbers and sources.",
   },
   accidents: {
-    title: "Accident Cases & Analysis",
+    title: "Serious Incident Information",
     description:
-      "Search ~5,000 integrated MHLW accident records, plus industry analysis reports, a statistics dashboard, and a fatal-accident case browser.",
+      "Review serious-incident information labelled by source and follow links to authoritative public sources. Locally reprinted case records remain unavailable until verified.",
   },
   "education-certification": {
-    title: "Special Education & Skill Training DB",
+    title: "Training & Qualification Candidate Search",
     description:
-      "Full catalog of ~60 special-education courses (OSH Rule Art. 36) and ~40 skill-training courses. Instantly identifies required qualifications by industry and task, with cited articles.",
+      "Separate special education, skill training, appointments, and licenses; narrow candidates by task conditions and confirm them in official sources.",
   },
   industries: {
     title: "Industry Portals (10 sectors)",
@@ -106,13 +106,13 @@ export function FlagshipGrid() {
           <div className="flex shrink-0 flex-col items-end gap-1 text-xs font-semibold">
             <Link
               href="/features/quick-tour"
-              className="text-emerald-700 hover:underline"
+              className="inline-flex min-h-[44px] items-center text-emerald-700 hover:underline"
             >
-              {isEn ? "New here? 3-min tour →" : "初めての方へ・3分ツアー →"}
+              {isEn ? "New here? 5-min tour →" : "初めての方へ・5分ツアー →"}
             </Link>
             <Link
               href="/features"
-              className="text-slate-500 hover:text-emerald-700 hover:underline dark:text-slate-400"
+              className="inline-flex min-h-[44px] items-center text-slate-600 hover:text-emerald-700 hover:underline dark:text-slate-300"
             >
               {isEn ? "All features →" : "機能一覧（全機能）→"}
             </Link>

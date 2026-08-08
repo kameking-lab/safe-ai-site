@@ -41,6 +41,21 @@ function articleMatches(
   );
 }
 
+const retrievalCases = RAG_100_QUESTIONS.filter(
+  (testCase) => !testCase.disposition,
+);
+
+function matchesExpectedEvidence(
+  articles: Array<{ law: string; lawShort: string; articleNum: string }>,
+  testCase: (typeof retrievalCases)[number],
+): boolean {
+  const matchOne = (gold: (typeof testCase.gold)[number]) =>
+    articles.some((article) => articleMatches(article, gold));
+  return testCase.requiredAll
+    ? testCase.gold.every(matchOne)
+    : testCase.gold.some(matchOne);
+}
+
 describe("Phase 2 評価メトリクス: Citation Accuracy@1", () => {
   it(
     `top-1 が gold に含まれる率が ${(CITATION_AT1_TARGET * 100).toFixed(0)}% 以上`,
@@ -50,7 +65,7 @@ describe("Phase 2 評価メトリクス: Citation Accuracy@1", () => {
       let totalWhitelistSize = 0;
       const failures: number[] = [];
 
-      for (const tc of RAG_100_QUESTIONS) {
+      for (const tc of retrievalCases) {
         const { articles } = searchRelevantArticlesWithScore(tc.question, TOP_K);
         const top1 = articles[0];
         const ok =
@@ -63,10 +78,10 @@ describe("Phase 2 評価メトリクス: Citation Accuracy@1", () => {
         totalWhitelistSize += allowed.length;
       }
 
-      const accAt1 = correctAt1 / RAG_100_QUESTIONS.length;
-      const avgWhitelistSize = totalWhitelistSize / RAG_100_QUESTIONS.length;
+      const accAt1 = correctAt1 / retrievalCases.length;
+      const avgWhitelistSize = totalWhitelistSize / retrievalCases.length;
       console.log(
-        `\n[Phase 2] Citation Accuracy@1: ${correctAt1}/${RAG_100_QUESTIONS.length} = ${(
+        `\n[Phase 2] Citation Accuracy@1: ${correctAt1}/${retrievalCases.length} = ${(
           accAt1 * 100
         ).toFixed(1)}%`
       );
@@ -85,17 +100,29 @@ describe("Phase 2 評価メトリクス: Citation Accuracy@1", () => {
     { timeout: 30000 },
     () => {
       let correctAt5 = 0;
-      for (const tc of RAG_100_QUESTIONS) {
+      const failures: number[] = [];
+      const failureDetails: string[] = [];
+      for (const tc of retrievalCases) {
         const { articles } = searchRelevantArticlesWithScore(tc.question, TOP_K);
-        const ok = tc.gold.some((g) => articles.some((r) => articleMatches(r, g)));
+        const ok = matchesExpectedEvidence(articles, tc);
         if (ok) correctAt5++;
+        else {
+          failures.push(tc.id);
+          failureDetails.push(
+            `Q${tc.id}: ${articles.map((article) => `${article.lawShort}${article.articleNum}`).join(", ")}`,
+          );
+        }
       }
-      const recall5 = correctAt5 / RAG_100_QUESTIONS.length;
+      const recall5 = correctAt5 / retrievalCases.length;
       console.log(
-        `[Phase 2] Recall@5: ${correctAt5}/${RAG_100_QUESTIONS.length} = ${(
+        `[Phase 2] Recall@5: ${correctAt5}/${retrievalCases.length} = ${(
           recall5 * 100
         ).toFixed(1)}%`
       );
+      if (failures.length > 0) {
+        console.log(`[Phase 2] @5 failures: ${failures.join(", ")}`);
+        console.log(`[Phase 2] @5 results:\n${failureDetails.join("\n")}`);
+      }
       // Phase 1a のメインベンチで 100% を維持していたため、ここでは 99% 以上を下限に設定
       expect(recall5).toBeGreaterThanOrEqual(0.99);
     }
@@ -112,7 +139,7 @@ describe("Phase 2 評価メトリクス: Hallucination Rate", () => {
       let falsePositive = 0;
       const fpQuestions: number[] = [];
 
-      for (const tc of RAG_100_QUESTIONS) {
+      for (const tc of retrievalCases) {
         const { articles } = searchRelevantArticlesWithScore(tc.question, TOP_K);
         const allowed = buildAllowedCitations(articles);
         // 応答テキスト: 検索ヒットのうち上位3件を引用
@@ -126,9 +153,9 @@ describe("Phase 2 評価メトリクス: Hallucination Rate", () => {
           fpQuestions.push(tc.id);
         }
       }
-      const fpRate = falsePositive / RAG_100_QUESTIONS.length;
+      const fpRate = falsePositive / retrievalCases.length;
       console.log(
-        `[Phase 2] Layer 2 False Positive Rate: ${falsePositive}/${RAG_100_QUESTIONS.length} = ${(
+        `[Phase 2] Layer 2 False Positive Rate: ${falsePositive}/${retrievalCases.length} = ${(
           fpRate * 100
         ).toFixed(2)}%`
       );
@@ -167,7 +194,7 @@ describe("Phase 2 評価メトリクス: Hallucination Rate", () => {
 
 describe("Phase 2 評価メトリクス: Pre-gen ホワイトリスト整合性", () => {
   it("ホワイトリストの正規化キーは Set 化しても重複しない", () => {
-    for (const tc of RAG_100_QUESTIONS.slice(0, 20)) {
+    for (const tc of retrievalCases.slice(0, 20)) {
       const { articles } = searchRelevantArticlesWithScore(tc.question, TOP_K);
       const allowed = buildAllowedCitations(articles);
       const keys = allowedCitationKeySet(allowed);
@@ -177,12 +204,12 @@ describe("Phase 2 評価メトリクス: Pre-gen ホワイトリスト整合性"
 
   it("ホワイトリストの平均サイズが TOP_K の半分以上（重複排除後）", { timeout: 15000 }, () => {
     let total = 0;
-    for (const tc of RAG_100_QUESTIONS) {
+    for (const tc of retrievalCases) {
       const { articles } = searchRelevantArticlesWithScore(tc.question, TOP_K);
       const allowed = buildAllowedCitations(articles);
       total += allowed.length;
     }
-    const avg = total / RAG_100_QUESTIONS.length;
+    const avg = total / retrievalCases.length;
     // RAG が同一条文を重複ヒットさせていないことの背理法的確認
     expect(avg).toBeGreaterThanOrEqual(TOP_K / 2);
   });

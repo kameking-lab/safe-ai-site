@@ -23,6 +23,11 @@ export function generateStaticParams() {
   return getResidenceStatusIds().map((id) => ({ status: id }));
 }
 
+function metadataDescription(summary: string): string {
+  if (summary.length >= 35) return summary;
+  return `${summary} 就労範囲と、事業主が確認する安全衛生上の要点を整理しています。`;
+}
+
 export async function generateMetadata(
   props: StatusPageProps,
 ): Promise<Metadata> {
@@ -30,7 +35,7 @@ export async function generateMetadata(
   const rule = getResidenceStatusRule(status as ResidenceStatusId);
   if (!rule) return { title: "在留資格ガイド" };
   const title = `${rule.labelJa}の安全衛生ガイド｜事業主義務と労働者の権利`;
-  const description = rule.summary;
+  const description = metadataDescription(rule.summary);
   return {
     title,
     description,

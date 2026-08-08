@@ -18,9 +18,33 @@ type SignageHourlyStripProps = {
   hourly: SignageHourlyPoint[];
   locationLabel: string;
   status: "idle" | "loading" | "success" | "error";
+  fetchedAt?: string | null;
+  forecastFrom?: string | null;
+  forecastThrough?: string | null;
 };
 
-export function SignageHourlyStrip({ hourly, locationLabel, status }: SignageHourlyStripProps) {
+function formatJst(value: string | null | undefined): string {
+  if (!value) return "不明";
+  const date = new Date(value);
+  if (!Number.isFinite(date.getTime())) return "不明";
+  return new Intl.DateTimeFormat("ja-JP", {
+    timeZone: "Asia/Tokyo",
+    month: "numeric",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(date);
+}
+
+export function SignageHourlyStrip({
+  hourly,
+  locationLabel,
+  status,
+  fetchedAt,
+  forecastFrom,
+  forecastThrough,
+}: SignageHourlyStripProps) {
   if (status === "loading" || status === "idle") {
     return (
       <div className="rounded-xl border border-slate-600 bg-slate-950/90 p-2">
@@ -44,7 +68,11 @@ export function SignageHourlyStrip({ hourly, locationLabel, status }: SignageHou
         <p className="text-[10px] font-bold text-slate-100 sm:text-xs xl:text-lg">1時間ごとの天気（現在の時間帯〜明日・Open-Meteo）</p>
         <p className="max-w-[55%] truncate text-[9px] text-slate-400 xl:text-sm">{locationLabel}</p>
       </div>
-      <p className="mt-0.5 text-[8px] text-slate-500 xl:text-sm">先頭が現在の時間帯。幅に応じて折り返し表示（横スクロールなし）。</p>
+      <p className="mt-0.5 text-[8px] text-slate-300 xl:text-sm">
+        Open-Meteo取得: {formatJst(fetchedAt)} JST ／ 予報対象: {formatJst(forecastFrom)}〜
+        {formatJst(forecastThrough)} JST
+      </p>
+      <p className="mt-0.5 text-[8px] text-slate-400 xl:text-sm">先頭が現在の時間帯。幅に応じて折り返し表示（横スクロールなし）。</p>
       <div
         className="mt-2 grid gap-1 [grid-template-columns:repeat(auto-fill,minmax(46px,1fr))] xl:[grid-template-columns:repeat(auto-fill,minmax(72px,1fr))]"
         role="list"

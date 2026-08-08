@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { Share2, Link2, Check, MessageSquare } from "lucide-react";
-import { SITE_STATS } from "@/data/site-stats";
 
-const SUPPORT_TEMPLATE = `安全AIポータル を応援しています。労働安全衛生分野の AI・DX 研究プロジェクトで、通達 ${SITE_STATS.lawArticleCount} 条文・事故DB ${SITE_STATS.accidentDbCount} 件・化学物質情報を一次ソース付きで無料公開しています。`;
+const SUPPORT_TEMPLATE =
+  "安全AIポータルを利用しています。公式一次資料への到達、今日の安全確認、KY・法令・事故・化学物質の実務確認を支援する無料機能があります。AIは補助で、現場条件と公式資料の確認が必要です。";
 
 type ShareButtonsProps = {
   /** シェア対象のテキスト（記事タイトル・AI応答要約・KY結果サマリー等） */

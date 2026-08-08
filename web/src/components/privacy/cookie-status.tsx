@@ -1,9 +1,11 @@
 import { isGaEnabled } from "@/lib/analytics-env";
+import { getRumServerReadiness } from "@/lib/rum/server-readiness";
 
 // Server component: shows current GA4 deployment status based on env var.
 // Audit reference: harsh-third-party-2026-05-16 G-005.
 export function PrivacyCookieStatus() {
   const gaEnabled = isGaEnabled();
+  const rumReadiness = getRumServerReadiness();
 
   return (
     <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
@@ -24,9 +26,9 @@ export function PrivacyCookieStatus() {
           {gaEnabled ? (
             <>
               <span className="ml-1 inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800">
-                有効
+                同意時のみ有効
               </span>
-              <span className="ml-2 text-slate-600">（送信先: Google LLC・米国）</span>
+              <span className="ml-2 text-slate-600">（初期状態は拒否・送信先: Google LLC）</span>
             </>
           ) : (
             <>
@@ -43,6 +45,28 @@ export function PrivacyCookieStatus() {
             未導入
           </span>
           <span className="ml-2 text-slate-600">（本サービス自体では設定していません）</span>
+        </li>
+        <li>
+          <span className="font-semibold">匿名Web Vitals（RUM）：</span>
+          {rumReadiness.ready ? (
+            <>
+              <span className="ml-1 inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800">
+                同意時のみ有効
+              </span>
+              <span className="ml-2 text-slate-600">
+                （保持期間 {rumReadiness.retentionDays} 日、機微ルート・Previewは対象外）
+              </span>
+            </>
+          ) : (
+            <>
+              <span className="ml-1 inline-flex items-center rounded-full bg-slate-200 px-2 py-0.5 text-xs font-semibold text-slate-700">
+                未導入
+              </span>
+              <span className="ml-2 text-slate-600">
+                （送信先・保持期間・DPA・本番レート制御の条件未充足時は送信しません）
+              </span>
+            </>
+          )}
         </li>
       </ul>
     </div>

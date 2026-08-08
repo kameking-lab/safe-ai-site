@@ -3,7 +3,7 @@
 import { AlertTriangle } from "lucide-react";
 import { BINDING_BADGE, type SourceBindingLevel } from "@/lib/gemini";
 
-/** 出典の拘束力バッジ */
+/** 文書種別バッジ。法的効力を自動判定するものではない。 */
 export function BindingBadge({ level }: { level: SourceBindingLevel }) {
   const { label, color } = BINDING_BADGE[level];
   return (
@@ -19,7 +19,7 @@ type AIResponseCardProps = {
   children: React.ReactNode;
   /** true のときに免責バナーを表示（デフォルト true） */
   showDisclaimer?: boolean;
-  /** "medium" 以上の信頼度のとき拘束力バッジを強調表示 */
+  /** 回答生成側の信頼区分（法的効力とは別）。 */
   confidence?: "high" | "medium" | "low";
   className?: string;
 };
@@ -49,18 +49,18 @@ export function AIResponseCard({
   );
 }
 
-/** 拘束力バッジ一覧（法令・告示・通達・指針の説明付き凡例） */
+/** 文書種別一覧。具体的効力は根拠法令と個別文書で確認する。 */
 export function BindingLevelLegend() {
   const levels: SourceBindingLevel[] = ["law", "binding", "indirect", "reference"];
   const descriptions: Record<SourceBindingLevel, string> = {
-    law: "法律・政令・省令（違反すると罰則あり）",
-    binding: "告示（拘束力あり、法令と同等の効果）",
-    indirect: "通達（行政解釈・行政指導。間接的拘束）",
-    reference: "指針・ガイドライン（参考。法的拘束力なし）",
+    law: "法律・政令・省令等。現行条文、対象、罰則条項を個別確認",
+    binding: "告示。根拠法令、委任、対象、効力を個別確認",
+    indirect: "通達。行政内部の解釈・運用資料で、事業者への義務を自動判定しない",
+    reference: "指針・ガイドライン。根拠法令と位置付けを個別確認",
   };
   return (
     <div className="text-xs text-gray-600 space-y-1">
-      <p className="font-semibold text-gray-700 mb-1">出典の拘束力レベル</p>
+      <p className="font-semibold text-gray-700 mb-1">文書種別と確認事項</p>
       {levels.map((lvl) => (
         <div key={lvl} className="flex items-center gap-2">
           <BindingBadge level={lvl} />

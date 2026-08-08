@@ -15,7 +15,14 @@ import {
   citesGoldArticle,
   type GenQualityResponse,
 } from "@/lib/chatbot-genquality-scorer";
-import { GEN_QUALITY_CASES } from "@/lib/chatbot-genquality.fixture";
+import {
+  GEN_QUALITY_CASES,
+  type GenQualityCase,
+} from "@/lib/chatbot-genquality.fixture";
+import {
+  GEN_QUALITY_SOURCE_RECORDS,
+  type GenQualitySourceRecord,
+} from "@/lib/chatbot-genquality-source-records";
 
 function caseById(id: string) {
   const tc = GEN_QUALITY_CASES.find((c) => c.id === id);
@@ -194,5 +201,213 @@ describe("採点器の部品", () => {
     // in-scope 41 + boundary 6（労基法・労施法域は収録済のため採点対象）
     expect(summary.scorable).toBe(47);
     expect(summary.outOfScope.total).toBe(4);
+  });
+});
+
+describe("GQ05 主張単位の一次資料支持", () => {
+  const completeAnswer =
+    "施行通達の基発0520第6号が対象作業の目安として示すのは、" +
+    "WBGT28度以上又は気温31度以上で、連続1時間以上又は1日4時間を超えることが見込まれる作業です。" +
+    "これは第612条の2の条文本文ではなく施行通達の対象作業の目安です。" +
+    "第612条の2の法定2項目は、報告体制と悪化防止手順の整備・周知です。";
+
+  it("28/31だけを第612条の2へ結び付けた回答をcorrectにしない", () => {
+    const score = scoreGenQuality(caseById("GQ05"), {
+      answer:
+        "安衛則第612条の2により、WBGT28度以上または気温31度以上が一律の法定基準です。",
+      confidence: "high",
+      citations: [{ lawShort: "安衛則", articleNum: "第612条の2" }],
+    });
+    expect(score.verdict).toBe("incorrect");
+    expect(score.checks.forbidden).toBe("fail");
+    expect(score.failureKinds).toContain("conclusion-wrong");
+    expect(score.failureKinds).toContain("unsupported-claim");
+  });
+
+  it("時間条件・通達上の目安・条文閾値でない旨が欠けると不合格", () => {
+    const score = scoreGenQuality(caseById("GQ05"), {
+      answer:
+        "WBGT28度以上または気温31度以上です。根拠は安衛則第612条の2です。",
+      confidence: "high",
+      citations: [{ lawShort: "安衛則", articleNum: "第612条の2" }],
+    });
+    expect(score.verdict).toBe("incorrect");
+    expect(score.checks.conclusion).toBe("partial");
+    expect(score.failureKinds).toContain("unsupported-claim");
+  });
+
+  it("回答文が全条件を満たしても、通達の一次資料引用がなければ支持済みにしない", () => {
+    const lawRecord = GEN_QUALITY_SOURCE_RECORDS.find(
+      (record) => record.id === "egov-osh-rule-612-2",
+    );
+    if (!lawRecord?.excerpt || !lawRecord.locator) {
+      throw new Error("第612条の2の独立一次資料recordがありません");
+    }
+    const score = scoreGenQuality(caseById("GQ05"), {
+      answer: completeAnswer,
+      confidence: "medium",
+      citations: [{ lawShort: "安衛則", articleNum: "第612条の2" }],
+      evidenceCitations: [
+        {
+          sourceId: lawRecord.id,
+          documentNumber: lawRecord.documentNumber,
+          url: lawRecord.url,
+          locator: lawRecord.locator,
+          excerpt: lawRecord.excerpt,
+          sourceClass: "primary",
+        },
+      ],
+    });
+    expect(score.checks.conclusion).toBe("pass");
+    expect(score.checks.citation).toBe("pass");
+    expect(score.checks.support).toBe("fail");
+    expect(score.failureKinds).toEqual(["unsupported-claim"]);
+    expect(score.verdict).toBe("incorrect");
+  });
+
+  it("612条の2と基発0520第6号を別々の一次資料で引用した場合だけ支持済みになる", () => {
+    const lawRecord = GEN_QUALITY_SOURCE_RECORDS.find(
+      (record) => record.id === "egov-osh-rule-612-2",
+    );
+    const noticeRecord = GEN_QUALITY_SOURCE_RECORDS.find(
+      (record) => record.id === "mhlw-heat-notice-0520-6",
+    );
+    if (
+      !lawRecord?.excerpt ||
+      !lawRecord.locator ||
+      !noticeRecord?.excerpt ||
+      !noticeRecord.locator
+    ) {
+      throw new Error("GQ05の独立一次資料recordが不足しています");
+    }
+
+    const score = scoreGenQuality(caseById("GQ05"), {
+      answer: completeAnswer,
+      confidence: "medium",
+      citations: [{ lawShort: "安衛則", articleNum: "第612条の2" }],
+      evidenceCitations: [lawRecord, noticeRecord].map((record) => ({
+        sourceId: record.id,
+        documentNumber: record.documentNumber,
+        url: record.url,
+        locator: record.locator ?? undefined,
+        excerpt: record.excerpt ?? undefined,
+        sourceClass: record.sourceClass,
+      })),
+    });
+
+    expect(score.checks).toMatchObject({
+      conclusion: "pass",
+      forbidden: "pass",
+      citation: "pass",
+      support: "pass",
+    });
+    expect(score.failureKinds).toEqual([]);
+    expect(score.verdict).toBe("correct");
+  });
+});
+
+describe("一次資料の未支持・間接・失効を区別する", () => {
+  const testCase: GenQualityCase = {
+    id: "SUPPORT-TEST",
+    category: "in-scope",
+    diagVerdict: "未",
+    question: "条件Aは何ですか？",
+    mustInclude: [["条件A"]],
+    goldCitations: [],
+    sourceRequirements: [
+      {
+        claimId: "condition-a",
+        label: "条件A",
+        sourceId: "primary-a",
+        sourceMustContain: ["条件A", "対象"],
+      },
+    ],
+    expectRetrievable: false,
+  };
+  const primaryRecord: GenQualitySourceRecord = {
+    id: "primary-a",
+    title: "一次資料A",
+    publisher: "公的機関",
+    documentNumber: "文書A",
+    url: "https://example.go.jp/document-a",
+    sourceClass: "primary",
+    retrievedAt: "2026-07-24",
+    locator: "第2 1",
+    excerpt: "第2 1 条件Aの対象を定める。",
+    hash: "a".repeat(64),
+    status: "snapshot-hash-verified",
+    humanReviewStatus: "not-reviewed",
+    successorSourceId: null,
+  };
+
+  const supportedResponse: GenQualityResponse = {
+    answer: "条件Aの対象です。",
+    evidenceCitations: [
+      {
+        sourceId: "primary-a",
+        documentNumber: "文書A",
+        url: "https://example.go.jp/document-a",
+        locator: "第2 1",
+        excerpt: "第2 1 条件Aの対象を定める。",
+        sourceClass: "primary",
+      },
+    ],
+  };
+
+  it("独立recordと公式URL・locator・excerptが一致すると支持済みになる", () => {
+    const score = scoreGenQuality(testCase, supportedResponse, [primaryRecord]);
+    expect(score.checks.support).toBe("pass");
+    expect(score.verdict).toBe("correct");
+  });
+
+  it("文書名だけで引用箇所がない場合はunsupported-claim", () => {
+    const score = scoreGenQuality(
+      testCase,
+      {
+        answer: "条件Aです。",
+        evidenceCitations: [
+          {
+            documentNumber: "文書A",
+            url: primaryRecord.url,
+          },
+        ],
+      },
+      [primaryRecord],
+    );
+    expect(score.verdict).toBe("incorrect");
+    expect(score.failureKinds).toContain("unsupported-claim");
+  });
+
+  it("同じ文書番号でも二次掲載URLだけならindirect-source", () => {
+    const score = scoreGenQuality(
+      testCase,
+      {
+        answer: "条件Aです。",
+        evidenceCitations: [
+          {
+            documentNumber: "文書A",
+            url: "https://secondary.example/document-a",
+            locator: "第2 1",
+            excerpt: primaryRecord.excerpt ?? undefined,
+            sourceClass: "secondary",
+          },
+        ],
+      },
+      [primaryRecord],
+    );
+    expect(score.verdict).toBe("incorrect");
+    expect(score.failureKinds).toContain("indirect-source");
+  });
+
+  it("失効recordは現行根拠として採用せずsuperseded-source", () => {
+    const score = scoreGenQuality(testCase, supportedResponse, [
+      {
+        ...primaryRecord,
+        status: "superseded",
+        successorSourceId: "primary-a-current",
+      },
+    ]);
+    expect(score.verdict).toBe("incorrect");
+    expect(score.failureKinds).toContain("superseded-source");
   });
 });

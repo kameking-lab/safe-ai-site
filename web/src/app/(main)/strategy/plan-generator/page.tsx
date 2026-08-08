@@ -16,6 +16,8 @@ import { CopilotMemo } from "@/components/copilot/CopilotMemo";
 import { CopilotNextSteps } from "@/components/copilot/CopilotNextSteps";
 import { INDUSTRY_LABELS, SCALE_LABELS } from "@/types/safety-plan";
 import { ogImageUrl } from "@/lib/og-url";
+import { AutomationServicePromo } from "@/components/automation/automation-service-promo";
+import { getAutomationConsultAvailability } from "@/lib/automation-consult/availability";
 import { Mascot } from "@/components/mascot";
 
 const _title = "年次安全衛生計画 業種別 ジェネレーター｜13業種×3規模・無料・PDF";
@@ -155,6 +157,12 @@ export default function PlanGeneratorPage() {
           intro="生成前でも、業種別レポートで事故傾向を先に確認すると、本フォームの「重点取組み」が自動で引き継がれます。"
         />
       </PageContainer>
+      <AutomationServicePromo
+        position="annual_plan"
+        availability={getAutomationConsultAvailability()}
+        title="年次計画・月次報告の集計を自動化できます"
+        cta="現場業務の効率化を相談する"
+      />
     </div>
   );
 }

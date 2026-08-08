@@ -24,6 +24,7 @@ import {
   type ArticleRef,
 } from "@/lib/article-number-normalize";
 import { getAllowedReferenceKeys } from "@/lib/article-registry";
+import { verifiedLawArticles } from "@/data/laws/verified-corpus";
 import type { AllowedCitation } from "@/lib/chatbot-prompt-builder";
 
 /**
@@ -112,6 +113,26 @@ const LAW_SHORT_ALIASES: Record<string, string[]> = {
   女性則: ["女性則", "女性労働基準規則"],
   年少者則: ["年少者則", "年少者労働基準規則"],
 };
+
+/**
+ * hash 検証済み e-Gov 本文コーパスの条レベルキー。
+ *
+ * RAG はこの全条文コーパスを使う一方、旧 article-registry は代表条文だけを
+ * 収録している。後段検証が旧レジストリだけを見ると、RAG が返した実在条文を
+ * Pattern A（架空条文）へ誤分類するため、両方を実在確認の正本にする。
+ */
+const VERIFIED_CORPUS_ARTICLE_KEYS = new Set(
+  verifiedLawArticles.flatMap((article) => {
+    const ref = parseArticleNum(article.articleNum);
+    if (!ref) return [];
+    return [
+      `${article.lawShort}|${refToKey({
+        article: ref.article,
+        branch: ref.branch,
+      })}`,
+    ];
+  }),
+);
 
 /**
  * 応答テキスト中の「(法令短縮名)第N条…」を抽出する。
@@ -236,10 +257,9 @@ export function validateCitations(
     // 1) DB に条文番号自体（条レベル）が存在しない → 完全ハルシネーション
     // registryKeys は「条までで一意」ではなく、登録された全エントリの key 集合なので
     // 条レベルでヒットがあるかを別途確認する必要がある。
-    const inRegistryArticle = anyRegistryKeyMatchesArticle(
-      registryKeys,
-      articleOnlyKey
-    );
+    const inRegistryArticle =
+      anyRegistryKeyMatchesArticle(registryKeys, articleOnlyKey) ||
+      VERIFIED_CORPUS_ARTICLE_KEYS.has(articleOnlyKey);
     if (!inRegistryArticle) {
       findings.push({
         pattern: "A",

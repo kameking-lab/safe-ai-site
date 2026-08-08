@@ -40,7 +40,7 @@ const HERO_BUTTONS: HeroButton[] = [
   {
     label: "気象警報",
     sublabel: "現場リスク確認",
-    href: "/risk-prediction",
+    href: "/risk",
     icon: <Cloud size={44} aria-hidden="true" />,
     bg: "bg-sky-500 hover:bg-sky-600 active:bg-sky-700",
   },

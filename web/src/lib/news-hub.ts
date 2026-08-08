@@ -11,7 +11,7 @@
  */
 
 import { lawRevisionCores } from "@/data/mock/law-revisions";
-import { mhlwNotices } from "@/data/mhlw-notices";
+import { publicMhlwNotices as mhlwNotices } from "@/data/public-mhlw-notices";
 import { buildEnforcementBadge } from "@/lib/law-revision-status";
 import { deriveIndustryTags } from "@/lib/law-revision-industry-tags";
 import { egovRevisionsMeta } from "@/data/law-revisions/egov-revisions-loaded";
@@ -81,7 +81,7 @@ function noticeItems(limit: number): NewsHubItem[] {
 function mediaItems(limit: number): NewsHubItem[] {
   const entries = (newsFeed as { entries?: Array<Record<string, unknown>> }).entries ?? [];
   return entries
-    .filter((e) => e.approved !== false)
+    .filter((e) => e.approved === true && e.humanReviewed === true)
     .map((e) => {
       const src = (e.source ?? {}) as Record<string, unknown>;
       const date = toYmd((src.fetchedAt as string) || (src.publishedAt as string));
@@ -128,7 +128,7 @@ function accidentSokuhouItem(): NewsHubItem | null {
       : "厚労省の月次速報（業種別）を更新しました。確定値は年次プレス・e-Statを参照。",
     date: toYmd(data.fetchedAt),
     url: sibou.sourceUrl || "https://anzeninfo.mhlw.go.jp/information/sokuhou.html",
-    internalHref: "/accidents-reports",
+    internalHref: "/accident-news",
   };
 }
 

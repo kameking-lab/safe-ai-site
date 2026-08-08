@@ -19,6 +19,8 @@ import {
 } from "@/lib/risk/weather-conclusion";
 import { buildRiskWeatherOutlook } from "@/lib/risk/weather-outlook";
 import { SAFETY_TONE } from "@/lib/design/safety-tone";
+import { dataFreshness, jstDateKey } from "@/lib/time/jst-date";
+import type { JmaMapLevel } from "@/lib/jma/parse-jma-warning";
 
 // ────────────────────────────────────────────────────────────
 // ユーティリティ
@@ -89,14 +91,25 @@ const REGION_CITIES: Record<string, string[]> = {
 function levelBgClass(level: MapAlertLevel | ForecastDay["alertLevel"]): string {
   if (level === "warning") return "bg-rose-100 text-rose-800 border-rose-200";
   if (level === "advisory") return "bg-amber-100 text-amber-800 border-amber-200";
-  return "bg-emerald-50 text-emerald-800 border-emerald-200";
+  return "bg-slate-50 text-slate-800 border-slate-200";
 }
 
 function levelBadge(level: MapAlertLevel | ForecastDay["alertLevel"]): string {
-  if (level === "warning") return "警報相当";
-  if (level === "advisory") return "注意報相当";
-  return "異常なし";
+  if (level === "warning") return "独自目安・警戒";
+  if (level === "advisory") return "独自目安・注意";
+  return "独自目安・顕著な値なし";
 }
+
+const JMA_LEVEL_RANK: Record<JmaMapLevel, number> = { none: 0, advisory: 1, warning: 2, special: 3 };
+
+type JmaWarningsResponse = {
+  degraded?: boolean;
+  warnings?: {
+    fetchedAt?: string;
+    byIso?: Record<string, { level?: JmaMapLevel }>;
+    quality?: { status?: string };
+  };
+};
 
 function weatherIcon(code: number) {
   const cls = "inline h-[1em] w-[1em] align-[-0.1em]";
@@ -200,97 +213,203 @@ export function WeatherForecastPanel() {
   const [forecast, setForecast] = useState<WeatherForecastApiResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [nowMs, setNowMs] = useState(() => Date.now());
   const [selectedDayIndex, setSelectedDayIndex] = useState(0);
   const [selectedRegionId, setSelectedRegionId] = useState<string | null>(null);
+  const [forecastFetchedAt, setForecastFetchedAt] = useState<string | null>(null);
+  const [jmaFetchedAt, setJmaFetchedAt] = useState<string | null>(null);
 
   // JMA Prefecture map のレベル (今日モード)
-  const [jmaLevels, setJmaLevels] = useState<Record<string, import("@/lib/jma/parse-jma-warning").JmaMapLevel>>({});
+  const [jmaLevels, setJmaLevels] = useState<Record<string, JmaMapLevel>>({});
   // 8ブロック単位のレベル（結論カード用）
   const [jmaBlockLevels, setJmaBlockLevels] = useState<Record<string, RiskWeatherLevel> | null>(null);
   const [jmaLoading, setJmaLoading] = useState(true);
   const [jmaError, setJmaError] = useState(false);
 
   useEffect(() => {
-    // 気象庁の都道府県別警報データ（signage-weather API today mode 経由）
-    void fetch("/api/signage-weather?mapMode=today")
-      .then((r) => r.ok ? r.json() : null)
-      .then((data: { mapLevels?: Record<string, string> } | null) => {
-        if (data?.mapLevels) {
-          // 8ブロックのレベルを47都道府県の ISO コードにマッピング
-          const levels: Record<string, import("@/lib/jma/parse-jma-warning").JmaMapLevel> = {};
-          JMA_REGIONS.forEach(({ iso, regionId }) => {
-            const blockLevel = data.mapLevels![regionId] as import("@/lib/jma/parse-jma-warning").JmaMapLevel | undefined;
-            levels[iso] = blockLevel ?? "none";
-          });
-          setJmaLevels(levels);
-          setJmaBlockLevels(data.mapLevels as Record<string, RiskWeatherLevel>);
-        } else {
-          setJmaError(true);
+    let active = true;
+    let controller: AbortController | null = null;
+    const refresh = async () => {
+      controller?.abort();
+      controller = new AbortController();
+      const timeoutId = window.setTimeout(() => controller?.abort(), 10_000);
+      try {
+        const response = await fetch("/api/signage/jma", {
+          cache: "no-store",
+          signal: controller.signal,
+        });
+        if (!response.ok) throw new Error(`JMA HTTP ${response.status}`);
+        const data = (await response.json()) as JmaWarningsResponse;
+        const warnings = data?.warnings;
+        const fetchedAt = warnings?.fetchedAt;
+        if (
+          data?.degraded !== false ||
+          !warnings?.byIso ||
+          Object.keys(warnings.byIso).length !== 47 ||
+          warnings.quality?.status !== "live" ||
+          dataFreshness(fetchedAt, new Date()) !== "fresh"
+        ) {
+          throw new Error("JMA response is incomplete, degraded, or stale");
         }
-        setJmaLoading(false);
-      })
-      .catch(() => {
+
+        const levels: Record<string, JmaMapLevel> = {};
+        const blocks: Record<string, RiskWeatherLevel> = {};
+        JMA_REGIONS.forEach(({ iso, regionId }) => {
+          const level = warnings.byIso?.[iso]?.level ?? "none";
+          levels[iso] = level;
+          const current = blocks[regionId] ?? "none";
+          blocks[regionId] = JMA_LEVEL_RANK[level] > JMA_LEVEL_RANK[current] ? level : current;
+        });
+        if (!active) return;
+        setJmaLevels(levels);
+        setJmaBlockLevels(blocks);
+        setJmaFetchedAt(fetchedAt ?? null);
+        setJmaError(false);
+      } catch (fetchError: unknown) {
+        if (!active || (fetchError instanceof DOMException && fetchError.name === "AbortError")) return;
+        setJmaLevels({});
+        setJmaBlockLevels(null);
+        setJmaFetchedAt(null);
         setJmaError(true);
-        setJmaLoading(false);
-      });
+      } finally {
+        window.clearTimeout(timeoutId);
+        if (active) {
+          setJmaLoading(false);
+          setNowMs(Date.now());
+        }
+      }
+    };
+    void refresh();
+    const refreshId = window.setInterval(() => void refresh(), 5 * 60 * 1000);
+    return () => {
+      active = false;
+      controller?.abort();
+      window.clearInterval(refreshId);
+    };
   }, []);
 
   useEffect(() => {
-    void fetch("/api/weather-forecast")
-      .then((r) => {
-        if (!r.ok) throw new Error("fetch error");
-        return r.json() as Promise<WeatherForecastApiResponse>;
-      })
-      .then((data) => {
+    let active = true;
+    let controller: AbortController | null = null;
+    const refresh = async () => {
+      controller?.abort();
+      controller = new AbortController();
+      const timeoutId = window.setTimeout(() => controller?.abort(), 10_000);
+      try {
+        const response = await fetch("/api/weather-forecast", {
+          cache: "no-store",
+          signal: controller.signal,
+        });
+        if (!response.ok) throw new Error(`Open-Meteo HTTP ${response.status}`);
+        const data = (await response.json()) as WeatherForecastApiResponse;
+        if (
+          data.degraded ||
+          !Array.isArray(data.regions) ||
+          data.regions.length === 0 ||
+          dataFreshness(data.fetchedAt, new Date()) !== "fresh"
+        ) {
+          throw new Error("weather source unavailable, malformed, or stale");
+        }
+        if (!active) return;
         setForecast(data);
-        setLoading(false);
-      })
-      .catch(() => {
-        setError("天気予報の取得に失敗しました。");
-        setLoading(false);
-      });
+        setForecastFetchedAt(data.fetchedAt);
+        setError(null);
+        const todayIndex = data.regions[0]?.days.findIndex((day) => day.date === jstDateKey()) ?? -1;
+        setSelectedDayIndex(todayIndex >= 0 ? todayIndex : 0);
+      } catch (fetchError: unknown) {
+        if (!active || (fetchError instanceof DOMException && fetchError.name === "AbortError")) return;
+        setForecast(null);
+        setForecastFetchedAt(null);
+        setError("Open-Meteo予報を取得できません。安全または警報なしとは判断できません。");
+      } finally {
+        window.clearTimeout(timeoutId);
+        if (active) {
+          setLoading(false);
+          setNowMs(Date.now());
+        }
+      }
+    };
+    void refresh();
+    const refreshId = window.setInterval(() => void refresh(), 5 * 60 * 1000);
+    return () => {
+      active = false;
+      controller?.abort();
+      window.clearInterval(refreshId);
+    };
   }, []);
+
+  useEffect(() => {
+    const clockId = window.setInterval(() => setNowMs(Date.now()), 30_000);
+    return () => window.clearInterval(clockId);
+  }, []);
+
+  const currentTime = useMemo(() => new Date(nowMs), [nowMs]);
+  const forecastFreshness = dataFreshness(forecastFetchedAt, currentTime);
+  const jmaFreshness = dataFreshness(jmaFetchedAt, currentTime);
+  const safeForecast =
+    forecast && !error && forecastFreshness === "fresh" ? forecast : null;
+  const forecastUnavailableMessage =
+    error ??
+    (!loading && forecastFreshness !== "fresh"
+      ? "Open-Meteo予報が古いか取得時刻を確認できないため、表示を停止しました。"
+      : null);
+  const jmaMapStatus =
+    jmaLoading
+      ? ("loading" as const)
+      : jmaError
+        ? ("error" as const)
+        : jmaFreshness === "stale" || jmaFreshness === "unknown"
+          ? ("stale" as const)
+          : Object.keys(jmaLevels).length === 47
+            ? ("fresh" as const)
+            : ("partial" as const);
 
   // 選択日の8ブロック別レベル（週モード用）
   const weekDayMapLevels = useMemo((): Record<JapanRegionId, MapAlertLevel> => {
-    if (!forecast) {
+    if (!safeForecast) {
       return Object.fromEntries(japanRegionMeta.map((r) => [r.id, "none"])) as Record<JapanRegionId, MapAlertLevel>;
     }
     return Object.fromEntries(
-      forecast.regions.map((r) => [r.regionId, r.days[selectedDayIndex]?.alertLevel ?? "none"])
+      safeForecast.regions.map((r) => [r.regionId, r.days[selectedDayIndex]?.alertLevel ?? "none"])
     ) as Record<JapanRegionId, MapAlertLevel>;
-  }, [forecast, selectedDayIndex]);
+  }, [safeForecast, selectedDayIndex]);
 
   const selectedRegionForecast: RegionForecast | null = useMemo(() => {
-    if (!forecast || !selectedRegionId) return null;
-    return forecast.regions.find((r) => r.regionId === selectedRegionId) ?? null;
-  }, [forecast, selectedRegionId]);
+    if (!safeForecast || !selectedRegionId) return null;
+    return safeForecast.regions.find((r) => r.regionId === selectedRegionId) ?? null;
+  }, [safeForecast, selectedRegionId]);
 
   const days = useMemo(() => {
-    if (!forecast?.regions[0]) return [];
-    return forecast.regions[0].days;
-  }, [forecast]);
+    if (!safeForecast?.regions[0]) return [];
+    return safeForecast.regions[0].days;
+  }, [safeForecast]);
+  const todayKey = jstDateKey(currentTime);
 
   // 結論カード（今日の全国状態を1メッセージに集約・予報と気象庁警報の悪い方）
   const conclusion = useMemo(() => {
-    const forecastStatus: RiskWeatherSourceStatus = loading ? "loading" : error ? "error" : "ok";
-    const jmaStatus: RiskWeatherSourceStatus = jmaLoading ? "loading" : jmaError ? "error" : "ok";
+    const forecastStatus: RiskWeatherSourceStatus = loading
+      ? "loading"
+      : safeForecast
+        ? "ok"
+        : "error";
+    const jmaStatus: RiskWeatherSourceStatus =
+      jmaMapStatus === "loading" ? "loading" : jmaMapStatus === "fresh" ? "ok" : "error";
     const regions = japanRegionMeta.map((meta) => {
-      const region = forecast?.regions.find((r) => r.regionId === meta.id);
+      const region = safeForecast?.regions.find((r) => r.regionId === meta.id);
       return {
         label: meta.label,
-        forecastLevel: region?.days[0]?.alertLevel,
-        jmaLevel: jmaBlockLevels?.[meta.id],
+        forecastLevel: region?.days.find((day) => day.date === todayKey)?.alertLevel,
+        jmaLevel: jmaMapStatus === "fresh" ? jmaBlockLevels?.[meta.id] : undefined,
       };
     });
     return buildRiskWeatherConclusion({ forecastStatus, jmaStatus, regions });
-  }, [loading, error, jmaLoading, jmaError, forecast, jmaBlockLevels]);
+  }, [loading, safeForecast, jmaMapStatus, jmaBlockLevels, todayKey]);
 
   // 明日以降の見通し（台風前日の前倒し判断用・予報ベース）。今日は結論カードが担うので含めない。
   const outlook = useMemo(() => {
-    if (!forecast) return [];
-    return buildRiskWeatherOutlook(forecast.regions, { startOffset: 1, days: 3 });
-  }, [forecast]);
+    if (!safeForecast) return [];
+    return buildRiskWeatherOutlook(safeForecast.regions, { startOffset: 1, days: 3 });
+  }, [safeForecast]);
 
   return (
     <div className="space-y-6">
@@ -327,14 +446,14 @@ export function WeatherForecastPanel() {
               // 「何地域か」だけでなく「どこか」を明示（台風前日に自現場の該否を3秒で判断）。
               // 地域名は予報データそのまま＝捏造なし。多い時は先頭2件＋「他N」で省略。
               const regionText =
-                count > 0 ? formatOutlookRegions(day.worstRegions, count) : "全国おおむね良好";
+                count > 0 ? formatOutlookRegions(day.worstRegions, count) : "独自しきい値の該当なし";
               return (
                 <button
                   key={day.date}
                   type="button"
                   onClick={() => {
                     setMode("week");
-                    setSelectedDayIndex(day.offset);
+                    setSelectedDayIndex(day.sourceIndex);
                   }}
                   aria-label={`${day.dayLabel || formatDate(day.date)}は${day.levelLabel}（${regionText}）。タップで地域別の予報マップを開く`}
                   className={`flex min-h-[44px] flex-col items-start rounded-xl border-2 p-2.5 text-left transition hover:shadow-md ${t.soft}`}
@@ -386,15 +505,14 @@ export function WeatherForecastPanel() {
         <div className="space-y-4">
           <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-bold text-slate-900">都道府県別 気象警報・注意報</h2>
+              <h2 className="text-sm font-bold text-slate-900">都道府県別 気象庁警報・注意報</h2>
               {jmaLoading && (
                 <span className="text-xs text-slate-500 animate-pulse">更新中…</span>
               )}
             </div>
-            <JapanPrefectureWarningMap levelsByIso={jmaLevels} />
+            <JapanPrefectureWarningMap levelsByIso={jmaLevels} status={jmaMapStatus} />
             <p className="mt-2 text-[11px] text-slate-500">
-              ※ 8地域ブロック代表地点の予報から強風・降水の目安を色分けしています。
-              気象庁の実際の警報・注意報は
+              ※ 気象庁防災情報の都道府県別JSONを表示しています。市区町村の発表状況と最新情報は
               <a
                 href="https://www.jma.go.jp/bosai/warning/"
                 target="_blank"
@@ -414,14 +532,16 @@ export function WeatherForecastPanel() {
                 <div key={i} className="h-20 animate-pulse rounded-xl bg-slate-100" />
               ))}
             </div>
-          ) : error ? (
-            <p className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">{error}</p>
-          ) : forecast ? (
+          ) : forecastUnavailableMessage ? (
+            <p role="alert" className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
+              {forecastUnavailableMessage}
+            </p>
+          ) : safeForecast ? (
             <>
               <h2 className="text-sm font-bold text-slate-900">地域ブロック別（今日）</h2>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                {forecast.regions.map((region) => {
-                  const today = region.days[0];
+                {safeForecast.regions.map((region) => {
+                  const today = region.days.find((day) => day.date === todayKey);
                   if (!today) return null;
                   return (
                     <button
@@ -446,9 +566,9 @@ export function WeatherForecastPanel() {
               </div>
 
               {/* 市区町村詳細 */}
-              {selectedRegionId && forecast && (() => {
-                const region = forecast.regions.find((r) => r.regionId === selectedRegionId);
-                const today = region?.days[0];
+              {selectedRegionId && safeForecast && (() => {
+                const region = safeForecast.regions.find((r) => r.regionId === selectedRegionId);
+                const today = region?.days.find((day) => day.date === todayKey);
                 if (!region || !today) return null;
                 return (
                   <MunicipalityDetail
@@ -494,6 +614,10 @@ export function WeatherForecastPanel() {
             </p>
             {loading ? (
               <div className="h-64 animate-pulse rounded-xl bg-slate-100" />
+            ) : forecastUnavailableMessage ? (
+              <p role="alert" className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm font-semibold text-amber-900">
+                {forecastUnavailableMessage}
+              </p>
             ) : (
               <>
                 <JapanMapSvg
@@ -502,13 +626,13 @@ export function WeatherForecastPanel() {
                 />
                 <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[10px] text-slate-500">
                   <span className="flex items-center gap-1">
-                    <span className="inline-block h-2 w-4 rounded bg-rose-500/50" />警報相当
+                    <span className="inline-block h-2 w-4 rounded bg-rose-500/50" />独自目安・警戒
                   </span>
                   <span className="flex items-center gap-1">
-                    <span className="inline-block h-2 w-4 rounded bg-amber-400/40" />注意報相当
+                    <span className="inline-block h-2 w-4 rounded bg-amber-400/40" />独自目安・注意
                   </span>
                   <span className="flex items-center gap-1">
-                    <span className="inline-block h-2 w-4 rounded bg-slate-700/55" />概ね良好
+                    <span className="inline-block h-2 w-4 rounded bg-slate-300" />独自目安・該当なし
                   </span>
                 </div>
               </>
@@ -522,12 +646,14 @@ export function WeatherForecastPanel() {
                 <div key={i} className="h-24 animate-pulse rounded-xl bg-slate-100" />
               ))}
             </div>
-          ) : error ? (
-            <p className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">{error}</p>
-          ) : forecast ? (
+          ) : forecastUnavailableMessage ? (
+            <p role="alert" className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
+              {forecastUnavailableMessage}
+            </p>
+          ) : safeForecast ? (
             <>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                {forecast.regions.map((region) => {
+                {safeForecast.regions.map((region) => {
                   const day = region.days[selectedDayIndex];
                   if (!day) return null;
                   return (
@@ -565,8 +691,9 @@ export function WeatherForecastPanel() {
       )}
 
       <p className="text-[11px] text-slate-500">
-        天気予報データ: Open-Meteo（無料・オープンデータ）。気象警報は気象庁データを参照。
-        予報は参考値です。現場では必ず最新の気象情報を確認してください。
+        気象庁警報取得: {jmaFetchedAt ? `${new Date(jmaFetchedAt).toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" })} JST` : "確認不能"}。
+        Open-Meteo予報取得: {forecastFetchedAt ? `${new Date(forecastFetchedAt).toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" })} JST` : "確認不能"}。
+        予報の色分けは本サイトの独自目安で、気象庁の警報・注意報ではありません。取得後15分を超えたデータは表示せず、現場では最新の公式情報を確認してください。
       </p>
     </div>
   );
