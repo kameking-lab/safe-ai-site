@@ -150,13 +150,12 @@ describe("RAG 100問ベンチマーク", () => {
       retrievalAccuracy >= TARGET_ACCURACY &&
       safeHoldCorrect === safeHoldTotal;
     const generatedAt = new Date().toISOString();
-    try {
-      writeFileSync(
-        resolve(
-          process.env.RAG_100Q_REPORT_PATH ??
-            "src/data/chatbot-eval-results.json",
-        ),
-        `${JSON.stringify(
+    const reportPath = process.env.RAG_100Q_REPORT_PATH;
+    if (reportPath) {
+      try {
+        writeFileSync(
+          resolve(reportPath),
+          `${JSON.stringify(
           {
             generated_at: generatedAt,
             source: "src/lib/rag-100q.fixture.ts",
@@ -180,11 +179,12 @@ describe("RAG 100問ベンチマーク", () => {
           },
           null,
           2,
-        )}\n`,
-        "utf8",
-      );
-    } catch {
-      // CIの読取専用FSではログとassertionを一次結果として維持する。
+          )}\n`,
+          "utf8",
+        );
+      } catch {
+        // CIの読取専用FSではログとassertionを一次結果として維持する。
+      }
     }
     // 結果サマリ出力（CI ログから精度を確認できるように）
     console.log(

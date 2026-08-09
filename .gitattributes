@@ -14,3 +14,4 @@ web/src/data/laws-fulltext/*.json linguist-generated=true
 web/scripts/vercel-ignore-build.sh text eol=lf
 web/scripts/storage-deployment-guard.mjs text eol=lf
 scripts/maintenance/push-with-storage-gate.sh text eol=lf
+scripts/maintenance/promote-storage-artifact.sh text eol=lf

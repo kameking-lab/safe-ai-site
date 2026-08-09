@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+export GIT_NO_REPLACE_OBJECTS=1
 
 # Push a trusted scheduled-data commit through the same immutable storage gate
 # required for human pull requests. The candidate is first made reachable on a
@@ -62,7 +63,7 @@ wait_for_storage_status() {
   local request_id="$2"
   local state="missing"
 
-  for _ in $(seq 1 48); do
+  for _ in $(seq 1 144); do
     state="$(
       gh api "repos/$repository/commits/$candidate_sha/statuses" \
         --jq ".[] | select(.context == \"$status_context\" and ((.description // \"\") | endswith(\"[$request_id]\"))) | .state" \
@@ -94,29 +95,29 @@ wait_for_storage_status() {
 for attempt in 1 2 3; do
   git fetch --no-tags "$remote_url" \
     "refs/heads/$target_branch:$remote_tracking_ref"
-  git rebase "$remote_tracking_ref"
+  expected_base="$(git rev-parse "$remote_tracking_ref")"
+  git rebase "$expected_base"
 
   candidate_sha="$(git rev-parse HEAD)"
-  expected_base="$(git rev-parse "$remote_tracking_ref")"
-  ahead_count="$(git rev-list --count "$remote_tracking_ref..HEAD")"
+  ahead_count="$(git rev-list --count "$expected_base..$candidate_sha")"
   if [[ "$ahead_count" != "1" ]]; then
     echo "::error::Scheduled update must contain exactly one candidate commit."
     exit 1
   fi
 
-  read -r commit_sha parent_sha extra_parent < <(git rev-list --parents -n 1 HEAD)
+  read -r commit_sha parent_sha extra_parent < <(git rev-list --parents -n 1 "$candidate_sha")
   if [[ "$commit_sha" != "$candidate_sha" || "$parent_sha" != "$expected_base" || -n "${extra_parent:-}" ]]; then
     echo "::error::Scheduled update must be a single-parent child of current main."
     exit 1
   fi
 
-  if [[ -n "$(git diff --name-only --diff-filter=ACDRTUXB "$remote_tracking_ref...HEAD")" ]]; then
+  if [[ -n "$(git diff --name-only --diff-filter=ACDRTUXB "$expected_base" "$candidate_sha")" ]]; then
     echo "::error::Scheduled update may only modify existing regular data files."
     exit 1
   fi
 
   mapfile -d '' changed_paths < <(
-    git diff --name-only -z "$remote_tracking_ref...HEAD"
+    git diff --name-only -z "$expected_base" "$candidate_sha"
   )
   if [[ "${#changed_paths[@]}" -eq 0 ]]; then
     echo "::error::Scheduled update candidate has no changed files."
@@ -134,7 +135,7 @@ for attempt in 1 2 3; do
       echo "::error::Scheduled update changed a path outside its allowlist."
       exit 1
     fi
-    if [[ "$(git ls-tree HEAD -- "$changed_path" | awk '{print $1 " " $2}')" != "100644 blob" ]]; then
+    if [[ "$(git ls-tree "$candidate_sha" -- "$changed_path" | awk '{print $1 " " $2}')" != "100644 blob" ]]; then
       echo "::error::Scheduled update target is not a regular 100644 blob."
       exit 1
     fi
