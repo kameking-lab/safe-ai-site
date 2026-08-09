@@ -79,4 +79,27 @@ describe("storage-gated deployment configuration", () => {
     expect(push).not.toContain("$remote_tracking_ref...HEAD");
     expect(push).not.toContain("git ls-tree HEAD");
   });
+
+  it("validates the trusted PR merge ref without relying on an optional webhook SHA", () => {
+    const source = readFileSync(
+      resolve(repoRoot, ".github/workflows/storage-budget.yml"),
+      "utf8",
+    ).replace(/\r\n/gu, "\n");
+
+    expect(source).toContain("pull_request_target:");
+    expect(source).not.toMatch(/\n  pull_request:\n/u);
+    expect(source).not.toContain("merge_commit_sha");
+    expect(source).toContain(
+      "format('refs/pull/{0}/merge', github.event.pull_request.number)",
+    );
+    expect(source).toContain(
+      'read -r actual parent_one parent_two extra <<< "$(git rev-list --parents -n 1 HEAD)"',
+    );
+    expect(source).toContain(
+      "Inspected PR merge parents do not match the immutable event base and head.",
+    );
+    expect(source).toContain(
+      "TARGET_SHA: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || inputs.target_sha }}",
+    );
+  });
 });

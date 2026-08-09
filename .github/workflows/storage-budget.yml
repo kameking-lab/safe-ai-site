@@ -24,9 +24,6 @@ on:
   # Commit-message skip directives do not suppress pull_request_target. The job
   # below checks out PR content as data only and never executes repository code.
   pull_request_target:
-  # Bootstrap only: the current PR predates pull_request_target on main. Its job
-  # is constrained to that audited base and has a distinct, non-required name.
-  pull_request:
   push:
     branches:
       - main
@@ -35,42 +32,47 @@ permissions:
   contents: read
 
 concurrency:
-  group: storage-budget-${{ github.event_name == 'pull_request' && format('bootstrap-pr-{0}', github.event.pull_request.number) || github.event_name == 'pull_request_target' && format('pr-{0}', github.event.pull_request.number) || (github.event_name == 'workflow_dispatch' && inputs.target_sha != '' && format('candidate-{0}', inputs.target_sha)) || github.ref }}
+  group: storage-budget-${{ github.event_name == 'pull_request_target' && format('pr-{0}', github.event.pull_request.number) || (github.event_name == 'workflow_dispatch' && inputs.target_sha != '' && format('candidate-{0}', inputs.target_sha)) || github.ref }}
   # Every main push must finish so an add-then-delete sequence cannot hide a
   # forbidden history blob behind a cancelled incremental run.
   cancel-in-progress: ${{ github.event_name == 'pull_request_target' }}
 
 jobs:
   repository-hygiene:
-    name: ${{ github.event_name == 'pull_request' && 'repository-hygiene-bootstrap' || 'repository-hygiene' }}
-    if: ${{ github.event_name != 'pull_request' || (github.event.pull_request.number == 975 && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'maintenance/storage-final-20260809') }}
+    name: repository-hygiene
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - name: Validate immutable storage target
         if: ${{ github.event_name == 'pull_request_target' || (github.event_name == 'workflow_dispatch' && inputs.target_sha != '') }}
         env:
-          EXPECTED_TARGET_SHA: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.merge_commit_sha || inputs.target_sha }}
+          EXPECTED_TARGET_SHA: ${{ inputs.target_sha }}
           EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           EXPECTED_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
           REQUEST_ID: ${{ inputs.request_id }}
         shell: bash
         run: |
-          if [[ ! "$EXPECTED_TARGET_SHA" =~ ^[0-9a-f]{40}$ ]]; then
-            echo '::error::Immutable storage target is missing or invalid.'
-            exit 1
-          fi
-          if [ "${{ github.event_name }}" = 'workflow_dispatch' ] && [[ ! "$REQUEST_ID" =~ ^automation-[0-9]+-[0-9]+-[1-3]$ ]]; then
-            echo '::error::Trusted automation request identifier is missing or invalid.'
-            exit 1
-          fi
-          if [ "${{ github.event_name }}" = 'pull_request_target' ]; then
+          if [ "${{ github.event_name }}" = 'workflow_dispatch' ]; then
+            if [[ ! "$EXPECTED_TARGET_SHA" =~ ^[0-9a-f]{40}$ ]]; then
+              echo '::error::Immutable storage target is missing or invalid.'
+              exit 1
+            fi
+            if [[ ! "$REQUEST_ID" =~ ^automation-[0-9]+-[0-9]+-[1-3]$ ]]; then
+              echo '::error::Trusted automation request identifier is missing or invalid.'
+              exit 1
+            fi
+          else
             for value in "$EXPECTED_HEAD_SHA" "$EXPECTED_BASE_SHA"; do
               if [[ ! "$value" =~ ^[0-9a-f]{40}$ ]]; then
                 echo '::error::Immutable PR commit metadata is missing or invalid.'
                 exit 1
               fi
             done
+            if [[ ! "$PR_NUMBER" =~ ^[1-9][0-9]*$ ]]; then
+              echo '::error::Immutable PR number is missing or invalid.'
+              exit 1
+            fi
           fi
 
       - name: Checkout complete history
@@ -78,7 +80,7 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-          ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.merge_commit_sha || (github.event_name == 'workflow_dispatch' && inputs.target_sha != '' && inputs.target_sha) || github.sha }}
+          ref: ${{ github.event_name == 'pull_request_target' && format('refs/pull/{0}/merge', github.event.pull_request.number) || (github.event_name == 'workflow_dispatch' && inputs.target_sha != '' && inputs.target_sha) || github.sha }}
 
       - name: Verify inspected workflow-dispatch commit
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.target_sha != '' }}
@@ -95,24 +97,25 @@ jobs:
       - name: Verify inspected PR merge commit
         if: ${{ github.event_name == 'pull_request_target' }}
         env:
-          EXPECTED_MERGE_SHA: ${{ github.event.pull_request.merge_commit_sha }}
           EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           EXPECTED_BASE_SHA: ${{ github.event.pull_request.base.sha }}
         shell: bash
         run: |
-          actual=$(git rev-parse HEAD)
-          if [ "$actual" != "$EXPECTED_MERGE_SHA" ]; then
-            echo '::error::Checked out commit does not match the immutable PR event merge SHA.'
+          read -r actual parent_one parent_two extra <<< "$(git rev-list --parents -n 1 HEAD)"
+          if [ -z "$actual" ] || [ -z "$parent_one" ] || [ -z "$parent_two" ] || [ -n "$extra" ]; then
+            echo '::error::Inspected PR target is not an exact two-parent merge commit.'
             exit 1
           fi
-          parent_line=$(git rev-list --parents -n 1 HEAD)
-          case " $parent_line " in *" $EXPECTED_HEAD_SHA "*) ;; *) echo '::error::PR head is not a merge parent.'; exit 1 ;; esac
-          case " $parent_line " in *" $EXPECTED_BASE_SHA "*) ;; *) echo '::error::PR base is not a merge parent.'; exit 1 ;; esac
+          if ! { [ "$parent_one" = "$EXPECTED_BASE_SHA" ] && [ "$parent_two" = "$EXPECTED_HEAD_SHA" ]; } && \
+             ! { [ "$parent_one" = "$EXPECTED_HEAD_SHA" ] && [ "$parent_two" = "$EXPECTED_BASE_SHA" ]; }; then
+            echo '::error::Inspected PR merge parents do not match the immutable event base and head.'
+            exit 1
+          fi
 
       - name: Enforce repository storage budgets
         env:
           STORAGE_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before || '' }}
-          STORAGE_FULL_TREE: ${{ github.event_name == 'pull_request' || github.event_name == 'pull_request_target' || (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' || github.event_name == 'schedule' || github.event_name == 'workflow_run' }}
+          STORAGE_FULL_TREE: ${{ github.event_name == 'pull_request_target' || (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' || github.event_name == 'schedule' || github.event_name == 'workflow_run' }}
         shell: bash
         run: |
           python3 -I - <<'PY'
