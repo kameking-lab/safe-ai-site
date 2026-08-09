@@ -1,6 +1,6 @@
 # safe-ai-site ストレージ保守ポリシー
 
-最終更新: 2026-08-08 JST
+最終更新: 2026-08-09 JST
 
 ## 目的と適用範囲
 
@@ -100,17 +100,29 @@ Preview・production・外部送信を伴う操作は、その task の権限と
 
 ## 自動保守の契約
 
-`cleanup-safe.ps1` は既定を dry-run とし、明示的な `-Apply` がある場合だけ、allowlist された repo 内の再生成物を削除します。source、runtime data、`.env*`、Git metadata、repo 外パスは対象にしません。削除候補が安全条件を満たさない場合は `REVIEW_REQUIRED` として終了します。
+`cleanup-safe.ps1` は既定を dry-run とし、明示的な `-Apply` がある場合だけ、allowlist された repo 内の再生成物を削除します。`npm run maintenance:cleanup` と `npm run maintenance:cleanup:dry` はどちらも dry-run、削除は意図が明確な `npm run maintenance:cleanup:apply` だけです。source、runtime data、`.env*`、Git metadata、repo 外パスは対象にしません。削除候補が安全条件を満たさない場合は `REVIEW_REQUIRED` として終了します。
 
-容量 budget は、5 MB 以上の新規 tracked file、raw evidence の追加、build/test output の commit、100 MB 超の artifact、1,000件超の untracked 生成物、runtime と無関係な大量 JSON・画像を検出します。法令・化学物質など正当な大規模 runtime data は、用途と所有者を記した明示 allowlist でのみ例外にします。
+保持期間はscript利用者が短縮・延長できない固定契約です。screenshots・trace・HARは3日、`lighthouse-raw*`を含むその他local rawは7日、build・test outputはtask終了時に削除します。`-Apply`直前にも内容hash、更新時刻、追跡状態、保護対象を再検証します。
+
+容量 budget は、5 MB 以上の新規 tracked file、raw evidence の追加、build/test output の commit、100 MB 超の artifact、1,000件超の untracked 生成物、runtime と無関係な大量 JSON・画像を検出します。main・手動実行・定期実行・自動ETL完了後はcurrent tree全体を検査し、main上の検査は途中cancelしません。履歴内で追加後に削除された禁止生成物も検出します。法令・化学物質など正当な大規模 runtime data は、用途と所有者を記した明示 allowlist でのみ例外にします。
+
+履歴検査のpolicy epochは、監査済みproduction commit `83f604e3a151fe645b594e2ca17b91cfa2435eae` を40桁SHAで固定します。event SHA、tag、`HEAD^`を代用せず、全eventでepochからHEADまでの追加・変更blobを走査します。epochが存在しない、またはHEADのancestorでない場合はfail closedです。epochを進められるのは、旧default branch版scannerで全範囲をPASSした通常PRだけです。そのPRへ旧SHA・新SHA、履歴blob件数、非runtime JSON・画像の件数とbytesを記録します。
+
+PRのstorage scannerは、commit-message skipで抑止されない`pull_request_target`上でcontents read-only、credential非永続として動き、checkoutしたGit objectとfile metadataをdataとしてだけ検査します。PR由来のscript・package・buildは一切実行せず、Pythonはisolated modeで起動してcheckout上のmoduleをimportしません。別jobのtrusted reporterだけに`statuses: write`を与え、検査したimmutable merge SHAのhead parentへsuccess/failureを明示報告します。Vercelはcommit messageやfirst-parent差分をskip根拠にせず、deploy前にHEAD tree objectを同じfail-closed分類で検査し、違反または検査不能なら現行productionを維持します。安全なcommitはすべてbuildし、build開始時にもupload済みworkspaceを再検査します。
+
+JMA、ニュース、e-Gov法改正、厚労省月次速報の自動更新はmainへ直接pushしません。外部取得・依存実行は`contents: read`だけのgeneration jobで行い、exact allowlistのregular data fileだけを1日保持のartifactへ渡します。書込権限を持つpromotion jobは別runnerでdefault branchの固定SHAをclean checkoutし、artifactのpath・file type・base SHA・remote mainを再検証してから、mainにcommit済みのhelperだけを実行します。任意branchを選べる`workflow_dispatch`は使わず、競合時のfresh再実行はdefault branchのworkflowだけを起動するtype別`repository_dispatch`で行います。候補は現在mainの単一子commitとして、ETLごとの既存`100644` data file exact allowlistだけを変更し、`automation/storage-gate/<run>-<attempt>-<try>`へ一時pushします。helperは`GIT_NO_REPLACE_OBJECTS=1`で固定OIDだけを検査し、候補statusを一意なrequest ID付き`pending`へ更新してからdefault branch上の中央scannerを明示dispatchします。新しいrequest IDに対応する`repository-hygiene-target` success、候補branch tip、候補parent、main tipを再照合できた同一SHAだけをnon-forceでmainへ進め、race時は新SHAを再scanします。rulesetはbypassを置かず、このcontextをGitHub Actions App `15368`由来かつstrict/up-to-dateで必須化します。
+
+storage候補branchはtransport専用です。`git.deploymentEnabled`で`automation/storage-gate/*`をVercel連携対象外にし、候補SHAのDeployment自体を作りません。同じSHAがmainへ進んだpushでは通常どおりproduction buildします。Ignored Build Stepで候補をCANCELEDにして同一SHAのmain buildを欠落させる運用、および通常のsafe commitをcommit messageやfirst-parent差分だけでskipする運用は禁止します。
+
+`web/public` はfail-closedのruntime asset置場です。既存の画像・font・動画、指定manifest等、`seminars/*.pptx`だけを許可し、それ以外の拡張子・拡張子なしfile・symlinkは公開しません。正当な配布物が必要な場合は、用途・owner・exact pathまたは限定suffixをレビューしてCI、Git ignore、root/web deploy ignore、deploy guardの全allowlistへ同時に明記します。directory名だけで正規sourceを除外しないよう、`build`・`trace`等の生成物判定はrepository直下または`web`直下の出力rootへ限定します。
 
 ## 現行 production baseline
 
-- Production Deployment: `dpl_ZDfFpkGCS2p86xXeavP4w2y5gPZb`
-- Production Build: `bld_oluo0rrdl`
-- Rollback Deployment: `dpl_F5nbj5gPCdxNXDQa3tYSWFYVHoyz`
-- Baseline commit: `852ecff29cf0475198aa1c4030c3629fcf621d0f`
-- Annotated tag: `production-20260808-852ecff`
-- Default branch integration: PR #971 で `main` へ統合
+- Production Deployment: `dpl_8hBD9HeQHpAmE6QEM5pMkcokotZQ`
+- Production Build: `bld_h0oa3x2zc`
+- Rollback Deployment: `dpl_muVQZ5RD32hSmpKxqzkamUA5hQTz`
+- Baseline commit: `83f604e3a151fe645b594e2ca17b91cfa2435eae`
+- Annotated tag: `production-20260809-83f604e3`
+- Default branch integration: PR #972 で `main` へ統合
 
 この baseline と rollback 情報を破棄する cleanup は禁止します。

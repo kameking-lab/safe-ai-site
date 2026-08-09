@@ -1,6 +1,6 @@
 # 09 3デバイス検証（軸9）
 
-検証: Playwright(Chromium) で本番 /accidents・/accidents-reports を 375/768/1920px 実レンダリング。スクショ: screenshots/。
+検証: Playwright(Chromium) で本番 /accidents・/accidents-reports を 375/768/1920px 実レンダリング。raw screenshotはretention policyにより削除し、判定要約を本文に保持する。
 
 ## 実測
 | ページ | 375px | 768px | 1920px |

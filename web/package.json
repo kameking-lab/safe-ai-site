@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "node scripts/storage-deployment-guard.mjs --workspace && next build",
     "start": "next start",
     "postinstall": "prisma generate --no-hints || true",
     "lint": "eslint",
@@ -52,8 +52,9 @@
     "check:ci": "npm run lint && npm run build && npm run test && npm run test:e2e:ci",
     "capture": "node ../scripts/capture-screenshots.mjs",
     "maintenance:audit": "powershell -NoProfile -ExecutionPolicy Bypass -File ../scripts/maintenance/storage-audit.ps1",
+    "maintenance:cleanup": "powershell -NoProfile -ExecutionPolicy Bypass -File ../scripts/maintenance/cleanup-safe.ps1",
     "maintenance:cleanup:dry": "powershell -NoProfile -ExecutionPolicy Bypass -File ../scripts/maintenance/cleanup-safe.ps1",
-    "maintenance:cleanup": "powershell -NoProfile -ExecutionPolicy Bypass -File ../scripts/maintenance/cleanup-safe.ps1 -Apply"
+    "maintenance:cleanup:apply": "powershell -NoProfile -ExecutionPolicy Bypass -File ../scripts/maintenance/cleanup-safe.ps1 -Apply"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.2",

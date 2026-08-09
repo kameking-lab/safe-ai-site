@@ -1,6 +1,6 @@
 # 04 スマホ実機検証（375px相当）（軸4）
 
-検証手段: Playwright(Chromium) で本番 https://www.anzen-ai-portal.jp/ky/morning を 375×812 で実レンダリング（ky-record をlocalStorageに注入し朝礼コンテンツを表示）。スクショ: `screenshots/smartphone-375.png`。
+検証手段: Playwright(Chromium) で本番 https://www.anzen-ai-portal.jp/ky/morning を 375×812 で実レンダリング（ky-record をlocalStorageに注入し朝礼コンテンツを表示）。raw screenshotはretention policyにより削除し、判定要約を本文に保持する。
 
 注: Lighthouse CLI / Chrome バイナリが当環境に無く、Lighthouse スコアは**未測定**（捏造しない）。本番デプロイ環境での Lighthouse 実行を別途推奨。
 

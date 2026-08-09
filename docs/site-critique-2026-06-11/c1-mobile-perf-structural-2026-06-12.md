@@ -2,7 +2,7 @@
 
 対象: /accidents・/laws・/whats-new（流入上位3ページ）
 完了条件: Lighthouse モバイル perf 90+ / CLS 0.1 以下を実測記録 → **達成（3ページ×3回連続 perf 91-94 / CLS 0.000）**
-計測方法: lighthouse 13.4.0 `--only-categories=performance --form-factor=mobile --screenEmulation.mobile`、headless Chrome、localhost 本番ビルド（`npm run build`→`npm run start`）。全ラン主要値は `lh/summary.json` に保全（生JSONは baseline + 最終 fable6-8 のみ保持）。
+計測方法: lighthouse 13.4.0 `--only-categories=performance --form-factor=mobile --screenEmulation.mobile`、headless Chrome、localhost 本番ビルド（`npm run build`→`npm run start`）。全ラン主要値は `lh/summary.json` に保全し、生JSONはretention policyにより削除済み。
 
 ## 結果サマリー
 

@@ -185,9 +185,17 @@ describe("現場口語ベンチ（チャットボットRAG × 横断検索）", 
         results,
       };
 
-      const outDir = resolve(__dirname, "../../.bench");
-      mkdirSync(outDir, { recursive: true });
-      writeFileSync(resolve(outDir, "field-vernacular-latest.json"), JSON.stringify(summary, null, 2));
+      // Keep the ordinary Vitest/full-gate run side-effect free. The raw
+      // benchmark report is generated only by the explicit npm benchmark
+      // command and is intentionally ignored until task-end cleanup.
+      if (process.env.npm_lifecycle_event === "bench:field-terms") {
+        const outDir = resolve(__dirname, "../../.bench");
+        mkdirSync(outDir, { recursive: true });
+        writeFileSync(
+          resolve(outDir, "field-vernacular-latest.json"),
+          JSON.stringify(summary, null, 2),
+        );
+      }
 
       // eslint-disable-next-line no-console
       console.log(

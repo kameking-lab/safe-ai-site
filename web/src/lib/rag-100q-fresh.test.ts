@@ -11,8 +11,10 @@ import { evaluateChatbotSafety } from "@/lib/chatbot-safety";
  * 既存の `rag-100q.test.ts` とは別の言い回し・観点で同等の論点を試す
  * セカンダリ評価。同じ閾値で判定し、結果サマリは
  * `/about/chatbot-eval` ページが表示する追加データソースとして
- * `web/src/data/chatbot-eval-fresh-results.json` に書き出す。
+ * `RAG_100Q_FRESH_REPORT_PATH` を明示した評価runだけがレポートを書き出す。
  */
+// The report file is written only when RAG_100Q_FRESH_REPORT_PATH is explicit.
+// Ordinary Vitest runs are assertion-only and leave production data untouched.
 const TOP_K = 5;
 /**
  * fresh セットは既存セットと異なる言い回し・観点で同じ法令論点を試す
@@ -188,16 +190,18 @@ describe("RAG 100問ベンチマーク (fresh)", () => {
       topic_breakdown: topicBreakdown,
     };
 
-    const outPath = resolve(
-      process.env.RAG_100Q_FRESH_REPORT_PATH ??
-        "src/data/chatbot-eval-fresh-results.json",
-    );
-    try {
-      writeFileSync(outPath, JSON.stringify(result, null, 2) + "\n", "utf8");
-    } catch {
-      // CI/読取専用 FS では書き込み失敗を許容（テストの主目的は精度判定）
+    const reportPath = process.env.RAG_100Q_FRESH_REPORT_PATH;
+    if (reportPath) {
+      try {
+        writeFileSync(
+          resolve(reportPath),
+          JSON.stringify(result, null, 2) + "\n",
+          "utf8",
+        );
+      } catch {
+        // CI/読取専用 FS では書き込み失敗を許容（テストの主目的は精度判定）
+      }
     }
-
     console.log(
       `\n[RAG 100Q fresh] 条文検索 ${correct}/${retrievalTotal} = ${(retrievalAccuracy * 100).toFixed(1)}%` +
         ` / 安全保留 ${safeHoldCorrect}/${safeHoldTotal}`

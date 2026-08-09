@@ -1,6 +1,6 @@
 # 10 3デバイス検証（軸10）
 
-検証手段: Playwright(Chromium) で本番 https://www.anzen-ai-portal.jp を実レンダリング。スクショ: `screenshots/`。
+検証手段: Playwright(Chromium) で本番 https://www.anzen-ai-portal.jp を実レンダリング。raw screenshotはretention policyにより削除し、判定要約を本文に保持する。
 
 ## 実測（/chemical-database/50-00-0 ホルムアルデヒド）
 

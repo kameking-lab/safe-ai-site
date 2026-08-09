@@ -3,7 +3,12 @@
   "framework": "nextjs",
   "installCommand": "npm ci",
   "buildCommand": "npm run build",
-  "ignoreCommand": "bash -c '[[ \"$VERCEL_GIT_COMMIT_MESSAGE\" == *\"[skip ci]\"* ]] && exit 0; git diff HEAD~1 --quiet -- src public prisma scripts package.json package-lock.json next.config.ts tsconfig.json vercel.json'",
+  "ignoreCommand": "bash scripts/vercel-ignore-build.sh",
+  "git": {
+    "deploymentEnabled": {
+      "automation/storage-gate/*": false
+    }
+  },
   "crons": [
     {
       "path": "/api/seo/notify-search-console",

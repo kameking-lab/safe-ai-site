@@ -4,10 +4,10 @@ on:
   schedule:
     # 15分間隔（cron は最短5分だが、レート制限と運用余裕のため15分）
     - cron: "*/15 * * * *"
-  workflow_dispatch:
-
+  repository_dispatch:
+    types: [jma-data-update]
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: jma-data-update-${{ github.ref }}
@@ -16,16 +16,25 @@ concurrency:
 jobs:
   fetch:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 25
+    outputs:
+      artifact_name: ${{ steps.artifact.outputs.name }}
+      base_sha: ${{ steps.base.outputs.sha }}
+      changed: ${{ steps.payload.outputs.changed }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
+          ref: ${{ github.event.repository.default_branch }}
           fetch-depth: 1
-          persist-credentials: true
+          persist-credentials: false
+
+      - name: Freeze generation base
+        id: base
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: "20"
 
@@ -37,24 +46,69 @@ jobs:
         env:
           NODE_OPTIONS: "--no-warnings"
 
-      - name: Commit if changed
+      - name: Prepare exact data artifact
+        id: payload
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           if git diff --quiet -- web/src/data/jma; then
             echo "No JMA changes"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          git add web/src/data/jma
-          git commit -m "chore(jma): scheduled data update [skip ci]"
-          # 並行 push の競合に備えて pull --rebase してから push
-          for i in 1 2 3; do
-            git pull --rebase origin "${{ github.ref_name }}" || true
-            if git push origin HEAD:"${{ github.ref_name }}"; then
-              echo "Pushed on attempt $i"
-              exit 0
-            fi
-            sleep 5
+          payload="$RUNNER_TEMP/storage-payload"
+          repo_root="$(git rev-parse --show-toplevel)"
+          for path in \
+            web/src/data/jma/earthquakes.json \
+            web/src/data/jma/index.json \
+            web/src/data/jma/warnings.json \
+            web/src/data/jma/weather.json; do
+            test -f "$path" && test ! -L "$path"
+            test "$(realpath -e -- "$path")" = "$repo_root/$path"
+            install -D -m 0644 -- "$path" "$payload/$path"
           done
-          echo "Failed to push after retries"
-          exit 1
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Freeze artifact identity
+        id: artifact
+        run: echo "name=jma-storage-payload-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" >> "$GITHUB_OUTPUT"
+
+      - name: Upload generated data only
+        if: steps.payload.outputs.changed == 'true'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ${{ steps.artifact.outputs.name }}
+          path: ${{ runner.temp }}/storage-payload/
+          if-no-files-found: error
+          retention-days: 1
+
+  promote:
+    needs: fetch
+    if: needs.fetch.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      actions: write
+      contents: write
+      statuses: write
+    steps:
+      - name: Checkout frozen default-branch base
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ needs.fetch.outputs.base_sha }}
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Download generated data
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: ${{ needs.fetch.outputs.artifact_name }}
+          path: ${{ runner.temp }}/storage-payload
+
+      - name: Validate, scan and promote immutable data commit
+        run: bash scripts/maintenance/promote-storage-artifact.sh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_BASE_SHA: ${{ needs.fetch.outputs.base_sha }}
+          STORAGE_ARTIFACT_ROOT: ${{ runner.temp }}/storage-payload
+          STORAGE_COMMIT_MESSAGE: "chore(jma): scheduled data update [skip ci]"
+          STORAGE_ALLOWED_PATHS: web/src/data/jma/earthquakes.json:web/src/data/jma/index.json:web/src/data/jma/warnings.json:web/src/data/jma/weather.json
+          TARGET_BRANCH: ${{ github.event.repository.default_branch }}

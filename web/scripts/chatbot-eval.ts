@@ -55,12 +55,21 @@ const vitestBin = resolve(
   root,
   isWindows ? "node_modules/.bin/vitest.cmd" : "node_modules/.bin/vitest"
 );
+const outPath = resolve(
+  root,
+  process.env.CHATBOT_EVAL_OUT || "src/data/chatbot-eval-results.json",
+);
 
 console.log("[chatbot-eval] vitest run rag-100q.test + chatbot-phase2-metrics.test 実行中…");
 const proc = spawnSync(
   vitestBin,
   ["run", "rag-100q.test", "chatbot-phase2-metrics.test", "--reporter=verbose"],
-  { cwd: root, encoding: "utf8", shell: isWindows }
+  {
+    cwd: root,
+    encoding: "utf8",
+    shell: isWindows,
+    env: { ...process.env, RAG_100Q_REPORT_PATH: outPath },
+  }
 );
 
 const out = (proc.stdout ?? "") + "\n" + (proc.stderr ?? "");
@@ -86,10 +95,6 @@ const phase2: Phase2Metrics = {
   hallucination_detection_rate: halDetectPct !== undefined ? halDetectPct / 100 : undefined,
 };
 
-const outPath = resolve(
-  root,
-  process.env.CHATBOT_EVAL_OUT || "src/data/chatbot-eval-results.json",
-);
 let result: EvalResult;
 try {
   result = JSON.parse(readFileSync(outPath, "utf8")) as EvalResult;

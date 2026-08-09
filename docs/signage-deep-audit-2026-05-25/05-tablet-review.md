@@ -1,6 +1,6 @@
 # 05 タブレット実機検証（768px相当）（軸5）
 
-検証手段: Playwright で本番 /ky/morning を 768×1024 実レンダリング。スクショ: `screenshots/tablet-768.png`。
+検証手段: Playwright で本番 /ky/morning を 768×1024 実レンダリング。raw screenshotはretention policyにより削除し、判定要約を本文に保持する。
 
 ## 実測値（系統1, 768px）
 - 横スクロール: **なし**（docWidth=768）✓
