@@ -108,7 +108,6 @@ docs/education-curriculum-coverage.md
 *.log
 *.lhr.json
 /.lighthouseci/
-/.lighthouseci/
 /web/.lighthouseci/
 /lighthouse-raw/
 /lighthouse-results/
@@ -119,11 +118,8 @@ docs/education-curriculum-coverage.md
 /web/lighthouse-trace-*/
 /lh5d-noimg*.json
 /.benchmark-output/
-/.benchmark-output/
 /web/.benchmark-output/
 /benchmark-output/
-/**/benchmark-output/
-/.maintenance-snapshots/
 /.maintenance-snapshots/
 /web/.maintenance-snapshots/
 /local-snapshots/
@@ -136,12 +132,21 @@ docs/education-curriculum-coverage.md
 /web/public/**/*.log
 /web/public/**/*.lcov
 /web/public/**/*.jsonl
+/web/public/**/*.ndjson
 /web/public/**/*.zip
 /web/public/**/*.gz
 /web/public/**/*.tgz
 /web/public/**/*.tar
 /web/public/**/*.7z
 /web/public/**/*.rar
+/web/public/**/*.bz2
+/web/public/**/*.xz
+/web/public/**/*.zst
+/web/public/**/*.sqlite
+/web/public/**/*.sqlite3
+/web/public/**/*.db
+/web/public/**/*.sql
+/web/public/**/*.dump
 
 # Raw audit evidence stays local. Only compact manifests/results may be committed.
 /docs/audits/evidence/**

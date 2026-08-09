@@ -88,8 +88,10 @@ jobs:
               ".jsonl", ".lcov",
           }
           FORBIDDEN_PUBLIC_RAW_SUFFIXES = {
-              ".har", ".trace", ".log", ".lcov", ".jsonl",
+              ".har", ".trace", ".log", ".lcov", ".jsonl", ".ndjson",
               ".zip", ".gz", ".tgz", ".tar", ".7z", ".rar",
+              ".bz2", ".xz", ".zst", ".sqlite", ".sqlite3", ".db",
+              ".sql", ".dump",
           }
           MEDIA_OR_JSON_SUFFIXES = {
               ".json", ".jsonl", ".png", ".jpg", ".jpeg", ".gif", ".webp",
@@ -228,7 +230,11 @@ jobs:
               failures.append("runtime media classifier self-test failed")
           if is_generated_artifact("web/src/app/build/page.tsx") or is_generated_artifact("web/src/app/trace/page.tsx"):
               failures.append("source route classifier self-test failed")
-          if not is_forbidden_public_raw("web/public/session.zip"):
+          if (
+              not is_forbidden_public_raw("web/public/session.zip")
+              or not is_forbidden_public_raw("web/public/prod.sqlite")
+              or not is_forbidden_public_raw("web/public/export.ndjson")
+          ):
               failures.append("public raw archive classifier self-test failed")
           if not is_generated_artifact("web/node_modules/pkg/dist/index.js"):
               failures.append("node_modules classifier self-test failed")
@@ -270,39 +276,64 @@ jobs:
 
           history_blob_count = 0
           if base:
-              object_lines = run_bytes(
-                  "git", "rev-list", "--objects", f"{base}..HEAD"
+              # Inspect each commit's new tree path, not `rev-list --objects`.
+              # The latter drops an added path when its blob already existed in
+              # the base tree and is therefore unsafe for copy-then-delete cases.
+              history_entries: list[tuple[bytes, str]] = []
+              seen_history_entries: set[tuple[bytes, str]] = set()
+              commit_ids = run_bytes(
+                  "git", "rev-list", "--reverse", f"{base}..HEAD"
               ).splitlines()
-              object_paths: dict[bytes, str] = {}
-              for line in object_lines:
-                  object_id, separator, raw_path = line.partition(b" ")
-                  if not separator or not raw_path:
-                      continue
-                  object_paths.setdefault(
-                      object_id,
-                      raw_path.decode("utf-8", errors="surrogateescape").replace("\\", "/"),
-                  )
-              if object_paths:
+              for commit_id in commit_ids:
+                  raw_changes = run_bytes(
+                      "git", "diff-tree", "--root", "-m", "--no-commit-id",
+                      "--no-renames", "-r", "--raw", "-z", "--diff-filter=ACM",
+                      commit_id.decode("ascii"),
+                  ).split(b"\0")
+                  index = 0
+                  while index + 1 < len(raw_changes):
+                      header = raw_changes[index]
+                      raw_path = raw_changes[index + 1]
+                      index += 2
+                      fields = header.split()
+                      if len(fields) < 5 or not header.startswith(b":") or not raw_path:
+                          continue
+                      object_id = fields[3]
+                      if not object_id or set(object_id) == {ord("0")}:
+                          continue
+                      path = raw_path.decode(
+                          "utf-8", errors="surrogateescape"
+                      ).replace("\\", "/")
+                      entry = (object_id, path)
+                      if entry not in seen_history_entries:
+                          seen_history_entries.add(entry)
+                          history_entries.append(entry)
+
+              object_ids = sorted({object_id for object_id, _ in history_entries})
+              if object_ids:
                   inspected = subprocess.run(
                       [
                           "git",
                           "cat-file",
                           "--batch-check=%(objectname) %(objecttype) %(objectsize)",
                       ],
-                      input=b"\n".join(object_paths) + b"\n",
+                      input=b"\n".join(object_ids) + b"\n",
                       stdout=subprocess.PIPE,
                       check=True,
                   ).stdout.splitlines()
+                  object_sizes: dict[bytes, int] = {}
                   for line in inspected:
                       fields = line.split()
                       if len(fields) != 3 or fields[1] != b"blob":
                           continue
                       object_id, _, raw_size = fields
-                      path = object_paths.get(object_id)
-                      if not path:
+                      object_sizes[object_id] = int(raw_size)
+
+                  for object_id, path in history_entries:
+                      size = object_sizes.get(object_id)
+                      if size is None:
                           continue
                       history_blob_count += 1
-                      size = int(raw_size)
                       if is_generated_artifact(path):
                           failures.append(f"generated build/test artifact entered history: {path}")
                       if is_forbidden_audit_evidence(path):

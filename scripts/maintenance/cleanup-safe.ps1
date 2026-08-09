@@ -315,7 +315,8 @@ function Get-DirectoryMeasurement {
             }
             else {
                 $relativeChild = $child.FullName.Substring($Path.Length).TrimStart('\', '/').Replace('\', '/')
-                [void]$fingerprintEntries.Add("F|$relativeChild|$($child.Length)|$($child.LastWriteTimeUtc.Ticks)")
+                $contentSha256 = Get-FileSha256 -Path $child.FullName
+                [void]$fingerprintEntries.Add("F|$relativeChild|$($child.Length)|$($child.LastWriteTimeUtc.Ticks)|$contentSha256")
                 $fileCount++
                 $bytes += [int64]$child.Length
                 if ($child.LastWriteTimeUtc -gt $newestWriteTimeUtc) {
