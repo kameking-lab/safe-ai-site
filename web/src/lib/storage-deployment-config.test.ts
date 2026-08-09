@@ -89,9 +89,13 @@ describe("storage-gated deployment configuration", () => {
     expect(source).toContain("pull_request_target:");
     expect(source).not.toMatch(/\n  pull_request:\n/u);
     expect(source).not.toContain("merge_commit_sha");
+    expect(source).toContain('"refs/pull/$PR_NUMBER/merge"');
+    expect(source).toContain("Trusted PR merge ref was not available within 60 seconds.");
     expect(source).toContain(
-      "format('refs/pull/{0}/merge', github.event.pull_request.number)",
+      "allow-unsafe-pr-checkout: ${{ github.event_name == 'pull_request_target' }}",
     );
+    expect(source).toContain("persist-credentials: false");
+    expect(source).toContain("steps.resolve_pr_merge.outputs.sha");
     expect(source).toContain(
       'read -r actual parent_one parent_two extra <<< "$(git rev-list --parents -n 1 HEAD)"',
     );

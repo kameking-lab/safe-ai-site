@@ -75,12 +75,36 @@ jobs:
             fi
           fi
 
+      - name: Resolve immutable PR merge ref
+        id: resolve_pr_merge
+        if: ${{ github.event_name == 'pull_request_target' }}
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        shell: bash
+        run: |
+          remote_url="https://github.com/${GITHUB_REPOSITORY}.git"
+          for attempt in $(seq 1 12); do
+            merge_sha="$(git ls-remote "$remote_url" "refs/pull/$PR_NUMBER/merge" | awk 'NR == 1 {print $1}')"
+            if [[ "$merge_sha" =~ ^[0-9a-f]{40}$ ]]; then
+              echo "sha=$merge_sha" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo '::error::Trusted PR merge ref was not available within 60 seconds.'
+          exit 1
+
       - name: Checkout complete history
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           fetch-depth: 0
           persist-credentials: false
-          ref: ${{ github.event_name == 'pull_request_target' && format('refs/pull/{0}/merge', github.event.pull_request.number) || (github.event_name == 'workflow_dispatch' && inputs.target_sha != '' && inputs.target_sha) || github.sha }}
+          # The trusted workflow treats PR files strictly as data: it executes no
+          # checked-out script, action, package, hook, or import. The ref is first
+          # resolved from the base repository, credentials are never persisted,
+          # and its exact event base/head parents are verified below.
+          allow-unsafe-pr-checkout: ${{ github.event_name == 'pull_request_target' }}
+          ref: ${{ github.event_name == 'pull_request_target' && steps.resolve_pr_merge.outputs.sha || (github.event_name == 'workflow_dispatch' && inputs.target_sha != '' && inputs.target_sha) || github.sha }}
 
       - name: Verify inspected workflow-dispatch commit
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.target_sha != '' }}
