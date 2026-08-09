@@ -16,23 +16,24 @@ afterEach(() => {
 });
 
 describe("Proxy CSP boundary", () => {
-  it("production defaults to strict Report-Only until framework nonce coverage is verified", () => {
+  it("production defaults to compatibility enforcement until framework nonce coverage is verified", () => {
     vi.stubEnv("NODE_ENV", "production");
     vi.stubEnv("VERCEL_ENV", "production");
     vi.stubEnv("CSP_STRICT_ENFORCEMENT_VERIFIED", "");
     const first = proxy(new NextRequest("https://example.test/search?q=safe"));
     const second = proxy(new NextRequest("https://example.test/search?q=safe"));
-    const firstPolicy =
-      first.headers.get("content-security-policy-report-only") ?? "";
-    const secondPolicy =
-      second.headers.get("content-security-policy-report-only") ?? "";
+    const firstPolicy = first.headers.get("content-security-policy") ?? "";
+    const secondPolicy = second.headers.get("content-security-policy") ?? "";
 
-    expect(scriptDirective(firstPolicy)).not.toContain("'unsafe-inline'");
-    expect(scriptDirective(firstPolicy)).toContain("'strict-dynamic'");
-    expect(firstPolicy).not.toBe(secondPolicy);
+    expect(scriptDirective(firstPolicy)).toContain("'unsafe-inline'");
+    expect(scriptDirective(firstPolicy)).not.toContain("'strict-dynamic'");
+    expect(firstPolicy).toBe(secondPolicy);
     expect(
-      scriptDirective(first.headers.get("content-security-policy") ?? ""),
-    ).toContain("'unsafe-inline'");
+      first.headers.get("content-security-policy-report-only"),
+    ).toBeNull();
+    expect(
+      second.headers.get("content-security-policy-report-only"),
+    ).toBeNull();
   });
 
   it("allows strict production enforcement only after an explicit verified gate", () => {
@@ -73,18 +74,17 @@ describe("Proxy CSP boundary", () => {
     );
   });
 
-  it("Preview keeps compatibility enforcement and reports the strict policy", () => {
+  it("Preview keeps compatibility enforcement without invalid strict telemetry", () => {
     vi.stubEnv("NODE_ENV", "production");
     vi.stubEnv("VERCEL_ENV", "preview");
     vi.stubEnv("CSP_STRICT_ENFORCEMENT_CANDIDATE", "");
     const response = proxy(new NextRequest("https://example.test/search"));
     const enforced = response.headers.get("content-security-policy") ?? "";
-    const reportOnly =
-      response.headers.get("content-security-policy-report-only") ?? "";
 
     expect(scriptDirective(enforced)).toContain("'unsafe-inline'");
-    expect(scriptDirective(reportOnly)).not.toContain("'unsafe-inline'");
-    expect(scriptDirective(reportOnly)).toContain("'strict-dynamic'");
+    expect(
+      response.headers.get("content-security-policy-report-only"),
+    ).toBeNull();
   });
 
   it("allows strict Preview enforcement only for the explicit candidate gate", () => {
@@ -113,10 +113,8 @@ describe("Proxy CSP boundary", () => {
       scriptDirective(response.headers.get("content-security-policy") ?? ""),
     ).toContain("'unsafe-inline'");
     expect(
-      scriptDirective(
-        response.headers.get("content-security-policy-report-only") ?? "",
-      ),
-    ).toContain("'strict-dynamic'");
+      response.headers.get("content-security-policy-report-only"),
+    ).toBeNull();
   });
 
   it("ignores the production verified gate in Preview", () => {
@@ -129,10 +127,12 @@ describe("Proxy CSP boundary", () => {
     expect(
       scriptDirective(response.headers.get("content-security-policy") ?? ""),
     ).toContain("'unsafe-inline'");
-    expect(response.headers.get("content-security-policy-report-only")).toBeTruthy();
+    expect(
+      response.headers.get("content-security-policy-report-only"),
+    ).toBeNull();
   });
 
-  it("CSP Report-Onlyをquery・token・PII付きcollectorへ保存しない", () => {
+  it("does not configure a CSP collector for query, token, or PII", () => {
     vi.stubEnv("NODE_ENV", "production");
     vi.stubEnv("VERCEL_ENV", "preview");
     const response = proxy(
@@ -147,6 +147,9 @@ describe("Proxy CSP boundary", () => {
     expect(response.headers.get("reporting-endpoints")).toBeNull();
     expect(response.headers.get("report-to")).toBeNull();
     expect(response.headers.get("nel")).toBeNull();
+    expect(
+      response.headers.get("content-security-policy-report-only"),
+    ).toBeNull();
     expect(reportOnly).not.toMatch(/作業本文|secret|user%40|user@/i);
   });
 
@@ -166,7 +169,7 @@ describe("Proxy CSP boundary", () => {
     expect(response.headers.get("content-security-policy")).toBeTruthy();
     expect(
       response.headers.get("content-security-policy-report-only"),
-    ).toBeTruthy();
+    ).toBeNull();
     await expect(response.json()).resolves.toMatchObject({
       error: { code: "preview_side_effect_blocked" },
     });
@@ -215,5 +218,44 @@ describe("Proxy CSP boundary", () => {
     expect(script).toContain("'unsafe-inline'");
     expect(script).toContain("'unsafe-eval'");
     expect(script).not.toContain("'strict-dynamic'");
+  });
+
+  it("allows offline retention only for exact, query-free public safety learning documents", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("VERCEL_ENV", "production");
+
+    for (const pathname of [
+      "/e-learning/safety",
+      "/e-learning/safety/first-class-health-officer",
+      "/e-learning/safety/second-class-health-officer",
+      "/e-learning/safety/occupational-safety-consultant",
+      "/e-learning/safety/occupational-health-consultant",
+    ]) {
+      const response = proxy(new NextRequest(`https://example.test${pathname}`));
+      expect(response.headers.get("cache-control")).toBe(
+        "public, max-age=0, must-revalidate",
+      );
+    }
+
+    for (const url of [
+      "https://example.test/e-learning/safety?user=1",
+      "https://example.test/e-learning/safety/not-published",
+      "https://example.test/account",
+      "https://example.test/laws",
+    ]) {
+      const response = proxy(new NextRequest(url));
+      expect(response.headers.get("cache-control")).toBeNull();
+    }
+  });
+
+  it("does not make Preview learning documents cacheable", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("VERCEL_ENV", "preview");
+    const response = proxy(
+      new NextRequest("https://example.test/e-learning/safety"),
+    );
+
+    expect(response.headers.get("cache-control")).toBeNull();
+    expect(response.headers.get("x-safe-ai-preview-mode")).toBe("dry-run");
   });
 });

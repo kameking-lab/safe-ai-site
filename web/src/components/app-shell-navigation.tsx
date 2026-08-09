@@ -296,7 +296,7 @@ export const NAV_CATEGORIES: AppShellNavCategory[] = [
         label: "Eラーニング",
         href: "/e-learning",
         icon: GraduationCap,
-        description: "クイズ式コース・進捗保存",
+        description: "根拠付きクイズ・保存なし",
       },
       {
         id: "education-certification",

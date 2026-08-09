@@ -18,9 +18,13 @@ const CHECKSUM_PATH = resolve(
 describe("2026-07-31 独立検索holdout", () => {
   it("実装前に固定したfixtureのchecksumと一次資料着地点を保持する", () => {
     const expected = readFileSync(CHECKSUM_PATH, "utf8").trim().split(/\s+/)[0];
-    const actual = createHash("sha256")
-      .update(readFileSync(HOLDOUT_PATH))
-      .digest("hex");
+    // Git may materialize text with CRLF on Windows. The immutable fixture
+    // checksum is defined over its canonical LF representation.
+    const canonicalFixture = readFileSync(HOLDOUT_PATH, "utf8").replace(
+      /\r\n/gu,
+      "\n",
+    );
+    const actual = createHash("sha256").update(canonicalFixture).digest("hex");
     expect(actual).toBe(expected);
     expect(SEARCH_QUALITY_HOLDOUT_2026_07_31).toHaveLength(13);
     expect(

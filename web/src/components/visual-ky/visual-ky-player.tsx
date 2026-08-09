@@ -27,12 +27,6 @@ import {
 } from "react";
 import type { VisualKyScenario } from "@/data/visual-ky/schema";
 import { getVisualKyCategory } from "@/data/visual-ky/categories";
-import {
-  completeVisualKyScenario,
-  readVisualKyProgress,
-  type VisualKyProgressCatalogItem,
-  writeVisualKyProgress,
-} from "@/lib/visual-ky/progress";
 import { trackVisualKyEvent } from "@/lib/visual-ky/analytics";
 import { MascotGuide } from "@/components/mascot-guide";
 import { KyHandoffLink } from "@/components/ky-handoff-link";
@@ -67,24 +61,13 @@ const ACTION_LINK_CLASS =
 
 const subscribeToClientReady = () => () => {};
 
-function currentJstDate(): string {
-  return new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Tokyo",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(new Date());
-}
-
 export function VisualKyPlayer({
   scenario,
   nextHref,
-  progressCatalog,
   priority = false,
 }: {
   scenario: VisualKyScenario;
   nextHref: string;
-  progressCatalog: readonly VisualKyProgressCatalogItem[];
   priority?: boolean;
 }) {
   const [phase, setPhase] = useState<PlayerPhase>("observe");
@@ -97,7 +80,6 @@ export function VisualKyPlayer({
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [imageFailed, setImageFailed] = useState(false);
-  const [saveStatus, setSaveStatus] = useState("");
   const [started, setStarted] = useState(false);
   const [noHazardAcknowledged, setNoHazardAcknowledged] = useState(false);
   const [noMeasureAcknowledged, setNoMeasureAcknowledged] = useState(false);
@@ -194,21 +176,6 @@ export function VisualKyPlayer({
 
   function completeTraining() {
     if (selectedMeasures.size === 0 && !noMeasureAcknowledged) return;
-    const stored = readVisualKyProgress();
-    const next = completeVisualKyScenario({
-      progress: stored.progress,
-      scenarioId: scenario.id,
-      selectedHazardCount,
-      totalHazardCount: scenario.hazards.length,
-      dateKey: currentJstDate(),
-      catalog: progressCatalog,
-    });
-    const saved = writeVisualKyProgress(next);
-    setSaveStatus(
-      saved
-        ? "完了をこの端末だけに保存しました。正式な資格・教育記録ではありません。"
-        : "完了しました。端末保存を利用できませんでしたが、学習はそのまま続けられます。",
-    );
     setPhase("summary");
     trackVisualKyEvent("visual_ky_complete", {
       scenarioId: scenario.id,
@@ -719,7 +686,7 @@ export function VisualKyPlayer({
                   見つけた数より、作業中止条件と優先対策を現場で確かめることが大切です。法定教育・正式な修了証・現場承認は代替しません。
                 </p>
                 <p className="mt-2 font-bold" role="status">
-                  {saveStatus}
+                  この画面での選択や完了状態は保存・送信しません。
                 </p>
               </>
             }

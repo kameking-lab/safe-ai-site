@@ -1,0 +1,248 @@
+{
+  "schemaVersion": 1,
+  "auditId": "safety-elearning-material-audit-2026-08-09",
+  "checkedAt": "2026-08-09T10:34:12+09:00",
+  "scope": {
+    "primaryRepository": "safe-ai-site",
+    "baseCommit": "f0b11e46fe0ea801f9dc7e001a358fe0b8b7da13",
+    "calendarBaseCommit": "42b5eb626cbf151b0ff2b1bd3bda012e95eefff6",
+    "searchedCurrentTree": true,
+    "searchedAllLocalBranches": true,
+    "searchedAllFetchedRemoteTrackingBranches": true,
+    "remoteBranchScope": "all remote-tracking refs present after fetch --all --prune",
+    "searchedPullRequests": true,
+    "searchedDeletedAndRenamedFiles": true,
+    "searchedStashes": true,
+    "searchedUntrackedAndIgnoredCandidates": true,
+    "searchedRelatedWorktrees": true,
+    "searchedBundlesAndRecoveryArchives": true,
+    "searchedPublicAndBuildManifests": true,
+    "repositoriesAndSnapshots": [
+      {
+        "path": "primary working tree",
+        "branch": "maintenance/production-baseline-20260808-2010",
+        "auditStartCommit": "c5234aaa33e5ec3f82bdf8c761fa6470f7b7cacf"
+      },
+      {
+        "path": "related fable worktree",
+        "branch": "fable/ky-canvas-phase1",
+        "auditStartCommit": "bc4afb609851ab7bbde07cdeeee3a98b8f510c08"
+      },
+      {
+        "path": "related pre-edit snapshot",
+        "branch": null,
+        "auditStartCommit": null
+      },
+      {
+        "path": "related cleanup snapshot",
+        "branch": null,
+        "auditStartCommit": null
+      }
+    ],
+    "gitInventory": {
+      "localHeads": 38,
+      "remoteRefs": 298,
+      "tags": 6,
+      "stashes": 0,
+      "allRefs": 342,
+      "reachableCommits": 3520,
+      "unreachableCommits": 828,
+      "unreachableBlobs": 1183,
+      "unreachableTrees": 3713,
+      "remoteTipsContainingDeletedQuestionTree": 175,
+      "bundlesFound": 0,
+      "pullRequestsInspected": 971,
+      "pullRequestKeywordHits": 25,
+      "gitLogGBroadKeywordCommitHits": 788
+    }
+  },
+  "rightsPolicy": {
+    "associationLinkPolicy": "link_free_does_not_grant_reproduction_or_adaptation",
+    "associationQuestionPdfRightsStatus": "permission_required",
+    "associationPublicUseMode": "link_only",
+    "egovLawRightsStatus": "public_domain",
+    "mhlwOwnedContentRightsStatus": "official_open_license",
+    "rawPdfCommitted": false,
+    "permissionRequestDraft": "docs/internal/EXAM_QUESTION_REUSE_PERMISSION_REQUEST_DRAFT.md"
+  },
+  "findings": [
+    {
+      "findingId": "deleted-exam-question-bank",
+      "path": "web/src/data/exam-questions/",
+      "branchOrCommit": "9a97bf2935e7cd6fae69945072ba2e8251c429e7",
+      "deletedBy": "0980147900626e77b045120539977cf17c004182",
+      "qualification": "multiple safety qualifications",
+      "subject": "multiple",
+      "questionCount": 1510,
+      "hasQuestionText": true,
+      "hasChoices": true,
+      "hasConfiguredAnswers": true,
+      "hasOverallExplanation": true,
+      "choiceExplanationCoverage": {
+        "explainedChoices": 250,
+        "totalChoices": 7500
+      },
+      "hasOfficialSourceUrls": false,
+      "hasOfficialAnswerVerification": false,
+      "hasRightsRecords": false,
+      "hasLawVersion": false,
+      "publicRoute": "/exam-quiz (deleted)",
+      "completion": "large_unverified_ai_prediction_bank",
+      "rightsStatus": "unknown",
+      "reuseDecision": "private_draft_only_not_publishable"
+    },
+    {
+      "findingId": "deleted-curated-cert-quiz-bank",
+      "path": "web/src/data/mock/quiz/cert-quiz/",
+      "branchOrCommit": "9a97bf2935e7cd6fae69945072ba2e8251c429e7",
+      "deletedBy": "0980147900626e77b045120539977cf17c004182",
+      "qualification": "10 qualification files",
+      "subject": "multiple",
+      "questionCount": 1000,
+      "hasQuestionText": true,
+      "hasChoices": true,
+      "hasConfiguredAnswers": true,
+      "hasOverallExplanation": true,
+      "hasChoiceExplanations": false,
+      "hasOfficialSourceUrls": false,
+      "hasOfficialAnswerVerification": false,
+      "hasRightsRecords": false,
+      "hasLawVersion": false,
+      "publicRoute": "/exam-quiz (deleted)",
+      "completion": "curated_label_without_primary_evidence",
+      "rightsStatus": "unknown",
+      "reuseDecision": "private_draft_only_not_publishable"
+    },
+    {
+      "findingId": "deleted-exam-engine",
+      "path": "web/src/app/(main)/exam-quiz and related quiz route/components",
+      "branchOrCommit": "9a97bf2935e7cd6fae69945072ba2e8251c429e7",
+      "deletedBy": "0980147900626e77b045120539977cf17c004182",
+      "qualification": "generic",
+      "subject": "generic",
+      "questionCount": 0,
+      "hasQuestionText": false,
+      "hasChoices": false,
+      "hasConfiguredAnswers": false,
+      "hasChoiceExplanations": false,
+      "hasOfficialSourceUrls": false,
+      "hasRightsRecords": false,
+      "publicRoute": "/exam-quiz and /quiz (deleted)",
+      "completion": "one_question_shell_with_persistent_progress",
+      "reuseDecision": "concept_only_reimplement"
+    }
+  ],
+  "selectedPriorityQualificationCountsRecovered": [
+    { "qualification": "第一種衛生管理者", "questionCount": 180 },
+    { "qualification": "第二種衛生管理者", "questionCount": 165 },
+    { "qualification": "労働安全コンサルタント選択式", "questionCount": 150 },
+    { "qualification": "労働安全コンサルタント建築安全", "questionCount": 100 },
+    { "qualification": "労働安全コンサルタント土木安全", "questionCount": 100 },
+    { "qualification": "労働衛生コンサルタント", "questionCount": 160 },
+    { "qualification": "第一種作業環境測定士", "questionCount": 160 },
+    { "qualification": "第二種作業環境測定士", "questionCount": 40 }
+  ],
+  "absenceEvidence": {
+    "associationNameReferencesPresent": true,
+    "officialQuestionUrlOrMarkerReferencesInReachableHistory": 0,
+    "officialQuestionPdfFilesInReachableHistory": 0,
+    "sourceRegistryRecordsForRecoveredQuestions": 0,
+    "officialAnswerVerificationRecords": 0,
+    "rightsRecordsForRecoveredQuestions": 0,
+    "optionEvidenceCompleteQuestions": 0,
+    "searchedOfficialMarkersWithZeroHitsInReachableGitHistory": [
+      "exam.or.jp",
+      "lckohyo",
+      "cskohyo",
+      "emkohyo",
+      "公表試験問題"
+    ],
+    "nonGitSnapshotOfficialReferences": [
+      {
+        "marker": "exam.or.jp",
+        "count": 1,
+        "scope": "related pre-edit snapshot",
+        "classification": "qualification introduction URL, not an official question or answer URL"
+      }
+    ],
+    "searchedKeywords": [
+      "安全衛生技術試験協会",
+      "exam.or.jp",
+      "lckohyo",
+      "cskohyo",
+      "emkohyo",
+      "公表試験問題",
+      "過去問題",
+      "正答",
+      "解説",
+      "産業安全一般",
+      "産業安全関係法令",
+      "労働衛生一般",
+      "労働衛生関係法令",
+      "労働安全コンサルタント",
+      "労働衛生コンサルタント",
+      "第一種衛生管理者",
+      "第二種衛生管理者",
+      "作業環境測定士",
+      "エックス線作業主任者",
+      "ガンマ線透過写真撮影作業主任者",
+      "高圧室内作業主任者",
+      "ガス溶接作業主任者",
+      "潜水士",
+      "question",
+      "questions",
+      "quiz",
+      "exam",
+      "learning",
+      "elearning",
+      "e-learning",
+      "course",
+      "module",
+      "explanation",
+      "choice",
+      "answer",
+      "distractor"
+    ],
+    "historySearchMethods": ["git log -S", "git log -G", "deleted tree inspection", "rename inspection", "GitHub PR list (all states)"],
+    "reachableCommitCountObserved": 3520,
+    "refCountAtDeletedTreeAudit": 342,
+    "representativeRefsContainingDeletedTree": [
+      "origin/claude/quizzical-engelbart-caaa22",
+      "origin/fix/audit-p0-robots-and-exam-quiz-notation",
+      "origin/docs/exam-quiz-content-inventory-2026-05-16"
+    ],
+    "relatedAuditCommits": [
+      "3f337716403b66545f1e36af30880c6197f69e43",
+      "85f56f2f9fd04e8a45dce0b91dc0d72653b5729c",
+      "f961ef199bcfcf07b614a44528cfb8efdd6eaa78"
+    ],
+    "unreachableDuplicateTreeCommit": "523f8e83f254e6d3ed1af01e3fb58a9f6268a294",
+    "searchedPaths": [
+      "web/src/data/exam-questions/",
+      "web/src/data/mock/quiz/cert-quiz/",
+      "web/src/app/(main)/exam-quiz/",
+      "web/src/app/(main)/quiz/",
+      "web/public/",
+      ".next/server/app-paths-manifest.json",
+      ".next/routes-manifest.json",
+      ".next/prerender-manifest.json",
+      "safe-ai-site-preedit-20260801-20260801-110228",
+      "safe-ai-site-cleanup-baseline-20260808",
+      "safe-ai-worktrees/fable-f1"
+    ]
+  },
+  "publicationDecision": {
+    "recoveredQuestionCount": 2510,
+    "reusableQuestionCount": 0,
+    "rightsUnknownQuestionCount": 2510,
+    "publishRecoveredVerbatim": false,
+    "engineReuse": "new_engine_required",
+    "reason": "No recovered question has the required rights record, official answer verification, current law version, and evidence for every choice."
+  },
+  "restrictions": {
+    "containsQuestionBodies": false,
+    "containsSourceHashes": false,
+    "containsRawPdf": false,
+    "containsSecretsOrPersonalData": false
+  }
+}
