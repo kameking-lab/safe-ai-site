@@ -1,7 +1,6 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { PUBLIC_VISUAL_KY_SCENARIOS } from "@/data/visual-ky";
-import { VISUAL_KY_PROGRESS_KEY } from "@/lib/visual-ky/progress";
 import { VisualKyPlayer } from "./visual-ky-player";
 import { VisualKyStaticReference } from "./visual-ky-static-reference";
 import {
@@ -20,10 +19,7 @@ vi.mock("@/lib/visual-ky/analytics", () => ({
 }));
 
 const scenario = PUBLIC_VISUAL_KY_SCENARIOS[0];
-const catalog = PUBLIC_VISUAL_KY_SCENARIOS.map((item) => ({
-  id: item.id,
-  categoryTags: item.categoryTags,
-}));
+const LEGACY_VISUAL_KY_PROGRESS_KEY = "safe-ai:visual-ky-progress:v1";
 
 describe("VisualKyPlayer", () => {
   beforeEach(() => {
@@ -38,7 +34,6 @@ describe("VisualKyPlayer", () => {
       <VisualKyPlayer
         scenario={scenario}
         nextHref="/training/visual-ky/aerial-lift-entrapment"
-        progressCatalog={catalog}
       />,
     );
 
@@ -77,12 +72,13 @@ describe("VisualKyPlayer", () => {
     }
   });
 
-  it("未選択を明示確認すれば完了でき、個人情報なしの粗い進捗だけを端末保存する", async () => {
+  it("未選択を明示確認すれば完了でき、既存の端末進捗を読まず変更もしない", () => {
+    const legacyValue = JSON.stringify({ completedScenarioIds: ["legacy"] });
+    window.localStorage.setItem(LEGACY_VISUAL_KY_PROGRESS_KEY, legacyValue);
     render(
       <VisualKyPlayer
         scenario={scenario}
         nextHref="/training/visual-ky/aerial-lift-entrapment"
-        progressCatalog={catalog}
       />,
     );
     fireEvent.click(
@@ -118,13 +114,10 @@ describe("VisualKyPlayer", () => {
     expect(
       screen.getByRole("heading", { name: "選んだ対策の振り返り" }),
     ).toBeTruthy();
-    await waitFor(() =>
-      expect(window.localStorage.getItem(VISUAL_KY_PROGRESS_KEY)).toContain(
-        scenario.id,
-      ),
+    expect(screen.getByText(/選択や完了状態は保存・送信しません/)).toBeTruthy();
+    expect(window.localStorage.getItem(LEGACY_VISUAL_KY_PROGRESS_KEY)).toBe(
+      legacyValue,
     );
-    const stored = window.localStorage.getItem(VISUAL_KY_PROGRESS_KEY) ?? "";
-    expect(stored).not.toMatch(/name|email|company|answerText|health|siteName/i);
   });
 
   it("選んだ対策を責めずに優先候補・見直し候補として振り返る", () => {
@@ -132,7 +125,6 @@ describe("VisualKyPlayer", () => {
       <VisualKyPlayer
         scenario={scenario}
         nextHref="/training/visual-ky/aerial-lift-entrapment"
-        progressCatalog={catalog}
       />,
     );
     fireEvent.click(
@@ -175,7 +167,6 @@ describe("VisualKyPlayer", () => {
       <VisualKyPlayer
         scenario={scenario}
         nextHref="/training/visual-ky/aerial-lift-entrapment"
-        progressCatalog={catalog}
       />,
     );
     const image = container.querySelector("img");
@@ -190,7 +181,6 @@ describe("VisualKyPlayer", () => {
       <VisualKyPlayer
         scenario={scenario}
         nextHref="/training/visual-ky/aerial-lift-entrapment"
-        progressCatalog={catalog}
       />,
     );
     fireEvent.click(screen.getByRole("button", { name: "イラストから危険を探す" }));

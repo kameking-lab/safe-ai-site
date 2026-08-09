@@ -7,18 +7,15 @@ const source = readFileSync(
   "utf8",
 );
 
-describe("organization training progress wording", () => {
-  it("fails closed and distinguishes every completion level", () => {
-    expect(source).toContain("fail-closed");
-    expect(source).toContain("自己確認");
-    expect(source).toContain("学習完了");
-    expect(source).toContain("社内受講記録");
-    expect(source).toContain("正式な修了証ではありません");
+describe("retired persistent learning progress route", () => {
+  it("permanently redirects to the non-persistent learning hub", () => {
+    expect(source).toContain('import { permanentRedirect } from "next/navigation"');
+    expect(source).toContain('permanentRedirect("/e-learning")');
+    expect(source).not.toMatch(/本人確認|CSV出力|累積学習時間|最終学習日|学習履歴/);
   });
 
-  it("exposes site/course progress without claiming anonymous progress is formal", () => {
-    expect(source).toContain("本人確認");
-    expect(source).toContain("CSV出力");
-    expect(source).toContain("端末内進捗は正式な受講記録ではありません");
+  it("does not read, write, clear, or migrate browser learning records", () => {
+    expect(source).not.toMatch(/localStorage|sessionStorage|removeItem|\.clear\(/);
+    expect(source).not.toMatch(/study[_-]?time|streak|study[_-]?history/i);
   });
 });

@@ -169,10 +169,6 @@ export default async function VisualKyScenarioPage({
         <VisualKyPlayer
           scenario={scenario}
           nextHref={`${HUB_PATH}/${next.slug}`}
-          progressCatalog={PUBLIC_VISUAL_KY_SCENARIOS.map((item) => ({
-            id: item.id,
-            categoryTags: item.categoryTags,
-          }))}
           priority
         />
         <nav aria-label="この問題の関連操作" className="mt-4 grid gap-2 sm:grid-cols-3">

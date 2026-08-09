@@ -603,9 +603,9 @@ const ALL_FEATURES: FeatureItem[] = [
   {
     slug: "e-learning",
     title: "Eラーニング",
-    summary: "一次資料再検証のため公開停止中",
+    summary: "一次根拠付き安全資格問題を公開",
     description:
-      "旧教材・クイズ・進捗機能は一次資料再検証のため停止中です。正式な法定教育、受講記録、修了証を提供しません。",
+      "第一種・第二種衛生管理者、労働安全・労働衛生コンサルタントの独自問題を、全選択肢の公式根拠付きで提供します。回答・学習時間・長期進捗は保存しません。",
     href: "/e-learning",
     category: "education",
     tags: ["Eラーニング"],

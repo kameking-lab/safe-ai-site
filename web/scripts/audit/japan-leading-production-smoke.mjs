@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 /**
  * Read-mostly production smoke for the 2026-07-31 gap-closure release.
  *

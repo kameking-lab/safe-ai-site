@@ -219,7 +219,23 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
       changeFrequency: "monthly",
     },
-    // /e-learning は旧設問の一次資料再検証中につき noindex/quarantine。
+    {
+      url: "/e-learning/safety",
+      lastModified: "2026-08-09",
+      priority: 0.9,
+      changeFrequency: "monthly",
+    },
+    ...[
+      "first-class-health-officer",
+      "second-class-health-officer",
+      "occupational-safety-consultant",
+      "occupational-health-consultant",
+    ].map((courseId) => ({
+      url: `/e-learning/safety/${courseId}`,
+      lastModified: "2026-08-09",
+      priority: 0.85,
+      changeFrequency: "monthly" as const,
+    })),
     {
       url: "/laws",
       lastModified: freshestLawRevision,

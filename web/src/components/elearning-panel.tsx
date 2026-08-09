@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { RotateCcw, Pencil } from "lucide-react";
-import { recordThemeAttempt } from "@/lib/elearning/progress";
 import { buildQuizConclusion } from "@/lib/elearning/learning-conclusion";
 import { SAFETY_TONE } from "@/lib/design/safety-tone";
 import { TONE_DEFAULT_ICON } from "@/components/ui/status-badge";
@@ -119,33 +118,6 @@ export function ELearningPanel() {
     (sum, q) => sum + (answers[q.id] === q.correctIndex ? 1 : 0),
     0
   );
-
-  // P0-014 (usability-audit-day3): 回答数が selectedTheme の全問数に到達した
-  // 時点で localStorage に進捗 record を保存。誤答 question ID リストも
-  // 一緒に記録し、復習リコメンドや進捗ボードで参照できるようにする。
-  const lastSavedKeyRef = useRef<string | null>(null);
-  useEffect(() => {
-    const totalQuestions = selectedTheme.questions.length;
-    if (totalQuestions === 0) return;
-    const answered = selectedTheme.questions.filter((q) => answers[q.id] != null);
-    if (answered.length < totalQuestions) return;
-    // 同一 themeId × 同一 answers 状態で 2 回保存しないよう key で重複排除
-    const fingerprint = `${selectedTheme.id}|${selectedTheme.questions
-      .map((q) => answers[q.id])
-      .join(",")}`;
-    if (lastSavedKeyRef.current === fingerprint) return;
-    lastSavedKeyRef.current = fingerprint;
-    const wrong = selectedTheme.questions
-      .filter((q) => answers[q.id] !== q.correctIndex)
-      .map((q) => q.id);
-    recordThemeAttempt({
-      themeId: selectedTheme.id,
-      themeTitle: selectedTheme.title,
-      totalQuestions,
-      correctCount: score,
-      wrongQuestionIds: wrong,
-    });
-  }, [selectedTheme, answers, score]);
 
   const handleSaveEdit = (updated: LearningTheme) => {
     const next = { ...overrides, [updated.id]: updated };

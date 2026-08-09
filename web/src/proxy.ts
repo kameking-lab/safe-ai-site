@@ -12,6 +12,8 @@ import {
 
 const NO_SCRIPT_CHATBOT_CSP =
   "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'";
+const PUBLIC_SAFETY_LEARNING_PATH =
+  /^\/e-learning\/safety(?:\/(?:first-class-health-officer|second-class-health-officer|occupational-safety-consultant|occupational-health-consultant))?\/?$/;
 
 function addCspResponseHeaders(
   response: NextResponse,
@@ -57,14 +59,15 @@ function addCspResponseHeaders(
     return response;
   }
 
-  // Keep strict CSP in Report-Only until the one audited Preview proves zero
-  // framework, RSC, JSON-LD and third-party nonce violations. Production
-  // promotion is an explicit non-secret deployment switch.
+  // Enforce the compatibility policy until a browser audit proves complete
+  // framework, RSC, JSON-LD and third-party nonce coverage. A strict policy
+  // that is known to report framework false positives is not useful telemetry;
+  // promotion remains an explicit non-secret deployment switch above.
   response.headers.set(
     "Content-Security-Policy",
     buildPreviewEnforcedContentSecurityPolicy(development, secureTransport),
   );
-  response.headers.set("Content-Security-Policy-Report-Only", strictPolicy);
+  response.headers.delete("Content-Security-Policy-Report-Only");
   return response;
 }
 
@@ -145,7 +148,7 @@ export function proxy(request: NextRequest) {
   requestHeaders.set("x-nonce", nonce);
   requestHeaders.set("Content-Security-Policy", strictPolicy);
 
-  return addCspResponseHeaders(
+  const response = addCspResponseHeaders(
     NextResponse.next({
       request: {
         headers: requestHeaders,
@@ -157,6 +160,18 @@ export function proxy(request: NextRequest) {
     secureTransport,
     noScriptChatbot,
   );
+  // These exact routes are public, reviewed, query-free documents with no
+  // server-rendered personal state. Their HTML may therefore be retained by
+  // the learning-only service-worker cache after a successful visit.
+  if (
+    !preview &&
+    ["GET", "HEAD"].includes(request.method) &&
+    !request.nextUrl.search &&
+    PUBLIC_SAFETY_LEARNING_PATH.test(request.nextUrl.pathname)
+  ) {
+    response.headers.set("Cache-Control", "public, max-age=0, must-revalidate");
+  }
+  return response;
 }
 
 export const config = {

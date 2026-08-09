@@ -21,6 +21,18 @@ const publicCalculatorSlugs = new Set<string>(
   PUBLIC_CONSTRUCTION_CALCULATOR_SLUGS,
 );
 
+export const PUBLIC_SAFETY_LEARNING_PATHS = [
+  "/e-learning/safety",
+  "/e-learning/safety/first-class-health-officer",
+  "/e-learning/safety/second-class-health-officer",
+  "/e-learning/safety/occupational-safety-consultant",
+  "/e-learning/safety/occupational-health-consultant",
+] as const;
+
+const publicSafetyLearningPaths = new Set<string>(
+  PUBLIC_SAFETY_LEARNING_PATHS,
+);
+
 export function isPublicConstructionCalculatorSlug(slug: string): boolean {
   return publicCalculatorSlugs.has(slug);
 }
@@ -31,14 +43,19 @@ function pathOnly(href: string): string {
   return value.split(/[?#]/, 1)[0] || "/";
 }
 
+function isPublishedSafetyLearningPath(path: string): boolean {
+  const normalized = path.length > 1 ? path.replace(/\/+$/u, "") : path;
+  return publicSafetyLearningPaths.has(normalized);
+}
+
 export function isQuarantinedPublicPath(href: string): boolean {
   const path = pathOnly(href);
 
   if (
     path === "/faq" ||
     path.startsWith("/faq/") ||
-    path === "/e-learning" ||
-    path.startsWith("/e-learning/") ||
+    ((path === "/e-learning" || path.startsWith("/e-learning/")) &&
+      !isPublishedSafetyLearningPath(path)) ||
     path === "/work-environment-measurement" ||
     path.startsWith("/work-environment-measurement/") ||
     path === "/health-checkup-scheduler" ||

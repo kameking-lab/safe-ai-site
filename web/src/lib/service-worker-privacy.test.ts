@@ -23,7 +23,7 @@ describe("service worker privacy boundary", () => {
   });
 
   it("bumps the cache version so previously cached private responses are purged", () => {
-    expect(source).toContain('const CACHE_NAME = "anzen-ai-v6"');
+    expect(source).toContain('const CACHE_NAME = "anzen-ai-v7"');
     expect(source).toContain('key.startsWith("anzen-ai-")');
   });
 
@@ -38,10 +38,23 @@ describe("service worker privacy boundary", () => {
     expect(source).toContain("parsed.origin !== self.location.origin");
   });
 
-  it("serves an explicit offline shell instead of cached safety HTML", () => {
+  it("serves an explicit offline shell instead of cached private or legal HTML", () => {
     const navigationBody =
-      source.match(/async function navigationNetworkFirst[\s\S]*?\n}\n/)?.[0] ?? "";
+      source.match(/async function navigationNetworkFirst[\s\S]*?\r?\n}\r?\n/)?.[0] ?? "";
     expect(navigationBody).toContain("caches.match(OFFLINE_URL)");
     expect(navigationBody).not.toContain("caches.match(request)");
+  });
+
+  it("caches only exact public safety-learning routes after a successful public HTML response", () => {
+    expect(source).toContain("PUBLIC_SAFETY_LEARNING_PATH");
+    expect(source).toContain('url.search === ""');
+    expect(source).toContain("publicLearningNavigationNetworkFirst(request, url)");
+    const learningBody =
+      source.match(/async function publicLearningNavigationNetworkFirst[\s\S]*?\r?\n}\r?\n/)?.[0] ?? "";
+    expect(learningBody).toContain("caches.match(cacheKey)");
+    expect(learningBody).toContain("cache.put(cacheKey, response.clone())");
+    expect(source).toContain('credentials: "omit"');
+    expect(source).toContain('!response.headers.has("set-cookie")');
+    expect(source).toContain('/\\b(?:no-store|private)\\b/i');
   });
 });
