@@ -55,6 +55,8 @@ describe("storage-gated deployment configuration", () => {
       expect(source.match(/contents: write/gu)).toHaveLength(1);
       expect(source).toContain("actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02");
       expect(source).toContain("actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093");
+      expect(source).toContain("artifact_name: ${{ steps.artifact.outputs.name }}");
+      expect(source).toMatch(/name: \$\{\{ needs\.(fetch|refresh)\.outputs\.artifact_name \}\}/u);
       expect(source).toContain("ref: ${{ needs.");
       expect(source).toContain("EXPECTED_BASE_SHA: ${{ needs.");
       expect(source).toContain("promote-storage-artifact.sh");

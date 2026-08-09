@@ -18,6 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     outputs:
+      artifact_name: ${{ steps.artifact.outputs.name }}
       base_sha: ${{ steps.base.outputs.sha }}
       changed: ${{ steps.payload.outputs.changed }}
     steps:
@@ -73,11 +74,15 @@ jobs:
           done
           echo "changed=true" >> "$GITHUB_OUTPUT"
 
+      - name: Freeze artifact identity
+        id: artifact
+        run: echo "name=news-storage-payload-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" >> "$GITHUB_OUTPUT"
+
       - name: Upload generated data only
         if: steps.payload.outputs.changed == 'true'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: news-storage-payload-${{ github.run_id }}-${{ github.run_attempt }}
+          name: ${{ steps.artifact.outputs.name }}
           path: ${{ runner.temp }}/storage-payload/
           if-no-files-found: error
           retention-days: 1
@@ -102,7 +107,7 @@ jobs:
       - name: Download generated data
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
-          name: news-storage-payload-${{ github.run_id }}-${{ github.run_attempt }}
+          name: ${{ needs.refresh.outputs.artifact_name }}
           path: ${{ runner.temp }}/storage-payload
 
       - name: Validate, scan and promote immutable data commit
