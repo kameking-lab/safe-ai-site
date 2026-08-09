@@ -85,7 +85,9 @@
 /web/e2e-*/
 /web/test/
 /web/tests/
-/web/scripts/
+/web/scripts/*
+!/web/scripts/vercel-ignore-build.sh
+!/web/scripts/storage-deployment-guard.mjs
 **/__snapshots__/
 **/__tests__/
 **/*.test.*
@@ -104,25 +106,28 @@ Desktop.ini
 /.idea/
 /.history/
 
-# Public raw archives/dumps are never deployable assets. A reviewed download
-# requires an exact allowlist in both deployment and storage-budget policy.
-/web/public/**/*.har
-/web/public/**/*.trace
-/web/public/**/*.log
-/web/public/**/*.lcov
-/web/public/**/*.jsonl
-/web/public/**/*.ndjson
-/web/public/**/*.zip
-/web/public/**/*.gz
-/web/public/**/*.tgz
-/web/public/**/*.tar
-/web/public/**/*.7z
-/web/public/**/*.rar
-/web/public/**/*.bz2
-/web/public/**/*.xz
-/web/public/**/*.zst
-/web/public/**/*.sqlite
-/web/public/**/*.sqlite3
-/web/public/**/*.db
-/web/public/**/*.sql
-/web/public/**/*.dump
+# Public assets are fail-closed. New formats require an explicit reviewed
+# allowlist here, in web/.vercelignore, and in storage-budget.yml.
+/web/public/**
+!/web/public/**/
+!/web/public/**/*.ico
+!/web/public/**/*.png
+!/web/public/**/*.jpg
+!/web/public/**/*.jpeg
+!/web/public/**/*.gif
+!/web/public/**/*.svg
+!/web/public/**/*.webp
+!/web/public/**/*.avif
+!/web/public/**/*.mp4
+!/web/public/**/*.webm
+!/web/public/**/*.woff
+!/web/public/**/*.woff2
+!/web/public/**/*.ttf
+!/web/public/ads.txt
+!/web/public/offline.html
+!/web/public/print.css
+!/web/public/sw.js
+!/web/public/manifest.json
+!/web/public/screenshots/manifest.json
+!/web/public/geo/japan-prefectures-ne10m.json
+!/web/public/seminars/*.pptx

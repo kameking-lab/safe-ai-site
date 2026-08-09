@@ -12,6 +12,11 @@ on:
       - MHLW monthly sokuhou ETL
     types:
       - completed
+  # Commit-message skip directives do not suppress pull_request_target. The job
+  # below checks out PR content as data only and never executes repository code.
+  pull_request_target:
+  # Bootstrap only: the current PR predates pull_request_target on main. Its job
+  # is constrained to that audited base and has a distinct, non-required name.
   pull_request:
   push:
     branches:
@@ -21,32 +26,77 @@ permissions:
   contents: read
 
 concurrency:
-  group: storage-budget-${{ github.ref }}
+  group: storage-budget-${{ github.event_name == 'pull_request' && format('bootstrap-pr-{0}', github.event.pull_request.number) || github.event_name == 'pull_request_target' && format('pr-{0}', github.event.pull_request.number) || github.ref }}
   # Every main push must finish so an add-then-delete sequence cannot hide a
   # forbidden history blob behind a cancelled incremental run.
-  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request_target' }}
 
 jobs:
   repository-hygiene:
+    name: ${{ github.event_name == 'pull_request' && 'repository-hygiene-bootstrap' || 'repository-hygiene' }}
+    if: ${{ github.event_name != 'pull_request' || (github.event.pull_request.number == 975 && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'maintenance/storage-final-20260809') }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
+      - name: Validate immutable PR merge input
+        if: ${{ github.event_name == 'pull_request_target' }}
+        env:
+          EXPECTED_MERGE_SHA: ${{ github.event.pull_request.merge_commit_sha }}
+          EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          EXPECTED_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        shell: bash
+        run: |
+          for value in "$EXPECTED_MERGE_SHA" "$EXPECTED_HEAD_SHA" "$EXPECTED_BASE_SHA"; do
+            if [[ ! "$value" =~ ^[0-9a-f]{40}$ ]]; then
+              echo '::error::Immutable PR commit metadata is missing or invalid.'
+              exit 1
+            fi
+          done
+
       - name: Checkout complete history
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.merge_commit_sha || github.sha }}
+
+      - name: Verify inspected PR merge commit
+        if: ${{ github.event_name == 'pull_request_target' }}
+        env:
+          EXPECTED_MERGE_SHA: ${{ github.event.pull_request.merge_commit_sha }}
+          EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          EXPECTED_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        shell: bash
+        run: |
+          actual=$(git rev-parse HEAD)
+          if [ "$actual" != "$EXPECTED_MERGE_SHA" ]; then
+            echo '::error::Checked out commit does not match the immutable PR event merge SHA.'
+            exit 1
+          fi
+          parent_line=$(git rev-list --parents -n 1 HEAD)
+          case " $parent_line " in *" $EXPECTED_HEAD_SHA "*) ;; *) echo '::error::PR head is not a merge parent.'; exit 1 ;; esac
+          case " $parent_line " in *" $EXPECTED_BASE_SHA "*) ;; *) echo '::error::PR base is not a merge parent.'; exit 1 ;; esac
 
       - name: Enforce repository storage budgets
         env:
           STORAGE_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before || '' }}
-          STORAGE_FULL_TREE: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' || github.event_name == 'schedule' || github.event_name == 'workflow_run' }}
+          STORAGE_FULL_TREE: ${{ github.event_name == 'pull_request' || github.event_name == 'pull_request_target' || (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' || github.event_name == 'schedule' || github.event_name == 'workflow_run' }}
         shell: bash
         run: |
-          python - <<'PY'
+          python3 -I - <<'PY'
           import os
+          import stat
           import subprocess
           import sys
           from pathlib import Path, PurePosixPath
+
+          current_directory = os.path.realpath(os.getcwd())
+          if any(
+              entry and os.path.realpath(entry) == current_directory
+              for entry in sys.path
+          ):
+              print("::error::Python isolated mode did not remove the untrusted checkout from sys.path")
+              sys.exit(1)
 
           MIB = 1024 * 1024
           MAX_NEW_TRACKED = 5 * MIB
@@ -55,6 +105,10 @@ jobs:
           MAX_NON_RUNTIME_MEDIA_COUNT = 100
           MAX_REPOSITORY_NON_RUNTIME_MEDIA_COUNT = 125
           MAX_NON_RUNTIME_MEDIA_BYTES = 20 * MIB
+          # Immutable policy epoch. Every run inspects all added/modified blobs
+          # after this commit, so a GitHub-native [skip ci] commit cannot hide a
+          # forbidden add-then-delete sequence from the next run or daily audit.
+          POLICY_HISTORY_BASE_SHA = "83f604e3a151fe645b594e2ca17b91cfa2435eae"
 
           # Large source datasets are intentional only in these reviewed runtime trees.
           # This includes legal, chemical, qualification, accident, KYT, source snapshots,
@@ -87,11 +141,18 @@ jobs:
               ".mp4", ".webm", ".png", ".jpg", ".jpeg", ".gif", ".webp",
               ".jsonl", ".lcov",
           }
-          FORBIDDEN_PUBLIC_RAW_SUFFIXES = {
-              ".har", ".trace", ".log", ".lcov", ".jsonl", ".ndjson",
-              ".zip", ".gz", ".tgz", ".tar", ".7z", ".rar",
-              ".bz2", ".xz", ".zst", ".sqlite", ".sqlite3", ".db",
-              ".sql", ".dump",
+          PUBLIC_RUNTIME_MEDIA_SUFFIXES = {
+              ".ico", ".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp",
+              ".avif", ".mp4", ".webm", ".woff", ".woff2", ".ttf",
+          }
+          PUBLIC_RUNTIME_EXACT_PATHS = {
+              "web/public/ads.txt",
+              "web/public/offline.html",
+              "web/public/print.css",
+              "web/public/sw.js",
+              "web/public/manifest.json",
+              "web/public/screenshots/manifest.json",
+              "web/public/geo/japan-prefectures-ne10m.json",
           }
           MEDIA_OR_JSON_SUFFIXES = {
               ".json", ".jsonl", ".png", ".jpg", ".jpeg", ".gif", ".webp",
@@ -131,7 +192,7 @@ jobs:
 
           if base:
               changed_raw = run_bytes(
-                  "git", "diff", "--diff-filter=ACMR", "--name-only", "-z", f"{base}...HEAD"
+                  "git", "diff", "--no-renames", "--diff-filter=ACMT", "--name-only", "-z", f"{base}...HEAD"
               )
           else:
               changed_raw = run_bytes("git", "ls-files", "-z")
@@ -152,12 +213,31 @@ jobs:
           failures: list[str] = []
           allowed_large: list[str] = []
           non_runtime_media: list[tuple[str, int]] = []
+          history_non_runtime_media: list[tuple[str, int]] = []
 
-          def is_runtime_allowed(path: str) -> bool:
-              return path.startswith(LARGE_RUNTIME_ALLOWLIST) and not is_forbidden_public_raw(path)
+          def is_public_runtime_allowed(path: str) -> bool:
+              if not path.startswith("web/public/"):
+                  return False
+              suffix = PurePosixPath(path).suffix.lower()
+              seminar_relative = path.removeprefix("web/public/seminars/")
+              direct_seminar_pptx = (
+                  path.startswith("web/public/seminars/")
+                  and "/" not in seminar_relative
+                  and suffix == ".pptx"
+              )
+              return (
+                  suffix in PUBLIC_RUNTIME_MEDIA_SUFFIXES
+                  or path in PUBLIC_RUNTIME_EXACT_PATHS
+                  or direct_seminar_pptx
+              )
 
           def is_forbidden_public_raw(path: str) -> bool:
-              return path.startswith("web/public/") and PurePosixPath(path).suffix.lower() in FORBIDDEN_PUBLIC_RAW_SUFFIXES
+              return path.startswith("web/public/") and not is_public_runtime_allowed(path)
+
+          def is_runtime_allowed(path: str) -> bool:
+              if path.startswith("web/public/"):
+                  return is_public_runtime_allowed(path)
+              return path.startswith(LARGE_RUNTIME_ALLOWLIST)
 
           def is_generated_artifact(path: str) -> bool:
               parts = PurePosixPath(path).parts
@@ -207,6 +287,12 @@ jobs:
               )
               return raw_dir or suffix in RAW_EVIDENCE_SUFFIXES or basename not in COMPACT_EVIDENCE_FILES
 
+          def media_budget_exceeded(entries: list[tuple[str, int]], count_budget: int) -> bool:
+              return (
+                  len(entries) > count_budget
+                  or sum(size for _, size in entries) > MAX_NON_RUNTIME_MEDIA_BYTES
+              )
+
           classifier_probes = (
               ".local-evidence/run.log",
               ".ci-performance-evidence/result.json",
@@ -231,11 +317,19 @@ jobs:
           if is_generated_artifact("web/src/app/build/page.tsx") or is_generated_artifact("web/src/app/trace/page.tsx"):
               failures.append("source route classifier self-test failed")
           if (
-              not is_forbidden_public_raw("web/public/session.zip")
+              is_forbidden_public_raw("web/public/screenshots/runtime-guide.png")
+              or is_forbidden_public_raw("web/public/videos/training.mp4")
+              or is_forbidden_public_raw("web/public/manifest.json")
+              or is_forbidden_public_raw("web/public/seminars/teiatsu-denki.pptx")
+              or not is_forbidden_public_raw("web/public/seminars/raw/unreviewed.pptx")
+              or not is_forbidden_public_raw("web/public/session.zip")
               or not is_forbidden_public_raw("web/public/prod.sqlite")
               or not is_forbidden_public_raw("web/public/export.ndjson")
+              or not is_forbidden_public_raw("web/public/database-backup")
+              or not is_forbidden_public_raw("web/public/prod.sqlite-wal")
+              or not is_forbidden_public_raw("web/public/export.parquet")
           ):
-              failures.append("public raw archive classifier self-test failed")
+              failures.append("public runtime allowlist classifier self-test failed")
           if not is_generated_artifact("web/node_modules/pkg/dist/index.js"):
               failures.append("node_modules classifier self-test failed")
           if sum(
@@ -243,12 +337,28 @@ jobs:
               if is_generated_artifact(f"web/test-results-probe/{index}.json")
           ) <= MAX_UNTRACKED_COUNT:
               failures.append("untracked generated-file budget self-test failed")
+          if not media_budget_exceeded(
+              [(f"docs/probe-{index}.png", 1) for index in range(MAX_NON_RUNTIME_MEDIA_COUNT + 1)],
+              MAX_NON_RUNTIME_MEDIA_COUNT,
+          ):
+              failures.append("non-runtime media count budget self-test failed")
+          if not media_budget_exceeded(
+              [(f"docs/probe-{index}.json", 4 * MIB) for index in range(6)],
+              MAX_NON_RUNTIME_MEDIA_COUNT,
+          ):
+              failures.append("non-runtime media byte budget self-test failed")
 
           for path in scan_paths:
               file_path = Path(path)
-              if not file_path.is_file():
+              try:
+                  metadata = file_path.lstat()
+              except OSError:
+                  failures.append(f"tracked file cannot be read without following links: {path}")
                   continue
-              size = file_path.lstat().st_size
+              if not stat.S_ISREG(metadata.st_mode):
+                  failures.append(f"tracked source is not a regular file: {path}")
+                  continue
+              size = metadata.st_size
               suffix = file_path.suffix.lower()
               basename = file_path.name
               changed_path = path in changed_set
@@ -275,19 +385,36 @@ jobs:
                   non_runtime_media.append((path, size))
 
           history_blob_count = 0
-          if base:
+          history_range_ready = valid_commit(POLICY_HISTORY_BASE_SHA)
+          if not history_range_ready:
+              failures.append(
+                  "immutable storage policy history baseline is unavailable: "
+                  f"{POLICY_HISTORY_BASE_SHA}"
+              )
+          elif subprocess.run(
+              ["git", "merge-base", "--is-ancestor", POLICY_HISTORY_BASE_SHA, "HEAD"],
+              stdout=subprocess.DEVNULL,
+              stderr=subprocess.DEVNULL,
+              check=False,
+          ).returncode != 0:
+              history_range_ready = False
+              failures.append(
+                  "HEAD does not descend from the immutable storage policy history baseline"
+              )
+
+          if history_range_ready:
               # Inspect each commit's new tree path, not `rev-list --objects`.
               # The latter drops an added path when its blob already existed in
               # the base tree and is therefore unsafe for copy-then-delete cases.
               history_entries: list[tuple[bytes, str]] = []
               seen_history_entries: set[tuple[bytes, str]] = set()
               commit_ids = run_bytes(
-                  "git", "rev-list", "--reverse", f"{base}..HEAD"
+                  "git", "rev-list", "--reverse", f"{POLICY_HISTORY_BASE_SHA}..HEAD"
               ).splitlines()
               for commit_id in commit_ids:
                   raw_changes = run_bytes(
                       "git", "diff-tree", "--root", "-m", "--no-commit-id",
-                      "--no-renames", "-r", "--raw", "-z", "--diff-filter=ACM",
+                      "--no-renames", "-r", "--raw", "-z", "--diff-filter=ACMT",
                       commit_id.decode("ascii"),
                   ).split(b"\0")
                   index = 0
@@ -304,6 +431,12 @@ jobs:
                       path = raw_path.decode(
                           "utf-8", errors="surrogateescape"
                       ).replace("\\", "/")
+                      if fields[1] not in {b"100644", b"100755"}:
+                          failures.append(
+                              f"non-regular source entered history: {path} "
+                              f"(mode {fields[1].decode('ascii', errors='replace')})"
+                          )
+                          continue
                       entry = (object_id, path)
                       if entry not in seen_history_entries:
                           seen_history_entries.add(entry)
@@ -348,6 +481,11 @@ jobs:
                           failures.append(
                               f"history blob exceeds 5 MiB: {path} ({size} bytes)"
                           )
+                      if (
+                          PurePosixPath(path).suffix.lower() in MEDIA_OR_JSON_SUFFIXES
+                          and not is_runtime_allowed(path)
+                      ):
+                          history_non_runtime_media.append((path, size))
 
           media_bytes = sum(size for _, size in non_runtime_media)
           media_count_budget = (
@@ -355,10 +493,18 @@ jobs:
               if full_tree_scan
               else MAX_NON_RUNTIME_MEDIA_COUNT
           )
-          if len(non_runtime_media) > media_count_budget or media_bytes > MAX_NON_RUNTIME_MEDIA_BYTES:
+          if media_budget_exceeded(non_runtime_media, media_count_budget):
               failures.append(
                   "non-runtime JSON/image addition exceeds budget: "
                   f"{len(non_runtime_media)} files (budget {media_count_budget}), {media_bytes} bytes"
+              )
+
+          history_media_bytes = sum(size for _, size in history_non_runtime_media)
+          if media_budget_exceeded(history_non_runtime_media, MAX_NON_RUNTIME_MEDIA_COUNT):
+              failures.append(
+                  "non-runtime JSON/image history additions exceed budget since policy baseline: "
+                  f"{len(history_non_runtime_media)} blobs (budget {MAX_NON_RUNTIME_MEDIA_COUNT}), "
+                  f"{history_media_bytes} bytes"
               )
 
           untracked_raw = run_bytes("git", "ls-files", "--others", "--exclude-standard", "-z")
@@ -386,17 +532,88 @@ jobs:
           print(f"Tracked files scanned for forbidden output: {len(scan_paths)}")
           print(f"Full-tree forbidden-output scan: {full_tree_scan}")
           print(f"New history blobs checked: {history_blob_count}")
+          print(f"Storage policy history baseline: {POLICY_HISTORY_BASE_SHA}")
+          print(
+              "Non-runtime JSON/image history additions: "
+              f"{len(history_non_runtime_media)} blobs, {history_media_bytes} bytes"
+          )
           print(f"Untracked generated files (ignored included): {len(untracked_generated)}")
           if allowed_large:
               print("Reviewed runtime allowlist accepted these >5 MiB files:")
               for entry in allowed_large:
-                  print(f"  - {entry}")
+                  print(f"  - {ascii(entry)}")
 
           if failures:
               print("::error::Repository storage budget failed")
               for failure in sorted(set(failures)):
-                  print(f"  - {failure}")
+                  # PR paths are untrusted data under pull_request_target. ASCII
+                  # representation prevents newline/ANSI/workflow-command injection.
+                  print(f"  - {ascii(failure)}")
               sys.exit(1)
 
           print("Repository storage budget passed.")
+          PY
+
+  publish-pr-status:
+    name: publish-repository-hygiene-status
+    if: ${{ always() && github.event_name == 'pull_request_target' }}
+    needs:
+      - repository-hygiene
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    permissions:
+      contents: read
+      statuses: write
+    steps:
+      - name: Publish immutable PR-head status
+        env:
+          API_URL: ${{ github.api_url }}
+          REPOSITORY: ${{ github.repository }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          SCAN_RESULT: ${{ needs.repository-hygiene.result }}
+          STATUS_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          python3 -I - <<'PY'
+          import json
+          import os
+          import sys
+          import urllib.request
+
+          sha = os.environ.get("PR_HEAD_SHA", "")
+          if len(sha) != 40 or any(character not in "0123456789abcdef" for character in sha):
+              print("::error::Invalid immutable PR head SHA")
+              sys.exit(1)
+
+          scan_passed = os.environ.get("SCAN_RESULT") == "success"
+          payload = json.dumps({
+              "state": "success" if scan_passed else "failure",
+              "context": "repository-hygiene-target",
+              "description": "Trusted storage policy passed" if scan_passed else "Trusted storage policy failed",
+              "target_url": os.environ["RUN_URL"],
+          }).encode("utf-8")
+          request = urllib.request.Request(
+              f"{os.environ['API_URL']}/repos/{os.environ['REPOSITORY']}/statuses/{sha}",
+              data=payload,
+              method="POST",
+              headers={
+                  "Accept": "application/vnd.github+json",
+                  "Authorization": f"Bearer {os.environ['STATUS_TOKEN']}",
+                  "Content-Type": "application/json",
+                  "X-GitHub-Api-Version": "2022-11-28",
+              },
+          )
+          try:
+              with urllib.request.urlopen(request, timeout=30) as response:
+                  if response.status != 201:
+                      raise RuntimeError(f"unexpected status {response.status}")
+          except Exception as error:
+              print(f"::error::Unable to publish trusted storage status: {type(error).__name__}")
+              sys.exit(1)
+
+          if not scan_passed:
+              print("::error::Trusted storage scan failed; failure status was published.")
+              sys.exit(1)
+          print("Trusted repository-hygiene-target status published.")
           PY

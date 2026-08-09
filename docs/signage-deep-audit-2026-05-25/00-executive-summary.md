@@ -39,4 +39,4 @@
 06 大画面 / 07 多言語 / 08 表示モード / 09 KY・打合せ統合 / 10 法令 /
 11 専用機に戻る理由 / 12 他SaaS理由 / 13 改修優先順位 / 14 KY教訓適用 / 15 ロードマップ
 
-実機検証スクショ: `screenshots/`（smartphone-375 / tablet-768 / largescreen-1920）
+実機検証のraw screenshotはretention policyにより削除済み。判定要約のみ本書へ保持。

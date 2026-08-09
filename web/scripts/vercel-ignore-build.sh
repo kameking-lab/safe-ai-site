@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 set -u
 
-message=${VERCEL_GIT_COMMIT_MESSAGE:-}
-if printf '%s' "$message" | grep -Eiq '\[(skip ci|ci skip|no ci|skip actions|actions skip)\]|(^|[[:space:]])skip-checks:[[:space:]]*true([[:space:]]|$)'; then
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+if ! node "$script_dir/storage-deployment-guard.mjs" --committed-tree; then
+  printf '%s\n' 'Committed source failed the deployment storage guard; keeping the current production deployment.' >&2
   exit 0
 fi
 
-# Every non-skipped commit is built. This avoids missing an earlier change in a
-# multi-commit push or a merge by comparing only with HEAD~1.
+# Every safe commit is built. Neither a commit message nor a first-parent diff
+# proves that all earlier commits in the same push were already deployed.
 exit 1

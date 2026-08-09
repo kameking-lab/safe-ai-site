@@ -1,56 +1,43 @@
 {
-  "schemaVersion": 1,
-  "asOfJst": "2026-08-08",
+  "schemaVersion": 2,
+  "asOfJst": "2026-08-09",
   "updateMode": "replace-current",
-  "production": {
+  "verifiedProductionBaseline": {
     "url": "https://www.anzen-ai-portal.jp/",
-    "deploymentId": "dpl_muVQZ5RD32hSmpKxqzkamUA5hQTz",
-    "buildId": "bld_ih5hragbz",
-    "rollbackDeploymentId": "dpl_7LroCVRPQtGKmXCoCnHgwpKD5gA2",
-    "secondRollbackDeploymentId": "dpl_ZDfFpkGCS2p86xXeavP4w2y5gPZb",
-    "runtimeSourceCommit": "10ad210b87ca777f399e210b0981cb5f86f66adf",
-    "productionTag": "production-20260808-answer-first-maintenance-final",
+    "deploymentId": "dpl_8hBD9HeQHpAmE6QEM5pMkcokotZQ",
+    "buildId": "bld_h0oa3x2zc",
+    "rollbackDeploymentId": "dpl_muVQZ5RD32hSmpKxqzkamUA5hQTz",
+    "runtimeSourceCommit": "83f604e3a151fe645b594e2ca17b91cfa2435eae",
+    "productionTag": "production-20260809-83f604e3",
     "integrationPullRequest": 972,
     "status": "PASS"
   },
+  "maintenanceCandidate": {
+    "pullRequest": 975,
+    "deploymentMetadata": "assigned-after-merge-do-not-guess",
+    "reviewStatus": "FINAL_COMMITTED_HEAD_REQUIRED",
+    "historyPolicyEpoch": "83f604e3a151fe645b594e2ca17b91cfa2435eae"
+  },
   "openFindings": {
     "P0": 0,
-    "P1": 0,
-    "P2": 4,
-    "P3": 0,
-    "blocking": 0,
+    "P1": 1,
+    "P2": 0,
+    "P3": 1,
+    "blocking": 1,
     "items": [
       {
-        "severity": "P2",
-        "scope": "github-actions",
-        "summary": "Artifact age policy does not yet automate latest-success/latest-failure/release-two exceptions."
+        "severity": "P1",
+        "scope": "github-governance-rollout",
+        "summary": "Trusted PR-head status and main ruleset require live proof before production merge."
       },
       {
-        "severity": "P2",
-        "scope": "git-history-budget",
-        "summary": "History guard sizes blobs but does not aggregate classification of many sub-5MiB generated blobs."
-      },
-      {
-        "severity": "P2",
-        "scope": "production-smoke-reporting",
-        "summary": "Smoke records the expected Deployment ID; alias binding remains paired with Vercel inspect metadata."
-      },
-      {
-        "severity": "P2",
-        "scope": "information-architecture-metadata",
-        "summary": "feature-portfolio retains an old one-click /resources statement although the route is intentionally reachable from /features and /search."
+        "severity": "P3",
+        "scope": "cleanup-concurrency-hardening",
+        "summary": "Apply revalidates full content hashes immediately before deletion but does not lock the producer directory during recursive removal."
       }
     ]
   },
   "quality": {
-    "fullGateClosure": "PASS",
-    "preview": "PASS",
-    "productionConversationSmoke": "PASS",
-    "productionGetOnlySmoke": {
-      "status": "PASS",
-      "checks": 251,
-      "nonGetAttempts": 0
-    },
     "answerFirstRate": 1,
     "substantiveAnswerRate": 1,
     "pureClarificationRate": 0,
@@ -58,59 +45,37 @@
     "citationSupportRate": 1,
     "maxClarificationQuestions": 1,
     "maxQuickReplies": 3,
+    "answerFirstFullGate": "PASS",
+    "maintenanceFinalReview": "PENDING_COMMITTED_HEAD",
     "rollbackPerformed": false,
     "historyRewritePerformed": false
   },
   "cleanup": {
     "scopeBeforeBytes": 207580925677,
-    "scopeAfterDeleteBytes": 2922453844,
-    "scopeRecoveredBytes": 204658471833,
-    "deletedFiles": 1044047,
-    "deletedDirectories": 219900,
-    "deletedOperationBytes": 206012005478,
-    "archiveBytes": 15146631,
-    "archiveRootBytes": 18902506,
+    "scopeAfterDeleteBytes": 2922991152,
+    "scopeRecoveredBytes": 204657934525,
+    "deletedFiles": 1056959,
+    "deletedDirectoriesApproximate": 221840,
+    "deletedOperationBytes": 207618022516,
     "untrackedBeforeFiles": 19498,
     "untrackedBeforeBytes": 17931768982,
-    "untrackedPostDeleteFiles": 3,
-    "untrackedPostDeleteBytes": 11841,
     "untrackedFinalFiles": 0,
-    "untrackedFinalBytes": 0,
     "snapshotRootsDeleted": 16,
-    "mergedWorktreesDeleted": 1,
-    "remoteBranchesDeleted": 4,
+    "remoteBranchesDeleted": 28,
     "localBranchesDeleted": 2,
-    "githubArtifactsDeleted": 2586,
-    "githubArtifactBytesDeleted": 654867277,
+    "githubArtifactsDeleted": 3970,
+    "githubArtifactBytesDeleted": 1651595254,
     "githubCachesDeleted": 0
   },
   "retained": {
-    "snapshots": [
-      "safe-ai-site-preedit-20260801-20260801-110228",
-      "safe-ai-site-cleanup-baseline-20260808"
-    ],
-    "unmergedWorktree": "safe-ai-worktrees/fable-f1",
-    "laneSourcesWithLocalHistory": 5,
-    "currentProductionRollbackGenerations": 2,
+    "productionPreeditSnapshot": "safe-ai-site-preedit-20260801-20260801-110228",
+    "cleanupBaselineSnapshot": "safe-ai-site-cleanup-baseline-20260808",
+    "unmergedLaneAndWorktreeSources": true,
     "runtimeData": true,
     "currentTests": true,
     "usedAssets": true,
-    "legalSourceSnapshotsAndHashes": true
-  },
-  "archives": {
-    "manifestSha256": "44309034851AD8276E48A00B8275673E231423B8F0F758376B3A6ADD69A33FDF",
-    "finalRaw": {
-      "bytes": 7920002,
-      "entries": 61,
-      "sha256": "F092DFF00D36BE7699ED8C98FE1730D766A7260258F4BA08AEA60165A3C0CA45"
-    },
-    "protectedSourceValidation": {
-      "bytes": 599398,
-      "entries": 6,
-      "sha256": "32876083B366B07C17CC93B111C410E18CDE2D6B2511873363C69BD5A3D84FDD"
-    },
-    "secretCandidateFindings": 0,
-    "entryHashMismatches": 0
+    "legalSourceSnapshotsAndHashes": true,
+    "rollbackDeploymentGenerations": 2
   },
   "blockedExternal": [
     {

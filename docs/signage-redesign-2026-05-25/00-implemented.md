@@ -23,7 +23,7 @@ P0/P1 を実装。本番Supabase障害（Phase A）の解消を待たずに投�
   KY本文（作業内容・危険・対策）は職長入力の日本語のまま（本文AI翻訳併記は P2）。
 - `lib/signage/signage-prefs.ts`: 選択言語を localStorage 保持。
 - ヘッダーに🌐言語セレクト。実測: ja「本日の主な作業」→ vi「Công việc chính hôm nay」切替確認。
-- スクショ: after-vietnamese.png
+- 多言語表示のraw screenshotはretention policyにより削除済み。判定要約のみ保持。
 
 ### P1-7 印刷モード
 - ヘッダーに「🖨 印刷」。`window.print()`＋`print:` クラスで操作系を非表示・白背景化し、掲示板貼り出し用にA4出力。

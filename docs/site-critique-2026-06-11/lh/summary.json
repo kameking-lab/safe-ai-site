@@ -646,7 +646,7 @@
   "final1-4 (2026-06-11 18:31-33) = 前セッション中断時点の状態。/accidents は4回中2回 CLS 0.254（保護具セクションが初回ペイント後に約6,300px押し下げ）・perf 73-87 で完了条件未達。",
   "fable1-3 = Fable 5 検収開始時の再現確認（app/loading.tsx 削除前後）。fable4-5 = inlineCss 実験（FCP悪化で不採用）+ PWAアイコン最適化。",
   "fable6-8 (2026-06-12) = 最終: 構造根治（app/loading.tsx 削除・auth() の UserMenu スロット隔離・ページ直下 Suspense 除去・AccidentExtrasPanel 静的 import 化）+ PWAアイコン palette 圧縮 (icon-192: 42.8→15.2KB) + Geist preload 停止。3ページ×3回連続 perf 90+ / CLS 0.000。",
-  "生JSONは baseline-* と fable6-8（最終）のみ保持。final1-4・fable1-5 は値抽出後に削除。",
+  "Lighthouse生JSONはretention policyにより削除済み。主要値は本summaryへ保持。",
   "fable9 = 出荷ビルド（動的セグメント11個の個別loading.tsx追加後）での最終裏取り: accidents 91 / laws 92 / whats-new 94・CLS全て0.000。"
  ]
 }

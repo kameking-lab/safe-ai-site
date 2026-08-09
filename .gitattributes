@@ -12,3 +12,4 @@ BACKLOG-plain-stale.md merge=union
 # GitHub の言語統計・レビュー差分ノイズから除外する（正しさは ETL＋取込検証ゲートで担保）。
 web/src/data/laws-fulltext/*.json linguist-generated=true
 web/scripts/vercel-ignore-build.sh text eol=lf
+web/scripts/storage-deployment-guard.mjs text eol=lf

@@ -125,28 +125,31 @@ docs/education-curriculum-coverage.md
 /local-snapshots/
 /web/local-snapshots/
 
-# Raw archives/dumps are never runtime assets. A reviewed download must use an
-# exact allowlist in storage-budget.yml before this rule is relaxed.
-/web/public/**/*.har
-/web/public/**/*.trace
-/web/public/**/*.log
-/web/public/**/*.lcov
-/web/public/**/*.jsonl
-/web/public/**/*.ndjson
-/web/public/**/*.zip
-/web/public/**/*.gz
-/web/public/**/*.tgz
-/web/public/**/*.tar
-/web/public/**/*.7z
-/web/public/**/*.rar
-/web/public/**/*.bz2
-/web/public/**/*.xz
-/web/public/**/*.zst
-/web/public/**/*.sqlite
-/web/public/**/*.sqlite3
-/web/public/**/*.db
-/web/public/**/*.sql
-/web/public/**/*.dump
+# Public assets are fail-closed. New formats require an explicit reviewed
+# allowlist in this file, both Vercel ignore files, and storage-budget.yml.
+/web/public/**
+!/web/public/**/
+!/web/public/**/*.ico
+!/web/public/**/*.png
+!/web/public/**/*.jpg
+!/web/public/**/*.jpeg
+!/web/public/**/*.gif
+!/web/public/**/*.svg
+!/web/public/**/*.webp
+!/web/public/**/*.avif
+!/web/public/**/*.mp4
+!/web/public/**/*.webm
+!/web/public/**/*.woff
+!/web/public/**/*.woff2
+!/web/public/**/*.ttf
+!/web/public/ads.txt
+!/web/public/offline.html
+!/web/public/print.css
+!/web/public/sw.js
+!/web/public/manifest.json
+!/web/public/screenshots/manifest.json
+!/web/public/geo/japan-prefectures-ne10m.json
+!/web/public/seminars/*.pptx
 
 # Raw audit evidence stays local. Only compact manifests/results may be committed.
 /docs/audits/evidence/**

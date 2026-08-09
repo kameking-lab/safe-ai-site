@@ -1,13 +1,12 @@
 [CmdletBinding()]
 param(
     [switch]$Apply,
-    [ValidateRange(1, 3650)]
-    [int]$EvidenceRetentionDays = 7,
     [switch]$Json
 )
 
 Set-StrictMode -Version 2.0
 $ErrorActionPreference = 'Stop'
+$EvidenceRetentionDays = 7
 
 function Resolve-RepositoryRoot {
     $candidate = [System.IO.Path]::GetFullPath((Join-Path -Path $PSScriptRoot -ChildPath '..\..'))
@@ -590,7 +589,10 @@ function Test-IsSevenDayRawRetentionRoot {
     param([Parameter(Mandatory = $true)][string]$Path)
 
     $name = (Split-Path -Leaf $Path).ToLowerInvariant()
-    return ($name -in @('logs', 'audit-out'))
+    return (
+        $name -in @('logs', 'audit-out') -or
+        $name -match '^lighthouse-raw(?:-.+)?$'
+    )
 }
 
 function Test-IsAllowedOutputDirectoryName {
