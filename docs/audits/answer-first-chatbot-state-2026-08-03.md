@@ -12,7 +12,7 @@
 
 ## 会話評価
 
-2026-08-09に固定12ケースをJSON、SSE、legacyで再実行した。通常質問30応答の集計は次のとおり。実ブラウザー12ケースは同じ候補をPreviewで再確認する。
+2026-08-09に固定12ケースをJSON、SSE、legacyで再実行した。通常質問30応答の集計は次のとおり。実ブラウザー12ケースも最終Previewで再確認した。
 
 | 指標 | 実測 |
 | --- | ---: |
@@ -49,6 +49,7 @@
 
 ## Release結果
 
-- release candidate full gate: 123 critical suites、TypeScript、ESLint、全Vitest、全Playwright 250/250、production build、npm audit、法令・AI safety・JMA/WBGT・chemical・KY・事故・Visual KYT・automation・CSP・rate limit・SEO・responsive・accessibility・LighthouseをPASS。失敗ID0。
-- 独立最終レビュー: source candidateはGO、P0=0、P1=0、P2=0、P3=2（テスト証明の補強余地のみ）。最終外部環境の判定はPreview・Production欄へ追記する。
-- Preview / Production: 新しい候補は未反映。この文書の旧Deployment値はcurrent candidateから除外し、検証後の実IDだけを記録する。
+- release candidate full gate: 123 critical suites、TypeScript、ESLint、Vitest 7,032、Playwright 254/254、production build、npm audit、法令・AI safety・JMA/WBGT・chemical・KY・事故・Visual KYT・automation・CSP・rate limit・SEO・responsive・accessibility・Lighthouse 51/51をPASS。失敗ID0。
+- 独立最終レビュー: source candidateはGO、P0=0、P1=0、P2=0、P3=0。answer-first、Gemini、RAG、安全境界の回帰0。日誌一覧と旧URLの編集導線10件はquery保持を含め実遷移で確認した。
+- Preview: `dpl_C68J7CG36wTtknY7pszdrs2qWbSm` / `bld_ku74i3p5q`。最終HEAD `e84b39995af2313e7069d215b6981a1e030fb37a`で、SSO/noindex/robots/dry-run境界、固定12会話のJSON API・390px SSEブラウザー・legacy APIをPASS。本番は検証中も旧IDを維持した。
+- Production: `dpl_8hBD9HeQHpAmE6QEM5pMkcokotZQ` / `bld_h0oa3x2zc`。merge commit `83f604e3a151fe645b594e2ca17b91cfa2435eae`、tag `production-20260809-83f604e3`。主要GET 254/254、固定12会話の390pxブラウザー12/12とJSON/SSE/legacy 36/36をPASS。直前 `dpl_muVQZ5RD32hSmpKxqzkamUA5hQTz` はREADYのrollback先として保持し、rollbackは未実施。
