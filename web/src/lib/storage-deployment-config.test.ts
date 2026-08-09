@@ -91,6 +91,9 @@ describe("storage-gated deployment configuration", () => {
     expect(source).not.toContain("merge_commit_sha");
     expect(source).toContain('"refs/pull/$PR_NUMBER/merge"');
     expect(source).toContain("Trusted PR merge ref was not available within 60 seconds.");
+    expect(source).toContain("deadline=$((SECONDS + 60))");
+    expect(source).toContain('timeout "${call_timeout}s" git ls-remote');
+    expect(source).toContain('if merge_sha="$(timeout');
     expect(source).toContain(
       "allow-unsafe-pr-checkout: ${{ github.event_name == 'pull_request_target' }}",
     );
