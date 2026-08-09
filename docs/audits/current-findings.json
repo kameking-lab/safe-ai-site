@@ -1,39 +1,69 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "asOfJst": "2026-08-09",
   "updateMode": "replace-current",
   "verifiedProductionBaseline": {
     "url": "https://www.anzen-ai-portal.jp/",
-    "deploymentId": "dpl_8hBD9HeQHpAmE6QEM5pMkcokotZQ",
-    "buildId": "bld_h0oa3x2zc",
-    "rollbackDeploymentId": "dpl_muVQZ5RD32hSmpKxqzkamUA5hQTz",
-    "runtimeSourceCommit": "83f604e3a151fe645b594e2ca17b91cfa2435eae",
-    "productionTag": "production-20260809-83f604e3",
-    "integrationPullRequest": 972,
+    "deploymentId": "dpl_6fNnrgZyqyxs2B12JRhUXHRoJUVb",
+    "buildId": "bld_h8uvtkv40",
+    "runtimeSourceCommit": "4f7805b8936c272aa9c9be46d844530609aa1458",
+    "rollbackDeploymentId": "dpl_DzzNYqXvD73JEwzQn7XqG1McWjbN",
+    "rollbackBuildId": "bld_c9m9gbv4n",
+    "rollbackSourceCommit": "2def7a86ec79e2603e4e533c59ced6717629d1ec",
+    "productionTag": "production-20260809-maintenance-final",
     "status": "PASS"
   },
-  "maintenanceCandidate": {
-    "pullRequest": 975,
-    "deploymentMetadata": "assigned-after-merge-do-not-guess",
-    "reviewStatus": "FINAL_COMMITTED_HEAD_REQUIRED",
-    "historyPolicyEpoch": "83f604e3a151fe645b594e2ca17b91cfa2435eae"
+  "maintenanceRollout": {
+    "baselinePullRequest": 975,
+    "liveFixPullRequest": 978,
+    "rulesetId": 20600963,
+    "rulesetEnforcement": "active",
+    "requiredContext": "repository-hygiene-target",
+    "requiredIntegrationId": 15368,
+    "bypassActors": 0,
+    "positiveCanary": {
+      "pullRequest": 979,
+      "runId": 31299132669,
+      "result": "PASS",
+      "vercelCandidateDeployments": 0
+    },
+    "negativeCanary": {
+      "pullRequest": 980,
+      "runId": 31299199531,
+      "result": "BLOCKED",
+      "vercelCandidateDeployments": 0
+    },
+    "liveEtl": {
+      "runId": 31299250270,
+      "storageRunId": 31299269685,
+      "candidateAndMainSha": "4f7805b8936c272aa9c9be46d844530609aa1458",
+      "candidateBranchRetained": false,
+      "candidateDeployments": 0,
+      "mainProductionDeployments": 1,
+      "result": "PASS"
+    }
   },
   "openFindings": {
     "P0": 0,
-    "P1": 1,
+    "P1": 0,
     "P2": 0,
-    "P3": 1,
-    "blocking": 1,
+    "P3": 3,
+    "blocking": 0,
     "items": [
       {
-        "severity": "P1",
-        "scope": "github-governance-rollout",
-        "summary": "Trusted PR-head status and main ruleset require live proof before production merge."
+        "severity": "P3",
+        "scope": "etl-artifact-retention",
+        "summary": "Expired immutable ETL payloads require a fresh type-specific repository_dispatch run."
+      },
+      {
+        "severity": "P3",
+        "scope": "non-runtime-test-output",
+        "summary": "Some existing ordinary tests can update non-runtime RAG metrics or legal-RAG summaries."
       },
       {
         "severity": "P3",
         "scope": "cleanup-concurrency-hardening",
-        "summary": "Apply revalidates full content hashes immediately before deletion but does not lock the producer directory during recursive removal."
+        "summary": "Apply revalidates hashes immediately before deletion but relies on the producer being stopped rather than locking its directory."
       }
     ]
   },
@@ -46,7 +76,9 @@
     "maxClarificationQuestions": 1,
     "maxQuickReplies": 3,
     "answerFirstFullGate": "PASS",
-    "maintenanceFinalReview": "PENDING_COMMITTED_HEAD",
+    "maintenanceFullGate": "PASS",
+    "maintenanceIndependentReview": "P0=0/P1=0/P2=0",
+    "productionSmoke": "PASS",
     "rollbackPerformed": false,
     "historyRewritePerformed": false
   },
@@ -59,7 +91,7 @@
     "deletedOperationBytes": 207618022516,
     "untrackedBeforeFiles": 19498,
     "untrackedBeforeBytes": 17931768982,
-    "untrackedFinalFiles": 0,
+    "untrackedPostDeleteFiles": 0,
     "snapshotRootsDeleted": 16,
     "remoteBranchesDeleted": 28,
     "localBranchesDeleted": 2,
