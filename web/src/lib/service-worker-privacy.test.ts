@@ -23,7 +23,7 @@ describe("service worker privacy boundary", () => {
   });
 
   it("bumps the cache version so previously cached private responses are purged", () => {
-    expect(source).toContain('const CACHE_NAME = "anzen-ai-v7"');
+    expect(source).toContain('const CACHE_NAME = "anzen-ai-v8"');
     expect(source).toContain('key.startsWith("anzen-ai-")');
   });
 
@@ -55,6 +55,7 @@ describe("service worker privacy boundary", () => {
     expect(learningBody).toContain("cache.put(cacheKey, response.clone())");
     expect(source).toContain('credentials: "omit"');
     expect(source).toContain('!response.headers.has("set-cookie")');
-    expect(source).toContain('/\\b(?:no-store|private)\\b/i');
+    expect(source).toContain('response.headers.get("x-safe-ai-public-offline")');
+    expect(source).toContain('"safety-learning-v1"');
   });
 });

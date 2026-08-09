@@ -109,7 +109,7 @@ test("visited safety routes remain usable through the service worker while offli
   await expect(page.getByRole("heading", { level: 2, name: /常時73人/ })).toBeVisible();
 
   const cachedPaths = await page.evaluate(async () => {
-    const cache = await caches.open("anzen-ai-v7");
+    const cache = await caches.open("anzen-ai-v8");
     return (await cache.keys()).map((request) => new URL(request.url).pathname);
   });
   expect(cachedPaths).toEqual(expect.arrayContaining(["/e-learning/safety", COURSE_PATH]));

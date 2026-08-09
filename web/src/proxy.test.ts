@@ -235,6 +235,9 @@ describe("Proxy CSP boundary", () => {
       expect(response.headers.get("cache-control")).toBe(
         "public, max-age=0, must-revalidate",
       );
+      expect(response.headers.get("x-safe-ai-public-offline")).toBe(
+        "safety-learning-v1",
+      );
     }
 
     for (const url of [
@@ -245,6 +248,7 @@ describe("Proxy CSP boundary", () => {
     ]) {
       const response = proxy(new NextRequest(url));
       expect(response.headers.get("cache-control")).toBeNull();
+      expect(response.headers.get("x-safe-ai-public-offline")).toBeNull();
     }
   });
 
@@ -256,6 +260,7 @@ describe("Proxy CSP boundary", () => {
     );
 
     expect(response.headers.get("cache-control")).toBeNull();
+    expect(response.headers.get("x-safe-ai-public-offline")).toBeNull();
     expect(response.headers.get("x-safe-ai-preview-mode")).toBe("dry-run");
   });
 });
