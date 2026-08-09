@@ -27,7 +27,10 @@ on:
 jobs:
   smoke:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # A cold hosted runner currently needs about 15 minutes for install, lint,
+    # build, all unit tests, browser install, and live smoke. Leave bounded
+    # headroom so a fully successful final step is not cancelled at teardown.
+    timeout-minutes: 25
     defaults:
       run:
         working-directory: web
@@ -39,7 +42,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22.23.2"
           cache: "npm"
           cache-dependency-path: web/package-lock.json
 
@@ -59,6 +62,8 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: E2E smoke tests (live mode)
+        env:
+          PLAYWRIGHT_SERVER_MODE: production
         run: npm run test:e2e:smoke
 
       - name: Upload Playwright artifacts (smoke)
@@ -69,11 +74,12 @@ jobs:
           path: |
             web/playwright-report
             web/test-results
+          retention-days: 7
 
   full:
     if: github.event_name == 'push' || github.event.inputs.run_full == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 35
     defaults:
       run:
         working-directory: web
@@ -85,7 +91,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22.23.2"
           cache: "npm"
           cache-dependency-path: web/package-lock.json
 
@@ -115,3 +121,4 @@ jobs:
           path: |
             web/playwright-report
             web/test-results
+          retention-days: 7

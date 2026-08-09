@@ -32,30 +32,37 @@ describe("サービス先行の定型回答に対する主張単位の引用支�
     "酸欠作業の監視人は必要？",
     "有機溶剤を屋内で使う",
     "手すりは？",
-  ])("必須通常ケースをruntime同順の取得・展開・引用絞込み後にも強検証する: %s", (query) => {
-    const now = new Date("2026-08-03T12:00:00+09:00");
-    const searched = searchRelevantArticlesWithScore(query, 10).articles;
-    const expanded = expandVerifiedLegalEvidenceArticles(query, searched);
-    const initialAnswer = buildServiceFirstLegalAnswer({
-      query,
-      articles: expanded,
-      now,
-    });
-    const cited = citedLegalAnswerArticles(initialAnswer, expanded);
-    const answer = buildServiceFirstLegalAnswer({ query, articles: cited, now });
-    const result = validateServiceFirstLegalClaimSupport({
-      answer,
-      query,
-      articles: cited,
-      now,
-    });
+  ])(
+    "必須通常ケースをruntime同順の取得・展開・引用絞込み後にも強検証する: %s",
+    (query) => {
+      const now = new Date("2026-08-03T12:00:00+09:00");
+      const searched = searchRelevantArticlesWithScore(query, 10).articles;
+      const expanded = expandVerifiedLegalEvidenceArticles(query, searched);
+      const initialAnswer = buildServiceFirstLegalAnswer({
+        query,
+        articles: expanded,
+        now,
+      });
+      const cited = citedLegalAnswerArticles(initialAnswer, expanded);
+      const answer = buildServiceFirstLegalAnswer({
+        query,
+        articles: cited,
+        now,
+      });
+      const result = validateServiceFirstLegalClaimSupport({
+        answer,
+        query,
+        articles: cited,
+        now,
+      });
 
-    expect(cited.length).toBeGreaterThan(0);
-    expect(result.markersValid).toBe(true);
-    expect(result.supported, `${answer}\n${result.failures.join(", ")}`).toBe(
-      true,
-    );
-  });
+      expect(cited.length).toBeGreaterThan(0);
+      expect(result.markersValid).toBe(true);
+      expect(result.supported, `${answer}\n${result.failures.join(", ")}`).toBe(
+        true,
+      );
+    },
+  );
 
   it.each([
     {
@@ -119,6 +126,97 @@ describe("サービス先行の定型回答に対する主張単位の引用支�
     expect(result.failures).toEqual([]);
   });
 
+  it.each([
+    "休業災害の報告書を出す決まりは？",
+    "休業3日の労働災害はいつまでに報告する？",
+    "休業4日の労災事故はいつまでに報告しますか？",
+    "労働者死傷病報告 労災 報告 休業4日 誰に",
+  ])("安衛則97条の各回答分岐を1項・2項の必須語で支持する: %s", (query) => {
+    const articles = expandVerifiedLegalEvidenceArticles(query, []);
+    const answer = buildServiceFirstLegalAnswer({ query, articles, now: NOW });
+    const result = validateServiceFirstLegalClaimSupport({
+      answer,
+      query,
+      articles,
+      now: NOW,
+    });
+
+    expect(result.supported, `${answer}\n${result.failures.join(", ")}`).toBe(
+      true,
+    );
+  });
+
+  it.each(["翌月末日", "所轄労働基準監督署長", "電子情報処理組織"])(
+    "安衛則97条の公式本文から必須語 %s が欠ければfail-closedにする",
+    (requiredTerm) => {
+      const query = "休業災害の報告書を出す決まりは？";
+      const articles = expandVerifiedLegalEvidenceArticles(query, []);
+      const answer = buildServiceFirstLegalAnswer({
+        query,
+        articles,
+        now: NOW,
+      });
+      const incomplete = articles.map((source) =>
+        source.lawShort === "安衛則" && source.articleNum === "第97条"
+          ? { ...source, text: source.text.replaceAll(requiredTerm, "") }
+          : source,
+      );
+      const result = validateServiceFirstLegalClaimSupport({
+        answer,
+        query,
+        articles: incomplete,
+        now: NOW,
+      });
+
+      expect(result.supported).toBe(false);
+      expect(result.failures).toContainEqual(
+        expect.stringMatching(/reviewed-template-evidence/),
+      );
+    },
+  );
+
+  it.each([
+    "一月から三月まで",
+    "四月から六月まで",
+    "七月から九月まで",
+    "十月から十二月まで",
+  ])(
+    "安衛則97条の四半期区分 %s が欠ければ全該当分岐をfail-closedにする",
+    (requiredTerm) => {
+      for (const query of [
+        "休業災害の報告書を出す決まりは？",
+        "休業3日の労働災害はいつまでに報告する？",
+        "労働者死傷病報告 労災 報告 休業4日 誰に",
+      ]) {
+        const articles = expandVerifiedLegalEvidenceArticles(query, []);
+        const answer = buildServiceFirstLegalAnswer({
+          query,
+          articles,
+          now: NOW,
+        });
+        const incomplete = articles.map((source) =>
+          source.lawShort === "安衛則" && source.articleNum === "第97条"
+            ? { ...source, text: source.text.replaceAll(requiredTerm, "") }
+            : source,
+        );
+        const result = validateServiceFirstLegalClaimSupport({
+          answer,
+          query,
+          articles: incomplete,
+          now: NOW,
+        });
+
+        expect(
+          result.supported,
+          `${query}\n${answer}\n${result.failures.join(", ")}`,
+        ).toBe(false);
+        expect(result.failures).toContainEqual(
+          expect.stringMatching(/reviewed-template-evidence/),
+        );
+      }
+    },
+  );
+
   it.each(["?", ".", ";", "！", "？", "；"])(
     "句読点を変えても危険な逆主張を後段引用で隠せない: %s",
     (boundary) => {
@@ -129,7 +227,11 @@ describe("サービス先行の定型回答に対する主張単位の引用支�
         article("安衛法", "第61条"),
         article("安衛令", "第20条"),
       ];
-      const answer = buildServiceFirstLegalAnswer({ query, articles, now: NOW });
+      const answer = buildServiceFirstLegalAnswer({
+        query,
+        articles,
+        now: NOW,
+      });
       const tampered = answer.replace(
         "結論\n",
         `結論\nフォークリフトは無資格で運転できます${boundary} `,
@@ -181,7 +283,11 @@ describe("サービス先行の定型回答に対する主張単位の引用支�
   ])(
     "$query のcanonical句へ同一文の前置き・後置き主張を混ぜても引用を借用できない",
     ({ query, articles, falsePremise }) => {
-      const answer = buildServiceFirstLegalAnswer({ query, articles, now: NOW });
+      const answer = buildServiceFirstLegalAnswer({
+        query,
+        articles,
+        now: NOW,
+      });
       for (const separator of ["が、", "、また、", "：", " / ", " "]) {
         const premise = falsePremise.replace(/です$/u, "");
         const prefixed = answer.replace(
@@ -222,7 +328,10 @@ describe("サービス先行の定型回答に対する主張単位の引用支�
     const query = "酸欠則第12条第1項第1号から第5号の科目は？";
     const articles = [article("酸欠則", "第12条")];
     const answer = buildServiceFirstLegalAnswer({ query, articles, now: NOW });
-    const tampered = answer.replace("空気呼吸器等の使用方法", "防毒マスクの選定方法");
+    const tampered = answer.replace(
+      "空気呼吸器等の使用方法",
+      "防毒マスクの選定方法",
+    );
     expect(tampered).not.toBe(answer);
     const result = validateServiceFirstLegalClaimSupport({
       answer: tampered,
@@ -261,30 +370,33 @@ describe("サービス先行の定型回答に対する主張単位の引用支�
       articles: [article("安衛法", "第59条"), article("安衛則", "第35条")],
       injected: "雇い入れ時の教育は不要です。",
     },
-  ])("後段の正しい引用で危険な逆主張を隠せない: $query", ({
-    query,
-    articles,
-    injected,
-  }) => {
-    const answer = buildServiceFirstLegalAnswer({ query, articles, now: NOW });
-    const tampered = answer.replace("結論\n", `結論\n${injected} `);
-    expect(tampered).not.toBe(answer);
+  ])(
+    "後段の正しい引用で危険な逆主張を隠せない: $query",
+    ({ query, articles, injected }) => {
+      const answer = buildServiceFirstLegalAnswer({
+        query,
+        articles,
+        now: NOW,
+      });
+      const tampered = answer.replace("結論\n", `結論\n${injected} `);
+      expect(tampered).not.toBe(answer);
 
-    const result = validateServiceFirstLegalClaimSupport({
-      answer: tampered,
-      query,
-      articles,
-      now: NOW,
-    });
-    expect(result.supported).toBe(false);
-    expect(result.failures).toEqual(
-      expect.arrayContaining([
-        expect.stringMatching(
-          /結論:(?:dangerous-contradiction|unregistered-claim)/,
-        ),
-      ]),
-    );
-  });
+      const result = validateServiceFirstLegalClaimSupport({
+        answer: tampered,
+        query,
+        articles,
+        now: NOW,
+      });
+      expect(result.supported).toBe(false);
+      expect(result.failures).toEqual(
+        expect.arrayContaining([
+          expect.stringMatching(
+            /結論:(?:dangerous-contradiction|unregistered-claim)/,
+          ),
+        ]),
+      );
+    },
+  );
 
   it("適用時点は施行日を持つ条文へ直接対応し、別出典への付け替えを拒否する", () => {
     const query = "フルハーネス型墜落制止用器具の特別教育はいつ必要？";
@@ -295,8 +407,12 @@ describe("サービス先行の定型回答に対する主張単位の引用支�
       /適用時点\n・現在施行中（平成31年2月1日施行[^\n]*）［2］/,
     );
     expect(
-      validateServiceFirstLegalClaimSupport({ answer, query, articles, now: NOW })
-        .supported,
+      validateServiceFirstLegalClaimSupport({
+        answer,
+        query,
+        articles,
+        now: NOW,
+      }).supported,
     ).toBe(true);
 
     const wrongMarker = answer.replace(
@@ -322,8 +438,12 @@ describe("サービス先行の定型回答に対する主張単位の引用支�
     expect(answer).toContain("確認不能（2027-04-01・対象日版未収録）");
     expect(answer).not.toContain("85cm以上");
     expect(
-      validateServiceFirstLegalClaimSupport({ answer, query, articles, now: NOW })
-      .supported,
+      validateServiceFirstLegalClaimSupport({
+        answer,
+        query,
+        articles,
+        now: NOW,
+      }).supported,
     ).toBe(true);
   });
 
@@ -352,7 +472,11 @@ describe("サービス先行の定型回答に対する主張単位の引用支�
   ])(
     "$query の結論・条件を引用本文の必須語へ狭く対応付ける",
     ({ query, articles }) => {
-      const answer = buildServiceFirstLegalAnswer({ query, articles, now: NOW });
+      const answer = buildServiceFirstLegalAnswer({
+        query,
+        articles,
+        now: NOW,
+      });
       const result = validateServiceFirstLegalClaimSupport({
         answer,
         query,
@@ -380,7 +504,11 @@ describe("サービス先行の定型回答に対する主張単位の引用支�
     "根拠条文一覧をmarker先の記事locatorと一対一で検証する: %s",
     (query, lawShort, articleNum) => {
       const articles = [article(lawShort, articleNum)];
-      const answer = buildServiceFirstLegalAnswer({ query, articles, now: NOW });
+      const answer = buildServiceFirstLegalAnswer({
+        query,
+        articles,
+        now: NOW,
+      });
       const result = validateServiceFirstLegalClaimSupport({
         answer,
         query,

@@ -1,6 +1,6 @@
 # Answer-first chatbot state（2026-08-03 JST基準）
 
-実装・評価の再検証日: 2026-08-08 JST。法令回答は実行時計ではなく、確認済み一次資料の監査上限である2026-08-03 JSTへ固定した。リリース日は本番反映後に記録する。
+実装・評価の再検証日: 2026-08-09 JST。法令回答は実行時計ではなく、確認済み一次資料の監査上限である2026-08-03 JSTへ固定した。リリース日は本番反映後に記録する。
 
 ## 結果
 
@@ -12,7 +12,7 @@
 
 ## 会話評価
 
-2026-08-08に固定12ケースをJSON、SSE、legacy、実ブラウザーで再実行した。通常質問40応答の集計は次のとおり。
+2026-08-09に固定12ケースをJSON、SSE、legacyで再実行した。通常質問30応答の集計は次のとおり。実ブラウザー12ケースは同じ候補をPreviewで再確認する。
 
 | 指標 | 実測 |
 | --- | ---: |
@@ -29,7 +29,7 @@
 | 緊急時通常回答 | 0 |
 | PII外部送信 | 0 |
 
-機械可読結果は `evidence/answer-first-chatbot-2026-08-03/preview/conversation/` と `evidence/answer-first-chatbot-2026-08-03/production/conversation-evaluation.json` に固定した。
+候補の機械可読結果は `evidence/answer-first-chatbot-2026-08-03/conversation-evaluation.json` に固定した。Preview・Productionの結果は各環境の検証後に同じevidenceへ上書きする。
 
 ## 法令RAG
 
@@ -49,7 +49,6 @@
 
 ## Release結果
 
-- full gate: 123 critical suites、TypeScript、ESLint、全Vitest、全Playwright、production build、npm audit、法令・AI safety・JMA/WBGT・chemical・KY・事故・Visual KYT・automation・CSP・rate limit・SEO・responsive・accessibility・LighthouseをPASS。失敗ID0。
-- 独立最終レビュー: GO。P0=0、P1=0。独立重点1042/1042 tests PASS。
-- Preview: `dpl_A3sDGZT8veqfQ5dSu8kgX5Bys9Zh`。SSO/noindex/robots/dry-run境界と12会話のAPI・実ブラウザーをPASS。
-- Production: `dpl_ZDfFpkGCS2p86xXeavP4w2y5gPZb`をpromote。主要14 GET、12会話×JSON/SSE/legacy、390pxを含む公開ブラウザーsmokeをPASS。rollback条件なし。
+- release candidate full gate: 123 critical suites、TypeScript、ESLint、全Vitest、全Playwright 250/250、production build、npm audit、法令・AI safety・JMA/WBGT・chemical・KY・事故・Visual KYT・automation・CSP・rate limit・SEO・responsive・accessibility・LighthouseをPASS。失敗ID0。
+- 独立最終レビュー: source candidateはGO、P0=0、P1=0、P2=0、P3=2（テスト証明の補強余地のみ）。最終外部環境の判定はPreview・Production欄へ追記する。
+- Preview / Production: 新しい候補は未反映。この文書の旧Deployment値はcurrent candidateから除外し、検証後の実IDだけを記録する。

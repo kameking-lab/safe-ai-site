@@ -22,6 +22,8 @@ import { ConclusionCard } from "@/components/ui/conclusion-card";
 
 type Row = MeetingSummary & { source: "local" | "cloud" };
 
+const EDITOR_HREF = "/safety-diary?edit=1";
+
 export function MeetingListClient() {
   const router = useRouter();
   const [list, setList] = useState<Row[]>([]);
@@ -80,7 +82,7 @@ export function MeetingListClient() {
       const rec = await loadFull(row);
       if (!rec) return;
       saveCurrentMeeting(rec);
-      router.push("/safety-diary");
+      router.push(EDITOR_HREF);
     } finally {
       setBusy(false);
     }
@@ -92,7 +94,7 @@ export function MeetingListClient() {
       const rec = await loadFull(row);
       if (!rec) return;
       saveCurrentMeeting(duplicateForNextDay(rec));
-      router.push("/safety-diary");
+      router.push(EDITOR_HREF);
     } finally {
       setBusy(false);
     }
@@ -117,7 +119,7 @@ export function MeetingListClient() {
           <h1 className="text-xl font-bold text-slate-900">保存した打合せ書</h1>
           <p className="mt-1 text-sm text-slate-600">過去の打合せ書を開いて再編集・翌日用に複製できます。{usingCloud ? "（クラウドの履歴を表示中）" : "（この端末の履歴）"}</p>
         </div>
-        <Link href="/safety-diary" className="rounded-lg border border-emerald-300 bg-white px-3 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-50">＋ 新規作成</Link>
+        <Link href={EDITOR_HREF} className="rounded-lg border border-emerald-300 bg-white px-3 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-50">＋ 新規作成</Link>
       </div>
 
       {/* 結論カード（柱0）: いまの状態＝保存件数を3秒で。保存ゼロは新規作成へ誘導。
@@ -130,7 +132,7 @@ export function MeetingListClient() {
             tone="info"
             title="打合せ書なし"
             description="まずは新規に打合せ書を作成・保存しましょう。次から開いて再編集・翌日用に複製できます。"
-            action={{ href: "/safety-diary", label: "新規作成" }}
+            action={{ href: EDITOR_HREF, label: "新規作成" }}
           />
         ) : filtered.length === 0 ? (
           <ConclusionCard
@@ -147,7 +149,7 @@ export function MeetingListClient() {
             unit="件"
             title="保存打合せ書"
             description={isFiltering ? `全${list.length}件のうち、いまの検索条件に一致する分です。` : undefined}
-            action={{ href: "/safety-diary", label: "新規作成" }}
+            action={{ href: EDITOR_HREF, label: "新規作成" }}
           />
         )}
       </div>

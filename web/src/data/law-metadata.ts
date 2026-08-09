@@ -205,7 +205,8 @@ export const LAW_METADATA: Record<string, LawMetadata> = {
   },
   育介法: {
     lawShort: "育介法",
-    fullName: "育児休業、介護休業等育児又は家族介護を行う労働者の福祉に関する法律",
+    fullName:
+      "育児休業、介護休業等育児又は家族介護を行う労働者の福祉に関する法律",
     issuer: "厚生労働省",
     enactedOn: "平成4年4月1日施行",
     egovLawId: "403AC0000000076",
@@ -240,7 +241,8 @@ export const LAW_METADATA: Record<string, LawMetadata> = {
   },
   派遣法: {
     lawShort: "派遣法",
-    fullName: "労働者派遣事業の適正な運営の確保及び派遣労働者の保護等に関する法律",
+    fullName:
+      "労働者派遣事業の適正な運営の確保及び派遣労働者の保護等に関する法律",
     issuer: "厚生労働省",
     enactedOn: "昭和61年7月1日施行",
     egovLawId: "360AC0000000088",
@@ -271,7 +273,8 @@ export const LAW_METADATA: Record<string, LawMetadata> = {
   // 協会規程（建災防規程等）は e-Gov 法令番号が存在しないため egovLawId を持たせない。
   労施法: {
     lawShort: "労施法",
-    fullName: "労働施策の総合的な推進並びに労働者の雇用の安定及び職業生活の充実等に関する法律",
+    fullName:
+      "労働施策の総合的な推進並びに労働者の雇用の安定及び職業生活の充実等に関する法律",
     issuer: "厚生労働省",
     enactedOn: "昭和41年7月21日公布",
     egovLawId: "341AC0000000132",
@@ -403,11 +406,11 @@ export function getLawMetadata(lawShort: string): LawMetadata {
  */
 export const ARTICLE_EFFECTIVE_DATES: Record<string, string> = {
   "安衛則|第612条の2": "令和7年6月1日施行（熱中症対策の義務規定）",
-  "安衛則|第563条": "平成21年6月1日施行（足場用墜落防止設備の強化。平成27年改正による新設ではない）",
+  "安衛則|第563条":
+    "平成21年6月1日施行（足場用墜落防止設備の強化。平成27年改正による新設ではない）",
   "安衛法|第57条の2": "平成28年6月1日施行（SDS交付義務）",
   "安衛法|第57条の3": "平成28年6月1日施行（化学物質リスクアセスメント義務）",
   "安衛法|第28条の2": "平成18年4月1日施行（事業者の自主的リスクアセスメント）",
-  "安衛則|第97条": "昭和47年9月30日施行（労働者死傷病報告）",
   "安衛則|第577条の2": "令和5年4月1日施行（化学物質の自律的管理）",
   "石綿則|第3条": "令和3年4月1日改正（事前調査・報告強化）",
   "特化則|第38条の8": "令和5年4月1日改正（化学物質管理者制度）",
@@ -421,8 +424,7 @@ export const ARTICLE_EFFECTIVE_DATES: Record<string, string> = {
 export const PROVISION_EFFECTIVE_DATES: Record<string, string> = {
   "安衛則|第36条|第41号":
     "平成31年2月1日施行（フルハーネス型墜落制止用器具の特別教育）",
-  "石綿則|第3条|第4項":
-    "令和5年10月1日施行（建築物の事前調査者要件）",
+  "石綿則|第3条|第4項": "令和5年10月1日施行（建築物の事前調査者要件）",
 };
 
 export function getProvisionEffectiveDate(
@@ -443,7 +445,7 @@ export function getProvisionEffectiveDate(
 
 export function getArticleEffectiveDate(
   lawShort: string,
-  articleNum: string
+  articleNum: string,
 ): string | undefined {
   return getProvisionEffectiveDate(lawShort, articleNum);
 }

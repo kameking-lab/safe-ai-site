@@ -1,0 +1,208 @@
+{
+  "source": {
+    "workflowRunId": 31264521002,
+    "artifactResultSha256": "016759a3108dae6f1ad612ef2a163f77396f6a213790b36f112a2ca771e2ee55",
+    "nodeVersion": "v20.20.2",
+    "cspPolicyMode": "report-only",
+    "methodologyUse": "calibration-sample-only",
+    "generatedAt": "2026-08-08T15:58:58.798Z",
+    "sourceInventorySha256": "26c7ef178275d1d66ea64f62b0d5be47c34df0d1e9a436c5c74d7c0c846e67bc",
+    "buildId": "qtzWDe6vRANIC_q7N2-Mo"
+  },
+  "actual": {
+    "commonClientJsBytes": 161092,
+    "routes": {
+      "home": {
+        "totalClientJsBytes": 195623,
+        "routeSpecificJsBytes": 18503,
+        "routePayloadBytes": 57240,
+        "cssBytes": 43324,
+        "lcpMs": 2391.1,
+        "cls": 0,
+        "tbtMs": 53.6,
+        "renderBlockingCssBytes": 39837,
+        "adoptedRuns": 3
+      },
+      "visual-ky": {
+        "totalClientJsBytes": 187051,
+        "routeSpecificJsBytes": 9931,
+        "routePayloadBytes": 43235,
+        "cssBytes": 43324,
+        "lcpMs": 2931.1,
+        "cls": 0,
+        "tbtMs": 41.3,
+        "renderBlockingCssBytes": 39837,
+        "adoptedRuns": 3
+      },
+      "visual-ky-scenario": {
+        "totalClientJsBytes": 208026,
+        "routeSpecificJsBytes": 30906,
+        "routePayloadBytes": 59609,
+        "cssBytes": 43324,
+        "lcpMs": 2568.2,
+        "cls": 0,
+        "tbtMs": 99.5,
+        "renderBlockingCssBytes": 39837,
+        "adoptedRuns": 3
+      },
+      "safety-ai": {
+        "totalClientJsBytes": 183799,
+        "routeSpecificJsBytes": 6679,
+        "routePayloadBytes": 39319,
+        "cssBytes": 43324,
+        "lcpMs": 2882.7,
+        "cls": 0,
+        "tbtMs": 54,
+        "renderBlockingCssBytes": 39837,
+        "adoptedRuns": 3
+      },
+      "project-story": {
+        "totalClientJsBytes": 183799,
+        "routeSpecificJsBytes": 6679,
+        "routePayloadBytes": 37823,
+        "cssBytes": 43324,
+        "lcpMs": 2866.4,
+        "cls": 0,
+        "tbtMs": 45,
+        "renderBlockingCssBytes": 39837,
+        "adoptedRuns": 3
+      },
+      "automation": {
+        "totalClientJsBytes": 189522,
+        "routeSpecificJsBytes": 12402,
+        "routePayloadBytes": 36162,
+        "cssBytes": 43324,
+        "lcpMs": 2570.7,
+        "cls": 0,
+        "tbtMs": 29,
+        "renderBlockingCssBytes": 39837,
+        "adoptedRuns": 3
+      },
+      "heat-hub": {
+        "totalClientJsBytes": 181888,
+        "routeSpecificJsBytes": 4768,
+        "routePayloadBytes": 35727,
+        "cssBytes": 43324,
+        "lcpMs": 2221.2,
+        "cls": 0,
+        "tbtMs": 43,
+        "renderBlockingCssBytes": 39837,
+        "adoptedRuns": 3
+      },
+      "chemical-ra": {
+        "totalClientJsBytes": 239965,
+        "routeSpecificJsBytes": 62845,
+        "routePayloadBytes": 37659,
+        "cssBytes": 43324,
+        "lcpMs": 2954.4,
+        "cls": 0,
+        "tbtMs": 75.5,
+        "renderBlockingCssBytes": 39837,
+        "adoptedRuns": 3
+      },
+      "ky": {
+        "totalClientJsBytes": 226540,
+        "routeSpecificJsBytes": 49420,
+        "routePayloadBytes": 35176,
+        "cssBytes": 43324,
+        "lcpMs": 2876.9,
+        "cls": 0,
+        "tbtMs": 42,
+        "renderBlockingCssBytes": 39837,
+        "adoptedRuns": 3
+      },
+      "safety-diary": {
+        "totalClientJsBytes": 250491,
+        "routeSpecificJsBytes": 73371,
+        "routePayloadBytes": 51855,
+        "cssBytes": 43324,
+        "lcpMs": 3099.6,
+        "cls": 0,
+        "tbtMs": 140,
+        "renderBlockingCssBytes": 39837,
+        "adoptedRuns": 3
+      },
+      "signage": {
+        "totalClientJsBytes": 234520,
+        "routeSpecificJsBytes": 73428,
+        "routePayloadBytes": 23650,
+        "cssBytes": 43324,
+        "lcpMs": 3006.9,
+        "cls": 0.004,
+        "tbtMs": 117.5,
+        "renderBlockingCssBytes": 39837,
+        "adoptedRuns": 3
+      },
+      "risk": {
+        "totalClientJsBytes": 214147,
+        "routeSpecificJsBytes": 37027,
+        "routePayloadBytes": 31634,
+        "cssBytes": 43324,
+        "lcpMs": 3002.4,
+        "cls": 0,
+        "tbtMs": 38,
+        "renderBlockingCssBytes": 39837,
+        "adoptedRuns": 3
+      },
+      "chatbot": {
+        "totalClientJsBytes": 220623,
+        "routeSpecificJsBytes": 43503,
+        "routePayloadBytes": 34668,
+        "cssBytes": 43324,
+        "lcpMs": 2381.1,
+        "cls": 0,
+        "tbtMs": 36,
+        "renderBlockingCssBytes": 39837,
+        "adoptedRuns": 3
+      },
+      "law-search": {
+        "totalClientJsBytes": 184863,
+        "routeSpecificJsBytes": 7743,
+        "routePayloadBytes": 34400,
+        "cssBytes": 43324,
+        "lcpMs": 2222.8,
+        "cls": 0,
+        "tbtMs": 42,
+        "renderBlockingCssBytes": 39837,
+        "adoptedRuns": 3
+      },
+      "laws": {
+        "totalClientJsBytes": 266788,
+        "routeSpecificJsBytes": 89668,
+        "routePayloadBytes": 42211,
+        "cssBytes": 43324,
+        "lcpMs": 2653.8,
+        "cls": 0,
+        "tbtMs": 113,
+        "renderBlockingCssBytes": 39837,
+        "adoptedRuns": 3
+      },
+      "accident-search": {
+        "totalClientJsBytes": 183890,
+        "routeSpecificJsBytes": 6770,
+        "routePayloadBytes": 46316,
+        "cssBytes": 43324,
+        "lcpMs": 3050.4,
+        "cls": 0,
+        "tbtMs": 80.5,
+        "renderBlockingCssBytes": 39837,
+        "adoptedRuns": 3
+      },
+      "resources": {
+        "totalClientJsBytes": 183768,
+        "routeSpecificJsBytes": 6648,
+        "routePayloadBytes": 54591,
+        "cssBytes": 43324,
+        "lcpMs": 2366.8,
+        "cls": 0,
+        "tbtMs": 52,
+        "renderBlockingCssBytes": 39837,
+        "adoptedRuns": 3
+      }
+    },
+    "inventory": {
+      "sitemapUrlCount": 3519,
+      "staticPageCount": 3180
+    }
+  }
+}

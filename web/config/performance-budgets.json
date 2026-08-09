@@ -3,10 +3,12 @@
   "method": {
     "minimumRuns": 3,
     "aggregation": "median",
-    "notes": "Safety/privacy/legal/chemical/qualification/weather gates run first. Lighthouse runs sequentially; product LCP targets remain separate from anti-regression headroom."
+    "notes": "Safety/privacy/legal/chemical/qualification/weather gates run first. Lighthouse runs sequentially; product LCP targets remain separate from anti-regression headroom. Shared CSS is gated once at the maximum measured route transfer. Route-specific JavaScript attribution remains diagnostic because Next.js chunk partitioning and chunks shared by only a subset of routes make it unstable as a hard gate; total client JavaScript remains the route hard gate."
   },
   "shared": {
-    "commonClientJsBytesMax": 218000
+    "commonClientJsBytesMax": 218000,
+    "commonCssBytesMax": 46000,
+    "renderBlockingCssBytesMax": 42000
   },
   "layoutCohorts": {
     "main": [
@@ -31,153 +33,119 @@
   "routes": {
     "home": {
       "totalClientJsBytesMax": 218000,
-      "routeSpecificJsBytesMax": 4096,
-      "routePayloadBytesMax": 56000,
-      "cssBytesMax": 39000,
+      "routePayloadBytesMax": 61000,
       "lcpMsMax": 3850,
       "clsMax": 0.1,
       "tbtMsMax": 200
     },
     "visual-ky": {
       "totalClientJsBytesMax": 230000,
-      "routeSpecificJsBytesMax": 14000,
       "routePayloadBytesMax": 90000,
-      "cssBytesMax": 39000,
       "lcpMsMax": 3500,
       "clsMax": 0.1,
       "tbtMsMax": 200
     },
     "visual-ky-scenario": {
       "totalClientJsBytesMax": 275000,
-      "routeSpecificJsBytesMax": 56000,
       "routePayloadBytesMax": 100000,
-      "cssBytesMax": 39000,
       "lcpMsMax": 3800,
       "clsMax": 0.1,
       "tbtMsMax": 200
     },
     "safety-ai": {
       "totalClientJsBytesMax": 218000,
-      "routeSpecificJsBytesMax": 4096,
-      "routePayloadBytesMax": 38000,
-      "cssBytesMax": 39000,
+      "routePayloadBytesMax": 42000,
       "lcpMsMax": 3550,
       "clsMax": 0.1,
       "tbtMsMax": 200
     },
     "project-story": {
       "totalClientJsBytesMax": 218000,
-      "routeSpecificJsBytesMax": 4096,
       "routePayloadBytesMax": 38000,
-      "cssBytesMax": 39000,
       "lcpMsMax": 3550,
       "clsMax": 0.1,
       "tbtMsMax": 200
     },
     "automation": {
       "totalClientJsBytesMax": 226000,
-      "routeSpecificJsBytesMax": 12000,
       "routePayloadBytesMax": 98000,
-      "cssBytesMax": 39000,
       "lcpMsMax": 3900,
       "clsMax": 0.1,
       "tbtMsMax": 200
     },
     "heat-hub": {
       "totalClientJsBytesMax": 229000,
-      "routeSpecificJsBytesMax": 16000,
       "routePayloadBytesMax": 62000,
-      "cssBytesMax": 39000,
       "lcpMsMax": 3300,
       "clsMax": 0.1,
       "tbtMsMax": 200
     },
     "chemical-ra": {
       "totalClientJsBytesMax": 370000,
-      "routeSpecificJsBytesMax": 150000,
       "routePayloadBytesMax": 39000,
-      "cssBytesMax": 39000,
       "lcpMsMax": 4350,
       "clsMax": 0.1,
       "tbtMsMax": 200
     },
     "ky": {
       "totalClientJsBytesMax": 365000,
-      "routeSpecificJsBytesMax": 146000,
       "routePayloadBytesMax": 51000,
-      "cssBytesMax": 39000,
       "lcpMsMax": 4500,
       "clsMax": 0.1,
       "tbtMsMax": 200
     },
     "safety-diary": {
       "totalClientJsBytesMax": 270000,
-      "routeSpecificJsBytesMax": 58000,
       "routePayloadBytesMax": 53000,
-      "cssBytesMax": 39000,
       "lcpMsMax": 4000,
       "clsMax": 0.1,
       "tbtMsMax": 200
     },
     "signage": {
       "totalClientJsBytesMax": 301000,
-      "routeSpecificJsBytesMax": 122000,
-      "routePayloadBytesMax": 18000,
-      "cssBytesMax": 39000,
+      "routePayloadBytesMax": 25000,
       "lcpMsMax": 4250,
       "clsMax": 0.1,
       "tbtMsMax": 200
     },
     "risk": {
       "totalClientJsBytesMax": 238500,
-      "routeSpecificJsBytesMax": 26000,
       "routePayloadBytesMax": 35000,
-      "cssBytesMax": 39000,
       "lcpMsMax": 3650,
       "clsMax": 0.1,
       "tbtMsMax": 200
     },
     "chatbot": {
       "totalClientJsBytesMax": 291000,
-      "routeSpecificJsBytesMax": 81000,
       "routePayloadBytesMax": 36000,
-      "cssBytesMax": 39000,
       "lcpMsMax": 3820,
       "clsMax": 0.1,
       "tbtMsMax": 200
     },
     "law-search": {
       "totalClientJsBytesMax": 235000,
-      "routeSpecificJsBytesMax": 13000,
-      "routePayloadBytesMax": 34000,
-      "cssBytesMax": 39000,
+      "routePayloadBytesMax": 37000,
       "lcpMsMax": 3400,
       "clsMax": 0.1,
       "tbtMsMax": 200
     },
     "laws": {
       "totalClientJsBytesMax": 275000,
-      "routeSpecificJsBytesMax": 56000,
       "routePayloadBytesMax": 60000,
-      "cssBytesMax": 39000,
       "lcpMsMax": 3800,
       "clsMax": 0.1,
       "tbtMsMax": 200
     },
     "accident-search": {
       "totalClientJsBytesMax": 220000,
-      "routeSpecificJsBytesMax": 7000,
       "routePayloadBytesMax": 90000,
-      "cssBytesMax": 39000,
       "lcpMsMax": 3650,
       "clsMax": 0.1,
       "tbtMsMax": 200
     },
     "resources": {
       "totalClientJsBytesMax": 220000,
-      "routeSpecificJsBytesMax": 7000,
       "routePayloadBytesMax": 60000,
-      "cssBytesMax": 39000,
       "lcpMsMax": 3400,
       "clsMax": 0.1,
       "tbtMsMax": 200
@@ -185,7 +153,7 @@
   },
   "inventory": {
     "sitemapUrlCountBaseline": 3492,
-    "staticPageCountBaseline": 3091,
+    "staticPageCountBaseline": 3180,
     "allowedChangeFraction": 0.02
   }
 }

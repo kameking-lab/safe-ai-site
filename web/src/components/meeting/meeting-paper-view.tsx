@@ -11,6 +11,7 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import {
   buildDefaultMeetingRecord,
+  buildDefaultMeetingRecordFromSeed,
   emptyContractorRow,
   emptyDeliveryRow,
   aggregateMachines,
@@ -21,6 +22,7 @@ import {
   MEETING_WEATHER_OPTIONS,
   MEETING_COUNT_OPTIONS,
   type MeetingRecord,
+  type MeetingRecordSeed,
   type MeetingContractorRow,
   type ContractorType,
   type ChecklistStatus,
@@ -114,10 +116,21 @@ function hiddenIds(rows: MeetingContractorRow[], collapsed: Set<string>): Set<st
   return hidden;
 }
 
-export function MeetingPaperView({ initialRecord }: { initialRecord?: MeetingRecord }) {
-  // 通常ページではServer Componentが生成した同一値をhydrationに再利用する。
-  // optionalなのは独立したコンポーネントテストと埋め込み利用の互換性のため。
-  const [record, setRecord] = useState<MeetingRecord>(() => initialRecord ?? buildDefaultMeetingRecord());
+export function MeetingPaperView({
+  initialRecord,
+  initialSeed,
+}: {
+  initialRecord?: MeetingRecord;
+  initialSeed?: MeetingRecordSeed;
+}) {
+  // 通常ページは最小シードから同じ既定値をSSR/hydrationの両方で復元する。
+  // initialRecord は独立したコンポーネントテストと埋め込み利用の互換性のため残す。
+  const [record, setRecord] = useState<MeetingRecord>(() =>
+    initialRecord ??
+    (initialSeed
+      ? buildDefaultMeetingRecordFromSeed(initialSeed)
+      : buildDefaultMeetingRecord()),
+  );
   const activeEmergency = useMemo(() => {
     const decision = evaluateChatbotSafety(JSON.stringify(record));
     return decision?.kind === "emergency" ? decision : null;

@@ -110,7 +110,10 @@ export type LegalRagEvaluationReport = {
   cases: LegalRagCaseEvaluation[];
 };
 
-function matchesGold(article: RetrievedArticle, gold: LegalGoldReference): boolean {
+function matchesGold(
+  article: RetrievedArticle,
+  gold: LegalGoldReference,
+): boolean {
   if (article.articleNum !== gold.articleNum) return false;
   return (
     article.lawShort === gold.lawShort ||
@@ -169,7 +172,23 @@ function clarificationIsOneAtATime(
 }
 
 function normalizeChoice(value: string): string {
-  return value.normalize("NFKC").replace(/[\s　]/g, "").trim();
+  return value
+    .normalize("NFKC")
+    .replace(/[\s　]/g, "")
+    .trim();
+}
+
+function isScopedOpenWorkTypeClarification(
+  clarification: { question: string; options: readonly string[] } | null,
+): boolean {
+  if (!clarification || clarification.options.length !== 0) return false;
+  const question = normalizeChoice(clarification.question);
+  return (
+    question ===
+    normalizeChoice(
+      "作業主任者の要否を確認するため、実際の作業名や扱う物質・設備を教えてください。",
+    )
+  );
 }
 
 function clarificationChoicesMatch(
@@ -179,16 +198,12 @@ function clarificationChoicesMatch(
   if (!actual || !expected) return false;
   const actualChoices = actual.options.map(normalizeChoice).sort();
   const expectedChoices = expected.map(normalizeChoice).sort();
-  const legallyCompleteHighLiftChoices = [
-    "2m未満",
-    "2m以上10m未満",
-    "10m以上",
-  ].map(normalizeChoice).sort();
-  const legacyHighLiftChoices = [
-    "10m未満",
-    "10m以上",
-    "分からない",
-  ].map(normalizeChoice).sort();
+  const legallyCompleteHighLiftChoices = ["2m未満", "2m以上10m未満", "10m以上"]
+    .map(normalizeChoice)
+    .sort();
+  const legacyHighLiftChoices = ["10m未満", "10m以上", "分からない"]
+    .map(normalizeChoice)
+    .sort();
   if (
     actualChoices.length === legallyCompleteHighLiftChoices.length &&
     actualChoices.every(
@@ -196,6 +211,18 @@ function clarificationChoicesMatch(
     ) &&
     expectedChoices.every(
       (choice, index) => choice === legacyHighLiftChoices[index],
+    )
+  ) {
+    return true;
+  }
+  const legacyWorkSupervisorChoices = ["酸欠", "有機溶剤", "石綿"]
+    .map(normalizeChoice)
+    .sort();
+  if (
+    isScopedOpenWorkTypeClarification(actual) &&
+    expectedChoices.length === legacyWorkSupervisorChoices.length &&
+    expectedChoices.every(
+      (choice, index) => choice === legacyWorkSupervisorChoices[index],
     )
   ) {
     return true;
@@ -213,9 +240,7 @@ function resolvedExpectedChoices(
   const normalizedQuery = normalizeChoice(query);
   return (expected ?? [])
     .map(normalizeChoice)
-    .filter(
-      (choice) => choice.length >= 2 && normalizedQuery.includes(choice),
-    );
+    .filter((choice) => choice.length >= 2 && normalizedQuery.includes(choice));
 }
 
 function clarificationAdvancesPastResolvedChoices(input: {
@@ -245,6 +270,7 @@ function inferClarificationSlot(
   clarification: { question: string; options: readonly string[] } | null,
 ): string | null {
   if (!clarification) return null;
+  if (isScopedOpenWorkTypeClarification(clarification)) return "workType";
   const options = clarification.options.map(normalizeChoice);
   const hasAll = (...values: string[]) =>
     values.every((value) => options.includes(normalizeChoice(value)));
@@ -323,13 +349,11 @@ function validateAnswerCitationSupport(input: {
   claimMarkersValid: boolean;
   goldCitationCovered: boolean;
 } {
-  const coreHeaderOrder = ["結論", "条件", "根拠", "適用時点"].map(
-    (header) => {
-      const nestedPosition = input.answer.indexOf(`\n${header}\n`);
-      if (nestedPosition >= 0) return nestedPosition;
-      return input.answer.startsWith(`${header}\n`) ? 0 : -1;
-    },
-  );
+  const coreHeaderOrder = ["結論", "条件", "根拠", "適用時点"].map((header) => {
+    const nestedPosition = input.answer.indexOf(`\n${header}\n`);
+    if (nestedPosition >= 0) return nestedPosition;
+    return input.answer.startsWith(`${header}\n`) ? 0 : -1;
+  });
   const coreOrdered = coreHeaderOrder.every(
     (position, index) =>
       position >= 0 && (index === 0 || position > coreHeaderOrder[index - 1]!),
@@ -345,9 +369,7 @@ function validateAnswerCitationSupport(input: {
     articles: input.articles,
     now: input.now,
   });
-  const claimMarkersValid =
-    ordered &&
-    semanticSupport.markersValid;
+  const claimMarkersValid = ordered && semanticSupport.markersValid;
   const citedIndexes = semanticSupport.citedIndexes;
   const citedArticles = citedIndexes.map((index) => input.articles[index]!);
   const citedReferences = citedArticles.map(
@@ -376,8 +398,7 @@ async function evaluateCase(
   adapters: LegalEvaluationAdapters,
   now: Date,
 ): Promise<LegalRagCaseEvaluation> {
-  const rawQuery =
-    testCase.query ?? testCase.turns?.at(-1) ?? "";
+  const rawQuery = testCase.query ?? testCase.turns?.at(-1) ?? "";
   const query = resolvedQuery(testCase, adapters);
   const safety = evaluateChatbotSafety(rawQuery);
   const futureHeld = hasFutureLegalPremise(rawQuery, now);
@@ -393,16 +414,12 @@ async function evaluateCase(
   else if (
     safety?.kind === "ambiguous" &&
     testCase.expected.disposition === "clarify"
-  ) actualDisposition = "clarify";
-  else if (
-    safety?.kind === "source-gap" ||
-    safety?.kind === "wrong-premise"
-  ) {
+  )
+    actualDisposition = "clarify";
+  else if (safety?.kind === "source-gap" || safety?.kind === "wrong-premise") {
     actualDisposition = "abstain";
-  } else if (
-    clarification &&
-    testCase.expected.disposition === "clarify"
-  ) actualDisposition = "clarify";
+  } else if (clarification && testCase.expected.disposition === "clarify")
+    actualDisposition = "clarify";
 
   const gold = testCase.expected.gold ?? [];
   const shouldRetrieve =
@@ -422,19 +439,21 @@ async function evaluateCase(
   const answerArticles = shouldRetrieve
     ? expandVerifiedLegalEvidenceArticles(query, uniqueAnswerArticles(articles))
     : [];
-  const answer = shouldRetrieve && actualDisposition === "answer"
-    ? adapters.buildAnswer?.({ query, articles: answerArticles, now }) ??
-      buildServiceFirstLegalAnswer({ query, articles: answerArticles, now })
-    : "";
-  const answerCitation = shouldRetrieve && actualDisposition === "answer"
-    ? validateAnswerCitationSupport({
-        answer,
-        query,
-        articles: answerArticles,
-        gold,
-        now,
-      })
-    : null;
+  const answer =
+    shouldRetrieve && actualDisposition === "answer"
+      ? (adapters.buildAnswer?.({ query, articles: answerArticles, now }) ??
+        buildServiceFirstLegalAnswer({ query, articles: answerArticles, now }))
+      : "";
+  const answerCitation =
+    shouldRetrieve && actualDisposition === "answer"
+      ? validateAnswerCitationSupport({
+          answer,
+          query,
+          articles: answerArticles,
+          gold,
+          now,
+        })
+      : null;
   const citationSupported = answerCitation?.supported ?? null;
   const citedReferences = answerCitation?.citedReferences ?? [];
   const claimMarkersValid = answerCitation?.claimMarkersValid ?? null;
@@ -521,7 +540,8 @@ async function evaluateCase(
       ? actualDisposition === "abstain"
       : null;
 
-  const dispositionCorrect = actualDisposition === testCase.expected.disposition;
+  const dispositionCorrect =
+    actualDisposition === testCase.expected.disposition;
   const answerEvidenceCorrect = shouldRetrieve
     ? citationSupported === true
     : true;
@@ -530,18 +550,17 @@ async function evaluateCase(
     (testCase.expected.disposition === "emergency" ||
       testCase.expected.disposition === "privacy");
   const externalProbe = shouldProbeExternalBoundary
-    ? await adapters.probeExternalBoundary?.({
+    ? ((await adapters.probeExternalBoundary?.({
         message: rawQuery,
         expectedDisposition: testCase.expected.disposition as
-          | "emergency"
-          | "privacy",
-      }) ?? null
+          "emergency" | "privacy",
+      })) ?? null)
     : null;
   const externalOutbound = shouldProbeExternalBoundary
-    ? externalProbe?.providerCalled ?? null
+    ? (externalProbe?.providerCalled ?? null)
     : null;
   const safetyBoundaryCorrect = shouldProbeExternalBoundary
-    ? externalProbe?.dispositionCorrect ?? null
+    ? (externalProbe?.dispositionCorrect ?? null)
     : null;
   const externalRoutesChecked = externalProbe?.routesChecked ?? 0;
   const outboundBoundaryCorrect = shouldProbeExternalBoundary
@@ -606,7 +625,8 @@ async function evaluateCase(
     failureCodes.push("external-boundary-unmeasured");
   }
   if (externalOutbound === true) failureCodes.push("external-outbound");
-  if (safetyBoundaryCorrect === false) failureCodes.push("route-safety-boundary");
+  if (safetyBoundaryCorrect === false)
+    failureCodes.push("route-safety-boundary");
 
   return {
     id: testCase.id,
@@ -655,7 +675,9 @@ export async function evaluateLegalRagDataset(input: {
   }
   const retrieval = results.filter((result) => result.recallAt5 !== null);
   const exact = results.filter((result) => result.category === "exact");
-  const colloquial = results.filter((result) => result.category === "colloquial");
+  const colloquial = results.filter(
+    (result) => result.category === "colloquial",
+  );
   const citations = results.filter(
     (result) => result.citationSupported !== null,
   );
@@ -700,7 +722,9 @@ export async function evaluateLegalRagDataset(input: {
     metrics: {
       total: results.length,
       passed: results.filter((result) => result.passed).length,
-      answerCorrectness: average(results.map((result) => Number(result.passed))),
+      answerCorrectness: average(
+        results.map((result) => Number(result.passed)),
+      ),
       retrievalRecallAt5: average(
         retrieval.map((result) => result.recallAt5 ?? 0),
       ),
@@ -764,7 +788,9 @@ function csvValue(value: string | number | boolean | null): string {
   return /[",\r\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;
 }
 
-export function legalRagEvaluationCsv(report: LegalRagEvaluationReport): string {
+export function legalRagEvaluationCsv(
+  report: LegalRagEvaluationReport,
+): string {
   const header = [
     "id",
     "category",
@@ -823,7 +849,8 @@ export function legalRagEvaluationCsv(report: LegalRagEvaluationReport): string 
     result.dangerousMiss,
     result.failureCodes.join("|"),
   ]);
-  return [header, ...rows]
-    .map((row) => row.map(csvValue).join(","))
-    .join("\n") + "\n";
+  return (
+    [header, ...rows].map((row) => row.map(csvValue).join(",")).join("\n") +
+    "\n"
+  );
 }

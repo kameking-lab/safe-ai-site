@@ -125,7 +125,7 @@ describe("chatbot source metadata", () => {
         ...scaffoldArticle,
         articleNum: "第36条",
         itemNumberMap: {
-          "十の五": "高所作業車の運転（作業床の高さ10メートル未満）",
+          十の五: "高所作業車の運転（作業床の高さ10メートル未満）",
           四十一: "フルハーネス型墜落制止用器具を用いて行う作業",
         },
       },
@@ -282,6 +282,47 @@ describe("chatbot source metadata", () => {
     expect(answer).toMatch(
       /第1号「酸素欠乏の発生の原因」.*第2号「酸素欠乏症の症状」.*第5号「前各号に掲げるもののほか、酸素欠乏症の防止に関し必要な事項」/,
     );
+  });
+
+  it("特化則38条の14の監視人を第1項第5号・第12号の該当箇所で示す", () => {
+    const article = verifiedLawArticles.find(
+      (candidate) =>
+        candidate.lawShort === "特化則" &&
+        candidate.articleNum === "第38条の14",
+    );
+    expect(article).toBeDefined();
+
+    const source = lawArticleToSource(
+      article as LawArticle,
+      "特化則38条の14の監視人はどの号？",
+      new Date("2026-08-08T00:00:00+09:00"),
+    );
+
+    expect(source.paragraph).toBe("第1項");
+    expect(source.item).toBe("第5号・第12号");
+    expect(source.snippet).toMatch(/第5号.*監視人.*第12号.*監視人/);
+    expect(source.snippet).toMatch(/燻蒸の効果を確認|濃度/);
+  });
+
+  it("広い監視人質問でも特化則38条の14を監視人の項号・該当箇所で示す", () => {
+    const article = verifiedLawArticles.find(
+      (candidate) =>
+        candidate.lawShort === "特化則" &&
+        candidate.articleNum === "第38条の14",
+    );
+    expect(article).toBeDefined();
+
+    const source = lawArticleToSource(
+      article as LawArticle,
+      "監視人は必要？",
+      new Date("2026-08-08T00:00:00+09:00"),
+    );
+
+    expect(source).toMatchObject({
+      paragraph: "第1項",
+      item: "第5号・第12号",
+    });
+    expect(source.snippet).toMatch(/第5号.*監視人.*第12号.*監視人/);
   });
 
   it("旧仮名を含む条文本文からフォークリフトの号と該当箇所を抽出する", () => {

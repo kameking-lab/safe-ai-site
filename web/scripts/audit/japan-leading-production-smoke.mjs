@@ -3,20 +3,93 @@
 /**
  * Read-mostly production smoke for the 2026-07-31 gap-closure release.
  *
- * The only POST requests use fixed, non-PII payloads and exercise deterministic
+ * By default, the only POST requests use fixed, non-PII payloads and exercise deterministic
  * fail-closed paths:
  * - emergency chatbot classification (before any model call),
  * - chemical ambiguity / name-CAS mismatch,
  * - unavailable automation intake (before request-body parsing or delivery).
  *
  * It never sends mail or push, creates a payment, submits Search Console data,
- * writes application data, or calls an external generative model.
+ * writes application data, or calls an external generative model. Pass
+ * `--get-only` when rechecking read-only production state after a harness change.
  */
-import { mkdirSync, writeFileSync } from "node:fs";
+import { spawn } from "node:child_process";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { chromium } from "playwright";
 
+export function assertProductionAliasDeployment({
+  expectedDeploymentId,
+  productionHostname,
+  linkedProject,
+  deploymentMetadata,
+  aliasMetadata,
+}) {
+  if (!/^dpl_[A-Za-z0-9]+$/u.test(expectedDeploymentId ?? "")) {
+    throw new Error("Expected deployment ID is invalid");
+  }
+  if (
+    typeof productionHostname !== "string" ||
+    productionHostname.length === 0
+  ) {
+    throw new Error("Production hostname is invalid");
+  }
+
+  function ownerId(metadata) {
+    return metadata?.ownerId ?? metadata?.team?.id ?? null;
+  }
+
+  function assertLinkedReadyProduction(metadata, source) {
+    if (
+      metadata?.id !== expectedDeploymentId ||
+      metadata?.projectId !== linkedProject.projectId ||
+      ownerId(metadata) !== linkedProject.orgId ||
+      metadata?.name !== linkedProject.projectName ||
+      metadata?.target !== "production" ||
+      metadata?.readyState !== "READY" ||
+      typeof metadata?.url !== "string" ||
+      !/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.vercel\.app$/iu.test(
+        metadata.url,
+      )
+    ) {
+      throw new Error(
+        `${source} metadata does not prove the expected READY production deployment in the linked project`,
+      );
+    }
+  }
+
+  assertLinkedReadyProduction(deploymentMetadata, "deployment ID");
+  assertLinkedReadyProduction(aliasMetadata, "production alias");
+  if (aliasMetadata.url !== deploymentMetadata.url) {
+    throw new Error(
+      "Production alias and deployment ID resolved to different immutable URLs",
+    );
+  }
+  if (
+    !Array.isArray(aliasMetadata.alias) ||
+    !aliasMetadata.alias.includes(productionHostname)
+  ) {
+    throw new Error(
+      `Production alias metadata does not include ${productionHostname}`,
+    );
+  }
+
+  return {
+    deploymentId: expectedDeploymentId,
+    productionHostname,
+    projectId: linkedProject.projectId,
+    orgId: linkedProject.orgId,
+    target: deploymentMetadata.target,
+    readyState: deploymentMetadata.readyState,
+    immutableUrl: deploymentMetadata.url,
+    exactAliasMatch: true,
+  };
+}
+
+async function main() {
 const argv = process.argv.slice(2);
+const getOnly = argv.includes("--get-only");
 
 function option(name, fallback) {
   const index = argv.indexOf(`--${name}`);
@@ -39,6 +112,139 @@ const expectedDeploymentId = option("deployment-id", "");
 if (!/^dpl_[A-Za-z0-9]+$/.test(expectedDeploymentId)) {
   throw new Error("--deployment-id must be an exact Vercel deployment ID");
 }
+
+const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
+const repositoryRoot = path.resolve(scriptDirectory, "../../..");
+const linkedProject = JSON.parse(
+  readFileSync(path.join(repositoryRoot, ".vercel", "project.json"), "utf8"),
+);
+if (
+  linkedProject.projectId !== "prj_b2brgXdwQpnpmEN6gc3vtNFm6m7a" ||
+  linkedProject.orgId !== "team_fmzwEegB8SRsADNmwXkBUN34" ||
+  linkedProject.projectName !== "safe-ai-site" ||
+  linkedProject.settings?.rootDirectory !== "web"
+) {
+  throw new Error(".vercel/project.json is not the linked Safe AI web project");
+}
+
+function vercelCommand() {
+  if (process.platform !== "win32") return { command: "vercel", prefix: [] };
+  return {
+    command: process.execPath,
+    prefix: [
+      path.join(
+        process.env.APPDATA ?? "",
+        "npm",
+        "node_modules",
+        "vercel",
+        "dist",
+        "vc.js",
+      ),
+    ],
+  };
+}
+
+function sanitizedVercelEnvironment() {
+  const environment = { ...process.env };
+  delete environment.ANSWER_FIRST_PREVIEW_BYPASS_SECRET;
+  delete environment.VERCEL_AUTOMATION_BYPASS_SECRET;
+  delete environment.VERCEL_DEBUG;
+  delete environment.DEBUG;
+  return environment;
+}
+
+function redactVercelSecrets(value) {
+  let redacted = value;
+  for (const secret of [
+    process.env.VERCEL_TOKEN,
+    process.env.ANSWER_FIRST_PREVIEW_BYPASS_SECRET,
+    process.env.VERCEL_AUTOMATION_BYPASS_SECRET,
+  ]) {
+    if (secret) redacted = redacted.replaceAll(secret, "[REDACTED]");
+  }
+  return redacted;
+}
+
+function runVercelApi(endpoint) {
+  return new Promise((resolve, reject) => {
+    const executable = vercelCommand();
+    const child = spawn(
+      executable.command,
+      [...executable.prefix, "api", endpoint],
+      {
+        cwd: repositoryRoot,
+        env: sanitizedVercelEnvironment(),
+        windowsHide: true,
+        stdio: ["ignore", "pipe", "pipe"],
+      },
+    );
+    let stdout = "";
+    let stderr = "";
+    let outputExceeded = false;
+    child.stdout.setEncoding("utf8");
+    child.stderr.setEncoding("utf8");
+    child.stdout.on("data", (chunk) => {
+      if (stdout.length + chunk.length > 4 * 1024 * 1024) {
+        outputExceeded = true;
+        child.kill();
+        return;
+      }
+      stdout += chunk;
+    });
+    child.stderr.on("data", (chunk) => {
+      if (stderr.length < 64 * 1024) stderr += chunk;
+    });
+    child.once("error", (error) => {
+      reject(
+        new Error(
+          `Unable to run authenticated Vercel metadata lookup: ${redactVercelSecrets(error.message)}`,
+        ),
+      );
+    });
+    child.once("close", (code) => {
+      if (outputExceeded) {
+        reject(new Error("Vercel metadata output exceeded the memory limit"));
+        return;
+      }
+      if (code !== 0) {
+        reject(
+          new Error(
+            `Vercel metadata lookup failed (${code ?? 1}): ${redactVercelSecrets(stderr).slice(-800)}`,
+          ),
+        );
+        return;
+      }
+      resolve(stdout);
+    });
+  });
+}
+
+async function readDeploymentMetadata(identifier) {
+  const endpoint = `/v13/deployments/${encodeURIComponent(
+    identifier,
+  )}?teamId=${encodeURIComponent(linkedProject.orgId)}`;
+  const output = await runVercelApi(endpoint);
+  try {
+    return JSON.parse(output);
+  } catch {
+    throw new Error("Vercel returned invalid deployment metadata");
+  }
+}
+
+// Both lookups are authenticated and read-only. Resolving the mutable
+// production hostname independently prevents a syntactically valid stale ID
+// from being accepted as the deployment currently serving production.
+const [deploymentMetadata, productionAliasMetadata] = await Promise.all([
+  readDeploymentMetadata(expectedDeploymentId),
+  readDeploymentMetadata(baseUrl.hostname),
+]);
+const deploymentVerification = assertProductionAliasDeployment({
+  expectedDeploymentId,
+  productionHostname: baseUrl.hostname,
+  linkedProject,
+  deploymentMetadata,
+  aliasMetadata: productionAliasMetadata,
+});
 
 const outputPath = path.resolve(
   option(
@@ -70,6 +276,12 @@ function record(id, passed, evidence, severity = "release") {
   checks.push(item);
   if (!item.passed) failures.push(item);
 }
+
+record(
+  "deployment:production-alias-exact-match",
+  deploymentVerification.exactAliasMatch,
+  deploymentVerification,
+);
 
 function headersFrom(response) {
   return Object.fromEntries(
@@ -145,6 +357,19 @@ function h1Count(html) {
   return (html.match(/<h1\b/gi) ?? []).length;
 }
 
+function h1CountsByRenderMode(html) {
+  const noscriptBlocks =
+    html.match(/<noscript\b[^>]*>[\s\S]*?<\/noscript>/gi) ?? [];
+  const noScript = noscriptBlocks.reduce(
+    (count, block) => count + h1Count(block),
+    0,
+  );
+  const interactive = h1Count(
+    html.replace(/<noscript\b[^>]*>[\s\S]*?<\/noscript>/gi, ""),
+  );
+  return { interactive, noScript };
+}
+
 function jsonLdCount(html) {
   return (
     html.match(
@@ -212,14 +437,18 @@ const routeResults = await Promise.all(
 for (const result of routeResults) {
   const robots = metaRobots(result.body);
   const canonicalUrl = canonical(result.body);
+  const h1ByMode = h1CountsByRenderMode(result.body);
   record(`${result.route}:http-200`, result.status === 200, {
     status: result.status,
     durationMs: result.durationMs,
     error: result.error,
   });
-  record(`${result.route}:single-h1`, h1Count(result.body) === 1, {
-    h1Count: h1Count(result.body),
-  });
+  record(
+    `${result.route}:single-h1-per-render-mode`,
+    h1ByMode.interactive === 1 &&
+      (h1ByMode.noScript === 0 || h1ByMode.noScript === 1),
+    h1ByMode,
+  );
   record(
     `${result.route}:canonical-production`,
     canonicalUrl.startsWith(baseUrl.origin),
@@ -247,15 +476,38 @@ for (const result of routeResults) {
 const protectedGovernanceRoutes = [
   {
     route: "/chemical-ra/ledger",
-    failClosedCopy: "接続状態: scope",
+    requiredCopies: [
+      "組織台帳は接続されていません",
+      "現在はfail-closed",
+    ],
+    validReasons: [
+      "authentication_not_configured",
+      "authentication_required",
+      "database_unavailable",
+      "membership_required",
+      "insufficient_role",
+      "ledger_unavailable",
+    ],
   },
   {
     route: "/education/progress",
-    failClosedCopy: "接続状態: scope",
+    requiredCopies: [
+      "組織の受講記録は接続されていません",
+      "確認できないためfail-closed",
+    ],
+    validReasons: [
+      "authentication_not_configured",
+      "authentication_required",
+      "database_unavailable",
+      "membership_required",
+      "insufficient_role",
+      "progress_unavailable",
+    ],
   },
   {
     route: "/signage/manage",
-    failClosedCopy: "端末未登録・接続未確認",
+    requiredCopies: ["端末未登録・接続未確認"],
+    validReasons: [],
   },
 ];
 const protectedGovernanceResults = await Promise.all(
@@ -264,6 +516,10 @@ const protectedGovernanceResults = await Promise.all(
 for (const [index, result] of protectedGovernanceResults.entries()) {
   const expectation = protectedGovernanceRoutes[index];
   const robots = metaRobots(result.body);
+  const renderedBody = withoutReactSsrMarkers(result.body);
+  const matchedReason = expectation.validReasons.find((reason) =>
+    renderedBody.includes(`接続状態: ${reason}`),
+  );
   record(`${result.route}:http-200`, result.status === 200, {
     status: result.status,
     durationMs: result.durationMs,
@@ -271,8 +527,15 @@ for (const [index, result] of protectedGovernanceResults.entries()) {
   });
   record(
     `${result.route}:fail-closed-without-scope`,
-    withoutReactSsrMarkers(result.body).includes(expectation.failClosedCopy),
-    { expectedState: "unscoped-and-unavailable" },
+    expectation.requiredCopies.every((copy) => renderedBody.includes(copy)) &&
+      (expectation.validReasons.length === 0 || Boolean(matchedReason)),
+    {
+      requiredCopiesPresent: expectation.requiredCopies.map((copy) => ({
+        copy,
+        present: renderedBody.includes(copy),
+      })),
+      matchedReason: matchedReason ?? null,
+    },
   );
   record(
     `${result.route}:noindex-noarchive`,
@@ -324,22 +587,59 @@ record(
   },
   "documented-residual",
 );
-const flagshipPaths = [
+// Keep this list aligned with COMPACT_NAV_CATEGORIES. /resources remains a
+// public, indexable feature reached through /features; it is intentionally not
+// part of the compact one-click navigation contract.
+const compactNavigationPaths = [
   "/risk",
+  "/heat-illness-prevention",
+  "/ky/paper",
+  "/signage",
   "/chatbot",
+  "/law-search",
   "/chemical-ra",
-  "/accident-news",
   "/laws",
-  "/resources",
-  "/education-certification",
+  "/accident-news",
   "/training/visual-ky",
+  "/education-certification",
   "/services/automation",
+  "/safety-ai",
+  "/search",
+  "/features",
 ];
-for (const href of flagshipPaths) {
+record(
+  "home:compact-navigation-contract",
+  compactNavigationPaths.length === 15 &&
+    new Set(compactNavigationPaths).size === 15 &&
+    !compactNavigationPaths.includes("/resources"),
+  {
+    expectedCount: 15,
+    actualCount: compactNavigationPaths.length,
+    uniqueCount: new Set(compactNavigationPaths).size,
+    resourcesIncluded: compactNavigationPaths.includes("/resources"),
+  },
+);
+for (const href of compactNavigationPaths) {
   record(`home:one-click:${href}`, home.body.includes(`href="${href}`), {
     href,
   });
 }
+const resourceDiscoveryResults = await Promise.all(
+  ["/features"].map((route) => request(route)),
+);
+record(
+  "resources:discoverable-from-site-navigation",
+  resourceDiscoveryResults.some(
+    (result) => result.status === 200 && result.body.includes('href="/resources"'),
+  ),
+  {
+    routes: resourceDiscoveryResults.map((result) => ({
+      route: result.route,
+      status: result.status,
+      linked: result.body.includes('href="/resources"'),
+    })),
+  },
+);
 
 const heatPaths = [
   "/heat-illness-prevention",
@@ -410,6 +710,11 @@ record(
     sitemapResult.body,
   ),
   { home: baseUrl.origin },
+);
+record(
+  "sitemap:resources-present",
+  sitemapResult.body.includes("/resources</loc>"),
+  { path: "/resources" },
 );
 for (const heatPath of heatPaths) {
   record(
@@ -492,96 +797,111 @@ record(
   },
 );
 
-const emergency = await request("/api/chatbot", {
-  method: "POST",
-  headers: {
-    "content-type": "application/json",
-    origin: baseUrl.origin,
-  },
-  body: JSON.stringify({
-    message: "呼吸がありません",
-    privacyConfirmed: true,
-  }),
-});
-const emergencyPayload = json(emergency.body);
-record("emergency:http-200", emergency.status === 200, {
-  status: emergency.status,
-});
-record(
-  "emergency:deterministic-safety-response",
-  emergencyPayload?.source_type === "safety" &&
-    emergencyPayload?.requiresHumanReview === true &&
-    emergencyPayload?.answer?.includes("119") &&
-    emergencyPayload?.answer?.includes("AED"),
-  {
-    sourceType: emergencyPayload?.source_type ?? null,
-    safetyKind: emergencyPayload?.safetyKind ?? null,
-    requiresHumanReview: emergencyPayload?.requiresHumanReview ?? null,
-    includes119: emergencyPayload?.answer?.includes("119") ?? false,
-    includesAed: emergencyPayload?.answer?.includes("AED") ?? false,
-  },
-);
-
-const [ambiguousChemical, mismatchChemical] = await Promise.all([
-  request("/api/chemical-ra", {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-      origin: baseUrl.origin,
+if (getOnly) {
+  record(
+    "smoke:get-only-post-probes-skipped",
+    true,
+    {
+      skipped: [
+        "/api/chatbot",
+        "/api/chemical-ra",
+        "/api/automation-consult",
+      ],
     },
-    body: JSON.stringify({ chemicalName: "キシレン" }),
-  }),
-  request("/api/chemical-ra", {
+    "informational",
+  );
+} else {
+  const emergency = await request("/api/chatbot", {
     method: "POST",
     headers: {
       "content-type": "application/json",
       origin: baseUrl.origin,
     },
     body: JSON.stringify({
-      chemicalName: "トルエン",
-      casNumber: "1330-20-7",
+      message: "呼吸がありません",
+      privacyConfirmed: true,
     }),
-  }),
-]);
-const ambiguousPayload = json(ambiguousChemical.body);
-const mismatchPayload = json(mismatchChemical.body);
-record(
-  "chemical:ambiguous-fail-closed",
-  ambiguousChemical.status === 422 &&
-    ambiguousPayload?.error?.code === "AMBIGUOUS",
-  {
-    status: ambiguousChemical.status,
-    code: ambiguousPayload?.error?.code ?? null,
-  },
-);
-record(
-  "chemical:name-cas-mismatch-fail-closed",
-  mismatchChemical.status === 422 &&
-    mismatchPayload?.error?.code === "CAS_MISMATCH",
-  {
-    status: mismatchChemical.status,
-    code: mismatchPayload?.error?.code ?? null,
-  },
-);
+  });
+  const emergencyPayload = json(emergency.body);
+  record("emergency:http-200", emergency.status === 200, {
+    status: emergency.status,
+  });
+  record(
+    "emergency:deterministic-safety-response",
+    emergencyPayload?.source_type === "safety" &&
+      emergencyPayload?.requiresHumanReview === true &&
+      emergencyPayload?.answer?.includes("119") &&
+      emergencyPayload?.answer?.includes("AED"),
+    {
+      sourceType: emergencyPayload?.source_type ?? null,
+      safetyKind: emergencyPayload?.safetyKind ?? null,
+      requiresHumanReview: emergencyPayload?.requiresHumanReview ?? null,
+      includes119: emergencyPayload?.answer?.includes("119") ?? false,
+      includesAed: emergencyPayload?.answer?.includes("AED") ?? false,
+    },
+  );
 
-const unavailableIntake = await request("/api/automation-consult", {
-  method: "POST",
-  headers: {
-    "content-type": "application/json",
-    origin: baseUrl.origin,
-  },
-  body: "{}",
-});
-const intakePayload = json(unavailableIntake.body);
-record(
-  "automation:intake-fail-closed-before-pii",
-  unavailableIntake.status === 503 &&
-    intakePayload?.error?.code === "intake_unavailable",
-  {
-    status: unavailableIntake.status,
-    code: intakePayload?.error?.code ?? null,
-  },
-);
+  const [ambiguousChemical, mismatchChemical] = await Promise.all([
+    request("/api/chemical-ra", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        origin: baseUrl.origin,
+      },
+      body: JSON.stringify({ chemicalName: "キシレン" }),
+    }),
+    request("/api/chemical-ra", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        origin: baseUrl.origin,
+      },
+      body: JSON.stringify({
+        chemicalName: "トルエン",
+        casNumber: "1330-20-7",
+      }),
+    }),
+  ]);
+  const ambiguousPayload = json(ambiguousChemical.body);
+  const mismatchPayload = json(mismatchChemical.body);
+  record(
+    "chemical:ambiguous-fail-closed",
+    ambiguousChemical.status === 422 &&
+      ambiguousPayload?.error?.code === "AMBIGUOUS",
+    {
+      status: ambiguousChemical.status,
+      code: ambiguousPayload?.error?.code ?? null,
+    },
+  );
+  record(
+    "chemical:name-cas-mismatch-fail-closed",
+    mismatchChemical.status === 422 &&
+      mismatchPayload?.error?.code === "CAS_MISMATCH",
+    {
+      status: mismatchChemical.status,
+      code: mismatchPayload?.error?.code ?? null,
+    },
+  );
+
+  const unavailableIntake = await request("/api/automation-consult", {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      origin: baseUrl.origin,
+    },
+    body: "{}",
+  });
+  const intakePayload = json(unavailableIntake.body);
+  record(
+    "automation:intake-fail-closed-before-pii",
+    unavailableIntake.status === 503 &&
+      intakePayload?.error?.code === "intake_unavailable",
+    {
+      status: unavailableIntake.status,
+      code: intakePayload?.error?.code ?? null,
+    },
+  );
+}
 
 const jmaResult = await request("/api/signage/jma");
 const jmaPayload = json(jmaResult.body);
@@ -752,6 +1072,9 @@ for (const target of browserTargets) {
       readonlyTemplateCount: document.querySelectorAll(
         "main textarea[readonly]",
       ).length,
+      mailDraftFormCount: document.querySelectorAll(
+        'main form[method="post"][action="/contact/automation-email/draft"]',
+      ).length,
       mascotCount: mascotImages.length,
       brokenMascotCount: mascotImages.filter(
         (image) =>
@@ -779,9 +1102,9 @@ for (const target of browserTargets) {
   if (target.route === "/") {
     record(
       `${prefix}:primary-navigation`,
-      flagshipPaths.every((href) => snapshot.allHrefs.includes(href)),
+      compactNavigationPaths.every((href) => snapshot.allHrefs.includes(href)),
       {
-        missing: flagshipPaths.filter(
+        missing: compactNavigationPaths.filter(
           (href) => !snapshot.allHrefs.includes(href),
         ),
       },
@@ -813,29 +1136,38 @@ for (const target of browserTargets) {
     );
   }
   if (target.route === "/accidents") {
+    const syntheticLabelPattern = /架空の学習例/;
     record(
       `${prefix}:synthetic-labelled`,
-      /モック|合成|synthetic/i.test(snapshot.bodyText),
-      { labelPresent: /モック|合成|synthetic/i.test(snapshot.bodyText) },
+      syntheticLabelPattern.test(snapshot.bodyText),
+      { labelPresent: syntheticLabelPattern.test(snapshot.bodyText) },
     );
   }
   if (target.route === "/services/automation") {
     const emailPattern =
       /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i;
     record(
-      `${prefix}:preparing-no-pii-form`,
-      /受付(?:は|の)?準備中/.test(snapshot.bodyText) &&
-        snapshot.mainFormCount === 0 &&
+      `${prefix}:mail-client-no-pii-form`,
+      snapshot.bodyText.includes("メール相談受付中") &&
+        snapshot.bodyText.includes(
+          "Webフォームへ相談本文を入力する方式ではありません",
+        ) &&
+        snapshot.mainFormCount === 1 &&
         snapshot.piiInputCount === 0 &&
-        snapshot.submitButtonCount === 0 &&
+        snapshot.submitButtonCount === 1 &&
         snapshot.readonlyTemplateCount > 0 &&
+        snapshot.mailDraftFormCount === 1 &&
         !emailPattern.test(snapshot.bodyText),
       {
-        preparationLabel: /受付(?:は|の)?準備中/.test(snapshot.bodyText),
+        mailClientLabel: snapshot.bodyText.includes("メール相談受付中"),
+        webFormDisabledCopy: snapshot.bodyText.includes(
+          "Webフォームへ相談本文を入力する方式ではありません",
+        ),
         mainFormCount: snapshot.mainFormCount,
         piiInputCount: snapshot.piiInputCount,
         submitButtonCount: snapshot.submitButtonCount,
         readonlyTemplateCount: snapshot.readonlyTemplateCount,
+        mailDraftFormCount: snapshot.mailDraftFormCount,
         emailExposed: emailPattern.test(snapshot.bodyText),
       },
     );
@@ -913,12 +1245,14 @@ record(
   noJsResponse?.status() === 200 &&
     noJsSnapshot.h1Count === 1 &&
     noJsSnapshot.mainCount === 1 &&
-    flagshipPaths.every((href) => noJsSnapshot.flagshipLinks.includes(href)),
+    compactNavigationPaths.every((href) =>
+      noJsSnapshot.flagshipLinks.includes(href),
+    ),
   {
     status: noJsResponse?.status() ?? null,
     h1Count: noJsSnapshot.h1Count,
     mainCount: noJsSnapshot.mainCount,
-    missing: flagshipPaths.filter(
+    missing: compactNavigationPaths.filter(
       (href) => !noJsSnapshot.flagshipLinks.includes(href),
     ),
   },
@@ -982,7 +1316,10 @@ const report = {
   generatedAt: new Date().toISOString(),
   baseUrl: baseUrl.origin,
   expectedDeploymentId,
-  mode: "production-smoke-fixed-non-pii-fail-closed-probes",
+  deploymentVerification,
+  mode: getOnly
+    ? "production-smoke-get-only"
+    : "production-smoke-fixed-non-pii-fail-closed-probes",
   guarantees: {
     credentialValuesRecorded: false,
     piiSubmitted: false,
@@ -1017,3 +1354,11 @@ console.log(
 );
 
 if (!report.passed) process.exitCode = 1;
+}
+
+if (
+  process.argv[1] &&
+  path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)
+) {
+  await main();
+}

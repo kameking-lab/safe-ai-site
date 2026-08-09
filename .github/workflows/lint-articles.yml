@@ -42,6 +42,7 @@ jobs:
           name: url-check-results
           path: logs/url-check-results.json
           if-no-files-found: ignore
+          retention-days: 7
 
       - name: 結果サマリー
         if: always()

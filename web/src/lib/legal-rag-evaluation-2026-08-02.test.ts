@@ -20,10 +20,7 @@ import {
 import { buildServiceFirstLegalAnswer } from "@/lib/legal-extractive-answer";
 
 const expectedChecksum = readFileSync(
-  resolve(
-    process.cwd(),
-    "src/data/legal-rag-evaluation-2026-08-02.sha256",
-  ),
+  resolve(process.cwd(), "src/data/legal-rag-evaluation-2026-08-02.sha256"),
   "utf8",
 ).trim();
 
@@ -250,6 +247,74 @@ describe("2026-08-02 legal RAG frozen evaluation", () => {
     });
   });
 
+  it("accepts only the scoped open-input work-type clarification for the frozen legacy choices", async () => {
+    const testCase = LEGAL_RAG_EVALUATION_2026_08_02.find(
+      ({ id }) => id === "ambiguous-30",
+    );
+    expect(testCase).toBeDefined();
+
+    const scoped = await evaluateLegalRagDataset({
+      cases: [testCase!],
+      frozenAt: LEGAL_RAG_EVALUATION_FROZEN_AT,
+      now: new Date("2026-08-02T00:00:00+09:00"),
+      adapters: {
+        buildClarification: () => ({
+          question:
+            "作業主任者の要否を確認するため、実際の作業名や扱う物質・設備を教えてください。",
+          options: [],
+        }),
+      },
+    });
+    expect(scoped.cases[0]).toMatchObject({
+      clarificationCorrect: true,
+      clarificationChoicesMatch: true,
+      clarificationSlotMatch: true,
+      actualClarificationSlot: "workType",
+    });
+
+    const vague = await evaluateLegalRagDataset({
+      cases: [testCase!],
+      frozenAt: LEGAL_RAG_EVALUATION_FROZEN_AT,
+      now: new Date("2026-08-02T00:00:00+09:00"),
+      adapters: {
+        buildClarification: () => ({
+          question: "どの作業ですか？",
+          options: [],
+        }),
+      },
+    });
+    expect(vague.cases[0]).toMatchObject({
+      clarificationCorrect: false,
+      clarificationChoicesMatch: false,
+      clarificationSlotMatch: false,
+      actualClarificationSlot: null,
+    });
+
+    for (const closedQuestion of [
+      "作業主任者の要否を確認するため、実際の作業名や扱う物質・設備を教えてください。酸欠・有機溶剤・石綿のどれですか？",
+      "作業主任者の要否を確認するため、実際の作業名や扱う物質・設備は酸欠・有機溶剤・石綿から選んでください。",
+    ]) {
+      const closed = await evaluateLegalRagDataset({
+        cases: [testCase!],
+        frozenAt: LEGAL_RAG_EVALUATION_FROZEN_AT,
+        now: new Date("2026-08-02T00:00:00+09:00"),
+        adapters: {
+          buildClarification: () => ({
+            question: closedQuestion,
+            options: [],
+          }),
+        },
+      });
+      expect(closed.cases[0]).toMatchObject({
+        passed: false,
+        clarificationCorrect: false,
+        clarificationChoicesMatch: false,
+        clarificationSlotMatch: false,
+        actualClarificationSlot: null,
+      });
+    }
+  });
+
   it(
     "measures retrieval, grounding, ambiguity, temporal and safety targets",
     { timeout: 120_000 },
@@ -266,10 +331,7 @@ describe("2026-08-02 legal RAG frozen evaluation", () => {
         adapters: {
           resolveConversationQuery: resolveLegalConversationQuery,
           buildClarification: buildLegalClarification,
-          probeExternalBoundary: async ({
-            message,
-            expectedDisposition,
-          }) => {
+          probeExternalBoundary: async ({ message, expectedDisposition }) => {
             const callsBefore = fetchSpy.mock.calls.length;
             const routes = [
               { post: postJson, mode: "json" as const },
@@ -338,8 +400,9 @@ describe("2026-08-02 legal RAG frozen evaluation", () => {
       );
       expect(falseClarifications.map(({ id }) => id)).toEqual([]);
       expect(
-        falseClarifications.every(({ failureCodes, dangerousMiss }) =>
-          failureCodes.includes("false-clarification") && !dangerousMiss,
+        falseClarifications.every(
+          ({ failureCodes, dangerousMiss }) =>
+            failureCodes.includes("false-clarification") && !dangerousMiss,
         ),
       ).toBe(true);
       const ladderClarification = report.cases.find(
@@ -354,8 +417,8 @@ describe("2026-08-02 legal RAG frozen evaluation", () => {
         passed: true,
         failureCodes: [],
       });
-      const frozenPastCases = report.cases.filter(
-        ({ id }) => /^temporal-(?:1[1-9]|20)$/.test(id),
+      const frozenPastCases = report.cases.filter(({ id }) =>
+        /^temporal-(?:1[1-9]|20)$/.test(id),
       );
       expect(frozenPastCases).toHaveLength(10);
       expect(

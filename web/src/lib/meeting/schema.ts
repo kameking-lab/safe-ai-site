@@ -142,6 +142,17 @@ export type MeetingRecord = {
   savedAt: string;
 };
 
+/**
+ * 新規帳票をSSRとhydrationで同じ値に復元するための最小シード。
+ * ids は buildDefaultMeetingRecord の生成順（元請行・帳票・搬入出行）。
+ */
+export type MeetingRecordSeed = {
+  ids: readonly [string, string, string];
+  workDate: readonly [string, string, string];
+  meetingDate: string;
+  savedAt: string;
+};
+
 /** 8カテゴリの標準点検項目（建設現場の一般的項目。カスタマイズで増減可） */
 export const DEFAULT_CHECKLIST: { key: string; label: string; items: string[] }[] = [
   { key: "general", label: "一般事項", items: ["朝礼・KY実施", "新規入場者教育", "保護具着用（ヘルメット・安全帯）", "立入禁止措置", "整理整頓（4S）"] },
@@ -287,6 +298,41 @@ export function buildDefaultMeetingRecord(options?: {
     },
     documentControl: createDefaultMeetingDocumentControl(),
     savedAt: d.toISOString(),
+  };
+}
+
+export function createDefaultMeetingRecordSeed(options?: {
+  idFactory?: () => string;
+  now?: Date;
+}): MeetingRecordSeed {
+  const record = buildDefaultMeetingRecord(options);
+  return {
+    ids: [record.contractors[0]!.id, record.id, record.deliveries[0]!.id],
+    workDate: [
+      record.workDateYear,
+      record.workDateMonth,
+      record.workDateDay,
+    ],
+    meetingDate: record.meetingDate,
+    savedAt: record.savedAt,
+  };
+}
+
+export function buildDefaultMeetingRecordFromSeed(
+  seed: MeetingRecordSeed,
+): MeetingRecord {
+  let idIndex = 0;
+  const record = buildDefaultMeetingRecord({
+    idFactory: () => seed.ids[idIndex++]!,
+    now: new Date(seed.savedAt),
+  });
+  return {
+    ...record,
+    workDateYear: seed.workDate[0],
+    workDateMonth: seed.workDate[1],
+    workDateDay: seed.workDate[2],
+    meetingDate: seed.meetingDate,
+    savedAt: seed.savedAt,
   };
 }
 

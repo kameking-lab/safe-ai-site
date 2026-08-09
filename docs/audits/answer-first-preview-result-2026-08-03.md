@@ -1,15 +1,10 @@
 # Answer-first Preview result（2026-08-03 JST基準）
 
-- Status: PASS（2026-08-08 JST、Preview作成1回）
-- Deployment ID: `dpl_A3sDGZT8veqfQ5dSu8kgX5Bys9Zh`
-- Immutable URL: `https://safe-ai-site-o8rp4hq8m-kameking-labs-projects.vercel.app/`
-- SSO: 未認証GETはVercel Authenticationへ302。既存automation bypassは値を表示・保存せず、メモリ内headerだけで使用した。
-- index境界: 全監査pathで`noindex,nofollow,noarchive`、`robots.txt`は`User-agent: * / Disallow: /`、production sitemapへの送信0。
-- 外部動作: Analytics 0、RUM 0、Service Worker登録・取得・controller 0。Vercel Preview制御面`vercel.live`以外の第三者origin 0。
-- メール等: 合成`example.test`相談は`deliveryMode=dry-run`、応答への宛先echo 0。RUM POSTは503 fail-closed。実メール・push・決済0。
-- production不変確認: Preview監査中の`www.anzen-ai-portal.jp`は`dpl_F5nbj5gPCdxNXDQa3tYSWFYVHoyz`を維持した。
-- 12会話: API 12/12、実ブラウザー12/12。answer-first 100%、substantive 100%、pure clarification 0%、context retention 100%、引用支持100%。
-- 上限・安全: 確認質問1、quick reply 3、回答操作2、カテゴリ飛躍0、緊急時通常回答0、PII外部送信0、外部AI利用0。
-- review: full gate PASS、独立最終レビューGO、open P0=0、P1=0。
+- Status: PENDING（current candidate）
+- Source verification: 2026-08-09 JST
+- Full gate: PASS、123 critical suites、failed check IDs 0
+- Local fixed conversation: JSON / SSE / legacy 12ケース、通常30応答 PASS
+- Required Preview boundaries: SSO、全path noindex/nofollow/noarchive、robots Disallow、Analytics/RUM/Service Worker停止、メールdry-run、production不変
+- Required Preview conversation: API・390×844実ブラウザー各12ケース
 
-機械可読証跡は`evidence/answer-first-chatbot-2026-08-03/preview/conversation/`と`preview/external-boundary.json`に保存した。
+旧PreviewのDeployment IDはcurrent candidateの結果として再利用しない。新しいGit Previewを1回だけ作成し、検証後に実ID・Build ID・commit・実測値を記録する。

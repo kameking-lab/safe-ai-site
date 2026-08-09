@@ -163,18 +163,8 @@ const nextConfig: NextConfig = {
         destination: "/strategy/plan-generator",
         permanent: true,
       },
-      // F-010 B縮小: 詳細/月次/印刷ページ → 一覧へ301 (LMS拡張時に再設計)
-      // /safety-diary/[id] と /safety-diary/[id]/print は component-level permanentRedirect で対応
-      {
-        source: "/safety-diary/new/detail",
-        destination: "/safety-diary",
-        permanent: true,
-      },
-      {
-        source: "/safety-diary/monthly/:ym",
-        destination: "/safety-diary",
-        permanent: true,
-      },
+      // F-010 B縮小: 旧日誌URLは各pageのpermanentRedirectで入力用紙へ統合する。
+      // page側に集約し、旧URLへ付いた絞り込み条件も引き継ぐ。
       // P0-008 (usability-audit-2026-05-24): /qa-knowledge を /faq に統合。
       // 投稿募集ランディング(119行・実投稿0件・コンサル監修コメント無し)を削除し、
       // 同一意図(=Q&Aで疑問解決)を満たす /faq 200問 (法令タグ付き) へ恒久転送。

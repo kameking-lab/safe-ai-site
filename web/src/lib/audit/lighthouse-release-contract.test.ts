@@ -6,12 +6,18 @@ const runner = readFileSync(
   resolve(process.cwd(), "scripts/audit/best-in-class-lighthouse.mjs"),
   "utf8",
 );
+const core = readFileSync(
+  resolve(process.cwd(), "scripts/audit/performance-budget-core.mjs"),
+  "utf8",
+);
 
 describe("Lighthouse release contract", () => {
   it("enforces the requested mobile score, CLS and TBT budgets", () => {
-    expect(runner).toContain('summary.performance < 90');
-    expect(runner).toContain('summary.cls > 0.1');
-    expect(runner).toContain('summary.tbtMs > 200');
+    expect(runner).toContain("evaluateLighthouseScoreTargets({");
+    expect(core).toContain("scores.performance < 90");
+    expect(core).toContain("allScoreTargetsMet !== true");
+    expect(runner).toContain("summary.cls > 0.1");
+    expect(runner).toContain("summary.tbtMs > 200");
     expect(runner).toContain('performance: profile === "mobile" ? 90 : null');
   });
 

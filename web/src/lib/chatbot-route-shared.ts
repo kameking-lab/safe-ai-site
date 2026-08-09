@@ -1,10 +1,7 @@
 import type { LawArticle } from "@/data/laws";
 import { getLawMetadata as getCitationLawMetadata } from "@/data/laws/law-metadata";
 import type { MlitResource } from "@/data/mlit-resources";
-import type {
-  ChatbotSource,
-  FollowupSuggestion,
-} from "@/lib/chatbot-contract";
+import type { ChatbotSource, FollowupSuggestion } from "@/lib/chatbot-contract";
 import { LEGAL_GENERATION_ENABLED } from "@/lib/chatbot-generation-policy";
 import {
   classifyLegalQuestionTime,
@@ -16,6 +13,7 @@ import {
   explicitlyRequestedItemLabels,
   explicitlyRequestedItemRangeLabel,
   explicitlyRequestedItemSelectionLabel,
+  isOxygenEducationSubjectsThreeAndFourCommonIntent,
   legalProvisionUnitForQuery,
   verifiedCurrentSnapshotDate,
 } from "@/lib/legal-extractive-answer";
@@ -90,7 +88,11 @@ export function mlitToSource(resource: MlitResource): ChatbotSource {
 }
 
 /** 条文テキストから質問キーワード周辺を抜粋したスニペットを生成 */
-export function buildSnippet(text: string, query: string, maxLen = 140): string {
+export function buildSnippet(
+  text: string,
+  query: string,
+  maxLen = 140,
+): string {
   if (!text) return "";
   const tokens = query
     .replace(/[？?！!。、.,（）()「」『』【】\s　]/g, " ")
@@ -169,10 +171,7 @@ function itemFromArticleText(
 
 // 条文本文の語から号を補うのは、資格区分を号で列挙する条文に限る。
 // 「第2種有機溶剤」のような区分名を「第2号」と取り違えない。
-const SEMANTIC_ITEM_FALLBACKS = new Set([
-  "安衛則|第36条",
-  "安衛令|第20条",
-]);
+const SEMANTIC_ITEM_FALLBACKS = new Set(["安衛則|第36条", "安衛令|第20条"]);
 
 function matchedItemNumber(
   article: LawArticle,
@@ -221,19 +220,34 @@ export function lawArticleToSource(
   const metadata = getCitationLawMetadata(article.lawShort);
   const questionTime = classifyLegalQuestionTime(query, now);
   const provisionUnit = legalProvisionUnitForQuery(article, query);
+  const oxygenEducationCommonSubjectsIntent =
+    article.lawShort === "酸欠則" &&
+    /^第?12条$/.test(article.articleNum) &&
+    isOxygenEducationSubjectsThreeAndFourCommonIntent(query);
+  const fumigationMonitorItemsIntent =
+    article.lawShort === "特化則" &&
+    /^第?38条の14$/.test(article.articleNum) &&
+    /(?:監視人|監視者|監視)/.test(query);
   const effectiveOn = applicableLegalProvisionEffectiveDate(article, query);
   const embeddedParagraph = article.articleNum.match(
     /第[0-9０-９一二三四五六七八九十百千]+項/,
   )?.[0];
-  const requestedParagraph = embeddedParagraph ?? provisionUnit.paragraph;
+  const requestedParagraph = oxygenEducationCommonSubjectsIntent
+    ? undefined
+    : (embeddedParagraph ?? provisionUnit.paragraph);
   const embeddedItem = article.articleNum.match(
     /第[0-9０-９一二三四五六七八九十百千]+号/,
   )?.[0];
-  const matchedParagraph = requestedParagraph && !embeddedParagraph
-    ? extractLegalParagraph(article, requestedParagraph)
-    : null;
-  const paragraph = embeddedParagraph ??
-    (matchedParagraph ? requestedParagraph : undefined);
+  const matchedParagraph =
+    requestedParagraph && !embeddedParagraph
+      ? extractLegalParagraph(article, requestedParagraph)
+      : null;
+  const paragraph = oxygenEducationCommonSubjectsIntent
+    ? "第1項・第2項"
+    : fumigationMonitorItemsIntent
+      ? "第1項"
+      : (embeddedParagraph ??
+        (matchedParagraph ? requestedParagraph : undefined));
   const scopedArticle = matchedParagraph
     ? {
         ...article,
@@ -256,21 +270,32 @@ export function lawArticleToSource(
     return found ? [found] : [];
   });
   const explicitItemsExcerpt =
+    !oxygenEducationCommonSubjectsIntent &&
     explicitSelectedItems.length === explicitItemLabels.length &&
     (explicitItemLabels.length > 1 ||
       (article.lawShort === "酸欠則" && explicitItemLabels.length === 1))
       ? explicitSelectedItems.map(({ snippet }) => snippet).join("／")
       : undefined;
+  const fumigationMonitorItems = fumigationMonitorItemsIntent
+    ? extractLegalItems(article).filter(({ item }) =>
+        ["第5号", "第12号"].includes(item),
+      )
+    : [];
+  const fumigationMonitorExcerpt =
+    fumigationMonitorItems.length === 2 &&
+    fumigationMonitorItems.every(({ text }) => text.includes("監視人"))
+      ? "第5号ただし書「燻蒸の効果を確認する場合」「呼吸用保護具を使用」「監視人を置いたとき」／第12号ただし書「濃度を基準値以下とすることが著しく困難」「当該場所の排気」「呼吸用保護具を使用」「監視人を置いたとき」"
+      : undefined;
   const matchedItem = provisionUnit.item
-    ? extractLegalItems(scopedArticle).find(
+    ? (extractLegalItems(scopedArticle).find(
         (candidate) => candidate.item === provisionUnit.item,
-      ) ?? matchedItemNumber(article, query)
+      ) ?? matchedItemNumber(article, query))
     : paragraph
       ? null
       : matchedItemNumber(article, query);
   const matchedUnitText = matchedItem?.snippet
     ? matchedItem.snippet.replace(/^第[^　]+[　\s]+/, "")
-    : matchedParagraph?.text ?? article.text;
+    : (matchedParagraph?.text ?? article.text);
   const scaffoldChapeau =
     article.lawShort === "安衛則" &&
     /^第?563条$/.test(article.articleNum) &&
@@ -290,12 +315,14 @@ export function lawArticleToSource(
     article.text.includes("墜落により労働者に危険を及ぼすおそれのある箇所") &&
     article.text.includes("わく組足場以外の足場")
       ? "「足場（一側足場を除く。第三号において同じ。）」／「高さ二メートル以上の作業場所」／第三号「墜落により労働者に危険を及ぼすおそれのある箇所」／ロ「わく組足場以外の足場　手すり等及び中桟等」"
-        : article.lawShort === "安衛則" &&
+      : article.lawShort === "安衛則" &&
           /^第?552条$/.test(article.articleNum) &&
           provisionUnit.item === "第4号" &&
           article.text.includes("墜落の危険のある箇所") &&
           article.text.includes("高さ八十五センチメートル以上") &&
-          article.text.includes("高さ三十五センチメートル以上五十センチメートル以下")
+          article.text.includes(
+            "高さ三十五センチメートル以上五十センチメートル以下",
+          )
         ? "第四号「墜落の危険のある箇所」／イ「高さ八十五センチメートル以上の手すり」／ロ「高さ三十五センチメートル以上五十センチメートル以下の桟」"
         : undefined;
   const scaffoldWorkFloorExcerpt =
@@ -308,6 +335,16 @@ export function lawArticleToSource(
     article.text.includes("床材と建地との隙間は、十二センチメートル未満") &&
     article.text.includes("前項第二号ハの規定は")
       ? "第1項第2号「つり足場を除き、幅40cm以上」「床材間の隙間3cm以下」「床材と建地との隙間12cm未満」／第2項「12cm以上の箇所に防網を張る等の墜落防止措置」を講じ、両端の隙間の和が24cm未満の場合又は作業上24cm未満が困難な場合は第1項第2号ハを適用しない"
+      : undefined;
+  const scaffoldInspectionRecordExcerpt =
+    article.lawShort === "安衛則" &&
+    /^第?567条$/.test(article.articleNum) &&
+    provisionUnit.paragraph === "第3項" &&
+    provisionUnit.item === "第1号・第2号" &&
+    article.text.includes("当該点検の結果及び点検者の氏名") &&
+    article.text.includes("補修等の措置") &&
+    article.text.includes("仕事が終了するまで")
+      ? "第3項第1号「当該点検の結果及び点検者の氏名」／第2号「補修等の措置を講じた場合は当該措置の内容」／「足場を使用する作業を行う仕事が終了するまで保存」"
       : undefined;
   const organicCoreExcerpt =
     article.lawShort === "有機則" && /(?:有機溶剤|シンナー)/.test(query)
@@ -386,29 +423,36 @@ export function lawArticleToSource(
       ? "対象「第339条、第341条第1項、第342条第1項、第344条第1項又は第345条第1項の作業」／「作業の指揮者を定めて」／第1号「作業の方法及び順序を周知」「作業を直接指揮」"
       : undefined;
   const oxygenDeficiencyExcerpt =
-    article.lawShort === "酸欠則" &&
-    /(?:酸欠|酸素欠乏|酸素濃度)/.test(query)
-      ? /^第?3条$/.test(article.articleNum) &&
-        article.text.includes("その日の作業を開始する前") &&
-        /これを(?:3|三)年間保存/.test(article.text)
-        ? "第1項「その日の作業を開始する前に酸素（第二種は酸素及び硫化水素）の濃度を測定」／第2項第1号「測定日時」／第2号「測定方法」／第3号「測定箇所」／第4号「測定条件」／第5号「測定結果」／第6号「測定を実施した者の氏名」／第7号「防止措置を講じたときは当該措置の概要」／「3年間保存」"
-        : /^第?5条$/.test(article.articleNum) &&
-            /酸素の濃度を(?:18|十八)パーセント以上/.test(article.text) &&
-            article.text.includes("換気することが著しく困難な場合")
-          ? "第1項「酸素濃度18%以上（第二種は酸素18%以上かつ硫化水素100万分の10以下）に保つよう換気」／ただし「爆発、酸化等を防止するため換気できない場合又は作業の性質上換気が著しく困難な場合」は除く"
-          : /^第?5条の2$/.test(article.articleNum) &&
-              article.text.includes("同時に就業する労働者の人数と同数以上") &&
-              article.text.includes("空気呼吸器等")
-            ? "第5条ただし書の場合「同時に就業する労働者の人数と同数以上の空気呼吸器等を備え、労働者にこれを使用させなければならない」"
-          : /^第?11条$/.test(article.articleNum) &&
-              article.text.includes("酸素欠乏危険作業主任者技能講習") &&
-              article.text.includes("酸素欠乏・硫化水素危険作業主任者技能講習")
-            ? "第1項「第一種は酸素欠乏危険作業主任者技能講習又は酸素欠乏・硫化水素危険作業主任者技能講習を修了した者」「第二種は酸素欠乏・硫化水素危険作業主任者技能講習を修了した者」から作業主任者を選任"
-          : /^第?12条$/.test(article.articleNum) &&
-              article.text.includes("第一種酸素欠乏危険作業") &&
-              article.text.includes("第二種酸素欠乏危険作業に係る業務について準用")
-            ? "第1項（第一種）第1号「酸素欠乏の発生の原因」／第2号「酸素欠乏症の症状」／第3号「空気呼吸器等の使用の方法」／第4号「事故の場合の退避及び救急そ生の方法」／第5号「その他、酸素欠乏症の防止に必要な事項」／第2項「第二種にも準用。第1号、第2号及び第5号を酸素欠乏等・酸素欠乏症等へ読み替え、第3号・第4号は共通」"
-          : undefined
+    article.lawShort === "酸欠則" && /(?:酸欠|酸素欠乏|酸素濃度)/.test(query)
+      ? /^第?2条$/.test(article.articleNum) &&
+        article.text.includes("酸素欠乏等") &&
+        article.text.includes("硫化水素中毒")
+        ? "第1号「酸素欠乏＝酸素濃度18%未満」／第2号「酸素欠乏等＝酸素欠乏又は硫化水素濃度100万分の10超の状態」／第3号「酸素欠乏症」／第4号「硫化水素中毒」／第5号「酸素欠乏症等＝酸素欠乏症又は硫化水素中毒」"
+        : /^第?3条$/.test(article.articleNum) &&
+            article.text.includes("その日の作業を開始する前") &&
+            /これを(?:3|三)年間保存/.test(article.text)
+          ? "第1項「その日の作業を開始する前に酸素（第二種は酸素及び硫化水素）の濃度を測定」／第2項第1号「測定日時」／第2号「測定方法」／第3号「測定箇所」／第4号「測定条件」／第5号「測定結果」／第6号「測定を実施した者の氏名」／第7号「防止措置を講じたときは当該措置の概要」／「3年間保存」"
+          : /^第?5条$/.test(article.articleNum) &&
+              /酸素の濃度を(?:18|十八)パーセント以上/.test(article.text) &&
+              article.text.includes("換気することが著しく困難な場合")
+            ? "第1項「酸素濃度18%以上（第二種は酸素18%以上かつ硫化水素100万分の10以下）に保つよう換気」／ただし「爆発、酸化等を防止するため換気できない場合又は作業の性質上換気が著しく困難な場合」は除く"
+            : /^第?5条の2$/.test(article.articleNum) &&
+                article.text.includes("同時に就業する労働者の人数と同数以上") &&
+                article.text.includes("空気呼吸器等")
+              ? "第5条ただし書の場合「同時に就業する労働者の人数と同数以上の空気呼吸器等を備え、労働者にこれを使用させなければならない」"
+              : /^第?11条$/.test(article.articleNum) &&
+                  article.text.includes("酸素欠乏危険作業主任者技能講習") &&
+                  article.text.includes(
+                    "酸素欠乏・硫化水素危険作業主任者技能講習",
+                  )
+                ? "第1項「第一種は酸素欠乏危険作業主任者技能講習又は酸素欠乏・硫化水素危険作業主任者技能講習を修了した者」「第二種は酸素欠乏・硫化水素危険作業主任者技能講習を修了した者」から作業主任者を選任"
+                : /^第?12条$/.test(article.articleNum) &&
+                    article.text.includes("第一種酸素欠乏危険作業") &&
+                    article.text.includes(
+                      "第二種酸素欠乏危険作業に係る業務について準用",
+                    )
+                  ? "第1項（第一種）第1号「酸素欠乏の発生の原因」／第2号「酸素欠乏症の症状」／第3号「空気呼吸器等の使用の方法」／第4号「事故の場合の退避及び救急そ生の方法」／第5号「その他、酸素欠乏症の防止に必要な事項」／第2項「第二種にも準用。第1号、第2号及び第5号を酸素欠乏等・酸素欠乏症等へ読み替え、第3号・第4号は共通」"
+                  : undefined
       : undefined;
   const heatProcedureExcerpt =
     article.lawShort === "安衛則" &&
@@ -429,7 +473,9 @@ export function lawArticleToSource(
     article.text.includes("必要な知識を有する者として厚生労働大臣が定めるもの")
       ? "第1項「建築物、工作物又は船舶（鋼製の船舶に限る。）の解体又は改修」「石綿等の使用の有無を調査」／第4項「前項各号に規定する場合を除き」「必要な知識を有する者として厚生労働大臣が定めるものに行わせなければならない」"
       : undefined;
-  const asbestosBuildingTarget = /(?:建築物|一戸建て|共同住宅|住戸)/.test(query);
+  const asbestosBuildingTarget = /(?:建築物|一戸建て|共同住宅|住戸)/.test(
+    query,
+  );
   const asbestosStructureTarget = /工作物/.test(query);
   const asbestosShipTarget = /船舶/.test(query);
   const asbestosTargetCount = [
@@ -472,12 +518,14 @@ export function lawArticleToSource(
   const supportedUnitText =
     scaffoldCitationExcerpt ??
     scaffoldWorkFloorExcerpt ??
+    scaffoldInspectionRecordExcerpt ??
     organicCoreExcerpt ??
     organicMultiParagraphExcerpt ??
     genericEducationExcerpt ??
     electricQualificationExcerpt ??
     electricalWorkControllerExcerpt ??
     fullHarnessEducationExcerpt ??
+    fumigationMonitorExcerpt ??
     explicitItemsExcerpt ??
     oxygenDeficiencyExcerpt ??
     heatProcedureExcerpt ??
@@ -517,12 +565,14 @@ export function lawArticleToSource(
   const sourceSnippet =
     scaffoldCitationExcerpt ??
     scaffoldWorkFloorExcerpt ??
+    scaffoldInspectionRecordExcerpt ??
     organicCoreExcerpt ??
     organicMultiParagraphExcerpt ??
     genericEducationExcerpt ??
     electricQualificationExcerpt ??
     electricalWorkControllerExcerpt ??
     fullHarnessEducationExcerpt ??
+    fumigationMonitorExcerpt ??
     explicitItemsExcerpt ??
     oxygenDeficiencyExcerpt ??
     heatProcedureExcerpt ??
@@ -530,22 +580,25 @@ export function lawArticleToSource(
     asbestosNoticeEvidence?.excerpt ??
     (scaffoldChapeau && scaffoldHandrailItem
       ? `${scaffoldChapeau} … ${scaffoldHandrailItem}`
-      : matchedItem?.snippet ??
+      : (matchedItem?.snippet ??
         matchedParagraph?.snippet ??
-        buildSnippet(article.text, query));
+        buildSnippet(article.text, query)));
   const sourceSnippetLimit =
     electricQualificationExcerpt ||
     electricalWorkControllerExcerpt ||
     genericEducationExcerpt ||
     scaffoldWorkFloorExcerpt ||
+    scaffoldInspectionRecordExcerpt ||
     organicCoreExcerpt ||
     fullHarnessEducationExcerpt ||
+    fumigationMonitorExcerpt ||
     explicitItemsExcerpt ||
     oxygenDeficiencyExcerpt ||
     heatProcedureExcerpt ||
     asbestosQualificationExcerpt ||
     asbestosNoticeEvidence ||
-    (article.lawShort === "有機則" && /^第?(?:6|8|9|29)条$/.test(article.articleNum))
+    (article.lawShort === "有機則" &&
+      /^第?(?:6|8|9|29)条$/.test(article.articleNum))
       ? 360
       : 140;
   return {
@@ -562,7 +615,9 @@ export function lawArticleToSource(
       explicitItemSelection ??
       explicitlyRequestedItemRangeLabel(query, article.articleNum) ??
       embeddedItem ??
+      (fumigationMonitorExcerpt ? "第5号・第12号" : undefined) ??
       asbestosNoticeEvidence?.item ??
+      (scaffoldInspectionRecordExcerpt ? "第1号・第2号" : undefined) ??
       matchedItem?.item ??
       (scaffoldCitationExcerpt ? provisionUnit.item : undefined),
     parentLaw,

@@ -281,6 +281,99 @@ describe("POST /api/chat safe compatibility route", () => {
   });
 
   it.each([
+    [
+      "作業主任者は必要？",
+      "作業主任者",
+      "作業主任者の要否を確認するため、実際の作業名や扱う物質・設備を教えてください。",
+    ],
+    [
+      "監視人は必要？",
+      "監視人",
+      "監視人の要否を確認するため、実際の作業名と作業場所を教えてください。",
+    ],
+    [
+      "作業指揮者は必要？",
+      "作業指揮者",
+      "作業指揮者の要否を確認するため、実際の作業名と使用する設備を教えてください。",
+    ],
+  ])(
+    "legacyでも安全管理者から独立した役割質問へ旧文脈を持ち越さない: %s",
+    async (question, marker, clarification) => {
+      const response = await POST(
+        new Request("http://localhost/api/chat", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            revisionId: "",
+            revisionTitle: "選択中の法改正",
+            question,
+            history: [
+              { role: "user", content: "安全管理者は必要？" },
+              { role: "assistant", content: "事業場の主な業種はどれですか？" },
+              { role: "user", content: "建設業" },
+            ],
+            context: {
+              workType: "労働安全衛生法 安全管理者の選任義務",
+            },
+            privacyConfirmed: true,
+          }),
+        }),
+      );
+      const body = (await response.json()) as LegacyAnswerFirstPayload;
+
+      expect(response.status).toBe(200);
+      expectAnswerFirst(body);
+      expect(body.substantiveAnswer).toContain(marker);
+      expect(body.answer).not.toContain("安全管理者");
+      expect(body.context?.workType).toBeUndefined();
+      expect(body.clarificationQuestion).toBe(clarification);
+      expect(body.quickReplies).toEqual([]);
+      expect(
+        body.sources.some(
+          ({ law, article }) => law === "労働安全衛生法" && /第11条/.test(article),
+        ),
+      ).toBe(false);
+    },
+  );
+
+  it("legacyでも安全管理者の技能講習質問は資格条件として継続し安衛則5条で答える", async () => {
+    const response = await POST(
+      new Request("http://localhost/api/chat", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          revisionId: "",
+          revisionTitle: "選択中の法改正",
+          question: "技能講習は必要？",
+          history: [
+            { role: "user", content: "安全管理者は必要？" },
+            { role: "assistant", content: "事業場の主な業種はどれですか？" },
+            { role: "user", content: "建設業" },
+          ],
+          context: {
+            workType: "労働安全衛生法 安全管理者の選任義務",
+          },
+          privacyConfirmed: true,
+        }),
+      }),
+    );
+    const body = (await response.json()) as LegacyAnswerFirstPayload;
+
+    expect(response.status).toBe(200);
+    expectAnswerFirst(body);
+    expect(body.substantiveAnswer).toMatch(/技能講習.*一律に満たす制度ではありません/);
+    expect(body.context).toMatchObject({
+      workType: "労働安全衛生法 安全管理者の選任義務",
+      qualification: "技能講習",
+    });
+    expect(
+      body.sources.some(
+        ({ law, article }) => law === "労働安全衛生規則" && /第5条/.test(article),
+      ),
+    ).toBe(true);
+  });
+
+  it.each([
     ["何条？", /電気工事士法2条/],
     ["何号？", /安衛則36条4号/],
     ["公式原文は？", /公式原文/],

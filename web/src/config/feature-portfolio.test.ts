@@ -73,6 +73,17 @@ describe("feature portfolio", () => {
     }
   });
 
+  it("教育資料は現行IAどおり全機能一覧経由の2クリック契約に固定する", () => {
+    const resources = getPortfolioFeatureByRoute("/resources");
+    expect(resources).toBeDefined();
+    expect(resources?.navPlacement).toBe("「全機能一覧」の「学ぶ・資格」分類。");
+    expect(resources?.acceptanceCriteria).toContain("全機能一覧");
+    expect(resources?.acceptanceCriteria).toContain("2クリック以内");
+    expect(
+      `${resources?.navPlacement} ${resources?.acceptanceCriteria}`,
+    ).not.toMatch(/一次(?:ナビ|メニュー)|1クリック/);
+  });
+
   it("自動化相談はメール受付中の主力で、自動化サンプルとは区別する", () => {
     const consultation = getPortfolioFeatureByRoute("/services/automation");
     const sampleHub = getPortfolioFeatureByRoute("/automation-examples");

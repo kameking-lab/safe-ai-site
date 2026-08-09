@@ -231,9 +231,15 @@ test.describe("効果先行ホーム", () => {
     );
     await page.goBack();
     const restoredPicker = await revealAreaSource(page);
+    await expect(restoredPicker).toHaveAttribute(
+      "data-selected-area-id",
+      "tokyo-shinjuku",
+    );
+    await page.reload({ waitUntil: "domcontentloaded" });
+    const reloadedPicker = await revealAreaSource(page);
     await expect(
-      restoredPicker.getByText("前回選択した地域（粗い区域）"),
-    ).toBeVisible();
+      reloadedPicker.getByText("前回選択した地域（粗い区域）"),
+    ).toBeVisible({ timeout: 15_000 });
   });
 
   test("risk remains unselected and a prompt-state location is requested only after the explicit button", async ({

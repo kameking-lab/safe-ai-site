@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "generatedAtJst": "2026-08-09T07:10:31+09:00",
+  "algorithm": "sha256(sorted lines: <canonical-file-sha256><two spaces><repo-relative-path><LF>); CRLF in .ts/.json/.jsonl is normalized to LF; all other files are raw",
+  "excludes": [
+    "test files",
+    "raw evidence",
+    "unverified or quarantined notices"
+  ],
+  "corpora": [
+    {
+      "id": "laws-fulltext",
+      "roots": ["web/src/data/laws-fulltext"],
+      "fileCount": 25,
+      "bytes": 6562218,
+      "manifestSha256": "ac988b993654b0b127b9ebb27713613dbc244e7f2d8a489ac968afb5f8b73d41"
+    },
+    {
+      "id": "laws-and-metadata",
+      "roots": [
+        "web/src/data/laws",
+        "web/src/data/laws-mhlw",
+        "web/src/data/law-revisions",
+        "web/src/data/law-navi"
+      ],
+      "fileCount": 69,
+      "bytes": 7863937,
+      "manifestSha256": "136b6b03e64032875c297891c30cda3c73ead9ecaded65fc6c483b0b187eae21"
+    },
+    {
+      "id": "verified-notices-and-circulars",
+      "roots": [
+        "web/src/data/circulars",
+        "web/src/data/source-snapshots",
+        "web/src/data/mhlw-notices.ts",
+        "web/src/data/public-mhlw-notices.ts",
+        "web/src/data/article-notice-map.ts",
+        "web/src/data/source-registry.ts"
+      ],
+      "fileCount": 10,
+      "bytes": 1423147,
+      "manifestSha256": "bf266800ecc8275862224d41da2e8b628e05b6fbb24c4cc950e2b8e2e5485b2f"
+    },
+    {
+      "id": "surrounding-legal-snapshots",
+      "roots": ["web/src/data/legal"],
+      "fileCount": 11,
+      "bytes": 811457,
+      "manifestSha256": "1a086ee1e1d11f40ff8e4327f13e1c2b4ec7599991114acf785ffffcb5eed71b"
+    }
+  ],
+  "reviewRequired": [
+    {
+      "record": "docs/audits/source-coverage-registry-2026-07-24.csv",
+      "reason": "18 source hashes and 14 review dates/reviewers are not yet recorded; files were retained, not inferred or deleted."
+    },
+    {
+      "record": "docs/audits/heat-illness-legal-review-pack-2026-07-29.csv",
+      "reason": "External expert review remains pending; files were retained and are not treated as verified legal authority."
+    }
+  ]
+}

@@ -27,6 +27,8 @@ runtime finalizerは、`substantiveAnswer`が空で確認質問だけになるpa
 
 同一タブのmemory-onlyで、作業種類、設備、高さ、荷重、電圧区分、役割、資格区分、対象日、確認済み選択肢だけを保持する。短いfollow-upは直前の安全な条件へ結合する。たとえば「電気作業の資格は？」の後の「作業主任者」は「電気作業で作業主任者の選任が必要か」と解釈する。
 
+空オブジェクトや値がすべて未定義のcontextは会話文脈として扱わない。JavaScript無効経路も生の質問や履歴をhidden fieldへ保存せず、allowlist済みの短いintentだけを次の1ターンへ渡す。未知intent、contextとの混在、余分なkey、PII、緊急表現は状態を破棄する。
+
 氏名、会社名、現場名、住所、電話、メール、社員番号、健康情報、生の会話履歴は条件へ取り込まず、URL、Web Storage、Analytics、RUM、consoleへ永続化しない。ホーム引継ぎも同一タブの一回限りとする。
 
 ## 根拠契約

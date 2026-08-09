@@ -10,9 +10,7 @@ import {
   setCachedResponse,
 } from "@/lib/chatbot-cache";
 import { CHATBOT_UNANSWERABLE_FALLBACK } from "@/lib/chatbot-contract";
-import {
-  LEGAL_GENERATION_ENABLED,
-} from "@/lib/chatbot-generation-policy";
+import { LEGAL_GENERATION_ENABLED } from "@/lib/chatbot-generation-policy";
 import { __resetRateLimitForTests } from "@/lib/chatbot-rate-limit";
 
 type RoutePost = (request: Request) => Promise<Response>;
@@ -84,11 +82,16 @@ function expectAnswerFirst(payload: RoutePayload) {
   expect(payload.conditions.length).toBeLessThanOrEqual(3);
   expect(payload.quickReplies.length).toBeLessThanOrEqual(3);
   expect(payload.clarification?.options.length ?? 0).toBeLessThanOrEqual(3);
-  expect(payload.clarificationQuestion?.match(/？|\?/g)?.length ?? 0).toBeLessThanOrEqual(1);
+  expect(
+    payload.clarificationQuestion?.match(/？|\?/g)?.length ?? 0,
+  ).toBeLessThanOrEqual(1);
 }
 
 function source(...parts: string[]) {
-  return readFileSync(join(process.cwd(), "src", "app", "api", "chatbot", ...parts), "utf8");
+  return readFileSync(
+    join(process.cwd(), "src", "app", "api", "chatbot", ...parts),
+    "utf8",
+  );
 }
 
 function sharedSource() {
@@ -109,7 +112,12 @@ async function callRoute(
     new Request("http://localhost/api/chatbot", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ message, history, context, privacyConfirmed: true }),
+      body: JSON.stringify({
+        message,
+        history,
+        context,
+        privacyConfirmed: true,
+      }),
     }),
   );
   const raw = await response.text();
@@ -120,9 +128,7 @@ async function callRoute(
       raw,
     };
   }
-  const matches = [
-    ...raw.matchAll(/event: meta\ndata: ([^\n]+)\n\n/g),
-  ];
+  const matches = [...raw.matchAll(/event: meta\ndata: ([^\n]+)\n\n/g)];
   const encoded = matches.at(-1)?.[1];
   if (!encoded) throw new Error(`SSE meta event missing: ${raw.slice(0, 240)}`);
   return {
@@ -148,9 +154,7 @@ function hasLegalSource(
 }
 
 function expectSupportedAsbestosParagraphSource(payload: RoutePayload) {
-  const paragraph = payload.sources.find(
-    (item) => item.paragraph === "第4項",
-  );
+  const paragraph = payload.sources.find((item) => item.paragraph === "第4項");
   expect(paragraph).toBeDefined();
   expect(paragraph?.snippet).toContain("第4項");
   expect(paragraph?.snippet).toContain("必要な知識を有する者");
@@ -208,10 +212,16 @@ describe.each([
   });
 
   it("evaluates safety before rate limiting, retrieval, cache, and model access", () => {
-    const guard = text.indexOf("const directSafety = evaluateChatbotSafety(message)");
+    const guard = text.indexOf(
+      "const directSafety = evaluateChatbotSafety(message)",
+    );
     expect(guard).toBeGreaterThan(0);
-    expect(guard).toBeLessThan(text.indexOf("checkRateLimit(getClientIp(request))", guard));
-    expect(guard).toBeLessThan(text.indexOf("searchRelevantArticlesWithScore(retrievalQuery", guard));
+    expect(guard).toBeLessThan(
+      text.indexOf("checkRateLimit(getClientIp(request))", guard),
+    );
+    expect(guard).toBeLessThan(
+      text.indexOf("searchRelevantArticlesWithScore(retrievalQuery", guard),
+    );
     expect(guard).toBeLessThan(text.indexOf("getCachedResponse", guard));
   });
 
@@ -277,9 +287,9 @@ describe("chatbot route executable safety boundary", () => {
     const second = await callRoute(postJson, "json", message);
     expect(second.response.headers.get("X-Cache-Hit")).toBe("true");
     expect(second.payload.answer).toContain("回答基準日: 2026-08-03 JST");
-    expect(second.payload.sources.every((item) => item.asOf === "2026-08-03")).toBe(
-      true,
-    );
+    expect(
+      second.payload.sources.every((item) => item.asOf === "2026-08-03"),
+    ).toBe(true);
   });
 
   it.each([postJson, postStream])(
@@ -336,20 +346,28 @@ describe("chatbot route executable safety boundary", () => {
   it.each([
     [postJson, "json"],
     [postStream, "sse"],
-  ] as const)("blocks emergency before any external model network on %s", async (post, _mode) => {
-    vi.stubEnv("GEMINI_API_KEY", "external-provider-test-key");
-    const fetchSpy = vi.fn();
-    vi.stubGlobal("fetch", fetchSpy);
-    const response = await post(new Request("http://localhost/api/chatbot", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ message: "呼吸がありません", privacyConfirmed: true }),
-    }));
-    expect(response.status).toBe(200);
-    expect(response.headers.get("x-ai-used")).toBe("false");
-    expect(await response.text()).toContain("119");
-    expect(fetchSpy).not.toHaveBeenCalled();
-  });
+  ] as const)(
+    "blocks emergency before any external model network on %s",
+    async (post, _mode) => {
+      vi.stubEnv("GEMINI_API_KEY", "external-provider-test-key");
+      const fetchSpy = vi.fn();
+      vi.stubGlobal("fetch", fetchSpy);
+      const response = await post(
+        new Request("http://localhost/api/chatbot", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            message: "呼吸がありません",
+            privacyConfirmed: true,
+          }),
+        }),
+      );
+      expect(response.status).toBe(200);
+      expect(response.headers.get("x-ai-used")).toBe("false");
+      expect(await response.text()).toContain("119");
+      expect(fetchSpy).not.toHaveBeenCalled();
+    },
+  );
 
   it.each(executableRouteModes)(
     "同僚が意識を失った相談は通常回答へ流さず119を示す ($label)",
@@ -369,25 +387,30 @@ describe("chatbot route executable safety boundary", () => {
   it.each([
     [postJson, "json"],
     [postStream, "sse"],
-  ] as const)("blocks PII before any external model network on %s", async (post, _mode) => {
-    vi.stubEnv("GEMINI_API_KEY", "external-provider-test-key");
-    const fetchSpy = vi.fn();
-    vi.stubGlobal("fetch", fetchSpy);
-    const response = await post(new Request("http://localhost/api/chatbot", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        message: "連絡先 worker@example.com の資格を確認して",
-        privacyConfirmed: true,
-      }),
-    }));
-    expect(response.status).toBe(200);
-    expect(response.headers.get("x-ai-used")).toBe("false");
-    const body = await response.text();
-    expect(body).toContain("個人情報");
-    expect(body).not.toContain("worker@example.com");
-    expect(fetchSpy).not.toHaveBeenCalled();
-  });
+  ] as const)(
+    "blocks PII before any external model network on %s",
+    async (post, _mode) => {
+      vi.stubEnv("GEMINI_API_KEY", "external-provider-test-key");
+      const fetchSpy = vi.fn();
+      vi.stubGlobal("fetch", fetchSpy);
+      const response = await post(
+        new Request("http://localhost/api/chatbot", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            message: "連絡先 worker@example.com の資格を確認して",
+            privacyConfirmed: true,
+          }),
+        }),
+      );
+      expect(response.status).toBe(200);
+      expect(response.headers.get("x-ai-used")).toBe("false");
+      const body = await response.text();
+      expect(body).toContain("個人情報");
+      expect(body).not.toContain("worker@example.com");
+      expect(fetchSpy).not.toHaveBeenCalled();
+    },
+  );
 
   it.each(executableRouteModes)(
     "ラベルなし氏名と本人の健康情報を外部送信前に遮断する ($label)",
@@ -428,6 +451,26 @@ describe("chatbot route executable safety boundary", () => {
         "サトウタロウがフォークリフトを運転します。資格は？",
         "私、腰が痛くて薬を飲みました。高所作業はできますか？",
         "新宿区西新宿2-8-1の現場です",
+        "健康診断でHIV陽性と分かりました",
+        "本人は「HIV陽性です」と話しました。",
+        "私は「HIV陽性です」と話しました。",
+        "「私はHIV陽性です」と申告しました。",
+        "同僚が「HIV陽性です」と言いました。",
+        "私はHIV陽性です\n別件はHIVという訓練用の例文です。",
+        "研修用の例文です。「HIV陽性です」\n実際には田中さんがHIV陽性です。",
+        "例文：「HIV陽性です」。なお本人の診断はHIV陽性です。",
+        "訓練文は「HIV陽性です」です。しかし実際には本人がHIV陽性です。",
+        "マニュアル例は「HIV陽性です」。実際の本人はB型肝炎に感染しています。",
+        "教材文は「HIV陽性です」；現実には本人のHIV検査結果が陽性でした。",
+        "ケース例：「HIV陽性です」。実際に同僚からHIV陽性と報告がありました。",
+        "本人からHIV陽性と報告がありました。",
+        "同僚からHBV陽性と報告がありました。",
+        "同僚からHCV陽性と報告がありました。",
+        "例文は「HIV陽性です」です。同僚からHCV陽性と報告がありました。",
+        "ところが本人の検査結果はHIV陽性でした。",
+        "現場では同僚が「私はHIV陽性です」と話しました。",
+        "教材文は「HIV陽性です」。ところが本人の検査結果はHIV陽性でした。",
+        "研修用の例文です。「HIV陽性です」：実際には本人がHIV陽性です。",
       ]) {
         const { response, payload } = await callRoute(
           post,
@@ -470,6 +513,19 @@ describe("chatbot route executable safety boundary", () => {
         "同僚の唇が紫で呼吸が浅いです",
         "作業員が倒れて返答ありません。どうする？",
         "胸を締め付けられるように痛がっています。",
+        "今、作業員が倒れて反応がありません、別件で「頭を打ったら119」という訓練用の例文です。",
+        "今、作業員が倒れて反応がありません\n別件で「頭を打ったら119」という訓練用の例文です。",
+        "今、作業員が倒れて反応がありません\u2028別件で「頭を打ったら119」という訓練用の例文です。",
+        "今、作業員が倒れて反応がありません\u2029別件で「頭を打ったら119」という訓練用の例文です。",
+        "今、作業員が倒れて反応がありません\t別件で「頭を打ったら119」という訓練用の例文です。",
+        "今、作業員が倒れて反応がありません：別件で「頭を打ったら119」という訓練用の例文です。",
+        "今、作業員が倒れて反応がありません／別件で「頭を打ったら119」という訓練用の例文です。",
+        "今、作業員が倒れて反応がありません・別件で「頭を打ったら119」という訓練用の例文です。",
+        "今、作業員が倒れて反応がありません｜別件で「頭を打ったら119」という訓練用の例文です。",
+        "今、作業員が倒れて反応がありません  別件で「頭を打ったら119」という訓練用の例文です。",
+        "「意識がありません」という訓練用の例文です。今、作業員が倒れて反応がありません。",
+        "「意識がありません」という訓練用の例文です、今、作業員が倒れて反応がありません。",
+        "「意識がありません」という訓練用の例文です；今、作業員が倒れて反応がありません。",
       ]) {
         const { response, payload } = await callRoute(
           post,
@@ -482,6 +538,60 @@ describe("chatbot route executable safety boundary", () => {
         expect(payload.sources).toEqual([]);
       }
       expect(fetchSpy).not.toHaveBeenCalled();
+    },
+  );
+
+  it.each(executableRouteModes)(
+    "事故非発生・明示的な訓練シナリオを実緊急と誤判定しない ($label)",
+    async ({ post, mode }) => {
+      for (const input of [
+        "作業員が倒れて反応がない事故は発生していません。",
+        "作業員が倒れて反応がない事故は起きていません。",
+        "作業員が倒れて反応がない事故はありません。",
+        "作業員が倒れて反応がない事故は起こりませんでした。",
+        "作業員が倒れて反応がない事故は確認されていません。",
+        "作業員が倒れて反応がありません、という救護訓練のシナリオです。",
+        "作業員が倒れて反応がありません、という模擬訓練です。",
+        "作業員が倒れて反応がありません、という演習用シナリオです。",
+        "作業員が倒れて反応がありません、というケーススタディです。",
+        "作業員が倒れて反応がありません、という机上演習です。",
+        "作業員が倒れて反応がありません、という練習問題です。",
+        "作業員が倒れて反応がありません、というデモンストレーションです。",
+        "作業員が倒れて反応がありません、というドリルです。",
+        "作業員がクレーンに挟まれた想定の机上演習です。",
+        "作業員が倒れた場合の練習問題です。",
+        "作業員が倒れた想定のドリルです。",
+        "作業員がクレーンに挟まれた想定で訓練します。",
+        "もし作業員がクレーンに挟まれた場合はどうする？",
+        "作業員が意識不明になった事故は発生していません。",
+        "作業員が倒れた場合の救護手順を教えて。",
+      ]) {
+        const { payload } = await callRoute(post, mode, input);
+        expect(payload.safetyKind).not.toBe("emergency");
+        expect(payload.answer).not.toContain("直ちに119番");
+      }
+    },
+  );
+
+  it.each(executableRouteModes)(
+    "感染症の仮定質問・明示的な研修例文を個人健康情報と誤判定しない ($label)",
+    async ({ post, mode }) => {
+      for (const input of [
+        "「HIV陽性だと分かりました」という訓練用の例文です",
+        "HIV陽性だと分かった場合の対応を教えて",
+        "私はHIV陽性です、という研修用の例文です。",
+        "私はHIV陽性です、というマニュアル用の例文です。",
+        "私はHIV陽性です、という演習用の例文です。",
+        "私はHIV陽性です、というサンプル文です。",
+        "訓練文は「HIV陽性です」。",
+        "マニュアル例は「HIV陽性です」。",
+        "教材文は「HIV陽性です」。",
+        "ケース例：「HIV陽性です」。",
+      ]) {
+        const { payload } = await callRoute(post, mode, input);
+        expect(payload.safetyKind).not.toBe("privacy");
+        expect(payload.answer).not.toContain("個人情報を除いて");
+      }
     },
   );
 
@@ -569,12 +679,10 @@ describe("chatbot route executable safety boundary", () => {
       expect(response.status).toBe(200);
       expect(payload.answer).toContain("結論");
       expect(payload.answer).toContain("根拠");
-      expect(payload.answer).toMatch(
-        /回答基準日:\s*\d{4}-\d{2}-\d{2}\s+JST/,
-      );
-      expect((payload as RoutePayload & { source_type?: string }).source_type).not.toBe(
-        "ai_inference",
-      );
+      expect(payload.answer).toMatch(/回答基準日:\s*\d{4}-\d{2}-\d{2}\s+JST/);
+      expect(
+        (payload as RoutePayload & { source_type?: string }).source_type,
+      ).not.toBe("ai_inference");
       expect(payload.answer).not.toContain("本回答はAIによる情報提供");
       expect(payload.answer).not.toContain("生成AI回答は停止中");
       expect(payload.answer.length).toBeLessThanOrEqual(640);
@@ -596,9 +704,9 @@ describe("chatbot route executable safety boundary", () => {
       );
 
       expect(response.status).toBe(200);
-      expect(hasLegalSource(payload, /労働安全衛生規則|安衛則/, /第612条の2/)).toBe(
-        true,
-      );
+      expect(
+        hasLegalSource(payload, /労働安全衛生規則|安衛則/, /第612条の2/),
+      ).toBe(true);
       expect(payload.answer).toContain("結論");
       expectVerifiedHeatNoticeAttachment(payload);
       expect(fetchSpy).not.toHaveBeenCalled();
@@ -621,9 +729,9 @@ describe("chatbot route executable safety boundary", () => {
       expect(response.status).toBe(200);
       expect(payload.safetyKind).not.toBe("source-gap");
       expectAnswerFirst(payload);
-      expect(hasLegalSource(payload, /労働安全衛生規則|安衛則/, /第612条の2/)).toBe(
-        true,
-      );
+      expect(
+        hasLegalSource(payload, /労働安全衛生規則|安衛則/, /第612条の2/),
+      ).toBe(true);
       expectVerifiedHeatNoticeAttachment(payload);
       expect(fetchSpy).not.toHaveBeenCalled();
     },
@@ -687,9 +795,7 @@ describe("chatbot route executable safety boundary", () => {
       expect(response.status).toBe(200);
       expect(payload.answer).toContain("将来時点の法令内容");
       expect(payload.answer).toContain("回答を保留");
-      expect(payload.answer).toMatch(
-        /回答基準日:\s*\d{4}-\d{2}-\d{2}\s+JST/,
-      );
+      expect(payload.answer).toMatch(/回答基準日:\s*\d{4}-\d{2}-\d{2}\s+JST/);
       expect(payload.sources).toEqual([]);
       expect(fetchSpy).not.toHaveBeenCalled();
     },
@@ -701,15 +807,20 @@ describe("chatbot route executable safety boundary", () => {
   ] as const)(
     "PF-012-CONTEXT: 文脈確認の法令応答にも基準日を付ける (%s)",
     async (post, mode) => {
-      const { response, payload } = await callRoute(
-        post,
-        mode,
-        "それについて教えて",
-      );
-      expect(response.status).toBe(200);
-      expect(payload.answer).toMatch(
-        /回答基準日:\s*\d{4}-\d{2}-\d{2}\s+JST/,
-      );
+      for (const context of [undefined, {}]) {
+        const { response, payload } = await callRoute(
+          post,
+          mode,
+          "それについて詳しく",
+          undefined,
+          context,
+        );
+        expect(response.status).toBe(200);
+        expect(payload.answer).toContain("前の会話内容を確認できない");
+        expect(payload.answer).toMatch(
+          /回答基準日:\s*\d{4}-\d{2}-\d{2}\s+JST/,
+        );
+      }
     },
   );
 
@@ -719,18 +830,13 @@ describe("chatbot route executable safety boundary", () => {
   ] as const)(
     "確認質問への回答を履歴の曖昧判定で遮断せず、%s 経路で資格回答まで進める",
     async (post, mode) => {
-      const { response, payload } = await callRoute(
-        post,
-        mode,
-        "1トン以上",
-        [
-          { role: "user", content: "フォークリフトに資格いる？" },
-          {
-            role: "assistant",
-            content: "フォークリフトの最大荷重はどれですか？",
-          },
-        ],
-      );
+      const { response, payload } = await callRoute(post, mode, "1トン以上", [
+        { role: "user", content: "フォークリフトに資格いる？" },
+        {
+          role: "assistant",
+          content: "フォークリフトの最大荷重はどれですか？",
+        },
+      ]);
 
       expect(response.status).toBe(200);
       expect(payload.safetyKind).not.toBe("ambiguous");
@@ -767,18 +873,10 @@ describe("chatbot route executable safety boundary", () => {
       expect(payload.answer).not.toContain("次の質問");
       expect(payload.answer).not.toContain("設備の種類・高さ・荷重");
       expect(
-        hasLegalSource(
-          payload,
-          /^(?:労働安全衛生法|安衛法)$/,
-          /第61条/,
-        ),
+        hasLegalSource(payload, /^(?:労働安全衛生法|安衛法)$/, /第61条/),
       ).toBe(true);
       expect(
-        hasLegalSource(
-          payload,
-          /^(?:労働安全衛生法施行令|安衛令)$/,
-          /第20条/,
-        ),
+        hasLegalSource(payload, /^(?:労働安全衛生法施行令|安衛令)$/, /第20条/),
       ).toBe(true);
     },
   );
@@ -803,18 +901,10 @@ describe("chatbot route executable safety boundary", () => {
       expect(payload.answer).not.toContain("次の質問");
       expect(payload.answer).not.toContain("設備の種類・高さ・荷重");
       expect(
-        hasLegalSource(
-          payload,
-          /^(?:労働安全衛生法|安衛法)$/,
-          /第59条/,
-        ),
+        hasLegalSource(payload, /^(?:労働安全衛生法|安衛法)$/, /第59条/),
       ).toBe(true);
       expect(
-        hasLegalSource(
-          payload,
-          /^(?:労働安全衛生規則|安衛則)$/,
-          /第36条/,
-        ),
+        hasLegalSource(payload, /^(?:労働安全衛生規則|安衛則)$/, /第36条/),
       ).toBe(true);
     },
   );
@@ -834,7 +924,9 @@ describe("chatbot route executable safety boundary", () => {
         "墜落のおそれがある場所はどこですか？",
       );
       expect(payload.answer).toMatch(/特別教育|高さ.*2メートル|作業床/);
-      expect(hasLegalSource(payload, /労働安全衛生規則|安衛則/, /第36条/)).toBe(true);
+      expect(hasLegalSource(payload, /労働安全衛生規則|安衛則/, /第36条/)).toBe(
+        true,
+      );
     },
   );
 
@@ -850,20 +942,30 @@ describe("chatbot route executable safety boundary", () => {
       expect(response.status).toBe(200);
       expect(conversationText).toMatch(/フルハーネス|墜落制止用器具|高さ/);
       expect(conversationText).not.toContain("どの作業床を確認しますか");
-      expect(conversationText).not.toContain("どの作業・設備について知りたいですか");
+      expect(conversationText).not.toContain(
+        "どの作業・設備について知りたいですか",
+      );
       expect(payload.answer).not.toContain(
         "この条件に直接対応する根拠を確認できないため、回答を保留します",
       );
-      expect(payload.answer).toContain("一律にフルハーネス型と決まるわけではありません");
+      expect(payload.answer).toContain(
+        "一律にフルハーネス型と決まるわけではありません",
+      );
       expect(payload.answer).not.toContain("特別教育が必要です");
-      expect(hasLegalSource(payload, /労働安全衛生規則|安衛則/, /第518条/)).toBe(true);
-      expect(hasLegalSource(payload, /労働安全衛生規則|安衛則/, /第519条/)).toBe(true);
+      expect(
+        hasLegalSource(payload, /労働安全衛生規則|安衛則/, /第518条/),
+      ).toBe(true);
+      expect(
+        hasLegalSource(payload, /労働安全衛生規則|安衛則/, /第519条/),
+      ).toBe(true);
       expect(payload.answer).toContain(
         "次の質問\n作業する高さを教えてください",
       );
       expect(payload.answer).not.toContain("作業する高さと、作業床");
       if (payload.clarification) {
-        expect(payload.clarification.question.match(/？|\?/g)?.length ?? 0).toBeLessThanOrEqual(1);
+        expect(
+          payload.clarification.question.match(/？|\?/g)?.length ?? 0,
+        ).toBeLessThanOrEqual(1);
       }
     },
   );
@@ -874,7 +976,8 @@ describe("chatbot route executable safety boundary", () => {
       const { response, payload } = await callRoute(post, mode, "作業床なし", [
         {
           role: "user",
-          content: "2010年8月2日にフルハーネス型を使う作業には特別教育が必要でしたか?",
+          content:
+            "2010年8月2日にフルハーネス型を使う作業には特別教育が必要でしたか?",
         },
         { role: "assistant", content: "作業床を設けられますか?" },
       ]);
@@ -901,7 +1004,8 @@ describe("chatbot route executable safety boundary", () => {
       const { response, payload } = await callRoute(post, mode, "作業床なし", [
         {
           role: "user",
-          content: "平成30年にフルハーネス型を使う作業には特別教育が必要でしたか?",
+          content:
+            "平成30年にフルハーネス型を使う作業には特別教育が必要でしたか?",
         },
         { role: "assistant", content: "作業床を設けられますか?" },
       ]);
@@ -919,7 +1023,8 @@ describe("chatbot route executable safety boundary", () => {
       const { response, payload } = await callRoute(post, mode, "作業床なし", [
         {
           role: "user",
-          content: "2019年にフルハーネス型を使う作業には特別教育が必要でしたか?",
+          content:
+            "2019年にフルハーネス型を使う作業には特別教育が必要でしたか?",
         },
         { role: "assistant", content: "作業床を設けられますか?" },
       ]);
@@ -995,11 +1100,7 @@ describe("chatbot route executable safety boundary", () => {
       expect(payload.answer).toContain("事前調査");
       expect(payload.answer).toMatch(/改修|建築物/);
       expect(
-        hasLegalSource(
-          payload,
-          /石綿障害予防規則|石綿則/,
-          /第3条.*第4項/,
-        ),
+        hasLegalSource(payload, /石綿障害予防規則|石綿則/, /第3条.*第4項/),
       ).toBe(true);
       expectSupportedAsbestosParagraphSource(payload);
       expectAnswerFirst(payload);
@@ -1065,12 +1166,7 @@ describe("chatbot route executable safety boundary", () => {
       const beforeMidnight = new Date("2026-08-02T14:59:59.999Z");
       const afterMidnight = new Date("2026-08-02T15:00:00.000Z");
       setCachedResponse(
-        cacheKey(
-          message,
-          "all",
-          beforeMidnight,
-          VERIFIED_LEGAL_SOURCE_VERSION,
-        ),
+        cacheKey(message, "all", beforeMidnight, VERIFIED_LEGAL_SOURCE_VERSION),
         {
           requiresHumanReview: true,
           answer: "STALE-PREVIOUS-DAY",
@@ -1160,42 +1256,52 @@ describe("chatbot route executable safety boundary", () => {
       expect(response.status).toBe(200);
       expect(payload.answer.startsWith("結論\n")).toBe(true);
       expect(payload.answer).toContain("安衛法第61条");
-      expect(payload.answer).toMatch(
-        /回答基準日:\s*\d{4}-\d{2}-\d{2}\s+JST/,
-      );
+      expect(payload.answer).toMatch(/回答基準日:\s*\d{4}-\d{2}-\d{2}\s+JST/);
       expect(payload.answer).not.toContain("直接規定する条文は特定できません");
-      expect(payload.sources.some((source) => source.article.includes("第61条"))).toBe(
-        true,
-      );
+      expect(
+        payload.sources.some((source) => source.article.includes("第61条")),
+      ).toBe(true);
     },
   );
 
-  it.each([postJson, postStream])("rechecks every supplied history turn server-side", async (post) => {
-    vi.stubEnv("GEMINI_API_KEY", "external-provider-test-key");
-    const fetchSpy = vi.fn();
-    vi.stubGlobal("fetch", fetchSpy);
-    const response = await post(new Request("http://localhost/api/chatbot", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        message: "足場の点検方法は？",
-        history: [{ role: "user", content: "東京都新宿区西新宿2丁目8番1号" }],
-        privacyConfirmed: true,
-      }),
-    }));
-    expect(response.status).toBe(200);
-    expect(await response.text()).toContain("個人情報");
-    expect(fetchSpy).not.toHaveBeenCalled();
-  });
+  it.each([postJson, postStream])(
+    "rechecks every supplied history turn server-side",
+    async (post) => {
+      vi.stubEnv("GEMINI_API_KEY", "external-provider-test-key");
+      const fetchSpy = vi.fn();
+      vi.stubGlobal("fetch", fetchSpy);
+      const response = await post(
+        new Request("http://localhost/api/chatbot", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            message: "足場の点検方法は？",
+            history: [
+              { role: "user", content: "東京都新宿区西新宿2丁目8番1号" },
+            ],
+            privacyConfirmed: true,
+          }),
+        }),
+      );
+      expect(response.status).toBe(200);
+      expect(await response.text()).toContain("個人情報");
+      expect(fetchSpy).not.toHaveBeenCalled();
+    },
+  );
 
-  it.each([postJson, postStream])("requires explicit anonymous-input confirmation", async (post) => {
-    const response = await post(new Request("http://localhost/api/chatbot", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ message: "足場の点検方法は？" }),
-    }));
-    expect(response.status).toBe(428);
-  });
+  it.each([postJson, postStream])(
+    "requires explicit anonymous-input confirmation",
+    async (post) => {
+      const response = await post(
+        new Request("http://localhost/api/chatbot", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ message: "足場の点検方法は？" }),
+        }),
+      );
+      expect(response.status).toBe(428);
+    },
+  );
 
   it.each([
     [postJson, "json"],
@@ -1300,9 +1406,9 @@ describe("chatbot route executable safety boundary", () => {
       expect(payload.answer).toContain("最大荷重1トン未満");
       expect(payload.answer).toContain("特別教育");
       expect(payload.answer).not.toContain("技能講習の修了者等に限られます");
-      expect(
-        hasLegalSource(payload, /労働安全衛生規則|安衛則/, /第36条/),
-      ).toBe(true);
+      expect(hasLegalSource(payload, /労働安全衛生規則|安衛則/, /第36条/)).toBe(
+        true,
+      );
     },
   );
 
@@ -1418,7 +1524,10 @@ describe("chatbot route executable safety boundary", () => {
     async ({ post, mode }) => {
       const ladderHistory = [
         { role: "user" as const, content: "脚立で作業していい高さは？" },
-        { role: "assistant" as const, content: "作業時の足元の高さはどれですか？" },
+        {
+          role: "assistant" as const,
+          content: "作業時の足元の高さはどれですか？",
+        },
       ];
       const ladder = await callRoute(post, mode, "2m以上", ladderHistory);
       expect(ladder.payload.clarification).toEqual({
@@ -1426,14 +1535,27 @@ describe("chatbot route executable safety boundary", () => {
         options: ["天板に立つ", "段に立つ", "昇降だけ"],
       });
       expectAnswerFirst(ladder.payload);
-      expect(ladder.payload.answer).not.toBe("脚立をどの使い方で確認しますか？");
+      expect(ladder.payload.answer).not.toBe(
+        "脚立をどの使い方で確認しますか？",
+      );
 
       for (const [query, question, options] of [
-        ["はしご作業 はしご 高さ はしご", "はしごを何に使いますか？", ["昇降用", "作業場所", "条件不明"]],
-        ["作業台", "作業台の種類はどれですか？", ["可搬式作業台", "ローリングタワー", "種類不明"]],
+        [
+          "はしご作業 はしご 高さ はしご",
+          "はしごを何に使いますか？",
+          ["昇降用", "作業場所", "条件不明"],
+        ],
+        [
+          "作業台",
+          "作業台の種類はどれですか？",
+          ["可搬式作業台", "ローリングタワー", "種類不明"],
+        ],
       ] as const) {
         const { payload } = await callRoute(post, mode, query);
-        expect(payload.clarification).toEqual({ question, options: [...options] });
+        expect(payload.clarification).toEqual({
+          question,
+          options: [...options],
+        });
         expectAnswerFirst(payload);
         expect(payload.answer).not.toBe(question);
       }
@@ -1450,8 +1572,12 @@ describe("chatbot route executable safety boundary", () => {
       );
       expect(payload.answer).toContain("高さ85cm以上");
       expect(payload.answer).toContain("高さ35〜50cm");
-      const scaffold = payload.sources.find((item) => /第563条/.test(item.article));
-      const definition = payload.sources.find((item) => /第552条/.test(item.article));
+      const scaffold = payload.sources.find((item) =>
+        /第563条/.test(item.article),
+      );
+      const definition = payload.sources.find((item) =>
+        /第552条/.test(item.article),
+      );
       expect(scaffold?.item).toBe("第3号");
       expect(`${scaffold?.text ?? ""}${scaffold?.snippet ?? ""}`).toContain(
         "手すり等及び中桟等",
@@ -1464,11 +1590,7 @@ describe("chatbot route executable safety boundary", () => {
         /三十五センチメートル以上五十センチメートル以下/,
       );
 
-      const natural = await callRoute(
-        post,
-        mode,
-        "足場の手すりは何センチ？",
-      );
+      const natural = await callRoute(post, mode, "足場の手すりは何センチ？");
       const naturalScaffold = natural.payload.sources.find((item) =>
         /第563条/.test(item.article),
       );
@@ -1523,8 +1645,12 @@ describe("chatbot route executable safety boundary", () => {
         "安衛法第59条第3項とは？",
       );
       expectAnswerFirst(specialEducation.payload);
-      expect(specialEducation.payload.substantiveAnswer).toContain("特別の教育");
-      expect(specialEducation.payload.substantiveAnswer).not.toContain("雇い入れ");
+      expect(specialEducation.payload.substantiveAnswer).toContain(
+        "特別の教育",
+      );
+      expect(specialEducation.payload.substantiveAnswer).not.toContain(
+        "雇い入れ",
+      );
       expect(specialEducation.payload.sources[0]?.paragraph).toBe("第3項");
 
       const organicParagraph = await callRoute(
@@ -1533,8 +1659,12 @@ describe("chatbot route executable safety boundary", () => {
         "有機則第9条第2項とは？",
       );
       expectAnswerFirst(organicParagraph.payload);
-      expect(organicParagraph.payload.substantiveAnswer).toContain("送気マスク");
-      expect(organicParagraph.payload.substantiveAnswer).not.toContain("内部以外");
+      expect(organicParagraph.payload.substantiveAnswer).toContain(
+        "送気マスク",
+      );
+      expect(organicParagraph.payload.substantiveAnswer).not.toContain(
+        "内部以外",
+      );
       expect(organicParagraph.payload.sources[0]?.paragraph).toBe("第2項");
 
       const healthItem = await callRoute(
@@ -1574,8 +1704,9 @@ describe("chatbot route executable safety boundary", () => {
       expectAnswerFirst(correctedOrganic.payload);
       expect(correctedOrganic.payload.substantiveAnswer).toContain("第9条2項");
       expect(
-        correctedOrganic.payload.sources.find(({ article }) => /第9条/.test(article))
-          ?.paragraph,
+        correctedOrganic.payload.sources.find(({ article }) =>
+          /第9条/.test(article),
+        )?.paragraph,
       ).toBe("第2項");
 
       const correctedHealth = await callRoute(
@@ -1586,8 +1717,9 @@ describe("chatbot route executable safety boundary", () => {
       expectAnswerFirst(correctedHealth.payload);
       expect(correctedHealth.payload.substantiveAnswer).toContain("29条2項");
       expect(
-        correctedHealth.payload.sources.find(({ article }) => /第29条/.test(article))
-          ?.paragraph,
+        correctedHealth.payload.sources.find(({ article }) =>
+          /第29条/.test(article),
+        )?.paragraph,
       ).toBe("第2項");
 
       const healthScope = await callRoute(
@@ -1600,8 +1732,9 @@ describe("chatbot route executable safety boundary", () => {
       expect(healthScope.payload.substantiveAnswer).toContain("対象業務");
       expect(healthScope.payload.substantiveAnswer).not.toContain("6か月以内");
       expect(
-        healthScope.payload.sources.find(({ article }) => /第29条/.test(article))
-          ?.paragraph,
+        healthScope.payload.sources.find(({ article }) =>
+          /第29条/.test(article),
+        )?.paragraph,
       ).toBe("第1項");
     },
   );
@@ -1662,7 +1795,9 @@ describe("chatbot route executable safety boundary", () => {
           law === "労働安全衛生規則" && /第36条/.test(article),
       );
       expect(specificDefinition?.paragraph).toBe("第3項");
-      expect(specificRestriction?.snippet).toContain("認定電気工事従事者認定証");
+      expect(specificRestriction?.snippet).toContain(
+        "認定電気工事従事者認定証",
+      );
       expect(specificDuty?.paragraph).toBe("第3項");
       expect(specificWork?.item).toBe("第4号");
 
@@ -1700,7 +1835,9 @@ describe("chatbot route executable safety boundary", () => {
       );
       expectAnswerFirst(electric.payload);
       expect(electric.payload.sources[0]?.item).toBe("第5号");
-      expect(electric.payload.sources[0]?.snippet).not.toContain("低圧の充電電路");
+      expect(electric.payload.sources[0]?.snippet).not.toContain(
+        "低圧の充電電路",
+      );
 
       const scaffold = await callRoute(
         post,
@@ -1762,13 +1899,11 @@ describe("chatbot route executable safety boundary", () => {
         expect(corrected.payload.sources[0]?.snippet).toMatch(/第1項.*第4項/);
       }
 
-      const vessel = await callRoute(
-        post,
-        mode,
-        "船舶の石綿事前調査者は誰？",
-      );
+      const vessel = await callRoute(post, mode, "船舶の石綿事前調査者は誰？");
       expectAnswerFirst(vessel.payload);
-      expect(vessel.payload.substantiveAnswer).toContain("鋼製の船舶に限られます");
+      expect(vessel.payload.substantiveAnswer).toContain(
+        "鋼製の船舶に限られます",
+      );
       expect(vessel.payload.sources[0]?.snippet).toContain("鋼製の船舶に限る");
     },
   );
@@ -1784,7 +1919,9 @@ describe("chatbot route executable safety boundary", () => {
       expectAnswerFirst(payload);
       expect(payload.answer).toContain("29条2項");
       expect(payload.answer).not.toContain("29条1項の対象となる");
-      const source = payload.sources.find(({ article }) => /第29条/.test(article));
+      const source = payload.sources.find(({ article }) =>
+        /第29条/.test(article),
+      );
       expect(source?.paragraph).toBe("第2項");
       expect(source?.snippet).toMatch(
         /常時従事する労働者.*雇入れの際.*配置替え.*六月以内ごとに一回.*健康診断/,
@@ -1814,8 +1951,18 @@ describe("chatbot route executable safety boundary", () => {
         expectAnswerFirst(result.payload);
         expect(result.payload.answer).toContain("密閉設備");
         expect(result.payload.answer).not.toMatch(/第三種|臨時作業|短時間作業/);
-        expect(hasLegalSource(result.payload, /有機溶剤中毒予防規則|有機則/, /第5条/)).toBe(true);
-        expect(result.payload.sources.some(({ article }) => /第6条|第8条|第9条/.test(article))).toBe(false);
+        expect(
+          hasLegalSource(
+            result.payload,
+            /有機溶剤中毒予防規則|有機則/,
+            /第5条/,
+          ),
+        ).toBe(true);
+        expect(
+          result.payload.sources.some(({ article }) =>
+            /第6条|第8条|第9条/.test(article),
+          ),
+        ).toBe(false);
       }
 
       const third = await callRoute(post, mode, "第3種", baseHistory);
@@ -1829,8 +1976,12 @@ describe("chatbot route executable safety boundary", () => {
         "それ以外の屋内",
         "不明",
       ]);
-      expect(hasLegalSource(third.payload, /有機溶剤中毒予防規則|有機則/, /第6条/)).toBe(true);
-      expect(third.payload.sources.some(({ article }) => /第5条/.test(article))).toBe(false);
+      expect(
+        hasLegalSource(third.payload, /有機溶剤中毒予防規則|有機則/, /第6条/),
+      ).toBe(true);
+      expect(
+        third.payload.sources.some(({ article }) => /第5条/.test(article)),
+      ).toBe(false);
       const broadThirdSource = third.payload.sources.find(({ article }) =>
         /第6条/.test(article),
       );
@@ -1846,10 +1997,18 @@ describe("chatbot route executable safety boundary", () => {
       ]);
       expectAnswerFirst(thirdOutside.payload);
       expect(thirdOutside.payload.answer).toContain("タンク等の内部以外");
-      expect(thirdOutside.payload.answer).toContain("同条の設備義務は適用されません");
+      expect(thirdOutside.payload.answer).toContain(
+        "同条の設備義務は適用されません",
+      );
       expect(thirdOutside.payload.answer).not.toContain("第一種・第二種");
       expect(thirdOutside.payload.clarificationQuestion).toBeNull();
-      expect(hasLegalSource(thirdOutside.payload, /有機溶剤中毒予防規則|有機則/, /第6条/)).toBe(true);
+      expect(
+        hasLegalSource(
+          thirdOutside.payload,
+          /有機溶剤中毒予防規則|有機則/,
+          /第6条/,
+        ),
+      ).toBe(true);
 
       const unknownLocation = await callRoute(post, mode, "不明", [
         ...baseHistory,
@@ -1871,10 +2030,18 @@ describe("chatbot route executable safety boundary", () => {
       expect(temporary.payload.answer).toContain("臨時");
       expect(temporary.payload.answer).toContain("タンク等の内部以外");
       expect(temporary.payload.answer).toContain("全体換気装置");
-      expect(hasLegalSource(temporary.payload, /有機溶剤中毒予防規則|有機則/, /第8条/)).toBe(true);
-      expect(temporary.payload.sources.some(({ article }) => /第9条/.test(article))).toBe(false);
-      const broadTemporarySource = temporary.payload.sources.find(({ article }) =>
-        /第8条/.test(article),
+      expect(
+        hasLegalSource(
+          temporary.payload,
+          /有機溶剤中毒予防規則|有機則/,
+          /第8条/,
+        ),
+      ).toBe(true);
+      expect(
+        temporary.payload.sources.some(({ article }) => /第9条/.test(article)),
+      ).toBe(false);
+      const broadTemporarySource = temporary.payload.sources.find(
+        ({ article }) => /第8条/.test(article),
       );
       expect(broadTemporarySource?.paragraph).toBeUndefined();
       expect(broadTemporarySource?.snippet).toMatch(
@@ -1890,7 +2057,9 @@ describe("chatbot route executable safety boundary", () => {
         expectAnswerFirst(locatedTemporary.payload);
         expect(locatedTemporary.payload.answer).toContain("臨時作業");
         expect(locatedTemporary.payload.answer).toContain("第8条");
-        expect(locatedTemporary.payload.answer).not.toContain("原則として発散源");
+        expect(locatedTemporary.payload.answer).not.toContain(
+          "原則として発散源",
+        );
         expect(locatedTemporary.payload.clarificationQuestion).toBeNull();
         const exceptionSource = locatedTemporary.payload.sources.find(
           ({ article }) => /第8条/.test(article),
@@ -1901,12 +2070,16 @@ describe("chatbot route executable safety boundary", () => {
         if (location === "タンク等の内部") {
           expect(locatedTemporary.payload.answer).toContain("第8条2項");
           expect(locatedTemporary.payload.answer).toContain("全体換気装置");
-          expect(exceptionSource?.snippet).toMatch(/タンク等の内部.*全体換気装置/);
+          expect(exceptionSource?.snippet).toMatch(
+            /タンク等の内部.*全体換気装置/,
+          );
           expect(exceptionSource?.snippet).not.toContain("内部以外");
         } else {
           expect(locatedTemporary.payload.answer).toContain("第8条1項");
           expect(locatedTemporary.payload.answer).toContain("適用されません");
-          expect(exceptionSource?.snippet).toMatch(/タンク等の内部以外.*適用しない/);
+          expect(exceptionSource?.snippet).toMatch(
+            /タンク等の内部以外.*適用しない/,
+          );
         }
       }
 
@@ -1920,10 +2093,18 @@ describe("chatbot route executable safety boundary", () => {
       expect(shortTime.payload.answer).toContain("短時間");
       expect(shortTime.payload.answer).toContain("全体換気装置");
       expect(shortTime.payload.answer).toContain("送気マスク");
-      expect(hasLegalSource(shortTime.payload, /有機溶剤中毒予防規則|有機則/, /第9条/)).toBe(true);
-      expect(shortTime.payload.sources.some(({ article }) => /第8条/.test(article))).toBe(false);
-      const broadShortTimeSource = shortTime.payload.sources.find(({ article }) =>
-        /第9条/.test(article),
+      expect(
+        hasLegalSource(
+          shortTime.payload,
+          /有機溶剤中毒予防規則|有機則/,
+          /第9条/,
+        ),
+      ).toBe(true);
+      expect(
+        shortTime.payload.sources.some(({ article }) => /第8条/.test(article)),
+      ).toBe(false);
+      const broadShortTimeSource = shortTime.payload.sources.find(
+        ({ article }) => /第9条/.test(article),
       );
       expect(broadShortTimeSource?.paragraph).toBeUndefined();
       expect(broadShortTimeSource?.snippet).toMatch(
@@ -1939,7 +2120,9 @@ describe("chatbot route executable safety boundary", () => {
         expectAnswerFirst(locatedShortTime.payload);
         expect(locatedShortTime.payload.answer).toContain("短時間作業");
         expect(locatedShortTime.payload.answer).toContain("第9条");
-        expect(locatedShortTime.payload.answer).not.toContain("原則として発散源");
+        expect(locatedShortTime.payload.answer).not.toContain(
+          "原則として発散源",
+        );
         expect(locatedShortTime.payload.clarificationQuestion).toBeNull();
         const exceptionSource = locatedShortTime.payload.sources.find(
           ({ article }) => /第9条/.test(article),
@@ -1950,12 +2133,16 @@ describe("chatbot route executable safety boundary", () => {
         if (location === "タンク等の内部") {
           expect(locatedShortTime.payload.answer).toContain("第9条2項");
           expect(locatedShortTime.payload.answer).toContain("送気マスク");
-          expect(exceptionSource?.snippet).toMatch(/タンク等の内部.*送気マスク/);
+          expect(exceptionSource?.snippet).toMatch(
+            /タンク等の内部.*送気マスク/,
+          );
           expect(exceptionSource?.snippet).not.toContain("内部以外");
         } else {
           expect(locatedShortTime.payload.answer).toContain("第9条1項");
           expect(locatedShortTime.payload.answer).toContain("全体換気装置");
-          expect(exceptionSource?.snippet).toMatch(/タンク等の内部以外.*全体換気装置/);
+          expect(exceptionSource?.snippet).toMatch(
+            /タンク等の内部以外.*全体換気装置/,
+          );
         }
       }
 
@@ -2028,12 +2215,16 @@ describe("chatbot route executable safety boundary", () => {
         expect(exceptionSource?.paragraph).toBe("第2項");
         if (method === "吹付け作業") {
           expect(methodResult.payload.answer).toContain("第6条2項");
-          expect(methodResult.payload.answer).toContain("設けないことができます");
+          expect(methodResult.payload.answer).toContain(
+            "設けないことができます",
+          );
           expect(equipmentSource?.snippet).toMatch(/吹付け.*局所排気装置/);
         } else {
           expect(methodResult.payload.answer).toContain("第6条1項");
           expect(methodResult.payload.answer).toContain("省略できません");
-          expect(equipmentSource?.snippet).toMatch(/吹付けによる.*除く.*全体換気装置/);
+          expect(equipmentSource?.snippet).toMatch(
+            /吹付けによる.*除く.*全体換気装置/,
+          );
         }
       }
     },
@@ -2069,13 +2260,15 @@ describe("chatbot route executable safety boundary", () => {
       expectAnswerFirst(forklift.payload);
       expect(forklift.payload.substantiveAnswer).toContain("特別教育");
       expect(
-        forklift.payload.sources.find(({ law, article }) =>
-          /労働安全衛生法$/.test(law) && /第59条/.test(article),
+        forklift.payload.sources.find(
+          ({ law, article }) =>
+            /労働安全衛生法$/.test(law) && /第59条/.test(article),
         )?.paragraph,
       ).toBe("第3項");
       expect(
-        forklift.payload.sources.find(({ law, article }) =>
-          /労働安全衛生規則/.test(law) && /第36条/.test(article),
+        forklift.payload.sources.find(
+          ({ law, article }) =>
+            /労働安全衛生規則/.test(law) && /第36条/.test(article),
         )?.item,
       ).toBe("第5号");
 
@@ -2102,8 +2295,8 @@ describe("chatbot route executable safety boundary", () => {
       );
       expectAnswerFirst(measurement.payload);
       expect(measurement.payload.substantiveAnswer).toMatch(/作業開始前.*測定/);
-      const measurementSource = measurement.payload.sources.find(({ article }) =>
-        /第3条/.test(article),
+      const measurementSource = measurement.payload.sources.find(
+        ({ article }) => /第3条/.test(article),
       );
       expect(measurementSource?.paragraph).toBe("第1項");
       expect(measurementSource?.snippet).toMatch(/第1項.*第2項.*3年間保存/);
@@ -2120,15 +2313,11 @@ describe("chatbot route executable safety boundary", () => {
           ?.paragraph,
       ).toBe("第2項");
 
-      const concentration = await callRoute(
-        post,
-        mode,
-        "酸素濃度は何%以上？",
-      );
+      const concentration = await callRoute(post, mode, "酸素濃度は何%以上？");
       expectAnswerFirst(concentration.payload);
       expect(concentration.payload.substantiveAnswer).toContain("18%以上");
-      const ventilationSource = concentration.payload.sources.find(({ article }) =>
-        /第5条/.test(article),
+      const ventilationSource = concentration.payload.sources.find(
+        ({ article }) => /第5条/.test(article),
       );
       expect(ventilationSource?.snippet).toMatch(/18%以上.*換気.*著しく困難/);
 
@@ -2151,7 +2340,9 @@ describe("chatbot route executable safety boundary", () => {
         "熱中症対応の手順と体制の義務は？",
       );
       expectAnswerFirst(heat.payload);
-      expect(heat.payload.substantiveAnswer).toMatch(/報告.*体制.*離脱.*冷却.*手順/);
+      expect(heat.payload.substantiveAnswer).toMatch(
+        /報告.*体制.*離脱.*冷却.*手順/,
+      );
       expect(
         heat.payload.sources.find(({ article }) => /第612条の2/.test(article))
           ?.snippet,
@@ -2178,6 +2369,100 @@ describe("chatbot route executable safety boundary", () => {
       expect(explicitSecondSource?.snippet).toMatch(
         /第1項（第一種）第1号.*第2号.*第3号.*第4号.*第5号.*第2項.*第1号、第2号及び第5号.*第3号・第4号は共通/,
       );
+
+      const secondEducationH2s = await callRoute(
+        post,
+        mode,
+        "第二種酸素欠乏危険作業の特別教育では硫化水素の科目も必要？",
+      );
+      expectAnswerFirst(secondEducationH2s.payload);
+      expect(secondEducationH2s.payload.substantiveAnswer).toMatch(
+        /^はい。.*第1号・第2号・第5号.*硫化水素/,
+      );
+      expect(secondEducationH2s.payload.conditions.join(" ")).toMatch(
+        /12条2項.*酸素欠乏等.*酸素欠乏症等/,
+      );
+      expect(
+        secondEducationH2s.payload.sources.find(({ article }) =>
+          /第2条/.test(article),
+        )?.snippet,
+      ).toMatch(
+        /第2号.*酸素欠乏等.*硫化水素.*第5号.*酸素欠乏症等.*硫化水素中毒/,
+      );
+      expect(
+        secondEducationH2s.payload.sources.find(({ article }) =>
+          /第12条/.test(article),
+        )?.snippet,
+      ).toMatch(/第2項.*第1号、第2号及び第5号/);
+
+      const commonEducationSubjects = await callRoute(
+        post,
+        mode,
+        "酸素欠乏症等防止規則第12条第1項第3号と第4号は第二種でも同じ？",
+      );
+      expectAnswerFirst(commonEducationSubjects.payload);
+      expect(commonEducationSubjects.payload.substantiveAnswer).toMatch(
+        /^酸欠則12条.*第3号.*第4号.*第二種の対象外ではなく.*第一種・第二種に共通/,
+      );
+      expect(commonEducationSubjects.payload.conditions.join(" ")).toMatch(
+        /12条2項.*第1項を第二種にも準用.*第3号・第4号は変更しません/,
+      );
+      const commonSubjectsSource = commonEducationSubjects.payload.sources.find(
+        ({ article }) => /第12条/.test(article),
+      );
+      expect(commonSubjectsSource?.article).toContain("第1項・第2項");
+      expect(commonSubjectsSource?.paragraph).toBe("第1項・第2項");
+      expect(commonSubjectsSource?.item).toBe("第3号・第4号");
+      expect(commonSubjectsSource?.snippet).toMatch(
+        /第2項.*第1号、第2号及び第5号.*第3号・第4号は共通/,
+      );
+
+      const kanjiCommonEducationSubjects = await callRoute(
+        post,
+        mode,
+        "酸素欠乏症等防止規則第十二条第一項第三号と第四号は第二種でも同じ？",
+      );
+      expectAnswerFirst(kanjiCommonEducationSubjects.payload);
+      expect(kanjiCommonEducationSubjects.payload.substantiveAnswer).toMatch(
+        /^酸欠則12条.*第3号.*第4号.*第二種の対象外ではなく.*第一種・第二種に共通/,
+      );
+      const kanjiCommonSource =
+        kanjiCommonEducationSubjects.payload.sources.find(({ article }) =>
+          /第12条/.test(article),
+        );
+      expect(kanjiCommonSource).toMatchObject({
+        paragraph: "第1項・第2項",
+        item: "第3号・第4号",
+      });
+      expect(kanjiCommonSource?.snippet).toMatch(
+        /第2項.*第1号、第2号及び第5号.*第3号・第4号は共通/,
+      );
+
+      for (const query of [
+        "酸素欠乏症等防止規則第12条第1項第3号と第4号は第二種にも適用されますか？",
+        "酸素欠乏症等防止規則第12条第1項第3号と第4号は第二種にも準用されますか？",
+        "酸素欠乏症等防止規則第12条第1項第3号と第4号は第二種の対象ですか？",
+        "酸素欠乏症等防止規則第12条第1項第3号と第4号は第二種の対象外ですか？",
+        "酸素欠乏症等防止規則第12条第1項第3号と第4号は第二種には適用されないのですか？",
+        "酸素欠乏症等防止規則第12条第1項第3号と第4号は第二種には含まれない？",
+        "酸素欠乏症等防止規則第12条第1項第3号と第4号は第二種にも準用されませんか？",
+      ]) {
+        const commonSynonym = await callRoute(post, mode, query);
+        expectAnswerFirst(commonSynonym.payload);
+        expect(commonSynonym.payload.substantiveAnswer).toMatch(
+          /^酸欠則12条.*第3号.*第4号.*第二種の対象外ではなく.*第一種・第二種に共通/,
+        );
+        const commonSynonymSource = commonSynonym.payload.sources.find(
+          ({ article }) => /第12条/.test(article),
+        );
+        expect(commonSynonymSource).toMatchObject({
+          paragraph: "第1項・第2項",
+          item: "第3号・第4号",
+        });
+        expect(commonSynonymSource?.snippet).toMatch(
+          /第2項.*第1号、第2号及び第5号.*第3号・第4号は共通/,
+        );
+      }
 
       const recordRange = await callRoute(
         post,
@@ -2218,26 +2503,21 @@ describe("chatbot route executable safety boundary", () => {
       expect(itemSeven.payload.sources).toHaveLength(1);
       expect(itemSeven.payload.citations).toHaveLength(1);
 
-      const h2s = await callRoute(
-        post,
-        mode,
-        "第二種酸欠でH2Sは何ppm以下？",
-      );
+      const h2s = await callRoute(post, mode, "第二種酸欠でH2Sは何ppm以下？");
       expectAnswerFirst(h2s.payload);
       expect(h2s.payload.substantiveAnswer).toMatch(/10ppm以下/);
       expect(
-        h2s.payload.sources.some(({ article, snippet }) =>
-          /第5条/.test(article) && /100万分の10以下/.test(snippet ?? ""),
+        h2s.payload.sources.some(
+          ({ article, snippet }) =>
+            /第5条/.test(article) && /100万分の10以下/.test(snippet ?? ""),
         ),
       ).toBe(true);
 
-      const subjects = await callRoute(
-        post,
-        mode,
-        "酸欠特別教育の科目は？",
-      );
+      const subjects = await callRoute(post, mode, "酸欠特別教育の科目は？");
       expectAnswerFirst(subjects.payload);
-      expect(subjects.payload.conditions.join(" ")).toMatch(/発生原因.*症状.*退避/);
+      expect(subjects.payload.conditions.join(" ")).toMatch(
+        /発生原因.*症状.*退避/,
+      );
       expect(subjects.payload.clarificationQuestion).toBeNull();
 
       const subjectRange = await callRoute(
@@ -2293,9 +2573,13 @@ describe("chatbot route executable safety boundary", () => {
         "酸欠で換気できない例外時の保護具は？",
       );
       expectAnswerFirst(exception.payload);
-      expect(exception.payload.substantiveAnswer).toMatch(/同時就業者数以上.*空気呼吸器/);
+      expect(exception.payload.substantiveAnswer).toMatch(
+        /同時就業者数以上.*空気呼吸器/,
+      );
       expect(
-        exception.payload.sources.some(({ article }) => /第5条の2/.test(article)),
+        exception.payload.sources.some(({ article }) =>
+          /第5条の2/.test(article),
+        ),
       ).toBe(true);
     },
   );
@@ -2309,7 +2593,9 @@ describe("chatbot route executable safety boundary", () => {
         "工作物の石綿事前調査者は誰？",
       );
       expectAnswerFirst(current.payload);
-      expect(current.payload.substantiveAnswer).toContain("工作物石綿事前調査者");
+      expect(current.payload.substantiveAnswer).toContain(
+        "工作物石綿事前調査者",
+      );
       const datedSources = current.payload.sources.filter(({ article }) =>
         /第3条|第1項/.test(article),
       );
@@ -2332,7 +2618,9 @@ describe("chatbot route executable safety boundary", () => {
       expect(beforeEffective.payload.substantiveAnswer).not.toContain(
         "工作物石綿事前調査者が行います",
       );
-      expect(beforeEffective.payload.answer).toMatch(/施行前|確定できません|回答を保留/);
+      expect(beforeEffective.payload.answer).toMatch(
+        /施行前|確定できません|回答を保留/,
+      );
     },
   );
 
@@ -2345,7 +2633,9 @@ describe("chatbot route executable safety boundary", () => {
         "建築物・工作物・船舶の石綿事前調査者は誰？",
       );
       expectAnswerFirst(combined.payload);
-      expect(combined.payload.substantiveAnswer).toMatch(/建築物.*鋼製船舶.*工作物/);
+      expect(combined.payload.substantiveAnswer).toMatch(
+        /建築物.*鋼製船舶.*工作物/,
+      );
       expect(combined.payload.substantiveAnswer).toMatch(
         /令和5年10月1日.*令和8年1月1日/,
       );
@@ -2357,13 +2647,11 @@ describe("chatbot route executable safety boundary", () => {
         /令和5年10月1日.*令和8年1月1日/,
       );
 
-      const ship = await callRoute(
-        post,
-        mode,
-        "船舶の石綿事前調査者は誰？",
-      );
+      const ship = await callRoute(post, mode, "船舶の石綿事前調査者は誰？");
       expectAnswerFirst(ship.payload);
-      expect(ship.payload.substantiveAnswer).toContain("船舶石綿含有資材調査者");
+      expect(ship.payload.substantiveAnswer).toContain(
+        "船舶石綿含有資材調査者",
+      );
       expect(
         ship.payload.sources
           .filter(({ article }) => /第3条|第1項/.test(article))
@@ -2414,6 +2702,165 @@ describe("chatbot route executable safety boundary", () => {
   );
 
   it.each(executableRouteModes)(
+    "安全管理者から適合しない役割・講習への変更で旧文脈を破棄する ($label)",
+    async ({ post, mode }) => {
+      const first = await callRoute(post, mode, "安全管理者は必要？");
+      expectAnswerFirst(first.payload);
+      expect(first.payload.clarificationQuestion).toBe(
+        "事業場の主な業種はどれですか？",
+      );
+
+      const second = await callRoute(
+        post,
+        mode,
+        "建設業",
+        [
+          { role: "user", content: "安全管理者は必要？" },
+          { role: "assistant", content: first.payload.answer },
+        ],
+        first.payload.context,
+      );
+      expectAnswerFirst(second.payload);
+      expect(second.payload.context?.workType).toBe(
+        "労働安全衛生法 安全管理者の選任義務",
+      );
+
+      for (const testCase of [
+        {
+          message: "作業主任者は必要？",
+          marker: "作業主任者",
+          clarification:
+            "作業主任者の要否を確認するため、実際の作業名や扱う物質・設備を教えてください。",
+          expectedContext: {
+            qualification: "作業主任者",
+            role: "作業主任者",
+          },
+        },
+        {
+          message: "監視人は必要？",
+          marker: "監視人",
+          clarification:
+            "監視人の要否を確認するため、実際の作業名と作業場所を教えてください。",
+          expectedContext: { role: "監視人" },
+        },
+        {
+          message: "作業指揮者は必要？",
+          marker: "作業指揮者",
+          clarification:
+            "作業指揮者の要否を確認するため、実際の作業名と使用する設備を教えてください。",
+          expectedContext: { role: "作業指揮者" },
+        },
+      ]) {
+        const third = await callRoute(
+          post,
+          mode,
+          testCase.message,
+          [
+            { role: "user", content: "安全管理者は必要？" },
+            { role: "assistant", content: first.payload.answer },
+            { role: "user", content: "建設業" },
+            { role: "assistant", content: second.payload.answer },
+          ],
+          second.payload.context,
+        );
+        expectAnswerFirst(third.payload);
+        expect(third.payload.substantiveAnswer).toContain(testCase.marker);
+        expect(third.payload.answer).not.toContain("安全管理者");
+        expect(third.payload.context).toMatchObject(testCase.expectedContext);
+        expect(third.payload.context?.workType).toBeUndefined();
+        expect(third.payload.clarificationQuestion).toBe(
+          testCase.clarification,
+        );
+        expect(third.payload.quickReplies).toEqual([]);
+        expect(
+          third.payload.sources.some(
+            ({ law, article }) =>
+              law === "労働安全衛生法" && /第11条/.test(article),
+          ),
+        ).toBe(false);
+      }
+
+      const trainingFollowup = await callRoute(
+        post,
+        mode,
+        "技能講習は必要？",
+        [
+          { role: "user", content: "安全管理者は必要？" },
+          { role: "assistant", content: first.payload.answer },
+          { role: "user", content: "建設業" },
+          { role: "assistant", content: second.payload.answer },
+        ],
+        second.payload.context,
+      );
+      expectAnswerFirst(trainingFollowup.payload);
+      expect(trainingFollowup.payload.substantiveAnswer).toMatch(
+        /技能講習.*一律に満たす制度ではありません/,
+      );
+      expect(trainingFollowup.payload.context).toMatchObject({
+        workType: "労働安全衛生法 安全管理者の選任義務",
+        qualification: "技能講習",
+      });
+      expect(
+        trainingFollowup.payload.sources.some(
+          ({ law, article }) =>
+            law === "労働安全衛生規則" && /第5条/.test(article),
+        ),
+      ).toBe(true);
+    },
+  );
+
+  it.each(executableRouteModes)(
+    "適合しない旧topicを別役割の質問へ持ち込まない ($label)",
+    async ({ post, mode }) => {
+      const cases = [
+        {
+          message: "作業主任者は必要？",
+          history: [{ role: "user" as const, content: "熱中症の報告義務は？" }],
+          context: { workType: "暑熱作業" },
+          staleText: /熱中症|暑熱/,
+          staleArticle: /第612条の2/,
+          clarification:
+            "作業主任者の要否を確認するため、実際の作業名や扱う物質・設備を教えてください。",
+        },
+        {
+          message: "監視人は必要？",
+          history: [
+            { role: "user" as const, content: "足場の手すりは何センチ？" },
+          ],
+          context: { workType: "足場作業", equipment: "足場" },
+          staleText: /足場/,
+          staleArticle: /第(?:518|552|563)条/,
+          clarification:
+            "監視人の要否を確認するため、実際の作業名と作業場所を教えてください。",
+        },
+      ];
+
+      for (const testCase of cases) {
+        const result = await callRoute(
+          post,
+          mode,
+          testCase.message,
+          testCase.history,
+          testCase.context,
+        );
+        expectAnswerFirst(result.payload);
+        expect(result.payload.substantiveAnswer).not.toMatch(
+          testCase.staleText,
+        );
+        expect(result.payload.context?.workType).toBeUndefined();
+        expect(result.payload.clarificationQuestion).toBe(
+          testCase.clarification,
+        );
+        expect(
+          result.payload.sources.some(({ article }) =>
+            testCase.staleArticle.test(article),
+          ),
+        ).toBe(false);
+      }
+    },
+  );
+
+  it.each(executableRouteModes)(
     "短い現場aspectを旧intentより優先して答える ($label)",
     async ({ post, mode }) => {
       const measurement = await callRoute(
@@ -2428,10 +2875,13 @@ describe("chatbot route executable safety boundary", () => {
         },
       );
       expectAnswerFirst(measurement.payload);
-      expect(measurement.payload.substantiveAnswer).toMatch(/作業開始前.*酸素濃度/);
+      expect(measurement.payload.substantiveAnswer).toMatch(
+        /作業開始前.*酸素濃度/,
+      );
       expect(
-        measurement.payload.sources.some(({ law, article }) =>
-          /酸素欠乏症等防止規則/.test(law) && /第3条/.test(article),
+        measurement.payload.sources.some(
+          ({ law, article }) =>
+            /酸素欠乏症等防止規則/.test(law) && /第3条/.test(article),
         ),
       ).toBe(true);
 
@@ -2447,8 +2897,96 @@ describe("chatbot route executable safety boundary", () => {
         },
       );
       expectAnswerFirst(controller.payload);
-      expect(controller.payload.substantiveAnswer).toMatch(/安衛則.*350条|作業の指揮者/);
+      expect(controller.payload.substantiveAnswer).toMatch(
+        /安衛則.*350条|作業の指揮者/,
+      );
       expect(controller.payload.answer).not.toMatch(/酸欠|有機溶剤|石綿/);
+
+      const forkliftController = await callRoute(
+        post,
+        mode,
+        "作業指揮者は必要？",
+        [{ role: "user", content: "フォークリフトの資格は？" }],
+        {
+          workType: "フォークリフト運転",
+          equipment: "フォークリフト",
+          qualification: "資格",
+        },
+      );
+      expectAnswerFirst(forkliftController.payload);
+      expect(forkliftController.payload.context).toMatchObject({
+        workType: "フォークリフト運転",
+        equipment: "フォークリフト",
+        role: "作業指揮者",
+      });
+      expect(forkliftController.payload.substantiveAnswer).toContain(
+        "作業指揮者",
+      );
+      expect(
+        forkliftController.payload.sources.some(
+          ({ law, article }) =>
+            law === "労働安全衛生規則" && /第151条の4/.test(article),
+        ),
+      ).toBe(true);
+
+      const openController = await callRoute(post, mode, "作業指揮者は必要？");
+      expectAnswerFirst(openController.payload);
+      expect(openController.payload.substantiveAnswer).not.toMatch(
+        /前の会話内容を確認できない|文脈を推測/,
+      );
+      expect(openController.payload.context).toMatchObject({
+        role: "作業指揮者",
+      });
+
+      const unrelatedTopic = await callRoute(
+        post,
+        mode,
+        "有機溶剤の換気は必要？",
+        [
+          { role: "user", content: "作業指揮者は必要？" },
+          { role: "assistant", content: openController.payload.answer },
+        ],
+        openController.payload.context,
+      );
+      expectAnswerFirst(unrelatedTopic.payload);
+      expect(unrelatedTopic.payload.context).toMatchObject({
+        workType: "有機溶剤業務",
+        equipment: "有機溶剤",
+      });
+      expect(unrelatedTopic.payload.context?.role).toBeUndefined();
+      expect(unrelatedTopic.payload.substantiveAnswer).toMatch(/換気|局所排気/);
+      expect(
+        unrelatedTopic.payload.sources.some(
+          ({ law, article }) =>
+            law === "労働安全衛生規則" && /第151条の4/.test(article),
+        ),
+      ).toBe(false);
+
+      const controllerCondition = await callRoute(
+        post,
+        mode,
+        "フォークリフトを使う作業です",
+        [
+          { role: "user", content: "作業指揮者は必要？" },
+          { role: "assistant", content: openController.payload.answer },
+        ],
+        openController.payload.context,
+      );
+      expectAnswerFirst(controllerCondition.payload);
+      expect(controllerCondition.payload.context).toMatchObject({
+        workType: "フォークリフト運転",
+        equipment: "フォークリフト",
+        role: "作業指揮者",
+      });
+      expect(controllerCondition.payload.substantiveAnswer).toContain(
+        "作業指揮者",
+      );
+      expect(
+        controllerCondition.payload.sources.some(
+          ({ law, article }) =>
+            law === "労働安全衛生規則" && /第151条の4/.test(article),
+        ),
+      ).toBe(true);
     },
   );
 
@@ -2482,8 +3020,98 @@ describe("chatbot route executable safety boundary", () => {
         qualification: "作業主任者",
         targetDate: "2027-01-01",
       });
-      expect(followup.payload.substantiveAnswer).toMatch(/回答を保留|確認できない/);
+      expect(followup.payload.substantiveAnswer).toMatch(
+        /回答を保留|確認できない/,
+      );
       expect(followup.payload.answer).not.toMatch(/酸欠|有機溶剤|石綿/);
+    },
+  );
+
+  it.each(executableRouteModes)(
+    "誰・どこ・期限・その対象だけのfollow-upでも直前の法令topicを維持する ($label)",
+    async ({ post, mode }) => {
+      const cases = [
+        {
+          initial: "労働者死傷病報告は誰に、いつまで提出？",
+          followup: "誰に？",
+          context: { workType: "労働者死傷病報告" },
+          expectedWorkType: "労働者死傷病報告",
+          expectedArticle: /第97条/,
+          forbiddenArticle: /第50条|第34条の21/,
+        },
+        {
+          initial: "労働者死傷病報告は誰に、いつまで提出？",
+          followup: "いつまで？",
+          context: { workType: "労働者死傷病報告" },
+          expectedWorkType: "労働者死傷病報告",
+          expectedArticle: /第97条/,
+          forbiddenArticle: /第50条|第34条の21/,
+        },
+        {
+          initial: "熱中症の報告義務は？",
+          followup: "その報告は？",
+          context: { workType: "暑熱作業" },
+          expectedWorkType: "暑熱作業",
+          expectedArticle: /第612条の2/,
+          forbiddenArticle: /第34条の21/,
+        },
+        {
+          initial: "足場の点検義務は？",
+          followup: "その点検は？",
+          context: { workType: "足場作業", equipment: "足場" },
+          expectedWorkType: "足場作業",
+          expectedArticle: /第567条/,
+          forbiddenArticle: /第34条の2/,
+        },
+        {
+          initial: "フォークリフトの資格は？",
+          followup: "その教育は？",
+          context: {
+            workType: "フォークリフト運転",
+            equipment: "フォークリフト",
+            qualification: "資格",
+          },
+          expectedWorkType: "フォークリフト運転",
+          expectedArticle: /第35条|第36条|第20条|第61条/,
+          forbiddenArticle: /第34条の21/,
+        },
+        {
+          initial: "酸欠作業の特別教育は？",
+          followup: "その教育は？",
+          context: {
+            workType: "酸素欠乏危険作業",
+            equipment: "酸欠危険場所",
+            qualification: "特別教育",
+          },
+          expectedWorkType: "酸素欠乏危険作業",
+          expectedArticle: /第12条/,
+          forbiddenArticle: /第34条の21/,
+        },
+      ];
+
+      for (const testCase of cases) {
+        const result = await callRoute(
+          post,
+          mode,
+          testCase.followup,
+          [{ role: "user", content: testCase.initial }],
+          testCase.context,
+        );
+        expectAnswerFirst(result.payload);
+        expect(result.payload.context?.workType).toBe(
+          testCase.expectedWorkType,
+        );
+        expect(
+          result.payload.sources.some(({ article }) =>
+            testCase.expectedArticle.test(article),
+          ),
+        ).toBe(true);
+        expect(
+          result.payload.sources.some(({ article }) =>
+            testCase.forbiddenArticle.test(article),
+          ),
+        ).toBe(false);
+      }
     },
   );
 
@@ -2504,6 +3132,395 @@ describe("chatbot route executable safety boundary", () => {
       expectAnswerFirst(sling.payload);
       expect(sling.payload.context?.workType).toBe("玉掛け");
       expect(sling.payload.substantiveAnswer).toContain("玉掛け");
+    },
+  );
+
+  it.each(executableRouteModes)(
+    "条文特定が難しい現場語でも一次資料の項・号をanswer-firstで返す ($label)",
+    async ({ post, mode }) => {
+      const injuryReport = await callRoute(
+        post,
+        mode,
+        "休業4日の労災事故はいつまでに報告しますか？",
+      );
+      expectAnswerFirst(injuryReport.payload);
+      expect(injuryReport.payload.substantiveAnswer).toMatch(
+        /休業4日以上.*4日ちょうど.*遅滞なく/,
+      );
+      expect(
+        injuryReport.payload.sources.some(
+          ({ law, article }) =>
+            law === "労働安全衛生規則" && /第97条/.test(article),
+        ),
+      ).toBe(true);
+      expect(injuryReport.payload.answer).not.toMatch(/労災保険法第?7条/);
+
+      const fumigationMonitor = await callRoute(
+        post,
+        mode,
+        "特化則38条の14の監視人はどの号？",
+      );
+      expectAnswerFirst(fumigationMonitor.payload);
+      expect(fumigationMonitor.payload.substantiveAnswer).toMatch(
+        /第1項第5号ただし書.*第1項第12号ただし書/,
+      );
+      const fumigationSource = fumigationMonitor.payload.sources.find(
+        ({ law, article }) =>
+          law === "特定化学物質障害予防規則" && /第38条の14/.test(article),
+      );
+      expect(fumigationSource).toMatchObject({
+        paragraph: "第1項",
+        item: "第5号・第12号",
+      });
+      expect(fumigationSource?.snippet).toMatch(
+        /第5号.*監視人.*第12号.*監視人/,
+      );
+
+      const broadMonitor = await callRoute(post, mode, "監視人は必要？");
+      expectAnswerFirst(broadMonitor.payload);
+      const broadFumigationSource = broadMonitor.payload.sources.find(
+        ({ law, article }) =>
+          law === "特定化学物質障害予防規則" && /第38条の14/.test(article),
+      );
+      expect(broadFumigationSource).toMatchObject({
+        paragraph: "第1項",
+        item: "第5号・第12号",
+      });
+      expect(broadFumigationSource?.snippet).toMatch(
+        /第5号.*監視人.*第12号.*監視人/,
+      );
+
+      const oxygenEducation = await callRoute(
+        post,
+        mode,
+        "酸欠則12条1項3号と4号は2種でも要る？",
+      );
+      expectAnswerFirst(oxygenEducation.payload);
+      expect(oxygenEducation.payload.substantiveAnswer).toMatch(
+        /第3号.*第4号.*共通/,
+      );
+      const oxygenSource = oxygenEducation.payload.sources.find(
+        ({ law, article }) =>
+          law === "酸素欠乏症等防止規則" && /第12条/.test(article),
+      );
+      expect(oxygenSource).toMatchObject({
+        paragraph: "第1項・第2項",
+        item: "第3号・第4号",
+      });
+
+      expect(oxygenEducation.payload.context).toMatchObject({
+        workType: "酸素欠乏危険作業",
+        qualification: "特別教育",
+      });
+      for (const oxygenEducationFollowup of [
+        {
+          message: "いつまでに受ける？",
+          expected: /従事させる時点までに実施/,
+        },
+        {
+          message: "誰が受ける？",
+          expected: /対象は.*酸素欠乏危険作業に係る業務へ就く労働者/,
+        },
+        {
+          message: "いつまで？",
+          expected: /従事させる時点までに実施/,
+        },
+        {
+          message: "誰が？",
+          expected: /対象は.*酸素欠乏危険作業に係る業務へ就く労働者/,
+        },
+      ]) {
+        const followup = await callRoute(
+          post,
+          mode,
+          oxygenEducationFollowup.message,
+          [
+            {
+              role: "user",
+              content: "酸欠則12条1項3号と4号は2種でも要る？",
+            },
+          ],
+          oxygenEducation.payload.context,
+        );
+        expectAnswerFirst(followup.payload);
+        expect(followup.payload.substantiveAnswer).toMatch(
+          oxygenEducationFollowup.expected,
+        );
+        expect(
+          followup.payload.sources.some(
+            ({ law, article }) =>
+              law === "酸素欠乏症等防止規則" && /第12条/.test(article),
+          ),
+        ).toBe(true);
+        expect(followup.payload.substantiveAnswer).not.toMatch(
+          /作業主任者技能講習.*選任/,
+        );
+      }
+
+      const scaffoldInspectionInitial = await callRoute(
+        post,
+        mode,
+        "足場の点検は必要？",
+      );
+      const scaffoldInspectionRecord = await callRoute(
+        post,
+        mode,
+        "その点検は記録するの？",
+        [{ role: "user", content: "足場の点検は必要？" }],
+        scaffoldInspectionInitial.payload.context,
+      );
+      expectAnswerFirst(scaffoldInspectionRecord.payload);
+      expect(scaffoldInspectionRecord.payload.context?.workType).toBe(
+        "足場作業",
+      );
+      expect(scaffoldInspectionRecord.payload.substantiveAnswer).toMatch(
+        /足場.*点検.*記録|点検.*記録.*足場/,
+      );
+      expect(
+        scaffoldInspectionRecord.payload.sources.find(
+          ({ law, article }) =>
+            law === "労働安全衛生規則" && /第567条/.test(article),
+        ),
+      ).toMatchObject({ paragraph: "第3項", item: "第1号・第2号" });
+      expect(scaffoldInspectionRecord.payload.sources).not.toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            law: "特定化学物質障害予防規則",
+            article: expect.stringMatching(/第34条の2/),
+          }),
+        ]),
+      );
+
+      const secondOxygenEducationInitial = await callRoute(
+        post,
+        mode,
+        "第二種酸素欠乏危険作業の特別教育は必要ですか？",
+      );
+      const beforeWorkEducation = await callRoute(
+        post,
+        mode,
+        "作業前に受ける必要がある？",
+        [
+          {
+            role: "user",
+            content: "第二種酸素欠乏危険作業の特別教育は必要ですか？",
+          },
+        ],
+        secondOxygenEducationInitial.payload.context,
+      );
+      expectAnswerFirst(beforeWorkEducation.payload);
+      expect(beforeWorkEducation.payload.substantiveAnswer).toMatch(
+        /従事させる時点までに実施|業務に就かせるとき/,
+      );
+      expect(
+        beforeWorkEducation.payload.sources.find(
+          ({ law, article }) =>
+            law === "酸素欠乏症等防止規則" && /第12条/.test(article),
+        ),
+      ).toMatchObject({ paragraph: "第2項" });
+      expect(beforeWorkEducation.payload.sources).not.toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            article: expect.stringMatching(/第52条の15/),
+          }),
+        ]),
+      );
+
+      const oxygenInstructorInitial = await callRoute(
+        post,
+        mode,
+        "酸欠作業の特別教育は？",
+      );
+      for (const instructorFollowup of ["誰が教えるの？", "講師は誰？"]) {
+        const oxygenInstructor = await callRoute(
+          post,
+          mode,
+          instructorFollowup,
+          [{ role: "user", content: "酸欠作業の特別教育は？" }],
+          oxygenInstructorInitial.payload.context,
+        );
+        expectAnswerFirst(oxygenInstructor.payload);
+        expect(oxygenInstructor.payload.context).toMatchObject({
+          workType: "酸素欠乏危険作業",
+          qualification: "特別教育",
+        });
+        expect(oxygenInstructor.payload.substantiveAnswer).toMatch(
+          /法的義務を負うのは事業者/,
+        );
+        expect(oxygenInstructor.payload.substantiveAnswer).toMatch(
+          /講師個人の資格名までは同条で定めていません/,
+        );
+        expect(
+          oxygenInstructor.payload.sources.some(
+            ({ law, article }) =>
+              law === "酸素欠乏症等防止規則" && /第12条/.test(article),
+          ),
+        ).toBe(true);
+      }
+
+      const heatRecipient = await callRoute(
+        post,
+        mode,
+        "誰に報告するの？",
+        [{ role: "user", content: "熱中症の報告義務は？" }],
+        { workType: "暑熱作業" },
+      );
+      expectAnswerFirst(heatRecipient.payload);
+      expect(heatRecipient.payload.substantiveAnswer).toMatch(
+        /報告先.*一律に指定していません|誰へ報告するか.*体制/,
+      );
+      expect(
+        heatRecipient.payload.sources.some(({ article }) =>
+          /第612条の2/.test(article),
+        ),
+      ).toBe(true);
+
+      for (const shortRecipient of ["誰に？", "どこへ？"]) {
+        const heatShort = await callRoute(
+          post,
+          mode,
+          shortRecipient,
+          [{ role: "user", content: "熱中症の報告義務は？" }],
+          { workType: "暑熱作業" },
+        );
+        expectAnswerFirst(heatShort.payload);
+        expect(heatShort.payload.substantiveAnswer).toMatch(
+          /報告先.*一律に指定していません|誰へ報告するか.*体制/,
+        );
+        expect(
+          heatShort.payload.sources.some(({ article }) =>
+            /第612条の2/.test(article),
+          ),
+        ).toBe(true);
+      }
+
+      for (const shortRecipient of ["誰に？", "どこへ？"]) {
+        const injuryRecipient = await callRoute(
+          post,
+          mode,
+          shortRecipient,
+          [
+            {
+              role: "user",
+              content: "休業4日の労災事故はいつまでに報告しますか？",
+            },
+          ],
+          { workType: "労働者死傷病報告" },
+        );
+        expectAnswerFirst(injuryRecipient.payload);
+        expect(injuryRecipient.payload.substantiveAnswer).toMatch(
+          /報告先は、所轄労働基準監督署長/,
+        );
+        expect(
+          injuryRecipient.payload.sources.some(({ article }) =>
+            /第97条/.test(article),
+          ),
+        ).toBe(true);
+      }
+
+      const reverseResolvedRecipient = await callRoute(
+        post,
+        mode,
+        "労働者死傷病報告についてです",
+        [{ role: "user", content: "報告はどこへ？" }],
+        {},
+      );
+      expectAnswerFirst(reverseResolvedRecipient.payload);
+      expect(reverseResolvedRecipient.payload.substantiveAnswer).toMatch(
+        /報告先は、所轄労働基準監督署長/,
+      );
+      expect(
+        reverseResolvedRecipient.payload.sources.some(({ article }) =>
+          /第97条/.test(article),
+        ),
+      ).toBe(true);
+
+      const injuryDeadline = await callRoute(
+        post,
+        mode,
+        "いつまで？",
+        [
+          {
+            role: "user",
+            content: "休業4日の労災事故はいつまでに報告しますか？",
+          },
+        ],
+        { workType: "労働者死傷病報告" },
+      );
+      expectAnswerFirst(injuryDeadline.payload);
+      expect(injuryDeadline.payload.substantiveAnswer).toMatch(
+        /休業4日以上.*4日ちょうど.*遅滞なく/,
+      );
+
+      for (const forkliftFollowup of [
+        {
+          message: "いつまで有効？",
+          expected: /有効期限や定期更新は定めていません/,
+        },
+        {
+          message: "誰が受ける？",
+          expected: /最大荷重1トン以上.*運転業務に就く人.*技能講習/,
+        },
+        {
+          message: "誰が？",
+          expected: /最大荷重1トン以上.*運転業務に就く人.*技能講習/,
+        },
+      ]) {
+        const forklift = await callRoute(
+          post,
+          mode,
+          forkliftFollowup.message,
+          [
+            {
+              role: "user",
+              content: "フォークリフトの技能講習は必要？",
+            },
+          ],
+          {
+            workType: "フォークリフト運転",
+            equipment: "フォークリフト",
+            qualification: "技能講習",
+          },
+        );
+        expectAnswerFirst(forklift.payload);
+        expect(forklift.payload.substantiveAnswer).toMatch(
+          forkliftFollowup.expected,
+        );
+        expect(forklift.payload.context?.workType).toBe("フォークリフト運転");
+      }
+
+      const genericForkliftInitial = await callRoute(
+        post,
+        mode,
+        "フォークリフトの運転資格は？",
+      );
+      for (const genericForkliftFollowup of [
+        {
+          message: "いつまで有効？",
+          expected: /有効期限や定期更新は定めていません/,
+        },
+        {
+          message: "誰が受ける？",
+          expected: /最大荷重1トン以上.*運転業務に就く人.*技能講習/,
+        },
+        {
+          message: "誰が？",
+          expected: /最大荷重1トン以上.*運転業務に就く人.*技能講習/,
+        },
+      ]) {
+        const followup = await callRoute(
+          post,
+          mode,
+          genericForkliftFollowup.message,
+          [{ role: "user", content: "フォークリフトの運転資格は？" }],
+          genericForkliftInitial.payload.context,
+        );
+        expectAnswerFirst(followup.payload);
+        expect(followup.payload.substantiveAnswer).toMatch(
+          genericForkliftFollowup.expected,
+        );
+        expect(followup.payload.context?.workType).toBe("フォークリフト運転");
+      }
     },
   );
 });

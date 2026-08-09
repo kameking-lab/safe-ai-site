@@ -56,10 +56,10 @@ import { inspectAiOutbound } from "@/lib/server/ai-outbound-safety";
 import { validateChatbotRequestBoundary } from "@/lib/server/chatbot-request-boundary";
 import {
   buildUnknownLoadConditionHold,
+  hasLegalConversationContext,
   nextLegalClarification,
   normalizeLegalConversationText,
   resolveLegalConversationQuery,
-  sanitizeLegalConversationContext,
 } from "@/lib/legal-conversation-context";
 import {
   buildServiceFirstLegalAnswer,
@@ -243,7 +243,7 @@ export async function POST(request: Request) {
     needsPriorConversationContext(
       message,
       (Array.isArray(body.history) && body.history.length > 0) ||
-        Object.keys(sanitizeLegalConversationContext(body.context)).length > 0,
+        hasLegalConversationContext(body.context),
     )
   ) {
     return NextResponse.json<ChatbotResponse>(finalizeChatbotResponse({

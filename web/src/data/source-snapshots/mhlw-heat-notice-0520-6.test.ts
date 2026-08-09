@@ -4,9 +4,9 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { MHLW_HEAT_NOTICE_0520_6_SNAPSHOT as snapshot } from "./mhlw-heat-notice-0520-6";
 
-const EVIDENCE_PDF = resolve(
+const SOURCE_PDF = resolve(
   process.cwd(),
-  "../docs/audits/evidence/performance-release-resume-2026-07-26/external-sources/gq05/mhlw-kihatsu-0520-6-2025-05-20.pdf",
+  "src/data/source-snapshots/mhlw-kihatsu-0520-6-2025-05-20.pdf",
 );
 
 const sha256 = (value: Uint8Array | string) =>
@@ -44,7 +44,7 @@ describe("基発0520第6号 公式PDF snapshot", () => {
   });
 
   it("保存した公式PDFのbytesとSHA-256を固定する", () => {
-    const pdf = readFileSync(EVIDENCE_PDF);
+    const pdf = readFileSync(SOURCE_PDF);
     expect(pdf.byteLength).toBe(snapshot.pdfBytes);
     expect(sha256(pdf)).toBe(snapshot.pdfSha256);
     expect(sha256(snapshot.excerpt)).toBe(snapshot.excerptSha256);
@@ -55,7 +55,7 @@ describe("基発0520第6号 公式PDF snapshot", () => {
     async () => {
       const pdfjs = await import("pdfjs-dist/legacy/build/pdf.mjs");
       const pdf = await pdfjs.getDocument({
-        data: new Uint8Array(readFileSync(EVIDENCE_PDF)),
+        data: new Uint8Array(readFileSync(SOURCE_PDF)),
         useWorkerFetch: false,
       }).promise;
       expect(pdf.numPages).toBe(snapshot.pdfPages);

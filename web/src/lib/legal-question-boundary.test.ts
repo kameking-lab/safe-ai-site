@@ -8,9 +8,15 @@ import {
 
 describe("PF-027 legal question boundary", () => {
   it("requires clarification for a context-dependent query after history reset", () => {
-    expect(needsPriorConversationContext("それについて詳しく", false)).toBe(true);
-    expect(needsPriorConversationContext("  先ほどの条件なら？", false)).toBe(true);
-    expect(needsPriorConversationContext("それについて詳しく", true)).toBe(false);
+    expect(needsPriorConversationContext("それについて詳しく", false)).toBe(
+      true,
+    );
+    expect(needsPriorConversationContext("  先ほどの条件なら？", false)).toBe(
+      true,
+    );
+    expect(needsPriorConversationContext("それについて詳しく", true)).toBe(
+      false,
+    );
     expect(buildContextClarificationAnswer()).toContain("文脈を推測");
   });
 
@@ -32,9 +38,30 @@ describe("PF-027 legal question boundary", () => {
     "いつから？",
     "換気は？",
     "測定は？",
+    "誰に？",
+    "どこへ？",
+    "いつまで？",
+    "その報告は？",
+    "その点検は？",
+    "その教育は？",
+    "誰に報告するの？",
+    "その報告は誰にしますか？",
+    "報告先はどこ？",
+    "誰が点検するの？",
+    "どこを点検しますか？",
+    "いつまでに点検するの？",
+    "いつまで有効？",
+    "誰が受ける？",
+    "いつまでに受ける？",
   ])("対象なしの省略follow-upを無関係な法令検索へ流さない: %s", (query) => {
     expect(needsPriorConversationContext(query, false)).toBe(true);
     expect(needsPriorConversationContext(query, true)).toBe(false);
+  });
+
+  it("完全文の役割質問を文脈なしfollow-upと誤判定しない", () => {
+    expect(needsPriorConversationContext("作業指揮者は必要？", false)).toBe(
+      false,
+    );
   });
 
   it("recognizes an explicit law and article while rejecting vague article-only text", () => {

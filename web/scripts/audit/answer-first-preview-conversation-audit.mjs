@@ -225,7 +225,11 @@ function collectRequestBody(request) {
 
 let loopbackOrigin = "";
 let postsEnabled = false;
-const allowedPostPaths = new Set(["/api/chatbot", "/api/chatbot/stream"]);
+const allowedPostPaths = new Set([
+  "/api/chat",
+  "/api/chatbot",
+  "/api/chatbot/stream",
+]);
 const allowedReadPaths = new Set([
   "/",
   "/chatbot",
@@ -763,7 +767,7 @@ try {
     [path.resolve("scripts/answer-first-conversation-eval.mjs")],
     {
       ANSWER_FIRST_BASE_URL: loopbackOrigin,
-      ANSWER_FIRST_ROUTE_IDS: "json",
+      ANSWER_FIRST_ROUTE_IDS: "json,legacy",
       ANSWER_FIRST_EVIDENCE_PATH: apiEvidencePath,
       ANSWER_FIRST_BROWSER_EVIDENCE_PATH: browserEvidencePath,
     },
@@ -784,7 +788,7 @@ try {
   const runtimeBoundary = await inspectRuntimeBoundary();
   const chatbotPosts = requestLog.filter(
     (entry) =>
-      entry.method === "POST" && entry.path.startsWith("/api/chatbot"),
+      entry.method === "POST" && allowedPostPaths.has(entry.path),
   );
   const aiUsedTrue = chatbotPosts.filter((entry) => entry.aiUsed === "true");
   // The route's in-memory cache is populated only by the evidence-only local
@@ -807,6 +811,9 @@ try {
   const streamPostCount = chatbotPosts.filter(
     (entry) => entry.path === "/api/chatbot/stream",
   ).length;
+  const legacyPostCount = chatbotPosts.filter(
+    (entry) => entry.path === "/api/chat",
+  ).length;
   const streamedPostCount = chatbotPosts.filter(
     (entry) =>
       entry.path === "/api/chatbot/stream" &&
@@ -821,12 +828,14 @@ try {
       ? null
       : "browser-case-coverage",
     apiReport?.fixture?.caseCount === 12 &&
-    apiReport?.routes?.length === 1 &&
+    apiReport?.routes?.length === 2 &&
     apiReport.routes[0]?.route === "json" &&
-    apiReport.routes[0]?.cases?.length === 12
+    apiReport.routes[0]?.cases?.length === 12 &&
+    apiReport.routes[1]?.route === "legacy" &&
+    apiReport.routes[1]?.cases?.length === 12
       ? null
       : "api-case-coverage",
-    jsonPostCount === 12 && streamPostCount === 10
+    jsonPostCount === 12 && streamPostCount === 10 && legacyPostCount === 12
       ? null
       : "deployed-request-coverage",
     streamedPostCount === 10 ? null : "deployed-sse-stream-coverage",
@@ -852,7 +861,7 @@ try {
     getOnlyBoundary,
     authenticatedTransport:
       "in-memory protected fetch via loopback-only browser proxy",
-    apiRoutes: ["json"],
+    apiRoutes: ["json", "legacy"],
     browserRoute: "sse",
     fixedCaseCount: 12,
     browserCaseCount: browserReport?.caseCount ?? 0,
@@ -863,6 +872,7 @@ try {
     chatbotPostCount: chatbotPosts.length,
     jsonPostCount,
     streamPostCount,
+    legacyPostCount,
     streamedPostCount,
     externalAiUsedCount: aiUsedTrue.length,
     aiUsedNotFalseCount: aiUsedNotFalse.length,

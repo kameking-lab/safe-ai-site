@@ -15,9 +15,9 @@
 | 新しい会話 | 大きな主操作 | ヘッダー内の小さな44px操作 |
 | badge・注意 | 主見出しと競合 | 「安衛法AI」を主見出しにし、modeを小表示、注意は1行 |
 
-2026-08-08の実ブラウザー結果:
+2026-08-09のproduction build実ブラウザー結果:
 
-- 固定12会話ケース: 4 Playwright test / 12 case PASS。
+- 全Playwright: 250/250 PASS。固定12会話ケースを含む。
 - 回答操作最大2、quick reply最大3、確認質問最大1。
 - 320〜1440pxおよび400%相当でhorizontal overflow 0。
 - chatbot composerとbottom nav等のoverlap 0。

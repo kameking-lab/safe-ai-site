@@ -72,9 +72,9 @@ describe("ChatbotPanel a11y", () => {
       document.querySelector('[data-chatbot-answer] [aria-live="polite"]'),
     ).toBeNull();
     expect(document.querySelectorAll('[aria-live="polite"]')).toHaveLength(1);
-    expect(document.querySelector("[data-chatbot-live-region]")?.textContent).toBe(
-      "",
-    );
+    expect(
+      document.querySelector("[data-chatbot-live-region]")?.textContent,
+    ).toBe("");
   });
 
   it("送信失敗時のエラー表示はrole=alertでスクリーンリーダーに通知される", async () => {
@@ -100,8 +100,7 @@ describe("ChatbotPanel a11y", () => {
       .mockResolvedValueOnce(
         chatbotStream({
           answer: "結論\nフォークリフトの資格は最大荷重で分かれます。",
-          substantiveAnswer:
-            "フォークリフトの資格は最大荷重で分かれます。",
+          substantiveAnswer: "フォークリフトの資格は最大荷重で分かれます。",
           assumptions: [],
           conditions: ["最大荷重"],
           citations: [],
@@ -188,9 +187,7 @@ describe("ChatbotPanel AI safety boundary", () => {
     );
 
     expect(source).not.toContain("/ky/paper?q=");
-    expect(source).not.toContain(
-      "/chemical-ra?name=${encodeURIComponent",
-    );
+    expect(source).not.toContain("/chemical-ra?name=${encodeURIComponent");
     expect(source).not.toContain("/laws?q=${encodeURIComponent");
   });
 
@@ -209,9 +206,9 @@ describe("ChatbotPanel AI safety boundary", () => {
 
     await waitFor(() => expect(consumed).toHaveBeenCalledTimes(1));
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
-    expect((screen.getByLabelText("質問入力") as HTMLTextAreaElement).value).toBe(
-      "",
-    );
+    expect(
+      (screen.getByLabelText("質問入力") as HTMLTextAreaElement).value,
+    ).toBe("");
     expect(String(fetchMock.mock.calls[0]?.[1]?.body)).toContain(question);
     expect(window.location.href).not.toContain(encodeURIComponent(question));
     expect(JSON.stringify(window.localStorage)).not.toContain(question);
@@ -303,7 +300,9 @@ describe("ChatbotPanel AI safety boundary", () => {
     vi.stubGlobal("fetch", fetchMock);
     render(<ChatbotPanel />);
 
-    fireEvent.change(screen.getByLabelText("質問入力"), { target: { value: input } });
+    fireEvent.change(screen.getByLabelText("質問入力"), {
+      target: { value: input },
+    });
     fireEvent.click(screen.getByRole("button", { name: "送信" }));
 
     const alert = await screen.findByRole("alert");
@@ -311,35 +310,48 @@ describe("ChatbotPanel AI safety boundary", () => {
     expect(fetchMock).not.toHaveBeenCalled();
     expect(screen.queryByText(input)).toBeNull();
     for (let index = 0; index < localStorage.length; index += 1) {
-      expect(localStorage.getItem(localStorage.key(index)!)).not.toContain(input);
+      expect(localStorage.getItem(localStorage.key(index)!)).not.toContain(
+        input,
+      );
     }
   });
 
   it("server-only safety block removes the user turn and never persists or analyses raw text", async () => {
     const input = "匿名化済みの一般的な足場点検について";
     const fetchMock = vi.fn().mockResolvedValue(
-      new Response(JSON.stringify({ error: "安全確認で送信を停止しました。" }), {
-        status: 422,
-        headers: { "content-type": "application/json" },
-      }),
+      new Response(
+        JSON.stringify({ error: "安全確認で送信を停止しました。" }),
+        {
+          status: 422,
+          headers: { "content-type": "application/json" },
+        },
+      ),
     );
     vi.stubGlobal("fetch", fetchMock);
     render(<ChatbotPanel />);
 
-    fireEvent.change(screen.getByLabelText("質問入力"), { target: { value: input } });
+    fireEvent.change(screen.getByLabelText("質問入力"), {
+      target: { value: input },
+    });
     fireEvent.click(screen.getByRole("button", { name: "送信" }));
 
-    expect((await screen.findByRole("alert")).textContent).toContain("安全確認");
+    expect((await screen.findByRole("alert")).textContent).toContain(
+      "安全確認",
+    );
     await waitFor(() => expect(screen.queryByText(input)).toBeNull());
     for (let index = 0; index < localStorage.length; index += 1) {
-      expect(localStorage.getItem(localStorage.key(index)!)).not.toContain(input);
+      expect(localStorage.getItem(localStorage.key(index)!)).not.toContain(
+        input,
+      );
     }
   });
 
   it("removes both legacy raw-chat storage keys on open and never serializes them into a new request", async () => {
     localStorage.setItem(
       "chatbot_history_v2",
-      JSON.stringify([{ messages: [{ role: "user", content: "worker@example.com" }] }]),
+      JSON.stringify([
+        { messages: [{ role: "user", content: "worker@example.com" }] },
+      ]),
     );
     localStorage.setItem(
       "anzen_chatbot_active_session_v1",
@@ -382,23 +394,27 @@ describe("ChatbotPanel conversation UI", () => {
   it("空状態は質問例3件以下で、compactなcomposerを最初から表示する", () => {
     render(<ChatbotPanel />);
 
-    expect(document.querySelectorAll("[data-chatbot-question-chip]")).toHaveLength(3);
+    expect(
+      document.querySelectorAll("[data-chatbot-question-chip]"),
+    ).toHaveLength(3);
     expect(document.querySelector("[data-chatbot-composer]")).not.toBeNull();
-    expect(document.querySelector("[data-chatbot-composer]")?.className).toContain(
-      "sticky",
-    );
-    expect(document.querySelector("[data-chatbot-composer]")?.className).toContain(
-      "bottom-0",
-    );
-    expect(document.querySelector("[data-chatbot-composer]")?.className).toContain(
-      "shrink-0",
-    );
+    expect(
+      document.querySelector("[data-chatbot-composer]")?.className,
+    ).toContain("sticky");
+    expect(
+      document.querySelector("[data-chatbot-composer]")?.className,
+    ).toContain("bottom-0");
+    expect(
+      document.querySelector("[data-chatbot-composer]")?.className,
+    ).toContain("shrink-0");
     expect(screen.getByLabelText("質問入力").getAttribute("rows")).toBe("1");
     expect(
       screen.getByText("個人情報は入力しない", { exact: false }).firstChild
         ?.textContent,
     ).toBe("個人情報は入力しない");
-    expect(document.querySelectorAll("[data-ui-box]").length).toBeLessThanOrEqual(1);
+    expect(
+      document.querySelectorAll("[data-ui-box]").length,
+    ).toBeLessThanOrEqual(1);
     expect(screen.queryByRole("alert")).toBeNull();
     expect(screen.queryByRole("checkbox")).toBeNull();
   });
@@ -465,11 +481,64 @@ describe("ChatbotPanel conversation UI", () => {
     expect(liveRegion?.getAttribute("aria-live")).toBe("polite");
     expect(liveRegion?.getAttribute("aria-atomic")).toBe("true");
     expect(liveRegion?.textContent).toBe("安衛法AIの回答 1 を表示しました。");
-    expect(screen.getAllByRole("button", { name: /1トン|分からない/ })).toHaveLength(
-      3,
-    );
-    expect(document.querySelectorAll("[data-chatbot-answer-actions]")).toHaveLength(1);
+    expect(
+      screen.getAllByRole("button", { name: /1トン|分からない/ }),
+    ).toHaveLength(3);
+    expect(
+      document.querySelectorAll("[data-chatbot-answer-actions]"),
+    ).toHaveLength(1);
     expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("範囲警告は回答後にだけ表示し、通常時の常設警告にしない", async () => {
+    const warning =
+      "指定条文を検証済み収録正本から一意に特定できないため、公式原文で条件を確認してください。";
+    const fetchMock = vi.fn().mockResolvedValue(
+      chatbotStream({
+        answer:
+          "結論\n確認済み資料の範囲では一般的な条件まで説明できます。［1］",
+        substantiveAnswer:
+          "確認済み資料の範囲では一般的な条件まで説明できます。［1］",
+        assumptions: [],
+        conditions: ["対象設備の種類"],
+        citations: [],
+        clarificationQuestion: null,
+        quickReplies: [],
+        scopeWarnings: [warning],
+        sources: [
+          {
+            law: "労働安全衛生規則（安衛則）",
+            article: "第563条",
+            text: "高さ二メートル以上の作業場所に関する規定。",
+            snippet: "高さ二メートル以上の作業場所",
+            url: "https://laws.e-gov.go.jp/law/347M50002000032",
+          },
+        ],
+        source_type: "rag",
+        confidence: "low",
+        requiresHumanReview: true,
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    render(<ChatbotPanel />);
+
+    expect(document.querySelector("[data-chatbot-scope-warning]")).toBeNull();
+    fireEvent.change(screen.getByLabelText("質問入力"), {
+      target: { value: "収録外かもしれない設備の条件は？" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "送信" }));
+
+    await screen.findByText(warning);
+    const answer = document.querySelector("[data-chatbot-answer]");
+    const conclusionIndex = answer?.textContent?.indexOf(
+      "確認済み資料の範囲では一般的な条件まで説明できます。",
+    );
+    const warningIndex = answer?.textContent?.indexOf(warning);
+    const sourceIndex = answer?.textContent?.indexOf("根拠 1件");
+    expect(conclusionIndex).toBeGreaterThanOrEqual(0);
+    expect(warningIndex).toBeGreaterThan(conclusionIndex ?? -1);
+    expect(sourceIndex).toBeGreaterThan(warningIndex ?? -1);
+    expect(screen.getByRole("note", { name: "確認が必要" })).toBeDefined();
   });
 
   it("会話開始後もpanelを親高に収め、履歴とcomposerを重ねない", async () => {
@@ -479,9 +548,7 @@ describe("ChatbotPanel conversation UI", () => {
     );
     render(<ChatbotPanel />);
 
-    fireEvent.click(
-      screen.getByRole("button", { name: "足場の手すりは？" }),
-    );
+    fireEvent.click(screen.getByRole("button", { name: "足場の手すりは？" }));
 
     await waitFor(() => {
       const panel = document.querySelector(
@@ -553,12 +620,12 @@ describe("ChatbotPanel conversation UI", () => {
     vi.stubGlobal("fetch", fetchMock);
     render(<ChatbotPanel />);
 
-    fireEvent.click(
-      screen.getByRole("button", { name: "電気作業の資格は？" }),
-    );
+    fireEvent.click(screen.getByRole("button", { name: "電気作業の資格は？" }));
     await screen.findByText(/電気作業の資格・教育は、配線や設備工事/);
     expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(document.querySelectorAll("[data-chatbot-quick-reply]")).toHaveLength(3);
+    expect(
+      document.querySelectorAll("[data-chatbot-quick-reply]"),
+    ).toHaveLength(3);
 
     fireEvent.change(screen.getByLabelText("質問入力"), {
       target: { value: "作業主任者" },
@@ -566,7 +633,9 @@ describe("ChatbotPanel conversation UI", () => {
     fireEvent.click(screen.getByRole("button", { name: "送信" }));
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
-    await screen.findByText(/作業主任者.*電気作業全般に共通して選任するものではなく/);
+    await screen.findByText(
+      /作業主任者.*電気作業全般に共通して選任するものではなく/,
+    );
     const body = JSON.parse(
       String(fetchMock.mock.calls[1]?.[1]?.body ?? "{}"),
     ) as {
@@ -581,7 +650,9 @@ describe("ChatbotPanel conversation UI", () => {
     expect(screen.queryByText("酸欠")).toBeNull();
     expect(screen.queryByText("有機溶剤")).toBeNull();
     expect(screen.queryByText("石綿")).toBeNull();
-    expect(document.querySelectorAll("[data-chatbot-quick-reply]")).toHaveLength(3);
+    expect(
+      document.querySelectorAll("[data-chatbot-quick-reply]"),
+    ).toHaveLength(3);
     for (const actions of document.querySelectorAll(
       "[data-chatbot-answer-actions]",
     )) {
@@ -666,10 +737,16 @@ describe("ChatbotPanel conversation UI", () => {
         screen.getByRole("heading", { name: section, level: 3 }),
       ).toBeDefined();
     }
-    expect(screen.queryByRole("heading", { name: "根拠", level: 3 })).toBeNull();
-    expect(screen.queryByRole("heading", { name: "次の質問", level: 3 })).toBeNull();
+    expect(
+      screen.queryByRole("heading", { name: "根拠", level: 3 }),
+    ).toBeNull();
+    expect(
+      screen.queryByRole("heading", { name: "次の質問", level: 3 }),
+    ).toBeNull();
     expect(screen.getAllByText("足場の種類は？")).toHaveLength(1);
-    expect(document.querySelectorAll("[data-chatbot-quick-reply]")).toHaveLength(3);
+    expect(
+      document.querySelectorAll("[data-chatbot-quick-reply]"),
+    ).toHaveLength(3);
     const details = document.querySelector("[data-chatbot-source-details]");
     expect(details).not.toBeNull();
     expect((details as HTMLDetailsElement).open).toBe(false);
@@ -718,8 +795,7 @@ describe("ChatbotPanel conversation UI", () => {
   it("確認済み通達を法令根拠と分け、折りたたみ内から公式PDFと該当抜粋へ到達できる", async () => {
     const fetchMock = vi.fn().mockResolvedValue(
       chatbotStream({
-        answer:
-          "結論\n熱中症の報告体制と悪化防止手順を整えて周知します。［1］",
+        answer: "結論\n熱中症の報告体制と悪化防止手順を整えて周知します。［1］",
         sources: [
           {
             law: "労働安全衛生規則（安衛則）",
@@ -742,15 +818,28 @@ describe("ChatbotPanel conversation UI", () => {
               "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000116133.html",
             sourceUrl:
               "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000116133.html",
-            pdfUrl:
-              "https://www.mhlw.go.jp/content/11303000/001490911.pdf",
+            pdfUrl: "https://www.mhlw.go.jp/content/11303000/001490911.pdf",
             category: "heat-stroke",
             source: "A",
             evidenceRole: "related-material",
             locator: "PDF 2ページ 第3 1(1)イ",
-            excerpt:
-              "湿球黒球温度（WBGT）が28度以上又は気温が31度以上の場所",
+            excerpt: "湿球黒球温度（WBGT）が28度以上又は気温が31度以上の場所",
             independentlyCheckedAt: "2026-08-02",
+          },
+        ],
+        attachedLeaflets: [
+          {
+            id: "mhlw-leaflet-0251",
+            title: "働く人の今すぐ使える熱中症ガイド",
+            publisher: "厚生労働省",
+            publishedDateRaw: "令和5年3月",
+            target: "general",
+            category: "occupational-health",
+            sourceUrl:
+              "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/roudoukijun/gyousei/anzen/index.html",
+            pdfUrl: "https://www.mhlw.go.jp/content/001103539.pdf",
+            detailUrl: null,
+            source: "A",
           },
         ],
         source_type: "rag",
@@ -772,7 +861,7 @@ describe("ChatbotPanel conversation UI", () => {
     ) as HTMLDetailsElement | null;
     expect(details).not.toBeNull();
     expect(details?.open).toBe(false);
-    expect(details?.textContent).toContain("根拠 1件・関連資料 1件");
+    expect(details?.textContent).toContain("根拠 1件・関連資料 2件");
     expect(details?.textContent).toContain("関連資料（条文本文とは別）");
     expect(details?.textContent).toContain("基発0520第6号");
     expect(details?.textContent).toContain("PDF 2ページ 第3 1(1)イ");
@@ -783,5 +872,69 @@ describe("ChatbotPanel conversation UI", () => {
     expect(
       screen.getByRole("link", { name: "公式PDF" }).getAttribute("href"),
     ).toBe("https://www.mhlw.go.jp/content/11303000/001490911.pdf");
+    expect(details?.textContent).toContain(
+      "公式リーフレット（条文本文とは別）",
+    );
+    expect(details?.textContent).toContain("働く人の今すぐ使える熱中症ガイド");
+    expect(
+      screen.getByRole("link", { name: "公式資料" }).getAttribute("href"),
+    ).toBe("https://www.mhlw.go.jp/content/001103539.pdf");
+  });
+
+  it("公式リーフレットだけでも根拠欄を表示し、厚労省以外のURLはリンクにしない", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      chatbotStream({
+        answer: "結論\n熱中症対策の公式資料を確認できます。",
+        attachedLeaflets: [
+          {
+            id: "mhlw-leaflet-safe",
+            title: "安全な公式リーフレット",
+            publisher: "厚生労働省",
+            publishedDateRaw: "令和7年6月",
+            target: "general",
+            category: "heat-stroke",
+            sourceUrl: "https://www.mhlw.go.jp/safe-leaflet.html",
+            pdfUrl: "https://www.mhlw.go.jp/content/safe-leaflet.pdf",
+            detailUrl: null,
+            source: "A",
+          },
+          {
+            id: "mhlw-leaflet-untrusted",
+            title: "不正な外部URLの資料",
+            publisher: "厚生労働省",
+            publishedDateRaw: null,
+            target: "general",
+            category: "heat-stroke",
+            sourceUrl: "https://example.com/not-official.html",
+            pdfUrl: "javascript:alert(1)",
+            detailUrl: "https://mhlw.go.jp.evil.example/phishing",
+            source: "A",
+          },
+        ],
+        source_type: "rag",
+        confidence: "medium",
+        requiresHumanReview: true,
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    render(<ChatbotPanel />);
+
+    fireEvent.change(screen.getByLabelText("質問入力"), {
+      target: { value: "熱中症の公式資料は？" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "送信" }));
+
+    await screen.findByText(/熱中症対策の公式資料/);
+    const details = document.querySelector(
+      "[data-chatbot-source-details]",
+    ) as HTMLDetailsElement | null;
+    expect(details).not.toBeNull();
+    expect(details?.textContent).toContain("根拠 0件・関連資料 2件");
+    expect(details?.textContent).toContain("安全な公式リーフレット");
+    expect(details?.textContent).toContain("不正な外部URLの資料");
+    expect(screen.getAllByRole("link", { name: "公式資料" })).toHaveLength(1);
+    expect(
+      screen.getByRole("link", { name: "公式資料" }).getAttribute("href"),
+    ).toBe("https://www.mhlw.go.jp/content/safe-leaflet.pdf");
   });
 });

@@ -4,6 +4,7 @@ import {
   buildServiceFirstLegalAnswer,
   buildServiceFirstNoHitAnswer,
   citedLegalAnswerArticles,
+  expandVerifiedLegalEvidenceArticles,
   legalProvisionUnitForQuery,
 } from "./legal-extractive-answer";
 
@@ -68,23 +69,23 @@ function forkliftQualificationArticles(): LawArticle[] {
 
 function forkliftOperationArticle(articleNum: string): LawArticle {
   const provisions: Record<string, { title: string; text: string }> = {
-    "第151条の4": {
+    第151条の4: {
       title: "作業指揮者",
       text: "事業者は、車両系荷役運搬機械等を用いて作業を行うときは、作業の指揮者を定め、作業計画に基づき作業の指揮を行わせなければならない。",
     },
-    "第151条の5": {
+    第151条の5: {
       title: "制限速度",
       text: "事業者は、車両系荷役運搬機械等（最高速度が毎時十キロメートル以下のものを除く。）について、地形、地盤の状態等に応じた適正な制限速度を定めなければならない。運転者は制限速度を超えて運転してはならない。",
     },
-    "第151条の14": {
+    第151条の14: {
       title: "主たる用途以外の使用の制限",
       text: "事業者は、車両系荷役運搬機械等を荷のつり上げ、労働者の昇降等主たる用途以外の用途に使用してはならない。ただし、労働者に危険を及ぼすおそれのないときは、この限りでない。",
     },
-    "第151条の21": {
+    第151条の21: {
       title: "定期自主検査",
       text: "事業者は、フォークリフトについては、一年を超えない期間ごとに一回、定期に自主検査を行わなければならない。一年を超える期間使用しないときは除くが、使用を再び開始する際に自主検査を行わなければならない。",
     },
-    "第151条の22": {
+    第151条の22: {
       title: "定期自主検査（月次）",
       text: "事業者は、フォークリフトについては、一月を超えない期間ごとに一回、定期に自主検査を行わなければならない。一月を超える期間使用しないときは除くが、使用を再び開始する際に自主検査を行わなければならない。",
     },
@@ -114,10 +115,7 @@ function expectSourceLedAnswerIntegrity(answer: string, sourceCount: number) {
       section = line;
       continue;
     }
-    if (
-      line.trim() &&
-      ["結論", "条件", "適用時点"].includes(section)
-    ) {
+    if (line.trim() && ["結論", "条件", "適用時点"].includes(section)) {
       if (
         line.trim() ===
         "・この条文が対象とする作業・設備・数値条件を照合してください。"
@@ -248,17 +246,16 @@ describe("生成AI OFF時の短文回答", () => {
         }),
       ],
     },
-  ])("フォークリフトの荷重回答後は不要な追加質問をしない: $query", ({
-    query,
-    expected,
-    articles,
-  }) => {
-    const answer = buildServiceFirstLegalAnswer({ query, articles });
+  ])(
+    "フォークリフトの荷重回答後は不要な追加質問をしない: $query",
+    ({ query, expected, articles }) => {
+      const answer = buildServiceFirstLegalAnswer({ query, articles });
 
-    expect(answer).toContain(expected);
-    expect(answer).not.toContain("次の質問");
-    expect(answer).not.toContain("設備の種類・高さ・荷重");
-  });
+      expect(answer).toContain(expected);
+      expect(answer).not.toContain("次の質問");
+      expect(answer).not.toContain("設備の種類・高さ・荷重");
+    },
+  );
 
   it.each([
     {
@@ -277,36 +274,49 @@ describe("生成AI OFF時の短文回答", () => {
       expected: ["主たる用途以外", "禁止", "危険を及ぼすおそれがない"],
     },
     {
-      query:
-        "フォークリフトの資格、制限速度、主用途外使用、年次検査は？",
+      query: "フォークリフトの資格、制限速度、主用途外使用、年次検査は？",
       operations: ["第151条の5", "第151条の14", "第151条の21"],
-      expected: ["技能講習修了者等", "制限速度", "主たる用途以外", "定期自主検査"],
+      expected: [
+        "技能講習修了者等",
+        "制限速度",
+        "主たる用途以外",
+        "定期自主検査",
+      ],
     },
-  ])("フォークリフト複合質問の各意図へ本文根拠付きで答える: $query", ({
-    query,
-    operations,
-    expected,
-  }) => {
-    const articles = [
-      ...operations.map(forkliftOperationArticle),
-      ...forkliftQualificationArticles(),
-    ];
-    const answer = buildServiceFirstLegalAnswer({ query, articles });
+  ])(
+    "フォークリフト複合質問の各意図へ本文根拠付きで答える: $query",
+    ({ query, operations, expected }) => {
+      const articles = [
+        ...operations.map(forkliftOperationArticle),
+        ...forkliftQualificationArticles(),
+      ];
+      const answer = buildServiceFirstLegalAnswer({ query, articles });
 
-    for (const text of expected) expect(answer).toContain(text);
-    expect(answer).not.toMatch(/取得した主な根拠条文は/);
-    expectSourceLedAnswerIntegrity(answer, articles.length);
-    const cited = citedLegalAnswerArticles(answer, articles);
-    for (const operation of operations) {
-      expect(cited.some((source) => source.articleNum === operation)).toBe(true);
-    }
-  });
+      for (const text of expected) expect(answer).toContain(text);
+      expect(answer).not.toMatch(/取得した主な根拠条文は/);
+      expectSourceLedAnswerIntegrity(answer, articles.length);
+      const cited = citedLegalAnswerArticles(answer, articles);
+      for (const operation of operations) {
+        expect(cited.some((source) => source.articleNum === operation)).toBe(
+          true,
+        );
+      }
+    },
+  );
 
   it.each([
     ["フォークリフトの毎月の自主検査必要？", "第151条の22", "一月を超えない"],
     ["フォークリフトの月例検査は？", "第151条の22", "一月を超えない"],
-    ["フォークリフトの月1回の定期自主検査は？", "第151条の22", "一月を超えない"],
-    ["フォークリフトの年1回の定期自主検査は？", "第151条の21", "一年を超えない"],
+    [
+      "フォークリフトの月1回の定期自主検査は？",
+      "第151条の22",
+      "一月を超えない",
+    ],
+    [
+      "フォークリフトの年1回の定期自主検査は？",
+      "第151条の21",
+      "一年を超えない",
+    ],
   ])("月次と年次の自主検査を混同しない: %s", (query, articleNum, expected) => {
     const articles = [forkliftOperationArticle(articleNum)];
     const answer = buildServiceFirstLegalAnswer({ query, articles });
@@ -678,8 +688,18 @@ describe("生成AI OFF時の短文回答", () => {
   });
 
   it.each([
-    ["電気工事士法", "第2条", "電気工事士法第2条第1項とは？", { paragraph: "第1項" }],
-    ["安衛則", "第36条", "安衛則第36条第5号の電気工事とは？", { item: "第5号" }],
+    [
+      "電気工事士法",
+      "第2条",
+      "電気工事士法第2条第1項とは？",
+      { paragraph: "第1項" },
+    ],
+    [
+      "安衛則",
+      "第36条",
+      "安衛則第36条第5号の電気工事とは？",
+      { item: "第5号" },
+    ],
     ["有機則", "第8条", "有機則第8条第2項とは？", { paragraph: "第2項" }],
     ["有機則", "第9条", "有機則第9条第1項とは？", { paragraph: "第1項" }],
   ] as const)(
@@ -927,7 +947,11 @@ describe("生成AI OFF時の短文回答", () => {
   });
 });
 
-function oxygenArticle(articleNum: string, text: string, articleTitle = ""): LawArticle {
+function oxygenArticle(
+  articleNum: string,
+  text: string,
+  articleTitle = "",
+): LawArticle {
   return article({
     law: "酸素欠乏症等防止規則",
     lawShort: "酸欠則",
@@ -1099,7 +1123,10 @@ describe("presentation follow-upは取得済み根拠で現在の質問へ答え
     ["告示は？", /関連告示.*含めていません|検証済みの告示/],
     ["どの通達？", /関連通達.*含めていません|検証済みの通達/],
     ["指針は？", /関連指針・ガイドライン.*含めていません|検証済みの指針/],
-    ["ガイドラインは？", /関連指針・ガイドライン.*含めていません|検証済みの指針/],
+    [
+      "ガイドラインは？",
+      /関連指針・ガイドライン.*含めていません|検証済みの指針/,
+    ],
     ["判例は？", /関連判例.*含めていません|検証済みの判例/],
     ["根拠は？", /主な根拠条文/],
     ["法律は？", /主な根拠条文/],
@@ -1118,7 +1145,9 @@ describe("presentation follow-upは取得済み根拠で現在の質問へ答え
         expect(answer).toMatch(expected);
         expect(answer).not.toContain(stale);
         expect(answer).toMatch(/［\d+］/);
-        expect(answer.match(/\n次の質問\n/g)?.length ?? 0).toBeLessThanOrEqual(1);
+        expect(answer.match(/\n次の質問\n/g)?.length ?? 0).toBeLessThanOrEqual(
+          1,
+        );
       });
     }
   }
@@ -1229,10 +1258,15 @@ describe("presentation follow-upは取得済み根拠で現在の質問へ答え
     ];
     const answer = buildServiceFirstLegalAnswer({
       query: "電気作業の資格は？ 指針は？",
-      articles: [...presentationSources("electric"), ...statutesMentioningGuidelines],
+      articles: [
+        ...presentationSources("electric"),
+        ...statutesMentioningGuidelines,
+      ],
     });
 
-    expect(answer).toContain("関連指針・ガイドラインは今回取得した検証済み回答根拠に含めていません");
+    expect(answer).toContain(
+      "関連指針・ガイドラインは今回取得した検証済み回答根拠に含めていません",
+    );
     expect(answer).not.toContain("取得・検証済みの指針・ガイドラインは");
     expect(answer).not.toMatch(/70条の3|70条の2|安衛法28条/);
   });
@@ -1262,20 +1296,52 @@ describe("presentation follow-upは取得済み根拠で現在の質問へ答え
 
   it("酸欠監視の資料質問は直接関係する5条文だけを提示し再採番する", () => {
     const original = [
-      oxygenArticle("第3条", "作業開始前に酸素濃度を測定し、結果を記録する。", "測定"),
-      oxygenArticle("第5条", "酸素濃度を十八パーセント以上に保つよう換気する。", "換気"),
-      oxygenArticle("第11条", "技能講習修了者から作業主任者を選任する。", "作業主任者"),
-      oxygenArticle("第12条", "酸素欠乏危険作業に係る業務について特別教育を行う。", "特別教育"),
-      oxygenArticle("第13条", "常時作業の状況を監視し、異常時に直ちに通報する者を置く等必要な措置を講ずる。", "監視人等"),
-      oxygenArticle("第26条", "事故について必要な措置を講じる。", "事故の場合の措置"),
+      oxygenArticle(
+        "第3条",
+        "作業開始前に酸素濃度を測定し、結果を記録する。",
+        "測定",
+      ),
+      oxygenArticle(
+        "第5条",
+        "酸素濃度を十八パーセント以上に保つよう換気する。",
+        "換気",
+      ),
+      oxygenArticle(
+        "第11条",
+        "技能講習修了者から作業主任者を選任する。",
+        "作業主任者",
+      ),
+      oxygenArticle(
+        "第12条",
+        "酸素欠乏危険作業に係る業務について特別教育を行う。",
+        "特別教育",
+      ),
+      oxygenArticle(
+        "第13条",
+        "常時作業の状況を監視し、異常時に直ちに通報する者を置く等必要な措置を講ずる。",
+        "監視人等",
+      ),
+      oxygenArticle(
+        "第26条",
+        "事故について必要な措置を講じる。",
+        "事故の場合の措置",
+      ),
     ];
     const query = "酸欠作業の監視人は必要？ 指針は？";
     const first = buildServiceFirstLegalAnswer({ query, articles: original });
     const cited = citedLegalAnswerArticles(first, original);
     const rebuilt = buildServiceFirstLegalAnswer({ query, articles: cited });
-    const markers = [...rebuilt.matchAll(/［(\d+)］/g)].map((match) => Number(match[1]));
+    const markers = [...rebuilt.matchAll(/［(\d+)］/g)].map((match) =>
+      Number(match[1]),
+    );
 
-    for (const provision of ["酸欠則3条", "酸欠則5条", "酸欠則11条", "酸欠則12条", "酸欠則13条"]) {
+    for (const provision of [
+      "酸欠則3条",
+      "酸欠則5条",
+      "酸欠則11条",
+      "酸欠則12条",
+      "酸欠則13条",
+    ]) {
       expect(rebuilt).toContain(provision);
     }
     expect(rebuilt).not.toContain("酸欠則26条");
@@ -1313,18 +1379,52 @@ describe("presentation follow-upは取得済み根拠で現在の質問へ答え
   it.each([
     ["フォークリフトの資格は？ 何号？", "forklift"],
     ["玉掛けは何トンから？ 例外は？", "sling"],
-  ] as const)("source pruning後に全markerを最終source順へ再構築する: %s", (query, topic) => {
-    const original = presentationSources(topic);
-    const first = buildServiceFirstLegalAnswer({ query, articles: original });
-    const displayed = citedLegalAnswerArticles(first, original);
-    const rebuilt = buildServiceFirstLegalAnswer({ query, articles: displayed });
-    const markers = [...rebuilt.matchAll(/［(\d+)］/g)].map((match) => Number(match[1]));
-    expect(markers.length).toBeGreaterThan(0);
-    expect(markers.every((value) => value >= 1 && value <= displayed.length)).toBe(true);
-    expect(new Set(markers)).toEqual(
-      new Set(displayed.map((_, index) => index + 1)),
-    );
-  });
+  ] as const)(
+    "source pruning後に全markerを最終source順へ再構築する: %s",
+    (query, topic) => {
+      const original = presentationSources(topic);
+      const first = buildServiceFirstLegalAnswer({ query, articles: original });
+      const displayed = citedLegalAnswerArticles(first, original);
+      const rebuilt = buildServiceFirstLegalAnswer({
+        query,
+        articles: displayed,
+      });
+      const markers = [...rebuilt.matchAll(/［(\d+)］/g)].map((match) =>
+        Number(match[1]),
+      );
+      expect(markers.length).toBeGreaterThan(0);
+      expect(
+        markers.every((value) => value >= 1 && value <= displayed.length),
+      ).toBe(true);
+      expect(new Set(markers)).toEqual(
+        new Set(displayed.map((_, index) => index + 1)),
+      );
+    },
+  );
+
+  it.each([
+    [
+      "酸素欠乏危険作業 酸欠危険場所 特別教育 いつまでに受ける",
+      /従事させる時点までに実施/,
+    ],
+    [
+      "酸素欠乏危険作業 酸欠危険場所 特別教育 誰が受ける",
+      /対象は.*酸素欠乏危険作業に係る業務へ就く労働者/,
+    ],
+  ])(
+    "酸欠則12条の特別教育follow-upへ時期・対象者を直接答える: %s",
+    (query, expected) => {
+      const sources = expandVerifiedLegalEvidenceArticles(query, []);
+      const answer = buildServiceFirstLegalAnswer({ query, articles: sources });
+
+      expect(answer).toMatch(expected);
+      expect(answer).toMatch(/酸欠則12条|［\d+］/);
+      expect(answer).not.toMatch(/作業主任者技能講習.*選任/);
+      expect(citedLegalAnswerArticles(answer, sources).length).toBeGreaterThan(
+        0,
+      );
+    },
+  );
 });
 
 describe("酸欠則の明示項を省略せず説明する", () => {
@@ -1347,13 +1447,99 @@ describe("酸欠則の明示項を省略せず説明する", () => {
       query,
       articles: [education],
     });
-      expect(answer).toContain("1項は第一種の特別教育5科目を定め");
-      expect(answer).toContain("2項がその規定を第二種にも準用");
+    expect(answer).toContain("1項は第一種の特別教育5科目を定め");
+    expect(answer).toContain("2項がその規定を第二種にも準用");
     expect(answer).toContain("第1号の「酸素欠乏」を「酸素欠乏等」");
     expect(answer).toContain("第2号・第5号の「酸素欠乏症」を「酸素欠乏症等」");
     expect(answer).toContain("第3号の空気呼吸器等の使用方法");
     expect(answer).toContain("第4号の事故時の退避・救急そ生方法");
   });
+
+  it("第二種特別教育の硫化水素質問へ明確に肯定し、定義と読替えを結び付ける", () => {
+    const definition = oxygenArticle(
+      "第2条",
+      "酸素欠乏とは空気中の酸素の濃度が十八パーセント未満である状態をいう。酸素欠乏等とは、酸素欠乏又は空気中の硫化水素の濃度が百万分の十を超える状態をいう。酸素欠乏症等とは、酸素欠乏症又は硫化水素中毒をいう。",
+      "定義",
+    );
+    const answer = buildServiceFirstLegalAnswer({
+      query: "第二種酸素欠乏危険作業の特別教育では硫化水素の科目も必要？",
+      articles: [definition, education],
+    });
+    const conclusion = answer.split("\n\n条件\n", 1)[0] ?? "";
+
+    expect(conclusion).toMatch(/^結論\nはい。/);
+    expect(conclusion).toMatch(/第1号・第2号・第5号.*硫化水素/);
+    expect(answer).toContain("10ppmを超える状態");
+    expect(citedLegalAnswerArticles(answer, [definition, education])).toEqual([
+      definition,
+      education,
+    ]);
+  });
+
+  it("12条1項3号・4号が第二種にも共通かを明確に肯定する", () => {
+    const answer = buildServiceFirstLegalAnswer({
+      query: "酸素欠乏症等防止規則第12条第1項第3号と第4号は第二種でも同じ？",
+      articles: [education],
+    });
+    const conclusion = answer.split("\n\n条件\n", 1)[0] ?? "";
+
+    expect(conclusion).toMatch(/^結論\n酸欠則12条/);
+    expect(conclusion).toMatch(
+      /第3号.*第4号.*第二種の対象外ではなく.*第一種・第二種に共通/,
+    );
+    expect(answer).toMatch(/12条2項.*第1項を第二種にも準用/);
+    expect(answer).toMatch(/第1号・第2号・第5号.*第3号・第4号は変更しません/);
+    expect(citedLegalAnswerArticles(answer, [education])).toEqual([education]);
+  });
+
+  it("漢数字の12条1項3号・4号質問も同じ共通科目として答える", () => {
+    const answer = buildServiceFirstLegalAnswer({
+      query:
+        "酸素欠乏症等防止規則第十二条第一項第三号と第四号は第二種でも同じ？",
+      articles: [education],
+    });
+    const conclusion = answer.split("\n\n条件\n", 1)[0] ?? "";
+
+    expect(conclusion).toMatch(/^結論\n酸欠則12条/);
+    expect(conclusion).toMatch(
+      /第3号.*第4号.*第二種の対象外ではなく.*第一種・第二種に共通/,
+    );
+    expect(answer).toMatch(/12条2項.*第1項を第二種にも準用/);
+    expect(citedLegalAnswerArticles(answer, [education])).toEqual([education]);
+  });
+
+  it.each([
+    "酸素欠乏症等防止規則第12条第1項第3号と第4号は第二種にも適用されますか？",
+    "酸素欠乏症等防止規則第12条第1項第3号と第4号は第二種にも準用されますか？",
+    "酸素欠乏症等防止規則第12条第1項第3号と第4号は第二種の対象ですか？",
+    "酸素欠乏症等防止規則第12条第1項第3号と第4号は第二種の対象外ですか？",
+    "酸素欠乏症等防止規則第12条第1項第3号と第4号は第二種には適用されないのですか？",
+    "酸素欠乏症等防止規則第12条第1項第3号と第4号は第二種には含まれない？",
+    "酸素欠乏症等防止規則第12条第1項第3号と第4号は第二種にも準用されませんか？",
+    "酸欠則第12条第1項第3号と第4号は第二種でも必要ですか？",
+    "酸欠則12条1項3号と4号は二種でも要る？",
+    "酸欠則12条1項3号と4号は2種でも要る？",
+    "酸欠則第12条第1項第3号と第4号は第二種でも受講するの？",
+    "酸欠則第12条第1項第3号と第4号は第二種の硫化水素教育でも同じですか？",
+  ])(
+    "適用・準用・対象の表現でも第二種への共通適用を先に答える: %s",
+    (query) => {
+      const answer = buildServiceFirstLegalAnswer({
+        query,
+        articles: [education],
+      });
+      const conclusion = answer.split("\n\n条件\n", 1)[0] ?? "";
+
+      expect(conclusion).toMatch(/^結論\n酸欠則12条/);
+      expect(conclusion).toMatch(
+        /第3号.*第4号.*第二種の対象外ではなく.*第一種・第二種に共通/,
+      );
+      expect(answer).toMatch(/12条2項.*第1項を第二種にも準用/);
+      expect(citedLegalAnswerArticles(answer, [education])).toEqual([
+        education,
+      ]);
+    },
+  );
 
   it("12条1項1号から5号の全科目を結論で返す", () => {
     const answer = buildServiceFirstLegalAnswer({
@@ -1377,16 +1563,35 @@ describe("酸欠則の明示項を省略せず説明する", () => {
     ["酸欠則第12条第2項の何号？", /第1号.*第2号・第5号/],
   ] as const)("明示12条2項だけへ根拠を絞る: %s", (query, expected) => {
     const neighbours = [
-      oxygenArticle("第11条", "作業主任者を選任しなければならない。", "作業主任者"),
+      oxygenArticle(
+        "第11条",
+        "作業主任者を選任しなければならない。",
+        "作業主任者",
+      ),
       education,
-      oxygenArticle("第27条", "救出時には空気呼吸器等を使用させなければならない。"),
+      oxygenArticle(
+        "第27条",
+        "救出時には空気呼吸器等を使用させなければならない。",
+      ),
       oxygenArticle("第26条", "事故について必要な措置を講じなければならない。"),
-      oxygenArticle("第2条", "酸素欠乏及び第二種酸素欠乏危険作業を定義する。", "定義"),
+      oxygenArticle(
+        "第2条",
+        "酸素欠乏及び第二種酸素欠乏危険作業を定義する。",
+        "定義",
+      ),
     ];
-    const answer = buildServiceFirstLegalAnswer({ query, articles: neighbours });
+    const answer = buildServiceFirstLegalAnswer({
+      query,
+      articles: neighbours,
+    });
     expect(answer).toMatch(expected);
     expect(answer).toContain("酸欠則12条");
-    for (const unrelated of ["酸欠則第11条", "酸欠則第27条", "酸欠則第26条", "酸欠則第2条"]) {
+    for (const unrelated of [
+      "酸欠則第11条",
+      "酸欠則第27条",
+      "酸欠則第26条",
+      "酸欠則第2条",
+    ]) {
       expect(answer).not.toContain(unrelated);
     }
     expect(citedLegalAnswerArticles(answer, neighbours)).toEqual([education]);
@@ -1468,11 +1673,181 @@ describe("酸欠則の明示項を省略せず説明する", () => {
     ]);
     expect(displayed).toEqual([ventilation, protection]);
 
-    const rebuilt = buildServiceFirstLegalAnswer({ query, articles: displayed });
-    const markers = [...rebuilt.matchAll(/［(\d+)］/g)].map((match) => Number(match[1]));
+    const rebuilt = buildServiceFirstLegalAnswer({
+      query,
+      articles: displayed,
+    });
+    const markers = [...rebuilt.matchAll(/［(\d+)］/g)].map((match) =>
+      Number(match[1]),
+    );
     expect(markers.length).toBeGreaterThan(0);
-    expect(markers.every((value) => value >= 1 && value <= displayed.length)).toBe(true);
+    expect(
+      markers.every((value) => value >= 1 && value <= displayed.length),
+    ).toBe(true);
     expect(new Set(markers)).toEqual(new Set([1, 2]));
     expect(rebuilt).toContain("同時就業者数以上の空気呼吸器等");
   });
+});
+
+describe("特化則38条の14の監視人を号単位で説明する", () => {
+  it("第1項第5号・第12号ただし書の異なる立入り条件を一次資料から返す", () => {
+    const query = "特化則38条の14の監視人はどの号？";
+    const sources = expandVerifiedLegalEvidenceArticles(query, []);
+
+    expect(
+      sources.map(({ lawShort, articleNum }) => `${lawShort}${articleNum}`),
+    ).toEqual(["特化則第38条の14"]);
+    expect(sources[0]?.text).toMatch(/五[\s\S]*監視人を置/);
+    expect(sources[0]?.text).toMatch(/十二[\s\S]*監視人を置/);
+
+    const answer = buildServiceFirstLegalAnswer({ query, articles: sources });
+    const conclusion = answer.split("\n\n条件\n", 1)[0] ?? "";
+
+    expect(conclusion).toContain("第1項第5号ただし書");
+    expect(conclusion).toContain("第1項第12号ただし書");
+    expect(conclusion).toContain("燻蒸の効果確認");
+    expect(conclusion).toContain("測定濃度が表の値を超える場所");
+    expect(answer).toMatch(/第5号ただし書.*呼吸用保護具.*監視人/);
+    expect(answer).toMatch(/第12号ただし書.*排気.*呼吸用保護具.*監視人/);
+    expect(citedLegalAnswerArticles(answer, sources)).toEqual(sources);
+  });
+});
+
+describe("安衛則97条の労働者死傷病報告期限を回答する", () => {
+  it("休業4日ちょうどを1項の遅滞なくへroutingする", () => {
+    const query = "休業4日の労災事故はいつまでに報告しますか？";
+    const sources = expandVerifiedLegalEvidenceArticles(query, []);
+
+    expect(
+      sources.map(({ lawShort, articleNum }) => `${lawShort}${articleNum}`),
+    ).toEqual(["安衛則第97条"]);
+    expect(sources[0]?.text).toMatch(/遅滞なく/);
+    expect(sources[0]?.text).toMatch(/休業の日数が四日に満たない/);
+
+    const answer = buildServiceFirstLegalAnswer({ query, articles: sources });
+    const conclusion = answer.split("\n\n条件\n", 1)[0] ?? "";
+
+    expect(conclusion).toMatch(/休業4日以上.*4日ちょうど.*遅滞なく/);
+    expect(conclusion).toContain("所轄労働基準監督署長");
+    expect(conclusion).not.toContain("労災保険法");
+    expect(answer).toMatch(/4日に満たない.*四半期.*翌月末日/);
+    expect(citedLegalAnswerArticles(answer, sources)).toEqual(sources);
+  });
+
+  it("休業3日は2項の四半期報告期限を先に返す", () => {
+    const query = "休業3日の労働災害はいつまでに報告する？";
+    const sources = expandVerifiedLegalEvidenceArticles(query, []);
+    const answer = buildServiceFirstLegalAnswer({ query, articles: sources });
+    const conclusion = answer.split("\n\n条件\n", 1)[0] ?? "";
+
+    expect(conclusion).toMatch(/4日に満たない.*1〜3日.*四半期/);
+    expect(conclusion).toContain("最後の月の翌月末日まで");
+    expect(answer).toMatch(/休業4日以上.*遅滞なく/);
+    expect(citedLegalAnswerArticles(answer, sources)).toEqual(sources);
+  });
+
+  it("現行の電子申請文言を昭和47年施行と誤表示しない", () => {
+    const query = "休業災害の報告書を出す決まりは？";
+    const sources = expandVerifiedLegalEvidenceArticles(query, []);
+    const answer = buildServiceFirstLegalAnswer({ query, articles: sources });
+
+    expect(answer).toContain("公式本文を2026-08-02確認");
+    expect(answer).not.toContain("昭和47年9月30日施行");
+  });
+});
+
+describe("有機溶剤の広い換気質問を一般換気へ逸らさない", () => {
+  it("屋内条件が省略されても有機則1条・5条・6条を先に取得する", () => {
+    const query = "有機溶剤の換気は必要？";
+    const sources = expandVerifiedLegalEvidenceArticles(query, []);
+    const keys = sources.map(
+      ({ lawShort, articleNum }) => `${lawShort}${articleNum}`,
+    );
+
+    expect(keys).toContain("有機則第1条");
+    expect(keys).toContain("有機則第5条");
+    expect(keys).toContain("有機則第6条");
+    const answer = buildServiceFirstLegalAnswer({ query, articles: sources });
+    expect(answer).toMatch(/有機溶剤.*局所排気|プッシュプル型換気/);
+  });
+});
+
+describe("短縮follow-upを資格・報告の直接回答へ戻す", () => {
+  it("酸欠特別教育の講師質問へ実施義務者と条文上の限界を答える", () => {
+    const query = "酸素欠乏危険作業 酸欠危険場所 特別教育 誰が教えるの？";
+    const sources = expandVerifiedLegalEvidenceArticles(query, []);
+    const answer = buildServiceFirstLegalAnswer({ query, articles: sources });
+
+    expect(answer).toMatch(/法的義務を負うのは事業者/);
+    expect(answer).toMatch(/講師個人の資格名までは同条で定めていません/);
+    expect(answer).toContain("酸欠則12条");
+    expect(citedLegalAnswerArticles(answer, sources).length).toBeGreaterThan(0);
+  });
+
+  it("足場点検の記録対象と保存期間を567条3項から直接答える", () => {
+    const query = "足場作業 足場 点検 その点検は記録するの";
+    const sources = [
+      article({
+        articleNum: "第567条",
+        articleTitle: "点検",
+        text: "事業者は、足場における作業を行うときは、点検者を指名して作業開始前に点検させる。2　悪天候、地震又は足場の組立て、一部解体若しくは変更の後は、作業開始前に点検させる。3　事業者は、前項の点検を行ったときは、点検結果及び点検者の氏名、補修等の措置内容を記録し、足場を使用する作業を行う仕事が終了するまで保存しなければならない。",
+      }),
+    ];
+    const answer = buildServiceFirstLegalAnswer({ query, articles: sources });
+
+    expect(answer).toMatch(/567条3項.*記録・保存/);
+    expect(answer).toMatch(/点検結果と点検者の氏名/);
+    expect(answer).toMatch(/仕事が終了するまで保存/);
+    expect(answer).not.toMatch(/特化則34条の2/);
+    expect(citedLegalAnswerArticles(answer, sources).length).toBeGreaterThan(0);
+    expect(legalProvisionUnitForQuery(sources[0]!, query)).toEqual({
+      paragraph: "第3項",
+      item: "第1号・第2号",
+    });
+  });
+
+  it("休業4日の報告先を所轄労基署長から先に答える", () => {
+    const query = "労働者死傷病報告 労災 報告 休業4日 誰に";
+    const sources = expandVerifiedLegalEvidenceArticles(query, []);
+    const answer = buildServiceFirstLegalAnswer({ query, articles: sources });
+
+    expect(answer).toMatch(
+      /結論\n労働者死傷病報告の報告先は、所轄労働基準監督署長/,
+    );
+    expect(answer).toMatch(/休業4日以上.*遅滞なく/);
+  });
+
+  it.each([
+    [
+      "フォークリフト運転 フォークリフト 技能講習 いつまで有効",
+      /有効期限や定期更新は定めていません/,
+    ],
+    [
+      "フォークリフト運転 フォークリフト 技能講習 誰が受ける",
+      /最大荷重1トン以上.*運転業務に就く人.*技能講習/,
+    ],
+    [
+      "フォークリフト運転 フォークリフト 資格 いつまで有効",
+      /最大荷重1トン以上.*技能講習.*有効期限や定期更新は定めていません/,
+    ],
+    [
+      "フォークリフト運転 フォークリフト 資格 誰が受ける",
+      /最大荷重1トン以上.*運転業務に就く人.*技能講習/,
+    ],
+    [
+      "フォークリフト運転 フォークリフト 資格 誰が？",
+      /最大荷重1トン以上.*運転業務に就く人.*技能講習/,
+    ],
+  ])(
+    "フォークリフト技能講習の省略follow-upへ直接答える: %s",
+    (query, expected) => {
+      const sources = expandVerifiedLegalEvidenceArticles(query, []);
+      const answer = buildServiceFirstLegalAnswer({ query, articles: sources });
+
+      expect(answer).toMatch(expected);
+      expect(citedLegalAnswerArticles(answer, sources).length).toBeGreaterThan(
+        0,
+      );
+    },
+  );
 });

@@ -9,7 +9,10 @@ on:
 jobs:
   e2e:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # The production build, Chromium setup, and the full browser matrix take
+    # more than 20 minutes on a cold hosted runner. Keep a bounded ceiling
+    # while allowing the complete suite to finish instead of cancelling it.
+    timeout-minutes: 35
     defaults:
       run:
         working-directory: web
@@ -21,7 +24,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          # Pin the current patched Node 22 LTS security release.
+          node-version: "22.23.2"
           cache: "npm"
           cache-dependency-path: web/package-lock.json
 
@@ -29,12 +33,30 @@ jobs:
         run: npm ci
 
       - name: Build
+        env:
+          # Public values are compiled into the client bundle. Keep the
+          # positive cloud-consent and live-service branches observable while
+          # every provider remains an unreachable Playwright placeholder.
+          NEXT_PUBLIC_API_MODE: "live"
+          NEXT_PUBLIC_SUPABASE_URL: "https://playwright.invalid"
         run: npm run build
 
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
 
+      - name: Verify production strict CSP
+        env:
+          # Prove the nonce/strict-dynamic branch on the same immutable build
+          # used by the full functional suite.
+          PLAYWRIGHT_SERVER_MODE: production
+        run: npx playwright test e2e/csp-runtime.spec.ts
+
       - name: Run E2E tests
+        env:
+          # Reuse the immutable build instead of compiling 250 tests through a
+          # memory-growing HMR server. Route interception and dry-run provider
+          # fixtures remain configured by playwright.config.ts.
+          PLAYWRIGHT_SERVER_MODE: production
         run: npm run test:e2e:ci
 
       - name: Upload Playwright report
@@ -45,7 +67,7 @@ jobs:
           path: |
             web/playwright-report
             web/test-results
-          retention-days: 14
+          retention-days: 7
 
       - name: Comment on PR (failure)
         if: failure()
