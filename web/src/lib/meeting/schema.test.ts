@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   buildDefaultMeetingRecord,
+  buildDefaultMeetingRecordFromSeed,
+  createDefaultMeetingRecordSeed,
   normalizeMeetingRecord,
   computePriority,
   aggregateMachines,
@@ -19,6 +21,36 @@ describe("meeting schema", () => {
     };
     expect(build()).toEqual(build());
     expect(build().contractors[0]?.id).toBe("stable-0");
+  });
+
+  it("最小シードから日時・IDを含む既定レコードを損失なく復元する", () => {
+    const now = new Date("2026-07-22T15:30:00.000Z");
+    const buildExpected = () => {
+      let sequence = 0;
+      return buildDefaultMeetingRecord({
+        idFactory: () => `seed-${sequence++}`,
+        now,
+      });
+    };
+    let seedSequence = 0;
+    const seed = createDefaultMeetingRecordSeed({
+      idFactory: () => `seed-${seedSequence++}`,
+      now,
+    });
+    const record = buildDefaultMeetingRecordFromSeed(seed);
+
+    expect(record).toEqual(buildExpected());
+    expect(record.contractors[0]?.id).toBe("seed-0");
+    expect(record.id).toBe("seed-1");
+    expect(record.deliveries[0]?.id).toBe("seed-2");
+    expect([
+      record.workDateYear,
+      record.workDateMonth,
+      record.workDateDay,
+    ]).toEqual(seed.workDate);
+    expect(record.meetingDate).toBe(seed.meetingDate);
+    expect(record.savedAt).toBe(seed.savedAt);
+    expect(record.checklist).toEqual(buildDefaultChecklist());
   });
 
   it("computePriority: 重大性×可能性 を 1-4 に写像", () => {

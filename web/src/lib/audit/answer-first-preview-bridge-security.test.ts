@@ -52,7 +52,7 @@ describe("Answer-first Preview browser bridge security", () => {
       /proveDeploymentProtection\(\);[\s\S]*assertGetOnlyPreviewBoundary\(\);[\s\S]*postsEnabled = true;/u,
     );
     expect(source).toContain(
-      'new Set(["/api/chatbot", "/api/chatbot/stream"])',
+      '"/api/chat",\n  "/api/chatbot",\n  "/api/chatbot/stream"',
     );
     expect(source).toContain("allowedReadPaths.has(url.pathname)");
     expect(source).toContain("allowedPublicAssetPrefixes.some");
@@ -69,6 +69,8 @@ describe("Answer-first Preview browser bridge security", () => {
     expect(source).toContain("deployed-sse-stream-coverage");
     expect(source).toContain("firstChunkLatencyMs <= 30_000");
     expect(source).toContain("flushedBeforeCompletion === true");
+    expect(source).toContain('ANSWER_FIRST_ROUTE_IDS: "json,legacy"');
+    expect(source).toContain("legacyPostCount === 12");
   });
 
   it("keeps the external-operations Preview probe on the same owned boundary", () => {

@@ -33,6 +33,12 @@ jobs:
         run: npm ci
 
       - name: Build
+        env:
+          # Public values are compiled into the client bundle. Keep the
+          # positive cloud-consent and live-service branches observable while
+          # every provider remains an unreachable Playwright placeholder.
+          NEXT_PUBLIC_API_MODE: "live"
+          NEXT_PUBLIC_SUPABASE_URL: "https://playwright.invalid"
         run: npm run build
 
       - name: Install Playwright browser
@@ -40,13 +46,17 @@ jobs:
 
       - name: Verify production strict CSP
         env:
-          # Run this before the dev suite can replace the production .next
-          # output. The full functional suite remains in its fixture-ready dev
-          # mode, while this step proves the nonce/strict-dynamic branch.
+          # Prove the nonce/strict-dynamic branch on the same immutable build
+          # used by the full functional suite.
           PLAYWRIGHT_SERVER_MODE: production
         run: npx playwright test e2e/csp-runtime.spec.ts
 
       - name: Run E2E tests
+        env:
+          # Reuse the immutable build instead of compiling 250 tests through a
+          # memory-growing HMR server. Route interception and dry-run provider
+          # fixtures remain configured by playwright.config.ts.
+          PLAYWRIGHT_SERVER_MODE: production
         run: npm run test:e2e:ci
 
       - name: Upload Playwright report

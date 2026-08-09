@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { MeetingPaperView } from "@/components/meeting/meeting-paper-view";
 import { PageJsonLd } from "@/components/page-json-ld";
 import { ogImageUrl } from "@/lib/og-url";
-import { buildDefaultMeetingRecord } from "@/lib/meeting/schema";
+import { createDefaultMeetingRecordSeed } from "@/lib/meeting/schema";
 import { AutomationServicePromo } from "@/components/automation/automation-service-promo";
 import { getAutomationConsultAvailability } from "@/lib/automation-consult/availability";
 import { TaskPageIntro } from "@/components/task-page-intro";
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
 };
 
 export default function SafetyDiaryPage() {
-  const initialRecord = buildDefaultMeetingRecord();
+  const initialSeed = createDefaultMeetingRecordSeed();
   return (
     <>
       <PageJsonLd
@@ -60,7 +60,7 @@ export default function SafetyDiaryPage() {
         />
       </div>
       <div id="meeting-paper-start" className="scroll-mt-28">
-        <MeetingPaperView initialRecord={initialRecord} />
+        <MeetingPaperView initialSeed={initialSeed} />
       </div>
       <div
         id="meeting-next-actions"
