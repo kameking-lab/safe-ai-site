@@ -59,11 +59,20 @@ test.describe("ビジュアルKYT", () => {
     await expect(page.locator('main [role="alert"]')).toHaveCount(0);
   });
 
-  test("hotspot、テキスト代替、回答、対策、ローカル進捗", async ({
+  test("hotspot、テキスト代替、回答、対策、永続保存なし", async ({
     page,
   }) => {
     await page.goto(SCENARIO);
     await waitForVisualKyPlayer(page);
+    const legacyRecord = JSON.stringify({
+      "vkyt-legacy": { completedAt: "2026-01-01T00:00:00.000Z" },
+    });
+    await page.evaluate((value) => {
+      localStorage.setItem("safe-ai:visual-ky-progress:v1", value);
+    }, legacyRecord);
+    const storageBefore = await page.evaluate(() =>
+      Object.fromEntries(Object.entries(localStorage)),
+    );
     await page
       .getByRole("button", { name: "イラストから危険を探す" })
       .focus();
@@ -93,13 +102,11 @@ test.describe("ビジュアルKYT", () => {
     await expect(
       page.getByRole("heading", { name: "5分KYTを完了しました" }),
     ).toBeVisible();
-    const saved = await page.evaluate(() =>
-      localStorage.getItem("safe-ai:visual-ky-progress:v1"),
+    const storageAfter = await page.evaluate(() =>
+      Object.fromEntries(Object.entries(localStorage)),
     );
-    expect(saved).toContain("vkyt-001");
-    expect(saved).not.toMatch(
-      /name|email|company|answerText|health|siteName|location/i,
-    );
+    expect(storageAfter).toEqual(storageBefore);
+    expect(storageAfter["safe-ai:visual-ky-progress:v1"]).toBe(legacyRecord);
     await expect(
       page.getByRole("heading", {
         name: "場面説明・危険・対策のテキスト版",
@@ -196,7 +203,7 @@ test.describe("ビジュアルKYT", () => {
     }
   });
 
-  test("画像失敗・offline・localStorage失敗でも学習可能", async ({
+  test("画像失敗・offline・localStorage非依存でも学習可能", async ({
     browser,
   }) => {
     const context = await browser.newContext();
@@ -265,8 +272,11 @@ test.describe("ビジュアルKYT", () => {
       .getByRole("button", { name: "まとめへ進む" })
       .click();
     await expect(
-      noStoragePage.getByText(/端末保存を利用できませんでした/),
+      noStoragePage.getByRole("heading", { name: "5分KYTを完了しました" }),
     ).toBeVisible();
+    await expect(
+      noStoragePage.getByText(/端末保存を利用できませんでした/),
+    ).toHaveCount(0);
     await noStorageContext.close();
   });
 
