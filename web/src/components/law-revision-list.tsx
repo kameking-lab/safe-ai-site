@@ -63,8 +63,9 @@ export type LawRevisionListProps = {
   onSelectForQuestion: (revisionId: string) => void;
 };
 
-// C-1/C-6: 一覧の初期描画件数（whats-new と同じ「初期N件＋もっと見る」方式）
-const INITIAL_LIST_COUNT = 30;
+// C-1/C-6: 一覧の初期描画件数（whats-new と同じ「初期N件＋もっと見る」方式）。
+// mobile の初期DOMを抑えつつ、残りは同じ一覧内の「もっと見る」から全件表示する。
+const INITIAL_LIST_COUNT = 12;
 
 // #40: 影響度バッジ
 const IMPACT_BADGE_CLASS: Record<RevisionImpact, string> = {
@@ -502,7 +503,7 @@ export function LawRevisionList({
 
   const showEmptyState = status === "success" && !error && filtered.length === 0;
 
-  // C-1/C-6: 初期表示は30件（120件全描画は SSR HTML・hydration とも重い）。
+  // C-1/C-6: 初期表示は12件（120件全描画は SSR HTML・hydration とも重い）。
   // 「もっと見る」で全件展開。フィルタ・検索は全件に対して効く（filtered が母集合）。
   const [showAllRevisions, setShowAllRevisions] = useState(false);
   const visibleRevisions = showAllRevisions ? filtered : filtered.slice(0, INITIAL_LIST_COUNT);
@@ -863,6 +864,10 @@ export function LawRevisionList({
             <li
               key={revision.id}
               id={`rev-${revision.id}`}
+              style={{
+                contentVisibility: "auto",
+                containIntrinsicSize: "auto 280px",
+              }}
               className={`scroll-mt-24 rounded-xl border bg-white p-4 transition ${
                 isSelected
                   ? "border-emerald-300 bg-emerald-50/30 ring-1 ring-emerald-200"
