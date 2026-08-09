@@ -959,7 +959,7 @@ const DOMAIN_FIRST_NATURAL_VARIANTS = [
     answer: /特別教育.*危険・有害.*研削といし.*高所作業車.*足場.*フルハーネス/,
     condition: /技能講習や免許側へ変わる/,
     sources: [/安衛法第59条/, /安衛則第36条/],
-    allowedFollowup: /高所作業車|研削といし|作業/,
+    allowedFollowup: /高所作業車|低圧電気|研削といし|作業/,
     poison: /酸欠則|有機則|石綿則|電気工事士法/,
   },
   {
@@ -988,6 +988,26 @@ const DOMAIN_FIRST_NATURAL_VARIANTS = [
     sources: [/安衛則第12条の5/],
     allowedFollowup: /RA対象物|製造|取り扱う|譲渡・提供|選任要件/,
     poison: /安衛則第34条の4|CAS|酸欠則|石綿則|電気工事士法/,
+  },
+  {
+    id: "chemical-manager-consumer-product-only",
+    question:
+      "一般消費者向けの市販洗剤だけを扱う事業場に化学物質管理者は必要？",
+    answer: /一般消費者の生活の用.*製品だけ.*選任対象外.*選任は不要/,
+    condition: /市販品.*だけでは.*除外を確定できません.*製品表示.*想定用途/,
+    sources: [/安衛則第12条の5/],
+    allowedFollowup: /一般消費者|製品表示|想定用途|業務用|RA対象物/,
+    poison: /酸欠則|有機則|石綿則|電気工事士法/,
+  },
+  {
+    id: "chemical-manager-centralized-sales-sites",
+    question:
+      "RA対象物の表示と教育管理を本社でまとめ、販売拠点は譲渡・提供だけです。各拠点に化学物質管理者は必要？",
+    answer: /譲渡または提供だけ.*事業場ごと.*選任対象/,
+    condition: /各販売拠点の選任は必要.*他事業場で選任した化学物質管理者.*管理/,
+    sources: [/安衛則第12条の5/],
+    allowedFollowup: /譲渡・提供|表示|教育管理|本社|事業場/,
+    poison: /酸欠則|有機則|石綿則|電気工事士法/,
   },
 ] as const;
 
@@ -1050,6 +1070,49 @@ describe("domain/entity を先に認識し、口語の要件質問を単条文�
       }
     }
   }, 60_000);
+});
+
+describe("化学物質管理者の対象外と他事業場管理を12条の5の該当項へ結ぶ", () => {
+  it.each(["json", "sse"] as const)("$0", async (mode) => {
+    for (const testCase of [
+      {
+        question:
+          "一般消費者向けの市販洗剤だけを扱う事業場に化学物質管理者は必要？",
+        paragraph: "第1項",
+        snippet:
+          /主として一般消費者の生活の用に供される製品に係るものを除く.*化学物質管理者を選任/,
+        answer: /選任対象外.*選任は不要/,
+      },
+      {
+        question:
+          "RA対象物の表示と教育管理を本社でまとめ、販売拠点は譲渡・提供だけです。各拠点に化学物質管理者は必要？",
+        paragraph: "第2項・第3項",
+        snippet:
+          /譲渡又は提供を行う事業場[\s\S]*ごとに、化学物質管理者を選任[\s\S]*他の事業場において選任した化学物質管理者に管理させなければならない[\s\S]*事由が発生した日から十四日以内/,
+        answer: /譲渡または提供だけ.*14日以内/,
+      },
+    ] as const) {
+      __resetChatbotCacheForTests();
+      __resetRateLimitForTests();
+      const response = await callRouteMode(testCase.question, mode);
+      const source = response.sources.find(
+        (candidate) =>
+          candidate.lawShort === "安衛則" &&
+          candidate.article.startsWith("第12条の5"),
+      );
+
+      expect(
+        normalized(
+          `${response.directAnswer} ${response.importantConditions.join(" ")}`,
+        ),
+      ).toMatch(testCase.answer);
+      expect(source?.paragraph).toBe(testCase.paragraph);
+      expect(source?.snippet).toMatch(testCase.snippet);
+      expect(response.clarificationQuestion ?? "").not.toMatch(
+        /RA対象物を製造する事業場ですか/,
+      );
+    }
+  });
 });
 
 describe("能力閾値と教育対象号をactual sourceの該当号本文まで表示する", () => {
@@ -1368,17 +1431,17 @@ describe("main14の生成quick replyをactual次turnで消費する", () => {
           }
           if (testCase.id === "aerial-work-platform") {
             if (selected.label === "2m未満") {
-              return /作業床最高高さが2m未満.*高所作業車.*対象外/.test(
+              return /作業床最高高さ.*2m未満.*高所作業車.*対象外/.test(
                 selectedText,
               );
             }
             if (selected.label === "2m以上10m未満") {
-              return /作業床最高高さが2m以上10m未満.*特別教育/.test(
+              return /作業床最高高さ.*2m以上10m未満.*特別教育/.test(
                 selectedText,
               );
             }
             if (selected.label === "10m以上") {
-              return /作業床最高高さが10m以上.*技能講習/.test(selectedText);
+              return /作業床最高高さ.*10m以上.*技能講習/.test(selectedText);
             }
           }
           if (testCase.id === "organic-solvent") {
@@ -1453,6 +1516,19 @@ describe("main14の生成quick replyをactual次turnで消費する", () => {
             if (selected.label === "高所作業車") {
               return /高所作業車.*10m未満.*特別教育.*10m以上.*技能講習/.test(
                 selectedText,
+              );
+            }
+            if (selected.label === "低圧電気") {
+              return (
+                /低圧.*特別教育対象.*充電電路.*敷設・修理.*露出充電部付き開閉器.*操作/.test(
+                  selectedText,
+                ) &&
+                /全ての.*(?:目視|点検|測定).*一律対象.*(?:ではありません|ではない)/.test(
+                  selectedText,
+                ) &&
+                second.context?.topicDomain === "electrical" &&
+                second.context?.voltageClass === "低圧" &&
+                second.context?.qualificationType === "special-education"
               );
             }
           }
@@ -1773,6 +1849,44 @@ describe("クレーン種類chipを能力区分まで二段で消費する", () 
     expect(decree?.item).toBe("第8号");
     expect(decree?.snippet).toMatch(/第8号.*五トン以上のデリ/);
   }, 90_000);
+});
+
+describe("酸欠タンクの換気例外をanswer-firstで適用する", () => {
+  it.each(["json", "sse"] as const)("$0", async (mode) => {
+    const response = await callRouteMode(
+      "爆発防止のため換気できない酸欠タンクに入る時に必要なことは？",
+      mode,
+    );
+    const visible = answerText(response);
+    expect(response.directAnswer).toMatch(
+      /換気できない場合.*換気義務の例外.*無対策で入れるわけではなく.*同時就業者数以上.*空気呼吸器.*酸素呼吸器.*送気マスク/,
+    );
+    expect(visible).toMatch(
+      /作業開始前.*酸素濃度.*常時監視.*特別教育.*作業主任者/,
+    );
+    expect(response.directAnswer).not.toMatch(/原則として.*換気が必要/);
+
+    const ventilation = response.sources.find(
+      (source) =>
+        source.lawShort === "酸欠則" &&
+        source.article.startsWith("第5条") &&
+        !source.article.startsWith("第5条の2"),
+    );
+    const protection = response.sources.find(
+      (source) =>
+        source.lawShort === "酸欠則" && source.article.startsWith("第5条の2"),
+    );
+    expect(ventilation?.snippet).toMatch(
+      /爆発、酸化等を防止するため換気することができない場合[\s\S]*作業の性質上換気することが著しく困難な場合[\s\S]*この限りでない/,
+    );
+    expect(protection?.snippet).toMatch(
+      /同時に就業する労働者の人数と同数以上[\s\S]*空気呼吸器[\s\S]*酸素呼吸器[\s\S]*送気マスク[\s\S]*使用させなければならない/,
+    );
+    expect(response.effectiveDateStatus).toMatchObject({
+      asOf: "2026-08-09",
+      status: "current",
+    });
+  });
 });
 
 describe("特別教育の研削といしchipを36条1号へ結ぶ", () => {

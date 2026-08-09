@@ -45,7 +45,7 @@ export const PUBLIC_LEGAL_CONVERSATION_CONTEXT_KEYS = [
   "confirmedChoices",
 ] as const satisfies readonly (keyof PublicLegalConversationContext)[];
 
-const SAFE_LITERAL_CHOICES = new Set([
+const SAFE_LITERAL_CHOICE_VALUES = [
   "見るだけ",
   "盤を開けて測定",
   "配線・充電部を扱う",
@@ -85,6 +85,9 @@ const SAFE_LITERAL_CHOICES = new Set([
   "移動式クレーン",
   "デリック",
   "床上操作式",
+  "低圧電気",
+  "対地電圧50V以下",
+  "50V以下（対地電圧要確認）",
   "研削といし",
   "有機溶剤・シンナー",
   "その他の化学物質",
@@ -114,7 +117,13 @@ const SAFE_LITERAL_CHOICES = new Set([
   "100・200Vを停電して作業",
   "高圧設備を停電して作業",
   "充電中に扱う",
-]);
+] as const;
+
+const SAFE_LITERAL_CHOICES = new Map<string, string>(
+  SAFE_LITERAL_CHOICE_VALUES.map(
+    (choice) => [choice.normalize("NFKC"), choice] as const,
+  ),
+);
 
 const SAFE_MEASURED_CHOICE =
   /^(?:高さ\d+(?:\.\d+)?(?:m|cm|mm|メートル|センチ(?:メートル)?|ミリ(?:メートル)?)(?:以上|以下|未満)?|(?:最大荷重|つり上げ荷重)\d+(?:\.\d+)?(?:t|kg|トン|キログラム)(?:以上|以下|未満)?)$/i;
@@ -200,6 +209,7 @@ function safeConfirmedChoices(
         (SAFE_LITERAL_CHOICES.has(choice) || SAFE_MEASURED_CHOICE.test(choice)) &&
         values.indexOf(choice) === index,
     )
+    .map((choice) => SAFE_LITERAL_CHOICES.get(choice) ?? choice)
     .slice(-PUBLIC_CHOICE_LIMIT);
   return safe.length > 0 ? safe : undefined;
 }

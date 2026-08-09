@@ -668,4 +668,117 @@ describe("電気会話のanswer-first API契約", () => {
       }
     },
   );
+
+  it.each(MODES)(
+    "安衛則36条4号の50V以下・電信電話回路の除外を結論から適用する ($label)",
+    async ({ post, mode }) => {
+      const cases = [
+        {
+          message: "対地電圧24Vの低圧充電電路を敷設する時、特別教育は必要？",
+          direct: /対地電圧24V.*特別教育対象から除外/,
+        },
+        {
+          message: "電話用の低圧充電電路を修理する時、特別教育は必要？",
+          direct:
+            /電話用等.*感電による危害のおそれがない場合.*特別教育対象から除外/,
+        },
+      ] as const;
+
+      for (const testCase of cases) {
+        const payload = await requestAnswer(post, mode, {
+          message: testCase.message,
+          context: {},
+          lawCategory: "all",
+        });
+        expectNormalContract(payload);
+        expect(payload.directAnswer).toMatch(testCase.direct);
+        expect(payload.directAnswer).not.toMatch(/^はい.*特別教育が必要/);
+        expect(payload.importantConditions.join(" ")).toMatch(
+          /電気工事士法.*別|従事制限.*別/,
+        );
+
+        const scope = requiredSource(payload, "安衛則", "第36条");
+        expect(`${payload.directAnswer} ${payload.importantConditions.join(" ")}`).toContain(
+          scope.marker,
+        );
+        expect(scope.source.item).toBe("第4号");
+        expect(scope.source.snippet).toMatch(
+          /対地電圧が五十ボルト以下.*電信用のもの.*電話用のもの.*感電による危害を生ずるおそれのないもの/,
+        );
+      }
+    },
+  );
+
+  it.each(MODES)(
+    "対地電圧50V以下では346条・347条より先に354条の適用除外を答える ($label)",
+    async ({ post, mode }) => {
+      for (const message of [
+        "対地電圧24Vの充電部にテスターを当てる時、346条の保護具は必要？",
+        "対地電圧24Vの充電部に近接して点検する時、347条の防具は必要？",
+      ]) {
+        const payload = await requestAnswer(post, mode, {
+          message,
+          context: {},
+          lawCategory: "all",
+        });
+        expectNormalContract(payload);
+        expect(payload.directAnswer).toMatch(
+          /対地電圧24V.*354条.*適用されません.*346条・347条.*一律には適用しません/,
+        );
+        expect(payload.context?.confirmedChoices).toContain(
+          "対地電圧50V以下",
+        );
+        if (/テスター/.test(message)) {
+          expect(payload.context?.energizedState).toBe("energized");
+          expect(payload.clarificationQuestion ?? "").not.toMatch(
+            /充電中.*停電済み/,
+          );
+        }
+        const exclusion = requiredSource(payload, "安衛則", "第354条");
+        expect(exclusion.source.snippet).toMatch(
+          /電気機械器具.*配線.*移動電線.*対地電圧が五十ボルト以下.*適用しない/,
+        );
+        expect(payload.sources.some((source) => source.article.startsWith("第346条"))).toBe(
+          false,
+        );
+        expect(payload.sources.some((source) => source.article.startsWith("第347条"))).toBe(
+          false,
+        );
+      }
+
+      const first = await requestAnswer(post, mode, {
+        message: "24V充電したままテスターを当てる",
+        context: {},
+        lawCategory: "all",
+      });
+      expect(first.directAnswer).toMatch(
+        /24Vが対地電圧であれば.*354条.*一律には適用しません.*対地電圧を確認/,
+      );
+      expect(first.context).toEqual(
+        expect.objectContaining({
+          energizedState: "energized",
+          confirmedChoices: expect.arrayContaining([
+            "50V以下（対地電圧要確認）",
+          ]),
+        }),
+      );
+      expect(first.clarificationQuestion ?? "").not.toMatch(
+        /充電中.*停電済み/,
+      );
+
+      const followup = await requestAnswer(post, mode, {
+        message: "充電中",
+        context: first.context,
+        lawCategory: "all",
+      });
+      expectNormalContract(followup);
+      expect(followup.directAnswer).toMatch(
+        /50V以下が対地電圧であれば.*354条.*一律には適用しません.*対地電圧を確認/,
+      );
+      expect(followup.context?.confirmedChoices).toContain(
+        "50V以下（対地電圧要確認）",
+      );
+      expect(followup.answer).not.toMatch(/346条.*必要|347条.*必要/);
+    },
+  );
 });

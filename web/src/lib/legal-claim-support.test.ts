@@ -23,6 +23,9 @@ function article(lawShort: string, articleNum: string): LawArticle {
 describe("サービス先行の定型回答に対する主張単位の引用支持", () => {
   it.each([
     "電気作業の資格は？",
+    "対地電圧24Vの低圧充電電路を敷設する時、特別教育は必要？",
+    "電話用の低圧充電電路を修理する時、特別教育は必要？",
+    "対地電圧24Vの充電部にテスターを当てる時、346条の保護具は必要？",
     "電気作業で作業主任者の選任が必要か",
     "フォークリフトの資格は？",
     "足場の手すり高さは？",
@@ -31,6 +34,11 @@ describe("サービス先行の定型回答に対する主張単位の引用支�
     "高所作業車の作業床における安全帯使用等の条文は？",
     "酸欠作業の監視人は必要？",
     "有機溶剤を屋内で使う",
+    "タンクに入る時に必要なことは？",
+    "爆発防止のため換気できない酸欠タンクに入る時に必要なことは？",
+    "一般消費者向けの市販洗剤だけを扱う事業場に化学物質管理者は必要？",
+    "RA対象物の表示と教育管理を本社でまとめ、販売拠点は譲渡・提供だけです。各拠点に化学物質管理者は必要？",
+    "熱中症対策を教えて",
     "手すりは？",
   ])(
     "必須通常ケースをruntime同順の取得・展開・引用絞込み後にも強検証する: %s",
@@ -57,10 +65,197 @@ describe("サービス先行の定型回答に対する主張単位の引用支�
       });
 
       expect(cited.length).toBeGreaterThan(0);
-      expect(result.markersValid).toBe(true);
+      expect(result.markersValid, answer).toBe(true);
       expect(result.supported, `${answer}\n${result.failures.join(", ")}`).toBe(
         true,
       );
+    },
+  );
+
+  it.each([
+    "絶縁用保護具",
+    "活線作業用器具",
+    "低圧の充電電路に近接する場所",
+    "絶縁用防具",
+    "に従事してはならない",
+    "対地電圧が五十ボルト以下",
+    "電信用のもの",
+    "電話用のもの",
+    "感電による危害を生ずるおそれのないもの",
+    "この章の規定は",
+    "電気機械器具、配線又は移動電線",
+    "適用しない",
+  ])(
+    "広い電気資格回答は必須根拠 %s が欠けた場合にfail-closedにする",
+    (requiredTerm) => {
+      const query = "電気作業の資格は？";
+      const searched = searchRelevantArticlesWithScore(query, 10).articles;
+      const expanded = expandVerifiedLegalEvidenceArticles(query, searched);
+      const initialAnswer = buildServiceFirstLegalAnswer({
+        query,
+        articles: expanded,
+        now: NOW,
+      });
+      const cited = citedLegalAnswerArticles(initialAnswer, expanded);
+      const answer = buildServiceFirstLegalAnswer({
+        query,
+        articles: cited,
+        now: NOW,
+      });
+      const incomplete = cited.map((source) => ({
+        ...source,
+        text: source.text.replaceAll(requiredTerm, ""),
+      }));
+
+      expect(
+        incomplete.some(
+          (source, index) => source.text !== cited[index]?.text,
+        ),
+      ).toBe(true);
+      const result = validateServiceFirstLegalClaimSupport({
+        answer,
+        query,
+        articles: incomplete,
+        now: NOW,
+      });
+
+      expect(result.supported).toBe(false);
+      expect(result.failures).toContainEqual(
+        expect.stringMatching(/reviewed-template-evidence/),
+      );
+    },
+  );
+
+  it("354条が壊れたbundleから回答を再合成しても低圧保護措置を支持済みにしない", () => {
+    const query = "電気作業の資格は？";
+    const searched = searchRelevantArticlesWithScore(query, 10).articles;
+    const expanded = expandVerifiedLegalEvidenceArticles(query, searched);
+    const poisoned = expanded.map((source) =>
+      source.lawShort === "安衛則" && source.articleNum === "第354条"
+        ? {
+            ...source,
+            text: source.text.replace(
+              "対地電圧が五十ボルト以下",
+              "対地電圧に関する条件を欠く",
+            ),
+          }
+        : source,
+    );
+    const answer = buildServiceFirstLegalAnswer({
+      query,
+      articles: poisoned,
+      now: NOW,
+    });
+    const result = validateServiceFirstLegalClaimSupport({
+      answer,
+      query,
+      articles: poisoned,
+      now: NOW,
+    });
+
+    expect(answer).toMatch(
+      /感電防止措置|絶縁用保護具|活線作業用器具|絶縁用防具/,
+    );
+    expect(result.supported).toBe(false);
+    expect(result.failures).toContain(
+      "answer:low-voltage-chapter-exclusion-evidence",
+    );
+  });
+
+  it.each([
+    {
+      query: "タンクに入る時に必要なことは？",
+      requiredTerms: [
+        "その日の作業を開始する前に",
+        "濃度を測定",
+        "屋内作業場等",
+        "有機溶剤業務",
+        "発散源を密閉する設備",
+        "局所排気装置",
+      ],
+    },
+    {
+      query: "熱中症対策を教えて",
+      requiredTerms: [
+        "湿球黒球温度の値（WBGT値）の把握",
+        "休憩時間の確保",
+        "暑熱順化期間を設ける",
+        "水分及び塩分の摂取",
+        "作業からの離脱",
+        "身体の冷却",
+      ],
+    },
+    {
+      query:
+        "一般消費者向けの市販洗剤だけを扱う事業場に化学物質管理者は必要？",
+      requiredTerms: [
+        "主として一般消費者の生活の用に供される製品に係るものを除く",
+        "リスクアセスメント対象物",
+        "化学物質管理者を選任",
+      ],
+    },
+    {
+      query:
+        "RA対象物の表示と教育管理を本社でまとめ、販売拠点は譲渡・提供だけです。各拠点に化学物質管理者は必要？",
+      requiredTerms: [
+        "リスクアセスメント対象物の譲渡又は提供を行う事業場",
+        "製造し、又は取り扱う事業場を除く",
+        "事業場ごとに、化学物質管理者を選任",
+        "表示等及び教育管理",
+        "他の事業場において選任した化学物質管理者に管理させなければならない",
+        "事由が発生した日から十四日以内",
+      ],
+    },
+    {
+      query: "爆発防止のため換気できない酸欠タンクに入る時に必要なことは？",
+      requiredTerms: [
+        "爆発、酸化等を防止するため換気することができない場合",
+        "作業の性質上換気することが著しく困難な場合",
+        "同時に就業する労働者の人数と同数以上",
+        "酸素呼吸器",
+        "送気マスク",
+        "常時作業の状況を監視",
+      ],
+    },
+  ])(
+    "$query は各命題の可視根拠が欠けた場合にfail-closedにする",
+    ({ query, requiredTerms }) => {
+      const searched = searchRelevantArticlesWithScore(query, 10).articles;
+      const expanded = expandVerifiedLegalEvidenceArticles(query, searched);
+      const initialAnswer = buildServiceFirstLegalAnswer({
+        query,
+        articles: expanded,
+        now: NOW,
+      });
+      const cited = citedLegalAnswerArticles(initialAnswer, expanded);
+      const answer = buildServiceFirstLegalAnswer({
+        query,
+        articles: cited,
+        now: NOW,
+      });
+
+      for (const requiredTerm of requiredTerms) {
+        const incomplete = cited.map((source) => ({
+          ...source,
+          text: source.text.replaceAll(requiredTerm, ""),
+        }));
+        expect(
+          incomplete.some(
+            (source, index) => source.text !== cited[index]?.text,
+          ),
+          requiredTerm,
+        ).toBe(true);
+        const result = validateServiceFirstLegalClaimSupport({
+          answer,
+          query,
+          articles: incomplete,
+          now: NOW,
+        });
+        expect(result.supported, requiredTerm).toBe(false);
+        expect(result.failures).toContainEqual(
+          expect.stringMatching(/reviewed-template-evidence/),
+        );
+      }
     },
   );
 
@@ -72,6 +267,9 @@ describe("サービス先行の定型回答に対する主張単位の引用支�
         article("電気工事士法", "第3条"),
         article("安衛法", "第59条"),
         article("安衛則", "第36条"),
+        article("安衛則", "第346条"),
+        article("安衛則", "第347条"),
+        article("安衛則", "第354条"),
       ],
     },
     {

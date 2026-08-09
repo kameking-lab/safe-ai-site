@@ -612,8 +612,10 @@ export function expandVerifiedLegalEvidenceArticles(
     required.push(
       ["安衛法", "第59条"],
       ["安衛則", "第36条"],
+      ["酸欠則", "第2条"],
       ["酸欠則", "第3条"],
       ["酸欠則", "第5条"],
+      ["酸欠則", "第5条の2"],
       ["酸欠則", "第11条"],
       ["酸欠則", "第12条"],
       ["酸欠則", "第13条"],
@@ -773,7 +775,11 @@ export function expandVerifiedLegalEvidenceArticles(
     // 安衛則36条だけでなく、特別教育義務の本体である安衛法59条3項を
     // 同じ回答内で示す。検索順位に委ねると、短い自然文で59条だけが
     // 欠落し「事業者が行う安全教育」という命題を支えられなくなる。
-    required.push(["安衛法", "第59条"], ["安衛則", "第36条"]);
+    required.push(
+      ["安衛法", "第59条"],
+      ["安衛則", "第36条"],
+      ["安衛則", "第354条"],
+    );
     if (groupedElectricalChoice) {
       required.push(
         ["電気工事士法", "第2条"],
@@ -1419,6 +1425,15 @@ export function legalProvisionUnitForQuery(
     /^第?12条の5$/.test(article.articleNum) &&
     hasChemicalManagerDomainSignal(normalized)
   ) {
+    if (/(?:主として)?一般消費者(?:の生活)?(?:向け|用)|市販(?:の)?洗剤/.test(normalized)) {
+      return { paragraph: "第1項" };
+    }
+    if (/(?:譲渡|提供|販売拠点|本社).*(?:だけ|のみ|一括|まとめ)|(?:表示等|教育管理).*(?:他事業場|本社)/.test(normalized)) {
+      // 第2項が譲渡・提供事業場の選任と他事業場管理のただし書、
+      // 第3項が選任期限を定める。期限まで述べる回答では両項を同じ
+      // 可視根拠へ結び、2項だけで14日を支えたように見せない。
+      return { paragraph: "第2項・第3項" };
+    }
     return { paragraph: "第1項・第2項・第3項" };
   }
   if (
@@ -2069,7 +2084,7 @@ function nextQuestion(
     highLiftIntent.qualification &&
     !context.height
   ) {
-    return "教育区分を確定するため、銘板・仕様上の作業床最高高さは10m以上ですか？";
+    return "教育区分を確定するため、作業床を最も高く上昇させた場合の床面の高さは10m以上ですか？";
   }
   if (context.equipment === "高所作業車") return null;
   if (
@@ -3225,6 +3240,13 @@ function knownConclusion(
     (article) =>
       article.lawShort === "安衛則" && /^第?347条$/.test(article.articleNum),
   );
+  const lowVoltageChapterExclusion = articleIndex(
+    articles,
+    (article) =>
+      article.lawShort === "安衛則" &&
+      /^第?354条$/.test(article.articleNum) &&
+      /対地電圧が五十ボルト以下/.test(article.text),
+  );
   const electricUseBeforeInspection = articleIndex(
     articles,
     (article) =>
@@ -3288,6 +3310,106 @@ function knownConclusion(
   const hasElectricQualificationSources = electricQualificationSources.every(
     (index) => index >= 0,
   );
+  const lowVoltageGroundVoltage = normalized.match(
+    /対地電圧(\d+(?:\.\d+)?)(?:V|ボルト)/i,
+  );
+  const statedElectricalVoltage = normalized.match(
+    /(?:^|[^\d])(\d+(?:\.\d+)?)\s*(?:V|ボルト)/i,
+  );
+  const explicitlyAtOrBelow50Volts = Boolean(
+    lowVoltageGroundVoltage && Number(lowVoltageGroundVoltage[1]) <= 50,
+  );
+  const statedAtOrBelow50Volts = Boolean(
+    statedElectricalVoltage && Number(statedElectricalVoltage[1]) <= 50,
+  );
+  const confirmedAtOrBelow50Volts =
+    conversationContext.confirmedChoices?.includes("対地電圧50V以下") ?? false;
+  const confirmedVoltageNeedsGroundCheck =
+    conversationContext.confirmedChoices?.includes(
+      "50V以下（対地電圧要確認）",
+    ) ?? false;
+  const inheritedVoltageNeedsGroundCheck =
+    /50V以下[（(]対地電圧要確認[）)]/.test(normalized);
+  const knownAtOrBelow50Volts =
+    explicitlyAtOrBelow50Volts ||
+    confirmedAtOrBelow50Volts ||
+    statedAtOrBelow50Volts ||
+    confirmedVoltageNeedsGroundCheck;
+  const groundVoltageIsConfirmed =
+    explicitlyAtOrBelow50Volts || confirmedAtOrBelow50Volts;
+  const explicitlyTelecomCircuit = /(?:電信|電話)用/.test(normalized);
+
+  if (
+    electricWork &&
+    /低圧/.test(normalized) &&
+    /充電電路/.test(normalized) &&
+    /(?:敷設|修理)/.test(normalized) &&
+    /(?:特別教育|教育)/.test(normalized) &&
+    (knownAtOrBelow50Volts || explicitlyTelecomCircuit) &&
+    electricSpecialEducationWork >= 0
+  ) {
+    const statedVoltage = Number(
+      lowVoltageGroundVoltage?.[1] ?? statedElectricalVoltage?.[1],
+    );
+    const unconfirmedVoltageLabel = inheritedVoltageNeedsGroundCheck
+      ? "50V以下"
+      : Number.isFinite(statedVoltage)
+        ? `${statedVoltage}V`
+        : "50V以下";
+    const exclusion = knownAtOrBelow50Volts
+      ? groundVoltageIsConfirmed
+        ? `対地電圧${Number.isFinite(statedVoltage) ? `${statedVoltage}V` : "50V以下"}は、安衛則36条4号の電気取扱業務の特別教育対象から除外されます。`
+        : `入力された${unconfirmedVoltageLabel}が対地電圧であれば、安衛則36条4号の電気取扱業務の特別教育対象から除外されます。公称電圧だけでは確定せず、対地電圧を確認します。`
+      : "電信用・電話用等の低圧回路は、感電による危害のおそれがない場合に安衛則36条4号の特別教育対象から除外されます。電話用という名称だけで危害のおそれなしとは確定せず、対地電圧と回路仕様を確認します。";
+    return {
+      conclusion: `${exclusion}${marker(electricSpecialEducationWork)}`,
+      conditions: [
+        ...(electricWorkDefinition >= 0 && electricianRestriction >= 0
+          ? [
+              `この除外は特別教育の範囲です。設備の設置・変更が電気工事士法上の電気工事に当たる場合の従事制限は、別に確認します。${markers(electricWorkDefinition, electricianRestriction)}`,
+            ]
+          : []),
+      ],
+    };
+  }
+
+  if (
+    electricWork &&
+    knownAtOrBelow50Volts &&
+    lowVoltageChapterExclusion >= 0 &&
+    /(?:充電|活線|近接|テスター|測定|点検|346条|347条|保護具|防具)/.test(
+      normalized,
+    )
+  ) {
+    const statedVoltage = Number(
+      lowVoltageGroundVoltage?.[1] ?? statedElectricalVoltage?.[1],
+    );
+    const voltageLabel = Number.isFinite(statedVoltage)
+      ? `${statedVoltage}V`
+      : "50V以下";
+    const unconfirmedVoltageLabel = inheritedVoltageNeedsGroundCheck
+      ? "50V以下"
+      : voltageLabel;
+    const scope = groundVoltageIsConfirmed
+      ? `対地電圧${voltageLabel}の電気機械器具・配線・移動電線には、安衛則354条により、同規則の電気による危険防止の章は適用されません。したがって、346条・347条の絶縁用保護具・活線作業用器具・絶縁用防具の義務をこの回路へ一律には適用しません。`
+      : `入力された${unconfirmedVoltageLabel}が対地電圧であれば、電気機械器具・配線・移動電線には安衛則354条の適用除外があり、346条・347条の絶縁用保護具・活線作業用器具・絶縁用防具の義務をこの回路へ一律には適用しません。公称電圧だけでは確定せず、対地電圧を確認します。`;
+    return {
+      conclusion: `${scope}${marker(lowVoltageChapterExclusion)}`,
+      conditions: [
+        ...(electricSpecialEducationWork >= 0
+          ? [
+              `特別教育も別の安衛則36条4号で、対地電圧50V以下の充電電路は対象から除かれます。${marker(electricSpecialEducationWork)}`,
+            ]
+          : []),
+        ...(electricWorkDefinition >= 0 && electricianRestriction >= 0
+          ? [
+              `電気工事士法上の電気工事への該当と従事制限は別制度なので、設置・変更作業なら別に確認します。${markers(electricWorkDefinition, electricianRestriction)}`,
+            ]
+          : []),
+      ],
+    };
+  }
+
   if (
     electricWork &&
     hasElectricQualificationSources &&
@@ -3513,7 +3635,7 @@ function knownConclusion(
               `安衛則37条は、事業者が十分な知識・技能を有すると認める事項について教育科目を省略できる規定で、免状だけを理由に全科目を当然免除する規定ではありません。${marker(educationOmission)}`,
             ]
           : []),
-        `実際の業務が低圧の充電電路の敷設・修理、または区画場所にある露出充電部付き開閉器の操作に当たるかを確認します。${marker(electricSpecialEducationWork)}`,
+        `実際の業務が、対地電圧50V以下及び電信・電話用等で感電危害のおそれがない回路を除く低圧充電電路の敷設・修理、または同じ除外条件のある区画場所の露出充電部付き開閉器操作に当たるかを確認します。${marker(electricSpecialEducationWork)}`,
       ],
     };
   }
@@ -3537,7 +3659,7 @@ function knownConclusion(
       conclusion: `今分かる範囲では、点検中の実際の行為で資格・教育の要件が変わります。盤外から非接触で見るだけ、盤を開けて測定する、配線を接続する、充電部を扱う、の順に確認すべき制度と感電防止措置が増えます。${markers(electricWorkDefinition, electricSpecialEducationWork)}`,
       conditions: [
         `収録している日本の公式資料・法令だけでは、${unresolvedScope}までは確定できません。メーカーの仕様書、適用する海外規格、または実際の作業内容を別に確認する必要があります。${markers(electricWorkDefinition, electricSpecialEducationWork)}`,
-        `配線の接続など設備を設置・変更する作業は、電気工事士法2条の「電気工事」に当たり得ます。高圧・特別高圧の充電電路等の点検は安衛則36条4号の特別教育対象で、低圧は敷設・修理と一定の露出充電部付き開閉器操作が対象です。${markers(electricWorkDefinition, electricSpecialEducationWork)}`,
+        `配線の接続など設備を設置・変更する作業は、電気工事士法2条の「電気工事」に当たり得ます。高圧・特別高圧の充電電路等の点検は安衛則36条4号の特別教育対象です。低圧は、対地電圧50V以下及び電信・電話用等で感電危害のおそれがない回路を除く敷設・修理と、一定の露出充電部付き開閉器操作が対象です。${markers(electricWorkDefinition, electricSpecialEducationWork)}`,
       ],
     };
   }
@@ -3760,7 +3882,7 @@ function knownConclusion(
     return {
       conclusion: `充電したまま端子を締める作業は、単なる目視点検ではありません。低圧なら安衛則346条、高圧なら同341条の活線作業として、電圧と充電状態に応じた絶縁用保護具・防具等の感電防止措置が必要です。電圧不明のまま作業可とは判断できません。${markers(lowVoltageLiveWork, highVoltageLiveWork)}`,
       conditions: [
-        `低圧の特別教育対象は、低圧の充電電路の敷設・修理と、区画された配電盤室等で露出充電部を持つ開閉器の操作です。端子締付けが充電電路の修理に当たるかを実際の作業内容で確認します。${marker(electricSpecialEducationWork)}`,
+        `低圧の特別教育対象は、対地電圧50V以下及び電信・電話用等で感電危害のおそれがない回路を除く充電電路の敷設・修理と、同じ除外条件のある区画された配電盤室等の露出充電部付き開閉器操作です。端子締付けが充電電路の修理に当たるかを確認します。${marker(electricSpecialEducationWork)}`,
         `高圧・特別高圧では、充電電路または支持物の敷設・点検・修理・操作が特別教育の対象です。停電できるか、充電中に行う必要があるかでも手順と要件が変わります。${markers(electricSpecialEducationWork, highVoltageLiveWork)}`,
         ...(electricWorkDefinition >= 0 && electricianRestriction >= 0
           ? [
@@ -3904,7 +4026,7 @@ function knownConclusion(
       conclusion: `${voltage}設備でテスター測定する条件まで分かっています。充電中なら、充電電路を直接取り扱う作業か充電部への近接作業かに応じて、${voltage === "低圧" ? "安衛則346条・347条" : voltage === "高圧" ? "安衛則341条・342条" : "安衛則344条・345条"}の措置を確認します。${markers(...testerLiveSources)} ${stoppedBranch}`,
       conditions: [
         voltage === "低圧"
-          ? `低圧特別教育の法定対象は、低圧充電電路の敷設・修理と、配電盤室・変電室等の区画場所にある露出充電部付き開閉器の操作です。低圧測定の全てが一律に対象という規定ではありません。充電電路を直接取り扱い感電の危険がある場合は346条の絶縁用保護具または活線作業用器具、近接して点検等を行い接触するおそれがある場合は347条の絶縁用防具を確認します。${markers(electricSpecialEducationWork, ...testerLiveSources)}`
+          ? `低圧特別教育の法定対象は、対地電圧50V以下及び電信・電話用等で感電危害のおそれがない回路を除く低圧充電電路の敷設・修理と、同じ除外条件のある区画場所の露出充電部付き開閉器操作です。低圧測定の全てが一律対象ではありません。充電電路を直接取り扱い感電の危険がある場合は346条、近接して点検等を行い接触するおそれがある場合は347条の措置を確認します。${markers(electricSpecialEducationWork, ...testerLiveSources)}`
           : `${voltage}の充電電路または支持物の点検は電気取扱業務の特別教育対象であり、測定時の充電状態に応じた作業措置とは別に確認します。${markers(electricSpecialEducationWork, ...testerLiveSources)}`,
       ],
     };
@@ -4007,7 +4129,7 @@ function knownConclusion(
     return {
       conclusion: `盤を開けること自体は、テスター測定や配線作業と同じ行為ではなく、それだけで電気工事士の要否は確定しません。ただし、充電中の盤を開けて充電部が露出する場合は、閉鎖状態より接触・近接の危険が増えるため、盤内で何をするかと充電状態を確認します。${markers(electricWorkDefinition, electricSpecialEducationWork, lowVoltageLiveWork, lowVoltageProximityWork)}`,
       conditions: [
-        `低圧特別教育の法定対象は、低圧充電電路の敷設・修理と、区画場所にある露出充電部付き開閉器の操作です。盤を開けて見る行為の全てが一律に対象という規定ではありません。${marker(electricSpecialEducationWork)}`,
+        `低圧特別教育の法定対象は、対地電圧50V以下及び電信・電話用等で感電危害のおそれがない回路を除く充電電路の敷設・修理と、同じ除外条件のある区画場所の露出充電部付き開閉器操作です。盤を開けて見る行為の全てが一律対象ではありません。${marker(electricSpecialEducationWork)}`,
         `盤内で測定器を当てる、開閉器を操作する、充電電路を直接扱う、または電路・支持物の点検等で充電部へ接触するおそれがある場合は、それぞれの行為に対応する規定を確認します。${markers(lowVoltageLiveWork, lowVoltageProximityWork)}`,
       ],
     };
@@ -4023,7 +4145,7 @@ function knownConclusion(
       conclusion: `${metiElectricianQa >= 0 ? `配線を傷付けず、測定器をクリップ留め又は巻き付けるだけなら、経済産業省の電気工事士Q&A Q10では電気工事士が工事する必要はありません。自家用電気工作物構内の配電盤など危険を伴う場所では、電気主任技術者の指示確認が望ましいとされています。${marker(metiElectricianQa)} ` : ""}盤を開けてテスターを当てる作業は「見るだけ」ではありません。充電中なら、測定で充電電路を直接取り扱うのか、電路・支持物の点検等を充電部に近接して行い接触のおそれがあるのかを、電圧区分ごとの規定に照らします。${markers(lowVoltageLiveWork, lowVoltageProximityWork, highVoltageLiveWork, highVoltageProximityWork)}`,
       conditions: [
         `低圧で充電電路を直接取り扱い感電の危険がある場合は、安衛則346条の絶縁用保護具または活線作業用器具が必要です。低圧充電電路に近接して電路・支持物の敷設・点検・修理等を行い、充電電路へ接触するおそれがある場合は、347条の絶縁用防具が原則で、絶縁用保護具を着用し他の身体部分が接触するおそれがない場合が例外です。${markers(lowVoltageLiveWork, lowVoltageProximityWork)}`,
-        `低圧特別教育の法定対象は、低圧充電電路の敷設・修理と、区画された配電盤室等にある露出充電部付き開閉器の操作です。全ての低圧測定が一律に特別教育対象という規定ではありません。${marker(electricSpecialEducationWork)}`,
+        `低圧特別教育の法定対象は、対地電圧50V以下及び電信・電話用等で感電危害のおそれがない回路を除く充電電路の敷設・修理と、同じ除外条件のある区画された配電盤室等の露出充電部付き開閉器操作です。全ての低圧測定が一律対象ではありません。${marker(electricSpecialEducationWork)}`,
         `高圧・特別高圧では、点検を含む特別教育と活線・近接作業の規定が関係し、安衛則342条等には充電電路への接近距離に応じた措置があります。測定時が充電中か停電済みか、100・200Vか高圧設備かでも結論が変わります。${markers(deEnergizedWork, electricSpecialEducationWork, highVoltageLiveWork, highVoltageProximityWork, extraHighVoltageLiveWork, extraHighVoltageProximityWork)}`,
       ],
     };
@@ -4074,7 +4196,7 @@ function knownConclusion(
         conclusion: `100Vは低圧です。安衛則347条は、低圧の充電電路に近接して電路・支持物の敷設・点検・修理・塗装等の電気工事を行い、作業者が充電電路へ接触することで感電するおそれがある場合に適用され、原則として充電電路へ絶縁用防具を装着します。${markers(electricSpecialEducationWork, lowVoltageProximityWork)}`,
         conditions: [
           `絶縁用保護具を着用し、保護具を着けた部分以外の身体が充電電路へ接触するおそれがない場合は、絶縁用防具の例外です。347条は低圧近接作業に一律の数値距離を定める規定ではありません。${marker(lowVoltageProximityWork)}`,
-          `低圧特別教育の法定対象は、低圧充電電路の敷設・修理と、区画場所にある露出充電部付き開閉器の操作であり、低圧の全近接作業が一律対象ではありません。${marker(electricSpecialEducationWork)}`,
+          `低圧特別教育の法定対象は、対地電圧50V以下及び電信・電話用等で感電危害のおそれがない回路を除く充電電路の敷設・修理と、同じ除外条件のある区画場所の露出充電部付き開閉器操作であり、低圧の全近接作業が一律対象ではありません。${marker(electricSpecialEducationWork)}`,
         ],
       };
     }
@@ -4082,14 +4204,14 @@ function knownConclusion(
       return {
         conclusion: `低圧の充電電路を直接取り扱い、感電の危険が生じるおそれがある場合は、安衛則346条により絶縁用保護具を着用するか、活線作業用器具を使用します。${marker(lowVoltageLiveWork)}`,
         conditions: [
-          `低圧特別教育の法定対象は、低圧充電電路の敷設・修理と、区画場所にある露出充電部付き開閉器の操作です。${marker(electricSpecialEducationWork)}`,
+          `低圧特別教育の法定対象は、対地電圧50V以下及び電信・電話用等で感電危害のおそれがない回路を除く充電電路の敷設・修理と、同じ除外条件のある区画場所の露出充電部付き開閉器操作です。${marker(electricSpecialEducationWork)}`,
         ],
       };
     }
     return {
       conclusion: `充電部を扱う、またはその近くで作業する場合は、盤外から見るだけの点検とは扱いが異なります。低圧で充電電路を直接扱う場合は安衛則346条、低圧充電電路に近接して電路・支持物の点検等を行い接触のおそれがある場合は347条の絶縁保護措置を確認します。${markers(lowVoltageLiveWork, lowVoltageProximityWork)}`,
       conditions: [
-        `低圧特別教育の法定対象は、低圧充電電路の敷設・修理と、区画場所にある露出充電部付き開閉器の操作です。低圧の全測定・全近接作業を一律に特別教育対象とは断定できません。${marker(electricSpecialEducationWork)}`,
+        `低圧特別教育の法定対象は、対地電圧50V以下及び電信・電話用等で感電危害のおそれがない回路を除く充電電路の敷設・修理と、同じ除外条件のある区画場所の露出充電部付き開閉器操作です。低圧の全測定・全近接作業を一律対象とは断定できません。${marker(electricSpecialEducationWork)}`,
         `高圧・特別高圧なら、点検・操作を含め特別教育の対象範囲が広がり、活線近接作業では接近距離に応じた措置も関係します。${markers(electricSpecialEducationWork, highVoltageProximityWork)}`,
       ],
     };
@@ -4105,7 +4227,7 @@ function knownConclusion(
     electricSpecialEducationWork >= 0
   ) {
     return {
-      conclusion: `はい。低圧の充電電路の敷設または修理は、安衛法59条3項と安衛則36条4号に基づく特別教育が必要です。${markers(electricSpecialEducationDuty, electricSpecialEducationWork)}`,
+      conclusion: `対地電圧50V以下の回路と、電信用・電話用等で感電による危害のおそれがない回路を除き、低圧の充電電路の敷設または修理には、安衛法59条3項と安衛則36条4号に基づく特別教育が必要です。${markers(electricSpecialEducationDuty, electricSpecialEducationWork)}`,
       conditions: [
         `対地電圧が50V以下のものや、電信用・電話用等で感電による危害のおそれがないものは同号から除かれます。${marker(electricSpecialEducationWork)}`,
         ...(electricWorkDefinition >= 0 && electricianRestriction >= 0
@@ -4125,7 +4247,7 @@ function knownConclusion(
     return {
       conclusion: `低圧と高圧・特別高圧では、電気取扱業務の特別教育が必要になる法定業務の範囲が違います。高圧・特別高圧の方が、点検や操作まで明文で対象に含む広い区分です。${marker(electricSpecialEducationWork)}`,
       conditions: [
-        `低圧は、充電電路の敷設・修理と、配電盤室・変電室等の区画場所にある露出充電部付き開閉器の操作が特別教育の対象です。全ての低圧点検・測定が一律に対象という規定ではありません。${markers(electricSpecialEducationWork, lowVoltageSpecialEducation)}`,
+        `低圧は、対地電圧50V以下及び電信・電話用等で感電危害のおそれがない回路を除く充電電路の敷設・修理と、同じ除外条件のある区画場所の露出充電部付き開閉器操作が対象です。全ての低圧点検・測定が一律対象ではありません。${markers(electricSpecialEducationWork, lowVoltageSpecialEducation)}`,
         `高圧・特別高圧は、充電電路または支持物の敷設・点検・修理・操作が特別教育の対象です。${markers(electricSpecialEducationWork, highVoltageSpecialEducation)}`,
         `教育時間も異なり、低圧は学科7時間以上・実技7時間以上、高圧・特別高圧は学科11時間以上・実技15時間以上が基本です。操作だけを行う場合は、それぞれ実技1時間以上の区分があります。${markers(lowVoltageSpecialEducation, highVoltageSpecialEducation)}`,
       ],
@@ -4144,7 +4266,7 @@ function knownConclusion(
     electricianRestriction >= 0
   ) {
     return {
-      conclusion: `低圧と分かっているので、次は作業行為で判断します。低圧の特別教育対象は、充電電路の敷設・修理と、配電盤室・変電室等の区画場所にある露出充電部付き開閉器の操作です。低圧設備の全ての目視・点検・測定が一律対象という規定ではありません。${markers(electricSpecialEducationDuty, electricSpecialEducationWork)}`,
+      conclusion: `低圧と分かっているので、次は作業行為で判断します。低圧の特別教育対象は、対地電圧50V以下及び電信・電話用等で感電危害のおそれがない回路を除く充電電路の敷設・修理と、同じ除外条件のある区画場所の露出充電部付き開閉器操作です。低圧設備の全ての目視・点検・測定が一律対象ではありません。${markers(electricSpecialEducationDuty, electricSpecialEducationWork)}`,
       conditions: [
         `配線を接続・取り外すなど設備を設置・変更する作業は、特別教育とは別に、電気工事士法上の電気工事と従事制限へ該当する可能性を確認します。${markers(electricWorkDefinition, electricianRestriction, electricSpecialEducationWork)}`,
         `盤外から見る、閉鎖型ブレーカーを通常操作する、盤を開けて測定する、配線を扱う、のどれかで必要条件が変わります。${markers(electricSpecialEducationWork, electricianRestriction)}`,
@@ -4181,7 +4303,7 @@ function knownConclusion(
       conclusion: `電気取扱業務の特別教育は、電気工事士免状とは別の制度です。事業者が労働者を危険な電気業務に就かせる前に行う安全教育で、国家資格の免状ではありません。${markers(electricSpecialEducationDuty, electricSpecialEducationWork, electricianRestriction)}`,
       conditions: [
         `高圧・特別高圧は、充電電路または支持物の敷設・点検・修理・操作が対象です。教育は学科11時間以上・実技15時間以上が基本で、操作だけなら実技1時間以上です。${markers(electricSpecialEducationWork, highVoltageSpecialEducation)}`,
-        `低圧は、充電電路の敷設・修理、または区画された配電盤室等で露出充電部を持つ開閉器の操作が対象です。学科7時間以上・実技7時間以上が基本で、開閉器操作だけなら実技1時間以上です。${markers(electricSpecialEducationWork, lowVoltageSpecialEducation)}`,
+        `低圧は、対地電圧50V以下及び電信・電話用等で感電危害のおそれがない回路を除く充電電路の敷設・修理、または同じ除外条件のある区画された配電盤室等の露出充電部付き開閉器操作が対象です。学科7時間以上・実技7時間以上が基本で、開閉器操作だけなら実技1時間以上です。${markers(electricSpecialEducationWork, lowVoltageSpecialEducation)}`,
         `盤外から見るだけや閉鎖型スイッチの通常操作まで一律対象ではありませんが、充電中の測定には安衛則346条・347条の保護措置が関係し、配線工事には別途電気工事士資格が必要になり得ます。${markers(electricSpecialEducationWork, lowVoltageLiveWork, lowVoltageProximityWork, electricWorkDefinition, electricianRestriction)}`,
       ],
     };
@@ -4218,7 +4340,7 @@ function knownConclusion(
     return {
       conclusion: `低圧設備を盤の外から見て、表示・異音・異臭を確認するだけなら、その点検だけで一律の国家資格が必要とは限りません。一方、盤を開けて測定する、配線を外す・つなぐ、充電部やその近くで作業する場合は、電気工事士、電気取扱業務の特別教育、感電防止措置がそれぞれ関係します。${markers(electricWorkDefinition, electricianRestriction, electricSpecialEducationWork, lowVoltageLiveWork, lowVoltageProximityWork)}`,
       conditions: [
-        `高圧・特別高圧では、充電電路または支持物の敷設・点検・修理・操作が特別教育の対象です。低圧では、充電電路の敷設・修理と、区画場所にある露出充電部付き開閉器の操作が対象で、全ての低圧点検が一律対象ではありません。${marker(electricSpecialEducationWork)}`,
+        `高圧・特別高圧では、充電電路または支持物の敷設・点検・修理・操作が特別教育の対象です。低圧では、対地電圧50V以下及び電信・電話用等で感電危害のおそれがない回路を除く充電電路の敷設・修理と、同じ除外条件のある区画場所の露出充電部付き開閉器操作が対象で、全ての低圧点検が一律対象ではありません。${marker(electricSpecialEducationWork)}${lowVoltageChapterExclusion >= 0 ? ` 対地電圧50V以下の電気機械器具・配線・移動電線には、安衛則354条により電気による危険防止の章を適用しません。${marker(lowVoltageChapterExclusion)}` : ""}`,
         `電気工事士は設備の設置・変更工事を行う資格、特別教育は危険業務へ就かせる事業者の安全教育で、別制度です。双方が必要になる場合もあります。${markers(electricWorkDefinition, electricianRestriction, electricSpecialEducationDuty, electricSpecialEducationWork)}`,
         ...(chiefElectricalEngineer >= 0
           ? [
@@ -4242,7 +4364,7 @@ function knownConclusion(
       conditions: [
         `電気工事士法3条の区分は、自家用・一般用・特殊・簡易の各電気工事で異なります。${marker(electricianRestriction)}`,
         `安衛則36条4号は、高圧・特別高圧では充電電路または支持物の敷設・点検・修理・操作を掲げています。${marker(electricSpecialEducationWork)}`,
-        `低圧では、充電電路の敷設・修理と、充電部分が露出した開閉器の操作が同号に掲げられています。${marker(electricSpecialEducationWork)}`,
+        `低圧では、対地電圧50V以下及び電信・電話用等で感電危害のおそれがない回路を除く充電電路の敷設・修理と、同じ除外条件のある充電部分が露出した開閉器の操作が同号に掲げられています。${marker(electricSpecialEducationWork)}`,
       ],
     };
   }
@@ -4470,6 +4592,18 @@ function knownConclusion(
       /リスクアセスメント対象物/.test(article.text),
   );
   if (hasChemicalManagerDomainSignal(normalized) && chemicalManagerDuty >= 0) {
+    const consumerProductOnly =
+      /(?:主として)?一般消費者(?:の生活)?(?:向け|用).*(?:だけ|のみ)|(?:だけ|のみ).*(?:主として)?一般消費者(?:の生活)?(?:向け|用)|市販(?:の)?洗剤(?:だけ|のみ)/.test(
+        normalized,
+      );
+    if (consumerProductOnly) {
+      return {
+        conclusion: `主として一般消費者の生活の用に供される製品だけを扱い、ほかのRA対象物を製造・取り扱わない事業場なら、安衛則12条の5第1項の選任対象外で、化学物質管理者の選任は不要です。${marker(chemicalManagerDuty)}`,
+        conditions: [
+          `「市販品」という呼び方だけでは除外を確定できません。製品表示と想定用途を確認し、業務用として供給・使用される製品を含む場合は、RA対象物への該当と選任要件を改めて確認します。${marker(chemicalManagerDuty)}`,
+        ],
+      };
+    }
     if (/確認済み選択肢:.*RA対象物を製造|RA対象物を製造/.test(normalized)) {
       return {
         conclusion: `RA対象物を製造する事業場では、事業場ごとに化学物質管理者を選任し、選任事由が発生した日から14日以内に、厚生労働大臣が定める講習の修了者または同等以上の能力を有する者から選任します。${marker(chemicalManagerDuty)}`,
@@ -4486,11 +4620,15 @@ function knownConclusion(
         ],
       };
     }
-    if (/確認済み選択肢:.*譲渡・提供のみ|譲渡・提供のみ/.test(normalized)) {
+    if (
+      /確認済み選択肢:.*譲渡・提供のみ|譲渡(?:または|・)?提供(?:だけ|のみ)|譲渡・提供のみ/.test(
+        normalized,
+      )
+    ) {
       return {
         conclusion: `RA対象物を製造・取り扱わず、譲渡または提供だけを行う事業場も、事業場ごとに化学物質管理者の選任対象です。表示・SDS通知等と教育管理に係る技術的事項を管理させ、選任事由が発生した日から14日以内に選任します。${marker(chemicalManagerDuty)}`,
         conditions: [
-          `その表示等と教育管理を他事業場で行う場合は、他事業場で選任した化学物質管理者に管理させるただし書があります。${marker(chemicalManagerDuty)}`,
+          `本社等で表示等と教育管理を一括していても各販売拠点の選任は必要です。一方、その表示等と教育管理の技術的事項は、他事業場で選任した化学物質管理者に管理させるただし書があります。${marker(chemicalManagerDuty)}`,
         ],
       };
     }
@@ -5339,6 +5477,12 @@ function knownConclusion(
       (article) =>
         article.lawShort === "酸欠則" && /^第?5条$/.test(article.articleNum),
     );
+    const tankOxygenProtection = articleIndex(
+      articles,
+      (article) =>
+        article.lawShort === "酸欠則" &&
+        /^第?5条の2$/.test(article.articleNum),
+    );
     const tankOxygenSupervisor = articleIndex(
       articles,
       (article) =>
@@ -5354,22 +5498,43 @@ function knownConclusion(
       (article) =>
         article.lawShort === "酸欠則" && /^第?13条$/.test(article.articleNum),
     );
+    const asksVentilationException =
+      /(?:換気.*(?:例外|できない|困難)|爆発.*換気|酸化.*換気|空気呼吸器|酸素呼吸器|送気マスク)/.test(
+        normalized,
+      );
     if (
+      asksVentilationException &&
       tankOxygenMeasurement >= 0 &&
       tankOxygenVentilation >= 0 &&
+      tankOxygenProtection >= 0 &&
       tankOxygenSupervisor >= 0 &&
       tankOxygenEducation >= 0 &&
       tankOxygenMonitor >= 0
     ) {
       return {
-        conclusion: `タンク内へ入る作業は、タンクという名称だけで一つの資格に決まりません。まず酸素欠乏危険場所に当たるかを確認し、該当する場合は作業開始前の酸素濃度等の測定、換気、常時監視、作業者への特別教育、作業主任者の選任が主要条件です。${markers(tankOxygenMeasurement, tankOxygenVentilation, tankOxygenSupervisor, tankOxygenEducation, tankOxygenMonitor)}`,
+        conclusion: `爆発・酸化等を防止するため換気できない場合、または作業の性質上換気が著しく困難な場合は、酸欠則5条の換気義務の例外です。${marker(tankOxygenVentilation)} ただし無対策で入れるわけではなく、酸欠則5条の2により同時就業者数以上の空気呼吸器、酸素呼吸器または送気マスクを備え、労働者に使用させます。${marker(tankOxygenProtection)}`,
         conditions: [
+          `換気の例外でも、その日の作業開始前の酸素濃度等の測定、作業者の常時監視、特別教育、作業主任者の選任は別に必要です。${markers(tankOxygenMeasurement, tankOxygenMonitor, tankOxygenEducation, tankOxygenSupervisor)}`,
+        ],
+      };
+    }
+    if (
+      tankOxygenMeasurement >= 0 &&
+      tankOxygenVentilation >= 0 &&
+      tankOxygenProtection >= 0 &&
+      tankOxygenSupervisor >= 0 &&
+      tankOxygenEducation >= 0 &&
+      tankOxygenMonitor >= 0
+    ) {
+      return {
+        conclusion: `タンク内作業は一つの資格だけで決まりません。酸素欠乏危険場所なら、作業開始前の濃度測定、原則換気、常時監視、特別教育、作業主任者が必要です。${markers(tankOxygenMeasurement, tankOxygenVentilation, tankOxygenSupervisor, tankOxygenEducation, tankOxygenMonitor)}`,
+        conditions: [
+          `爆発・酸化防止のため換気できない場合、または作業の性質上換気が著しく困難な場合は換気義務の例外ですが、同時就業者数以上の空気呼吸器等を備え、労働者に使用させます。${markers(tankOxygenVentilation, tankOxygenProtection)}`,
           ...(organicIndoorEquipment >= 0 && organicSupervisorSelection >= 0
             ? [
-                `シンナー等の有機溶剤やその残留物がある場合は、有機則による密閉・局所排気・プッシュプル等の設備措置と、対象業務での有機溶剤作業主任者も別に確認します。${markers(organicIndoorEquipment, organicSupervisorSelection)}`,
+                `有機溶剤がある場合は、屋内作業場等への該当、密閉・局所排気等の設備、有機溶剤作業主任者を別に確認します。${markers(organicIndoorEquipment, organicSupervisorSelection)}`,
               ]
             : []),
-          `入槽前に、タンクの用途、直前の内容物・残留物、洗浄方法を特定し、酸欠と化学物質の両方を評価します。${markers(tankOxygenMeasurement, organicIndoorEquipment)}`,
         ],
       };
     }
@@ -5965,7 +6130,7 @@ function knownConclusion(
     const isUnderTwo = /(?:2|二)(?:m|メートル)?未満/.test(normalized);
     if (isUnderTwo && highLiftDefinition >= 0) {
       return {
-        conclusion: `銘板・仕様上の作業床最高高さが2m未満なら、安衛令10条7号の「高所作業車」には該当せず、同区分の運転資格判定の対象外です。${marker(highLiftDefinition)}`,
+        conclusion: `作業床を最も高く上昇させた場合の床面の高さ（作業床最高高さ）が2m未満なら、安衛令10条7号の「高所作業車」には該当せず、同区分の運転資格判定の対象外です。${marker(highLiftDefinition)}`,
         conditions: [
           `判定は当日の作業高さではなく、作業床を最大まで上げたときの高さで行います。${marker(highLiftDefinition)}`,
           "別種の機械や別の危険・有害業務に当たる場合は、その業務に対応する要件を別に確認します。",
@@ -5974,7 +6139,7 @@ function knownConclusion(
     }
     if (isUnderTen && safetyEducationDuty >= 0) {
       return {
-        conclusion: `銘板・仕様上の作業床最高高さが2m以上10m未満の高所作業車運転には、特別教育が必要です。${markers(safetyEducationDuty, specialEducation, highLiftDefinition)}`,
+        conclusion: `作業床を最も高く上昇させた場合の床面の高さ（作業床最高高さ）が2m以上10m未満の高所作業車運転には、特別教育が必要です。${markers(safetyEducationDuty, specialEducation, highLiftDefinition)}`,
         conditions: [
           ...(highLiftDefinition >= 0
             ? [
@@ -5987,7 +6152,7 @@ function knownConclusion(
     }
     if (isTenOrMore && highLiftDecree >= 0 && restrictedWorkDuty >= 0) {
       return {
-        conclusion: `銘板・仕様上の作業床最高高さが10m以上の高所作業車運転は、高所作業車運転技能講習の修了者等に限られます。${markers(restrictedWorkDuty, highLiftDecree, highLiftDefinition)}`,
+        conclusion: `作業床を最も高く上昇させた場合の床面の高さ（作業床最高高さ）が10m以上の高所作業車運転は、高所作業車運転技能講習の修了者等に限られます。${markers(restrictedWorkDuty, highLiftDecree, highLiftDefinition)}`,
         conditions: [
           `作業床最高高さ10mちょうどは技能講習側です。${markers(restrictedWorkDuty, highLiftDecree)}`,
           ...(highLiftDefinition >= 0
@@ -6014,7 +6179,7 @@ function knownConclusion(
         };
       }
       return {
-        conclusion: `高所作業車は、銘板・仕様上の作業床最高高さで判定します。2m以上10m未満の運転は特別教育が必要で、10m以上は高所作業車運転技能講習の修了者等に限られます。${markers(highLiftDefinition, specialEducation, highLiftDecree, restrictedWorkDuty)}`,
+        conclusion: `高所作業車は、作業床を最も高く上昇させた場合の床面の高さ（作業床最高高さ）で判定します。2m以上10m未満の運転は特別教育が必要で、10m以上は高所作業車運転技能講習の修了者等に限られます。${markers(highLiftDefinition, specialEducation, highLiftDecree, restrictedWorkDuty)}`,
         conditions: [
           `作業床最高高さ10mちょうどは、技能講習側の就業制限対象です。${markers(highLiftDecree, restrictedWorkDuty)}`,
           ...(highLiftDefinition >= 0
@@ -6209,7 +6374,7 @@ function knownConclusion(
     }
     const preventionAnswer =
       heatPreventionGuideline >= 0
-        ? `予防と発症疑い時の対応を分けて準備します。予防では、WBGTを把握・評価し、値に応じて作業場所の暑熱を下げる、休止・休憩と作業時間を調整する、計画的に暑熱順化する、作業前後と作業中に水分・塩分を摂る、といった対策を組み合わせます。${marker(heatPreventionGuideline)} `
+        ? `予防では、WBGTを把握・評価し、値に応じて作業場所の暑熱を下げる、休止・休憩と作業時間を調整する、計画的に暑熱順化する、作業前後と作業中に水分・塩分を摂る、といった対策を組み合わせます。${marker(heatPreventionGuideline)} `
         : "";
     return {
       conclusion: `${preventionAnswer}2025年6月1日施行の安衛則612条の2により、熱中症のおそれがある作業では、症状の自覚や疑いを報告させる体制と、発症が疑われた人を作業から離脱させ、身体を冷却し、必要に応じて受診させる手順を整備・周知する必要があります。${marker(heat)}`,

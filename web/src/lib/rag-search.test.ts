@@ -668,13 +668,21 @@ describe("2026-08-09 電気作業の意味モデルに基づく一次資料 pin"
   });
 
   it.each([
-    ["電工いる？", "電気工事士法第2条"],
+    ["電工いる？", "電気工事士法第3条"],
     ["盤あけてはかる", "経産省電工Q&AQ9・Q10"],
     ["低圧のとくべつきょういく", "安衛則第36条"],
     ["電気の電源をする", "特別教育規程第6条"],
   ])("誤字・音声入力も同じ行為根拠へ正規化する: %s", (query, first) => {
     const keys = articleKeys(query);
     expect(keys[0]).toBe(first);
+    if (query === "電工いる？") {
+      expect(keys.slice(0, 4)).toEqual([
+        "電気工事士法第3条",
+        "電気工事士法第2条",
+        "安衛法第59条",
+        "安衛則第36条",
+      ]);
+    }
     expectNoUnrelatedQualificationDomain(query);
   });
 

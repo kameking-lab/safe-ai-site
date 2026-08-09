@@ -122,7 +122,13 @@ function extractEnergizedState(
   if (/(?:近接|付近|近く|接近)/.test(text) && /(?:充電|活線|電路|高圧|特高)/.test(text)) {
     return "proximity";
   }
-  if (/(?:充電中|活線|通電中|電圧がかか|電源が入)/.test(text)) {
+  if (
+    /(?:充電中|充電(?:した|された)?まま|活線|通電中|通電(?:した)?まま|電圧がかか|電源が入|電源(?:を)?入れたまま)/.test(
+      text,
+    ) ||
+    (/(?:充電部|充電部分)/.test(text) &&
+      /(?:テスター|測定|当て)/.test(text))
+  ) {
     return "energized";
   }
   return undefined;

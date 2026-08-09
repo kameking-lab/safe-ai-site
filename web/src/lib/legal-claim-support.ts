@@ -10,6 +10,7 @@ import {
   legalEffectiveStatusConclusion,
   legalProvisionUnitForQuery,
 } from "@/lib/legal-extractive-answer";
+import { hasElectricalDomainSignal } from "@/lib/electrical-work-model";
 
 export type LegalClaimSupportResult = {
   supported: boolean;
@@ -138,6 +139,36 @@ function claimHasAll(claim: string, terms: readonly string[]): boolean {
   return evidenceHasAll(normalizeEvidence(claim), terms);
 }
 
+function lowVoltageSpecialEducationScopeSupported(evidence: string): boolean {
+  return evidenceHasAll(evidence, [
+    "低圧",
+    "敷設若しくは修理の業務",
+    "対地電圧が五十ボルト以下",
+    "電信用のもの",
+    "電話用のもの",
+    "感電による危害を生ずるおそれのないもの",
+  ]);
+}
+
+function lowVoltageChapterExclusionSupported(evidence: string): boolean {
+  return evidenceHasAll(evidence, [
+    "この章の規定は",
+    "電気機械器具",
+    "配線",
+    "移動電線",
+    "対地電圧が五十ボルト以下",
+    "適用しない",
+  ]);
+}
+
+function assertsLowVoltageSpecialEducationScope(text: string): boolean {
+  return (
+    /低圧/.test(text) &&
+    /(?:特別教育|安衛則36条4号|同号|対象)/.test(text) &&
+    /(?:充電電路|敷設|修理|露出充電部|開閉器)/.test(text)
+  );
+}
+
 function hasDangerousUnsupportedContradiction(value: string): boolean {
   const withoutGuardedWarning = value.replace(
     /(?:資格・免許|資格)(?:が)?不要とは判断できません。?/g,
@@ -217,6 +248,16 @@ function inlineReviewedLocatorSupported(input: {
 }
 
 function knownClaimSupported(text: string, evidence: string): boolean | null {
+  // Rule 36(4) expressly excludes ground voltage at or below 50 V and
+  // telecom/telephone circuits that present no electric-shock hazard.  Any
+  // reviewed claim that describes the low-voltage special-education scope
+  // must carry that complete limiting language in its own cited evidence.
+  if (
+    assertsLowVoltageSpecialEducationScope(text) &&
+    !lowVoltageSpecialEducationScopeSupported(evidence)
+  ) {
+    return false;
+  }
   if (
     /高さ2m以上の一側足場を除く足場で、墜落により危険を及ぼすおそれのある箇所のうち、わく組足場以外の部分には手すり等と中桟等が必要/.test(
       text,
@@ -386,6 +427,223 @@ function knownClaimSupported(text: string, evidence: string): boolean | null {
     return evidenceHasAll(evidence, ["最大荷重", "フォークリフト"]);
   }
   if (
+    /^低圧設備を盤の外から見て、表示・異音・異臭を確認するだけなら、その点検だけで一律の国家資格が必要とは限りません/.test(
+      text,
+    )
+  ) {
+    return evidenceHasAll(evidence, [
+      "一般用電気工作物等又は自家用電気工作物を設置し又は変更する工事",
+      "軽微な工事を除く",
+      "低圧",
+      "敷設若しくは修理の業務",
+      "充電部分が露出している開閉器の操作の業務",
+    ]);
+  }
+  if (
+    /^対地電圧(?:\d+(?:\.\d+)?V|50V以下)は、安衛則36条4号の電気取扱業務の特別教育対象から除外されます/.test(
+      text,
+    )
+  ) {
+    return lowVoltageSpecialEducationScopeSupported(evidence);
+  }
+  if (
+    /^入力された(?:\d+(?:\.\d+)?V|50V以下)が対地電圧であれば、安衛則36条4号の電気取扱業務の特別教育対象から除外されます/.test(
+      text,
+    )
+  ) {
+    return lowVoltageSpecialEducationScopeSupported(evidence);
+  }
+  if (
+    /^電信用・電話用等の低圧回路は、感電による危害のおそれがない場合に安衛則36条4号の特別教育対象から除外されます/.test(
+      text,
+    )
+  ) {
+    return lowVoltageSpecialEducationScopeSupported(evidence);
+  }
+  if (
+    /^電話用という名称だけで危害のおそれなしとは確定せず、対地電圧と回路仕様を確認します/.test(
+      text,
+    )
+  ) {
+    return lowVoltageSpecialEducationScopeSupported(evidence);
+  }
+  if (/^公称電圧だけでは確定せず、対地電圧を確認します/.test(text)) {
+    return (
+      lowVoltageSpecialEducationScopeSupported(evidence) ||
+      lowVoltageChapterExclusionSupported(evidence)
+    );
+  }
+  if (
+    /^対地電圧(?:\d+(?:\.\d+)?V|50V以下)の電気機械器具・配線・移動電線には、安衛則354条により、同規則の電気による危険防止の章は適用されません/.test(
+      text,
+    ) ||
+    /^入力された(?:\d+(?:\.\d+)?V|50V以下)が対地電圧であれば、電気機械器具・配線・移動電線には安衛則354条の適用除外があります/.test(
+      text,
+    )
+  ) {
+    return lowVoltageChapterExclusionSupported(evidence);
+  }
+  if (
+    /^(?:したがって、)?346条・347条の絶縁用保護具・活線作業用器具・絶縁用防具の義務をこの回路へ一律には適用しません/.test(
+      text,
+    )
+  ) {
+    return lowVoltageChapterExclusionSupported(evidence);
+  }
+  if (
+    /^特別教育も別の安衛則36条4号で、対地電圧50V以下の充電電路は対象から除かれます/.test(
+      text,
+    )
+  ) {
+    return lowVoltageSpecialEducationScopeSupported(evidence);
+  }
+  if (
+    /^対地電圧50V以下の電気機械器具・配線・移動電線には、安衛則354条により電気による危険防止の章を適用しません/.test(
+      text,
+    )
+  ) {
+    return lowVoltageChapterExclusionSupported(evidence);
+  }
+  if (
+    /^この除外は特別教育の範囲です/.test(text)
+  ) {
+    return evidenceHasAll(evidence, [
+      "一般用電気工作物等又は自家用電気工作物を設置し又は変更する工事",
+      "自家用電気工作物に係る電気工事",
+      "一般用電気工作物等に係る電気工事",
+      "従事してはならない",
+    ]);
+  }
+  if (
+    /^設備の設置・変更が電気工事士法上の「?電気工事」?に当たる場合(?:の従事制限は、別に確認します|、同法の従事制限も特別教育とは別に確認します)/.test(
+      text,
+    )
+  ) {
+    return evidenceHasAll(evidence, [
+      "一般用電気工作物等又は自家用電気工作物を設置し又は変更する工事",
+      "自家用電気工作物に係る電気工事",
+      "一般用電気工作物等に係る電気工事",
+      "従事してはならない",
+    ]);
+  }
+  if (
+    /^電気工事士法上の電気工事への該当と従事制限は別制度なので、設置・変更作業なら別に確認します/.test(
+      text,
+    )
+  ) {
+    return evidenceHasAll(evidence, [
+      "一般用電気工作物等又は自家用電気工作物を設置し又は変更する工事",
+      "自家用電気工作物に係る電気工事",
+      "一般用電気工作物等に係る電気工事",
+      "従事してはならない",
+    ]);
+  }
+  if (
+    /^一方、盤を開けて測定する、配線を外す・つなぐ、充電部やその近くで作業する場合は、電気工事士、電気取扱業務の特別教育、感電防止措置がそれぞれ関係します/.test(
+      text,
+    )
+  ) {
+    return evidenceHasAll(evidence, [
+      "一般用電気工作物等又は自家用電気工作物を設置し又は変更する工事",
+      "自家用電気工作物に係る電気工事",
+      "一般用電気工作物等に係る電気工事",
+      "法第59条第3項の厚生労働省令で定める危険又は有害な業務",
+      "高圧",
+      "特別高圧",
+      "充電電路若しくは当該充電電路の支持物の敷設点検修理若しくは操作",
+      "低圧",
+      "敷設若しくは修理の業務",
+      "絶縁用保護具",
+      "活線作業用器具",
+      "低圧の充電電路に近接する場所",
+      "絶縁用防具",
+    ]);
+  }
+  if (
+    /^高圧・特別高圧では、充電電路または支持物の敷設・点検・修理・操作が特別教育の対象です/.test(
+      text,
+    )
+  ) {
+    return evidenceHasAll(evidence, [
+      "高圧",
+      "特別高圧",
+      "充電電路若しくは当該充電電路の支持物の敷設点検修理若しくは操作",
+    ]);
+  }
+  if (
+    /^低圧では、対地電圧50V以下及び電信・電話用等で感電危害のおそれがない回路を除く充電電路の敷設・修理と、同じ除外条件のある区画場所の露出充電部付き開閉器操作が対象で、全ての低圧点検が一律対象ではありません/.test(
+      text,
+    )
+  ) {
+    return (
+      lowVoltageSpecialEducationScopeSupported(evidence) &&
+      evidenceHasAll(evidence, [
+        "配電盤室変電室等区画された場所",
+        "充電部分が露出している開閉器の操作の業務",
+      ])
+    );
+  }
+  if (
+    /^電気工事士は設備の設置・変更工事を行う資格、特別教育は危険業務へ就かせる事業者の安全教育で、別制度です/.test(
+      text,
+    )
+  ) {
+    return (
+      evidenceHasAll(evidence, [
+        "一般用電気工作物等又は自家用電気工作物を設置し又は変更する工事",
+        "自家用電気工作物に係る電気工事",
+        "一般用電気工作物等に係る電気工事",
+        "危険又は有害な業務で厚生労働省令で定めるもの",
+      ]) &&
+      evidenceHasAny(evidence, [
+        "に従事してはならない",
+        "従事させてはならない",
+      ]) &&
+      evidenceHasAny(evidence, [
+        "特別の教育を行なわなければならない",
+        "特別の教育を行わなければならない",
+      ])
+    );
+  }
+  if (/^双方が必要になる場合もあります/.test(text)) {
+    return (
+      evidenceHasAll(evidence, [
+        "一般用電気工作物等又は自家用電気工作物を設置し又は変更する工事",
+        "危険又は有害な業務で厚生労働省令で定めるもの",
+        "充電電路若しくは当該充電電路の支持物の敷設点検修理若しくは操作",
+      ]) &&
+      evidenceHasAny(evidence, [
+        "に従事してはならない",
+        "従事させてはならない",
+      ]) &&
+      evidenceHasAny(evidence, [
+        "特別の教育を行なわなければならない",
+        "特別の教育を行わなければならない",
+      ])
+    );
+  }
+  if (
+    /^電気主任技術者は事業用電気工作物の保安監督をする制度で、個々の作業者の電気工事士資格や特別教育の代わりではありません/.test(
+      text,
+    ) ||
+    /^事業用電気工作物の保安監督をする電気主任技術者も別の役割で、個々の作業者の資格・教育を置き換えるものではありません/.test(
+      text,
+    )
+  ) {
+    return (
+      evidenceHasAll(evidence, [
+        "事業用電気工作物の工事維持及び運用に関する保安の監督",
+        "自家用電気工作物に係る電気工事",
+        "一般用電気工作物等に係る電気工事",
+        "危険又は有害な業務で厚生労働省令で定めるもの",
+      ]) &&
+      evidenceHasAny(evidence, [
+        "特別の教育を行なわなければならない",
+        "特別の教育を行わなければならない",
+      ])
+    );
+  }
+  if (
     /電気作業で必要な資格・教育は一つではありません.*電気工事士免状または認定証等.*特別教育/.test(
       text,
     )
@@ -505,16 +763,16 @@ function knownClaimSupported(text: string, evidence: string): boolean | null {
     ]);
   }
   if (
-    /低圧では、充電電路の敷設・修理と、充電部分が露出した開閉器の操作が同号に掲げられています/.test(
+    /低圧では、対地電圧50V以下及び電信・電話用等で感電危害のおそれがない回路を除く充電電路の敷設・修理と、同じ除外条件のある充電部分が露出した開閉器の操作が同号に掲げられています/.test(
       text,
     )
   ) {
-    return evidenceHasAll(evidence, [
-      "低圧",
-      "充電電路",
-      "敷設若しくは修理の業務",
-      "充電部分が露出している開閉器の操作の業務",
-    ]);
+    return (
+      lowVoltageSpecialEducationScopeSupported(evidence) &&
+      evidenceHasAll(evidence, [
+        "充電部分が露出している開閉器の操作の業務",
+      ])
+    );
   }
   if (
     /安衛法14条は、対象作業の区分に応じて作業主任者を選任し、労働者の指揮等を行わせるよう定めています/.test(
@@ -525,6 +783,57 @@ function knownClaimSupported(text: string, evidence: string): boolean | null {
       "政令で定めるものについては",
       "作業主任者を選任し",
       "当該作業に従事する労働者の指揮その他の厚生労働省令で定める事項を行わせなければならない",
+    ]);
+  }
+  if (/^電気作業全般に一律の「作業主任者」を置く制度はありません/.test(text)) {
+    return evidenceHasAll(evidence, [
+      "政令で定めるものについては",
+      "作業主任者を選任",
+      "法第14条の政令で定める作業は次のとおり",
+    ]);
+  }
+  if (
+    /^作業主任者は安衛法14条と安衛令6条で指定された作業ごとの制度で、同令の「高圧室内作業」は圧気工法の高気圧室内作業を指し、電気の高圧作業ではありません/.test(
+      text,
+    )
+  ) {
+    return evidenceHasAll(evidence, [
+      "政令で定めるものについては",
+      "作業主任者を選任",
+      "法第14条の政令で定める作業は次のとおり",
+      "高圧室内作業",
+      "圧気工法",
+      "大気圧を超える気圧下の作業室",
+      "内部において行う作業",
+    ]);
+  }
+  if (
+    /^安衛則350条が安衛則339条、341条1項、342条1項、344条1項、345条1項の作業を列挙しており、停電作業と高圧・特別高圧の活線・近接作業では、別制度の「作業の指揮者」が必要です/.test(
+      text,
+    )
+  ) {
+    return evidenceHasAll(evidence, [
+      "第三百三十九条",
+      "第三百四十一条第一項",
+      "第三百四十二条第一項",
+      "第三百四十四条第一項",
+      "第三百四十五条第一項",
+      "作業の指揮者を定めて",
+      "作業を直接指揮",
+    ]);
+  }
+  if (
+    /^安衛則36条4号の特別教育対象も低圧か高圧・特別高圧かで異なるため、電圧区分に加え、停電・活線・近接のどの作業かを確認します/.test(
+      text,
+    )
+  ) {
+    return evidenceHasAll(evidence, [
+      "高圧",
+      "特別高圧",
+      "充電電路若しくは当該充電電路の支持物の敷設点検修理若しくは操作",
+      "低圧",
+      "敷設若しくは修理の業務",
+      "充電部分が露出している開閉器の操作の業務",
     ]);
   }
   if (
@@ -694,6 +1003,37 @@ function knownClaimSupported(text: string, evidence: string): boolean | null {
       "玉掛け技能講習を修了した者",
     ]);
   }
+  if (
+    /^玉掛けは、クレーン等のつり上げ荷重が1トン未満なら特別教育、1トン以上なら玉掛け技能講習の修了者等に限られます/.test(
+      text,
+    )
+  ) {
+    return evidenceHasAll(evidence, [
+      "つり上げ荷重が1トン以上のクレーン",
+      "移動式クレーン",
+      "デリック",
+      "玉掛けの業務",
+      "玉掛け技能講習を修了した者",
+      "つり上げ荷重が1トン未満のクレーン",
+      "安全のための特別の教育を行なわなければならない",
+    ]);
+  }
+  if (
+    /^区分は実際の荷やつり荷重量ではなく、機械の構造・材料に応じて負荷できる最大荷重である「つり上げ荷重」で判定します/.test(
+      text,
+    )
+  ) {
+    return evidenceHasAll(evidence, [
+      "構造及び材料に応じて負荷させることができる最大の荷重",
+    ]);
+  }
+  if (/^1トンちょうどは玉掛け技能講習側です/.test(text)) {
+    return evidenceHasAll(evidence, [
+      "つり上げ荷重が1トン以上",
+      "玉掛けの業務",
+      "玉掛け技能講習を修了した者",
+    ]);
+  }
   if (/つり上げ荷重1トンちょうどは、就業制限の対象/.test(text)) {
     return evidenceHasAll(evidence, [
       "つり上げ荷重が一トン以上",
@@ -818,8 +1158,37 @@ function knownClaimSupported(text: string, evidence: string): boolean | null {
       "特別の教育を行",
     ]);
   }
-  if (/ロープ高所作業は、この号の対象から除かれ/.test(text)) {
-    return evidenceHasAll(evidence, ["ロープ高所作業", "除く"]);
+  if (
+    /^フルハーネスについて一律の国家資格免状があるわけではありません/.test(
+      text,
+    )
+  ) {
+    return (
+      evidenceHasAll(evidence, [
+        "危険又は有害な業務で厚生労働省令で定めるもの",
+        "高さが2メートル以上",
+        "作業床を設けることが困難",
+        "フルハーネス型",
+      ]) &&
+      evidenceHasAny(evidence, [
+        "特別の教育を行なわなければならない",
+        "特別の教育を行わなければならない",
+      ])
+    );
+  }
+  if (
+    /ロープ高所作業は(?:安衛則36条41号の|、この号の)対象から除かれ/.test(
+      text,
+    )
+  ) {
+    return (
+      evidenceHasAll(evidence, [
+        "昇降器具により身体を保持しつつ行う作業",
+        "ロープ高所作業",
+        "フルハーネス型のものを用いて行う作業",
+        "前号に掲げる業務を除く",
+      ])
+    );
   }
   if (/高さだけでなく、作業床を設けることが困難か/.test(text)) {
     return evidenceHasAll(evidence, [
@@ -833,6 +1202,35 @@ function knownClaimSupported(text: string, evidence: string): boolean | null {
       "高所作業車",
       "特別の教育を行",
     ]);
+  }
+  if (
+    /^高所作業車は、作業床を最も高く上昇させた場合の床面の高さ（作業床最高高さ）で判定します/.test(
+      text,
+    )
+  ) {
+    return evidenceHasAll(evidence, [
+      "作業床を最も高く上昇させた場合",
+      "床面の高さ",
+      "二メートル以上の高所作業車",
+    ]);
+  }
+  if (
+    /^2m以上10m未満の運転は特別教育が必要で、10m以上は高所作業車運転技能講習の修了者等に限られます/.test(
+      text,
+    )
+  ) {
+    return (
+      evidenceHasAll(evidence, [
+        "十メートル未満の高所作業車",
+        "作業床の高さが十メートル以上の高所作業車",
+        "運転の業務",
+        "技能講習を修了した者",
+      ]) &&
+      evidenceHasAny(evidence, [
+        "当該業務に就かせてはならない",
+        "業務に就かせてはならない",
+      ])
+    );
   }
   if (
     /高所作業車の作業床上では、事業者は労働者に要求性能墜落制止用器具等を使用させ、労働者本人も使用しなければ/.test(
@@ -965,7 +1363,9 @@ function knownClaimSupported(text: string, evidence: string): boolean | null {
     ]);
   }
   if (
-    /銘板・仕様上の作業床最高高さが2m以上10m未満の高所作業車運転/.test(text)
+    /作業床を最も高く上昇させた場合の床面の高さ（作業床最高高さ）が2m以上10m未満の高所作業車運転/.test(
+      text,
+    )
   ) {
     return evidenceHasAll(evidence, [
       "作業床の高さ",
@@ -973,6 +1373,29 @@ function knownClaimSupported(text: string, evidence: string): boolean | null {
       "10メートル未満",
       "高所作業車",
       "特別の教育を行",
+    ]);
+  }
+  if (
+    /作業床を最も高く上昇させた場合の床面の高さ（作業床最高高さ）が2m未満なら/.test(
+      text,
+    )
+  ) {
+    return evidenceHasAll(evidence, [
+      "作業床を最も高く上昇させた場合",
+      "床面の高さ",
+      "二メートル以上の高所作業車",
+    ]);
+  }
+  if (
+    /作業床を最も高く上昇させた場合の床面の高さ（作業床最高高さ）が10m以上の高所作業車運転/.test(
+      text,
+    )
+  ) {
+    return evidenceHasAll(evidence, [
+      "作業床を最も高く上昇させた場合",
+      "床面の高さ",
+      "作業床の高さが十メートル以上の高所作業車",
+      "技能講習を修了した者",
     ]);
   }
   if (/作業床の高さ10m以上.*高所作業車.*技能講習/.test(text)) {
@@ -991,7 +1414,11 @@ function knownClaimSupported(text: string, evidence: string): boolean | null {
       "技能講習を修了した者",
     ]);
   }
-  if (/銘板・仕様上の作業床最高高さが2m以上で、10m未満は特別教育/.test(text)) {
+  if (
+    /作業床を最も高く上昇させた場合の床面の高さ（作業床最高高さ）が2m以上で、10m未満は特別教育/.test(
+      text,
+    )
+  ) {
     return evidenceHasAll(evidence, [
       "作業床の高さ",
       "2メートル以上",
@@ -1002,7 +1429,11 @@ function knownClaimSupported(text: string, evidence: string): boolean | null {
       "技能講習を修了した者",
     ]);
   }
-  if (/作業床最高高さ10mちょうどは技能講習側/.test(text)) {
+  if (
+    /作業床最高高さ10mちょうどは、?(?:技能講習側|技能講習側の就業制限対象)/.test(
+      text,
+    )
+  ) {
     return evidenceHasAll(evidence, [
       "作業床の高さ",
       "10メートル以上",
@@ -1044,7 +1475,22 @@ function knownClaimSupported(text: string, evidence: string): boolean | null {
     );
   }
   if (
-    /^加えて、作業場ごとに作業からの離脱、身体の冷却、必要に応じた受診等の措置内容と実施手順をあらかじめ定め、周知/.test(
+    /^予防では、WBGTを把握・評価し、値に応じて作業場所の暑熱を下げる、休止・休憩と作業時間を調整する、計画的に暑熱順化する、作業前後と作業中に水分・塩分を摂る、といった対策を組み合わせます/.test(
+      text,
+    )
+  ) {
+    return evidenceHasAll(evidence, [
+      "湿球黒球温度の値（WBGT値）の把握",
+      "WBGT値の低減",
+      "作業の休止時間や休憩時間の確保",
+      "作業時間の短縮",
+      "計画的に暑熱順化期間を設ける",
+      "水分及び塩分の摂取",
+      "作業前後の摂取と作業中の定期的な摂取",
+    ]);
+  }
+  if (
+    /^(?:加えて、|発症が疑われた場合に備え、)作業場ごとに作業からの離脱、身体の冷却、必要に応じた受診等の措置内容と実施手順(?:も)?あらかじめ定め、周知/.test(
       text,
     )
   ) {
@@ -1059,6 +1505,29 @@ function knownClaimSupported(text: string, evidence: string): boolean | null {
       evidenceHasAny(evidence, [
         "当該手順を周知",
         "当該措置の内容及びその実施に関する手順を周知させなければならない",
+        "作業従事者に周知させなければならない",
+      ])
+    );
+  }
+  if (
+    /^安衛則612条の2の法定義務は報告体制と悪化防止手順で、WBGT・休憩・暑熱順化等の予防管理は厚生労働省の2026年ガイドラインに基づく対策です/.test(
+      text,
+    )
+  ) {
+    return (
+      evidenceHasAll(evidence, [
+        "熱中症を生ずるおそれのある作業",
+        "報告をさせる体制を整備",
+        "作業からの離脱",
+        "身体の冷却",
+        "必要な措置の内容及びその実施に関する手順を定め",
+        "湿球黒球温度の値（WBGT値）の把握",
+        "休憩時間の確保",
+        "暑熱順化期間を設ける",
+        "水分及び塩分の摂取",
+      ]) &&
+      evidenceHasAny(evidence, [
+        "当該体制を周知",
         "作業従事者に周知させなければならない",
       ])
     );
@@ -1302,6 +1771,63 @@ function knownClaimSupported(text: string, evidence: string): boolean | null {
   if (/作業が法令上の有機溶剤業務に当たるか/.test(text)) {
     return evidenceHasAll(evidence, ["有機溶剤業務"]);
   }
+  if (
+    /^タンク内作業は一つの資格だけで決まりません/.test(
+      text,
+    )
+  ) {
+    return evidenceHasAll(evidence, [
+      "酸素欠乏危険作業主任者",
+      "特別の教育",
+      "常時作業の状況を監視",
+    ]);
+  }
+  if (
+    /^酸素欠乏危険場所なら、作業開始前の濃度測定、原則換気、常時監視、特別教育、作業主任者が必要です/.test(
+      text,
+    )
+  ) {
+    return evidenceHasAll(evidence, [
+      "その日の作業を開始する前に",
+      "酸素",
+      "濃度を測定",
+      "酸素の濃度を18パーセント以上",
+      "換気しなければならない",
+      "酸素欠乏危険作業主任者技能講習",
+      "作業主任者を選任",
+      "特別の教育を行",
+      "常時作業の状況を監視",
+    ]);
+  }
+  if (
+    /^有機溶剤がある場合は、屋内作業場等への該当、密閉・局所排気等の設備、有機溶剤作業主任者を別に確認します/.test(
+      text,
+    )
+  ) {
+    return evidenceHasAll(evidence, [
+      "屋内作業場等",
+      "有機溶剤業務",
+      "発散源を密閉する設備",
+      "局所排気装置",
+      "プッシュプル型換気装置",
+      "有機溶剤作業主任者技能講習を修了した者",
+      "有機溶剤作業主任者を選任",
+    ]);
+  }
+  if (
+    /^入槽前には、その日の作業を開始する前に酸素濃度等を測定し、屋内作業場等で有機溶剤業務を行う場合は、発散源の密閉・局所排気等の設備措置を確認します/.test(
+      text,
+    )
+  ) {
+    return evidenceHasAll(evidence, [
+      "その日の作業を開始する前に",
+      "濃度を測定",
+      "屋内作業場等",
+      "有機溶剤業務",
+      "発散源を密閉する設備",
+      "局所排気装置",
+    ]);
+  }
   if (/酸素欠乏危険作業では、作業を常時監視/.test(text)) {
     return evidenceHasAll(evidence, [
       "酸素欠乏危険作業",
@@ -1398,6 +1924,58 @@ function knownClaimSupported(text: string, evidence: string): boolean | null {
       "第二種酸素欠乏危険作業",
       "硫化水素の濃度を百万分の十以下",
       "換気しなければならない",
+    ]);
+  }
+  if (
+    /^爆発・酸化等を防止するため換気できない場合、または作業の性質上換気が著しく困難な場合は、酸欠則5条の換気義務の例外です/.test(
+      text,
+    )
+  ) {
+    return evidenceHasAll(evidence, [
+      "爆発、酸化等を防止するため換気することができない場合",
+      "作業の性質上換気することが著しく困難な場合",
+      "この限りでない",
+    ]);
+  }
+  if (
+    /^ただし無対策で入れるわけではなく、酸欠則5条の2により同時就業者数以上の空気呼吸器、酸素呼吸器または送気マスクを備え、労働者に使用させます/.test(
+      text,
+    )
+  ) {
+    return evidenceHasAll(evidence, [
+      "前条第一項ただし書の場合",
+      "同時に就業する労働者の人数と同数以上",
+      "空気呼吸器",
+      "酸素呼吸器",
+      "送気マスク",
+      "労働者にこれを使用させなければならない",
+    ]);
+  }
+  if (
+    /^換気の例外でも、その日の作業開始前の酸素濃度等の測定、作業者の常時監視、特別教育、作業主任者の選任は別に必要です/.test(
+      text,
+    )
+  ) {
+    return evidenceHasAll(evidence, [
+      "その日の作業を開始する前",
+      "酸素の濃度を測定",
+      "常時作業の状況を監視",
+      "特別の教育を行わなければならない",
+      "酸素欠乏危険作業主任者を選任",
+    ]);
+  }
+  if (
+    /^爆発・酸化防止のため換気できない場合、または作業の性質上換気が著しく困難な場合は換気義務の例外ですが、同時就業者数以上の空気呼吸器等を備え、労働者に使用させます/.test(
+      text,
+    )
+  ) {
+    return evidenceHasAll(evidence, [
+      "爆発、酸化等を防止するため換気することができない場合",
+      "作業の性質上換気することが著しく困難な場合",
+      "この限りでない",
+      "同時に就業する労働者の人数と同数以上",
+      "空気呼吸器等",
+      "労働者にこれを使用させなければならない",
     ]);
   }
   if (
@@ -1623,6 +2201,130 @@ function knownClaimSupported(text: string, evidence: string): boolean | null {
   if (/^死亡した場合も、同条1項による「遅滞なく」の報告対象/.test(text)) {
     return evidenceHasAll(evidence, ["死亡し又は休業したとき", "遅滞なく"]);
   }
+  if (
+    /^主として一般消費者の生活の用に供される製品だけを扱い、ほかのRA対象物を製造・取り扱わない事業場なら、安衛則12条の5第1項の選任対象外で、化学物質管理者の選任は不要です/.test(
+      text,
+    )
+  ) {
+    return evidenceHasAll(evidence, [
+      "主として一般消費者の生活の用に供される製品に係るものを除く",
+      "リスクアセスメント対象物",
+      "製造し、又は取り扱う事業場ごとに",
+      "化学物質管理者を選任",
+    ]);
+  }
+  if (
+    /^「市販品」という呼び方だけでは除外を確定できません/.test(text)
+  ) {
+    return evidenceHasAll(evidence, [
+      "主として一般消費者の生活の用に供される製品に係るものを除く",
+      "リスクアセスメント対象物",
+    ]);
+  }
+  if (
+    /^製品表示と想定用途を確認し、業務用として供給・使用される製品を含む場合は、RA対象物への該当と選任要件を改めて確認します/.test(
+      text,
+    )
+  ) {
+    return evidenceHasAll(evidence, [
+      "主として一般消費者の生活の用に供される製品に係るものを除く",
+      "リスクアセスメント対象物",
+      "製造し、又は取り扱う事業場ごとに",
+    ]);
+  }
+  if (
+    /^RA対象物を製造・取り扱わず、譲渡または提供だけを行う事業場も、事業場ごとに化学物質管理者の選任対象です/.test(
+      text,
+    )
+  ) {
+    return evidenceHasAll(evidence, [
+      "リスクアセスメント対象物の譲渡又は提供を行う事業場",
+      "製造し又は取り扱う事業場を除く",
+      "事業場ごとに、化学物質管理者を選任",
+    ]);
+  }
+  if (
+    /^表示・SDS通知等と教育管理に係る技術的事項を管理させ、選任事由が発生した日から14日以内に選任します/.test(
+      text,
+    )
+  ) {
+    return evidenceHasAll(evidence, [
+      "表示等及び教育管理に係る技術的事項を管理させなければならない",
+      "事由が発生した日から十四日以内",
+    ]);
+  }
+  if (
+    /^化学物質管理者は、リスクアセスメント対象物（RA対象物）を製造し、または取り扱う事業場ごとに選任が必要です/.test(
+      text,
+    )
+  ) {
+    return evidenceHasAll(evidence, [
+      "リスクアセスメント対象物",
+      "製造し又は取り扱う事業場ごとに",
+      "化学物質管理者を選任",
+      "化学物質の管理に係る技術的事項を管理させなければならない",
+    ]);
+  }
+  if (
+    /^本社等で表示等と教育管理を一括していても各販売拠点の選任は必要です/.test(
+      text,
+    )
+  ) {
+    return evidenceHasAll(evidence, [
+      "リスクアセスメント対象物の譲渡又は提供を行う事業場",
+      "事業場ごとに、化学物質管理者を選任",
+      "表示等及び教育管理を、当該事業場以外の事業場",
+      "他の事業場において選任した化学物質管理者に管理させなければならない",
+    ]);
+  }
+  if (
+    /^一方、その表示等と教育管理の技術的事項は、他事業場で選任した化学物質管理者に管理させるただし書があります/.test(
+      text,
+    )
+  ) {
+    return evidenceHasAll(evidence, [
+      "表示等及び教育管理を、当該事業場以外の事業場",
+      "他の事業場において選任した化学物質管理者に管理させなければならない",
+    ]);
+  }
+  if (
+    /^RA対象物を譲渡・提供するだけの事業場も別途対象になります/.test(
+      text,
+    )
+  ) {
+    return evidenceHasAll(evidence, [
+      "リスクアセスメント対象物の譲渡又は提供を行う事業場",
+      "製造し又は取り扱う事業場を除く",
+      "化学物質管理者を選任",
+    ]);
+  }
+  if (/^選任すべき事由が発生した日から14日以内に選任します/.test(text)) {
+    return evidenceHasAll(evidence, [
+      "化学物質管理者を選任すべき事由が発生した日から14日以内に選任すること",
+    ]);
+  }
+  if (
+    /^RA対象物の製造事業場では、厚生労働大臣が定める講習の修了者または同等以上の能力がある者から選任します/.test(
+      text,
+    )
+  ) {
+    return evidenceHasAll(evidence, [
+      "リスクアセスメント対象物を製造している事業場",
+      "厚生労働大臣が定める化学物質の管理に関する講習を修了した者",
+      "同等以上の能力を有すると認められる者",
+    ]);
+  }
+  if (
+    /^製造事業場以外の取扱事業場では、その講習修了者等に加え、所定事項を担当するために必要な能力があると認められる者も選任できます/.test(
+      text,
+    )
+  ) {
+    return evidenceHasAll(evidence, [
+      "イに掲げる事業場以外の事業場",
+      "イに定める者のほか",
+      "第1項各号の事項を担当するために必要な能力を有すると認められる者",
+    ]);
+  }
   return null;
 }
 
@@ -1668,6 +2370,24 @@ export function validateServiceFirstLegalClaimSupport(input: {
 }): LegalClaimSupportResult {
   const claims = parseClaims(input.answer);
   const failures: string[] = [];
+  const answerDescribesLowVoltageProtection =
+    hasElectricalDomainSignal(input.query) &&
+    /(?:感電防止措置|絶縁用保護具|活線作業用器具|絶縁用防具)/.test(
+      input.answer,
+    ) &&
+    /低圧/.test(input.answer);
+  const hasValidLowVoltageChapterExclusionSource = input.articles.some(
+    (article) =>
+      article.lawShort === "安衛則" &&
+      /^第?354条$/.test(article.articleNum) &&
+      lowVoltageChapterExclusionSupported(normalizeEvidence(article.text)),
+  );
+  if (
+    answerDescribesLowVoltageProtection &&
+    !hasValidLowVoltageChapterExclusionSource
+  ) {
+    failures.push("answer:low-voltage-chapter-exclusion-evidence");
+  }
   const citedIndexes = new Set<number>();
   // Legal answers are produced by the deterministic, reviewed formatter.  A
   // substring regex alone must never allow an unreviewed premise or suffix to

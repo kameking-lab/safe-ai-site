@@ -181,7 +181,9 @@ describe("電気作業のanswer-first合成", () => {
   it("活線端子の電圧不明質問へ低圧・高圧の双方を先に答える", () => {
     const result = answerTurn("活線のまま端子を締める");
     expect(result.answer).toMatch(/低圧[\s\S]*346条[\s\S]*高圧[\s\S]*341条/);
-    expect(result.answer).toMatch(/低圧の特別教育対象[\s\S]*敷設・修理[\s\S]*開閉器の操作/);
+    expect(result.answer).toMatch(
+      /低圧の特別教育対象[\s\S]*敷設・修理[\s\S]*開閉器(?:の)?操作/,
+    );
     expect(result.sourceKeys).toEqual(
       expect.arrayContaining(["安衛則第341条", "安衛則第346条"]),
     );
@@ -228,7 +230,9 @@ describe("電気作業のanswer-first合成", () => {
     const result = answerTurn("低圧と高圧の教育の違い", {
       topicDomain: "electrical",
     });
-    expect(result.answer).toMatch(/低圧[\s\S]*充電電路の敷設・修理[\s\S]*露出充電部付き開閉器の操作/);
+    expect(result.answer).toMatch(
+      /低圧[\s\S]*充電電路の敷設・修理[\s\S]*露出充電部付き開閉器(?:の)?操作/,
+    );
     expect(result.answer).toMatch(/高圧・特別高圧[\s\S]*敷設・点検・修理・操作/);
     expect(result.sourceKeys).toContain("安衛則第36条");
   });

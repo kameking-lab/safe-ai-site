@@ -816,7 +816,7 @@ export function lawArticleToSource(
             : /^第?5条の2$/.test(article.articleNum) &&
                 article.text.includes("同時に就業する労働者の人数と同数以上") &&
                 article.text.includes("空気呼吸器等")
-                ? "第5条ただし書の場合「同時に就業する労働者の人数と同数以上の空気呼吸器等を備え、労働者にこれを使用させなければならない」"
+                ? (matchedParagraphLabeledText ?? article.text)
                 : /^第?11条$/.test(article.articleNum) &&
                   article.text.includes("酸素欠乏危険作業主任者技能講習") &&
                   article.text.includes(

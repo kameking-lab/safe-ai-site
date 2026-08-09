@@ -91,8 +91,30 @@ test("forced colorsでも見出し・主操作・現在値が残る", async ({
   }
 
   await page.goto("/", { waitUntil: "domcontentloaded" });
-  await expect(page.locator('[data-home-section="heat"]')).toBeVisible();
-  await expect(page.locator("[data-warning-card]")).toHaveCount(0);
+  const heatSection = page.locator('[data-home-section="heat"]');
+  await expect(heatSection).toBeVisible();
+  const heatStatus = heatSection.locator("[data-heat-status]").first();
+  await expect(heatStatus).toBeVisible();
+  const heatWarnings = heatSection.locator("[data-warning-card]");
+  const warningCount = await heatWarnings.count();
+  expect(warningCount).toBeLessThanOrEqual(1);
+  if (warningCount === 0) {
+    await expect(heatStatus).toHaveAttribute(
+      "data-heat-status",
+      /^(?:national-live|ready)$/u,
+    );
+  } else {
+    const warning = heatWarnings.first();
+    await expect(warning).toBeVisible();
+    await expect(warning).toHaveAttribute(
+      "data-warning-trigger",
+      /^upstream-(?:unavailable|stale)$/u,
+    );
+    await expect(warning).toContainText(/公式情報を確認/u);
+    await expect(
+      heatSection.locator('a[href^="https://www.wbgt.env.go.jp/"]').first(),
+    ).toBeVisible();
+  }
   await context.close();
 });
 

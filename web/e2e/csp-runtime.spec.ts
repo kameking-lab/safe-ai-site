@@ -96,11 +96,12 @@ test("development compatibility and Preview strict candidate CSP have zero viola
       ).toEqual([]);
     } else {
       // Next dev's framework bootstrap does not propagate request nonces.
-      expect(scriptDirective(enforced), route).toContain("'unsafe-inline'");
-      expect(scriptDirective(reportOnly), route).not.toContain("'strict-dynamic'");
-      expect(scriptDirective(reportOnly), route).toContain("'unsafe-inline'");
-      expect(scriptDirective(reportOnly), route).toContain("'unsafe-eval'");
-      expect(scriptDirective(reportOnly), route).not.toContain("'nonce-");
+      const enforcedScript = scriptDirective(enforced);
+      expect(enforcedScript, route).toContain("'unsafe-inline'");
+      expect(enforcedScript, route).toContain("'unsafe-eval'");
+      expect(enforcedScript, route).not.toContain("'strict-dynamic'");
+      expect(enforcedScript, route).not.toContain("'nonce-");
+      expect(reportOnly, route).toBe("");
     }
   }
 

@@ -4,7 +4,11 @@ import { verifiedPrimaryNoticeArticles } from "./verified-primary-notices";
 
 describe("確認済み厚労省一次資料", () => {
   it("告示276号の固定本文hash・公式URL・確認状態を保持する", () => {
-    const notice = verifiedPrimaryNoticeArticles[0]!;
+    const notice = verifiedPrimaryNoticeArticles.find(
+      ({ lawShort }) => lawShort === "厚労省告示276号",
+    );
+    expect(notice).toBeDefined();
+    if (!notice) throw new Error("厚労省告示276号の一次資料がありません");
     expect(createHash("sha256").update(notice.text).digest("hex")).toBe(
       notice.sourceHash,
     );

@@ -1550,8 +1550,9 @@ function applyPinnedTopics(
       !/(?:点検|検査|確認)/.test(normalizedElectricalQuery)
     ) {
       // 広い資格質問でも、電気工事士と電気取扱業務の特別教育を対で返す。
-      pinArticle("電気工事士法", "第2条");
       pinArticle("電気工事士法", "第3条");
+      pinArticle("電気工事士法", "第2条");
+      pinArticle("安衛法", "第59条");
       pinArticle("安衛則", "第36条");
       pinArticle("特別教育規程", "第6条");
       pinArticle("特別教育規程", "第5条");

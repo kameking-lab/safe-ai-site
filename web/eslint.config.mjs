@@ -25,6 +25,7 @@ const eslintConfig = defineConfig([
     // Default ignores of eslint-config-next:
     ".next/**",
     ".next.bak/**",
+    ".cache/**",
     "out/**",
     "build/**",
     "coverage/**",

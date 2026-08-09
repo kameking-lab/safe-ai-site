@@ -66,6 +66,9 @@ const SAFE_LEGAL_CONFIRMED_CHOICES = [
   "移動式クレーン",
   "デリック",
   "床上操作式",
+  "低圧電気",
+  "対地電圧50V以下",
+  "50V以下（対地電圧要確認）",
   "研削といし",
   "有機溶剤・シンナー",
   "その他の化学物質",
@@ -118,6 +121,7 @@ type LegalConfirmedChoiceSlot =
   | "craneType"
   | "craneOperation"
   | "educationWork"
+  | "electricalVoltageLimit"
   | "electricalSupervisorCondition"
   | "electricalVoltageState"
   | "tankResidue";
@@ -196,7 +200,15 @@ function confirmedChoiceSlot(
     return "craneType";
   }
   if (choice === "床上操作式") return "craneOperation";
-  if (choice === "研削といし") return "educationWork";
+  if (choice === "低圧電気" || choice === "研削といし") {
+    return "educationWork";
+  }
+  if (
+    choice === "対地電圧50V以下" ||
+    choice === "50V以下（対地電圧要確認）"
+  ) {
+    return "electricalVoltageLimit";
+  }
   if (
     choice === "停電して扱う" ||
     choice === "高圧・特高の活線・近接" ||
@@ -857,6 +869,30 @@ export function extractLegalConversationContext(
       /^クレーン(?:です|について|を選びます)?[。.!！]?$/.test(text)
     );
   });
+  const explicitGroundVoltage = text.match(
+    /対地電圧(?:は|が|約)?\s*(\d+(?:\.\d+)?)\s*(?:V|ボルト)/i,
+  );
+  const statedElectricalVoltage = text.match(
+    /(?:^|[^\d])(\d+(?:\.\d+)?)\s*(?:V|ボルト)/i,
+  );
+  const voltageValue = Number(
+    explicitGroundVoltage?.[1] ?? statedElectricalVoltage?.[1],
+  );
+  const hasElectricalContext =
+    electricalMeaning.topicDomain === "electrical" ||
+    topicDomainFor(topic?.workType, topic?.equipment) === "electrical";
+  if (
+    Number.isFinite(voltageValue) &&
+    voltageValue <= 50 &&
+    hasElectricalContext
+  ) {
+    const voltageChoice = explicitGroundVoltage
+      ? "対地電圧50V以下"
+      : "50V以下（対地電圧要確認）";
+    if (!confirmedChoices.includes(voltageChoice)) {
+      confirmedChoices.push(voltageChoice);
+    }
+  }
   if (
     /配線(?:は|を)?(?:触らない|外さない|つながない)/.test(text) &&
     !confirmedChoices.includes("配線非接触")
@@ -903,7 +939,10 @@ export function extractLegalConversationContext(
     load,
     voltageClass:
       electricalMeaning.voltageClass ??
-      extractVoltageClass(text, topic?.workType === "電気作業"),
+      extractVoltageClass(text, topic?.workType === "電気作業") ??
+      (Number.isFinite(voltageValue) && voltageValue <= 50 && hasElectricalContext
+        ? "低圧"
+        : undefined),
     energizedState: electricalMeaning.energizedState,
     roleType: electricalMeaning.roleType,
     qualificationType: electricalMeaning.qualificationType,
@@ -1981,7 +2020,7 @@ export function buildLegalClarification(
   ) {
     return {
       question:
-        "運転に必要な資格区分を確定するため、銘板・仕様書にある高所作業車の作業床の最高高さはどれですか？",
+        "運転に必要な資格区分を確定するため、作業床を最も高く上昇させた場合の床面の高さ（作業床最高高さ）はどれですか？",
       options: ["2m未満", "2m以上10m未満", "10m以上"],
     };
   }
@@ -2310,6 +2349,10 @@ export function buildLegalClarification(
       text,
     ) &&
     !/(?:化学物質管理者の)?選任(?:について)?です[。.]?$/.test(text) &&
+    !/(?:主として)?一般消費者(?:の生活)?(?:向け|用).*(?:だけ|のみ)|市販(?:の)?洗剤(?:だけ|のみ)/.test(
+      text,
+    ) &&
+    !/(?:譲渡|提供).*(?:だけ|のみ)/.test(text) &&
     !confirmedChoices.has("RA対象物を製造") &&
     !confirmedChoices.has("RA対象物を取り扱う") &&
     !confirmedChoices.has("譲渡・提供のみ")
@@ -2416,7 +2459,7 @@ export function buildLegalClarification(
   ) {
     return {
       question: "特別教育を確認したい作業はどれですか？",
-      options: ["高所作業車", "研削といし"],
+      options: ["高所作業車", "低圧電気", "研削といし"],
     };
   }
   if (

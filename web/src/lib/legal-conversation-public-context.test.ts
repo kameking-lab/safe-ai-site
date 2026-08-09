@@ -102,4 +102,46 @@ describe("public legal conversation context", () => {
     expect(hydrated.load).toBe("最大荷重1.5t");
     expect(JSON.stringify(hydrated)).not.toContain("山田");
   });
+
+  it("keeps the low-voltage special-education branch across the public boundary", () => {
+    const projected = sanitizePublicLegalConversationContext({
+      topicDomain: "electrical",
+      voltageClass: "低圧",
+      qualificationType: "special-education",
+      confirmedChoices: ["低圧電気"],
+    });
+
+    expect(projected).toEqual({
+      topicDomain: "electrical",
+      voltageClass: "低圧",
+      qualificationType: "special-education",
+      confirmedChoices: ["低圧電気"],
+    });
+    expect(rehydratePublicLegalConversationContext(projected)).toMatchObject({
+      voltageClass: "低圧",
+      qualification: "特別教育",
+      confirmedChoices: ["低圧電気"],
+    });
+  });
+
+  it("keeps only the safe 50V applicability condition across the public boundary", () => {
+    const projected = sanitizePublicLegalConversationContext({
+      topicDomain: "electrical",
+      voltageClass: "低圧",
+      confirmedChoices: [
+        "対地電圧50V以下",
+        "24Vは山田さんが確認",
+      ],
+    });
+
+    expect(projected).toEqual({
+      topicDomain: "electrical",
+      voltageClass: "低圧",
+      confirmedChoices: ["対地電圧50V以下"],
+    });
+    expect(rehydratePublicLegalConversationContext(projected)).toMatchObject({
+      voltageClass: "低圧",
+      confirmedChoices: ["対地電圧50V以下"],
+    });
+  });
 });

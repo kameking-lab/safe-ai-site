@@ -1803,7 +1803,9 @@ describe("chatbot route executable safety boundary", () => {
         "低圧の充電電路の敷設作業に特別教育は必要？",
       );
       expectAnswerFirst(specific.payload);
-      expect(specific.payload.substantiveAnswer).toMatch(/^はい。/);
+      expect(specific.payload.substantiveAnswer).toMatch(
+        /対地電圧50V以下.*除(?:き|く).*特別教育が必要/,
+      );
       expect(specific.payload.substantiveAnswer).toContain("特別教育が必要");
       expect(specific.payload.clarificationQuestion).toBeNull();
       const specificDefinition = specific.payload.sources.find(
@@ -1833,7 +1835,9 @@ describe("chatbot route executable safety boundary", () => {
       ]) {
         const corrected = await callRoute(post, mode, wrongPremise);
         expectAnswerFirst(corrected.payload);
-        expect(corrected.payload.substantiveAnswer).toMatch(/^はい。/);
+        expect(corrected.payload.substantiveAnswer).toMatch(
+          /対地電圧50V以下.*除(?:き|く).*特別教育が必要/,
+        );
         expect(corrected.payload.substantiveAnswer).toContain("特別教育が必要");
         expect(
           corrected.payload.sources.find(

@@ -390,6 +390,36 @@ describe("法令対話のmemory-only文脈", () => {
     expect(context.voltageClass).toBeUndefined();
   });
 
+  it.each([
+    ["対地電圧24Vの充電部を点検する", "対地電圧50V以下"],
+    ["24V充電したままテスターを当てる", "50V以下（対地電圧要確認）"],
+  ])("50V以下の安全な構造条件を保持する: %s", (input, choice) => {
+    const context = extractLegalConversationContext(input);
+    expect(context).toMatchObject({
+      topicDomain: "electrical",
+      voltageClass: "低圧",
+    });
+    expect(context.confirmedChoices).toContain(choice);
+    if (/テスター|充電したまま/.test(input)) {
+      expect(context.energizedState).toBe("energized");
+      expect(nextLegalClarification(input)).not.toMatchObject({
+        question: expect.stringMatching(/充電中.*停電済み/),
+      });
+    }
+  });
+
+  it.each([
+    "対地電圧24Vの充電部にテスターを当てる",
+    "24V通電したまま測定する",
+    "24Vで電源を入れたままテスターを当てる",
+  ])("明示された充電状態を再質問しない: %s", (input) => {
+    const resolved = resolveLegalConversationQuery({ message: input });
+    expect(resolved.context.energizedState).toBe("energized");
+    expect(nextLegalClarification(resolved.query)?.question ?? "").not.toMatch(
+      /充電中.*停電済み/,
+    );
+  });
+
   it("短い作業主任者follow-upを直前の電気作業へ結合する", () => {
     const result = resolveLegalConversationQuery({
       message: "作業主任者",
@@ -1092,6 +1122,13 @@ describe("教育・資格の短い主語follow-up", () => {
 });
 
 describe("曖昧質問の確認", () => {
+  it("広い特別教育質問は代表3分岐を保ち、低圧電気を落とさない", () => {
+    expect(buildLegalClarification("特別教育の対象ですか？")).toEqual({
+      question: "特別教育を確認したい作業はどれですか？",
+      options: ["高所作業車", "低圧電気", "研削といし"],
+    });
+  });
+
   it("電気作業は目的を示す一問とcompactな3選択肢にする", () => {
     expect(buildLegalClarification("電気作業の資格は？")).toEqual({
       question:
@@ -1130,7 +1167,7 @@ describe("曖昧質問の確認", () => {
   it("高所作業車は法定定義と資格区分の境界を分けて確認する", () => {
     expect(buildLegalClarification("高所作業車の教育は？")).toEqual({
       question:
-        "運転に必要な資格区分を確定するため、銘板・仕様書にある高所作業車の作業床の最高高さはどれですか？",
+        "運転に必要な資格区分を確定するため、作業床を最も高く上昇させた場合の床面の高さ（作業床最高高さ）はどれですか？",
       options: ["2m未満", "2m以上10m未満", "10m以上"],
     });
   });
