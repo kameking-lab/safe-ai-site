@@ -1,40 +1,38 @@
-# 現行Production結果
+# 現行 Production 結果
 
 最終更新: 2026-08-09 JST
-source freeze時点の最終判定: **PASS**
+判定: **PASS**
 
-## 検証済みproduction baseline
+## 検証済み Production
 
 - URL: `https://www.anzen-ai-portal.jp/`
-- Deployment / Build: `dpl_8hBD9HeQHpAmE6QEM5pMkcokotZQ` / `bld_h0oa3x2zc`
-- Rollback Deployment / Build: `dpl_muVQZ5RD32hSmpKxqzkamUA5hQTz` / `bld_ih5hragbz`
-- Runtime source: `83f604e3a151fe645b594e2ca17b91cfa2435eae`
-- Annotated tag: `production-20260809-83f604e3`
-- Integration: PR #972、履歴書換えなし
+- Deployment / Build: `dpl_6fNnrgZyqyxs2B12JRhUXHRoJUVb` / `bld_h8uvtkv40`
+- Source: `4f7805b8936c272aa9c9be46d844530609aa1458`
+- Rollback Deployment / Build: `dpl_DzzNYqXvD73JEwzQn7XqG1McWjbN` / `bld_c9m9gbv4n`
+- Rollback source: `2def7a86ec79e2603e4e533c59ced6717629d1ec`
+- 最終tag: `production-20260809-maintenance-final`
 
-PR #975の保守変更はdeploy設定を含むため、最終Preview後にproductionへ通常反映する。新Deployment / Buildはmerge後のVercel metadataで確認し、production tag annotationと最終報告へ記録する。推測値は記録しない。
+最終監査文書を統合したmain commitにはVercelが新しいIDを割り当てる。そのIDは推測せず、annotated tagと完了報告に記録する。
 
 ## Answer-first / Gemini
 
-- 12会話をbrowser・JSON・SSE・legacyでPASS。
+- 12会話ケースをbrowser・JSON・SSE・legacyでPASS。
 - answer-first / substantive / context retention / citation support = 100%。pure clarification = 0%。
-- 確認質問最大1、quick reply最大3、回答操作最大2、無関係カテゴリ飛躍0。
-- 「電気作業の資格は？」へ主要分岐を先に回答し、「作業主任者」は同じ電気作業文脈を維持。
-- 緊急時通常回答0、PII外部送信0。active Gemini modelは`gemini-3.6-flash`。
-- 対象法源: 労働安全衛生法、施行令、安衛則、クレーン等安全規則、有機則、特化則、酸欠則、石綿則、粉じん則、鉛則、電離則、関連告示、確認済み厚労省通達。
+- 「電気作業の資格は？」へ主要分岐を先に回答し、「作業主任者」は同じ電気作業文脈を維持。無関係カテゴリ飛躍0。
+- 確認質問最大1、quick reply最大3、回答操作最大2。
+- 緊急時通常法令回答0、PII外部送信0。active Gemini modelは `gemini-3.6-flash`。
+
+## Repository / storage gate
+
+- PR #975とPR #978を通常merge。force push・履歴書換え・admin bypassなし。
+- Ruleset `#20600963` active、strict、required context `repository-hygiene-target`、GitHub Actions App `15368`、bypass 0。
+- 正canary PR #979 / run `31299132669`はPASS・CLEAN。負canary PR #980 / run `31299199531`は公開archiveを検出しFAIL・BLOCKED。
+- JMA run `31299250270`はstorage run `31299269685`で候補 `4f7805b…` を検査し、active ruleset下で同一SHAをmainへ昇格。候補Vercel Deployment 0、main Production Deployment 1。
 
 ## Gate / smoke
 
-- Answer-first Preview: `dpl_C68J7CG36wTtknY7pszdrs2qWbSm` / `bld_ku74i3p5q`、PASS。
-- Answer-first production GET routes 254/254、API JSON/SSE/legacy 36/36、390×844 fixed 12/12、PASS。
-- Full gate: storage run 31288334712、web-ci 31288334720、E2E 31288334719、performance 31288334716、すべてPASS。
-- Vitest 7,032 passed / 1 skipped、Playwright E2E 254/254、Lighthouse 51/51。
-- 独立answer-first review: P0/P1/P2/P3 = 0/0/0/0、rollback条件0。
-
-## 保守候補
-
-- PR: #975
-- local gate: TypeScript、ESLint、関連Vitest、production build、npm audit、diff、secret/PII、storage/cleanup probeをPASS。
-- public/deploy guard: tracked public 326/326 allow、unknown raw・nested PPTX・nonregular fileはfail closed。
-- cleanup後のruntime source差分はなく、deploy差分はbuild前storage guardとignore policy。
-- 新しいproductionがsmokeをPASSするまでrollbackは`dpl_8hBD9HeQHpAmE6QEM5pMkcokotZQ`。
+- Full gate: TypeScript、ESLint、Vitest 7,033、Playwright 254、production build、npm audit、storage、security/privacy/legal/chemical/KY/JMA/WBGT、metadata/indexability、responsive/accessibility、Lighthouse 51/51がPASS。
+- Preview: `dpl_Dm7dKVRq5WtsVaRBUF6g9J4gmQJH`。SSO維持、全path noindex、robots Disallow `/`、Analytics/RUM/SW停止、mail dry-run、production非変更をPASS。
+- Production: 主要13 route 13/13、robots一般group、sitemap、heat noindex、Visual KY、電気資格answer-first、作業主任者context、緊急119、PII遮断をPASS。
+- 独立最終review: P0=0、P1=0、P2=0。保守上の非ブロッキングP3=3。
+- rollback条件は0件。rollbackは実施していない。
