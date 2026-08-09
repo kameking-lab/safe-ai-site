@@ -10,7 +10,8 @@ web/src/data/accidents-mhlw/
 # Build artifacts
 .next/
 node_modules/
-dist/
+/dist/
+/web/dist/
 
 # Python ETL artifacts
 __pycache__/
@@ -45,7 +46,8 @@ yarn.lock
 .env*
 
 # 無人自走ループ runner のログ
-logs/
+/logs/
+/web/logs/
 
 # 無人自走ループ launcher が生成するローカル専用の実行時アーティファクト
 # (loop-config.json は追跡・人手編集。可変状態と現況ダッシュボードは追跡しない)
@@ -61,25 +63,44 @@ scripts/imagegen/output/
 docs/education-curriculum-coverage.md
 
 # Repository hygiene: reproducible local output (never source/runtime data)
-**/.next/
-**/out/
-**/build/
-**/dist/
-**/coverage/
-**/test-results/
-**/test-results-*/
-**/playwright-report/
-**/playwright-report-*/
-**/audit-out/
-**/.local-evidence/
-**/.ci-performance-evidence/
-**/.turbo/
-**/.cache/
-**/.tmp/
-**/tmp/
-**/trace/
-**/traces/
-**/videos/
+/.next/
+/web/.next/
+/out/
+/web/out/
+/build/
+/web/build/
+/dist/
+/web/dist/
+/coverage/
+/web/coverage/
+/test-results/
+/web/test-results/
+/test-results-*/
+/web/test-results-*/
+/playwright-report/
+/web/playwright-report/
+/playwright-report-*/
+/web/playwright-report-*/
+/audit-out/
+/web/audit-out/
+/.local-evidence/
+/web/.local-evidence/
+/.ci-performance-evidence/
+/web/.ci-performance-evidence/
+/.turbo/
+/web/.turbo/
+/.cache/
+/web/.cache/
+/.tmp/
+/web/.tmp/
+/tmp/
+/web/tmp/
+/trace/
+/web/trace/
+/traces/
+/web/traces/
+/videos/
+/web/videos/
 /screenshots/
 /web/screenshots/
 /web/test-screenshots/
@@ -87,21 +108,40 @@ docs/education-curriculum-coverage.md
 *.log
 *.lhr.json
 /.lighthouseci/
-/**/.lighthouseci/
+/.lighthouseci/
+/web/.lighthouseci/
 /lighthouse-raw/
 /lighthouse-results/
 /lighthouse-raw-*/
-/**/lighthouse-trace/
-/**/lighthouse-trace-*/
+/lighthouse-trace/
+/web/lighthouse-trace/
+/lighthouse-trace-*/
+/web/lighthouse-trace-*/
 /lh5d-noimg*.json
 /.benchmark-output/
-/**/.benchmark-output/
+/.benchmark-output/
+/web/.benchmark-output/
 /benchmark-output/
 /**/benchmark-output/
 /.maintenance-snapshots/
-/**/.maintenance-snapshots/
+/.maintenance-snapshots/
+/web/.maintenance-snapshots/
 /local-snapshots/
 /web/local-snapshots/
+
+# Raw archives/dumps are never runtime assets. A reviewed download must use an
+# exact allowlist in storage-budget.yml before this rule is relaxed.
+/web/public/**/*.har
+/web/public/**/*.trace
+/web/public/**/*.log
+/web/public/**/*.lcov
+/web/public/**/*.jsonl
+/web/public/**/*.zip
+/web/public/**/*.gz
+/web/public/**/*.tgz
+/web/public/**/*.tar
+/web/public/**/*.7z
+/web/public/**/*.rar
 
 # Raw audit evidence stays local. Only compact manifests/results may be committed.
 /docs/audits/evidence/**

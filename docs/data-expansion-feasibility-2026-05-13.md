@@ -12,7 +12,7 @@ Read-only investigation of five owner-identified expansion areas: chemical RA co
 
 - `git worktree prune --verbose` reported 30 stale gitdir entries with `Permission Denied` — OneDrive sync locks on `.git/worktrees/*/gitdir` block deletion. These are dangling metadata only; no working directory exists.
 - Physical worktree directories under `.claude/worktrees/`: 40. Registered worktree entries (excluding main repo): 40. No orphan physical directories detected.
-- Alive marker committed at `logs/data-expansion-feasibility-progress.md` (SHA `0e3b295`).
+- The temporary alive marker from SHA `0e3b295` was retired under the repository retention policy; the decision record remains in this document.
 
 OneDrive-locked stale gitdir cleanup is a separate maintenance task and is left out of scope here.
 

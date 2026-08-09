@@ -78,6 +78,76 @@ function Test-IsReparsePoint {
     return (($Item.Attributes -band [System.IO.FileAttributes]::ReparsePoint) -ne 0)
 }
 
+function Test-IsSafeGeneratedReparsePoint {
+    param(
+        [Parameter(Mandatory = $true)][string]$Root,
+        [Parameter(Mandatory = $true)][System.IO.FileSystemInfo]$Item
+    )
+
+    if (-not (Test-IsReparsePoint -Item $Item)) {
+        return $false
+    }
+
+    $rootFull = [System.IO.Path]::GetFullPath($Root).TrimEnd('\', '/')
+    $rootPrefix = $rootFull + [System.IO.Path]::DirectorySeparatorChar
+    $targets = @($Item.Target)
+    if ($targets.Count -eq 0) {
+        return $false
+    }
+
+    foreach ($target in $targets) {
+        if ([string]::IsNullOrWhiteSpace([string]$target)) {
+            return $false
+        }
+        $targetPath = if ([System.IO.Path]::IsPathRooted([string]$target)) {
+            [System.IO.Path]::GetFullPath([string]$target)
+        }
+        else {
+            [System.IO.Path]::GetFullPath((Join-Path -Path $Item.DirectoryName -ChildPath ([string]$target)))
+        }
+        if (
+            [string]::Equals($targetPath.TrimEnd('\', '/'), $rootFull, [System.StringComparison]::OrdinalIgnoreCase) -or
+            -not $targetPath.StartsWith($rootPrefix, [System.StringComparison]::OrdinalIgnoreCase)
+        ) {
+            return $false
+        }
+    }
+
+    return $true
+}
+
+function Get-StringListSha256 {
+    param(
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyCollection()]
+        [string[]]$Values
+    )
+
+    $joined = [string]::Join("`n", @($Values | Sort-Object))
+    $bytes = [System.Text.Encoding]::UTF8.GetBytes($joined)
+    $sha256 = [System.Security.Cryptography.SHA256]::Create()
+    try {
+        return ([System.BitConverter]::ToString($sha256.ComputeHash($bytes))).Replace('-', '')
+    }
+    finally {
+        $sha256.Dispose()
+    }
+}
+
+function Get-FileSha256 {
+    param([Parameter(Mandatory = $true)][string]$Path)
+
+    $stream = [System.IO.File]::Open($Path, [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read, [System.IO.FileShare]::Read)
+    $sha256 = [System.Security.Cryptography.SHA256]::Create()
+    try {
+        return ([System.BitConverter]::ToString($sha256.ComputeHash($stream))).Replace('-', '')
+    }
+    finally {
+        $sha256.Dispose()
+        $stream.Dispose()
+    }
+}
+
 function Assert-SafePath {
     param(
         [Parameter(Mandatory = $true)][string]$Root,
@@ -136,6 +206,20 @@ function Test-DirectoryContainsTrackedFiles {
     return ($tracked.Count -gt 0)
 }
 
+function Test-IsTrackedPath {
+    param(
+        [Parameter(Mandatory = $true)][string]$Root,
+        [Parameter(Mandatory = $true)][string]$Path
+    )
+
+    $relativePath = Convert-ToGitPath -Root $Root -Path $Path
+    if ($relativePath -match '[\s"]') {
+        throw "Unexpected path syntax while checking tracked state: $relativePath"
+    }
+    $tracked = @(Invoke-GitUtf8PathList -Root $Root -Arguments "ls-files -z -- $relativePath")
+    return ($tracked.Count -gt 0)
+}
+
 function Test-PathIndicatesProtectedMaterial {
     param([Parameter(Mandatory = $true)][string]$Path)
 
@@ -156,21 +240,26 @@ function Test-PathIndicatesProtectedMaterial {
 }
 
 function Get-DirectoryMeasurement {
-    param([Parameter(Mandatory = $true)][string]$Path)
+    param(
+        [Parameter(Mandatory = $true)][string]$Path,
+        [Parameter(Mandatory = $true)][string]$RepositoryRoot,
+        [switch]$TrustKnownGeneratedContent
+    )
 
     $fileCount = [int64]0
     $directoryCount = [int64]0
     $bytes = [int64]0
     $newestWriteTimeUtc = [DateTime]::MinValue
     $newestShortRawWriteTimeUtc = [DateTime]::MinValue
+    $newestSevenDayRawWriteTimeUtc = [DateTime]::MinValue
     $containsSensitiveEntry = $false
     $protectedReasons = New-Object 'System.Collections.Generic.HashSet[string]' ([System.StringComparer]::OrdinalIgnoreCase)
+    $safeReparsePoints = New-Object 'System.Collections.Generic.List[string]'
+    $fingerprintEntries = New-Object 'System.Collections.Generic.List[string]'
     $rootName = (Split-Path -Leaf $Path).ToLowerInvariant()
-    $isAmbiguousOutput = $rootName -in @(
-        'out', 'build', 'dist', 'logs', 'tmp', 'temp', '.tmp', 'cache', '.cache',
-        'audit-out', '.maintenance-snapshots', 'local-snapshots',
-        'benchmark-output', '.benchmark-output', '.bench', '.genquality',
-        '.loop-eval', '.r4-screens', '.r8-screens'
+    $isAmbiguousOutput = -not $TrustKnownGeneratedContent -and $rootName -in @(
+        'out', 'build', 'dist', 'tmp', 'temp', '.tmp', 'cache', '.cache',
+        '.maintenance-snapshots', 'local-snapshots'
     )
     if ($isAmbiguousOutput) {
         $containsSensitiveEntry = $true
@@ -184,12 +273,24 @@ function Get-DirectoryMeasurement {
         $directoryCount++
         foreach ($child in @(Get-ChildItem -LiteralPath $current -Force -ErrorAction Stop)) {
             if (Test-IsReparsePoint -Item $child) {
-                $containsSensitiveEntry = $true
-                [void]$protectedReasons.Add('reparse point')
+                $relativeChild = $child.FullName.Substring($Path.Length).TrimStart('\', '/').Replace('\', '/')
+                [void]$fingerprintEntries.Add("L|$relativeChild|$(@($child.Target) -join '|')")
+                if (
+                    $TrustKnownGeneratedContent -and
+                    (Test-IsSafeGeneratedReparsePoint -Root $RepositoryRoot -Item $child)
+                ) {
+                    [void]$safeReparsePoints.Add($child.FullName)
+                }
+                else {
+                    $containsSensitiveEntry = $true
+                    [void]$protectedReasons.Add('reparse point outside the repository or with an unreadable target')
+                }
                 continue
             }
             if ($child.PSIsContainer) {
-                if (Test-PathIndicatesProtectedMaterial -Path $child.FullName) {
+                $relativeChild = $child.FullName.Substring($Path.Length).TrimStart('\', '/').Replace('\', '/')
+                [void]$fingerprintEntries.Add("D|$relativeChild")
+                if (-not $TrustKnownGeneratedContent -and (Test-PathIndicatesProtectedMaterial -Path $child.FullName)) {
                     $containsSensitiveEntry = $true
                     [void]$protectedReasons.Add('legal source, official record, rollback, or canonical material')
                     continue
@@ -202,7 +303,7 @@ function Get-DirectoryMeasurement {
                     [void]$protectedReasons.Add('nested Git metadata')
                     continue
                 }
-                if ($child.Name.ToLowerInvariant() -in @(
+                if (-not $TrustKnownGeneratedContent -and $child.Name.ToLowerInvariant() -in @(
                     'src', 'public', 'data', 'prisma', 'schema', 'schemas',
                     'migration', 'migrations', 'laws-fulltext'
                 )) {
@@ -213,6 +314,8 @@ function Get-DirectoryMeasurement {
                 $stack.Push($child.FullName)
             }
             else {
+                $relativeChild = $child.FullName.Substring($Path.Length).TrimStart('\', '/').Replace('\', '/')
+                [void]$fingerprintEntries.Add("F|$relativeChild|$($child.Length)|$($child.LastWriteTimeUtc.Ticks)")
                 $fileCount++
                 $bytes += [int64]$child.Length
                 if ($child.LastWriteTimeUtc -gt $newestWriteTimeUtc) {
@@ -221,16 +324,17 @@ function Get-DirectoryMeasurement {
 
                 $lowerName = $child.Name.ToLowerInvariant()
                 $lowerExtension = $child.Extension.ToLowerInvariant()
-                if (
-                    $lowerExtension -in @(
-                        '.har', '.trace', '.png', '.jpg', '.jpeg', '.gif',
-                        '.webp', '.avif', '.mp4', '.webm'
-                    ) -and
-                    $child.LastWriteTimeUtc -gt $newestShortRawWriteTimeUtc
-                ) {
+                $isShortRawFile = $lowerExtension -in @(
+                    '.har', '.trace', '.png', '.jpg', '.jpeg', '.gif', '.svg',
+                    '.webp', '.avif', '.mp4', '.webm'
+                )
+                if ($isShortRawFile -and $child.LastWriteTimeUtc -gt $newestShortRawWriteTimeUtc) {
                     $newestShortRawWriteTimeUtc = $child.LastWriteTimeUtc
                 }
-                if (Test-PathIndicatesProtectedMaterial -Path $child.FullName) {
+                elseif (-not $isShortRawFile -and $child.LastWriteTimeUtc -gt $newestSevenDayRawWriteTimeUtc) {
+                    $newestSevenDayRawWriteTimeUtc = $child.LastWriteTimeUtc
+                }
+                if (-not $TrustKnownGeneratedContent -and (Test-PathIndicatesProtectedMaterial -Path $child.FullName)) {
                     $containsSensitiveEntry = $true
                     [void]$protectedReasons.Add('legal source, official record, rollback, or canonical material')
                 }
@@ -276,6 +380,21 @@ function Get-DirectoryMeasurement {
                     $rootName -match '^playwright-report(?:-.+)?$' -and
                     $lowerName -eq 'index.html'
                 )
+                $isKnownGeneratedReportFile = (
+                    (
+                        $rootName -in @(
+                            '.bench', '.genquality', '.loop-eval', '.r4-screens', '.r8-screens',
+                            'benchmark-output', '.benchmark-output', 'logs', 'audit-out'
+                        ) -or
+                        $rootName -match '^test-results(?:-.+)?$' -or
+                        $rootName -match '^lighthouse-(?:raw|trace)(?:-.+)?$'
+                    ) -and
+                    $lowerExtension -in @(
+                        '.json', '.jsonl', '.csv', '.html', '.htm', '.xml', '.md', '.txt',
+                        '.log', '.lcov', '.trace', '.har', '.png', '.jpg', '.jpeg', '.gif',
+                        '.svg', '.webp', '.avif', '.mp4', '.webm'
+                    )
+                )
                 $isKnownGeneratedExtension = $lowerExtension -in @(
                     '.js', '.mjs', '.cjs', '.json', '.map', '.sst', '.meta',
                     '.avif', '.gz', '.body', '.css', '.png', '.jpg', '.jpeg',
@@ -291,16 +410,20 @@ function Get-DirectoryMeasurement {
                     )
                 )
                 if (
+                    -not $TrustKnownGeneratedContent -and
                     -not $isAmbiguousOutput -and
                     -not $isKnownGeneratedExtension -and
                     -not $isKnownGeneratedNoExtension -and
-                    -not $isNextGeneratedType
+                    -not $isNextGeneratedType -and
+                    -not $isKnownGeneratedReportFile
                 ) {
                     $containsSensitiveEntry = $true
                     [void]$protectedReasons.Add('unrecognized file type inside generated output')
                 }
                 if (
+                    -not $TrustKnownGeneratedContent -and
                     -not $isAmbiguousOutput -and
+                    -not $isKnownGeneratedReportFile -and
                     $lowerExtension -in @(
                         '.js', '.mjs', '.cjs', '.json', '.css', '.html', '.htm',
                         '.tsx', '.jsx', '.py', '.pyw', '.ps1', '.psm1', '.psd1',
@@ -311,16 +434,18 @@ function Get-DirectoryMeasurement {
                     ) -and
                     -not $isTrustedCompiledOutput -and
                     -not $isKnownCoverageReportFile -and
-                    -not $isKnownPlaywrightReportFile
+                    -not $isKnownPlaywrightReportFile -and
+                    -not $isKnownGeneratedReportFile
                 ) {
                     $containsSensitiveEntry = $true
                     [void]$protectedReasons.Add('source or runtime data inside generated output')
                 }
-                if (-not $isAmbiguousOutput -and $lowerExtension -eq '.ts' -and -not $isNextGeneratedType) {
+                if (-not $TrustKnownGeneratedContent -and -not $isAmbiguousOutput -and $lowerExtension -eq '.ts' -and -not $isNextGeneratedType) {
                     $containsSensitiveEntry = $true
                     [void]$protectedReasons.Add('unrecognized TypeScript source inside generated output')
                 }
                 if (
+                    -not $TrustKnownGeneratedContent -and
                     -not $isAmbiguousOutput -and
                     $lowerExtension -in @(
                         '.zip', '.tar', '.tgz', '.7z', '.rar', '.bundle', '.pdf',
@@ -330,7 +455,7 @@ function Get-DirectoryMeasurement {
                     $containsSensitiveEntry = $true
                     [void]$protectedReasons.Add('opaque archive, document, or dataset inside generated output')
                 }
-                if ($isAmbiguousOutput -and (
+                if (-not $TrustKnownGeneratedContent -and $isAmbiguousOutput -and (
                     $lowerExtension -in @(
                         '.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs',
                         '.py', '.pyw', '.ps1', '.psm1', '.psd1', '.go', '.rs',
@@ -362,9 +487,109 @@ function Get-DirectoryMeasurement {
         DirectoryCount = $directoryCount
         NewestWriteTimeUtc = $newestWriteTimeUtc
         NewestShortRawWriteTimeUtc = $newestShortRawWriteTimeUtc
+        NewestSevenDayRawWriteTimeUtc = $newestSevenDayRawWriteTimeUtc
         ContainsSensitiveEntry = $containsSensitiveEntry
         ProtectedReasons = @($protectedReasons)
+        SafeReparsePoints = @($safeReparsePoints)
+        Fingerprint = Get-StringListSha256 -Values @($fingerprintEntries)
     }
+}
+
+function Test-IsValidatedNextOutputRoot {
+    param([Parameter(Mandatory = $true)][string]$Path)
+
+    $normalized = $Path.Replace('\', '/').ToLowerInvariant().TrimEnd('/')
+    $name = Split-Path -Leaf $normalized
+    if ($name -ne '.next' -or -not (Test-Path -LiteralPath $Path -PathType Container)) {
+        return $false
+    }
+
+    $allowedDirectories = New-Object 'System.Collections.Generic.HashSet[string]' ([System.StringComparer]::OrdinalIgnoreCase)
+    foreach ($entryName in @(
+        'build', 'cache', 'dev', 'diagnostics', 'node_modules', 'server',
+        'standalone', 'static', 'types'
+    )) {
+        [void]$allowedDirectories.Add($entryName)
+    }
+    $allowedFiles = New-Object 'System.Collections.Generic.HashSet[string]' ([System.StringComparer]::OrdinalIgnoreCase)
+    foreach ($entryName in @(
+        'BUILD_ID', 'app-build-manifest.json', 'app-path-routes-manifest.json',
+        'build-manifest.json', 'export-marker.json', 'fallback-build-manifest.json',
+        'images-manifest.json', 'next-minimal-server.js.nft.json',
+        'next-server.js.nft.json', 'package.json', 'prerender-manifest.json',
+        'react-loadable-manifest.json', 'required-server-files.js',
+        'required-server-files.json', 'routes-manifest.json',
+        'server-reference-manifest.json'
+    )) {
+        [void]$allowedFiles.Add($entryName)
+    }
+    $flexibleGeneratedEntries = @('trace', 'trace-build', 'turbopack')
+
+    $entries = @{}
+    foreach ($entry in @(Get-ChildItem -LiteralPath $Path -Force -ErrorAction Stop)) {
+        $entries[$entry.Name] = $entry
+        if ($allowedDirectories.Contains($entry.Name) -and -not $entry.PSIsContainer) {
+            return $false
+        }
+        if ($allowedFiles.Contains($entry.Name) -and $entry.PSIsContainer) {
+            return $false
+        }
+        if (
+            -not $allowedDirectories.Contains($entry.Name) -and
+            -not $allowedFiles.Contains($entry.Name) -and
+            $entry.Name -notin $flexibleGeneratedEntries
+        ) {
+            return $false
+        }
+    }
+
+    $hasProductionManifest = $entries.ContainsKey('BUILD_ID') -or $entries.ContainsKey('build-manifest.json')
+    $hasProductionTree = (
+        $entries.ContainsKey('server') -or $entries.ContainsKey('static') -or
+        $entries.ContainsKey('build')
+    )
+    if ($hasProductionManifest -and $hasProductionTree) {
+        return $true
+    }
+
+    if (-not $entries.ContainsKey('dev') -or -not $entries['dev'].PSIsContainer) {
+        return $false
+    }
+    $devPath = $entries['dev'].FullName
+    $devManifest = Test-Path -LiteralPath (Join-Path -Path $devPath -ChildPath 'build-manifest.json') -PathType Leaf
+    $devTree = (
+        (Test-Path -LiteralPath (Join-Path -Path $devPath -ChildPath 'server') -PathType Container) -or
+        (Test-Path -LiteralPath (Join-Path -Path $devPath -ChildPath 'static') -PathType Container)
+    )
+    return ($devManifest -and $devTree)
+}
+
+function Test-IsKnownGeneratedContentRoot {
+    param([Parameter(Mandatory = $true)][string]$Path)
+
+    return (Test-IsValidatedNextOutputRoot -Path $Path)
+}
+
+function Test-IsShortRawRetentionRoot {
+    param([Parameter(Mandatory = $true)][string]$Path)
+
+    $name = (Split-Path -Leaf $Path).ToLowerInvariant()
+    return (
+        $name -in @(
+            'screenshots', 'trace', 'traces', 'videos', '.r4-screens', '.r8-screens',
+            '.bench', '.genquality', '.loop-eval', 'benchmark-output', '.benchmark-output'
+        ) -or
+        $name -match '^test-results(?:-.+)?$' -or
+        $name -match '^playwright-report(?:-.+)?$' -or
+        $name -match '^lighthouse-(?:raw|trace)(?:-.+)?$'
+    )
+}
+
+function Test-IsSevenDayRawRetentionRoot {
+    param([Parameter(Mandatory = $true)][string]$Path)
+
+    $name = (Split-Path -Leaf $Path).ToLowerInvariant()
+    return ($name -in @('logs', 'audit-out'))
 }
 
 function Test-IsAllowedOutputDirectoryName {
@@ -573,7 +798,7 @@ function Test-IsProtectedEvidenceContent {
     }
     $transparentRawExtensions = @(
         '.har', '.trace', '.log', '.html', '.htm', '.lcov',
-        '.png', '.jpg', '.jpeg', '.gif', '.webp', '.avif',
+        '.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp', '.avif',
         '.mp4', '.webm'
     )
     if ($extension -in $transparentRawExtensions) {
@@ -620,7 +845,22 @@ foreach ($directoryPath in $generatedDirectoryPaths) {
             })
             continue
         }
-        $measurement = Get-DirectoryMeasurement -Path $safePath
+        $trustKnownGeneratedContent = Test-IsKnownGeneratedContentRoot -Path $safePath
+        if (
+            (Split-Path -Leaf $safePath).ToLowerInvariant() -eq '.next' -and
+            -not $trustKnownGeneratedContent
+        ) {
+            [void]$skipped.Add([pscustomobject]@{
+                Path = Convert-ToGitPath -Root $repositoryRoot -Path $safePath
+                Reason = 'Next.js output markers are missing or an unexpected top-level entry exists'
+                Disposition = 'REVIEW_REQUIRED'
+            })
+            continue
+        }
+        $measurement = Get-DirectoryMeasurement `
+            -Path $safePath `
+            -RepositoryRoot $repositoryRoot `
+            -TrustKnownGeneratedContent:$trustKnownGeneratedContent
         if ($measurement.ContainsSensitiveEntry) {
             [void]$skipped.Add([pscustomobject]@{
                 Path = Convert-ToGitPath -Root $repositoryRoot -Path $safePath
@@ -630,12 +870,28 @@ foreach ($directoryPath in $generatedDirectoryPaths) {
             continue
         }
         if (
+            (
+                (Test-IsShortRawRetentionRoot -Path $safePath) -or
+                (Test-IsSevenDayRawRetentionRoot -Path $safePath)
+            ) -and
             $measurement.NewestShortRawWriteTimeUtc -gt [DateTime]::MinValue -and
             $measurement.NewestShortRawWriteTimeUtc -ge $shortRawCutoffUtc
         ) {
             [void]$skipped.Add([pscustomobject]@{
                 Path = Convert-ToGitPath -Root $repositoryRoot -Path $safePath
                 Reason = 'contains screenshot, trace, HAR, or video within 3-day retention'
+                Disposition = 'KEEP'
+            })
+            continue
+        }
+        if (
+            (Test-IsSevenDayRawRetentionRoot -Path $safePath) -and
+            $measurement.NewestSevenDayRawWriteTimeUtc -gt [DateTime]::MinValue -and
+            $measurement.NewestSevenDayRawWriteTimeUtc -ge $cutoffUtc
+        ) {
+            [void]$skipped.Add([pscustomobject]@{
+                Path = Convert-ToGitPath -Root $repositoryRoot -Path $safePath
+                Reason = 'contains raw log output within 7-day retention'
                 Disposition = 'KEEP'
             })
             continue
@@ -648,6 +904,9 @@ foreach ($directoryPath in $generatedDirectoryPaths) {
             Bytes = [int64]$measurement.Bytes
             FileCount = [int64]$measurement.FileCount
             DirectoryCount = [int64]$measurement.DirectoryCount
+            SafeReparsePoints = @($measurement.SafeReparsePoints)
+            TrustKnownGeneratedContent = [bool]$trustKnownGeneratedContent
+            Fingerprint = [string]$measurement.Fingerprint
         })
     }
     catch {
@@ -684,7 +943,7 @@ foreach ($relativePath in $untrackedEvidencePaths) {
             throw "Refusing an evidence reparse point: $relativePath"
         }
         $itemCutoffUtc = if ($item.Extension.ToLowerInvariant() -in @(
-            '.har', '.trace', '.png', '.jpg', '.jpeg', '.gif', '.webp', '.avif', '.mp4', '.webm'
+            '.har', '.trace', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp', '.avif', '.mp4', '.webm'
         )) { $shortRawCutoffUtc } else { $cutoffUtc }
         if (-not (Test-IsRawEvidence -RelativePath ([string]$relativePath) -Item $item -CutoffUtc $itemCutoffUtc)) {
             continue
@@ -699,6 +958,8 @@ foreach ($relativePath in $untrackedEvidencePaths) {
             Bytes = [int64]$item.Length
             FileCount = [int64]1
             DirectoryCount = [int64]0
+            LastWriteTimeUtcTicks = [int64]$item.LastWriteTimeUtc.Ticks
+            ContentSha256 = Get-FileSha256 -Path $fullPath
         })
     }
     catch {
@@ -756,12 +1017,136 @@ foreach ($target in $targets) {
     if ($Apply -and -not $applyBlocked) {
         try {
             $safeDeletePath = Assert-SafePath -Root $repositoryRoot -Path $target.FullPath
-            Remove-Item -LiteralPath $safeDeletePath -Force -Recurse -ErrorAction Stop
+            $freshMeasurement = $null
+            if ($target.Kind -eq 'generated-directory') {
+                if (Test-DirectoryContainsTrackedFiles -Root $repositoryRoot -Path $safeDeletePath) {
+                    throw 'Generated output gained a tracked file after the dry-run measurement.'
+                }
+                $freshTrust = Test-IsKnownGeneratedContentRoot -Path $safeDeletePath
+                if (
+                    (Split-Path -Leaf $safeDeletePath).ToLowerInvariant() -eq '.next' -and
+                    -not $freshTrust
+                ) {
+                    throw 'Next.js output markers changed after the dry-run measurement.'
+                }
+                $freshMeasurement = Get-DirectoryMeasurement `
+                    -Path $safeDeletePath `
+                    -RepositoryRoot $repositoryRoot `
+                    -TrustKnownGeneratedContent:$freshTrust
+                if ($freshMeasurement.ContainsSensitiveEntry) {
+                    throw 'Generated output gained protected content after the dry-run measurement.'
+                }
+                if ([string]$freshMeasurement.Fingerprint -ne [string]$target.Fingerprint) {
+                    throw 'Generated output changed after the dry-run measurement.'
+                }
+                if (
+                    (
+                        (Test-IsShortRawRetentionRoot -Path $safeDeletePath) -or
+                        (Test-IsSevenDayRawRetentionRoot -Path $safeDeletePath)
+                    ) -and
+                    $freshMeasurement.NewestShortRawWriteTimeUtc -gt [DateTime]::MinValue -and
+                    $freshMeasurement.NewestShortRawWriteTimeUtc -ge $shortRawCutoffUtc
+                ) {
+                    throw 'Generated output gained short-retention raw evidence after the dry-run measurement.'
+                }
+                if (
+                    (Test-IsSevenDayRawRetentionRoot -Path $safeDeletePath) -and
+                    $freshMeasurement.NewestSevenDayRawWriteTimeUtc -gt [DateTime]::MinValue -and
+                    $freshMeasurement.NewestSevenDayRawWriteTimeUtc -ge $cutoffUtc
+                ) {
+                    throw 'Generated output gained raw logs within the retention window.'
+                }
+            }
+            elseif ($target.Kind -eq 'expired-untracked-evidence') {
+                if (-not (Test-Path -LiteralPath $safeDeletePath -PathType Leaf)) {
+                    throw 'Evidence file no longer exists as a regular file.'
+                }
+                $freshEvidence = Get-Item -LiteralPath $safeDeletePath -Force
+                if (Test-IsReparsePoint -Item $freshEvidence) {
+                    throw 'Evidence file changed into a reparse point.'
+                }
+                if (Test-IsTrackedPath -Root $repositoryRoot -Path $safeDeletePath) {
+                    throw 'Evidence file became tracked after the dry-run measurement.'
+                }
+                if (
+                    [int64]$freshEvidence.Length -ne [int64]$target.Bytes -or
+                    [int64]$freshEvidence.LastWriteTimeUtc.Ticks -ne [int64]$target.LastWriteTimeUtcTicks -or
+                    (Get-FileSha256 -Path $safeDeletePath) -ne [string]$target.ContentSha256
+                ) {
+                    throw 'Evidence file changed after the dry-run measurement.'
+                }
+                $freshEvidenceCutoffUtc = if ($freshEvidence.Extension.ToLowerInvariant() -in @(
+                    '.har', '.trace', '.png', '.jpg', '.jpeg', '.gif', '.svg',
+                    '.webp', '.avif', '.mp4', '.webm'
+                )) { $shortRawCutoffUtc } else { $cutoffUtc }
+                if (-not (Test-IsRawEvidence -RelativePath ([string]$target.Path) -Item $freshEvidence -CutoffUtc $freshEvidenceCutoffUtc)) {
+                    throw 'Evidence file no longer satisfies the retention rule.'
+                }
+                if (Test-IsProtectedEvidenceContent -RelativePath ([string]$target.Path) -Item $freshEvidence) {
+                    throw 'Evidence file became protected after the dry-run measurement.'
+                }
+            }
+            elseif ($target.Kind -eq 'empty-evidence-directory') {
+                if (-not (Test-Path -LiteralPath $safeDeletePath -PathType Container)) {
+                    throw 'Evidence directory no longer exists as a directory.'
+                }
+                $freshDirectory = Get-Item -LiteralPath $safeDeletePath -Force
+                if (Test-IsReparsePoint -Item $freshDirectory) {
+                    throw 'Evidence directory changed into a reparse point.'
+                }
+                if (@(Get-ChildItem -LiteralPath $safeDeletePath -Force -ErrorAction Stop).Count -ne 0) {
+                    throw 'Evidence directory is no longer empty.'
+                }
+            }
+            $safeReparsePoints = if ($null -ne $freshMeasurement) {
+                @($freshMeasurement.SafeReparsePoints)
+            }
+            elseif ($target.PSObject.Properties.Name -contains 'SafeReparsePoints') {
+                @($target.SafeReparsePoints)
+            }
+            else {
+                @()
+            }
+            if ($target.Kind -eq 'generated-directory') {
+                foreach ($reparsePath in @($safeReparsePoints | Sort-Object { $_.Length } -Descending)) {
+                    $reparseFull = [System.IO.Path]::GetFullPath([string]$reparsePath)
+                    $deletePrefix = $safeDeletePath.TrimEnd('\', '/') + [System.IO.Path]::DirectorySeparatorChar
+                    if (-not $reparseFull.StartsWith($deletePrefix, [System.StringComparison]::OrdinalIgnoreCase)) {
+                        throw "Refusing a generated-output link outside its deletion root: $reparsePath"
+                    }
+                    if (Test-Path -LiteralPath $reparseFull) {
+                        $reparseItem = Get-Item -LiteralPath $reparseFull -Force
+                        if (
+                            -not (Test-IsReparsePoint -Item $reparseItem) -or
+                            -not (Test-IsSafeGeneratedReparsePoint -Root $repositoryRoot -Item $reparseItem)
+                        ) {
+                            throw "Generated-output link changed after inspection: $reparsePath"
+                        }
+                        if ($reparseItem.PSIsContainer) {
+                            [System.IO.Directory]::Delete($reparseFull, $false)
+                        }
+                        else {
+                            [System.IO.File]::Delete($reparseFull)
+                        }
+                    }
+                }
+                Remove-Item -LiteralPath $safeDeletePath -Force -Recurse -ErrorAction Stop
+            }
+            elseif ($target.Kind -eq 'expired-untracked-evidence') {
+                [System.IO.File]::Delete($safeDeletePath)
+            }
+            elseif ($target.Kind -eq 'empty-evidence-directory') {
+                [System.IO.Directory]::Delete($safeDeletePath, $false)
+            }
+            else {
+                throw "Unknown cleanup target kind: $($target.Kind)"
+            }
         }
         catch {
             [void]$failed.Add([pscustomobject]@{
                 Path = $target.Path
                 Reason = $_.Exception.Message
+                ScriptStackTrace = $_.ScriptStackTrace
             })
             continue
         }

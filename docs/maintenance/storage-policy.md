@@ -1,6 +1,6 @@
 # safe-ai-site ストレージ保守ポリシー
 
-最終更新: 2026-08-08 JST
+最終更新: 2026-08-09 JST
 
 ## 目的と適用範囲
 
@@ -100,17 +100,19 @@ Preview・production・外部送信を伴う操作は、その task の権限と
 
 ## 自動保守の契約
 
-`cleanup-safe.ps1` は既定を dry-run とし、明示的な `-Apply` がある場合だけ、allowlist された repo 内の再生成物を削除します。source、runtime data、`.env*`、Git metadata、repo 外パスは対象にしません。削除候補が安全条件を満たさない場合は `REVIEW_REQUIRED` として終了します。
+`cleanup-safe.ps1` は既定を dry-run とし、明示的な `-Apply` がある場合だけ、allowlist された repo 内の再生成物を削除します。`npm run maintenance:cleanup` と `npm run maintenance:cleanup:dry` はどちらも dry-run、削除は意図が明確な `npm run maintenance:cleanup:apply` だけです。source、runtime data、`.env*`、Git metadata、repo 外パスは対象にしません。削除候補が安全条件を満たさない場合は `REVIEW_REQUIRED` として終了します。
 
-容量 budget は、5 MB 以上の新規 tracked file、raw evidence の追加、build/test output の commit、100 MB 超の artifact、1,000件超の untracked 生成物、runtime と無関係な大量 JSON・画像を検出します。法令・化学物質など正当な大規模 runtime data は、用途と所有者を記した明示 allowlist でのみ例外にします。
+容量 budget は、5 MB 以上の新規 tracked file、raw evidence の追加、build/test output の commit、100 MB 超の artifact、1,000件超の untracked 生成物、runtime と無関係な大量 JSON・画像を検出します。main・手動実行・定期実行・自動ETL完了後はcurrent tree全体を検査し、main上の検査は途中cancelしません。履歴内で追加後に削除された禁止生成物も検出します。法令・化学物質など正当な大規模 runtime data は、用途と所有者を記した明示 allowlist でのみ例外にします。
+
+`web/public` はruntime asset置場ですが、HAR・trace・log・coverage・JSONL・圧縮archiveを置くことは禁止します。正当な配布物が必要な場合は、用途・owner・exact pathをレビューしてCIとdeployの両allowlistへ明記します。directory名だけで正規sourceを除外しないよう、`build`・`trace`等の生成物判定はrepository直下または`web`直下の出力rootへ限定します。
 
 ## 現行 production baseline
 
-- Production Deployment: `dpl_ZDfFpkGCS2p86xXeavP4w2y5gPZb`
-- Production Build: `bld_oluo0rrdl`
-- Rollback Deployment: `dpl_F5nbj5gPCdxNXDQa3tYSWFYVHoyz`
-- Baseline commit: `852ecff29cf0475198aa1c4030c3629fcf621d0f`
-- Annotated tag: `production-20260808-852ecff`
-- Default branch integration: PR #971 で `main` へ統合
+- Production Deployment: `dpl_8hBD9HeQHpAmE6QEM5pMkcokotZQ`
+- Production Build: `bld_h0oa3x2zc`
+- Rollback Deployment: `dpl_muVQZ5RD32hSmpKxqzkamUA5hQTz`
+- Baseline commit: `83f604e3a151fe645b594e2ca17b91cfa2435eae`
+- Annotated tag: `production-20260809-83f604e3`
+- Default branch integration: PR #972 で `main` へ統合
 
 この baseline と rollback 情報を破棄する cleanup は禁止します。

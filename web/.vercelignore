@@ -10,9 +10,9 @@ test-results
 test-results-*
 playwright-report
 playwright-report-*
-out
-build
-dist
+/out
+/build
+/dist
 .maintenance-snapshots
 coverage
 .bench
@@ -41,9 +41,9 @@ lighthouse-trace
 lighthouse-trace-*
 lighthouse-results
 .lighthouseci
-trace
-traces
-videos
+/trace
+/traces
+/videos
 tmp
 .tmp
 .turbo
@@ -64,3 +64,16 @@ Desktop.ini
 ._*
 .idea
 .history
+
+# Public raw archives/dumps are not deployable assets.
+public/**/*.har
+public/**/*.trace
+public/**/*.log
+public/**/*.lcov
+public/**/*.jsonl
+public/**/*.zip
+public/**/*.gz
+public/**/*.tgz
+public/**/*.tar
+public/**/*.7z
+public/**/*.rar

@@ -233,7 +233,9 @@ function Measure-RepositoryTree {
 function Measure-UntrackedFiles {
     param([Parameter(Mandatory = $true)][string]$Root)
 
-    $paths = @(Invoke-GitUtf8PathList -Root $Root -Arguments 'ls-files -z --others --exclude-standard')
+    $normal = @(Invoke-GitUtf8PathList -Root $Root -Arguments 'ls-files -z --others --exclude-standard')
+    $ignored = @(Invoke-GitUtf8PathList -Root $Root -Arguments 'ls-files -z --others --ignored --exclude-standard')
+    $paths = @($normal + $ignored | Sort-Object -Unique)
 
     $rootPrefix = $Root.TrimEnd('\', '/') + [System.IO.Path]::DirectorySeparatorChar
     $fileCount = [int64]0
@@ -242,6 +244,10 @@ function Measure-UntrackedFiles {
 
     foreach ($relativePath in $paths) {
         if ([string]::IsNullOrEmpty([string]$relativePath)) {
+            continue
+        }
+        $segments = ([string]$relativePath).Replace('\', '/').Split('/')
+        if ($segments -contains 'node_modules') {
             continue
         }
 
@@ -297,6 +303,7 @@ $measurements += [pscustomobject]@{
     Bytes = [int64]$untracked.Bytes
     FileCount = [int64]$untracked.FileCount
     DirectoryCount = [int64]0
+    Scope = 'including ignored files; excluding dependency trees'
 }
 
 $result = [pscustomobject]@{
@@ -317,4 +324,8 @@ else {
     "Skipped reparse points: $($result.SkippedReparsePoints)"
     "Read errors: $($result.ReadErrors)"
     "Missing untracked files: $($result.MissingUntrackedFiles)"
+}
+
+if ($result.ReadErrors -gt 0 -or $result.MissingUntrackedFiles -gt 0) {
+    exit 1
 }

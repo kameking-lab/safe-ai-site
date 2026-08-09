@@ -1,6 +1,6 @@
 # 06 大画面実機検証（50-80インチTV / 1920px〜4K相当）（軸6）
 
-検証手段: Playwright で本番 /ky/morning を 1920×1080 実レンダリング。スクショ: `screenshots/largescreen-1920.png`。
+検証手段: Playwright で本番 /ky/morning を 1920×1080 実レンダリング。raw screenshotはretention policyにより削除し、判定要約を本文に保持する。
 
 ## 実測値（系統1, 1920px）— 重大課題
 - 横スクロール: なし

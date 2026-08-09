@@ -230,7 +230,7 @@ og:site_name, og:locale, og:url to the 20 helper-adopting pages on
 the next Vercel deploy.
 
 The 10-query chatbot smoke and HTTP status sweep on production are
-preserved unchanged in `logs/audit-1A-http.txt` and `logs/audit-1G-chatbot.txt`
+The raw HTTP/chatbot logs were retired under the repository retention policy; the resulting findings remain summarized in this document.
 as the pre-fix baseline. No regression was expected because the
 fixes are metadata-only and `web/src/lib/rag-search.ts` was not
 touched.

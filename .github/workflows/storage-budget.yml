@@ -2,6 +2,16 @@ name: storage-budget
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_run:
+    workflows:
+      - JMA data update
+      - News feed (RSS + human review queue)
+      - e-Gov law revisions ETL
+      - MHLW monthly sokuhou ETL
+    types:
+      - completed
   pull_request:
   push:
     branches:
@@ -12,7 +22,9 @@ permissions:
 
 concurrency:
   group: storage-budget-${{ github.ref }}
-  cancel-in-progress: true
+  # Every main push must finish so an add-then-delete sequence cannot hide a
+  # forbidden history blob behind a cancelled incremental run.
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   repository-hygiene:
@@ -27,6 +39,7 @@ jobs:
       - name: Enforce repository storage budgets
         env:
           STORAGE_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before || '' }}
+          STORAGE_FULL_TREE: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'workflow_dispatch' || github.event_name == 'schedule' || github.event_name == 'workflow_run' }}
         shell: bash
         run: |
           python - <<'PY'
@@ -40,6 +53,7 @@ jobs:
           MAX_SINGLE_FILE = 100 * MIB
           MAX_UNTRACKED_COUNT = 1_000
           MAX_NON_RUNTIME_MEDIA_COUNT = 100
+          MAX_REPOSITORY_NON_RUNTIME_MEDIA_COUNT = 125
           MAX_NON_RUNTIME_MEDIA_BYTES = 20 * MIB
 
           # Large source datasets are intentional only in these reviewed runtime trees.
@@ -72,6 +86,10 @@ jobs:
               ".har", ".html", ".log", ".trace", ".zip", ".gz", ".tgz",
               ".mp4", ".webm", ".png", ".jpg", ".jpeg", ".gif", ".webp",
               ".jsonl", ".lcov",
+          }
+          FORBIDDEN_PUBLIC_RAW_SUFFIXES = {
+              ".har", ".trace", ".log", ".lcov", ".jsonl",
+              ".zip", ".gz", ".tgz", ".tar", ".7z", ".rar",
           }
           MEDIA_OR_JSON_SUFFIXES = {
               ".json", ".jsonl", ".png", ".jpg", ".jpeg", ".gif", ".webp",
@@ -110,15 +128,23 @@ jobs:
               base = fallback.stdout.strip() if fallback.returncode == 0 else ""
 
           if base:
-              raw = run_bytes(
+              changed_raw = run_bytes(
                   "git", "diff", "--diff-filter=ACMR", "--name-only", "-z", f"{base}...HEAD"
               )
           else:
-              raw = run_bytes("git", "ls-files", "-z")
+              changed_raw = run_bytes("git", "ls-files", "-z")
 
-          added = [
+          changed = [
               item.decode("utf-8", errors="surrogateescape").replace("\\", "/")
-              for item in raw.split(b"\0")
+              for item in changed_raw.split(b"\0")
+              if item
+          ]
+          changed_set = set(changed)
+          full_tree_scan = os.environ.get("STORAGE_FULL_TREE", "").lower() == "true"
+          scan_raw = run_bytes("git", "ls-files", "-z") if full_tree_scan else changed_raw
+          scan_paths = [
+              item.decode("utf-8", errors="surrogateescape").replace("\\", "/")
+              for item in scan_raw.split(b"\0")
               if item
           ]
           failures: list[str] = []
@@ -126,7 +152,10 @@ jobs:
           non_runtime_media: list[tuple[str, int]] = []
 
           def is_runtime_allowed(path: str) -> bool:
-              return path.startswith(LARGE_RUNTIME_ALLOWLIST)
+              return path.startswith(LARGE_RUNTIME_ALLOWLIST) and not is_forbidden_public_raw(path)
+
+          def is_forbidden_public_raw(path: str) -> bool:
+              return path.startswith("web/public/") and PurePosixPath(path).suffix.lower() in FORBIDDEN_PUBLIC_RAW_SUFFIXES
 
           def is_generated_artifact(path: str) -> bool:
               parts = PurePosixPath(path).parts
@@ -143,15 +172,38 @@ jobs:
                   "test-results-", "playwright-report-", "lighthouse-raw-",
                   "lighthouse-trace-",
               )
-              if any(part in GENERATED_SEGMENTS or part.startswith(generated_prefixes) for part in parts):
+              root_index = 1 if parts and parts[0] == "web" else 0
+              generated_root = parts[root_index] if len(parts) > root_index else ""
+              unique_generated_segments = {
+                  ".next", ".turbo", ".cache", ".local-evidence",
+                  ".ci-performance-evidence", ".maintenance-snapshots",
+                  "node_modules",
+              }
+              if (
+                  generated_root in GENERATED_SEGMENTS
+                  or generated_root.startswith(generated_prefixes)
+                  or any(part in unique_generated_segments for part in parts)
+              ):
                   return True
               basename = PurePosixPath(path).name
-              return path.endswith((".lhr.json", ".trace", ".log", ".tmp")) or (
+              return path.endswith((".lhr.json", ".har", ".lcov", ".trace", ".log", ".tmp")) or (
                   basename.startswith("lh5d-noimg") and basename.endswith(".json")
               )
 
           def is_audit_evidence(path: str) -> bool:
               return path.startswith("docs/audits/evidence/") or "/docs/audits/evidence/" in f"/{path}"
+
+          def is_forbidden_audit_evidence(path: str) -> bool:
+              if not is_audit_evidence(path):
+                  return False
+              parts = PurePosixPath(path).parts
+              suffix = PurePosixPath(path).suffix.lower()
+              basename = PurePosixPath(path).name
+              raw_dir = any(
+                  part in {"raw", "screenshots", "traces", "videos", "playwright-report", "test-results", "lighthouse-runs"}
+                  for part in parts
+              )
+              return raw_dir or suffix in RAW_EVIDENCE_SUFFIXES or basename not in COMPACT_EVIDENCE_FILES
 
           classifier_probes = (
               ".local-evidence/run.log",
@@ -169,8 +221,15 @@ jobs:
           )
           if any(not is_generated_artifact(path) for path in classifier_probes):
               failures.append("storage classifier self-test failed")
-          if is_generated_artifact("web/public/screenshots/runtime-guide.png"):
-              failures.append("runtime screenshot classifier self-test failed")
+          if (
+              is_generated_artifact("web/public/screenshots/runtime-guide.png")
+              or is_generated_artifact("web/public/videos/training.mp4")
+          ):
+              failures.append("runtime media classifier self-test failed")
+          if is_generated_artifact("web/src/app/build/page.tsx") or is_generated_artifact("web/src/app/trace/page.tsx"):
+              failures.append("source route classifier self-test failed")
+          if not is_forbidden_public_raw("web/public/session.zip"):
+              failures.append("public raw archive classifier self-test failed")
           if not is_generated_artifact("web/node_modules/pkg/dist/index.js"):
               failures.append("node_modules classifier self-test failed")
           if sum(
@@ -179,35 +238,34 @@ jobs:
           ) <= MAX_UNTRACKED_COUNT:
               failures.append("untracked generated-file budget self-test failed")
 
-          for path in added:
+          for path in scan_paths:
               file_path = Path(path)
               if not file_path.is_file():
                   continue
               size = file_path.lstat().st_size
               suffix = file_path.suffix.lower()
               basename = file_path.name
+              changed_path = path in changed_set
 
-              if size > MAX_SINGLE_FILE:
-                  failures.append(f"single file exceeds 100 MiB: {path} ({size} bytes)")
-              elif size >= MAX_NEW_TRACKED:
-                  if is_runtime_allowed(path):
-                      allowed_large.append(f"{path} ({size} bytes)")
-                  else:
-                      failures.append(f"new tracked file exceeds 5 MiB: {path} ({size} bytes)")
+              if changed_path or full_tree_scan:
+                  if size > MAX_SINGLE_FILE:
+                      failures.append(f"single file exceeds 100 MiB: {path} ({size} bytes)")
+                  elif size >= MAX_NEW_TRACKED:
+                      if is_runtime_allowed(path):
+                          allowed_large.append(f"{path} ({size} bytes)")
+                      else:
+                          failures.append(f"new tracked file exceeds 5 MiB: {path} ({size} bytes)")
 
               if is_generated_artifact(path):
                   failures.append(f"generated build/test artifact is tracked: {path}")
 
-              if is_audit_evidence(path):
-                  parts = PurePosixPath(path).parts
-                  raw_dir = any(
-                      part in {"raw", "screenshots", "traces", "videos", "playwright-report", "test-results", "lighthouse-runs"}
-                      for part in parts
-                  )
-                  if raw_dir or suffix in RAW_EVIDENCE_SUFFIXES or basename not in COMPACT_EVIDENCE_FILES:
-                      failures.append(f"raw/non-current audit evidence is tracked: {path}")
+              if is_forbidden_public_raw(path):
+                  failures.append(f"raw archive/dump must not be deployed from public: {path}")
 
-              if suffix in MEDIA_OR_JSON_SUFFIXES and not is_runtime_allowed(path):
+              if is_forbidden_audit_evidence(path):
+                  failures.append(f"raw/non-current audit evidence is tracked: {path}")
+
+              if (changed_path or full_tree_scan) and suffix in MEDIA_OR_JSON_SUFFIXES and not is_runtime_allowed(path):
                   non_runtime_media.append((path, size))
 
           history_blob_count = 0
@@ -245,6 +303,12 @@ jobs:
                           continue
                       history_blob_count += 1
                       size = int(raw_size)
+                      if is_generated_artifact(path):
+                          failures.append(f"generated build/test artifact entered history: {path}")
+                      if is_forbidden_audit_evidence(path):
+                          failures.append(f"raw/non-current audit evidence entered history: {path}")
+                      if is_forbidden_public_raw(path):
+                          failures.append(f"raw archive/dump entered public history: {path}")
                       if size > MAX_SINGLE_FILE:
                           failures.append(
                               f"history blob exceeds 100 MiB: {path} ({size} bytes)"
@@ -255,13 +319,15 @@ jobs:
                           )
 
           media_bytes = sum(size for _, size in non_runtime_media)
-          if (
-              len(non_runtime_media) > MAX_NON_RUNTIME_MEDIA_COUNT
-              or media_bytes > MAX_NON_RUNTIME_MEDIA_BYTES
-          ):
+          media_count_budget = (
+              MAX_REPOSITORY_NON_RUNTIME_MEDIA_COUNT
+              if full_tree_scan
+              else MAX_NON_RUNTIME_MEDIA_COUNT
+          )
+          if len(non_runtime_media) > media_count_budget or media_bytes > MAX_NON_RUNTIME_MEDIA_BYTES:
               failures.append(
                   "non-runtime JSON/image addition exceeds budget: "
-                  f"{len(non_runtime_media)} files, {media_bytes} bytes"
+                  f"{len(non_runtime_media)} files (budget {media_count_budget}), {media_bytes} bytes"
               )
 
           untracked_raw = run_bytes("git", "ls-files", "--others", "--exclude-standard", "-z")
@@ -285,7 +351,9 @@ jobs:
               )
 
           print(f"Storage budget base: {base or '<initial tree>'}")
-          print(f"New tracked files checked: {len(added)}")
+          print(f"New tracked files checked: {len(changed)}")
+          print(f"Tracked files scanned for forbidden output: {len(scan_paths)}")
+          print(f"Full-tree forbidden-output scan: {full_tree_scan}")
           print(f"New history blobs checked: {history_blob_count}")
           print(f"Untracked generated files (ignored included): {len(untracked_generated)}")
           if allowed_large:

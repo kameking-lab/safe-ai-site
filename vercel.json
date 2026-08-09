@@ -2,7 +2,7 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
   "installCommand": "npm ci",
-  "ignoreCommand": "bash -c 'subject=$(echo \"$VERCEL_GIT_COMMIT_MESSAGE\" | head -n1); [[ \"$subject\" == *\"[skip ci]\"* ]] && exit 0; git diff HEAD~1 --name-only 2>/dev/null | grep -qE \"^(web/|vercel\\.json|next\\.config)\" && exit 1; exit 0'",
+  "ignoreCommand": "bash -c 'message=$(printf \"%s\" \"$VERCEL_GIT_COMMIT_MESSAGE\"); printf \"%s\" \"$message\" | grep -Eiq \"\\[(skip ci|ci skip|no ci|skip actions|actions skip)\\]|(^|[[:space:]])skip-checks:[[:space:]]*true([[:space:]]|$)\" && exit 0; git diff HEAD~1 --name-only 2>/dev/null | grep -qE \"^(web/|vercel\\.json|next\\.config)\" && exit 1; exit 0'",
   "crons": [
     {
       "path": "/api/seo/notify-search-console",
