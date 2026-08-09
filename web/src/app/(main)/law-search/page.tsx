@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
 import { LawSearchPanel } from "@/components/law-search-panel";
 import { ogImageUrl } from "@/lib/og-url";
 import Link from "next/link";
@@ -62,25 +61,11 @@ export default async function LawSearchPage({
         />
       </noscript>
       <div id="law-search-js">
-      <Suspense
-        fallback={
-          <div
-            className="mx-auto min-h-[70vh] max-w-7xl space-y-3 px-4 py-6"
-            aria-busy="true"
-            aria-label="法令収録条文検索を読み込み中"
-          >
-            <div className="h-8 w-2/3 animate-pulse rounded bg-slate-200" />
-            <div className="h-10 animate-pulse rounded-lg bg-slate-100" />
-            <div className="h-40 animate-pulse rounded-lg bg-slate-100" />
-          </div>
-        }
-      >
         <LawSearchPanel
           initialQuery={initialQuery}
           initialArticleNumQuery={initialArticleNumQuery}
           initialSelectedLaw={initialSelectedLaw}
         />
-      </Suspense>
       </div>
       <PageContainer>
         <nav aria-label="法令検索の関連操作" className="mt-20 flex flex-wrap gap-x-5 gap-y-1">
