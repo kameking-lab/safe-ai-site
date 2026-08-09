@@ -8,7 +8,7 @@ const source = readFileSync(
     "scripts/audit/answer-first-preview-conversation-audit.mjs",
   ),
   "utf8",
-);
+).replace(/\r\n/gu, "\n");
 const externalOperationsSource = readFileSync(
   path.resolve(
     process.cwd(),
