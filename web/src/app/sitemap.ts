@@ -220,12 +220,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
     },
     {
-      url: "/e-learning",
-      lastModified: "2026-08-09",
-      priority: 0.8,
-      changeFrequency: "monthly",
-    },
-    {
       url: "/e-learning/safety",
       lastModified: "2026-08-09",
       priority: 0.9,
