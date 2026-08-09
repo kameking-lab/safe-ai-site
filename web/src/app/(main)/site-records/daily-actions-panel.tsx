@@ -35,7 +35,7 @@ const ROW_BORDER: Record<DailyAction["severity"], string> = {
 };
 
 /**
- * 「今日やること（期限切れ・要対応）」横断パネル。
+ * 「要対応の記録（期限切れ・未対応）」横断パネル。
  * 各記録ツールの localStorage を走査し、優先順に並んだ具体アクションを1枚で示す。
  */
 export function DailyActionsPanel() {
@@ -73,7 +73,7 @@ export function DailyActionsPanel() {
     <section className="mt-2 rounded-2xl border border-slate-200 bg-white p-4">
       <h2 className="flex items-center gap-1.5 text-sm font-bold text-slate-800">
         <ListTodo className="h-4 w-4 text-slate-500" aria-hidden="true" />
-        今日やること（期限切れ・要対応）
+        要対応の記録（期限切れ・未対応）
       </h2>
 
       {tone === "danger" ? (

@@ -2,8 +2,9 @@
 // Cache-first: static assets / Network-first: API calls
 // 安全・法令ページはオフライン時に最新表示と誤認させないためHTMLを保存しない。
 
-const CACHE_NAME = "anzen-ai-v6";
+const CACHE_NAME = "anzen-ai-v7";
 const OFFLINE_URL = "/offline.html";
+const PUBLIC_SAFETY_LEARNING_PATH = /^\/e-learning\/safety(?:\/(?:first-class-health-officer|second-class-health-officer|occupational-safety-consultant|occupational-health-consultant))?\/?$/;
 
 const PRECACHE_URLS = [
   OFFLINE_URL,
@@ -81,9 +82,14 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // ナビゲーションリクエスト（HTMLページ） → Network-first、オフライン時は /offline.html
+  // 公開安全資格教材だけは、訪問成功後の同一routeをオフライン再読込できる。
+  // query付きURL、非公開route、法令・API・account等は対象外。
   if (request.mode === "navigate") {
-    event.respondWith(navigationNetworkFirst(request));
+    if (PUBLIC_SAFETY_LEARNING_PATH.test(url.pathname) && url.search === "") {
+      event.respondWith(publicLearningNavigationNetworkFirst(request, url));
+    } else {
+      event.respondWith(navigationNetworkFirst(request));
+    }
     return;
   }
 
@@ -112,6 +118,47 @@ async function cacheFirst(request) {
     return response;
   } catch {
     return new Response("Network error", { status: 408 });
+  }
+}
+
+function canCachePublicLearningHtml(response) {
+  const cacheControl = response.headers.get("cache-control") ?? "";
+  const contentType = response.headers.get("content-type") ?? "";
+  return (
+    response.ok &&
+    response.type !== "opaque" &&
+    /text\/html/i.test(contentType) &&
+    !/\b(?:no-store|private)\b/i.test(cacheControl) &&
+    !response.headers.has("set-cookie")
+  );
+}
+
+/**
+ * 公開資格教材専用: 成功した公開HTMLだけをroute完全一致で保存する。
+ * 個人状態をqueryやcache keyへ含めず、失敗時も別courseへfallbackしない。
+ */
+async function publicLearningNavigationNetworkFirst(request, url) {
+  const cacheKey = new Request(`${url.origin}${url.pathname}`, {
+    method: "GET",
+    headers: { Accept: "text/html" },
+    credentials: "omit",
+  });
+  try {
+    const response = await fetch(request);
+    if (canCachePublicLearningHtml(response)) {
+      const cache = await caches.open(CACHE_NAME);
+      await cache.put(cacheKey, response.clone());
+    }
+    return response;
+  } catch {
+    return (
+      (await caches.match(cacheKey)) ??
+      (await caches.match(OFFLINE_URL)) ??
+      new Response("オフライン中です。", {
+        status: 503,
+        headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" },
+      })
+    );
   }
 }
 

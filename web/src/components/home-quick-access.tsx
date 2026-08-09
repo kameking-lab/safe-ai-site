@@ -85,7 +85,7 @@ export function HomeQuickAccess() {
             aria-label="やることを選ぶ"
             className="mt-2 text-3xl font-black tracking-tight text-slate-950 dark:text-white sm:text-4xl"
           >
-            今日やることから、すぐ始める
+            要対応の記録から、すぐ始める
           </h2>
           <p className="mt-2 text-sm font-medium text-slate-600 dark:text-slate-300">
             迷ったら、目的にいちばん近いシーンを選んでください。

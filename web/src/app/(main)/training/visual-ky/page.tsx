@@ -4,7 +4,6 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { JsonLd } from "@/components/json-ld";
 import { PageJsonLd } from "@/components/page-json-ld";
-import { VisualKyLocalProgressPanel } from "@/components/visual-ky/local-progress-panel";
 import {
   PUBLIC_VISUAL_KY_SCENARIOS,
   VISUAL_KY_CATEGORY_DEFINITIONS,
@@ -246,21 +245,6 @@ export default function VisualKyHubPage() {
             </div>
           </details>
         </section>
-
-        <details
-          aria-labelledby="learning-progress-summary"
-          className="mt-8 border-t border-slate-200 pt-4 dark:border-slate-800"
-        >
-          <summary
-            id="learning-progress-summary"
-            className="min-h-11 cursor-pointer py-2 font-bold text-slate-800 focus-visible:rounded focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:text-slate-100"
-          >
-            学習状況を見る
-          </summary>
-          <div className="mt-3">
-            <VisualKyLocalProgressPanel totalScenarios={PUBLIC_VISUAL_KY_SCENARIOS.length} />
-          </div>
-        </details>
 
         <nav aria-label="ビジュアルKYTの関連情報" className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm">
           <Link
