@@ -110,6 +110,10 @@ Preview・production・外部送信を伴う操作は、その task の権限と
 
 PRのstorage scannerは、commit-message skipで抑止されない`pull_request_target`上でcontents read-only、credential非永続として動き、checkoutしたGit objectとfile metadataをdataとしてだけ検査します。PR由来のscript・package・buildは一切実行せず、Pythonはisolated modeで起動してcheckout上のmoduleをimportしません。別jobのtrusted reporterだけに`statuses: write`を与え、検査したimmutable merge SHAのhead parentへsuccess/failureを明示報告します。Vercelはcommit messageやfirst-parent差分をskip根拠にせず、deploy前にHEAD tree objectを同じfail-closed分類で検査し、違反または検査不能なら現行productionを維持します。安全なcommitはすべてbuildし、build開始時にもupload済みworkspaceを再検査します。
 
+JMA、ニュース、e-Gov法改正、厚労省月次速報の自動更新はmainへ直接pushしません。現在mainの単一子commitとして、ETLごとの既存`100644` data file exact allowlistだけを変更し、`automation/storage-gate/<run>-<attempt>-<try>`へ一時pushします。credentialを永続化せず、mainにcommit済みのpromotion scriptだけを実行します。scriptは候補statusを一意なrequest ID付き`pending`へ更新してから、default branch上の中央scannerを明示dispatchします。新しいrequest IDに対応する`repository-hygiene-target` success、候補branch tip、候補parent、main tipを再照合できた同一SHAだけをnon-forceでmainへ進め、race時は新SHAを再scanします。rulesetはbypassを置かず、このcontextをGitHub Actions App `15368`由来かつstrict/up-to-dateで必須化します。
+
+storage候補branchはtransport専用です。Vercelのcommitted-tree guardを先にPASSさせた後、上記exact branch形式だけPreview buildをskipします。同じSHAがmainへ進んだpushではskipせずproduction buildします。通常のsafe commitをcommit messageやfirst-parent差分だけでskipすることは引き続き禁止します。
+
 `web/public` はfail-closedのruntime asset置場です。既存の画像・font・動画、指定manifest等、`seminars/*.pptx`だけを許可し、それ以外の拡張子・拡張子なしfile・symlinkは公開しません。正当な配布物が必要な場合は、用途・owner・exact pathまたは限定suffixをレビューしてCI、Git ignore、root/web deploy ignore、deploy guardの全allowlistへ同時に明記します。directory名だけで正規sourceを除外しないよう、`build`・`trace`等の生成物判定はrepository直下または`web`直下の出力rootへ限定します。
 
 ## 現行 production baseline
