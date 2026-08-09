@@ -43,7 +43,9 @@
     ".next/ky-targeted-gate-2/types/**/*.ts",
     ".next/ky-targeted-gate-2/dev/types/**/*.ts",
     ".next/ky-full-gate-final/types/**/*.ts",
-    ".next/ky-full-gate-final/dev/types/**/*.ts"
+    ".next/ky-full-gate-final/dev/types/**/*.ts",
+    ".cache/playwright-next/types/**/*.ts",
+    ".cache/playwright-next/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"

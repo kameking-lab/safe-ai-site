@@ -16,9 +16,9 @@ const NOW = new Date("2026-07-28T03:00:00Z");
 
 describe("法令回答の共通時点管理", () => {
   it("一次資料の監査済み上限を実行時計と独立した基準日にする", () => {
-    expect(LEGAL_ANSWER_BASIS_DATE_JST).toBe("2026-08-03");
-    expect(legalAnswerAsOf(legalAnswerBasisNow())).toBe("2026-08-03");
-    expect(hasFutureLegalPremise("2026年8月4日時点の義務", legalAnswerBasisNow())).toBe(
+    expect(LEGAL_ANSWER_BASIS_DATE_JST).toBe("2026-08-09");
+    expect(legalAnswerAsOf(legalAnswerBasisNow())).toBe("2026-08-09");
+    expect(hasFutureLegalPremise("2026年8月10日時点の義務", legalAnswerBasisNow())).toBe(
       true,
     );
   });

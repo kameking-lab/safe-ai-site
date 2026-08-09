@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import CertFinderPage from "./page";
+import { TransientQueryBridgeProvider } from "@/components/home-safety-cockpit/transient-query-bridge";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
@@ -22,7 +23,9 @@ async function renderPage(
   const ui = await CertFinderPage({
     searchParams: Promise.resolve(searchParams),
   });
-  return render(ui);
+  return render(
+    <TransientQueryBridgeProvider>{ui}</TransientQueryBridgeProvider>,
+  );
 }
 
 describe("/education-certification/finder server query boundary", () => {

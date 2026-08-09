@@ -977,8 +977,42 @@ describe("evaluateChatbotSafety", () => {
     expect(detectChatbotSensitiveData("職長教育の対象者は？")).toEqual([]);
     expect(detectChatbotSensitiveData("作業主任者の職務は？")).toEqual([]);
     expect(detectChatbotSensitiveData("安全衛生責任者教育とは？")).toEqual([]);
+    for (const question of [
+      "電気主任技術者がいれば作業できる？",
+      "電気主任技術者と電気工事士の違い",
+      "高圧の点検は主任技術者の立会いだけでいい？",
+      "主任技術者がいればいい？",
+    ]) {
+      expect(detectChatbotSensitiveData(question)).toEqual([]);
+      expect(evaluateChatbotSafety(question)?.kind).not.toBe("privacy");
+    }
     expect(evaluateChatbotSafety("職長は小野太郎です")?.kind).toBe("privacy");
+    expect(
+      evaluateChatbotSafety("電気主任技術者は小野太郎です")?.kind,
+    ).toBe("privacy");
   });
+
+  it.each([
+    "配線・充電部を扱う",
+    "盤内測定・配線",
+    "換気・保護措置",
+    "譲渡・提供のみ",
+    "有機溶剤・シンナー",
+    "高圧・特別高圧",
+    "低圧・高圧",
+    "低圧・高圧・特別高圧",
+  ])("生成quick replyの安全な業務複合語を実名扱いしない: %s", (message) => {
+    expect(detectChatbotSensitiveData(message)).toEqual([]);
+    expect(evaluateChatbotSafety(message)).toBeNull();
+  });
+
+  it.each(["山田・太郎", "佐藤・花子"])(
+    "中黒区切りの実名は引き続き外部送信前に遮断する: %s",
+    (message) => {
+      expect(detectChatbotSensitiveData(message)).toContain("name");
+      expect(evaluateChatbotSafety(message)?.kind).toBe("privacy");
+    },
+  );
 
   it("速度設定と作業指揮者を含む複合法令質問を氏名扱いしない", () => {
     const legalQuestion = "フォークリフトの資格、速度設定、作業指揮者を教えて";

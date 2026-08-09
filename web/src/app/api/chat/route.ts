@@ -28,8 +28,11 @@ import {
 import {
   nextLegalClarification,
   resolveLegalConversationQuery,
-  sanitizeLegalConversationContext,
 } from "@/lib/legal-conversation-context";
+import {
+  hasPublicLegalConversationContext,
+  rehydratePublicLegalConversationContext,
+} from "@/lib/legal-conversation-public-context";
 import { lawArticleToSource } from "@/lib/chatbot-route-shared";
 import { inspectAiOutbound } from "@/lib/server/ai-outbound-safety";
 import {
@@ -137,7 +140,7 @@ export async function POST(request: Request) {
     typeof body.revisionTitle === "string" && body.revisionTitle.trim()
       ? body.revisionTitle.trim()
       : "選択中の法改正";
-  const history = Array.isArray(body.history)
+  const untrustedLegacyHistory = Array.isArray(body.history)
     ? body.history
         .slice(-10)
         .filter(
@@ -162,7 +165,7 @@ export async function POST(request: Request) {
     texts: [
       revisionTitle,
       question,
-      ...history
+      ...untrustedLegacyHistory
         .filter((turn) => turn.role === "user")
         .map((turn) => turn.content),
     ],
@@ -186,8 +189,10 @@ export async function POST(request: Request) {
   const selectedRevision = getLawRevisionById(revisionId);
   const resolvedConversation = resolveLegalConversationQuery({
     message: safeQuestion,
-    history,
-    context: body.context,
+    // Free-text history from old clients is inspected above for PII, but never
+    // becomes legal context. Follow-ups use only the allowlisted structure.
+    history: [],
+    context: rehydratePublicLegalConversationContext(body.context),
   });
   const legalAnswerNow = legalAnswerBasisNow();
   const revisionContextTitle = selectedRevision?.title ?? "";
@@ -229,8 +234,7 @@ export async function POST(request: Request) {
   if (
     needsPriorConversationContext(
       safeQuestion,
-      history.length > 0 ||
-        Object.keys(sanitizeLegalConversationContext(body.context)).length > 0,
+      hasPublicLegalConversationContext(body.context),
     )
   ) {
     const contextHold = finalizeChatbotResponse({

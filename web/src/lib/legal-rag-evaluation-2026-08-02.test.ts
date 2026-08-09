@@ -363,15 +363,21 @@ describe("2026-08-02 legal RAG frozen evaluation", () => {
       });
 
       const outPath = resolve(
-        process.cwd(),
-        "../docs/audits/legal-rag-evaluation-2026-08-02.csv",
+        process.env.LEGAL_RAG_EVALUATION_CSV_PATH ??
+          resolve(
+            process.cwd(),
+            "../docs/audits/legal-rag-evaluation-2026-08-02.csv",
+          ),
       );
       mkdirSync(dirname(outPath), { recursive: true });
       writeFileSync(outPath, legalRagEvaluationCsv(report), "utf8");
 
       const summaryPath = resolve(
-        process.cwd(),
-        "../docs/audits/evidence/service-first-copy-reduction-2026-08-02/legal-rag-evaluation-summary.json",
+        process.env.LEGAL_RAG_EVALUATION_SUMMARY_PATH ??
+          resolve(
+            process.cwd(),
+            "../docs/audits/evidence/service-first-copy-reduction-2026-08-02/legal-rag-evaluation-summary.json",
+          ),
       );
       mkdirSync(dirname(summaryPath), { recursive: true });
       writeFileSync(

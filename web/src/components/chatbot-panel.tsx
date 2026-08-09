@@ -24,25 +24,24 @@ import { clearChatHistory } from "@/lib/chat-history";
 import { trackEvent } from "@/components/Analytics";
 import { formatAnswerForDisplay } from "@/lib/chatbot-answer-format";
 import {
-  CHATBOT_PRIVACY_RESPONSE,
   evaluateChatbotSafety,
-  inspectChatbotHistory,
-  migrateChatbotHistory,
   type ChatbotSafetyKind,
 } from "@/lib/chatbot-safety";
 import { inspectAiOutbound } from "@/lib/ai-outbound-safety";
+import type { LegalClarification } from "@/lib/legal-conversation-context";
 import {
-  sanitizeLegalConversationContext,
-  type LegalClarification,
-  type LegalConversationContext,
-} from "@/lib/legal-conversation-context";
+  sanitizePublicLegalConversationContext,
+  type PublicLegalConversationContext,
+} from "@/lib/legal-conversation-public-context";
 
 type ChatMessage = {
   id: string;
   role: "user" | "assistant";
   content: string;
+  directAnswer?: string;
   substantiveAnswer?: string;
   assumptions?: string[];
+  importantConditions?: string[];
   conditions?: string[];
   sources?: ChatbotSource[];
   source_type?: "rag" | "ai_inference" | "safety";
@@ -61,6 +60,13 @@ type ChatMessage = {
   clarification?: LegalClarification;
   clarificationQuestion?: string | null;
   quickReplies?: ChatbotQuickReply[];
+  effectiveDateStatus?: ChatbotResponse["effectiveDateStatus"];
+};
+
+type ChatbotResponsePayload = Partial<ChatbotResponse> & {
+  /** 新契約を先に読み、旧契約名は移行期間だけfallbackとして扱う。 */
+  directAnswer?: string;
+  importantConditions?: string[];
 };
 
 const EXAMPLE_QUESTIONS = [
@@ -102,53 +108,40 @@ function displayAnswer(content: string): { visible: string; rest: string } {
   };
 }
 
-const ANSWER_SECTION_RE =
-  /^(?:\*\*)?(結論|条件|根拠|適用時点|次の質問)(?:\*\*)?[：:]?$/;
+const PRESENTATION_ONLY_HEADING_RE =
+  /^(?:\*\*)?(?:結論|条件(?:で変わる点)?|根拠|適用時点|確認|次の質問)(?:\*\*)?[：:]?$/;
 
-function AnswerContent({ text }: { text: string }) {
-  const blocks: Array<
-    { type: "heading"; text: string } | { type: "body"; text: string }
-  > = [];
-  let bodyLines: string[] = [];
-  const flushBody = () => {
-    const body = bodyLines.join("\n").trim();
-    if (body) blocks.push({ type: "body", text: body });
-    bodyLines = [];
-  };
-
-  for (const line of text.split("\n")) {
-    const heading = ANSWER_SECTION_RE.exec(line.trim());
-    if (heading) {
-      flushBody();
-      blocks.push({ type: "heading", text: heading[1] });
-    } else {
-      bodyLines.push(line);
-    }
-  }
-  flushBody();
+function AnswerContent({ text, lead = false }: { text: string; lead?: boolean }) {
+  const blocks = text
+    .split(/\n\s*\n/u)
+    .map((block) =>
+      block
+        .split("\n")
+        .filter((line) => !PRESENTATION_ONLY_HEADING_RE.test(line.trim()))
+        .join("\n")
+        .trim(),
+    )
+    .filter(Boolean);
 
   return (
-    <div className="space-y-1">
-      {blocks.map((block, index) =>
-        block.type === "heading" ? (
-          <h3
-            key={`heading-${index}`}
-            className="mt-3 text-sm font-bold first:mt-0"
-          >
-            {block.text}
-          </h3>
-        ) : (
-          <p key={`body-${index}`} className="whitespace-pre-wrap">
-            {block.text}
-          </p>
-        ),
-      )}
+    <div className="space-y-2">
+      {blocks.map((block, index) => (
+        <p
+          key={`${index}-${block.slice(0, 24)}`}
+          className={`whitespace-pre-wrap ${lead && index === 0 ? "font-semibold text-slate-950 dark:text-white" : ""}`}
+        >
+          {block}
+        </p>
+      ))}
     </div>
   );
 }
 
 function structuredConditions(message: ChatMessage): string[] {
-  return [...(message.assumptions ?? []), ...(message.conditions ?? [])]
+  return [
+    ...(message.importantConditions ?? message.conditions ?? []),
+    ...(message.assumptions ?? []),
+  ]
     .map((item) => item.trim())
     .filter(
       (item, index, items) =>
@@ -159,13 +152,7 @@ function structuredConditions(message: ChatMessage): string[] {
 }
 
 function quickRepliesFor(message: ChatMessage): ChatbotQuickReply[] {
-  const replies = message.quickReplies?.length
-    ? message.quickReplies
-    : (message.clarification?.options ?? []).map((option) => ({
-        label: option,
-        prompt: option,
-      }));
-  return replies
+  return (message.quickReplies ?? [])
     .filter((reply) => reply.label.trim() && reply.prompt.trim())
     .slice(0, 3);
 }
@@ -191,6 +178,9 @@ export function ChatbotPanel({
     null,
   );
   const [copyStates, setCopyStates] = useState<Record<string, boolean>>({});
+  const [answerFeedback, setAnswerFeedback] = useState<
+    Record<string, "matched" | "mismatched">
+  >({});
   const [localSafetyNotice, setLocalSafetyNotice] = useState<{
     kind: "emergency" | "privacy";
     message: string;
@@ -198,7 +188,7 @@ export function ChatbotPanel({
   const abortRef = useRef<AbortController | null>(null);
   const requestPendingRef = useRef(false);
   const requestGenerationRef = useRef(0);
-  const conversationContextRef = useRef<LegalConversationContext>({});
+  const conversationContextRef = useRef<PublicLegalConversationContext>({});
   const listRef = useRef<HTMLDivElement>(null);
   const composerRef = useRef<HTMLTextAreaElement>(null);
   const previousInputValueRef = useRef(input);
@@ -253,10 +243,6 @@ export function ChatbotPanel({
   async function handleSend(question?: string) {
     const text = (question ?? input).trim();
     if (!text || requestPendingRef.current) return;
-    const history = messages.slice(-8).map((message) => ({
-      role: message.role,
-      content: message.content,
-    }));
 
     const safety = evaluateChatbotSafety(text);
     if (safety?.kind === "emergency" || safety?.kind === "privacy") {
@@ -280,37 +266,6 @@ export function ChatbotPanel({
         message: outboundPreflight.message,
       });
       setInput("");
-      return;
-    }
-
-    const historyInspection = inspectChatbotHistory(
-      history.filter((turn) => turn.role === "user"),
-    );
-    const unsafeHistoryIds = new Set(
-      messages
-        .filter((message) => {
-          if (message.role !== "user") return false;
-          const decision = inspectAiOutbound({
-            purpose: "chatbot-client-history-preflight",
-            texts: [message.content],
-            consent: true,
-            maxChars: 4_000,
-            contextPolicy: "approved-server-corpus",
-          });
-          return !decision.allowed;
-        })
-        .map((message) => message.id),
-    );
-    if (!historyInspection.safe || unsafeHistoryIds.size > 0) {
-      const migrated = migrateChatbotHistory(messages).messages.filter(
-        (message) => !unsafeHistoryIds.has(message.id),
-      );
-      setMessages(migrated);
-      setLocalSafetyNotice({
-        kind: "privacy",
-        message: CHATBOT_PRIVACY_RESPONSE,
-      });
-      setError(null);
       return;
     }
 
@@ -338,8 +293,9 @@ export function ChatbotPanel({
     abortRef.current = controller;
     const requestBody = JSON.stringify({
       message: text,
-      history,
-      context: sanitizeLegalConversationContext(conversationContextRef.current),
+      context: sanitizePublicLegalConversationContext(
+        conversationContextRef.current,
+      ),
       lawCategory,
       // The client and server have both run the same PII/emergency gate.
       privacyConfirmed: true,
@@ -388,7 +344,7 @@ export function ChatbotPanel({
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let buffer = "";
-      let finalMeta: Partial<ChatbotResponse> = {};
+      let finalMeta: ChatbotResponsePayload = {};
 
       while (true) {
         const { done, value } = await reader.read();
@@ -423,7 +379,7 @@ export function ChatbotPanel({
                 );
                 scrollConversation(listRef);
               } else if (event === "meta") {
-                finalMeta = parsed as Partial<ChatbotResponse>;
+                finalMeta = parsed as ChatbotResponsePayload;
               } else if (event === "error") {
                 throw new Error("stream-error");
               }
@@ -440,11 +396,15 @@ export function ChatbotPanel({
         }
       }
 
-      if (typeof finalMeta.answer !== "string" || !finalMeta.answer.trim()) {
+      const directAnswer =
+        finalMeta.directAnswer?.trim() ||
+        finalMeta.substantiveAnswer?.trim() ||
+        "";
+      if (!directAnswer && !finalMeta.answer?.trim()) {
         throw new Error("stream-incomplete");
       }
 
-      conversationContextRef.current = sanitizeLegalConversationContext(
+      conversationContextRef.current = sanitizePublicLegalConversationContext(
         finalMeta.context,
       );
 
@@ -454,9 +414,11 @@ export function ChatbotPanel({
           message.id === assistantId
             ? {
                 ...message,
-                content: finalMeta.answer ?? streamedContent,
+                content: finalMeta.answer ?? directAnswer ?? streamedContent,
+                directAnswer: finalMeta.directAnswer,
                 substantiveAnswer: finalMeta.substantiveAnswer,
                 assumptions: finalMeta.assumptions,
+                importantConditions: finalMeta.importantConditions,
                 conditions: finalMeta.conditions,
                 sources: finalMeta.sources,
                 source_type: finalMeta.source_type,
@@ -474,6 +436,7 @@ export function ChatbotPanel({
                 clarification: finalMeta.clarification,
                 clarificationQuestion: finalMeta.clarificationQuestion,
                 quickReplies: finalMeta.quickReplies,
+                effectiveDateStatus: finalMeta.effectiveDateStatus,
                 requiresHumanReview: finalMeta.requiresHumanReview ?? true,
               }
             : message,
@@ -567,6 +530,7 @@ export function ChatbotPanel({
     setError(null);
     setRetryableQuestion(null);
     setLocalSafetyNotice(null);
+    setAnswerFeedback({});
     clearChatHistory();
     window.requestAnimationFrame(() => composerRef.current?.focus());
   }
@@ -663,8 +627,15 @@ export function ChatbotPanel({
                 index === messages.length - 1;
               const hasStructuredAnswer = Boolean(
                 message.role === "assistant" &&
-                message.substantiveAnswer?.trim(),
+                (message.directAnswer?.trim() ||
+                  message.substantiveAnswer?.trim()),
               );
+              const directAnswer =
+                message.role === "assistant"
+                  ? (message.directAnswer?.trim() ||
+                    message.substantiveAnswer?.trim() ||
+                    "")
+                  : "";
               const answer =
                 message.role === "assistant" && !hasStructuredAnswer
                   ? displayAnswer(message.content)
@@ -726,31 +697,23 @@ export function ChatbotPanel({
                           className="space-y-3"
                           data-chatbot-structured-answer=""
                         >
-                          <section aria-label="結論">
-                            <h3 className="text-sm font-bold">結論</h3>
-                            <p className="mt-1 whitespace-pre-wrap">
-                              {message.substantiveAnswer}
-                            </p>
-                          </section>
+                          <AnswerContent text={directAnswer} lead />
                           {conditionItems.length > 0 && (
-                            <section aria-label="条件で変わる点">
-                              <h3 className="text-sm font-bold">
-                                条件で変わる点
-                              </h3>
-                              <ul className="mt-1 space-y-1 pl-5">
-                                {conditionItems.map((condition) => (
-                                  <li key={condition} className="list-disc">
-                                    {condition}
-                                  </li>
-                                ))}
-                              </ul>
-                            </section>
+                            <ul
+                              className="space-y-1 pl-5 text-slate-800 dark:text-slate-200"
+                              aria-label="主な条件"
+                            >
+                              {conditionItems.map((condition) => (
+                                <li key={condition} className="list-disc">
+                                  {condition}
+                                </li>
+                              ))}
+                            </ul>
                           )}
                           {clarificationQuestion && (
-                            <section aria-label="確認">
-                              <h3 className="text-sm font-bold">確認</h3>
-                              <p className="mt-1">{clarificationQuestion}</p>
-                            </section>
+                            <p data-chatbot-clarification-question="">
+                              {clarificationQuestion}
+                            </p>
                           )}
                         </div>
                       ) : answer?.visible ? (
@@ -791,6 +754,7 @@ export function ChatbotPanel({
 
                   {message.role === "assistant" &&
                     message.id === activeReplyMessage?.id &&
+                    answerFeedback[message.id] !== "mismatched" &&
                     quickReplies.length > 0 && (
                       <div
                         className="mt-3 flex flex-wrap gap-2"
@@ -804,7 +768,7 @@ export function ChatbotPanel({
                             data-chatbot-question-chip=""
                             data-chatbot-quick-reply=""
                             onClick={() => void handleSend(reply.prompt)}
-                            className="min-h-11 rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-xs font-semibold text-blue-800 hover:bg-blue-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-200"
+                            className="min-h-11 max-w-full whitespace-normal rounded-full border border-blue-200 bg-blue-50 px-3 py-2 text-left text-xs font-semibold leading-4 text-blue-800 hover:bg-blue-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-200"
                           >
                             {reply.label}
                           </button>
@@ -826,7 +790,9 @@ export function ChatbotPanel({
                         onClick={() =>
                           void handleCopy(
                             message.id,
-                            message.substantiveAnswer ?? message.content,
+                            message.directAnswer ??
+                              message.substantiveAnswer ??
+                              message.content,
                           )
                         }
                         className="inline-flex min-h-11 items-center gap-1 px-1 text-xs font-medium text-slate-500 hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 dark:text-slate-400 dark:hover:text-white"
@@ -850,6 +816,65 @@ export function ChatbotPanel({
                         )}
                     </div>
                   )}
+
+                  {message.role === "assistant" &&
+                    !isStreaming &&
+                    !message.safetyKind && (
+                      <div
+                        className="mt-1 border-t border-slate-100 pt-2 text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400"
+                        data-chatbot-answer-feedback=""
+                      >
+                        <p
+                          id={`chatbot-feedback-label-${message.id}`}
+                          className="leading-5"
+                        >
+                          {answerFeedback[message.id] === "mismatched"
+                            ? "知りたい点をもう少し教えてください"
+                            : answerFeedback[message.id] === "matched"
+                              ? "ありがとうございます。"
+                              : "質問の意図に合っていましたか？"}
+                        </p>
+                        <div
+                          className="mt-1 flex flex-wrap gap-x-3"
+                          role="group"
+                          aria-labelledby={`chatbot-feedback-label-${message.id}`}
+                        >
+                          <button
+                            type="button"
+                            aria-pressed={
+                              answerFeedback[message.id] === "matched"
+                            }
+                            onClick={() =>
+                              setAnswerFeedback((current) => ({
+                                ...current,
+                                [message.id]: "matched",
+                              }))
+                            }
+                            className="min-h-11 px-1 font-medium hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 dark:hover:text-white"
+                          >
+                            合っている
+                          </button>
+                          <button
+                            type="button"
+                            aria-pressed={
+                              answerFeedback[message.id] === "mismatched"
+                            }
+                            onClick={() => {
+                              setAnswerFeedback((current) => ({
+                                ...current,
+                                [message.id]: "mismatched",
+                              }));
+                              window.requestAnimationFrame(() =>
+                                composerRef.current?.focus(),
+                              );
+                            }}
+                            className="min-h-11 px-1 font-medium hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 dark:hover:text-white"
+                          >
+                            違う
+                          </button>
+                        </div>
+                      </div>
+                    )}
                 </article>
               );
             })}
@@ -971,6 +996,64 @@ export function ChatbotPanel({
   );
 }
 
+const LEGAL_UNIT_NUMBER = "[0-9０-９一二三四五六七八九十百千]+";
+const ARTICLE_METADATA_RE = new RegExp(
+  `^(第${LEGAL_UNIT_NUMBER}条(?:の${LEGAL_UNIT_NUMBER})*)`,
+);
+const PARAGRAPH_METADATA_RE = new RegExp(
+  `^(第${LEGAL_UNIT_NUMBER}項(?:[・、](?:第)?${LEGAL_UNIT_NUMBER}項)*)`,
+);
+const ITEM_METADATA_RE = new RegExp(
+  `^(第${LEGAL_UNIT_NUMBER}号(?:の${LEGAL_UNIT_NUMBER})?(?:[・、](?:第)?${LEGAL_UNIT_NUMBER}号(?:の${LEGAL_UNIT_NUMBER})?)*)`,
+);
+
+type TrustedSourceLocator = {
+  article: string | null;
+  paragraph: string | null;
+  item: string | null;
+  rawPosition: string | null;
+};
+
+/**
+ * APIの構造化メタデータだけから表示用locatorを取り出す。
+ * snippet/textの条文表現から項号を推測すると、回答が実際に依拠した範囲を
+ * 越えて表示しうるため、source.article / paragraph / item と
+ * citation.articleNum 以外は解析対象にしない。
+ */
+function trustedSourceLocator(
+  source: ChatbotSource | undefined,
+  citation: StructuredCitation | undefined,
+): TrustedSourceLocator {
+  const candidates = [source?.article, citation?.articleNum]
+    .map((value) => value?.trim() ?? "")
+    .filter(Boolean);
+  let article: string | null = null;
+  let embeddedParagraph: string | null = null;
+  let embeddedItem: string | null = null;
+
+  for (const candidate of candidates) {
+    const articleMatch = candidate.match(ARTICLE_METADATA_RE);
+    if (!articleMatch?.[1]) continue;
+    article = articleMatch[1];
+    let remainder = candidate.slice(articleMatch[0].length);
+    const paragraphMatch = remainder.match(PARAGRAPH_METADATA_RE);
+    if (paragraphMatch?.[1]) {
+      embeddedParagraph = paragraphMatch[1];
+      remainder = remainder.slice(paragraphMatch[0].length);
+    }
+    const itemMatch = remainder.match(ITEM_METADATA_RE);
+    if (itemMatch?.[1]) embeddedItem = itemMatch[1];
+    break;
+  }
+
+  return {
+    article,
+    paragraph: source?.paragraph?.trim() || embeddedParagraph,
+    item: source?.item?.trim() || embeddedItem,
+    rawPosition: candidates[0] ?? null,
+  };
+}
+
 function SourceDetails({ message }: { message: ChatMessage }) {
   const citations = message.citations ?? [];
   const sources = message.sources ?? [];
@@ -996,9 +1079,9 @@ function SourceDetails({ message }: { message: ChatMessage }) {
       citation: citationIndex >= 0 ? citations[citationIndex] : undefined,
     };
   });
-  if (sources.length === 0) {
-    citations.forEach((citation) => entries.push({ citation }));
-  }
+  citations.forEach((citation, index) => {
+    if (!matchedCitationIndexes.has(index)) entries.push({ citation });
+  });
   const statusLabel: Record<
     NonNullable<ChatbotSource["applicationStatus"]>,
     string
@@ -1008,52 +1091,69 @@ function SourceDetails({ message }: { message: ChatMessage }) {
     past: "過去時点",
     unknown: "確認不能",
   };
-  const count = entries.length;
-  const summary = [
-    `根拠 ${count}件`,
-    relatedNotices.length + relatedLeaflets.length > 0
-      ? `関連資料 ${relatedNotices.length + relatedLeaflets.length}件`
-      : null,
-  ]
-    .filter(Boolean)
-    .join("・");
+  const evidenceCount =
+    entries.length + relatedNotices.length + relatedLeaflets.length;
   return (
     <details
       className="mt-3 border-y border-slate-200 py-1 dark:border-slate-800"
       data-chatbot-source-details=""
     >
       <summary className="flex min-h-11 cursor-pointer items-center py-2 text-xs font-semibold text-slate-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 dark:text-slate-200">
-        {summary}
+        根拠 {evidenceCount}件
       </summary>
       {entries.length > 0 && (
         <ol className="space-y-3 pb-3">
           {entries.map(({ source, citation }, index) => {
             const officialUrl = citation?.egovHref ?? source?.url;
-            const excerpt = (
+            const locator = trustedSourceLocator(source, citation);
+            const lawName =
+              citation?.fullName ??
+              source?.law ??
+              "法令名を取得できません";
+            const evidenceTitle =
+              citation?.articleTitle ?? source?.articleTitle ?? "公式一次資料";
+            const excerpt =
               source?.snippet ??
               source?.text ??
-              "該当箇所を取得できません"
-            ).slice(0, 240);
-            const applicationStatus = source?.applicationStatus ?? "unknown";
+              "該当箇所を取得できません";
+            const applicationStatus =
+              source?.applicationStatus ??
+              message.effectiveDateStatus?.status ??
+              "unknown";
+            const asOf = source?.asOf ?? message.effectiveDateStatus?.asOf;
             return (
               <li
                 key={`${citation?.lawShort ?? source?.law ?? "source"}-${index}`}
-                className="text-xs leading-5"
+                className="min-w-0 text-xs leading-5"
+                data-chatbot-source-entry=""
               >
                 <p className="font-semibold text-slate-900 dark:text-white">
-                  ［{index + 1}］{citation?.fullName ?? source?.law}{" "}
-                  {citation?.articleNum ?? source?.article}
+                  ［{index + 1}］{evidenceTitle}
                 </p>
-                {(source?.paragraph || source?.item) && (
-                  <p className="text-slate-600 dark:text-slate-300">
-                    {[source.paragraph, source.item].filter(Boolean).join("・")}
-                  </p>
-                )}
-                {citation?.articleTitle && (
-                  <p className="text-slate-600 dark:text-slate-300">
-                    {citation.articleTitle}
-                  </p>
-                )}
+                <dl
+                  className="mt-1 grid min-w-0 grid-cols-[4rem_minmax(0,1fr)] gap-x-2 text-slate-600 dark:text-slate-300"
+                  data-chatbot-source-locator=""
+                >
+                  <dt>法令名:</dt>
+                  <dd className="min-w-0 break-words">{lawName}</dd>
+                  {locator.article ? (
+                    <>
+                      <dt>条:</dt>
+                      <dd>{locator.article}</dd>
+                      <dt>項:</dt>
+                      <dd>{locator.paragraph ?? "指定なし"}</dd>
+                      <dt>号:</dt>
+                      <dd>{locator.item ?? "指定なし"}</dd>
+                    </>
+                  ) : (
+                    <>
+                      <dt>資料内位置:</dt>
+                      <dd className="min-w-0 break-words">
+                        {locator.rawPosition ?? "取得できません"}
+                      </dd>
+                    </>
+                  )}
+                </dl>
                 {source?.lawNumber && (
                   <p className="text-slate-600 dark:text-slate-300">
                     法令番号: {source.lawNumber}
@@ -1061,10 +1161,14 @@ function SourceDetails({ message }: { message: ChatMessage }) {
                 )}
                 <p className="mt-1 text-slate-600 dark:text-slate-300">
                   施行状態: {statusLabel[applicationStatus]}
-                  {source?.effectiveOn ? `（${source.effectiveOn}）` : ""}
-                  {source?.asOf ? `・対象 ${source.asOf}` : ""}
+                  {source?.effectiveOn
+                    ? `（${source.effectiveOn}）`
+                    : citation?.effectiveDate
+                      ? `（${citation.effectiveDate}）`
+                      : ""}
+                  {asOf ? `・対象 ${asOf}` : ""}
                 </p>
-                <p className="mt-1 text-slate-700 dark:text-slate-200">
+                <p className="mt-1 whitespace-pre-wrap text-slate-700 dark:text-slate-200">
                   該当箇所: {excerpt}
                 </p>
                 {officialUrl && (

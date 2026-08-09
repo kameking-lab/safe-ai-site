@@ -7,14 +7,17 @@ import type {
 } from "@/lib/chatbot-contract";
 import { evaluateChatbotSafety } from "@/lib/chatbot-safety";
 import {
-  buildLegalClarification,
-  hasLegalConversationContext,
   normalizeLegalConversationText,
   resolveLegalConversationQuery,
   safeClarificationIntent,
-  sanitizeLegalConversationContext,
-  type LegalConversationContext,
 } from "@/lib/legal-conversation-context";
+import {
+  PUBLIC_LEGAL_CONVERSATION_CONTEXT_KEYS,
+  hasPublicLegalConversationContext,
+  rehydratePublicLegalConversationContext,
+  sanitizePublicLegalConversationContext,
+  type PublicLegalConversationContext,
+} from "@/lib/legal-conversation-public-context";
 
 const FORM_CONTENT_TYPES = new Set([
   "application/x-www-form-urlencoded",
@@ -23,31 +26,27 @@ const FORM_CONTENT_TYPES = new Set([
 
 const NO_SCRIPT_STATE_VERSION = 1;
 const MAX_NO_SCRIPT_STATE_CHARS = 2_000;
-const MAX_PRIOR_USER_CHARS = 800;
-const MAX_CLARIFICATION_CHARS = 240;
 const SAFETY_MANAGER_WORK_TYPE = "労働安全衛生法 安全管理者の選任義務";
-const INDUSTRY_CLARIFICATION_QUESTION = "事業場の主な業種はどれですか？";
-const OPEN_WORK_CONTEXT_QUESTION = "どの作業・設備について知りたいですか？";
 const SAFE_NO_SCRIPT_INDUSTRIES = ["建設業", "製造業", "その他"] as const;
+
+function isSafetyManagerContext(
+  context: PublicLegalConversationContext,
+): boolean {
+  return (
+    context.topicDomain === "general" &&
+    context.equipment === SAFETY_MANAGER_WORK_TYPE
+  );
+}
 
 type SafeNoScriptIndustry = (typeof SAFE_NO_SCRIPT_INDUSTRIES)[number];
 type SafeNoScriptIntent = "reportRecipient";
 
 type NoScriptConversationState = {
   v: typeof NO_SCRIPT_STATE_VERSION;
-  context: LegalConversationContext;
+  context: PublicLegalConversationContext;
   industry?: SafeNoScriptIndustry;
   intent?: SafeNoScriptIntent;
-  history?: [ChatTurn, ChatTurn];
 };
-
-function stateClarificationForMessage(message: string) {
-  const generated = buildLegalClarification(message);
-  if (generated) return generated;
-  return safeClarificationIntent(message).split(/\s+/).includes("報告先")
-    ? { question: OPEN_WORK_CONTEXT_QUESTION, options: [] }
-    : null;
-}
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
@@ -59,14 +58,6 @@ function hasOnlyKeys(
 ): boolean {
   const keys = Object.keys(value);
   return keys.every((key) => allowed.includes(key));
-}
-
-function hasBlockedConversationStateText(value: string): boolean {
-  if (/[<>\u0000-\u001f\u007f]/.test(value)) return true;
-  return [value, normalizeLegalConversationText(value)].some((candidate) => {
-    const safety = evaluateChatbotSafety(candidate);
-    return safety?.kind === "emergency" || safety?.kind === "privacy";
-  });
 }
 
 function isSafeNoScriptIndustry(
@@ -91,28 +82,16 @@ function blockingCurrentInputSafety(message: string) {
     : null;
 }
 
-function canonicalContext(value: unknown): LegalConversationContext | null {
+function canonicalContext(
+  value: unknown,
+): PublicLegalConversationContext | null {
   if (!isRecord(value)) return null;
   if (
-    !hasOnlyKeys(value, [
-      "workType",
-      "equipment",
-      "height",
-      "load",
-      "voltageClass",
-      "qualification",
-      "role",
-      "targetDate",
-      "targetDateEnd",
-      "targetDatePrecision",
-      "confirmedChoices",
-    ])
+    !hasOnlyKeys(value, PUBLIC_LEGAL_CONVERSATION_CONTEXT_KEYS)
   ) {
     return null;
   }
-  const sanitized = sanitizeLegalConversationContext(
-    value as LegalConversationContext,
-  );
+  const sanitized = sanitizePublicLegalConversationContext(value);
   return JSON.stringify(sanitized) === JSON.stringify(value)
     ? sanitized
     : null;
@@ -128,7 +107,7 @@ function parseConversationState(value: string): NoScriptConversationState | null
   }
   if (
     !isRecord(parsed) ||
-    !hasOnlyKeys(parsed, ["v", "context", "industry", "intent", "history"]) ||
+    !hasOnlyKeys(parsed, ["v", "context", "industry", "intent"]) ||
     parsed.v !== NO_SCRIPT_STATE_VERSION
   ) {
     return null;
@@ -139,7 +118,7 @@ function parseConversationState(value: string): NoScriptConversationState | null
   if (
     industry !== undefined &&
     (!isSafeNoScriptIndustry(industry) ||
-      context.workType !== SAFETY_MANAGER_WORK_TYPE)
+      !isSafetyManagerContext(context))
   ) {
     return null;
   }
@@ -147,108 +126,29 @@ function parseConversationState(value: string): NoScriptConversationState | null
   if (
     intent !== undefined &&
     (intent !== "reportRecipient" ||
-      hasLegalConversationContext(context) ||
+      hasPublicLegalConversationContext(context) ||
       industry !== undefined)
   ) {
     return null;
   }
-  if (parsed.history === undefined) {
-    return {
-      v: NO_SCRIPT_STATE_VERSION,
-      context,
-      ...(industry ? { industry } : {}),
-      ...(intent ? { intent } : {}),
-    };
-  }
-  if (intent !== undefined) return null;
-  if (!Array.isArray(parsed.history) || parsed.history.length !== 2) return null;
-  const [userTurn, assistantTurn] = parsed.history;
-  if (!isRecord(userTurn) || !isRecord(assistantTurn)) return null;
-  if (
-    !hasOnlyKeys(userTurn, ["role", "content"]) ||
-    !hasOnlyKeys(assistantTurn, ["role", "content"]) ||
-    userTurn.role !== "user" ||
-    assistantTurn.role !== "assistant" ||
-    typeof userTurn.content !== "string" ||
-    typeof assistantTurn.content !== "string" ||
-    userTurn.content.length === 0 ||
-    userTurn.content.length > MAX_PRIOR_USER_CHARS ||
-    assistantTurn.content.length === 0 ||
-    assistantTurn.content.length > MAX_CLARIFICATION_CHARS ||
-    hasBlockedConversationStateText(userTurn.content)
-  ) {
-    return null;
-  }
-  const expectedClarification = stateClarificationForMessage(userTurn.content);
-  if (expectedClarification?.question !== assistantTurn.content) return null;
-  const standaloneContext = sanitizeLegalConversationContext(
-    resolveLegalConversationQuery({ message: userTurn.content }).context,
-  );
-  if (JSON.stringify(standaloneContext) !== JSON.stringify(context)) return null;
   return {
     v: NO_SCRIPT_STATE_VERSION,
     context,
     ...(industry ? { industry } : {}),
-    history: [
-      { role: "user", content: userTurn.content },
-      { role: "assistant", content: assistantTurn.content },
-    ],
+    ...(intent ? { intent } : {}),
   };
 }
 
-function nextTurnHistory(
-  message: string,
-  payload: Partial<ChatbotResponse>,
-  context: LegalConversationContext,
-): [ChatTurn, ChatTurn] | undefined {
-  const clarification = payload.clarificationQuestion?.trim();
-  const expected = stateClarificationForMessage(message);
-  if (
-    !clarification ||
-    !expected ||
-    expected.question !== clarification ||
-    message.length > MAX_PRIOR_USER_CHARS ||
-    clarification.length > MAX_CLARIFICATION_CHARS ||
-    hasBlockedConversationStateText(message)
-  ) {
-    return undefined;
-  }
-  const standaloneContext = sanitizeLegalConversationContext(
-    resolveLegalConversationQuery({ message }).context,
-  );
-  if (JSON.stringify(standaloneContext) !== JSON.stringify(context)) {
-    return undefined;
-  }
-  const expectedOptions = new Set(expected.options);
-  const replies = payload.quickReplies ?? [];
-  if (
-    (expected.options.length > 0 && replies.length === 0) ||
-    (expected.options.length === 0 && replies.length > 0) ||
-    replies.some(
-      (reply) =>
-        reply.prompt !== reply.label || !expectedOptions.has(reply.prompt),
-    )
-  ) {
-    return undefined;
-  }
-  return [
-    { role: "user", content: message },
-    { role: "assistant", content: clarification },
-  ];
-}
-
 function conversationState(input: {
-  context?: LegalConversationContext;
+  context?: PublicLegalConversationContext;
   industry?: SafeNoScriptIndustry;
   intent?: SafeNoScriptIntent;
-  history?: [ChatTurn, ChatTurn];
 }): NoScriptConversationState | undefined {
-  const context = sanitizeLegalConversationContext(input.context);
+  const context = sanitizePublicLegalConversationContext(input.context);
   const industry =
-    context.workType === SAFETY_MANAGER_WORK_TYPE ? input.industry : undefined;
+    isSafetyManagerContext(context) ? input.industry : undefined;
   if (
-    !hasLegalConversationContext(context) &&
-    !input.history &&
+    !hasPublicLegalConversationContext(context) &&
     !input.intent &&
     !industry
   ) {
@@ -259,10 +159,9 @@ function conversationState(input: {
     context,
     ...(industry ? { industry } : {}),
     ...(input.intent ? { intent: input.intent } : {}),
-    ...(input.history ? { history: input.history } : {}),
   };
   if (JSON.stringify(candidate).length > MAX_NO_SCRIPT_STATE_CHARS) {
-    return hasLegalConversationContext(context)
+    return hasPublicLegalConversationContext(context)
       ? {
           v: NO_SCRIPT_STATE_VERSION,
           context,
@@ -281,9 +180,9 @@ function intentHistory(intent: SafeNoScriptIntent | undefined): ChatTurn[] | und
 
 function nextTurnIntent(
   message: string,
-  context: LegalConversationContext,
+  context: PublicLegalConversationContext,
 ): SafeNoScriptIntent | undefined {
-  if (hasLegalConversationContext(context)) return undefined;
+  if (hasPublicLegalConversationContext(context)) return undefined;
   return safeClarificationIntent(message).split(/\s+/).includes("報告先")
     ? "reportRecipient"
     : undefined;
@@ -293,20 +192,12 @@ function industryForRequest(
   message: string,
   priorState: NoScriptConversationState | undefined,
 ): SafeNoScriptIndustry | undefined {
-  if (priorState?.context.workType !== SAFETY_MANAGER_WORK_TYPE) {
+  if (!priorState || !isSafetyManagerContext(priorState.context)) {
     return undefined;
   }
   if (!isSafeNoScriptIndustry(message)) return priorState.industry;
   if (priorState.industry) return message;
-  const [priorUser, priorAssistant] = priorState.history ?? [];
-  const clarification = priorUser
-    ? buildLegalClarification(priorUser.content)
-    : null;
-  return priorAssistant?.content === INDUSTRY_CLARIFICATION_QUESTION &&
-    clarification?.question === INDUSTRY_CLARIFICATION_QUESTION &&
-    clarification.options.includes(message)
-    ? message
-    : undefined;
+  return message;
 }
 
 function messageWithSafeIndustryContext(input: {
@@ -317,13 +208,14 @@ function messageWithSafeIndustryContext(input: {
   if (!input.priorState || !input.industry) return input.message;
   const resolved = resolveLegalConversationQuery({
     message: input.message,
-    context: input.priorState.context,
-    history: input.priorState.history,
+    context: rehydratePublicLegalConversationContext(
+      input.priorState.context,
+    ),
   });
   const continuesSafetyManagerTopic =
     resolved.context.workType === SAFETY_MANAGER_WORK_TYPE ||
     (isSafeNoScriptIndustry(input.message) &&
-      input.priorState.context.workType === SAFETY_MANAGER_WORK_TYPE);
+      isSafetyManagerContext(input.priorState.context));
   if (!continuesSafetyManagerTopic) return input.message;
   if (
     input.message.includes("安全管理者") &&
@@ -352,6 +244,7 @@ function escapeHtml(value: string): string {
 const OFFICIAL_SOURCE_HOSTS = [
   "mhlw.go.jp",
   "e-gov.go.jp",
+  "meti.go.jp",
   "mlit.go.jp",
 ] as const;
 const MAX_RELATED_NOTICES = 2;
@@ -388,41 +281,115 @@ function firstSafeOfficialUrl(values: readonly unknown[]): string | null {
   return null;
 }
 
-function renderSources(
-  sources: ChatbotSource[],
+function evidenceStatusLabel(
+  status: ChatbotSource["applicationStatus"] | undefined,
+): string | null {
+  return status === "current"
+    ? "施行中"
+    : status === "future"
+      ? "未施行"
+      : status === "past"
+        ? "過去時点"
+        : status === "unknown"
+          ? "施行状態未確認"
+          : null;
+}
+
+function sourceForCitation(
+  citation: ChatbotResponse["citations"][number],
+  sources: readonly ChatbotSource[],
+): ChatbotSource | undefined {
+  return sources.find((source) => {
+    const sameLaw =
+      source.law === citation.fullName ||
+      source.law === citation.lawShort ||
+      source.lawShort === citation.lawShort;
+    const sameArticle =
+      source.article.includes(citation.articleNum) ||
+      citation.articleNum.includes(source.article);
+    return sameLaw && sameArticle;
+  });
+}
+
+function sourceLocator(source: ChatbotSource): string {
+  const locatorParts = [source.article];
+  for (const part of [source.paragraph, source.item]) {
+    if (part && !source.article.includes(part)) locatorParts.push(part);
+  }
+  return locatorParts.join(" ");
+}
+
+function renderEvidence(
+  payload: Partial<ChatbotResponse>,
   requiresHumanReview: boolean,
 ): string {
-  if (sources.length === 0 && !requiresHumanReview) return "";
-  const items = sources.map((source, index) => {
-    const excerpt = (source.snippet ?? source.text).slice(0, 360);
-    const officialUrl = safeOfficialUrl(source.url);
-    const locatorParts = [source.article];
-    for (const part of [source.paragraph, source.item]) {
-      if (part && !source.article.includes(part)) locatorParts.push(part);
-    }
-    const locator = locatorParts.join(" ");
-    const status =
-      source.applicationStatus === "current"
-        ? "施行中"
-        : source.applicationStatus === "future"
-          ? "未施行"
-          : source.applicationStatus === "past"
-            ? "過去時点"
-            : null;
-    const timing = [status, source.effectiveOn ? `適用日 ${source.effectiveOn}` : null]
+  const sources = payload.sources ?? [];
+  const citations = payload.citations ?? [];
+  const relatedMaterials = renderRelatedOfficialMaterials(payload);
+  if (
+    sources.length === 0 &&
+    citations.length === 0 &&
+    relatedMaterials.count === 0 &&
+    !requiresHumanReview
+  ) {
+    return "";
+  }
+
+  const matchedSources = new Set<ChatbotSource>();
+  const citationItems = citations.map((citation) => {
+    const source = sourceForCitation(citation, sources);
+    if (source) matchedSources.add(source);
+    const excerpt = source
+      ? (source.snippet ?? source.text).slice(0, 360)
+      : "";
+    const officialUrl = firstSafeOfficialUrl([
+      citation.egovHref,
+      source?.url,
+    ]);
+    const locator = source
+      ? sourceLocator(source)
+      : citation.articleNum;
+    const status = evidenceStatusLabel(
+      source?.applicationStatus ?? payload.effectiveDateStatus?.status,
+    );
+    const timing = [
+      status,
+      citation.effectiveDate || source?.effectiveOn
+        ? `適用日 ${citation.effectiveDate ?? source?.effectiveOn}`
+        : null,
+    ]
       .filter(Boolean)
       .join("・");
-    return `<li><strong>［${index + 1}］${escapeHtml(source.law)} ${escapeHtml(locator)}</strong>${timing ? `<p class="meta">${escapeHtml(timing)}</p>` : ""}<p>${escapeHtml(excerpt)}</p>${officialUrl ? `<a href="${escapeHtml(officialUrl)}" rel="noopener noreferrer">公式原文</a>` : ""}</li>`;
+    const issuer = citation.issuer
+      ? `<p class="meta">発出機関 ${escapeHtml(citation.issuer)}</p>`
+      : "";
+    return `<li><strong>${escapeHtml(citation.fullName)} ${escapeHtml(locator)}</strong>${timing ? `<p class="meta">${escapeHtml(timing)}</p>` : ""}${issuer}${excerpt ? `<p>${escapeHtml(excerpt)}</p>` : ""}${officialUrl ? `<a href="${escapeHtml(officialUrl)}" rel="noopener noreferrer">公式原文</a>` : ""}</li>`;
   });
+  const sourceItems = sources
+    .filter((source) => !matchedSources.has(source))
+    .map((source) => {
+      const excerpt = (source.snippet ?? source.text).slice(0, 360);
+      const officialUrl = safeOfficialUrl(source.url);
+      const status = evidenceStatusLabel(source.applicationStatus);
+      const timing = [
+        status,
+        source.effectiveOn ? `適用日 ${source.effectiveOn}` : null,
+      ]
+        .filter(Boolean)
+        .join("・");
+      return `<li><strong>${escapeHtml(source.law)} ${escapeHtml(sourceLocator(source))}</strong>${timing ? `<p class="meta">${escapeHtml(timing)}</p>` : ""}<p>${escapeHtml(excerpt)}</p>${officialUrl ? `<a href="${escapeHtml(officialUrl)}" rel="noopener noreferrer">公式原文</a>` : ""}</li>`;
+    });
+  const items = [...citationItems, ...sourceItems];
   const reviewStatus = requiresHumanReview
     ? '<p class="meta review-status">確認状態：回答と根拠の対応は最終確認が必要です。</p>'
     : "";
-  return `<details><summary>${items.length > 0 ? `根拠 ${items.length}件` : "確認状態"}</summary>${reviewStatus}${items.length > 0 ? `<ol>${items.join("")}</ol>` : ""}</details>`;
+  const evidenceCount = items.length + relatedMaterials.count;
+  return `<details><summary>${evidenceCount > 0 ? `根拠 ${evidenceCount}件` : "確認状態"}</summary>${reviewStatus}${items.length > 0 ? `<ol>${items.map((item, index) => item.replace("<li><strong>", `<li><strong>［${index + 1}］`)).join("")}</ol>` : ""}${relatedMaterials.html}</details>`;
 }
 
 function renderRelatedOfficialMaterials(
   payload: Partial<ChatbotResponse>,
-): string {
+): { count: number; html: string } {
   const notices = (payload.attachedNotices ?? [])
     .map((notice) => ({
       notice,
@@ -450,7 +417,7 @@ function renderRelatedOfficialMaterials(
     )
     .slice(0, MAX_RELATED_LEAFLETS);
   const count = notices.length + leaflets.length;
-  if (count === 0) return "";
+  if (count === 0) return { count: 0, html: "" };
 
   const noticeItems = notices
     .map(({ notice, url }) => {
@@ -469,13 +436,51 @@ function renderRelatedOfficialMaterials(
       return `<li><strong>${escapeHtml(leaflet.title)}</strong>${metadata ? `<p class="meta">${escapeHtml(metadata)}</p>` : ""}<a href="${escapeHtml(url)}" rel="noopener noreferrer">厚生労働省の資料</a></li>`;
     })
     .join("");
-  return `<details><summary>関連公式資料 ${count}件</summary>${noticeItems ? `<section aria-labelledby="related-notices-title"><h2 class="detail-heading" id="related-notices-title">確認済み通達</h2><ul>${noticeItems}</ul></section>` : ""}${leafletItems ? `<section aria-labelledby="related-leaflets-title"><h2 class="detail-heading" id="related-leaflets-title">リーフレット</h2><ul>${leafletItems}</ul></section>` : ""}</details>`;
+  return {
+    count,
+    html: `<section aria-labelledby="related-materials-title"><h2 class="detail-heading" id="related-materials-title">関連公式資料 ${count}件</h2>${noticeItems ? `<section aria-labelledby="related-notices-title"><h3 class="detail-heading" id="related-notices-title">確認済み通達</h3><ul>${noticeItems}</ul></section>` : ""}${leafletItems ? `<section aria-labelledby="related-leaflets-title"><h3 class="detail-heading" id="related-leaflets-title">リーフレット</h3><ul>${leafletItems}</ul></section>` : ""}</section>`,
+  };
 }
 
 function renderItems(title: string, items: string[] | undefined): string {
-  const visible = (items ?? []).filter(Boolean).slice(0, 3);
+  const visible = (items ?? [])
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .slice(0, 3);
   if (visible.length === 0) return "";
   return `<section><h2>${escapeHtml(title)}</h2><ul>${visible.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul></section>`;
+}
+
+function oneClarificationQuestion(value: string | null | undefined): string | null {
+  const firstLine = value
+    ?.split(/\r?\n/)
+    .map((line) => line.trim())
+    .find(Boolean);
+  if (!firstLine) return null;
+  const questionEnd = firstLine.search(/[？?]/);
+  return questionEnd >= 0
+    ? firstLine.slice(0, questionEnd + 1)
+    : firstLine;
+}
+
+function renderAnswerMetadata(payload: Partial<ChatbotResponse>): string {
+  const effective = payload.effectiveDateStatus;
+  const confidenceLabel =
+    payload.confidence === "high"
+      ? "高"
+      : payload.confidence === "medium"
+        ? "中"
+        : payload.confidence === "low"
+          ? "低"
+          : null;
+  const values = [
+    effective?.asOf ? `回答基準日 ${effective.asOf}` : null,
+    effective?.label?.trim().slice(0, 120) || null,
+    confidenceLabel ? `確信度 ${confidenceLabel}` : null,
+  ].filter((value): value is string => Boolean(value));
+  return values.length > 0
+    ? `<p class="meta answer-metadata">${escapeHtml(values.join("・"))}</p>`
+    : "";
 }
 
 function renderScopeWarnings(items: string[] | undefined): string {
@@ -490,9 +495,10 @@ function renderScopeWarnings(items: string[] | undefined): string {
 function renderQuickReplies(
   payload: Partial<ChatbotResponse>,
   serializedState: string | null,
+  clarificationQuestion: string | null,
 ): string {
   const replies = (payload.quickReplies ?? []).slice(0, 3);
-  if (!payload.clarificationQuestion || replies.length === 0) return "";
+  if (!clarificationQuestion || replies.length === 0) return "";
   return `<div class="chips" aria-label="回答候補">${replies
     .map(
       (reply) =>
@@ -505,11 +511,19 @@ function renderAnswer(
   payload: Partial<ChatbotResponse>,
   serializedState: string | null,
 ): string {
-  const substantiveAnswer = payload.substantiveAnswer?.trim();
-  if (!substantiveAnswer) {
-    return `<section aria-labelledby="answer-title"><h1 id="answer-title">回答</h1><p class="answer">${escapeHtml(payload.answer ?? "回答を取得できませんでした。").replaceAll("\n", "<br>")}</p>${renderScopeWarnings(payload.scopeWarnings)}${renderSources(payload.sources ?? [], payload.requiresHumanReview === true)}${renderRelatedOfficialMaterials(payload)}</section>`;
-  }
-  return `<section aria-labelledby="answer-title"><h1 id="answer-title">回答</h1><p class="answer">${escapeHtml(substantiveAnswer).replaceAll("\n", "<br>")}</p>${renderScopeWarnings(payload.scopeWarnings)}${renderItems("前提", payload.assumptions)}${renderItems("条件で変わる点", payload.conditions)}${payload.clarificationQuestion ? `<section><h2>確認</h2><p>${escapeHtml(payload.clarificationQuestion)}</p></section>` : ""}${renderQuickReplies(payload, serializedState)}${renderSources(payload.sources ?? [], payload.requiresHumanReview === true)}${renderRelatedOfficialMaterials(payload)}</section>`;
+  const directAnswer =
+    payload.directAnswer?.trim() ||
+    payload.substantiveAnswer?.trim() ||
+    payload.answer?.trim() ||
+    "回答を取得できませんでした。";
+  const importantConditions =
+    payload.importantConditions !== undefined
+      ? payload.importantConditions
+      : payload.conditions;
+  const clarificationQuestion = oneClarificationQuestion(
+    payload.clarificationQuestion,
+  );
+  return `<section aria-labelledby="answer-title"><h1 id="answer-title">回答</h1><p class="answer">${escapeHtml(directAnswer).replaceAll("\n", "<br>")}</p>${renderAnswerMetadata(payload)}${renderScopeWarnings(payload.scopeWarnings)}${renderItems("前提", payload.assumptions)}${renderItems("条件で変わる点", importantConditions)}${clarificationQuestion ? `<section><h2>確認</h2><p>${escapeHtml(clarificationQuestion)}</p></section>` : ""}${renderQuickReplies(payload, serializedState, clarificationQuestion)}${renderEvidence(payload, payload.requiresHumanReview === true)}</section>`;
 }
 
 function htmlResponse(input: {
@@ -520,7 +534,11 @@ function htmlResponse(input: {
   headers?: HeadersInit;
 }): Response {
   const serializedState = input.state ? JSON.stringify(input.state) : null;
-  const answer = input.payload?.answer
+  const answer =
+    input.payload &&
+    (input.payload.directAnswer ||
+      input.payload.substantiveAnswer ||
+      input.payload.answer)
     ? renderAnswer(input.payload, serializedState)
     : `<p role="alert">${escapeHtml(input.error ?? "回答を取得できませんでした。")}</p>`;
   const html = `<!doctype html>
@@ -588,7 +606,7 @@ export async function POST(request: Request): Promise<Response> {
   }
 
   let message = "";
-  let context: LegalConversationContext = {};
+  let context: PublicLegalConversationContext = {};
   let history: ChatTurn[] | undefined;
   let priorState: NoScriptConversationState | undefined;
   let stateValue: FormDataEntryValue | null = null;
@@ -629,13 +647,13 @@ export async function POST(request: Request): Promise<Response> {
       }
       priorState = parsedState;
       context = parsedState.context;
-      history = parsedState.history ?? intentHistory(parsedState.intent);
+      history = intentHistory(parsedState.intent);
     } else if (typeof contextValue === "string" && contextValue.length > 0) {
       if (contextValue.length > 2_000) {
         return htmlResponse({ error: "会話条件が長すぎます。", status: 400 });
       }
-      const parsed = JSON.parse(contextValue) as LegalConversationContext;
-      context = sanitizeLegalConversationContext(parsed);
+      const parsed = JSON.parse(contextValue) as unknown;
+      context = sanitizePublicLegalConversationContext(parsed);
       priorState = conversationState({ context });
     }
   } catch {
@@ -677,7 +695,7 @@ export async function POST(request: Request): Promise<Response> {
         headers,
         body: JSON.stringify({
           message: upstreamMessage,
-          ...(hasLegalConversationContext(context) ? { context } : {}),
+          ...(hasPublicLegalConversationContext(context) ? { context } : {}),
           ...(history ? { history } : {}),
           privacyConfirmed: true,
         }),
@@ -694,7 +712,11 @@ export async function POST(request: Request): Promise<Response> {
   const payload = (await response.json().catch(() => null)) as
     | (Partial<ChatbotResponse> & { error?: string })
     | null;
-  if (!response.ok || !payload?.answer) {
+  if (
+    !response.ok ||
+    !payload ||
+    !(payload.directAnswer || payload.substantiveAnswer || payload.answer)
+  ) {
     return htmlResponse({
       error: payload?.error ?? "回答を取得できませんでした。",
       status: response.status >= 400 ? response.status : 502,
@@ -704,31 +726,23 @@ export async function POST(request: Request): Promise<Response> {
   }
   const blockedState =
     payload.safetyKind === "emergency" || payload.safetyKind === "privacy";
-  const nextContext = sanitizeLegalConversationContext(
+  const nextContext = sanitizePublicLegalConversationContext(
     payload.context ??
       resolveLegalConversationQuery({
         message: upstreamMessage,
-        context,
+        context: rehydratePublicLegalConversationContext(context),
         history,
       }).context,
-  );
-  const retainedHistory = nextTurnHistory(
-    upstreamMessage,
-    payload,
-    nextContext,
   );
   const nextState = blockedState
     ? undefined
     : conversationState({
         context: nextContext,
         industry:
-          nextContext.workType === SAFETY_MANAGER_WORK_TYPE
+          isSafetyManagerContext(nextContext)
             ? industry
             : undefined,
-        intent: retainedHistory
-          ? undefined
-          : nextTurnIntent(upstreamMessage, nextContext),
-        history: retainedHistory,
+        intent: nextTurnIntent(upstreamMessage, nextContext),
       });
   return htmlResponse({
     payload,

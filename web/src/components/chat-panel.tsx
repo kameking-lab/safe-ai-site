@@ -10,7 +10,7 @@ import type {
   ChatbotQuickReply,
   ChatbotSource,
 } from "@/lib/chatbot-contract";
-import type { LegalConversationContext } from "@/lib/legal-conversation-context";
+import type { PublicLegalConversationContext } from "@/lib/legal-conversation-public-context";
 
 export type ChatMessage = {
   id: string;
@@ -20,7 +20,7 @@ export type ChatMessage = {
   clarificationQuestion?: string | null;
   quickReplies?: ChatbotQuickReply[];
   sources?: ChatbotSource[];
-  context?: LegalConversationContext;
+  context?: PublicLegalConversationContext;
 };
 
 function officialSourceUrl(source: ChatbotSource): string | null {

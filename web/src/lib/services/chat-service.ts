@@ -7,14 +7,16 @@ import type {
   ServiceResult,
 } from "@/lib/types/api";
 import type { ChatMessage, LawRevision } from "@/lib/types/domain";
-import type { LegalConversationContext } from "@/lib/legal-conversation-context";
+import {
+  sanitizePublicLegalConversationContext,
+  type PublicLegalConversationContext,
+} from "@/lib/legal-conversation-public-context";
 
 export type SendChatMessageInput = {
   revision: LawRevision | null;
   question: string;
   privacyConfirmed: boolean;
-  history?: ChatMessage[];
-  context?: LegalConversationContext;
+  context?: PublicLegalConversationContext;
 };
 
 export type ChatService = {
@@ -39,7 +41,17 @@ function createMessage(
   content: string,
   structured: Pick<
     ChatMessage,
-    "conditions" | "clarificationQuestion" | "quickReplies" | "sources" | "context"
+    | "directAnswer"
+    | "assumptions"
+    | "importantConditions"
+    | "citations"
+    | "confidence"
+    | "effectiveDateStatus"
+    | "conditions"
+    | "clarificationQuestion"
+    | "quickReplies"
+    | "sources"
+    | "context"
   > = {},
 ): ChatMessage {
   return {
@@ -51,22 +63,14 @@ function createMessage(
 }
 
 function toApiRequest(input: SendChatMessageInput): ChatApiRequest {
-  const history = (input.history ?? [])
-    .filter(
-      (message) =>
-        message.role === "user" &&
-        message.content.trim().length > 0 &&
-        message.content.length <= 4_000,
-    )
-    .slice(-10)
-    .map((message) => ({ role: message.role, content: message.content.trim() }));
   return {
     revisionId: input.revision?.id ?? "",
     revisionTitle: input.revision?.title ?? "選択中の法改正",
     question: input.question.trim(),
     privacyConfirmed: input.privacyConfirmed,
-    ...(history.length > 0 ? { history } : {}),
-    ...(input.context ? { context: input.context } : {}),
+    ...(input.context
+      ? { context: sanitizePublicLegalConversationContext(input.context) }
+      : {}),
   };
 }
 
@@ -165,15 +169,28 @@ export class ApiChatService implements ChatService {
       }
 
       const payload = (await response.json()) as ChatApiResponse;
+      const directAnswer =
+        payload.directAnswer?.trim() ||
+        payload.substantiveAnswer?.trim() ||
+        payload.reply;
+      const importantConditions = (
+        payload.importantConditions ?? payload.conditions ?? []
+      ).slice(0, 3);
       return {
         ok: true,
         data: createMessage(
-          payload.substantiveAnswer?.trim() || payload.reply,
+          directAnswer,
           {
-            conditions: payload.conditions?.slice(0, 3),
+            directAnswer,
+            assumptions: payload.assumptions ?? [],
+            importantConditions,
+            citations: payload.citations ?? [],
+            confidence: payload.confidence,
+            effectiveDateStatus: payload.effectiveDateStatus,
+            conditions: importantConditions,
             clarificationQuestion: payload.clarificationQuestion,
             quickReplies: payload.quickReplies?.slice(0, 3),
-            sources: payload.sources,
+            sources: payload.sources ?? [],
             context: payload.context,
           },
         ),

@@ -4,7 +4,10 @@ import {
   isNoticeIndividuallyVerified,
   verifiedMhlwNotices,
 } from "@/data/public-mhlw-notices";
-import { attachNoticesAndLeaflets } from "./chatbot-notice-attachment";
+import {
+  attachNoticesAndLeaflets,
+  isLeafletRelevantToQuery,
+} from "./chatbot-notice-attachment";
 
 const ART_563: LawArticle = {
   law: "労働安全衛生規則",
@@ -33,11 +36,36 @@ const ART_UNMAPPED: LawArticle = {
   keywords: [],
 };
 
+const ART_SPECIAL_EDUCATION: LawArticle = {
+  law: "労働安全衛生法",
+  lawShort: "安衛法",
+  articleNum: "第59条",
+  articleTitle: "安全衛生教育",
+  text: "危険又は有害な業務に就かせるときは特別の教育を行う。",
+  keywords: [],
+};
+
+const ART_SPECIAL_EDUCATION_WORK: LawArticle = {
+  law: "労働安全衛生規則",
+  lawShort: "安衛則",
+  articleNum: "第36条",
+  articleTitle: "特別教育を必要とする業務",
+  text: "低圧、高圧又は特別高圧の充電電路に関する業務",
+  keywords: [],
+};
+
 describe("attachNoticesAndLeaflets - Layer A 条文紐付け", () => {
   it("足場（第563条）→ 未確認通達を除外し、リーフレットは維持する", () => {
-    const r = attachNoticesAndLeaflets({ articles: [ART_563] });
+    const r = attachNoticesAndLeaflets({
+      articles: [ART_563],
+      query: "足場の作業床と手すりを確認したい",
+      answer: "足場の作業床と手すりの条件です。",
+    });
     expect(r.notices).toEqual([]);
     expect(r.leaflets.length).toBeGreaterThan(0);
+    expect(r.leaflets.every((leaflet) => /足場/u.test(leaflet.title))).toBe(
+      true,
+    );
   });
 
   it("熱中症（第612条の2）→ 個別照合済みの基発0520第6号だけを関連資料にする", () => {
@@ -70,6 +98,70 @@ describe("attachNoticesAndLeaflets - Layer A 条文紐付け", () => {
     const r = attachNoticesAndLeaflets({ articles: [ART_563, ART_612_2] });
     const ids = r.notices.map((n) => n.id);
     expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  it("電気質問には条文共通taxonomy由来のフルハーネス・外国人教材を添付しない", () => {
+    const r = attachNoticesAndLeaflets({
+      articles: [ART_SPECIAL_EDUCATION, ART_SPECIAL_EDUCATION_WORK],
+      query: "電気作業の特別教育について教えて",
+      answer: "低圧・高圧の電気取扱業務に関する特別教育です。",
+    });
+
+    expect(r.leaflets).toEqual([]);
+    expect(r.leaflets.map((leaflet) => leaflet.title).join(" ")).not.toMatch(
+      /フルハーネス|墜落制止用器具|外国人/u,
+    );
+  });
+});
+
+describe("isLeafletRelevantToQuery - 全分野fail-closed", () => {
+  const base = {
+    target: "general",
+    category: "general",
+    categoryLabel: "安全衛生関係",
+    subCategory: "リーフレット",
+  };
+
+  it.each([
+    ["酸欠作業の資格は？", "酸素欠乏危険作業の安全対策", "酸欠作業の条件です。"],
+    ["有機溶剤の作業主任者は必要？", "有機溶剤中毒を防止しましょう", "有機則に基づく措置です。"],
+    ["石綿の事前調査について", "石綿除去工事を行う皆さまへ", "石綿則の事前調査です。"],
+    ["熱中症の報告体制は？", "働く人の今すぐ使える熱中症ガイド", "WBGTと熱中症対策です。"],
+    ["足場の手すりを確認したい", "足場からの墜落防止措置が強化されます", "足場の作業床について説明します。"],
+    ["フルハーネスの特別教育は？", "正しく使おうフルハーネス", "墜落制止用器具の教育です。"],
+  ])("%s には同じ概念の資料だけを許可する", (query, title, answer) => {
+    expect(
+      isLeafletRelevantToQuery({ ...base, title }, query, answer),
+    ).toBe(true);
+  });
+
+  it("unknown・generic-only質問は条文mappingがあっても添付しない", () => {
+    expect(
+      isLeafletRelevantToQuery(
+        { ...base, title: "安全で安心な職場をつくりましょう" },
+        "これについて教えて",
+        "一般的な安全衛生上の説明です。",
+      ),
+    ).toBe(false);
+  });
+
+  it("queryとmetadataが一致しても回答が別domainならfail-closedにする", () => {
+    expect(
+      isLeafletRelevantToQuery(
+        { ...base, title: "正しく使おうフルハーネス" },
+        "フルハーネスの教育は？",
+        "酸素欠乏危険作業の教育について説明します。",
+      ),
+    ).toBe(false);
+  });
+
+  it.each([
+    ["酸欠作業の資格は？", "外国人労働者向け安全衛生教育教材"],
+    ["有機溶剤の教育は？", "正しく使おうフルハーネス"],
+    ["石綿の事前調査は？", "熱中症を防ごう！"],
+    ["足場の点検は？", "安衛法におけるラベル表示・SDS提供制度"],
+  ])("%s に無関係な『%s』を添付しない", (query, title) => {
+    expect(isLeafletRelevantToQuery({ ...base, title }, query)).toBe(false);
   });
 });
 
@@ -168,6 +260,6 @@ describe("attachNoticesAndLeaflets - マージ・制限", () => {
     expect(r.notices.map((notice) => [notice.id, notice.source])).toEqual([
       ["mhlw-notice-0014", "C"],
     ]);
-    expect(r.leaflets.length).toBeGreaterThan(0);
+    expect(r.leaflets).toEqual([]);
   });
 });

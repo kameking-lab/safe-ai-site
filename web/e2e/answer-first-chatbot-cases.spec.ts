@@ -6,9 +6,32 @@ const CHATBOT_STREAM_PATH = "/api/chatbot/stream";
 
 type AnswerExpectation = {
   conclusion: RegExp;
+  branches?: RegExp[];
+  evidence?: Array<{
+    law: RegExp;
+    article?: RegExp;
+    paragraph?: RegExp;
+    item?: RegExp;
+    excerpt: RegExp[];
+  }>;
+  contextRequired?: RegExp[];
   clarification?: 0 | 1;
   excluded?: RegExp;
   supported?: boolean;
+};
+
+type BrowserChatbotPayload = {
+  directAnswer?: string;
+  importantConditions?: string[];
+  sources?: Array<{
+    law: string;
+    lawShort?: string;
+    article: string;
+    paragraph?: string;
+    item?: string;
+    text: string;
+    snippet?: string;
+  }>;
 };
 
 type BrowserCaseEvidence = {
@@ -17,6 +40,7 @@ type BrowserCaseEvidence = {
   normalQuestion: boolean;
   answerFirst: boolean | null;
   substantiveAnswer: boolean | null;
+  majorBranchesPresent: boolean | null;
   pureClarification: boolean | null;
   clarificationCorrect: boolean | null;
   clarificationCount: number;
@@ -68,6 +92,14 @@ async function writeBrowserEvidence(): Promise<void> {
         normalCases.filter((item) => item.substantiveAnswer).length,
         normalCases.length,
       ),
+      majorBranchCoverageRate: rate(
+        normalCases.filter((item) => item.majorBranchesPresent).length,
+        normalCases.length,
+      ),
+      citationSupportRate: rate(
+        normalCases.filter((item) => item.sourceSupported).length,
+        normalCases.length,
+      ),
       pureClarificationRate: rate(
         normalCases.filter((item) => item.pureClarification).length,
         normalCases.length,
@@ -108,12 +140,96 @@ async function gotoChatbot(page: Page) {
   await expect(page.locator("[data-chatbot-composer] textarea")).toBeVisible();
 }
 
+function parseSseMeta(raw: string): BrowserChatbotPayload {
+  const frames = [...raw.matchAll(/event: meta\ndata: ([^\n]+)\n\n/g)];
+  const meta = frames.at(-1)?.[1];
+  if (!meta) throw new Error(`chatbot SSE meta is missing: ${raw.slice(0, 240)}`);
+  return JSON.parse(meta) as BrowserChatbotPayload;
+}
+
+function payloadAnswerText(payload: BrowserChatbotPayload): string {
+  return [
+    payload.directAnswer ?? "",
+    ...(payload.importantConditions ?? []),
+  ].join("\n");
+}
+
+async function inspectSemanticSupport(
+  answer: Locator,
+  expectation: AnswerExpectation,
+  payload: BrowserChatbotPayload,
+): Promise<{
+  majorBranchesPresent: boolean;
+  sourceSupported: boolean;
+  contextRetained: boolean | null;
+}> {
+  const answerText = payloadAnswerText(payload);
+  const majorBranchesPresent = (expectation.branches ?? []).every((pattern) =>
+    pattern.test(answerText),
+  );
+  const contextRetained = expectation.contextRequired
+    ? expectation.contextRequired.every((pattern) => pattern.test(answerText))
+    : null;
+  if (expectation.supported === false) {
+    return {
+      majorBranchesPresent,
+      sourceSupported:
+        (payload.sources?.length ?? 0) === 0 &&
+        (await answer.locator("[data-chatbot-source-details]").count()) === 0,
+      contextRetained,
+    };
+  }
+
+  const requirements = expectation.evidence ?? [];
+  const sources = payload.sources ?? [];
+  const evidence = answer.locator("[data-chatbot-source-details]");
+  if (requirements.length === 0 || (await evidence.count()) !== 1) {
+    return { majorBranchesPresent, sourceSupported: false, contextRetained };
+  }
+  await evidence.evaluate((element) => {
+    (element as HTMLDetailsElement).open = true;
+  });
+  const entries = answer.locator("[data-chatbot-source-entry]");
+
+  for (const requirement of requirements) {
+    const sourceIndex = sources.findIndex((source) => {
+      const excerpt = source.snippet?.trim() || source.text;
+      return (
+        requirement.law.test(`${source.lawShort ?? ""} ${source.law}`) &&
+        (!requirement.article || requirement.article.test(source.article)) &&
+        (!requirement.paragraph ||
+          requirement.paragraph.test(source.paragraph ?? "")) &&
+        (!requirement.item || requirement.item.test(source.item ?? "")) &&
+        requirement.excerpt.every((pattern) => pattern.test(excerpt))
+      );
+    });
+    if (sourceIndex < 0) {
+      return { majorBranchesPresent, sourceSupported: false, contextRetained };
+    }
+    if (!answerText.includes(`［${sourceIndex + 1}］`)) {
+      return { majorBranchesPresent, sourceSupported: false, contextRetained };
+    }
+    const entryText = (await entries.nth(sourceIndex).textContent()) ?? "";
+    if (
+      !requirement.law.test(entryText) ||
+      (requirement.article && !requirement.article.test(entryText)) ||
+      (requirement.paragraph && !requirement.paragraph.test(entryText)) ||
+      (requirement.item && !requirement.item.test(entryText)) ||
+      !requirement.excerpt.every((pattern) => pattern.test(entryText))
+    ) {
+      return { majorBranchesPresent, sourceSupported: false, contextRetained };
+    }
+  }
+  return { majorBranchesPresent, sourceSupported: true, contextRetained };
+}
+
 async function assertAnswerFirst(
   answer: Locator,
   expectation: AnswerExpectation,
+  payload: BrowserChatbotPayload,
 ) {
   const structured = answer.locator("[data-chatbot-structured-answer]");
-  const conclusion = structured.locator('section[aria-label="結論"] p');
+  const conclusion = structured.locator(":scope > div > p").first();
   await expect(structured).toBeVisible({ timeout: 30_000 });
   await expect(conclusion).toBeVisible();
   await expect(conclusion).toContainText(expectation.conclusion);
@@ -122,16 +238,16 @@ async function assertAnswerFirst(
   expect(conclusionText.length).toBeGreaterThan(10);
   expect(conclusionText).not.toMatch(/^[^。\n]*[？?]\s*$/u);
 
-  const clarification = structured.locator('section[aria-label="確認"]');
+  const clarification = structured.locator(
+    "[data-chatbot-clarification-question]",
+  );
   const clarificationCount = await clarification.count();
   expect(clarificationCount).toBeLessThanOrEqual(1);
   if (expectation.clarification !== undefined) {
     expect(clarificationCount).toBe(expectation.clarification);
   }
 
-  const conditions = structured.locator(
-    'section[aria-label="条件で変わる点"] li',
-  );
+  const conditions = structured.locator('ul[aria-label="主な条件"] > li');
   expect(await conditions.count()).toBeLessThanOrEqual(3);
 
   const quickReplies = answer.locator("[data-chatbot-quick-reply]");
@@ -142,12 +258,12 @@ async function assertAnswerFirst(
   expect(
     await answer.evaluate((root) => {
       const first = root.querySelector(
-        '[data-chatbot-structured-answer] section[aria-label="結論"]',
+        "[data-chatbot-structured-answer] > div",
       );
       if (!first) return false;
       const later = [
         root.querySelector(
-          '[data-chatbot-structured-answer] section[aria-label="確認"]',
+          "[data-chatbot-clarification-question]",
         ),
         ...root.querySelectorAll("[data-chatbot-quick-reply]"),
       ].filter((element): element is Element => element !== null);
@@ -174,6 +290,13 @@ async function assertAnswerFirst(
       ),
     ).toBe(false);
   }
+  const semantic = await inspectSemanticSupport(answer, expectation, payload);
+  expect(semantic.majorBranchesPresent).toBe(true);
+  expect(semantic.sourceSupported).toBe(true);
+  if (expectation.contextRequired) {
+    expect(semantic.contextRetained).toBe(true);
+  }
+  return semantic;
 }
 
 async function ask(
@@ -201,14 +324,15 @@ async function ask(
   expect(response.status()).toBe(200);
   expect(response.headers()["content-type"]).toContain("text/event-stream");
   expect(response.headers()["x-ai-used"]).toBe("false");
+  const payload = parseSseMeta((await response.body()).toString("utf8"));
 
   const answer = answers.nth(answerCount);
-  await assertAnswerFirst(answer, expectation);
+  const semantic = await assertAnswerFirst(answer, expectation, payload);
   const structured = answer.locator("[data-chatbot-structured-answer]");
-  const conclusion = structured.locator('section[aria-label="結論"] p');
+  const conclusion = structured.locator(":scope > div > p").first();
   const conclusionText = (await conclusion.innerText()).trim();
   const clarificationCount = await structured
-    .locator('section[aria-label="確認"]')
+    .locator("[data-chatbot-clarification-question]")
     .count();
   const quickReplyCount = await answer
     .locator("[data-chatbot-quick-reply]")
@@ -221,12 +345,12 @@ async function ask(
     (await answer.locator("[data-chatbot-source-details]").count()) > 0;
   const answerFirst = await answer.evaluate((root) => {
     const first = root.querySelector(
-      '[data-chatbot-structured-answer] section[aria-label="結論"]',
+      "[data-chatbot-structured-answer] > div",
     );
     if (!first) return false;
     const later = [
       root.querySelector(
-        '[data-chatbot-structured-answer] section[aria-label="確認"]',
+        "[data-chatbot-clarification-question]",
       ),
       ...root.querySelectorAll("[data-chatbot-quick-reply]"),
     ].filter((element): element is Element => element !== null);
@@ -246,6 +370,7 @@ async function ask(
     normalQuestion: true,
     answerFirst,
     substantiveAnswer,
+    majorBranchesPresent: semantic.majorBranchesPresent,
     pureClarification: clarificationCount > 0 && !substantiveAnswer,
     clarificationCorrect:
       expectation.clarification === undefined
@@ -254,14 +379,11 @@ async function ask(
     clarificationCount,
     quickReplyCount,
     answerActionCount,
-    contextRetained: caseId === 2 ? /電気作業|電気/u.test(answerText) : null,
+    contextRetained: semantic.contextRetained,
     categoryDrift:
       caseId === 2 && /酸欠|酸素欠乏|有機溶剤|石綿/u.test(answerText),
     sourceEvidenceVisible,
-    sourceSupported:
-      expectation.supported === false
-        ? !sourceEvidenceVisible
-        : sourceEvidenceVisible,
+    sourceSupported: semantic.sourceSupported,
     emergencyNormalAnswer: false,
     piiOutbound: false,
   });
@@ -323,12 +445,48 @@ test.describe("安衛法AI answer-first 必須12会話ケース", () => {
 
     await ask(page, "電気作業の資格は？", {
       conclusion: /電気工事士|特別教育/u,
+      branches: [
+        /電気工事士.*(?:設置|変更)|(?:設置|変更).*電気工事士/u,
+        /特別教育.*(?:充電電路|低圧|高圧)|(?:充電電路|低圧|高圧).*特別教育/u,
+        /(?:見るだけ|目視).*(?:盤|測定|配線)|(?:盤|測定|配線).*(?:見るだけ|目視)/u,
+      ],
+      evidence: [
+        {
+          law: /安衛則|労働安全衛生規則/u,
+          article: /第36条/u,
+          item: /第4号/u,
+          excerpt: [/高圧.*特別高圧/u, /低圧/u, /充電電路/u],
+        },
+        {
+          law: /電気工事士法/u,
+          article: /第3条/u,
+          paragraph: /第1項.*第2項/u,
+          excerpt: [/第一種電気工事士免状/u, /第二種電気工事士免状/u],
+        },
+      ],
       clarification: 1,
     }, 1);
     await assertMobileComposerIsUsable(page);
 
     const followup = await ask(page, "作業主任者", {
       conclusion: /作業主任者|作業の指揮者/u,
+      branches: [
+        /電気作業.*(?:一律|全般).*(?:作業主任者).*(?:ない|ありません)|作業主任者.*(?:一律|全般).*(?:ない|ありません)/u,
+        /作業の指揮者.*350条|350条.*作業の指揮者/u,
+        /(?:電気主任技術者|主任技術者).*(?:保安監督|工事・維持・運用)/u,
+      ],
+      evidence: [
+        {
+          law: /安衛則|労働安全衛生規則/u,
+          article: /第350条/u,
+          excerpt: [/作業の指揮者を定め/u],
+        },
+      ],
+      contextRequired: [
+        /電気/u,
+        /作業主任者/u,
+        /作業の指揮者|電気主任技術者/u,
+      ],
       clarification: 1,
       excluded: /酸欠|酸素欠乏|有機溶剤|石綿/u,
     }, 2);
@@ -352,41 +510,117 @@ test.describe("安衛法AI answer-first 必須12会話ケース", () => {
         question: "フォークリフトの資格は？",
         expectation: {
           conclusion: /1トン|技能講習|特別教育/u,
+          branches: [/1トン以上.*技能講習/u, /1トン未満.*特別教育/u],
+          evidence: [
+            {
+              law: /安衛令|労働安全衛生法施行令/u,
+              article: /第20条/u,
+              excerpt: [/一トン以上/u, /フォークリフト/u],
+            },
+            {
+              law: /安衛則|労働安全衛生規則/u,
+              article: /第36条/u,
+              excerpt: [/一トン未満/u, /フオークリフト|フォークリフト/u],
+            },
+          ],
           clarification: 1,
         },
       },
       {
         id: 4,
         question: "足場の手すり高さは？",
-        expectation: { conclusion: /85|手すり|2メートル|2m/u },
+        expectation: {
+          conclusion: /85|手すり|2メートル|2m/u,
+          branches: [/85(?:センチメートル|cm)|手すり/u, /中桟|35.*50/u],
+          evidence: [
+            {
+              law: /安衛則|労働安全衛生規則/u,
+              article: /第563条/u,
+              excerpt: [/八十五センチメートル|85センチメートル/u, /中桟/u],
+            },
+          ],
+        },
       },
       {
         id: 5,
         question: "玉掛けは何トンから？",
-        expectation: { conclusion: /1トン|技能講習|特別教育/u },
+        expectation: {
+          conclusion: /1トン|技能講習|特別教育/u,
+          branches: [/1トン以上.*技能講習/u, /1トン未満.*特別教育/u],
+          evidence: [
+            {
+              law: /安衛令|労働安全衛生法施行令/u,
+              article: /第20条/u,
+              excerpt: [/一トン以上/u, /玉掛け/u],
+            },
+            {
+              law: /安衛則|労働安全衛生規則/u,
+              article: /第36条/u,
+              excerpt: [/一トン未満/u, /玉掛け/u],
+            },
+          ],
+        },
       },
       {
         id: 6,
         question: "高所作業車は特別教育いる？",
         expectation: {
           conclusion: /2メートル|2m|10メートル|10m|特別教育|技能講習/u,
+          branches: [/10メートル以上.*技能講習/u, /10メートル未満.*特別教育/u],
+          evidence: [
+            {
+              law: /安衛令|労働安全衛生法施行令/u,
+              article: /第20条/u,
+              excerpt: [/十メートル以上/u, /高所作業車/u],
+            },
+            {
+              law: /安衛則|労働安全衛生規則/u,
+              article: /第36条/u,
+              excerpt: [/十メートル未満/u, /高所作業車/u],
+            },
+          ],
         },
       },
       {
         id: 7,
         question: "酸欠作業の監視人は必要？",
-        expectation: { conclusion: /監視|酸素|救出/u },
+        expectation: {
+          conclusion: /監視|酸素|救出/u,
+          branches: [/監視人/u, /異常.*連絡|救出/u, /酸素.*測定|換気/u],
+          evidence: [
+            {
+              law: /酸欠則|酸素欠乏症等防止規則/u,
+              excerpt: [/監視人/u, /異常/u],
+            },
+          ],
+        },
       },
       {
         id: 8,
         question: "有機溶剤を屋内で使う",
-        expectation: { conclusion: /局所排気|プッシュプル|密閉|発散源|SDS/u },
+        expectation: {
+          conclusion: /局所排気|プッシュプル|密閉|発散源|SDS/u,
+          branches: [/密閉|局所排気|プッシュプル/u, /有機溶剤.*区分|第一種|第二種|第三種/u],
+          evidence: [
+            {
+              law: /有機則|有機溶剤中毒予防規則/u,
+              excerpt: [/局所排気|プッシュプル|全体換気/u],
+            },
+          ],
+        },
       },
       {
         id: 9,
         question: "手すりは？",
         expectation: {
           conclusion: /手すり|足場|開口部/u,
+          branches: [/足場|開口部/u, /手すり/u],
+          evidence: [
+            {
+              law: /安衛則|労働安全衛生規則/u,
+              excerpt: [/手すり/u],
+            },
+          ],
           clarification: 1,
         },
       },
@@ -417,6 +651,78 @@ test.describe("安衛法AI answer-first 必須12会話ケース", () => {
     await expect(answer).toContainText(/作業|設備|法令名|条番号/u);
   });
 
+  test("semantic browser gateはgeneric回答・空の根拠・電気1語だけの偽陽性を拒否する", async ({
+    page,
+  }) => {
+    const poisonPayload: BrowserChatbotPayload & Record<string, unknown> = {
+      directAnswer: "電気作業について回答します。",
+      importantConditions: [],
+      sources: [
+        {
+          law: "労働安全衛生規則",
+          lawShort: "安衛則",
+          article: "第563条",
+          text: "電気",
+          snippet: "電気",
+        },
+      ],
+      answer: "電気作業について回答します。",
+      assumptions: [],
+      citations: [],
+      clarificationQuestion: null,
+      quickReplies: [],
+      effectiveDateStatus: {
+        asOf: "2026-08-09",
+        status: "current",
+        label: "2026-08-09時点",
+      },
+      source_type: "rag",
+      confidence: "low",
+      requiresHumanReview: true,
+    };
+    await page.route(`**${CHATBOT_STREAM_PATH}`, async (route) => {
+      await route.fulfill({
+        status: 200,
+        headers: {
+          "content-type": "text/event-stream; charset=utf-8",
+          "x-ai-used": "false",
+        },
+        body: `event: meta\ndata: ${JSON.stringify(poisonPayload)}\n\n`,
+      });
+    });
+    await gotoChatbot(page);
+    const input = page.locator("[data-chatbot-composer] textarea");
+    await input.fill("電気作業の資格は？");
+    await page.getByRole("button", { name: "送信" }).click();
+    const answer = page
+      .locator('article[aria-label="安衛法AIの回答"]')
+      .last();
+    await expect(answer).toContainText("電気作業について回答します。");
+
+    const semantic = await inspectSemanticSupport(
+      answer,
+      {
+        conclusion: /電気/u,
+        branches: [
+          /電気工事士.*(?:設置|変更)/u,
+          /特別教育.*(?:充電電路|低圧|高圧)/u,
+          /見るだけ.*(?:盤|測定|配線)/u,
+        ],
+        evidence: [
+          {
+            law: /安衛則|労働安全衛生規則/u,
+            article: /第36条/u,
+            item: /第4号/u,
+            excerpt: [/充電電路/u, /低圧/u, /高圧/u],
+          },
+        ],
+      },
+      poisonPayload,
+    );
+    expect(semantic.majorBranchesPresent).toBe(false);
+    expect(semantic.sourceSupported).toBe(false);
+  });
+
   test("Case 11〜12: 緊急・PIIは通常回答や外部送信より前に端末内で遮断する", async ({
     page,
   }) => {
@@ -444,6 +750,7 @@ test.describe("安衛法AI answer-first 必須12会話ケース", () => {
       normalQuestion: false,
       answerFirst: null,
       substantiveAnswer: null,
+      majorBranchesPresent: null,
       pureClarification: null,
       clarificationCorrect: null,
       clarificationCount: 0,
@@ -485,6 +792,7 @@ test.describe("安衛法AI answer-first 必須12会話ケース", () => {
       normalQuestion: false,
       answerFirst: null,
       substantiveAnswer: null,
+      majorBranchesPresent: null,
       pureClarification: null,
       clarificationCorrect: null,
       clarificationCount: 0,

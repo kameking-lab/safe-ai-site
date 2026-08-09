@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { LawArticle } from "@/data/laws";
 import { verifiedLawArticles } from "@/data/laws/verified-corpus";
+import { verifiedPrimaryElectricalArticles } from "@/data/laws/verified-primary-electrical";
 import { buildServiceFirstLegalAnswer } from "@/lib/legal-extractive-answer";
 import { lawArticleToSource } from "@/lib/chatbot-route-shared";
 
@@ -17,6 +18,31 @@ const scaffoldArticle: LawArticle = {
 };
 
 describe("chatbot source metadata", () => {
+  it.each([
+    "測定器をクリップ留めするだけなら電工いる？",
+    "屋内配線に測定器を取り付ける場合は電気工事士必要？",
+    "経産省電工Q&A Q10",
+    "盤を開けてテスターを当てる",
+  ])("経産省Q10を測定器取付けの完結した公式抜粋として返す: %s", (query) => {
+    const article = verifiedPrimaryElectricalArticles.find(
+      (candidate) => candidate.lawShort === "経産省電工Q&A",
+    );
+    expect(article).toBeDefined();
+    const source = lawArticleToSource(
+      article as LawArticle,
+      query,
+      new Date("2026-08-09T00:00:00+09:00"),
+    );
+
+    expect(source.item).toBe("Q10");
+    expect(source.snippet).toMatch(
+      /Q10[\s\S]*屋内配線を傷付けることが想定されない場合[\s\S]*電気工事士が工事する必要はありません[\s\S]*電気主任技術者の指示確認/,
+    );
+    expect(source.url).toBe(
+      "https://www.meti.go.jp/policy/safety_security/industrial_safety/sangyo/electric/files/kouzi-si-QA201803.pdf",
+    );
+  });
+
   it("本文版と一致したe-Gov改正の公布日と履歴だけをAPI出典へ渡す", () => {
     const article = verifiedLawArticles.find(
       (candidate) =>
@@ -323,6 +349,179 @@ describe("chatbot source metadata", () => {
       item: "第5号・第12号",
     });
     expect(source.snippet).toMatch(/第5号.*監視人.*第12号.*監視人/);
+  });
+
+  it("電気主任技術者の回答は電事法43条の選任・職務・指示遵守の項だけを返す", () => {
+    const article = verifiedPrimaryElectricalArticles.find(
+      (candidate) =>
+        candidate.lawShort === "電事法" && candidate.articleNum === "第43条",
+    );
+    expect(article).toBeDefined();
+
+    const source = lawArticleToSource(
+      article as LawArticle,
+      "電気主任技術者がいれば作業できる？",
+      new Date("2026-08-09T00:00:00+09:00"),
+    );
+
+    expect(source).toMatchObject({
+      paragraph: "第1項・第4項・第5項",
+      item: undefined,
+    });
+    expect(source.article).toContain("第43条第1項・第4項・第5項");
+    expect(source.snippet).toMatch(
+      /第1項.*保安の監督.*第4項.*職務を誠実.*第5項.*指示に従わなければならない/,
+    );
+  });
+
+  it.each([
+    ["安衛則", "第341条", /高圧の充電電路の点検.*感電の危険/],
+    ["安衛則", "第342条", /充電電路に接触.*接近.*感電の危険/],
+    ["安衛則", "第346条", /低圧の充電電路の点検.*絶縁用保護具/],
+    ["安衛則", "第347条", /低圧の充電電路に近接.*絶縁用防具/],
+  ])(
+    "%s%sはテスター測定回答が引用する第1項とその公式本文を返す",
+    (lawShort, articleNum, supportedText) => {
+      const article = verifiedLawArticles.find(
+        (candidate) =>
+          candidate.lawShort === lawShort &&
+          candidate.articleNum === articleNum,
+      );
+      expect(article).toBeDefined();
+
+      const source = lawArticleToSource(
+        article as LawArticle,
+        "盤を開けてテスターを当てる",
+        new Date("2026-08-09T00:00:00+09:00"),
+      );
+
+      expect(source.paragraph).toBe("第1項");
+      expect(source.article).toContain(`${articleNum}第1項`);
+      expect(source.snippet).toMatch(supportedText);
+    },
+  );
+
+  it.each([
+    ["電源を入れるだけ", /低圧.*開閉器の操作/],
+    ["ブレーカーを操作する", /低圧.*開閉器の操作/],
+    ["開閉器を操作する", /低圧.*開閉器の操作/],
+    ["高圧受電設備を点検する", /高圧.*特別高圧.*点検.*操作/],
+  ])(
+    "%sは安衛則36条第4号の対象行為を該当抜粋で返す",
+    (query, supportedText) => {
+      const article = verifiedLawArticles.find(
+        (candidate) =>
+          candidate.lawShort === "安衛則" && candidate.articleNum === "第36条",
+      );
+      expect(article).toBeDefined();
+
+      const source = lawArticleToSource(
+        article as LawArticle,
+        query,
+        new Date("2026-08-09T00:00:00+09:00"),
+      );
+
+      expect(source.item).toBe("第4号");
+      expect(source.snippet).toMatch(supportedText);
+      expect(source.snippet).not.toMatch(/研削といしの取替え/);
+    },
+  );
+
+  it.each([
+    "電気の点検に資格いる？",
+    "盤を見るだけ",
+    "ブレーカーを操作する",
+    "配線をつなぐ",
+  ])("%sは電気工事士法2条3項の定義を返す", (query) => {
+    const article = verifiedLawArticles.find(
+      (candidate) =>
+        candidate.lawShort === "電気工事士法" &&
+        candidate.articleNum === "第2条",
+    );
+    expect(article).toBeDefined();
+
+    const source = lawArticleToSource(
+      article as LawArticle,
+      query,
+      new Date("2026-08-09T00:00:00+09:00"),
+    );
+
+    expect(source.paragraph).toBe("第3項");
+    expect(source.article).toContain("第2条第3項");
+    expect(source.snippet).toMatch(
+      /第3項.*電気工事.*設置し、又は変更する工事.*軽微な工事を除く/,
+    );
+    expect(source.snippet).not.toMatch(/^第1項/);
+  });
+
+  it("配線作業は電気工事士法3条1項から4項までの設備区分を返す", () => {
+    const article = verifiedLawArticles.find(
+      (candidate) =>
+        candidate.lawShort === "電気工事士法" &&
+        candidate.articleNum === "第3条",
+    );
+    expect(article).toBeDefined();
+
+    const source = lawArticleToSource(
+      article as LawArticle,
+      "配線をつなぐ",
+      new Date("2026-08-09T00:00:00+09:00"),
+    );
+
+    expect(source.paragraph).toBe("第1項・第2項・第3項・第4項");
+    expect(source.article).toContain("第3条第1項・第2項・第3項・第4項");
+    expect(source.snippet).toMatch(
+      /第1項[\s\S]*第一種電気工事士免状[\s\S]*第2項[\s\S]*第二種電気工事士免状[\s\S]*第3項[\s\S]*特種電気工事資格者認定証[\s\S]*第4項[\s\S]*認定電気工事従事者認定証/,
+    );
+  });
+
+  it.each([
+    ["第5条", /11時間以上.*実技15時間以上.*操作の業務のみは1時間以上/],
+    ["第6条", /7時間以上.*実技7時間以上.*開閉器操作のみは1時間以上/],
+  ])(
+    "特別教育規程%sは学科・実技・操作限定の検証済み時間を返す",
+    (articleNum, supportedText) => {
+      const article = verifiedPrimaryElectricalArticles.find(
+        (candidate) =>
+          candidate.lawShort === "特別教育規程" &&
+          candidate.articleNum === articleNum,
+      );
+      expect(article).toBeDefined();
+
+      const source = lawArticleToSource(
+        article as LawArticle,
+        "電気作業の特別教育の時間は？",
+        new Date("2026-08-09T00:00:00+09:00"),
+      );
+
+      expect(source.paragraph).toBe("第1項・第2項・第3項");
+      expect(source.article).toContain(`${articleNum}第1項・第2項・第3項`);
+      expect(source.text).toMatch(supportedText);
+      expect(source.snippet).toMatch(supportedText);
+    },
+  );
+
+  it("停電配線作業は安衛則339条1項1号から3号の措置を返す", () => {
+    const article = verifiedLawArticles.find(
+      (candidate) =>
+        candidate.lawShort === "安衛則" && candidate.articleNum === "第339条",
+    );
+    expect(article).toBeDefined();
+
+    const source = lawArticleToSource(
+      article as LawArticle,
+      "停電して配線を外す",
+      new Date("2026-08-09T00:00:00+09:00"),
+    );
+
+    expect(source).toMatchObject({
+      paragraph: "第1項",
+      item: "第1号・第2号・第3号",
+    });
+    expect(source.article).toContain("第339条第1項");
+    expect(source.snippet).toMatch(
+      /第1号[\s\S]*施錠[\s\S]*通電禁止[\s\S]*監視人[\s\S]*第2号[\s\S]*残留電荷[\s\S]*放電[\s\S]*第3号[\s\S]*高圧又は特別高圧[\s\S]*検電器具[\s\S]*短絡接地/,
+    );
   });
 
   it("旧仮名を含む条文本文からフォークリフトの号と該当箇所を抽出する", () => {

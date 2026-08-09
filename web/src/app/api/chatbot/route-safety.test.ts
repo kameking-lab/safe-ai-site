@@ -12,6 +12,10 @@ import {
 import { CHATBOT_UNANSWERABLE_FALLBACK } from "@/lib/chatbot-contract";
 import { LEGAL_GENERATION_ENABLED } from "@/lib/chatbot-generation-policy";
 import { __resetRateLimitForTests } from "@/lib/chatbot-rate-limit";
+import {
+  PUBLIC_LEGAL_CONVERSATION_CONTEXT_KEYS,
+  type PublicLegalConversationContext,
+} from "@/lib/legal-conversation-public-context";
 
 type RoutePost = (request: Request) => Promise<Response>;
 type RoutePayload = {
@@ -40,6 +44,10 @@ type RoutePayload = {
   clarification?: { question: string; options: string[] };
   source_type?: string;
   citations?: unknown[];
+  effectiveDateStatus?: {
+    status: "current" | "future" | "past" | "unknown";
+    asOf: string | null;
+  };
   notices?: Array<{
     id: string;
     sourceUrl: string;
@@ -59,19 +67,7 @@ type RoutePayload = {
     independentlyCheckedAt: string | null;
   }>;
   attachedLeaflets?: unknown[];
-  context?: {
-    workType?: string;
-    equipment?: string;
-    height?: string;
-    load?: string;
-    voltageClass?: string;
-    qualification?: string;
-    role?: string;
-    targetDate?: string;
-    targetDateEnd?: string;
-    targetDatePrecision?: string;
-    confirmedChoices?: string[];
-  };
+  context?: PublicLegalConversationContext;
 };
 
 function expectAnswerFirst(payload: RoutePayload) {
@@ -85,6 +81,13 @@ function expectAnswerFirst(payload: RoutePayload) {
   expect(
     payload.clarificationQuestion?.match(/？|\?/g)?.length ?? 0,
   ).toBeLessThanOrEqual(1);
+  expect(
+    Object.keys(payload.context ?? {}).every((key) =>
+      PUBLIC_LEGAL_CONVERSATION_CONTEXT_KEYS.includes(
+        key as (typeof PUBLIC_LEGAL_CONVERSATION_CONTEXT_KEYS)[number],
+      ),
+    ),
+  ).toBe(true);
 }
 
 function source(...parts: string[]) {
@@ -106,7 +109,7 @@ async function callRoute(
   mode: "json" | "sse",
   message: string,
   history?: Array<{ role: "user" | "assistant"; content: string }>,
-  context?: RoutePayload["context"],
+  context?: Record<string, unknown>,
 ): Promise<{ response: Response; payload: RoutePayload; raw: string }> {
   const response = await post(
     new Request("http://localhost/api/chatbot", {
@@ -247,7 +250,7 @@ describe("chatbot route executable safety boundary", () => {
   });
 
   it.each(executableRouteModes)(
-    "実行時計が監査日を超えても回答・出典を2026-08-03基準に固定する ($label)",
+    "実行時計が監査日を超えても回答・出典を2026-08-09基準に固定する ($label)",
     async ({ post, mode }) => {
       vi.useFakeTimers();
       vi.setSystemTime(new Date("2030-01-01T00:00:00.000Z"));
@@ -255,20 +258,20 @@ describe("chatbot route executable safety boundary", () => {
       const current = await callRoute(post, mode, "酸欠作業の監視人は必要？");
       expect(current.response.status).toBe(200);
       expectAnswerFirst(current.payload);
-      expect(current.payload.answer).toContain("回答基準日: 2026-08-03 JST");
+      expect(current.payload.answer).toContain("回答基準日: 2026-08-09 JST");
       expect(current.payload.answer).not.toContain("2030-01-01");
       expect(current.payload.sources.length).toBeGreaterThan(0);
       expect(
-        current.payload.sources.every((item) => item.asOf === "2026-08-03"),
+        current.payload.sources.every((item) => item.asOf === "2026-08-09"),
       ).toBe(true);
 
       const future = await callRoute(
         post,
         mode,
-        "2026年8月4日時点の足場の手すり高さは？",
+        "2026年8月10日時点の足場の手すり高さは？",
       );
       expect(future.response.status).toBe(200);
-      expect(future.payload.answer).toContain("回答基準日: 2026-08-03 JST");
+      expect(future.payload.answer).toContain("回答基準日: 2026-08-09 JST");
       expect(future.payload.answer).toContain("回答を保留");
       expect(future.payload.sources).toEqual([]);
     },
@@ -281,14 +284,14 @@ describe("chatbot route executable safety boundary", () => {
 
     const first = await callRoute(postJson, "json", message);
     expect(first.response.headers.get("X-Cache-Hit")).toBe("false");
-    expect(first.payload.answer).toContain("回答基準日: 2026-08-03 JST");
+    expect(first.payload.answer).toContain("回答基準日: 2026-08-09 JST");
 
     vi.setSystemTime(new Date("2026-08-08T01:00:00.000Z"));
     const second = await callRoute(postJson, "json", message);
     expect(second.response.headers.get("X-Cache-Hit")).toBe("true");
-    expect(second.payload.answer).toContain("回答基準日: 2026-08-03 JST");
+    expect(second.payload.answer).toContain("回答基準日: 2026-08-09 JST");
     expect(
-      second.payload.sources.every((item) => item.asOf === "2026-08-03"),
+      second.payload.sources.every((item) => item.asOf === "2026-08-09"),
     ).toBe(true);
   });
 
@@ -587,6 +590,22 @@ describe("chatbot route executable safety boundary", () => {
         "マニュアル例は「HIV陽性です」。",
         "教材文は「HIV陽性です」。",
         "ケース例：「HIV陽性です」。",
+      ]) {
+        const { payload } = await callRoute(post, mode, input);
+        expect(payload.safetyKind).not.toBe("privacy");
+        expect(payload.answer).not.toContain("個人情報を除いて");
+      }
+    },
+  );
+
+  it.each(executableRouteModes)(
+    "電気主任技術者の制度質問を氏名PIIと誤判定しない ($label)",
+    async ({ post, mode }) => {
+      for (const input of [
+        "電気主任技術者がいれば作業できる？",
+        "電気主任技術者と電気工事士の違い",
+        "高圧の点検は主任技術者の立会いだけでいい？",
+        "主任技術者がいればいい？",
       ]) {
         const { payload } = await callRoute(post, mode, input);
         expect(payload.safetyKind).not.toBe("privacy");
@@ -1189,7 +1208,7 @@ describe("chatbot route executable safety boundary", () => {
 
       expect(response.status).toBe(200);
       expect(raw).not.toContain("STALE-PREVIOUS-DAY");
-      expect(payload.answer).toContain("回答基準日: 2026-08-03 JST");
+      expect(payload.answer).toContain("回答基準日: 2026-08-09 JST");
       expectSupportedAsbestosParagraphSource(payload);
       if (mode === "json") {
         expect(response.headers.get("X-Cache-Hit")).toBe("false");
@@ -1385,7 +1404,7 @@ describe("chatbot route executable safety boundary", () => {
           Date.parse("2026-07-23T00:00:00.000Z"),
         );
         expect(fetchedAt).toBeLessThanOrEqual(
-          Date.parse("2026-08-03T00:00:00.000Z"),
+          Date.parse("2026-08-09T00:00:00.000Z"),
         );
         expect(item.humanReviewStatus).toBe("not-reviewed");
       }
@@ -1463,12 +1482,19 @@ describe("chatbot route executable safety boundary", () => {
           content: "フォークリフトの最大荷重はどれですか？",
         },
       ]);
-      expect(payload.answer).toContain("資格区分はまだ確定できません");
-      expect(payload.answer).toContain("車体銘板");
+      expect(payload.answer).toMatch(/最大荷重1トン未満.*特別教育/);
+      expect(payload.answer).toMatch(/最大荷重1トン以上.*技能講習/);
+      expect(payload.answer).toMatch(/車体銘板|仕様書/);
       expectAnswerFirst(payload);
-      expect(payload.clarificationQuestion).toContain("確認できた最大荷重");
+      expect(payload.clarificationQuestion).toMatch(/(?:車体銘板|仕様書).*最大荷重/);
       expect(payload.quickReplies).toEqual([]);
-      expect(payload.sources).toEqual([]);
+      expect(payload.source_type).toBe("rag");
+      expect(payload.sources.length).toBeGreaterThan(0);
+      expect(payload.citations?.length ?? 0).toBeGreaterThan(0);
+      expect(payload.effectiveDateStatus).toMatchObject({
+        status: "current",
+        asOf: "2026-08-09",
+      });
     },
   );
 
@@ -1617,7 +1643,7 @@ describe("chatbot route executable safety boundary", () => {
       ]);
       expectAnswerFirst(payload);
       expect(payload.clarificationQuestion).toBeNull();
-      expect(payload.answer).toContain("密閉設備");
+      expect(payload.answer).toMatch(/(?:密閉設備|密閉する設備)/);
       expect(payload.answer).toContain("局所排気装置");
       expect(payload.answer).toContain("プッシュプル型換気装置");
       expect(payload.answer).not.toContain("臨時作業");
@@ -1760,15 +1786,15 @@ describe("chatbot route executable safety boundary", () => {
       );
       expect(definition?.paragraph).toBe("第3項");
       expect(definition?.snippet).toMatch(/電気工事.*設置し、又は変更/);
-      expect(restriction?.paragraph).toBeUndefined();
+      expect(restriction?.paragraph).toBe("第1項・第2項・第3項・第4項");
       expect(restriction?.snippet).toMatch(
-        /第1項.*第一種電気工事士免状.*第2項.*第二種電気工事士免状.*第3項.*特種電気工事資格者認定証.*第4項.*認定電気工事従事者認定証/,
+        /第1項[\s\S]*第一種電気工事士免状[\s\S]*第2項[\s\S]*第二種電気工事士免状[\s\S]*第3項[\s\S]*特種電気工事資格者認定証[\s\S]*第4項[\s\S]*認定電気工事従事者認定証/,
       );
       expect(educationDuty?.paragraph).toBe("第3項");
       expect(educationDuty?.snippet).toMatch(/危険又は有害な業務.*特別の教育/);
       expect(educationWork?.item).toBe("第4号");
       expect(educationWork?.snippet).toMatch(
-        /低圧の充電電路.*対地電圧が五十ボルト以下.*敷設若しくは修理/,
+        /低圧[\s\S]*交流にあつては六百ボルト以下[\s\S]*対地電圧が五十ボルト以下[\s\S]*敷設若しくは修理/,
       );
 
       const specific = await callRoute(
@@ -1949,7 +1975,7 @@ describe("chatbot route executable safety boundary", () => {
       for (const solventClass of ["第1種", "第2種"] as const) {
         const result = await callRoute(post, mode, solventClass, baseHistory);
         expectAnswerFirst(result.payload);
-        expect(result.payload.answer).toContain("密閉設備");
+        expect(result.payload.answer).toMatch(/(?:密閉設備|密閉する設備)/);
         expect(result.payload.answer).not.toMatch(/第三種|臨時作業|短時間作業/);
         expect(
           hasLegalSource(
@@ -1987,7 +2013,7 @@ describe("chatbot route executable safety boundary", () => {
       );
       expect(broadThirdSource?.paragraph).toBeUndefined();
       expect(broadThirdSource?.snippet).toMatch(
-        /第1項.*全体換気装置.*第2項.*吹付けによる第三種.*密閉する設備/,
+        /全体換気装置.*吹付けによる第三種.*密閉する設備/,
       );
 
       const thirdOutside = await callRoute(post, mode, "それ以外の屋内", [
@@ -2017,8 +2043,20 @@ describe("chatbot route executable safety boundary", () => {
       ]);
       expectAnswerFirst(unknownLocation.payload);
       expect(unknownLocation.payload.answer).toContain("容器・設備図面");
-      expect(unknownLocation.payload.clarificationQuestion).toBeNull();
+      expect(unknownLocation.payload.answer).toMatch(
+        /第三種.*タンク等の内部.*(?:密閉|局所排気|プッシュプル|全体換気).*タンク等の内部以外/,
+      );
+      expect(unknownLocation.payload.clarificationQuestion).toMatch(
+        /タンク等の内部.*それ以外の屋内/,
+      );
       expect(unknownLocation.payload.quickReplies).toEqual([]);
+      expect(
+        hasLegalSource(
+          unknownLocation.payload,
+          /有機溶剤中毒予防規則|有機則/,
+          /第6条/,
+        ),
+      ).toBe(true);
 
       const temporary = await callRoute(
         post,
@@ -2043,9 +2081,9 @@ describe("chatbot route executable safety boundary", () => {
       const broadTemporarySource = temporary.payload.sources.find(
         ({ article }) => /第8条/.test(article),
       );
-      expect(broadTemporarySource?.paragraph).toBeUndefined();
+      expect(broadTemporarySource?.paragraph).toBe("第1項・第2項");
       expect(broadTemporarySource?.snippet).toMatch(
-        /第1項.*適用しない.*第2項.*全体換気装置.*設けないことができる/,
+        /第1項[\s\S]*適用しない[\s\S]*第2項[\s\S]*全体換気装置[\s\S]*設けないことができる/,
       );
 
       for (const location of ["タンク等の内部", "それ以外の屋内"] as const) {
@@ -2106,9 +2144,9 @@ describe("chatbot route executable safety boundary", () => {
       const broadShortTimeSource = shortTime.payload.sources.find(
         ({ article }) => /第9条/.test(article),
       );
-      expect(broadShortTimeSource?.paragraph).toBeUndefined();
+      expect(broadShortTimeSource?.paragraph).toBe("第1項・第2項");
       expect(broadShortTimeSource?.snippet).toMatch(
-        /第1項.*全体換気装置.*設けないことができる.*第2項.*送気マスク.*設けないことができる/,
+        /第1項[\s\S]*全体換気装置[\s\S]*設けないことができる[\s\S]*第2項[\s\S]*送気マスク[\s\S]*設けないことができる/,
       );
 
       for (const location of ["タンク等の内部", "それ以外の屋内"] as const) {
@@ -2188,7 +2226,7 @@ describe("chatbot route executable safety boundary", () => {
       );
       expect(unresolvedMethodSource?.paragraph).toBeUndefined();
       expect(unresolvedMethodSource?.snippet).toMatch(
-        /第1項.*全体換気装置.*第2項.*吹付けによる第三種/,
+        /全体換気装置.*吹付けによる第三種/,
       );
 
       for (const method of ["吹付け作業", "吹付け以外"] as const) {
@@ -2298,8 +2336,10 @@ describe("chatbot route executable safety boundary", () => {
       const measurementSource = measurement.payload.sources.find(
         ({ article }) => /第3条/.test(article),
       );
-      expect(measurementSource?.paragraph).toBe("第1項");
-      expect(measurementSource?.snippet).toMatch(/第1項.*第2項.*3年間保存/);
+      expect(measurementSource?.paragraph).toBe("第1項・第2項");
+      expect(measurementSource?.snippet).toMatch(
+        /第1項[\s\S]*第2項[\s\S]*(?:三|3)年間保存/,
+      );
 
       const record = await callRoute(
         post,
@@ -2319,7 +2359,9 @@ describe("chatbot route executable safety boundary", () => {
       const ventilationSource = concentration.payload.sources.find(
         ({ article }) => /第5条/.test(article),
       );
-      expect(ventilationSource?.snippet).toMatch(/18%以上.*換気.*著しく困難/);
+      expect(ventilationSource?.snippet).toMatch(
+        /十八パーセント以上[\s\S]*換気[\s\S]*著しく困難/,
+      );
 
       const education = await callRoute(
         post,
@@ -2331,8 +2373,10 @@ describe("chatbot route executable safety boundary", () => {
       const educationSource = education.payload.sources.find(({ article }) =>
         /第12条/.test(article),
       );
-      expect(educationSource?.paragraph).toBe("第1項");
-      expect(educationSource?.snippet).toMatch(/第1項.*第2項.*第二種/);
+      expect(educationSource?.paragraph).toBe("第1項・第2項");
+      expect(educationSource?.snippet).toMatch(
+        /第1項[\s\S]*第2項[\s\S]*第二種/,
+      );
 
       const heat = await callRoute(
         post,
@@ -2367,7 +2411,7 @@ describe("chatbot route executable safety boundary", () => {
       );
       expect(explicitSecondSource?.paragraph).toBe("第2項");
       expect(explicitSecondSource?.snippet).toMatch(
-        /第1項（第一種）第1号.*第2号.*第3号.*第4号.*第5号.*第2項.*第1号、第2号及び第5号.*第3号・第4号は共通/,
+        /前項の規定[\s\S]*第二種酸素欠乏危険作業[\s\S]*第一号[\s\S]*酸素欠乏等[\s\S]*第二号及び第五号[\s\S]*酸素欠乏症等/,
       );
 
       const secondEducationH2s = await callRoute(
@@ -2393,7 +2437,9 @@ describe("chatbot route executable safety boundary", () => {
         secondEducationH2s.payload.sources.find(({ article }) =>
           /第12条/.test(article),
         )?.snippet,
-      ).toMatch(/第2項.*第1号、第2号及び第5号/);
+      ).toMatch(
+        /第2項[\s\S]*第一号[\s\S]*第二号及び第五号[\s\S]*読み替える/,
+      );
 
       const commonEducationSubjects = await callRoute(
         post,
@@ -2414,7 +2460,7 @@ describe("chatbot route executable safety boundary", () => {
       expect(commonSubjectsSource?.paragraph).toBe("第1項・第2項");
       expect(commonSubjectsSource?.item).toBe("第3号・第4号");
       expect(commonSubjectsSource?.snippet).toMatch(
-        /第2項.*第1号、第2号及び第5号.*第3号・第4号は共通/,
+        /第1項[\s\S]*空気呼吸器等の使用の方法[\s\S]*事故の場合の退避及び救急そ生[\s\S]*第2項[\s\S]*前項の規定[\s\S]*第二号及び第五号/,
       );
 
       const kanjiCommonEducationSubjects = await callRoute(
@@ -2435,7 +2481,7 @@ describe("chatbot route executable safety boundary", () => {
         item: "第3号・第4号",
       });
       expect(kanjiCommonSource?.snippet).toMatch(
-        /第2項.*第1号、第2号及び第5号.*第3号・第4号は共通/,
+        /第1項[\s\S]*空気呼吸器等の使用の方法[\s\S]*事故の場合の退避及び救急そ生[\s\S]*第2項[\s\S]*前項の規定[\s\S]*第二号及び第五号/,
       );
 
       for (const query of [
@@ -2460,7 +2506,7 @@ describe("chatbot route executable safety boundary", () => {
           item: "第3号・第4号",
         });
         expect(commonSynonymSource?.snippet).toMatch(
-          /第2項.*第1号、第2号及び第5号.*第3号・第4号は共通/,
+          /第1項[\s\S]*空気呼吸器等の使用の方法[\s\S]*事故の場合の退避及び救急そ生[\s\S]*第2項[\s\S]*前項の規定[\s\S]*第二号及び第五号/,
         );
       }
 
@@ -2509,7 +2555,8 @@ describe("chatbot route executable safety boundary", () => {
       expect(
         h2s.payload.sources.some(
           ({ article, snippet }) =>
-            /第5条/.test(article) && /100万分の10以下/.test(snippet ?? ""),
+            /第5条/.test(article) &&
+            /(?:百万分の十|100万分の10)以下/.test(snippet ?? ""),
         ),
       ).toBe(true);
 
@@ -2674,7 +2721,7 @@ describe("chatbot route executable safety boundary", () => {
         ["何項？", /安衛法59条(?:第)?3項/],
         ["何号？", /安衛則36条4号/],
         ["公式原文は？", /公式原文/],
-        ["告示は？", /関連告示.*含めていません/],
+        ["告示は？", /特別教育規程/],
         ["例外は？", /対地電圧50V以下/],
         ["いつから？", /開始日は一つではありません/],
       ] as const;
@@ -2693,7 +2740,7 @@ describe("chatbot route executable safety boundary", () => {
         expectAnswerFirst(result.payload);
         expect(result.payload.substantiveAnswer, message).toMatch(expected);
         expect(result.payload.context).toMatchObject({
-          workType: "電気作業",
+          topicDomain: "electrical",
           equipment: "電気設備",
         });
         expect(result.payload.answer).not.toMatch(/酸欠|有機溶剤|石綿/);
@@ -2721,7 +2768,7 @@ describe("chatbot route executable safety boundary", () => {
         first.payload.context,
       );
       expectAnswerFirst(second.payload);
-      expect(second.payload.context?.workType).toBe(
+      expect(second.payload.context?.equipment).toBe(
         "労働安全衛生法 安全管理者の選任義務",
       );
 
@@ -2732,8 +2779,8 @@ describe("chatbot route executable safety boundary", () => {
           clarification:
             "作業主任者の要否を確認するため、実際の作業名や扱う物質・設備を教えてください。",
           expectedContext: {
-            qualification: "作業主任者",
-            role: "作業主任者",
+            qualificationType: "work-supervisor",
+            roleType: "work-supervisor",
           },
         },
         {
@@ -2741,14 +2788,14 @@ describe("chatbot route executable safety boundary", () => {
           marker: "監視人",
           clarification:
             "監視人の要否を確認するため、実際の作業名と作業場所を教えてください。",
-          expectedContext: { role: "監視人" },
+          expectedContext: { roleType: "monitor" },
         },
         {
           message: "作業指揮者は必要？",
           marker: "作業指揮者",
           clarification:
             "作業指揮者の要否を確認するため、実際の作業名と使用する設備を教えてください。",
-          expectedContext: { role: "作業指揮者" },
+          expectedContext: { roleType: "work-leader" },
         },
       ]) {
         const third = await callRoute(
@@ -2767,7 +2814,7 @@ describe("chatbot route executable safety boundary", () => {
         expect(third.payload.substantiveAnswer).toContain(testCase.marker);
         expect(third.payload.answer).not.toContain("安全管理者");
         expect(third.payload.context).toMatchObject(testCase.expectedContext);
-        expect(third.payload.context?.workType).toBeUndefined();
+        expect(third.payload.context?.equipment).toBeUndefined();
         expect(third.payload.clarificationQuestion).toBe(
           testCase.clarification,
         );
@@ -2797,8 +2844,9 @@ describe("chatbot route executable safety boundary", () => {
         /技能講習.*一律に満たす制度ではありません/,
       );
       expect(trainingFollowup.payload.context).toMatchObject({
-        workType: "労働安全衛生法 安全管理者の選任義務",
-        qualification: "技能講習",
+        topicDomain: "general",
+        equipment: "労働安全衛生法 安全管理者の選任義務",
+        qualificationType: "skills-training",
       });
       expect(
         trainingFollowup.payload.sources.some(
@@ -2847,7 +2895,7 @@ describe("chatbot route executable safety boundary", () => {
         expect(result.payload.substantiveAnswer).not.toMatch(
           testCase.staleText,
         );
-        expect(result.payload.context?.workType).toBeUndefined();
+        expect(result.payload.context).not.toHaveProperty("workType");
         expect(result.payload.clarificationQuestion).toBe(
           testCase.clarification,
         );
@@ -2915,9 +2963,9 @@ describe("chatbot route executable safety boundary", () => {
       );
       expectAnswerFirst(forkliftController.payload);
       expect(forkliftController.payload.context).toMatchObject({
-        workType: "フォークリフト運転",
-        equipment: "フォークリフト",
-        role: "作業指揮者",
+        topicDomain: "forklift",
+        equipment: "フォークリフト運転",
+        roleType: "work-leader",
       });
       expect(forkliftController.payload.substantiveAnswer).toContain(
         "作業指揮者",
@@ -2935,7 +2983,7 @@ describe("chatbot route executable safety boundary", () => {
         /前の会話内容を確認できない|文脈を推測/,
       );
       expect(openController.payload.context).toMatchObject({
-        role: "作業指揮者",
+        roleType: "work-leader",
       });
 
       const unrelatedTopic = await callRoute(
@@ -2950,10 +2998,10 @@ describe("chatbot route executable safety boundary", () => {
       );
       expectAnswerFirst(unrelatedTopic.payload);
       expect(unrelatedTopic.payload.context).toMatchObject({
-        workType: "有機溶剤業務",
-        equipment: "有機溶剤",
+        topicDomain: "organic-solvent",
+        equipment: "有機溶剤業務",
       });
-      expect(unrelatedTopic.payload.context?.role).toBeUndefined();
+      expect(unrelatedTopic.payload.context?.roleType).toBeUndefined();
       expect(unrelatedTopic.payload.substantiveAnswer).toMatch(/換気|局所排気/);
       expect(
         unrelatedTopic.payload.sources.some(
@@ -2974,9 +3022,9 @@ describe("chatbot route executable safety boundary", () => {
       );
       expectAnswerFirst(controllerCondition.payload);
       expect(controllerCondition.payload.context).toMatchObject({
-        workType: "フォークリフト運転",
-        equipment: "フォークリフト",
-        role: "作業指揮者",
+        topicDomain: "forklift",
+        equipment: "フォークリフト運転",
+        roleType: "work-leader",
       });
       expect(controllerCondition.payload.substantiveAnswer).toContain(
         "作業指揮者",
@@ -3001,9 +3049,9 @@ describe("chatbot route executable safety boundary", () => {
         { workType: "電気作業", equipment: "電気設備", qualification: "資格" },
       );
       expect(future.payload.context).toMatchObject({
-        workType: "電気作業",
+        topicDomain: "electrical",
         equipment: "電気設備",
-        targetDate: "2027-01-01",
+        workDate: "2027-01-01",
       });
 
       const followup = await callRoute(
@@ -3015,10 +3063,10 @@ describe("chatbot route executable safety boundary", () => {
       );
       expectAnswerFirst(followup.payload);
       expect(followup.payload.context).toMatchObject({
-        workType: "電気作業",
+        topicDomain: "electrical",
         equipment: "電気設備",
-        qualification: "作業主任者",
-        targetDate: "2027-01-01",
+        qualificationType: "work-supervisor",
+        workDate: "2027-01-01",
       });
       expect(followup.payload.substantiveAnswer).toMatch(
         /回答を保留|確認できない/,
@@ -3098,13 +3146,14 @@ describe("chatbot route executable safety boundary", () => {
           testCase.context,
         );
         expectAnswerFirst(result.payload);
-        expect(result.payload.context?.workType).toBe(
+        expect(result.payload.context?.equipment).toBe(
           testCase.expectedWorkType,
         );
         expect(
           result.payload.sources.some(({ article }) =>
             testCase.expectedArticle.test(article),
           ),
+          testCase.initial,
         ).toBe(true);
         expect(
           result.payload.sources.some(({ article }) =>
@@ -3122,7 +3171,7 @@ describe("chatbot route executable safety boundary", () => {
         { role: "user", content: "足場の手すり高さは？" },
       ]);
       expectAnswerFirst(harness.payload);
-      expect(harness.payload.context?.equipment).toBe("墜落制止用器具");
+      expect(harness.payload.context?.equipment).toBe("墜落制止用器具使用");
       expect(harness.payload.substantiveAnswer).toContain("フルハーネス");
       expect(harness.payload.substantiveAnswer).not.toContain("85cm");
 
@@ -3130,7 +3179,7 @@ describe("chatbot route executable safety boundary", () => {
         { role: "user", content: "移動式クレーンの資格は？" },
       ]);
       expectAnswerFirst(sling.payload);
-      expect(sling.payload.context?.workType).toBe("玉掛け");
+      expect(sling.payload.context?.equipment).toBe("玉掛け");
       expect(sling.payload.substantiveAnswer).toContain("玉掛け");
     },
   );
@@ -3209,8 +3258,9 @@ describe("chatbot route executable safety boundary", () => {
       });
 
       expect(oxygenEducation.payload.context).toMatchObject({
-        workType: "酸素欠乏危険作業",
-        qualification: "特別教育",
+        topicDomain: "oxygen-deficiency",
+        equipment: "酸素欠乏危険作業",
+        qualificationType: "special-education",
       });
       for (const oxygenEducationFollowup of [
         {
@@ -3270,7 +3320,7 @@ describe("chatbot route executable safety boundary", () => {
         scaffoldInspectionInitial.payload.context,
       );
       expectAnswerFirst(scaffoldInspectionRecord.payload);
-      expect(scaffoldInspectionRecord.payload.context?.workType).toBe(
+      expect(scaffoldInspectionRecord.payload.context?.equipment).toBe(
         "足場作業",
       );
       expect(scaffoldInspectionRecord.payload.substantiveAnswer).toMatch(
@@ -3341,8 +3391,9 @@ describe("chatbot route executable safety boundary", () => {
         );
         expectAnswerFirst(oxygenInstructor.payload);
         expect(oxygenInstructor.payload.context).toMatchObject({
-          workType: "酸素欠乏危険作業",
-          qualification: "特別教育",
+          topicDomain: "oxygen-deficiency",
+          equipment: "酸素欠乏危険作業",
+          qualificationType: "special-education",
         });
         expect(oxygenInstructor.payload.substantiveAnswer).toMatch(
           /法的義務を負うのは事業者/,
@@ -3486,7 +3537,7 @@ describe("chatbot route executable safety boundary", () => {
         expect(forklift.payload.substantiveAnswer).toMatch(
           forkliftFollowup.expected,
         );
-        expect(forklift.payload.context?.workType).toBe("フォークリフト運転");
+        expect(forklift.payload.context?.equipment).toBe("フォークリフト運転");
       }
 
       const genericForkliftInitial = await callRoute(
@@ -3519,7 +3570,7 @@ describe("chatbot route executable safety boundary", () => {
         expect(followup.payload.substantiveAnswer).toMatch(
           genericForkliftFollowup.expected,
         );
-        expect(followup.payload.context?.workType).toBe("フォークリフト運転");
+        expect(followup.payload.context?.equipment).toBe("フォークリフト運転");
       }
     },
   );

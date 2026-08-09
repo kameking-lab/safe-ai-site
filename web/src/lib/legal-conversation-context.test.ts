@@ -368,15 +368,15 @@ describe("法令対話のmemory-only文脈", () => {
   });
 
   it.each([
-    ["低圧の電気作業の資格は？", "低圧"],
-    ["高圧の充電部に近づく作業です", "高圧"],
-    ["特高の活線作業です", "特別高圧"],
+    ["低圧の電気作業の資格は？", "低圧", "電気設備"],
+    ["高圧の充電部に近づく作業です", "高圧", "充電電路"],
+    ["特高の活線作業です", "特別高圧", "電気設備"],
   ])(
     "電気作業と電圧区分だけを安全な文脈へ保持する: %s",
-    (input, voltageClass) => {
+    (input, voltageClass, equipment) => {
       expect(extractLegalConversationContext(input)).toMatchObject({
         workType: "電気作業",
-        equipment: "電気設備",
+        equipment,
         voltageClass,
       });
     },
@@ -414,11 +414,171 @@ describe("法令対話のmemory-only文脈", () => {
     });
     const clarification = nextLegalClarification(result.query);
     expect(clarification?.options).toEqual([
-      "配線工事",
-      "充電部・近接作業",
-      "操作・点検",
+      "停電して扱う",
+      "高圧・特高の活線・近接",
+      "どちらでもない",
     ]);
     expect(clarification?.options.join(" ")).not.toMatch(/酸欠|有機溶剤|石綿/);
+  });
+
+  it.each([
+    [
+      "盤を開けてテスターを当てる",
+      "100V",
+      "tester-measurement",
+      "低圧",
+    ],
+    [
+      "電源を入れるだけ",
+      "充電部分は露出していない",
+      "breaker-operation",
+      undefined,
+    ],
+  ])(
+    "電気の短い条件follow-upで直前の行為を保持する: %s → %s",
+    (initial, message, workAction, voltageClass) => {
+      const result = resolveLegalConversationQuery({
+        message,
+        context: extractLegalConversationContext(initial),
+      });
+
+      expect(result.usedHistory).toBe(true);
+      expect(result.context).toMatchObject({
+        topicDomain: "electrical",
+        workAction,
+        ...(voltageClass ? { voltageClass } : {}),
+      });
+      expect(result.query).toContain("電気作業");
+    },
+  );
+
+  it("盤内測定で100V確認後は電圧を再質問せず充電状態だけを聞く", () => {
+    const result = resolveLegalConversationQuery({
+      message: "100V",
+      context: extractLegalConversationContext(
+        "盤を開けてテスターを当てる",
+      ),
+    });
+    const clarification = nextLegalClarification(result.query);
+
+    expect(result.context).toMatchObject({
+      topicDomain: "electrical",
+      workAction: "tester-measurement",
+      voltageClass: "低圧",
+    });
+    expect(clarification).toEqual({
+      question: "測定時は充電中ですか、それとも停電済みですか？",
+      options: ["充電中", "停電済み"],
+    });
+    expect(
+      `${clarification?.question} ${clarification?.options.join(" ")}`,
+    ).not.toMatch(/高圧|特高/);
+  });
+
+  it("閉鎖状態を確認済みなら露出型を再質問せず電圧だけを聞く", () => {
+    const result = resolveLegalConversationQuery({
+      message: "充電部分は露出していない",
+      context: extractLegalConversationContext("電源を入れるだけ"),
+    });
+    const clarification = nextLegalClarification(result.query);
+
+    expect(result.context).toMatchObject({
+      topicDomain: "electrical",
+      workAction: "breaker-operation",
+      confirmedChoices: ["充電部分は露出していない"],
+    });
+    expect(clarification).toEqual({
+      question:
+        "操作対象は100・200Vの低圧設備ですか、それとも高圧設備ですか？",
+      options: ["100・200Vの低圧", "高圧盤"],
+    });
+    expect(
+      `${clarification?.question} ${clarification?.options.join(" ")}`,
+    ).not.toMatch(/露出型|露出していますか/);
+  });
+
+  it("活線端子の電圧と停電可否をanswer-first後の一問で確認する", () => {
+    const context = extractLegalConversationContext("活線のまま端子を締める");
+    const clarification = nextLegalClarification(
+      resolveLegalConversationQuery({
+        message: "活線のまま端子を締める",
+        context,
+      }).query,
+    );
+
+    expect(context).toMatchObject({
+      topicDomain: "electrical",
+      workAction: "live-work",
+      energizedState: "energized",
+    });
+    expect(clarification).toEqual({
+      question:
+        "端子の電圧（100・200Vの低圧／高圧・特別高圧）と、停電作業へ切り替えられるかを教えてください。",
+      options: [
+        "100・200Vを停電して作業",
+        "100・200Vの活線作業",
+        "高圧・特高の活線作業",
+      ],
+    });
+    expect(clarification?.options).toHaveLength(3);
+  });
+
+  it("100V近接作業は距離でなく347条の作業内容・接触危険を確認する", () => {
+    const clarification = nextLegalClarification(
+      resolveLegalConversationQuery({
+        message: "100Vの充電部付近で作業する",
+      }).query,
+    );
+
+    expect(clarification).toEqual({
+      question:
+        "低圧の充電部付近で、電路・支持物の点検等を行い、充電部へ接触するおそれがありますか？",
+      options: [
+        "低圧充電部に近接し点検・接触のおそれあり",
+        "低圧充電部に近接し点検・接触のおそれなし",
+        "電路・支持物は扱わず付近で別作業",
+      ],
+    });
+    expect(
+      `${clarification?.question} ${clarification?.options.join(" ")}`,
+    ).not.toMatch(/距離/);
+  });
+
+  it("高圧近接作業は接近距離の確認を維持する", () => {
+    const clarification = nextLegalClarification(
+      resolveLegalConversationQuery({
+        message: "高圧線の近くで点検する",
+      }).query,
+    );
+
+    expect(clarification?.question).toMatch(/高圧・特別高圧.*最短距離/);
+    expect(clarification?.options.join(" ")).toMatch(/高圧線との距離/);
+  });
+
+  it("高圧受電設備の主任技術者follow-upで低圧を再質問しない", () => {
+    const result = resolveLegalConversationQuery({
+      message: "主任技術者がいればいい？",
+      context: extractLegalConversationContext("高圧受電設備を点検する"),
+    });
+    const clarification = nextLegalClarification(result.query);
+
+    expect(result.context).toMatchObject({
+      topicDomain: "electrical",
+      workAction: "high-voltage-facility-inspection",
+      voltageClass: "高圧",
+      qualificationType: "chief-electrical-engineer",
+    });
+    expect(clarification).toEqual({
+      question:
+        "実際に高圧受電設備を点検するのは、主任技術者本人ですか、別の作業者ですか？",
+      options: [
+        "主任技術者が高圧受電設備を点検",
+        "別の作業者が高圧受電設備を点検",
+      ],
+    });
+    expect(
+      `${clarification?.question} ${clarification?.options.join(" ")}`,
+    ).not.toMatch(/低圧|100|200/);
   });
 
   it("安全管理者から作業主任者へ明示した話題変更では旧業種文脈を破棄する", () => {
@@ -600,7 +760,7 @@ describe("法令対話のmemory-only文脈", () => {
   it("電気作業の確認済み選択肢だけを最大3件の安全なスロットへ保持する", () => {
     const initial = buildLegalClarification("電気作業の資格は？");
     const result = resolveLegalConversationQuery({
-      message: "充電部・近接作業",
+      message: "配線・充電部を扱う",
       history: [
         { role: "user", content: "電気作業の資格は？" },
         { role: "assistant", content: initial!.question },
@@ -608,8 +768,8 @@ describe("法令対話のmemory-only文脈", () => {
     });
 
     expect(result.answeredClarification).toEqual(initial);
-    expect(result.context.confirmedChoices).toEqual(["充電部・近接作業"]);
-    expect(result.query).toContain("確認済み選択肢:充電部・近接作業");
+    expect(result.context.confirmedChoices).toEqual(["配線・充電部を扱う"]);
+    expect(result.query).toContain("確認済み選択肢:配線・充電部を扱う");
     expect(nextLegalClarification(result.query, initial!)).not.toEqual(initial);
   });
 
@@ -935,8 +1095,8 @@ describe("曖昧質問の確認", () => {
   it("電気作業は目的を示す一問とcompactな3選択肢にする", () => {
     expect(buildLegalClarification("電気作業の資格は？")).toEqual({
       question:
-        "必要な資格・教育や作業主任者の要否を絞るため、実際の作業はどれに近いですか？",
-      options: ["配線工事", "充電部・近接作業", "操作・点検"],
+        "実際にするのは、盤外から見るだけ、盤を開けて測る、配線や充電部を扱う、のどれで、100・200Vか高圧設備か分かりますか？",
+      options: ["見るだけ", "盤を開けて測定", "配線・充電部を扱う"],
     });
   });
 

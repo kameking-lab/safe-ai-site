@@ -39,6 +39,12 @@ const auditChildEnv = {
   RAG_100Q_FRESH_REPORT_PATH:
     process.env.RAG_100Q_FRESH_REPORT_PATH ??
     resolve(evidenceRoot, "chatbot-rag-100q-fresh-current.json"),
+  LEGAL_RAG_EVALUATION_CSV_PATH:
+    process.env.LEGAL_RAG_EVALUATION_CSV_PATH ??
+    resolve(evidenceRoot, "legal-rag-evaluation.csv"),
+  LEGAL_RAG_EVALUATION_SUMMARY_PATH:
+    process.env.LEGAL_RAG_EVALUATION_SUMMARY_PATH ??
+    resolve(evidenceRoot, "legal-rag-evaluation-summary.json"),
 };
 
 const suitesByGate = {

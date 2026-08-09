@@ -16,6 +16,7 @@ vi.mock("../route", async (importOriginal) => {
 
 import { POST } from "./route";
 import { __resetRateLimitForTests } from "@/lib/chatbot-rate-limit";
+import { PUBLIC_LEGAL_CONVERSATION_CONTEXT_KEYS } from "@/lib/legal-conversation-public-context";
 
 function formRequest(
   message: string,
@@ -55,6 +56,17 @@ function hiddenState(html: string): string {
 function hiddenContext(html: string): string {
   const state = JSON.parse(hiddenState(html)) as { context?: unknown };
   return JSON.stringify(state.context ?? {});
+}
+
+function expectPublicContextOnly(context: unknown) {
+  expect(context).toBeTypeOf("object");
+  expect(
+    Object.keys(context as Record<string, unknown>).every((key) =>
+      PUBLIC_LEGAL_CONVERSATION_CONTEXT_KEYS.includes(
+        key as (typeof PUBLIC_LEGAL_CONVERSATION_CONTEXT_KEYS)[number],
+      ),
+    ),
+  ).toBe(true);
 }
 
 describe("JavaScript無効時の法令対話", () => {
@@ -102,12 +114,12 @@ describe("JavaScript無効時の法令対話", () => {
     expect((chipMarkup.match(/<button/g) ?? []).length).toBeLessThanOrEqual(3);
   });
 
-  it("熱中症回答の確認済み通達とリーフレットを根拠後のdetailsへ表示する", async () => {
+  it("熱中症回答の条文・確認済み通達・リーフレットを1つの根拠detailsへ表示する", async () => {
     const response = await POST(formRequest("熱中症の報告体制は義務？"));
     const html = await response.text();
     const answerIndex = html.indexOf('<p class="answer">');
     const evidenceIndex = html.indexOf("<summary>根拠 ");
-    const materialsIndex = html.indexOf("<summary>関連公式資料 ");
+    const materialsIndex = html.indexOf("関連公式資料 3件</h2>");
 
     expect(response.status).toBe(200);
     expect(answerIndex).toBeGreaterThanOrEqual(0);
@@ -121,9 +133,8 @@ describe("JavaScript無効時の法令対話", () => {
     expect(html).toContain(
       'href="https://www.mhlw.go.jp/content/11303000/001490911.pdf"',
     );
-    expect(
-      html.match(/<summary>関連公式資料 3件<\/summary>/g) ?? [],
-    ).toHaveLength(1);
+    expect(html.match(/<details>/g) ?? []).toHaveLength(1);
+    expect(html.match(/<summary>根拠 /g) ?? []).toHaveLength(1);
     expect(html).not.toContain("<details open");
   });
 
@@ -206,15 +217,110 @@ describe("JavaScript無効時の法令対話", () => {
     expect(response.headers.get("x-ai-used")).toBe("false");
   });
 
+  it("新契約を正本にanswer-first表示し、確認1件・候補3件・根拠1折畳みに制限する", async () => {
+    chatbotRouteMock.post.mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          answer: "旧統合回答",
+          directAnswer:
+            "見るだけの点検なら、それだけで一律の国家資格が必要とは限りません。",
+          substantiveAnswer: "表示してはいけない旧本文",
+          assumptions: ["低圧設備を前提とします。"],
+          importantConditions: ["盤を開けるか", "充電部へ近づくか"],
+          conditions: ["表示してはいけない旧条件"],
+          clarificationQuestion:
+            "実際に行うのは見るだけですか？\n盤を開けますか？",
+          quickReplies: [
+            { label: "見るだけ", prompt: "見るだけ" },
+            { label: "盤を開けて測定", prompt: "盤を開けて測定" },
+            { label: "配線を扱う", prompt: "配線を扱う" },
+            { label: "表示しない4件目", prompt: "表示しない4件目" },
+          ],
+          citations: [
+            {
+              lawShort: "安衛則",
+              fullName: "労働安全衛生規則",
+              articleNum: "第36条",
+              articleTitle: "特別教育を必要とする業務",
+              issuer: "厚生労働省",
+              effectiveDate: "2026-08-09",
+              searchHref: "/law-search?q=安衛則第36条",
+              egovHref: "https://laws.e-gov.go.jp/law/347M50002000032",
+            },
+          ],
+          sources: [
+            {
+              law: "労働安全衛生規則",
+              lawShort: "安衛則",
+              article: "第36条",
+              paragraph: "第4号",
+              applicationStatus: "current",
+              text: "低圧の充電電路の敷設若しくは修理の業務",
+              url: "https://laws.e-gov.go.jp/law/347M50002000032",
+            },
+          ],
+          source_type: "rag",
+          confidence: "high",
+          effectiveDateStatus: {
+            asOf: "2026-08-09",
+            status: "current",
+            label: "2026年8月9日時点で施行中",
+          },
+          requiresHumanReview: true,
+        }),
+        {
+          status: 200,
+          headers: {
+            "content-type": "application/json",
+            "X-AI-Used": "false",
+          },
+        },
+      ),
+    );
+
+    const response = await POST(formRequest("電気の点検に資格いる？"));
+    const html = await response.text();
+    const answerIndex = html.indexOf("見るだけの点検なら");
+    const questionIndex = html.indexOf("実際に行うのは見るだけですか？");
+    const evidenceIndex = html.indexOf("<summary>根拠 1件</summary>");
+
+    expect(response.status).toBe(200);
+    expect(answerIndex).toBeGreaterThanOrEqual(0);
+    expect(questionIndex).toBeGreaterThan(answerIndex);
+    expect(evidenceIndex).toBeGreaterThan(questionIndex);
+    expect(html).toContain("低圧設備を前提とします。");
+    expect(html).toContain("盤を開けるか");
+    expect(html).toContain("充電部へ近づくか");
+    expect(html).not.toContain("表示してはいけない旧本文");
+    expect(html).not.toContain("表示してはいけない旧条件");
+    expect(html).not.toContain("盤を開けますか？");
+    expect(html).toContain("回答基準日 2026-08-09");
+    expect(html).toContain("2026年8月9日時点で施行中");
+    expect(html).toContain("確信度 高");
+    expect(html).toContain("発出機関 厚生労働省");
+    expect(html).toContain("第36条 第4号");
+    expect(html).toContain("低圧の充電電路の敷設若しくは修理の業務");
+    expect(html).toContain(
+      'href="https://laws.e-gov.go.jp/law/347M50002000032"',
+    );
+    expect(html.match(/<summary>根拠 /g) ?? []).toHaveLength(1);
+    const chipMarkup =
+      html.match(/<div class="chips"[\s\S]*?<\/div>/)?.[0] ?? "";
+    expect(chipMarkup.match(/<button/g) ?? []).toHaveLength(3);
+    expect(chipMarkup).not.toContain("表示しない4件目");
+  });
+
   it("許可済み条件だけをhiddenで引き継ぎ、短いfollow-upでも電気文脈を維持する", async () => {
     const first = await POST(formRequest("電気作業の資格は？"));
     const firstHtml = await first.text();
     const state = hiddenState(firstHtml);
     const context = hiddenContext(firstHtml);
-    expect(JSON.parse(context)).toMatchObject({
-      workType: "電気作業",
+    const parsedContext = JSON.parse(context) as unknown;
+    expectPublicContextOnly(parsedContext);
+    expect(parsedContext).toMatchObject({
+      topicDomain: "electrical",
       equipment: "電気設備",
-      qualification: "資格",
+      qualificationType: "qualification-general",
     });
     expect(context).not.toContain("電気作業の資格は？");
 
@@ -223,7 +329,9 @@ describe("JavaScript無効時の法令対話", () => {
     expect(second.status).toBe(200);
     expect(secondHtml).toContain("電気作業");
     expect(secondHtml).toContain("作業主任者");
-    expect(secondHtml).not.toMatch(/酸欠|有機溶剤|石綿/);
+    expect(secondHtml.split("<details>", 1)[0]).not.toMatch(
+      /酸欠|有機溶剤|石綿/,
+    );
     const displayedSourceNumbers = [
       ...secondHtml.matchAll(/<li><strong>［(\d+)］/g),
     ].map((match) => Number(match[1]));
@@ -238,7 +346,7 @@ describe("JavaScript無効時の法令対話", () => {
     );
     const pronounHtml = await pronoun.text();
     expect(pronoun.status).toBe(200);
-    expect(pronounHtml).toContain("電気作業");
+    expect(pronounHtml).toMatch(/低圧設備|電気工事士/);
     expect(pronounHtml).not.toContain("前の会話内容を確認できない");
   });
 
@@ -386,6 +494,41 @@ describe("JavaScript無効時の法令対話", () => {
     }
   });
 
+  it("電事法43条の所管と公式e-Govリンクをno-scriptでも表示する", async () => {
+    const response = await POST(
+      formRequest("電気主任技術者がいれば作業できる？"),
+    );
+    const html = await response.text();
+
+    expect(response.status).toBe(200);
+    expect(html).toMatch(/電気事業法[^<]*第43条/);
+    expect(html).toContain("発出機関 経済産業省");
+    expect(html).toContain(
+      'href="https://laws.e-gov.go.jp/law/339AC0000000170"',
+    );
+  });
+
+  it("電工士法本体・施行令・施行規則の所管と公式e-Govリンクをno-scriptでも表示する", async () => {
+    const response = await POST(formRequest("停電して配線を外す"));
+    const html = await response.text();
+
+    expect(response.status).toBe(200);
+    expect(html).toContain("電気工事士法");
+    expect(html).toContain("電気工事士法施行令");
+    expect(html).toContain("電気工事士法施行規則");
+    expect(html).toContain("発出機関 内閣（経済産業省所管）");
+    expect(html.match(/発出機関 経済産業省/g)?.length ?? 0).toBeGreaterThanOrEqual(
+      2,
+    );
+    for (const url of [
+      "https://laws.e-gov.go.jp/law/335AC0000000139",
+      "https://laws.e-gov.go.jp/law/335CO0000000260",
+      "https://laws.e-gov.go.jp/law/335M50000400097",
+    ]) {
+      expect(html).toContain(`href="${url}"`);
+    }
+  });
+
   it("点検記録・教育時期・一般資格の短いfollow-upを直前制度へ結合する", async () => {
     const scaffoldInitial = await POST(formRequest("足場の点検は必要？"));
     const scaffoldState = hiddenState(await scaffoldInitial.text());
@@ -456,18 +599,36 @@ describe("JavaScript無効時の法令対話", () => {
       "フォークリフトを使う作業です",
       "作業指揮者",
       "フォークリフト",
+      "roleType",
+      "work-leader",
     ],
-    ["監視人は必要？", "酸欠作業です", "監視人", "酸素欠乏"],
-    ["作業主任者は必要？", "有機溶剤作業です", "作業主任者", "有機溶剤"],
+    [
+      "監視人は必要？",
+      "酸欠作業です",
+      "監視人",
+      "酸素欠乏",
+      "roleType",
+      "monitor",
+    ],
+    [
+      "作業主任者は必要？",
+      "有機溶剤作業です",
+      "作業主任者",
+      "有機溶剤",
+      "qualificationType",
+      "work-supervisor",
+    ],
     [
       "技能講習は必要？",
       "フォークリフトを運転します",
       "技能講習",
       "フォークリフト",
+      "qualificationType",
+      "skills-training",
     ],
   ])(
     "選択肢のない確認へ自由入力した作業条件をno-scriptでも結合する: %s → %s",
-    async (initial, condition, marker, topic) => {
+    async (initial, condition, marker, topic, publicField, publicValue) => {
       const first = await POST(formRequest(initial));
       const firstHtml = await first.text();
       const state = hiddenState(firstHtml);
@@ -481,16 +642,18 @@ describe("JavaScript無効時の法令対話", () => {
       expect(secondHtml).toContain(topic);
       const nextState = JSON.parse(hiddenState(secondHtml)) as {
         context: {
-          workType?: string;
+          topicDomain?: string;
           equipment?: string;
-          role?: string;
-          qualification?: string;
+          roleType?: string;
+          qualificationType?: string;
         };
       };
-      expect(nextState.context.workType).toContain(topic);
-      expect(nextState.context.role ?? nextState.context.qualification).toBe(
-        marker,
-      );
+      expect(nextState.context.equipment).toContain(topic);
+      expect(
+        nextState.context[
+          publicField as "roleType" | "qualificationType"
+        ],
+      ).toBe(publicValue);
     },
   );
 
@@ -500,8 +663,7 @@ describe("JavaScript無効時の法令対話", () => {
     const state = hiddenState(firstHtml);
     const parsed = JSON.parse(state) as {
       v: number;
-      context: { workType?: string };
-      history?: Array<{ role: string; content: string }>;
+      context: { topicDomain?: string; equipment?: string };
     };
 
     expect(first.status).toBe(200);
@@ -509,15 +671,12 @@ describe("JavaScript無効時の法令対話", () => {
     expect(firstHtml).toContain('value="建設業"');
     expect(parsed).toMatchObject({
       v: 1,
-      context: { workType: "労働安全衛生法 安全管理者の選任義務" },
-      history: [
-        { role: "user", content: "安全管理者は必要？" },
-        {
-          role: "assistant",
-          content: "事業場の主な業種はどれですか？",
-        },
-      ],
+      context: {
+        topicDomain: "general",
+        equipment: "労働安全衛生法 安全管理者の選任義務",
+      },
     });
+    expect(parsed).not.toHaveProperty("history");
 
     const second = await POST(
       formRequest(
@@ -543,7 +702,10 @@ describe("JavaScript無効時の法令対話", () => {
     const secondState = hiddenState(secondHtml);
     expect(JSON.parse(secondState)).toMatchObject({
       v: 1,
-      context: { workType: "労働安全衛生法 安全管理者の選任義務" },
+      context: {
+        topicDomain: "general",
+        equipment: "労働安全衛生法 安全管理者の選任義務",
+      },
       industry: "建設業",
     });
 
@@ -561,7 +723,10 @@ describe("JavaScript無効時の法令対話", () => {
 
     const conditionsState = hiddenState(conditionsHtml);
     expect(JSON.parse(conditionsState)).toMatchObject({
-      context: { workType: "労働安全衛生法 安全管理者の選任義務" },
+      context: {
+        topicDomain: "general",
+        equipment: "労働安全衛生法 安全管理者の選任義務",
+      },
       industry: "建設業",
     });
 
@@ -582,21 +747,21 @@ describe("JavaScript無効時の法令対話", () => {
         clarification:
           "作業主任者の要否を確認するため、実際の作業名や扱う物質・設備を教えてください。",
         expectedContext: {
-          qualification: "作業主任者",
-          role: "作業主任者",
+          qualificationType: "work-supervisor",
+          roleType: "work-supervisor",
         },
       },
       {
         message: "監視人は必要？",
         clarification:
           "監視人の要否を確認するため、実際の作業名と作業場所を教えてください。",
-        expectedContext: { role: "監視人" },
+        expectedContext: { roleType: "monitor" },
       },
       {
         message: "作業指揮者は必要？",
         clarification:
           "作業指揮者の要否を確認するため、実際の作業名と使用する設備を教えてください。",
-        expectedContext: { role: "作業指揮者" },
+        expectedContext: { roleType: "work-leader" },
       },
     ]) {
       const roleLeap = await POST(
@@ -610,11 +775,17 @@ describe("JavaScript無効時の法令対話", () => {
       expect(roleLeapHtml, testCase.message).not.toContain('value="有機溶剤"');
       expect(roleLeapHtml, testCase.message).not.toContain('value="石綿"');
       const roleLeapState = JSON.parse(hiddenState(roleLeapHtml)) as {
-        context: { workType?: string; qualification?: string; role?: string };
+        context: {
+          topicDomain?: string;
+          equipment?: string;
+          qualificationType?: string;
+          roleType?: string;
+        };
         industry?: string;
       };
       expect(roleLeapState.context).toMatchObject(testCase.expectedContext);
-      expect(roleLeapState.context.workType).toBeUndefined();
+      expect(roleLeapState.context.topicDomain).toBeUndefined();
+      expect(roleLeapState.context.equipment).toBeUndefined();
       expect(roleLeapState.industry).toBeUndefined();
     }
 
@@ -627,8 +798,9 @@ describe("JavaScript無効時の法令対話", () => {
     expect(trainingHtml).toMatch(/労働安全衛生規則[^<]*第5条/);
     expect(JSON.parse(hiddenState(trainingHtml))).toMatchObject({
       context: {
-        workType: "労働安全衛生法 安全管理者の選任義務",
-        qualification: "技能講習",
+        topicDomain: "general",
+        equipment: "労働安全衛生法 安全管理者の選任義務",
+        qualificationType: "skills-training",
       },
       industry: "建設業",
     });
@@ -914,10 +1086,13 @@ describe("JavaScript無効時の法令対話", () => {
     expect(html).toContain("&lt;script&gt;alert(&#39;xss&#39;)&lt;/script&gt;");
 
     const first = await POST(formRequest("安全管理者は必要？"));
-    const state = JSON.parse(hiddenState(await first.text())) as {
-      history: Array<{ role: string; content: string }>;
-    };
-    state.history[0]!.content += "<img src=x onerror=alert(1)>";
+    const state = JSON.parse(hiddenState(await first.text())) as Record<
+      string,
+      unknown
+    >;
+    state.history = [
+      { role: "user", content: "<img src=x onerror=alert(1)>" },
+    ];
     const tampered = await POST(
       formRequest("建設業", {}, undefined, JSON.stringify(state)),
     );

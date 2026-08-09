@@ -27,12 +27,39 @@ export type LawMetadata = {
  * 該当しないものは LAW_METADATA_FALLBACK を返す。
  */
 export const LAW_METADATA: Record<string, LawMetadata> = {
+  "経産省電工Q&A": {
+    lawShort: "経産省電工Q&A",
+    fullName: "経済産業省 よくある質問（電気工事士）",
+    issuer: "経済産業省",
+    enactedOn: "2018年3月公開（2026年8月9日現行公開確認）",
+  },
+  電事法: {
+    lawShort: "電事法",
+    fullName: "電気事業法",
+    issuer: "経済産業省",
+    enactedOn: "昭和39年7月11日公布",
+    egovLawId: "339AC0000000170",
+  },
   電気工事士法: {
     lawShort: "電気工事士法",
     fullName: "電気工事士法",
     issuer: "経済産業省",
     enactedOn: "昭和35年10月1日施行",
     egovLawId: "335AC0000000139",
+  },
+  電工士法令: {
+    lawShort: "電工士法令",
+    fullName: "電気工事士法施行令",
+    issuer: "内閣（経済産業省所管）",
+    enactedOn: "昭和35年9月30日公布",
+    egovLawId: "335CO0000000260",
+  },
+  電工士法則: {
+    lawShort: "電工士法則",
+    fullName: "電気工事士法施行規則",
+    issuer: "経済産業省",
+    enactedOn: "昭和35年9月30日公布",
+    egovLawId: "335M50000400097",
   },
   安衛法: {
     lawShort: "安衛法",

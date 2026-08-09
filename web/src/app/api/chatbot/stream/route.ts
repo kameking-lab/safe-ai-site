@@ -76,12 +76,14 @@ import { evaluateChatbotSafety } from "@/lib/chatbot-safety";
 import { inspectAiOutbound } from "@/lib/server/ai-outbound-safety";
 import { validateChatbotRequestBoundary } from "@/lib/server/chatbot-request-boundary";
 import {
-  buildUnknownLoadConditionHold,
-  hasLegalConversationContext,
   nextLegalClarification,
   normalizeLegalConversationText,
   resolveLegalConversationQuery,
 } from "@/lib/legal-conversation-context";
+import {
+  hasPublicLegalConversationContext,
+  rehydratePublicLegalConversationContext,
+} from "@/lib/legal-conversation-public-context";
 import {
   buildServiceFirstLegalAnswer,
   buildServiceFirstNoHitAnswer,
@@ -269,7 +271,7 @@ export async function POST(request: Request) {
   const resolvedConversation = resolveLegalConversationQuery({
     message,
     history: Array.isArray(body.history) ? body.history : undefined,
-    context: body.context,
+    context: rehydratePublicLegalConversationContext(body.context),
   });
 
   if (hasFutureLegalPremise(message, legalAnswerNow)) {
@@ -305,17 +307,19 @@ export async function POST(request: Request) {
   }
 
   if (safetyPayload) {
-    return immediateSseResponse({
-      ...safetyPayload,
-      context: resolvedConversation.context,
-    });
+    return immediateSseResponse(
+      finalizeChatbotResponse({
+        ...safetyPayload,
+        context: resolvedConversation.context,
+      }),
+    );
   }
 
   if (
     needsPriorConversationContext(
       message,
       (Array.isArray(body.history) && body.history.length > 0) ||
-        hasLegalConversationContext(body.context),
+        hasPublicLegalConversationContext(body.context),
     )
   ) {
     const payload = finalizeChatbotResponse({
@@ -348,19 +352,6 @@ export async function POST(request: Request) {
   }
 
   const retrievalQuery = resolvedConversation.query;
-  const unknownLoadHold = buildUnknownLoadConditionHold(retrievalQuery);
-  if (unknownLoadHold) {
-    return immediateSseResponse(finalizeChatbotResponse({
-      requiresHumanReview: true,
-      answer: ensureLegalAnswerAsOf(unknownLoadHold, legalAnswerNow),
-      sources: [],
-      source_type: "safety",
-      confidence: "low",
-      safetyKind: "ambiguous",
-      citations: [],
-      context: resolvedConversation.context,
-    }));
-  }
   // A generic "which notice?" clarification is unnecessary when this exact
   // query already resolves to an independently checked official notice.
   const proactiveClarification = verifiedNoticeResolvesSourceGap

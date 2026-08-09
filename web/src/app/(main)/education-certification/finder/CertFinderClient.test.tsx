@@ -1,18 +1,25 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { ReactElement } from "react";
 import {
   QUALIFICATION_FINDER_PATH,
   parseQualificationFinderQuery,
 } from "@/lib/education/qualification-finder-query";
 import { CertFinderClient } from "./CertFinderClient";
+import {
+  TransientQueryBridgeProvider,
+  useTransientQueryBridge,
+} from "@/components/home-safety-cockpit/transient-query-bridge";
 
 const navigation = vi.hoisted(() => ({
   replace: vi.fn(),
+  push: vi.fn(),
 }));
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
     replace: navigation.replace,
+    push: navigation.push,
   }),
 }));
 
@@ -28,15 +35,47 @@ function inputValue(element: HTMLElement): string {
   return (element as HTMLInputElement).value;
 }
 
+function PendingChatQuestionProbe() {
+  const { peekChatQuestion } = useTransientQueryBridge();
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        document.body.dataset.pendingQualificationQuestion =
+          peekChatQuestion()?.question ?? "";
+      }}
+    >
+      一時質問を確認
+    </button>
+  );
+}
+
+function withTransientBridge(ui: ReactElement) {
+  return (
+    <TransientQueryBridgeProvider>
+      {ui}
+      <PendingChatQuestionProbe />
+    </TransientQueryBridgeProvider>
+  );
+}
+
+function renderFinder(ui: ReactElement) {
+  return render(withTransientBridge(ui));
+}
+
 describe("CertFinderClient query hand-off", () => {
   beforeEach(() => {
     navigation.replace.mockReset();
+    navigation.push.mockReset();
+    window.localStorage.clear();
+    window.sessionStorage.clear();
+    delete document.body.dataset.pendingQualificationQuestion;
   });
 
   it("冒頭を短い1主操作に絞り、重複したパンくずを表示しない", () => {
     const initialState = parseQualificationFinderQuery({});
 
-    const { container } = render(
+    const { container } = renderFinder(
       <CertFinderClient
         key={initialState.stateKey}
         initialState={initialState}
@@ -70,7 +109,7 @@ describe("CertFinderClient query hand-off", () => {
       role: "solo",
     });
 
-    render(
+    renderFinder(
       <CertFinderClient
         key={initialState.stateKey}
         initialState={initialState}
@@ -97,7 +136,7 @@ describe("CertFinderClient query hand-off", () => {
   it("現行コーパスで0件のallowlist語を未判定として明示する", () => {
     const initialState = parseQualificationFinderQuery({ q: "HACCP" });
 
-    render(
+    renderFinder(
       <CertFinderClient
         key={initialState.stateKey}
         initialState={initialState}
@@ -116,7 +155,7 @@ describe("CertFinderClient query hand-off", () => {
   it("roleだけの引継ぎでは作業条件不足を保ち、資格不要と確定しない", () => {
     const initialState = parseQualificationFinderQuery({ role: "solo" });
 
-    render(
+    renderFinder(
       <CertFinderClient
         key={initialState.stateKey}
         initialState={initialState}
@@ -133,7 +172,7 @@ describe("CertFinderClient query hand-off", () => {
   it("旧URLのtopicGuideは専用HTMLへ案内し、0件を対策不要としない", () => {
     const initialState = parseQualificationFinderQuery({ q: "熱中症" });
 
-    render(
+    renderFinder(
       <CertFinderClient
         key={initialState.stateKey}
         initialState={initialState}
@@ -152,7 +191,7 @@ describe("CertFinderClient query hand-off", () => {
   it("資格候補から固有の合成KYT問題へ移動できる", () => {
     const initialState = parseQualificationFinderQuery({ q: "足場" });
 
-    render(
+    renderFinder(
       <CertFinderClient
         key={initialState.stateKey}
         initialState={initialState}
@@ -179,7 +218,7 @@ describe("CertFinderClient query hand-off", () => {
   it("未知・改ざん値を入力やDOMへ反映しない", () => {
     const malicious = "<script>private-site-data</script>";
     const initialState = parseQualificationFinderQuery({ q: malicious });
-    const { container } = render(
+    const { container } = renderFinder(
       <CertFinderClient
         key={initialState.stateKey}
         initialState={initialState}
@@ -203,7 +242,7 @@ describe("CertFinderClient query hand-off", () => {
       role: "safety-manager",
     });
 
-    render(
+    renderFinder(
       <CertFinderClient
         key={initialState.stateKey}
         initialState={initialState}
@@ -235,7 +274,7 @@ describe("CertFinderClient query hand-off", () => {
   it("安全なstateKeyの変更でback/forward相当の初期条件を再適用する", () => {
     const first = parseQualificationFinderQuery({ q: "足場" });
     const second = parseQualificationFinderQuery({ q: "石綿" });
-    const { rerender } = render(
+    const { rerender } = renderFinder(
       <CertFinderClient key={first.stateKey} initialState={first} />,
     );
 
@@ -243,12 +282,51 @@ describe("CertFinderClient query hand-off", () => {
       target: { value: "利用者が編集した値" },
     });
     rerender(
-      <CertFinderClient key={second.stateKey} initialState={second} />,
+      withTransientBridge(
+        <CertFinderClient key={second.stateKey} initialState={second} />,
+      ),
     );
 
     expect(
       inputValue(screen.getByRole("textbox", { name: /フリー入力/ })),
     ).toBe("石綿");
     expect(screen.getByText("作業・テーマ: 石綿")).toBeTruthy();
+  });
+
+  it("選択条件をURLやstorageに含めずmemory-onlyでチャットへ渡す", () => {
+    const initialState = parseQualificationFinderQuery({
+      q: "フォークリフト",
+      industry: "transport",
+    });
+    renderFinder(
+      <CertFinderClient
+        key={initialState.stateKey}
+        initialState={initialState}
+      />,
+    );
+
+    fireEvent.change(screen.getByRole("textbox", { name: "機械・設備と能力" }), {
+      target: { value: "最大荷重1.5トン" },
+    });
+    const link = screen.getByRole("link", {
+      name: "この条件で安衛法AIに質問",
+    });
+    expect(link.getAttribute("href")).toBe("/chatbot");
+    expect(link.className).toContain("min-h-11");
+    fireEvent.click(link);
+
+    expect(navigation.push).toHaveBeenCalledWith("/chatbot");
+    expect(JSON.stringify(navigation.push.mock.calls)).not.toContain(
+      "フォークリフト",
+    );
+    fireEvent.click(screen.getByRole("button", { name: "一時質問を確認" }));
+    expect(document.body.dataset.pendingQualificationQuestion).toContain(
+      "フォークリフト",
+    );
+    expect(document.body.dataset.pendingQualificationQuestion).toContain(
+      "最大荷重1.5トン",
+    );
+    expect(window.localStorage.length).toBe(0);
+    expect(window.sessionStorage.length).toBe(0);
   });
 });

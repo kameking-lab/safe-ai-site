@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { TaskPageIntro } from "@/components/task-page-intro";
 import { ContextualNextActions } from "@/components/contextual-next-actions";
+import { TransientChatLink } from "@/components/home-safety-cockpit/transient-chat-link";
 import {
   createCertCandidateResult,
   determineRequiredCerts,
@@ -365,6 +366,45 @@ export function CertFinderClient({
     selectedScenarios.length > 0 ||
     hasAnyCondition;
   const hasAnyInput = hasSearchCriteria || prefill.status !== "none";
+  const chatQuestion = useMemo(() => {
+    if (!hasSearchCriteria) return "";
+    const scenarioLabels = selectedScenarios
+      .map((id) => WORK_SCENARIOS.find((scenario) => scenario.id === id)?.label)
+      .filter((label): label is string => Boolean(label));
+    const categoryLabels = selectedCategories.map(
+      (category) => `業種: ${WORK_CATEGORY_LABELS[category]}`,
+    );
+    const work = [...scenarioLabels, ...selectedWorks, freeText.trim()]
+      .map((value) => value.trim())
+      .filter(
+        (value, index, values) =>
+          Boolean(value) && values.indexOf(value) === index,
+      );
+    const conditionLabels: Array<[keyof QualificationFinderConditions, string]> = [
+      ["equipment", "機械・設備"],
+      ["role", "立場・担当"],
+      ["target", "対象物"],
+      ["height", "高さ"],
+      ["voltage", "電圧・充電状態"],
+    ];
+    const conditionText = [
+      ...categoryLabels,
+      ...conditionLabels
+        .map(([key, label]) =>
+          conditions[key].trim() ? `${label}: ${conditions[key].trim()}` : "",
+        )
+        .filter(Boolean),
+    ].join("、");
+    const target = work.length > 0 ? work.join("、") : "選択した作業";
+    return `${target}に必要な資格・教育を教えて。${conditionText ? `条件は${conditionText}です。` : ""}`;
+  }, [
+    conditions,
+    freeText,
+    hasSearchCriteria,
+    selectedCategories,
+    selectedScenarios,
+    selectedWorks,
+  ]);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -664,6 +704,18 @@ export function CertFinderClient({
             )}
           </section>
         </div>
+        {chatQuestion && (
+          <div className="mt-6 flex flex-wrap items-center gap-2 rounded-xl border border-blue-100 bg-white px-3 py-2 text-xs text-slate-600 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
+            <span>選択した条件を引き継いで会話で確認できます。</span>
+            <TransientChatLink
+              question={chatQuestion}
+              data-qualification-chat-handoff=""
+              className="inline-flex min-h-11 items-center rounded-full border border-blue-200 bg-blue-50 px-3 py-2 font-semibold text-blue-800 hover:bg-blue-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-200"
+            >
+              この条件で安衛法AIに質問
+            </TransientChatLink>
+          </div>
+        )}
         <div className="mt-6">
           <ContextualNextActions
             actions={[

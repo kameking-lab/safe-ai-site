@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import type { AnchorHTMLAttributes, MouseEvent } from "react";
+import { beginTransientChatNavigation } from "@/lib/transient-chat-navigation";
 import { useTransientQueryBridge } from "./transient-query-bridge";
 
 export function TransientChatLink({
@@ -29,11 +30,19 @@ export function TransientChatLink({
     }
     event.preventDefault();
     const pending = stageChatQuestion(question);
-    if (pending) router.push("/chatbot");
+    if (pending) {
+      beginTransientChatNavigation();
+      router.push("/chatbot");
+    }
   };
 
   return (
-    <a href="/chatbot" {...anchorProps} onClick={handleClick}>
+    <a
+      href="/chatbot"
+      data-transient-chat-handoff=""
+      {...anchorProps}
+      onClick={handleClick}
+    >
       {children}
     </a>
   );

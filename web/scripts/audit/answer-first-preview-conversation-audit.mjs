@@ -52,13 +52,23 @@ if (!configuredProtectionBypassSecret?.trim()) {
 }
 const protectionBypassSecret = configuredProtectionBypassSecret.trim();
 
-const outputDirectory = path.resolve(
-  readArgument(
-    "out",
-    "../docs/audits/evidence/answer-first-chatbot-2026-08-03/preview/conversation",
-  ),
-);
 const repositoryRoot = path.resolve(process.cwd(), "..");
+const configuredOutputDirectory = readArgument("out");
+if (
+  !configuredOutputDirectory ||
+  !path.isAbsolute(configuredOutputDirectory)
+) {
+  throw new Error("--out must be an explicit absolute repository-external directory");
+}
+const outputDirectory = path.resolve(configuredOutputDirectory);
+const relativeOutputDirectory = path.relative(repositoryRoot, outputDirectory);
+if (
+  relativeOutputDirectory === "" ||
+  (!relativeOutputDirectory.startsWith(`..${path.sep}`) &&
+    relativeOutputDirectory !== "..")
+) {
+  throw new Error("Preview evidence must remain outside the repository");
+}
 const linkedProject = JSON.parse(
   await readFile(path.join(repositoryRoot, ".vercel", "project.json"), "utf8"),
 );
@@ -710,8 +720,25 @@ const apiEvidencePath = path.join(
 );
 const playwrightLogPath = path.join(outputDirectory, "playwright.log");
 const evaluationLogPath = path.join(outputDirectory, "api-evaluation.log");
+const electricHoldoutEvidencePath = path.join(
+  outputDirectory,
+  "electric-holdout-json-api-preview.json",
+);
+const electricHoldoutBrowserEvidencePath = path.join(
+  outputDirectory,
+  "electric-holdout-browser-sse-preview.json",
+);
+const electricHoldoutLogPath = path.join(
+  outputDirectory,
+  "electric-holdout-preview.log",
+);
+const playwrightOutputDirectory = path.join(
+  outputDirectory,
+  "playwright-artifacts",
+);
 let playwrightResult;
 let evaluationResult;
+let electricHoldoutResult;
 let deploymentMetadata;
 let protectionProbe;
 let getOnlyBoundary;
@@ -723,6 +750,9 @@ try {
       apiEvidencePath,
       playwrightLogPath,
       evaluationLogPath,
+      electricHoldoutEvidencePath,
+      electricHoldoutBrowserEvidencePath,
+      electricHoldoutLogPath,
       path.join(outputDirectory, "preview-conversation-audit.json"),
     ].map((filePath) => unlink(filePath).catch(() => undefined)),
   );
@@ -743,7 +773,10 @@ try {
     [
       playwrightCli,
       "test",
+      "--config=playwright.preview-chatbot.config.ts",
       "e2e/answer-first-chatbot-cases.spec.ts",
+      "e2e/electric-chatbot-conversation.spec.ts",
+      "e2e/electric-chatbot-deployed-holdout.spec.ts",
       "--workers=1",
     ],
     {
@@ -751,11 +784,18 @@ try {
       PLAYWRIGHT_HOST: "127.0.0.1",
       PLAYWRIGHT_REUSE_EXISTING_SERVER: "true",
       ANSWER_FIRST_BROWSER_EVIDENCE_PATH: browserEvidencePath,
+      ELECTRIC_HOLDOUT_BROWSER_EVIDENCE_PATH:
+        electricHoldoutBrowserEvidencePath,
+      ANSWER_FIRST_PLAYWRIGHT_OUTPUT_DIR: playwrightOutputDirectory,
+      // Playwright's AI-copy error snapshot includes the current conversation.
+      // Disable it even on failure so raw synthetic questions never become an
+      // evidence attachment; trace/video/screenshot are also off in the config.
+      PLAYWRIGHT_NO_COPY_PROMPT: "1",
     },
   );
   await writeFile(
     playwrightLogPath,
-    `${playwrightResult.stdout}\n${playwrightResult.stderr}`,
+    `${JSON.stringify({ exitCode: playwrightResult.code })}\n`,
     "utf8",
   );
   if (playwrightResult.code !== 0) {
@@ -768,22 +808,54 @@ try {
     {
       ANSWER_FIRST_BASE_URL: loopbackOrigin,
       ANSWER_FIRST_ROUTE_IDS: "json,legacy",
+      ANSWER_FIRST_API_SAFETY_MODE: "non-pii",
       ANSWER_FIRST_EVIDENCE_PATH: apiEvidencePath,
       ANSWER_FIRST_BROWSER_EVIDENCE_PATH: browserEvidencePath,
     },
   );
   await writeFile(
     evaluationLogPath,
-    `${evaluationResult.stdout}\n${evaluationResult.stderr}`,
+    `${JSON.stringify({ exitCode: evaluationResult.code })}\n`,
     "utf8",
   );
   if (evaluationResult.code !== 0) {
     throw new Error(`Preview API evaluation failed (${evaluationResult.code})`);
   }
 
-  const [browserReport, apiReport] = await Promise.all([
+  electricHoldoutResult = await runChild(
+    process.execPath,
+    [
+      path.resolve("node_modules/vitest/vitest.mjs"),
+      "run",
+      "src/lib/electric-chatbot-deployed-holdout.test.ts",
+      "--maxWorkers=1",
+    ],
+    {
+      ELECTRIC_HOLDOUT_BASE_URL: loopbackOrigin,
+      ELECTRIC_HOLDOUT_EVIDENCE_PATH: electricHoldoutEvidencePath,
+    },
+  );
+  await writeFile(
+    electricHoldoutLogPath,
+    `${JSON.stringify({ exitCode: electricHoldoutResult.code })}\n`,
+    "utf8",
+  );
+  if (electricHoldoutResult.code !== 0) {
+    throw new Error(
+      `Preview electric holdout failed (${electricHoldoutResult.code})`,
+    );
+  }
+
+  const [
+    browserReport,
+    apiReport,
+    electricHoldoutReport,
+    electricHoldoutBrowserReport,
+  ] = await Promise.all([
     readFile(browserEvidencePath, "utf8").then(JSON.parse),
     readFile(apiEvidencePath, "utf8").then(JSON.parse),
+    readFile(electricHoldoutEvidencePath, "utf8").then(JSON.parse),
+    readFile(electricHoldoutBrowserEvidencePath, "utf8").then(JSON.parse),
   ]);
   const runtimeBoundary = await inspectRuntimeBoundary();
   const chatbotPosts = requestLog.filter(
@@ -828,20 +900,58 @@ try {
       ? null
       : "browser-case-coverage",
     apiReport?.fixture?.caseCount === 12 &&
+    apiReport?.fixture?.apiCaseCountPerRoute === 11 &&
     apiReport?.routes?.length === 2 &&
     apiReport.routes[0]?.route === "json" &&
-    apiReport.routes[0]?.cases?.length === 12 &&
+    apiReport.routes[0]?.cases?.length === 11 &&
     apiReport.routes[1]?.route === "legacy" &&
-    apiReport.routes[1]?.cases?.length === 12
+    apiReport.routes[1]?.cases?.length === 11 &&
+    apiReport?.scope?.apiPiiCaseIncluded === false
       ? null
       : "api-case-coverage",
-    jsonPostCount === 12 && streamPostCount === 10 && legacyPostCount === 12
+    jsonPostCount === 99 && streamPostCount === 101 && legacyPostCount === 11
       ? null
       : "deployed-request-coverage",
-    streamedPostCount === 10 ? null : "deployed-sse-stream-coverage",
+    streamedPostCount === 101 ? null : "deployed-sse-stream-coverage",
+    electricHoldoutReport?.passed === true &&
+    electricHoldoutReport?.requestCount === 88 &&
+    electricHoldoutReport?.metrics?.totalCases === 72 &&
+    electricHoldoutReport?.metrics?.passedCases === 72 &&
+    electricHoldoutReport?.externalAiUsedCount === 0
+      ? null
+      : "electric-holdout",
+    electricHoldoutBrowserReport?.passed === true &&
+    electricHoldoutBrowserReport?.route === "deployed-browser-sse-ui" &&
+    electricHoldoutBrowserReport?.requestCount === 88 &&
+    electricHoldoutBrowserReport?.fixture?.caseCount === 72 &&
+    electricHoldoutBrowserReport?.fixture?.turnCount === 88 &&
+    electricHoldoutBrowserReport?.fixture?.checksumUnchanged === true &&
+    electricHoldoutBrowserReport?.fixture?.checksumSha256 ===
+      electricHoldoutReport?.fixture?.checksumSha256 &&
+    electricHoldoutBrowserReport?.metrics?.totalCases === 72 &&
+    electricHoldoutBrowserReport?.metrics?.passedCases === 72 &&
+    electricHoldoutBrowserReport?.metrics?.totalTurns === 88 &&
+    electricHoldoutBrowserReport?.expandedEvidenceTurnCount === 88 &&
+    electricHoldoutBrowserReport?.structuredAnswerTurnCount === 88 &&
+    electricHoldoutBrowserReport?.quickReplyAlignedTurnCount === 88 &&
+    electricHoldoutBrowserReport?.externalAiUsedCount === 0 &&
+    electricHoldoutBrowserReport?.rawQuestionLeakCount === 0 &&
+    electricHoldoutBrowserReport?.privacy?.rawQuestionPersistedInEvidence ===
+      false
+      ? null
+      : "electric-browser-holdout",
     browserReport?.metrics?.answerFirstRate === 1
       ? null
       : "browser-answer-first",
+    browserReport?.metrics?.substantiveAnswerRate === 1
+      ? null
+      : "browser-substantive-answer",
+    browserReport?.metrics?.majorBranchCoverageRate === 1
+      ? null
+      : "browser-major-branch-coverage",
+    browserReport?.metrics?.citationSupportRate === 1
+      ? null
+      : "browser-citation-support",
     browserReport?.metrics?.contextRetentionRate === 1
       ? null
       : "browser-context-retention",
@@ -864,6 +974,37 @@ try {
     apiRoutes: ["json", "legacy"],
     browserRoute: "sse",
     fixedCaseCount: 12,
+    evaluationScopes: {
+      fixedConversation12: {
+        relationToElectricalHoldout: "additional fixed conversation set",
+        browser: {
+          route: "deployed-browser-sse-ui",
+          caseCount: browserReport?.caseCount ?? 0,
+          piiCase: "local preflight; zero deployed POST",
+        },
+        api: {
+          routes: ["deployed-json-api", "deployed-legacy-json-api"],
+          caseCountPerRoute: apiReport?.fixture?.apiCaseCountPerRoute ?? 0,
+          piiCase: "excluded; browser preflight is authoritative",
+        },
+      },
+      frozenElectrical72: {
+        checksumSha256:
+          electricHoldoutReport?.fixture?.checksumSha256 ?? null,
+        jsonApi: { caseCount: 72, turnCount: 88 },
+        browserSseUi: { caseCount: 72, turnCount: 88 },
+      },
+    },
+    electricHoldoutCaseCount: electricHoldoutReport?.metrics?.totalCases ?? 0,
+    electricHoldoutPassedCaseCount:
+      electricHoldoutReport?.metrics?.passedCases ?? 0,
+    electricHoldoutMetrics: electricHoldoutReport?.metrics ?? null,
+    electricHoldoutBrowserCaseCount:
+      electricHoldoutBrowserReport?.metrics?.totalCases ?? 0,
+    electricHoldoutBrowserPassedCaseCount:
+      electricHoldoutBrowserReport?.metrics?.passedCases ?? 0,
+    electricHoldoutBrowserMetrics:
+      electricHoldoutBrowserReport?.metrics ?? null,
     browserCaseCount: browserReport?.caseCount ?? 0,
     apiCaseCount: apiReport?.fixture?.caseCount ?? 0,
     apiPassed: Boolean(apiReport?.passed),
@@ -908,14 +1049,21 @@ try {
   if (playwrightResult && !(await fileExists(playwrightLogPath))) {
     await writeFile(
       playwrightLogPath,
-      `${playwrightResult.stdout}\n${playwrightResult.stderr}`,
+      `${JSON.stringify({ exitCode: playwrightResult.code })}\n`,
       "utf8",
     );
   }
   if (evaluationResult && !(await fileExists(evaluationLogPath))) {
     await writeFile(
       evaluationLogPath,
-      `${evaluationResult.stdout}\n${evaluationResult.stderr}`,
+      `${JSON.stringify({ exitCode: evaluationResult.code })}\n`,
+      "utf8",
+    );
+  }
+  if (electricHoldoutResult && !(await fileExists(electricHoldoutLogPath))) {
+    await writeFile(
+      electricHoldoutLogPath,
+      `${JSON.stringify({ exitCode: electricHoldoutResult.code })}\n`,
       "utf8",
     );
   }

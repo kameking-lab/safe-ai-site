@@ -376,13 +376,10 @@ export function HomeScreen({
       return;
     }
     const userMessageId = `user-${Date.now()}`;
-    const priorUserTurns = chatMessages
-      .filter((message) => message.role === "user")
-      .slice(-10);
     const guardedResponse = await runClientAiAction(
       {
         purpose: "legacy-law-chat-client",
-        texts: [trimmed, ...priorUserTurns.map((message) => message.content)],
+        texts: [trimmed],
         consent: true,
         maxChars: 2_000,
         contextPolicy: "approved-server-corpus",
@@ -395,7 +392,6 @@ export function HomeScreen({
           revision: selectedRevision,
           question: trimmed,
           privacyConfirmed: true,
-          history: priorUserTurns,
           context: [...chatMessages]
             .reverse()
             .find((message) => message.role === "assistant" && message.context)

@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useRef, useState, type FormEvent } from "react";
+import { beginTransientChatNavigation } from "@/lib/transient-chat-navigation";
 import { useTransientQueryBridge } from "./transient-query-bridge";
 import type { HomeSafetyState } from "./home-types";
 
@@ -94,6 +95,7 @@ function ChatQuickAsk({
           });
         })
         .catch(() => undefined);
+      beginTransientChatNavigation();
       router.push("/chatbot");
     } catch {
       setNotice({

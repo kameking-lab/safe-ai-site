@@ -36,7 +36,7 @@ export default defineConfig({
             VERCEL_GIT_COMMIT_SHA: "playwright-local-preview-20260802",
             CSP_STRICT_ENFORCEMENT_CANDIDATE: "true",
           }
-        : {}),
+        : { NEXT_DIST_DIR: ".cache/playwright-next" }),
       NEXT_PUBLIC_API_MODE: "live",
       // Makes the real App Router loading boundary observable long enough for
       // browser geometry/CLS checks. The page honors this only outside production.

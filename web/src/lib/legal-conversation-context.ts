@@ -2,6 +2,18 @@ import {
   requestedLegalPeriod,
   type LegalDatePrecision,
 } from "@/lib/legal-answer-temporal";
+import {
+  electricalEnergizedStateQueryTerm,
+  electricalWorkActionQueryTerm,
+  extractElectricalMeaning,
+  hasMultipleElectricalVoltageClasses,
+  normalizeElectricalWorkText,
+  type ElectricalEnergizedState,
+  type ElectricalQualificationType,
+  type ElectricalRoleType,
+  type ElectricalWorkAction,
+  type LegalTopicDomain,
+} from "@/lib/electrical-work-model";
 
 export type LegalConversationTurn = {
   role: "user" | "assistant";
@@ -11,13 +23,20 @@ export type LegalConversationTurn = {
 export type LegalVoltageClass = "低圧" | "高圧" | "特別高圧";
 
 const ELECTRICAL_WORK_CHOICES = [
-  "配線工事",
-  "充電部・近接作業",
-  "操作・点検",
+  "見るだけ",
+  "盤を開けて測定",
+  "配線・充電部を扱う",
 ] as const;
 
 const SAFE_LEGAL_CONFIRMED_CHOICES = [
   ...ELECTRICAL_WORK_CHOICES,
+  "盤内測定・配線",
+  "配線工事",
+  "充電部・近接作業",
+  "操作・点検",
+  "配線非接触",
+  "充電部分は露出していない",
+  "充電部分が露出している",
   "第1種",
   "第2種",
   "第3種",
@@ -27,6 +46,55 @@ const SAFE_LEGAL_CONFIRMED_CHOICES = [
   "短時間作業",
   "吹付け作業",
   "吹付け以外",
+  "作業床あり",
+  "作業床なし",
+  "条件不明",
+  "作業者の特別教育",
+  "足場の作業主任者",
+  "作業者の教育",
+  "有機溶剤作業主任者",
+  "換気・保護措置",
+  "石綿作業主任者",
+  "事前調査者",
+  "建築物",
+  "工作物",
+  "船舶",
+  "RA対象物を製造",
+  "RA対象物を取り扱う",
+  "譲渡・提供のみ",
+  "クレーン",
+  "移動式クレーン",
+  "デリック",
+  "床上操作式",
+  "研削といし",
+  "有機溶剤・シンナー",
+  "その他の化学物質",
+  "内容物不明",
+  "テスター測定だけ",
+  "配線接続・取り外し",
+  "両方",
+  "停電して配線接続・取り外し",
+  "充電部に触れる",
+  "充電部の近くで作業",
+  "電線同士",
+  "機器端子",
+  "電圧が不明",
+  "100・200Vの閉鎖型",
+  "高圧盤",
+  "露出型の開閉器",
+  "停電して扱う",
+  "高圧・特高の活線・近接",
+  "どちらでもない",
+  "盤外から見る",
+  "充電中の盤内を測る",
+  "充電中",
+  "停電済み",
+  "高圧設備",
+  "低圧で停電済み",
+  "100・200Vの低圧",
+  "100・200Vを停電して作業",
+  "高圧設備を停電して作業",
+  "充電中に扱う",
 ] as const;
 
 const SAFE_CONFIRMED_CHOICE_LIMIT = 5;
@@ -35,7 +103,24 @@ export type LegalConfirmedChoice =
   (typeof SAFE_LEGAL_CONFIRMED_CHOICES)[number];
 
 type LegalConfirmedChoiceSlot =
-  "electricalWork" | "solventClass" | "workPattern" | "location" | "workMethod";
+  | "electricalWork"
+  | "electricalConstraint"
+  | "electricalExposure"
+  | "solventClass"
+  | "workPattern"
+  | "location"
+  | "workMethod"
+  | "workFloor"
+  | "workRole"
+  | "workFocus"
+  | "surveyTarget"
+  | "chemicalSite"
+  | "craneType"
+  | "craneOperation"
+  | "educationWork"
+  | "electricalSupervisorCondition"
+  | "electricalVoltageState"
+  | "tankResidue";
 
 function confirmedChoiceSlot(
   choice: LegalConfirmedChoice,
@@ -43,9 +128,28 @@ function confirmedChoiceSlot(
   if (
     ELECTRICAL_WORK_CHOICES.includes(
       choice as (typeof ELECTRICAL_WORK_CHOICES)[number],
-    )
+    ) ||
+    choice === "配線工事" ||
+    choice === "充電部・近接作業" ||
+    choice === "操作・点検" ||
+    choice === "盤内測定・配線" ||
+    choice === "テスター測定だけ" ||
+    choice === "配線接続・取り外し" ||
+    choice === "両方" ||
+    choice === "停電して配線接続・取り外し" ||
+    choice === "充電部に触れる" ||
+    choice === "充電部の近くで作業" ||
+    choice === "盤外から見る" ||
+    choice === "充電中の盤内を測る"
   ) {
     return "electricalWork";
+  }
+  if (choice === "配線非接触") return "electricalConstraint";
+  if (
+    choice === "充電部分は露出していない" ||
+    choice === "充電部分が露出している"
+  ) {
+    return "electricalExposure";
   }
   if (choice === "第1種" || choice === "第2種" || choice === "第3種") {
     return "solventClass";
@@ -55,6 +159,83 @@ function confirmedChoiceSlot(
   }
   if (choice === "吹付け作業" || choice === "吹付け以外") {
     return "workMethod";
+  }
+  if (
+    choice === "作業床あり" ||
+    choice === "作業床なし" ||
+    choice === "条件不明"
+  ) {
+    return "workFloor";
+  }
+  if (
+    choice === "作業者の特別教育" ||
+    choice === "足場の作業主任者" ||
+    choice === "作業者の教育" ||
+    choice === "有機溶剤作業主任者" ||
+    choice === "石綿作業主任者" ||
+    choice === "事前調査者"
+  ) {
+    return "workRole";
+  }
+  if (choice === "建築物" || choice === "工作物" || choice === "船舶") {
+    return "surveyTarget";
+  }
+  if (choice === "換気・保護措置") return "workFocus";
+  if (
+    choice === "RA対象物を製造" ||
+    choice === "RA対象物を取り扱う" ||
+    choice === "譲渡・提供のみ"
+  ) {
+    return "chemicalSite";
+  }
+  if (
+    choice === "クレーン" ||
+    choice === "移動式クレーン" ||
+    choice === "デリック"
+  ) {
+    return "craneType";
+  }
+  if (choice === "床上操作式") return "craneOperation";
+  if (choice === "研削といし") return "educationWork";
+  if (
+    choice === "停電して扱う" ||
+    choice === "高圧・特高の活線・近接" ||
+    choice === "どちらでもない"
+  ) {
+    return "electricalSupervisorCondition";
+  }
+  if (
+    choice === "充電中" ||
+    choice === "停電済み" ||
+    choice === "高圧設備" ||
+    choice === "低圧で停電済み" ||
+    choice === "100・200Vの低圧" ||
+    choice === "100・200Vを停電して作業" ||
+    choice === "高圧設備を停電して作業" ||
+    choice === "充電中に扱う"
+  ) {
+    return "electricalVoltageState";
+  }
+  if (
+    choice === "電線同士" ||
+    choice === "機器端子" ||
+    choice === "電圧が不明"
+  ) {
+    return "electricalWork";
+  }
+  if (
+    choice === "100・200Vの閉鎖型" ||
+    choice === "高圧盤" ||
+    choice === "露出型の開閉器"
+  ) {
+    return "electricalExposure";
+  }
+  if (
+    choice === "有機溶剤・シンナー" ||
+    choice === "その他の化学物質" ||
+    choice === "内容物不明"
+  ) {
+    return "tankResidue";
   }
   return "location";
 }
@@ -71,11 +252,17 @@ function latestConfirmedChoices(
 }
 
 export type LegalConversationContext = {
+  topicDomain?: LegalTopicDomain;
+  workAction?: ElectricalWorkAction;
   workType?: string;
   equipment?: string;
   height?: string;
   load?: string;
   voltageClass?: LegalVoltageClass;
+  energizedState?: ElectricalEnergizedState;
+  roleType?: ElectricalRoleType;
+  qualificationType?: ElectricalQualificationType;
+  workDate?: string;
   qualification?: string;
   role?: string;
   targetDate?: string;
@@ -83,6 +270,66 @@ export type LegalConversationContext = {
   targetDatePrecision?: LegalDatePrecision;
   confirmedChoices?: LegalConfirmedChoice[];
 };
+
+const LEGAL_TOPIC_DOMAINS: readonly LegalTopicDomain[] = [
+  "electrical",
+  "forklift",
+  "lifting",
+  "fall",
+  "oxygen-deficiency",
+  "organic-solvent",
+  "asbestos",
+  "heat",
+  "chemical",
+  "general",
+];
+
+const ELECTRICAL_WORK_ACTIONS: readonly ElectricalWorkAction[] = [
+  "visual-inspection",
+  "indicator-check",
+  "noise-odor-check",
+  "cleaning",
+  "breaker-operation",
+  "open-panel",
+  "tester-measurement",
+  "insulation-measurement",
+  "wiring-connection",
+  "wiring-removal",
+  "repair",
+  "live-work",
+  "live-proximity-work",
+  "de-energized-work",
+  "high-voltage-facility-inspection",
+  "start-of-work-inspection",
+  "unknown",
+];
+
+const ELECTRICAL_ENERGIZED_STATES: readonly ElectricalEnergizedState[] = [
+  "de-energized",
+  "energized",
+  "proximity",
+  "unknown",
+];
+
+const ELECTRICAL_QUALIFICATION_TYPES: readonly ElectricalQualificationType[] = [
+  "national-license",
+  "special-education",
+  "skills-training",
+  "work-supervisor",
+  "work-leader",
+  "chief-electrical-engineer",
+  "inspection-duty",
+  "work-procedure",
+  "qualification-general",
+];
+
+const ELECTRICAL_ROLE_TYPES: readonly ElectricalRoleType[] = [
+  "worker",
+  "work-supervisor",
+  "work-leader",
+  "chief-electrical-engineer",
+  "employer",
+];
 
 export type LegalClarification = {
   question: string;
@@ -101,25 +348,58 @@ const TOPICS: Array<{
   equipment?: string;
 }> = [
   {
-    pattern: /(?:電気作業|電気工事|電気設備|配線工事|活線作業|充電部|電路)/,
+    pattern:
+      /(?:電気|電源|電工|でんき|電気設備|配線|結線|活線|充電部|充電電路|制御盤|分電盤|配電盤|受電盤|キュービクル|ブレ[ーイ]カー|遮断器|開閉器|テスター|絶縁測定|低圧教育|特高|高圧受電)/,
     workType: "電気作業",
     equipment: "電気設備",
   },
   {
-    pattern: /フォー?クリフト/i,
+    pattern: /(?:フォー?クリフト|フォーク(?=(?:を|で|に)?(?:使|乗|運転|操作|作業)|(?:資格|免許)))/i,
     workType: "フォークリフト運転",
     equipment: "フォークリフト",
   },
-  { pattern: /玉掛(?:け)?/, workType: "玉掛け", equipment: "クレーン等" },
+  {
+    pattern:
+      /(?:玉掛(?:け)?|(?:荷|吊り荷).*(?:ワイヤ|フック|玉掛|(?:吊|つ)る).*(?:準備|掛け|外し|教育|資格|講習|必要|するには))/,
+    workType: "玉掛け",
+    equipment: "クレーン等",
+  },
   {
     pattern: /移動式クレーン/,
     workType: "移動式クレーン運転",
     equipment: "移動式クレーン",
   },
   {
-    pattern: /高所作業車/,
+    pattern: /デリック/,
+    workType: "デリック運転",
+    equipment: "デリック",
+  },
+  {
+    pattern:
+      /(?:クレーン.*(?:点検|検査|自主検査)|(?:点検|検査|自主検査).*クレーン)/,
+    workType: "クレーン作業",
+    equipment: "クレーン",
+  },
+  {
+    pattern: /クレーン/,
+    workType: "クレーン運転",
+    equipment: "クレーン",
+  },
+  {
+    pattern:
+      /(?:高所作業車|作業車.*(?:高い所|高所).*(?:上が|上る|作業)|(?:高い所|高所).*(?:上が|上る|作業).*作業車)/,
     workType: "高所作業車運転",
     equipment: "高所作業車",
+  },
+  {
+    pattern: /研削といし/,
+    workType: "研削といしの取替え等",
+    equipment: "研削といし",
+  },
+  {
+    pattern: /タンク(?:等)?(?:の)?(?:中|内|内部)?(?:に|へ)?(?:入る|立ち入る|入槽)/,
+    workType: "タンク内作業",
+    equipment: "タンク",
   },
   { pattern: /(?:足場|あしば)/, workType: "足場作業", equipment: "足場" },
   {
@@ -128,7 +408,7 @@ const TOPICS: Array<{
     equipment: "作業床・開口部",
   },
   {
-    pattern: /(?:フルハーネス|墜落制止用器具|安全帯)/,
+    pattern: /(?:(?:フル)?ハーネス|墜落制止用器具|安全帯)/,
     workType: "墜落制止用器具使用",
     equipment: "墜落制止用器具",
   },
@@ -137,23 +417,23 @@ const TOPICS: Array<{
   { pattern: /作業台/, workType: "作業台作業", equipment: "作業台" },
   {
     pattern:
-      /(?:(?:第二種|第2種).*(?:酸欠|酸素欠乏)|(?:酸欠|酸素欠乏).*(?:第二種|第2種))/,
+      /(?:(?:第二種|第2種).*(?:酸欠|酸素欠乏|酸素(?:が|の)?(?:少ない|薄い|足りない))|(?:酸欠|酸素欠乏|酸素(?:が|の)?(?:少ない|薄い|足りない)).*(?:第二種|第2種))/,
     workType: "第二種酸素欠乏危険作業",
     equipment: "酸欠危険場所",
   },
   {
     pattern:
-      /(?:(?:第一種|第1種).*(?:酸欠|酸素欠乏)|(?:酸欠|酸素欠乏).*(?:第一種|第1種))/,
+      /(?:(?:第一種|第1種).*(?:酸欠|酸素欠乏|酸素(?:が|の)?(?:少ない|薄い|足りない))|(?:酸欠|酸素欠乏|酸素(?:が|の)?(?:少ない|薄い|足りない)).*(?:第一種|第1種))/,
     workType: "第一種酸素欠乏危険作業",
     equipment: "酸欠危険場所",
   },
   {
-    pattern: /(?:酸欠|酸素欠乏)/,
+    pattern: /(?:酸欠|酸素欠乏|酸素(?:が|の)?(?:少ない|薄い|足りない)(?:場所|所|現場)?)/,
     workType: "酸素欠乏危険作業",
     equipment: "酸欠危険場所",
   },
   {
-    pattern: /(?=.*(?:有機溶剤|有機則|シンナー))(?=.*屋内)/,
+    pattern: /(?=.*(?:有機溶剤|有機則|シンナー|溶剤))(?=.*屋内)/,
     workType: "屋内有機溶剤業務",
     equipment: "有機溶剤",
   },
@@ -164,7 +444,7 @@ const TOPICS: Array<{
     equipment: "有機溶剤",
   },
   {
-    pattern: /(?:有機溶剤|有機則|シンナー)/,
+    pattern: /(?:有機溶剤|有機則|シンナー|溶剤.*(?:塗装|洗浄|拭|扱|使)|(?:塗装|洗浄).*溶剤)/,
     workType: "有機溶剤業務",
     equipment: "有機溶剤",
   },
@@ -174,10 +454,14 @@ const TOPICS: Array<{
     equipment: "石綿含有建材",
   },
   {
-    pattern: /(?=.*(?:熱中症|暑熱|WBGT))(?=.*(?:報告|連絡))/i,
+    pattern: /(?=.*(?:熱中症|暑熱|WBGT|暑い(?:現場|作業場|場所)|暑さ))(?=.*(?:報告|連絡))/i,
     workType: "暑熱作業の報告体制",
   },
-  { pattern: /(?:熱中症|暑熱|WBGT)/i, workType: "暑熱作業" },
+  {
+    pattern:
+      /(?:熱中症|暑熱|WBGT|(?:暑い|熱い)(?:現場|作業場|場所)|暑さ|夏(?:の)?(?:現場|作業場|作業).*(?:安全)?対策)/i,
+    workType: "暑熱作業",
+  },
   {
     pattern:
       /(?=.*(?:労働者死傷病報告|死傷病報告|労災事故|労働災害|休業災害))(?=.*休業(?:4|四)日)/,
@@ -204,14 +488,26 @@ const TOPICS: Array<{
     workType: "化学物質リスクアセスメント",
     equipment: "化学物質",
   },
+  {
+    pattern:
+      /(?:化学物質(?:管理|かんり)者|化学物質.*(?:扱|取扱).*(?:管理者|管理)|(?:管理者|管理).*化学物質.*(?:扱|取扱)|(?:RA|リスクアセスメント)対象物.*(?:管理者|管理)|(?:管理者|管理).*(?:RA|リスクアセスメント)対象物)/i,
+    workType: "化学物質管理者の選任",
+    equipment: "化学物質",
+  },
   { pattern: /クレーン/, workType: "クレーン作業", equipment: "クレーン" },
   { pattern: /安全管理者/, workType: SAFETY_MANAGER_WORK_TYPE },
 ];
 
 const QUALIFICATIONS: Array<{ pattern: RegExp; value: string }> = [
   { pattern: /技能講習/, value: "技能講習" },
-  { pattern: /特別教育/, value: "特別教育" },
-  { pattern: /作業主任者/, value: "作業主任者" },
+  {
+    pattern: /(?:特別教育|(?:危険|有害)(?:な)?作業.*教育)/,
+    value: "特別教育",
+  },
+  {
+    pattern: /(?:作業主任者|主任者(?:を)?(?:置く|選任).*(?:仕事|作業))/,
+    value: "作業主任者",
+  },
   { pattern: /(?:免許|資格)/, value: "資格" },
 ];
 
@@ -228,7 +524,7 @@ const CONTEXT_DEPENDENT =
   /^(?:はい|いいえ|不明|分からない|わからない|それ|その場合|この場合|先ほど|さっき|前の質問|上記|(?:それの)?根拠|条件|詳しく|対象|理由|なぜ|いつ|例外|(?:約)?\d+(?:\.\d+)?(?:m|cm|mm|t|kg|メートル|センチ|ミリ|トン)(?:以上|以下|未満)?)(?:です|ですか|なら|の場合|について|を|は|で|$)/i;
 
 const CONDITION_FOLLOWUP =
-  /^(?=.*(?:低圧|高圧|特別高圧|配線|充電部|近接|操作|点検|第[123一二三]種|タンク|屋内|臨時|短時間|吹付け|建築物|工作物|船舶|作業床|最大荷重|つり上げ荷重|高さ|SDS|対象物|自主検査|建設業|常時\d+人|\d+(?:\.\d+)?(?:m|cm|mm|t|kg|メートル|センチ|ミリ|トン))).*(?:です|使います|再開します|についてです|聞いています|前です|入ります|の場合)[。.!！]?$|^(?:作業床あり|作業床なし|条件不明)$/i;
+  /^(?=.*(?:低圧|高圧|特別高圧|特高|100V|200V|400V|配線|結線|充電部|充電中|停電済み|近接|操作|点検|作業開始前点検|始業前点検|見るだけ|盤を開け|テスター|測定|ブレーカー|触らない|第[123一二三]種|タンク|屋内|臨時|短時間|吹付け|建築物|工作物|船舶|作業床|最大荷重|つり上げ荷重|高さ|SDS|対象物|自主検査|建設業|常時\d+人|\d+(?:\.\d+)?(?:m|cm|mm|t|kg|メートル|センチ|ミリ|トン))).*(?:です|使います|再開します|についてです|聞いています|前です|入ります|の場合|だけ|触らない|開ける|測る|測定する|操作する)?[。.!！]?$|^(?:作業床あり|作業床なし|条件不明)$/i;
 
 const QUALIFICATION_ONLY_FOLLOWUP =
   /^(?:作業主任者|主任者|資格|免許|技能講習|特別教育|教育)(?:について|は|です|ですか|が必要|いる|要る)?[。?？!！]?$/;
@@ -326,7 +622,9 @@ function isTopicAspectFollowup(
   }
   return (
     /電気/.test(workType) &&
-    /^(?:運転|操作|点検|作業指揮者|指揮者)(?:は|について|ですか)?$/.test(value)
+    /^(?:運転|操作|点検|作業開始前点検|始業前点検|見るだけ|盤を開ける?|盤を開けて(?:測定|テスターを当てる)|テスター(?:測定)?|配線(?:は触らない|をつなぐ|を外す)?|ブレーカー(?:操作|を入切する)?|充電中|停電済み|充電部(?:分)?は露出していない|作業主任者|作業指揮者|指揮者|電気主任技術者)(?:は|について|ですか|だけ)?$/.test(
+      value,
+    )
   );
 }
 
@@ -336,8 +634,25 @@ function legalTopicFamily(workType: string | undefined): string | undefined {
   if (/有機溶剤/.test(workType)) return "organic";
   if (/石綿/.test(workType)) return "asbestos";
   if (/墜落|足場|脚立|はしご|作業台/.test(workType)) return "fall";
-  if (/クレーン|玉掛/.test(workType)) return "lifting";
+  if (/クレーン|デリック|玉掛/.test(workType)) return "lifting";
   return workType;
+}
+
+function topicDomainFor(
+  workType: string | undefined,
+  equipment: string | undefined,
+): LegalTopicDomain | undefined {
+  const topic = `${workType ?? ""} ${equipment ?? ""}`;
+  if (/電気/.test(topic)) return "electrical";
+  if (/フォークリフト/.test(topic)) return "forklift";
+  if (/玉掛|クレーン|デリック/.test(topic)) return "lifting";
+  if (/墜落|足場|脚立|はしご|作業台|高所作業車/.test(topic)) return "fall";
+  if (/酸素欠乏|酸欠/.test(topic)) return "oxygen-deficiency";
+  if (/有機溶剤/.test(topic)) return "organic-solvent";
+  if (/石綿/.test(topic)) return "asbestos";
+  if (/暑熱|熱中症/.test(topic)) return "heat";
+  if (/化学物質/.test(topic)) return "chemical";
+  return workType ? "general" : undefined;
 }
 
 function isCompatibleRoleOrTrainingFollowup(
@@ -360,8 +675,7 @@ function isCompatibleRoleOrTrainingFollowup(
 }
 
 export function normalizeLegalConversationText(value: string): string {
-  return value
-    .normalize("NFKC")
+  return normalizeElectricalWorkText(value)
     .replace(/あしば/g, "足場")
     .replace(/(?:手摺り?|てすり)/g, "手すり")
     .replace(/フォーク(?!リフト)/g, "フォークリフト")
@@ -475,6 +789,7 @@ function extractVoltageClass(
   ) {
     return undefined;
   }
+  if (hasMultipleElectricalVoltageClasses(text)) return undefined;
   if (/(?:特別高圧|特高)/.test(text)) return "特別高圧";
   if (/高圧/.test(text)) return "高圧";
   if (/低圧/.test(text)) return "低圧";
@@ -486,6 +801,7 @@ export function extractLegalConversationContext(
   value: string,
 ): LegalConversationContext {
   const text = normalize(value);
+  const electricalMeaning = extractElectricalMeaning(text);
   const inferredTopic = TOPICS.find(({ pattern }) => pattern.test(text));
   // 「作業床なし」「作業床を設けにくい」は、直前の墜落制止用器具の
   // 確認に対する条件であり、新しい「開口部・作業床」の相談ではない。
@@ -494,7 +810,16 @@ export function extractLegalConversationContext(
     /作業床/.test(text) &&
     /(?:あり|なし|設け(?:る|られ|にく|ることが困難)|困難)/.test(text) &&
     !/(?:開口部|囲い|手すり|覆い|養生)/.test(text);
-  const topic = conditionOnlyWorkFloor ? undefined : inferredTopic;
+  const retainedHarnessTopic = conditionOnlyWorkFloor
+    ? TOPICS.find(
+        ({ equipment }) =>
+          equipment === "墜落制止用器具" &&
+          /(?:フル)?ハーネス|墜落制止用器具|安全帯/.test(text),
+      )
+    : undefined;
+  const topic = conditionOnlyWorkFloor
+    ? retainedHarnessTopic
+    : inferredTopic;
   const heightMatch = text.match(
     /(?:高さ(?:は|が|約)?\s*)?(\d+(?:\.\d+)?|[〇一二三四五六七八九十])\s*(m|cm|mm|メートル|センチ(?:メートル)?|ミリ(?:メートル)?)(以上|以下|未満)?/i,
   );
@@ -521,10 +846,23 @@ export function extractLegalConversationContext(
       : undefined) ??
     (topic?.equipment === "墜落制止用器具" && /教育/.test(text)
       ? "特別教育"
-      : undefined);
-  const confirmedChoices = SAFE_LEGAL_CONFIRMED_CHOICES.filter((choice) =>
-    text.includes(choice),
-  );
+      : undefined) ??
+    (topic?.equipment === "研削といし" ? "特別教育" : undefined);
+  const confirmedChoices = SAFE_LEGAL_CONFIRMED_CHOICES.filter((choice) => {
+    if (choice !== "クレーン") return text.includes(choice);
+    // 「クレーン運転の資格は？」は機種をまだ選んでいない広い質問。
+    // generic entity mentionを、機種選択chip「クレーン」の確定値へ昇格しない。
+    return (
+      /確認済み選択肢:[^ ]*クレーン/.test(text) ||
+      /^クレーン(?:です|について|を選びます)?[。.!！]?$/.test(text)
+    );
+  });
+  if (
+    /配線(?:は|を)?(?:触らない|外さない|つながない)/.test(text) &&
+    !confirmedChoices.includes("配線非接触")
+  ) {
+    confirmedChoices.push("配線非接触");
+  }
   if (/臨時/.test(text) && !confirmedChoices.includes("臨時作業")) {
     confirmedChoices.push("臨時作業");
   }
@@ -552,12 +890,24 @@ export function extractLegalConversationContext(
       ? undefined
       : role;
 
+  const topicDomain =
+    electricalMeaning.topicDomain ??
+    topicDomainFor(topic?.workType, topic?.equipment);
+
   return {
+    topicDomain,
+    workAction: electricalMeaning.workAction,
     workType: topic?.workType,
-    equipment: topic?.equipment,
+    equipment: electricalMeaning.equipment ?? topic?.equipment,
     height,
     load,
-    voltageClass: extractVoltageClass(text, topic?.workType === "電気作業"),
+    voltageClass:
+      electricalMeaning.voltageClass ??
+      extractVoltageClass(text, topic?.workType === "電気作業"),
+    energizedState: electricalMeaning.energizedState,
+    roleType: electricalMeaning.roleType,
+    qualificationType: electricalMeaning.qualificationType,
+    workDate: targetPeriod?.start,
     qualification,
     role: safeRole,
     targetDate: targetPeriod?.start,
@@ -592,6 +942,36 @@ export function sanitizeLegalConversationContext(
     .join(" ");
   const sanitized = extractLegalConversationContext(safeText);
   const isoDate = /^\d{4}-\d{2}-\d{2}$/;
+  if (
+    context.topicDomain &&
+    LEGAL_TOPIC_DOMAINS.includes(context.topicDomain)
+  ) {
+    sanitized.topicDomain = context.topicDomain;
+  }
+  if (
+    context.workAction &&
+    ELECTRICAL_WORK_ACTIONS.includes(context.workAction)
+  ) {
+    sanitized.workAction = context.workAction;
+  }
+  if (
+    context.energizedState &&
+    ELECTRICAL_ENERGIZED_STATES.includes(context.energizedState)
+  ) {
+    sanitized.energizedState = context.energizedState;
+  }
+  if (
+    context.qualificationType &&
+    ELECTRICAL_QUALIFICATION_TYPES.includes(context.qualificationType)
+  ) {
+    sanitized.qualificationType = context.qualificationType;
+  }
+  if (context.roleType && ELECTRICAL_ROLE_TYPES.includes(context.roleType)) {
+    sanitized.roleType = context.roleType;
+  }
+  if (typeof context.workDate === "string" && isoDate.test(context.workDate)) {
+    sanitized.workDate = context.workDate;
+  }
   if (
     typeof context.targetDate === "string" &&
     isoDate.test(context.targetDate)
@@ -660,18 +1040,56 @@ function contextValues(context: LegalConversationContext): string[] {
         ? `${context.targetDate.slice(0, 4)}年${Number(context.targetDate.slice(5, 7))}月 対象期間(月):${context.targetDate}〜${context.targetDateEnd ?? context.targetDate}`
         : context.targetDate
     : undefined;
+  const domainTerm =
+    context.topicDomain === "electrical"
+      ? "電気作業"
+      : undefined;
+  const qualificationTypeTerm: Partial<
+    Record<ElectricalQualificationType, string>
+  > = {
+    "national-license": "国家資格",
+    "special-education": "特別教育",
+    "skills-training": "技能講習",
+    "work-supervisor": "作業主任者",
+    "work-leader": "作業の指揮者",
+    "chief-electrical-engineer": "電気主任技術者",
+    "inspection-duty": "点検義務",
+    "work-procedure": "作業手順",
+    "qualification-general": "資格・教育",
+  };
+  const roleTypeTerm: Partial<Record<ElectricalRoleType, string>> = {
+    worker: "作業者",
+    "work-supervisor": "作業主任者",
+    "work-leader": "作業の指揮者",
+    "chief-electrical-engineer": "電気主任技術者",
+    employer: "事業者",
+  };
   return [
+    domainTerm,
+    context.topicDomain === "electrical"
+      ? electricalWorkActionQueryTerm(context.workAction)
+      : undefined,
     context.workType,
     context.equipment,
     context.height,
     context.load,
     context.voltageClass,
+    context.topicDomain === "electrical"
+      ? electricalEnergizedStateQueryTerm(context.energizedState)
+      : undefined,
+    context.qualificationType
+      ? qualificationTypeTerm[context.qualificationType]
+      : undefined,
+    context.roleType ? roleTypeTerm[context.roleType] : undefined,
     context.qualification,
     context.role,
     context.confirmedChoices?.length
       ? `確認済み選択肢:${context.confirmedChoices.join("・")}`
       : undefined,
     targetDate,
+    context.workDate && context.workDate !== context.targetDate
+      ? `作業日:${context.workDate}`
+      : undefined,
   ].filter((value): value is string => Boolean(value));
 }
 
@@ -879,10 +1297,21 @@ export function resolveLegalConversationQuery(input: {
   }
   const compact = message.replace(/[\s　、。,.!?！？]/g, "");
   const currentHasTopic = Boolean(
-    currentContext.workType || currentContext.equipment,
+    currentContext.topicDomain || currentContext.workType || currentContext.equipment,
   );
   const hasPriorContext =
     history.length > 0 || contextValues(previousContext).length > 0;
+  const hasProvidedMemoryContext =
+    contextValues(sanitizeLegalConversationContext(input.context)).length > 0;
+  // The browser intentionally sends only the nine-field memory context, not
+  // raw history. An allowlisted generated chip must therefore be recognised
+  // as a context choice even when there is no preceding free-text turn.
+  const isStructuredMemoryChoice = Boolean(
+    hasProvidedMemoryContext &&
+      currentContext.confirmedChoices?.some((choice) =>
+        matchesClarificationChoice(choice, message),
+      ),
+  );
   const answersOpenReportRecipientClarification = Boolean(
     currentHasTopic &&
     !previousContext.workType &&
@@ -902,11 +1331,23 @@ export function resolveLegalConversationQuery(input: {
       OPEN_CLARIFICATION_CONDITION_ANSWER.test(message) &&
       (!latestUserQuestion || priorClarification?.options.length === 0)),
   );
-  const previousTopicFamily = legalTopicFamily(previousContext.workType);
-  const currentTopicFamily = legalTopicFamily(currentContext.workType);
-  const changesEquipment =
-    currentContext.equipment !== previousContext.equipment;
-  const changesWorkType = currentContext.workType !== previousContext.workType;
+  const previousTopicFamily =
+    previousContext.topicDomain ?? legalTopicFamily(previousContext.workType);
+  const currentTopicFamily =
+    currentContext.topicDomain ?? legalTopicFamily(currentContext.workType);
+  // 条件だけの短いfollow-upで未指定の設備・作業を「変更」と見なさない。
+  // 新しい設備・作業が実際に抽出された場合だけ明示変更の候補にする。
+  const changesEquipment = Boolean(
+    currentContext.equipment &&
+      currentContext.equipment !== previousContext.equipment,
+  );
+  const changesWorkType = Boolean(
+    currentContext.workType &&
+      currentContext.workType !== previousContext.workType,
+  );
+  const changesTopicDomain =
+    Boolean(currentContext.topicDomain) &&
+    currentContext.topicDomain !== previousContext.topicDomain;
   const currentIsPriorTopicAspect =
     hasPriorContext &&
     compact.length <= 32 &&
@@ -914,9 +1355,11 @@ export function resolveLegalConversationQuery(input: {
   const explicitlyChangesTopic = Boolean(
     currentHasTopic &&
     !isClarificationChoice &&
+    !isStructuredMemoryChoice &&
     !currentIsPriorTopicAspect &&
     !answersOpenRoleOrTrainingClarification &&
-    (changesEquipment ||
+    (changesTopicDomain ||
+      changesEquipment ||
       (changesWorkType && !CONDITION_FOLLOWUP.test(message))),
   );
   const topicCompatible =
@@ -932,6 +1375,13 @@ export function resolveLegalConversationQuery(input: {
     currentContext.height ||
     currentContext.load ||
     currentContext.voltageClass ||
+    currentContext.energizedState ||
+    currentContext.workDate ||
+    currentContext.roleType ||
+    currentContext.qualificationType ||
+    ((previousContext.topicDomain === "electrical" ||
+      currentContext.topicDomain === "electrical") &&
+      currentContext.workAction) ||
     currentContext.role ||
     currentContext.targetDate ||
     currentContext.confirmedChoices?.length ||
@@ -952,12 +1402,26 @@ export function resolveLegalConversationQuery(input: {
     hasPriorContext && compact.length <= 32 && currentIsPriorTopicAspect;
   const preservesPriorTraining = Boolean(
     topicAspectFollowup &&
-    /^(?:特別教育|技能講習|資格)$/.test(previousContext.qualification ?? "") &&
+    (/^(?:特別教育|技能講習|資格)$/.test(
+      previousContext.qualification ?? "",
+    ) ||
+      /^(?:special-education|skills-training|qualification-general)$/.test(
+        previousContext.qualificationType ?? "",
+      )) &&
     /(?:受け|受講|教育|講習|有効|更新|いつ|期限|時期|誰|どの人)/.test(compact),
   );
   const safeAspectFollowup = universalContextFollowup || topicAspectFollowup;
+  const structuredChoiceSelectsEquipment = Boolean(
+    isStructuredMemoryChoice &&
+      currentContext.confirmedChoices?.some((choice) =>
+        ["craneType", "educationWork", "surveyTarget", "tankResidue"].includes(
+          confirmedChoiceSlot(choice),
+        ),
+      ),
+  );
   const selectsEquipment = Boolean(
-    isClarificationChoice && priorClarification?.question.includes("設備"),
+    (isClarificationChoice && priorClarification?.question.includes("設備")) ||
+      (structuredChoiceSelectsEquipment && currentContext.equipment),
   );
   const shouldUseHistory =
     hasPriorContext &&
@@ -965,8 +1429,10 @@ export function resolveLegalConversationQuery(input: {
     (!currentHasTopic ||
       conditionFollowup ||
       isClarificationChoice ||
+      isStructuredMemoryChoice ||
       topicAspectFollowup) &&
     (isClarificationChoice ||
+      isStructuredMemoryChoice ||
       conditionFollowup ||
       safeAspectFollowup ||
       CONTEXT_DEPENDENT.test(compact) ||
@@ -983,12 +1449,24 @@ export function resolveLegalConversationQuery(input: {
         equipment: selectsEquipment
           ? (currentContext.equipment ?? previousContext.equipment)
           : (previousContext.equipment ?? currentContext.equipment),
+        topicDomain:
+          currentContext.topicDomain ?? previousContext.topicDomain,
+        workAction:
+          currentContext.workAction ?? previousContext.workAction,
       }
     : currentContext;
-  if (topicAspectFollowup) {
+  if (
+    topicAspectFollowup &&
+    !isClarificationChoice &&
+    !isStructuredMemoryChoice
+  ) {
     if (!currentContext.role) delete context.role;
     if (!currentContext.qualification && !preservesPriorTraining) {
       delete context.qualification;
+    }
+    if (!currentContext.roleType) delete context.roleType;
+    if (!currentContext.qualificationType && !preservesPriorTraining) {
+      delete context.qualificationType;
     }
   }
 
@@ -1035,10 +1513,30 @@ export function buildLegalClarification(
 ): LegalClarification | null {
   const text = normalize(message);
   const context = extractLegalConversationContext(text);
-  const asksQualification = /(?:資格|免許|技能講習|特別教育|教育)/.test(text);
+  const confirmedChoices = new Set(context.confirmedChoices ?? []);
+  const asksQualification =
+    /(?:資格|免許|技能講習|特別教育|教育|何が(?:必要|要る|いる)|何を(?:すべき|する)|必要なもの|どうすれば)/.test(
+      text,
+    ) ||
+    /(?:乗る|使う|扱う|取り扱う|動かす|運転する|操作する|作業する|やる|組み立てる|解体する|塗装する)(?:には|のに)/.test(
+      text,
+    ) ||
+    /(?:する|行う|入る|立ち入る|入槽する)(?:には|のに)/.test(text);
 
   if (
     /(?:法|令|規則|則)\s*第?[0-9一二三四五六七八九十百千]+条(?:の[0-9一二三四五六七八九十百千]+)?/.test(
+      text,
+    )
+  ) {
+    return null;
+  }
+
+  // The work and the legal question are already concrete.  Adding a broad
+  // low/high-voltage picker here would turn a complete answer back into a
+  // classification form.
+  if (
+    context.topicDomain === "electrical" &&
+    /低圧.*充電電路.*(?:敷設|修理).*(?:特別教育|教育).*(?:必要|要る|いる)|(?:特別教育|教育).*(?:必要|要る|いる).*低圧.*充電電路.*(?:敷設|修理)/.test(
       text,
     )
   ) {
@@ -1053,17 +1551,346 @@ export function buildLegalClarification(
     };
   }
   if (
-    context.workType === "電気作業" &&
-    (asksQualification || /作業主任者/.test(text)) &&
-    !/(?:配線工事|配線.*(?:工事|敷設|修理)|(?:活線|充電部).*(?:作業|近接|接近|取扱い?)|充電電路.*(?:敷設|修理|点検|操作)|(?:電気設備|開閉器|遮断器).*(?:操作|点検)|操作・点検)/.test(
-      text,
-    )
+    context.workAction === "start-of-work-inspection" &&
+    context.topicDomain !== "electrical"
   ) {
     return {
-      question:
-        "必要な資格・教育や作業主任者の要否を絞るため、実際の作業はどれに近いですか？",
-      options: [...ELECTRICAL_WORK_CHOICES],
+      question: "始業前点検の対象となる設備名を教えてください。",
+      options: [],
     };
+  }
+  if (context.topicDomain === "electrical") {
+    if (context.confirmedChoices?.includes("配線非接触")) {
+      return {
+        question:
+          "配線を触らない前提で、実際に行うのは盤外の目視・盤内の測定・ブレーカー操作のどれですか？",
+        options: ["盤外から見る", "盤を開けて測定", "ブレーカー操作"],
+      };
+    }
+    if (context.confirmedChoices?.includes("配線・充電部を扱う")) {
+      return {
+        question:
+          "実際に行うのは、停電して配線を接続・取り外す、充電部に触れる、充電部の近くで作業する、のどれですか？",
+        options: [
+          "停電して配線接続・取り外し",
+          "充電部に触れる",
+          "充電部の近くで作業",
+        ],
+      };
+    }
+    if (context.confirmedChoices?.includes("盤内測定・配線")) {
+      return {
+        question:
+          "実際に行うのは、テスター測定だけですか、それとも配線の接続・取り外しもしますか？",
+        options: ["テスター測定だけ", "配線接続・取り外し", "両方"],
+      };
+    }
+    if (context.confirmedChoices?.includes("両方")) {
+      return {
+        question:
+          "測定と配線作業を行う回路の電圧と、充電中か停電済みかを教えてください。",
+        options: ["100・200Vを停電して作業", "高圧設備を停電して作業", "充電中に扱う"],
+      };
+    }
+    if (context.confirmedChoices?.includes("充電部に触れる")) {
+      return {
+        question:
+          "触れる可能性がある充電部の電圧と、停電作業へ切り替えられるかを教えてください。",
+        options: ["100・200Vを停電して作業", "高圧設備を停電して作業", "充電中に扱う"],
+      };
+    }
+    if (
+      context.workAction === "visual-inspection" ||
+      context.workAction === "indicator-check" ||
+      context.workAction === "noise-odor-check"
+    ) {
+      return null;
+    }
+    if (context.workAction === "high-voltage-facility-inspection") {
+      if (
+        context.roleType === "chief-electrical-engineer" ||
+        context.qualificationType === "chief-electrical-engineer"
+      ) {
+        return {
+          question:
+            "実際に高圧受電設備を点検するのは、主任技術者本人ですか、別の作業者ですか？",
+          options: [
+            "主任技術者が高圧受電設備を点検",
+            "別の作業者が高圧受電設備を点検",
+          ],
+        };
+      }
+      if (
+        context.energizedState &&
+        context.energizedState !== "unknown"
+      ) {
+        return null;
+      }
+      return {
+        question:
+          "高圧受電設備の点検は、停電して行いますか、それとも充電中の部分へ近づきますか？",
+        options: ["停電して高圧設備を点検", "充電中の高圧部に近接"],
+      };
+    }
+    if (
+      context.roleType === "work-supervisor" ||
+      context.qualificationType === "work-supervisor"
+    ) {
+      if (
+        confirmedChoices.has("停電して扱う") ||
+        confirmedChoices.has("高圧・特高の活線・近接")
+      ) {
+        return null;
+      }
+      if (confirmedChoices.has("どちらでもない")) {
+        return {
+          question:
+            "該当する制度を確認するため、実際に行う電気作業を一つ教えてください。",
+          options: [],
+        };
+      }
+      return {
+        question:
+          "停電して電路を扱う作業ですか、それとも高圧・特別高圧の充電部やその近くの作業ですか？",
+        options: ["停電して扱う", "高圧・特高の活線・近接", "どちらでもない"],
+      };
+    }
+    if (context.workAction === "start-of-work-inspection") {
+      return {
+        question:
+          "盤を開けず外から見る点検ですか、それとも充電中の盤内を測りますか？",
+        options: ["盤外から見る", "充電中の盤内を測る"],
+      };
+    }
+    if (context.workAction === "breaker-operation") {
+      const hasConfirmedExposureState = context.confirmedChoices?.some(
+        (choice) =>
+          choice === "充電部分は露出していない" ||
+          choice === "充電部分が露出している" ||
+          choice === "100・200Vの閉鎖型" ||
+          choice === "高圧盤" ||
+          choice === "露出型の開閉器",
+      );
+      if (hasConfirmedExposureState) {
+        if (context.voltageClass) return null;
+        return {
+          question:
+            "操作対象は100・200Vの低圧設備ですか、それとも高圧設備ですか？",
+          options: ["100・200Vの低圧", "高圧盤"],
+        };
+      }
+      if (context.voltageClass === "高圧" || context.voltageClass === "特別高圧") {
+        return null;
+      }
+      if (context.voltageClass === "低圧") {
+        return {
+          question:
+            "低圧開閉器の充電部分は、閉鎖されたカバー内ですか、それとも露出していますか？",
+          options: ["充電部分は露出していない", "充電部分が露出している"],
+        };
+      }
+      return {
+        question:
+          "100・200Vの閉鎖型ブレーカーですか、それとも高圧盤・露出型の開閉器ですか？",
+        options: ["100・200Vの閉鎖型", "高圧盤", "露出型の開閉器"],
+      };
+    }
+    if (context.workAction === "live-work") {
+      if (context.voltageClass === "低圧") {
+        return {
+          question: "低圧の活線作業を、停電作業へ切り替えられますか？",
+          options: ["100・200Vを停電して作業", "100・200Vの活線作業"],
+        };
+      }
+      if (
+        context.voltageClass === "高圧" ||
+        context.voltageClass === "特別高圧"
+      ) {
+        return {
+          question:
+            "高圧・特別高圧の活線作業を、停電作業へ切り替えられますか？",
+          options: ["停電して高圧設備を扱う", "高圧・特高の活線作業"],
+        };
+      }
+      return {
+        question:
+          "端子の電圧（100・200Vの低圧／高圧・特別高圧）と、停電作業へ切り替えられるかを教えてください。",
+        options: [
+          "100・200Vを停電して作業",
+          "100・200Vの活線作業",
+          "高圧・特高の活線作業",
+        ],
+      };
+    }
+    if (context.workAction === "live-proximity-work") {
+      if (
+        context.voltageClass === "高圧" ||
+        context.voltageClass === "特別高圧"
+      ) {
+        return {
+          question:
+            "高圧・特別高圧の電路を停電できるか、できなければ作業位置までの最短距離を教えてください。",
+          options: [
+            "停電して高圧線付近で作業",
+            "充電中の高圧線との距離を確認",
+          ],
+        };
+      }
+      if (context.voltageClass === "低圧") {
+        return {
+          question:
+            "低圧の充電部付近で、電路・支持物の点検等を行い、充電部へ接触するおそれがありますか？",
+          options: [
+            "低圧充電部に近接し点検・接触のおそれあり",
+            "低圧充電部に近接し点検・接触のおそれなし",
+            "電路・支持物は扱わず付近で別作業",
+          ],
+        };
+      }
+      return {
+        question:
+          "近接する電路の電圧と、電路・支持物の点検等で充電部へ接触するおそれがあるかを教えてください。",
+        options: [
+          "100・200Vで接触のおそれあり",
+          "100・200Vで接触のおそれなし",
+          "高圧・特高の充電部に近接",
+        ],
+      };
+    }
+    if (context.workAction === "open-panel") {
+      return {
+        question:
+          "盤を開けた後は、見るだけですか、測定・操作もしますか。また盤内は充電中ですか？",
+        options: [
+          "停電して盤内を見るだけ",
+          "充電中の盤内を見るだけ",
+          "盤内で測定・操作する",
+        ],
+      };
+    }
+    if (
+      context.workAction === "tester-measurement" ||
+      context.workAction === "insulation-measurement"
+    ) {
+      if (context.voltageClass) {
+        if (
+          context.energizedState &&
+          context.energizedState !== "unknown"
+        ) {
+          return null;
+        }
+        return {
+          question: "測定時は充電中ですか、それとも停電済みですか？",
+          options: ["充電中", "停電済み"],
+        };
+      }
+      if (
+        context.energizedState &&
+        context.energizedState !== "unknown"
+      ) {
+        return {
+          question: "測定する電路は100・200Vの低圧ですか、高圧ですか？",
+          options: ["100・200Vの低圧", "高圧設備"],
+        };
+      }
+      return {
+        question:
+          "測定時は充電中で、電圧は100・200Vと高圧のどちらですか？",
+        options: ["100・200Vで充電中", "低圧で停電済み", "高圧設備"],
+      };
+    }
+    if (
+      context.workAction === "wiring-connection" ||
+      context.workAction === "wiring-removal"
+    ) {
+      if (context.confirmedChoices?.includes("電圧が不明")) {
+        return {
+          question:
+            "銘板・回路図で電圧を確認した後、接続先が電線同士か機器端子かを教えてください。",
+          options: [],
+        };
+      }
+      if (
+        context.confirmedChoices?.includes("電線同士") ||
+        context.confirmedChoices?.includes("機器端子")
+      ) {
+        if (
+          context.voltageClass &&
+          context.energizedState &&
+          context.energizedState !== "unknown"
+        ) {
+          return null;
+        }
+        if (
+          context.energizedState &&
+          context.energizedState !== "unknown"
+        ) {
+          return {
+            question: "接続する回路の電圧を教えてください。",
+            options: ["100・200Vの低圧", "高圧設備"],
+          };
+        }
+        return {
+          question:
+            "接続する回路の電圧と、停電して作業できるかを教えてください。",
+          options: [
+            "100・200Vを停電して作業",
+            "高圧設備を停電して作業",
+            "充電中に扱う",
+          ],
+        };
+      }
+      if (context.voltageClass) {
+        return {
+          question: `${context.voltageClass}の配線について、接続先と、停電して作業できるかを教えてください。`,
+          options: ["電線同士を停電して扱う", "機器端子を停電して扱う", "充電中に扱う"],
+        };
+      }
+      return {
+        question: "接続先（電線同士・機器端子）と電圧を教えてください。",
+        options: ["電線同士", "機器端子", "電圧が不明"],
+      };
+    }
+    if (
+      context.voltageClass &&
+      (context.qualificationType === "special-education" ||
+        asksQualification ||
+        context.workAction === "unknown")
+    ) {
+      const voltageLabel =
+        context.voltageClass === "低圧"
+          ? "低圧設備"
+          : `${context.voltageClass}設備`;
+      return {
+        question: `${voltageLabel}で実際に行うのは、見る・操作する・盤内や配線を扱う、のどれですか？`,
+        options:
+          context.voltageClass === "低圧"
+            ? ["盤外から見る", "低圧ブレーカーを操作", "低圧盤内・配線を扱う"]
+            : [
+                `${context.voltageClass}設備を目視点検`,
+                `${context.voltageClass}設備を操作`,
+                `${context.voltageClass}充電部・配線を扱う`,
+              ],
+      };
+    }
+    if (context.qualificationType === "special-education") {
+      return {
+        question:
+          "実際に行う作業と、低圧・高圧・特別高圧のどれかを教えてください。",
+        options: ["見るだけ", "ブレーカー操作", "盤内測定・配線"],
+      };
+    }
+    if (
+      asksQualification ||
+      context.workAction === "unknown" ||
+      /(?:点検|検査|資格|教育)/.test(text)
+    ) {
+      return {
+        question:
+          "実際にするのは、盤外から見るだけ、盤を開けて測る、配線や充電部を扱う、のどれで、100・200Vか高圧設備か分かりますか？",
+        options: [...ELECTRICAL_WORK_CHOICES],
+      };
+    }
   }
   if (
     context.equipment === "フォークリフト" &&
@@ -1071,6 +1898,13 @@ export function buildLegalClarification(
     !context.load &&
     !/(?:何|なん)\s*(?:トン|t)から/i.test(text)
   ) {
+    if (/(?:分からない|わからない|不明|確認できない)/.test(text)) {
+      return {
+        question:
+          "車体銘板または仕様書を確認できたら、フォークリフトの最大荷重を教えてください。",
+        options: [],
+      };
+    }
     return {
       question:
         "必要な資格区分を確定するため、銘板・仕様書にあるフォークリフトの最大荷重はどれですか？",
@@ -1078,11 +1912,18 @@ export function buildLegalClarification(
     };
   }
   if (
-    /玉掛/.test(text) &&
+    /(?:玉掛|(?:荷|吊り荷).*(?:ワイヤ|フック|(?:吊|つ)る))/.test(text) &&
     asksQualification &&
     !context.load &&
     !/(?:何|なん)\s*(?:トン|t)から/i.test(text)
   ) {
+    if (/(?:分からない|わからない|不明|確認できない)/.test(text)) {
+      return {
+        question:
+          "機械の銘板または仕様書を確認できたら、クレーン等のつり上げ荷重を教えてください。",
+        options: [],
+      };
+    }
     return {
       question:
         "必要な資格区分を確定するため、使用するクレーン等のつり上げ荷重はどれですか？",
@@ -1100,10 +1941,32 @@ export function buildLegalClarification(
     };
   }
   if (
+    (confirmedChoices.has("クレーン") || confirmedChoices.has("デリック")) &&
+    asksQualification &&
+    !context.load
+  ) {
+    return {
+      question:
+        confirmedChoices.has("クレーン")
+          ? confirmedChoices.has("床上操作式")
+            ? "床上操作式クレーンのつり上げ荷重はどれですか？"
+            : "移動式でないクレーンのつり上げ荷重と操作方式はどれですか？"
+          : "デリックのつり上げ荷重はどれですか？",
+      options: confirmedChoices.has("クレーン")
+        ? confirmedChoices.has("床上操作式")
+          ? ["5トン未満", "5トン以上"]
+          : ["5トン未満", "5トン以上", "床上操作式"]
+        : ["5トン未満", "5トン以上"],
+    };
+  }
+  if (
     /クレーン/.test(text) &&
     (asksQualification || /運転/.test(text)) &&
     !/玉掛/.test(text) &&
-    !/(?:移動式|天井|橋形|デリック|スタッカー)/.test(text)
+    !/(?:移動式|天井|橋形|デリック|スタッカー)/.test(text) &&
+    !["クレーン", "移動式クレーン", "デリック"].some((choice) =>
+      confirmedChoices.has(choice as LegalConfirmedChoice),
+    )
   ) {
     return {
       question: "資格を確認したい機械はどれですか？",
@@ -1134,6 +1997,18 @@ export function buildLegalClarification(
     return {
       question: "作業床を設けられますか？",
       options: ["作業床あり", "作業床なし", "条件不明"],
+    };
+  }
+  if (
+    context.equipment === "足場" &&
+    asksQualification &&
+    !confirmedChoices.has("作業者の特別教育") &&
+    !confirmedChoices.has("足場の作業主任者")
+  ) {
+    return {
+      question:
+        "作業者として組立て等を行う場合の特別教育と、作業主任者として選任される要件のどちらを確認しますか？",
+      options: ["作業者の特別教育", "足場の作業主任者"],
     };
   }
   if (
@@ -1250,7 +2125,8 @@ export function buildLegalClarification(
   }
   if (
     /(?:石綿|アスベスト)/.test(text) &&
-    /(?:資格|誰|できる|行える)/.test(text) &&
+    /(?:事前調査|調査者)/.test(text) &&
+    /(?:資格|誰|できる|行える|調査者)/.test(text) &&
     !/(?:解体|改修|工作物|建築物|船舶)/.test(text)
   ) {
     return {
@@ -1259,7 +2135,61 @@ export function buildLegalClarification(
     };
   }
   if (
-    /(?:有機溶剤|有機則)/.test(text) &&
+    /(?:石綿|アスベスト)/.test(text) &&
+    (confirmedChoices.has("建築物") ||
+      confirmedChoices.has("工作物") ||
+      confirmedChoices.has("船舶"))
+  ) {
+    return null;
+  }
+  if (
+    context.equipment === "タンク" &&
+    !/(?:直前の内容物|残留物|有機溶剤|シンナー|その他の化学物質|内容物不明)/.test(
+      text,
+    )
+  ) {
+    return {
+      question:
+        "酸欠・化学物質の条件を絞るため、タンクの直前の内容物や残留物は何ですか？",
+      options: ["有機溶剤・シンナー", "その他の化学物質", "内容物不明"],
+    };
+  }
+  if (
+    /(?:石綿|アスベスト)/.test(text) &&
+    /(?:資格|教育|特別教育|講習|作業主任者)/.test(text) &&
+    !/(?:事前調査|調査者)/.test(text) &&
+    !confirmedChoices.has("作業者の特別教育") &&
+    !confirmedChoices.has("石綿作業主任者")
+  ) {
+    return {
+      question: "確認したい役割は、作業者・作業主任者・事前調査者のどれですか？",
+      options: ["作業者の特別教育", "石綿作業主任者", "事前調査者"],
+    };
+  }
+  if (
+    /(?:有機溶剤|有機則|シンナー|溶剤.*(?:塗装|洗浄|拭|扱|使)|(?:塗装|洗浄).*溶剤)/.test(
+      text,
+    ) &&
+    asksQualification &&
+    !confirmedChoices.has("作業者の教育") &&
+    !confirmedChoices.has("有機溶剤作業主任者") &&
+    !confirmedChoices.has("換気・保護措置")
+  ) {
+    return {
+      question: "確認したいのは、作業者の教育・作業主任者・設備措置のどれですか？",
+      options: ["作業者の教育", "有機溶剤作業主任者", "換気・保護措置"],
+    };
+  }
+  if (
+    confirmedChoices.has("作業者の教育") ||
+    confirmedChoices.has("有機溶剤作業主任者")
+  ) {
+    return null;
+  }
+  if (
+    /(?:有機溶剤|有機則|シンナー|溶剤.*(?:塗装|洗浄|拭|扱|使)|(?:塗装|洗浄).*溶剤)/.test(
+      text,
+    ) &&
     !/(?:第一種|第二種|第三種|第[123一二三]種)/.test(text) &&
     !/(?:健康診断|健診|何条|条文|根拠)/.test(text)
   ) {
@@ -1267,6 +2197,17 @@ export function buildLegalClarification(
       question:
         "設備要件を絞るため、SDS上の区分は第1種・第2種・第3種のどれですか？",
       options: ["第1種", "第2種", "第3種"],
+    };
+  }
+  if (
+    /(?:有機溶剤|有機則)/.test(text) &&
+    /(?:第三種|第[3三]種|臨時|短時間)/.test(text) &&
+    /(?:不明|分からない|わからない)/.test(text)
+  ) {
+    return {
+      question:
+        "容器・設備図面で確認できたら、作業場所がタンク等の内部か、それ以外の屋内かを教えてください。",
+      options: [],
     };
   }
   if (
@@ -1314,6 +2255,7 @@ export function buildLegalClarification(
   }
   if (
     /(?:点検|検査)/.test(text) &&
+    context.topicDomain !== "electrical" &&
     !/足場/.test(text) &&
     !/(?:健康|健診|ストレス|心の|日常|定期自主|月例|月次|毎月|月1回|1月(?:に)?1回|一月(?:に)?一回|年次|性能検査|使用前|始業前|作業開始前)/.test(
       text,
@@ -1354,13 +2296,28 @@ export function buildLegalClarification(
   if (
     /(?:化学物質|薬品|物質)/.test(text) &&
     !/(?:CAS|SDS|製品名|成分名|有機溶剤|石綿|鉛)/i.test(text) &&
-    !/(?:リスクアセスメント|危険性評価|健康診断|健診|化学物質(?:管理|かんり)者|薬品管理.*担当|選任|何条|条文|根拠)/i.test(
+    !/(?:リスクアセスメント|危険性評価|健康診断|健診|化学物質(?:管理|かんり)者|化学物質.*(?:扱|取扱).*(?:管理者|管理)|(?:管理者|管理).*化学物質.*(?:扱|取扱)|薬品管理.*担当|選任|何条|条文|根拠)/i.test(
       text,
     )
   ) {
     return {
       question: "物質を特定できる情報はどれですか？",
       options: ["製品名", "SDS名", "CAS番号"],
+    };
+  }
+  if (
+    /(?:化学物質(?:管理|かんり)者|化学物質.*(?:扱|取扱).*(?:管理者|管理)|(?:管理者|管理).*化学物質.*(?:扱|取扱)|(?:RA|リスクアセスメント)対象物.*(?:管理者|管理)|(?:管理者|管理).*(?:RA|リスクアセスメント)対象物)/i.test(
+      text,
+    ) &&
+    !/(?:化学物質管理者の)?選任(?:について)?です[。.]?$/.test(text) &&
+    !confirmedChoices.has("RA対象物を製造") &&
+    !confirmedChoices.has("RA対象物を取り扱う") &&
+    !confirmedChoices.has("譲渡・提供のみ")
+  ) {
+    return {
+      question:
+        "選任要件を絞るため、RA対象物を製造する事業場ですか、それ以外の取扱事業場ですか？",
+      options: ["RA対象物を製造", "RA対象物を取り扱う", "譲渡・提供のみ"],
     };
   }
   if (
@@ -1408,7 +2365,12 @@ export function buildLegalClarification(
       options: ["溶融", "塗料除去", "はんだ付け"],
     };
   }
-  if (/作業主任者/.test(text) && !context.workType) {
+  if (
+    /(?:作業主任者|主任者(?:を)?(?:置く|選任).*(?:仕事|作業)|(?:仕事|作業).*(?:主任者(?:を)?(?:置く|選任)))/.test(
+      text,
+    ) &&
+    !context.workType
+  ) {
     return {
       question:
         "作業主任者の要否を確認するため、実際の作業名や扱う物質・設備を教えてください。",
@@ -1436,10 +2398,25 @@ export function buildLegalClarification(
       options: [],
     };
   }
-  if (/特別教育/.test(text) && !context.workType && !context.equipment) {
+  if (
+    context.confirmedChoices?.includes("研削といし") ||
+    context.equipment === "研削といし" ||
+    /研削といし/.test(context.workType ?? "")
+  ) {
+    return {
+      question:
+        "実際に行うのは、研削といしの取替え・取替え時の試運転・通常の研削作業のどれですか？",
+      options: [],
+    };
+  }
+  if (
+    /(?:特別教育|(?:危険|有害)(?:な)?作業.*教育)/.test(text) &&
+    !context.workType &&
+    !context.equipment
+  ) {
     return {
       question: "特別教育を確認したい作業はどれですか？",
-      options: ["高所作業車", "低圧電気", "研削といし"],
+      options: ["高所作業車", "研削といし"],
     };
   }
   if (

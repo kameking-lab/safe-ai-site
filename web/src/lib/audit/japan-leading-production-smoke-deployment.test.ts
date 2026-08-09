@@ -1,7 +1,10 @@
 import { readFileSync } from "node:fs";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
-import { assertProductionAliasDeployment } from "../../../scripts/audit/japan-leading-production-smoke.mjs";
+import {
+  assertProductionAliasDeployment,
+  resolveRepositoryExternalEvidencePath,
+} from "../../../scripts/audit/japan-leading-production-smoke.mjs";
 
 const LINKED_PROJECT = {
   projectId: "prj_b2brgXdwQpnpmEN6gc3vtNFm6m7a",
@@ -42,6 +45,29 @@ function assertFixture(
 }
 
 describe("Japan-leading production deployment boundary", () => {
+  it("requires an explicit absolute evidence path outside the repository", () => {
+    const repositoryRoot = resolve("C:/safe-ai-site");
+    expect(() =>
+      resolveRepositoryExternalEvidencePath({
+        configuredPath: undefined,
+        repositoryRoot,
+      }),
+    ).toThrow("explicit absolute repository-external path");
+    expect(() =>
+      resolveRepositoryExternalEvidencePath({
+        configuredPath: join(repositoryRoot, "docs", "smoke.json"),
+        repositoryRoot,
+      }),
+    ).toThrow("outside the repository");
+    const external = resolve("C:/safe-ai-release/production/smoke.json");
+    expect(
+      resolveRepositoryExternalEvidencePath({
+        configuredPath: external,
+        repositoryRoot,
+      }),
+    ).toBe(external);
+  });
+
   it("accepts only when the production alias and ID resolve to the same linked deployment", () => {
     const evidence = assertFixture(
       productionMetadata({ credential: "must-not-be-copied" }),

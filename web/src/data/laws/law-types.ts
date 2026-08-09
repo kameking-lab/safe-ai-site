@@ -32,8 +32,11 @@ export type LawArticle = {
    * プロンプトに添付する。キーは漢数字表記（例: "六"）、値は当該号の主題（例: "フォークリフト"）。
    */
   itemNumberMap?: Record<string, string>;
-  /** Exact text copied from a committed e-Gov full-text snapshot. */
-  sourceKind?: "egov-fulltext-snapshot" | "mhlw-official-primary";
+  /** Provenance class for exact text copied from an official source. */
+  sourceKind?:
+    | "egov-fulltext-snapshot"
+    | "mhlw-official-primary"
+    | "government-official-primary";
   /** Primary-source law page. */
   sourceUrl?: string;
   /** e-Gov law identifier used by the snapshot. */
@@ -56,7 +59,7 @@ export type LawArticle = {
   sourceValidTo?: string;
   /** Snapshot acquisition time. This is not a human review time. */
   sourceFetchedAt?: string;
-  /** SHA-256 of the complete snapshot article array. */
+  /** SHA-256 of the complete snapshot, or of the normalized official excerpt. */
   sourceHash?: string;
   /** SHA-256 of the selected canonical article object. */
   contentHash?: string;

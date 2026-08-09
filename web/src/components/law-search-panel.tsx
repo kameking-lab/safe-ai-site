@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import dynamic from "next/dynamic";
 import { InputWithVoice } from "@/components/voice-input-field";
+import { TransientChatLink } from "@/components/home-safety-cockpit/transient-chat-link";
 import { useLanguage } from "@/contexts/language-context";
 import { PageContainer } from "@/components/layout/page-container";
 import { Stack } from "@/components/layout/stack";
@@ -31,6 +32,17 @@ export function LawSearchPanel({
   const shouldLoadCorpus = Boolean(
     query.trim() || articleNumQuery.trim() || selectedLaw !== "all",
   );
+  const chatQuestion = (() => {
+    const keyword = query.trim();
+    const article = articleNumQuery.trim();
+    if (!keyword && !article) return "";
+    if (keyword && !article && selectedLaw === "all") return keyword;
+    const scope = [
+      selectedLaw !== "all" ? selectedLaw : "",
+      article,
+    ].filter(Boolean).join(" ");
+    return `${keyword || scope}${keyword && scope ? `（${scope}）` : ""}について、安衛法上の要件を教えて`;
+  })();
 
   const keepSearchInMemory = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -93,6 +105,23 @@ export function LawSearchPanel({
           </button>
         ))}
       </nav>
+
+      {chatQuestion && (
+        <div className="flex flex-wrap items-center gap-2 text-xs text-slate-600">
+          <span>
+            {isEn
+              ? "You can continue with this search in the legal assistant."
+              : "この検索内容を会話で確認できます。"}
+          </span>
+          <TransientChatLink
+            question={chatQuestion}
+            data-law-search-chat-handoff=""
+            className="inline-flex min-h-11 items-center rounded-full border border-blue-200 bg-white px-3 py-2 font-semibold text-blue-800 hover:bg-blue-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700"
+          >
+            {isEn ? "Ask the legal assistant" : "この内容で安衛法AIに質問"}
+          </TransientChatLink>
+        </div>
+      )}
 
       {shouldLoadCorpus ? (
         <LawSearchResults

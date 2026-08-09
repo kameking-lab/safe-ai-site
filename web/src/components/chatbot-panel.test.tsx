@@ -316,6 +316,89 @@ describe("ChatbotPanel AI safety boundary", () => {
     }
   });
 
+  it("生成quick replyの中黒を個人名扱いせず、promptと9-key contextで次の回答まで送る", async () => {
+    const expectedContext = {
+      topicDomain: "electrical",
+      workAction: "tester-measurement",
+      equipment: "電気設備",
+      voltageClass: "低圧",
+      energizedState: "energized",
+      roleType: "worker",
+      qualificationType: "special-education",
+      workDate: "2026-08-09",
+      confirmedChoices: ["配線・充電部を扱う"],
+    };
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        chatbotStream({
+          answer:
+            "見るだけか、盤内測定か、配線・充電部を扱うかで必要条件が変わります。",
+          directAnswer:
+            "見るだけか、盤内測定か、配線・充電部を扱うかで必要条件が変わります。",
+          assumptions: [],
+          importantConditions: ["作業行為", "電圧", "充電状態"],
+          citations: [],
+          clarificationQuestion: "実際の作業はどれですか？",
+          quickReplies: [
+            {
+              label: "配線・充電部を扱う",
+              prompt: "配線・充電部を扱う",
+            },
+          ],
+          context: expectedContext,
+          sources: [],
+          source_type: "rag",
+          confidence: "medium",
+          requiresHumanReview: true,
+        }),
+      )
+      .mockResolvedValueOnce(
+        chatbotStream({
+          answer:
+            "配線や充電部を扱う場合は、電気工事士免状と電気取扱業務の特別教育を別々に確認します。",
+          directAnswer:
+            "配線や充電部を扱う場合は、電気工事士免状と電気取扱業務の特別教育を別々に確認します。",
+          assumptions: ["直前の電気作業を引き継いでいます"],
+          importantConditions: ["低圧", "充電中"],
+          citations: [],
+          clarificationQuestion: null,
+          quickReplies: [],
+          context: expectedContext,
+          sources: [],
+          source_type: "rag",
+          confidence: "medium",
+          requiresHumanReview: true,
+        }),
+      );
+    vi.stubGlobal("fetch", fetchMock);
+    render(<ChatbotPanel />);
+
+    fireEvent.click(screen.getByRole("button", { name: "電気作業の資格は？" }));
+    await screen.findByText(/見るだけか、盤内測定か/);
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "配線・充電部を扱う" }),
+    );
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+    await screen.findByText(/電気工事士免状と電気取扱業務の特別教育/);
+    const nextBody = JSON.parse(
+      String(fetchMock.mock.calls[1]?.[1]?.body ?? "{}"),
+    ) as {
+      message?: string;
+      context?: Record<string, unknown>;
+      privacyConfirmed?: boolean;
+    };
+    expect(nextBody.message).toBe("配線・充電部を扱う");
+    expect(nextBody.context).toEqual(expectedContext);
+    expect(Object.keys(nextBody.context ?? {}).sort()).toEqual(
+      Object.keys(expectedContext).sort(),
+    );
+    expect(nextBody.privacyConfirmed).toBe(true);
+    expect(screen.queryByRole("alert")).toBeNull();
+  });
+
   it("server-only safety block removes the user turn and never persists or analyses raw text", async () => {
     const input = "匿名化済みの一般的な足場点検について";
     const fetchMock = vi.fn().mockResolvedValue(
@@ -490,6 +573,123 @@ describe("ChatbotPanel conversation UI", () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
+  it("新契約のdirectAnswerとimportantConditionsを旧表示本文より優先する", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      chatbotStream({
+        answer: "結論\n旧表示だけの回答です。",
+        substantiveAnswer: "旧フィールドの回答です。",
+        directAnswer:
+          "見るだけの点検なら、それだけで一律の国家資格が必要とは限りません。",
+        assumptions: [],
+        conditions: ["旧条件"],
+        importantConditions: ["盤を開けるか", "充電部へ近づくか"],
+        citations: [],
+        clarificationQuestion: "実際に盤を開けますか？",
+        quickReplies: [
+          { label: "見るだけ", prompt: "見るだけ" },
+          { label: "盤を開けて測定", prompt: "盤を開けて測定" },
+        ],
+        sources: [],
+        source_type: "rag",
+        confidence: "medium",
+        requiresHumanReview: true,
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    render(<ChatbotPanel />);
+
+    fireEvent.click(screen.getByRole("button", { name: "電気作業の資格は？" }));
+
+    await screen.findByText(/見るだけの点検なら/);
+    expect(screen.queryByText("旧フィールドの回答です。")).toBeNull();
+    expect(screen.queryByText("旧条件")).toBeNull();
+    expect(screen.getByText("盤を開けるか")).toBeDefined();
+    expect(screen.getByText("充電部へ近づくか")).toBeDefined();
+    expect(screen.queryByRole("heading", { name: "結論" })).toBeNull();
+    for (const chip of document.querySelectorAll("[data-chatbot-quick-reply]")) {
+      expect(chip.className).toContain("min-h-11");
+      expect(chip.className).toContain("max-w-full");
+      expect(chip.className).toContain("whitespace-normal");
+    }
+    fireEvent.click(screen.getByRole("button", { name: "合っている" }));
+    expect(screen.getByText("ありがとうございます。")).toBeDefined();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("回答フィードバックは外部送信せず、違うで文脈を保ってcomposerへ戻す", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        chatbotStream({
+          answer: "結論\n電気点検は行為と充電状態で必要条件が変わります。",
+          directAnswer:
+            "電気点検は行為と充電状態で必要条件が変わります。",
+          assumptions: [],
+          importantConditions: ["盤を開けるか", "充電中か"],
+          citations: [],
+          clarificationQuestion: "盤を開けますか？",
+          quickReplies: [
+            { label: "見るだけ", prompt: "見るだけ" },
+            { label: "盤を開ける", prompt: "盤を開ける" },
+          ],
+          context: {
+            topicDomain: "electrical",
+            workAction: "start-of-work-inspection",
+            workType: "電気作業",
+            equipment: "電気設備",
+            load: "最大荷重1.5t",
+            role: "作業主任者",
+            targetDate: "2026-08-09",
+            confirmedChoices: ["山田太郎"],
+          } as never,
+          sources: [],
+          source_type: "rag",
+          confidence: "medium",
+          requiresHumanReview: true,
+        }),
+      )
+      .mockImplementationOnce(() => new Promise(() => {}));
+    vi.stubGlobal("fetch", fetchMock);
+    render(<ChatbotPanel />);
+
+    fireEvent.click(screen.getByRole("button", { name: "電気作業の資格は？" }));
+    await screen.findByText(/電気点検は行為と充電状態/);
+
+    const composer = screen.getByLabelText("質問入力");
+    expect(
+      document.querySelectorAll("[data-chatbot-quick-reply]"),
+    ).toHaveLength(2);
+    fireEvent.click(screen.getByRole("button", { name: "違う" }));
+    expect(
+      screen.getByText("知りたい点をもう少し教えてください"),
+    ).toBeDefined();
+    await waitFor(() => expect(document.activeElement).toBe(composer));
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(
+      document.querySelectorAll("[data-chatbot-quick-reply]"),
+    ).toHaveLength(0);
+    expect(screen.queryByText("酸欠")).toBeNull();
+    expect(screen.queryByText("有機溶剤")).toBeNull();
+
+    fireEvent.change(composer, { target: { value: "盤を開けて測る" } });
+    fireEvent.click(screen.getByRole("button", { name: "送信" }));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+    const nextBody = JSON.parse(
+      String(fetchMock.mock.calls[1]?.[1]?.body ?? "{}"),
+    ) as Record<string, unknown>;
+    expect(nextBody).not.toHaveProperty("history");
+    expect(nextBody.context).toEqual({
+      topicDomain: "electrical",
+      workAction: "start-of-work-inspection",
+      equipment: "電気設備",
+      roleType: "work-supervisor",
+      qualificationType: "work-supervisor",
+      workDate: "2026-08-09",
+      confirmedChoices: ["最大荷重1.5t"],
+    });
+    expect(JSON.stringify(nextBody)).not.toContain("山田太郎");
+  });
+
   it("範囲警告は回答後にだけ表示し、通常時の常設警告にしない", async () => {
     const warning =
       "指定条文を検証済み収録正本から一意に特定できないため、公式原文で条件を確認してください。";
@@ -570,7 +770,7 @@ describe("ChatbotPanel conversation UI", () => {
     expect(composer?.className).toContain("bottom-0");
   });
 
-  it("電気作業の作業主任者follow-upを履歴付きで送り、無関係な分類へ飛ばない", async () => {
+  it("電気作業のfollow-upは生履歴を送らず構造化contextだけを引き継ぐ", async () => {
     const firstAnswer =
       "結論\n電気作業の資格・教育は作業内容で変わります。\n\n条件\n・配線工事\n・充電部付近の作業\n・設備操作\n\n次の質問\n実際の作業はどれに近いですか？";
     const secondAnswer =
@@ -594,6 +794,11 @@ describe("ChatbotPanel conversation UI", () => {
           sources: [],
           source_type: "rag",
           confidence: "low",
+          context: {
+            topicDomain: "electrical",
+            workAction: "unknown",
+            equipment: "電気設備",
+          },
           requiresHumanReview: true,
         }),
       )
@@ -640,13 +845,17 @@ describe("ChatbotPanel conversation UI", () => {
       String(fetchMock.mock.calls[1]?.[1]?.body ?? "{}"),
     ) as {
       message?: string;
-      history?: Array<{ role: string; content: string }>;
+      history?: unknown;
+      context?: Record<string, unknown>;
     };
     expect(body.message).toBe("作業主任者");
-    expect(body.history).toEqual([
-      { role: "user", content: "電気作業の資格は？" },
-      { role: "assistant", content: firstAnswer },
-    ]);
+    expect(body).not.toHaveProperty("history");
+    expect(body.context).toEqual({
+      topicDomain: "electrical",
+      workAction: "unknown",
+      equipment: "電気設備",
+    });
+    expect(JSON.stringify(body)).not.toContain(firstAnswer);
     expect(screen.queryByText("酸欠")).toBeNull();
     expect(screen.queryByText("有機溶剤")).toBeNull();
     expect(screen.queryByText("石綿")).toBeNull();
@@ -715,6 +924,11 @@ describe("ChatbotPanel conversation UI", () => {
           { label: "単管足場", prompt: "単管足場" },
           { label: "分からない", prompt: "足場種類は不明" },
         ],
+        effectiveDateStatus: {
+          asOf: "2026-08-09",
+          status: "current",
+          label: "2026-08-09時点で施行中として確認済みです。",
+        },
         source_type: "rag",
         confidence: "low",
         requiresHumanReview: true,
@@ -733,10 +947,9 @@ describe("ChatbotPanel conversation UI", () => {
       screen.getByRole("heading", { name: /安衛法AIの回答/, level: 2 }),
     ).toBeDefined();
     for (const section of ["結論", "条件で変わる点", "確認"]) {
-      expect(
-        screen.getByRole("heading", { name: section, level: 3 }),
-      ).toBeDefined();
+      expect(screen.queryByRole("heading", { name: section })).toBeNull();
     }
+    expect(screen.getByRole("list", { name: "主な条件" })).toBeDefined();
     expect(
       screen.queryByRole("heading", { name: "根拠", level: 3 }),
     ).toBeNull();
@@ -750,8 +963,322 @@ describe("ChatbotPanel conversation UI", () => {
     const details = document.querySelector("[data-chatbot-source-details]");
     expect(details).not.toBeNull();
     expect((details as HTMLDetailsElement).open).toBe(false);
+    expect(details?.textContent).toContain("施行状態: 現在施行中");
+    expect(details?.textContent).toContain("対象 2026-08-09");
     const actions = document.querySelector("[data-chatbot-answer-actions]");
     expect(actions?.querySelectorAll("button").length).toBeLessThanOrEqual(3);
+  });
+
+  it("電気分野の主根拠は信頼できるsourceメタデータから法令名・条・項・号を直接表示する", async () => {
+    const officialUrl = "https://laws.e-gov.go.jp/law/example";
+    const sources = [
+      {
+        law: "労働安全衛生規則",
+        lawShort: "安衛則",
+        article: "第346条",
+        articleTitle: "低圧活線作業",
+        text: "低圧の充電電路の点検、修理等に関する条文。",
+        // 本文に項号があっても、locatorとして明示されていない限り推測しない。
+        snippet: "第2項では労働者の義務を定める。",
+        applicationStatus: "current" as const,
+        asOf: "2026-08-09",
+        url: officialUrl,
+      },
+      {
+        law: "労働安全衛生規則",
+        lawShort: "安衛則",
+        article: "第347条第2項",
+        articleTitle: "低圧活線近接作業",
+        text: "絶縁用防具の装着又は取外しに関する条文。",
+        applicationStatus: "current" as const,
+        asOf: "2026-08-09",
+        url: officialUrl,
+      },
+      {
+        law: "労働安全衛生規則",
+        lawShort: "安衛則",
+        article: "第341条第1項第2号",
+        articleTitle: "高圧活線作業",
+        text: "活線作業用器具の使用に関する条文。",
+        applicationStatus: "current" as const,
+        asOf: "2026-08-09",
+        url: officialUrl,
+      },
+      {
+        law: "電気工事士法",
+        lawShort: "電気工事士法",
+        article: "第3条第2項",
+        articleTitle: "電気工事士等",
+        text: "一般用電気工作物等の電気工事に関する条文。",
+        applicationStatus: "current" as const,
+        asOf: "2026-08-09",
+        url: officialUrl,
+      },
+      {
+        law: "電気事業法",
+        lawShort: "電事法",
+        article: "第43条第4項",
+        articleTitle: "主任技術者",
+        text: "主任技術者の保安監督の職務に関する条文。",
+        applicationStatus: "current" as const,
+        asOf: "2026-08-09",
+        url: officialUrl,
+      },
+    ];
+    const citations = [
+      ["安衛則", "労働安全衛生規則", "第346条", "低圧活線作業"],
+      ["安衛則", "労働安全衛生規則", "第347条", "低圧活線近接作業"],
+      ["安衛則", "労働安全衛生規則", "第341条", "高圧活線作業"],
+      ["電気工事士法", "電気工事士法", "第3条", "電気工事士等"],
+      ["電事法", "電気事業法", "第43条", "主任技術者"],
+    ].map(([lawShort, fullName, articleNum, articleTitle]) => ({
+      lawShort,
+      fullName,
+      articleNum,
+      articleTitle,
+      issuer: lawShort === "安衛則" ? "厚生労働省" : "経済産業省",
+      searchHref: `/law-search?q=${articleNum}`,
+      egovHref: officialUrl,
+    }));
+    const fetchMock = vi.fn().mockResolvedValue(
+      chatbotStream({
+        answer: "電気点検の行為と電圧・充電状態によって必要条件が変わります。",
+        directAnswer:
+          "電気点検の行為と電圧・充電状態によって必要条件が変わります。",
+        assumptions: [],
+        importantConditions: [],
+        sources,
+        citations,
+        clarificationQuestion: null,
+        quickReplies: [],
+        effectiveDateStatus: {
+          asOf: "2026-08-09",
+          status: "current",
+          label: "2026-08-09時点で施行中として確認済みです。",
+        },
+        source_type: "rag",
+        confidence: "high",
+        requiresHumanReview: true,
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    render(<ChatbotPanel />);
+
+    fireEvent.change(screen.getByLabelText("質問入力"), {
+      target: { value: "電気の点検に資格いる？" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "送信" }));
+    await screen.findByText(/電気点検の行為/);
+
+    const details = document.querySelectorAll("[data-chatbot-source-details]");
+    expect(details).toHaveLength(1);
+    const entries = details[0]!.querySelectorAll(
+      "[data-chatbot-source-entry]",
+    );
+    expect(entries).toHaveLength(5);
+    const expectedLocators = [
+      ["労働安全衛生規則", "条:第346条", "項:指定なし", "号:指定なし"],
+      ["労働安全衛生規則", "条:第347条", "項:第2項", "号:指定なし"],
+      ["労働安全衛生規則", "条:第341条", "項:第1項", "号:第2号"],
+      ["電気工事士法", "条:第3条", "項:第2項", "号:指定なし"],
+      ["電気事業法", "条:第43条", "項:第4項", "号:指定なし"],
+    ];
+    entries.forEach((entry, index) => {
+      const locator = entry.querySelector("[data-chatbot-source-locator]");
+      expect(locator).not.toBeNull();
+      for (const expected of expectedLocators[index]!) {
+        expect(locator?.textContent).toContain(expected);
+      }
+      expect(entry.textContent).toContain("施行状態: 現在施行中");
+      expect(entry.textContent).toContain("該当箇所:");
+      expect(entry.querySelector("a")?.textContent).toContain("公式原文");
+    });
+    // 第346条のsnippetにある「第2項」をlocatorとして推測しない。
+    expect(
+      entries[0]!
+        .querySelector("[data-chatbot-source-locator]")
+        ?.textContent,
+    ).not.toContain("第2項");
+  });
+
+  it("クレーン則22条の床上操作式技能講習の許可句を根拠foldで末尾まで表示する", async () => {
+    const officialUrl = "https://laws.e-gov.go.jp/law/347M50002000034#Mp-At_22";
+    const exactExcerpt =
+      "事業者は、令第二十条第六号に掲げる業務については、クレーン・デリック運転士免許を受けた者でなければ、当該業務に就かせてはならない。ただし、床上で運転し、かつ、当該運転をする者が荷の移動とともに移動する方式のクレーン（以下「床上操作式クレーン」という。）の運転の業務については、床上操作式クレーン運転技能講習を修了した者を当該業務に就かせることができる。";
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        chatbotStream({
+          answer:
+            "床上操作式クレーンは、所定の技能講習修了者も運転できます。［1］",
+          directAnswer:
+            "床上操作式クレーンは、所定の技能講習修了者も運転できます。［1］",
+          assumptions: [],
+          importantConditions: [],
+          sources: [
+            {
+              law: "クレーン等安全規則",
+              lawShort: "クレーン則",
+              article: "第22条「就業制限」",
+              paragraph: "第1項",
+              text: exactExcerpt,
+              snippet: exactExcerpt,
+              applicationStatus: "current",
+              asOf: "2026-08-09",
+              url: officialUrl,
+            },
+          ],
+          citations: [
+            {
+              lawShort: "クレーン則",
+              fullName: "クレーン等安全規則",
+              articleNum: "第22条",
+              articleTitle: "就業制限",
+              issuer: "厚生労働省",
+              searchHref: "/law-search?q=クレーン則第22条",
+              egovHref: officialUrl,
+            },
+          ],
+          clarificationQuestion: null,
+          quickReplies: [],
+          effectiveDateStatus: {
+            asOf: "2026-08-09",
+            status: "current",
+            label: "2026-08-09時点で施行中として確認済みです。",
+          },
+          source_type: "rag",
+          confidence: "high",
+          requiresHumanReview: true,
+        }),
+      ),
+    );
+    render(<ChatbotPanel />);
+
+    fireEvent.change(screen.getByLabelText("質問入力"), {
+      target: { value: "クレーンを運転する資格は？" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "送信" }));
+    await screen.findByText(/所定の技能講習修了者/);
+
+    const details = document.querySelector(
+      "[data-chatbot-source-details]",
+    ) as HTMLDetailsElement;
+    fireEvent.click(details.querySelector("summary")!);
+    const entry = details.querySelector("[data-chatbot-source-entry]");
+    expect(entry?.textContent).toContain(
+      "床上操作式クレーン運転技能講習を修了した者を当該業務に就かせることができる",
+    );
+    expect(entry?.textContent).not.toMatch(/運転の業務について(?:は)?…$/);
+  });
+
+  it("電気のexact verified unitを240字で切らず、項号・時間数・例外末尾まで根拠foldに表示する", async () => {
+    const officialUrl = "https://laws.e-gov.go.jp/law/example";
+    const lowVoltageScope =
+      "低圧（直流にあつては七百五十ボルト以下、交流にあつては六百ボルト以下である電圧をいう。）の充電電路の敷設若しくは修理の業務又は配電盤室、変電室等区画された場所に設置する低圧の電路のうち充電部分が露出している開閉器の操作の業務";
+    const proximityException = `${"低圧の充電電路に近接する場所において作業を行なうときは、当該充電電路に絶縁用防具を装着すること。".repeat(3)}ただし、労働者に絶縁用保護具を着用させ、身体の部分以外の部分が当該充電電路に接触するおそれのないときは、この限りでない。`;
+    const sources = [
+      {
+        law: "労働安全衛生規則",
+        lawShort: "安衛則",
+        article: "第36条",
+        item: "第4号",
+        articleTitle: "特別教育を必要とする業務",
+        text: lowVoltageScope,
+        snippet: lowVoltageScope,
+        applicationStatus: "current" as const,
+        asOf: "2026-08-09",
+        url: officialUrl,
+      },
+      {
+        law: "労働安全衛生規則",
+        lawShort: "安衛則",
+        article: "第347条",
+        paragraph: "第1項",
+        articleTitle: "低圧活線近接作業",
+        text: proximityException,
+        snippet: proximityException,
+        applicationStatus: "current" as const,
+        asOf: "2026-08-09",
+        url: officialUrl,
+      },
+      {
+        law: "電気事業法",
+        lawShort: "電事法",
+        article: "第43条",
+        paragraph: "第5項",
+        articleTitle: "主任技術者",
+        text: "事業用電気工作物の工事、維持又は運用に従事する者は、主任技術者がその保安のためにする指示に従わなければならない。",
+        applicationStatus: "current" as const,
+        asOf: "2026-08-09",
+        url: officialUrl,
+      },
+      {
+        law: "安全衛生特別教育規程",
+        lawShort: "特別教育規程",
+        article: "第5条",
+        paragraph: "第1項・第2項・第3項",
+        articleTitle: "高圧・特別高圧",
+        text: "学科教育は合計十一時間以上。実技教育は十五時間以上（充電電路の操作の業務のみを行なう者については一時間以上）。",
+        applicationStatus: "current" as const,
+        asOf: "2026-08-09",
+        url: "https://www.mhlw.go.jp/web/t_doc?dataId=74085000",
+      },
+      {
+        law: "安全衛生特別教育規程",
+        lawShort: "特別教育規程",
+        article: "第6条",
+        paragraph: "第1項・第2項・第3項",
+        articleTitle: "低圧",
+        text: "学科教育は合計七時間以上。実技教育は七時間以上（開閉器の操作の業務のみを行なう者については一時間以上）。",
+        applicationStatus: "current" as const,
+        asOf: "2026-08-09",
+        url: "https://www.mhlw.go.jp/web/t_doc?dataId=74085000",
+      },
+    ];
+    const fetchMock = vi.fn().mockResolvedValue(
+      chatbotStream({
+        answer: "電気取扱業務の対象と教育時間を公式原文で確認できます。",
+        directAnswer:
+          "電気取扱業務の対象と教育時間を公式原文で確認できます。",
+        assumptions: [],
+        importantConditions: [],
+        sources,
+        citations: [],
+        clarificationQuestion: null,
+        quickReplies: [],
+        effectiveDateStatus: {
+          asOf: "2026-08-09",
+          status: "current",
+          label: "2026-08-09時点で施行中として確認済みです。",
+        },
+        source_type: "rag",
+        confidence: "high",
+        requiresHumanReview: true,
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    render(<ChatbotPanel />);
+
+    fireEvent.change(screen.getByLabelText("質問入力"), {
+      target: { value: "電気作業の特別教育について教えて" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "送信" }));
+    await screen.findByText(/電気取扱業務の対象/);
+
+    const details = document.querySelector(
+      "[data-chatbot-source-details]",
+    ) as HTMLDetailsElement | null;
+    expect(details).not.toBeNull();
+    expect(details?.querySelector("summary")?.textContent).toContain("根拠 5件");
+    expect(details?.textContent).toContain("号:第4号");
+    expect(details?.textContent).toContain("項:第1項");
+    expect(details?.textContent).toContain("項:第5項");
+    expect(details?.textContent).toContain("項:第1項・第2項・第3項");
+    expect(details?.textContent).toContain("身体の部分以外の部分が当該充電電路に接触するおそれのないときは、この限りでない");
+    expect(details?.textContent).toContain("十五時間以上");
+    expect(details?.textContent).toContain("七時間以上");
+    expect(details?.textContent).toContain("一時間以上");
+    expect(details?.textContent).not.toMatch(/フルハーネス|外国人教材/u);
   });
 
   it("長文回答と根拠が同時にある場合も初期表示の操作を3件以下にする", async () => {
@@ -861,7 +1388,7 @@ describe("ChatbotPanel conversation UI", () => {
     ) as HTMLDetailsElement | null;
     expect(details).not.toBeNull();
     expect(details?.open).toBe(false);
-    expect(details?.textContent).toContain("根拠 1件・関連資料 2件");
+    expect(details?.querySelector("summary")?.textContent).toContain("根拠 3件");
     expect(details?.textContent).toContain("関連資料（条文本文とは別）");
     expect(details?.textContent).toContain("基発0520第6号");
     expect(details?.textContent).toContain("PDF 2ページ 第3 1(1)イ");
@@ -876,6 +1403,9 @@ describe("ChatbotPanel conversation UI", () => {
       "公式リーフレット（条文本文とは別）",
     );
     expect(details?.textContent).toContain("働く人の今すぐ使える熱中症ガイド");
+    expect(details?.textContent).not.toMatch(
+      /外国人教材|外国人労働者|フルハーネス|石綿|有機溶剤|酸素欠乏/u,
+    );
     expect(
       screen.getByRole("link", { name: "公式資料" }).getAttribute("href"),
     ).toBe("https://www.mhlw.go.jp/content/001103539.pdf");
@@ -929,7 +1459,7 @@ describe("ChatbotPanel conversation UI", () => {
       "[data-chatbot-source-details]",
     ) as HTMLDetailsElement | null;
     expect(details).not.toBeNull();
-    expect(details?.textContent).toContain("根拠 0件・関連資料 2件");
+    expect(details?.querySelector("summary")?.textContent).toContain("根拠 2件");
     expect(details?.textContent).toContain("安全な公式リーフレット");
     expect(details?.textContent).toContain("不正な外部URLの資料");
     expect(screen.getAllByRole("link", { name: "公式資料" })).toHaveLength(1);

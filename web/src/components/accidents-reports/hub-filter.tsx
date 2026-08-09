@@ -11,6 +11,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
 import { ArrowRight, Search, X, ClipboardList, MessageSquare } from "lucide-react";
+import { TransientChatLink } from "@/components/home-safety-cockpit/transient-chat-link";
 import type { AllIndustriesSummary } from "@/lib/accident-analysis";
 import { SLUG_TO_SAFETY_PLAN, type IndustrySlug } from "@/lib/industry-slugs";
 import {
@@ -279,13 +280,13 @@ export function HubFilter({
                   >
                     <ClipboardList className="h-3.5 w-3.5" aria-hidden="true" />{it.label}の年次計画を作る
                   </Link>
-                  <Link
-                    href="/chatbot"
+                  <TransientChatLink
+                    question={`${it.label}で多い「${it.topType ?? "労働災害"}」を防ぐために関係する安衛法上の義務は？`}
                     className="inline-flex items-center gap-1 rounded-full bg-white px-2.5 py-1 text-[11px] font-semibold text-blue-700 ring-1 ring-blue-200 hover:bg-blue-50 dark:bg-slate-900 dark:text-blue-300 dark:ring-blue-800 dark:hover:bg-blue-950/40"
                     aria-label={`${it.label}の労働災害について安衛法AIチャットボットに質問する`}
                   >
                     <MessageSquare className="h-3.5 w-3.5" aria-hidden="true" />AIに条文を質問
-                  </Link>
+                  </TransientChatLink>
                 </div>
               </div>
             );

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { trackEvent } from "@/components/Analytics";
 import {
-  canEmitChatDestinationEvent,
+  HOME_COCKPIT_EVENTS,
   sanitizeHomeCockpitAttributes,
   trackHomeCockpitEvent,
 } from "./home-cockpit-telemetry";
@@ -57,31 +57,14 @@ describe("home cockpit telemetry privacy", () => {
     expect(trackEvent).not.toHaveBeenCalled();
   });
 
-  it("allows destination-ready only on the query-free production route after consent", () => {
-    const base = {
-      hostname: "www.anzen-ai-portal.jp",
-      pathname: "/chatbot",
-      search: "",
-      hash: "",
-      consentGranted: true,
-      privacyOptOut: false,
-      gaAvailable: true,
-    };
-    expect(canEmitChatDestinationEvent(base)).toBe(true);
-    expect(
-      canEmitChatDestinationEvent({ ...base, consentGranted: false }),
-    ).toBe(false);
-    expect(
-      canEmitChatDestinationEvent({ ...base, privacyOptOut: true }),
-    ).toBe(false);
-    expect(
-      canEmitChatDestinationEvent({ ...base, hostname: "preview.vercel.app" }),
-    ).toBe(false);
-    expect(
-      canEmitChatDestinationEvent({ ...base, search: "?question=blocked" }),
-    ).toBe(false);
-    expect(
-      canEmitChatDestinationEvent({ ...base, hash: "#blocked" }),
-    ).toBe(false);
+  it("has no destination-ready exception for the sensitive chatbot route", () => {
+    expect(HOME_COCKPIT_EVENTS).not.toContain("home_chat_destination_ready");
+
+    trackHomeCockpitEvent(
+      "home_chat_destination_ready" as never,
+      { action_type: "chat", destination_route_template: "/chatbot" },
+    );
+
+    expect(trackEvent).not.toHaveBeenCalled();
   });
 });

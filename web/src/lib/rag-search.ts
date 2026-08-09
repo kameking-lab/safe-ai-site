@@ -1,4 +1,5 @@
 import { verifiedLawArticles } from "@/data/laws/verified-corpus";
+import { verifiedPrimaryElectricalArticles } from "@/data/laws/verified-primary-electrical";
 import type { LawArticle } from "@/data/laws";
 import { normalizeSearchText } from "@/lib/fuzzy-search";
 import { expandQuery } from "@/lib/query-expansion";
@@ -13,6 +14,10 @@ import {
   OUT_OF_DOMAIN_PENALTY_FACTOR,
 } from "@/lib/rag/out-of-domain";
 import { kanjiToArabic } from "@/lib/article-number-normalize";
+import {
+  extractElectricalMeaning,
+  normalizeElectricalWorkText,
+} from "@/lib/electrical-work-model";
 // C-1（モバイル実速度の構造是正）: カテゴリフィルタのUI選択肢は law-category-options.ts
 // に分離した。client（chatbot-panel）がこの定数のためだけに本モジュール経由で
 // 法令コーパス全体（チャンク生約1.4MB）をバンドルへ巻き込んでいたため。
@@ -21,6 +26,17 @@ import type { LawCategoryFilter } from "@/lib/law-category-options";
 
 export { LAW_CATEGORY_OPTIONS } from "@/lib/law-category-options";
 export type { LawCategoryFilter } from "@/lib/law-category-options";
+
+/**
+ * e-Gov の検証済み条文に、省庁が公式公開する電気分野の一次資料を加えた
+ * サーバー専用コーパス。告示の教育課程、電気事業法上の主任技術者、
+ * 電気工事士法の軽微作業/Q&Aは既存 e-Gov 抜粋だけでは回答できないため、
+ * 通常のスコア検索と明示 pin の双方で同じ集合を使う。
+ */
+const verifiedRagArticles: LawArticle[] = [
+  ...verifiedLawArticles,
+  ...verifiedPrimaryElectricalArticles,
+];
 
 /**
  * 公開一次資料へのリンクは確認できても、本文を承認済みRAGへ収録していない
@@ -1225,7 +1241,7 @@ function applyPinnedTopics(
   query: string,
   articles: LawArticle[],
   explicitQuery = query,
-  pinSource: readonly LawArticle[] = verifiedLawArticles
+  pinSource: readonly LawArticle[] = verifiedRagArticles
 ): { articles: LawArticle[]; hadPins: boolean } {
   const normalizedQuery = query.normalize("NFKC");
   const pinned: LawArticle[] = [];
@@ -1245,19 +1261,32 @@ function applyPinnedTopics(
   const normalizedExplicitQuery = explicitQuery
     .normalize("NFKC")
     .replace(/衞/g, "衛");
+  const normalizedElectricalQuery = normalizeElectricalWorkText(
+    normalizedExplicitQuery,
+  );
+  const electricalMeaning = extractElectricalMeaning(normalizedElectricalQuery);
   const hasElectricalWorkContext =
-    /(?:電気作業|電気工事|配線(?:工事|作業)?|活線|充電(?:部|電路)|電路(?:の|に|へ|を|で)?(?:近接|接近)|電気設備)/.test(
-      normalizedExplicitQuery,
+    electricalMeaning.topicDomain === "electrical" ||
+    /(?:電気|電源|電工|電路|制御盤|分電盤|配電盤|受電盤|ブレーカー|開閉器|テスター|絶縁測定|配線|結線|活線|充電部|低圧|高圧|特高)/.test(
+      normalizedElectricalQuery,
     );
   const asksElectricalQualification =
     hasElectricalWorkContext &&
-    /(?:資格|免許|教育|特別教育|特教|講習|作業主任者)/.test(
-      normalizedExplicitQuery,
-    );
+    (electricalMeaning.qualificationType !== undefined ||
+      /(?:資格|免許|教育|特別教育|特教|講習|作業主任者)/.test(
+        normalizedElectricalQuery,
+      ));
   const asksElectricalWorkChief =
-    hasElectricalWorkContext && /作業主任者/.test(normalizedExplicitQuery);
+    hasElectricalWorkContext && /作業主任者/.test(normalizedElectricalQuery);
   const articleNumbers = normalizedExplicitQuery.match(/第\d+条(?:の\d+)*/g) ?? [];
-  const explicitLawGroup = LAW_ALIAS_GROUPS.map((group) => ({
+  const explicitLawGroups = [
+    ...LAW_ALIAS_GROUPS,
+    ["安全衛生特別教育規程", "特別教育規程"],
+    ["電気事業法", "電事法"],
+    ["電気工事士法施行令", "電工士法令"],
+    ["電気工事士法施行規則", "電工士法則"],
+  ];
+  const explicitLawGroup = explicitLawGroups.map((group) => ({
     group,
     matchedAlias: group
       .map((alias) => alias.normalize("NFKC"))
@@ -1347,24 +1376,219 @@ function applyPinnedTopics(
     }
   }
 
-  // 広い制度PIN（例: 健診全般、墜落全般）より、質問中で確定した具体的な
-  // 作業・数値条件を先に置く。固定文そのものではなく、現場概念の共起と数値で判定する。
-  if (asksElectricalQualification) {
+  // 広い制度PIN（例: 健診全般、墜落全般）より、質問中で確定した電気の
+  // 行為・電圧・充電状態を先に置く。「点検」という一語を定期自主検査や
+  // 性能検査へ落とさず、実際の行為へ直接対応する一次資料を取得する。
+  if (hasElectricalWorkContext) {
+    const action = electricalMeaning.workAction;
+    const voltage = electricalMeaning.voltageClass;
+    const state = electricalMeaning.energizedState;
+    const asksSpecialEducation =
+      electricalMeaning.qualificationType === "special-education" ||
+      /(?:特別教育|特教|低圧教育|高圧教育)/.test(normalizedElectricalQuery);
+    const asksElectrician = /(?:電気工事士|電工|免状)/.test(
+      normalizedElectricalQuery,
+    );
+    const asksSchemeComparison = asksSpecialEducation && asksElectrician;
+    const asksChiefElectricalEngineer =
+      electricalMeaning.qualificationType === "chief-electrical-engineer" ||
+      /(?:電気主任技術者|主任技術者)/.test(normalizedElectricalQuery);
+    const asksWorkLeader =
+      electricalMeaning.qualificationType === "work-leader" ||
+      /(?:作業指揮者|作業の指揮者)/.test(normalizedElectricalQuery);
+
     if (asksElectricalWorkChief) {
-      // 電気作業全般に共通の「作業主任者」はない。制度本体・対象作業一覧と、
-      // 電気作業で別に定める「作業の指揮者」を同時に取得して区別できるようにする。
-      // 令6条1号の「高圧室内作業」は圧気作業であり、電気の高圧作業ではない。
+      // 電気作業全般に一律の作業主任者はない。制度本体（法14条）、
+      // 対象作業（令6条）と、電気編の作業指揮者（則350条）を区別する。
+      // 令6条1号の「高圧室内作業」は圧気作業であり高圧電気ではない。
       pinArticle("安衛法", "第14条");
       pinArticle("安衛令", "第6条");
       pinArticle("安衛則", "第350条");
-    } else {
-      // 配線・設備工事そのものの資格は電気工事士法、充電電路等の危険業務に
-      // 必要な特別教育は安衛法令であり、相互に代替する制度ではない。
-      pinArticle("電気工事士法", "第3条");
+    } else if (asksWorkLeader) {
+      pinArticle("安衛則", "第350条");
+      pinArticle("安衛則", "第339条");
+    } else if (asksChiefElectricalEngineer) {
+      // 主任技術者は設備の保安監督。個々の工事資格・特別教育の代替ではない。
+      pinArticle("電事法", "第43条");
+      pinArticle("電事法", "第42条");
       pinArticle("電気工事士法", "第2条");
+      pinArticle("電気工事士法", "第3条");
+    } else if (asksSchemeComparison) {
+      pinArticle("電気工事士法", "第2条");
+      pinArticle("電気工事士法", "第3条");
+      pinArticle("安衛則", "第36条");
+      pinArticle("特別教育規程", "第6条");
+      pinArticle("特別教育規程", "第5条");
+      pinArticle("安衛法", "第59条");
+    } else if (
+      action === "wiring-connection" ||
+      action === "wiring-removal" ||
+      action === "repair"
+    ) {
+      // 設置・変更に当たる配線作業は電気工事士制度を先行。軽微な工事・
+      // 作業の範囲も同時取得し、一律断定を避ける。
+      if (state === "de-energized" || action === "wiring-removal") {
+        pinArticle("安衛則", "第339条");
+        pinArticle("安衛則", "第350条");
+      }
+      pinArticle("電気工事士法", "第2条");
+      pinArticle("電気工事士法", "第3条");
+      pinArticle("電工士法則", "第2条");
+      pinArticle("電工士法令", "第1条");
+    } else if (
+      action === "tester-measurement" ||
+      action === "insulation-measurement" ||
+      action === "open-panel"
+    ) {
+      // 測定器を配線へ損傷なく当てる場合の電工士法上の扱いを最優先し、
+      // 充電部の取扱い/近接に対する安衛則を電圧別に続ける。
+      if (action !== "open-panel") {
+        pinArticle("経産省電工Q&A", "Q9・Q10");
+      }
+      if (voltage === "高圧") {
+        pinArticle("安衛則", "第341条");
+        pinArticle("安衛則", "第342条");
+      } else if (voltage === "特別高圧") {
+        pinArticle("安衛則", "第344条");
+        pinArticle("安衛則", "第345条");
+      } else if (voltage === "低圧") {
+        pinArticle("安衛則", "第346条");
+        pinArticle("安衛則", "第347条");
+      } else {
+        pinArticle("安衛則", "第346条");
+        pinArticle("安衛則", "第347条");
+        pinArticle("安衛則", "第341条");
+        pinArticle("安衛則", "第342条");
+      }
+      pinArticle("安衛則", "第36条");
+      if (voltage === "高圧" || voltage === "特別高圧") {
+        pinArticle("特別教育規程", "第5条");
+      } else if (voltage === "低圧") {
+        pinArticle("特別教育規程", "第6条");
+      } else {
+        pinArticle("特別教育規程", "第6条");
+        pinArticle("特別教育規程", "第5条");
+      }
+    } else if (action === "de-energized-work" || state === "de-energized") {
+      pinArticle("安衛則", "第339条");
+      pinArticle("安衛則", "第350条");
+    } else if (action === "live-proximity-work" || state === "proximity") {
+      if (voltage === "特別高圧") {
+        pinArticle("安衛則", "第345条");
+      } else if (voltage === "高圧") {
+        pinArticle("安衛則", "第342条");
+      } else if (voltage === "低圧") {
+        pinArticle("安衛則", "第347条");
+      } else {
+        pinArticle("安衛則", "第347条");
+        pinArticle("安衛則", "第342条");
+        pinArticle("安衛則", "第345条");
+      }
+    } else if (action === "live-work" || state === "energized") {
+      if (voltage === "特別高圧") {
+        pinArticle("安衛則", "第344条");
+      } else if (voltage === "高圧") {
+        pinArticle("安衛則", "第341条");
+      } else if (voltage === "低圧") {
+        pinArticle("安衛則", "第346条");
+      } else {
+        pinArticle("安衛則", "第346条");
+        pinArticle("安衛則", "第341条");
+        pinArticle("安衛則", "第344条");
+      }
+    } else if (action === "breaker-operation") {
+      // 低圧は「区画場所の露出充電部をもつ開閉器」、高圧・特高は
+      // 充電電路の操作という対象条件を告示本文で確認できる順序にする。
+      if (voltage === "低圧") {
+        pinArticle("特別教育規程", "第6条");
+      } else if (voltage === "高圧" || voltage === "特別高圧") {
+        pinArticle("特別教育規程", "第5条");
+      } else {
+        pinArticle("特別教育規程", "第6条");
+        pinArticle("特別教育規程", "第5条");
+      }
+      pinArticle("安衛則", "第36条");
+    } else if (action === "high-voltage-facility-inspection") {
+      pinArticle("特別教育規程", "第5条");
+      pinArticle("安衛則", "第36条");
+      pinArticle("安衛則", "第341条");
+      pinArticle("安衛則", "第342条");
+      pinArticle("電事法", "第43条");
+    } else if (action === "start-of-work-inspection") {
+      // 352条は列挙された電気機械器具等の使用前点検であり、あらゆる
+      // 電気設備の点検者資格を定める条文ではない。制度境界も続けて取得する。
+      pinArticle("安衛則", "第352条");
+      pinArticle("電気工事士法", "第2条");
+      pinArticle("電気工事士法", "第3条");
+      pinArticle("安衛則", "第36条");
+      pinArticle("特別教育規程", "第5条");
+      pinArticle("特別教育規程", "第6条");
+    } else if (
+      action === "visual-inspection" ||
+      action === "indicator-check" ||
+      action === "noise-odor-check"
+    ) {
+      pinArticle("電気工事士法", "第2条");
+      pinArticle("安衛則", "第352条");
+    } else if (asksSpecialEducation) {
+      pinArticle("安衛則", "第36条");
+      if (voltage === "低圧") {
+        pinArticle("特別教育規程", "第6条");
+        pinArticle("安衛則", "第346条");
+        pinArticle("安衛則", "第347条");
+      } else if (voltage === "高圧" || voltage === "特別高圧") {
+        pinArticle("特別教育規程", "第5条");
+        pinArticle("安衛則", voltage === "特別高圧" ? "第344条" : "第341条");
+        pinArticle("安衛則", voltage === "特別高圧" ? "第345条" : "第342条");
+      } else {
+        pinArticle("特別教育規程", "第6条");
+        pinArticle("特別教育規程", "第5条");
+      }
+      pinArticle("安衛法", "第59条");
+    } else if (
+      asksElectricalQualification &&
+      !/(?:点検|検査|確認)/.test(normalizedElectricalQuery)
+    ) {
+      // 広い資格質問でも、電気工事士と電気取扱業務の特別教育を対で返す。
+      pinArticle("電気工事士法", "第2条");
+      pinArticle("電気工事士法", "第3条");
+      pinArticle("安衛則", "第36条");
+      pinArticle("特別教育規程", "第6条");
+      pinArticle("特別教育規程", "第5条");
+      pinArticle("電事法", "第43条");
+    } else if (/点検|検査|確認/.test(normalizedElectricalQuery)) {
+      // 点検の広い質問では「見るだけ」から充電部取扱い・高圧点検・
+      // 配線変更まで主要分岐を一度で説明できる根拠束を返す。
+      pinArticle("特別教育規程", "第5条");
+      pinArticle("特別教育規程", "第6条");
+      pinArticle("安衛則", "第36条");
+      pinArticle("安衛則", "第341条");
+      pinArticle("安衛則", "第346条");
+      pinArticle("安衛則", "第347条");
+      pinArticle("経産省電工Q&A", "Q9・Q10");
+      pinArticle("電気工事士法", "第2条");
+      pinArticle("電気工事士法", "第3条");
+      pinArticle("電事法", "第43条");
     }
-    pinArticle("安衛法", "第59条");
-    pinArticle("安衛則", "第36条");
+
+    // 充電部を扱う/近接する作業では、作業種別の直接条文に続けて
+    // 特別教育の対象業務と課程を取得する。配線資格とは別制度として扱う。
+    const hasChargedWork =
+      action === "live-work" ||
+      action === "live-proximity-work" ||
+      state === "energized" ||
+      state === "proximity";
+    if (hasChargedWork || asksSpecialEducation) {
+      pinArticle("安衛則", "第36条");
+      if (voltage === "高圧" || voltage === "特別高圧") {
+        pinArticle("特別教育規程", "第5条");
+      } else if (voltage === "低圧") {
+        pinArticle("特別教育規程", "第6条");
+      } else {
+        pinArticle("特別教育規程", "第6条");
+        pinArticle("特別教育規程", "第5条");
+      }
+    }
   }
   if (highLiftIntent.fallProtection) {
     pinArticle("安衛則", "第194条の22");
@@ -1605,13 +1829,79 @@ function applyPinnedTopics(
       addPinnedArticle(found);
     }
   }
-  const isAllowedElectricalSource = (article: LawArticle) =>
-    ["安衛法", "安衛令", "安衛則"].includes(article.lawShort) ||
-    article.law.includes("電気工事士法");
-  const contextSafePinned = asksElectricalQualification
+  const isAllowedElectricalSource = (article: LawArticle) => {
+    // 電圧が明示された場合は、別電圧区分だけを扱う条文・告示を候補から外す。
+    // 「低圧」という条件に高圧課程が混ざるなど、本文中の共通語による弱一致を防ぐ。
+    if (electricalMeaning.voltageClass === "低圧") {
+      if (
+        (article.lawShort === "特別教育規程" && article.articleNum === "第5条") ||
+        (article.lawShort === "安衛則" &&
+          ["第341条", "第342条", "第343条", "第344条", "第345条"].includes(
+            article.articleNum,
+          ))
+      ) {
+        return false;
+      }
+    }
+    if (electricalMeaning.voltageClass === "高圧") {
+      if (
+        (article.lawShort === "特別教育規程" && article.articleNum === "第6条") ||
+        (article.lawShort === "安衛則" &&
+          ["第344条", "第345条", "第346条", "第347条"].includes(
+            article.articleNum,
+          ))
+      ) {
+        return false;
+      }
+    }
+    if (electricalMeaning.voltageClass === "特別高圧") {
+      if (
+        (article.lawShort === "特別教育規程" && article.articleNum === "第6条") ||
+        (article.lawShort === "安衛則" &&
+          ["第341条", "第342条", "第343条", "第346条", "第347条"].includes(
+            article.articleNum,
+          ))
+      ) {
+        return false;
+      }
+    }
+    if (
+      [
+        "特別教育規程",
+        "電事法",
+        "電工士法令",
+        "電工士法則",
+        "経産省電工Q&A",
+      ].includes(article.lawShort) ||
+      article.law.includes("電気工事士法")
+    ) {
+      return true;
+    }
+    const allowedArticles: Partial<Record<string, ReadonlySet<string>>> = {
+      安衛法: new Set(["第14条", "第59条"]),
+      安衛令: new Set(["第6条"]),
+      安衛則: new Set([
+        "第36条",
+        "第37条",
+        "第329条",
+        "第339条",
+        "第341条",
+        "第342条",
+        "第343条",
+        "第344条",
+        "第345条",
+        "第346条",
+        "第347条",
+        "第350条",
+        "第352条",
+      ]),
+    };
+    return allowedArticles[article.lawShort]?.has(article.articleNum) ?? false;
+  };
+  const contextSafePinned = hasElectricalWorkContext
     ? pinned.filter(isAllowedElectricalSource)
     : pinned;
-  const contextSafeArticles = asksElectricalQualification
+  const contextSafeArticles = hasElectricalWorkContext
     ? articles.filter(isAllowedElectricalSource)
     : articles;
 
@@ -1668,8 +1958,8 @@ export function searchRelevantArticlesWithScore(
 
   const corpus =
     category === "all"
-      ? verifiedLawArticles
-      : verifiedLawArticles.filter((a) => a.lawShort === category);
+      ? verifiedRagArticles
+      : verifiedRagArticles.filter((a) => a.lawShort === category);
 
   // Phase C: BM25 をデンス側スコアの**控えめなブースト**として追加する。
   //
@@ -1684,7 +1974,7 @@ export function searchRelevantArticlesWithScore(
   //   寄与にとどまる。
   // - 自由文クエリ（テスト fixture 外）に対するロバスト性は確保しつつ、
   //   ベンチ Recall@5 100% を維持する。
-  const bm25Index = getOrBuildIndex(verifiedLawArticles, tokenize);
+  const bm25Index = getOrBuildIndex(verifiedRagArticles, tokenize);
   const BM25_BOOST = 0.5;
 
   const scored = corpus.map((article) => {

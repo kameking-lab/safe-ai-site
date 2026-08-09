@@ -1157,7 +1157,7 @@ describe("presentation follow-upは取得済み根拠で現在の質問へ答え
       query: "屋内の第2種有機溶剤は例外条文でなく有機則5条の原則を答えて",
       articles: presentationSources("organic"),
     });
-    expect(answer).toContain("原則として発散源の密閉設備");
+    expect(answer).toMatch(/原則として発散源(?:を密閉する設備|の密閉設備)/);
     expect(answer).not.toContain("臨時作業または短時間作業について");
   });
 

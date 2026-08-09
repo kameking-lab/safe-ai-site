@@ -31,6 +31,63 @@ describe("buildStructuredCitations", () => {
     expect(result[0].searchHref).toContain("/law-search");
   });
 
+  it("電事法43条は経済産業省とe-Gov正本URLを返す", () => {
+    const result = buildStructuredCitations([
+      {
+        law: "電気事業法",
+        lawShort: "電事法",
+        articleNum: "第43条",
+        articleTitle: "主任技術者",
+        text: "主任技術者を選任しなければならない。",
+        keywords: ["電気主任技術者"],
+      },
+    ]);
+
+    expect(result).toEqual([
+      expect.objectContaining({
+        lawShort: "電事法",
+        fullName: "電気事業法",
+        articleNum: "第43条",
+        issuer: "経済産業省",
+        egovHref: "https://laws.e-gov.go.jp/law/339AC0000000170",
+      }),
+    ]);
+  });
+
+  it("電工士法の施行令・施行規則は制定主体・所管と各e-Gov正本URLを返す", () => {
+    const citations = buildStructuredCitations([
+      {
+        law: "電気工事士法施行令",
+        lawShort: "電工士法令",
+        articleNum: "第1条",
+        articleTitle: "軽微な工事",
+        text: "軽微な工事を定める。",
+        keywords: ["軽微な工事"],
+      },
+      {
+        law: "電気工事士法施行規則",
+        lawShort: "電工士法則",
+        articleNum: "第2条",
+        articleTitle: "軽微な作業",
+        text: "軽微な作業を定める。",
+        keywords: ["軽微な作業"],
+      },
+    ]);
+
+    expect(citations).toEqual([
+      expect.objectContaining({
+        fullName: "電気工事士法施行令",
+        issuer: "内閣（経済産業省所管）",
+        egovHref: "https://laws.e-gov.go.jp/law/335CO0000000260",
+      }),
+      expect.objectContaining({
+        fullName: "電気工事士法施行規則",
+        issuer: "経済産業省",
+        egovHref: "https://laws.e-gov.go.jp/law/335M50000400097",
+      }),
+    ]);
+  });
+
   it("dedups same law + article", () => {
     const result = buildStructuredCitations([article, article]);
     expect(result).toHaveLength(1);

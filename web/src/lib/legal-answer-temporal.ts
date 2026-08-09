@@ -10,7 +10,7 @@
  * source verification. Runtime clock time must not silently extend this legal
  * assurance window.
  */
-export const LEGAL_ANSWER_BASIS_DATE_JST = "2026-08-03";
+export const LEGAL_ANSWER_BASIS_DATE_JST = "2026-08-09";
 const LEGAL_ANSWER_BASIS_INSTANT = `${LEGAL_ANSWER_BASIS_DATE_JST}T00:00:00+09:00`;
 
 export function legalAnswerBasisNow(): Date {

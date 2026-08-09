@@ -14,6 +14,13 @@ const browserEvidencePath = process.env.ANSWER_FIRST_BROWSER_EVIDENCE_PATH
 const configuredHeaders = process.env.ANSWER_FIRST_REQUEST_HEADERS_JSON
   ? JSON.parse(process.env.ANSWER_FIRST_REQUEST_HEADERS_JSON)
   : {};
+const apiSafetyMode =
+  process.env.ANSWER_FIRST_API_SAFETY_MODE ?? "all";
+if (!["all", "non-pii"].includes(apiSafetyMode)) {
+  throw new Error(
+    "ANSWER_FIRST_API_SAFETY_MODE must be either all or non-pii",
+  );
+}
 
 const availableRoutes = [
   { id: "json", path: "/api/chatbot" },
@@ -134,7 +141,7 @@ function parseSse(raw) {
 
 let requestSequence = 0;
 
-async function requestRoute(route, question, history = []) {
+async function requestRoute(route, question, context = {}) {
   requestSequence += 1;
   const body =
     route.id === "legacy"
@@ -142,10 +149,10 @@ async function requestRoute(route, question, history = []) {
           revisionId: "answer-first-evaluation",
           revisionTitle: "answer-first-evaluation",
           question,
-          history,
+          context,
           privacyConfirmed: true,
         }
-      : { message: question, history, privacyConfirmed: true };
+      : { message: question, context, privacyConfirmed: true };
   const response = await fetch(`${baseUrl}${route.path}`, {
     method: "POST",
     headers: {
@@ -1030,14 +1037,11 @@ async function evaluateRoute(route) {
   const cases = [];
   let firstTurn = null;
   for (const caseDefinition of normalCases) {
-    const history =
-      caseDefinition.id === 2 && firstTurn
-        ? [
-            { role: "user", content: normalCases[0].question },
-            { role: "assistant", content: firstTurn.answer },
-          ]
-        : [];
-    const result = await requestRoute(route, caseDefinition.question, history);
+    const context =
+      caseDefinition.id === 2 && firstTurn?.context
+        ? firstTurn.context
+        : {};
+    const result = await requestRoute(route, caseDefinition.question, context);
     if (result.status !== 200 || !result.payload) {
       throw new Error(
         `${route.id} Case ${caseDefinition.id}: HTTP ${result.status} ${result.raw.slice(0, 240)}`,
@@ -1056,7 +1060,11 @@ async function evaluateRoute(route) {
     });
   }
 
-  for (const caseDefinition of safetyCases) {
+  const apiSafetyCases =
+    apiSafetyMode === "non-pii"
+      ? safetyCases.filter((caseDefinition) => caseDefinition.kind !== "privacy")
+      : safetyCases;
+  for (const caseDefinition of apiSafetyCases) {
     const result = await requestRoute(route, caseDefinition.question);
     const { legacyBlocked, structuredBlocked } = inspectSafetyBoundary(
       route.id,
@@ -1127,11 +1135,20 @@ export async function runEvaluation() {
     fixture: {
       id: "answer-first-required-12-v1",
       caseCount: 12,
+      apiCaseCountPerRoute:
+        normalCases.length +
+        (apiSafetyMode === "non-pii" ? safetyCases.length - 1 : safetyCases.length),
       existingEvaluationSetsModified: false,
       contextSequence: [1, 2],
     },
     scope: {
       apiRoutes: routes.map((route) => route.id),
+      apiSafetyMode,
+      apiPiiCaseIncluded: apiSafetyMode === "all",
+      piiBoundaryEvidence:
+        apiSafetyMode === "non-pii"
+          ? "browser preflight only; zero deployed API requests"
+          : "API route and browser preflight",
       browserIncluded: browserCases.length === 12,
       citationSupportScope:
         "sentence-level legal-claim coverage plus claim-local lexical, polarity, and numeric-threshold alignment; not general semantic entailment",

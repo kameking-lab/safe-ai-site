@@ -1,10 +1,35 @@
 import type { LawArticle } from "./law-types";
+import { verifiedPrimaryElectricalArticles } from "./verified-primary-electrical";
 
 /**
  * 厚生労働省法令等データベースの公式HTMLを2026-08-03 JSTに照合した告示本文。
  * chatbotで資格名まで答えるための最小範囲だけを保持し、URL・取得日・本文hashを固定する。
  */
 export const verifiedPrimaryNoticeArticles: readonly LawArticle[] = [
+  {
+    law: "職場における熱中症防止のためのガイドライン",
+    lawShort: "熱中症ガイドライン",
+    articleNum: "第2・第3",
+    articleTitle: "熱中症リスクの評価とリスクに応じた措置",
+    text: "第2 熱中症リスクの評価　2 湿球黒球温度の値（WBGT値）の把握　JIS B 7922等に適合したWBGT指数計で実測。3 熱中症リスクの評価・検討　WBGT基準値を超える場合はWBGT値の低減等の熱中症予防対策を実施。第3 熱中症リスクに応じた措置　2 作業環境管理　WBGT値の低減、休憩場所の整備等。3 作業管理　作業時間の短縮等（作業の休止時間や休憩時間の確保）、暑熱順化（計画的に暑熱順化期間を設ける）、水分及び塩分の摂取（作業前後の摂取と作業中の定期的な摂取）、作業中の巡視。",
+    keywords: [
+      "熱中症",
+      "WBGT",
+      "休憩",
+      "水分",
+      "塩分",
+      "暑熱順化",
+      "作業時間",
+      "基発0318第1号",
+    ],
+    sourceKind: "mhlw-official-primary",
+    sourceUrl: "https://www.mhlw.go.jp/content/11303000/001676307.pdf",
+    sourceFetchedAt: "2026-08-09T21:24:00+09:00",
+    sourceHash: "798c840620bec6c1aeb73b06f8594728e671e643f1e95d7ab9db5809870d1c78",
+    verificationStatus: "primary-source-verified",
+    humanReviewStatus: "reviewed",
+    sourceVersionKind: "current",
+  },
   {
     law: "石綿障害予防規則第三条第四項の規定に基づき厚生労働大臣が定める者",
     lawShort: "厚労省告示276号",
@@ -27,4 +52,5 @@ export const verifiedPrimaryNoticeArticles: readonly LawArticle[] = [
     humanReviewStatus: "reviewed",
     sourceVersionKind: "current",
   },
+  ...verifiedPrimaryElectricalArticles,
 ] as const;

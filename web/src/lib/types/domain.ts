@@ -1,5 +1,6 @@
 import type {
   ChatbotQuickReply,
+  ChatbotResponse,
   ChatbotSource,
 } from "@/lib/chatbot-contract";
 
@@ -98,11 +99,18 @@ export type ChatMessage = {
   id: string;
   role: "user" | "assistant";
   content: string;
+  directAnswer?: ChatbotResponse["directAnswer"];
+  assumptions?: ChatbotResponse["assumptions"];
+  importantConditions?: ChatbotResponse["importantConditions"];
+  citations?: ChatbotResponse["citations"];
+  confidence?: ChatbotResponse["confidence"];
+  effectiveDateStatus?: ChatbotResponse["effectiveDateStatus"];
+  /** @deprecated importantConditions の読み取り互換エイリアス。 */
   conditions?: string[];
   clarificationQuestion?: string | null;
   quickReplies?: ChatbotQuickReply[];
   sources?: ChatbotSource[];
-  context?: import("@/lib/legal-conversation-context").LegalConversationContext;
+  context?: import("@/lib/legal-conversation-public-context").PublicLegalConversationContext;
 };
 
 export type ChatReplyRule = {

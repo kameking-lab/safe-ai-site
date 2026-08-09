@@ -319,7 +319,9 @@ export function buildStructuredCitations(articles: LawArticle[]): StructuredCita
       searchHref: `/law-search?q=${encodeURIComponent(a.lawShort + a.articleNum)}`,
       egovHref: meta.egovLawId
         ? `https://laws.e-gov.go.jp/law/${meta.egovLawId}`
-        : undefined,
+        : a.lawShort === "経産省電工Q&A"
+          ? a.sourceUrl
+          : undefined,
       plainHref: plain ? articlePermalink(a) ?? undefined : undefined,
     });
   }

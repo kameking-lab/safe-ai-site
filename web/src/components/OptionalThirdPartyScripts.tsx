@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import Analytics from "@/components/Analytics";
 import AdSenseScript from "@/components/AdSenseScript";
@@ -12,6 +12,7 @@ import {
   OPTIONAL_TRACKING_CONSENT_EVENT,
 } from "@/lib/analytics-privacy";
 import { removeGoogleOptionalCookies } from "@/lib/google-cookie-privacy";
+import { consumeTransientChatNavigation } from "@/lib/transient-chat-navigation";
 
 type Consent = "granted" | "denied" | null;
 
@@ -40,6 +41,7 @@ export function OptionalThirdPartyScripts({
   const [consent, setConsent] = useState<Consent>(null);
   const [editing, setEditing] = useState(false);
   const configured = analyticsEnabled || adsEnabled || rumEnabled;
+  const committedTransientChatNavigationRef = useRef(false);
 
   useEffect(() => {
     if (!configured) return;
@@ -74,10 +76,40 @@ export function OptionalThirdPartyScripts({
       denyGoogleProcessing();
       window.location.assign(target.href);
     };
+    const isExactChatbotUrl = (value: string | URL | null | undefined) => {
+      if (value == null) return false;
+      try {
+        const target = new URL(String(value), window.location.href);
+        return (
+          target.origin === window.location.origin &&
+          target.pathname === "/chatbot" &&
+          target.search === "" &&
+          target.hash === ""
+        );
+      } catch {
+        return false;
+      }
+    };
     const onClick = (event: MouseEvent) => {
       const element = event.target instanceof Element ? event.target : null;
       const anchor = element?.closest<HTMLAnchorElement>("a[href]");
       if (!anchor || !shouldIsolate(anchor.href)) return;
+      if (
+        anchor.hasAttribute("data-transient-chat-handoff") &&
+        isExactChatbotUrl(anchor.href) &&
+        event.button === 0 &&
+        !event.metaKey &&
+        !event.ctrlKey &&
+        !event.shiftKey &&
+        !event.altKey &&
+        !anchor.download &&
+        (!anchor.target || anchor.target === "_self")
+      ) {
+        // Let React stage the question and emit the data-free authorization
+        // event. Deny optional processing before any route transition.
+        denyGoogleProcessing();
+        return;
+      }
       event.preventDefault();
       event.stopImmediatePropagation();
       isolate(anchor.href);
@@ -87,6 +119,15 @@ export function OptionalThirdPartyScripts({
     const originalPushState = window.history.pushState.bind(window.history);
     const originalReplaceState = window.history.replaceState.bind(window.history);
     const guardedPushState: History["pushState"] = (data, unused, url) => {
+      if (
+        isExactChatbotUrl(url) &&
+        consumeTransientChatNavigation()
+      ) {
+        denyGoogleProcessing();
+        committedTransientChatNavigationRef.current = true;
+        originalPushState(data, unused, url);
+        return;
+      }
       if (shouldIsolate(url)) {
         isolate(url as string | URL);
         return;
@@ -94,6 +135,15 @@ export function OptionalThirdPartyScripts({
       originalPushState(data, unused, url);
     };
     const guardedReplaceState: History["replaceState"] = (data, unused, url) => {
+      if (
+        isExactChatbotUrl(url) &&
+        consumeTransientChatNavigation()
+      ) {
+        denyGoogleProcessing();
+        committedTransientChatNavigationRef.current = true;
+        originalReplaceState(data, unused, url);
+        return;
+      }
       if (shouldIsolate(url)) {
         isolate(url as string | URL);
         return;
@@ -120,6 +170,15 @@ export function OptionalThirdPartyScripts({
 
   useEffect(() => {
     if (!configured || isOptionalTrackingUrl(window.location.href)) return;
+    if (
+      pathname === "/chatbot" &&
+      committedTransientChatNavigationRef.current
+    ) {
+      committedTransientChatNavigationRef.current = false;
+      denyGoogleProcessing();
+      return;
+    }
+    committedTransientChatNavigationRef.current = false;
     const tagWasLoaded = Boolean(
       window.gtag ||
       document.querySelector('script[src*="googletagmanager.com"],script[src*="googlesyndication.com"]'),

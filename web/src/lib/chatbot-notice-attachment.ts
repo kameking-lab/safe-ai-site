@@ -60,6 +60,66 @@ export type NoticeAttachmentResult = {
 const MAX_NOTICES = 5;
 const MAX_LEAFLETS = 5;
 
+type LeafletConcept =
+  | "asbestos"
+  | "boiler"
+  | "chemical"
+  | "crane"
+  | "dust"
+  | "electrical"
+  | "foreign-worker"
+  | "full-harness"
+  | "health-check"
+  | "heat"
+  | "ionizing-radiation"
+  | "mental-health"
+  | "organic-solvent"
+  | "overwork"
+  | "oxygen-deficiency"
+  | "scaffold"
+  | "special-chemical"
+  | "truck-cargo";
+
+const LEAFLET_CONCEPT_PATTERNS: ReadonlyArray<
+  readonly [LeafletConcept, RegExp]
+> = [
+  ["electrical", /(?:電気|感電|充電電路|充電部|低圧|高圧|特別高圧|特高|電工|配線|結線|分電盤|配電盤|制御盤|受電設備|開閉器|ブレーカー)/u],
+  ["oxygen-deficiency", /(?:酸素欠乏|酸欠|硫化水素|酸欠則)/u],
+  ["organic-solvent", /(?:有機溶剤|有機則|トルエン|キシレン)/u],
+  ["asbestos", /(?:石綿|アスベスト|石綿則)/u],
+  ["heat", /(?:熱中症|暑熱|WBGT|高温多湿|熱ストレス)/iu],
+  ["scaffold", /(?:足場|手すり先行|布板|建地|筋かい)/u],
+  ["full-harness", /(?:フルハーネス|墜落制止用器具|安全帯|胴ベルト)/u],
+  ["chemical", /(?:化学物質|SDS|安全データシート|ラベル表示|リスクアセスメント|化学物質管理者|chemicals)/iu],
+  ["special-chemical", /(?:特定化学物質|特化物|特化則)/u],
+  ["dust", /(?:粉じん|粉塵|じん肺|粉じん則)/u],
+  ["crane", /(?:クレーン|玉掛け)/u],
+  ["boiler", /(?:ボイラー|第一種圧力容器)/u],
+  ["health-check", /(?:健康診断|健康管理手帳|産業医)/u],
+  ["mental-health", /(?:ストレスチェック|メンタルヘルス|心の健康)/u],
+  ["overwork", /(?:過重労働|長時間労働)/u],
+  ["ionizing-radiation", /(?:電離放射線|放射線障害|放射線業務)/u],
+  ["truck-cargo", /(?:荷役|貨物自動車|テールゲート|昇降設備)/u],
+  ["foreign-worker", /(?:外国人|foreign-worker)/iu],
+];
+
+function leafletConcepts(value: string | undefined): Set<LeafletConcept> {
+  const normalized = value?.normalize("NFKC").trim();
+  if (!normalized) return new Set();
+  return new Set(
+    LEAFLET_CONCEPT_PATTERNS.flatMap(([concept, pattern]) =>
+      pattern.test(normalized) ? [concept] : [],
+    ),
+  );
+}
+
+function conceptsOverlap(
+  left: ReadonlySet<LeafletConcept>,
+  right: ReadonlySet<LeafletConcept>,
+): boolean {
+  return [...left].some((concept) => right.has(concept));
+}
+
 // bindingLevel の優先度（数値が小さいほど上位）
 const BINDING_ORDER: Record<MhlwNotice["bindingLevel"], number> = {
   binding: 0,
@@ -124,6 +184,41 @@ function toLeaflet(l: MhlwLeaflet): AttachedLeaflet {
 }
 
 /**
+ * Article mappings are deliberately broad (for example, 安衛法59条 covers
+ * every special-education domain). A mapped leaflet is displayed only when a
+ * specific concept in its own metadata also occurs in the user's effective
+ * query and, when the answer names a specific domain, in that answer. Unknown
+ * and generic-only queries deliberately attach nothing.
+ */
+export function isLeafletRelevantToQuery(
+  leaflet: Pick<
+    MhlwLeaflet,
+    "title" | "target" | "category" | "categoryLabel" | "subCategory"
+  >,
+  query: string | undefined,
+  answer?: string,
+): boolean {
+  const queryConcepts = leafletConcepts(query);
+  if (queryConcepts.size === 0) return false;
+  const metadataConcepts = leafletConcepts(
+    [
+      leaflet.title,
+      leaflet.target,
+      leaflet.category,
+      leaflet.categoryLabel,
+      leaflet.subCategory ?? "",
+    ].join(" "),
+  );
+  if (!conceptsOverlap(queryConcepts, metadataConcepts)) return false;
+
+  const answerConcepts = leafletConcepts(answer);
+  return (
+    answerConcepts.size === 0 ||
+    conceptsOverlap(answerConcepts, metadataConcepts)
+  );
+}
+
+/**
  * 通達/リーフレット添付の統合。
  *
  * 引数:
@@ -158,7 +253,7 @@ export function attachNoticesAndLeaflets(args: {
     for (const lid of mapping.leaflets ?? []) {
       if (seenLeafletIds.has(lid)) continue;
       const l = resolveLeafletById(lid);
-      if (!l) continue;
+      if (!l || !isLeafletRelevantToQuery(l, query, answer)) continue;
       seenLeafletIds.add(lid);
       aLeaflets.push(toLeaflet(l));
     }

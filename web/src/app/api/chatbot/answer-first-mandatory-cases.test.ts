@@ -458,9 +458,17 @@ describe("answer-first mandatory conversation cases", () => {
       }
 
       const unknown = await callRoute(route, "分からない", history);
-      expectStructuredContract(unknown.payload);
-      expect(unknown.payload.safetyKind).toBe("ambiguous");
-      expect(unknown.payload.answer).toMatch(/最大荷重.*確認/);
+      expectSupportedAnswer(unknown.payload);
+      expect(unknown.payload.safetyKind).toBeUndefined();
+      expect(unknown.payload.answer).toMatch(/最大荷重1トン未満.*特別教育/);
+      expect(unknown.payload.answer).toMatch(/最大荷重1トン以上.*技能講習/);
+      expect(unknown.payload.answer).toMatch(/車体銘板|仕様書/);
+      expect(unknown.payload.clarificationQuestion).toMatch(/最大荷重/);
+      expect(unknown.payload.quickReplies).toEqual([]);
+      expect(unknown.payload.effectiveDateStatus).toMatchObject({
+        status: "current",
+        asOf: "2026-08-09",
+      });
       expect(unknown.payload.safetyKind).not.toBe("privacy");
     },
   );
@@ -515,8 +523,12 @@ describe("answer-first mandatory conversation cases", () => {
 
       expect(response.status).toBe(200);
       expectSupportedAnswer(payload);
-      expect(payload.substantiveAnswer).toMatch(/すべての作業に共通.*ではなく/);
-      expect(payload.substantiveAnswer).toContain("政令で指定された作業");
+      expect(payload.substantiveAnswer).toMatch(
+        /(?:すべての作業|全作業)に共通.*ではなく/,
+      );
+      expect(payload.substantiveAnswer).toMatch(
+        /(?:政令|安衛令6条)で指定された作業/,
+      );
       expect(payload.clarificationQuestion).toContain("作業主任者");
       expectLawSource(payload, /労働安全衛生法(?!施行令)/, /第14条/);
       expectLawSource(payload, /労働安全衛生法施行令|安衛令/, /第6条/);

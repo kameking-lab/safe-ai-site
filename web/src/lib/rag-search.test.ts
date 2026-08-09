@@ -487,3 +487,203 @@ describe("answer-first surrounding operation retrieval", () => {
     expect(keys[0]).toBe("安衛則第151条の4");
   });
 });
+
+describe("2026-08-09 電気作業の意味モデルに基づく一次資料 pin", () => {
+  const articleKeys = (query: string, topK = 10) =>
+    searchRelevantArticlesWithScore(query, topK).articles.map(
+      (article) => `${article.lawShort}${article.articleNum}`,
+    );
+
+  const expectNoUnrelatedQualificationDomain = (query: string) => {
+    const articles = searchRelevantArticlesWithScore(query, 10).articles;
+    expect(
+      articles.some((article) =>
+        ["酸欠則", "有機則", "石綿則", "クレーン則"].includes(
+          article.lawShort,
+        ),
+      ),
+    ).toBe(false);
+    expect(
+      articles.some(
+        (article) =>
+          (article.lawShort === "安衛令" && article.articleNum === "第20条") ||
+          (article.lawShort === "安衛則" && article.articleNum === "第41条"),
+      ),
+    ).toBe(false);
+  };
+
+  it("広い電気点検資格質問は主要分岐の一次資料を一度で取得する", () => {
+    const query = "電気の点検する時に必要な資格ある？";
+    const keys = articleKeys(query);
+    expect(keys).toEqual(
+      expect.arrayContaining([
+        "特別教育規程第5条",
+        "特別教育規程第6条",
+        "安衛則第36条",
+        "安衛則第341条",
+        "安衛則第346条",
+        "安衛則第347条",
+        "経産省電工Q&AQ9・Q10",
+        "電気工事士法第2条",
+        "電気工事士法第3条",
+        "電事法第43条",
+      ]),
+    );
+    expectNoUnrelatedQualificationDomain(query);
+  });
+
+  it("電気の特別教育は低圧・高圧等の両課程と36条4号を返す", () => {
+    const keys = articleKeys("電気作業の特別教育について教えて");
+    expect(keys.slice(0, 3)).toEqual([
+      "安衛則第36条",
+      "特別教育規程第6条",
+      "特別教育規程第5条",
+    ]);
+    expect(keys).toContain("安衛法第59条");
+  });
+
+  it("電気文脈付き作業開始前点検は352条を先頭にし制度境界も残す", () => {
+    const keys = articleKeys("電気設備の資格を確認中。作業開始前点検");
+    expect(keys[0]).toBe("安衛則第352条");
+    expect(keys).toEqual(
+      expect.arrayContaining([
+        "電気工事士法第2条",
+        "電気工事士法第3条",
+        "安衛則第36条",
+        "特別教育規程第5条",
+        "特別教育規程第6条",
+      ]),
+    );
+  });
+
+  it("ブレーカー入切だけは低圧の限定条件と高圧等の操作課程を返す", () => {
+    const keys = articleKeys("ブレーカーを入切するだけ");
+    expect(keys.slice(0, 3)).toEqual([
+      "特別教育規程第6条",
+      "特別教育規程第5条",
+      "安衛則第36条",
+    ]);
+  });
+
+  it("盤を開けたテスター測定は測定Q&Aと充電部取扱い・近接規定を優先する", () => {
+    const keys = articleKeys("盤を開けてテスターを当てる");
+    expect(keys[0]).toBe("経産省電工Q&AQ9・Q10");
+    expect(keys).toEqual(
+      expect.arrayContaining([
+        "安衛則第346条",
+        "安衛則第347条",
+        "安衛則第341条",
+        "安衛則第342条",
+        "安衛則第36条",
+      ]),
+    );
+  });
+
+  it.each([
+    "測定器をクリップ留めするだけなら電工いる？",
+    "屋内配線に測定器を取り付ける場合は電気工事士必要？",
+    "経産省電工Q&A Q10",
+  ])("測定器取付けの自然文は経産省Q10を最優先する: %s", (query) => {
+    const keys = articleKeys(query);
+    expect(keys[0]).toBe("経産省電工Q&AQ9・Q10");
+    expect(keys).toEqual(
+      expect.arrayContaining(["安衛則第346条", "安衛則第347条"]),
+    );
+  });
+
+  it("配線接続は電気工事の定義・資格と軽微作業の境界を先行する", () => {
+    const keys = articleKeys("配線をつなぐ");
+    expect(keys.slice(0, 4)).toEqual([
+      "電気工事士法第2条",
+      "電気工事士法第3条",
+      "電工士法則第2条",
+      "電工士法令第1条",
+    ]);
+  });
+
+  it("100V充電部付近は低圧近接規定と低圧特別教育資料へ限定する", () => {
+    const keys = articleKeys("100Vの充電部付近で作業する");
+    expect(keys[0]).toBe("安衛則第347条");
+    expect(keys).toEqual(
+      expect.arrayContaining([
+        "安衛則第36条",
+        "特別教育規程第6条",
+      ]),
+    );
+    expect(keys).not.toContain("特別教育規程第5条");
+  });
+
+  it("高圧受電設備点検は高圧等の点検課程と活線・近接規定を優先する", () => {
+    const keys = articleKeys("高圧受電設備を点検する");
+    expect(keys.slice(0, 4)).toEqual([
+      "特別教育規程第5条",
+      "安衛則第36条",
+      "安衛則第341条",
+      "安衛則第342条",
+    ]);
+    expect(keys).toContain("電事法第43条");
+  });
+
+  it("停電して配線を外す場合は停電措置・指揮者と工事資格を分けて返す", () => {
+    const keys = articleKeys("停電して配線を外す");
+    expect(keys.slice(0, 4)).toEqual([
+      "安衛則第339条",
+      "安衛則第350条",
+      "電気工事士法第2条",
+      "電気工事士法第3条",
+    ]);
+    expect(keys).toContain("電工士法則第2条");
+  });
+
+  it("電気工事士と特別教育の比較は両制度の正本を同時取得する", () => {
+    const keys = articleKeys("電気工事士と特別教育の違い");
+    expect(keys.slice(0, 5)).toEqual([
+      "電気工事士法第2条",
+      "電気工事士法第3条",
+      "安衛則第36条",
+      "特別教育規程第6条",
+      "特別教育規程第5条",
+    ]);
+  });
+
+  it("電気主任技術者は設備保安監督を先頭にし作業資格と区別する", () => {
+    const keys = articleKeys("電気主任技術者がいれば配線作業できる？");
+    expect(keys.slice(0, 4)).toEqual([
+      "電事法第43条",
+      "電事法第42条",
+      "電気工事士法第2条",
+      "電気工事士法第3条",
+    ]);
+  });
+
+  it("電気作業主任者は法14・令6と作業指揮者350条を区別する", () => {
+    const query = "電気作業に作業主任者は必要？";
+    const keys = articleKeys(query);
+    expect(keys.slice(0, 3)).toEqual([
+      "安衛法第14条",
+      "安衛令第6条",
+      "安衛則第350条",
+    ]);
+    expectNoUnrelatedQualificationDomain(query);
+  });
+
+  it.each([
+    ["電工いる？", "電気工事士法第2条"],
+    ["盤あけてはかる", "経産省電工Q&AQ9・Q10"],
+    ["低圧のとくべつきょういく", "安衛則第36条"],
+    ["電気の電源をする", "特別教育規程第6条"],
+  ])("誤字・音声入力も同じ行為根拠へ正規化する: %s", (query, first) => {
+    const keys = articleKeys(query);
+    expect(keys[0]).toBe(first);
+    expectNoUnrelatedQualificationDomain(query);
+  });
+
+  it.each([
+    ["安全衛生特別教育規程第5条", "特別教育規程第5条"],
+    ["電気事業法第43条", "電事法第43条"],
+    ["電気工事士法施行令第1条", "電工士法令第1条"],
+    ["電気工事士法施行規則第2条", "電工士法則第2条"],
+  ])("追加一次資料の法令名・条番号完全一致を最優先する: %s", (query, first) => {
+    expect(articleKeys(query, 5)[0]).toBe(first);
+  });
+});

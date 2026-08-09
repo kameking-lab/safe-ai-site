@@ -2,15 +2,50 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { OptionalThirdPartyScripts } from "./OptionalThirdPartyScripts";
 import { OPTIONAL_TRACKING_CONSENT_KEY } from "@/lib/analytics-privacy";
+import { ChatbotClientBridge } from "@/app/(main)/chatbot/ChatbotClientBridge";
+import { TransientChatLink } from "./home-safety-cockpit/transient-chat-link";
+import {
+  TransientQueryBridgeProvider,
+  useTransientQueryBridge,
+} from "./home-safety-cockpit/transient-query-bridge";
+import {
+  __resetTransientChatNavigationForTests,
+  consumeTransientChatNavigation,
+} from "@/lib/transient-chat-navigation";
 
 let currentPathname = "/laws";
-vi.mock("next/navigation", () => ({ usePathname: () => currentPathname }));
+const router = vi.hoisted(() => ({ push: vi.fn() }));
+vi.mock("next/navigation", () => ({
+  usePathname: () => currentPathname,
+  useRouter: () => router,
+}));
 vi.mock("@/components/Analytics", () => ({ default: () => <div data-testid="analytics-script" /> }));
 vi.mock("@/components/AdSenseScript", () => ({ default: () => <div data-testid="ads-script" /> }));
+vi.mock("@/components/chatbot-panel", () => ({
+  ChatbotPanel: ({
+    initialQuestion,
+    onInitialQuestionConsumed,
+  }: {
+    initialQuestion?: string;
+    onInitialQuestionConsumed: () => void;
+  }) => (
+    <section aria-label="chatbot destination">
+      <output data-testid="destination-question">{initialQuestion ?? ""}</output>
+      <button type="button" onClick={onInitialQuestionConsumed}>
+        一時質問を消費
+      </button>
+    </section>
+  ),
+}));
 
 afterEach(() => {
   currentPathname = "/laws";
+  router.push.mockReset();
+  __resetTransientChatNavigationForTests();
+  window.history.replaceState(null, "", "/laws");
   localStorage.clear();
+  sessionStorage.clear();
+  delete document.body.dataset.pendingQuestion;
   Reflect.deleteProperty(window, "gtag");
   for (const entry of document.cookie.split(";")) {
     const name = entry.split("=")[0]?.trim();
@@ -21,7 +56,108 @@ afterEach(() => {
   Reflect.deleteProperty(window.navigator, "doNotTrack");
 });
 
+function PendingQuestionProbe() {
+  const { peekChatQuestion } = useTransientQueryBridge();
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        document.body.dataset.pendingQuestion =
+          peekChatQuestion()?.question ?? "";
+      }}
+    >
+      一時質問を確認
+    </button>
+  );
+}
+
 describe("OptionalThirdPartyScripts consent lifecycle", () => {
+  it.each(["granted", "denied"] as const)(
+    "configured本番状態・consent=%sでも質問を一度だけmemory handoffし任意eventを送らない",
+    async (consent) => {
+      const question = "盤を開けてテスターを当てる場合の資格は？";
+      const gtag = vi.fn();
+      window.gtag = gtag;
+      localStorage.setItem(OPTIONAL_TRACKING_CONSENT_KEY, consent);
+      vi.stubGlobal("crypto", { randomUUID: () => "configured-handoff" });
+      router.push.mockImplementation((href: string) => {
+        currentPathname = href;
+        window.history.pushState(null, "", href);
+      });
+
+      const view = render(
+        <>
+          <OptionalThirdPartyScripts
+            analyticsEnabled
+            adsEnabled
+            rumEnabled
+          />
+          <TransientQueryBridgeProvider>
+            <TransientChatLink question={question}>
+              安衛法AIで確認
+            </TransientChatLink>
+            <PendingQuestionProbe />
+          </TransientQueryBridgeProvider>
+        </>,
+      );
+
+      fireEvent.click(screen.getByRole("link", { name: "安衛法AIで確認" }));
+      view.rerender(
+        <>
+          <OptionalThirdPartyScripts
+            analyticsEnabled
+            adsEnabled
+            rumEnabled
+          />
+          <TransientQueryBridgeProvider>
+            <ChatbotClientBridge />
+            <PendingQuestionProbe />
+          </TransientQueryBridgeProvider>
+        </>,
+      );
+
+      expect(router.push).toHaveBeenCalledWith("/chatbot");
+      expect(window.location.pathname).toBe("/chatbot");
+      expect(window.location.search).toBe("");
+      expect(window.location.hash).toBe("");
+      expect(screen.getByTestId("destination-question").textContent).toBe(
+        question,
+      );
+      expect(consumeTransientChatNavigation()).toBe(false);
+      fireEvent.click(screen.getByRole("button", { name: "一時質問を確認" }));
+      expect(document.body.dataset.pendingQuestion).toBe(question);
+      fireEvent.click(screen.getByRole("button", { name: "一時質問を消費" }));
+      expect(screen.getByTestId("destination-question").textContent).toBe("");
+      fireEvent.click(screen.getByRole("button", { name: "一時質問を確認" }));
+      expect(document.body.dataset.pendingQuestion).toBe("");
+      fireEvent.click(screen.getByRole("button", { name: "一時質問を消費" }));
+      expect(JSON.stringify(window.history.state)).not.toContain(question);
+      expect(
+        [
+          ...Array(localStorage.length).keys(),
+          ...Array(sessionStorage.length).keys(),
+        ]
+          .map((_unused, index) =>
+            index < localStorage.length
+              ? localStorage.getItem(localStorage.key(index) ?? "")
+              : sessionStorage.getItem(
+                  sessionStorage.key(index - localStorage.length) ?? "",
+                ),
+          )
+          .join(" "),
+      ).not.toContain(question);
+      expect(JSON.stringify(gtag.mock.calls)).not.toContain(question);
+      expect(
+        gtag.mock.calls.filter(([command]) => command === "event"),
+      ).toEqual([]);
+      expect(gtag).toHaveBeenCalledWith(
+        "consent",
+        "update",
+        expect.objectContaining({ analytics_storage: "denied" }),
+      );
+    },
+  );
+
   it("does not place Cookie controls over the chatbot composer", async () => {
     currentPathname = "/chatbot";
     render(<OptionalThirdPartyScripts analyticsEnabled adsEnabled rumEnabled />);

@@ -18,6 +18,7 @@ export default defineConfig({
   webServer: {
     command: `npm run dev -- --hostname 0.0.0.0 --port ${port}`,
     env: {
+      NEXT_DIST_DIR: ".cache/playwright-privacy-next",
       NEXT_PUBLIC_API_MODE: "live",
       NEXT_PUBLIC_GA_MEASUREMENT_ID: "G-PRIVACYTEST1",
       NEXT_PUBLIC_ADSENSE_PUB_ID: "ca-pub-0000000000000000",

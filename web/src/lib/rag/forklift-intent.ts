@@ -32,7 +32,9 @@ export function detectForkliftQueryIntent(
   const hasForkliftContext =
     /フォークリフト/.test(expanded) ||
     /(?:リーチリフト|カウンターリフト)/.test(explicit) ||
-    /フォーク(?:の|を|に|で|へ|乗|資格|免許|速度)/.test(explicit);
+    /フォーク(?:の|を|に|で|へ|乗|使|運転|操作|作業|資格|免許|速度)/.test(
+      explicit,
+    );
 
   if (!hasForkliftContext) {
     return {
@@ -54,7 +56,12 @@ export function detectForkliftQueryIntent(
     /(?:運転|操作)(?:したい|でき(?:る|ます)?|するには|に必要)/.test(
       explicit,
     ) ||
-    /乗(?:るには|りたい|れる|っていい)/.test(explicit);
+    /乗(?:るには|るのに(?:何が)?(?:必要|要る|いる)|りたい|れる|っていい)/.test(
+      explicit,
+    ) ||
+    /(?:使う|運転する|操作する)(?:には|のに)(?:何が)?(?:必要|要る|いる)?/.test(
+      explicit,
+    );
   const speed = /速度/.test(explicit);
   const monthlyInspection =
     /(?:月次(?:自主)?(?:検査|点検)|月例(?:検査|点検)|(?:毎月|月1回|1月(?:に)?1回|一月(?:に)?一回|一か月(?:以内|ごと)|一ヶ月(?:以内|ごと))[^。！？]{0,16}(?:自主検査|検査|点検)|(?:自主検査|検査|点検)[^。！？]{0,16}(?:毎月|月1回|1月(?:に)?1回|一月(?:に)?一回|一か月(?:以内|ごと)|一ヶ月(?:以内|ごと)))/.test(

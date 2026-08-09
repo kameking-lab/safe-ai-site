@@ -1,10 +1,6 @@
 "use client";
 
 import { trackEvent } from "@/components/Analytics";
-import {
-  hasOptionalTrackingConsent,
-  hasPrivacySignalOptOut,
-} from "@/lib/analytics-privacy";
 
 export const HOME_COCKPIT_EVENTS = [
   "home_cockpit_view",
@@ -16,7 +12,6 @@ export const HOME_COCKPIT_EVENTS = [
   "home_chemical_search_start",
   "home_chemical_result_open",
   "home_chat_start",
-  "home_chat_destination_ready",
 ] as const;
 
 export type HomeCockpitEvent = (typeof HOME_COCKPIT_EVENTS)[number];
@@ -125,26 +120,6 @@ export function countBucket(count: number): AllowedAttributes["count_bucket"] {
   return "6+";
 }
 
-export function canEmitChatDestinationEvent(input: {
-  hostname: string;
-  pathname: string;
-  search: string;
-  hash: string;
-  consentGranted: boolean;
-  privacyOptOut: boolean;
-  gaAvailable: boolean;
-}): boolean {
-  return (
-    input.hostname === "www.anzen-ai-portal.jp" &&
-    input.pathname === "/chatbot" &&
-    input.search === "" &&
-    input.hash === "" &&
-    input.consentGranted &&
-    !input.privacyOptOut &&
-    input.gaAvailable
-  );
-}
-
 /**
  * Production-host only, consent-gated coarse telemetry. Callers cannot attach
  * raw region, chemical, CAS, question, URL query, or any free-form value.
@@ -170,32 +145,5 @@ export function trackHomeCockpitEvent(
     deployment,
     date: jstDate(),
   };
-  if (event === "home_chat_destination_ready") {
-    const gaAvailable =
-      Boolean(process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID) &&
-      typeof window.gtag === "function";
-    if (
-      !canEmitChatDestinationEvent({
-        hostname: window.location.hostname,
-        pathname: window.location.pathname,
-        search: window.location.search,
-        hash: window.location.hash,
-        consentGranted: hasOptionalTrackingConsent(),
-        privacyOptOut: hasPrivacySignalOptOut(),
-        gaAvailable,
-      })
-    ) {
-      return;
-    }
-    // This one fixed-template event is permitted on /chatbot only after the
-    // one-shot memory handoff has been consumed. It cannot carry the question,
-    // a URL query, or arbitrary attributes, and it never runs on Preview.
-    window.gtag?.("event", event, {
-      ...safeAttributes,
-      page_path: "/chatbot",
-      page_location: `${window.location.origin}/chatbot`,
-    });
-    return;
-  }
   trackEvent(event, safeAttributes);
 }

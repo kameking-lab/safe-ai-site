@@ -11,8 +11,11 @@ import type {
 import type { ChatbotSafetyKind } from "@/lib/chatbot-safety";
 import type {
   LegalClarification,
-  LegalConversationContext,
 } from "@/lib/legal-conversation-context";
+import {
+  sanitizePublicLegalConversationContext,
+  type PublicLegalConversationContext,
+} from "@/lib/legal-conversation-public-context";
 import type { NoticeHit } from "@/lib/notice-search";
 import type { LawCategoryFilter } from "@/lib/rag-search";
 
@@ -22,7 +25,7 @@ export type ChatbotRequest = {
   message: string;
   history?: ChatTurn[];
   /** 生履歴ではなく許可済み作業条件だけを引き継ぐ経路向け。 */
-  context?: LegalConversationContext;
+  context?: PublicLegalConversationContext;
   /** UIで現在の質問と全送信履歴を確認・匿名化済みであること。 */
   privacyConfirmed?: boolean;
   /** 法令カテゴリで検索の対象を絞る（"all" または lawShort 指定） */
@@ -77,14 +80,27 @@ export type FollowupSuggestion = {
  */
 export type ChatbotQuickReply = FollowupSuggestion;
 
+export type ChatbotEffectiveDateStatus = {
+  /** 回答が前提とする日付。公式資料から特定できない場合は null。 */
+  asOf: string | null;
+  /** 回答対象となる規定の施行状態。混在または未確認は unknown。 */
+  status: "current" | "future" | "past" | "unknown";
+  /** UI・no-JS経路でそのまま読める短い状態説明。 */
+  label: string;
+};
+
 export type ChatbotResponse = {
-  /** 後方互換の表示本文。必ず substantiveAnswer から始める。 */
+  /** 後方互換の表示本文。必ず directAnswer から始める。 */
   answer: string;
-  /** 利用者が与えた情報だけで返せる、質問ではない実質回答。 */
+  /** 利用者が与えた情報だけで返せる、空でない質問以外の直接回答。 */
+  directAnswer: string;
+  /** @deprecated directAnswer の互換エイリアス。 */
   substantiveAnswer: string;
   /** 暫定回答で置いた前提。前提がなければ空配列。 */
   assumptions: string[];
-  /** 結果が変わる主要条件。最大3件。 */
+  /** 結果が変わる主要条件。 */
+  importantConditions: string[];
+  /** @deprecated importantConditions の互換エイリアス。 */
   conditions: string[];
   sources: ChatbotSource[];
   source_type: "rag" | "ai_inference" | "safety";
@@ -117,30 +133,38 @@ export type ChatbotResponse = {
   clarificationQuestion: string | null;
   /** 回答後にだけ表示する小さな選択肢。最大3件。 */
   quickReplies: ChatbotQuickReply[];
+  /** 回答対象日と、公式資料で確認できた施行状態。 */
+  effectiveDateStatus: ChatbotEffectiveDateStatus;
   /** 同一タブでのみ引き継ぐ、許可済み作業条件。生会話や識別情報は含めない。 */
-  context?: LegalConversationContext;
+  context?: PublicLegalConversationContext;
   /** Must remain true until semantic support of each claim is independently verified. */
   requiresHumanReview: true;
 };
 
 export type ChatbotResponseDraft = Omit<
   ChatbotResponse,
+  | "directAnswer"
   | "substantiveAnswer"
   | "assumptions"
+  | "importantConditions"
   | "conditions"
   | "citations"
   | "clarificationQuestion"
   | "quickReplies"
+  | "effectiveDateStatus"
 > &
   Partial<
     Pick<
       ChatbotResponse,
+      | "directAnswer"
       | "substantiveAnswer"
       | "assumptions"
+      | "importantConditions"
       | "conditions"
       | "citations"
       | "clarificationQuestion"
       | "quickReplies"
+      | "effectiveDateStatus"
     >
   >;
 
@@ -191,6 +215,134 @@ function firstSubstantiveText(answer: string): string {
   return beforeQuestion;
 }
 
+function normalizedList(values: string[] | undefined): string[] {
+  return (values ?? [])
+    .map((value) => value.trim())
+    .filter(
+      (value, index, items) =>
+        Boolean(value) && items.indexOf(value) === index,
+    );
+}
+
+function oneClarificationQuestion(value: string | null | undefined): string | null {
+  const firstLine = value
+    ?.split(/\r?\n/)
+    .map((line) => line.trim())
+    .find(Boolean);
+  if (!firstLine) return null;
+  const firstQuestionEnd = firstLine.search(/[？?]/);
+  return firstQuestionEnd >= 0
+    ? firstLine.slice(0, firstQuestionEnd + 1).trim()
+    : firstLine;
+}
+
+function isQuestionOnlyAnswer(
+  answer: string,
+  clarificationQuestion: string | null,
+): boolean {
+  const normalized = answer.trim();
+  if (!normalized) return true;
+  if (clarificationQuestion && normalized === clarificationQuestion) return true;
+
+  const contentLines = normalized
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(
+      (line) =>
+        Boolean(line) &&
+        !ANSWER_SECTION_NAMES.includes(
+          line as (typeof ANSWER_SECTION_NAMES)[number],
+        ) &&
+        !/^回答基準日:/.test(line),
+    );
+  if (contentLines.length !== 1) return false;
+  const onlyLine = contentLines[0]!;
+  return /^[^。！!\n]*[？?]$/.test(onlyLine);
+}
+
+function synchronizeVisibleAnswer(answer: string, directAnswer: string): string {
+  if (firstSubstantiveText(answer).trim() === directAnswer) return answer.trim();
+
+  const lines = answer.split("\n");
+  const conclusionIndex = lines.findIndex((line) => line.trim() === "結論");
+  if (conclusionIndex >= 0) {
+    let endIndex = lines.length;
+    for (let index = conclusionIndex + 1; index < lines.length; index += 1) {
+      const value = lines[index]!.trim();
+      if (
+        ANSWER_SECTION_NAMES.includes(
+          value as (typeof ANSWER_SECTION_NAMES)[number],
+        )
+      ) {
+        endIndex = index;
+        break;
+      }
+    }
+    return [
+      ...lines.slice(0, conclusionIndex + 1),
+      directAnswer,
+      ...lines.slice(endIndex),
+    ]
+      .join("\n")
+      .trim();
+  }
+
+  const questionIndex = answer.search(/\n(?:次の質問|確認質問)\n/);
+  if (questionIndex >= 0) {
+    return `${directAnswer}${answer.slice(questionIndex)}`.trim();
+  }
+  return directAnswer;
+}
+
+function answerAsOf(answer: string): string | null {
+  return answer.match(/回答基準日:\s*(\d{4}-\d{2}-\d{2})\s+JST/)?.[1] ?? null;
+}
+
+function effectiveDateStatus(
+  draft: ChatbotResponseDraft,
+  answer: string,
+): ChatbotEffectiveDateStatus {
+  if (draft.effectiveDateStatus) {
+    const asOf = draft.effectiveDateStatus.asOf?.trim() || null;
+    return {
+      asOf,
+      status: draft.effectiveDateStatus.status,
+      label: draft.effectiveDateStatus.label.trim() || effectiveDateLabel(
+        draft.effectiveDateStatus.status,
+        asOf,
+      ),
+    };
+  }
+
+  const asOf =
+    answerAsOf(answer) ??
+    draft.sources.map((source) => source.asOf?.trim()).find(Boolean) ??
+    null;
+  const statuses = [
+    ...new Set(
+      draft.sources
+        .map((source) => source.applicationStatus)
+        .filter(
+          (status): status is NonNullable<ChatbotSource["applicationStatus"]> =>
+            Boolean(status),
+        ),
+    ),
+  ];
+  const status = statuses.length === 1 ? statuses[0]! : "unknown";
+  return { asOf, status, label: effectiveDateLabel(status, asOf) };
+}
+
+function effectiveDateLabel(
+  status: ChatbotEffectiveDateStatus["status"],
+  asOf: string | null,
+): string {
+  const date = asOf ? `${asOf}時点で` : "";
+  if (status === "current") return `${date}施行中として確認済みです。`;
+  if (status === "future") return `${date}将来施行として確認済みです。`;
+  if (status === "past") return `${date}過去の規定として確認済みです。`;
+  return `${date}施行状態を公式資料から特定できていません。`;
+}
+
 /** 回答本文の末尾にある確認質問を、構造化された1件へ同期する。 */
 export function withAnswerClarification(
   answer: string,
@@ -223,32 +375,37 @@ export function finalizeChatbotResponse(
     answerQuestion && /(?:対象|適用).*(?:日付|時点)/.test(answerQuestion)
       ? answerQuestion
       : "";
-  const clarificationQuestion =
+  const clarificationQuestion = oneClarificationQuestion(
     draft.clarificationQuestion?.trim() ||
     temporalAnswerQuestion ||
     draft.clarification?.question.trim() ||
     answerQuestion ||
-    null;
+    null,
+  );
   let answer = withAnswerClarification(
     draft.answer,
     clarificationQuestion
       ? { question: clarificationQuestion, options: draft.clarification?.options ?? [] }
       : null,
   );
-  let substantiveAnswer =
-    draft.substantiveAnswer?.trim() || firstSubstantiveText(answer);
+  let directAnswer =
+    draft.directAnswer?.trim() ||
+    draft.substantiveAnswer?.trim() ||
+    firstSubstantiveText(answer);
 
   // 最終境界でも質問だけの通常応答を通さない。これは例外経路の説明文にもなる。
-  if (!substantiveAnswer || substantiveAnswer === clarificationQuestion) {
-    substantiveAnswer = CHATBOT_UNANSWERABLE_FALLBACK;
+  if (isQuestionOnlyAnswer(directAnswer, clarificationQuestion)) {
+    directAnswer = CHATBOT_UNANSWERABLE_FALLBACK;
   }
+
+  answer = synchronizeVisibleAnswer(answer, directAnswer);
 
   // A legacy caller or stale cache may still contain only the clarification.
   // Upgrade the visible answer as well as the structured field so every
   // rendering path (including no-JS and legacy clients) remains answer-first.
-  if (!firstSubstantiveText(answer) || firstSubstantiveText(answer) === clarificationQuestion) {
+  if (isQuestionOnlyAnswer(firstSubstantiveText(answer), clarificationQuestion)) {
     answer = withAnswerClarification(
-      `結論\n${substantiveAnswer}`,
+      `結論\n${directAnswer}`,
       clarificationQuestion
         ? {
             question: clarificationQuestion,
@@ -273,18 +430,23 @@ export function finalizeChatbotResponse(
         ) === index,
     )
     .slice(0, 3);
+  const importantConditions = normalizedList(
+    draft.importantConditions ?? draft.conditions ?? answerConditions(answer),
+  );
+  const finalEffectiveDateStatus = effectiveDateStatus(draft, answer);
 
   return {
     ...draft,
     answer,
-    substantiveAnswer,
-    assumptions: (draft.assumptions ?? []).filter(Boolean).slice(0, 3),
-    conditions: (draft.conditions ?? answerConditions(answer))
-      .filter(Boolean)
-      .slice(0, 3),
+    directAnswer,
+    substantiveAnswer: directAnswer,
+    assumptions: normalizedList(draft.assumptions),
+    importantConditions,
+    conditions: importantConditions,
     citations: draft.citations ?? [],
     clarificationQuestion,
     quickReplies,
+    effectiveDateStatus: finalEffectiveDateStatus,
     followups: draft.followups?.slice(0, 3),
     clarification: clarificationQuestion
       ? {
@@ -292,15 +454,21 @@ export function finalizeChatbotResponse(
           options: quickReplies.map((reply) => reply.label),
         }
       : undefined,
+    context: draft.context
+      ? sanitizePublicLegalConversationContext(draft.context)
+      : undefined,
   };
 }
 
 export function isPureClarificationResponse(
-  response: Pick<ChatbotResponse, "substantiveAnswer" | "clarificationQuestion">,
+  response: Pick<ChatbotResponse, "clarificationQuestion"> &
+    Partial<Pick<ChatbotResponse, "directAnswer" | "substantiveAnswer">>,
 ): boolean {
+  const directAnswer =
+    response.directAnswer?.trim() || response.substantiveAnswer?.trim() || "";
   return Boolean(
     response.clarificationQuestion &&
-      response.substantiveAnswer.trim() === response.clarificationQuestion.trim(),
+      directAnswer === response.clarificationQuestion.trim(),
   );
 }
 

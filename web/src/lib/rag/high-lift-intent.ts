@@ -21,9 +21,11 @@ export function detectHighLiftQueryIntent(
 ): HighLiftQueryIntent {
   const explicit = normalize(explicitQuery);
   const contextual = normalize(contextualQuery);
-  const hasHighLiftContext = /(?:高所作業車|高作車|こうしょ作業車)/.test(
-    contextual,
-  );
+  const hasHighLiftContext =
+    /(?:高所作業車|高作車|こうしょ作業車)/.test(contextual) ||
+    /作業車.*(?:高い所|高所).*(?:上が|上る|作業)|(?:高い所|高所).*(?:上が|上る|作業).*作業車/.test(
+      contextual,
+    );
 
   if (!hasHighLiftContext) {
     return {
@@ -46,7 +48,7 @@ export function detectHighLiftQueryIntent(
     ) ||
     /(?:運転|操作)(?:したい|でき(?:る|ます)?|するには|に必要)/.test(
       explicit,
-    );
+    ) || /(?:上がる|上る|使う|作業する)(?:には|のに)/.test(explicit);
 
   return { hasHighLiftContext, qualification, fallProtection };
 }

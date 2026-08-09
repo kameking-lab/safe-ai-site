@@ -2,13 +2,14 @@ import type { RevisionSummary } from "@/lib/types/domain";
 import type { LawRevision } from "@/lib/types/domain";
 import type {
   ChatbotQuickReply,
+  ChatbotResponse,
   ChatbotSource,
 } from "@/lib/chatbot-contract";
 import type {
   OfficialWeatherWarningState,
   WeatherSnapshot,
 } from "@/lib/types/domain";
-import type { LegalConversationContext } from "@/lib/legal-conversation-context";
+import type { PublicLegalConversationContext } from "@/lib/legal-conversation-public-context";
 
 export type ApiMode = "mock" | "live";
 
@@ -58,19 +59,27 @@ export type ChatApiRequest = {
   revisionTitle: string;
   question: string;
   privacyConfirmed: boolean;
-  /** 同一画面の直近ターン。サーバーでは許可済み作業条件だけへ縮約する。 */
+  /** @deprecated 旧clientの安全遮断だけに読み、回答文脈には利用しない。 */
   history?: Array<{ role: "user" | "assistant"; content: string }>;
-  context?: LegalConversationContext;
+  context?: PublicLegalConversationContext;
 };
 
 export type ChatApiResponse = {
   reply: string;
+  directAnswer: ChatbotResponse["directAnswer"];
+  assumptions: ChatbotResponse["assumptions"];
+  importantConditions: ChatbotResponse["importantConditions"];
+  citations: ChatbotResponse["citations"];
+  confidence: ChatbotResponse["confidence"];
+  effectiveDateStatus: ChatbotResponse["effectiveDateStatus"];
+  clarificationQuestion: ChatbotResponse["clarificationQuestion"];
+  quickReplies: ChatbotQuickReply[];
+  sources: ChatbotSource[];
+  /** @deprecated directAnswer の読み取り互換エイリアス。 */
   substantiveAnswer?: string;
+  /** @deprecated importantConditions の読み取り互換エイリアス。 */
   conditions?: string[];
-  clarificationQuestion?: string | null;
-  quickReplies?: ChatbotQuickReply[];
-  sources?: ChatbotSource[];
-  context?: LegalConversationContext;
+  context?: PublicLegalConversationContext;
 };
 
 export type RevisionListApiResponse = {

@@ -17,6 +17,26 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium } from "playwright";
 
+export function resolveRepositoryExternalEvidencePath({
+  configuredPath,
+  repositoryRoot,
+}) {
+  if (!configuredPath || !path.isAbsolute(configuredPath)) {
+    throw new Error(
+      "--output must be an explicit absolute repository-external path",
+    );
+  }
+  const resolvedOutput = path.resolve(configuredPath);
+  const relativeOutput = path.relative(repositoryRoot, resolvedOutput);
+  if (
+    relativeOutput === "" ||
+    (!relativeOutput.startsWith(`..${path.sep}`) && relativeOutput !== "..")
+  ) {
+    throw new Error("Production smoke evidence must remain outside the repository");
+  }
+  return resolvedOutput;
+}
+
 export function assertProductionAliasDeployment({
   expectedDeploymentId,
   productionHostname,
@@ -244,12 +264,10 @@ const deploymentVerification = assertProductionAliasDeployment({
   aliasMetadata: productionAliasMetadata,
 });
 
-const outputPath = path.resolve(
-  option(
-    "output",
-    "../docs/audits/evidence/japan-leading-gap-closure-2026-07-31/production/production-smoke.json",
-  ),
-);
+const outputPath = resolveRepositoryExternalEvidencePath({
+  configuredPath: option("output", undefined),
+  repositoryRoot,
+});
 const screenshotDirectory = path.resolve(
   path.dirname(outputPath),
   "screenshots",
@@ -954,6 +972,7 @@ await context.addInitScript(() => {
 });
 
 const page = await context.newPage();
+const chatbotBrowserRequests = [];
 page.on("console", (message) => {
   if (message.type() === "error") {
     observations.browser.consoleErrors.push({
@@ -969,6 +988,22 @@ page.on("pageerror", (error) => {
   });
 });
 page.on("request", (browserRequest) => {
+  const requestUrl = new URL(browserRequest.url());
+  if (
+    requestUrl.pathname === "/api/chatbot/stream" &&
+    browserRequest.method() === "POST"
+  ) {
+    let body = null;
+    try {
+      body = browserRequest.postDataJSON();
+    } catch {
+      // The checks below fail closed when a JSON body cannot be inspected.
+    }
+    chatbotBrowserRequests.push({
+      body,
+      urlHasQuery: Boolean(requestUrl.search),
+    });
+  }
   if (
     /\/api\/rum(?:[/?]|$)|googletagmanager|google-analytics|vercelinsights/i.test(
       browserRequest.url(),
@@ -1177,6 +1212,236 @@ for (const target of browserTargets) {
       animations: "disabled",
     });
   }
+}
+
+if (!getOnly) {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(new URL("/chatbot", baseUrl).href, {
+    waitUntil: "domcontentloaded",
+    timeout: 60_000,
+  });
+
+  const sendChatbotQuestion = async (question) => {
+    const answers = page.locator("[data-chatbot-answer]");
+    const answerCount = await answers.count();
+    const composer = page.locator("[data-chatbot-composer]");
+    await composer.locator("textarea").fill(question);
+    const responsePromise = page.waitForResponse(
+      (response) =>
+        new URL(response.url()).pathname === "/api/chatbot/stream" &&
+        response.request().method() === "POST",
+    );
+    await composer.getByRole("button", { name: "送信" }).click();
+    const response = await responsePromise;
+    const answer = answers.nth(answerCount);
+    await answer
+      .locator("[data-chatbot-structured-answer]")
+      .waitFor({ state: "visible", timeout: 30_000 });
+    return { answer, response };
+  };
+
+  const broad = await sendChatbotQuestion(
+    "電気の点検する時に必要な資格ある？",
+  );
+  const broadText = await broad.answer.innerText();
+  const broadQuickReplies = await broad.answer
+    .locator("[data-chatbot-quick-reply]")
+    .allTextContents();
+  const broadSourceDetails = broad.answer.locator(
+    "[data-chatbot-source-details]",
+  );
+  const broadSourceSummary = await broadSourceDetails
+    .locator("summary")
+    .innerText();
+  const broadUseful =
+    /盤の外.*一律の国家資格が必要とは限りません/u.test(broadText) &&
+    /盤を開け.*測定/u.test(broadText) &&
+    /電気工事士.*特別教育/u.test(broadText) &&
+    /電気主任技術者.*保安監督/u.test(broadText) &&
+    !/酸欠|有機溶剤|石綿|玉掛け/u.test(broadText);
+  record("chatbot:electric-broad-answer-first", broadUseful, {
+    hasVisualBranch: /盤の外/u.test(broadText),
+    hasMeasurementBranch: /盤を開け.*測定/u.test(broadText),
+    distinguishesSchemes: /電気工事士.*特別教育/u.test(broadText),
+    distinguishesChiefEngineer: /電気主任技術者.*保安監督/u.test(
+      broadText,
+    ),
+  });
+  record(
+    "chatbot:electric-broad-quick-replies",
+    JSON.stringify(broadQuickReplies.map((value) => value.trim())) ===
+      JSON.stringify([
+        "見るだけ",
+        "盤を開けて測定",
+        "配線・充電部を扱う",
+      ]),
+    { count: broadQuickReplies.length },
+  );
+  record(
+    "chatbot:electric-source-disclosure",
+    /^根拠 \d+件$/u.test(broadSourceSummary.trim()) &&
+      !(await broadSourceDetails.evaluate((element) => element.open)),
+    { summary: broadSourceSummary.trim() },
+  );
+  await broad.answer.getByRole("button", { name: "違う" }).click();
+  const mismatchFocused = await page
+    .locator("[data-chatbot-composer] textarea")
+    .evaluate((element) => element === document.activeElement);
+  record(
+    "chatbot:feedback-mismatch-keeps-conversation",
+    mismatchFocused &&
+      (await broad.answer.locator("[data-chatbot-quick-reply]").count()) === 0,
+    { mismatchFocused },
+  );
+  await page.screenshot({
+    path: path.join(screenshotDirectory, "chatbot-electric-broad-390.png"),
+    fullPage: false,
+    animations: "disabled",
+  });
+
+  const startCheck = await sendChatbotQuestion("作業開始前点検");
+  const startCheckText = await startCheck.answer.innerText();
+  record(
+    "chatbot:electric-start-check-context",
+    /資格名ではなく.*手順|資格名ではなく.*時点/u.test(startCheckText) &&
+      /盤を開け.*充電中/u.test(startCheckText) &&
+      !/定期自主検査|性能検査|酸欠|有機溶剤|石綿|玉掛け/u.test(
+        startCheckText,
+      ),
+    {
+      explainsProcedure: /資格名ではなく/u.test(startCheckText),
+      retainsElectricalWork: /盤を開け.*充電中/u.test(startCheckText),
+    },
+  );
+  await page.screenshot({
+    path: path.join(
+      screenshotDirectory,
+      "chatbot-electric-start-check-390.png",
+    ),
+    fullPage: false,
+    animations: "disabled",
+  });
+
+  await page.getByRole("button", { name: "新しい相談" }).click();
+  const specialEducation = await sendChatbotQuestion(
+    "電気作業の特別教育について教えて",
+  );
+  const specialEducationText = await specialEducation.answer.innerText();
+  record(
+    "chatbot:electric-special-education",
+    /国家資格の免状ではありません/u.test(specialEducationText) &&
+      /高圧・特別高圧.*敷設・点検・修理・操作/u.test(
+        specialEducationText,
+      ) &&
+      /低圧.*敷設・修理.*露出充電部/u.test(specialEducationText) &&
+      /電気工事士/u.test(specialEducationText),
+    {
+      distinguishesLicense: /国家資格の免状ではありません/u.test(
+        specialEducationText,
+      ),
+      explainsHighVoltage: /高圧・特別高圧/u.test(specialEducationText),
+      explainsLowVoltage: /低圧/u.test(specialEducationText),
+    },
+  );
+  await page.screenshot({
+    path: path.join(
+      screenshotDirectory,
+      "chatbot-electric-special-education-390.png",
+    ),
+    fullPage: false,
+    animations: "disabled",
+  });
+
+  const browserChatBoundary = await page.evaluate(() => {
+    const composer = document.querySelector("[data-chatbot-composer]");
+    const composerFrame = composer?.firstElementChild;
+    const bottomNav = document.querySelector('[data-mobile-nav="bottom"]');
+    const cookieControl = [...document.querySelectorAll("button")].find(
+      (button) => button.textContent?.trim() === "Cookie設定",
+    );
+    const rect = (element) => element?.getBoundingClientRect() ?? null;
+    const overlaps = (left, right) =>
+      Boolean(
+        left &&
+          right &&
+          left.width > 0 &&
+          left.height > 0 &&
+          right.width > 0 &&
+          right.height > 0 &&
+          left.left < right.right &&
+          left.right > right.left &&
+          left.top < right.bottom &&
+          left.bottom > right.top,
+      );
+    const composerRect = rect(composer);
+    const frameRect = rect(composerFrame);
+    return {
+      composerWithinViewport: Boolean(
+        composerRect &&
+          composerRect.left >= 0 &&
+          composerRect.right <= innerWidth &&
+          composerRect.top >= 0 &&
+          composerRect.bottom <= innerHeight,
+      ),
+      bottomNavOverlap: overlaps(frameRect, rect(bottomNav)),
+      cookieControlOverlap: overlaps(frameRect, rect(cookieControl)),
+      storageContainsQuestion: [localStorage, sessionStorage].some((storage) =>
+        Array.from({ length: storage.length }, (_, index) => {
+          const key = storage.key(index);
+          return `${key ?? ""}:${key ? storage.getItem(key) ?? "" : ""}`;
+        })
+          .join("\n")
+          .includes("電気の点検する時に必要な資格ある？"),
+      ),
+    };
+  });
+  const safeStructuredRequests =
+    chatbotBrowserRequests.length === 3 &&
+    chatbotBrowserRequests.every(
+      ({ body, urlHasQuery }) =>
+        body &&
+        !("history" in body) &&
+        urlHasQuery === false,
+    ) &&
+    chatbotBrowserRequests[1]?.body?.context?.topicDomain === "electrical";
+  const aiUseProvenFalse = [
+    broad.response,
+    startCheck.response,
+    specialEducation.response,
+  ].every(
+    (response) =>
+      response.headers()["x-ai-used"] === "false" ||
+      (response.headers()["x-ai-used"] === undefined &&
+        response.headers()["x-cache-hit"] === "true"),
+  );
+  record(
+    "chatbot:memory-only-structured-context",
+    safeStructuredRequests &&
+      !browserChatBoundary.storageContainsQuestion &&
+      aiUseProvenFalse,
+    {
+      requestCount: chatbotBrowserRequests.length,
+      rawHistorySent: chatbotBrowserRequests.some(({ body }) =>
+        Boolean(body && "history" in body),
+      ),
+      rawQuestionStored: browserChatBoundary.storageContainsQuestion,
+      externalAiUsed: !aiUseProvenFalse,
+    },
+  );
+  record(
+    "chatbot:composer-mobile-boundary",
+    browserChatBoundary.composerWithinViewport &&
+      !browserChatBoundary.bottomNavOverlap &&
+      !browserChatBoundary.cookieControlOverlap,
+    browserChatBoundary,
+  );
+} else {
+  record(
+    "chatbot:electric-browser-flow-skipped-get-only",
+    true,
+    { skipped: true },
+    "informational",
+  );
 }
 
 await page.setViewportSize({ width: 1440, height: 900 });

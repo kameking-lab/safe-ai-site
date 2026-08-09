@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { POST } from "./route";
 import type { ChatbotResponse } from "@/lib/chatbot-contract";
 import type { ChatApiResponse } from "@/lib/types/api";
+import { PUBLIC_LEGAL_CONVERSATION_CONTEXT_KEYS } from "@/lib/legal-conversation-public-context";
 
 const generateContent = vi.fn();
 const CRANE_REVISION = {
@@ -49,6 +50,13 @@ function expectAnswerFirst(payload: LegacyAnswerFirstPayload) {
       payload.answer.indexOf(payload.substantiveAnswer),
     );
   }
+  expect(
+    Object.keys(payload.context ?? {}).every((key) =>
+      PUBLIC_LEGAL_CONVERSATION_CONTEXT_KEYS.includes(
+        key as (typeof PUBLIC_LEGAL_CONVERSATION_CONTEXT_KEYS)[number],
+      ),
+    ),
+  ).toBe(true);
 }
 
 describe("POST /api/chat safe compatibility route", () => {
@@ -62,7 +70,7 @@ describe("POST /api/chat safe compatibility route", () => {
     vi.unstubAllEnvs();
   });
 
-  it("legacy APIも実行時計ではなく2026-08-03を回答・施行判定の基準にする", async () => {
+  it("legacy APIも実行時計ではなく2026-08-09を回答・施行判定の基準にする", async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2030-01-01T00:00:00.000Z"));
 
@@ -70,16 +78,16 @@ describe("POST /api/chat safe compatibility route", () => {
     const body = (await response.json()) as LegacyAnswerFirstPayload;
     expect(response.status).toBe(200);
     expectAnswerFirst(body);
-    expect(body.answer).toContain("回答基準日: 2026-08-03 JST");
+    expect(body.answer).toContain("回答基準日: 2026-08-09 JST");
     expect(body.answer).not.toContain("2030-01-01");
     expect(body.sources.length).toBeGreaterThan(0);
-    expect(body.sources.every((item) => item.asOf === "2026-08-03")).toBe(true);
+    expect(body.sources.every((item) => item.asOf === "2026-08-09")).toBe(true);
 
     const futureResponse = await POST(
-      request("2026年8月4日時点の足場の手すり高さは？"),
+      request("2026年8月10日時点の足場の手すり高さは？"),
     );
     const future = (await futureResponse.json()) as LegacyAnswerFirstPayload;
-    expect(future.answer).toContain("回答基準日: 2026-08-03 JST");
+    expect(future.answer).toContain("回答基準日: 2026-08-09 JST");
     expect(future.answer).toContain("回答を保留");
     expect(future.sources).toEqual([]);
   });
@@ -252,7 +260,40 @@ describe("POST /api/chat safe compatibility route", () => {
     },
   );
 
-  it("短いfollow-upを直前の電気作業文脈へ結合し、無関係なカテゴリへ飛ばさない", async () => {
+  it("短いfollow-upを構造化された電気作業文脈へ結合し、無関係なカテゴリへ飛ばさない", async () => {
+    const response = await POST(
+      new Request("http://localhost/api/chat", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          revisionId: "",
+          revisionTitle: "選択中の法改正",
+          question: "作業主任者",
+          context: {
+            topicDomain: "electrical",
+            workType: "電気作業",
+            equipment: "電気設備",
+            qualification: "資格",
+          },
+          privacyConfirmed: true,
+        }),
+      }),
+    );
+    const body = (await response.json()) as LegacyAnswerFirstPayload;
+
+    expect(response.status).toBe(200);
+    expectAnswerFirst(body);
+    expect(body.substantiveAnswer).toContain("電気作業");
+    expect(body.substantiveAnswer).toContain("作業主任者");
+    expect(body.answer).not.toMatch(/酸欠|有機溶剤|石綿/);
+    expect(body.quickReplies.map((reply) => reply.label)).toEqual([
+      "停電して扱う",
+      "高圧・特高の活線・近接",
+      "どちらでもない",
+    ]);
+  });
+
+  it("旧clientの自由文historyだけでは法令domainを復元しない", async () => {
     const response = await POST(
       new Request("http://localhost/api/chat", {
         method: "POST",
@@ -270,14 +311,10 @@ describe("POST /api/chat safe compatibility route", () => {
 
     expect(response.status).toBe(200);
     expectAnswerFirst(body);
-    expect(body.substantiveAnswer).toContain("電気作業");
-    expect(body.substantiveAnswer).toContain("作業主任者");
-    expect(body.answer).not.toMatch(/酸欠|有機溶剤|石綿/);
-    expect(body.quickReplies.map((reply) => reply.label)).toEqual([
-      "配線工事",
-      "充電部・近接作業",
-      "操作・点検",
-    ]);
+    expect(body.context?.topicDomain).not.toBe("electrical");
+    expect(body.substantiveAnswer).not.toContain(
+      "電気作業全般に一律の「作業主任者」を置く制度はありません",
+    );
   });
 
   it.each([
@@ -325,7 +362,9 @@ describe("POST /api/chat safe compatibility route", () => {
       expectAnswerFirst(body);
       expect(body.substantiveAnswer).toContain(marker);
       expect(body.answer).not.toContain("安全管理者");
-      expect(body.context?.workType).toBeUndefined();
+      expect(body.context?.equipment).not.toBe(
+        "労働安全衛生法 安全管理者の選任義務",
+      );
       expect(body.clarificationQuestion).toBe(clarification);
       expect(body.quickReplies).toEqual([]);
       expect(
@@ -363,8 +402,9 @@ describe("POST /api/chat safe compatibility route", () => {
     expectAnswerFirst(body);
     expect(body.substantiveAnswer).toMatch(/技能講習.*一律に満たす制度ではありません/);
     expect(body.context).toMatchObject({
-      workType: "労働安全衛生法 安全管理者の選任義務",
-      qualification: "技能講習",
+      topicDomain: "general",
+      equipment: "労働安全衛生法 安全管理者の選任義務",
+      qualificationType: "skills-training",
     });
     expect(
       body.sources.some(

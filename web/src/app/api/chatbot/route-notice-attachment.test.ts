@@ -65,18 +65,24 @@ type AttachmentPayload = {
     excerpt: string | null;
     independentlyCheckedAt: string | null;
   }>;
+  attachedLeaflets?: Array<{
+    id: string;
+    title: string;
+    category: string;
+  }>;
 };
 
 async function callRoute(
   post: RoutePost,
   mode: "json" | "sse",
+  message = "熱中症の報告体制は義務？",
 ): Promise<AttachmentPayload> {
   const response = await post(
     new Request("http://localhost/api/chatbot", {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
-        message: "熱中症の報告体制は義務？",
+        message,
         privacyConfirmed: true,
       }),
     }),
@@ -163,6 +169,135 @@ describe.each([
       );
       expect(payload.answer).toContain("結論");
       expectRelatedHeatNotice(payload);
+    },
+  );
+});
+
+describe("electrical leaflet relevance at the actual route boundary", () => {
+  beforeEach(() => {
+    vi.stubEnv("GEMINI_EXTERNAL_AI_ENABLED", "false");
+    __resetChatbotCacheForTests();
+    __resetRateLimitForTests();
+  });
+
+  afterEach(() => {
+    __resetChatbotCacheForTests();
+    __resetRateLimitForTests();
+    resetCircuitBreakers();
+    vi.unstubAllEnvs();
+    vi.restoreAllMocks();
+  });
+
+  it.each(modes)(
+    "$label AI OFF応答は電気と無関係な教材をroute payloadへ含めない",
+    async ({ post, mode }) => {
+      const response = await post(
+        new Request("http://localhost/api/chatbot", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            message: "電気作業の特別教育について教えて",
+            privacyConfirmed: true,
+          }),
+        }),
+      );
+      expect(response.status).toBe(200);
+      const raw = await response.text();
+      const payload =
+        mode === "json"
+          ? (JSON.parse(raw) as AttachmentPayload)
+          : (() => {
+              const frames = [
+                ...raw.matchAll(/event: meta\ndata: ([^\n]+)\n\n/g),
+              ];
+              const meta = frames.at(-1)?.[1];
+              if (!meta) {
+                throw new Error(`SSE meta event missing: ${raw.slice(0, 240)}`);
+              }
+              return JSON.parse(meta) as AttachmentPayload;
+            })();
+
+      expect(payload.attachedLeaflets ?? []).toEqual([]);
+      expect(JSON.stringify(payload.attachedLeaflets ?? [])).not.toMatch(
+        /フルハーネス|墜落制止用器具|外国人/u,
+      );
+    },
+  );
+});
+
+describe("cross-domain leaflet relevance at the actual route boundary", () => {
+  beforeEach(() => {
+    vi.stubEnv("GEMINI_EXTERNAL_AI_ENABLED", "false");
+    __resetChatbotCacheForTests();
+    __resetRateLimitForTests();
+  });
+
+  afterEach(() => {
+    __resetChatbotCacheForTests();
+    __resetRateLimitForTests();
+    resetCircuitBreakers();
+    vi.unstubAllEnvs();
+    vi.restoreAllMocks();
+  });
+
+  const domainCases = [
+    {
+      label: "酸欠",
+      message: "酸欠作業の資格は？",
+      allowed: /(?:酸素欠乏|酸欠|硫化水素)/u,
+    },
+    {
+      label: "有機溶剤",
+      message: "有機溶剤作業主任者は必要？",
+      allowed: /(?:有機溶剤|有機則|トルエン|キシレン)/u,
+    },
+    {
+      label: "石綿",
+      message: "石綿の事前調査について教えて",
+      allowed: /(?:石綿|アスベスト)/u,
+    },
+    {
+      label: "熱中症",
+      message: "熱中症の報告体制は義務？",
+      allowed: /(?:熱中症|暑熱|WBGT)/iu,
+    },
+    {
+      label: "足場",
+      message: "足場の手すりと作業床の条件は？",
+      allowed: /(?:足場|手すり先行)/u,
+    },
+    {
+      label: "フルハーネス",
+      message: "フルハーネスの特別教育について教えて",
+      allowed: /(?:フルハーネス|墜落制止用器具|安全帯|胴ベルト)/u,
+    },
+  ] as const;
+
+  it.each(modes)(
+    "$label AI OFF応答は全domainで同じ概念の資料だけを返しunknownは0件にする",
+    async ({ post, mode }) => {
+      for (const domain of domainCases) {
+        __resetChatbotCacheForTests();
+        __resetRateLimitForTests();
+        const payload = await callRoute(post, mode, domain.message);
+        for (const leaflet of payload.attachedLeaflets ?? []) {
+          expect(leaflet.title, `${domain.label}: ${leaflet.title}`).toMatch(
+            domain.allowed,
+          );
+        }
+        expect(JSON.stringify(payload.attachedLeaflets ?? [])).not.toMatch(
+          /外国人労働者|外国人建設就労者/u,
+        );
+      }
+
+      __resetChatbotCacheForTests();
+      __resetRateLimitForTests();
+      const unknown = await callRoute(
+        post,
+        mode,
+        "これについて一般的に教えて",
+      );
+      expect(unknown.attachedLeaflets ?? []).toEqual([]);
     },
   );
 });
