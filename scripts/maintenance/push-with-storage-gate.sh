@@ -15,9 +15,15 @@ run_attempt="${GITHUB_RUN_ATTEMPT:-1}"
 allowed_path_list="${STORAGE_ALLOWED_PATHS:-}"
 status_context="repository-hygiene-target"
 staging_branch=""
+remote_url=""
+remote_tracking_ref=""
 
-if [[ -z "${GH_TOKEN:-}" || -z "$repository" || ! "$run_id" =~ ^[0-9]+$ || ! "$run_attempt" =~ ^[0-9]+$ ]]; then
+if [[ -z "${GH_TOKEN:-}" || ! "$repository" =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ || ! "$run_id" =~ ^[0-9]+$ || ! "$run_attempt" =~ ^[0-9]+$ ]]; then
   echo "::error::Trusted GitHub Actions identity metadata is missing."
+  exit 1
+fi
+if [[ "$server_url" != "https://github.com" ]]; then
+  echo "::error::Unexpected GitHub server URL."
   exit 1
 fi
 if ! git check-ref-format --branch "$target_branch" >/dev/null 2>&1; then
@@ -36,13 +42,16 @@ for allowed_path in "${allowed_paths[@]}"; do
   fi
 done
 
+remote_url="$server_url/$repository.git"
+remote_tracking_ref="refs/remotes/storage-origin/$target_branch"
+
 # checkout intentionally persists no credential. Configure git to delegate
 # authentication to gh only inside this trusted promotion step.
 gh auth setup-git
 
 cleanup_staging_branch() {
   if [[ -n "$staging_branch" ]]; then
-    git push origin --delete "$staging_branch" >/dev/null 2>&1 || true
+    git push "$remote_url" --delete "$staging_branch" >/dev/null 2>&1 || true
     staging_branch=""
   fi
 }
@@ -83,13 +92,13 @@ wait_for_storage_status() {
 }
 
 for attempt in 1 2 3; do
-  git fetch --no-tags origin \
-    "refs/heads/$target_branch:refs/remotes/origin/$target_branch"
-  git rebase "refs/remotes/origin/$target_branch"
+  git fetch --no-tags "$remote_url" \
+    "refs/heads/$target_branch:$remote_tracking_ref"
+  git rebase "$remote_tracking_ref"
 
   candidate_sha="$(git rev-parse HEAD)"
-  expected_base="$(git rev-parse "refs/remotes/origin/$target_branch")"
-  ahead_count="$(git rev-list --count "refs/remotes/origin/$target_branch..HEAD")"
+  expected_base="$(git rev-parse "$remote_tracking_ref")"
+  ahead_count="$(git rev-list --count "$remote_tracking_ref..HEAD")"
   if [[ "$ahead_count" != "1" ]]; then
     echo "::error::Scheduled update must contain exactly one candidate commit."
     exit 1
@@ -101,13 +110,13 @@ for attempt in 1 2 3; do
     exit 1
   fi
 
-  if [[ -n "$(git diff --name-only --diff-filter=ACDRTUXB "refs/remotes/origin/$target_branch...HEAD")" ]]; then
+  if [[ -n "$(git diff --name-only --diff-filter=ACDRTUXB "$remote_tracking_ref...HEAD")" ]]; then
     echo "::error::Scheduled update may only modify existing regular data files."
     exit 1
   fi
 
   mapfile -d '' changed_paths < <(
-    git diff --name-only -z "refs/remotes/origin/$target_branch...HEAD"
+    git diff --name-only -z "$remote_tracking_ref...HEAD"
   )
   if [[ "${#changed_paths[@]}" -eq 0 ]]; then
     echo "::error::Scheduled update candidate has no changed files."
@@ -132,9 +141,9 @@ for attempt in 1 2 3; do
   done
 
   staging_branch="automation/storage-gate/${run_id}-${run_attempt}-${attempt}"
-  git push origin "$candidate_sha:refs/heads/$staging_branch"
+  git push "$remote_url" "$candidate_sha:refs/heads/$staging_branch"
 
-  staged_tip="$(git ls-remote --heads origin "refs/heads/$staging_branch" | awk '{print $1}')"
+  staged_tip="$(git ls-remote --heads "$remote_url" "refs/heads/$staging_branch" | awk '{print $1}')"
   if [[ "$staged_tip" != "$candidate_sha" ]]; then
     echo "::error::Remote automation candidate does not match the inspected commit."
     exit 1
@@ -156,20 +165,20 @@ for attempt in 1 2 3; do
 
   wait_for_storage_status "$candidate_sha" "$request_id"
 
-  remote_main="$(git ls-remote --heads origin "refs/heads/$target_branch" | awk '{print $1}')"
+  remote_main="$(git ls-remote --heads "$remote_url" "refs/heads/$target_branch" | awk '{print $1}')"
   if [[ "$remote_main" != "$expected_base" ]]; then
     echo "Target branch advanced while the candidate was scanned; rebasing and rescanning."
     cleanup_staging_branch
     continue
   fi
 
-  if git push origin "$candidate_sha:refs/heads/$target_branch"; then
+  if git push "$remote_url" "$candidate_sha:refs/heads/$target_branch"; then
     echo "Trusted storage-gated update pushed on attempt $attempt."
     cleanup_staging_branch
     exit 0
   fi
 
-  remote_after_failure="$(git ls-remote --heads origin "refs/heads/$target_branch" | awk '{print $1}')"
+  remote_after_failure="$(git ls-remote --heads "$remote_url" "refs/heads/$target_branch" | awk '{print $1}')"
   if [[ "$remote_after_failure" == "$expected_base" ]]; then
     echo "::error::Storage-gated main update was rejected without a branch race."
     exit 1
