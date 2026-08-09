@@ -91,4 +91,30 @@ test.describe("安全工程打合せ書", () => {
     expect(res?.status()).toBeLessThan(400);
     await expect(page.getByText("保存した打合せ書")).toBeVisible();
   });
+
+  test("保存一覧の新規作成は入力用紙を直接開く", async ({ page }) => {
+    await page.goto("/safety-diary/list");
+    await page.getByRole("link", { name: "＋ 新規作成", exact: true }).click();
+    await expect(page).toHaveURL(/\/safety-diary\?edit=1/);
+    await expect(page.getByLabel("作業所名", { exact: true })).toBeVisible();
+  });
+
+  test("旧入力URLは概要を挟まず入力用紙へ移行する", async ({ page }) => {
+    for (const path of [
+      "/safety-diary/new",
+      "/safety-diary/new/detail",
+      "/safety-diary/legacy-entry",
+      "/safety-diary/legacy-entry/print",
+      "/safety-diary/monthly/2026-08",
+    ]) {
+      await test.step(path, async () => {
+        await page.goto(`${path}?source=legacy&edit=0`);
+        await expect(page).toHaveURL(/\/safety-diary\?/);
+        const target = new URL(page.url());
+        expect(target.searchParams.get("edit")).toBe("1");
+        expect(target.searchParams.get("source")).toBe("legacy");
+        await expect(page.getByLabel("作業所名", { exact: true })).toBeVisible();
+      });
+    }
+  });
 });
