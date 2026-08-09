@@ -2,7 +2,7 @@
 // Cache-first: static assets / Network-first: API calls
 // 安全・法令ページはオフライン時に最新表示と誤認させないためHTMLを保存しない。
 
-const CACHE_NAME = "anzen-ai-v7";
+const CACHE_NAME = "anzen-ai-v8";
 const OFFLINE_URL = "/offline.html";
 const PUBLIC_SAFETY_LEARNING_PATH = /^\/e-learning\/safety(?:\/(?:first-class-health-officer|second-class-health-officer|occupational-safety-consultant|occupational-health-consultant))?\/?$/;
 
@@ -122,13 +122,13 @@ async function cacheFirst(request) {
 }
 
 function canCachePublicLearningHtml(response) {
-  const cacheControl = response.headers.get("cache-control") ?? "";
   const contentType = response.headers.get("content-type") ?? "";
   return (
     response.ok &&
     response.type !== "opaque" &&
     /text\/html/i.test(contentType) &&
-    !/\b(?:no-store|private)\b/i.test(cacheControl) &&
+    response.headers.get("x-safe-ai-public-offline") ===
+      "safety-learning-v1" &&
     !response.headers.has("set-cookie")
   );
 }

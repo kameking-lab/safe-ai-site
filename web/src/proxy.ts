@@ -170,6 +170,14 @@ export function proxy(request: NextRequest) {
     PUBLIC_SAFETY_LEARNING_PATH.test(request.nextUrl.pathname)
   ) {
     response.headers.set("Cache-Control", "public, max-age=0, must-revalidate");
+    // Next/Vercel may replace Cache-Control after proxy execution because the
+    // response carries a request-scoped CSP nonce. This explicit marker is
+    // limited to the reviewed, non-personal route allowlist above and lets the
+    // service worker distinguish those documents from every private response.
+    response.headers.set(
+      "X-Safe-AI-Public-Offline",
+      "safety-learning-v1",
+    );
   }
   return response;
 }
