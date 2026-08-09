@@ -4,7 +4,12 @@ test.describe("安全工程打合せ書", () => {
   test("ページが表示される @smoke", async ({ page }) => {
     const res = await page.goto("/safety-diary");
     expect(res?.status()).toBeLessThan(400);
-    await expect(page.locator("body")).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: "工程を入力する", exact: true }),
+    ).toHaveAttribute("href", "/safety-diary?edit=1#meeting-paper-start");
+    await expect(
+      page.getByRole("link", { name: "内容を確認・承認する", exact: true }),
+    ).toHaveAttribute("href", "/safety-diary?edit=1#meeting-approval");
   });
 
   test("タイトルに『打合せ書』が含まれる", async ({ page }) => {
@@ -12,8 +17,29 @@ test.describe("安全工程打合せ書", () => {
     await expect(page).toHaveTitle(/打合せ書/);
   });
 
+  test("JavaScript無効でも開始リンクから入力用紙へ進める", async ({ browser }) => {
+    const context = await browser.newContext({ javaScriptEnabled: false });
+    const page = await context.newPage();
+    try {
+      await page.goto("/safety-diary");
+      await page
+        .getByRole("link", { name: "工程を入力する", exact: true })
+        .click();
+      await expect(page).toHaveURL(/\/safety-diary\?edit=1/);
+      await expect(page.getByLabel("作業所名", { exact: true })).toBeVisible();
+    } finally {
+      await context.close();
+    }
+  });
+
+  test("既存のcanvas=0 deep linkでもアクセシブル入力を維持する", async ({ page }) => {
+    await page.goto("/safety-diary?canvas=0");
+    await expect(page.getByLabel("作業所名", { exact: true })).toBeVisible();
+    await expect(page.getByTestId("paper-stage-content")).toHaveCount(0);
+  });
+
   test("既定のアクセシブル入力で作成→保存し、localStorage(meeting-record) に永続化される", async ({ page }) => {
-    await page.goto("/safety-diary");
+    await page.goto("/safety-diary?edit=1");
     await page.waitForLoadState("networkidle");
 
     const site = page.getByLabel("作業所名", { exact: true });
@@ -32,7 +58,7 @@ test.describe("安全工程打合せ書", () => {
       localStorage.setItem("anzen-onboarding-v1-seen", "1");
       localStorage.removeItem("meeting-record");
     });
-    await page.goto("/safety-diary");
+    await page.goto("/safety-diary?edit=1");
     await expect(page.getByLabel("作業所名", { exact: true })).toBeVisible();
     await expect(page.getByTestId("paper-stage-content")).toHaveCount(0);
     await page.getByRole("button", { name: /用紙プレビュー/ }).click();
