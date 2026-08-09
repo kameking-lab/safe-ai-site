@@ -47,8 +47,9 @@ describe("storage-gated deployment configuration", () => {
       const source = readFileSync(
         resolve(repoRoot, ".github/workflows", workflow),
         "utf8",
-      );
+      ).replace(/\r\n/gu, "\n");
       expect(source).not.toContain("workflow_dispatch:");
+      expect(source).toContain("repository_dispatch:");
       expect(source).not.toContain("git show HEAD:");
       expect(source).toContain("permissions:\n  contents: read");
       expect(source.match(/contents: write/gu)).toHaveLength(1);

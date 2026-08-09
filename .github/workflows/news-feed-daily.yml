@@ -4,6 +4,8 @@ on:
   schedule:
     # Daily 06:00 JST  =  21:00 UTC (previous day)
     - cron: "0 21 * * *"
+  repository_dispatch:
+    types: [news-feed-daily]
 permissions:
   contents: read
 

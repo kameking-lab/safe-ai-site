@@ -4,6 +4,8 @@ on:
   schedule:
     # 15分間隔（cron は最短5分だが、レート制限と運用余裕のため15分）
     - cron: "*/15 * * * *"
+  repository_dispatch:
+    types: [jma-data-update]
 permissions:
   contents: read
 

@@ -4,6 +4,8 @@ on:
   schedule:
     # 毎週月曜 09:00 JST = 00:00 UTC（週次。反映ラグ短縮 P2-3。diff-onlyのため無料枠内）
     - cron: "0 0 * * 1"
+  repository_dispatch:
+    types: [egov-revisions-update]
 permissions:
   contents: read
 

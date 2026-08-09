@@ -4,6 +4,8 @@ on:
   schedule:
     # 毎月15日 09:00 JST = 00:00 UTC（月次速報の公開タイミングに余裕を持たせる）
     - cron: "0 0 15 * *"
+  repository_dispatch:
+    types: [mhlw-monthly-update]
 permissions:
   contents: read
 
