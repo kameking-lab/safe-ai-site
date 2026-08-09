@@ -1,16 +1,16 @@
 {
-  "generatedAt": "2026-08-08T10:35:09.598Z",
-  "deployment": "https://safe-ai-site-o8rp4hq8m-kameking-labs-projects.vercel.app",
+  "generatedAt": "2026-08-09T01:40:26.381Z",
+  "deployment": "https://safe-ai-site-6zh1aar5d-kameking-labs-projects.vercel.app",
   "deploymentMetadata": {
-    "id": "dpl_A3sDGZT8veqfQ5dSu8kgX5Bys9Zh",
+    "id": "dpl_C68J7CG36wTtknY7pszdrs2qWbSm",
     "projectId": "prj_b2brgXdwQpnpmEN6gc3vtNFm6m7a",
     "ownerId": "team_fmzwEegB8SRsADNmwXkBUN34",
     "target": "preview",
     "readyState": "READY",
-    "url": "safe-ai-site-o8rp4hq8m-kameking-labs-projects.vercel.app",
-    "verifiedProductionId": "dpl_F5nbj5gPCdxNXDQa3tYSWFYVHoyz"
+    "url": "safe-ai-site-6zh1aar5d-kameking-labs-projects.vercel.app",
+    "verifiedProductionId": "dpl_muVQZ5RD32hSmpKxqzkamUA5hQTz"
   },
-  "productionDeploymentId": "dpl_F5nbj5gPCdxNXDQa3tYSWFYVHoyz",
+  "productionDeploymentId": "dpl_muVQZ5RD32hSmpKxqzkamUA5hQTz",
   "protectionProbe": {
     "status": 302,
     "protectedRedirect": true,
@@ -23,7 +23,8 @@
   },
   "authenticatedTransport": "in-memory protected fetch via loopback-only browser proxy",
   "apiRoutes": [
-    "json"
+    "json",
+    "legacy"
   ],
   "browserRoute": "sse",
   "fixedCaseCount": 12,
@@ -44,7 +45,7 @@
     "piiOutboundCount": 0
   },
   "overallMetrics": {
-    "normalQuestionCount": 20,
+    "normalQuestionCount": 30,
     "answerFirstRate": 1,
     "substantiveAnswerRate": 1,
     "pureClarificationRate": 0,
@@ -58,9 +59,10 @@
     "emergencyNormalAnswerCount": 0,
     "piiOutboundCount": 0
   },
-  "chatbotPostCount": 22,
+  "chatbotPostCount": 34,
   "jsonPostCount": 12,
   "streamPostCount": 10,
+  "legacyPostCount": 12,
   "streamedPostCount": 10,
   "externalAiUsedCount": 0,
   "aiUsedNotFalseCount": 0,
@@ -90,7 +92,7 @@
     },
     {
       "method": "GET",
-      "path": "/chatbot",
+      "path": "/",
       "status": 200,
       "aiUsed": null,
       "cacheHit": null,
@@ -98,7 +100,7 @@
     },
     {
       "method": "GET",
-      "path": "/",
+      "path": "/chatbot",
       "status": 200,
       "aiUsed": null,
       "cacheHit": null,
@@ -114,14 +116,6 @@
     },
     {
       "method": "GET",
-      "path": "/_next/static/chunks/2lw1-pxzs1d9j.css",
-      "status": 200,
-      "aiUsed": null,
-      "cacheHit": null,
-      "previewMode": "dry-run"
-    },
-    {
-      "method": "GET",
       "path": "/_next/static/chunks/2e031e0tdgt5-.js",
       "status": 200,
       "aiUsed": null,
@@ -130,31 +124,7 @@
     },
     {
       "method": "GET",
-      "path": "/_next/static/chunks/2pszerz68jt-u.js",
-      "status": 200,
-      "aiUsed": null,
-      "cacheHit": null,
-      "previewMode": "dry-run"
-    },
-    {
-      "method": "GET",
-      "path": "/_next/static/chunks/2p7y4zs7vhqla.js",
-      "status": 200,
-      "aiUsed": null,
-      "cacheHit": null,
-      "previewMode": "dry-run"
-    },
-    {
-      "method": "GET",
-      "path": "/mascot/mascot-badge-64.webp",
-      "status": 200,
-      "aiUsed": null,
-      "cacheHit": null,
-      "previewMode": "dry-run"
-    },
-    {
-      "method": "GET",
-      "path": "/_next/static/chunks/turbopack-1yympa9sp45hc.js",
+      "path": "/_next/static/chunks/117h2-zliytsl.css",
       "status": 200,
       "aiUsed": null,
       "cacheHit": null,
@@ -170,7 +140,23 @@
     },
     {
       "method": "GET",
-      "path": "/_next/static/chunks/0n62-6hl3ogo5.js",
+      "path": "/_next/static/chunks/2pszerz68jt-u.js",
+      "status": 200,
+      "aiUsed": null,
+      "cacheHit": null,
+      "previewMode": "dry-run"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/turbopack-1yympa9sp45hc.js",
+      "status": 200,
+      "aiUsed": null,
+      "cacheHit": null,
+      "previewMode": "dry-run"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/2p7y4zs7vhqla.js",
       "status": 200,
       "aiUsed": null,
       "cacheHit": null,
@@ -186,7 +172,7 @@
     },
     {
       "method": "GET",
-      "path": "/_next/static/chunks/41fi0nmuiyrbt.js",
+      "path": "/_next/static/chunks/0pxhq-w_t5pur.js",
       "status": 200,
       "aiUsed": null,
       "cacheHit": null,
@@ -194,7 +180,7 @@
     },
     {
       "method": "GET",
-      "path": "/_next/static/chunks/064kh6h9werdh.js",
+      "path": "/mascot/mascot-badge-64.webp",
       "status": 200,
       "aiUsed": null,
       "cacheHit": null,
@@ -202,7 +188,7 @@
     },
     {
       "method": "GET",
-      "path": "/_next/static/chunks/3c3fyy-8i6ifk.js",
+      "path": "/_next/static/chunks/3oydumt83l3ds.js",
       "status": 200,
       "aiUsed": null,
       "cacheHit": null,
@@ -210,7 +196,31 @@
     },
     {
       "method": "GET",
-      "path": "/_next/static/chunks/3mjyqq78sbu-w.js",
+      "path": "/_next/static/chunks/26b52l8pt90km.js",
+      "status": 200,
+      "aiUsed": null,
+      "cacheHit": null,
+      "previewMode": "dry-run"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/0n62-6hl3ogo5.js",
+      "status": 200,
+      "aiUsed": null,
+      "cacheHit": null,
+      "previewMode": "dry-run"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/3q0ymzw98-x6d.js",
+      "status": 200,
+      "aiUsed": null,
+      "cacheHit": null,
+      "previewMode": "dry-run"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/2v40gt29xf3if.js",
       "status": 200,
       "aiUsed": null,
       "cacheHit": null,
@@ -234,14 +244,6 @@
     },
     {
       "method": "GET",
-      "path": "/_next/static/chunks/0pxhq-w_t5pur.js",
-      "status": 200,
-      "aiUsed": null,
-      "cacheHit": null,
-      "previewMode": "dry-run"
-    },
-    {
-      "method": "GET",
       "path": "/print.css",
       "status": 200,
       "aiUsed": null,
@@ -255,9 +257,9 @@
       "aiUsed": "false",
       "cacheHit": null,
       "previewMode": "dry-run",
-      "streamByteCount": 15009,
+      "streamByteCount": 15099,
       "streamChunkCount": 2,
-      "firstChunkLatencyMs": 386,
+      "firstChunkLatencyMs": 1952,
       "flushedBeforeCompletion": true
     },
     {
@@ -269,7 +271,7 @@
       "previewMode": "dry-run",
       "streamByteCount": 15437,
       "streamChunkCount": 2,
-      "firstChunkLatencyMs": 429,
+      "firstChunkLatencyMs": 446,
       "flushedBeforeCompletion": true
     },
     {
@@ -279,9 +281,9 @@
       "aiUsed": "false",
       "cacheHit": null,
       "previewMode": "dry-run",
-      "streamByteCount": 14957,
+      "streamByteCount": 15047,
       "streamChunkCount": 2,
-      "firstChunkLatencyMs": 368,
+      "firstChunkLatencyMs": 372,
       "flushedBeforeCompletion": true
     },
     {
@@ -291,9 +293,9 @@
       "aiUsed": "false",
       "cacheHit": null,
       "previewMode": "dry-run",
-      "streamByteCount": 9271,
+      "streamByteCount": 9361,
       "streamChunkCount": 2,
-      "firstChunkLatencyMs": 375,
+      "firstChunkLatencyMs": 398,
       "flushedBeforeCompletion": true
     },
     {
@@ -303,9 +305,9 @@
       "aiUsed": "false",
       "cacheHit": null,
       "previewMode": "dry-run",
-      "streamByteCount": 13455,
+      "streamByteCount": 13545,
       "streamChunkCount": 2,
-      "firstChunkLatencyMs": 382,
+      "firstChunkLatencyMs": 384,
       "flushedBeforeCompletion": true
     },
     {
@@ -315,9 +317,9 @@
       "aiUsed": "false",
       "cacheHit": null,
       "previewMode": "dry-run",
-      "streamByteCount": 13965,
+      "streamByteCount": 14055,
       "streamChunkCount": 2,
-      "firstChunkLatencyMs": 375,
+      "firstChunkLatencyMs": 556,
       "flushedBeforeCompletion": true
     },
     {
@@ -327,9 +329,9 @@
       "aiUsed": "false",
       "cacheHit": null,
       "previewMode": "dry-run",
-      "streamByteCount": 10134,
+      "streamByteCount": 10224,
       "streamChunkCount": 2,
-      "firstChunkLatencyMs": 377,
+      "firstChunkLatencyMs": 380,
       "flushedBeforeCompletion": true
     },
     {
@@ -339,9 +341,9 @@
       "aiUsed": "false",
       "cacheHit": null,
       "previewMode": "dry-run",
-      "streamByteCount": 16405,
+      "streamByteCount": 16495,
       "streamChunkCount": 2,
-      "firstChunkLatencyMs": 374,
+      "firstChunkLatencyMs": 528,
       "flushedBeforeCompletion": true
     },
     {
@@ -351,9 +353,9 @@
       "aiUsed": "false",
       "cacheHit": null,
       "previewMode": "dry-run",
-      "streamByteCount": 9299,
+      "streamByteCount": 9389,
       "streamChunkCount": 2,
-      "firstChunkLatencyMs": 377,
+      "firstChunkLatencyMs": 373,
       "flushedBeforeCompletion": true
     },
     {
@@ -363,17 +365,17 @@
       "aiUsed": "false",
       "cacheHit": null,
       "previewMode": "dry-run",
-      "streamByteCount": 1941,
+      "streamByteCount": 2031,
       "streamChunkCount": 1,
-      "firstChunkLatencyMs": 382,
+      "firstChunkLatencyMs": 372,
       "flushedBeforeCompletion": true
     },
     {
       "method": "POST",
       "path": "/api/chatbot",
       "status": 200,
-      "aiUsed": null,
-      "cacheHit": "true",
+      "aiUsed": "false",
+      "cacheHit": "false",
       "previewMode": "dry-run"
     },
     {
@@ -388,64 +390,64 @@
       "method": "POST",
       "path": "/api/chatbot",
       "status": 200,
-      "aiUsed": null,
-      "cacheHit": "true",
+      "aiUsed": "false",
+      "cacheHit": "false",
       "previewMode": "dry-run"
     },
     {
       "method": "POST",
       "path": "/api/chatbot",
       "status": 200,
-      "aiUsed": null,
-      "cacheHit": "true",
+      "aiUsed": "false",
+      "cacheHit": "false",
       "previewMode": "dry-run"
     },
     {
       "method": "POST",
       "path": "/api/chatbot",
       "status": 200,
-      "aiUsed": null,
-      "cacheHit": "true",
+      "aiUsed": "false",
+      "cacheHit": "false",
       "previewMode": "dry-run"
     },
     {
       "method": "POST",
       "path": "/api/chatbot",
       "status": 200,
-      "aiUsed": null,
-      "cacheHit": "true",
+      "aiUsed": "false",
+      "cacheHit": "false",
       "previewMode": "dry-run"
     },
     {
       "method": "POST",
       "path": "/api/chatbot",
       "status": 200,
-      "aiUsed": null,
-      "cacheHit": "true",
+      "aiUsed": "false",
+      "cacheHit": "false",
       "previewMode": "dry-run"
     },
     {
       "method": "POST",
       "path": "/api/chatbot",
       "status": 200,
-      "aiUsed": null,
-      "cacheHit": "true",
+      "aiUsed": "false",
+      "cacheHit": "false",
       "previewMode": "dry-run"
     },
     {
       "method": "POST",
       "path": "/api/chatbot",
       "status": 200,
-      "aiUsed": null,
-      "cacheHit": "true",
+      "aiUsed": "false",
+      "cacheHit": "false",
       "previewMode": "dry-run"
     },
     {
       "method": "POST",
       "path": "/api/chatbot",
       "status": 200,
-      "aiUsed": null,
-      "cacheHit": "true",
+      "aiUsed": "false",
+      "cacheHit": "false",
       "previewMode": "dry-run"
     },
     {
@@ -465,10 +467,98 @@
       "previewMode": "dry-run"
     },
     {
-      "method": "GET",
-      "path": "/_next/static/chunks/0op835xjwk5lk.js",
+      "method": "POST",
+      "path": "/api/chat",
       "status": 200,
-      "aiUsed": null,
+      "aiUsed": "false",
+      "cacheHit": null,
+      "previewMode": "dry-run"
+    },
+    {
+      "method": "POST",
+      "path": "/api/chat",
+      "status": 200,
+      "aiUsed": "false",
+      "cacheHit": null,
+      "previewMode": "dry-run"
+    },
+    {
+      "method": "POST",
+      "path": "/api/chat",
+      "status": 200,
+      "aiUsed": "false",
+      "cacheHit": null,
+      "previewMode": "dry-run"
+    },
+    {
+      "method": "POST",
+      "path": "/api/chat",
+      "status": 200,
+      "aiUsed": "false",
+      "cacheHit": null,
+      "previewMode": "dry-run"
+    },
+    {
+      "method": "POST",
+      "path": "/api/chat",
+      "status": 200,
+      "aiUsed": "false",
+      "cacheHit": null,
+      "previewMode": "dry-run"
+    },
+    {
+      "method": "POST",
+      "path": "/api/chat",
+      "status": 200,
+      "aiUsed": "false",
+      "cacheHit": null,
+      "previewMode": "dry-run"
+    },
+    {
+      "method": "POST",
+      "path": "/api/chat",
+      "status": 200,
+      "aiUsed": "false",
+      "cacheHit": null,
+      "previewMode": "dry-run"
+    },
+    {
+      "method": "POST",
+      "path": "/api/chat",
+      "status": 200,
+      "aiUsed": "false",
+      "cacheHit": null,
+      "previewMode": "dry-run"
+    },
+    {
+      "method": "POST",
+      "path": "/api/chat",
+      "status": 200,
+      "aiUsed": "false",
+      "cacheHit": null,
+      "previewMode": "dry-run"
+    },
+    {
+      "method": "POST",
+      "path": "/api/chat",
+      "status": 200,
+      "aiUsed": "false",
+      "cacheHit": null,
+      "previewMode": "dry-run"
+    },
+    {
+      "method": "POST",
+      "path": "/api/chat",
+      "status": 422,
+      "aiUsed": "false",
+      "cacheHit": null,
+      "previewMode": "dry-run"
+    },
+    {
+      "method": "POST",
+      "path": "/api/chat",
+      "status": 422,
+      "aiUsed": "false",
       "cacheHit": null,
       "previewMode": "dry-run"
     },
@@ -482,7 +572,7 @@
     },
     {
       "method": "GET",
-      "path": "/_next/static/chunks/3ts_jp7_0tni9.js",
+      "path": "/_next/static/chunks/3zxt9o5a--xty.js",
       "status": 200,
       "aiUsed": null,
       "cacheHit": null,
@@ -491,6 +581,14 @@
     {
       "method": "GET",
       "path": "/_next/static/chunks/2beyz8gjh_f3v.js",
+      "status": 200,
+      "aiUsed": null,
+      "cacheHit": null,
+      "previewMode": "dry-run"
+    },
+    {
+      "method": "GET",
+      "path": "/_next/static/chunks/3ts_jp7_0tni9.js",
       "status": 200,
       "aiUsed": null,
       "cacheHit": null,
