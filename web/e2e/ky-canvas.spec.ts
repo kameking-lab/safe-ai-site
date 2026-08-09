@@ -604,12 +604,13 @@ test.describe("KY zero-friction builder", () => {
   });
 
   test("Visual KYT CTA carries the user's selected hazard and measure as candidates", async ({ page }) => {
+    test.setTimeout(90_000);
     await trackKyHandoffSessionWrites(page);
     await warmKyHandoffDestination(page);
     await page.goto("/training/visual-ky/scaffold-fall");
     await expect(
       page.locator('[data-visual-ky-ready="true"]'),
-    ).toBeVisible();
+    ).toBeVisible({ timeout: 30_000 });
     await page.getByRole("button", { name: "イラストから危険を探す" }).click();
     await expect(
       page.getByRole("heading", { name: "危険と思う候補を選ぶ" }),
@@ -673,7 +674,9 @@ test.describe("KY zero-friction builder", () => {
   });
 
   test("chemical RA CTA carries verified CAS conditions without raw work text in the URL", async ({ page }) => {
+    test.setTimeout(90_000);
     await trackKyHandoffSessionWrites(page);
+    await warmKyHandoffDestination(page);
     await page.route("**/api/chemical-ra", (route) =>
       route.fulfill({
         status: 200,

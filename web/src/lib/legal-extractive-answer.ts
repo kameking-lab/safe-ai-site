@@ -910,7 +910,10 @@ export function expandVerifiedLegalEvidenceArticles(
         ["安衛則", "第345条"],
         ["経産省電工Q&A", "Q9・Q10"],
       );
-      if (action === "insulation-measurement") {
+      if (
+        action === "tester-measurement" ||
+        action === "insulation-measurement"
+      ) {
         required.push(["安衛則", "第339条"]);
       }
     } else if (action === "breaker-operation") {
@@ -4015,18 +4018,19 @@ function knownConclusion(
     (!conversationContext.energizedState ||
       conversationContext.energizedState === "unknown") &&
     electricSpecialEducationWork >= 0 &&
+    (!testerKnownLowVoltage || lowVoltageChapterExclusion >= 0) &&
     hasTesterEnergizedSources
   ) {
     const voltage = conversationContext.voltageClass;
     const stoppedBranch =
       deEnergizedWork >= 0
-        ? `停電済みなら安衛則339条の停電作業措置を先に確認します。${marker(deEnergizedWork)}`
-        : "停電済みなら、充電中向けの措置ではなく停電作業の手順を先に確認します。";
+        ? ` 停電済みなら安衛則339条の停電作業措置を先に確認します。${marker(deEnergizedWork)}`
+        : "";
     return {
-      conclusion: `${voltage}設備でテスター測定する条件まで分かっています。充電中なら、充電電路を直接取り扱う作業か充電部への近接作業かに応じて、${voltage === "低圧" ? "安衛則346条・347条" : voltage === "高圧" ? "安衛則341条・342条" : "安衛則344条・345条"}の措置を確認します。${markers(...testerLiveSources)} ${stoppedBranch}`,
+      conclusion: `${voltage}設備でテスター測定する条件まで分かっており、充電中なら、充電電路を直接取り扱う作業か充電部への近接作業かに応じて、${voltage === "低圧" ? "安衛則346条の絶縁用保護具または活線作業用器具、347条により充電電路へ装着する絶縁用防具" : voltage === "高圧" ? "安衛則341条・342条" : "安衛則344条・345条"}を確認します。${markers(...testerLiveSources)}${stoppedBranch}${voltage === "低圧" ? ` 対地電圧50V以下の電気機械器具・配線・移動電線には、安衛則354条により電気による危険防止の章を適用しません。${marker(lowVoltageChapterExclusion)}` : ""}`,
       conditions: [
         voltage === "低圧"
-          ? `低圧特別教育の法定対象は、対地電圧50V以下及び電信・電話用等で感電危害のおそれがない回路を除く低圧充電電路の敷設・修理と、同じ除外条件のある区画場所の露出充電部付き開閉器操作です。低圧測定の全てが一律対象ではありません。充電電路を直接取り扱い感電の危険がある場合は346条、近接して点検等を行い接触するおそれがある場合は347条の措置を確認します。${markers(electricSpecialEducationWork, ...testerLiveSources)}`
+          ? `低圧特別教育の法定対象は、対地電圧50V以下及び電信・電話用等で感電危害のおそれがない回路を除く低圧充電電路の敷設・修理と、同じ除外条件のある区画場所の露出充電部付き開閉器操作です。低圧測定の全てが一律対象ではありません。充電電路を直接取り扱い感電の危険がある場合は346条の絶縁用保護具または活線作業用器具、近接して点検等を行い接触するおそれがある場合は347条により事業者が充電電路へ絶縁用防具を装着します。ただし、絶縁用保護具を着用し、着用部以外が充電部へ接触するおそれがない場合は347条の絶縁用防具の例外です。${markers(electricSpecialEducationWork, ...testerLiveSources)}`
           : `${voltage}の充電電路または支持物の点検は電気取扱業務の特別教育対象であり、測定時の充電状態に応じた作業措置とは別に確認します。${markers(electricSpecialEducationWork, ...testerLiveSources)}`,
       ],
     };
@@ -4036,13 +4040,14 @@ function knownConclusion(
     electricalAction === "tester-measurement" &&
     testerEnergizedSelected &&
     electricSpecialEducationWork >= 0 &&
+    (!testerKnownLowVoltage || lowVoltageChapterExclusion >= 0) &&
     hasTesterEnergizedSources
   ) {
     return {
       conclusion: testerKnownHighVoltage
         ? `充電中の${conversationContext.voltageClass}設備でテスター測定する場合は、単なる目視ではなく、充電電路を直接取り扱うか、充電部へ近接するかに応じて${conversationContext.voltageClass}の活線・近接作業措置を確認します。${markers(electricSpecialEducationWork, ...testerLiveSources)}`
         : testerKnownLowVoltage
-          ? `充電中の低圧設備でテスター測定する場合は、充電電路を直接取り扱い感電の危険があれば安衛則346条、電路・支持物の点検等で充電部へ接触するおそれがあれば347条の措置を確認します。${markers(...testerLiveSources)}`
+          ? `充電中の低圧設備でテスター測定する場合は、充電電路を直接取り扱い感電の危険があれば安衛則346条の絶縁用保護具または活線作業用器具、電路・支持物の点検等で充電部へ接触するおそれがあれば347条により事業者が充電電路へ装着する絶縁用防具を確認します。${markers(...testerLiveSources)} 対地電圧50V以下の電気機械器具・配線・移動電線には、安衛則354条により電気による危険防止の章を適用しません。${marker(lowVoltageChapterExclusion)}`
           : `充電中の盤内でテスター測定する条件を選んだため、停電測定ではなく活線・近接側の安全措置を先に確認します。低圧は安衛則346条・347条、高圧は341条・342条で条件が分かれます。${markers(...testerLiveSources)}`,
       conditions: [
         `配線を傷付けず測定器をクリップ留め・巻き付けるだけなら電気工事士を要しない場合もありますが、それで感電防止措置や特別教育の確認が不要になるわけではありません。${markers(metiElectricianQa, electricSpecialEducationWork, ...testerLiveSources)}`,
@@ -4053,13 +4058,16 @@ function knownConclusion(
     electricWork &&
     electricalAction === "tester-measurement" &&
     conversationContext.energizedState === "de-energized" &&
-    deEnergizedWork >= 0
+    deEnergizedWork >= 0 &&
+    (conversationContext.voltageClass !== "低圧" ||
+      lowVoltageChapterExclusion >= 0)
   ) {
     const knownHighVoltage =
       conversationContext.voltageClass === "高圧" ||
       conversationContext.voltageClass === "特別高圧";
+    const knownLowVoltage = conversationContext.voltageClass === "低圧";
     return {
-      conclusion: `「停電済み」を選んだため、充電中の測定ではなく安衛則339条の停電作業措置を先に確認します。開閉器の施錠・通電禁止表示または監視人の配置を行い、残留電荷の危険がある電路は放電します。${marker(deEnergizedWork)}`,
+      conclusion: `「停電済み」を選んだため、充電中の測定ではなく安衛則339条の停電作業措置を先に確認します。開閉器の施錠・通電禁止表示または監視人の配置を行い、残留電荷の危険がある電路は放電します。${marker(deEnergizedWork)}${knownLowVoltage ? ` 対地電圧50V以下の電気機械器具・配線・移動電線には、安衛則354条により電気による危険防止の章を適用しません。${marker(lowVoltageChapterExclusion)}` : ""}`,
       conditions: [
         knownHighVoltage
           ? `開路前が${conversationContext.voltageClass}だった電路では、検電器による停電確認と短絡接地も確認します。既知の電圧を低圧か高圧か再質問する必要はありません。${marker(deEnergizedWork)}`

@@ -221,6 +221,12 @@ async function inspectRenderedTurn(
 
 test.use({ viewport: { width: 390, height: 844 } });
 
+test.skip(
+  !process.env.ANSWER_FIRST_PLAYWRIGHT_OUTPUT_DIR ||
+    !process.env.ELECTRIC_HOLDOUT_BROWSER_EVIDENCE_PATH,
+  "deployed browser holdout runs only through the protected Preview audit",
+);
+
 test("fixed electrical holdout passes all 72 cases and 88 turns through deployed browser SSE/UI", async ({
   page,
 }) => {

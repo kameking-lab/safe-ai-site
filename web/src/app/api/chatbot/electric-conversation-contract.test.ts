@@ -273,6 +273,71 @@ describe("電気会話のanswer-first API契約", () => {
         /低圧で充電電路を直接取り扱い[\s\S]*絶縁用保護具[\s\S]*接触するおそれ[\s\S]*絶縁用防具/,
       );
 
+      const knownLowVoltage = await requestAnswer(post, mode, {
+        message: "100V",
+        context: measurement.context,
+        lawCategory: "all",
+      });
+      expectNormalContract(knownLowVoltage);
+      expect(knownLowVoltage.context).toMatchObject({
+        topicDomain: "electrical",
+        workAction: "tester-measurement",
+        voltageClass: "低圧",
+      });
+      expect(knownLowVoltage.directAnswer).toMatch(
+        /低圧設備でテスター測定[\s\S]*346条の絶縁用保護具または活線作業用器具[\s\S]*347条により充電電路へ装着する絶縁用防具/,
+      );
+      expect(knownLowVoltage.directAnswer).toMatch(
+        /対地電圧50V以下[\s\S]*安衛則354条[\s\S]*電気による危険防止の章を適用しません/,
+      );
+      expect(knownLowVoltage.importantConditions.join(" ")).toMatch(
+        /事業者が充電電路へ絶縁用防具を装着[\s\S]*絶縁用保護具を着用[\s\S]*着用部以外[\s\S]*接触するおそれがない場合[\s\S]*例外/,
+      );
+      expect(requiredSource(knownLowVoltage, "安衛則", "第346条").source.snippet).toMatch(
+        /絶縁用保護具[\s\S]*活線作業用器具/,
+      );
+      expect(requiredSource(knownLowVoltage, "安衛則", "第347条").source.snippet).toMatch(
+        /絶縁用防具[\s\S]*絶縁用保護具を着用させて作業[\s\S]*身体の部分以外の部分[\s\S]*この限りでない/,
+      );
+      expect(requiredSource(knownLowVoltage, "安衛則", "第354条").source.snippet).toMatch(
+        /この章の規定[\s\S]*対地電圧が五十ボルト以下[\s\S]*適用しない/,
+      );
+
+      const energizedLowVoltage = await requestAnswer(post, mode, {
+        message: "充電中",
+        context: knownLowVoltage.context,
+        lawCategory: "all",
+      });
+      expectNormalContract(energizedLowVoltage);
+      expect(energizedLowVoltage.context).toMatchObject({
+        workAction: "tester-measurement",
+        voltageClass: "低圧",
+        energizedState: "energized",
+      });
+      expect(energizedLowVoltage.directAnswer).toMatch(
+        /充電中の低圧設備[\s\S]*安衛則346条の絶縁用保護具または活線作業用器具[\s\S]*347条[\s\S]*充電電路へ装着する絶縁用防具[\s\S]*対地電圧50V以下[\s\S]*安衛則354条[\s\S]*適用しません/,
+      );
+      requiredSource(energizedLowVoltage, "安衛則", "第346条");
+      requiredSource(energizedLowVoltage, "安衛則", "第347条");
+      requiredSource(energizedLowVoltage, "安衛則", "第354条");
+
+      const stoppedLowVoltage = await requestAnswer(post, mode, {
+        message: "停電済み",
+        context: knownLowVoltage.context,
+        lawCategory: "all",
+      });
+      expectNormalContract(stoppedLowVoltage);
+      expect(stoppedLowVoltage.context).toMatchObject({
+        workAction: "tester-measurement",
+        voltageClass: "低圧",
+        energizedState: "de-energized",
+      });
+      expect(stoppedLowVoltage.directAnswer).toMatch(
+        /安衛則339条[\s\S]*施錠[\s\S]*残留電荷[\s\S]*対地電圧50V以下[\s\S]*安衛則354条[\s\S]*適用しません/,
+      );
+      requiredSource(stoppedLowVoltage, "安衛則", "第339条");
+      requiredSource(stoppedLowVoltage, "安衛則", "第354条");
+
       const lowVoltage = await requestAnswer(post, mode, {
         message: "100Vの充電部付近で作業する",
         lawCategory: "all",

@@ -679,9 +679,52 @@ function sourceSupportsDeEnergizedMeasures(source: ChatbotSource): boolean {
       locatorContains(source.item, label),
     ) &&
     sourceHasEvidence(source, [
-      /施錠.*通電禁止.*監視人/,
-      /残留電荷.*放電/,
+      /開路に用いた開閉器.*施錠.*通電禁止.*監視人/,
+      /開路した電路.*残留電荷.*放電/,
       /高圧又は特別高圧.*検電器具.*短絡接地/,
+    ])
+  );
+}
+
+function sourceSupportsLowVoltageLiveWorkProtection(
+  source: ChatbotSource,
+): boolean {
+  return (
+    sourceMatches(source, "安衛則", "第346条") &&
+    locatorContains(source.paragraph, "第1項") &&
+    sourceHasEvidence(source, [
+      /事業者.*低圧の充電電路の点検.*当該充電電路を取り扱う作業/,
+      /当該作業に従事する労働者.*感電の危険が生ずるおそれ/,
+      /当該労働者に絶縁用保護具を着用させ.*又は活線作業用器具を使用させなければならない/,
+    ])
+  );
+}
+
+function sourceSupportsLowVoltageProximityProtection(
+  source: ChatbotSource,
+): boolean {
+  return (
+    sourceMatches(source, "安衛則", "第347条") &&
+    locatorContains(source.paragraph, "第1項") &&
+    sourceHasEvidence(source, [
+      /事業者.*低圧の充電電路に近接する場所.*点検.*電気工事の作業/,
+      /当該作業に従事する労働者.*当該充電電路に接触.*感電の危険が生ずるおそれ/,
+      /当該充電電路に絶縁用防具を装着しなければならない/,
+      /ただし.*絶縁用保護具を着用させて.*身体の部分以外の部分.*接触するおそれのないとき.*この限りでない/,
+    ])
+  );
+}
+
+function sourceSupportsLowVoltageChapterExclusion(
+  source: ChatbotSource,
+): boolean {
+  return (
+    sourceMatches(source, "安衛則", "第354条") &&
+    sourceHasEvidence(source, [
+      /この章の規定/,
+      /電気機械器具.*配線.*移動電線/,
+      /対地電圧が五十ボルト以下/,
+      /適用しない/,
     ])
   );
 }
@@ -728,13 +771,20 @@ function sourceSupportsRequiredAuthority(
   if (parts.lawShort === "安衛則" && parts.articleNum === "第339条") {
     return sourceSupportsDeEnergizedMeasures(source);
   }
+  if (parts.lawShort === "安衛則" && parts.articleNum === "第346条") {
+    return sourceSupportsLowVoltageLiveWorkProtection(source);
+  }
+  if (parts.lawShort === "安衛則" && parts.articleNum === "第347条") {
+    return sourceSupportsLowVoltageProximityProtection(source);
+  }
+  if (parts.lawShort === "安衛則" && parts.articleNum === "第354条") {
+    return sourceSupportsLowVoltageChapterExclusion(source);
+  }
   const firstParagraphPatterns: Partial<Record<string, readonly RegExp[]>> = {
     第341条: [/高圧の充電電路の点検/, /感電の危険/],
     第342条: [/高圧の充電電路/, /接触.*接近/, /感電の危険/],
     第344条: [/特別高圧の充電電路/, /点検/, /感電の危険/],
     第345条: [/特別高圧の充電電路/, /近接|接近/, /感電の危険/],
-    第346条: [/低圧の充電電路の点検/, /絶縁用保護具|活線作業用器具/],
-    第347条: [/低圧の充電電路に近接/, /接触/, /絶縁用防具/],
   };
   const firstParagraphRule = firstParagraphPatterns[parts.articleNum];
   if (parts.lawShort === "安衛則" && firstParagraphRule) {
@@ -881,14 +931,9 @@ const CITATION_CLAIM_RULES: readonly CitationClaimRule[] = [
     applies: (statement) =>
       /低圧.*充電電路.*(?:直接取り扱|取り扱う).*(?:絶縁用保護具|活線作業用器具)/.test(
         statement,
-      ),
+    ),
     supports: (sources) =>
-      sources.some((source) =>
-        sourceSupportsArticleFirstParagraph(source, "第346条", [
-          /低圧の充電電路の点検/,
-          /絶縁用保護具|活線作業用器具/,
-        ]),
-      ),
+      sources.some(sourceSupportsLowVoltageLiveWorkProtection),
   },
   {
     id: "100v-is-low-voltage",
@@ -910,13 +955,7 @@ const CITATION_CLAIM_RULES: readonly CitationClaimRule[] = [
     applies: (statement) =>
       /低圧.*充電電路.*近接.*接触.*絶縁用防具/.test(statement),
     supports: (sources) =>
-      sources.some((source) =>
-        sourceSupportsArticleFirstParagraph(source, "第347条", [
-          /低圧の充電電路に近接/,
-          /接触/,
-          /絶縁用防具/,
-        ]),
-      ),
+      sources.some(sourceSupportsLowVoltageProximityProtection),
   },
   {
     id: "low-voltage-proximity-exception",
@@ -926,16 +965,18 @@ const CITATION_CLAIM_RULES: readonly CitationClaimRule[] = [
       ) ||
       /例外.*絶縁用保護具を着用.*(?:他の|以外の)身体(?:部分)?.*接触するおそれがない/.test(
         statement,
+    ),
+    supports: (sources) =>
+      sources.some(sourceSupportsLowVoltageProximityProtection),
+  },
+  {
+    id: "low-voltage-chapter-exclusion",
+    applies: (statement) =>
+      /対地電圧50V以下.*(?:電気機械器具|配線|移動電線).*(?:この章|電気による危険防止の章).*(?:適用しません|適用しない)/.test(
+        statement,
       ),
     supports: (sources) =>
-      sources.some(
-        (source) =>
-          sourceSupportsArticleFirstParagraph(source, "第347条", [
-            /絶縁用保護具を着用(?:させ)?/,
-            /身体の部分以外の部分/,
-            /接触するおそれ(?:が|の)ない/,
-          ]),
-      ),
+      sources.some(sourceSupportsLowVoltageChapterExclusion),
   },
   {
     id: "extra-high-live-and-proximity-work",
@@ -1034,6 +1075,59 @@ function semanticClaimFailures(response: ChatbotResponse): string[] {
   return [...new Set(failures)];
 }
 
+function electricalSourceUnitFailures(response: ChatbotResponse): string[] {
+  const failures: string[] = [];
+  const claimText = normalizedText(
+    [response.directAnswer, ...response.importantConditions].join(" "),
+  );
+  const isKnownLowVoltageTesterAnswer =
+    response.context?.workAction === "tester-measurement" &&
+    response.context.voltageClass === "低圧";
+  const statesLowVoltageLiveWorkProtection =
+    /346条/.test(claimText) &&
+    /絶縁用保護具|活線作業用器具/.test(claimText);
+  const statesLowVoltageProximityProtection =
+    /347条/.test(claimText) && /絶縁用防具/.test(claimText);
+
+  if (
+    isKnownLowVoltageTesterAnswer &&
+    statesLowVoltageLiveWorkProtection &&
+    statesLowVoltageProximityProtection
+  ) {
+    if (!response.sources.some(sourceSupportsLowVoltageLiveWorkProtection)) {
+      failures.push(
+        "unsupported low-voltage tester source unit: 安衛則第346条",
+      );
+    }
+    if (!response.sources.some(sourceSupportsLowVoltageProximityProtection)) {
+      failures.push(
+        "unsupported low-voltage tester source unit: 安衛則第347条",
+      );
+    }
+    if (!response.sources.some(sourceSupportsLowVoltageChapterExclusion)) {
+      failures.push(
+        "unsupported low-voltage tester source unit: 安衛則第354条",
+      );
+    }
+  }
+
+  const statesDeEnergizedRule339 =
+    /(?:停電済み|停電して|停電作業).{0,30}(?:安衛則)?339条/.test(
+      claimText,
+    ) ||
+    /(?:安衛則)?339条.{0,30}(?:停電作業措置|施錠|通電禁止|残留電荷|放電)/.test(
+      claimText,
+    );
+  if (
+    statesDeEnergizedRule339 &&
+    !response.sources.some(sourceSupportsDeEnergizedMeasures)
+  ) {
+    failures.push("unsupported de-energized source unit: 安衛則第339条");
+  }
+
+  return failures;
+}
+
 function citationSupportFailures(
   response: ChatbotResponse,
   testCase?: ElectricChatbotHoldoutCase,
@@ -1083,6 +1177,7 @@ function citationSupportFailures(
     failures.push("a legal answer paragraph has no source marker");
   }
   failures.push(...semanticClaimFailures(response));
+  failures.push(...electricalSourceUnitFailures(response));
 
   if (testCase) {
     const answerMarkerSet = new Set(markers);

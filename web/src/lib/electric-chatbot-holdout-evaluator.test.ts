@@ -461,6 +461,83 @@ describe("fixed electrical chatbot semantic holdout", () => {
         "required authority source unit is unsupported: 安衛則第339条",
     },
     {
+      id: "EL-053",
+      lawShort: "安衛則",
+      article: "第346条",
+      poisonedParagraph: "第1項",
+      poisonedItem: undefined,
+      poisonedEvidence:
+        "第1項 事業者は、低圧の充電電路の点検、修理等当該充電電路を取り扱う作業を行なう場合において、当該作業に従事する労働者について感電の危険が生ずるおそれのあるときは、当該労働者に絶縁用保護具を着用させなければならない。",
+      expectedFailure:
+        "unsupported low-voltage tester source unit: 安衛則第346条",
+    },
+    {
+      id: "EL-053",
+      lawShort: "安衛則",
+      article: "第346条",
+      poisonedParagraph: "第1項",
+      poisonedItem: undefined,
+      poisonedEvidence:
+        "第1項 事業者は、低圧の充電電路の点検、修理等当該充電電路を取り扱う作業を行なう場合において、当該作業に従事する労働者について感電の危険が生ずるおそれのあるときは、当該労働者に活線作業用器具を使用させなければならない。",
+      expectedFailure:
+        "unsupported low-voltage tester source unit: 安衛則第346条",
+    },
+    {
+      id: "EL-053",
+      lawShort: "安衛則",
+      article: "第347条",
+      poisonedParagraph: "第1項",
+      poisonedItem: undefined,
+      poisonedEvidence:
+        "第1項 事業者は、低圧の充電電路に近接する場所で電路又はその支持物の敷設、点検、修理、塗装等の電気工事の作業を行なう場合において、当該作業に従事する労働者が当該充電電路に接触することにより感電の危険が生ずるおそれのあるときは、当該充電電路に絶縁用防具を装着しなければならない。",
+      expectedFailure:
+        "unsupported low-voltage tester source unit: 安衛則第347条",
+    },
+    {
+      id: "EL-053",
+      lawShort: "安衛則",
+      article: "第347条",
+      poisonedParagraph: "第1項",
+      poisonedItem: undefined,
+      poisonedEvidence:
+        "第1項 ただし、労働者に絶縁用保護具を着用させ、着用する身体の部分以外が充電電路に接触するおそれのないときは、この限りでない。",
+      expectedFailure:
+        "unsupported low-voltage tester source unit: 安衛則第347条",
+    },
+    {
+      id: "EL-053",
+      lawShort: "安衛則",
+      article: "第354条",
+      poisonedParagraph: undefined,
+      poisonedItem: undefined,
+      poisonedEvidence:
+        "この章の規定は、電気機械器具、配線又は移動電線については適用しない。",
+      expectedFailure:
+        "unsupported low-voltage tester source unit: 安衛則第354条",
+    },
+    {
+      id: "EL-053",
+      lawShort: "安衛則",
+      article: "第339条",
+      poisonedParagraph: "第1項",
+      poisonedItem: "第1号・第2号・第3号",
+      poisonedEvidence:
+        "第1号 開路に用いた開閉器に施錠し、通電禁止を表示し、又は監視人を置く。第3号 高圧又は特別高圧では検電器具で確認し、短絡接地する。",
+      expectedFailure:
+        "unsupported de-energized source unit: 安衛則第339条",
+    },
+    {
+      id: "EL-053",
+      lawShort: "安衛則",
+      article: "第339条",
+      poisonedParagraph: "第1項",
+      poisonedItem: "第1号・第2号・第3号",
+      poisonedEvidence:
+        "第1号 開閉器に施錠し、通電禁止を表示し、又は監視人を置く。第2号 残留電荷による危険がある電路は確実に放電する。第3号 高圧又は特別高圧では検電器具で確認し、短絡接地する。",
+      expectedFailure:
+        "unsupported de-energized source unit: 安衛則第339条",
+    },
+    {
       id: "EL-013",
       lawShort: "安衛則",
       article: "第347条",
@@ -519,6 +596,7 @@ describe("fixed electrical chatbot semantic holdout", () => {
       );
       const result = evaluation.results.find((candidate) => candidate.id === id);
       if (!testCase || !result) throw new Error(`${id} fixture is missing`);
+      expect(result.passed).toBe(true);
 
       const finalTurn = result.turns.at(-1)!;
       const sourceIndex = finalTurn.response.sources.findIndex(
@@ -564,6 +642,7 @@ describe("fixed electrical chatbot semantic holdout", () => {
         poisonedTurns,
       );
       expect(poisoned.checks.citationSupport).toBe(false);
+      expect(poisoned.passed).toBe(false);
       expect(poisoned.failures.join(" ")).toContain(expectedFailure);
     },
   );

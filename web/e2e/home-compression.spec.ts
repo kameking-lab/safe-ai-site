@@ -1,6 +1,16 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
 const MOBILE_VIEWPORT = { width: 390, height: 844 } as const;
+
+async function warmKyPaperRoute(page: Page) {
+  // A cold App Router chunk can trigger a dev-only Fast Refresh that cancels
+  // the first client transition. Production serves precompiled chunks.
+  await page.goto("/ky/paper", { waitUntil: "domcontentloaded" });
+  await expect(
+    page.getByRole("heading", { level: 1, name: "KYを作る" }),
+  ).toBeVisible({ timeout: 30_000 });
+  await page.waitForLoadState("networkidle", { timeout: 30_000 });
+}
 
 test.describe("効果先行ホームの圧縮予算", () => {
   test.beforeEach(async ({ page }) => {
@@ -182,7 +192,9 @@ test.describe("効果先行ホームの圧縮予算", () => {
 test("事故カードは判断材料を先に示し、KYへ未確認内容を自動取込しない", async ({
   page,
 }) => {
+  test.setTimeout(60_000);
   await page.setViewportSize(MOBILE_VIEWPORT);
+  await warmKyPaperRoute(page);
   await page.goto("/", { waitUntil: "networkidle" });
   const accidentCard = page.locator('[data-home-update="accidents"]');
   await expect(accidentCard.getByRole("link", { name: /KYを作る/ })).toHaveCount(0);
@@ -234,6 +246,7 @@ test("不正な事故文脈queryではバナーも自動確定も行わない", 
 test("ホームの化学物質入力をURL・storage・request URLへ露出しない", async ({
   page,
 }) => {
+  test.setTimeout(60_000);
   const rawQuery = "toluene-test-raw";
   const requestUrls: string[] = [];
   const chemicalSearchRequests: Array<{ method: string; url: string }> = [];
@@ -254,7 +267,9 @@ test("ホームの化学物質入力をURL・storage・request URLへ露出し�
   );
   await input.fill(rawQuery);
   await input.press("Enter");
-  await expect(page).toHaveURL(/\/chemical-ra#chemical-ra-start$/);
+  await expect(page).toHaveURL(/\/chemical-ra#chemical-ra-start$/, {
+    timeout: 30_000,
+  });
   await expect(page.locator("#chemical-onebox-input")).toHaveValue(rawQuery);
   expect((await chemicalSearchResponse).status()).toBeLessThan(400);
 

@@ -161,6 +161,50 @@ function lowVoltageChapterExclusionSupported(evidence: string): boolean {
   ]);
 }
 
+function lowVoltageLiveWorkProtectionSupported(evidence: string): boolean {
+  const liveWorkClause = normalizeEvidence(
+    "事業者は、低圧の充電電路の点検、修理等当該充電電路を取り扱う作業を行なう場合において、当該作業に従事する労働者について感電の危険が生ずるおそれのあるときは、当該労働者に絶縁用保護具を着用させ、又は活線作業用器具を使用させなければならない。",
+  );
+  return evidence.includes(liveWorkClause);
+}
+
+function lowVoltageProximityProtectionSupported(evidence: string): boolean {
+  const proximityClause = normalizeEvidence(
+    "事業者は、低圧の充電電路に近接する場所で電路又はその支持物の敷設、点検、修理、塗装等の電気工事の作業を行なう場合において、当該作業に従事する労働者が当該充電電路に接触することにより感電の危険が生ずるおそれのあるときは、当該充電電路に絶縁用防具を装着しなければならない。",
+  );
+  return evidence.includes(proximityClause);
+}
+
+function lowVoltageLiveProtectionSupported(evidence: string): boolean {
+  return (
+    lowVoltageLiveWorkProtectionSupported(evidence) &&
+    lowVoltageProximityProtectionSupported(evidence)
+  );
+}
+
+function lowVoltageProximityExceptionSupported(evidence: string): boolean {
+  return evidence.includes(
+    normalizeEvidence(
+      "ただし、当該作業に従事する労働者に絶縁用保護具を着用させて作業を行なう場合において、当該絶縁用保護具を着用する身体の部分以外の部分が当該充電電路に接触するおそれのないときは、この限りでない。",
+    ),
+  );
+}
+
+function deEnergizedWorkMeasuresSupported(evidence: string): boolean {
+  return evidenceHasAll(evidence, [
+    "事業者は、電路を開路して",
+    "当該電路を開路した後に",
+    "次に定める措置を講じなければならない",
+    "開路に用いた開閉器に、作業中、施錠し",
+    "通電禁止に関する所要事項を表示し",
+    "又は監視人を置くこと",
+    "残留電荷を確実に放電させること",
+    "高圧又は特別高圧であつたもの",
+    "検電器具により停電を確認し",
+    "短絡接地すること",
+  ]);
+}
+
 function assertsLowVoltageSpecialEducationScope(text: string): boolean {
   return (
     /低圧/.test(text) &&
@@ -558,6 +602,77 @@ function knownClaimSupported(text: string, evidence: string): boolean | null {
       "低圧の充電電路に近接する場所",
       "絶縁用防具",
     ]);
+  }
+  if (
+    /^低圧設備でテスター測定する条件まで分かっており、充電中なら、充電電路を直接取り扱う作業か充電部への近接作業かに応じて、安衛則346条の絶縁用保護具または活線作業用器具、347条により充電電路へ装着する絶縁用防具を確認します/.test(
+      text,
+    )
+  ) {
+    return lowVoltageLiveProtectionSupported(evidence);
+  }
+  if (/^停電済みなら安衛則339条の停電作業措置を先に確認します/.test(text)) {
+    return deEnergizedWorkMeasuresSupported(evidence);
+  }
+  if (
+    /^充電中の低圧設備でテスター測定する場合は、充電電路を直接取り扱い感電の危険があれば安衛則346条の絶縁用保護具または活線作業用器具、電路・支持物の点検等で充電部へ接触するおそれがあれば347条により事業者が充電電路へ装着する絶縁用防具を確認します/.test(
+      text,
+    )
+  ) {
+    return lowVoltageLiveProtectionSupported(evidence);
+  }
+  if (
+    /^配線を傷付けず測定器をクリップ留め・巻き付けるだけなら電気工事士を要しない場合もありますが、それで感電防止措置や特別教育の確認が不要になるわけではありません/.test(
+      text,
+    )
+  ) {
+    return (
+      lowVoltageLiveProtectionSupported(evidence) &&
+      evidenceHasAll(evidence, [
+        "測定器をクリップ留め又は巻き付ける場合",
+        "電気工事士が工事する必要はありません",
+        "法第59条第3項の厚生労働省令で定める危険又は有害な業務",
+      ])
+    );
+  }
+  if (
+    /^「停電済み」を選んだため、充電中の測定ではなく安衛則339条の停電作業措置を先に確認します/.test(
+      text,
+    ) ||
+    /^開閉器の施錠・通電禁止表示または監視人の配置を行い、残留電荷の危険がある電路は放電します/.test(
+      text,
+    ) ||
+    /^検電器による停電確認と短絡接地を同条1項3号が求めるのは、開路前が高圧・特別高圧だった電路です/.test(
+      text,
+    ) ||
+    /^低圧へ無条件に同号を当てはめません/.test(text)
+  ) {
+    return deEnergizedWorkMeasuresSupported(evidence);
+  }
+  if (/^低圧特別教育の法定対象は/.test(text)) {
+    return (
+      lowVoltageSpecialEducationScopeSupported(evidence) &&
+      evidenceHasAll(evidence, [
+        "配電盤室変電室等区画された場所",
+        "充電部分が露出している開閉器の操作の業務",
+      ])
+    );
+  }
+  if (/^低圧測定の全てが一律対象ではありません/.test(text)) {
+    return lowVoltageSpecialEducationScopeSupported(evidence);
+  }
+  if (
+    /^充電電路を直接取り扱い感電の危険がある場合は346条の絶縁用保護具または活線作業用器具、近接して点検等を行い接触するおそれがある場合は347条により事業者が充電電路へ絶縁用防具を装着します/.test(
+      text,
+    )
+  ) {
+    return lowVoltageLiveProtectionSupported(evidence);
+  }
+  if (
+    /^ただし、絶縁用保護具を着用し、着用部以外が充電部へ接触するおそれがない場合は347条の絶縁用防具の例外です/.test(
+      text,
+    )
+  ) {
+    return lowVoltageProximityExceptionSupported(evidence);
   }
   if (
     /^高圧・特別高圧では、充電電路または支持物の敷設・点検・修理・操作が特別教育の対象です/.test(
@@ -2382,11 +2497,59 @@ export function validateServiceFirstLegalClaimSupport(input: {
       /^第?354条$/.test(article.articleNum) &&
       lowVoltageChapterExclusionSupported(normalizeEvidence(article.text)),
   );
+  const resolvedLowVoltageTester =
+    hasElectricalDomainSignal(input.query) &&
+    /盤内でテスター測定/.test(input.query) &&
+    /低圧/.test(input.query);
+  const resolvedEnergizedLowVoltageTester =
+    resolvedLowVoltageTester && /充電中/.test(input.query);
+  const resolvedStoppedLowVoltageTester =
+    resolvedLowVoltageTester && /停電済み/.test(input.query);
+  const hasValidLowVoltageLiveWorkSource = input.articles.some(
+    (article) =>
+      article.lawShort === "安衛則" &&
+      /^第?346条$/.test(article.articleNum) &&
+      lowVoltageLiveWorkProtectionSupported(normalizeEvidence(article.text)),
+  );
+  const hasValidLowVoltageProximitySource = input.articles.some(
+    (article) =>
+      article.lawShort === "安衛則" &&
+      /^第?347条$/.test(article.articleNum) &&
+      lowVoltageProximityProtectionSupported(normalizeEvidence(article.text)) &&
+      lowVoltageProximityExceptionSupported(normalizeEvidence(article.text)),
+  );
+  const hasValidDeEnergizedWorkSource = input.articles.some(
+    (article) =>
+      article.lawShort === "安衛則" &&
+      /^第?339条$/.test(article.articleNum) &&
+      deEnergizedWorkMeasuresSupported(normalizeEvidence(article.text)),
+  );
   if (
     answerDescribesLowVoltageProtection &&
     !hasValidLowVoltageChapterExclusionSource
   ) {
     failures.push("answer:low-voltage-chapter-exclusion-evidence");
+  }
+  if (
+    resolvedLowVoltageTester &&
+    !hasValidLowVoltageChapterExclusionSource
+  ) {
+    failures.push("answer:resolved-low-voltage-chapter-exclusion-evidence");
+  }
+  if (
+    resolvedLowVoltageTester &&
+    !resolvedStoppedLowVoltageTester &&
+    (!hasValidLowVoltageLiveWorkSource ||
+      !hasValidLowVoltageProximitySource)
+  ) {
+    failures.push("answer:resolved-low-voltage-live-protection-evidence");
+  }
+  if (
+    resolvedLowVoltageTester &&
+    !resolvedEnergizedLowVoltageTester &&
+    !hasValidDeEnergizedWorkSource
+  ) {
+    failures.push("answer:resolved-low-voltage-stopped-work-evidence");
   }
   const citedIndexes = new Set<number>();
   // Legal answers are produced by the deterministic, reviewed formatter.  A

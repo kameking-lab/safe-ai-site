@@ -26,6 +26,9 @@ describe("サービス先行の定型回答に対する主張単位の引用支�
     "対地電圧24Vの低圧充電電路を敷設する時、特別教育は必要？",
     "電話用の低圧充電電路を修理する時、特別教育は必要？",
     "対地電圧24Vの充電部にテスターを当てる時、346条の保護具は必要？",
+    "電気作業 盤内でテスター測定 電気設備 低圧 100V",
+    "電気作業 盤内でテスター測定 電気設備 低圧 充電中 確認済み選択肢:充電中",
+    "電気作業 盤内でテスター測定 電気設備 低圧 停電済み 確認済み選択肢:停電済み",
     "電気作業で作業主任者の選任が必要か",
     "フォークリフトの資格は？",
     "足場の手すり高さは？",
@@ -164,6 +167,91 @@ describe("サービス先行の定型回答に対する主張単位の引用支�
 
   it.each([
     {
+      label: "充電中の346条措置",
+      query:
+        "電気作業 盤内でテスター測定 電気設備 低圧 充電中 確認済み選択肢:充電中",
+      articleNum: "第346条",
+      poisonedTerms: [
+        "絶縁用保護具を着用させ",
+        "活線作業用器具を使用させ",
+      ],
+    },
+    {
+      label: "充電中の347条防具",
+      query:
+        "電気作業 盤内でテスター測定 電気設備 低圧 充電中 確認済み選択肢:充電中",
+      articleNum: "第347条",
+      poisonedTerms: ["絶縁用防具を装着しなければならない"],
+    },
+    {
+      label: "充電中の354条除外",
+      query:
+        "電気作業 盤内でテスター測定 電気設備 低圧 充電中 確認済み選択肢:充電中",
+      articleNum: "第354条",
+      poisonedTerms: ["対地電圧が五十ボルト以下"],
+    },
+    {
+      label: "停電済みの339条開路",
+      query:
+        "電気作業 盤内でテスター測定 電気設備 低圧 停電済み 確認済み選択肢:停電済み",
+      articleNum: "第339条",
+      poisonedTerms: ["電路を開路して", "当該電路を開路した後"],
+    },
+    {
+      label: "停電済みの354条除外",
+      query:
+        "電気作業 盤内でテスター測定 電気設備 低圧 停電済み 確認済み選択肢:停電済み",
+      articleNum: "第354条",
+      poisonedTerms: ["対地電圧が五十ボルト以下"],
+    },
+  ])(
+    "$labelを対応sourceだけから削ると別条文から借用せずfail-closedにする",
+    ({ query, articleNum, poisonedTerms }) => {
+      const searched = searchRelevantArticlesWithScore(query, 10).articles;
+      const expanded = expandVerifiedLegalEvidenceArticles(query, searched);
+      const initialAnswer = buildServiceFirstLegalAnswer({
+        query,
+        articles: expanded,
+        now: NOW,
+      });
+      const cited = citedLegalAnswerArticles(initialAnswer, expanded);
+      const poisoned = cited.map((source) =>
+        source.lawShort === "安衛則" && source.articleNum === articleNum
+          ? {
+              ...source,
+              text: poisonedTerms.reduce(
+                (text, term) => text.replaceAll(term, ""),
+                source.text,
+              ),
+            }
+          : source,
+      );
+      const answer = buildServiceFirstLegalAnswer({
+        query,
+        articles: poisoned,
+        now: NOW,
+      });
+      const result = validateServiceFirstLegalClaimSupport({
+        answer,
+        query,
+        articles: poisoned,
+        now: NOW,
+      });
+
+      expect(poisoned.some((source, index) => source.text !== cited[index]?.text)).toBe(
+        true,
+      );
+      expect(result.supported, answer).toBe(false);
+      expect(result.failures).toContainEqual(
+        expect.stringMatching(
+          /reviewed-template-evidence|low-voltage-chapter-exclusion-evidence/,
+        ),
+      );
+    },
+  );
+
+  it.each([
+    {
       query: "タンクに入る時に必要なことは？",
       requiredTerms: [
         "その日の作業を開始する前に",
@@ -183,6 +271,20 @@ describe("サービス先行の定型回答に対する主張単位の引用支�
         "水分及び塩分の摂取",
         "作業からの離脱",
         "身体の冷却",
+      ],
+    },
+    {
+      query: "電気作業 盤内でテスター測定 電気設備 低圧 100V",
+      requiredTerms: [
+        "絶縁用保護具を着用させ",
+        "活線作業用器具を使用させ",
+        "低圧の充電電路に近接する場所",
+        "絶縁用防具を装着しなければならない",
+        "絶縁用保護具を着用する身体の部分以外の部分",
+        "電路を開路して",
+        "対地電圧が五十ボルト以下",
+        "この章の規定は",
+        "適用しない",
       ],
     },
     {

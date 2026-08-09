@@ -203,6 +203,64 @@ describe("電気作業のanswer-first合成", () => {
     expect(result.sourceKeys).toContain("安衛則第347条");
   });
 
+  it("テスター測定の100V follow-upへ346条・347条の具体措置を直接答える", () => {
+    const first = answerTurn("盤を開けてテスターを当てる");
+    const second = answerTurn("100V", first.context);
+
+    expect(second.context).toMatchObject({
+      topicDomain: "electrical",
+      workAction: "tester-measurement",
+      voltageClass: "低圧",
+    });
+    expect(second.answer).toMatch(
+      /低圧設備でテスター測定[\s\S]*346条の絶縁用保護具または活線作業用器具[\s\S]*347条により充電電路へ装着する絶縁用防具/,
+    );
+    expect(second.answer).toMatch(/事業者が充電電路へ絶縁用防具を装着/);
+    expect(second.answer).toMatch(
+      /絶縁用保護具を着用[\s\S]*着用部以外[\s\S]*接触するおそれがない場合[\s\S]*例外/,
+    );
+    expect(second.answer).toMatch(
+      /対地電圧50V以下[\s\S]*安衛則354条[\s\S]*電気による危険防止の章を適用しません/,
+    );
+    expect(second.sourceKeys).toEqual(
+      expect.arrayContaining([
+        "安衛則第346条",
+        "安衛則第347条",
+        "安衛則第354条",
+      ]),
+    );
+
+    const energized = answerTurn("充電中", second.context);
+    expect(energized.context).toMatchObject({
+      workAction: "tester-measurement",
+      voltageClass: "低圧",
+      energizedState: "energized",
+    });
+    expect(energized.answer).toMatch(
+      /充電中の低圧設備[\s\S]*安衛則346条の絶縁用保護具または活線作業用器具[\s\S]*347条[\s\S]*充電電路へ装着する絶縁用防具[\s\S]*対地電圧50V以下[\s\S]*安衛則354条[\s\S]*適用しません/,
+    );
+    expect(energized.sourceKeys).toEqual(
+      expect.arrayContaining([
+        "安衛則第346条",
+        "安衛則第347条",
+        "安衛則第354条",
+      ]),
+    );
+
+    const deEnergized = answerTurn("停電済み", second.context);
+    expect(deEnergized.context).toMatchObject({
+      workAction: "tester-measurement",
+      voltageClass: "低圧",
+      energizedState: "de-energized",
+    });
+    expect(deEnergized.answer).toMatch(
+      /安衛則339条[\s\S]*施錠[\s\S]*残留電荷[\s\S]*対地電圧50V以下[\s\S]*安衛則354条[\s\S]*適用しません/,
+    );
+    expect(deEnergized.sourceKeys).toEqual(
+      expect.arrayContaining(["安衛則第339条", "安衛則第354条"]),
+    );
+  });
+
   it("電気工事士・特別教育・主任技術者を根拠付きで区別する", () => {
     const schemes = answerTurn("電気工事士と特別教育の違い");
     expect(schemes.answer).toMatch(/別制度[\s\S]*設置・変更[\s\S]*配線/);
