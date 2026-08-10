@@ -1,16 +1,18 @@
 # 安衛法AI 現在状態
 
-基準日: 2026-08-09 JST
-状態: **リリース候補の独立レビューPASS（full gate・Preview・本番は未実行）**
+法令・回答基準日: 2026-08-09 JST
+リリース観測日: 2026-08-10 JST
+状態: **Production反映・production smoke PASS**
 
-## 独立レビュー対象snapshot
+## 最終リリース対象snapshot
 
-- Source HEAD: `cb3b56075c398ea241bfa7af6985d9a8b764bba9`
-- Reviewed working-tree diff fingerprint: `df01ce3270d766712bdcd8f1f1ec6d6ab45908fb`（`git diff --binary | git hash-object --stdin`）
+- Release candidate / Production source: `0f46b01ffd45e4a5e5572096f116933b2027fbe1`
+- Release candidate tree: `4fd843a4c2e4667a7da7947dde2c9e87a78a2640`
+- Audit evaluator source: `5e8cc33ee655067e041f84f50adc0ff166017985`
 - 固定電気holdout: 72/72ケース・88ターン PASS
 - 固定SHA-256: `122fc6dffb7dbd08a6665bf276883f2fefc7f8010730cb7803f25d66faca3554`
 
-fingerprintは独立レビューに渡したworking-tree差分を識別する値であり、この監査文書自体の後続更新は含まない。
+Release candidate treeはGitHub CIのPR merge treeと一致し、最終PreviewとProductionのsource commitも同一である。監査評価器は製品候補へ混入させず、deployment-disabled audit branchで固定した。
 
 ## 今回の修正範囲
 
@@ -65,7 +67,7 @@ fingerprintは独立レビューに渡したworking-tree差分を識別する値
 
 引用評価は、URL、法令名、条番号、markerの一致だけで合格させない。回答中の法的命題に対応する項・号・該当抜粋が存在するかを検査し、正しいURL等を残したまま本文だけを別命題へ差し替えるpoisonテストが失敗を検出することも固定した。
 
-## 現在までのcandidate検証
+## 最終検証
 
 - 固定電気holdout: 72ケース・88ターン PASS。
 - 空contextからの電気分類: 67/67 PASS。明示read-only context fixture: 5/5 PASS。
@@ -74,11 +76,15 @@ fingerprintは独立レビューに渡したworking-tree差分を識別する値
 - main 14分野はJSON 14/14、SSE 14/14 PASS。answer-first、同じ質問・chipの反復なし、domain維持、無関係domainへの遷移なし、privacy誤遮断なし、公開context 9キー限定を確認した。
 - domain-first口語・短文25件をJSON/SSEの両経路で確認し、answer-first、主要分岐、公式根拠、無関係法源poison抑制をPASSした。
 - exact citation claim検査は19/19 PASS。strict semantic citation、既知条件の再質問、低圧距離の誤断定、行為の膨張、否定条件反転の各poison回帰もPASSした。
-- 最新対象Vitest: 12ファイル・1,246テスト PASS。
-- 実装担当と分離した読み取り専用の独立レビューはPASS。open P0=0、P1=0、P2=0、P3=0。
-- 72ケース・88ターンをdeployed browser SSE/UIで評価するPreviewテストは実装済みだが、保護Previewではまだ実行していない。
-
-これらは候補snapshotの対象検証と独立レビューであり、最終full gate、保護Preview、本番smokeの代わりではない。
+- 最終full gateは13/13 PASS。Vitest 7,346件、Playwright 256件、privacy Playwright 2件がPASSした。
+- GitHub CI performance budgetは51/51 Lighthouse runを採用し、`/laws` のclient JavaScriptは269,836 bytes（上限275,000 bytes）でPASSした。
+- 保護Preview `dpl_2scBM6D1pHaMr2M4GT8cxTVvaY7e`（build `bld_3t5ukph6k`）で、JSON APIとbrowser SSE/UIを各72/72ケース・88/88ターン検証した。主要率はすべて100%、raw question leakは0件だった。
+- 追加固定12ケースはbrowser・JSON・legacyでPASSし、通常質問30件のanswer-first、substantive answer、context retention、clarification correctness、citation supportはいずれも100%だった。
+- Previewのchatbot POSTは211件、external AI使用0件、Preview mode欠落0件、監査failure 0件だった。Preview保護は `all_except_custom_domains`、監査後のbypassは0件だった。
+- 実装担当と分離した読み取り専用の最終独立レビューはPASS。open P0=0、P1=0、P2=0、P3=0。
+- Production `dpl_5LLzyucARx7TGaLj9PrfTQsyKJNm`（build `bld_cxrh3jgpr`）はsource `0f46b01ffd45e4a5e5572096f116933b2027fbe1`でREADYとなり、`https://www.anzen-ai-portal.jp/` に反映された。
+- Production smokeは同一Productionを264/264 PASS（生成時刻 `2026-08-10T11:29:00+09:00`）。Attempt 1は旧progress契約とfocus raceによる監査側のfalse-negativeであり、監査ロジックを独立診断・修正して再実行した。
+- push後の `web-ci` はsmokeをPASSした。full jobは35分上限で250件時点にキャンセルされたが、事前full gateは256件PASS済みで、CIのNext開発server再起動で白画面となった1件と未実行7件はexact candidateのproduction modeで再実行して全件PASSした。
 
 ## リリース進捗
 
@@ -86,11 +92,11 @@ fingerprintは独立レビューに渡したworking-tree差分を識別する値
 |---|---|
 | 固定holdout | PASS |
 | 対象ローカルテスト | PASS |
-| full gate | PENDING |
+| full gate | PASS（13/13、Vitest 7,346、Playwright 256 + privacy 2） |
 | 独立レビュー | PASS（P0=0 / P1=0 / P2=0 / P3=0） |
-| Preview | PENDING |
-| Production反映 | PENDING |
-| production smoke | PENDING |
-| commit / push / production tag | PENDING |
+| Preview | PASS（`dpl_2scBM6D1pHaMr2M4GT8cxTVvaY7e`） |
+| Production反映 | PASS（`dpl_5LLzyucARx7TGaLj9PrfTQsyKJNm`） |
+| production smoke | PASS（264/264） |
+| commit / push / production tag | PASS（`production-20260810-answer-first`） |
 
-緊急時遮断、PII外部送信前遮断、AI OFF、provider timeout、根拠不足時のfail-closedは維持しているが、最終判定はfull gateとPreview、本番smokeの完了後に更新する。
+緊急時遮断、PII外部送信前遮断、AI OFF、provider timeout、根拠不足時のfail-closedを維持したままリリースを完了した。rollbackは不要で、直前Production `dpl_87jKmHESX4ta9fdn4pmqbXF6erqt` を復旧対象として記録した。定期書込みworkflowは2026-08-10T11:55:21.4088794+09:00に、リリース前activeだったMHLW・e-Gov・news-feedの3本をactiveへ復帰し、リリース前から停止中だったJMAは `disabled_manually` を維持した。

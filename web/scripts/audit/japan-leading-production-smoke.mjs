@@ -506,21 +506,6 @@ const protectedGovernanceRoutes = [
     ],
   },
   {
-    route: "/education/progress",
-    requiredCopies: [
-      "組織の受講記録は接続されていません",
-      "確認できないためfail-closed",
-    ],
-    validReasons: [
-      "authentication_not_configured",
-      "authentication_required",
-      "database_unavailable",
-      "membership_required",
-      "insufficient_role",
-      "progress_unavailable",
-    ],
-  },
-  {
     route: "/signage/manage",
     requiredCopies: ["端末未登録・接続未確認"],
     validReasons: [],
@@ -564,6 +549,22 @@ for (const [index, result] of protectedGovernanceResults.entries()) {
     { canonical: canonical(result.body) },
   );
 }
+
+const retiredProgressRoute = await request("/education/progress");
+record(
+  "/education/progress:permanent-redirect",
+  retiredProgressRoute.status === 308,
+  {
+    status: retiredProgressRoute.status,
+    durationMs: retiredProgressRoute.durationMs,
+    error: retiredProgressRoute.error,
+  },
+);
+record(
+  "/education/progress:redirects-to-non-persistent-learning-hub",
+  retiredProgressRoute.headers.location === "/e-learning",
+  { location: retiredProgressRoute.headers.location },
+);
 
 const home = routeResults[0];
 const productionCsp = home.headers["content-security-policy"] ?? "";
@@ -1284,6 +1285,21 @@ if (!getOnly) {
     { summary: broadSourceSummary.trim() },
   );
   await broad.answer.getByRole("button", { name: "違う" }).click();
+  await page
+    .waitForFunction(
+      () => {
+        const composer = document.querySelector(
+          "[data-chatbot-composer] textarea",
+        );
+        return (
+          composer === document.activeElement &&
+          document.querySelectorAll("[data-chatbot-quick-reply]").length === 0
+        );
+      },
+      undefined,
+      { timeout: 5_000 },
+    )
+    .catch(() => null);
   const mismatchFocused = await page
     .locator("[data-chatbot-composer] textarea")
     .evaluate((element) => element === document.activeElement);
