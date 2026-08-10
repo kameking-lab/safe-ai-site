@@ -7,10 +7,7 @@ import type {
   ServiceResult,
 } from "@/lib/types/api";
 import type { ChatMessage, LawRevision } from "@/lib/types/domain";
-import {
-  sanitizePublicLegalConversationContext,
-  type PublicLegalConversationContext,
-} from "@/lib/legal-conversation-public-context";
+import type { PublicLegalConversationContext } from "@/lib/legal-conversation-public-context";
 
 export type SendChatMessageInput = {
   revision: LawRevision | null;
@@ -62,15 +59,19 @@ function createMessage(
   };
 }
 
-function toApiRequest(input: SendChatMessageInput): ChatApiRequest {
+async function toApiRequest(
+  input: SendChatMessageInput,
+): Promise<ChatApiRequest> {
+  const context = input.context
+    ? (await import("@/lib/legal-conversation-public-context"))
+        .sanitizePublicLegalConversationContext(input.context)
+    : null;
   return {
     revisionId: input.revision?.id ?? "",
     revisionTitle: input.revision?.title ?? "選択中の法改正",
     question: input.question.trim(),
     privacyConfirmed: input.privacyConfirmed,
-    ...(input.context
-      ? { context: sanitizePublicLegalConversationContext(input.context) }
-      : {}),
+    ...(context ? { context } : {}),
   };
 }
 
@@ -129,7 +130,7 @@ export class ApiChatService implements ChatService {
     options?: { forceError?: ApiForceErrorType; delayMs?: number }
   ): Promise<ServiceResult<ChatMessage>> {
     try {
-      const request = toApiRequest(input);
+      const request = await toApiRequest(input);
       const url = new URL(this.endpoint, "http://localhost");
       if (options?.forceError) {
         url.searchParams.set("forceError", options.forceError);
