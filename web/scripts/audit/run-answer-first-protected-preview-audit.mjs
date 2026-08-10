@@ -110,17 +110,21 @@ function runChild(command, args, { input, env, inherit = false } = {}) {
 
 async function vercelApi(endpoint, method = "GET", body) {
   const executable = vercelCommand();
-  const result = await runChild(executable.command, [
-    ...executable.prefix,
-    "api",
-    endpoint,
-    "-X",
-    method,
-    ...(body === undefined ? [] : ["--input", "-"]),
-    "--raw",
-  ], {
-    ...(body === undefined ? {} : { input: JSON.stringify(body) }),
-  });
+  const result = await runChild(
+    executable.command,
+    [
+      ...executable.prefix,
+      "api",
+      endpoint,
+      "-X",
+      method,
+      ...(body === undefined ? [] : ["--input", "-"]),
+      "--raw",
+    ],
+    {
+      ...(body === undefined ? {} : { input: JSON.stringify(body) }),
+    },
+  );
   if (result.code !== 0) {
     throw new Error(`Vercel API ${method} failed with exit ${result.code}`);
   }
@@ -151,7 +155,7 @@ async function readProtectionState() {
 const bypassEndpoint =
   `/v1/projects/${encodeURIComponent(linkedProject.projectId)}` +
   `/protection-bypass?teamId=${encodeURIComponent(linkedProject.orgId)}`;
-const secret = (await import("node:crypto")).randomBytes(32).toString("base64url");
+const secret = (await import("node:crypto")).randomBytes(16).toString("hex");
 let generationAttempted = false;
 let auditError = null;
 let revokeError = null;
@@ -174,7 +178,9 @@ async function revokeGeneratedBypass() {
       state.deploymentType !== "all_except_custom_domains" ||
       state.bypassCount !== 0
     ) {
-      throw revokeCallError ?? new Error("Preview bypass cleanup was not proven");
+      throw (
+        revokeCallError ?? new Error("Preview bypass cleanup was not proven")
+      );
     }
     generationAttempted = false;
   })();
@@ -200,7 +206,9 @@ async function terminateAfterCleanup(exitCode, error) {
     process.exit(exitCode || 1);
   }
   if (error) {
-    process.stderr.write(`Protected Preview audit failed: ${sanitizedFatalMessage(error)}\n`);
+    process.stderr.write(
+      `Protected Preview audit failed: ${sanitizedFatalMessage(error)}\n`,
+    );
   }
   process.exit(exitCode);
 }
