@@ -1,14 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, HardHat, HeartHandshake, Route, Wrench } from "lucide-react";
+import {
+  ArrowRight,
+  BookOpenCheck,
+  ClipboardCheck,
+  HardHat,
+  ShieldCheck,
+  UsersRound,
+} from "lucide-react";
 import { Mascot } from "@/components/mascot";
 
 const STORY_LINKS = [
   ["安全AIポータルを使う", "/"],
   ["できることを見る", "/safety-ai"],
   ["品質と出典を見る", "/about/quality"],
-  ["自社向けの相談内容を整理する", "/contact/automation-email"],
+  ["業務改善・資料制作の相談範囲を見る", "/about#work-support"],
 ] as const;
 
 /**
@@ -28,14 +35,14 @@ export function ProjectStoryContent() {
             <nav aria-label="パンくず" className="text-sm font-bold text-slate-600 dark:text-slate-300">
               <Link href="/" className="inline-flex min-h-11 items-center underline underline-offset-4">ホーム</Link>
               <span aria-hidden="true" className="mx-2">/</span>
-              <span aria-current="page">つくった理由</span>
+              <span aria-current="page">プロジェクトについて</span>
             </nav>
-            <p className="mt-5 text-sm font-black tracking-[.14em] text-emerald-800 dark:text-emerald-300">PROJECT STORY</p>
+            <p className="mt-5 text-sm font-black tracking-[.14em] text-emerald-800 dark:text-emerald-300">PROJECT POLICY</p>
             <h1 className="mt-3 text-[clamp(2.4rem,6vw,4.4rem)] font-black leading-[1.02] tracking-[-.05em]">
-              現場の時間を、安全と本質的な仕事へ。
+              労働安全と生成AIを、根拠を確認できる形へ。
             </h1>
             <p className="mt-4 max-w-3xl text-base font-semibold leading-7 text-slate-700 dark:text-slate-200">
-              なぜ個人で安全AIポータルをつくり、無償で公開しているのか。その原点と、開発で大切にしていることだけを記します。
+              安全AIポータルは、労働安全の一次資料と現場で使う道具を、探しやすく確認しやすい形へ整える公開Webプロジェクトです。目的、編集体制、品質の境界をここで説明します。
             </p>
           </div>
           <div className="mx-auto rounded-2xl border-2 border-slate-900 bg-white p-2 shadow-[5px_5px_0_#f59e0b] dark:bg-slate-900">
@@ -46,66 +53,59 @@ export function ProjectStoryContent() {
 
       <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 sm:py-14">
         <section data-story-block="origin" aria-labelledby="story-origin" className="grid gap-4 border-b border-slate-300 pb-8 sm:grid-cols-[3rem_minmax(0,1fr)] dark:border-slate-700">
-          <HeartHandshake className="h-8 w-8 text-emerald-800 dark:text-emerald-300" aria-hidden="true" />
+          <HardHat className="h-8 w-8 text-emerald-800 dark:text-emerald-300" aria-hidden="true" />
           <div>
-            <h2 id="story-origin" className="text-2xl font-black">1. 原点</h2>
+            <h2 id="story-origin" className="text-2xl font-black">1. 目的</h2>
             <p className="mt-3 text-base leading-8 text-slate-700 dark:text-slate-200">
-              学生時代、工事現場で死亡事故を目の当たりにしました。その経験が、労働安全に向き合う原点です。事故の詳細や関係者を語るのではなく、同じことを繰り返さないために自分が何をできるかを考え続けてきました。
-              安全を、誰か任せにしないためです。
+              法令、通達、事故事例、化学物質、気象、安全教育など、確認先が分かれやすい情報を一つの入口からたどれるようにします。AIは検索や整理を補助しますが、公式情報、現場責任者、専門家による判断を置き換えません。
             </p>
           </div>
         </section>
 
         <section data-story-block="field" aria-labelledby="story-field" className="grid gap-4 border-b border-slate-300 py-8 sm:grid-cols-[3rem_minmax(0,1fr)] dark:border-slate-700">
-          <Route className="h-8 w-8 text-sky-800 dark:text-sky-300" aria-hidden="true" />
+          <BookOpenCheck className="h-8 w-8 text-sky-800 dark:text-sky-300" aria-hidden="true" />
           <div>
-            <h2 id="story-field" className="text-2xl font-black">2. 文系から現場へ</h2>
+            <h2 id="story-field" className="text-2xl font-black">2. 公開するもの</h2>
             <p className="mt-3 text-base leading-8 text-slate-700 dark:text-slate-200">
-              文系から土木施工管理の道へ進み、建設・土木分野で約10年、現場と安全衛生の実務に携わってきました。計画どおりに進まない状況で、作業する人の声、施工条件、法令、品質を同時に確かめることの重さを学びました。
-            </p>
-            <p className="mt-3 inline-flex flex-wrap gap-x-3 gap-y-1 rounded-xl bg-slate-950 px-4 py-3 text-sm font-black text-white">
-              <span>実務経験：約10年</span>
-              <span aria-hidden="true">・</span>
-              <span>一級土木施工管理技士</span>
-              <span aria-hidden="true">・</span>
-              <span>労働安全コンサルタント</span>
+              根拠付き法令検索、KY支援、建設計算、事故事例・法改正・通達の整理、現場帳票、安全教育などを提供します。各ページでは、出典、更新日、確認状態、利用上の限界をできる限り明示します。
             </p>
           </div>
         </section>
 
         <section data-story-block="essential-work" aria-labelledby="story-essential" className="grid gap-4 border-b border-slate-300 py-8 sm:grid-cols-[3rem_minmax(0,1fr)] dark:border-slate-700">
-          <Wrench className="h-8 w-8 text-amber-800 dark:text-amber-300" aria-hidden="true" />
+          <UsersRound className="h-8 w-8 text-amber-800 dark:text-amber-300" aria-hidden="true" />
           <div>
-            <h2 id="story-essential" className="text-2xl font-black">3. 雑務を減らし、本質的な仕事へ</h2>
+            <h2 id="story-essential" className="text-2xl font-black">3. 編集・監修体制</h2>
             <p className="mt-3 text-base leading-8 text-slate-700 dark:text-slate-200">
-              現場では、同じ転記、集計、書類の整形に多くの時間が使われます。その時間を減らし、安全、施工計画、品質向上、人との対話へ振り向けたいと考えています。
+              制作・更新・訂正の窓口は「安全AIポータル編集部」に統一しています。プロジェクトは労働安全コンサルタント監修のもとで運用し、個別コンテンツの確認状況は各ページの表示を優先します。
             </p>
             <p className="mt-3 text-base leading-8 text-slate-700 dark:text-slate-200">
-              当時は形にできなかった改善を実装するため、AIとコーディングを学びました。安全AIポータルは、以前なら案で終わっていた工夫を、実際に触って検証できる形へ変える試みです。
+              監修資格は品質管理の一要素であり、法令適合、行政受理、現場承認、安全な結果を保証する表示ではありません。重要な判断では必ず一次資料と事業場の手順を確認してください。
             </p>
           </div>
         </section>
 
         <section data-story-block="listen" aria-labelledby="story-listen" className="grid gap-4 border-b border-slate-300 py-8 sm:grid-cols-[3rem_minmax(0,1fr)] dark:border-slate-700">
-          <HardHat className="h-8 w-8 text-orange-800 dark:text-orange-300" aria-hidden="true" />
+          <ShieldCheck className="h-8 w-8 text-orange-800 dark:text-orange-300" aria-hidden="true" />
           <div>
-            <h2 id="story-listen" className="text-2xl font-black">4. 現場へ押し付けない開発</h2>
+            <h2 id="story-listen" className="text-2xl font-black">4. プライバシーと公開境界</h2>
             <p className="mt-3 text-base leading-8 text-slate-700 dark:text-slate-200">
-              便利そうに見えるツールでも、帳票、承認、端末、通信、役割が違えば使われません。まず話を聞き、困っている一つの作業を理解し、小さく試し、使う人の意見で直します。
+              公開ページには、監修者の氏名、資格番号、所属に関する情報、連絡先、住所など、本人特定につながる情報を掲載しません。問い合わせにも、健康情報、現場機密、第三者の個人情報を入力しないよう案内します。
             </p>
             <p className="mt-3 text-base leading-8 text-slate-700 dark:text-slate-200">
-              AIの出力をそのまま正解にせず、人が確認できる根拠と停止線を残します。公式一次資料と現場の判断を置き換えないことが、開発の前提です。
+              構造化データ、配布資料、画像メタデータを含めて公開前に検査し、不要な識別情報を残さない運用を行います。
             </p>
           </div>
         </section>
 
         <section data-story-block="independent" aria-labelledby="story-independent" className="pt-8">
-          <h2 id="story-independent" className="text-2xl font-black">5. 個人開発として続ける</h2>
+          <ClipboardCheck className="h-8 w-8 text-violet-800 dark:text-violet-300" aria-hidden="true" />
+          <h2 id="story-independent" className="mt-3 text-2xl font-black">5. 品質確認と改善</h2>
           <p className="mt-3 text-base leading-8 text-slate-700 dark:text-slate-200">
-            安全AIポータルは、個人が開発・運営し、無償公開しているプロジェクトです。サーバー費などの運営費も個人で負担しています。広告や相談サービスは、無償公開を続けるための選択肢です。
+            出典照合、自動テスト、リンク確認、モバイル表示、アクセシビリティ、プライバシー検査を継続します。誤りや不足が判明した場合は修正し、確認できない情報を確定事項として表示しません。
           </p>
           <p className="mt-3 rounded-xl border-2 border-amber-600 bg-amber-50 p-4 text-sm font-bold leading-7 text-amber-950">
-            現在および過去の勤務先、取引先、その他の組織が運営、監修、推奨するものではありません。法的判断や作業の最終判断は、公式情報、専門家、各組織の手順に従ってください。
+            AI回答、計算結果、教材、帳票例は最終判断を代替しません。法的判断や作業の実施可否は、公式情報、現場責任者、専門家、各組織の手順に従ってください。
           </p>
           <div className="mt-7 grid gap-3 sm:grid-cols-2">
             {STORY_LINKS.map(([label, href], index) => (

@@ -25,7 +25,7 @@
 | F-002 | /api-docs 削除または /admin 移動 | 2h | Batch 2 |
 | F-003 | /handover noindex+削除 | 1h | Batch 2 |
 | F-004 | /pricing noindex+ナビ除外 | 2h | Batch 2 |
-| A-005 | 個人運営 vs 企業向け機能 体裁整合 | 6h | Batch 3 |
+| A-005 | [redacted] vs 企業向け機能 体裁整合 | 6h | Batch 3 |
 | G-002 | /dpa noindex+縮小案内 | 3h | Batch 3 |
 | B-001 | 事故事例「想定例(合成)」バッジ新設 | 8h | Batch 4 |
 | G-003 | /insurance 保険加入ロードマップ明示 | 4h | Batch 4 |
@@ -129,10 +129,10 @@
 **依存先:** Batch 2 完了推奨（非公開化済みページへの整合）  
 **PR名案:** `fix(branding): clarify personal-project scope + noindex /dpa`
 
-#### A-005: 「個人運営」表記と企業向け機能(LMS/DPA/API/pricing)の体裁不整合
+#### A-005: 「[redacted]」表記と企業向け機能(LMS/DPA/API/pricing)の体裁不整合
 
 - 修正方針:
-  1. フッタの「個人運営の研究プロジェクト」表記に加え、法人化前サービスの範囲を明示
+  1. フッタの「[redacted]の研究プロジェクト」表記に加え、法人化前サービスの範囲を明示
   2. Batch 2 で非公開化したページへの残存リンクをすべて削除
   3. `/about` に「現在提供中のサービス / 法人化後に提供予定のサービス」を明確に分離掲載
 - 影響範囲: フッタ、`/about`、ナビゲーション全体

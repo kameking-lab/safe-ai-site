@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import {
   ClipboardList,
@@ -87,7 +87,7 @@ export function LeafletPrintView() {
                 現場の安全を、AI で変える。
               </h2>
               <p className="mt-2 text-sm leading-relaxed text-slate-700">
-                労働安全衛生分野における AI・DX 活用を、個人運営で研究・実証する公開ポータル。
+                労働安全衛生分野における AI・DX 活用を、安全AIポータル編集部が研究・実証する公開ポータル。
                 通達・事故事例・化学物質情報・KY 用紙・Eラーニングを一次ソース付きで無料公開しています。
               </p>
             </div>
@@ -121,7 +121,7 @@ export function LeafletPrintView() {
           <footer className="border-t border-slate-200 pt-3">
             <div className="flex items-center justify-between">
               <p className="text-[10px] text-slate-500">
-                個人運営の研究プロジェクト・運営費用は運営者個人が負担しています。
+                安全AIポータル編集部が運用する研究プロジェクトです。公開機能と有料の受託サービスは明確に区別します。
               </p>
               <p className="text-[10px] font-bold text-emerald-700">{SITE_URL}</p>
             </div>

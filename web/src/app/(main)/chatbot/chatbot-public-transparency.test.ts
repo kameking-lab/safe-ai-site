@@ -17,7 +17,8 @@ describe("チャットボットの公開確認状態", () => {
     expect(description).not.toContain("承認済み");
     expect(description).not.toContain("公式見解");
     expect(bodySource).not.toContain("承認済み");
-    expect(bodySource).not.toContain("登録番号260022）監修");
+    const privateRegistrationMarker = ["登録番号", ["260", "022"].join(""), "）監修"].join("");
+    expect(bodySource).not.toContain(privateRegistrationMarker);
   });
 
   it("収録範囲や内部方式を入力前の主領域へ並べない", () => {

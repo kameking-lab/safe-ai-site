@@ -5,8 +5,8 @@
 
 ## 0. 前提（picリポジトリから吸収した知見）
 
-- 自動化専用Chrome（`C:\Users\kanet\chrome-automation\profile`・CDP :9222）に
-  `connect_over_cdp` で接続する。起動は `C:\Users\kanet\20260522\pic\scripts\start_chrome_cdp.bat`。
+- 自動化専用Chrome（`<user-profile>\chrome-automation\profile`・CDP :9222）に
+  `connect_over_cdp` で接続する。起動は `<user-profile>\20260522\pic\scripts\start_chrome_cdp.bat`。
   **オーナーの普段のChromeプロファイルには触れない。自分が開いたタブのみ操作。**
 - ログイン状態はプロファイルに永続化されている（2026-07-12実測: ChatGPT・Geminiとも生きており人手ログイン不要だった）。
   切れていた場合のみ `start_chrome_cdp.bat login` で人手ログイン1回。
@@ -74,7 +74,7 @@ py -3.12 scripts\imagegen\process.py --src scripts/imagegen/output/<id>/<file> `
 
 ## 5. トラブルシューティング
 
-- CDP不通(9222) → `C:\Users\kanet\20260522\pic\scripts\start_chrome_cdp.bat` を実行（勝手にChromeをkillしない）
+- CDP不通(9222) → `<user-profile>\20260522\pic\scripts\start_chrome_cdp.bat` を実行（勝手にChromeをkillしない）
 - `no input box`/セレクタ不一致 → output/<id>/ の *_noimg_*.png スクショを見てセレクタ更新
 - 上限（QUOTA_RE検知）→ そのサイトの残り資産は自動スキップされる。時間を置いて再実行（resumeが効く）
 - 生成が途中で切れた → 会話URLを控えて `collect_conversation.py` で回収

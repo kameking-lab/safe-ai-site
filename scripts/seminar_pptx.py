@@ -57,6 +57,9 @@ WHITE = RGBColor(0xFF, 0xFF, 0xFF)
 FONT_JP = "Meiryo"
 FONT_EN = "Meiryo"
 
+PUBLIC_EDITOR = "安全AIポータル編集部"
+PUBLIC_SUPERVISOR = "安全AIポータル編集部｜労働安全コンサルタント監修"
+
 # スライドサイズ 16:9（13.333" x 7.5"）
 SLIDE_W_IN = 13.333
 SLIDE_H_IN = 7.5
@@ -1120,10 +1123,26 @@ def build_pptx(yaml_path: Path, template_path: Path | None, output_path: Path) -
     prs.slide_width = Inches(SLIDE_W_IN)
     prs.slide_height = Inches(SLIDE_H_IN)
 
+    # Office core properties are public metadata. Keep them free of personal
+    # identifiers and normalize every generated file even if a stale template is used.
+    core = prs.core_properties
+    core.title = f"安全AIポータル 教育資料 - {spec.get('meta', {}).get('title', yaml_path.stem)}"
+    core.subject = "労働安全衛生教育資料"
+    core.author = PUBLIC_EDITOR
+    core.last_modified_by = PUBLIC_EDITOR
+    core.company = PUBLIC_EDITOR
+    core.comments = "安全AIポータル編集部制作｜労働安全コンサルタント監修"
+    core.keywords = "安全AIポータル; 労働安全; 労働衛生教育"
+
     blank_layout = prs.slide_layouts[6]  # 完全な空白レイアウト
     meta = spec.get("meta", {})
+    meta["supervisor"] = PUBLIC_SUPERVISOR
 
     for idx, slide_data in enumerate(spec["slides"], start=1):
+        if "supervisor" in slide_data:
+            slide_data["supervisor"] = PUBLIC_SUPERVISOR
+        if "footer_supervisor" in slide_data:
+            slide_data["footer_supervisor"] = PUBLIC_SUPERVISOR
         layout_key = slide_data["layout"]
         renderer = LAYOUTS.get(layout_key)
         if renderer is None:

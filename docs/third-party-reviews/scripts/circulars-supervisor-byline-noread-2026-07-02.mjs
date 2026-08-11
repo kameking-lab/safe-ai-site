@@ -1,8 +1,8 @@
 /**
  * 監修者バイライン配線チェック（S8-a・機能UX班-B・2026-07-02）
  *
- * 目的: /circulars/[id] にE-E-A-T監修者バイライン（氏名・労働安全コンサルタント
- * 登録260022・aboutリンク）とPerson JSON-LD(contributor)が実機で配線されているか、
+ * 目的: /circulars/[id] に編集部・監修資格のバイラインとプロジェクト方針リンク、
+ * Organization JSON-LD(contributor)が実機で配線されているか、
  * かつ既存のh1単一性・法令発出者author表記を壊していないかを機械確認する。
  *
  * 実行: BASE_URL=http://localhost:3100 node docs/third-party-reviews/scripts/circulars-supervisor-byline-noread-2026-07-02.mjs
@@ -28,9 +28,9 @@ const main = async () => {
 
     const checks = await page.evaluate(() => {
       const bodyText = document.body.innerText;
-      const supervisorVisible = bodyText.includes("労働安全衛生コンサルタント（登録番号260022）");
+      const supervisorVisible = bodyText.includes("安全AIポータル編集部｜労働安全コンサルタント監修");
       const aboutLink = Array.from(document.querySelectorAll("a")).some(
-        (a) => a.textContent?.includes("労働安全衛生コンサルタント") && a.getAttribute("href") === "/about"
+        (a) => a.textContent?.includes("労働安全コンサルタント監修") && a.getAttribute("href") === "/about/project-story"
       );
       const h1Count = document.querySelectorAll("h1").length;
       const ldScripts = Array.from(
@@ -47,9 +47,8 @@ const main = async () => {
       const contributorOk =
         !!legalDoc &&
         legalDoc.contributor &&
-        legalDoc.contributor["@type"] === "Person" &&
-        legalDoc.contributor.name === "労働安全衛生コンサルタント（登録番号260022）" &&
-        legalDoc.contributor.url?.endsWith("/about");
+        legalDoc.contributor["@type"] === "Organization" &&
+        legalDoc.contributor.name === "安全AIポータル";
       const issuerAuthorIntact =
         !legalDoc || !legalDoc.author || legalDoc.author["@type"] === "Organization";
       return { supervisorVisible, aboutLink, h1Count, contributorOk, issuerAuthorIntact };

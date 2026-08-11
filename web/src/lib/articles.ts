@@ -77,8 +77,8 @@ function loadAll(): Article[] {
     return {
       ...parsed,
       author: {
-        name: "安全AIポータル編集部（専門家監修：未確認）",
-        url: "https://www.anzen-ai-portal.jp/about/quality",
+        name: "安全AIポータル編集部",
+        url: "https://www.anzen-ai-portal.jp/about/project-story",
       },
     };
   });

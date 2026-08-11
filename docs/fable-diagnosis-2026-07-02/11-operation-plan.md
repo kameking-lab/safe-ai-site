@@ -11,7 +11,7 @@
 まず自律運転の点火系を直す。これだけは手動で1回起動:
 
 ```
-cd C:\Users\kanet\20260522\safe-ai-site
+cd <user-profile>\20260522\safe-ai-site
 powershell -ExecutionPolicy Bypass -File .\loop-runner.ps1 -Lane ops -Model claude-opus-4-8 -UntilIso "2026-07-04T23:00:00"
 ```
 

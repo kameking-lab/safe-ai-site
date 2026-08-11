@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { PageContainer } from "@/components/layout";
 import { PageJsonLd } from "@/components/page-json-ld";
+import { WorkSupportSection } from "@/components/work-support-section";
 
 const DESCRIPTION =
   "安全AIポータルの目的、一次資料の扱い、AIの限界、公開基準、修正報告先を説明します。";
@@ -149,6 +150,8 @@ export default function AboutPage() {
           ))}
         </div>
       </section>
+
+      <WorkSupportSection />
 
       <section className="mt-10 rounded-2xl border border-sky-300 bg-sky-50 p-5 text-sky-950 dark:border-sky-700 dark:bg-sky-950/30 dark:text-sky-100">
         <h2 className="text-xl font-bold">誤り・不足を報告する</h2>

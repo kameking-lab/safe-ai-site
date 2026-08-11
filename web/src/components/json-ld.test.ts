@@ -208,6 +208,10 @@ describe("newsArticleSchema", () => {
       name: SITE_NAME,
       logo: { width: 180, height: 180 },
     });
+    expect(s.author).toMatchObject({
+      "@type": "Organization",
+      "@id": ORG_ID,
+    });
   });
 
   it("image/keywords は与えられた時だけ出力する", () => {

@@ -33,7 +33,7 @@
 - 証拠: /audits/hobby-recovery-forecast-2026-05-19・/audits/site-status-2026-05-19・/audits とも **404**。sitemap.xml 内 "audits" 一致 **0件**。robots.txt からも露出なし。
 
 ### 9. E-E-A-T監修者バイライン（Person JSON-LD） — **一部解消**
-- 解消部分: 記事（/articles/freelance-rosai-2024）に `author: {"@type":"Person","name":"安全AIポータル 編集部（労働安全衛生コンサルタント監修）","url":"…/about"}` を確認。/laws 個別ページ（/laws/freelance-rosai）に可視バイライン「労働安全コンサルタント監修（登録番号 260022）」を確認。
+- 解消部分: 記事（/articles/freelance-rosai-2024）に `author: {"@type":"Person","name":"安全AIポータル 編集部（労働安全衛生コンサルタント監修）","url":"…/about"}` を確認。/laws 個別ページ（/laws/freelance-rosai）に可視バイライン「労働安全コンサルタント監修（登録番号 [redacted]）」を確認。
 - 未解消部分: /laws 個別ページの JSON-LD は Organization/WebSite/BreadcrumbList のみで **Person なし**。/whats-new にも Person なし。Person名も実名でなく「編集部（…監修）」の汎用名。
 
 ### 10. AI検索ボット遮断 — **解消（推奨どおりPath A採用）**

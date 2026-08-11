@@ -17,7 +17,7 @@ const IMAGE_EXTENSIONS = new Set([
 ]);
 
 const inputRoot = path.resolve(
-  process.argv[2] ?? "C:\\Users\\kanet\\20260522\\pic",
+  process.argv[2] ?? process.env.VISUAL_KYT_ASSET_ROOT ?? path.join(process.cwd(), "..", "pic"),
 );
 const outputCsv = path.resolve(
   process.argv[3] ??

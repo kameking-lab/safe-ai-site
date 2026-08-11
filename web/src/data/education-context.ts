@@ -64,7 +64,7 @@ export type EducationContext = {
 };
 
 const SUPERVISOR_LABEL =
-  "編集：安全AIポータル編集部。一次資料との照合・外部レビュー状態は各教材に表示";
+  "安全AIポータル編集部｜労働安全コンサルタント監修。個別教材の確認状態は各ページに表示";
 
 export const EDUCATION_CONTEXTS: Record<EducationSlug, EducationContext> = {
   "hoteikyoiku/chemical-ra": {

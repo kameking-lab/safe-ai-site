@@ -66,7 +66,7 @@ REVIEW_SIZE: 50
 **必ず各ペルソナの辛口コメントを最低 1 件は原文で残す**（抜粋要約可だが丸めない）。
 
 ## ワークスペース情報
-- リポジトリ: C:\Users\kanet\OneDrive\ドキュメント\safe-ai-site
+- リポジトリ: <user-profile>\OneDrive\ドキュメント\safe-ai-site
 - ブランチ戦略: 作業ブランチに commit、最後に PR 作成（または main 直 push は運用者指示に従う）
 - ルールファイル: `web/scripts/daily-review.md` を最初に必ず読むこと
 
@@ -173,7 +173,7 @@ PM ロール（ペルソナではない、司会役）として：
 `web/scripts/create-review-issue.sh` があれば利用:
 
 ```bash
-cd C:\Users\kanet\OneDrive\ドキュメント\safe-ai-site
+cd <user-profile>\OneDrive\ドキュメント\safe-ai-site
 bash web/scripts/create-review-issue.sh {{TODAY}} "REVIEW_SIZE=50 / {{GROUP}} / Monthly" web/scripts/daily-review-{{TODAY}}.md
 ```
 

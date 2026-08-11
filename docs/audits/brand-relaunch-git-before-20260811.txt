@@ -1,0 +1,35 @@
+Captured at: 2026-08-11T22:39:42+09:00
+Repository: safe-ai-site
+
+Branch before relaunch work:
+automation/storage-gate/release-audit-evaluator-20260810
+
+HEAD before relaunch work:
+2da7767797d8eacd6b275ac350cfdaf9c0fa591f
+docs(audit): close answer-first production release
+
+Upstream:
+origin/automation/storage-gate/release-audit-evaluator-20260810
+ahead 0 / behind 0
+
+Status before relaunch work:
+# branch.oid 2da7767797d8eacd6b275ac350cfdaf9c0fa591f
+# branch.head automation/storage-gate/release-audit-evaluator-20260810
+# branch.upstream origin/automation/storage-gate/release-audit-evaluator-20260810
+# branch.ab +0 -0
+
+Remotes:
+origin https://github.com/kameking-lab/safe-ai-site.git (fetch)
+origin https://github.com/kameking-lab/safe-ai-site.git (push)
+
+origin/main at capture time:
+0f46b01ffd45e4a5e5572096f116933b2027fbe1
+2026-08-10T10:18:47+09:00
+perf(laws): defer conversation sanitizer
+
+origin/main...HEAD divergence:
+origin/main unique commits: 1
+HEAD unique commits: 2
+
+The pre-existing branch and its commits were preserved. No reset, checkout restore,
+or destructive cleanup was performed.

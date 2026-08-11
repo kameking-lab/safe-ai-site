@@ -1,4 +1,4 @@
-﻿meta:
+meta:
   id: necchu
   title: 熱中症予防 労働衛生教育
   subtitle: WBGT・現場運用対応コース
@@ -6,7 +6,7 @@
   english_subtitle: Workplace Occupational Health Education
   legal_basis: "安衛則第612条の2（令和7年6月1日施行）／基発0318第1号「職場における熱中症対策のためのガイドライン」準拠"
   duration: 約1.5時間
-  supervisor: 安全AIポータル
+  supervisor: 安全AIポータル編集部｜労働安全コンサルタント監修
   contact: "https://anzen-ai-portal.jp/contact"
   output: necchu.pptx
 
@@ -20,7 +20,7 @@ slides:
     title: 熱中症予防 労働衛生教育
     subtitle: WBGT・現場運用対応コース
     legal: 安衛則第612条の2・基発0318第1号準拠 ／ 約1.5時間
-    supervisor: 安全AIポータル
+    supervisor: 安全AIポータル編集部｜労働安全コンサルタント監修
 
   # =========================================================
   # Slide 2 — 目次
@@ -224,4 +224,4 @@ slides:
         body: 教育・健診・対応記録を3年保存し毎年見直し
     footer_label: お問い合わせ
     footer_value: anzen-ai-portal.jp/contact
-    footer_supervisor: 安全AIポータル
+    footer_supervisor: 安全AIポータル編集部｜労働安全コンサルタント監修

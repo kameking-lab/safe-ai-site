@@ -166,10 +166,10 @@
 - 二次利用不可
 - 本プロジェクト方針: リンクのみ。 本文転載・要約禁止
 
-### 3.5 「個人運営研究プロジェクト」体裁との整合(PR #182 P0)
+### 3.5 「[redacted]研究プロジェクト」体裁との整合(PR #182 P0)
 
 PR #182 で確定した方針(docs/brand-consistency-audit-2026-05-17.md):
-- 「専門家チーム」表現 → 「労働安全衛生コンサルタント(登録番号260022)」に変更済
+- 「専門家チーム」表現 → 「労働安全衛生コンサルタント(登録番号[redacted])」に変更済
 - 「無料相談」 CTA → 「ご意見・改善提案を送る」に変更済
 - 「完全対応」「完全網羅」表現 → 「対応」「主要」に軽減
 - サービス体裁 → 研究プロジェクト体裁
@@ -217,7 +217,7 @@ PR #182 で確定した方針(docs/brand-consistency-audit-2026-05-17.md):
 - docs/data-expansion-roadmap-2026-05-13.md: Phase 3 で D.3 を扱う計画
 - docs/rag-deferred-improvements-2026-05-13.md: トークナイザー強化・漢数字正規化等。 本研究の Phase 1 と Phase 2 で部分的に消化
 - docs/rag-improvements-2026-05-17.md, docs/rag-baseline-2026-05-17.md: 直近の RAG 改善履歴
-- docs/brand-consistency-audit-2026-05-17.md(PR #182): 個人運営研究プロジェクト体裁の方針
+- docs/brand-consistency-audit-2026-05-17.md(PR #182): [redacted]研究プロジェクト体裁の方針
 
 ## 6. 「33法令」「50法令」の表記整理
 

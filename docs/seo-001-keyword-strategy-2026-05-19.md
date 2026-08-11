@@ -46,7 +46,7 @@ Per-keyword decision:
 
 Each landing emits:
 
-- `Person` author with `hasOccupation` (労働安全衛生コンサルタント・登録番号260022)
+- `Person` author with `hasOccupation` (労働安全衛生コンサルタント・登録番号[redacted])
   and `knowsAbout` of the relevant safety domains.
 - Header CTA linking to `/about` (運営者プロフィール).
 - Visible `公開日 / 最終更新日` block plus citation list of 一次資料 (e-Gov,

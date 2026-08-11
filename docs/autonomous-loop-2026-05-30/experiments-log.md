@@ -5,7 +5,7 @@
 ---
 
 ## 事前調査メモ（重要）
-- PR#311 で「命名統一(安全衛生日誌→安全工程打合せ書)・信頼性(footer登録番号260022)・SEO」は**実装済**。残存「安全衛生日誌」はmock/FAQ/internalのみ＝再対応不要。
+- PR#311 で「命名統一(安全衛生日誌→安全工程打合せ書)・信頼性(footer登録番号[redacted])・SEO」は**実装済**。残存「安全衛生日誌」はmock/FAQ/internalのみ＝再対応不要。
 - 既存ペルソナ入口は `/for/construction` のみ（約530行・法令引用/KYプリセット/統計の実データ充実＝品質基準）。
 - ナビは2系統: ①PCサイドバー(app-shell.tsx, 6カテゴリ+α 約30項目) ②FlagshipNav(flagship-nav.tsx, 11項目横並び+ホバーPopover)。
 - ベースラインテスト: 941 pass / 116 files（5/30 05:19実測）。
@@ -21,7 +21,7 @@
   - lint **0 errors**（15 warningは全て既存・本変更由来0）/ tsc **0 errors**
   - test **955 pass / 119 files**（baseline 941 + 新規14、全pass）
   - build **成功**（3新規ルートを生成）
-  - ローカル本番サーバ(`next start`)で実機確認: `/` `/for/solo` `/for/manager` `/for/consultant` `/for/construction` 全て **HTTP 200**。トップにペルソナバンド4枚＋各ページの見出し・規模別義務表(常時50人以上×10箇所)・主要内部リンク・登録番号260022 を実HTML上で確認。
+  - ローカル本番サーバ(`next start`)で実機確認: `/` `/for/solo` `/for/manager` `/for/consultant` `/for/construction` 全て **HTTP 200**。トップにペルソナバンド4枚＋各ページの見出し・規模別義務表(常時50人以上×10箇所)・主要内部リンク・登録番号[redacted] を実HTML上で確認。
   - Vercel preview: deploy **SUCCESS**（プレビューは保護で401・curl不可のためローカル本番で代替検証）
   - CI e2e/smoke: **両方 SUCCESS**（既存導線の回帰なしを確認）/ Vercel deploy SUCCESS
 - 採否: **採用（squash merge PR #312 → main `c3e7cbe0`）**。理由: 初見の自己同定導線を1→4に拡張する mission #1 の高インパクト改善。3ページはthin templateでなく実データ・実ツールへ誘導、捏造なし、既存非破壊(e2e/smoke green)、/for/construction無改変。「やった気」でなく実務レベルへ前進。
@@ -222,7 +222,7 @@
 | - | accident-news/print | 是正後OK | タイトル/作成日/出典/免責 印刷復活を確認 |
 | - | KY /ky/paper A4 | **検証済OK** | chrome無・はみ出し無・画面フォーム非表示・確認印枠ありの整ったA4様式 |
 | - | 打合せ書 /safety-diary A4(横) | **検証済OK** | chrome無・はみ出し無・画面フォーム非表示 |
-| - | features/print | **検証済OK** | chrome無・登録番号260022監修明記 |
+| - | features/print | **検証済OK** | chrome無・登録番号[redacted]監修明記 |
 | - | RSS /feed/{news,law-revisions,accident-reports,serious-cases}.xml | **検証済OK** | XML宣言/rss2.0/channel/item有・生アンパサンド無・本文転載過多無(最大273字要約)・content-type application/rss+xml |
 
 第1巡 計: 実崩れ3件発見・全是正(うち2件はサイト全体に波及する高インパクト)、5系統 検証済OK。

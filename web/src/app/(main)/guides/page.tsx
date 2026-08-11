@@ -372,7 +372,7 @@ export default async function GuidesHubPage({ searchParams }: GuidesPageProps = 
               読者の検索意図に最短で答えるため、Tool（実行画面）への導線を上下二箇所以上に置く。
             </li>
             <li>
-              「個人運営の研究プロジェクト」という体裁を保ち、行政・公的機関を装う表現を行わない。
+              「編集部が運用する研究プロジェクト」という体裁を保ち、行政・公的機関を装う表現を行わない。
             </li>
           </ul>
         </Section>

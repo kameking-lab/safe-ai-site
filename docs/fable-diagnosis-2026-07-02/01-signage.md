@@ -3,7 +3,7 @@
 - 診断日時: 2026-07-02 18:57〜19:05 JST（本番 https://www.anzen-ai-portal.jp/ を Playwright chromium 1920x1080 で実測）
 - 対象: `/signage`（休憩所ダッシュボード）、`/signage/map`、`/signage/display`、`/ky/morning`
 - 証拠一式:
-  - スクショ: `C:\Users\kanet\AppData\Local\Temp\claude\C--Users-kanet-20260522-safe-ai-site\f1b88d76-b5a7-4400-9def-3e3d9e4135bc\scratchpad\shots\signage\`（`signage-full.png` / `signage-viewport.png` / `signage-after-3min.png` / `signage-after-6min.png` / `signage-map-viewport.png` / `signage-display-viewport.png` / `ky-morning-viewport.png`）
+  - スクショ: `<user-profile>\AppData\Local\Temp\claude\<workspace-path>-20260522-safe-ai-site\f1b88d76-b5a7-4400-9def-3e3d9e4135bc\scratchpad\shots\signage\`（`signage-full.png` / `signage-viewport.png` / `signage-after-3min.png` / `signage-after-6min.png` / `signage-map-viewport.png` / `signage-display-viewport.png` / `ky-morning-viewport.png`）
   - 実測JSON（フォントサイズ分布・6分間DOM観察・API鮮度）: 同scratchpad `signage-probe-result.json`
   - 診断スクリプト: 同scratchpad `signage-probe.js`
 - 注意: コード変更は一切していない（診断のみ）

@@ -10,9 +10,9 @@ import {
 } from "@/lib/seo-metadata";
 import { ProjectStoryContent } from "./project-story-content";
 
-const TITLE = "このプロジェクトをつくった理由";
+const TITLE = "プロジェクトについて";
 const DESCRIPTION =
-  "工事現場での事故を原点に、安全AIポータルを個人で開発・無償公開している理由と、現場へ押し付けず小さく改善する姿勢を伝えます。";
+  "安全AIポータルの目的、編集体制、品質確認、プライバシー方針と、AIを最終判断の代わりにしない運用原則を説明します。";
 const PATH = "/about/project-story";
 const URL = `${SITE_URL}${PATH}`;
 const PUBLISHED_AT = "2026-08-01";
@@ -51,7 +51,7 @@ export default function ProjectStoryPage() {
             "@id": URL,
             url: URL,
             name: TITLE,
-            headline: "現場の時間を、安全と本質的な仕事へ。",
+            headline: "労働安全と生成AIを、根拠を確認できる形へ。",
             description: DESCRIPTION,
             inLanguage: "ja",
             datePublished: PUBLISHED_AT,

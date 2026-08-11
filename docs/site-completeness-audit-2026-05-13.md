@@ -56,10 +56,10 @@ only legacy marker is a default Twitter hashtag `ANZENAI` in
 `web/src/components/share-buttons.tsx:38`. Site name is consistently
 "安全AIポータル" in titles, OG, and footer.
 
-Operator-identity rule per task says only registration number 260022 should
+Operator-identity rule per task says only registration number [redacted] should
 be exposed. `/about` currently exposes the profession plus qualifications
 (`1級土木施工管理技士`, `監理技術者`) and an experience line referencing
-"スーパーゼネコンでの施工管理". The number 260022 is NOT rendered on /about
+"スーパーゼネコンでの施工管理". The number [redacted] is NOT rendered on /about
 (only present in `web/scripts/daily-review-*.md`). This is borderline —
 the qualifications listed are common, but the combination plus
 super-general-contractor reference is more specific than the rule allows.
@@ -185,9 +185,9 @@ a real browser.
    for the parallel investigation Dispatch.
 4. **Operator-identity disclosure on `/about` exceeds rule** — exposes
    qualifications + super-general-contractor experience. The required
-   marker (registration number 260022) is *not* shown on /about.
+   marker (registration number [redacted]) is *not* shown on /about.
    Owner judgment required: tighten /about to "労働安全コンサルタント
-   (登録番号 260022)" only, or keep current narrative. Not auto-fixed.
+   (登録番号 [redacted])" only, or keep current narrative. Not auto-fixed.
 
 ### P2
 5. **Legacy Twitter hashtag `ANZENAI`** — default in
@@ -257,7 +257,7 @@ touched.
 - **`/about` operator-identity disclosure (P1, owner decision)** —
   current `/about` still exposes qualifications + super-general-contractor
   experience line. Per task constraints the only permitted operator
-  marker is registration number 260022, which is not currently rendered.
+  marker is registration number [redacted], which is not currently rendered.
   This is a judgment call for the owner; not auto-fixed.
 - **Q6 chatbot RAG miss (フルハーネス型墜落制止用器具) (P1)** — 0 sources,
   low confidence. Lives in `rag-search.ts` which is out of scope per

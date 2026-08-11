@@ -10,24 +10,23 @@ const STORY_URL = `https://www.anzen-ai-portal.jp${STORY_PATH}`;
 const REMOVED_PUBLIC_TERMS = [
   "日商簿記2級",
   "簿記",
-  "現場別気象警報・熱中症通知システム",
-  "安全eラーニングシステム",
-  "全社表彰",
-  "年間表彰",
+  "学生時代",
+  "文系",
+  "約10年",
   "現在の職場",
-  "賞金額",
+  "勤務先",
   "worksFor",
 ] as const;
 
 describe("/about/project-story", () => {
   it("uses a self canonical, concise metadata, and sitemap entry", () => {
-    expect(metadata.title).toBe("このプロジェクトをつくった理由");
-    expect(metadata.description).toContain("工事現場での事故を原点");
+    expect(metadata.title).toBe("プロジェクトについて");
+    expect(metadata.description).toContain("編集体制");
     expect(metadata.alternates?.canonical).toBe(STORY_URL);
     expect(sitemap().some((entry) => entry.url === STORY_URL)).toBe(true);
   });
 
-  it("renders one H1, five story blocks, and a 900–1400 character story", () => {
+  it("renders one H1 and five policy blocks", () => {
     const { container } = render(<ProjectStoryPage />);
     const article = container.querySelector("[data-project-story]");
     expect(article).not.toBeNull();
@@ -36,30 +35,25 @@ describe("/about/project-story", () => {
     expect(
       screen.getByRole("heading", {
         level: 1,
-        name: "現場の時間を、安全と本質的な仕事へ。",
+        name: "労働安全と生成AIを、根拠を確認できる形へ。",
       }),
     ).toBeTruthy();
     const textLength = (article?.textContent ?? "").replace(/\s+/gu, "").length;
-    expect(textLength).toBeGreaterThanOrEqual(900);
+    expect(textLength).toBeGreaterThanOrEqual(700);
     expect(textLength).toBeLessThanOrEqual(1400);
   });
 
-  it("keeps the origin, field experience, qualifications, and improvement stance", () => {
+  it("states the editorial identity, supervision boundary, privacy, and improvement stance", () => {
     const { container } = render(<ProjectStoryPage />);
     const text = container.textContent ?? "";
-    expect(text).toContain("学生時代、工事現場で死亡事故を目の当たりにしました");
-    expect(text).toContain("文系から土木施工管理の道へ");
-    expect(text).toContain("建設・土木分野で約10年");
-    expect(text).toContain("一級土木施工管理技士");
-    expect(text).toContain("労働安全コンサルタント");
-    expect(text).toContain("安全、施工計画、品質向上");
-    expect(text).toContain("AIとコーディングを学びました");
-    expect(text).toContain("まず話を聞き");
-    expect(text).toContain("小さく試し");
-    expect(text).not.toMatch(/衝撃的|凄惨|生々しい/u);
+    expect(text).toContain("安全AIポータル編集部");
+    expect(text).toContain("労働安全コンサルタント監修");
+    expect(text).toContain("個別コンテンツの確認状況");
+    expect(text).toContain("本人特定につながる情報を掲載しません");
+    expect(text).toContain("AI回答、計算結果、教材、帳票例は最終判断を代替しません");
   });
 
-  it("removes bookkeeping, workplace systems, awards, and employer promotion", () => {
+  it("removes personal history and employment clues", () => {
     const { container } = render(<ProjectStoryPage />);
     const publicOutput = container.innerHTML;
     for (const term of REMOVED_PUBLIC_TERMS) {
@@ -67,15 +61,13 @@ describe("/about/project-story", () => {
     }
   });
 
-  it("states individual funding, free publication, and independence from employers", () => {
+  it("does not publish a personal operation or employment narrative", () => {
     const { container } = render(<ProjectStoryPage />);
     const text = container.textContent ?? "";
-    expect(text).toContain("個人が開発・運営し、無償公開しているプロジェクト");
-    expect(text).toContain("運営費も個人で負担");
-    expect(text).toContain(
-      "現在および過去の勤務先、取引先、その他の組織が運営、監修、推奨するものではありません",
-    );
-    expect(text).toContain("最終判断は、公式情報、専門家、各組織の手順");
+    expect(text).not.toContain(["個人", "運営"].join(""));
+    expect(text).not.toContain(["個人", "開発"].join(""));
+    expect(text).not.toContain("現在および過去の勤務先");
+    expect(text).toContain("最終判断を代替しません");
   });
 
   it("offers the four requested next actions and links back to the canonical LP", () => {
@@ -84,7 +76,7 @@ describe("/about/project-story", () => {
       ["安全AIポータルを使う", "/"],
       ["できることを見る", "/safety-ai"],
       ["品質と出典を見る", "/about/quality"],
-      ["自社向けの相談内容を整理する", "/contact/automation-email"],
+      ["業務改善・資料制作の相談範囲を見る", "/about#work-support"],
     ] as const) {
       expect(screen.getByRole("link", { name }).getAttribute("href")).toBe(href);
     }
