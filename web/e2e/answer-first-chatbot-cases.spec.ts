@@ -137,7 +137,9 @@ async function writeBrowserEvidence(): Promise<void> {
 async function gotoChatbot(page: Page) {
   const response = await page.goto("/chatbot", { waitUntil: "domcontentloaded" });
   expect(response?.status()).toBeLessThan(400);
-  await expect(page.locator("[data-chatbot-composer] textarea")).toBeVisible();
+  const input = page.locator("[data-chatbot-composer] textarea");
+  await expect(input).toHaveCount(1);
+  await expect(input).toBeVisible();
 }
 
 function parseSseMeta(raw: string): BrowserChatbotPayload {
