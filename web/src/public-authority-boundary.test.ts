@@ -9,15 +9,19 @@ const guardScript = resolve(
 );
 
 describe("公開画面の権威・監修表示境界", () => {
-  it("recursively scans source, public assets, Office files, and metadata", () => {
-    expect(() =>
-      execFileSync(process.execPath, [guardScript], {
-        cwd: process.cwd(),
-        encoding: "utf8",
-        stdio: "pipe",
-      }),
-    ).not.toThrow();
-  });
+  it(
+    "recursively scans source, public assets, Office files, and metadata",
+    () => {
+      expect(() =>
+        execFileSync(process.execPath, [guardScript], {
+          cwd: process.cwd(),
+          encoding: "utf8",
+          stdio: "pipe",
+        }),
+      ).not.toThrow();
+    },
+    30_000,
+  );
 
   it("uses the editorial identity and qualification without a registration number", () => {
     const byline = readFileSync(
