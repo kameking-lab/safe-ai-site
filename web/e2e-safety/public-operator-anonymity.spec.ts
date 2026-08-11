@@ -47,12 +47,18 @@ test("project policy stays anonymous and readable without horizontal overflow", 
   }
 });
 
-test("paid support stays separate and unpublished marketplace links stay hidden", async ({ page }) => {
+test("paid support stays separate and confirmed marketplace links are published safely", async ({ page }) => {
   const response = await page.goto("/about#work-support", { waitUntil: "networkidle" });
   expect(response?.ok()).toBe(true);
 
   const section = page.locator("#work-support");
   await expect(section).toBeVisible();
-  await expect(section.locator("li")).toHaveCount(5);
-  await expect(section.locator('a[href*="coconala.com"]')).toHaveCount(0);
+  await expect(section.locator("[data-work-support-category]")).toHaveCount(5);
+  const marketplaceLinks = section.locator("[data-work-support-listing]");
+  await expect(marketplaceLinks).toHaveCount(9);
+  for (const link of await marketplaceLinks.all()) {
+    await expect(link).toHaveAttribute("href", /^https:\/\/coconala\.com\/services\/\d+$/u);
+    await expect(link).toHaveAttribute("target", "_blank");
+    await expect(link).toHaveAttribute("rel", "noopener noreferrer");
+  }
 });
