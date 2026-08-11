@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """マスコット画像 資産キュー式ブラウザ生成ランナー（ChatGPT / Gemini）。
 
-前例: C:\\Users\\kanet\\20260522\\pic の実証済みブラウザ自動化
+前例: 環境変数 IMAGEGEN_AUTOMATION_ROOT で指定するブラウザ自動化
 (CDP常駐Chrome接続・自タブのみ操作・ポーリング待機・多段ダウンロード・
  上限/拒否検知・既存ファイルからの再開) を土台に、
 参照画像添付と ChatGPT ドライバを追加した自己完結版。
@@ -491,7 +491,7 @@ def main():
 
     os.makedirs(OUTROOT, exist_ok=True)
     if not cdp_up():
-        print("CDP不通。C:\\Users\\kanet\\20260522\\pic\\scripts\\start_chrome_cdp.bat の実行が必要（Chromeは起動しません）。")
+        print("CDP不通。IMAGEGEN_AUTOMATION_ROOT 配下のChrome起動スクリプトを実行してください（Chromeは起動しません）。")
         sys.exit(3)
 
     queue = load_queue()

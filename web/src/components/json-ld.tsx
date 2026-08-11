@@ -171,8 +171,6 @@ export function newsArticleSchema(input: {
     url,
     datePublished,
     dateModified,
-    authorName,
-    authorUrl,
     image,
     inLanguage = "ja",
     keywords,
@@ -190,11 +188,7 @@ export function newsArticleSchema(input: {
     ...(image ? { image: [image] } : {}),
     ...(keywords && keywords.length ? { keywords: keywords.join(", ") } : {}),
     ...(articleSection ? { articleSection } : {}),
-    author: {
-      "@type": "Person",
-      name: authorName,
-      ...(authorUrl ? { url: authorUrl } : {}),
-    },
+    author: PUBLISHER_REF,
     publisher: {
       "@type": "Organization",
       "@id": ORG_ID,

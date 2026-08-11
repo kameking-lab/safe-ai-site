@@ -262,7 +262,7 @@ const AUDIT_PAGES: AuditPage[] = [
   {
     id: "brand-consistency-2026-05-17",
     path: "/audits/brand-consistency",
-    label: "ブランド整合性監査 (個人運営研究プロジェクト体裁)",
+    label: "ブランド整合性監査（編集部運営の研究プロジェクト体裁）",
     httpStatus: 200,
     findingsOpen: 0,
     note: "PR #222 で A-005 follow-up 全件解消",

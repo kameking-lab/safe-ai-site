@@ -4,7 +4,7 @@ import { PageContainer } from "@/components/layout";
 export const metadata: Metadata = {
   title: "ブランド整合性監査 2026-05-17",
   description:
-    "「個人運営研究プロジェクト・ボランティア運営」体裁との整合性監査。PR #187 激辛監査 A-005 派生フォローアップ。",
+    "「安全AIポータル編集部が運用する研究プロジェクト」体裁との整合性監査。過去監査から匿名化方針を更新。",
   robots: { index: false, follow: false, nocache: true },
   alternates: { canonical: null as unknown as string },
 };
@@ -33,28 +33,28 @@ const FIXES: Fix[] = [
     category: "B2-1",
     target: "data/education-context.ts SUPERVISOR_LABEL",
     before: "コンテンツは 安全AIポータル 専門家チームによる設計です",
-    after: "労働安全衛生コンサルタント（登録番号260022）監修",
+    after: "安全AIポータル編集部｜労働安全コンサルタント監修",
   },
   {
     id: "F2",
     category: "B2-1",
     target: "教育詳細12ページ footer / articles/page.tsx / chatbot/ChatbotBody.tsx",
     before: "安全AIポータル 専門家チームによる設計",
-    after: "労働安全衛生コンサルタント（登録番号260022）監修",
+    after: "安全AIポータル編集部｜労働安全コンサルタント監修",
   },
   {
     id: "F3",
     category: "B2-1",
     target: "features/print/print-features-client.tsx / leaflet/LeafletPrintView.tsx",
     before: "監修: 安全AIポータル 専門家チーム",
-    after: "監修: 労働安全衛生コンサルタント（登録番号260022）",
+    after: "安全AIポータル編集部｜労働安全コンサルタント監修",
   },
   {
     id: "F4",
     category: "B2-1",
     target: "data/features-catalog.ts (stats entry)",
     before: "本サイトは登録安全AIポータル 専門家チームが監修",
-    after: "本サイトは労働安全衛生コンサルタント（登録番号260022）が個人で監修",
+    after: "本サイトは安全AIポータル編集部が編集し、労働安全コンサルタントが監修",
   },
   {
     id: "F5",
@@ -68,21 +68,21 @@ const FIXES: Fix[] = [
     category: "B2-1",
     target: "components/home-value-hero.tsx",
     before: "専門家チームのもと、すべての機能を無料で公開",
-    after: "労働安全衛生コンサルタント（登録番号260022）監修のもと、すべての機能を無料で公開",
+    after: "労働安全コンサルタント監修のもと、無料機能を公開",
   },
   {
     id: "F7",
     category: "B2-1",
     target: "about/page.tsx 運営チームセクション",
     before: "安全AIポータル 運営チーム / 労働安全衛生の専門家チームが運営",
-    after: "運営者プロフィール / 労働安全衛生コンサルタント（登録番号260022）が個人で運営",
+    after: "プロジェクトについて / 安全AIポータル編集部が運用",
   },
   {
     id: "F8",
     category: "B2-1",
     target: "about/page.tsx 特商法表記の運営責任者",
     before: "安全AIポータル 運営チーム（氏名は請求により開示）",
-    after: "個人事業主・労働安全衛生コンサルタント（登録番号260022）（氏名は請求により開示）",
+    after: "安全AIポータル編集部（法的表示が必要な場合は別途確認）",
   },
   {
     id: "F9",
@@ -173,7 +173,7 @@ const FIXES: Fix[] = [
     category: "B2-5",
     target: "chatbot/ChatbotBody.tsx 英語ガイダンス",
     before: "Content designed by 安全AIポータル expert team",
-    after: "Supervised by an Occupational Safety & Health Consultant (registration no. 260022)",
+    after: "Edited by the Safety AI Portal Editorial Team; supervised by an Occupational Safety Consultant",
   },
 ];
 
@@ -187,7 +187,7 @@ type ArchiveItem = {
 const ARCHIVE_CANDIDATES: ArchiveItem[] = [
   { page: "/api-docs", status: "resolved", rationale: "実APIなし、ロードマップのみ。法人化・API提供開始時に再公開。", followUpPR: "F-002 解決済（noindex / sitemap除外 / robots Disallow）" },
   { page: "/handover", status: "resolved", rationale: "公開リポジトリ上でゲートキーのデフォルト値がソースに残る情報露出リスクのため、ルート自体を撤去（内容は docs/session-handover-2026-04-21.md へ）。", followUpPR: "S11 解決済" },
-  { page: "/dpa", status: "resolved", rationale: "個人運営でのDPA提供は法的責任曖昧。法人化後に再公開予定。", followUpPR: "G-002 解決済 (PR #200)" },
+  { page: "/dpa", status: "resolved", rationale: "運営主体と責任範囲が未確定のため非公開。法的確認後に再公開予定。", followUpPR: "G-002 解決済 (PR #200)" },
   { page: "/lms", status: "needs-redesign", rationale: "法人化後β提供予定。ウェイティングリストのみ。", followUpPR: "F-001 解決済（noindex化）" },
   { page: "/pricing", status: "needs-redesign", rationale: "M6期に課金事業再開時に復活。PAID_MODE 無効時は「準備中」表示。", followUpPR: "F-004 解決済" },
   { page: "/insurance", status: "ongoing", rationale: "短期: 個人事業者向けPL保険検討。中期: 法人化後にIT賠償責任保険取得。", followUpPR: "G-003 解決済 (PR #200)" },
@@ -209,8 +209,8 @@ export default function BrandConsistencyAuditPage() {
             ブランド整合性監査 2026-05-17
           </h1>
           <p className="mt-3 text-sm leading-6 text-slate-700">
-            「個人運営研究プロジェクト・ボランティア運営」体裁との整合性監査。
-            PR #187 激辛監査 Finding A-005「個人運営の研究プロジェクト表記と機能(LMS β/Stripe/DPA/API-docs)の体裁不整合」の派生フォローアップ。
+            安全AIポータル編集部が運用する研究プロジェクトとしての整合性監査。
+            過去監査 Finding A-005「研究プロジェクト表記と機能体裁の不整合」の派生フォローアップ。
           </p>
           <dl className="mt-4 grid grid-cols-2 gap-3 text-xs sm:grid-cols-4">
             <div className="rounded bg-white p-3">
@@ -239,8 +239,8 @@ export default function BrandConsistencyAuditPage() {
           <h2 className="text-lg font-bold text-slate-900">監査スコープ</h2>
           <p className="mt-2 text-sm leading-6 text-slate-700">{META.scope}</p>
           <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-slate-700">
-            <li>ブランド方針: 個人運営の研究・実証プロジェクト。ボランティア運営。</li>
-            <li>運営者匿名化: 労働安全衛生コンサルタント登録番号260022のみ明示。</li>
+            <li>ブランド方針: 安全AIポータル編集部が運用する研究・実証プロジェクト。</li>
+            <li>公開方針: 氏名・資格番号・勤務先・個人連絡先を非公開。</li>
             <li>除外: PAID_MODE 無効時に表示されないゲート配下のコード（ContactForm / PricingContent / ja.json pricing.* 等）は本PRでは保留。</li>
           </ul>
         </section>

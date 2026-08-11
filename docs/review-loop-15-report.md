@@ -26,7 +26,7 @@ C. **Footer "お気軽にご相談ください" のトーン** → ブランド�
 | `mental-health/page.tsx` | 同上（canonical: "/mental-health"、twitter + ogImageUrl 連動）|
 
 ## 確認事項
-- 監修者表記「労働安全コンサルタント（登録番号260022・土木区分）」が site-stats / about / OGP で完全に一致
+- 監修者表記「労働安全コンサルタント（登録番号[redacted]・土木区分）」が site-stats / about / OGP で完全に一致
 - 医師法的免責は mental-health で「医師ではないため診断不可」記載済（Loop 6）
 - 景表法NG語句（業界初／圧倒的／必ず／100%）は Loop 6 で削除済
 - 特商法 11 項目（事業者・連絡先・対価・支払方法・引渡時期・返品・適格請求書番号・動作環境）は about で完全網羅（Loop 6 で補強）

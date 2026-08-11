@@ -55,18 +55,20 @@ test.describe("simple LP, story, and mail contact", () => {
     await expectNoHorizontalOverflow(page);
   });
 
-  test("story stays concise, independent, and free of removed career claims", async ({ page }) => {
+  test("story stays neutral and free of removed career claims", async ({ page }) => {
     await page.setViewportSize({ width: 320, height: 900 });
     await page.goto("/about/project-story", { waitUntil: "domcontentloaded" });
     await expect(page.locator("[data-story-block]")).toHaveCount(5);
-    await expect(page.getByText("一級土木施工管理技士")).toBeVisible();
-    await expect(page.getByText("労働安全コンサルタント")).toBeVisible();
+    await expect(page.getByText(/安全AIポータル編集部/).first()).toBeVisible();
+    await expect(page.getByText(/労働安全コンサルタント監修/).first()).toBeVisible();
     const body = await page.locator("body").innerText();
     for (const term of [
+      "一級土木施工管理技士",
       "日商簿記2級",
       "現場別気象警報・熱中症通知システム",
       "安全eラーニングシステム",
       "年間表彰",
+      "なぜ個人で",
     ]) {
       expect(body).not.toContain(term);
     }

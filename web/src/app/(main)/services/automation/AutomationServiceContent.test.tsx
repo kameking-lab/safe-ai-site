@@ -57,7 +57,7 @@ describe("AutomationServiceContent", () => {
     render(<AutomationServiceContent availability={MAIL_AVAILABLE} />);
     expect(
       screen
-        .getByRole("link", { name: "開発方針と背景を見る" })
+        .getByRole("link", { name: "プロジェクトと編集方針を見る" })
         .getAttribute("href"),
     ).toBe("/about/project-story");
   });
@@ -140,7 +140,11 @@ describe("AutomationServiceContent", () => {
       <AutomationServiceContent availability={AVAILABLE} />,
     );
     const text = container.textContent ?? "";
-    expect(text).not.toMatch(/kenshi\.ycc|kaneta-yoshita|@outlook|@gmail/i);
+    const privateRomanizedName = ["ka", "neta", "-", "yoshita"].join("");
+    expect(text.toLowerCase()).not.toContain(privateRomanizedName);
+    const privateEmailLocal = ["ken", "shi", ".y", "cc"].join("");
+    expect(text.toLowerCase()).not.toContain(privateEmailLocal);
+    expect(text).not.toMatch(/@outlook|@gmail/i);
     expect(text).not.toMatch(/業界最安|最安保証|満足度\d|導入実績\d|必ず削減/);
     expect(text).toContain("実在顧客の実績ではなく");
   });

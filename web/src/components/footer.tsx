@@ -12,6 +12,7 @@ const TRUST_LINKS = [
   { href: "/about/data-sources", label: "データの出典" },
   { href: "/about/quality", label: "情報品質" },
   { href: "/about", label: "サイトについて" },
+  { href: "/about/project-story", label: "プロジェクトについて" },
   { href: "/contact", label: "お問い合わせ" },
   { href: "/privacy", label: "プライバシー" },
   { href: "/terms", label: "利用規約" },

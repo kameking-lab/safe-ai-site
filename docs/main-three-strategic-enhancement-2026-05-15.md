@@ -178,7 +178,7 @@ The five perspectives are:
 - **P2. Data exclusivity** — what user-contributed or accumulating dataset becomes impossible to copy?
 - **P3. Habit formation** — what shifts cadence from annual / one-shot to weekly / daily?
 - **P4. Community & network effects** — what makes each new user increase the value for all existing users?
-- **P5. Expert authority** — what is anchored to the consultant's certification (労働安全コンサルタント 第260022号) or to named professional sign-off that competitors cannot copy?
+- **P5. Expert authority** — what is anchored to the consultant's certification (労働安全コンサルタント 第[redacted]号) or to named professional sign-off that competitors cannot copy?
 
 ### 4.1 `/chatbot` — five perspectives
 
@@ -200,7 +200,7 @@ The five perspectives are:
 - **C1-N2. "Was this useful?" with expert override.** Thumbs-up/down feeds into the retrieval ranking; the consultant has a moderation override. — Risk: low.
 
 #### P5. Expert authority
-- **C1-A1. Named consultant byline on flagship answers.** Top-N high-frequency questions get a "Reviewed by 労働安全コンサルタント 第260022号" stamp. — Differentiation strength: very high; the JISHA chatbot, by virtue of being a generic institutional chatbot, cannot put a single named consultant's reputation on the line. This is impossible to replicate without an equivalent consultant.
+- **C1-A1. Named consultant byline on flagship answers.** Top-N high-frequency questions get a "Reviewed by 労働安全コンサルタント 第[redacted]号" stamp. — Differentiation strength: very high; the JISHA chatbot, by virtue of being a generic institutional chatbot, cannot put a single named consultant's reputation on the line. This is impossible to replicate without an equivalent consultant.
 - **C1-A2. Disclaimer hierarchy.** Three tiers: (i) AI auto-generated, (ii) AI + consultant-reviewed, (iii) consultant-authored. Each tier gets a different visual tag and a different liability statement.
 
 ### 4.2 `/accidents-reports` — five perspectives
@@ -225,7 +225,7 @@ The five perspectives are:
 
 #### P5. Expert authority
 - **C2-A1. Named consultant commentary on the top 10 cases per industry.** A short paragraph by the consultant per top case, explaining (i) what's distinctive, (ii) what's typically missed in 再発防止. — Differentiation strength: very high; institutional PDFs from 中災防 / 建災防 don't bind to a single named expert at the case level.
-- **C2-A2. "Independent review" badge per report.** Each per-industry report carries a "reviewed and signed off by 労働安全コンサルタント 第260022号 on YYYY-MM-DD" stamp, refreshed on dataset update. — Differentiation strength: very high; competitors must staff a comparable consultant network to match this.
+- **C2-A2. "Independent review" badge per report.** Each per-industry report carries a "reviewed and signed off by 労働安全コンサルタント 第[redacted]号 on YYYY-MM-DD" stamp, refreshed on dataset update. — Differentiation strength: very high; competitors must staff a comparable consultant network to match this.
 
 ### 4.3 `/strategy/plan-generator` — five perspectives
 
@@ -249,7 +249,7 @@ The five perspectives are:
 
 #### P5. Expert authority
 - **C3-A1. Optional paid consultant review.** Owner reviews the generated draft for a fee (e.g. ¥30k–¥80k) before the committee meeting. Lead-gen direct from product → consulting practice. — Differentiation strength: very high; this is the consulting business model embedded in the SaaS surface.
-- **C3-A2. Per-template consultant byline.** Each industry/scale template footnote lists "designed and maintained by 労働安全コンサルタント 第260022号" and a version+date. Refresh quarterly. — Differentiation strength: very high.
+- **C3-A2. Per-template consultant byline.** Each industry/scale template footnote lists "designed and maintained by 労働安全コンサルタント 第[redacted]号" and a version+date. Refresh quarterly. — Differentiation strength: very high.
 
 ---
 

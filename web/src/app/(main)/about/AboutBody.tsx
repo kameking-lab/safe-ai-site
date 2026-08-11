@@ -19,12 +19,12 @@ export function AboutResearchDeclaration() {
       <h2 id="research-project-heading" className="mt-2 text-base font-bold leading-snug text-slate-900 sm:text-lg">
         {isEn
           ? "Anzen AI Portal is an independent project researching and demonstrating AI/DX in occupational safety and health."
-          : "安全AIポータル は、労働安全衛生分野における AI・DX 活用の研究・実証を目的とした個人プロジェクトです。"}
+          : "安全AIポータルは、労働安全衛生分野における AI・DX 活用の研究・実証を目的とした公開Webプロジェクトです。"}
       </h2>
       <p className="mt-3 text-sm leading-6 text-slate-700">
         {isEn
           ? "Operating costs are covered personally by the maintainer. Notices, accident cases, and chemical-substance information are published free of charge with primary sources, and we welcome feedback from field practitioners, researchers, and regulators."
-          : "運営費用は運営者個人が負担しています。通達・事故事例・化学物質情報を一次ソース付きで無料公開し、現場担当者・研究者・行政の皆さまから広くフィードバックを募っています。"}
+          : "安全AIポータル編集部が、通達・事故事例・化学物質情報を一次ソース付きで無料公開し、現場担当者・研究者・行政の皆さまから広くフィードバックを募っています。"}
       </p>
       <p className="mt-2 text-[11px] leading-5 text-slate-500">
         {isEn

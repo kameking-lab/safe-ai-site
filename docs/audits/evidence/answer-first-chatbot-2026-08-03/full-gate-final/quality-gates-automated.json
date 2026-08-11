@@ -156,10 +156,10 @@
   "checks": [
     {
       "id": "typescript",
-      "command": "C:\\Program Files\\nodejs\\node.exe C:\\Users\\kanet\\20260522\\safe-ai-site\\web\\node_modules\\typescript\\bin\\tsc --noEmit",
+      "command": "<node-executable> <repo-root>\\web\\node_modules\\typescript\\bin\\tsc --noEmit",
       "exitCode": 0,
       "passed": true,
-      "log": "C:\\Users\\kanet\\20260522\\safe-ai-site\\docs\\audits\\evidence\\answer-first-chatbot-2026-08-03\\full-gate-final\\typescript.log",
+      "log": "<repo-root>\\docs\\audits\\evidence\\answer-first-chatbot-2026-08-03\\full-gate-final\\typescript.log",
       "signal": null,
       "error": null
     },
@@ -168,106 +168,106 @@
       "command": "git diff --check",
       "exitCode": 0,
       "passed": true,
-      "log": "C:\\Users\\kanet\\20260522\\safe-ai-site\\docs\\audits\\evidence\\answer-first-chatbot-2026-08-03\\full-gate-final\\git-diff-check.log",
+      "log": "<repo-root>\\docs\\audits\\evidence\\answer-first-chatbot-2026-08-03\\full-gate-final\\git-diff-check.log",
       "signal": null,
       "error": null
     },
     {
       "id": "source-safety-inventory",
-      "command": "C:\\Program Files\\nodejs\\node.exe C:\\Users\\kanet\\20260522\\safe-ai-site\\web\\scripts\\audit\\source-safety-inventory.mjs",
+      "command": "<node-executable> <repo-root>\\web\\scripts\\audit\\source-safety-inventory.mjs",
       "exitCode": 0,
       "passed": true,
-      "log": "C:\\Users\\kanet\\20260522\\safe-ai-site\\docs\\audits\\evidence\\answer-first-chatbot-2026-08-03\\full-gate-final\\source-safety-inventory.log",
+      "log": "<repo-root>\\docs\\audits\\evidence\\answer-first-chatbot-2026-08-03\\full-gate-final\\source-safety-inventory.log",
       "signal": null,
       "error": null
     },
     {
       "id": "ky-zero-friction-static-gate",
-      "command": "C:\\Program Files\\nodejs\\node.exe C:\\Users\\kanet\\20260522\\safe-ai-site\\web\\scripts\\audit\\ky-zero-friction-static-gate.mjs",
+      "command": "<node-executable> <repo-root>\\web\\scripts\\audit\\ky-zero-friction-static-gate.mjs",
       "exitCode": 0,
       "passed": true,
-      "log": "C:\\Users\\kanet\\20260522\\safe-ai-site\\docs\\audits\\evidence\\answer-first-chatbot-2026-08-03\\full-gate-final\\ky-zero-friction-static-gate.log",
+      "log": "<repo-root>\\docs\\audits\\evidence\\answer-first-chatbot-2026-08-03\\full-gate-final\\ky-zero-friction-static-gate.log",
       "signal": null,
       "error": null
     },
     {
       "id": "eslint-full",
-      "command": "C:\\Program Files\\nodejs\\node.exe C:\\Users\\kanet\\20260522\\safe-ai-site\\web\\node_modules\\eslint\\bin\\eslint.js .",
+      "command": "<node-executable> <repo-root>\\web\\node_modules\\eslint\\bin\\eslint.js .",
       "exitCode": 0,
       "passed": true,
-      "log": "C:\\Users\\kanet\\20260522\\safe-ai-site\\docs\\audits\\evidence\\answer-first-chatbot-2026-08-03\\full-gate-final\\eslint-full.log",
+      "log": "<repo-root>\\docs\\audits\\evidence\\answer-first-chatbot-2026-08-03\\full-gate-final\\eslint-full.log",
       "signal": null,
       "error": null
     },
     {
       "id": "vitest-full",
-      "command": "C:\\Program Files\\nodejs\\node.exe C:\\Users\\kanet\\20260522\\safe-ai-site\\web\\node_modules\\vitest\\vitest.mjs run",
+      "command": "<node-executable> <repo-root>\\web\\node_modules\\vitest\\vitest.mjs run",
       "exitCode": 0,
       "passed": true,
-      "log": "C:\\Users\\kanet\\20260522\\safe-ai-site\\docs\\audits\\evidence\\answer-first-chatbot-2026-08-03\\full-gate-final\\vitest-full.log",
+      "log": "<repo-root>\\docs\\audits\\evidence\\answer-first-chatbot-2026-08-03\\full-gate-final\\vitest-full.log",
       "signal": null,
       "error": null
     },
     {
       "id": "production-build",
-      "command": "C:\\Program Files\\nodejs\\node.exe C:\\Users\\kanet\\20260522\\safe-ai-site\\web\\node_modules\\next\\dist\\bin\\next build",
+      "command": "<node-executable> <repo-root>\\web\\node_modules\\next\\dist\\bin\\next build",
       "exitCode": 0,
       "passed": true,
-      "log": "C:\\Users\\kanet\\20260522\\safe-ai-site\\docs\\audits\\evidence\\answer-first-chatbot-2026-08-03\\full-gate-final\\production-build.log",
+      "log": "<repo-root>\\docs\\audits\\evidence\\answer-first-chatbot-2026-08-03\\full-gate-final\\production-build.log",
       "signal": null,
       "error": null
     },
     {
       "id": "client-bundle-email-scan",
-      "command": "C:\\Program Files\\nodejs\\node.exe C:\\Users\\kanet\\20260522\\safe-ai-site\\web\\scripts\\audit\\client-bundle-email-scan.mjs",
+      "command": "<node-executable> <repo-root>\\web\\scripts\\audit\\client-bundle-email-scan.mjs",
       "exitCode": 0,
       "passed": true,
-      "log": "C:\\Users\\kanet\\20260522\\safe-ai-site\\docs\\audits\\evidence\\answer-first-chatbot-2026-08-03\\full-gate-final\\client-bundle-email-scan.log",
+      "log": "<repo-root>\\docs\\audits\\evidence\\answer-first-chatbot-2026-08-03\\full-gate-final\\client-bundle-email-scan.log",
       "signal": null,
       "error": null
     },
     {
       "id": "trust-boundary-inventory",
-      "command": "C:\\Program Files\\nodejs\\node.exe C:\\Users\\kanet\\20260522\\safe-ai-site\\web\\scripts\\audit\\trust-boundary-inventory.mjs",
+      "command": "<node-executable> <repo-root>\\web\\scripts\\audit\\trust-boundary-inventory.mjs",
       "exitCode": 0,
       "passed": true,
-      "log": "C:\\Users\\kanet\\20260522\\safe-ai-site\\docs\\audits\\evidence\\answer-first-chatbot-2026-08-03\\full-gate-final\\trust-boundary-inventory.log",
+      "log": "<repo-root>\\docs\\audits\\evidence\\answer-first-chatbot-2026-08-03\\full-gate-final\\trust-boundary-inventory.log",
       "signal": null,
       "error": null
     },
     {
       "id": "playwright-full",
-      "command": "C:\\Program Files\\nodejs\\node.exe C:\\Users\\kanet\\20260522\\safe-ai-site\\web\\node_modules\\playwright\\cli.js test",
+      "command": "<node-executable> <repo-root>\\web\\node_modules\\playwright\\cli.js test",
       "exitCode": 0,
       "passed": true,
-      "log": "C:\\Users\\kanet\\20260522\\safe-ai-site\\docs\\audits\\evidence\\answer-first-chatbot-2026-08-03\\full-gate-final\\playwright-full.log",
+      "log": "<repo-root>\\docs\\audits\\evidence\\answer-first-chatbot-2026-08-03\\full-gate-final\\playwright-full.log",
       "signal": null,
       "error": null
     },
     {
       "id": "playwright-privacy",
-      "command": "C:\\Program Files\\nodejs\\node.exe C:\\Users\\kanet\\20260522\\safe-ai-site\\web\\node_modules\\playwright\\cli.js test --config=playwright.privacy.config.ts",
+      "command": "<node-executable> <repo-root>\\web\\node_modules\\playwright\\cli.js test --config=playwright.privacy.config.ts",
       "exitCode": 0,
       "passed": true,
-      "log": "C:\\Users\\kanet\\20260522\\safe-ai-site\\docs\\audits\\evidence\\answer-first-chatbot-2026-08-03\\full-gate-final\\playwright-privacy.log",
+      "log": "<repo-root>\\docs\\audits\\evidence\\answer-first-chatbot-2026-08-03\\full-gate-final\\playwright-privacy.log",
       "signal": null,
       "error": null
     },
     {
       "id": "npm-audit-production",
-      "command": "C:\\WINDOWS\\system32\\cmd.exe /d /s /c npm audit --omit=dev",
+      "command": "<command-shell> /d /s /c npm audit --omit=dev",
       "exitCode": 0,
       "passed": true,
-      "log": "C:\\Users\\kanet\\20260522\\safe-ai-site\\docs\\audits\\evidence\\answer-first-chatbot-2026-08-03\\full-gate-final\\npm-audit-production.log",
+      "log": "<repo-root>\\docs\\audits\\evidence\\answer-first-chatbot-2026-08-03\\full-gate-final\\npm-audit-production.log",
       "signal": null,
       "error": null
     },
     {
       "id": "npm-audit-all",
-      "command": "C:\\WINDOWS\\system32\\cmd.exe /d /s /c npm audit",
+      "command": "<command-shell> /d /s /c npm audit",
       "exitCode": 0,
       "passed": true,
-      "log": "C:\\Users\\kanet\\20260522\\safe-ai-site\\docs\\audits\\evidence\\answer-first-chatbot-2026-08-03\\full-gate-final\\npm-audit-all.log",
+      "log": "<repo-root>\\docs\\audits\\evidence\\answer-first-chatbot-2026-08-03\\full-gate-final\\npm-audit-all.log",
       "signal": null,
       "error": null
     }

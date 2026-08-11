@@ -304,7 +304,7 @@ export default function SafetyAiLandingPage() {
                  href="/about/project-story"
                  className="font-bold text-cyan-200 underline underline-offset-4"
                >
-                 運営について
+                 プロジェクトについて
                </Link>
              </div>
            </div>

@@ -25,11 +25,12 @@ def main() -> None:
 
     core = prs.core_properties
     core.title = "安全AIポータル Seminar Template"
-    core.author = "安全AIポータル"
-    core.company = "安全AIポータル"
+    core.author = "安全AIポータル編集部"
+    core.last_modified_by = "安全AIポータル編集部"
+    core.company = "安全AIポータル編集部"
     core.comments = (
-        "労働安全コンサルタント（登録番号260022・土木）監修による"
-        "労働衛生教育セミナー資料の共通テンプレート。"
+        "安全AIポータル編集部が制作し、労働安全コンサルタント監修のもとで"
+        "公開する労働衛生教育セミナー資料の共通テンプレート。"
     )
     core.subject = "労働衛生教育 16:9 テンプレート"
     core.keywords = "安全AIポータル; 労働安全; 労働衛生教育; PowerPoint"

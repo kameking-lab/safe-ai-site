@@ -331,7 +331,7 @@ export default function ComparisonPage() {
       <section className="mx-auto mt-10 max-w-5xl rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-white p-6 text-center sm:p-8">
         <h2 className="text-xl font-bold text-emerald-900 sm:text-2xl">機能比較に関するご意見</h2>
         <p className="mt-2 text-sm text-emerald-800">
-          機能比較項目の追加・修正・現場運用での気づきをお寄せください。本サイトは個人運営の研究プロジェクトです。
+          機能比較項目の追加・修正・現場運用での気づきをお寄せください。本サイトは安全AIポータル編集部が運用する研究プロジェクトです。
         </p>
         <div className="mt-4 flex flex-col items-center justify-center gap-2 sm:flex-row">
           <Link

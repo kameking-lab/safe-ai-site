@@ -44,11 +44,7 @@ function parseArgs(argv) {
 
 function detectPython(override) {
   if (override) return override;
-  const candidates = [
-    "C:/Users/kanet/AppData/Local/Programs/Python/Python312/python.exe",
-    "python3",
-    "python",
-  ];
+  const candidates = ["python3", "python"];
   for (const cmd of candidates) {
     const r = spawnSync(cmd, ["--version"], { encoding: "utf8" });
     if (r.status === 0) return cmd;

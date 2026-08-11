@@ -172,7 +172,7 @@ route.ts:230 で searchRelevantNotices が呼ばれており、関連通達が�
 
 - Direct Hit: 通常の suggestDigDeeperLinks
 - Adjacent Hit: 「他の関連条文も見る」「業種別事故事例」「通達カテゴリ」
-- Out-of-Scope: 「e-Gov 法令検索」「専門家に相談」「フィードバック送信」(個人運営研究プロジェクト体裁のため「無料相談」は使わない)
+- Out-of-Scope: 「e-Gov 法令検索」「専門家に相談」「フィードバック送信」([redacted]研究プロジェクト体裁のため「無料相談」は使わない)
 
 ## 6. 想定精度
 

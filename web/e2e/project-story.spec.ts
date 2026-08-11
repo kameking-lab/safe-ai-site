@@ -9,7 +9,7 @@ test.describe("project story and landing-page separation", () => {
     const response = await page.goto(STORY_PATH);
     expect(response?.status()).toBe(200);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-      "現場の時間を、安全と本質的な仕事へ。",
+      "労働安全と生成AIを、根拠を確認できる形へ。",
     );
     await expect(page.locator("main h1")).toHaveCount(1);
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
@@ -119,7 +119,7 @@ test.describe("project story and landing-page separation", () => {
     for (const [path, expectedText, minimum, maximum] of [
       [
         STORY_PATH,
-        "なぜ個人で安全AIポータルをつくり、無償で公開しているのか。その原点と、開発で大切にしていることだけを記します。",
+        "安全AIポータルは、労働安全の一次資料と現場で使う道具を、探しやすく確認しやすい形へ整える公開Webプロジェクトです。目的、編集体制、品質の境界をここで説明します。",
         900,
         1400,
       ],

@@ -27,7 +27,7 @@ export default function PrivacyPage() {
         <section className="space-y-3">
           <h2 className="text-base font-bold text-slate-900">1. 事業者の名称・連絡先</h2>
           <p className="text-sm leading-7 text-slate-600">
-            本サービス「安全AIポータル」（以下「本サービス」）の個人情報取扱事業者は、安全AIポータル 事務局（以下「当方」）です。
+            本サービス「安全AIポータル」（以下「本サービス」）の個人情報取扱窓口は、安全AIポータル編集部（以下「当方」）です。
             個人情報保護に関するお問い合わせは
             <a className="underline hover:text-emerald-700" href="/contact">お問い合わせフォーム</a>
             よりご連絡ください。

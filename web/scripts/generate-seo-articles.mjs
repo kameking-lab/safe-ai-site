@@ -172,8 +172,8 @@ function buildArticle(seed) {
   return {
     ...seed,
     author: {
-      name: "労働安全コンサルタント（登録番号260022・土木）",
-      url: "https://anzen-ai-portal.jp/about",
+      name: "安全AIポータル編集部｜労働安全コンサルタント監修",
+      url: "https://www.anzen-ai-portal.jp/about/project-story",
     },
     sections: [
       {
@@ -209,7 +209,7 @@ function buildArticle(seed) {
     ],
     ctaSlot: {
       title: "現場の運用設計をご相談ください",
-      description: "労働安全コンサルタント（登録番号260022）が直接ヒアリング。",
+      description: "安全AIポータル編集部が依頼範囲を整理します。法令適合や現場承認は保証しません。",
       href: "/contact",
       label: "無料相談を申し込む",
     },

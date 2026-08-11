@@ -278,7 +278,7 @@ export function AutomationServiceContent({
           href="/about/project-story"
           className="inline-flex min-h-11 items-center font-bold text-emerald-900 underline underline-offset-4"
         >
-          開発方針と背景を見る
+          プロジェクトと編集方針を見る
         </Link>
         <a
           href="https://elaws.e-gov.go.jp/document?lawid=347M50002000032"

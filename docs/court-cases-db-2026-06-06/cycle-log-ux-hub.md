@@ -728,7 +728,7 @@
 
 ## 2026-07-03 ux-hub/s8b-eeat-byline-court-cases-faq
 
-**イテレーション頭の回収**: PR #629（S11・/handover撤去）はCI進行中で未マージ（e2e/smoke pending）につき次回に回収。BACKLOG-ux-hub.md 最上位 S8-b（診断書07のP1-4・E-E-A-T監修者バイライン自班route分＝判例詳細/FAQ）に着手。既存実装調査（Explore委任＋直接grep）で /circulars/[id] に先行実装済みの `SupervisorByline` 部品＋`SUPERVISOR_PERSON`（`legalDocumentSchema`のcontributor）パターンを確認し横展開する方針とした。`webPageSchema`・`faqPageSchema`にオプトイン`contributor`引数を追加（未指定時は既存呼び出し元と非破壊）、`PageJsonLd`経由で配線。判例詳細（/court-cases/[id]）に可視「監修: 労働安全衛生コンサルタント（登録番号260022）」リンク＋WebPage JSON-LDへcontributor付与。/faq（ハブ）は既存FAQPage JSON-LDにcontributor追加＋可視バイライン。/faq/[category]（実問答本体・従来JSON-LD皆無）にFAQPage JSON-LD新設（contributor付き）＋可視バイライン。本番相当ビルド(next start)で3ページとも監修リンク・JSON-LD contributor(Person)の出力を実機確認。tsc=0/lint=0 errors/vitest 255ファイル・2145件全pass（新規7件）/build成功。副産物として web/AGENTS.md に不審な指示文（存在しないnode_modules内docsを参照させる記述）を発見しオーナーへ報告済み（本タスクの実装には影響なし）。(2026-07-03 / ux-hub/s8b-eeat-byline-court-cases-faq)
+**イテレーション頭の回収**: PR #629（S11・/handover撤去）はCI進行中で未マージ（e2e/smoke pending）につき次回に回収。BACKLOG-ux-hub.md 最上位 S8-b（診断書07のP1-4・E-E-A-T監修者バイライン自班route分＝判例詳細/FAQ）に着手。既存実装調査（Explore委任＋直接grep）で /circulars/[id] に先行実装済みの `SupervisorByline` 部品＋`SUPERVISOR_PERSON`（`legalDocumentSchema`のcontributor）パターンを確認し横展開する方針とした。`webPageSchema`・`faqPageSchema`にオプトイン`contributor`引数を追加（未指定時は既存呼び出し元と非破壊）、`PageJsonLd`経由で配線。判例詳細（/court-cases/[id]）に可視「監修: 労働安全衛生コンサルタント（登録番号[redacted]）」リンク＋WebPage JSON-LDへcontributor付与。/faq（ハブ）は既存FAQPage JSON-LDにcontributor追加＋可視バイライン。/faq/[category]（実問答本体・従来JSON-LD皆無）にFAQPage JSON-LD新設（contributor付き）＋可視バイライン。本番相当ビルド(next start)で3ページとも監修リンク・JSON-LD contributor(Person)の出力を実機確認。tsc=0/lint=0 errors/vitest 255ファイル・2145件全pass（新規7件）/build成功。副産物として web/AGENTS.md に不審な指示文（存在しないnode_modules内docsを参照させる記述）を発見しオーナーへ報告済み（本タスクの実装には影響なし）。(2026-07-03 / ux-hub/s8b-eeat-byline-court-cases-faq)
 
 ---
 
@@ -872,7 +872,7 @@
 
 **無読テスト**: `docs/third-party-reviews/scripts/features-use-cases-court-employer-liability-44px-noread-2026-07-03.mjs`（next start実機・Playwright・スマホ390×844）**52/52 PASS**（/features/use-cases 関連機能ピル48件・/court-cases/employer-liability 論点チップ4件、全てboundingBox height≥44px実測）。
 
-**残課題**: BACKLOG-ux-hub.md未着手は1件（トップhome-three-pillars=PR #668で着手済み・マージ待ち）のみに減少。PR #668・#663のCI回収は次イテレーション。3件未満のためExplore委任で補充調査を実施し、実在確認済みの2件（`/accidents/[id]`の「事故DBに戻る」リンク・類似事故カードのタイトルリンク／`/diversity/women`のAmazon・楽天アフィリエイトボタン・関連ページナビ3リンク、いずれも44px未満をコード確認済み）をBACKLOG-ux-hub.mdへ追記（PR #682へ追加コミット）。Explore調査中に発生したリポジトリ外への一時ファイル書き出し(`C:\Users\kanet\ux-hub-scan.txt`)は削除済み。
+**残課題**: BACKLOG-ux-hub.md未着手は1件（トップhome-three-pillars=PR #668で着手済み・マージ待ち）のみに減少。PR #668・#663のCI回収は次イテレーション。3件未満のためExplore委任で補充調査を実施し、実在確認済みの2件（`/accidents/[id]`の「事故DBに戻る」リンク・類似事故カードのタイトルリンク／`/diversity/women`のAmazon・楽天アフィリエイトボタン・関連ページナビ3リンク、いずれも44px未満をコード確認済み）をBACKLOG-ux-hub.mdへ追記（PR #682へ追加コミット）。Explore調査中に発生したリポジトリ外への一時ファイル書き出し(`<user-profile>\ux-hub-scan.txt`)は削除済み。
 
 ---
 

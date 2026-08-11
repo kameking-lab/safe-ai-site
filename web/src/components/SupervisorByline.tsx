@@ -1,11 +1,8 @@
 import Link from "next/link";
 
-/**
- * 公開ページの編集主体表記。第三者が検証できる資格台帳・個別の確認記録が
- * そろうまでは、個人資格や「監修済み」を権威シグナルとして表示しない。
- */
+/** 公開ページで共通利用する編集主体とプロジェクト監修の表記。 */
 export const SUPERVISOR_NAME =
-  "安全AIポータル編集部（確認状態は各ページに表示）";
+  "安全AIポータル編集部｜労働安全コンサルタント監修";
 
 export function SupervisorByline({
   className = "text-emerald-700 hover:underline",
@@ -13,7 +10,7 @@ export function SupervisorByline({
   className?: string;
 }) {
   return (
-    <Link href="/about" className={className}>
+    <Link href="/about/project-story" className={className}>
       {SUPERVISOR_NAME}
     </Link>
   );

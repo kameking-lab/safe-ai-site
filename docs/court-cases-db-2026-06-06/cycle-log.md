@@ -308,7 +308,7 @@
 
 ## Cycle50【仕組み修正・runner文字化け解消】(2026-06-08 23:18 JST)
 - 社長環境(Windows PowerShell 5.x)でloop-runner.ps1がパースエラー(BOMなしUTF-8をShift-JIS誤認し日本語化け→文字列終端/{}破綻)。対処: ps1本体を純ASCII化(全コメント・ログ英語)＋可変の日本語指示は loop-prompt.txt(UTF-8)に分離し実行時に -Encoding UTF8 で読込→$OutputEncoding=UTF8 で claude にstdinパイプ。
-- 実環境確認: claude=C:\Users\kanet\AppData\Roaming\npm\claude.ps1、headlessは -p/--print・bypassは --dangerously-skip-permissions(v2.1.168)。PURE_ASCII_OK＋Windows PowerShellでPARSE_OK＋runner 1イテレーション試走で claude起動・"RUNNER_SELFTEST_OK"返答・exit0を確認。
+- 実環境確認: claude=<user-profile>\AppData\Roaming\npm\claude.ps1、headlessは -p/--print・bypassは --dangerously-skip-permissions(v2.1.168)。PURE_ASCII_OK＋Windows PowerShellでPARSE_OK＋runner 1イテレーション試走で claude起動・"RUNNER_SELFTEST_OK"返答・exit0を確認。
 - これで社長が powershell -File .\loop-runner.ps1 で確実に無人自走起動できる。
 
 ## Cycle52【軸2: 化学物質RA 一人親方ペルソナレビュー】(2026-06-08 23:45 JST)

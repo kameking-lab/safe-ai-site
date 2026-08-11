@@ -476,13 +476,19 @@ export const NAV_CATEGORIES: AppShellNavCategory[] = [
   },
   {
     label: "プロジェクト",
-    description: "運営者・お問い合わせ",
+    description: "編集方針・お問い合わせ",
     items: [
       {
         id: "about",
-        label: "研究プロジェクトについて",
+        label: "サイトについて",
         href: "/about",
         icon: Info,
+      },
+      {
+        id: "project-policy",
+        label: "プロジェクト・編集方針",
+        href: "/about/project-story",
+        icon: ClipboardList,
       },
       {
         id: "contact",

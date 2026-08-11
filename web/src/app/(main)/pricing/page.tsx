@@ -46,7 +46,7 @@ export default function PricingPage() {
             現在、全機能を無料公開中です
           </h1>
           <p className="mt-4 text-sm leading-6 text-slate-700">
-            安全AIポータル は現時点で個人運営の研究・実証プロジェクトです。
+            安全AIポータルは、安全AIポータル編集部が運用する研究・実証プロジェクトです。
             通達・事故事例・化学物質情報・KY用紙・Eラーニング等、すべての機能を無料でお使いいただけます。
           </p>
           <p className="mt-3 text-xs text-slate-500">

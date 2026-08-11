@@ -121,12 +121,12 @@ export default function QualityPage() {
             から、今すぐ使える機能を確認できます。
           </p>
           <p className="mt-1 text-sm leading-6 text-slate-700">
-            この品質方針を採用する背景は
+            この品質方針と編集体制は
             <Link
               href="/about/project-story"
               className="mx-1 inline-flex min-h-11 items-center font-bold text-emerald-800 underline underline-offset-4"
             >
-              このプロジェクトをつくった理由
+              プロジェクトについて
             </Link>
             で公開しています。
           </p>
