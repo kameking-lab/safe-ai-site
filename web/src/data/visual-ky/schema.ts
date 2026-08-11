@@ -115,7 +115,7 @@ export const visualKyScenarioSchema = z
         z.object({
           id: z.string().regex(/^mhlw-\d+$/),
           label: z.string().min(5),
-          href: z.string().startsWith("/accidents/"),
+          href: z.literal("/accidents"),
           sourceStatus: z.literal("curated"),
         }),
       )
