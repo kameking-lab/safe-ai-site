@@ -52,7 +52,10 @@ function accident(
   return {
     id,
     label,
-    href: `/accidents/${id}`,
+    // Curated references are intentionally not exposed as official accident
+    // detail pages. The detail route fails closed unless its source has been
+    // manually verified, so keep these references on the public database hub.
+    href: "/accidents",
     sourceStatus: "curated",
   };
 }

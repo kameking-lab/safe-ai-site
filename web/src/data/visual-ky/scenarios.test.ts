@@ -30,6 +30,11 @@ describe("visual KY scenario registry", () => {
           (accident) => accident.sourceStatus === "curated",
         ),
       ).toBe(true);
+      expect(
+        scenario.relatedAccidents.every(
+          (accident) => accident.href === "/accidents",
+        ),
+      ).toBe(true);
       expect(scenario.relatedLaws.length).toBeGreaterThan(0);
       expect(scenario.relatedQualifications.length).toBeGreaterThan(0);
     }
