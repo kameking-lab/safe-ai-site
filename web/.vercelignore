@@ -50,8 +50,12 @@
 /test/
 /tests/
 /scripts/*
+!/scripts/
 !/scripts/vercel-ignore-build.sh
 !/scripts/storage-deployment-guard.mjs
+!/scripts/audit
+/scripts/audit/*
+!/scripts/audit/public-identity-guard.mjs
 **/__snapshots__/
 **/__tests__/
 **/*.test.*
@@ -74,6 +78,22 @@ Desktop.ini
 # allowlist here, in ../.vercelignore, and in storage-budget.yml.
 /public/**
 !/public/**/
+# Vercel CLI's recursive walker checks directory paths without a trailing slash.
+# Keep reviewed public directories traversable while the file extension allowlist stays fail-closed.
+!/public/geo
+!/public/icons
+!/public/images
+!/public/mascot
+!/public/safety-images
+!/public/safety-images/library
+!/public/safety-images/library/originals
+!/public/safety-images/library/previews
+!/public/safety-images/pilot
+!/public/screenshots
+!/public/seminars
+!/public/visual-ky
+!/public/visual-ky/scenarios
+!/public/visual-refresh
 !/public/**/*.ico
 !/public/**/*.png
 !/public/**/*.jpg

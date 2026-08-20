@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-20T12:31:37.956Z",
+  "sourceIntegrity": [
+    {
+      "file": "helmet-required-clean-original.png",
+      "sha256": "7469a1fdda9a152c998d9942254c1bee3b80b147878cbed42e7122d7720c0aa7",
+      "bytes": 1842530
+    },
+    {
+      "file": "helmet-required-direct-text-original.png",
+      "sha256": "b32eb101ae42bf9141642bd3f9ccf9f09334b2e7068c0943eeaef10a8a9d7fc1",
+      "bytes": 1963930
+    }
+  ],
+  "derivativeCount": 8,
+  "derivatives": [
+    {
+      "file": "helmet-required-a-all-branded-a4-portrait.jpg",
+      "sha256": "99ee5ee98b00abfdef437d973772145e111d3e163dfac6c0a535982e1f711bc2",
+      "bytes": 1415054,
+      "variant": "a",
+      "paper": "A4",
+      "format": "jpeg"
+    },
+    {
+      "file": "helmet-required-a-all-branded-a4-portrait.pdf",
+      "sha256": "2a51d719e8322cf308bb523f8c255e7caaab1aaf5d67664b2e27dfb6be012e1d",
+      "bytes": 1415761,
+      "variant": "a",
+      "paper": "A4",
+      "format": "pdf"
+    },
+    {
+      "file": "helmet-required-a-all-branded-a3-portrait.jpg",
+      "sha256": "b652752fd27d81d697a78713837c1962f5a1ffd122f1dc3fe87818f5722dca59",
+      "bytes": 2383736,
+      "variant": "a",
+      "paper": "A3",
+      "format": "jpeg"
+    },
+    {
+      "file": "helmet-required-a-all-branded-a3-portrait.pdf",
+      "sha256": "e008f9d0a8cf4907ae96ce333babdff1329d0dd903d8edd2b2f4de84fde9fc53",
+      "bytes": 2384445,
+      "variant": "a",
+      "paper": "A3",
+      "format": "pdf"
+    },
+    {
+      "file": "helmet-required-b-all-branded-a4-portrait.jpg",
+      "sha256": "ce306978aaa9d8a5cb3cb36d40cef0ad8bec6d1d1d013b4daa8c353b12a6737a",
+      "bytes": 1461786,
+      "variant": "b",
+      "paper": "A4",
+      "format": "jpeg"
+    },
+    {
+      "file": "helmet-required-b-all-branded-a4-portrait.pdf",
+      "sha256": "c573c2fd434e757d9ee4f15b44922a7138d4b1de94ffdf421c1beb65766837b7",
+      "bytes": 1462493,
+      "variant": "b",
+      "paper": "A4",
+      "format": "pdf"
+    },
+    {
+      "file": "helmet-required-b-all-branded-a3-portrait.jpg",
+      "sha256": "338218306960a665c44ada135052469b94cbb356d5c537d5bf6e2fa48eece6b5",
+      "bytes": 2468980,
+      "variant": "b",
+      "paper": "A3",
+      "format": "jpeg"
+    },
+    {
+      "file": "helmet-required-b-all-branded-a3-portrait.pdf",
+      "sha256": "5891bb6354a9aa1eeb28eb8287cce2aa86af0bd1fc5dff73357e25d914ccbb5d",
+      "bytes": 2469689,
+      "variant": "b",
+      "paper": "A3",
+      "format": "pdf"
+    }
+  ]
+}

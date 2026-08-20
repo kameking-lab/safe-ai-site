@@ -6,6 +6,7 @@ import {
   FileText,
   MonitorUp,
   ShoppingBag,
+  Images,
 } from "lucide-react";
 
 const PRIMARY_LINKS = [
@@ -13,6 +14,7 @@ const PRIMARY_LINKS = [
   { href: "/risk", label: "朝礼要点", status: "今日の確認", icon: FileText },
   { href: "/safety-diary", label: "工程打合せ書", status: "記録・共有", icon: FileText },
   { href: "/signage", label: "サイネージ", status: "全画面", icon: MonitorUp },
+  { href: "/materials/safety-images", label: "安全画像", status: "編集できる100点", icon: Images },
   { href: "/goods", label: "安全グッズ", status: "用途別", icon: ShoppingBag },
   { href: "/notifications", label: "通知設定", status: "配信条件", icon: Bell },
 ] as const;
@@ -56,7 +58,7 @@ export function HomeCoreFeatures() {
           </Link>
         </header>
 
-        <ul className="mt-4 grid grid-cols-2 gap-2 md:grid-cols-3 lg:grid-cols-6">
+        <ul className="mt-4 grid grid-cols-2 gap-2 md:grid-cols-4 lg:grid-cols-7">
           {PRIMARY_LINKS.map(({ href, label, status, icon: Icon }) => (
             <li key={href}>
               <Link

@@ -51,6 +51,7 @@ describe("サイドバーナビ(NAV_CATEGORIES)のIA不変条件", () => {
       "/education-certification",
       "/training/visual-ky",
       "/signage",
+      "/materials/safety-images",
       "/services/automation",
       "/safety-ai",
       "/search",
@@ -68,7 +69,7 @@ describe("サイドバーナビ(NAV_CATEGORIES)のIA不変条件", () => {
         category.items.map((item) => item.href),
       );
     const desktop = hrefs("desktop");
-    expect(desktop).toHaveLength(15);
+    expect(desktop).toHaveLength(16);
     expect(new Set(desktop).size).toBe(desktop.length);
     expect(desktop).toEqual(expect.arrayContaining(requiredDesktop));
     expect(

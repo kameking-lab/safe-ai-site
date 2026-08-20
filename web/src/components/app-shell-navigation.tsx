@@ -41,6 +41,7 @@ import {
   LayoutGrid,
   Calculator,
   Workflow,
+  Images,
 } from "lucide-react";
 import { isPublicRouteAvailable } from "@/lib/public-content-policy";
 import { PAID_MODE } from "@/lib/paid-mode";
@@ -182,6 +183,15 @@ export const NAV_CATEGORIES: AppShellNavCategory[] = [
         href: "/signage",
         icon: Monitor,
         description: "現場掲示用フルスクリーン・自動更新",
+      },
+      {
+        id: "safety-image-library",
+        label: "安全画像倉庫",
+        href: "/materials/safety-images",
+        icon: Images,
+        badge: "NEW",
+        badgeUntil: "2026-10-31",
+        description: "安全看板・施工計画イラスト100点を検索・編集・印刷",
       },
       {
         id: "heat-illness",
@@ -548,6 +558,12 @@ const COMPACT_NAV_CATEGORIES: AppShellNavCategory[] = [
         href: "/signage",
         icon: Monitor,
       },
+      {
+        id: "safety-image-library",
+        label: "安全画像倉庫",
+        href: "/materials/safety-images",
+        icon: Images,
+      },
     ],
   },
   {
@@ -647,6 +663,7 @@ export function getAppShellNavigationCategories(
     items: category.items.filter(
       (item) =>
         item.id !== "construction-calc" &&
+        !(position === "mobile" && item.id === "safety-image-library") &&
         isPublicRouteAvailable(item.href) &&
         !repeatedPrimaryHrefs.has(item.href),
     ),

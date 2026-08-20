@@ -1,0 +1,26 @@
+{
+  "reviewedAt": "2026-08-20T21:18:00+09:00",
+  "reviewMethod": "original-resolution visual inspection",
+  "cleanMaster": {
+    "exactlyOneAdult": "pass",
+    "naturalAnatomy": "pass",
+    "extraLimbsOrDigits": "pass",
+    "faceEarsNeckShoulders": "pass",
+    "helmetFit": "pass",
+    "chinStrapFit": "pass",
+    "vestWorkwearBoots": "pass",
+    "ppeIntersections": "pass",
+    "backgroundGibberish": "pass",
+    "thirdPartyLogo": "pass",
+    "copiedSignage": "pass"
+  },
+  "directText": {
+    "anatomyAndPpePreserved": "pass",
+    "ja": { "expected": "保護帽を着用", "visualResult": "exact" },
+    "en": { "expected": "WEAR A SAFETY HELMET", "visualResult": "exact" },
+    "vi": { "expected": "ĐỘI MŨ BẢO HỘ", "visualResult": "exact" },
+    "zh-CN": { "expected": "佩戴安全帽", "visualResult": "exact" },
+    "id": { "expected": "GUNAKAN HELM KESELAMATAN", "visualResult": "exact" },
+    "downloadPolicy": "comparison-download-allowed"
+  }
+}

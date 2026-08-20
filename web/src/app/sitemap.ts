@@ -14,6 +14,12 @@ import { computeSitemapFreshness } from "@/lib/sitemap/freshness";
 import { SITE_URL } from "@/lib/seo-metadata";
 import { isPublicRouteAvailable } from "@/lib/public-content-policy";
 import { PUBLIC_VISUAL_KY_SCENARIOS } from "@/data/visual-ky";
+import {
+  SAFETY_IMAGE_CATEGORIES,
+  SAFETY_IMAGE_LIBRARY_PATH,
+  SAFETY_IMAGE_LIBRARY_RIGHTS_PATH,
+  SAFETY_IMAGE_THEMES,
+} from "@/data/safety-image-library";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   // 柱C-3 / S DRY: 絶対URLのオリジンは seo-metadata.ts の SITE_URL を単一ソースにする
@@ -1062,8 +1068,38 @@ export default function sitemap(): MetadataRoute.Sitemap {
     })),
   ];
 
+  // 安全画像倉庫は生成・人体/PPE・文字なしQAを通過した正式公開100点だけを列挙する。
+  // 編集状態、言語切替、ブランド切替、印刷HTML、方式B比較ページは別URLとしてindexしない。
+  const safetyImagePages: typeof pages = [
+    {
+      url: SAFETY_IMAGE_LIBRARY_PATH,
+      lastModified: "2026-08-21",
+      priority: 0.9,
+      changeFrequency: "weekly" as Freq,
+    },
+    {
+      url: SAFETY_IMAGE_LIBRARY_RIGHTS_PATH,
+      lastModified: "2026-08-21",
+      priority: 0.5,
+      changeFrequency: "yearly" as Freq,
+    },
+    ...SAFETY_IMAGE_CATEGORIES.map((category) => ({
+      url: `${SAFETY_IMAGE_LIBRARY_PATH}/category/${category.id}`,
+      lastModified: "2026-08-21",
+      priority: 0.75,
+      changeFrequency: "monthly" as Freq,
+    })),
+    ...SAFETY_IMAGE_THEMES.map((theme) => ({
+      url: theme.detailPath,
+      lastModified: "2026-08-21",
+      priority: theme.recommended ? 0.8 : 0.7,
+      changeFrequency: "monthly" as Freq,
+    })),
+  ];
+
   return [
     ...filtered,
+    ...safetyImagePages,
     ...visualKyPages,
     ...eduPackPages,
     ...featureCategoryPages,

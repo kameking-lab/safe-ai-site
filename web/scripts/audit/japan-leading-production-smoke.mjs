@@ -442,6 +442,7 @@ const publicRoutes = [
   "/training/visual-ky",
   "/ky/paper",
   "/signage",
+  "/materials/safety-images",
   "/services/automation",
   "/about/quality",
   "/search?q=%E5%A2%9C%E8%90%BD",
@@ -611,6 +612,7 @@ const compactNavigationPaths = [
   "/heat-illness-prevention",
   "/ky/paper",
   "/signage",
+  "/materials/safety-images",
   "/chatbot",
   "/law-search",
   "/chemical-ra",
@@ -625,11 +627,11 @@ const compactNavigationPaths = [
 ];
 record(
   "home:compact-navigation-contract",
-  compactNavigationPaths.length === 15 &&
-    new Set(compactNavigationPaths).size === 15 &&
+  compactNavigationPaths.length === 16 &&
+    new Set(compactNavigationPaths).size === 16 &&
     !compactNavigationPaths.includes("/resources"),
   {
-    expectedCount: 15,
+    expectedCount: 16,
     actualCount: compactNavigationPaths.length,
     uniqueCount: new Set(compactNavigationPaths).size,
     resourcesIncluded: compactNavigationPaths.includes("/resources"),

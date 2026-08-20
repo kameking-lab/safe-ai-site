@@ -1,0 +1,16 @@
+{
+  "portrait": {
+    "safeMarginRatio": 0.055,
+    "textWidthRatio": 0.89,
+    "defaultPosition": "top",
+    "defaultBandColor": "#ffffff",
+    "defaultTextColor": "#082f49"
+  },
+  "landscape": {
+    "safeMarginRatio": 0.05,
+    "textWidthRatio": 0.9,
+    "defaultPosition": "bottom",
+    "defaultBandColor": "#ffffff",
+    "defaultTextColor": "#082f49"
+  }
+}

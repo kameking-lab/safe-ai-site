@@ -1,0 +1,14 @@
+{
+  "recordedAt": "2026-08-20T21:13:51.0368945+09:00",
+  "production": {
+    "deploymentId": "dpl_6FVbW6NQiGphMRPa13m5iRQT6e37",
+    "immutableUrl": "https://safe-ai-site-mxiuet1g7-kameking-labs-projects.vercel.app",
+    "alias": "https://www.anzen-ai-portal.jp",
+    "readyState": "READY"
+  },
+  "rollback": {
+    "deploymentId": "dpl_GZfyrh6Z3Fsud3YNN8fBPmwEJg1o",
+    "immutableUrl": "https://safe-ai-site-3eszg9ld2-kameking-labs-projects.vercel.app",
+    "readyState": "READY"
+  }
+}

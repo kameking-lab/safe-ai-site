@@ -38,6 +38,18 @@ const nextConfig: NextConfig = {
   // /admin/status が同階層の report.md をサーバ読込するため明示的にトレース
   outputFileTracingIncludes: {
     "/admin/status": ["./src/app/admin/status/report.md"],
+    "/api/safety-images/pilot/helmet-required/download": [
+      "./src/assets/safety-image-pilot/originals/*.png",
+      "./src/assets/safety-image-pilot/fonts/NotoSansJP-Bold.ttf",
+      "./public/mascot/mascot-head-256.png",
+      "./node_modules/@resvg/resvg-wasm/**/*",
+    ],
+    "/api/safety-images/[slug]/download": [
+      "./src/assets/safety-image-pilot/fonts/NotoSansJP-Bold.ttf",
+      "./src/assets/safety-image-library/fonts/NotoSans-Bold.ttf",
+      "./public/mascot/mascot-head-256.png",
+      "./node_modules/@resvg/resvg-wasm/**/*",
+    ],
   },
   // Prisma clientはengineType=libraryかつdatasource=PostgreSQL。native library
   // engine（.prisma/client/query_engine-* / libquery_engine-*）は必ず保持し、
