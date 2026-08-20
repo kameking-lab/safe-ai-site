@@ -1,0 +1,5670 @@
+{
+  "summary": {
+    "generatedForProject": true,
+    "method": "A: generated clean master plus code-rendered text and brand layers",
+    "generatedCleanMasters": 100,
+    "uniqueChecksums": 100,
+    "totalGenerationCalls": 121,
+    "totalRegenerations": 21,
+    "categoryCounts": {
+      "safety-signs": 45,
+      "rules": 20,
+      "construction-illustrations": 20,
+      "heat-health": 10,
+      "general": 5
+    },
+    "qaPassed": 100,
+    "qaFailed": 0,
+    "embeddedTextPolicy": "none",
+    "rightsDisplay": "安全AIポータル作成／商用利用可／加工可"
+  },
+  "items": [
+    {
+      "id": "safety-image-001",
+      "order": 1,
+      "slug": "full-harness-required",
+      "title": "ここではフルハーネスを使用",
+      "category": "safety-signs",
+      "categoryLabel": "現場掲示・安全看板",
+      "texts": {
+        "ja": "ここではフルハーネスを使用",
+        "en": "Use a full-body harness here",
+        "vi": "Sử dụng dây đai toàn thân tại đây",
+        "zh-CN": "此处须使用全身式安全带",
+        "id": "Gunakan sabuk pengaman tubuh penuh di sini"
+      },
+      "tags": [
+        "ここではフルハーネスを使用",
+        "安全看板",
+        "full",
+        "harness",
+        "required",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "教育"
+      ],
+      "orientation": "portrait",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/full-harness-required.webp",
+      "originalPath": "/safety-images/library/originals/full-harness-required.png",
+      "detailPath": "/materials/safety-images/full-harness-required",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1122,
+        "height": 1402
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 900
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-002",
+      "order": 2,
+      "slug": "helmet-required",
+      "title": "保護帽を着用",
+      "category": "safety-signs",
+      "categoryLabel": "現場掲示・安全看板",
+      "texts": {
+        "ja": "保護帽を着用",
+        "en": "Wear a safety helmet",
+        "vi": "Đội mũ bảo hộ",
+        "zh-CN": "佩戴安全帽",
+        "id": "Gunakan helm keselamatan"
+      },
+      "tags": [
+        "保護帽を着用",
+        "安全看板",
+        "helmet",
+        "required",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "教育"
+      ],
+      "orientation": "portrait",
+      "recommended": true,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/helmet-required.webp",
+      "originalPath": "/safety-images/library/originals/helmet-required.png",
+      "detailPath": "/materials/safety-images/helmet-required",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1122,
+        "height": 1402
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 900
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-003",
+      "order": 3,
+      "slug": "safety-glasses-required",
+      "title": "保護メガネ着用",
+      "category": "safety-signs",
+      "categoryLabel": "現場掲示・安全看板",
+      "texts": {
+        "ja": "保護メガネ着用",
+        "en": "Wear safety glasses",
+        "vi": "Đeo kính bảo hộ",
+        "zh-CN": "佩戴防护眼镜",
+        "id": "Gunakan kacamata keselamatan"
+      },
+      "tags": [
+        "保護メガネ着用",
+        "安全看板",
+        "safety",
+        "glasses",
+        "required",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "教育"
+      ],
+      "orientation": "portrait",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/safety-glasses-required.webp",
+      "originalPath": "/safety-images/library/originals/safety-glasses-required.png",
+      "detailPath": "/materials/safety-images/safety-glasses-required",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1055,
+        "height": 1491
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 1018
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-004",
+      "order": 4,
+      "slug": "hearing-protection-required",
+      "title": "耳栓・イヤーマフ着用",
+      "category": "safety-signs",
+      "categoryLabel": "現場掲示・安全看板",
+      "texts": {
+        "ja": "耳栓・イヤーマフ着用",
+        "en": "Wear hearing protection",
+        "vi": "Đeo thiết bị bảo vệ thính giác",
+        "zh-CN": "佩戴听力防护用品",
+        "id": "Gunakan pelindung pendengaran"
+      },
+      "tags": [
+        "耳栓・イヤーマフ着用",
+        "安全看板",
+        "hearing",
+        "protection",
+        "required",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "教育"
+      ],
+      "orientation": "portrait",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/hearing-protection-required.webp",
+      "originalPath": "/safety-images/library/originals/hearing-protection-required.png",
+      "detailPath": "/materials/safety-images/hearing-protection-required",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1122,
+        "height": 1402
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 900
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-005",
+      "order": 5,
+      "slug": "safety-shoes-required",
+      "title": "安全靴着用",
+      "category": "safety-signs",
+      "categoryLabel": "現場掲示・安全看板",
+      "texts": {
+        "ja": "安全靴着用",
+        "en": "Wear safety footwear",
+        "vi": "Mang giày bảo hộ",
+        "zh-CN": "穿安全鞋",
+        "id": "Gunakan sepatu keselamatan"
+      },
+      "tags": [
+        "安全靴着用",
+        "安全看板",
+        "safety",
+        "shoes",
+        "required",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "教育"
+      ],
+      "orientation": "portrait",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/safety-shoes-required.webp",
+      "originalPath": "/safety-images/library/originals/safety-shoes-required.png",
+      "detailPath": "/materials/safety-images/safety-shoes-required",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1122,
+        "height": 1402
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 900
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-006",
+      "order": 6,
+      "slug": "protective-gloves-required",
+      "title": "保護手袋着用",
+      "category": "safety-signs",
+      "categoryLabel": "現場掲示・安全看板",
+      "texts": {
+        "ja": "保護手袋着用",
+        "en": "Wear protective gloves",
+        "vi": "Đeo găng tay bảo hộ",
+        "zh-CN": "佩戴防护手套",
+        "id": "Gunakan sarung tangan pelindung"
+      },
+      "tags": [
+        "保護手袋着用",
+        "安全看板",
+        "protective",
+        "gloves",
+        "required",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "教育"
+      ],
+      "orientation": "portrait",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/protective-gloves-required.webp",
+      "originalPath": "/safety-images/library/originals/protective-gloves-required.png",
+      "detailPath": "/materials/safety-images/protective-gloves-required",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1023,
+        "height": 1537
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 1082
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-007",
+      "order": 7,
+      "slug": "dust-mask-required",
+      "title": "防じんマスク着用",
+      "category": "safety-signs",
+      "categoryLabel": "現場掲示・安全看板",
+      "texts": {
+        "ja": "防じんマスク着用",
+        "en": "Wear a dust mask",
+        "vi": "Đeo khẩu trang chống bụi",
+        "zh-CN": "佩戴防尘口罩",
+        "id": "Gunakan masker debu"
+      },
+      "tags": [
+        "防じんマスク着用",
+        "安全看板",
+        "dust",
+        "mask",
+        "required",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "教育"
+      ],
+      "orientation": "portrait",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/dust-mask-required.webp",
+      "originalPath": "/safety-images/library/originals/dust-mask-required.png",
+      "detailPath": "/materials/safety-images/dust-mask-required",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1122,
+        "height": 1402
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 900
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-008",
+      "order": 8,
+      "slug": "face-shield-required",
+      "title": "フェイスシールド着用",
+      "category": "safety-signs",
+      "categoryLabel": "現場掲示・安全看板",
+      "texts": {
+        "ja": "フェイスシールド着用",
+        "en": "Wear a face shield",
+        "vi": "Đeo tấm che mặt",
+        "zh-CN": "佩戴防护面罩",
+        "id": "Gunakan pelindung wajah"
+      },
+      "tags": [
+        "フェイスシールド着用",
+        "安全看板",
+        "face",
+        "shield",
+        "required",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "教育"
+      ],
+      "orientation": "portrait",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/face-shield-required.webp",
+      "originalPath": "/safety-images/library/originals/face-shield-required.png",
+      "detailPath": "/materials/safety-images/face-shield-required",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1122,
+        "height": 1402
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 900
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-009",
+      "order": 9,
+      "slug": "no-entry",
+      "title": "立入禁止",
+      "category": "safety-signs",
+      "categoryLabel": "現場掲示・安全看板",
+      "texts": {
+        "ja": "立入禁止",
+        "en": "No entry",
+        "vi": "Cấm vào",
+        "zh-CN": "禁止入内",
+        "id": "Dilarang masuk"
+      },
+      "tags": [
+        "立入禁止",
+        "安全看板",
+        "no",
+        "entry",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "教育"
+      ],
+      "orientation": "portrait",
+      "recommended": true,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/no-entry.webp",
+      "originalPath": "/safety-images/library/originals/no-entry.png",
+      "detailPath": "/materials/safety-images/no-entry",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1089,
+        "height": 1444
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 955
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-010",
+      "order": 10,
+      "slug": "no-open-flame",
+      "title": "火気厳禁",
+      "category": "safety-signs",
+      "categoryLabel": "現場掲示・安全看板",
+      "texts": {
+        "ja": "火気厳禁",
+        "en": "No open flames",
+        "vi": "Cấm lửa",
+        "zh-CN": "严禁烟火",
+        "id": "Dilarang menyalakan api"
+      },
+      "tags": [
+        "火気厳禁",
+        "安全看板",
+        "no",
+        "open",
+        "flame",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "教育"
+      ],
+      "orientation": "portrait",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/no-open-flame.webp",
+      "originalPath": "/safety-images/library/originals/no-open-flame.png",
+      "detailPath": "/materials/safety-images/no-open-flame",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1122,
+        "height": 1402
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 900
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-011",
+      "order": 11,
+      "slug": "no-smoking",
+      "title": "禁煙",
+      "category": "safety-signs",
+      "categoryLabel": "現場掲示・安全看板",
+      "texts": {
+        "ja": "禁煙",
+        "en": "No smoking",
+        "vi": "Cấm hút thuốc",
+        "zh-CN": "禁止吸烟",
+        "id": "Dilarang merokok"
+      },
+      "tags": [
+        "禁煙",
+        "安全看板",
+        "no",
+        "smoking",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "教育"
+      ],
+      "orientation": "portrait",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/no-smoking.webp",
+      "originalPath": "/safety-images/library/originals/no-smoking.png",
+      "detailPath": "/materials/safety-images/no-smoking",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1122,
+        "height": 1402
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 900
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-012",
+      "order": 12,
+      "slug": "opening-caution",
+      "title": "開口部注意",
+      "category": "safety-signs",
+      "categoryLabel": "現場掲示・安全看板",
+      "texts": {
+        "ja": "開口部注意",
+        "en": "Caution: floor opening",
+        "vi": "Chú ý lỗ mở",
+        "zh-CN": "当心洞口",
+        "id": "Awas bukaan lantai"
+      },
+      "tags": [
+        "開口部注意",
+        "安全看板",
+        "opening",
+        "caution",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "教育"
+      ],
+      "orientation": "portrait",
+      "recommended": true,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/opening-caution.webp",
+      "originalPath": "/safety-images/library/originals/opening-caution.png",
+      "detailPath": "/materials/safety-images/opening-caution",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1122,
+        "height": 1402
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 900
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-013",
+      "order": 13,
+      "slug": "fall-caution",
+      "title": "墜落注意",
+      "category": "safety-signs",
+      "categoryLabel": "現場掲示・安全看板",
+      "texts": {
+        "ja": "墜落注意",
+        "en": "Caution: fall hazard",
+        "vi": "Chú ý nguy cơ ngã cao",
+        "zh-CN": "当心坠落",
+        "id": "Awas bahaya jatuh"
+      },
+      "tags": [
+        "墜落注意",
+        "安全看板",
+        "fall",
+        "caution",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "教育"
+      ],
+      "orientation": "portrait",
+      "recommended": true,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/fall-caution.webp",
+      "originalPath": "/safety-images/library/originals/fall-caution.png",
+      "detailPath": "/materials/safety-images/fall-caution",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1054,
+        "height": 1492
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 1019
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-014",
+      "order": 14,
+      "slug": "overhead-load-caution",
+      "title": "上部吊り荷注意",
+      "category": "safety-signs",
+      "categoryLabel": "現場掲示・安全看板",
+      "texts": {
+        "ja": "上部吊り荷注意",
+        "en": "Caution: overhead load",
+        "vi": "Chú ý tải treo phía trên",
+        "zh-CN": "当心上方吊物",
+        "id": "Awas beban tergantung di atas"
+      },
+      "tags": [
+        "上部吊り荷注意",
+        "安全看板",
+        "overhead",
+        "load",
+        "caution",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "教育"
+      ],
+      "orientation": "portrait",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/overhead-load-caution.webp",
+      "originalPath": "/safety-images/library/originals/overhead-load-caution.png",
+      "detailPath": "/materials/safety-images/overhead-load-caution",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1058,
+        "height": 1487
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 1012
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-015",
+      "order": 15,
+      "slug": "rigging-in-progress",
+      "title": "玉掛け作業中",
+      "category": "safety-signs",
+      "categoryLabel": "現場掲示・安全看板",
+      "texts": {
+        "ja": "玉掛け作業中",
+        "en": "Rigging work in progress",
+        "vi": "Đang thực hiện công tác móc cáp",
+        "zh-CN": "正在进行吊装索具作业",
+        "id": "Pekerjaan rigging sedang berlangsung"
+      },
+      "tags": [
+        "玉掛け作業中",
+        "安全看板",
+        "rigging",
+        "in",
+        "progress",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "教育"
+      ],
+      "orientation": "portrait",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/rigging-in-progress.webp",
+      "originalPath": "/safety-images/library/originals/rigging-in-progress.png",
+      "detailPath": "/materials/safety-images/rigging-in-progress",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1054,
+        "height": 1492
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 1019
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-016",
+      "order": 16,
+      "slug": "working-at-height",
+      "title": "高所作業中",
+      "category": "safety-signs",
+      "categoryLabel": "現場掲示・安全看板",
+      "texts": {
+        "ja": "高所作業中",
+        "en": "Work at height in progress",
+        "vi": "Đang làm việc trên cao",
+        "zh-CN": "正在进行高处作业",
+        "id": "Pekerjaan di ketinggian sedang berlangsung"
+      },
+      "tags": [
+        "高所作業中",
+        "安全看板",
+        "working",
+        "at",
+        "height",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "教育"
+      ],
+      "orientation": "portrait",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/working-at-height.webp",
+      "originalPath": "/safety-images/library/originals/working-at-height.png",
+      "detailPath": "/materials/safety-images/working-at-height",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1054,
+        "height": 1492
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 1019
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-017",
+      "order": 17,
+      "slug": "heavy-equipment-operating",
+      "title": "重機作業中",
+      "category": "safety-signs",
+      "categoryLabel": "現場掲示・安全看板",
+      "texts": {
+        "ja": "重機作業中",
+        "en": "Heavy equipment operating",
+        "vi": "Thiết bị hạng nặng đang hoạt động",
+        "zh-CN": "重型机械作业中",
+        "id": "Alat berat sedang beroperasi"
+      },
+      "tags": [
+        "重機作業中",
+        "安全看板",
+        "heavy",
+        "equipment",
+        "operating",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "教育"
+      ],
+      "orientation": "portrait",
+      "recommended": true,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/heavy-equipment-operating.webp",
+      "originalPath": "/safety-images/library/originals/heavy-equipment-operating.png",
+      "detailPath": "/materials/safety-images/heavy-equipment-operating",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1122,
+        "height": 1402
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 900
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-018",
+      "order": 18,
+      "slug": "electric-shock-caution",
+      "title": "感電注意",
+      "category": "safety-signs",
+      "categoryLabel": "現場掲示・安全看板",
+      "texts": {
+        "ja": "感電注意",
+        "en": "Caution: electric shock",
+        "vi": "Chú ý điện giật",
+        "zh-CN": "当心触电",
+        "id": "Awas sengatan listrik"
+      },
+      "tags": [
+        "感電注意",
+        "安全看板",
+        "electric",
+        "shock",
+        "caution",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "教育"
+      ],
+      "orientation": "portrait",
+      "recommended": true,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/electric-shock-caution.webp",
+      "originalPath": "/safety-images/library/originals/electric-shock-caution.png",
+      "detailPath": "/materials/safety-images/electric-shock-caution",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1086,
+        "height": 1448
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 960
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-019",
+      "order": 19,
+      "slug": "oxygen-deficiency-caution",
+      "title": "酸欠注意",
+      "category": "safety-signs",
+      "categoryLabel": "現場掲示・安全看板",
+      "texts": {
+        "ja": "酸欠注意",
+        "en": "Caution: oxygen deficiency",
+        "vi": "Chú ý thiếu oxy",
+        "zh-CN": "当心缺氧",
+        "id": "Awas kekurangan oksigen"
+      },
+      "tags": [
+        "酸欠注意",
+        "安全看板",
+        "oxygen",
+        "deficiency",
+        "caution",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "教育"
+      ],
+      "orientation": "portrait",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/oxygen-deficiency-caution.webp",
+      "originalPath": "/safety-images/library/originals/oxygen-deficiency-caution.png",
+      "detailPath": "/materials/safety-images/oxygen-deficiency-caution",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1055,
+        "height": 1491
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 1018
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-020",
+      "order": 20,
+      "slug": "organic-solvent-caution",
+      "title": "有機溶剤取扱い注意",
+      "category": "safety-signs",
+      "categoryLabel": "現場掲示・安全看板",
+      "texts": {
+        "ja": "有機溶剤取扱い注意",
+        "en": "Caution: organic solvents",
+        "vi": "Chú ý dung môi hữu cơ",
+        "zh-CN": "当心有机溶剂",
+        "id": "Awas pelarut organik"
+      },
+      "tags": [
+        "有機溶剤取扱い注意",
+        "安全看板",
+        "organic",
+        "solvent",
+        "caution",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "教育"
+      ],
+      "orientation": "portrait",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/organic-solvent-caution.webp",
+      "originalPath": "/safety-images/library/originals/organic-solvent-caution.png",
+      "detailPath": "/materials/safety-images/organic-solvent-caution",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1122,
+        "height": 1402
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 900
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-021",
+      "order": 21,
+      "slug": "asbestos-work-area",
+      "title": "石綿作業区域",
+      "category": "safety-signs",
+      "categoryLabel": "現場掲示・安全看板",
+      "texts": {
+        "ja": "石綿作業区域",
+        "en": "Asbestos work area",
+        "vi": "Khu vực làm việc với amiăng",
+        "zh-CN": "石棉作业区域",
+        "id": "Area kerja asbes"
+      },
+      "tags": [
+        "石綿作業区域",
+        "安全看板",
+        "asbestos",
+        "work",
+        "area",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "教育"
+      ],
+      "orientation": "portrait",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/asbestos-work-area.webp",
+      "originalPath": "/safety-images/library/originals/asbestos-work-area.png",
+      "detailPath": "/materials/safety-images/asbestos-work-area",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1122,
+        "height": 1402
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 900
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-022",
+      "order": 22,
+      "slug": "forklift-traffic",
+      "title": "フォークリフト通行注意",
+      "category": "safety-signs",
+      "categoryLabel": "現場掲示・安全看板",
+      "texts": {
+        "ja": "フォークリフト通行注意",
+        "en": "Caution: forklift traffic",
+        "vi": "Chú ý xe nâng qua lại",
+        "zh-CN": "当心叉车通行",
+        "id": "Awas lalu lintas forklift"
+      },
+      "tags": [
+        "フォークリフト通行注意",
+        "安全看板",
+        "forklift",
+        "traffic",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "教育"
+      ],
+      "orientation": "portrait",
+      "recommended": true,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/forklift-traffic.webp",
+      "originalPath": "/safety-images/library/originals/forklift-traffic.png",
+      "detailPath": "/materials/safety-images/forklift-traffic",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1122,
+        "height": 1402
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 900
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-023",
+      "order": 23,
+      "slug": "watch-your-step",
+      "title": "足元注意",
+      "category": "safety-signs",
+      "categoryLabel": "現場掲示・安全看板",
+      "texts": {
+        "ja": "足元注意",
+        "en": "Watch your step",
+        "vi": "Chú ý bước chân",
+        "zh-CN": "小心脚下",
+        "id": "Perhatikan langkah Anda"
+      },
+      "tags": [
+        "足元注意",
+        "安全看板",
+        "watch",
+        "your",
+        "step",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "教育"
+      ],
+      "orientation": "portrait",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/watch-your-step.webp",
+      "originalPath": "/safety-images/library/originals/watch-your-step.png",
+      "detailPath": "/materials/safety-images/watch-your-step",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1122,
+        "height": 1402
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 900
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-024",
+      "order": 24,
+      "slug": "slippery-surface",
+      "title": "滑りやすい床面",
+      "category": "safety-signs",
+      "categoryLabel": "現場掲示・安全看板",
+      "texts": {
+        "ja": "滑りやすい床面",
+        "en": "Caution: slippery surface",
+        "vi": "Chú ý sàn trơn",
+        "zh-CN": "小心地滑",
+        "id": "Awas permukaan licin"
+      },
+      "tags": [
+        "滑りやすい床面",
+        "安全看板",
+        "slippery",
+        "surface",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "教育"
+      ],
+      "orientation": "portrait",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/slippery-surface.webp",
+      "originalPath": "/safety-images/library/originals/slippery-surface.png",
+      "detailPath": "/materials/safety-images/slippery-surface",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1122,
+        "height": 1402
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 900
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-025",
+      "order": 25,
+      "slug": "keep-tidy",
+      "title": "整理整頓",
+      "category": "safety-signs",
+      "categoryLabel": "現場掲示・安全看板",
+      "texts": {
+        "ja": "整理整頓",
+        "en": "Keep the area tidy",
+        "vi": "Giữ khu vực gọn gàng",
+        "zh-CN": "整理整顿",
+        "id": "Jaga area tetap rapi"
+      },
+      "tags": [
+        "整理整頓",
+        "安全看板",
+        "keep",
+        "tidy",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "教育"
+      ],
+      "orientation": "portrait",
+      "recommended": true,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/keep-tidy.webp",
+      "originalPath": "/safety-images/library/originals/keep-tidy.png",
+      "detailPath": "/materials/safety-images/keep-tidy",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1122,
+        "height": 1402
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 900
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-026",
+      "order": 26,
+      "slug": "point-and-call",
+      "title": "指差呼称",
+      "category": "safety-signs",
+      "categoryLabel": "現場掲示・安全看板",
+      "texts": {
+        "ja": "指差呼称",
+        "en": "Point and call",
+        "vi": "Chỉ tay và hô xác nhận",
+        "zh-CN": "指差呼唤确认",
+        "id": "Tunjuk dan sebutkan"
+      },
+      "tags": [
+        "指差呼称",
+        "安全看板",
+        "point",
+        "and",
+        "call",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "教育"
+      ],
+      "orientation": "portrait",
+      "recommended": true,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/point-and-call.webp",
+      "originalPath": "/safety-images/library/originals/point-and-call.png",
+      "detailPath": "/materials/safety-images/point-and-call",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1122,
+        "height": 1402
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 900
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-027",
+      "order": 27,
+      "slug": "safety-passage",
+      "title": "安全通路",
+      "category": "safety-signs",
+      "categoryLabel": "現場掲示・安全看板",
+      "texts": {
+        "ja": "安全通路",
+        "en": "Safety walkway",
+        "vi": "Lối đi an toàn",
+        "zh-CN": "安全通道",
+        "id": "Jalur aman"
+      },
+      "tags": [
+        "安全通路",
+        "安全看板",
+        "safety",
+        "passage",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "教育"
+      ],
+      "orientation": "portrait",
+      "recommended": true,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/safety-passage.webp",
+      "originalPath": "/safety-images/library/originals/safety-passage.png",
+      "detailPath": "/materials/safety-images/safety-passage",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1122,
+        "height": 1402
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 900
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-028",
+      "order": 28,
+      "slug": "crane-slewing-range",
+      "title": "クレーン旋回範囲 立入注意",
+      "category": "safety-signs",
+      "categoryLabel": "現場掲示・安全看板",
+      "texts": {
+        "ja": "クレーン旋回範囲 立入注意",
+        "en": "Keep clear of the crane slewing area",
+        "vi": "Tránh xa vùng quay của cần cẩu",
+        "zh-CN": "请勿进入起重机回转范围",
+        "id": "Jauhi area putar derek"
+      },
+      "tags": [
+        "クレーン旋回範囲 立入注意",
+        "安全看板",
+        "crane",
+        "slewing",
+        "range",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "教育"
+      ],
+      "orientation": "portrait",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/crane-slewing-range.webp",
+      "originalPath": "/safety-images/library/originals/crane-slewing-range.png",
+      "detailPath": "/materials/safety-images/crane-slewing-range",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1055,
+        "height": 1491
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 1018
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-029",
+      "order": 29,
+      "slug": "excavation-edge",
+      "title": "掘削端部 接近注意",
+      "category": "safety-signs",
+      "categoryLabel": "現場掲示・安全看板",
+      "texts": {
+        "ja": "掘削端部 接近注意",
+        "en": "Keep away from excavation edges",
+        "vi": "Tránh xa mép hố đào",
+        "zh-CN": "请勿靠近开挖边缘",
+        "id": "Jauhi tepi galian"
+      },
+      "tags": [
+        "掘削端部 接近注意",
+        "安全看板",
+        "excavation",
+        "edge",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "教育"
+      ],
+      "orientation": "portrait",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/excavation-edge.webp",
+      "originalPath": "/safety-images/library/originals/excavation-edge.png",
+      "detailPath": "/materials/safety-images/excavation-edge",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1122,
+        "height": 1402
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 900
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-030",
+      "order": 30,
+      "slug": "suspended-load",
+      "title": "吊り荷の下に入らない",
+      "category": "safety-signs",
+      "categoryLabel": "現場掲示・安全看板",
+      "texts": {
+        "ja": "吊り荷の下に入らない",
+        "en": "Keep out from under suspended loads",
+        "vi": "Không đứng dưới tải treo",
+        "zh-CN": "严禁进入吊物下方",
+        "id": "Jangan berada di bawah beban tergantung"
+      },
+      "tags": [
+        "吊り荷の下に入らない",
+        "安全看板",
+        "suspended",
+        "load",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "教育"
+      ],
+      "orientation": "portrait",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/suspended-load.webp",
+      "originalPath": "/safety-images/library/originals/suspended-load.png",
+      "detailPath": "/materials/safety-images/suspended-load",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1054,
+        "height": 1492
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 1019
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-031",
+      "order": 31,
+      "slug": "welding-arc",
+      "title": "溶接アーク光 注意",
+      "category": "safety-signs",
+      "categoryLabel": "現場掲示・安全看板",
+      "texts": {
+        "ja": "溶接アーク光 注意",
+        "en": "Caution: welding arc",
+        "vi": "Chú ý hồ quang hàn",
+        "zh-CN": "当心焊接弧光",
+        "id": "Awas cahaya busur las"
+      },
+      "tags": [
+        "溶接アーク光 注意",
+        "安全看板",
+        "welding",
+        "arc",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "教育"
+      ],
+      "orientation": "portrait",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/welding-arc.webp",
+      "originalPath": "/safety-images/library/originals/welding-arc.png",
+      "detailPath": "/materials/safety-images/welding-arc",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1054,
+        "height": 1492
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 1019
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-032",
+      "order": 32,
+      "slug": "hot-surface",
+      "title": "高温部 接触注意",
+      "category": "safety-signs",
+      "categoryLabel": "現場掲示・安全看板",
+      "texts": {
+        "ja": "高温部 接触注意",
+        "en": "Caution: hot surface",
+        "vi": "Chú ý bề mặt nóng",
+        "zh-CN": "当心高温表面",
+        "id": "Awas permukaan panas"
+      },
+      "tags": [
+        "高温部 接触注意",
+        "安全看板",
+        "hot",
+        "surface",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "教育"
+      ],
+      "orientation": "portrait",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/hot-surface.webp",
+      "originalPath": "/safety-images/library/originals/hot-surface.png",
+      "detailPath": "/materials/safety-images/hot-surface",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1122,
+        "height": 1402
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 900
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-033",
+      "order": 33,
+      "slug": "high-noise-area",
+      "title": "高騒音区域",
+      "category": "safety-signs",
+      "categoryLabel": "現場掲示・安全看板",
+      "texts": {
+        "ja": "高騒音区域",
+        "en": "High-noise area",
+        "vi": "Khu vực tiếng ồn cao",
+        "zh-CN": "高噪声区域",
+        "id": "Area kebisingan tinggi"
+      },
+      "tags": [
+        "高騒音区域",
+        "安全看板",
+        "high",
+        "noise",
+        "area",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "教育"
+      ],
+      "orientation": "portrait",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/high-noise-area.webp",
+      "originalPath": "/safety-images/library/originals/high-noise-area.png",
+      "detailPath": "/materials/safety-images/high-noise-area",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1122,
+        "height": 1402
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 900
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-034",
+      "order": 34,
+      "slug": "low-headroom",
+      "title": "頭上注意",
+      "category": "safety-signs",
+      "categoryLabel": "現場掲示・安全看板",
+      "texts": {
+        "ja": "頭上注意",
+        "en": "Mind your head",
+        "vi": "Chú ý phía trên đầu",
+        "zh-CN": "小心碰头",
+        "id": "Awas kepala"
+      },
+      "tags": [
+        "頭上注意",
+        "安全看板",
+        "low",
+        "headroom",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "教育"
+      ],
+      "orientation": "portrait",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/low-headroom.webp",
+      "originalPath": "/safety-images/library/originals/low-headroom.png",
+      "detailPath": "/materials/safety-images/low-headroom",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1122,
+        "height": 1402
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 900
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-035",
+      "order": 35,
+      "slug": "falling-objects",
+      "title": "飛来・落下物注意",
+      "category": "safety-signs",
+      "categoryLabel": "現場掲示・安全看板",
+      "texts": {
+        "ja": "飛来・落下物注意",
+        "en": "Caution: falling objects",
+        "vi": "Chú ý vật rơi",
+        "zh-CN": "当心飞落物",
+        "id": "Awas benda jatuh"
+      },
+      "tags": [
+        "飛来・落下物注意",
+        "安全看板",
+        "falling",
+        "objects",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "教育"
+      ],
+      "orientation": "portrait",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/falling-objects.webp",
+      "originalPath": "/safety-images/library/originals/falling-objects.png",
+      "detailPath": "/materials/safety-images/falling-objects",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1122,
+        "height": 1402
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 900
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-036",
+      "order": 36,
+      "slug": "pinch-point",
+      "title": "はさまれ注意",
+      "category": "safety-signs",
+      "categoryLabel": "現場掲示・安全看板",
+      "texts": {
+        "ja": "はさまれ注意",
+        "en": "Caution: pinch point",
+        "vi": "Chú ý điểm kẹp",
+        "zh-CN": "当心夹伤",
+        "id": "Awas titik jepit"
+      },
+      "tags": [
+        "はさまれ注意",
+        "安全看板",
+        "pinch",
+        "point",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "教育"
+      ],
+      "orientation": "portrait",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/pinch-point.webp",
+      "originalPath": "/safety-images/library/originals/pinch-point.png",
+      "detailPath": "/materials/safety-images/pinch-point",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1055,
+        "height": 1491
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 1018
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-037",
+      "order": 37,
+      "slug": "rotating-parts",
+      "title": "回転部に触れない",
+      "category": "safety-signs",
+      "categoryLabel": "現場掲示・安全看板",
+      "texts": {
+        "ja": "回転部に触れない",
+        "en": "Do not touch rotating parts",
+        "vi": "Không chạm vào bộ phận quay",
+        "zh-CN": "请勿触摸旋转部件",
+        "id": "Jangan sentuh bagian berputar"
+      },
+      "tags": [
+        "回転部に触れない",
+        "安全看板",
+        "rotating",
+        "parts",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "教育"
+      ],
+      "orientation": "portrait",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/rotating-parts.webp",
+      "originalPath": "/safety-images/library/originals/rotating-parts.png",
+      "detailPath": "/materials/safety-images/rotating-parts",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1054,
+        "height": 1492
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 1019
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-038",
+      "order": 38,
+      "slug": "chemical-splash",
+      "title": "薬液飛散注意",
+      "category": "safety-signs",
+      "categoryLabel": "現場掲示・安全看板",
+      "texts": {
+        "ja": "薬液飛散注意",
+        "en": "Caution: chemical splash",
+        "vi": "Chú ý hóa chất bắn tóe",
+        "zh-CN": "当心化学品飞溅",
+        "id": "Awas percikan bahan kimia"
+      },
+      "tags": [
+        "薬液飛散注意",
+        "安全看板",
+        "chemical",
+        "splash",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "教育"
+      ],
+      "orientation": "portrait",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/chemical-splash.webp",
+      "originalPath": "/safety-images/library/originals/chemical-splash.png",
+      "detailPath": "/materials/safety-images/chemical-splash",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1122,
+        "height": 1402
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 900
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-039",
+      "order": 39,
+      "slug": "gas-cylinder-storage",
+      "title": "ボンベ転倒防止",
+      "category": "safety-signs",
+      "categoryLabel": "現場掲示・安全看板",
+      "texts": {
+        "ja": "ボンベ転倒防止",
+        "en": "Secure gas cylinders",
+        "vi": "Cố định bình khí chống đổ",
+        "zh-CN": "固定气瓶防止倾倒",
+        "id": "Amankan tabung gas agar tidak jatuh"
+      },
+      "tags": [
+        "ボンベ転倒防止",
+        "安全看板",
+        "gas",
+        "cylinder",
+        "storage",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "教育"
+      ],
+      "orientation": "portrait",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/gas-cylinder-storage.webp",
+      "originalPath": "/safety-images/library/originals/gas-cylinder-storage.png",
+      "detailPath": "/materials/safety-images/gas-cylinder-storage",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1122,
+        "height": 1402
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 900
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-040",
+      "order": 40,
+      "slug": "fire-extinguisher",
+      "title": "消火器",
+      "category": "safety-signs",
+      "categoryLabel": "現場掲示・安全看板",
+      "texts": {
+        "ja": "消火器",
+        "en": "Fire extinguisher",
+        "vi": "Bình chữa cháy",
+        "zh-CN": "灭火器",
+        "id": "Alat pemadam api"
+      },
+      "tags": [
+        "消火器",
+        "安全看板",
+        "fire",
+        "extinguisher",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "教育"
+      ],
+      "orientation": "portrait",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/fire-extinguisher.webp",
+      "originalPath": "/safety-images/library/originals/fire-extinguisher.png",
+      "detailPath": "/materials/safety-images/fire-extinguisher",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1122,
+        "height": 1402
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 900
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-041",
+      "order": 41,
+      "slug": "emergency-exit",
+      "title": "非常口",
+      "category": "safety-signs",
+      "categoryLabel": "現場掲示・安全看板",
+      "texts": {
+        "ja": "非常口",
+        "en": "Emergency exit",
+        "vi": "Lối thoát hiểm",
+        "zh-CN": "紧急出口",
+        "id": "Pintu keluar darurat"
+      },
+      "tags": [
+        "非常口",
+        "安全看板",
+        "emergency",
+        "exit",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "教育"
+      ],
+      "orientation": "portrait",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/emergency-exit.webp",
+      "originalPath": "/safety-images/library/originals/emergency-exit.png",
+      "detailPath": "/materials/safety-images/emergency-exit",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1122,
+        "height": 1402
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 900
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-042",
+      "order": 42,
+      "slug": "first-aid-station",
+      "title": "救急用品",
+      "category": "safety-signs",
+      "categoryLabel": "現場掲示・安全看板",
+      "texts": {
+        "ja": "救急用品",
+        "en": "First-aid supplies",
+        "vi": "Dụng cụ sơ cứu",
+        "zh-CN": "急救用品",
+        "id": "Perlengkapan P3K"
+      },
+      "tags": [
+        "救急用品",
+        "安全看板",
+        "first",
+        "aid",
+        "station",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "教育"
+      ],
+      "orientation": "portrait",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/first-aid-station.webp",
+      "originalPath": "/safety-images/library/originals/first-aid-station.png",
+      "detailPath": "/materials/safety-images/first-aid-station",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1066,
+        "height": 1476
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 997
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-043",
+      "order": 43,
+      "slug": "eyewash-station",
+      "title": "洗眼設備",
+      "category": "safety-signs",
+      "categoryLabel": "現場掲示・安全看板",
+      "texts": {
+        "ja": "洗眼設備",
+        "en": "Emergency eyewash",
+        "vi": "Thiết bị rửa mắt",
+        "zh-CN": "洗眼设备",
+        "id": "Pencuci mata darurat"
+      },
+      "tags": [
+        "洗眼設備",
+        "安全看板",
+        "eyewash",
+        "station",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "教育"
+      ],
+      "orientation": "portrait",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/eyewash-station.webp",
+      "originalPath": "/safety-images/library/originals/eyewash-station.png",
+      "detailPath": "/materials/safety-images/eyewash-station",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1122,
+        "height": 1402
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 900
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-044",
+      "order": 44,
+      "slug": "assembly-point",
+      "title": "緊急集合場所",
+      "category": "safety-signs",
+      "categoryLabel": "現場掲示・安全看板",
+      "texts": {
+        "ja": "緊急集合場所",
+        "en": "Emergency assembly point",
+        "vi": "Điểm tập kết khẩn cấp",
+        "zh-CN": "紧急集合点",
+        "id": "Titik kumpul darurat"
+      },
+      "tags": [
+        "緊急集合場所",
+        "安全看板",
+        "assembly",
+        "point",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "教育"
+      ],
+      "orientation": "portrait",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/assembly-point.webp",
+      "originalPath": "/safety-images/library/originals/assembly-point.png",
+      "detailPath": "/materials/safety-images/assembly-point",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1122,
+        "height": 1402
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 900
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-045",
+      "order": 45,
+      "slug": "pedestrian-crossing",
+      "title": "歩行者横断箇所",
+      "category": "safety-signs",
+      "categoryLabel": "現場掲示・安全看板",
+      "texts": {
+        "ja": "歩行者横断箇所",
+        "en": "Pedestrian crossing",
+        "vi": "Lối qua đường cho người đi bộ",
+        "zh-CN": "行人横穿处",
+        "id": "Penyeberangan pejalan kaki"
+      },
+      "tags": [
+        "歩行者横断箇所",
+        "安全看板",
+        "pedestrian",
+        "crossing",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "教育"
+      ],
+      "orientation": "portrait",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/pedestrian-crossing.webp",
+      "originalPath": "/safety-images/library/originals/pedestrian-crossing.png",
+      "detailPath": "/materials/safety-images/pedestrian-crossing",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1054,
+        "height": 1492
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 1019
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-046",
+      "order": 46,
+      "slug": "floor-load-limit",
+      "title": "作業床の制限荷重 ○○ t/㎡",
+      "category": "rules",
+      "categoryLabel": "制限・ルール掲示",
+      "texts": {
+        "ja": "作業床の制限荷重 ○○ t/㎡",
+        "en": "Floor load limit: ○○ t/m²",
+        "vi": "Tải trọng sàn giới hạn: ○○ t/m²",
+        "zh-CN": "作业平台限载：○○ t/㎡",
+        "id": "Batas beban lantai: ○○ t/m²"
+      },
+      "tags": [
+        "作業床の制限荷重 ○○ t/㎡",
+        "ルール掲示",
+        "floor",
+        "load",
+        "limit",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "朝礼"
+      ],
+      "orientation": "portrait",
+      "recommended": true,
+      "multilingual": true,
+      "pngAvailable": false,
+      "numericTemplate": {
+        "label": "制限荷重",
+        "placeholder": "○○",
+        "unit": "t/㎡"
+      },
+      "previewPath": "/safety-images/library/previews/floor-load-limit.webp",
+      "originalPath": "/safety-images/library/originals/floor-load-limit.png",
+      "detailPath": "/materials/safety-images/floor-load-limit",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1055,
+        "height": 1491
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 1018
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-047",
+      "order": 47,
+      "slug": "maximum-load",
+      "title": "最大積載荷重 ○○ kg",
+      "category": "rules",
+      "categoryLabel": "制限・ルール掲示",
+      "texts": {
+        "ja": "最大積載荷重 ○○ kg",
+        "en": "Maximum load: ○○ kg",
+        "vi": "Tải trọng tối đa: ○○ kg",
+        "zh-CN": "最大载荷：○○ kg",
+        "id": "Beban maksimum: ○○ kg"
+      },
+      "tags": [
+        "最大積載荷重 ○○ kg",
+        "ルール掲示",
+        "maximum",
+        "load",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "朝礼"
+      ],
+      "orientation": "portrait",
+      "recommended": true,
+      "multilingual": true,
+      "pngAvailable": false,
+      "numericTemplate": {
+        "label": "最大積載荷重",
+        "placeholder": "○○",
+        "unit": "kg"
+      },
+      "previewPath": "/safety-images/library/previews/maximum-load.webp",
+      "originalPath": "/safety-images/library/originals/maximum-load.png",
+      "detailPath": "/materials/safety-images/maximum-load",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1122,
+        "height": 1402
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 900
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-048",
+      "order": 48,
+      "slug": "ppe-rules",
+      "title": "この区域の保護具ルール",
+      "category": "rules",
+      "categoryLabel": "制限・ルール掲示",
+      "texts": {
+        "ja": "この区域の保護具ルール",
+        "en": "PPE rules for this area",
+        "vi": "Quy định PPE tại khu vực này",
+        "zh-CN": "本区域个人防护用品规定",
+        "id": "Aturan APD di area ini"
+      },
+      "tags": [
+        "この区域の保護具ルール",
+        "ルール掲示",
+        "ppe",
+        "rules",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "朝礼"
+      ],
+      "orientation": "portrait",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/ppe-rules.webp",
+      "originalPath": "/safety-images/library/originals/ppe-rules.png",
+      "detailPath": "/materials/safety-images/ppe-rules",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1122,
+        "height": 1402
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 900
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-049",
+      "order": 49,
+      "slug": "hydration-break",
+      "title": "休憩・水分補給を忘れずに",
+      "category": "rules",
+      "categoryLabel": "制限・ルール掲示",
+      "texts": {
+        "ja": "休憩・水分補給を忘れずに",
+        "en": "Take breaks and stay hydrated",
+        "vi": "Nghỉ giải lao và uống đủ nước",
+        "zh-CN": "注意休息和补充水分",
+        "id": "Istirahat dan cukup minum"
+      },
+      "tags": [
+        "休憩・水分補給を忘れずに",
+        "ルール掲示",
+        "hydration",
+        "break",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "朝礼"
+      ],
+      "orientation": "portrait",
+      "recommended": true,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/hydration-break.webp",
+      "originalPath": "/safety-images/library/originals/hydration-break.png",
+      "detailPath": "/materials/safety-images/hydration-break",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1122,
+        "height": 1402
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 900
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-050",
+      "order": 50,
+      "slug": "emergency-contacts",
+      "title": "緊急連絡体制",
+      "category": "rules",
+      "categoryLabel": "制限・ルール掲示",
+      "texts": {
+        "ja": "緊急連絡体制",
+        "en": "Emergency contact procedure",
+        "vi": "Quy trình liên lạc khẩn cấp",
+        "zh-CN": "紧急联络流程",
+        "id": "Prosedur kontak darurat"
+      },
+      "tags": [
+        "緊急連絡体制",
+        "ルール掲示",
+        "emergency",
+        "contacts",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "朝礼"
+      ],
+      "orientation": "portrait",
+      "recommended": true,
+      "multilingual": true,
+      "pngAvailable": false,
+      "numericTemplate": {
+        "label": "緊急連絡先",
+        "placeholder": "",
+        "unit": ""
+      },
+      "previewPath": "/safety-images/library/previews/emergency-contacts.webp",
+      "originalPath": "/safety-images/library/originals/emergency-contacts.png",
+      "detailPath": "/materials/safety-images/emergency-contacts",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1122,
+        "height": 1402
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 900
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-051",
+      "order": 51,
+      "slug": "ky-in-progress",
+      "title": "KY実施中",
+      "category": "rules",
+      "categoryLabel": "制限・ルール掲示",
+      "texts": {
+        "ja": "KY実施中",
+        "en": "Hazard prediction meeting in progress",
+        "vi": "Đang họp dự đoán nguy cơ",
+        "zh-CN": "危险预知活动进行中",
+        "id": "Pertemuan prediksi bahaya sedang berlangsung"
+      },
+      "tags": [
+        "KY実施中",
+        "ルール掲示",
+        "ky",
+        "in",
+        "progress",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "朝礼"
+      ],
+      "orientation": "portrait",
+      "recommended": true,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/ky-in-progress.webp",
+      "originalPath": "/safety-images/library/originals/ky-in-progress.png",
+      "detailPath": "/materials/safety-images/ky-in-progress",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1122,
+        "height": 1402
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 900
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-052",
+      "order": 52,
+      "slug": "morning-meeting",
+      "title": "安全朝礼 実施中",
+      "category": "rules",
+      "categoryLabel": "制限・ルール掲示",
+      "texts": {
+        "ja": "安全朝礼 実施中",
+        "en": "Safety morning meeting in progress",
+        "vi": "Đang họp an toàn đầu ca",
+        "zh-CN": "安全早会进行中",
+        "id": "Briefing keselamatan pagi sedang berlangsung"
+      },
+      "tags": [
+        "安全朝礼 実施中",
+        "ルール掲示",
+        "morning",
+        "meeting",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "朝礼"
+      ],
+      "orientation": "portrait",
+      "recommended": true,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/morning-meeting.webp",
+      "originalPath": "/safety-images/library/originals/morning-meeting.png",
+      "detailPath": "/materials/safety-images/morning-meeting",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1122,
+        "height": 1402
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 900
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-053",
+      "order": 53,
+      "slug": "tool-inspected",
+      "title": "持込工具 点検済",
+      "category": "rules",
+      "categoryLabel": "制限・ルール掲示",
+      "texts": {
+        "ja": "持込工具 点検済",
+        "en": "Brought-in tools inspected",
+        "vi": "Dụng cụ mang vào đã được kiểm tra",
+        "zh-CN": "自带工具已检查",
+        "id": "Peralatan bawaan telah diperiksa"
+      },
+      "tags": [
+        "持込工具 点検済",
+        "ルール掲示",
+        "tool",
+        "inspected",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "朝礼"
+      ],
+      "orientation": "portrait",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/tool-inspected.webp",
+      "originalPath": "/safety-images/library/originals/tool-inspected.png",
+      "detailPath": "/materials/safety-images/tool-inspected",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1122,
+        "height": 1402
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 900
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-054",
+      "order": 54,
+      "slug": "charging-area",
+      "title": "充電設備 使用中",
+      "category": "rules",
+      "categoryLabel": "制限・ルール掲示",
+      "texts": {
+        "ja": "充電設備 使用中",
+        "en": "Charging equipment in use",
+        "vi": "Thiết bị sạc đang được sử dụng",
+        "zh-CN": "充电设备使用中",
+        "id": "Peralatan pengisian daya sedang digunakan"
+      },
+      "tags": [
+        "充電設備 使用中",
+        "ルール掲示",
+        "charging",
+        "area",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "朝礼"
+      ],
+      "orientation": "portrait",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/charging-area.webp",
+      "originalPath": "/safety-images/library/originals/charging-area.png",
+      "detailPath": "/materials/safety-images/charging-area",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1122,
+        "height": 1402
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 900
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-055",
+      "order": 55,
+      "slug": "hygiene-rules",
+      "title": "手洗い・衛生を徹底",
+      "category": "rules",
+      "categoryLabel": "制限・ルール掲示",
+      "texts": {
+        "ja": "手洗い・衛生を徹底",
+        "en": "Wash hands and maintain hygiene",
+        "vi": "Rửa tay và giữ vệ sinh",
+        "zh-CN": "彻底洗手并保持卫生",
+        "id": "Cuci tangan dan jaga kebersihan"
+      },
+      "tags": [
+        "手洗い・衛生を徹底",
+        "ルール掲示",
+        "hygiene",
+        "rules",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "朝礼"
+      ],
+      "orientation": "portrait",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/hygiene-rules.webp",
+      "originalPath": "/safety-images/library/originals/hygiene-rules.png",
+      "detailPath": "/materials/safety-images/hygiene-rules",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1122,
+        "height": 1402
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 900
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-056",
+      "order": 56,
+      "slug": "site-speed-limit",
+      "title": "場内制限速度 ○○ km/h",
+      "category": "rules",
+      "categoryLabel": "制限・ルール掲示",
+      "texts": {
+        "ja": "場内制限速度 ○○ km/h",
+        "en": "Site speed limit: ○○ km/h",
+        "vi": "Tốc độ giới hạn trong công trường: ○○ km/h",
+        "zh-CN": "场内限速：○○ km/h",
+        "id": "Batas kecepatan lokasi: ○○ km/jam"
+      },
+      "tags": [
+        "場内制限速度 ○○ km/h",
+        "ルール掲示",
+        "site",
+        "speed",
+        "limit",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "朝礼"
+      ],
+      "orientation": "portrait",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": false,
+      "numericTemplate": {
+        "label": "場内制限速度",
+        "placeholder": "○○",
+        "unit": "km/h"
+      },
+      "previewPath": "/safety-images/library/previews/site-speed-limit.webp",
+      "originalPath": "/safety-images/library/originals/site-speed-limit.png",
+      "detailPath": "/materials/safety-images/site-speed-limit",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1122,
+        "height": 1402
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 900
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-057",
+      "order": 57,
+      "slug": "one-way-route",
+      "title": "場内一方通行",
+      "category": "rules",
+      "categoryLabel": "制限・ルール掲示",
+      "texts": {
+        "ja": "場内一方通行",
+        "en": "One-way site route",
+        "vi": "Đường một chiều trong công trường",
+        "zh-CN": "场内单向通行",
+        "id": "Jalur satu arah di lokasi"
+      },
+      "tags": [
+        "場内一方通行",
+        "ルール掲示",
+        "one",
+        "way",
+        "route",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "朝礼"
+      ],
+      "orientation": "portrait",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/one-way-route.webp",
+      "originalPath": "/safety-images/library/originals/one-way-route.png",
+      "detailPath": "/materials/safety-images/one-way-route",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1122,
+        "height": 1402
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 900
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-058",
+      "order": 58,
+      "slug": "visitor-check-in",
+      "title": "入場前に受付をお願いします",
+      "category": "rules",
+      "categoryLabel": "制限・ルール掲示",
+      "texts": {
+        "ja": "入場前に受付をお願いします",
+        "en": "Check in before entering",
+        "vi": "Vui lòng đăng ký trước khi vào",
+        "zh-CN": "进入前请登记",
+        "id": "Harap lapor sebelum masuk"
+      },
+      "tags": [
+        "入場前に受付をお願いします",
+        "ルール掲示",
+        "visitor",
+        "check",
+        "in",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "朝礼"
+      ],
+      "orientation": "portrait",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/visitor-check-in.webp",
+      "originalPath": "/safety-images/library/originals/visitor-check-in.png",
+      "detailPath": "/materials/safety-images/visitor-check-in",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1122,
+        "height": 1402
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 900
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-059",
+      "order": 59,
+      "slug": "permit-to-work",
+      "title": "作業許可を確認",
+      "category": "rules",
+      "categoryLabel": "制限・ルール掲示",
+      "texts": {
+        "ja": "作業許可を確認",
+        "en": "Confirm the work permit",
+        "vi": "Xác nhận giấy phép làm việc",
+        "zh-CN": "确认作业许可证",
+        "id": "Pastikan izin kerja"
+      },
+      "tags": [
+        "作業許可を確認",
+        "ルール掲示",
+        "permit",
+        "to",
+        "work",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "朝礼"
+      ],
+      "orientation": "portrait",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/permit-to-work.webp",
+      "originalPath": "/safety-images/library/originals/permit-to-work.png",
+      "detailPath": "/materials/safety-images/permit-to-work",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1122,
+        "height": 1402
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 900
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-060",
+      "order": 60,
+      "slug": "lockout-tagout",
+      "title": "停止・遮断・表示を確認",
+      "category": "rules",
+      "categoryLabel": "制限・ルール掲示",
+      "texts": {
+        "ja": "停止・遮断・表示を確認",
+        "en": "Confirm stop, isolation and tagging",
+        "vi": "Xác nhận dừng, cách ly và gắn thẻ",
+        "zh-CN": "确认停机、隔离和挂牌",
+        "id": "Pastikan berhenti, isolasi, dan penandaan"
+      },
+      "tags": [
+        "停止・遮断・表示を確認",
+        "ルール掲示",
+        "lockout",
+        "tagout",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "朝礼"
+      ],
+      "orientation": "portrait",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/lockout-tagout.webp",
+      "originalPath": "/safety-images/library/originals/lockout-tagout.png",
+      "detailPath": "/materials/safety-images/lockout-tagout",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1122,
+        "height": 1402
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 900
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-061",
+      "order": 61,
+      "slug": "housekeeping-zone",
+      "title": "資材は区画内へ",
+      "category": "rules",
+      "categoryLabel": "制限・ルール掲示",
+      "texts": {
+        "ja": "資材は区画内へ",
+        "en": "Keep materials inside the marked area",
+        "vi": "Để vật liệu trong khu vực quy định",
+        "zh-CN": "材料请放在划定区域内",
+        "id": "Simpan material di dalam area yang ditandai"
+      },
+      "tags": [
+        "資材は区画内へ",
+        "ルール掲示",
+        "housekeeping",
+        "zone",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "朝礼"
+      ],
+      "orientation": "portrait",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/housekeeping-zone.webp",
+      "originalPath": "/safety-images/library/originals/housekeeping-zone.png",
+      "detailPath": "/materials/safety-images/housekeeping-zone",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1122,
+        "height": 1402
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 900
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-062",
+      "order": 62,
+      "slug": "waste-sorting",
+      "title": "分別して廃棄",
+      "category": "rules",
+      "categoryLabel": "制限・ルール掲示",
+      "texts": {
+        "ja": "分別して廃棄",
+        "en": "Sort waste before disposal",
+        "vi": "Phân loại trước khi thải bỏ",
+        "zh-CN": "分类后丢弃",
+        "id": "Pilah sebelum dibuang"
+      },
+      "tags": [
+        "分別して廃棄",
+        "ルール掲示",
+        "waste",
+        "sorting",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "朝礼"
+      ],
+      "orientation": "portrait",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/waste-sorting.webp",
+      "originalPath": "/safety-images/library/originals/waste-sorting.png",
+      "detailPath": "/materials/safety-images/waste-sorting",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1070,
+        "height": 1470
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 989
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-063",
+      "order": 63,
+      "slug": "fire-watch",
+      "title": "火気作業後の確認",
+      "category": "rules",
+      "categoryLabel": "制限・ルール掲示",
+      "texts": {
+        "ja": "火気作業後の確認",
+        "en": "Check after hot work",
+        "vi": "Kiểm tra sau công việc phát sinh nhiệt",
+        "zh-CN": "动火作业后检查",
+        "id": "Periksa setelah pekerjaan panas"
+      },
+      "tags": [
+        "火気作業後の確認",
+        "ルール掲示",
+        "fire",
+        "watch",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "朝礼"
+      ],
+      "orientation": "portrait",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/fire-watch.webp",
+      "originalPath": "/safety-images/library/originals/fire-watch.png",
+      "detailPath": "/materials/safety-images/fire-watch",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1122,
+        "height": 1402
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 900
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-064",
+      "order": 64,
+      "slug": "delivery-zone",
+      "title": "荷受け・荷降ろし場所",
+      "category": "rules",
+      "categoryLabel": "制限・ルール掲示",
+      "texts": {
+        "ja": "荷受け・荷降ろし場所",
+        "en": "Loading and unloading zone",
+        "vi": "Khu vực nhận và dỡ hàng",
+        "zh-CN": "收货及卸货区",
+        "id": "Area bongkar muat"
+      },
+      "tags": [
+        "荷受け・荷降ろし場所",
+        "ルール掲示",
+        "delivery",
+        "zone",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "朝礼"
+      ],
+      "orientation": "portrait",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/delivery-zone.webp",
+      "originalPath": "/safety-images/library/originals/delivery-zone.png",
+      "detailPath": "/materials/safety-images/delivery-zone",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1086,
+        "height": 1448
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 960
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-065",
+      "order": 65,
+      "slug": "daily-inspection",
+      "title": "始業前点検を実施",
+      "category": "rules",
+      "categoryLabel": "制限・ルール掲示",
+      "texts": {
+        "ja": "始業前点検を実施",
+        "en": "Perform a pre-start inspection",
+        "vi": "Kiểm tra trước khi bắt đầu",
+        "zh-CN": "进行作业前检查",
+        "id": "Lakukan pemeriksaan sebelum mulai"
+      },
+      "tags": [
+        "始業前点検を実施",
+        "ルール掲示",
+        "daily",
+        "inspection",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "朝礼"
+      ],
+      "orientation": "portrait",
+      "recommended": true,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/daily-inspection.webp",
+      "originalPath": "/safety-images/library/originals/daily-inspection.png",
+      "detailPath": "/materials/safety-images/daily-inspection",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1122,
+        "height": 1402
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 900
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-066",
+      "order": 66,
+      "slug": "scaffold-work-illustration",
+      "title": "足場作業",
+      "category": "construction-illustrations",
+      "categoryLabel": "施工計画・報告書用イラスト",
+      "texts": {
+        "ja": "足場作業",
+        "en": "Scaffold work",
+        "vi": "Công việc giàn giáo",
+        "zh-CN": "脚手架作业",
+        "id": "Pekerjaan perancah"
+      },
+      "tags": [
+        "足場作業",
+        "施工計画・報告書",
+        "scaffold",
+        "work",
+        "illustration",
+        "施工計画",
+        "報告書"
+      ],
+      "uses": [
+        "施工計画",
+        "報告書",
+        "教育"
+      ],
+      "orientation": "landscape",
+      "recommended": true,
+      "multilingual": true,
+      "pngAvailable": true,
+      "previewPath": "/safety-images/library/previews/scaffold-work-illustration.webp",
+      "originalPath": "/safety-images/library/originals/scaffold-work-illustration.png",
+      "detailPath": "/materials/safety-images/scaffold-work-illustration",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf",
+        "png"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1402,
+        "height": 1122
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 576
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-067",
+      "order": 67,
+      "slug": "mobile-crane-illustration",
+      "title": "移動式クレーン",
+      "category": "construction-illustrations",
+      "categoryLabel": "施工計画・報告書用イラスト",
+      "texts": {
+        "ja": "移動式クレーン",
+        "en": "Mobile crane",
+        "vi": "Cần cẩu di động",
+        "zh-CN": "移动式起重机",
+        "id": "Derek bergerak"
+      },
+      "tags": [
+        "移動式クレーン",
+        "施工計画・報告書",
+        "mobile",
+        "crane",
+        "illustration",
+        "施工計画",
+        "報告書"
+      ],
+      "uses": [
+        "施工計画",
+        "報告書",
+        "教育"
+      ],
+      "orientation": "landscape",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": true,
+      "previewPath": "/safety-images/library/previews/mobile-crane-illustration.webp",
+      "originalPath": "/safety-images/library/originals/mobile-crane-illustration.png",
+      "detailPath": "/materials/safety-images/mobile-crane-illustration",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf",
+        "png"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1536,
+        "height": 1024
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 480
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-068",
+      "order": 68,
+      "slug": "rigging-work-illustration",
+      "title": "玉掛け作業",
+      "category": "construction-illustrations",
+      "categoryLabel": "施工計画・報告書用イラスト",
+      "texts": {
+        "ja": "玉掛け作業",
+        "en": "Rigging work",
+        "vi": "Công việc móc cáp",
+        "zh-CN": "吊装索具作业",
+        "id": "Pekerjaan rigging"
+      },
+      "tags": [
+        "玉掛け作業",
+        "施工計画・報告書",
+        "rigging",
+        "work",
+        "illustration",
+        "施工計画",
+        "報告書"
+      ],
+      "uses": [
+        "施工計画",
+        "報告書",
+        "教育"
+      ],
+      "orientation": "landscape",
+      "recommended": true,
+      "multilingual": true,
+      "pngAvailable": true,
+      "previewPath": "/safety-images/library/previews/rigging-work-illustration.webp",
+      "originalPath": "/safety-images/library/originals/rigging-work-illustration.png",
+      "detailPath": "/materials/safety-images/rigging-work-illustration",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf",
+        "png"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1402,
+        "height": 1122
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 576
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-069",
+      "order": 69,
+      "slug": "aerial-work-platform-illustration",
+      "title": "高所作業車",
+      "category": "construction-illustrations",
+      "categoryLabel": "施工計画・報告書用イラスト",
+      "texts": {
+        "ja": "高所作業車",
+        "en": "Aerial work platform",
+        "vi": "Xe nâng người làm việc trên cao",
+        "zh-CN": "高空作业平台",
+        "id": "Platform kerja udara"
+      },
+      "tags": [
+        "高所作業車",
+        "施工計画・報告書",
+        "aerial",
+        "work",
+        "platform",
+        "illustration",
+        "施工計画",
+        "報告書"
+      ],
+      "uses": [
+        "施工計画",
+        "報告書",
+        "教育"
+      ],
+      "orientation": "landscape",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": true,
+      "previewPath": "/safety-images/library/previews/aerial-work-platform-illustration.webp",
+      "originalPath": "/safety-images/library/originals/aerial-work-platform-illustration.png",
+      "detailPath": "/materials/safety-images/aerial-work-platform-illustration",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf",
+        "png"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1402,
+        "height": 1122
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 576
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-070",
+      "order": 70,
+      "slug": "full-harness-illustration",
+      "title": "フルハーネス使用",
+      "category": "construction-illustrations",
+      "categoryLabel": "施工計画・報告書用イラスト",
+      "texts": {
+        "ja": "フルハーネス使用",
+        "en": "Using a full-body harness",
+        "vi": "Sử dụng dây đai toàn thân",
+        "zh-CN": "使用全身式安全带",
+        "id": "Penggunaan sabuk pengaman tubuh penuh"
+      },
+      "tags": [
+        "フルハーネス使用",
+        "施工計画・報告書",
+        "full",
+        "harness",
+        "illustration",
+        "施工計画",
+        "報告書"
+      ],
+      "uses": [
+        "施工計画",
+        "報告書",
+        "教育"
+      ],
+      "orientation": "landscape",
+      "recommended": true,
+      "multilingual": true,
+      "pngAvailable": true,
+      "previewPath": "/safety-images/library/previews/full-harness-illustration.webp",
+      "originalPath": "/safety-images/library/originals/full-harness-illustration.png",
+      "detailPath": "/materials/safety-images/full-harness-illustration",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf",
+        "png"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1536,
+        "height": 1024
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 480
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-071",
+      "order": 71,
+      "slug": "traffic-guidance-illustration",
+      "title": "交通誘導",
+      "category": "construction-illustrations",
+      "categoryLabel": "施工計画・報告書用イラスト",
+      "texts": {
+        "ja": "交通誘導",
+        "en": "Traffic guidance",
+        "vi": "Điều tiết giao thông",
+        "zh-CN": "交通引导",
+        "id": "Pengaturan lalu lintas"
+      },
+      "tags": [
+        "交通誘導",
+        "施工計画・報告書",
+        "traffic",
+        "guidance",
+        "illustration",
+        "施工計画",
+        "報告書"
+      ],
+      "uses": [
+        "施工計画",
+        "報告書",
+        "教育"
+      ],
+      "orientation": "landscape",
+      "recommended": true,
+      "multilingual": true,
+      "pngAvailable": true,
+      "previewPath": "/safety-images/library/previews/traffic-guidance-illustration.webp",
+      "originalPath": "/safety-images/library/originals/traffic-guidance-illustration.png",
+      "detailPath": "/materials/safety-images/traffic-guidance-illustration",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf",
+        "png"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1402,
+        "height": 1122
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 576
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-072",
+      "order": 72,
+      "slug": "dump-excavator-illustration",
+      "title": "ダンプ・バックホウ連携",
+      "category": "construction-illustrations",
+      "categoryLabel": "施工計画・報告書用イラスト",
+      "texts": {
+        "ja": "ダンプ・バックホウ連携",
+        "en": "Dump truck and excavator coordination",
+        "vi": "Phối hợp xe ben và máy xúc",
+        "zh-CN": "自卸车与挖掘机协同",
+        "id": "Koordinasi truk jungkit dan ekskavator"
+      },
+      "tags": [
+        "ダンプ・バックホウ連携",
+        "施工計画・報告書",
+        "dump",
+        "excavator",
+        "illustration",
+        "施工計画",
+        "報告書"
+      ],
+      "uses": [
+        "施工計画",
+        "報告書",
+        "教育"
+      ],
+      "orientation": "landscape",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": true,
+      "previewPath": "/safety-images/library/previews/dump-excavator-illustration.webp",
+      "originalPath": "/safety-images/library/originals/dump-excavator-illustration.png",
+      "detailPath": "/materials/safety-images/dump-excavator-illustration",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf",
+        "png"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1402,
+        "height": 1122
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 576
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-073",
+      "order": 73,
+      "slug": "excavation-work-illustration",
+      "title": "掘削作業",
+      "category": "construction-illustrations",
+      "categoryLabel": "施工計画・報告書用イラスト",
+      "texts": {
+        "ja": "掘削作業",
+        "en": "Excavation work",
+        "vi": "Công việc đào đất",
+        "zh-CN": "开挖作业",
+        "id": "Pekerjaan penggalian"
+      },
+      "tags": [
+        "掘削作業",
+        "施工計画・報告書",
+        "excavation",
+        "work",
+        "illustration",
+        "施工計画",
+        "報告書"
+      ],
+      "uses": [
+        "施工計画",
+        "報告書",
+        "教育"
+      ],
+      "orientation": "landscape",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": true,
+      "previewPath": "/safety-images/library/previews/excavation-work-illustration.webp",
+      "originalPath": "/safety-images/library/originals/excavation-work-illustration.png",
+      "detailPath": "/materials/safety-images/excavation-work-illustration",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf",
+        "png"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1402,
+        "height": 1122
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 576
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-074",
+      "order": 74,
+      "slug": "formwork-illustration",
+      "title": "型枠組立",
+      "category": "construction-illustrations",
+      "categoryLabel": "施工計画・報告書用イラスト",
+      "texts": {
+        "ja": "型枠組立",
+        "en": "Formwork assembly",
+        "vi": "Lắp dựng ván khuôn",
+        "zh-CN": "模板组装",
+        "id": "Perakitan bekisting"
+      },
+      "tags": [
+        "型枠組立",
+        "施工計画・報告書",
+        "formwork",
+        "illustration",
+        "施工計画",
+        "報告書"
+      ],
+      "uses": [
+        "施工計画",
+        "報告書",
+        "教育"
+      ],
+      "orientation": "landscape",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": true,
+      "previewPath": "/safety-images/library/previews/formwork-illustration.webp",
+      "originalPath": "/safety-images/library/originals/formwork-illustration.png",
+      "detailPath": "/materials/safety-images/formwork-illustration",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf",
+        "png"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1401,
+        "height": 1123
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 577
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-075",
+      "order": 75,
+      "slug": "rebar-work-illustration",
+      "title": "鉄筋組立",
+      "category": "construction-illustrations",
+      "categoryLabel": "施工計画・報告書用イラスト",
+      "texts": {
+        "ja": "鉄筋組立",
+        "en": "Rebar assembly",
+        "vi": "Lắp dựng cốt thép",
+        "zh-CN": "钢筋组装",
+        "id": "Perakitan tulangan"
+      },
+      "tags": [
+        "鉄筋組立",
+        "施工計画・報告書",
+        "rebar",
+        "work",
+        "illustration",
+        "施工計画",
+        "報告書"
+      ],
+      "uses": [
+        "施工計画",
+        "報告書",
+        "教育"
+      ],
+      "orientation": "landscape",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": true,
+      "previewPath": "/safety-images/library/previews/rebar-work-illustration.webp",
+      "originalPath": "/safety-images/library/originals/rebar-work-illustration.png",
+      "detailPath": "/materials/safety-images/rebar-work-illustration",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf",
+        "png"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1402,
+        "height": 1122
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 576
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-076",
+      "order": 76,
+      "slug": "concrete-placement-illustration",
+      "title": "コンクリート打設",
+      "category": "construction-illustrations",
+      "categoryLabel": "施工計画・報告書用イラスト",
+      "texts": {
+        "ja": "コンクリート打設",
+        "en": "Concrete placement",
+        "vi": "Đổ bê tông",
+        "zh-CN": "混凝土浇筑",
+        "id": "Pengecoran beton"
+      },
+      "tags": [
+        "コンクリート打設",
+        "施工計画・報告書",
+        "concrete",
+        "placement",
+        "illustration",
+        "施工計画",
+        "報告書"
+      ],
+      "uses": [
+        "施工計画",
+        "報告書",
+        "教育"
+      ],
+      "orientation": "landscape",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": true,
+      "previewPath": "/safety-images/library/previews/concrete-placement-illustration.webp",
+      "originalPath": "/safety-images/library/originals/concrete-placement-illustration.png",
+      "detailPath": "/materials/safety-images/concrete-placement-illustration",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf",
+        "png"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1402,
+        "height": 1122
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 576
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-077",
+      "order": 77,
+      "slug": "temporary-electric-illustration",
+      "title": "仮設電気設備",
+      "category": "construction-illustrations",
+      "categoryLabel": "施工計画・報告書用イラスト",
+      "texts": {
+        "ja": "仮設電気設備",
+        "en": "Temporary electrical equipment",
+        "vi": "Thiết bị điện tạm thời",
+        "zh-CN": "临时电气设备",
+        "id": "Peralatan listrik sementara"
+      },
+      "tags": [
+        "仮設電気設備",
+        "施工計画・報告書",
+        "temporary",
+        "electric",
+        "illustration",
+        "施工計画",
+        "報告書"
+      ],
+      "uses": [
+        "施工計画",
+        "報告書",
+        "教育"
+      ],
+      "orientation": "landscape",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": true,
+      "previewPath": "/safety-images/library/previews/temporary-electric-illustration.webp",
+      "originalPath": "/safety-images/library/originals/temporary-electric-illustration.png",
+      "detailPath": "/materials/safety-images/temporary-electric-illustration",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf",
+        "png"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1402,
+        "height": 1122
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 576
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-078",
+      "order": 78,
+      "slug": "welding-work-illustration",
+      "title": "溶接作業",
+      "category": "construction-illustrations",
+      "categoryLabel": "施工計画・報告書用イラスト",
+      "texts": {
+        "ja": "溶接作業",
+        "en": "Welding work",
+        "vi": "Công việc hàn",
+        "zh-CN": "焊接作业",
+        "id": "Pekerjaan pengelasan"
+      },
+      "tags": [
+        "溶接作業",
+        "施工計画・報告書",
+        "welding",
+        "work",
+        "illustration",
+        "施工計画",
+        "報告書"
+      ],
+      "uses": [
+        "施工計画",
+        "報告書",
+        "教育"
+      ],
+      "orientation": "landscape",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": true,
+      "previewPath": "/safety-images/library/previews/welding-work-illustration.webp",
+      "originalPath": "/safety-images/library/originals/welding-work-illustration.png",
+      "detailPath": "/materials/safety-images/welding-work-illustration",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf",
+        "png"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1402,
+        "height": 1122
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 576
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-079",
+      "order": 79,
+      "slug": "cutting-work-illustration",
+      "title": "切断作業",
+      "category": "construction-illustrations",
+      "categoryLabel": "施工計画・報告書用イラスト",
+      "texts": {
+        "ja": "切断作業",
+        "en": "Cutting work",
+        "vi": "Công việc cắt",
+        "zh-CN": "切割作业",
+        "id": "Pekerjaan pemotongan"
+      },
+      "tags": [
+        "切断作業",
+        "施工計画・報告書",
+        "cutting",
+        "work",
+        "illustration",
+        "施工計画",
+        "報告書"
+      ],
+      "uses": [
+        "施工計画",
+        "報告書",
+        "教育"
+      ],
+      "orientation": "landscape",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": true,
+      "previewPath": "/safety-images/library/previews/cutting-work-illustration.webp",
+      "originalPath": "/safety-images/library/originals/cutting-work-illustration.png",
+      "detailPath": "/materials/safety-images/cutting-work-illustration",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf",
+        "png"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1402,
+        "height": 1122
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 576
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-080",
+      "order": 80,
+      "slug": "material-hoisting-illustration",
+      "title": "資材荷揚げ",
+      "category": "construction-illustrations",
+      "categoryLabel": "施工計画・報告書用イラスト",
+      "texts": {
+        "ja": "資材荷揚げ",
+        "en": "Material hoisting",
+        "vi": "Nâng vật liệu",
+        "zh-CN": "材料吊运",
+        "id": "Pengangkatan material"
+      },
+      "tags": [
+        "資材荷揚げ",
+        "施工計画・報告書",
+        "material",
+        "hoisting",
+        "illustration",
+        "施工計画",
+        "報告書"
+      ],
+      "uses": [
+        "施工計画",
+        "報告書",
+        "教育"
+      ],
+      "orientation": "landscape",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": true,
+      "previewPath": "/safety-images/library/previews/material-hoisting-illustration.webp",
+      "originalPath": "/safety-images/library/originals/material-hoisting-illustration.png",
+      "detailPath": "/materials/safety-images/material-hoisting-illustration",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf",
+        "png"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1402,
+        "height": 1122
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 576
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-081",
+      "order": 81,
+      "slug": "opening-protection-illustration",
+      "title": "開口部養生",
+      "category": "construction-illustrations",
+      "categoryLabel": "施工計画・報告書用イラスト",
+      "texts": {
+        "ja": "開口部養生",
+        "en": "Floor opening protection",
+        "vi": "Bảo vệ lỗ mở sàn",
+        "zh-CN": "洞口防护",
+        "id": "Perlindungan bukaan lantai"
+      },
+      "tags": [
+        "開口部養生",
+        "施工計画・報告書",
+        "opening",
+        "protection",
+        "illustration",
+        "施工計画",
+        "報告書"
+      ],
+      "uses": [
+        "施工計画",
+        "報告書",
+        "教育"
+      ],
+      "orientation": "landscape",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": true,
+      "previewPath": "/safety-images/library/previews/opening-protection-illustration.webp",
+      "originalPath": "/safety-images/library/originals/opening-protection-illustration.png",
+      "detailPath": "/materials/safety-images/opening-protection-illustration",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf",
+        "png"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1402,
+        "height": 1122
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 576
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-082",
+      "order": 82,
+      "slug": "stepladder-illustration",
+      "title": "脚立作業",
+      "category": "construction-illustrations",
+      "categoryLabel": "施工計画・報告書用イラスト",
+      "texts": {
+        "ja": "脚立作業",
+        "en": "Stepladder work",
+        "vi": "Công việc trên thang chữ A",
+        "zh-CN": "人字梯作业",
+        "id": "Pekerjaan dengan tangga lipat"
+      },
+      "tags": [
+        "脚立作業",
+        "施工計画・報告書",
+        "stepladder",
+        "illustration",
+        "施工計画",
+        "報告書"
+      ],
+      "uses": [
+        "施工計画",
+        "報告書",
+        "教育"
+      ],
+      "orientation": "landscape",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": true,
+      "previewPath": "/safety-images/library/previews/stepladder-illustration.webp",
+      "originalPath": "/safety-images/library/originals/stepladder-illustration.png",
+      "detailPath": "/materials/safety-images/stepladder-illustration",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf",
+        "png"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1402,
+        "height": 1122
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 576
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-083",
+      "order": 83,
+      "slug": "rolling-tower-illustration",
+      "title": "ローリングタワー",
+      "category": "construction-illustrations",
+      "categoryLabel": "施工計画・報告書用イラスト",
+      "texts": {
+        "ja": "ローリングタワー",
+        "en": "Mobile scaffold tower",
+        "vi": "Tháp giàn giáo di động",
+        "zh-CN": "移动脚手架塔",
+        "id": "Menara perancah bergerak"
+      },
+      "tags": [
+        "ローリングタワー",
+        "施工計画・報告書",
+        "rolling",
+        "tower",
+        "illustration",
+        "施工計画",
+        "報告書"
+      ],
+      "uses": [
+        "施工計画",
+        "報告書",
+        "教育"
+      ],
+      "orientation": "landscape",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": true,
+      "previewPath": "/safety-images/library/previews/rolling-tower-illustration.webp",
+      "originalPath": "/safety-images/library/originals/rolling-tower-illustration.png",
+      "detailPath": "/materials/safety-images/rolling-tower-illustration",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf",
+        "png"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1402,
+        "height": 1122
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 576
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-084",
+      "order": 84,
+      "slug": "safety-morning-meeting-illustration",
+      "title": "安全朝礼",
+      "category": "construction-illustrations",
+      "categoryLabel": "施工計画・報告書用イラスト",
+      "texts": {
+        "ja": "安全朝礼",
+        "en": "Safety morning meeting",
+        "vi": "Họp an toàn đầu ca",
+        "zh-CN": "安全早会",
+        "id": "Briefing keselamatan pagi"
+      },
+      "tags": [
+        "安全朝礼",
+        "施工計画・報告書",
+        "safety",
+        "morning",
+        "meeting",
+        "illustration",
+        "施工計画",
+        "報告書"
+      ],
+      "uses": [
+        "施工計画",
+        "報告書",
+        "教育"
+      ],
+      "orientation": "landscape",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": true,
+      "previewPath": "/safety-images/library/previews/safety-morning-meeting-illustration.webp",
+      "originalPath": "/safety-images/library/originals/safety-morning-meeting-illustration.png",
+      "detailPath": "/materials/safety-images/safety-morning-meeting-illustration",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf",
+        "png"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1402,
+        "height": 1122
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 576
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-085",
+      "order": 85,
+      "slug": "site-inspection-illustration",
+      "title": "現場点検",
+      "category": "construction-illustrations",
+      "categoryLabel": "施工計画・報告書用イラスト",
+      "texts": {
+        "ja": "現場点検",
+        "en": "Site inspection",
+        "vi": "Kiểm tra công trường",
+        "zh-CN": "现场检查",
+        "id": "Inspeksi lokasi"
+      },
+      "tags": [
+        "現場点検",
+        "施工計画・報告書",
+        "site",
+        "inspection",
+        "illustration",
+        "施工計画",
+        "報告書"
+      ],
+      "uses": [
+        "施工計画",
+        "報告書",
+        "教育"
+      ],
+      "orientation": "landscape",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": true,
+      "previewPath": "/safety-images/library/previews/site-inspection-illustration.webp",
+      "originalPath": "/safety-images/library/originals/site-inspection-illustration.png",
+      "detailPath": "/materials/safety-images/site-inspection-illustration",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf",
+        "png"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1536,
+        "height": 1024
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 480
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-086",
+      "order": 86,
+      "slug": "heat-illness-alert",
+      "title": "熱中症警戒",
+      "category": "heat-health",
+      "categoryLabel": "熱中症・健康安全",
+      "texts": {
+        "ja": "熱中症警戒",
+        "en": "Heat illness alert",
+        "vi": "Cảnh báo sốc nhiệt",
+        "zh-CN": "谨防中暑",
+        "id": "Waspada penyakit akibat panas"
+      },
+      "tags": [
+        "熱中症警戒",
+        "熱中症・健康",
+        "heat",
+        "illness",
+        "alert",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "朝礼",
+        "教育"
+      ],
+      "orientation": "portrait",
+      "recommended": true,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/heat-illness-alert.webp",
+      "originalPath": "/safety-images/library/originals/heat-illness-alert.png",
+      "detailPath": "/materials/safety-images/heat-illness-alert",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1122,
+        "height": 1402
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 900
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-087",
+      "order": 87,
+      "slug": "drink-water",
+      "title": "こまめに水分補給",
+      "category": "heat-health",
+      "categoryLabel": "熱中症・健康安全",
+      "texts": {
+        "ja": "こまめに水分補給",
+        "en": "Drink water frequently",
+        "vi": "Uống nước thường xuyên",
+        "zh-CN": "及时补充水分",
+        "id": "Minum air secara teratur"
+      },
+      "tags": [
+        "こまめに水分補給",
+        "熱中症・健康",
+        "drink",
+        "water",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "朝礼",
+        "教育"
+      ],
+      "orientation": "portrait",
+      "recommended": true,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/drink-water.webp",
+      "originalPath": "/safety-images/library/originals/drink-water.png",
+      "detailPath": "/materials/safety-images/drink-water",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1122,
+        "height": 1402
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 900
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-088",
+      "order": 88,
+      "slug": "salt-intake",
+      "title": "適度に塩分補給",
+      "category": "heat-health",
+      "categoryLabel": "熱中症・健康安全",
+      "texts": {
+        "ja": "適度に塩分補給",
+        "en": "Replenish salt appropriately",
+        "vi": "Bổ sung muối hợp lý",
+        "zh-CN": "适量补充盐分",
+        "id": "Cukupi asupan garam"
+      },
+      "tags": [
+        "適度に塩分補給",
+        "熱中症・健康",
+        "salt",
+        "intake",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "朝礼",
+        "教育"
+      ],
+      "orientation": "portrait",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/salt-intake.webp",
+      "originalPath": "/safety-images/library/originals/salt-intake.png",
+      "detailPath": "/materials/safety-images/salt-intake",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1122,
+        "height": 1402
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 900
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-089",
+      "order": 89,
+      "slug": "cool-rest-area",
+      "title": "涼しい休憩所",
+      "category": "heat-health",
+      "categoryLabel": "熱中症・健康安全",
+      "texts": {
+        "ja": "涼しい休憩所",
+        "en": "Cool rest area",
+        "vi": "Khu nghỉ mát",
+        "zh-CN": "清凉休息区",
+        "id": "Tempat istirahat sejuk"
+      },
+      "tags": [
+        "涼しい休憩所",
+        "熱中症・健康",
+        "cool",
+        "rest",
+        "area",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "朝礼",
+        "教育"
+      ],
+      "orientation": "portrait",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/cool-rest-area.webp",
+      "originalPath": "/safety-images/library/originals/cool-rest-area.png",
+      "detailPath": "/materials/safety-images/cool-rest-area",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1122,
+        "height": 1402
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 900
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-090",
+      "order": 90,
+      "slug": "check-wbgt",
+      "title": "WBGTを確認",
+      "category": "heat-health",
+      "categoryLabel": "熱中症・健康安全",
+      "texts": {
+        "ja": "WBGTを確認",
+        "en": "Check the WBGT",
+        "vi": "Kiểm tra chỉ số WBGT",
+        "zh-CN": "确认WBGT指数",
+        "id": "Periksa WBGT"
+      },
+      "tags": [
+        "WBGTを確認",
+        "熱中症・健康",
+        "check",
+        "wbgt",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "朝礼",
+        "教育"
+      ],
+      "orientation": "portrait",
+      "recommended": true,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/check-wbgt.webp",
+      "originalPath": "/safety-images/library/originals/check-wbgt.png",
+      "detailPath": "/materials/safety-images/check-wbgt",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1024,
+        "height": 1536
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 1080
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-091",
+      "order": 91,
+      "slug": "health-check",
+      "title": "作業前に体調確認",
+      "category": "heat-health",
+      "categoryLabel": "熱中症・健康安全",
+      "texts": {
+        "ja": "作業前に体調確認",
+        "en": "Check your condition before work",
+        "vi": "Kiểm tra sức khỏe trước khi làm việc",
+        "zh-CN": "作业前确认身体状况",
+        "id": "Periksa kondisi tubuh sebelum bekerja"
+      },
+      "tags": [
+        "作業前に体調確認",
+        "熱中症・健康",
+        "health",
+        "check",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "朝礼",
+        "教育"
+      ],
+      "orientation": "portrait",
+      "recommended": true,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/health-check.webp",
+      "originalPath": "/safety-images/library/originals/health-check.png",
+      "detailPath": "/materials/safety-images/health-check",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1122,
+        "height": 1402
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 900
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-092",
+      "order": 92,
+      "slug": "buddy-system",
+      "title": "単独作業を避ける",
+      "category": "heat-health",
+      "categoryLabel": "熱中症・健康安全",
+      "texts": {
+        "ja": "単独作業を避ける",
+        "en": "Avoid working alone",
+        "vi": "Tránh làm việc một mình",
+        "zh-CN": "避免单独作业",
+        "id": "Hindari bekerja sendirian"
+      },
+      "tags": [
+        "単独作業を避ける",
+        "熱中症・健康",
+        "buddy",
+        "system",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "朝礼",
+        "教育"
+      ],
+      "orientation": "portrait",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/buddy-system.webp",
+      "originalPath": "/safety-images/library/originals/buddy-system.png",
+      "detailPath": "/materials/safety-images/buddy-system",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1122,
+        "height": 1402
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 900
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-093",
+      "order": 93,
+      "slug": "first-aid-response",
+      "title": "異変時はすぐ救急対応",
+      "category": "heat-health",
+      "categoryLabel": "熱中症・健康安全",
+      "texts": {
+        "ja": "異変時はすぐ救急対応",
+        "en": "Respond immediately when someone feels unwell",
+        "vi": "Sơ cứu ngay khi có bất thường",
+        "zh-CN": "发现异常立即急救",
+        "id": "Segera tangani jika ada gangguan kesehatan"
+      },
+      "tags": [
+        "異変時はすぐ救急対応",
+        "熱中症・健康",
+        "first",
+        "aid",
+        "response",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "朝礼",
+        "教育"
+      ],
+      "orientation": "portrait",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/first-aid-response.webp",
+      "originalPath": "/safety-images/library/originals/first-aid-response.png",
+      "detailPath": "/materials/safety-images/first-aid-response",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1122,
+        "height": 1402
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 900
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-094",
+      "order": 94,
+      "slug": "cool-down",
+      "title": "体を冷やして休む",
+      "category": "heat-health",
+      "categoryLabel": "熱中症・健康安全",
+      "texts": {
+        "ja": "体を冷やして休む",
+        "en": "Cool down and rest",
+        "vi": "Làm mát cơ thể và nghỉ ngơi",
+        "zh-CN": "降温并休息",
+        "id": "Dinginkan tubuh dan beristirahat"
+      },
+      "tags": [
+        "体を冷やして休む",
+        "熱中症・健康",
+        "cool",
+        "down",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "朝礼",
+        "教育"
+      ],
+      "orientation": "portrait",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/cool-down.webp",
+      "originalPath": "/safety-images/library/originals/cool-down.png",
+      "detailPath": "/materials/safety-images/cool-down",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1122,
+        "height": 1402
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 900
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-095",
+      "order": 95,
+      "slug": "emergency-call",
+      "title": "迷わず緊急連絡",
+      "category": "heat-health",
+      "categoryLabel": "熱中症・健康安全",
+      "texts": {
+        "ja": "迷わず緊急連絡",
+        "en": "Call for emergency help without delay",
+        "vi": "Gọi hỗ trợ khẩn cấp ngay",
+        "zh-CN": "立即进行紧急联络",
+        "id": "Segera hubungi bantuan darurat"
+      },
+      "tags": [
+        "迷わず緊急連絡",
+        "熱中症・健康",
+        "emergency",
+        "call",
+        "安全掲示"
+      ],
+      "uses": [
+        "掲示",
+        "朝礼",
+        "教育"
+      ],
+      "orientation": "portrait",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/emergency-call.webp",
+      "originalPath": "/safety-images/library/originals/emergency-call.png",
+      "detailPath": "/materials/safety-images/emergency-call",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1122,
+        "height": 1402
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 900
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-096",
+      "order": 96,
+      "slug": "safety-calendar",
+      "title": "安全活動カレンダー",
+      "category": "general",
+      "categoryLabel": "その他汎用",
+      "texts": {
+        "ja": "安全活動カレンダー",
+        "en": "Safety activity calendar",
+        "vi": "Lịch hoạt động an toàn",
+        "zh-CN": "安全活动日历",
+        "id": "Kalender kegiatan keselamatan"
+      },
+      "tags": [
+        "安全活動カレンダー",
+        "汎用",
+        "safety",
+        "calendar",
+        "安全掲示"
+      ],
+      "uses": [
+        "朝礼",
+        "教育",
+        "報告書"
+      ],
+      "orientation": "portrait",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/safety-calendar.webp",
+      "originalPath": "/safety-images/library/originals/safety-calendar.png",
+      "detailPath": "/materials/safety-images/safety-calendar",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1122,
+        "height": 1402
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 900
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-097",
+      "order": 97,
+      "slug": "near-miss-share",
+      "title": "ヒヤリハットを共有",
+      "category": "general",
+      "categoryLabel": "その他汎用",
+      "texts": {
+        "ja": "ヒヤリハットを共有",
+        "en": "Share near-miss reports",
+        "vi": "Chia sẻ sự cố suýt xảy ra",
+        "zh-CN": "分享未遂事件",
+        "id": "Bagikan laporan nyaris celaka"
+      },
+      "tags": [
+        "ヒヤリハットを共有",
+        "汎用",
+        "near",
+        "miss",
+        "share",
+        "安全掲示"
+      ],
+      "uses": [
+        "朝礼",
+        "教育",
+        "報告書"
+      ],
+      "orientation": "portrait",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/near-miss-share.webp",
+      "originalPath": "/safety-images/library/originals/near-miss-share.png",
+      "detailPath": "/materials/safety-images/near-miss-share",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1122,
+        "height": 1402
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 900
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-098",
+      "order": 98,
+      "slug": "photo-record",
+      "title": "写真で作業記録",
+      "category": "general",
+      "categoryLabel": "その他汎用",
+      "texts": {
+        "ja": "写真で作業記録",
+        "en": "Record the work with photos",
+        "vi": "Ghi lại công việc bằng ảnh",
+        "zh-CN": "用照片记录作业",
+        "id": "Catat pekerjaan dengan foto"
+      },
+      "tags": [
+        "写真で作業記録",
+        "汎用",
+        "photo",
+        "record",
+        "安全掲示"
+      ],
+      "uses": [
+        "朝礼",
+        "教育",
+        "報告書"
+      ],
+      "orientation": "portrait",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/photo-record.webp",
+      "originalPath": "/safety-images/library/originals/photo-record.png",
+      "detailPath": "/materials/safety-images/photo-record",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1122,
+        "height": 1402
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 900
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-099",
+      "order": 99,
+      "slug": "toolbox-meeting",
+      "title": "作業前のひと声",
+      "category": "general",
+      "categoryLabel": "その他汎用",
+      "texts": {
+        "ja": "作業前のひと声",
+        "en": "Speak up before starting work",
+        "vi": "Nhắc nhau trước khi bắt đầu",
+        "zh-CN": "作业前相互提醒",
+        "id": "Saling mengingatkan sebelum bekerja"
+      },
+      "tags": [
+        "作業前のひと声",
+        "汎用",
+        "toolbox",
+        "meeting",
+        "安全掲示"
+      ],
+      "uses": [
+        "朝礼",
+        "教育",
+        "報告書"
+      ],
+      "orientation": "portrait",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/toolbox-meeting.webp",
+      "originalPath": "/safety-images/library/originals/toolbox-meeting.png",
+      "detailPath": "/materials/safety-images/toolbox-meeting",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1122,
+        "height": 1402
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 900
+      },
+      "published": true
+    },
+    {
+      "id": "safety-image-100",
+      "order": 100,
+      "slug": "completion-check",
+      "title": "作業完了を確認",
+      "category": "general",
+      "categoryLabel": "その他汎用",
+      "texts": {
+        "ja": "作業完了を確認",
+        "en": "Confirm work completion",
+        "vi": "Xác nhận công việc đã hoàn thành",
+        "zh-CN": "确认作业完成",
+        "id": "Pastikan pekerjaan selesai"
+      },
+      "tags": [
+        "作業完了を確認",
+        "汎用",
+        "completion",
+        "check",
+        "安全掲示"
+      ],
+      "uses": [
+        "朝礼",
+        "教育",
+        "報告書"
+      ],
+      "orientation": "portrait",
+      "recommended": false,
+      "multilingual": true,
+      "pngAvailable": false,
+      "previewPath": "/safety-images/library/previews/completion-check.webp",
+      "originalPath": "/safety-images/library/originals/completion-check.png",
+      "detailPath": "/materials/safety-images/completion-check",
+      "rights": "portal-owned-commercial-editable",
+      "cleanMaster": true,
+      "overlay": "runtime-code-layer",
+      "downloadFormats": [
+        "jpeg",
+        "pdf"
+      ],
+      "printSizes": [
+        "A4-portrait",
+        "A4-landscape",
+        "A3-portrait",
+        "A3-landscape"
+      ],
+      "sourceDimensions": {
+        "width": 1122,
+        "height": 1402
+      },
+      "previewDimensions": {
+        "width": 720,
+        "height": 900
+      },
+      "published": true
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "recordedAt": "2026-08-21T01:37:00+09:00",
+  "productionBeforeRelease": {
+    "deploymentId": "dpl_FFiTUr4HxURnMb1j9JYswSop67Ze",
+    "immutableUrl": "https://safe-ai-site-rmnkdjwfm-kameking-labs-projects.vercel.app",
+    "readyState": "READY"
+  },
+  "previousRollback": {
+    "deploymentId": "dpl_6FVbW6NQiGphMRPa13m5iRQT6e37",
+    "immutableUrl": "https://safe-ai-site-mxiuet1g7-kameking-labs-projects.vercel.app",
+    "readyState": "READY"
+  },
+  "validatedPreview": {
+    "deploymentId": "dpl_3wGd9an7rKEv9At8cZB3X1F3odEw",
+    "immutableUrl": "https://safe-ai-site-34jwb3aq1-kameking-labs-projects.vercel.app",
+    "readyState": "READY"
+  },
+  "releasedProduction": {
+    "deploymentId": "dpl_6QCrL98PCGqkubTeL7S8txJfS3PD",
+    "immutableUrl": "https://safe-ai-site-mleks34ps-kameking-labs-projects.vercel.app",
+    "publicAlias": "https://www.anzen-ai-portal.jp",
+    "readyState": "READY"
+  }
+}

@@ -86,8 +86,21 @@
 /web/test/
 /web/tests/
 /web/scripts/*
+!/web/scripts/
 !/web/scripts/vercel-ignore-build.sh
 !/web/scripts/storage-deployment-guard.mjs
+!/web/scripts/audit
+/web/scripts/audit/*
+!/web/scripts/audit/public-identity-guard.mjs
+# Vercel CLI resolves this root ignore file against rootDirectory=web.
+# Keep the build guards available under either resolution base.
+!/scripts/
+/scripts/*
+!/scripts/vercel-ignore-build.sh
+!/scripts/storage-deployment-guard.mjs
+!/scripts/audit
+/scripts/audit/*
+!/scripts/audit/public-identity-guard.mjs
 **/__snapshots__/
 **/__tests__/
 **/*.test.*
@@ -110,6 +123,22 @@ Desktop.ini
 # allowlist here, in web/.vercelignore, and in storage-budget.yml.
 /web/public/**
 !/web/public/**/
+# Vercel CLI's recursive walker checks directory paths without a trailing slash.
+# Keep reviewed public directories traversable while the file extension allowlist stays fail-closed.
+!/web/public/geo
+!/web/public/icons
+!/web/public/images
+!/web/public/mascot
+!/web/public/safety-images
+!/web/public/safety-images/library
+!/web/public/safety-images/library/originals
+!/web/public/safety-images/library/previews
+!/web/public/safety-images/pilot
+!/web/public/screenshots
+!/web/public/seminars
+!/web/public/visual-ky
+!/web/public/visual-ky/scenarios
+!/web/public/visual-refresh
 !/web/public/**/*.ico
 !/web/public/**/*.png
 !/web/public/**/*.jpg

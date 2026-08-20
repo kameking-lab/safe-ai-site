@@ -1,0 +1,21 @@
+{
+  "canvas": { "width": 1122, "height": 1402 },
+  "all": {
+    "panel": { "x": 38, "y": 58, "width": 590, "height": 438, "radius": 24 },
+    "lines": [
+      { "language": "ja", "x": 62, "y": 155, "fontSize": 82, "lineHeight": 92 },
+      { "language": "en", "x": 64, "y": 238, "fontSize": 43, "lineHeight": 54 },
+      { "language": "vi", "x": 64, "y": 307, "fontSize": 49, "lineHeight": 60 },
+      { "language": "zh-CN", "x": 64, "y": 383, "fontSize": 61, "lineHeight": 70 },
+      { "language": "id", "x": 64, "y": 452, "fontSize": 34, "lineHeight": 44 }
+    ]
+  },
+  "single": {
+    "panel": { "x": 38, "y": 58, "width": 590, "height": 310, "radius": 24 },
+    "ja": { "lines": ["保護帽を着用"], "fontSize": 82, "lineHeight": 98, "top": 175 },
+    "en": { "lines": ["WEAR A", "SAFETY HELMET"], "fontSize": 62, "lineHeight": 76, "top": 150 },
+    "vi": { "lines": ["ĐỘI MŨ", "BẢO HỘ"], "fontSize": 68, "lineHeight": 82, "top": 148 },
+    "zh-CN": { "lines": ["佩戴安全帽"], "fontSize": 88, "lineHeight": 104, "top": 180 },
+    "id": { "lines": ["GUNAKAN HELM", "KESELAMATAN"], "fontSize": 52, "lineHeight": 68, "top": 155 }
+  }
+}

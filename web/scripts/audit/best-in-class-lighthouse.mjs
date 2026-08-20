@@ -89,6 +89,11 @@ const allPages = [
   { id: "ky", path: "/ky/paper", mobileLcpTargetMs: 3_000 },
   { id: "safety-diary", path: "/safety-diary", mobileLcpTargetMs: 3_000 },
   { id: "signage", path: "/signage", mobileLcpTargetMs: 3_000 },
+  {
+    id: "safety-images",
+    path: "/materials/safety-images",
+    mobileLcpTargetMs: 3_000,
+  },
   { id: "risk", path: "/risk", mobileLcpTargetMs: 3_000 },
   { id: "chatbot", path: "/chatbot", mobileLcpTargetMs: 3_000 },
   { id: "law-search", path: "/law-search", mobileLcpTargetMs: 3_000 },

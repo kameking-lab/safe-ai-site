@@ -91,6 +91,20 @@ describe("preview deployment safety", () => {
       shouldBlockPreviewRequest("POST", "/api/accident-news/search", preview),
     ).toBe(false);
     expect(
+      shouldBlockPreviewRequest(
+        "POST",
+        "/api/safety-images/helmet-required/download",
+        preview,
+      ),
+    ).toBe(false);
+    expect(
+      shouldBlockPreviewRequest(
+        "POST",
+        "/api/safety-images/helmet-required/download/extra",
+        preview,
+      ),
+    ).toBe(true);
+    expect(
       shouldBlockPreviewRequest("POST", "/api/chatbot/no-script", preview),
     ).toBe(false);
     expect(
