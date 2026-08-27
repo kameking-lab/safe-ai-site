@@ -249,7 +249,13 @@ export default function SafetyAiLandingPage() {
             <h2 id="learn-title" className="text-3xl font-black tracking-tight sm:text-4xl">
               事故から学び、危険を見る
             </h2>
-            <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-700 dark:text-slate-200">事故、短時間教材、Visual KYTへ直接進めます。</p>
+            <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-700 dark:text-slate-200">
+              事故、短時間教材、Visual KYTへ直接進めます。音声付きの社内研修は
+              <Link href="/training/safety-seminars" className="font-black text-emerald-800 underline underline-offset-4 dark:text-emerald-300">
+                安全研修ライブラリ
+              </Link>
+              で利用できます。
+            </p>
             <ul className="mt-7 grid border-y-2 border-slate-900 sm:grid-cols-3 dark:border-slate-500">
               {CAPABILITIES.slice(3).map((item, index) => {
                 const Icon = item.icon;

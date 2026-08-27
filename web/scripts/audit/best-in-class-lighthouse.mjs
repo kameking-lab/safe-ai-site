@@ -69,6 +69,16 @@ const allPages = [
     path: "/training/visual-ky/rain-wind-delivery",
     mobileLcpTargetMs: 2_500,
   },
+  {
+    id: "safety-seminar-library",
+    path: "/training/safety-seminars",
+    mobileLcpTargetMs: 2_500,
+  },
+  {
+    id: "fall-prevention-training",
+    path: "/training/safety-seminars/fall-prevention",
+    mobileLcpTargetMs: 3_000,
+  },
   { id: "safety-ai", path: "/safety-ai", mobileLcpTargetMs: 2_500 },
   {
     id: "project-story",

@@ -32,12 +32,23 @@ export function HomeLearningOverview() {
               KYT・5分教材・資格を1件ずつ
             </h2>
           </div>
-          <Link
-            href="/education"
-            className="inline-flex min-h-11 items-center text-sm font-black text-teal-900 underline underline-offset-4 dark:text-teal-200"
+          <nav
+            aria-label="今日学ぶの関連ページ"
+            className="flex flex-wrap items-center gap-x-4"
           >
-            学習一覧
-          </Link>
+            <Link
+              href="/training/safety-seminars"
+              className="inline-flex min-h-11 items-center text-sm font-black text-emerald-900 underline underline-offset-4 dark:text-emerald-200"
+            >
+              安全研修ライブラリ
+            </Link>
+            <Link
+              href="/education"
+              className="inline-flex min-h-11 items-center text-sm font-black text-teal-900 underline underline-offset-4 dark:text-teal-200"
+            >
+              学習一覧
+            </Link>
+          </nav>
         </header>
 
         <div className="mt-4 grid gap-3 lg:grid-cols-3">

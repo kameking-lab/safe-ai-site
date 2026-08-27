@@ -76,6 +76,12 @@ export function FeaturesIndexClient() {
             <Link href="/automation-examples" className="portal-button-secondary">
               Safety Labsを見る
             </Link>
+            <Link
+              href="/training/safety-seminars"
+              className="portal-button-secondary"
+            >
+              安全研修ライブラリ
+            </Link>
           </div>
         </div>
         <div className="flex items-end justify-center">

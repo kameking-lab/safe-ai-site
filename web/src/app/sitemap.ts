@@ -1068,6 +1068,23 @@ export default function sitemap(): MetadataRoute.Sitemap {
     })),
   ];
 
+  // 安全研修ライブラリは公開済み教材だけを列挙する。Coming Soon 27テーマ、
+  // 再生・字幕・ダウンロード状態、利用条件ページは個別のindex対象にしない。
+  const safetySeminarPages: typeof pages = [
+    {
+      url: "/training/safety-seminars",
+      lastModified: "2026-08-27",
+      priority: 0.9,
+      changeFrequency: "monthly" as Freq,
+    },
+    {
+      url: "/training/safety-seminars/fall-prevention",
+      lastModified: "2026-08-27",
+      priority: 0.85,
+      changeFrequency: "monthly" as Freq,
+    },
+  ];
+
   // 安全画像倉庫は生成・人体/PPE・文字なしQAを通過した正式公開100点だけを列挙する。
   // 編集状態、言語切替、ブランド切替、印刷HTML、方式B比較ページは別URLとしてindexしない。
   const safetyImagePages: typeof pages = [
@@ -1100,6 +1117,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return [
     ...filtered,
     ...safetyImagePages,
+    ...safetySeminarPages,
     ...visualKyPages,
     ...eduPackPages,
     ...featureCategoryPages,

@@ -1,7 +1,18 @@
 import { describe, expect, it } from "vitest";
 import { buildAutomationServiceSchema } from "./automation-service-schema";
+import { generateMetadata } from "./page";
 
 describe("automation Service JSON-LD", () => {
+  it("clean URLだけをindexし、カスタマイズqueryはclean canonicalのnoindexにする", async () => {
+    const clean = await generateMetadata({ searchParams: Promise.resolve({}) });
+    const customized = await generateMetadata({
+      searchParams: Promise.resolve({ consultationType: "training-materials" }),
+    });
+    expect(clean.robots).toEqual({ index: true, follow: true });
+    expect(customized.robots).toEqual({ index: false, follow: true });
+    expect(customized.alternates?.canonical).toBe("/services/automation");
+  });
+
   it("omits a Web-form channel while only mail-client consultation is available", () => {
     const schema = buildAutomationServiceSchema({
       status: "mail_available",
