@@ -20,3 +20,6 @@ web/src/data/electric-chatbot-holdout-2026-08-09.sha256 text eol=lf
 web/public/training/safety-seminars/fall-prevention/audio/*.mp3 binary
 web/public/training/safety-seminars/fall-prevention/downloads/*.pdf binary
 web/public/training/safety-seminars/fall-prevention/downloads/*.pptx binary
+web/public/training/ai-seminars/ai-chat-work/audio/*.mp3 binary
+web/public/training/ai-seminars/ai-chat-work/downloads/*.pdf binary
+web/public/training/ai-seminars/ai-chat-work/downloads/*.pptx binary

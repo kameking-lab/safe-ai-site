@@ -64,4 +64,18 @@ describe("/features 機能一覧クライアント", () => {
         .getAttribute("href"),
     ).toBe("/automation-examples");
   });
+
+  it("安全研修・AI実務研修・低リスク建設計算へ直接移動できる", () => {
+    renderClient();
+    for (const [name, href] of [
+      ["安全研修", "/training/safety-seminars"],
+      ["AI実務研修", "/training/ai-seminars"],
+      ["建設計算ツール", "/tools/construction-calculators"],
+    ] as const) {
+      expect(screen.getByRole("link", { name }).getAttribute("href")).toBe(href);
+    }
+    expect(
+      screen.queryByRole("link", { name: /建設計算（現場計算機ポータル）/u }),
+    ).toBeNull();
+  });
 });

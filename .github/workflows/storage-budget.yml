@@ -220,6 +220,12 @@ jobs:
               "web/public/screenshots/manifest.json",
               "web/public/geo/japan-prefectures-ne10m.json",
           }
+          REVIEWED_TRAINING_PREFIXES = {
+              "web/public/training/safety-seminars/fall-prevention/",
+              "web/public/training/ai-seminars/ai-chat-work/",
+          }
+          # Only finalized, directly served training artifacts are allowlisted.
+          REVIEWED_TRAINING_DOWNLOAD_SUFFIXES = {".pdf", ".pptx"}
           MEDIA_OR_JSON_SUFFIXES = {
               ".json", ".jsonl", ".png", ".jpg", ".jpeg", ".gif", ".webp",
               ".avif", ".svg",
@@ -291,10 +297,31 @@ jobs:
                   and "/" not in seminar_relative
                   and suffix == ".pptx"
               )
+              reviewed_training_artifact = False
+              for prefix in REVIEWED_TRAINING_PREFIXES:
+                  if not path.startswith(prefix):
+                      continue
+                  relative = path.removeprefix(prefix)
+                  direct_audio = (
+                      relative.startswith("audio/")
+                      and "/" not in relative.removeprefix("audio/")
+                      and len(relative.removeprefix("audio/")) == len("slide-00.mp3")
+                      and relative.removeprefix("audio/").startswith("slide-")
+                      and relative.removeprefix("audio/")[6:8].isdigit()
+                      and relative.removeprefix("audio/").endswith(".mp3")
+                  )
+                  direct_download = (
+                      relative.startswith("downloads/")
+                      and "/" not in relative.removeprefix("downloads/")
+                      and suffix in REVIEWED_TRAINING_DOWNLOAD_SUFFIXES
+                  )
+                  reviewed_training_artifact = direct_audio or direct_download
+                  break
               return (
                   suffix in PUBLIC_RUNTIME_MEDIA_SUFFIXES
                   or path in PUBLIC_RUNTIME_EXACT_PATHS
                   or direct_seminar_pptx
+                  or reviewed_training_artifact
               )
 
           def is_forbidden_public_raw(path: str) -> bool:
@@ -387,6 +414,10 @@ jobs:
               or is_forbidden_public_raw("web/public/videos/training.mp4")
               or is_forbidden_public_raw("web/public/manifest.json")
               or is_forbidden_public_raw("web/public/seminars/teiatsu-denki.pptx")
+              or is_forbidden_public_raw("web/public/training/ai-seminars/ai-chat-work/audio/slide-01.mp3")
+              or is_forbidden_public_raw("web/public/training/ai-seminars/ai-chat-work/downloads/ai-chat-work-training.pdf")
+              or is_forbidden_public_raw("web/public/training/ai-seminars/ai-chat-work/downloads/ai-chat-work-training.pptx")
+              or not is_forbidden_public_raw("web/public/training/ai-seminars/ai-chat-work/downloads/raw/unreviewed.pdf")
               or not is_forbidden_public_raw("web/public/seminars/raw/unreviewed.pptx")
               or not is_forbidden_public_raw("web/public/session.zip")
               or not is_forbidden_public_raw("web/public/prod.sqlite")

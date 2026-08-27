@@ -1,0 +1,19 @@
+[
+  {"claimId":"CLM-AI-001","claimType":"official-guidance","statement":"AIチャットは下書き、整理、書換え、要約などの補助に使えるが、出力は人が確認する下書きとして扱う。","sourceIds":["SRC-AI-002"],"caveat":"用途適合や品質を保証する主張ではない。"},
+  {"claimId":"CLM-AI-002","claimType":"portal-proposal","statement":"実務依頼は目的、背景、出力形式、条件・禁止・人の確認点の4要素で組み立てられる。","sourceIds":["SRC-AI-001"],"caveat":"Goal/Context/Output/Boundaryを日本語実務向けに再構成した補助枠組みで、正解保証式ではない。"},
+  {"claimId":"CLM-AI-003","claimType":"official-guidance","statement":"目的、必要な背景、制約、望む形式を明確かつ具体的に伝えることを複数の主要AI提供者が推奨している。","sourceIds":["SRC-AI-002","SRC-AI-004","SRC-AI-006"],"caveat":"製品間の効果比較や必ず高品質になるとの主張はしない。"},
+  {"claimId":"CLM-AI-004","claimType":"official-guidance","statement":"一度で完成させず、対象と変更点を具体化した追加指示で反復する。","sourceIds":["SRC-AI-002","SRC-AI-006"],"caveat":"反復回数や成功率は示さない。"},
+  {"claimId":"CLM-AI-005","claimType":"product-limitation","statement":"言語モデルは自然で自信があるように見える誤答や、架空の引用・研究・出典を生成し得る。","sourceIds":["SRC-AI-003","SRC-AI-005"],"caveat":"全出力が誤りという意味ではなく、特定製品だけの問題とも扱わない。"},
+  {"claimId":"CLM-AI-006","claimType":"official-guidance","statement":"重要情報は信頼できる原資料を開き、数字、引用、法令、技術情報を直接照合する。","sourceIds":["SRC-AI-001","SRC-AI-002","SRC-AI-003"],"caveat":"AIが示すリンクや引用の存在だけでは確認完了としない。"},
+  {"claimId":"CLM-AI-007","claimType":"official-guidance","statement":"検索、grounding、引用要求は出力の監査可能性を高め誤りの低減に役立つが、誤りをゼロにはしない。","sourceIds":["SRC-AI-003","SRC-AI-005"],"caveat":"一次資料本文の人による確認を残す。"},
+  {"claimId":"CLM-AI-008","claimType":"official-guidance","statement":"送信・公開・意思決定前に重要主張を出典へ追跡し、事実と仮定を分け、重要数値を再計算し、最終責任者を人に置く。","sourceIds":["SRC-AI-001"],"caveat":"確認の深さは影響度に応じて決める。"},
+  {"claimId":"CLM-AI-009","claimType":"legal-caution","statement":"個人情報取扱事業者が個人情報をプロンプトへ入れる場合、利用目的の必要範囲を確認し、条件によっては提供者の応答以外の取扱いを確認する必要がある。","sourceIds":["SRC-AI-007"],"caveat":"個人情報の一律入力禁止という法的断定はしない。本人同意、利用目的、個人データ、提供者の取扱い等で結論が変わる。"},
+  {"claimId":"CLM-AI-010","claimType":"government-guidance","statement":"一般利用者も入力情報の取扱い、不正確な再出力のリスク、利用規約とプライバシーポリシーを確認する。","sourceIds":["SRC-AI-007"],"caveat":"各サービスの現行条件を利用時に再確認する。"},
+  {"claimId":"CLM-AI-011","claimType":"legal-caution","statement":"利用するアカウント、ワークスペース、サービス規約、データ取扱いを確認してから業務情報を入力する。","sourceIds":["SRC-AI-007"],"caveat":"製品・プラン・設定は変わるため教材に固定仕様を埋め込まない。"},
+  {"claimId":"CLM-AI-012","claimType":"portal-proposal","statement":"承認済み業務環境を使い、会社ルールに従い、必要最小限だけを渡し、秘密や認証情報を入力せず、公開・架空・集計・適切に匿名化した情報を優先する。","sourceIds":["SRC-AI-001"],"caveat":"法定一律禁止ではなく本教材の安全側の業務運用提案。匿名化の十分性は別途確認する。"},
+  {"claimId":"CLM-AI-013","claimType":"legal-caution","statement":"AI生成物は利用前に既存著作物との類似性を確認し、生成が適法でも公開・配布などの利用が直ちに適法とは限らない。","sourceIds":["SRC-AI-009","SRC-AI-010","SRC-AI-011"],"caveat":"権利制限や許諾など個別事情で判断が変わる。"},
+  {"claimId":"CLM-AI-014","claimType":"legal-caution","statement":"著作権侵害は原則として既存著作物との類似性と依拠性で判断される。","sourceIds":["SRC-AI-009","SRC-AI-011"],"caveat":"文化庁の『考え方』自体は法的拘束力を持たず、個別事案は司法判断。"},
+  {"claimId":"CLM-AI-015","claimType":"legal-caution","statement":"AI生成物の著作物性は人の創作意図と創作的寄与を総合して個別に判断される。","sourceIds":["SRC-AI-009","SRC-AI-010","SRC-AI-011"],"caveat":"単純なプロンプトの有無だけで常に権利が生じる又は生じないとは断定しない。"},
+  {"claimId":"CLM-AI-016","claimType":"scientific","statement":"自動化への過信は、不完全な助言を採用する作為エラーや警告がないため行動しない不作為エラーにつながり得る。","sourceIds":["SRC-AI-012","SRC-AI-013"],"caveat":"古い自動化・意思決定支援研究で医療中心のレビューも含み、生成AI一般の効果率へ外挿しない。"},
+  {"claimId":"CLM-AI-017","claimType":"government-guidance","statement":"重大な影響や被害があり得るAI出力には適切な人の判断を介在させ、データ最小化とAIリテラシーを確保することが行政指針で推奨されている。","sourceIds":["SRC-AI-008"],"caveat":"AI事業者ガイドラインは行政指針であり、それ自体を一律の法的義務と表示しない。"}
+]

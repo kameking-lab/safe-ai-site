@@ -79,6 +79,26 @@ const allPages = [
     path: "/training/safety-seminars/fall-prevention",
     mobileLcpTargetMs: 3_000,
   },
+  {
+    id: "ai-seminar-library",
+    path: "/training/ai-seminars",
+    mobileLcpTargetMs: 2_500,
+  },
+  {
+    id: "ai-chat-work-training",
+    path: "/training/ai-seminars/ai-chat-work",
+    mobileLcpTargetMs: 3_000,
+  },
+  {
+    id: "construction-calculator-library",
+    path: "/tools/construction-calculators",
+    mobileLcpTargetMs: 2_500,
+  },
+  {
+    id: "construction-calculator-concrete",
+    path: "/tools/construction-calculators/concrete-quantity",
+    mobileLcpTargetMs: 3_000,
+  },
   { id: "safety-ai", path: "/safety-ai", mobileLcpTargetMs: 2_500 },
   {
     id: "project-story",

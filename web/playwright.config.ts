@@ -2,7 +2,9 @@ import { defineConfig, devices } from "@playwright/test";
 
 const playwrightPort = process.env.PLAYWRIGHT_PORT ?? "3310";
 const playwrightHost = process.env.PLAYWRIGHT_HOST ?? "localhost";
-const playwrightBaseUrl = `http://${playwrightHost}:${playwrightPort}`;
+const playwrightExternalBaseUrl = process.env.PLAYWRIGHT_BASE_URL?.trim();
+const playwrightBaseUrl =
+  playwrightExternalBaseUrl || `http://${playwrightHost}:${playwrightPort}`;
 const useProductionServer =
   process.env.PLAYWRIGHT_SERVER_MODE === "production";
 
@@ -21,7 +23,7 @@ export default defineConfig({
     video: "retain-on-failure",
     screenshot: "only-on-failure",
   },
-  webServer: {
+  webServer: playwrightExternalBaseUrl ? undefined : {
     // Webpack avoids intermittent Windows Turbopack cache corruption that can
     // otherwise prevent the test server from reaching READY before any test runs.
     command: useProductionServer

@@ -101,7 +101,7 @@ test("ホームは6幅で熱中症を最上部にし、主要タスクへ進め�
     ).toHaveAttribute("href", "/laws");
     await expect(
       page.locator('[data-home-section="core-features"] > div > ul > li'),
-    ).toHaveCount(6);
+    ).toHaveCount(7);
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth - window.innerWidth,

@@ -105,6 +105,18 @@ describe("AutomationServiceContent", () => {
     expect(container.querySelector("#faq")).toBeNull();
   });
 
+  it("無料の安全研修・AI実務研修・低リスク建設計算を相談導線と分けて案内する", () => {
+    render(<AutomationServiceContent availability={MAIL_AVAILABLE} />);
+    for (const [name, href] of [
+      ["無料の安全研修教材を見る", "/training/safety-seminars"],
+      ["無料のAI実務研修を見る", "/training/ai-seminars"],
+      ["建設計算ツールを見る", "/tools/construction-calculators"],
+    ] as const) {
+      expect(screen.getByRole("link", { name }).getAttribute("href")).toBe(href);
+    }
+    expect(screen.queryByRole("link", { name: /許容荷重|構造計算|安全判定/u })).toBeNull();
+  });
+
   it("答えに必要な4セクションを料金・事例・サービス・相談の順に持つ", () => {
     const { container } = render(
       <AutomationServiceContent availability={AVAILABLE} />,

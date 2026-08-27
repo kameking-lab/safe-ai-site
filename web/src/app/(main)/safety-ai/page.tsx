@@ -224,7 +224,13 @@ export default function SafetyAiLandingPage() {
             <h2 id="available-title" className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">
               必要な機能を、その場で開く
             </h2>
-            <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-700 dark:text-slate-200">確認したい機能を直接開けます。</p>
+            <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-700 dark:text-slate-200">
+              確認したい機能を直接開けます。数量・勾配・座標の概算は
+              <Link href="/tools/construction-calculators" className="mx-1 font-black text-emerald-800 underline underline-offset-4 dark:text-emerald-300">
+                建設計算ツール
+              </Link>
+              を利用できます。
+            </p>
             <ul className="mt-7 grid border-y-2 border-slate-900 sm:grid-cols-2 lg:grid-cols-3 dark:border-slate-500">
               {CAPABILITIES.slice(0, 3).map((item, index) => {
                 const Icon = item.icon;
@@ -250,11 +256,15 @@ export default function SafetyAiLandingPage() {
               事故から学び、危険を見る
             </h2>
             <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-700 dark:text-slate-200">
-              事故、短時間教材、Visual KYTへ直接進めます。音声付きの社内研修は
+              事故、短時間教材、Visual KYTへ直接進めます。音声付きの安全研修は
               <Link href="/training/safety-seminars" className="font-black text-emerald-800 underline underline-offset-4 dark:text-emerald-300">
                 安全研修ライブラリ
               </Link>
-              で利用できます。
+              、生成AIの仕事での使い方は
+              <Link href="/training/ai-seminars" className="font-black text-sky-800 underline underline-offset-4 dark:text-sky-300">
+                AI実務研修
+              </Link>
+              で学べます。
             </p>
             <ul className="mt-7 grid border-y-2 border-slate-900 sm:grid-cols-3 dark:border-slate-500">
               {CAPABILITIES.slice(3).map((item, index) => {

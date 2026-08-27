@@ -52,6 +52,7 @@ describe("サイドバーナビ(NAV_CATEGORIES)のIA不変条件", () => {
       "/training/visual-ky",
       "/signage",
       "/materials/safety-images",
+      "/tools/construction-calculators",
       "/services/automation",
       "/safety-ai",
       "/search",
@@ -69,7 +70,7 @@ describe("サイドバーナビ(NAV_CATEGORIES)のIA不変条件", () => {
         category.items.map((item) => item.href),
       );
     const desktop = hrefs("desktop");
-    expect(desktop).toHaveLength(16);
+    expect(desktop).toHaveLength(17);
     expect(new Set(desktop).size).toBe(desktop.length);
     expect(desktop).toEqual(expect.arrayContaining(requiredDesktop));
     expect(
@@ -77,7 +78,7 @@ describe("サイドバーナビ(NAV_CATEGORIES)のIA不変条件", () => {
         .flatMap((category) => category.items.map((item) => item.href))
         .filter((href) => mobilePrimary.has(href)),
     ).toEqual([]);
-    expect(hrefs("mobile").length).toBeLessThanOrEqual(10);
+    expect(hrefs("mobile").length).toBeLessThanOrEqual(11);
   });
 
   it.each([
@@ -108,6 +109,7 @@ describe("サイドバーナビ(NAV_CATEGORIES)のIA不変条件", () => {
         "/signage",
         "/training/visual-ky",
         "/education-certification",
+        "/tools/construction-calculators",
         "/services/automation",
         "/safety-ai",
         "/features",
@@ -140,6 +142,16 @@ describe("サイドバーナビ(NAV_CATEGORIES)のIA不変条件", () => {
         (category) => category.items.map((item) => item.href),
       );
       expect(hrefs).toContain("/safety-ai");
+    }
+  });
+
+  it("PC・モバイルの実務メニューは低リスクの新しい建設計算ツールだけを案内する", () => {
+    for (const position of ["desktop", "mobile"] as const) {
+      const hrefs = getAppShellNavigationCategories(position).flatMap(
+        (category) => category.items.map((item) => item.href),
+      );
+      expect(hrefs).toContain("/tools/construction-calculators");
+      expect(hrefs).not.toContain("/construction-calc");
     }
   });
 });

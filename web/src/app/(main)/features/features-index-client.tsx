@@ -76,13 +76,30 @@ export function FeaturesIndexClient() {
             <Link href="/automation-examples" className="portal-button-secondary">
               Safety Labsを見る
             </Link>
+          </div>
+          <nav
+            aria-label="研修・実務ツール"
+            className="mt-2 flex flex-wrap gap-x-4"
+          >
             <Link
               href="/training/safety-seminars"
-              className="portal-button-secondary"
+              className="inline-flex min-h-11 items-center text-sm font-black text-brand-primary underline underline-offset-4"
             >
-              安全研修ライブラリ
+              安全研修
             </Link>
-          </div>
+            <Link
+              href="/training/ai-seminars"
+              className="inline-flex min-h-11 items-center text-sm font-black text-brand-primary underline underline-offset-4"
+            >
+              AI実務研修
+            </Link>
+            <Link
+              href="/tools/construction-calculators"
+              className="inline-flex min-h-11 items-center text-sm font-black text-brand-primary underline underline-offset-4"
+            >
+              建設計算ツール
+            </Link>
+          </nav>
         </div>
         <div className="flex items-end justify-center">
           <Mascot

@@ -24,14 +24,14 @@ function smokeCompactNavigationPaths(): string[] {
 }
 
 describe("japan-leading production smoke IA contract", () => {
-  it("現行compact navの厳密16リンクだけをホーム1クリック契約にする", () => {
+  it("現行compact navの厳密17リンクだけをホーム1クリック契約にする", () => {
     const smokePaths = smokeCompactNavigationPaths();
     const currentCompactPaths = getAppShellNavigationCategories("desktop").flatMap(
       (category) => category.items.map((item) => item.href),
     );
 
-    expect(smokePaths).toHaveLength(16);
-    expect(new Set(smokePaths).size).toBe(16);
+    expect(smokePaths).toHaveLength(17);
+    expect(new Set(smokePaths).size).toBe(17);
     expect(smokePaths).toEqual(currentCompactPaths);
     expect(smokePaths).not.toContain("/resources");
     expect(SMOKE_SOURCE).not.toContain("flagshipPaths");

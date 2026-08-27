@@ -21,7 +21,7 @@ import {
   useState,
 } from "react";
 import type {
-  FallPreventionSlide,
+  TrainingSlide,
   TrainingClaim,
   TrainingSource,
 } from "@/data/safety-seminars/types";
@@ -45,10 +45,16 @@ export function SafetySeminarPlayer({
   slides,
   claims,
   sources,
+  audioBasePath = "/training/safety-seminars/fall-prevention/audio",
+  playerLabel = "音声付き安全研修スライド",
+  transcriptId = "safety-seminar-transcript",
 }: {
-  slides: FallPreventionSlide[];
+  slides: TrainingSlide[];
   claims: TrainingClaim[];
   sources: TrainingSource[];
+  audioBasePath?: string;
+  playerLabel?: string;
+  transcriptId?: string;
 }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [speechStatus, setSpeechStatus] = useState<SpeechStatus>("idle");
@@ -284,7 +290,7 @@ export function SafetySeminarPlayer({
       className="overflow-hidden rounded-[1.75rem] border border-slate-700 bg-slate-950 text-white shadow-2xl print:border-0 print:shadow-none"
     >
       <h2 id="seminar-player-title" className="sr-only">
-        音声付き安全研修スライド
+        {playerLabel}
       </h2>
       <div className="relative min-h-[680px] overflow-hidden bg-slate-950 p-5 sm:min-h-[620px] sm:p-8 lg:aspect-video lg:min-h-0 lg:p-12">
         <div
@@ -350,7 +356,7 @@ export function SafetySeminarPlayer({
         <audio
           ref={audioRef}
           preload="metadata"
-          src={`/training/safety-seminars/fall-prevention/audio/slide-${String(slide.number).padStart(2, "0")}.mp3`}
+          src={`${audioBasePath}/slide-${String(slide.number).padStart(2, "0")}.mp3`}
           onError={() => {
             setAudioFailed(true);
             if (
@@ -505,13 +511,13 @@ export function SafetySeminarPlayer({
           className="min-h-11 text-sm font-bold text-teal-200 underline underline-offset-4"
           onClick={() => setTranscriptVisible((value) => !value)}
           aria-expanded={transcriptVisible}
-          aria-controls="safety-seminar-transcript"
+          aria-controls={transcriptId}
         >
           {transcriptVisible ? "音声原稿を閉じる" : "音声原稿を読む"}
         </button>
         {transcriptVisible ? (
           <div
-            id="safety-seminar-transcript"
+            id={transcriptId}
             role="region"
             aria-label={`${slide.number}枚目の音声原稿と講師向け補足`}
             tabIndex={0}
@@ -591,7 +597,7 @@ function ControlButton({
   );
 }
 
-function SlideVisual({ slide }: { slide: FallPreventionSlide }) {
+function SlideVisual({ slide }: { slide: TrainingSlide }) {
   const visual = slide.visual;
   if (visual.type === "image") {
     return (
