@@ -16,6 +16,23 @@ afterEach(() => {
 });
 
 describe("Proxy CSP boundary", () => {
+  it("quarantines legacy safety-image assets before static delivery", () => {
+    for (const pathname of [
+      "/safety-images/library/originals/helmet-required.png",
+      "/safety-images/pilot/helmet-required.webp",
+    ]) {
+      const response = proxy(
+        new NextRequest(`https://example.test${pathname}`),
+      );
+
+      expect(response.status).toBe(404);
+      expect(response.headers.get("cache-control")).toContain("no-store");
+      expect(response.headers.get("x-robots-tag")).toBe(
+        "noindex, nofollow, noarchive",
+      );
+    }
+  });
+
   it("production defaults to compatibility enforcement until framework nonce coverage is verified", () => {
     vi.stubEnv("NODE_ENV", "production");
     vi.stubEnv("VERCEL_ENV", "production");
@@ -28,9 +45,7 @@ describe("Proxy CSP boundary", () => {
     expect(scriptDirective(firstPolicy)).toContain("'unsafe-inline'");
     expect(scriptDirective(firstPolicy)).not.toContain("'strict-dynamic'");
     expect(firstPolicy).toBe(secondPolicy);
-    expect(
-      first.headers.get("content-security-policy-report-only"),
-    ).toBeNull();
+    expect(first.headers.get("content-security-policy-report-only")).toBeNull();
     expect(
       second.headers.get("content-security-policy-report-only"),
     ).toBeNull();
@@ -180,7 +195,9 @@ describe("Proxy CSP boundary", () => {
     vi.stubEnv("VERCEL_ENV", "preview");
 
     for (const pathname of ["/", "/chatbot", "/law-search", "/unknown-path"]) {
-      const response = proxy(new NextRequest(`https://example.test${pathname}`));
+      const response = proxy(
+        new NextRequest(`https://example.test${pathname}`),
+      );
       expect(response.headers.get("x-safe-ai-preview-mode")).toBe("dry-run");
       expect(response.headers.get("x-robots-tag")).toBe(
         "noindex, nofollow, noarchive",
@@ -231,7 +248,9 @@ describe("Proxy CSP boundary", () => {
       "/e-learning/safety/occupational-safety-consultant",
       "/e-learning/safety/occupational-health-consultant",
     ]) {
-      const response = proxy(new NextRequest(`https://example.test${pathname}`));
+      const response = proxy(
+        new NextRequest(`https://example.test${pathname}`),
+      );
       expect(response.headers.get("cache-control")).toBe(
         "public, max-age=0, must-revalidate",
       );

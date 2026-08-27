@@ -175,3 +175,8 @@ Desktop.ini
 !/web/public/training/ai-seminars/ai-chat-work/audio/slide-*.mp3
 !/web/public/training/ai-seminars/ai-chat-work/downloads/*.pdf
 !/web/public/training/ai-seminars/ai-chat-work/downloads/*.pptx
+
+# The previous safety-image masters and previews are quarantined until the
+# market-grounded replacement library is approved.
+/web/public/safety-images/library/**
+/web/public/safety-images/pilot/**
