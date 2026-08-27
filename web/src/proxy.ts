@@ -14,6 +14,8 @@ const NO_SCRIPT_CHATBOT_CSP =
   "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'";
 const PUBLIC_SAFETY_LEARNING_PATH =
   /^\/e-learning\/safety(?:\/(?:first-class-health-officer|second-class-health-officer|occupational-safety-consultant|occupational-health-consultant))?\/?$/;
+const QUARANTINED_SAFETY_IMAGE_ASSET_PATH =
+  /^\/safety-images\/(?:library|pilot)(?:\/|$)/;
 
 function addCspResponseHeaders(
   response: NextResponse,
@@ -85,6 +87,17 @@ function sanitizedAuthPageUrl(request: NextRequest): URL | null {
 }
 
 export function proxy(request: NextRequest) {
+  if (QUARANTINED_SAFETY_IMAGE_ASSET_PATH.test(request.nextUrl.pathname)) {
+    return new NextResponse("Not Found", {
+      status: 404,
+      headers: {
+        "Cache-Control": "private, no-store, max-age=0",
+        "Content-Type": "text/plain; charset=utf-8",
+        "X-Robots-Tag": "noindex, nofollow, noarchive",
+      },
+    });
+  }
+
   const nonce = createCspNonce();
   const preview = isPreviewSafetyMode();
   // Next/Turbopackの実行形式はNODE_ENVが正本。Playwright等がVercelの
@@ -100,8 +113,7 @@ export function proxy(request: NextRequest) {
     development,
     secureTransport,
   });
-  const noScriptChatbot =
-    request.nextUrl.pathname === "/api/chatbot/no-script";
+  const noScriptChatbot = request.nextUrl.pathname === "/api/chatbot/no-script";
   const sanitizedAuthUrl = sanitizedAuthPageUrl(request);
   if (sanitizedAuthUrl) {
     return addCspResponseHeaders(
@@ -121,8 +133,7 @@ export function proxy(request: NextRequest) {
           ok: false,
           error: {
             code: "preview_side_effect_blocked",
-            message:
-              "検証環境では外部送信・保存・認証・決済を実行しません。",
+            message: "検証環境では外部送信・保存・認証・決済を実行しません。",
           },
         },
         {
@@ -174,10 +185,7 @@ export function proxy(request: NextRequest) {
     // response carries a request-scoped CSP nonce. This explicit marker is
     // limited to the reviewed, non-personal route allowlist above and lets the
     // service worker distinguish those documents from every private response.
-    response.headers.set(
-      "X-Safe-AI-Public-Offline",
-      "safety-learning-v1",
-    );
+    response.headers.set("X-Safe-AI-Public-Offline", "safety-learning-v1");
   }
   return response;
 }
@@ -186,6 +194,7 @@ export const config = {
   // HTML, route handlers, robots and sitemap need the security boundary.
   // Immutable assets do not need a per-request nonce.
   matcher: [
+    "/safety-images/:path*",
     "/((?!_next/static|_next/image|favicon.ico|favicon-32.png|apple-touch-icon.png|manifest.json|sw.js|.*\\.(?:svg|png|jpg|jpeg|gif|webp|avif|ico|woff|woff2)$).*)",
   ],
 };

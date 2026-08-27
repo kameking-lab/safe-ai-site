@@ -20,12 +20,6 @@ import { computeSitemapFreshness } from "@/lib/sitemap/freshness";
 import { SITE_URL } from "@/lib/seo-metadata";
 import { isPublicRouteAvailable } from "@/lib/public-content-policy";
 import { PUBLIC_VISUAL_KY_SCENARIOS } from "@/data/visual-ky";
-import {
-  SAFETY_IMAGE_CATEGORIES,
-  SAFETY_IMAGE_LIBRARY_PATH,
-  SAFETY_IMAGE_LIBRARY_RIGHTS_PATH,
-  SAFETY_IMAGE_THEMES,
-} from "@/data/safety-image-library";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   // 柱C-3 / S DRY: 絶対URLのオリジンは seo-metadata.ts の SITE_URL を単一ソースにする
@@ -974,14 +968,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // sitemap-index.xml が列挙）が正本として出力する。本体 sitemap.xml に直書きすると
   // 同一URLが2つのサイトマップに二重掲載され、役割分担が崩壊するためここでは出力しない。
 
-  const featureCategoryPages: typeof pages = FEATURE_CATEGORIES
-    .filter((category) => getFeaturesByCategory(category.id).length > 0)
-    .map((category) => ({
-      url: `/features/${category.id}`,
-      lastModified: "2026-05-15",
-      priority: 0.7,
-      changeFrequency: "monthly",
-    }));
+  const featureCategoryPages: typeof pages = FEATURE_CATEGORIES.filter(
+    (category) => getFeaturesByCategory(category.id).length > 0,
+  ).map((category) => ({
+    url: `/features/${category.id}`,
+    lastModified: "2026-05-15",
+    priority: 0.7,
+    changeFrequency: "monthly",
+  }));
 
   // 建設計算: ハブ＋個別計算機（registry から列挙＝計算機の量産に自動追従）
   const constructionCalcPages: typeof pages = [
@@ -1101,12 +1095,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     ...PUBLISHED_AI_SEMINARS.flatMap((seminar) =>
       seminar.href
-        ? [{
-            url: seminar.href,
-            lastModified: "2026-08-27",
-            priority: 0.85,
-            changeFrequency: "monthly" as Freq,
-          }]
+        ? [
+            {
+              url: seminar.href,
+              lastModified: "2026-08-27",
+              priority: 0.85,
+              changeFrequency: "monthly" as Freq,
+            },
+          ]
         : [],
     ),
   ];
@@ -1127,34 +1123,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     })),
   ];
 
-  // 安全画像倉庫は生成・人体/PPE・文字なしQAを通過した正式公開100点だけを列挙する。
-  // 編集状態、言語切替、ブランド切替、印刷HTML、方式B比較ページは別URLとしてindexしない。
-  const safetyImagePages: typeof pages = [
-    {
-      url: SAFETY_IMAGE_LIBRARY_PATH,
-      lastModified: "2026-08-21",
-      priority: 0.9,
-      changeFrequency: "weekly" as Freq,
-    },
-    {
-      url: SAFETY_IMAGE_LIBRARY_RIGHTS_PATH,
-      lastModified: "2026-08-21",
-      priority: 0.5,
-      changeFrequency: "yearly" as Freq,
-    },
-    ...SAFETY_IMAGE_CATEGORIES.map((category) => ({
-      url: `${SAFETY_IMAGE_LIBRARY_PATH}/category/${category.id}`,
-      lastModified: "2026-08-21",
-      priority: 0.75,
-      changeFrequency: "monthly" as Freq,
-    })),
-    ...SAFETY_IMAGE_THEMES.map((theme) => ({
-      url: theme.detailPath,
-      lastModified: "2026-08-21",
-      priority: theme.recommended ? 0.8 : 0.7,
-      changeFrequency: "monthly" as Freq,
-    })),
-  ];
+  // 安全看板は再制作中。旧一覧・カテゴリ・詳細をsitemapへ残さない。
+  const safetyImagePages: typeof pages = [];
 
   return [
     ...filtered,
@@ -1172,12 +1142,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
   ]
     .filter(({ url }) => isPublicRouteAvailable(url))
     .map(({ url, lastModified, priority, changeFrequency }) => {
-    const absolute = `${base}${url}`;
-    return {
-      url: absolute,
-      lastModified,
-      changeFrequency,
-      priority,
-    };
+      const absolute = `${base}${url}`;
+      return {
+        url: absolute,
+        lastModified,
+        changeFrequency,
+        priority,
+      };
     });
 }

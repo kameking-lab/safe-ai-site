@@ -191,7 +191,7 @@ export const NAV_CATEGORIES: AppShellNavCategory[] = [
         icon: Images,
         badge: "NEW",
         badgeUntil: "2026-10-31",
-        description: "安全看板・施工計画イラスト100点を検索・編集・印刷",
+        description: "安全看板ライブラリを準備中",
       },
       {
         id: "heat-illness",
