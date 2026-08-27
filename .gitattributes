@@ -17,3 +17,6 @@ scripts/maintenance/push-with-storage-gate.sh text eol=lf
 scripts/maintenance/promote-storage-artifact.sh text eol=lf
 web/src/data/electric-chatbot-holdout-2026-08-09.ts text eol=lf
 web/src/data/electric-chatbot-holdout-2026-08-09.sha256 text eol=lf
+web/public/training/safety-seminars/fall-prevention/audio/*.mp3 binary
+web/public/training/safety-seminars/fall-prevention/downloads/*.pdf binary
+web/public/training/safety-seminars/fall-prevention/downloads/*.pptx binary

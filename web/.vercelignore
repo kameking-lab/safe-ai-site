@@ -94,6 +94,11 @@ Desktop.ini
 !/public/visual-ky
 !/public/visual-ky/scenarios
 !/public/visual-refresh
+!/public/training
+!/public/training/safety-seminars
+!/public/training/safety-seminars/fall-prevention
+!/public/training/safety-seminars/fall-prevention/audio
+!/public/training/safety-seminars/fall-prevention/downloads
 !/public/**/*.ico
 !/public/**/*.png
 !/public/**/*.jpg
@@ -115,3 +120,6 @@ Desktop.ini
 !/public/screenshots/manifest.json
 !/public/geo/japan-prefectures-ne10m.json
 !/public/seminars/*.pptx
+!/public/training/safety-seminars/fall-prevention/audio/slide-*.mp3
+!/public/training/safety-seminars/fall-prevention/downloads/*.pdf
+!/public/training/safety-seminars/fall-prevention/downloads/*.pptx

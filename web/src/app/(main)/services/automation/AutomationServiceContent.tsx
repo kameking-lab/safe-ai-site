@@ -236,6 +236,12 @@ export function AutomationServiceContent({
             <span className="mt-1 block text-sm text-slate-700">
               社内講習、スライド、手順書、確認クイズ
             </span>
+            <Link
+              href="/training/safety-seminars"
+              className="mt-2 inline-flex min-h-11 items-center text-sm font-black text-emerald-900 underline underline-offset-4"
+            >
+              無料の安全研修教材を見る
+            </Link>
           </li>
         </ul>
       </section>

@@ -33,6 +33,9 @@ const PUBLIC_RUNTIME_EXACT_PATHS = new Set([
   "web/public/screenshots/manifest.json",
   "web/public/geo/japan-prefectures-ne10m.json",
 ]);
+const REVIEWED_FALL_PREVENTION_PREFIX =
+  "web/public/training/safety-seminars/fall-prevention/";
+const REVIEWED_FALL_PREVENTION_DOWNLOAD_SUFFIXES = new Set([".pdf", ".pptx"]);
 const COMPACT_EVIDENCE_FILES = new Set([
   "README.md",
   "manifest.json",
@@ -74,9 +77,20 @@ function isPublicRuntimeAllowed(filePath) {
   const directSeminarPptx = filePath.startsWith("web/public/seminars/")
     && !seminarRelative.includes("/")
     && suffix === ".pptx";
+  const fallPreventionRelative = filePath.startsWith(REVIEWED_FALL_PREVENTION_PREFIX)
+    ? filePath.slice(REVIEWED_FALL_PREVENTION_PREFIX.length)
+    : "";
+  const directFallPreventionAudio = fallPreventionRelative.startsWith("audio/")
+    && !fallPreventionRelative.slice("audio/".length).includes("/")
+    && /^slide-\d{2}\.mp3$/u.test(fallPreventionRelative.slice("audio/".length));
+  const directFallPreventionDownload = fallPreventionRelative.startsWith("downloads/")
+    && !fallPreventionRelative.slice("downloads/".length).includes("/")
+    && REVIEWED_FALL_PREVENTION_DOWNLOAD_SUFFIXES.has(suffix);
   return PUBLIC_RUNTIME_MEDIA_SUFFIXES.has(suffix)
     || PUBLIC_RUNTIME_EXACT_PATHS.has(filePath)
-    || directSeminarPptx;
+    || directSeminarPptx
+    || directFallPreventionAudio
+    || directFallPreventionDownload;
 }
 
 function isRuntimeAllowed(filePath) {
@@ -207,6 +221,11 @@ if (committedTreeMode) {
 
 if (!isPublicRuntimeAllowed("web/public/screenshots/runtime-guide.png")
   || !isPublicRuntimeAllowed("web/public/seminars/teiatsu-denki.pptx")
+  || !isPublicRuntimeAllowed(`${REVIEWED_FALL_PREVENTION_PREFIX}audio/slide-01.mp3`)
+  || !isPublicRuntimeAllowed(`${REVIEWED_FALL_PREVENTION_PREFIX}downloads/fall-prevention-training.pdf`)
+  || !isPublicRuntimeAllowed(`${REVIEWED_FALL_PREVENTION_PREFIX}downloads/fall-prevention-training.pptx`)
+  || isPublicRuntimeAllowed(`${REVIEWED_FALL_PREVENTION_PREFIX}audio/raw/slide-01.mp3`)
+  || isPublicRuntimeAllowed("web/public/training/safety-seminars/another-theme/audio/slide-01.mp3")
   || isPublicRuntimeAllowed("web/public/seminars/raw/unreviewed.pptx")
   || isPublicRuntimeAllowed("web/public/prod.sqlite-wal")
   || isPublicRuntimeAllowed("web/public/database-backup")

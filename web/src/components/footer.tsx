@@ -8,6 +8,7 @@ function Link(props: ComponentProps<typeof NextLink>) {
 
 const TRUST_LINKS = [
   { href: "/safety-ai", label: "安全AIポータル" },
+  { href: "/training/safety-seminars", label: "安全研修ライブラリ" },
   { href: "/about/usage-notes", label: "ご利用上の注意" },
   { href: "/about/data-sources", label: "データの出典" },
   { href: "/about/quality", label: "情報品質" },
