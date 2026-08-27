@@ -144,6 +144,10 @@ Desktop.ini
 !/web/public/training/safety-seminars/fall-prevention
 !/web/public/training/safety-seminars/fall-prevention/audio
 !/web/public/training/safety-seminars/fall-prevention/downloads
+!/web/public/training/ai-seminars
+!/web/public/training/ai-seminars/ai-chat-work
+!/web/public/training/ai-seminars/ai-chat-work/audio
+!/web/public/training/ai-seminars/ai-chat-work/downloads
 !/web/public/**/*.ico
 !/web/public/**/*.png
 !/web/public/**/*.jpg
@@ -168,3 +172,6 @@ Desktop.ini
 !/web/public/training/safety-seminars/fall-prevention/audio/slide-*.mp3
 !/web/public/training/safety-seminars/fall-prevention/downloads/*.pdf
 !/web/public/training/safety-seminars/fall-prevention/downloads/*.pptx
+!/web/public/training/ai-seminars/ai-chat-work/audio/slide-*.mp3
+!/web/public/training/ai-seminars/ai-chat-work/downloads/*.pdf
+!/web/public/training/ai-seminars/ai-chat-work/downloads/*.pptx

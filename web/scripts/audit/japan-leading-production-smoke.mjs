@@ -507,26 +507,23 @@ const protectedGovernanceRoutes = [
     ],
   },
   {
-    route: "/education/progress",
-    requiredCopies: [
-      "組織の受講記録は接続されていません",
-      "確認できないためfail-closed",
-    ],
-    validReasons: [
-      "authentication_not_configured",
-      "authentication_required",
-      "database_unavailable",
-      "membership_required",
-      "insufficient_role",
-      "progress_unavailable",
-    ],
-  },
-  {
     route: "/signage/manage",
     requiredCopies: ["端末未登録・接続未確認"],
     validReasons: [],
   },
 ];
+
+const educationProgressRedirect = await request("/education/progress");
+record(
+  "/education/progress:permanent-redirect",
+  educationProgressRedirect.status === 308 &&
+    educationProgressRedirect.headers.location === "/e-learning",
+  {
+    status: educationProgressRedirect.status,
+    location: educationProgressRedirect.headers.location,
+    error: educationProgressRedirect.error,
+  },
+);
 const protectedGovernanceResults = await Promise.all(
   protectedGovernanceRoutes.map(({ route }) => request(route)),
 );
@@ -613,6 +610,7 @@ const compactNavigationPaths = [
   "/ky/paper",
   "/signage",
   "/materials/safety-images",
+  "/tools/construction-calculators",
   "/chatbot",
   "/law-search",
   "/chemical-ra",
@@ -627,11 +625,11 @@ const compactNavigationPaths = [
 ];
 record(
   "home:compact-navigation-contract",
-  compactNavigationPaths.length === 16 &&
-    new Set(compactNavigationPaths).size === 16 &&
+  compactNavigationPaths.length === 17 &&
+    new Set(compactNavigationPaths).size === 17 &&
     !compactNavigationPaths.includes("/resources"),
   {
-    expectedCount: 16,
+    expectedCount: 17,
     actualCount: compactNavigationPaths.length,
     uniqueCount: new Set(compactNavigationPaths).size,
     resourcesIncluded: compactNavigationPaths.includes("/resources"),

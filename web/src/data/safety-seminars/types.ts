@@ -1,6 +1,7 @@
 export type TrainingSourceType =
   | "law"
   | "statistics"
+  | "official-product"
   | "government-guidance"
   | "scientific";
 
@@ -18,6 +19,7 @@ export type TrainingSource = {
   locator: string;
   claimIds: string[];
   checksum: string;
+  checksumMethod?: string;
   status: string;
 };
 
@@ -26,11 +28,16 @@ export type TrainingClaim = {
   claimType:
     | "law-duty"
     | "administrative-recommendation"
+    | "official-guidance"
+    | "product-limitation"
+    | "government-guidance"
+    | "legal-caution"
     | "statistics"
     | "scientific"
     | "portal-proposal";
   statement: string;
   sourceIds: string[];
+  caveat?: string;
 };
 
 export type SlideMetric = {
@@ -66,7 +73,7 @@ export type SlideVisual =
       prompts: string[];
     };
 
-export type FallPreventionSlide = {
+export type TrainingSlide = {
   id: string;
   number: number;
   title: string;
@@ -74,21 +81,14 @@ export type FallPreventionSlide = {
   message: string;
   body: string[];
   visual: SlideVisual;
-  label:
-    | "導入"
-    | "統計・確定値"
-    | "法定義務"
-    | "行政推奨"
-    | "科学的知見"
-    | "サイト提案"
-    | "演習";
+  label: string;
   claimIds: string[];
   narration: string;
   instructorNotes: string[];
   estimatedSeconds: number;
 };
 
-export type FallPreventionTraining = {
+export type TrainingCourse = {
   id: string;
   title: string;
   subtitle: string;
@@ -98,5 +98,9 @@ export type FallPreventionTraining = {
   standardMinutes: { audioMin: number; audioMax: number; workshop: number };
   boundary: string;
   slideCount: number;
-  slides: FallPreventionSlide[];
+  slides: TrainingSlide[];
 };
+
+// 公開済み安全研修の既存importを保ったまま、AI研修でも共通正本を使う。
+export type FallPreventionSlide = TrainingSlide;
+export type FallPreventionTraining = TrainingCourse;

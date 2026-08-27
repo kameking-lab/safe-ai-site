@@ -5,6 +5,8 @@ const DESKTOP_NAV = [
   ["熱中症対策", "/heat-illness-prevention"],
   ["KY用紙", "/ky/paper"],
   ["サイネージ", "/signage"],
+  ["安全画像倉庫", "/materials/safety-images"],
+  ["建設計算ツール", "/tools/construction-calculators"],
   ["安衛法AI", "/chatbot"],
   ["法令検索", "/law-search"],
   ["化学物質RA", "/chemical-ra"],
@@ -116,7 +118,7 @@ test("モバイルは結果と直接入力を保ち、Safety Labs・全機能を
   await expect(page.locator('[data-home-section="chemical"] input')).toHaveCount(1);
   await expect(
     page.locator('[data-home-section="core-features"] > div > ul > li'),
-  ).toHaveCount(6);
+  ).toHaveCount(7);
   await expect(
     page.locator(
       '[data-feature-tier="3"][data-feature-role="automation-sample"]',
@@ -183,9 +185,13 @@ test("モバイルは結果と直接入力を保ち、Safety Labs・全機能を
       .filter((href) => mobilePrimaryHrefs.includes(href)),
   ).toEqual([]);
   const menuHrefs = menuLinkMetrics.map(({ href }) => href);
-  expect(menuLinkMetrics).toHaveLength(12);
+  expect(menuLinkMetrics).toHaveLength(13);
   expect([...mobilePrimaryHrefs, ...menuHrefs]).toEqual(
-    expect.arrayContaining(["/risk", "/heat-illness-prevention"]),
+    expect.arrayContaining([
+      "/risk",
+      "/heat-illness-prevention",
+      "/tools/construction-calculators",
+    ]),
   );
   expect(new Set(menuLinkMetrics.map(({ href }) => href)).size).toBe(
     menuLinkMetrics.length,

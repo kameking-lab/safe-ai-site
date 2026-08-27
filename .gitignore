@@ -156,6 +156,9 @@ docs/education-curriculum-coverage.md
 !/web/public/training/safety-seminars/fall-prevention/audio/slide-*.mp3
 !/web/public/training/safety-seminars/fall-prevention/downloads/*.pdf
 !/web/public/training/safety-seminars/fall-prevention/downloads/*.pptx
+!/web/public/training/ai-seminars/ai-chat-work/audio/slide-*.mp3
+!/web/public/training/ai-seminars/ai-chat-work/downloads/*.pdf
+!/web/public/training/ai-seminars/ai-chat-work/downloads/*.pptx
 
 # Raw audit evidence stays local. Only compact manifests/results may be committed.
 /docs/audits/evidence/**

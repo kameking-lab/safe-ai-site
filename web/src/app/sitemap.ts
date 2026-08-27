@@ -5,6 +5,12 @@ import {
   getFeaturesByCategory,
 } from "@/data/features-catalog";
 import { CONSTRUCTION_CALCULATORS } from "@/lib/construction-calc/registry";
+import { constructionCalculatorRegistry } from "@/data/construction-calculators/formula-registry";
+import { CONSTRUCTION_CALCULATOR_HUB_PATH } from "@/data/construction-calculators/coming-soon";
+import {
+  AI_SEMINAR_HUB_PATH,
+  PUBLISHED_AI_SEMINARS,
+} from "@/data/ai-seminars/themes";
 import { ILLNESS_CATEGORIES } from "@/data/illness-considerations";
 import { COURT_CASES } from "@/data/court-cases";
 import { CANONICAL_HAZARD_TYPES } from "@/lib/accidents/type-normalization";
@@ -1085,6 +1091,42 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
   ];
 
+  // AI実務研修はハブと公開済み教材だけを収載する。Coming Soon 24件にはURLを作らない。
+  const aiSeminarPages: typeof pages = [
+    {
+      url: AI_SEMINAR_HUB_PATH,
+      lastModified: "2026-08-27",
+      priority: 0.9,
+      changeFrequency: "monthly" as Freq,
+    },
+    ...PUBLISHED_AI_SEMINARS.flatMap((seminar) =>
+      seminar.href
+        ? [{
+            url: seminar.href,
+            lastModified: "2026-08-27",
+            priority: 0.85,
+            changeFrequency: "monthly" as Freq,
+          }]
+        : [],
+    ),
+  ];
+
+  // 新しい建設計算は低リスクな公開12件だけ。第二弾候補には個別URLを作らない。
+  const constructionCalculatorToolPages: typeof pages = [
+    {
+      url: CONSTRUCTION_CALCULATOR_HUB_PATH,
+      lastModified: "2026-08-27",
+      priority: 0.9,
+      changeFrequency: "monthly" as Freq,
+    },
+    ...constructionCalculatorRegistry.map((calculator) => ({
+      url: `${CONSTRUCTION_CALCULATOR_HUB_PATH}/${calculator.slug}`,
+      lastModified: "2026-08-27",
+      priority: 0.82,
+      changeFrequency: "monthly" as Freq,
+    })),
+  ];
+
   // 安全画像倉庫は生成・人体/PPE・文字なしQAを通過した正式公開100点だけを列挙する。
   // 編集状態、言語切替、ブランド切替、印刷HTML、方式B比較ページは別URLとしてindexしない。
   const safetyImagePages: typeof pages = [
@@ -1118,6 +1160,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...filtered,
     ...safetyImagePages,
     ...safetySeminarPages,
+    ...aiSeminarPages,
+    ...constructionCalculatorToolPages,
     ...visualKyPages,
     ...eduPackPages,
     ...featureCategoryPages,

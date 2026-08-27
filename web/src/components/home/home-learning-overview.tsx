@@ -43,6 +43,12 @@ export function HomeLearningOverview() {
               安全研修ライブラリ
             </Link>
             <Link
+              href="/training/ai-seminars"
+              className="inline-flex min-h-11 items-center text-sm font-black text-sky-900 underline underline-offset-4 dark:text-sky-200"
+            >
+              AI実務研修
+            </Link>
+            <Link
               href="/education"
               className="inline-flex min-h-11 items-center text-sm font-black text-teal-900 underline underline-offset-4 dark:text-teal-200"
             >

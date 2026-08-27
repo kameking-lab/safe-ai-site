@@ -10,6 +10,7 @@ import {
   Users,
 } from "lucide-react";
 import { PageJsonLd } from "@/components/page-json-ld";
+import { TrainingLibrarySwitcher } from "@/components/training/training-library-switcher";
 import {
   COMING_SOON_SAFETY_SEMINARS,
   PUBLISHED_SAFETY_SEMINARS,
@@ -102,6 +103,7 @@ export default function SafetySeminarLibraryPage() {
         </section>
 
         <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
+          <TrainingLibrarySwitcher current="safety" />
           <section aria-labelledby="published-seminars-title">
             <div className="flex flex-wrap items-end justify-between gap-2">
               <div>

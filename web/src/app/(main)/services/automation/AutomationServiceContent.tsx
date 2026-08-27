@@ -224,6 +224,12 @@ export function AutomationServiceContent({
             <span className="mt-1 block text-sm text-slate-700">
               Excel、CSV、フォーム回答、定型メール
             </span>
+            <Link
+              href="/tools/construction-calculators"
+              className="mt-2 inline-flex min-h-11 items-center text-sm font-black text-emerald-900 underline underline-offset-4"
+            >
+              建設計算ツールを見る
+            </Link>
           </li>
           <li className="rounded-xl border border-slate-300 p-4">
             <strong>安全衛生業務</strong>
@@ -241,6 +247,12 @@ export function AutomationServiceContent({
               className="mt-2 inline-flex min-h-11 items-center text-sm font-black text-emerald-900 underline underline-offset-4"
             >
               無料の安全研修教材を見る
+            </Link>
+            <Link
+              href="/training/ai-seminars"
+              className="inline-flex min-h-11 items-center text-sm font-black text-emerald-900 underline underline-offset-4"
+            >
+              無料のAI実務研修を見る
             </Link>
           </li>
         </ul>
