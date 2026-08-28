@@ -1,11 +1,4 @@
 {
-  "full-harness-required": {
-    "ja": "ここではフルハーネスを使用",
-    "en": "Use a full-body harness here",
-    "vi": "Sử dụng dây đai toàn thân tại đây",
-    "zh-CN": "此处须使用全身式安全带",
-    "id": "Gunakan sabuk pengaman tubuh penuh di sini"
-  },
   "helmet-required": {
     "ja": "保護帽を着用",
     "en": "Wear a safety helmet",
@@ -14,60 +7,137 @@
     "id": "Gunakan helm keselamatan"
   },
   "safety-glasses-required": {
-    "ja": "保護メガネ着用",
+    "ja": "保護メガネを着用",
     "en": "Wear safety glasses",
     "vi": "Đeo kính bảo hộ",
     "zh-CN": "佩戴防护眼镜",
     "id": "Gunakan kacamata keselamatan"
   },
-  "hearing-protection-required": {
-    "ja": "耳栓・イヤーマフ着用",
-    "en": "Wear hearing protection",
-    "vi": "Đeo thiết bị bảo vệ thính giác",
-    "zh-CN": "佩戴听力防护用品",
-    "id": "Gunakan pelindung pendengaran"
+  "goggles-required": {
+    "ja": "ゴーグルを着用",
+    "en": "Wear safety goggles",
+    "vi": "Đeo kính bảo hộ kín",
+    "zh-CN": "佩戴护目镜",
+    "id": "Gunakan kacamata pelindung tertutup"
   },
-  "safety-shoes-required": {
-    "ja": "安全靴着用",
-    "en": "Wear safety footwear",
-    "vi": "Mang giày bảo hộ",
-    "zh-CN": "穿安全鞋",
-    "id": "Gunakan sepatu keselamatan"
-  },
-  "protective-gloves-required": {
-    "ja": "保護手袋着用",
-    "en": "Wear protective gloves",
-    "vi": "Đeo găng tay bảo hộ",
-    "zh-CN": "佩戴防护手套",
-    "id": "Gunakan sarung tangan pelindung"
+  "earplugs-required": {
+    "ja": "耳栓を着用",
+    "en": "Wear earplugs",
+    "vi": "Đeo nút tai chống ồn",
+    "zh-CN": "佩戴耳塞",
+    "id": "Gunakan sumbat telinga"
   },
   "dust-mask-required": {
-    "ja": "防じんマスク着用",
+    "ja": "防じんマスクを着用",
     "en": "Wear a dust mask",
     "vi": "Đeo khẩu trang chống bụi",
     "zh-CN": "佩戴防尘口罩",
     "id": "Gunakan masker debu"
   },
-  "face-shield-required": {
-    "ja": "フェイスシールド着用",
-    "en": "Wear a face shield",
-    "vi": "Đeo tấm che mặt",
-    "zh-CN": "佩戴防护面罩",
-    "id": "Gunakan pelindung wajah"
+  "respiratory-protection-required": {
+    "ja": "指定の呼吸用保護具を着用",
+    "en": "Wear the specified respiratory protection",
+    "vi": "Sử dụng thiết bị bảo vệ hô hấp được chỉ định",
+    "zh-CN": "佩戴指定的呼吸防护用品",
+    "id": "Gunakan pelindung pernapasan yang ditentukan"
+  },
+  "protective-gloves-required": {
+    "ja": "保護手袋を着用",
+    "en": "Wear protective gloves",
+    "vi": "Đeo găng tay bảo hộ",
+    "zh-CN": "佩戴防护手套",
+    "id": "Gunakan sarung tangan pelindung"
+  },
+  "safety-shoes-required": {
+    "ja": "安全靴を着用",
+    "en": "Wear safety footwear",
+    "vi": "Mang giày bảo hộ",
+    "zh-CN": "穿安全鞋",
+    "id": "Gunakan sepatu keselamatan"
+  },
+  "full-body-harness-required": {
+    "ja": "フルハーネスを着用",
+    "en": "Use a full-body harness",
+    "vi": "Sử dụng dây đai toàn thân",
+    "zh-CN": "使用全身式安全带",
+    "id": "Gunakan sabuk pengaman tubuh penuh"
+  },
+  "fall-restraint-required": {
+    "ja": "墜落制止用器具を使用",
+    "en": "Use fall-arrest equipment",
+    "vi": "Sử dụng thiết bị chống rơi",
+    "zh-CN": "使用防坠落安全带",
+    "id": "Gunakan alat penahan jatuh"
+  },
+  "ppe-required": {
+    "ja": "指定の保護具を着用",
+    "en": "Wear the specified PPE",
+    "vi": "Mang PPE được chỉ định",
+    "zh-CN": "佩戴指定的防护用品",
+    "id": "Gunakan APD yang ditentukan"
+  },
+  "complete-ppe-required": {
+    "ja": "保護具を完全着用",
+    "en": "Wear all required PPE",
+    "vi": "Mang đầy đủ PPE bắt buộc",
+    "zh-CN": "完整佩戴所需防护用品",
+    "id": "Gunakan semua APD yang diwajibkan"
+  },
+  "protective-clothing-required": {
+    "ja": "防護服を着用",
+    "en": "Wear protective clothing",
+    "vi": "Mặc quần áo bảo hộ",
+    "zh-CN": "穿防护服",
+    "id": "Gunakan pakaian pelindung"
+  },
+  "life-jacket-required": {
+    "ja": "救命胴衣を着用",
+    "en": "Wear a life jacket",
+    "vi": "Mặc áo phao",
+    "zh-CN": "穿救生衣",
+    "id": "Gunakan jaket pelampung"
+  },
+  "mask-required": {
+    "ja": "マスクを着用",
+    "en": "Wear a mask",
+    "vi": "Đeo khẩu trang",
+    "zh-CN": "佩戴口罩",
+    "id": "Gunakan masker"
   },
   "no-entry": {
     "ja": "立入禁止",
-    "en": "No entry",
+    "en": "Keep Out",
     "vi": "Cấm vào",
-    "zh-CN": "禁止入内",
+    "zh-CN": "禁止进入",
     "id": "Dilarang masuk"
   },
-  "no-open-flame": {
-    "ja": "火気厳禁",
-    "en": "No open flames",
-    "vi": "Cấm lửa",
-    "zh-CN": "严禁烟火",
-    "id": "Dilarang menyalakan api"
+  "authorized-personnel-only": {
+    "ja": "関係者以外立入禁止",
+    "en": "Authorized personnel only",
+    "vi": "Chỉ người có phận sự mới được vào",
+    "zh-CN": "非相关人员禁止入内",
+    "id": "Hanya petugas yang berwenang"
+  },
+  "no-access": {
+    "ja": "進入禁止",
+    "en": "No access",
+    "vi": "Cấm đi vào",
+    "zh-CN": "禁止进入",
+    "id": "Dilarang masuk"
+  },
+  "no-vehicle-entry": {
+    "ja": "車両進入禁止",
+    "en": "No vehicle entry",
+    "vi": "Cấm xe cộ vào",
+    "zh-CN": "车辆禁止进入",
+    "id": "Kendaraan dilarang masuk"
+  },
+  "operation-prohibited": {
+    "ja": "運転禁止",
+    "en": "Operation prohibited",
+    "vi": "Cấm vận hành",
+    "zh-CN": "禁止运行",
+    "id": "Dilarang mengoperasikan"
   },
   "no-smoking": {
     "ja": "禁煙",
@@ -76,208 +146,530 @@
     "zh-CN": "禁止吸烟",
     "id": "Dilarang merokok"
   },
-  "opening-caution": {
+  "no-open-flames": {
+    "ja": "火気厳禁",
+    "en": "No open flames",
+    "vi": "Cấm lửa",
+    "zh-CN": "严禁烟火",
+    "id": "Dilarang menyalakan api"
+  },
+  "do-not-use": {
+    "ja": "使用禁止",
+    "en": "Do not use",
+    "vi": "Cấm sử dụng",
+    "zh-CN": "禁止使用",
+    "id": "Dilarang digunakan"
+  },
+  "do-not-operate": {
+    "ja": "操作禁止",
+    "en": "Do not operate",
+    "vi": "Cấm vận hành",
+    "zh-CN": "禁止操作",
+    "id": "Dilarang mengoperasikan"
+  },
+  "do-not-touch": {
+    "ja": "さわるな",
+    "en": "Do not touch",
+    "vi": "Cấm sờ",
+    "zh-CN": "禁止触摸",
+    "id": "Jangan pegang"
+  },
+  "no-climbing": {
+    "ja": "昇降禁止",
+    "en": "Do not climb here",
+    "vi": "Không leo lên từ đây",
+    "zh-CN": "禁止从此处攀爬",
+    "id": "Jangan memanjat dari sini"
+  },
+  "do-not-open-close": {
+    "ja": "開閉禁止",
+    "en": "Do not open or close",
+    "vi": "Cấm đóng mở",
+    "zh-CN": "禁止开闭",
+    "id": "Dilarang membuka atau menutup"
+  },
+  "no-mobile-phone": {
+    "ja": "携帯電話使用禁止",
+    "en": "No mobile phone use",
+    "vi": "Cấm sử dụng điện thoại",
+    "zh-CN": "禁止使用手机",
+    "id": "Dilarang menggunakan ponsel"
+  },
+  "no-parking": {
+    "ja": "駐車禁止",
+    "en": "No Parking",
+    "vi": "Cấm đỗ xe",
+    "zh-CN": "禁止停车",
+    "id": "Dilarang parkir di sini"
+  },
+  "no-passage": {
+    "ja": "通行禁止",
+    "en": "No passage",
+    "vi": "Cấm qua lại",
+    "zh-CN": "禁止通行",
+    "id": "Dilarang melintas"
+  },
+  "fall-hazard": {
+    "ja": "墜落注意",
+    "en": "Fall hazard",
+    "vi": "Nguy cơ ngã từ độ cao",
+    "zh-CN": "当心坠落",
+    "id": "Bahaya jatuh"
+  },
+  "floor-opening-hazard": {
     "ja": "開口部注意",
     "en": "Caution: floor opening",
-    "vi": "Chú ý lỗ mở",
+    "vi": "Chú ý lỗ mở sàn",
     "zh-CN": "当心洞口",
     "id": "Awas bukaan lantai"
   },
-  "fall-caution": {
-    "ja": "墜落注意",
-    "en": "Caution: fall hazard",
-    "vi": "Chú ý nguy cơ ngã cao",
-    "zh-CN": "当心坠落",
-    "id": "Awas bahaya jatuh"
+  "falling-objects-hazard": {
+    "ja": "落下物注意",
+    "en": "Caution: falling objects",
+    "vi": "Chú ý vật rơi",
+    "zh-CN": "当心坠落物",
+    "id": "Awas benda jatuh"
   },
-  "overhead-load-caution": {
-    "ja": "上部吊り荷注意",
-    "en": "Caution: overhead load",
-    "vi": "Chú ý tải treo phía trên",
-    "zh-CN": "当心上方吊物",
-    "id": "Awas beban tergantung di atas"
-  },
-  "rigging-in-progress": {
-    "ja": "玉掛け作業中",
-    "en": "Rigging work in progress",
-    "vi": "Đang thực hiện công tác móc cáp",
-    "zh-CN": "正在进行吊装索具作业",
-    "id": "Pekerjaan rigging sedang berlangsung"
-  },
-  "working-at-height": {
-    "ja": "高所作業中",
-    "en": "Work at height in progress",
-    "vi": "Đang làm việc trên cao",
-    "zh-CN": "正在进行高处作业",
-    "id": "Pekerjaan di ketinggian sedang berlangsung"
-  },
-  "heavy-equipment-operating": {
-    "ja": "重機作業中",
-    "en": "Heavy equipment operating",
-    "vi": "Thiết bị hạng nặng đang hoạt động",
-    "zh-CN": "重型机械作业中",
-    "id": "Alat berat sedang beroperasi"
-  },
-  "electric-shock-caution": {
-    "ja": "感電注意",
-    "en": "Caution: electric shock",
-    "vi": "Chú ý điện giật",
-    "zh-CN": "当心触电",
-    "id": "Awas sengatan listrik"
-  },
-  "oxygen-deficiency-caution": {
-    "ja": "酸欠注意",
-    "en": "Caution: oxygen deficiency",
-    "vi": "Chú ý thiếu oxy",
-    "zh-CN": "当心缺氧",
-    "id": "Awas kekurangan oksigen"
-  },
-  "organic-solvent-caution": {
-    "ja": "有機溶剤取扱い注意",
-    "en": "Caution: organic solvents",
-    "vi": "Chú ý dung môi hữu cơ",
-    "zh-CN": "当心有机溶剂",
-    "id": "Awas pelarut organik"
-  },
-  "asbestos-work-area": {
-    "ja": "石綿作業区域",
-    "en": "Asbestos work area",
-    "vi": "Khu vực làm việc với amiăng",
-    "zh-CN": "石棉作业区域",
-    "id": "Area kerja asbes"
-  },
-  "forklift-traffic": {
-    "ja": "フォークリフト通行注意",
-    "en": "Caution: forklift traffic",
-    "vi": "Chú ý xe nâng qua lại",
-    "zh-CN": "当心叉车通行",
-    "id": "Awas lalu lintas forklift"
+  "overhead-hazard": {
+    "ja": "頭上注意",
+    "en": "Mind your head",
+    "vi": "Chú ý phía trên đầu",
+    "zh-CN": "当心碰头",
+    "id": "Awas kepala"
   },
   "watch-your-step": {
     "ja": "足元注意",
     "en": "Watch your step",
-    "vi": "Chú ý bước chân",
-    "zh-CN": "小心脚下",
+    "vi": "Cẩn thận bước chân",
+    "zh-CN": "当心脚下",
     "id": "Perhatikan langkah Anda"
   },
   "slippery-surface": {
-    "ja": "滑りやすい床面",
-    "en": "Caution: slippery surface",
-    "vi": "Chú ý sàn trơn",
+    "ja": "すべり注意",
+    "en": "Slippery surface",
+    "vi": "Chú ý bề mặt trơn",
     "zh-CN": "小心地滑",
     "id": "Awas permukaan licin"
   },
-  "keep-tidy": {
-    "ja": "整理整頓",
-    "en": "Keep the area tidy",
-    "vi": "Giữ khu vực gọn gàng",
-    "zh-CN": "整理整顿",
-    "id": "Jaga area tetap rapi"
+  "trip-fall-hazard": {
+    "ja": "転倒注意",
+    "en": "Caution: trip hazard",
+    "vi": "Chú ý nguy cơ vấp ngã",
+    "zh-CN": "当心绊倒",
+    "id": "Awas tersandung"
   },
-  "point-and-call": {
-    "ja": "指差呼称",
-    "en": "Point and call",
-    "vi": "Chỉ tay và hô xác nhận",
-    "zh-CN": "指差呼唤确认",
-    "id": "Tunjuk dan sebutkan"
+  "level-change-hazard": {
+    "ja": "段差注意",
+    "en": "Caution: level change",
+    "vi": "Chú ý chênh lệch độ cao",
+    "zh-CN": "当心台阶",
+    "id": "Awas perbedaan ketinggian"
   },
-  "safety-passage": {
-    "ja": "安全通路",
-    "en": "Safety walkway",
-    "vi": "Lối đi an toàn",
-    "zh-CN": "安全通道",
-    "id": "Jalur aman"
+  "cutting-hazard": {
+    "ja": "切断注意",
+    "en": "Cutting hazard",
+    "vi": "Nguy cơ bị cắt",
+    "zh-CN": "当心切割伤",
+    "id": "Bahaya terpotong"
   },
-  "crane-slewing-range": {
-    "ja": "クレーン旋回範囲 立入注意",
-    "en": "Keep clear of the crane slewing area",
-    "vi": "Tránh xa vùng quay của cần cẩu",
-    "zh-CN": "请勿进入起重机回转范围",
-    "id": "Jauhi area putar derek"
+  "collision-hazard": {
+    "ja": "衝突注意",
+    "en": "Collision hazard",
+    "vi": "Nguy cơ va chạm",
+    "zh-CN": "当心碰撞",
+    "id": "Bahaya tabrakan"
   },
-  "excavation-edge": {
-    "ja": "掘削端部 接近注意",
-    "en": "Keep away from excavation edges",
-    "vi": "Tránh xa mép hố đào",
-    "zh-CN": "请勿靠近开挖边缘",
-    "id": "Jauhi tepi galian"
-  },
-  "suspended-load": {
-    "ja": "吊り荷の下に入らない",
-    "en": "Keep out from under suspended loads",
-    "vi": "Không đứng dưới tải treo",
-    "zh-CN": "严禁进入吊物下方",
+  "no-under-suspended-load": {
+    "ja": "吊り荷の下に入るな",
+    "en": "Do not go under suspended loads",
+    "vi": "Không đi vào hoặc đứng dưới tải treo",
+    "zh-CN": "禁止进入吊物下方",
     "id": "Jangan berada di bawah beban tergantung"
   },
-  "welding-arc": {
-    "ja": "溶接アーク光 注意",
-    "en": "Caution: welding arc",
-    "vi": "Chú ý hồ quang hàn",
-    "zh-CN": "当心焊接弧光",
-    "id": "Awas cahaya busur las"
+  "equipment-swing-zone": {
+    "ja": "重機作業半径内 立入禁止",
+    "en": "No entry within heavy-equipment operating radius",
+    "vi": "Cấm vào bán kính hoạt động của máy móc hạng nặng",
+    "zh-CN": "重型机械作业半径内禁止入内",
+    "id": "Dilarang masuk radius kerja alat berat"
   },
-  "hot-surface": {
-    "ja": "高温部 接触注意",
-    "en": "Caution: hot surface",
-    "vi": "Chú ý bề mặt nóng",
-    "zh-CN": "当心高温表面",
-    "id": "Awas permukaan panas"
+  "forklift-hazard": {
+    "ja": "フォークリフトに注意",
+    "en": "Beware of forklifts",
+    "vi": "Chú ý xe nâng",
+    "zh-CN": "当心叉车",
+    "id": "Waspadai forklift"
   },
-  "high-noise-area": {
-    "ja": "高騒音区域",
-    "en": "High-noise area",
-    "vi": "Khu vực tiếng ồn cao",
-    "zh-CN": "高噪声区域",
-    "id": "Area kebisingan tinggi"
-  },
-  "low-headroom": {
-    "ja": "頭上注意",
-    "en": "Mind your head",
-    "vi": "Chú ý phía trên đầu",
-    "zh-CN": "小心碰头",
-    "id": "Awas kepala"
-  },
-  "falling-objects": {
-    "ja": "飛来・落下物注意",
-    "en": "Caution: falling objects",
-    "vi": "Chú ý vật rơi",
-    "zh-CN": "当心飞落物",
-    "id": "Awas benda jatuh"
-  },
-  "pinch-point": {
+  "pinch-point-hazard": {
     "ja": "はさまれ注意",
     "en": "Caution: pinch point",
     "vi": "Chú ý điểm kẹp",
     "zh-CN": "当心夹伤",
     "id": "Awas titik jepit"
   },
-  "rotating-parts": {
-    "ja": "回転部に触れない",
-    "en": "Do not touch rotating parts",
-    "vi": "Không chạm vào bộ phận quay",
-    "zh-CN": "请勿触摸旋转部件",
-    "id": "Jangan sentuh bagian berputar"
+  "entanglement-hazard": {
+    "ja": "巻き込まれ注意",
+    "en": "Entanglement hazard",
+    "vi": "Chú ý nguy cơ bị cuốn vào",
+    "zh-CN": "当心卷入",
+    "id": "Bahaya tersangkut"
   },
-  "chemical-splash": {
-    "ja": "薬液飛散注意",
-    "en": "Caution: chemical splash",
-    "vi": "Chú ý hóa chất bắn tóe",
-    "zh-CN": "当心化学品飞溅",
-    "id": "Awas percikan bahan kimia"
+  "electric-shock-hazard": {
+    "ja": "感電注意",
+    "en": "Electric shock hazard",
+    "vi": "Nguy cơ điện giật",
+    "zh-CN": "当心触电",
+    "id": "Bahaya sengatan listrik"
   },
-  "gas-cylinder-storage": {
-    "ja": "ボンベ転倒防止",
-    "en": "Secure gas cylinders",
-    "vi": "Cố định bình khí chống đổ",
-    "zh-CN": "固定气瓶防止倾倒",
-    "id": "Amankan tabung gas agar tidak jatuh"
+  "high-voltage-hazard": {
+    "ja": "高電圧注意",
+    "en": "High voltage hazard",
+    "vi": "Nguy hiểm điện áp cao",
+    "zh-CN": "高压危险",
+    "id": "Bahaya tegangan tinggi"
   },
-  "fire-extinguisher": {
-    "ja": "消火器",
-    "en": "Fire extinguisher",
-    "vi": "Bình chữa cháy",
-    "zh-CN": "灭火器",
-    "id": "Alat pemadam api"
+  "oxygen-deficiency-hazard": {
+    "ja": "酸欠危険",
+    "en": "Oxygen deficiency hazard",
+    "vi": "Nguy hiểm thiếu oxy",
+    "zh-CN": "缺氧危险",
+    "id": "Bahaya kekurangan oksigen"
+  },
+  "laser-radiation-hazard": {
+    "ja": "レーザー光線注意",
+    "en": "Caution: laser beam",
+    "vi": "Chú ý tia laser",
+    "zh-CN": "当心激光",
+    "id": "Awas sinar laser"
+  },
+  "organic-solvent-in-use": {
+    "ja": "有機溶剤使用中",
+    "en": "Organic solvents in use",
+    "vi": "Đang sử dụng dung môi hữu cơ",
+    "zh-CN": "有机溶剂使用中",
+    "id": "Pelarut organik sedang digunakan"
+  },
+  "asbestos-removal-in-progress": {
+    "ja": "石綿除去作業中",
+    "en": "Asbestos removal in progress",
+    "vi": "Đang loại bỏ amiăng",
+    "zh-CN": "石棉拆除作业中",
+    "id": "Pekerjaan pembuangan asbes sedang berlangsung"
+  },
+  "hot-surface-hazard": {
+    "ja": "高温注意",
+    "en": "Caution: hot surface",
+    "vi": "Chú ý bề mặt nóng",
+    "zh-CN": "当心高温表面",
+    "id": "Awas permukaan panas"
+  },
+  "burn-hazard": {
+    "ja": "火傷注意",
+    "en": "Burn hazard",
+    "vi": "Nguy cơ bỏng",
+    "zh-CN": "当心烫伤",
+    "id": "Bahaya luka bakar"
+  },
+  "high-pressure-gas-hazard": {
+    "ja": "高圧ガス注意",
+    "en": "High-pressure gas hazard",
+    "vi": "Nguy hiểm khí áp suất cao",
+    "zh-CN": "当心高压气体",
+    "id": "Bahaya gas bertekanan tinggi"
+  },
+  "toxic-substances-hazard": {
+    "ja": "劇物・毒物注意",
+    "en": "Caution: toxic substances",
+    "vi": "Chú ý chất độc và chất cực độc",
+    "zh-CN": "当心有毒、剧毒物质",
+    "id": "Awas bahan berbahaya dan beracun"
+  },
+  "construction-in-progress": {
+    "ja": "工事中",
+    "en": "Construction in progress",
+    "vi": "Công trường đang thi công",
+    "zh-CN": "施工中",
+    "id": "Pekerjaan konstruksi sedang berlangsung"
+  },
+  "work-in-progress": {
+    "ja": "作業中",
+    "en": "Work in progress",
+    "vi": "Đang làm việc",
+    "zh-CN": "作业中",
+    "id": "Pekerjaan sedang berlangsung"
+  },
+  "work-at-height-in-progress": {
+    "ja": "高所作業中",
+    "en": "Work at height in progress",
+    "vi": "Đang làm việc trên cao",
+    "zh-CN": "高处作业中",
+    "id": "Pekerjaan di ketinggian sedang berlangsung"
+  },
+  "scaffold-assembly-in-progress": {
+    "ja": "足場組立・解体作業中",
+    "en": "Scaffold assembly or dismantling in progress",
+    "vi": "Đang lắp dựng hoặc tháo dỡ giàn giáo",
+    "zh-CN": "脚手架搭设、拆除中",
+    "id": "Pemasangan atau pembongkaran perancah sedang berlangsung"
+  },
+  "hot-work-in-progress": {
+    "ja": "火気使用中",
+    "en": "Hot work in progress",
+    "vi": "Đang thực hiện công việc phát sinh nhiệt",
+    "zh-CN": "动火作业中",
+    "id": "Pekerjaan panas sedang berlangsung"
+  },
+  "inspection-in-progress": {
+    "ja": "点検中",
+    "en": "Inspection in progress",
+    "vi": "Đang kiểm tra",
+    "zh-CN": "点检中",
+    "id": "Sedang diperiksa"
+  },
+  "cleaning-in-progress": {
+    "ja": "清掃中",
+    "en": "Cleaning in progress",
+    "vi": "Đang vệ sinh",
+    "zh-CN": "清扫中",
+    "id": "Sedang dibersihkan"
+  },
+  "repair-in-progress": {
+    "ja": "修理中",
+    "en": "Repair in progress",
+    "vi": "Đang sửa chữa",
+    "zh-CN": "维修中",
+    "id": "Sedang diperbaiki"
+  },
+  "inspected": {
+    "ja": "点検済",
+    "en": "Inspected",
+    "vi": "Đã kiểm tra",
+    "zh-CN": "已检查",
+    "id": "Telah diperiksa"
+  },
+  "out-of-service": {
+    "ja": "故障中",
+    "en": "Out of service",
+    "vi": "Hỏng",
+    "zh-CN": "故障中",
+    "id": "Rusak"
+  },
+  "adjustment-in-progress": {
+    "ja": "調整中",
+    "en": "Adjustment in progress",
+    "vi": "Đang điều chỉnh",
+    "zh-CN": "调整中",
+    "id": "Sedang disetel"
+  },
+  "equipment-operating": {
+    "ja": "運転中",
+    "en": "Equipment operating",
+    "vi": "Đang vận hành",
+    "zh-CN": "运行中",
+    "id": "Sedang beroperasi"
+  },
+  "material-storage": {
+    "ja": "資材置場",
+    "en": "Materials storage area",
+    "vi": "Khu vực tập kết vật liệu",
+    "zh-CN": "材料存放区",
+    "id": "Area penyimpanan material"
+  },
+  "safe-passage": {
+    "ja": "安全通路",
+    "en": "Safety walkway",
+    "vi": "Lối đi an toàn",
+    "zh-CN": "安全通道",
+    "id": "Jalur aman"
+  },
+  "housekeeping": {
+    "ja": "整理整頓",
+    "en": "Keep the area tidy",
+    "vi": "Giữ khu vực gọn gàng",
+    "zh-CN": "整理整顿",
+    "id": "Jaga area tetap rapi"
+  },
+  "stop": {
+    "ja": "一旦停止",
+    "en": "Stop",
+    "vi": "Dừng lại",
+    "zh-CN": "停车",
+    "id": "Berhenti"
+  },
+  "slow": {
+    "ja": "徐行",
+    "en": "Drive slowly",
+    "vi": "Đi chậm",
+    "zh-CN": "慢行",
+    "id": "Jalan perlahan"
+  },
+  "one-way": {
+    "ja": "一方通行",
+    "en": "One way",
+    "vi": "Một chiều",
+    "zh-CN": "单向通行",
+    "id": "Satu arah"
+  },
+  "road-closed-to-vehicles": {
+    "ja": "車両通行止め",
+    "en": "Road closed to vehicles",
+    "vi": "Cấm xe cộ qua lại",
+    "zh-CN": "车辆禁止通行",
+    "id": "Jalan ditutup untuk kendaraan"
+  },
+  "vehicle-entrance": {
+    "ja": "車両出入口",
+    "en": "Vehicle entrance and exit",
+    "vi": "Lối ra vào xe",
+    "zh-CN": "车辆出入口",
+    "id": "Pintu keluar masuk kendaraan"
+  },
+  "pedestrian-route": {
+    "ja": "歩行者通路",
+    "en": "Pedestrian walkway",
+    "vi": "Lối đi dành cho người đi bộ",
+    "zh-CN": "人行通道",
+    "id": "Jalur pejalan kaki"
+  },
+  "forklift-operating": {
+    "ja": "フォークリフト運転中",
+    "en": "Forklift operating",
+    "vi": "Xe nâng đang hoạt động",
+    "zh-CN": "叉车作业中",
+    "id": "Forklift sedang beroperasi"
+  },
+  "look-both-ways": {
+    "ja": "左右確認",
+    "en": "Look both ways",
+    "vi": "Quan sát hai bên",
+    "zh-CN": "左右确认",
+    "id": "Lihat kiri dan kanan"
+  },
+  "road-shoulder-hazard": {
+    "ja": "路肩注意",
+    "en": "Caution: road shoulder",
+    "vi": "Chú ý lề đường",
+    "zh-CN": "当心路肩",
+    "id": "Awas bahu jalan"
+  },
+  "watch-for-vehicles": {
+    "ja": "車に注意",
+    "en": "Watch for vehicles",
+    "vi": "Chú ý xe cộ",
+    "zh-CN": "当心车辆",
+    "id": "Waspadai kendaraan"
+  },
+  "site-speed-limit": {
+    "ja": "制限速度 {value} km/h",
+    "en": "Site speed limit {value} km/h",
+    "vi": "Giới hạn tốc độ trong công trường {value} km/h",
+    "zh-CN": "场内限速 {value} km/h",
+    "id": "Batas kecepatan di lokasi {value} km/jam"
+  },
+  "maximum-load": {
+    "ja": "最大積載荷重 {value} kg",
+    "en": "Maximum load {value} kg",
+    "vi": "Tải trọng tối đa {value} kg",
+    "zh-CN": "最大载荷 {value} kg",
+    "id": "Beban maksimum {value} kg"
+  },
+  "platform-load-limit": {
+    "ja": "作業床 最大積載荷重 {value} kg/m²",
+    "en": "Work platform maximum load {value} kg/m²",
+    "vi": "Tải trọng tối đa của sàn công tác {value} kg/m²",
+    "zh-CN": "作业平台最大载荷 {value} kg/m²",
+    "id": "Beban maksimum platform kerja {value} kg/m²"
+  },
+  "height-limit": {
+    "ja": "高さ制限 {value} m",
+    "en": "Height limit {value} m",
+    "vi": "Giới hạn chiều cao {value} m",
+    "zh-CN": "限高 {value} m",
+    "id": "Batas tinggi {value} m"
+  },
+  "weight-limit": {
+    "ja": "重量制限 {value} kg",
+    "en": "Weight limit {value} kg",
+    "vi": "Giới hạn trọng lượng {value} kg",
+    "zh-CN": "限重 {value} kg",
+    "id": "Batas berat {value} kg"
+  },
+  "maximum-width": {
+    "ja": "最大幅 {value} m",
+    "en": "Maximum width {value} m",
+    "vi": "Chiều rộng tối đa {value} m",
+    "zh-CN": "最大宽度 {value} m",
+    "id": "Lebar maksimum {value} m"
+  },
+  "work-radius-no-entry": {
+    "ja": "作業半径 {value} m以内 立入禁止",
+    "en": "No entry within work radius {value} m",
+    "vi": "Cấm vào trong bán kính làm việc {value} m",
+    "zh-CN": "作业半径 {value} m以内禁止入内",
+    "id": "Dilarang masuk dalam radius kerja {value} m"
+  },
+  "accident-free-record": {
+    "ja": "連続無災害日数 {value} 日",
+    "en": "Consecutive accident-free days {value} days",
+    "vi": "Số ngày liên tiếp không tai nạn {value} ngày",
+    "zh-CN": "连续无事故 {value} 天",
+    "id": "Hari tanpa kecelakaan berturut-turut {value} hari"
+  },
+  "emergency-contact": {
+    "ja": "緊急時連絡表 {value}",
+    "en": "Emergency contact list {value}",
+    "vi": "Danh sách liên hệ khẩn cấp {value}",
+    "zh-CN": "紧急联系表 {value}",
+    "id": "Daftar kontak darurat {value}"
+  },
+  "fire-safety-manager": {
+    "ja": "火元責任者 {value}",
+    "en": "Fire safety manager {value}",
+    "vi": "Người phụ trách phòng cháy {value}",
+    "zh-CN": "防火负责人 {value}",
+    "id": "Penanggung jawab keselamatan kebakaran {value}"
+  },
+  "heat-illness-alert": {
+    "ja": "熱中症に注意",
+    "en": "Heat illness alert",
+    "vi": "Cảnh báo sốc nhiệt",
+    "zh-CN": "谨防中暑",
+    "id": "Waspada penyakit akibat panas"
+  },
+  "wbgt-display": {
+    "ja": "WBGTを確認",
+    "en": "Check WBGT",
+    "vi": "Kiểm tra WBGT",
+    "zh-CN": "确认WBGT",
+    "id": "Periksa WBGT"
+  },
+  "heat-illness-prevention": {
+    "ja": "水分・塩分・休憩",
+    "en": "Water, salt and rest",
+    "vi": "Uống nước, bổ sung muối và nghỉ ngơi",
+    "zh-CN": "补充水分、盐分并休息",
+    "id": "Minum, tambah asupan garam, dan istirahat"
+  },
+  "evacuation-exit": {
+    "ja": "避難口",
+    "en": "Evacuation exit",
+    "vi": "Lối thoát sơ tán",
+    "zh-CN": "疏散出口",
+    "id": "Pintu keluar evakuasi"
+  },
+  "first-aid-station": {
+    "ja": "救護所",
+    "en": "First-aid station",
+    "vi": "Trạm sơ cứu",
+    "zh-CN": "急救点",
+    "id": "Pos P3K"
+  },
+  "first-aid-kit": {
+    "ja": "救急箱",
+    "en": "First-aid kit",
+    "vi": "Hộp sơ cứu",
+    "zh-CN": "急救箱",
+    "id": "Kotak P3K"
   },
   "emergency-exit": {
     "ja": "非常口",
@@ -286,417 +678,25 @@
     "zh-CN": "紧急出口",
     "id": "Pintu keluar darurat"
   },
-  "first-aid-station": {
-    "ja": "救急用品",
-    "en": "First-aid supplies",
-    "vi": "Dụng cụ sơ cứu",
-    "zh-CN": "急救用品",
-    "id": "Perlengkapan P3K"
+  "aed-location": {
+    "ja": "AED設置場所",
+    "en": "AED location",
+    "vi": "Vị trí AED",
+    "zh-CN": "AED设置场所",
+    "id": "Lokasi AED"
   },
-  "eyewash-station": {
-    "ja": "洗眼設備",
-    "en": "Emergency eyewash",
-    "vi": "Thiết bị rửa mắt",
-    "zh-CN": "洗眼设备",
-    "id": "Pencuci mata darurat"
+  "stretcher-location": {
+    "ja": "担架",
+    "en": "Stretcher",
+    "vi": "Cáng cứu thương",
+    "zh-CN": "担架",
+    "id": "Tandu"
   },
-  "assembly-point": {
-    "ja": "緊急集合場所",
-    "en": "Emergency assembly point",
-    "vi": "Điểm tập kết khẩn cấp",
-    "zh-CN": "紧急集合点",
-    "id": "Titik kumpul darurat"
-  },
-  "pedestrian-crossing": {
-    "ja": "歩行者横断箇所",
-    "en": "Pedestrian crossing",
-    "vi": "Lối qua đường cho người đi bộ",
-    "zh-CN": "行人横穿处",
-    "id": "Penyeberangan pejalan kaki"
-  },
-  "floor-load-limit": {
-    "ja": "作業床の制限荷重 ○○ t/㎡",
-    "en": "Floor load limit: ○○ t/m²",
-    "vi": "Tải trọng sàn giới hạn: ○○ t/m²",
-    "zh-CN": "作业平台限载：○○ t/㎡",
-    "id": "Batas beban lantai: ○○ t/m²"
-  },
-  "maximum-load": {
-    "ja": "最大積載荷重 ○○ kg",
-    "en": "Maximum load: ○○ kg",
-    "vi": "Tải trọng tối đa: ○○ kg",
-    "zh-CN": "最大载荷：○○ kg",
-    "id": "Beban maksimum: ○○ kg"
-  },
-  "ppe-rules": {
-    "ja": "この区域の保護具ルール",
-    "en": "PPE rules for this area",
-    "vi": "Quy định PPE tại khu vực này",
-    "zh-CN": "本区域个人防护用品规定",
-    "id": "Aturan APD di area ini"
-  },
-  "hydration-break": {
-    "ja": "休憩・水分補給を忘れずに",
-    "en": "Take breaks and stay hydrated",
-    "vi": "Nghỉ giải lao và uống đủ nước",
-    "zh-CN": "注意休息和补充水分",
-    "id": "Istirahat dan cukup minum"
-  },
-  "emergency-contacts": {
-    "ja": "緊急連絡体制",
-    "en": "Emergency contact procedure",
-    "vi": "Quy trình liên lạc khẩn cấp",
-    "zh-CN": "紧急联络流程",
-    "id": "Prosedur kontak darurat"
-  },
-  "ky-in-progress": {
-    "ja": "KY実施中",
-    "en": "Hazard prediction meeting in progress",
-    "vi": "Đang họp dự đoán nguy cơ",
-    "zh-CN": "危险预知活动进行中",
-    "id": "Pertemuan prediksi bahaya sedang berlangsung"
-  },
-  "morning-meeting": {
-    "ja": "安全朝礼 実施中",
-    "en": "Safety morning meeting in progress",
-    "vi": "Đang họp an toàn đầu ca",
-    "zh-CN": "安全早会进行中",
-    "id": "Briefing keselamatan pagi sedang berlangsung"
-  },
-  "tool-inspected": {
-    "ja": "持込工具 点検済",
-    "en": "Brought-in tools inspected",
-    "vi": "Dụng cụ mang vào đã được kiểm tra",
-    "zh-CN": "自带工具已检查",
-    "id": "Peralatan bawaan telah diperiksa"
-  },
-  "charging-area": {
-    "ja": "充電設備 使用中",
-    "en": "Charging equipment in use",
-    "vi": "Thiết bị sạc đang được sử dụng",
-    "zh-CN": "充电设备使用中",
-    "id": "Peralatan pengisian daya sedang digunakan"
-  },
-  "hygiene-rules": {
-    "ja": "手洗い・衛生を徹底",
-    "en": "Wash hands and maintain hygiene",
-    "vi": "Rửa tay và giữ vệ sinh",
-    "zh-CN": "彻底洗手并保持卫生",
-    "id": "Cuci tangan dan jaga kebersihan"
-  },
-  "site-speed-limit": {
-    "ja": "場内制限速度 ○○ km/h",
-    "en": "Site speed limit: ○○ km/h",
-    "vi": "Tốc độ giới hạn trong công trường: ○○ km/h",
-    "zh-CN": "场内限速：○○ km/h",
-    "id": "Batas kecepatan lokasi: ○○ km/jam"
-  },
-  "one-way-route": {
-    "ja": "場内一方通行",
-    "en": "One-way site route",
-    "vi": "Đường một chiều trong công trường",
-    "zh-CN": "场内单向通行",
-    "id": "Jalur satu arah di lokasi"
-  },
-  "visitor-check-in": {
-    "ja": "入場前に受付をお願いします",
-    "en": "Check in before entering",
-    "vi": "Vui lòng đăng ký trước khi vào",
-    "zh-CN": "进入前请登记",
-    "id": "Harap lapor sebelum masuk"
-  },
-  "permit-to-work": {
-    "ja": "作業許可を確認",
-    "en": "Confirm the work permit",
-    "vi": "Xác nhận giấy phép làm việc",
-    "zh-CN": "确认作业许可证",
-    "id": "Pastikan izin kerja"
-  },
-  "lockout-tagout": {
-    "ja": "停止・遮断・表示を確認",
-    "en": "Confirm stop, isolation and tagging",
-    "vi": "Xác nhận dừng, cách ly và gắn thẻ",
-    "zh-CN": "确认停机、隔离和挂牌",
-    "id": "Pastikan berhenti, isolasi, dan penandaan"
-  },
-  "housekeeping-zone": {
-    "ja": "資材は区画内へ",
-    "en": "Keep materials inside the marked area",
-    "vi": "Để vật liệu trong khu vực quy định",
-    "zh-CN": "材料请放在划定区域内",
-    "id": "Simpan material di dalam area yang ditandai"
-  },
-  "waste-sorting": {
-    "ja": "分別して廃棄",
-    "en": "Sort waste before disposal",
-    "vi": "Phân loại trước khi thải bỏ",
-    "zh-CN": "分类后丢弃",
-    "id": "Pilah sebelum dibuang"
-  },
-  "fire-watch": {
-    "ja": "火気作業後の確認",
-    "en": "Check after hot work",
-    "vi": "Kiểm tra sau công việc phát sinh nhiệt",
-    "zh-CN": "动火作业后检查",
-    "id": "Periksa setelah pekerjaan panas"
-  },
-  "delivery-zone": {
-    "ja": "荷受け・荷降ろし場所",
-    "en": "Loading and unloading zone",
-    "vi": "Khu vực nhận và dỡ hàng",
-    "zh-CN": "收货及卸货区",
-    "id": "Area bongkar muat"
-  },
-  "daily-inspection": {
-    "ja": "始業前点検を実施",
-    "en": "Perform a pre-start inspection",
-    "vi": "Kiểm tra trước khi bắt đầu",
-    "zh-CN": "进行作业前检查",
-    "id": "Lakukan pemeriksaan sebelum mulai"
-  },
-  "scaffold-work-illustration": {
-    "ja": "足場作業",
-    "en": "Scaffold work",
-    "vi": "Công việc giàn giáo",
-    "zh-CN": "脚手架作业",
-    "id": "Pekerjaan perancah"
-  },
-  "mobile-crane-illustration": {
-    "ja": "移動式クレーン",
-    "en": "Mobile crane",
-    "vi": "Cần cẩu di động",
-    "zh-CN": "移动式起重机",
-    "id": "Derek bergerak"
-  },
-  "rigging-work-illustration": {
-    "ja": "玉掛け作業",
-    "en": "Rigging work",
-    "vi": "Công việc móc cáp",
-    "zh-CN": "吊装索具作业",
-    "id": "Pekerjaan rigging"
-  },
-  "aerial-work-platform-illustration": {
-    "ja": "高所作業車",
-    "en": "Aerial work platform",
-    "vi": "Xe nâng người làm việc trên cao",
-    "zh-CN": "高空作业平台",
-    "id": "Platform kerja udara"
-  },
-  "full-harness-illustration": {
-    "ja": "フルハーネス使用",
-    "en": "Using a full-body harness",
-    "vi": "Sử dụng dây đai toàn thân",
-    "zh-CN": "使用全身式安全带",
-    "id": "Penggunaan sabuk pengaman tubuh penuh"
-  },
-  "traffic-guidance-illustration": {
-    "ja": "交通誘導",
-    "en": "Traffic guidance",
-    "vi": "Điều tiết giao thông",
-    "zh-CN": "交通引导",
-    "id": "Pengaturan lalu lintas"
-  },
-  "dump-excavator-illustration": {
-    "ja": "ダンプ・バックホウ連携",
-    "en": "Dump truck and excavator coordination",
-    "vi": "Phối hợp xe ben và máy xúc",
-    "zh-CN": "自卸车与挖掘机协同",
-    "id": "Koordinasi truk jungkit dan ekskavator"
-  },
-  "excavation-work-illustration": {
-    "ja": "掘削作業",
-    "en": "Excavation work",
-    "vi": "Công việc đào đất",
-    "zh-CN": "开挖作业",
-    "id": "Pekerjaan penggalian"
-  },
-  "formwork-illustration": {
-    "ja": "型枠組立",
-    "en": "Formwork assembly",
-    "vi": "Lắp dựng ván khuôn",
-    "zh-CN": "模板组装",
-    "id": "Perakitan bekisting"
-  },
-  "rebar-work-illustration": {
-    "ja": "鉄筋組立",
-    "en": "Rebar assembly",
-    "vi": "Lắp dựng cốt thép",
-    "zh-CN": "钢筋组装",
-    "id": "Perakitan tulangan"
-  },
-  "concrete-placement-illustration": {
-    "ja": "コンクリート打設",
-    "en": "Concrete placement",
-    "vi": "Đổ bê tông",
-    "zh-CN": "混凝土浇筑",
-    "id": "Pengecoran beton"
-  },
-  "temporary-electric-illustration": {
-    "ja": "仮設電気設備",
-    "en": "Temporary electrical equipment",
-    "vi": "Thiết bị điện tạm thời",
-    "zh-CN": "临时电气设备",
-    "id": "Peralatan listrik sementara"
-  },
-  "welding-work-illustration": {
-    "ja": "溶接作業",
-    "en": "Welding work",
-    "vi": "Công việc hàn",
-    "zh-CN": "焊接作业",
-    "id": "Pekerjaan pengelasan"
-  },
-  "cutting-work-illustration": {
-    "ja": "切断作業",
-    "en": "Cutting work",
-    "vi": "Công việc cắt",
-    "zh-CN": "切割作业",
-    "id": "Pekerjaan pemotongan"
-  },
-  "material-hoisting-illustration": {
-    "ja": "資材荷揚げ",
-    "en": "Material hoisting",
-    "vi": "Nâng vật liệu",
-    "zh-CN": "材料吊运",
-    "id": "Pengangkatan material"
-  },
-  "opening-protection-illustration": {
-    "ja": "開口部養生",
-    "en": "Floor opening protection",
-    "vi": "Bảo vệ lỗ mở sàn",
-    "zh-CN": "洞口防护",
-    "id": "Perlindungan bukaan lantai"
-  },
-  "stepladder-illustration": {
-    "ja": "脚立作業",
-    "en": "Stepladder work",
-    "vi": "Công việc trên thang chữ A",
-    "zh-CN": "人字梯作业",
-    "id": "Pekerjaan dengan tangga lipat"
-  },
-  "rolling-tower-illustration": {
-    "ja": "ローリングタワー",
-    "en": "Mobile scaffold tower",
-    "vi": "Tháp giàn giáo di động",
-    "zh-CN": "移动脚手架塔",
-    "id": "Menara perancah bergerak"
-  },
-  "safety-morning-meeting-illustration": {
-    "ja": "安全朝礼",
-    "en": "Safety morning meeting",
-    "vi": "Họp an toàn đầu ca",
-    "zh-CN": "安全早会",
-    "id": "Briefing keselamatan pagi"
-  },
-  "site-inspection-illustration": {
-    "ja": "現場点検",
-    "en": "Site inspection",
-    "vi": "Kiểm tra công trường",
-    "zh-CN": "现场检查",
-    "id": "Inspeksi lokasi"
-  },
-  "heat-illness-alert": {
-    "ja": "熱中症警戒",
-    "en": "Heat illness alert",
-    "vi": "Cảnh báo sốc nhiệt",
-    "zh-CN": "谨防中暑",
-    "id": "Waspada penyakit akibat panas"
-  },
-  "drink-water": {
-    "ja": "こまめに水分補給",
-    "en": "Drink water frequently",
-    "vi": "Uống nước thường xuyên",
-    "zh-CN": "及时补充水分",
-    "id": "Minum air secara teratur"
-  },
-  "salt-intake": {
-    "ja": "適度に塩分補給",
-    "en": "Replenish salt appropriately",
-    "vi": "Bổ sung muối hợp lý",
-    "zh-CN": "适量补充盐分",
-    "id": "Cukupi asupan garam"
-  },
-  "cool-rest-area": {
-    "ja": "涼しい休憩所",
-    "en": "Cool rest area",
-    "vi": "Khu nghỉ mát",
-    "zh-CN": "清凉休息区",
-    "id": "Tempat istirahat sejuk"
-  },
-  "check-wbgt": {
-    "ja": "WBGTを確認",
-    "en": "Check the WBGT",
-    "vi": "Kiểm tra chỉ số WBGT",
-    "zh-CN": "确认WBGT指数",
-    "id": "Periksa WBGT"
-  },
-  "health-check": {
-    "ja": "作業前に体調確認",
-    "en": "Check your condition before work",
-    "vi": "Kiểm tra sức khỏe trước khi làm việc",
-    "zh-CN": "作业前确认身体状况",
-    "id": "Periksa kondisi tubuh sebelum bekerja"
-  },
-  "buddy-system": {
-    "ja": "単独作業を避ける",
-    "en": "Avoid working alone",
-    "vi": "Tránh làm việc một mình",
-    "zh-CN": "避免单独作业",
-    "id": "Hindari bekerja sendirian"
-  },
-  "first-aid-response": {
-    "ja": "異変時はすぐ救急対応",
-    "en": "Respond immediately when someone feels unwell",
-    "vi": "Sơ cứu ngay khi có bất thường",
-    "zh-CN": "发现异常立即急救",
-    "id": "Segera tangani jika ada gangguan kesehatan"
-  },
-  "cool-down": {
-    "ja": "体を冷やして休む",
-    "en": "Cool down and rest",
-    "vi": "Làm mát cơ thể và nghỉ ngơi",
-    "zh-CN": "降温并休息",
-    "id": "Dinginkan tubuh dan beristirahat"
-  },
-  "emergency-call": {
-    "ja": "迷わず緊急連絡",
-    "en": "Call for emergency help without delay",
-    "vi": "Gọi hỗ trợ khẩn cấp ngay",
-    "zh-CN": "立即进行紧急联络",
-    "id": "Segera hubungi bantuan darurat"
-  },
-  "safety-calendar": {
-    "ja": "安全活動カレンダー",
-    "en": "Safety activity calendar",
-    "vi": "Lịch hoạt động an toàn",
-    "zh-CN": "安全活动日历",
-    "id": "Kalender kegiatan keselamatan"
-  },
-  "near-miss-share": {
-    "ja": "ヒヤリハットを共有",
-    "en": "Share near-miss reports",
-    "vi": "Chia sẻ sự cố suýt xảy ra",
-    "zh-CN": "分享未遂事件",
-    "id": "Bagikan laporan nyaris celaka"
-  },
-  "photo-record": {
-    "ja": "写真で作業記録",
-    "en": "Record the work with photos",
-    "vi": "Ghi lại công việc bằng ảnh",
-    "zh-CN": "用照片记录作业",
-    "id": "Catat pekerjaan dengan foto"
-  },
-  "toolbox-meeting": {
-    "ja": "作業前のひと声",
-    "en": "Speak up before starting work",
-    "vi": "Nhắc nhau trước khi bắt đầu",
-    "zh-CN": "作业前相互提醒",
-    "id": "Saling mengingatkan sebelum bekerja"
-  },
-  "completion-check": {
-    "ja": "作業完了を確認",
-    "en": "Confirm work completion",
-    "vi": "Xác nhận công việc đã hoàn thành",
-    "zh-CN": "确认作业完成",
-    "id": "Pastikan pekerjaan selesai"
+  "fire-extinguisher-location": {
+    "ja": "消火器",
+    "en": "Fire extinguisher",
+    "vi": "Bình chữa cháy",
+    "zh-CN": "灭火器",
+    "id": "Alat pemadam api"
   }
 }

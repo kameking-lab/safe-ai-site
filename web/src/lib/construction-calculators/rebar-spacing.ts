@@ -89,7 +89,7 @@ export function calculateRebarSpacing(input: RebarSpacingInput): CalculationOutc
       { key: "totalBars", label: "必要本数", value: totalBars, unit: "本" },
       { key: "actualSpacingM", label: "実際の配置間隔", value: outputs.actualSpacingM, unit: "m" },
       { key: "totalLengthM", label: "総延長", value: outputs.totalLengthM, unit: "m" },
-      { key: "totalMassKg", label: "重量", value: outputs.totalMassKg, unit: "kg" },
+      { key: "totalMassKg", label: "重量（真円概算）", value: outputs.totalMassKg, unit: "kg" },
     ],
     usedInputs: { ...input, steelDensityKgM3: STEEL_DENSITY_KG_M3, rounding: { ...rounding } },
     formula: [
@@ -106,5 +106,6 @@ export function calculateRebarSpacing(input: RebarSpacingInput): CalculationOutc
       "継手、定着、曲げ、加工ロス、配筋可能性、必要かぶりは判定しない。",
       "重量は呼び径を真円として鋼密度7,850 kg/m³から導く概算。",
     ],
+    warnings: ["異形鉄筋の公称単位質量ではありません。製品規格・ミルシートを確認してください。"],
   });
 }

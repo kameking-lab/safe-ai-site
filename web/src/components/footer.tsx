@@ -11,6 +11,7 @@ const TRUST_LINKS = [
   { href: "/training/safety-seminars", label: "安全研修ライブラリ" },
   { href: "/training/ai-seminars", label: "AI実務研修" },
   { href: "/tools/construction-calculators", label: "建設計算ツール" },
+  { href: "/materials/safety-images", label: "現場安全看板" },
   { href: "/about/usage-notes", label: "ご利用上の注意" },
   { href: "/about/data-sources", label: "データの出典" },
   { href: "/about/quality", label: "情報品質" },

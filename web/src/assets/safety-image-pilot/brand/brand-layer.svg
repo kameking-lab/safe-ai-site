@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="520" height="132" viewBox="0 0 520 132" role="img" aria-labelledby="title desc">
-  <title id="title">安全AIポータル ブランドレイヤー</title>
-  <desc id="desc">画像本体と分離した既存チワワアイコンと著作権表示</desc>
-  <rect x="2" y="2" width="516" height="128" rx="26" fill="#ffffff" fill-opacity=".96" stroke="#0f766e" stroke-width="4"/>
-  <image href="/mascot/mascot-head-256.png" x="14" y="12" width="108" height="108" preserveAspectRatio="xMidYMid meet"/>
-  <text x="322" y="70" text-anchor="middle" dominant-baseline="middle" fill="#0f172a" font-family="Noto Sans JP, sans-serif" font-size="34" font-weight="800">© 安全AIポータル</text>
-</svg>

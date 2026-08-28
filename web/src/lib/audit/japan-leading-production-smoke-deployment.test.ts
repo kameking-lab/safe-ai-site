@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import {
   assertProductionAliasDeployment,
   resolveRepositoryExternalEvidencePath,
+  sitemapContainsLocation,
 } from "../../../scripts/audit/japan-leading-production-smoke.mjs";
 
 const LINKED_PROJECT = {
@@ -27,6 +28,8 @@ function productionMetadata(
     readyState: "READY",
     url: IMMUTABLE_URL,
     alias: [PRODUCTION_HOSTNAME, "anzen-ai-portal.jp"],
+    aliasAssigned: true,
+    aliasError: null,
     ...overrides,
   };
 }
@@ -45,6 +48,29 @@ function assertFixture(
 }
 
 describe("Japan-leading production deployment boundary", () => {
+  it("matches exact sitemap locations without suffix collisions", () => {
+    const xml = [
+      "<urlset>",
+      "<url><loc>https://www.anzen-ai-portal.jp/materials/safety-images/heat-illness-prevention</loc></url>",
+      "</urlset>",
+    ].join("");
+
+    expect(
+      sitemapContainsLocation(
+        xml,
+        "https://www.anzen-ai-portal.jp/",
+        "/heat-illness-prevention",
+      ),
+    ).toBe(false);
+    expect(
+      sitemapContainsLocation(
+        xml,
+        "https://www.anzen-ai-portal.jp/",
+        "/materials/safety-images/heat-illness-prevention",
+      ),
+    ).toBe(true);
+  });
+
   it("requires an explicit absolute evidence path outside the repository", () => {
     const repositoryRoot = resolve("C:/safe-ai-site");
     expect(() =>
@@ -87,6 +113,18 @@ describe("Japan-leading production deployment boundary", () => {
     expect(JSON.stringify(evidence)).not.toContain("must-not-be-copied");
   });
 
+  it("accepts the current Vercel shape when the custom hostname is omitted from alias", () => {
+    const evidence = assertFixture(
+      productionMetadata(),
+      productionMetadata({
+        alias: ["safe-ai-site-kameking-labs-projects.vercel.app"],
+        aliasAssigned: true,
+      }),
+    );
+
+    expect(evidence.exactAliasMatch).toBe(true);
+  });
+
   it("rejects a stale deployment ID even when its syntax and metadata are valid", () => {
     expect(() =>
       assertFixture(
@@ -102,7 +140,8 @@ describe("Japan-leading production deployment boundary", () => {
     ["preview target", { target: "preview" }],
     ["not ready", { readyState: "BUILDING" }],
     ["different immutable URL", { url: "different.vercel.app" }],
-    ["missing production alias", { alias: ["anzen-ai-portal.jp"] }],
+    ["alias assignment missing", { aliasAssigned: false }],
+    ["alias assignment error", { aliasError: { code: "ALIAS_FAILED" } }],
   ])("fails closed for %s alias metadata", (_label, overrides) => {
     expect(() =>
       assertFixture(productionMetadata(), productionMetadata(overrides)),

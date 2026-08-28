@@ -236,6 +236,12 @@ export function AutomationServiceContent({
             <span className="mt-1 block text-sm text-slate-700">
               KY、点検、教育記録、WBGT通知
             </span>
+            <Link
+              href="/materials/safety-images"
+              className="mt-2 inline-flex min-h-11 items-center text-sm font-black text-emerald-900 underline underline-offset-4"
+            >
+              現場安全看板を見る
+            </Link>
           </li>
           <li className="rounded-xl border border-slate-300 p-4">
             <strong>講習・資料</strong>

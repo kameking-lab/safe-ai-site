@@ -7,20 +7,28 @@ import {
   getSafetyImageTheme,
 } from "@/data/safety-image-library";
 import {
+  MAX_SAFETY_IMAGE_WORKING_PIXELS,
+  buildSafetyImageTextLayer,
   buildSafetyImagePdf,
+  getSafetyImageWorkingDimensions,
   renderSafetyImage,
   type SafetyImageRenderSettings,
 } from "./renderer";
+import {
+  SAFETY_SIGN_OUTPUT_SIZES,
+  outputSizePixels,
+} from "@/data/safety-image-library/sizes";
 
 const helmet = getSafetyImageTheme("helmet-required")!;
-const assetRoot = join(process.cwd(), "src", "assets", "safety-image-pilot");
+const assetRoot = join(process.cwd(), "src", "assets", "safety-image-library");
 const common = {
   theme: helmet,
   paper: "A4" as const,
   orientation: "portrait" as const,
   source: readFileSync(join(process.cwd(), "public", "safety-images", "library", "originals", "helmet-required.png")),
   mascotPath: join(process.cwd(), "public", "mascot", "mascot-head-256.png"),
-  fontPath: join(assetRoot, "fonts", "NotoSansJP-Bold.ttf"),
+  fontPath: join(assetRoot, "fonts", "NotoSansCJKjp-Bold.otf"),
+  simplifiedChineseFontPath: join(assetRoot, "fonts", "NotoSansCJKsc-Bold.otf"),
   latinFontPath: join(process.cwd(), "src", "assets", "safety-image-library", "fonts", "NotoSans-Bold.ttf"),
   wasmPath: join(process.cwd(), "node_modules", "@resvg", "resvg-wasm", "index_bg.wasm"),
   dimensions: { width: 480, height: 679 },
@@ -49,6 +57,37 @@ function settings(language: (typeof SAFETY_IMAGE_LANGUAGES)[number]): SafetyImag
 }
 
 describe("safety image library renderer", () => {
+  it("bounds working memory while preserving every exact 300dpi output geometry", () => {
+    for (const size of SAFETY_SIGN_OUTPUT_SIZES) {
+      const output = outputSizePixels(size.id);
+      const working = getSafetyImageWorkingDimensions(output);
+      expect(working.width * working.height, size.id).toBeLessThanOrEqual(MAX_SAFETY_IMAGE_WORKING_PIXELS);
+      expect(working.width / working.height, size.id).toBeCloseTo(output.width / output.height, 3);
+    }
+    expect(outputSizePixels("banner-450x1800")).toEqual({ width: 5315, height: 21260 });
+  });
+
+  it("fits maximum editable text in horizontal and Japanese vertical layouts for all sizes", () => {
+    const longText = "安全確認を行い異常がある場合は作業を中止して責任者へ連絡する".repeat(3).slice(0, 180);
+    for (const size of SAFETY_SIGN_OUTPUT_SIZES) {
+      const dimensions = getSafetyImageWorkingDimensions(outputSizePixels(size.id));
+      for (const writingMode of ["horizontal", "vertical"] as const) {
+        const layer = buildSafetyImageTextLayer({
+          theme: helmet,
+          dimensions,
+          settings: {
+            ...settings("ja"),
+            mode: "edited",
+            text: longText,
+            subMessage: "異常時は作業中止・責任者へ連絡",
+            writingMode,
+          },
+        });
+        expect(layer, `${size.id}/${writingMode}`).toContain("editable-text-layer");
+      }
+    }
+  });
+
   it("renders all five exact language presets as openable 300dpi JPEG", async () => {
     for (const language of SAFETY_IMAGE_LANGUAGES) {
       const jpeg = await renderSafetyImage({
@@ -86,8 +125,8 @@ describe("safety image library renderer", () => {
   });
 
   it("creates an openable PNG with 300dpi pHYs metadata", async () => {
-    const construction = getSafetyImageTheme("scaffold-work-illustration");
-    if (!construction) throw new Error("construction theme missing");
+    const construction = getSafetyImageTheme("no-under-suspended-load");
+    if (!construction) throw new Error("landscape theme missing");
     const png = await renderSafetyImage({
       ...common,
       theme: construction,

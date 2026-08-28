@@ -230,6 +230,11 @@ export default function SafetyAiLandingPage() {
                 建設計算ツール
               </Link>
               を利用できます。
+              現場掲示や資料用の画像は
+              <Link href="/materials/safety-images" className="mx-1 font-black text-emerald-800 underline underline-offset-4 dark:text-emerald-300">
+                現場安全看板ライブラリ
+              </Link>
+              から編集・ダウンロードできます。
             </p>
             <ul className="mt-7 grid border-y-2 border-slate-900 sm:grid-cols-2 lg:grid-cols-3 dark:border-slate-500">
               {CAPABILITIES.slice(0, 3).map((item, index) => {

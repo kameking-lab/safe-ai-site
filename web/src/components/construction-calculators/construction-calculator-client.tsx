@@ -16,7 +16,7 @@ import {
 } from "@/lib/construction-calculator-exports";
 import {
   addConstructionCalculatorHistory,
-  clearConstructionCalculatorHistory,
+  clearConstructionCalculatorHistoryForSlug,
   loadConstructionCalculatorHistory,
   removeConstructionCalculatorHistory,
   type ConstructionCalculatorHistoryEntry,
@@ -63,6 +63,21 @@ const loaders: Record<string, () => Promise<GenericCalculator>> = {
     (await import("@/lib/construction-calculators/scale-coordinate")).calculateScaleCoordinate as GenericCalculator,
 };
 
+const calculatorPromises = new Map<string, Promise<GenericCalculator>>();
+
+function loadCalculator(slug: string): Promise<GenericCalculator> {
+  const cached = calculatorPromises.get(slug);
+  if (cached) return cached;
+  const loader = loaders[slug];
+  if (!loader) return Promise.reject(new Error("calculator loader missing"));
+  const promise = loader().catch((error: unknown) => {
+    calculatorPromises.delete(slug);
+    throw error;
+  });
+  calculatorPromises.set(slug, promise);
+  return promise;
+}
+
 const OPTION_LABELS: Record<string, Record<string, string>> = {
   shape: {
     rectangular: "直方体",
@@ -92,7 +107,11 @@ const OPTION_LABELS: Record<string, Record<string, string>> = {
   referencePoint: { start: "始点標高を入力", end: "終点標高を入力" },
   flowDirection: { "start-to-end": "始点から終点", "end-to-start": "終点から始点" },
   solveFor: { actual: "図上寸法から実寸", drawing: "実寸から図上寸法" },
-  roundingMode: { round: "四捨五入", ceil: "切上げ", floor: "切捨て" },
+  roundingMode: {
+    round: "四捨五入",
+    ceil: "切上げ（+∞方向）",
+    floor: "切捨て（−∞方向）",
+  },
 };
 
 function optionLabel(key: string, value: string) {
@@ -160,22 +179,48 @@ function portableInput(input: Record<string, unknown>): Record<string, PortableV
   return JSON.parse(JSON.stringify(input)) as Record<string, PortableValue>;
 }
 
+function issueLabel(definition: PublicFormulaDefinition, field: string): string {
+  const segmentMatch = /^segments\.(\d+)\.(startArea|endArea|length)$/u.exec(field);
+  if (segmentMatch) {
+    const labels = { startArea: "前断面積", endArea: "後断面積", length: "区間長" };
+    return `区間${Number(segmentMatch[1]) + 1}の${labels[segmentMatch[2] as keyof typeof labels]}`;
+  }
+  return definition.inputDefinitions.find((item) => item.key === field)?.label
+    ?? definition.outputDefinitions.find((item) => item.key === field)?.label
+    ?? (field === "calculator" ? "計算" : "入力値");
+}
+
+function issueMessage(definition: PublicFormulaDefinition, issue: ValidationIssue): string {
+  const label = issueLabel(definition, issue.field);
+  if (issue.message.startsWith(issue.field)) return `${label}${issue.message.slice(issue.field.length)}`;
+  return issue.field === "calculator" ? issue.message : `${label}：${issue.message}`;
+}
+
 function Field({
   field,
   value,
   onChange,
+  issue,
 }: {
   field: InputDefinition;
   value: unknown;
   onChange: (value: string) => void;
+  issue?: string;
 }) {
   const id = `construction-calculator-${field.key}`;
+  const helpId = `${id}-help`;
+  const errorId = `${id}-error`;
+  const describedBy = issue ? `${helpId} ${errorId}` : helpId;
   if (field.type === "select") {
     return (
       <label className="block" htmlFor={id}>
         <span className="text-sm font-black text-slate-900 dark:text-white">{field.label}</span>
         <select
           id={id}
+          required={field.required}
+          aria-required={field.required ? true : undefined}
+          aria-invalid={issue ? true : undefined}
+          aria-describedby={describedBy}
           value={String(value ?? "")}
           onChange={(event) => onChange(event.target.value)}
           className="mt-1 min-h-11 w-full rounded-xl border-2 border-slate-300 bg-white px-3 text-base text-slate-950 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-300 dark:border-slate-600 dark:bg-slate-950 dark:text-white"
@@ -184,7 +229,8 @@ function Field({
             <option key={option} value={option}>{optionLabel(field.key, option)}</option>
           ))}
         </select>
-        <span className="mt-1 block text-xs leading-5 text-slate-600 dark:text-slate-300">{field.help}</span>
+        <span id={helpId} className="mt-1 block text-xs leading-5 text-slate-600 dark:text-slate-300">{field.help}</span>
+        {issue ? <span id={errorId} className="mt-1 block text-sm font-bold text-rose-700 dark:text-rose-300">{issue}</span> : null}
       </label>
     );
   }
@@ -195,6 +241,10 @@ function Field({
       </span>
       <input
         id={id}
+        required={field.required}
+        aria-required={field.required ? true : undefined}
+        aria-invalid={issue ? true : undefined}
+        aria-describedby={describedBy}
         type="number"
         inputMode="decimal"
         value={typeof value === "number" || typeof value === "string" ? value : ""}
@@ -204,7 +254,8 @@ function Field({
         onChange={(event) => onChange(event.target.value)}
         className="mt-1 min-h-11 w-full rounded-xl border-2 border-slate-300 bg-white px-3 text-base text-slate-950 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-300 dark:border-slate-600 dark:bg-slate-950 dark:text-white"
       />
-      <span className="mt-1 block text-xs leading-5 text-slate-600 dark:text-slate-300">{field.help}</span>
+      <span id={helpId} className="mt-1 block text-xs leading-5 text-slate-600 dark:text-slate-300">{field.help}</span>
+      {issue ? <span id={errorId} className="mt-1 block text-sm font-bold text-rose-700 dark:text-rose-300">{issue}</span> : null}
     </label>
   );
 }
@@ -227,11 +278,16 @@ export function ConstructionCalculatorClient({
   const [history, setHistory] = useState<ConstructionCalculatorHistoryEntry[]>([]);
   const [printReady, setPrintReady] = useState(false);
   const resultRef = useRef<HTMLHeadingElement>(null);
+  const errorSummaryRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setMounted(true);
     setHistory(loadConstructionCalculatorHistory(window.localStorage));
   }, []);
+
+  useEffect(() => {
+    void loadCalculator(definition.slug).catch(() => undefined);
+  }, [definition.slug]);
 
   useEffect(() => {
     if (result) window.requestAnimationFrame(() => resultRef.current?.focus());
@@ -252,6 +308,14 @@ export function ConstructionCalculatorClient({
     ),
     [definition, raw],
   );
+  const currentHistory = useMemo(
+    () => history.filter((entry) => entry.slug === definition.slug),
+    [definition.slug, history],
+  );
+  const issuesByField = useMemo(
+    () => new Map(errors.map((issue) => [issue.field, issueMessage(definition, issue)])),
+    [definition, errors],
+  );
 
   const change = (key: string, value: unknown) => {
     setRaw((current) => ({ ...current, [key]: value }));
@@ -266,17 +330,19 @@ export function ConstructionCalculatorClient({
     setCopied(false);
     const input = prepareInput(definition, raw, rounding);
     try {
-      const loader = loaders[definition.slug];
-      if (!loader) throw new Error("calculator loader missing");
-      const calculate = await loader();
+      const calculate = await loadCalculator(definition.slug);
       const outcome = calculate(input as never) as CalculationOutcome;
       if (!outcome.ok) {
         setResult(null);
         setErrors(outcome.errors);
         const first = outcome.errors[0]?.field.replaceAll(".", "-");
-        window.requestAnimationFrame(() =>
-          document.getElementById(`construction-calculator-${first}`)?.focus(),
-        );
+        window.requestAnimationFrame(() => {
+          const input = first
+            ? document.getElementById(`construction-calculator-${first}`)
+            : null;
+          if (input instanceof HTMLElement) input.focus();
+          else errorSummaryRef.current?.focus();
+        });
         return;
       }
       setResult(outcome.result);
@@ -354,16 +420,28 @@ export function ConstructionCalculatorClient({
             条件を入力
           </h2>
           {errors.length ? (
-            <div role="alert" aria-labelledby="calculation-error-title" className="mt-4 rounded-xl border-2 border-rose-500 bg-rose-50 p-4 text-rose-950">
+            <div
+              ref={errorSummaryRef}
+              role="alert"
+              tabIndex={-1}
+              aria-labelledby="calculation-error-title"
+              className="mt-4 rounded-xl border-2 border-rose-500 bg-rose-50 p-4 text-rose-950 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-rose-300"
+            >
               <h3 id="calculation-error-title" className="font-black">計算できません</h3>
               <ul className="mt-2 list-disc pl-5 text-sm">
-                {errors.map((error) => <li key={`${error.field}-${error.code}`}>{error.message}</li>)}
+                {errors.map((error) => <li key={`${error.field}-${error.code}`}>{issueMessage(definition, error)}</li>)}
               </ul>
             </div>
           ) : null}
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
             {visibleDefinitions.filter((field) => field.type !== "segments").map((field) => (
-              <Field key={field.key} field={field} value={raw[field.key]} onChange={(value) => change(field.key, value)} />
+              <Field
+                key={field.key}
+                field={field}
+                value={raw[field.key]}
+                issue={issuesByField.get(field.key)}
+                onChange={(value) => change(field.key, value)}
+              />
             ))}
           </div>
           {visibleDefinitions.some((field) => field.type === "segments") ? (
@@ -376,22 +454,32 @@ export function ConstructionCalculatorClient({
                       ["startArea", "前断面積"],
                       ["endArea", "後断面積"],
                       ["length", "区間長"],
-                    ].map(([key, label]) => (
-                      <label key={key} htmlFor={`construction-calculator-segments-${index}-${key}`} className="text-sm font-black">
-                        {label}
-                        <input
-                          id={`construction-calculator-segments-${index}-${key}`}
-                          type="number"
-                          inputMode="decimal"
-                          value={String(segment[key] ?? "")}
-                          onChange={(event) => {
-                            const next = segments.map((item, itemIndex) => itemIndex === index ? { ...item, [key]: event.target.value } : item);
-                            change("segments", next);
-                          }}
-                          className="mt-1 min-h-11 w-full rounded-xl border-2 border-slate-300 bg-white px-3 text-base dark:border-slate-600 dark:bg-slate-950"
-                        />
-                      </label>
-                    ))}
+                    ].map(([key, label]) => {
+                      const id = `construction-calculator-segments-${index}-${key}`;
+                      const issue = issuesByField.get(`segments.${index}.${key}`);
+                      const errorId = `${id}-error`;
+                      return (
+                        <label key={key} htmlFor={id} className="text-sm font-black">
+                          {label}
+                          <input
+                            id={id}
+                            required
+                            aria-required="true"
+                            aria-invalid={issue ? true : undefined}
+                            aria-describedby={issue ? errorId : undefined}
+                            type="number"
+                            inputMode="decimal"
+                            value={String(segment[key] ?? "")}
+                            onChange={(event) => {
+                              const next = segments.map((item, itemIndex) => itemIndex === index ? { ...item, [key]: event.target.value } : item);
+                              change("segments", next);
+                            }}
+                            className="mt-1 min-h-11 w-full rounded-xl border-2 border-slate-300 bg-white px-3 text-base dark:border-slate-600 dark:bg-slate-950"
+                          />
+                          {issue ? <span id={errorId} className="mt-1 block text-sm font-bold text-rose-700 dark:text-rose-300">{issue}</span> : null}
+                        </label>
+                      );
+                    })}
                     <button
                       type="button"
                       disabled={segments.length === 1}
@@ -472,12 +560,15 @@ export function ConstructionCalculatorClient({
                 <ClipboardCopy className="h-5 w-5" aria-hidden="true" />{copied ? "コピーしました" : "結果をコピー"}
               </button>
               <button type="button" onClick={() => setPrintReady(true)} className="inline-flex min-h-11 items-center gap-2 rounded-xl border-2 border-slate-700 bg-white px-4 py-2 font-black text-slate-950">
-                <FileText className="h-5 w-5" aria-hidden="true" />PDF・印刷
+                <FileText className="h-5 w-5" aria-hidden="true" />PDF保存（印刷画面）
               </button>
               <button type="button" onClick={downloadCsv} className="inline-flex min-h-11 items-center gap-2 rounded-xl border-2 border-slate-700 bg-white px-4 py-2 font-black text-slate-950">
                 <Download className="h-5 w-5" aria-hidden="true" />CSV
               </button>
             </div>
+            <p className="mt-2 text-xs font-bold text-slate-700 dark:text-slate-200">
+              ブラウザーの印刷画面で「PDFに保存」を選べます。
+            </p>
             <details className="mt-5 rounded-xl border border-emerald-800 bg-white p-4 dark:bg-slate-900">
               <summary className="min-h-11 cursor-pointer font-black">使用した入力値・式・前提</summary>
               <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
@@ -498,12 +589,19 @@ export function ConstructionCalculatorClient({
         <section aria-labelledby="calculator-history-title" className="rounded-2xl border-2 border-slate-300 bg-white p-5 dark:border-slate-700 dark:bg-slate-900">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 id="calculator-history-title" className="flex items-center gap-2 text-xl font-black"><History className="h-5 w-5" aria-hidden="true" />最近の計算</h2>
-            <button type="button" onClick={() => setHistory(clearConstructionCalculatorHistory(window.localStorage))} disabled={!history.length} className="inline-flex min-h-11 items-center gap-2 rounded-xl border-2 border-slate-400 px-3 text-sm font-black disabled:opacity-40"><Trash2 className="h-4 w-4" aria-hidden="true" />すべて削除</button>
+            <button
+              type="button"
+              onClick={() => setHistory(clearConstructionCalculatorHistoryForSlug(window.localStorage, definition.slug))}
+              disabled={!currentHistory.length}
+              className="inline-flex min-h-11 items-center gap-2 rounded-xl border-2 border-slate-400 px-3 text-sm font-black disabled:opacity-40"
+            >
+              <Trash2 className="h-4 w-4" aria-hidden="true" />この計算の履歴をすべて削除
+            </button>
           </div>
           <p className="mt-2 text-xs leading-5 text-slate-600 dark:text-slate-300">この端末だけに31日間、最大20件保存します。入力値をサーバー、analytics、RUMへ送りません。</p>
-          {history.filter((entry) => entry.slug === definition.slug).length ? (
+          {currentHistory.length ? (
             <ul className="mt-4 space-y-2">
-              {history.filter((entry) => entry.slug === definition.slug).map((entry) => (
+              {currentHistory.map((entry) => (
                 <li key={entry.id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-slate-100 p-3 dark:bg-slate-800">
                   <div><p className="font-black">{entry.result.displayValues[0]?.label}: {entry.result.displayValues[0]?.value}{entry.result.displayValues[0]?.unit}</p><p className="text-xs text-slate-600 dark:text-slate-300">{new Date(entry.createdAt).toLocaleString("ja-JP")}</p></div>
                   <div className="flex gap-2">
@@ -530,6 +628,12 @@ export function ConstructionCalculatorClient({
           <p className="mt-4 text-sm font-bold">丸め：{optionLabel("roundingMode", result.rounding.mode)}・小数{result.rounding.decimalPlaces}桁</p>
           <h2 className="mt-5 text-lg font-black">前提</h2>
           <ul className="mt-2 list-disc pl-6 text-sm">{result.assumptions.map((line) => <li key={line}>{line}</li>)}</ul>
+          {result.warnings.length ? (
+            <>
+              <h2 className="mt-5 text-lg font-black">注意</h2>
+              <ul className="mt-2 list-disc pl-6 text-sm">{result.warnings.map((line) => <li key={line}>{line}</li>)}</ul>
+            </>
+          ) : null}
           <p className="mt-5 border-2 border-black p-3 font-black">概算結果です。設計図書、仕様書、実測値を確認してください。</p>
         </article>
       ) : null}

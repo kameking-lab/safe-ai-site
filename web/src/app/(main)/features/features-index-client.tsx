@@ -99,6 +99,12 @@ export function FeaturesIndexClient() {
             >
               建設計算ツール
             </Link>
+            <Link
+              href="/materials/safety-images"
+              className="inline-flex min-h-11 items-center text-sm font-black text-brand-primary underline underline-offset-4"
+            >
+              現場安全看板
+            </Link>
           </nav>
         </div>
         <div className="flex items-end justify-center">

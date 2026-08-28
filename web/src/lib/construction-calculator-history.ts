@@ -71,3 +71,13 @@ export function clearConstructionCalculatorHistory(storage: Pick<Storage, "setIt
   storage.setItem(CONSTRUCTION_CALCULATOR_HISTORY_KEY, "[]");
   return [];
 }
+
+export function clearConstructionCalculatorHistoryForSlug(
+  storage: Pick<Storage, "getItem" | "setItem">,
+  slug: string,
+  now = new Date(),
+): ConstructionCalculatorHistoryEntry[] {
+  const next = loadConstructionCalculatorHistory(storage, now).filter((entry) => entry.slug !== slug);
+  storage.setItem(CONSTRUCTION_CALCULATOR_HISTORY_KEY, JSON.stringify(next));
+  return next;
+}

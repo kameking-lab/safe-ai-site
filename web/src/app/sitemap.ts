@@ -20,6 +20,11 @@ import { computeSitemapFreshness } from "@/lib/sitemap/freshness";
 import { SITE_URL } from "@/lib/seo-metadata";
 import { isPublicRouteAvailable } from "@/lib/public-content-policy";
 import { PUBLIC_VISUAL_KY_SCENARIOS } from "@/data/visual-ky";
+import {
+  SAFETY_IMAGE_CATEGORIES,
+  SAFETY_IMAGE_LIBRARY_PATH,
+  SAFETY_IMAGE_THEMES,
+} from "@/data/safety-image-library";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   // 柱C-3 / S DRY: 絶対URLのオリジンは seo-metadata.ts の SITE_URL を単一ソースにする
@@ -1123,8 +1128,28 @@ export default function sitemap(): MetadataRoute.Sitemap {
     })),
   ];
 
-  // 安全看板は再制作中。旧一覧・カテゴリ・詳細をsitemapへ残さない。
-  const safetyImagePages: typeof pages = [];
+  // 現場安全看板は公開ハブ、7カテゴリ、独立QA合格済み100詳細だけを収載する。
+  // 編集・言語・サイズ・ダウンロード状態と利用条件は個別URLとして収載しない。
+  const safetyImagePages: typeof pages = [
+    {
+      url: SAFETY_IMAGE_LIBRARY_PATH,
+      lastModified: "2026-08-28",
+      priority: 0.9,
+      changeFrequency: "monthly" as Freq,
+    },
+    ...SAFETY_IMAGE_CATEGORIES.map((category) => ({
+      url: `${SAFETY_IMAGE_LIBRARY_PATH}/category/${category.id}`,
+      lastModified: "2026-08-28",
+      priority: 0.76,
+      changeFrequency: "monthly" as Freq,
+    })),
+    ...SAFETY_IMAGE_THEMES.map((theme) => ({
+      url: theme.detailPath,
+      lastModified: "2026-08-28",
+      priority: 0.72,
+      changeFrequency: "yearly" as Freq,
+    })),
+  ];
 
   return [
     ...filtered,

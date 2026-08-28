@@ -881,6 +881,16 @@ table {
 /* Windows High Contrast / forced-colors。状態は色だけに依存せず、境界・下線・
    aria属性に対応する輪郭を残す。OSのsystem colorを優先する。 */
 @media (forced-colors: active) {
+  [data-site-footer],
+  [data-site-footer] :where(section, div, p, h2, span, nav) {
+    forced-color-adjust: auto;
+    border-color: CanvasText !important;
+    background-color: Canvas !important;
+    color: CanvasText !important;
+  }
+  [data-site-footer] a[href] {
+    color: LinkText !important;
+  }
   :where(a[href]) {
     color: LinkText;
     text-decoration: underline;

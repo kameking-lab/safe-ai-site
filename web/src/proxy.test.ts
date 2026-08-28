@@ -16,21 +16,38 @@ afterEach(() => {
 });
 
 describe("Proxy CSP boundary", () => {
-  it("quarantines legacy safety-image assets before static delivery", () => {
-    for (const pathname of [
-      "/safety-images/library/originals/helmet-required.png",
-      "/safety-images/pilot/helmet-required.webp",
-    ]) {
-      const response = proxy(
-        new NextRequest(`https://example.test${pathname}`),
-      );
+  it("serves the reviewed library boundary while keeping the old pilot private", () => {
+    const library = proxy(new NextRequest("https://example.test/safety-images/library/originals/helmet-required.png"));
+    expect(library.status).toBe(200);
+    const pilot = proxy(new NextRequest("https://example.test/safety-images/pilot/helmet-required.webp"));
+    expect(pilot.status).toBe(404);
+    expect(pilot.headers.get("cache-control")).toContain("no-store");
+    expect(pilot.headers.get("x-robots-tag")).toBe("noindex, nofollow, noarchive");
+  });
 
-      expect(response.status).toBe(404);
-      expect(response.headers.get("cache-control")).toContain("no-store");
-      expect(response.headers.get("x-robots-tag")).toBe(
-        "noindex, nofollow, noarchive",
-      );
+  it("redirects equivalent legacy details, returns 410 for retired ones, and noindexes query variants", () => {
+    const redirect = proxy(new NextRequest("https://example.test/materials/safety-images/full-harness-required?text=secret"));
+    expect(redirect.status).toBe(301);
+    expect(redirect.headers.get("location")).toBe("https://example.test/materials/safety-images/full-body-harness-required");
+
+    const suspendedLoad = proxy(new NextRequest("https://example.test/materials/safety-images/overhead-load-caution"));
+    expect(suspendedLoad.status).toBe(301);
+    expect(suspendedLoad.headers.get("location")).toBe("https://example.test/materials/safety-images/no-under-suspended-load");
+
+    const gone = proxy(new NextRequest("https://example.test/materials/safety-images/photo-record"));
+    expect(gone.status).toBe(410);
+    expect(gone.headers.get("x-robots-tag")).toContain("noindex");
+
+    for (const legacySlug of [
+      "hearing-protection-required",
+      "asbestos-work-area",
+      "pedestrian-crossing",
+    ]) {
+      expect(proxy(new NextRequest(`https://example.test/materials/safety-images/${legacySlug}`)).status).toBe(410);
     }
+
+    const query = proxy(new NextRequest("https://example.test/materials/safety-images/helmet-required?lang=vi&text=secret"));
+    expect(query.headers.get("x-robots-tag")).toBe("noindex, follow, noarchive");
   });
 
   it("production defaults to compatibility enforcement until framework nonce coverage is verified", () => {

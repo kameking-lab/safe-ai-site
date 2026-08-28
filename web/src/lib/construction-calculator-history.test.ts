@@ -3,6 +3,7 @@ import type { CalculationResult } from "@/lib/construction-calculators/types";
 import {
   addConstructionCalculatorHistory,
   clearConstructionCalculatorHistory,
+  clearConstructionCalculatorHistoryForSlug,
   CONSTRUCTION_CALCULATOR_HISTORY_DAYS,
   CONSTRUCTION_CALCULATOR_HISTORY_KEY,
   CONSTRUCTION_CALCULATOR_HISTORY_LIMIT,
@@ -25,8 +26,8 @@ const result: CalculationResult = {
   isEstimate: true,
 };
 
-function entry(id: string, createdAt: string): ConstructionCalculatorHistoryEntry {
-  return { id, slug: "concrete-quantity", title: "コンクリート数量", createdAt, input: { length: 1 }, result };
+function entry(id: string, createdAt: string, slug = "concrete-quantity"): ConstructionCalculatorHistoryEntry {
+  return { id, slug, title: "コンクリート数量", createdAt, input: { length: 1 }, result };
 }
 
 describe("建設計算の端末内履歴", () => {
@@ -61,5 +62,18 @@ describe("建設計算の端末内履歴", () => {
     localStorage.setItem(CONSTRUCTION_CALCULATOR_HISTORY_KEY, "{broken");
     expect(loadConstructionCalculatorHistory(localStorage)).toEqual([]);
     expect(localStorage.getItem(CONSTRUCTION_CALCULATOR_HISTORY_KEY)).toBe("[]");
+  });
+
+  it("現在の計算だけを全削除し、別の計算履歴を残す", () => {
+    const now = new Date("2026-08-27T12:00:00.000Z");
+    addConstructionCalculatorHistory(localStorage, entry("concrete", now.toISOString()), now);
+    addConstructionCalculatorHistory(
+      localStorage,
+      entry("slope", new Date(now.getTime() - 1_000).toISOString(), "slope-angle-length"),
+      now,
+    );
+    const remaining = clearConstructionCalculatorHistoryForSlug(localStorage, "concrete-quantity", now);
+    expect(remaining.map((item) => item.id)).toEqual(["slope"]);
+    expect(loadConstructionCalculatorHistory(localStorage, now).map((item) => item.id)).toEqual(["slope"]);
   });
 });

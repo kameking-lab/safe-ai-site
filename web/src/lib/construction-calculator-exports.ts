@@ -10,6 +10,14 @@ function csvCell(value: string): string {
   return `"${value.replaceAll('"', '""')}"`;
 }
 
+function roundingLabel(mode: CalculationResult["rounding"]["mode"]): string {
+  return {
+    round: "四捨五入",
+    ceil: "切上げ（+∞方向）",
+    floor: "切捨て（−∞方向）",
+  }[mode];
+}
+
 export function buildCalculationCopyText(title: string, result: CalculationResult): string {
   return [
     title,
@@ -20,7 +28,11 @@ export function buildCalculationCopyText(title: string, result: CalculationResul
     "",
     "計算式",
     ...result.formula,
-    `丸め: ${result.rounding.mode} / 小数${result.rounding.decimalPlaces}桁`,
+    `丸め: ${roundingLabel(result.rounding.mode)} / 小数${result.rounding.decimalPlaces}桁`,
+    "",
+    "使用した仮定",
+    ...result.assumptions,
+    ...(result.warnings.length ? ["", "注意", ...result.warnings] : []),
     "概算結果です。設計図書、仕様書、実測値を確認してください。",
   ].join("\n");
 }
@@ -38,9 +50,12 @@ export function buildCalculationCsv(title: string, result: CalculationResult): s
     ["section", "formula"],
     ...result.formula.map((line, index) => [`formula-${index + 1}`, line]),
     ["roundingMode", result.rounding.mode],
+    ["roundingLabel", roundingLabel(result.rounding.mode)],
     ["decimalPlaces", String(result.rounding.decimalPlaces)],
     ["section", "assumptions"],
     ...result.assumptions.map((line, index) => [`assumption-${index + 1}`, line]),
+    ["section", "warnings"],
+    ...result.warnings.map((line, index) => [`warning-${index + 1}`, line]),
   ];
   return `\uFEFF${rows.map((row) => row.map(csvCell).join(",")).join("\r\n")}`;
 }
