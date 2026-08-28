@@ -1,11 +1,24 @@
 import { readFile } from "node:fs/promises";
 import { Resvg, initWasm } from "@resvg/resvg-wasm";
-import { encode as encodeJpeg } from "jpeg-js";
+import sharp from "sharp";
 import type {
   SafetyImageLanguage,
   SafetyImageOrientation,
   SafetyImageTheme,
 } from "@/data/safety-image-library";
+import { resolveSafetyImageMessage } from "@/lib/safety-image-library/message";
+import { fitSafetyImageText } from "@/lib/safety-image-library/text-fit";
+import {
+  outputSizePixels,
+  outputSizePoints,
+  type SafetySignOutputSize,
+} from "@/data/safety-image-library/sizes";
+
+// Print-size rendering is intentionally single-threaded and uses a small
+// libvips cache. The route already serializes renders; these bounds prevent
+// large market formats from multiplying decoder/encoder working sets.
+sharp.concurrency(1);
+sharp.cache({ memory: 32, files: 0, items: 16 });
 
 export type SafetyImagePaper = "A4" | "A3";
 export type SafetyImageFormat = "jpeg" | "pdf" | "png";
@@ -38,6 +51,13 @@ export type SafetyImageRenderSettings = {
 
 type Dimensions = { width: number; height: number };
 
+export class SafetyImageTextOverflowError extends Error {
+  constructor() {
+    super("Editable text does not fit the selected output size");
+    this.name = "SafetyImageTextOverflowError";
+  }
+}
+
 const PORTRAIT_PIXELS: Record<SafetyImagePaper, Dimensions> = {
   A4: { width: 2480, height: 3508 },
   A3: { width: 3508, height: 4961 },
@@ -47,6 +67,23 @@ const PORTRAIT_POINTS: Record<SafetyImagePaper, Dimensions> = {
   A4: { width: 595.276, height: 841.89 },
   A3: { width: 841.89, height: 1190.551 },
 };
+
+// resvg owns an uncompressed RGBA canvas. Bound that canvas independently of
+// the final print raster, then let libvips perform the final tiled resample.
+// This keeps the largest 450x1800 mm output from allocating a 450+ MiB resvg
+// canvas while retaining the exact 300 dpi output dimensions and metadata.
+export const MAX_SAFETY_IMAGE_WORKING_PIXELS = 24_000_000;
+export const MAX_SAFETY_IMAGE_OUTPUT_PIXELS = 113_000_000;
+
+export function getSafetyImageWorkingDimensions(dimensions: Dimensions): Dimensions {
+  const pixels = dimensions.width * dimensions.height;
+  if (pixels <= MAX_SAFETY_IMAGE_WORKING_PIXELS) return dimensions;
+  const scale = Math.sqrt(MAX_SAFETY_IMAGE_WORKING_PIXELS / pixels);
+  return {
+    width: Math.max(1, Math.floor(dimensions.width * scale)),
+    height: Math.max(1, Math.floor(dimensions.height * scale)),
+  };
+}
 
 const binaryCache = new Map<string, Promise<Buffer>>();
 let wasmInitialization: Promise<void> | undefined;
@@ -100,101 +137,25 @@ function escapeXml(value: string): string {
     .replaceAll("'", "&apos;");
 }
 
-function normalizedText(value: string): string {
-  return value.replace(/\r\n?/gu, "\n").trim();
-}
-
-function visualUnits(value: string): number {
-  return Array.from(value).reduce((sum, character) => {
-    if (/\s/u.test(character)) return sum + 0.34;
-    if (/^[\u0000-\u024f]$/u.test(character)) {
-      return sum + (/[A-Z0-9]/u.test(character) ? 0.68 : 0.57);
-    }
-    return sum + 1;
-  }, 0);
-}
-
-function wrapText(value: string, maximumUnits: number, maximumLines = 4): string[] {
-  const explicit = normalizedText(value).split("\n");
-  const result: string[] = [];
-  for (const paragraph of explicit) {
-    if (!paragraph) {
-      result.push("");
-      continue;
-    }
-    const words = /\s/u.test(paragraph)
-      ? paragraph.split(/\s+/u)
-      : Array.from(paragraph);
-    let line = "";
-    for (const word of words) {
-      const separator = line && /\s/u.test(paragraph) ? " " : "";
-      const candidate = `${line}${separator}${word}`;
-      if (line && visualUnits(candidate) > maximumUnits) {
-        result.push(line);
-        line = word;
-      } else {
-        line = candidate;
-      }
-    }
-    if (line) result.push(line);
-  }
-  if (result.length <= maximumLines) return result;
-  const kept = result.slice(0, maximumLines - 1);
-  kept.push(result.slice(maximumLines - 1).join(" "));
-  return kept;
-}
-
-function resolvedMessage(theme: SafetyImageTheme, settings: SafetyImageRenderSettings): string {
-  if (settings.mode === "clean") return "";
-  const base = settings.mode === "default" ? theme.texts[settings.language] : settings.text;
-  const numeric = settings.numericValue.trim();
-  const unit = settings.numericUnit.trim();
-  const numericLine = numeric ? `${numeric}${unit ? ` ${unit}` : ""}` : "";
-  return [base, numericLine, settings.subMessage.trim()].filter(Boolean).join("\n");
-}
-
-function textLayer(options: {
+export function buildSafetyImageTextLayer(options: {
   theme: SafetyImageTheme;
   dimensions: Dimensions;
   settings: SafetyImageRenderSettings;
 }): string {
   const { dimensions, settings } = options;
-  const fontFamily = ["en", "vi", "id"].includes(settings.language)
-    ? "Noto Sans"
-    : "Noto Sans JP";
-  const message = resolvedMessage(options.theme, settings);
+  const fontFamily = settings.language === "zh-CN"
+    ? "Noto Sans CJK SC"
+    : settings.language === "ja"
+      ? "Noto Sans CJK JP"
+      : "Noto Sans";
+  const message = resolveSafetyImageMessage(options.theme, settings);
   if (!message) return "";
+  const fit = fitSafetyImageText({ message, dimensions, settings });
+  if (!fit) throw new SafetyImageTextOverflowError();
+  const { margin, panelWidth, panelPadding, fontSize, brandClearance } = fit;
 
-  const marginRatio = dimensions.width < dimensions.height ? 0.052 : 0.045;
-  const margin = Math.round(dimensions.width * marginRatio);
-  const panelWidth = dimensions.width - margin * 2;
-  const paddingRatios = { small: 0.022, standard: 0.035, large: 0.05 } as const;
-  const panelPadding = Math.round(panelWidth * paddingRatios[settings.padding]);
-  const sizeRatios = { small: 0.041, standard: 0.052, large: 0.063 } as const;
-  let fontSize = Math.round(dimensions.width * sizeRatios[settings.fontSize]);
-  const brandClearance =
-    settings.brand && settings.mode !== "clean" && settings.position === "bottom"
-      ? Math.round(dimensions.width * 0.066)
-      : 0;
-
-  if (settings.writingMode === "vertical" && settings.language === "ja") {
-    const characters = Array.from(normalizedText(message).replaceAll("\n", ""));
-    const charactersPerColumn = Math.max(
-      8,
-      Math.min(15, Math.floor((dimensions.height * 0.48) / (fontSize * 1.08))),
-    );
-    const columns: string[][] = [];
-    for (let index = 0; index < characters.length; index += charactersPerColumn) {
-      columns.push(characters.slice(index, index + charactersPerColumn));
-    }
-    const columnGap = fontSize * 1.18;
-    const verticalPanelWidth = Math.round(
-      Math.min(panelWidth, panelPadding * 2 + Math.max(1, columns.length) * columnGap),
-    );
-    const longestColumn = Math.max(...columns.map((column) => column.length), 1);
-    const verticalPanelHeight = Math.round(
-      panelPadding * 2 + longestColumn * fontSize * settings.lineHeight,
-    );
+  if (fit.kind === "vertical") {
+    const { columns, columnGap, verticalPanelWidth, verticalPanelHeight } = fit;
     const panelX = Math.round((dimensions.width - verticalPanelWidth) / 2);
     const panelY =
       settings.position === "top"
@@ -221,17 +182,8 @@ function textLayer(options: {
     return `<g id="editable-text-layer">${band}${text}</g>`;
   }
 
-  const availableWidth = panelWidth - panelPadding * 2;
-  let lines = wrapText(message, availableWidth / fontSize);
-  const widest = Math.max(...lines.map(visualUnits), 1);
-  const fittedSize = Math.floor(availableWidth / widest);
-  fontSize = Math.max(Math.round(dimensions.width * 0.027), Math.min(fontSize, fittedSize));
-  lines = wrapText(message, availableWidth / fontSize);
-
+  const { lines, panelHeight } = fit;
   const effectiveLineHeight = fontSize * settings.lineHeight;
-  const panelHeight = Math.round(
-    panelPadding * 2 + Math.max(fontSize, lines.length * effectiveLineHeight),
-  );
   const y =
     settings.position === "top"
       ? margin
@@ -271,7 +223,7 @@ function brandLayer(dimensions: Dimensions, mascot: Buffer): string {
   return `<g id="brand-layer">
     <rect x="${x}" y="${y}" width="${width}" height="${height}" rx="${Math.round(24 * scale)}" fill="#ffffff" fill-opacity=".95" stroke="#0f766e" stroke-width="${Math.max(3, Math.round(4 * scale))}"/>
     <image href="${data}" x="${x + Math.round(12 * scale)}" y="${y + Math.round(11 * scale)}" width="${mascotSize}" height="${mascotSize}" preserveAspectRatio="xMidYMid meet"/>
-    <text x="${x + Math.round(318 * scale)}" y="${y + Math.round(68 * scale)}" text-anchor="middle" dominant-baseline="middle" fill="#0f172a" font-family="Noto Sans JP, sans-serif" font-size="${Math.round(33 * scale)}" font-weight="800">© 安全AIポータル</text>
+    <text x="${x + Math.round(318 * scale)}" y="${y + Math.round(68 * scale)}" text-anchor="middle" dominant-baseline="middle" fill="#0f172a" font-family="Noto Sans CJK JP, sans-serif" font-size="${Math.round(33 * scale)}" font-weight="800">© 安全AIポータル</text>
   </g>`;
 }
 
@@ -281,9 +233,10 @@ function posterSvg(options: {
   source: Buffer;
   mascot: Buffer;
   settings: SafetyImageRenderSettings;
+  transparentCanvas?: boolean;
 }): string {
   const sourceData = `data:image/png;base64,${options.source.toString("base64")}`;
-  const text = textLayer({
+  const text = buildSafetyImageTextLayer({
     theme: options.theme,
     dimensions: options.dimensions,
     settings: options.settings,
@@ -292,9 +245,12 @@ function posterSvg(options: {
     options.settings.mode !== "clean" && options.settings.brand
       ? brandLayer(options.dimensions, options.mascot)
       : "";
+  const canvas = options.transparentCanvas
+    ? ""
+    : '<rect width="100%" height="100%" fill="#eef7f7"/>';
   return `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="${options.dimensions.width}" height="${options.dimensions.height}" viewBox="0 0 ${options.dimensions.width} ${options.dimensions.height}">
-  <rect width="100%" height="100%" fill="#eef7f7"/>
+  ${canvas}
   <image href="${sourceData}" x="0" y="0" width="${options.dimensions.width}" height="${options.dimensions.height}" preserveAspectRatio="xMidYMid meet"/>
   ${text}
   ${brand}
@@ -317,97 +273,95 @@ function addJpegDensity(jpeg: Buffer, density = 300): Buffer {
   return jpeg;
 }
 
-function crc32(buffer: Buffer): number {
-  let crc = 0xffffffff;
-  for (const byte of buffer) {
-    crc ^= byte;
-    for (let bit = 0; bit < 8; bit += 1) {
-      crc = (crc >>> 1) ^ (crc & 1 ? 0xedb88320 : 0);
-    }
-  }
-  return (crc ^ 0xffffffff) >>> 0;
-}
-
-function addPngDensity(png: Buffer): Buffer {
-  const signatureLength = 8;
-  const ihdrLength = 25;
-  const insertion = signatureLength + ihdrLength;
-  if (png.subarray(1, 4).toString("ascii") !== "PNG") return png;
-  const type = Buffer.from("pHYs", "ascii");
-  const data = Buffer.alloc(9);
-  data.writeUInt32BE(11811, 0);
-  data.writeUInt32BE(11811, 4);
-  data[8] = 1;
-  const chunk = Buffer.alloc(4 + type.length + data.length + 4);
-  chunk.writeUInt32BE(data.length, 0);
-  type.copy(chunk, 4);
-  data.copy(chunk, 8);
-  chunk.writeUInt32BE(crc32(Buffer.concat([type, data])), 17);
-  return Buffer.concat([png.subarray(0, insertion), chunk, png.subarray(insertion)]);
-}
-
 export async function renderSafetyImage(options: {
   theme: SafetyImageTheme;
   paper: SafetyImagePaper;
   orientation: SafetyImageOrientation;
+  outputSize?: SafetySignOutputSize;
   format: SafetyImageFormat;
   source: Buffer;
   mascotPath: string;
   fontPath: string;
+  simplifiedChineseFontPath: string;
   latinFontPath: string;
   wasmPath: string;
   settings: SafetyImageRenderSettings;
   /** Small deterministic canvas used only by renderer tests; production omits it. */
   dimensions?: Dimensions;
 }): Promise<Buffer> {
-  const dimensions =
-    options.dimensions ?? getSafetyImagePixelDimensions(options.paper, options.orientation);
-  const [mascot, font, latinFont] = await Promise.all([
+  const outputDimensions =
+    options.dimensions ?? (options.outputSize
+      ? outputSizePixels(options.outputSize)
+      : getSafetyImagePixelDimensions(options.paper, options.orientation));
+  const workingDimensions = options.dimensions
+    ? outputDimensions
+    : getSafetyImageWorkingDimensions(outputDimensions);
+  if (outputDimensions.width * outputDimensions.height > MAX_SAFETY_IMAGE_OUTPUT_PIXELS) {
+    throw new Error("Safety-image output exceeds the hard pixel boundary");
+  }
+  const [mascot, font, simplifiedChineseFont, latinFont] = await Promise.all([
     cachedBinary(options.mascotPath),
     cachedBinary(options.fontPath),
+    cachedBinary(options.simplifiedChineseFontPath),
     cachedBinary(options.latinFontPath),
     ensureWasm(options.wasmPath),
   ]);
   const svg = posterSvg({
     theme: options.theme,
-    dimensions,
+    dimensions: workingDimensions,
     source: options.source,
     mascot,
     settings: options.settings,
+    transparentCanvas:
+      options.format === "png" && options.settings.mode === "clean",
   });
   const renderer = new Resvg(svg, {
-    background: "#eef7f7",
+    ...(options.format === "png" && options.settings.mode === "clean"
+      ? {}
+      : { background: "#eef7f7" }),
     dpi: 300,
     textRendering: 1,
     imageRendering: 0,
     font: {
-      fontBuffers: [new Uint8Array(font), new Uint8Array(latinFont)],
-      defaultFontFamily: "Noto Sans JP",
-      sansSerifFamily: "Noto Sans JP",
+      fontBuffers: [
+        new Uint8Array(font),
+        new Uint8Array(simplifiedChineseFont),
+        new Uint8Array(latinFont),
+      ],
+      defaultFontFamily: "Noto Sans CJK JP",
+      sansSerifFamily: "Noto Sans CJK JP",
     },
   });
   const rendered = renderer.render();
   try {
-    if (rendered.width !== dimensions.width || rendered.height !== dimensions.height) {
+    if (rendered.width !== workingDimensions.width || rendered.height !== workingDimensions.height) {
       throw new Error(`Unexpected output dimensions: ${rendered.width}x${rendered.height}`);
     }
+    const raw = sharp(Buffer.from(rendered.pixels), {
+      raw: { width: rendered.width, height: rendered.height, channels: 4 },
+      limitInputPixels: MAX_SAFETY_IMAGE_WORKING_PIXELS,
+      sequentialRead: true,
+    }).resize(outputDimensions.width, outputDimensions.height, {
+      fit: "fill",
+      kernel: sharp.kernel.lanczos3,
+    });
     if (options.format === "png") {
-      return addPngDensity(Buffer.from(rendered.asPng()));
+      return raw
+        .png({ compressionLevel: 9, adaptiveFiltering: true })
+        .withMetadata({ density: 300 })
+        .toBuffer();
     }
-    const encoded = encodeJpeg(
-      {
-        data: Buffer.from(rendered.pixels),
-        width: rendered.width,
-        height: rendered.height,
-      },
-      92,
-    );
-    const jpeg = addJpegDensity(Buffer.from(encoded.data));
+    const jpeg = addJpegDensity(await raw
+      .flatten({ background: "#eef7f7" })
+      .jpeg({ quality: 90, chromaSubsampling: "4:2:0", mozjpeg: false })
+      .withMetadata({ density: 300 })
+      .toBuffer());
     return options.format === "pdf"
       ? buildSafetyImagePdf({
           jpeg,
           paper: options.paper,
           orientation: options.orientation,
+          outputSize: options.outputSize,
         })
       : jpeg;
   } finally {
@@ -424,9 +378,14 @@ export function buildSafetyImagePdf(options: {
   jpeg: Buffer;
   paper: SafetyImagePaper;
   orientation: SafetyImageOrientation;
+  outputSize?: SafetySignOutputSize;
 }): Buffer {
-  const pixels = getSafetyImagePixelDimensions(options.paper, options.orientation);
-  const page = getPagePoints(options.paper, options.orientation);
+  const pixels = options.outputSize
+    ? outputSizePixels(options.outputSize)
+    : getSafetyImagePixelDimensions(options.paper, options.orientation);
+  const page = options.outputSize
+    ? outputSizePoints(options.outputSize)
+    : getPagePoints(options.paper, options.orientation);
   const content = ascii(
     `q\n${page.width.toFixed(3)} 0 0 ${page.height.toFixed(3)} 0 0 cm\n/Im0 Do\nQ\n`,
   );

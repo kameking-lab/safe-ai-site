@@ -61,7 +61,7 @@ export function calculateRebarWeight(input: RebarWeightInput): CalculationOutcom
     rawOutputs: { massPerMetreKg, massPerBarKg, totalLengthM, totalMassKg, totalMassT: totalMassKg / 1_000 },
     outputs,
     displayValues: [
-      { key: "massPerMetreKg", label: "1m当たり重量", value: outputs.massPerMetreKg, unit: "kg/m" },
+      { key: "massPerMetreKg", label: "1m当たり重量（真円概算）", value: outputs.massPerMetreKg, unit: "kg/m" },
       { key: "massPerBarKg", label: "1本重量", value: outputs.massPerBarKg, unit: "kg" },
       { key: "totalLengthM", label: "総延長", value: outputs.totalLengthM, unit: "m" },
       { key: "totalMassKg", label: "総重量", value: outputs.totalMassKg, unit: "kg" },
@@ -78,5 +78,6 @@ export function calculateRebarWeight(input: RebarWeightInput): CalculationOutcom
       "呼び径を真円の直径とみなす幾何学的概算で、異形鉄筋のJIS単位質量表の転載・照合値ではない。",
       "鋼の密度は7,850 kg/m³とする。ミルシート、製品規格、加工ロスは別途確認する。",
     ],
+    warnings: ["異形鉄筋の公称単位質量ではありません。製品規格・ミルシートを確認してください。"],
   });
 }

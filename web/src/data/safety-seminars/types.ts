@@ -63,7 +63,7 @@ export type SlideVisual =
   | { type: "metrics"; metrics: SlideMetric[] }
   | { type: "bars"; bars: SlideBar[]; max: number; unit: string }
   | { type: "trend"; points: SlideTrendPoint[] }
-  | { type: "image"; src: string; alt: string }
+  | { type: "image"; src: string; alt: string; summaryItems?: string[] }
   | { type: "steps"; steps: { label: string; detail: string; tone?: string }[] }
   | { type: "checklist"; items: string[] }
   | {

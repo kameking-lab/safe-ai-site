@@ -149,7 +149,7 @@ test.describe("AI実務研修と建設計算ツール", () => {
     const clipboardText = await page.evaluate(() => navigator.clipboard.readText());
     expect(clipboardText.replace(/\s+/gu, "")).toContain(primaryResult.replace(/\s+/gu, ""));
 
-    await page.getByRole("button", { name: "PDF・印刷" }).click();
+    await page.getByRole("button", { name: "PDF保存（印刷画面）" }).click();
     await expect.poll(() => page.locator("body").getAttribute("data-print-called")).toBe("true");
 
     const downloadPromise = page.waitForEvent("download");
@@ -163,6 +163,19 @@ test.describe("AI実務研修と建設計算ツール", () => {
     expect(stored).toContain("concrete-quantity");
     await page.getByRole("button", { name: "この履歴を削除" }).click();
     await expect(page.getByRole("button", { name: "入力を復元" })).toHaveCount(0);
+  });
+
+  test("表示済みの計算ページは通信断後も明示ボタンで計算できる", async ({ page, context }) => {
+    await page.goto(`${CALCULATOR_HUB}/concrete-quantity`);
+    await expect(page.getByRole("button", { name: "計算する" })).toBeVisible();
+    await page.waitForLoadState("networkidle");
+    await context.setOffline(true);
+    try {
+      await page.getByRole("button", { name: "計算する" }).click();
+      await expect(page.getByRole("heading", { name: "結果", exact: true })).toBeVisible();
+    } finally {
+      await context.setOffline(false);
+    }
   });
 
   test("query noindex、reduced motion、forced colors、主要viewport、Axeを満たす", async ({ page }) => {

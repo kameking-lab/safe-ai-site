@@ -186,12 +186,12 @@ export const NAV_CATEGORIES: AppShellNavCategory[] = [
       },
       {
         id: "safety-image-library",
-        label: "安全画像倉庫",
+        label: "現場安全看板",
         href: "/materials/safety-images",
         icon: Images,
         badge: "NEW",
         badgeUntil: "2026-10-31",
-        description: "安全看板ライブラリを準備中",
+        description: "100点を文字編集・5言語・JPEG/PNG/PDFで利用",
       },
       {
         id: "heat-illness",
@@ -560,7 +560,7 @@ const COMPACT_NAV_CATEGORIES: AppShellNavCategory[] = [
       },
       {
         id: "safety-image-library",
-        label: "安全画像倉庫",
+        label: "現場安全看板",
         href: "/materials/safety-images",
         icon: Images,
       },

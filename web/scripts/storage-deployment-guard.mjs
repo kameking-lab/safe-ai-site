@@ -13,6 +13,8 @@ const MAX_NON_RUNTIME_MEDIA_BYTES = 20 * MIB;
 const LARGE_RUNTIME_PREFIXES = [
   "data/",
   "web/src/data/",
+  // Server-side poster rendering embeds these reviewed CJK fonts at request time.
+  "web/src/assets/safety-image-library/fonts/",
   "web/prisma/",
   "web/src/fixtures/",
   "web/src/__fixtures__/",
@@ -249,6 +251,10 @@ if (!isPublicRuntimeAllowed("web/public/screenshots/runtime-guide.png")
   || !isGeneratedArtifact("web/test-results-probe/result.json")
   || isGeneratedArtifact("web/src/app/build/page.tsx")) {
   fail("classifier self-test failed; deployment is blocked");
+}
+if (!isRuntimeAllowed("web/src/assets/safety-image-library/fonts/NotoSansCJKjp-Bold.otf")
+  || isRuntimeAllowed("web/src/assets/unreviewed/raw-font.otf")) {
+  fail("server-rendering font classifier self-test failed; deployment is blocked");
 }
 
 let mediaCount = 0;

@@ -186,6 +186,14 @@ describe("墜落・転落防止研修の共通正本", () => {
     }
   });
 
+  it("まとめスライドのPPTX用3メッセージを共通データで管理する", () => {
+    const summary = training.slides.find((slide) => slide.id === "summary");
+    expect(summary?.visual.type).toBe("image");
+    if (!summary || summary.visual.type !== "image") return;
+    expect(summary.visual.summaryItems).toEqual(["設備で防ぐ", "器具を合わせる", "救助まで準備"]);
+    for (const keyword of ["設備", "器具", "救助"]) expect(summary.message).toContain(keyword);
+  });
+
   it("確認クイズは5問で、正解・解説・claim対応を持つ", () => {
     expect(quizJson.questions).toHaveLength(5);
     for (const question of quizJson.questions) {

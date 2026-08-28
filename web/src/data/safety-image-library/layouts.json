@@ -1,4 +1,6 @@
 {
+  "schemaVersion": "safety-sign-layouts-v2",
+  "checkedAt": "2026-08-28",
   "portrait": {
     "safeMarginRatio": 0.055,
     "textWidthRatio": 0.89,
@@ -12,5 +14,2621 @@
     "defaultPosition": "bottom",
     "defaultBandColor": "#ffffff",
     "defaultTextColor": "#082f49"
+  },
+  "square": {
+    "safeMarginRatio": 0.052,
+    "textWidthRatio": 0.896,
+    "defaultPosition": "bottom",
+    "defaultBandColor": "#ffffff",
+    "defaultTextColor": "#082f49"
+  },
+  "brandOverlay": {
+    "source": "/mascot/mascot-head-256.png",
+    "label": "© 安全AIポータル",
+    "defaultVisible": true,
+    "removable": true,
+    "position": "bottom-right"
+  },
+  "themes": {
+    "helmet-required": {
+      "visualFormat": "directive-subject",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.59
+      },
+      "subjectBounds": {
+        "x": 0.08,
+        "y": 0.34,
+        "width": 0.84,
+        "height": 0.6
+      },
+      "textSafeArea": {
+        "x": 0.055,
+        "y": 0.045,
+        "width": 0.89,
+        "height": 0.3
+      },
+      "allowedCrops": [
+        "contain",
+        "portrait"
+      ],
+      "recommendedSizes": [
+        "450×600mm"
+      ]
+    },
+    "safety-glasses-required": {
+      "visualFormat": "directive-subject",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.59
+      },
+      "subjectBounds": {
+        "x": 0.08,
+        "y": 0.34,
+        "width": 0.84,
+        "height": 0.6
+      },
+      "textSafeArea": {
+        "x": 0.055,
+        "y": 0.045,
+        "width": 0.89,
+        "height": 0.3
+      },
+      "allowedCrops": [
+        "contain",
+        "portrait"
+      ],
+      "recommendedSizes": [
+        "450×600mm"
+      ]
+    },
+    "goggles-required": {
+      "visualFormat": "directive-subject",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.59
+      },
+      "subjectBounds": {
+        "x": 0.08,
+        "y": 0.34,
+        "width": 0.84,
+        "height": 0.6
+      },
+      "textSafeArea": {
+        "x": 0.055,
+        "y": 0.045,
+        "width": 0.89,
+        "height": 0.3
+      },
+      "allowedCrops": [
+        "contain",
+        "portrait"
+      ],
+      "recommendedSizes": [
+        "450×600mm"
+      ]
+    },
+    "earplugs-required": {
+      "visualFormat": "directive-subject",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.59
+      },
+      "subjectBounds": {
+        "x": 0.08,
+        "y": 0.34,
+        "width": 0.84,
+        "height": 0.6
+      },
+      "textSafeArea": {
+        "x": 0.055,
+        "y": 0.045,
+        "width": 0.89,
+        "height": 0.3
+      },
+      "allowedCrops": [
+        "contain",
+        "portrait"
+      ],
+      "recommendedSizes": [
+        "450×600mm"
+      ]
+    },
+    "dust-mask-required": {
+      "visualFormat": "directive-subject",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.59
+      },
+      "subjectBounds": {
+        "x": 0.08,
+        "y": 0.34,
+        "width": 0.84,
+        "height": 0.6
+      },
+      "textSafeArea": {
+        "x": 0.055,
+        "y": 0.045,
+        "width": 0.89,
+        "height": 0.3
+      },
+      "allowedCrops": [
+        "contain",
+        "portrait"
+      ],
+      "recommendedSizes": [
+        "450×600mm"
+      ]
+    },
+    "respiratory-protection-required": {
+      "visualFormat": "directive-subject",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.59
+      },
+      "subjectBounds": {
+        "x": 0.08,
+        "y": 0.34,
+        "width": 0.84,
+        "height": 0.6
+      },
+      "textSafeArea": {
+        "x": 0.055,
+        "y": 0.045,
+        "width": 0.89,
+        "height": 0.3
+      },
+      "allowedCrops": [
+        "contain",
+        "portrait"
+      ],
+      "recommendedSizes": [
+        "450×600mm"
+      ]
+    },
+    "protective-gloves-required": {
+      "visualFormat": "directive-subject",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.59
+      },
+      "subjectBounds": {
+        "x": 0.08,
+        "y": 0.34,
+        "width": 0.84,
+        "height": 0.6
+      },
+      "textSafeArea": {
+        "x": 0.055,
+        "y": 0.045,
+        "width": 0.89,
+        "height": 0.3
+      },
+      "allowedCrops": [
+        "contain",
+        "portrait"
+      ],
+      "recommendedSizes": [
+        "450×600mm"
+      ]
+    },
+    "safety-shoes-required": {
+      "visualFormat": "directive-subject",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.59
+      },
+      "subjectBounds": {
+        "x": 0.08,
+        "y": 0.34,
+        "width": 0.84,
+        "height": 0.6
+      },
+      "textSafeArea": {
+        "x": 0.055,
+        "y": 0.045,
+        "width": 0.89,
+        "height": 0.3
+      },
+      "allowedCrops": [
+        "contain",
+        "portrait"
+      ],
+      "recommendedSizes": [
+        "450×600mm"
+      ]
+    },
+    "full-body-harness-required": {
+      "visualFormat": "directive-subject",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.59
+      },
+      "subjectBounds": {
+        "x": 0.08,
+        "y": 0.34,
+        "width": 0.84,
+        "height": 0.6
+      },
+      "textSafeArea": {
+        "x": 0.055,
+        "y": 0.045,
+        "width": 0.89,
+        "height": 0.3
+      },
+      "allowedCrops": [
+        "contain",
+        "portrait"
+      ],
+      "recommendedSizes": [
+        "450×600mm"
+      ]
+    },
+    "fall-restraint-required": {
+      "visualFormat": "directive-subject",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.59
+      },
+      "subjectBounds": {
+        "x": 0.08,
+        "y": 0.34,
+        "width": 0.84,
+        "height": 0.6
+      },
+      "textSafeArea": {
+        "x": 0.055,
+        "y": 0.045,
+        "width": 0.89,
+        "height": 0.3
+      },
+      "allowedCrops": [
+        "contain",
+        "portrait"
+      ],
+      "recommendedSizes": [
+        "450×600mm"
+      ]
+    },
+    "ppe-required": {
+      "visualFormat": "directive-subject",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.59
+      },
+      "subjectBounds": {
+        "x": 0.08,
+        "y": 0.34,
+        "width": 0.84,
+        "height": 0.6
+      },
+      "textSafeArea": {
+        "x": 0.055,
+        "y": 0.045,
+        "width": 0.89,
+        "height": 0.3
+      },
+      "allowedCrops": [
+        "contain",
+        "portrait"
+      ],
+      "recommendedSizes": [
+        "450×600mm"
+      ]
+    },
+    "complete-ppe-required": {
+      "visualFormat": "directive-subject",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.59
+      },
+      "subjectBounds": {
+        "x": 0.08,
+        "y": 0.34,
+        "width": 0.84,
+        "height": 0.6
+      },
+      "textSafeArea": {
+        "x": 0.055,
+        "y": 0.045,
+        "width": 0.89,
+        "height": 0.3
+      },
+      "allowedCrops": [
+        "contain",
+        "portrait"
+      ],
+      "recommendedSizes": [
+        "450×600mm"
+      ]
+    },
+    "protective-clothing-required": {
+      "visualFormat": "directive-subject",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.59
+      },
+      "subjectBounds": {
+        "x": 0.08,
+        "y": 0.34,
+        "width": 0.84,
+        "height": 0.6
+      },
+      "textSafeArea": {
+        "x": 0.055,
+        "y": 0.045,
+        "width": 0.89,
+        "height": 0.3
+      },
+      "allowedCrops": [
+        "contain",
+        "portrait"
+      ],
+      "recommendedSizes": [
+        "450×600mm"
+      ]
+    },
+    "life-jacket-required": {
+      "visualFormat": "directive-subject",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.59
+      },
+      "subjectBounds": {
+        "x": 0.08,
+        "y": 0.34,
+        "width": 0.84,
+        "height": 0.6
+      },
+      "textSafeArea": {
+        "x": 0.055,
+        "y": 0.045,
+        "width": 0.89,
+        "height": 0.3
+      },
+      "allowedCrops": [
+        "contain",
+        "portrait"
+      ],
+      "recommendedSizes": [
+        "450×600mm"
+      ]
+    },
+    "mask-required": {
+      "visualFormat": "directive-subject",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.59
+      },
+      "subjectBounds": {
+        "x": 0.08,
+        "y": 0.34,
+        "width": 0.84,
+        "height": 0.6
+      },
+      "textSafeArea": {
+        "x": 0.055,
+        "y": 0.045,
+        "width": 0.89,
+        "height": 0.3
+      },
+      "allowedCrops": [
+        "contain",
+        "portrait"
+      ],
+      "recommendedSizes": [
+        "450×600mm"
+      ]
+    },
+    "no-entry": {
+      "visualFormat": "directive-subject",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "authorized-personnel-only": {
+      "visualFormat": "directive-subject",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "no-access": {
+      "visualFormat": "directive-subject",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "no-vehicle-entry": {
+      "visualFormat": "directive-subject",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "operation-prohibited": {
+      "visualFormat": "directive-subject",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "no-smoking": {
+      "visualFormat": "directive-subject",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "no-open-flames": {
+      "visualFormat": "directive-subject",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "do-not-use": {
+      "visualFormat": "directive-subject",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "do-not-operate": {
+      "visualFormat": "directive-subject",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "do-not-touch": {
+      "visualFormat": "directive-subject",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "no-climbing": {
+      "visualFormat": "directive-subject",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "do-not-open-close": {
+      "visualFormat": "directive-subject",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "no-mobile-phone": {
+      "visualFormat": "directive-subject",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "no-parking": {
+      "visualFormat": "directive-subject",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "no-passage": {
+      "visualFormat": "directive-subject",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "fall-hazard": {
+      "visualFormat": "hazard-scene",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "floor-opening-hazard": {
+      "visualFormat": "hazard-scene",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "falling-objects-hazard": {
+      "visualFormat": "hazard-scene",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "overhead-hazard": {
+      "visualFormat": "hazard-scene",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "watch-your-step": {
+      "visualFormat": "hazard-scene",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "slippery-surface": {
+      "visualFormat": "hazard-scene",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "trip-fall-hazard": {
+      "visualFormat": "hazard-scene",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "level-change-hazard": {
+      "visualFormat": "hazard-scene",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "cutting-hazard": {
+      "visualFormat": "hazard-scene",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "collision-hazard": {
+      "visualFormat": "hazard-scene",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "no-under-suspended-load": {
+      "visualFormat": "hazard-scene",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "equipment-swing-zone": {
+      "visualFormat": "hazard-scene",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "forklift-hazard": {
+      "visualFormat": "hazard-scene",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "pinch-point-hazard": {
+      "visualFormat": "hazard-scene",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "entanglement-hazard": {
+      "visualFormat": "hazard-scene",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "electric-shock-hazard": {
+      "visualFormat": "hazard-scene",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "high-voltage-hazard": {
+      "visualFormat": "hazard-scene",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "oxygen-deficiency-hazard": {
+      "visualFormat": "hazard-scene",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "laser-radiation-hazard": {
+      "visualFormat": "hazard-scene",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "organic-solvent-in-use": {
+      "visualFormat": "hazard-scene",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "asbestos-removal-in-progress": {
+      "visualFormat": "hazard-scene",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "hot-surface-hazard": {
+      "visualFormat": "hazard-scene",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "burn-hazard": {
+      "visualFormat": "hazard-scene",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "high-pressure-gas-hazard": {
+      "visualFormat": "hazard-scene",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "toxic-substances-hazard": {
+      "visualFormat": "hazard-scene",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "construction-in-progress": {
+      "visualFormat": "status-numeric",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "work-in-progress": {
+      "visualFormat": "status-numeric",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "work-at-height-in-progress": {
+      "visualFormat": "status-numeric",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.59
+      },
+      "subjectBounds": {
+        "x": 0.08,
+        "y": 0.34,
+        "width": 0.84,
+        "height": 0.6
+      },
+      "textSafeArea": {
+        "x": 0.055,
+        "y": 0.045,
+        "width": 0.89,
+        "height": 0.3
+      },
+      "allowedCrops": [
+        "contain",
+        "portrait"
+      ],
+      "recommendedSizes": [
+        "450×1800mm"
+      ]
+    },
+    "scaffold-assembly-in-progress": {
+      "visualFormat": "status-numeric",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.59
+      },
+      "subjectBounds": {
+        "x": 0.08,
+        "y": 0.34,
+        "width": 0.84,
+        "height": 0.6
+      },
+      "textSafeArea": {
+        "x": 0.055,
+        "y": 0.045,
+        "width": 0.89,
+        "height": 0.3
+      },
+      "allowedCrops": [
+        "contain",
+        "portrait"
+      ],
+      "recommendedSizes": [
+        "450×1800mm"
+      ]
+    },
+    "hot-work-in-progress": {
+      "visualFormat": "status-numeric",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.59
+      },
+      "subjectBounds": {
+        "x": 0.08,
+        "y": 0.34,
+        "width": 0.84,
+        "height": 0.6
+      },
+      "textSafeArea": {
+        "x": 0.055,
+        "y": 0.045,
+        "width": 0.89,
+        "height": 0.3
+      },
+      "allowedCrops": [
+        "contain",
+        "portrait"
+      ],
+      "recommendedSizes": [
+        "450×1800mm"
+      ]
+    },
+    "inspection-in-progress": {
+      "visualFormat": "status-numeric",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "cleaning-in-progress": {
+      "visualFormat": "status-numeric",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "repair-in-progress": {
+      "visualFormat": "status-numeric",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "inspected": {
+      "visualFormat": "status-numeric",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "out-of-service": {
+      "visualFormat": "status-numeric",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "adjustment-in-progress": {
+      "visualFormat": "status-numeric",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "equipment-operating": {
+      "visualFormat": "status-numeric",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "material-storage": {
+      "visualFormat": "status-numeric",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "safe-passage": {
+      "visualFormat": "status-numeric",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "housekeeping": {
+      "visualFormat": "status-numeric",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "stop": {
+      "visualFormat": "directive-subject",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.59
+      },
+      "subjectBounds": {
+        "x": 0.08,
+        "y": 0.34,
+        "width": 0.84,
+        "height": 0.6
+      },
+      "textSafeArea": {
+        "x": 0.055,
+        "y": 0.045,
+        "width": 0.89,
+        "height": 0.3
+      },
+      "allowedCrops": [
+        "contain",
+        "portrait"
+      ],
+      "recommendedSizes": [
+        "1400×550mm"
+      ]
+    },
+    "slow": {
+      "visualFormat": "directive-subject",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.59
+      },
+      "subjectBounds": {
+        "x": 0.08,
+        "y": 0.34,
+        "width": 0.84,
+        "height": 0.6
+      },
+      "textSafeArea": {
+        "x": 0.055,
+        "y": 0.045,
+        "width": 0.89,
+        "height": 0.3
+      },
+      "allowedCrops": [
+        "contain",
+        "portrait"
+      ],
+      "recommendedSizes": [
+        "1400×550mm"
+      ]
+    },
+    "one-way": {
+      "visualFormat": "directive-subject",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "road-closed-to-vehicles": {
+      "visualFormat": "directive-subject",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.59
+      },
+      "subjectBounds": {
+        "x": 0.08,
+        "y": 0.34,
+        "width": 0.84,
+        "height": 0.6
+      },
+      "textSafeArea": {
+        "x": 0.055,
+        "y": 0.045,
+        "width": 0.89,
+        "height": 0.3
+      },
+      "allowedCrops": [
+        "contain",
+        "portrait"
+      ],
+      "recommendedSizes": [
+        "1400×550mm"
+      ]
+    },
+    "vehicle-entrance": {
+      "visualFormat": "directive-subject",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.59
+      },
+      "subjectBounds": {
+        "x": 0.08,
+        "y": 0.34,
+        "width": 0.84,
+        "height": 0.6
+      },
+      "textSafeArea": {
+        "x": 0.055,
+        "y": 0.045,
+        "width": 0.89,
+        "height": 0.3
+      },
+      "allowedCrops": [
+        "contain",
+        "portrait"
+      ],
+      "recommendedSizes": [
+        "1400×550mm"
+      ]
+    },
+    "pedestrian-route": {
+      "visualFormat": "directive-subject",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "forklift-operating": {
+      "visualFormat": "directive-subject",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "look-both-ways": {
+      "visualFormat": "directive-subject",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "road-shoulder-hazard": {
+      "visualFormat": "directive-subject",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.59
+      },
+      "subjectBounds": {
+        "x": 0.08,
+        "y": 0.34,
+        "width": 0.84,
+        "height": 0.6
+      },
+      "textSafeArea": {
+        "x": 0.055,
+        "y": 0.045,
+        "width": 0.89,
+        "height": 0.3
+      },
+      "allowedCrops": [
+        "contain",
+        "portrait"
+      ],
+      "recommendedSizes": [
+        "1400×550mm"
+      ]
+    },
+    "watch-for-vehicles": {
+      "visualFormat": "directive-subject",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "site-speed-limit": {
+      "visualFormat": "status-numeric",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "maximum-load": {
+      "visualFormat": "status-numeric",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "platform-load-limit": {
+      "visualFormat": "status-numeric",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "height-limit": {
+      "visualFormat": "status-numeric",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "weight-limit": {
+      "visualFormat": "status-numeric",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "maximum-width": {
+      "visualFormat": "status-numeric",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "work-radius-no-entry": {
+      "visualFormat": "status-numeric",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "accident-free-record": {
+      "visualFormat": "status-numeric",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "emergency-contact": {
+      "visualFormat": "status-numeric",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "fire-safety-manager": {
+      "visualFormat": "status-numeric",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.43
+      },
+      "subjectBounds": {
+        "x": 0.06,
+        "y": 0.06,
+        "width": 0.88,
+        "height": 0.58
+      },
+      "textSafeArea": {
+        "x": 0.05,
+        "y": 0.67,
+        "width": 0.9,
+        "height": 0.28
+      },
+      "allowedCrops": [
+        "contain",
+        "landscape"
+      ],
+      "recommendedSizes": [
+        "600×450mm"
+      ]
+    },
+    "heat-illness-alert": {
+      "visualFormat": "hazard-scene",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.59
+      },
+      "subjectBounds": {
+        "x": 0.08,
+        "y": 0.34,
+        "width": 0.84,
+        "height": 0.6
+      },
+      "textSafeArea": {
+        "x": 0.055,
+        "y": 0.045,
+        "width": 0.89,
+        "height": 0.3
+      },
+      "allowedCrops": [
+        "contain",
+        "portrait"
+      ],
+      "recommendedSizes": [
+        "450×600mm"
+      ]
+    },
+    "wbgt-display": {
+      "visualFormat": "hazard-scene",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.59
+      },
+      "subjectBounds": {
+        "x": 0.08,
+        "y": 0.34,
+        "width": 0.84,
+        "height": 0.6
+      },
+      "textSafeArea": {
+        "x": 0.055,
+        "y": 0.045,
+        "width": 0.89,
+        "height": 0.3
+      },
+      "allowedCrops": [
+        "contain",
+        "portrait"
+      ],
+      "recommendedSizes": [
+        "450×600mm"
+      ]
+    },
+    "heat-illness-prevention": {
+      "visualFormat": "hazard-scene",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.59
+      },
+      "subjectBounds": {
+        "x": 0.08,
+        "y": 0.34,
+        "width": 0.84,
+        "height": 0.6
+      },
+      "textSafeArea": {
+        "x": 0.055,
+        "y": 0.045,
+        "width": 0.89,
+        "height": 0.3
+      },
+      "allowedCrops": [
+        "contain",
+        "portrait"
+      ],
+      "recommendedSizes": [
+        "450×600mm"
+      ]
+    },
+    "evacuation-exit": {
+      "visualFormat": "hazard-scene",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.59
+      },
+      "subjectBounds": {
+        "x": 0.08,
+        "y": 0.34,
+        "width": 0.84,
+        "height": 0.6
+      },
+      "textSafeArea": {
+        "x": 0.055,
+        "y": 0.045,
+        "width": 0.89,
+        "height": 0.3
+      },
+      "allowedCrops": [
+        "contain",
+        "portrait"
+      ],
+      "recommendedSizes": [
+        "450×600mm"
+      ]
+    },
+    "first-aid-station": {
+      "visualFormat": "hazard-scene",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.59
+      },
+      "subjectBounds": {
+        "x": 0.08,
+        "y": 0.34,
+        "width": 0.84,
+        "height": 0.6
+      },
+      "textSafeArea": {
+        "x": 0.055,
+        "y": 0.045,
+        "width": 0.89,
+        "height": 0.3
+      },
+      "allowedCrops": [
+        "contain",
+        "portrait"
+      ],
+      "recommendedSizes": [
+        "450×600mm"
+      ]
+    },
+    "first-aid-kit": {
+      "visualFormat": "hazard-scene",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.59
+      },
+      "subjectBounds": {
+        "x": 0.08,
+        "y": 0.34,
+        "width": 0.84,
+        "height": 0.6
+      },
+      "textSafeArea": {
+        "x": 0.055,
+        "y": 0.045,
+        "width": 0.89,
+        "height": 0.3
+      },
+      "allowedCrops": [
+        "contain",
+        "portrait"
+      ],
+      "recommendedSizes": [
+        "450×600mm"
+      ]
+    },
+    "emergency-exit": {
+      "visualFormat": "hazard-scene",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.59
+      },
+      "subjectBounds": {
+        "x": 0.08,
+        "y": 0.34,
+        "width": 0.84,
+        "height": 0.6
+      },
+      "textSafeArea": {
+        "x": 0.055,
+        "y": 0.045,
+        "width": 0.89,
+        "height": 0.3
+      },
+      "allowedCrops": [
+        "contain",
+        "portrait"
+      ],
+      "recommendedSizes": [
+        "450×600mm"
+      ]
+    },
+    "aed-location": {
+      "visualFormat": "hazard-scene",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.59
+      },
+      "subjectBounds": {
+        "x": 0.08,
+        "y": 0.34,
+        "width": 0.84,
+        "height": 0.6
+      },
+      "textSafeArea": {
+        "x": 0.055,
+        "y": 0.045,
+        "width": 0.89,
+        "height": 0.3
+      },
+      "allowedCrops": [
+        "contain",
+        "portrait"
+      ],
+      "recommendedSizes": [
+        "450×600mm"
+      ]
+    },
+    "stretcher-location": {
+      "visualFormat": "hazard-scene",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.59
+      },
+      "subjectBounds": {
+        "x": 0.08,
+        "y": 0.34,
+        "width": 0.84,
+        "height": 0.6
+      },
+      "textSafeArea": {
+        "x": 0.055,
+        "y": 0.045,
+        "width": 0.89,
+        "height": 0.3
+      },
+      "allowedCrops": [
+        "contain",
+        "portrait"
+      ],
+      "recommendedSizes": [
+        "450×600mm"
+      ]
+    },
+    "fire-extinguisher-location": {
+      "visualFormat": "hazard-scene",
+      "focalPoint": {
+        "x": 0.5,
+        "y": 0.59
+      },
+      "subjectBounds": {
+        "x": 0.08,
+        "y": 0.34,
+        "width": 0.84,
+        "height": 0.6
+      },
+      "textSafeArea": {
+        "x": 0.055,
+        "y": 0.045,
+        "width": 0.89,
+        "height": 0.3
+      },
+      "allowedCrops": [
+        "contain",
+        "portrait"
+      ],
+      "recommendedSizes": [
+        "450×600mm"
+      ]
+    }
   }
 }

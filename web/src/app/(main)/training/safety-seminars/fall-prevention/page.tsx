@@ -44,7 +44,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const query = await searchParams;
   const hasQuery = Object.keys(query).length > 0;
-  const image = `${SITE_URL}/safety-images/library/originals/full-harness-illustration.png`;
+  const image = `${SITE_URL}/safety-images/library/originals/fall-restraint-required.png`;
   return {
     title: TITLE,
     description: DESCRIPTION,

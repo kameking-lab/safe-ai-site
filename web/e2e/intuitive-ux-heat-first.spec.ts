@@ -5,7 +5,7 @@ const DESKTOP_NAV = [
   ["熱中症対策", "/heat-illness-prevention"],
   ["KY用紙", "/ky/paper"],
   ["サイネージ", "/signage"],
-  ["安全画像倉庫", "/materials/safety-images"],
+  ["現場安全看板", "/materials/safety-images"],
   ["建設計算ツール", "/tools/construction-calculators"],
   ["安衛法AI", "/chatbot"],
   ["法令検索", "/law-search"],

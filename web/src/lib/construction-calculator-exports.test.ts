@@ -23,11 +23,14 @@ describe("建設計算のコピー・CSV共通正本", () => {
       if (expected === "四捨五入") continue;
       expect(copy).toContain(expected);
     }
-    expect(copy).toContain("ceil");
+    expect(copy).toContain("切上げ（+∞方向）");
     expect(csv.startsWith("\uFEFF")).toBe(true);
     expect(csv).toContain('"12.42"');
     expect(csv).toContain('"lossPercent"');
     expect(csv).toContain('"roundingMode","ceil"');
+    expect(csv).toContain('"roundingLabel","切上げ（+∞方向）"');
     expect(csv).toContain('"estimate","true"');
+    expect(copy).toContain("使用した仮定");
+    expect(csv).toContain('"section","warnings"');
   });
 });

@@ -632,7 +632,10 @@ async function buildSummary(slide, data) {
     bold: true,
     color: COLORS.white,
   });
-  const words = ["設備で防ぐ", "器具を合わせる", "救助まで準備"];
+  const words = data.visual.summaryItems;
+  if (!Array.isArray(words) || words.length !== 3) {
+    throw new Error("Summary slide requires exactly three semantic summaryItems");
+  }
   words.forEach((word, index) => {
     const top = 250 + index * 104;
     addText(slide, `summary-no-${index}`, String(index + 1).padStart(2, "0"), { left: 88, top, width: 76, height: 52 }, {
