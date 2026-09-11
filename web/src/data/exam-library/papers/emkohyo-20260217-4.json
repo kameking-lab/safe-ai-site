@@ -1,0 +1,322 @@
+[
+  {
+    "id": "emkohyo-20260217-4-q1",
+    "number": 1,
+    "text": "問 １ 次の物理量、物理定数又は単位名称ⒶとそのSI基本単位による表現Ⓑとの\n組合せのうち、誤っているものはどれか。\nⒶ Ⓑ\n１ 圧力 m-１kgs-２\n２ 気体定数 JKmol\n３ ヘルツ s-１\n４ クーロン sA\n５ オーム m２kgs-３A-２",
+    "images": [
+      "/exam-library/emkohyo-20260217-4/q1-p2-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      2
+    ],
+    "sourceQuestionNumber": 1,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-20260217-4-q2",
+    "number": 2,
+    "text": "問 ２ 捕集材に空気を流量 100 mL･min-１で 60.0 分間通気して物質 A を 50.30 µg\n捕集した。捕集材の物質Aに対する捕集効率が75％であるとき、物質Aの空\n気中濃度（µg･L-１）の数値として適切なものは次のうちどれか。\n１ 6.3\n２ 6.29\n３ 11\n４ 11.2\n５ 11.18",
+    "images": [
+      "/exam-library/emkohyo-20260217-4/q2-p2-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      2
+    ],
+    "sourceQuestionNumber": 2,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-20260217-4-q3",
+    "number": 3,
+    "text": "問 ３ 有機化合物に関する次の記述のうち、誤っているものはどれか。\n１ フェノールの水溶液は、酸性を示す。\n２ アニリンの水溶液は、アルカリ性を示す。\n３ プロピオン酸の水溶液は、酸性を示す。\n４ トルエンは水によく溶ける。\n５ アセトンは水によく溶ける。",
+    "images": [
+      "/exam-library/emkohyo-20260217-4/q3-p3-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      3
+    ],
+    "sourceQuestionNumber": 3,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-20260217-4-q4",
+    "number": 4,
+    "text": "問 ４ 容積5.0Lの密閉容器に炭素と、温度25℃で圧力1.0気圧の酸素を封入して\nから燃焼させ、酸素を全て二酸化炭素へ変換した。燃焼後の容器内の温度が25℃\nになったときの二酸化炭素が示す圧力は次のうちどれか。\nなお、炭素の体積は無視できるものとする。\n１ 0.5 気圧\n２ 1.0 気圧\n３ 1.5 気圧\n４ 2.0 気圧\n５ 2.5 気圧",
+    "images": [
+      "/exam-library/emkohyo-20260217-4/q4-p3-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      3
+    ],
+    "sourceQuestionNumber": 4,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-20260217-4-q5",
+    "number": 5,
+    "text": "問 ５ 質量パーセント濃度が 40.0％の硫酸（密度 1.30 g･cm-３）100 mLを精製水\n（密度1.00g･cm-３）で希釈し、質量パーセント濃度を 10.0 ％としたい。この\nときに必要な精製水の量として、正しい値は次のうちどれか。\n１ 195mL\n２ 300mL\n３ 390mL\n４ 420mL\n５ 442mL",
+    "images": [
+      "/exam-library/emkohyo-20260217-4/q5-p4-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      4
+    ],
+    "sourceQuestionNumber": 5,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-20260217-4-q6",
+    "number": 6,
+    "text": "問 ６ 濃度0.1mol･L-１の次の水溶液のうち、そのpHの値が最も大きいものはどれ\nか。\n１ 塩酸\n２ 硝酸\n３ 硫酸\n４ フッ化水素酸\n５ ヨウ化水素酸",
+    "images": [
+      "/exam-library/emkohyo-20260217-4/q6-p4-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      4
+    ],
+    "sourceQuestionNumber": 6,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-20260217-4-q7",
+    "number": 7,
+    "text": "問 ７ 分析に使用するガラス製体積計に関する次の記述のうち、誤っているものは\nどれか。\n１ ビュレットは最小目盛の1/10までを読みとる。\n２ ホールピペットの容量に対する許容誤差の割合は、一般に、容量が小さ\nいものの方が大きい。\n３ ホールピペットに溶液を吸引する際には、中間の膨らんだ部分を持つの\nがよい。\n４ 同じ容量のメスピペットとホールピペットでは、メスピペットの方が許\n容誤差が大きく設定されている。\n５ 洗浄後、乾燥器で加熱すると、ガラスが膨張し変形するため正しく体積\nが測定できなくなる場合がある。",
+    "images": [
+      "/exam-library/emkohyo-20260217-4/q7-p5-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      5
+    ],
+    "sourceQuestionNumber": 7,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-20260217-4-q8",
+    "number": 8,
+    "text": "問 ８ ディフュージョンチューブ（拡散セル）を用いた標準ガスの調製に関する次\nの記述のうち、誤っているものはどれか。\nだ\n１ ディフュージョンチューブは液体溜めと拡散管からできている。\n２ ディフュージョンチューブはテフロンなどのガス透過性材料でできてい\nる。\n３ 希釈空気の流量、あるいはディフュージョンチューブの温度を変えるこ\nとにより標準ガスの濃度を変えることができる。\n４ ディフュージョンチューブを用いる際は、チューブ全体を一定の温度に\n保つ。\n５ ディフュージョンチューブの一方の端は解放した状態で使用する。",
+    "images": [
+      "/exam-library/emkohyo-20260217-4/q8-p5-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      5
+    ],
+    "sourceQuestionNumber": 8,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-20260217-4-q9",
+    "number": 9,
+    "text": "問 ９ 精製水の製造に関する次の記述のうち、誤っているものはどれか。\n１ 金属製やガラス製の蒸留水製造装置からは、イオンの溶出がある。\n２ ろ過に用いるメンブランフィルターは、孔径0.1～0.2µmのものを用い\nる。\n３ 逆浸透法では、原料水中の不純物のイオンを除去できる。\n４ 逆浸透法における加圧は、原料水の浸透圧を超えてはならない。\n５ イオン交換法では、中性の有機成分を除くことはできない。",
+    "images": [
+      "/exam-library/emkohyo-20260217-4/q9-p6-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      6
+    ],
+    "sourceQuestionNumber": 9,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-20260217-4-q10",
+    "number": 10,
+    "text": "問１０ シアン化水素の検知管は、シアン化水素が塩化水銀（Ⅱ）と反応して生成する\n物質によるpH指示薬の変色を利用して濃度を測定する。共存すると、変色の\n長さが短くなる物質は次のうちどれか。\n１ 二酸化窒素\n２ アンモニア\n３ 硝酸\n４ フッ化水素\n５ 塩化水素",
+    "images": [
+      "/exam-library/emkohyo-20260217-4/q10-p6-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      6
+    ],
+    "sourceQuestionNumber": 10,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-20260217-4-q11",
+    "number": 11,
+    "text": "問１１ 濃度1.0×10-２mol･L-１の塩酸10mLと濃度3.0×10-２mol･L-１の水酸化ナ\nトリウム水溶液10mLとを混合した溶液の水素イオン濃度として、正しい値は\n次のうちどれか。\nただし、水のイオン積は1.0×10-14mol２･L-２とする。\n１ 1.0 × 10-５ mol･L-１\n２ 1.0 × 10-７ mol･L-１\n３ 1.0 × 10-９ mol･L-１\n４ 1.0 × 10-12 mol･L-１\n５ 1.0 × 10-16 mol･L-１",
+    "images": [
+      "/exam-library/emkohyo-20260217-4/q11-p7-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      7
+    ],
+    "sourceQuestionNumber": 11,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-20260217-4-q12",
+    "number": 12,
+    "text": "問１２ 容量分析に用いる試薬に関する次の記述のうち、誤っているものはどれか。\n１ 硫酸溶液の標定には、炭酸ナトリウムが用いられる。\n２ 水酸化ナトリウム溶液の標定には、アミド硫酸（スルファミン酸）が用\nいられる。\n３ 硝酸銀溶液の標定には、塩化ナトリウムが用いられる。\n４ エチレンジアミン四酢酸二ナトリウム溶液の標定には、チオ硫酸ナトリ\nウムが用いられる。\n５ 標定に用いる反応は、平衡定数が大きく、反応速度が大きいことが必要\nである。",
+    "images": [
+      "/exam-library/emkohyo-20260217-4/q12-p7-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      7
+    ],
+    "sourceQuestionNumber": 12,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-20260217-4-q13",
+    "number": 13,
+    "text": "問１３ 吸光光度分析法に関する次の記述のうち、誤っているものはどれか。\n１ 透過率（透過光の強さ / 入射光の強さ）の逆数の対数が吸光度である。\n２ 透過率は、光路の長さに反比例する。\n３ 吸光度は、測定対象物質の濃度に比例する。\n４ 測定対象物質の濃度の異なる溶液の吸光度を測定して、検量線を作成す\nる。\n５ 定量分析は、検量線の直線範囲内で行う。",
+    "images": [
+      "/exam-library/emkohyo-20260217-4/q13-p8-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      8
+    ],
+    "sourceQuestionNumber": 13,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-20260217-4-q14",
+    "number": 14,
+    "text": "問１４ モル質量が50g･mol-１の物質Aの溶液が100mL ある。この溶液の一部を光\n路長2.0cmの試料セルに入れ、波長550nmにおける吸光度を測定したところ、\n0.480であった。この溶液100mL中に含まれる物質Aの質量として、正しい値\nは次のうちどれか。\nただし、この溶液中で、物質Aの550nmにおけるモル吸光係数は2.0×10４\nmol-１･L･cm-１である。\n１ 30 µg\n２ 60 µg\n３ 90 µg\n４ 120 µg\n５ 150 µg",
+    "images": [
+      "/exam-library/emkohyo-20260217-4/q14-p8-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      8
+    ],
+    "sourceQuestionNumber": 14,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-20260217-4-q15",
+    "number": 15,
+    "text": "問１５ 原子吸光分析法に関する次の記述のうち、誤っているものはどれか。\n１ フレーム法では、一般に、アセチレンを燃料ガスとし空気を助燃ガスと\nした化学炎が目的元素の原子化に用いられる。\n２ フレーム法では、吸引して噴霧された試料溶液のうち数％から10％程度\nがフレームに送られる。\n３ グラファイト炉法では、試料導入の後、炉の温度を100℃程度の乾燥、\n500～600℃の灰化と段階的に上昇させてから1000～3000℃で原子化を行う。\n４ グラファイト炉法で共存元素による化学干渉の影響を受けるときは、重\n水素ランプを用いたバックグラウンド補正が行われる。\n５ 還元気化法では、水銀イオンを塩化スズ（Ⅱ）などの還元剤で還元して水\n銀の原子化を行う。",
+    "images": [
+      "/exam-library/emkohyo-20260217-4/q15-p9-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      9
+    ],
+    "sourceQuestionNumber": 15,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-20260217-4-q16",
+    "number": 16,
+    "text": "問１６ 図はある分子のエネルギー準位の模式図で、ⒶⒷⒸで示した矢印は状態の遷\n移方向を示している。それぞれの遷移過程の名称として、適切なものの組合せ\nは次のうちどれか。\n電子励起状態\n電子励起状態 （一重項）\n（三重項）\n振動\n振動 準位\n準位\n一重項 振動\n振動 ❘ 緩和\n三重項遷移\n緩和\nⒶ Ⓑ Ⓒ\n振動\n準位\n電子基底状態\n（一重項）\nⒶ Ⓑ Ⓒ\n１ 吸光 蛍光 りん光\n２ 蛍光 吸光 りん光\n３ 蛍光 りん光 吸光\n４ りん光 吸光 蛍光\n５ りん光 蛍光 吸光",
+    "images": [
+      "/exam-library/emkohyo-20260217-4/q16-p10-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      10
+    ],
+    "sourceQuestionNumber": 16,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-20260217-4-q17",
+    "number": 17,
+    "text": "問１７ ガスクロマトグラフ分析法に関する次の記述のうち、誤っているものはどれ\nか。\n１ カラム温度が高いほど、ピークの分離度は小さくなる。\n２ カラム温度が高いほど、保持時間は短くなる。\n３ カラム温度が高いほど、キャリヤーガスの粘度は小さくなる。\n４ 試料気化室の温度は、通常、カラム温度よりも高めに設定される。\n５ 検出器の温度は、通常、カラム温度よりも高めに設定される。",
+    "images": [
+      "/exam-library/emkohyo-20260217-4/q17-p11-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      11
+    ],
+    "sourceQuestionNumber": 17,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-20260217-4-q18",
+    "number": 18,
+    "text": "問１８ ガスクロマトグラフ分析に用いられる検出器Ⓐと分析対象物質Ⓑとの次の組\n合せのうち、不適切なものはどれか。\nⒶ Ⓑ\n１ 水素炎イオン化検出器（FID） 不飽和炭化水素化合物\n２ 炎光光度検出器（FPD） 有機硫黄化合物\n３ 電子捕獲検出器（ECD） 有機ハロゲン化合物\n４ 光イオン化検出器（PID） 芳香族炭化水素化合物\n５ 熱イオン化検出器（TID、FTD） 飽和炭化水素化合物",
+    "images": [
+      "/exam-library/emkohyo-20260217-4/q18-p11-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      11
+    ],
+    "sourceQuestionNumber": 18,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-20260217-4-q19",
+    "number": 19,
+    "text": "問１９ 作業環境測定におけるX線回折分析法に関する次の記述のうち、誤っている\nものはどれか。\n１ 定性分析の試料には、乳鉢ですり潰した粉末などが用いられる。\n２ 結晶物質の定量は、回折線の強度測定で行う。\n３ X線検出器は、X線のスペクトル分析ができるものでなければならない。\n４ 内標準物質を混合することで、試料の質量吸収係数の影響をなくして定\n量を行うことができる。\n５ 定量成分と同一の純物質を既知量添加して、その回折線強度の増加分と\n元の回折線強度から定量を行うことができる。",
+    "images": [
+      "/exam-library/emkohyo-20260217-4/q19-p12-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      12
+    ],
+    "sourceQuestionNumber": 19,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-20260217-4-q20",
+    "number": 20,
+    "text": "問２０ 放射能の単位（Bq）の定義として正しいものは、次のうちどれか。\n１ 単位質量当たりの壊変数\n２ 単位質量当たりの放射線の数\n３ 単位時間当たりの壊変数\n４ 単位時間当たりの放射線の数\n５ 単位時間当たりの被ばく線量\n（終 り）",
+    "images": [
+      "/exam-library/emkohyo-20260217-4/q20-p12-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      12
+    ],
+    "sourceQuestionNumber": 20,
+    "extractionStatus": "complete"
+  }
+]

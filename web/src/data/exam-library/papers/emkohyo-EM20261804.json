@@ -1,0 +1,322 @@
+[
+  {
+    "id": "emkohyo-EM20261804-q1",
+    "number": 1,
+    "text": "問 １ 物理量又は物理定数Ⓐとその単位記号Ⓑとの次の組合せのうち、誤っている\nものはどれか。\nⒶ Ⓑ\n１ 絶対温度 K\n２ アボガドロ定数 mol-１\n３ 圧力 mkg s-２\n４ エネルギー m２kg s-２\n５ 電荷 s A",
+    "images": [
+      "/exam-library/emkohyo-EM20261804/q1-p2-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      2
+    ],
+    "sourceQuestionNumber": 1,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261804-q2",
+    "number": 2,
+    "text": "問 ２ 分析値とそのばらつきに関する次の記述の㋑及び㋺の に入る式の組合\nせとして、正しいものは下のうちどれか。\n「n 回の分析で分析値 x\n１\n,x\n２\n,x\n３\n,\n…\n,x\nn\nを得た時、その平均値を x とする\nと、分析値のばらつきの程度は ㋑ （分散）で表され、その母集団のばら\nつきの程度は ㋺ で表される不偏分散を用いる。」\n㋑ ㋺\nΣn (x -x)2 Σn-1 (x -x)2\n１ i= 1 i i =1 i\nn -１ n\n２ Σ n i =1 ( x i - x ) Σ n i =1 ( x i + x )2\nn -１ n\nΣn (x -x)2 Σn-1 (x -x)\n３ i= 1 i i= 1 i\nn n -１\n４ Σ n i= 1 ( x i - x ) 2 Σ n i =1 ( x i - x )\nn n -１\nΣn (x -x)2 Σn (x -x)2\n５ i= 1 i i= 1 i\nn n -１",
+    "images": [
+      "/exam-library/emkohyo-EM20261804/q2-p3-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      3
+    ],
+    "sourceQuestionNumber": 2,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261804-q3",
+    "number": 3,
+    "text": "問 ３ 有機化合物Ⓐとその化合物がもつ官能基Ⓑとの次の組合せのうち、誤ってい\nるものはどれか。\nⒶ Ⓑ\n１ アニリン -NH\n２\n２ アセトニトリル -CN\n３ トルエン -CH\n３\n４ アセトン -CHO\n５ ジエチルエーテル -O-",
+    "images": [
+      "/exam-library/emkohyo-EM20261804/q3-p4-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      4
+    ],
+    "sourceQuestionNumber": 3,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261804-q4",
+    "number": 4,
+    "text": "問 ４ 液体の純物質 2.3 g を 1.23 L の真空容器に入れて加熱すると完全に気化し、\n温度が 97 ℃ になったときに圧力が 1.0 気圧になった。この物質の分子量とし\nて、正しい値に最も近いものは次のうちどれか。\nなお、気体定数は 0.082 atm･ L･K-１･ mol-１とする。\n１ 20\n２ 23\n３ 46\n４ 57\n５ 69",
+    "images": [
+      "/exam-library/emkohyo-EM20261804/q4-p4-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      4
+    ],
+    "sourceQuestionNumber": 4,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261804-q5",
+    "number": 5,
+    "text": "問 ５ 0.5 mol･L-１の水酸化ナトリウム溶液の質量パーセント濃度として、正しい値\nは次のうちどれか。\nただし、水酸化ナトリウムのモル質量を 40.0 g･mol-１とし、この溶液の密度\nは 1.0 g･cm-３ とする。\n１ 0.5 ％\n２ 2 ％\n３ 5 ％\n４ 20 ％\n５ 40 ％",
+    "images": [
+      "/exam-library/emkohyo-EM20261804/q5-p5-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      5
+    ],
+    "sourceQuestionNumber": 5,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261804-q6",
+    "number": 6,
+    "text": "問 ６ 水素 H 1.0 molと臭素 Br 1.0 molを 10 L の容器に入れて、一定温度に保っ\n２ ２\nたところ、次の反応により、臭化水素 H Brが 1.2 mol 生成して平衡状態となっ\nた。\nH + Br 2H Br\n２ ２\nこの反応の平衡定数として、正しい値は次のうちどれか。\n１ 3\n２ 6\n３ 9\n４ 12\n５ 15",
+    "images": [
+      "/exam-library/emkohyo-EM20261804/q6-p5-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      5
+    ],
+    "sourceQuestionNumber": 6,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261804-q7",
+    "number": 7,
+    "text": "問 ７ 図に示すガラス製体積計のうち、ビュレットはどれか。\n１ ２ ３\n４ ５",
+    "images": [
+      "/exam-library/emkohyo-EM20261804/q7-p6-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      6
+    ],
+    "sourceQuestionNumber": 7,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261804-q8",
+    "number": 8,
+    "text": "問 ８ 拡散セルを用いた有機溶剤の標準ガス発生に関する次の記述のうち、誤って\nいるものはどれか。\n１ 拡散チューブの内径が大きいほど濃度が高くなる。\nひょう\n２ 有機溶剤量をセルごと秤量し、蒸発量を求めることにより濃度を計算で\nきる。\n３ 拡散速度は、温度が高いほど大きくなる。\n４ 飽和蒸気圧が同じなら、異なる物質でも濃度が等しくなる。\n５ 拡散チューブの有効長が長いほど濃度が低くなる。",
+    "images": [
+      "/exam-library/emkohyo-EM20261804/q8-p6-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      6
+    ],
+    "sourceQuestionNumber": 8,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261804-q9",
+    "number": 9,
+    "text": "問 ９ 化学物質Ⓐとその使用例Ⓑとの次の組合せのうち、誤っているものはどれか。\nⒶ Ⓑ\n１ フェノールフタレイン pH指示薬\n２ メチルイソブチルケトン キレート滴定\n３ 活性炭 有機溶剤の捕集\n４ 二硫化炭素 有機溶剤の脱着\n５ 重水素化トルエン-d GC/MS分析の内標準\n８",
+    "images": [
+      "/exam-library/emkohyo-EM20261804/q9-p7-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      7
+    ],
+    "sourceQuestionNumber": 9,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261804-q10",
+    "number": 10,
+    "text": "問１０ 検知管に関する次の記述のうち、誤っているものはどれか。\n１ 検知管は、通常20℃で校正されており、使用温度と検知管の種類によっ\nては温度補正が必要なことがある。\n２ 検知剤の変色層の長さは、担体粒子径の影響を受ける。\n３ 検知剤は、対象ガス以外の物質とは反応しない。\n４ 変色層が斜めに現れたときは、変色した部分の最先端と斜めに変色が生\nじ始めた点との中央値を読み取る。\n５ 検知管は冷凍保存してはならない。",
+    "images": [
+      "/exam-library/emkohyo-EM20261804/q10-p7-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      7
+    ],
+    "sourceQuestionNumber": 10,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261804-q11",
+    "number": 11,
+    "text": "問１１ 硫酸銅五水和物（CuSO ･5H O ）を水に溶解して、硫酸銅の濃度 2.00 ×10-４\n４ ２\nmol･L-１ の水溶液を調製した。この水溶液 5.00 mL に含まれる銅の質量（mg）\nとして、正しい値は次のうちどれか。\nただし、水素、酸素、硫黄、銅の原子量はそれぞれ、1.0、16.0、32.1、 63.5\nとする。\n１ 6.35×10-３ mg\n２ 1.60×10-２ mg\n３ 2.50×10-２ mg\n４ 6.35×10-２ mg\n５ 1.60×10-１ mg",
+    "images": [
+      "/exam-library/emkohyo-EM20261804/q11-p8-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      8
+    ],
+    "sourceQuestionNumber": 11,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261804-q12",
+    "number": 12,
+    "text": "問１２ エチレン（C H ）とエタン（C H ）の燃焼に関する次の記述のうち、誤って\n２ ４ ２ ６\nいるものはどれか。\n１ エチレンの完全燃焼に必要な酸素の物質量は、エチレンの物質量の３倍\nである。\n２ エタンの完全燃焼に必要な酸素の物質量は、エタンの物質量の５倍であ\nる。\n３ エチレンの完全燃焼で生成する二酸化炭素と水の物質量は等しい。\n４ エタンの完全燃焼で生成する二酸化炭素の物質量は、エタンの物質量の\n２倍である。\n５ エタンの完全燃焼で生成する水の物質量は、エタンの物質量の３倍であ\nる。",
+    "images": [
+      "/exam-library/emkohyo-EM20261804/q12-p8-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      8
+    ],
+    "sourceQuestionNumber": 12,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261804-q13",
+    "number": 13,
+    "text": "問１３ 可視光を用いた吸光光度分析法に関する次の記述のうち、誤っているものは\nどれか。\n１ 光源にタングステンランプを用いる。\n２ 石英セルを用いることができる。\n３ 検出器には、一般に、光電子増倍管が用いられる。\n４ 吸光度の測定波長の光の色は、その試料溶液の色とは異なる。\n５ モル吸光係数の単位は、mol･L-１･cm で表される。",
+    "images": [
+      "/exam-library/emkohyo-EM20261804/q13-p9-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      9
+    ],
+    "sourceQuestionNumber": 13,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261804-q14",
+    "number": 14,
+    "text": "問１４ 物質 A の濃度が 2.0 × 10-５ mol･L-１ の溶液に、波長 550 nm の光を当てた\nところ、透過率は 50 ％ であった。同様の方法で、物質Aの濃度が 1.0 × 10-５\nmol･L-１の溶液に、波長 550 nm の光を当てたとき、その透過率に最も近い値\nは次のうちどれか。\n１ 80％\n２ 70％\n３ 60％\n４ 40％\n５ 30％",
+    "images": [
+      "/exam-library/emkohyo-EM20261804/q14-p9-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      9
+    ],
+    "sourceQuestionNumber": 14,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261804-q15",
+    "number": 15,
+    "text": "問１５ 原子吸光分析法に関する次の記述のうち、誤っているものはどれか。\n１ 中空陰極ランプは、光源として用いられる。\n２ 重水素ランプは、バックグラウンド吸収の補正に用いられる。\n３ フレーム法における目的原子の原子蒸気は、ほとんどが基底状態にある。\n４ グラファイト炉法では、炉に通電することで生じるジュール熱で原子化\nを行う。\n５ 吸光度は、原子の原子番号に比例する。",
+    "images": [
+      "/exam-library/emkohyo-EM20261804/q15-p10-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      10
+    ],
+    "sourceQuestionNumber": 15,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261804-q16",
+    "number": 16,
+    "text": "問１６ 蛍光光度分析法に関する次の記述のうち、誤っているものはどれか。\n１ 蛍光の波長は、励起光よりも長い。\n２ 蛍光の強度は、励起光の波長が長いほど強くなる。\n３ 蛍光の強度は、励起光の強度に比例する。\n４ 蛍光の強度は、試料濃度に比例する。\n５ 蛍光の強度は、溶存酸素の影響を受けることがある。",
+    "images": [
+      "/exam-library/emkohyo-EM20261804/q16-p10-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      10
+    ],
+    "sourceQuestionNumber": 16,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261804-q17",
+    "number": 17,
+    "text": "問１７ ガスクロマトグラフ分析法に用いられる検出器に関する次の記述のうち、誤\nっているものはどれか。\n１ 水素炎イオン化検出器（FID）では、水素炎中で試料がイオン化される。\n２ 電子捕獲検出器（ECD）では、β線照射で生じた二次電子が測定対象化\n合物に捕獲されることを利用する。\n３ 光イオン化検出器（PID）では、グロー放電で放射される紫外線で試料\nがイオン化される。\n４ 炎光光度検出器（FPD）では、水素炎中で臭素又は塩素に特有な発光を\n利用する。\n５ 熱イオン化検出器 （TID、FTD） では、窒素やリンを含む化合物の一\n部が熱イオン化し、増加するイオン電流の値を利用する。",
+    "images": [
+      "/exam-library/emkohyo-EM20261804/q17-p11-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      11
+    ],
+    "sourceQuestionNumber": 17,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261804-q18",
+    "number": 18,
+    "text": "問１８ キャピラリーガスクロマトグラフ分析法に関する次の記述のうち、誤ってい\nるものはどれか。\n１ キャリヤーガスの流速には、最適値がある。\n２ カラムの内径が小さいほど、理論段数は大きくなる。\n３ カラムの長さが長いほど、理論段相当高さは大きくなる。\n４ 極性液相を用いると、極性官能基を有する化合物の保持時間は大きくな\nる。\n５ 無極性液相を用いると、飽和炭化水素化合物は、ほぼ炭素数が少ないも\nのから順に溶出する。",
+    "images": [
+      "/exam-library/emkohyo-EM20261804/q18-p11-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      11
+    ],
+    "sourceQuestionNumber": 18,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261804-q19",
+    "number": 19,
+    "text": "問１９ 作業環境測定におけるＸ線回折分析法に関する次の記述のうち、誤っている\nものはどれか。\n１ 特性Ｘ線が用いられる。\n２ 回折線の強度により測定物質の定量を行う。\n３ 回折角により測定物質の同定を行う。\n４ 測定試料は、一般に粒径が0.1mm～1mmの粉末が適当である。\n５ 測定試料の捕集量が多い場合は、その質量に見合ったＸ線の吸収の補正\nをする必要がある。",
+    "images": [
+      "/exam-library/emkohyo-EM20261804/q19-p12-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      12
+    ],
+    "sourceQuestionNumber": 19,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261804-q20",
+    "number": 20,
+    "text": "問２０ 放射能に関する次の記述のうち、誤っているものはどれか。\n１ 放射能は時間経過とともに、指数関数的に減衰する。\n２ 放射性核種の壊変速度は、核種により異なる。\n３ 放射性核種の壊変速度は、温度が高いほど大きくなる。\n４ 放射性核種の半減期が長いほど、壊変速度は小さい。\n５ 半減期の10倍の時間が経過すると、放射能は約 0.1 ％ まで減衰する。\n（終 り）",
+    "images": [
+      "/exam-library/emkohyo-EM20261804/q20-p12-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      12
+    ],
+    "sourceQuestionNumber": 20,
+    "extractionStatus": "complete"
+  }
+]

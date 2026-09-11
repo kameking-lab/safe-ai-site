@@ -1,0 +1,322 @@
+[
+  {
+    "id": "emkohyo-EM20251806-q1",
+    "number": 1,
+    "text": "問 １ 次の記述の㋑及び㋺の に入る語句の組合せとして、誤っているもの\nは下のうちどれか。\nただし、粒子の密度は空気の密度より十分大きいものとする。\n「 粒径 ５ µm程度の球形粒子が空気中を落下する際の終末速度は、 ㋑\nに ㋺ する。」\n㋑ ㋺\n１ 粒子の直径の二乗 比例\n２ 粒子の密度 比例\n３ 空気の密度の逆数 反比例\n４ 重力加速度の逆数 反比例\n５ 空気の粘性係数 反比例",
+    "images": [
+      "/exam-library/emkohyo-EM20251806/q1-p2-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      2
+    ],
+    "sourceQuestionNumber": 1,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251806-q2",
+    "number": 2,
+    "text": "問 ２ 空気中の粒子の挙動に関する次の記述のうち、誤っているものはどれか。\n１ ブラウン運動している粒子の拡散係数は、絶対温度に比例する。\n２ 空気中でブラウン運動する粒子の個数濃度が半減するのに要する時間は、\n初期濃度が 10倍になれば約 10倍となる。\n３ 平衡帯電状態では粒子が大きいほど１個当たりの平均帯電量は多い。\n４ 電界中での帯電している粒子の移動速度は、粒径が小さいほど大きい。\n５ 遠心力場における粒子の移動速度は、角速度の二乗に比例する。",
+    "images": [
+      "/exam-library/emkohyo-EM20251806/q2-p2-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      2
+    ],
+    "sourceQuestionNumber": 2,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251806-q3",
+    "number": 3,
+    "text": "問 ３ 密度 2.5g・cm-３、粒径 4.0µmの球形粒子の水中における自由落下の終末速\n度を測定して 8.7× 10-４ cm・s-１ を得た。このときの水の粘性係数として、正\nしい値に最も近いものは次のうちどれか。\nただし、粒子の終末速度はストークスの式に従い、また、水の密度は1.0 g・\ncm-３とする。\n１ 1.5 × 10-４ g・cm-１・s-１\n２ 2.5 × 10-４ g・cm-１・s-１\n３ 2.0 × 10-３ g・cm-１・s-１\n４ 1.5 × 10-２ g・cm-１・s-１\n５ 2.5 × 10-２ g・cm-１・s-１",
+    "images": [
+      "/exam-library/emkohyo-EM20251806/q3-p3-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      3
+    ],
+    "sourceQuestionNumber": 3,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251806-q4",
+    "number": 4,
+    "text": "問 ４ 吸入性粉じん濃度の測定に用いられる分粒装置に関する次の記述のうち、誤\nっているものはどれか。\n１ 分粒装置としては、多段平行板式分粒装置（重力沈降）か慣性衝突式分\n粒装置（慣性衝突）のいずれかを選択しなければならない。\n２ 多段平行板式分粒装置を構成する平行板の一部を何らかの理由で欠損し\nた状態で使用したときは、分粒装置を通過する粒子の50％分粒粒径は大き\nくなる。\n３ 多段平行板式分粒装置の吸引流量を所定の流量より大きくすると、分粒\n装置を通過する粒子の 50％ 分粒粒径は大きくなる。\n４ 慣性衝突式分粒装置の吸引流量を所定の流量より大きくすると、分粒装\n置を通過する粒子の 50％ 分粒粒径は小さくなる。\n５ 慣性衝突式分粒装置では、分粒装置の衝突板に付着する粉じんが多くな\nると、分粒装置を通過する粒子の粒径は大きい方へ移行する。",
+    "images": [
+      "/exam-library/emkohyo-EM20251806/q4-p3-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      3
+    ],
+    "sourceQuestionNumber": 4,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251806-q5",
+    "number": 5,
+    "text": "問 ５ 粉じんのろ過捕集に関する次の記述のうち、誤っているものはどれか。\n１ グラスファイバーフィルターは、メンブランフィルターに比べ空間率が\n大きい。\n２ ろ過材を通して空気を吸引した場合におけるろ過材の圧力損失は、流速\nにほぼ比例する。\n３ ろ過捕集に使用できるろ過材は、粒径 0.3 µm の粒子を 95％以上捕集\nする性能を有するものに限られる。\n４ フッ素樹脂加工グラスファイバーフィルターは、加湿空気を通してもほ\nとんど吸湿しない。\n５ 多段平行板式分粒装置の 50％ 分粒粒径は、流量に比例する。",
+    "images": [
+      "/exam-library/emkohyo-EM20251806/q5-p4-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      4
+    ],
+    "sourceQuestionNumber": 5,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251806-q6",
+    "number": 6,
+    "text": "問 ６ 繊維状フィルターによる粉じんの捕集原理に関する次の記述のうち、誤って\nいるものはどれか。\n１ 慣性効果による捕集効率は、ろ過速度が小さいほど低くなる。\n２ 重力効果による捕集効率は、ろ過速度が小さいほど高くなる。\n３ さえぎり効果による捕集効率は、粒径が小さいほど低くなる。\n４ 拡散効果による捕集効率は、粒径が大きいほど高くなる。\n５ 捕集効率は、粒径 0.1～ 0.3µmの付近で最も低くなる。",
+    "images": [
+      "/exam-library/emkohyo-EM20251806/q6-p4-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      4
+    ],
+    "sourceQuestionNumber": 6,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251806-q7",
+    "number": 7,
+    "text": "問 ７ 粉じんのろ過捕集で用いられる流量計に関する次の記述のうち、誤っている\nものはどれか。\n１ 面積式流量計は、テーパー管と管内の浮子（フロート）との間隙の面積\nと、そこを流れる試料空気の体積流量が比例することを利用した流量計で\nある。\n２ ローボリウムエアサンプラーに用いる流量計の校正に用いる湿式ガスメ\nーターは、押し込み方式では使用しない。\n３ 絞り式流量計は、管内の絞り部分の上流側と下流側の圧力差が流量の二\n乗に比例することを利用した流量計である。\n４ 絞り式流量計には、差圧を発生させる絞りとして、管路中にオリフィス\n板やベンチュリー管が設けられているものがある。\n５ 20L･min-１の流量で空気（ 25℃）を吸引する場合において、捕集装置\nの圧力損失が 25kPaのとき、組み込まれた面積式流量計の指示値は約\n23L･min-１となる。",
+    "images": [
+      "/exam-library/emkohyo-EM20251806/q7-p5-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      5
+    ],
+    "sourceQuestionNumber": 7,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251806-q8",
+    "number": 8,
+    "text": "問 ８ 光散乱方式の相対濃度計の特性等に関する次の記述のうち、誤っているもの\nはどれか。\n１ 粒子の粒径が一定であっても、粉じんの種類が異なると相対濃度の値が\n同じになるとは限らない。\n２ 同じ組成、同じ質量濃度の粉じんの場合、粒径 1µmの粒子の方が10 µm\nの粒子より相対濃度の値が大きい。\n３ 数 µmの粒径の粒子による散乱光強度は、全方向においてほぼ一定であ\nる。\n４ 0.1 µmより小さい粒子をほとんど検知しない。\n５ 粒子による散乱光の強度は、粒子の屈折率によって異なる。",
+    "images": [
+      "/exam-library/emkohyo-EM20251806/q8-p5-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      5
+    ],
+    "sourceQuestionNumber": 8,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251806-q9",
+    "number": 9,
+    "text": "問 ９ 光散乱方式の相対濃度計に関する次の記述のうち、誤っているものはどれか。\n１ 相対濃度計に付属する質量濃度変換係数は、平均粒径0.3µmのステアリ\nン酸粒子で値付けられたものである。\n２ 質量濃度変換係数は、同一物質の場合、粒径が大きくなるほど大きくな\nる。\n３ 粉じんの質量濃度が同じであっても、粒度分布が異なると相対濃度計の\n測定値は同じにならない。\n４ 質量濃度変換係数は、併行測定によって得られた質量濃度を相対濃度で\n除した値である。\n５ 研磨作業場での質量濃度変換係数は、発生源の近くでは小さく、発生源\nから離れると大きくなる傾向がある。",
+    "images": [
+      "/exam-library/emkohyo-EM20251806/q9-p6-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      6
+    ],
+    "sourceQuestionNumber": 9,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251806-q10",
+    "number": 10,
+    "text": "問１０ 空気調和されている室内に設置されている電子天秤を用いた試料の秤量操作\n等に関する次の記述のうち、誤っているものはどれか。\n１ 粉じん濃度の測定には、読み取り限度 0.01 mg 以下の天秤を使用する。\n２ 天秤の水平が保たれていない状態で秤量すると、秤量値は真値より小さ\nくなる。\n３ 周囲温度より温度の高い試料を秤量すると、秤量値は真値より小さくな\nる。\n４ フィルターは、秤量直前にすばやく乾燥剤入り密閉容器等から取り出し、\n直ちに秤量を行うとよい。\n５ 捕集前のフィルターの秤量値は、同一の手順で秤量を繰り返し、連続し\nた２回の秤量値が同一となったときの値を採用する。",
+    "images": [
+      "/exam-library/emkohyo-EM20251806/q10-p6-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      6
+    ],
+    "sourceQuestionNumber": 10,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251806-q11",
+    "number": 11,
+    "text": "問１１ 遊離けい酸含有率の測定に用いる試料の採取や処理に関する次の記述のうち、\n誤っているものはどれか。\n１ 浮遊粉じんの採取には、分粒装置付きエアサンプラーが用いられる。\n２ 浮遊粉じんの採取の際の採取量の目安を得るためには、あらかじめ流量\n計の指示値と粉じんの採取量との関係を求めておくとよい。\n３ 浮遊粉じんを採取した試料は、X線回折分析法の分析用試料として用い\nられる。\n４ 堆積粉じんは、単位作業場所内の腰より高い位置に堆積しているものを\n採取する。\n５ 堆積粉じんを採取した試料は、粒度調整を行った上で、X線回折分析法\n又はりん酸法の分析用試料として用いられる。",
+    "images": [
+      "/exam-library/emkohyo-EM20251806/q11-p7-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      7
+    ],
+    "sourceQuestionNumber": 11,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251806-q12",
+    "number": 12,
+    "text": "問１２ 遊離けい酸の分析に用いる粒子の再発じん法に関する次の記述のうち、誤っ\nているものはどれか。\n１ 再発じん法に用いる試料は、採取した堆積粉じんを目開き 75µm程度の\nふるいを通し、乾燥させたものを用いる。\n２ 再発じん装置として、ビニール袋を用いる場合には、分粒装置として慣\n性衝突式のものを用いるとよい。\n３ フィルターは、粉じん採取量が多くなると変形しやすいので、２枚重ね\nにして用いるとよい。\n４ 粉じんの採取は、再発じん装置で発じんさせたら直ちに開始する。\n５ フィルターの粉じん採取量は、フィルター１cm２ あたり約１mgを目安\nとするとよい。",
+    "images": [
+      "/exam-library/emkohyo-EM20251806/q12-p7-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      7
+    ],
+    "sourceQuestionNumber": 12,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251806-q13",
+    "number": 13,
+    "text": "問１３ 王水添加りん酸法による遊離けい酸の分析に関する次の記述のうち、誤って\nいるものはどれか。\n１ クリストバライトが含まれる試料をりん酸法で測定すると、遊離けい酸\n含有率は、真の値より低く評価されるので、りん酸法を用いることは適当\nではない。\n２ 最適加熱条件として、リン酸の温度は 250～ 300℃、加熱時間は 11～13\n分間の範囲にあることが重要である。\n３ 微斜長石及び石英の両方の最適加熱条件を満足する加熱時間が複数存在\nする場合は、その中で最も短い時間で試料の処理を行う。\nさ\n４ 最適加熱条件は、微斜長石のりん酸残渣率が 1％ 以下で、かつ、石英の\nりん酸残渣率が 90％ 以上になるように決める。\n５ フッ化水素酸処理の最適加熱条件は、白金るつぼに40mgの石英と5 mL\nのフッ化水素酸を入れて、ふっ化水素酸残渣率が1％以下になるように決\nめる。",
+    "images": [
+      "/exam-library/emkohyo-EM20251806/q13-p8-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      8
+    ],
+    "sourceQuestionNumber": 13,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251806-q14",
+    "number": 14,
+    "text": "問１４ 王水添加りん酸法による遊離けい酸の分析において、次の㋑から㋭までの試\n薬のうち、使用しないもののみの組合せは下のうちどれか。\n㋑ 塩酸\n㋺ メタリン酸\n㋩ 酢酸\n㋥ 硫酸\n㋭ ホウフッ化水素酸\n１ ㋑ ㋺\n２ ㋑ ㋭\n３ ㋺ ㋩\n４ ㋩ ㋥\n５ ㋥ ㋭",
+    "images": [
+      "/exam-library/emkohyo-EM20251806/q14-p8-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      8
+    ],
+    "sourceQuestionNumber": 14,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251806-q15",
+    "number": 15,
+    "text": "問１５ 王水添加りん酸法により、石英含有率を求めるため、液相沈降法により10µm\nさ\n以下に粒度調整した試料200.00 mgを王水及び熱リン酸で処理し、りん酸残渣\nとして 45.25mgを得た。\nこのりん酸残渣を白金るつぼに移し、フッ化水素酸で処理したところ、ふっ\n化水素酸残渣 0.75mgが得られた。この試料の石英含有率（％）として、正しい\n値に最も近いものは次のうちどれか。\nただし、標準石英について求めたりん酸残渣率は95.0％であったものとする。\n１ 21.1\n２ 22.3\n３ 23.0\n４ 23.4\n５ 24.2",
+    "images": [
+      "/exam-library/emkohyo-EM20251806/q15-p9-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      9
+    ],
+    "sourceQuestionNumber": 15,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251806-q16",
+    "number": 16,
+    "text": "問１６ 遊離けい酸のX線回折分析法に関する次の記述のうち、誤っているものはど\nれか。\n１ K 線とは、L殻の電子が K殻に落ち込んだ際に放出される特性X線のこ\nα\nとをいい、原子番号が大きくなるほど波長が短くなる。\n２ 対陰極がCuの場合のX線の単色化には、原子番号が１小さい Niが用い\nられる。\n３ モノクロメーターにより単色化した回折X線の強度は、K 線除去フィル\nβ\nターによる場合よりも強い。\n４ クリストバライトの主回折線の回折角度（2θ）は、対陰極が Cuの X線\n管球を用いて分析した場合、22.0°に出現する。\n５ 石英の主回折線に近接する回折線をもつ鉱物には、シリマナイトやグラ\nファイトなどがある。",
+    "images": [
+      "/exam-library/emkohyo-EM20251806/q16-p9-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      9
+    ],
+    "sourceQuestionNumber": 16,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251806-q17",
+    "number": 17,
+    "text": "問１７ CuのK 線を用いてX線回折分析を行った。得られた回折線の回折角度（2θ）\nα\nが石英のものは次のうちどれか。\n１ 20.53°\n２ 20.87°\n３ 21.63°\n４ 23.00°\n５ 36.11°",
+    "images": [
+      "/exam-library/emkohyo-EM20251806/q17-p10-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      10
+    ],
+    "sourceQuestionNumber": 17,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251806-q18",
+    "number": 18,
+    "text": "問１８ X線回折基底標準吸収補正法によって、粉じん中の石英を定量する方法に関\nする次の記述のうち、誤っているものはどれか。\n１ 基底標準吸収補正法は、試料による吸収の影響を補正して、遊離けい酸\n含有率の多少にかかわらず、標準試料で作った検量線をそのまま適用でき\nるようにした方法である。\n２ 金属基底標準板には、石英の測定回折線より低角度側のそれに近い回折\n線をもつ材質を選ぶ。\n３ 定性分析により炭酸カルシウムの存在が確認された試料の場合、金属基\n底標準板として亜鉛板ではなくアルミニウム板を用いる。\nきょう\n４ 吸収補正を行うことにより、定量範囲は広くなり、夾雑物の吸収の影響\nを少なくして精度を向上させることができる。\n５ １個の微少量試料を10回程度繰り返し測定したとき、その測定値の標準\n偏差の３倍を検出下限とする。",
+    "images": [
+      "/exam-library/emkohyo-EM20251806/q18-p10-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      10
+    ],
+    "sourceQuestionNumber": 18,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251806-q19",
+    "number": 19,
+    "text": "問１９ X線回折基底標準吸収補正法により、以下のような手順で粉じん中のクリス\nトバライトの定量操作を行った。\n有効直径20mmのフィルターに、再発じん法により1.26mgの粉じんを捕集し\nた。このフィルターのクリストバライトの主回折線強度は325cpsであった。クリ\nストバライトの回折線強度はクリストバライトが1 mg･cm-２のとき6500cpsであ\nり、このフィルターの定量操作に用いたX線吸収補正係数は1.20であった。\nこの粉じん中のクリストバライト含有率（％）として、正しい値に最も近い\nものは次のうちどれか。\n１ 9.0\n２ 11.0\n３ 13.0\n４ 15.0\n５ 17.0",
+    "images": [
+      "/exam-library/emkohyo-EM20251806/q19-p11-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      11
+    ],
+    "sourceQuestionNumber": 19,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251806-q20",
+    "number": 20,
+    "text": "問２０ 位相差顕微鏡による石綿粉じんの計数に関する次の記述のうち、誤っている\nものはどれか。\n１ 付着した粒子によって繊維の片方の端が隠れている場合は、繊維が見え\nている部分の長さのみで判断する。\n２ 計数する視野のピントは常に一定のままではなく、微動装置を動かして\n焦点深度を調整し、視野内の粒子を見落とすことがないように注意する。\n３ 繊維が絡まって正確な数を読み取ることができない場合は数えない。\n４ 繊維の一部が計数視野に入っていたとしても、両端が計数視野の外にあ\nる場合は０本とする。\n５ アイピースグレーティクルの小円内（直径0.1 mm）を計数する場合には、\n繊維数 100 本以上あるいは検鏡した視野の数が 100 視野になるまで行う。\n（終 り）",
+    "images": [
+      "/exam-library/emkohyo-EM20251806/q20-p11-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      11
+    ],
+    "sourceQuestionNumber": 20,
+    "extractionStatus": "complete"
+  }
+]

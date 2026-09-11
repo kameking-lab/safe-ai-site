@@ -1,0 +1,322 @@
+[
+  {
+    "id": "emkohyo-EM20261809-q1",
+    "number": 1,
+    "text": "問 １ 次の記述のうち、誤っているものはどれか。\n１ Ｘ線やβ線による皮膚の等価線量の算定には 70 µm 線量当量を用いる。\n２ 男性及び妊娠する可能性がないと診断された女性に対する放射線業務従\n事者の実効線量限度は、５年間で100 mSv、かつ、１年間につき50 mSv\nである。\n３ 眼の水晶体に対する等価線量限度は、５年間で100 mSv、かつ、１年\n間につき50 mSv である。\n４ 空気カーマは、一定質量中の空気に入射したＸ線やγ線が空気との相互\n作用の結果として発生したα線、β線の初期運動エネルギーの総和である。\n５ 実効線量は、人体の組織・臓器ごとの吸収線量に放射線加重係数を乗じ\nて得られる等価線量に、対応する組織加重係数を乗じた値の総和である。",
+    "images": [
+      "/exam-library/emkohyo-EM20261809/q1-p2-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      2
+    ],
+    "sourceQuestionNumber": 1,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261809-q2",
+    "number": 2,
+    "text": "問 ２ 次の記述のうち、誤っているものはどれか。\n１ 空気中放射能濃度を表す単位は、Bq･cm-３である。\n２ 照射線量は、放射線の照射により水の単位質量当たりに生成された荷電\n粒子が停止するまでに生成する正又は負の全電荷で、単位は C･kg-１であ\nる。\n３ 吸収線量は、放射線の照射により物質の単位質量当たりに吸収されたエ\nネルギーで、単位は J･kg-１である。\n４ 放射性物質の表面密度は、単位面積当たりの放射能で、単位はBq･cm-２\nである。\n５ 作業環境測定等に用いる１cm線量当量率を表す単位は、Sv･h-１である。",
+    "images": [
+      "/exam-library/emkohyo-EM20261809/q2-p2-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      2
+    ],
+    "sourceQuestionNumber": 2,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261809-q3",
+    "number": 3,
+    "text": "問 ３ 次の核種のうち、半減期が最も長いものはどれか。\n１ ３ H\n２ １４ C\n３ ６０ Co\n４ １３７ Cs\n５ ２４１ Am",
+    "images": [
+      "/exam-library/emkohyo-EM20261809/q3-p3-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      3
+    ],
+    "sourceQuestionNumber": 3,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261809-q4",
+    "number": 4,
+    "text": "問 ４ 放射線に関する次の記述の㋑から㋥の に入る語句の組合せとして、\n正しいものは下のうちどれか。\n「６０ Co から放出されるγ線などの比較的高いエネルギーの光子に対する高\n分解能エネルギー分析には ㋑ が最適であり、 ㋺ などの低いエネル\nギーの光子に対して高いエネルギー分解能が必要な場合は ㋩ が使用さ\nれている。\n試料測定時、どの検出器であっても複数の光子が同時偶発的に有感部に入\n射すると、その光子エネルギーの総和に相当する位置に ㋥ が観測され\nることがあり、定量・定性分析ではその補正が重要である。｣\n㋑ ㋺ ㋩ ㋥\n１ CZT半導体検出器 特性X線 Si半導体検出器 エスケープ\nピーク\n２ CZT半導体検出器 ２４１ Amから放出 Ge半導体検出器 光電ピーク\nされるγ線\n３ Ge半導体検出器 特性X線 Si半導体検出器 サムピーク\n４ Ge半導体検出器 ２４１ Amから放出 CZT半導体検出器 エスケープ\nされるγ線 ピーク\n５ Si半導体検出器 ２４１ Amから放出 Ge半導体検出器 サムピーク\nされるγ線",
+    "images": [
+      "/exam-library/emkohyo-EM20261809/q4-p3-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      3
+    ],
+    "sourceQuestionNumber": 4,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261809-q5",
+    "number": 5,
+    "text": "問 ５ 次の記述のうち、誤っているものはどれか。\n１ ９０ Sr の壊変核種である９０ Y からのβ線の空気中における最大飛程は、\n80 cm程度である。\n２ １３７ Csはβ崩壊により１３７ Baの励起状態に変わり、662 keV のγ線を放\n出する。\n３ α線などの高速の荷電粒子が物質を電離する際には、二次電子を発生さ\nせる。\n４ α粒子は人体組織中で数十 µm 程度の飛程を持つが、この距離で全エ\nネルギーを失うことから比電離は大きい。\n５ 熱中性子線に対しては、鉄よりも水の方が遮へい効果が大きい。",
+    "images": [
+      "/exam-library/emkohyo-EM20261809/q5-p4-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      4
+    ],
+    "sourceQuestionNumber": 5,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261809-q6",
+    "number": 6,
+    "text": "問 ６ 次の壊変様式をもつ放射性核種 250 Bq から放出される 0.441 MeV のγ線\n（γ ）の数として、正しい値に最も近いものは下のうちどれか。\n１\nただし、励起レベル 0.441 MeV からの内部転換電子（ce）の放出率は 50 ％\nであり、γ とγ の放出率は等しいものとする。\n２ ３\nβ－\n１\n1.350 MeV\nγ\n24 ％ β ２ － ２\n0.441MeV\n68 ％\n8 ％ β\n３\n－ γ\n３\nγ\n１\n、ce\n0 MeV\n１ 10\n２ 15\n３ 85\n４ 100\n５ 200",
+    "images": [
+      "/exam-library/emkohyo-EM20261809/q6-p4-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      4
+    ],
+    "sourceQuestionNumber": 6,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261809-q7",
+    "number": 7,
+    "text": "問 ７ 放射性物質の測定に関する次の記述のうち、誤っているものはどれか。\n１ 液体シンチレーション検出器を用いて、３２ Pを測定する。\n２ NaI(Tl)シンチレーション式サーベイメータを用いて、６０Co を測定する。\n３ 通気型電離箱を用いて、４１Ar を測定する。\n４ ZnS(Ag)シンチレーション式サーベイメータを用いて、３ Hを測定する。\n５ 電離箱式サーベイメータを用いて、２４１ Amを測定する。",
+    "images": [
+      "/exam-library/emkohyo-EM20261809/q7-p5-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      5
+    ],
+    "sourceQuestionNumber": 7,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261809-q8",
+    "number": 8,
+    "text": "問 ８ 試料の放射能を測定する際、計測器の検出効率が 10 ％の測定器を用いて試料\n及びバックグラウンドをそれぞれ20 分間測定した。バックグラウンド計数率が\n60 cpm だったとき、検出下限放射能として、正しい値に最も近いものは次のうち\nどれか。\nただし、検出下限放射能は 3 2 σで与えられるものとし、σ はバックグラウ\nンド計数率の標準偏差である。\n１ 1.2 × 10-２Bq\n２ 5.5 × 10-１ Bq\n３ 1.2 × 10０ Bq\n４ 5.5 × 10０ Bq\n５ 1.2 × 10１ Bq",
+    "images": [
+      "/exam-library/emkohyo-EM20261809/q8-p5-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      5
+    ],
+    "sourceQuestionNumber": 8,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261809-q9",
+    "number": 9,
+    "text": "問 ９ 放射能測定において、試料の 1000 秒間測定で 3600 カウント、バックグラウ\nンドの 3000 秒間測定で 900 カウントであるとき、試料の正味計数率の標準偏\n差の値に最も近いものは次のうちどれか。\nただし、これらの測定において測定時間以外の測定条件は同じとする。\n１ 2.0 × 10-２ s-１\n２ 6.0 × 10-２ s-１\n３ 2.0 × 10-１ s-１\n４ 6.0 × 10-１ s-１\n５ 2.0 × 10０ s-１",
+    "images": [
+      "/exam-library/emkohyo-EM20261809/q9-p6-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      6
+    ],
+    "sourceQuestionNumber": 9,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261809-q10",
+    "number": 10,
+    "text": "問１０ α線計測に関する次の記述の㋑から㋥の に入る語句等の組合せとして、\n正しいものは下のうちどれか。\n「２３９ Pu や２１０ Po などのα線スペクトル分析には従来、 ㋑ Si半導体検\nろう\n出器が用いられてきたが、堅牢性や安定性から最近は ㋺ Si半導体検出\n器が主流となってきた。検出器のエネルギー分解能は２４１ Am からの ㋩\nα線のスペクトル半値幅を基準として評価されるのが一般的であり 300 mm ２\n程度の有感面積に対して、 ㋺ Si半導体検出器は 20 keV程度のエネルギ\nー分解能を示すが、 ㋑ Si半導体検出器は 30 keV程度を示すことが多い。\nこれらの検出器は真空中で使用するため、計測試料の ㋥ による検出器\nの汚染に注意する必要がある。」\n㋑ ㋺ ㋩ ㋥\n１ アモルファス イオン注入型 5.49 MeV α反跳\n２ イオン注入型 表面障壁型 59.5 keV α反跳\n３ イオン注入型 アモルファス 59.5 keV 波高欠損\n４ 表面障壁型 アモルファス 1.02 MeV 波高欠損\n５ 表面障壁型 イオン注入型 5.49 MeV α反跳",
+    "images": [
+      "/exam-library/emkohyo-EM20261809/q10-p6-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      6
+    ],
+    "sourceQuestionNumber": 10,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261809-q11",
+    "number": 11,
+    "text": "問１１ ９０ Srの放射能測定に用いる検出器として、不適当なものは次のうちどれか。\n１ ガスフロー比例計数管\n２ 端窓型GM計数管\n３ 液体シンチレーション検出器\n４ プラスチックシンチレーション検出器\n５ NaI(Tl)シンチレーション検出器",
+    "images": [
+      "/exam-library/emkohyo-EM20261809/q11-p7-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      7
+    ],
+    "sourceQuestionNumber": 11,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261809-q12",
+    "number": 12,
+    "text": "問１２ γ線エネルギー分析装置の校正用線源として、適切な核種のみの組合せは次\nのうちどれか。\n１ １４ C ３５ S ２０４ Tl\n２ ９０ Sr １３７ Cs ２５２ Cf\n３ ５４ Mn １０９ Cd ２４１ Am\n４ １２４ Sb-Be ２２６ Ra-Be ２４１ Am-Be\n５ ３２ P ９０ Y ２１０ Bi",
+    "images": [
+      "/exam-library/emkohyo-EM20261809/q12-p7-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      7
+    ],
+    "sourceQuestionNumber": 12,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261809-q13",
+    "number": 13,
+    "text": "問１３ 液体シンチレーション検出器による放射能測定に関する次の㋑から㋥までの\n記述のうち、正しいもののみの組合せは下のうちどれか。\n㋑ 放射能測定は、試料液をシンチレータ溶液に乳化又は溶解させて行う。\n㋺ 化学発光は、放射能の過小評価をもたらすことがある。\n㋩ γ線外部標準線源を用いて、β線核種測定の計数効率を求めることが\nできる。\n㋥ β線のエネルギーは連続スペクトルを示すため、３ Hと１４ Cの同時測\n定はできない。\n１ ㋑ ㋩\n２ ㋑ ㋥\n３ ㋺ ㋩\n４ ㋺ ㋥\n５ ㋩ ㋥",
+    "images": [
+      "/exam-library/emkohyo-EM20261809/q13-p8-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      8
+    ],
+    "sourceQuestionNumber": 13,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261809-q14",
+    "number": 14,
+    "text": "問１４ 次の放射性物質の測定に関する記述のうち、誤っているものはどれか。\n１ 放射性ヨウ素の捕集には、活性炭含浸ろ紙、活性炭カートリッジなどが\n用いられる。\n２ トリチウム化水蒸気の捕集には、モノエタノールアミンが吸着剤として\n用いられる。\n３ 取り扱う核種が全て既知で、かつ、複数存在する場合における放射能濃\n度の評価は、濃度限度が最も小さい核種が全放射能を占めるとしてよい。\n４ 表面捕集率とは、測定対象となるα線の平均飛程以内のろ紙表面部分に\n捕集された粉じんの、全捕集粉じんに対する割合である。\n５ ガスモニタには、捕集用ガス容器内に放射線検出器を備え、容器内に試\n料空気を流しながら、空気中放射能濃度を連続して測定できるものがある。",
+    "images": [
+      "/exam-library/emkohyo-EM20261809/q14-p8-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      8
+    ],
+    "sourceQuestionNumber": 14,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261809-q15",
+    "number": 15,
+    "text": "問１５ 次の記述の㋑から㋩までの に入る放射性物質の組合せとして、正し\nいものは下のうちどれか。\n「作業環境空気中の放射性物質の濃度を測定するために用いられる試料の捕集\n材又は捕集器具として、 ㋑ に対しては、活性炭カートリッジ、 ㋺\nに対しては、セルローズ・ガラス系ろ紙、 ㋩ に対しては、コールドトラ\nップが用いられる。」\n㋑ ㋺ ㋩\n１ １３３ Xe １４ CO CH １３１ I\n２ ３\n２ CH １３１ I ２３９ PuO ６０ Co O\n３ ２ ２ ３\n３ CH １３１ I HTO １３３ Xe\n３\n４ ２０３ Hg １４ CO HTO\n２\n５ ２０３ Hg ２３９ PuO HTO\n２",
+    "images": [
+      "/exam-library/emkohyo-EM20261809/q15-p9-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      9
+    ],
+    "sourceQuestionNumber": 15,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261809-q16",
+    "number": 16,
+    "text": "問１６ 作業環境空気中の放射性物質の濃度を測定するため、直接捕集法により試料\nを採取し、48時間後にその試料の全放射能を測定したところ４ Bq であった。作業\n環境空気中の放射能濃度として、正しい値に最も近いものは次のうちどれか。\nただし、採取試料は 1.2L、放射性物質の半減期は12時間とする。\n１ 5.3 × 10－２ Bq･cm－３\n２ 8.2 × 10－２ Bq･cm－３\n３ 1.3 × 10－１ Bq･cm－３\n４ 2.7 × 10－１ Bq･cm－３\n５ 6.4 × 10－１ Bq･cm－３",
+    "images": [
+      "/exam-library/emkohyo-EM20261809/q16-p9-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      9
+    ],
+    "sourceQuestionNumber": 16,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261809-q17",
+    "number": 17,
+    "text": "問１７ 作業環境空気中のトリチウムの捕集材又は捕集器具Ⓐと検出器又は計測器Ⓑ\nとの次の組合せのうち、正しいものはどれか。\nⒶ Ⓑ\n１ セルローズ・ガラス系ろ紙 電離箱式サーベイメータ\n２ コールドトラップ 表面障壁型Si半導体検出器\n３ モレキュラシーブ プラスチックシンチレーション検出器\n４ ガス捕集用電離箱 振動容量電位計\n５ 捕集用ガス容器 NaI(Tl)シンチレーション検出器",
+    "images": [
+      "/exam-library/emkohyo-EM20261809/q17-p10-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      10
+    ],
+    "sourceQuestionNumber": 17,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261809-q18",
+    "number": 18,
+    "text": "問１８ 放射性物質を取り扱う作業場において、作業環境空気中の放射能濃度が、取\n扱い核種の濃度限度の 1 /10 を超えないよう管理するために必要な測定装置の\n検出下限計数率（s-１）の値として、正しい値に最も近いものは次のうちどれか。\nただし、取扱い核種の濃度限度は 7.0 × 10-７Bq･cm-３、測定装置の計数効率\nは 22 ％、使用する捕集材の捕集効率は 100 ％、捕集時間は 168 時間、試料空気の\n吸引流量は、捕集開始直後に 100 L･min-１、捕集終了直前に 87 L･min-１ とし、\n吸引流量は直線的に変化するものとする。\n１ 0.24 s-１\n２ 0.97 s-１\n３ 8.3 s-１\n４ 14 s-１\n５ 60 s-１",
+    "images": [
+      "/exam-library/emkohyo-EM20261809/q18-p10-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      10
+    ],
+    "sourceQuestionNumber": 18,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261809-q19",
+    "number": 19,
+    "text": "問１９ 作業環境中の放射性物質のサンプリングに関する次の記述のうち、誤ってい\nるものはどれか。\n１ ゼネラルサンプリングは、放射性物質取扱室全体についての空気汚染の\n検出を目的とし、発生源の位置を確認するためのものではない。\n２ セントラルサンプリングは、放射性物質取扱室が多数ある場合、サンプ\nリング配管を通じて各室の試料空気を中央の測定室に集め、部屋ごとの放\n射能濃度を正確に採取・測定する方式である。\n３ ローカルサンプリングは、局所的に発生する空気汚染の検出及び室内の\n空気中放射性物質の濃度分布を知ることを目的とする。\n４ パーソナルサンプリングは、作業者が吸入する空気中の濃度を知るため、\n作業者の呼吸域の高さで、携帯型の個人サンプラでモニタする。\n５ γ線や中性子線のような外部放射線の測定点を決める際は、人が立ち入\nるエリア内で最も線量率が高くなると見込まれる箇所を選択し、定期的な\n測定を実施する。",
+    "images": [
+      "/exam-library/emkohyo-EM20261809/q19-p11-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      11
+    ],
+    "sourceQuestionNumber": 19,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261809-q20",
+    "number": 20,
+    "text": "問２０ 作業環境空気中の粒子状放射性物質の放射能測定に関する次の㋑から㋥まで\nの記述のうち、正しいもののみの組合せは下のうちどれか。\n㋑ ろ紙に捕集した試料の放射能は、検出器の自然計数と大気中に存在す\nるラドン等の天然放射性物質の影響を差し引いた値を用いる。\nあい\n㋺ ろ紙に多量のじん埃が捕集された場合で、α線を測定対象としている\nときは、その自己吸収の補正を行う。\n㋩ ろ紙の捕集効率は、捕集する粒子状放射性物質の化学的性状には依存\nしない。\n㋥ 粒子状放射性物質をサンプリング配管及び長いホースで吸引した後に\nろ紙に捕集する場合は、長い配管や曲折の多い配管の場合、濃度を過大\n評価することがある。\n１ ㋑ ㋺\n２ ㋑ ㋩\n３ ㋑ ㋥\n４ ㋺ ㋩\n５ ㋩ ㋥\n（終 り）",
+    "images": [
+      "/exam-library/emkohyo-EM20261809/q20-p12-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      12
+    ],
+    "sourceQuestionNumber": 20,
+    "extractionStatus": "complete"
+  }
+]

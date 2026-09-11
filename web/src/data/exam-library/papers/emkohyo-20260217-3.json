@@ -1,0 +1,322 @@
+[
+  {
+    "id": "emkohyo-20260217-3-q1",
+    "number": 1,
+    "text": "問 １ 作業環境測定の対象物質の状態に関する次の記述のうち、誤っているものは\nどれか。\n１ ガス状物質には、ガス及び蒸気がある。\n２ 固体に研磨、切削などの機械的な作用を加えて発生した固体の微粒子が、\n空気中に浮遊しているものは、粉じんである。\n３ 気体が空気中で凝固し、固体の微粒子となって空気中に浮遊しているも\nのは、ヒュームである。\n４ 液体の微粒子が空気中に浮遊しているものは、ミストである。\n５ ミストの粒径は、一般に、ヒュームの一次粒子よりも小さい。",
+    "images": [
+      "/exam-library/emkohyo-20260217-3/q1-p2-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      2
+    ],
+    "sourceQuestionNumber": 1,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-20260217-3-q2",
+    "number": 2,
+    "text": "問 ２ A・B測定の単位作業場所の設定に関する次の記述のうち、誤っているもの\nはどれか。\n１ 単位作業場所の設定に当たっては、作業場内で働く労働者の人数や作業\n時間などを考慮する必要はない。\n２ 単位作業場所の設定に当たっては、作業場の区域を、労働者の行動範囲、\n有害物質の分布状況などの判断基準によって層別化を行う。\n３ 単位作業場所の範囲を決める際には、作業場内の気流の影響を考慮しな\nくてもよい。\n４ 連続する２作業日にわたって測定を行う場合、第１日目と第２日目の単\n位作業場所の範囲は同一とする。\n５ 有機溶剤による金属の洗浄を行う工場で働く労働者の行動範囲が当該工\n場内全体であるが、有機溶剤の分布が発生源周辺に限定されると考えられ\nる場合には、発生源周辺の区域を単位作業場所としてよい。",
+    "images": [
+      "/exam-library/emkohyo-20260217-3/q2-p2-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      2
+    ],
+    "sourceQuestionNumber": 2,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-20260217-3-q3",
+    "number": 3,
+    "text": "問 ３ 有害物質のA測定に関する次の記述のうち、誤っているものはどれか。\n１ 測定点を決めるために等間隔で引いた縦の線と横の線は、建屋の形状な\nどにより、直交しなくてもよい。\n２ 有害物質の発生源の間隔が等間隔で配置されている場合は、測定点の縦\n又は横の線の間隔が発生源の間隔と一致しないようにする。\n３ 単位作業場所における有害物質の濃度がほぼ均一であることが明らかな\nときは、測定点は、６mを超える等間隔で引いた縦の線と横の線との交点\nとしてよい。\n４ 単位作業場所の範囲が狭く、縦の線と横の線の交点の数が５未満になる\nときは、測定点の数が５となるよう、下図のように測定点を設定してもよ\nい。\n５ 単位作業場所が著しく狭く、かつ、単位作業場所における空気中の有害\n物質の濃度がほぼ均一であることが明らかなため、測定点の数を３点とし\nた場合には、３点のうちいずれか２点で２回繰り返し測定を行うことによ\nって、測定値の総数を５とする。",
+    "images": [
+      "/exam-library/emkohyo-20260217-3/q3-p3-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      3
+    ],
+    "sourceQuestionNumber": 3,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-20260217-3-q4",
+    "number": 4,
+    "text": "問 ４ 有害物質のB測定に関する次の記述のうち、誤っているものはどれか。\n１ B測定を行う必要がある単位作業場所で、連続する２作業日にわたって\n測定を行う場合は、第１日目と第２日目ともに、B測定を行う。\nびん\n２ B測定に圧電天秤方式の粉じん計を用いる場合は、測定時間を２分に合\nわせて連続して５回測定し、各測定値の算術平均値をB測定値とする。\n３ 相対濃度指示方法によって B 測定を行った場合、質量濃度変換係数は\nA測定で用いる係数と同じものを用いる。\n４ 検知管５本を用いても、測定時間の合計が10分に満たない場合は、10分\nの間に均等な間隔をおいて測定した５本の検知管の指示値の算術平均値を\nB測定値とする。\n５ 有害物質の濃度が高くなると考えられる作業位置が複数あり、どの作業\n位置が最大濃度になるか予測できない場合には、それらの全ての作業位置\nで測定を行い、各測定値の算術平均値をB測定値とする。",
+    "images": [
+      "/exam-library/emkohyo-20260217-3/q4-p4-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      4
+    ],
+    "sourceQuestionNumber": 4,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-20260217-3-q5",
+    "number": 5,
+    "text": "問 ５ 常温・常圧（25℃、１気圧）の環境空気中における有害物質Ⓐと、その物質\nの状態Ⓑとの次の組合せのうち、誤っているものはどれか。\nただし、ここで、ガスとは常圧下における沸点が常温よりも低いものをいい、\n蒸気とは常圧下における沸点が常温よりも高いもので気体となっているものを\nいうこととする。\nⒶ Ⓑ\n１ ヨウ化メチル 蒸気\n２ 二硫化炭素 蒸気\n３ 硫化水素 ガス\n４ ホルムアルデヒド ガス\n５ 1,2-ジクロロプロパン ガス",
+    "images": [
+      "/exam-library/emkohyo-20260217-3/q5-p4-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      4
+    ],
+    "sourceQuestionNumber": 5,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-20260217-3-q6",
+    "number": 6,
+    "text": "問 ６ 騒音のA測定に関する次の記述のうち、誤っているものはどれか。\n１ A測定点の位置は、単位作業場所の床面上に任意の基点を定め、原則と\nして、この基点を軸として６m以下の等間隔で引いた縦の線と横の線との\n交点のうちから５個の点を選び、測定点とする。\n２ 縦の線の間隔と横の線の間隔は必ずしも同一とする必要はない。\n３ 測定点の高さは床上1.2m以上1.5m以下とするが、作業者が作業台等に\n乗って作業をする場合は、当該作業が行われる作業床から1.2m以上1.5m\n以下とする。\n４ １測定点における測定時間は10分間以上の継続した時間とし、各測定点\nの測定時間は等しくする。\n５ A測定のみを実施した場合の管理区分の決定は、A測定の算術平均値は\n用いるが、標準偏差は用いない。",
+    "images": [
+      "/exam-library/emkohyo-20260217-3/q6-p5-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      5
+    ],
+    "sourceQuestionNumber": 6,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-20260217-3-q7",
+    "number": 7,
+    "text": "問 ７ 次の有害物質のうち、個人サンプリング法による測定（C・D測定）の対象と\nなっていないものはどれか。\n１ カドミウム\n２ 三酸化二アンチモン\n３ 粉状の硫酸ニッケル\n４ 溶接ヒューム\n５ 鉛",
+    "images": [
+      "/exam-library/emkohyo-20260217-3/q7-p5-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      5
+    ],
+    "sourceQuestionNumber": 7,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-20260217-3-q8",
+    "number": 8,
+    "text": "問 ８ 個人サンプリング法による測定（C・D測定）に関する次の記述のうち、誤っ\nているものはどれか。\n１ C測定では、均等ばく露作業に従事する労働者が５人以上の場合は、５\n人以上の労働者を選定し、サンプラーを装着する。\n２ 均等ばく露作業に従事する労働者が５人未満の場合には、作業時間を分\n割してサンプリングを行い、C測定の測定値の数を５以上とする。\n３ C測定におけるサンプリング時間は、サンプラーを装着する労働者が単\n位作業場所において作業に従事する全時間としなければならない。\n４ D測定は、有害物質の発生源に近接する場所において作業が行われる場\n合、気中濃度が最大になると考えられる時間に行う。\n５ D測定のサンプリング時間は、連続した15分間である。",
+    "images": [
+      "/exam-library/emkohyo-20260217-3/q8-p6-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      6
+    ],
+    "sourceQuestionNumber": 8,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-20260217-3-q9",
+    "number": 9,
+    "text": "問 ９ 有害物質Ⓐと、その濃度の測定に用いる捕集器具又はろ過材Ⓑとの次の組合\nせのうち、誤っているものはどれか。\nⒶ Ⓑ\n１ クロロホルム 活性炭管\n２ インジウム化合物 セルロースエステルメンブランフィルター\n３ ヨウ化メチル シリカゲル管\n４ アクリルアミド グラスファイバーフィルター及び活性炭フェルト\n５ シアン化水素 ミゼットインピンジャー",
+    "images": [
+      "/exam-library/emkohyo-20260217-3/q9-p6-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      6
+    ],
+    "sourceQuestionNumber": 9,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-20260217-3-q10",
+    "number": 10,
+    "text": "問１０ 流量計に関する次の記述のうち、誤っているものはどれか。\n１ 石けん膜流量計は、石けん膜が所定の体積を通過する時間から流量を求\nめる流量計である。\n２ 面積式流量計は、テーパー管内の浮子が停止したとき、浮子とテーパー\n管の間隙の面積とそこを流れている流量とが比例することを利用している。\n３ 湿式ガスメーターを用いて流量計の校正を行う場合には、湿式ガスメー\nターは、ポンプより上流側に接続する。\n４ オリフィス流量計は、オリフィス板の上流側と下流側との間に生じる圧\n力差が流量と一定の関係を示すことを利用している。\n５ ハイボリウムエアサンプラーの流量校正は、設置型のルーツメーターを\n用いると精度よく行うことができるが、測定現場では、ルーツメーターに\nよって校正されたオリフィス流量計を二次的な基準流量計として用いるこ\nとが多い。",
+    "images": [
+      "/exam-library/emkohyo-20260217-3/q10-p7-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      7
+    ],
+    "sourceQuestionNumber": 10,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-20260217-3-q11",
+    "number": 11,
+    "text": "問１１ 固体捕集法に関する次の記述のうち、誤っているものはどれか。\n１ 活性炭の活性化は、乾燥した空気又は窒素の気流中で、約200℃での加熱、\n脱水により行うことができる。\n２ シリカゲルは、100～110℃で約１時間加熱して活性化したものを用いる。\n３ ポーラスポリマー管に捕集した試料は、活性炭管に捕集した試料に比べ\nて、加熱脱着が容易である。\n４ 捕集剤には、シリカゲル、活性炭などの吸着剤、ガスクロマトグラフ分\n析用のカラム充填剤が使用されるが、金属繊維を捕集剤として使用するこ\nともある。\n５ 固体捕集-加熱脱着-パージトラップ法は、熱分解する可能性のある物質\nなどに適している。",
+    "images": [
+      "/exam-library/emkohyo-20260217-3/q11-p7-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      7
+    ],
+    "sourceQuestionNumber": 11,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-20260217-3-q12",
+    "number": 12,
+    "text": "問１２ ろ過捕集法に関する次の記述のうち、誤っているものはどれか。\n１ 石綿粉じんの捕集には、オープンフェース型ホルダーを用いる。\n２ 鉱物性粉じん中に含まれる遊離けい酸の分析に用いるサンプルの捕集に\nは、分粒装置付きホルダーを用いる。\n３ グラスファイバーフィルターによる微細粒子の捕集では、ろ過流速が速\nいほど、拡散作用による捕集率は増加する。\n４ 一般に、フィルターによる粒子の捕集率は、粒径が 0.1 ～ 0.3 µm程度\nの粒子で最も低くなる。\n５ 石綿粉じんの捕集にはメンブランフィルターが、鉱物性粉じんの捕集に\nはグラスファイバーフィルターが用いられる。",
+    "images": [
+      "/exam-library/emkohyo-20260217-3/q12-p8-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      8
+    ],
+    "sourceQuestionNumber": 12,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-20260217-3-q13",
+    "number": 13,
+    "text": "問１３ 液体捕集法及び直接捕集法に関する次の記述のうち、誤っているものはどれ\nか。\n１ 小型ガス吸収管による有機溶剤などの揮発性物質の捕集では、捕集液の\n温度が低いほど捕集率は高くなる。\n２ ミゼットインピンジャーによる粒子状物質の捕集は、慣性衝突効果によ\nるものである。\n３ 液体捕集法では、試料空気採取により捕集液量が減少した場合には、採\n取した液に減少分の捕集液を追加して試料液とする。\n４ 直接捕集法で用いる真空捕集瓶は、捕集瓶内を1.33kPa以下に減圧しや\nすい１L以下の容積のものを使用する。\n５ 直接捕集法で用いる捕集袋は、使用前には袋に窒素又は清浄空気を送入\nし、気密性や接続部に漏れの無いことを確認しておく必要がある。",
+    "images": [
+      "/exam-library/emkohyo-20260217-3/q13-p8-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      8
+    ],
+    "sourceQuestionNumber": 13,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-20260217-3-q14",
+    "number": 14,
+    "text": "問１４ 光散乱方式の相対濃度計による測定等に関する次の記述のうち、誤っている\nものはどれか。\n１ 散乱光の強度は、粒子の大きさによって異なる。\n２ 粒子の組成と粒度分布が一定で、濃度に変動がなければ、相対濃度計の\n積算値は、測定時間に比例する。\n３ 一部の特例を除き、質量濃度変換係数を求めるための併行測定を行う必\n要がある。\n４ A測定では、１単位作業場所での採取開始から終了までの時間は、一定\nの条件を満足した場合は、１時間未満とすることができる。\n５ A測定における１測定点のサンプリング時間は、測定点が10個の場合は\n１分以上であればよい。",
+    "images": [
+      "/exam-library/emkohyo-20260217-3/q14-p9-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      9
+    ],
+    "sourceQuestionNumber": 14,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-20260217-3-q15",
+    "number": 15,
+    "text": "問１５ 検知管に関する次の記述のうち、誤っているものはどれか。\n１ 検知管法では、測定対象ガスを含む試料空気の一定量が検知管内に吸引\nされることが求められるので、実測前に真空法ガス採取器（ガス採取器）\nの空気漏れ試験を行う。\n２ ガス採取器から漏れが確認された場合には、ピストン及びシリンダー内\n部のグリースや検知管取付口のゴムの劣化を確認し、必要に応じてグリー\nスの塗布やゴムの交換を行う。\n３ 通気終了後、時間の経過とともに着色が変化する場合があるので、濃度\nの読み取りは速やかに行う。\n４ 検知限度とは、変色がわずかに認められる最低濃度のことである。\n５ 検知管の濃度目盛は、25℃、１気圧を基準にして目盛付けがされている。",
+    "images": [
+      "/exam-library/emkohyo-20260217-3/q15-p9-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      9
+    ],
+    "sourceQuestionNumber": 15,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-20260217-3-q16",
+    "number": 16,
+    "text": "問１６ 次の記述の㋑及び㋺の に入る用語の組合せとして、正しいものは下\nのうちどれか。\n「作業環境空気中の放射性物質の濃度を測定するために用いられる試料の採\n取方法として、 ㋑ に対してはろ過捕集法、 ㋺ に対しては固体捕集\n法が用いられる。」\n㋑ ㋺\n１ 放射性セシウム 放射性炭素\n２ 放射性ヨウ素 放射性アルゴン\n３ 放射性水銀 トリチウム化水蒸気\n４ 放射性水銀 放射性ヨウ素\n５ ウラン トリチウム化水蒸気",
+    "images": [
+      "/exam-library/emkohyo-20260217-3/q16-p10-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      10
+    ],
+    "sourceQuestionNumber": 16,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-20260217-3-q17",
+    "number": 17,
+    "text": "問１７ 放射性物質を取り扱っている作業場において、試料空気をサンプリングし、\nその試料を測定した結果、測定装置の正味計数率は、3.4×10３ s-１であった。\nそのときの空気中の放射性物質の濃度として、正しい値に最も近いものは次\nのうちどれか。\nただし、測定装置の計数効率は32％、試料空気の吸引流量は毎分90L、試料\n採取時間は40時間、使用する捕集材の捕集率は85％とする。\n１ 5.0 × 10-６ Bq･cm-３\n２ 5.9 × 10-６ Bq･cm-３\n３ 1.5 × 10-５ Bq･cm-３\n４ 4.9 × 10-５ Bq･cm-３\n５ 5.8 × 10-５ Bq･cm-３",
+    "images": [
+      "/exam-library/emkohyo-20260217-3/q17-p10-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      10
+    ],
+    "sourceQuestionNumber": 17,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-20260217-3-q18",
+    "number": 18,
+    "text": "問１８ 正規分布、対数正規分布及び作業環境中の有害物質の濃度分布に関する次の\n記述のうち、誤っているものはどれか。\n１ 正規分布の算術平均値と標準偏差をそれぞれμ、σとすると、この分布の\n95％上限値は μ＋1.645σである。\n２ 対数正規分布の幾何平均値の範囲は、-∞～∞である。\n３ 対数正規分布の幾何標準偏差の値は、必ず１以上である。\n４ 作業環境中の有害物質の濃度分布は、対数正規分布で近似される。\n５ 一般に、作業環境中の有害物質の濃度の算術平均値が高くなるにしたが\nって、濃度の標準偏差も大きくなる。",
+    "images": [
+      "/exam-library/emkohyo-20260217-3/q18-p11-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      11
+    ],
+    "sourceQuestionNumber": 18,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-20260217-3-q19",
+    "number": 19,
+    "text": "問１９ 測定誤差に関する次の記述のうち、誤っているものはどれか。\n１ 系統誤差には、個人の習慣により、常に目盛りを小さめに読むことによ\nる誤差が含まれる。\n２ 系統誤差は、その原因を明らかにしても補正することができない。\n３ 一つのサンプルを同一条件で繰り返し測定したとき、測定値がばらつく\nのは、偶然誤差のためである。\n４ 測定値の偶然誤差は、一般に、標準偏差で表す。\n５ 測定機器の指示値を記録する際に書き違えることは、過失誤差である。",
+    "images": [
+      "/exam-library/emkohyo-20260217-3/q19-p11-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      11
+    ],
+    "sourceQuestionNumber": 19,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-20260217-3-q20",
+    "number": 20,
+    "text": "問２０ 有害物質の A 測定及び B 測定が行われた場合の作業環境評価に関する次の\n記述のうち、誤っているものはどれか。\n１ A測定の第１評価値は、気中有害物質濃度の算術平均値の推定値である。\n２ A測定の第１評価値は、一般に、第２評価値より大きくなる。\n３ A測定の第１評価値及びB測定値が管理濃度未満の場合の管理区分は、\n第１管理区分となる。\n４ A測定の第１評価値が管理濃度を超えておらず、B測定値が管理濃度の\n1.5倍であった場合の管理区分は、第２管理区分となる。\n５ 全てのA測定値が管理濃度を超えた場合、B測定値が管理濃度未満であ\nっても管理区分は第３管理区分となる。\n（終 り）",
+    "images": [
+      "/exam-library/emkohyo-20260217-3/q20-p12-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      12
+    ],
+    "sourceQuestionNumber": 20,
+    "extractionStatus": "complete"
+  }
+]

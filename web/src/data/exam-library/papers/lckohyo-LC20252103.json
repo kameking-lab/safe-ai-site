@@ -1,0 +1,642 @@
+[
+  {
+    "id": "lckohyo-LC20252103-q1",
+    "number": 1,
+    "text": "問 １ 温度及び圧力に関する記述のうち、適切でないものは次のうちどれか。\nただし、* を付した数字は、小数点以下を省略している。\n（１）セルシウス(摂氏)温度は、標準大気圧の下で、水の氷点を０℃、沸点を\n100℃と定め、この間を100等分したものを１℃としたものである。\n*\n（２）セルシウス(摂氏)温度ｔ[℃]と絶対温度Ｔ[Ｋ]との間には、ｔ＝Ｔ＋273\nの関係がある。\n*\n（３）760㎜の高さの水銀柱がその底面に及ぼす圧力を標準大気圧といい、1013\nhPaに相当する。\n（４）圧力計に表れる圧力をゲージ圧力といい、その値に大気圧を加えたものを\n絶対圧力という。\n（５）１Paは１ｍ２当たり１Ｎの力が作用する圧力であり、１ＭPa＝10６Pa＝\n１Ｎ/mm２ である。",
+    "images": [
+      "/exam-library/lckohyo-LC20252103/q1-p2-0.webp"
+    ],
+    "correctChoice": 2,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      2
+    ],
+    "sourceQuestionNumber": 1,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252103-q2",
+    "number": 2,
+    "text": "問 ２ ボイラーの水循環に関する記述のうち、適切でないものは次のうちどれか。\n（１）ボイラー内で、温度が上昇した水及び気泡を含んだ水は上昇し、その後に\n温度の低い水が下降して、水の循環流ができる。\n（２）丸ボイラーは、伝熱面の多くがボイラー水中に設けられ、水の対流が容易\nなので、特別な水循環の系路を構成する必要がない。\n（３）水管ボイラーは、水と気泡の混合体が上昇する管と、水が下降する管を区\n別して設けているものが多い。\n（４）炉筒ボイラーには、水循環を良くするために、炉筒を中央部から片方に少\nしずらしたものがある。\n（５）水循環が良くなるほど、熱が水に十分に伝わるので、伝熱面温度は水温よ\nり著しく高い温度となる。",
+    "images": [
+      "/exam-library/lckohyo-LC20252103/q2-p2-1.webp"
+    ],
+    "correctChoice": 5,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      2
+    ],
+    "sourceQuestionNumber": 2,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252103-q3",
+    "number": 3,
+    "text": "問 ３ ボイラーの伝熱面、燃焼室及び燃焼装置に関する記述のうち、適切でないも\nのは次のうちどれか。\n（１）燃焼室に直面している伝熱面は接触伝熱面、燃焼室を出た高温ガス通路に\n配置される伝熱面は対流伝熱面といわれる。\n（２）燃焼室は、燃料を燃焼させ、熱が発生する部分で、火炉ともいわれる。\n（３）燃焼室は、供給された燃料を速やかに着火・燃焼させ、発生する可燃性ガ\nスと空気との混合接触を良好にして、完全燃焼を行わせる部分である。\n（４）加圧燃焼方式の燃焼室は、気密構造になっている。\n（５）燃焼装置は、燃料の種類によって異なり、液体燃料、気体燃料及び微粉炭\nにはバーナが、一般固体燃料には火格子が用いられる。",
+    "images": [
+      "/exam-library/lckohyo-LC20252103/q3-p3-0.webp"
+    ],
+    "correctChoice": 1,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      3
+    ],
+    "sourceQuestionNumber": 3,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252103-q4",
+    "number": 4,
+    "text": "問 ４ 炉筒煙管ボイラーに関する記述のうち、適切でないものは次のうちどれか。\n（１）加圧燃焼方式を採用し、燃焼室熱負荷を高くして燃焼効率を高めたものが\nある。\n（２）水管ボイラーに比べ、蒸気使用量の変動による圧力変動が小さい。\n（３）戻り燃焼方式を採用し、燃焼効率を高めたものがある。\n（４）炉筒は、他の部分より高温になるので、胴にブリージングスペースを設け\nて応力を緩和する。\n（５）煙管には、伝熱効果の高いスパイラル管を使用しているものが多い。",
+    "images": [
+      "/exam-library/lckohyo-LC20252103/q4-p3-1.webp"
+    ],
+    "correctChoice": 4,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      3
+    ],
+    "sourceQuestionNumber": 4,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252103-q5",
+    "number": 5,
+    "text": "問 ５ 貫流ボイラーに関する記述のうち、適切でないものは次のうちどれか。\n（１）水管ボイラーに分類され、一連の長い管系で構成されており、水循環がな\nい。\n（２）暖房用、業務用及び工場プロセス用の小形低圧ボイラーとして、単管式及\nび多管式が多く使われる。\n（３）細い管内で給水のほとんどが蒸発するので、十分な処理を行った水を使用\nしなければならない。\n（４）伝熱面積当たりの保有水量が著しく小さいので、起動から所要蒸気を発生\nするまでの時間が短い。\n（５）同容量の丸ボイラーに比べ、一般に据付面積が大きくなる。",
+    "images": [
+      "/exam-library/lckohyo-LC20252103/q5-p3-2.webp"
+    ],
+    "correctChoice": 5,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      3
+    ],
+    "sourceQuestionNumber": 5,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252103-q6",
+    "number": 6,
+    "text": "問 ６ 暖房用鋳鉄製蒸気ボイラーにハートフォード式連結法により返り管を取り付\nける主な目的として、適切なものは次のうちどれか。\n（１）蒸気圧力の異常な昇圧を防止する。\n（２）水の自然循環を良くする。\n（３）不純物のボイラーへの混入を防止する。\n（４）低水位事故を防止する。\n（５）湿り蒸気を乾き飽和蒸気にする。",
+    "images": [
+      "/exam-library/lckohyo-LC20252103/q6-p4-0.webp"
+    ],
+    "correctChoice": 4,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      4
+    ],
+    "sourceQuestionNumber": 6,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252103-q7",
+    "number": 7,
+    "text": "問 ７ ボイラーの胴に設けるマンホールなどの穴に関する記述のうち、適切でない\nものは次のうちどれか。\n（１）マンホールの大きさは、だ円の場合は長径375mm以上、短径275mm以上とし、\n円形の場合は直径375mm以上とすることが、JISで定められている。\n（２）だ円形又は長方形の穴をボイラーの胴に設ける場合には、短径又は短い辺\nを胴の軸方向に配置する。\n（３）掃除穴は、ボイラー内部を掃除するための穴で、だ円形又は円形とする。\n（４）検査穴は、ボイラー内部の点検用として設けられるもので、普通、だ円形\nとする。\n（５）穴を設けた場所は、強度が減少するので、強め材を取り付けたり、フラン\nジを打ち出したりして補強する。",
+    "images": [
+      "/exam-library/lckohyo-LC20252103/q7-p4-1.webp"
+    ],
+    "correctChoice": 4,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      4
+    ],
+    "sourceQuestionNumber": 7,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252103-q8",
+    "number": 8,
+    "text": "問 ８ 温水ボイラー及び蒸気ボイラーの附属品に関する記述のうち、適切でないも\nのは次のうちどれか。\n（１）水高計は、温水ボイラーの圧力を測る計器であり、蒸気ボイラーの圧力計\nに相当する。\n（２）温水ボイラーの温度計は、ボイラー水が最高温度となる箇所の見やすい位\n置に取り付ける。\n（３）温水ボイラーの逃がし管は、ボイラー水の膨張分を逃がすためのもので、\n高所に設けた密閉型膨張タンクに直結させる。\n（４）温水ボイラーの逃がし弁は、水の膨張により圧力が設定した圧力を超える\nと、弁体を押し上げ、水を逃がすものである。\n（５）暖房用蒸気ボイラーの真空給水ポンプは、受水槽内を真空にして返り管途\n中の凝縮水を受水槽に吸引するとともに、ボイラーに給水するために用いら\nれる。",
+    "images": [
+      "/exam-library/lckohyo-LC20252103/q8-p5-0.webp"
+    ],
+    "correctChoice": 3,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      5
+    ],
+    "sourceQuestionNumber": 8,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252103-q9",
+    "number": 9,
+    "text": "問 ９ ボイラーの蒸気トラップの分類を示すＡからＤまでの方式のうち、作動原理\nが蒸気とドレンの温度差を利用するもののみを全て挙げた組合せは、(１)～\n(５)のうちどれか。\nＡ バイメタル式\nＢ ベローズ式\nＣ オリフィス式\nＤ ディスク式\n（１）Ａ，Ｂ\n（２）Ａ，Ｂ，Ｃ\n（３）Ａ，Ｃ，Ｄ\n（４）Ｂ，Ｃ\n（５）Ｃ，Ｄ",
+    "images": [
+      "/exam-library/lckohyo-LC20252103/q9-p5-1.webp"
+    ],
+    "correctChoice": 1,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      5
+    ],
+    "sourceQuestionNumber": 9,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252103-q10",
+    "number": 10,
+    "text": "問１０ 温水ボイラーの温度制御に用いるオンオフ式温度調節器(電気式)に関するＡ\nからＤまでの記述のうち、適切なもののみを全て挙げた組合せは、(１)～(５)\nのうちどれか。\nＡ 感温体内の液体は、温度の上昇・下降によって膨張・収縮し、ベローズ\nやダイヤフラムの変位により、マイクロスイッチを開閉させる。\nＢ 感温体内の液体には、一般にトルエン、エーテル、アルコールなどが用\nいられる。\nＣ 保護管を用いて感温体を取り付ける場合は、保護管内にシリコングリス\nを挿入してはならない。\nＤ 温度調節器は、一般に調節温度及び比例帯の設定を行う。\n（１）Ａ，Ｂ\n（２）Ａ，Ｂ，Ｃ\n（３）Ａ，Ｂ，Ｄ\n（４）Ｂ，Ｃ，Ｄ\n（５）Ｃ，Ｄ\n〔ボイラーの取扱いに関する知識〕",
+    "images": [
+      "/exam-library/lckohyo-LC20252103/q10-p6-0.webp"
+    ],
+    "correctChoice": 1,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      6
+    ],
+    "sourceQuestionNumber": 10,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252103-q11",
+    "number": 11,
+    "text": "問１１ 油だきボイラーの点火時に発生する逆火の発生原因となる事象に関する記述\nのうち、適切でないものは次のうちどれか。\n（１）噴霧蒸気(空気)の圧力が強すぎるとき。\n（２）煙道ダンパの開度が不足しているとき。\n（３）点火の際に着火遅れが生じたとき。\n（４）空気より先に燃料を供給したとき。\n（５）複数のバーナを有するボイラーで、燃焼中のバーナの火炎を利用して次の\nバーナに点火したとき。",
+    "images": [
+      "/exam-library/lckohyo-LC20252103/q11-p6-1.webp"
+    ],
+    "correctChoice": 1,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      6
+    ],
+    "sourceQuestionNumber": 11,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252103-q12",
+    "number": 12,
+    "text": "問１２ ボイラーをたき始めるときの、各種の弁又はコックとその開閉の組合せとし\nて、適切でないものは次のうちどれか。\n（１）主蒸気弁 ………………………………………………… 閉\n（２）水面計とボイラー間の連絡管の弁又はコック ……… 閉\n（３）胴の空気抜弁 …………………………………………… 開\n（４）吹出し弁又は吹出しコック …………………………… 閉\n（５）圧力計のコック ………………………………………… 開",
+    "images": [
+      "/exam-library/lckohyo-LC20252103/q12-p7-0.webp"
+    ],
+    "correctChoice": 2,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      7
+    ],
+    "sourceQuestionNumber": 12,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252103-q13",
+    "number": 13,
+    "text": "問１３ 油だきボイラーの燃焼の維持及び調節などに関する記述のうち、適切でない\nものは次のうちどれか。\n（１）燃焼時に火炎の流れの方向を監視し、ボイラー本体及びれんが壁に火炎が\n触れないようにする。\n（２）蒸気圧力又は温水温度を一定に保つように、負荷の変動に応じて燃焼量を\n増減する。\n（３）燃焼中に突然消火の可能性があるため、監視を怠らない。\n（４）燃焼用空気量の過不足は、計測して得た燃焼ガス中のＣＯ 、ＣＯ又はＯ\n２ ２\nの値により判断する。\n（５）燃焼用空気量が適量の場合は、炎が輝白色で、炉内の見通しがきく。",
+    "images": [
+      "/exam-library/lckohyo-LC20252103/q13-p7-1.webp"
+    ],
+    "correctChoice": 5,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      7
+    ],
+    "sourceQuestionNumber": 13,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252103-q14",
+    "number": 14,
+    "text": "問１４ ボイラーにキャリオーバが発生した場合の処置に関する記述のうち、適切で\nないものは次のうちどれか。\n（１）燃焼量を下げる。\n（２）主蒸気弁を急開して蒸気圧力を下げる。\n（３）ボイラー水位が高いときは、一部を吹出しする。\n（４）ボイラー水の水質試験を行う。\n（５）ボイラー水が過度に濃縮されたときは、吹出し量を増し、その分を給水す\nる。",
+    "images": [
+      "/exam-library/lckohyo-LC20252103/q14-p7-2.webp"
+    ],
+    "correctChoice": 2,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      7
+    ],
+    "sourceQuestionNumber": 14,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252103-q15",
+    "number": 15,
+    "text": "問１５ ボイラー水位が安全低水面以下にあると気付いたときの措置に関する記述の\nうち、適切でないものは次のうちどれか。\n（１）炉筒煙管ボイラーでは、水面が煙管のある位置より低下した場合は、まず\n第一に、徐々に給水を行い煙管を冷却する。\n（２）鋳鉄製ボイラーでは、いかなる場合であっても給水しない。\n（３）燃料の供給を止めて、燃焼を停止する。\n（４）燃焼系統の換気を行い、炉を冷却する。\n（５）ボイラーが冷却してから、原因及び各部の損傷の有無を調査する。",
+    "images": [
+      "/exam-library/lckohyo-LC20252103/q15-p8-0.webp"
+    ],
+    "correctChoice": 1,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      8
+    ],
+    "sourceQuestionNumber": 15,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252103-q16",
+    "number": 16,
+    "text": "問１６ ボイラーのガラス水面計の機能試験を行う時期に関するＡからＤまでの記述\nで、必要性の高い時期のみを全て挙げた組合せは、(１)～(５)のうちどれか。\nＡ ガラス管の取替えなどの補修を行ったとき。\nＢ 水位が絶えず上下にかすかに動いているとき。\nＣ 取扱い担当者が交替し、次の者が引き継いだとき。\nＤ プライミングやホーミングが生じたとき。\n（１）Ａ，Ｃ\n（２）Ａ，Ｃ，Ｄ\n（３）Ａ，Ｄ\n（４）Ｂ，Ｃ\n（５）Ｂ，Ｃ，Ｄ",
+    "images": [
+      "/exam-library/lckohyo-LC20252103/q16-p8-1.webp"
+    ],
+    "correctChoice": 2,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      8
+    ],
+    "sourceQuestionNumber": 16,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252103-q17",
+    "number": 17,
+    "text": "問１７ ボイラーのばね安全弁に蒸気漏れが生じる原因となる事項として、適切でな\nいものは次のうちどれか。\n（１）弁体と弁座の間に、ごみなどの異物が付着している。\n（２）弁体と弁座のすり合わせが悪くなっている。\n（３）弁体と弁座の中心がずれて、当たり面の接触圧力が不均一になっている。\n（４）ばねが腐食して、弁体を押し下げる力が弱くなっている。\n（５）蒸気による熱膨張などにより、弁体円筒部と弁体ガイド部が密着している。",
+    "images": [
+      "/exam-library/lckohyo-LC20252103/q17-p8-2.webp"
+    ],
+    "correctChoice": 5,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      8
+    ],
+    "sourceQuestionNumber": 17,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252103-q18",
+    "number": 18,
+    "text": "問１８ ボイラーの休止中の満水保存法に関する記述のうち、適切でないものは次の\nうちどれか。\nせい\n（１）ボイラーの燃焼側及び煙道は、すすや灰を完全に除去して、防錆油、防錆\n剤などを塗布する。\n（２）休止期間が３か月程度以内の場合に採用される。\n（３）凍結のおそれがあるときは、採用できない。\n（４）満水保存剤は、所定の濃度になるようにボイラーに連続注入するか、又は\n間欠的に注入する。\n（５）保存水の管理のため、水素イオン指数(pＨ)のみ月に１～２回測定し、所定\nの値を維持する。",
+    "images": [
+      "/exam-library/lckohyo-LC20252103/q18-p9-0.webp"
+    ],
+    "correctChoice": 5,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      9
+    ],
+    "sourceQuestionNumber": 18,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252103-q19",
+    "number": 19,
+    "text": "問１９ ボイラー水中の不純物に関する記述のうち、適切でないものは次のうちどれ\nか。\n（１）溶存しているＯ は、鋼材の腐食の原因となる。\n２\n（２）溶存しているＣＯ は、鋼材の腐食の原因となる。\n２\n（３）スケールは、溶解性蒸発残留物が濃縮され、ドラム底部などに沈積した軟\n質沈殿物である。\n（４）スケールの熱伝導率は、炭素鋼の熱伝導率より低い。\n（５）懸濁物には、りん酸カルシウムなどの不溶物質、エマルジョン化された鉱\n物油などがある。",
+    "images": [
+      "/exam-library/lckohyo-LC20252103/q19-p9-1.webp"
+    ],
+    "correctChoice": 3,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      9
+    ],
+    "sourceQuestionNumber": 19,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252103-q20",
+    "number": 20,
+    "text": "問２０ 単純軟化法における残留硬度と処理水量の関係を示す次のグラフにおいて、\nＡ(横軸)、Ｂ(縦軸)に入る語句及びＰ点(名称)について、適切な組合せは(１)\n～(５)のうちどれか。\nＢ\nＰ点\nＡ\nＡ Ｂ Ｐ点\n（１）処理水量 残留硬度 臨界点\n（２）処理水量 残留硬度 貫流点\n（３）処理水量 残留硬度 飽和点\n（４）残留硬度 処理水量 臨界点\n（５）残留硬度 処理水量 貫流点",
+    "images": [
+      "/exam-library/lckohyo-LC20252103/q20-p10-0.webp"
+    ],
+    "correctChoice": 2,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      10
+    ],
+    "sourceQuestionNumber": 20,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252103-q21",
+    "number": 21,
+    "text": "問２１ 次の文中の 内に入れるＡからＣまでの語句の組合せとして、適切なも\nのは(１)～(５)のうちどれか。\n「燃料を空気中で加熱し、他から点火しないで自然に燃え始める最低の温度\nを Ａ という。 Ａ は、燃料が加熱されて Ｂ 反応によって発生する熱\n量と、外気に放散される熱量との Ｃ によって決まる。」\nＡ Ｂ Ｃ\n（１）着火温度 酸化 合計\n（２）着火温度 酸化 平衡\n（３）着火温度 還元 差\n（４）引火点 酸化 平衡\n（５）引火点 還元 差",
+    "images": [
+      "/exam-library/lckohyo-LC20252103/q21-p11-0.webp"
+    ],
+    "correctChoice": 2,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      11
+    ],
+    "sourceQuestionNumber": 21,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252103-q22",
+    "number": 22,
+    "text": "問２２ 重油に含まれる水分及びスラッジによる障害に関する記述のうち、適切でな\nいものは次のうちどれか。\n（１）水分が多いと、熱損失が増加する。\n（２）水分が多いと、いきづき燃焼を起こす。\n（３）水分が多いと、油管内でベーパロックを起こす。\n（４）スラッジは、弁、ろ過器、バーナチップなどを閉塞させる。\n（５）スラッジは、ポンプ、流量計、バーナチップなどを摩耗させる。",
+    "images": [
+      "/exam-library/lckohyo-LC20252103/q22-p11-1.webp"
+    ],
+    "correctChoice": 3,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      11
+    ],
+    "sourceQuestionNumber": 22,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252103-q23",
+    "number": 23,
+    "text": "問２３ ボイラーにおける燃料の燃焼の基礎的な事項に関する記述のうち、適切でな\nいものは次のうちどれか。\n（１）燃焼には、燃料、空気及び温度の三つの要素が必要である。\n（２）燃焼室における燃焼温度は、特別な場合を除き、高温維持することが望ま\nしい。\n（３）実際空気量に対する理論空気量の比を空気比という。\n（４）燃焼ガスの成分割合は、燃料の成分、空気比及び燃焼の方法によって変わ\nる。\n（５）燃焼ガスの成分には、燃焼中の水分などによるＨ₂Ｏがある。",
+    "images": [
+      "/exam-library/lckohyo-LC20252103/q23-p11-2.webp"
+    ],
+    "correctChoice": 3,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      11
+    ],
+    "sourceQuestionNumber": 23,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252103-q24",
+    "number": 24,
+    "text": "問２４ 油だきボイラーにおける重油の加熱に関するＡからＤまでの記述のうち、適\n切なもののみを全て挙げた組合せは、(１)～(５)のうちどれか。\nＡ Ａ重油や軽油は、一般に50～60 ℃に加熱する必要がある。\nＢ 加熱温度が高すぎると、いきづき燃焼となる。\nＣ 加熱温度が低すぎると、すすが発生する。\nＤ 加熱温度が低すぎると、バーナ管内でベーパロックを起こす。\n（１）Ａ，Ｂ，Ｃ\n（２）Ａ，Ｃ\n（３）Ａ，Ｄ\n（４）Ｂ，Ｃ\n（５）Ｂ，Ｃ，Ｄ",
+    "images": [
+      "/exam-library/lckohyo-LC20252103/q24-p12-0.webp"
+    ],
+    "correctChoice": 4,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      12
+    ],
+    "sourceQuestionNumber": 24,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252103-q25",
+    "number": 25,
+    "text": "問２５ ボイラーの液体燃料の供給装置に関する記述のうち、適切でないものは次の\nうちどれか。\n（１）燃料油タンクは、用途により貯蔵タンクとサービスタンクに分類される。\n（２）貯蔵タンクの貯油量は、１週間から１か月間の使用量が一般的である。\n（３）サービスタンクには、油面計、温度計、自動油面調節装置などを取り付け\nる。\n（４）油加熱器は、燃料油を加熱し、燃料油を噴霧に適した粘度とする装置であ\nる。\n（５）油ストレーナには、オートクリーナがあり、油中の水分を除去することが\nできる。",
+    "images": [
+      "/exam-library/lckohyo-LC20252103/q25-p12-1.webp"
+    ],
+    "correctChoice": 5,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      12
+    ],
+    "sourceQuestionNumber": 25,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252103-q26",
+    "number": 26,
+    "text": "問２６ 霧化媒体を必要とするボイラーの油バーナは、次のうちどれか。\n（１）プランジャ式圧力噴霧バーナ\n（２）戻り油式圧力噴霧バーナ\n（３）回転式バーナ\n（４）ガンタイプバーナ\n（５）空気噴霧式バーナ",
+    "images": [
+      "/exam-library/lckohyo-LC20252103/q26-p12-2.webp"
+    ],
+    "correctChoice": 5,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      12
+    ],
+    "sourceQuestionNumber": 26,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252103-q27",
+    "number": 27,
+    "text": "問２７ ボイラーにおける気体燃料の燃焼方式に関する記述のうち、適切でないもの\nは次のうちどれか。\n（１）拡散燃焼方式は、ガスと空気を別々にバーナに供給し、燃焼させる方法で\nある。\n（２）拡散燃焼方式は、バーナ内に可燃性混合気を作らないため逆火のおそれが\nない。\n（３）拡散燃焼方式は、火炎の広がり、長さなどの調節が難しい。\n（４）予混合燃焼方式は、安定した火炎を作りやすい。\n（５）予混合燃焼方式は、気体燃料に特有な燃焼方式である。",
+    "images": [
+      "/exam-library/lckohyo-LC20252103/q27-p13-0.webp"
+    ],
+    "correctChoice": 3,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      13
+    ],
+    "sourceQuestionNumber": 27,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252103-q28",
+    "number": 28,
+    "text": "問２８ ボイラーの燃料の燃焼により発生するＮＯ の抑制方法に関するＡからＤま\nＸ\nでの記述のうち、適切なもののみを全て挙げた組合せは、(１)～(５)のうちど\nれか。\nＡ 窒素の少ない燃料を使用する。\nＢ 燃焼温度を低くし、特に局所的高温域が生じないようにする。\nＣ 炉内燃焼ガス中の酸素濃度を高くする。\nＤ 排煙脱硝装置を設置する。\n（１）Ａ，Ｂ\n（２）Ａ，Ｂ，Ｄ\n（３）Ａ，Ｃ\n（４）Ｂ，Ｃ，Ｄ\n（５）Ｃ，Ｄ",
+    "images": [
+      "/exam-library/lckohyo-LC20252103/q28-p13-1.webp"
+    ],
+    "correctChoice": 2,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      13
+    ],
+    "sourceQuestionNumber": 28,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252103-q29",
+    "number": 29,
+    "text": "問２９ ボイラーの燃焼における一次空気及び二次空気に関する記述のうち、適切で\nないものは次のうちどれか。\n（１）油・ガスだき燃焼における一次空気は、噴射された燃料の周辺に供給され、\n初期燃焼を安定させる。\n（２）油・ガスだき燃焼における二次空気は、旋回又は交差流によって燃料と空\n気の混合を良好にして、燃焼を完結させる。\n（３）微粉炭バーナ燃焼における二次空気は、微粉炭と予混合してバーナに送入\nされる。\n（４）火格子燃焼における一次空気は、一般的な上向き通風の場合、火格子下か\nら送入される。\n（５）火格子燃焼における二次空気は、燃料層上の可燃性ガスの火炎中に送入さ\nれる。",
+    "images": [
+      "/exam-library/lckohyo-LC20252103/q29-p14-0.webp"
+    ],
+    "correctChoice": 3,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      14
+    ],
+    "sourceQuestionNumber": 29,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252103-q30",
+    "number": 30,
+    "text": "問３０ ボイラーの人工通風に用いられるファンに関する記述のうち、適切でないも\nのは次のうちどれか。\n（１）多翼形ファンは、羽根車の外周近くに、幅長で前向きの羽根を多数設けた\nものである。\n（２）多翼形ファンは、大形で重量は大きいが、効率が高い。\n（３）後向き形ファンは、高温、高圧及び大容量のボイラーに適する。\n（４）ラジアル形ファンは、中央の回転軸から放射状に６～12枚の羽根を設けた\nものである。\n（５）ラジアル形ファンは、形状が簡単で羽根の取替えが容易である。",
+    "images": [
+      "/exam-library/lckohyo-LC20252103/q30-p14-1.webp"
+    ],
+    "correctChoice": 2,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      14
+    ],
+    "sourceQuestionNumber": 30,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252103-q31",
+    "number": 31,
+    "text": "問３１ ボイラーの伝熱面積に算入する部分について、法令上、該当しないのは次の\nうちどれか。\n（１）管寄せ\n（２）煙管\n（３）水管\n（４）炉筒\n（５）過熱器管",
+    "images": [
+      "/exam-library/lckohyo-LC20252103/q31-p15-0.webp"
+    ],
+    "correctChoice": 5,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      15
+    ],
+    "sourceQuestionNumber": 31,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252103-q32",
+    "number": 32,
+    "text": "問３２ 次の文中の 内に入れるＡ及びＢの語句の組合せとして、該当する法令\nの内容と一致するものは(１)～(５)のうちどれか。\n「溶接によるボイラー(小型ボイラーを除く。)については、 Ａ 検査に合\n格した後でなければ、 Ｂ 検査を受けることができない。」\nＡ Ｂ\n（１）溶接 使用\n（２）溶接 構造\n（３）使用 構造\n（４）使用 溶接\n（５）構造 溶接",
+    "images": [
+      "/exam-library/lckohyo-LC20252103/q32-p15-1.webp"
+    ],
+    "correctChoice": 2,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      15
+    ],
+    "sourceQuestionNumber": 32,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252103-q33",
+    "number": 33,
+    "text": "問３３ ボイラー室に設置されている胴の内径が500mmで、その長さが1000mmの本体\nを被覆していないボイラー(小型ボイラーを除く。)の場合、その外壁から壁、\n配管その他のボイラーの側部にある構造物(検査及びそうじに支障のない物を\n除く。)までの距離として、法令上、許容される最小の数値は次のうちどれか。\n（１）0.15ｍ\n（２）0.30ｍ\n（３）0.45ｍ\n（４）1.20ｍ\n（５）2.00ｍ",
+    "images": [
+      "/exam-library/lckohyo-LC20252103/q33-p15-2.webp"
+    ],
+    "correctChoice": 2,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      15
+    ],
+    "sourceQuestionNumber": 33,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252103-q34",
+    "number": 34,
+    "text": "問３４ 原則として、ボイラー技士でなければ取り扱うことができないボイラーは、\n法令上、次のうちどれか。\nただし、温水ボイラーは、木質バイオマス温水ボイラーではないものとする。\n（１）伝熱面積が19ｍ２の温水ボイラー\n（２）伝熱面積が３ｍ２の蒸気ボイラーで、胴の内径が750㎜、かつ、その長さ\nが1300㎜のもの\n（３）伝熱面積が30ｍ２の気水分離器を有しない貫流ボイラー\n（４）伝熱面積が３ｍ２の蒸気ボイラーで、最高使用圧力が0.1ＭPaのもの\n（５）最大電力設備容量が75kＷの電気ボイラー",
+    "images": [
+      "/exam-library/lckohyo-LC20252103/q34-p16-0.webp"
+    ],
+    "correctChoice": 1,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      16
+    ],
+    "sourceQuestionNumber": 34,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252103-q35",
+    "number": 35,
+    "text": "問３５ ボイラー(小型ボイラーを除く。)の定期自主検査に関する項目及びその具体\n的な検査対象の装置等を示すＡからＤまでの記述のうち、該当する法令の内容\nと一致するもののみを全て挙げた組合せは、(１)～(５)のうちどれか。\n項目 具体的な検査対象の装置等\nＡ ボイラー本体 バーナタイル及び炉壁\nＢ 自動制御装置 火炎検出装置\nＣ 燃焼装置 ストレーナ\nＤ 附属装置及び附属品 煙道\n（１）Ａ，Ｂ\n（２）Ａ，Ｂ，Ｃ\n（３）Ａ，Ｄ\n（４）Ｂ，Ｃ\n（５）Ｂ，Ｃ，Ｄ",
+    "images": [
+      "/exam-library/lckohyo-LC20252103/q35-p16-1.webp"
+    ],
+    "correctChoice": 4,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      16
+    ],
+    "sourceQuestionNumber": 35,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252103-q36",
+    "number": 36,
+    "text": "問３６ 法令上、ボイラー(小型ボイラーを除く。)の変更検査を受けなければならな\nい場合は、次のうちどれか。\nただし、所轄労働基準監督署長が当該検査の必要がないと認めたボイラーで\nはないものとする。\n（１）ボイラーの空気予熱器に変更を加えたとき。\n（２）ボイラーの給水装置に変更を加えたとき。\n（３）ボイラーの過熱器に変更を加えたとき。\n（４）使用を廃止したボイラーを再び設置しようとするとき。\n（５）構造検査を受けた後、１年以上設置されなかったボイラーを設置しようと\nするとき。",
+    "images": [
+      "/exam-library/lckohyo-LC20252103/q36-p17-0.webp"
+    ],
+    "correctChoice": 3,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      17
+    ],
+    "sourceQuestionNumber": 36,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252103-q37",
+    "number": 37,
+    "text": "問３７ ボイラーの検査証に関する記述のうち、その内容が法令と一致しないものは\n次のうちどれか。\n（１）所轄労働基準監督署長は、落成検査に合格したボイラー又は落成検査の必\n要がないと認めたボイラーについて、ボイラー検査証を交付する。\n（２）原則として、ボイラー検査証の有効期間は１年とする。\n（３）ボイラー検査証の有効期間の更新を受けようとする者は、登録性能検査機\n関の性能検査を受けなければならない。\n（４）性能検査の結果により、登録性能検査機関はボイラー検査証の有効期間を、\n１年未満又は１年を超え２年以内の期間を定めて更新することができる。\n（５）事業者に変更があったときは、その変更後30日以内に、所轄労働基準監督\n署長にボイラー検査証書替申請書を提出し、その書替えを受けなければなら\nない。",
+    "images": [
+      "/exam-library/lckohyo-LC20252103/q37-p17-1.webp"
+    ],
+    "correctChoice": 5,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      17
+    ],
+    "sourceQuestionNumber": 37,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252103-q38",
+    "number": 38,
+    "text": "問３８ 鋳鉄製温水ボイラー(小型ボイラーを除く。)に取り付けなければならない附\n属品として法令に定められているものは、次のうちどれか。\n（１）温度計\n（２）ガラス水面計\n（３）験水コック\n（４）吹出しコック\n（５）水柱管",
+    "images": [
+      "/exam-library/lckohyo-LC20252103/q38-p18-0.webp"
+    ],
+    "correctChoice": 1,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      18
+    ],
+    "sourceQuestionNumber": 38,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252103-q39",
+    "number": 39,
+    "text": "問３９ 貫流ボイラー(小型ボイラーを除く。)の附属品に関する記述について、その\n内容が法令に合致しないものは、次のうちどれか。\n（１）過熱器には、ドレン抜きを備えなければならない。\n（２）ボイラーの最大蒸発量以上の吹出し量の安全弁を、ボイラー本体ではなく\n過熱器の入口付近に取り付けることができる。\n（３）給水装置の給水管には、給水弁を取り付けなければならないが、逆止め弁\nは取り付けないことができる。\n（４）起動時にボイラー水が不足している場合及び運転時にボイラー水が不足し\nた場合に、自動的に燃料の供給を遮断する装置又はこれに代わる安全装置を\n設けなければならない。\n（５）吹出し管は、設けないことができる。",
+    "images": [
+      "/exam-library/lckohyo-LC20252103/q39-p18-1.webp"
+    ],
+    "correctChoice": 2,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      18
+    ],
+    "sourceQuestionNumber": 39,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252103-q40",
+    "number": 40,
+    "text": "問４０ 給水が水道その他圧力を有する水源から供給される場合に、法令上、当該水\n源に係る管を返り管に取り付けなければならないボイラー(小型ボイラーを除\nく。)は、次のうちどれか。\n（１）立てボイラー\n（２）鋳鉄製ボイラー\n（３）炉筒煙管ボイラー\n（４）水管ボイラー\n（５）貫流ボイラー\n（終 り）",
+    "images": [
+      "/exam-library/lckohyo-LC20252103/q40-p19-0.webp"
+    ],
+    "correctChoice": 2,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      19
+    ],
+    "sourceQuestionNumber": 40,
+    "extractionStatus": "complete"
+  }
+]

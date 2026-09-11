@@ -1,0 +1,642 @@
+[
+  {
+    "id": "lckohyo-LC20252119-q1",
+    "number": 1,
+    "text": "問 １ 空気をゲージ圧力0.3ＭPaに加圧したとき、窒素の分圧(絶対圧力)に最も近\nいものは、次のうちどれか。\n（１）0.06 ＭPa\n（２）0.20 ＭPa\n（３）0.23 ＭPa\n（４）0.31 ＭPa\n（５）0.40 ＭPa",
+    "images": [
+      "/exam-library/lckohyo-LC20252119/q1-p2-0.webp"
+    ],
+    "correctChoice": 4,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      2
+    ],
+    "sourceQuestionNumber": 1,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252119-q2",
+    "number": 2,
+    "text": "問 ２ 下の図のように、深さ10ｍの水中において中性浮力の状態で静止している、\n体積500cm3で質量４kgの重りをつるした空気入りのゴム風船を、水面上まで浮\n上させたときのゴム風船の体積に最も近いものは次のうちどれか。\n水面\n10ｍ\n浮上\n重り 体積 500cm３\n質量 ４kg\n（１） 4 Ｌ\n（２） 4.5 Ｌ\n（３） 5 Ｌ\n（４） 7 Ｌ\n（５） 9 Ｌ",
+    "images": [
+      "/exam-library/lckohyo-LC20252119/q2-p2-1.webp"
+    ],
+    "correctChoice": 4,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      2
+    ],
+    "sourceQuestionNumber": 2,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252119-q3",
+    "number": 3,
+    "text": "問 ３ 気体の性質などに関し、正しいものは次のうちどれか。\n（１）窒素は、無色・無臭で、常温・常圧では化学的に安定した不活性の気体で\nある。\n（２）ヘリウムは、密度が極めて大きく、他の元素と化合しにくい気体で、呼吸\n抵抗は少ない。\n（３）酸素は、無色・無臭の気体で、生命維持に必要不可欠なものであり、空気\n中の酸素濃度が高いほど人体に良い。\n（４）一酸化炭素は、物質の不完全燃焼などによって生じる無色の有毒な気体で\nあり、物が焦げたような異臭がある。\n（５）二酸化炭素は、無色・無臭の気体で、空気中に約0.3％の割合で含まれて\nいる。",
+    "images": [
+      "/exam-library/lckohyo-LC20252119/q3-p3-0.webp"
+    ],
+    "correctChoice": 1,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      3
+    ],
+    "sourceQuestionNumber": 3,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252119-q4",
+    "number": 4,
+    "text": "問 ４ 気体の液体への溶解に関する次の文中の[ ]内に入れるＡ及びＢの語句の\n組合せとして、正しいものは(１)～(５)のうちどれか。\nただし、その気体のその液体に対する溶解度は小さく、また、その気体はそ\nの液体と反応する気体ではないものとする。\n「温度が一定のとき、一定量の液体に溶解する気体の[ Ａ ]は、その気体の\n圧力に[ Ｂ ]。」\nＡ Ｂ\n（１）体積 かかわらず一定である\n（２）体積 反比例する\n（３）体積 比例する\n（４）質量 かかわらず一定である\n（５）質量 反比例する",
+    "images": [
+      "/exam-library/lckohyo-LC20252119/q4-p3-1.webp"
+    ],
+    "correctChoice": 1,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      3
+    ],
+    "sourceQuestionNumber": 4,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252119-q5",
+    "number": 5,
+    "text": "問 ５ 水中における光や音に関し、正しいものは次のうちどれか。\n（１）水分子による光の吸収の度合いは、光の波長によって異なり、波長の長い\n青色は、波長の短い赤色より吸収されやすい。\n（２）水中では、音に対する両耳効果が増すので、音源の方向探知が容易になる。\n（３）光は、水と空気の境界では下の図のように屈折し、顔マスクを通して水中\nの物体を見た場合、実際よりも大きく見える。\n空気\n水\n入射光\nぱ\n（４）水中での音の伝播速度は、毎秒約1,400～1,500ｍである。\nぱ\n（５）水は、空気と比べ密度が大きいので、水中では音は長い距離を伝播するこ\nとができない。",
+    "images": [
+      "/exam-library/lckohyo-LC20252119/q5-p4-0.webp"
+    ],
+    "correctChoice": 4,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      4
+    ],
+    "sourceQuestionNumber": 5,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252119-q6",
+    "number": 6,
+    "text": "問 ６ 潜水の種類及び方式に関し、誤っているものは次のうちどれか。\n（１）自給気式潜水で一般的に使用されている潜水器は、開放回路型スクーバ式\n潜水器である。\n（２）スクーバ式潜水は、軟式潜水であり、潜水者は直接人体に水圧を受ける。\n（３）全面マスク式潜水は、スクーバ式潜水と比べ、長時間の潜水作業が可能で\nある。\n（４）全面マスク式潜水は、船上のコンプレッサーなどによって送気を行う潜水\nで、潜水者がボンベを携行することはない。\n（５）ヘルメット式潜水は、常時、連続的に潜水者に送気が行われる定量送気式\nの潜水方式である。",
+    "images": [
+      "/exam-library/lckohyo-LC20252119/q6-p4-1.webp"
+    ],
+    "correctChoice": 4,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      4
+    ],
+    "sourceQuestionNumber": 6,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252119-q7",
+    "number": 7,
+    "text": "問 ７ 潜水業務の危険性に関し、誤っているものは次のうちどれか。\n（１）海中の生物による危険性としては、タコ、ウツボなどによりかまれること、\nガンガゼ、ゴンズイなどにより刺されることなどがある。\n（２）潮流の速い水域でスクーバ式潜水により潜水作業を行うときは、命綱を使\n用する。\n（３）潜水作業中、海上衝突を予防するため、潜水作業船に下の図に示す様式の\n国際信号書Ａ旗板を掲揚する。\n白色\n青色\n（４）水中での溶接・溶断作業では、ガス爆発や感電の危険がある。\n（５）水中作業による事故には、潜水ホースが潜水作業船のスクリューへ接触し\nたり、巻き込まれることなどがある。",
+    "images": [
+      "/exam-library/lckohyo-LC20252119/q7-p5-0.webp"
+    ],
+    "correctChoice": 3,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      5
+    ],
+    "sourceQuestionNumber": 7,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252119-q8",
+    "number": 8,
+    "text": "問 ８ 潜水墜落又は吹き上げに関し、誤っているものは次のうちどれか｡\n（１）吹き上げは、潜水服内部の圧力と水圧の平衡が崩れ、内部の圧力が水圧よ\nり高くなったときに起こる。\n（２）潜水墜落では、一たび浮力が減少して沈降が始まると、水圧が増して浮力\nが更に減少するという悪循環を繰り返す。\n（３）ヘルメット式潜水では、潜水者が頭部を胴体より下にする姿勢をとり、逆\n立ちの状態になってしまったときに潜水墜落を起こすことがある。\n（４）ヘルメット式潜水では、潜水者に常に大量の空気が送気されており、排気\n弁の操作を誤ると吹き上げを起こすことがある。\n（５）吹き上げ時の対応を誤ると、潜水墜落を起こすことがある。",
+    "images": [
+      "/exam-library/lckohyo-LC20252119/q8-p5-1.webp"
+    ],
+    "correctChoice": 3,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      5
+    ],
+    "sourceQuestionNumber": 8,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252119-q9",
+    "number": 9,
+    "text": "問 ９ 水中拘束又は溺れに関し、誤っているものは次のうちどれか｡\n（１）気管支や肺にまで水が入ってしまい窒息状態になって溺れる場合だけでな\nく、水が気管に入っただけで呼吸が止まって溺れる場合がある。\nさ\n（２）スクーバ式潜水では、些細なトラブルからパニック状態に陥り、正常な判\n断ができなくなり、自らくわえている潜水器を外してしまって溺れることが\nある。\n（３）送気式潜水では、溺れに対する予防法として、送気ホース切断事故を生じ\nないよう、潜水作業船にクラッチ固定装置やスクリュー覆いを取り付ける。\n（４）ヘルメット式潜水では、溺れを予防するため、救命胴衣又はＢＣを必ず着\n用する。\n（５）送気式潜水では、水中拘束を予防するため、障害物を通過するときは、周\n囲を回ったり、下をくぐり抜けたりせずに、その上を越えていくようにする。",
+    "images": [
+      "/exam-library/lckohyo-LC20252119/q9-p6-0.webp"
+    ],
+    "correctChoice": 4,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      6
+    ],
+    "sourceQuestionNumber": 9,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252119-q10",
+    "number": 10,
+    "text": "問１０ 特殊な環境下における潜水に関し、誤っているものは次のうちどれか。\nきょ\n（１）暗渠内は潮流の影響などを受けにくいため、十分な照度を確保することに\nより、安全に潜水作業を行うことができる。\n（２）河川での潜水では、流れの速さに特に注意する必要があるので、命綱を使\n用したり、装着するウエイト重量を増やしたりする。\n（３）淡水よりも海水の方がわずかに浮力が大きいため、湖で行う潜水に比べて、\n海で行う潜水にはより多くのウエイトが必要となる。\n（４）冷水中での潜水で体温が低下すると、人体の運動機能が低下するとともに、\n減圧症にかかりやすくなる。\n（５）山岳部のダムなど高所域での潜水では、通常の海洋での潜水よりも長い減\n圧浮上時間が必要となる。",
+    "images": [
+      "/exam-library/lckohyo-LC20252119/q10-p6-1.webp"
+    ],
+    "correctChoice": 1,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      6
+    ],
+    "sourceQuestionNumber": 10,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252119-q11",
+    "number": 11,
+    "text": "問１１ 潜水業務に用いるコンプレッサーに関し、誤っているものは次のうちどれか。\n（１）コンプレッサーには、固定式と移動式があるが、固定式は潜水作業船に設\n置される場合が多い。\n（２）移動式のコンプレッサーは、空気槽を分離式とすることにより、重量を\n100kg程度にし、小型・軽量となっている。\n（３）コンプレッサーの圧縮効率は、圧力の上昇に伴い低下する。\n（４）ストレーナーは、コンプレッサーに吸入される外気をろ過し、ゴミなどの\n侵入を防ぐための装置である。\n（５）大出力化した原動機(主機)を備える潜水作業船は、コンプレッサー専用の\n原動機(補機)を設置して駆動するものが多い。",
+    "images": [
+      "/exam-library/lckohyo-LC20252119/q11-p7-0.webp"
+    ],
+    "correctChoice": 2,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      7
+    ],
+    "sourceQuestionNumber": 11,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252119-q12",
+    "number": 12,
+    "text": "問１２ 毎分20Ｌの呼吸を行う潜水者が、水深10ｍにおいて、内容積12Ｌ、空気圧力\n19ＭPa(ゲージ圧力)の空気ボンベを使用してスクーバ式潜水により潜水業務を\n行う場合の潜水可能時間に最も近いものは次のうちどれか。\nただし、空気ボンベの残圧が５ＭPa(ゲージ圧力)になったら浮上するものと\nする。\n（１） 37 分\n（２） 42 分\n（３） 47 分\n（４） 52 分\n（５） 57 分",
+    "images": [
+      "/exam-library/lckohyo-LC20252119/q12-p7-1.webp"
+    ],
+    "correctChoice": 2,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      7
+    ],
+    "sourceQuestionNumber": 12,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252119-q13",
+    "number": 13,
+    "text": "問１３ 送気式潜水に使用する空気槽に関し、誤っているものは次のうちどれか。\n（１）コンプレッサーから送られる圧縮空気は脈流であるが、調節用空気槽によ\nり緩和される。\n（２）調節用空気槽は、送気に含まれる水分や油分を分離する機能をもっている。\n（３）予備空気槽は、コンプレッサーの故障などの事故が発生した場合に備えて、\n必要な空気をあらかじめ蓄えておくための設備である。\n（４）始業前には、空気槽内の汚物を圧縮空気と一緒にドレーンコックから排出\nさせる。\n（５）終業後、調節用空気槽の内部には0.1ＭPa(ゲージ圧力)程度の空気を残す\nようにしておく。",
+    "images": [
+      "/exam-library/lckohyo-LC20252119/q13-p8-0.webp"
+    ],
+    "correctChoice": 5,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      8
+    ],
+    "sourceQuestionNumber": 13,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252119-q14",
+    "number": 14,
+    "text": "問１４ スクーバ式潜水における潜降の方法などに関し、誤っているものは次のうち\nどれか。\n（１）船の舷から水面までの高さが１～1.5ｍ程度であれば、片手でマスクを押\nさえ、足を先にして水中に飛び込んでも支障はない。\n（２）潜降の際は、口にくわえたレギュレーターのマウスピースに空気を吹き込\nみ、セカンドステージの低圧室とマウスピース内の水を押し出してから、呼\n吸を開始する。\n（３）ＢＣを装着している場合、インフレーターを肩より上に上げ、給気ボタン\nを押して潜降を始める。\n（４）潜水中の遊泳は、通常は両腕を伸ばして体側につけて行うが、視界のきか\nないときは、腕を前方に伸ばして障害物の有無を確認しながら行う。\n（５）マスクの中に水が入ってきたときは、深く息を吸い込んでマスクの上端を\n顔に押し付け、鼻から強く息を吹き出してマスクの下端から水を排出する。",
+    "images": [
+      "/exam-library/lckohyo-LC20252119/q14-p8-1.webp"
+    ],
+    "correctChoice": 3,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      8
+    ],
+    "sourceQuestionNumber": 14,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252119-q15",
+    "number": 15,
+    "text": "問１５ ヘルメット式潜水における浮上の方法(緊急時の措置を含む。)に関し、誤っ\nているものは次のうちどれか。\n（１）浮上の際には、さがり綱(潜降索)は使用しないようにする。\n（２）緊急浮上の場合以外は、毎分10ｍを超えない速度で浮上する。\n（３）無減圧潜水の範囲内の潜水の場合でも、緊急浮上の場合以外は、水深３ｍ\n前後で安全のため、５分ほど浮上停止を行うようにする。\n（４）緊急浮上を要する場合は、所定の浮上停止を省略し、又は所定の浮上停止\n時間を短縮し、水面まで浮上する。\n（５）吹き上げにより急速に浮上した場合には、無減圧潜水の範囲内の潜水であ\nっても、直ちに再圧処置を行うようにする。",
+    "images": [
+      "/exam-library/lckohyo-LC20252119/q15-p9-0.webp"
+    ],
+    "correctChoice": 1,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      9
+    ],
+    "sourceQuestionNumber": 15,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252119-q16",
+    "number": 16,
+    "text": "問１６ 生体の組織をいくつかの半飽和組織に分類して不活性ガスの分圧の計算を行\nうビュールマンのＺＨ-Ｌ16モデルに基づく減圧方法に関し、誤っているもの\nは次のうちどれか。\n（１）Ｍ値とは、ある環境圧力に対して、身体が許容できる各半飽和組織におけ\nる最大の不活性ガス分圧をいう。\n（２）所定の計算により求めた全ての半飽和組織での体内不活性ガス分圧が対応\nするＭ値を超えないように、必要な減圧停止時間を設定する。\n（３）減圧計算において、ある浮上停止深度で、不活性ガス分圧がＭ値を上回る\nときは、直前の浮上停止深度での浮上停止時間を増加させる。\n（４）Ｍ値は、半飽和時間が長い組織ほど大きく、潜水者が潜っている深度が深\nくなるほど小さい。\n（５）繰り返し潜水において、作業終了後、次の作業まで水上で休息する時間を\n十分に設けなかった場合には、次の作業における減圧時間がより長くなる。",
+    "images": [
+      "/exam-library/lckohyo-LC20252119/q16-p9-1.webp"
+    ],
+    "correctChoice": 4,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      9
+    ],
+    "sourceQuestionNumber": 16,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252119-q17",
+    "number": 17,
+    "text": "問１７ 下の図はヘルメット式潜水器のヘルメットをスケッチしたものであるが、図\n中に 又は で示すＡ～Ｅの部分に関し、誤っているものは次のうちど\nれか。\n斜め前から見たところ 後ろから見たところ\nＥ\nＣ\nＡ\nＤ\nＢ\nちょう\n（１）Ａの部分はシコロで、潜水服の襟ゴム部分に取り付け、押え金と蝶ねじ\nで固定する。\n（２）Ｂの部分は排気弁で、潜水者が自分の頭部を使ってこれを操作して余剰空\n気や呼気を排出する。\n（３）Ｃの部分は送気ホース取付部で、送気された空気が逆流することがないよ\nう、逆止弁が設けられている。\n（４）Ｄの部分はドレーンコックで、潜水者が送気中の水分や油分をヘルメット\nの外へ排出するときに使用する。\n（５）Ｅの部分は側面窓で、金属製格子などが取り付けられて窓ガラスを保護し\nている。",
+    "images": [
+      "/exam-library/lckohyo-LC20252119/q17-p10-0.webp"
+    ],
+    "correctChoice": 4,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      10
+    ],
+    "sourceQuestionNumber": 17,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252119-q18",
+    "number": 18,
+    "text": "問１８ スクーバ式潜水の装備に関し、誤っているものは次のうちどれか。\n（１）ボンベには、クロムモリブデン鋼などの鋼合金で製造されたスチールボン\nベと、アルミ合金で製造されたアルミボンベがある。\n（２）ボンベは、一般に、内容積が10～14Ｌで、最高充塡圧力が19.6ＭPa(ゲー\nジ圧力)である。\n（３）ボンベは、耐圧、衝撃、気密などの検査が行われ、最高充塡圧力などが刻\n印されている。\n（４）残圧計には、圧力調整器のファーストステージからボンベの高圧空気がホ\nースを通して送られ、ボンベ内の圧力が表示される。\n（５）圧力調整器は、潜水後、ボンベから取り外し、ファーストステージのキャ\nつ\nップを外したまま真水に浸け、水中でセカンドステージのパージボタンを押\nして、内部まできれいに洗い流す。",
+    "images": [
+      "/exam-library/lckohyo-LC20252119/q18-p11-0.webp"
+    ],
+    "correctChoice": 5,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      11
+    ],
+    "sourceQuestionNumber": 18,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252119-q19",
+    "number": 19,
+    "text": "問１９ 全面マスク式潜水の装備に関し、正しいものは次のうちどれか。\n（１）全面マスク式潜水器では、ヘルメット式潜水器に比べて多くの送気量が必\n要となる。\n（２）全面マスク式潜水では、送気ホースの緩み、外れなどにつながるおそれが\nあるので、足ヒレを用いてはならない。\n（３）全面マスク式潜水器のマスク内には、口と鼻を覆う口鼻マスクが取り付け\nられており、潜水者はこの口鼻マスクを介して給気を受ける。\n（４）全面マスク式潜水で使用する水中電話機用のイヤホンは、潜水中に外れる\nことがないよう、外耳道にイヤーピースを差し込むものが一般的である。\n（５）全面マスク式潜水では、保温のためドライスーツを着用し、ウエットスー\nツを着用することはない。",
+    "images": [
+      "/exam-library/lckohyo-LC20252119/q19-p11-1.webp"
+    ],
+    "correctChoice": 3,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      11
+    ],
+    "sourceQuestionNumber": 19,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252119-q20",
+    "number": 20,
+    "text": "問２０ 潜水業務に使用する装備又は器具に関し、誤っているものは次のうちどれか。\n（１）水中時計には、現在時刻や潜水経過時間を表示するだけでなく、潜水深度\nの時間的経過の記録が可能なものもある。\n（２）さがり綱(潜降索)は、丈夫で耐候性のある素材で作られたロープで、太さ\n１～２cm程度のものを使用する。\n（３）全面マスク式潜水用ドライスーツは、ブーツと一体となっており、潜水靴\nを必要としない。\n（４）スクーバ式潜水で使用するオープンヒルタイプの足ヒレは、爪先だけを差\nかかと\nし込み、踵をストラップで固定する方式である。\n（５）ヘルメット式潜水の場合、ヘルメット及び潜水服に重量があるので、潜水\n靴は、できるだけ軽量のものを使用する。\n〔高気圧障害〕",
+    "images": [
+      "/exam-library/lckohyo-LC20252119/q20-p12-0.webp"
+    ],
+    "correctChoice": 5,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      12
+    ],
+    "sourceQuestionNumber": 20,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252119-q21",
+    "number": 21,
+    "text": "問２１ 肺及び肺の障害に関し、誤っているものは次のうちどれか。\n（１）肺の中で行われる、空気と血液の間での酸素と二酸化炭素の交換は、肺胞\n及び呼吸細気管支でのみ行われている。\nくう\n（２）肺の表面と胸郭内側の面は、胸膜で覆われており、両者間の空間を胸膜腔\nという。\n（３）肺は、筋肉活動による胸郭の拡張に伴って膨らむ。\nくう\n（４）胸膜腔に気体が侵入し胸郭が広がっても肺が広がらない状態を、肺気腫と\nいう。\n（５）潜水によって生じる肺の過膨張は、浮上時に起こりやすい。",
+    "images": [
+      "/exam-library/lckohyo-LC20252119/q21-p12-1.webp"
+    ],
+    "correctChoice": 4,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      12
+    ],
+    "sourceQuestionNumber": 21,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252119-q22",
+    "number": 22,
+    "text": "問２２ 心臓及び血液循環等に関し、誤っているものは次のうちどれか。\nしょう\n（１）末梢組織から二酸化炭素を受け取った血液は、毛細血管から静脈、大静脈\nを通って心臓の右心房に戻る。\n（２）心臓は左右の心室及び心房、すなわち四つの部屋に分かれており、血液は\n左心房から大動脈を通って体全体に送り出される。\n（３）心臓の右心房に戻った静脈血は、右心室から肺動脈を通って肺に送られ、\nそこでガス交換が行われる。\n（４）心臓の左右の心房の間が卵円孔開存で通じていると、減圧障害を引き起こ\nすおそれがある。\n（５）大動脈の根元から出た冠動脈は、心臓の表面を取り巻き、心筋に酸素と栄\n養を供給する。",
+    "images": [
+      "/exam-library/lckohyo-LC20252119/q22-p13-0.webp"
+    ],
+    "correctChoice": 2,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      13
+    ],
+    "sourceQuestionNumber": 22,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252119-q23",
+    "number": 23,
+    "text": "問２３ 神経系に関し、誤っているものは次のうちどれか。\n（１）大脳は外側の皮質と内側の髄質からなり、大脳皮質には、運動機能中枢、\n感覚中枢、記憶中枢などの機能がある。\n（２）小脳は、随意運動、平衡機能などの調整に関与しており、小脳が侵される\nと運動失調が生じる。\n（３）延髄には、生命の維持に重要な呼吸中枢がある。\n（４）感覚器官からの情報を中枢に伝える神経を体性神経といい、中枢からの命\n令を運動器官に伝える神経を自律神経という。\n（５）交感神経系と副交感神経系は、各種臓器において双方の神経が分布し、相\n反する作用を有している。",
+    "images": [
+      "/exam-library/lckohyo-LC20252119/q23-p13-1.webp"
+    ],
+    "correctChoice": 4,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      13
+    ],
+    "sourceQuestionNumber": 23,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252119-q24",
+    "number": 24,
+    "text": "問２４ 人体に及ぼす水温の作用及び体温に関し、誤っているものは次のうちどれか。\n（１）体温は、代謝によって生じる産熱と、人体と外部環境の温度差に基づく放\n熱のバランスによって一定に保たれる。\n（２）体温が低下し始めると、筋肉の緊張の増強、酸素摂取量の増加などの症状\nが現れる。\n（３）水中で体温が低下すると、震え、意識の混濁や消失などを起こし、死に至\nることもある。\n（４）一般に、深部体温が35℃以下の状態を低体温症という。\n（５）重度の低体温症に陥った者への処置としては、できるだけ早く体温を回復\nさせるため、温かいシャワーか風呂に入れるようにする。",
+    "images": [
+      "/exam-library/lckohyo-LC20252119/q24-p14-0.webp"
+    ],
+    "correctChoice": 5,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      14
+    ],
+    "sourceQuestionNumber": 24,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252119-q25",
+    "number": 25,
+    "text": "問２５ 潜水によって生じる圧外傷に関し、正しいものは次のうちどれか。\n（１）圧外傷は、潜降又は浮上いずれのときでも生じ、潜降時のものをブロック、\n浮上時のものをスクィーズと呼ぶ。\nくう\n（２）潜降時の圧外傷は、潜降による圧力変化のために体腔内の空気の体積が増\nくう くう\nえることにより生じ、中耳腔、副鼻腔、面マスクの内部や潜水服と皮膚の間\nなどで生じる。\nくう\n（３）浮上時の圧外傷は、浮上による圧力変化のために体腔内の空気の体積が減\nくう\n少することにより生じ、副鼻腔、肺などで生じる。\n（４）深さ２ｍ程度の浅い場所での潜水からの浮上でも、圧外傷が生じることが\nある。\n（５）浮上時の肺圧外傷を防ぐためには、息を止めたまま浮上するとよい。",
+    "images": [
+      "/exam-library/lckohyo-LC20252119/q25-p14-1.webp"
+    ],
+    "correctChoice": 4,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      14
+    ],
+    "sourceQuestionNumber": 25,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252119-q26",
+    "number": 26,
+    "text": "くう\n問２６ 潜水による副鼻腔や耳の障害に関し、誤っているものは次のうちどれか。\nくう\n（１）潜降の途中で耳が痛くなるのは、外耳道と中耳腔との間に圧力差が生じる\nためである。\nくう\n（２）中耳腔は、耳管によって咽頭と通じているが、この管は通常は閉じている。\n（３）耳の障害による症状には、耳の痛み、閉塞感、難聴、めまいなどがある。\nがく くう くう\n（４）前頭洞、上顎洞などの副鼻腔は、管によって鼻腔と通じており、耳抜きに\nよってこの管を開いて圧力調整を行う。\nくう\n（５）副鼻腔の障害による症状には、額の周りや目・鼻の根部の痛み、鼻出血な\nどがある。",
+    "images": [
+      "/exam-library/lckohyo-LC20252119/q26-p15-0.webp"
+    ],
+    "correctChoice": 4,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      15
+    ],
+    "sourceQuestionNumber": 26,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252119-q27",
+    "number": 27,
+    "text": "問２７ 潜水業務における二酸化炭素中毒又は酸素中毒に関し、正しいものは次のう\nちどれか。\n（１）二酸化炭素中毒は、二酸化炭素が血液中の赤血球に含まれるヘモグロビン\nと強く結合し、酸素の運搬ができなくなるために起こる。\n（２）スクーバ式潜水では、二酸化炭素中毒は生じないが、ヘルメット式潜水で\nは、ヘルメット内に吐き出した呼気により二酸化炭素濃度が高くなって中毒\nを起こすことがある。\n（３）酸素中毒は、酸素分圧の高いガスの吸入によって生じ、呼吸ガス中に二酸\n化炭素が多いときには起こりにくい。\n（４）脳酸素中毒は、50kPa程度の酸素分圧の呼吸ガスを長時間呼吸したときに\n生じ、肺酸素中毒は、140～160kPa程度の酸素分圧の呼吸ガスを短時間呼吸\nしたときに生じる。\n（５）大深度潜水では、酸素中毒を防止するため、潜水深度に応じて酸素濃度を\n低くした混合ガスを用いる。",
+    "images": [
+      "/exam-library/lckohyo-LC20252119/q27-p15-1.webp"
+    ],
+    "correctChoice": 5,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      15
+    ],
+    "sourceQuestionNumber": 27,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252119-q28",
+    "number": 28,
+    "text": "問２８ 減圧症に関し、誤っているものは次のうちどれか。\n（１）減圧症は、通常、浮上後24時間以上経過した後に発症するが、長時間の潜\n水や飽和潜水では24時間以内に発症することがある。\nかゆ\n（２）減圧症は、皮膚の痒み、関節の痛みなどを呈する比較的軽症の減圧症と、\n脳、肺などが冒される比較的重症の減圧症とがある。\n（３）規定の浮上速度や浮上停止時間を順守しても減圧症にかかることがある。\nり\n（４）減圧症は、高齢者、最近外傷を受けた人、脱水症状の人などが罹患しやす\nい。\nり\n（５）作業量が多く、血流量の増える重筋作業の潜水では、減圧症に罹患しやす\nくなる。",
+    "images": [
+      "/exam-library/lckohyo-LC20252119/q28-p16-0.webp"
+    ],
+    "correctChoice": 1,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      16
+    ],
+    "sourceQuestionNumber": 28,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252119-q29",
+    "number": 29,
+    "text": "問２９ 医師が必要と認める期間、潜水業務への就業が禁止される疾病に該当しない\nものは次のうちどれか。\n（１）貧血症\n（２）白内障\n（３）メニエル病\n（４）バセドー病\n（５）関節炎",
+    "images": [
+      "/exam-library/lckohyo-LC20252119/q29-p16-1.webp"
+    ],
+    "correctChoice": 2,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      16
+    ],
+    "sourceQuestionNumber": 29,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252119-q30",
+    "number": 30,
+    "text": "問３０ 一次救命処置に関し、誤っているものは次のうちどれか。\n（１）一次救命処置は、できる限り単独で行うことは避ける。\n（２）傷病者に反応がある場合は、回復体位をとらせて安静にして、経過を観察\nする。\n（３）呼吸を確認して普段どおりの息(正常な呼吸)がない場合や約１分間観察し\nそ\nても判断できない場合は、心肺停止とみなし、心肺蘇生を開始する。\n（４）胸骨圧迫は、胸が約５cm沈む強さで、１分間に100～120回のテンポで行う。\n（５）ＡＥＤ(自動体外式除細動器)を用いた場合、電気ショックを行った後や電\nそ\n気ショック不要の音声メッセージが出たときは、胸骨圧迫を再開し心肺蘇生\nを続ける。\n〔関係法令〕",
+    "images": [
+      "/exam-library/lckohyo-LC20252119/q30-p17-0.webp"
+    ],
+    "correctChoice": 3,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      17
+    ],
+    "sourceQuestionNumber": 30,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252119-q31",
+    "number": 31,
+    "text": "問３１ 空気圧縮機による送気式潜水における空気槽に関し、法令上、誤っているも\nのは次のうちどれか。\n（１）送気を調節するための空気槽は、潜水業務従事者ごとに設けなければなら\nない。\n（２）予備空気槽を設ける場合は、潜水業務従事者ごとに設けなければならない。\n（３）送気を調節するための空気槽が予備空気槽の内容積等の基準に適合するも\nのであるときは、予備空気槽を設けることを要しない。\n（４）予備空気槽の内容積等の基準に適合する予備ボンベを潜水業務従事者に携\n行させるときは、予備空気槽を設けることを要しない。\n（５）予備空気槽内の空気の圧力は、常時、最高の潜水深度に相当する圧力以上\nでなければならない。",
+    "images": [
+      "/exam-library/lckohyo-LC20252119/q31-p17-1.webp"
+    ],
+    "correctChoice": 5,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      17
+    ],
+    "sourceQuestionNumber": 31,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252119-q32",
+    "number": 32,
+    "text": "問３２ 潜水業務に係る特別の教育に関し、法令上、誤っているものは次のうちどれ\nか。\n（１）水深10ｍ未満の場所における潜水業務に就かせるときは、特別の教育を行\nわなければならない。\n（２）潜水作業者への送気の調節を行うためのバルブ又はコックを操作する業務\nに就かせるときは、特別の教育を行わなければならない。\n（３）再圧室を操作する業務に就かせるときは、特別の教育を行わなければなら\nない。\n（４）特別の教育を行ったときは、その記録を作成して、これを３年間保存しな\nければならない。\n（５）特別の教育の科目の全部又は一部について十分な知識及び技能を有してい\nると認められる労働者については、その科目についての教育を省略すること\nができる。",
+    "images": [
+      "/exam-library/lckohyo-LC20252119/q32-p18-0.webp"
+    ],
+    "correctChoice": 1,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      18
+    ],
+    "sourceQuestionNumber": 32,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252119-q33",
+    "number": 33,
+    "text": "問３３ 潜水業務従事者に圧力調整器を使用させない潜水方式の場合、大気圧下で送\n気量が毎分240Ｌの空気圧縮機を用いて送気するとき、法令上、潜水できる最\n高の水深に最も近いものは、次のうちどれか。\n（１）10 ｍ\n（２）15 ｍ\n（３）20 ｍ\n（４）30 ｍ\n（５）40 ｍ",
+    "images": [
+      "/exam-library/lckohyo-LC20252119/q33-p18-1.webp"
+    ],
+    "correctChoice": 4,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      18
+    ],
+    "sourceQuestionNumber": 33,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252119-q34",
+    "number": 34,
+    "text": "問３４ 法令上、空気圧縮機による送気式の潜水業務を行うときは、特定の設備・器\n具について一定期間ごとに１回以上点検しなければならないと定められている\nが、次の設備・器具とその期間との組合せのうち、誤っているものはどれか。\n（１）空気圧縮機 ……………………………………… １週\n（２）水深計 …………………………………………… １か月\n（３）水中時計 ………………………………………… ３か月\n（４）送気する空気を清浄にするための装置 ……… ３か月\n（５）送気量を計るための流量計 …………………… ６か月",
+    "images": [
+      "/exam-library/lckohyo-LC20252119/q34-p19-0.webp"
+    ],
+    "correctChoice": 4,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      19
+    ],
+    "sourceQuestionNumber": 34,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252119-q35",
+    "number": 35,
+    "text": "問３５ 送気式潜水による潜水業務における連絡員に関し、法令上、定められていな\nいものは次のうちどれか。\n（１）連絡員の配置は、潜水業務従事者２人以下ごとに１人とする。\n（２）連絡員は、潜水業務従事者と連絡して、その者の潜降及び浮上を適正に行\nわせる。\n（３）連絡員は、潜水業務従事者への送気の調節を行うためのバルブ又はコック\nを操作する業務に従事する者と連絡して、潜水業務従事者に必要な量の空気\nを送気させる。\n（４）連絡員は、送気設備の故障その他の事故により、潜水業務従事者に危険又\nは健康障害の生ずるおそれがあるときは、速やかにバルブ又はコックを操作\nする業務に従事する者に連絡する。\n（５）連絡員は、ヘルメット式潜水器を用いて行う潜水業務にあっては、潜降直\n前に潜水業務従事者のヘルメットがかぶと台に結合されているかどうかを確\n認する。",
+    "images": [
+      "/exam-library/lckohyo-LC20252119/q35-p19-1.webp"
+    ],
+    "correctChoice": 4,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      19
+    ],
+    "sourceQuestionNumber": 35,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252119-q36",
+    "number": 36,
+    "text": "問３６ 潜水業務とこれに対応して潜水作業者に携行又は着用させなければならない\n物との組合せとして、法令上、正しいものは次のうちどれか。\n（１）スクーバ式潜水器による潜水業務\n………… 水中時計、水深計、コンパス、救命胴衣\n（２）ボンベ(潜水作業者に携行させたボンベを除く｡)からの給気を受けて行う\n潜水業務(通話装置がある場合)\n………… 信号索、水中時計、コンパス、救命胴衣\n（３）ボンベ(潜水作業者に携行させたボンベを除く｡)からの給気を受けて行う\n潜水業務(通話装置がない場合)\n………… 信号索、水中時計、鋭利な刃物、コンパス\n（４）空気圧縮機により送気して行う潜水業務(通話装置がある場合)\n………… 水中時計、水深計、鋭利な刃物、救命胴衣\n（５）空気圧縮機により送気して行う潜水業務(通話装置がない場合)\n………… 信号索、水中時計、水深計、鋭利な刃物",
+    "images": [
+      "/exam-library/lckohyo-LC20252119/q36-p20-0.webp"
+    ],
+    "correctChoice": 5,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      20
+    ],
+    "sourceQuestionNumber": 36,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252119-q37",
+    "number": 37,
+    "text": "問３７ 潜水業務に常時従事する労働者に対して行う高気圧業務健康診断において、\n法令上、実施することが義務付けられていない項目は次のうちどれか。\n（１）既往歴及び高気圧業務歴の調査\n（２）四肢の運動機能の検査\n（３）鼓膜及び聴力の検査\n（４）肺活量の測定\n（５）血液中の尿酸の量の検査",
+    "images": [
+      "/exam-library/lckohyo-LC20252119/q37-p20-1.webp"
+    ],
+    "correctChoice": 5,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      20
+    ],
+    "sourceQuestionNumber": 37,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252119-q38",
+    "number": 38,
+    "text": "問３８ 再圧室の点検事項に関する次の文中の[ ]内に入れるＡ及びＢの語句の組\n合せとして、法令上、正しいものは(１)～(５)のうちどれか。\n『再圧室については、設置時及びその後１か月をこえない期間ごとに、「送\n気設備及び排気設備の作動の状況」、「通話装置及び[ Ａ ]の作動の状況」、\n「電路の[ Ｂ ]の有無」、「電気機械器具及び配線の損傷その他異常の有\n無」について点検し、異常を認めたときは、直ちに補修し、又は取り替えな\nければならない。』\nＡ Ｂ\n（１）空気清浄装置 接触防止装置の異常\n（２）空気清浄装置 漏電遮断装置の異常\n（３）警報装置 漏電\n（４）警報装置 接触防止装置の異常\n（５）主室と副室間の扉 漏電",
+    "images": [
+      "/exam-library/lckohyo-LC20252119/q38-p21-0.webp"
+    ],
+    "correctChoice": 3,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      21
+    ],
+    "sourceQuestionNumber": 38,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252119-q39",
+    "number": 39,
+    "text": "問３９ 潜水士免許に関する次のＡからＤの記述について、法令上、誤っているもの\nの組合せは(１)～(５)のうちどれか。\nＡ 潜水器を用い、かつ、空気圧縮機による送気又はボンベからの給気を受\nけて、水中において行う業務は、免許を受けた者でなければ、就くことが\nできない。\nＢ 満20歳に満たない者は、免許を受けることができない。\nＣ 故意又は重大な過失により、潜水業務について重大な事故を発生させた\nときは、免許の取消しの処分を受けることがある。\nＤ 免許を受けることができる者は、潜水士免許試験に合格した者に限られ\nる。\n（１）Ａ，Ｂ\n（２）Ａ，Ｃ\n（３）Ａ，Ｄ\n（４）Ｂ，Ｄ\n（５）Ｃ，Ｄ",
+    "images": [
+      "/exam-library/lckohyo-LC20252119/q39-p21-1.webp"
+    ],
+    "correctChoice": 4,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      21
+    ],
+    "sourceQuestionNumber": 39,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20252119-q40",
+    "number": 40,
+    "text": "問４０ 潜水作業において一定の範囲内に収めなければならないとされている、潜水\n作業者が吸入する時点のガス分圧に関し、法令上、誤っているものは次のうち\nどれか。\nただし、潜水作業者が溺水しないよう必要な措置を講じて浮上を行わせる場\n合を除く。\n（１）窒素の分圧は、400kPaを超えてはならない。\n（２）ヘリウムの分圧は、300kPaを超えてはならない。\n（３）酸素の分圧は、18kPa未満であってはならない。\n（４）酸素の分圧は、160kPaを超えてはならない。\n（５）炭酸ガスの分圧は、0.5kPaを超えてはならない。\n（終 り）",
+    "images": [
+      "/exam-library/lckohyo-LC20252119/q40-p22-0.webp"
+    ],
+    "correctChoice": 2,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      22
+    ],
+    "sourceQuestionNumber": 40,
+    "extractionStatus": "complete"
+  }
+]

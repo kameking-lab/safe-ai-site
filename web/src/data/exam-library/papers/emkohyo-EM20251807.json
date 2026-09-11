@@ -1,0 +1,322 @@
+[
+  {
+    "id": "emkohyo-EM20251807-q1",
+    "number": 1,
+    "text": "問 １ 吸光光度分析法に関する次の記述のうち、誤っているものはどれか。\n１ 吸光度は、入射光の強度に依存しない。\n２ 吸光度0.3では、入射光の30％が試料液に吸収される。\n３ 可視部の測定の光源には、ハロゲンタングステンランプ又はタングステ\nンランプが用いられる。\n４ 石英セルはガラスセルに比べて、紫外光の吸収が少ない。\n５ 通常、分析には、吸収スペクトルの極大波長を用いる。",
+    "images": [
+      "/exam-library/emkohyo-EM20251807/q1-p2-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      2
+    ],
+    "sourceQuestionNumber": 1,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251807-q2",
+    "number": 2,
+    "text": "問 ２ 作業環境空気（25 ℃、１気圧）中の硫化水素濃度を測定するため、捕集液\n4.0mL に0.10L･min-１の流量で試料空気を10分間吸引した。試料を捕集した溶\n液のうち3.0mLについて発色操作を行い、その吸光度をブランクを対照として\n測定したところ 0.125 であった。硫化水素濃度が、0.25 µg･mL-１の標準溶液に\nついて同様の操作を行って測定した吸光度は0.400であった。\n硫化水素の作業環境空気中の濃度として、正しい値に最も近いものは次のう\nちどれか。\nただし、硫化水素の分子量は34.1、捕集率は 100％とする。\n１ 0.016 ppm\n２ 0.022 ppm\n３ 0.16 ppm\n４ 0.22 ppm\n５ 1.6 ppm",
+    "images": [
+      "/exam-library/emkohyo-EM20251807/q2-p2-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      2
+    ],
+    "sourceQuestionNumber": 2,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251807-q3",
+    "number": 3,
+    "text": "問 ３ ミゼットインピンジャーを用いたシアン化ナトリウムの液体捕集－吸光光度\n分析法に関する次の記述のうち、誤っているものはどれか。\n１ 捕集液は水酸化ナトリウム溶液を用いる。\n２ 捕集される粉じんは、粒径が小さくなるほど捕集率が低下する。\n３ 標準原液のシアン化物イオン濃度は、硝酸銀溶液で滴定して求める。\n４ シアン化ナトリウムを捕集した溶液は、塩酸で中和した後、発色操作を\n行う。\n５ 発色操作には、クロラミンTとピリジン-ピラゾロンを用いる。",
+    "images": [
+      "/exam-library/emkohyo-EM20251807/q3-p3-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      3
+    ],
+    "sourceQuestionNumber": 3,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251807-q4",
+    "number": 4,
+    "text": "問 ４ 次の化学物質のうち、可視部の吸光光度分析法で定量する場合に発色操作を\n必要としないものはどれか。\n１ マゼンタ\n２ クロロメチルメチルエーテル\n３ トルエンジイソシアネート（TDI）\n４ エチレンイミン\n５ p-ニトロクロロベンゼン",
+    "images": [
+      "/exam-library/emkohyo-EM20251807/q4-p3-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      3
+    ],
+    "sourceQuestionNumber": 4,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251807-q5",
+    "number": 5,
+    "text": "問 ５ 特定化学物質Ⓐとそのガスクロマトグラフ分析に用いる検出器Ⓑとの次の組\n合せのうち、不適当なものはどれか。\nⒶ Ⓑ\n１ アクリロニトリル 電子捕獲検出器（ECD）\n２ アクリルアミド フレーム熱イオン化検出器（FTD、TID）\n３ 臭化メチル 水素炎イオン化検出器（FID）\n４ ナフタレン 質量分析器（MS）\n５ 硫酸ジメチル 炎光光度検出器（FPD）",
+    "images": [
+      "/exam-library/emkohyo-EM20251807/q5-p4-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      4
+    ],
+    "sourceQuestionNumber": 5,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251807-q6",
+    "number": 6,
+    "text": "問 ６ ガスクロマトグラフ分析法に用いられる固定相液体に関する次の記述の㋑か\nら㋩までの に入る語句の組合せとして、適切なものは下のうちどれか。\n「固定相として用いられる液体は、蒸気圧が ㋑ 、かつ、分析対象物質に\n対して ㋺ があり、しかも反応性や熱分解性の低い液体が推奨される。こ\nの液体の一種であるポリエチレングリコールエーテルでは、重合度によって\n㋩ が変化する。」\n㋑ ㋺ ㋩\n１ 高く 溶解力 極性\n２ 高く 吸着力 膜厚\n３ 低く 溶解力 極性\n４ 低く 溶解力 膜厚\n５ 低く 吸着力 膜厚",
+    "images": [
+      "/exam-library/emkohyo-EM20251807/q6-p4-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      4
+    ],
+    "sourceQuestionNumber": 6,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251807-q7",
+    "number": 7,
+    "text": "問 ７ 次の特定化学物質のうち、2,4-ジニトロフェニルヒドラゾン誘導体として捕\n集された後、アセトニトリルで抽出し、ガスクロマトグラフ－質量分析法で定\n量されるものはどれか。\n１ ジメチル-2,2-ジクロロビニルホスフェイト（DDVP）\n２ 3,3'-ジクロロ-4,4'-ジアミノジフェニルメタン（MOCA）\n３ ホルムアルデヒド\n４ 酸化プロピレン\n５ 1,1-ジメチルヒドラジン",
+    "images": [
+      "/exam-library/emkohyo-EM20251807/q7-p5-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      5
+    ],
+    "sourceQuestionNumber": 7,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251807-q8",
+    "number": 8,
+    "text": "問 ８ ガスクロマトグラフ分析法で、ある化合物をカラム A で測定したときの保\n持時間とカラム B で測定したときの保持時間が同じであった。カラム A の理\n論段数が 9000 、カラムB の理論段数が 4500 の場合、カラム Bにおけるピー\nク幅（W ）とカラムAにおけるピーク幅（W ）の比（W /W ）の値は、次の\nB A B A\nうちどれか。\n１ 0.07\n２ 0.5\n３ 0.7\n４ 1.4\n５ 2.0",
+    "images": [
+      "/exam-library/emkohyo-EM20251807/q8-p5-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      5
+    ],
+    "sourceQuestionNumber": 8,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251807-q9",
+    "number": 9,
+    "text": "問 ９ 高速液体クロマトグラフ分析法に関する次の記述のうち、誤っているものは\nどれか。\n１ 高速液体クロマトグラフィーの基本構成は、溶離液槽－送液ポンプ－試\n料導入装置－カラム－検出器－データ処理装置から成る。\n２ 分離モードの選択は、分析対象物質の分子量、極性、溶媒に対する溶解\n性や解離性などの物性を考慮して決定する。\n３ 分析対象物質の検出感度を向上させるために、誘導体化反応を利用する\nことがある。\n４ 逆相クロマトグラフィーでは、極性の高い成分から順に溶出する。\n５ 逆相クロマトグラフィーでは、移動相より固定相の方が極性が高い。",
+    "images": [
+      "/exam-library/emkohyo-EM20251807/q9-p6-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      6
+    ],
+    "sourceQuestionNumber": 9,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251807-q10",
+    "number": 10,
+    "text": "問１０ 特定化学物質用の検知管Ⓐと、それに利用される反応Ⓑとの次の組合せのう\nち、誤っているものはどれか。\nⒶ Ⓑ\n１ シアン化水素用検知管 シアン化水素が反応剤と反応して酸性物\n質を生成する。\n２ 四塩化炭素用検知管 四塩化炭素が酸化剤と反応してホスゲン\nを生成する。\n３ スチレン用検知管 スチレンがpH指示薬と反応し変色させ\nる。\n４ ホルムアルデヒド用検知管 ホルムアルデヒドがリン酸ヒドロキシル\nアミンと反応してリン酸を遊離させる。\n５ アクリロニトリル用検知管 アクリロニトリルが酸化剤と反応してシ\nアン化水素を発生する。",
+    "images": [
+      "/exam-library/emkohyo-EM20251807/q10-p6-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      6
+    ],
+    "sourceQuestionNumber": 10,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251807-q11",
+    "number": 11,
+    "text": "問１１ 蛍光光度分析法に関する次の記述のうち、誤っているものはどれか。\n１ 蛍光は、励起状態の分子が基底状態に遷移する際に観測される。\n２ 蛍光は、励起波長よりも短波長側に現れる。\n３ 蛍光強度は、溶媒の種類、溶液のpH、温度の影響を受ける。\n４ キセノンランプは、分光蛍光光度計の光源に用いられる。\n５ 吸光光度分析法と比べて検出感度と選択性が高い。",
+    "images": [
+      "/exam-library/emkohyo-EM20251807/q11-p7-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      7
+    ],
+    "sourceQuestionNumber": 11,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251807-q12",
+    "number": 12,
+    "text": "問１２ 作業環境空気（25℃、１気圧）中のトルエンジイソシアネート（TDI）の濃\n度を測定するため、1.0L･min-１で10分間試料空気を1-(2-ピリジル)ピペラジ\nン（2-PP）含浸ろ紙に通気した。得られたTDI-2-PP誘導体を抽出液4.0mLで\n抽出し試料液とした。高速液体クロマトグラフで分析した結果、試料液中のこ\nの誘導体の濃度は0.15µg･mL-１であった。作業環境空気中のTDI濃度として、\n正しい値に最も近いものは次のうちどれか。\nただし、TDIとTDI-2-PP誘導体のモル質量は、それぞれ174 g･mol-１と501\ng･mol-１、ろ紙への捕集率は100％とし、TDIは全て2,4-TDIの形で存在して\nいるものとする。\n１ 1ppb\n２ 2ppb\n３ 3ppb\n４ 4ppb\n５ 5ppb",
+    "images": [
+      "/exam-library/emkohyo-EM20251807/q12-p7-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      7
+    ],
+    "sourceQuestionNumber": 12,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251807-q13",
+    "number": 13,
+    "text": "問１３ 次の化合物Ⓐについて、その構造式Ⓑが誤っているものはどれか。\nⒶ Ⓑ\nH\n2\n１ ニトログリコール O N C O\n2\nO C NO\n2\nH\n2\nNH\n2\n２ α-ナフチルアミン\nH\nC\n３ アクリロニトリル\nH C C\n2\nN\nNH\n2\nCH\n４ o-トルイジン 3\nOH\n５ ペンタクロロフェノール Cl Cl\nCl Cl\nCl",
+    "images": [
+      "/exam-library/emkohyo-EM20251807/q13-p8-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      8
+    ],
+    "sourceQuestionNumber": 13,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251807-q14",
+    "number": 14,
+    "text": "問１４ 臭化メチル及びヨウ化メチルの１気圧における物性に関する次の記述のうち、\n誤っているものはどれか。\n１ 両物質とも、アセトンによく溶ける。\n２ 両物質とも、気体の密度は空気の密度より大きい。\n３ 両物質とも、光に対して安定である。\n４ 臭化メチルの方が、ヨウ化メチルより常温（25℃）での蒸気圧が大きい。\n５ ヨウ化メチルの方が、臭化メチルより融点が高い。",
+    "images": [
+      "/exam-library/emkohyo-EM20251807/q14-p9-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      9
+    ],
+    "sourceQuestionNumber": 14,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251807-q15",
+    "number": 15,
+    "text": "問１５ 有機化合物の官能基の名称Ⓐとそれを表す式Ⓑとの次の組合せのうち、誤っ\nているものはどれか。\nⒶ Ⓑ\nO\n=\nC\n１ アルデヒド基\nH\n２ ビニル基 CH=CH\n２\n３ アゾ基 N=N\n４ イソシアネート基 O C N\n５ イミノ基 NH",
+    "images": [
+      "/exam-library/emkohyo-EM20251807/q15-p9-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      9
+    ],
+    "sourceQuestionNumber": 15,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251807-q16",
+    "number": 16,
+    "text": "問１６ 塩素の濃度測定に用いる次亜塩素酸ナトリウム溶液の有効塩素濃度の標定に\n関する次の記述の㋑から㋩までの に入る化学式又は語句の組合せとし\nて、正しいものは下のうちどれか。\n「次亜塩素酸ナトリウム溶液に塩酸とヨウ化カリウムを加え、生成した\n㋑ を ㋺ 溶液で滴定する。滴定の終点は溶液に ㋩ を加え、溶液\nの青紫色が消失する点とする。」\n㋑ ㋺ ㋩\n１ Ｉ チオ硫酸ナトリウム でんぷん\n２\n２ Ｉ チオ硫酸ナトリウム グルコース\n２\n３ Ｉ 硫酸 グルコース\n２\n４ ＨＩ チオ硫酸ナトリウム でんぷん\n５ ＨＩ 硫酸 グルコース",
+    "images": [
+      "/exam-library/emkohyo-EM20251807/q16-p10-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      10
+    ],
+    "sourceQuestionNumber": 16,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251807-q17",
+    "number": 17,
+    "text": "問１７ 吸光光度分析法における測定対象物質Ⓐとその標準原液の調製に用いる溶媒\nⒷとの組合せとして、誤っているものは次のうちどれか。\nⒶ Ⓑ\n１ シアン化カリウム 精製水\n２ α-ナフチルアミン 水酸化ナトリウム溶液\n３ クロロメチルメチルエーテル アセトン\n４ ペンタクロロフェノール 水酸化ナトリウム溶液\n５ ニトログリコール 精製水",
+    "images": [
+      "/exam-library/emkohyo-EM20251807/q17-p10-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      10
+    ],
+    "sourceQuestionNumber": 17,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251807-q18",
+    "number": 18,
+    "text": "問１８ ガスクロマトグラフ分析法により、管理濃度の1/10に相当する標準試料ガス\nを５回繰り返し分析し、平均値 cppm、標準偏差σppmの結果を得た。この測\n定法の定量下限濃度に相当する濃度として、正しいものは次のうちどれか。\n１ ３σppm\n２ 10σppm\n３ c－σppm\n４ c－３σppm\n５ c－10σppm",
+    "images": [
+      "/exam-library/emkohyo-EM20251807/q18-p11-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      11
+    ],
+    "sourceQuestionNumber": 18,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251807-q19",
+    "number": 19,
+    "text": "問１９ 次の測定対象物質のうち、固体捕集法による捕集が不適切なものはどれか。\n１ アクリロニトリル\n２ ナフタレン\n３ ベンゼン\n４ ベンゾトリクロリド\n５ オーラミン",
+    "images": [
+      "/exam-library/emkohyo-EM20251807/q19-p11-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      11
+    ],
+    "sourceQuestionNumber": 19,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251807-q20",
+    "number": 20,
+    "text": "問２０ 直接捕集法に関する次の記述のうち、誤っているものはどれか。\n１ 真空捕集瓶による捕集では、あらかじめコックの開き具合を一定にして、\n試料空気吸引に要する時間を測定しておく。\n２ 真空捕集瓶のコックのすり合わせ部には、グリースの使用を避ける。\n３ 捕集袋の内容積は、試料採取から分析までに要する時間とその間の濃度\n減衰を考慮して、１L以上とする。\n４ 試料空気から水分を取り除く場合には、ガラス管に無水硫酸カルシウム\n粒などの乾燥剤を詰めて、試料採取口の前に接続する。\n５ 電動ポンプを通して、捕集袋内に試料空気を送り採取する方法の場合、\nポンプ内の吸着に注意する必要がある。\n（終 り）",
+    "images": [
+      "/exam-library/emkohyo-EM20251807/q20-p12-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      12
+    ],
+    "sourceQuestionNumber": 20,
+    "extractionStatus": "complete"
+  }
+]

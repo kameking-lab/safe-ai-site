@@ -1,0 +1,322 @@
+[
+  {
+    "id": "emkohyo-EM20251809-q1",
+    "number": 1,
+    "text": "問 １ 放射線に関する次の記述のうち、誤っているものはどれか。\n１ X線による眼の水晶体に対する等価線量の算定には、３mm線量当量を\n用いる。\n２ 40 keV以上のγ線及びX線の場合、70 µm線量当量と１ cm線量当量の\n違いは10％以内である。\n３ カーマは、γ線やX線などの直接電離放射線によって単位質量中に生成\nされた２次荷電粒子の運動エネルギーの総和である。\n４ 作業環境測定における１cm線量当量は、均一で単一方向からの平行ビ\nームで ICRU 球全体を照射したとき、照射軸上の深さ１ cmにおける線量\n当量である。\n５ １Gyの吸収線量は、放射線の種類、物質にかかわらず照射された物質\n１kg当り１Jのエネルギーを受け取る量である。",
+    "images": [
+      "/exam-library/emkohyo-EM20251809/q1-p2-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      2
+    ],
+    "sourceQuestionNumber": 1,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251809-q2",
+    "number": 2,
+    "text": "問 ２ 放射線に関する次の記述のうち、誤っているものはどれか。\n１ 作業環境測定に用いる１cm線量当量率を表す単位は、Sv･h-１である。\n２ 空気吸収線量は、放射線の照射によって空気の単位質量あたりに吸収さ\nれたエネルギーで、単位は J･kg-１である。\n３ 照射線量率は、光子によって単位時間当たりの空気中に生成される正又\nは負の電荷量で、単位はC･s-１である。\n４ 空気中放射能濃度を表す単位は、Bq･cm－３である。\n５ 中性子放出率は、中性子源から単位時間あたりに発生する中性子の数で、\n単位はs-１である。",
+    "images": [
+      "/exam-library/emkohyo-EM20251809/q2-p2-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      2
+    ],
+    "sourceQuestionNumber": 2,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251809-q3",
+    "number": 3,
+    "text": "問 ３ 次の記述のうち、誤っているものはどれか。\n１ 原子番号は、原子核を構成する陽子の数と同じである。\n２ α崩壊は、原子核内部から陽子２個と中性子２個からなるα粒子が放出\nされる現象で、崩壊後の原子は原子番号が２つ減少する。\n３ β崩壊は、原子核内部から電子又は陽電子と、ニュートリノが放出され\nる現象で、崩壊後の原子は、電子放出の場合は原子番号が１つ増加し、陽\n電子放出の場合は１つ減少する。\n４ γ線は、励起状態に置かれた原子核がより安定な状態に遷移する際に放\n出される電磁波であり、原子番号は変化しない。\n５ 電子捕獲は、原子核が軌道電子を捕獲吸収する現象で、特性 X 線が放\n出され、原子番号が１つ増加する。",
+    "images": [
+      "/exam-library/emkohyo-EM20251809/q3-p3-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      3
+    ],
+    "sourceQuestionNumber": 3,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251809-q4",
+    "number": 4,
+    "text": "問 ４ 放射線に関する次の記述の㋑から㋩までの に入る核種、数値又は語\n句の組合せとして、正しいものは下のうちどれか。\n「直径２インチ、高さ２インチのNaI（Tl）シンチレーション検出器を用いて\nγ線エネルギー分析を行う場合、対象核種が ㋑ であると662keVの位置\nに光電ピークが観察される。そのエネルギー分解能は一般的に ㋺ ％程度\nである。また、おおよそ185keV辺りに幅の広いピーク形状のものが観察され\nる場合があるが、これは ㋩ に起因するものである。」\n㋑ ㋺ ㋩\n１ １３７ Cs ２～３ 消滅γ線\n２ １３７ Cs ６～８ 後方散乱\n３ ６０ Co ２～３ 消滅γ線\n４ ６０ Co ６～８ 消滅γ線\n５ ６０ Co ６～８ 後方散乱",
+    "images": [
+      "/exam-library/emkohyo-EM20251809/q4-p3-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      3
+    ],
+    "sourceQuestionNumber": 4,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251809-q5",
+    "number": 5,
+    "text": "問 ５ 放射線に関する次の記述の㋑から㋩までの に入る語句の組合せとして、\n正しいものは下のうちどれか。\n「原子核から放出される ㋑ と ㋺ のうち、 ㋺ はそれ自身が電荷\nを持っており、比較的短い飛程でエネルギーが失われる。一方 ㋑ と\n㋩ は、電荷を持たないので物質を透過しやすい。 ㋩ の遮蔽には、\n水などの水素を含む物質が有効である。」\n㋑ ㋺ ㋩\n１ α線 β線 γ線\n２ β線 α線 中性子線\n３ β線 中性子線 γ線\n４ γ線 α線 β線\n５ γ線 β線 中性子線",
+    "images": [
+      "/exam-library/emkohyo-EM20251809/q5-p4-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      4
+    ],
+    "sourceQuestionNumber": 5,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251809-q6",
+    "number": 6,
+    "text": "問 ６ 次の壊変様式をもつ放射性核種から放出される0.412MeVのγ線（γ ）の数\n１\nが毎秒2.0×10２であるとき、その核種の放射能の正しい値に最も近いものは、\n下のうちどれか。\nただし、励起レベル1.088MeVから放出されるγ 、γ の数の比は２：１とし、\n２ ３\n0.412 MeVからの内部転換電子（ce）の放出率は20％であるとする。\nβ－\n１\n1.088MeV\nγ\n24％ β－ ２\n２\n0.412MeV\n67％\n9.0％ γ γ ce\nβ－ ３ １、\n３\n0MeV\n１ 2.4×10２Bq\n２ 3.0×10２Bq\n３ 1.5×10３Bq\n４ 2.4×10３Bq\n５ 3.0×10３Bq",
+    "images": [
+      "/exam-library/emkohyo-EM20251809/q6-p5-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      5
+    ],
+    "sourceQuestionNumber": 6,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251809-q7",
+    "number": 7,
+    "text": "問 ７ 検出器Ⓐとこれらを用いて測定する放射性核種Ⓑとの次の組合せのうち、適\n切でないものはどれか。\nⒶ Ⓑ\n１ ３ He比例計数管 ２５２ Cf\n２ Ge半導体検出器 ３２ P\n３ NaI（Tl）シンチレーション検出器 ４０ K\n４ Si半導体検出器 ２１０ Po\n５ CsI（Tl）シンチレーション検出器 ２４１ Am",
+    "images": [
+      "/exam-library/emkohyo-EM20251809/q7-p6-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      6
+    ],
+    "sourceQuestionNumber": 7,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251809-q8",
+    "number": 8,
+    "text": "問 ８ 試料の放射能を測定する際、計測器の検出効率が10 ％の測定器を用いて試料\n及びバックグラウンドをそれぞれ30分間測定した。バックグラウンド計数率が\n150cpmだったとき、検出下限放射能として正しい値に最も近いものは次のうち\nどれか。\nただし、検出下限放射能は 3 2 σで与えられるものとし、σ はバックグラウ\nンド計数率の標準偏差である。\n１ 1.6×10-１Bq\n２ 8.6×10-１Bq\n３ 1.6×10０ Bq\n４ 8.6×10０ Bq\n５ 1.6×10１ Bq",
+    "images": [
+      "/exam-library/emkohyo-EM20251809/q8-p6-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      6
+    ],
+    "sourceQuestionNumber": 8,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251809-q9",
+    "number": 9,
+    "text": "問 ９ 放射能測定において、試料の1000秒間測定で 6400カウント、バックグラウ\nンドの 4000 秒間測定で 350 カウントであるとき、試料の正味計数率の標準偏\n差の値に最も近いものは次のうちどれか。\nただし、これらの測定において測定時間以外の測定条件は同じとする。\n１ 8.0×10-２ s-１\n２ 2.5×10-２ s-１\n３ 8.0×10-１ s-１\n４ 2.5×10０ s-１\n５ 8.0×10０ s-１",
+    "images": [
+      "/exam-library/emkohyo-EM20251809/q9-p7-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      7
+    ],
+    "sourceQuestionNumber": 9,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251809-q10",
+    "number": 10,
+    "text": "問１０ ２３９ Pu の空気中濃度モニタリングに関する次の記述の ㋑ から ㋩ までの\nに入る語句又は数値の組合せとして、正しいものは下のうちどれか。\n「人工放射性物質の空気中濃度を計測する場合、自然放射能であるラドンや\nトロンの影響を取り除く必要がある。一般的な手法として ㋑ を用いた\nα線スペクトル分析法がある。例えば２３９ Pu からのα線エネルギーは約\n㋺ MeVであることから、そのエネルギー領域に入るα線ピークを２３９ Pu\nとして計数することで、ラドンやトロンの減衰を待つことなく空気中濃度測定\nができる。この場合、２３９ Pu のα線ピーク面積を正確に測定することが重要\nであるため、表面捕集率の ㋩ ろ紙を使用することが望ましい。」\n㋑ ㋺ ㋩\n１ Si半導体検出器 ５ 高い\n２ Si半導体検出器 ８ 高い\n３ NaI（Tl）シンチレーション検出器 ８ 低い\n４ Ge半導体検出器 ５ 高い\n５ Ge半導体検出器 ８ 低い",
+    "images": [
+      "/exam-library/emkohyo-EM20251809/q10-p7-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      7
+    ],
+    "sourceQuestionNumber": 10,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251809-q11",
+    "number": 11,
+    "text": "問１１ β＋放射性核種の放射能測定に用いる検出器として、適切でないものは次の\nうちどれか。\n１ ガスフロー比例計数管\n２ ３ He比例計数管\n３ NaI（Tl）シンチレーション検出器\n４ プラスチックシンチレーション検出器\n５ 液体シンチレーション検出器",
+    "images": [
+      "/exam-library/emkohyo-EM20251809/q11-p8-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      8
+    ],
+    "sourceQuestionNumber": 11,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251809-q12",
+    "number": 12,
+    "text": "問１２ γ線エネルギー分析装置の校正用線源として、適切な核種のみの組合せは次\nのうちどれか。\n１ ３ H １４ C １４７ Pm\n２ ２２ Na １０９ Cd １３７ Cs\n３ １８ F １３７ Cs ２４１ Am\n４ １０９ Cd ２４１ Am ２５２ Cf\n５ ３２ P ４０ K ６０ Co",
+    "images": [
+      "/exam-library/emkohyo-EM20251809/q12-p8-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      8
+    ],
+    "sourceQuestionNumber": 12,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251809-q13",
+    "number": 13,
+    "text": "問１３ 液体シンチレーション検出器による放射能測定に関する次の㋑から㋥までの\n記述のうち、正しいもののみの組合せは下のうちどれか。\n㋑ 化学クエンチング及び色クエンチングは、それぞれ放射能の過少及び\n過大評価をもたらす。\n㋺ γ線外部標準線源を用いて、β線核種測定の計数効率を求めることが\nできる。\n㋩ β線のエネルギーは連続スペクトルを示すため、３ Hと１４ Cの同時測\n定はできない。\n㋥ 測定時の雑音（ノイズ）を下げるため、光電子増倍管を２台用いて、\n２台から同時に信号があった場合だけ計数（同時計数）する。\n１ ㋑ ㋩\n２ ㋑ ㋥\n３ ㋺ ㋩\n４ ㋺ ㋥\n５ ㋩ ㋥",
+    "images": [
+      "/exam-library/emkohyo-EM20251809/q13-p9-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      9
+    ],
+    "sourceQuestionNumber": 13,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251809-q14",
+    "number": 14,
+    "text": "問１４ 放射性物質の測定に関する次の記述のうち、誤っているものはどれか。\n１ 捕集用ガス容器に試料空気を直接採取する直接捕集法は、ガス状の放射\n性物質に対してのみ適用可能である。\n２ ろ過式ダストサンプラに用いるろ紙は、0.5µmの粒子を90％以上捕集\nする能力が求められる。\n３ ラドン・トロンは、放射性アルゴンよりも電離箱内壁の放射能汚染を生\nじやすい。\n４ 空気流通型の電離箱の測定値には、天然のラドンとその子孫核種の影響\nが含まれている。\n５ 1.5リットル程度のガス捕集用電離箱における電離効率は、β線のエネ\nルギーにほぼ反比例し、β線エネルギーが高くなるほど、効率は低下する。",
+    "images": [
+      "/exam-library/emkohyo-EM20251809/q14-p9-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      9
+    ],
+    "sourceQuestionNumber": 14,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251809-q15",
+    "number": 15,
+    "text": "問１５ 作業環境空気中の放射性物質Ⓐと、その捕集材又は捕集器具Ⓑとの次の組合\nせのうち、適切なもののみの組合せはどれか。\nⒶ Ⓑ\n㋑ HT シリカゲル\n㋺ H１３１IO 活性炭含浸ろ紙\n４\n㋩ ２３９ PuO コールドトラップ\n２\n㋥ １３３ Xe 捕集用電離箱\n１ ㋑ ㋺\n２ ㋑ ㋩\n３ ㋺ ㋩\n４ ㋺ ㋥\n５ ㋩ ㋥",
+    "images": [
+      "/exam-library/emkohyo-EM20251809/q15-p10-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      10
+    ],
+    "sourceQuestionNumber": 15,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251809-q16",
+    "number": 16,
+    "text": "問１６ 作業環境空気中の放射性物質濃度を測定するため、直接捕集法により試料を\n採取し、２日（48時間）後にその試料の全放射能を測定したところ３Bq であった。\n作業環境空気中の放射性物質の放射能濃度として、正しい値に最も近いものは\n次のうちどれか。\nただし、採取試料は1.1L、放射性物質の半減期は８時間とする。\n１ 1.6 × 10－２ Bq･cm－３\n２ 1.9 × 10－２ Bq･cm－３\n３ 2.0 × 10－２ Bq･cm－３\n４ 1.7 × 10－１ Bq･cm－３\n５ 2.1 × 10－１ Bq･cm－３",
+    "images": [
+      "/exam-library/emkohyo-EM20251809/q16-p10-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      10
+    ],
+    "sourceQuestionNumber": 16,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251809-q17",
+    "number": 17,
+    "text": "問１７ 作業環境空気中のトリチウムの放射能測定に関する次の㋑から㋥までの記述\nのうち、正しいもののみの組合せは下のうちどれか。\n㋑ ガス状トリチウムは、酸化させることにより、トリチウム化水蒸気と\n同様な測定が可能である。\n㋺ 空気流通型電離箱式モニターで測定する場合、他の放射性ガスとの分\n離測定は可能である。\n㋩ トリチウム化水蒸気のシリカゲルによる捕集は、１か月程度の長期の\n連続サンプリングが可能である。\n㋥ トリチウム化水蒸気の冷却凝縮捕集法では、他の放射性ガスとの分離\n測定は困難である。\n１ ㋑ ㋺\n２ ㋑ ㋩\n３ ㋺ ㋩\n４ ㋺ ㋥\n５ ㋩ ㋥",
+    "images": [
+      "/exam-library/emkohyo-EM20251809/q17-p11-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      11
+    ],
+    "sourceQuestionNumber": 17,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251809-q18",
+    "number": 18,
+    "text": "問１８ 放射性物質を取り扱う作業場において、作業環境空気中の放射能濃度が、取\n扱い核種の濃度限度の 1 /10 を超えないよう管理するために必要な測定装置の\n検出下限計数率（s-１）の値として、正しい値に最も近いものは次のうちどれか。\nただし、取扱い核種の濃度限度は5.0×10-７Bq･cm-３、測定装置の計数効率\nは25％、使用する捕集材の捕集効率は100％、捕集時間は24時間、試料空気の\n吸引流量は、捕集開始直後に 100 L･min-１、捕集終了直前に92 L･min-１とし、\n吸引流量は直線的に変化するものとする。\n１ 0.83s-１\n２ 0.91s-１\n３ 1.7 s-１\n４ 6.9 s-１\n５ 28 s-１",
+    "images": [
+      "/exam-library/emkohyo-EM20251809/q18-p11-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      11
+    ],
+    "sourceQuestionNumber": 18,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251809-q19",
+    "number": 19,
+    "text": "問１９ 作業環境中の放射線又は放射性物質の測定に関する次の記述のうち、適切で\nないものはどれか。\n１ 表面汚染用サーベイメータは、測定対象物に直接触れないよう注意しつ\nつ、出来るだけ表面直近を移動させて計数率を求めることが望ましい。\n２ GM管式サーベイメータで、保護キャップやシャッターが付属している\n測定器を用いて周辺線量当量率を測定する場合は、保護キャップを外し、\n又はシャッターを開いた状態で測定する。\n３ 定期的にスミア試験やサーベイメータなどで測定を行う場合、できるだ\nけ前回と同じ場所を測定点とする。\n４ γ線用サーベイメータによる線量測定は、地上約１m 程度の高さで行\nう。\n５ 個人線量計は、放射線入射窓を外側にして、体幹部に着用する。",
+    "images": [
+      "/exam-library/emkohyo-EM20251809/q19-p12-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      12
+    ],
+    "sourceQuestionNumber": 19,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251809-q20",
+    "number": 20,
+    "text": "問２０ 作業環境空気中の放射能濃度に関する次の記述のうち、誤っているものはど\nれか。\n１ 低エネルギーβ線を放出する核種を捕集対象とするときには、表面捕集\n率の高いろ紙の使用が望ましい。\n２ ガス捕集用電離箱の動作電圧は、飽和電離電流をとるように設定する。\n３ ガス捕集用電離箱を用いた直接捕集法における検出下限濃度は、捕集容\n器の容積に依存しない。\n４ ガス捕集用電離箱において、β線に対する電離効率は、α線に対する電\n離効率より低い。\n５ 取り扱う核種が明らかで、かつ、複数の場合は、濃度限度が最も低い核\n種が全放射能を占めるとして良い。\n（終 り）",
+    "images": [
+      "/exam-library/emkohyo-EM20251809/q20-p12-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      12
+    ],
+    "sourceQuestionNumber": 20,
+    "extractionStatus": "complete"
+  }
+]

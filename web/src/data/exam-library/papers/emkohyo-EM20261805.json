@@ -1,0 +1,322 @@
+[
+  {
+    "id": "emkohyo-EM20261805-q1",
+    "number": 1,
+    "text": "問 １ 次の有機溶剤のうち、25 ℃における飽和蒸気圧が最も小さいものはどれか。\n１ エチレングリコールモノメチルエーテル\n２ 1,1,1 -トリクロロエタン\n３ 二硫化炭素\n４ n-ヘキサン\n５ メチルエチルケトン",
+    "images": [
+      "/exam-library/emkohyo-EM20261805/q1-p2-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      2
+    ],
+    "sourceQuestionNumber": 1,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261805-q2",
+    "number": 2,
+    "text": "問 ２ 次の有機溶剤のうち、極性が最も高いものはどれか。\n１ トルエン\n２ テトラヒドロフラン\n３ クロロベンゼン\n４ イソブチルアルコール\n５ 酢酸イソプロピル",
+    "images": [
+      "/exam-library/emkohyo-EM20261805/q2-p2-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      2
+    ],
+    "sourceQuestionNumber": 2,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261805-q3",
+    "number": 3,
+    "text": "問 ３ アセトン、エチレングリコールモノエチルエーテルアセテート、キシレン、\n酢酸イソブチル、N,N-ジメチルホルムアミドの分子中に含まれる酸素原子の合\n計数として、正しいものは次のうちどれか。\n１ 7\n２ 8\n３ 9\n４ 10\n５ 11",
+    "images": [
+      "/exam-library/emkohyo-EM20261805/q3-p3-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      3
+    ],
+    "sourceQuestionNumber": 3,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261805-q4",
+    "number": 4,
+    "text": "問 ４ 環境空気中の有機溶剤の直接捕集法とその試料の取扱いに関する次の記述の\nうち、誤っているものはどれか。\n１ 真空捕集びんに試料を採取する際の空気吸引流量は一定ではない。\n２ 新しい捕集袋を使用する場合、内面からの分析妨害物質の発生を考慮す\nる。\n３ 捕集袋の内容積は、５L以上とする。\n４ 個人サンプリング法に用いるキャニスターは、一般に容量 400 ～ 600 mL\nのものが使用される。\n５ オリフィス式抵抗を利用したキャニスターは、空気吸引流量は一定に保\nたれる。",
+    "images": [
+      "/exam-library/emkohyo-EM20261805/q4-p3-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      3
+    ],
+    "sourceQuestionNumber": 4,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261805-q5",
+    "number": 5,
+    "text": "問 ５ 固体捕集法に用いられる捕集剤に関する次の記述のうち、誤っているものは\nどれか。\n１ シリカゲルは、極性物質の捕集に適している。\n２ 活性炭は、無極性物質に対する吸着力が強い。\n３ 活性炭は、湿度の影響を受けにくい。\n４ ポーラスポリマービーズは、活性炭に比べて捕集容量が小さい。\n５ ポーラスポリマービーズでは、活性炭に比べて、不安定な化合物の変質\nが起こりやすい。",
+    "images": [
+      "/exam-library/emkohyo-EM20261805/q5-p4-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      4
+    ],
+    "sourceQuestionNumber": 5,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261805-q6",
+    "number": 6,
+    "text": "問 ６ 有機溶剤の受動型試料採取機器（パッシブサンプラー）に関する次の記述の\nうち、誤っているものはどれか。\n１ サンプリング原理は、拡散現象を利用している。\n２ サンプリング速度は、拡散係数（cm２・min-１）に比例する。\n３ サンプリング速度は、温度や気流の影響を受けない。\n４ サンプリング速度は、サンプラーの構造により異なる。\n５ サンプリング開始時刻は、捕集面開口部を開放した時刻とする。",
+    "images": [
+      "/exam-library/emkohyo-EM20261805/q6-p4-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      4
+    ],
+    "sourceQuestionNumber": 6,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261805-q7",
+    "number": 7,
+    "text": "問 ７ 検知管法に関する次の記述のうち、誤っているものはどれか。\n１ 主成分の検知管のみを用いた混合有機溶剤の測定が許可されている場合\nの濃度の換算値は、検知管の指示値に換算値変換係数を乗じて求める。\n２ 主成分の検知管のみを用いた混合有機溶剤の測定が許可されている場合、\n主成分の管理濃度の1/10が精度よく測定できるものを選定する。\n３ クロム（Ⅵ）の還元反応を用いた酢酸エチルの検知管は、アセトンが\n共存すると妨害となる。\n４ 試料空気の吸引に電動吸引ポンプを用いる検知管の使用は認められてい\nない。\n５ 検知管法は有機溶剤による脱着操作が不要である。",
+    "images": [
+      "/exam-library/emkohyo-EM20261805/q7-p5-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      5
+    ],
+    "sourceQuestionNumber": 7,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261805-q8",
+    "number": 8,
+    "text": "問 ８ ポリエチレングリコール 20 M を固定相液体としたカラムを用いるガスクロ\nマトグラフ分析において、トルエンより保持時間の長い有機溶剤は、次のうち\nどれか。\n１ メタノール\n２ 二硫化炭素\n３ ｍ-キシレン\n４ 酢酸メチル\n５ メチルエチルケトン",
+    "images": [
+      "/exam-library/emkohyo-EM20261805/q8-p5-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      5
+    ],
+    "sourceQuestionNumber": 8,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261805-q9",
+    "number": 9,
+    "text": "問 ９ ガスクロマトグラフ分析法のキャリアガスに関する次の記述のうち、誤って\nいるものはどれか。\n１ キャリアガスとして、水素を使用することはできない。\n２ 溶出ピークの幅は、カラム内キャリアガスの渦流拡散の影響を受ける。\n３ カラムの理論段数は、キャリアガスの種類が関係する。\n４ 内径 3 mm の充填カラムでは、キャリアガス流量が 20 ～ 30 mL･min-１が適切\nである。\n５ 電子捕獲検出器（ECD）には、キャリアガスとして、窒素を使用するこ\nとができる。",
+    "images": [
+      "/exam-library/emkohyo-EM20261805/q9-p6-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      6
+    ],
+    "sourceQuestionNumber": 9,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261805-q10",
+    "number": 10,
+    "text": "問１０ 同族化合物の複数成分を含む試料を分析する際、ガスクロマトグラフの温度\n設定に関する次の記述の㋑から㋩の に入る語句の組合せとして、正しい\nものは下のうちどれか。\n「カラム温度は分析対象物質の沸点を基にして決められるが、カラム温度が\n㋑ ほど試料成分の固定相への分配が ㋺ なるので、一般に、試料成\n分のピークとピークの間隔は ㋩ なる。」\n㋑ ㋺ ㋩\n１ 低い 小さく 狭く\n２ 低い 小さく 広く\n３ 低い 大きく 広く\n４ 高い 小さく 広く\n５ 高い 大きく 狭く",
+    "images": [
+      "/exam-library/emkohyo-EM20261805/q10-p6-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      6
+    ],
+    "sourceQuestionNumber": 10,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261805-q11",
+    "number": 11,
+    "text": "問１１ ガスクロマトグラフ分析法に関する次の記述のうち、誤っているものはどれ\nか。\n１ カラムの長さが２倍になると、ピーク幅は２倍になる。\n２ カラムの内径が小さいほど、理論段数は大きくなる。\n３ 保持時間が同一の場合、理論段数が大きいほどピーク幅は狭くなる。\n４ カラムの理論段相当高さを最小にするキャリアガス流速が存在する。\n５ カラムの長さを短くするためには、理論段相当高さが小さいものを選ぶ。",
+    "images": [
+      "/exam-library/emkohyo-EM20261805/q11-p7-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      7
+    ],
+    "sourceQuestionNumber": 11,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261805-q12",
+    "number": 12,
+    "text": "問１２ ガスクロマトグラフ分析法で用いられるキャピラリカラムに関する次の記述\nのうち、誤っているものはどれか。\n１ 充塡カラムと比較して、試料負荷量が多いので、導入量を多くすること\nができる。\n２ カラムの内面は、固定相液体を薄膜状に塗布する基材となるので、その\n表面を不活性化することは重要である。\n３ 理論段数が大きいので、多成分を含む試料の分離分析に適している。\n４ 一般に、カラム温度が高いほど、試料成分の保持時間が短くなる。\n５ キャリアガス流量が小さいので、水素炎イオン化検出器（FID）を取り\n付けた装置では、検出器部でメイクアップガスを追加する必要がある。",
+    "images": [
+      "/exam-library/emkohyo-EM20261805/q12-p7-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      7
+    ],
+    "sourceQuestionNumber": 12,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261805-q13",
+    "number": 13,
+    "text": "問１３ ガスクロマトグラフ分析法に関する次の記述のうち、誤っているものはどれ\nか。\n１ カラムの長さが２倍になると、保持時間及び理論段数は共に約２倍にな\nる。\n２ 通常、検出器の温度は、カラム温度より高く設定する。\n３ カラムの分離能は、移動相の線速度の影響を受ける。\n４ 移動相と固定相との間の分配平衡は、速やかに成立する。\n５ カラムの液相の膜厚が厚くなると、保持時間は短くなる。",
+    "images": [
+      "/exam-library/emkohyo-EM20261805/q13-p8-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      8
+    ],
+    "sourceQuestionNumber": 13,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261805-q14",
+    "number": 14,
+    "text": "問１４ ガスクロマトグラム上に二つのピーク、A及び Bがあり、保持時間が Aは\n142 秒、Bは 194 秒であった。ピーク幅については、Aは 4 秒 、Bは 6 秒であ\nった。分離度として、正しい値に最も近いものは次のうちどれか。\n１ 0.5\n２ 1\n３ 5\n４ 10\n５ 15",
+    "images": [
+      "/exam-library/emkohyo-EM20261805/q14-p8-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      8
+    ],
+    "sourceQuestionNumber": 14,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261805-q15",
+    "number": 15,
+    "text": "問１５ ガスクロマトグラフ質量分析法に関する次の記述のうち、誤っているものは\nどれか。\n１ 電子イオン化法は、熱電子を利用してイオン化する方法である。\n２ 化学イオン化法は、試薬ガスから生成したイオンでイオン化する方法で\nある。\n３ 電子イオン化法は、化学イオン化法に比べて分子イオンの開裂が起こり\nにくい。\n４ 質量分離部では、質量電荷比（m/z）の違いによって分離が行われる。\n５ 定量は、ターゲットイオンのピーク面積を用いて行う。",
+    "images": [
+      "/exam-library/emkohyo-EM20261805/q15-p9-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      9
+    ],
+    "sourceQuestionNumber": 15,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261805-q16",
+    "number": 16,
+    "text": "問１６ 吸光光度分析法に関する次の記述のうち、誤っているものはどれか。\n１ 発色反応は、発色までの時間が比較的短時間であること、発色液の発色\nの状態が安定であることが望ましい。\n２ 通常、青色溶液の可視部の主な吸収波長域は、赤色溶液のそれより長波\n長側にある。\n３ 定量分析の測定波長として、吸収極大を示す波長又は共存物質や発色試\n薬自身による影響のない波長を選ぶ。\n４ 液層の長さが同一の場合、透過率（％）の値が大きいほど、対象物質の\n試料液中の濃度は高い。\n５ 溶液の濃度1mol･L-１、かつ、液層の長さ1cmのときの吸光度の値を\nモル吸光係数という。",
+    "images": [
+      "/exam-library/emkohyo-EM20261805/q16-p9-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      9
+    ],
+    "sourceQuestionNumber": 16,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261805-q17",
+    "number": 17,
+    "text": "問１７ 吸光光度分析法に関する次の記述の㋑から㋩までの に入る語句の組\n合せとして、正しいものは下のうちどれか。\n「300 nmにおいて吸光度を測定する場合、光源には ㋑ を使用し、光源\nからの光を ㋺ によって単色光とした後、 ㋩ に入れた試料液を透過\nさせる。」\n㋑ ㋺ ㋩\n１ 重水素ランプ モノクロメータ ガラスセル\n２ 重水素ランプ モノクロメータ 石英セル\n３ タングステンランプ スリット プラスチックセル\n４ タングステンランプ スリット ガラスセル\n５ タングステンランプ モノクロメータ 石英セル",
+    "images": [
+      "/exam-library/emkohyo-EM20261805/q17-p10-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      10
+    ],
+    "sourceQuestionNumber": 17,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261805-q18",
+    "number": 18,
+    "text": "問１８ 捕集率が同じ２本のミゼットインピンジャーを直列に連結して、ある有機溶\n剤蒸気の捕集を行ったところ、１本目には0.800mgの有機溶剤が、２本目に\nは0.0600mgの有機溶剤が捕集された。\nこのミゼットインピンジャー１本の捕集率（％）として、正しい値は次のう\nちどれか。\n１ 86.0％\n２ 88.8％\n３ 91.2％\n４ 92.5％\n５ 93.0％",
+    "images": [
+      "/exam-library/emkohyo-EM20261805/q18-p10-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      10
+    ],
+    "sourceQuestionNumber": 18,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261805-q19",
+    "number": 19,
+    "text": "問１９ 酢酸エチルを含む塗料を用いた塗装作業を行う作業者５名に、能動型試料採\n取機器（アクティブサンプラー）を装着して、C測定を６時間実施した。作業\n後に採取機器を回収し、捕集された酢酸エチルを溶媒 2 mLで脱着し、ガスク\nロマトグラフで分析したところ、１名の分析結果として酢酸エチル1750.0\nµg･mL-１が得られた。この１名のC測定の測定値として、正しい値に最も近い\nものは次のうちどれか。\nただし、吸引流量：0.1 L･min-１ 、酢酸エチルのモル質量：88.1 g･mol-１、\n脱着率：90%とする。また、25℃、１気圧下とする。\n１ 3ppm\n２ 15ppm\n３ 30ppm\n４ 60ppm\n５ 120ppm",
+    "images": [
+      "/exam-library/emkohyo-EM20261805/q19-p11-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      11
+    ],
+    "sourceQuestionNumber": 19,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261805-q20",
+    "number": 20,
+    "text": "問２０ ガスクロマトグラフ分析法に用いる検量線に関する次の記述のうち、誤って\nいるものはどれか。\n１ 内標準法で用いられる内標準物質には、目的物質と物理的・化学的によ\nく似ており、実際の試料中に含まれず、かつ、測定を妨害しない物質を選\n択する。\n２ 内標準法では、ガスクロマトグラフに導入した試料の体積を厳密に測定\nする必要がない。\n３ 標準溶液は、対象の標準物質を脱着溶媒で適切な濃度範囲内に希釈した\nものを用いる。\n４ 水素炎イオン化検出器（FID）は検量線の直線範囲が広いため、標準試\n料の濃度範囲を超える高濃度の際は、検量線を延長して定量を行う。\n５ 比較的高濃度の溶液を標準原液として冷暗所に保管し、検量線作成の都\n度、適切に希釈して標準系列液を調製する。\n（終 り）",
+    "images": [
+      "/exam-library/emkohyo-EM20261805/q20-p12-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      12
+    ],
+    "sourceQuestionNumber": 20,
+    "extractionStatus": "complete"
+  }
+]

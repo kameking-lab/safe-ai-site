@@ -1,0 +1,642 @@
+[
+  {
+    "id": "lckohyo-LC20260405-2-q1",
+    "number": 1,
+    "text": "問 １ 水管ボイラーの特徴に関する記述について、適切でないものは次のうちどれ\nか。\n（１）構造上、低圧から高圧まで適しており、大容量のものまで製作することが\nできる。\n（２）燃焼室を自由な大きさに作れるので、燃焼状態がよく、種々の燃料及び燃\n焼方式に適応できる。\n（３）伝熱面積を大きくすることができるので、一般に熱効率を高くできる。\n（４）伝熱面積当たりの保有水量が少ないので、起動から所要蒸気発生までの時\n間が短い。\n（５）良質な給水を必要とする構造で、戻り燃焼方式を採用して、燃焼効率を高\nめているものや自動化させたものが多い。",
+    "images": [
+      "/exam-library/lckohyo-LC20260405-2/q1-p2-0.webp"
+    ],
+    "correctChoice": 5,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      2
+    ],
+    "sourceQuestionNumber": 1,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20260405-2-q2",
+    "number": 2,
+    "text": "問 ２ ボイラー各部の構造及び強さに関する記述について、適切でないものは次の\nうちどれか。\n（１）胴の長手方向の継手は、主に曲げ応力が生じ、周方向の継手は、主に引張\n応力が生じる。\n（２）炉筒は、外面に圧力を受けるため、真円に作る。\n（３）内部の圧力によって生じる周方向の引張応力は、胴と鏡板の厚さが同じ場\n合、内部の圧力によって生じる軸方向の引張応力の２倍となる。\n（４）ガセットステーの鏡板への取付部の下端と、炉筒との間には、ブリージン\nグスペースを設ける。\n（５）半だ円体形鏡板は、同材質、同径、同厚の場合、皿形鏡板より高強度とな\nる。",
+    "images": [
+      "/exam-library/lckohyo-LC20260405-2/q2-p2-1.webp"
+    ],
+    "correctChoice": 1,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      2
+    ],
+    "sourceQuestionNumber": 2,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20260405-2-q3",
+    "number": 3,
+    "text": "問 ３ ボイラーの附属設備及び附属品に関する記述について、適切でないものは次\nのうちどれか。\n（１）空気予熱器は、熱源として蒸気又は煙道ガスを用いて燃焼用空気を予熱す\nる装置である。\n（２）減圧装置は、発生蒸気の圧力と使用箇所での蒸気圧力の差が大きいとき又\nは使用箇所での蒸気圧力を一定に保ちたいときに用いられる装置である。\n（３）蒸気トラップは、蒸気使用設備中にたまったドレンを自動的に排出する装\n置である。\n（４）過熱器は、ボイラー本体で発生した飽和水を更に加熱して飽和蒸気にする\n設備である。\n（５）エコノマイザは、燃焼ガスの余熱を利用してボイラー給水を予熱する設備\nである。",
+    "images": [
+      "/exam-library/lckohyo-LC20260405-2/q3-p3-0.webp"
+    ],
+    "correctChoice": 4,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      3
+    ],
+    "sourceQuestionNumber": 3,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20260405-2-q4",
+    "number": 4,
+    "text": "問 ４ ボイラーの主要材料である鋼材の性質に関するＡからＤまでの記述について、\n適切でないもののみを全てあげた組合せは、(１)～(５)のうちどれか。\nＡ 応力とは、材料に外力が加わった際に、材料中に生じる抵抗力をいう。\nＢ ひずみとは、外力やその応力により、材料中に生じるクリープ現象をい\nう。\nＣ 伸びとは、引張試験における元の試験片の長さを、試験片の破断までの\n伸び量で除した値(％)をいう。\nＤ 降伏点とは、弾性限度を少し超え、わずかな力で変形が急激に大きくな\nる直前の応力をいう。\n（１）Ａ，Ｂ，Ｃ\n（２）Ａ，Ｂ，Ｄ\n（３）Ａ，Ｄ\n（４）Ｂ，Ｃ\n（５）Ｃ，Ｄ",
+    "images": [
+      "/exam-library/lckohyo-LC20260405-2/q4-p3-1.webp"
+    ],
+    "correctChoice": 4,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      3
+    ],
+    "sourceQuestionNumber": 4,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20260405-2-q5",
+    "number": 5,
+    "text": "問 ５ 炭素鋼の成分に関する記述について、適切でないものは次のうちどれか。\n（１）マンガンは、製鋼のときに脱酸剤として添加され、適量であれば結晶をち\n密にして、じん性を増す。\n（２）りんは、製鋼のときに不純物として入り、適量であれば伸びを増す。\n（３）けい素は、製鋼のとき脱酸剤として添加され、その量が増すと硬さや強さ\nを増すが、伸びや衝撃値が減少する。\n（４）炭素含有量が多くなると、硬さや強さは増すが、伸びが減少する。\n（５）溶接を行うボイラー用鋼材は、炭素含有量が0.35％以下のものを使用する。\n〔ボイラーの工作及び修繕方法に関する知識〕",
+    "images": [
+      "/exam-library/lckohyo-LC20260405-2/q5-p4-0.webp"
+    ],
+    "correctChoice": 2,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      4
+    ],
+    "sourceQuestionNumber": 5,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20260405-2-q6",
+    "number": 6,
+    "text": "問 ６ 溶接で製造するボイラーのＡからＤまでの部位について、溶接を避けなけれ\nばならない部位を全てあげた組合せは、(１)～(５)のうちどれか。\nＡ 著しく高温にさらされる、炉筒上部の長手継手部分\nＢ 応力集中が起きる、厚さが異なる板の突合せ部分\nＣ 圧縮応力だけを受ける部分\nＤ 著しく曲げ応力を受ける、皿形鏡板のすみの丸みがある部分\n（１）Ａ，Ｂ，Ｃ\n（２）Ａ，Ｂ，Ｄ\n（３）Ａ，Ｃ\n（４）Ｂ，Ｄ\n（５）Ｃ，Ｄ",
+    "images": [
+      "/exam-library/lckohyo-LC20260405-2/q6-p4-1.webp"
+    ],
+    "correctChoice": 2,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      4
+    ],
+    "sourceQuestionNumber": 6,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20260405-2-q7",
+    "number": 7,
+    "text": "問 ７ ボイラーのステーの溶接による取付けに関する記述について、適切でないも\nのは次のうちどれか。\n（１）管ステーは、溶接前に軽くころ広げを行う。\n（２）管ステーの溶接の脚長は４mm以上、かつ、管の厚さ以上とする。\n（３）管ステーの厚さは、４mm以上とする。\n（４）ガセットステーの胴板への取付けは、Ｋ形溶接、レ形溶接又は両側すみ肉\n溶接とする。\n（５）ガセットステーの鏡板への取付けは、主として両側すみ肉溶接とする。",
+    "images": [
+      "/exam-library/lckohyo-LC20260405-2/q7-p5-0.webp"
+    ],
+    "correctChoice": 5,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      5
+    ],
+    "sourceQuestionNumber": 7,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20260405-2-q8",
+    "number": 8,
+    "text": "問 ８ ボイラーの胴の溶接継手において、重ね溶接を行ってはならない部分は、次\nのうちどれか。\n（１）板の厚さが14㎜の胴の長手継手\n（２）板の厚さが12㎜のドームの取付部\n（３）強め材の取付部\n（４）板の厚さが12㎜の裏当金の取付部\n（５）板の厚さが14mmの胴の周継手",
+    "images": [
+      "/exam-library/lckohyo-LC20260405-2/q8-p5-1.webp"
+    ],
+    "correctChoice": 1,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      5
+    ],
+    "sourceQuestionNumber": 8,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20260405-2-q9",
+    "number": 9,
+    "text": "問 ９ ボイラーの切り継ぎ溶接法による溶接修繕に関する記述について、適切でな\nいものは次のうちどれか。\n（１）切り継ぎ溶接法は、膨出、焼損などによってその部分の材料が劣化してい\nる場合に行う。\n（２）切り継ぎ溶接法は、損傷部を切除し、切り取り穴に同材質、同板厚さ以上\nの当て金を重ねて溶接する方法である。\nく\n（３）切り取り部の形状は、できるだけ円形又は短い方を長手方向に配置した矩\n形又は長円形とする。\n（４）溶接は、継手線の収縮量の大きい方から小さい方の順に行う。\n（５）成形を必要とする継ぎ板は、開先加工を行った後に成形加工を行う。",
+    "images": [
+      "/exam-library/lckohyo-LC20260405-2/q9-p5-2.webp"
+    ],
+    "correctChoice": 2,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      5
+    ],
+    "sourceQuestionNumber": 9,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20260405-2-q10",
+    "number": 10,
+    "text": "問１０ ボイラーの漏止め溶接法による溶接修繕について、適切でないものは次のう\nちどれか。\n（１）漏止め溶接を行った場合、溶接部は溶接後熱処理を省略することができる。\n（２）漏止め溶接は、気密性を確実にするために行う。\n（３）漏止め溶接部ののど厚は、できるだけ小さくする。\n（４）水管の取付部は漏止め溶接を行うことができる。\n（５）再熱管の取付部は、発生した過熱蒸気の影響があるので、漏止め溶接をす\nることができない。\n〔溶接施行方法の概要に関する知識〕",
+    "images": [
+      "/exam-library/lckohyo-LC20260405-2/q10-p6-0.webp"
+    ],
+    "correctChoice": 5,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      6
+    ],
+    "sourceQuestionNumber": 10,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20260405-2-q11",
+    "number": 11,
+    "text": "問１１ 溶接用ジグの使用目的に関するＡからＥまでの記述について、適切なものの\nみを全てあげた組合せは、(１)～(５)のうちどれか。\nＡ 溶接部のビード下割れを防止する。\nＢ 溶接のひずみを防止する。\nＣ ラミネーションを防止する。\nＤ 寸法精度を向上させる。\nＥ 溶接部の止端割れを防止する。\n（１）Ａ，Ｂ，Ｅ\n（２）Ａ，Ｃ\n（３）Ａ，Ｄ，Ｅ\n（４）Ｂ，Ｄ\n（５）Ｃ，Ｄ，Ｅ",
+    "images": [
+      "/exam-library/lckohyo-LC20260405-2/q11-p6-1.webp"
+    ],
+    "correctChoice": 4,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      6
+    ],
+    "sourceQuestionNumber": 11,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20260405-2-q12",
+    "number": 12,
+    "text": "問１２ 溶接アークの性質に関する記述について、適切でないものは次のうちどれか。\n（１）電極間にアークを発生させた場合、両極面に電極点と呼ばれる輝く部分が\nできる。\n（２）直流でアークの長さが一定で、数アンペアの小電流のときは、電流が増加\nするとともに電圧も増加する。\n（３）熱源が鉄アークの場合には、その温度は約6000℃に達する。\n（４）交流の場合は、無負荷電圧を直流の場合より高くしたり、高周波電流を併\n用したりして、アークの安定化を図る。\n（５）交流の場合は、アークが周波数の２倍分の明滅が生じるため、直流の場合\nより維持が困難である。",
+    "images": [
+      "/exam-library/lckohyo-LC20260405-2/q12-p7-0.webp"
+    ],
+    "correctChoice": 2,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      7
+    ],
+    "sourceQuestionNumber": 12,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20260405-2-q13",
+    "number": 13,
+    "text": "問１３ アーク溶接に関するＡからＥまでの記述について、適切なもののみを全てあ\nげた組合せは、(１)～(５)のうちどれか。\nＡ ブローホールとは、ビードの終端にできるくぼみをいう。\nＢ クレータとは、溶着金属中に生じる球状又はほぼ球状の空洞をいう。\nＣ スパッタとは、溶接中に飛散するスラグ及び金属粒をいう。\nＤ ビードとは、１回のパスによって作られた溶接金属をいう。\nＥ スラグとは、溶接部に生じる非金属物質をいう。\n（１）Ａ，Ｂ，Ｃ\n（２）Ａ，Ｂ，Ｅ\n（３）Ｂ，Ｅ\n（４）Ｃ，Ｄ\n（５）Ｃ，Ｄ，Ｅ",
+    "images": [
+      "/exam-library/lckohyo-LC20260405-2/q13-p7-1.webp"
+    ],
+    "correctChoice": 5,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      7
+    ],
+    "sourceQuestionNumber": 13,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20260405-2-q14",
+    "number": 14,
+    "text": "問１４ 溶着法に関するＡからＥまでの記述について、適切なもののみを全てあげた\n組合せは、(１)～(５)のうちどれか。\nＡ 単層法は、薄板の溶接やすみ肉の小さい脚長の場合に用いられ、サブマ\nージアーク溶接による場合では、16～20㎜程度の厚板を単層溶接すること\nができる。\nＢ 多層法は、２層以上で溶接する方法で、溶接金属に焼ならし効果を与え、\n多層溶接法とも呼ばれる。\nＣ 後退法は、溶接方向と溶着方向とが反対になるように溶接する方法で、\n終端に近い部分は前進法に比べ、ひずみや残留応力が大きくなる。\nＤ 前進法は、溶接方向と溶着方向とが同一になるように溶接する方法で、\n終端に近い部分はひずみや残留応力が小さくなる。\nＥ 対称法は、溶接線長手中央部から両端に対称的に溶接を行う方法で、振\n分け法とも呼ばれる。\n（１）Ａ，Ｂ，Ｃ，Ｄ\n（２）Ａ，Ｂ，Ｅ\n（３）Ｂ，Ｃ，Ｅ\n（４）Ｃ，Ｄ\n（５）Ｄ，Ｅ",
+    "images": [
+      "/exam-library/lckohyo-LC20260405-2/q14-p8-0.webp"
+    ],
+    "correctChoice": 2,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      8
+    ],
+    "sourceQuestionNumber": 14,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20260405-2-q15",
+    "number": 15,
+    "text": "問１５ 図に示す溶接記号による溶接施工の説明に関するＡからＤまでの記述につい\nて、適切なもののみを全てあげた組合せは、(１)～(５)のうちどれか。\n16\n２\n60°\nＭ\nＡ 矢の側を溶接部とする。\nＢ 板厚を16㎜とする。\nＣ ルート面を２mmとする。\nＤ 溶接部を切削仕上げする。\n（１）Ａ，Ｂ，Ｃ\n（２）Ａ，Ｄ\n（３）Ｂ，Ｃ，Ｄ\n（４）Ｂ，Ｄ\n（５）Ｃ",
+    "images": [
+      "/exam-library/lckohyo-LC20260405-2/q15-p9-0.webp"
+    ],
+    "correctChoice": 2,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      9
+    ],
+    "sourceQuestionNumber": 15,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20260405-2-q16",
+    "number": 16,
+    "text": "問１６ 炭素鋼の溶接における予熱及び後熱に関する記述について、適切でないもの\nは次のうちどれか。\n（１）溶接金属及び熱影響部の切欠きじん性を向上させる。\n（２）溶接部からの拡散性水素の放出を防止する。\n（３）溶接部に発生する割れを防止する。\n（４）溶接部の残留応力を低減させる。\n（５）溶接による変形を防止する。",
+    "images": [
+      "/exam-library/lckohyo-LC20260405-2/q16-p9-1.webp"
+    ],
+    "correctChoice": 2,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      9
+    ],
+    "sourceQuestionNumber": 16,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20260405-2-q17",
+    "number": 17,
+    "text": "問１７ 裏はつり及び裏溶接に関する記述について、適切でないものは次のうちどれ\nか。\n（１）裏はつりは、一般に、厚板に比べ第１層目に欠陥が生じやすい薄板の突合\nせ両側溶接時に行われる。\n（２）裏はつりの方法には、グラインダで削る方法、プレーナなどの機械で削る\n方法及びエアアークガウジング法がある。\n（３）裏溶接は、本溶接と同様な方法で行う。\n（４）エアアークガウジング法では、アーク熱によって溶かした金属を、圧縮空\n気で吹き飛ばして溝を形成する。\n（５）エアアークガウジング法では、ガウジング後にグラインダで表面の硬化部、\nノロなどを除去してから裏溶接を行う。",
+    "images": [
+      "/exam-library/lckohyo-LC20260405-2/q17-p10-0.webp"
+    ],
+    "correctChoice": 1,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      10
+    ],
+    "sourceQuestionNumber": 17,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20260405-2-q18",
+    "number": 18,
+    "text": "問１８ サブマージアーク溶接法の施工要領に関するＡからＥまでの記述について、\n適切なもののみを全てあげた組合せは、(１)～(５)のうちどれか。\nＡ 溶接電圧が低すぎると、扁平なビードになる。\nＢ 開先精度は、一般に開先角度が±５°以内、ルート面が±２mm以内、ル\nート間隔が1.8mm以内とする。\nＣ ルート間隔が大きい場合などは、溶落ちを防止するため、本溶接を行う\n前に手溶接でビードをおくことがある。\nへん\nＤ 溶接速度が遅すぎると、扁平なビードになり、余盛が多くなる。\nＥ ボイラーのドラムの板厚が厚くなると、一般にＩ形開先による多層溶接\nが採用される。\n（１）Ａ，Ｂ，Ｃ，Ｅ\n（２）Ａ，Ｂ，Ｅ\n（３）Ａ，Ｄ\n（４）Ｂ，Ｃ，Ｄ，Ｅ\n（５）Ｃ，Ｄ",
+    "images": [
+      "/exam-library/lckohyo-LC20260405-2/q18-p10-1.webp"
+    ],
+    "correctChoice": 5,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      10
+    ],
+    "sourceQuestionNumber": 18,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20260405-2-q19",
+    "number": 19,
+    "text": "問１９ ガスシールドアーク溶接法について、適切でないものは次のうちどれか。\n（１）直流ティグ溶接法による炭素鋼、ステンレス鋼などの溶接には、棒プラス\nを用いる。\n（２）アルミニウムなど清浄作用を必要とする溶接には、一般に、交流ティグ溶\n接法が用いられる。\n（３）ガスシールドアーク溶接法には、タングステン電極を用いるティグ溶接法、\n母材と同種の金属ワイヤを電極として用いるミグ溶接法などがある。\n（４）マグ溶接法のうち、シールドガスとして炭酸ガスを単独で用いるものを炭\n酸ガスアーク溶接法という。\n（５）ミグ溶接法では棒プラスを用い、被覆アーク溶接の場合の約６倍の電流密\n度で溶接する。",
+    "images": [
+      "/exam-library/lckohyo-LC20260405-2/q19-p11-0.webp"
+    ],
+    "correctChoice": 1,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      11
+    ],
+    "sourceQuestionNumber": 19,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20260405-2-q20",
+    "number": 20,
+    "text": "問２０ 突合せ溶接部のタック溶接に関する記述について、適切でないものは次のう\nちどれか。\n（１）タック溶接と本溶接は、同様の溶接条件で行うことが望ましい。\n（２）両側溶接を行う場合には、裏はつりされる部分に行う。\n（３）できる限り対称的に行う。\n（４）一般に600mm程度の間隔で約10mmの長さで行う。\n（５）材料などによって必要な場合には、タック溶接部を本溶接前に削り取る。\n〔溶接棒及び溶接部の性質の概要に関する知識〕",
+    "images": [
+      "/exam-library/lckohyo-LC20260405-2/q20-p11-1.webp"
+    ],
+    "correctChoice": 4,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      11
+    ],
+    "sourceQuestionNumber": 20,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20260405-2-q21",
+    "number": 21,
+    "text": "問２１ 溶接性が良い材料の判断基準として、適切でないものは次のうちどれか。\n（１）溶接割れ感受性が低い。\n（２）切欠きぜい性が小さい。\n（３）じん性が低い。\n（４）溶接熱による焼きが入りにくい。\n（５）溶接しても伸びが小さくならない。",
+    "images": [
+      "/exam-library/lckohyo-LC20260405-2/q21-p11-2.webp"
+    ],
+    "correctChoice": 3,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      11
+    ],
+    "sourceQuestionNumber": 21,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20260405-2-q22",
+    "number": 22,
+    "text": "問２２ JISによる軟鋼用被覆アーク溶接棒の区分記号に関するＡからＥまでの記号\nの説明について、適切なもののみを全てあげた組合せは(１)～(５)のうちどれ\nか。\nJIS Z 3211-E XX XX - XXX X U L HX\nＡ Ｂ Ｃ Ｄ Ｅ\nＡ 被覆アーク溶接棒の記号\nＢ 溶着金属の伸びの記号\nＣ 溶着金属の引張強さの記号\nＤ 溶着金属の主要化学成分の記号\nＥ 溶接後熱処理の有無の記号\n（１）Ａ，Ｂ，Ｃ，Ｄ\n（２）Ａ，Ｂ，Ｃ，Ｅ\n（３）Ａ，Ｄ，Ｅ\n（４）Ｂ，Ｄ\n（５）Ｃ，Ｅ",
+    "images": [
+      "/exam-library/lckohyo-LC20260405-2/q22-p12-0.webp"
+    ],
+    "correctChoice": 3,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      12
+    ],
+    "sourceQuestionNumber": 22,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20260405-2-q23",
+    "number": 23,
+    "text": "問２３ 軟鋼用被覆アーク溶接棒の保管及び乾燥に関する記述について、適切でない\nものは次のうちどれか。\n（１）溶接棒の乾燥温度は、100～120℃が一般的であるが、イルミナイト系溶接\n棒に関しては300～400℃で行う。\n（２）屋外で溶接作業を行うときには、携帯式の乾燥器を用いて、必要量をその\n都度、取り出して使用するのが望ましい。\n（３）溶接棒は、湿気により、アークの不安定、ブローホールの発生の原因とな\nる。\n（４）溶接棒は、専用の貯蔵室のパレット又は棚上に保管し、常に内部を乾燥さ\nせておく。\n（５）低水素系溶接棒は、大気中に４時間以上放置したものは、再乾燥して使用\nすることができるが、再乾燥の回数は３回までが望ましい。",
+    "images": [
+      "/exam-library/lckohyo-LC20260405-2/q23-p12-1.webp"
+    ],
+    "correctChoice": 1,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      12
+    ],
+    "sourceQuestionNumber": 23,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20260405-2-q24",
+    "number": 24,
+    "text": "問２４ 次の図中(突合せ溶接継手)に示すＡ部の名称として、最も適切なものは次の\nうちどれか。\nＡ部\n母材\n（１）溶接部\n（２）ボンド部\n（３）熱影響部\n（４）溶接金属\n（５）溶着金属",
+    "images": [
+      "/exam-library/lckohyo-LC20260405-2/q24-p13-0.webp"
+    ],
+    "correctChoice": 2,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      13
+    ],
+    "sourceQuestionNumber": 24,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20260405-2-q25",
+    "number": 25,
+    "text": "問２５ 被覆アーク溶接における溶接部に生じる欠陥に関する記述について、適切で\nないものは次のうちどれか。\n（１）オーバラップは、溶接速度が遅すぎるときや溶接電流が小さすぎるときに\n生じやすい。\n（２）ビード下割れは、熱影響部に生じる溶接割れである。\n（３）溶込み不良は、開先角度が小さすぎるときや溶接電流が小さすぎるときに\n生じやすい。\n（４）アンダカットは、溶接電流が小さすぎるときに生じやすい。\n（５）ブローホールは、アーク長が長く、溶接速度が速すぎるときに生じやすい。",
+    "images": [
+      "/exam-library/lckohyo-LC20260405-2/q25-p13-1.webp"
+    ],
+    "correctChoice": 4,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      13
+    ],
+    "sourceQuestionNumber": 25,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20260405-2-q26",
+    "number": 26,
+    "text": "問２６ 被覆アーク溶接において、スラグ巻込みが生じやすい場合として、適切でな\nいものは次のうちどれか。\n（１）開先形状が不適当であるとき。\n（２）多層溶接で、下層の溶接ビード表面が平滑だったとき。\n（３）多層溶接で、下層にできたスラグの清掃が不十分であるとき。\n（４）溶接電流が小さすぎるとき。\n（５）運棒が不適正であるとき。\n〔溶接部の検査方法の概要に関する知識〕",
+    "images": [
+      "/exam-library/lckohyo-LC20260405-2/q26-p14-0.webp"
+    ],
+    "correctChoice": 2,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      14
+    ],
+    "sourceQuestionNumber": 26,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20260405-2-q27",
+    "number": 27,
+    "text": "問２７ 放射線透過試験の透過写真によるきずの像の分類方法により、きずの種類と\nそのきずの種別を示したＡからＤまでの語句について、適切なもののみを全て\nあげた組合せは、(１)～(５)のうちどれか。\nきずの種類 きずの種別\nＡ タングステン巻込み ………………… 第１種\nＢ 丸いブローホール …………………… 第２種\nＣ 割れ …………………………………… 第３種\nＤ 溶込み不良・融合不良 ……………… 第４種\n（１）Ａ，Ｂ，Ｃ\n（２）Ａ，Ｄ\n（３）Ｂ，Ｃ\n（４）Ｂ，Ｄ\n（５）Ｃ",
+    "images": [
+      "/exam-library/lckohyo-LC20260405-2/q27-p14-1.webp"
+    ],
+    "correctChoice": 5,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      14
+    ],
+    "sourceQuestionNumber": 27,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20260405-2-q28",
+    "number": 28,
+    "text": "問２８ 溶接部の調査のために実施するＡからＥまでの試験について、破壊試験方法\nに該当するもののみを全てあげた組合せは、(１)～(５)のうちどれか。\nＡ 超音波探傷試験\nＢ ミクロ試験\nＣ 硬さ試験\nＤ 放射線透過試験\nＥ 磁粉探傷試験\n（１）Ａ，Ｂ，Ｃ\n（２）Ａ，Ｂ，Ｄ\n（３）Ａ，Ｄ，Ｅ\n（４）Ｂ，Ｃ\n（５）Ｃ，Ｄ，Ｅ",
+    "images": [
+      "/exam-library/lckohyo-LC20260405-2/q28-p15-0.webp"
+    ],
+    "correctChoice": 4,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      15
+    ],
+    "sourceQuestionNumber": 28,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20260405-2-q29",
+    "number": 29,
+    "text": "問２９ 溶接部に対する浸透探傷試験に関する記述について、適切でないものは次の\nうちどれか。\n（１）操作が簡単であり、非磁性材を含むあらゆる金属に応用することができる。\n（２）鋼溶接部の表面に開口している割れの検出性能は、一般に、磁粉探傷試験\nの方が優れている。\n（３）蛍光物質を含む浸透液を用いたときは、紫外線を当てると、きず部は蛍光\nを発する。\n（４）染色した浸透液を用いたときは、現像液を塗布すると、きず部は、通常、\n赤色を呈する。\n（５）表面は開口していないが、表面からごく浅い内部のきずも検出できる。",
+    "images": [
+      "/exam-library/lckohyo-LC20260405-2/q29-p15-1.webp"
+    ],
+    "correctChoice": 5,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      15
+    ],
+    "sourceQuestionNumber": 29,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20260405-2-q30",
+    "number": 30,
+    "text": "問３０ アーク溶接機器などに関する記述について、適切でないものは次のうちどれ\nか。\n（１）一般の交流アーク溶接機は、その電源の外部特性が垂下特性のものが用い\nられる。\n（２）被覆アーク溶接では、低電圧、高電流で使用し、絶えず短絡のおそれがあ\nるため、短絡電流の制限とともに再点弧が容易でなければならない。\n（３）電源の定電圧特性とは、出力電流が変化しても負荷電圧があまり変化しな\nい特性をいい、炭酸ガスアーク溶接機などに用いられる。\n（４）ミグ溶接で使用する直流アーク溶接機は、その電源の外部特性が定電圧特\n性又は上昇特性のものが用いられる。\n（５）磁気吹きとは、アークが発生して変圧器の二次巻線に電流が流れ始めると、\n漏えい磁束が大きくなる現象をいう。",
+    "images": [
+      "/exam-library/lckohyo-LC20260405-2/q30-p16-0.webp"
+    ],
+    "correctChoice": 5,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      16
+    ],
+    "sourceQuestionNumber": 30,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20260405-2-q31",
+    "number": 31,
+    "text": "問３１ 断面積４mm２、長さ12ｍの電線の抵抗が0.1Ωであるとき、断面積８mm２、長\nさ96ｍの電線の抵抗値に一番近い値は、次のうちどれか。\nただし、電線の材質及び温度は同一とする。\n（１）0.05Ω\n（２）0.1Ω\n（３）0.2Ω\n（４）0.3Ω\n（５）0.4Ω",
+    "images": [
+      "/exam-library/lckohyo-LC20260405-2/q31-p16-1.webp"
+    ],
+    "correctChoice": 5,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      16
+    ],
+    "sourceQuestionNumber": 31,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20260405-2-q32",
+    "number": 32,
+    "text": "問３２ 交流アーク溶接機と比較した直流アーク溶接機の特徴に関するＡからＥまで\nの記述について、適切なもののみを全てあげた組合せは、(１)～(５)のうちど\nれか。\nＡ アークの維持が難しく、不安定になりやすい。\nＢ 磁気吹きを起こしやすい。\nＣ 負荷分布が良好である。\nＤ 極性を利用できる。\nＥ 機構が複雑である。\n（１）Ａ，Ｂ，Ｅ\n（２）Ａ，Ｄ\n（３）Ｂ，Ｃ，Ｄ\n（４）Ｂ，Ｃ，Ｅ\n（５）Ｂ，Ｃ，Ｄ，Ｅ\n〔溶接作業の安全に関する知識〕",
+    "images": [
+      "/exam-library/lckohyo-LC20260405-2/q32-p17-0.webp"
+    ],
+    "correctChoice": 5,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      17
+    ],
+    "sourceQuestionNumber": 32,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20260405-2-q33",
+    "number": 33,
+    "text": "問３３ アーク溶接作業時の災害防止に関する記述について、適切でないものは次の\nうちどれか。\n（１）作業を一時中止するときは、溶接機の電源を切り、ホルダから溶接棒を外\nして木箱などの絶縁物の上に置くか、ホルダ掛けにかける。\n（２）アーク溶接作業では、発汗に伴って皮膚の抵抗が小さくなり電撃を受けや\nすくなるので、必ず乾いた作業衣と手袋を着用する。\n（３）遮光保護具は、遮光度番号の小さいものほど、高い溶接電流での溶接に適\nしている。\n（４）ボイラーの胴の内部など狭い場所で交流アーク溶接機による手溶接作業を\n行うときは、交流アーク溶接機用自動電撃防止装置を使用する。\n（５）溶接機外箱及び溶接する品物は、確実にアースをする。",
+    "images": [
+      "/exam-library/lckohyo-LC20260405-2/q33-p17-1.webp"
+    ],
+    "correctChoice": 3,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      17
+    ],
+    "sourceQuestionNumber": 33,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20260405-2-q34",
+    "number": 34,
+    "text": "問３４ 密閉状態や通風が不十分な状態のタンク内作業におけるＡからＥまでの酸素\n欠乏症防止に関する記述について、適切なもののみを全てあげた組合せは(１)\n～(５)のうちどれか。\nＡ 避難用具を準備しておくこと。\nＢ 防毒マスクを着用、使用すること。\nＣ 酸素欠乏危険作業について特別教育を受けた者がその作業を行うこと。\nＤ 監視人を配置すること。\nＥ タンク内の酸素濃度を15％以上に保つように換気すること。\n（１）Ａ，Ｂ，Ｃ，Ｅ\n（２）Ａ，Ｂ，Ｄ\n（３）Ａ，Ｃ，Ｄ\n（４）Ｂ，Ｅ\n（５）Ｃ，Ｄ，Ｅ",
+    "images": [
+      "/exam-library/lckohyo-LC20260405-2/q34-p18-0.webp"
+    ],
+    "correctChoice": 3,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      18
+    ],
+    "sourceQuestionNumber": 34,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20260405-2-q35",
+    "number": 35,
+    "text": "問３５ アーク溶接作業における健康障害に関する記述について、適切でないものは\n次のうちどれか。\n（１）低水素系溶接棒から生じるヒュームは、頭痛、のどの痛み、悪寒などの中\n毒症状を起こすおそれがある。\n（２）溶接の際に発生するヒュームは、長年の吸引により、じん肺になるおそれ\nがある。\n（３）亜鉛メッキ鋼板や黄銅を溶接する際に発生するヒュームは、中毒症状を起\nこすおそれがある。\n（４）通風が不十分な場所における炭酸ガスアーク溶接作業は、一酸化炭素中毒\nを起こすおそれがある。\n（５）溶接の際に発生する赤外線は、眼の角膜を侵し、電光性眼炎を起こすおそ\nれがある。",
+    "images": [
+      "/exam-library/lckohyo-LC20260405-2/q35-p18-1.webp"
+    ],
+    "correctChoice": 5,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      18
+    ],
+    "sourceQuestionNumber": 35,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20260405-2-q36",
+    "number": 36,
+    "text": "問３６ ボイラー(小型ボイラーを除く。)及び第一種圧力容器(小型圧力容器を除く。)の\n次の溶接(自動溶接機による溶接を除く。)の業務について、法令上、特別ボイ\nラー溶接士でなければ行うことができないものは次のうちどれか。\n（１）厚さが25mmのボイラーの胴に管台を取り付ける溶接の業務\n（２）厚さが25mmの第一種圧力容器の胴の長手継手の溶接の業務\n（３）厚さが27mmのボイラーの胴の周継手の溶接の業務\n（４）鋼板の厚さが30㎜の第一種圧力容器の胴にフランジを取り付ける溶接の業\n務\n（５）ボイラーの管(主蒸気管及び給水管を除く。)の周継手の溶接の業務",
+    "images": [
+      "/exam-library/lckohyo-LC20260405-2/q36-p19-0.webp"
+    ],
+    "correctChoice": 3,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      19
+    ],
+    "sourceQuestionNumber": 36,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20260405-2-q37",
+    "number": 37,
+    "text": "問３７ 溶接によるボイラー(移動式ボイラー及び小型ボイラーを除く。)の製造から\n使用までの手続きの順序として、法令上、適切なものは次のうちどれか。\nただし、計画届の免除認定を受けていない場合とする。\n（１）構造検査 → 溶接検査 → 落成検査 → 設置報告書\n（２）構造検査 → 落成検査 → 設置届 → 溶接検査\n（３）溶接検査 → 構造検査 → 設置届 → 落成検査\n（４）設置届 → 溶接検査 → 構造検査 → 落成検査\n（５）設置届 → 落成検査 → 溶接検査 → 構造検査",
+    "images": [
+      "/exam-library/lckohyo-LC20260405-2/q37-p19-1.webp"
+    ],
+    "correctChoice": 3,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      19
+    ],
+    "sourceQuestionNumber": 37,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20260405-2-q38",
+    "number": 38,
+    "text": "問３８ ボイラーの伝熱面積の算定方法として、法令上、適切でないものは次のうち\nどれか。\n（１）水管ボイラーの水管の伝熱面積は、水管の外径側で算定する。\n（２）水管ボイラーのドラムの面積は、伝熱面積に算入しない。\n（３）炉筒煙管ボイラーの煙管の伝熱面積は、煙管の外径側で算定する。\n（４）貫流ボイラーの過熱管の伝熱面は、伝熱面積に算入しない。\n（５）立てボイラー(横管式)の横管の伝熱面積は、横管の外径側で算定する。",
+    "images": [
+      "/exam-library/lckohyo-LC20260405-2/q38-p19-2.webp"
+    ],
+    "correctChoice": 3,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      19
+    ],
+    "sourceQuestionNumber": 38,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20260405-2-q39",
+    "number": 39,
+    "text": "問３９ 鋼製蒸気ボイラー(小型ボイラーを除く。)の構造検査及び溶接検査に関する\n記述について、法令上、誤っているものは次のうちどれか。\n（１）構造検査を受ける者は、ボイラーを検査しやすい位置に置かなければなら\nない。\n（２）構造検査を受ける者は、水圧試験の準備をしなければならない。\n（３）溶接検査を受けようとする者は、当該ボイラーの溶接作業が完了した後に、\nボイラー溶接検査申請書を溶接検査を行う者に提出しなければならない。\n（４）溶接検査を受ける者は、放射線検査の準備をしなければならない。\n（５）溶接検査を受ける者は、検査に立ち会わなければならない。",
+    "images": [
+      "/exam-library/lckohyo-LC20260405-2/q39-p20-0.webp"
+    ],
+    "correctChoice": 3,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      20
+    ],
+    "sourceQuestionNumber": 39,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "lckohyo-LC20260405-2-q40",
+    "number": 40,
+    "text": "問４０ 法令上、溶接継手の効率を決定するＡからＥまでの要素について、適切なも\nののみを全てあげた組合せは、(１)～(５)のうちどれか。\nＡ 溶接棒の種類\nＢ 超音波探傷試験の有無\nＣ 放射線検査の有無\nＤ 溶接継手の種類\nＥ 溶接後熱処理の方法\n（１）Ａ，Ｂ，Ｅ\n（２）Ａ，Ｃ，Ｄ\n（３）Ａ，Ｄ，Ｅ\n（４）Ｂ，Ｃ，Ｅ\n（５）Ｃ，Ｄ\n（終 り）",
+    "images": [
+      "/exam-library/lckohyo-LC20260405-2/q40-p20-1.webp"
+    ],
+    "correctChoice": 5,
+    "choiceCount": 5,
+    "answerAuthority": "official",
+    "sourcePages": [
+      20
+    ],
+    "sourceQuestionNumber": 40,
+    "extractionStatus": "complete"
+  }
+]

@@ -1,0 +1,322 @@
+[
+  {
+    "id": "emkohyo-EM20261807-q1",
+    "number": 1,
+    "text": "問 １ シアン化水素の吸光光度分析法に関する次の記述のうち、誤っているものは\nどれか。\n１ シアン化水素は、硫酸を含浸したろ紙を使用して捕集し、精製水を加え\nて試料溶液とする。\n２ 標準原液は、シアン化カリウムを精製水に溶解して調製する。\n３ 標準原液のシアン化物イオン濃度は、硝酸銀溶液で滴定して標定する。\n４ 試料溶液は中和し、緩衝液で pH を調整する。\n５ クロラミンTを加えた後、ピリジン-ピラゾロンを加えて発色させる。",
+    "images": [
+      "/exam-library/emkohyo-EM20261807/q1-p2-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      2
+    ],
+    "sourceQuestionNumber": 1,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261807-q2",
+    "number": 2,
+    "text": "問 ２ ある化合物の水溶液を吸光光度分析法で測定したところ、測定波長における\n透過率は 80 ％であった。その波長におけるモル吸光係数を 8.26 × 10３\ncm-１･mol-１･L、セルの光路長を 2.0 cm とすると、この化合物のモル濃度に\n最も近いものは次のうちどれか。\nただし、log 2 =0.301とする。\n10\n１ 1.3×10-６mol･L-１\n２ 2.0×10-６mol･L-１\n３ 2.9×10-６mol･L-１\n４ 5.9×10-６mol･L-１\n５ 11.7×10-６mol･L-１",
+    "images": [
+      "/exam-library/emkohyo-EM20261807/q2-p2-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      2
+    ],
+    "sourceQuestionNumber": 2,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261807-q3",
+    "number": 3,
+    "text": "問 ３ 硫化水素を液体捕集し、得られた試料液に塩化鉄（Ⅲ）と p-アミノジメチ\nルアニリンを加えて、生成する物質の吸光度を測定して定量した。この分析に\n関する次の記述のうち、誤っているものはどれか。\n１ 捕集液の調製には硫酸亜鉛七水和物を用いる。\n２ 塩化鉄（Ⅲ）は酸化剤として働く。\n３ 生成する物質はメチレンブルーである。\n４ 標準原液は硫化ナトリウムから調製する。\n５ 標準原液の濃度の標定に中和滴定法を用いる。",
+    "images": [
+      "/exam-library/emkohyo-EM20261807/q3-p3-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      3
+    ],
+    "sourceQuestionNumber": 3,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261807-q4",
+    "number": 4,
+    "text": "問 ４ 環境空気中のエチレンイミンの吸光光度分析法に関する次の記述の㋑から㋩\nの に入る用語又は数値の組合せとして、正しいものは下のうちどれか。\n「環境空気中のエチレンイミンを精製水中に捕集し、捕集液を ㋑ にして\nナフトキノンスルホン酸と反応させる。生成する黄色色素を ㋺ に抽出し、\n㋩ nm 付近の波長での吸光度から定量を行う。」\n㋑ ㋺ ㋩\n１ 酸性 クロロホルム 250\n２ 酸性 クロロホルム 420\n３ 酸性 アセトニトリル 420\n４ アルカリ性 クロロホルム 420\n５ アルカリ性 アセトニトリル 250",
+    "images": [
+      "/exam-library/emkohyo-EM20261807/q4-p3-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      3
+    ],
+    "sourceQuestionNumber": 4,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261807-q5",
+    "number": 5,
+    "text": "問 ５ ガスクロマトグラフ分析法の検出器に関する次の記述のうち、誤っているも\nのはどれか。\n１ 水素炎イオン化検出器は、水素炎中で燃焼しイオン化する物質のみを検\n出する。\n２ 電子捕獲型検出器は、電子親和力の強い物質が高感度で検出される。\n３ 電子捕獲型検出器の直線性を示す測定範囲は、水素炎イオン化検出器よ\nりも狭い。\n４ 炎光光度検出器は、窒素や硫黄を含む化合物に選択性がある。\n５ 質量分析計は、分子構造情報を収集できる。",
+    "images": [
+      "/exam-library/emkohyo-EM20261807/q5-p4-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      4
+    ],
+    "sourceQuestionNumber": 5,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261807-q6",
+    "number": 6,
+    "text": "問 ６ ガスクロマトグラフ分析法で、ある化合物をカラムAを用いて測定したとき\nと、カラムBを用いて測定したときの保持時間が同じであった。カラム A の\n理論段数が 5000 、カラム B の理論段数が 9000 の場合、カラム Bにおけるピ\nーク幅（W ）とカラム A におけるピーク幅（W ）の比（W ／W ）の値と\nＢ Ａ Ｂ Ａ\nして、正しい値に最も近いものは次のうちどれか。\n１ 0.38\n２ 0.56\n３ 0.75\n４ 1.34\n５ 1.80",
+    "images": [
+      "/exam-library/emkohyo-EM20261807/q6-p4-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      4
+    ],
+    "sourceQuestionNumber": 6,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261807-q7",
+    "number": 7,
+    "text": "問 ７ ガスクロマトグラフ分析法において、キャピラリーカラムを使用する場合に\n用いる次の試料導入法のうち、高濃度試料の分析に最も適しているものはどれ\nか。\n１ 加熱脱着法\n２ プログラム昇温気化注入法\n３ スプリット注入法\n４ スプリットレス注入法\n５ 直接注入法",
+    "images": [
+      "/exam-library/emkohyo-EM20261807/q7-p5-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      5
+    ],
+    "sourceQuestionNumber": 7,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261807-q8",
+    "number": 8,
+    "text": "問 ８ 環境空気中のエチレンオキシドの測定方法に関する次の記述の㋑から㋩の\nに入る用語の組合せとして、正しいものは下のうちどれか。\n「活性炭に ㋑ を含浸・乾燥させたものを充塡した捕集管に試料空気を通気し、\nエチレンオキシドを誘導体化して 2-ブロモエタノールとして捕集する。この\n2-ブロモエタノールをトルエン／アセトニトリルで抽出し、 ㋺ を加えて\n１時間以上放置した後、 ㋩ で分析する。」\n㋑ ㋺ ㋩\n１ 臭化水素酸 塩化ナトリウム 高速液体クロマトグラフ分析法\n２ 臭化水素酸 炭酸ナトリウム 高速液体クロマトグラフ分析法\n３ 臭化水素酸 炭酸ナトリウム ガスクロマトグラフ質量分析法\n４ 臭化カリウム溶液 塩化ナトリウム ガスクロマトグラフ質量分析法\n５ 臭化カリウム溶液 炭酸ナトリウム 高速液体クロマトグラフ分析法",
+    "images": [
+      "/exam-library/emkohyo-EM20261807/q8-p5-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      5
+    ],
+    "sourceQuestionNumber": 8,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261807-q9",
+    "number": 9,
+    "text": "問 ９ 作業環境測定の一般的事項に関する次の記述のうち、誤っているものはどれ\nか。\n１ 25℃、１気圧におけるガス又は蒸気の１モルの体積は、22.4 Lである。\n２ 空気中に存在する有害物質の濃度は、質量濃度又は体積分率で表す。\n３ 空気中の有害物質は、粒子、ガス又は蒸気の状態で存在する。\n４ 標準液の濃度は、所定の濃度に厳密に合わせる必要はない。\n５ 標準系列液は、原則的に保管はしない。",
+    "images": [
+      "/exam-library/emkohyo-EM20261807/q9-p6-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      6
+    ],
+    "sourceQuestionNumber": 9,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261807-q10",
+    "number": 10,
+    "text": "問１０ 特定化学物質用の検知管Ⓐとマイナスの妨害を示す物質Ⓑとの組合せとして、\n正しいものは次のうちどれか。\nⒶ Ⓑ\n１ アクリロニトリル用検知管 シアン化水素\n２ ベンゼン用検知管 トルエン\n３ 塩化ビニル用検知管 塩化水素\n４ フッ化水素用検知管 硝酸\n５ 硫化水素用検知管 二酸化窒素",
+    "images": [
+      "/exam-library/emkohyo-EM20261807/q10-p6-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      6
+    ],
+    "sourceQuestionNumber": 10,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261807-q11",
+    "number": 11,
+    "text": "問１１ 環境空気（25℃、１気圧）中のp-ニトロクロロベンゼンの濃度を測定する\nため、２本のミゼットインピンジャーの各々に捕集液10mLを入れて直列に\n連結し、試料空気を流量1.0L･min-１で10分間捕集した。捕集後の捕集液は合\nわせてメスフラスコに入れ、さらに捕集液で25mLに定容したものを試料液\nとした。ガスクロマトグラフで分析した結果、試料液のピーク面積は1700 で\nあった。p-ニトロクロロベンゼン濃度が、0.25µg･mL-１の標準液を試料液と\n同様に分析したところ、ピーク面積は5300であった。環境空気中の p-ニトロ\nクロロベンゼン濃度として、正しい値に最も近いものは次のうちどれか。\n１ 0.1 mg･m-３\n２ 0.2 mg･m-３\n３ 0.4 mg･m-３\n４ 0.6 mg･m-３\n５ 0.8 mg･m-３",
+    "images": [
+      "/exam-library/emkohyo-EM20261807/q11-p7-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      7
+    ],
+    "sourceQuestionNumber": 11,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261807-q12",
+    "number": 12,
+    "text": "問１２ 蛍光光度分析法による作業環境空気中のα-ナフチルアミン濃度の測定に関\nする次の記述のうち、誤っているものはどれか。\n１ α-ナフチルアミンは、インピンジャーを用いて捕集する。\n２ エチルエーテルを用いて捕集液から抽出する。\n３ 亜硝酸ナトリウムとスルファニル酸を加えて、誘導体化する。\n４ 薄層クロマトグラフ法を用いて単離し、蛍光強度を測定する。\n５ α-ナフチルアミンをエタノールに溶解して、標準液とする。",
+    "images": [
+      "/exam-library/emkohyo-EM20261807/q12-p7-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      7
+    ],
+    "sourceQuestionNumber": 12,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261807-q13",
+    "number": 13,
+    "text": "問１３ 有機化合物の官能基の名称Ⓐとそれを表す式Ⓑとの次の組合せのうち、誤っ\nているものはどれか。\nⒶ Ⓑ\nO\n１ フェニル基\n２ アミド基 O\nC\nNH\n2\n３ カルボニル基\nC\nO\n４ シアノ基 －CN\n５ ニトロ基 －NO\n2",
+    "images": [
+      "/exam-library/emkohyo-EM20261807/q13-p8-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      8
+    ],
+    "sourceQuestionNumber": 13,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261807-q14",
+    "number": 14,
+    "text": "問１４ 体積２ Lの３個の容器に、アクリロニトリル（Ａ）、酸化プロピレン（Ｂ）、\nヨウ化メチル（Ｃ）をそれぞれ 1 g ずつ別々に入れて密封し 20 ℃に保った｡\n定常状態になったとき、各容器中のそれぞれの物質の分圧（Ｐ 、Ｐ 、Ｐ ）\nＡ Ｂ Ｃ\nを大きい順に並べたものは下のうちどれか。\nただし、アクリロニトリル、酸化プロピレン、ヨウ化メチルの物性等は次の\n表のとおりとする。\nモル質量 20 ℃における\n（g･mol-１） 飽和蒸気圧\nアクリロニトリル(Ａ) 53 15 kPa\n酸化プロピレン(Ｂ) 58 59 kPa\nヨウ化メチル(Ｃ) 142 54 kPa\n１ Ｐ ＞ Ｐ ＞ Ｐ\nＡ Ｃ Ｂ\n２ Ｐ ＞ Ｐ ＞ Ｐ\nＢ Ａ Ｃ\n３ Ｐ ＞ Ｐ ＞ Ｐ\nＢ Ｃ Ａ\n４ Ｐ ＞ Ｐ ＞ Ｐ\nＣ Ａ Ｂ\n５ Ｐ ＞ Ｐ ＞ Ｐ\nＣ Ｂ Ａ",
+    "images": [
+      "/exam-library/emkohyo-EM20261807/q14-p9-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      9
+    ],
+    "sourceQuestionNumber": 14,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261807-q15",
+    "number": 15,
+    "text": "問１５ 化合物Ⓐとその構造式Ⓑとの次の組合せのうち、誤っているものはどれか。\nⒶ Ⓑ\nCl\n１ ベンゾトリクロリド\nCl Cl\nO\n２ エチレンオキシド\nH C CH\n2 2\n３ p -ジメチルアミノ\nCH\n3\nアゾベンゼン N N N\nCH\n3\n４ クロロメチルメチルエーテル CH O CH Cｌ\n3 2\nCH\n2\nO C CH\n５ β-プロピオラクトン 2\nO",
+    "images": [
+      "/exam-library/emkohyo-EM20261807/q15-p10-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      10
+    ],
+    "sourceQuestionNumber": 15,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261807-q16",
+    "number": 16,
+    "text": "問１６ 拡散セルを用いた標準ガスの調製に関する次の記述のうち、誤っているもの\nはどれか。\n１ 拡散チューブの上端で希釈用ガスの気流と混合する。\n２ 拡散チューブ内の濃度勾配に従って蒸気が移動する。\n３ 標準ガスの濃度は、拡散速度が一定とみなせるときの液体の減少量から\n求める。\n４ 拡散セルに振動を与えることで拡散速度の安定性を確保する。\n５ 標準ガスの濃度は、拡散セルを保持する恒温槽の温度が高いほど高くな\nる。",
+    "images": [
+      "/exam-library/emkohyo-EM20261807/q16-p11-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      11
+    ],
+    "sourceQuestionNumber": 16,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261807-q17",
+    "number": 17,
+    "text": "問１７ 特定化学物質Ⓐと、その分析を吸光光度分析法を用いて行う場合の標準原液の\n調製に用いる溶媒Ⓑとの次の組合せのうち、誤っているものはどれか。\nⒶ Ⓑ\n１ フッ化水素 アセトン\n２ ペンタクロロフェノール 水酸化ナトリウム溶液\n３ クロロメチルメチルエーテル アセトン\n４ オーラミン メタノール\n５ ニトログリコール 精製水",
+    "images": [
+      "/exam-library/emkohyo-EM20261807/q17-p11-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      11
+    ],
+    "sourceQuestionNumber": 17,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261807-q18",
+    "number": 18,
+    "text": "問１８ 次の測定対象物質のうち、ろ過捕集法と固体捕集法を組み合わせた相補型ろ\n過捕集法により捕集するものはどれか。\n１ エチルベンゼン\n２ アクリロニトリル\n３ o-フタロジニトリル\n４ 塩化ビニル\n５ o-トルイジン",
+    "images": [
+      "/exam-library/emkohyo-EM20261807/q18-p12-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      12
+    ],
+    "sourceQuestionNumber": 18,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261807-q19",
+    "number": 19,
+    "text": "問１９ 直接捕集法に関する次の記述のうち、誤っているものはどれか。\n１ 真空捕集瓶のコックのすり合わせ部には、グリースを使用しない。\n２ 捕集袋の内容積は、試料採取から分析までの間の濃度減衰を考慮して、\n５L以上とする。\n３ 捕集袋は、清浄な乾燥空気又は窒素を用いて洗浄する。\n４ 試料空気から水分を取り除く場合には、ガラス管にシリカゲルなどの乾\n燥剤を詰めて、試料採取口の前に接続する。\n５ 電動ポンプを通して、捕集袋内に試料空気を送り採取する場合、ポンプ\n内の吸着に注意する必要がある。",
+    "images": [
+      "/exam-library/emkohyo-EM20261807/q19-p12-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      12
+    ],
+    "sourceQuestionNumber": 19,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20261807-q20",
+    "number": 20,
+    "text": "問２０ 液体捕集法を用いて環境空気試料を捕集する際の、必要最小吸引空気量\nＱ（L）を求める次の式中のＡ、Ｂ、Ｃが表すものの組合せとして、正しいもの\nは下のうちどれか。\nただし、単位は次のとおりとする。\n吸引流量（L･min-１）\n捕集時間（min）\n捕集液の量（mL）\n最終試料液の総量（mL）\n検出下限濃度（µg･mL-１）\n定量下限濃度（µg･mL-１）\n管理濃度（mg･m-３）\n抑制濃度（mg･m-３）\nＡ×Ｂ\nＱ ＝\n0.1×Ｃ\nＡ Ｂ Ｃ\n１ 定量下限濃度 最終試料液の総量 管理濃度\n２ 定量下限濃度 最終試料液の総量 抑制濃度\n３ 検出下限濃度 最終試料液の総量 管理濃度\n４ 吸引流量 捕集時間 管理濃度\n５ 吸引流量 捕集液の量 抑制濃度\n（終 り）",
+    "images": [
+      "/exam-library/emkohyo-EM20261807/q20-p13-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      13
+    ],
+    "sourceQuestionNumber": 20,
+    "extractionStatus": "complete"
+  }
+]

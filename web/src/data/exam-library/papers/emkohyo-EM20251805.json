@@ -1,0 +1,322 @@
+[
+  {
+    "id": "emkohyo-EM20251805-q1",
+    "number": 1,
+    "text": "問 １ 次の有機溶剤の組合せのうち、モル質量の値及び常温（25℃）での蒸気圧\n（hPa）の値のいずれもがⒷに比べⒶの方が大きいものはどれか。\nⒶ Ⓑ\n１ 酢酸エチル トルエン\n２ テトラヒドロフラン n-ヘキサン\n３ シクロヘキサノン シクロヘキサノール\n４ 酢酸メチル メタノール\n５ 2-ブタノール イソプロピルアルコール",
+    "images": [
+      "/exam-library/emkohyo-EM20251805/q1-p2-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      2
+    ],
+    "sourceQuestionNumber": 1,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251805-q2",
+    "number": 2,
+    "text": "問 ２ 有機溶剤を、１気圧において、沸点の高い順に並べたものは次のうちどれか。\n１ アセトン、エチルエーテル、二硫化炭素\n２ 二硫化炭素、アセトン、エチルエーテル\n３ エチルエーテル、アセトン、二硫化炭素\n４ 二硫化炭素、エチルエーテル、アセトン\n５ アセトン、二硫化炭素、エチルエーテル",
+    "images": [
+      "/exam-library/emkohyo-EM20251805/q2-p2-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      2
+    ],
+    "sourceQuestionNumber": 2,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251805-q3",
+    "number": 3,
+    "text": "問 ３ N,N-ジメチルホルムアミドの物性に関する次の記述の㋑から㋩までの\nに入る語句の組合せとして、適切なものは下のうちどれか。\n「N,N-ジメチルホルムアミドは１分子内に窒素が ㋑ あり、官能基として\nは ㋺ を有する。また、常温、常圧での状態は ㋩ である。」\n㋑ ㋺ ㋩\n１ 一つ カルボニル基 液体\n２ 一つ アミノ基 固体\n３ 二つ カルボニル基 液体\n４ 二つ カルボニル基 固体\n５ 二つ アミノ基 液体",
+    "images": [
+      "/exam-library/emkohyo-EM20251805/q3-p3-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      3
+    ],
+    "sourceQuestionNumber": 3,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251805-q4",
+    "number": 4,
+    "text": "問 ４ 有機溶剤の測定に関する次の記述のうち、誤っているものはどれか。\n１ 流量計の校正には、基準流量計として、石けん膜流量計を用いることが\nできる。\n２ 固体捕集法により試料を捕集する際に用いる電動ポンプの流量調整は、\n捕集管を接続した状態で行ってはならない。\n３ 捕集管の活性炭量に比べて脱着溶媒の量が少ない場合、脱着率が低くな\nることがある。\n４ 真空捕集瓶は、捕集瓶内の圧力を1.33kPa以下にしたものを使用する。\n５ 真空捕集瓶のコックには、グリースは使用しない。",
+    "images": [
+      "/exam-library/emkohyo-EM20251805/q4-p3-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      3
+    ],
+    "sourceQuestionNumber": 4,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251805-q5",
+    "number": 5,
+    "text": "問 ５ 固体捕集法-ガスクロマトグラフ分析法に関する次の記述の㋑から㋩までの\nに入る語句の組合せとして、不適当なものは下のうちどれか。\n「作業環境空気中の ㋑ は ㋺ に捕集し、 ㋩ で脱着して得た試料\n液を、ガスクロマトグラフに導入して定量する。」\n㋑ ㋺ ㋩\n１ キシレン 活性炭管 二硫化炭素\n２ メタノール 活性炭管 二硫化炭素\n３ イソプロピルアルコール 活性炭管 N,N-ジメチルホルムアミド\n４ アセトン シリカゲル管 メタノール\n５ クロロベンゼン シリカゲル管 メタノール",
+    "images": [
+      "/exam-library/emkohyo-EM20251805/q5-p4-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      4
+    ],
+    "sourceQuestionNumber": 5,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251805-q6",
+    "number": 6,
+    "text": "問 ６ 受動型試料採取機器（パッシブサンプラー）を用いた有機溶剤の測定では、\nフィックの拡散法則に基づいた計算式により空気中濃度が算出される。フィッ\nクの拡散法則に基づき理論的に求めたサンプリング速度（cm３・min-１）に関する\n次の記述のうち、誤っているものはどれか。\n１ 拡散係数（cm２・min-１）は、物質によって異なる値である。\n２ サンプリング速度は、拡散係数（cm２・min-１）に比例する。\n３ サンプリング速度は、拡散面断面積（cm２）に比例する。\n４ サンプリング速度は、拡散長（cm）に比例する。\n５ サンプリング速度は、実験により求めた値とは異なる場合がある。",
+    "images": [
+      "/exam-library/emkohyo-EM20251805/q6-p4-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      4
+    ],
+    "sourceQuestionNumber": 6,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251805-q7",
+    "number": 7,
+    "text": "問 ７ 混合有機溶剤について検知管法の使用が認められている場合において、トル\nエン、酢酸エチル、1,1,1-トリクロロエタン及びキシレンを含有する混合溶剤\nを使用している単位作業場所内の併行測定点におけるトルエン用検知管の測定\n値は、15ppmであった。\n一方、ガスクロマトグラフで分析した測定値は、トルエン10ppm、酢酸エチ\nル14ppm、1,1,1-トリクロロエタン8.0ppm及びキシレン4.0ppmであった。\n換算値変換係数として、正しい値は次のうちどれか。\nなお、トルエン、酢酸エチル、1,1,1-トリクロロエタン及びキシレンの管理\n濃度は、それぞれ20ppm、200ppm、200ppm及び50ppmである。\n１ 0.0058ppm-１\n２ 0.0115ppm-１\n３ 0.0230ppm-１\n４ 0.0460ppm-１\n５ 0.0920ppm-１",
+    "images": [
+      "/exam-library/emkohyo-EM20251805/q7-p5-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      5
+    ],
+    "sourceQuestionNumber": 7,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251805-q8",
+    "number": 8,
+    "text": "問 ８ 固定相液体としてメチルシリコン系の無極性カラムを用いたガスクロマトグ\nラフ分析法において、保持時間の最も長い有機溶剤は、次のうちどれか。\n１ 酢酸メチル\n２ イソプロピルアルコール\n３ n-ヘキサン\n４ シクロヘキサノン\n５ アセトン",
+    "images": [
+      "/exam-library/emkohyo-EM20251805/q8-p5-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      5
+    ],
+    "sourceQuestionNumber": 8,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251805-q9",
+    "number": 9,
+    "text": "問 ９ ガスクロマトグラフ分析法のキャリアガスに関する次の記述のうち、誤って\nいるものはどれか。\n１ キャリアガスとして、水素を使用することができる。\n２ 溶出ピークの幅は、カラム内キャリアガスの渦流拡散の影響を受ける。\n３ カラムの理論段数は、キャリアガスの種類が関係する。\n４ 内径0.3mmのキャピラリーカラムでは、キャリアガス流量が１～３mL･min-１\nが適切である。\n５ 電子捕獲検出器（ECD）には、キャリアガスとして、窒素を使用するこ\nとができない。",
+    "images": [
+      "/exam-library/emkohyo-EM20251805/q9-p6-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      6
+    ],
+    "sourceQuestionNumber": 9,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251805-q10",
+    "number": 10,
+    "text": "問１０ ガスクロマトグラフ分析法に用いられる検出器に関する次の記述のうち、誤\nっているものはどれか。\n１ 電子捕獲検出器（ECD）は、ニッケル63などから放出されるβ線を利用\nする方法で、ハロゲンを含む有機化合物の高感度検出に適している。\n２ 水素炎イオン化検出器（FID）は、水素炎中で燃焼しイオン化する物質\nを検出する方法で、ほとんどの有機化合物及び無機化合物を検出できる。\n３ 熱伝導度検出器（TCD）は、キャリアガスと対象物質蒸気の熱伝導度の\n差を利用した検出器で、物質選択性がない。\n４ 質量分析計（MS）は、分子構造情報を収集でき、未知物質の同定が可能\nである。\n５ 光イオン化検出器（PID）は、紫外線を照射して対象物質をイオン化し、\nイオン電流を検出する方法で、多くの有機化合物を高感度で検出できる。",
+    "images": [
+      "/exam-library/emkohyo-EM20251805/q10-p6-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      6
+    ],
+    "sourceQuestionNumber": 10,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251805-q11",
+    "number": 11,
+    "text": "問１１ 同族化合物の複数成分からなる試料を分析する際の、ガスクロマトグラフの\nカラム温度に関する次の記述の㋑から㋩までの に入る語句の組合せと\nして、正しいものは下のうちどれか。\n「カラム温度は分析対象物質の沸点を基にして決められるが、カラム温度が\n㋑ ほど試料成分の保持時間が ㋺ なり、試料成分の分離は ㋩ な\nる。」\n㋑ ㋺ ㋩\n１ 低い 長く 良く\n２ 低い 短く 悪く\n３ 高い 短く 良く\n４ 高い 長く 悪く\n５ 高い 長く 良く",
+    "images": [
+      "/exam-library/emkohyo-EM20251805/q11-p7-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      7
+    ],
+    "sourceQuestionNumber": 11,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251805-q12",
+    "number": 12,
+    "text": "問１２ キャピラリーカラムを用いたガスクロマトグラフ分析法におけるスプリット\n注入法に関する次の記述のうち、誤っているものはどれか。\n１ カラムに導入される部分と排出される部分の比率をスプリット比という。\n２ スプリット注入法では、カラムに導入される部分を１として、排出され\nる部分を、通常1/10～1/100の任意の比率に設定する。\n３ スプリットレス注入法と比較して、低濃度成分の分析に不向きである。\n４ スプリットレス注入法と比較して、溶媒ピークの影響を受けにくい。\n５ スプリットレス注入法と比較して、ライナー内で気化した試料がカラム\nに導入されるまでの時間は短い。",
+    "images": [
+      "/exam-library/emkohyo-EM20251805/q12-p7-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      7
+    ],
+    "sourceQuestionNumber": 12,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251805-q13",
+    "number": 13,
+    "text": "問１３ ガスクロマトグラフ質量分析装置による定性分析及び定量分析に関する次の\n記述のうち、誤っているものはどれか。\n１ 全イオンクロマトグラム（Total Ion Chromatogram）は、分子イオンとフ\nラグメントイオンを合算したクロマトグラムである。\n２ 安定同位体で置換した測定対象物質は、内部標準物質として使用できる。\n３ 定量は代表的なイオンのピーク面積又は高さで行う。\n４ 定性分析は、測定対象物質と標準物質のマススペクトルを比較して行う。\n５ 同じ保持時間の有機溶剤は、定量分析できない。",
+    "images": [
+      "/exam-library/emkohyo-EM20251805/q13-p8-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      8
+    ],
+    "sourceQuestionNumber": 13,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251805-q14",
+    "number": 14,
+    "text": "問１４ ガスクロマトグラフの検出器に用いられる質量分析計（MS）に関する次の\n記述のうち、誤っているものはどれか。\n１ 化学物質のイオン化法には、電子イオン化（EI）法のほかに、化学イオ\nン化（CI）法などがある。\n２ 電子イオン化（EI）法によるイオン化では、化学物質の分子イオンとフ\nラグメントイオンが生成される。\n３ 質量分離部には、磁場型と四重極型があり、後者の方が質量の分解能が\n高い。\n４ 検出部には、二次電子増倍管が用いられている。\n５ 質量分析計では、個々の化学物質に特有のマススペクトルが得られる。",
+    "images": [
+      "/exam-library/emkohyo-EM20251805/q14-p8-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      8
+    ],
+    "sourceQuestionNumber": 14,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251805-q15",
+    "number": 15,
+    "text": "問１５ ガスクロマトグラフ分析法の定量下限を求める次の記述のうち、誤っている\nものはどれか。\n１ 標準液を調製して検量線を作成する。\n２ 管理濃度の1/10倍の標準ガスを捕集して得られる最終試料濃度になるよ\nうに調製した標準試料を分析する。\n３ 標準試料を５回以上繰り返し分析し、得られた測定濃度から標準偏差を\n求める。\n４ 標準偏差の10倍に相当する濃度を検出下限、標準偏差の３倍に相当する\n濃度を定量下限とする。\n５ 管理濃度の1/10倍濃度で得た最終試料液濃度が、分析機器の標準的な定\n量下限よりかなり高い場合は、定量下限は検量線作成時の最低濃度の標準\n液を用いて求めることが望ましい。",
+    "images": [
+      "/exam-library/emkohyo-EM20251805/q15-p9-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      9
+    ],
+    "sourceQuestionNumber": 15,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251805-q16",
+    "number": 16,
+    "text": "問１６ 吸光光度分析法に関する次の記述のうち、誤っているものはどれか。\n１ 測定可能な波長範囲は、通常200～1000nmである。\n２ 二重結合を持つ化合物は、紫外部の光を吸収する。\n３ 複数の吸収極大を示す化合物もある。\n４ 石英製セルは、全ての測定波長領域で用いることができる。\n５ 入射光の強さをI 、透過光の強さをIとすると、吸光度Aは、A=log (I/I )\n0 10 0\nで表される。",
+    "images": [
+      "/exam-library/emkohyo-EM20251805/q16-p9-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      9
+    ],
+    "sourceQuestionNumber": 16,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251805-q17",
+    "number": 17,
+    "text": "問１７ 二硫化炭素の吸光光度分析法に関する次の記述の㋑から㋩までの に\n入る語句又は数字の組合せとして、正しいものは下のうちどれか。\n「環境空気中の二硫化炭素は、 ㋑ に捕集し、捕集液が ㋺ を呈した\nら、試料空気の吸引をやめ、 ㋩ nm付近の波長で吸光度を測定する。」\n㋑ ㋺ ㋩\n１ ピリジン溶液 赤桃色 530\n２ 2,4-ジニトロフェニルヒドラジン溶液 赤桃色 530\n３ 塩酸ヒドロキシルアミン溶液 紫色 510\n４ ジエチルアミン銅溶液 黄金色 420\n５ ジエチルジチオカルバミン酸ナトリウム溶液 黄金色 420",
+    "images": [
+      "/exam-library/emkohyo-EM20251805/q17-p10-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      10
+    ],
+    "sourceQuestionNumber": 17,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251805-q18",
+    "number": 18,
+    "text": "問１８ 作業者がメチルエチルケトンを含む塗料容器を持ち、移動しながら製品に塗\n装する作業を行っていたため、作業者に受動型試料採取機器（パッシブサンプ\nラー）を装着して15分間のD測定を実施した。測定終了後、2mLの溶媒でメチ\nルエチルケトンを脱着し、これを試料液とした。試料液のうち2µLをマイクロ\nシリンジでガスクロマトグラフに導入して分析したところ、試料液の濃度は\n10.5µg･mL-１であった。D測定値として、正しい値に最も近いものは次のうち\nどれか。\nただし、サンプリング速度：12cm３･min-１、メチルエチルケトンのモル質量：\n72.1g･mol-１、脱着率：0.9とする。また、25℃、１気圧下とする。\n１ 22ppm\n２ 44ppm\n３ 66ppm\n４ 88ppm\n５ 110ppm",
+    "images": [
+      "/exam-library/emkohyo-EM20251805/q18-p10-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      10
+    ],
+    "sourceQuestionNumber": 18,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251805-q19",
+    "number": 19,
+    "text": "問１９ １名の作業者により、トルエンを溶剤とした塗料を用いた手吹きによる塗装\n作業が移動しながら行われていた。作業者に能動型試料採取器（アクティブサ\nンプラー）を装着して、１時間のサンプリングを５回繰り返すことによりC測\n定を行った。作業後に回収された採取器の一つについて、溶媒にて脱着した後\nにガスクロマトグラフで分析したところ、トルエン濃度として322µg･mL-１が\n得られた。脱着溶媒は2mLとすると、測定値として正しい値に最も近いものは\n次のうちどれか。\nただし、吸引流量：0.1 L･min-１、トルエンのモル質量：92.1g･mol-１、脱着率\n：95％とする。また、25℃、１気圧下とする。\n１ 3ppm\n２ 5ppm\n３ 10ppm\n４ 20ppm\n５ 30ppm",
+    "images": [
+      "/exam-library/emkohyo-EM20251805/q19-p11-0.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      11
+    ],
+    "sourceQuestionNumber": 19,
+    "extractionStatus": "complete"
+  },
+  {
+    "id": "emkohyo-EM20251805-q20",
+    "number": 20,
+    "text": "問２０ 有機溶剤の標準液の調製に関する次の記述のうち、誤っているものはどれか。\n１ 標準液は、対象の標準物質を脱着溶媒で適切な濃度範囲内に希釈したも\nのを用いる。\n２ 液体の体積の正確な計量が必要な標準液の調製には、メスシリンダーや\nメスピペットを使用する。\n３ 比較的高濃度の溶液を標準原液として冷暗所に保管し、検量線作成の都\n度、適切に希釈して標準系列液を調製する。\n４ 標準原液の保存可能期間は、溶質と溶媒の組合せによって異なる。\n５ 未知試料中の対象物質の濃度が、標準系列液の最高濃度と最低濃度の間\nになるように調製する。\n（終 り）",
+    "images": [
+      "/exam-library/emkohyo-EM20251805/q20-p11-1.webp"
+    ],
+    "correctChoice": null,
+    "choiceCount": 5,
+    "answerAuthority": "unconfirmed",
+    "sourcePages": [
+      11
+    ],
+    "sourceQuestionNumber": 20,
+    "extractionStatus": "complete"
+  }
+]
