@@ -11,7 +11,7 @@ describe("/training/ai-seminars/ai-chat-work", () => {
     const { container } = render(<AiChatWorkSeminarPage />);
     expect(screen.getByRole("heading", { level: 1, name: "AIチャット仕事術" })).toBeTruthy();
     expect(screen.getByText("20枚")).toBeTruthy();
-    expect(screen.getByText("音声 約36分")).toBeTruthy();
+    expect(screen.getByText("音声 約35分")).toBeTruthy();
     expect(screen.getByRole("region", { name: "音声付きAI実務研修スライド" })).toBeTruthy();
     expect(container.querySelector("audio")?.getAttribute("src")).toBe(
       "/training/ai-seminars/ai-chat-work/audio/slide-01.mp3",

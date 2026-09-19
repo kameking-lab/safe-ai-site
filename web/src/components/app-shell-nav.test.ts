@@ -123,17 +123,17 @@ describe("サイドバーナビ(NAV_CATEGORIES)のIA不変条件", () => {
     },
   );
 
-  it("モバイルの全機能メニューから化学物質RAへ直接到達できる", () => {
+  it("モバイル固定導線から化学物質RAへ直接到達できる", () => {
     const mobileHrefs = getAppShellNavigationCategories("mobile").flatMap(
       (category) => category.items.map((item) => item.href),
     );
-    expect(mobileHrefs).toContain("/chemical-ra");
+    expect(mobileHrefs).not.toContain("/chemical-ra");
     expect(mobileHrefs).not.toContain("/features");
     expect(
       getMobilePrimaryItems(new Date("2026-08-03T00:00:00+09:00")).map(
         (item) => item.href,
       ),
-    ).toContain("/features");
+    ).toEqual(expect.arrayContaining(["/chemical-ra", "/features"]));
   });
 
   it("PC・モバイルのメニューから安全AIの短いLPへ到達できる", () => {

@@ -841,6 +841,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
     },
     {
+      url: "/resources/netis-safety",
+      lastModified: "2026-09-20",
+      priority: 0.75,
+      changeFrequency: "monthly",
+    },
+    {
       url: "/subsidies/calculator",
       lastModified: "2026-04-01",
       priority: 0.6,

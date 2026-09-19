@@ -47,6 +47,14 @@ export type AiPromptElement = {
   questions: string[];
 };
 
+export type AiPromptCaseTemplate = {
+  id: "email" | "report" | "research" | "review" | "confidential-rewrite";
+  title: string;
+  scene: string;
+  prompt: string;
+  humanChecks: string[];
+};
+
 export type AiPromptTemplate = {
   id: string;
   title: string;
@@ -60,6 +68,7 @@ export type AiPromptTemplate = {
     humanCheckpoint: string;
   };
   copyTemplate: string;
+  caseTemplates: AiPromptCaseTemplate[];
   safeUseNotes: string[];
   claimIds: string[];
 };

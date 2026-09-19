@@ -4,9 +4,11 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import {
   COMING_SOON_SAFETY_SEMINARS,
+  COMING_SOON_SAFETY_CORE_20,
   FALL_PREVENTION_SEMINAR_PATH,
   PUBLISHED_SAFETY_SEMINARS,
   SAFETY_SEMINARS,
+  SAFETY_SEMINAR_CORE_20,
   SAFETY_SEMINAR_HUB_PATH,
 } from "@/data/safety-seminars/themes";
 import SafetySeminarLibraryPage, { generateMetadata } from "./page";
@@ -65,7 +67,9 @@ describe("/training/safety-seminars", () => {
     ).toHaveLength(1);
     expect(
       container.querySelectorAll('[data-seminar-status="coming-soon"]'),
-    ).toHaveLength(27);
+    ).toHaveLength(19);
+    expect(SAFETY_SEMINAR_CORE_20).toHaveLength(20);
+    expect(COMING_SOON_SAFETY_CORE_20).toHaveLength(19);
     expect(screen.getByText("音声あり")).toBeDefined();
     expect(screen.getByText("PowerPoint・PDF")).toBeDefined();
     expect(screen.getByText("20枚")).toBeDefined();

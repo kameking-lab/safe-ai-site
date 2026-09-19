@@ -42,7 +42,7 @@ export function ChatbotBody() {
               法令本文検索
             </StatusBadge>
           </div>
-          <div className="mt-1 flex min-h-11 items-center gap-3">
+          <div className="mt-1 flex min-h-11 flex-wrap items-center gap-3">
             <p className="min-w-0 flex-1 text-xs text-slate-600 dark:text-slate-300 sm:text-sm">
               作業や設備について、普段の言葉で質問できます。
             </p>
@@ -51,6 +51,12 @@ export function ChatbotBody() {
               className="inline-flex min-h-11 shrink-0 items-center text-xs font-medium text-slate-700 underline-offset-4 hover:text-slate-950 hover:underline dark:text-slate-300 dark:hover:text-white"
             >
               注意事項
+            </Link>
+            <Link
+              href="/resources/netis-safety"
+              className="inline-flex min-h-11 shrink-0 items-center text-xs font-bold text-sky-800 underline underline-offset-4 hover:text-sky-950 dark:text-sky-300 dark:hover:text-sky-100"
+            >
+              NETIS安全技術5選
             </Link>
           </div>
         </header>

@@ -56,10 +56,10 @@ export function RegulationTagsSection({
     <section className={sectionClass} aria-labelledby="regulation-tags-heading">
       <h2 id="regulation-tags-heading" className={headerClass}>
         <ShieldAlert className="w-5 h-5" aria-hidden="true" />
-        関連法令 ({tags.length} 件)
+        関連制度・法令 ({tags.length} 件)
       </h2>
       <p className="text-xs text-slate-600 dark:text-slate-400">
-        本物質に該当する規制法令一覧。詳細は各公式リンクから確認してください。
+        収録データに基づく参照先です。物質の指定と、事業場・製品・作業に課される義務は区別し、含有率や取扱条件を公式資料で確認してください。
       </p>
       <div className="space-y-3">
         {TAG_CATEGORY_ORDER.map((cat) => {

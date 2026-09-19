@@ -31,33 +31,20 @@ function source(relativePath: string): string {
 }
 
 describe("業務自動化相談のクロール可能な入口", () => {
-  it("ホームは新しい主機能ランチャーだけを描画し、旧熱中症キャンペーンを外す", () => {
+  it("ホームでは主機能→安全の新着→サンプル→全機能→自動化相談の順に置く", () => {
     const home = source("src/app/(main)/page.tsx");
-    const removedHomeSections = [
-      "HomeHeatSection",
-      "HomeDirectChatSection",
-      "HomeSafetyUpdates",
-      "HomeDirectChemicalSection",
-      "HomeLearningOverview",
-      "HomeCoreFeatures",
-      "HomeAutomationSamples",
-      "HomeAutomationService",
-      "loadHomeHeatInitialData",
-      "loadHomeLatestAccidentNews",
-      "/heat-illness-prevention",
+    const orderedComponents = [
+      "<HomeRelaunch",
+      "<HomeSafetyUpdates",
+      "<HomeAutomationSamples",
+      "<HomeFeatureDirectory",
+      "<HomeAutomationService",
     ];
-    expect(home).toContain(
-      'import { HomeRelaunch } from "@/components/home/home-relaunch"',
+    const positions = orderedComponents.map((component) =>
+      home.indexOf(component),
     );
-    expect(home).toContain("<HomeRelaunch />");
-    for (const removedSection of removedHomeSections) {
-      expect(home).not.toContain(removedSection);
-    }
-
-    const relaunch = source("src/components/home/home-relaunch.tsx");
-    expect(relaunch).toContain("/mascot/mascot-chat-talk-v4.webp");
-    expect(relaunch).toContain("仕事から選ぶ、9つの主機能");
-    expect(relaunch).not.toContain("/heat-illness-prevention");
+    expect(positions.every((position) => position >= 0)).toBe(true);
+    expect(positions).toEqual([...positions].sort((a, b) => a - b));
   });
 
   it.each(REQUIRED_ENTRY_FILES)(

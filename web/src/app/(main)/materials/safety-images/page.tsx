@@ -5,6 +5,7 @@ import { BadgeCheck, Images, Languages, PencilLine, ShieldCheck } from "lucide-r
 import { PageJsonLd } from "@/components/page-json-ld";
 import { SafetyImageLibraryClient } from "@/components/safety-image-library/safety-image-library-client";
 import { SafetySignCustomization } from "@/components/safety-image-library/safety-sign-customization";
+import { SafetyImageFirstRelease } from "@/components/safety-image-library/safety-image-first-release";
 import {
   SAFETY_IMAGE_CATEGORIES,
   SAFETY_IMAGE_LIBRARY_PATH,
@@ -55,7 +56,7 @@ export default function SafetyImageLibraryPage() {
     <div className="pb-16">
       <PageJsonLd name="現場安全看板ライブラリ" description={DESCRIPTION} path={SAFETY_IMAGE_LIBRARY_PATH} />
       <header className="border-b border-emerald-100 bg-gradient-to-br from-emerald-50 via-white to-sky-50 px-4 py-9 sm:px-6 dark:border-emerald-950 dark:from-slate-950 dark:via-slate-950 dark:to-emerald-950">
-        <div className="mx-auto grid max-w-7xl items-center gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(28rem,1fr)]">
+        <div className="mx-auto grid max-w-7xl items-center gap-8 min-[1280px]:grid-cols-[minmax(0,1fr)_minmax(28rem,1fr)]">
           <div>
             <p className="inline-flex items-center gap-2 rounded-full border border-emerald-300 bg-white px-3 py-1.5 text-xs font-black text-emerald-900 shadow-sm dark:border-emerald-800 dark:bg-slate-900 dark:text-emerald-200">
               <BadgeCheck className="h-4 w-4" aria-hidden="true" />市場調査・独立QA済み100点
@@ -85,8 +86,10 @@ export default function SafetyImageLibraryPage() {
       </header>
 
       <div className="mx-auto max-w-7xl px-4 pt-8 sm:px-6">
+        <SafetyImageFirstRelease />
+
         <section aria-labelledby="quick-entry-heading">
-          <h2 id="quick-entry-heading" className="text-2xl font-black text-slate-950 dark:text-white">よく使う看板から探す</h2>
+          <h2 id="quick-entry-heading" className="mt-10 text-2xl font-black text-slate-950 dark:text-white">よく使う看板から探す</h2>
           <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {QUICK_CATEGORY_IDS.map((id) => {
               const category = SAFETY_IMAGE_CATEGORIES.find((item) => item.id === id);

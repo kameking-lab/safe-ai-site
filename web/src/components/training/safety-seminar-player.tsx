@@ -27,8 +27,20 @@ import type {
 } from "@/data/safety-seminars/types";
 
 type SpeechStatus = "idle" | "playing" | "paused" | "unavailable";
+type VoiceMode = "recorded" | "device-primary" | "device-secondary";
 
 const RATE_OPTIONS = [0.75, 1, 1.25, 1.5] as const;
+const LIDA_CREDIT_URL = "https://youtube.com/channel/UC2tX473Zo09ZCnhAUNdAvjA/join";
+const VOICE_OPTIONS: ReadonlyArray<{ value: VoiceMode; label: string }> = [
+  { value: "recorded", label: "AivisSpeech リダ（高品質録音）" },
+  { value: "device-primary", label: "端末音声 1" },
+  { value: "device-secondary", label: "端末音声 2" },
+];
+
+function deviceVoice(voices: SpeechSynthesisVoice[], mode: VoiceMode) {
+  const japanese = voices.filter((voice) => voice.lang.toLowerCase().startsWith("ja"));
+  return mode === "device-secondary" ? japanese[1] ?? japanese[0] : japanese[0];
+}
 
 function sentenceAt(text: string, charIndex: number) {
   const chunks = text.match(/[^。！？]+[。！？]?/g) ?? [text];
@@ -67,6 +79,8 @@ export function SafetySeminarPlayer({
   const [muted, setMuted] = useState(false);
   const [volume, setVolume] = useState(1);
   const [rate, setRate] = useState<(typeof RATE_OPTIONS)[number]>(1);
+  const [voiceMode, setVoiceMode] = useState<VoiceMode>("recorded");
+  const [deviceVoices, setDeviceVoices] = useState<SpeechSynthesisVoice[]>([]);
   const playerRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
@@ -74,6 +88,7 @@ export function SafetySeminarPlayer({
   const currentIndexRef = useRef(0);
   const statusRef = useRef<SpeechStatus>("idle");
   const slide = slides[currentIndex];
+  const useRecordedAudio = voiceMode === "recorded" && !audioFailed;
 
   const claimById = useMemo(
     () => new Map(claims.map((claim) => [claim.claimId, claim])),
@@ -96,6 +111,15 @@ export function SafetySeminarPlayer({
   useEffect(() => {
     statusRef.current = speechStatus;
   }, [speechStatus]);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+    if (typeof window.speechSynthesis.getVoices !== "function") return;
+    const updateVoices = () => setDeviceVoices(window.speechSynthesis.getVoices());
+    updateVoices();
+    window.speechSynthesis.addEventListener?.("voiceschanged", updateVoices);
+    return () => window.speechSynthesis.removeEventListener?.("voiceschanged", updateVoices);
+  }, []);
 
   const cancelSpeech = useCallback(() => {
     if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
@@ -127,31 +151,39 @@ export function SafetySeminarPlayer({
     const activeSlide = slides[currentIndexRef.current];
     const utterance = new SpeechSynthesisUtterance(activeSlide.narration);
     utterance.lang = "ja-JP";
+    if (voiceMode !== "recorded") {
+      const selectedVoice = deviceVoice(deviceVoices, voiceMode);
+      if (selectedVoice) utterance.voice = selectedVoice;
+    }
     utterance.rate = rate;
     utterance.volume = muted ? 0 : volume;
     utterance.onboundary = (event) => {
+      if (utteranceRef.current !== utterance) return;
       const index = Math.max(0, event.charIndex ?? 0);
       setSpeechProgress(Math.min(99, (index / activeSlide.narration.length) * 100));
       setCaption(sentenceAt(activeSlide.narration, index));
     };
     utterance.onend = () => {
+      if (utteranceRef.current !== utterance) return;
       utteranceRef.current = null;
       setSpeechProgress(100);
       if (statusRef.current !== "playing") return;
       if (currentIndexRef.current < slides.length - 1) {
+        if (voiceMode !== "recorded") pendingSpeechRestartRef.current = true;
         resetSlideState(currentIndexRef.current + 1);
       } else {
         setSpeechStatus("idle");
       }
     };
     utterance.onerror = () => {
+      if (utteranceRef.current !== utterance) return;
       utteranceRef.current = null;
       setSpeechStatus("idle");
     };
     utteranceRef.current = utterance;
     setCaption(sentenceAt(activeSlide.narration, 0));
     window.speechSynthesis.speak(utterance);
-  }, [cancelSpeech, muted, rate, resetSlideState, slides, volume]);
+  }, [cancelSpeech, deviceVoices, muted, rate, resetSlideState, slides, voiceMode, volume]);
 
   useEffect(() => {
     return () => cancelSpeech();
@@ -159,7 +191,7 @@ export function SafetySeminarPlayer({
 
   useEffect(() => {
     const audio = audioRef.current;
-    if (!audio || audioFailed) return;
+    if (!audio || !useRecordedAudio) return;
     audio.playbackRate = rate;
     audio.volume = volume;
     audio.muted = muted;
@@ -169,10 +201,10 @@ export function SafetySeminarPlayer({
         speakCurrent();
       });
     }
-  }, [audioFailed, currentIndex, muted, rate, speakCurrent, speechStatus, volume]);
+  }, [currentIndex, muted, rate, speakCurrent, speechStatus, useRecordedAudio, volume]);
 
   const play = useCallback(() => {
-    if (!audioFailed && audioRef.current) {
+    if (useRecordedAudio && audioRef.current) {
       void audioRef.current.play().then(
         () => setSpeechStatus("playing"),
         () => {
@@ -190,10 +222,10 @@ export function SafetySeminarPlayer({
     }
     setSpeechStatus("playing");
     speakCurrent();
-  }, [audioFailed, speakCurrent, speechStatus]);
+  }, [speakCurrent, speechStatus, useRecordedAudio]);
 
   const pause = useCallback(() => {
-    if (!audioFailed && audioRef.current) {
+    if (useRecordedAudio && audioRef.current) {
       audioRef.current.pause();
       setSpeechStatus("paused");
       return;
@@ -202,7 +234,7 @@ export function SafetySeminarPlayer({
       window.speechSynthesis.pause();
       setSpeechStatus("paused");
     }
-  }, [audioFailed]);
+  }, [useRecordedAudio]);
 
   const stop = useCallback(() => {
     if (audioRef.current) {
@@ -218,30 +250,34 @@ export function SafetySeminarPlayer({
   const goTo = useCallback(
     (index: number) => {
       const next = Math.min(slides.length - 1, Math.max(0, index));
+      const wasPlaying = statusRef.current === "playing";
+      const wasPaused = statusRef.current === "paused";
       audioRef.current?.pause();
       cancelSpeech();
+      pendingSpeechRestartRef.current = voiceMode !== "recorded" && wasPlaying;
+      if (voiceMode !== "recorded" && wasPaused) setSpeechStatus("idle");
       resetSlideState(next);
     },
-    [cancelSpeech, resetSlideState, slides.length],
+    [cancelSpeech, resetSlideState, slides.length, voiceMode],
   );
 
   const restartForSetting = useCallback(
     (callback: () => void) => {
       const wasPlaying = statusRef.current === "playing";
       const wasPaused = statusRef.current === "paused";
-      if (audioFailed && wasPlaying) pendingSpeechRestartRef.current = true;
+      if (!useRecordedAudio && wasPlaying) pendingSpeechRestartRef.current = true;
       cancelSpeech();
       callback();
-      if (audioFailed && wasPaused) setSpeechStatus("idle");
+      if (!useRecordedAudio && wasPaused) setSpeechStatus("idle");
       else if (wasPlaying) setSpeechStatus("playing");
     },
-    [audioFailed, cancelSpeech],
+    [cancelSpeech, useRecordedAudio],
   );
 
   useEffect(() => {
     if (
       !pendingSpeechRestartRef.current ||
-      !audioFailed ||
+      useRecordedAudio ||
       speechStatus !== "playing"
     )
       return;
@@ -253,7 +289,29 @@ export function SafetySeminarPlayer({
     return () => {
       active = false;
     };
-  }, [audioFailed, muted, rate, speakCurrent, speechStatus, volume]);
+  }, [currentIndex, muted, rate, speakCurrent, speechStatus, useRecordedAudio, voiceMode, volume]);
+
+  const changeVoiceMode = useCallback(
+    (next: VoiceMode) => {
+      const wasPlaying = statusRef.current === "playing";
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
+      cancelSpeech();
+      setSpeechProgress(0);
+      setCaption(slide.message);
+      setAudioFailed(false);
+      setVoiceMode(next);
+      if (wasPlaying) {
+        pendingSpeechRestartRef.current = next !== "recorded";
+        setSpeechStatus("playing");
+      } else {
+        setSpeechStatus("idle");
+      }
+    },
+    [cancelSpeech, slide.message],
+  );
 
   const enterFullscreen = useCallback(async () => {
     if (playerRef.current?.requestFullscreen) await playerRef.current.requestFullscreen();
@@ -358,6 +416,7 @@ export function SafetySeminarPlayer({
           preload="metadata"
           src={`${audioBasePath}/slide-${String(slide.number).padStart(2, "0")}.mp3`}
           onError={() => {
+            if (voiceMode !== "recorded") return;
             setAudioFailed(true);
             if (
               typeof window === "undefined" ||
@@ -465,6 +524,19 @@ export function SafetySeminarPlayer({
             />
           </label>
           <label className="flex min-h-11 items-center gap-2 rounded-xl border border-slate-600 px-3 text-sm font-bold">
+            音声
+            <select
+              aria-label="音声の種類"
+              value={voiceMode}
+              onChange={(event) => changeVoiceMode(event.target.value as VoiceMode)}
+              className="max-w-52 rounded bg-slate-950 px-2 py-1 text-white"
+            >
+              {VOICE_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>{option.label}</option>
+              ))}
+            </select>
+          </label>
+          <label className="flex min-h-11 items-center gap-2 rounded-xl border border-slate-600 px-3 text-sm font-bold">
             速度
             <select
               aria-label="再生速度"
@@ -501,11 +573,28 @@ export function SafetySeminarPlayer({
             このブラウザーでは読み上げを利用できません。字幕と全文原稿をご利用ください。
           </p>
         ) : null}
-        {audioFailed && speechStatus !== "unavailable" ? (
+        {audioFailed && voiceMode === "recorded" && speechStatus !== "unavailable" ? (
           <p className="text-xs text-amber-200">
             音声ファイルを取得できないため、ブラウザー読み上げへ切り替えました。
           </p>
         ) : null}
+        {voiceMode !== "recorded" ? (
+          <p className="text-xs text-slate-300">
+            端末に入っている日本語音声を使います。利用できる声と声質は端末・ブラウザーにより異なります。
+          </p>
+        ) : (
+          <p className="text-xs leading-5 text-slate-400">
+            音声: AivisSpeech / リダ<br />
+            <a
+              href={LIDA_CREDIT_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="break-all underline underline-offset-2 hover:text-slate-200"
+            >
+              {LIDA_CREDIT_URL}
+            </a>
+          </p>
+        )}
         <button
           type="button"
           className="min-h-11 text-sm font-bold text-teal-200 underline underline-offset-4"

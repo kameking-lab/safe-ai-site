@@ -15,10 +15,10 @@ export type SafetyImageLanguage = (typeof SAFETY_IMAGE_LANGUAGES)[number];
 
 export const SAFETY_IMAGE_LANGUAGE_LABELS: Record<SafetyImageLanguage, string> = {
   ja: "日本語",
-  en: "English",
-  vi: "Tiếng Việt",
-  "zh-CN": "简体中文",
-  id: "Bahasa Indonesia",
+  en: "英語",
+  vi: "ベトナム語",
+  "zh-CN": "中国語（簡体）",
+  id: "インドネシア語",
 };
 
 export const SAFETY_IMAGE_CATEGORIES = SAFETY_SIGN_MARKET_CATEGORIES;

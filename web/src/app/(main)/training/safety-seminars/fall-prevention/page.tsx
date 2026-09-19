@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -31,7 +32,7 @@ import {
 const PATH = "/training/safety-seminars/fall-prevention";
 const TITLE = "墜落・転落防止とフルハーネスの実務｜無料安全研修";
 const DESCRIPTION =
-  "2025年全国確定統計、現行法令、政府資料、査読研究から、作業床・手すり、フルハーネス、取付点、落下距離、点検、救助を20枚で学ぶ社内安全研修。";
+  "2025年全国確定統計、e-Gov現行条文、厚労省リーフレットに基づき、本質安全から個人用保護具までの順序と、作業床・手すり、器具選定・取付け・点検を20枚で学ぶ社内安全研修。";
 const training = fallPreventionJson as FallPreventionTraining;
 const claims = claimsJson as TrainingClaim[];
 const sources = sourcesJson as TrainingSource[];
@@ -44,7 +45,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const query = await searchParams;
   const hasQuery = Object.keys(query).length > 0;
-  const image = `${SITE_URL}/safety-images/library/originals/fall-restraint-required.png`;
+  const image = `${SITE_URL}${PATH}/fall-prevention-hero-v2.png`;
   return {
     title: TITLE,
     description: DESCRIPTION,
@@ -109,15 +110,23 @@ export default function FallPreventionSeminarPage() {
       </nav>
 
       <header className="relative overflow-hidden rounded-[2rem] bg-slate-950 px-5 py-8 text-white shadow-2xl sm:px-8 lg:px-12 lg:py-12">
+        <Image
+          src={`${PATH}/fall-prevention-hero-v2.png`}
+          alt="親綱にフルハーネスを接続し、指差し確認を行う建設作業員"
+          fill
+          priority
+          sizes="(min-width: 1024px) 100vw, 100vw"
+          className="object-cover object-center"
+        />
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 opacity-35"
+          className="pointer-events-none absolute inset-0"
           style={{
             background:
-              "radial-gradient(circle at 10% 10%, #0f766e 0, transparent 34%), radial-gradient(circle at 90% 80%, #f97316 0, transparent 28%)",
+              "linear-gradient(90deg, rgba(2,6,23,.98) 0%, rgba(2,6,23,.92) 38%, rgba(2,6,23,.52) 64%, rgba(2,6,23,.16) 100%)",
           }}
         />
-        <div className="relative max-w-4xl">
+        <div className="relative max-w-3xl lg:max-w-[58%]">
           <p className="text-sm font-black tracking-[0.16em] text-teal-300">公開中・無料教材</p>
           <h1 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl lg:text-6xl">
             墜落・転落防止と
@@ -127,10 +136,10 @@ export default function FallPreventionSeminarPage() {
             {training.subtitle}
           </p>
           <div className="mt-5 flex flex-wrap gap-2 text-xs font-bold sm:text-sm">
-            <span className="rounded-full bg-white/10 px-3 py-2"><Headphones className="mr-1 inline h-4 w-4" aria-hidden="true" />音声 約37分</span>
+            <span className="rounded-full bg-white/10 px-3 py-2"><Headphones className="mr-1 inline h-4 w-4" aria-hidden="true" />音声 約{Math.round(audioSeconds / 60)}分</span>
             <span className="rounded-full bg-white/10 px-3 py-2"><Presentation className="mr-1 inline h-4 w-4" aria-hidden="true" />20枚</span>
             <span className="rounded-full bg-white/10 px-3 py-2">演習込み 約60分</span>
-            <span className="rounded-full bg-white/10 px-3 py-2">基準日 2026-08-27</span>
+            <span className="rounded-full bg-white/10 px-3 py-2">基準日 {training.asOf}</span>
           </div>
           <p className="mt-5 rounded-xl border border-amber-300 bg-amber-200/10 p-3 font-bold leading-6 text-amber-100">
             {training.boundary}

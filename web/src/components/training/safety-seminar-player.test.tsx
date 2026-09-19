@@ -44,6 +44,7 @@ describe("SafetySeminarPlayer", () => {
       lang = "";
       rate = 1;
       volume = 1;
+      voice: SpeechSynthesisVoice | null = null;
       onboundary: ((event: { charIndex?: number }) => void) | null = null;
       onend: (() => void) | null = null;
       onerror: (() => void) | null = null;
@@ -58,7 +59,18 @@ describe("SafetySeminarPlayer", () => {
     });
     Object.defineProperty(window, "speechSynthesis", {
       configurable: true,
-      value: { speak, cancel, pause, resume },
+      value: {
+        speak,
+        cancel,
+        pause,
+        resume,
+        getVoices: () => [
+          { name: "Microsoft Sayaka", lang: "ja-JP" },
+          { name: "Microsoft Ichiro", lang: "ja-JP" },
+        ],
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+      },
     });
   });
 
@@ -93,7 +105,11 @@ describe("SafetySeminarPlayer", () => {
     fireEvent.click(screen.getByRole("button", { name: "次のスライド" }));
     expect(screen.getByText("02 / 20")).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "スライド一覧" }));
-    fireEvent.click(screen.getByRole("button", { name: /20\. 設備で防ぎ/u }));
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: /20\. 設備で防ぎ、器具を合わせ、救助まで/u,
+      }),
+    );
     expect(screen.getByText("20 / 20")).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "前のスライド" }));
     expect(screen.getByText("19 / 20")).toBeTruthy();
@@ -159,5 +175,50 @@ describe("SafetySeminarPlayer", () => {
     fireEvent.click(screen.getByRole("button", { name: "ミュート" }));
     await waitFor(() => expect(speak).toHaveBeenCalledTimes(3));
     expect(speak.mock.calls.at(-1)?.[0]).toMatchObject({ volume: 0 });
+  });
+
+  it("日本語表示の音声パターンから端末音声を選び、切替時は先頭へ戻る", async () => {
+    const { container } = renderPlayer();
+    const selector = screen.getByRole("combobox", { name: "音声の種類" });
+    expect(screen.getByRole("option", { name: "AivisSpeech リダ（高品質録音）" })).toBeTruthy();
+    expect(screen.getByRole("option", { name: "端末音声 1" })).toBeTruthy();
+    expect(screen.getByRole("option", { name: "端末音声 2" })).toBeTruthy();
+    const audio = container.querySelector("audio") as HTMLAudioElement;
+    audio.currentTime = 12;
+    fireEvent.change(selector, { target: { value: "device-secondary" } });
+    expect(audio.currentTime).toBe(0);
+    fireEvent.click(screen.getByRole("button", { name: "再生" }));
+    await waitFor(() => expect(speak).toHaveBeenCalledTimes(1));
+    expect(speak.mock.calls[0]?.[0]).toMatchObject({ voice: { name: "Microsoft Ichiro" } });
+  });
+
+  it("録音音声の必須クレジットと配布者URLを表示する", () => {
+    renderPlayer();
+    expect(screen.getByText("音声: AivisSpeech / リダ")).toBeTruthy();
+    expect(
+      screen
+        .getByRole("link", { name: "https://youtube.com/channel/UC2tX473Zo09ZCnhAUNdAvjA/join" })
+        .getAttribute("href"),
+    ).toBe("https://youtube.com/channel/UC2tX473Zo09ZCnhAUNdAvjA/join");
+  });
+
+  it("端末音声の再生中も手動移動と読み上げ終了後に次の原稿を続ける", async () => {
+    renderPlayer();
+    fireEvent.change(screen.getByRole("combobox", { name: "音声の種類" }), {
+      target: { value: "device-primary" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "再生" }));
+    await waitFor(() => expect(speak).toHaveBeenCalledTimes(1));
+    expect(speak.mock.calls[0]?.[0]).toMatchObject({ text: training.slides[0].narration });
+
+    fireEvent.click(screen.getByRole("button", { name: "次のスライド" }));
+    await waitFor(() => expect(speak).toHaveBeenCalledTimes(2));
+    expect(speak.mock.calls[1]?.[0]).toMatchObject({ text: training.slides[1].narration });
+
+    const secondUtterance = speak.mock.calls[1]?.[0] as SpeechSynthesisUtterance;
+    secondUtterance.onend?.(new Event("end") as SpeechSynthesisEvent);
+    await waitFor(() => expect(speak).toHaveBeenCalledTimes(3));
+    expect(screen.getByText("03 / 20")).toBeTruthy();
+    expect(speak.mock.calls[2]?.[0]).toMatchObject({ text: training.slides[2].narration });
   });
 });

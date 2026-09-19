@@ -4,6 +4,7 @@ import { SafetyGoodsPanel } from "@/components/safety-goods-panel";
 import { ogImageUrl } from "@/lib/og-url";
 import { withSiteOpenGraph, withSiteTwitter, SITE_URL } from "@/lib/seo-metadata";
 import { JsonLd, webPageSchema, breadcrumbSchema } from "@/components/json-ld";
+import { NetisSafetyGuide } from "@/components/netis-safety-guide";
 
 const _title = "安全用品・保護具の購入前確認とカテゴリ検索";
 const _desc =
@@ -37,6 +38,9 @@ export default function GoodsPage() {
         ]}
       />
       <SafetyGoodsPanel />
+      <div className="mx-auto max-w-7xl px-4 pb-10 lg:px-8">
+        <NetisSafetyGuide compact />
+      </div>
     </Suspense>
   );
 }

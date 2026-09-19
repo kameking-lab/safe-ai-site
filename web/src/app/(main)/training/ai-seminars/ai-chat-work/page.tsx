@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -30,7 +31,7 @@ import { SITE_URL, withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata
 const PATH = "/training/ai-seminars/ai-chat-work";
 const TITLE = "AIチャット仕事術｜無料のAI実務研修";
 const DESCRIPTION =
-  "質問、調査、文書作成、検証、個人情報・著作権、人による確認を20枚で実践する60分の社内AI研修。音声、PowerPoint、PDF、依頼テンプレート付き。";
+  "メール、報告書、一次資料調査、文章レビュー、機密を含まない依頼への書換えを20枚の具体例で実践する60分の社内AI研修。音声、PowerPoint、PDF、依頼テンプレート付き。";
 const DOWNLOAD_BASE = `${PATH}/downloads`;
 const AUDIO_BASE = `${PATH}/audio`;
 const course = courseJson as AiChatWorkTraining;
@@ -45,13 +46,18 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const query = await searchParams;
   const hasQuery = Object.keys(query).length > 0;
+  const image = `${SITE_URL}${PATH}/ai-chat-work-hero-v2.png`;
   return {
     title: TITLE,
     description: DESCRIPTION,
     alternates: { canonical: PATH },
     robots: hasQuery ? { index: false, follow: true } : { index: true, follow: true },
-    openGraph: withSiteOpenGraph(PATH, { title: TITLE, description: DESCRIPTION }),
-    twitter: withSiteTwitter({ title: TITLE, description: DESCRIPTION }),
+    openGraph: withSiteOpenGraph(PATH, {
+      title: TITLE,
+      description: DESCRIPTION,
+      images: [{ url: image, alt: "AIの回答を一次資料と照合する安全管理担当者" }],
+    }),
+    twitter: withSiteTwitter({ title: TITLE, description: DESCRIPTION, images: [image] }),
   };
 }
 export default function AiChatWorkSeminarPage() {
@@ -100,15 +106,23 @@ export default function AiChatWorkSeminarPage() {
       <TrainingLibrarySwitcher current="ai" />
 
       <header className="relative mt-6 overflow-hidden rounded-[2rem] bg-slate-950 px-5 py-8 text-white shadow-2xl sm:px-8 lg:px-12 lg:py-12">
+        <Image
+          src={`${PATH}/ai-chat-work-hero-v2.png`}
+          alt="AIの回答を法令資料と照合しながら確認する安全管理担当者と現場監督"
+          fill
+          priority
+          sizes="(min-width: 1024px) 100vw, 100vw"
+          className="object-cover object-center"
+        />
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 opacity-40"
+          className="pointer-events-none absolute inset-0"
           style={{
             background:
-              "radial-gradient(circle at 15% 15%, #0369a1 0, transparent 34%), radial-gradient(circle at 88% 82%, #7c3aed 0, transparent 30%)",
+              "linear-gradient(90deg, rgba(2,6,23,.98) 0%, rgba(2,6,23,.92) 38%, rgba(2,6,23,.5) 64%, rgba(2,6,23,.12) 100%)",
           }}
         />
-        <div className="relative max-w-4xl">
+        <div className="relative max-w-3xl lg:max-w-[58%]">
           <p className="text-sm font-black tracking-[.16em] text-sky-300">公開中・無料教材</p>
           <h1 className="mt-3 text-4xl font-black tracking-tight sm:text-5xl lg:text-6xl">AIチャット仕事術</h1>
           <p className="mt-4 max-w-3xl text-base leading-7 text-slate-200 sm:text-lg">{course.subtitle}</p>
@@ -172,6 +186,22 @@ export default function AiChatWorkSeminarPage() {
         <h2 id="template-title" className="mt-1 text-3xl font-black">仕事で使えるAI依頼テンプレート</h2>
         <p className="mt-3 max-w-4xl leading-7 text-slate-700 dark:text-slate-200">{promptTemplate.description}</p>
         <pre className="mt-5 max-h-80 overflow-auto whitespace-pre-wrap rounded-2xl bg-slate-950 p-4 text-sm leading-6 text-slate-100">{promptTemplate.copyTemplate}</pre>
+        <details className="mt-5 rounded-2xl border border-violet-300 bg-white p-4 dark:border-violet-700 dark:bg-slate-900">
+          <summary className="min-h-11 cursor-pointer font-black">業務別の具体例5件を見る</summary>
+          <div className="mt-4 grid gap-4 lg:grid-cols-2">
+            {promptTemplate.caseTemplates.map((item) => (
+              <article key={item.id} className="rounded-xl border border-slate-200 p-4 dark:border-slate-700">
+                <h3 className="font-black">{item.title}</h3>
+                <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">業務場面：{item.scene}</p>
+                <pre className="mt-3 whitespace-pre-wrap rounded-xl bg-slate-950 p-3 text-xs leading-6 text-slate-100">{item.prompt}</pre>
+                <p className="mt-3 text-xs font-black">人の確認点</p>
+                <ul className="mt-1 list-disc space-y-1 pl-5 text-xs leading-5">
+                  {item.humanChecks.map((check) => <li key={check}>{check}</li>)}
+                </ul>
+              </article>
+            ))}
+          </div>
+        </details>
         <p className="mt-3 text-sm font-bold leading-6 text-slate-700 dark:text-slate-200">テンプレートは正しさや適法性を保証しません。会社ルール、承認済み環境、原資料確認を残してください。</p>
       </section>
 

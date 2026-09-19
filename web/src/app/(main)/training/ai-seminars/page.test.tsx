@@ -3,19 +3,23 @@ import { describe, expect, it } from "vitest";
 import {
   AI_SEMINAR_THEMES,
   AI_SEMINAR_HUB_PATH,
+  AI_SEMINAR_CORE_20,
   COMING_SOON_AI_SEMINARS,
+  COMING_SOON_AI_CORE_20,
   PUBLISHED_AI_SEMINARS,
 } from "@/data/ai-seminars/themes";
 import AiSeminarLibraryPage, { generateMetadata } from "./page";
 
 describe("/training/ai-seminars", () => {
-  it("25テーマを公開中1件とリンクなしComing Soon 24件に分ける", () => {
+  it("25テーマを保持しつつ最初の20テーマを目次表示する", () => {
     const { container } = render(<AiSeminarLibraryPage />);
     expect(AI_SEMINAR_THEMES).toHaveLength(25);
     expect(PUBLISHED_AI_SEMINARS).toHaveLength(1);
     expect(COMING_SOON_AI_SEMINARS).toHaveLength(24);
+    expect(AI_SEMINAR_CORE_20).toHaveLength(20);
+    expect(COMING_SOON_AI_CORE_20).toHaveLength(19);
     expect(container.querySelectorAll('[data-ai-seminar-status="published"]')).toHaveLength(1);
-    expect(container.querySelectorAll('[data-ai-seminar-status="coming-soon"]')).toHaveLength(24);
+    expect(container.querySelectorAll('[data-ai-seminar-status="coming-soon"]')).toHaveLength(19);
     for (const item of container.querySelectorAll('[data-ai-seminar-status="coming-soon"]')) {
       expect(item.querySelector("a, button, input, form")).toBeNull();
     }

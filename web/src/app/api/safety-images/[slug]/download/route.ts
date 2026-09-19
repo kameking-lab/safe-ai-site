@@ -22,6 +22,12 @@ import {
   type SafetyImageTextPosition,
   type SafetyImageWritingMode,
 } from "@/lib/safety-image-library/renderer";
+import {
+  hasOnlyCanonicalQuery,
+  isSafeSafetyImageMainText,
+  isSafeSafetyImageUnit,
+  isShortPlainText,
+} from "@/lib/safety-image-library/download-validation";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -35,8 +41,6 @@ const PADDINGS = new Set<SafetyImagePadding>(["small", "standard", "large"]);
 const WRITING_MODES = new Set<SafetyImageWritingMode>(["horizontal", "vertical"]);
 const LANGUAGES = new Set<string>(SAFETY_IMAGE_LANGUAGES);
 const HEX_COLOR = /^#[0-9a-f]{6}$/iu;
-const UNIT = /^[\p{L}\p{N}%‰²³㎡㎥°℃/・.\- ]{0,16}$/u;
-const DOWNLOAD_QUERY_KEYS = new Set(["brand", "format", "lang", "mode", "orientation", "paper", "size"]);
 const RENDER_RATE_WINDOW_MS = 60_000;
 const RENDER_RATE_LIMIT = 24;
 const renderRateBuckets = new Map<string, { startedAt: number; count: number }>();
@@ -57,22 +61,6 @@ function errorResponse(message: string, status = 400, extraHeaders: Record<strin
       },
     },
   );
-}
-
-export function hasOnlyCanonicalQuery(search: URLSearchParams): boolean {
-  for (const key of search.keys()) {
-    if (!DOWNLOAD_QUERY_KEYS.has(key) || search.getAll(key).length !== 1) return false;
-  }
-  const hasLegacyPaper = search.has("paper");
-  const hasLegacyOrientation = search.has("orientation");
-  if (search.has("size") && (hasLegacyPaper || hasLegacyOrientation)) return false;
-  if (hasLegacyPaper !== hasLegacyOrientation) return false;
-  if (hasLegacyPaper) {
-    if (!new Set(["A4", "A3"]).has(search.get("paper") ?? "")) return false;
-    if (!new Set(["portrait", "landscape"]).has(search.get("orientation") ?? "")) return false;
-  }
-  const brand = search.get("brand");
-  return brand === null || brand === "branded" || brand === "none";
 }
 
 function acquireRenderSlot(request: Request): (() => void) | Response {
@@ -100,20 +88,6 @@ function acquireRenderSlot(request: Request): (() => void) | Response {
     released = true;
     activeRenderCount = Math.max(0, activeRenderCount - 1);
   };
-}
-
-function shortPlainText(value: unknown, maxLength: number, maxLines: number): value is string {
-  if (typeof value !== "string" || value.length > maxLength) return false;
-  const lines = value.replace(/\r\n?/gu, "\n").split("\n");
-  return lines.length <= maxLines && !/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/u.test(value);
-}
-
-export function isSafeSafetyImageUnit(value: unknown): value is string {
-  return typeof value === "string" && UNIT.test(value) && shortPlainText(value, 16, 1);
-}
-
-export function isSafeSafetyImageMainText(value: unknown): value is string {
-  return shortPlainText(value, 180, 12);
 }
 
 function bool(value: unknown, fallback: boolean) {
@@ -150,7 +124,9 @@ function defaults(options: {
   return {
     mode: options.mode,
     language: options.language,
+    languages: [options.language],
     text: options.text,
+    texts: { [options.language]: options.text },
     fontSize: "standard",
     position: options.orientation === "portrait" ? "top" : "bottom",
     textColor: "#082f49",
@@ -172,15 +148,33 @@ function parseSettings(input: unknown, fallback: SafetyImageRenderSettings) {
   if (!input || typeof input !== "object" || Array.isArray(input)) return undefined;
   const body = input as Record<string, unknown>;
   if (body.mode !== "edited" || !LANGUAGES.has(String(body.language))) return undefined;
-  if (!isSafeSafetyImageMainText(body.text) || !shortPlainText(body.subMessage, 72, 2)) return undefined;
+  const requestedLanguages = body.languages === undefined
+    ? [body.language as SafetyImageLanguage]
+    : Array.isArray(body.languages)
+      ? body.languages.map(String) as SafetyImageLanguage[]
+      : [];
+  if (
+    requestedLanguages.length < 1 ||
+    requestedLanguages.length > LANGUAGES.size ||
+    new Set(requestedLanguages).size !== requestedLanguages.length ||
+    requestedLanguages.some((language) => !LANGUAGES.has(language))
+  ) return undefined;
+  const requestedTexts = body.texts === undefined
+    ? { [body.language as SafetyImageLanguage]: body.text }
+    : body.texts;
+  if (!requestedTexts || typeof requestedTexts !== "object" || Array.isArray(requestedTexts)) return undefined;
+  const texts = requestedTexts as Partial<Record<SafetyImageLanguage, unknown>>;
+  if (requestedLanguages.some((language) => !isSafeSafetyImageMainText(texts[language]))) return undefined;
+  if (!isSafeSafetyImageMainText(body.text) || !isShortPlainText(body.subMessage, 72, 2)) return undefined;
   if (!FONT_SIZES.has(body.fontSize as SafetyImageFontSize)) return undefined;
   if (!POSITIONS.has(body.position as SafetyImageTextPosition)) return undefined;
   if (!ALIGNS.has(body.align as SafetyImageTextAlign)) return undefined;
   if (!PADDINGS.has(body.padding as SafetyImagePadding)) return undefined;
   if (!WRITING_MODES.has(body.writingMode as SafetyImageWritingMode)) return undefined;
+  if (requestedLanguages.length > 1 && body.writingMode !== "horizontal") return undefined;
   if (typeof body.textColor !== "string" || !HEX_COLOR.test(body.textColor)) return undefined;
   if (typeof body.bandColor !== "string" || !HEX_COLOR.test(body.bandColor)) return undefined;
-  if (!shortPlainText(body.numericValue, 24, 1)) return undefined;
+  if (!isShortPlainText(body.numericValue, 24, 1)) return undefined;
   if (!isSafeSafetyImageUnit(body.numericUnit)) return undefined;
   const lineHeight = Number(body.lineHeight);
   if (!Number.isFinite(lineHeight) || lineHeight < 0.9 || lineHeight > 1.8) return undefined;
@@ -188,7 +182,11 @@ function parseSettings(input: unknown, fallback: SafetyImageRenderSettings) {
     ...fallback,
     mode: "edited" as const,
     language: body.language as SafetyImageLanguage,
+    languages: requestedLanguages,
     text: body.text,
+    texts: Object.fromEntries(
+      requestedLanguages.map((language) => [language, String(texts[language])]),
+    ) as Partial<Record<SafetyImageLanguage, string>>,
     fontSize: body.fontSize as SafetyImageFontSize,
     position: body.position as SafetyImageTextPosition,
     textColor: body.textColor,
@@ -277,7 +275,12 @@ async function renderResponse(options: {
     }
     return errorResponse("Download rendering failed", 500);
   }
-  const fileName = `${theme.slug}-${options.settings.mode}-${options.settings.language.toLowerCase()}-${options.size}.${extensionFor(options.format)}`;
+  const languageToken = (options.settings.languages?.length
+    ? options.settings.languages
+    : [options.settings.language])
+    .map((language) => language.toLowerCase())
+    .join("-");
+  const fileName = `${theme.slug}-${options.settings.mode}-${languageToken}-${options.size}.${extensionFor(options.format)}`;
   // Vercel Functions have a 4.5 MB buffered-response limit. Large A3 and
   // market-size print files are therefore emitted as bounded stream chunks.
   // The custom text remains only in memory and is never used in the URL,

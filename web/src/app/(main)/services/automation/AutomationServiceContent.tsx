@@ -4,6 +4,7 @@ import { UsageNotesLink } from "@/components/usage-notes-link";
 import type { AutomationConsultAvailability } from "@/lib/automation-consult/availability";
 import { AutomationConsultForm } from "./AutomationConsultForm";
 import { AutomationConsultPreparation } from "./AutomationConsultPreparation";
+import { FeatureMascotCompanion } from "@/components/feature-mascot-companion";
 
 const buttonPrimary =
   "inline-flex min-h-[44px] items-center justify-center rounded-xl bg-emerald-800 px-5 py-3 text-center text-sm font-black text-white hover:bg-emerald-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-700/30 forced-colors:border-2 forced-colors:border-[LinkText] forced-colors:bg-[Canvas] forced-colors:text-[LinkText]";
@@ -128,6 +129,15 @@ export function AutomationServiceContent({
             利用者のメールアプリから送信します。
           </p>
         ) : null}
+        <FeatureMascotCompanion
+          variant="calendar-plan"
+          eyebrow="改善係チワワ"
+          title="面倒なひと手間を、ひとつずつ減らします。"
+          message="まだ仕様が固まっていなくても、今の作業をそのまま話してください。"
+          tone="green"
+          compact
+          className="mt-5 max-w-2xl"
+        />
       </section>
 
       <section

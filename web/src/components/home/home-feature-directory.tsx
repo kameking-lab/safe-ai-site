@@ -10,6 +10,7 @@ import {
   Scale,
   ShieldCheck,
 } from "lucide-react";
+import { isPublicRouteAvailable } from "@/lib/public-content-policy";
 
 type FeatureLink = { href: string; label: string };
 type FeatureCategory = {
@@ -28,13 +29,13 @@ const CATEGORIES: FeatureCategory[] = [
     tone: "border-orange-300 bg-orange-50 dark:border-orange-800 dark:bg-orange-950/35",
     iconTone: "bg-orange-600 text-white",
     visible: [
+      { href: "/morning-briefing", label: "朝礼3分セット" },
       { href: "/risk", label: "今日の安全" },
-      { href: "/heat-illness-prevention", label: "熱中症対策" },
       { href: "/signage", label: "サイネージ" },
     ],
     more: [
-      { href: "/whats-new", label: "新着情報" },
       { href: "/notifications", label: "通知設定" },
+      { href: "/whats-new", label: "新着情報" },
     ],
   },
   {
@@ -80,7 +81,7 @@ const CATEGORIES: FeatureCategory[] = [
     ],
     more: [
       { href: "/accidents-analytics", label: "事故統計" },
-      { href: "/accident-news", label: "重大災害事例" },
+      { href: "/accident-news", label: "労災事故速報" },
     ],
   },
   {
@@ -147,9 +148,10 @@ const CATEGORIES: FeatureCategory[] = [
 ];
 
 function FeatureList({ links }: { links: FeatureLink[] }) {
+  const availableLinks = links.filter((item) => isPublicRouteAvailable(item.href));
   return (
     <ul className="space-y-1">
-      {links.map((item) => (
+      {availableLinks.map((item) => (
         <li key={`${item.href}-${item.label}`}>
           <Link
             href={item.href}
@@ -172,7 +174,7 @@ export function HomeFeatureDirectory() {
   return (
     <section
       aria-labelledby="home-feature-directory"
-      className="relative overflow-hidden border-t-2 border-slate-200 bg-[#f3efe5] px-4 py-12 [content-visibility:auto] [contain-intrinsic-size:auto_980px] dark:border-slate-800 dark:bg-slate-950 sm:py-16"
+      className="relative overflow-hidden border-t-2 border-slate-200 bg-[#f3efe5] px-4 py-12 dark:border-slate-800 dark:bg-slate-950 sm:py-16"
     >
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(15,23,42,.08)_1px,transparent_0)] bg-[size:22px_22px] forced-colors:hidden dark:opacity-20" aria-hidden="true" />
       <div className="mx-auto max-w-7xl">
@@ -193,7 +195,7 @@ export function HomeFeatureDirectory() {
           {CATEGORIES.map(({ title, icon: Icon, visible, more, tone, iconTone }, index) => (
             <article
               key={title}
-              className={`group overflow-hidden rounded-[1.5rem] border-2 p-3 shadow-[0_20px_45px_-35px_rgba(15,23,42,.65)] transition-[transform,box-shadow] hover:-translate-y-1 hover:shadow-lg motion-reduce:transform-none motion-reduce:transition-none ${tone}`}
+              className={`group overflow-hidden rounded-[1.5rem] border-2 p-3 shadow-[0_20px_45px_-35px_rgba(15,23,42,.65)] transition-[transform,box-shadow] motion-safe:hover:-translate-y-1 hover:shadow-lg motion-reduce:transform-none motion-reduce:transition-none ${tone}`}
             >
               <div className="flex min-h-16 items-center gap-3 px-2">
                 <span className={`flex h-11 w-11 items-center justify-center rounded-xl shadow-sm ${iconTone}`}>

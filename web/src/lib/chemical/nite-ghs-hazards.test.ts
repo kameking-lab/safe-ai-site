@@ -56,5 +56,9 @@ describe("buildGhsHazardsFromNite", () => {
     // 生殖毒性 区分1A（NITE収録値）が含まれ、危険の割当
     const repro = hazards.find((h) => h.category === "生殖毒性");
     expect(repro?.signal).toBe("危険");
+    expect(repro?.classification).toContain("区分1A");
+    const repeated = hazards.find((h) => h.category === "特定標的臓器毒性（反復ばく露）");
+    expect(repeated?.classification).toBe("区分1（中枢神経系、腎臓）");
+    expect(repeated?.signal).toBe("危険");
   });
 });

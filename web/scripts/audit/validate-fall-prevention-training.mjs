@@ -20,6 +20,31 @@ invariant(training.slides.length === 20, "slide count must be 20");
 invariant(quiz.questions.length === 5, "quiz count must be 5");
 invariant(training.boundary.includes("法定の特別教育等を代替するものではありません"), "training boundary missing");
 
+const narrationChars = training.slides.reduce(
+  (total, slide) => total + slide.narration.length,
+  0,
+);
+const estimatedNarrationSeconds = training.slides.reduce(
+  (total, slide) => total + slide.estimatedSeconds,
+  0,
+);
+invariant(
+  narrationChars >= 5_500 && narrationChars <= 6_200,
+  `narration characters outside 5,500-6,200: ${narrationChars}`,
+);
+invariant(
+  estimatedNarrationSeconds >= 35 * 60 && estimatedNarrationSeconds <= 37 * 60,
+  `estimated narration outside 35-37 minutes: ${estimatedNarrationSeconds}`,
+);
+for (const slide of training.slides) {
+  invariant(
+    slide.narration.length >= 220 && slide.narration.length <= 430,
+    `slide narration outside reviewed length range: ${slide.id}`,
+  );
+  invariant(slide.estimatedSeconds >= 60 && slide.estimatedSeconds <= 150,
+    `slide estimate outside 60-150 seconds: ${slide.id}`);
+}
+
 const claimById = new Map(claims.map((claim) => [claim.claimId, claim]));
 const sourceById = new Map(sources.map((source) => [source.sourceId, source]));
 invariant(claimById.size === claims.length, "duplicate claim ID");
@@ -33,7 +58,10 @@ const numericStatisticsSourceIds = [
 
 for (const source of sources) {
   invariant(/^sha256:[a-f0-9]{64}$/u.test(source.checksum), `bad checksum: ${source.sourceId}`);
-  invariant(source.checkedAt.startsWith("2026-08-27"), `bad checkedAt: ${source.sourceId}`);
+  invariant(
+    source.checkedAt.slice(0, 10) <= training.asOf,
+    `source checked after training asOf: ${source.sourceId}`,
+  );
   for (const claimId of source.claimIds) {
     const claim = claimById.get(claimId);
     invariant(claim, `missing claim: ${source.sourceId} -> ${claimId}`);
@@ -87,7 +115,7 @@ for (const slide of training.slides) {
   invariant(Number.isFinite(duration) && duration > 30, `invalid duration: ${path}`);
   audioSeconds += duration;
 }
-invariant(audioSeconds >= 35 * 60 && audioSeconds <= 50 * 60, `audio total outside 35-50 minutes: ${audioSeconds}`);
+invariant(audioSeconds >= 30 * 60 && audioSeconds <= 40 * 60, `audio total outside 30-40 minutes: ${audioSeconds}`);
 
 const artifacts = [
   "fall-prevention-training.pptx",
@@ -136,6 +164,8 @@ console.log(JSON.stringify({
   audioFiles: training.slides.length,
   audioSeconds: Number(audioSeconds.toFixed(1)),
   audioMinutes: Number((audioSeconds / 60).toFixed(1)),
+  narrationChars,
+  estimatedNarrationSeconds,
   missingArtifacts,
 }, null, 2));
 

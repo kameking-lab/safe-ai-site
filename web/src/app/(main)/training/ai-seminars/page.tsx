@@ -13,14 +13,17 @@ import { PageJsonLd } from "@/components/page-json-ld";
 import { TrainingLibrarySwitcher } from "@/components/training/training-library-switcher";
 import {
   AI_SEMINAR_HUB_PATH,
-  COMING_SOON_AI_SEMINARS,
+  COMING_SOON_AI_CORE_20,
   PUBLISHED_AI_SEMINARS,
 } from "@/data/ai-seminars/themes";
 import { withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
+import { FeatureMascotCompanion } from "@/components/feature-mascot-companion";
 
 const TITLE = "AI実務研修｜生成AIを仕事で安全に使う社内研修";
 const DESCRIPTION =
-  "質問、調査、文書作成、検証、個人情報・著作権を学ぶAI実務研修。第一弾「AIチャット仕事術」を音声、PowerPoint、PDF付きで無料公開しています。";
+  "メール、報告書、一次資料調査、文章レビュー、安全な依頼への書換えを具体例で学ぶAI実務研修。第一弾「AIチャット仕事術」を音声、PowerPoint、PDF付きで無料公開しています。";
+const REFERENCE_FOLDER_URL =
+  "https://drive.google.com/drive/folders/1ueL4tATdCiIuiUKCluDlov1CLCo56FGn?usp=drive_link";
 
 export async function generateMetadata({
   searchParams,
@@ -79,6 +82,15 @@ export default function AiSeminarLibraryPage() {
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </Link>
             </div>
+            <FeatureMascotCompanion
+              variant="tablet-dx"
+              eyebrow="実務研修チワワ"
+              title="便利さだけでなく、確かめ方まで身につけよう。"
+              message="AIに任せきらない、仕事で使える手順を一緒に練習します。"
+              tone="sky"
+              compact
+              className="mt-6 max-w-2xl"
+            />
           </div>
         </header>
 
@@ -146,11 +158,11 @@ export default function AiSeminarLibraryPage() {
           <section aria-labelledby="ai-coming-soon" className="mt-14">
             <details className="rounded-2xl border-2 border-slate-300 bg-white dark:border-slate-700 dark:bg-slate-900">
               <summary className="flex min-h-14 cursor-pointer items-center justify-between gap-4 px-5 py-3 font-black">
-                <span id="ai-coming-soon">Coming Soon {COMING_SOON_AI_SEMINARS.length}件</span>
+                <span id="ai-coming-soon">全20テーマの目次（公開1・準備中{COMING_SOON_AI_CORE_20.length}）</span>
                 <span className="text-xs text-slate-600 dark:text-slate-300">テーマ一覧を開く</span>
               </summary>
               <ul className="divide-y divide-slate-200 border-t border-slate-200 dark:divide-slate-700 dark:border-slate-700">
-                {COMING_SOON_AI_SEMINARS.map((seminar) => (
+                {COMING_SOON_AI_CORE_20.map((seminar) => (
                   <li
                     key={seminar.id}
                     data-ai-seminar-status="coming-soon"
@@ -163,6 +175,12 @@ export default function AiSeminarLibraryPage() {
                 ))}
               </ul>
             </details>
+            <p className="mt-5 rounded-2xl border border-slate-300 bg-white p-4 text-sm font-bold leading-6 text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
+              目次の再構成根拠：提供資料「AI.pdf」の10分類（テキスト、スライド、画像、動画、音声、コーディング、業務改善・自動化、デザイン、調査・マーケティング、専門ツール）を、職場で学ぶ順序へ組み替えました。
+              <a href={REFERENCE_FOLDER_URL} target="_blank" rel="noreferrer" className="ml-1 text-sky-800 underline underline-offset-4 dark:text-sky-300">
+                参照フォルダ
+              </a>
+            </p>
           </section>
         </div>
       </div>

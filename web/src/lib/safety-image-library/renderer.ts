@@ -6,8 +6,14 @@ import type {
   SafetyImageOrientation,
   SafetyImageTheme,
 } from "@/data/safety-image-library";
-import { resolveSafetyImageMessage } from "@/lib/safety-image-library/message";
-import { fitSafetyImageText } from "@/lib/safety-image-library/text-fit";
+import {
+  resolveSafetyImageMessage,
+  resolveSafetyImageMessageSegments,
+} from "@/lib/safety-image-library/message";
+import {
+  fitSafetyImageText,
+  wrapSafetyImageText,
+} from "@/lib/safety-image-library/text-fit";
 import {
   outputSizePixels,
   outputSizePoints,
@@ -32,7 +38,9 @@ export type SafetyImageWritingMode = "horizontal" | "vertical";
 export type SafetyImageRenderSettings = {
   mode: SafetyImageDownloadMode;
   language: SafetyImageLanguage;
+  languages?: SafetyImageLanguage[];
   text: string;
+  texts?: Partial<Record<SafetyImageLanguage, string>>;
   fontSize: SafetyImageFontSize;
   position: SafetyImageTextPosition;
   textColor: string;
@@ -137,17 +145,19 @@ function escapeXml(value: string): string {
     .replaceAll("'", "&apos;");
 }
 
+function fontFamilyForLanguage(language: SafetyImageLanguage): string {
+  if (language === "zh-CN") return "Noto Sans CJK SC";
+  if (language === "ja") return "Noto Sans CJK JP";
+  return "Noto Sans";
+}
+
 export function buildSafetyImageTextLayer(options: {
   theme: SafetyImageTheme;
   dimensions: Dimensions;
   settings: SafetyImageRenderSettings;
 }): string {
   const { dimensions, settings } = options;
-  const fontFamily = settings.language === "zh-CN"
-    ? "Noto Sans CJK SC"
-    : settings.language === "ja"
-      ? "Noto Sans CJK JP"
-      : "Noto Sans";
+  const fontFamily = fontFamilyForLanguage(settings.language);
   const message = resolveSafetyImageMessage(options.theme, settings);
   if (!message) return "";
   const fit = fitSafetyImageText({ message, dimensions, settings });
@@ -183,6 +193,15 @@ export function buildSafetyImageTextLayer(options: {
   }
 
   const { lines, panelHeight } = fit;
+  const availableWidth = panelWidth - panelPadding * 2;
+  const localizedLines = resolveSafetyImageMessageSegments(options.theme, settings)
+    .flatMap((segment) =>
+      wrapSafetyImageText(segment.text, availableWidth / fontSize)
+        .map((line) => ({ line, language: segment.language })),
+    );
+  const renderedLines = localizedLines.length === lines.length
+    ? localizedLines
+    : lines.map((line) => ({ line, language: settings.language }));
   const effectiveLineHeight = fontSize * settings.lineHeight;
   const y =
     settings.position === "top"
@@ -202,10 +221,10 @@ export function buildSafetyImageTextLayer(options: {
         settings.border ? ` stroke="#0f172a" stroke-width="${Math.max(3, Math.round(dimensions.width * 0.002))}"` : ""
       }/>`
     : "";
-  const text = lines
-    .map((line, index) => {
+  const text = renderedLines
+    .map(({ line, language }, index) => {
       const baseline = y + panelPadding + fontSize * 0.87 + index * effectiveLineHeight;
-      return `<text x="${x}" y="${baseline}" text-anchor="${anchor}" fill="${settings.textColor}" font-family="${fontFamily}, sans-serif" font-size="${fontSize}" font-weight="900" paint-order="stroke" stroke="${settings.band ? settings.textColor : "#ffffff"}" stroke-width="${settings.band ? 0.7 : Math.max(2, fontSize * 0.035)}" stroke-linejoin="round">${escapeXml(line)}</text>`;
+      return `<text x="${x}" y="${baseline}" text-anchor="${anchor}" lang="${language}" fill="${settings.textColor}" font-family="${fontFamilyForLanguage(language)}, sans-serif" font-size="${fontSize}" font-weight="900" paint-order="stroke" stroke="${settings.band ? settings.textColor : "#ffffff"}" stroke-width="${settings.band ? 0.7 : Math.max(2, fontSize * 0.035)}" stroke-linejoin="round">${escapeXml(line)}</text>`;
     })
     .join("\n");
   return `<g id="editable-text-layer">${band}${text}</g>`;

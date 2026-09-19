@@ -28,7 +28,7 @@ export const CATEGORY_TO_LAW: Record<MhlwChemicalCategory, string> = {
   label_sds: "労働安全衛生法 第57条・第57条の2（ラベル表示・SDS交付義務）",
   concentration: "労働安全衛生規則 第577条の2（濃度基準値）",
   skin: "労働安全衛生規則 第594条の2・第594条の3（皮膚等障害化学物質等）",
-  carcinogenic: "労働安全衛生規則 第577条の2 第3項（がん原性物質 記録30年保存）",
+  carcinogenic: "労働安全衛生規則 第577条の2（がん原性物質を扱う業務の記録等）",
   other: "",
 };
 
@@ -107,13 +107,13 @@ export const TIER_BADGE: Record<DataTier, string> = {
 export const MANAGEMENT_VS_LIMIT_DISCLAIMER =
   "※ 「濃度基準値」（安衛則577条の2・告示第177号）と「管理濃度」（作業環境評価基準）は別の指標です。両者の数値が一致する物質もあれば、異なる物質もあります。";
 
-/** カテゴリフラグ → 規制区分のラベル（推定） */
+/** 物質リストへの収録を示す。フラグだけで事業場・製品への義務は判定しない。 */
 export function regulatoryLabels(flags: MergedChemical["flags"]): string[] {
   const out: string[] = [];
-  if (flags.label_sds) out.push("リスクアセスメント対象物（SDS交付義務）");
-  if (flags.concentration) out.push("濃度基準値設定物質（自律的管理）");
-  if (flags.carcinogenic) out.push("がん原性物質（記録30年保存）");
-  if (flags.skin) out.push("皮膚等障害化学物質（不浸透性保護具必要）");
+  if (flags.label_sds) out.push("ラベル表示・SDS通知対象物質のリストに収録");
+  if (flags.concentration) out.push("濃度基準値設定物質のリストに収録");
+  if (flags.carcinogenic) out.push("がん原性物質のリストに収録");
+  if (flags.skin) out.push("皮膚等障害化学物質等のリストに収録");
   return out;
 }
 

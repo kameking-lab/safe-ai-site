@@ -37,7 +37,7 @@
       "generationMethod": "OpenAI image generation",
       "sourceFile": "public/safety-images/library/originals/helmet-required.png",
       "checksumAlgorithm": "sha256",
-      "checksum": "34bcfea603f43c4cbbee2e8429c66c4ccce8e1b00f2b52ac257d3a5d1f5e2cdb",
+      "checksum": "9c3440154bf7c582e6f130dc8399500a2b9f88252dc1f9ad40e499d073c4349e",
       "rightsStatus": "portal-owned-commercial-editable",
       "publishStatus": "published",
       "sourceFileUnmodified": true,
@@ -45,7 +45,7 @@
         "width": 1024,
         "height": 1536
       },
-      "sourceBytes": 1494998,
+      "sourceBytes": 598455,
       "hasAlpha": false,
       "entropy": 4.453
     },
@@ -59,7 +59,7 @@
       "generationMethod": "OpenAI image generation",
       "sourceFile": "public/safety-images/library/originals/safety-glasses-required.png",
       "checksumAlgorithm": "sha256",
-      "checksum": "86f2da3233e39b704c3e02356ec89b7ffb29dcdcd45bebc69dc65977233a19dd",
+      "checksum": "6fdf5405e42dcd1b73f1da1fb40e3a9b1f7d423c7e6d3912bf2a1b573a93ee58",
       "rightsStatus": "portal-owned-commercial-editable",
       "publishStatus": "published",
       "sourceFileUnmodified": true,
@@ -67,7 +67,7 @@
         "width": 1024,
         "height": 1536
       },
-      "sourceBytes": 1648135,
+      "sourceBytes": 796309,
       "hasAlpha": false,
       "entropy": 5.1409
     },
@@ -103,7 +103,7 @@
       "generationMethod": "OpenAI image generation",
       "sourceFile": "public/safety-images/library/originals/earplugs-required.png",
       "checksumAlgorithm": "sha256",
-      "checksum": "dd5a3e405b0ef714a50d3805a55e0f14f0495361735665bf81c11196fc8570e7",
+      "checksum": "f0d263b136c0654a60496f5bb6467f25f1d53383fb6df8e815a0ece358987544",
       "rightsStatus": "portal-owned-commercial-editable",
       "publishStatus": "published",
       "sourceFileUnmodified": true,
@@ -111,7 +111,7 @@
         "width": 1024,
         "height": 1536
       },
-      "sourceBytes": 1686306,
+      "sourceBytes": 682837,
       "hasAlpha": false,
       "entropy": 4.2426
     },
@@ -125,7 +125,7 @@
       "generationMethod": "OpenAI image generation",
       "sourceFile": "public/safety-images/library/originals/dust-mask-required.png",
       "checksumAlgorithm": "sha256",
-      "checksum": "1f86b04f20cbddc4ecfef4ac0c99403c688bb44c4dcdc48b0053fb96be8667f3",
+      "checksum": "de0de4239bf2120ee420d65c1d0f6507d6d3a8aa0adec18a8d44a541b7ad19cf",
       "rightsStatus": "portal-owned-commercial-editable",
       "publishStatus": "published",
       "sourceFileUnmodified": true,
@@ -133,7 +133,7 @@
         "width": 1024,
         "height": 1536
       },
-      "sourceBytes": 1555990,
+      "sourceBytes": 780711,
       "hasAlpha": false,
       "entropy": 5.1439
     },
@@ -213,7 +213,7 @@
       "generationMethod": "OpenAI image generation",
       "sourceFile": "public/safety-images/library/originals/full-body-harness-required.png",
       "checksumAlgorithm": "sha256",
-      "checksum": "e7781e731c0d49738bc5ea2e9c097ad767428e29ed8404926b12a9c75d9632c6",
+      "checksum": "6b51a925d19fd64511224791202ddc1c3e32ae3721ee9ae30356a79b3dadcaeb",
       "rightsStatus": "portal-owned-commercial-editable",
       "publishStatus": "published",
       "sourceFileUnmodified": true,
@@ -221,7 +221,7 @@
         "width": 864,
         "height": 1821
       },
-      "sourceBytes": 990015,
+      "sourceBytes": 439907,
       "hasAlpha": false,
       "entropy": 2.8672
     },
@@ -445,7 +445,7 @@
       "generationMethod": "OpenAI image generation",
       "sourceFile": "public/safety-images/library/originals/no-vehicle-entry.png",
       "checksumAlgorithm": "sha256",
-      "checksum": "83e2982afab8cabcdb817e6a0f3ef5be573ad500ac2f2936be7e3e9018b40029",
+      "checksum": "849e0f9ed92e3554561e4f2ac60605c55728a7f8e47fb0bdeff2b1dfa9e84193",
       "rightsStatus": "portal-owned-commercial-editable",
       "publishStatus": "published",
       "sourceFileUnmodified": true,
@@ -453,7 +453,7 @@
         "width": 1774,
         "height": 887
       },
-      "sourceBytes": 1264642,
+      "sourceBytes": 299944,
       "hasAlpha": false,
       "entropy": 5.0693
     },
@@ -467,7 +467,7 @@
       "generationMethod": "OpenAI image generation",
       "sourceFile": "public/safety-images/library/originals/operation-prohibited.png",
       "checksumAlgorithm": "sha256",
-      "checksum": "2bc5011bec682463a1249cb6ea7001c16bfd905289f7c4f2807bcae37d9d845b",
+      "checksum": "9ca09aa2602f15b6cad432f15fb1f297768896dbdd8e4bb4c2d357b3108c4fc3",
       "rightsStatus": "portal-owned-commercial-editable",
       "publishStatus": "published",
       "sourceFileUnmodified": true,
@@ -475,7 +475,7 @@
         "width": 1693,
         "height": 929
       },
-      "sourceBytes": 1102511,
+      "sourceBytes": 382825,
       "hasAlpha": false,
       "entropy": 3.9488
     },
@@ -741,7 +741,7 @@
       "generationMethod": "OpenAI image generation",
       "sourceFile": "public/safety-images/library/originals/floor-opening-hazard.png",
       "checksumAlgorithm": "sha256",
-      "checksum": "45c391d69657ab0f3f23105d8982f234043b5271021a9286e2674d8e99d6986a",
+      "checksum": "3166ae7757f509fcecd0eebcf54d6948aa2fa77f72ce833c6c32e1280c8b31b6",
       "rightsStatus": "portal-owned-commercial-editable",
       "publishStatus": "published",
       "sourceFileUnmodified": true,
@@ -749,7 +749,7 @@
         "width": 1774,
         "height": 887
       },
-      "sourceBytes": 1621730,
+      "sourceBytes": 326483,
       "hasAlpha": false,
       "entropy": 4.8497
     },
@@ -945,7 +945,7 @@
       "generationMethod": "OpenAI image generation",
       "sourceFile": "public/safety-images/library/originals/no-under-suspended-load.png",
       "checksumAlgorithm": "sha256",
-      "checksum": "9f9896e8f79927b4b8b2074e26f6c55bc94b6d4eae24ae74420a4109e397ec55",
+      "checksum": "6b404e663c54daf8b3e9013dab64ab2ab6afaa0a0db356ac9f2691a3fdbdbd08",
       "rightsStatus": "portal-owned-commercial-editable",
       "publishStatus": "published",
       "sourceFileUnmodified": true,
@@ -953,7 +953,7 @@
         "width": 1210,
         "height": 977
       },
-      "sourceBytes": 1264801,
+      "sourceBytes": 455757,
       "hasAlpha": false,
       "entropy": 7.2841
     },
@@ -969,7 +969,7 @@
       "generationMethod": "OpenAI image generation",
       "sourceFile": "public/safety-images/library/originals/equipment-swing-zone.png",
       "checksumAlgorithm": "sha256",
-      "checksum": "12ab87f9ce9275f0e8bb37446c21402097da07b4a7558dd78a944e3e9314397e",
+      "checksum": "531dc3e3902a72ce349bf74888547727363f56ad64404bf9f36cc53918c376c3",
       "rightsStatus": "portal-owned-commercial-editable",
       "publishStatus": "published",
       "sourceFileUnmodified": true,
@@ -977,7 +977,7 @@
         "width": 1536,
         "height": 1024
       },
-      "sourceBytes": 1310586,
+      "sourceBytes": 572206,
       "hasAlpha": false,
       "entropy": 3.5827
     },

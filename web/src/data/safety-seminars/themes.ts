@@ -210,3 +210,9 @@ export const COMING_SOON_SAFETY_SEMINARS = SAFETY_SEMINARS.filter(
   (seminar): seminar is ComingSoonSafetySeminar =>
     seminar.status === "coming-soon",
 );
+
+/** 提供資料の章立てを基に、公開順を固定した最初の20テーマ。残りは次期候補として保持する。 */
+export const SAFETY_SEMINAR_CORE_20 = SAFETY_SEMINARS.slice(0, 20);
+export const COMING_SOON_SAFETY_CORE_20 = SAFETY_SEMINAR_CORE_20.filter(
+  (seminar): seminar is ComingSoonSafetySeminar => seminar.status === "coming-soon",
+);

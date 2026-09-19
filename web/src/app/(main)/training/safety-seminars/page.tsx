@@ -12,7 +12,7 @@ import {
 import { PageJsonLd } from "@/components/page-json-ld";
 import { TrainingLibrarySwitcher } from "@/components/training/training-library-switcher";
 import {
-  COMING_SOON_SAFETY_SEMINARS,
+  COMING_SOON_SAFETY_CORE_20,
   PUBLISHED_SAFETY_SEMINARS,
   SAFETY_SEMINAR_HUB_PATH,
 } from "@/data/safety-seminars/themes";
@@ -20,10 +20,13 @@ import {
   withSiteOpenGraph,
   withSiteTwitter,
 } from "@/lib/seo-metadata";
+import { FeatureMascotCompanion } from "@/components/feature-mascot-companion";
 
 const TITLE = "安全研修ライブラリ｜現場で使える社内安全研修";
 const DESCRIPTION =
   "統計と一次資料に基づく社内安全研修を、音声付きスライド、PowerPoint、PDFで利用できます。第一弾は墜落・転落防止とフルハーネスの実務です。";
+const REFERENCE_FOLDER_URL =
+  "https://drive.google.com/drive/folders/1ueL4tATdCiIuiUKCluDlov1CLCo56FGn?usp=drive_link";
 
 type SearchParams = Promise<
   Record<string, string | string[] | undefined>
@@ -99,6 +102,15 @@ export default function SafetySeminarLibraryPage() {
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </Link>
             </div>
+            <FeatureMascotCompanion
+              variant="teacher"
+              eyebrow="安全講師チワワ"
+              title="そのまま朝礼で使える教材から始めよう。"
+              message="見る・聞く・配る。現場に合う方法で使えます。"
+              tone="cream"
+              compact
+              className="mt-6 max-w-2xl"
+            />
           </div>
         </section>
 
@@ -182,7 +194,7 @@ export default function SafetySeminarLibraryPage() {
                       FIRST RELEASE
                     </p>
                     <p className="mt-3 text-sm leading-6 text-slate-200">
-                      現場の優先対策、フルハーネスの使い方、使用前点検、救助計画までを一つの教材で確認します。
+                      法定措置を確認し、本質安全→工学的対策→管理的対策→個人用保護具の順と、器具の選定・取付け・点検を学びます。
                     </p>
                   </div>
                   <Link
@@ -212,10 +224,10 @@ export default function SafetySeminarLibraryPage() {
               id="coming-soon-title"
               className="mt-1 text-3xl font-black tracking-tight"
             >
-              Coming Soon {COMING_SOON_SAFETY_SEMINARS.length}件
+              全20テーマの目次（公開1・準備中{COMING_SOON_SAFETY_CORE_20.length}）
             </h2>
             <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-              {COMING_SOON_SAFETY_SEMINARS.map((seminar) => (
+              {COMING_SOON_SAFETY_CORE_20.map((seminar) => (
                 <article
                   key={seminar.id}
                   data-seminar-status="coming-soon"
@@ -233,6 +245,12 @@ export default function SafetySeminarLibraryPage() {
                 </article>
               ))}
             </div>
+            <p className="mt-5 rounded-2xl border border-slate-300 bg-white p-4 text-sm font-bold leading-6 text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
+              目次の再構成根拠：提供資料「安全.pdf」の章立て（機械・墜落・足場・火気・保護具・緊急対応等）を、朝礼と社内研修で選びやすい20テーマへ再編しました。
+              <a href={REFERENCE_FOLDER_URL} target="_blank" rel="noreferrer" className="ml-1 text-emerald-800 underline underline-offset-4 dark:text-emerald-300">
+                参照フォルダ
+              </a>
+            </p>
           </section>
         </div>
       </div>

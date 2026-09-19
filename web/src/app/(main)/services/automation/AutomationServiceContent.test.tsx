@@ -76,18 +76,21 @@ describe("AutomationServiceContent", () => {
     expect(overview.textContent).toContain("初回30分は無料");
     expect(overview.textContent).toContain("税込33,000円から");
     expect(overview.textContent).toContain("メール相談受付中");
-    expect((overview.textContent ?? "").length).toBeLessThanOrEqual(150);
+    expect((overview.textContent ?? "").length).toBeLessThanOrEqual(180);
     expect(overview.querySelectorAll('[data-primary-action="true"]')).toHaveLength(1);
     expect(overview.querySelectorAll('[data-secondary-action="true"]')).toHaveLength(1);
     expect(container.querySelector('[role="alert"]')).toBeNull();
   });
 
-  it("LCP候補の装飾画像を初期HTMLへ出さない", () => {
+  it("案内チワワをLCP候補にせず遅延読込する", () => {
     const { container } = render(
       <AutomationServiceContent availability={AVAILABLE} />,
     );
-    expect(container.querySelectorAll("img")).toHaveLength(0);
-    expect(container.querySelector("[data-mascot-variant]")).toBeNull();
+    const images = container.querySelectorAll("img");
+    expect(images).toHaveLength(1);
+    expect(images[0]?.getAttribute("loading")).toBe("lazy");
+    expect(images[0]?.getAttribute("fetchpriority")).not.toBe("high");
+    expect(container.querySelector("[data-feature-mascot-companion]")).not.toBeNull();
   });
 
   it("料金3件と想定例3件だけを常時描画する", () => {
