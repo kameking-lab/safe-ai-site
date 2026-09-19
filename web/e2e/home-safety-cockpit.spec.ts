@@ -6,7 +6,7 @@ const PRIMARY_DESTINATIONS = [
   "/resources/mlit",
   "/accident-news",
   "/laws",
-  "/contact/automation-email",
+  "/services/automation",
   "/goods",
   "/education/hazard-slides",
   "/training/visual-ky",

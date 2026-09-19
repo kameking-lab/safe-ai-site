@@ -75,10 +75,10 @@ const MAIN_SERVICES = [
     softAccent: "bg-[#c8b9df]",
   },
   {
-    href: "/contact/automation-email",
+    href: "/services/automation",
     title: "自動化相談",
     description: "帳票、集計、研修資料、通知などの定型業務を見本つきで相談。",
-    action: "メールで相談",
+    action: "料金と例を見る",
     icon: Workflow,
     mascot: "/mascot/mascot-tablet-dx.webp",
     mascotAlt: "タブレットを使って仕事の自動化を考えるチワワ",
@@ -183,7 +183,7 @@ export function HomeRelaunch() {
             </h1>
             <p className="mt-5 max-w-2xl text-base font-bold leading-8 text-slate-200 sm:text-lg">
               大きな耳で現場の声を聴き、わずかな違和感を見逃さない。
-              チワワは、安全を上から指導するのではなく、そばで確認を手伝う小さな相棒です。
+              そばで確認を手伝う、小さな安全相棒です。
             </p>
 
             <nav
