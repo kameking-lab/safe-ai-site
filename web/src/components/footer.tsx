@@ -18,6 +18,17 @@ const TRUST_LINKS = [
   { href: "/terms", label: "利用規約" },
 ] as const;
 
+const NOTE_GUIDES = [
+  {
+    href: "https://note.com/anzen_ai_jp/n/nbe0fafcf0f34?utm_source=anzen_ai_portal&utm_medium=referral&utm_campaign=height_2m_note_funnel&utm_content=free_guide",
+    label: "無料：2m高所作業の確認順",
+  },
+  {
+    href: "https://note.com/anzen_ai_jp/n/n838317f8153d?utm_source=anzen_ai_portal&utm_medium=referral&utm_campaign=height_2m_note_funnel&utm_content=paid_template",
+    label: "有料：作業計画・KY・点検の5点テンプレート",
+  },
+] as const;
+
 export function Footer() {
   const availability = getAutomationConsultAvailability();
   const consultationHref =
@@ -59,6 +70,37 @@ export function Footer() {
               : "自動化例・料金を見る"}
             <span aria-hidden="true">↗</span>
           </Link>
+        </section>
+
+        <section
+          aria-labelledby="footer-note-guides-title"
+          className="mt-6 rounded-[var(--radius-lg)] border border-white/20 bg-white/5 p-4 sm:p-5"
+        >
+          <h2 id="footer-note-guides-title" className="text-base font-black">
+            高所作業の実務ガイドをnoteで読む
+          </h2>
+          <p className="mt-1 text-sm leading-6 text-slate-200">
+            2m以上の作業で確認する順番と、現場で複製して使える記録様式を用途別に案内します。
+          </p>
+          <nav
+            aria-label="安全AI編集部のnote記事"
+            className="mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap"
+          >
+            {NOTE_GUIDES.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-h-11 items-center rounded-[var(--radius-sm)] border border-white/30 bg-white/10 px-4 py-2 text-sm font-bold text-white underline-offset-4 hover:bg-white/15 hover:underline focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/70"
+              >
+                {item.label}
+                <span className="ml-2" aria-hidden="true">
+                  ↗
+                </span>
+              </Link>
+            ))}
+          </nav>
         </section>
 
         <div className="mt-6 border-t border-white/15 pt-4">
