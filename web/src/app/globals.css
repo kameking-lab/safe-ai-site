@@ -1,5 +1,6 @@
 @import "tailwindcss" source(none);
 @import "./tailwind-route-source-exclusions.css";
+@import "../components/footer.css";
 
 /* Generate utilities from shipped application sources only. Test files and
    snapshots must not grow the production stylesheet. */
@@ -850,7 +851,11 @@ table {
   .text-\[10px\]:not([data-compact-text]),
   .text-\[11px\]:not([data-compact-text]),
   .text-\[12px\]:not([data-compact-text]),
-  .text-\[13px\]:not([data-compact-text]) {
+  .text-\[13px\]:not([data-compact-text]),
+  .footer-eyebrow,
+  .footer-availability,
+  .footer-legal-link,
+  .footer-copyright {
     font-size: 0.875rem; /* 14px */
     line-height: 1.45;
   }
