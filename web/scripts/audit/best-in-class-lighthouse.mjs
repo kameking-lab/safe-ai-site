@@ -69,6 +69,36 @@ const allPages = [
     path: "/training/visual-ky/rain-wind-delivery",
     mobileLcpTargetMs: 2_500,
   },
+  {
+    id: "safety-seminar-library",
+    path: "/training/safety-seminars",
+    mobileLcpTargetMs: 2_500,
+  },
+  {
+    id: "fall-prevention-training",
+    path: "/training/safety-seminars/fall-prevention",
+    mobileLcpTargetMs: 3_000,
+  },
+  {
+    id: "ai-seminar-library",
+    path: "/training/ai-seminars",
+    mobileLcpTargetMs: 2_500,
+  },
+  {
+    id: "ai-chat-work-training",
+    path: "/training/ai-seminars/ai-chat-work",
+    mobileLcpTargetMs: 3_000,
+  },
+  {
+    id: "construction-calculator-library",
+    path: "/tools/construction-calculators",
+    mobileLcpTargetMs: 2_500,
+  },
+  {
+    id: "construction-calculator-concrete",
+    path: "/tools/construction-calculators/concrete-quantity",
+    mobileLcpTargetMs: 3_000,
+  },
   { id: "safety-ai", path: "/safety-ai", mobileLcpTargetMs: 2_500 },
   {
     id: "project-story",
@@ -89,6 +119,11 @@ const allPages = [
   { id: "ky", path: "/ky/paper", mobileLcpTargetMs: 3_000 },
   { id: "safety-diary", path: "/safety-diary", mobileLcpTargetMs: 3_000 },
   { id: "signage", path: "/signage", mobileLcpTargetMs: 3_000 },
+  {
+    id: "safety-images",
+    path: "/materials/safety-images",
+    mobileLcpTargetMs: 3_000,
+  },
   { id: "risk", path: "/risk", mobileLcpTargetMs: 3_000 },
   { id: "chatbot", path: "/chatbot", mobileLcpTargetMs: 3_000 },
   { id: "law-search", path: "/law-search", mobileLcpTargetMs: 3_000 },

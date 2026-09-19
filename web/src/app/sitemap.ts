@@ -5,6 +5,12 @@ import {
   getFeaturesByCategory,
 } from "@/data/features-catalog";
 import { CONSTRUCTION_CALCULATORS } from "@/lib/construction-calc/registry";
+import { constructionCalculatorRegistry } from "@/data/construction-calculators/formula-registry";
+import { CONSTRUCTION_CALCULATOR_HUB_PATH } from "@/data/construction-calculators/coming-soon";
+import {
+  AI_SEMINAR_HUB_PATH,
+  PUBLISHED_AI_SEMINARS,
+} from "@/data/ai-seminars/themes";
 import { ILLNESS_CATEGORIES } from "@/data/illness-considerations";
 import { COURT_CASES } from "@/data/court-cases";
 import { CANONICAL_HAZARD_TYPES } from "@/lib/accidents/type-normalization";
@@ -14,6 +20,11 @@ import { computeSitemapFreshness } from "@/lib/sitemap/freshness";
 import { SITE_URL } from "@/lib/seo-metadata";
 import { isPublicRouteAvailable } from "@/lib/public-content-policy";
 import { PUBLIC_VISUAL_KY_SCENARIOS } from "@/data/visual-ky";
+import {
+  SAFETY_IMAGE_CATEGORIES,
+  SAFETY_IMAGE_LIBRARY_PATH,
+  SAFETY_IMAGE_THEMES,
+} from "@/data/safety-image-library";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   // 柱C-3 / S DRY: 絶対URLのオリジンは seo-metadata.ts の SITE_URL を単一ソースにする
@@ -830,6 +841,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
     },
     {
+      url: "/resources/netis-safety",
+      lastModified: "2026-09-20",
+      priority: 0.75,
+      changeFrequency: "monthly",
+    },
+    {
       url: "/subsidies/calculator",
       lastModified: "2026-04-01",
       priority: 0.6,
@@ -962,14 +979,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // sitemap-index.xml が列挙）が正本として出力する。本体 sitemap.xml に直書きすると
   // 同一URLが2つのサイトマップに二重掲載され、役割分担が崩壊するためここでは出力しない。
 
-  const featureCategoryPages: typeof pages = FEATURE_CATEGORIES
-    .filter((category) => getFeaturesByCategory(category.id).length > 0)
-    .map((category) => ({
-      url: `/features/${category.id}`,
-      lastModified: "2026-05-15",
-      priority: 0.7,
-      changeFrequency: "monthly",
-    }));
+  const featureCategoryPages: typeof pages = FEATURE_CATEGORIES.filter(
+    (category) => getFeaturesByCategory(category.id).length > 0,
+  ).map((category) => ({
+    url: `/features/${category.id}`,
+    lastModified: "2026-05-15",
+    priority: 0.7,
+    changeFrequency: "monthly",
+  }));
 
   // 建設計算: ハブ＋個別計算機（registry から列挙＝計算機の量産に自動追従）
   const constructionCalcPages: typeof pages = [
@@ -1062,8 +1079,90 @@ export default function sitemap(): MetadataRoute.Sitemap {
     })),
   ];
 
+  // 安全研修ライブラリは公開済み教材だけを列挙する。Coming Soon 27テーマ、
+  // 再生・字幕・ダウンロード状態、利用条件ページは個別のindex対象にしない。
+  const safetySeminarPages: typeof pages = [
+    {
+      url: "/training/safety-seminars",
+      lastModified: "2026-08-27",
+      priority: 0.9,
+      changeFrequency: "monthly" as Freq,
+    },
+    {
+      url: "/training/safety-seminars/fall-prevention",
+      lastModified: "2026-08-27",
+      priority: 0.85,
+      changeFrequency: "monthly" as Freq,
+    },
+  ];
+
+  // AI実務研修はハブと公開済み教材だけを収載する。Coming Soon 24件にはURLを作らない。
+  const aiSeminarPages: typeof pages = [
+    {
+      url: AI_SEMINAR_HUB_PATH,
+      lastModified: "2026-08-27",
+      priority: 0.9,
+      changeFrequency: "monthly" as Freq,
+    },
+    ...PUBLISHED_AI_SEMINARS.flatMap((seminar) =>
+      seminar.href
+        ? [
+            {
+              url: seminar.href,
+              lastModified: "2026-08-27",
+              priority: 0.85,
+              changeFrequency: "monthly" as Freq,
+            },
+          ]
+        : [],
+    ),
+  ];
+
+  // 新しい建設計算は低リスクな公開12件だけ。第二弾候補には個別URLを作らない。
+  const constructionCalculatorToolPages: typeof pages = [
+    {
+      url: CONSTRUCTION_CALCULATOR_HUB_PATH,
+      lastModified: "2026-08-27",
+      priority: 0.9,
+      changeFrequency: "monthly" as Freq,
+    },
+    ...constructionCalculatorRegistry.map((calculator) => ({
+      url: `${CONSTRUCTION_CALCULATOR_HUB_PATH}/${calculator.slug}`,
+      lastModified: "2026-08-27",
+      priority: 0.82,
+      changeFrequency: "monthly" as Freq,
+    })),
+  ];
+
+  // 現場安全看板は公開ハブ、7カテゴリ、独立QA合格済み100詳細だけを収載する。
+  // 編集・言語・サイズ・ダウンロード状態と利用条件は個別URLとして収載しない。
+  const safetyImagePages: typeof pages = [
+    {
+      url: SAFETY_IMAGE_LIBRARY_PATH,
+      lastModified: "2026-08-28",
+      priority: 0.9,
+      changeFrequency: "monthly" as Freq,
+    },
+    ...SAFETY_IMAGE_CATEGORIES.map((category) => ({
+      url: `${SAFETY_IMAGE_LIBRARY_PATH}/category/${category.id}`,
+      lastModified: "2026-08-28",
+      priority: 0.76,
+      changeFrequency: "monthly" as Freq,
+    })),
+    ...SAFETY_IMAGE_THEMES.map((theme) => ({
+      url: theme.detailPath,
+      lastModified: "2026-08-28",
+      priority: 0.72,
+      changeFrequency: "yearly" as Freq,
+    })),
+  ];
+
   return [
     ...filtered,
+    ...safetyImagePages,
+    ...safetySeminarPages,
+    ...aiSeminarPages,
+    ...constructionCalculatorToolPages,
     ...visualKyPages,
     ...eduPackPages,
     ...featureCategoryPages,
@@ -1074,12 +1173,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
   ]
     .filter(({ url }) => isPublicRouteAvailable(url))
     .map(({ url, lastModified, priority, changeFrequency }) => {
-    const absolute = `${base}${url}`;
-    return {
-      url: absolute,
-      lastModified,
-      changeFrequency,
-      priority,
-    };
+      const absolute = `${base}${url}`;
+      return {
+        url: absolute,
+        lastModified,
+        changeFrequency,
+        priority,
+      };
     });
 }

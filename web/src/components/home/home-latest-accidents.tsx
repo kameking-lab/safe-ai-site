@@ -74,7 +74,7 @@ export function HomeLatestAccidents({
                   <dd className="mt-1 text-3xl font-black tabular-nums">
                     {featured.deaths === null
                       ? "未確認"
-                      : `${featured.deaths.toLocaleString("ja-JP")}件`}
+                      : `${featured.deaths.toLocaleString("ja-JP")}人`}
                   </dd>
                 </div>
                 <div className="rounded-2xl bg-white/10 p-4">
@@ -84,7 +84,7 @@ export function HomeLatestAccidents({
                   <dd className="mt-1 text-3xl font-black tabular-nums">
                     {featured.injuries === null
                       ? "未確認"
-                      : `${featured.injuries.toLocaleString("ja-JP")}件`}
+                      : `${featured.injuries.toLocaleString("ja-JP")}人`}
                   </dd>
                 </div>
               </dl>
@@ -107,7 +107,7 @@ export function HomeLatestAccidents({
                       {index + 1}. {row.name}
                     </span>
                     <span className="shrink-0 text-xl font-black tabular-nums">
-                      {row.total}件
+                      {row.total}人
                     </span>
                   </li>
                 ))}

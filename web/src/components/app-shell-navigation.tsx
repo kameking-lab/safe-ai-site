@@ -41,6 +41,7 @@ import {
   LayoutGrid,
   Calculator,
   Workflow,
+  Images,
 } from "lucide-react";
 import { isPublicRouteAvailable } from "@/lib/public-content-policy";
 import { PAID_MODE } from "@/lib/paid-mode";
@@ -184,6 +185,15 @@ export const NAV_CATEGORIES: AppShellNavCategory[] = [
         description: "現場掲示用フルスクリーン・自動更新",
       },
       {
+        id: "safety-image-library",
+        label: "現場安全看板",
+        href: "/materials/safety-images",
+        icon: Images,
+        badge: "NEW",
+        badgeUntil: "2026-10-31",
+        description: "100点を文字編集・5言語・JPEG/PNG/PDFで利用",
+      },
+      {
         id: "heat-illness",
         label: "熱中症対策",
         href: "/heat-illness-prevention",
@@ -206,13 +216,13 @@ export const NAV_CATEGORIES: AppShellNavCategory[] = [
           "A測定・B測定値から管理区分(第1〜第3)を判定・改善措置を提案",
       },
       {
-        id: "construction-calc",
-        label: "建設計算",
-        href: "/construction-calc",
+        id: "construction-calculators",
+        label: "建設計算ツール",
+        href: "/tools/construction-calculators",
         icon: Calculator,
         badge: "NEW",
-        badgeUntil: "2026-08-31",
-        description: "玉掛け・単管足場・掘削勾配を法令根拠つきで即計算",
+        badgeUntil: "2026-10-31",
+        description: "数量・勾配・座標を概算。構造・安全の可否は判定しません",
       },
     ],
   },
@@ -548,6 +558,18 @@ const COMPACT_NAV_CATEGORIES: AppShellNavCategory[] = [
         href: "/signage",
         icon: Monitor,
       },
+      {
+        id: "safety-image-library",
+        label: "現場安全看板",
+        href: "/materials/safety-images",
+        icon: Images,
+      },
+      {
+        id: "construction-calculators",
+        label: "建設計算ツール",
+        href: "/tools/construction-calculators",
+        icon: Calculator,
+      },
     ],
   },
   {
@@ -646,7 +668,7 @@ export function getAppShellNavigationCategories(
     ...category,
     items: category.items.filter(
       (item) =>
-        item.id !== "construction-calc" &&
+        !(position === "mobile" && item.id === "safety-image-library") &&
         isPublicRouteAvailable(item.href) &&
         !repeatedPrimaryHrefs.has(item.href),
     ),

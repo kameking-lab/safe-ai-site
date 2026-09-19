@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
-import { cookies, headers } from "next/headers";
 import { HomeAutomationService } from "@/components/home/home-automation-service";
 import { HomeAutomationSamples } from "@/components/home/home-automation-samples";
-import { HomeCoreFeatures } from "@/components/home/home-core-features";
-import { HomeLearningOverview } from "@/components/home/home-learning-overview";
+import { HomeFeatureDirectory } from "@/components/home/home-feature-directory";
+import { HomeRelaunch } from "@/components/home/home-relaunch";
 import { HomeSafetyUpdates } from "@/components/home/home-safety-updates";
 import { PageJsonLd } from "@/components/page-json-ld";
 import {
@@ -13,26 +12,14 @@ import {
 } from "@/components/json-ld";
 import { ogImageUrl } from "@/lib/og-url";
 import { withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
-import {
-  HomeDirectChatSection,
-  HomeDirectChemicalSection,
-  HomeHeatSection,
-} from "@/components/home-safety-cockpit/home-safety-cockpit";
 import { getAutomationConsultAvailability } from "@/lib/automation-consult/availability";
-import {
-  HOME_COARSE_AREA_COOKIE,
-  resolveVercelCoarseArea,
-} from "@/lib/area/coarse-location";
-import { officialAreaCandidateById } from "@/lib/area/official-area-resolver";
-import { loadHomeHeatInitialData } from "@/lib/home/home-heat-server";
 import { loadHomeLatestAccidentNews } from "@/lib/home/home-accident-server";
 
-// 今日のKYTと夏季特集をJST日付境界で切り替える。
-export const dynamic = "force-dynamic";
+export const revalidate = 3_600;
 
 const _title = "安全AIポータル｜根拠から、現場の行動へ";
 const _desc =
-  "今日の現場リスク、安衛法AI、化学物質RA、労災事故、法改正、教育・資格、ビジュアルKYTを、出典と更新状態を確認しながら使える労働安全ポータルです。";
+  "安衛法AI、化学物質RA、労災事故速報、法改正、事故統計、教材、安全グッズを、出典と更新状態を確認しながら使える労働安全ポータルです。";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/" },
@@ -57,22 +44,7 @@ export const metadata: Metadata = {
 
 export default async function HomePage() {
   const automationConsultAvailability = getAutomationConsultAvailability();
-  const [requestHeaders, cookieStore] = await Promise.all([
-    headers(),
-    cookies(),
-  ]);
-  const previousArea = officialAreaCandidateById(
-    cookieStore.get(HOME_COARSE_AREA_COOKIE)?.value ?? "",
-  );
-  const ipCoarseArea = resolveVercelCoarseArea({
-    country: requestHeaders.get("x-vercel-ip-country"),
-    countryRegion: requestHeaders.get("x-vercel-ip-country-region"),
-  });
-  const coarseArea = previousArea ?? ipCoarseArea;
-  const [initialHeat, latestAccidentNews] = await Promise.all([
-    loadHomeHeatInitialData(coarseArea?.id ?? null),
-    loadHomeLatestAccidentNews(),
-  ]);
+  const latestAccidentNews = await loadHomeLatestAccidentNews();
   return (
     <div>
       <JsonLd schema={[organizationSchema(), webSiteSchema()]} />
@@ -92,29 +64,24 @@ export default async function HomePage() {
           </p>
           <ul className="mx-auto mt-2 flex max-w-7xl flex-wrap gap-x-4 gap-y-2 text-sm font-black underline underline-offset-4">
             <li>
-              <a href="/risk">WBGT・現場リスク</a>
+              <a href="/chatbot">安衛法AI</a>
             </li>
             <li>
-              <a href="/heat-illness-prevention/slides">熱中症スライド</a>
+              <a href="/chemical-ra">化学物質RA</a>
+            </li>
+            <li>
+              <a href="/accident-news">労災事故速報</a>
+            </li>
+            <li>
+              <a href="/laws">法改正速報</a>
             </li>
           </ul>
         </nav>
       </noscript>
-      <HomeHeatSection
-        initialAreaId={coarseArea?.id ?? null}
-        initialAreaLabel={coarseArea?.label ?? null}
-        initialLocationSource={
-          previousArea ? "previous" : ipCoarseArea ? "ip-coarse" : "national"
-        }
-        initialWbgt={initialHeat.wbgt}
-        nationalSummary={initialHeat.national}
-      />
-      <HomeDirectChatSection />
+      <HomeRelaunch />
       <HomeSafetyUpdates latestNews={latestAccidentNews} />
-      <HomeDirectChemicalSection />
-      <HomeLearningOverview />
-      <HomeCoreFeatures />
       <HomeAutomationSamples />
+      <HomeFeatureDirectory />
       <HomeAutomationService availability={automationConsultAvailability} />
     </div>
   );

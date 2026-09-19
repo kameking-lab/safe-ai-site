@@ -31,16 +31,13 @@ function source(relativePath: string): string {
 }
 
 describe("業務自動化相談のクロール可能な入口", () => {
-  it("ホームでは熱中症→法令入力→事故→法改正→化学→学習→主力→サンプル→自動化相談の順に置く", () => {
+  it("ホームでは主機能→安全の新着→サンプル→全機能→自動化相談の順に置く", () => {
     const home = source("src/app/(main)/page.tsx");
     const orderedComponents = [
-      "<HomeHeatSection",
-      "<HomeDirectChatSection",
+      "<HomeRelaunch",
       "<HomeSafetyUpdates",
-      "<HomeDirectChemicalSection",
-      "<HomeLearningOverview",
-      "<HomeCoreFeatures",
       "<HomeAutomationSamples",
+      "<HomeFeatureDirectory",
       "<HomeAutomationService",
     ];
     const positions = orderedComponents.map((component) =>

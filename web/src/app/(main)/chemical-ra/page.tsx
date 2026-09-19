@@ -17,6 +17,7 @@ import { TransientChemicalLink } from "@/components/home-safety-cockpit/transien
 import { PageJsonLd } from "@/components/page-json-ld";
 import { JsonLd } from "@/components/json-ld";
 import { ChemicalRaNoScriptFallback } from "./chemical-ra-noscript";
+import { FeatureMascotCompanion } from "@/components/feature-mascot-companion";
 const _title =
   "化学物質リスクアセスメント無料確認｜CAS・SDS・混合物";
 const _desc =
@@ -113,6 +114,15 @@ export default async function ChemicalRaPage({
             {directStart ? <span data-status-badge className="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-bold text-emerald-900">候補を検索中</span> : null}
           </div>
           <p className="mt-2 text-sm leading-6 text-slate-700">物質名・CAS番号・SDS記載名から始めます。</p>
+          <FeatureMascotCompanion
+            variant="chemical-lab"
+            eyebrow="化学物質の確認係"
+            title="まずは容器やSDSに書かれた名前を一緒に確認しましょう。"
+            message="検索結果は候補です。実際の製品の最新SDSと照らして進めます。"
+            tone="amber"
+            compact
+            className="mt-4 max-w-3xl"
+          />
         </header>
       </PageContainer>
       <noscript>
