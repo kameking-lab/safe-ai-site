@@ -74,7 +74,7 @@ export function Footer() {
 
         <section
           aria-labelledby="footer-note-guides-title"
-          className="mt-6 rounded-[var(--radius-lg)] border border-white/20 bg-white/5 p-4 sm:p-5"
+          className="mt-6 rounded-[var(--radius-lg)] border border-white/20 bg-white/5 p-[min(1rem,16px)] sm:p-5"
         >
           <h2 id="footer-note-guides-title" className="text-base font-black">
             高所作業の実務ガイドをnoteで読む
@@ -92,10 +92,10 @@ export function Footer() {
                 href={item.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex min-h-11 items-center rounded-[var(--radius-sm)] border border-white/30 bg-white/10 px-4 py-2 text-sm font-bold text-white underline-offset-4 hover:bg-white/15 hover:underline focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/70"
+                className="inline-flex min-h-11 min-w-0 items-center rounded-[var(--radius-sm)] border border-white/30 bg-white/10 px-[min(1rem,16px)] py-2 text-sm font-bold text-white underline-offset-4 hover:bg-white/15 hover:underline focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/70"
               >
-                {item.label}
-                <span className="ml-2" aria-hidden="true">
+                <span className="min-w-0 [overflow-wrap:anywhere]">{item.label}</span>
+                <span className="ml-[min(0.5rem,8px)] shrink-0" aria-hidden="true">
                   ↗
                 </span>
               </Link>
