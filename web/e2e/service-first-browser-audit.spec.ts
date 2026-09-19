@@ -32,7 +32,7 @@ type BrowserCopyBudgetSnapshot = ServiceCopyBudgetSnapshot & {
 const COPY_BUDGET_LIMIT_OVERRIDES: Partial<
   Record<string, Partial<ServiceCopyBudgetLimits>>
 > = {
-  "/": { introDescriptionLength: 70 },
+  "/": { introDescriptionLength: 70, mascotCount: 10 },
   "/chemical-ra": { visibleCharactersBeforePrimaryAction: 130 },
   "/laws": { visibleCharactersBeforePrimaryAction: 130 },
 };
