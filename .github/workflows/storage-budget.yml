@@ -226,6 +226,10 @@ jobs:
           }
           # Only finalized, directly served training artifacts are allowlisted.
           REVIEWED_TRAINING_DOWNLOAD_SUFFIXES = {".pdf", ".pptx"}
+          REVIEWED_RUNTIME_EXACT_PATHS = {
+              "web/src/assets/safety-image-library/fonts/NotoSansCJKjp-Bold.otf",
+              "web/src/assets/safety-image-library/fonts/NotoSansCJKsc-Bold.otf",
+          }
           MEDIA_OR_JSON_SUFFIXES = {
               ".json", ".jsonl", ".png", ".jpg", ".jpeg", ".gif", ".webp",
               ".avif", ".svg",
@@ -330,7 +334,10 @@ jobs:
           def is_runtime_allowed(path: str) -> bool:
               if path.startswith("web/public/"):
                   return is_public_runtime_allowed(path)
-              return path.startswith(LARGE_RUNTIME_ALLOWLIST)
+              return (
+                  path.startswith(LARGE_RUNTIME_ALLOWLIST)
+                  or path in REVIEWED_RUNTIME_EXACT_PATHS
+              )
 
           def is_generated_artifact(path: str) -> bool:
               parts = PurePosixPath(path).parts
@@ -427,6 +434,12 @@ jobs:
               or not is_forbidden_public_raw("web/public/export.parquet")
           ):
               failures.append("public runtime allowlist classifier self-test failed")
+          if (
+              not is_runtime_allowed("web/src/assets/safety-image-library/fonts/NotoSansCJKjp-Bold.otf")
+              or not is_runtime_allowed("web/src/assets/safety-image-library/fonts/NotoSansCJKsc-Bold.otf")
+              or is_runtime_allowed("web/src/assets/safety-image-library/fonts/unreviewed.otf")
+          ):
+              failures.append("reviewed runtime exact-path classifier self-test failed")
           if not is_generated_artifact("web/node_modules/pkg/dist/index.js"):
               failures.append("node_modules classifier self-test failed")
           if sum(
