@@ -21,7 +21,7 @@ export default function PrivacyPage() {
       <PageJsonLd name="プライバシーポリシー" description="安全AIポータルのプライバシーポリシー。個人情報の取り扱いについて説明しています。" path="/privacy" />
         <div>
           <h1 className="text-xl font-bold text-slate-900">プライバシーポリシー</h1>
-          <p className="mt-2 text-sm text-slate-500">最終更新日: 2026年7月28日</p>
+          <p className="mt-2 text-sm text-slate-500">最終更新日: 2026年9月20日</p>
         </div>
 
         <section className="space-y-3">
@@ -80,6 +80,7 @@ export default function PrivacyPage() {
             <li className="list-disc">月次メールダイジェスト（法改正・労災速報のまとめ）の配信（購読者のみ）。解除時は配信停止状態に変更します。コンタクト情報自体の削除は、お問い合わせ窓口から別途請求できます</li>
             <li className="list-disc">サービスの安定運用・障害調査・不正アクセス防止・セキュリティ確保</li>
             <li className="list-disc">利用傾向の統計分析、機能改善、品質向上</li>
+            <li className="list-disc">同意に基づく広告配信、広告の効果測定、不正利用防止</li>
             <li className="list-disc">法令・行政機関・裁判所の要請に応じた対応</li>
           </ul>
         </section>
@@ -114,6 +115,10 @@ export default function PrivacyPage() {
             <li className="list-disc">
               <span className="font-semibold text-slate-700">クラウドデータ保存</span>
               ：Supabase, Inc. — 構成済み環境では、認証済み利用者からサーバー側で導出した非可逆識別子とともに KY、作業員、打合せ、化学物質RA、Web Push購読等を同期する場合があります。未認証時のクラウド同期は無効で、端末内のみの保存とは別に取り扱われます
+            </li>
+            <li className="list-disc">
+              <span className="font-semibold text-slate-700">アクセス解析・広告配信</span>
+              ：Google LLC（米国・Google Analytics / Google AdSense）および広告配信パートナー — 任意 Cookie の許可後に、閲覧ページ、IPアドレス、端末・ブラウザ情報、Cookie識別子等を処理する場合があります。広告配信では第三者配信事業者・広告ネットワークの Cookie が使用される場合があります。詳細と設定方法は第6項をご覧ください。
             </li>
             <li className="list-disc">
               <span className="font-semibold text-slate-700">アフィリエイト</span>
@@ -207,7 +212,13 @@ export default function PrivacyPage() {
             </li>
             <li className="list-disc">
               <span className="font-semibold text-slate-700">広告（Advertising）</span>
-              ：本サービス自体は広告トラッキング目的の Cookie を設定していません。ただし、ページ内のアフィリエイトリンク（Amazon・楽天等）をクリックして遷移した先では、各事業者のポリシーに基づき Cookie が設定される場合があります。これらは本サービスの管理外です。
+              ：本サービスでは Google AdSense を利用した第三者配信広告を掲載する場合があります。広告配信が有効な環境で、利用者が任意 Cookie を許可した後にのみ広告スクリプトを読み込みます。Google およびそのパートナーは広告 Cookie を使用し、本サービスや他のサイトへの過去のアクセス情報に基づく広告を配信する場合があります。配信時には、閲覧ページのURL、IPアドレス、端末・ブラウザ情報、Cookie識別子等が Google や広告配信事業者へ送信され、広告配信・効果測定・不正利用防止等に利用される場合があります。詳しくは
+              <a className="ml-0.5 underline hover:text-emerald-700" href="https://policies.google.com/technologies/partner-sites?hl=ja" target="_blank" rel="noopener noreferrer">Google によるパートナーサイトの情報利用</a>
+              をご覧ください。
+            </li>
+            <li className="list-disc">
+              <span className="font-semibold text-slate-700">アフィリエイトリンク</span>
+              ：Amazon・楽天等の商品リンクから遷移した先では、各事業者のポリシーに基づき Cookie が設定される場合があります。リンク先の Cookie は本サービスの管理外です。
             </li>
             <li className="list-disc">
               <span className="font-semibold text-slate-700">匿名Web Vitals（RUM）</span>
@@ -215,23 +226,27 @@ export default function PrivacyPage() {
             </li>
           </ul>
           <p className="text-sm leading-7 text-slate-600">
-            <span className="font-semibold text-slate-700">分析 Cookie のオプトアウト：</span>
-            画面左下の「Cookie設定」から拒否・撤回できます。加えて、(a) ブラウザの設定から Cookie をブロック、または (b)
+            <span className="font-semibold text-slate-700">分析・広告 Cookie のオプトアウト：</span>
+            本ページなどに表示される画面左下の「Cookie設定」から「拒否する」を選ぶと、同意を撤回できます。変更後はページを再読み込みしてください。当サイトから削除可能な Google の任意 Cookie は削除しますが、第三者ドメインの Cookie はブラウザの設定から削除・ブロックしてください。GA4 の計測は
             <a className="ml-0.5 underline hover:text-emerald-700" href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener noreferrer">Google アナリティクス オプトアウト アドオン</a>
-            の導入により、本サービスでの GA4 計測を無効化できます。
+            の導入でも無効化できます。
           </p>
           <p className="text-sm leading-7 text-slate-600">
-            <span className="font-semibold text-slate-700">2022年改正個人情報保護法・GDPR/CCPA対応について：</span>
-            個人関連情報（Cookie等）の第三者提供にかかる本人同意取得義務（個人情報保護法第31条）への対応として、
-            分析 Cookie の利用範囲・送信先・オプトアウト手段を本ポリシーで明示し、利用者が事前に判断できる体制としています。
-            EU/EEA・英国・カリフォルニア州在住の利用者は、GDPR第15条〜第22条・CCPA に基づくデータ主体の権利
-            （開示・訂正・削除・処理停止・データポータビリティ等）の請求を
+            パーソナライズド広告は
+            <a className="ml-0.5 underline hover:text-emerald-700" href="https://adssettings.google.com/" target="_blank" rel="noopener noreferrer">Google の広告設定</a>
+            で無効にできます。その他の第三者配信事業者については、各事業者の設定、または
+            <a className="ml-0.5 underline hover:text-emerald-700" href="https://www.aboutads.info/choices/" target="_blank" rel="noopener noreferrer">第三者広告のオプトアウト（AboutAds）</a>
+            で対応する事業者の設定を変更できます。パーソナライズを無効にしても、広告表示や効果測定等に使う Cookie がすべて停止するわけではありません。
+          </p>
+          <p className="text-sm leading-7 text-slate-600">
+            <span className="font-semibold text-slate-700">データに関するご請求：</span>
+            分析・広告 Cookie の利用範囲・送信先・オプトアウト手段は本ポリシーに記載しています。適用される法令に基づく開示・訂正・削除・処理停止等のご請求は
             <a className="underline hover:text-emerald-700" href="/contact">お問い合わせフォーム</a>
             よりお寄せいただけます。
           </p>
           <p className="text-sm leading-7 text-slate-600">
             <span className="font-semibold text-slate-700">同意管理バナーについて：</span>
-            任意の分析・広告スクリプトは初期状態では読み込まず、同意管理バナーで「許可する」を選んだ場合のみ有効化します。「拒否する」を選んでも必須機能は利用できます。選択後も画面左下の「Cookie設定」からいつでも変更できます。
+            任意の分析・広告スクリプトは初期状態では読み込まず、同意管理バナーで「許可する」を選んだ場合のみ有効化します。「拒否する」を選んでも必須機能は利用できます。選択はこのブラウザのローカルストレージに保存され、本ページなどの画面左下の「Cookie設定」から変更できます。DNT（Do Not Track）または GPC（Global Privacy Control）が有効な場合や、検索語・個人情報等を扱う対象外の画面では、許可後も任意スクリプトを読み込みません。
           </p>
         </section>
 
