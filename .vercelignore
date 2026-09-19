@@ -88,6 +88,9 @@
 /web/scripts/*
 !/web/scripts/vercel-ignore-build.sh
 !/web/scripts/storage-deployment-guard.mjs
+!/web/scripts/production-deploy-guard.mjs
+!/web/scripts/audit/
+!/web/scripts/audit/public-identity-guard.mjs
 **/__snapshots__/
 **/__tests__/
 **/*.test.*

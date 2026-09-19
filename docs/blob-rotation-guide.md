@@ -65,8 +65,10 @@ echo "<新しいトークン>" | vercel env add BLOB_READ_WRITE_TOKEN preview
 
 ```bash
 # 新しいトークンを反映させるため再デプロイが必要
-vercel --prod
-# または GitHub に push して自動デプロイ
+# cleanなmainかつHEAD==origin/mainでだけ実行できる
+cd web
+npm run deploy:production
+# 通常のコード変更はPRをmainへ統合し、GitHub連携で自動デプロイ
 ```
 
 ---

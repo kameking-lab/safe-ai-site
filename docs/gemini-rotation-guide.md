@@ -81,8 +81,9 @@ GEMINI_API_KEY=<新しいキー>
 ## ステップ 4: 再デプロイと動作確認
 
 ```bash
-# Vercel 再デプロイ
-vercel --prod
+# Vercel 再デプロイ（cleanなmainかつHEAD==origin/mainでだけ実行できる）
+cd web
+npm run deploy:production
 
 # チャット API の動作確認
 curl -s -X POST "https://anzen-ai-portal.jp/api/chatbot" \
