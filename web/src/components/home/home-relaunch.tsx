@@ -104,10 +104,10 @@ const MAIN_SERVICES = [
     softAccent: "bg-[#bcd4b8]",
   },
   {
-    href: "/training/safety-seminars",
-    title: "自由に使えるスライド",
-    description: "安全20テーマ・AI20テーマを軸に、音声・PPTX・PDFで展開。",
-    action: "公開資料を見る",
+    href: "/education/hazard-slides",
+    title: "安全教育スライド",
+    description: "災害の型21分類を、統計・原因・対策・確認クイズで学ぶ。",
+    action: "スライドを見る",
     icon: Presentation,
     mascot: "/mascot/mascot-teacher.webp",
     mascotAlt: "黒板の前で安全教育をする先生役のチワワ",
@@ -118,10 +118,10 @@ const MAIN_SERVICES = [
     softAccent: "bg-[#b5d1dd]",
   },
   {
-    href: "/materials/safety-images",
-    title: "自由に使える画像集",
-    description: "立入禁止と着用・表示を中心に、最初の5+5案を公開。",
-    action: "画像を確認",
+    href: "/training/visual-ky",
+    title: "5分ビジュアルKYT",
+    description: "現場イラストから危険を探し、対策まで短時間で確認。",
+    action: "KYTを始める",
     icon: Images,
     mascot: "/mascot/mascot-pointing.webp",
     mascotAlt: "安全画像を指し示して案内するチワワ",
@@ -193,6 +193,7 @@ export function HomeRelaunch() {
               <Link
                 href="/chatbot"
                 prefetch={false}
+                data-primary-action
                 className={`group inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl bg-emerald-300 px-4 text-sm font-black text-slate-950 shadow-[0_14px_36px_-16px_rgba(52,211,153,.9)] hover:bg-emerald-200 motion-safe:transition motion-safe:hover:-translate-y-0.5 ${focusRing}`}
               >
                 <Bot className="h-5 w-5" aria-hidden="true" />
@@ -214,12 +215,12 @@ export function HomeRelaunch() {
                 化学物質RAを開く
               </Link>
               <Link
-                href="/resources/netis-safety"
+                href="/resources/mlit"
                 prefetch={false}
                 className={`inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-4 text-sm font-black text-white hover:bg-white/15 motion-safe:transition-colors ${focusRing}`}
               >
                 <Boxes className="h-5 w-5 text-sky-200" aria-hidden="true" />
-                安全技術を探す
+                安全資料を探す
               </Link>
             </nav>
 
