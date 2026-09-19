@@ -259,19 +259,18 @@ export function HomeRelaunch() {
             />
             <div className="relative overflow-hidden rounded-[2.2rem] border border-white/20 bg-[#102b24] p-2 shadow-2xl shadow-black/40">
               <div className="relative aspect-[2/1] overflow-hidden rounded-[1.8rem] bg-[#d9efe6] sm:aspect-[4/5]">
-                <div className="absolute inset-y-0 left-0 w-[40%] sm:inset-0 sm:w-auto">
-                  <Image
-                    src="/mascot/mascot-chat-talk-v4.webp"
-                    alt="吹き出しと一緒に相談を案内する安全AIポータルのチワワ"
-                    fill
-                    priority
-                    fetchPriority="high"
-                    decoding="sync"
-                    sizes="(max-width: 639px) 40vw, (max-width: 1023px) 36rem, 34vw"
-                    className="object-contain p-2 sm:p-4"
-                  />
-                </div>
-                <div className="absolute inset-y-3 right-3 left-[40%] flex flex-col justify-center rounded-2xl border border-white/60 bg-white/92 p-3 text-slate-950 shadow-lg sm:inset-x-3 sm:top-auto sm:bottom-3 sm:block sm:p-4 sm:backdrop-blur">
+                <Image
+                  src="/mascot/mascot-chat-talk-v4.webp"
+                  alt="吹き出しと一緒に相談を案内する安全AIポータルのチワワ"
+                  width={640}
+                  height={640}
+                  priority
+                  fetchPriority="high"
+                  decoding="sync"
+                  sizes="(max-width: 639px) 104px, (max-width: 1023px) 36rem, 34vw"
+                  className="absolute left-3 top-1/2 h-[104px] w-[104px] -translate-y-1/2 object-contain p-1 sm:inset-0 sm:h-full sm:w-full sm:translate-y-0 sm:p-4"
+                />
+                <div className="absolute inset-y-3 right-3 left-[34%] flex flex-col justify-center rounded-2xl border border-white/60 bg-white/92 p-3 text-slate-950 shadow-lg sm:inset-x-3 sm:top-auto sm:bottom-3 sm:block sm:p-4 sm:backdrop-blur">
                   <p className="text-[10px] font-black tracking-[.08em] text-emerald-800 sm:text-xs sm:tracking-[.12em]">
                     YOUR SAFETY PARTNER
                   </p>
