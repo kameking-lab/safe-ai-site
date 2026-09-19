@@ -9,6 +9,7 @@ import { SITE_URL } from "@/lib/seo-metadata";
 import { lawRevisionCores } from "@/data/mock/law-revisions";
 import { HOME_FEATURED_LAW_REFORM } from "@/lib/home/effect-first-data";
 import { UsageNotesLink } from "@/components/usage-notes-link";
+import { FeatureMascotCompanion } from "@/components/feature-mascot-companion";
 
 const _title = "労働安全衛生関係法令の改正情報";
 const _desc =
@@ -33,20 +34,12 @@ export const revalidate = 86400;
 
 export default function LawsPage() {
   const lawSchema = articleListSchema(
-    [
-      {
-        headline: HOME_FEATURED_LAW_REFORM.officialTitle,
-        datePublished: HOME_FEATURED_LAW_REFORM.promulgatedAt,
-        url: HOME_FEATURED_LAW_REFORM.sourceUrl,
-        description: `${HOME_FEATURED_LAW_REFORM.change} ${HOME_FEATURED_LAW_REFORM.action}`,
-      },
-      ...lawRevisionCores.map((r) => ({
-        headline: r.title,
-        datePublished: r.publishedAt,
-        url: r.source_url ?? `${SITE_URL}/laws`,
-        description: r.summary,
-      })),
-    ]
+    lawRevisionCores.map((r) => ({
+      headline: r.title,
+      datePublished: r.publishedAt,
+      url: r.source_url ?? `${SITE_URL}/laws`,
+      description: r.summary,
+    }))
   );
 
   return (
@@ -60,6 +53,15 @@ export default function LawsPage() {
             {HOME_FEATURED_LAW_REFORM.title}
           </h1>
           <p className="mt-2 text-sm leading-6 text-slate-700">施行日、対象者、今やることを確認できます。</p>
+          <FeatureMascotCompanion
+            variant="law-reading"
+            eyebrow="法令チワワ"
+            title="難しい改正も、「いつ・誰が・何をする」にほどきます。"
+            message="判断に迷ったら、公式原文まで一緒にたどれます。"
+            tone="violet"
+            compact
+            className="mt-4 max-w-3xl"
+          />
         </header>
       </div>
       {/* C-1: 一覧の初期データは server で確定して渡す（クライアントの

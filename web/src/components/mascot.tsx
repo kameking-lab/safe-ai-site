@@ -16,8 +16,18 @@ export type MascotSize = keyof typeof SIZE_MAP;
  * 明示 width/height で CLS 0 を維持する。
  */
 const VARIANT_MAP = {
+  /** サイトの基準マスコット: 緑の作業服とヘルメットのチワワ */
+  "safety-guide": {
+    src: "/mascot/mascot-safety-guide-v2.webp",
+    width: 600,
+    height: 900,
+  },
   /** 頭部バッジ（緑円＋角丸四角）: フッター・チャットアバター等の既定 */
-  default: { src: "/mascot/mascot-chihuahua-4.webp", width: 1024, height: 1024 },
+  default: {
+    src: "/mascot/mascot-chihuahua-4.webp",
+    width: 1024,
+    height: 1024,
+  },
   /** お辞儀: 404・エラー画面用 */
   bow: { src: "/mascot/mascot-bow.webp", width: 297, height: 320 },
   /** 考え中: 空状態・ローディング用 */
@@ -29,39 +39,95 @@ const VARIANT_MAP = {
   /** 敬礼: 完了画面用 */
   salute: { src: "/mascot/mascot-salute.webp", width: 309, height: 320 },
   /** KY記入中: KY用紙・KY一覧用 */
-  "ky-writing": { src: "/mascot/mascot-ky-writing.webp", width: 270, height: 320 },
+  "ky-writing": {
+    src: "/mascot/mascot-ky-writing.webp",
+    width: 270,
+    height: 320,
+  },
   /** 麦茶で一休み: 熱中症・暑熱ページ用 */
-  "water-break": { src: "/mascot/mascot-water-break.webp", width: 316, height: 320 },
+  "water-break": {
+    src: "/mascot/mascot-water-break.webp",
+    width: 316,
+    height: 320,
+  },
   /** 玉掛け合図（巻け）: 建設計算用 */
-  "tamakake-signal": { src: "/mascot/mascot-tamakake-signal.webp", width: 272, height: 320 },
+  "tamakake-signal": {
+    src: "/mascot/mascot-tamakake-signal.webp",
+    width: 272,
+    height: 320,
+  },
   /** 白衣+フラスコ: 化学物質RA・化学DB用 */
-  "chemical-lab": { src: "/mascot/mascot-chemical-lab.webp", width: 249, height: 320 },
+  "chemical-lab": {
+    src: "/mascot/mascot-chemical-lab.webp",
+    width: 249,
+    height: 320,
+  },
   /** 六法全書を読む: 法令ナビ・法改正用 */
-  "law-reading": { src: "/mascot/mascot-law-reading.webp", width: 241, height: 300 },
+  "law-reading": {
+    src: "/mascot/mascot-law-reading.webp",
+    width: 241,
+    height: 300,
+  },
   /** 吹き出しで会話: チャットボット用 */
-  "chat-talk": { src: "/mascot/mascot-chat-talk-v4.webp", width: 640, height: 640 },
+  "chat-talk": {
+    src: "/mascot/mascot-chat-talk-v4.webp",
+    width: 640,
+    height: 640,
+  },
   /** 虫眼鏡で調査: 事故DB用 */
   detective: { src: "/mascot/mascot-detective.webp", width: 271, height: 320 },
   /** 双眼鏡: 検索用 */
-  binoculars: { src: "/mascot/mascot-binoculars.webp", width: 264, height: 320 },
+  binoculars: {
+    src: "/mascot/mascot-binoculars.webp",
+    width: 264,
+    height: 320,
+  },
   /** スコップで掘削: 建設計算（掘削）用 */
-  "shovel-dig": { src: "/mascot/mascot-shovel-dig.webp", width: 320, height: 307 },
+  "shovel-dig": {
+    src: "/mascot/mascot-shovel-dig.webp",
+    width: 320,
+    height: 307,
+  },
   /** バンザイ: クイズ正解・お祝い用 */
   banzai: { src: "/mascot/mascot-banzai.webp", width: 320, height: 295 },
   /** 拡声器: サイネージ朝礼用 */
   megaphone: { src: "/mascot/mascot-megaphone.webp", width: 283, height: 288 },
   /** 夏（タオル＋ひまわり）: トップ季節演出用 */
-  "seasonal-summer": { src: "/mascot/mascot-seasonal-summer.webp", width: 291, height: 320 },
+  "seasonal-summer": {
+    src: "/mascot/mascot-seasonal-summer.webp",
+    width: 291,
+    height: 320,
+  },
   /** 天秤: 労災判例用 */
-  "court-scale": { src: "/mascot/mascot-court-scale.webp", width: 269, height: 320 },
+  "court-scale": {
+    src: "/mascot/mascot-court-scale.webp",
+    width: 269,
+    height: 320,
+  },
   /** 新聞: 新着・速報用 */
-  "news-read": { src: "/mascot/mascot-news-read.webp", width: 320, height: 315 },
+  "news-read": {
+    src: "/mascot/mascot-news-read.webp",
+    width: 320,
+    height: 315,
+  },
   /** 聴診器: 健診スケジューラ用 */
-  "health-check": { src: "/mascot/mascot-health-check.webp", width: 254, height: 320 },
+  "health-check": {
+    src: "/mascot/mascot-health-check.webp",
+    width: 254,
+    height: 320,
+  },
   /** 計測器: 作業環境測定用 */
-  "measure-meter": { src: "/mascot/mascot-measure-meter.webp", width: 282, height: 288 },
+  "measure-meter": {
+    src: "/mascot/mascot-measure-meter.webp",
+    width: 282,
+    height: 288,
+  },
   /** 印鑑: 現場記録・打合せ書用 */
-  "stamp-doc": { src: "/mascot/mascot-stamp-doc.webp", width: 281, height: 320 },
+  "stamp-doc": {
+    src: "/mascot/mascot-stamp-doc.webp",
+    width: 281,
+    height: 320,
+  },
   /** 空を見上げる: 防災・気象用 */
   "weather-look": {
     src: "/mascot/mascot-weather-look-v2.webp",
@@ -69,15 +135,31 @@ const VARIANT_MAP = {
     height: 882,
   },
   /** タブレット: AI・DX系用 */
-  "tablet-dx": { src: "/mascot/mascot-tablet-dx.webp", width: 274, height: 320 },
+  "tablet-dx": {
+    src: "/mascot/mascot-tablet-dx.webp",
+    width: 274,
+    height: 320,
+  },
   /** 電卓: 建設計算（結果）用 */
-  calculator: { src: "/mascot/mascot-calculator.webp", width: 274, height: 320 },
+  calculator: {
+    src: "/mascot/mascot-calculator.webp",
+    width: 274,
+    height: 320,
+  },
   /** トロフィー: 達成・実績用 */
   trophy: { src: "/mascot/mascot-trophy.webp", width: 263, height: 320 },
   /** フルハーネス点検: 保護具DB用 */
-  "ppe-check": { src: "/mascot/mascot-ppe-check.webp", width: 316, height: 320 },
+  "ppe-check": {
+    src: "/mascot/mascot-ppe-check.webp",
+    width: 316,
+    height: 320,
+  },
   /** 救急箱（緑十字）: 両立支援・応急手当用 */
-  "first-aid": { src: "/mascot/mascot-first-aid.webp", width: 308, height: 320 },
+  "first-aid": {
+    src: "/mascot/mascot-first-aid.webp",
+    width: 308,
+    height: 320,
+  },
   /** 緊急時の真剣な案内: 笑顔・コミカルな表現を避けた専用素材 */
   "emergency-serious": {
     src: "/mascot/mascot-emergency-serious.webp",
@@ -87,9 +169,17 @@ const VARIANT_MAP = {
   /** おやすみ: オフライン・メンテ画面用 */
   sleeping: { src: "/mascot/mascot-sleeping.webp", width: 320, height: 235 },
   /** 地球儀: 外国人労働者向けページ用 */
-  "world-friends": { src: "/mascot/mascot-world-friends.webp", width: 301, height: 320 },
+  "world-friends": {
+    src: "/mascot/mascot-world-friends.webp",
+    width: 301,
+    height: 320,
+  },
   /** 書類を確認: 年次計画ジェネレータ用（同一犬の書類ポーズへ統一） */
-  "calendar-plan": { src: "/mascot/mascot-stamp-doc.webp", width: 281, height: 320 },
+  "calendar-plan": {
+    src: "/mascot/mascot-stamp-doc.webp",
+    width: 281,
+    height: 320,
+  },
 } as const;
 
 export type MascotVariant = keyof typeof VARIANT_MAP;
@@ -139,7 +229,11 @@ type MascotWithBubbleProps = MascotProps & {
   message: string;
 };
 
-export function MascotWithBubble({ message, size = "md", ...rest }: MascotWithBubbleProps) {
+export function MascotWithBubble({
+  message,
+  size = "md",
+  ...rest
+}: MascotWithBubbleProps) {
   return (
     <div className="flex items-end gap-2">
       <Mascot size={size} {...rest} />

@@ -1,5 +1,5 @@
-import { permanentRedirect } from "next/navigation";
+import type { ReactNode } from "react";
 
-export default function AccidentsAnalyticsLayout() {
-  permanentRedirect("/accidents");
+export default function AccidentsAnalyticsLayout({ children }: { children: ReactNode }) {
+  return children;
 }

@@ -4,7 +4,8 @@ import Link from "next/link";
 import { BookOpen, Database, ExternalLink, Gauge, ArrowRight } from "lucide-react";
 import type { MergedChemical, ConcentrationLimitEntry } from "@/lib/mhlw-chemicals";
 import { regulatoryLabels, relatedLawTexts, EXTERNAL_REF_LABEL } from "@/lib/chemical/mhlw-labels";
-import { getSupplementalInfo } from "@/lib/chemical/supplemental-info";
+import { buildGhsHazardsFromNite } from "@/lib/chemical/nite-ghs-hazards";
+import { verifiedMhlwPublicDocumentUrl } from "@/lib/chemical/official-source-url";
 import { SITE_STATS } from "@/data/site-stats";
 import { RegulationTagBadgeList } from "@/components/regulation-tag-badge";
 import { RegulationTagsSection } from "@/components/regulation-tags-section";
@@ -23,18 +24,17 @@ import {
 export function MhlwChemicalInfoCard({ chemical }: { chemical: MergedChemical }) {
   const reg = regulatoryLabels(chemical.flags);
   const laws = relatedLawTexts(chemical.flags);
-  const supplemental = getSupplementalInfo(chemical.cas);
-  // MHLW 濃度基準値 (八時間) 優先、なければ特化則・有機則の管理濃度で補完
-  const limit8h = chemical.details?.limit8h ?? supplemental?.oel;
-  const limit8hSource: "mhlw" | "oel" | null = chemical.details?.limit8h
-    ? "mhlw"
-    : supplemental?.oel
-      ? "oel"
-      : null;
-  const limitShort = chemical.details?.limitShort;
-  const link = chemical.details?.link;
-  const isCarcinogenic =
-    chemical.flags.carcinogenic || supplemental?.carcinogenic === true;
+  // RA結果と同じ政府版GHSを使う。旧50物質の手入力補助表では補完しない。
+  const ghsHazards = buildGhsHazardsFromNite(
+    chemical.details?.limits?.niteGhsClassifications,
+  );
+  const ghsSourceUrl = chemical.details?.limits?.niteChripUrl;
+  const link = verifiedMhlwPublicDocumentUrl(
+    chemical.details?.link ?? chemical.details?.limits?.mhlwSdsUrl,
+  );
+  // 管理濃度・OELを濃度基準値へ代入せず、資料URLを追跡できる値だけ表示する。
+  const limit8h = link ? chemical.details?.limit8h : undefined;
+  const limitShort = link ? chemical.details?.limitShort : undefined;
 
   return (
     <div className="rounded-xl border border-emerald-200 bg-emerald-50/40 p-4">
@@ -75,20 +75,13 @@ export function MhlwChemicalInfoCard({ chemical }: { chemical: MergedChemical })
         <div className="rounded-lg bg-white p-3">
           <dt className="flex items-center gap-1 font-semibold text-amber-700">
             <Gauge className="h-3.5 w-3.5" aria-hidden="true" />
-            {limit8hSource === "oel" ? "管理濃度（八時間）" : "濃度基準値（八時間）"}
+            濃度基準値（八時間）
           </dt>
           <dd className="mt-1 text-base font-bold text-slate-900">
             {limit8h ? (
-              <>
-                {limit8h}
-                {limit8hSource === "oel" && (
-                  <span className="ml-1 text-[10px] font-normal text-slate-500">
-                    ※特化則・有機則の管理濃度
-                  </span>
-                )}
-              </>
+              limit8h
             ) : (
-              <span className="text-slate-400 text-sm font-normal">データ未登録</span>
+              <span className="text-slate-500 text-sm font-normal">個別資料で確認が必要</span>
             )}
           </dd>
         </div>
@@ -99,47 +92,54 @@ export function MhlwChemicalInfoCard({ chemical }: { chemical: MergedChemical })
           </dt>
           <dd className="mt-1 text-base font-bold text-slate-900">
             {limitShort ?? (
-              <span className="text-slate-400 text-sm font-normal">データ未登録</span>
+              <span className="text-slate-500 text-sm font-normal">個別資料で確認が必要</span>
             )}
           </dd>
         </div>
       </dl>
 
       <div className="mt-3 grid gap-2 sm:grid-cols-2 text-xs">
-        <FlagBadge label="SDS交付義務" on={chemical.flags.label_sds} />
+        <FlagBadge label="ラベル・SDS対象物質" on={chemical.flags.label_sds} />
         <FlagBadge label="濃度基準値設定" on={chemical.flags.concentration} />
         <FlagBadge label="皮膚等障害" on={chemical.flags.skin} />
-        <FlagBadge label="がん原性" on={isCarcinogenic} />
+        <FlagBadge label="がん原性物質リスト" on={chemical.flags.carcinogenic} />
       </div>
+      <p className="mt-2 text-[11px] leading-5 text-slate-600">
+        物質リストの収録状況です。製品の含有率や取扱業務など、実際の適用条件は各法令で確認してください。
+      </p>
 
-      {supplemental?.ghs && supplemental.ghs.length > 0 && (
+      {ghsHazards.length > 0 ? (
         <div className="mt-3 rounded-lg bg-white p-3">
-          <p className="text-xs font-semibold text-slate-600">GHS分類（主要ハザード）</p>
-          <div className="mt-1 flex flex-wrap gap-1">
-            {supplemental.ghs.map((g) => (
-              <span
-                key={g}
-                className="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-800"
-              >
-                {g}
-              </span>
+          <p className="text-xs font-semibold text-slate-700">政府版GHS分類（NITE・主要有害性）</p>
+          <dl className="mt-2 space-y-2 text-xs">
+            {ghsHazards.map((hazard) => (
+              <div key={hazard.category} className="rounded-lg border border-amber-100 bg-amber-50/50 p-2">
+                <dt className="font-semibold text-slate-700">{hazard.category}</dt>
+                <dd className="mt-0.5 leading-5 text-slate-900">{hazard.classification}</dd>
+              </div>
             ))}
-          </div>
+          </dl>
+          <p className="mt-2 text-[11px] leading-5 text-slate-600">
+            収録済みの政府分類です。ここにない危険有害性と、製品・混合物の分類は最新の製品SDSで確認してください。
+          </p>
+          {ghsSourceUrl && (
+            <a href={ghsSourceUrl} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-emerald-800 underline">
+              NITE 政府版GHS分類の出典
+              <ExternalLink className="h-3 w-3" aria-hidden="true" />
+            </a>
+          )}
         </div>
-      )}
-
-      {supplemental?.healthEffects && (
-        <div className="mt-3 rounded-lg bg-white p-3">
-          <p className="text-xs font-semibold text-slate-600">主な健康影響</p>
-          <p className="mt-1 text-xs text-slate-700">{supplemental.healthEffects}</p>
-        </div>
+      ) : (
+        <p className="mt-3 rounded-lg bg-white p-3 text-xs leading-5 text-slate-600">
+          政府版GHSの主要有害性区分は未収録です。危険有害性がないという意味ではありません。最新の製品SDSと公的資料で確認してください。
+        </p>
       )}
 
       {reg.length > 0 && (
         <div className="mt-3 rounded-lg bg-white p-3">
           <p className="flex items-center gap-1 text-xs font-semibold text-slate-600">
             <BookOpen className="h-3.5 w-3.5" aria-hidden="true" />
-            規制区分
+            公的物質リストの収録情報
           </p>
           <ul className="mt-1 space-y-0.5 text-xs text-slate-700">
             {reg.map((r) => (
@@ -280,12 +280,15 @@ function OshaRegulationsSection({ cas }: { cas: string | null }) {
     <div className="mt-3 rounded-lg border border-red-200 bg-white p-3">
       <p className="flex items-center gap-1 text-xs font-semibold text-red-700">
         <BookOpen className="h-3.5 w-3.5" aria-hidden="true" />
-        労働安全衛生 特別則
+        労働安全衛生 特別則の確認先
         {special && (
           <span className="ml-1 rounded-full bg-red-100 px-1.5 py-0.5 text-[10px] font-bold text-red-900">
             特別管理物質
           </span>
         )}
+      </p>
+      <p className="mt-2 text-[11px] leading-5 text-slate-600">
+        物質名から確認すべき規則を示しています。対象業務・含有率・作業場所・適用除外などを確認して適用を判断してください。
       </p>
       <ul className="mt-2 space-y-2 text-xs text-slate-700">
         {oshaTags.map((tag) => {
@@ -315,7 +318,7 @@ function OshaRegulationsSection({ cas }: { cas: string | null }) {
       </ul>
       {special && (
         <p className="mt-2 rounded bg-red-50 px-2 py-1.5 text-[11px] text-red-900">
-          特別管理物質: 作業環境測定結果・特殊健診結果・作業記録を 30 年間保存する義務があります (特化則 第38条の4)。
+          特別管理物質には記録・保存の規定があります。対象業務、記録の種類と保存期間を特化則の該当条文で確認してください。
         </p>
       )}
     </div>
@@ -331,7 +334,7 @@ function FlagBadge({ label, on }: { label: string; on: boolean }) {
     >
       <span className="text-xs font-semibold">{label}</span>
       <span className="text-xs font-bold">
-        {on ? "収録データで該当" : "収録データ上未確認"}
+        {on ? "リスト収録あり" : "収録データ上未確認"}
       </span>
     </div>
   );

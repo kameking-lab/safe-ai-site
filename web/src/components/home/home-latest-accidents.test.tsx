@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import type { HomeLatestAccidentNews } from "@/lib/home/home-accident-server";
+import { buildHomeAccidentPreview } from "@/lib/home/effect-first-data";
 import { HomeLatestAccidents } from "./home-latest-accidents";
 
 const live: HomeLatestAccidentNews = {
@@ -33,10 +34,15 @@ const live: HomeLatestAccidentNews = {
 describe("HomeLatestAccidents", () => {
   it("shows the official aggregate before current reported incidents and never marks them synthetic", () => {
     const { container } = render(<HomeLatestAccidents latestNews={live} />);
+    const { featured } = buildHomeAccidentPreview();
 
-    expect(screen.getByText(/令和８年業種別局別死亡災害発生状況/)).toBeTruthy();
-    expect(screen.getByText("301件")).toBeTruthy();
-    expect(screen.getByText("67,945件")).toBeTruthy();
+    expect(screen.getByText(featured.period)).toBeTruthy();
+    expect(
+      screen.getByText(`${featured.deaths?.toLocaleString("ja-JP")}人`),
+    ).toBeTruthy();
+    expect(
+      screen.getByText(`${featured.injuries?.toLocaleString("ja-JP")}人`),
+    ).toBeTruthy();
     expect(
       screen.getByRole("link", { name: "工事現場で作業員が転落し死亡" }),
     ).toBeTruthy();
@@ -48,10 +54,23 @@ describe("HomeLatestAccidents", () => {
     expect(
       container.querySelector('[data-accident-origin="synthetic"]'),
     ).toBeNull();
+    const official = container.querySelector(
+      '[data-accident-origin="official"]',
+    );
+    const reported = container.querySelector(
+      '[data-accident-origin="reported-unverified"]',
+    );
+    expect(official).not.toBeNull();
+    expect(reported).not.toBeNull();
+    expect(
+      official!.compareDocumentPosition(reported!) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
     expect(container.textContent).not.toContain("詳細DBの直近収録事例");
   });
 
   it("keeps the official value and refuses to turn an RSS failure into no accidents", () => {
+    const { featured } = buildHomeAccidentPreview();
     render(
       <HomeLatestAccidents
         latestNews={{
@@ -64,7 +83,9 @@ describe("HomeLatestAccidents", () => {
       />,
     );
 
-    expect(screen.getByText("301件")).toBeTruthy();
+    expect(
+      screen.getByText(`${featured.deaths?.toLocaleString("ja-JP")}人`),
+    ).toBeTruthy();
     expect(screen.getByRole("status").textContent).toContain(
       "取得不能を「事故なし」へ変換していません",
     );

@@ -46,13 +46,54 @@ export type AnalyticsKpi = {
   fatalRatePercent: number;
 };
 
+export type AnalyticsFilters = {
+  industry?: string;
+  type?: string;
+  year?: number;
+};
+
+export type AnalyticsFilterOptions = {
+  industries: string[];
+  types: string[];
+  years: number[];
+};
+
+export type AnalyticsFieldCoverage = {
+  known: number;
+  missing: number;
+  missingRatePercent: number;
+};
+
+export type AnalyticsCoverage = {
+  industry: AnalyticsFieldCoverage;
+  type: AnalyticsFieldCoverage;
+  month: AnalyticsFieldCoverage;
+  prefecture: AnalyticsFieldCoverage;
+  workplaceSize: AnalyticsFieldCoverage;
+  cause: AnalyticsFieldCoverage;
+  occurrenceTime: AnalyticsFieldCoverage;
+  age: AnalyticsFieldCoverage;
+  weekday: AnalyticsFieldCoverage;
+};
+
 export type AnalyticsAggregates = {
   generatedAt: string;
   meta: {
     curatedCases: number;
     mhlwDeathsCount: number;
     mhlwFullDbCount: number;
+    /** 絞り込み前の統合データセット総件数。 */
+    datasetCases: number;
+    /** 現在の業種・事故型・年フィルタに該当する件数。 */
+    filteredCases: number;
     yearsCovered: { from: number; to: number };
+    filters: {
+      industry: string | null;
+      type: string | null;
+      year: number | null;
+    };
+    filterOptions: AnalyticsFilterOptions;
+    coverage: AnalyticsCoverage;
   };
   kpi: AnalyticsKpi;
   /** A: 時系列軸 */

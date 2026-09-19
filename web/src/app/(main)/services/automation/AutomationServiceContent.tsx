@@ -4,6 +4,7 @@ import { UsageNotesLink } from "@/components/usage-notes-link";
 import type { AutomationConsultAvailability } from "@/lib/automation-consult/availability";
 import { AutomationConsultForm } from "./AutomationConsultForm";
 import { AutomationConsultPreparation } from "./AutomationConsultPreparation";
+import { FeatureMascotCompanion } from "@/components/feature-mascot-companion";
 
 const buttonPrimary =
   "inline-flex min-h-[44px] items-center justify-center rounded-xl bg-emerald-800 px-5 py-3 text-center text-sm font-black text-white hover:bg-emerald-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-700/30 forced-colors:border-2 forced-colors:border-[LinkText] forced-colors:bg-[Canvas] forced-colors:text-[LinkText]";
@@ -128,6 +129,15 @@ export function AutomationServiceContent({
             利用者のメールアプリから送信します。
           </p>
         ) : null}
+        <FeatureMascotCompanion
+          variant="calendar-plan"
+          eyebrow="改善係チワワ"
+          title="面倒なひと手間を、ひとつずつ減らします。"
+          message="まだ仕様が固まっていなくても、今の作業をそのまま話してください。"
+          tone="green"
+          compact
+          className="mt-5 max-w-2xl"
+        />
       </section>
 
       <section
@@ -224,18 +234,42 @@ export function AutomationServiceContent({
             <span className="mt-1 block text-sm text-slate-700">
               Excel、CSV、フォーム回答、定型メール
             </span>
+            <Link
+              href="/tools/construction-calculators"
+              className="mt-2 inline-flex min-h-11 items-center text-sm font-black text-emerald-900 underline underline-offset-4"
+            >
+              建設計算ツールを見る
+            </Link>
           </li>
           <li className="rounded-xl border border-slate-300 p-4">
             <strong>安全衛生業務</strong>
             <span className="mt-1 block text-sm text-slate-700">
               KY、点検、教育記録、WBGT通知
             </span>
+            <Link
+              href="/materials/safety-images"
+              className="mt-2 inline-flex min-h-11 items-center text-sm font-black text-emerald-900 underline underline-offset-4"
+            >
+              現場安全看板を見る
+            </Link>
           </li>
           <li className="rounded-xl border border-slate-300 p-4">
             <strong>講習・資料</strong>
             <span className="mt-1 block text-sm text-slate-700">
               社内講習、スライド、手順書、確認クイズ
             </span>
+            <Link
+              href="/training/safety-seminars"
+              className="mt-2 inline-flex min-h-11 items-center text-sm font-black text-emerald-900 underline underline-offset-4"
+            >
+              無料の安全研修教材を見る
+            </Link>
+            <Link
+              href="/training/ai-seminars"
+              className="inline-flex min-h-11 items-center text-sm font-black text-emerald-900 underline underline-offset-4"
+            >
+              無料のAI実務研修を見る
+            </Link>
           </li>
         </ul>
       </section>

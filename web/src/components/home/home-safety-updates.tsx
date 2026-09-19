@@ -105,11 +105,11 @@ export function HomeSafetyUpdates({
                   {aggregate.period}：死亡災害{" "}
                   {aggregate.deaths === null
                     ? "未確認"
-                    : `${aggregate.deaths.toLocaleString("ja-JP")}件`}
+                    : `${aggregate.deaths.toLocaleString("ja-JP")}人`}
                   、休業4日以上等{" "}
                   {aggregate.injuries === null
                     ? "未確認"
-                    : `${aggregate.injuries.toLocaleString("ja-JP")}件`}
+                    : `${aggregate.injuries.toLocaleString("ja-JP")}人`}
                 </p>
                 <p className="mt-1 font-bold text-amber-200">
                   全国速報（暫定値）

@@ -65,6 +65,12 @@ const PREVIEW_SAFE_MUTATION_PATHS = new Set([
   "/api/translate/article",
 ]);
 
+const PREVIEW_SAFE_MUTATION_PATTERNS = [
+  // Pure, no-store image composition. The route validates every field and
+  // performs no persistence, analytics, external delivery, or paid inference.
+  /^\/api\/safety-images\/[a-z0-9-]+\/download$/u,
+];
+
 const PREVIEW_BLOCKED_READ_PREFIXES = [
   "/api/auth/",
   "/api/cron/",
@@ -99,7 +105,10 @@ export function shouldBlockPreviewRequest(
     normalizedMethod === "PATCH" ||
     normalizedMethod === "DELETE"
   ) {
-    return !PREVIEW_SAFE_MUTATION_PATHS.has(pathname);
+    return !(
+      PREVIEW_SAFE_MUTATION_PATHS.has(pathname) ||
+      PREVIEW_SAFE_MUTATION_PATTERNS.some((pattern) => pattern.test(pathname))
+    );
   }
   return false;
 }

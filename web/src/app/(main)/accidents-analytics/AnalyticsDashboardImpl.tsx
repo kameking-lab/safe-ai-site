@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { BarChart3, Lightbulb } from "lucide-react";
 import {
   Bar,
@@ -23,7 +23,10 @@ import { CardGrid, PageContainer, Section, Stack } from "@/components/layout";
 import { LazyChart } from "@/components/charts/lazy-chart";
 import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
 import { DataExportToolbar } from "@/components/accidents/data-export-toolbar";
-import type { AnalyticsAggregates, NameCount } from "@/lib/accidents-analytics/types";
+import type {
+  AnalyticsAggregates,
+  NameCount,
+} from "@/lib/accidents-analytics/types";
 import { getIndustryInsight } from "@/lib/accidents-analytics/industry-insight";
 import {
   ANALYTICS_CSV_FILENAME,
@@ -74,9 +77,15 @@ function KpiCard({
   };
   return (
     <div className={`rounded-lg border p-3 sm:p-4 ${toneClass[tone]}`}>
-      <div className="text-[11px] font-semibold tracking-wide text-slate-500 sm:text-xs">{label}</div>
-      <div className="mt-1 text-xl font-bold tabular-nums sm:text-2xl">{value}</div>
-      {note ? <div className="mt-1 text-[11px] text-slate-500 sm:text-xs">{note}</div> : null}
+      <div className="text-[11px] font-semibold tracking-wide text-slate-500 sm:text-xs">
+        {label}
+      </div>
+      <div className="mt-1 text-xl font-bold tabular-nums sm:text-2xl">
+        {value}
+      </div>
+      {note ? (
+        <div className="mt-1 text-[11px] text-slate-500 sm:text-xs">{note}</div>
+      ) : null}
     </div>
   );
 }
@@ -96,7 +105,9 @@ function ChartCard({
     <div className="rounded-lg border border-slate-200 bg-white p-3 sm:p-4">
       <h3 className="text-sm font-bold text-slate-900 sm:text-base">{title}</h3>
       {description ? (
-        <p className="mt-0.5 text-[11px] text-slate-500 sm:text-xs">{description}</p>
+        <p className="mt-0.5 text-[11px] text-slate-500 sm:text-xs">
+          {description}
+        </p>
       ) : null}
       <LazyChart className="mt-3" style={{ width: "100%", height }}>
         <ResponsiveContainer width="100%" height="100%">
@@ -107,69 +118,45 @@ function ChartCard({
   );
 }
 
-function applyFilter(
-  data: NameCount[],
-  industry: string | null,
-  type: string | null,
-): NameCount[] {
-  // Industry/type filters affect dimensions other than themselves only;
-  // the filter UI is informational on rankings already-restricted by the
-  // dimension being shown. We apply a simple visibility filter that
-  // preserves the dataset's existing aggregate when no filter is set.
-  if (!industry && !type) return data;
-  // For rankings within the dimension of the filter itself, keep only the
-  // matched row so users can see relative magnitude on its own.
-  if (industry && data.some((d) => d.name === industry)) {
-    return data.filter((d) => d.name === industry);
-  }
-  if (type && data.some((d) => d.name === type)) {
-    return data.filter((d) => d.name === type);
-  }
-  return data;
-}
-
-export function AnalyticsDashboardImpl({ aggregates }: AnalyticsDashboardProps) {
+export function AnalyticsDashboardImpl({
+  aggregates,
+}: AnalyticsDashboardProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const industryFilter = aggregates.meta.filters.industry ?? "";
+  const typeFilter = aggregates.meta.filters.type ?? "";
+  const yearFilter = aggregates.meta.filters.year
+    ? String(aggregates.meta.filters.year)
+    : "";
 
-  const [industryFilter, setIndustryFilter] = useState<string>(
-    () => searchParams?.get("industry") ?? "",
-  );
-  const [typeFilter, setTypeFilter] = useState<string>(
-    () => searchParams?.get("type") ?? "",
-  );
-
-  // Sync filter state -> URL (replace so back goes to a previous page, not a previous filter)
-  useEffect(() => {
+  const replaceFilters = (next: {
+    industry: string;
+    type: string;
+    year: string;
+  }) => {
     const params = new URLSearchParams();
-    if (industryFilter) params.set("industry", industryFilter);
-    if (typeFilter) params.set("type", typeFilter);
+    if (next.industry) params.set("industry", next.industry);
+    if (next.type) params.set("type", next.type);
+    if (next.year) params.set("year", next.year);
     const qs = params.toString();
-    const next = qs ? `${pathname}?${qs}` : pathname;
-    const current =
-      window.location.pathname + (window.location.search || "");
-    if (next !== current) {
-      router.replace(next, { scroll: false });
-    }
-  }, [industryFilter, typeFilter, pathname, router]);
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  };
 
   const industryOptions = useMemo(
-    () => aggregates.industryRanking.map((x) => x.name),
-    [aggregates.industryRanking],
+    () => aggregates.meta.filterOptions.industries,
+    [aggregates.meta.filterOptions.industries],
   );
-  // 軸G: 「まず、自業種の要点」サマリー。業種選択で多い事故型・順位・死亡率を即提示。
+  // 軸G: 「まず、自業種の要点」サマリー。業種選択で収録事例中の構成を即提示。
   const insight = useMemo(
     () => getIndustryInsight(aggregates, industryFilter),
     [aggregates, industryFilter],
   );
   const typeOptions = useMemo(
-    () => aggregates.typeRanking.map((x) => x.name),
-    [aggregates.typeRanking],
+    () => aggregates.meta.filterOptions.types,
+    [aggregates.meta.filterOptions.types],
   );
-
-  const i = industryFilter || null;
-  const t = typeFilter || null;
+  const yearOptions = aggregates.meta.filterOptions.years;
+  const hasFilters = Boolean(industryFilter || typeFilter || yearFilter);
 
   const yearTrendData = aggregates.yearTrend.map((y) => ({
     year: String(y.year),
@@ -193,8 +180,8 @@ export function AnalyticsDashboardImpl({ aggregates }: AnalyticsDashboardProps) 
     count: w.count,
   }));
 
-  const industryRankTop12 = applyFilter(aggregates.industryRanking, i, t).slice(0, 12);
-  const typeRankTop10 = applyFilter(aggregates.typeRanking, i, t).slice(0, 10);
+  const industryRankTop12 = aggregates.industryRanking.slice(0, 12);
+  const typeRankTop10 = aggregates.typeRanking.slice(0, 10);
 
   const industryDeathRate = aggregates.industryDeathRate.slice(0, 10);
 
@@ -212,7 +199,9 @@ export function AnalyticsDashboardImpl({ aggregates }: AnalyticsDashboardProps) 
   const occurrenceTime = aggregates.occurrenceTimeDistribution;
   const ageDistribution = aggregates.ageDistribution;
   const workplaceSize = aggregates.workplaceSizeRanking;
-  const severityBreakdown = aggregates.severityBreakdown.filter((s) => s.count > 0);
+  const severityBreakdown = aggregates.severityBreakdown.filter(
+    (s) => s.count > 0,
+  );
   const prefectureTop15 = aggregates.prefectureRanking.slice(0, 15);
 
   const fullDbYearTrend = aggregates.fullDbYearTrend.map((y) => ({
@@ -222,10 +211,30 @@ export function AnalyticsDashboardImpl({ aggregates }: AnalyticsDashboardProps) 
   const fullDbIndustryTop10 = aggregates.fullDbIndustryRanking.slice(0, 10);
 
   const yoy = aggregates.yoyComparison;
+  const periodLabel =
+    aggregates.meta.yearsCovered.from > 0
+      ? aggregates.meta.yearsCovered.from === aggregates.meta.yearsCovered.to
+        ? `${aggregates.meta.yearsCovered.from}年`
+        : `${aggregates.meta.yearsCovered.from}〜${aggregates.meta.yearsCovered.to}年`
+      : "該当期間なし";
+  const coverageItems = [
+    ["業種", aggregates.meta.coverage.industry],
+    ["事故型", aggregates.meta.coverage.type],
+    ["発生月", aggregates.meta.coverage.month],
+    ["都道府県", aggregates.meta.coverage.prefecture],
+    ["年齢", aggregates.meta.coverage.age],
+  ] as const;
+
+  const resetFilters = () => {
+    replaceFilters({ industry: "", type: "", year: "" });
+  };
 
   // 柱C-7: 会議資料への持ち出し（CSV/要点コピー）。集計値そのままを文字列化。
   const exportCsv = useMemo(() => analyticsToCsv(aggregates), [aggregates]);
-  const exportText = useMemo(() => analyticsToSummaryText(aggregates), [aggregates]);
+  const exportText = useMemo(
+    () => analyticsToSummaryText(aggregates),
+    [aggregates],
+  );
 
   return (
     <PageContainer width="full" paddingX="default" paddingY="default">
@@ -258,23 +267,25 @@ export function AnalyticsDashboardImpl({ aggregates }: AnalyticsDashboardProps) 
           >
             <div>
               <div className="text-[11px] font-semibold tracking-wide text-slate-500">
-                収録 労働災害
+                {hasFilters ? "絞り込み対象" : "収録 労働災害"}
               </div>
               <div className="flex items-baseline gap-1">
                 <span className="text-4xl font-bold tabular-nums text-slate-900 sm:text-5xl">
-                  {formatNumber(
-                    aggregates.meta.curatedCases + aggregates.meta.mhlwDeathsCount,
-                  )}
+                  {formatNumber(aggregates.meta.filteredCases)}
                 </span>
                 <span className="text-lg font-bold text-slate-700">件</span>
               </div>
               <div className="mt-0.5 text-[11px] text-slate-500">
-                {aggregates.meta.yearsCovered.from}〜{aggregates.meta.yearsCovered.to}年・厚労省統合データセット
+                {periodLabel}・統合データセット
+                {hasFilters
+                  ? `（全${formatNumber(aggregates.meta.datasetCases)}件中）`
+                  : ""}
               </div>
             </div>
             <div className="flex flex-wrap gap-2">
               <span className="inline-flex items-center rounded-full border border-rose-200 bg-rose-50 px-3 py-1 text-xs font-bold text-rose-800">
-                厚労省死亡災害DB {formatNumber(aggregates.meta.mhlwDeathsCount)}件
+                厚労省死亡災害DB {formatNumber(aggregates.meta.mhlwDeathsCount)}
+                件
               </span>
               <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-bold text-slate-700">
                 curated詳細 {formatNumber(aggregates.meta.curatedCases)}件
@@ -283,8 +294,13 @@ export function AnalyticsDashboardImpl({ aggregates }: AnalyticsDashboardProps) 
           </div>
           {/* 柱0バッチ7/9: 長い説明文は折りたたみへ（下のKPI・軸Gがファーストビューの主役）。内容は不変。 */}
           <CollapsibleDetail summary="このダッシュボードのデータ源について">
-            curated 詳細事例＋厚労省 死亡災害DB（{formatNumber(aggregates.meta.mhlwDeathsCount)} 件 / 2019〜2024）を統合し、時系列・業種・事故種類・地域・規模・原因など多軸で集計したダッシュボードです。
-            厚労省「職場のあんぜんサイト」全件DB（{formatNumber(aggregates.meta.mhlwFullDbCount)} 件 / 2006〜2021）の集計データも参照軸として併載しています。
+            curated 詳細事例＋厚労省
+            死亡災害DBを統合し、時系列・業種・事故種類・地域・規模・原因など多軸で集計したダッシュボードです。現在の対象は
+            curated {formatNumber(aggregates.meta.curatedCases)}件＋厚労省{" "}
+            {formatNumber(aggregates.meta.mhlwDeathsCount)}件です。
+            厚労省「職場のあんぜんサイト」全件DB（
+            {formatNumber(aggregates.meta.mhlwFullDbCount)} 件 /
+            2006〜2021）の集計データも参照軸として併載しています。
           </CollapsibleDetail>
           {/* 柱C-7: 集計の出力手段。月例安全会議の資料へCSV/要点コピー/共有/印刷で持ち出せる。 */}
           <DataExportToolbar
@@ -299,21 +315,33 @@ export function AnalyticsDashboardImpl({ aggregates }: AnalyticsDashboardProps) 
         <section className="rounded-xl border-2 border-emerald-300 bg-emerald-50/70 p-4 sm:p-5">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <h2 className="flex items-center gap-1.5 text-sm font-bold text-emerald-900 sm:text-base">
-              <BarChart3 className="h-4 w-4 shrink-0" aria-hidden="true" />まず、あなたの業種の要点を見る
+              <BarChart3 className="h-4 w-4 shrink-0" aria-hidden="true" />
+              まず、あなたの業種の要点を見る
             </h2>
-            <span className="text-[11px] text-emerald-700">3秒で「自業種で多い事故」が分かります</span>
+            <span className="text-[11px] text-emerald-700">
+              3秒で「自業種で多い事故」が分かります
+            </span>
           </div>
           <p className="mt-1 text-[11px] text-emerald-900/70 sm:text-xs">
             下には時系列・業種・事故種類など多軸の詳細グラフが続きます。まずは業種を選んで、要点だけ先に確認してください。
           </p>
           <div className="mt-3 flex flex-wrap items-center gap-2">
-            <label htmlFor="quick-industry" className="text-xs font-semibold text-emerald-900">
+            <label
+              htmlFor="quick-industry"
+              className="text-xs font-semibold text-emerald-900"
+            >
               あなたの業種
             </label>
             <select
               id="quick-industry"
               value={industryFilter}
-              onChange={(e) => setIndustryFilter(e.target.value)}
+              onChange={(e) =>
+                replaceFilters({
+                  industry: e.target.value,
+                  type: typeFilter,
+                  year: yearFilter,
+                })
+              }
               className="min-h-[44px] rounded-md border border-emerald-400 bg-white px-2.5 py-1.5 text-sm font-semibold text-slate-900 focus:border-emerald-600 focus:outline-none focus:ring-1 focus:ring-emerald-600"
             >
               <option value="">― 選んでください ―</option>
@@ -330,7 +358,7 @@ export function AnalyticsDashboardImpl({ aggregates }: AnalyticsDashboardProps) 
               <div className="rounded-lg border border-emerald-200 bg-white p-3">
                 <p className="text-[11px] font-semibold text-slate-500">
                   {insight.industry}で多い事故の型
-                  {insight.rank ? `（事故件数 全${insight.industryCount}業種中 第${insight.rank}位・${formatNumber(insight.industryTotal)}件）` : ""}
+                  {`（現在の条件で ${formatNumber(insight.industryTotal)}件）`}
                 </p>
                 {insight.topTypes.length > 0 ? (
                   <ol className="mt-1.5 flex flex-wrap gap-1.5">
@@ -343,20 +371,28 @@ export function AnalyticsDashboardImpl({ aggregates }: AnalyticsDashboardProps) 
                             : "border border-rose-200 bg-rose-50 text-rose-800"
                         }`}
                       >
-                        <span className="tabular-nums opacity-80">{i + 1}.</span>
+                        <span className="tabular-nums opacity-80">
+                          {i + 1}.
+                        </span>
                         {t.name}
-                        <span className="tabular-nums opacity-80">{formatNumber(t.count)}件</span>
+                        <span className="tabular-nums opacity-80">
+                          {formatNumber(t.count)}件
+                        </span>
                       </li>
                     ))}
                   </ol>
                 ) : (
-                  <p className="mt-1 text-xs text-slate-500">この業種の詳細事例データは現在ありません。</p>
+                  <p className="mt-1 text-xs text-slate-500">
+                    この業種の詳細事例データは現在ありません。
+                  </p>
                 )}
               </div>
 
               {insight.deathRate ? (
                 <div className="flex flex-wrap items-center gap-2 rounded-lg border border-slate-200 bg-white p-3 text-xs">
-                  <span className="font-semibold text-slate-500">{insight.industry}の死亡率</span>
+                  <span className="font-semibold text-slate-500">
+                    {insight.industry}の収録事例中の死亡事例割合
+                  </span>
                   <span
                     className={`rounded-md px-2 py-0.5 text-sm font-bold tabular-nums ${
                       insight.fatalComparison === "above"
@@ -374,31 +410,52 @@ export function AnalyticsDashboardImpl({ aggregates }: AnalyticsDashboardProps) 
                       ? "より高い＝重篤化しやすい"
                       : insight.fatalComparison === "below"
                         ? "より低い"
-                        : "と同程度"}）
+                        : "と同程度"}
+                    ）
                   </span>
                 </div>
               ) : null}
 
               {insight.topTypes.length > 0 ? (
                 <p className="rounded-lg bg-emerald-100/60 px-3 py-2 text-xs font-semibold leading-relaxed text-emerald-900">
-                  <Lightbulb className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />{insight.industry}でまず備えるべきは「{insight.topTypes[0].name}」。
+                  <Lightbulb
+                    className="mr-1 inline h-3.5 w-3.5 align-[-2px]"
+                    aria-hidden="true"
+                  />
+                  {insight.industry}でまず備えるべきは「
+                  {insight.topTypes[0].name}」。
                   KY・打合せ書ではこの型を最初の危険ポイントに。
-                  <Link href={`/accidents?industry=${encodeURIComponent(insight.industry)}`} className="ml-1 underline hover:text-emerald-700">
+                  <Link
+                    href={`/accidents?industry=${encodeURIComponent(insight.industry)}`}
+                    className="ml-1 underline hover:text-emerald-700"
+                  >
                     {insight.industry}の事故事例を見る →
                   </Link>
                 </p>
               ) : null}
 
-              <a href="#detail-charts" className="inline-block text-xs font-bold text-emerald-700 hover:underline">
+              <a
+                href="#detail-charts"
+                className="inline-block text-xs font-bold text-emerald-700 hover:underline"
+              >
                 ↓ さらに時系列・季節性・原因など多軸の詳しい分析を見る
               </a>
             </div>
           ) : (
             <div className="mt-3 rounded-lg border border-dashed border-emerald-300 bg-white/60 p-3 text-xs text-slate-600">
-              業種を選ぶと、その業種で<span className="font-semibold">多い事故の型・死亡率・順位</span>がすぐ表示されます。
+              業種を選ぶと、その業種で
+              <span className="font-semibold">
+                収録の多い事故の型・死亡事例割合・収録件数順位
+              </span>
+              がすぐ表示されます。
               {aggregates.kpi.riskiestTypes.length > 0 && (
                 <span className="mt-1 block text-[11px] text-slate-500">
-                  （全体で最も多い事故の型: {aggregates.kpi.riskiestTypes.slice(0, 3).map((t) => t.name).join("・")}）
+                  （全体で最も多い事故の型:{" "}
+                  {aggregates.kpi.riskiestTypes
+                    .slice(0, 3)
+                    .map((t) => t.name)
+                    .join("・")}
+                  ）
                 </span>
               )}
             </div>
@@ -406,7 +463,10 @@ export function AnalyticsDashboardImpl({ aggregates }: AnalyticsDashboardProps) 
         </section>
 
         {/* ===== Filter bar ===== */}
-        <section id="detail-charts" className="scroll-mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 sm:p-4">
+        <section
+          id="detail-charts"
+          className="scroll-mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 sm:p-4"
+        >
           <div className="flex flex-wrap items-end gap-3">
             <div className="flex flex-col">
               <label
@@ -418,7 +478,13 @@ export function AnalyticsDashboardImpl({ aggregates }: AnalyticsDashboardProps) 
               <select
                 id="industry-filter"
                 value={industryFilter}
-                onChange={(e) => setIndustryFilter(e.target.value)}
+                onChange={(e) =>
+                  replaceFilters({
+                    industry: e.target.value,
+                    type: typeFilter,
+                    year: yearFilter,
+                  })
+                }
                 className="min-h-[44px] rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
               >
                 <option value="">全業種</option>
@@ -439,7 +505,13 @@ export function AnalyticsDashboardImpl({ aggregates }: AnalyticsDashboardProps) 
               <select
                 id="type-filter"
                 value={typeFilter}
-                onChange={(e) => setTypeFilter(e.target.value)}
+                onChange={(e) =>
+                  replaceFilters({
+                    industry: industryFilter,
+                    type: e.target.value,
+                    year: yearFilter,
+                  })
+                }
                 className="min-h-[44px] rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
               >
                 <option value="">全種類</option>
@@ -450,21 +522,98 @@ export function AnalyticsDashboardImpl({ aggregates }: AnalyticsDashboardProps) 
                 ))}
               </select>
             </div>
-            {(industryFilter || typeFilter) && (
+            <div className="flex flex-col">
+              <label
+                htmlFor="year-filter"
+                className="mb-1 text-[11px] font-semibold text-slate-600"
+              >
+                年で絞り込み
+              </label>
+              <select
+                id="year-filter"
+                value={yearFilter}
+                onChange={(e) =>
+                  replaceFilters({
+                    industry: industryFilter,
+                    type: typeFilter,
+                    year: e.target.value,
+                  })
+                }
+                className="min-h-[44px] rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+              >
+                <option value="">全期間</option>
+                {yearOptions.map((year) => (
+                  <option key={year} value={String(year)}>
+                    {year}年
+                  </option>
+                ))}
+              </select>
+            </div>
+            {hasFilters && (
               <button
                 type="button"
-                onClick={() => {
-                  setIndustryFilter("");
-                  setTypeFilter("");
-                }}
+                onClick={resetFilters}
                 className="min-h-[44px] rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-700 hover:bg-slate-100"
               >
-                絞り込みをクリア
+                絞り込みをリセット
               </button>
             )}
             <p className="ml-auto text-[10px] text-slate-500 sm:text-[11px]">
-              ※ フィルタは「業種別」「事故種類別」ランキングの強調表示に作用します。
+              3条件はANDで適用され、下の統合データグラフ・KPI・出力へ反映されます。
             </p>
+          </div>
+          <div
+            className="mt-3 rounded-lg border border-slate-200 bg-white p-3"
+            aria-live="polite"
+            data-testid="analytics-filter-summary"
+          >
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <p className="text-sm font-bold text-slate-900">
+                対象 {formatNumber(aggregates.meta.filteredCases)}件
+                <span className="ml-2 text-xs font-normal text-slate-500">
+                  全{formatNumber(aggregates.meta.datasetCases)}件中・
+                  {periodLabel}
+                </span>
+              </p>
+              {hasFilters ? (
+                <p className="text-[11px] font-semibold text-emerald-800">
+                  {[industryFilter, typeFilter, yearFilter && `${yearFilter}年`]
+                    .filter(Boolean)
+                    .join(" × ")}
+                </p>
+              ) : (
+                <p className="text-[11px] text-slate-500">全データを表示中</p>
+              )}
+            </div>
+            <dl className="mt-2 grid grid-cols-2 gap-1.5 sm:grid-cols-5">
+              {coverageItems.map(([label, coverage]) => (
+                <div key={label} className="rounded-md bg-slate-50 px-2 py-1.5">
+                  <dt className="text-[10px] font-semibold text-slate-500">
+                    {label}欠損率
+                  </dt>
+                  <dd className="text-xs font-bold tabular-nums text-slate-800">
+                    {coverage.missingRatePercent}%
+                    <span className="ml-1 font-normal text-slate-500">
+                      ({formatNumber(coverage.missing)}/
+                      {formatNumber(aggregates.meta.filteredCases)})
+                    </span>
+                  </dd>
+                </div>
+              ))}
+            </dl>
+            {aggregates.meta.filteredCases === 0 ? (
+              <div className="mt-3 rounded-md border border-amber-300 bg-amber-50 p-3 text-xs text-amber-950">
+                この条件に一致する事例はありません。条件を1つ外すか、
+                <button
+                  type="button"
+                  onClick={resetFilters}
+                  className="ml-1 font-bold underline underline-offset-2"
+                >
+                  全条件をリセット
+                </button>
+                してください。
+              </div>
+            ) : null}
           </div>
         </section>
 
@@ -478,13 +627,15 @@ export function AnalyticsDashboardImpl({ aggregates }: AnalyticsDashboardProps) 
             <KpiCard
               label={`${aggregates.kpi.recentYearLabel}の事故件数`}
               value={`${formatNumber(aggregates.kpi.recentYearCount)} 件`}
-              note="統合データセット最新年"
+              note={yearFilter ? "選択年の対象件数" : "統合データセット最新年"}
               tone="rose"
             />
             <KpiCard
-              label="直近12ヶ月"
+              label={yearFilter ? "選択年（月情報あり）" : "直近12ヶ月"}
               value={`${formatNumber(aggregates.kpi.trailing12mCount)} 件`}
-              note="月次推移から累計"
+              note={
+                yearFilter ? "月を特定できる事例の累計" : "月次推移から累計"
+              }
               tone="amber"
             />
             <KpiCard
@@ -494,8 +645,8 @@ export function AnalyticsDashboardImpl({ aggregates }: AnalyticsDashboardProps) 
               tone="rose"
             />
             <KpiCard
-              label="収録総件数"
-              value={`${formatNumber(aggregates.meta.curatedCases + aggregates.meta.mhlwDeathsCount)} 件`}
+              label={hasFilters ? "対象総件数" : "収録総件数"}
+              value={`${formatNumber(aggregates.meta.filteredCases)} 件`}
               note={`curated ${formatNumber(aggregates.meta.curatedCases)} ＋ 厚労省 ${formatNumber(aggregates.meta.mhlwDeathsCount)}`}
               tone="emerald"
             />
@@ -503,18 +654,25 @@ export function AnalyticsDashboardImpl({ aggregates }: AnalyticsDashboardProps) 
           <CardGrid cols={2} gap="md" className="mt-3">
             <div className="rounded-lg border border-slate-200 bg-white p-3 sm:p-4">
               <div className="text-[11px] font-semibold tracking-wide text-slate-500 sm:text-xs">
-                危険業種 TOP3
+                収録件数の多い業種 TOP3
               </div>
               <ol className="mt-2 space-y-1.5">
                 {aggregates.kpi.riskiestIndustries.map((ind, idx) => (
-                  <li key={ind.name} className="flex items-center justify-between gap-2 text-sm">
+                  <li
+                    key={ind.name}
+                    className="flex items-center justify-between gap-2 text-sm"
+                  >
                     <span className="flex items-center gap-2">
                       <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-rose-100 text-[11px] font-bold text-rose-700">
                         {idx + 1}
                       </span>
-                      <span className="font-semibold text-slate-900">{ind.name}</span>
+                      <span className="font-semibold text-slate-900">
+                        {ind.name}
+                      </span>
                     </span>
-                    <span className="tabular-nums text-slate-600">{formatNumber(ind.count)} 件</span>
+                    <span className="tabular-nums text-slate-600">
+                      {formatNumber(ind.count)} 件
+                    </span>
                   </li>
                 ))}
               </ol>
@@ -525,14 +683,21 @@ export function AnalyticsDashboardImpl({ aggregates }: AnalyticsDashboardProps) 
               </div>
               <ol className="mt-2 space-y-1.5">
                 {aggregates.kpi.riskiestTypes.map((ty, idx) => (
-                  <li key={ty.name} className="flex items-center justify-between gap-2 text-sm">
+                  <li
+                    key={ty.name}
+                    className="flex items-center justify-between gap-2 text-sm"
+                  >
                     <span className="flex items-center gap-2">
                       <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-amber-100 text-[11px] font-bold text-amber-700">
                         {idx + 1}
                       </span>
-                      <span className="font-semibold text-slate-900">{ty.name}</span>
+                      <span className="font-semibold text-slate-900">
+                        {ty.name}
+                      </span>
                     </span>
-                    <span className="tabular-nums text-slate-600">{formatNumber(ty.count)} 件</span>
+                    <span className="tabular-nums text-slate-600">
+                      {formatNumber(ty.count)} 件
+                    </span>
                   </li>
                 ))}
               </ol>
@@ -549,14 +714,23 @@ export function AnalyticsDashboardImpl({ aggregates }: AnalyticsDashboardProps) 
           <CardGrid cols={2} gap="md">
             <ChartCard
               title="年別 事故件数推移"
-              description={`${aggregates.meta.yearsCovered.from}〜${aggregates.meta.yearsCovered.to}年・統合データセット`}
+              description={`${periodLabel}・現在の絞り込み対象`}
             >
-              <LineChart data={yearTrendData} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
+              <LineChart
+                data={yearTrendData}
+                margin={{ top: 8, right: 12, left: 0, bottom: 0 }}
+              >
                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                 <XAxis dataKey="year" tick={{ fontSize: 11 }} />
                 <YAxis tick={{ fontSize: 11 }} />
                 <Tooltip formatter={(v) => formatNumber(Number(v))} />
-                <Line type="monotone" dataKey="count" stroke="#dc2626" strokeWidth={2} dot={{ r: 3 }} />
+                <Line
+                  type="monotone"
+                  dataKey="count"
+                  stroke="#dc2626"
+                  strokeWidth={2}
+                  dot={{ r: 3 }}
+                />
               </LineChart>
             </ChartCard>
 
@@ -564,12 +738,25 @@ export function AnalyticsDashboardImpl({ aggregates }: AnalyticsDashboardProps) 
               title="月別 事故件数推移（直近5年）"
               description="月次の細かい変動を把握"
             >
-              <LineChart data={monthTrend} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
+              <LineChart
+                data={monthTrend}
+                margin={{ top: 8, right: 12, left: 0, bottom: 0 }}
+              >
                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                <XAxis dataKey="month" tick={{ fontSize: 9 }} interval={"preserveStartEnd"} />
+                <XAxis
+                  dataKey="month"
+                  tick={{ fontSize: 9 }}
+                  interval={"preserveStartEnd"}
+                />
                 <YAxis tick={{ fontSize: 11 }} />
                 <Tooltip formatter={(v) => formatNumber(Number(v))} />
-                <Line type="monotone" dataKey="count" stroke="#0891b2" strokeWidth={1.5} dot={false} />
+                <Line
+                  type="monotone"
+                  dataKey="count"
+                  stroke="#0891b2"
+                  strokeWidth={1.5}
+                  dot={false}
+                />
               </LineChart>
             </ChartCard>
 
@@ -622,7 +809,11 @@ export function AnalyticsDashboardImpl({ aggregates }: AnalyticsDashboardProps) 
         >
           <CardGrid cols={2} gap="md">
             <ChartCard title="業種別 事故件数 TOP12" height={360}>
-              <BarChart data={industryRankTop12} layout="vertical" margin={{ left: 24 }}>
+              <BarChart
+                data={industryRankTop12}
+                layout="vertical"
+                margin={{ left: 24 }}
+              >
                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                 <XAxis type="number" tick={{ fontSize: 11 }} />
                 <YAxis
@@ -637,11 +828,15 @@ export function AnalyticsDashboardImpl({ aggregates }: AnalyticsDashboardProps) 
             </ChartCard>
 
             <ChartCard
-              title="業種別 死亡率（全事例比）"
-              description="統合データセット内での死亡災害比率"
+              title="業種別 収録事例中の死亡事例割合"
+              description="統合データセット内の構成比です。全国の発生確率や危険度を示す値ではありません。"
               height={360}
             >
-              <BarChart data={industryDeathRate} layout="vertical" margin={{ left: 24 }}>
+              <BarChart
+                data={industryDeathRate}
+                layout="vertical"
+                margin={{ left: 24 }}
+              >
                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                 <XAxis
                   type="number"
@@ -657,7 +852,8 @@ export function AnalyticsDashboardImpl({ aggregates }: AnalyticsDashboardProps) 
                 />
                 <Tooltip
                   formatter={(value, name) => {
-                    if (name === "rate") return [`${Number(value)}%`, "死亡率"];
+                    if (name === "rate")
+                      return [`${Number(value)}%`, "収録事例中の割合"];
                     return [formatNumber(Number(value)), String(name)];
                   }}
                 />
@@ -685,7 +881,11 @@ export function AnalyticsDashboardImpl({ aggregates }: AnalyticsDashboardProps) 
         >
           <CardGrid cols={2} gap="md">
             <ChartCard title="事故種類別 件数 TOP10" height={360}>
-              <BarChart data={typeRankTop10} layout="vertical" margin={{ left: 24 }}>
+              <BarChart
+                data={typeRankTop10}
+                layout="vertical"
+                margin={{ left: 24 }}
+              >
                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                 <XAxis type="number" tick={{ fontSize: 11 }} />
                 <YAxis
@@ -733,7 +933,11 @@ export function AnalyticsDashboardImpl({ aggregates }: AnalyticsDashboardProps) 
               description="厚労省 2024年 死傷病報告（739件・都道府県情報あり）"
               height={360}
             >
-              <BarChart data={prefectureTop15} layout="vertical" margin={{ left: 24 }}>
+              <BarChart
+                data={prefectureTop15}
+                layout="vertical"
+                margin={{ left: 24 }}
+              >
                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                 <XAxis type="number" tick={{ fontSize: 11 }} />
                 <YAxis
@@ -752,7 +956,11 @@ export function AnalyticsDashboardImpl({ aggregates }: AnalyticsDashboardProps) 
               description="厚労省データの workplaceSize 区分"
               height={360}
             >
-              <BarChart data={workplaceSize} layout="vertical" margin={{ left: 24 }}>
+              <BarChart
+                data={workplaceSize}
+                layout="vertical"
+                margin={{ left: 24 }}
+              >
                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                 <XAxis type="number" tick={{ fontSize: 11 }} />
                 <YAxis
@@ -779,7 +987,7 @@ export function AnalyticsDashboardImpl({ aggregates }: AnalyticsDashboardProps) 
         {/* ===== Section 6: Comparison ===== */}
         <Section
           title="⑥ 比較分析"
-          description="年度比較・長期トレンド・参照軸との比較。"
+          description="現在の業種・事故型における年度比較と、絞り込み対象外の長期参照軸。"
           spacing="tight"
         >
           <CardGrid cols={3} gap="md">
@@ -805,23 +1013,33 @@ export function AnalyticsDashboardImpl({ aggregates }: AnalyticsDashboardProps) 
           <CardGrid cols={2} gap="md">
             <ChartCard
               title="厚労省 全件DB 年別推移（参照軸）"
-              description={`2006〜2021・504,415件の全件統計`}
+              description={`2006〜2021・504,415件の全件統計（上の絞り込み対象外）`}
             >
               <LineChart data={fullDbYearTrend}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                 <XAxis dataKey="year" tick={{ fontSize: 11 }} />
                 <YAxis tick={{ fontSize: 11 }} />
                 <Tooltip formatter={(v) => formatNumber(Number(v))} />
-                <Line type="monotone" dataKey="count" stroke="#6366f1" strokeWidth={2} dot={{ r: 3 }} />
+                <Line
+                  type="monotone"
+                  dataKey="count"
+                  stroke="#6366f1"
+                  strokeWidth={2}
+                  dot={{ r: 3 }}
+                />
               </LineChart>
             </ChartCard>
 
             <ChartCard
               title="厚労省 全件DB 業種別 TOP10（参照軸）"
-              description="長期スパンでの業種ランキング"
+              description="長期スパンでの業種ランキング（上の絞り込み対象外）"
               height={320}
             >
-              <BarChart data={fullDbIndustryTop10} layout="vertical" margin={{ left: 24 }}>
+              <BarChart
+                data={fullDbIndustryTop10}
+                layout="vertical"
+                margin={{ left: 24 }}
+              >
                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                 <XAxis type="number" tick={{ fontSize: 11 }} />
                 <YAxis
@@ -839,22 +1057,43 @@ export function AnalyticsDashboardImpl({ aggregates }: AnalyticsDashboardProps) 
 
         {/* ===== Disclaimer footer ===== */}
         <section className="rounded-md border border-slate-200 bg-slate-50 p-3 text-[11px] text-slate-600 sm:text-xs">
-          <p className="font-semibold text-slate-800"><BarChart3 className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />データソースと制限</p>
+          <p className="font-semibold text-slate-800">
+            <BarChart3
+              className="mr-1 inline h-3.5 w-3.5 align-[-2px]"
+              aria-hidden="true"
+            />
+            データソースと制限
+          </p>
           <ul className="mt-1 list-disc space-y-0.5 pl-5">
             <li>
-              <strong>統合データセット</strong>（curated {formatNumber(aggregates.meta.curatedCases)} 件 ＋ 厚労省死亡災害DB {formatNumber(aggregates.meta.mhlwDeathsCount)} 件 / 2019〜2024）を主軸に集計。
+              <strong>統合データセット</strong>（curated{" "}
+              {formatNumber(aggregates.meta.curatedCases)} 件 ＋
+              厚労省死亡災害DB {formatNumber(aggregates.meta.mhlwDeathsCount)}{" "}
+              件 / 2019〜2024）を主軸に集計。
             </li>
             <li>
-              <strong>都道府県・年齢</strong>は厚労省 2024年データ（739件）のみで取得可能なため、その範囲での集計です。
+              <strong>都道府県・年齢</strong>は厚労省
+              2024年データ（739件）のみで取得可能なため、その範囲での集計です。
             </li>
             <li>
-              <strong>曜日</strong>は curated 事例（日付詳細あり）からの集計のため、サンプル数が限定的です。
+              <strong>曜日</strong>は curated
+              事例（日付詳細あり）からの集計のため、サンプル数が限定的です。
             </li>
             <li>
-              <strong>参照軸（⑥）</strong>は厚労省全件DB（{formatNumber(aggregates.meta.mhlwFullDbCount)} 件・2006〜2021）の事前集計値を表示しています。
+              <strong>参照軸（⑥）</strong>は厚労省全件DB（
+              {formatNumber(aggregates.meta.mhlwFullDbCount)}{" "}
+              件・2006〜2021）の事前集計値を表示しています。
             </li>
             <li>
-              数値は<Link href="/accidents" className="underline">/accidents</Link>と<Link href="/stats" className="underline">/stats</Link>で表示される件数と整合しています。
+              数値は
+              <Link href="/accidents" className="underline">
+                /accidents
+              </Link>
+              と
+              <Link href="/stats" className="underline">
+                /stats
+              </Link>
+              で表示される件数と整合しています。
             </li>
           </ul>
         </section>
@@ -954,7 +1193,9 @@ function DetailsSection({
                   nameKey="name"
                   outerRadius={92}
                   label={(entry: { name?: string; count?: number }) =>
-                    entry.name && entry.count ? `${entry.name}: ${entry.count}` : ""
+                    entry.name && entry.count
+                      ? `${entry.name}: ${entry.count}`
+                      : ""
                   }
                 >
                   {severityBreakdown.map((_, idx) => (
@@ -977,10 +1218,7 @@ function CrossHeatmap({
 }: {
   matrix: { industries: string[]; types: string[]; matrix: number[][] };
 }) {
-  const max = matrix.matrix.reduce(
-    (m, row) => Math.max(m, ...row),
-    0,
-  );
+  const max = matrix.matrix.reduce((m, row) => Math.max(m, ...row), 0);
   const intensity = (v: number): string => {
     if (max === 0) return "#f8fafc";
     const ratio = v / max;
@@ -1027,7 +1265,10 @@ function CrossHeatmap({
                   <td
                     key={j}
                     className="px-2 py-1 text-center tabular-nums"
-                    style={{ backgroundColor: intensity(v), color: v / max > 0.55 ? "#fff" : "#0f172a" }}
+                    style={{
+                      backgroundColor: intensity(v),
+                      color: v / max > 0.55 ? "#fff" : "#0f172a",
+                    }}
                   >
                     {v === 0 ? "·" : formatNumber(v)}
                   </td>

@@ -1,0 +1,364 @@
+{
+  "schema_version": 1,
+  "training_id": "fall-prevention",
+  "engine": "AivisSpeech Engine",
+  "engine_version": "1.1.0-dev",
+  "endpoint_policy": "loopback-only; no API key",
+  "speaker": "リダ / Lida（感情表現モデル）",
+  "style": "元気",
+  "style_id": 1349521252,
+  "format": {
+    "codec": "mp3",
+    "sample_rate": 48000,
+    "channels": 1,
+    "bitrate": "64k"
+  },
+  "licence": {
+    "name": "リダ カスタムライセンス",
+    "credit_required": true,
+    "credit": "音声: AivisSpeech / リダ",
+    "credit_url": "https://youtube.com/channel/UC2tX473Zo09ZCnhAUNdAvjA/join"
+  },
+  "slides": [
+    {
+      "slide": 1,
+      "input_sha256": "36f1be7d445b74ee47382f02234d1022fff26d1065e9b180368afa55835046ff",
+      "narration_sha256": "560380a5c177d0d865fac5a7f51e8344ebcb41fb949febfd352765c8af71b25b",
+      "mp3_sha256": "65962ade6bf23610e5f20a49a6566ceb73354c4437ced8a6baf7718d770b0f29",
+      "duration_seconds": 67.7,
+      "parameters": {
+        "speedScale": 1.02,
+        "pitchScale": 0.0,
+        "intonationScale": 1.02,
+        "volumeScale": 0.8,
+        "prePhonemeLength": 0.08,
+        "postPhonemeLength": 0.14,
+        "outputSamplingRate": 48000,
+        "outputStereo": false
+      }
+    },
+    {
+      "slide": 2,
+      "input_sha256": "577e55c97a164386e1942190ea7d205de27efcc9137e2a8fd78d6a688d982ea0",
+      "narration_sha256": "f3a8c462f6c61916b71338121c515e846ee1d4502930d20f2e84a7879cc3fc1d",
+      "mp3_sha256": "bf834474fe2a3897979d9dc5ac0b8d1b963afeb025f554297ba5de40173910b5",
+      "duration_seconds": 74.809,
+      "parameters": {
+        "speedScale": 1.02,
+        "pitchScale": 0.0,
+        "intonationScale": 1.02,
+        "volumeScale": 0.8,
+        "prePhonemeLength": 0.08,
+        "postPhonemeLength": 0.14,
+        "outputSamplingRate": 48000,
+        "outputStereo": false
+      }
+    },
+    {
+      "slide": 3,
+      "input_sha256": "2c083e3681e3ca04f290684caec0f8dbe91ccd5968cda15537aad173558e4509",
+      "narration_sha256": "8e2a189625f81c5c4abb508722ce239275cfdd829accf65eeff1cbe55feaf22f",
+      "mp3_sha256": "15b7d952f90f47c9523f7d7247978da543b52746b1d15e57508ec785bc7de9b3",
+      "duration_seconds": 101.154,
+      "parameters": {
+        "speedScale": 1.02,
+        "pitchScale": 0.0,
+        "intonationScale": 1.02,
+        "volumeScale": 0.8,
+        "prePhonemeLength": 0.08,
+        "postPhonemeLength": 0.14,
+        "outputSamplingRate": 48000,
+        "outputStereo": false
+      }
+    },
+    {
+      "slide": 4,
+      "input_sha256": "05aaccca39ce037c0b1d8769d0c98360d4c36e9fd6eaaafec33e91054d0724e6",
+      "narration_sha256": "3c4beeee02fd73fb6d25e03d0c030bdc52ebf97d070c3302ea64c4de1613840a",
+      "mp3_sha256": "89883ac65f200502d14b1a20e21bef2c3aef8acc298d577144a49439bc6ad953",
+      "duration_seconds": 90.435,
+      "parameters": {
+        "speedScale": 1.02,
+        "pitchScale": 0.0,
+        "intonationScale": 1.02,
+        "volumeScale": 0.8,
+        "prePhonemeLength": 0.08,
+        "postPhonemeLength": 0.14,
+        "outputSamplingRate": 48000,
+        "outputStereo": false
+      }
+    },
+    {
+      "slide": 5,
+      "input_sha256": "5fdc5d6bd558746b5ec3ca6b104a5975359f8e3eb4f6e05166d21ee57b099673",
+      "narration_sha256": "904aac3ad2fefdcab0370005fb3fd07f45f87fd90a481d907ecf72e6770cae98",
+      "mp3_sha256": "11ca0d8894033b87ee56e95e04782c0969896785108f1f10236b73cc581b9e0b",
+      "duration_seconds": 98.635,
+      "parameters": {
+        "speedScale": 1.02,
+        "pitchScale": 0.0,
+        "intonationScale": 1.02,
+        "volumeScale": 0.8,
+        "prePhonemeLength": 0.08,
+        "postPhonemeLength": 0.14,
+        "outputSamplingRate": 48000,
+        "outputStereo": false
+      }
+    },
+    {
+      "slide": 6,
+      "input_sha256": "f6c23e672254fed401f0dfd72df9ca3463ce2e3140407a7f6b26144552f1f886",
+      "narration_sha256": "96c335b9fc48d9df417ac12bcd9fe172e024ea3ac366194d1ed7b8d8972a3e44",
+      "mp3_sha256": "63694cf566a65e8f58b829ac1b98233d0a39b50a0291f4bbca6b345853b5c9d2",
+      "duration_seconds": 91.777,
+      "parameters": {
+        "speedScale": 1.02,
+        "pitchScale": 0.0,
+        "intonationScale": 1.02,
+        "volumeScale": 0.8,
+        "prePhonemeLength": 0.08,
+        "postPhonemeLength": 0.14,
+        "outputSamplingRate": 48000,
+        "outputStereo": false
+      }
+    },
+    {
+      "slide": 7,
+      "input_sha256": "3d2b9717aeb32b84121bd4f877ddcfab82086c64326c1ad2b47f18d245a3b90a",
+      "narration_sha256": "003d135ac10ced6c836ce43131aa782dcd8cc99e9eb324ca05466157cafd7c1a",
+      "mp3_sha256": "867daa50aabdc6bb82c36e0762fa1e229e42fd155e6ddaf7553ee26b6b4fedc1",
+      "duration_seconds": 106.969,
+      "parameters": {
+        "speedScale": 1.02,
+        "pitchScale": 0.0,
+        "intonationScale": 1.02,
+        "volumeScale": 0.8,
+        "prePhonemeLength": 0.08,
+        "postPhonemeLength": 0.14,
+        "outputSamplingRate": 48000,
+        "outputStereo": false
+      }
+    },
+    {
+      "slide": 8,
+      "input_sha256": "226555cbab33048b207c3e371082922b90402bb567f8f8074ee32aec675a1e74",
+      "narration_sha256": "38b3033655a76b6126b2f6ba1d2c8405d9f18d2c8b5e65f49f008ea9abb6d045",
+      "mp3_sha256": "a3106dd77a998b592786d258dbdf8b45bf45f3d60e74d3543f95bbe1dadb4165",
+      "duration_seconds": 83.626,
+      "parameters": {
+        "speedScale": 1.02,
+        "pitchScale": 0.0,
+        "intonationScale": 1.02,
+        "volumeScale": 0.8,
+        "prePhonemeLength": 0.08,
+        "postPhonemeLength": 0.14,
+        "outputSamplingRate": 48000,
+        "outputStereo": false
+      }
+    },
+    {
+      "slide": 9,
+      "input_sha256": "1239b3a71e502f46191606e6218d3274da6723c6731261ee4915a240574e58bf",
+      "narration_sha256": "34b88dee85141b8f70f9ffb677520ce1ef28d4ff02d31e4e092514cd87bd14fb",
+      "mp3_sha256": "98742d4a3da023c8e9ac2d8d10677a1fa52bd0b72d24ff538a39ac960f3c4a80",
+      "duration_seconds": 102.645,
+      "parameters": {
+        "speedScale": 1.02,
+        "pitchScale": 0.0,
+        "intonationScale": 1.02,
+        "volumeScale": 0.8,
+        "prePhonemeLength": 0.08,
+        "postPhonemeLength": 0.14,
+        "outputSamplingRate": 48000,
+        "outputStereo": false
+      }
+    },
+    {
+      "slide": 10,
+      "input_sha256": "001a36d2962ac98fec2eb945c218ed31f4ec57b847852b54a937218c0ea7a42b",
+      "narration_sha256": "1917259627d37d76352f270ebfcc9c1663bf425842ec3b38a713335713b93d91",
+      "mp3_sha256": "c8ba5064526e65438606abfc09796be9a2abc8442ed355bac6aa52e1ffa792df",
+      "duration_seconds": 97.143,
+      "parameters": {
+        "speedScale": 1.02,
+        "pitchScale": 0.0,
+        "intonationScale": 1.02,
+        "volumeScale": 0.8,
+        "prePhonemeLength": 0.08,
+        "postPhonemeLength": 0.14,
+        "outputSamplingRate": 48000,
+        "outputStereo": false
+      }
+    },
+    {
+      "slide": 11,
+      "input_sha256": "4b12a58bd1fc55eec455ef1876f47809f8d7d90a290a7a36828e666b08410685",
+      "narration_sha256": "67fb78afffa9a87f74978cb07c1fae69834100b7ff9196e51b22e26cf312ab75",
+      "mp3_sha256": "40f2a1a50c231ecc741aa9a309f8a150e47186ce9da554e1ac4f8f421f11bdef",
+      "duration_seconds": 97.181,
+      "parameters": {
+        "speedScale": 1.02,
+        "pitchScale": 0.0,
+        "intonationScale": 1.02,
+        "volumeScale": 0.8,
+        "prePhonemeLength": 0.08,
+        "postPhonemeLength": 0.14,
+        "outputSamplingRate": 48000,
+        "outputStereo": false
+      }
+    },
+    {
+      "slide": 12,
+      "input_sha256": "97516f73050617f663af7a6f086c3d3554c9f1a2c4ba3ad01ab14460be38d830",
+      "narration_sha256": "2aaa5c420e9db55b1d6676a3fa776b406b07892ba9d20ff004404049710ddece",
+      "mp3_sha256": "c65c3cedd16f333fdaab44df5e46a3cf18104b6375015d88ea0bdf8934aa7724",
+      "duration_seconds": 128.881,
+      "parameters": {
+        "speedScale": 1.02,
+        "pitchScale": 0.0,
+        "intonationScale": 1.02,
+        "volumeScale": 0.8,
+        "prePhonemeLength": 0.08,
+        "postPhonemeLength": 0.14,
+        "outputSamplingRate": 48000,
+        "outputStereo": false
+      }
+    },
+    {
+      "slide": 13,
+      "input_sha256": "1a5d78da4a8a8ac7ce87d010a70a497aa57e445d7d982ff5a9e28d2d4b6eeda1",
+      "narration_sha256": "39f2f3bd5cd3a2e1559f19e78bf727977fc9ef95e396a5367a8ca26d9992621c",
+      "mp3_sha256": "29d92d71ce82731a35b8b4663c6c626df3a8d91ee46ca9ecc6ed3d31fdb885a0",
+      "duration_seconds": 118.802,
+      "parameters": {
+        "speedScale": 1.02,
+        "pitchScale": 0.0,
+        "intonationScale": 1.02,
+        "volumeScale": 0.8,
+        "prePhonemeLength": 0.08,
+        "postPhonemeLength": 0.14,
+        "outputSamplingRate": 48000,
+        "outputStereo": false
+      }
+    },
+    {
+      "slide": 14,
+      "input_sha256": "2883c0c7cd7912c63bac0406a8f8696a6c4e87b4db46721d84d23274a0ca2b05",
+      "narration_sha256": "0f1c2918aaed42e1ad88aa3408834d5d3efa70f08994af15fc762647ca758c4c",
+      "mp3_sha256": "c46f6f246128b90f4770a702778ad15eccf73f8e3b327dcc9021869f2139121a",
+      "duration_seconds": 109.935,
+      "parameters": {
+        "speedScale": 1.02,
+        "pitchScale": 0.0,
+        "intonationScale": 1.02,
+        "volumeScale": 0.8,
+        "prePhonemeLength": 0.08,
+        "postPhonemeLength": 0.14,
+        "outputSamplingRate": 48000,
+        "outputStereo": false
+      }
+    },
+    {
+      "slide": 15,
+      "input_sha256": "7bddf46bfc6b5d691ddf1ffda701a30f3e3d87e4f147fe21d9647c1c90d533f3",
+      "narration_sha256": "cbdc0a237765c94cb96da02e5dd6bd5a9d520379cf3a47378a8d2342908c02ef",
+      "mp3_sha256": "a11cb6da0c300a1d4f4801b620c3753ab5022fe90890eda169d0185b3a339185",
+      "duration_seconds": 104.538,
+      "parameters": {
+        "speedScale": 1.02,
+        "pitchScale": 0.0,
+        "intonationScale": 1.02,
+        "volumeScale": 0.8,
+        "prePhonemeLength": 0.08,
+        "postPhonemeLength": 0.14,
+        "outputSamplingRate": 48000,
+        "outputStereo": false
+      }
+    },
+    {
+      "slide": 16,
+      "input_sha256": "523754ac2d7555ee8f0eafe63990d5d65d0224cd600cbcaaaba620d8c626e19e",
+      "narration_sha256": "6c1ba591bc92373f3a41c6b5752ec382d7982d6a72aeccf58bcf0c61847b86e6",
+      "mp3_sha256": "a070d5eb4ec265687d09ff301f446e7df5e22fca231674f8c8c8c0da420df022",
+      "duration_seconds": 95.191,
+      "parameters": {
+        "speedScale": 1.02,
+        "pitchScale": 0.0,
+        "intonationScale": 1.02,
+        "volumeScale": 0.8,
+        "prePhonemeLength": 0.08,
+        "postPhonemeLength": 0.14,
+        "outputSamplingRate": 48000,
+        "outputStereo": false
+      }
+    },
+    {
+      "slide": 17,
+      "input_sha256": "c23bf6a5ff07c4fbe4eca1f145fe17abfc4b5bca53265a865b51ad9c0e1b085d",
+      "narration_sha256": "f09ae358caa2685759d7526388d25d8818077f0eaf02aeb0ddb5b523d337494b",
+      "mp3_sha256": "c11fdb4ffdab940108fcb523a6e96087b47dc999506c2d74cbb178345d9ab242",
+      "duration_seconds": 99.333,
+      "parameters": {
+        "speedScale": 1.02,
+        "pitchScale": 0.0,
+        "intonationScale": 1.02,
+        "volumeScale": 0.8,
+        "prePhonemeLength": 0.08,
+        "postPhonemeLength": 0.14,
+        "outputSamplingRate": 48000,
+        "outputStereo": false
+      }
+    },
+    {
+      "slide": 18,
+      "input_sha256": "9e340122eef252d455aff4c9b6ce60f16b52f11f84405ecb13685e5e97009e44",
+      "narration_sha256": "bee93cf693eaa383d4736fac4720c31d8174623b90a6b2a9978d0761ed1aea01",
+      "mp3_sha256": "d26ed478e17f7c3d504d6ece9b9fb8cadacc38fd5431fd142f44b10198ccdb36",
+      "duration_seconds": 94.398,
+      "parameters": {
+        "speedScale": 1.02,
+        "pitchScale": 0.0,
+        "intonationScale": 1.02,
+        "volumeScale": 0.8,
+        "prePhonemeLength": 0.08,
+        "postPhonemeLength": 0.14,
+        "outputSamplingRate": 48000,
+        "outputStereo": false
+      }
+    },
+    {
+      "slide": 19,
+      "input_sha256": "f5ffa1dba52b5cdc15d282fbeb912e7902d4dcdc8f83f14b22cb2e8ee6b1e3d2",
+      "narration_sha256": "1e949187f22c0b4bbe4c4700383f199af90cf31e3d2b8430bfeff3ad64e938e8",
+      "mp3_sha256": "67807439b30673b5c066781488d80ad06a7891337b4480afcc74cd709f1cd2d5",
+      "duration_seconds": 114.613,
+      "parameters": {
+        "speedScale": 1.02,
+        "pitchScale": 0.0,
+        "intonationScale": 1.02,
+        "volumeScale": 0.8,
+        "prePhonemeLength": 0.08,
+        "postPhonemeLength": 0.14,
+        "outputSamplingRate": 48000,
+        "outputStereo": false
+      }
+    },
+    {
+      "slide": 20,
+      "input_sha256": "b26befff889fb59b926e8792e19361806e8c7685cc1a266d51dd5bfcc43d3161",
+      "narration_sha256": "f615cd0f48491a2d9c487375cb8f7cb145371ab13a111f6f2e50e4613e5392c7",
+      "mp3_sha256": "896a265cbb24b3d8dd21430939e69028899a80b4c2e25b1cebcc3d210bdb1f6e",
+      "duration_seconds": 89.809,
+      "parameters": {
+        "speedScale": 1.02,
+        "pitchScale": 0.0,
+        "intonationScale": 1.02,
+        "volumeScale": 0.8,
+        "prePhonemeLength": 0.08,
+        "postPhonemeLength": 0.14,
+        "outputSamplingRate": 48000,
+        "outputStereo": false
+      }
+    }
+  ]
+}

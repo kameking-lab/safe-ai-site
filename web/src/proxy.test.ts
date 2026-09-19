@@ -16,6 +16,40 @@ afterEach(() => {
 });
 
 describe("Proxy CSP boundary", () => {
+  it("serves the reviewed library boundary while keeping the old pilot private", () => {
+    const library = proxy(new NextRequest("https://example.test/safety-images/library/originals/helmet-required.png"));
+    expect(library.status).toBe(200);
+    const pilot = proxy(new NextRequest("https://example.test/safety-images/pilot/helmet-required.webp"));
+    expect(pilot.status).toBe(404);
+    expect(pilot.headers.get("cache-control")).toContain("no-store");
+    expect(pilot.headers.get("x-robots-tag")).toBe("noindex, nofollow, noarchive");
+  });
+
+  it("redirects equivalent legacy details, returns 410 for retired ones, and noindexes query variants", () => {
+    const redirect = proxy(new NextRequest("https://example.test/materials/safety-images/full-harness-required?text=secret"));
+    expect(redirect.status).toBe(301);
+    expect(redirect.headers.get("location")).toBe("https://example.test/materials/safety-images/full-body-harness-required");
+
+    const suspendedLoad = proxy(new NextRequest("https://example.test/materials/safety-images/overhead-load-caution"));
+    expect(suspendedLoad.status).toBe(301);
+    expect(suspendedLoad.headers.get("location")).toBe("https://example.test/materials/safety-images/no-under-suspended-load");
+
+    const gone = proxy(new NextRequest("https://example.test/materials/safety-images/photo-record"));
+    expect(gone.status).toBe(410);
+    expect(gone.headers.get("x-robots-tag")).toContain("noindex");
+
+    for (const legacySlug of [
+      "hearing-protection-required",
+      "asbestos-work-area",
+      "pedestrian-crossing",
+    ]) {
+      expect(proxy(new NextRequest(`https://example.test/materials/safety-images/${legacySlug}`)).status).toBe(410);
+    }
+
+    const query = proxy(new NextRequest("https://example.test/materials/safety-images/helmet-required?lang=vi&text=secret"));
+    expect(query.headers.get("x-robots-tag")).toBe("noindex, follow, noarchive");
+  });
+
   it("production defaults to compatibility enforcement until framework nonce coverage is verified", () => {
     vi.stubEnv("NODE_ENV", "production");
     vi.stubEnv("VERCEL_ENV", "production");
@@ -28,9 +62,7 @@ describe("Proxy CSP boundary", () => {
     expect(scriptDirective(firstPolicy)).toContain("'unsafe-inline'");
     expect(scriptDirective(firstPolicy)).not.toContain("'strict-dynamic'");
     expect(firstPolicy).toBe(secondPolicy);
-    expect(
-      first.headers.get("content-security-policy-report-only"),
-    ).toBeNull();
+    expect(first.headers.get("content-security-policy-report-only")).toBeNull();
     expect(
       second.headers.get("content-security-policy-report-only"),
     ).toBeNull();
@@ -180,7 +212,9 @@ describe("Proxy CSP boundary", () => {
     vi.stubEnv("VERCEL_ENV", "preview");
 
     for (const pathname of ["/", "/chatbot", "/law-search", "/unknown-path"]) {
-      const response = proxy(new NextRequest(`https://example.test${pathname}`));
+      const response = proxy(
+        new NextRequest(`https://example.test${pathname}`),
+      );
       expect(response.headers.get("x-safe-ai-preview-mode")).toBe("dry-run");
       expect(response.headers.get("x-robots-tag")).toBe(
         "noindex, nofollow, noarchive",
@@ -231,7 +265,9 @@ describe("Proxy CSP boundary", () => {
       "/e-learning/safety/occupational-safety-consultant",
       "/e-learning/safety/occupational-health-consultant",
     ]) {
-      const response = proxy(new NextRequest(`https://example.test${pathname}`));
+      const response = proxy(
+        new NextRequest(`https://example.test${pathname}`),
+      );
       expect(response.headers.get("cache-control")).toBe(
         "public, max-age=0, must-revalidate",
       );

@@ -7,6 +7,8 @@ import {
 } from "@/lib/affiliate-url";
 import { trackEvent } from "@/components/Analytics";
 import { PUBLIC_SAFETY_GOODS_CATEGORIES } from "@/data/public-safety-goods-categories";
+import { GoodsChatbot } from "@/components/goods-chatbot";
+import { FeatureMascotCompanion } from "@/components/feature-mascot-companion";
 
 const OFFICIAL_SELECTION_SOURCES = [
   {
@@ -52,6 +54,15 @@ export function SafetyGoodsPanel() {
           作業条件と一次資料を確認した後に、販売サイトで候補を探すための入口です。
           特定商品、型式、規格適合、性能、価格、現場への適合性は当サイトでは確認していません。
         </p>
+        <FeatureMascotCompanion
+          variant="ppe-check"
+          eyebrow="装備点検チワワ"
+          title="買う前に、作業条件から合うカテゴリを絞ろう。"
+          message="かわいく案内しますが、最後は規格・説明書・装着性まできちんと確認します。"
+          tone="cream"
+          compact
+          className="mt-4 max-w-3xl"
+        />
       </header>
 
       <section
@@ -79,6 +90,8 @@ export function SafetyGoodsPanel() {
           </div>
         </div>
       </section>
+
+      <GoodsChatbot />
 
       <section aria-labelledby="official-selection-sources">
         <h2
@@ -110,6 +123,24 @@ export function SafetyGoodsPanel() {
         </p>
       </section>
 
+      <section aria-labelledby="goods-quick-selector" className="rounded-3xl bg-slate-950 p-5 text-white sm:p-7">
+        <p className="text-xs font-black tracking-[.14em] text-emerald-300">30-SECOND SELECTOR</p>
+        <h2 id="goods-quick-selector" className="mt-2 text-2xl font-black">危険からカテゴリを絞る</h2>
+        <p className="mt-2 text-sm font-semibold leading-6 text-slate-300">該当する危険を選ぶと、関連カテゴリへ移動します。最終選定は作業条件と公式資料で確認してください。</p>
+        <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            ["高所から落ちる", "#goods-fall-protection", "墜落制止用器具へ"],
+            ["有害物を吸う", "#goods-respiratory", "呼吸用保護具へ"],
+            ["薬液が触れる", "#goods-chemical-gloves", "化学防護へ"],
+            ["酸欠・ガスが心配", "#goods-gas-detectors", "検知器へ"],
+          ].map(([risk, href, label]) => (
+            <a key={risk} href={href} className="flex min-h-14 items-center justify-between gap-2 rounded-xl border border-white/20 bg-white/10 px-4 text-sm font-black hover:bg-white/15">
+              <span>{risk}</span><span className="text-xs text-emerald-200">{label}</span>
+            </a>
+          ))}
+        </div>
+      </section>
+
       <section aria-labelledby="goods-categories-title">
         <h2
           id="goods-categories-title"
@@ -125,6 +156,7 @@ export function SafetyGoodsPanel() {
           {PUBLIC_SAFETY_GOODS_CATEGORIES.map((category) => (
             <li
               key={category.id}
+              id={`goods-${category.id}`}
               className="rounded-2xl border border-slate-300 bg-white p-5 shadow-sm"
             >
               <div className="flex items-center gap-3">
@@ -136,7 +168,7 @@ export function SafetyGoodsPanel() {
                 </h3>
               </div>
               <p className="mt-3 text-xs leading-6 text-slate-600">
-                検索結果の型式、適用範囲、規格表示、使用期限、点検方法を商品ごとに確認してください。
+                {category.selectionPrompt}。検索結果では型式、適用範囲、規格表示、使用期限、点検方法を商品ごとに確認してください。
               </p>
               <div className="mt-4 grid grid-cols-2 gap-2">
                 <a
