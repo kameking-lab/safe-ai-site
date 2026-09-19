@@ -57,6 +57,7 @@ export type SafetyImageTheme = {
   tags: string[];
   uses: SafetyImageUse[];
   orientation: SafetyImageArtworkOrientation;
+  preferredTextPosition?: "top" | "center" | "bottom";
   recommended: boolean;
   multilingual: true;
   pngAvailable: true;
@@ -66,6 +67,19 @@ export type SafetyImageTheme = {
   detailPath: string;
   rights: "portal-owned-commercial-editable";
 };
+
+const FIRST_RELEASE_TOP_TEXT_SLUGS = new Set([
+  "no-under-suspended-load",
+  "equipment-swing-zone",
+  "floor-opening-hazard",
+  "no-vehicle-entry",
+  "operation-prohibited",
+  "helmet-required",
+  "safety-glasses-required",
+  "earplugs-required",
+  "dust-mask-required",
+  "full-body-harness-required",
+]);
 
 type MarketThemeRow = {
   id: string;
@@ -206,6 +220,9 @@ export const SAFETY_IMAGE_THEMES: readonly SafetyImageTheme[] = rows.map((row) =
     ],
     uses: usesForCategory(row.marketCategory),
     orientation: row.orientation,
+    preferredTextPosition: FIRST_RELEASE_TOP_TEXT_SLUGS.has(row.slug)
+      ? "top"
+      : undefined,
     recommended: row.priority === "high",
     multilingual: true,
     pngAvailable: true,

@@ -49,7 +49,9 @@ function limitEditableText(value: string): string {
 }
 
 export function SafetyImageEditor({ theme }: { theme: SafetyImageTheme }) {
-  const defaultPosition: TextPosition = theme.orientation === "portrait" ? "top" : "bottom";
+  const defaultPosition: TextPosition =
+    theme.preferredTextPosition ??
+    (theme.orientation === "portrait" ? "top" : "bottom");
   const recommendedOutputSize = defaultOutputSize(theme.recommendedSize, theme.orientation);
   const [language, setLanguage] = useState<SafetyImageLanguage>("ja");
   const [text, setText] = useState(theme.texts.ja);

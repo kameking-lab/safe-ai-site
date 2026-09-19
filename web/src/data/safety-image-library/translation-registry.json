@@ -2216,28 +2216,28 @@
     {
       "id": "S032",
       "slug": "floor-opening-hazard",
-      "titleJa": "開口部注意",
+      "titleJa": "開口部 立入禁止",
       "multilingualPriority": "high",
       "editableNumber": false,
       "translations": {
         "ja": {
-          "text": "開口部注意",
+          "text": "開口部 立入禁止",
           "status": "translated-backchecked-not-native",
           "officialConfirmed": false,
           "checkedAt": "2026-08-28",
-          "backTranslationJa": "開口部注意",
+          "backTranslationJa": "開口部 立入禁止",
           "sourceIds": [
             "MHLW-TOKYO-KENSAIBO-SIGN-EXAMPLES",
             "MHLW-VISIBLE-SAFETY-GUIDANCE"
           ],
-          "translationMethod": "source-market-wording"
+          "translationMethod": "human-drafted-and-sense-backchecked"
         },
         "en": {
-          "text": "Caution: floor opening",
+          "text": "No entry: floor opening",
           "status": "translated-backchecked-not-native",
           "officialConfirmed": false,
           "checkedAt": "2026-08-28",
-          "backTranslationJa": "開口部注意",
+          "backTranslationJa": "開口部 立入禁止",
           "sourceIds": [
             "MHLW-TOKYO-KENSAIBO-SIGN-EXAMPLES",
             "MHLW-VISIBLE-SAFETY-GUIDANCE"
@@ -2245,11 +2245,11 @@
           "translationMethod": "human-drafted-and-sense-backchecked"
         },
         "vi": {
-          "text": "Chú ý lỗ mở sàn",
+          "text": "Cấm vào khu vực lỗ mở sàn",
           "status": "translated-backchecked-not-native",
           "officialConfirmed": false,
           "checkedAt": "2026-08-28",
-          "backTranslationJa": "開口部注意",
+          "backTranslationJa": "開口部 立入禁止",
           "sourceIds": [
             "MHLW-TOKYO-KENSAIBO-SIGN-EXAMPLES",
             "MHLW-VISIBLE-SAFETY-GUIDANCE"
@@ -2257,11 +2257,11 @@
           "translationMethod": "human-drafted-and-sense-backchecked"
         },
         "zh-CN": {
-          "text": "当心洞口",
+          "text": "洞口区域 禁止进入",
           "status": "translated-backchecked-not-native",
           "officialConfirmed": false,
           "checkedAt": "2026-08-28",
-          "backTranslationJa": "開口部注意",
+          "backTranslationJa": "開口部 立入禁止",
           "sourceIds": [
             "MHLW-TOKYO-KENSAIBO-SIGN-EXAMPLES",
             "MHLW-VISIBLE-SAFETY-GUIDANCE"
@@ -2269,11 +2269,11 @@
           "translationMethod": "human-drafted-and-sense-backchecked"
         },
         "id": {
-          "text": "Awas bukaan lantai",
+          "text": "Dilarang masuk area bukaan lantai",
           "status": "translated-backchecked-not-native",
           "officialConfirmed": false,
           "checkedAt": "2026-08-28",
-          "backTranslationJa": "開口部注意",
+          "backTranslationJa": "開口部 立入禁止",
           "sourceIds": [
             "MHLW-TOKYO-KENSAIBO-SIGN-EXAMPLES",
             "MHLW-VISIBLE-SAFETY-GUIDANCE"

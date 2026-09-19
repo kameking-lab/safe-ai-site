@@ -119,6 +119,7 @@ function defaults(options: {
   mode: SafetyImageDownloadMode;
   text: string;
   orientation: SafetyImageOrientation;
+  preferredTextPosition?: SafetyImageTextPosition;
   brand: boolean;
 }): SafetyImageRenderSettings {
   return {
@@ -128,7 +129,9 @@ function defaults(options: {
     text: options.text,
     texts: { [options.language]: options.text },
     fontSize: "standard",
-    position: options.orientation === "portrait" ? "top" : "bottom",
+    position:
+      options.preferredTextPosition ??
+      (options.orientation === "portrait" ? "top" : "bottom"),
     textColor: "#082f49",
     band: true,
     bandColor: "#ffffff",
@@ -352,6 +355,7 @@ export async function GET(request: Request, context: RouteContext) {
       mode,
       text: theme.texts[language],
       orientation,
+      preferredTextPosition: theme.preferredTextPosition,
       brand: search.get("brand") !== "none",
     }),
     cacheControl: "public, max-age=86400, stale-while-revalidate=604800",
@@ -426,7 +430,14 @@ export async function POST(request: Request, context: RouteContext) {
   const orientation = renderOrientation(size);
   const settings = parseSettings(
     body.settings,
-    defaults({ language: "ja", mode: "edited", text: theme.texts.ja, orientation, brand: true }),
+    defaults({
+      language: "ja",
+      mode: "edited",
+      text: theme.texts.ja,
+      orientation,
+      preferredTextPosition: theme.preferredTextPosition,
+      brand: true,
+    }),
   );
   if (!settings) return errorResponse("Invalid or unsafe edit settings");
   return renderResponse({
