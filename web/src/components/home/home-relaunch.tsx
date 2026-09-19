@@ -264,6 +264,7 @@ export function HomeRelaunch() {
                   alt="吹き出しと一緒に相談を案内する安全AIポータルのチワワ"
                   fill
                   priority
+                  fetchPriority="high"
                   sizes="(max-width: 639px) calc(100vw - 3rem), (max-width: 1023px) 36rem, 34vw"
                   className="object-contain p-2 sm:p-4"
                 />

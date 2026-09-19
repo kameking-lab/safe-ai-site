@@ -56,6 +56,7 @@ describe("業務自動化相談のクロール可能な入口", () => {
 
     const relaunch = source("src/components/home/home-relaunch.tsx");
     expect(relaunch).toContain("/mascot/mascot-chat-talk-v4.webp");
+    expect(relaunch).toContain('fetchPriority="high"');
     expect(relaunch).toContain("仕事から選ぶ、9つの主機能");
     expect(relaunch).toContain('href: "/education/hazard-slides"');
     expect(relaunch).toContain('href: "/training/visual-ky"');
