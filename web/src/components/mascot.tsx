@@ -39,7 +39,7 @@ const VARIANT_MAP = {
   /** 六法全書を読む: 法令ナビ・法改正用 */
   "law-reading": { src: "/mascot/mascot-law-reading.webp", width: 241, height: 300 },
   /** 吹き出しで会話: チャットボット用 */
-  "chat-talk": { src: "/mascot/mascot-chat-talk.webp", width: 320, height: 310 },
+  "chat-talk": { src: "/mascot/mascot-chat-talk-v4.webp", width: 640, height: 640 },
   /** 虫眼鏡で調査: 事故DB用 */
   detective: { src: "/mascot/mascot-detective.webp", width: 271, height: 320 },
   /** 双眼鏡: 検索用 */

@@ -6,6 +6,21 @@ function read(relativePath: string): string {
   return fs.readFileSync(path.join(process.cwd(), relativePath), "utf8");
 }
 
+describe("AdSense privacy disclosure", () => {
+  it("discloses third-party advertising, consent and distinct opt-out controls", () => {
+    const policy = read("src/app/(main)/privacy/page.tsx");
+    expect(policy).toContain("Google AdSense");
+    expect(policy).toContain("第三者配信事業者・広告ネットワーク");
+    expect(policy).toContain("本サービスや他のサイトへの過去のアクセス情報");
+    expect(policy).toContain("許可した後にのみ広告スクリプトを読み込みます");
+    expect(policy).toContain("同意を撤回できます");
+    expect(policy).toContain('href="https://adssettings.google.com/"');
+    expect(policy).toContain('href="https://www.aboutads.info/choices/"');
+    expect(policy).toContain('href="https://policies.google.com/technologies/partner-sites?hl=ja"');
+    expect(policy).not.toContain("本サービス自体は広告トラッキング目的の Cookie を設定していません");
+  });
+});
+
 describe("high-risk input disclosures", () => {
   it("keeps annual-plan free text in a same-tab handoff with short input prevention", () => {
     const form = read("src/components/safety-plan/plan-generator-form.tsx");
