@@ -1751,7 +1751,7 @@ describe("安衛則97条の労働者死傷病報告期限を回答する", () =>
     const sources = expandVerifiedLegalEvidenceArticles(query, []);
     const answer = buildServiceFirstLegalAnswer({ query, articles: sources });
 
-    expect(answer).toContain("公式本文を2026-08-02確認");
+    expect(answer).toContain("公式原文を確認");
     expect(answer).not.toContain("昭和47年9月30日施行");
   });
 });

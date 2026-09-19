@@ -35,8 +35,8 @@ describe("HomeLatestAccidents", () => {
     const { container } = render(<HomeLatestAccidents latestNews={live} />);
 
     expect(screen.getByText(/令和８年業種別局別死亡災害発生状況/)).toBeTruthy();
-    expect(screen.getByText("199件")).toBeTruthy();
-    expect(screen.getByText("43,835件")).toBeTruthy();
+    expect(screen.getByText("301件")).toBeTruthy();
+    expect(screen.getByText("67,945件")).toBeTruthy();
     expect(
       screen.getByRole("link", { name: "工事現場で作業員が転落し死亡" }),
     ).toBeTruthy();
@@ -64,7 +64,7 @@ describe("HomeLatestAccidents", () => {
       />,
     );
 
-    expect(screen.getByText("199件")).toBeTruthy();
+    expect(screen.getByText("301件")).toBeTruthy();
     expect(screen.getByRole("status").textContent).toContain(
       "取得不能を「事故なし」へ変換していません",
     );

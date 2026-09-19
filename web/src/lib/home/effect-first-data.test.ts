@@ -12,9 +12,9 @@ describe("effect-first home verified data", () => {
     expect(preview.featured.synthetic).toBe(false);
     expect(preview.featured.status).toContain("official");
     expect(preview.featured.period.normalize("NFKC")).toContain("令和8年");
-    expect(preview.featured.checkedAt).toBe("2026-07-31");
-    expect(preview.featured.deaths).toBe(199);
-    expect(preview.featured.injuries).toBe(43_835);
+    expect(preview.featured.checkedAt).toBe("2026-09-15");
+    expect(preview.featured.deaths).toBe(301);
+    expect(preview.featured.injuries).toBe(67_945);
     expect(preview.featured.sourceUrl).toMatch(/^https:\/\/anzeninfo\.mhlw\.go\.jp\//);
   });
 

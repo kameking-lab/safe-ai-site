@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAtJst": "2026-08-10T02:26:15+09:00",
+  "generatedAtJst": "2026-09-20T00:55:00+09:00",
   "algorithm": "sha256(sorted lines: <canonical-file-sha256><two spaces><repo-relative-path><LF>); CRLF in .ts/.json/.jsonl is normalized to LF; all other files are raw",
   "excludes": [
     "test files",
@@ -24,8 +24,8 @@
         "web/src/data/law-navi"
       ],
       "fileCount": 70,
-      "bytes": 7886030,
-      "manifestSha256": "4667bceb4623e496724a28a701c344d081da2c6109791c14bb31eeff0b9419bc"
+      "bytes": 7886242,
+      "manifestSha256": "f527c79257e4ea5048f256ccbe53e3b3eca69b6ab97a7b3920baffef14a66a38"
     },
     {
       "id": "verified-notices-and-circulars",
