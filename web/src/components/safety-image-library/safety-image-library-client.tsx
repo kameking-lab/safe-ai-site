@@ -18,9 +18,9 @@ import {
   type SafetyImageArtworkOrientation,
   type SafetyImageCategory,
   type SafetyImageLanguage,
-  type SafetyImageTheme,
+  type SafetyImageLibraryCardTheme,
   type SafetyImageUse,
-} from "@/data/safety-image-library";
+} from "@/data/safety-image-library/client-metadata";
 
 type SortMode = "recommended" | "order" | "new";
 type QuickFilter =
@@ -39,7 +39,7 @@ export function SafetyImageLibraryClient({
   themes,
   initialCategory = "all",
 }: {
-  themes: readonly SafetyImageTheme[];
+  themes: readonly SafetyImageLibraryCardTheme[];
   initialCategory?: SafetyImageCategory | "all";
 }) {
   const [query, setQuery] = useState("");
@@ -223,7 +223,7 @@ export function SafetyImageLibraryClient({
 
       {visible.length ? (
         <div className="mt-5 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-          {visible.map((theme, index) => (
+          {visible.map((theme) => (
             <article key={theme.slug} className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg dark:border-slate-800 dark:bg-slate-950">
               <Link href={theme.detailPath} className="block focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-emerald-300">
                 <div className={`relative overflow-hidden bg-slate-100 ${theme.orientation === "portrait" ? "aspect-[4/5]" : theme.orientation === "square" ? "aspect-square" : "aspect-[3/2]"}`}>
@@ -231,8 +231,7 @@ export function SafetyImageLibraryClient({
                     src={theme.previewPath}
                     alt={`${theme.title}を表す、文字なしの安全AIポータル作成イラスト`}
                     fill
-                    priority={index < 4}
-                    loading={index < 4 ? "eager" : "lazy"}
+                    loading="lazy"
                     sizes="(max-width: 640px) 94vw, (max-width: 1280px) 46vw, 24vw"
                     className="object-contain transition duration-300 group-hover:scale-[1.02]"
                   />

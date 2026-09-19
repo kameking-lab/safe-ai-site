@@ -2,30 +2,35 @@ import marketRegistry from "./market-themes.json" with { type: "json" };
 import textRegistry from "./texts.json" with { type: "json" };
 import translationRegistry from "./translation-registry.json" with { type: "json" };
 import {
-  SAFETY_SIGN_MARKET_CATEGORIES,
   type SafetySignFormat,
-  type SafetySignMarketCategory,
 } from "./market-definitions.ts";
+import {
+  SAFETY_IMAGE_CATEGORIES,
+  SAFETY_IMAGE_LANGUAGES,
+  SAFETY_IMAGE_LANGUAGE_LABELS,
+  type SafetyImageArtworkOrientation,
+  type SafetyImageCategory,
+  type SafetyImageLanguage,
+  type SafetyImageLibraryCardTheme,
+  type SafetyImageOrientation,
+  type SafetyImageUse,
+} from "./client-metadata";
+
+export {
+  SAFETY_IMAGE_CATEGORIES,
+  SAFETY_IMAGE_LANGUAGES,
+  SAFETY_IMAGE_LANGUAGE_LABELS,
+};
+export type {
+  SafetyImageArtworkOrientation,
+  SafetyImageCategory,
+  SafetyImageLanguage,
+  SafetyImageOrientation,
+  SafetyImageUse,
+};
 
 export const SAFETY_IMAGE_LIBRARY_PATH = "/materials/safety-images";
 export const SAFETY_IMAGE_LIBRARY_RIGHTS_PATH = "/materials/safety-images/terms";
-
-export const SAFETY_IMAGE_LANGUAGES = ["ja", "en", "vi", "zh-CN", "id"] as const;
-export type SafetyImageLanguage = (typeof SAFETY_IMAGE_LANGUAGES)[number];
-
-export const SAFETY_IMAGE_LANGUAGE_LABELS: Record<SafetyImageLanguage, string> = {
-  ja: "日本語",
-  en: "英語",
-  vi: "ベトナム語",
-  "zh-CN": "中国語（簡体）",
-  id: "インドネシア語",
-};
-
-export const SAFETY_IMAGE_CATEGORIES = SAFETY_SIGN_MARKET_CATEGORIES;
-export type SafetyImageCategory = SafetySignMarketCategory;
-export type SafetyImageOrientation = "portrait" | "landscape";
-export type SafetyImageArtworkOrientation = SafetyImageOrientation | "square";
-export type SafetyImageUse = "掲示" | "報告書" | "施工計画" | "教育" | "朝礼";
 
 export type SafetyImageNumericTemplate = {
   label: string;
@@ -237,6 +242,27 @@ export const SAFETY_IMAGE_THEMES: readonly SafetyImageTheme[] = rows.map((row) =
 export const SAFETY_IMAGE_THEME_BY_SLUG = new Map(
   SAFETY_IMAGE_THEMES.map((theme) => [theme.slug, theme]),
 );
+
+export const SAFETY_IMAGE_LIBRARY_CARD_THEMES: readonly SafetyImageLibraryCardTheme[] =
+  SAFETY_IMAGE_THEMES.map((theme) => ({
+    order: theme.order,
+    slug: theme.slug,
+    title: theme.title,
+    category: theme.category,
+    categoryLabel: theme.categoryLabel,
+    signFormat: theme.signFormat,
+    recommendedSize: theme.recommendedSize,
+    commonWording: theme.commonWording,
+    multilingualPriority: theme.multilingualPriority,
+    editableNumber: theme.editableNumber,
+    texts: theme.texts,
+    tags: theme.tags,
+    uses: theme.uses,
+    orientation: theme.orientation,
+    recommended: theme.recommended,
+    previewPath: theme.previewPath,
+    detailPath: theme.detailPath,
+  }));
 
 export function getSafetyImageCategory(category: string) {
   return SAFETY_IMAGE_CATEGORIES.find((item) => item.id === category);

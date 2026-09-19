@@ -14,8 +14,8 @@ import {
 import {
   SAFETY_IMAGE_LANGUAGE_LABELS,
   type SafetyImageLanguage,
-  type SafetyImageTheme,
-} from "@/data/safety-image-library";
+} from "@/data/safety-image-library/client-metadata";
+import type { SafetyImageTheme } from "@/data/safety-image-library";
 import {
   defaultOutputSize,
   outputSizePixels,

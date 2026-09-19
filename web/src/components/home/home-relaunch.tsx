@@ -263,7 +263,7 @@ export function HomeRelaunch() {
                   alt="吹き出しと一緒に相談を案内する安全AIポータルのチワワ"
                   fill
                   priority
-                  sizes="(max-width: 639px) calc(100vw - 3rem), (max-width: 1023px) 36rem, 34vw"
+                  sizes="(max-width: 639px) 11rem, (max-width: 1359px) 36rem, 34vw"
                   className="object-contain p-2 sm:p-4"
                 />
                 <div className="absolute inset-x-3 bottom-3 hidden rounded-2xl border border-white/60 bg-white/92 p-4 text-slate-950 shadow-lg backdrop-blur sm:block">
@@ -343,11 +343,14 @@ export function HomeRelaunch() {
                     >
                       <PawPrint className="h-9 w-9" />
                     </span>
-                    <span
-                      role="img"
-                      aria-label={service.mascotAlt}
-                      className="absolute -bottom-6 right-0 h-44 w-48 bg-contain bg-bottom bg-no-repeat drop-shadow-[0_12px_14px_rgba(25,45,38,.2)] motion-safe:transition-transform motion-safe:duration-300 motion-safe:group-hover:-translate-y-1 motion-safe:group-hover:rotate-1 motion-safe:group-hover:scale-[1.04]"
-                      style={{ backgroundImage: `url(${service.mascot})` }}
+                    <Image
+                      src={service.mascot}
+                      alt={service.mascotAlt}
+                      width={192}
+                      height={176}
+                      loading="lazy"
+                      sizes="12rem"
+                      className="absolute -bottom-6 right-0 h-44 w-48 object-contain object-bottom drop-shadow-[0_12px_14px_rgba(25,45,38,.2)] motion-safe:transition-transform motion-safe:duration-300 motion-safe:group-hover:-translate-y-1 motion-safe:group-hover:rotate-1 motion-safe:group-hover:scale-[1.04]"
                     />
                     <span
                       className={`absolute bottom-3 right-3 z-10 flex h-10 w-10 items-center justify-center rounded-full border-2 border-white text-white shadow-md ${service.accent}`}

@@ -10,6 +10,7 @@ import {
   SAFETY_IMAGE_CATEGORIES,
   SAFETY_IMAGE_LIBRARY_PATH,
   SAFETY_IMAGE_LIBRARY_RIGHTS_PATH,
+  SAFETY_IMAGE_LIBRARY_CARD_THEMES,
   SAFETY_IMAGE_THEMES,
 } from "@/data/safety-image-library";
 import { withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
@@ -77,7 +78,7 @@ export default function SafetyImageLibraryPage() {
             {featured.map((theme, index) => (
               <Link key={theme.slug} href={theme.detailPath} className={`relative overflow-hidden rounded-2xl border-4 border-white bg-white shadow-xl focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-300 ${index === 1 ? "-translate-y-4" : ""}`}>
                 <div className={theme.orientation === "square" ? "relative aspect-square" : theme.orientation === "portrait" ? "relative aspect-[4/5]" : "relative aspect-[3/2]"}>
-                  <Image src={theme.previewPath} alt={`${theme.title}の安全看板イラスト`} fill priority sizes="(max-width: 1024px) 30vw, 14vw" className="object-contain" />
+                  <Image src={theme.previewPath} alt={`${theme.title}の安全看板イラスト`} fill priority={index === 1} sizes="(max-width: 1024px) 30vw, 14vw" className="object-contain" />
                 </div>
               </Link>
             ))}
@@ -106,7 +107,7 @@ export default function SafetyImageLibraryPage() {
         </section>
 
         <div id="library" className="mt-8 scroll-mt-24">
-          <SafetyImageLibraryClient themes={SAFETY_IMAGE_THEMES} />
+          <SafetyImageLibraryClient themes={SAFETY_IMAGE_LIBRARY_CARD_THEMES} />
         </div>
 
         <section className="mt-10 grid gap-5 rounded-3xl border border-emerald-200 bg-emerald-50 p-5 sm:grid-cols-[1fr_auto] sm:items-center sm:p-7 dark:border-emerald-900 dark:bg-emerald-950">
