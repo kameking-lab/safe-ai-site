@@ -58,7 +58,7 @@ describe("業務自動化相談のクロール可能な入口", () => {
     expect(relaunch).toContain("/mascot/mascot-chat-talk-v4.webp");
     expect(relaunch).toContain('fetchPriority="high"');
     expect(relaunch).toContain('decoding="sync"');
-    expect(relaunch).toContain("aspect-[2/1]");
+    expect(relaunch).toContain('height: "clamp(10rem, 40vw, 34rem)"');
     expect(relaunch).toContain("仕事から選ぶ、9つの主機能");
     expect(relaunch).toContain('href: "/education/hazard-slides"');
     expect(relaunch).toContain('href: "/training/visual-ky"');

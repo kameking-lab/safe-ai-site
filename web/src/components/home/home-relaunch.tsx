@@ -258,7 +258,10 @@ export function HomeRelaunch() {
               aria-hidden="true"
             />
             <div className="relative overflow-hidden rounded-[2.2rem] border border-white/20 bg-[#102b24] p-2 shadow-2xl shadow-black/40">
-              <div className="relative aspect-[2/1] overflow-hidden rounded-[1.8rem] bg-[#d9efe6] sm:aspect-[4/5]">
+              <div
+                className="relative overflow-hidden rounded-[1.8rem] bg-[#d9efe6]"
+                style={{ height: "clamp(10rem, 40vw, 34rem)" }}
+              >
                 <Image
                   src="/mascot/mascot-chat-talk-v4.webp"
                   alt="吹き出しと一緒に相談を案内する安全AIポータルのチワワ"
@@ -267,11 +270,15 @@ export function HomeRelaunch() {
                   priority
                   fetchPriority="high"
                   decoding="sync"
-                  sizes="(max-width: 639px) 104px, (max-width: 1023px) 36rem, 34vw"
-                  className="absolute left-3 top-1/2 h-[104px] w-[104px] -translate-y-1/2 object-contain p-1 sm:inset-0 sm:h-full sm:w-full sm:translate-y-0 sm:p-4"
+                  sizes="(max-width: 639px) 112px, (max-width: 1023px) 24vw, 16rem"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 object-contain p-1 sm:p-4"
+                  style={{
+                    height: "clamp(7rem, 24vw, 16rem)",
+                    width: "clamp(7rem, 24vw, 16rem)",
+                  }}
                 />
-                <div className="absolute inset-y-3 right-3 left-[34%] flex flex-col justify-center rounded-2xl border border-white/60 bg-white/92 p-3 text-slate-950 shadow-lg sm:inset-x-3 sm:top-auto sm:bottom-3 sm:block sm:p-4 sm:backdrop-blur">
-                  <p className="text-[10px] font-black tracking-[.08em] text-emerald-800 sm:text-xs sm:tracking-[.12em]">
+                <div className="absolute top-3 right-3 bottom-3 flex w-1/2 flex-col justify-center rounded-2xl border border-white/60 bg-white/92 p-3 text-slate-950 shadow-lg sm:p-4">
+                  <p className="text-xs font-black tracking-[.08em] text-emerald-800">
                     YOUR SAFETY PARTNER
                   </p>
                   <p className="mt-1 text-base font-black sm:text-xl">
@@ -350,7 +357,7 @@ export function HomeRelaunch() {
                     <span
                       role="img"
                       aria-label={service.mascotAlt}
-                      className="absolute -bottom-6 right-0 h-44 w-48 bg-contain bg-bottom bg-no-repeat drop-shadow-[0_12px_14px_rgba(25,45,38,.2)] motion-safe:transition-transform motion-safe:duration-300 motion-safe:group-hover:-translate-y-1 motion-safe:group-hover:rotate-1 motion-safe:group-hover:scale-[1.04]"
+                      className="absolute -bottom-6 right-0 h-44 w-48 bg-contain bg-bottom bg-no-repeat motion-safe:transition-transform motion-safe:duration-300 motion-safe:group-hover:-translate-y-1 motion-safe:group-hover:rotate-1 motion-safe:group-hover:scale-[1.04]"
                       style={{ backgroundImage: `url(${service.mascot})` }}
                     />
                     <span
