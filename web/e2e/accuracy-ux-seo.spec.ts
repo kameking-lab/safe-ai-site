@@ -70,7 +70,7 @@ test.afterAll(() => {
   );
 });
 
-test("ホームは6幅で熱中症を最上部にし、主要タスクへ進める", async ({ page }) => {
+test("ホームは6幅でチワワの案内と9つの主機能から主要タスクへ進める", async ({ page }) => {
   collectErrors(page);
   for (const width of [320, 360, 390, 768, 1024, 1440]) {
     await page.setViewportSize({
@@ -82,13 +82,14 @@ test("ホームは6幅で熱中症を最上部にし、主要タスクへ進め�
     await expect(
       page.getByRole("heading", {
         level: 1,
-        name: "今日の熱中症リスク",
+        name: /小さな気づきが、\s*大きな事故を防ぐ。/u,
       }),
     ).toBeVisible();
-    await expect(page.locator('[data-home-section="heat"]')).toBeVisible();
-    await expect(page.locator("[data-home-heat-slide-deck]")).toBeAttached();
-    await expect(page.locator("[data-home-chemical-quick-search]")).toBeAttached();
-    await expect(page.locator("[data-home-chat-quick-ask]")).toBeAttached();
+    const quickNav = page.getByRole("navigation", { name: "すぐに使う主要機能" });
+    await expect(quickNav.getByRole("link", { name: "安衛法AIを開く" })).toHaveAttribute("href", "/chatbot");
+    await expect(quickNav.getByRole("link", { name: "化学物質RAを開く" })).toHaveAttribute("href", "/chemical-ra");
+    await expect(quickNav.getByRole("link", { name: "安全技術を探す" })).toHaveAttribute("href", "/resources/netis-safety");
+    await expect(page.locator('[data-home-section="heat"]')).toHaveCount(0);
     await expect(page.getByRole("tab")).toHaveCount(0);
     await expect(
       page.getByRole("link", { name: "関連事故を見る" }),
@@ -100,8 +101,8 @@ test("ホームは6幅で熱中症を最上部にし、主要タスクへ進め�
       page.getByRole("link", { name: "法改正一覧を見る" }),
     ).toHaveAttribute("href", "/laws");
     await expect(
-      page.locator('[data-home-section="core-features"] > div > ul > li'),
-    ).toHaveCount(7);
+      page.getByRole("region", { name: "仕事から選ぶ、9つの主機能" }).getByRole("listitem"),
+    ).toHaveCount(9);
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth - window.innerWidth,
@@ -117,7 +118,7 @@ test("ホームは6幅で熱中症を最上部にし、主要タスクへ進め�
   }
 });
 
-test("モバイル下部ナビは季節の5操作をキーボードで移動できる", async ({
+test("モバイル下部ナビは主要な5操作をキーボードで移動できる", async ({
   page,
 }) => {
   collectErrors(page);
@@ -126,12 +127,14 @@ test("モバイル下部ナビは季節の5操作をキーボードで移動で�
   const mobileNav = page.getByRole("navigation", {
     name: "モバイル ボトムナビゲーション",
   });
-  for (const label of ["ホーム", "熱中症", "法令AI", "学ぶ", "メニュー"]) {
+  await expect(mobileNav.getByRole("link")).toHaveCount(5);
+  for (const label of ["ホーム", "化学RA", "法令AI", "学ぶ", "メニュー"]) {
     await expect(mobileNav.getByRole("link", { name: label })).toBeVisible();
   }
-  const heat = mobileNav.getByRole("link", { name: "熱中症" });
-  await heat.focus();
-  await expect(heat).toBeFocused();
+  const chemical = mobileNav.getByRole("link", { name: "化学RA" });
+  await expect(chemical).toHaveAttribute("href", "/chemical-ra");
+  await chemical.focus();
+  await expect(chemical).toBeFocused();
   await page.keyboard.press("Tab");
   await expect(mobileNav.getByRole("link", { name: "法令AI" })).toBeFocused();
   await page.screenshot({

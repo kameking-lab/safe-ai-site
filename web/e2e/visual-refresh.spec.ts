@@ -1,16 +1,41 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
 const VISUAL_ROUTES = [
   "/",
-  "/heat-illness-prevention/slides",
-  "/services/automation",
-  "/chemical-ra",
-  "/ky/paper",
   "/chatbot",
-  "/law-search",
-  "/accidents",
-  "/safety-ai",
+  "/chemical-ra",
+  "/accident-news",
+  "/laws",
+  "/contact/automation-email",
+  "/goods",
+  "/training/safety-seminars",
+  "/materials/safety-images",
+  "/accidents-analytics",
 ] as const;
+
+const HOME_SERVICE_HREFS = [
+  "/chatbot",
+  "/chemical-ra",
+  "/accident-news",
+  "/laws",
+  "/contact/automation-email",
+  "/goods",
+  "/training/safety-seminars",
+  "/materials/safety-images",
+  "/accidents-analytics",
+] as const;
+
+function routePrimaryAction(page: Page, route: string) {
+  if (route === "/") {
+    return page
+      .getByRole("navigation", { name: "すぐに使う主要機能" })
+      .getByRole("link", { name: /安衛法AIを開く/u });
+  }
+  if (route === "/contact/automation-email") {
+    return page.getByRole("button", { name: "メールで相談する" });
+  }
+  return page.locator("main [data-primary-action], main a[href], main button").first();
+}
 
 test("1280pxを400%拡大した相当幅（320 CSS px）でも主要画面がリフローする", async ({
   page,
@@ -30,21 +55,62 @@ test("1280pxを400%拡大した相当幅（320 CSS px）でも主要画面がリ
   }
 });
 
+test("ホームはチワワ主導の9主機能導線で、熱中症キャンペーンを表示しない", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+
+  await expect(
+    page.getByRole("heading", {
+      level: 1,
+      name: /小さな気づきが、\s*大きな事故を防ぐ。/u,
+    }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("img", {
+      name: /案内する安全AIポータルのチワワ/u,
+    }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("navigation", { name: "すぐに使う主要機能" }),
+  ).toBeVisible();
+
+  const serviceLinks = page.locator(
+    'section[aria-labelledby="main-services-title"] ul > li > a',
+  );
+  await expect(serviceLinks).toHaveCount(HOME_SERVICE_HREFS.length);
+  await expect
+    .poll(async () =>
+      serviceLinks.evaluateAll((links) =>
+        links.map((link) => link.getAttribute("href")),
+      ),
+    )
+    .toEqual([...HOME_SERVICE_HREFS]);
+  await expect(page.locator('[data-home-section="heat"]')).toHaveCount(0);
+  await expect(page.locator("[data-home-heat-slide-deck]")).toHaveCount(0);
+  await expect(
+    page.locator('main a[href="/heat-illness-prevention/slides"]'),
+  ).toHaveCount(0);
+});
+
 test("追加画像には代替テキストがあり、主要画像の表示領域が確保される", async ({
   page,
 }) => {
-  for (const route of [
-    "/",
-    "/heat-illness-prevention/slides",
-  ]) {
+  for (const { route, imageSelector } of [
+    {
+      route: "/",
+      imageSelector: 'img[alt*="安全AIポータルのチワワ"]',
+    },
+    {
+      route: "/materials/safety-images",
+      imageSelector: 'img[alt*="安全看板イラスト"]',
+    },
+  ] as const) {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(route, { waitUntil: "domcontentloaded" });
-    const imageSelector =
-      route === "/"
-        ? 'img[src*="visual-ky"]'
-        : 'img[src*="visual-refresh"]';
     await expect(page.locator(imageSelector).first(), route).toBeVisible();
-    await expect(page.locator(`${imageSelector}:not([alt])`), route).toHaveCount(0);
+    await expect(page.locator("main img:not([alt])"), route).toHaveCount(0);
     const imageMetrics = await page
       .locator(imageSelector)
       .first()
@@ -62,7 +128,9 @@ test("追加画像には代替テキストがあり、主要画像の表示領�
   }
 
   await page.goto("/services/automation", { waitUntil: "domcontentloaded" });
-  await expect(page.locator("[data-automation-service] img")).toHaveCount(0);
+  const automationMascot = page.locator("[data-automation-service] img");
+  await expect(automationMascot).toHaveCount(1);
+  await expect(automationMascot).toBeVisible();
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   await expect(page.getByText(/税込33,000円から/)).toBeVisible();
   await expect(page.locator("#overview [data-primary-action]")).toBeVisible();
@@ -82,66 +150,38 @@ test("forced colorsでも見出し・主操作・現在値が残る", async ({
 
   for (const route of [
     "/",
-    "/heat-illness-prevention/slides",
-    "/services/automation",
+    "/contact/automation-email",
+    "/materials/safety-images",
   ]) {
     await page.goto(route, { waitUntil: "domcontentloaded" });
     await expect(page.locator("main h1").first(), route).toBeVisible();
-    await expect(page.locator("main [data-primary-action]").first(), route).toBeVisible();
+    await expect(routePrimaryAction(page, route), route).toBeVisible();
   }
 
   await page.goto("/", { waitUntil: "domcontentloaded" });
-  const heatSection = page.locator('[data-home-section="heat"]');
-  await expect(heatSection).toBeVisible();
-  const heatStatus = heatSection.locator("[data-heat-status]").first();
-  await expect(heatStatus).toBeVisible();
-  const heatWarnings = heatSection.locator("[data-warning-card]");
-  const warningCount = await heatWarnings.count();
-  expect(warningCount).toBeLessThanOrEqual(1);
-  if (warningCount === 0) {
-    await expect(heatStatus).toHaveAttribute(
-      "data-heat-status",
-      /^(?:national-live|ready)$/u,
-    );
-  } else {
-    const warning = heatWarnings.first();
-    await expect(warning).toBeVisible();
-    await expect(warning).toHaveAttribute(
-      "data-warning-trigger",
-      /^upstream-(?:unavailable|stale)$/u,
-    );
-    await expect(warning).toContainText(/公式情報を確認/u);
-    await expect(
-      heatSection.locator('a[href^="https://www.wbgt.env.go.jp/"]').first(),
-    ).toBeVisible();
-  }
+  await expect(
+    page.getByRole("heading", { name: "仕事から選ぶ、9つの主機能" }),
+  ).toBeVisible();
+  await expect(
+    page.locator('section[aria-labelledby="main-services-title"] ul > li > a'),
+  ).toHaveCount(9);
+  await expect(page.locator('[data-home-section="heat"]')).toHaveCount(0);
   await context.close();
 });
 
-test("熱中症スライドはキーボードでめくれ、Escapeで元の操作へ戻る", async ({
+test("ホームの主要導線はキーボードで開ける", async ({
   page,
 }) => {
-  await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto("/heat-illness-prevention/slides", {
-    waitUntil: "networkidle",
-  });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
 
-  const trigger = page.getByRole("button", { name: "投影モード" });
-  await trigger.focus();
-  await page.keyboard.press("Enter");
-
-  const dialog = page.getByRole("dialog", {
-    name: "熱中症ブリーフィング投影モード",
-  });
-  await expect(dialog).toBeVisible();
-  await expect(dialog.getByText("1 / 15", { exact: true })).toBeVisible();
-  await expect(dialog.getByRole("button", { name: "閉じる" })).toBeFocused();
-
-  await page.keyboard.press("ArrowRight");
-  await expect(dialog.getByText("2 / 15", { exact: true })).toBeVisible();
-  await page.keyboard.press("Escape");
-  await expect(dialog).toBeHidden();
-  await expect(trigger).toBeFocused();
+  const primary = page
+    .getByRole("navigation", { name: "すぐに使う主要機能" })
+    .getByRole("link", { name: /安衛法AIを開く/u });
+  await primary.focus();
+  await expect(primary).toBeFocused();
+  await Promise.all([page.waitForURL("**/chatbot"), page.keyboard.press("Enter")]);
+  await expect(page.locator("main h1").first()).toBeVisible();
 });
 
 test("モバイルメニューは標準detailsで開き、Escapeと表示支援を維持する", async ({

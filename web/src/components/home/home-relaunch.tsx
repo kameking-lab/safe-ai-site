@@ -251,7 +251,7 @@ export function HomeRelaunch() {
             </ul>
           </div>
 
-          <div className="relative mx-auto w-full max-w-xl">
+          <div className="relative mx-auto w-full max-w-[11rem] sm:max-w-xl">
             <div
               className="absolute -inset-5 rounded-[2.5rem] bg-gradient-to-br from-emerald-300/20 via-cyan-300/5 to-transparent blur-2xl"
               aria-hidden="true"
@@ -266,7 +266,7 @@ export function HomeRelaunch() {
                   sizes="(max-width: 639px) calc(100vw - 3rem), (max-width: 1023px) 36rem, 34vw"
                   className="object-contain p-2 sm:p-4"
                 />
-                <div className="absolute inset-x-3 bottom-3 rounded-2xl border border-white/60 bg-white/92 p-4 text-slate-950 shadow-lg backdrop-blur">
+                <div className="absolute inset-x-3 bottom-3 hidden rounded-2xl border border-white/60 bg-white/92 p-4 text-slate-950 shadow-lg backdrop-blur sm:block">
                   <p className="text-xs font-black tracking-[.12em] text-emerald-800">
                     YOUR SAFETY PARTNER
                   </p>

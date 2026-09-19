@@ -20,12 +20,12 @@ const CALCULATOR_SLUGS = [
 ] as const;
 
 test.describe("AI実務研修と建設計算ツール", () => {
-  test("AI一覧は公開1件、Coming Soon 24件で空詳細リンクを作らない", async ({ page }) => {
+  test("AI一覧は全20テーマ（公開1件、Coming Soon 19件）で空詳細リンクを作らない", async ({ page }) => {
     const response = await page.goto(AI_HUB);
     expect(response?.status()).toBe(200);
     await expect(page.getByRole("heading", { level: 1, name: "AI実務研修" })).toBeVisible();
     await expect(page.locator('[data-ai-seminar-status="published"]')).toHaveCount(1);
-    await expect(page.locator('[data-ai-seminar-status="coming-soon"]')).toHaveCount(24);
+    await expect(page.locator('[data-ai-seminar-status="coming-soon"]')).toHaveCount(19);
     await expect(page.locator('[data-ai-seminar-status="coming-soon"] a')).toHaveCount(0);
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
       "href",

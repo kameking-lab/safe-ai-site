@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
 const DESKTOP_NAV = [
   ["今日の安全", "/risk"],
@@ -20,54 +20,58 @@ const DESKTOP_NAV = [
   ["全機能一覧", "/features"],
 ] as const;
 
-const MOBILE_NAV = ["ホーム", "熱中症", "法令AI", "学ぶ", "メニュー"] as const;
+const MOBILE_NAV = [
+  ["ホーム", "/"],
+  ["化学RA", "/chemical-ra"],
+  ["法令AI", "/chatbot"],
+  ["学ぶ", "/education-certification"],
+  ["メニュー", "/features"],
+] as const;
 
-test("ホームは熱中症の現在値、直接入力、事故、法改正、学習、実務、相談の順で使える", async ({
-  page,
-}) => {
+const MAIN_SERVICES = [
+  ["安衛法AI", "/chatbot"],
+  ["化学物質RA", "/chemical-ra"],
+  ["労災事故速報", "/accident-news"],
+  ["法改正速報", "/laws"],
+  ["自動化相談", "/contact/automation-email"],
+  ["安全グッズ", "/goods"],
+  ["自由に使えるスライド", "/training/safety-seminars"],
+  ["自由に使える画像集", "/materials/safety-images"],
+  ["事故統計分析", "/accidents-analytics"],
+] as const;
+
+async function expectMainServices(page: Page) {
+  const services = page.getByRole("region", { name: "仕事から選ぶ、9つの主機能" });
+  const cards = services.getByRole("listitem");
+  await expect(cards).toHaveCount(MAIN_SERVICES.length);
+  for (const [title, href] of MAIN_SERVICES) {
+    const card = cards.filter({ has: page.getByRole("heading", { level: 3, name: title, exact: true }) });
+    await expect(card).toHaveCount(1);
+    await expect(card.getByRole("link")).toHaveAttribute("href", href);
+    await expect(card.getByRole("img")).toHaveAccessibleName(/チワワ/);
+  }
+}
+
+test("ホームはチワワの案内、9つの主機能、更新情報、カテゴリの順で使える", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.setExtraHTTPHeaders({
-    "x-vercel-ip-country": "JP",
-    "x-vercel-ip-country-region": "13",
-  });
   await page.goto("/", { waitUntil: "domcontentloaded" });
-
   await expect(
     page.getByRole("heading", {
       level: 1,
-      name: "今日の熱中症リスク",
+      name: /小さな気づきが、\s*大きな事故を防ぐ。/u,
     }),
   ).toBeVisible();
-  expect(
-    await page.locator("[data-home-section]").evaluateAll((sections) =>
-      sections.map((section) => section.getAttribute("data-home-section")),
-    ),
-  ).toEqual([
-    "heat",
-    "chat",
-    "updates",
-    "chemical",
-    "learning",
-    "core-features",
-    "safety-labs",
-    "automation-consult",
+  await expect(page.locator("main h1")).toHaveCount(1);
+  await expectMainServices(page);
+  expect(await page.locator("main section[aria-labelledby]").evaluateAll((sections) =>
+    sections.map((section) => section.getAttribute("aria-labelledby")),
+  )).toEqual([
+    "home-relaunch-title", "main-services-title", "home-updates-title",
+    "home-automation-samples", "home-feature-directory", "home-automation-heading",
   ]);
-  await expect(page.locator('[data-home-section="quality"]')).toHaveCount(0);
-  const heatState = await page
-    .locator('[data-home-section="heat"] [data-heat-status]')
-    .getAttribute("data-heat-status");
-  await expect(page.locator('[data-home-section] [data-warning-card]')).toHaveCount(
-    heatState === "degraded" || heatState === "unavailable" ? 1 : 0,
-  );
-  const heatText = await page.locator('[data-home-section="heat"]').innerText();
-  expect(heatText).not.toContain("化学物質を検索");
-  expect(heatText).not.toContain("安衛法AIへの質問");
-  await expect(page.locator('[data-home-section="chat"] textarea')).toBeAttached();
-  await expect(page.locator('[data-home-section="chemical"] input')).toBeAttached();
-
-  const nav = page.getByRole("navigation", {
-    name: "サイト全体ナビゲーション",
-  });
+  await expect(page.locator('[data-home-section="heat"]')).toHaveCount(0);
+  await expect(page.locator('main [data-warning-card], main [role="alert"]')).toHaveCount(0);
+  const nav = page.getByRole("navigation", { name: "サイト全体ナビゲーション", exact: true });
   await expect(nav).toBeVisible();
   await expect(nav.getByRole("link")).toHaveCount(DESKTOP_NAV.length);
   for (const [label, href] of DESKTOP_NAV) {
@@ -76,217 +80,110 @@ test("ホームは熱中症の現在値、直接入力、事故、法改正、�
     await expect(link).toHaveAttribute("href", href);
   }
   await expect(page.locator("[data-primary-navigation]")).toHaveCount(0);
-
-  await expect(
-    page
-      .locator('[data-home-section="heat"] details[data-home-area-picker]')
-      .locator('a[href="/risk?area=tokyo-shinjuku"]'),
-  ).toHaveAttribute("href", "/risk?area=tokyo-shinjuku");
-  await expect(
-    page.locator('[data-home-update="accidents"]').getByRole("link", {
-      name: "関連事故を見る",
-    }),
-  ).toHaveAttribute("href", "/accident-news");
-  await expect(
-    page.locator('[data-home-update="law-reform"]').getByRole("link", {
-      name: "法改正一覧を見る",
-    }),
-  ).toHaveAttribute("href", "/laws");
-  await expect(
-    page.locator('[data-home-section="learning"]').getByRole("link", {
-      name: "問題に挑戦",
-    }),
-  ).toHaveAttribute("href", /\/training\/visual-ky\//);
-  await expect(
-    page.locator('[data-home-section="core-features"]').getByRole("link", {
-      name: /KY用紙/,
-    }),
-  ).toHaveAttribute("href", "/ky/paper");
+  await expect(page.locator('[data-home-update="accidents"]').getByRole("link", { name: "関連事故を見る" })).toHaveAttribute("href", "/accident-news");
+  await expect(page.locator('[data-home-update="law-reform"]').getByRole("link", { name: "法改正一覧を見る" })).toHaveAttribute("href", "/laws");
+  await expect(page.getByRole("region", { name: "カテゴリから探す" }).getByRole("link", { name: "KY用紙", exact: true })).toHaveAttribute("href", "/ky/paper");
 });
 
-test("モバイルは結果と直接入力を保ち、Safety Labs・全機能を正規URLで区別する", async ({
-  page,
-}) => {
+test("モバイルは9機能とSafety Labsを区別し、重複のないメニューをキーボードで閉じられる", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/", { waitUntil: "domcontentloaded" });
-
-  await expect(page.locator('[data-home-section="heat"]')).toBeVisible();
+  await expectMainServices(page);
   await expect(page.locator('[data-home-section="updates"] article')).toHaveCount(2);
-  await expect(page.locator('[data-home-update="accidents"]')).toHaveCount(1);
-  await expect(page.locator('[data-home-update="law-reform"]')).toHaveCount(1);
-  await expect(page.locator('[data-home-section="chat"] textarea')).toHaveCount(1);
-  await expect(page.locator('[data-home-section="chemical"] input')).toHaveCount(1);
-  await expect(
-    page.locator('[data-home-section="core-features"] > div > ul > li'),
-  ).toHaveCount(7);
-  await expect(
-    page.locator(
-      '[data-feature-tier="3"][data-feature-role="automation-sample"]',
-    ),
-  ).toHaveCount(3);
-  await expect(
-    page.getByRole("link", { name: "サンプルをすべて見る" }),
-  ).toHaveAttribute("href", "/automation-examples");
-  await expect(page.getByRole("link", { name: "すべての機能" })).toHaveAttribute(
-    "href",
-    "/features",
-  );
-
-  const mobileNav = page.getByRole("navigation", {
-    name: "モバイル ボトムナビゲーション",
-  });
-  await expect(mobileNav.getByRole("link")).toHaveCount(5);
-  for (const label of MOBILE_NAV) {
-    await expect(mobileNav.getByRole("link", { name: label })).toHaveCount(1);
+  await expect(page.locator('[data-feature-tier="3"][data-feature-role="automation-sample"]')).toHaveCount(3);
+  await expect(page.getByRole("link", { name: "サンプルをすべて見る" })).toHaveAttribute("href", "/automation-examples");
+  await expect(page.getByRole("link", { name: "すべての機能", exact: true })).toHaveAttribute("href", "/features");
+  const mobileNav = page.getByRole("navigation", { name: "モバイル ボトムナビゲーション" });
+  await expect(mobileNav.getByRole("link")).toHaveCount(MOBILE_NAV.length);
+  for (const [label, href] of MOBILE_NAV) {
+    const link = mobileNav.getByRole("link", { name: label, exact: true });
+    await expect(link).toBeVisible();
+    await expect(link).toHaveAttribute("href", href);
   }
-
-  const heat = page.locator('[data-home-section="heat"]');
-  const chat = page.locator('[data-home-section="chat"]');
-  const chemical = page.locator('[data-home-section="chemical"]');
-  const coreFeatures = page.locator(
-    'section[aria-labelledby="home-core-features"]',
-  );
-  const [heatBox, chatBox, chemicalBox, coreFeaturesBox] = await Promise.all([
-    heat.boundingBox(),
-    chat.boundingBox(),
-    chemical.boundingBox(),
-    coreFeatures.boundingBox(),
-  ]);
-  expect(heatBox?.y ?? Number.POSITIVE_INFINITY).toBeLessThan(chatBox?.y ?? 0);
-  expect(chatBox?.y ?? Number.POSITIVE_INFINITY).toBeLessThan(
-    chemicalBox?.y ?? 0,
-  );
-  expect(chemicalBox?.y ?? Number.POSITIVE_INFINITY).toBeLessThan(
-    coreFeaturesBox?.y ?? 0,
-  );
-  await expect(
-    heat.getByText("地域・観測情報", { exact: true }),
-  ).toBeVisible();
-
+  await expect(mobileNav.getByRole("link", { name: "熱中症", exact: true })).toHaveCount(0);
+  const sections = [
+    page.getByRole("region", {
+      name: /小さな気づきが、\s*大きな事故を防ぐ。/u,
+    }),
+    page.getByRole("region", { name: "仕事から選ぶ、9つの主機能" }),
+    page.locator('[data-home-section="updates"]'),
+    page.getByRole("region", { name: "カテゴリから探す" }),
+  ];
+  const boxes = await Promise.all(sections.map((section) => section.boundingBox()));
+  for (let index = 0; index < boxes.length - 1; index += 1) {
+    expect(boxes[index]).not.toBeNull();
+    expect(boxes[index + 1]).not.toBeNull();
+    expect(boxes[index]!.y + boxes[index]!.height).toBeLessThanOrEqual(boxes[index + 1]!.y);
+  }
   const menuButton = page.getByRole("button", { name: "メニューを開閉" });
   await menuButton.click();
-  const menu = page.getByRole("region", {
-    name: "モバイルサイトメニュー。Escキーで閉じます",
-  });
+  const menu = page.getByRole("region", { name: "モバイルサイトメニュー。Escキーで閉じます" });
   await expect(menu).toBeVisible();
   const menuLinkMetrics = await menu.getByRole("link").evaluateAll((links) =>
-    links.map((link) => ({
-      href: link.getAttribute("href"),
-      height: link.getBoundingClientRect().height,
-    })),
+    links.map((link) => ({ href: link.getAttribute("href"), height: link.getBoundingClientRect().height })),
   );
   expect(menuLinkMetrics.every(({ height }) => height >= 44)).toBe(true);
-  const mobilePrimaryHrefs = await mobileNav
-    .getByRole("link")
-    .evaluateAll((links) => links.map((link) => link.getAttribute("href")));
-  expect(
-    menuLinkMetrics
-      .map(({ href }) => href)
-      .filter((href) => mobilePrimaryHrefs.includes(href)),
-  ).toEqual([]);
+  const mobilePrimaryHrefs = await mobileNav.getByRole("link").evaluateAll((links) =>
+    links.map((link) => link.getAttribute("href")),
+  );
+  expect(menuLinkMetrics.map(({ href }) => href).filter((href) => mobilePrimaryHrefs.includes(href))).toEqual([]);
   const menuHrefs = menuLinkMetrics.map(({ href }) => href);
-  expect(menuLinkMetrics).toHaveLength(13);
-  expect([...mobilePrimaryHrefs, ...menuHrefs]).toEqual(
-    expect.arrayContaining([
-      "/risk",
-      "/heat-illness-prevention",
-      "/tools/construction-calculators",
-    ]),
-  );
-  expect(new Set(menuLinkMetrics.map(({ href }) => href)).size).toBe(
-    menuLinkMetrics.length,
-  );
+  // Header search and safety-image shortcut have their own mobile entrypoints.
+  const expectedMenuHrefs = [
+    "/notifications",
+    "/account",
+    ...DESKTOP_NAV.map(([, href]) => href).filter((href) =>
+      !mobilePrimaryHrefs.includes(href) && href !== "/search" && href !== "/materials/safety-images",
+    ),
+  ];
+  expect(menuHrefs).toEqual(expectedMenuHrefs);
+  expect(new Set(menuHrefs).size).toBe(menuHrefs.length);
   await page.keyboard.press("Escape");
   await expect(menu).toBeHidden();
   await expect(menuButton).toBeFocused();
 });
 
-test("JavaScript無効でも実情報・通常リンク・Safety LabsをSSR HTMLに保持する", async ({
-  browser,
-}) => {
-  const context = await browser.newContext({
-    javaScriptEnabled: false,
-    viewport: { width: 390, height: 844 },
-    locale: "ja-JP",
-  });
-  const page = await context.newPage();
-  const response = await page.goto("/", { waitUntil: "domcontentloaded" });
-  expect(response?.status()).toBe(200);
-
-  await expect(
-    page
-      .getByRole("navigation", { name: "JavaScriptなしで利用できる機能" })
-      .getByRole("link", { name: "WBGT・現場リスク" }),
-  ).toHaveAttribute("href", "/risk");
-  await expect(
-    page
-      .getByRole("navigation", { name: "JavaScriptなしで利用できる機能" })
-      .getByRole("link", { name: "熱中症スライド" }),
-  ).toHaveAttribute("href", "/heat-illness-prevention/slides");
-  const noScriptNavigation = page.getByRole("navigation", {
-    name: "JavaScriptなしで利用できる機能",
-  });
-  expect(
-    await noScriptNavigation.getByRole("link").evaluateAll((links) =>
+test("JavaScript無効でも9機能・事故の確認状態・通常リンクをSSR HTMLに保持する", async ({ browser, baseURL }) => {
+  const context = await browser.newContext({ baseURL, javaScriptEnabled: false, viewport: { width: 390, height: 844 }, locale: "ja-JP" });
+  try {
+    const page = await context.newPage();
+    const response = await page.goto("/", { waitUntil: "domcontentloaded" });
+    expect(response?.status()).toBe(200);
+    const noScriptNavigation = page.getByRole("navigation", { name: "JavaScriptなしで利用できる機能" });
+    await expect(noScriptNavigation).toBeVisible();
+    expect(await noScriptNavigation.getByRole("link").evaluateAll((links) =>
       links.map((link) => link.getAttribute("href")),
-    ),
-  ).toEqual(["/risk", "/heat-illness-prevention/slides"]);
-  expect(
-    await page.locator("[data-home-section]").evaluateAll((sections) =>
-      sections.map((section) => section.getAttribute("data-home-section")),
-    ),
-  ).toEqual([
-    "heat",
-    "chat",
-    "updates",
-    "chemical",
-    "learning",
-    "core-features",
-    "safety-labs",
-    "automation-consult",
-  ]);
-  const accidentCard = page.locator('[data-home-update="accidents"]');
-  const reportedAccidents = accidentCard.locator(
-    '[data-accident-origin="reported-unverified"]',
-  );
-  if ((await reportedAccidents.count()) > 0) {
-    await expect(reportedAccidents.first()).toBeVisible();
-  } else {
-    await expect(accidentCard.getByRole("status")).toContainText(
-      "取得できません",
-    );
-    await expect(accidentCard).not.toContainText("事故なし");
+    )).toEqual(["/chatbot", "/chemical-ra", "/accident-news", "/laws"]);
+    await expectMainServices(page);
+    const accidentCard = page.locator('[data-home-update="accidents"]');
+    const reportedAccidents = accidentCard.locator('[data-accident-origin="reported-unverified"]');
+    if ((await reportedAccidents.count()) > 0) {
+      await expect(reportedAccidents.first()).toBeVisible();
+      await expect(reportedAccidents.first().locator("time")).toHaveAttribute("datetime", /\d{4}-\d{2}-\d{2}/);
+      await expect(reportedAccidents.first().locator("[data-accident-source]")).toHaveText(/出典：\S/u);
+    } else {
+      await expect(accidentCard.getByRole("status")).toContainText("取得できません");
+      await expect(accidentCard).not.toContainText("事故なし");
+    }
+    await expect(page.getByText(/産業医が辞任・解任・退任したとき/).first()).toBeVisible();
+    const quickNav = page.getByRole("navigation", { name: "すぐに使う主要機能" });
+    await expect(quickNav.getByRole("link", { name: "化学物質RAを開く" })).toHaveAttribute("href", "/chemical-ra");
+    await expect(quickNav.getByRole("link", { name: "安衛法AIを開く" })).toHaveAttribute("href", "/chatbot");
+    await expect(page.locator('[data-feature-tier="3"]')).toHaveCount(3);
+    await expect(page.locator('section[aria-labelledby="home-automation-samples"]').getByRole("link", { name: "サンプルをすべて見る" })).toHaveAttribute("href", "/automation-examples");
+    await expect(page.getByRole("region", { name: "仕事から選ぶ、9つの主機能" }).getByRole("link", { name: "すべての機能", exact: true })).toHaveAttribute("href", "/features");
+    const directory = page.getByRole("region", { name: "カテゴリから探す" });
+    const details = directory.locator("details").first();
+    await details.locator("summary").focus();
+    await page.keyboard.press("Enter");
+    await expect(details).toHaveAttribute("open", "");
+    await expect(details.getByRole("link", { name: "通知設定" })).toBeVisible();
+  } finally {
+    await context.close();
   }
-  await expect(
-    page.getByText(/産業医が辞任・解任・退任したとき/).first(),
-  ).toBeVisible();
-  await expect(
-    page
-      .locator("[data-home-chemical-quick-search]")
-      .getByRole("link", { name: "化学物質RAを開く" }),
-  ).toHaveAttribute("href", "/chemical-ra");
-  await expect(
-    page
-      .locator("[data-home-chat-quick-ask]")
-      .getByRole("link", { name: "安衛法AIで質問する" }),
-  ).toHaveAttribute("href", "/chatbot");
-  await expect(page.locator('[data-feature-tier="3"]')).toHaveCount(3);
-  await expect(
-    page
-      .locator('section[aria-labelledby="home-automation-samples"]')
-      .getByRole("link", { name: "サンプルをすべて見る" }),
-  ).toHaveAttribute("href", "/automation-examples");
-  await expect(
-    page
-      .locator('[data-home-section="core-features"]')
-      .getByRole("link", { name: "すべての機能" }),
-  ).toHaveAttribute("href", "/features");
-  await context.close();
 });
 
-test("主要作業ページは入力・現在値を先に示し、通常時の警告壁と操作乱立を出さない", async ({
-  page,
-}) => {
+test("主要作業ページは入力・現在値を先に示し、通常時の警告壁と操作乱立を出さない", async ({ page }) => {
   const routes = [
     ["/heat-illness-prevention", "[data-primary-action]"],
     ["/ky/paper", "#ky-work-description"],
@@ -298,19 +195,14 @@ test("主要作業ページは入力・現在値を先に示し、通常時の�
   for (const [route, targetSelector] of routes) {
     await page.goto(route, { waitUntil: "domcontentloaded" });
     await expect(page.locator("main h1"), route).toHaveCount(1);
-    const target = page.locator(targetSelector).first();
-    await expect(target, route).toBeVisible();
+    await expect(page.locator(targetSelector).first(), route).toBeVisible();
     await expect(page.locator("main [role=alert]"), route).toHaveCount(0);
-    const nextActions = page.locator(
-      'main section[aria-labelledby="contextual-next-actions"] a[href]',
-    );
+    const nextActions = page.locator('main section[aria-labelledby="contextual-next-actions"] a[href]');
     expect(await nextActions.count(), route).toBeLessThanOrEqual(3);
   }
 });
 
-test("旗艦ツールは1つのH1と主入力・主操作を初期画面内に示し、400%相当幅でも操作できる", async ({
-  page,
-}) => {
+test("旗艦ツールは1つのH1と主入力・主操作を初期画面内に示し、400%相当幅でも操作できる", async ({ page }) => {
   const routes = [
     ["/risk", 'form[data-official-area-resolver] input[role="combobox"]'],
     ["/ky/paper", "#ky-work-description"],
@@ -326,29 +218,17 @@ test("旗艦ツールは1つのH1と主入力・主操作を初期画面内に�
     await expect(page.locator("main h1")).toHaveCount(1);
     const primary = page.locator(targetSelector).first();
     await expect(primary, route).toBeVisible();
-    if (route === "/risk") {
-      await expect(primary).toHaveAccessibleName("現場の地域を検索");
-    }
+    if (route === "/risk") await expect(primary).toHaveAccessibleName("現場の地域を検索");
     await primary.focus();
     await expect(primary, route).toBeFocused();
     const box = await primary.boundingBox();
     expect(box, route).not.toBeNull();
     expect(box?.y ?? 844, route).toBeGreaterThanOrEqual(0);
     expect((box?.y ?? 844) + (box?.height ?? 0), route).toBeLessThanOrEqual(844);
-    expect(
-      await page.evaluate(
-        () => document.documentElement.scrollWidth - window.innerWidth,
-      ),
-    ).toBeLessThanOrEqual(1);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(1);
   }
-
   await page.setViewportSize({ width: 320, height: 800 });
   await page.goto("/chatbot", { waitUntil: "domcontentloaded" });
-  const composer = page.getByLabel("質問入力");
-  await expect(composer).toBeVisible();
-  expect(
-    await page.evaluate(
-      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
-    ),
-  ).toBeLessThanOrEqual(1);
+  await expect(page.getByLabel("質問入力")).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
 });

@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-test.describe("事故データベースの公開隔離", () => {
+test.describe("事故データベースと分析の公開境界", () => {
   test("サイト内事故検索は検索語とページを保持し、暗黙転送しない @smoke", async ({
     request,
   }) => {
@@ -32,14 +32,15 @@ test.describe("事故データベースの公開隔離", () => {
     expect(response.headers().location).toBe("/accidents");
   });
 
-  test("事故分析ダッシュボードも隔離された事故DBへ集約する", async ({
+  test("事故分析ダッシュボードは公開画面を直接返す", async ({
     request,
   }) => {
     const response = await request.get("/accidents-analytics", {
       maxRedirects: 0,
     });
-    expect(response.status()).toBe(308);
-    expect(response.headers().location).toBe("/accidents");
+    expect(response.status()).toBe(200);
+    expect(response.headers().location).toBeUndefined();
+    expect(await response.text()).toContain("事故統計ダッシュボード");
   });
 });
 

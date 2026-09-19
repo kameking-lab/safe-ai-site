@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-test("ホームはテキスト400%拡大でも横スクロールなく主導線を使える", async ({
+test("ホームは400%ズーム相当幅でも横スクロールなく主導線を使える", async ({
   page,
 }) => {
   // 1440px画面を400%ズームしたときの実効CSS幅（360px）でreflowを確認する。
@@ -17,19 +17,28 @@ test("ホームはテキスト400%拡大でも横スクロールなく主導線�
   await expect(
     page.getByRole("heading", {
       level: 1,
-      name: "今日の熱中症リスク",
+      name: /小さな気づきが、\s*大きな事故を防ぐ。/u,
     }),
   ).toBeVisible();
-  await expect(page.locator('[data-home-section="heat"]')).toBeVisible();
-  await expect(
-    page.locator('[data-home-section="chat"] textarea'),
-  ).toBeAttached();
-  await expect(
-    page.locator('[data-home-section="chemical"] input'),
-  ).toBeAttached();
+  const quickNav = page.getByRole("navigation", { name: "すぐに使う主要機能" });
+  await expect(quickNav.getByRole("link")).toHaveCount(3);
+  for (const link of await quickNav.getByRole("link").all()) {
+    await link.focus();
+    await expect(link).toBeFocused();
+    await expect(link).toBeInViewport();
+  }
+  const services = page.getByRole("region", { name: "仕事から選ぶ、9つの主機能" });
+  await expect(services.getByRole("listitem")).toHaveCount(9);
+  for (const link of await services.getByRole("listitem").getByRole("link").all()) {
+    await link.scrollIntoViewIfNeeded();
+    await link.focus();
+    await expect(link).toBeFocused();
+    await expect(link).toBeInViewport();
+  }
   for (const selector of [
-    '[data-home-section="learning"]',
-    '[data-home-section="core-features"]',
+    '[data-home-section="updates"]',
+    '[data-home-section="safety-labs"]',
+    'section[aria-labelledby="home-feature-directory"]',
     '[data-home-section="automation-consult"]',
   ]) {
     const section = page.locator(selector);
@@ -46,10 +55,6 @@ test("ホームはテキスト400%拡大でも横スクロールなく主導線�
   }));
   expect(reflow.scrollWidth - reflow.clientWidth).toBeLessThanOrEqual(2);
   await expect(page.locator('[data-home-section="quality"]')).toHaveCount(0);
-  const heatState = await page
-    .locator('[data-home-section="heat"] [data-heat-status]')
-    .getAttribute("data-heat-status");
-  await expect(page.locator('[data-home-section] [data-warning-card]')).toHaveCount(
-    heatState === "degraded" || heatState === "unavailable" ? 1 : 0,
-  );
+  await expect(page.locator('[data-home-section="heat"]')).toHaveCount(0);
+  await expect(page.locator('main [data-warning-card]')).toHaveCount(0);
 });

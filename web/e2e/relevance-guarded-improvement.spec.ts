@@ -100,7 +100,7 @@ test.describe("relevance-guarded task completion", () => {
     }
   });
 
-  test("検証済み地域aliasを共有resolverで解決し、曖昧区は選択必須、戻ると状態復元", async ({
+  test("検証済み地域aliasをriskとKYで解決し、曖昧区は選択必須、戻ると状態復元", async ({
     page,
   }) => {
     const queries = [
@@ -143,24 +143,6 @@ test.describe("relevance-guarded task completion", () => {
     await expect(page).toHaveURL(/\/risk\?area=osaka-osaka/);
     await expect(input).toHaveValue("大阪府 大阪市");
     await expect(resolver.getByRole("combobox")).toHaveCount(1);
-
-    await page.goto("/", { waitUntil: "domcontentloaded" });
-    await waitForClientReady(page);
-    const homePicker = page.locator("details[data-home-area-picker]");
-    await expect(homePicker).toHaveAttribute(
-      "data-home-area-picker-hydrated",
-      "true",
-      { timeout: 15_000 },
-    );
-    const homeInput = page.locator("#home-area-change");
-    if (!(await homeInput.isVisible())) {
-      await page.locator("details:has(#home-area-change) summary").click();
-    }
-    const homeForm = page.locator("form").filter({ has: homeInput });
-    await homeInput.fill("横浜 港北");
-    await expect
-      .poll(() => homeForm.getByRole("option").count(), { timeout: 15_000 })
-      .toBe(1);
 
     await page.goto("/ky/paper", { waitUntil: "domcontentloaded" });
     await waitForClientReady(page);

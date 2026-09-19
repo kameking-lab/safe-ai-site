@@ -59,9 +59,11 @@ test("モバイルのスキップリンクと下部5操作をキーボードだ�
   const mobileNav = page.getByRole("navigation", {
     name: "モバイル ボトムナビゲーション",
   });
-  const heat = mobileNav.getByRole("link", { name: "熱中症" });
-  await heat.focus();
-  await expect(heat).toBeFocused();
+  await expect(mobileNav.getByRole("link")).toHaveCount(5);
+  const chemical = mobileNav.getByRole("link", { name: "化学RA" });
+  await expect(chemical).toHaveAttribute("href", "/chemical-ra");
+  await chemical.focus();
+  await expect(chemical).toBeFocused();
   await page.keyboard.press("Tab");
   await expect(mobileNav.getByRole("link", { name: "法令AI" })).toBeFocused();
   await page.screenshot({ path: resolve(screenshotRoot, "mobile-bottom-nav-390px.png"), fullPage: true, caret: "initial" });

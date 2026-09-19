@@ -13,30 +13,19 @@ async function waitForVisualKyPlayer(page: Page) {
 }
 
 test.describe("ビジュアルKYT", () => {
-  test("ホームの優先順とhubのSSR一覧", async ({ page }) => {
+  test("ホームの現行導線とhubのSSR一覧", async ({ page }) => {
     await page.goto("/");
-    const heat = page.locator('[data-home-section="heat"]');
-    const learning = page.locator('[data-home-section="learning"]');
-    const tasks = page.locator('[aria-labelledby="home-core-features"]');
-    const automation = page.locator('[aria-labelledby="home-automation-heading"]');
-    await expect(heat).toBeVisible();
-    await expect(learning).toBeVisible();
-    await expect(tasks).toBeVisible();
-    await expect(automation).toBeVisible();
-    const positions = await Promise.all(
-      [heat, learning, tasks, automation].map(async (locator) => {
-        const box = await locator.boundingBox();
-        return box?.y ?? Number.POSITIVE_INFINITY;
-      }),
-    );
-    expect(positions[0]).toBeLessThan(positions[1]);
-    expect(positions[1]).toBeLessThan(positions[2]);
-    expect(positions[2]).toBeLessThan(positions[3]);
     await expect(
-      learning.getByRole("link", { name: "問題に挑戦" }),
+      page.getByRole("heading", {
+        level: 1,
+        name: /小さな気づきが、.*大きな事故を防ぐ。/,
+      }),
     ).toBeVisible();
     await expect(
-      learning.getByRole("link", { name: "5分学習を始める" }),
+      page.getByRole("heading", { name: "仕事から選ぶ、9つの主機能" }),
+    ).toBeVisible();
+    await expect(
+      page.locator("main").getByRole("link", { name: /ビジュアルKYT/u }).first(),
     ).toBeVisible();
 
     await page.goto(HUB);

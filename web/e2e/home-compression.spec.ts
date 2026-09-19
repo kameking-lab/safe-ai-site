@@ -12,7 +12,7 @@ async function warmKyPaperRoute(page: Page) {
   await page.waitForLoadState("networkidle", { timeout: 30_000 });
 }
 
-test.describe("効果先行ホームの圧縮予算", () => {
+test.describe("9つの主機能を案内するホームの圧縮予算", () => {
   test.beforeEach(async ({ page }) => {
     await page.setViewportSize(MOBILE_VIEWPORT);
     await page.setExtraHTTPHeaders({
@@ -21,50 +21,24 @@ test.describe("効果先行ホームの圧縮予算", () => {
     });
   });
 
-  test("実値、法令入力、事故・法改正、化学物質入力、学習を先に短く配置する", async ({
+  test("主要導線と9機能を先に配置し、事故・法改正の根拠表示を保つ", async ({
     page,
   }) => {
     await page.goto("/", { waitUntil: "domcontentloaded" });
-    await expect(page.locator('[data-home-section="heat"]')).toBeVisible();
-
-    expect(
-      await page.locator("[data-home-section]").evaluateAll((sections) =>
-        sections.map((section) => section.getAttribute("data-home-section")),
-      ),
-    ).toEqual([
-      "heat",
-      "chat",
-      "updates",
-      "chemical",
-      "learning",
-      "core-features",
-      "safety-labs",
-      "automation-consult",
-    ]);
-
     await expect(
-      page.getByRole("heading", { level: 1, name: "今日の熱中症リスク" }),
+      page.getByRole("heading", {
+        level: 1,
+        name: /小さな気づきが、\s*大きな事故を防ぐ。/u,
+      }),
     ).toBeVisible();
-    await expect(page.locator('[data-home-section="heat"] [data-heat-status]')).toBeVisible();
-    const heatState = await page
-      .locator('[data-home-section="heat"] [data-heat-status]')
-      .getAttribute("data-heat-status");
-    await expect(
-      page.locator('[data-home-section="heat"] [data-warning-card]'),
-    ).toHaveCount(
-      heatState === "degraded" || heatState === "unavailable" ? 1 : 0,
-    );
-    if (heatState === "degraded" || heatState === "unavailable") {
-      const warning = page.locator(
-        '[data-home-section="heat"] [data-warning-card]',
-      );
-      await expect(warning).toHaveText(
-        /^(取得できません|情報が古いため|一部を確認できません)/,
-      );
-      expect((await warning.innerText()).trim().length).toBeLessThanOrEqual(32);
-    }
-    await expect(page.locator('[data-home-section="heat"] [data-primary-action]')).toHaveCount(1);
+    const quickNav = page.getByRole("navigation", { name: "すぐに使う主要機能" });
+    await expect(quickNav.getByRole("link")).toHaveCount(3);
+    const services = page.getByRole("region", { name: "仕事から選ぶ、9つの主機能" });
+    await expect(services.getByRole("listitem")).toHaveCount(9);
+    await expect(services.getByRole("listitem").getByRole("link")).toHaveCount(9);
+    await expect(page.locator('[data-home-section="heat"]')).toHaveCount(0);
     await expect(page.locator('[data-home-section="quality"]')).toHaveCount(0);
+    await expect(page.locator('main [data-warning-card], main [role="alert"]')).toHaveCount(0);
 
     const metrics = await page.evaluate(({ viewportHeight }) => {
       const top = (selector: string) =>
@@ -75,28 +49,21 @@ test.describe("効果先行ホームの圧縮予算", () => {
         Number.POSITIVE_INFINITY;
       return {
         screens: document.documentElement.scrollHeight / viewportHeight,
-        heatHeight: height('[data-home-section="heat"]'),
-        slideHeight: height("[data-home-heat-slide-deck]"),
-        chatInputScreen: top('[data-home-section="chat"] textarea') / viewportHeight,
-        accidentScreen: top('[data-home-update="accidents"]') / viewportHeight,
-        lawScreen: top('[data-home-update="law-reform"]') / viewportHeight,
-        chemicalInputScreen:
-          top('[data-home-section="chemical"] input') / viewportHeight,
-        learningScreen: top('[data-home-section="learning"]') / viewportHeight,
+        heroHeight: height('section[aria-labelledby="home-relaunch-title"]'),
+        quickNavScreen: top('nav[aria-label="すぐに使う主要機能"]') / viewportHeight,
+        servicesTop: top('section[aria-labelledby="main-services-title"]'),
+        updatesTop: top('[data-home-section="updates"]'),
+        directoryTop: top('section[aria-labelledby="home-feature-directory"]'),
         mainDom: document.querySelector("main")?.querySelectorAll("*").length ?? 0,
       };
     }, { viewportHeight: MOBILE_VIEWPORT.height });
 
-    expect(metrics.screens).toBeLessThanOrEqual(12);
-    expect(metrics.heatHeight).toBeLessThanOrEqual(1_200);
-    expect(metrics.slideHeight).toBeGreaterThanOrEqual(240);
-    expect(metrics.slideHeight).toBeLessThanOrEqual(340);
-    expect(metrics.chatInputScreen).toBeLessThanOrEqual(1.5);
-    expect(metrics.accidentScreen).toBeLessThanOrEqual(2);
-    expect(metrics.lawScreen).toBeLessThanOrEqual(2.5);
-    expect(metrics.chemicalInputScreen).toBeLessThanOrEqual(3.1);
-    expect(metrics.learningScreen).toBeLessThanOrEqual(4);
-    expect(metrics.mainDom).toBeLessThanOrEqual(700);
+    expect(metrics.screens).toBeLessThanOrEqual(13);
+    expect(metrics.heroHeight).toBeLessThanOrEqual(1_200);
+    expect(metrics.quickNavScreen).toBeLessThanOrEqual(1);
+    expect(metrics.servicesTop).toBeLessThan(metrics.updatesTop);
+    expect(metrics.updatesTop).toBeLessThan(metrics.directoryTop);
+    expect(metrics.mainDom).toBeLessThanOrEqual(900);
 
     await expect(page.locator('[data-accident-origin="official"]')).toHaveCount(1);
     expect(
@@ -106,7 +73,7 @@ test.describe("効果先行ホームの圧縮予算", () => {
       "事故なし",
     );
     await expect(page.locator("[data-law-source-state]")).toHaveCount(3);
-    await expect(page.locator('[data-home-section="learning"] article')).toHaveCount(3);
+    await expect(page.locator('section[aria-labelledby="home-feature-directory"] article')).toHaveCount(8);
   });
 
   test("320pxでも横にはみ出さず、同じ節の操作重複とDOMを予算内に保つ", async ({
@@ -117,7 +84,7 @@ test.describe("効果先行ホームの圧縮予算", () => {
 
     const budgets = await page.evaluate(() => {
       const repeatedSectionActions = [
-        ...document.querySelectorAll<HTMLElement>("[data-home-section]"),
+        ...document.querySelectorAll<HTMLElement>("main section[aria-labelledby]"),
       ].reduce((total, section) => {
         const counts = new Map<string, number>();
         for (const link of section.querySelectorAll<HTMLAnchorElement>("a[href]")) {
@@ -139,33 +106,26 @@ test.describe("効果先行ホームの圧縮予算", () => {
         repeatedSectionActions,
         dom: document.querySelectorAll("*").length,
         normalWarningCards: document.querySelectorAll(
-          '[data-home-section] [data-warning-card], [data-home-section] [role="alert"]',
+          'main [data-warning-card], main [role="alert"]',
         ).length,
-        heatState: document
-          .querySelector('[data-home-section="heat"] [data-heat-status]')
-          ?.getAttribute("data-heat-status"),
       };
     });
 
     expect(budgets.overflow).toBe(0);
-    expect(budgets.screens).toBeLessThanOrEqual(12);
+    expect(budgets.screens).toBeLessThanOrEqual(13);
     expect(budgets.repeatedSectionActions).toBe(0);
-    expect(budgets.normalWarningCards).toBe(
-      budgets.heatState === "degraded" || budgets.heatState === "unavailable"
-        ? 1
-        : 0,
-    );
+    expect(budgets.normalWarningCards).toBe(0);
     expect(budgets.dom).toBeLessThanOrEqual(1_250);
   });
 
-  test("アンカーは一意で、固定UIに隠れないoffsetを持つ", async ({ page }) => {
+  test("見出し参照は一意で、更新・相談のアンカーは固定UI用offsetを持つ", async ({ page }) => {
     await page.goto("/", { waitUntil: "domcontentloaded" });
+    for (const id of ["home-relaunch-title", "main-services-title", "home-feature-directory"]) {
+      await expect(page.locator(`#${id}`)).toHaveCount(1);
+      await expect(page.locator(`section[aria-labelledby="${id}"]`)).toHaveCount(1);
+    }
     for (const id of [
-      "home-heat",
-      "home-chat",
       "home-updates",
-      "home-chemical",
-      "home-learning",
       "home-automation",
     ]) {
       await expect(page.locator(`#${id}`)).toHaveCount(1);
@@ -179,12 +139,13 @@ test.describe("効果先行ホームの圧縮予算", () => {
 
   test("初期HTMLとinline RSCを圧縮予算内に保つ", async ({ request }) => {
     const response = await request.get("/");
+    expect(response.status()).toBe(200);
     const html = await response.text();
     const rscBytes = [...html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g)]
       .filter((match) => match[1]?.includes("self.__next_f.push"))
       .reduce((total, match) => total + Buffer.byteLength(match[1] ?? "", "utf8"), 0);
 
-    expect(Buffer.byteLength(html, "utf8")).toBeLessThanOrEqual(330_000);
+    expect(Buffer.byteLength(html, "utf8")).toBeLessThanOrEqual(350_000);
     expect(rscBytes).toBeLessThanOrEqual(190_000);
   });
 });
@@ -222,7 +183,7 @@ test("事故カードは判断材料を先に示し、KYへ未確認内容を自
   }
   await expect(accidentCard.getByRole("link", { name: "関連事故を見る" })).toHaveCount(1);
 
-  const link = page.getByRole("link", { name: /KY用紙.*作成・印刷/ }).first();
+  const link = page.getByRole("region", { name: "カテゴリから探す" }).getByRole("link", { name: "KY用紙", exact: true });
   const href = await link.getAttribute("href");
 
   expect(href).toBe("/ky/paper");
@@ -243,7 +204,7 @@ test("不正な事故文脈queryではバナーも自動確定も行わない", 
   await expect(page.getByText(/候補として読み込みました/)).toHaveCount(0);
 });
 
-test("ホームの化学物質入力をURL・storage・request URLへ露出しない", async ({
+test("ホームから開いた化学物質RAの入力をURL・storage・request URLへ露出しない", async ({
   page,
 }) => {
   test.setTimeout(60_000);
@@ -258,20 +219,26 @@ test("ホームの化学物質入力をURL・storage・request URLへ露出し�
   });
   await page.setViewportSize(MOBILE_VIEWPORT);
   await page.goto("/", { waitUntil: "networkidle" });
+  const chemicalLink = page.getByRole("navigation", { name: "すぐに使う主要機能" })
+    .getByRole("link", { name: "化学物質RAを開く" });
+  await expect(chemicalLink).toHaveAttribute("href", "/chemical-ra");
+  await chemicalLink.click();
+  await expect(page).toHaveURL(/\/chemical-ra$/);
 
-  const input = page.getByRole("combobox", { name: "化学物質を検索" });
+  const input = page.getByRole("combobox", { name: "物質名・CAS番号・SDS記載名" });
   const chemicalSearchResponse = page.waitForResponse(
     (response) =>
       response.url().includes("/api/chemical/search") &&
       response.request().method() === "POST",
   );
   await input.fill(rawQuery);
-  await input.press("Enter");
-  await expect(page).toHaveURL(/\/chemical-ra#chemical-ra-start$/, {
-    timeout: 30_000,
-  });
   await expect(page.locator("#chemical-onebox-input")).toHaveValue(rawQuery);
-  expect((await chemicalSearchResponse).status()).toBeLessThan(400);
+  const searchResponse = await chemicalSearchResponse;
+  expect(searchResponse.status()).toBeLessThan(400);
+  expect(searchResponse.request().postDataJSON()).toMatchObject({ query: rawQuery });
+  // Keep the raw input in place while debounced follow-up requests settle.
+  await page.waitForLoadState("networkidle");
+  await expect(input).toHaveValue(rawQuery);
 
   expect(page.url()).not.toContain(rawQuery);
   expect(requestUrls.some((url) => url.includes(rawQuery))).toBe(false);
