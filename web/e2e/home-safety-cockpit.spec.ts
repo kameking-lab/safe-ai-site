@@ -53,6 +53,8 @@ test.describe("リニューアルホーム", () => {
     expect(await mascot.evaluate((image: HTMLImageElement) => image.currentSrc)).toContain(
       "mascot-chat-talk-v4.webp",
     );
+    expect((await mascot.boundingBox())?.width).toBeLessThanOrEqual(160);
+    await expect(page.getByText("気になること、聞いてみる？")).toBeVisible();
     await expect(page.getByRole("link", { name: "安衛法AIを開く" })).toHaveAttribute(
       "href",
       "/chatbot",

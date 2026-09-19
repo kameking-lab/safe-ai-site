@@ -258,24 +258,27 @@ export function HomeRelaunch() {
               aria-hidden="true"
             />
             <div className="relative overflow-hidden rounded-[2.2rem] border border-white/20 bg-[#102b24] p-2 shadow-2xl shadow-black/40">
-              <div className="relative aspect-[4/5] overflow-hidden rounded-[1.8rem] bg-[#d9efe6]">
-                <Image
-                  src="/mascot/mascot-chat-talk-v4.webp"
-                  alt="吹き出しと一緒に相談を案内する安全AIポータルのチワワ"
-                  fill
-                  priority
-                  fetchPriority="high"
-                  sizes="(max-width: 639px) calc(100vw - 3rem), (max-width: 1023px) 36rem, 34vw"
-                  className="object-contain p-2 sm:p-4"
-                />
-                <div className="absolute inset-x-3 bottom-3 rounded-2xl border border-white/60 bg-white/92 p-4 text-slate-950 shadow-lg backdrop-blur">
-                  <p className="text-xs font-black tracking-[.12em] text-emerald-800">
+              <div className="relative aspect-[2/1] overflow-hidden rounded-[1.8rem] bg-[#d9efe6] sm:aspect-[4/5]">
+                <div className="absolute inset-y-0 left-0 w-[40%] sm:inset-0 sm:w-auto">
+                  <Image
+                    src="/mascot/mascot-chat-talk-v4.webp"
+                    alt="吹き出しと一緒に相談を案内する安全AIポータルのチワワ"
+                    fill
+                    priority
+                    fetchPriority="high"
+                    decoding="sync"
+                    sizes="(max-width: 639px) 40vw, (max-width: 1023px) 36rem, 34vw"
+                    className="object-contain p-2 sm:p-4"
+                  />
+                </div>
+                <div className="absolute inset-y-3 right-3 left-[40%] flex flex-col justify-center rounded-2xl border border-white/60 bg-white/92 p-3 text-slate-950 shadow-lg sm:inset-x-3 sm:top-auto sm:bottom-3 sm:block sm:p-4 sm:backdrop-blur">
+                  <p className="text-[10px] font-black tracking-[.08em] text-emerald-800 sm:text-xs sm:tracking-[.12em]">
                     YOUR SAFETY PARTNER
                   </p>
-                  <p className="mt-1 text-xl font-black">
+                  <p className="mt-1 text-base font-black sm:text-xl">
                     気になること、聞いてみる？
                   </p>
-                  <p className="mt-1 text-xs font-bold text-slate-600">
+                  <p className="mt-1 hidden text-xs font-bold text-slate-600 sm:block">
                     法令確認から保護具選びまで、必要な仕事へ案内します。
                   </p>
                 </div>
