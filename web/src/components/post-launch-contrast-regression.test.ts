@@ -18,6 +18,10 @@ const footerSource = readFileSync(
   resolve(process.cwd(), "src/components/footer.tsx"),
   "utf8",
 );
+const footerStylesSource = readFileSync(
+  resolve(process.cwd(), "src/components/footer.css"),
+  "utf8",
+);
 const whatsNewSource = readFileSync(
   resolve(process.cwd(), "src/app/(main)/whats-new/whats-new-client.tsx"),
   "utf8",
@@ -100,7 +104,10 @@ describe("post-launch contrast regressions", () => {
   });
 
   it("uses the accessible brand tokens in the audited shared surfaces", () => {
-    expect(footerSource).toContain("text-brand-accent-cool-on-dark");
+    expect(footerSource).toContain('className="footer-eyebrow"');
+    expect(footerStylesSource).toMatch(
+      /\.footer-eyebrow\s*\{[^}]*color:\s*var\(--accent-cool-on-dark\)/u,
+    );
     expect(whatsNewSource).toContain("bg-semantic-success-solid");
     expect(whatsNewSource).not.toContain("bg-emerald-600 text-white");
     expect(lawsSource).toContain("bg-semantic-caution-solid");
