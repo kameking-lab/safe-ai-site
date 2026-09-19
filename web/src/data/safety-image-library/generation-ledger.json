@@ -7,8 +7,8 @@
     "generatedCleanMasters": 100,
     "generatedPreviews": 100,
     "uniqueChecksums": 100,
-    "totalGenerationCalls": 137,
-    "totalRegenerations": 37,
+    "totalGenerationCalls": 144,
+    "totalRegenerations": 44,
     "categoryCounts": {
       "protective-equipment": 15,
       "entry-prohibition": 16,
@@ -31,13 +31,15 @@
       "id": "S001",
       "slug": "helmet-required",
       "prompt": "日本の建設現場の安全看板用、テーマは「保護帽を正しく着用」。自然な体格の成人作業員が、あご紐を締めたヘルメットと反射ベストを正しく着用する縦長構図で、広い余白を残す。写実寄りの鮮明なデジタルイラスト、太い輪郭、高コントラスト、簡潔な背景、文字・数字・ロゴ・透かしなし。",
-      "generatedAt": "2026-08-27T17:40:07.339Z",
-      "generationCount": 1,
-      "regenerationReasons": [],
+      "generatedAt": "2026-09-20T10:00:00.000+09:00",
+      "generationCount": 2,
+      "regenerationReasons": [
+        "first-release-purpose-specific-artwork"
+      ],
       "generationMethod": "OpenAI image generation",
       "sourceFile": "public/safety-images/library/originals/helmet-required.png",
       "checksumAlgorithm": "sha256",
-      "checksum": "9c3440154bf7c582e6f130dc8399500a2b9f88252dc1f9ad40e499d073c4349e",
+      "checksum": "e52b4549c9f5cd23eb55f6d2587e8f715e8820e93e6db2c11e073a1229267da6",
       "rightsStatus": "portal-owned-commercial-editable",
       "publishStatus": "published",
       "sourceFileUnmodified": true,
@@ -45,21 +47,23 @@
         "width": 1024,
         "height": 1536
       },
-      "sourceBytes": 598455,
+      "sourceBytes": 1625257,
       "hasAlpha": false,
-      "entropy": 4.453
+      "entropy": 5.549
     },
     {
       "id": "S002",
       "slug": "safety-glasses-required",
       "prompt": "日本の建設現場の安全看板用、テーマは「保護メガネ着用」。ヘルメットと透明な保護メガネを正しく着けた自然な成人作業員を縦長に大きく描き、上部に広い余白を残す。写実寄りの鮮明なデジタルイラスト、太い輪郭、青の補助色、簡潔な背景、文字なし、数字・ロゴ・透かしなし。",
-      "generatedAt": "2026-08-27T18:34:52.880Z",
-      "generationCount": 1,
-      "regenerationReasons": [],
+      "generatedAt": "2026-09-20T10:00:00.000+09:00",
+      "generationCount": 2,
+      "regenerationReasons": [
+        "first-release-purpose-specific-artwork"
+      ],
       "generationMethod": "OpenAI image generation",
       "sourceFile": "public/safety-images/library/originals/safety-glasses-required.png",
       "checksumAlgorithm": "sha256",
-      "checksum": "6fdf5405e42dcd1b73f1da1fb40e3a9b1f7d423c7e6d3912bf2a1b573a93ee58",
+      "checksum": "9796e1b0957bf26408806a319b9b1082a70bc6aaa56382b1c957c1cf178206eb",
       "rightsStatus": "portal-owned-commercial-editable",
       "publishStatus": "published",
       "sourceFileUnmodified": true,
@@ -67,9 +71,9 @@
         "width": 1024,
         "height": 1536
       },
-      "sourceBytes": 796309,
+      "sourceBytes": 1586437,
       "hasAlpha": false,
-      "entropy": 5.1409
+      "entropy": 5.37
     },
     {
       "id": "S003",
@@ -97,13 +101,15 @@
       "id": "S004",
       "slug": "earplugs-required",
       "prompt": "日本の建設現場の安全看板用、テーマは「耳栓着用」。ヘルメット姿の自然な成人作業員が耳栓を正しく装着する横顔を縦長に分かりやすく描き、上部に広い余白を残す。写実寄りの鮮明なデジタルイラスト、太い輪郭、高コントラスト、簡潔な背景、文字なし、数字・ロゴ・透かしなし。",
-      "generatedAt": "2026-08-27T18:35:31.174Z",
-      "generationCount": 1,
-      "regenerationReasons": [],
+      "generatedAt": "2026-09-20T10:00:00.000+09:00",
+      "generationCount": 2,
+      "regenerationReasons": [
+        "first-release-purpose-specific-artwork"
+      ],
       "generationMethod": "OpenAI image generation",
       "sourceFile": "public/safety-images/library/originals/earplugs-required.png",
       "checksumAlgorithm": "sha256",
-      "checksum": "f0d263b136c0654a60496f5bb6467f25f1d53383fb6df8e815a0ece358987544",
+      "checksum": "216a88eb0e85b753b2cf89dca62c4365d81173fed3a3cfc5bd41efb158fd7990",
       "rightsStatus": "portal-owned-commercial-editable",
       "publishStatus": "published",
       "sourceFileUnmodified": true,
@@ -111,21 +117,23 @@
         "width": 1024,
         "height": 1536
       },
-      "sourceBytes": 682837,
+      "sourceBytes": 1627025,
       "hasAlpha": false,
-      "entropy": 4.2426
+      "entropy": 5.393
     },
     {
       "id": "S005",
       "slug": "dust-mask-required",
       "prompt": "日本の建設現場の安全看板用、テーマは「防じんマスク着用」。ヘルメットと粒子用防じんマスクを隙間なく正しく着けた自然な成人作業員を縦長に描き、上部に広い余白を残す。写実寄りの鮮明なデジタルイラスト、太い輪郭、高コントラスト、簡潔な背景、文字なし、数字・ロゴ・透かしなし。",
-      "generatedAt": "2026-08-27T18:35:49.613Z",
-      "generationCount": 1,
-      "regenerationReasons": [],
+      "generatedAt": "2026-09-20T10:00:00.000+09:00",
+      "generationCount": 2,
+      "regenerationReasons": [
+        "first-release-purpose-specific-artwork"
+      ],
       "generationMethod": "OpenAI image generation",
       "sourceFile": "public/safety-images/library/originals/dust-mask-required.png",
       "checksumAlgorithm": "sha256",
-      "checksum": "de0de4239bf2120ee420d65c1d0f6507d6d3a8aa0adec18a8d44a541b7ad19cf",
+      "checksum": "d4d8a88d6e26c0f810e80dad8de3707f9ad5a8384f14ba05dbc072915f48c584",
       "rightsStatus": "portal-owned-commercial-editable",
       "publishStatus": "published",
       "sourceFileUnmodified": true,
@@ -133,9 +141,9 @@
         "width": 1024,
         "height": 1536
       },
-      "sourceBytes": 780711,
+      "sourceBytes": 1783447,
       "hasAlpha": false,
-      "entropy": 5.1439
+      "entropy": 5.438
     },
     {
       "id": "S006",
@@ -207,23 +215,25 @@
       "id": "S009",
       "slug": "full-body-harness-required",
       "prompt": "日本の建設現場の安全看板用、テーマは「フルハーネス着用」。自然な成人作業員が肩・胸・腿ベルトと背面D環のあるフルハーネスを正しく着ける縦長全身構図で、上部に広い余白を残す。写実寄りの鮮明なデジタルイラスト、太い輪郭、高コントラスト、文字なし、数字・ロゴ・透かしなし。",
-      "generatedAt": "2026-08-27T18:37:21.824Z",
-      "generationCount": 1,
-      "regenerationReasons": [],
+      "generatedAt": "2026-09-20T10:00:00.000+09:00",
+      "generationCount": 2,
+      "regenerationReasons": [
+        "first-release-purpose-specific-artwork"
+      ],
       "generationMethod": "OpenAI image generation",
       "sourceFile": "public/safety-images/library/originals/full-body-harness-required.png",
       "checksumAlgorithm": "sha256",
-      "checksum": "6b51a925d19fd64511224791202ddc1c3e32ae3721ee9ae30356a79b3dadcaeb",
+      "checksum": "c066ae1014640c59f7e0acf97616809cedb1a73c0427d932d5ac5bf784bdab02",
       "rightsStatus": "portal-owned-commercial-editable",
       "publishStatus": "published",
       "sourceFileUnmodified": true,
       "sourceDimensions": {
-        "width": 864,
-        "height": 1821
+        "width": 1024,
+        "height": 1536
       },
-      "sourceBytes": 439907,
+      "sourceBytes": 1788128,
       "hasAlpha": false,
-      "entropy": 2.8672
+      "entropy": 5.58
     },
     {
       "id": "S010",
@@ -439,13 +449,15 @@
       "id": "S019",
       "slug": "no-vehicle-entry",
       "prompt": "日本の工事現場の禁止看板用、テーマは「車両進入禁止」。工事用ゲート手前で小型トラックが停止し、閉じたバリケードと迂回余地を明確にした横長構図で右側に広い余白を残す。鮮明なデジタルイラスト、太い輪郭、赤は補助色、文字なし、数字・ロゴ・透かしなし。",
-      "generatedAt": "2026-08-27T18:43:08.681Z",
-      "generationCount": 1,
-      "regenerationReasons": [],
+      "generatedAt": "2026-09-20T10:00:00.000+09:00",
+      "generationCount": 2,
+      "regenerationReasons": [
+        "first-release-purpose-specific-artwork"
+      ],
       "generationMethod": "OpenAI image generation",
       "sourceFile": "public/safety-images/library/originals/no-vehicle-entry.png",
       "checksumAlgorithm": "sha256",
-      "checksum": "849e0f9ed92e3554561e4f2ac60605c55728a7f8e47fb0bdeff2b1dfa9e84193",
+      "checksum": "dc540fc643d25c14c51846846c2aebde7aac9430b4629ec02886663a505c3c29",
       "rightsStatus": "portal-owned-commercial-editable",
       "publishStatus": "published",
       "sourceFileUnmodified": true,
@@ -453,31 +465,33 @@
         "width": 1774,
         "height": 887
       },
-      "sourceBytes": 299944,
+      "sourceBytes": 1944799,
       "hasAlpha": false,
-      "entropy": 5.0693
+      "entropy": 6.554
     },
     {
       "id": "S020",
       "slug": "operation-prohibited",
       "prompt": "日本の建設現場の禁止看板用、テーマは「運転禁止」。停止中の小型建設機械の運転席へ近づかず、作業員が手で静止を示す横長構図で右側に広い余白を残す。鮮明なデジタルイラスト、太い輪郭、赤は補助色、鍵や文字なし、数字・ロゴ・透かしなし。",
-      "generatedAt": "2026-08-27T18:43:32.854Z",
-      "generationCount": 1,
-      "regenerationReasons": [],
+      "generatedAt": "2026-09-20T10:00:00.000+09:00",
+      "generationCount": 2,
+      "regenerationReasons": [
+        "first-release-purpose-specific-artwork"
+      ],
       "generationMethod": "OpenAI image generation",
       "sourceFile": "public/safety-images/library/originals/operation-prohibited.png",
       "checksumAlgorithm": "sha256",
-      "checksum": "9ca09aa2602f15b6cad432f15fb1f297768896dbdd8e4bb4c2d357b3108c4fc3",
+      "checksum": "77457467b5462c813a25d08074693e81cc2bca12239f559c6cd921525a70c6e0",
       "rightsStatus": "portal-owned-commercial-editable",
       "publishStatus": "published",
       "sourceFileUnmodified": true,
       "sourceDimensions": {
-        "width": 1693,
-        "height": 929
+        "width": 1774,
+        "height": 887
       },
-      "sourceBytes": 382825,
+      "sourceBytes": 1818688,
       "hasAlpha": false,
-      "entropy": 3.9488
+      "entropy": 7.091
     },
     {
       "id": "S021",
@@ -733,15 +747,16 @@
       "id": "S032",
       "slug": "floor-opening-hazard",
       "prompt": "日本の建設現場の警告看板用、テーマは「開口部注意」。床開口部を四周の堅固な手すりで囲い、無地のヘルメット姿の作業員は手すり外で停止する写実寄りの横長構図で右側に広い余白を残す。太い輪郭、不透明な簡潔背景、透過ぼかし・文字なし、数字・記号・ロゴなし。",
-      "generatedAt": "2026-08-27T19:08:22.507Z",
+      "generatedAt": "2026-09-20T10:00:00.000+09:00",
       "generationCount": 2,
       "regenerationReasons": [
-        "初回候補の透明縁に不自然な色フリンジが現れたため再生成"
+        "初回候補の透明縁に不自然な色フリンジが現れたため再生成",
+        "first-release-purpose-specific-artwork"
       ],
       "generationMethod": "OpenAI image generation",
       "sourceFile": "public/safety-images/library/originals/floor-opening-hazard.png",
       "checksumAlgorithm": "sha256",
-      "checksum": "3166ae7757f509fcecd0eebcf54d6948aa2fa77f72ce833c6c32e1280c8b31b6",
+      "checksum": "ec8d9ac367895c5895c8f4f933f0248f10cbdc6def13b969b9f4ea8ff5870ff2",
       "rightsStatus": "portal-owned-commercial-editable",
       "publishStatus": "published",
       "sourceFileUnmodified": true,
@@ -749,9 +764,9 @@
         "width": 1774,
         "height": 887
       },
-      "sourceBytes": 326483,
+      "sourceBytes": 1582989,
       "hasAlpha": false,
-      "entropy": 4.8497
+      "entropy": 6.082
     },
     {
       "id": "S033",
@@ -937,49 +952,51 @@
       "id": "S041",
       "slug": "no-under-suspended-load",
       "prompt": "日本の建設現場の危険看板用、テーマは「吊り荷の下に入らない」。クレーンフックと緊張した吊具で荷を吊り、成人作業員は落下範囲の外で止まる横長構図で、広い余白を残す。写実寄りの鮮明なデジタルイラスト、太い輪郭、高コントラスト、簡潔な背景、文字・数字・ロゴ・流血なし。",
-      "generatedAt": "2026-08-27T17:51:00.233Z",
+      "generatedAt": "2026-09-20T10:00:00.000+09:00",
       "generationCount": 2,
       "regenerationReasons": [
-        "試作hard gateで吊り荷と人物位置関係の明瞭性が不足"
+        "試作hard gateで吊り荷と人物位置関係の明瞭性が不足",
+        "first-release-purpose-specific-artwork"
       ],
       "generationMethod": "OpenAI image generation",
       "sourceFile": "public/safety-images/library/originals/no-under-suspended-load.png",
       "checksumAlgorithm": "sha256",
-      "checksum": "6b404e663c54daf8b3e9013dab64ab2ab6afaa0a0db356ac9f2691a3fdbdbd08",
+      "checksum": "02ae1fe241a87b596696ac6b47e73f66c4f07b127fee4f355ec32ba149db8844",
       "rightsStatus": "portal-owned-commercial-editable",
       "publishStatus": "published",
       "sourceFileUnmodified": true,
       "sourceDimensions": {
-        "width": 1210,
-        "height": 977
+        "width": 1448,
+        "height": 1086
       },
-      "sourceBytes": 455757,
+      "sourceBytes": 1363468,
       "hasAlpha": false,
-      "entropy": 7.2841
+      "entropy": 4.935
     },
     {
       "id": "S042",
       "slug": "equipment-swing-zone",
       "prompt": "日本の建設現場の警告看板用、テーマは「重機作業半径内立入禁止」。機械的に正確なバックホウを堅固なバリケードで囲い、無地のヘルメットと反射ベスト姿の成人作業員は範囲外で停止する写実寄りの横長構図で右側に広い余白を残す。太い輪郭、不透明背景、ヘルメット記号・文字なし、数字・ロゴなし。",
-      "generatedAt": "2026-08-27T19:11:02.268Z",
+      "generatedAt": "2026-09-20T10:00:00.000+09:00",
       "generationCount": 2,
       "regenerationReasons": [
-        "初回候補のヘルメットに既存標識と誤認し得る記号が現れたため再生成"
+        "初回候補のヘルメットに既存標識と誤認し得る記号が現れたため再生成",
+        "first-release-purpose-specific-artwork"
       ],
       "generationMethod": "OpenAI image generation",
       "sourceFile": "public/safety-images/library/originals/equipment-swing-zone.png",
       "checksumAlgorithm": "sha256",
-      "checksum": "531dc3e3902a72ce349bf74888547727363f56ad64404bf9f36cc53918c376c3",
+      "checksum": "8de2446ce4cc3c9f6caf1390e24e3e51df7a4742e071cbb62adb438e87dd8251",
       "rightsStatus": "portal-owned-commercial-editable",
       "publishStatus": "published",
       "sourceFileUnmodified": true,
       "sourceDimensions": {
-        "width": 1536,
-        "height": 1024
+        "width": 1448,
+        "height": 1086
       },
-      "sourceBytes": 572206,
+      "sourceBytes": 1369222,
       "hasAlpha": false,
-      "entropy": 3.5827
+      "entropy": 5.094
     },
     {
       "id": "S043",

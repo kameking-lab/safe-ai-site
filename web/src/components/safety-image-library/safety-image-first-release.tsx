@@ -3,16 +3,6 @@ import Link from "next/link";
 import {
   ArrowRight,
   BadgeCheck,
-  Ban,
-  Construction,
-  Glasses,
-  HardHat,
-  Headphones,
-  LockKeyhole,
-  ShieldCheck,
-  Truck,
-  Wind,
-  type LucideIcon,
 } from "lucide-react";
 
 const REFERENCE_FOLDER_URL =
@@ -23,44 +13,43 @@ type FirstReleaseItem = {
   message: string;
   slug: string;
   place: string;
-  mascot: string;
-  icon: LucideIcon;
 };
 
 // 旧100点の先頭抽出ではなく、提供資料257〜260頁の用途分類から再設計した固定10案。
 const ENTRY_FIRST_FIVE: readonly FirstReleaseItem[] = [
-  { title: "吊り荷の下 立入禁止", message: "吊り荷の下には入らない", slug: "no-under-suspended-load", place: "クレーン・揚重作業", mascot: "/mascot/mascot-tamakake-signal.webp", icon: Construction },
-  { title: "重機旋回内 立入禁止", message: "重機の旋回範囲に入らない", slug: "equipment-swing-zone", place: "掘削・積込み作業", mascot: "/mascot/mascot-megaphone.webp", icon: Ban },
-  { title: "開口部 立入禁止", message: "手すりの内側へ入らない", slug: "floor-opening-hazard", place: "床開口・端部", mascot: "/mascot/mascot-pointing.webp", icon: Ban },
-  { title: "車両進入禁止", message: "歩行者区画へ車両を入れない", slug: "no-vehicle-entry", place: "歩車分離区画", mascot: "/mascot/mascot-salute.webp", icon: Truck },
-  { title: "点検中 操作禁止", message: "ロックアウトを解除しない", slug: "operation-prohibited", place: "機械の点検・清掃", mascot: "/mascot/mascot-thinking.webp", icon: LockKeyhole },
+  { title: "吊り荷の下 立入禁止", message: "吊り荷の下には入らない", slug: "no-under-suspended-load", place: "クレーン・揚重作業" },
+  { title: "重機旋回内 立入禁止", message: "重機の旋回範囲に入らない", slug: "equipment-swing-zone", place: "掘削・積込み作業" },
+  { title: "開口部 立入禁止", message: "手すりの内側へ入らない", slug: "floor-opening-hazard", place: "床開口・端部" },
+  { title: "車両進入禁止", message: "歩行者区画へ車両を入れない", slug: "no-vehicle-entry", place: "歩車分離区画" },
+  { title: "点検中 操作禁止", message: "ロックアウトを解除しない", slug: "operation-prohibited", place: "機械の点検・清掃" },
 ];
 
 const REQUIRED_FIRST_FIVE: readonly FirstReleaseItem[] = [
-  { title: "保護帽を着用", message: "あごひもまで確実に", slug: "helmet-required", place: "建設・荷役・製造", mascot: "/mascot/mascot-ppe-check.webp", icon: HardHat },
-  { title: "保護めがねを着用", message: "飛来物から目を守る", slug: "safety-glasses-required", place: "切断・研磨・薬液", mascot: "/mascot/mascot-chemical-lab.webp", icon: Glasses },
-  { title: "耳栓を着用", message: "騒音区画に入る前に", slug: "earplugs-required", place: "はつり・プレス・機械室", mascot: "/mascot/mascot-measure-meter.webp", icon: Headphones },
-  { title: "防じんマスクを着用", message: "区分とフィットを確認", slug: "dust-mask-required", place: "粉じん・研磨作業", mascot: "/mascot/mascot-health-check.webp", icon: Wind },
-  { title: "フルハーネスを使用", message: "ランヤードを先に接続", slug: "full-body-harness-required", place: "高所・足場・屋根", mascot: "/mascot/mascot-ppe-check.webp", icon: ShieldCheck },
+  { title: "保護帽を着用", message: "あごひもまで確実に", slug: "helmet-required", place: "建設・荷役・製造" },
+  { title: "保護めがねを着用", message: "飛来物から目を守る", slug: "safety-glasses-required", place: "切断・研磨・薬液" },
+  { title: "耳栓を着用", message: "騒音区画に入る前に", slug: "earplugs-required", place: "はつり・プレス・機械室" },
+  { title: "防じんマスクを着用", message: "区分とフィットを確認", slug: "dust-mask-required", place: "粉じん・研磨作業" },
+  { title: "フルハーネスを使用", message: "ランヤードを先に接続", slug: "full-body-harness-required", place: "高所・足場・屋根" },
 ];
 
 function ThemeCard({ item, accent }: { item: FirstReleaseItem; accent: "red" | "blue" }) {
-  const Icon = item.icon;
   return (
     <li>
       <Link
         href={`/materials/safety-images/${item.slug}`}
         className="group flex h-full flex-col overflow-hidden rounded-2xl border-2 border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:border-emerald-600 hover:shadow-lg focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-300 dark:border-slate-800 dark:bg-slate-900"
       >
-        <div className={`relative aspect-[4/3] overflow-hidden border-[7px] border-emerald-700 bg-white ${accent === "red" ? "text-rose-800" : "text-sky-900"}`}>
-          <div className="absolute inset-x-0 top-0 z-10 border-b-4 border-emerald-700 bg-white px-2 py-1.5 text-center text-[clamp(.58rem,1.2vw,.84rem)] font-black leading-tight text-emerald-900">
+        <div className="relative aspect-[4/3] overflow-hidden bg-white">
+          <Image
+            src={`/safety-images/library/previews/${item.slug}.webp`}
+            alt={`${item.title}を用途別に描いた、もふもふのチワワ安全看板`}
+            fill
+            sizes="(max-width: 640px) 48vw, (max-width: 1280px) 30vw, 16vw"
+            className="object-contain transition duration-300 group-hover:scale-[1.02]"
+          />
+          <div className="absolute inset-x-[8%] top-[7%] z-10 text-center text-[clamp(.58rem,1.2vw,.84rem)] font-black leading-tight text-emerald-950">
             {item.title}
           </div>
-          <div className={`absolute inset-x-0 bottom-0 top-9 ${accent === "red" ? "bg-gradient-to-br from-white to-rose-50" : "bg-gradient-to-br from-white to-emerald-50"}`} />
-          <Image src={item.mascot} alt="" width={512} height={512} sizes="(max-width: 640px) 24vw, 8rem" className="absolute -bottom-2 -left-2 z-[1] h-[76%] w-[54%] object-contain object-bottom drop-shadow-md transition duration-300 group-hover:scale-[1.03]" />
-          <span className={`absolute right-[6%] top-[34%] z-[1] flex h-[42%] aspect-square items-center justify-center rounded-full border-[5px] bg-white shadow-sm ${accent === "red" ? "border-rose-700" : "border-emerald-700"}`}>
-            <Icon className="h-[62%] w-[62%]" strokeWidth={2.7} aria-hidden="true" />
-          </span>
           <span className={`absolute left-2 top-2 rounded-full px-2 py-1 text-[10px] font-black text-white ${accent === "red" ? "bg-rose-700" : "bg-sky-800"}`}>
             NEW
           </span>

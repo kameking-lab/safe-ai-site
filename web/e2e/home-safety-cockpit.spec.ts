@@ -65,7 +65,7 @@ test.describe("新しい安全AIポータルのホーム", () => {
       ),
     ).toBe(0);
     const mobileNavigation = page.getByRole("navigation", {
-      name: "モバイルナビゲーション",
+      name: "モバイル ボトムナビゲーション",
     });
     await expect(
       mobileNavigation.getByRole("link", { name: /化学RA/u }),

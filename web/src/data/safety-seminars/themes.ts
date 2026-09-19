@@ -31,7 +31,7 @@ export const SAFETY_SEMINARS: readonly SafetySeminar[] = [
     status: "published",
     title: "墜落・転落防止とフルハーネスの実務",
     audience: "建設現場の作業者・職長・安全衛生担当者",
-    standardDuration: "約35〜50分（演習込み約60分）",
+    standardDuration: "音声約30〜35分／演習込み約60分",
     slideCount: 20,
     hasAudio: true,
     formats: ["PowerPoint", "PDF"],

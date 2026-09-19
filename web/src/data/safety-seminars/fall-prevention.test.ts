@@ -18,7 +18,7 @@ const claimById = new Map(claims.map((claim) => [claim.claimId, claim]));
 const sourceById = new Map(sources.map((source) => [source.sourceId, source]));
 
 describe("墜落・転落防止研修の共通正本", () => {
-  it("20枚が連番で、音声原稿は35〜50分の設計値を持つ", () => {
+  it("20枚が連番で、音声原稿は30〜35分の設計値を持つ", () => {
     expect(training.slideCount).toBe(20);
     expect(training.slides).toHaveLength(20);
     expect(training.slides.map((slide) => slide.number)).toEqual(
@@ -28,8 +28,8 @@ describe("墜落・転落防止研修の共通正本", () => {
       (total, slide) => total + slide.estimatedSeconds,
       0,
     );
-    expect(seconds).toBeGreaterThanOrEqual(35 * 60);
-    expect(seconds).toBeLessThanOrEqual(50 * 60);
+    expect(seconds).toBeGreaterThanOrEqual(30 * 60);
+    expect(seconds).toBeLessThanOrEqual(35 * 60);
     expect(training.slides.every((slide) => slide.narration.length >= 150)).toBe(true);
   });
 
