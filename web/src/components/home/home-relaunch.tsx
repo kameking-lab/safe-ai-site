@@ -1,5 +1,8 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import type { CSSProperties } from "react";
 import {
   ArrowRight,
   BarChart3,
@@ -27,10 +30,9 @@ const MAIN_SERVICES = [
     mascot: "/mascot/mascot-law-reading.webp",
     mascotAlt: "法令集を開いて相談に答えるチワワ",
     role: "現場を知る法令相談役",
-    surface: "bg-[#dcefe9]",
-    accent: "bg-[#176b57]",
-    accentText: "text-[#176b57]",
-    softAccent: "bg-[#b9ddd2]",
+    surface: "#dcefe9",
+    accent: "#176b57",
+    softAccent: "#b9ddd2",
   },
   {
     href: "/chemical-ra",
@@ -41,10 +43,9 @@ const MAIN_SERVICES = [
     mascot: "/mascot/mascot-chemical-lab.webp",
     mascotAlt: "試験器具を使って化学物質を確認するチワワ",
     role: "化学物質の健康相談係",
-    surface: "bg-[#f6ebcf]",
-    accent: "bg-[#a85d17]",
-    accentText: "text-[#8b4c12]",
-    softAccent: "bg-[#ebc983]",
+    surface: "#f6ebcf",
+    accent: "#a85d17",
+    softAccent: "#ebc983",
   },
   {
     href: "/accident-news",
@@ -55,10 +56,9 @@ const MAIN_SERVICES = [
     mascot: "/mascot/mascot-news-read.webp",
     mascotAlt: "新聞を開いて労災事故速報を伝えるチワワ",
     role: "現場速報アナウンサー",
-    surface: "bg-[#f3dfe0]",
-    accent: "bg-[#9a3f49]",
-    accentText: "text-[#8f3541]",
-    softAccent: "bg-[#e5aeb3]",
+    surface: "#f3dfe0",
+    accent: "#9a3f49",
+    softAccent: "#e5aeb3",
   },
   {
     href: "/laws",
@@ -69,10 +69,9 @@ const MAIN_SERVICES = [
     mascot: "/mascot/mascot-calendar-plan.webp",
     mascotAlt: "カレンダーで法改正の施行日を確認するチワワ",
     role: "法改正を追う取材記者",
-    surface: "bg-[#e8e2f2]",
-    accent: "bg-[#65508d]",
-    accentText: "text-[#604984]",
-    softAccent: "bg-[#c8b9df]",
+    surface: "#e8e2f2",
+    accent: "#65508d",
+    softAccent: "#c8b9df",
   },
   {
     href: "/contact/automation-email",
@@ -83,10 +82,9 @@ const MAIN_SERVICES = [
     mascot: "/mascot/mascot-tablet-dx.webp",
     mascotAlt: "タブレットを使って仕事の自動化を考えるチワワ",
     role: "業務改善エンジニア",
-    surface: "bg-[#e6e1ee]",
-    accent: "bg-[#704e7b]",
-    accentText: "text-[#674571]",
-    softAccent: "bg-[#cdbbd3]",
+    surface: "#e6e1ee",
+    accent: "#704e7b",
+    softAccent: "#cdbbd3",
   },
   {
     href: "/goods",
@@ -98,10 +96,9 @@ const MAIN_SERVICES = [
     mascot: "/mascot/mascot-ppe-check.webp",
     mascotAlt: "保護具を点検して安全用品選びを手伝うチワワ",
     role: "頼れる安全用品店長",
-    surface: "bg-[#dfeadd]",
-    accent: "bg-[#407044]",
-    accentText: "text-[#37633c]",
-    softAccent: "bg-[#bcd4b8]",
+    surface: "#dfeadd",
+    accent: "#407044",
+    softAccent: "#bcd4b8",
   },
   {
     href: "/training/safety-seminars",
@@ -112,10 +109,9 @@ const MAIN_SERVICES = [
     mascot: "/mascot/mascot-teacher.webp",
     mascotAlt: "黒板の前で安全教育をする先生役のチワワ",
     role: "安全を伝える先生",
-    surface: "bg-[#dce9ef]",
-    accent: "bg-[#356b82]",
-    accentText: "text-[#2f6277]",
-    softAccent: "bg-[#b5d1dd]",
+    surface: "#dce9ef",
+    accent: "#356b82",
+    softAccent: "#b5d1dd",
   },
   {
     href: "/materials/safety-images",
@@ -126,10 +122,9 @@ const MAIN_SERVICES = [
     mascot: "/mascot/mascot-pointing.webp",
     mascotAlt: "安全画像を指し示して案内するチワワ",
     role: "素材づくりの案内役",
-    surface: "bg-[#d9ece7]",
-    accent: "bg-[#2b7569]",
-    accentText: "text-[#24685e]",
-    softAccent: "bg-[#acd7cd]",
+    surface: "#d9ece7",
+    accent: "#2b7569",
+    softAccent: "#acd7cd",
   },
   {
     href: "/accidents-analytics",
@@ -141,12 +136,33 @@ const MAIN_SERVICES = [
     mascot: "/mascot/mascot-detective.webp",
     mascotAlt: "虫眼鏡で事故統計を調べる探偵役のチワワ",
     role: "事故データ研究員",
-    surface: "bg-[#eee5d7]",
-    accent: "bg-[#8a6235]",
-    accentText: "text-[#79542d]",
-    softAccent: "bg-[#dac29e]",
+    surface: "#eee5d7",
+    accent: "#8a6235",
+    softAccent: "#dac29e",
   },
 ] as const;
+
+const SERVICE_STYLES = `
+.hs-section{background:#091f1a;padding:2.5rem 1rem}
+.home-render-skip-section{content-visibility:auto}.home-skip-updates{contain-intrinsic-block-size:auto 50rem}.home-skip-labs{contain-intrinsic-block-size:auto 28.75rem}.home-skip-directory{contain-intrinsic-block-size:auto 158.5rem}.home-skip-consult{contain-intrinsic-block-size:auto 32.8rem}
+.hs-wrap{max-width:80rem;margin-inline:auto}.hs-heading{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:1rem}
+.hs-kicker{display:inline-flex;align-items:center;gap:.5rem;color:#6ee7b7;font-size:.75rem;font-weight:900;letter-spacing:.14em}.hs-kicker svg,.hs-arrow{width:1rem;height:1rem}
+.hs-title{margin-top:.5rem;font-size:1.875rem;font-weight:900;letter-spacing:-.03em}.hs-lead{max-width:48rem;margin-top:.5rem;color:#cbd5e1;font-size:.875rem;font-weight:600;line-height:1.5rem}
+.hs-all{display:inline-flex;min-height:2.75rem;align-items:center;gap:.5rem;border-radius:.5rem;padding-inline:.5rem;color:#a7f3d0;font-size:.875rem;font-weight:900;text-decoration:underline;text-underline-offset:4px}
+.hs-grid{display:grid;gap:1rem;margin-top:1.75rem}.hs-card{position:relative;display:block;min-height:21rem;overflow:hidden;border:1px solid rgb(255 255 255/.15);border-radius:1.8rem;background:#fffdf8;color:#0f172a;box-shadow:0 22px 55px -34px rgb(0 0 0/.95);content-visibility:auto;contain-intrinsic-block-size:auto 21rem;transition:transform .2s,border-color .2s,box-shadow .2s}
+.hs-card:hover{border-color:rgb(255 255 255/.4);box-shadow:0 26px 65px -32px rgb(0 0 0/.9);transform:translateY(-.25rem)}.hs-card:focus-visible,.hs-all:focus-visible{outline:0;box-shadow:0 0 0 4px #6ee7b7,0 0 0 8px #071b17}
+.hs-visual{position:relative;height:9rem;overflow:hidden;background:var(--surface)}.hs-orb{position:absolute;left:-2rem;top:-2.5rem;width:7rem;height:7rem;border-radius:999px;background:var(--soft);opacity:.55}.hs-role{position:absolute;z-index:10;left:1rem;top:1rem;display:inline-flex;max-width:58%;align-items:center;gap:.5rem;border:1px solid rgb(255 255 255/.7);border-radius:999px;background:rgb(255 255 255/.8);padding:.375rem .75rem;color:#334155;font-size:.6875rem;font-weight:900;letter-spacing:.04em;box-shadow:0 1px 2px rgb(0 0 0/.05);backdrop-filter:blur(4px)}
+.hs-role svg{width:1rem;height:1rem;flex:none;color:var(--accent)}.hs-index{position:absolute;z-index:10;right:1rem;top:1rem;color:rgb(51 65 85/.45);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.75rem;font-weight:900}.hs-paw{position:absolute;z-index:10;bottom:.5rem;left:1.25rem;color:rgb(51 65 85/.2);transform:rotate(-9deg)}.hs-paw svg{width:2.25rem;height:2.25rem}
+.hs-mascot{position:absolute;right:0;bottom:-1.5rem;width:12rem;height:11rem;object-fit:contain;object-position:bottom;filter:drop-shadow(0 12px 14px rgb(25 45 38/.2));transition:transform .3s}.hs-card:hover .hs-mascot{transform:translateY(-.25rem) rotate(1deg) scale(1.04)}.hs-badge{position:absolute;z-index:10;right:.75rem;bottom:.75rem;display:flex;width:2.5rem;height:2.5rem;align-items:center;justify-content:center;border:2px solid #fff;border-radius:999px;background:var(--accent);color:#fff;box-shadow:0 4px 6px -1px rgb(0 0 0/.1)}.hs-badge svg{width:1.25rem;height:1.25rem}
+.hs-body{display:flex;min-height:12rem;flex-direction:column;padding:1.25rem}.hs-name{color:#020617;font-size:1.25rem;font-weight:900;letter-spacing:-.02em}.hs-copy{flex:1;margin-top:.5rem;color:#475569;font-size:.875rem;font-weight:600;line-height:1.5rem}.hs-action{display:inline-flex;min-height:2.5rem;width:max-content;align-items:center;gap:.5rem;margin-top:1rem;border-radius:999px;background:var(--accent);padding:.5rem 1rem;color:#fff;font-size:.875rem;font-weight:900;box-shadow:0 1px 2px rgb(0 0 0/.05)}.hs-action svg{transition:transform .2s}.hs-card:hover .hs-action svg{transform:translateX(.25rem)}
+@media(min-width:640px){.hs-section{padding:3.5rem 1.5rem}.hs-title{font-size:2.25rem}.hs-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(min-width:640px){.home-skip-updates{contain-intrinsic-block-size:auto 52.5rem}.home-skip-labs{contain-intrinsic-block-size:auto 25.625rem}.home-skip-directory{contain-intrinsic-block-size:auto 89rem}.home-skip-consult{contain-intrinsic-block-size:auto 24rem}}
+@media(min-width:1280px){.hs-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(min-width:1280px){.home-skip-updates{contain-intrinsic-block-size:auto 38rem}.home-skip-labs{contain-intrinsic-block-size:auto 15.625rem}.home-skip-directory{contain-intrinsic-block-size:auto 52.5rem}.home-skip-consult{contain-intrinsic-block-size:auto 18.5rem}}
+@media(max-width:480px){.hs-kicker,.hs-role,.hs-index{font-size:.875rem;line-height:1.45}}
+@media(prefers-reduced-motion:reduce){.hs-card,.hs-mascot,.hs-action svg{transition:none}.hs-card:hover,.hs-card:hover .hs-mascot,.hs-card:hover .hs-action svg{transform:none}}
+@media print{.hs-card,.home-render-skip-section{content-visibility:visible;contain-intrinsic-size:none}}
+`;
 
 export function HomeRelaunch() {
   const focusRing =
@@ -154,6 +170,7 @@ export function HomeRelaunch() {
 
   return (
     <div className="overflow-hidden bg-[#071b17] text-white">
+      <style>{SERVICE_STYLES}</style>
       <section
         aria-labelledby="home-relaunch-title"
         className="relative border-b border-white/10 px-4 py-8 sm:px-6 sm:py-12 lg:py-16"
@@ -283,65 +300,46 @@ export function HomeRelaunch() {
         </div>
       </section>
 
-      <section
-        aria-labelledby="main-services-title"
-        className="bg-[#091f1a] px-4 py-10 sm:px-6 sm:py-14"
-      >
-        <div className="mx-auto max-w-7xl">
-          <div className="flex flex-wrap items-end justify-between gap-4">
+      <section aria-labelledby="main-services-title" className="hs-section">
+        <div className="hs-wrap">
+          <div className="hs-heading">
             <div>
-              <p className="inline-flex items-center gap-2 text-xs font-black tracking-[.14em] text-emerald-300">
-                <PawPrint className="h-4 w-4" aria-hidden="true" />
+              <p className="hs-kicker">
+                <PawPrint aria-hidden="true" />
                 いつもの仕事を、相棒と
               </p>
-              <h2
-                id="main-services-title"
-                className="mt-2 text-3xl font-black tracking-[-.03em] sm:text-4xl"
-              >
+              <h2 id="main-services-title" className="hs-title">
                 仕事から選ぶ、9つの主機能
               </h2>
-              <p className="mt-2 max-w-3xl text-sm font-semibold leading-6 text-slate-300">
+              <p className="hs-lead">
                 入口を厳選しました。その他の機能はページ下部の一覧から探せます。
               </p>
             </div>
-            <Link
-              href="/features"
-              prefetch={false}
-              className={`inline-flex min-h-11 items-center gap-2 rounded-lg px-2 text-sm font-black text-emerald-200 underline underline-offset-4 ${focusRing}`}
-            >
+            <Link href="/features" prefetch={false} className="hs-all">
               すべての機能
-              <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              <ArrowRight className="hs-arrow" aria-hidden="true" />
             </Link>
           </div>
 
-          <ul className="mt-7 grid gap-4 sm:grid-cols-2 min-[1280px]:grid-cols-3">
+          <ul className="hs-grid">
             {MAIN_SERVICES.map((service, index) => {
               const Icon = service.icon;
-              const cardClass = `group relative block min-h-[21rem] overflow-hidden rounded-[1.8rem] border border-white/15 bg-[#fffdf8] text-slate-900 shadow-[0_22px_55px_-34px_rgba(0,0,0,.95)] hover:border-white/40 hover:shadow-[0_26px_65px_-32px_rgba(0,0,0,.9)] motion-safe:transition motion-safe:hover:-translate-y-1 ${focusRing}`;
+              const palette = {
+                "--surface": service.surface,
+                "--accent": service.accent,
+                "--soft": service.softAccent,
+              } as CSSProperties;
               const content = (
                 <>
-                  <div
-                    className={`relative h-36 overflow-hidden ${service.surface}`}
-                  >
-                    <span
-                      className={`absolute -left-8 -top-10 h-28 w-28 rounded-full ${service.softAccent} opacity-55`}
-                      aria-hidden="true"
-                    />
-                    <span className="absolute left-4 top-4 z-10 inline-flex max-w-[58%] items-center gap-2 rounded-full border border-white/70 bg-white/80 px-3 py-1.5 text-[11px] font-black tracking-[.04em] text-slate-700 shadow-sm backdrop-blur">
-                      <Icon
-                        className={`h-4 w-4 shrink-0 ${service.accentText}`}
-                        aria-hidden="true"
-                      />
+                  <div className="hs-visual">
+                    <span className="hs-orb" aria-hidden="true" />
+                    <span className="hs-role">
+                      <Icon aria-hidden="true" />
                       {service.role}
                     </span>
-                    <span className="absolute right-4 top-4 z-10 font-mono text-xs font-black text-slate-700/45">
-                      0{index + 1}
-                    </span>
-                    <span
-                      className="absolute bottom-2 left-5 z-10 rotate-[-9deg] text-slate-700/20"
-                      aria-hidden="true"
-                    >
-                      <PawPrint className="h-9 w-9" />
+                    <span className="hs-index">0{index + 1}</span>
+                    <span className="hs-paw" aria-hidden="true">
+                      <PawPrint />
                     </span>
                     <Image
                       src={service.mascot}
@@ -349,31 +347,19 @@ export function HomeRelaunch() {
                       width={192}
                       height={176}
                       loading="lazy"
-                      sizes="12rem"
-                      className="absolute -bottom-6 right-0 h-44 w-48 object-contain object-bottom drop-shadow-[0_12px_14px_rgba(25,45,38,.2)] motion-safe:transition-transform motion-safe:duration-300 motion-safe:group-hover:-translate-y-1 motion-safe:group-hover:rotate-1 motion-safe:group-hover:scale-[1.04]"
+                      unoptimized
+                      className="hs-mascot"
                     />
-                    <span
-                      className={`absolute bottom-3 right-3 z-10 flex h-10 w-10 items-center justify-center rounded-full border-2 border-white text-white shadow-md ${service.accent}`}
-                      aria-hidden="true"
-                    >
-                      <Icon className="h-5 w-5" />
+                    <span className="hs-badge" aria-hidden="true">
+                      <Icon />
                     </span>
                   </div>
-                  <div className="flex min-h-[12rem] flex-col p-5">
-                    <h3 className="text-xl font-black tracking-[-.02em] text-slate-950">
-                      {service.title}
-                    </h3>
-                    <p className="mt-2 flex-1 text-sm font-semibold leading-6 text-slate-600">
-                      {service.description}
-                    </p>
-                    <span
-                      className={`mt-4 inline-flex min-h-10 w-fit items-center gap-2 rounded-full px-4 py-2 text-sm font-black text-white shadow-sm ${service.accent}`}
-                    >
+                  <div className="hs-body">
+                    <h3 className="hs-name">{service.title}</h3>
+                    <p className="hs-copy">{service.description}</p>
+                    <span className="hs-action">
                       {service.action}
-                      <ArrowRight
-                        className="h-4 w-4 motion-safe:transition-transform motion-safe:group-hover:translate-x-1"
-                        aria-hidden="true"
-                      />
+                      <ArrowRight className="hs-arrow" aria-hidden="true" />
                     </span>
                   </div>
                 </>
@@ -383,7 +369,8 @@ export function HomeRelaunch() {
                   <Link
                     href={service.href}
                     prefetch={false}
-                    className={cardClass}
+                    className="hs-card"
+                    style={palette}
                   >
                     {content}
                   </Link>

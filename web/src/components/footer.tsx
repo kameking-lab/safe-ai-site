@@ -2,6 +2,7 @@ import NextLink from "next/link";
 import { FooterNoteGuides } from "./footer-note-guides";
 import type { ComponentProps } from "react";
 import { getAutomationConsultAvailability } from "@/lib/automation-consult/availability";
+import { FooterStyles } from "./footer-styles";
 
 function Link(props: ComponentProps<typeof NextLink>) {
   return <NextLink {...props} prefetch={false} />;
@@ -30,62 +31,64 @@ export function Footer() {
       ? "/contact/automation-email"
       : "/services/automation";
   return (
-    <footer data-site-footer className="footer-shell">
-      <div className="footer-inner">
-        <section
-          aria-labelledby="footer-automation-title"
-          className="footer-consult"
-        >
-          <div>
-            <div className="flex flex-wrap items-center gap-2">
-              <p className="footer-eyebrow">
-                自動化相談
-              </p>
-              <span className="footer-availability">
-                {availability.label}
-              </span>
-            </div>
-            <h2 id="footer-automation-title" className="mt-2 text-xl font-black">
-              安全業務の「毎回同じ」を整理する
-            </h2>
-            <p className="footer-description">
-              {availability.accepting
-                ? "対応範囲と料金を確認し、小さな業務から相談できます。"
-                : "対応範囲・料金目安・自動化サンプルを確認できます。"}
-            </p>
-          </div>
-          <Link
-            href={consultationHref}
-            data-automation-cta-position="footer"
-            className="footer-consult-link"
+    <>
+      <FooterStyles />
+      <footer data-site-footer className="footer-shell">
+        <div className="footer-inner">
+          <section
+            aria-labelledby="footer-automation-title"
+            className="footer-consult"
           >
-            {availability.contactMode === "mail_client"
-              ? "メールで相談する"
-              : "自動化例・料金を見る"}
-            <span aria-hidden="true">↗</span>
-          </Link>
-        </section>
-
-        <FooterNoteGuides />
-
-        <nav
-          aria-label="運営・規約"
-          className="footer-legal flex flex-wrap gap-x-5 gap-y-1"
-        >
-          {TRUST_LINKS.map((item) => (
+            <div>
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="footer-eyebrow">自動化相談</p>
+                <span className="footer-availability">
+                  {availability.label}
+                </span>
+              </div>
+              <h2
+                id="footer-automation-title"
+                className="mt-2 text-xl font-black"
+              >
+                安全業務の「毎回同じ」を整理する
+              </h2>
+              <p className="footer-description">
+                {availability.accepting
+                  ? "対応範囲と料金を確認し、小さな業務から相談できます。"
+                  : "対応範囲・料金目安・自動化サンプルを確認できます。"}
+              </p>
+            </div>
             <Link
-              key={item.href}
-              href={item.href}
-              className="footer-legal-link"
+              href={consultationHref}
+              data-automation-cta-position="footer"
+              className="footer-consult-link"
             >
-              {item.label}
+              {availability.contactMode === "mail_client"
+                ? "メールで相談する"
+                : "自動化例・料金を見る"}
+              <span aria-hidden="true">↗</span>
             </Link>
-          ))}
-        </nav>
-        <p className="footer-copyright">
-          © 2026 安全AIポータル
-        </p>
-      </div>
-    </footer>
+          </section>
+
+          <FooterNoteGuides />
+
+          <nav
+            aria-label="運営・規約"
+            className="footer-legal flex flex-wrap gap-x-5 gap-y-1"
+          >
+            {TRUST_LINKS.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="footer-legal-link"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+          <p className="footer-copyright">© 2026 安全AIポータル</p>
+        </div>
+      </footer>
+    </>
   );
 }

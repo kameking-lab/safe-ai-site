@@ -51,10 +51,17 @@ describe("HomeRelaunch", () => {
     const primaryLink = screen.getByRole("link", { name: /安衛法AIを開く/ });
     expect(primaryLink.className).toContain("min-h-14");
     expect(primaryLink.className).toContain("focus-visible:ring-4");
-    expect(primaryLink.className).toContain("motion-safe:hover:-translate-y-0.5");
+    expect(primaryLink.className).toContain(
+      "motion-safe:hover:-translate-y-0.5",
+    );
 
     const serviceLink = screen.getByRole("link", { name: /事故統計分析/ });
-    expect(serviceLink.className).toContain("focus-visible:ring-4");
-    expect(serviceLink.className).toContain("motion-safe:hover:-translate-y-1");
+    expect(serviceLink.className).toContain("hs-card");
+    const componentCss = Array.from(document.querySelectorAll("style"))
+      .map((style) => style.textContent ?? "")
+      .join("\n");
+    expect(componentCss).toContain(".hs-card:focus-visible");
+    expect(componentCss).toContain(".hs-card:hover");
+    expect(componentCss).toContain("@media(prefers-reduced-motion:reduce)");
   });
 });
