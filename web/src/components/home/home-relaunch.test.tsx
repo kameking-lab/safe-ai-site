@@ -42,15 +42,11 @@ describe("HomeRelaunch", () => {
   it("LCP画像、タップ領域、フォーカス、動きの低減を明示する", () => {
     render(<HomeRelaunch />);
 
-    const mobileMascot = screen.getByRole("img", {
-      name: "耳をすまして相談を待つ安全AIポータルのチワワ",
-    });
     const desktopMascot = screen.getByRole("img", {
       name: "吹き出しと一緒に相談を案内する安全AIポータルのチワワ",
     });
-    expect(mobileMascot.getAttribute("loading")).not.toBe("lazy");
     expect(desktopMascot.getAttribute("sizes")).toContain("max-width: 1023px");
-    expect(desktopMascot.getAttribute("loading")).toBe("lazy");
+    expect(desktopMascot.getAttribute("loading")).not.toBe("lazy");
 
     const primaryLink = screen.getByRole("link", { name: /安衛法AIを開く/ });
     expect(primaryLink.className).toContain("min-h-14");

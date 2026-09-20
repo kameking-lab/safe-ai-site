@@ -50,6 +50,12 @@ describe("事故分析ダッシュボードの公開表示", () => {
     expect(source).toContain(
       "formatNumber(aggregates.meta.filteredCases)",
     );
+    expect(source).toContain(
+      "SOURCE_LABELS[aggregates.meta.filters.source]",
+    );
+    expect(source).not.toContain(
+      "<strong>既定の母集団</strong>は厚労省死亡災害個票",
+    );
     expect(source).not.toContain(
       "数値は\n              <Link href=\"/accidents\"",
     );

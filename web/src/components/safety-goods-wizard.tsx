@@ -8,6 +8,15 @@ import {
 } from "@/lib/affiliate-url";
 import { trackEvent } from "@/components/Analytics";
 
+const MHLW_OXYGEN_RULES_URL =
+  "https://anzeninfo.mhlw.go.jp/horei/hor1-45/hor1-45-33-1-5.html";
+const MHLW_DUST_MASK_GUIDANCE_URL =
+  "https://www.mhlw.go.jp/web/t_doc?dataId=00tc2747&dataType=1";
+const MHLW_SAFETY_FOOTWEAR_URL =
+  "https://www.mhlw.go.jp/web/t_doc?dataId=74003000&dataType=0&pageNo=9";
+const NETIS_SEARCH_URL =
+  "https://www.netis.mlit.go.jp/netis/input/pubsearch/search";
+
 type Option = { id: string; label: string; detail: string };
 
 type Selection = {
@@ -139,7 +148,7 @@ function buildRecommendation(selection: Selection): Recommendation {
         title: "まず酸素・有害ガスを測るための候補",
         query: "酸素濃度計 ガス検知器 作業用 校正",
         summary: "酸欠や有害ガスのおそれがある場所は、防じん・防毒マスクを先に買う入口ではありません。入る前に測定、換気、監視、救助手順を整えるための機器・体制を確認します。",
-        officialHref: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000187558.html",
+        officialHref: MHLW_OXYGEN_RULES_URL,
         officialLabel: "厚生労働省｜酸素欠乏症等防止対策",
         checks: ["酸素濃度と有害ガスを入坑前・作業中に測れるか", "換気、監視人、救助手順を先に決めたか", "必要な呼吸用保護具の方式は責任者・専門家と確認したか"],
         urgent: true,
@@ -166,7 +175,7 @@ function buildRecommendation(selection: Selection): Recommendation {
       title: "防じんマスク（製品群）の購入候補",
       query: `重松製作所 DD02V-S2-2K DS2 排気弁付${limitedVentilation ? " 屋内 集じん 換気" : ""}`,
       summary: `研削・清掃などの粉じん作業では、国家検定合格表示のある防じんマスクの製品群から、粉じんの性状と作業条件に合うものを探します。${limitedVentilation ? "換気が弱い場所では、集じん・局所排気と濃度確認を先に組み合わせます。" : ""}`,
-      officialHref: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000187558.html",
+      officialHref: MHLW_DUST_MASK_GUIDANCE_URL,
       officialLabel: "厚生労働省｜粉じん障害防止対策",
       checks: ["粉じんの種類・濃度・作業時間を確認", "国家検定合格標章とろ過材の区分を確認", "顔への密着、ひげ・眼鏡との干渉、交換時期を確認", ...(limitedVentilation ? ["集じん・局所排気を改善し、改善後の濃度で必要な区分を確認"] : [])],
       verifiedCandidate: {
@@ -207,12 +216,12 @@ function buildRecommendation(selection: Selection): Recommendation {
     { categoryId: "chemical", taskIds: ["mix"], title: "混合・調製用の全身防護候補", query: "化学防護服 エプロン ゴーグル 耐薬品 混合", summary: "混合・調製では反応・発熱・飛散範囲も確認し、手・目だけでなく衣類を含む防護を絞ります。", officialHref: "https://www.mhlw.go.jp/content/11300000/001670143.pdf", officialLabel: "厚生労働省｜保護具の選定マニュアル", checks: ["混合禁止・反応性・発熱をSDSで確認", "飛散範囲に応じた手・目・顔・身体の防護を確認", "局所排気と緊急時手順を確認"] },
     {
       categoryId: "machine", taskIds: ["vehicle"], title: "車両接近警報・動線分離用品の候補", query: "フォークリフト 接近警報 人車分離 LED ライン", summary: "重機・フォークリフトでは、人車分離を基本に死角を補う警報・表示用品を絞ります。",
-      officialHref: "https://www.mlit.go.jp/tec/tec_tk_000067.html",
-      officialLabel: "国土交通省｜NETIS（新技術情報提供システム）",
+      officialHref: NETIS_SEARCH_URL,
+      officialLabel: "国土交通省｜NETIS公式検索",
       checks: ["人と車両の動線を物理的に分けられるか", "死角・後退・交差箇所を現地確認", "警報の検知範囲と停止ルールを確認"],
     },
-    { categoryId: "machine", taskIds: ["moving"], title: "機械停止・ロックアウト用品の候補", query: "ロックアウト タグアウト キット 機械 メンテナンス", summary: "回転体・搬送機・プレスでは、接近警報ではなく停止・隔離・施錠を軸に用品を絞ります。", officialHref: "https://www.mlit.go.jp/tec/tec_tk_000067.html", officialLabel: "国土交通省｜NETIS（新技術情報提供システム）", checks: ["清掃・調整・復旧時に動力を遮断できるか", "残留エネルギーと再起動を防げるか", "施錠者と解除手順を決めたか"] },
-    { categoryId: "machine", taskIds: ["restricted"], title: "危険区域の区画・立入表示候補", query: "立入禁止 バリケード コーンバー 危険区域 表示", summary: "吊り荷下・旋回範囲などには、境界が一目で分かり勝手に外れにくい区画用品を絞ります。", officialHref: "https://www.mlit.go.jp/tec/tec_tk_000067.html", officialLabel: "国土交通省｜NETIS（新技術情報提供システム）", checks: ["危険区域を現場で見える形にできるか", "区画の移設・解除権限を決めたか", "多言語表示と夜間視認性を確認"] },
+    { categoryId: "machine", taskIds: ["moving"], title: "機械停止・ロックアウト用品の候補", query: "ロックアウト タグアウト キット 機械 メンテナンス", summary: "回転体・搬送機・プレスでは、接近警報ではなく停止・隔離・施錠を軸に用品を絞ります。", officialHref: NETIS_SEARCH_URL, officialLabel: "国土交通省｜NETIS公式検索", checks: ["清掃・調整・復旧時に動力を遮断できるか", "残留エネルギーと再起動を防げるか", "施錠者と解除手順を決めたか"] },
+    { categoryId: "machine", taskIds: ["restricted"], title: "危険区域の区画・立入表示候補", query: "立入禁止 バリケード コーンバー 危険区域 表示", summary: "吊り荷下・旋回範囲などには、境界が一目で分かり勝手に外れにくい区画用品を絞ります。", officialHref: NETIS_SEARCH_URL, officialLabel: "国土交通省｜NETIS公式検索", checks: ["危険区域を現場で見える形にできるか", "区画の移設・解除権限を決めたか", "多言語表示と夜間視認性を確認"] },
     {
       categoryId: "noise", taskIds: ["grinding"], title: "研削用の耳・目・顔面保護候補", query: "研削 フェイスシールド 保護めがね イヤーマフ", summary: "研削・切断では、騒音に加えて高速飛来物から目・顔を守る組合せを絞ります。",
       officialHref: "https://www.mhlw.go.jp/web/t_doc?dataId=00tc7618&dataType=1&pageNo=1",
@@ -223,12 +232,12 @@ function buildRecommendation(selection: Selection): Recommendation {
     { categoryId: "noise", taskIds: ["welding"], title: "溶接光・火花用の遮光面候補", query: "溶接面 自動遮光 遮光度 保護めがね", summary: "溶接では、工程に合う遮光度と火花への耐性を備えた面・保護めがねを絞ります。", officialHref: "https://www.mhlw.go.jp/web/t_doc?dataId=00tc7618&dataType=1&pageNo=1", officialLabel: "厚生労働省｜騒音障害防止ガイドライン", checks: ["溶接方法・電流に合う遮光度を確認", "側方光・飛散物への保護範囲を確認", "呼吸用保護具・ヘルメットとの干渉を確認"] },
     {
       categoryId: "foot", taskIds: ["slip"], title: "床面に合う耐滑作業靴候補", query: "耐滑 作業靴 油 水 SRC 厨房 倉庫", summary: "濡れ・油のある床では、床材と汚れに合う耐滑性と靴底形状を軸に絞ります。",
-      officialHref: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000187558.html",
-      officialLabel: "厚生労働省｜労働災害防止対策",
+      officialHref: MHLW_SAFETY_FOOTWEAR_URL,
+      officialLabel: "厚生労働省｜労働安全衛生規則（履物）",
       checks: ["水・油・粉体など滑りの原因を確認", "床材に合う耐滑性能と靴底を確認", "清掃方法と靴底の交換基準を決める"],
     },
-    { categoryId: "foot", taskIds: ["puncture"], title: "踏抜き防止板入り安全靴候補", query: "踏抜き防止 安全靴 踏抜き抵抗 解体", summary: "釘・金属片・解体材には、靴底の踏抜き抵抗を確認できる安全靴を絞ります。", officialHref: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000187558.html", officialLabel: "厚生労働省｜労働災害防止対策", checks: ["釘・金属片の長さと散在範囲を確認", "踏抜き抵抗を示す規格・仕様を確認", "中敷きだけに頼らず靴全体の適合を確認"] },
-    { categoryId: "foot", taskIds: ["impact"], title: "先芯・甲プロテクタ付き安全靴候補", query: "安全靴 先芯 甲プロテクタ 荷役 JIS", summary: "荷役・落下物には、つま先保護と必要に応じ甲部保護を備える安全靴を絞ります。", officialHref: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000187558.html", officialLabel: "厚生労働省｜労働災害防止対策", checks: ["落下物の重量・形状と挟まれ箇所を確認", "先芯・甲プロテクタの規格を確認", "サイズ、足幅、歩行時の安定性を確認"] },
+    { categoryId: "foot", taskIds: ["puncture"], title: "踏抜き防止板入り安全靴候補", query: "踏抜き防止 安全靴 踏抜き抵抗 解体", summary: "釘・金属片・解体材には、靴底の踏抜き抵抗を確認できる安全靴を絞ります。", officialHref: MHLW_SAFETY_FOOTWEAR_URL, officialLabel: "厚生労働省｜労働安全衛生規則（履物）", checks: ["釘・金属片の長さと散在範囲を確認", "踏抜き抵抗を示す規格・仕様を確認", "中敷きだけに頼らず靴全体の適合を確認"] },
+    { categoryId: "foot", taskIds: ["impact"], title: "先芯・甲プロテクタ付き安全靴候補", query: "安全靴 先芯 甲プロテクタ 荷役 JIS", summary: "荷役・落下物には、つま先保護と必要に応じ甲部保護を備える安全靴を絞ります。", officialHref: MHLW_SAFETY_FOOTWEAR_URL, officialLabel: "厚生労働省｜労働安全衛生規則（履物）", checks: ["落下物の重量・形状と挟まれ箇所を確認", "先芯・甲プロテクタの規格を確認", "サイズ、足幅、歩行時の安定性を確認"] },
   ];
 
   const conditionProfiles: readonly ConditionProfile[] = [

@@ -143,7 +143,7 @@ const MAIN_SERVICES = [
 ] as const;
 
 const SERVICE_STYLES = `
-.hs-section{background:#091f1a;padding:2.5rem 1rem}
+.hs-section{background:#091f1a;padding:1.75rem 1rem}
 .home-render-skip-section{content-visibility:auto}.home-skip-updates{contain-intrinsic-block-size:auto 50rem}.home-skip-labs{contain-intrinsic-block-size:auto 28.75rem}.home-skip-directory{contain-intrinsic-block-size:auto 158.5rem}.home-skip-consult{contain-intrinsic-block-size:auto 32.8rem}
 .hs-wrap{max-width:80rem;margin-inline:auto}.hs-heading{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:1rem}
 .hs-kicker{display:inline-flex;align-items:center;gap:.5rem;color:#6ee7b7;font-size:.75rem;font-weight:900;letter-spacing:.14em}.hs-kicker svg,.hs-arrow{width:1rem;height:1rem}
@@ -197,7 +197,7 @@ export function HomeRelaunch({
               </p>
               <Image
                 src="/mascot/mascot-chat-talk-v4.webp"
-                alt="耳をすまして相談を待つ安全AIポータルのチワワ"
+                alt=""
                 width={112}
                 height={112}
                 priority
@@ -294,6 +294,7 @@ export function HomeRelaunch({
                   src="/mascot/mascot-chat-talk-v4.webp"
                   alt="吹き出しと一緒に相談を案内する安全AIポータルのチワワ"
                   fill
+                  priority
                   sizes="(max-width: 1023px) 18rem, (max-width: 1359px) 20rem, 34vw"
                   className="object-contain p-2 sm:p-4"
                 />

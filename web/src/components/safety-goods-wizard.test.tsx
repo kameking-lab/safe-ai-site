@@ -1,4 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import { SafetyGoodsWizard } from "./safety-goods-wizard";
 
@@ -6,6 +8,18 @@ const { trackEventMock } = vi.hoisted(() => ({ trackEventMock: vi.fn() }));
 vi.mock("@/components/Analytics", () => ({ trackEvent: trackEventMock }));
 
 describe("SafetyGoodsWizard", () => {
+  it("公開中の厚労省・NETIS公式URLだけを選定根拠に使う", () => {
+    const source = readFileSync(
+      resolve(process.cwd(), "src/components/safety-goods-wizard.tsx"),
+      "utf8",
+    );
+
+    expect(source).not.toContain("0000187558.html");
+    expect(source).not.toContain("www.mlit.go.jp/tec/tec_tk_000067.html");
+    expect(source).toContain("dataId=00tc2747&dataType=1");
+    expect(source).toContain("netis/input/pubsearch/search");
+  });
+
   it("作業・条件を順に選び、呼吸用保護具の購入候補へ進める", () => {
     render(<SafetyGoodsWizard />);
 

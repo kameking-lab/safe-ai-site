@@ -1168,7 +1168,8 @@ export function AnalyticsDashboardImpl({
           </p>
           <ul className="mt-1 list-disc space-y-0.5 pl-5">
             <li>
-              <strong>既定の母集団</strong>は厚労省死亡災害個票
+              <strong>選択中の母集団</strong>は
+              {SOURCE_LABELS[aggregates.meta.filters.source] ?? "選択データ源"}の
               {formatNumber(aggregates.meta.datasetCases)}件です。現在の絞り込み後は
               {formatNumber(aggregates.meta.filteredCases)}件です。編集済み事例はデータ源で明示的に選んだ場合だけ含めます。
             </li>
