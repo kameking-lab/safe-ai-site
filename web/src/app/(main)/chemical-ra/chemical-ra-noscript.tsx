@@ -1,5 +1,3 @@
-/* eslint-disable @next/next/no-html-link-for-pages -- These links live inside noscript; client-side Link hydration cannot run here. */
-
 export function ChemicalRaNoScriptFallback() {
   return (
     <section
@@ -11,7 +9,7 @@ export function ChemicalRaNoScriptFallback() {
         物質名・CAS番号を確認
       </h2>
       <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-700">
-        SDSの第1項で物質名とCAS番号を確認し、公式検索で一致する物質を選んでください。
+        SDS第1項の物質名・CAS番号を確認し、一致しない場合は評価せず最新SDSを確認してください。
       </p>
       <nav
         aria-label="JavaScriptなしの化学物質確認"
@@ -34,27 +32,6 @@ export function ChemicalRaNoScriptFallback() {
           公式CREATE-SIMPLEを開く
         </a>
       </nav>
-      <p className="mt-5 text-sm font-black text-slate-900">CAS番号別の確認例</p>
-      <nav
-        aria-label="CAS番号別の確認例"
-        className="mt-1 flex flex-wrap gap-x-5 gap-y-1"
-      >
-        <a
-          href="/chemical-database/108-88-3"
-          className="inline-flex min-h-11 items-center font-bold text-brand-primary underline underline-offset-4"
-        >
-          トルエン（108-88-3）
-        </a>
-        <a
-          href="/chemical-database/67-56-1"
-          className="inline-flex min-h-11 items-center font-bold text-brand-primary underline underline-offset-4"
-        >
-          メタノール（67-56-1）
-        </a>
-      </nav>
-      <p className="mt-2 text-xs font-bold text-slate-600">
-        物質名とCAS番号が一致しない場合は評価を始めず、製品の最新SDSを確認してください。
-      </p>
     </section>
   );
 }

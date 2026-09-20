@@ -60,10 +60,7 @@ export default async function HomePage() {
           aria-label="JavaScriptなしで利用できる機能"
           className="border-b border-amber-300 bg-amber-50 px-4 py-3 text-amber-950"
         >
-          <p className="mx-auto max-w-7xl text-sm font-bold">
-            JavaScriptなしでも実情報を読めます。入力や地域変更は各ページの通常リンクから利用してください。
-          </p>
-          <ul className="mx-auto mt-2 flex max-w-7xl flex-wrap gap-x-4 gap-y-2 text-sm font-black underline underline-offset-4">
+          <ul className="mx-auto flex max-w-7xl flex-wrap gap-x-4 gap-y-2 text-sm font-black underline underline-offset-4">
             <li>
               <a href="/chatbot">安衛法AI</a>
             </li>
