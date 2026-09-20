@@ -1,4 +1,4 @@
-import Link from "next/link";
+/* eslint-disable @next/next/no-html-link-for-pages -- These links live inside noscript; client-side Link hydration cannot run here. */
 
 export function ChemicalRaNoScriptFallback() {
   return (
@@ -39,18 +39,18 @@ export function ChemicalRaNoScriptFallback() {
         aria-label="CAS番号別の確認例"
         className="mt-1 flex flex-wrap gap-x-5 gap-y-1"
       >
-        <Link
+        <a
           href="/chemical-database/108-88-3"
           className="inline-flex min-h-11 items-center font-bold text-brand-primary underline underline-offset-4"
         >
           トルエン（108-88-3）
-        </Link>
-        <Link
+        </a>
+        <a
           href="/chemical-database/67-56-1"
           className="inline-flex min-h-11 items-center font-bold text-brand-primary underline underline-offset-4"
         >
           メタノール（67-56-1）
-        </Link>
+        </a>
       </nav>
       <p className="mt-2 text-xs font-bold text-slate-600">
         物質名とCAS番号が一致しない場合は評価を始めず、製品の最新SDSを確認してください。

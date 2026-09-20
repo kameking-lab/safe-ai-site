@@ -28,6 +28,7 @@ describe("Search Console production operations targets", () => {
     "/guides/anzeneho-ai-chatbot",
     "/law-search",
     "/accident-news",
+    "/fatal-accidents",
   ])("keeps %s in the priority inspection list", (pathname) => {
     const priorityBlock = script.match(
       /const PRIORITY_PATHS = \[([\s\S]*?)\];/,

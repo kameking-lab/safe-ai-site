@@ -1,14 +1,15 @@
 "use client";
 
-import { ExternalLink, Search, ShieldAlert } from "lucide-react";
+import { ExternalLink, Search } from "lucide-react";
 import {
   generateAmazonAffiliateUrl,
   generateRakutenSearchUrl,
 } from "@/lib/affiliate-url";
 import { trackEvent } from "@/components/Analytics";
 import { PUBLIC_SAFETY_GOODS_CATEGORIES } from "@/data/public-safety-goods-categories";
-import { GoodsChatbot } from "@/components/goods-chatbot";
 import { FeatureMascotCompanion } from "@/components/feature-mascot-companion";
+import { NetisSafetyGuide } from "@/components/netis-safety-guide";
+import { SafetyGoodsWizard } from "@/components/safety-goods-wizard";
 
 const OFFICIAL_SELECTION_SOURCES = [
   {
@@ -46,57 +47,36 @@ export function SafetyGoodsPanel() {
   return (
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 lg:px-8">
       <header>
-        <p className="text-sm font-semibold text-emerald-700">購入前の確認入口</p>
+        <p className="text-sm font-semibold text-emerald-700">作業から選べる購入入口</p>
         <h1 className="mt-1 text-2xl font-bold text-slate-950 sm:text-3xl">
-          安全用品・保護具のカテゴリ検索
+          安全用品・保護具を、迷わず選ぶ
         </h1>
         <p className="mt-3 max-w-4xl text-sm leading-7 text-slate-700">
-          作業条件と一次資料を確認した後に、販売サイトで候補を探すための入口です。
-          特定商品、型式、規格適合、性能、価格、現場への適合性は当サイトでは確認していません。
+          「何から見ればいい？」を、危険・作業・現場条件の順に整理。
+          そのまま購入候補と公式資料へ進めます。
         </p>
         <FeatureMascotCompanion
           variant="ppe-check"
           eyebrow="装備点検チワワ"
-          title="買う前に、作業条件から合うカテゴリを絞ろう。"
-          message="かわいく案内しますが、最後は規格・説明書・装着性まできちんと確認します。"
+          title="作業に合う道具を、いっしょに絞ろう。"
+          message="まずは危険と作業を選べばOK。次に見るポイントまで案内します。"
           tone="cream"
           compact
           className="mt-4 max-w-3xl"
         />
       </header>
 
-      <section
-        className="rounded-2xl border-2 border-amber-400 bg-amber-50 p-5"
-        aria-labelledby="goods-boundary-title"
-      >
-        <div className="flex gap-3">
-          <ShieldAlert
-            className="mt-0.5 h-6 w-6 shrink-0 text-amber-800"
-            aria-hidden="true"
-          />
-          <div>
-            <h2
-              id="goods-boundary-title"
-              className="text-lg font-bold text-amber-950"
-            >
-              この一覧だけで保護具を選定しないでください
-            </h2>
-            <p className="mt-2 text-sm leading-7 text-amber-950">
-              リスクアセスメント、対象物質・濃度、作業高さ、落下距離、騒音ばく露、
-              使用時間、装着者への適合、他装備との干渉、製品ラベル、取扱説明書を確認し、
-              必要に応じてメーカー、販売事業者、労働安全衛生の専門家へ確認してください。
-              購入リンクは検索結果へのアフィリエイトリンクであり、推奨・適合証明ではありません。
-            </p>
-          </div>
-        </div>
-      </section>
+      <SafetyGoodsWizard />
 
-      <GoodsChatbot />
+      <NetisSafetyGuide compact />
 
-      <section aria-labelledby="official-selection-sources">
+      <details className="group rounded-2xl border border-slate-200 bg-slate-50 p-5" aria-labelledby="official-selection-sources">
+        <summary className="cursor-pointer list-none text-lg font-bold text-slate-950 marker:hidden">
+          <span className="inline-flex items-center gap-2">公式資料を見ながら、もう一度確認する <span aria-hidden="true" className="text-emerald-700 group-open:rotate-90">›</span></span>
+        </summary>
         <h2
           id="official-selection-sources"
-          className="text-xl font-bold text-slate-950"
+          className="sr-only"
         >
           選定前に確認する公式一次資料
         </h2>
@@ -121,12 +101,12 @@ export function SafetyGoodsPanel() {
         <p className="mt-2 text-xs leading-6 text-slate-600">
           確認日: 2026年7月24日。資料は対象作業・製品ごとに異なります。リンク先の改訂状況も確認してください。
         </p>
-      </section>
+      </details>
 
       <section aria-labelledby="goods-quick-selector" className="rounded-3xl bg-slate-950 p-5 text-white sm:p-7">
         <p className="text-xs font-black tracking-[.14em] text-emerald-300">30-SECOND SELECTOR</p>
-        <h2 id="goods-quick-selector" className="mt-2 text-2xl font-black">危険からカテゴリを絞る</h2>
-        <p className="mt-2 text-sm font-semibold leading-6 text-slate-300">該当する危険を選ぶと、関連カテゴリへ移動します。最終選定は作業条件と公式資料で確認してください。</p>
+        <h2 id="goods-quick-selector" className="mt-2 text-2xl font-black">ほかの安全用品から探す</h2>
+        <p className="mt-2 text-sm font-semibold leading-6 text-slate-300">上の3ステップにない危険も、カテゴリからすぐ購入検索へ進めます。</p>
         <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
           {[
             ["高所から落ちる", "#goods-fall-protection", "墜落制止用器具へ"],
@@ -148,9 +128,9 @@ export function SafetyGoodsPanel() {
         >
           カテゴリから販売サイトを検索
         </h2>
-        <p className="mt-2 text-sm leading-6 text-slate-700">
-          旧商品データは型式と仕様を一次資料で照合できていないため公開停止しました。
-          以下は特定SKUを示さないカテゴリ検索だけです。
+        <p className="mt-2 text-sm leading-6 text-slate-700">作業に近いカテゴリを選ぶと、Amazon・楽天の検索結果へ進めます。</p>
+        <p className="mt-2 max-w-4xl text-xs font-semibold leading-6 text-slate-600">
+          購入前に、対象物質・濃度、落下距離、騒音ばく露、使用時間と、規格・サイズ・装着適合を公式資料で照合してください。検索結果は推奨や適合証明ではありません。
         </p>
         <ul className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {PUBLIC_SAFETY_GOODS_CATEGORIES.map((category) => (
@@ -167,9 +147,7 @@ export function SafetyGoodsPanel() {
                   {category.name}
                 </h3>
               </div>
-              <p className="mt-3 text-xs leading-6 text-slate-600">
-                {category.selectionPrompt}。検索結果では型式、適用範囲、規格表示、使用期限、点検方法を商品ごとに確認してください。
-              </p>
+              <p className="mt-3 text-xs leading-6 text-slate-600">{category.selectionPrompt}</p>
               <div className="mt-4 grid grid-cols-2 gap-2">
                 <a
                   href={generateAmazonAffiliateUrl(category.searchQuery)}

@@ -4,11 +4,10 @@ import { SafetyGoodsPanel } from "@/components/safety-goods-panel";
 import { ogImageUrl } from "@/lib/og-url";
 import { withSiteOpenGraph, withSiteTwitter, SITE_URL } from "@/lib/seo-metadata";
 import { JsonLd, webPageSchema, breadcrumbSchema } from "@/components/json-ld";
-import { NetisSafetyGuide } from "@/components/netis-safety-guide";
 
-const _title = "安全用品・保護具の購入前確認とカテゴリ検索";
+const _title = "安全用品・保護具の選び方｜作業から購入候補を絞る";
 const _desc =
-  "保護具を購入する前に確認する公式資料と選定条件を案内。特定商品の適合を断定せず、墜落制止用器具・呼吸用保護具・保護手袋等の販売サイト検索へつなぎます。";
+  "呼吸用保護具・墜落制止用器具・化学防護手袋などを、危険・作業・現場条件の順に選んで購入候補へ。公式資料とNETIS安全技術も確認できます。";
 
 export const metadata: Metadata = {
   title: _title,
@@ -38,9 +37,6 @@ export default function GoodsPage() {
         ]}
       />
       <SafetyGoodsPanel />
-      <div className="mx-auto max-w-7xl px-4 pb-10 lg:px-8">
-        <NetisSafetyGuide compact />
-      </div>
     </Suspense>
   );
 }

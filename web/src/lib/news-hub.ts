@@ -141,7 +141,7 @@ function seriousCaseItems(limit: number): NewsHubItem[] {
     summary: `${c.description}${c.type && c.sameTypeTotal > 0 ? `（同種事故 収録${c.sameTypeTotal}件）` : ""}`,
     date: `${c.year}-${String(c.month ?? 1).padStart(2, "0")}-01`,
     url: SERIOUS_CASES_META.sourceUrl,
-    internalHref: "/accident-news",
+    internalHref: "/fatal-accidents",
   }));
 }
 

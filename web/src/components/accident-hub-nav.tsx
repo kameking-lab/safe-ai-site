@@ -1,15 +1,33 @@
+import { isPublicRouteAvailable } from "@/lib/public-content-policy";
+
 type AccidentHubNavProps = {
-  current: "accidents" | "accidents-reports" | "accidents-analytics" | "accident-news";
+  current:
+    | "accidents"
+    | "accidents-reports"
+    | "accidents-analytics"
+    | "accident-news"
+    | "fatal-accidents";
 };
 
-// 一次資料との本文一致を再検証中の事故DB・分析系ルートはここへ置かない。
-// 公開中の重大災害情報だけを明示し、隔離機能への復活導線を作らない。
+// 公開確認済みの速報と統計分析を相互に移動できるようにする。
 const NAV_ITEMS = [
   {
     id: "accident-news" as const,
     href: "/accident-news",
-    label: "重大災害事例",
-    description: "死亡災害を業種・事故型・原因で類型検索（公表事実・匿名・出典付き）",
+    label: "労災事故速報",
+    description: "直近14日以内の国内労災報道を公表日時・媒体名・確認状態つきで表示",
+  },
+  {
+    id: "fatal-accidents" as const,
+    href: "/fatal-accidents",
+    label: "死亡事故データベース",
+    description: "厚労省の死亡災害を業種・事故型・起因物・年で類型検索",
+  },
+  {
+    id: "accidents-analytics" as const,
+    href: "/accidents-analytics",
+    label: "事故分析ダッシュボード",
+    description: "全国公式統計と収録事例を分け、業種・事故型・経年傾向を確認",
   },
 ];
 
@@ -52,4 +70,3 @@ export function AccidentHubNav({ current }: AccidentHubNavProps) {
     </nav>
   );
 }
-import { isPublicRouteAvailable } from "@/lib/public-content-policy";

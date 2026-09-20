@@ -53,7 +53,7 @@ export default function WhatsNewPage() {
           primaryAction={{ href: "#news-list", label: "新着一覧を見る" }}
           secondaryActions={[
             { href: "/laws", label: "法改正を見る" },
-            { href: "/accident-news", label: "重大災害を探す" },
+            { href: "/accident-news", label: "労災事故速報を見る" },
           ]}
           importantNote="サイト解説と公式原文を分けて表示します。対応判断はリンク先の公式情報で確認してください。"
           compactOnMobile
@@ -92,8 +92,8 @@ export default function WhatsNewPage() {
             <Link href="/accidents" className="font-semibold text-emerald-700 hover:underline">
               事故データベースへ →
             </Link>
-            <Link href="/accident-news" className="font-semibold text-emerald-700 hover:underline">
-              重大災害事例ブラウザへ →
+            <Link href="/fatal-accidents" className="font-semibold text-emerald-700 hover:underline">
+              死亡事故データベースへ →
             </Link>
           </div>
           {/* P2-3: 反映ラグの可視化（最終取得日時） */}

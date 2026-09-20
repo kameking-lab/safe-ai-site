@@ -153,7 +153,7 @@ export default async function CourtCaseDetailPage({ params }: { params: Promise<
               <Link href="/ky/paper" className="flex min-h-[44px] items-center gap-2 rounded-xl border border-slate-200 bg-white p-3 text-sm shadow-sm hover:border-emerald-300 dark:border-slate-700 dark:bg-slate-900">
                 <ClipboardList className="h-4 w-4 shrink-0 text-emerald-600" aria-hidden="true" /> <span className="font-semibold">KY用紙で危険予知</span>
               </Link>
-              <Link href="/accident-news" className="flex min-h-[44px] items-center gap-2 rounded-xl border border-slate-200 bg-white p-3 text-sm shadow-sm hover:border-emerald-300 dark:border-slate-700 dark:bg-slate-900">
+              <Link href="/fatal-accidents" className="flex min-h-[44px] items-center gap-2 rounded-xl border border-slate-200 bg-white p-3 text-sm shadow-sm hover:border-emerald-300 dark:border-slate-700 dark:bg-slate-900">
                 <Database className="h-4 w-4 shrink-0 text-emerald-600" aria-hidden="true" /> <span className="font-semibold">重大災害事例を見る</span>
               </Link>
               <Link href="/chatbot" className="flex min-h-[44px] items-center gap-2 rounded-xl border border-slate-200 bg-white p-3 text-sm shadow-sm hover:border-emerald-300 dark:border-slate-700 dark:bg-slate-900">

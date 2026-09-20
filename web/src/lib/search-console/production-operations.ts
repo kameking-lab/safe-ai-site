@@ -26,6 +26,7 @@ const PRIORITY_PATHS = [
   "/guides/anzeneho-ai-chatbot",
   "/law-search",
   "/accident-news",
+  "/fatal-accidents",
 ] as const;
 const HOLD_PATHS = [
   "/heat-illness-prevention",

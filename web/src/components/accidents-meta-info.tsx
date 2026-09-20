@@ -127,12 +127,12 @@ export function AccidentsAnalyticsBanner({ totalLabel }: { totalLabel: string })
         <div>
           <p className="text-sm font-bold text-emerald-900 sm:text-base">
             <BarChart3 className="mr-1 inline h-4 w-4 align-[-2px]" aria-hidden="true" />
-            {isEn ? "Accident statistics dashboard" : "事故統計ダッシュボード"}
+            {isEn ? "Accident analytics dashboard" : "事故分析ダッシュボード"}
           </p>
           <p className="mt-0.5 text-[11px] text-emerald-800 sm:text-xs">
             {isEn
-              ? `Visualize ${totalLabel} cases across 25 analytical axes — year, month, industry, accident type, region, scale.`
-              : `収録 ${totalLabel} 件を、年・月・業種・事故種類・地域・規模など 25 種類の分析軸で可視化。`}
+              ? `Filter ${totalLabel} cases by 12 dimensions, including year, month, industry, accident type, region, and workplace size.`
+              : `収録 ${totalLabel} 件を、年・月・業種・事故種類・地域・規模など12種類の条件で分析。`}
           </p>
         </div>
         <a

@@ -88,10 +88,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
       changeFrequency: "weekly",
     },
-    // 重大災害事例ブラウザ（死亡災害DBの類型検索・自己canonical・実在indexableページ）。
-    // 死亡災害DB由来のためlastmodは accidentsDataUpdated（= SERIOUS_CASES_META.generatedAt）に追従。
+    // 直近の報道ベース労災事故速報。更新日はニュース系データの最新日に追従。
     {
       url: "/accident-news",
+      lastModified: freshestNews,
+      priority: 0.9,
+      changeFrequency: "hourly",
+    },
+    // 厚労省死亡災害DBの類型検索。スナップショット更新日に追従。
+    {
+      url: "/fatal-accidents",
       lastModified: accidentsDataUpdated,
       priority: 0.85,
       changeFrequency: "weekly",

@@ -66,7 +66,6 @@
   --radius-lg: 1.5rem;
   --space-1: 0.25rem;
   --space-2: 0.5rem;
-  --space-4: 1rem;
   --type-xs: 0.75rem;
 }
 
@@ -182,10 +181,7 @@ body {
       .bg-slate-100,
       .bg-slate-200,
       .bg-gray-50,
-      .bg-gray-100,
       .bg-gray-200,
-      .bg-zinc-50,
-      .bg-zinc-100,
       .bg-zinc-200
     ):not([class*="dark:bg-"]) {
     background-color: var(--surface-muted);
@@ -218,10 +214,8 @@ body {
       .bg-sky-200,
       .bg-blue-50,
       .bg-blue-100,
-      .bg-blue-200,
       .bg-cyan-50,
       .bg-cyan-100,
-      .bg-cyan-200,
       [class^="bg-sky-50/"],
       [class*=" bg-sky-50/"],
       [class^="bg-blue-50/"],
@@ -239,10 +233,8 @@ body {
       .bg-amber-200,
       .bg-orange-50,
       .bg-orange-100,
-      .bg-orange-200,
       .bg-yellow-50,
       .bg-yellow-100,
-      .bg-yellow-200,
       [class^="bg-amber-50/"],
       [class*=" bg-amber-50/"],
       [class^="bg-orange-50/"],
@@ -277,13 +269,11 @@ body {
     :where(
       .bg-indigo-50,
       .bg-indigo-100,
-      .bg-indigo-200,
       .bg-violet-50,
       .bg-violet-100,
       .bg-violet-200,
       .bg-purple-50,
       .bg-purple-100,
-      .bg-purple-200,
       [class^="bg-indigo-50/"],
       [class*=" bg-indigo-50/"],
       [class^="bg-violet-50/"],
@@ -407,6 +397,13 @@ body {
 }
 
 /* Shared visual grammar. Layouts may vary; color, radius, shadow, CTA and status do not. */
+aside [data-nav-active="true"],
+#mobile-site-menu [data-nav-active="true"] {
+  background: var(--surface-emphasis);
+  color: var(--primary);
+  font-weight: 600;
+}
+
 .portal-surface {
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
@@ -520,15 +517,6 @@ body {
   color: var(--ai);
 }
 
-.portal-evidence-card {
-  border-left: 0.3rem solid var(--official);
-  border-radius: var(--radius-md);
-  background: var(--surface);
-  padding: var(--space-4);
-  color: var(--text);
-  box-shadow: var(--shadow-xs);
-}
-
 .portal-callout-caution {
   border: 1px solid color-mix(in srgb, var(--caution) 48%, var(--border));
   border-radius: var(--radius-md);
@@ -554,31 +542,8 @@ body {
   transform: translateY(-2px);
 }
 
-.mascot-bubble {
-  position: relative;
-  border: 1px solid color-mix(in srgb, var(--primary) 32%, var(--border));
-  border-radius: var(--radius-md);
-  background: var(--surface);
-  color: var(--text);
-  box-shadow: var(--shadow-sm);
-}
-
-.mascot-bubble::before {
-  position: absolute;
-  left: -0.45rem;
-  bottom: 1rem;
-  width: 0.8rem;
-  height: 0.8rem;
-  border-left: 1px solid color-mix(in srgb, var(--primary) 32%, var(--border));
-  border-bottom: 1px solid color-mix(in srgb, var(--primary) 32%, var(--border));
-  background: var(--surface);
-  content: "";
-  transform: rotate(45deg);
-}
-
 /* スクロールバー非表示（モバイルタブ等） */
 .scrollbar-hide {
-  -ms-overflow-style: none;
   scrollbar-width: none;
 }
 .scrollbar-hide::-webkit-scrollbar {
@@ -834,7 +799,6 @@ table {
  */
 @media (max-width: 480px) {
   .text-xs:not([data-compact-text]),
-  .text-2xs:not([data-compact-text]),
   .text-\[10px\]:not([data-compact-text]),
   .text-\[11px\]:not([data-compact-text]),
   .text-\[12px\]:not([data-compact-text]),
@@ -931,13 +895,6 @@ table {
   svg {
     forced-color-adjust: auto;
   }
-}
-
-/* App Router may briefly retain a route fallback while the page-level
-   Suspense fallback streams in. Never show both accident loading shells. */
-main:has(#accident-news-search [data-accident-news-loading-shell])
-  [data-accident-news-route-loading] {
-  display: none;
 }
 
 /* JS無効時は送信可能なnoscriptフォームだけを残す。headのnonce付き

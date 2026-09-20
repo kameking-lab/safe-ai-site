@@ -34,7 +34,7 @@ const CATEGORIES: FeatureCategory[] = [
     title: "今日使う",
     icon: ShieldCheck,
     visible: [
-      { href: "/morning-briefing", label: "朝礼3分セット" },
+      { href: "/risk", label: "朝礼3分セット" },
       { href: "/risk", label: "今日の安全" },
       { href: "/signage", label: "サイネージ" },
     ],

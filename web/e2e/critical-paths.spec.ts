@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 
 const pages = [
   { path: "/", label: "トップページ" },
-  { path: "/accidents", label: "事故データベース" },
+  { path: "/accidents", label: "事故事例検索（補助）" },
   { path: "/law-search", label: "法改正検索" },
   { path: "/chemical-ra", label: "化学物質RA" },
   { path: "/education", label: "教育" },

@@ -186,7 +186,7 @@ export default async function AccidentDetailPage({
         schema={[
           breadcrumbSchema([
             { name: "ホーム", url: SITE_BASE },
-            { name: "事故データベース", url: `${SITE_BASE}/accidents` },
+            { name: "事故事例検索（補助）", url: `${SITE_BASE}/accidents` },
             { name: accident.title, url },
           ]),
         ]}
@@ -198,7 +198,7 @@ export default async function AccidentDetailPage({
           className="inline-flex min-h-[44px] items-center gap-1 hover:text-emerald-600 transition-colors"
         >
           <ChevronLeft className="h-3 w-3" />
-          事故データベース
+          事故事例検索（補助）
         </Link>
         <span>/</span>
         <span className="line-clamp-1 text-slate-700">{accident.title}</span>

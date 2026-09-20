@@ -1,12 +1,12 @@
 /**
- * 事故統計ダッシュボードの出力（柱C-7）。
+ * 事故分析ダッシュボードの出力（柱C-7）。
  * 「月例安全会議の資料に貼る」を完了させるための CSV／要点テキスト生成。
  * 集計値（aggregates）をそのまま転記＝捏造・水増しなし。純関数。
  */
 import type { AnalyticsAggregates } from "./types";
 import { sectionsToCsv } from "@/lib/export/csv";
 
-export const ANALYTICS_CSV_FILENAME = "accident-statistics.csv";
+export const ANALYTICS_CSV_FILENAME = "accident-analysis.csv";
 
 function jp(n: number): string {
   return n.toLocaleString("ja-JP");
@@ -17,20 +17,31 @@ function filterLabel(a: AnalyticsAggregates): string {
     a.meta.filters.industry,
     a.meta.filters.type,
     a.meta.filters.year ? `${a.meta.filters.year}年` : null,
+    a.meta.filters.month ? `${a.meta.filters.month}月` : null,
+    a.meta.filters.industryMedium,
+    a.meta.filters.cause,
+    a.meta.filters.workplaceSize,
+    a.meta.filters.occurrenceTime,
+    a.meta.filters.prefecture,
+    a.meta.filters.age,
+    a.meta.filters.severity,
+    a.meta.filters.source !== "official"
+      ? `データ源:${a.meta.filters.source}`
+      : null,
   ].filter(Boolean);
-  return filters.length > 0 ? filters.join(" × ") : "全データ";
+  return filters.length > 0 ? filters.join(" × ") : "公式死亡個票";
 }
 
 /** ダッシュボードの主要集計表を1つの CSV へ（Excel で開ける控え・集計用）。 */
 export function analyticsToCsv(a: AnalyticsAggregates): string {
   return sectionsToCsv([
     {
-      title: "事故統計ダッシュボード サマリー",
+      title: "事故分析ダッシュボード サマリー",
       headers: ["項目", "値"],
       rows: [
         ["絞り込み条件", filterLabel(a)],
         ["対象件数（件）", a.meta.filteredCases],
-        ["統合データセット総件数（件）", a.meta.datasetCases],
+        ["選択データ源の総件数（件）", a.meta.datasetCases],
         [
           "収録期間",
           `${a.meta.yearsCovered.from}〜${a.meta.yearsCovered.to}年`,
@@ -39,7 +50,7 @@ export function analyticsToCsv(a: AnalyticsAggregates): string {
         ["厚労省 死亡災害DB（件）", a.meta.mhlwDeathsCount],
         [`${a.kpi.recentYearLabel}の事故件数（件）`, a.kpi.recentYearCount],
         ["直近12ヶ月の事故件数（件）", a.kpi.trailing12mCount],
-        ["死亡災害比率（%）", a.kpi.fatalRatePercent],
+        ["死亡事例の構成比（%）", a.kpi.fatalRatePercent],
         ["業種欠損率（%）", a.meta.coverage.industry.missingRatePercent],
         ["事故型欠損率（%）", a.meta.coverage.type.missingRatePercent],
         ["発生月欠損率（%）", a.meta.coverage.month.missingRatePercent],
@@ -100,9 +111,10 @@ export function analyticsToSummaryText(a: AnalyticsAggregates): string {
     `【事故統計サマリー】${filterLabel(a)}・対象${jp(a.meta.filteredCases)}件（全${jp(a.meta.datasetCases)}件）`,
     `収録期間：${a.meta.yearsCovered.from}〜${a.meta.yearsCovered.to}年`,
     `${a.kpi.recentYearLabel}の事故件数：${jp(a.kpi.recentYearCount)}件（前年比 ${delta}）`,
-    `死亡災害比率：${a.kpi.fatalRatePercent}%`,
-    `危険業種TOP3：${top3i}`,
+    `死亡事例の構成比：${a.kpi.fatalRatePercent}%`,
+    `収録件数上位業種TOP3：${top3i}`,
     `事故種類TOP3：${top3t}`,
-    `出典：安全AIポータル 事故統計ダッシュボード（厚労省データ＋curated事例）`,
+    `注記：数値は収録事例内の構成比・件数であり、発生率やリスクの高さを示すものではありません。`,
+    `出典：安全AIポータル 事故分析ダッシュボード`,
   ].join("\n");
 }

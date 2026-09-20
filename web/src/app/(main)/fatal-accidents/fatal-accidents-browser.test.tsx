@@ -1,9 +1,9 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import {
-  AccidentNewsBrowser,
-  buildAccidentNewsPageHref,
-} from "./accident-news-browser";
+  FatalAccidentsBrowser,
+  buildFatalAccidentsPageHref,
+} from "./fatal-accidents-browser";
 import type { SeriousCase } from "@/lib/accident-news/serious-cases";
 
 const push = vi.fn();
@@ -37,20 +37,20 @@ afterEach(() => {
   window.history.replaceState({}, "", "/");
 });
 
-describe("AccidentNewsBrowser URL privacy", () => {
+describe("FatalAccidentsBrowser URL privacy", () => {
   it("no-JavaScriptページングは構造化フィルタだけをGETへ残す", () => {
     expect(
-      buildAccidentNewsPageHref(
+      buildFatalAccidentsPageHref(
         { industry: "建設業", type: "墜落、転落", year: "2023" },
         2,
       ),
     ).toBe(
-      "/accident-news?industry=%E5%BB%BA%E8%A8%AD%E6%A5%AD&type=%E5%A2%9C%E8%90%BD%E3%80%81%E8%BB%A2%E8%90%BD&year=2023&page=2",
+      "/fatal-accidents?industry=%E5%BB%BA%E8%A8%AD%E6%A5%AD&type=%E5%A2%9C%E8%90%BD%E3%80%81%E8%BB%A2%E8%90%BD&year=2023&page=2",
     );
   });
 
   it("任意キーワードをPOST本文だけで検索し、結果更新後もURLへ露出しない", async () => {
-    window.history.replaceState({}, "", "/accident-news?industry=建設業");
+    window.history.replaceState({}, "", "/fatal-accidents?industry=建設業");
     const privateCase = {
       ...initialCase,
       id: "case-private",
@@ -68,7 +68,7 @@ describe("AccidentNewsBrowser URL privacy", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     render(
-      <AccidentNewsBrowser
+      <FatalAccidentsBrowser
         options={{
           industries: [{ value: "建設業", count: 1 }],
           types: [{ value: "墜落、転落", count: 1 }],

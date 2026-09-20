@@ -234,7 +234,7 @@ export function suggestDigDeeperLinks(
       out.push({
         kind: "accidents",
         label: topic.label,
-        href: "/accident-news",
+        href: "/fatal-accidents",
         description: `厚労省死亡災害DBの収録範囲から関連語を検索します。個別出典は公式DBで確認してください。`,
       });
       accidentAdded = true;
@@ -246,7 +246,7 @@ export function suggestDigDeeperLinks(
     out.push({
       kind: "accidents",
       label: `「${fallback}」関連の事故事例`,
-      href: "/accident-news",
+      href: "/fatal-accidents",
       description: `この語で重大災害データを検索します。関連性や原因関係を示すものではありません。`,
     });
   }

@@ -107,7 +107,7 @@ export function buildMonthlyDigest(input: DigestInput): DigestOutput {
     ...accidents.map((i) => `・${i.title}（${i.date}） ${i.url}`),
     "",
     "■ 重大災害事例（業種・事故型の類型／匿名・公表事実）",
-    ...seriousCases.map((i) => `・${i.title} ${SITE}/accident-news`),
+    ...seriousCases.map((i) => `・${i.title} ${SITE}/fatal-accidents`),
     "",
     "■ 通達・告示の新着",
     ...notices.map((i) => `・${i.title}（${i.date}） ${i.url}`),

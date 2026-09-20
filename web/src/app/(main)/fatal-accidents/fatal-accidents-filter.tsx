@@ -11,7 +11,7 @@ export type SelectedFilters = {
   q: string;
 };
 
-export function AccidentNewsFilter({
+export function FatalAccidentsFilter({
   options,
   selected,
   keyword,
@@ -41,7 +41,7 @@ export function AccidentNewsFilter({
       if (next.year) params.set("year", next.year);
       const qs = params.toString();
       startTransition(() => {
-        router.push(qs ? `/accident-news?${qs}` : "/accident-news");
+        router.push(qs ? `/fatal-accidents?${qs}` : "/fatal-accidents");
       });
     },
     [router, selected],
@@ -50,7 +50,7 @@ export function AccidentNewsFilter({
   return (
     <>
       <form
-        action="/accident-news"
+        action="/fatal-accidents"
         method="get"
         className="flex flex-wrap items-end gap-2 print:hidden"
         aria-busy={pending}
@@ -109,7 +109,7 @@ export function AccidentNewsFilter({
       </label>
       <label
         className="flex flex-1 flex-col text-xs font-semibold text-slate-600"
-        data-accident-news-keyword=""
+        data-fatal-accidents-keyword=""
       >
         キーワード
         <input
@@ -129,10 +129,10 @@ export function AccidentNewsFilter({
       {(selected.industry || selected.type || selected.year || keyword) && (
         <button
           type="button"
-          data-accident-news-js-only=""
+          data-fatal-accidents-js-only=""
           onClick={() => {
             onClear();
-            router.push("/accident-news");
+            router.push("/fatal-accidents");
           }}
           className="min-h-[44px] rounded-lg border border-slate-300 px-3 py-1 text-sm font-semibold text-slate-600 hover:bg-slate-50"
         >
@@ -141,7 +141,7 @@ export function AccidentNewsFilter({
       )}
       </form>
       <noscript>
-        <style>{`[data-accident-news-keyword],[data-accident-news-js-only]{display:none!important}`}</style>
+        <style>{`[data-fatal-accidents-keyword],[data-fatal-accidents-js-only]{display:none!important}`}</style>
         <p className="mt-2 text-xs text-slate-600">
           業種・事故型・年を選び「検索」を押してください。
         </p>
@@ -151,7 +151,7 @@ export function AccidentNewsFilter({
           role="status"
           aria-live="polite"
           className="sr-only"
-          data-accident-news-filter-pending
+          data-fatal-accidents-filter-pending
         >
           検索結果を更新しています。更新完了までは前回の結果を表示しています。
         </span>

@@ -51,7 +51,7 @@ export function HomeSafetyUpdates({
             className="rounded-2xl border border-rose-300/50 bg-white/5 p-3 sm:p-5"
             data-home-update="accidents"
           >
-            <h3 className="text-lg font-black">最新事故</h3>
+            <h3 className="text-lg font-black">直近の事故報道</h3>
 
             {featuredAccident ? (
               <div
@@ -163,7 +163,7 @@ export function HomeSafetyUpdates({
                 href="/accident-news"
                 className="inline-flex min-h-11 items-center justify-center gap-1 text-xs font-black underline underline-offset-4 sm:text-sm"
               >
-                関連事故を見る
+                事故速報をすべて見る
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </Link>
             </div>

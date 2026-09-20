@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 const LAUNCHER: { href: string; label: string }[] = [
   { href: "/risk", label: "今日の安全" },
   { href: "/laws", label: "法令一覧" },
-  { href: "/accident-news", label: "重大災害情報" },
+  { href: "/accident-news", label: "労災事故速報" },
   { href: "/circulars", label: "通達" },
   { href: "/ky/paper", label: "KY用紙" },
   { href: "/chemical-ra", label: "化学物質RA" },

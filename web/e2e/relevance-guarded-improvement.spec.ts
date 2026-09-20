@@ -51,7 +51,7 @@ async function waitForClientReady(page: Page) {
 
 async function activeNavigationHrefs(page: Page) {
   return page
-    .locator('a[data-app-shell-nav-href][data-nav-active="true"]')
+    .locator('a[data-nav-active="true"]')
     .evaluateAll((links) => [
       ...new Set(links.map((link) => link.getAttribute("href") ?? "")),
     ]);
@@ -328,7 +328,7 @@ test.describe("relevance-guarded task completion", () => {
     await waitForClientReady(page);
     await expect.poll(() => activeNavigationHrefs(page)).toEqual(["/"]);
     await expect(
-      page.locator('a[href="/"][data-app-shell-nav-href="/"]'),
+      page.locator('a[href="/"][data-nav-active="true"]'),
     ).toHaveAttribute("aria-current", "page");
 
     const menuDetails = page.locator("details[data-mobile-site-menu]");

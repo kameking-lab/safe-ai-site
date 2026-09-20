@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { HomeAutomationService } from "@/components/home/home-automation-service";
 import { HomeAutomationSamples } from "@/components/home/home-automation-samples";
+import { HomeActionCockpit } from "@/components/home/home-action-cockpit";
 import { HomeFeatureDirectory } from "@/components/home/home-feature-directory";
 import { HomeRelaunch } from "@/components/home/home-relaunch";
 import { HomeSafetyUpdates } from "@/components/home/home-safety-updates";
@@ -78,8 +79,14 @@ export default async function HomePage() {
           </ul>
         </nav>
       </noscript>
-      <HomeRelaunch />
-      <HomeSafetyUpdates latestNews={latestAccidentNews} />
+      <HomeRelaunch
+        priorityContent={
+          <>
+            <HomeActionCockpit />
+            <HomeSafetyUpdates latestNews={latestAccidentNews} />
+          </>
+        }
+      />
       <HomeAutomationSamples />
       <HomeFeatureDirectory />
       <HomeAutomationService availability={automationConsultAvailability} />

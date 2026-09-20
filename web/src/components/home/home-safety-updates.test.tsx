@@ -47,12 +47,14 @@ describe("HomeSafetyUpdates", () => {
   it("combines accident and law data and limits each stream to one featured plus two additions", () => {
     const { container } = render(<HomeSafetyUpdates latestNews={live} />);
 
-    expect(screen.getByRole("heading", { name: "最新事故" })).toBeTruthy();
+    expect(
+      screen.getByRole("heading", { name: "直近の事故報道" }),
+    ).toBeTruthy();
     expect(screen.getByRole("heading", { name: "注目法改正" })).toBeTruthy();
     expect(container.querySelectorAll("[data-accident-origin]")).toHaveLength(3);
     expect(container.querySelectorAll("[data-law-source-state]")).toHaveLength(3);
     expect(container.textContent).toContain("追加2件を確認");
-    expect(container.textContent).toContain("関連事故を見る");
+    expect(container.textContent).toContain("事故速報をすべて見る");
     expect(container.textContent).toContain("施行 2026-08-01");
     expect(container.textContent).toContain("原文");
     expect(container.textContent).not.toContain("報道・内容未確認");

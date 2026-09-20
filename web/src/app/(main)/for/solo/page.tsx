@@ -35,7 +35,7 @@ const ACTIONS: readonly RoleAction[] = [
       "ゼロ件を資格不要と扱わず、条件不足時は判定不能として公式窓口へ案内します。",
   },
   {
-    href: "/accident-news",
+    href: "/fatal-accidents",
     label: "重大災害情報を確認",
     description:
       "公表事実・匿名・出典付きの情報を確認し、自分の作業へ適用する前に条件を照合します。",

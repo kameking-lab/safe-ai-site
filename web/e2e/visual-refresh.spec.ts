@@ -68,9 +68,7 @@ test("ホームはチワワ主導の9主機能導線で、熱中症キャンペ�
     }),
   ).toBeVisible();
   await expect(
-    page.getByRole("img", {
-      name: /案内する安全AIポータルのチワワ/u,
-    }),
+    page.locator('img[src*="mascot-chat-talk-v4.webp"]:visible').first(),
   ).toBeVisible();
   await expect(
     page.getByRole("navigation", { name: "すぐに使う主要機能" }),
@@ -100,7 +98,7 @@ test("追加画像には代替テキストがあり、主要画像の表示領�
   for (const { route, imageSelector } of [
     {
       route: "/",
-      imageSelector: 'img[alt*="安全AIポータルのチワワ"]',
+      imageSelector: 'img[src*="mascot-chat-talk-v4.webp"]',
     },
     {
       route: "/materials/safety-images",
@@ -109,12 +107,10 @@ test("追加画像には代替テキストがあり、主要画像の表示領�
   ] as const) {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(route, { waitUntil: "domcontentloaded" });
-    await expect(page.locator(imageSelector).first(), route).toBeVisible();
+    const visibleImage = page.locator(`${imageSelector}:visible`).first();
+    await expect(visibleImage, route).toBeVisible();
     await expect(page.locator("main img:not([alt])"), route).toHaveCount(0);
-    const imageMetrics = await page
-      .locator(imageSelector)
-      .first()
-      .evaluate((image) => {
+    const imageMetrics = await visibleImage.evaluate((image) => {
         const rect = image.getBoundingClientRect();
         return {
           alt: image.getAttribute("alt"),
@@ -122,7 +118,13 @@ test("追加画像には代替テキストがあり、主要画像の表示領�
           height: rect.height,
         };
       });
-    expect(imageMetrics.alt?.trim().length ?? 0, route).toBeGreaterThan(0);
+    if (route === "/") {
+      await expect(
+        page.locator('img[alt*="安全AIポータルのチワワ"]'),
+      ).toHaveCount(1);
+    } else {
+      expect(imageMetrics.alt?.trim().length ?? 0, route).toBeGreaterThan(0);
+    }
     expect(imageMetrics.width, route).toBeGreaterThan(100);
     expect(imageMetrics.height, route).toBeGreaterThan(100);
   }

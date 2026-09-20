@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import {
   ArrowRight,
   BarChart3,
@@ -128,7 +128,7 @@ const MAIN_SERVICES = [
   },
   {
     href: "/accidents-analytics",
-    title: "事故統計分析",
+    title: "事故分析ダッシュボード",
     description:
       "厚労省データと収録事例を分け、業種・型・地域・年齢など多軸で分析。",
     action: "傾向を分析",
@@ -143,28 +143,33 @@ const MAIN_SERVICES = [
 ] as const;
 
 const SERVICE_STYLES = `
-.hs-section{background:#091f1a;padding:2.5rem 1rem}
+.hs-section{background:#091f1a;padding:1.75rem 1rem}
 .home-render-skip-section{content-visibility:auto}.home-skip-updates{contain-intrinsic-block-size:auto 50rem}.home-skip-labs{contain-intrinsic-block-size:auto 28.75rem}.home-skip-directory{contain-intrinsic-block-size:auto 158.5rem}.home-skip-consult{contain-intrinsic-block-size:auto 32.8rem}
 .hs-wrap{max-width:80rem;margin-inline:auto}.hs-heading{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:1rem}
 .hs-kicker{display:inline-flex;align-items:center;gap:.5rem;color:#6ee7b7;font-size:.75rem;font-weight:900;letter-spacing:.14em}.hs-kicker svg,.hs-arrow{width:1rem;height:1rem}
 .hs-title{margin-top:.5rem;font-size:1.875rem;font-weight:900;letter-spacing:-.03em}.hs-lead{max-width:48rem;margin-top:.5rem;color:#cbd5e1;font-size:.875rem;font-weight:600;line-height:1.5rem}
 .hs-all{display:inline-flex;min-height:2.75rem;align-items:center;gap:.5rem;border-radius:.5rem;padding-inline:.5rem;color:#a7f3d0;font-size:.875rem;font-weight:900;text-decoration:underline;text-underline-offset:4px}
-.hs-grid{display:grid;gap:1rem;margin-top:1.75rem}.hs-card{position:relative;display:block;min-height:21rem;overflow:hidden;border:1px solid rgb(255 255 255/.15);border-radius:1.8rem;background:#fffdf8;color:#0f172a;box-shadow:0 22px 55px -34px rgb(0 0 0/.95);content-visibility:auto;contain-intrinsic-block-size:auto 21rem;transition:transform .2s,border-color .2s,box-shadow .2s}
+.hs-quick{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.5rem;margin-top:1rem}.hs-quick-link{display:flex;min-height:4.25rem;flex-direction:column;align-items:center;justify-content:center;gap:.35rem;border:1px solid rgb(255 255 255/.16);border-radius:1rem;background:rgb(255 255 255/.08);padding:.5rem;color:#f8fafc;text-align:center;font-size:.68rem;font-weight:900;line-height:1rem}.hs-quick-link svg{width:1.2rem;height:1.2rem;color:#6ee7b7}.hs-quick-link:focus-visible{outline:3px solid #6ee7b7;outline-offset:2px}
+.hs-grid{display:grid;gap:.75rem;margin-top:1.25rem}.hs-card{position:relative;display:block;min-height:13rem;overflow:hidden;border:1px solid rgb(255 255 255/.15);border-radius:1.5rem;background:#fffdf8;color:#0f172a;box-shadow:0 22px 55px -34px rgb(0 0 0/.95);content-visibility:auto;contain-intrinsic-block-size:auto 13rem;transition:transform .2s,border-color .2s,box-shadow .2s}
 .hs-card:hover{border-color:rgb(255 255 255/.4);box-shadow:0 26px 65px -32px rgb(0 0 0/.9);transform:translateY(-.25rem)}.hs-card:focus-visible,.hs-all:focus-visible{outline:0;box-shadow:0 0 0 4px #6ee7b7,0 0 0 8px #071b17}
-.hs-visual{position:relative;height:9rem;overflow:hidden;background:var(--surface)}.hs-orb{position:absolute;left:-2rem;top:-2.5rem;width:7rem;height:7rem;border-radius:999px;background:var(--soft);opacity:.55}.hs-role{position:absolute;z-index:10;left:1rem;top:1rem;display:inline-flex;max-width:58%;align-items:center;gap:.5rem;border:1px solid rgb(255 255 255/.7);border-radius:999px;background:rgb(255 255 255/.8);padding:.375rem .75rem;color:#334155;font-size:.6875rem;font-weight:900;letter-spacing:.04em;box-shadow:0 1px 2px rgb(0 0 0/.05);backdrop-filter:blur(4px)}
+.hs-visual{position:relative;height:6rem;overflow:hidden;background:var(--surface)}.hs-orb{position:absolute;left:-2rem;top:-2.5rem;width:7rem;height:7rem;border-radius:999px;background:var(--soft);opacity:.55}.hs-role{position:absolute;z-index:10;left:.75rem;top:.75rem;display:inline-flex;max-width:62%;align-items:center;gap:.35rem;border:1px solid rgb(255 255 255/.7);border-radius:999px;background:rgb(255 255 255/.84);padding:.25rem .55rem;color:#334155;font-size:.625rem;font-weight:900;letter-spacing:.02em;box-shadow:0 1px 2px rgb(0 0 0/.05);backdrop-filter:blur(4px)}
 .hs-role svg{width:1rem;height:1rem;flex:none;color:var(--accent)}.hs-index{position:absolute;z-index:10;right:1rem;top:1rem;color:rgb(51 65 85/.45);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.75rem;font-weight:900}.hs-paw{position:absolute;z-index:10;bottom:.5rem;left:1.25rem;color:rgb(51 65 85/.2);transform:rotate(-9deg)}.hs-paw svg{width:2.25rem;height:2.25rem}
-.hs-mascot{position:absolute;right:0;bottom:-1.5rem;width:12rem;height:11rem;object-fit:contain;object-position:bottom;filter:drop-shadow(0 12px 14px rgb(25 45 38/.2));transition:transform .3s}.hs-card:hover .hs-mascot{transform:translateY(-.25rem) rotate(1deg) scale(1.04)}.hs-badge{position:absolute;z-index:10;right:.75rem;bottom:.75rem;display:flex;width:2.5rem;height:2.5rem;align-items:center;justify-content:center;border:2px solid #fff;border-radius:999px;background:var(--accent);color:#fff;box-shadow:0 4px 6px -1px rgb(0 0 0/.1)}.hs-badge svg{width:1.25rem;height:1.25rem}
-.hs-body{display:flex;min-height:12rem;flex-direction:column;padding:1.25rem}.hs-name{color:#020617;font-size:1.25rem;font-weight:900;letter-spacing:-.02em}.hs-copy{flex:1;margin-top:.5rem;color:#475569;font-size:.875rem;font-weight:600;line-height:1.5rem}.hs-action{display:inline-flex;min-height:2.5rem;width:max-content;align-items:center;gap:.5rem;margin-top:1rem;border-radius:999px;background:var(--accent);padding:.5rem 1rem;color:#fff;font-size:.875rem;font-weight:900;box-shadow:0 1px 2px rgb(0 0 0/.05)}.hs-action svg{transition:transform .2s}.hs-card:hover .hs-action svg{transform:translateX(.25rem)}
-@media(min-width:640px){.hs-section{padding:3.5rem 1.5rem}.hs-title{font-size:2.25rem}.hs-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.hs-mascot{position:absolute;right:0;bottom:-1rem;width:8rem;height:7.5rem;object-fit:contain;object-position:bottom;filter:drop-shadow(0 12px 14px rgb(25 45 38/.2));transition:transform .3s}.hs-card:hover .hs-mascot{transform:translateY(-.25rem) rotate(1deg) scale(1.04)}.hs-badge{position:absolute;z-index:10;right:.55rem;bottom:.45rem;display:flex;width:2rem;height:2rem;align-items:center;justify-content:center;border:2px solid #fff;border-radius:999px;background:var(--accent);color:#fff;box-shadow:0 4px 6px -1px rgb(0 0 0/.1)}.hs-badge svg{width:1rem;height:1rem}
+.hs-body{display:flex;min-height:7rem;flex-direction:column;padding:.7rem 1rem}.hs-name{color:#020617;font-size:1rem;font-weight:900;letter-spacing:-.02em}.hs-copy{display:-webkit-box;flex:1;overflow:hidden;margin-top:.25rem;color:#475569;font-size:.75rem;font-weight:600;line-height:1rem;-webkit-box-orient:vertical;-webkit-line-clamp:2}.hs-action{display:inline-flex;min-height:1.75rem;width:max-content;align-items:center;gap:.35rem;margin-top:.35rem;border-radius:999px;background:var(--accent);padding:.25rem .75rem;color:#fff;font-size:.75rem;font-weight:900;box-shadow:0 1px 2px rgb(0 0 0/.05)}.hs-action svg{transition:transform .2s}.hs-card:hover .hs-action svg{transform:translateX(.25rem)}
+@media(min-width:640px){.hs-section{padding:3.5rem 1.5rem}.hs-title{font-size:2.25rem}.hs-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem;margin-top:1.75rem}.hs-card{min-height:21rem;border-radius:1.8rem;contain-intrinsic-block-size:auto 21rem}.hs-visual{height:9rem}.hs-role{left:1rem;top:1rem;max-width:58%;gap:.5rem;padding:.375rem .75rem;font-size:.6875rem;letter-spacing:.04em}.hs-mascot{bottom:-1.5rem;width:12rem;height:11rem}.hs-badge{right:.75rem;bottom:.75rem;width:2.5rem;height:2.5rem}.hs-badge svg{width:1.25rem;height:1.25rem}.hs-body{min-height:12rem;padding:1.25rem}.hs-name{font-size:1.25rem}.hs-copy{display:block;overflow:visible;margin-top:.5rem;font-size:.875rem;line-height:1.5rem}.hs-action{min-height:2.5rem;gap:.5rem;margin-top:1rem;padding:.5rem 1rem;font-size:.875rem}.hs-quick{display:none}}
 @media(min-width:640px){.home-skip-updates{contain-intrinsic-block-size:auto 52.5rem}.home-skip-labs{contain-intrinsic-block-size:auto 25.625rem}.home-skip-directory{contain-intrinsic-block-size:auto 89rem}.home-skip-consult{contain-intrinsic-block-size:auto 24rem}}
 @media(min-width:1280px){.hs-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(min-width:1280px){.home-skip-updates{contain-intrinsic-block-size:auto 38rem}.home-skip-labs{contain-intrinsic-block-size:auto 15.625rem}.home-skip-directory{contain-intrinsic-block-size:auto 52.5rem}.home-skip-consult{contain-intrinsic-block-size:auto 18.5rem}}
-@media(max-width:480px){.hs-kicker,.hs-role,.hs-index{font-size:.875rem;line-height:1.45}}
+@media(max-width:480px){.hs-quick-link{min-height:5rem}.hs-quick-link,.hs-copy,.hs-kicker,.hs-role,.hs-index{font-size:.875rem;line-height:1.45}}
 @media(prefers-reduced-motion:reduce){.hs-card,.hs-mascot,.hs-action svg{transition:none}.hs-card:hover,.hs-card:hover .hs-mascot,.hs-card:hover .hs-action svg{transform:none}}
 @media print{.hs-card,.home-render-skip-section{content-visibility:visible;contain-intrinsic-size:none}}
 `;
 
-export function HomeRelaunch() {
+export function HomeRelaunch({
+  priorityContent,
+}: {
+  priorityContent?: ReactNode;
+} = {}) {
   const focusRing =
     "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-300 focus-visible:ring-offset-4 focus-visible:ring-offset-[#071b17]";
 
@@ -185,10 +190,20 @@ export function HomeRelaunch() {
         />
         <div className="relative mx-auto grid max-w-7xl gap-7 min-[1360px]:grid-cols-[minmax(0,1.25fr)_minmax(20rem,.75fr)] min-[1360px]:items-center">
           <div>
-            <p className="inline-flex items-center gap-2 rounded-full border border-emerald-300/30 bg-emerald-300/10 px-3 py-1.5 text-xs font-black tracking-[.14em] text-emerald-200">
-              <Sparkles className="h-4 w-4" aria-hidden="true" />
-              現場の声を聴く、小さな安全相棒
-            </p>
+            <div className="flex items-start justify-between gap-3">
+              <p className="inline-flex items-center gap-2 rounded-full border border-emerald-300/30 bg-emerald-300/10 px-3 py-1.5 text-xs font-black tracking-[.14em] text-emerald-200">
+                <Sparkles className="h-4 w-4" aria-hidden="true" />
+                現場の声を聴く、小さな安全相棒
+              </p>
+              <Image
+                src="/mascot/mascot-chat-talk-v4.webp"
+                alt=""
+                width={112}
+                height={112}
+                priority
+                className="-mt-3 h-28 w-28 shrink-0 object-contain drop-shadow-xl sm:hidden"
+              />
+            </div>
             <h1
               id="home-relaunch-title"
               className="mt-5 max-w-5xl text-[clamp(1.9rem,7vw,4rem)] font-black leading-[1.08] tracking-[-.045em] sm:leading-[1.05]"
@@ -268,7 +283,7 @@ export function HomeRelaunch() {
             </ul>
           </div>
 
-          <div className="relative mx-auto w-full max-w-[11rem] sm:max-w-xl">
+          <div className="relative mx-auto hidden w-full sm:block sm:max-w-[18rem] lg:max-w-[20rem] min-[1360px]:max-w-none">
             <div
               className="absolute -inset-5 rounded-[2.5rem] bg-gradient-to-br from-emerald-300/20 via-cyan-300/5 to-transparent blur-2xl"
               aria-hidden="true"
@@ -280,7 +295,7 @@ export function HomeRelaunch() {
                   alt="吹き出しと一緒に相談を案内する安全AIポータルのチワワ"
                   fill
                   priority
-                  sizes="(max-width: 639px) 11rem, (max-width: 1359px) 36rem, 34vw"
+                  sizes="(max-width: 1023px) 18rem, (max-width: 1359px) 20rem, 34vw"
                   className="object-contain p-2 sm:p-4"
                 />
                 <div className="absolute inset-x-3 bottom-3 hidden rounded-2xl border border-white/60 bg-white/92 p-4 text-slate-950 shadow-lg backdrop-blur sm:block">
@@ -299,6 +314,8 @@ export function HomeRelaunch() {
           </div>
         </div>
       </section>
+
+      {priorityContent}
 
       <section aria-labelledby="main-services-title" className="hs-section">
         <div className="hs-wrap">
@@ -320,6 +337,23 @@ export function HomeRelaunch() {
               <ArrowRight className="hs-arrow" aria-hidden="true" />
             </Link>
           </div>
+
+          <nav aria-label="9つの主機能へすぐ移動" className="hs-quick">
+            {MAIN_SERVICES.map((service) => {
+              const Icon = service.icon;
+              return (
+                <Link
+                  key={`quick-${service.href}`}
+                  href={service.href}
+                  prefetch={false}
+                  className="hs-quick-link"
+                >
+                  <Icon aria-hidden="true" />
+                  <span>{service.title}</span>
+                </Link>
+              );
+            })}
+          </nav>
 
           <ul className="hs-grid">
             {MAIN_SERVICES.map((service, index) => {
