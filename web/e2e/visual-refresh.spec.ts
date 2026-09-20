@@ -136,7 +136,7 @@ test("追加画像には代替テキストがあり、主要画像の表示領�
   await expect(page.locator("#overview [data-primary-action]")).toBeVisible();
 });
 
-test("forced colorsでも見出し・主操作・現在値が残る", async ({
+test("forced colorsでも見出しと主操作が残る", async ({
   browser,
   baseURL,
 }) => {

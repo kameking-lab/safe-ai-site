@@ -28,6 +28,7 @@ npm run dev
 
 - Vercelログイン（CLIまたはGitHub連携）
 - 必要なら Vercel Project の Root Directory を `web` に設定
+- 通常の本番公開はPRを`main`へ統合し、Vercel Git連携に任せる
 
 ### 2) CLIでPreview URLを出す（最短）
 
@@ -40,12 +41,14 @@ npm run vercel:preview
 
 成功すると Preview URL（`https://*.vercel.app`）が表示されます。
 
-### 3) Production公開
+### 3) Production公開（ローカル実行が必要な例外時のみ）
 
 ```bash
 cd web
-npm run vercel:prod
+npm run deploy:production
 ```
+
+このwrapperは、作業ツリーがclean、現在ブランチが`main`、`HEAD`が`origin/main`と完全一致、`VERCEL_GIT_COMMIT_REF=main`であることを確認します。さらに`/e-learning/exams`と`/exam-quiz`がソースまたはビルドに含まれる場合は配備を停止します。`vercel --prod`を直接実行しないでください。
 
 ### 4) トークン利用（非対話）
 

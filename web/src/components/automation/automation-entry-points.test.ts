@@ -40,11 +40,27 @@ describe("業務自動化相談のクロール可能な入口", () => {
       "<HomeFeatureDirectory",
       "<HomeAutomationService",
     ];
-    const positions = orderedComponents.map((component) =>
-      home.indexOf(component),
+    expect(home).toContain(
+      'import { HomeRelaunch } from "@/components/home/home-relaunch"',
     );
-    expect(positions.every((position) => position >= 0)).toBe(true);
-    expect(positions).toEqual([...positions].sort((a, b) => a - b));
+    expect(home).toContain("<HomeRelaunch />");
+    for (const removedSection of removedHomeSections) {
+      expect(home).not.toContain(removedSection);
+    }
+
+    const relaunch = source("src/components/home/home-relaunch.tsx");
+    expect(relaunch).toContain("/mascot/mascot-chat-talk-v4.webp");
+    expect(relaunch).toContain('fetchPriority="high"');
+    expect(relaunch).toContain('decoding="sync"');
+    expect(relaunch).toContain('height: "clamp(10rem, 40vw, 34rem)"');
+    expect(relaunch).toContain("仕事から選ぶ、9つの主機能");
+    expect(relaunch).toContain('href: "/education/hazard-slides"');
+    expect(relaunch).toContain('href: "/training/visual-ky"');
+    expect(relaunch).toContain('href="/resources/mlit"');
+    expect(relaunch).not.toMatch(
+      /\/training\/safety-seminars|\/materials\/safety-images|\/resources\/netis-safety/u,
+    );
+    expect(relaunch).not.toContain("/heat-illness-prevention");
   });
 
   it.each(REQUIRED_ENTRY_FILES)(

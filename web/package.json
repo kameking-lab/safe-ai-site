@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "npm run audit:public-identity && node scripts/storage-deployment-guard.mjs --workspace && next build",
+    "build": "node scripts/production-deploy-guard.mjs --source && npm run audit:public-identity && node scripts/storage-deployment-guard.mjs --workspace && next build && node scripts/production-deploy-guard.mjs --build",
     "start": "next start",
     "postinstall": "prisma generate --no-hints || true",
     "lint": "eslint",
@@ -35,6 +35,9 @@
     "audit:performance-budget": "node scripts/audit/performance-budget.mjs",
     "audit:public-identity": "node scripts/audit/public-identity-guard.mjs",
     "audit:public-identity:build": "node scripts/audit/public-identity-guard.mjs --include-build",
+    "audit:production-deploy": "node scripts/production-deploy-guard.mjs --preflight",
+    "deploy:production": "node scripts/deploy-production.mjs",
+    "vercel:prod": "npm run deploy:production",
     "audit:service-first:browser": "node scripts/audit/service-first-browser-audit.mjs",
     "test:service-copy": "vitest run src/lib/audit/service-copy-budget.test.ts",
     "audit:heat-review-pack": "node scripts/audit/heat-review-pack-copy.mjs",

@@ -95,7 +95,7 @@ test("ホームは6幅でチワワの案内と9つの主機能から主要タス
       page.getByRole("link", { name: "関連事故を見る" }),
     ).toHaveAttribute(
       "href",
-      "/accident-news",
+      "/chatbot",
     );
     await expect(
       page.getByRole("link", { name: "法改正一覧を見る" }),
