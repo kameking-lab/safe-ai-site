@@ -69,6 +69,8 @@ export default async function AccidentNewsPage({
               href={latestNews.sourceUrl}
               target="_blank"
               rel="noopener noreferrer"
+              data-compact-text="true"
+              data-primary-action="true"
               className="inline-flex min-h-11 items-center gap-1 text-sky-800 underline underline-offset-4"
             >
               {latestNews.sourceLabel}
@@ -77,7 +79,11 @@ export default async function AccidentNewsPage({
           </div>
         </header>
 
-        <section aria-labelledby="latest-report-heading" className="mt-7 pb-10">
+        <section
+          aria-labelledby="latest-report-heading"
+          className="mt-7 pb-10"
+          data-primary-task
+        >
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
               <h2 id="latest-report-heading" className="text-xl font-black text-slate-950 sm:text-2xl">
@@ -92,7 +98,7 @@ export default async function AccidentNewsPage({
 
           {latestNews.items.length > 0 ? (
             <ol className="mt-4 grid gap-4 md:grid-cols-2">
-              {latestNews.items.map((report) => (
+              {latestNews.items.map((report, index) => (
                 <li
                   key={report.publicId}
                   className="flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
@@ -110,6 +116,7 @@ export default async function AccidentNewsPage({
                       href={report.href}
                       target="_blank"
                       rel="noopener noreferrer"
+                      data-primary-action={index === 0 ? "true" : undefined}
                       className="decoration-slate-300 underline-offset-4 hover:underline"
                     >
                       {report.title}

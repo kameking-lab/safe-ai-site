@@ -197,11 +197,11 @@ export function HomeRelaunch({
               </p>
               <Image
                 src="/mascot/mascot-chat-talk-v4.webp"
-                alt=""
-                width={96}
-                height={96}
+                alt="吹き出しと一緒に相談を案内する安全AIポータルのチワワ"
+                width={112}
+                height={112}
                 priority
-                className="-mt-3 h-20 w-20 shrink-0 object-contain drop-shadow-xl sm:hidden"
+                className="-mt-3 h-28 w-28 shrink-0 object-contain drop-shadow-xl sm:hidden"
               />
             </div>
             <h1

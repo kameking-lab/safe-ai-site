@@ -40,27 +40,27 @@ test.describe("事故データベースと分析の公開境界", () => {
     });
     expect(response.status()).toBe(200);
     expect(response.headers().location).toBeUndefined();
-    expect(await response.text()).toContain("事故統計ダッシュボード");
+    expect(await response.text()).toContain("事故分析ダッシュボード");
   });
 });
 
-test.describe("重大災害事例の疎結果・最終ページ", () => {
-  const results = "[data-accident-news-results]";
+test.describe("死亡事故データベースの疎結果・最終ページ", () => {
+  const results = "[data-fatal-accidents-results]";
 
   test("通常・1件・0件・最終ページで件数とページングが安定する", async ({
     page,
   }) => {
-    await page.goto("/accident-news");
+    await page.goto("/fatal-accidents");
     await expect(page.locator(results)).toHaveAttribute("data-result-count", "30");
 
     const paginationText = await page
-      .getByRole("navigation", { name: "重大災害事例の検索結果ページ" })
+      .getByRole("navigation", { name: "死亡事故データベースの検索結果ページ" })
       .textContent();
     const pageCount = Number(paginationText?.match(/1\s*\/\s*(\d+)/)?.[1]);
     expect(pageCount).toBeGreaterThan(1);
 
     await page.goto(
-      `/accident-news?page=${pageCount}`,
+      `/fatal-accidents?page=${pageCount}`,
     );
     const finalCount = Number(
       await page.locator(results).getAttribute("data-result-count"),
@@ -72,22 +72,22 @@ test.describe("重大災害事例の疎結果・最終ページ", () => {
     ).toHaveCount(0);
 
     await page.goto(
-      `/accident-news?q=${encodeURIComponent("タクシー待機所")}`,
+      `/fatal-accidents?q=${encodeURIComponent("タクシー待機所")}`,
     );
     await expect(page.locator(results)).toHaveAttribute("data-result-count", "1");
     await expect(page.locator(results)).toHaveAttribute("data-result-total", "1");
 
     await page.goto(
-      `/accident-news?q=${encodeURIComponent("存在しない事故検索語ZXQY9876")}`,
+      `/fatal-accidents?q=${encodeURIComponent("存在しない事故検索語ZXQY9876")}`,
     );
     await expect(page.locator(results)).toHaveAttribute("data-result-count", "0");
-    await expect(page.locator("[data-accident-news-empty]")).toBeVisible();
+    await expect(page.locator("[data-fatal-accidents-empty]")).toBeVisible();
   });
 
   test("フィルタ変更中は前回結果を保持し、任意キーワードをURLへ出さない", async ({
     page,
   }) => {
-    await page.goto("/accident-news");
+    await page.goto("/fatal-accidents");
     await expect(page.locator(results)).toHaveAttribute("data-result-count", "30");
     await page.waitForLoadState("networkidle");
     await page.evaluate(async () => {
@@ -132,7 +132,7 @@ test.describe("重大災害事例の疎結果・最終ページ", () => {
                 id: element?.id ?? "",
                 marker:
                   element?.getAttribute("data-home-section") ??
-                  element?.getAttribute("data-accident-news-results") ??
+                  element?.getAttribute("data-fatal-accidents-results") ??
                   element?.getAttribute("aria-label") ??
                   "",
                 text: (element?.textContent ?? "").trim().slice(0, 80),
@@ -152,7 +152,7 @@ test.describe("重大災害事例の疎結果・最終ページ", () => {
     await page.route("**/*", async (route) => {
       const request = route.request();
       if (
-        request.url().includes("/accident-news") &&
+        request.url().includes("/api/accident-news/search") &&
         request.resourceType() === "fetch"
       ) {
         await new Promise((resolve) => setTimeout(resolve, 1_200));
@@ -169,7 +169,7 @@ test.describe("重大災害事例の疎結果・最終ページ", () => {
     );
     await page.getByRole("button", { name: "検索", exact: true }).click();
     await expect(
-      page.locator("[data-accident-news-filter-pending]"),
+      page.locator("[data-fatal-accidents-filter-pending]"),
     ).toContainText("前回の結果");
     await expect(page.locator(results)).toHaveAttribute("data-result-count", "30");
     const pendingHeight = (await page.locator(results).boundingBox())?.height ?? 0;
@@ -232,14 +232,14 @@ test.describe("重大災害事例の疎結果・最終ページ", () => {
         }
       }).observe({ type: "layout-shift", buffered: true });
     });
-    await page.goto("/accident-news?playwright_stream_probe=1", {
+    await page.goto("/fatal-accidents?playwright_stream_probe=1", {
       waitUntil: "commit",
     });
 
-    const shell = page.locator("[data-accident-news-loading-shell]");
+    const shell = page.locator("[data-fatal-accidents-loading-shell]");
     await expect(shell).toBeVisible();
     await expect(
-      page.locator("[data-accident-news-loading-grid] > li"),
+      page.locator("[data-fatal-accidents-loading-grid] > li"),
     ).toHaveCount(3);
     const shellHeight = (await shell.boundingBox())?.height ?? 0;
     expect(shellHeight).toBeGreaterThan(300);
@@ -250,7 +250,7 @@ test.describe("重大災害事例の疎結果・最終ページ", () => {
     expect(animationNames.every((name) => name === "none")).toBe(true);
 
     await page.waitForLoadState("load");
-    await expect(page).toHaveURL(/\/accident-news\?playwright_stream_probe=1$/);
+    await expect(page).toHaveURL(/\/fatal-accidents\?playwright_stream_probe=1$/);
     await expect(page.locator(results)).toHaveAttribute("data-result-count", "30");
     await page.waitForTimeout(650);
     const layoutShift = await page.evaluate(
@@ -265,7 +265,7 @@ test.describe("重大災害事例の疎結果・最終ページ", () => {
     page,
   }) => {
     await page.goto(
-      `/accident-news?industry=${encodeURIComponent("官公署")}`,
+      `/fatal-accidents?industry=${encodeURIComponent("官公署")}`,
     );
     await expect(page.locator(results)).toHaveAttribute("data-result-count", "3");
 

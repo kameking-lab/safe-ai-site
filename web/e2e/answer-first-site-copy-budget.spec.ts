@@ -65,6 +65,7 @@ type SiteCopySnapshot = {
 
 const COPY_BEFORE_PRIMARY_LIMITS: Partial<Record<(typeof TARGET_ROUTES)[number], number>> = {
   "/chemical-ra": 130,
+  "/accident-news": 200,
   "/laws": 130,
 };
 
