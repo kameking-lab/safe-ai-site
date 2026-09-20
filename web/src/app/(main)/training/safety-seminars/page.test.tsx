@@ -7,6 +7,7 @@ import {
   COMING_SOON_SAFETY_CORE_20,
   FALL_PREVENTION_SEMINAR_PATH,
   PUBLISHED_SAFETY_SEMINARS,
+  SAFETY_MANAGEMENT_BASICS_OSH_LAW_SEMINAR_PATH,
   SAFETY_SEMINARS,
   SAFETY_SEMINAR_CORE_20,
   SAFETY_SEMINAR_HUB_PATH,
@@ -14,6 +15,7 @@ import {
 import SafetySeminarLibraryPage, { generateMetadata } from "./page";
 
 const EXPECTED_TITLES = [
+  "安全管理の基本と安衛法",
   "墜落・転落防止とフルハーネスの実務",
   "熱中症対策の実装",
   "足場・脚立・開口部の安全",
@@ -45,11 +47,15 @@ const EXPECTED_TITLES = [
 ] as const;
 
 describe("/training/safety-seminars", () => {
-  it("28テーマを公開中1件とComing Soon 27件に分ける", () => {
+  it("29テーマを公開中2件とComing Soon 27件に分ける", () => {
     expect(SAFETY_SEMINARS.map((seminar) => seminar.title)).toEqual(
       EXPECTED_TITLES,
     );
-    expect(PUBLISHED_SAFETY_SEMINARS).toHaveLength(1);
+    expect(PUBLISHED_SAFETY_SEMINARS).toHaveLength(2);
+    expect(PUBLISHED_SAFETY_SEMINARS.map((seminar) => seminar.href)).toEqual([
+      SAFETY_MANAGEMENT_BASICS_OSH_LAW_SEMINAR_PATH,
+      FALL_PREVENTION_SEMINAR_PATH,
+    ]);
     expect(COMING_SOON_SAFETY_SEMINARS).toHaveLength(27);
     expect(
       COMING_SOON_SAFETY_SEMINARS.every((seminar) => !("href" in seminar)),
@@ -64,17 +70,29 @@ describe("/training/safety-seminars", () => {
     ).toBeDefined();
     expect(
       container.querySelectorAll('[data-seminar-status="published"]'),
-    ).toHaveLength(1);
+    ).toHaveLength(2);
     expect(
       container.querySelectorAll('[data-seminar-status="coming-soon"]'),
-    ).toHaveLength(19);
+    ).toHaveLength(18);
     expect(SAFETY_SEMINAR_CORE_20).toHaveLength(20);
-    expect(COMING_SOON_SAFETY_CORE_20).toHaveLength(19);
-    expect(screen.getByText("音声あり")).toBeDefined();
-    expect(screen.getByText("PowerPoint・PDF")).toBeDefined();
+    expect(COMING_SOON_SAFETY_CORE_20).toHaveLength(18);
+    expect(screen.getAllByText("音声あり")).toHaveLength(2);
+    expect(screen.getAllByText("PowerPoint・PDF")).toHaveLength(2);
+    expect(screen.getByText("12枚")).toBeDefined();
     expect(screen.getByText("20枚")).toBeDefined();
-    expect(screen.getByRole("link", { name: /今すぐ見る/ }).getAttribute("href"))
-      .toBe(FALL_PREVENTION_SEMINAR_PATH);
+    expect(screen.getByText("おすすめ")).toBeDefined();
+    expect(screen.queryByText("FIRST RELEASE")).toBeNull();
+    expect(screen.getAllByText("AUDIO & SLIDES")).toHaveLength(2);
+    expect(
+      container
+        .querySelector('[data-seminar-status="published"]')
+        ?.getAttribute("data-seminar-id"),
+    ).toBe("safety-management-basics-osh-law");
+    expect(screen.getAllByRole("link", { name: /今すぐ見る/ }).map((link) => link.getAttribute("href")))
+      .toEqual([
+        SAFETY_MANAGEMENT_BASICS_OSH_LAW_SEMINAR_PATH,
+        FALL_PREVENTION_SEMINAR_PATH,
+      ]);
   });
 
   it("Coming Soonカードにはテーマ名・対象者・Coming Soonだけを表示し、操作を置かない", () => {

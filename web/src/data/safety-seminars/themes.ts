@@ -1,4 +1,6 @@
 export const SAFETY_SEMINAR_HUB_PATH = "/training/safety-seminars";
+export const SAFETY_MANAGEMENT_BASICS_OSH_LAW_SEMINAR_PATH =
+  "/training/safety-seminars/safety-management-basics-osh-law";
 export const FALL_PREVENTION_SEMINAR_PATH =
   "/training/safety-seminars/fall-prevention";
 
@@ -26,6 +28,17 @@ export type SafetySeminar =
   | ComingSoonSafetySeminar;
 
 export const SAFETY_SEMINARS: readonly SafetySeminar[] = [
+  {
+    id: "safety-management-basics-osh-law",
+    status: "published",
+    title: "安全管理の基本と安衛法",
+    audience: "全作業者・職長・現場責任者・安全衛生担当者",
+    standardDuration: "音声約8分／確認込み約12〜15分",
+    slideCount: 12,
+    hasAudio: true,
+    formats: ["PowerPoint", "PDF"],
+    href: SAFETY_MANAGEMENT_BASICS_OSH_LAW_SEMINAR_PATH,
+  },
   {
     id: "fall-prevention",
     status: "published",
@@ -211,7 +224,7 @@ export const COMING_SOON_SAFETY_SEMINARS = SAFETY_SEMINARS.filter(
     seminar.status === "coming-soon",
 );
 
-/** 提供資料の章立てを基に、公開順を固定した最初の20テーマ。残りは次期候補として保持する。 */
+/** おすすめ教材を先頭に、公開順を固定した最初の20テーマ。残りは次期候補として保持する。 */
 export const SAFETY_SEMINAR_CORE_20 = SAFETY_SEMINARS.slice(0, 20);
 export const COMING_SOON_SAFETY_CORE_20 = SAFETY_SEMINAR_CORE_20.filter(
   (seminar): seminar is ComingSoonSafetySeminar => seminar.status === "coming-soon",

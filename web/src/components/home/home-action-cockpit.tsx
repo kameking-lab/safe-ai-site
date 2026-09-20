@@ -10,8 +10,9 @@ import {
 } from "lucide-react";
 import { HomeDirectChatClient } from "@/components/home-safety-cockpit/home-chat-quick-ask";
 import { HomeDirectChemicalClient } from "@/components/home-safety-cockpit/home-chemical-quick-search";
+import { SAFETY_MANAGEMENT_BASICS_OSH_LAW_SEMINAR_PATH } from "@/data/safety-seminars/themes";
 
-const SEMINAR_PATH = "/training/safety-seminars/fall-prevention";
+const SEMINAR_PATH = SAFETY_MANAGEMENT_BASICS_OSH_LAW_SEMINAR_PATH;
 const DOWNLOAD_PATH = `${SEMINAR_PATH}/downloads`;
 
 export function HomeActionCockpit() {
@@ -79,15 +80,15 @@ export function HomeActionCockpit() {
           <div className="grid lg:grid-cols-[18rem_minmax(0,1fr)]">
             <div className="relative min-h-48 overflow-hidden bg-emerald-100">
               <Image
-                src={`${SEMINAR_PATH}/fall-prevention-hero-v2.png`}
-                alt="墜落・転落防止とフルハーネスの安全教育スライド"
+                src={`${SEMINAR_PATH}/safe-site-hero.webp`}
+                alt="安全管理の基本と労働安全衛生法を学ぶ安全教育スライド"
                 fill
                 priority
                 sizes="(max-width: 1023px) 100vw, 18rem"
                 className="object-cover"
               />
               <span className="absolute left-3 top-3 rounded-full bg-emerald-900 px-3 py-1 text-xs font-black text-white">
-                公開中・全20枚
+                おすすめ・全12枚
               </span>
             </div>
             <div className="p-4 sm:p-6">
@@ -95,7 +96,7 @@ export function HomeActionCockpit() {
                 SAFETY TRAINING
               </p>
               <h3 className="mt-1 text-2xl font-black leading-tight">
-                墜落・転落防止とフルハーネス
+                安全管理の基本と安衛法
               </h3>
               <p className="mt-2 text-sm font-semibold leading-6 text-slate-600">
                 音声付きスライドをすぐ再生。朝礼投影、編集用PowerPoint、配布用PDFも選べます。
@@ -117,14 +118,14 @@ export function HomeActionCockpit() {
                   音声で再生
                 </Link>
                 <a
-                  href={`${DOWNLOAD_PATH}/fall-prevention-training.pptx`}
+                  href={`${DOWNLOAD_PATH}/safety-management-basics-osh-law-training.pptx`}
                   className="inline-flex min-h-12 items-center gap-2 rounded-xl border-2 border-slate-300 px-4 py-3 text-sm font-black text-slate-800"
                 >
                   <Download className="h-5 w-5" aria-hidden="true" />
                   PPTX
                 </a>
                 <a
-                  href={`${DOWNLOAD_PATH}/fall-prevention-training.pdf`}
+                  href={`${DOWNLOAD_PATH}/safety-management-basics-osh-law-training.pdf`}
                   className="inline-flex min-h-12 items-center gap-2 rounded-xl border-2 border-slate-300 px-4 py-3 text-sm font-black text-slate-800"
                 >
                   <Download className="h-5 w-5" aria-hidden="true" />

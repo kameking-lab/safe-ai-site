@@ -24,7 +24,7 @@ import { FeatureMascotCompanion } from "@/components/feature-mascot-companion";
 
 const TITLE = "安全研修ライブラリ｜現場で使える社内安全研修";
 const DESCRIPTION =
-  "統計と一次資料に基づく社内安全研修を、音声付きスライド、PowerPoint、PDFで利用できます。第一弾は墜落・転落防止とフルハーネスの実務です。";
+  "統計と一次資料に基づく社内安全研修を、音声付きスライド、PowerPoint、PDFで利用できます。安全管理の基本から個別災害の防止まで、公開教材を無料で活用できます。";
 const REFERENCE_FOLDER_URL =
   "https://drive.google.com/drive/folders/1ueL4tATdCiIuiUKCluDlov1CLCo56FGn?usp=drive_link";
 
@@ -59,8 +59,6 @@ export async function generateMetadata({
 }
 
 export default function SafetySeminarLibraryPage() {
-  const published = PUBLISHED_SAFETY_SEMINARS[0];
-
   return (
     <>
       <PageJsonLd
@@ -134,79 +132,92 @@ export default function SafetySeminarLibraryPage() {
               </p>
             </div>
 
-            <article
-              data-seminar-status="published"
-              className="mt-5 overflow-hidden rounded-3xl border-2 border-slate-900 bg-white shadow-[7px_7px_0_#0f766e] dark:border-slate-500 dark:bg-slate-900"
-            >
-              <div className="grid lg:grid-cols-[minmax(0,1fr)_18rem]">
-                <div className="p-5 sm:p-7">
-                  <span className="inline-flex rounded-full bg-emerald-100 px-3 py-1 text-xs font-black text-emerald-950 dark:bg-emerald-950 dark:text-emerald-200">
-                    公開中
-                  </span>
-                  <h3 className="mt-3 max-w-3xl text-2xl font-black leading-tight sm:text-3xl">
-                    {published.title}
-                  </h3>
-                  <p className="mt-3 flex items-start gap-2 text-sm font-semibold leading-6 text-slate-700 dark:text-slate-200">
-                    <Users className="mt-0.5 h-5 w-5 shrink-0 text-emerald-800 dark:text-emerald-300" aria-hidden="true" />
-                    対象：{published.audience}
-                  </p>
-                  <dl className="mt-5 grid gap-3 sm:grid-cols-2">
-                    <div className="rounded-xl bg-slate-100 p-3 dark:bg-slate-800">
-                      <dt className="flex items-center gap-2 text-xs font-black text-slate-600 dark:text-slate-300">
-                        <Clock3 className="h-4 w-4" aria-hidden="true" />
-                        標準時間
-                      </dt>
-                      <dd className="mt-1 text-sm font-black">
-                        {published.standardDuration}
-                      </dd>
+            <div className="mt-5 grid gap-6">
+              {PUBLISHED_SAFETY_SEMINARS.map((published, index) => (
+                <article
+                  key={published.id}
+                  data-seminar-status="published"
+                  data-seminar-id={published.id}
+                  className="overflow-hidden rounded-3xl border-2 border-slate-900 bg-white shadow-[7px_7px_0_#0f766e] dark:border-slate-500 dark:bg-slate-900"
+                >
+                  <div className="grid lg:grid-cols-[minmax(0,1fr)_18rem]">
+                    <div className="p-5 sm:p-7">
+                      <div className="flex flex-wrap gap-2">
+                        <span className="inline-flex rounded-full bg-emerald-100 px-3 py-1 text-xs font-black text-emerald-950 dark:bg-emerald-950 dark:text-emerald-200">
+                          公開中
+                        </span>
+                        {index === 0 ? (
+                          <span className="inline-flex rounded-full bg-amber-100 px-3 py-1 text-xs font-black text-amber-950 dark:bg-amber-950 dark:text-amber-200">
+                            おすすめ
+                          </span>
+                        ) : null}
+                      </div>
+                      <h3 className="mt-3 max-w-3xl text-2xl font-black leading-tight sm:text-3xl">
+                        {published.title}
+                      </h3>
+                      <p className="mt-3 flex items-start gap-2 text-sm font-semibold leading-6 text-slate-700 dark:text-slate-200">
+                        <Users className="mt-0.5 h-5 w-5 shrink-0 text-emerald-800 dark:text-emerald-300" aria-hidden="true" />
+                        対象：{published.audience}
+                      </p>
+                      <dl className="mt-5 grid gap-3 sm:grid-cols-2">
+                        <div className="rounded-xl bg-slate-100 p-3 dark:bg-slate-800">
+                          <dt className="flex items-center gap-2 text-xs font-black text-slate-600 dark:text-slate-300">
+                            <Clock3 className="h-4 w-4" aria-hidden="true" />
+                            標準時間
+                          </dt>
+                          <dd className="mt-1 text-sm font-black">
+                            {published.standardDuration}
+                          </dd>
+                        </div>
+                        <div className="rounded-xl bg-slate-100 p-3 dark:bg-slate-800">
+                          <dt className="flex items-center gap-2 text-xs font-black text-slate-600 dark:text-slate-300">
+                            <Presentation className="h-4 w-4" aria-hidden="true" />
+                            スライド枚数
+                          </dt>
+                          <dd className="mt-1 text-sm font-black">
+                            {published.slideCount}枚
+                          </dd>
+                        </div>
+                        <div className="rounded-xl bg-slate-100 p-3 dark:bg-slate-800">
+                          <dt className="flex items-center gap-2 text-xs font-black text-slate-600 dark:text-slate-300">
+                            <Headphones className="h-4 w-4" aria-hidden="true" />
+                            音声
+                          </dt>
+                          <dd className="mt-1 text-sm font-black">音声あり</dd>
+                        </div>
+                        <div className="rounded-xl bg-slate-100 p-3 dark:bg-slate-800">
+                          <dt className="flex items-center gap-2 text-xs font-black text-slate-600 dark:text-slate-300">
+                            <FileDown className="h-4 w-4" aria-hidden="true" />
+                            ダウンロード
+                          </dt>
+                          <dd className="mt-1 text-sm font-black">
+                            {published.formats.join("・")}
+                          </dd>
+                        </div>
+                      </dl>
                     </div>
-                    <div className="rounded-xl bg-slate-100 p-3 dark:bg-slate-800">
-                      <dt className="flex items-center gap-2 text-xs font-black text-slate-600 dark:text-slate-300">
-                        <Presentation className="h-4 w-4" aria-hidden="true" />
-                        スライド枚数
-                      </dt>
-                      <dd className="mt-1 text-sm font-black">
-                        {published.slideCount}枚
-                      </dd>
-                    </div>
-                    <div className="rounded-xl bg-slate-100 p-3 dark:bg-slate-800">
-                      <dt className="flex items-center gap-2 text-xs font-black text-slate-600 dark:text-slate-300">
-                        <Headphones className="h-4 w-4" aria-hidden="true" />
-                        音声
-                      </dt>
-                      <dd className="mt-1 text-sm font-black">音声あり</dd>
-                    </div>
-                    <div className="rounded-xl bg-slate-100 p-3 dark:bg-slate-800">
-                      <dt className="flex items-center gap-2 text-xs font-black text-slate-600 dark:text-slate-300">
-                        <FileDown className="h-4 w-4" aria-hidden="true" />
-                        ダウンロード
-                      </dt>
-                      <dd className="mt-1 text-sm font-black">
-                        {published.formats.join("・")}
-                      </dd>
-                    </div>
-                  </dl>
-                </div>
 
-                <div className="flex flex-col justify-between bg-slate-950 p-5 text-white sm:p-7">
-                  <div>
-                    <p className="text-xs font-black tracking-[.12em] text-emerald-300">
-                      FIRST RELEASE
-                    </p>
-                    <p className="mt-3 text-sm leading-6 text-slate-200">
-                      法定措置を確認し、本質安全→工学的対策→管理的対策→個人用保護具の順と、器具の選定・取付け・点検を学びます。
-                    </p>
+                    <div className="flex flex-col justify-between bg-slate-950 p-5 text-white sm:p-7">
+                      <div>
+                        <p className="text-xs font-black tracking-[.12em] text-emerald-300">
+                          AUDIO &amp; SLIDES
+                        </p>
+                        <p className="mt-3 text-sm leading-6 text-slate-200">
+                          音声付きスライドで要点を確認し、朝礼投影・社内研修・配布資料として活用できます。
+                        </p>
+                      </div>
+                      <Link
+                        href={published.href}
+                        className="mt-6 inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-emerald-400 px-5 py-3 font-black text-slate-950 hover:bg-emerald-300 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white dark:text-slate-950"
+                      >
+                        今すぐ見る
+                        <ArrowRight className="h-5 w-5" aria-hidden="true" />
+                      </Link>
+                    </div>
                   </div>
-                  <Link
-                    href={published.href}
-                    className="mt-6 inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-emerald-400 px-5 py-3 font-black text-slate-950 hover:bg-emerald-300 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white dark:text-slate-950"
-                  >
-                    今すぐ見る
-                    <ArrowRight className="h-5 w-5" aria-hidden="true" />
-                  </Link>
-                </div>
-              </div>
-            </article>
+                </article>
+              ))}
+            </div>
             <p className="mt-4 text-sm font-bold leading-6 text-slate-700 dark:text-slate-200">
               この教材は社内安全研修用です。法定の特別教育等を代替するものではありません。
             </p>
@@ -224,7 +235,7 @@ export default function SafetySeminarLibraryPage() {
               id="coming-soon-title"
               className="mt-1 text-3xl font-black tracking-tight"
             >
-              全20テーマの目次（公開1・準備中{COMING_SOON_SAFETY_CORE_20.length}）
+              全20テーマの目次（公開{PUBLISHED_SAFETY_SEMINARS.length}・準備中{COMING_SOON_SAFETY_CORE_20.length}）
             </h2>
             <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
               {COMING_SOON_SAFETY_CORE_20.map((seminar) => (

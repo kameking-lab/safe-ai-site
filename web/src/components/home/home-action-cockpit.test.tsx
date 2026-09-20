@@ -29,12 +29,12 @@ describe("HomeActionCockpit", () => {
     ).toBeDefined();
     expect(
       screen.getByRole("link", { name: /スライドを見る/ }).getAttribute("href"),
-    ).toBe("/training/safety-seminars/fall-prevention#seminar-player");
+    ).toBe("/training/safety-seminars/safety-management-basics-osh-law#seminar-player");
     expect(screen.getByRole("link", { name: "PPTX" }).getAttribute("href")).toMatch(
-      /fall-prevention-training\.pptx$/u,
+      /safety-management-basics-osh-law-training\.pptx$/u,
     );
     expect(screen.getByRole("link", { name: "PDF" }).getAttribute("href")).toMatch(
-      /fall-prevention-training\.pdf$/u,
+      /safety-management-basics-osh-law-training\.pdf$/u,
     );
   });
 });

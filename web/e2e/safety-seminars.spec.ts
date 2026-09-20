@@ -5,12 +5,21 @@ const HUB = "/training/safety-seminars";
 const DETAIL = `${HUB}/fall-prevention`;
 
 test.describe("安全研修ライブラリ", () => {
-  test("一覧は全20テーマ（公開1件、Coming Soon 19件）で空の個別CTAがない", async ({ page }) => {
+  test("一覧は全20テーマ（公開2件、Coming Soon 18件）で空の個別CTAがない", async ({ page }) => {
     const response = await page.goto(HUB);
     expect(response?.status()).toBe(200);
     await expect(page.getByRole("heading", { level: 1, name: "安全研修ライブラリ" })).toBeVisible();
-    await expect(page.locator('[data-seminar-status="published"]')).toHaveCount(1);
-    await expect(page.locator('[data-seminar-status="coming-soon"]')).toHaveCount(19);
+    const publishedCards = page.locator('[data-seminar-status="published"]');
+    await expect(publishedCards).toHaveCount(2);
+    expect(
+      await publishedCards
+        .getByRole("link", { name: "今すぐ見る" })
+        .evaluateAll((links) => links.map((link) => link.getAttribute("href"))),
+    ).toEqual([
+      `${HUB}/safety-management-basics-osh-law`,
+      DETAIL,
+    ]);
+    await expect(page.locator('[data-seminar-status="coming-soon"]')).toHaveCount(18);
     for (const card of await page.locator('[data-seminar-status="coming-soon"]').all()) {
       await expect(card.locator("a, button")).toHaveCount(0);
       await expect(card.getByText("Coming Soon", { exact: true })).toBeVisible();
