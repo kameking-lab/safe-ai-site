@@ -20,6 +20,13 @@ const INCIDENT_MARKERS =
   /死亡|死者|遺体|重傷|重体|意識不明|転落|墜落|崩落|崩壊|倒壊|挟ま|巻き込|はねられ|衝突|激突|爆発|火災|感電|下敷き|落下/u;
 const NON_INCIDENT_MARKERS =
   /リスクアセスメント|重点点検|教育を実施|増加傾向|統計|防止週間|講習|セミナー|対策を解説/u;
+/**
+ * 事故そのものの発生速報ではなく、後日の司法・行政手続や件数集計を
+ * 主題にした見出し。これらは事故関連報道ではあるが、速報の先頭へ
+ * 混ぜると「直近に起きた事故」と誤認させるため除外する。
+ */
+const INCIDENT_FOLLOW_UP_MARKERS =
+  /書類送検|送検(?:した|へ)|起訴|不起訴|判決|勝訴|敗訴|高裁|地裁|最高裁|賠償|企業責任|労災認定|緊急要請|(?:労働局|労基署).*(?:要請|指導)|死亡事故.*(?:\d+件|件発生)|労災.*\d+件発生/u;
 
 function splitPublisher(rawTitle: string): {
   headline: string;
@@ -139,6 +146,7 @@ export function selectHomeLatestAccidentReports(
         WORK_MARKERS.test(entry.headline) &&
         INCIDENT_MARKERS.test(entry.headline) &&
         !NON_INCIDENT_MARKERS.test(entry.headline) &&
+        !INCIDENT_FOLLOW_UP_MARKERS.test(entry.headline) &&
         scoreLaborNewsSeriousness(entry.headline) >= 55,
     )
     .sort(

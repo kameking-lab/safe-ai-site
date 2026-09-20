@@ -161,15 +161,15 @@ describe("production remediation fixed-ID P1 regression", () => {
   });
 
   it("PF-009 accident search remains internal without serializing free text", () => {
-    const page = source("src/app/(main)/accident-news/page.tsx");
+    const page = source("src/app/(main)/fatal-accidents/page.tsx");
     const browser = source(
-      "src/app/(main)/accident-news/accident-news-browser.tsx",
+      "src/app/(main)/fatal-accidents/fatal-accidents-browser.tsx",
     );
     const filter = source(
-      "src/app/(main)/accident-news/accident-news-filter.tsx",
+      "src/app/(main)/fatal-accidents/fatal-accidents-filter.tsx",
     );
     expect(page).not.toMatch(/\bredirect\s*\(/);
-    expect(page).toContain("<AccidentNewsBrowser");
+    expect(page).toContain("<FatalAccidentsBrowser");
     expect(browser).toContain('fetch("/api/accident-news/search"');
     expect(browser).toContain('method: "POST"');
     expect(filter).not.toContain('params.set("q"');

@@ -82,7 +82,7 @@ export function AccidentsNoScriptFallback({
           rel="noopener noreferrer"
           className="mt-3 inline-flex min-h-11 items-center text-sm font-bold text-brand-primary underline underline-offset-4"
         >
-          厚労省の死亡災害データベースで探す
+          厚労省の死亡事故データベースで探す
         </a>
       </section>
     </>

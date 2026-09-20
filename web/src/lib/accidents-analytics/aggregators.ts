@@ -9,9 +9,11 @@ import type {
   AnalyticsFieldCoverage,
   AnalyticsFilterOptions,
   AnalyticsFilters,
+  AnalyticsSourceFilter,
   IndustryDeathRate,
   IndustryTypeMatrix,
   NameCount,
+  SeverityKey,
   YearTrendByType,
 } from "./types";
 
@@ -34,11 +36,49 @@ function normalizeFilters(filters: AnalyticsFilters = {}) {
       typeof filters.year === "number" && Number.isInteger(filters.year)
         ? filters.year
         : null,
+    month:
+      typeof filters.month === "number" &&
+      Number.isInteger(filters.month) &&
+      filters.month >= 1 &&
+      filters.month <= 12
+        ? filters.month
+        : null,
+    industryMedium: filters.industryMedium?.trim() || null,
+    cause: filters.cause?.trim() || null,
+    workplaceSize: filters.workplaceSize?.trim() || null,
+    occurrenceTime: normalizeOccurrenceTimeBucket(filters.occurrenceTime),
+    prefecture: filters.prefecture?.trim() || null,
+    age: filters.age?.trim() || null,
+    severity: filters.severity ?? null,
+    source: filters.source ?? "official",
   };
 }
 
+/** 1時間刻み・2時間刻みが混在する原票時刻を、0～2 … 22～24へ統一する。 */
+export function normalizeOccurrenceTimeBucket(
+  value: string | null | undefined,
+): string | null {
+  const trimmed = value?.trim();
+  if (!trimmed) return null;
+  const match = trimmed.match(/^(\d{1,2})\s*[~～〜-]\s*(\d{1,2})$/);
+  if (!match) return trimmed;
+  const start = Number(match[1]);
+  if (!Number.isInteger(start) || start < 0 || start >= 24) return trimmed;
+  const bucketStart = Math.floor(start / 2) * 2;
+  return `${bucketStart}～${bucketStart + 2}`;
+}
+
+function matchesSource(
+  item: CombinedCase,
+  source: AnalyticsSourceFilter,
+): boolean {
+  if (source === "all") return true;
+  if (source === "official") return item.source !== "curated";
+  return item.source === source;
+}
+
 /**
- * 同一の個票母集団へ業種・正規化済み事故型・年をAND条件で適用する。
+ * 同一の個票母集団へ全条件をANDで適用する。
  * UI上の選択だけを強調する旧挙動へ戻らないため、純関数としてテスト可能に保つ。
  */
 export function filterAnalyticsCases(
@@ -50,6 +90,29 @@ export function filterAnalyticsCases(
     if (normalized.industry && c.industry !== normalized.industry) return false;
     if (normalized.type && caseHazardLabel(c) !== normalized.type) return false;
     if (normalized.year !== null && c.year !== normalized.year) return false;
+    if (normalized.month !== null && c.month !== normalized.month) return false;
+    if (
+      normalized.industryMedium &&
+      c.industryMedium !== normalized.industryMedium
+    )
+      return false;
+    if (normalized.cause && c.cause !== normalized.cause) return false;
+    if (
+      normalized.workplaceSize &&
+      c.workplaceSize !== normalized.workplaceSize
+    )
+      return false;
+    if (
+      normalized.occurrenceTime &&
+      normalizeOccurrenceTimeBucket(c.occurrenceTime) !==
+        normalized.occurrenceTime
+    )
+      return false;
+    if (normalized.prefecture && c.prefecture !== normalized.prefecture)
+      return false;
+    if (normalized.age && c.age !== normalized.age) return false;
+    if (normalized.severity && c.severity !== normalized.severity) return false;
+    if (!matchesSource(c, normalized.source)) return false;
     return true;
   });
 }
@@ -116,6 +179,41 @@ function buildFilterOptions(cases: CombinedCase[]): AnalyticsFilterOptions {
     years: [
       ...new Set(cases.map((c) => c.year).filter((year) => year > 0)),
     ].sort((a, b) => b - a),
+    months: [
+      ...new Set(
+        cases
+          .map((c) => c.month)
+          .filter((month): month is number => month !== null),
+      ),
+    ].sort((a, b) => a - b),
+    industryMediums: allRanked(
+      countBy(cases, (c) => c.industryMedium),
+    ).map((x) => x.name),
+    causes: allRanked(countBy(cases, (c) => c.cause)).map((x) => x.name),
+    workplaceSizes: allRanked(countBy(cases, (c) => c.workplaceSize)).map(
+      (x) => x.name,
+    ),
+    occurrenceTimes: allRanked(
+      countBy(cases, (c) => normalizeOccurrenceTimeBucket(c.occurrenceTime)),
+    )
+      .map((x) => x.name)
+      .sort((a, b) => Number(a.match(/^\d+/)?.[0]) - Number(b.match(/^\d+/)?.[0])),
+    prefectures: allRanked(countBy(cases, (c) => c.prefecture)).map(
+      (x) => x.name,
+    ),
+    ages: allRanked(countBy(cases, (c) => c.age))
+      .map((x) => x.name)
+      .sort((a, b) => Number(a.match(/^\d+/)?.[0]) - Number(b.match(/^\d+/)?.[0])),
+    severities: allRanked(countBy(cases, (c) => c.severity)).map(
+      (item) => item.name as SeverityKey,
+    ),
+    sources: [
+      "official",
+      "mhlw-deaths-compact",
+      "mhlw-deaths-2024",
+      "curated",
+      "all",
+    ],
   };
 }
 
@@ -316,8 +414,9 @@ function aggregateCause(cases: CombinedCase[]) {
 function aggregateOccurrenceTime(cases: CombinedCase[]): NameCount[] {
   const map = new Map<string, number>();
   for (const c of cases) {
-    if (!c.occurrenceTime) continue;
-    map.set(c.occurrenceTime, (map.get(c.occurrenceTime) ?? 0) + 1);
+    const bucket = normalizeOccurrenceTimeBucket(c.occurrenceTime);
+    if (!bucket) continue;
+    map.set(bucket, (map.get(bucket) ?? 0) + 1);
   }
   // Sort by leading numeric value to produce 0-2, 2-4, ... order.
   return [...map.entries()]
@@ -380,9 +479,7 @@ function aggregateFullDbIndustryRanking(): NameCount[] {
 const aggregateCache = new Map<string, AnalyticsAggregates>();
 
 function cacheKey(filters: ReturnType<typeof normalizeFilters>): string {
-  return [filters.industry ?? "", filters.type ?? "", filters.year ?? ""].join(
-    "\u0001",
-  );
+  return Object.values(filters).map((value) => value ?? "").join("\u0001");
 }
 
 /**
@@ -398,13 +495,13 @@ export function getAnalyticsAggregates(
   if (cached) return cached;
 
   const allCases = loadCombinedCases();
-  const cases = filterAnalyticsCases(allCases, {
-    industry: filters.industry ?? undefined,
-    type: filters.type ?? undefined,
-    year: filters.year ?? undefined,
+  const cases = filterAnalyticsCases(allCases, filters);
+  const baseCases = filterAnalyticsCases(allCases, {
+    source: filters.source,
   });
+  const datasetCases = baseCases.length;
   const yr = yearRange(cases.map((c) => c.year));
-  const allYearRange = yearRange(allCases.map((c) => c.year));
+  const allYearRange = yearRange(baseCases.map((c) => c.year));
   const maxYear =
     yr.max || filters.year || allYearRange.max || new Date().getFullYear();
 
@@ -420,8 +517,8 @@ export function getAnalyticsAggregates(
   // 年で絞った場合も「同じ業種・事故型の前年」と比較できるよう、前年比だけは
   // 年条件を外した同一母集団から対象年と前年を数える。
   const comparisonCases = filterAnalyticsCases(allCases, {
-    industry: filters.industry ?? undefined,
-    type: filters.type ?? undefined,
+    ...filters,
+    year: undefined,
   });
   const comparisonTrend = aggregateYearTrend(comparisonCases);
   const comparisonYear = filters.year ?? recentYear.year;
@@ -457,14 +554,14 @@ export function getAnalyticsAggregates(
       mhlwDeathsCount: cases.filter((c) => c.source !== "curated").length,
       mhlwFullDbCount: (metaJson as { accidents: { total: number } }).accidents
         .total,
-      datasetCases: allCases.length,
+      datasetCases,
       filteredCases: cases.length,
       yearsCovered: {
         from: yr.min || filters.year || 0,
         to: yr.max || filters.year || 0,
       },
       filters,
-      filterOptions: buildFilterOptions(allCases),
+      filterOptions: buildFilterOptions(baseCases),
       coverage: aggregateCoverage(cases),
     },
     kpi: {

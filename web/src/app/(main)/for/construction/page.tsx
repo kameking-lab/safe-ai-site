@@ -35,7 +35,7 @@ const ACTIONS: readonly RoleAction[] = [
       "協力会社ごとの作業と危険を入力し、未承認・承認後変更を印刷前に止めます。",
   },
   {
-    href: "/accident-news",
+    href: "/fatal-accidents",
     label: "重大災害情報を確認",
     description:
       "公表事実・匿名・出典区分を確認し、KYへ反映する場合は現場条件を人が照合します。",

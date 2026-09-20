@@ -46,7 +46,10 @@ const loadCached = unstable_cache(
     const nowMs = Date.now();
     const checkedAt = new Date(nowMs).toISOString();
     const items = await fetchLaborTrendItems(40, nowMs);
-    const selected = selectHomeLatestAccidentReports(items, nowMs, 2).map(
+    // The dedicated accident-news page needs enough current reports to be useful.
+    // Homepage consumers already slice this collection, so keeping one cached
+    // server-side source avoids a second RSS request while preserving their layout.
+    const selected = selectHomeLatestAccidentReports(items, nowMs, 10).map(
       publicReport,
     );
     return {
@@ -61,7 +64,7 @@ const loadCached = unstable_cache(
           : "14日以内の国内労災報道を確認できませんでした。0件・事故なしとは判定しません。",
     };
   },
-  ["home-latest-accident-news-v3"],
+  ["home-latest-accident-news-v4"],
   { revalidate: 3_600 },
 );
 

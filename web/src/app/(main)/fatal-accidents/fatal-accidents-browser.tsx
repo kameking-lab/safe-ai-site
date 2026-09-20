@@ -11,9 +11,9 @@ import type {
   SeriousCasePage,
 } from "@/lib/accident-news/serious-cases";
 import {
-  AccidentNewsFilter,
+  FatalAccidentsFilter,
   type SelectedFilters,
-} from "./accident-news-filter";
+} from "./fatal-accidents-filter";
 
 const PAGE_SIZE = 30;
 
@@ -22,7 +22,7 @@ type BrowserResult = SeriousCasePage & {
   pageCount: number;
 };
 
-export function buildAccidentNewsPageHref(
+export function buildFatalAccidentsPageHref(
   selected: Pick<SelectedFilters, "industry" | "type" | "year">,
   page: number,
 ): string {
@@ -32,10 +32,10 @@ export function buildAccidentNewsPageHref(
   if (selected.year) params.set("year", selected.year);
   if (page > 1) params.set("page", String(page));
   const query = params.toString();
-  return query ? `/accident-news?${query}` : "/accident-news";
+  return query ? `/fatal-accidents?${query}` : "/fatal-accidents";
 }
 
-export function AccidentNewsBrowser({
+export function FatalAccidentsBrowser({
   children,
   options,
   selected,
@@ -158,13 +158,13 @@ export function AccidentNewsBrowser({
           tone="info"
           value={corpusTotal.toLocaleString()}
           unit="件"
-          title="重大災害事例を収録"
+          title="死亡事故データベース"
           description={`厚労省の死亡災害データ（${corpusYearRange}・匿名）。業種・事故型・起因物分類・年で類型検索できます。`}
         />
       )}
 
-      <div id="accident-news-search" className="mt-3 scroll-mt-24">
-        <AccidentNewsFilter
+      <div id="fatal-accidents-search" className="mt-3 scroll-mt-24">
+        <FatalAccidentsFilter
           options={options}
           selected={selected}
           keyword={keyword}
@@ -186,12 +186,12 @@ export function AccidentNewsBrowser({
 
       <ul
         className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3"
-        data-accident-news-results
+        data-fatal-accidents-results
         data-result-count={result.cases.length}
         data-result-total={result.total}
       >
         {result.cases.map((item) => (
-          <AccidentNewsCard key={item.id} item={item} />
+          <FatalAccidentCard key={item.id} item={item} />
         ))}
       </ul>
 
@@ -208,8 +208,8 @@ export function AccidentNewsBrowser({
 
       {result.pageCount > 1 && (
         <nav
-          data-accident-news-client-pagination=""
-          aria-label="重大災害事例の検索結果ページ"
+          data-fatal-accidents-client-pagination=""
+          aria-label="死亡事故データベースの検索結果ページ"
           className="mt-4 flex items-center justify-center gap-3"
         >
           <button
@@ -235,15 +235,15 @@ export function AccidentNewsBrowser({
       )}
 
       <noscript>
-        <style>{`[data-accident-news-client-pagination]{display:none!important}`}</style>
+        <style>{`[data-fatal-accidents-client-pagination]{display:none!important}`}</style>
         {initialPageCount > 1 ? (
           <nav
-            aria-label="重大災害事例の検索結果ページ"
+            aria-label="死亡事故データベースの検索結果ページ"
             className="mt-4 flex flex-wrap items-center justify-center gap-3"
           >
             {initialPage > 1 ? (
               <a
-                href={buildAccidentNewsPageHref(selected, initialPage - 1)}
+                href={buildFatalAccidentsPageHref(selected, initialPage - 1)}
                 className="inline-flex min-h-11 items-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-700"
               >
                 ← 前の{PAGE_SIZE}件
@@ -254,7 +254,7 @@ export function AccidentNewsBrowser({
             </span>
             {initialPage < initialPageCount ? (
               <a
-                href={buildAccidentNewsPageHref(selected, initialPage + 1)}
+                href={buildFatalAccidentsPageHref(selected, initialPage + 1)}
                 className="inline-flex min-h-11 items-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-700"
               >
                 次の{PAGE_SIZE}件 →
@@ -267,7 +267,7 @@ export function AccidentNewsBrowser({
       {result.cases.length === 0 && (
         <p
           className="mt-4 rounded-lg border border-slate-200 bg-slate-50 px-4 py-6 text-center text-sm text-slate-500"
-          data-accident-news-empty
+          data-fatal-accidents-empty
         >
           該当する事例がありません。条件を変えてお試しください。
         </p>
@@ -276,7 +276,7 @@ export function AccidentNewsBrowser({
   );
 }
 
-function AccidentNewsCard({ item }: { item: SeriousCase }) {
+function FatalAccidentCard({ item }: { item: SeriousCase }) {
   return (
     <li className="rounded-xl border border-slate-200 bg-white p-3">
       <div className="flex flex-wrap items-center gap-2 text-[11px]">
@@ -303,7 +303,7 @@ function AccidentNewsCard({ item }: { item: SeriousCase }) {
         >
           AIに対策を質問 →
         </TransientChatLink>
-        <Link href={`/accident-news?focus=${encodeURIComponent(item.id)}`} className="font-semibold text-orange-700 hover:underline">
+        <Link href={`/fatal-accidents?focus=${encodeURIComponent(item.id)}`} className="font-semibold text-orange-700 hover:underline">
           似た事例 →
         </Link>
         <Link href="/ky/paper" className="font-semibold text-emerald-700 hover:underline">

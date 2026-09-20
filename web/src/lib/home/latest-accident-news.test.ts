@@ -80,6 +80,39 @@ describe("selectHomeLatestAccidentReports", () => {
     expect(reports).toEqual([]);
   });
 
+  it("excludes prosecution, judgment, lawsuit, aggregate, and administrative follow-up headlines", () => {
+    const reports = selectHomeLatestAccidentReports(
+      [
+        rss(
+          "ビル鉄骨落下2人死亡、工事現場監督らを書類送検 - 経済紙",
+          "2026-07-30T11:00:00+09:00",
+          "prosecution",
+        ),
+        rss(
+          "労災で重傷の作業員、一審から一転して高裁で逆転勝訴 - 法律媒体",
+          "2026-07-30T10:00:00+09:00",
+          "judgment",
+        ),
+        rss(
+          "建設業での労災死亡事故すでに3件 労働局が業界に緊急要請 - 地方紙",
+          "2026-07-30T09:00:00+09:00",
+          "request",
+        ),
+        rss(
+          "工事現場で足場から作業員が転落し死亡 岐阜県 - 地方テレビ",
+          "2026-07-30T08:00:00+09:00",
+          "incident",
+        ),
+      ],
+      NOW,
+      10,
+    );
+
+    expect(reports.map((report) => report.title)).toEqual([
+      "工事現場で足場から作業員が転落し死亡 岐阜県",
+    ]);
+  });
+
   it("deduplicates reports that describe the same event", () => {
     const reports = selectHomeLatestAccidentReports(
       [

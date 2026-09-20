@@ -1,4 +1,5 @@
 export { getAnalyticsAggregates } from "./aggregators";
+export { buildAnalyticsInsights } from "./insights";
 export { loadCombinedCases, getLoaderMeta } from "./loader";
 export type {
   AnalyticsAggregates,
@@ -6,6 +7,7 @@ export type {
   AnalyticsFieldCoverage,
   AnalyticsFilterOptions,
   AnalyticsFilters,
+  AnalyticsSourceFilter,
   AnalyticsKpi,
   IndustryDeathRate,
   IndustryTypeMatrix,

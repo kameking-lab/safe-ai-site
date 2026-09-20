@@ -206,12 +206,12 @@ const ALL_FLAGSHIP_FEATURES: FlagshipFeature[] = [
   },
   {
     id: "accidents",
-    label: "重大災害情報",
+    label: "労災事故情報",
     icon: "🚨",
     iconSrc: "/icons/icon-accident.webp",
-    cardTitle: "重大災害情報",
+    cardTitle: "労災事故速報・事故データ",
     cardDescription:
-      "公表事実・匿名の重大災害情報を検索できます。データセット単位の出典、対象年、個別追跡の限界を確認してください。",
+      "直近の報道速報、厚労省の死亡事故データ、事故分析を、情報の確認状態と出典を分けて確認できます。",
     href: "/accident-news",
     subItems: [
       {
@@ -225,14 +225,19 @@ const ALL_FLAGSHIP_FEATURES: FlagshipFeature[] = [
         description: "5業種の事故型・原因・対策・関連法令を自動集計",
       },
       {
-        label: "事故統計ダッシュボード",
+        label: "事故分析ダッシュボード",
         href: "/accidents-analytics",
         description: "事故型・業種・経年の傾向をグラフで把握",
       },
       {
-        label: "重大災害事例（死亡災害）",
+        label: "死亡事故データベース",
+        href: "/fatal-accidents",
+        description: "厚労省公表の死亡災害を業種・事故型・起因物・年から検索",
+      },
+      {
+        label: "直近の労災事故速報",
         href: "/accident-news",
-        description: "公表事実・匿名のデータを業種・事故型・起因物分類から検索",
+        description: "国内の労災報道を公表日時・媒体名・確認状態つきで確認",
       },
       {
         label: "業種別 安全管理ポータル",

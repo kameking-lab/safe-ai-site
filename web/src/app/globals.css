@@ -935,8 +935,8 @@ table {
 
 /* App Router may briefly retain a route fallback while the page-level
    Suspense fallback streams in. Never show both accident loading shells. */
-main:has(#accident-news-search [data-accident-news-loading-shell])
-  [data-accident-news-route-loading] {
+main:has(#fatal-accidents-search [data-fatal-accidents-loading-shell])
+  [data-fatal-accidents-route-loading] {
   display: none;
 }
 

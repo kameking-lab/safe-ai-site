@@ -46,6 +46,7 @@ describe("サイドバーナビ(NAV_CATEGORIES)のIA不変条件", () => {
       "/chatbot",
       "/chemical-ra",
       "/accident-news",
+      "/fatal-accidents",
       "/laws",
       "/ky/paper",
       "/education-certification",
@@ -53,7 +54,10 @@ describe("サイドバーナビ(NAV_CATEGORIES)のIA不変条件", () => {
       "/signage",
       "/materials/safety-images",
       "/tools/construction-calculators",
-      "/services/automation",
+      "/contact/automation-email",
+      "/training/safety-seminars",
+      "/goods",
+      "/accidents-analytics",
       "/safety-ai",
       "/search",
       "/features",
@@ -70,7 +74,7 @@ describe("サイドバーナビ(NAV_CATEGORIES)のIA不変条件", () => {
         category.items.map((item) => item.href),
       );
     const desktop = hrefs("desktop");
-    expect(desktop).toHaveLength(17);
+    expect(desktop).toHaveLength(21);
     expect(new Set(desktop).size).toBe(desktop.length);
     expect(desktop).toEqual(expect.arrayContaining(requiredDesktop));
     expect(
@@ -78,7 +82,7 @@ describe("サイドバーナビ(NAV_CATEGORIES)のIA不変条件", () => {
         .flatMap((category) => category.items.map((item) => item.href))
         .filter((href) => mobilePrimary.has(href)),
     ).toEqual([]);
-    expect(hrefs("mobile").length).toBeLessThanOrEqual(11);
+    expect(hrefs("mobile").length).toBeLessThanOrEqual(16);
   });
 
   it.each([
@@ -105,12 +109,17 @@ describe("サイドバーナビ(NAV_CATEGORIES)のIA不変条件", () => {
         "/law-search",
         "/laws",
         "/accident-news",
+        "/fatal-accidents",
         "/ky/paper",
         "/signage",
         "/training/visual-ky",
         "/education-certification",
         "/tools/construction-calculators",
-        "/services/automation",
+        "/contact/automation-email",
+        "/training/safety-seminars",
+        "/materials/safety-images",
+        "/goods",
+        "/accidents-analytics",
         "/safety-ai",
         "/features",
       ];

@@ -42,7 +42,8 @@ export async function generateMetadata({
   }
   const name = entry.name ?? `CAS ${cas}`;
   return {
-    title: `${name} (CAS ${cas}) | 化学物質データベース | 安全AI`,
+    // root layout の title template でサイト名を一度だけ付与する。
+    title: `${name}（CAS ${cas}）｜化学物質DB`,
     description: `${name} の濃度基準値・GHS 区分・関連法令 (化管法/PRTR・化審法・毒劇法等) を出典付きで確認できます。`,
     alternates: { canonical: `/chemical-database/${cas}` },
     robots: isIndexableChemical(normalizeCas(cas), entry)

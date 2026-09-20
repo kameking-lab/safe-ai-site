@@ -10,6 +10,7 @@ export const RUM_ROUTE_TEMPLATES = [
   "/risk",
   "/law-search",
   "/accident-news",
+  "/fatal-accidents",
   "/privacy",
   "/security",
   "/accidents/[id]",

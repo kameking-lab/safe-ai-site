@@ -18,7 +18,7 @@
 1. [楽天アフィリエイト](https://affiliate.rakuten.co.jp/) に登録する。
 2. リンクツールや検索URL用の **afid**（アフィリエイトID）を取得する。
 3. 環境変数を追加する:
-   - 名前: `NEXT_PUBLIC_RAKUTEN_AFID`
+   - 名前: `NEXT_PUBLIC_RAKUTEN_AFFILIATE_ID`
    - 値: 発行されたID
 4. 再デプロイ後、楽天の検索URLに `afid` クエリが付与されます。
 
@@ -37,7 +37,7 @@
 7. **「Value」** 欄に、Amazonアソシエイトで発行したストアID（例 `yourname-22`）だけを貼り付ける。
 8. **「Environments」** で Production（必要なら Preview も）にチェックが付いていることを確認する。
 9. **「Save」** ボタンを押す。
-10. 同様に **「Add Another」** または新しい行で Key に `NEXT_PUBLIC_RAKUTEN_AFID`、Value に楽天の afid を入れて **Save** する。
+10. 同様に **「Add Another」** または新しい行で Key に `NEXT_PUBLIC_RAKUTEN_AFFILIATE_ID`、Value に楽天の afid を入れて **Save** する。
 11. 画面上部の **「Deployments」** タブへ移動し、最新デプロイの **「⋯」メニュー → 「Redeploy」** から再デプロイする（環境変数はデプロイ時にビルドへ取り込まれるため）。
 
 ## ローカルで試す

@@ -62,8 +62,6 @@ export function isQuarantinedPublicPath(href: string): boolean {
     path.startsWith("/health-checkup-scheduler/") ||
     path === "/accidents-reports" ||
     path.startsWith("/accidents-reports/") ||
-    path === "/accidents-analytics" ||
-    path.startsWith("/accidents-analytics/") ||
     (path.startsWith("/accidents/") && path !== "/accidents/mhlw-100620") ||
     path === "/strategy/plan-generator" ||
     path.startsWith("/strategy/plan-generator/") ||

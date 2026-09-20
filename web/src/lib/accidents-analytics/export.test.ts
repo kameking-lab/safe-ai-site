@@ -15,11 +15,33 @@ const FIXTURE: AnalyticsAggregates = {
     datasetCases: 4000,
     filteredCases: 4000,
     yearsCovered: { from: 2019, to: 2024 },
-    filters: { industry: null, type: null, year: null },
+    filters: {
+      industry: null,
+      type: null,
+      year: null,
+      month: null,
+      industryMedium: null,
+      cause: null,
+      workplaceSize: null,
+      occurrenceTime: null,
+      prefecture: null,
+      age: null,
+      severity: null,
+      source: "official",
+    },
     filterOptions: {
       industries: ["建設業", "製造業"],
       types: ["墜落・転落"],
       years: [2024, 2023],
+      months: [1, 2],
+      industryMediums: [],
+      causes: [],
+      workplaceSizes: [],
+      occurrenceTimes: ["0～2"],
+      prefectures: ["東京都"],
+      ages: [],
+      severities: ["軽傷", "中等傷", "重傷", "死亡"],
+      sources: ["official", "mhlw-deaths-compact", "mhlw-deaths-2024", "curated", "all"],
     },
     coverage: Object.fromEntries(
       [
@@ -112,7 +134,7 @@ describe("analyticsToSummaryText", () => {
   it("結論（最新年件数・前年比・死亡率）とTOP3を含む", () => {
     const text = analyticsToSummaryText(FIXTURE);
     expect(text).toContain("2024年の事故件数：820件（前年比 +5.1%）");
-    expect(text).toContain("死亡災害比率：12.5%");
+    expect(text).toContain("死亡事例の構成比：12.5%");
     expect(text).toContain("1.建設業(1,200件)");
     expect(text).toContain("1.墜落・転落(800件)");
   });

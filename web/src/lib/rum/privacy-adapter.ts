@@ -56,6 +56,7 @@ const EXACT_ROUTE_TEMPLATES = new Set([
   "/risk",
   "/law-search",
   "/accident-news",
+  "/fatal-accidents",
   "/privacy",
   "/security",
 ]);

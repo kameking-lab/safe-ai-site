@@ -337,13 +337,21 @@ export const NAV_CATEGORIES: AppShellNavCategory[] = [
       },
       {
         id: "accident-news",
-        label: "重大災害事例",
+        label: "労災事故速報",
         href: "/accident-news",
-        icon: HardHat,
+        icon: Newspaper,
         badge: "NEW",
-        badgeUntil: "2026-08-31",
+        badgeUntil: "2026-10-31",
         description:
-          "死亡災害を業種・事故型・起因物分類で検索（匿名・データセット単位の出典）",
+          "直近14日以内の国内労災報道を、公表日時・媒体名・確認状態つきで表示",
+      },
+      {
+        id: "fatal-accidents",
+        label: "死亡事故データベース",
+        href: "/fatal-accidents",
+        icon: HardHat,
+        description:
+          "厚労省の死亡災害を業種・事故型・起因物・年で検索",
       },
       {
         id: "court-cases",
@@ -357,7 +365,7 @@ export const NAV_CATEGORIES: AppShellNavCategory[] = [
       },
       {
         id: "accidents-analytics",
-        label: "事故統計ダッシュボード",
+        label: "事故分析ダッシュボード",
         href: "/accidents-analytics",
         icon: BarChart3,
         description: "事故型・業種・経年の傾向をグラフで把握",
@@ -601,9 +609,21 @@ const COMPACT_NAV_CATEGORIES: AppShellNavCategory[] = [
       },
       {
         id: "accident-news",
-        label: "労災事故",
+        label: "労災事故速報",
         href: "/accident-news",
         icon: Newspaper,
+      },
+      {
+        id: "fatal-accidents",
+        label: "死亡事故DB",
+        href: "/fatal-accidents",
+        icon: HardHat,
+      },
+      {
+        id: "accidents-analytics",
+        label: "事故分析",
+        href: "/accidents-analytics",
+        icon: BarChart3,
       },
     ],
   },
@@ -625,8 +645,20 @@ const COMPACT_NAV_CATEGORIES: AppShellNavCategory[] = [
       {
         id: "automation-consult",
         label: "自動化相談",
-        href: "/services/automation",
+        href: "/contact/automation-email",
         icon: Workflow,
+      },
+      {
+        id: "safety-seminars",
+        label: "自由に使えるスライド",
+        href: "/training/safety-seminars",
+        icon: LibraryBig,
+      },
+      {
+        id: "safety-goods",
+        label: "安全グッズ",
+        href: "/goods",
+        icon: ShoppingBag,
       },
       {
         id: "safety-ai",
@@ -668,7 +700,6 @@ export function getAppShellNavigationCategories(
     ...category,
     items: category.items.filter(
       (item) =>
-        !(position === "mobile" && item.id === "safety-image-library") &&
         isPublicRouteAvailable(item.href) &&
         !repeatedPrimaryHrefs.has(item.href),
     ),

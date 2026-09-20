@@ -47,7 +47,7 @@ describe("/for/construction 正規機能ランチャー", () => {
         "/risk?work=construction",
         "/ky/paper?industry=construction",
         "/safety-diary?industry=construction",
-        "/accident-news",
+        "/fatal-accidents",
         "/education-certification/finder?industry=construction",
         "/signage?industry=construction",
       ]),
