@@ -11,10 +11,14 @@ const DESKTOP_NAV = [
   ["法令検索", "/law-search"],
   ["化学物質RA", "/chemical-ra"],
   ["法改正", "/laws"],
-  ["労災事故", "/accident-news"],
+  ["労災事故速報", "/accident-news"],
+  ["死亡事故DB", "/fatal-accidents"],
+  ["事故分析", "/accidents-analytics"],
   ["5分ビジュアルKYT", "/training/visual-ky"],
   ["教育・資格", "/education-certification"],
   ["自動化相談", "/services/automation"],
+  ["自由に使えるスライド", "/training/safety-seminars"],
+  ["安全グッズ", "/goods"],
   ["安全AIとは", "/safety-ai"],
   ["サイト内検索", "/search"],
   ["全機能一覧", "/features"],
@@ -37,7 +41,7 @@ const MAIN_SERVICES = [
   ["安全グッズ", "/goods"],
   ["自由に使えるスライド", "/training/safety-seminars"],
   ["自由に使える画像集", "/materials/safety-images"],
-  ["事故統計分析", "/accidents-analytics"],
+  ["事故分析ダッシュボード", "/accidents-analytics"],
 ] as const;
 
 async function expectMainServices(page: Page) {
@@ -66,7 +70,7 @@ test("ホームはチワワの案内、9つの主機能、更新情報、カテ�
   expect(await page.locator("main section[aria-labelledby]").evaluateAll((sections) =>
     sections.map((section) => section.getAttribute("aria-labelledby")),
   )).toEqual([
-    "home-relaunch-title", "main-services-title", "home-updates-title",
+    "home-relaunch-title", "home-action-cockpit-title", "home-updates-title", "main-services-title",
     "home-automation-samples", "home-feature-directory", "home-automation-heading",
   ]);
   await expect(page.locator('[data-home-section="heat"]')).toHaveCount(0);
@@ -80,7 +84,7 @@ test("ホームはチワワの案内、9つの主機能、更新情報、カテ�
     await expect(link).toHaveAttribute("href", href);
   }
   await expect(page.locator("[data-primary-navigation]")).toHaveCount(0);
-  await expect(page.locator('[data-home-update="accidents"]').getByRole("link", { name: "関連事故を見る" })).toHaveAttribute("href", "/accident-news");
+  await expect(page.locator('[data-home-update="accidents"]').getByRole("link", { name: "事故速報をすべて見る" })).toHaveAttribute("href", "/accident-news");
   await expect(page.locator('[data-home-update="law-reform"]').getByRole("link", { name: "法改正一覧を見る" })).toHaveAttribute("href", "/laws");
   await expect(page.getByRole("region", { name: "カテゴリから探す" }).getByRole("link", { name: "KY用紙", exact: true })).toHaveAttribute("href", "/ky/paper");
 });
@@ -105,8 +109,9 @@ test("モバイルは9機能とSafety Labsを区別し、重複のないメニ�
     page.getByRole("region", {
       name: /小さな気づきが、\s*大きな事故を防ぐ。/u,
     }),
-    page.getByRole("region", { name: "仕事から選ぶ、9つの主機能" }),
+    page.getByRole("region", { name: "質問・検索・安全教育をワンクリックで" }),
     page.locator('[data-home-section="updates"]'),
+    page.getByRole("region", { name: "仕事から選ぶ、9つの主機能" }),
     page.getByRole("region", { name: "カテゴリから探す" }),
   ];
   const boxes = await Promise.all(sections.map((section) => section.boundingBox()));
@@ -128,12 +133,12 @@ test("モバイルは9機能とSafety Labsを区別し、重複のないメニ�
   );
   expect(menuLinkMetrics.map(({ href }) => href).filter((href) => mobilePrimaryHrefs.includes(href))).toEqual([]);
   const menuHrefs = menuLinkMetrics.map(({ href }) => href);
-  // Header search and safety-image shortcut have their own mobile entrypoints.
+  // Header search has its own mobile entrypoint.
   const expectedMenuHrefs = [
     "/notifications",
     "/account",
     ...DESKTOP_NAV.map(([, href]) => href).filter((href) =>
-      !mobilePrimaryHrefs.includes(href) && href !== "/search" && href !== "/materials/safety-images",
+      !mobilePrimaryHrefs.includes(href) && href !== "/search",
     ),
   ];
   expect(menuHrefs).toEqual(expectedMenuHrefs);

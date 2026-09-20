@@ -82,6 +82,7 @@ export function HomeActionCockpit() {
                 src={`${SEMINAR_PATH}/fall-prevention-hero-v2.png`}
                 alt="墜落・転落防止とフルハーネスの安全教育スライド"
                 fill
+                priority
                 sizes="(max-width: 1023px) 100vw, 18rem"
                 className="object-cover"
               />
