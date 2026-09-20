@@ -330,7 +330,7 @@ export const NAV_CATEGORIES: AppShellNavCategory[] = [
       },
       {
         id: "accidents",
-        label: "事故データベース",
+        label: "事故事例検索（補助）",
         href: "/accidents",
         icon: Database,
         description: "公式・編集済み・モデル事例を区別して収録範囲内を検索",

@@ -351,7 +351,7 @@ export function AnalyticsDashboardImpl({
               href="/accidents"
               className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2.5 py-0.5 text-[11px] text-slate-600 hover:bg-slate-50"
             >
-              ← 事故データベースへ戻る
+              ← 事故事例検索（補助）へ戻る
             </Link>
             <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700">
               Analytics

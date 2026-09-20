@@ -239,7 +239,7 @@ export default async function AccidentsAnalyticsPage({
                 className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-slate-700 hover:bg-slate-50"
               >
                 <Siren className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                事故データベース
+                事故事例検索（補助）
               </Link>
             </li>
             <li>
