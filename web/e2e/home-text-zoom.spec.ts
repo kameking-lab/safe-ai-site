@@ -3,8 +3,15 @@ import { expect, test } from "@playwright/test";
 test("ホームは400%ズーム相当幅でも横スクロールなく主導線を使える", async ({
   page,
 }) => {
+  // 1440px画面を400%ズームしたときの実効CSS幅（360px）でreflowを確認する。
+  // root font-size=400%はブラウザズームとは異なり、全remを4倍にしてしまうため
+  // ここでは実際のズーム時と同じレイアウト幅を使う。
   await page.setViewportSize({ width: 360, height: 900 });
-  const response = await page.goto("/", { waitUntil: "networkidle" });
+  await page.setExtraHTTPHeaders({
+    "x-vercel-ip-country": "JP",
+    "x-vercel-ip-country-region": "13",
+  });
+  const response = await page.goto("/", { waitUntil: "domcontentloaded" });
   expect(response?.status()).toBe(200);
 
   await expect(
@@ -41,7 +48,10 @@ test("ホームは400%ズーム相当幅でも横スクロールなく主導線�
 
   const reflow = await page.evaluate(() => ({
     clientWidth: document.documentElement.clientWidth,
-    scrollWidth: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth),
+    scrollWidth: Math.max(
+      document.documentElement.scrollWidth,
+      document.body.scrollWidth,
+    ),
   }));
   expect(reflow.scrollWidth - reflow.clientWidth).toBeLessThanOrEqual(2);
   await expect(page.locator('[data-home-section="quality"]')).toHaveCount(0);
