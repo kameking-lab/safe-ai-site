@@ -37,7 +37,6 @@
 @source not "../components/flagship-grid.tsx";
 @source not "../components/flagship-nav.tsx";
 @source not "../components/for-construction/role-anchor-scroller.tsx";
-@source not "../components/goods-chatbot.tsx";
 @source not "../components/goods-icons/index.tsx";
 @source not "../components/health-checkup/scheduler-form.tsx";
 @source not "../components/heat-illness/heat-safety-special.tsx";
@@ -48,9 +47,10 @@
 @source not "../components/home-safety-cockpit/home-effect-first-client.tsx";
 @source not "../components/home-safety-cockpit/home-safety-cockpit-client.tsx";
 @source not "../components/home-three-pillars.tsx";
-@source not "../components/home/home-feature-directory.tsx";
+@source not "../components/home/home-core-features.tsx";
 @source not "../components/home/home-featured-law-reform.tsx";
 @source not "../components/home/home-latest-accidents.tsx";
+@source not "../components/home/home-learning-overview.tsx";
 @source not "../components/home/home-news-feed.tsx";
 @source not "../components/home/home-trust-entry.tsx";
 @source not "../components/home/home-visual-ky-feature.tsx";

@@ -13,10 +13,10 @@ const COCKPIT_MASCOT_ASSET = join(
 );
 
 describe("HomeCoreFeatures ownership boundary", () => {
-  it("shows six compact primary links and role chips without repeating upper-page experiences", () => {
+  it("shows seven compact primary links and role chips without repeating upper-page experiences", () => {
     const { container } = render(<HomeCoreFeatures />);
 
-    expect(container.querySelectorAll("section > div > ul > li")).toHaveLength(6);
+    expect(container.querySelectorAll("section > div > ul > li")).toHaveLength(7);
     expect(container.querySelectorAll('nav[aria-label="役割別の入口"] a')).toHaveLength(6);
     const hrefs = [...container.querySelectorAll("a")].map((link) =>
       link.getAttribute("href"),
@@ -27,6 +27,7 @@ describe("HomeCoreFeatures ownership boundary", () => {
       "/risk",
       "/safety-diary",
       "/signage",
+      "/materials/safety-images",
       "/goods",
       "/notifications",
       "/for/construction",

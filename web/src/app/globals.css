@@ -1,6 +1,5 @@
 @import "tailwindcss" source(none);
 @import "./tailwind-route-source-exclusions.css";
-@import "../components/footer.css";
 
 /* Generate utilities from shipped application sources only. Test files and
    snapshots must not grow the production stylesheet. */
@@ -25,13 +24,10 @@
   --foreground: #132238;
   --surface: #ffffff;
   --surface-emphasis: #edf6f2;
-  --surface-inverse: #142d4c;
-  --surface-card: var(--surface);
   --surface-muted: #f1f4f2;
   --text: var(--foreground);
   --muted: #526173;
   --border: #d7dfdc;
-  --border-subtle: var(--border);
   --primary: #0b5d4b;
   --primary-hover: #08483b;
   --primary-solid: #0b5d4b;
@@ -68,20 +64,10 @@
   --radius-sm: 0.625rem;
   --radius-md: 1rem;
   --radius-lg: 1.5rem;
-  --radius-xl: 2rem;
   --space-1: 0.25rem;
   --space-2: 0.5rem;
-  --space-3: 0.75rem;
   --space-4: 1rem;
-  --space-6: 1.5rem;
-  --space-8: 2rem;
   --type-xs: 0.75rem;
-  --type-sm: 0.875rem;
-  --type-body: 1rem;
-  --type-lead: clamp(1.05rem, 1rem + 0.25vw, 1.25rem);
-  --type-h3: clamp(1.125rem, 1rem + 0.5vw, 1.5rem);
-  --type-h2: clamp(1.5rem, 1.2rem + 1vw, 2.25rem);
-  --type-h1: clamp(2rem, 1.45rem + 2vw, 3.5rem);
 }
 
 html.dark {
@@ -89,13 +75,10 @@ html.dark {
   --foreground: #eef5f2;
   --surface: #132238;
   --surface-emphasis: #12352f;
-  --surface-inverse: #07111e;
-  --surface-card: var(--surface);
   --surface-muted: #0e1c2e;
   --text: var(--foreground);
   --muted: #b7c3cf;
   --border: #34465a;
-  --border-subtle: var(--border);
   --primary: #65d6b4;
   --primary-hover: #8be3c8;
   --primary-solid: #0b5d4b;
@@ -134,9 +117,9 @@ html.dark {
   --color-foreground: var(--foreground);
   /* 日本語・欧文ともOS標準フォントを使う。全ページ共通のWebフォント取得と
      読み込み後の字幅変化を避け、低速回線のLCPとCLSを安定させる。 */
-  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI",
-    "Hiragino Kaku Gothic ProN", "Hiragino Sans", "BIZ UDPGothic", "Yu Gothic UI",
-    Meiryo, sans-serif;
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Kaku Gothic ProN",
+    "Hiragino Sans", "BIZ UDPGothic", "Yu Gothic UI", Meiryo, sans-serif;
   --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
   /* 安全AIポータル brand / semantic colors */
   --color-brand-primary: var(--primary);
@@ -178,9 +161,6 @@ body {
   color: var(--foreground);
   /* フォントは @theme の --font-sans に一元化（Arial直書きが日本語UIをチープに見せていた） */
   font-family: var(--font-sans);
-  /* PWAプルリフレッシュを有効にする */
-  overscroll-behavior-y: auto;
-  transition: background-color 200ms ease, color 200ms ease;
 }
 
 /*
@@ -224,7 +204,11 @@ body {
       [class^="bg-teal-50/"],
       [class*=" bg-teal-50/"]
     ):not([class*="dark:bg-"]) {
-    background-color: color-mix(in srgb, var(--success-solid) 22%, var(--surface));
+    background-color: color-mix(
+      in srgb,
+      var(--success-solid) 22%,
+      var(--surface)
+    );
   }
 
   html.dark
@@ -266,7 +250,11 @@ body {
       [class^="bg-yellow-50/"],
       [class*=" bg-yellow-50/"]
     ):not([class*="dark:bg-"]) {
-    background-color: color-mix(in srgb, var(--caution-solid) 24%, var(--surface));
+    background-color: color-mix(
+      in srgb,
+      var(--caution-solid) 24%,
+      var(--surface)
+    );
   }
 
   html.dark
@@ -411,10 +399,9 @@ body {
   }
 
   html.dark
-    :where(
-      [class^="text-rose-800/"],
-      [class*=" text-rose-800/"]
-    ):not([class*="dark:text-"]) {
+    :where([class^="text-rose-800/"], [class*=" text-rose-800/"]):not(
+      [class*="dark:text-"]
+    ) {
     color: #fecdd3;
   }
 }
@@ -886,6 +873,16 @@ table {
 /* Windows High Contrast / forced-colors。状態は色だけに依存せず、境界・下線・
    aria属性に対応する輪郭を残す。OSのsystem colorを優先する。 */
 @media (forced-colors: active) {
+  [data-site-footer],
+  [data-site-footer] :where(section, div, p, h2, span, nav) {
+    forced-color-adjust: auto;
+    border-color: CanvasText !important;
+    background-color: Canvas !important;
+    color: CanvasText !important;
+  }
+  [data-site-footer] a[href] {
+    color: LinkText !important;
+  }
   :where(a[href]) {
     color: LinkText;
     text-decoration: underline;

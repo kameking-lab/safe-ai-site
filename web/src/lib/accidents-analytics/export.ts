@@ -12,6 +12,15 @@ function jp(n: number): string {
   return n.toLocaleString("ja-JP");
 }
 
+function filterLabel(a: AnalyticsAggregates): string {
+  const filters = [
+    a.meta.filters.industry,
+    a.meta.filters.type,
+    a.meta.filters.year ? `${a.meta.filters.year}年` : null,
+  ].filter(Boolean);
+  return filters.length > 0 ? filters.join(" × ") : "全データ";
+}
+
 /** ダッシュボードの主要集計表を1つの CSV へ（Excel で開ける控え・集計用）。 */
 export function analyticsToCsv(a: AnalyticsAggregates): string {
   return sectionsToCsv([
@@ -19,12 +28,21 @@ export function analyticsToCsv(a: AnalyticsAggregates): string {
       title: "事故統計ダッシュボード サマリー",
       headers: ["項目", "値"],
       rows: [
-        ["収録期間", `${a.meta.yearsCovered.from}〜${a.meta.yearsCovered.to}年`],
+        ["絞り込み条件", filterLabel(a)],
+        ["対象件数（件）", a.meta.filteredCases],
+        ["統合データセット総件数（件）", a.meta.datasetCases],
+        [
+          "収録期間",
+          `${a.meta.yearsCovered.from}〜${a.meta.yearsCovered.to}年`,
+        ],
         ["curated詳細事例（件）", a.meta.curatedCases],
         ["厚労省 死亡災害DB（件）", a.meta.mhlwDeathsCount],
         [`${a.kpi.recentYearLabel}の事故件数（件）`, a.kpi.recentYearCount],
         ["直近12ヶ月の事故件数（件）", a.kpi.trailing12mCount],
         ["死亡災害比率（%）", a.kpi.fatalRatePercent],
+        ["業種欠損率（%）", a.meta.coverage.industry.missingRatePercent],
+        ["事故型欠損率（%）", a.meta.coverage.type.missingRatePercent],
+        ["発生月欠損率（%）", a.meta.coverage.month.missingRatePercent],
         [
           `前年比 ${a.yoyComparison.previousYear.year}→${a.yoyComparison.currentYear.year}（%）`,
           a.yoyComparison.deltaPercent,
@@ -44,7 +62,12 @@ export function analyticsToCsv(a: AnalyticsAggregates): string {
     {
       title: "業種別 死亡率",
       headers: ["業種", "総数", "うち死亡", "死亡率（%）"],
-      rows: a.industryDeathRate.map((x) => [x.industry, x.total, x.fatal, x.rate]),
+      rows: a.industryDeathRate.map((x) => [
+        x.industry,
+        x.total,
+        x.fatal,
+        x.rate,
+      ]),
     },
     {
       title: "年別 事故件数推移",
@@ -74,7 +97,8 @@ export function analyticsToSummaryText(a: AnalyticsAggregates): string {
     .join("　");
   const delta = `${a.yoyComparison.deltaPercent > 0 ? "+" : ""}${a.yoyComparison.deltaPercent}%`;
   return [
-    `【事故統計サマリー】収録期間 ${a.meta.yearsCovered.from}〜${a.meta.yearsCovered.to}年`,
+    `【事故統計サマリー】${filterLabel(a)}・対象${jp(a.meta.filteredCases)}件（全${jp(a.meta.datasetCases)}件）`,
+    `収録期間：${a.meta.yearsCovered.from}〜${a.meta.yearsCovered.to}年`,
     `${a.kpi.recentYearLabel}の事故件数：${jp(a.kpi.recentYearCount)}件（前年比 ${delta}）`,
     `死亡災害比率：${a.kpi.fatalRatePercent}%`,
     `危険業種TOP3：${top3i}`,

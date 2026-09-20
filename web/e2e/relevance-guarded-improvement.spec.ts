@@ -100,7 +100,7 @@ test.describe("relevance-guarded task completion", () => {
     }
   });
 
-  test("検証済み地域aliasを共有resolverで解決し、曖昧区は選択必須、戻ると状態復元", async ({
+  test("検証済み地域aliasをriskとKYで解決し、曖昧区は選択必須、戻ると状態復元", async ({
     page,
   }) => {
     const queries = [
@@ -143,16 +143,6 @@ test.describe("relevance-guarded task completion", () => {
     await expect(page).toHaveURL(/\/risk\?area=osaka-osaka/);
     await expect(input).toHaveValue("大阪府 大阪市");
     await expect(resolver.getByRole("combobox")).toHaveCount(1);
-
-    await page.goto("/", { waitUntil: "domcontentloaded" });
-    await waitForClientReady(page);
-    await expect(page.getByRole("heading", { level: 1 })).toContainText(
-      "大きな事故を防ぐ。",
-    );
-    await expect(page.getByRole("link", { name: "安全資料を探す" })).toHaveAttribute(
-      "href",
-      "/resources/mlit",
-    );
 
     await page.goto("/ky/paper", { waitUntil: "domcontentloaded" });
     await waitForClientReady(page);

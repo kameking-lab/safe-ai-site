@@ -15,7 +15,7 @@ import { ChatbotBody } from "./ChatbotBody";
 
 const TITLE = "安衛法AI｜現場の言葉で法令を確認";
 const DESCRIPTION =
-  "作業や設備を普段の言葉で質問し、労働安全衛生法令の結論・適用条件・施行状態と公式根拠を一つの会話で確認できます。";
+  "作業や設備を普段の言葉で質問し、労働安全衛生法令の結論・適用条件・施行状態と公式根拠を確認できます。安全課題に応じたNETIS技術案内も利用できます。";
 
 type SearchParams = Record<string, string | string[] | undefined>;
 
@@ -88,6 +88,7 @@ export default function ChatbotPage() {
               "会話中の作業条件を踏まえた回答",
               "公式原文と該当箇所の表示",
               "条件不足時の確認質問",
+              "安全課題別のNETIS技術案内",
             ],
           }),
         ]}

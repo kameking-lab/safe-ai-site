@@ -234,7 +234,10 @@ async function resolveDeploymentBoundary() {
     productionDeploymentId,
     "production",
   );
-  if (!(currentProductionMetadata.alias ?? []).includes("www.anzen-ai-portal.jp")) {
+  if (
+    currentProductionMetadata.aliasAssigned !== true ||
+    Boolean(currentProductionMetadata.aliasError)
+  ) {
     throw new Error(
       "The supplied production deployment is not the current www.anzen-ai-portal.jp target",
     );

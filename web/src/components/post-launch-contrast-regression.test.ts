@@ -19,7 +19,7 @@ const footerSource = readFileSync(
   "utf8",
 );
 const footerStylesSource = readFileSync(
-  resolve(process.cwd(), "src/components/footer.css"),
+  resolve(process.cwd(), "src/components/footer-styles.tsx"),
   "utf8",
 );
 const whatsNewSource = readFileSync(

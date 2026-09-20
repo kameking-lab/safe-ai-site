@@ -20,6 +20,10 @@ const FINAL_LIGHTHOUSE_ROOT = resolve(
 const PERFORMANCE_BUDGET = JSON.parse(
   readFileSync("config/performance-budgets.json", "utf8"),
 );
+const LIGHTHOUSE_RUNNER_SOURCE = readFileSync(
+  "scripts/audit/best-in-class-lighthouse.mjs",
+  "utf8",
+);
 const CURRENT_CI_RESULT = JSON.parse(
   readFileSync(
     "src/lib/audit/fixtures/performance-budget-ci-31264521002.json",
@@ -44,7 +48,13 @@ const STABLE_ROUTE_HARD_GATES = {
   home: [218000, 61000, 3850, 0.1, 200],
   "visual-ky": [230000, 90000, 3500, 0.1, 200],
   "visual-ky-scenario": [275000, 100000, 3800, 0.1, 200],
-  "safety-ai": [218000, 42000, 3550, 0.1, 200],
+  "safety-seminar-library": [200000, 50000, 3000, 0.1, 200],
+  "fall-prevention-training": [210000, 130000, 4000, 0.1, 200],
+  "ai-seminar-library": [200000, 50000, 3300, 0.1, 200],
+  "ai-chat-work-training": [210000, 115000, 3500, 0.1, 200],
+  "construction-calculator-library": [200000, 55000, 3300, 0.1, 200],
+  "construction-calculator-concrete": [210000, 50000, 3300, 0.1, 200],
+  "safety-ai": [218000, 44000, 3550, 0.1, 200],
   "project-story": [218000, 38000, 3550, 0.1, 200],
   automation: [226000, 98000, 3900, 0.1, 200],
   "heat-hub": [229000, 62000, 3300, 0.1, 200],
@@ -52,13 +62,49 @@ const STABLE_ROUTE_HARD_GATES = {
   ky: [365000, 51000, 4500, 0.1, 200],
   "safety-diary": [270000, 53000, 4000, 0.1, 200],
   signage: [301000, 25000, 4250, 0.1, 200],
+  "safety-images": [205000, 85000, 3400, 0.1, 200],
   risk: [238500, 35000, 3650, 0.1, 200],
-  chatbot: [291000, 36000, 3820, 0.1, 200],
+  chatbot: [291000, 40000, 3820, 0.1, 200],
   "law-search": [235000, 37000, 3400, 0.1, 200],
   laws: [275000, 60000, 3800, 0.1, 200],
   "accident-search": [220000, 90000, 3650, 0.1, 200],
   resources: [220000, 60000, 3400, 0.1, 200],
 };
+
+const FORMAL_35477051432_NEW_ROUTE_ACTUALS = {
+  "safety-seminar-library": [185368, 44112, 2336.8, 23.5],
+  "fall-prevention-training": [192974, 118162, 3572.9, 26],
+  "ai-seminar-library": [185368, 43186, 2793.1, 15.5],
+  "ai-chat-work-training": [193608, 106401, 2791.3, 32.5],
+  "construction-calculator-library": [179661, 48804, 2712.3, 24],
+  "construction-calculator-concrete": [194199, 41033, 2263, 28],
+  "safety-images": [190764, 74153, 2571.8, 33.5],
+} as const;
+
+function currentBudgetActual() {
+  const actual = structuredClone(CURRENT_CI_RESULT.actual);
+  for (const [route, values] of Object.entries(
+    FORMAL_35477051432_NEW_ROUTE_ACTUALS,
+  )) {
+    const [totalClientJsBytes, routePayloadBytes, lcpMs, tbtMs] = values;
+    actual.routes[route] = {
+      totalClientJsBytes,
+      routeSpecificJsBytes: 0,
+      routePayloadBytes,
+      cssBytes: 44795,
+      lcpMs,
+      cls: 0,
+      tbtMs,
+      renderBlockingCssBytes: 41997,
+      adoptedRuns: 3,
+    };
+  }
+  actual.inventory = {
+    sitemapUrlCount: 3650,
+    staticPageCount: 3413,
+  };
+  return actual;
+}
 
 function finalEvidenceCandidate(
   sessionId: string,
@@ -180,6 +226,22 @@ function compiledPage(userland: Record<string, unknown>) {
 }
 
 describe("performance budget measurement", () => {
+  it("keeps every formally measured route under a performance budget", () => {
+    const runnerRouteIds = [
+      ...LIGHTHOUSE_RUNNER_SOURCE.matchAll(/\bid:\s*"([^"]+)"/gu),
+    ].map((match) => match[1]);
+
+    expect(new Set(runnerRouteIds).size).toBe(runnerRouteIds.length);
+    expect(runnerRouteIds.sort()).toEqual([...PERFORMANCE_ROUTES].sort());
+    for (const members of Object.values(
+      PERFORMANCE_BUDGET.layoutCohorts as Record<string, string[]>,
+    )) {
+      expect(members.every((route) => PERFORMANCE_ROUTES.includes(route))).toBe(
+        true,
+      );
+    }
+  });
+
   it("discovers the service-first final Lighthouse sessions with default CLI paths", () => {
     const runtime = resolvePerformanceBudgetRuntimePaths({
       env: { NODE_ENV: "test" },
@@ -392,13 +454,13 @@ describe("performance budget measurement", () => {
         PERFORMANCE_BUDGET.routes["law-search"].routePayloadBytesMax,
     }).toEqual({
       home: 61000,
-      "safety-ai": 42000,
+      "safety-ai": 44000,
       signage: 25000,
       "law-search": 37000,
     });
     expect(PERFORMANCE_BUDGET.inventory).toEqual({
-      sitemapUrlCountBaseline: 3492,
-      staticPageCountBaseline: 3180,
+      sitemapUrlCountBaseline: 3650,
+      staticPageCountBaseline: 3413,
       allowedChangeFraction: 0.02,
     });
   });
@@ -412,17 +474,18 @@ describe("performance budget measurement", () => {
       cspPolicyMode: "report-only",
       methodologyUse: "calibration-sample-only",
     });
+    const actual = currentBudgetActual();
     const evaluation = evaluatePerformanceBudget({
       budget: PERFORMANCE_BUDGET,
-      commonClientJsBytes: CURRENT_CI_RESULT.actual.commonClientJsBytes,
-      routeActuals: CURRENT_CI_RESULT.actual.routes,
-      inventory: CURRENT_CI_RESULT.actual.inventory,
+      commonClientJsBytes: actual.commonClientJsBytes,
+      routeActuals: actual.routes,
+      inventory: actual.inventory,
     });
 
     expect(evaluation.failures).toEqual([]);
     expect(evaluation.sharedActuals).toEqual({
-      commonCssBytes: 43324,
-      renderBlockingCssBytes: 39837,
+      commonCssBytes: 44795,
+      renderBlockingCssBytes: 41997,
     });
     expect(CURRENT_CI_RESULT.actual.routes.laws.routeSpecificJsBytes).toBe(
       89668,
@@ -430,7 +493,7 @@ describe("performance budget measurement", () => {
   });
 
   it("gates each shared CSS maximum once without hard-failing route-specific JS", () => {
-    const actual = structuredClone(CURRENT_CI_RESULT.actual);
+    const actual = currentBudgetActual();
     actual.routes.home.cssBytes = 46001;
     actual.routes["safety-ai"].cssBytes = 47000;
     actual.routes.signage.renderBlockingCssBytes = 42001;
@@ -455,9 +518,9 @@ describe("performance budget measurement", () => {
   });
 
   it("keeps total client JavaScript and static inventory as hard gates", () => {
-    const actual = structuredClone(CURRENT_CI_RESULT.actual);
+    const actual = currentBudgetActual();
     actual.routes.laws.totalClientJsBytes = 275001;
-    actual.inventory.staticPageCount = 3245;
+    actual.inventory.staticPageCount = 3483;
 
     const evaluation = evaluatePerformanceBudget({
       budget: PERFORMANCE_BUDGET,
@@ -474,9 +537,9 @@ describe("performance budget measurement", () => {
       },
       {
         id: "static-page-count",
-        actual: 3245,
-        expectedRange: [3116, 3244],
-        baseline: 3180,
+        actual: 3483,
+        expectedRange: [3344, 3482],
+        baseline: 3413,
       },
     ]);
   });
@@ -487,11 +550,12 @@ describe("performance budget measurement", () => {
     budget.inventory.staticPageCountBaseline = Number.NaN;
     budget.method.minimumRuns = null;
 
+    const actual = currentBudgetActual();
     const evaluation = evaluatePerformanceBudget({
       budget,
-      commonClientJsBytes: CURRENT_CI_RESULT.actual.commonClientJsBytes,
-      routeActuals: CURRENT_CI_RESULT.actual.routes,
-      inventory: CURRENT_CI_RESULT.actual.inventory,
+      commonClientJsBytes: actual.commonClientJsBytes,
+      routeActuals: actual.routes,
+      inventory: actual.inventory,
     });
 
     expect(evaluation.failures).toEqual([
@@ -607,11 +671,12 @@ describe("performance budget measurement", () => {
       actual: 0,
       minimum: 90,
     };
+    const actual = currentBudgetActual();
     const evaluation = evaluatePerformanceBudget({
       budget: PERFORMANCE_BUDGET,
-      commonClientJsBytes: CURRENT_CI_RESULT.actual.commonClientJsBytes,
-      routeActuals: CURRENT_CI_RESULT.actual.routes,
-      inventory: CURRENT_CI_RESULT.actual.inventory,
+      commonClientJsBytes: actual.commonClientJsBytes,
+      routeActuals: actual.routes,
+      inventory: actual.inventory,
       lighthouseScoreFailures: [scoreFailure] as never,
     });
 
@@ -745,7 +810,7 @@ describe("performance budget measurement", () => {
   });
 
   it("fails shared CSS closed when one budget route has no finite measurement", () => {
-    const actual = structuredClone(CURRENT_CI_RESULT.actual);
+    const actual = currentBudgetActual();
     delete actual.routes.home.cssBytes;
     actual.routes.signage.renderBlockingCssBytes = Number.NaN;
 

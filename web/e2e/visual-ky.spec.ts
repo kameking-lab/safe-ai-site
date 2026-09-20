@@ -13,12 +13,20 @@ async function waitForVisualKyPlayer(page: Page) {
 }
 
 test.describe("ビジュアルKYT", () => {
-  test("ホームの主機能カードとhubのSSR一覧", async ({ page }) => {
+  test("ホームの現行導線とhubのSSR一覧", async ({ page }) => {
     await page.goto("/");
-    const visualKy = page.locator('main a[href="/training/visual-ky"]');
-    await expect(visualKy).toHaveCount(1);
-    await expect(visualKy).toContainText("5分ビジュアルKYT");
-    await expect(visualKy).toContainText("KYTを始める");
+    await expect(
+      page.getByRole("heading", {
+        level: 1,
+        name: /小さな気づきが、.*大きな事故を防ぐ。/,
+      }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "仕事から選ぶ、9つの主機能" }),
+    ).toBeVisible();
+    await expect(
+      page.locator("main").getByRole("link", { name: /ビジュアルKYT/u }).first(),
+    ).toBeVisible();
 
     await page.goto(HUB);
     await expect(

@@ -72,6 +72,19 @@ describe("/safety-ai simple landing page", () => {
     }
   });
 
+  it("AI実務研修と低リスクの建設計算ツールへ短い導線を持つ", () => {
+    render(<SafetyAiLandingPage />);
+    expect(
+      screen.getByRole("link", { name: "AI実務研修" }).getAttribute("href"),
+    ).toBe("/training/ai-seminars");
+    expect(
+      screen
+        .getByRole("link", { name: "建設計算ツール" })
+        .getAttribute("href"),
+    ).toBe("/tools/construction-calculators");
+    expect(screen.queryByRole("link", { name: /玉掛け|許容荷重|安全判定/u })).toBeNull();
+  });
+
   it("distinguishes standard features from company and site customization", () => {
     const { container } = render(<SafetyAiLandingPage />);
     const text = container.textContent ?? "";

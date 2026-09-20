@@ -1,0 +1,70 @@
+{
+  "schemaVersion": "three-services-review-v1",
+  "reviewedAt": "2026-08-28T08:45:00+09:00",
+  "productionBaseline": "dpl_75mTcJCSfgxc6ch9LRJz72vHZNYP",
+  "releasedProduction": "dpl_CKyCHVBQTZ7785EX9JBbcBjsGe9e",
+  "rollbackDeployment": "dpl_75mTcJCSfgxc6ch9LRJz72vHZNYP",
+  "summary": { "p0Open": 0, "p1Open": 0, "formulaFactP2Open": 0, "improvementP2Open": 3, "p3Open": 2, "fixed": 10 },
+  "findings": [
+    {
+      "id": "SIGN-P1-001", "service": "安全看板", "severity": "P1", "confidence": "high", "route": "/materials/safety-images/one-way", "viewport": "all",
+      "reproduction": "旧Productionで一方通行の原本を5秒確認", "observed": "閉じたゲートと正面車両に見え、進行方向を特定できなかった", "expected": "車両と明瞭な一方向矢印が同じ進行方向を示す", "userImpact": "進行方向を誤認し得る", "businessImpact": "安全看板としての信頼を損なう", "rootCause": "再生成時に矢印を避け過ぎた", "recommendation": "独自の車両後面と大矢印を持つ原本へ交換", "relatedFiles": ["web/public/safety-images/library/originals/one-way.png", "web/src/data/safety-image-library/generation-ledger.json", "web/src/data/safety-image-library/qa.json"], "acceptanceCriteria": "独立レビューで5秒理解、文字・ロゴ0、P0/P1/P2 0", "regressionTest": "asset pipelineとchecksum照合", "effort": "M", "simpleFix": false, "status": "fixed"
+    },
+    {
+      "id": "CALC-A11Y-001", "service": "建設計算", "severity": "P2", "confidence": "high", "route": "/tools/construction-calculators/[slug]", "viewport": "keyboard/screen-reader",
+      "reproduction": "0または負値で計算", "observed": "内部field keyが表示され、エラー入力とのARIA関連付けがなかった", "expected": "日本語label、aria-invalid/describedby、エラー入力focus", "userImpact": "修正対象を把握しにくい", "businessImpact": "入力完了率とアクセシビリティ低下", "rootCause": "純粋関数のValidationIssueを直接表示", "recommendation": "registry labelへ変換し入力とsummaryへ関連付け", "relatedFiles": ["web/src/components/construction-calculators/construction-calculator-client.tsx"], "acceptanceCriteria": "内部key非表示、参照ID実在、入力へfocus", "regressionTest": "construction-calculator-client.test.tsx", "effort": "S", "simpleFix": true, "status": "fixed"
+    },
+    {
+      "id": "CALC-RELIABILITY-001", "service": "建設計算", "severity": "P2", "confidence": "high", "route": "/tools/construction-calculators/[slug]", "viewport": "offline-after-load",
+      "reproduction": "表示後に通信を切り計算ボタンを押す", "observed": "初回submit時のdynamic importが失敗し得た", "expected": "表示した計算だけを事前読込し通信断後も計算", "userImpact": "現場で計算不能になり得る", "businessImpact": "実務ツールの信頼性低下", "rootCause": "chunk読込をsubmitまで遅延", "recommendation": "slug別Promise cacheをmount時にpreload", "relatedFiles": ["web/src/components/construction-calculators/construction-calculator-client.tsx"], "acceptanceCriteria": "route別bundleを維持しoffline E2E PASS", "regressionTest": "ai-training-construction-calculators.spec.ts offline", "effort": "S", "simpleFix": true, "status": "fixed"
+    },
+    {
+      "id": "CALC-UX-001", "service": "建設計算", "severity": "P3", "confidence": "high", "route": "/tools/construction-calculators/[slug]", "viewport": "all",
+      "reproduction": "複数計算の履歴を作り、1ページで全削除", "observed": "非表示の他計算履歴も削除した", "expected": "現在の計算だけを削除", "userImpact": "意図しない履歴消失", "businessImpact": "再利用性低下", "rootCause": "global clear関数を使用", "recommendation": "slug限定clearへ変更", "relatedFiles": ["web/src/lib/construction-calculator-history.ts"], "acceptanceCriteria": "別slug履歴が残る", "regressionTest": "construction-calculator-history.test.ts", "effort": "S", "simpleFix": true, "status": "fixed"
+    },
+    {
+      "id": "CALC-OUTPUT-001", "service": "建設計算", "severity": "P3", "confidence": "high", "route": "/tools/construction-calculators/[slug]", "viewport": "all",
+      "reproduction": "負値を含む丸め表示とcopy/CSVを比較", "observed": "copy/CSVはceil/floorだけだった", "expected": "切上げ+∞、切捨て−∞を一貫表示", "userImpact": "負値の丸め方向を誤解し得る", "businessImpact": "出力説明の一貫性低下", "rootCause": "export側に表示labelがなかった", "recommendation": "共通の日本語方向labelを出力", "relatedFiles": ["web/src/lib/construction-calculator-exports.ts"], "acceptanceCriteria": "画面・copy・CSV・printの意味一致", "regressionTest": "construction-calculator-exports.test.ts", "effort": "S", "simpleFix": true, "status": "fixed"
+    },
+    {
+      "id": "CALC-SAFETY-001", "service": "建設計算", "severity": "P2", "confidence": "high", "route": "/tools/construction-calculators/rebar-weight", "viewport": "all",
+      "reproduction": "D13等の結果を公称単位質量と比較", "observed": "真円幾何概算は公称単位質量と異なる", "expected": "ユーザー指定どおり密度×真円断面で導出し、公称値でないことを明示", "userImpact": "公称値と誤認する余地", "businessImpact": "数量概算の誤用リスク", "rootCause": "結果labelの概算範囲が目立たなかった", "recommendation": "式は維持し、結果・copy・CSV・printへ真円概算警告", "relatedFiles": ["web/src/lib/construction-calculators/rebar-weight.ts", "web/src/lib/construction-calculators/rebar-spacing.ts"], "acceptanceCriteria": "公称単位質量でない旨が全出力に存在", "regressionTest": "component/export/calculator tests", "effort": "S", "simpleFix": true, "status": "fixed-adjudicated"
+    },
+    {
+      "id": "TRAIN-DATA-001", "service": "研修", "severity": "P3", "confidence": "high", "route": "/training/safety-seminars/fall-prevention", "viewport": "PPTX",
+      "reproduction": "slide 20生成コードとJSONを比較", "observed": "PPTXだけ3要点をhard-code", "expected": "共通スライドデータを正本化", "userImpact": "将来の更新不一致", "businessImpact": "教材保守性低下", "rootCause": "summary専用semantic field不足", "recommendation": "summaryItemsをJSONへ追加し3件contractを検証", "relatedFiles": ["web/src/data/safety-seminars/fall-prevention.json", "web/scripts/training/build-fall-prevention-pptx.mjs"], "acceptanceCriteria": "20枚PPTX生成とsemantic test PASS", "regressionTest": "fall-prevention.test.ts", "effort": "S", "simpleFix": true, "status": "fixed"
+    },
+    {
+      "id": "SIGN-SEO-001", "service": "安全看板", "severity": "P3", "confidence": "high", "route": "/materials/safety-images/terms", "viewport": "SEO",
+      "reproduction": "生成titleを確認", "observed": "ブランド接尾辞が二重になる指定", "expected": "root templateで1回だけ付与", "userImpact": "検索結果titleが冗長", "businessImpact": "品質シグナル低下", "rootCause": "page metadataにもブランドを含めた", "recommendation": "ページtitleを短縮", "relatedFiles": ["web/src/app/(main)/materials/safety-images/terms/page.tsx"], "acceptanceCriteria": "二重接尾辞0", "regressionTest": "terms/page.test.tsx", "effort": "S", "simpleFix": true, "status": "fixed"
+    },
+    {
+      "id": "SIGN-I18N-001", "service": "安全看板", "severity": "P3", "confidence": "high", "route": "/materials/safety-images/terms", "viewport": "all",
+      "reproduction": "translation registry集計と利用条件を比較", "observed": "確認範囲を誤読し得る文言", "expected": "公式確認24件の内訳（日本語4、外国語20）、残る外国語はbacktranslation、native未確認を明示", "userImpact": "翻訳品質の過大評価", "businessImpact": "多言語利用の信頼低下", "rootCause": "対象言語の修飾不足", "recommendation": "件数内訳を含む短い開示", "relatedFiles": ["web/src/app/(main)/materials/safety-images/terms/page.tsx"], "acceptanceCriteria": "registry集計と画面一致", "regressionTest": "terms/page.test.tsx", "effort": "S", "simpleFix": true, "status": "fixed"
+    },
+    {
+      "id": "OPS-SMOKE-001", "service": "横断", "severity": "P2", "confidence": "high", "route": "production smoke", "viewport": "CLI",
+      "reproduction": "Vercel v13 inspection shapeでproduction/Preview smoke", "observed": "alias配列仕様を仮定し偽陰性", "expected": "aliasAssignedとexact deployment lookupを両方確認", "userImpact": "正常releaseを失敗扱い", "businessImpact": "rollback判断を誤る", "rootCause": "CLI response変更", "recommendation": "現行shapeへfail-closed更新", "relatedFiles": ["web/scripts/audit/japan-leading-production-smoke.mjs", "web/scripts/audit/external-operations-preview-smoke.mjs"], "acceptanceCriteria": "production/Previewとも正しいdeploymentだけPASS", "regressionTest": "deployment shape testとPreview smoke実行", "effort": "S", "simpleFix": true, "status": "fixed"
+    },
+    {
+      "id": "SIGN-PERF-OPEN-001", "service": "安全看板", "severity": "P2", "confidence": "medium", "route": "/materials/safety-images", "viewport": "mobile",
+      "reproduction": "Lighthouse mobile", "observed": "Performance 87", "expected": "画像中心一覧でも90以上を安定", "userImpact": "低速回線の初期表示が遅い", "businessImpact": "離脱率の余地", "rootCause": "初期20プレビューと共通JS", "recommendation": "次回、画像priority・サイズ・client境界を計測改善", "relatedFiles": ["web/src/components/safety-image-library/safety-image-library-client.tsx"], "acceptanceCriteria": "mobile Performance 90以上を3回再現", "regressionTest": "Lighthouse budget", "effort": "M", "simpleFix": false, "status": "open-improvement"
+    },
+    {
+      "id": "SIGN-EVIDENCE-OPEN-002", "service": "安全看板", "severity": "P2", "confidence": "medium", "route": "/materials/safety-images", "viewport": "content",
+      "reproduction": "198商品evidenceをvendor別集計", "observed": "JGCとモノタロウへのURL集中が大きい", "expected": "次回更新で主要テーマの販売証拠をさらに分散", "userImpact": "公開UIへの直接影響なし", "businessImpact": "市場根拠の耐久性", "rootCause": "確認可能な商品詳細URLの偏り", "recommendation": "次回棚卸しでメーカー一次商品ページを追加", "relatedFiles": ["docs/audits/current-safety-sign-market-products.csv"], "acceptanceCriteria": "主要80テーマのvendor分散向上", "regressionTest": "market registry vendor distribution", "effort": "M", "simpleFix": false, "status": "open-improvement"
+    },
+    {
+      "id": "SIGN-ART-OPEN-003", "service": "安全看板", "severity": "P2", "confidence": "medium", "route": "/materials/safety-images/[slug]", "viewport": "visual",
+      "reproduction": "100点をカテゴリ横断で比較", "observed": "全点hard gateは通るが一部の衝突・墜落場面は看板的な即読性をさらに上げられる", "expected": "全カテゴリで同等の即読性", "userImpact": "一部テーマの理解に5秒超の可能性", "businessImpact": "ライブラリの均一感", "rootCause": "100テーマの場面複雑度差", "recommendation": "次回versionで測定型の限定art pass", "relatedFiles": ["web/public/safety-images/library/originals"], "acceptanceCriteria": "独立5秒テストの再計測", "regressionTest": "visual QA sample", "effort": "L", "simpleFix": false, "status": "open-improvement"
+    },
+    {
+      "id": "TRAIN-ASSET-OPEN-001", "service": "研修", "severity": "P3", "confidence": "high", "route": "/training/safety-seminars/fall-prevention", "viewport": "download",
+      "reproduction": "研修PDF容量を確認", "observed": "約14.4MB", "expected": "品質を保ち低速回線でも扱いやすい容量", "userImpact": "モバイルDL待ち", "businessImpact": "教材利用率", "rootCause": "20枚高解像度画像", "recommendation": "次回、画像再圧縮を視覚QA付きで検討", "relatedFiles": ["web/public/training/safety-seminars/fall-prevention/downloads/fall-prevention-training.pdf"], "acceptanceCriteria": "可読性維持で容量削減", "regressionTest": "PDF visual/size budget", "effort": "M", "simpleFix": false, "status": "open-improvement"
+    },
+    {
+      "id": "AI-SOURCE-OPEN-001", "service": "研修", "severity": "P3", "confidence": "medium", "route": "/training/ai-seminars/ai-chat-work", "viewport": "source-link",
+      "reproduction": "一部OpenAI公式sourceへbot request", "observed": "自動取得は403になることがある", "expected": "利用者ブラウザーで公式URLへ到達", "userImpact": "自動監査の可用性のみ低下", "businessImpact": "定期source health運用", "rootCause": "公式サイトbot保護", "recommendation": "ブラウザー到達確認を定期監査へ併用", "relatedFiles": ["web/src/data/ai-seminars/source-registry.json"], "acceptanceCriteria": "公式URLとlocatorを維持", "regressionTest": "source registry validation", "effort": "M", "simpleFix": false, "status": "open-improvement"
+    }
+  ]
+}

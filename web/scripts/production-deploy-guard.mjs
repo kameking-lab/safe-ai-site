@@ -56,6 +56,9 @@ export function forbiddenRouteFor(candidate) {
   ) ?? null;
 }
 
+/**
+ * @param {{ sourceFiles?: string[], builtRoutes?: string[] }} routes
+ */
 export function assertNoForbiddenRoutes({ sourceFiles = [], builtRoutes = [] }) {
   const sourceViolations = sourceFiles.flatMap((filePath) => {
     const route = routeFromAppFile(filePath);
@@ -96,6 +99,7 @@ export function assertProductionGitState({
   return { branch, head, vercelGitCommitRef };
 }
 
+/** @param {Record<string, string | undefined>} environment */
 export function assertProductionBuildEnvironment(environment = process.env) {
   if (environment.VERCEL_ENV !== "production") return;
   if (environment.VERCEL_GIT_COMMIT_REF !== PRODUCTION_BRANCH) {

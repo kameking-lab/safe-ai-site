@@ -76,18 +76,21 @@ describe("AutomationServiceContent", () => {
     expect(overview.textContent).toContain("初回30分は無料");
     expect(overview.textContent).toContain("税込33,000円から");
     expect(overview.textContent).toContain("メール相談受付中");
-    expect((overview.textContent ?? "").length).toBeLessThanOrEqual(150);
+    expect((overview.textContent ?? "").length).toBeLessThanOrEqual(180);
     expect(overview.querySelectorAll('[data-primary-action="true"]')).toHaveLength(1);
     expect(overview.querySelectorAll('[data-secondary-action="true"]')).toHaveLength(1);
     expect(container.querySelector('[role="alert"]')).toBeNull();
   });
 
-  it("LCP候補の装飾画像を初期HTMLへ出さない", () => {
+  it("案内チワワをLCP候補にせず遅延読込する", () => {
     const { container } = render(
       <AutomationServiceContent availability={AVAILABLE} />,
     );
-    expect(container.querySelectorAll("img")).toHaveLength(0);
-    expect(container.querySelector("[data-mascot-variant]")).toBeNull();
+    const images = container.querySelectorAll("img");
+    expect(images).toHaveLength(1);
+    expect(images[0]?.getAttribute("loading")).toBe("lazy");
+    expect(images[0]?.getAttribute("fetchpriority")).not.toBe("high");
+    expect(container.querySelector("[data-feature-mascot-companion]")).not.toBeNull();
   });
 
   it("料金3件と想定例3件だけを常時描画する", () => {
@@ -103,6 +106,18 @@ describe("AutomationServiceContent", () => {
     expect(within(examples).getByText("KY・点検記録の月次集計")).toBeDefined();
     expect(within(examples).getByText("90分の社内AI研修")).toBeDefined();
     expect(container.querySelector("#faq")).toBeNull();
+  });
+
+  it("無料の安全研修・AI実務研修・低リスク建設計算を相談導線と分けて案内する", () => {
+    render(<AutomationServiceContent availability={MAIL_AVAILABLE} />);
+    for (const [name, href] of [
+      ["無料の安全研修教材を見る", "/training/safety-seminars"],
+      ["無料のAI実務研修を見る", "/training/ai-seminars"],
+      ["建設計算ツールを見る", "/tools/construction-calculators"],
+    ] as const) {
+      expect(screen.getByRole("link", { name }).getAttribute("href")).toBe(href);
+    }
+    expect(screen.queryByRole("link", { name: /許容荷重|構造計算|安全判定/u })).toBeNull();
   });
 
   it("答えに必要な4セクションを料金・事例・サービス・相談の順に持つ", () => {

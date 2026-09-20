@@ -18,7 +18,7 @@ import {
   buildAutomationServiceSchema,
 } from "./automation-service-schema";
 
-export const metadata: Metadata = {
+const baseMetadata: Metadata = {
   title: PAGE_TITLE,
   description: PAGE_DESCRIPTION,
   keywords: [
@@ -56,11 +56,22 @@ export const metadata: Metadata = {
     description: PAGE_DESCRIPTION,
     images: [ogImageUrl(PAGE_TITLE, "小さな業務から相談・税込料金目安を公開")],
   }),
-  robots: {
-    index: true,
-    follow: true,
-  },
 };
+
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}): Promise<Metadata> {
+  const query = await searchParams;
+  const hasQuery = Object.keys(query).length > 0;
+  return {
+    ...baseMetadata,
+    robots: hasQuery
+      ? { index: false, follow: true }
+      : { index: true, follow: true },
+  };
+}
 
 export default function AutomationServicePage() {
   const availability = getAutomationConsultAvailability();

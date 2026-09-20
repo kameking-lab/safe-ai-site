@@ -77,6 +77,35 @@ export function FeaturesIndexClient() {
               Safety Labsを見る
             </Link>
           </div>
+          <nav
+            aria-label="研修・実務ツール"
+            className="mt-2 flex flex-wrap gap-x-4"
+          >
+            <Link
+              href="/training/safety-seminars"
+              className="inline-flex min-h-11 items-center text-sm font-black text-brand-primary underline underline-offset-4"
+            >
+              安全研修
+            </Link>
+            <Link
+              href="/training/ai-seminars"
+              className="inline-flex min-h-11 items-center text-sm font-black text-brand-primary underline underline-offset-4"
+            >
+              AI実務研修
+            </Link>
+            <Link
+              href="/tools/construction-calculators"
+              className="inline-flex min-h-11 items-center text-sm font-black text-brand-primary underline underline-offset-4"
+            >
+              建設計算ツール
+            </Link>
+            <Link
+              href="/materials/safety-images"
+              className="inline-flex min-h-11 items-center text-sm font-black text-brand-primary underline underline-offset-4"
+            >
+              現場安全看板
+            </Link>
+          </nav>
         </div>
         <div className="flex items-end justify-center">
           <Mascot

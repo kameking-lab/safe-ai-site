@@ -9,11 +9,18 @@ import {
   buildPreviewEnforcedContentSecurityPolicy,
   createCspNonce,
 } from "@/lib/security/csp";
+import {
+  LEGACY_SAFETY_IMAGE_REDIRECTS,
+  LEGACY_SAFETY_IMAGE_SLUGS,
+} from "@/data/safety-image-library/legacy";
 
 const NO_SCRIPT_CHATBOT_CSP =
   "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'";
 const PUBLIC_SAFETY_LEARNING_PATH =
   /^\/e-learning\/safety(?:\/(?:first-class-health-officer|second-class-health-officer|occupational-safety-consultant|occupational-health-consultant))?\/?$/;
+const SAFETY_IMAGE_DETAIL_PATH =
+  /^\/materials\/safety-images\/([^/]+)(\/print)?\/?$/u;
+const OLD_SAFETY_IMAGE_PILOT_ASSET_PATH = /^\/safety-images\/pilot(?:\/|$)/u;
 
 function addCspResponseHeaders(
   response: NextResponse,
@@ -85,6 +92,16 @@ function sanitizedAuthPageUrl(request: NextRequest): URL | null {
 }
 
 export function proxy(request: NextRequest) {
+  if (OLD_SAFETY_IMAGE_PILOT_ASSET_PATH.test(request.nextUrl.pathname)) {
+    return new NextResponse("Not Found", {
+      status: 404,
+      headers: {
+        "Cache-Control": "private, no-store, max-age=0",
+        "Content-Type": "text/plain; charset=utf-8",
+        "X-Robots-Tag": "noindex, nofollow, noarchive",
+      },
+    });
+  }
   const nonce = createCspNonce();
   const preview = isPreviewSafetyMode();
   // Next/Turbopackの実行形式はNODE_ENVが正本。Playwright等がVercelの
@@ -100,8 +117,39 @@ export function proxy(request: NextRequest) {
     development,
     secureTransport,
   });
-  const noScriptChatbot =
-    request.nextUrl.pathname === "/api/chatbot/no-script";
+  const noScriptChatbot = request.nextUrl.pathname === "/api/chatbot/no-script";
+  const legacyMatch = SAFETY_IMAGE_DETAIL_PATH.exec(request.nextUrl.pathname);
+  if (legacyMatch && LEGACY_SAFETY_IMAGE_SLUGS.has(legacyMatch[1])) {
+    const replacement = LEGACY_SAFETY_IMAGE_REDIRECTS.get(legacyMatch[1]);
+    if (replacement) {
+      const destination = request.nextUrl.clone();
+      destination.pathname = `/materials/safety-images/${replacement}${legacyMatch[2] ?? ""}`;
+      destination.search = "";
+      return addCspResponseHeaders(
+        NextResponse.redirect(destination, 301),
+        strictPolicy,
+        preview,
+        development,
+        secureTransport,
+        noScriptChatbot,
+      );
+    }
+    return addCspResponseHeaders(
+      new NextResponse("Gone", {
+        status: 410,
+        headers: {
+          "Cache-Control": "private, no-store, max-age=0",
+          "Content-Type": "text/plain; charset=utf-8",
+          "X-Robots-Tag": "noindex, nofollow, noarchive",
+        },
+      }),
+      strictPolicy,
+      preview,
+      development,
+      secureTransport,
+      noScriptChatbot,
+    );
+  }
   const sanitizedAuthUrl = sanitizedAuthPageUrl(request);
   if (sanitizedAuthUrl) {
     return addCspResponseHeaders(
@@ -121,8 +169,7 @@ export function proxy(request: NextRequest) {
           ok: false,
           error: {
             code: "preview_side_effect_blocked",
-            message:
-              "検証環境では外部送信・保存・認証・決済を実行しません。",
+            message: "検証環境では外部送信・保存・認証・決済を実行しません。",
           },
         },
         {
@@ -174,10 +221,13 @@ export function proxy(request: NextRequest) {
     // response carries a request-scoped CSP nonce. This explicit marker is
     // limited to the reviewed, non-personal route allowlist above and lets the
     // service worker distinguish those documents from every private response.
-    response.headers.set(
-      "X-Safe-AI-Public-Offline",
-      "safety-learning-v1",
-    );
+    response.headers.set("X-Safe-AI-Public-Offline", "safety-learning-v1");
+  }
+  if (
+    request.nextUrl.pathname.startsWith("/materials/safety-images") &&
+    request.nextUrl.search
+  ) {
+    response.headers.set("X-Robots-Tag", "noindex, follow, noarchive");
   }
   return response;
 }
@@ -186,6 +236,7 @@ export const config = {
   // HTML, route handlers, robots and sitemap need the security boundary.
   // Immutable assets do not need a per-request nonce.
   matcher: [
+    "/safety-images/:path*",
     "/((?!_next/static|_next/image|favicon.ico|favicon-32.png|apple-touch-icon.png|manifest.json|sw.js|.*\\.(?:svg|png|jpg|jpeg|gif|webp|avif|ico|woff|woff2)$).*)",
   ],
 };

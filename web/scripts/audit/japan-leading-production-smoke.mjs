@@ -37,6 +37,11 @@ export function resolveRepositoryExternalEvidencePath({
   return resolvedOutput;
 }
 
+export function sitemapContainsLocation(xml, origin, pathname) {
+  const location = new URL(pathname, origin).href;
+  return xml.includes(`<loc>${location}</loc>`);
+}
+
 export function assertProductionAliasDeployment({
   expectedDeploymentId,
   productionHostname,
@@ -84,12 +89,14 @@ export function assertProductionAliasDeployment({
       "Production alias and deployment ID resolved to different immutable URLs",
     );
   }
-  if (
-    !Array.isArray(aliasMetadata.alias) ||
-    !aliasMetadata.alias.includes(productionHostname)
-  ) {
+  // Vercel's v13 deployment response for a custom-domain lookup no longer
+  // guarantees that the requested custom hostname is repeated in `alias`.
+  // The lookup itself is performed with the fixed production hostname above;
+  // require the platform's assignment proof and the independently resolved
+  // deployment identity instead of treating the optional alias list as truth.
+  if (aliasMetadata.aliasAssigned !== true || aliasMetadata.aliasError) {
     throw new Error(
-      `Production alias metadata does not include ${productionHostname}`,
+      `Production alias metadata does not prove an active assignment for ${productionHostname}`,
     );
   }
 
@@ -442,6 +449,7 @@ const publicRoutes = [
   "/training/visual-ky",
   "/ky/paper",
   "/signage",
+  "/materials/safety-images",
   "/services/automation",
   "/about/quality",
   "/search?q=%E5%A2%9C%E8%90%BD",
@@ -506,26 +514,23 @@ const protectedGovernanceRoutes = [
     ],
   },
   {
-    route: "/education/progress",
-    requiredCopies: [
-      "組織の受講記録は接続されていません",
-      "確認できないためfail-closed",
-    ],
-    validReasons: [
-      "authentication_not_configured",
-      "authentication_required",
-      "database_unavailable",
-      "membership_required",
-      "insufficient_role",
-      "progress_unavailable",
-    ],
-  },
-  {
     route: "/signage/manage",
     requiredCopies: ["端末未登録・接続未確認"],
     validReasons: [],
   },
 ];
+
+const educationProgressRedirect = await request("/education/progress");
+record(
+  "/education/progress:permanent-redirect",
+  educationProgressRedirect.status === 308 &&
+    educationProgressRedirect.headers.location === "/e-learning",
+  {
+    status: educationProgressRedirect.status,
+    location: educationProgressRedirect.headers.location,
+    error: educationProgressRedirect.error,
+  },
+);
 const protectedGovernanceResults = await Promise.all(
   protectedGovernanceRoutes.map(({ route }) => request(route)),
 );
@@ -611,6 +616,8 @@ const compactNavigationPaths = [
   "/heat-illness-prevention",
   "/ky/paper",
   "/signage",
+  "/materials/safety-images",
+  "/tools/construction-calculators",
   "/chatbot",
   "/law-search",
   "/chemical-ra",
@@ -625,11 +632,11 @@ const compactNavigationPaths = [
 ];
 record(
   "home:compact-navigation-contract",
-  compactNavigationPaths.length === 15 &&
-    new Set(compactNavigationPaths).size === 15 &&
+  compactNavigationPaths.length === 17 &&
+    new Set(compactNavigationPaths).size === 17 &&
     !compactNavigationPaths.includes("/resources"),
   {
-    expectedCount: 15,
+    expectedCount: 17,
     actualCount: compactNavigationPaths.length,
     uniqueCount: new Set(compactNavigationPaths).size,
     resourcesIncluded: compactNavigationPaths.includes("/resources"),
@@ -735,8 +742,8 @@ record(
 for (const heatPath of heatPaths) {
   record(
     `sitemap:heat-excluded:${heatPath}`,
-    !sitemapResult.body.includes(`${heatPath}</loc>`) &&
-      !sitemapIndexResult.body.includes(`${heatPath}</loc>`),
+    !sitemapContainsLocation(sitemapResult.body, baseUrl, heatPath) &&
+      !sitemapContainsLocation(sitemapIndexResult.body, baseUrl, heatPath),
     { path: heatPath },
   );
 }
@@ -751,8 +758,8 @@ for (const excludedPath of [
 ]) {
   record(
     `sitemap:nonindexable-excluded:${excludedPath}`,
-    !sitemapResult.body.includes(`${excludedPath}</loc>`) &&
-      !sitemapIndexResult.body.includes(`${excludedPath}</loc>`),
+    !sitemapContainsLocation(sitemapResult.body, baseUrl, excludedPath) &&
+      !sitemapContainsLocation(sitemapIndexResult.body, baseUrl, excludedPath),
     { path: excludedPath },
   );
 }

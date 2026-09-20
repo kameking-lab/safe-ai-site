@@ -25,6 +25,10 @@ try {
       VERCEL_GIT_COMMIT_REF: PRODUCTION_BRANCH,
       VERCEL_GIT_COMMIT_SHA: state.head,
     },
+    // Windows cannot execute npm's .cmd shims directly with shell:false.
+    // The command and every argument are fixed constants, so enabling the
+    // platform shell here does not introduce user-controlled interpolation.
+    shell: process.platform === "win32",
     stdio: "inherit",
   });
   if (result.error) throw result.error;

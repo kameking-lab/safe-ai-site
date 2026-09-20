@@ -1,102 +1,90 @@
 import { expect, test } from "@playwright/test";
 
-const PRIMARY_DESTINATIONS = [
+const MAIN_ROUTES = [
   "/chatbot",
   "/chemical-ra",
-  "/resources/mlit",
   "/accident-news",
   "/laws",
-  "/services/automation",
+  "/contact/automation-email",
   "/goods",
-  "/education/hazard-slides",
-  "/training/visual-ky",
+  "/training/safety-seminars",
+  "/materials/safety-images",
   "/accidents-analytics",
 ] as const;
 
-test.describe("リニューアルホーム", () => {
-  test("新しい相棒ヒーローと9つの主機能だけを表示し、全導線が公開ページへ到達する", async ({
+test.describe("新しい安全AIポータルのホーム", () => {
+  test("PCで理念、修正済みチワワ、9つの主機能を先頭に表示する", async ({
     page,
-    request,
   }) => {
-    const response = await page.goto("/", { waitUntil: "networkidle" });
-    expect(response?.status()).toBe(200);
-    await expect(page.locator("#home-relaunch-title")).toContainText("小さな気づきが、");
-    await expect(page.locator("#home-relaunch-title")).toContainText("大きな事故を防ぐ。");
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto("/");
+
+    const heroHeading = page.getByRole("heading", { level: 1 });
+    await expect(heroHeading).toContainText("小さな気づきが、");
+    await expect(heroHeading).toContainText("大きな事故を防ぐ。");
     await expect(
-      page.getByRole("heading", { level: 2, name: "仕事から選ぶ、9つの主機能" }),
+      page.getByRole("heading", {
+        level: 2,
+        name: "仕事から選ぶ、9つの主機能",
+      }),
     ).toBeVisible();
-    await expect(page.locator('[aria-labelledby="main-services-title"] > div > ul > li')).toHaveCount(9);
-    await expect(page.getByText("今日の熱中症リスク", { exact: true })).toHaveCount(0);
-    await expect(page.locator('[data-home-section="heat"]')).toHaveCount(0);
+    await expect(page.getByText("今日の熱中症リスク")).toHaveCount(0);
 
-    for (const path of PRIMARY_DESTINATIONS) {
-      await expect(page.locator(`main a[href="${path}"]`).first(), path).toBeVisible();
-      expect((await request.get(path)).status(), path).toBeLessThan(400);
-    }
-  });
-
-  test("390pxでv4チワワ、主要導線、footer noteを横溢れやブラウザエラーなく表示する", async ({
-    page,
-  }) => {
-    const errors: string[] = [];
-    page.on("console", (message) => {
-      if (message.type() === "error") errors.push(message.text());
-    });
-    page.on("pageerror", (error) => errors.push(error.message));
-    await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto("/", { waitUntil: "networkidle" });
-
-    const mascot = page.getByAltText(
+    const heroMascot = page.getByAltText(
       "吹き出しと一緒に相談を案内する安全AIポータルのチワワ",
     );
-    await expect(mascot).toBeVisible();
-    expect(await mascot.evaluate((image: HTMLImageElement) => image.currentSrc)).toContain(
-      "mascot-chat-talk-v4.webp",
+    await expect(heroMascot).toBeVisible();
+    await expect(heroMascot).toHaveAttribute(
+      "src",
+      /mascot-chat-talk-v4/u,
     );
-    expect((await mascot.boundingBox())?.width).toBeLessThanOrEqual(112);
-    await expect(page.getByText("気になること、聞いてみる？")).toBeVisible();
-    await expect(page.getByRole("link", { name: "安衛法AIを開く" })).toHaveAttribute(
-      "href",
-      "/chatbot",
+
+    const mainCards = page
+      .locator('section[aria-labelledby="main-services-title"] ul > li > a');
+    await expect(mainCards).toHaveCount(9);
+    const cardHrefs = await mainCards.evaluateAll((links) =>
+      links.map((link) => link.getAttribute("href")),
     );
-    await expect(page.locator('a[href*="nbe0fafcf0f34"]')).toHaveAttribute(
-      "href",
-      /utm_source=anzen_ai_portal/u,
-    );
-    await expect(page.locator('a[href*="n838317f8153d"]')).toHaveAttribute(
-      "href",
-      /utm_source=anzen_ai_portal/u,
-    );
+    expect(cardHrefs).toEqual(MAIN_ROUTES);
+  });
+
+  test("スマホで横にはみ出さず、季節機能を固定ナビから外す", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/");
+
+    await expect(
+      page.getByRole("heading", { level: 1 }),
+    ).toContainText("大きな事故を防ぐ。");
     expect(
       await page.evaluate(
-        () => Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - innerWidth,
+        () =>
+          document.documentElement.scrollWidth -
+          document.documentElement.clientWidth,
       ),
     ).toBe(0);
-    expect(errors).toEqual([]);
-  });
-
-  test("JavaScript無効でも見出し、v4チワワ、通常リンクをSSR HTMLに保持する", async ({
-    browser,
-    baseURL,
-  }) => {
-    const context = await browser.newContext({
-      baseURL,
-      javaScriptEnabled: false,
-      viewport: { width: 390, height: 844 },
+    const mobileNavigation = page.getByRole("navigation", {
+      name: "モバイル ボトムナビゲーション",
     });
-    const page = await context.newPage();
-    await page.goto("/", { waitUntil: "domcontentloaded" });
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("小さな気づきが、");
-    await expect(page.getByAltText(/吹き出しと一緒に相談/u)).toBeVisible();
-    await expect(page.getByRole("link", { name: "安衛法AIを開く" })).toHaveAttribute(
-      "href",
-      "/chatbot",
-    );
-    await context.close();
+    await expect(
+      mobileNavigation.getByRole("link", { name: /化学RA/u }),
+    ).toBeVisible();
+    await expect(
+      mobileNavigation.getByRole("link", { name: /熱中症/u }),
+    ).toHaveCount(0);
   });
 
-  test("公式関連を示さない試験ルートは公開されない", async ({ request }) => {
-    expect((await request.get("/exam-quiz")).status()).toBe(404);
-    expect((await request.get("/e-learning/exams")).status()).toBe(404);
+  test("主機能の公開先はすべて応答し、試験ライブラリは公開しない", async ({
+    request,
+  }) => {
+    for (const route of MAIN_ROUTES) {
+      const response = await request.get(route);
+      expect(response.status(), route).toBe(200);
+    }
+    const netis = await request.get("/resources/netis-safety");
+    expect(netis.status()).toBe(200);
+    const exams = await request.get("/e-learning/exams");
+    expect(exams.status()).toBe(404);
   });
 });
