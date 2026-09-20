@@ -43,6 +43,9 @@ describe("AppShellNavLink", () => {
     expect(
       screen.getByRole("link", { name: "安衛法AI" }).hasAttribute("aria-current"),
     ).toBe(false);
+    expect(
+      screen.getByRole("link", { name: "安衛法AI" }).hasAttribute("data-nav-active"),
+    ).toBe(false);
   });
 
   it("Next SPA遷移と戻る・進むでactiveを一意に更新する", () => {
@@ -73,6 +76,6 @@ describe("AppShellNavLink", () => {
     ).toBe("page");
     expect(
       screen.getByRole("link", { name: "安衛法AI" }).dataset.navActive,
-    ).toBe("false");
+    ).toBeUndefined();
   });
 });

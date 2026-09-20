@@ -708,7 +708,7 @@ export function getAppShellNavigationCategories(
 
 function navLinkClass(showBadge: boolean): string {
   const base =
-    "group flex min-h-11 w-full items-center gap-2 rounded-[var(--radius-sm)] px-3 py-2 text-left text-sm data-[nav-active=true]:bg-portal-surface-emphasis data-[nav-active=true]:font-semibold data-[nav-active=true]:text-brand-primary";
+    "group flex min-h-11 w-full items-center gap-2 rounded-[var(--radius-sm)] px-3 py-2 text-left text-sm";
   return showBadge
     ? `${base} font-semibold text-brand-secondary hover:bg-portal-surface-emphasis dark:text-slate-100`
     : `${base} font-medium text-slate-700 hover:bg-portal-surface-emphasis dark:text-slate-200`;

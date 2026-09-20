@@ -397,6 +397,13 @@ body {
 }
 
 /* Shared visual grammar. Layouts may vary; color, radius, shadow, CTA and status do not. */
+aside [data-nav-active="true"],
+#mobile-site-menu [data-nav-active="true"] {
+  background: var(--surface-emphasis);
+  color: var(--primary);
+  font-weight: 600;
+}
+
 .portal-surface {
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
