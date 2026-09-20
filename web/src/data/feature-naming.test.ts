@@ -30,4 +30,23 @@ describe("feature naming consistency", () => {
     expect(f?.label).toBe(CANONICAL);
     expect(f?.href).toBe("/safety-diary");
   });
+
+  it("事故3機能を速報・死亡災害検索・分析として別々に案内する", () => {
+    const byHref = new Map(FEATURES.map((item) => [item.href, item]));
+
+    expect(byHref.get("/accident-news")).toMatchObject({
+      slug: "accident-news",
+      title: "労災事故速報",
+    });
+    expect(byHref.get("/accident-news")?.title).not.toContain("データベース");
+    expect(byHref.get("/fatal-accidents")).toMatchObject({
+      slug: "fatal-accidents",
+      title: "死亡災害DB",
+    });
+    expect(byHref.get("/accidents-analytics")).toMatchObject({
+      slug: "accidents-analytics",
+      title: "事故分析ダッシュボード",
+    });
+    expect(byHref.get("/accidents-analytics")?.summary).toContain("12種類");
+  });
 });

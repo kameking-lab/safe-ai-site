@@ -9,6 +9,10 @@
  * search, sitemap and feature catalogs can apply the same fail-closed rule.
  */
 import { isArticleQuarantined } from "@/lib/article-quarantine";
+import {
+  hasApprovedPublicContentRevalidation,
+  requiresPublicContentRevalidation,
+} from "@/lib/public-content-revalidation";
 
 export const PUBLIC_CONSTRUCTION_CALCULATOR_SLUGS = [
   "soil-volume-conversion",
@@ -50,6 +54,13 @@ function isPublishedSafetyLearningPath(path: string): boolean {
 
 export function isQuarantinedPublicPath(href: string): boolean {
   const path = pathOnly(href);
+
+  if (
+    requiresPublicContentRevalidation(path) &&
+    !hasApprovedPublicContentRevalidation(path)
+  ) {
+    return true;
+  }
 
   if (
     path === "/faq" ||
