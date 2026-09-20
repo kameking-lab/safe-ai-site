@@ -510,14 +510,34 @@ const ALL_FEATURES: FeatureItem[] = [
   },
   // データベース
   {
-    slug: "accidents",
-    title: "事故データベース",
-    summary: "死傷災害事例を業種・原因で検索",
+    slug: "accident-news",
+    title: "労災事故速報",
+    summary: "直近の労災報道を確認状態つきで確認",
     description:
-      "厚労省の死亡災害データ（2019〜2023年）を業種・事故型・起因物分類で検索。出典はデータセット単位で、個別行の逆引きは未整備です。",
+      "公開報道から確認した労災事故を、媒体・確認状態・発生日とともに掲載します。厚労省の死亡災害個票検索や統計分析とは分けて表示します。",
     href: "/accident-news",
     category: "databases",
-    tags: ["事故", "DB"],
+    tags: ["事故", "速報", "報道"],
+  },
+  {
+    slug: "fatal-accidents",
+    title: "死亡災害DB",
+    summary: "厚労省の死亡災害個票を条件検索",
+    description:
+      "厚生労働省「職場のあんぜんサイト」の死亡災害個票を、キーワード・発生年・業種・事故の型などで検索します。全国速報の総数とは分けて表示します。",
+    href: "/fatal-accidents",
+    category: "databases",
+    tags: ["事故", "死亡災害", "DB"],
+  },
+  {
+    slug: "accidents-analytics",
+    title: "事故分析ダッシュボード",
+    summary: "死亡災害個票を12種類の条件で分析",
+    description:
+      "厚労省の死亡災害個票を年・月・業種・事故種類・地域・規模・原因など12種類の条件で絞り込みます。割合は項目値が確認できる収録事例を母数とし、発生率とは区別します。",
+    href: "/accidents-analytics",
+    category: "databases",
+    tags: ["事故", "分析", "死亡災害"],
   },
   {
     slug: "law-navi",

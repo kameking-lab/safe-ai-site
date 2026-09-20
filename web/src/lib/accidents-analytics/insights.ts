@@ -4,6 +4,8 @@ export type AnalyticsInsight = {
   label: string;
   value: string;
   description: string;
+  knownCount: number;
+  knownFieldLabel: string;
 };
 
 function top(items: readonly NameCount[]): NameCount | null {
@@ -22,6 +24,7 @@ function insight(
   label: string,
   item: NameCount | null,
   denominator: number,
+  knownFieldLabel: string,
 ): AnalyticsInsight {
   if (!item || denominator === 0) {
     return {
@@ -29,12 +32,16 @@ function insight(
       value: "該当データなし",
       description:
         "この条件では算出できません。収録事例内の構成比であり、発生率やリスクの高さを示すものではありません。",
+      knownCount: denominator,
+      knownFieldLabel,
     };
   }
   return {
     label,
     value: `${item.name} ${item.count.toLocaleString("ja-JP")}件`,
-    description: `収録事例内の構成比は ${share(item.count, denominator)} です。発生率やリスクの高さを示すものではありません。`,
+    description: `収録事例内の構成比は ${share(item.count, denominator)} です（母数：${knownFieldLabel}が確認できる ${denominator.toLocaleString("ja-JP")}件）。発生率やリスクの高さを示すものではありません。`,
+    knownCount: denominator,
+    knownFieldLabel,
   };
 }
 
@@ -47,16 +54,19 @@ export function buildAnalyticsInsights(
       "最も多い事故の型",
       top(aggregates.typeRanking),
       aggregates.meta.coverage.type.known,
+      "事故の型",
     ),
     insight(
       "最も多い発生月",
       top(aggregates.seasonalityByMonth),
       aggregates.meta.coverage.month.known,
+      "発生月",
     ),
     insight(
       "最も多い起因物",
       top(aggregates.causeRanking),
       aggregates.meta.coverage.cause.known,
+      "起因物",
     ),
   ];
 }

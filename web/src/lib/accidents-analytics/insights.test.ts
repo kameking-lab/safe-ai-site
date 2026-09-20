@@ -9,8 +9,17 @@ describe("事故分析の短い考察", () => {
 
     expect(aggregates.meta.filteredCases).toBeGreaterThan(0);
     expect(insights).toHaveLength(3);
-    for (const item of insights) {
+    const expectedKnownCounts = [
+      aggregates.meta.coverage.type.known,
+      aggregates.meta.coverage.month.known,
+      aggregates.meta.coverage.cause.known,
+    ];
+    for (const [index, item] of insights.entries()) {
       expect(item.description).toContain("収録事例内の構成比");
+      expect(item.knownCount).toBe(expectedKnownCounts[index]);
+      expect(item.description).toContain(
+        `母数：${item.knownFieldLabel}が確認できる ${item.knownCount.toLocaleString("ja-JP")}件`,
+      );
       expect(item.description).toContain("リスクの高さを示すものではありません");
       expect(item.description).not.toContain("危険");
       expect(item.description).not.toContain("重篤化しやすい");

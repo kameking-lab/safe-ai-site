@@ -145,7 +145,7 @@ export default async function AccidentsAnalyticsPage({
       {
         "@type": "Dataset",
         name: "厚生労働省 職場のあんぜんサイト 死亡災害DB",
-        url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SIB_FND.aspx",
+        url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SIB_FND.html",
       },
       {
         "@type": "Dataset",
@@ -168,6 +168,19 @@ export default async function AccidentsAnalyticsPage({
         <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-600 dark:text-slate-300">
           最新の全国傾向と収録済み死亡災害個票を分け、業種・事故型・時間帯などから絞り込んで読めます。上段は厚労省の{official.label}です。
         </p>
+        <aside
+          data-analytics-scope-caution
+          aria-label="集計期間と母数の注意"
+          className="mt-4 max-w-4xl rounded-xl border-2 border-amber-300 bg-amber-50 p-4 text-sm leading-6 text-amber-950 dark:border-amber-500/60 dark:bg-amber-950/40 dark:text-amber-100"
+        >
+          <p className="font-black">期間と母数を分けて確認してください</p>
+          <p className="mt-1">
+            全国速報は発生対象 {official.occurredThrough} まで・報告締切 {official.reportAsOf} の集計です。下の分析は
+            {aggregates.meta.yearsCovered.from}〜{aggregates.meta.yearsCovered.to}年の収録個票
+            {aggregates.meta.datasetCases.toLocaleString("ja-JP")}件を基準に、現在の条件に合う
+            {aggregates.meta.filteredCases.toLocaleString("ja-JP")}件を表示します。割合の母数は分析項目の値が確認できる件数で、欠損値を除きます。発生率やリスクの高さを示すものではありません。
+          </p>
+        </aside>
         <FeatureMascotCompanion
           variant="detective"
           eyebrow="傾向調査チワワ"
@@ -204,6 +217,9 @@ export default async function AccidentsAnalyticsPage({
                 <p className="text-xs font-bold text-sky-800">{item.label}</p>
                 <p className="mt-1 text-base font-black text-slate-950">{item.value}</p>
                 <p className="mt-1 text-xs leading-5 text-slate-600">{item.description}</p>
+                <p className="mt-2 text-[11px] font-semibold text-sky-900">
+                  割合の母数：{item.knownCount.toLocaleString("ja-JP")}件（{item.knownFieldLabel}確認済み）
+                </p>
               </article>
             ))}
           </div>
@@ -239,7 +255,7 @@ export default async function AccidentsAnalyticsPage({
                 className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-slate-700 hover:bg-slate-50"
               >
                 <Siren className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                事故データベース
+                事故事例検索（補助）
               </Link>
             </li>
             <li>

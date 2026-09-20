@@ -12,7 +12,7 @@ export default function FatalAccidentsLoading() {
           死亡事故データベース
         </h1>
       </header>
-      <FatalAccidentsResultsFallback />
+      <FatalAccidentsResultsFallback instrumented={false} />
     </PageContainer>
   );
 }

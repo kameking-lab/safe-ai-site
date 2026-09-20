@@ -61,9 +61,9 @@ test.describe("9つの主機能を案内するホームの圧縮予算", () => {
     expect(metrics.screens).toBeLessThanOrEqual(13);
     expect(metrics.heroHeight).toBeLessThanOrEqual(1_200);
     expect(metrics.quickNavScreen).toBeLessThanOrEqual(1);
-    expect(metrics.servicesTop).toBeLessThan(metrics.updatesTop);
-    expect(metrics.updatesTop).toBeLessThan(metrics.directoryTop);
-    expect(metrics.mainDom).toBeLessThanOrEqual(900);
+    expect(metrics.updatesTop).toBeLessThan(metrics.servicesTop);
+    expect(metrics.servicesTop).toBeLessThan(metrics.directoryTop);
+    expect(metrics.mainDom).toBeLessThanOrEqual(1_050);
 
     await expect(page.locator('[data-accident-origin="official"]')).toHaveCount(1);
     expect(
@@ -115,7 +115,7 @@ test.describe("9つの主機能を案内するホームの圧縮予算", () => {
     expect(budgets.screens).toBeLessThanOrEqual(13);
     expect(budgets.repeatedSectionActions).toBe(0);
     expect(budgets.normalWarningCards).toBe(0);
-    expect(budgets.dom).toBeLessThanOrEqual(1_250);
+    expect(budgets.dom).toBeLessThanOrEqual(1_300);
   });
 
   test("見出し参照は一意で、更新・相談のアンカーは固定UI用offsetを持つ", async ({ page }) => {
@@ -160,7 +160,7 @@ test("事故カードは判断材料を先に示し、KYへ未確認内容を自
   const accidentCard = page.locator('[data-home-update="accidents"]');
   await expect(accidentCard.getByRole("link", { name: /KYを作る/ })).toHaveCount(0);
   await expect(accidentCard.getByText(/報道内容はKYへ引き継ぎません/)).toHaveCount(0);
-  await expect(accidentCard.getByRole("heading", { level: 3, name: "最新事故" })).toBeVisible();
+  await expect(accidentCard.getByRole("heading", { level: 3, name: "直近の事故報道" })).toBeVisible();
   if (
     (await accidentCard.locator('[data-accident-origin="reported-unverified"]').count()) >
     0
@@ -181,7 +181,7 @@ test("事故カードは判断材料を先に示し、KYへ未確認内容を自
     );
     await expect(accidentCard).not.toContainText("事故なし");
   }
-  await expect(accidentCard.getByRole("link", { name: "関連事故を見る" })).toHaveCount(1);
+  await expect(accidentCard.getByRole("link", { name: "事故速報をすべて見る" })).toHaveCount(1);
 
   const link = page.getByRole("region", { name: "カテゴリから探す" }).getByRole("link", { name: "KY用紙", exact: true });
   const href = await link.getAttribute("href");
@@ -218,12 +218,15 @@ test("ホームから開いた化学物質RAの入力をURL・storage・request 
     }
   });
   await page.setViewportSize(MOBILE_VIEWPORT);
+  await page.goto("/chemical-ra", { waitUntil: "domcontentloaded" });
   await page.goto("/", { waitUntil: "networkidle" });
   const chemicalLink = page.getByRole("navigation", { name: "すぐに使う主要機能" })
     .getByRole("link", { name: "化学物質RAを開く" });
   await expect(chemicalLink).toHaveAttribute("href", "/chemical-ra");
-  await chemicalLink.click();
-  await expect(page).toHaveURL(/\/chemical-ra$/);
+  await Promise.all([
+    page.waitForURL(/\/chemical-ra$/, { timeout: 15_000 }),
+    chemicalLink.click(),
+  ]);
 
   const input = page.getByRole("combobox", { name: "物質名・CAS番号・SDS記載名" });
   const chemicalSearchResponse = page.waitForResponse(

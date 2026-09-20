@@ -354,8 +354,8 @@ export const KEYWORD_LANDINGS: KeywordLanding[] = [
       },
       {
         href: "/accidents-analytics",
-        label: "事故統計ダッシュボード（25軸）",
-        description: "年次推移・年代別・業種別など25軸で可視化",
+        label: "事故分析ダッシュボード（12種類）",
+        description: "年・月・業種・事故種類・地域・規模など12種類の条件で分析",
       },
       {
         href: "/guides/annual-safety-plan-generator",

@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { buildLegacyFatalAccidentsRedirect } from "./legacy-route";
+import {
+  buildLegacyFatalAccidentsPrintRedirect,
+  buildLegacyFatalAccidentsRedirect,
+} from "./legacy-route";
 
 describe("buildLegacyFatalAccidentsRedirect", () => {
   it("keeps the plain news route on /accident-news", () => {
@@ -26,5 +29,17 @@ describe("buildLegacyFatalAccidentsRedirect", () => {
     expect(
       buildLegacyFatalAccidentsRedirect({ focus: ["case-a", "case-b"] }),
     ).toBe("/fatal-accidents?focus=case-a&focus=case-b");
+  });
+
+  it("moves legacy print filters without losing the query", () => {
+    expect(
+      buildLegacyFatalAccidentsPrintRedirect({
+        industry: "建設業",
+        q: "足場",
+        limit: "80",
+      }),
+    ).toBe(
+      "/fatal-accidents/print?industry=%E5%BB%BA%E8%A8%AD%E6%A5%AD&q=%E8%B6%B3%E5%A0%B4&limit=80",
+    );
   });
 });

@@ -24,4 +24,18 @@ describe("FatalAccidentsResultsFallback", () => {
         ?.className,
     ).toContain("motion-reduce:");
   });
+
+  it("route loading側はstreaming計測用マーカーを重複させない", () => {
+    const { container } = render(
+      <FatalAccidentsResultsFallback instrumented={false} />,
+    );
+
+    expect(
+      container.querySelector("[data-fatal-accidents-loading-shell]"),
+    ).toBeNull();
+    expect(
+      container.querySelector("[data-fatal-accidents-loading-grid]"),
+    ).toBeNull();
+    expect(container.querySelector("#fatal-accidents-search")).toBeNull();
+  });
 });

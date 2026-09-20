@@ -62,12 +62,12 @@ export default function AccidentsPage() {
           webPageSchema({ name: _title, description: _desc, url: `${SITE_URL}/accidents`, keywords: ["労働災害 事故事例 10年統計 厚生労働省", "墜落防止 対策", "転倒 はさまれ 業種別", "死亡災害 再発防止"] }),
           breadcrumbSchema([
             { name: "ホーム", url: SITE_URL },
-            { name: "事故データベース", url: `${SITE_URL}/accidents` },
+            { name: "事故事例検索（補助）", url: `${SITE_URL}/accidents` },
           ]),
         ]}
       />
       <div className="mx-auto max-w-7xl px-4 pt-3 sm:px-6 lg:px-8">
-        <Breadcrumb items={[{ name: "事故データベース" }]} />
+        <Breadcrumb items={[{ name: "事故事例検索（補助）" }]} />
       </div>
       {/* C-1: ここを Suspense で包むと client モジュールの非同期ロードで境界が
           サスペンドし、静的HTMLに「フォールバック先行→$RCスワップ」が焼き込まれて

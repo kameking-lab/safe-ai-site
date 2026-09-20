@@ -294,7 +294,7 @@ export function AccidentDatabasePanel({
     <section id="accident-results" className="scroll-mt-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5 overflow-hidden">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h2 className="text-base font-bold text-slate-900 sm:text-lg">事故データベース</h2>
+          <h2 className="text-base font-bold text-slate-900 sm:text-lg">事故事例検索（補助）</h2>
           <p className="mt-1 text-xs text-slate-600">
             公式個票URLを持つ公表事例・公開情報からの編集再構成 {publishedCaseCount.toLocaleString("ja-JP")}件
             {learningCaseCount > 0 &&

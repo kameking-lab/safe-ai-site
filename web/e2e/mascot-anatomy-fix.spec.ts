@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-const HOME_MASCOT_ALT = "吹き出しと一緒に相談を案内する安全AIポータルのチワワ";
+const HOME_MASCOT_SELECTOR = 'img[src*="mascot-chat-talk-v4.webp"]:visible';
 
 test.describe("チワワが案内するコンパクトホーム", () => {
   test("320〜1440pxと200%・400%相当幅でチワワと9機能を横にはみ出さず表示する", async ({ page }) => {
@@ -8,7 +8,7 @@ test.describe("チワワが案内するコンパクトホーム", () => {
       await page.setViewportSize({ width, height: 900 });
       await page.goto("/");
 
-      const mascot = page.getByRole("img", { name: HOME_MASCOT_ALT, exact: true });
+      const mascot = page.locator(HOME_MASCOT_SELECTOR).first();
       await expect(mascot).toBeVisible();
       await expect(mascot).toHaveJSProperty("complete", true);
       expect(await mascot.evaluate((image: HTMLImageElement) => image.naturalWidth)).toBeGreaterThan(0);
@@ -52,7 +52,7 @@ test.describe("チワワが案内するコンパクトホーム", () => {
     await page.route("**/*", (route) => route.request().resourceType() === "image" ? route.abort() : route.continue());
     await page.goto("/");
 
-    const mascot = page.getByRole("img", { name: HOME_MASCOT_ALT, exact: true });
+    const mascot = page.locator(HOME_MASCOT_SELECTOR).first();
     await expect(mascot).toHaveJSProperty("complete", true);
     await expect(mascot).toHaveJSProperty("naturalWidth", 0);
     await expect(
@@ -75,7 +75,7 @@ test.describe("チワワが案内するコンパクトホーム", () => {
     try {
       const page = await context.newPage();
       await page.goto("/");
-      await expect(page.getByRole("img", { name: HOME_MASCOT_ALT, exact: true })).toBeVisible();
+      await expect(page.locator(HOME_MASCOT_SELECTOR).first()).toBeVisible();
       await expect(
         page.getByRole("heading", {
           level: 1,

@@ -215,7 +215,7 @@ const ALL_FLAGSHIP_FEATURES: FlagshipFeature[] = [
     href: "/accident-news",
     subItems: [
       {
-        label: "事故DB検索（事例・出典付き）",
+        label: "事故事例検索（補助）",
         href: "/accidents",
         description: "厚労省の死傷・死亡災害事例を業種・原因・作業区分で検索",
       },

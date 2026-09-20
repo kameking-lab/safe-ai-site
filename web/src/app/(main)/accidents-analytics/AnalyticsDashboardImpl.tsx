@@ -351,7 +351,7 @@ export function AnalyticsDashboardImpl({
               href="/accidents"
               className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2.5 py-0.5 text-[11px] text-slate-600 hover:bg-slate-50"
             >
-              ← 事故データベースへ戻る
+              ← 事故事例検索（補助）へ戻る
             </Link>
             <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700">
               Analytics
@@ -1168,16 +1168,17 @@ export function AnalyticsDashboardImpl({
           </p>
           <ul className="mt-1 list-disc space-y-0.5 pl-5">
             <li>
-              <strong>既定の母集団</strong>は厚労省死亡災害個票
-              {formatNumber(aggregates.meta.mhlwDeathsCount)}件です。編集済み事例はデータ源で明示的に選んだ場合だけ含めます。
+              <strong>選択中の母集団</strong>は
+              {SOURCE_LABELS[aggregates.meta.filters.source] ?? "選択データ源"}の
+              {formatNumber(aggregates.meta.datasetCases)}件です。現在の絞り込み後は
+              {formatNumber(aggregates.meta.filteredCases)}件です。編集済み事例はデータ源で明示的に選んだ場合だけ含めます。
             </li>
             <li>
               <strong>都道府県・年齢</strong>は厚労省
               2024年データ（739件）のみで取得可能なため、その範囲での集計です。
             </li>
             <li>
-              <strong>曜日</strong>は curated
-              事例（日付詳細あり）からの集計のため、サンプル数が限定的です。
+              <strong>曜日</strong>は編集済み事例をデータ源で選んだ場合だけ表示し、日付詳細がある事例を母数にします。
             </li>
             <li>
               <strong>参照軸（⑥）</strong>は厚労省全件DB（
@@ -1185,15 +1186,7 @@ export function AnalyticsDashboardImpl({
               件・2006〜2021）の事前集計値を表示しています。
             </li>
             <li>
-              数値は
-              <Link href="/accidents" className="underline">
-                /accidents
-              </Link>
-              と
-              <Link href="/stats" className="underline">
-                /stats
-              </Link>
-              で表示される件数と整合しています。
+              表示中の数値は、上記のデータ源・期間・現在の絞り込み条件に基づきます。
             </li>
           </ul>
         </section>
