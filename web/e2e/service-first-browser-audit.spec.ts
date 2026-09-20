@@ -797,7 +797,9 @@ async function auditWithoutJavaScript(browser: Browser): Promise<void> {
         }
       }
       if (enforce && route === "/accident-news") {
-        await expect(page.locator("form").first()).toBeVisible();
+        await expect(
+          page.getByRole("heading", { level: 2, name: "直近の報道" }),
+        ).toBeVisible();
         expect(
           Number(await page.locator("[data-accident-news-results]").getAttribute("data-result-count")),
         ).toBeGreaterThan(0);

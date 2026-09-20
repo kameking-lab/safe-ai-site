@@ -56,9 +56,16 @@ export default async function AccidentNewsPage({
           <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
             労災事故速報
           </h1>
-          <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-600 sm:text-base">
-            直近14日以内に公表された国内の労災報道を、掲載日時の新しい順に確認できます。
-            見出しから確認できない原因・責任・法的評価は補いません。
+          <a
+            href="#latest-report-heading"
+            data-primary-action="true"
+            className="mt-4 inline-flex min-h-11 items-center gap-1 rounded-xl bg-rose-700 px-4 py-2 text-sm font-black text-white hover:bg-rose-600"
+          >
+            直近の報道を見る
+            <ArrowRight className="h-4 w-4" aria-hidden="true" />
+          </a>
+          <p data-page-description className="mt-3 max-w-3xl text-sm leading-7 text-slate-600 sm:text-base">
+            直近14日の国内労災報道を、新しい順に掲載します。見出しにない原因や法的評価は補いません。
           </p>
           <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-bold text-slate-600">
             <span className="inline-flex items-center gap-1.5">
@@ -70,7 +77,6 @@ export default async function AccidentNewsPage({
               target="_blank"
               rel="noopener noreferrer"
               data-compact-text="true"
-              data-primary-action="true"
               className="inline-flex min-h-11 items-center gap-1 text-sky-800 underline underline-offset-4"
             >
               {latestNews.sourceLabel}
@@ -97,8 +103,12 @@ export default async function AccidentNewsPage({
           </div>
 
           {latestNews.items.length > 0 ? (
-            <ol className="mt-4 grid gap-4 md:grid-cols-2">
-              {latestNews.items.map((report, index) => (
+            <ol
+              className="mt-4 grid gap-4 md:grid-cols-2"
+              data-accident-news-results
+              data-result-count={latestNews.items.length}
+            >
+              {latestNews.items.map((report) => (
                 <li
                   key={report.publicId}
                   className="flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
@@ -116,7 +126,6 @@ export default async function AccidentNewsPage({
                       href={report.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      data-primary-action={index === 0 ? "true" : undefined}
                       className="decoration-slate-300 underline-offset-4 hover:underline"
                     >
                       {report.title}
