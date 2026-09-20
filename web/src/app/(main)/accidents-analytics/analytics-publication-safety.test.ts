@@ -38,4 +38,20 @@ describe("事故分析ダッシュボードの公開表示", () => {
     expect(combined).toContain("事故分析ダッシュボード");
     expect(combined).toContain("12種類");
   });
+
+  it("母集団の総件数と現在の絞り込み件数を別の値で表示する", () => {
+    const source = readSource(
+      "src/app/(main)/accidents-analytics/AnalyticsDashboardImpl.tsx",
+    );
+
+    expect(source).toContain(
+      "formatNumber(aggregates.meta.datasetCases)",
+    );
+    expect(source).toContain(
+      "formatNumber(aggregates.meta.filteredCases)",
+    );
+    expect(source).not.toContain(
+      "数値は\n              <Link href=\"/accidents\"",
+    );
+  });
 });
