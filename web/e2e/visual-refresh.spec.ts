@@ -41,7 +41,7 @@ test("追加画像には代替テキストがあり、主要画像の表示領�
     await page.goto(route, { waitUntil: "domcontentloaded" });
     const imageSelector =
       route === "/"
-        ? 'img[src*="visual-ky"]'
+        ? 'img[src*="mascot-chat-talk-v4"]'
         : 'img[src*="visual-refresh"]';
     await expect(page.locator(imageSelector).first(), route).toBeVisible();
     await expect(page.locator(`${imageSelector}:not([alt])`), route).toHaveCount(0);
@@ -68,7 +68,7 @@ test("追加画像には代替テキストがあり、主要画像の表示領�
   await expect(page.locator("#overview [data-primary-action]")).toBeVisible();
 });
 
-test("forced colorsでも見出し・主操作・現在値が残る", async ({
+test("forced colorsでも見出しと主操作が残る", async ({
   browser,
   baseURL,
 }) => {
@@ -91,30 +91,10 @@ test("forced colorsでも見出し・主操作・現在値が残る", async ({
   }
 
   await page.goto("/", { waitUntil: "domcontentloaded" });
-  const heatSection = page.locator('[data-home-section="heat"]');
-  await expect(heatSection).toBeVisible();
-  const heatStatus = heatSection.locator("[data-heat-status]").first();
-  await expect(heatStatus).toBeVisible();
-  const heatWarnings = heatSection.locator("[data-warning-card]");
-  const warningCount = await heatWarnings.count();
-  expect(warningCount).toBeLessThanOrEqual(1);
-  if (warningCount === 0) {
-    await expect(heatStatus).toHaveAttribute(
-      "data-heat-status",
-      /^(?:national-live|ready)$/u,
-    );
-  } else {
-    const warning = heatWarnings.first();
-    await expect(warning).toBeVisible();
-    await expect(warning).toHaveAttribute(
-      "data-warning-trigger",
-      /^upstream-(?:unavailable|stale)$/u,
-    );
-    await expect(warning).toContainText(/公式情報を確認/u);
-    await expect(
-      heatSection.locator('a[href^="https://www.wbgt.env.go.jp/"]').first(),
-    ).toBeVisible();
-  }
+  await expect(page.getByRole("heading", { level: 1 })).toContainText(
+    "大きな事故を防ぐ。",
+  );
+  await expect(page.getByRole("link", { name: "安衛法AIを開く" })).toBeVisible();
   await context.close();
 });
 

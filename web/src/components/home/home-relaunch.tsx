@@ -75,10 +75,10 @@ const MAIN_SERVICES = [
     softAccent: "bg-[#c8b9df]",
   },
   {
-    href: "/contact/automation-email",
+    href: "/services/automation",
     title: "自動化相談",
     description: "帳票、集計、研修資料、通知などの定型業務を見本つきで相談。",
-    action: "メールで相談",
+    action: "料金と例を見る",
     icon: Workflow,
     mascot: "/mascot/mascot-tablet-dx.webp",
     mascotAlt: "タブレットを使って仕事の自動化を考えるチワワ",
@@ -104,10 +104,10 @@ const MAIN_SERVICES = [
     softAccent: "bg-[#bcd4b8]",
   },
   {
-    href: "/training/safety-seminars",
-    title: "自由に使えるスライド",
-    description: "安全20テーマ・AI20テーマを軸に、音声・PPTX・PDFで展開。",
-    action: "公開資料を見る",
+    href: "/education/hazard-slides",
+    title: "安全教育スライド",
+    description: "災害の型21分類を、統計・原因・対策・確認クイズで学ぶ。",
+    action: "スライドを見る",
     icon: Presentation,
     mascot: "/mascot/mascot-teacher.webp",
     mascotAlt: "黒板の前で安全教育をする先生役のチワワ",
@@ -118,10 +118,10 @@ const MAIN_SERVICES = [
     softAccent: "bg-[#b5d1dd]",
   },
   {
-    href: "/materials/safety-images",
-    title: "自由に使える画像集",
-    description: "立入禁止と着用・表示を中心に、最初の5+5案を公開。",
-    action: "画像を確認",
+    href: "/training/visual-ky",
+    title: "5分ビジュアルKYT",
+    description: "現場イラストから危険を探し、対策まで短時間で確認。",
+    action: "KYTを始める",
     icon: Images,
     mascot: "/mascot/mascot-pointing.webp",
     mascotAlt: "安全画像を指し示して案内するチワワ",
@@ -183,7 +183,7 @@ export function HomeRelaunch() {
             </h1>
             <p className="mt-5 max-w-2xl text-base font-bold leading-8 text-slate-200 sm:text-lg">
               大きな耳で現場の声を聴き、わずかな違和感を見逃さない。
-              チワワは、安全を上から指導するのではなく、そばで確認を手伝う小さな相棒です。
+              そばで確認を手伝う、小さな安全相棒です。
             </p>
 
             <nav
@@ -193,6 +193,7 @@ export function HomeRelaunch() {
               <Link
                 href="/chatbot"
                 prefetch={false}
+                data-primary-action
                 className={`group inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl bg-emerald-300 px-4 text-sm font-black text-slate-950 shadow-[0_14px_36px_-16px_rgba(52,211,153,.9)] hover:bg-emerald-200 motion-safe:transition motion-safe:hover:-translate-y-0.5 ${focusRing}`}
               >
                 <Bot className="h-5 w-5" aria-hidden="true" />
@@ -214,12 +215,12 @@ export function HomeRelaunch() {
                 化学物質RAを開く
               </Link>
               <Link
-                href="/resources/netis-safety"
+                href="/resources/mlit"
                 prefetch={false}
                 className={`inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-4 text-sm font-black text-white hover:bg-white/15 motion-safe:transition-colors ${focusRing}`}
               >
                 <Boxes className="h-5 w-5 text-sky-200" aria-hidden="true" />
-                安全技術を探す
+                安全資料を探す
               </Link>
             </nav>
 
@@ -257,23 +258,33 @@ export function HomeRelaunch() {
               aria-hidden="true"
             />
             <div className="relative overflow-hidden rounded-[2.2rem] border border-white/20 bg-[#102b24] p-2 shadow-2xl shadow-black/40">
-              <div className="relative aspect-[4/5] overflow-hidden rounded-[1.8rem] bg-[#d9efe6]">
+              <div
+                className="relative overflow-hidden rounded-[1.8rem] bg-[#d9efe6]"
+                style={{ height: "clamp(10rem, 40vw, 34rem)" }}
+              >
                 <Image
                   src="/mascot/mascot-chat-talk-v4.webp"
                   alt="吹き出しと一緒に相談を案内する安全AIポータルのチワワ"
-                  fill
+                  width={640}
+                  height={640}
                   priority
-                  sizes="(max-width: 639px) calc(100vw - 3rem), (max-width: 1023px) 36rem, 34vw"
-                  className="object-contain p-2 sm:p-4"
+                  fetchPriority="high"
+                  decoding="sync"
+                  sizes="(max-width: 639px) 112px, (max-width: 1023px) 24vw, 16rem"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 object-contain p-1 sm:p-4"
+                  style={{
+                    height: "clamp(7rem, 24vw, 16rem)",
+                    width: "clamp(7rem, 24vw, 16rem)",
+                  }}
                 />
-                <div className="absolute inset-x-3 bottom-3 rounded-2xl border border-white/60 bg-white/92 p-4 text-slate-950 shadow-lg backdrop-blur">
-                  <p className="text-xs font-black tracking-[.12em] text-emerald-800">
+                <div className="absolute top-3 right-3 bottom-3 flex w-1/2 flex-col justify-center rounded-2xl border border-white/60 bg-white/92 p-3 text-slate-950 shadow-lg sm:p-4">
+                  <p className="text-xs font-black tracking-[.08em] text-emerald-800">
                     YOUR SAFETY PARTNER
                   </p>
-                  <p className="mt-1 text-xl font-black">
+                  <p className="mt-1 text-base font-black sm:text-xl">
                     気になること、聞いてみる？
                   </p>
-                  <p className="mt-1 text-xs font-bold text-slate-600">
+                  <p className="mt-1 hidden text-xs font-bold text-slate-600 sm:block">
                     法令確認から保護具選びまで、必要な仕事へ案内します。
                   </p>
                 </div>
@@ -346,7 +357,7 @@ export function HomeRelaunch() {
                     <span
                       role="img"
                       aria-label={service.mascotAlt}
-                      className="absolute -bottom-6 right-0 h-44 w-48 bg-contain bg-bottom bg-no-repeat drop-shadow-[0_12px_14px_rgba(25,45,38,.2)] motion-safe:transition-transform motion-safe:duration-300 motion-safe:group-hover:-translate-y-1 motion-safe:group-hover:rotate-1 motion-safe:group-hover:scale-[1.04]"
+                      className="absolute -bottom-6 right-0 h-44 w-48 bg-contain bg-bottom bg-no-repeat motion-safe:transition-transform motion-safe:duration-300 motion-safe:group-hover:-translate-y-1 motion-safe:group-hover:rotate-1 motion-safe:group-hover:scale-[1.04]"
                       style={{ backgroundImage: `url(${service.mascot})` }}
                     />
                     <span

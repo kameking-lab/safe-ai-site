@@ -146,21 +146,13 @@ test.describe("relevance-guarded task completion", () => {
 
     await page.goto("/", { waitUntil: "domcontentloaded" });
     await waitForClientReady(page);
-    const homePicker = page.locator("details[data-home-area-picker]");
-    await expect(homePicker).toHaveAttribute(
-      "data-home-area-picker-hydrated",
-      "true",
-      { timeout: 15_000 },
+    await expect(page.getByRole("heading", { level: 1 })).toContainText(
+      "大きな事故を防ぐ。",
     );
-    const homeInput = page.locator("#home-area-change");
-    if (!(await homeInput.isVisible())) {
-      await page.locator("details:has(#home-area-change) summary").click();
-    }
-    const homeForm = page.locator("form").filter({ has: homeInput });
-    await homeInput.fill("横浜 港北");
-    await expect
-      .poll(() => homeForm.getByRole("option").count(), { timeout: 15_000 })
-      .toBe(1);
+    await expect(page.getByRole("link", { name: "安全資料を探す" })).toHaveAttribute(
+      "href",
+      "/resources/mlit",
+    );
 
     await page.goto("/ky/paper", { waitUntil: "domcontentloaded" });
     await waitForClientReady(page);

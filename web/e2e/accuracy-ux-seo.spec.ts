@@ -70,7 +70,7 @@ test.afterAll(() => {
   );
 });
 
-test("ホームは6幅で熱中症を最上部にし、主要タスクへ進める", async ({ page }) => {
+test("ホームは6幅で新しい相棒ヒーローと9主機能を表示する", async ({ page }) => {
   collectErrors(page);
   for (const width of [320, 360, 390, 768, 1024, 1440]) {
     await page.setViewportSize({
@@ -79,29 +79,14 @@ test("ホームは6幅で熱中症を最上部にし、主要タスクへ進め�
     });
     const response = await page.goto("/", { waitUntil: "domcontentloaded" });
     expect(response?.status()).toBe(200);
-    await expect(
-      page.getByRole("heading", {
-        level: 1,
-        name: "今日の熱中症リスク",
-      }),
-    ).toBeVisible();
-    await expect(page.locator('[data-home-section="heat"]')).toBeVisible();
-    await expect(page.locator("[data-home-heat-slide-deck]")).toBeAttached();
-    await expect(page.locator("[data-home-chemical-quick-search]")).toBeAttached();
-    await expect(page.locator("[data-home-chat-quick-ask]")).toBeAttached();
-    await expect(page.getByRole("tab")).toHaveCount(0);
-    await expect(
-      page.getByRole("link", { name: "関連事故を見る" }),
-    ).toHaveAttribute(
+    await expect(page.locator("#home-relaunch-title")).toContainText("小さな気づきが、");
+    await expect(page.locator("#home-relaunch-title")).toContainText("大きな事故を防ぐ。");
+    await expect(page.getByRole("link", { name: "安衛法AIを開く" })).toHaveAttribute(
       "href",
-      "/accident-news",
+      "/chatbot",
     );
-    await expect(
-      page.getByRole("link", { name: "法改正一覧を見る" }),
-    ).toHaveAttribute("href", "/laws");
-    await expect(
-      page.locator('[data-home-section="core-features"] > div > ul > li'),
-    ).toHaveCount(6);
+    await expect(page.locator('[aria-labelledby="main-services-title"] > div > ul > li')).toHaveCount(9);
+    await expect(page.locator('[data-home-section="heat"]')).toHaveCount(0);
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth - window.innerWidth,

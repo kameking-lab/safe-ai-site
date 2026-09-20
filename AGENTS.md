@@ -21,7 +21,9 @@
 - ユーザー確認なしで進める
 - 動作確認を優先する
 - 実装後は変更ファイルを簡潔にまとめる
-- 変更のたびにオンラインに反映（Vercel デプロイ）する
+- 変更はPRでmainへ統合し、VercelのGit連携で本番へ反映する
+- ローカルから本番配備する例外時は、cleanなmainで`cd web && npm run deploy:production`だけを使う。`vercel --prod`の直実行は禁止
+- 安全AIポータルへ`/e-learning/exams`または`/exam-quiz`を生成・公開しない
 
 ## 技術ルール
 - Next.js App Router を使う
