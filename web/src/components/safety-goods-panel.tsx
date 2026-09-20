@@ -129,6 +129,9 @@ export function SafetyGoodsPanel() {
           カテゴリから販売サイトを検索
         </h2>
         <p className="mt-2 text-sm leading-6 text-slate-700">作業に近いカテゴリを選ぶと、Amazon・楽天の検索結果へ進めます。</p>
+        <p className="mt-2 max-w-4xl text-xs font-semibold leading-6 text-slate-600">
+          購入前に、対象物質・濃度、落下距離、騒音ばく露、使用時間と、規格・サイズ・装着適合を公式資料で照合してください。検索結果は推奨や適合証明ではありません。
+        </p>
         <ul className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {PUBLIC_SAFETY_GOODS_CATEGORIES.map((category) => (
             <li

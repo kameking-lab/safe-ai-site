@@ -43,6 +43,22 @@ describe("SafetyGoodsWizard", () => {
     expect(screen.getByText(/安易に入らず/)).toBeDefined();
   });
 
+  it("換気が弱い呼吸用保護具では濃度測定と換気改善を購入条件へ反映する", () => {
+    render(<SafetyGoodsWizard />);
+
+    fireEvent.click(screen.getByRole("button", { name: /呼吸用保護具/ }));
+    fireEvent.click(screen.getByRole("button", { name: /塗装・洗浄・接着/ }));
+    fireEvent.click(screen.getByRole("button", { name: /換気が弱い・屋内/ }));
+
+    expect(screen.getByText(/購入前に濃度測定と局所排気の改善を優先/)).toBeDefined();
+    expect(screen.getByText(/改善後に必要な防護係数/)).toBeDefined();
+    expect(
+      decodeURIComponent(
+        screen.getByRole("link", { name: /Amazonで候補を見る/ }).getAttribute("href") ?? "",
+      ),
+    ).toContain("濃度測定");
+  });
+
   it.each(["換気が効いている", "酸素濃度が不明・低いおそれ"])("危険有害性が不明な場合（%s）は通販候補を出さず、確認と相談へ導く", (condition) => {
     render(<SafetyGoodsWizard />);
 

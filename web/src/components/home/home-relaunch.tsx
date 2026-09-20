@@ -160,7 +160,7 @@ const SERVICE_STYLES = `
 @media(min-width:640px){.home-skip-updates{contain-intrinsic-block-size:auto 52.5rem}.home-skip-labs{contain-intrinsic-block-size:auto 25.625rem}.home-skip-directory{contain-intrinsic-block-size:auto 89rem}.home-skip-consult{contain-intrinsic-block-size:auto 24rem}}
 @media(min-width:1280px){.hs-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(min-width:1280px){.home-skip-updates{contain-intrinsic-block-size:auto 38rem}.home-skip-labs{contain-intrinsic-block-size:auto 15.625rem}.home-skip-directory{contain-intrinsic-block-size:auto 52.5rem}.home-skip-consult{contain-intrinsic-block-size:auto 18.5rem}}
-@media(max-width:480px){.hs-kicker,.hs-role,.hs-index{font-size:.875rem;line-height:1.45}}
+@media(max-width:480px){.hs-quick-link{min-height:5rem}.hs-quick-link,.hs-copy,.hs-kicker,.hs-role,.hs-index{font-size:.875rem;line-height:1.45}}
 @media(prefers-reduced-motion:reduce){.hs-card,.hs-mascot,.hs-action svg{transition:none}.hs-card:hover,.hs-card:hover .hs-mascot,.hs-card:hover .hs-action svg{transform:none}}
 @media print{.hs-card,.home-render-skip-section{content-visibility:visible;contain-intrinsic-size:none}}
 `;
@@ -197,7 +197,7 @@ export function HomeRelaunch({
               </p>
               <Image
                 src="/mascot/mascot-chat-talk-v4.webp"
-                alt=""
+                alt="耳をすまして相談を待つ安全AIポータルのチワワ"
                 width={112}
                 height={112}
                 priority
@@ -294,7 +294,6 @@ export function HomeRelaunch({
                   src="/mascot/mascot-chat-talk-v4.webp"
                   alt="吹き出しと一緒に相談を案内する安全AIポータルのチワワ"
                   fill
-                  priority
                   sizes="(max-width: 1023px) 18rem, (max-width: 1359px) 20rem, 34vw"
                   className="object-contain p-2 sm:p-4"
                 />

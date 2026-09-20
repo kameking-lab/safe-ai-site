@@ -122,6 +122,7 @@ const CONDITIONS: Record<string, readonly Option[]> = {
 function buildRecommendation(selection: Selection): Recommendation {
   const { category, task, condition } = selection;
   if (category.id === "respiratory") {
+    const limitedVentilation = condition.id === "limited";
     if (task.id === "unknown") {
       return {
         title: "危険有害性が分かるまで、製品推薦を保留します",
@@ -147,11 +148,11 @@ function buildRecommendation(selection: Selection): Recommendation {
     if (task.id === "vapor") {
       return {
         title: "有機ガス用防毒マスク（製品群）の購入候補",
-        query: "スリーエム ジャパン 面体 6000 有機ガス用吸収缶 6001",
-        summary: "塗装・洗浄などの蒸気には、対象物質に合う吸収缶を使う防毒マスクの製品群から探します。粉じん用だけで置き換えず、SDSの記載を基に絞り込みます。",
+        query: `スリーエム ジャパン 面体 6000 有機ガス用吸収缶 6001${limitedVentilation ? " 屋内 換気 濃度測定" : ""}`,
+        summary: `塗装・洗浄などの蒸気には、対象物質に合う吸収缶を使う防毒マスクの製品群から探します。粉じん用だけで置き換えず、SDSの記載を基に絞り込みます。${limitedVentilation ? "換気が弱い場所では、購入前に濃度測定と局所排気の改善を優先します。" : ""}`,
         officialHref: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000099121_00005.html",
         officialLabel: "厚生労働省｜化学物質による労働災害防止",
-        checks: ["SDSで対象物質と吸収缶の対象を照合", "国家検定合格標章と面体・吸収缶の組み合わせを確認", "交換時期、フィット、換気対策を確認"],
+        checks: ["SDSで対象物質と吸収缶の対象を照合", "国家検定合格標章と面体・吸収缶の組み合わせを確認", "交換時期、フィット、換気対策を確認", ...(limitedVentilation ? ["作業環境の濃度を測定し、局所排気の改善後に必要な防護係数を確認"] : [])],
         verifiedCandidate: {
           name: "3M 面体6000シリーズ＋有機ガス用吸収缶6001",
           maker: "スリーエム ジャパン",
@@ -163,11 +164,11 @@ function buildRecommendation(selection: Selection): Recommendation {
     }
     return {
       title: "防じんマスク（製品群）の購入候補",
-      query: "重松製作所 DD02V-S2-2K DS2 排気弁付",
-      summary: "研削・清掃などの粉じん作業では、国家検定合格表示のある防じんマスクの製品群から、粉じんの性状と作業条件に合うものを探します。",
+      query: `重松製作所 DD02V-S2-2K DS2 排気弁付${limitedVentilation ? " 屋内 集じん 換気" : ""}`,
+      summary: `研削・清掃などの粉じん作業では、国家検定合格表示のある防じんマスクの製品群から、粉じんの性状と作業条件に合うものを探します。${limitedVentilation ? "換気が弱い場所では、集じん・局所排気と濃度確認を先に組み合わせます。" : ""}`,
       officialHref: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000187558.html",
       officialLabel: "厚生労働省｜粉じん障害防止対策",
-      checks: ["粉じんの種類・濃度・作業時間を確認", "国家検定合格標章とろ過材の区分を確認", "顔への密着、ひげ・眼鏡との干渉、交換時期を確認"],
+      checks: ["粉じんの種類・濃度・作業時間を確認", "国家検定合格標章とろ過材の区分を確認", "顔への密着、ひげ・眼鏡との干渉、交換時期を確認", ...(limitedVentilation ? ["集じん・局所排気を改善し、改善後の濃度で必要な区分を確認"] : [])],
       verifiedCandidate: {
         name: "DD02V-S2-2K（DS2・排気弁付）",
         maker: "重松製作所",
