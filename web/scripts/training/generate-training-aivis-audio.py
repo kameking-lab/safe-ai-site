@@ -1,4 +1,4 @@
-"""Generate the two 20-slide training narrations with local AivisSpeech.
+"""Generate training narration sets with local AivisSpeech.
 
 This is a deliberately offline production step.  It only accepts a loopback
 AivisSpeech endpoint and never reads an API key.  The voice profiles and the
@@ -72,6 +72,13 @@ LIDA_GENKI = VoiceProfile(
 
 
 TARGETS: dict[str, TrainingTarget] = {
+    "safety-management-basics-osh-law": TrainingTarget(
+        data=WEB_ROOT
+        / "src/data/safety-seminars/safety-management-basics-osh-law.json",
+        output=WEB_ROOT
+        / "public/training/safety-seminars/safety-management-basics-osh-law/audio",
+        voice=LIDA_GENKI,
+    ),
     "fall-prevention": TrainingTarget(
         data=WEB_ROOT / "src/data/safety-seminars/fall-prevention.json",
         output=WEB_ROOT / "public/training/safety-seminars/fall-prevention/audio",
@@ -291,11 +298,16 @@ def write_manifest_atomic(path: Path, manifest: dict[str, Any]) -> None:
 def generate_target(training_id: str, target: TrainingTarget, endpoint: str, engine_version: str) -> None:
     training = json.loads(target.data.read_text(encoding="utf-8-sig"))
     slides = training.get("slides", [])
-    if len(slides) != 20:
-        raise RuntimeError(f"{training_id} must contain exactly 20 slides; found {len(slides)}")
+    expected_count = int(training.get("slideCount", 0))
+    if expected_count <= 0 or len(slides) != expected_count:
+        raise RuntimeError(
+            f"{training_id} slideCount mismatch; declared={expected_count}, found={len(slides)}"
+        )
     numbers = [int(slide["number"]) for slide in slides]
-    if numbers != list(range(1, 21)):
-        raise RuntimeError(f"{training_id} slide numbers must be 1..20; found {numbers}")
+    if numbers != list(range(1, expected_count + 1)):
+        raise RuntimeError(
+            f"{training_id} slide numbers must be 1..{expected_count}; found {numbers}"
+        )
 
     validate_voice(endpoint, target.voice)
     target.output.mkdir(parents=True, exist_ok=True)
@@ -326,7 +338,11 @@ def generate_target(training_id: str, target: TrainingTarget, endpoint: str, eng
                     manifest_path,
                     build_manifest(training_id, target, engine_version, records),
                 )
-                print(f"[{training_id}] {number:02d}/20 cached ({float(probe['duration']):.1f}s)", flush=True)
+                print(
+                    f"[{training_id}] {number:02d}/{expected_count} cached "
+                    f"({float(probe['duration']):.1f}s)",
+                    flush=True,
+                )
                 continue
 
             query_url = (
@@ -372,9 +388,15 @@ def generate_target(training_id: str, target: TrainingTarget, endpoint: str, eng
                 manifest_path,
                 build_manifest(training_id, target, engine_version, records),
             )
-            print(f"[{training_id}] {number:02d}/20 generated ({record['duration_seconds']:.1f}s)", flush=True)
+            print(
+                f"[{training_id}] {number:02d}/{expected_count} generated "
+                f"({record['duration_seconds']:.1f}s)",
+                flush=True,
+            )
 
-    expected_names = {f"slide-{number:02d}.mp3" for number in range(1, 21)}
+    expected_names = {
+        f"slide-{number:02d}.mp3" for number in range(1, expected_count + 1)
+    }
     actual_names = {path.name for path in target.output.glob("slide-*.mp3")}
     if actual_names != expected_names:
         raise RuntimeError(
@@ -387,7 +409,10 @@ def generate_target(training_id: str, target: TrainingTarget, endpoint: str, eng
         build_manifest(training_id, target, engine_version, records),
     )
     total = sum(float(record["duration_seconds"]) for record in records)
-    print(f"[{training_id}] complete: 20 files / {total / 60:.1f} minutes / {target.voice.speaker}")
+    print(
+        f"[{training_id}] complete: {expected_count} files / "
+        f"{total / 60:.1f} minutes / {target.voice.speaker}"
+    )
 
 
 def main() -> int:

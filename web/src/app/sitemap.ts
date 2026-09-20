@@ -11,6 +11,10 @@ import {
   AI_SEMINAR_HUB_PATH,
   PUBLISHED_AI_SEMINARS,
 } from "@/data/ai-seminars/themes";
+import {
+  PUBLISHED_SAFETY_SEMINARS,
+  SAFETY_SEMINAR_HUB_PATH,
+} from "@/data/safety-seminars/themes";
 import { ILLNESS_CATEGORIES } from "@/data/illness-considerations";
 import { COURT_CASES } from "@/data/court-cases";
 import { CANONICAL_HAZARD_TYPES } from "@/lib/accidents/type-normalization";
@@ -1085,21 +1089,21 @@ export default function sitemap(): MetadataRoute.Sitemap {
     })),
   ];
 
-  // 安全研修ライブラリは公開済み教材だけを列挙する。Coming Soon 27テーマ、
+  // 安全研修ライブラリは公開済み教材だけを列挙する。Coming Soonテーマ、
   // 再生・字幕・ダウンロード状態、利用条件ページは個別のindex対象にしない。
   const safetySeminarPages: typeof pages = [
     {
-      url: "/training/safety-seminars",
-      lastModified: "2026-08-27",
+      url: SAFETY_SEMINAR_HUB_PATH,
+      lastModified: "2026-09-20",
       priority: 0.9,
       changeFrequency: "monthly" as Freq,
     },
-    {
-      url: "/training/safety-seminars/fall-prevention",
-      lastModified: "2026-08-27",
+    ...PUBLISHED_SAFETY_SEMINARS.map((seminar) => ({
+      url: seminar.href,
+      lastModified: "2026-09-20",
       priority: 0.85,
       changeFrequency: "monthly" as Freq,
-    },
+    })),
   ];
 
   // AI実務研修はハブと公開済み教材だけを収載する。Coming Soon 24件にはURLを作らない。

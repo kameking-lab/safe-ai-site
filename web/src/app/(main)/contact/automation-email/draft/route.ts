@@ -22,10 +22,8 @@ export function GET() {
   });
 }
 
-export function POST(request?: Request) {
-  const requestedType = request
-    ? new URL(request.url).searchParams.get("type")
-    : null;
+export function POST(request: Request) {
+  const requestedType = new URL(request.url).searchParams.get("type");
   if (
     requestedType !== null &&
     requestedType !== "automation" &&

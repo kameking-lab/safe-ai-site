@@ -222,6 +222,7 @@ jobs:
           }
           REVIEWED_TRAINING_PREFIXES = {
               "web/public/training/safety-seminars/fall-prevention/",
+              "web/public/training/safety-seminars/safety-management-basics-osh-law/",
               "web/public/training/ai-seminars/ai-chat-work/",
           }
           # Only finalized, directly served training artifacts are allowlisted.
@@ -424,6 +425,16 @@ jobs:
               or is_forbidden_public_raw("web/public/training/ai-seminars/ai-chat-work/audio/slide-01.mp3")
               or is_forbidden_public_raw("web/public/training/ai-seminars/ai-chat-work/downloads/ai-chat-work-training.pdf")
               or is_forbidden_public_raw("web/public/training/ai-seminars/ai-chat-work/downloads/ai-chat-work-training.pptx")
+              or is_forbidden_public_raw("web/public/training/safety-seminars/safety-management-basics-osh-law/safe-site-hero.webp")
+              or is_forbidden_public_raw("web/public/training/safety-seminars/safety-management-basics-osh-law/hazard-spotting.webp")
+              or is_forbidden_public_raw("web/public/training/safety-seminars/safety-management-basics-osh-law/audio/slide-01.mp3")
+              or is_forbidden_public_raw("web/public/training/safety-seminars/safety-management-basics-osh-law/downloads/safety-management-basics-osh-law-training.pdf")
+              or is_forbidden_public_raw("web/public/training/safety-seminars/safety-management-basics-osh-law/downloads/safety-management-basics-osh-law-training.pptx")
+              or not is_forbidden_public_raw("web/public/training/safety-seminars/safety-management-basics-osh-law/audio/raw/slide-01.mp3")
+              or not is_forbidden_public_raw("web/public/training/safety-seminars/safety-management-basics-osh-law/downloads/raw/unreviewed.pdf")
+              or not is_forbidden_public_raw("web/public/training/safety-seminars/safety-management-basics-osh-law/nested/audio/slide-01.mp3")
+              or not is_forbidden_public_raw("web/public/training/safety-seminars/safety-management-basics-osh-law/audio/narration.mp3")
+              or not is_forbidden_public_raw("web/public/training/safety-seminars/another-theme/audio/slide-01.mp3")
               or not is_forbidden_public_raw("web/public/training/ai-seminars/ai-chat-work/downloads/raw/unreviewed.pdf")
               or not is_forbidden_public_raw("web/public/seminars/raw/unreviewed.pptx")
               or not is_forbidden_public_raw("web/public/session.zip")

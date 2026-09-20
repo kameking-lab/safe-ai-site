@@ -3,7 +3,8 @@ export type TrainingSourceType =
   | "statistics"
   | "official-product"
   | "government-guidance"
-  | "scientific";
+  | "scientific"
+  | "provided-reference";
 
 export type TrainingSource = {
   sourceId: string;

@@ -11,7 +11,11 @@ describe("/contact/automation-email/draft", () => {
       "AUTOMATION_CONSULT_RECIPIENTS",
       "audit@outlook.com,primary@gmail.com",
     );
-    const response = POST();
+    const response = POST(
+      new Request("https://www.anzen-ai-portal.jp/contact/automation-email/draft", {
+        method: "POST",
+      }),
+    );
     expect(response.status).toBe(303);
     expect(response.headers.get("cache-control")).toContain("no-store");
     expect(response.headers.get("referrer-policy")).toBe("no-referrer");
@@ -69,7 +73,11 @@ describe("/contact/automation-email/draft", () => {
 
   it("fails closed without safe server-only recipients", () => {
     vi.stubEnv("AUTOMATION_CONSULT_RECIPIENTS", "");
-    const response = POST();
+    const response = POST(
+      new Request("https://www.anzen-ai-portal.jp/contact/automation-email/draft", {
+        method: "POST",
+      }),
+    );
     expect(response.status).toBe(503);
     expect(response.headers.get("location")).toBeNull();
   });

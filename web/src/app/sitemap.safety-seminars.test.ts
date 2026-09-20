@@ -1,7 +1,10 @@
 import { readdirSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { COMING_SOON_SAFETY_SEMINARS } from "@/data/safety-seminars/themes";
+import {
+  COMING_SOON_SAFETY_SEMINARS,
+  PUBLISHED_SAFETY_SEMINARS,
+} from "@/data/safety-seminars/themes";
 import sitemap from "./sitemap";
 
 const BASE = "https://www.anzen-ai-portal.jp";
@@ -9,10 +12,12 @@ const BASE = "https://www.anzen-ai-portal.jp";
 describe("安全研修ライブラリのsitemap境界", () => {
   const urls = sitemap().map((entry) => entry.url);
 
-  it("一覧と公開教材1件だけを収載する", () => {
+  it("一覧と公開教材だけを公開配列の順で収載する", () => {
     expect(urls).toContain(`${BASE}/training/safety-seminars`);
-    expect(urls).toContain(`${BASE}/training/safety-seminars/fall-prevention`);
-    expect(urls.filter((url) => url.startsWith(`${BASE}/training/safety-seminars`))).toHaveLength(2);
+    expect(
+      urls.filter((url) => url.startsWith(`${BASE}/training/safety-seminars/`)),
+    ).toEqual(PUBLISHED_SAFETY_SEMINARS.map((seminar) => `${BASE}${seminar.href}`));
+    expect(urls.filter((url) => url.startsWith(`${BASE}/training/safety-seminars`))).toHaveLength(3);
   });
 
   it("Coming Soon個別URL・利用条件・再生状態URLを収載しない", () => {
@@ -29,6 +34,10 @@ describe("安全研修ライブラリのsitemap境界", () => {
       .filter((entry) => entry.isDirectory())
       .map((entry) => entry.name)
       .sort();
-    expect(directories).toEqual(["fall-prevention", "terms"]);
+    expect(directories).toEqual([
+      "fall-prevention",
+      "safety-management-basics-osh-law",
+      "terms",
+    ]);
   });
 });

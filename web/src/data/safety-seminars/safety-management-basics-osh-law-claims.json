@@ -1,0 +1,78 @@
+[
+  {
+    "claimId": "C-REF-ROLE",
+    "claimType": "official-guidance",
+    "statement": "安全衛生管理は、元方、協力会社、職長、作業者それぞれの役割と連絡経路を作業前に確認して運用する。",
+    "sourceIds": ["REF-SAFETY-PDF-CH01"]
+  },
+  {
+    "claimId": "C-REF-MULTI",
+    "claimType": "official-guidance",
+    "statement": "災害は人、設備、作業方法、管理など複数の条件が重なって生じるため、個人の行動だけで原因を終わらせない。",
+    "sourceIds": ["REF-SAFETY-PDF-CH01"]
+  },
+  {
+    "claimId": "C-REF-CYCLE",
+    "claimType": "official-guidance",
+    "statement": "始業前確認、作業中の変化確認、終業時の記録と引継ぎを日々の安全活動としてつなげる。",
+    "sourceIds": ["REF-SAFETY-PDF-CH01"]
+  },
+  {
+    "claimId": "C-LAW-PURPOSE",
+    "claimType": "legal-caution",
+    "statement": "労働安全衛生法は、労働災害の防止に関する総合的かつ計画的な対策を推進し、職場における労働者の安全と健康を確保するとともに快適な職場環境の形成を促進することを目的とする。",
+    "sourceIds": ["LAW-MHLW-OSH"]
+  },
+  {
+    "claimId": "C-LAW-EMPLOYER",
+    "claimType": "law-duty",
+    "statement": "事業者は法令の最低基準を守るだけでなく、労働災害防止のため必要な措置を講じるよう努め、労働者の安全と健康を確保しなければならない。",
+    "sourceIds": ["LAW-MHLW-OSH"]
+  },
+  {
+    "claimId": "C-LAW-WORKER",
+    "claimType": "law-duty",
+    "statement": "2026年4月1日施行の改正後は、労働者に加え、同じ場所で作業する一人親方等を含む作業従事者にも関係する保護措置が拡大している。条文ごとの対象者と義務主体を確認する。",
+    "sourceIds": ["LAW-MHLW-OSH", "LAW-R7-33-AMENDMENT"],
+    "caveat": "すべての条文が同じ対象へ一律に拡大したわけではない。"
+  },
+  {
+    "claimId": "C-LAW-COORDINATION",
+    "claimType": "law-duty",
+    "statement": "元方事業者、特定元方事業者、注文者等の義務は条文と現場条件で異なる。第30条の統括管理をすべての元方へ一律に当てはめない。",
+    "sourceIds": ["LAW-MHLW-OSH", "LAW-R7-33-AMENDMENT"],
+    "caveat": "発注関係、事業の種類、混在作業の有無を確認する。"
+  },
+  {
+    "claimId": "C-LAW-TRAINING",
+    "claimType": "law-duty",
+    "statement": "労働者の雇入れ時・作業内容変更時の教育や、危険有害業務の特別教育、就業制限は対象業務と要件を個別に確認する。",
+    "sourceIds": ["LAW-MHLW-OSH"],
+    "caveat": "この教材だけで法定教育や資格要件を満たすものではない。"
+  },
+  {
+    "claimId": "C-LAW-FUTURE",
+    "claimType": "legal-caution",
+    "statement": "一人親方等に対する安全衛生教育の仕組みなど、令和7年改正法には2027年4月1日施行予定の規定がある。2026年9月20日現在の現行義務と混同しない。",
+    "sourceIds": ["LAW-R7-33-AMENDMENT"]
+  },
+  {
+    "claimId": "C-GUIDE-OSHMS",
+    "claimType": "administrative-recommendation",
+    "statement": "OSHMS指針は、安全衛生方針、目標と計画、実施、日常的な点検・改善、システム監査と見直しを継続して回す考え方を示す。",
+    "sourceIds": ["GUIDE-MHLW-OSHMS"]
+  },
+  {
+    "claimId": "C-GUIDE-RA",
+    "claimType": "official-guidance",
+    "statement": "リスクアセスメントは、危険性又は有害性の特定、リスクの見積り、優先度の設定、低減措置の検討・実施、結果の記録と共有を一連で行う。",
+    "sourceIds": ["GUIDE-MHLW-RA"]
+  },
+  {
+    "claimId": "C-GUIDE-CONTROLS",
+    "claimType": "official-guidance",
+    "statement": "低減措置は法令上の措置を確実に行ったうえで、危険作業の廃止・変更、工学的対策、管理的対策、個人用保護具の順に検討する。",
+    "sourceIds": ["GUIDE-MHLW-RA"],
+    "caveat": "保護具だけで対策を終えず、実施後の残留リスクも確認する。"
+  }
+]
