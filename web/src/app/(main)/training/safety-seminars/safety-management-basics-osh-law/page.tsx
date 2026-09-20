@@ -86,7 +86,7 @@ export default function SafetyManagementBasicsOshLawPage() {
         <span>安全管理の基本と安衛法</span>
       </nav>
 
-      <header className="grid overflow-hidden rounded-[2rem] bg-[#073c36] text-white shadow-2xl lg:grid-cols-[minmax(0,1.2fr)_minmax(22rem,.8fr)]">
+      <header className="grid overflow-hidden rounded-[2rem] bg-emerald-950 text-white shadow-2xl lg:grid-cols-2">
         <div className="px-5 py-8 sm:px-8 lg:px-12 lg:py-12">
           <p className="text-sm font-black tracking-[0.16em] text-emerald-200">第1章・公開中・無料教材</p>
           <h1 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl lg:text-6xl">
@@ -104,7 +104,7 @@ export default function SafetyManagementBasicsOshLawPage() {
             今すぐ再生 <ArrowRight className="h-5 w-5" aria-hidden="true" />
           </a>
         </div>
-        <div className="relative min-h-80 bg-[#dcefe7] lg:min-h-full">
+        <div className="relative min-h-80 bg-emerald-50 lg:min-h-full">
           <Image
             src={`${PATH}/safe-site-hero.webp`}
             alt="安全管理の基本を案内するチワワの先生"
