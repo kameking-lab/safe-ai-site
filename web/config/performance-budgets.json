@@ -15,6 +15,12 @@
       "home",
       "visual-ky",
       "visual-ky-scenario",
+      "safety-seminar-library",
+      "fall-prevention-training",
+      "ai-seminar-library",
+      "ai-chat-work-training",
+      "construction-calculator-library",
+      "construction-calculator-concrete",
       "safety-ai",
       "project-story",
       "automation",
@@ -22,6 +28,7 @@
       "chemical-ra",
       "ky",
       "safety-diary",
+      "safety-images",
       "risk",
       "chatbot",
       "law-search",
@@ -52,9 +59,51 @@
       "clsMax": 0.1,
       "tbtMsMax": 200
     },
+    "safety-seminar-library": {
+      "totalClientJsBytesMax": 200000,
+      "routePayloadBytesMax": 50000,
+      "lcpMsMax": 3000,
+      "clsMax": 0.1,
+      "tbtMsMax": 200
+    },
+    "fall-prevention-training": {
+      "totalClientJsBytesMax": 210000,
+      "routePayloadBytesMax": 130000,
+      "lcpMsMax": 4000,
+      "clsMax": 0.1,
+      "tbtMsMax": 200
+    },
+    "ai-seminar-library": {
+      "totalClientJsBytesMax": 200000,
+      "routePayloadBytesMax": 50000,
+      "lcpMsMax": 3300,
+      "clsMax": 0.1,
+      "tbtMsMax": 200
+    },
+    "ai-chat-work-training": {
+      "totalClientJsBytesMax": 210000,
+      "routePayloadBytesMax": 115000,
+      "lcpMsMax": 3500,
+      "clsMax": 0.1,
+      "tbtMsMax": 200
+    },
+    "construction-calculator-library": {
+      "totalClientJsBytesMax": 200000,
+      "routePayloadBytesMax": 55000,
+      "lcpMsMax": 3300,
+      "clsMax": 0.1,
+      "tbtMsMax": 200
+    },
+    "construction-calculator-concrete": {
+      "totalClientJsBytesMax": 210000,
+      "routePayloadBytesMax": 50000,
+      "lcpMsMax": 3300,
+      "clsMax": 0.1,
+      "tbtMsMax": 200
+    },
     "safety-ai": {
       "totalClientJsBytesMax": 218000,
-      "routePayloadBytesMax": 42000,
+      "routePayloadBytesMax": 44000,
       "lcpMsMax": 3550,
       "clsMax": 0.1,
       "tbtMsMax": 200
@@ -108,6 +157,13 @@
       "clsMax": 0.1,
       "tbtMsMax": 200
     },
+    "safety-images": {
+      "totalClientJsBytesMax": 205000,
+      "routePayloadBytesMax": 85000,
+      "lcpMsMax": 3400,
+      "clsMax": 0.1,
+      "tbtMsMax": 200
+    },
     "risk": {
       "totalClientJsBytesMax": 238500,
       "routePayloadBytesMax": 35000,
@@ -117,7 +173,7 @@
     },
     "chatbot": {
       "totalClientJsBytesMax": 291000,
-      "routePayloadBytesMax": 36000,
+      "routePayloadBytesMax": 40000,
       "lcpMsMax": 3820,
       "clsMax": 0.1,
       "tbtMsMax": 200
@@ -152,8 +208,8 @@
     }
   },
   "inventory": {
-    "sitemapUrlCountBaseline": 3492,
-    "staticPageCountBaseline": 3180,
+    "sitemapUrlCountBaseline": 3650,
+    "staticPageCountBaseline": 3413,
     "allowedChangeFraction": 0.02
   }
 }
