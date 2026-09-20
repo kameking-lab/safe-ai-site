@@ -102,6 +102,9 @@ jobs:
         run: npm run lint
 
       - name: Build
+        env:
+          NEXT_PUBLIC_API_MODE: "live"
+          NEXT_PUBLIC_SUPABASE_URL: "https://playwright.invalid"
         run: npm run build
 
       - name: Unit tests
@@ -111,6 +114,8 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: E2E full tests (live mode)
+        env:
+          PLAYWRIGHT_SERVER_MODE: production
         run: npm run test:e2e:ci
 
       - name: Upload Playwright artifacts (full)
