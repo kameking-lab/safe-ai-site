@@ -102,7 +102,7 @@ test("追加画像には代替テキストがあり、主要画像の表示領�
     },
     {
       route: "/materials/safety-images",
-      imageSelector: 'img[alt*="安全看板イラスト"]',
+      imageSelector: 'img[alt*="安全AIポータル作成イラスト"]',
     },
   ] as const) {
     await page.setViewportSize({ width: 390, height: 844 });
