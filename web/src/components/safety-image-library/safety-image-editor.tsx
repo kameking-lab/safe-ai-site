@@ -31,6 +31,7 @@ import {
   wrapSafetyImageText,
   type SafetyImageTextFit,
 } from "@/lib/safety-image-library/text-fit";
+import { getSafetyImageComposition } from "@/lib/safety-image-library/composition";
 
 type DownloadMode = "clean" | "default" | "edited";
 type FontSize = "small" | "standard" | "large";
@@ -120,9 +121,18 @@ export function SafetyImageEditor({ theme }: { theme: SafetyImageTheme }) {
   const displayText = displaySegments.map((segment) => segment.text).join("\n");
   const previewDescriptionId = `${textFieldsId}-preview-languages`;
   const previewDimensions = outputSizePixels(outputSize);
+  const composition = getSafetyImageComposition(previewDimensions, {
+    mode: "edited", languages, position, brand,
+  });
+  const regionStyle = (region: typeof composition.artwork) => ({
+    left: `${(region.x / previewDimensions.width) * 100}%`,
+    top: `${(region.y / previewDimensions.height) * 100}%`,
+    width: `${(region.width / previewDimensions.width) * 100}%`,
+    height: `${(region.height / previewDimensions.height) * 100}%`,
+  });
   const previewFit = fitSafetyImageText({
     message: displayText,
-    dimensions: previewDimensions,
+    dimensions: composition.text,
     settings: {
       mode: "edited",
       language: renderLanguage,
@@ -317,29 +327,33 @@ export function SafetyImageEditor({ theme }: { theme: SafetyImageTheme }) {
                 }}
                 data-preview-fit={previewFit ? "pass" : "overflow"}
               >
-                <Image
-                  src={theme.originalPath}
-                  alt={`${theme.title}の文字なしクリーンマスター。文字編集プレビュー`}
-                  fill
-                  priority
-                  sizes="(max-width: 1280px) 92vw, 48vw"
-                  className="object-contain"
-                />
-                {displayText && previewFit ? (
-                  <SafetyImageTextPreview
-                    fit={previewFit}
-                    dimensions={previewDimensions}
-                    language={renderLanguage}
-                    position={position}
-                    textColor={textColor}
-                    band={band}
-                    bandColor={bandColor}
-                    border={border}
-                    align={align}
-                    lineHeight={lineHeight}
-                    segments={displaySegments}
-                    descriptionId={previewDescriptionId}
+                <div className="absolute" style={regionStyle(composition.artwork)} data-safety-sign-artwork>
+                  <Image
+                    src={theme.originalPath}
+                    alt={`${theme.title}の文字なしクリーンマスター。文字編集プレビュー`}
+                    fill
+                    priority
+                    sizes="(max-width: 1280px) 92vw, 48vw"
+                    className="object-contain"
                   />
+                </div>
+                {displayText && previewFit ? (
+                  <div className="absolute" style={regionStyle(composition.text)} data-safety-sign-text>
+                    <SafetyImageTextPreview
+                      fit={previewFit}
+                      dimensions={composition.text}
+                      language={renderLanguage}
+                      position={position}
+                      textColor={textColor}
+                      band={band}
+                      bandColor={bandColor}
+                      border={border}
+                      align={align}
+                      lineHeight={lineHeight}
+                      segments={displaySegments}
+                      descriptionId={previewDescriptionId}
+                    />
+                  </div>
                 ) : null}
                 {displayText ? (
                   <span id={previewDescriptionId} className="sr-only">
