@@ -14,6 +14,7 @@ import {
   fitSafetyImageText,
   wrapSafetyImageText,
 } from "@/lib/safety-image-library/text-fit";
+import { getSafetyImageComposition } from "@/lib/safety-image-library/composition";
 import {
   outputSizePixels,
   outputSizePoints,
@@ -156,7 +157,9 @@ export function buildSafetyImageTextLayer(options: {
   dimensions: Dimensions;
   settings: SafetyImageRenderSettings;
 }): string {
-  const { dimensions, settings } = options;
+  const { settings } = options;
+  const textRegion = getSafetyImageComposition(options.dimensions, settings).text;
+  const dimensions = textRegion;
   const fontFamily = fontFamilyForLanguage(settings.language);
   const message = resolveSafetyImageMessage(options.theme, settings);
   if (!message) return "";
@@ -189,7 +192,7 @@ export function buildSafetyImageTextLayer(options: {
           .join("\n"),
       )
       .join("\n");
-    return `<g id="editable-text-layer">${band}${text}</g>`;
+    return `<g id="editable-text-layer" transform="translate(${textRegion.x} ${textRegion.y})">${band}${text}</g>`;
   }
 
   const { lines, panelHeight } = fit;
@@ -227,7 +230,7 @@ export function buildSafetyImageTextLayer(options: {
       return `<text x="${x}" y="${baseline}" text-anchor="${anchor}" lang="${language}" fill="${settings.textColor}" font-family="${fontFamilyForLanguage(language)}, sans-serif" font-size="${fontSize}" font-weight="900" paint-order="stroke" stroke="${settings.band ? settings.textColor : "#ffffff"}" stroke-width="${settings.band ? 0.7 : Math.max(2, fontSize * 0.035)}" stroke-linejoin="round">${escapeXml(line)}</text>`;
     })
     .join("\n");
-  return `<g id="editable-text-layer">${band}${text}</g>`;
+  return `<g id="editable-text-layer" transform="translate(${textRegion.x} ${textRegion.y})">${band}${text}</g>`;
 }
 
 function brandLayer(dimensions: Dimensions, mascot: Buffer): string {
@@ -255,6 +258,7 @@ function posterSvg(options: {
   transparentCanvas?: boolean;
 }): string {
   const sourceData = `data:image/png;base64,${options.source.toString("base64")}`;
+  const artwork = getSafetyImageComposition(options.dimensions, options.settings).artwork;
   const text = buildSafetyImageTextLayer({
     theme: options.theme,
     dimensions: options.dimensions,
@@ -270,7 +274,7 @@ function posterSvg(options: {
   return `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="${options.dimensions.width}" height="${options.dimensions.height}" viewBox="0 0 ${options.dimensions.width} ${options.dimensions.height}">
   ${canvas}
-  <image href="${sourceData}" x="0" y="0" width="${options.dimensions.width}" height="${options.dimensions.height}" preserveAspectRatio="xMidYMid meet"/>
+  <image href="${sourceData}" x="${artwork.x}" y="${artwork.y}" width="${artwork.width}" height="${artwork.height}" preserveAspectRatio="xMidYMid meet"/>
   ${text}
   ${brand}
 </svg>`;
