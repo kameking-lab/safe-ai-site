@@ -288,8 +288,14 @@ function sourceIdsFor(data) {
 
 function addFooter(slide, data) {
   const sourceNumbers = sourceIdsFor(data).map((id) => sourceMap.get(id)?.sourceNo).filter(Boolean);
+  const articleRefs = [...new Set((data.claimIds ?? []).flatMap((id) =>
+    [...(claimMap.get(id)?.statement.matchAll(/第\d+条(?:の\d+)?/gu) ?? [])].map((match) => match[0]),
+  ))];
   addShape(slide, pptx.ShapeType.rect, { left: MARGIN, top: 640, width: 1122, height: 1 }, COLORS.line);
-  addText(slide, sourceNumbers.length ? `出典 S${sourceNumbers.join("・S")}（詳細はノート）` : "教材内の確認事項", { left: MARGIN, top: 647, width: 780, height: 22 }, { fontSize: 13, color: COLORS.slate });
+  const sourceCaption = articleRefs.length
+    ? `根拠 安衛法 ${articleRefs.join("・")}（詳細はノート）`
+    : sourceNumbers.length ? `出典 S${sourceNumbers.join("・S")}（詳細はノート）` : "教材内の確認事項";
+  addText(slide, sourceCaption, { left: MARGIN, top: 647, width: 780, height: 22 }, { fontSize: 13, color: COLORS.slate });
   addText(slide, `${String(data.number).padStart(2, "0")} / 12`, { left: 1072, top: 647, width: 124, height: 22 }, { fontSize: 13, bold: true, color: COLORS.evergreen, alignment: "right" });
 }
 

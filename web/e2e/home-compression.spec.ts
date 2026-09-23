@@ -160,7 +160,7 @@ test("事故カードは判断材料を先に示し、KYへ未確認内容を自
   const accidentCard = page.locator('[data-home-update="accidents"]');
   await expect(accidentCard.getByRole("link", { name: /KYを作る/ })).toHaveCount(0);
   await expect(accidentCard.getByText(/報道内容はKYへ引き継ぎません/)).toHaveCount(0);
-  await expect(accidentCard.getByRole("heading", { level: 3, name: "直近の事故報道" })).toBeVisible();
+  await expect(accidentCard.getByRole("heading", { level: 3, name: "国内の死亡事故報道" })).toBeVisible();
   if (
     (await accidentCard.locator('[data-accident-origin="reported-unverified"]').count()) >
     0

@@ -48,7 +48,7 @@ describe("HomeSafetyUpdates", () => {
     const { container } = render(<HomeSafetyUpdates latestNews={live} />);
 
     expect(
-      screen.getByRole("heading", { name: "直近の事故報道" }),
+      screen.getByRole("heading", { name: "国内の死亡事故報道" }),
     ).toBeTruthy();
     expect(screen.getByRole("heading", { name: "注目法改正" })).toBeTruthy();
     expect(container.querySelectorAll("[data-accident-origin]")).toHaveLength(3);

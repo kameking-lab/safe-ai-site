@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { TransientQueryBridgeProvider } from "@/components/home-safety-cockpit/transient-query-bridge";
 import { HomeActionCockpit } from "./home-action-cockpit";
@@ -30,11 +30,9 @@ describe("HomeActionCockpit", () => {
     expect(
       screen.getByRole("link", { name: /スライドを見る/ }).getAttribute("href"),
     ).toBe("/training/safety-seminars/safety-management-basics-osh-law#seminar-player");
-    expect(screen.getByRole("link", { name: "PPTX" }).getAttribute("href")).toMatch(
-      /safety-management-basics-osh-law-training\.pptx$/u,
-    );
-    expect(screen.getByRole("link", { name: "PDF" }).getAttribute("href")).toMatch(
-      /safety-management-basics-osh-law-training\.pdf$/u,
-    );
+    const fiveTools = screen.getByRole("navigation", { name: "チワワと試す5機能" });
+    expect(within(fiveTools).getAllByRole("link")).toHaveLength(5);
+    expect(within(fiveTools).getByRole("link", { name: "死亡事故速報" }).getAttribute("href")).toBe("/accident-news");
+    expect(within(fiveTools).getByRole("link", { name: "法改正" }).getAttribute("href")).toBe("/laws");
   });
 });

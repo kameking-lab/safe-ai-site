@@ -337,13 +337,13 @@ export const NAV_CATEGORIES: AppShellNavCategory[] = [
       },
       {
         id: "accident-news",
-        label: "労災事故速報",
+        label: "国内の死亡事故速報",
         href: "/accident-news",
         icon: Newspaper,
         badge: "NEW",
         badgeUntil: "2026-10-31",
         description:
-          "直近14日以内の国内労災報道を、公表日時・媒体名・確認状態つきで表示",
+          "直近14日以内の国内の労働中の死亡事故報道を表示",
       },
       {
         id: "fatal-accidents",
@@ -609,7 +609,7 @@ const COMPACT_NAV_CATEGORIES: AppShellNavCategory[] = [
       },
       {
         id: "accident-news",
-        label: "労災事故速報",
+        label: "国内の死亡事故速報",
         href: "/accident-news",
         icon: Newspaper,
       },

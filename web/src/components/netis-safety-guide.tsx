@@ -156,7 +156,7 @@ export function NetisSafetyGuide({ compact = false }: { compact?: boolean }) {
                 className="group rounded-xl border border-sky-200 bg-white px-3 py-3 transition hover:border-sky-400 hover:shadow-sm dark:border-sky-900 dark:bg-slate-900"
               >
                 <span className="block text-[11px] font-black text-emerald-800 dark:text-emerald-300">{technology.category}</span>
-                <span className="mt-1 block text-xs font-black leading-5 text-slate-950 group-hover:text-sky-900 dark:text-white dark:group-hover:text-sky-200">{technology.name}</span>
+                <span className="mt-1 block text-xs font-black leading-5 text-slate-950 dark:text-white">{technology.name}</span>
                 <span className="mt-1 block font-mono text-[11px] font-bold text-slate-500 dark:text-slate-400">{technology.registrationNumber}</span>
               </a>
             ))}

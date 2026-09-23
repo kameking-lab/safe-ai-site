@@ -9,9 +9,6 @@ import {
   List,
   Pause,
   Play,
-  RotateCcw,
-  Volume2,
-  VolumeX,
 } from "lucide-react";
 import {
   useCallback,
@@ -29,13 +26,6 @@ import type {
 type SpeechStatus = "idle" | "playing" | "paused" | "unavailable";
 type VoiceMode = "recorded" | "device-primary" | "device-secondary";
 
-const RATE_OPTIONS = [0.75, 1, 1.25, 1.5] as const;
-const LIDA_CREDIT_URL = "https://youtube.com/channel/UC2tX473Zo09ZCnhAUNdAvjA/join";
-const VOICE_OPTIONS: ReadonlyArray<{ value: VoiceMode; label: string }> = [
-  { value: "recorded", label: "AivisSpeech リダ（高品質録音）" },
-  { value: "device-primary", label: "端末音声 1" },
-  { value: "device-secondary", label: "端末音声 2" },
-];
 
 function deviceVoice(voices: SpeechSynthesisVoice[], mode: VoiceMode) {
   const japanese = voices.filter((voice) => voice.lang.toLowerCase().startsWith("ja"));
@@ -60,6 +50,7 @@ export function SafetySeminarPlayer({
   audioBasePath = "/training/safety-seminars/fall-prevention/audio",
   playerLabel = "音声付き安全研修スライド",
   transcriptId = "safety-seminar-transcript",
+  sourcesAnchorId = "sources-title",
 }: {
   slides: TrainingSlide[];
   claims: TrainingClaim[];
@@ -67,6 +58,7 @@ export function SafetySeminarPlayer({
   audioBasePath?: string;
   playerLabel?: string;
   transcriptId?: string;
+  sourcesAnchorId?: string;
 }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [speechStatus, setSpeechStatus] = useState<SpeechStatus>("idle");
@@ -76,10 +68,10 @@ export function SafetySeminarPlayer({
   const [captionsVisible, setCaptionsVisible] = useState(true);
   const [transcriptVisible, setTranscriptVisible] = useState(false);
   const [listVisible, setListVisible] = useState(false);
-  const [muted, setMuted] = useState(false);
-  const [volume, setVolume] = useState(1);
-  const [rate, setRate] = useState<(typeof RATE_OPTIONS)[number]>(1);
-  const [voiceMode, setVoiceMode] = useState<VoiceMode>("recorded");
+  const [muted] = useState(false);
+  const [volume] = useState(1);
+  const [rate] = useState(1);
+  const [voiceMode] = useState<VoiceMode>("recorded");
   const [deviceVoices, setDeviceVoices] = useState<SpeechSynthesisVoice[]>([]);
   const playerRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -107,6 +99,12 @@ export function SafetySeminarPlayer({
       .map((sourceId) => sourceById.get(sourceId))
       .filter((source): source is TrainingSource => Boolean(source));
   }, [claimById, slide.claimIds, sourceById]);
+  const slideLawArticles = useMemo(() => [...new Set(
+    slide.claimIds.flatMap((claimId) =>
+      [...(claimById.get(claimId)?.statement.matchAll(/第\d+条(?:の\d+)?/gu) ?? [])]
+        .map((match) => match[0]),
+    ),
+  )], [claimById, slide.claimIds]);
 
   useEffect(() => {
     statusRef.current = speechStatus;
@@ -236,17 +234,6 @@ export function SafetySeminarPlayer({
     }
   }, [useRecordedAudio]);
 
-  const stop = useCallback(() => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-    }
-    cancelSpeech();
-    setSpeechProgress(0);
-    setCaption(slide.message);
-    setSpeechStatus("idle");
-  }, [cancelSpeech, slide.message]);
-
   const goTo = useCallback(
     (index: number) => {
       const next = Math.min(slides.length - 1, Math.max(0, index));
@@ -259,19 +246,6 @@ export function SafetySeminarPlayer({
       resetSlideState(next);
     },
     [cancelSpeech, resetSlideState, slides.length, voiceMode],
-  );
-
-  const restartForSetting = useCallback(
-    (callback: () => void) => {
-      const wasPlaying = statusRef.current === "playing";
-      const wasPaused = statusRef.current === "paused";
-      if (!useRecordedAudio && wasPlaying) pendingSpeechRestartRef.current = true;
-      cancelSpeech();
-      callback();
-      if (!useRecordedAudio && wasPaused) setSpeechStatus("idle");
-      else if (wasPlaying) setSpeechStatus("playing");
-    },
-    [cancelSpeech, useRecordedAudio],
   );
 
   useEffect(() => {
@@ -290,28 +264,6 @@ export function SafetySeminarPlayer({
       active = false;
     };
   }, [currentIndex, muted, rate, speakCurrent, speechStatus, useRecordedAudio, voiceMode, volume]);
-
-  const changeVoiceMode = useCallback(
-    (next: VoiceMode) => {
-      const wasPlaying = statusRef.current === "playing";
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.currentTime = 0;
-      }
-      cancelSpeech();
-      setSpeechProgress(0);
-      setCaption(slide.message);
-      setAudioFailed(false);
-      setVoiceMode(next);
-      if (wasPlaying) {
-        pendingSpeechRestartRef.current = next !== "recorded";
-        setSpeechStatus("playing");
-      } else {
-        setSpeechStatus("idle");
-      }
-    },
-    [cancelSpeech, slide.message],
-  );
 
   const enterFullscreen = useCallback(async () => {
     if (playerRef.current?.requestFullscreen) await playerRef.current.requestFullscreen();
@@ -332,14 +284,12 @@ export function SafetySeminarPlayer({
         if (statusRef.current === "playing") pause();
         else play();
       }
-      if (event.key.toLowerCase() === "m")
-        restartForSetting(() => setMuted((value) => !value));
       if (event.key.toLowerCase() === "c") setCaptionsVisible((value) => !value);
       if (event.key.toLowerCase() === "f") void enterFullscreen();
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [enterFullscreen, goTo, pause, play, restartForSetting]);
+  }, [enterFullscreen, goTo, pause, play]);
 
   return (
     <section
@@ -350,9 +300,9 @@ export function SafetySeminarPlayer({
       <h2 id="seminar-player-title" className="sr-only">
         {playerLabel}
       </h2>
-      <div className="relative min-h-[680px] overflow-hidden bg-slate-950 p-5 sm:min-h-[620px] sm:p-8 lg:aspect-video lg:min-h-0 lg:p-12">
+      <div className="relative min-h-[680px] overflow-hidden bg-slate-950 p-5 sm:min-h-[620px] sm:p-8 lg:aspect-video lg:min-h-0 lg:p-10">
         <div
-          className="pointer-events-none absolute inset-0 opacity-35"
+          className="pointer-events-none absolute inset-0 opacity-30"
           aria-hidden="true"
           style={{
             background:
@@ -373,7 +323,7 @@ export function SafetySeminarPlayer({
               {String(slide.number).padStart(2, "0")} / {slides.length}
             </p>
           </header>
-          <div className="mt-3 grid min-h-0 flex-1 items-center gap-5 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-10">
+          <div className="mt-3 grid min-h-0 flex-1 items-center gap-5 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-8">
             <div>
               <h3 className="text-2xl font-black leading-tight tracking-tight sm:text-3xl lg:text-5xl">
                 {slide.title}
@@ -394,9 +344,11 @@ export function SafetySeminarPlayer({
             </div>
             <SlideVisual slide={slide} />
           </div>
-          <p className="mt-2 truncate text-[10px] text-slate-400">
-            出典: {slideSources.map((source) => source.sourceId).join(" / ") || "サイト独自構成"}
-          </p>
+          <a href={`#${sourcesAnchorId}`} className="mt-2 block truncate text-[10px] text-slate-300 underline underline-offset-2">
+            根拠: {slideLawArticles.length > 0
+              ? `労働安全衛生法 ${slideLawArticles.join("・")}`
+              : slideSources.map((source) => source.title).join(" / ") || "教材内の確認事項"}
+          </a>
         </div>
       </div>
 
@@ -495,65 +447,12 @@ export function SafetySeminarPlayer({
               primary
             />
           )}
-          <ControlButton label="停止" onClick={stop} icon={RotateCcw} />
           <ControlButton
             label="次のスライド"
             onClick={() => goTo(currentIndex + 1)}
             disabled={currentIndex === slides.length - 1}
             icon={ChevronRight}
           />
-          <ControlButton
-            label={muted ? "ミュート解除" : "ミュート"}
-            onClick={() => restartForSetting(() => setMuted((value) => !value))}
-            icon={muted ? VolumeX : Volume2}
-          />
-          <label className="flex min-h-11 items-center gap-2 rounded-xl border border-slate-600 px-3 text-sm font-bold">
-            音量
-            <input
-              aria-label="音量"
-              type="range"
-              min="0"
-              max="1"
-              step="0.1"
-              value={volume}
-              onChange={(event) => {
-                const next = Number(event.target.value);
-                restartForSetting(() => setVolume(next));
-              }}
-              className="w-20 accent-teal-400"
-            />
-          </label>
-          <label className="flex min-h-11 items-center gap-2 rounded-xl border border-slate-600 px-3 text-sm font-bold">
-            音声
-            <select
-              aria-label="音声の種類"
-              value={voiceMode}
-              onChange={(event) => changeVoiceMode(event.target.value as VoiceMode)}
-              className="max-w-52 rounded bg-slate-950 px-2 py-1 text-white"
-            >
-              {VOICE_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>{option.label}</option>
-              ))}
-            </select>
-          </label>
-          <label className="flex min-h-11 items-center gap-2 rounded-xl border border-slate-600 px-3 text-sm font-bold">
-            速度
-            <select
-              aria-label="再生速度"
-              value={rate}
-              onChange={(event) => {
-                const next = Number(event.target.value) as (typeof RATE_OPTIONS)[number];
-                restartForSetting(() => setRate(next));
-              }}
-              className="rounded bg-slate-950 px-2 py-1 text-white"
-            >
-              {RATE_OPTIONS.map((option) => (
-                <option key={option} value={option}>
-                  {option}倍
-                </option>
-              ))}
-            </select>
-          </label>
           <ControlButton
             label="字幕"
             onClick={() => setCaptionsVisible((value) => !value)}
@@ -578,23 +477,6 @@ export function SafetySeminarPlayer({
             音声ファイルを取得できないため、ブラウザー読み上げへ切り替えました。
           </p>
         ) : null}
-        {voiceMode !== "recorded" ? (
-          <p className="text-xs text-slate-300">
-            端末に入っている日本語音声を使います。利用できる声と声質は端末・ブラウザーにより異なります。
-          </p>
-        ) : (
-          <p className="text-xs leading-5 text-slate-400">
-            音声: AivisSpeech / リダ<br />
-            <a
-              href={LIDA_CREDIT_URL}
-              target="_blank"
-              rel="noreferrer"
-              className="break-all underline underline-offset-2 hover:text-slate-200"
-            >
-              {LIDA_CREDIT_URL}
-            </a>
-          </p>
-        )}
         <button
           type="button"
           className="min-h-11 text-sm font-bold text-teal-200 underline underline-offset-4"
@@ -642,7 +524,7 @@ export function SafetySeminarPlayer({
           </ol>
         ) : null}
         <p className="text-xs text-slate-400">
-          キーボード: Space 再生/一時停止、←/→ 移動、M ミュート、C 字幕、F 全画面
+          キーボード: Space 再生/一時停止、←/→ 移動、C 字幕、F 全画面
         </p>
       </div>
     </section>

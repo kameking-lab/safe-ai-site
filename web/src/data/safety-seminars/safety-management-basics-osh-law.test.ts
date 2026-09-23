@@ -73,6 +73,14 @@ describe("安全管理の基本と安衛法研修の共通正本", () => {
     }
   });
 
+  it("公開する根拠は公的資料に限定し、個人の参照資料を出典にしない", () => {
+    expect(sources.every((source) =>
+      /^https:\/\/(laws\.e-gov\.go\.jp|www\.mhlw\.go\.jp)\//u.test(source.url),
+    )).toBe(true);
+    expect(JSON.stringify(sources)).not.toContain("drive.google.com");
+    expect(claimById.get("C-REF-MULTI")?.statement).toContain("第28条の2");
+  });
+
   it("Webスライドが参照する画像は公開ディレクトリに存在する", () => {
     for (const slide of training.slides) {
       if (slide.visual.type !== "image") continue;

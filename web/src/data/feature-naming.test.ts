@@ -36,7 +36,7 @@ describe("feature naming consistency", () => {
 
     expect(byHref.get("/accident-news")).toMatchObject({
       slug: "accident-news",
-      title: "労災事故速報",
+      title: "国内の死亡事故速報",
     });
     expect(byHref.get("/accident-news")?.title).not.toContain("データベース");
     expect(byHref.get("/fatal-accidents")).toMatchObject({

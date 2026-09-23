@@ -14,8 +14,8 @@ const NAV_ITEMS = [
   {
     id: "accident-news" as const,
     href: "/accident-news",
-    label: "労災事故速報",
-    description: "直近14日以内の国内労災報道を公表日時・媒体名・確認状態つきで表示",
+    label: "国内の死亡事故速報",
+    description: "直近14日以内の日本国内の労働中の死亡事故報道を表示",
   },
   {
     id: "fatal-accidents" as const,

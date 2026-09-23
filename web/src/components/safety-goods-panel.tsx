@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useState } from "react";
 import { ExternalLink, Search } from "lucide-react";
 import {
   generateAmazonHighRatedSearchUrl,
@@ -14,6 +15,7 @@ import {
 import { FeatureMascotCompanion } from "@/components/feature-mascot-companion";
 import { NetisSafetyGuide } from "@/components/netis-safety-guide";
 import { SafetyGoodsWizard } from "@/components/safety-goods-wizard";
+import { GoodsProductCarousel } from "@/components/goods-product-carousel";
 
 const OFFICIAL_SELECTION_SOURCES = [
   {
@@ -48,6 +50,14 @@ function affiliateClick(
 }
 
 export function SafetyGoodsPanel() {
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+  const selectedCategory = PUBLIC_SAFETY_GOODS_CATEGORIES.find((category) => category.id === selectedCategoryId);
+
+  function selectCategory(categoryId: string) {
+    setSelectedCategoryId(categoryId);
+    window.requestAnimationFrame(() => document.getElementById("goods-product-panel")?.scrollIntoView({ behavior: "smooth", block: "start" }));
+  }
+
   return (
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 lg:px-8">
       <header>
@@ -72,17 +82,18 @@ export function SafetyGoodsPanel() {
 
       <section aria-labelledby="goods-categories-title">
         <h2 id="goods-categories-title" className="text-xl font-bold text-slate-950">
-          イラストから安全用品を選ぶ
+          用品カテゴリから実商品を探す
         </h2>
         <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-700">
-          まず使う用品を選び、カード内で必要な特徴を確認してください。商品検索へ進む前に、カテゴリの代表イラストと確認項目を表示します。
+          使う用品を一つ選ぶと、サイト内で実商品写真と購入者評価を確認できます。接続できない場合は未確認と表示します。
         </p>
         <ul className="mt-4 flex snap-x gap-4 overflow-x-auto pb-4" aria-label="安全用品カテゴリの画像一覧">
           {PUBLIC_SAFETY_GOODS_CATEGORIES.map((category) => (
             <li key={category.id} id={`goods-${category.id}`} className="w-[17rem] shrink-0 snap-start overflow-hidden rounded-2xl border border-slate-300 bg-white shadow-sm">
-              <div className="relative aspect-[4/3] bg-slate-100">
-                <Image src={category.image} alt={`${category.name}のカテゴリイラスト`} fill sizes="272px" className="object-contain p-2" />
-              </div>
+              <button type="button" onClick={() => selectCategory(category.id)} aria-pressed={selectedCategoryId === category.id} className="group relative block aspect-[4/3] w-full bg-slate-100 text-left focus-visible:ring-2 focus-visible:ring-emerald-600">
+                <Image src={category.image} alt={`${category.name}のカテゴリイラスト`} fill sizes="272px" className="object-contain p-2 transition" />
+                <span className="absolute bottom-2 right-2 rounded-full bg-emerald-900 px-3 py-2 text-xs font-black text-white">実物を見る</span>
+              </button>
               <div className="p-4">
                 <h3 className="text-base font-bold text-slate-950">{category.name}</h3>
                 <p className="mt-2 min-h-12 text-xs leading-6 text-slate-600">{category.selectionPrompt}</p>
@@ -104,8 +115,13 @@ export function SafetyGoodsPanel() {
             </li>
           ))}
         </ul>
+        {selectedCategory ? (
+          <div id="goods-product-panel" className="scroll-mt-24">
+            <GoodsProductCarousel key={selectedCategory.id} categoryId={selectedCategory.id} categoryName={selectedCategory.name} />
+          </div>
+        ) : null}
         <p className="mt-2 text-xs font-semibold leading-6 text-slate-600">
-          検索結果は推奨や適合証明ではありません。評価・レビュー件数・商品画像・価格は、販売サイトを開いた時点の表示で確認します。安全AIポータル内では未確認の評価値を掲載しません。確認先: <a href={PUBLIC_GOODS_RATING_DISCLOSURE.sourceUrl} target="_blank" rel="noopener noreferrer" className="underline">{PUBLIC_GOODS_RATING_DISCLOSURE.sourceLabel}</a>
+          検索結果は推奨や適合証明ではありません。APIで取得できた評価のみサイト内に表示します。最新の評価・価格・在庫と安全規格の適合は、販売ページと一次資料で確認してください。商品データ: <a href={PUBLIC_GOODS_RATING_DISCLOSURE.sourceUrl} target="_blank" rel="noopener noreferrer" className="underline">{PUBLIC_GOODS_RATING_DISCLOSURE.sourceLabel}</a>
         </p>
       </section>
 

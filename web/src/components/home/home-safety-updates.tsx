@@ -41,7 +41,7 @@ export function HomeSafetyUpdates({
               id="home-updates-title"
               className="mt-0.5 text-xl font-black tracking-tight sm:mt-1 sm:text-3xl"
             >
-              事故と法改正
+              死亡事故と法改正
             </h2>
           </div>
         </header>
@@ -51,7 +51,7 @@ export function HomeSafetyUpdates({
             className="rounded-2xl border border-rose-300/50 bg-white/5 p-3 sm:p-5"
             data-home-update="accidents"
           >
-            <h3 className="text-lg font-black">直近の事故報道</h3>
+            <h3 className="text-lg font-black">国内の死亡事故報道</h3>
 
             {featuredAccident ? (
               <div
@@ -92,14 +92,14 @@ export function HomeSafetyUpdates({
                 role="status"
                 className="mt-3 rounded-xl border border-amber-300 bg-amber-950/50 p-3 text-sm font-bold leading-6 text-amber-100"
               >
-                直近の事故報道を取得できません。
+                直近の国内死亡事故報道を取得できません。
               </div>
             )}
 
             <div className="mt-2 grid grid-cols-2 gap-2 sm:mt-3">
               <details className="rounded-xl border border-white/20 bg-white/5 px-2 sm:px-3">
                 <summary className="flex min-h-11 cursor-pointer items-center text-xs font-black focus-visible:ring-4 focus-visible:ring-rose-300 sm:text-sm">
-                  速報・追加2件
+                  死亡災害の補足
                 </summary>
                 <div
                   className="border-t border-white/15 py-3 text-xs leading-5"
@@ -111,10 +111,6 @@ export function HomeSafetyUpdates({
                     {aggregate.deaths === null
                       ? "未確認"
                       : `${aggregate.deaths.toLocaleString("ja-JP")}人`}
-                    、休業4日以上等{" "}
-                    {aggregate.injuries === null
-                      ? "未確認"
-                      : `${aggregate.injuries.toLocaleString("ja-JP")}人`}
                   </p>
                   <p className="mt-1 font-bold text-amber-200">
                     全国速報（暫定値）

@@ -27,7 +27,7 @@ test.describe("安全研修ライブラリ", () => {
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", `https://www.anzen-ai-portal.jp${HUB}`);
   });
 
-  test("音声の再生・一時停止・停止、スライド移動、字幕、原稿、速度、keyboardを操作できる", async ({ page }) => {
+  test("音声の再生・一時停止、スライド移動、字幕、原稿、keyboardを操作できる", async ({ page }) => {
     await page.goto(DETAIL);
     const audio = page.locator("audio");
     await expect(audio).toHaveCount(1);
@@ -37,9 +37,6 @@ test.describe("安全研修ライブラリ", () => {
     await expect.poll(() => audio.evaluate((element) => (element as HTMLAudioElement).currentTime)).toBeGreaterThan(0);
     await page.getByRole("button", { name: "一時停止" }).click();
     expect(await audio.evaluate((element) => (element as HTMLAudioElement).paused)).toBe(true);
-    await page.getByRole("button", { name: "停止" }).click();
-    await expect.poll(() => audio.evaluate((element) => (element as HTMLAudioElement).currentTime)).toBeLessThan(0.1);
-
     await page.getByRole("button", { name: "次のスライド" }).click();
     await expect(page.getByText("02 / 20")).toBeVisible();
     await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
@@ -55,11 +52,8 @@ test.describe("安全研修ライブラリ", () => {
     await expect(page.locator('[role="status"]')).toBeVisible();
     await page.getByRole("button", { name: "音声原稿を読む" }).click();
     await expect(page.getByRole("heading", { name: "講師向け補足" })).toBeVisible();
-    await page.getByRole("combobox", { name: "再生速度" }).selectOption("1.5");
-    expect(await audio.evaluate((element) => (element as HTMLAudioElement).playbackRate)).toBe(1.5);
-    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
-    await page.keyboard.press("m");
-    expect(await audio.evaluate((element) => (element as HTMLAudioElement).muted)).toBe(true);
+    await expect(page.getByRole("button", { name: "停止" })).toHaveCount(0);
+    await expect(page.getByRole("combobox", { name: "再生速度" })).toHaveCount(0);
   });
 
   test("320/390/768/1440pxと400%相当で横溢れしない", async ({ page }) => {

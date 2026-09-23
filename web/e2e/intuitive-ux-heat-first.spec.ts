@@ -11,7 +11,7 @@ const DESKTOP_NAV = [
   ["法令検索", "/law-search"],
   ["化学物質RA", "/chemical-ra"],
   ["法改正", "/laws"],
-  ["労災事故速報", "/accident-news"],
+  ["国内の死亡事故速報", "/accident-news"],
   ["死亡事故DB", "/fatal-accidents"],
   ["事故分析", "/accidents-analytics"],
   ["5分ビジュアルKYT", "/training/visual-ky"],
@@ -35,7 +35,7 @@ const MOBILE_NAV = [
 const MAIN_SERVICES = [
   ["安衛法AI", "/chatbot"],
   ["化学物質RA", "/chemical-ra"],
-  ["労災事故速報", "/accident-news"],
+  ["国内の死亡事故速報", "/accident-news"],
   ["法改正速報", "/laws"],
   ["自動化相談", "/contact/automation-email"],
   ["安全グッズ", "/goods"],
@@ -109,7 +109,7 @@ test("モバイルは9機能とSafety Labsを区別し、重複のないメニ�
     page.getByRole("region", {
       name: /小さな気づきが、\s*大きな事故を防ぐ。/u,
     }),
-    page.getByRole("region", { name: "質問・検索・安全教育をワンクリックで" }),
+    page.getByRole("region", { name: "5つの機能をすぐ使う" }),
     page.locator('[data-home-section="updates"]'),
     page.getByRole("region", { name: "仕事から選ぶ、9つの主機能" }),
     page.getByRole("region", { name: "カテゴリから探す" }),

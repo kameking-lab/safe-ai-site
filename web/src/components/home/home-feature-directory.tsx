@@ -80,7 +80,7 @@ const CATEGORIES: FeatureCategory[] = [
     ],
     more: [
       { href: "/accidents-analytics", label: "事故統計" },
-      { href: "/accident-news", label: "労災事故速報" },
+      { href: "/accident-news", label: "国内の死亡事故速報" },
     ],
   },
   {

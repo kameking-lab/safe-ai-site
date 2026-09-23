@@ -28,6 +28,7 @@ describe("SafetyGoodsWizard", () => {
     fireEvent.click(screen.getByRole("button", { name: /換気が効いている/ }));
 
     expect(screen.getByRole("heading", { name: "防じんマスク（製品群）の購入候補" })).toBeDefined();
+    expect(screen.getByRole("heading", { name: "呼吸用保護具の実商品写真と高評価候補" })).toBeDefined();
     expect(screen.getByRole("link", { name: /Amazonで候補を見る/ }).getAttribute("href")).toContain("amazon.co.jp/s");
     expect(decodeURIComponent(screen.getByRole("link", { name: /Amazonで候補を見る/ }).getAttribute("href") ?? "")).toContain("DD02V-S2-2K");
     expect(screen.getByRole("link", { name: /楽天で候補を見る/ }).getAttribute("href")).toContain("rakuten.co.jp");
@@ -83,6 +84,7 @@ describe("SafetyGoodsWizard", () => {
     expect(screen.getByRole("heading", { name: "危険有害性が分かるまで、製品推薦を保留します" })).toBeDefined();
     expect(screen.queryByRole("link", { name: /Amazonで候補を見る/ })).toBeNull();
     expect(screen.queryByRole("link", { name: /楽天で候補を見る/ })).toBeNull();
+    expect(screen.queryByRole("heading", { name: /実商品写真と高評価候補/ })).toBeNull();
     expect(screen.getByRole("link", { name: "選定を相談する" }).getAttribute("href")).toBe("/contact/automation-email?subject=ppe-selection");
     expect(screen.getByText(/SDS・酸素濃度・作業環境を確認/)).toBeDefined();
   });
