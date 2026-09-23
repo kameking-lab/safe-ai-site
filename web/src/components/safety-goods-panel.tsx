@@ -142,7 +142,7 @@ export function SafetyGoodsPanel() {
           ))}
         </ul>
         {selectedCategory ? (
-          <div id="goods-product-panel" tabIndex={-1} aria-label={`${selectedCategory.name}の商品候補`} className="mt-4 scroll-mt-24 rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700">
+          <div id="goods-product-panel" role="region" tabIndex={-1} aria-label={`${selectedCategory.name}の商品候補`} className="mt-4 scroll-mt-24 rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700">
             <button type="button" onClick={returnToCategories} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 text-sm font-bold text-slate-800 hover:bg-slate-50">
               <ArrowLeft aria-hidden="true" className="h-4 w-4" />用品一覧に戻る
             </button>
