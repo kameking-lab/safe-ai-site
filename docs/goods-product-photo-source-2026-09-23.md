@@ -23,7 +23,8 @@ API未設定・接続失敗・条件合致0件は、それぞれ画面に明示�
 - 2026-09-24 03:27 JST、本番の `/api/goods-products` を `head-protection`、`respiratory`、`fall-protection`、`eye-face-protection`、`safety-footwear` で読み取り確認。5/5が `status: not_configured`、`items: []`、`checkedAt: null`。高評価の実商品写真を本番で表示できた実績は **未確認**。
 - 既存安全AI・note・Instagramの運用 `.env` を必要な変数名に限定して確認したが、再利用できる `RAKUTEN_APPLICATION_ID` / `RAKUTEN_ACCESS_KEY` はなかった。値をログへ出力していない。
 - [現行API仕様](https://webservice.rakuten.co.jp/documentation/ichiba-item-search)は2026-07-01版であり、実装のエンドポイントは現行版と一致。App IDとAccess Keyの両方が必要。Affiliate IDはこの2値の代用にならない。
-- [利用ガイド](https://webservice.rakuten.co.jp/guide)ではアプリごとにApp IDとAccess Keyを発行する。確認した既存設定・一次資料の範囲では、登録せずに写真と実測レビューをまとめて取得できる、許諾済みかつキー不要の代替経路は見つからなかった。
+- [利用ガイド](https://webservice.rakuten.co.jp/guide)ではアプリごとにApp IDとAccess Keyを発行する。確認した既存設定・一次資料の範囲では、登録せずに写真と実測レビューをまとめて取得し、現在の条件で更新できるキー不要の代替経路は見つからなかった。
+- **画像だけの部分代替はある**。[楽天公式のリンク作成画面](https://affiliate.rakuten.co.jp/guides/link/)が発行する画像リンクを使える。ただし利用サイトの登録と商品ごとの生成HTML取得が必要で、[ガイドライン](https://affiliate.rakuten.co.jp/guideline/rule/)には生成HTML・画像サイズ・タグ属性の変更制限がある。公開商品ページからの画像コピーで代用しない。この方式だけでは購入者評価・レビュー件数・在庫を継続取得できる根拠が確認できず、今回の独自カルーセル全体の代替とは判定しない。
 
 ### 今回の接続不要の改善
 
@@ -48,3 +49,8 @@ API未設定・接続失敗・条件合致0件は、それぞれ画面に明示�
 - **安全適合とレビューの区別**：★4.2・10件以上は購入者評価の絞り込みであり、作業への安全適合判定ではない。実測の資格条件・規格表示・SDS等を別に確認する既存表示を保持。
 
 「日本一」の比較評価や、実写真の本番公開が完了したという判定はしていない。
+
+
+### 検証記録
+
+Next 16.2.11 / lockfile準拠の依存で、関連unit 20/20、Chromium操作5/5、TypeScript、変更ファイルESLintを確認。別のclean検証worktreeで通常 `npm run build` を実行し、source・public identity・storage workspace・3450ページ生成・build後728 routeチェックを全て通過。390/1440pxの実画面でカテゴリ一覧と選択後パネルを確認した。商品取得成功系の操作検証はモックであり、本番楽天データ取得の成功実績ではない。
