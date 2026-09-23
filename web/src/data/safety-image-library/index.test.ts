@@ -154,7 +154,7 @@ describe("market-grounded safety sign library", () => {
   });
 
   it("provides five post-production language layers and exactly ten numeric templates", () => {
-    expect(SAFETY_IMAGE_LANGUAGES).toEqual(["ja", "en", "vi", "zh-CN", "id"]);
+    expect(SAFETY_IMAGE_LANGUAGES).toEqual(["ja", "vi", "zh-CN", "en", "id"]);
     for (const theme of SAFETY_IMAGE_THEMES) {
       expect(Object.keys(theme.texts)).toEqual(SAFETY_IMAGE_LANGUAGES);
       const sourceTexts = texts[theme.slug as keyof typeof texts];

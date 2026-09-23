@@ -2,11 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
-  BadgeCheck,
 } from "lucide-react";
-
-const REFERENCE_FOLDER_URL =
-  "https://drive.google.com/drive/folders/1ueL4tATdCiIuiUKCluDlov1CLCo56FGn?usp=drive_link";
 
 type FirstReleaseItem = {
   title: string;
@@ -32,7 +28,7 @@ const REQUIRED_FIRST_FIVE: readonly FirstReleaseItem[] = [
   { title: "フルハーネスを使用", message: "ランヤードを先に接続", slug: "full-body-harness-required", place: "高所・足場・屋根" },
 ];
 
-function ThemeCard({ item, accent }: { item: FirstReleaseItem; accent: "red" | "blue" }) {
+function ThemeCard({ item }: { item: FirstReleaseItem }) {
   return (
     <li>
       <Link
@@ -42,7 +38,7 @@ function ThemeCard({ item, accent }: { item: FirstReleaseItem; accent: "red" | "
         <div className="relative aspect-[4/3] overflow-hidden bg-white">
           <Image
             src={`/safety-images/library/previews/${item.slug}.webp`}
-            alt={`${item.title}を用途別に描いた、もふもふのチワワ安全看板`}
+            alt={`もふもふのチワワが用途別に案内する「${item.title}」の安全看板イラスト`}
             fill
             sizes="(max-width: 640px) 48vw, (max-width: 1280px) 30vw, 16vw"
             className="object-contain transition duration-300 group-hover:scale-[1.02]"
@@ -50,9 +46,6 @@ function ThemeCard({ item, accent }: { item: FirstReleaseItem; accent: "red" | "
           <div className="absolute inset-x-[8%] top-[7%] z-10 text-center text-[clamp(.58rem,1.2vw,.84rem)] font-black leading-tight text-emerald-950">
             {item.title}
           </div>
-          <span className={`absolute left-2 top-2 rounded-full px-2 py-1 text-[10px] font-black text-white ${accent === "red" ? "bg-rose-700" : "bg-sky-800"}`}>
-            NEW
-          </span>
         </div>
         <div className="flex flex-1 flex-col p-3">
           <h4 className="font-black text-slate-950 dark:text-white">{item.title}</h4>
@@ -72,23 +65,11 @@ export function SafetyImageFirstRelease() {
     <section aria-labelledby="safety-image-first-release" className="rounded-[2rem] border border-emerald-200 bg-[#f5f8f2] p-4 sm:p-7 dark:border-emerald-900 dark:bg-emerald-950/20">
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_11rem] lg:items-center">
         <div>
-          <p className="inline-flex items-center gap-2 text-xs font-black tracking-[.14em] text-emerald-800 dark:text-emerald-300">
-            <BadgeCheck className="h-4 w-4" aria-hidden="true" />
-            FIRST REVIEW RELEASE
-          </p>
-          <h2 id="safety-image-first-release" className="mt-2 text-3xl font-black tracking-tight text-slate-950 dark:text-white">
-            まず10枚、ここから確認できます
+          <h2 id="safety-image-first-release" className="text-3xl font-black tracking-tight text-slate-950 dark:text-white">
+            現場でよく使う10枚
           </h2>
           <p className="mt-2 max-w-3xl text-sm font-semibold leading-6 text-slate-700 dark:text-slate-200">
-            添付例の「緑・白・大きな指示・親しみやすい案内役」を基準に、立入禁止5枚と着用・保護具表示5枚を先頭へ再構成しました。
-            文字は画像へ焼き込まず、編集・多言語・印刷時に正確に重ねます。
-          </p>
-          <p className="mt-3 max-w-3xl text-xs font-bold leading-5 text-slate-600 dark:text-slate-300">
-            構成根拠：提供資料「安全.pdf」資料編257〜260頁の
-            「表示が必要な場所」「立入禁止措置が必要な場所」を用途分類へ反映。
-            <a href={REFERENCE_FOLDER_URL} target="_blank" rel="noreferrer" className="ml-1 underline underline-offset-4">
-              参照フォルダを確認
-            </a>
+            立入禁止と保護具の看板から選べます。開いて文字・言語・用紙の向きを整えてください。
           </p>
         </div>
         <div className="relative mx-auto h-36 w-36 overflow-hidden rounded-3xl border-4 border-white bg-emerald-900 shadow-xl">
@@ -106,7 +87,7 @@ export function SafetyImageFirstRelease() {
             <Link href="/materials/safety-images/category/entry-prohibition" className="min-h-11 text-xs font-black text-rose-800 underline underline-offset-4 dark:text-rose-200">禁止表示をすべて見る</Link>
           </div>
           <ul className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
-            {ENTRY_FIRST_FIVE.map((item) => <ThemeCard key={item.slug} item={item} accent="red" />)}
+            {ENTRY_FIRST_FIVE.map((item) => <ThemeCard key={item.slug} item={item} />)}
           </ul>
         </section>
 
@@ -119,7 +100,7 @@ export function SafetyImageFirstRelease() {
             <Link href="/materials/safety-images/category/protective-equipment" className="min-h-11 text-xs font-black text-sky-900 underline underline-offset-4 dark:text-sky-200">着用表示をすべて見る</Link>
           </div>
           <ul className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
-            {REQUIRED_FIRST_FIVE.map((item) => <ThemeCard key={item.slug} item={item} accent="blue" />)}
+            {REQUIRED_FIRST_FIVE.map((item) => <ThemeCard key={item.slug} item={item} />)}
           </ul>
         </section>
       </div>

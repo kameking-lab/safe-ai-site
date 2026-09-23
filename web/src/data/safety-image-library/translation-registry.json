@@ -4,9 +4,9 @@
   "inventorySource": "docs/audits/current-safety-sign-market-inventory.csv",
   "languageOrder": [
     "ja",
-    "en",
     "vi",
     "zh-CN",
+    "en",
     "id"
   ],
   "languageNames": {

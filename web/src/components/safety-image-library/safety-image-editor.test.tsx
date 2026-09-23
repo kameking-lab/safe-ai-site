@@ -55,7 +55,7 @@ describe("SafetyImageEditor", () => {
     expect((screen.getByLabelText("単位") as HTMLInputElement).value).toBe("km/jam");
     fireEvent.change(screen.getByLabelText("数値・連絡先"), { target: { value: "8" } });
     expect(screen.getAllByText(/8 km\/jam/u).length).toBeGreaterThan(0);
-    fireEvent.click(screen.getByLabelText(/3\. 編集した文字入り/u));
+    expect((screen.getByLabelText("出力内容") as HTMLSelectElement).value).toBe("edited");
     const downloadButton = screen.getByRole("button", { name: /JPEGをダウンロード/u });
     expect(downloadButton.hasAttribute("disabled")).toBe(false);
     expect(document.body.innerHTML).not.toContain("8%20km");
@@ -77,7 +77,7 @@ describe("SafetyImageEditor", () => {
     for (const radio of screen.getAllByRole("radio") as HTMLInputElement[]) {
       groups.set(radio.name, (groups.get(radio.name) ?? 0) + 1);
     }
-    expect([...groups.values()].filter((count) => count === 3).length).toBeGreaterThanOrEqual(5);
+    expect([...groups.values()].filter((count) => count === 3).length).toBeGreaterThanOrEqual(4);
     expect((screen.getByLabelText("単位") as HTMLInputElement).value).toBe("日");
     fireEvent.click(screen.getByLabelText("ベトナム語"));
     fireEvent.click(screen.getByLabelText("日本語"));
@@ -121,9 +121,17 @@ describe("SafetyImageEditor", () => {
     for (const label of ["A4縦", "A4横", "A3縦", "A3横", "平板 600×450mm（推奨）", "垂れ幕 450×1800mm"]) {
       expect(screen.getByRole("option", { name: label })).not.toBeNull();
     }
+    expect((screen.getByLabelText("出力内容") as HTMLSelectElement).value).toBe("edited");
+    expect(screen.getByRole("option", { name: "プレビューどおり" })).not.toBeNull();
+    expect(screen.getByRole("option", { name: "推奨文字入り" })).not.toBeNull();
+    expect(screen.getByRole("option", { name: "文字なし" })).not.toBeNull();
     expect(screen.getByRole("option", { name: "JPEG" })).not.toBeNull();
     expect(screen.getByRole("option", { name: "PDF" })).not.toBeNull();
     expect(screen.getByRole("option", { name: "PNG" })).not.toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "A4縦" }));
+    expect((screen.getByLabelText("印刷・看板サイズ") as HTMLSelectElement).value).toBe("a4-portrait");
+    fireEvent.click(screen.getByRole("button", { name: "A4横" }));
+    expect((screen.getByLabelText("印刷・看板サイズ") as HTMLSelectElement).value).toBe("a4-landscape");
   });
 
   it("POSTには選択中の言語だけを含め、選択解除した編集文を送信しない", async () => {
@@ -144,7 +152,7 @@ describe("SafetyImageEditor", () => {
         target: { value: "選択解除後は送信しない文言" },
       });
       fireEvent.click(screen.getByLabelText("ベトナム語"));
-      fireEvent.click(screen.getByLabelText(/3\. 編集した文字入り/u));
+      expect((screen.getByLabelText("出力内容") as HTMLSelectElement).value).toBe("edited");
       fireEvent.click(screen.getByRole("button", { name: /JPEGをダウンロード/u }));
 
       await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
