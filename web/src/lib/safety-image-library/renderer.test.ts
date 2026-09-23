@@ -17,7 +17,6 @@ import {
 } from "./renderer";
 import {
   SAFETY_SIGN_OUTPUT_SIZES,
-  defaultOutputSize,
   outputSizePixels,
 } from "@/data/safety-image-library/sizes";
 
@@ -125,24 +124,25 @@ describe("safety image library renderer", () => {
     expect((await sharp(jpeg).metadata()).format).toBe("jpeg");
   });
 
-  it("fits the four common site languages on every theme at its recommended size", () => {
-    const selected = ["ja", "en", "vi", "zh-CN"] as const;
+  it("fits five languages on every theme in both A4 orientations", () => {
+    const selected = SAFETY_IMAGE_LANGUAGES;
     for (const theme of SAFETY_IMAGE_THEMES) {
-      const outputSize = defaultOutputSize(theme.recommendedSize, theme.orientation);
-      const layer = buildSafetyImageTextLayer({
-        theme,
-        dimensions: getSafetyImageWorkingDimensions(outputSizePixels(outputSize)),
-        settings: {
-          ...settings("ja"),
-          language: "ja",
-          languages: [...selected],
-          text: theme.texts.ja,
-          texts: theme.texts,
-          numericUnit: theme.numericTemplate?.unit ?? "",
-          position: theme.orientation === "portrait" ? "top" : "bottom",
-        },
-      });
-      expect(layer, `${theme.slug}/${outputSize}`).toContain("editable-text-layer");
+      for (const outputSize of ["a4-portrait", "a4-landscape"] as const) {
+        const layer = buildSafetyImageTextLayer({
+          theme,
+          dimensions: getSafetyImageWorkingDimensions(outputSizePixels(outputSize)),
+          settings: {
+            ...settings("ja"),
+            language: "ja",
+            languages: [...selected],
+            text: theme.texts.ja,
+            texts: theme.texts,
+            numericUnit: theme.numericTemplate?.unit ?? "",
+            position: theme.orientation === "portrait" ? "top" : "bottom",
+          },
+        });
+        expect(layer, `${theme.slug}/${outputSize}`).toContain("editable-text-layer");
+      }
     }
   });
 
