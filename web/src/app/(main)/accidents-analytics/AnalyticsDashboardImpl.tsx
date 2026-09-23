@@ -21,12 +21,12 @@ import {
 } from "recharts";
 import { CardGrid, PageContainer, Section, Stack } from "@/components/layout";
 import { LazyChart } from "@/components/charts/lazy-chart";
-import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
 import { DataExportToolbar } from "@/components/accidents/data-export-toolbar";
 import type {
   AnalyticsAggregates,
   NameCount,
 } from "@/lib/accidents-analytics/types";
+import type { TypeComposition } from "@/lib/accidents-analytics";
 import {
   ANALYTICS_CSV_FILENAME,
   analyticsToCsv,
@@ -50,6 +50,7 @@ const PALETTE = [
 
 type AnalyticsDashboardProps = {
   aggregates: AnalyticsAggregates;
+  typeComposition: TypeComposition | null;
 };
 
 type FilterState = {
@@ -178,92 +179,97 @@ function ChartCard({
 }
 
 function RiskVisualSummary({
-  fatalRatePercent,
-  recentYearLabel,
-  recentYearCount,
+  typeComposition,
   seasonality,
+  yearTrend,
 }: {
-  fatalRatePercent: number;
-  recentYearLabel: string;
-  recentYearCount: number;
+  typeComposition: TypeComposition | null;
   seasonality: NameCount[];
+  yearTrend: Array<{ year: string; count: number }>;
 }) {
-  const clampedFatalRate = Math.min(100, Math.max(0, fatalRatePercent));
   const maxMonthCount = Math.max(0, ...seasonality.map((item) => item.count));
+  const clampedTypeShare = typeComposition
+    ? Math.min(100, Math.max(0, typeComposition.percent))
+    : null;
 
   return (
     <section
       aria-labelledby="risk-visual-summary-title"
-      className="rounded-xl border border-slate-200 bg-slate-50 p-3 sm:p-5"
+      className="rounded-xl border border-slate-200 bg-slate-50 p-3 sm:p-4"
+      data-testid="analytics-visual-summary"
     >
       <div className="flex flex-wrap items-end justify-between gap-2">
         <div>
-          <p className="text-[11px] font-bold tracking-[.12em] text-rose-700">
-            VISUAL SUMMARY
-          </p>
           <h2
             id="risk-visual-summary-title"
             className="text-base font-bold text-slate-950 sm:text-lg"
           >
-            メーターと月別ヒートマップで先に把握
+            まず3つの図で確認
           </h2>
         </div>
         <p className="max-w-xl text-[11px] leading-5 text-slate-600 sm:text-xs">
-          色と長さは現在の絞り込み条件に連動します。死亡災害比率は全国の発生確率ではなく、収録事例内の構成比です。
+          同じ収録事例・絞り込み条件で集計。件数の構成であり、発生率ではありません。
         </p>
       </div>
 
-      <div className="mt-3 grid gap-3 lg:grid-cols-[minmax(220px,0.7fr)_minmax(0,1.3fr)]">
-        <div className="rounded-lg border border-rose-200 bg-white p-4">
-          <div className="flex items-end justify-between gap-3">
-            <div>
+      <div className="mt-2 grid gap-2 lg:grid-cols-3">
+        <div className="rounded-lg border border-rose-200 bg-white p-3">
+          {typeComposition && clampedTypeShare !== null ? (
+            <>
               <p className="text-xs font-semibold text-slate-600">
-                収録事例中の死亡災害比率
+                {typeComposition.label}の構成比
               </p>
-              <p className="mt-1 text-3xl font-black tabular-nums text-rose-700">
-                {fatalRatePercent}%
+              <div className="mt-1 flex items-baseline justify-between gap-2">
+                <p className="text-3xl font-black tabular-nums text-rose-700">
+                  {typeComposition.percent}%
+                </p>
+                <p className="text-[10px] text-slate-500">
+                  {formatNumber(typeComposition.count)} / {formatNumber(typeComposition.denominator)}件
+                </p>
+              </div>
+              <div
+                role="meter"
+                aria-label={`${typeComposition.label}の構成比`}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuenow={clampedTypeShare}
+                aria-valuetext={`${typeComposition.percent}%、${typeComposition.count}件 / 比較母集団${typeComposition.denominator}件`}
+                className="mt-2 h-4 overflow-hidden rounded-full bg-slate-200"
+              >
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-amber-400 via-orange-500 to-rose-600"
+                  style={{ width: `${clampedTypeShare}%` }}
+                />
+              </div>
+              <p className="mt-1.5 text-[10px] leading-4 text-slate-500">
+                分母：同じ業種・年・データ源などで、事故型条件だけを除いた事例
               </p>
+            </>
+          ) : (
+            <div className="flex min-h-28 items-center justify-center rounded-md bg-amber-50 p-3 text-center text-xs font-semibold text-amber-950">
+              この条件に一致する事例がないため、構成比は算出しません。
             </div>
-            <span className="rounded-full bg-rose-50 px-2 py-1 text-[10px] font-bold text-rose-800">
-              構成比
-            </span>
-          </div>
-          <div
-            role="meter"
-            aria-label="収録事例中の死亡災害比率"
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-valuenow={clampedFatalRate}
-            aria-valuetext={`${fatalRatePercent}%`}
-            className="mt-4 h-4 overflow-hidden rounded-full bg-slate-200"
-          >
-            <div
-              className="h-full rounded-full bg-gradient-to-r from-amber-400 via-orange-500 to-rose-600"
-              style={{ width: `${clampedFatalRate}%` }}
-            />
-          </div>
-          <div className="mt-2 flex justify-between text-[10px] text-slate-500">
-            <span>0%</span>
-            <span>100%</span>
-          </div>
+          )}
         </div>
 
-        <div className="rounded-lg border border-orange-200 bg-white p-4">
+        <div className="rounded-lg border border-orange-200 bg-white p-3">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <h3 className="text-sm font-bold text-slate-900">月別発生ヒートマップ</h3>
-            <p className="text-[10px] text-slate-500">濃い色ほど収録件数が多い</p>
+            <p className="text-[10px] text-slate-500">月名・件数を併記</p>
           </div>
-          <div className="mt-3 grid grid-cols-3 gap-1.5 sm:grid-cols-6" aria-hidden="true">
+          <div className="mt-2 grid grid-cols-4 gap-1" role="list" aria-label="月別の事故件数">
             {seasonality.map((item) => {
               const intensity =
                 maxMonthCount === 0 ? 0 : item.count / maxMonthCount;
               return (
                 <div
                   key={item.name}
-                  className="min-w-0 rounded-md border border-orange-100 px-2 py-2 text-center"
+                  role="listitem"
+                  aria-label={`${item.name} ${formatNumber(item.count)}件`}
+                  className="min-w-0 rounded-md border border-orange-100 px-1 py-1.5 text-center"
                   style={{
-                    backgroundColor: `rgba(234, 88, 12, ${0.08 + intensity * 0.82})`,
-                    color: intensity > 0.55 ? "#ffffff" : "#7c2d12",
+                    backgroundColor: intensity > 0.66 ? "#9a3412" : intensity > 0.33 ? "#fed7aa" : "#ffedd5",
+                    color: intensity > 0.66 ? "#ffffff" : "#7c2d12",
                   }}
                 >
                   <div className="text-[10px] font-bold">{item.name}</div>
@@ -275,15 +281,36 @@ function RiskVisualSummary({
             })}
           </div>
         </div>
+
+        <div className="rounded-lg border border-sky-200 bg-white p-3" data-testid="analytics-year-trend">
+          <h3 className="text-sm font-bold text-slate-900">年別推移</h3>
+          {yearTrend.length > 0 ? (
+            <LazyChart className="mt-1" style={{ width: "100%", height: 142 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={yearTrend} margin={{ top: 8, right: 8, bottom: 0, left: -24 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                  <XAxis dataKey="year" tick={{ fontSize: 10 }} />
+                  <YAxis tick={{ fontSize: 10 }} allowDecimals={false} />
+                  <Tooltip formatter={(value) => [`${formatNumber(Number(value))}件`, "件数"]} />
+                  <Line type="monotone" dataKey="count" stroke="#0369a1" strokeWidth={2.5} dot={{ r: 3 }} />
+                </LineChart>
+              </ResponsiveContainer>
+            </LazyChart>
+          ) : (
+            <div className="mt-2 flex min-h-28 items-center justify-center rounded-md bg-amber-50 p-3 text-center text-xs font-semibold text-amber-950">
+              表示できる年別データがありません。
+            </div>
+          )}
+        </div>
       </div>
 
-      <details className="mt-3 rounded-lg border border-slate-200 bg-white p-3">
+      <details className="mt-2 rounded-lg border border-slate-200 bg-white p-3">
         <summary className="cursor-pointer text-xs font-bold text-slate-800">
           グラフの数値を表で確認
         </summary>
         <div className="mt-3 overflow-x-auto" role="region" aria-label="視覚サマリーの代替データ表">
           <table className="min-w-full border-collapse text-xs">
-            <caption className="sr-only">死亡災害比率、最新年件数、月別件数</caption>
+            <caption className="sr-only">事故型構成比、月別件数、年別件数</caption>
             <thead>
               <tr className="border-b border-slate-200 text-left text-slate-500">
                 <th scope="col" className="whitespace-nowrap px-2 py-2">指標</th>
@@ -291,17 +318,21 @@ function RiskVisualSummary({
               </tr>
             </thead>
             <tbody>
-              <tr className="border-b border-slate-100">
-                <th scope="row" className="whitespace-nowrap px-2 py-2 text-left font-semibold">死亡災害比率</th>
-                <td className="whitespace-nowrap px-2 py-2 text-right tabular-nums">{fatalRatePercent}%</td>
-              </tr>
-              <tr className="border-b border-slate-100">
-                <th scope="row" className="whitespace-nowrap px-2 py-2 text-left font-semibold">{recentYearLabel}の事故件数</th>
-                <td className="whitespace-nowrap px-2 py-2 text-right tabular-nums">{formatNumber(recentYearCount)}件</td>
-              </tr>
+              {typeComposition ? (
+                <tr className="border-b border-slate-100">
+                  <th scope="row" className="whitespace-nowrap px-2 py-2 text-left font-semibold">{typeComposition.label}の構成比</th>
+                  <td className="whitespace-nowrap px-2 py-2 text-right tabular-nums">{typeComposition.percent}%（{formatNumber(typeComposition.count)}/{formatNumber(typeComposition.denominator)}件）</td>
+                </tr>
+              ) : null}
               {seasonality.map((item) => (
                 <tr key={item.name} className="border-b border-slate-100 last:border-0">
                   <th scope="row" className="whitespace-nowrap px-2 py-2 text-left font-semibold">{item.name}</th>
+                  <td className="whitespace-nowrap px-2 py-2 text-right tabular-nums">{formatNumber(item.count)}件</td>
+                  </tr>
+              ))}
+              {yearTrend.map((item) => (
+                <tr key={item.year} className="border-b border-slate-100 last:border-0">
+                  <th scope="row" className="whitespace-nowrap px-2 py-2 text-left font-semibold">{item.year}年</th>
                   <td className="whitespace-nowrap px-2 py-2 text-right tabular-nums">{formatNumber(item.count)}件</td>
                 </tr>
               ))}
@@ -315,6 +346,7 @@ function RiskVisualSummary({
 
 export function AnalyticsDashboardImpl({
   aggregates,
+  typeComposition,
 }: AnalyticsDashboardProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -348,7 +380,7 @@ export function AnalyticsDashboardImpl({
       params.set(key, value);
     }
     const qs = params.toString();
-    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+    router.push(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
   };
 
   const replaceFilter = (key: keyof FilterState, value: string) => {
@@ -445,14 +477,6 @@ export function AnalyticsDashboardImpl({
         ? `${aggregates.meta.yearsCovered.from}年`
         : `${aggregates.meta.yearsCovered.from}〜${aggregates.meta.yearsCovered.to}年`
       : "該当期間なし";
-  const coverageItems = [
-    ["業種", aggregates.meta.coverage.industry],
-    ["事故型", aggregates.meta.coverage.type],
-    ["発生月", aggregates.meta.coverage.month],
-    ["都道府県", aggregates.meta.coverage.prefecture],
-    ["年齢", aggregates.meta.coverage.age],
-  ] as const;
-
   const resetFilters = () => {
     replaceFilters({
       industry: "",
@@ -478,143 +502,49 @@ export function AnalyticsDashboardImpl({
   );
 
   return (
-    <PageContainer width="full" paddingX="default" paddingY="default">
-      <Stack className="space-y-6 sm:space-y-8">
+    <PageContainer width="full" paddingX="default" paddingY="tight">
+      <Stack className="space-y-4 sm:space-y-6">
         {/* ===== Page header ===== */}
-        <header className="space-y-2">
-          <div className="flex flex-wrap items-center gap-2">
-            <Link
-              href="/accidents"
-              className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2.5 py-0.5 text-[11px] text-slate-600 hover:bg-slate-50"
-            >
-              ← 事故事例検索（補助）へ戻る
-            </Link>
-            <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700">
-              Analytics
+        <header
+          data-testid="analytics-headline"
+          className="flex flex-wrap items-baseline justify-between gap-2"
+        >
+          <p className="text-sm font-black text-slate-950">
+            対象 <span className="text-2xl tabular-nums text-rose-700">{formatNumber(aggregates.meta.filteredCases)}</span>件
+            <span className="ml-2 text-[11px] font-semibold text-slate-500">
+              全{formatNumber(aggregates.meta.datasetCases)}件中・{periodLabel}
             </span>
-          </div>
-          <h2 className="text-xl font-bold text-slate-900 sm:text-2xl">
-            収録個票を絞り込んで分析
-          </h2>
-          {/* 柱0・結論ファースト: 統計DBの規模をファーストビュー最上部にデカ数字で提示。
-              値は下の「サマリーKPI」と同一ソース（収録総件数＝curatedCases＋mhlwDeathsCount、
-              内訳＝厚労省死亡災害DB mhlwDeathsCount＋curated curatedCases、期間＝meta.yearsCovered）
-              の転記のみ＝捏造なし。「いま何件を集計したダッシュボードか」を段落を読まず3秒で掴ませる。
-              ※死亡災害比率は死亡災害DB寄りの統合構成で高めに出るため、文脈注記つきの
-                サマリーKPI側に残し、ここでは誤読を避けて構成内訳チップのみ並べる。 */}
-          <div
-            data-testid="analytics-headline"
-            className="flex flex-wrap items-end gap-x-5 gap-y-2 rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
+          </p>
+          <Link
+            href="/accidents"
+            className="text-xs font-bold text-sky-800 underline underline-offset-2"
           >
-            <div>
-              <div className="text-[11px] font-semibold tracking-wide text-slate-500">
-                {hasFilters ? "絞り込み対象" : "収録 労働災害"}
-              </div>
-              <div className="flex items-baseline gap-1">
-                <span className="text-4xl font-bold tabular-nums text-slate-900 sm:text-5xl">
-                  {formatNumber(aggregates.meta.filteredCases)}
-                </span>
-                <span className="text-lg font-bold text-slate-700">件</span>
-              </div>
-              <div className="mt-0.5 text-[11px] text-slate-500">
-                {periodLabel}・{SOURCE_LABELS[filterState.source] ?? "選択データ源"}
-                {hasFilters
-                  ? `（全${formatNumber(aggregates.meta.datasetCases)}件中）`
-                  : ""}
-              </div>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <span className="inline-flex items-center rounded-full border border-rose-200 bg-rose-50 px-3 py-1 text-xs font-bold text-rose-800">
-                厚労省死亡災害DB {formatNumber(aggregates.meta.mhlwDeathsCount)}
-                件
-              </span>
-              {aggregates.meta.curatedCases > 0 ? (
-                <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-bold text-slate-700">
-                  編集済み事例 {formatNumber(aggregates.meta.curatedCases)}件
-                </span>
-              ) : null}
-            </div>
-          </div>
-          {/* 長いデータ源説明は折りたたみ、操作と対象件数を先に見せる。 */}
-          <CollapsibleDetail summary="このダッシュボードのデータ源について">
-            既定では厚労省の死亡災害個票だけを対象にし、編集済み事例は混ぜません。詳細条件の「データ源」で切り替えた場合だけ、選んだ母集団を集計します。現在の対象は
-            {formatNumber(aggregates.meta.filteredCases)}件です。
-            厚労省「職場のあんぜんサイト」全件DB（
-            {formatNumber(aggregates.meta.mhlwFullDbCount)} 件 /
-            2006〜2021）の集計データも参照軸として併載しています。
-          </CollapsibleDetail>
-          {/* 柱C-7: 集計の出力手段。月例安全会議の資料へCSV/要点コピー/共有/印刷で持ち出せる。 */}
-          <DataExportToolbar
-            filename={ANALYTICS_CSV_FILENAME}
-            csv={exportCsv}
-            text={exportText}
-            shareTitle="事故分析ダッシュボード"
-          />
+            事故事例検索へ
+          </Link>
         </header>
 
         {/* ===== Filter bar ===== */}
         <section
           id="detail-charts"
-          className="scroll-mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 sm:p-4"
+          className="scroll-mt-4 rounded-lg border border-slate-200 bg-slate-50 p-2.5 sm:p-3"
         >
-          <div className="mb-3">
+          <div className="mb-2">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
-                <h2 className="text-base font-black text-slate-950">条件を選んで事故を絞り込む</h2>
-                <p className="mt-0.5 text-xs text-slate-600">
-                  選んだ条件はすべてANDで集計・グラフ・CSVへ反映します。
-                </p>
+                <h2 className="text-sm font-black text-slate-950">業種・事故型・年を選ぶ</h2>
               </div>
               <span className="rounded-full bg-rose-100 px-3 py-1 text-xs font-bold text-rose-800">
                 対象 {formatNumber(aggregates.meta.filteredCases)}件
               </span>
             </div>
-            <div className="mt-3 space-y-2" aria-label="よく使う条件">
-              <div className="flex flex-wrap items-center gap-1.5">
-                <span className="mr-1 text-[11px] font-bold text-slate-500">よく使う業種</span>
-                {industryOptions.slice(0, 5).map((option) => (
-                  <button
-                    key={option}
-                    type="button"
-                    aria-pressed={industryFilter === option}
-                    onClick={() => replaceFilter("industry", industryFilter === option ? "" : option)}
-                    className={`min-h-[36px] rounded-full border px-3 py-1 text-xs font-bold ${
-                      industryFilter === option
-                        ? "border-emerald-700 bg-emerald-700 text-white"
-                        : "border-slate-300 bg-white text-slate-700 hover:border-emerald-400"
-                    }`}
-                  >
-                    {option}
-                  </button>
-                ))}
-              </div>
-              <div className="flex flex-wrap items-center gap-1.5">
-                <span className="mr-1 text-[11px] font-bold text-slate-500">よく使う事故型</span>
-                {typeOptions.slice(0, 5).map((option) => (
-                  <button
-                    key={option}
-                    type="button"
-                    aria-pressed={typeFilter === option}
-                    onClick={() => replaceFilter("type", typeFilter === option ? "" : option)}
-                    className={`min-h-[36px] rounded-full border px-3 py-1 text-xs font-bold ${
-                      typeFilter === option
-                        ? "border-rose-700 bg-rose-700 text-white"
-                        : "border-slate-300 bg-white text-slate-700 hover:border-rose-400"
-                    }`}
-                  >
-                    {option}
-                  </button>
-                ))}
-              </div>
-            </div>
           </div>
-          <div className="flex flex-wrap items-end gap-3">
-            <div className="flex flex-col">
+          <div className="grid grid-cols-3 items-end gap-2">
+            <div className="flex min-w-0 flex-col">
               <label
                 htmlFor="industry-filter"
                 className="mb-1 text-[11px] font-semibold text-slate-600"
               >
-                業種で絞り込み
+                業種
               </label>
               <select
                 id="industry-filter"
@@ -626,7 +556,7 @@ export function AnalyticsDashboardImpl({
                     year: yearFilter,
                   })
                 }
-                className="min-h-[44px] rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                className="min-h-[44px] min-w-0 rounded-md border border-slate-300 bg-white px-1.5 py-1.5 text-xs text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
               >
                 <option value="">全業種</option>
                 {industryOptions.map((opt) => (
@@ -636,12 +566,12 @@ export function AnalyticsDashboardImpl({
                 ))}
               </select>
             </div>
-            <div className="flex flex-col">
+            <div className="flex min-w-0 flex-col">
               <label
                 htmlFor="type-filter"
                 className="mb-1 text-[11px] font-semibold text-slate-600"
               >
-                事故種類で絞り込み
+                事故型
               </label>
               <select
                 id="type-filter"
@@ -653,7 +583,7 @@ export function AnalyticsDashboardImpl({
                     year: yearFilter,
                   })
                 }
-                className="min-h-[44px] rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                className="min-h-[44px] min-w-0 rounded-md border border-slate-300 bg-white px-1.5 py-1.5 text-xs text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
               >
                 <option value="">全種類</option>
                 {typeOptions.map((opt) => (
@@ -663,12 +593,12 @@ export function AnalyticsDashboardImpl({
                 ))}
               </select>
             </div>
-            <div className="flex flex-col">
+            <div className="flex min-w-0 flex-col">
               <label
                 htmlFor="year-filter"
                 className="mb-1 text-[11px] font-semibold text-slate-600"
               >
-                年で絞り込み
+                年
               </label>
               <select
                 id="year-filter"
@@ -680,7 +610,7 @@ export function AnalyticsDashboardImpl({
                     year: e.target.value,
                   })
                 }
-                className="min-h-[44px] rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                className="min-h-[44px] min-w-0 rounded-md border border-slate-300 bg-white px-1.5 py-1.5 text-xs text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
               >
                 <option value="">全期間</option>
                 {yearOptions.map((year) => (
@@ -690,177 +620,66 @@ export function AnalyticsDashboardImpl({
                 ))}
               </select>
             </div>
-            <details className="w-full rounded-lg border border-slate-200 bg-white p-3">
-              <summary className="cursor-pointer text-sm font-bold text-slate-800">
-                詳細条件（月・中分類・起因物・規模・時間帯・地域・年齢・重傷度・データ源）
-              </summary>
-              <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                <FilterSelect
-                  id="month-filter"
-                  label="発生月"
-                  value={filterState.month}
-                  allLabel="全月"
-                  options={aggregates.meta.filterOptions.months.map((month) => ({ value: String(month), label: `${month}月` }))}
-                  onChange={(value) => replaceFilter("month", value)}
-                />
-                <FilterSelect
-                  id="industry-medium-filter"
-                  label="業種中分類"
-                  value={filterState.industryMedium}
-                  allLabel="全中分類"
-                  options={aggregates.meta.filterOptions.industryMediums.map((value) => ({ value, label: value }))}
-                  onChange={(value) => replaceFilter("industryMedium", value)}
-                />
-                <FilterSelect
-                  id="cause-filter"
-                  label="起因物"
-                  value={filterState.cause}
-                  allLabel="全起因物"
-                  options={aggregates.meta.filterOptions.causes.map((value) => ({ value, label: value }))}
-                  onChange={(value) => replaceFilter("cause", value)}
-                />
-                <FilterSelect
-                  id="workplace-size-filter"
-                  label="事業場規模"
-                  value={filterState.workplaceSize}
-                  allLabel="全規模"
-                  options={aggregates.meta.filterOptions.workplaceSizes.map((value) => ({ value, label: value }))}
-                  onChange={(value) => replaceFilter("workplaceSize", value)}
-                />
-                <FilterSelect
-                  id="occurrence-time-filter"
-                  label="発生時間帯（2時間）"
-                  value={filterState.occurrenceTime}
-                  allLabel="全時間帯"
-                  options={aggregates.meta.filterOptions.occurrenceTimes.map((value) => ({ value, label: value }))}
-                  onChange={(value) => replaceFilter("occurrenceTime", value)}
-                />
-                <FilterSelect
-                  id="prefecture-filter"
-                  label="都道府県"
-                  value={filterState.prefecture}
-                  allLabel="全国"
-                  options={aggregates.meta.filterOptions.prefectures.map((value) => ({ value, label: value }))}
-                  onChange={(value) => replaceFilter("prefecture", value)}
-                />
-                <FilterSelect
-                  id="age-filter"
-                  label="年齢"
-                  value={filterState.age}
-                  allLabel="全年齢"
-                  options={aggregates.meta.filterOptions.ages.map((value) => ({ value, label: value }))}
-                  onChange={(value) => replaceFilter("age", value)}
-                />
-                <FilterSelect
-                  id="severity-filter"
-                  label="重傷度"
-                  value={filterState.severity}
-                  allLabel="全重傷度"
-                  options={aggregates.meta.filterOptions.severities.map((value) => ({ value, label: value }))}
-                  onChange={(value) => replaceFilter("severity", value)}
-                />
-                <FilterSelect
-                  id="source-filter"
-                  label="データ源"
-                  value={filterState.source}
-                  allLabel="公式死亡個票（既定）"
-                  options={aggregates.meta.filterOptions.sources.map((value) => ({ value, label: SOURCE_LABELS[value] ?? value }))}
-                  onChange={(value) => replaceFilter("source", value || "official")}
-                />
-              </div>
-            </details>
-            {hasFilters && (
-              <button
-                type="button"
-                onClick={resetFilters}
-                className="min-h-[44px] rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-700 hover:bg-slate-100"
-              >
-                絞り込みをリセット
-              </button>
-            )}
-            <p className="ml-auto text-[10px] text-slate-500 sm:text-[11px]">
-              公式死亡個票が既定です。編集済み事例はデータ源で明示的に選べます。
-            </p>
-          </div>
-          {activeFilters.length > 0 ? (
-            <div className="mt-3 flex flex-wrap items-center gap-1.5" aria-label="適用中の条件">
-              <span className="text-[11px] font-bold text-slate-500">適用中</span>
-              {activeFilters.map(([key, label, value]) => (
-                <button
-                  key={key}
-                  type="button"
-                  onClick={() => replaceFilter(key, key === "source" ? "official" : "")}
-                  className="inline-flex min-h-[32px] items-center gap-1 rounded-full border border-emerald-300 bg-emerald-50 px-2.5 py-1 text-[11px] font-bold text-emerald-900 hover:bg-emerald-100"
-                  aria-label={`${label} ${value} を解除`}
-                >
-                  {label}: {value}
-                  <X className="h-3 w-3" aria-hidden="true" />
-                </button>
-              ))}
-              <button type="button" onClick={resetFilters} className="min-h-[32px] px-2 text-[11px] font-bold text-slate-600 underline">
-                すべて解除
-              </button>
-            </div>
-          ) : null}
-          <div
-            className="mt-3 rounded-lg border border-slate-200 bg-white p-3"
-            aria-live="polite"
-            data-testid="analytics-filter-summary"
-          >
-            <div className="flex flex-wrap items-baseline justify-between gap-2">
-              <p className="text-sm font-bold text-slate-900">
-                対象 {formatNumber(aggregates.meta.filteredCases)}件
-                <span className="ml-2 text-xs font-normal text-slate-500">
-                  全{formatNumber(aggregates.meta.datasetCases)}件中・
-                  {periodLabel}
-                </span>
-              </p>
-              {hasFilters ? (
-                <p className="text-[11px] font-semibold text-emerald-800">
-                  {activeFilters.map(([, label, value]) => `${label}: ${value}`).join(" × ")}
-                </p>
-              ) : (
-                <p className="text-[11px] text-slate-500">公式死亡個票を表示中</p>
-              )}
-            </div>
-            <dl className="mt-2 grid grid-cols-2 gap-1.5 sm:grid-cols-5">
-              {coverageItems.map(([label, coverage]) => (
-                <div key={label} className="rounded-md bg-slate-50 px-2 py-1.5">
-                  <dt className="text-[10px] font-semibold text-slate-500">
-                    {label}欠損率
-                  </dt>
-                  <dd className="text-xs font-bold tabular-nums text-slate-800">
-                    {coverage.missingRatePercent}%
-                    <span className="ml-1 font-normal text-slate-500">
-                      ({formatNumber(coverage.missing)}/
-                      {formatNumber(aggregates.meta.filteredCases)})
-                    </span>
-                  </dd>
-                </div>
-              ))}
-            </dl>
-            {aggregates.meta.filteredCases === 0 ? (
-              <div className="mt-3 rounded-md border border-amber-300 bg-amber-50 p-3 text-xs text-amber-950">
-                この条件に一致する事例はありません。条件を1つ外すか、
-                <button
-                  type="button"
-                  onClick={resetFilters}
-                  className="ml-1 font-bold underline underline-offset-2"
-                >
-                  全条件をリセット
-                </button>
-                してください。
-              </div>
-            ) : null}
           </div>
         </section>
 
         <RiskVisualSummary
-          fatalRatePercent={aggregates.kpi.fatalRatePercent}
-          recentYearLabel={aggregates.kpi.recentYearLabel}
-          recentYearCount={aggregates.kpi.recentYearCount}
+          typeComposition={typeComposition}
           seasonality={seasonalityData}
+          yearTrend={yearTrendData}
         />
+        <section className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+          <details className="w-full rounded-lg border border-slate-200 bg-white p-2.5">
+            <summary className="cursor-pointer text-sm font-bold text-slate-800">
+              詳細条件（月・地域・規模・原因など）
+            </summary>
+            <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              <FilterSelect id="month-filter" label="発生月" value={filterState.month} allLabel="全月" options={aggregates.meta.filterOptions.months.map((month) => ({ value: String(month), label: `${month}月` }))} onChange={(value) => replaceFilter("month", value)} />
+              <FilterSelect id="industry-medium-filter" label="業種中分類" value={filterState.industryMedium} allLabel="全中分類" options={aggregates.meta.filterOptions.industryMediums.map((value) => ({ value, label: value }))} onChange={(value) => replaceFilter("industryMedium", value)} />
+              <FilterSelect id="cause-filter" label="起因物" value={filterState.cause} allLabel="全起因物" options={aggregates.meta.filterOptions.causes.map((value) => ({ value, label: value }))} onChange={(value) => replaceFilter("cause", value)} />
+              <FilterSelect id="workplace-size-filter" label="事業場規模" value={filterState.workplaceSize} allLabel="全規模" options={aggregates.meta.filterOptions.workplaceSizes.map((value) => ({ value, label: value }))} onChange={(value) => replaceFilter("workplaceSize", value)} />
+              <FilterSelect id="occurrence-time-filter" label="発生時間帯（2時間）" value={filterState.occurrenceTime} allLabel="全時間帯" options={aggregates.meta.filterOptions.occurrenceTimes.map((value) => ({ value, label: value }))} onChange={(value) => replaceFilter("occurrenceTime", value)} />
+              <FilterSelect id="prefecture-filter" label="都道府県" value={filterState.prefecture} allLabel="全国" options={aggregates.meta.filterOptions.prefectures.map((value) => ({ value, label: value }))} onChange={(value) => replaceFilter("prefecture", value)} />
+              <FilterSelect id="age-filter" label="年齢" value={filterState.age} allLabel="全年齢" options={aggregates.meta.filterOptions.ages.map((value) => ({ value, label: value }))} onChange={(value) => replaceFilter("age", value)} />
+              <FilterSelect id="severity-filter" label="重傷度" value={filterState.severity} allLabel="全重傷度" options={aggregates.meta.filterOptions.severities.map((value) => ({ value, label: value }))} onChange={(value) => replaceFilter("severity", value)} />
+              <FilterSelect id="source-filter" label="データ源" value={filterState.source} allLabel="公式死亡個票（既定）" options={aggregates.meta.filterOptions.sources.map((value) => ({ value, label: SOURCE_LABELS[value] ?? value }))} onChange={(value) => replaceFilter("source", value || "official")} />
+            </div>
+          </details>
+          {activeFilters.length > 0 ? (
+            <div className="mt-2 flex flex-wrap items-center gap-1.5" aria-label="適用中の条件">
+              <span className="text-[11px] font-bold text-slate-500">適用中</span>
+              {activeFilters.map(([key, label, value]) => (
+                <button key={key} type="button" onClick={() => replaceFilter(key, key === "source" ? "official" : "")} className="inline-flex min-h-[32px] items-center gap-1 rounded-full border border-emerald-300 bg-emerald-50 px-2.5 py-1 text-[11px] font-bold text-emerald-900 hover:bg-emerald-100" aria-label={`${label} ${value} を解除`}>
+                  {label}: {value}<X className="h-3 w-3" aria-hidden="true" />
+                </button>
+              ))}
+              <button type="button" onClick={resetFilters} className="min-h-[32px] px-2 text-[11px] font-bold text-slate-600 underline">すべて解除</button>
+            </div>
+          ) : null}
+          <div className="mt-2" aria-live="polite" data-testid="analytics-filter-summary">
+            {aggregates.meta.filteredCases === 0 ? (
+              <div className="rounded-md border border-amber-300 bg-amber-50 p-3 text-xs text-amber-950">
+                この条件に一致する事例はありません。条件を1つ外すか、
+                <button type="button" onClick={resetFilters} className="ml-1 font-bold underline underline-offset-2">全条件をリセット</button>
+                してください。
+              </div>
+            ) : (
+              <p className="text-xs text-slate-600">図・代替表・CSVは対象{formatNumber(aggregates.meta.filteredCases)}件の同じ条件で集計しています。</p>
+            )}
+          </div>
+        </section>
+        <div className="space-y-2 rounded-lg border border-slate-200 bg-white p-3">
+          <p className="text-xs font-bold text-slate-800">この条件のデータを使う</p>
+          <DataExportToolbar
+            filename={ANALYTICS_CSV_FILENAME}
+            csv={exportCsv}
+            text={exportText}
+            shareTitle="事故分析ダッシュボード"
+          />
+        </div>
+        <details className="rounded-lg border border-slate-200 bg-white p-3">
+          <summary className="cursor-pointer text-sm font-bold text-slate-800">詳しい分析・比較グラフ</summary>
+          <div className="mt-4 space-y-6">
         {/* ===== KPI summary ===== */}
         <Section
           title="サマリーKPI"
@@ -883,9 +702,9 @@ export function AnalyticsDashboardImpl({
               tone="amber"
             />
             <KpiCard
-              label="死亡事例の構成比"
-              value={`${aggregates.kpi.fatalRatePercent}%`}
-              note="収録事例内の構成比（発生率ではありません）"
+              label={typeComposition ? `${typeComposition.label}の構成比` : "事故型の構成比"}
+              value={typeComposition ? `${typeComposition.percent}%` : "算出対象なし"}
+              note={typeComposition ? `${formatNumber(typeComposition.count)} / ${formatNumber(typeComposition.denominator)}件` : "0件条件では表示しません"}
               tone="rose"
             />
             <KpiCard
@@ -1299,6 +1118,22 @@ export function AnalyticsDashboardImpl({
           </CardGrid>
         </Section>
 
+          </div>
+        </details>
+        <details className="rounded-lg border border-slate-200 bg-white p-3">
+          <summary className="cursor-pointer text-sm font-bold text-slate-800">出典・欠損値と集計の制限</summary>
+          <p className="mt-3 text-xs"><a className="text-sky-800 underline" href="https://anzeninfo.mhlw.go.jp/anzen_pg/SIB_FND.html" target="_blank" rel="noopener noreferrer">厚生労働省・死亡災害データベース</a></p>
+          <table className="my-3 w-full text-xs">
+            <caption className="text-left font-bold">現在の対象事例のデータ充足</caption>
+            <thead><tr><th scope="col" className="text-left">項目</th><th scope="col">確認可能</th><th scope="col">欠損</th></tr></thead>
+            <tbody>{([
+              ["業種", aggregates.meta.coverage.industry],
+              ["事故型", aggregates.meta.coverage.type],
+              ["発生月", aggregates.meta.coverage.month],
+              ["都道府県", aggregates.meta.coverage.prefecture],
+              ["年齢", aggregates.meta.coverage.age],
+            ] as const).map(([label, coverage]) => <tr key={label}><th scope="row" className="text-left">{label}</th><td className="text-center">{formatNumber(coverage.known)}件</td><td className="text-center">{formatNumber(coverage.missing)}件</td></tr>)}</tbody>
+          </table>
         {/* ===== Disclaimer footer ===== */}
         <section className="rounded-md border border-slate-200 bg-slate-50 p-3 text-[11px] text-slate-600 sm:text-xs">
           <p className="font-semibold text-slate-800">
@@ -1332,6 +1167,7 @@ export function AnalyticsDashboardImpl({
             </li>
           </ul>
         </section>
+        </details>
       </Stack>
     </PageContainer>
   );

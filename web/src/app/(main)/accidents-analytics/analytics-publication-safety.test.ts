@@ -19,7 +19,7 @@ describe("事故分析ダッシュボードの公開表示", () => {
     expect(cautionIndex).toBeLessThan(dashboardIndex);
     expect(source).toContain("発生対象 {official.occurredThrough} まで");
     expect(source).toContain("報告締切 {official.reportAsOf}");
-    expect(source).toContain("割合の母数は分析項目の値が確認できる件数");
+    expect(source).toContain("構成比の分母は事故型条件だけを除いた件数");
     expect(source).toContain("欠損値を除きます");
     expect(source).toContain("発生率やリスクの高さを示すものではありません");
   });
@@ -59,5 +59,21 @@ describe("事故分析ダッシュボードの公開表示", () => {
     expect(source).not.toContain(
       "数値は\n              <Link href=\"/accidents\"",
     );
+  });
+
+  it("速報と収録事例を分離し、図をフィルタ直後に置いて履歴復元を可能にする", () => {
+    const page = readSource("src/app/(main)/accidents-analytics/page.tsx");
+    const dashboard = readSource(
+      "src/app/(main)/accidents-analytics/AnalyticsDashboardImpl.tsx",
+    );
+
+    expect(page).toContain('firstParam(params.view) === "flash"');
+    expect(page).toContain("収録事例の2019〜2024年系列には接続していません");
+    expect(dashboard.indexOf("<RiskVisualSummary")).toBeLessThan(
+      dashboard.indexOf('title="サマリーKPI"'),
+    );
+    expect(dashboard).toContain("router.push(");
+    expect(dashboard).not.toContain("収録事例中の死亡災害比率");
+    expect(dashboard).toContain("事故型条件だけを除いた事例");
   });
 });
