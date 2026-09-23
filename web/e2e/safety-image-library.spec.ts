@@ -9,7 +9,7 @@ test.describe("market-grounded safety sign library", () => {
     const response = await page.goto(hubPath);
     expect(response?.status()).toBe(200);
     await expect(page.getByRole("heading", { level: 1, name: "現場安全看板ライブラリ" })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "現場でよく使う10枚" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "現場でよく使う10枚" })).toHaveCount(0);
     await expect(page.getByText("検索結果 100点")).toBeVisible();
     await expect(page.getByRole("button", { name: "次の20点を表示" })).toBeVisible();
     await expect(page.getByRole("article")).toHaveCount(20);
@@ -127,6 +127,33 @@ test.describe("market-grounded safety sign library", () => {
       const picture = related.getByRole("img", { name });
       await picture.scrollIntoViewIfNeeded();
       await expect.poll(() => picture.evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0)).toBe(true);
+    }
+  });
+
+  test("keeps five-language text clear of the illustration in both orientations", async ({ page }) => {
+    test.setTimeout(120_000);
+    for (const width of [320, 390, 1440]) {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto(detailPath);
+      for (const language of ["インドネシア語", "英語", "中国語（簡体）", "ベトナム語"]) {
+        const checkbox = page.getByLabel(language, { exact: true });
+        await checkbox.focus();
+        await page.keyboard.press("Space");
+        await expect(checkbox).toBeChecked();
+      }
+      expect(await page.locator("#edit-controls textarea").evaluateAll((fields) => fields.map((field) => field.lang))).toEqual(["ja", "vi", "zh-CN", "en", "id"]);
+      for (const orientation of ["A4縦", "A4横"]) {
+        await page.getByRole("button", { name: orientation, exact: true }).click();
+        await expect(page.locator('[data-preview-fit="pass"]')).toBeVisible();
+        const artwork = await page.locator("[data-safety-sign-artwork]").boundingBox();
+        const text = await page.locator("[data-safety-sign-text]").boundingBox();
+        expect(artwork).not.toBeNull();
+        expect(text).not.toBeNull();
+        const overlapWidth = Math.max(0, Math.min(artwork!.x + artwork!.width, text!.x + text!.width) - Math.max(artwork!.x, text!.x));
+        const overlapHeight = Math.max(0, Math.min(artwork!.y + artwork!.height, text!.y + text!.height) - Math.max(artwork!.y, text!.y));
+        expect(overlapWidth * overlapHeight).toBeLessThanOrEqual(1);
+        expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
+      }
     }
   });
 

@@ -4,7 +4,6 @@ import { ShieldCheck } from "lucide-react";
 import { PageJsonLd } from "@/components/page-json-ld";
 import { SafetyImageLibraryClient } from "@/components/safety-image-library/safety-image-library-client";
 import { SafetySignCustomization } from "@/components/safety-image-library/safety-sign-customization";
-import { SafetyImageFirstRelease } from "@/components/safety-image-library/safety-image-first-release";
 import {
   SAFETY_IMAGE_LIBRARY_PATH,
   SAFETY_IMAGE_LIBRARY_RIGHTS_PATH,
@@ -58,7 +57,6 @@ export default function SafetyImageLibraryPage() {
         <div id="library" className="scroll-mt-24">
           <SafetyImageLibraryClient themes={SAFETY_IMAGE_LIBRARY_CARD_THEMES} />
         </div>
-        <div className="mt-10"><SafetyImageFirstRelease /></div>
 
         <section className="mt-10 grid gap-5 rounded-3xl border border-emerald-200 bg-emerald-50 p-5 sm:grid-cols-[1fr_auto] sm:items-center sm:p-7 dark:border-emerald-900 dark:bg-emerald-950">
           <div>
