@@ -74,6 +74,30 @@ export type SlideVisual =
       prompts: string[];
     };
 
+export type TrainingArticleRef = {
+  lawShort: "安衛法" | "安衛則" | "安衛令";
+  article: string;
+  sourceId: string;
+  egovUrl: string;
+  naviPath?: string;
+};
+
+export type TrainingEvidenceRef =
+  | TrainingArticleRef
+  | { sourceId: string; locator: string };
+
+export type TrainingStage = {
+  headline: string;
+  keyPoints: string[];
+  caveat?: string;
+  mascot?: {
+    src: string;
+    alt: string;
+    width: number;
+    height: number;
+  };
+};
+
 export type TrainingSlide = {
   id: string;
   number: number;
@@ -87,6 +111,25 @@ export type TrainingSlide = {
   narration: string;
   instructorNotes: string[];
   estimatedSeconds: number;
+  stage?: TrainingStage;
+  articleRefs?: TrainingArticleRef[];
+};
+
+export type TrainingQuizQuestion = {
+  id: string;
+  question: string;
+  choices: string[];
+  correctIndex: number;
+  explanation: string;
+  claimIds: string[];
+  choiceRationales: string[];
+  refs: TrainingEvidenceRef[];
+};
+
+export type TrainingQuiz = {
+  title: string;
+  version: string;
+  questions: TrainingQuizQuestion[];
 };
 
 export type TrainingCourse = {

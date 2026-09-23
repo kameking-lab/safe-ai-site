@@ -5,6 +5,7 @@ import { ArrowRight, Download, FileText, Headphones, Presentation } from "lucide
 import { JsonLd } from "@/components/json-ld";
 import { PageContainer } from "@/components/layout";
 import { SafetySeminarPlayer } from "@/components/training/safety-seminar-player";
+import { SeminarQuiz } from "@/components/training/seminar-quiz";
 import claimsJson from "@/data/safety-seminars/safety-management-basics-osh-law-claims.json";
 import quizJson from "@/data/safety-seminars/safety-management-basics-osh-law-quiz.json";
 import sourcesJson from "@/data/safety-seminars/safety-management-basics-osh-law-source-registry.json";
@@ -180,15 +181,22 @@ export default function SafetyManagementBasicsOshLawPage() {
 
       <section aria-labelledby="quiz-title" className="mt-12">
         <h2 id="quiz-title" className="text-3xl font-black text-slate-950 dark:text-white">5問の確認クイズ</h2>
-        <div className="mt-5 space-y-3">
-          {quizJson.questions.map((question, index) => (
-            <details key={question.id} className="rounded-2xl border border-slate-300 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
-              <summary className="min-h-11 cursor-pointer py-2 font-black text-slate-950 dark:text-white">Q{index + 1}. {question.question}</summary>
-              <ol className="mt-2 list-[upper-alpha] space-y-1 pl-6 text-sm leading-6">{question.choices.map((choice) => <li key={choice}>{choice}</li>)}</ol>
-              <p className="mt-3 rounded-xl bg-teal-50 p-3 text-sm font-bold leading-6 text-teal-950 dark:bg-teal-950/50 dark:text-teal-100">正解: {String.fromCharCode(65 + question.correctIndex)}。{question.explanation}</p>
-            </details>
-          ))}
-        </div>
+        <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+          選択すると、4つの選択肢それぞれの理由と確認済みの根拠を表示します。進捗はこの端末にだけ保存します。
+        </p>
+        <SeminarQuiz courseId={training.id} />
+        <noscript>
+          <ol className="mt-5 space-y-4">
+            {quizJson.questions.map((question, index) => (
+              <li key={question.id} className="rounded-2xl border border-slate-300 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
+                <h3 className="font-black text-slate-950 dark:text-white">Q{index + 1}. {question.question}</h3>
+                <ol className="mt-2 list-[upper-alpha] space-y-1 pl-6 text-sm leading-6">
+                  {question.choices.map((choice) => <li key={choice}>{choice}</li>)}
+                </ol>
+              </li>
+            ))}
+          </ol>
+        </noscript>
       </section>
 
       <section aria-labelledby="sources-title" className="mt-12">

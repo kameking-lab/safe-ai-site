@@ -65,14 +65,10 @@ const MARGIN = 76;
 for (const data of course.slides) {
   const slide = pptx.addSlide();
   if (data.number === 1) await buildCover(slide, data);
-  else if (data.number === course.slideCount) buildClose(slide, data);
+  else if (data.number === course.slideCount) await buildClose(slide, data);
   else {
     addBase(slide, data);
-    if (data.visual.type === "image") await buildImageSlide(slide, data);
-    else if (data.visual.type === "steps") buildSteps(slide, data);
-    else if (data.visual.type === "metrics") buildMetrics(slide, data);
-    else if (data.visual.type === "checklist") buildChecklist(slide, data);
-    else throw new Error(`Unsupported visual type on slide ${data.number}: ${data.visual.type}`);
+    await buildStageSlide(slide, data);
     addFooter(slide, data);
   }
   addSpeakerNotes(slide, data);
@@ -176,7 +172,7 @@ function addBase(slide, data) {
   addText(slide, data.label, { left: 857, top: 40, width: 340, height: 28 }, { fontSize: 15, bold: true, color: COLORS.slate, alignment: "right" });
   addText(slide, data.title, { left: MARGIN, top: 82, width: 1120, height: 61 }, { fontSize: 56, bold: true, color: COLORS.forest });
   addShape(slide, pptx.ShapeType.rect, { left: MARGIN, top: 153, width: 96, height: 6 }, COLORS.orange);
-  addText(slide, data.message, { left: MARGIN, top: 178, width: 1100, height: 49 }, { fontSize: 23, bold: true, color: COLORS.ink });
+  addText(slide, data.stage.headline, { left: MARGIN, top: 178, width: 1100, height: 49 }, { fontSize: 23, bold: true, color: COLORS.ink });
 }
 
 async function buildCover(slide, data) {
@@ -186,94 +182,41 @@ async function buildCover(slide, data) {
   addShape(slide, pptx.ShapeType.rect, { left: 0, top: 0, width: 22, height: 720 }, COLORS.orange);
   addText(slide, data.kicker, { left: 84, top: 68, width: 530, height: 30 }, { fontSize: 19, bold: true, color: "A8E8D7" });
   addText(slide, data.title, { left: 84, top: 135, width: 690, height: 142 }, { fontSize: 56, bold: true, color: COLORS.white });
-  addText(slide, data.subtitle ?? data.message, { left: 88, top: 304, width: 590, height: 72 }, { fontSize: 25, color: "E6FAF1" });
+  addText(slide, data.stage.headline, { left: 88, top: 304, width: 590, height: 72 }, { fontSize: 25, color: "E6FAF1" });
   addShape(slide, pptx.ShapeType.rect, { left: 88, top: 420, width: 500, height: 2 }, "77BFAE");
-  addText(slide, data.body.join("　"), { left: 88, top: 443, width: 560, height: 70 }, { fontSize: 19, bold: true, color: COLORS.white });
+  addText(slide, data.stage.keyPoints.join("　"), { left: 88, top: 443, width: 560, height: 70 }, { fontSize: 19, bold: true, color: COLORS.white });
   addText(slide, course.boundary, { left: 88, top: 603, width: 590, height: 41 }, { fontSize: 15, color: "BFE6DA" });
   addText(slide, `基準日 ${formatDate(course.asOf)}`, { left: 88, top: 658, width: 280, height: 25 }, { fontSize: 14, color: "A3D7CA" });
   addText(slide, "01 / 12", { left: 1090, top: 658, width: 108, height: 25 }, { fontSize: 14, bold: true, color: COLORS.white, alignment: "right" });
 }
 
-async function buildImageSlide(slide, data) {
-  addImage(slide, assetPath(data.visual.src), data.visual.alt, { left: 676, top: 242, width: 510, height: 324 });
-  addText(slide, data.body[0] ?? "", { left: MARGIN, top: 278, width: 500, height: 92 }, { fontSize: 28, bold: true, color: COLORS.evergreen });
-  addShape(slide, pptx.ShapeType.rect, { left: MARGIN, top: 386, width: 442, height: 4 }, COLORS.orange);
-  addText(slide, data.body.slice(1).join("\n"), { left: MARGIN, top: 418, width: 510, height: 126 }, { fontSize: 23, color: COLORS.ink });
-  addText(slide, "安全AIポータル教材用イラスト", { left: 676, top: 578, width: 510, height: 20 }, { fontSize: 13, color: COLORS.slate });
-}
-
-function buildSteps(slide, data) {
-  const steps = data.visual.steps;
-  const palette = [COLORS.evergreen, COLORS.orange, COLORS.coral, COLORS.forest];
-  const top = 257;
-  if (steps.length === 4) {
-    steps.forEach((step, index) => {
-      const left = MARGIN + (index % 2) * 565;
-      const y = top + Math.floor(index / 2) * 145;
-      addText(slide, String(index + 1).padStart(2, "0"), { left, top: y, width: 70, height: 50 }, { fontSize: 37, bold: true, color: palette[index] });
-      addText(slide, step.label, { left: left + 86, top: y, width: 440, height: 38 }, { fontSize: 26, bold: true, color: COLORS.forest });
-      addText(slide, step.detail, { left: left + 86, top: y + 45, width: 438, height: 51 }, { fontSize: 23, color: COLORS.slate });
-      addShape(slide, pptx.ShapeType.rect, { left, top: y + 106, width: 522, height: 3 }, palette[index]);
-    });
-  } else {
-    const width = steps.length === 3 ? 334 : 254;
-    const gap = steps.length === 3 ? 38 : 25;
-    steps.forEach((step, index) => {
-      const left = MARGIN + index * (width + gap);
-      const fill = palette[index % palette.length];
-      addText(slide, String(index + 1).padStart(2, "0"), { left, top, width, height: 52 }, { fontSize: 40, bold: true, color: fill });
-      addShape(slide, pptx.ShapeType.rect, { left, top: top + 65, width, height: 4 }, fill);
-      addText(slide, step.label, { left, top: top + 92, width, height: 50 }, { fontSize: 24, bold: true, color: COLORS.forest });
-      addText(slide, step.detail, { left, top: top + 150, width, height: 98 }, { fontSize: 23, color: COLORS.slate });
-    });
+async function buildStageSlide(slide, data) {
+  if (!data.stage?.mascot) throw new Error(`Slide ${data.number} is missing stage.mascot.`);
+  data.stage.keyPoints.forEach((item, index) => {
+    const top = 270 + index * 82;
+    addText(slide, String(index + 1).padStart(2, "0"), { left: MARGIN, top, width: 58, height: 44 }, { fontSize: 30, bold: true, color: index === 1 ? COLORS.orange : COLORS.evergreen });
+    addText(slide, item, { left: MARGIN + 78, top, width: 580, height: 46 }, { fontSize: 27, bold: true, color: COLORS.ink });
+  });
+  await addImage(slide, assetPath(data.stage.mascot.src), data.stage.mascot.alt, { left: 820, top: 235, width: 300, height: 300 }, "contain");
+  if (data.stage.caveat) {
+    addText(slide, `条件: ${data.stage.caveat}`, { left: MARGIN, top: 548, width: 1040, height: 39 }, { fontSize: 20, bold: true, color: COLORS.coral });
   }
-  addBottomCopy(slide, data);
 }
 
-function buildMetrics(slide, data) {
-  const metrics = data.visual.metrics;
-  const grid = metrics.length === 4;
-  metrics.forEach((metric, index) => {
-    const left = MARGIN + (grid ? (index % 2) * 566 : index * 352);
-    const top = 263 + (grid ? Math.floor(index / 2) * 145 : 0);
-    addText(slide, metric.value, { left, top, width: 440, height: 60 }, { fontSize: grid ? 46 : 42, bold: true, color: index % 2 ? COLORS.orange : COLORS.evergreen });
-    addText(slide, metric.label, { left, top: top + 67, width: 490, height: 32 }, { fontSize: 23, bold: true, color: COLORS.forest });
-    if (metric.note) addText(slide, metric.note, { left, top: top + 102, width: 490, height: 24 }, { fontSize: 23, color: COLORS.slate });
-  });
-  addBottomCopy(slide, data);
-}
-
-function buildChecklist(slide, data) {
-  const items = data.visual.items;
-  const perColumn = Math.ceil(items.length / 2);
-  items.forEach((item, index) => {
-    const left = MARGIN + Math.floor(index / perColumn) * 574;
-    const top = 255 + (index % perColumn) * 77;
-    addShape(slide, pptx.ShapeType.ellipse, { left, top: top + 4, width: 31, height: 31 }, COLORS.evergreen);
-    addText(slide, "✓", { left, top: top + 2, width: 31, height: 32 }, { fontSize: 20, bold: true, color: COLORS.white, alignment: "center" });
-    addText(slide, item, { left: left + 47, top, width: 498, height: 38 }, { fontSize: 23, bold: true, color: COLORS.ink });
-    addShape(slide, pptx.ShapeType.rect, { left: left + 47, top: top + 48, width: 480, height: 1 }, COLORS.line);
-  });
-  addBottomCopy(slide, data);
-}
-
-function buildClose(slide, data) {
+async function buildClose(slide, data) {
   slide.background = { color: COLORS.forest };
   addShape(slide, pptx.ShapeType.rect, { left: 0, top: 0, width: 22, height: 720 }, COLORS.orange);
   addText(slide, data.kicker, { left: 84, top: 60, width: 450, height: 30 }, { fontSize: 19, bold: true, color: "A8E8D7" });
   addText(slide, data.title, { left: 84, top: 112, width: 920, height: 66 }, { fontSize: 46, bold: true, color: COLORS.white });
-  const items = data.visual.type === "checklist" ? data.visual.items : data.body;
+  const items = data.stage.keyPoints;
   items.slice(0, 5).forEach((item, index) => {
     const top = 225 + index * 65;
     addText(slide, String(index + 1).padStart(2, "0"), { left: 90, top, width: 58, height: 42 }, { fontSize: 29, bold: true, color: COLORS.orange });
     addText(slide, item, { left: 174, top, width: 790, height: 42 }, { fontSize: 25, bold: true, color: COLORS.white });
   });
-  addText(slide, data.message, { left: 86, top: 590, width: 930, height: 44 }, { fontSize: 23, bold: true, color: "D9FAEE" });
+  addText(slide, data.stage.headline, { left: 86, top: 520, width: 760, height: 70 }, { fontSize: 26, bold: true, color: "D9FAEE" });
+  await addImage(slide, assetPath(data.stage.mascot.src), data.stage.mascot.alt, { left: 910, top: 260, width: 260, height: 260 }, "contain");
   addText(slide, "12 / 12", { left: 1080, top: 658, width: 118, height: 25 }, { fontSize: 14, bold: true, color: "BFE6DA", alignment: "right" });
-}
-
-function addBottomCopy(slide, data) {
-  if (data.body?.length) addText(slide, data.body.join("　"), { left: MARGIN, top: 574, width: 1100, height: 58 }, { fontSize: 23, color: COLORS.slate });
 }
 
 function sourceIdsFor(data) {
@@ -288,12 +231,10 @@ function sourceIdsFor(data) {
 
 function addFooter(slide, data) {
   const sourceNumbers = sourceIdsFor(data).map((id) => sourceMap.get(id)?.sourceNo).filter(Boolean);
-  const articleRefs = [...new Set((data.claimIds ?? []).flatMap((id) =>
-    [...(claimMap.get(id)?.statement.matchAll(/第\d+条(?:の\d+)?/gu) ?? [])].map((match) => match[0]),
-  ))];
+  const articleRefs = data.articleRefs ?? [];
   addShape(slide, pptx.ShapeType.rect, { left: MARGIN, top: 640, width: 1122, height: 1 }, COLORS.line);
   const sourceCaption = articleRefs.length
-    ? `根拠 安衛法 ${articleRefs.join("・")}（詳細はノート）`
+    ? `根拠 ${articleRefs.map((ref) => `${ref.lawShort} ${ref.article}`).join("・")}（詳細はノート）`
     : sourceNumbers.length ? `出典 S${sourceNumbers.join("・S")}（詳細はノート）` : "教材内の確認事項";
   addText(slide, sourceCaption, { left: MARGIN, top: 647, width: 780, height: 22 }, { fontSize: 13, color: COLORS.slate });
   addText(slide, `${String(data.number).padStart(2, "0")} / 12`, { left: 1072, top: 647, width: 124, height: 22 }, { fontSize: 13, bold: true, color: COLORS.evergreen, alignment: "right" });
@@ -305,10 +246,15 @@ function addSpeakerNotes(slide, data) {
     if (!source) throw new Error(`Unknown source ID: ${sourceId}`);
     return `- S${source.sourceNo} ${source.sourceId}: ${source.url}`;
   });
+  const articleLines = (data.articleRefs ?? []).map((ref) =>
+    `- ${ref.lawShort} ${ref.article}: ${ref.article.includes("の") && ref.naviPath ? ref.naviPath : ref.egovUrl} / e-Gov: ${ref.egovUrl}`,
+  );
   slide.addNotes([
+    "詳しい内容", data.message, ...(data.body ?? []).map((item) => `- ${item}`), "",
     "ナレーション", data.narration, "", "講師補足",
     ...(data.instructorNotes ?? []).map((note) => `- ${note}`),
     "", "主張ID", data.claimIds?.length ? data.claimIds.join(", ") : "教材案内", "", "[Sources]",
+    ...articleLines,
     ...(sourceLines.length ? sourceLines : ["- 教材ページ: https://anzen-ai-portal.jp/training/safety-seminars/safety-management-basics-osh-law"]),
   ].join("\n"));
 }
