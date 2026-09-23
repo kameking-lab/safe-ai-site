@@ -60,4 +60,20 @@ describe("事故分析ダッシュボードの公開表示", () => {
       "数値は\n              <Link href=\"/accidents\"",
     );
   });
+
+  it("速報と収録事例を分離し、図をフィルタ直後に置いて履歴復元を可能にする", () => {
+    const page = readSource("src/app/(main)/accidents-analytics/page.tsx");
+    const dashboard = readSource(
+      "src/app/(main)/accidents-analytics/AnalyticsDashboardImpl.tsx",
+    );
+
+    expect(page).toContain('firstParam(params.view) === "flash"');
+    expect(page).toContain("収録事例の2019〜2024年系列には接続していません");
+    expect(dashboard.indexOf("<RiskVisualSummary")).toBeLessThan(
+      dashboard.indexOf('title="サマリーKPI"'),
+    );
+    expect(dashboard).toContain("router.push(");
+    expect(dashboard).not.toContain("収録事例中の死亡災害比率");
+    expect(dashboard).toContain("事故型条件だけを除いた事例");
+  });
 });

@@ -1,5 +1,6 @@
 export { getAnalyticsAggregates } from "./aggregators";
 export { buildAnalyticsInsights } from "./insights";
+export { buildTypeComposition } from "./type-composition";
 export { loadCombinedCases, getLoaderMeta } from "./loader";
 export type {
   AnalyticsAggregates,
@@ -17,3 +18,4 @@ export type {
   WeekdayCount,
   YearTrendByType,
 } from "./types";
+export type { TypeComposition } from "./type-composition";
