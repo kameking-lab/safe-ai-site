@@ -9,6 +9,7 @@ test.describe("market-grounded safety sign library", () => {
     const response = await page.goto(hubPath);
     expect(response?.status()).toBe(200);
     await expect(page.getByRole("heading", { level: 1, name: "現場安全看板ライブラリ" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "現場でよく使う10枚" })).toBeVisible();
     await expect(page.getByText("100点", { exact: true }).first()).toBeVisible();
     await expect(page.getByRole("button", { name: "次の20点を表示" })).toBeVisible();
     await expect(page.getByRole("article")).toHaveCount(20);
@@ -42,6 +43,18 @@ test.describe("market-grounded safety sign library", () => {
     await page.getByRole("button", { name: "元に戻す" }).click();
     await expect(page.getByLabel("表示する文字（日本語）")).toHaveValue("保護帽を着用");
     await expect(page.getByLabel("ベトナム語", { exact: true })).not.toBeChecked();
+  });
+
+  test("loads related sign pictures when the user scrolls to them", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(detailPath);
+    const related = page.locator('section[aria-labelledby="related-heading"]');
+    await related.scrollIntoViewIfNeeded();
+    for (const name of ["耳栓着用の安全看板イラスト", "防じんマスク着用の安全看板イラスト"]) {
+      const picture = related.getByRole("img", { name });
+      await picture.scrollIntoViewIfNeeded();
+      await expect.poll(() => picture.evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0)).toBe(true);
+    }
   });
 
   test("downloads valid JPEG, PNG and PDF with private edited output", async ({ request }) => {
