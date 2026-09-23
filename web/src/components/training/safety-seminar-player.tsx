@@ -300,9 +300,9 @@ export function SafetySeminarPlayer({
       <h2 id="seminar-player-title" className="sr-only">
         {playerLabel}
       </h2>
-      <div className="relative min-h-[680px] overflow-hidden bg-slate-950 p-5 sm:min-h-[620px] sm:p-8 lg:aspect-video lg:min-h-0 lg:p-12">
+      <div className="relative min-h-[680px] overflow-hidden bg-slate-950 p-5 sm:min-h-[620px] sm:p-8 lg:aspect-video lg:min-h-0 lg:p-10">
         <div
-          className="pointer-events-none absolute inset-0 opacity-35"
+          className="pointer-events-none absolute inset-0 opacity-30"
           aria-hidden="true"
           style={{
             background:
@@ -323,7 +323,7 @@ export function SafetySeminarPlayer({
               {String(slide.number).padStart(2, "0")} / {slides.length}
             </p>
           </header>
-          <div className="mt-3 grid min-h-0 flex-1 items-center gap-5 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-10">
+          <div className="mt-3 grid min-h-0 flex-1 items-center gap-5 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-8">
             <div>
               <h3 className="text-2xl font-black leading-tight tracking-tight sm:text-3xl lg:text-5xl">
                 {slide.title}

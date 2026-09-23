@@ -17,7 +17,7 @@ export function HomeActionCockpit() {
     <section
       id="mascot-tools"
       aria-labelledby="home-action-cockpit-title"
-      className="scroll-mt-24 rounded-[2rem] border-2 border-emerald-200 bg-[#f7f4ec] px-4 py-7 text-slate-950 shadow-2xl sm:px-6 sm:py-10"
+      className="scroll-mt-24 rounded-3xl border-2 border-emerald-200 bg-amber-50 px-4 py-7 text-slate-950 shadow-2xl sm:px-6 sm:py-10"
       data-home-section="action-cockpit"
     >
       <div className="mx-auto max-w-7xl">
@@ -25,7 +25,7 @@ export function HomeActionCockpit() {
           <div className="flex items-center gap-3">
             <Image src="/mascot/mascot-chat-talk-v4.webp" alt="" width={88} height={88} className="h-20 w-20 rounded-2xl bg-emerald-100 object-contain" />
             <div>
-            <p className="text-xs font-black tracking-[.16em] text-emerald-800">
+            <p className="text-xs font-black tracking-wide text-emerald-800">
               チワワと、ここで試せます
             </p>
             <h2
@@ -50,7 +50,7 @@ export function HomeActionCockpit() {
         </nav>
 
         <div className="mt-5 grid gap-4 lg:grid-cols-2">
-          <article id="mascot-chat" className="scroll-mt-24 rounded-3xl border-2 border-sky-900 bg-[#e9f5f7] p-4 shadow-[5px_5px_0_#0c4a6e] sm:p-5">
+          <article id="mascot-chat" className="scroll-mt-24 rounded-3xl border-2 border-sky-900 bg-sky-50 p-4 shadow-md sm:p-5">
             <div className="flex items-start gap-3">
               <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-sky-900 text-white">
                 <Bot className="h-6 w-6" aria-hidden="true" />
@@ -67,7 +67,7 @@ export function HomeActionCockpit() {
             </div>
           </article>
 
-          <article id="mascot-chemical" className="scroll-mt-24 rounded-3xl border-2 border-amber-900 bg-[#fff3d8] p-4 shadow-[5px_5px_0_#92400e] sm:p-5">
+          <article id="mascot-chemical" className="scroll-mt-24 rounded-3xl border-2 border-amber-900 bg-amber-50 p-4 shadow-md sm:p-5">
             <div className="flex items-start gap-3">
               <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-amber-900 text-white">
                 <FlaskConical className="h-6 w-6" aria-hidden="true" />
@@ -85,8 +85,8 @@ export function HomeActionCockpit() {
           </article>
         </div>
 
-        <article id="mascot-slides" className="mt-4 scroll-mt-24 overflow-hidden rounded-3xl border-2 border-slate-900 bg-white shadow-[5px_5px_0_#0f766e]">
-          <div className="grid lg:grid-cols-[18rem_minmax(0,1fr)]">
+        <article id="mascot-slides" className="mt-4 scroll-mt-24 overflow-hidden rounded-3xl border-2 border-slate-900 bg-white shadow-md">
+          <div className="grid lg:grid-cols-2">
             <div className="relative hidden min-h-48 overflow-hidden bg-emerald-100 lg:block">
               <Image
                 src={`${SEMINAR_PATH}/safe-site-hero.webp`}
@@ -101,7 +101,7 @@ export function HomeActionCockpit() {
               </span>
             </div>
             <div className="p-4 sm:p-6">
-              <p className="text-xs font-black tracking-[.14em] text-emerald-800">
+              <p className="text-xs font-black tracking-wide text-emerald-800">
                 SAFETY TRAINING
               </p>
               <h3 className="mt-1 text-2xl font-black leading-tight">

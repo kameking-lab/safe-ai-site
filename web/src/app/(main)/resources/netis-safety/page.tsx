@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 
 export default function NetisSafetyPage() {
   return (
-    <div className="bg-[#f7f4ec] px-4 py-9 sm:px-6 sm:py-12 dark:bg-slate-950">
+    <div className="bg-amber-50 px-4 py-9 sm:px-6 sm:py-12 dark:bg-slate-950">
       <PageJsonLd name={TITLE} description={DESCRIPTION} path="/resources/netis-safety" />
       <div className="mx-auto max-w-6xl">
         <header className="max-w-4xl">
