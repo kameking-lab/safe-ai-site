@@ -96,15 +96,22 @@ export function NetisSafetyExplorer() {
     }
     const params = new URLSearchParams(searchParams.toString());
     if (categoryId) params.set("risk", categoryId);
-    else params.delete("risk");
+    else {
+      params.delete("risk");
+      params.delete("q");
+    }
     const query = params.toString();
     shouldFocusResultsRef.current = true;
     router.push(query ? `${pathname}?${query}` : pathname, { scroll: false });
   }
 
   function updateSearch(value: string) {
-    const params = new URLSearchParams(searchParams.toString());
     const queryValue = value.trim();
+    if (queryValue === rawSearch) {
+      focusResults(resultsHeadingRef.current);
+      return;
+    }
+    const params = new URLSearchParams(searchParams.toString());
     if (queryValue) params.set("q", queryValue);
     else params.delete("q");
     const query = params.toString();

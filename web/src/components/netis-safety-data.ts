@@ -83,7 +83,7 @@ export const FEATURED_NETIS_TECHNOLOGIES = [
     useCase:
       "死角・夜間・粉じん下を含む、重機やフォークリフト周辺の接近管理。",
     limitations:
-      "ICタグを携帯する作業員が検知対象です。現場ごとに検知範囲と警報動作を確認し、誘導・目視確認を併用します。",
+      "ICタグを携帯する作業員が検知対象です。タグは金属・電子機器から離し、現場の電磁ノイズ、機器ごとの動作温度、検知範囲と警報を事前確認します。電池管理と誘導・目視確認を併用します。",
     checkedAt: NETIS_CHECKED_AT,
     productUrl:
       "https://matrix-inc.co.jp/product/hiyarihunter/hiyari-v2.html",
@@ -98,7 +98,7 @@ export const FEATURED_NETIS_TECHNOLOGIES = [
     useCase:
       "重機後端・旋回範囲など、立入禁止区域への接近の注意喚起。",
     limitations:
-      "超音波で人と物体を検知するため対象を識別しません。取付位置、検知範囲、周囲への警報が現場に合うか事前確認が必要です。",
+      "人と物体を識別しません。豪雨・降雪・強風時は適用外で、動作温度は-10～50℃です。DC12/24V電源と後方約3mの確認スペースを確保し、取付位置・検知範囲・警報を始業前に点検します。",
     checkedAt: NETIS_CHECKED_AT,
     productUrl: "https://www.tukusi.co.jp/commodity/list/631.html",
   },
@@ -112,7 +112,7 @@ export const FEATURED_NETIS_TECHNOLOGIES = [
     useCase:
       "タグを持たない来訪者も通る現場での、重機後方・側方の接触防止支援。",
     limitations:
-      "カメラの画角外や遮蔽、天候・照明条件では検知できない場合があります。警報は安全確認や誘導員を置き換えません。",
+      "人物検知は8mまでで、LTE/Wi-Fi環境と機器の設置スペースを確認します。画角外や遮蔽、天候・照明条件では検知できない場合があります。レンズを清掃し、安全確認や誘導員を併用します。",
     checkedAt: NETIS_CHECKED_AT,
     productUrl:
       "https://www.iwasakinet.co.jp/rental/construction-ict-support/xacti-doboleko-jk/",
@@ -121,20 +121,20 @@ export const FEATURED_NETIS_TECHNOLOGIES = [
     categoryIds: ["fall-prevention"] as const,
     name: "安全帯フックかけ忘れ防止装置「ハーネスノーティファイ」",
     registrationNumber: "KT-230282-A",
-    summary: "フックの不使用を検知し、本人へ音と光で警告します。",
+    summary: "設定エリアでフックの不使用を検知し、本人へ音と光で警告します。",
     mechanism:
-      "後付けスイッチでフックの使用状態を検出し、不使用時に本人へ音と光で警告します。",
+      "後付けスイッチでフックの使用状態を検出し、設定した警報エリア内で不使用時に本人へ音と光で警告します。",
     useCase:
-      "高所作業でのフック掛け忘れ防止と、使用状況ログによる安全管理。",
+      "高所作業でのフック掛け忘れ防止。使用状況ログによる履歴管理はオプションです。",
     limitations:
-      "フックの使用状態を知らせる補助装置です。適切な親綱への掛け方や法定の墜落防止措置を自動確認するものではありません。",
+      "設定エリア内でフック不使用時に警報が出るか使用前に確認し、充電・電池を管理します。エリアセンサーの使用温度は-20～60℃です。親綱への適切な掛け方や法定の墜落防止措置を自動確認するものではありません。",
     checkedAt: NETIS_CHECKED_AT,
     productUrl:
       "https://ronk-jp.com/wp-content/uploads/2024/08/923a78cb58e3840064f71fca56ccd563.pdf",
   },
   {
     categoryIds: ["restricted-zone"] as const,
-    name: "移動式ネットワークカメラ「MICS AI」",
+    name: "画像解析カメラ（人物検知）MICS-AI",
     registrationNumber: "QS-210006-A",
     summary: "設定区域への人物進入を検知し、写真付きメールで通知します。",
     mechanism:
@@ -142,7 +142,7 @@ export const FEATURED_NETIS_TECHNOLOGIES = [
     useCase:
       "資材ヤード、開口部周辺、無人時間帯を含む危険区域の遠隔監視。",
     limitations:
-      "設定した画角・区域内が対象です。通信・電源断やメール遅延を想定し、現地の立入防止措置と巡視を併用します。",
+      "安定したdocomo通信、AC100V電源、1m四方の設置場所が必要です。月明かり未満の照度や遮蔽では検知できない場合があり、赤外線対応には別条件があります。通信・電源断やメール遅延を想定し、立入防止措置と巡視を併用します。",
     checkedAt: NETIS_CHECKED_AT,
     productUrl: "https://assistyou-m.com/mics/mics_ai/",
   },
@@ -156,7 +156,7 @@ export const FEATURED_NETIS_TECHNOLOGIES = [
     useCase:
       "仮設足場の組立・解体、橋梁、屋根、開口部など、フック使用が必要な高所作業。",
     limitations:
-      "ホルダからフックを外した状態を検知しますが、親綱等へ正しく掛けたことまでは確認しません。作業前の警報確認と電池管理が必要です。",
+      "フックをホルダから外した状態を検知し、親綱等への正しい掛け方は確認しません。水中と100/200V引込線の中心から半径2m以内は適用外です。警告まで2～3秒かかり、設定機1台につき最大20タグです。作業前の警報確認と電池管理が必要です。",
     checkedAt: NETIS_CHECKED_AT,
     productUrl: "https://ykc-amulet.net/harnessalert/",
   },
@@ -185,7 +185,7 @@ export const FEATURED_NETIS_TECHNOLOGIES = [
     useCase:
       "大人数の現場、季節の変わり目、作業員ごとの暑熱リスクと健康状態を管理したい工事。",
     limitations:
-      "BluetoothまたはLTE通信が必要で、医療機器ではありません。強い直射日光で端末電源が落ちる場合があり、装着位置の調整が必要です。",
+      "BluetoothおよびLTEの通信環境に支障がないことが条件で、医療機器ではありません。強い直射日光で端末電源が落ちる場合があり、装着位置の調整が必要です。",
     checkedAt: NETIS_CHECKED_AT,
     productUrl: "https://www.tecraft.co.jp/topics/2584/",
   },

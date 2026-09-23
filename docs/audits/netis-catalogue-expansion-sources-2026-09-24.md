@@ -14,7 +14,7 @@ The five records already verified in the independent Astra audit remain unchange
 - [KT-180097-VE — 超音波警報センサー・パノラマOプレミアム](https://www.netis.mlit.go.jp/netis/pubsearch/details?regNo=KT-180097), with [つくし工房 provider information](https://www.tukusi.co.jp/commodity/list/631.html).
 - [KK-210060-VE — 重機取付型セーフティカメラシステム「ドボレコJK」](https://www.netis.mlit.go.jp/netis/pubsearch/details?regNo=KK-210060), with [岩崎 provider information](https://www.iwasakinet.co.jp/rental/construction-ict-support/xacti-doboleko-jk/).
 - [KT-230282-A — 安全帯フックかけ忘れ防止装置「ハーネスノーティファイ」](https://www.netis.mlit.go.jp/netis/pubsearch/details?regNo=KT-230282), with [Ronk provider catalogue](https://ronk-jp.com/wp-content/uploads/2024/08/923a78cb58e3840064f71fca56ccd563.pdf).
-- [QS-210006-A — 移動式ネットワークカメラ「MICS AI」](https://www.netis.mlit.go.jp/netis/pubsearch/details?regNo=QS-210006), with [Assist You provider information](https://assistyou-m.com/mics/mics_ai/).
+- [QS-210006-A — 画像解析カメラ（人物検知）MICS-AI](https://www.netis.mlit.go.jp/netis/pubsearch/details?regNo=QS-210006), with [Assist You provider information](https://assistyou-m.com/mics/mics_ai/). The independent final audit corrected the on-site name to the registered name (typographic full-width Latin characters are normalized).
 
 The five additions were checked directly as follows:
 
@@ -37,7 +37,7 @@ The five additions were checked directly as follows:
 - Official: [NETIS detail](https://www.netis.mlit.go.jp/netis/pubsearch/details?regNo=KT-260019).
 - Provider: [Techno Craft registration notice](https://www.tecraft.co.jp/topics/2584/).
 - Verified basis: WBGT and age-specific heart-rate data produce four heat-risk levels, with notifications to the wearer and management screen. The system also exposes work-health and SOS functions.
-- Material limitations: Bluetooth or LTE connectivity is required. Direct sun can trigger protective shutdown of the wearable, and the product is not a medical device.
+- Material limitations: NETIS requires unobstructed Bluetooth **and** LTE connectivity. Direct sun can trigger protective shutdown of the wearable, and the product is not a medical device. The independent final audit corrected the previous "or" wording.
 
 ### KK-210002-VE — 重機接触防止装置、ハッとセンサー
 

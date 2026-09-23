@@ -116,7 +116,7 @@ test("選択済みカテゴリの再操作でも結果へ移動し、未知の�
   await expect(restricted).toHaveAttribute("aria-pressed", "true");
   await expect(page.getByRole("heading", { name: "立入禁止：3件" })).toBeVisible();
   await expect(page.getByText(/パノラマOプレミアム/)).toBeVisible();
-  await expect(page.getByText(/MICS AI/)).toBeVisible();
+  await expect(page.getByText(/MICS-AI/)).toBeVisible();
   await restricted.focus();
   await page.keyboard.press("Enter");
   await expect(page.getByRole("heading", { name: "立入禁止：3件" })).toBeFocused();
@@ -141,11 +141,27 @@ test("カテゴリと結果のARIA・コントラストに問題がない", asyn
   }
 });
 
-test("320px・390px・1280pxで横にはみ出さず詳細と公式リンクを操作できる", async ({ page }) => {
+test("全10件へ戻す操作で検索も解除し、戻るで条件を復元する", async ({ page }) => {
+  await page.goto(`${ROUTE}?risk=heat-environment&q=存在しない技術&from=review`);
+  await expect(page.locator('[data-netis-explorer-ready="true"]')).toBeVisible();
+  await expect(page.getByRole("heading", { name: "暑熱・作業環境：0件" })).toBeVisible();
+  await page.getByRole("button", { name: "掲載全10件を見る" }).click();
+  await expect(page).toHaveURL(`${page.url().split("?")[0]}?from=review`);
+  await expect(page.locator("#netis-technology-results article")).toHaveCount(10);
+  await expect(page.getByLabel(/名称・登録番号・用途/)).toHaveValue("");
+  await expect(page.getByRole("heading", { name: "当サイト掲載：10件" })).toBeFocused();
+  await page.goBack({ waitUntil: "domcontentloaded" });
+  await expect(page.getByLabel(/名称・登録番号・用途/)).toHaveValue("存在しない技術");
+  await expect(page.getByRole("heading", { name: "暑熱・作業環境：0件" })).toBeVisible();
+  await page.getByRole("button", { name: "掲載技術を検索" }).click();
+  await expect(page.getByRole("heading", { name: "暑熱・作業環境：0件" })).toBeFocused();
+});
+
+test("320px・390px・1440pxで横にはみ出さず詳細と公式リンクを操作できる", async ({ page }) => {
   for (const viewport of [
     { width: 320, height: 800 },
     { width: 390, height: 844 },
-    { width: 1280, height: 900 },
+    { width: 1440, height: 900 },
   ]) {
     await page.setViewportSize(viewport);
     await page.goto(`${ROUTE}?risk=fall-prevention`, { waitUntil: "domcontentloaded" });
