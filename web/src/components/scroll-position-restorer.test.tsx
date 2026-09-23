@@ -49,4 +49,32 @@ describe("ScrollPositionRestorer", () => {
     expect(window.scrollTo).toHaveBeenCalledWith({ top: 330, left: 0 });
     expect(window.sessionStorage.getItem("anzen-ai:scroll:/goods")).toBe("640");
   });
+
+  it("preserves the home section across a Next client link and return", () => {
+    pathname = "/";
+    window.history.replaceState({}, "", "/");
+    const view = render(<ScrollPositionRestorer />);
+    const link = document.createElement("a");
+    link.href = "/goods";
+    document.body.append(link);
+    act(() => link.dispatchEvent(new MouseEvent("click", { bubbles: true, button: 0 })));
+    Object.defineProperty(window, "scrollY", { configurable: true, value: 0 });
+    act(() => window.dispatchEvent(new Event("scroll")));
+    expect(window.sessionStorage.getItem("anzen-ai:scroll:/")).toBe("640");
+
+    pathname = "/goods";
+    window.history.replaceState({}, "", "/goods");
+    view.rerender(<ScrollPositionRestorer />);
+    const homeLink = document.createElement("a");
+    homeLink.href = "/";
+    document.body.append(homeLink);
+    act(() => homeLink.dispatchEvent(new MouseEvent("click", { bubbles: true, button: 0 })));
+    pathname = "/";
+    window.history.replaceState({}, "", "/");
+    view.rerender(<ScrollPositionRestorer />);
+    expect(window.scrollTo).toHaveBeenCalledWith({ top: 640, left: 0 });
+    link.remove();
+    homeLink.remove();
+    view.unmount();
+  });
 });

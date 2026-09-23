@@ -9,9 +9,9 @@ import { buildLegacyFatalAccidentsRedirect } from "@/lib/accident-news/legacy-ro
 import { loadHomeLatestAccidentNews } from "@/lib/home/home-accident-server";
 import { ogImageUrl } from "@/lib/og-url";
 
-const TITLE = "労災事故速報｜直近の報道を公表日時順に確認";
+const TITLE = "国内の死亡事故速報｜直近の報道を公表日時順に確認";
 const DESCRIPTION =
-  "直近14日以内の国内労災報道を公表日時順に掲載。媒体名と報道・内容未確認の状態を明示し、死亡事故データベースや事故分析へつなぎます。";
+  "直近14日以内に報じられた日本国内の労働中の死亡事故を公表日時順に掲載。媒体名と未確認の状態を明示します。";
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: TITLE,
     description: DESCRIPTION,
-    images: [{ url: ogImageUrl("労災事故速報"), width: 1200, height: 630 }],
+    images: [{ url: ogImageUrl("国内の死亡事故速報"), width: 1200, height: 630 }],
   },
 };
 
@@ -49,12 +49,12 @@ export default async function AccidentNewsPage({
     <>
       <AccidentHubNav current="accident-news" />
       <PageContainer width="wide">
-        <PageJsonLd name="労災事故速報" description={DESCRIPTION} path="/accident-news" />
+        <PageJsonLd name="国内の死亡事故速報" description={DESCRIPTION} path="/accident-news" />
 
         <header className="pt-6 sm:pt-9">
           <p className="text-xs font-black tracking-[.16em] text-rose-700">RECENT REPORTS</p>
           <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
-            労災事故速報
+                国内の死亡事故速報
           </h1>
           <a
             href="#latest-report-heading"
@@ -65,7 +65,7 @@ export default async function AccidentNewsPage({
             <ArrowRight className="h-4 w-4" aria-hidden="true" />
           </a>
           <p data-page-description className="mt-3 max-w-3xl text-sm leading-7 text-slate-600 sm:text-base">
-            直近14日の国内労災報道を、新しい順に掲載します。見出しにない原因や法的評価は補いません。
+            直近14日の日本国内の労働中の死亡事故報道を、新しい順に掲載します。見出しにない原因や法的評価は補いません。
           </p>
           <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-bold text-slate-600">
             <span className="inline-flex items-center gap-1.5">

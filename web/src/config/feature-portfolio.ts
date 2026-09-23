@@ -388,9 +388,9 @@ export const FEATURE_PORTFOLIO = [
   },
   {
     id: "accident-news",
-    label: "労災事故速報",
+    label: "国内の死亡事故速報",
     route: "/accident-news",
-    currentRole: "直近14日以内の国内労災報道速報",
+    currentRole: "直近14日以内の国内の労働中の死亡事故報道速報",
     tier: 1,
     role: "flagship",
     reason: "公式データ・報道を区別して事故から学ぶ主力情報機能だから。",

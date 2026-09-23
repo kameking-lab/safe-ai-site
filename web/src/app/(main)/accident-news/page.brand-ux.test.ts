@@ -24,7 +24,7 @@ describe("事故速報と死亡事故データベースの役割分離", () => {
     expect(source).toContain("buildLegacyFatalAccidentsRedirect(await searchParams)");
     expect(source).toContain("permanentRedirect(legacyRedirect)");
     expect(source).toContain("await loadHomeLatestAccidentNews()");
-    expect(source).toContain("労災事故速報");
+    expect(source).toContain("国内の死亡事故速報");
     expect(source).toContain("report.publishedAt");
     expect(source).toContain("report.publisher");
     expect(source).toContain("報道・内容未確認");

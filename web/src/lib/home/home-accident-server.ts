@@ -64,7 +64,7 @@ const loadCached = unstable_cache(
           : "14日以内の国内労災報道を確認できませんでした。0件・事故なしとは判定しません。",
     };
   },
-  ["home-latest-accident-news-v4"],
+  ["home-latest-accident-news-domestic-fatal-v5"],
   { revalidate: 3_600 },
 );
 

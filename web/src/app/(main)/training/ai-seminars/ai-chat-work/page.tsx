@@ -151,6 +151,7 @@ export default function AiChatWorkSeminarPage() {
           slides={course.slides}
           claims={claims}
           sources={sources}
+          sourcesAnchorId="sources-web-title"
           audioBasePath={AUDIO_BASE}
           playerLabel="音声付きAI実務研修スライド"
           transcriptId="ai-chat-work-transcript"

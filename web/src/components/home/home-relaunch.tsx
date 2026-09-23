@@ -49,12 +49,12 @@ const MAIN_SERVICES = [
   },
   {
     href: "/accident-news",
-    title: "労災事故速報",
-    description: "速報・重大災害・類似事例を、出典と確認状態を見ながら追う。",
-    action: "事故を確認",
+    title: "国内の死亡事故速報",
+    description: "日本国内で報じられた労働中の死亡事故を確認する。",
+    action: "死亡事故を確認",
     icon: Newspaper,
     mascot: "/mascot/mascot-news-read.webp",
-    mascotAlt: "新聞を開いて労災事故速報を伝えるチワワ",
+    mascotAlt: "新聞を開いて国内の死亡事故速報を伝えるチワワ",
     role: "現場速報アナウンサー",
     surface: "#f3dfe0",
     accent: "#9a3f49",
@@ -166,8 +166,10 @@ const SERVICE_STYLES = `
 `;
 
 export function HomeRelaunch({
+  mascotContent,
   priorityContent,
 }: {
+  mascotContent?: ReactNode;
   priorityContent?: ReactNode;
 } = {}) {
   const focusRing =
@@ -313,6 +315,11 @@ export function HomeRelaunch({
             </div>
           </div>
         </div>
+        {mascotContent ? (
+          <div className="relative mx-auto mt-8 max-w-7xl" data-mascot-toolbox>
+            {mascotContent}
+          </div>
+        ) : null}
       </section>
 
       {priorityContent}

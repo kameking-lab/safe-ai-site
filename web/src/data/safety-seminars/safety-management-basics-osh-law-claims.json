@@ -1,32 +1,32 @@
 [
   {
     "claimId": "C-REF-ROLE",
-    "claimType": "official-guidance",
-    "statement": "安全衛生管理は、元方、協力会社、職長、作業者それぞれの役割と連絡経路を作業前に確認して運用する。",
-    "sourceIds": ["REF-SAFETY-PDF-CH01"]
+    "claimType": "law-duty",
+    "statement": "建設現場で複数の事業者が混在して作業する場合は、元方事業者等に適用される安衛法第29条・第30条の条件と役割を確認する。",
+    "sourceIds": ["LAW-MHLW-OSH"]
   },
   {
     "claimId": "C-REF-MULTI",
     "claimType": "official-guidance",
-    "statement": "災害は人、設備、作業方法、管理など複数の条件が重なって生じるため、個人の行動だけで原因を終わらせない。",
-    "sourceIds": ["REF-SAFETY-PDF-CH01"]
+    "statement": "安衛法第28条の2に基づく危険性又は有害性等の調査では、作業行動だけでなく設備、原材料、作業環境等の危険源を特定する。",
+    "sourceIds": ["LAW-MHLW-OSH", "GUIDE-MHLW-RA"]
   },
   {
     "claimId": "C-REF-CYCLE",
-    "claimType": "official-guidance",
-    "statement": "始業前確認、作業中の変化確認、終業時の記録と引継ぎを日々の安全活動としてつなげる。",
-    "sourceIds": ["REF-SAFETY-PDF-CH01"]
+    "claimType": "administrative-recommendation",
+    "statement": "安全衛生マネジメントシステムでは、計画、実施、評価、改善を継続して回す。日々の確認と記録はその実行方法として使う。",
+    "sourceIds": ["GUIDE-MHLW-OSHMS"]
   },
   {
     "claimId": "C-LAW-PURPOSE",
     "claimType": "legal-caution",
-    "statement": "労働安全衛生法は、労働災害の防止に関する総合的かつ計画的な対策を推進し、職場における労働者の安全と健康を確保するとともに快適な職場環境の形成を促進することを目的とする。",
+    "statement": "労働安全衛生法第1条は、労働災害の防止に関する総合的かつ計画的な対策を推進し、職場における労働者の安全と健康を確保するとともに快適な職場環境の形成を促進することを目的とする。",
     "sourceIds": ["LAW-MHLW-OSH"]
   },
   {
     "claimId": "C-LAW-EMPLOYER",
     "claimType": "law-duty",
-    "statement": "事業者は法令の最低基準を守るだけでなく、労働災害防止のため必要な措置を講じるよう努め、労働者の安全と健康を確保しなければならない。",
+    "statement": "労働安全衛生法第3条は、事業者に法令の最低基準を守るだけでなく、労働災害防止のため必要な措置を講じることなどを求める。",
     "sourceIds": ["LAW-MHLW-OSH"]
   },
   {
@@ -46,7 +46,7 @@
   {
     "claimId": "C-LAW-TRAINING",
     "claimType": "law-duty",
-    "statement": "労働者の雇入れ時・作業内容変更時の教育や、危険有害業務の特別教育、就業制限は対象業務と要件を個別に確認する。",
+    "statement": "労働安全衛生法第59条の雇入れ時・作業内容変更時教育と特別教育、第61条の就業制限は、対象業務と要件を個別に確認する。",
     "sourceIds": ["LAW-MHLW-OSH"],
     "caveat": "この教材だけで法定教育や資格要件を満たすものではない。"
   },

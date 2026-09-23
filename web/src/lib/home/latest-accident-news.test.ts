@@ -14,18 +14,13 @@ const rss = (
 });
 
 describe("selectHomeLatestAccidentReports", () => {
-  it("shows recent domestic reports in publication order with explicit unverified provenance", () => {
+  it("shows recent domestic fatal reports in publication order with explicit unverified provenance", () => {
     const reports = selectHomeLatestAccidentReports(
       [
         rss(
           "工事現場で作業員が転落し死亡 愛知県 - 中日新聞Web",
           "2026-07-30T10:00:00+09:00",
           "a",
-        ),
-        rss(
-          "倉庫でフォークリフトに挟まれ従業員が重傷 大阪府 - 共同通信",
-          "2026-07-29T10:00:00+09:00",
-          "b",
         ),
         rss(
           "補修工事の警備員がトラックにはねられ死亡 福島県 - 福島テレビ",
@@ -39,14 +34,12 @@ describe("selectHomeLatestAccidentReports", () => {
 
     expect(reports.map((report) => report.publisher)).toEqual([
       "中日新聞Web",
-      "共同通信",
       "福島テレビ",
     ]);
     expect(reports.every((report) => report.verification === "reported-unverified")).toBe(true);
     expect(reports[0]?.industry).toContain("建設業");
     expect(reports[0]?.accidentType).toContain("墜落・転落");
-    expect(reports[1]?.accidentType).toContain("はさまれ");
-    expect(reports[2]?.accidentType).toContain("交通事故");
+    expect(reports[1]?.accidentType).toContain("交通事故");
   });
 
   it("excludes stale, future, foreign, commentary, and non-incident items", () => {
@@ -56,6 +49,21 @@ describe("selectHomeLatestAccidentReports", () => {
           "建設現場で作業員が死亡 コソボ - kossev.info",
           "2026-07-30T10:00:00+09:00",
           "foreign",
+        ),
+        rss(
+          "ハイフォン市の工場で作業員が重傷 ベトナム - 地方紙",
+          "2026-07-30T10:00:00+09:00",
+          "haiphong",
+        ),
+        rss(
+          "大阪府の工場で従業員が重傷 - 地方紙",
+          "2026-07-30T10:00:00+09:00",
+          "injury",
+        ),
+        rss(
+          "工事現場で作業員が死亡 - 地方紙",
+          "2026-07-30T10:00:00+09:00",
+          "location-unconfirmed",
         ),
         rss(
           "死亡災害 リスクアセスメントの重点点検を - 労働新聞社",
@@ -131,6 +139,13 @@ describe("selectHomeLatestAccidentReports", () => {
       3,
     );
 
+    expect(reports).toHaveLength(1);
+  });
+
+  it("国内で働く外国籍労働者の死亡事故は国籍だけで除外しない", () => {
+    const reports = selectHomeLatestAccidentReports([
+      rss("大阪府の工事現場でベトナム人作業員が死亡 - 地方紙", "2026-07-30T10:00:00+09:00", "domestic-worker"),
+    ], NOW, 3);
     expect(reports).toHaveLength(1);
   });
 });

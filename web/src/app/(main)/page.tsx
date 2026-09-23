@@ -80,12 +80,8 @@ export default async function HomePage() {
         </nav>
       </noscript>
       <HomeRelaunch
-        priorityContent={
-          <>
-            <HomeActionCockpit />
-            <HomeSafetyUpdates latestNews={latestAccidentNews} />
-          </>
-        }
+        mascotContent={<HomeActionCockpit />}
+        priorityContent={<HomeSafetyUpdates latestNews={latestAccidentNews} />}
       />
       <HomeAutomationSamples />
       <HomeFeatureDirectory />

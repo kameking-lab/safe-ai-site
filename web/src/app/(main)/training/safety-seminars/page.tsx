@@ -25,8 +25,6 @@ import { FeatureMascotCompanion } from "@/components/feature-mascot-companion";
 const TITLE = "安全研修ライブラリ｜現場で使える社内安全研修";
 const DESCRIPTION =
   "統計と一次資料に基づく社内安全研修を、音声付きスライド、PowerPoint、PDFで利用できます。安全管理の基本から個別災害の防止まで、公開教材を無料で活用できます。";
-const REFERENCE_FOLDER_URL =
-  "https://drive.google.com/drive/folders/1ueL4tATdCiIuiUKCluDlov1CLCo56FGn?usp=drive_link";
 
 type SearchParams = Promise<
   Record<string, string | string[] | undefined>
@@ -256,12 +254,6 @@ export default function SafetySeminarLibraryPage() {
                 </article>
               ))}
             </div>
-            <p className="mt-5 rounded-2xl border border-slate-300 bg-white p-4 text-sm font-bold leading-6 text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
-              目次の再構成根拠：提供資料「安全.pdf」の章立て（機械・墜落・足場・火気・保護具・緊急対応等）を、朝礼と社内研修で選びやすい20テーマへ再編しました。
-              <a href={REFERENCE_FOLDER_URL} target="_blank" rel="noreferrer" className="ml-1 text-emerald-800 underline underline-offset-4 dark:text-emerald-300">
-                参照フォルダ
-              </a>
-            </p>
           </section>
         </div>
       </div>
