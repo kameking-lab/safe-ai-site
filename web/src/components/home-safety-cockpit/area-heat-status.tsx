@@ -11,8 +11,14 @@ import {
   ThermometerSun,
 } from "lucide-react";
 import type { EnvironmentWbgtStatus } from "@/lib/heat-illness/environment-wbgt";
-import type { WeatherRiskApiResponse } from "@/lib/types/api";
-import { parseWeatherRiskApiPayload } from "@/lib/services/weather-risk-service";
+import type {
+  WeatherRiskApiResponse,
+  WeatherRiskPartialApiResponse,
+} from "@/lib/types/api";
+import {
+  parseWeatherRiskApiPayload,
+  parseWeatherRiskPartialApiPayload,
+} from "@/lib/services/weather-risk-service";
 import { officialAreaCandidateById } from "@/lib/area/official-area-resolver";
 import { trackHomeCockpitEvent } from "@/lib/home-cockpit-telemetry";
 import { KyHandoffLink } from "@/components/ky-handoff-link";
@@ -23,6 +29,7 @@ type LoadState = "idle" | "loading" | "ready" | "degraded" | "unavailable";
 type HeatStatusState = {
   loadState: LoadState;
   weather: WeatherRiskApiResponse | null;
+  partialWeather: WeatherRiskPartialApiResponse | null;
   wbgt: EnvironmentWbgtStatus | null;
   weatherFailed: boolean;
   wbgtFailed: boolean;
@@ -31,6 +38,7 @@ type HeatStatusState = {
 const INITIAL_STATE: HeatStatusState = {
   loadState: "idle",
   weather: null,
+  partialWeather: null,
   wbgt: null,
   weatherFailed: false,
   wbgtFailed: false,
@@ -211,6 +219,7 @@ export function AreaHeatStatus({
       ? {
           loadState: "degraded",
           weather: null,
+          partialWeather: null,
           wbgt: initialWbgt,
           weatherFailed: true,
           wbgtFailed: false,
@@ -253,6 +262,7 @@ export function AreaHeatStatus({
           : {
               loadState: "loading",
               weather: null,
+              partialWeather: null,
               wbgt: null,
               weatherFailed: false,
               wbgtFailed: false,
@@ -285,6 +295,10 @@ export function AreaHeatStatus({
         weatherResult.status === "fulfilled"
           ? parseWeatherRiskApiPayload(weatherResult.value)
           : null;
+      const partialWeather =
+        weatherResult.status === "fulfilled"
+          ? parseWeatherRiskPartialApiPayload(weatherResult.value)
+          : null;
       const fetchedWbgt =
         wbgtResult.status === "fulfilled" &&
         isEnvironmentWbgtStatus(wbgtResult.value, areaId)
@@ -310,6 +324,7 @@ export function AreaHeatStatus({
                 ? "degraded"
                 : "ready",
           weather,
+          partialWeather,
           wbgt,
           weatherFailed,
           wbgtFailed,
@@ -360,9 +375,11 @@ export function AreaHeatStatus({
 
   const wbgt = state.wbgt?.wbgt;
   const weather = state.weather;
+  const officialWarning =
+    weather?.officialWarning ?? state.partialWeather?.officialWarning;
   const weatherAge =
-    now !== null && weather
-      ? now - Date.parse(weather.fetchedAt)
+    now !== null && (weather || state.partialWeather)
+      ? now - Date.parse((weather ?? state.partialWeather)!.fetchedAt)
       : Number.POSITIVE_INFINITY;
   const weatherStale =
     !Number.isFinite(weatherAge) ||
@@ -387,7 +404,7 @@ export function AreaHeatStatus({
   const detailedRecommendations = recommendations.slice(2);
   const handoffWeather = combineKyWeatherPayloads({
     areaId,
-    weather: state.weather,
+    weather: state.weather ?? state.partialWeather,
     wbgt: state.wbgt,
     ...(now === null ? {} : { now: new Date(now) }),
   });
@@ -612,7 +629,7 @@ export function AreaHeatStatus({
           <div className="rounded-xl bg-slate-100 p-2.5 text-slate-950">
             <p className="text-[10px] font-black">JMA警報・注意報</p>
             <p className="mt-1 text-xs font-black">
-              {jmaLabel(weather?.officialWarning)}
+              {jmaLabel(officialWarning)}
             </p>
             <p className="text-[10px]">気象庁 公式</p>
           </div>

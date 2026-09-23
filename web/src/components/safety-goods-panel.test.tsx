@@ -3,7 +3,10 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { SafetyGoodsPanel } from "./safety-goods-panel";
 
 describe("SafetyGoodsPanel", () => {
-  afterEach(() => vi.unstubAllGlobals());
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    window.history.replaceState(null, "", "/goods");
+  });
 
   it("冒頭に選定ウィザードとNETIS案内を置き、旧来の大きな警告を出さない", () => {
     render(<SafetyGoodsPanel />);
@@ -23,8 +26,8 @@ describe("SafetyGoodsPanel", () => {
       json: async () => ({ status: "not_configured", items: [], checkedAt: null }),
     }));
     render(<SafetyGoodsPanel />);
-    fireEvent.click(screen.getByRole("button", { name: /保護帽のカテゴリイラスト.*実物を見る/u }));
-    expect(await screen.findByText(/商品データの接続が未設定/u)).toBeDefined();
+    fireEvent.click(screen.getByRole("button", { name: "保護帽" }));
+    expect(await screen.findByText(/実商品写真・購入者評価は現在表示できません/u)).toBeDefined();
     expect(screen.queryByText(/★4\.\d \(/u)).toBeNull();
   });
 });

@@ -111,7 +111,6 @@ function errorResponse(
 }
 
 async function partialWeatherErrorResponse(
-  status: number,
   message: string,
   officialWarningPromise: Promise<OfficialWeatherWarningState>,
 ) {
@@ -127,7 +126,11 @@ async function partialWeatherErrorResponse(
     },
   };
   return NextResponse.json(body, {
-    status,
+    // The envelope itself is a valid partial response: JMA warning data can
+    // still be used while Open-Meteo is unavailable. 207 keeps that contract
+    // explicit without making browsers report an already-handled dependency
+    // outage as an unhandled failed resource.
+    status: 207,
     headers: {
       "Cache-Control": "no-store",
       "x-weather-source": "partial:jma",
@@ -208,7 +211,6 @@ export async function GET(request: NextRequest) {
         : "source_unavailable";
     console.error("[weather-risk] degraded", { failureKind });
     return partialWeatherErrorResponse(
-      503,
       "Open-Meteoの気象予測を取得できません。数値を0や「注意なし」とみなさず、気象庁の公式情報と現場計測を確認してください。",
       officialWarningPromise,
     );
@@ -216,14 +218,12 @@ export async function GET(request: NextRequest) {
 
   if (!snapshot) {
     return partialWeatherErrorResponse(
-      502,
       "Open-Meteoの応答に必要な対象日・気温・風速・降水量・天気コードがありません。安全判断には使用できません。",
       officialWarningPromise,
     );
   }
   if (snapshot.date !== target.date) {
     return partialWeatherErrorResponse(
-      502,
       "Open-Meteoの予報対象日が指定したJST作業日と一致しません。別日の値で代用しません。",
       officialWarningPromise,
     );

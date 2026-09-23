@@ -121,7 +121,9 @@ describe("weather risk safety boundary", () => {
     }
   });
 
-  it("Open-Meteo失敗のpartial応答から検証済みJMA警報を保持する", async () => {
+  it.each([207, 503])(
+    "Open-Meteo失敗のpartial応答（HTTP %i）から検証済みJMA警報を保持する",
+    async (status) => {
     const partial = {
       partial: true,
       fetchedAt: "2026-07-26T03:00:00.000Z",
@@ -141,7 +143,7 @@ describe("weather risk safety boundary", () => {
     const service = createApiWeatherRiskService(
       vi.fn().mockResolvedValue(
         new Response(JSON.stringify(partial), {
-          status: 503,
+          status,
           headers: { "content-type": "application/json" },
         }),
       ) as unknown as typeof fetch,
@@ -154,5 +156,6 @@ describe("weather risk safety boundary", () => {
       ]);
       expect(result.error.code).toBe("UNAVAILABLE");
     }
-  });
+    },
+  );
 });
