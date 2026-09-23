@@ -90,7 +90,8 @@ export function SafetyImageEditor({ theme }: { theme: SafetyImageTheme }) {
   const [numericUnit, setNumericUnit] = useState(
     theme.numericTemplate?.unit ?? "",
   );
-  const [downloadMode, setDownloadMode] = useState<DownloadMode>("default");
+  // The editable preview and the primary download must represent the same sign.
+  const [downloadMode, setDownloadMode] = useState<DownloadMode>("edited");
   const [outputSize, setOutputSize] = useState<SafetySignOutputSize>(
     recommendedOutputSize,
   );
@@ -165,6 +166,7 @@ export function SafetyImageEditor({ theme }: { theme: SafetyImageTheme }) {
     setNumericUnit(theme.numericTemplate?.unit ?? "");
     setOutputSize(recommendedOutputSize);
     setFormat("jpeg");
+    setDownloadMode("edited");
     setError("");
   };
 
@@ -513,45 +515,6 @@ export function SafetyImageEditor({ theme }: { theme: SafetyImageTheme }) {
                   </fieldset>
                 ) : null}
 
-                <RadioGroup
-                  label="文字サイズ"
-                  value={fontSize}
-                  values={[
-                    ["small", "小"],
-                    ["standard", "標準"],
-                    ["large", "大"],
-                  ]}
-                  onChange={(value) => setFontSize(value as FontSize)}
-                />
-                <RadioGroup
-                  label="文字位置"
-                  value={position}
-                  values={[
-                    ["top", "上"],
-                    ["center", "中央"],
-                    ["bottom", "下"],
-                  ]}
-                  onChange={(value) => setPosition(value as TextPosition)}
-                />
-
-                <div className="grid grid-cols-2 gap-3">
-                  <ColorControl
-                    label="文字色"
-                    value={textColor}
-                    onChange={setTextColor}
-                  />
-                  <ToggleControl
-                    label="背景帯"
-                    checked={band}
-                    onChange={setBand}
-                  />
-                </div>
-                <ToggleControl
-                  label="チワワ・©"
-                  checked={brand}
-                  onChange={setBrand}
-                />
-
                 <details className="group rounded-2xl border border-slate-200 dark:border-slate-700">
                   <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between px-4 font-black text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-200 dark:text-white">
                     詳細設定{" "}
@@ -561,6 +524,43 @@ export function SafetyImageEditor({ theme }: { theme: SafetyImageTheme }) {
                     />
                   </summary>
                   <div className="space-y-4 border-t border-slate-200 p-4 dark:border-slate-700">
+                    <RadioGroup
+                      label="文字サイズ"
+                      value={fontSize}
+                      values={[
+                        ["small", "小"],
+                        ["standard", "標準"],
+                        ["large", "大"],
+                      ]}
+                      onChange={(value) => setFontSize(value as FontSize)}
+                    />
+                    <RadioGroup
+                      label="文字位置"
+                      value={position}
+                      values={[
+                        ["top", "上"],
+                        ["center", "中央"],
+                        ["bottom", "下"],
+                      ]}
+                      onChange={(value) => setPosition(value as TextPosition)}
+                    />
+                    <div className="grid grid-cols-2 gap-3">
+                      <ColorControl
+                        label="文字色"
+                        value={textColor}
+                        onChange={setTextColor}
+                      />
+                      <ToggleControl
+                        label="背景帯"
+                        checked={band}
+                        onChange={setBand}
+                      />
+                    </div>
+                    <ToggleControl
+                      label="チワワ・©"
+                      checked={brand}
+                      onChange={setBrand}
+                    />
                     <label className="block text-sm font-black text-slate-800 dark:text-slate-100">
                       サブメッセージ
                       <input
@@ -631,17 +631,16 @@ export function SafetyImageEditor({ theme }: { theme: SafetyImageTheme }) {
                         }
                       />
                     ) : null}
+                    <button
+                      type="button"
+                      onClick={reset}
+                      className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-slate-400 bg-white font-black text-slate-800 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-200 dark:bg-slate-900 dark:text-slate-100"
+                    >
+                      <RotateCcw className="h-4 w-4" aria-hidden="true" />
+                      元に戻す
+                    </button>
                   </div>
                 </details>
-
-                <button
-                  type="button"
-                  onClick={reset}
-                  className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-slate-400 bg-white font-black text-slate-800 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-200 dark:bg-slate-900 dark:text-slate-100"
-                >
-                  <RotateCcw className="h-4 w-4" aria-hidden="true" />
-                  元に戻す
-                </button>
               </div>
             </div>
           </div>
@@ -657,38 +656,19 @@ export function SafetyImageEditor({ theme }: { theme: SafetyImageTheme }) {
           >
             ダウンロード
           </h2>
-          <p className="mt-1 text-sm font-bold text-emerald-900 dark:text-emerald-200">
-            300dpi相当・A判と市場サイズの安全余白で、その場で生成します。
-          </p>
-          <div className="mt-5 grid gap-4 lg:grid-cols-3">
-            {[
-              ["clean", "1. 文字なし", "クリーンマスターのみ"],
-              ["default", "2. 推奨文字入り", "チェックした全言語の既定文言"],
-              ["edited", "3. 編集した文字入り", "現在の編集内容"],
-            ].map(([value, label, description]) => (
-              <label
-                key={value}
-                className={`cursor-pointer rounded-2xl border-2 p-4 ${downloadMode === value ? "border-emerald-800 bg-white shadow-sm dark:bg-slate-900" : "border-emerald-200 bg-emerald-50/60 dark:border-emerald-900 dark:bg-emerald-950"}`}
-              >
-                <input
-                  type="radio"
-                  name="download-mode"
-                  value={value}
-                  checked={downloadMode === value}
-                  onChange={() => setDownloadMode(value as DownloadMode)}
-                  className="mr-2 accent-emerald-800"
-                />
-                <span className="font-black text-slate-950 dark:text-white">
-                  {label}
-                </span>
-                <span className="mt-1 block pl-6 text-xs font-bold text-slate-600 dark:text-slate-300">
-                  {description}
-                </span>
-              </label>
-            ))}
-          </div>
-
           <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <label className="text-sm font-black text-slate-800 dark:text-slate-100">
+              出力内容
+              <select
+                value={downloadMode}
+                onChange={(event) => setDownloadMode(event.target.value as DownloadMode)}
+                className="mt-2 min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 font-bold text-slate-950 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+              >
+                <option value="edited">プレビューどおり</option>
+                <option value="default">推奨文字入り</option>
+                <option value="clean">文字なし</option>
+              </select>
+            </label>
             <label className="block text-sm font-black text-slate-800 sm:col-span-2 dark:text-slate-100">
               印刷・看板サイズ
               <select

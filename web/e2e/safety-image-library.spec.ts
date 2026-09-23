@@ -35,6 +35,7 @@ test.describe("market-grounded safety sign library", () => {
     await expect(page.getByRole("img", { name: /^文字編集プレビュー:/u })).toHaveAttribute("lang", "ja");
     await page.getByLabel("表示する文字（ベトナム語）").fill("THÔNG ĐIỆP THỬ NGHIỆM");
     await expect(page.getByText("THÔNG ĐIỆP THỬ NGHIỆM").first()).toBeVisible();
+    await page.getByText("詳細設定", { exact: true }).click();
     await page.getByLabel("チワワ・©").uncheck();
     await expect(page.getByAltText("安全AIポータルのチワワ")).toHaveCount(0);
     expect(page.url()).not.toContain("THÔNG");
@@ -118,8 +119,8 @@ test.describe("market-grounded safety sign library", () => {
     await page.setViewportSize({ width: 320, height: 900 });
     await page.goto(detailPath);
     await page.getByLabel("表示する文字").fill("W".repeat(180));
-    await page.getByRole("radio", { name: "大", exact: true }).first().check({ force: true });
     await page.getByText("詳細設定", { exact: true }).click();
+    await page.getByRole("radio", { name: "大", exact: true }).first().check({ force: true });
     await page.getByLabel(/行間/u).fill("1.8");
     await expect(page.locator('[data-preview-fit="pass"]')).toBeVisible();
     await expect(page.getByText("文字が収まりません。文字量・サイズ・行間を調整してください。", { exact: true })).toHaveCount(0);
