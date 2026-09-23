@@ -38,7 +38,7 @@ function ThemeCard({ item }: { item: FirstReleaseItem }) {
         <div className="relative aspect-[4/3] overflow-hidden bg-white">
           <Image
             src={`/safety-images/library/previews/${item.slug}.webp`}
-            alt={`${item.title}を用途別に描いた、もふもふのチワワ安全看板`}
+            alt={`もふもふのチワワが用途別に案内する「${item.title}」の安全看板イラスト`}
             fill
             sizes="(max-width: 640px) 48vw, (max-width: 1280px) 30vw, 16vw"
             className="object-contain transition duration-300 group-hover:scale-[1.02]"
