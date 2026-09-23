@@ -2,10 +2,11 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, BadgeCheck, FileImage, Languages, ShieldCheck } from "lucide-react";
+import { FileImage, Languages, ShieldCheck } from "lucide-react";
 import { JsonLd } from "@/components/json-ld";
 import { PageJsonLd } from "@/components/page-json-ld";
 import { SafetyImageEditor } from "@/components/safety-image-library/safety-image-editor";
+import { SafetyImageLibraryReturnLink } from "@/components/safety-image-library/safety-image-library-return-link";
 import { SafetySignCustomization } from "@/components/safety-image-library/safety-sign-customization";
 import {
   getSafetyImageTheme,
@@ -88,18 +89,13 @@ export default async function SafetyImageDetailPage({ params }: PageProps) {
       />
       <header className="border-b border-emerald-100 bg-gradient-to-br from-emerald-50 via-white to-sky-50 px-4 pb-8 pt-3 sm:px-6 dark:border-emerald-950 dark:from-slate-950 dark:to-emerald-950">
         <div className="mx-auto max-w-7xl">
-          <Link href={SAFETY_IMAGE_LIBRARY_PATH} className="inline-flex min-h-11 items-center gap-1 text-sm font-black text-emerald-800 underline underline-offset-4 dark:text-emerald-300">
-            <ArrowLeft className="h-4 w-4" aria-hidden="true" />現場安全看板ライブラリへ
-          </Link>
+          <SafetyImageLibraryReturnLink />
           <div className="mt-3 grid items-center gap-7 lg:grid-cols-[minmax(18rem,.78fr)_minmax(25rem,1.22fr)]">
             <div className={`relative mx-auto w-full max-w-lg overflow-hidden rounded-3xl border-4 border-white bg-[#eef7f7] shadow-xl ${theme.orientation === "portrait" ? "aspect-[4/5]" : theme.orientation === "square" ? "aspect-square" : "aspect-[3/2]"}`}>
               <Image src={theme.previewPath} alt={`${theme.title}を表す、文字やロゴを含まない安全看板用イラスト`} fill priority sizes="(max-width: 1024px) 92vw, 36vw" className="object-contain" />
             </div>
             <div>
-              <p className="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1 text-xs font-black text-emerald-950 dark:bg-emerald-900 dark:text-emerald-100">
-                <BadgeCheck className="h-4 w-4" aria-hidden="true" />独立画像QA合格
-              </p>
-              <p className="mt-4 text-sm font-black text-emerald-800 dark:text-emerald-300">{theme.categoryLabel}</p>
+              <p className="text-sm font-black text-emerald-800 dark:text-emerald-300">{theme.categoryLabel}</p>
               <h1 className="mt-1 text-3xl font-black tracking-tight text-slate-950 sm:text-5xl dark:text-white">{theme.title}</h1>
               <p className="mt-3 max-w-2xl text-base font-bold leading-7 text-slate-700 dark:text-slate-200">{theme.commonWording}</p>
               <div className="mt-5 flex flex-wrap gap-2 text-xs font-black text-slate-700 dark:text-slate-200">

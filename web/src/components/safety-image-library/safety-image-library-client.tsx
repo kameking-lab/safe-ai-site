@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 import {
   ArrowRight,
   BadgeCheck,
@@ -16,6 +17,7 @@ import {
   type SafetyImageLibraryCardTheme,
   type SafetyImageUse,
 } from "@/data/safety-image-library/client-metadata";
+import { isLibraryPath, listStorageKey, RETURN_PATH_KEY } from "./library-navigation";
 
 type SortMode = "recommended" | "order" | "new";
 type QuickFilter =
@@ -41,6 +43,9 @@ export function SafetyImageLibraryClient({
   themes: readonly SafetyImageLibraryCardTheme[];
   initialCategory?: SafetyImageCategory | "all";
 }) {
+  const pathname = usePathname();
+  const [restored, setRestored] = useState(false);
+  const leaving = useRef(false);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<SafetyImageCategory | "all">(
     initialCategory,
@@ -52,6 +57,78 @@ export function SafetyImageLibraryClient({
   const [quickFilter, setQuickFilter] = useState<QuickFilter>("all");
   const [sort, setSort] = useState<SortMode>("recommended");
   const [visibleCount, setVisibleCount] = useState(20);
+
+  useEffect(() => {
+    if (!isLibraryPath(pathname)) return;
+    let cancelled = false;
+    let savedScroll = 0;
+    const hydrate = window.setTimeout(() => {
+      try {
+        const raw = window.sessionStorage.getItem(listStorageKey(pathname));
+        if (raw) {
+          const saved = JSON.parse(raw) as Record<string, unknown>;
+          if (typeof saved.query === "string") setQuery(saved.query.slice(0, 200));
+          if (saved.category === "all" || SAFETY_IMAGE_CATEGORIES.some((item) => item.id === saved.category)) setCategory(saved.category as SafetyImageCategory | "all");
+          if (saved.use === "all" || USES.includes(saved.use as SafetyImageUse)) setUse(saved.use as SafetyImageUse | "all");
+          if (saved.signFormat === "all" || themes.some((theme) => theme.signFormat === saved.signFormat)) setSignFormat(saved.signFormat as string);
+          if (typeof saved.numericOnly === "boolean") setNumericOnly(saved.numericOnly);
+          if (typeof saved.documentOnly === "boolean") setDocumentOnly(saved.documentOnly);
+          if (["all", "recommended", "ppe", "prohibition", "heavy", "multilingual", "numeric"].includes(saved.quickFilter as string)) setQuickFilter(saved.quickFilter as QuickFilter);
+          if (["recommended", "order", "new"].includes(saved.sort as string)) setSort(saved.sort as SortMode);
+          if (typeof saved.visibleCount === "number" && Number.isInteger(saved.visibleCount) && saved.visibleCount >= 20 && saved.visibleCount <= 100) setVisibleCount(saved.visibleCount);
+          if (typeof saved.scrollY === "number" && Number.isFinite(saved.scrollY)) savedScroll = Math.max(0, Math.min(saved.scrollY, 100000));
+        }
+      } catch {
+        // Malformed or unavailable session storage falls back to ordinary filters.
+      }
+      if (savedScroll === 0) {
+        setRestored(true);
+        return;
+      }
+      let attempts = 0;
+      const restoreScroll = () => {
+        if (cancelled) return;
+        const maximum = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+        if (maximum >= savedScroll || attempts > 30) {
+          window.scrollTo({ top: savedScroll, left: 0, behavior: "instant" });
+          setRestored(true);
+          return;
+        }
+        attempts += 1;
+        window.setTimeout(restoreScroll, 30);
+      };
+      // Allow the saved result count to render before restoring a deep position.
+      window.setTimeout(restoreScroll, 80);
+    }, 0);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(hydrate);
+    };
+  }, [pathname, themes]);
+
+  const persist = useCallback(() => {
+    if (!restored || leaving.current || !isLibraryPath(pathname)) return;
+    try {
+      window.sessionStorage.setItem(listStorageKey(pathname), JSON.stringify({
+        query, category, use, signFormat, numericOnly, documentOnly,
+        quickFilter, sort, visibleCount, scrollY: window.scrollY,
+      }));
+    } catch {
+      // Browsers can disable session storage; navigation remains usable.
+    }
+  }, [restored, pathname, query, category, use, signFormat, numericOnly, documentOnly, quickFilter, sort, visibleCount]);
+
+  useEffect(() => {
+    persist();
+    window.addEventListener("scroll", persist, { passive: true });
+    return () => window.removeEventListener("scroll", persist);
+  }, [persist]);
+
+  const rememberBeforeDetail = () => {
+    persist();
+    try { window.sessionStorage.setItem(RETURN_PATH_KEY, pathname); } catch { /* ordinary hub link still works */ }
+    leaving.current = true;
+  };
 
   const filtered = useMemo(() => {
     const normalized = query.trim().toLocaleLowerCase("ja");
@@ -292,7 +369,8 @@ export function SafetyImageLibraryClient({
               className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg dark:border-slate-800 dark:bg-slate-950"
             >
               <Link
-                href={theme.detailPath}
+                href={`${theme.detailPath}?fromLibrary=1`}
+                onClick={rememberBeforeDetail}
                 className="block focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-inset focus-visible:ring-emerald-300"
               >
                 <div
