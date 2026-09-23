@@ -3,9 +3,7 @@ import Link from "next/link";
 import {
   ArrowRight,
   Bot,
-  FileClock,
   FlaskConical,
-  Newspaper,
   Presentation,
 } from "lucide-react";
 import { HomeDirectChatClient } from "@/components/home-safety-cockpit/home-chat-quick-ask";
@@ -44,11 +42,11 @@ export function HomeActionCockpit() {
         </div>
 
         <nav aria-label="チワワと試す5機能" className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-5">
-          <a href="#mascot-chat" className="flex min-h-12 items-center justify-center gap-1 rounded-xl bg-sky-900 px-2 text-center text-sm font-black text-white"><Bot className="h-4 w-4" aria-hidden="true" />安衛法AI</a>
-          <a href="#mascot-chemical" className="flex min-h-12 items-center justify-center gap-1 rounded-xl bg-amber-800 px-2 text-center text-sm font-black text-white"><FlaskConical className="h-4 w-4" aria-hidden="true" />化学物質RA</a>
-          <Link href="/accident-news" className="flex min-h-12 items-center justify-center gap-1 rounded-xl bg-rose-800 px-2 text-center text-sm font-black text-white"><Newspaper className="h-4 w-4" aria-hidden="true" />死亡事故速報</Link>
-          <a href="#mascot-slides" className="flex min-h-12 items-center justify-center gap-1 rounded-xl bg-emerald-800 px-2 text-center text-sm font-black text-white"><Presentation className="h-4 w-4" aria-hidden="true" />安全スライド</a>
-          <Link href="/laws" className="col-span-2 flex min-h-12 items-center justify-center gap-1 rounded-xl bg-violet-800 px-2 text-center text-sm font-black text-white sm:col-span-1"><FileClock className="h-4 w-4" aria-hidden="true" />法改正</Link>
+          <a href="#mascot-chat" className="flex min-h-12 items-center justify-center rounded-xl bg-sky-900 px-2 text-center text-sm font-black text-white">安衛法AI</a>
+          <a href="#mascot-chemical" className="flex min-h-12 items-center justify-center rounded-xl bg-amber-800 px-2 text-center text-sm font-black text-white">化学物質RA</a>
+          <Link href="/accident-news" className="flex min-h-12 items-center justify-center rounded-xl bg-rose-800 px-2 text-center text-sm font-black text-white">死亡事故速報</Link>
+          <a href="#mascot-slides" className="flex min-h-12 items-center justify-center rounded-xl bg-emerald-800 px-2 text-center text-sm font-black text-white">安全スライド</a>
+          <Link href="/laws" className="col-span-2 flex min-h-12 items-center justify-center rounded-xl bg-violet-800 px-2 text-center text-sm font-black text-white sm:col-span-1">法改正</Link>
         </nav>
 
         <div className="mt-5 grid gap-4 lg:grid-cols-2">
@@ -89,7 +87,7 @@ export function HomeActionCockpit() {
 
         <article id="mascot-slides" className="mt-4 scroll-mt-24 overflow-hidden rounded-3xl border-2 border-slate-900 bg-white shadow-[5px_5px_0_#0f766e]">
           <div className="grid lg:grid-cols-[18rem_minmax(0,1fr)]">
-            <div className="relative min-h-48 overflow-hidden bg-emerald-100">
+            <div className="relative hidden min-h-48 overflow-hidden bg-emerald-100 lg:block">
               <Image
                 src={`${SEMINAR_PATH}/safe-site-hero.webp`}
                 alt="安全管理の基本と労働安全衛生法を学ぶ安全教育スライド"

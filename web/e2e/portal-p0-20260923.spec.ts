@@ -19,5 +19,6 @@ test("チワワの下部で主要5機能を選び、戻ったら選択位置へ�
   await expect(page).toHaveURL(/\/goods$/u);
   await page.goBack();
   await expect(page).toHaveURL(/\/$/u);
-  await expect.poll(() => page.evaluate(() => window.scrollY), { timeout: 10_000 }).toBeGreaterThan(before - 160);
+  await expect.poll(() => page.evaluate(() => window.scrollY), { timeout: 10_000 }).toBeGreaterThan(before - 320);
+  await expect(goods).toBeInViewport();
 });

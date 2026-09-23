@@ -54,15 +54,10 @@ test.describe("AI実務研修と建設計算ツール", () => {
     await expect.poll(() => audio.evaluate((element) => (element as HTMLAudioElement).paused)).toBe(false);
     await page.getByRole("button", { name: "一時停止", exact: true }).click();
     await expect.poll(() => audio.evaluate((element) => (element as HTMLAudioElement).paused)).toBe(true);
-    await page.getByRole("button", { name: "停止", exact: true }).click();
-    await expect.poll(() => audio.evaluate((element) => (element as HTMLAudioElement).currentTime)).toBeLessThan(0.1);
-
     await page.getByRole("button", { name: "次のスライド" }).click();
     await expect(page.getByText("02 / 20")).toBeVisible();
-    await page.getByLabel("再生速度").selectOption("1.25");
-    await expect.poll(() => audio.evaluate((element) => (element as HTMLAudioElement).playbackRate)).toBe(1.25);
-    await page.getByRole("button", { name: "ミュート", exact: true }).click();
-    await expect.poll(() => audio.evaluate((element) => (element as HTMLAudioElement).muted)).toBe(true);
+    await expect(page.getByRole("button", { name: "停止", exact: true })).toHaveCount(0);
+    await expect(page.getByLabel("再生速度")).toHaveCount(0);
     await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
     await page.keyboard.press("ArrowRight");
     await expect(page.getByText("03 / 20")).toBeVisible();

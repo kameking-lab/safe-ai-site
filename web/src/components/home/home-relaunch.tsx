@@ -315,12 +315,13 @@ export function HomeRelaunch({
             </div>
           </div>
         </div>
-        {mascotContent ? (
-          <div className="relative mx-auto mt-8 max-w-7xl" data-mascot-toolbox>
-            {mascotContent}
-          </div>
-        ) : null}
       </section>
+
+      {mascotContent ? (
+        <div className="relative mx-auto w-full max-w-7xl px-4 pb-5 sm:px-6" data-mascot-toolbox>
+          {mascotContent}
+        </div>
+      ) : null}
 
       {priorityContent}
 
