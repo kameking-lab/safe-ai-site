@@ -17,7 +17,7 @@ import { withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
 
 const TITLE = "現場安全看板ライブラリ｜文字編集・多言語・無料ダウンロード";
 const DESCRIPTION =
-  "建設現場で実際に使われるテーマを調査して制作した安全看板100点。文字なし、推奨文字入り、自由編集を5言語・JPEG・PNG・PDF・市場サイズで利用できます。";
+  "建設現場で実際に使われるテーマを調査して制作した安全看板100点。縦横を選び、日本語を先頭に最大5言語を1枚へ表示。JPEG・PNG・PDFで利用できます。";
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -70,7 +70,7 @@ export default function SafetyImageLibraryPage() {
             </p>
             <div className="mt-5 grid max-w-xl grid-cols-3 gap-2 text-center">
               <HeroStat value="100点" label="オリジナル" icon={<Images className="h-5 w-5" aria-hidden="true" />} />
-              <HeroStat value="5言語" label="文字を切替" icon={<Languages className="h-5 w-5" aria-hidden="true" />} />
+              <HeroStat value="5言語" label="1枚に同時表示" icon={<Languages className="h-5 w-5" aria-hidden="true" />} />
               <HeroStat value="編集" label="文字・数値" icon={<PencilLine className="h-5 w-5" aria-hidden="true" />} />
             </div>
           </div>

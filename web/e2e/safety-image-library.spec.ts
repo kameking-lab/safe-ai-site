@@ -12,9 +12,10 @@ test.describe("market-grounded safety sign library", () => {
     await expect(page.getByText("100点", { exact: true }).first()).toBeVisible();
     await expect(page.getByRole("button", { name: "次の20点を表示" })).toBeVisible();
     await expect(page.getByRole("article")).toHaveCount(20);
-    for (const label of ["よく使う看板", "保護具", "立入・禁止", "重機・吊り荷", "多言語", "荷重・数値編集"]) {
+    for (const label of ["よく使う看板", "保護具", "立入・禁止", "重機・吊り荷", "多言語優先", "数値編集"]) {
       await expect(page.getByRole("button", { name: label })).toBeVisible();
     }
+    await expect(page.getByRole("link", { name: /保護帽着用.*看板を開く/u })).toHaveCount(1);
     await page.getByRole("searchbox").fill("保護帽");
     await expect(page.getByRole("heading", { level: 3, name: "保護帽着用" })).toBeVisible();
     await expect(page.getByText(/検索結果 1点/u)).toBeVisible();

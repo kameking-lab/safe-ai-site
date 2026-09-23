@@ -283,9 +283,25 @@ export function SafetyImageEditor({ theme }: { theme: SafetyImageTheme }) {
               >
                 プレビュー
               </h2>
-              <p className="mt-1 text-sm font-bold text-slate-600 dark:text-slate-300">
-                入力するとすぐ反映されます。
-              </p>
+              <fieldset className="mt-3">
+                <legend className="text-sm font-black text-slate-800 dark:text-slate-100">縦型・横型を選ぶ</legend>
+                <div className="mt-2 grid grid-cols-2 gap-2">
+                  {(["portrait", "landscape"] as const).map((direction) => {
+                    const size = `a4-${direction}` as SafetySignOutputSize;
+                    return (
+                      <button
+                        key={direction}
+                        type="button"
+                        aria-pressed={outputSize === size}
+                        onClick={() => setOutputSize(size)}
+                        className={`min-h-11 rounded-xl border-2 px-3 text-sm font-black focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-200 ${outputSize === size ? "border-emerald-800 bg-emerald-800 text-white" : "border-slate-300 bg-white text-slate-800 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"}`}
+                      >
+                        A4{direction === "portrait" ? "縦" : "横"}
+                      </button>
+                    );
+                  })}
+                </div>
+              </fieldset>
               <div
                 className="relative mx-auto mt-4 max-w-full overflow-hidden rounded-2xl border-2 border-slate-200 bg-[#eef7f7] shadow-lg"
                 style={{

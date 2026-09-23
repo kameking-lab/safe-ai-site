@@ -124,6 +124,10 @@ describe("SafetyImageEditor", () => {
     expect(screen.getByRole("option", { name: "JPEG" })).not.toBeNull();
     expect(screen.getByRole("option", { name: "PDF" })).not.toBeNull();
     expect(screen.getByRole("option", { name: "PNG" })).not.toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "A4縦" }));
+    expect((screen.getByLabelText("印刷・看板サイズ") as HTMLSelectElement).value).toBe("a4-portrait");
+    fireEvent.click(screen.getByRole("button", { name: "A4横" }));
+    expect((screen.getByLabelText("印刷・看板サイズ") as HTMLSelectElement).value).toBe("a4-landscape");
   });
 
   it("POSTには選択中の言語だけを含め、選択解除した編集文を送信しない", async () => {

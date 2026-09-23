@@ -9,14 +9,17 @@ import {
  * the 100-item source registries so filter controls do not ship those JSON
  * files to every library visitor.
  */
-export const SAFETY_IMAGE_LANGUAGES = ["ja", "en", "vi", "zh-CN", "id"] as const;
+// Put Japanese first, then the available languages closest to the largest
+// foreign-worker groups in MHLW's October 2025 national employment report.
+// English is offered as a shared language; it is not a Filipino translation.
+export const SAFETY_IMAGE_LANGUAGES = ["ja", "vi", "zh-CN", "en", "id"] as const;
 export type SafetyImageLanguage = (typeof SAFETY_IMAGE_LANGUAGES)[number];
 
 export const SAFETY_IMAGE_LANGUAGE_LABELS: Record<SafetyImageLanguage, string> = {
   ja: "日本語",
-  en: "英語",
   vi: "ベトナム語",
   "zh-CN": "中国語（簡体）",
+  en: "英語",
   id: "インドネシア語",
 };
 

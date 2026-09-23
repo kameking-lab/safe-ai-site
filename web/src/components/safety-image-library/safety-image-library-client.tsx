@@ -6,18 +6,13 @@ import { useMemo, useState } from "react";
 import {
   ArrowRight,
   BadgeCheck,
-  Download,
   Filter,
   Languages,
-  PencilLine,
   Search,
 } from "lucide-react";
 import {
   SAFETY_IMAGE_CATEGORIES,
-  SAFETY_IMAGE_LANGUAGE_LABELS,
-  type SafetyImageArtworkOrientation,
   type SafetyImageCategory,
-  type SafetyImageLanguage,
   type SafetyImageLibraryCardTheme,
   type SafetyImageUse,
 } from "@/data/safety-image-library/client-metadata";
@@ -39,11 +34,6 @@ const USES: readonly SafetyImageUse[] = [
   "教育",
   "朝礼",
 ];
-const LANGUAGES = Object.entries(SAFETY_IMAGE_LANGUAGE_LABELS) as [
-  SafetyImageLanguage,
-  string,
-][];
-
 export function SafetyImageLibraryClient({
   themes,
   initialCategory = "all",
@@ -57,10 +47,6 @@ export function SafetyImageLibraryClient({
   );
   const [use, setUse] = useState<SafetyImageUse | "all">("all");
   const [signFormat, setSignFormat] = useState("all");
-  const [languages, setLanguages] = useState<SafetyImageLanguage[]>(["ja"]);
-  const [orientation, setOrientation] = useState<
-    SafetyImageArtworkOrientation | "all"
-  >("all");
   const [numericOnly, setNumericOnly] = useState(false);
   const [documentOnly, setDocumentOnly] = useState(false);
   const [quickFilter, setQuickFilter] = useState<QuickFilter>("all");
@@ -85,9 +71,6 @@ export function SafetyImageLibraryClient({
       if (category !== "all" && theme.category !== category) return false;
       if (use !== "all" && !theme.uses.includes(use)) return false;
       if (signFormat !== "all" && theme.signFormat !== signFormat) return false;
-      if (languages.some((language) => !theme.texts[language])) return false;
-      if (orientation !== "all" && theme.orientation !== orientation)
-        return false;
       if (numericOnly && !theme.editableNumber) return false;
       if (
         documentOnly &&
@@ -128,9 +111,7 @@ export function SafetyImageLibraryClient({
   }, [
     category,
     documentOnly,
-    languages,
     numericOnly,
-    orientation,
     query,
     quickFilter,
     signFormat,
@@ -151,7 +132,7 @@ export function SafetyImageLibraryClient({
         data-safety-sign-filters
         className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6 dark:border-slate-800 dark:bg-slate-950"
       >
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(18rem,1.4fr)_repeat(3,minmax(8rem,.7fr))]">
+        <div className="grid gap-3 sm:grid-cols-[minmax(18rem,1.5fr)_minmax(10rem,.5fr)]">
           <label className="relative block">
             <span className="sr-only">安全画像をキーワード検索</span>
             <Search
@@ -181,6 +162,40 @@ export function SafetyImageLibraryClient({
               label: item.shortLabel,
             }))}
           />
+        </div>
+        <div className="mt-3 flex flex-wrap gap-2" aria-label="よく使う絞り込み">
+          {[
+            ["recommended", "よく使う看板"],
+            ["ppe", "保護具"],
+            ["prohibition", "立入・禁止"],
+            ["heavy", "重機・吊り荷"],
+            ["multilingual", "多言語優先"],
+            ["numeric", "数値編集"],
+          ].map(([value, label]) => (
+            <button
+              key={value}
+              type="button"
+              aria-pressed={quickFilter === value}
+              onClick={() =>
+                updateFilter(() =>
+                  setQuickFilter((current) =>
+                    current === value ? "all" : (value as QuickFilter),
+                  ),
+                )
+              }
+              className={`min-h-11 rounded-full border px-4 text-sm font-black focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-200 ${
+                quickFilter === value
+                  ? "border-emerald-800 bg-emerald-800 text-white"
+                  : "border-slate-300 bg-white text-slate-700 hover:border-emerald-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        <details className="mt-3 rounded-xl border border-slate-200 px-3 py-2 dark:border-slate-700">
+          <summary className="min-h-11 cursor-pointer py-3 text-sm font-black text-slate-800 dark:text-slate-100">詳細条件</summary>
+          <div className="grid gap-3 pb-3 sm:grid-cols-2 lg:grid-cols-4">
           <FilterSelect
             label="看板形式"
             value={signFormat}
@@ -189,72 +204,6 @@ export function SafetyImageLibraryClient({
               .sort()
               .map((item) => ({ value: item, label: item }))}
           />
-          <fieldset className="sm:col-span-2 lg:col-span-1">
-            <legend className="mb-1 text-xs font-black text-slate-600 dark:text-slate-300">
-              向き
-            </legend>
-            <div className="grid grid-cols-3 gap-1">
-              {(
-                [
-                  ["portrait", "縦"],
-                  ["landscape", "横"],
-                  ["square", "正方形"],
-                ] as const
-              ).map(([value, label]) => (
-                <button
-                  key={value}
-                  type="button"
-                  aria-pressed={orientation === value}
-                  onClick={() =>
-                    updateFilter(() =>
-                      setOrientation((current) =>
-                        current === value ? "all" : value,
-                      ),
-                    )
-                  }
-                  className={`min-h-12 rounded-xl border text-sm font-black ${orientation === value ? "border-emerald-800 bg-emerald-800 text-white" : "border-slate-300 bg-white text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"}`}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-          </fieldset>
-        </div>
-
-        <fieldset className="mt-3">
-          <legend className="text-xs font-black text-slate-600 dark:text-slate-300">
-            表示言語（複数選択）
-          </legend>
-          <p className="mt-1 text-xs text-slate-500">
-            日本語を初期選択。国内の外国人労働者数が多い言語を並べています。
-          </p>
-          <div className="mt-2 flex flex-wrap gap-2">
-            {LANGUAGES.map(([value, label]) => (
-              <label
-                key={value}
-                className="flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border border-slate-300 bg-white px-3 text-sm font-bold dark:border-slate-700 dark:bg-slate-900"
-              >
-                <input
-                  type="checkbox"
-                  checked={languages.includes(value)}
-                  onChange={(event) =>
-                    updateFilter(() =>
-                      setLanguages((current) =>
-                        event.target.checked
-                          ? [...current, value]
-                          : current.filter((item) => item !== value),
-                      ),
-                    )
-                  }
-                  className="h-5 w-5 accent-emerald-800"
-                />
-                {label}
-              </label>
-            ))}
-          </div>
-        </fieldset>
-
-        <div className="mt-3 grid gap-3 sm:grid-cols-3">
           <FilterSelect
             label="用途"
             value={use}
@@ -285,41 +234,8 @@ export function SafetyImageLibraryClient({
             />
             施工計画・報告書向け
           </label>
-        </div>
-
-        <div
-          className="mt-5 flex flex-wrap gap-2"
-          aria-label="よく使う絞り込み"
-        >
-          {[
-            ["recommended", "よく使う看板"],
-            ["ppe", "保護具"],
-            ["prohibition", "立入・禁止"],
-            ["heavy", "重機・吊り荷"],
-            ["multilingual", "多言語"],
-            ["numeric", "荷重・数値編集"],
-          ].map(([value, label]) => (
-            <button
-              key={value}
-              type="button"
-              aria-pressed={quickFilter === value}
-              onClick={() =>
-                updateFilter(() =>
-                  setQuickFilter((current) =>
-                    current === value ? "all" : (value as QuickFilter),
-                  ),
-                )
-              }
-              className={`min-h-11 rounded-full border px-4 text-sm font-black focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-200 ${
-                quickFilter === value
-                  ? "border-emerald-800 bg-emerald-800 text-white"
-                  : "border-slate-300 bg-white text-slate-700 hover:border-emerald-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
-              }`}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
+          </div>
+        </details>
       </div>
       <noscript>
         <style>{`[data-safety-sign-filters]{display:none!important}`}</style>
@@ -398,7 +314,7 @@ export function SafetyImageLibraryClient({
                     </span>
                   ) : null}
                 </div>
-                <div className="p-4 pb-2">
+                <div className="p-4">
                   <p className="text-xs font-black text-emerald-800 dark:text-emerald-300">
                     {theme.categoryLabel}
                   </p>
@@ -410,26 +326,13 @@ export function SafetyImageLibraryClient({
                   </p>
                   <p className="mt-1 flex flex-wrap items-center gap-1.5 text-xs font-bold text-slate-500 dark:text-slate-400">
                     <Languages className="h-4 w-4" aria-hidden="true" />
-                    5言語{theme.editableNumber ? "・数値編集" : "・文字編集"}
+                    5言語・縦横選択・{theme.editableNumber ? "数値編集" : "文字編集"}
                   </p>
+                  <span className="mt-3 inline-flex min-h-11 items-center gap-1 font-black text-emerald-800 dark:text-emerald-300">
+                    看板を開く <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                  </span>
                 </div>
               </Link>
-              <div className="grid grid-cols-2 gap-2 p-4 pt-3">
-                <Link
-                  href={theme.detailPath}
-                  className="inline-flex min-h-11 items-center justify-center gap-1 rounded-lg bg-emerald-800 px-2 text-sm font-black text-white hover:bg-emerald-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-200"
-                >
-                  <Download className="h-4 w-4" aria-hidden="true" />
-                  そのまま使う
-                </Link>
-                <Link
-                  href={`${theme.detailPath}#edit`}
-                  className="inline-flex min-h-11 items-center justify-center gap-1 rounded-lg border border-emerald-700 px-2 text-sm font-black text-emerald-900 hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-200 dark:text-emerald-200"
-                >
-                  <PencilLine className="h-4 w-4" aria-hidden="true" />
-                  文字を編集
-                </Link>
-              </div>
             </article>
           ))}
         </div>
@@ -445,8 +348,6 @@ export function SafetyImageLibraryClient({
               setCategory("all");
               setUse("all");
               setSignFormat("all");
-              setLanguages(["ja"]);
-              setOrientation("all");
               setNumericOnly(false);
               setDocumentOnly(false);
               setQuickFilter("all");
