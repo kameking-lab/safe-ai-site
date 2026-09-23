@@ -15,7 +15,7 @@
         "結果の軽重にかかわらず条件を記録し、次の計画と改善へつなげます。"
       ],
       "refs": [
-        { "lawShort": "安衛法", "article": "第28条の2", "sourceId": "LAW-MHLW-OSH", "egovUrl": "https://laws.e-gov.go.jp/law/347AC0000000057", "naviPath": "/law-navi/347AC0000000057/28-2" },
+        { "lawShort": "安衛法", "article": "第28条の2", "sourceId": "LAW-MHLW-OSH", "egovUrl": "https://laws.e-gov.go.jp/law/347AC0000000057#Mp-At_28_2" },
         { "sourceId": "GUIDE-MHLW-RA", "locator": "危険性又は有害性の特定、リスクの見積り、優先度、低減措置、記録" }
       ],
       "claimIds": ["C-REF-MULTI"]

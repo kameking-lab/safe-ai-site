@@ -375,6 +375,7 @@ export function SafetySeminarPlayer({
                   height={slide.stage.mascot.height}
                   sizes="(max-width: 639px) 34vw, (max-width: 1023px) 32vw, 280px"
                   loading={slide.number === 1 ? "eager" : "lazy"}
+                  style={{ maxWidth: Math.min(280, slide.stage.mascot.width) }}
                   className="mx-auto h-auto max-h-[250px] w-full max-w-[280px] object-contain"
                 />
               ) : null}

@@ -157,8 +157,10 @@ describe("安全管理の基本と安衛法研修の共通正本", () => {
       expect(source, `${ref.lawShort} ${ref.article}: source`).toBeTruthy();
       expect(ref.egovUrl.startsWith(source!.url), `${ref.article}: e-Gov prefix`).toBe(true);
       if (ref.article.includes("の")) {
-        expect(ref.egovUrl).toBe(source!.url);
-        expect(ref.naviPath, `${ref.article}: branch path`).toBeTruthy();
+        // 2026-09-24、Astra監査でこの枝番の実ブラウザ着地を確認済み。
+        expect(ref.article).toBe("第28条の2");
+        expect(ref.egovUrl).toBe(`${source!.url}#Mp-At_28_2`);
+        expect(ref.naviPath).toBeUndefined();
       } else {
         expect(ref.egovUrl).toMatch(/^https:\/\/laws\.e-gov\.go\.jp\/law\/347AC0000000057#Mp-At_\d+$/u);
       }

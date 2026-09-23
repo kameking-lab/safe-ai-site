@@ -1,6 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import sharp from "sharp";
 
 // Artifact Tool is unavailable in this supplied runtime. This builder therefore
 // uses the bundled PptxGenJS package, then retains the presentation finalizer's
@@ -58,7 +59,7 @@ const inch = (pixels) => Math.round(pixels * PX * 10000) / 10000;
 const color = (value) => String(value).replace("#", "");
 const COLORS = {
   forest: "073C35", evergreen: "0A6257", paper: "FCFCF8", ink: "173B36",
-  slate: "56706B", line: "BDD4CD", orange: "F6A234", coral: "EA735F", white: "FFFFFF",
+  slate: "56706B", line: "BDD4CD", orange: "F6A234", coral: "A83F2D", white: "FFFFFF",
 };
 const MARGIN = 76;
 
@@ -74,7 +75,9 @@ for (const data of course.slides) {
   addSpeakerNotes(slide, data);
 }
 
-const stagingDir = path.join(WEB_ROOT, ".codex-finalizer", COURSE_ID);
+const stagingRoot = path.join(WEB_ROOT, ".codex-finalizer");
+await fs.mkdir(stagingRoot, { recursive: true });
+const stagingDir = await fs.mkdtemp(path.join(stagingRoot, `${COURSE_ID}-`));
 const candidatePath = path.join(stagingDir, `${COURSE_ID}-candidate.pptx`);
 await fs.mkdir(stagingDir, { recursive: true });
 await fs.mkdir(path.dirname(FINAL_PPTX), { recursive: true });
@@ -156,11 +159,13 @@ function addText(slide, text, position, style = {}) {
   });
 }
 
-function addImage(slide, filePath, alt, position, sizing = "contain") {
+async function addImage(slide, filePath, alt, position, sizing = "contain") {
+  const metadata = await sharp(filePath).metadata();
+  if (!metadata.width || !metadata.height) throw new Error(`Image dimensions missing: ${filePath}`);
   slide.addImage({
     path: filePath,
     altText: alt,
-    x: inch(position.left), y: inch(position.top), w: inch(position.width), h: inch(position.height),
+    x: inch(position.left), y: inch(position.top), w: inch(metadata.width), h: inch(metadata.height),
     sizing: { type: sizing, x: inch(position.left), y: inch(position.top), w: inch(position.width), h: inch(position.height) },
   });
 }
@@ -177,7 +182,8 @@ function addBase(slide, data) {
 
 async function buildCover(slide, data) {
   slide.background = { color: COLORS.forest };
-  addImage(slide, assetPath(data.visual.src), data.visual.alt, { left: 730, top: 0, width: 550, height: 720 }, "cover");
+  await addImage(slide, assetPath(data.visual.src), data.visual.alt, { left: 0, top: 0, width: 1280, height: 720 }, "cover");
+  addShape(slide, pptx.ShapeType.rect, { left: 0, top: 0, width: 730, height: 720 }, COLORS.forest);
   addShape(slide, pptx.ShapeType.rect, { left: 700, top: 0, width: 580, height: 720 }, COLORS.forest, null, 35);
   addShape(slide, pptx.ShapeType.rect, { left: 0, top: 0, width: 22, height: 720 }, COLORS.orange);
   addText(slide, data.kicker, { left: 84, top: 68, width: 530, height: 30 }, { fontSize: 19, bold: true, color: "A8E8D7" });
@@ -247,7 +253,7 @@ function addSpeakerNotes(slide, data) {
     return `- S${source.sourceNo} ${source.sourceId}: ${source.url}`;
   });
   const articleLines = (data.articleRefs ?? []).map((ref) =>
-    `- ${ref.lawShort} ${ref.article}: ${ref.article.includes("の") && ref.naviPath ? ref.naviPath : ref.egovUrl} / e-Gov: ${ref.egovUrl}`,
+    `- ${ref.lawShort} ${ref.article}: ${ref.article.includes("の") && ref.naviPath ? `https://www.anzen-ai-portal.jp${ref.naviPath}` : ref.egovUrl} / e-Gov: ${ref.egovUrl}`,
   );
   slide.addNotes([
     "詳しい内容", data.message, ...(data.body ?? []).map((item) => `- ${item}`), "",

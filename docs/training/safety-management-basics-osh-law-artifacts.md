@@ -3,32 +3,30 @@
 ## 正本と固定条件
 
 - Web・PPTX の投影文面は `web/src/data/safety-seminars/safety-management-basics-osh-law.json` の `stage` を正本とする。
-- `narration`、`claimIds`、音声12本、ファイル名、12枚構成は変更しない。
-- PPTX のノートには詳しい本文、原稿、講師補足、claim ID、条文直リンクを含める。
-- PDF は更新済み PPTX から変換し、PPTX と同じ12枚を確認してから同時に公開する。
+- `narration`、`claimIds`、音声12本、公開ファイル名、12枚構成は変更しない。
+- PPTX のノートには詳しい本文、原稿、講師補足、claim ID、条文直リンクを含める。内部法令ナビも配布後に使える絶対URLで記録する。
+- PDF は更新済み PPTX から変換し、同じ12枚を確認してから同時に公開パスへ置く。
 
-## PPTX 生成
+## 検証済みの生成手順
 
-生成スクリプトは `web/scripts/training/build-safety-management-basics-osh-law-pptx.mjs`。次の実行環境を明示する。
+2026-09-24、bundled Artifact Tool / LibreOffice がないことを再確認した。一方、リポジトリ既存の `scripts/pptx-to-images.ps1` とこのホストの PowerPoint COM は利用可能だった。オーナーへの再生成依頼は不要となった。既存スクリプトに任意の `-Pdf` 出力を追加し、同一のPPTXを非表示・読み取り専用で開いて全スライドを画像化し、PowerPointのPDF書き出しを使う。
 
-- `SKILL_DIR`: Presentations スキルの絶対パス
-- `RUNTIME_NODE_MODULES`: `pptxgenjs` と `jszip` を含む承認済み Node.js 依存の絶対パス
-- `RUNTIME_PYTHON`: 検証用 Python の絶対パス
-- `TRAINING_PPTX_OUTPUT`: リポジトリ内の一時出力先。既存の公開ファイルを直接上書きしない
+1. `load_workspace_dependencies` で承認済みランタイムを解決する。
+2. 次の環境変数を設定し、`web` で `node scripts/training/build-safety-management-basics-osh-law-pptx.mjs` を実行する。`SKILL_DIR` はPresentationsスキル、`RUNTIME_NODE_MODULES` はbundled pptxgenjs/jszipの依存、`RUNTIME_PYTHON` はbundled Pythonの絶対パス。`TRAINING_PPTX_OUTPUT` はweb内の未使用の一時出力先。既存公開ファイルを直接指定しない。
+3. リポジトリルートで `pwsh -NoProfile -File scripts/pptx-to-images.ps1 -Pptx <候補.pptx> -OutDir <監査画像ディレクトリ> -Width 1600 -Pdf <候補.pdf>` を実行する。PowerPointが必要。LibreOfficeへ自動フォールバックしない。
+4. finalizer の12枚・寸法 `12192000 × 6858000 EMU`・Yu Gothic・パッケージ検査を確認する。実行ごとに専用の一時ディレクトリを作るので、前回の検証receiptとの衝突は起こらない。
+5. 全12枚の画像を目視し、PDFも12ページを別途描画する。PDFタイトル、全ページの `stage.headline`、私有URL不在、PPTXノート12件と条URLを検査する。
+6. 検査後にPPTX/PDFを既存の `web/public/training/safety-seminars/safety-management-basics-osh-law/downloads/` へ同時にコピーする。
 
-生成後は12枚、`12192000 × 6858000 EMU`、Yu Gothic、パッケージ整合性、見出し収まりを finalizer で確認する。さらに全12枚を画像化し、重なり、欠落、切れ、マスコットの重複がないことを目視確認する。
+PowerPointは画像の縦横比を保つ。表紙はシーンを全面配置して左を既存の背景で覆い、右のチワワを潰さない。限定条件は白地で読みやすい濃色へ修正した。
 
-## PDF 同期
+## 2026-09-24 の同期結果
 
-PDF は検証済み PPTX を同一環境の LibreOffice で変換する。12頁、タイトルメタデータ、全 `stage.headline`、私有URLがないことを確認する。PPTXだけ、またはPDFだけを更新しない。
+- PPTX: 12枚 / 12ノート / 651,823 bytes / SHA-256 `a77c7c5d5b9a33e53dad9ac12cab9679374ad96cbdc78f1eb0b015c6d8aa23ce`。
+- PDF: 12ページ / タイトル「安全管理の基本と安衛法｜安全AIポータル」/ SHA-256 `b6954a1991ac9e3f1e79c4ac49d97bf8d2f94f43ef7b65b8072f514795337c78`。
+- 全 `stage.headline` が該当PDFページから抽出でき、欠落0。PPTXノートに第28条の2を含む e-Gov 条アンカーを確認。私有Drive URLなし。
+- 全12枚を PowerPoint 書き出し画像と PDFium のPDF描画で確認。文字切れ・重なり・同一ポーズ重複なし。
+- 元の公開PPTX `9a6d305c…` と PDF `0d37f848…` は本PRで更新済み。
+- ローカルの描画証跡は `../seminar-review-evidence/pptx-final/` と `../seminar-review-evidence/pdf-final/`。生成画像はstorage policyに従いコミットしない。
 
-## 2026-09-24 の再現性判定
-
-この作業環境では PPTX 候補を12枚で生成し、構造・寸法・フォント検査まで通過した。候補の SHA-256 は `8db6803529cbf05b49c2004413384c82365f6e1c7856eeed9b3d498a88f60ab7`。
-
-一方、承認済みランタイムに `@oai/artifact-tool` と LibreOffice がなく、全スライドの画像化とPDF変換を同じ手順で再現できなかった。このため公開中の PPTX/PDF はこのPRでは更新しない。公開中ファイルの SHA-256 は次のとおり。
-
-- PPTX: `9a6d305c26f6101ccdcb8ebef8a55ff38fe7a3f61a8500374122ca617bfa27b3`
-- PDF: `0d37f8483a91318341a01c02764e8a20b90fa14282701defed046376c364278c`
-
-両ツールを備えたオーナー環境で、生成、全12枚の目視、PDF変換、検査を一続きで実行した後に2ファイルを同時更新する。
+構造検査だけをPowerPointの目視確認と混同しない。今回はPowerPointで実際に開いて書き出した画像を目視したが、スライドショーモードの実機投影は未実施。

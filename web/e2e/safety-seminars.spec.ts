@@ -221,6 +221,9 @@ test.describe("安全管理の基本と安衛法 PR1", () => {
         }).map((element) => ({ text: element.textContent, rect: element.getBoundingClientRect().toJSON() })),
       );
       expect(undersizedTargets, `${width}px targets`).toEqual([]);
+      const mascot = stage.locator("img");
+      await mascot.evaluate((element) => (element as HTMLImageElement).decode());
+      expect((await mascot.boundingBox())!.width).toBeLessThanOrEqual(280);
     }
   });
 
@@ -232,7 +235,7 @@ test.describe("安全管理の基本と安衛法 PR1", () => {
 
     const correctIndexes = [1, 1, 0, 2, 3];
     for (const [index, answer] of correctIndexes.entries()) {
-      await page.getByRole("radio").nth(answer).click();
+      await page.getByRole("group", { name: /問目の選択肢/u }).getByRole("button").nth(answer).click();
       const status = page.locator('[role="status"]').filter({ hasText: /正解です/u });
       await expect(status).toBeFocused();
       await expect(page.getByText(/○ 正解：/u)).toHaveCount(1);
@@ -276,5 +279,55 @@ test.describe("安全管理の基本と安衛法 PR1", () => {
       expect(Number(response.headers()["content-length"] ?? 0), name).toBeGreaterThan(0);
     }
     await context.close();
+  });
+
+  test("保存拒否と壊れた保存値でもクイズを操作できる", async ({ browser, baseURL }) => {
+    for (const blocked of [true, false]) {
+      const context = await browser.newContext({ baseURL });
+      await context.addInitScript((denyStorage) => {
+        if (denyStorage) {
+          for (const method of ["getItem", "setItem", "removeItem"] as const) {
+            Storage.prototype[method] = () => { throw new DOMException("Storage blocked", "SecurityError"); };
+          }
+        } else {
+          localStorage.setItem("seminar-quiz:safety-management-basics-osh-law:1.0.0", JSON.stringify({ queue: [99], position: 0, responses: { 99: 1 }, complete: false }));
+        }
+      }, blocked);
+      const page = await context.newPage();
+      await page.goto(OSH_DETAIL);
+      const choice = page.getByRole("group", { name: /問目の選択肢/u }).getByRole("button").first();
+      await choice.focus();
+      await page.keyboard.press("Space");
+      await expect(page.getByRole("status")).toContainText("不正解です");
+      await page.getByRole("button", { name: "次の問題" }).click();
+      await expect(page.getByText("問題 2/5", { exact: true })).toBeVisible();
+      await context.close();
+    }
+  });
+
+  test("誤答再挑戦、再読み込みと根拠から戻る操作で進捗を維持する", async ({ page }) => {
+    await page.goto(OSH_DETAIL);
+    const answers = [0, 1, 0, 2, 3];
+    for (const [index, answer] of answers.entries()) {
+      await page.getByRole("group", { name: /問目の選択肢/u }).getByRole("button").nth(answer).click();
+      await page.getByRole("button", { name: index === 4 ? "結果を見る" : "次の問題" }).click();
+    }
+    await expect(page.getByText("4/5問 正解")).toBeVisible();
+    await page.getByRole("button", { name: "間違えた問題だけ再挑戦" }).click();
+    await expect(page.getByText("問題 1/1", { exact: true })).toBeVisible();
+    await page.getByRole("button", { name: "人、設備、作業方法、管理の条件を確認する", exact: true }).click();
+    await page.reload();
+    await page.getByRole("button", { name: "続きから", exact: true }).click();
+    await expect(page.getByText("回答済み 1/1問", { exact: true })).toBeVisible();
+    const evidence = page.getByRole("link", { name: "根拠: 安衛法 第28条の2", exact: true });
+    await expect(evidence).toHaveAttribute("href", "https://laws.e-gov.go.jp/law/347AC0000000057#Mp-At_28_2");
+    await expect(evidence).toHaveAttribute("target", "_blank");
+    await page.getByRole("navigation", { name: "パンくず" }).getByRole("link", { name: "安全研修ライブラリ", exact: true }).click();
+    await expect(page).toHaveURL(/\/training\/safety-seminars$/u);
+    await page.goBack();
+    const resume = page.getByRole("button", { name: "続きから", exact: true });
+    if (await resume.isVisible()) await resume.click();
+    await page.getByRole("button", { name: "結果を見る" }).click();
+    await expect(page.getByText("1/1問 正解")).toBeVisible();
   });
 });

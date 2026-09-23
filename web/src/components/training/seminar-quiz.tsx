@@ -30,6 +30,28 @@ function initialState(): QuizState {
   };
 }
 
+function isQuizState(value: unknown): value is QuizState {
+  if (!value || typeof value !== "object") return false;
+  const candidate = value as Partial<QuizState>;
+  const { queue, position, responses, complete } = candidate;
+  if (
+    !Array.isArray(queue) || queue.length === 0 ||
+    new Set(queue).size !== queue.length ||
+    queue.some((index) => !Number.isInteger(index) || index < 0 || index >= quiz.questions.length) ||
+    !Number.isInteger(position) || position! < 0 || position! >= queue.length ||
+    !responses || typeof responses !== "object" || Array.isArray(responses) ||
+    typeof complete !== "boolean"
+  ) return false;
+  if (!Object.entries(responses).every(([key, choice]) => {
+    const index = Number(key);
+    return String(index) === key && queue.includes(index) && Number.isInteger(choice) &&
+      choice >= 0 && choice < quiz.questions[index]!.choices.length;
+  })) return false;
+  return queue.every((index, offset) =>
+    (offset < position! || complete) ? responses[index] !== undefined : offset > position! ? responses[index] === undefined : true,
+  );
+}
+
 function isArticleRef(
   ref: TrainingQuizQuestion["refs"][number],
 ): ref is TrainingArticleRef {
@@ -64,21 +86,13 @@ export function SeminarQuiz({ courseId }: { courseId: string }) {
     try {
       const raw = window.localStorage.getItem(storageKey);
       if (raw) {
-        const parsed = JSON.parse(raw) as QuizState;
-        if (
-          Array.isArray(parsed.queue) &&
-          parsed.queue.length > 0 &&
-          Number.isInteger(parsed.position) &&
-          parsed.position >= 0 &&
-          parsed.position < parsed.queue.length &&
-          parsed.responses &&
-          typeof parsed.responses === "object"
-        ) {
+        const parsed: unknown = JSON.parse(raw);
+        if (isQuizState(parsed) && Object.keys(parsed.responses).length > 0) {
           setSavedState(parsed);
         }
       }
     } catch {
-      window.localStorage.removeItem(storageKey);
+      // 保存を拒否するブラウザーでも、その場でクイズを続けられる。
     } finally {
       setLoaded(true);
     }
@@ -86,7 +100,11 @@ export function SeminarQuiz({ courseId }: { courseId: string }) {
 
   useEffect(() => {
     if (!loaded || savedState) return;
-    window.localStorage.setItem(storageKey, JSON.stringify(state));
+    try {
+      window.localStorage.setItem(storageKey, JSON.stringify(state));
+    } catch {
+      // 容量超過や保存制限は、採点や次問への移動を妨げない。
+    }
   }, [loaded, savedState, state, storageKey]);
 
   const questionIndex = state.queue[state.position] ?? 0;
@@ -104,7 +122,11 @@ export function SeminarQuiz({ courseId }: { courseId: string }) {
   }, [answered, questionIndex, state.complete]);
 
   const clearAndStart = () => {
-    window.localStorage.removeItem(storageKey);
+    try {
+      window.localStorage.removeItem(storageKey);
+    } catch {
+      // 保存状態を消せなくても、現在の画面は初期化する。
+    }
     setSavedState(null);
     setState(initialState());
   };
@@ -116,7 +138,7 @@ export function SeminarQuiz({ courseId }: { courseId: string }) {
     return (
       <div className="mt-5 rounded-2xl border border-teal-300 bg-white p-5 dark:border-teal-700 dark:bg-slate-900">
         <p className="font-black text-slate-950 dark:text-white">
-          保存済みの進捗があります（{Math.min(savedAnswered, 5)}/5問）
+          保存済みの進捗があります（{savedAnswered}/{savedState.queue.length}問）
         </p>
         <div className="mt-4 flex flex-wrap gap-3">
           <button
@@ -189,27 +211,27 @@ export function SeminarQuiz({ courseId }: { courseId: string }) {
           問題 {state.position + 1}/{state.queue.length}
         </p>
         <p className="text-sm font-bold text-slate-600 dark:text-slate-300">
-          全体 {Object.keys(state.responses).length}/5問
+          回答済み {Object.keys(state.responses).length}/{state.queue.length}問
         </p>
       </div>
       <div
         role="progressbar"
         aria-label="確認クイズの進捗"
         aria-valuemin={0}
-        aria-valuemax={5}
-        aria-valuenow={Math.min(Object.keys(state.responses).length, 5)}
+        aria-valuemax={state.queue.length}
+        aria-valuenow={Object.keys(state.responses).length}
         className="mt-3 h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-700"
       >
         <div
           className="h-full bg-teal-600 transition-[width] motion-reduce:transition-none"
-          style={{ width: `${Math.min(100, Object.keys(state.responses).length * 20)}%` }}
+          style={{ width: `${Object.keys(state.responses).length / state.queue.length * 100}%` }}
         />
       </div>
       <fieldset className="mt-5">
         <legend className="text-lg font-black leading-7 text-slate-950 dark:text-white">
           {question.question}
         </legend>
-        <div className="mt-4 grid gap-3" role="radiogroup" aria-label={`${state.position + 1}問目の選択肢`}>
+        <div className="mt-4 grid gap-3" role="group" aria-label={`${state.position + 1}問目の選択肢`}>
           {question.choices.map((choice, index) => {
             const selected = selectedIndex === index;
             const correct = answered && question.correctIndex === index;
@@ -218,8 +240,7 @@ export function SeminarQuiz({ courseId }: { courseId: string }) {
               <div key={choice} className={`rounded-xl border ${correct ? "border-teal-600 bg-teal-50 dark:bg-teal-950/60" : selected ? "border-rose-600 bg-rose-50 dark:bg-rose-950/50" : "border-slate-300 dark:border-slate-600"}`}>
                 <button
                   type="button"
-                  role="radio"
-                  aria-checked={selected}
+                  aria-pressed={selected}
                   disabled={answered}
                   onClick={() => setState((current) => ({
                     ...current,

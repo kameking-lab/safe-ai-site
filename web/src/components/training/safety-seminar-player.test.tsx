@@ -196,7 +196,7 @@ describe("SafetySeminarPlayer", () => {
     fireEvent.click(screen.getByRole("button", { name: "詳しく閉じる" }));
     fireEvent.click(screen.getByRole("button", { name: "次のスライド" }));
     expect(screen.getByRole("link", { name: "安衛法 第28条の2" }).getAttribute("href"))
-      .toBe("/law-navi/347AC0000000057/28-2");
+      .toBe("https://laws.e-gov.go.jp/law/347AC0000000057#Mp-At_28_2");
     fireEvent.click(screen.getByRole("button", { name: "次のスライド" }));
     expect(screen.getByRole("link", { name: "安衛法 第1条" }).getAttribute("href"))
       .toBe("https://laws.e-gov.go.jp/law/347AC0000000057#Mp-At_1");

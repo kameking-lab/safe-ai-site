@@ -41,7 +41,7 @@
         "mascot": { "src": "/mascot/mascot-detective.webp", "alt": "事故の複数要因を調べるチワワ", "width": 271, "height": 320 }
       },
       "articleRefs": [
-        { "lawShort": "安衛法", "article": "第28条の2", "sourceId": "LAW-MHLW-OSH", "egovUrl": "https://laws.e-gov.go.jp/law/347AC0000000057", "naviPath": "/law-navi/347AC0000000057/28-2" }
+        { "lawShort": "安衛法", "article": "第28条の2", "sourceId": "LAW-MHLW-OSH", "egovUrl": "https://laws.e-gov.go.jp/law/347AC0000000057#Mp-At_28_2" }
       ],
       "visual": { "type": "image", "src": "/training/safety-seminars/safety-management-basics-osh-law/hazard-spotting.webp", "alt": "現場の複数の危険条件を確認するチワワの先生" },
       "label": "安全管理",
@@ -253,7 +253,7 @@
         "mascot": { "src": "/mascot/mascot-salute.webp", "alt": "5つの確認を終えたチワワ", "width": 309, "height": 320 }
       },
       "articleRefs": [
-        { "lawShort": "安衛法", "article": "第28条の2", "sourceId": "LAW-MHLW-OSH", "egovUrl": "https://laws.e-gov.go.jp/law/347AC0000000057", "naviPath": "/law-navi/347AC0000000057/28-2" }
+        { "lawShort": "安衛法", "article": "第28条の2", "sourceId": "LAW-MHLW-OSH", "egovUrl": "https://laws.e-gov.go.jp/law/347AC0000000057#Mp-At_28_2" }
       ],
       "visual": { "type": "checklist", "items": ["危険を具体的な場面で言える", "対策を優先順に説明できる", "自分と責任者の役割が分かる", "作業を止める条件が分かる", "連絡先と再開条件が分かる"] },
       "label": "確認クイズへ",
