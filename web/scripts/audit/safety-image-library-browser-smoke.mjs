@@ -82,16 +82,15 @@ try {
   const heatCount = Number((await page.getByText(/検索結果 \d+点/u).textContent())?.match(/\d+/u)?.[0]);
   if (!(heatCount > 0 && heatCount < 100)) throw new Error(`keyword filter invalid: ${heatCount}`);
   await search.fill("");
-  await page.getByRole("button", { name: "荷重・数値編集" }).click();
+  await page.getByRole("button", { name: "数値編集", exact: true }).click();
   if (!(await page.getByText("検索結果 10点").isVisible())) {
     throw new Error("numeric quick filter must return 10 items");
   }
   process.stdout.write("PASS formal browser search/filter/numeric-count\n");
 
   await page.goto(`${origin}${detailPath}`, { waitUntil: "domcontentloaded" });
-  const languageSelect = page.locator("#edit-controls select").first();
-  const textInput = page.locator("#edit-controls textarea").first();
-  await languageSelect.selectOption("en");
+  await page.getByLabel("英語", { exact: true }).check();
+  const textInput = page.getByLabel("表示する文字（英語）", { exact: true });
   await textInput.fill("CHECK HELMET BEFORE ENTRY");
   if ((await textInput.inputValue()) !== "CHECK HELMET BEFORE ENTRY") {
     throw new Error("custom text edit failed");
@@ -99,8 +98,8 @@ try {
   if ((await textInput.getAttribute("lang")) !== "en") {
     throw new Error("edited language is not exposed to assistive technology");
   }
-  const previewLanguage = await page.getByRole("img", { name: /文字編集プレビュー/u }).last().getAttribute("lang");
-  if (previewLanguage !== "en") throw new Error("preview language attribute did not follow the preset");
+  const previewLanguages = await page.locator('svg[aria-label^="文字編集プレビュー"] text').evaluateAll((lines) => [...new Set(lines.map((line) => line.getAttribute("lang")))]);
+  if (previewLanguages.join(",") !== "ja,en") throw new Error("preview language layers did not follow the selected presets");
   if ((await page.locator('#download-heading').count()) !== 1) {
     throw new Error("download controls missing");
   }
@@ -134,6 +133,7 @@ try {
   await page.goto(`${origin}/materials/safety-images/maximum-load`, { waitUntil: "domcontentloaded" });
   await page.getByLabel("数値・連絡先").fill("250");
   await page.getByLabel("単位").fill("kg");
+  await page.getByText("詳細設定", { exact: true }).click();
   await page.getByLabel("チワワ・©").click();
   if ((await page.getByLabel("数値・連絡先").inputValue()) !== "250") {
     throw new Error("numeric edit failed");
