@@ -1,12 +1,16 @@
 "use client";
 
+import Image from "next/image";
 import { ExternalLink, Search } from "lucide-react";
 import {
-  generateAmazonAffiliateUrl,
+  generateAmazonHighRatedSearchUrl,
   generateRakutenSearchUrl,
 } from "@/lib/affiliate-url";
 import { trackEvent } from "@/components/Analytics";
-import { PUBLIC_SAFETY_GOODS_CATEGORIES } from "@/data/public-safety-goods-categories";
+import {
+  PUBLIC_GOODS_RATING_DISCLOSURE,
+  PUBLIC_SAFETY_GOODS_CATEGORIES,
+} from "@/data/public-safety-goods-categories";
 import { FeatureMascotCompanion } from "@/components/feature-mascot-companion";
 import { NetisSafetyGuide } from "@/components/netis-safety-guide";
 import { SafetyGoodsWizard } from "@/components/safety-goods-wizard";
@@ -66,6 +70,45 @@ export function SafetyGoodsPanel() {
         />
       </header>
 
+      <section aria-labelledby="goods-categories-title">
+        <h2 id="goods-categories-title" className="text-xl font-bold text-slate-950">
+          イラストから安全用品を選ぶ
+        </h2>
+        <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-700">
+          まず使う用品を選び、カード内で必要な特徴を確認してください。商品検索へ進む前に、カテゴリの代表イラストと確認項目を表示します。
+        </p>
+        <ul className="mt-4 flex snap-x gap-4 overflow-x-auto pb-4" aria-label="安全用品カテゴリの画像一覧">
+          {PUBLIC_SAFETY_GOODS_CATEGORIES.map((category) => (
+            <li key={category.id} id={`goods-${category.id}`} className="w-[17rem] shrink-0 snap-start overflow-hidden rounded-2xl border border-slate-300 bg-white shadow-sm">
+              <div className="relative aspect-[4/3] bg-slate-100">
+                <Image src={category.image} alt={`${category.name}のカテゴリイラスト`} fill sizes="272px" className="object-contain p-2" />
+              </div>
+              <div className="p-4">
+                <h3 className="text-base font-bold text-slate-950">{category.name}</h3>
+                <p className="mt-2 min-h-12 text-xs leading-6 text-slate-600">{category.selectionPrompt}</p>
+                <details className="mt-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
+                  <summary className="cursor-pointer text-sm font-bold text-emerald-900">特徴と候補を見る</summary>
+                  <p className="mt-2 text-xs leading-6 text-slate-600">
+                    型式・規格表示・適用範囲・使用期限・点検方法を商品ごとに照合してください。
+                  </p>
+                  <div className="mt-3 grid grid-cols-2 gap-2">
+                    <a href={generateAmazonHighRatedSearchUrl(category.searchQuery)} target="_blank" rel="noopener noreferrer sponsored" onClick={() => affiliateClick("amazon", category.id, category.name)} className="inline-flex min-h-11 items-center justify-center gap-1 rounded-lg bg-amber-700 px-2 text-xs font-bold text-white hover:bg-amber-800">
+                      <Search className="h-4 w-4" aria-hidden="true" />Amazon ★4〜
+                    </a>
+                    <a href={generateRakutenSearchUrl(category.searchQuery)} target="_blank" rel="noopener noreferrer sponsored" onClick={() => affiliateClick("rakuten", category.id, category.name)} className="inline-flex min-h-11 items-center justify-center gap-1 rounded-lg bg-rose-700 px-2 text-xs font-bold text-white hover:bg-rose-800">
+                      <Search className="h-4 w-4" aria-hidden="true" />楽天
+                    </a>
+                  </div>
+                </details>
+              </div>
+            </li>
+          ))}
+        </ul>
+        <p className="mt-2 text-xs font-semibold leading-6 text-slate-600">
+          検索結果は推奨や適合証明ではありません。評価・レビュー件数・商品画像・価格は、販売サイトを開いた時点の表示で確認します。安全AIポータル内では未確認の評価値を掲載しません。確認先: <a href={PUBLIC_GOODS_RATING_DISCLOSURE.sourceUrl} target="_blank" rel="noopener noreferrer" className="underline">{PUBLIC_GOODS_RATING_DISCLOSURE.sourceLabel}</a>
+        </p>
+      </section>
+
       <SafetyGoodsWizard />
 
       <NetisSafetyGuide compact />
@@ -102,82 +145,6 @@ export function SafetyGoodsPanel() {
           確認日: 2026年7月24日。資料は対象作業・製品ごとに異なります。リンク先の改訂状況も確認してください。
         </p>
       </details>
-
-      <section aria-labelledby="goods-quick-selector" className="rounded-3xl bg-slate-950 p-5 text-white sm:p-7">
-        <p className="text-xs font-black tracking-[.14em] text-emerald-300">30-SECOND SELECTOR</p>
-        <h2 id="goods-quick-selector" className="mt-2 text-2xl font-black">ほかの安全用品から探す</h2>
-        <p className="mt-2 text-sm font-semibold leading-6 text-slate-300">上の3ステップにない危険も、カテゴリからすぐ購入検索へ進めます。</p>
-        <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-          {[
-            ["高所から落ちる", "#goods-fall-protection", "墜落制止用器具へ"],
-            ["有害物を吸う", "#goods-respiratory", "呼吸用保護具へ"],
-            ["薬液が触れる", "#goods-chemical-gloves", "化学防護へ"],
-            ["酸欠・ガスが心配", "#goods-gas-detectors", "検知器へ"],
-          ].map(([risk, href, label]) => (
-            <a key={risk} href={href} className="flex min-h-14 items-center justify-between gap-2 rounded-xl border border-white/20 bg-white/10 px-4 text-sm font-black hover:bg-white/15">
-              <span>{risk}</span><span className="text-xs text-emerald-200">{label}</span>
-            </a>
-          ))}
-        </div>
-      </section>
-
-      <section aria-labelledby="goods-categories-title">
-        <h2
-          id="goods-categories-title"
-          className="text-xl font-bold text-slate-950"
-        >
-          カテゴリから販売サイトを検索
-        </h2>
-        <p className="mt-2 text-sm leading-6 text-slate-700">作業に近いカテゴリを選ぶと、Amazon・楽天の検索結果へ進めます。</p>
-        <p className="mt-2 max-w-4xl text-xs font-semibold leading-6 text-slate-600">
-          購入前に、対象物質・濃度、落下距離、騒音ばく露、使用時間と、規格・サイズ・装着適合を公式資料で照合してください。検索結果は推奨や適合証明ではありません。
-        </p>
-        <ul className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {PUBLIC_SAFETY_GOODS_CATEGORIES.map((category) => (
-            <li
-              key={category.id}
-              id={`goods-${category.id}`}
-              className="rounded-2xl border border-slate-300 bg-white p-5 shadow-sm"
-            >
-              <div className="flex items-center gap-3">
-                <span className="text-3xl" aria-hidden="true">
-                  {category.icon}
-                </span>
-                <h3 className="text-base font-bold text-slate-950">
-                  {category.name}
-                </h3>
-              </div>
-              <p className="mt-3 text-xs leading-6 text-slate-600">{category.selectionPrompt}</p>
-              <div className="mt-4 grid grid-cols-2 gap-2">
-                <a
-                  href={generateAmazonAffiliateUrl(category.searchQuery)}
-                  target="_blank"
-                  rel="noopener noreferrer sponsored"
-                  onClick={() =>
-                    affiliateClick("amazon", category.id, category.name)
-                  }
-                  className="inline-flex min-h-12 items-center justify-center gap-1 rounded-lg bg-amber-700 px-3 py-2 text-center text-sm font-bold text-white hover:bg-amber-800"
-                >
-                  <Search className="h-4 w-4" aria-hidden="true" />
-                  Amazon
-                </a>
-                <a
-                  href={generateRakutenSearchUrl(category.searchQuery)}
-                  target="_blank"
-                  rel="noopener noreferrer sponsored"
-                  onClick={() =>
-                    affiliateClick("rakuten", category.id, category.name)
-                  }
-                  className="inline-flex min-h-12 items-center justify-center gap-1 rounded-lg bg-rose-700 px-3 py-2 text-center text-sm font-bold text-white hover:bg-rose-800"
-                >
-                  <Search className="h-4 w-4" aria-hidden="true" />
-                  楽天
-                </a>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </section>
 
       <p className="rounded-xl bg-slate-100 p-4 text-xs leading-6 text-slate-700">
         本ページはアフィリエイトリンクを含みます。リンク先で購入された場合、当サイトに紹介料が支払われることがあります。

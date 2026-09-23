@@ -61,6 +61,15 @@ describe("generateAmazonAffiliateUrl", () => {
   });
 });
 
+describe("generateAmazonHighRatedSearchUrl", () => {
+  test("adds Amazon's four-stars-and-up filter", async () => {
+    const mod = await loadModule({ NEXT_PUBLIC_AMAZON_AFFILIATE_ID: "safe-22" });
+    const url = new URL(mod.generateAmazonHighRatedSearchUrl("フルハーネス"));
+    expect(url.searchParams.get("rh")).toBe("p_72:2227292051");
+    expect(url.searchParams.get("tag")).toBe("safe-22");
+  });
+});
+
 describe("appendAmazonTag", () => {
   test("Amazon URLにtagを付与する", async () => {
     const mod = await loadModule({

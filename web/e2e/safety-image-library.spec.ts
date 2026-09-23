@@ -24,19 +24,22 @@ test.describe("market-grounded safety sign library", () => {
     await page.goto(detailPath);
     await expect(page.getByRole("heading", { level: 1, name: "保護帽着用" })).toBeVisible();
     await expect(page.getByRole("link", { name: "そのままダウンロード" })).toHaveAttribute("href", /mode=default/u);
-    await expect(page.getByLabel("言語プリセット").locator("option")).toHaveCount(5);
+    for (const language of ["日本語", "英語", "ベトナム語", "中国語（簡体）", "インドネシア語"]) {
+      await expect(page.getByLabel(language, { exact: true })).toBeVisible();
+    }
     await expect(page.getByLabel("印刷・看板サイズ").locator("option")).toHaveCount(13);
-    await page.getByLabel("言語プリセット").selectOption("vi");
-    await expect(page.getByLabel("表示する文字")).toHaveValue("Đội mũ bảo hộ");
-    await expect(page.getByLabel("表示する文字")).toHaveAttribute("lang", "vi");
-    await expect(page.getByRole("img", { name: /^文字編集プレビュー:/u })).toHaveAttribute("lang", "vi");
-    await page.getByLabel("表示する文字").fill("THÔNG ĐIỆP THỬ NGHIỆM");
-    await expect(page.getByText("THÔNG ĐIỆP THỬ NGHIỆM")).toBeVisible();
+    await page.getByLabel("ベトナム語", { exact: true }).check();
+    await expect(page.getByLabel("表示する文字（ベトナム語）")).toHaveValue("Đội mũ bảo hộ");
+    await expect(page.getByLabel("表示する文字（ベトナム語）")).toHaveAttribute("lang", "vi");
+    await expect(page.getByRole("img", { name: /^文字編集プレビュー:/u })).toHaveAttribute("lang", "ja");
+    await page.getByLabel("表示する文字（ベトナム語）").fill("THÔNG ĐIỆP THỬ NGHIỆM");
+    await expect(page.getByText("THÔNG ĐIỆP THỬ NGHIỆM").first()).toBeVisible();
     await page.getByLabel("チワワ・©").uncheck();
     await expect(page.getByAltText("安全AIポータルのチワワ")).toHaveCount(0);
     expect(page.url()).not.toContain("THÔNG");
     await page.getByRole("button", { name: "元に戻す" }).click();
-    await expect(page.getByLabel("表示する文字")).toHaveValue("保護帽を着用");
+    await expect(page.getByLabel("表示する文字（日本語）")).toHaveValue("保護帽を着用");
+    await expect(page.getByLabel("ベトナム語", { exact: true })).not.toBeChecked();
   });
 
   test("downloads valid JPEG, PNG and PDF with private edited output", async ({ request }) => {

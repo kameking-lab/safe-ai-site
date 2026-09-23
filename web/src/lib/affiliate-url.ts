@@ -58,6 +58,13 @@ export function generateAmazonSearchUrl(query: string): string {
   return generateAmazonAffiliateUrl(query);
 }
 
+/** Amazonの「カスタマーレビュー4つ星以上」検索を生成する。評価は遷移先の最新表示で再確認する。 */
+export function generateAmazonHighRatedSearchUrl(query: string): string {
+  const url = new URL(generateAmazonAffiliateUrl(query));
+  url.searchParams.set("rh", "p_72:2227292051");
+  return url.toString();
+}
+
 /** 楽天市場の任意URLを hb.afl.rakuten.co.jp 経由のアフィリエイトリンクに変換する */
 export function generateRakutenAffiliateUrl(productUrl: string): string {
   if (!RAKUTEN_AFFID) return productUrl;

@@ -177,6 +177,142 @@ function ChartCard({
   );
 }
 
+function RiskVisualSummary({
+  fatalRatePercent,
+  recentYearLabel,
+  recentYearCount,
+  seasonality,
+}: {
+  fatalRatePercent: number;
+  recentYearLabel: string;
+  recentYearCount: number;
+  seasonality: NameCount[];
+}) {
+  const clampedFatalRate = Math.min(100, Math.max(0, fatalRatePercent));
+  const maxMonthCount = Math.max(0, ...seasonality.map((item) => item.count));
+
+  return (
+    <section
+      aria-labelledby="risk-visual-summary-title"
+      className="rounded-xl border border-slate-200 bg-slate-50 p-3 sm:p-5"
+    >
+      <div className="flex flex-wrap items-end justify-between gap-2">
+        <div>
+          <p className="text-[11px] font-bold tracking-[.12em] text-rose-700">
+            VISUAL SUMMARY
+          </p>
+          <h2
+            id="risk-visual-summary-title"
+            className="text-base font-bold text-slate-950 sm:text-lg"
+          >
+            メーターと月別ヒートマップで先に把握
+          </h2>
+        </div>
+        <p className="max-w-xl text-[11px] leading-5 text-slate-600 sm:text-xs">
+          色と長さは現在の絞り込み条件に連動します。死亡災害比率は全国の発生確率ではなく、収録事例内の構成比です。
+        </p>
+      </div>
+
+      <div className="mt-3 grid gap-3 lg:grid-cols-[minmax(220px,0.7fr)_minmax(0,1.3fr)]">
+        <div className="rounded-lg border border-rose-200 bg-white p-4">
+          <div className="flex items-end justify-between gap-3">
+            <div>
+              <p className="text-xs font-semibold text-slate-600">
+                収録事例中の死亡災害比率
+              </p>
+              <p className="mt-1 text-3xl font-black tabular-nums text-rose-700">
+                {fatalRatePercent}%
+              </p>
+            </div>
+            <span className="rounded-full bg-rose-50 px-2 py-1 text-[10px] font-bold text-rose-800">
+              構成比
+            </span>
+          </div>
+          <div
+            role="meter"
+            aria-label="収録事例中の死亡災害比率"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={clampedFatalRate}
+            aria-valuetext={`${fatalRatePercent}%`}
+            className="mt-4 h-4 overflow-hidden rounded-full bg-slate-200"
+          >
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-amber-400 via-orange-500 to-rose-600"
+              style={{ width: `${clampedFatalRate}%` }}
+            />
+          </div>
+          <div className="mt-2 flex justify-between text-[10px] text-slate-500">
+            <span>0%</span>
+            <span>100%</span>
+          </div>
+        </div>
+
+        <div className="rounded-lg border border-orange-200 bg-white p-4">
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <h3 className="text-sm font-bold text-slate-900">月別発生ヒートマップ</h3>
+            <p className="text-[10px] text-slate-500">濃い色ほど収録件数が多い</p>
+          </div>
+          <div className="mt-3 grid grid-cols-3 gap-1.5 sm:grid-cols-6" aria-hidden="true">
+            {seasonality.map((item) => {
+              const intensity =
+                maxMonthCount === 0 ? 0 : item.count / maxMonthCount;
+              return (
+                <div
+                  key={item.name}
+                  className="min-w-0 rounded-md border border-orange-100 px-2 py-2 text-center"
+                  style={{
+                    backgroundColor: `rgba(234, 88, 12, ${0.08 + intensity * 0.82})`,
+                    color: intensity > 0.55 ? "#ffffff" : "#7c2d12",
+                  }}
+                >
+                  <div className="text-[10px] font-bold">{item.name}</div>
+                  <div className="mt-0.5 text-sm font-black tabular-nums">
+                    {formatNumber(item.count)}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      <details className="mt-3 rounded-lg border border-slate-200 bg-white p-3">
+        <summary className="cursor-pointer text-xs font-bold text-slate-800">
+          グラフの数値を表で確認
+        </summary>
+        <div className="mt-3 overflow-x-auto" role="region" aria-label="視覚サマリーの代替データ表">
+          <table className="min-w-full border-collapse text-xs">
+            <caption className="sr-only">死亡災害比率、最新年件数、月別件数</caption>
+            <thead>
+              <tr className="border-b border-slate-200 text-left text-slate-500">
+                <th scope="col" className="whitespace-nowrap px-2 py-2">指標</th>
+                <th scope="col" className="whitespace-nowrap px-2 py-2 text-right">値</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr className="border-b border-slate-100">
+                <th scope="row" className="whitespace-nowrap px-2 py-2 text-left font-semibold">死亡災害比率</th>
+                <td className="whitespace-nowrap px-2 py-2 text-right tabular-nums">{fatalRatePercent}%</td>
+              </tr>
+              <tr className="border-b border-slate-100">
+                <th scope="row" className="whitespace-nowrap px-2 py-2 text-left font-semibold">{recentYearLabel}の事故件数</th>
+                <td className="whitespace-nowrap px-2 py-2 text-right tabular-nums">{formatNumber(recentYearCount)}件</td>
+              </tr>
+              {seasonality.map((item) => (
+                <tr key={item.name} className="border-b border-slate-100 last:border-0">
+                  <th scope="row" className="whitespace-nowrap px-2 py-2 text-left font-semibold">{item.name}</th>
+                  <td className="whitespace-nowrap px-2 py-2 text-right tabular-nums">{formatNumber(item.count)}件</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </details>
+    </section>
+  );
+}
+
 export function AnalyticsDashboardImpl({
   aggregates,
 }: AnalyticsDashboardProps) {
@@ -719,6 +855,12 @@ export function AnalyticsDashboardImpl({
           </div>
         </section>
 
+        <RiskVisualSummary
+          fatalRatePercent={aggregates.kpi.fatalRatePercent}
+          recentYearLabel={aggregates.kpi.recentYearLabel}
+          recentYearCount={aggregates.kpi.recentYearCount}
+          seasonality={seasonalityData}
+        />
         {/* ===== KPI summary ===== */}
         <Section
           title="サマリーKPI"

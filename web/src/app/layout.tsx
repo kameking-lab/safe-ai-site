@@ -11,6 +11,8 @@ import { isPreviewSafetyMode } from "@/lib/server/deployment-safety";
 import { getRumServerReadiness } from "@/lib/rum/server-readiness";
 import { DeferredGlobalEnhancements } from "@/components/deferred-global-enhancements";
 import { CspNonceProvider } from "@/components/csp-nonce-context";
+import { ScrollPositionRestorer } from "@/components/scroll-position-restorer";
+import { adsenseAccountMetadata } from "@/lib/adsense-account";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -35,6 +37,7 @@ const PREVIEW_ROBOTS: NonNullable<Metadata["robots"]> = {
 };
 
 const metadataDefinition: Metadata = {
+  other: adsenseAccountMetadata(),
   manifest: "/manifest.json",
   icons: {
     icon: [
@@ -180,6 +183,7 @@ export default async function RootLayout({
           </div>
         </noscript>
         <CspNonceProvider nonce={nonce}>
+          <ScrollPositionRestorer />
           <DeferredGlobalEnhancements
             analyticsEnabled={analyticsEnabled}
             adsEnabled={adsEnabled}
