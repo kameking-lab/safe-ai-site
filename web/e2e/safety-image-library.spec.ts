@@ -141,7 +141,7 @@ test.describe("market-grounded safety sign library", () => {
         await page.keyboard.press("Space");
         await expect(checkbox).toBeChecked();
       }
-      expect(await page.locator("#edit-controls textarea").evaluateAll((fields) => fields.map((field) => field.lang))).toEqual(["ja", "vi", "zh-CN", "en", "id"]);
+      expect(await page.locator("#edit-controls textarea").evaluateAll((fields) => fields.map((field) => field.getAttribute("lang")))).toEqual(["ja", "vi", "zh-CN", "en", "id"]);
       for (const orientation of ["A4縦", "A4横"]) {
         await page.getByRole("button", { name: orientation, exact: true }).click();
         await expect(page.locator('[data-preview-fit="pass"]')).toBeVisible();
