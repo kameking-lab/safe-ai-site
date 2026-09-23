@@ -8,8 +8,8 @@ test("390px初期画面で画像カテゴリを先に選べる", async ({ page }
   await page.goto(ROUTE, { waitUntil: "domcontentloaded" });
   await expect(page.locator('[data-netis-explorer-ready="true"]')).toBeVisible();
 
-  const firstRow = ["重機接触", "立入禁止"];
-  for (const label of firstRow) {
+  const categories = ["重機接触", "立入禁止", "墜落・転落", "暑熱・作業環境"];
+  for (const label of categories) {
     const button = page.getByRole("button", { name: label, exact: true });
     await expect(button).toBeVisible();
     const box = await button.boundingBox();
@@ -17,8 +17,7 @@ test("390px初期画面で画像カテゴリを先に選べる", async ({ page }
     expect(box!.y + box!.height).toBeLessThanOrEqual(844);
   }
 
-  await expect(page.getByRole("button", { name: "墜落・転落" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "暑熱・作業環境" })).toBeVisible();
+  await expect(page.getByText("当サイトで出典を確認した5件を掲載しています。NETIS全登録技術の一覧ではありません。")).toBeVisible();
   const loadedImages = await page
     .locator('[aria-label="安全課題カテゴリ"] img')
     .evaluateAll((images) =>
@@ -76,16 +75,16 @@ test("暑熱は0件を明示し、キーボード操作と公式検索を保つ"
   await page.keyboard.press("Space");
   await expect(page).toHaveURL(/risk=heat-environment/);
   await expect(page.getByRole("heading", { name: "暑熱・作業環境：0件" })).toBeVisible();
-  await expect(page.getByText("このカテゴリの検証済み掲載技術は0件です")).toBeVisible();
+  await expect(page.getByText("このカテゴリの当サイト掲載技術は0件です")).toBeVisible();
   await expect(page.getByRole("link", { name: /NETIS公式検索を開く/ })).toHaveAttribute(
     "href",
     "https://www.netis.mlit.go.jp/netis/input/pubsearch/search",
   );
   await expect(page.getByRole("status")).toContainText("0件表示しました");
 
-  await page.getByRole("button", { name: "全5件を見る" }).click();
+  await page.getByRole("button", { name: "掲載全5件を見る" }).click();
   await expect(page).toHaveURL(new RegExp(`${ROUTE}$`));
-  await expect(page.getByRole("heading", { name: "全5技術：5件" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "当サイト掲載：5件" })).toBeVisible();
 });
 
 test("選択済みカテゴリの再操作でも結果へ移動し、未知の値は全5件へ戻す", async ({ page }) => {
@@ -95,17 +94,17 @@ test("選択済みカテゴリの再操作でも結果へ移動し、未知の�
   const restricted = page.getByRole("button", { name: "立入禁止", exact: true });
   await expect(restricted).toHaveAttribute("aria-pressed", "true");
   await expect(page.getByRole("heading", { name: "立入禁止：2件" })).toBeVisible();
-  await expect(page.getByText(/パノラマ0プレミアム/)).toBeVisible();
+  await expect(page.getByText(/パノラマOプレミアム/)).toBeVisible();
   await expect(page.getByText(/MICS AI/)).toBeVisible();
   await restricted.focus();
   await page.keyboard.press("Enter");
   await expect(page.getByRole("heading", { name: "立入禁止：2件" })).toBeFocused();
 
-  await page.getByRole("button", { name: "全5件を見る" }).click();
+  await page.getByRole("button", { name: "掲載全5件を見る" }).click();
   await expect(page).toHaveURL(`${page.url().split("?")[0]}?from=review`);
   await expect(page.locator("#netis-technology-results article")).toHaveCount(5);
   await page.goto(`${ROUTE}?risk=unknown`);
-  await expect(page.getByRole("heading", { name: "全5技術：5件" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "当サイト掲載：5件" })).toBeVisible();
   await expect(page.getByText("カテゴリ画像は危険の図解です。製品写真ではありません。")).toBeVisible();
 });
 

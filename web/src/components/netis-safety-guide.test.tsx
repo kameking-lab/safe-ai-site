@@ -98,7 +98,7 @@ describe("NetisSafetyGuide", () => {
 
     expect(screen.getByText("暑熱・作業環境：0件")).toBeDefined();
     expect(
-      screen.getByText("このカテゴリの検証済み掲載技術は0件です"),
+      screen.getByText("このカテゴリの当サイト掲載技術は0件です"),
     ).toBeDefined();
     expect(
       screen.getByRole("link", { name: /NETIS公式検索を開く/ }),

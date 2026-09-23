@@ -4,7 +4,7 @@ export const NETIS_SEARCH_URL =
 export const NETIS_RELEASE_URL =
   "https://www.mlit.go.jp/report/press/kanbo08_hh_001326.html";
 
-export const NETIS_CHECKED_AT = "2026年9月19日確認";
+export const NETIS_CHECKED_AT = "2026年9月24日確認";
 
 export const NETIS_SAFETY_CATEGORIES = [
   {
@@ -71,7 +71,7 @@ export const FEATURED_NETIS_TECHNOLOGIES = [
   },
   {
     categoryIds: ["machine-collision", "restricted-zone"] as const,
-    name: "超音波警報センサー・パノラマ0プレミアム",
+    name: "超音波警報センサー・パノラマOプレミアム",
     registrationNumber: "KT-180097-VE",
     summary: "重機後部の人や物体を検知し、周囲と運転者へ警告します。",
     mechanism:
@@ -108,9 +108,9 @@ export const FEATURED_NETIS_TECHNOLOGIES = [
     categoryIds: ["restricted-zone"] as const,
     name: "移動式ネットワークカメラ「MICS AI」",
     registrationNumber: "QS-210006-A",
-    summary: "設定区域への人物進入を検知し、現地と遠隔へ通知します。",
+    summary: "設定区域への人物進入を検知し、写真付きメールで通知します。",
     mechanism:
-      "設定した侵入エリアへの人物進入をAIカメラが検知し、現地警報と写真付き通知を行います。",
+      "設定した侵入エリアへの人物進入を画像解析カメラが検知し、写真付きアラートメールを遠隔の管理者へ送信します。",
     useCase:
       "資材ヤード、開口部周辺、無人時間帯を含む危険区域の遠隔監視。",
     productUrl: "https://assistyou-m.com/mics/mics_ai/",

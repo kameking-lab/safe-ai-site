@@ -160,6 +160,9 @@ export function NetisSafetyExplorer() {
       <p className="mt-2 text-xs text-slate-600 dark:text-slate-300">
         カテゴリ画像は危険の図解です。製品写真ではありません。
       </p>
+      <p className="mt-2 text-sm leading-6 text-slate-700 dark:text-slate-200">
+        当サイトで出典を確認した{FEATURED_NETIS_TECHNOLOGIES.length}件を掲載しています。NETIS全登録技術の一覧ではありません。
+      </p>
 
       <div
         id="netis-technology-results"
@@ -169,7 +172,7 @@ export function NetisSafetyExplorer() {
         <div className="flex flex-wrap items-end justify-between gap-3 border-b border-slate-200 pb-3 dark:border-slate-800">
           <div>
             <p className="text-xs font-black text-emerald-800 dark:text-emerald-300">
-              {selectedCategory ? "選択中" : "検証済み技術"} ・ {NETIS_CHECKED_AT}
+              {selectedCategory ? "選択中" : "出典確認済み技術"} ・ {NETIS_CHECKED_AT}
             </p>
             <h3
               ref={resultsHeadingRef}
@@ -179,7 +182,7 @@ export function NetisSafetyExplorer() {
             >
               {selectedCategory
                 ? `${selectedCategory.label}：${technologies.length}件`
-                : `全5技術：${technologies.length}件`}
+                : `当サイト掲載：${technologies.length}件`}
             </h3>
           </div>
           {selectedCategory ? (
@@ -196,7 +199,7 @@ export function NetisSafetyExplorer() {
                 className="inline-flex min-h-11 items-center gap-1 rounded-xl bg-slate-900 px-3 text-sm font-black text-white dark:bg-white dark:text-slate-950"
               >
                 <RotateCcw className="h-4 w-4" aria-hidden="true" />
-                全5件を見る
+                掲載全{FEATURED_NETIS_TECHNOLOGIES.length}件を見る
               </button>
             </div>
           ) : null}
@@ -205,7 +208,7 @@ export function NetisSafetyExplorer() {
         <p className="sr-only" role="status" aria-live="polite">
           {selectedCategory
             ? `${selectedCategory.label}の対応技術を${technologies.length}件表示しました。`
-            : "検証済み技術を5件表示しています。"}
+            : `当サイト掲載技術を${technologies.length}件表示しています。`}
         </p>
 
         {technologies.length > 0 ? (
@@ -287,7 +290,7 @@ export function NetisSafetyExplorer() {
         ) : selectedCategory ? (
           <div className="mt-4 rounded-2xl border border-amber-300 bg-amber-50 p-5 dark:border-amber-800 dark:bg-amber-950/30">
             <h4 className="font-black text-slate-950 dark:text-white">
-              このカテゴリの検証済み掲載技術は0件です
+              このカテゴリの当サイト掲載技術は0件です
             </h4>
             <p className="mt-2 text-sm leading-6 text-slate-700 dark:text-slate-200">
               無関係な技術は表示していません。公式検索へ「{selectedCategory.searchTerms}」を入力し、登録状態と適用条件を確認してください。

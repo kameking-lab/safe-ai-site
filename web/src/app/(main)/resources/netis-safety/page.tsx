@@ -23,7 +23,7 @@ export default function NetisSafetyPage() {
             安全課題からNETISを探す
           </h1>
           <p className="mt-2 text-sm font-semibold leading-6 text-slate-700 sm:text-base dark:text-slate-200">
-            商品名が分からなくても、現場の危険を選ぶだけで対応技術を確認できます。
+            商品名が分からなくても、現場の危険を選ぶだけで掲載技術を確認できます。
           </p>
         </header>
         <div className="mt-4"><NetisSafetyGuide /></div>

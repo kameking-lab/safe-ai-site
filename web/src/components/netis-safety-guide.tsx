@@ -68,7 +68,7 @@ export function NetisSafetyGuide({ compact = false }: { compact?: boolean }) {
         安全課題から新技術を探す
       </h2>
       <p className="mt-2 text-sm font-semibold leading-6 text-slate-700 dark:text-slate-200">
-        危険の画像を選び、検証済み5技術を課題別に絞れます。
+        危険の画像を選び、当サイト掲載の5技術を課題別に絞れます。
       </p>
       <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
         {FEATURED_NETIS_TECHNOLOGIES.map((technology) => (
