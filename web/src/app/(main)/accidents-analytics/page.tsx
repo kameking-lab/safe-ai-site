@@ -10,17 +10,15 @@ import {
 } from "lucide-react";
 import { AnalyticsDashboard } from "./AnalyticsDashboard";
 import {
-  buildAnalyticsInsights,
+  buildTypeComposition,
   getAnalyticsAggregates,
 } from "@/lib/accidents-analytics";
 import type { AnalyticsFilters } from "@/lib/accidents-analytics";
 import { JsonLd } from "@/components/json-ld";
 import { ogImageUrl } from "@/lib/og-url";
 import { withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
-import { AccidentHubNav } from "@/components/accident-hub-nav";
 import { OFFICIAL_ACCIDENT_SNAPSHOT as official } from "@/data/accidents/official-current";
 import { OfficialAccidentFlash } from "@/components/accidents/official-accident-flash";
-import { FeatureMascotCompanion } from "@/components/feature-mascot-companion";
 
 const title = "事故分析ダッシュボード";
 const description =
@@ -52,6 +50,7 @@ export default async function AccidentsAnalyticsPage({
   searchParams: Promise<SearchParams>;
 }) {
   const params = await searchParams;
+  const view = firstParam(params.view) === "flash" ? "flash" : "cases";
   const baseline = getAnalyticsAggregates();
   const requestedSource = firstParam(params.source);
   const source = baseline.meta.filterOptions.sources.includes(
@@ -105,7 +104,23 @@ export default async function AccidentsAnalyticsPage({
     source,
   };
   const aggregates = getAnalyticsAggregates(filters);
-  const insights = buildAnalyticsInsights(aggregates);
+  const compositionBaseline = filters.type
+    ? getAnalyticsAggregates({ ...filters, type: undefined })
+    : aggregates;
+  const typeComposition = buildTypeComposition(
+    aggregates,
+    compositionBaseline,
+    filters.type,
+  );
+  const tabParams = new URLSearchParams();
+  for (const [key, value] of Object.entries(filters)) {
+    if (value !== undefined && !(key === "source" && value === "official")) {
+      tabParams.set(key, String(value));
+    }
+  }
+  const casesHref = `/accidents-analytics${tabParams.size ? `?${tabParams}` : ""}`;
+  tabParams.set("view", "flash");
+  const flashHref = `/accidents-analytics?${tabParams}`;
 
   // JSON-LD: Dataset describing the analytics dataset.
   const datasetSchema = {
@@ -158,90 +173,73 @@ export default async function AccidentsAnalyticsPage({
   return (
     <>
       <JsonLd schema={datasetSchema} />
-      <AccidentHubNav current="accidents-analytics" />
       <section
-        className="mx-auto max-w-7xl px-4 pt-5 sm:px-6 lg:px-8"
+        className="mx-auto max-w-7xl px-4 pt-4 sm:px-6 lg:px-8"
         aria-labelledby="analytics-current-title"
       >
-        <p className="text-xs font-black tracking-[.16em] text-rose-700">厚生労働省データを多軸分析</p>
-        <h1 id="analytics-current-title" className="mt-1 text-3xl font-black tracking-tight text-slate-950 dark:text-white sm:text-4xl">事故分析ダッシュボード</h1>
-        <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-600 dark:text-slate-300">
-          最新の全国傾向と収録済み死亡災害個票を分け、業種・事故型・時間帯などから絞り込んで読めます。上段は厚労省の{official.label}です。
+        <p className="text-[11px] font-black tracking-[.14em] text-rose-700">厚生労働省データを図で確認</p>
+        <h1 id="analytics-current-title" className="mt-0.5 text-2xl font-black tracking-tight text-slate-950 dark:text-white sm:text-4xl">事故分析ダッシュボード</h1>
+        <p className="mt-1 max-w-4xl text-xs leading-5 text-slate-600 dark:text-slate-300 sm:text-sm">
+          最新の全国傾向と収録済み死亡災害個票を分け、業種・事故型・時間帯などから絞り込んで読めます。
         </p>
+        <nav aria-label="表示する事故データ" className="mt-3 grid grid-cols-2 gap-2 sm:max-w-md">
+          <Link
+            href={casesHref}
+            aria-current={view === "cases" ? "page" : undefined}
+            className={`min-h-[44px] rounded-lg border px-3 py-2 text-center text-sm font-black ${
+              view === "cases"
+                ? "border-rose-700 bg-rose-700 text-white"
+                : "border-slate-300 bg-white text-slate-700"
+            }`}
+          >
+            収録事例
+          </Link>
+          <Link
+            href={flashHref}
+            aria-current={view === "flash" ? "page" : undefined}
+            className={`min-h-[44px] rounded-lg border px-3 py-2 text-center text-sm font-black ${
+              view === "flash"
+                ? "border-rose-700 bg-rose-700 text-white"
+                : "border-slate-300 bg-white text-slate-700"
+            }`}
+          >
+            全国速報
+          </Link>
+        </nav>
         <aside
           data-analytics-scope-caution
           aria-label="集計期間と母数の注意"
-          className="mt-4 max-w-4xl rounded-xl border-2 border-amber-300 bg-amber-50 p-4 text-sm leading-6 text-amber-950 dark:border-amber-500/60 dark:bg-amber-950/40 dark:text-amber-100"
+          className="mt-2 max-w-4xl rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-[11px] leading-5 text-amber-950 dark:border-amber-500/60 dark:bg-amber-950/40 dark:text-amber-100 sm:text-xs"
         >
-          <p className="font-black">期間と母数を分けて確認してください</p>
-          <p className="mt-1">
-            全国速報は発生対象 {official.occurredThrough} まで・報告締切 {official.reportAsOf} の集計です。下の分析は
-            {aggregates.meta.yearsCovered.from}〜{aggregates.meta.yearsCovered.to}年の収録個票
-            {aggregates.meta.datasetCases.toLocaleString("ja-JP")}件を基準に、現在の条件に合う
-            {aggregates.meta.filteredCases.toLocaleString("ja-JP")}件を表示します。割合の母数は分析項目の値が確認できる件数で、欠損値を除きます。発生率やリスクの高さを示すものではありません。
-          </p>
-        </aside>
-        <FeatureMascotCompanion
-          variant="detective"
-          eyebrow="傾向調査チワワ"
-          title="件数の先にある、次の一手を探します。"
-          message="全国速報と収録事例を混ぜず、気になる軸から掘り下げられます。"
-          tone="sky"
-          compact
-          className="mt-4 max-w-3xl"
-        />
-        <OfficialAccidentFlash />
-        <div className="mt-8 border-t border-slate-200 pt-6 dark:border-slate-700">
-          <p className="text-xs font-black tracking-[.16em] text-sky-700 dark:text-sky-300">蓄積事例の多軸分析</p>
-          <h2 className="mt-1 text-2xl font-black text-slate-950 dark:text-white">年・業種・事故型・地域・規模・原因を掘り下げる</h2>
-          <p className="mt-1 text-xs font-semibold leading-5 text-slate-600 dark:text-slate-300">ここから下は最新速報の全国総数ではなく、画面に示す収録範囲内の傾向です。</p>
-        </div>
-      </section>
-      <section
-        className="mx-auto max-w-7xl px-4 pt-5 sm:px-6 lg:px-8"
-        aria-labelledby="analytics-insights-title"
-        data-testid="analytics-server-insights"
-      >
-        <div className="rounded-xl border border-sky-200 bg-sky-50/70 p-4 sm:p-5">
-          <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <h2 id="analytics-insights-title" className="text-lg font-black text-slate-950">
-              対象{aggregates.meta.filteredCases.toLocaleString("ja-JP")}件から見える3つの構成
-            </h2>
-            <p className="text-xs font-semibold text-sky-900">
-              収録事例内の構成比（発生率・リスク評価ではありません）
+          {view === "cases" ? (
+            <p>
+              <strong>{sourceBaseline.meta.yearsCovered.from}〜{sourceBaseline.meta.yearsCovered.to}年・収録個票{sourceBaseline.meta.filteredCases.toLocaleString("ja-JP")}件</strong>を基準に、現在{aggregates.meta.filteredCases.toLocaleString("ja-JP")}件を表示。構成比の分母は事故型条件だけを除いた件数。月別などの図は各項目の欠損値を除きます。発生率やリスクの高さを示すものではありません。
             </p>
-          </div>
-          <div className="mt-3 grid gap-3 md:grid-cols-3">
-            {insights.map((item) => (
-              <article key={item.label} className="rounded-lg border border-sky-100 bg-white p-3">
-                <p className="text-xs font-bold text-sky-800">{item.label}</p>
-                <p className="mt-1 text-base font-black text-slate-950">{item.value}</p>
-                <p className="mt-1 text-xs leading-5 text-slate-600">{item.description}</p>
-                <p className="mt-2 text-[11px] font-semibold text-sky-900">
-                  割合の母数：{item.knownCount.toLocaleString("ja-JP")}件（{item.knownFieldLabel}確認済み）
-                </p>
-              </article>
-            ))}
-          </div>
-        </div>
+          ) : (
+            <p>
+              <strong>全国速報は発生対象 {official.occurredThrough} まで・報告締切 {official.reportAsOf}</strong>の集計です。収録事例の2019〜2024年系列には接続していません。
+            </p>
+          )}
+        </aside>
       </section>
-      <Suspense
-        fallback={
-          <div className="mx-auto max-w-7xl space-y-3 px-4 py-6">
-            <div className="h-8 w-2/3 animate-pulse rounded bg-slate-200" />
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="h-24 animate-pulse rounded-lg bg-slate-100"
-                />
-              ))}
+      {view === "flash" ? (
+        <section className="mx-auto max-w-7xl px-4 pb-6 pt-3 sm:px-6 lg:px-8">
+          <OfficialAccidentFlash />
+        </section>
+      ) : (
+        <Suspense
+          fallback={
+            <div className="mx-auto max-w-7xl space-y-3 px-4 py-4">
+              <div className="h-52 animate-pulse rounded-lg bg-slate-100" />
             </div>
-          </div>
-        }
-      >
-        <AnalyticsDashboard aggregates={aggregates} />
-      </Suspense>
+          }
+        >
+          <AnalyticsDashboard
+            aggregates={aggregates}
+            typeComposition={typeComposition}
+          />
+        </Suspense>
+      )}
       <nav
         aria-label="関連ページ"
         className="mx-auto max-w-7xl px-4 pb-8 sm:px-6 lg:px-8"
