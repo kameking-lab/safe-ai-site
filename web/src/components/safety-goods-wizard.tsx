@@ -317,7 +317,7 @@ export function SafetyGoodsWizard() {
     <section aria-labelledby="goods-wizard-title" className="overflow-hidden rounded-[2rem] border border-emerald-200 bg-white shadow-sm">
       <div className="bg-gradient-to-r from-emerald-800 via-emerald-700 to-teal-700 px-5 py-6 text-white sm:px-7">
         <p className="text-xs font-black tracking-[.16em] text-emerald-100">PPE PICKER</p>
-        <h2 id="goods-wizard-title" className="mt-2 text-2xl font-black tracking-tight sm:text-3xl">作業から、買う候補を絞る</h2>
+        <h2 id="goods-wizard-title" className="mt-2 text-2xl font-black tracking-tight sm:text-3xl">3つ選んで保護具候補を見る</h2>
         <p className="mt-2 max-w-3xl text-sm font-medium leading-6 text-emerald-50">カテゴリ → 作業 → 現場条件の3つを選ぶだけ。型式を決め打ちせず、確認すべき条件と購入検索を一緒に出します。</p>
       </div>
 

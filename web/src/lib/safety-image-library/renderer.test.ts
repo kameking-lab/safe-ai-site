@@ -104,8 +104,8 @@ describe("safety image library renderer", () => {
     }
   });
 
-  it("renders four selected languages together on one sign", async () => {
-    const selected = ["ja", "en", "vi", "zh-CN"] as const;
+  it("renders all five selected languages together on one sign", async () => {
+    const selected = ["ja", "en", "vi", "zh-CN", "id"] as const;
     const renderSettings: SafetyImageRenderSettings = {
       ...settings("ja"),
       mode: "edited",
