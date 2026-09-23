@@ -24,15 +24,15 @@ function ExplorerFallback() {
         現場の課題を画像で選ぶ
       </h2>
       <div
-        className="mt-3 grid grid-cols-2 gap-2.5 sm:gap-4"
+        className="mt-3 grid grid-cols-2 gap-2.5 sm:gap-4 lg:grid-cols-4"
         aria-hidden="true"
       >
         {NETIS_SAFETY_CATEGORIES.map((category) => (
           <div
             key={category.id}
-            className="min-h-44 animate-pulse rounded-2xl border-2 border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900"
+            className="min-h-44 animate-pulse rounded-2xl border-2 border-slate-200 bg-white sm:min-h-56 dark:border-slate-700 dark:bg-slate-900"
           >
-            <div className="h-24 rounded-t-xl bg-slate-200 dark:bg-slate-800" />
+            <div className="h-24 rounded-t-xl bg-slate-200 sm:h-36 dark:bg-slate-800" />
             <p className="px-3 py-4 text-sm font-black text-slate-950 dark:text-white">
               {category.label}
             </p>

@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import AxeBuilder from "@axe-core/playwright";
 
 const ROUTE = "/resources/netis-safety";
 
@@ -87,6 +88,39 @@ test("暑熱は0件を明示し、キーボード操作と公式検索を保つ"
   await expect(page.getByRole("heading", { name: "全5技術：5件" })).toBeVisible();
 });
 
+test("選択済みカテゴリの再操作でも結果へ移動し、未知の値は全5件へ戻す", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto(`${ROUTE}?risk=restricted-zone&from=review`);
+  await expect(page.locator('[data-netis-explorer-ready="true"]')).toBeVisible();
+  const restricted = page.getByRole("button", { name: "立入禁止", exact: true });
+  await expect(restricted).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByRole("heading", { name: "立入禁止：2件" })).toBeVisible();
+  await expect(page.getByText(/パノラマ0プレミアム/)).toBeVisible();
+  await expect(page.getByText(/MICS AI/)).toBeVisible();
+  await restricted.focus();
+  await page.keyboard.press("Enter");
+  await expect(page.getByRole("heading", { name: "立入禁止：2件" })).toBeFocused();
+
+  await page.getByRole("button", { name: "全5件を見る" }).click();
+  await expect(page).toHaveURL(`${page.url().split("?")[0]}?from=review`);
+  await expect(page.locator("#netis-technology-results article")).toHaveCount(5);
+  await page.goto(`${ROUTE}?risk=unknown`);
+  await expect(page.getByRole("heading", { name: "全5技術：5件" })).toBeVisible();
+  await expect(page.getByText("カテゴリ画像は危険の図解です。製品写真ではありません。")).toBeVisible();
+});
+
+test("カテゴリと結果のARIA・コントラストに問題がない", async ({ page }) => {
+  for (const risk of ["", "heat-environment"]) {
+    await page.goto(`${ROUTE}${risk ? `?risk=${risk}` : ""}`);
+    await expect(page.locator('[data-netis-explorer-ready="true"]')).toBeVisible();
+    const accessibility = await new AxeBuilder({ page })
+      .include('[data-netis-explorer-ready="true"]')
+      .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
+      .analyze();
+    expect(accessibility.violations).toEqual([]);
+  }
+});
+
 test("320px・390px・1280pxで横にはみ出さず詳細と公式リンクを操作できる", async ({ page }) => {
   for (const viewport of [
     { width: 320, height: 800 },
@@ -115,6 +149,16 @@ test("320px・390px・1280pxで横にはみ出さず詳細と公式リンクを�
     const summaryBox = await details.locator("summary").boundingBox();
     expect(summaryBox).not.toBeNull();
     expect(summaryBox!.height).toBeGreaterThanOrEqual(44);
+    const controls = await page.locator('[data-netis-explorer-ready="true"] button, [data-netis-explorer-ready="true"] a, [data-netis-explorer-ready="true"] summary').evaluateAll((elements) =>
+      elements
+        .map((element) => ({ name: element.textContent, rect: element.getBoundingClientRect() }))
+        .filter(({ rect }) => rect.width > 0 && rect.height > 0)
+        .map(({ name, rect }) => ({ name, width: rect.width, height: rect.height })),
+    );
+    for (const control of controls) {
+      expect(control.height, `${viewport.width}px ${control.name}`).toBeGreaterThanOrEqual(44);
+      expect(control.width, `${viewport.width}px ${control.name}`).toBeGreaterThanOrEqual(44);
+    }
     await page.keyboard.press("Space");
     await expect(details).not.toHaveAttribute("open", "");
   }

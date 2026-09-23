@@ -19,6 +19,16 @@ function categoryFor(id: NetisSafetyCategoryId) {
   return NETIS_SAFETY_CATEGORIES.find((category) => category.id === id)!;
 }
 
+function focusResults(heading: HTMLHeadingElement | null) {
+  heading?.focus({ preventScroll: true });
+  heading?.scrollIntoView({
+    behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      ? "instant"
+      : "smooth",
+    block: "start",
+  });
+}
+
 export function NetisSafetyExplorer() {
   const pathname = usePathname();
   const router = useRouter();
@@ -53,12 +63,14 @@ export function NetisSafetyExplorer() {
   useEffect(() => {
     if (!shouldFocusResultsRef.current) return;
     shouldFocusResultsRef.current = false;
-    const heading = resultsHeadingRef.current;
-    heading?.focus({ preventScroll: true });
-    heading?.scrollIntoView({ behavior: "smooth", block: "start" });
+    focusResults(resultsHeadingRef.current);
   }, [selectedCategoryId]);
 
   function updateCategory(categoryId: NetisSafetyCategoryId | null) {
+    if (categoryId === selectedCategoryId) {
+      focusResults(resultsHeadingRef.current);
+      return;
+    }
     const params = new URLSearchParams(searchParams.toString());
     if (categoryId) params.set("risk", categoryId);
     else params.delete("risk");
@@ -98,7 +110,8 @@ export function NetisSafetyExplorer() {
       </div>
 
       <div
-        className="mt-3 grid grid-cols-2 gap-2.5 sm:gap-4"
+        className="mt-3 grid grid-cols-2 gap-2.5 sm:gap-4 lg:grid-cols-4"
+        role="group"
         aria-label="安全課題カテゴリ"
       >
         {NETIS_SAFETY_CATEGORIES.map((category) => {
@@ -123,8 +136,8 @@ export function NetisSafetyExplorer() {
                   alt={category.imageAlt}
                   fill
                   loading="eager"
-                  sizes="(max-width: 640px) 46vw, 360px"
-                  className="object-cover transition duration-300 group-hover:scale-[1.03]"
+                  sizes="(max-width: 1024px) 46vw, 280px"
+                  className={`transition duration-300 group-hover:scale-[1.03] ${category.id === "heat-environment" ? "object-cover object-top" : "object-contain"}`}
                 />
               </span>
               <span className="flex min-h-16 items-center justify-between gap-2 px-3 py-2.5 sm:px-4">
@@ -144,6 +157,9 @@ export function NetisSafetyExplorer() {
           );
         })}
       </div>
+      <p className="mt-2 text-xs text-slate-600 dark:text-slate-300">
+        カテゴリ画像は危険の図解です。製品写真ではありません。
+      </p>
 
       <div
         id="netis-technology-results"
@@ -194,24 +210,14 @@ export function NetisSafetyExplorer() {
 
         {technologies.length > 0 ? (
           <div className="mt-4 grid gap-4 lg:grid-cols-2">
-            {technologies.map((technology, index) => {
+            {technologies.map((technology) => {
               const primaryCategory = categoryFor(technology.categoryIds[0]);
               return (
                 <article
                   key={technology.registrationNumber}
                   className="overflow-hidden rounded-2xl border border-emerald-200 bg-white shadow-sm dark:border-emerald-900 dark:bg-slate-900"
                 >
-                  <div className="grid sm:grid-cols-[9rem_1fr]">
-                    <div className="relative h-32 bg-slate-100 sm:h-full dark:bg-slate-800">
-                      <Image
-                        src={primaryCategory.image}
-                        alt={`${technology.name}が対応する${primaryCategory.label}の図解`}
-                        fill
-                        loading={index === 0 ? "eager" : undefined}
-                        sizes="(max-width: 640px) 100vw, 144px"
-                        className="object-cover"
-                      />
-                    </div>
+                  <div>
                     <div className="p-4 sm:p-5">
                       <div className="flex flex-wrap items-center gap-2">
                         {technology.categoryIds.map((categoryId) => (
