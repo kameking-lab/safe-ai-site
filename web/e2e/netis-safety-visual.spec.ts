@@ -17,7 +17,7 @@ test("390px初期画面で画像カテゴリを先に選べる", async ({ page }
     expect(box!.y + box!.height).toBeLessThanOrEqual(844);
   }
 
-  await expect(page.getByText("当サイトで出典を確認した5件を掲載しています。NETIS全登録技術の一覧ではありません。")).toBeVisible();
+  await expect(page.getByText("当サイトで出典を確認した10件を掲載しています。NETIS全登録技術の一覧ではありません。")).toBeVisible();
   const loadedImages = await page
     .locator('[aria-label="安全課題カテゴリ"] img')
     .evaluateAll((images) =>
@@ -37,28 +37,28 @@ test("カテゴリ選択、URL再読込、戻るで同じ絞り込みを復元�
 
   await page.getByRole("button", { name: "重機接触", exact: true }).click();
   await expect(page).toHaveURL(/risk=machine-collision/);
-  await expect(page.getByRole("heading", { name: "重機接触：3件" })).toBeFocused();
+  await expect(page.getByRole("heading", { name: "重機接触：5件" })).toBeFocused();
   await expect(page.getByText(/ヒヤリハンター/)).toBeVisible();
   await expect(page.getByText(/ドボレコJK/)).toBeVisible();
   await expect(page.getByText(/ハーネスノーティファイ/)).toHaveCount(0);
 
   await page.reload({ waitUntil: "domcontentloaded" });
   await expect(page.locator('[data-netis-explorer-ready="true"]')).toBeVisible();
-  await expect(page.getByRole("heading", { name: "重機接触：3件" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "重機接触：5件" })).toBeVisible();
   await expect(page.getByRole("button", { name: "重機接触" })).toHaveAttribute("aria-pressed", "true");
 
   await page.getByRole("button", { name: "墜落・転落", exact: true }).click();
   await expect(page).toHaveURL(/risk=fall-prevention/);
-  await expect(page.getByRole("heading", { name: "墜落・転落：1件" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "墜落・転落：2件" })).toBeVisible();
   await expect(page.getByText(/ハーネスノーティファイ/)).toBeVisible();
   await expect(page.getByText(/ヒヤリハンター/)).toHaveCount(0);
 
   await page.goBack({ waitUntil: "domcontentloaded" });
   await expect(page).toHaveURL(/risk=machine-collision/);
-  await expect(page.getByRole("heading", { name: "重機接触：3件" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "重機接触：5件" })).toBeVisible();
 });
 
-test("暑熱は0件を明示し、キーボード操作と公式検索を保つ", async ({ page }) => {
+test("暑熱2件を表示し、検索・再読込・解除をURLから復元する", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto(ROUTE, { waitUntil: "domcontentloaded" });
   await expect(page.locator('[data-netis-explorer-ready="true"]')).toBeVisible();
@@ -74,43 +74,64 @@ test("暑熱は0件を明示し、キーボード操作と公式検索を保つ"
   await heatButton.focus();
   await page.keyboard.press("Space");
   await expect(page).toHaveURL(/risk=heat-environment/);
-  await expect(page.getByRole("heading", { name: "暑熱・作業環境：0件" })).toBeVisible();
-  await expect(page.getByText("このカテゴリの当サイト掲載技術は0件です")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "暑熱・作業環境：2件" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /熱中対策バンド/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /TECHNO BAND/ })).toBeVisible();
+
+  await page.getByLabel(/名称・登録番号・用途/).fill("存在しない技術");
+  await page.getByRole("button", { name: "掲載技術を検索" }).click();
+  await expect(page).toHaveURL(/risk=heat-environment&q=/);
+  await expect(page.getByRole("heading", { name: "暑熱・作業環境：0件" })).toBeFocused();
+  await expect(page.getByText("条件に合う当サイト掲載技術は0件です")).toBeVisible();
   await expect(page.getByRole("link", { name: /NETIS公式検索を開く/ })).toHaveAttribute(
     "href",
     "https://www.netis.mlit.go.jp/netis/input/pubsearch/search",
   );
   await expect(page.getByRole("status")).toContainText("0件表示しました");
 
-  await page.getByRole("button", { name: "掲載全5件を見る" }).click();
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await expect(page.locator('[data-netis-explorer-ready="true"]')).toBeVisible();
+  await expect(page.getByLabel(/名称・登録番号・用途/)).toHaveValue("存在しない技術");
+  await expect(page.getByRole("heading", { name: "暑熱・作業環境：0件" })).toBeVisible();
+  await page.getByRole("button", { name: "検索を解除" }).click();
+  await expect(page).toHaveURL(/risk=heat-environment$/);
+  await expect(page.getByRole("heading", { name: "暑熱・作業環境：2件" })).toBeFocused();
+  await page.goBack({ waitUntil: "domcontentloaded" });
+  await expect(page.getByLabel(/名称・登録番号・用途/)).toHaveValue("存在しない技術");
+  await expect(page.getByRole("heading", { name: "暑熱・作業環境：0件" })).toBeVisible();
+  await page.goForward({ waitUntil: "domcontentloaded" });
+  await expect(page.getByLabel(/名称・登録番号・用途/)).toHaveValue("");
+  await expect(page.getByRole("heading", { name: "暑熱・作業環境：2件" })).toBeVisible();
+
+  await page.getByRole("button", { name: "掲載全10件を見る" }).click();
   await expect(page).toHaveURL(new RegExp(`${ROUTE}$`));
-  await expect(page.getByRole("heading", { name: "当サイト掲載：5件" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "当サイト掲載：10件" })).toBeVisible();
 });
 
-test("選択済みカテゴリの再操作でも結果へ移動し、未知の値は全5件へ戻す", async ({ page }) => {
+test("選択済みカテゴリの再操作でも結果へ移動し、未知の値は全10件へ戻す", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto(`${ROUTE}?risk=restricted-zone&from=review`);
   await expect(page.locator('[data-netis-explorer-ready="true"]')).toBeVisible();
   const restricted = page.getByRole("button", { name: "立入禁止", exact: true });
   await expect(restricted).toHaveAttribute("aria-pressed", "true");
-  await expect(page.getByRole("heading", { name: "立入禁止：2件" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "立入禁止：3件" })).toBeVisible();
   await expect(page.getByText(/パノラマOプレミアム/)).toBeVisible();
   await expect(page.getByText(/MICS AI/)).toBeVisible();
   await restricted.focus();
   await page.keyboard.press("Enter");
-  await expect(page.getByRole("heading", { name: "立入禁止：2件" })).toBeFocused();
+  await expect(page.getByRole("heading", { name: "立入禁止：3件" })).toBeFocused();
 
-  await page.getByRole("button", { name: "掲載全5件を見る" }).click();
+  await page.getByRole("button", { name: "掲載全10件を見る" }).click();
   await expect(page).toHaveURL(`${page.url().split("?")[0]}?from=review`);
-  await expect(page.locator("#netis-technology-results article")).toHaveCount(5);
+  await expect(page.locator("#netis-technology-results article")).toHaveCount(10);
   await page.goto(`${ROUTE}?risk=unknown`);
-  await expect(page.getByRole("heading", { name: "当サイト掲載：5件" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "当サイト掲載：10件" })).toBeVisible();
   await expect(page.getByText("カテゴリ画像は危険の図解です。製品写真ではありません。")).toBeVisible();
 });
 
 test("カテゴリと結果のARIA・コントラストに問題がない", async ({ page }) => {
-  for (const risk of ["", "heat-environment"]) {
-    await page.goto(`${ROUTE}${risk ? `?risk=${risk}` : ""}`);
+  for (const query of ["", "?risk=heat-environment&q=存在しない技術"]) {
+    await page.goto(`${ROUTE}${query}`);
     await expect(page.locator('[data-netis-explorer-ready="true"]')).toBeVisible();
     const accessibility = await new AxeBuilder({ page })
       .include('[data-netis-explorer-ready="true"]')
@@ -134,9 +155,10 @@ test("320px・390px・1280pxで横にはみ出さず詳細と公式リンクを�
         () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
       ),
     ).toBeLessThanOrEqual(1);
-    const details = page.locator("details").filter({
-      has: page.getByText("仕組み・適用条件を詳しく見る", { exact: true }),
-    });
+    const details = page
+      .locator("article")
+      .filter({ hasText: "KT-230282-A" })
+      .locator("details");
     await details.locator("summary").focus();
     await page.keyboard.press("Space");
     await expect(details).toHaveAttribute("open", "");

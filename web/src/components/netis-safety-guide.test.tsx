@@ -24,15 +24,15 @@ describe("NetisSafetyGuide", () => {
     navigation.push.mockReset();
   });
 
-  it("5件の具体技術に一意なNETIS番号と短い初期説明を持つ", () => {
-    expect(FEATURED_NETIS_TECHNOLOGIES).toHaveLength(5);
+  it("10件の具体技術に一意なNETIS番号、注意点、確認日を持つ", () => {
+    expect(FEATURED_NETIS_TECHNOLOGIES).toHaveLength(10);
     expect(
       new Set(
         FEATURED_NETIS_TECHNOLOGIES.map(
           (technology) => technology.registrationNumber,
         ),
       ).size,
-    ).toBe(5);
+    ).toBe(10);
     for (const technology of FEATURED_NETIS_TECHNOLOGIES) {
       expect(technology.registrationNumber).toMatch(
         /^[A-Z]{2}-\d{6}-(?:A|VE)$/,
@@ -41,10 +41,19 @@ describe("NetisSafetyGuide", () => {
       expect(technology.summary.length).toBeLessThanOrEqual(60);
       expect(technology.mechanism.length).toBeGreaterThan(30);
       expect(technology.useCase.length).toBeGreaterThan(20);
+      expect(technology.limitations.length).toBeGreaterThan(20);
+      expect(technology.checkedAt).toBe("2026年9月24日確認");
+    }
+    for (const category of NETIS_SAFETY_CATEGORIES) {
+      expect(
+        FEATURED_NETIS_TECHNOLOGIES.filter((technology) =>
+          (technology.categoryIds as readonly string[]).includes(category.id),
+        ).length,
+      ).toBeGreaterThanOrEqual(2);
     }
   });
 
-  it("コンパクト表示でも全5件をNETIS公式照合へつなぐ", () => {
+  it("コンパクト表示でも全10件をNETIS公式照合へつなぐ", () => {
     render(<NetisSafetyGuide compact />);
 
     for (const technology of FEATURED_NETIS_TECHNOLOGIES) {
@@ -76,10 +85,10 @@ describe("NetisSafetyGuide", () => {
     );
   });
 
-  it("重機接触は定義済み技術だけ、墜落・転落はハーネスだけを表示する", () => {
+  it("重機接触は5件、墜落・転落は2件の定義済み技術を表示する", () => {
     navigation.query = "risk=machine-collision";
     const { unmount } = render(<NetisSafetyExplorer />);
-    expect(screen.getByText("重機接触：3件")).toBeDefined();
+    expect(screen.getByText("重機接触：5件")).toBeDefined();
     expect(screen.getByText(/ヒヤリハンター/)).toBeDefined();
     expect(screen.getByText(/ドボレコJK/)).toBeDefined();
     expect(screen.queryByText(/ハーネスノーティファイ/)).toBeNull();
@@ -87,21 +96,26 @@ describe("NetisSafetyGuide", () => {
 
     navigation.query = "risk=fall-prevention";
     render(<NetisSafetyExplorer />);
-    expect(screen.getByText("墜落・転落：1件")).toBeDefined();
+    expect(screen.getByText("墜落・転落：2件")).toBeDefined();
     expect(screen.getByText(/ハーネスノーティファイ/)).toBeDefined();
+    expect(screen.getByText(/ハーネスアラート/)).toBeDefined();
     expect(screen.queryByText(/ヒヤリハンター/)).toBeNull();
   });
 
-  it("暑熱・作業環境は0件を明示して公式検索へ案内する", () => {
+  it("暑熱・作業環境は2件を表示し、名称検索をURLへ同期する", () => {
     navigation.query = "risk=heat-environment";
     render(<NetisSafetyExplorer />);
 
-    expect(screen.getByText("暑熱・作業環境：0件")).toBeDefined();
-    expect(
-      screen.getByText("このカテゴリの当サイト掲載技術は0件です"),
-    ).toBeDefined();
-    expect(
-      screen.getByRole("link", { name: /NETIS公式検索を開く/ }),
-    ).toBeDefined();
+    expect(screen.getByText("暑熱・作業環境：2件")).toBeDefined();
+    expect(screen.getByText(/熱中対策バンド/)).toBeDefined();
+    expect(screen.getByText(/TECHNO BAND/)).toBeDefined();
+    fireEvent.change(screen.getByLabelText(/名称・登録番号・用途/), {
+      target: { value: "KT-260019" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "掲載技術を検索" }));
+    expect(navigation.push).toHaveBeenCalledWith(
+      "/resources/netis-safety?risk=heat-environment&q=KT-260019",
+      { scroll: false },
+    );
   });
 });

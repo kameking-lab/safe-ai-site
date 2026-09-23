@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useRef } from "react";
-import { ExternalLink, RotateCcw, ShieldCheck } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { ExternalLink, RotateCcw, Search, ShieldCheck, X } from "lucide-react";
 import {
   FEATURED_NETIS_TECHNOLOGIES,
   isNetisSafetyCategoryId,
@@ -29,11 +29,16 @@ function focusResults(heading: HTMLHeadingElement | null) {
   });
 }
 
+function normalizeSearchText(value: string) {
+  return value.normalize("NFKC").trim().toLocaleLowerCase("ja");
+}
+
 export function NetisSafetyExplorer() {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
   const rawCategory = searchParams.get("risk");
+  const rawSearch = searchParams.get("q")?.trim() ?? "";
   const selectedCategoryId = isNetisSafetyCategoryId(rawCategory)
     ? rawCategory
     : null;
@@ -43,17 +48,31 @@ export function NetisSafetyExplorer() {
   const resultsHeadingRef = useRef<HTMLHeadingElement>(null);
   const shouldFocusResultsRef = useRef(false);
   const explorerRef = useRef<HTMLElement>(null);
+  const [searchInput, setSearchInput] = useState(rawSearch);
 
   const technologies = useMemo(
     () =>
-      selectedCategoryId
-        ? FEATURED_NETIS_TECHNOLOGIES.filter((technology) =>
-            (technology.categoryIds as readonly string[]).includes(
+      FEATURED_NETIS_TECHNOLOGIES.filter((technology) => {
+        const categoryMatches = selectedCategoryId
+          ? (technology.categoryIds as readonly string[]).includes(
               selectedCategoryId,
-            ),
-          )
-        : FEATURED_NETIS_TECHNOLOGIES,
-    [selectedCategoryId],
+            )
+          : true;
+        if (!categoryMatches) return false;
+        const query = normalizeSearchText(rawSearch);
+        if (!query) return true;
+        return normalizeSearchText(
+          [
+            technology.name,
+            technology.registrationNumber,
+            technology.summary,
+            technology.mechanism,
+            technology.useCase,
+            technology.limitations,
+          ].join(" "),
+        ).includes(query);
+      }),
+    [rawSearch, selectedCategoryId],
   );
 
   useEffect(() => {
@@ -61,10 +80,14 @@ export function NetisSafetyExplorer() {
   }, []);
 
   useEffect(() => {
+    setSearchInput(rawSearch);
+  }, [rawSearch]);
+
+  useEffect(() => {
     if (!shouldFocusResultsRef.current) return;
     shouldFocusResultsRef.current = false;
     focusResults(resultsHeadingRef.current);
-  }, [selectedCategoryId]);
+  }, [rawSearch, selectedCategoryId]);
 
   function updateCategory(categoryId: NetisSafetyCategoryId | null) {
     if (categoryId === selectedCategoryId) {
@@ -74,6 +97,16 @@ export function NetisSafetyExplorer() {
     const params = new URLSearchParams(searchParams.toString());
     if (categoryId) params.set("risk", categoryId);
     else params.delete("risk");
+    const query = params.toString();
+    shouldFocusResultsRef.current = true;
+    router.push(query ? `${pathname}?${query}` : pathname, { scroll: false });
+  }
+
+  function updateSearch(value: string) {
+    const params = new URLSearchParams(searchParams.toString());
+    const queryValue = value.trim();
+    if (queryValue) params.set("q", queryValue);
+    else params.delete("q");
     const query = params.toString();
     shouldFocusResultsRef.current = true;
     router.push(query ? `${pathname}?${query}` : pathname, { scroll: false });
@@ -163,6 +196,65 @@ export function NetisSafetyExplorer() {
       <p className="mt-2 text-sm leading-6 text-slate-700 dark:text-slate-200">
         当サイトで出典を確認した{FEATURED_NETIS_TECHNOLOGIES.length}件を掲載しています。NETIS全登録技術の一覧ではありません。
       </p>
+      <details className="mt-1 text-xs text-slate-600 dark:text-slate-300">
+        <summary className="flex min-h-11 cursor-pointer items-center font-bold underline underline-offset-4">
+          カテゴリ画像の出典・権利を確認
+        </summary>
+        <ul className="space-y-1.5 pb-2">
+          {NETIS_SAFETY_CATEGORIES.map((category) => (
+            <li key={category.id}>
+              <span className="font-black">{category.label}</span>：{category.imageSource}／権利記録 {category.imageRights}（生成台帳 {category.imageLedgerId}）
+            </li>
+          ))}
+        </ul>
+      </details>
+
+      <form
+        role="search"
+        aria-label="当サイト掲載NETIS技術を検索"
+        className="mt-3 rounded-2xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-900"
+        onSubmit={(event) => {
+          event.preventDefault();
+          updateSearch(searchInput);
+        }}
+      >
+        <label
+          htmlFor="netis-catalog-search"
+          className="text-sm font-black text-slate-950 dark:text-white"
+        >
+          名称・登録番号・用途で掲載10件を検索
+        </label>
+        <div className="mt-2 flex flex-col gap-2 sm:flex-row">
+          <input
+            id="netis-catalog-search"
+            type="search"
+            value={searchInput}
+            onChange={(event) => setSearchInput(event.target.value)}
+            placeholder="例：WBGT、ハーネス、KK-210002"
+            className="min-h-11 min-w-0 flex-1 rounded-xl border border-slate-300 bg-white px-3 text-base text-slate-950 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+          />
+          <button
+            type="submit"
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-sky-800 px-4 text-sm font-black text-white hover:bg-sky-900"
+          >
+            <Search className="h-4 w-4" aria-hidden="true" />
+            掲載技術を検索
+          </button>
+          {rawSearch ? (
+            <button
+              type="button"
+              onClick={() => {
+                setSearchInput("");
+                updateSearch("");
+              }}
+              className="inline-flex min-h-11 items-center justify-center gap-1 rounded-xl border border-slate-300 bg-white px-3 text-sm font-black text-slate-800 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
+            >
+              <X className="h-4 w-4" aria-hidden="true" />
+              検索を解除
+            </button>
+          ) : null}
+        </div>
+      </form>
 
       <div
         id="netis-technology-results"
@@ -184,6 +276,11 @@ export function NetisSafetyExplorer() {
                 ? `${selectedCategory.label}：${technologies.length}件`
                 : `当サイト掲載：${technologies.length}件`}
             </h3>
+            {rawSearch ? (
+              <p className="mt-1 text-sm font-bold text-slate-600 dark:text-slate-300">
+                「{rawSearch}」で絞り込み中
+              </p>
+            ) : null}
           </div>
           {selectedCategory ? (
             <div className="flex flex-wrap gap-2">
@@ -234,6 +331,9 @@ export function NetisSafetyExplorer() {
                         <span className="font-mono text-xs font-black text-sky-800 dark:text-sky-300">
                           {technology.registrationNumber}
                         </span>
+                        <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
+                          出典確認：{technology.checkedAt}
+                        </span>
                       </div>
                       <h4 className="mt-3 text-base font-black leading-6 text-slate-950 dark:text-white">
                         {technology.name}
@@ -261,6 +361,10 @@ export function NetisSafetyExplorer() {
                         <dt className="font-black text-slate-950 dark:text-white">比較前に確認</dt>
                         <dd className="text-slate-700 dark:text-slate-200">{primaryCategory.checks}</dd>
                       </div>
+                      <div>
+                        <dt className="font-black text-slate-950 dark:text-white">制約・注意点</dt>
+                        <dd className="text-slate-700 dark:text-slate-200">{technology.limitations}</dd>
+                      </div>
                     </dl>
                     <div className="mt-3 flex flex-wrap gap-3 text-xs font-black">
                       <a
@@ -287,13 +391,13 @@ export function NetisSafetyExplorer() {
               );
             })}
           </div>
-        ) : selectedCategory ? (
+        ) : selectedCategory || rawSearch ? (
           <div className="mt-4 rounded-2xl border border-amber-300 bg-amber-50 p-5 dark:border-amber-800 dark:bg-amber-950/30">
             <h4 className="font-black text-slate-950 dark:text-white">
-              このカテゴリの当サイト掲載技術は0件です
+              条件に合う当サイト掲載技術は0件です
             </h4>
             <p className="mt-2 text-sm leading-6 text-slate-700 dark:text-slate-200">
-              無関係な技術は表示していません。公式検索へ「{selectedCategory.searchTerms}」を入力し、登録状態と適用条件を確認してください。
+              無関係な技術は表示していません。NETIS公式検索で「{rawSearch || selectedCategory?.searchTerms}」を検索し、登録状態と適用条件を確認してください。
             </p>
             <a
               href={NETIS_SEARCH_URL}

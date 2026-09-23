@@ -13,6 +13,10 @@ export const NETIS_SAFETY_CATEGORIES = [
     title: "重機接触を減らす",
     image: "/safety-images/library/previews/collision-hazard.webp",
     imageAlt: "重機との接触危険を示す安全イラスト",
+    imageLedgerId: "S040",
+    imageSource:
+      "安全AIポータル自作（OpenAI image generation、原本 collision-hazard.png）",
+    imageRights: "portal-owned-commercial-editable",
     searchTerms: "重機 接触 人検知 接近警報",
     description:
       "カメラ、AI画像認識、ICタグ、センサーで接近を検知し、運転者や作業員へ知らせる技術。",
@@ -24,6 +28,10 @@ export const NETIS_SAFETY_CATEGORIES = [
     title: "立入禁止区域を守る",
     image: "/safety-images/library/previews/equipment-swing-zone.webp",
     imageAlt: "重機の旋回範囲への立入禁止を示す安全イラスト",
+    imageLedgerId: "S042",
+    imageSource:
+      "安全AIポータル自作（OpenAI image generation、原本 equipment-swing-zone.png）",
+    imageRights: "portal-owned-commercial-editable",
     searchTerms: "立入 検知 警報 区画",
     description:
       "侵入検知や無線通知で、旋回範囲・掘削部など危険区域への立入りを知らせる技術。",
@@ -35,6 +43,10 @@ export const NETIS_SAFETY_CATEGORIES = [
     title: "墜落・転落を防ぐ",
     image: "/safety-images/library/previews/fall-hazard.webp",
     imageAlt: "高所からの墜落危険を示す安全イラスト",
+    imageLedgerId: "S031",
+    imageSource:
+      "安全AIポータル自作（OpenAI image generation、原本 fall-hazard.png）",
+    imageRights: "portal-owned-commercial-editable",
     searchTerms: "墜落 転落 高所 足場 安全",
     description:
       "高所作業の状態把握、開口部対策、足場点検、フルハーネス使用確認を支援する技術。",
@@ -46,6 +58,10 @@ export const NETIS_SAFETY_CATEGORIES = [
     title: "暑熱・作業環境を見える化",
     image: "/safety-images/library/previews/wbgt-display.webp",
     imageAlt: "WBGT値による暑熱環境の確認を示す安全イラスト",
+    imageLedgerId: "S092",
+    imageSource:
+      "安全AIポータル自作（OpenAI image generation、原本 wbgt-display.png）",
+    imageRights: "portal-owned-commercial-editable",
     searchTerms: "暑熱 WBGT 作業環境 遠隔監視",
     description:
       "WBGT、温湿度、作業者状態を計測・共有し、休憩や作業中止の判断を支援する技術。",
@@ -66,6 +82,9 @@ export const FEATURED_NETIS_TECHNOLOGIES = [
       "作業員が携帯するICタグを重機側の磁界で識別し、接近時に運転者へブザーと表示灯で知らせます。",
     useCase:
       "死角・夜間・粉じん下を含む、重機やフォークリフト周辺の接近管理。",
+    limitations:
+      "ICタグを携帯する作業員が検知対象です。現場ごとに検知範囲と警報動作を確認し、誘導・目視確認を併用します。",
+    checkedAt: NETIS_CHECKED_AT,
     productUrl:
       "https://matrix-inc.co.jp/product/hiyarihunter/hiyari-v2.html",
   },
@@ -78,6 +97,9 @@ export const FEATURED_NETIS_TECHNOLOGIES = [
       "重機後部の超音波センサーが人や物体を検知し、周辺作業員には音声、運転者には電子音で警告します。",
     useCase:
       "重機後端・旋回範囲など、立入禁止区域への接近の注意喚起。",
+    limitations:
+      "超音波で人と物体を検知するため対象を識別しません。取付位置、検知範囲、周囲への警報が現場に合うか事前確認が必要です。",
+    checkedAt: NETIS_CHECKED_AT,
     productUrl: "https://www.tukusi.co.jp/commodity/list/631.html",
   },
   {
@@ -89,6 +111,9 @@ export const FEATURED_NETIS_TECHNOLOGIES = [
       "2台の広角カメラとAI人物検知で重機周辺の死角を監視し、映像とアラートで運転者へ通知します。",
     useCase:
       "タグを持たない来訪者も通る現場での、重機後方・側方の接触防止支援。",
+    limitations:
+      "カメラの画角外や遮蔽、天候・照明条件では検知できない場合があります。警報は安全確認や誘導員を置き換えません。",
+    checkedAt: NETIS_CHECKED_AT,
     productUrl:
       "https://www.iwasakinet.co.jp/rental/construction-ict-support/xacti-doboleko-jk/",
   },
@@ -101,6 +126,9 @@ export const FEATURED_NETIS_TECHNOLOGIES = [
       "後付けスイッチでフックの使用状態を検出し、不使用時に本人へ音と光で警告します。",
     useCase:
       "高所作業でのフック掛け忘れ防止と、使用状況ログによる安全管理。",
+    limitations:
+      "フックの使用状態を知らせる補助装置です。適切な親綱への掛け方や法定の墜落防止措置を自動確認するものではありません。",
+    checkedAt: NETIS_CHECKED_AT,
     productUrl:
       "https://ronk-jp.com/wp-content/uploads/2024/08/923a78cb58e3840064f71fca56ccd563.pdf",
   },
@@ -113,7 +141,81 @@ export const FEATURED_NETIS_TECHNOLOGIES = [
       "設定した侵入エリアへの人物進入を画像解析カメラが検知し、写真付きアラートメールを遠隔の管理者へ送信します。",
     useCase:
       "資材ヤード、開口部周辺、無人時間帯を含む危険区域の遠隔監視。",
+    limitations:
+      "設定した画角・区域内が対象です。通信・電源断やメール遅延を想定し、現地の立入防止措置と巡視を併用します。",
+    checkedAt: NETIS_CHECKED_AT,
     productUrl: "https://assistyou-m.com/mics/mics_ai/",
+  },
+  {
+    categoryIds: ["fall-prevention"] as const,
+    name: "安全帯フック着脱確認システム「ハーネスアラート」",
+    registrationNumber: "QS-240022-A",
+    summary: "高所エリアでフック未使用を検知し、作業員へ音で警告します。",
+    mechanism:
+      "エリア設定機が高所作業エリアを作り、ハーネスへ後付けしたICタグ付きフックホルダの状態を検知して警告します。回転灯はオプションです。",
+    useCase:
+      "仮設足場の組立・解体、橋梁、屋根、開口部など、フック使用が必要な高所作業。",
+    limitations:
+      "ホルダからフックを外した状態を検知しますが、親綱等へ正しく掛けたことまでは確認しません。作業前の警報確認と電池管理が必要です。",
+    checkedAt: NETIS_CHECKED_AT,
+    productUrl: "https://ykc-amulet.net/harnessalert/",
+  },
+  {
+    categoryIds: ["heat-environment"] as const,
+    name: "熱中対策バンド",
+    registrationNumber: "KT-230099-VE",
+    summary: "外気温と皮膚温度から暑熱リスクを捉え、音・光・振動で知らせます。",
+    mechanism:
+      "腕に密着させた2つのセンサーで外気温と皮膚温度を測り、深部体温の変化を推定して着用者へ警告します。",
+    useCase:
+      "舗装工事、風通しや照り返しの厳しい場所、大人数・高齢者を含む暑熱作業。",
+    limitations:
+      "医療機器ではありません。センサーを肌へ密着させ、表示にかかわらず体調が悪い場合は休憩し、現場の熱中症対策を継続します。",
+    checkedAt: NETIS_CHECKED_AT,
+    productUrl:
+      "https://sooki.co.jp/irental/allproduct/ct15/i-bow-2025/",
+  },
+  {
+    categoryIds: ["heat-environment"] as const,
+    name: "現場作業員健康管理システム「TECHNO BAND」",
+    registrationNumber: "KT-260019-A",
+    summary: "WBGTと年代別心拍数から暑熱リスクを分析し、本人と管理者へ通知します。",
+    mechanism:
+      "ウェアラブル端末の心拍情報とWBGTを組み合わせてリスクを4段階で判定し、端末の振動・音と管理画面へ通知します。",
+    useCase:
+      "大人数の現場、季節の変わり目、作業員ごとの暑熱リスクと健康状態を管理したい工事。",
+    limitations:
+      "BluetoothまたはLTE通信が必要で、医療機器ではありません。強い直射日光で端末電源が落ちる場合があり、装着位置の調整が必要です。",
+    checkedAt: NETIS_CHECKED_AT,
+    productUrl: "https://www.tecraft.co.jp/topics/2584/",
+  },
+  {
+    categoryIds: ["machine-collision"] as const,
+    name: "重機接触防止装置、ハッとセンサー",
+    registrationNumber: "KK-210002-VE",
+    summary: "超音波で重機周辺の人や物を捉え、周囲と運転者へ音・光で警告します。",
+    mechanism:
+      "重機に取り付けた反射式超音波センサーが最長5mの人・物を検知し、周囲へ警報音と回転灯、運転席へブザーと距離表示で知らせます。",
+    useCase:
+      "バックホウ、ブレーカ、ホイルローダなどを使う掘削、道路、舗装、トンネル工事。",
+    limitations:
+      "豪雨・降雪時は適用外です。設置スペースと配線を確保し、センサーの高さ・方向、検知距離、電池や動作を作業前に確認します。",
+    checkedAt: NETIS_CHECKED_AT,
+    productUrl: "https://tsucumore.com/backsensor-hatto/",
+  },
+  {
+    categoryIds: ["machine-collision", "restricted-zone"] as const,
+    name: "カメラ式人検知システム",
+    registrationNumber: "KK-200054-A",
+    summary: "AIカメラで人物を検知し、警報や対応機種の停止制御へ信号を送ります。",
+    mechanism:
+      "最大4台のカメラ映像をAIで解析し、人物検知時に警報や機械制御用の信号を発信します。自動停止は対応する機種・条件でのみ使えます。",
+    useCase:
+      "トンネル、土工、道路工事の重機死角や、壁面設置カメラによる立入禁止区域の監視。",
+    limitations:
+      "目視で2m先を確認できる環境が条件です。機種ごとに停止可否を検討し、画角・検知レベルを調整して従来の安全確認を継続します。",
+    checkedAt: NETIS_CHECKED_AT,
+    productUrl: "https://www.nishio-tm.co.jp/netis/",
   },
 ] as const;
 
