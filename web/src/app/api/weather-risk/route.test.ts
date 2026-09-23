@@ -150,7 +150,9 @@ describe("weather-risk Open-Meteo contract", () => {
         "https://example.test/api/weather-risk?area=tokyo-shinjuku",
       ),
     );
-    expect(response.status).toBe(503);
+    expect(response.status).toBe(207);
+    expect(response.ok).toBe(true);
+    expect(response.headers.get("x-weather-source")).toBe("partial:jma");
     const body = await response.json();
     expect(body).toMatchObject({
       partial: true,
@@ -204,7 +206,7 @@ describe("weather-risk Open-Meteo contract", () => {
           "https://example.test/api/weather-risk?area=tokyo-shinjuku",
         ),
       );
-      expect(response.status).toBe(503);
+      expect(response.status).toBe(207);
       const body = await response.json();
       expect(body.officialWarning).toMatchObject({
         status: "live",

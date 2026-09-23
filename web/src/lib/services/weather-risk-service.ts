@@ -497,19 +497,23 @@ export class ApiWeatherRiskService implements WeatherRiskService {
         ? `${this.endpoint}?${query.toString()}`
         : this.endpoint;
       const response = await this.fetchImpl(target, { timeoutMs: 4500 });
+      const body = (await response.json().catch(() => null)) as unknown;
+      const partial = parseWeatherRiskPartialApiPayload(body);
+      if (partial) {
+        return {
+          ok: false,
+          error: partial.error,
+          officialWarning: partial.officialWarning,
+          partialFetchedAt: partial.fetchedAt,
+        };
+      }
       if (!response.ok) {
-        const body = (await response.json().catch(() => null)) as unknown;
-        const partial = parseWeatherRiskPartialApiPayload(body);
         return {
           ok: false,
           error: normalizeApiError(body, "天気・警報リスクを取得できませんでした。"),
-          officialWarning: partial?.officialWarning,
-          partialFetchedAt: partial?.fetchedAt,
         };
       }
-      const payload = parseWeatherRiskApiPayload(
-        await response.json().catch(() => null),
-      );
+      const payload = parseWeatherRiskApiPayload(body);
       if (!payload) {
         return {
           ok: false,
