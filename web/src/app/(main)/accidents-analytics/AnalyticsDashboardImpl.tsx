@@ -170,7 +170,11 @@ function ChartCard({
         </p>
       ) : null}
       <LazyChart className="mt-3" style={{ width: "100%", height }}>
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer
+          width="100%"
+          height="100%"
+          initialDimension={{ width: 0, height }}
+        >
           {children as React.ReactElement}
         </ResponsiveContainer>
       </LazyChart>
@@ -286,15 +290,19 @@ function RiskVisualSummary({
           <h3 className="text-sm font-bold text-slate-900">年別推移</h3>
           {yearTrend.length > 0 ? (
             <LazyChart className="mt-1" style={{ width: "100%", height: 142 }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={yearTrend} margin={{ top: 8, right: 8, bottom: 0, left: -24 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                  <XAxis dataKey="year" tick={{ fontSize: 10 }} />
-                  <YAxis tick={{ fontSize: 10 }} allowDecimals={false} />
-                  <Tooltip formatter={(value) => [`${formatNumber(Number(value))}件`, "件数"]} />
-                  <Line type="monotone" dataKey="count" stroke="#0369a1" strokeWidth={2.5} dot={{ r: 3 }} />
-                </LineChart>
-              </ResponsiveContainer>
+              <LineChart
+                width={320}
+                height={142}
+                style={{ width: "100%", maxWidth: "100%", height: 142 }}
+                data={yearTrend}
+                margin={{ top: 8, right: 8, bottom: 0, left: -24 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                <XAxis dataKey="year" tick={{ fontSize: 10 }} />
+                <YAxis tick={{ fontSize: 10 }} allowDecimals={false} />
+                <Tooltip formatter={(value) => [`${formatNumber(Number(value))}件`, "件数"]} />
+                <Line type="monotone" dataKey="count" stroke="#0369a1" strokeWidth={2.5} dot={{ r: 3 }} />
+              </LineChart>
             </LazyChart>
           ) : (
             <div className="mt-2 flex min-h-28 items-center justify-center rounded-md bg-amber-50 p-3 text-center text-xs font-semibold text-amber-950">
