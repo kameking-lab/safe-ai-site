@@ -268,8 +268,8 @@ function RiskVisualSummary({
                   aria-label={`${item.name} ${formatNumber(item.count)}件`}
                   className="min-w-0 rounded-md border border-orange-100 px-1 py-1.5 text-center"
                   style={{
-                    backgroundColor: `rgba(234, 88, 12, ${0.08 + intensity * 0.82})`,
-                    color: intensity > 0.55 ? "#ffffff" : "#7c2d12",
+                    backgroundColor: intensity > 0.66 ? "#9a3412" : intensity > 0.33 ? "#fed7aa" : "#ffedd5",
+                    color: intensity > 0.66 ? "#ffffff" : "#7c2d12",
                   }}
                 >
                   <div className="text-[10px] font-bold">{item.name}</div>
@@ -677,6 +677,9 @@ export function AnalyticsDashboardImpl({
             shareTitle="事故分析ダッシュボード"
           />
         </div>
+        <details className="rounded-lg border border-slate-200 bg-white p-3">
+          <summary className="cursor-pointer text-sm font-bold text-slate-800">詳しい分析・比較グラフ</summary>
+          <div className="mt-4 space-y-6">
         {/* ===== KPI summary ===== */}
         <Section
           title="サマリーKPI"
@@ -1115,6 +1118,22 @@ export function AnalyticsDashboardImpl({
           </CardGrid>
         </Section>
 
+          </div>
+        </details>
+        <details className="rounded-lg border border-slate-200 bg-white p-3">
+          <summary className="cursor-pointer text-sm font-bold text-slate-800">出典・欠損値と集計の制限</summary>
+          <p className="mt-3 text-xs"><a className="text-sky-800 underline" href="https://anzeninfo.mhlw.go.jp/anzen_pg/SIB_FND.html" target="_blank" rel="noopener noreferrer">厚生労働省・死亡災害データベース</a></p>
+          <table className="my-3 w-full text-xs">
+            <caption className="text-left font-bold">現在の対象事例のデータ充足</caption>
+            <thead><tr><th scope="col" className="text-left">項目</th><th scope="col">確認可能</th><th scope="col">欠損</th></tr></thead>
+            <tbody>{([
+              ["業種", aggregates.meta.coverage.industry],
+              ["事故型", aggregates.meta.coverage.type],
+              ["発生月", aggregates.meta.coverage.month],
+              ["都道府県", aggregates.meta.coverage.prefecture],
+              ["年齢", aggregates.meta.coverage.age],
+            ] as const).map(([label, coverage]) => <tr key={label}><th scope="row" className="text-left">{label}</th><td className="text-center">{formatNumber(coverage.known)}件</td><td className="text-center">{formatNumber(coverage.missing)}件</td></tr>)}</tbody>
+          </table>
         {/* ===== Disclaimer footer ===== */}
         <section className="rounded-md border border-slate-200 bg-slate-50 p-3 text-[11px] text-slate-600 sm:text-xs">
           <p className="font-semibold text-slate-800">
@@ -1148,6 +1167,7 @@ export function AnalyticsDashboardImpl({
             </li>
           </ul>
         </section>
+        </details>
       </Stack>
     </PageContainer>
   );

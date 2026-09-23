@@ -19,7 +19,7 @@ describe("事故分析ダッシュボードの公開表示", () => {
     expect(cautionIndex).toBeLessThan(dashboardIndex);
     expect(source).toContain("発生対象 {official.occurredThrough} まで");
     expect(source).toContain("報告締切 {official.reportAsOf}");
-    expect(source).toContain("割合の母数は分析項目の値が確認できる件数");
+    expect(source).toContain("構成比の分母は事故型条件だけを除いた件数");
     expect(source).toContain("欠損値を除きます");
     expect(source).toContain("発生率やリスクの高さを示すものではありません");
   });

@@ -112,6 +112,15 @@ export default async function AccidentsAnalyticsPage({
     compositionBaseline,
     filters.type,
   );
+  const tabParams = new URLSearchParams();
+  for (const [key, value] of Object.entries(filters)) {
+    if (value !== undefined && !(key === "source" && value === "official")) {
+      tabParams.set(key, String(value));
+    }
+  }
+  const casesHref = `/accidents-analytics${tabParams.size ? `?${tabParams}` : ""}`;
+  tabParams.set("view", "flash");
+  const flashHref = `/accidents-analytics?${tabParams}`;
 
   // JSON-LD: Dataset describing the analytics dataset.
   const datasetSchema = {
@@ -171,11 +180,11 @@ export default async function AccidentsAnalyticsPage({
         <p className="text-[11px] font-black tracking-[.14em] text-rose-700">厚生労働省データを図で確認</p>
         <h1 id="analytics-current-title" className="mt-0.5 text-2xl font-black tracking-tight text-slate-950 dark:text-white sm:text-4xl">事故分析ダッシュボード</h1>
         <p className="mt-1 max-w-4xl text-xs leading-5 text-slate-600 dark:text-slate-300 sm:text-sm">
-          最新の全国傾向と収録済み死亡災害個票を分け、業種・事故型・時間帯などから絞り込んで読めます。上段は厚労省の{official.label}です。
+          最新の全国傾向と収録済み死亡災害個票を分け、業種・事故型・時間帯などから絞り込んで読めます。
         </p>
         <nav aria-label="表示する事故データ" className="mt-3 grid grid-cols-2 gap-2 sm:max-w-md">
           <Link
-            href="/accidents-analytics"
+            href={casesHref}
             aria-current={view === "cases" ? "page" : undefined}
             className={`min-h-[44px] rounded-lg border px-3 py-2 text-center text-sm font-black ${
               view === "cases"
@@ -186,7 +195,7 @@ export default async function AccidentsAnalyticsPage({
             収録事例
           </Link>
           <Link
-            href="/accidents-analytics?view=flash"
+            href={flashHref}
             aria-current={view === "flash" ? "page" : undefined}
             className={`min-h-[44px] rounded-lg border px-3 py-2 text-center text-sm font-black ${
               view === "flash"
@@ -204,7 +213,7 @@ export default async function AccidentsAnalyticsPage({
         >
           {view === "cases" ? (
             <p>
-              <strong>{sourceBaseline.meta.yearsCovered.from}〜{sourceBaseline.meta.yearsCovered.to}年・収録個票{sourceBaseline.meta.filteredCases.toLocaleString("ja-JP")}件</strong>を基準に、現在{aggregates.meta.filteredCases.toLocaleString("ja-JP")}件を表示。割合の母数は分析項目の値が確認できる件数で、欠損値を除きます。発生率やリスクの高さを示すものではありません。
+              <strong>{sourceBaseline.meta.yearsCovered.from}〜{sourceBaseline.meta.yearsCovered.to}年・収録個票{sourceBaseline.meta.filteredCases.toLocaleString("ja-JP")}件</strong>を基準に、現在{aggregates.meta.filteredCases.toLocaleString("ja-JP")}件を表示。構成比の分母は事故型条件だけを除いた件数。月別などの図は各項目の欠損値を除きます。発生率やリスクの高さを示すものではありません。
             </p>
           ) : (
             <p>
