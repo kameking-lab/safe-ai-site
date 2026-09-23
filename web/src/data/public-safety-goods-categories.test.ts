@@ -20,6 +20,6 @@ describe("public safety goods category contract", () => {
     expect(PUBLIC_GOODS_RATING_DISCLOSURE.checkedAt).toMatch(
       /^\d{4}-\d{2}-\d{2}$/,
     );
-    expect(PUBLIC_GOODS_RATING_DISCLOSURE.localRatingPublished).toBe(false);
+    expect(PUBLIC_GOODS_RATING_DISCLOSURE.ratingDisplayRequiresApi).toBe(true);
   });
 });

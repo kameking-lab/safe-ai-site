@@ -7,6 +7,8 @@ import {
   generateRakutenSearchUrl,
 } from "@/lib/affiliate-url";
 import { trackEvent } from "@/components/Analytics";
+import { GoodsProductCarousel } from "@/components/goods-product-carousel";
+import { PUBLIC_SAFETY_GOODS_CATEGORIES } from "@/data/public-safety-goods-categories";
 
 const MHLW_OXYGEN_RULES_URL =
   "https://anzeninfo.mhlw.go.jp/horei/hor1-45/hor1-45-33-1-5.html";
@@ -56,6 +58,15 @@ type ConditionProfile = {
   guidance: string;
   check: string;
 };
+
+function photoCategoryId(categoryId: string, taskId: string): string {
+  if (categoryId === "respiratory") return taskId === "confined" ? "gas-detectors" : "respiratory";
+  if (categoryId === "fall") return taskId === "scaffold" ? "fall-protection" : "fall-accessories";
+  if (categoryId === "chemical") return taskId === "splash" ? "eye-face-protection" : "chemical-gloves";
+  if (categoryId === "machine") return taskId === "moving" ? "machine-lockout" : "signs-barriers";
+  if (categoryId === "noise") return taskId === "loud" ? "hearing" : "eye-face-protection";
+  return "safety-footwear";
+}
 
 const CATEGORIES: readonly Option[] = [
   { id: "respiratory", label: "呼吸用保護具", detail: "粉じん・蒸気・ガス・酸欠が気になる" },
@@ -292,6 +303,9 @@ export function SafetyGoodsWizard() {
     () => (category && task && condition ? buildRecommendation({ category, task, condition }) : null),
     [category, task, condition],
   );
+  const photoCategory = category && task
+    ? PUBLIC_SAFETY_GOODS_CATEGORIES.find((item) => item.id === photoCategoryId(category.id, task.id))
+    : null;
 
   function chooseCategory(id: string) {
     setCategoryId(id);
@@ -387,6 +401,9 @@ export function SafetyGoodsWizard() {
                   </a>
                 </div>
               </div>
+            ) : null}
+            {!recommendation.withholdPurchase && photoCategory ? (
+              <GoodsProductCarousel key={photoCategory.id} categoryId={photoCategory.id} categoryName={photoCategory.name} />
             ) : null}
             <div className="mt-5 grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
               <div>

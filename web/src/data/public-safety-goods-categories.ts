@@ -8,11 +8,11 @@ export type PublicSafetyGoodsCategory = {
 };
 
 export const PUBLIC_GOODS_RATING_DISCLOSURE = {
-  sourceLabel: "Amazon.co.jpの商品検索結果",
-  sourceUrl: "https://www.amazon.co.jp/",
+  sourceLabel: "楽天市場商品検索API",
+  sourceUrl: "https://webservice.rakuten.co.jp/documentation/ichiba-item-search",
   checkedAt: "2026-09-23",
-  localRatingPublished: false,
-  note: "商品画像・購入者評価・レビュー件数は販売サイトを開いた時点の表示を確認する。安全AIポータル内では評価値を転載・断定しない。",
+  ratingDisplayRequiresApi: true,
+  note: "公式APIで実画像・購入者評価・レビュー件数を取得できた商品のみサイト内に表示し、最新情報と安全規格の適合は販売ページと一次資料で確認する。",
 } as const;
 
 /**
