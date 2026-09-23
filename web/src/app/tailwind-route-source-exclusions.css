@@ -36,6 +36,7 @@
 @source not "../components/flagship-grid.tsx";
 @source not "../components/flagship-nav.tsx";
 @source not "../components/for-construction/role-anchor-scroller.tsx";
+@source not "../components/goods-chatbot.tsx";
 @source not "../components/goods-icons/index.tsx";
 @source not "../components/health-checkup/scheduler-form.tsx";
 @source not "../components/heat-illness/heat-safety-special.tsx";
@@ -43,7 +44,12 @@
 @source not "../components/home-persona-entry.tsx";
 @source not "../components/home-quick-access.tsx";
 @source not "../components/home-safety-alert-generator.tsx";
+@source not "../components/home-safety-cockpit/home-area-picker-client.tsx";
 @source not "../components/home-safety-cockpit/home-effect-first-client.tsx";
+@source not "../components/home-safety-cockpit/home-heat-actions-client.tsx";
+@source not "../components/home-safety-cockpit/home-heat-content.tsx";
+@source not "../components/home-safety-cockpit/home-heat-slide-controls.tsx";
+@source not "../components/home-safety-cockpit/home-safety-cockpit.tsx";
 @source not "../components/home-safety-cockpit/home-safety-cockpit-client.tsx";
 @source not "../components/home-three-pillars.tsx";
 @source not "../components/home/home-core-features.tsx";
@@ -80,6 +86,7 @@
 @source not "../components/notifications/notification-bell.tsx";
 @source not "../components/pdf-export-panel.tsx";
 @source not "../components/persona-entry.tsx";
+@source not "../components/safety-image-library/safety-image-first-release.tsx";
 @source not "../components/safety-plan/plan-history-saver.tsx";
 @source not "../components/safety-sign-svg.tsx";
 @source not "../components/section-wave.tsx";

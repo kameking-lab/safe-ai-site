@@ -136,7 +136,7 @@ export function SeminarQuiz({ courseId }: { courseId: string }) {
   if (savedState) {
     const savedAnswered = Object.keys(savedState.responses).length;
     return (
-      <div className="mt-5 rounded-2xl border border-teal-300 bg-white p-5 dark:border-teal-700 dark:bg-slate-900">
+      <div className="mt-5 rounded-2xl border border-teal-300 bg-white p-5 dark:border-teal-500 dark:bg-slate-900">
         <p className="font-black text-slate-950 dark:text-white">
           保存済みの進捗があります（{savedAnswered}/{savedState.queue.length}問）
         </p>
@@ -147,7 +147,7 @@ export function SeminarQuiz({ courseId }: { courseId: string }) {
               setState(savedState);
               setSavedState(null);
             }}
-            className="min-h-11 rounded-xl bg-teal-700 px-5 py-3 font-black text-white hover:bg-teal-800"
+            className="min-h-11 rounded-xl bg-teal-700 px-5 py-3 font-black text-white hover:bg-teal-900"
           >
             続きから
           </button>
@@ -165,8 +165,8 @@ export function SeminarQuiz({ courseId }: { courseId: string }) {
 
   if (state.complete) {
     return (
-      <div className="mt-5 rounded-2xl border border-teal-300 bg-white p-5 dark:border-teal-700 dark:bg-slate-900">
-        <div role="status" tabIndex={-1} ref={feedbackRef} className="focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-400">
+      <div className="mt-5 rounded-2xl border border-teal-300 bg-white p-5 dark:border-teal-500 dark:bg-slate-900">
+        <div role="status" tabIndex={-1} ref={feedbackRef} className="focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300">
           <p className="text-sm font-bold text-teal-800 dark:text-teal-200">結果</p>
           <p className="mt-1 text-3xl font-black text-slate-950 dark:text-white">
             {score}/{state.queue.length}問 正解
@@ -187,7 +187,7 @@ export function SeminarQuiz({ courseId }: { courseId: string }) {
             <button
               type="button"
               onClick={() => setState({ queue: incorrect, position: 0, responses: {}, complete: false })}
-              className="min-h-11 rounded-xl bg-teal-700 px-5 py-3 font-black text-white hover:bg-teal-800"
+              className="min-h-11 rounded-xl bg-teal-700 px-5 py-3 font-black text-white hover:bg-teal-900"
             >
               間違えた問題だけ再挑戦
             </button>
@@ -252,7 +252,7 @@ export function SeminarQuiz({ courseId }: { courseId: string }) {
                   <span>{choice}</span>
                 </button>
                 {answered ? (
-                  <p className="border-t border-current/15 px-4 py-3 text-sm leading-6 text-slate-800 dark:text-slate-100">
+                  <p className="border-t border-current/20 px-4 py-3 text-sm leading-6 text-slate-800 dark:text-slate-100">
                     <strong>{stateLabel}：</strong>{question.choiceRationales[index]}
                   </p>
                 ) : null}
@@ -266,7 +266,7 @@ export function SeminarQuiz({ courseId }: { courseId: string }) {
           ref={feedbackRef}
           role="status"
           tabIndex={-1}
-          className="mt-5 rounded-xl bg-slate-100 p-4 text-sm leading-6 text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-400 dark:bg-slate-800 dark:text-white"
+          className="mt-5 rounded-xl bg-slate-100 p-4 text-sm leading-6 text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:bg-slate-800 dark:text-white"
         >
           <p className="font-black">
             {selectedIndex === question.correctIndex ? "○ 正解です" : "× 不正解です"}
@@ -281,7 +281,7 @@ export function SeminarQuiz({ courseId }: { courseId: string }) {
                   href={link.href}
                   target={link.external ? "_blank" : undefined}
                   rel={link.external ? "noopener noreferrer" : undefined}
-                  className="inline-flex min-h-11 items-center rounded-full border border-teal-700 px-3 font-black text-teal-800 underline underline-offset-4 dark:border-teal-300 dark:text-teal-200"
+                  className="inline-flex min-h-11 items-center rounded-full border border-teal-700 px-3 font-black text-teal-800 underline underline-offset-4 dark:border-teal-500 dark:text-teal-200"
                 >
                   根拠: {link.label}
                 </a>
@@ -296,7 +296,7 @@ export function SeminarQuiz({ courseId }: { courseId: string }) {
           onClick={() => setState((current) => current.position === current.queue.length - 1
             ? { ...current, complete: true }
             : { ...current, position: current.position + 1 })}
-          className="mt-5 min-h-11 rounded-xl bg-teal-700 px-5 py-3 font-black text-white hover:bg-teal-800"
+          className="mt-5 min-h-11 rounded-xl bg-teal-700 px-5 py-3 font-black text-white hover:bg-teal-900"
         >
           {state.position === state.queue.length - 1 ? "結果を見る" : "次の問題"}
         </button>

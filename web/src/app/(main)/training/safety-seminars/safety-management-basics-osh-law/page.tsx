@@ -100,12 +100,12 @@ export default function SafetyManagementBasicsOshLawPage() {
             <span className="rounded-full bg-white/10 px-3 py-2"><Presentation className="mr-1 inline h-4 w-4" aria-hidden="true" />12枚</span>
             <span className="rounded-full bg-white/10 px-3 py-2">基準日 {training.asOf}</span>
           </div>
-          <p className="mt-5 rounded-xl border border-amber-200/60 bg-black/15 p-3 font-bold leading-6 text-amber-50">{training.boundary}</p>
+          <p className="mt-5 rounded-xl border border-amber-200 bg-black/20 p-3 font-bold leading-6 text-amber-50">{training.boundary}</p>
           <a href="#seminar-player" className="mt-6 inline-flex min-h-11 items-center gap-2 rounded-xl bg-emerald-200 px-5 py-3 font-black text-emerald-950 hover:bg-emerald-100">
             今すぐ再生 <ArrowRight className="h-5 w-5" aria-hidden="true" />
           </a>
         </div>
-        <div className="relative min-h-80 bg-emerald-50 lg:min-h-full">
+        <div className="relative bg-emerald-50" style={{ minHeight: 320 }}>
           <Image
             src={`${PATH}/safe-site-hero.webp`}
             alt="安全管理の基本を案内するチワワの先生"
