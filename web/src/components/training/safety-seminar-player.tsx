@@ -43,6 +43,14 @@ function sentenceAt(text: string, charIndex: number) {
   return chunks.at(-1)?.trim() ?? text;
 }
 
+function sourceLabel(source: TrainingSource) {
+  if (source.sourceId === "GUIDE-MHLW-OSHMS") return "厚労省 OSHMS指針";
+  if (source.sourceId === "GUIDE-MHLW-RA") return "厚労省 RA指針";
+  if (source.sourceId === "LAW-R7-33-AMENDMENT") return "厚労省 令和7年改正法";
+  if (source.sourceId === "LAW-MHLW-OSH") return "e-Gov 労働安全衛生法";
+  return source.publisher;
+}
+
 export function SafetySeminarPlayer({
   slides,
   claims,
@@ -99,12 +107,19 @@ export function SafetySeminarPlayer({
       .map((sourceId) => sourceById.get(sourceId))
       .filter((source): source is TrainingSource => Boolean(source));
   }, [claimById, slide.claimIds, sourceById]);
-  const slideLawArticles = useMemo(() => [...new Set(
-    slide.claimIds.flatMap((claimId) =>
-      [...(claimById.get(claimId)?.statement.matchAll(/第\d+条(?:の\d+)?/gu) ?? [])]
-        .map((match) => match[0]),
-    ),
-  )], [claimById, slide.claimIds]);
+  const slideEvidenceLinks = useMemo(() => {
+    const articleLinks = (slide.articleRefs ?? []).slice(0, 2).map((ref) => ({
+      href: ref.article.includes("の") && ref.naviPath ? ref.naviPath : ref.egovUrl,
+      label: `${ref.lawShort} ${ref.article}`,
+      external: !(ref.article.includes("の") && ref.naviPath),
+    }));
+    if (articleLinks.length > 0) return articleLinks;
+    return slideSources.slice(0, 2).map((source) => ({
+      href: source.url,
+      label: sourceLabel(source),
+      external: true,
+    }));
+  }, [slide.articleRefs, slideSources]);
 
   useEffect(() => {
     statusRef.current = speechStatus;
@@ -300,7 +315,12 @@ export function SafetySeminarPlayer({
       <h2 id="seminar-player-title" className="sr-only">
         {playerLabel}
       </h2>
-      <div className="relative min-h-[680px] overflow-hidden bg-slate-950 p-5 sm:min-h-[620px] sm:p-8 lg:aspect-video lg:min-h-0 lg:p-10">
+      <div
+        data-testid="seminar-stage"
+        className={`relative overflow-hidden bg-slate-950 p-5 sm:p-8 lg:aspect-video lg:min-h-0 lg:p-10 ${
+          slide.stage ? "" : "min-h-[680px] sm:min-h-[620px]"
+        }`}
+      >
         <div
           className="pointer-events-none absolute inset-0 opacity-30"
           aria-hidden="true"
@@ -309,6 +329,87 @@ export function SafetySeminarPlayer({
               "radial-gradient(circle at 10% 15%, #0f766e 0, transparent 30%), radial-gradient(circle at 88% 80%, #f97316 0, transparent 24%)",
           }}
         />
+        {slide.stage ? (
+          <div className="relative flex h-full flex-col" style={{ minHeight: 440 }}>
+            <header className="flex items-start justify-between gap-3 text-sm lg:text-xl">
+              <div>
+                <p className="font-black text-teal-200" style={{ letterSpacing: "0.08em" }}>
+                  {slide.kicker}
+                </p>
+                <p className="mt-1 font-bold text-slate-200">{slide.label}</p>
+              </div>
+              <p className="shrink-0 font-mono text-slate-200">
+                {String(slide.number).padStart(2, "0")} / {slides.length}
+              </p>
+            </header>
+            <div
+              className="grid min-h-0 flex-1 items-center gap-3 sm:gap-6 lg:gap-8"
+              style={{ gridTemplateColumns: "minmax(0, 1fr) minmax(92px, 34%)" }}
+            >
+              <div className="min-w-0">
+                <h3
+                  data-testid="stage-title"
+                  style={{ fontSize: "clamp(24px, 4vw, 40px)" }}
+                  className="font-black leading-tight tracking-tight"
+                >
+                  {slide.title}
+                </h3>
+                <p
+                  data-testid="stage-headline"
+                  style={{ fontSize: "clamp(18px, 2.5vw, 24px)" }}
+                  className="mt-4 text-lg font-black leading-7 text-white sm:text-xl lg:text-2xl"
+                >
+                  {slide.stage.headline}
+                </p>
+                <ul className="mt-4 space-y-2 text-sm font-bold leading-6 text-slate-100 lg:text-xl lg:leading-8">
+                  {slide.stage.keyPoints.map((item) => (
+                    <li key={item} className="flex gap-2">
+                      <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-orange-300" aria-hidden="true" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              {slide.stage.mascot ? (
+                <Image
+                  src={slide.stage.mascot.src}
+                  alt={slide.stage.mascot.alt}
+                  width={slide.stage.mascot.width}
+                  height={slide.stage.mascot.height}
+                  sizes="(max-width: 639px) 34vw, (max-width: 1023px) 32vw, 280px"
+                  loading={slide.number === 1 ? "eager" : "lazy"}
+                  style={{
+                    maxHeight: 250,
+                    maxWidth: Math.min(280, slide.stage.mascot.width),
+                  }}
+                  className="mx-auto h-auto w-full object-contain"
+                />
+              ) : null}
+            </div>
+            <div className="space-y-2 text-sm lg:text-xl">
+              {slide.stage.caveat ? (
+                <p data-testid="stage-caveat" className="rounded-lg border border-amber-300/60 bg-amber-950/70 px-3 py-2 font-bold text-amber-100">
+                  条件: {slide.stage.caveat}
+                </p>
+              ) : null}
+              {slideEvidenceLinks.length > 0 ? (
+                <div className="flex flex-wrap gap-2" aria-label="このスライドの根拠">
+                  {slideEvidenceLinks.map((link) => (
+                    <a
+                      key={`${link.href}-${link.label}`}
+                      href={link.href}
+                      target={link.external ? "_blank" : undefined}
+                      rel={link.external ? "noopener noreferrer" : undefined}
+                      className="inline-flex min-h-11 items-center rounded-full border border-teal-300 bg-teal-950 px-3 font-black text-teal-100 underline underline-offset-4"
+                    >
+                      {link.label}
+                    </a>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+          </div>
+        ) : (
         <div className="relative flex h-full flex-col">
           <header className="flex items-start justify-between gap-4">
             <div>
@@ -345,14 +446,13 @@ export function SafetySeminarPlayer({
             <SlideVisual slide={slide} />
           </div>
           <a href={`#${sourcesAnchorId}`} className="mt-2 block truncate text-[10px] text-slate-300 underline underline-offset-2">
-            根拠: {slideLawArticles.length > 0
-              ? `労働安全衛生法 ${slideLawArticles.join("・")}`
-              : slideSources.map((source) => source.title).join(" / ") || "教材内の確認事項"}
+            根拠: {slideSources.map((source) => source.title).join(" / ") || "教材内の確認事項"}
           </a>
         </div>
+        )}
       </div>
 
-      {captionsVisible ? (
+      {captionsVisible && (!slide.stage || speechStatus === "playing") ? (
         <div
           role="status"
           aria-live="polite"
@@ -429,7 +529,7 @@ export function SafetySeminarPlayer({
             />
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
+        <div data-testid="seminar-controls" className="flex flex-wrap items-center gap-2">
           <ControlButton
             label="前のスライド"
             onClick={() => goTo(currentIndex - 1)}
@@ -453,14 +553,16 @@ export function SafetySeminarPlayer({
             disabled={currentIndex === slides.length - 1}
             icon={ChevronRight}
           />
+          {!slide.stage ? (
+            <ControlButton
+              label="字幕"
+              onClick={() => setCaptionsVisible((value) => !value)}
+              pressed={captionsVisible}
+              icon={Captions}
+            />
+          ) : null}
           <ControlButton
-            label="字幕"
-            onClick={() => setCaptionsVisible((value) => !value)}
-            pressed={captionsVisible}
-            icon={Captions}
-          />
-          <ControlButton
-            label="スライド一覧"
+            label={slide.stage ? `${slides.length}枚` : "スライド一覧"}
             onClick={() => setListVisible((value) => !value)}
             pressed={listVisible}
             icon={List}
@@ -484,21 +586,60 @@ export function SafetySeminarPlayer({
           aria-expanded={transcriptVisible}
           aria-controls={transcriptId}
         >
-          {transcriptVisible ? "音声原稿を閉じる" : "音声原稿を読む"}
+          {slide.stage
+            ? transcriptVisible ? "詳しく閉じる" : "詳しく"
+            : transcriptVisible ? "音声原稿を閉じる" : "音声原稿を読む"}
         </button>
         {transcriptVisible ? (
           <div
             id={transcriptId}
             role="region"
-            aria-label={`${slide.number}枚目の音声原稿と講師向け補足`}
+            aria-label={slide.stage
+              ? `${slide.number}枚目の詳しい内容、音声原稿、講師向け補足、根拠`
+              : `${slide.number}枚目の音声原稿と講師向け補足`}
             tabIndex={0}
             className="max-h-64 overflow-y-auto rounded-xl border border-slate-700 bg-slate-950 p-4 text-sm leading-7 text-slate-200 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300"
           >
-            <p>{slide.narration}</p>
+            {slide.stage ? (
+              <>
+                <h4 className="font-black text-white">詳しい内容</h4>
+                <p className="mt-2 font-bold">{slide.message}</p>
+                <ul className="mt-2 list-disc space-y-1 pl-5">
+                  {slide.body.map((item) => <li key={item}>{item}</li>)}
+                </ul>
+                <label className="mt-4 flex min-h-11 items-center gap-3 font-bold text-white">
+                  <input
+                    type="checkbox"
+                    checked={captionsVisible}
+                    onChange={(event) => setCaptionsVisible(event.currentTarget.checked)}
+                    className="h-5 w-5"
+                    style={{ accentColor: "#5eead4" }}
+                  />
+                  再生中に字幕を表示
+                </label>
+                <h4 className="mt-4 font-black text-white">音声原稿</h4>
+              </>
+            ) : null}
+            <p className={slide.stage ? "mt-2" : undefined}>{slide.narration}</p>
             <h4 className="mt-4 font-black text-white">講師向け補足</h4>
             <ul className="mt-2 list-disc space-y-1 pl-5">
               {slide.instructorNotes.map((note) => (
                 <li key={note}>{note}</li>
+              ))}
+            </ul>
+            <h4 className="mt-4 font-black text-white">根拠</h4>
+            <ul className="mt-2 space-y-2">
+              {slideEvidenceLinks.map((link) => (
+                <li key={`${link.href}-${link.label}`}>
+                  <a
+                    href={link.href}
+                    target={link.external ? "_blank" : undefined}
+                    rel={link.external ? "noopener noreferrer" : undefined}
+                    className="inline-flex min-h-11 items-center font-bold text-teal-200 underline underline-offset-4"
+                  >
+                    {link.label}
+                  </a>
+                </li>
               ))}
             </ul>
           </div>
@@ -523,7 +664,7 @@ export function SafetySeminarPlayer({
             ))}
           </ol>
         ) : null}
-        <p className="text-xs text-slate-400">
+        <p className={`${slide.stage ? "hidden lg:block lg:text-sm" : "text-xs"} text-slate-400`}>
           キーボード: Space 再生/一時停止、←/→ 移動、C 字幕、F 全画面
         </p>
       </div>
@@ -563,7 +704,7 @@ function ControlButton({
       }`}
     >
       <Icon className="h-4 w-4" aria-hidden="true" />
-      <span className={primary ? "inline" : "sr-only sm:not-sr-only"}>{label}</span>
+      <span className={primary ? "inline" : "hidden sm:inline"}>{label}</span>
     </button>
   );
 }
@@ -586,7 +727,7 @@ function SlideVisual({ slide }: { slide: TrainingSlide }) {
   }
   if (visual.type === "ky") {
     return (
-      <div className="grid gap-3 sm:grid-cols-[1.2fr_0.8fr]">
+      <div className="grid gap-3 sm:grid-cols-2">
         <div className="relative aspect-[4/3] overflow-hidden rounded-2xl border-2 border-orange-400">
           <Image src={visual.image} alt={visual.alt} fill sizes="40vw" className="object-cover" />
         </div>
@@ -618,7 +759,11 @@ function SlideVisual({ slide }: { slide: TrainingSlide }) {
     return (
       <div className="space-y-2 rounded-2xl border border-white/15 bg-white/5 p-4">
         {visual.bars.map((bar) => (
-          <div key={bar.label} className="grid grid-cols-[6rem_1fr_3.8rem] items-center gap-2 text-xs sm:grid-cols-[8rem_1fr_4.5rem] sm:text-sm">
+          <div
+            key={bar.label}
+            className="grid items-center gap-2 text-xs sm:text-sm"
+            style={{ gridTemplateColumns: "minmax(6rem, 8rem) minmax(0, 1fr) 4.5rem" }}
+          >
             <span className="break-words font-bold leading-4" title={bar.label}>{bar.label}</span>
             <div className="h-5 overflow-hidden rounded bg-slate-800">
               <div className="h-full rounded bg-teal-400" style={{ width: `${Math.max(3, (bar.value / visual.max) * 100)}%` }} />
@@ -663,7 +808,11 @@ function SlideVisual({ slide }: { slide: TrainingSlide }) {
     return (
       <ol className="space-y-2">
         {visual.steps.map((step, index) => (
-          <li key={step.label} className="grid grid-cols-[2.5rem_1fr] gap-3 rounded-2xl border border-white/15 bg-white/10 p-3">
+          <li
+            key={step.label}
+            className="grid gap-3 rounded-2xl border border-white/15 bg-white/10 p-3"
+            style={{ gridTemplateColumns: "2.5rem minmax(0, 1fr)" }}
+          >
             <span className="flex h-10 w-10 items-center justify-center rounded-full bg-teal-300 font-black text-slate-950">{index + 1}</span>
             <span><strong className="block text-base">{step.label}</strong><span className="text-xs leading-5 text-slate-300">{step.detail}</span></span>
           </li>

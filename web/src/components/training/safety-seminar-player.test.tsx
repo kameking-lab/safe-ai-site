@@ -3,9 +3,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import trainingJson from "@/data/safety-seminars/fall-prevention.json";
 import claimsJson from "@/data/safety-seminars/claims.json";
 import sourcesJson from "@/data/safety-seminars/source-registry.json";
+import oshTrainingJson from "@/data/safety-seminars/safety-management-basics-osh-law.json";
+import oshClaimsJson from "@/data/safety-seminars/safety-management-basics-osh-law-claims.json";
+import oshSourcesJson from "@/data/safety-seminars/safety-management-basics-osh-law-source-registry.json";
 import type {
   FallPreventionTraining,
   TrainingClaim,
+  TrainingCourse,
   TrainingSource,
 } from "@/data/safety-seminars/types";
 import { SafetySeminarPlayer } from "./safety-seminar-player";
@@ -13,6 +17,9 @@ import { SafetySeminarPlayer } from "./safety-seminar-player";
 const training = trainingJson as FallPreventionTraining;
 const claims = claimsJson as TrainingClaim[];
 const sources = sourcesJson as TrainingSource[];
+const oshTraining = oshTrainingJson as TrainingCourse;
+const oshClaims = oshClaimsJson as TrainingClaim[];
+const oshSources = oshSourcesJson as TrainingSource[];
 
 describe("SafetySeminarPlayer", () => {
   const play = vi.fn().mockResolvedValue(undefined);
@@ -80,6 +87,17 @@ describe("SafetySeminarPlayer", () => {
         slides={training.slides}
         claims={claims}
         sources={sources}
+      />,
+    );
+  }
+
+  function renderStagePlayer() {
+    return render(
+      <SafetySeminarPlayer
+        slides={oshTraining.slides}
+        claims={oshClaims}
+        sources={oshSources}
+        audioBasePath="/training/safety-seminars/safety-management-basics-osh-law/audio"
       />,
     );
   }
@@ -161,5 +179,26 @@ describe("SafetySeminarPlayer", () => {
     expect(speak).toHaveBeenCalledTimes(1);
 
     expect(speak.mock.calls[0]?.[0]).toMatchObject({ text: training.slides[0].narration });
+  });
+
+  it("stage教材は投影文面と5操作だけを出し、詳細と直接根拠へ1回で到達できる", () => {
+    renderStagePlayer();
+    expect(play).not.toHaveBeenCalled();
+    expect(screen.getByTestId("seminar-controls").querySelectorAll("button")).toHaveLength(5);
+    expect(screen.queryByText(oshTraining.slides[0].body[0]!)).toBeNull();
+    expect(screen.getByText(oshTraining.slides[0].stage!.headline)).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "詳しく" }));
+    expect(screen.getByText(oshTraining.slides[0].body[0]!)).toBeTruthy();
+    expect(screen.getByText(oshTraining.slides[0].narration)).toBeTruthy();
+    expect(screen.getByRole("checkbox", { name: "再生中に字幕を表示" })).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "詳しく閉じる" }));
+    fireEvent.click(screen.getByRole("button", { name: "次のスライド" }));
+    expect(screen.getByRole("link", { name: "安衛法 第28条の2" }).getAttribute("href"))
+      .toBe("https://laws.e-gov.go.jp/law/347AC0000000057#Mp-At_28_2");
+    fireEvent.click(screen.getByRole("button", { name: "次のスライド" }));
+    expect(screen.getByRole("link", { name: "安衛法 第1条" }).getAttribute("href"))
+      .toBe("https://laws.e-gov.go.jp/law/347AC0000000057#Mp-At_1");
   });
 });

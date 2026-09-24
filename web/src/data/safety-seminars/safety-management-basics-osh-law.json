@@ -16,6 +16,11 @@
       "kicker": "第1章 安衛法と安全管理のしくみ",
       "message": "災害を防ぐ力は、作業を始める前の確認で決まる。",
       "body": ["始業前に危険と対策を確認", "作業中の変化を共有", "終業時に記録して次へ渡す"],
+      "stage": {
+        "headline": "始める前に危険と対策を確認",
+        "keyPoints": ["始業前に確認", "変化を共有", "記録して引継ぐ"],
+        "mascot": { "src": "/mascot/mascot-teacher.webp", "alt": "始業前確認を案内するチワワの先生", "width": 320, "height": 320 }
+      },
       "visual": { "type": "image", "src": "/training/safety-seminars/safety-management-basics-osh-law/safe-site-hero.webp", "alt": "安全な現場づくりを案内するチワワの先生" },
       "label": "導入",
       "claimIds": ["C-REF-CYCLE"],
@@ -30,6 +35,14 @@
       "kicker": "原因の見方",
       "message": "人だけを責めると、設備や管理に残った危険を見落とす。",
       "body": ["人の行動と判断", "設備、材料、作業環境", "手順、工程、連絡、監督"],
+      "stage": {
+        "headline": "人・設備・方法・管理を広く見る",
+        "keyPoints": ["行動と判断", "設備と環境", "手順と管理"],
+        "mascot": { "src": "/mascot/mascot-detective.webp", "alt": "事故の複数要因を調べるチワワ", "width": 271, "height": 320 }
+      },
+      "articleRefs": [
+        { "lawShort": "安衛法", "article": "第28条の2", "sourceId": "LAW-MHLW-OSH", "egovUrl": "https://laws.e-gov.go.jp/law/347AC0000000057#Mp-At_28_2" }
+      ],
       "visual": { "type": "image", "src": "/training/safety-seminars/safety-management-basics-osh-law/hazard-spotting.webp", "alt": "現場の複数の危険条件を確認するチワワの先生" },
       "label": "安全管理",
       "claimIds": ["C-REF-MULTI"],
@@ -44,6 +57,15 @@
       "kicker": "法令の基本",
       "message": "法令の目的は、災害を防ぎ、安全と健康を守ることにある。",
       "body": ["総合的・計画的な災害防止", "安全と健康の確保", "快適な職場環境の形成"],
+      "stage": {
+        "headline": "災害を防ぎ、安全と健康を守る",
+        "keyPoints": ["計画的に防止", "安全と健康", "職場環境を改善"],
+        "mascot": { "src": "/mascot/mascot-law-reading.webp", "alt": "労働安全衛生法を確認するチワワ", "width": 241, "height": 300 }
+      },
+      "articleRefs": [
+        { "lawShort": "安衛法", "article": "第1条", "sourceId": "LAW-MHLW-OSH", "egovUrl": "https://laws.e-gov.go.jp/law/347AC0000000057#Mp-At_1", "naviPath": "/law-navi/347AC0000000057/1" },
+        { "lawShort": "安衛法", "article": "第3条", "sourceId": "LAW-MHLW-OSH", "egovUrl": "https://laws.e-gov.go.jp/law/347AC0000000057#Mp-At_3", "naviPath": "/law-navi/347AC0000000057/3" }
+      ],
       "visual": { "type": "steps", "steps": [{ "label": "危険を把握", "detail": "作業と現場条件を具体的に確認" }, { "label": "措置を実施", "detail": "法令上の措置と追加対策を実行" }, { "label": "確かめて改善", "detail": "結果と変化を点検し、次の計画へ反映" }] },
       "label": "現行法 2026-09-20",
       "claimIds": ["C-LAW-PURPOSE", "C-LAW-EMPLOYER"],
@@ -58,6 +80,15 @@
       "kicker": "確認の順序",
       "message": "法律だけで判断せず、政省令・規則と現場条件まで確認する。",
       "body": ["法律は目的と基本責任を定める", "政令・省令・規則が具体要件を定める", "指針・通達・社内基準を現場手順へ反映"],
+      "stage": {
+        "headline": "施行日と現場条件まで確かめる",
+        "keyPoints": ["法律", "政省令・規則", "現場ルール"],
+        "caveat": "将来施行は現在の義務と分ける",
+        "mascot": { "src": "/mascot/mascot-court-scale.webp", "alt": "法令の段階と施行日を比べるチワワ", "width": 269, "height": 320 }
+      },
+      "articleRefs": [
+        { "lawShort": "安衛法", "article": "第1条", "sourceId": "LAW-MHLW-OSH", "egovUrl": "https://laws.e-gov.go.jp/law/347AC0000000057#Mp-At_1", "naviPath": "/law-navi/347AC0000000057/1" }
+      ],
       "visual": { "type": "steps", "steps": [{ "label": "法律", "detail": "目的、責務、基本的な義務" }, { "label": "政令・省令・規則", "detail": "対象業務、設備、教育などの具体要件" }, { "label": "指針・通達", "detail": "行政が示す実施方法や考え方" }, { "label": "現場ルール", "detail": "自社基準、施工計画、作業手順へ具体化" }] },
       "label": "現行法と施行日の確認",
       "claimIds": ["C-LAW-PURPOSE", "C-LAW-FUTURE"],
@@ -72,6 +103,16 @@
       "kicker": "混在作業の管理",
       "message": "誰が決め、誰が確認し、誰へ止める連絡をするかを作業前に決める。",
       "body": ["元方・事業者は現場条件と法的立場を確認", "職長・責任者は当日の作業と変更を調整", "作業者は危険や異常を伝え、必要時に停止"],
+      "stage": {
+        "headline": "止める人・連絡先・再開者を決める",
+        "keyPoints": ["工程を調整", "当日の役割", "異常時の連絡"],
+        "caveat": "第30条は全元方へ一律適用しない",
+        "mascot": { "src": "/mascot/mascot-megaphone.webp", "alt": "混在作業の連絡経路を伝えるチワワ", "width": 283, "height": 288 }
+      },
+      "articleRefs": [
+        { "lawShort": "安衛法", "article": "第29条", "sourceId": "LAW-MHLW-OSH", "egovUrl": "https://laws.e-gov.go.jp/law/347AC0000000057#Mp-At_29", "naviPath": "/law-navi/347AC0000000057/29" },
+        { "lawShort": "安衛法", "article": "第30条", "sourceId": "LAW-MHLW-OSH", "egovUrl": "https://laws.e-gov.go.jp/law/347AC0000000057#Mp-At_30", "naviPath": "/law-navi/347AC0000000057/30" }
+      ],
       "visual": { "type": "steps", "steps": [{ "label": "計画と調整", "detail": "工程、立入、設備、他職との干渉を整理" }, { "label": "当日の確認", "detail": "作業内容、担当、合図、停止条件を共有" }, { "label": "異常時の連絡", "detail": "止める人、連絡先、再開を決める人を明確化" }] },
       "label": "役割は条文と現場条件で確認",
       "claimIds": ["C-REF-ROLE", "C-LAW-COORDINATION", "C-LAW-WORKER"],
@@ -86,6 +127,11 @@
       "kicker": "安全衛生管理の仕組み",
       "message": "方針と計画を、実施、点検、見直しまでつなげる。",
       "body": ["経営トップの方針と役割", "目標・計画に基づく実施", "日常点検と監査から改善"],
+      "stage": {
+        "headline": "計画・実施・点検・改善を回す",
+        "keyPoints": ["方針と計画", "実施と運用", "点検から改善"],
+        "mascot": { "src": "/mascot/mascot-calendar-plan.webp", "alt": "安全衛生の改善計画を示すチワワ", "width": 302, "height": 320 }
+      },
       "visual": { "type": "steps", "steps": [{ "label": "方針・計画", "detail": "目標、責任、必要な資源を明確化" }, { "label": "実施・運用", "detail": "手順、教育、連絡、文書を運用" }, { "label": "点検・評価", "detail": "日常点検と監査で実施状況を確認" }, { "label": "見直し・改善", "detail": "結果を次の方針と計画へ反映" }] },
       "label": "厚生労働省指針",
       "claimIds": ["C-GUIDE-OSHMS"],
@@ -100,6 +146,11 @@
       "kicker": "危険を対策へ変える",
       "message": "危険の特定から、実施後の残留リスクの共有までを一続きで行う。",
       "body": ["作業単位で危険性・有害性を特定", "重大性と発生可能性から優先度を決定", "対策後の残留リスクを記録して共有"],
+      "stage": {
+        "headline": "特定から残留リスク共有まで行う",
+        "keyPoints": ["危険を特定", "見積りと優先度", "対策後も共有"],
+        "mascot": { "src": "/mascot/mascot-ky-writing.webp", "alt": "リスクアセスメントを記録するチワワ", "width": 270, "height": 320 }
+      },
       "visual": { "type": "steps", "steps": [{ "label": "危険を特定", "detail": "通常、非定常、変更時の作業を確認" }, { "label": "リスクを見積る", "detail": "けがの重大性と発生可能性を分けて評価" }, { "label": "対策を決める", "detail": "優先度と対策の順序に沿って実施" }, { "label": "残留リスクを共有", "detail": "記録し、作業者と次工程へ伝える" }] },
       "label": "厚生労働省指針",
       "claimIds": ["C-GUIDE-RA"],
@@ -114,6 +165,11 @@
       "kicker": "見積りの考え方",
       "message": "よく起きるかと、起きたときの結果を分けて考える。",
       "body": ["重大性は起こり得る最も重い結果を確認", "発生可能性は接触機会と回避の難しさを確認", "不確かなら安全側で判断し、現場を再確認"],
+      "stage": {
+        "headline": "重大性と発生可能性を分けて見る",
+        "keyPoints": ["最も重い結果", "接触と回避", "不確かなら再確認"],
+        "mascot": { "src": "/mascot/mascot-measure-meter.webp", "alt": "重大性と発生可能性を測るチワワ", "width": 282, "height": 288 }
+      },
       "visual": { "type": "metrics", "metrics": [{ "label": "重大性", "value": "結果", "note": "死亡、重傷、休業、軽傷など", "tone": "rose" }, { "label": "発生可能性", "value": "機会", "note": "頻度、接触、回避のしやすさ", "tone": "orange" }, { "label": "優先度", "value": "順番", "note": "先に対策する危険を決める", "tone": "teal" }, { "label": "残留リスク", "value": "共有", "note": "対策後に残る条件を伝える", "tone": "sky" }] },
       "label": "厚生労働省指針",
       "claimIds": ["C-GUIDE-RA"],
@@ -128,6 +184,12 @@
       "kicker": "対策の選び方",
       "message": "危険そのものをなくす対策から検討し、保護具だけで終えない。",
       "body": ["法令上の措置は必ず実施", "廃止・変更と工学的対策を優先", "管理的対策と保護具の後も残留リスクを確認"],
+      "stage": {
+        "headline": "危険をなくす対策から検討する",
+        "keyPoints": ["廃止・変更", "工学的対策", "残留リスク確認"],
+        "caveat": "保護具だけで対策を終えない",
+        "mascot": { "src": "/mascot/mascot-ppe-check.webp", "alt": "対策の順序と保護具を確認するチワワ", "width": 316, "height": 320 }
+      },
       "visual": { "type": "steps", "steps": [{ "label": "廃止・変更", "detail": "危険作業をなくす、材料や方法を変更" }, { "label": "工学的対策", "detail": "囲い、インターロック、局所排気、機械化" }, { "label": "管理的対策", "detail": "手順、立入管理、合図、教育、監督" }, { "label": "個人用保護具", "detail": "残る危険に適合する保護具を選定・管理" }] },
       "label": "厚生労働省指針",
       "claimIds": ["C-GUIDE-CONTROLS"],
@@ -142,6 +204,16 @@
       "kicker": "作業前確認",
       "message": "設備、周囲、人、手順の条件がそろったことを確かめてから始める。",
       "body": ["仕様・能力・禁止事項を確認", "防護装置と停止機能を確認", "担当、合図、立入、異常時の停止を共有"],
+      "stage": {
+        "headline": "開始条件がそろってから動かす",
+        "keyPoints": ["仕様と能力", "防護と停止", "担当と立入範囲"],
+        "caveat": "法定教育・資格の代替ではない",
+        "mascot": { "src": "/mascot/mascot-pointing.webp", "alt": "機械作業の開始条件を指すチワワ", "width": 400, "height": 388 }
+      },
+      "articleRefs": [
+        { "lawShort": "安衛法", "article": "第59条", "sourceId": "LAW-MHLW-OSH", "egovUrl": "https://laws.e-gov.go.jp/law/347AC0000000057#Mp-At_59", "naviPath": "/law-navi/347AC0000000057/59" },
+        { "lawShort": "安衛法", "article": "第61条", "sourceId": "LAW-MHLW-OSH", "egovUrl": "https://laws.e-gov.go.jp/law/347AC0000000057#Mp-At_61", "naviPath": "/law-navi/347AC0000000057/61" }
+      ],
       "visual": { "type": "checklist", "items": ["機械の仕様、能力、使用条件が作業に合う", "ガード、インターロック、非常停止が有効", "足場、照明、通路、周囲作業に問題がない", "操作者、補助者、合図、立入範囲が明確", "清掃、調整、詰まり除去時の停止手順が明確"] },
       "label": "現場実務",
       "claimIds": ["C-GUIDE-RA", "C-GUIDE-CONTROLS", "C-LAW-TRAINING"],
@@ -156,6 +228,11 @@
       "kicker": "予定外を管理する",
       "message": "人、設備、材料、手順、周囲条件が変わったら、いったん止めて見直す。",
       "body": ["変更を見つけた人が停止を提案できる", "変更部分と影響範囲を再評価", "対策と残留リスクを共有して再開"],
+      "stage": {
+        "headline": "変化を見つけたら止めて再評価",
+        "keyPoints": ["いったん停止", "影響を再評価", "共有後に再開"],
+        "mascot": { "src": "/mascot/mascot-emergency-serious.webp", "alt": "変更時の停止を知らせるチワワ", "width": 640, "height": 640 }
+      },
       "visual": { "type": "steps", "steps": [{ "label": "変化を発見", "detail": "予定との差、異常、他職の進入を確認" }, { "label": "作業を停止", "detail": "安全な状態にして責任者へ連絡" }, { "label": "再評価と対策", "detail": "影響範囲を確認し、必要な措置を追加" }, { "label": "共有して再開", "detail": "関係者が条件を理解した後に再開" }] },
       "label": "現場実務",
       "claimIds": ["C-GUIDE-RA", "C-REF-CYCLE", "C-REF-ROLE"],
@@ -170,6 +247,14 @@
       "kicker": "理解確認",
       "message": "危険、対策、役割、停止条件、連絡先を自分の言葉で説明できるか。",
       "body": ["今日の作業で最も重い結果につながる危険は何か", "危険をなくす、または下げる対策は何か", "変更時に誰が止め、誰へ連絡し、誰が再開を決めるか"],
+      "stage": {
+        "headline": "5つの確認を自分の言葉で説明",
+        "keyPoints": ["危険と対策", "役割と停止条件", "連絡先"],
+        "mascot": { "src": "/mascot/mascot-salute.webp", "alt": "5つの確認を終えたチワワ", "width": 309, "height": 320 }
+      },
+      "articleRefs": [
+        { "lawShort": "安衛法", "article": "第28条の2", "sourceId": "LAW-MHLW-OSH", "egovUrl": "https://laws.e-gov.go.jp/law/347AC0000000057#Mp-At_28_2" }
+      ],
       "visual": { "type": "checklist", "items": ["危険を具体的な場面で言える", "対策を優先順に説明できる", "自分と責任者の役割が分かる", "作業を止める条件が分かる", "連絡先と再開条件が分かる"] },
       "label": "確認クイズへ",
       "claimIds": ["C-REF-MULTI", "C-GUIDE-RA", "C-GUIDE-CONTROLS", "C-REF-ROLE"],

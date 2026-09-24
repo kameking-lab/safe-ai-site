@@ -5,6 +5,7 @@ import { ArrowRight, Download, FileText, Headphones, Presentation } from "lucide
 import { JsonLd } from "@/components/json-ld";
 import { PageContainer } from "@/components/layout";
 import { SafetySeminarPlayer } from "@/components/training/safety-seminar-player";
+import { SeminarQuiz } from "@/components/training/seminar-quiz";
 import claimsJson from "@/data/safety-seminars/safety-management-basics-osh-law-claims.json";
 import quizJson from "@/data/safety-seminars/safety-management-basics-osh-law-quiz.json";
 import sourcesJson from "@/data/safety-seminars/safety-management-basics-osh-law-source-registry.json";
@@ -99,12 +100,12 @@ export default function SafetyManagementBasicsOshLawPage() {
             <span className="rounded-full bg-white/10 px-3 py-2"><Presentation className="mr-1 inline h-4 w-4" aria-hidden="true" />12枚</span>
             <span className="rounded-full bg-white/10 px-3 py-2">基準日 {training.asOf}</span>
           </div>
-          <p className="mt-5 rounded-xl border border-amber-200/60 bg-black/15 p-3 font-bold leading-6 text-amber-50">{training.boundary}</p>
+          <p className="mt-5 rounded-xl border border-amber-200 bg-black/20 p-3 font-bold leading-6 text-amber-50">{training.boundary}</p>
           <a href="#seminar-player" className="mt-6 inline-flex min-h-11 items-center gap-2 rounded-xl bg-emerald-200 px-5 py-3 font-black text-emerald-950 hover:bg-emerald-100">
             今すぐ再生 <ArrowRight className="h-5 w-5" aria-hidden="true" />
           </a>
         </div>
-        <div className="relative min-h-80 bg-emerald-50 lg:min-h-full">
+        <div className="relative bg-emerald-50" style={{ minHeight: 320 }}>
           <Image
             src={`${PATH}/safe-site-hero.webp`}
             alt="安全管理の基本を案内するチワワの先生"
@@ -180,15 +181,22 @@ export default function SafetyManagementBasicsOshLawPage() {
 
       <section aria-labelledby="quiz-title" className="mt-12">
         <h2 id="quiz-title" className="text-3xl font-black text-slate-950 dark:text-white">5問の確認クイズ</h2>
-        <div className="mt-5 space-y-3">
-          {quizJson.questions.map((question, index) => (
-            <details key={question.id} className="rounded-2xl border border-slate-300 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
-              <summary className="min-h-11 cursor-pointer py-2 font-black text-slate-950 dark:text-white">Q{index + 1}. {question.question}</summary>
-              <ol className="mt-2 list-[upper-alpha] space-y-1 pl-6 text-sm leading-6">{question.choices.map((choice) => <li key={choice}>{choice}</li>)}</ol>
-              <p className="mt-3 rounded-xl bg-teal-50 p-3 text-sm font-bold leading-6 text-teal-950 dark:bg-teal-950/50 dark:text-teal-100">正解: {String.fromCharCode(65 + question.correctIndex)}。{question.explanation}</p>
-            </details>
-          ))}
-        </div>
+        <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+          選択すると、4つの選択肢それぞれの理由と確認済みの根拠を表示します。進捗はこの端末にだけ保存します。
+        </p>
+        <SeminarQuiz courseId={training.id} />
+        <noscript>
+          <ol className="mt-5 space-y-4">
+            {quizJson.questions.map((question, index) => (
+              <li key={question.id} className="rounded-2xl border border-slate-300 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
+                <h3 className="font-black text-slate-950 dark:text-white">Q{index + 1}. {question.question}</h3>
+                <ol className="mt-2 list-[upper-alpha] space-y-1 pl-6 text-sm leading-6">
+                  {question.choices.map((choice) => <li key={choice}>{choice}</li>)}
+                </ol>
+              </li>
+            ))}
+          </ol>
+        </noscript>
       </section>
 
       <section aria-labelledby="sources-title" className="mt-12">

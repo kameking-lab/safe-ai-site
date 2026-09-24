@@ -10,7 +10,7 @@ describe("/training/safety-seminars/safety-management-basics-osh-law", () => {
     const { container } = render(<SafetyManagementBasicsOshLawPage />);
     expect(container.querySelector("main")).toBeNull();
     expect(screen.getByRole("heading", { level: 1, name: /安全管理の基本と/u })).toBeTruthy();
-    expect(screen.getByText("12枚")).toBeTruthy();
+    expect(screen.getAllByText("12枚").length).toBeGreaterThan(0);
     expect(screen.getByText("音声 約8分")).toBeTruthy();
     expect(screen.getAllByText(/法定の雇入れ時/u).length).toBeGreaterThan(0);
     expect(screen.getByRole("link", { name: "編集可能PowerPoint" }).getAttribute("href")).toMatch(/\.pptx$/u);
