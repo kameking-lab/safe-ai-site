@@ -13,6 +13,7 @@ import {
 import { PageContainer } from "@/components/layout";
 import { JsonLd } from "@/components/json-ld";
 import { SafetySeminarPlayer } from "@/components/training/safety-seminar-player";
+import { SeminarQuiz } from "@/components/training/seminar-quiz";
 import fallPreventionJson from "@/data/safety-seminars/fall-prevention.json";
 import claimsJson from "@/data/safety-seminars/claims.json";
 import quizJson from "@/data/safety-seminars/quiz.json";
@@ -20,6 +21,7 @@ import sourcesJson from "@/data/safety-seminars/source-registry.json";
 import type {
   FallPreventionTraining,
   TrainingClaim,
+  TrainingQuiz,
   TrainingSource,
 } from "@/data/safety-seminars/types";
 import {
@@ -36,6 +38,7 @@ const DESCRIPTION =
 const training = fallPreventionJson as FallPreventionTraining;
 const claims = claimsJson as TrainingClaim[];
 const sources = sourcesJson as TrainingSource[];
+const quiz = quizJson as TrainingQuiz;
 const DOWNLOAD_BASE = "/training/safety-seminars/fall-prevention/downloads";
 
 export async function generateMetadata({
@@ -186,15 +189,10 @@ export default function FallPreventionSeminarPage() {
           </div>
           <p className="text-sm text-slate-600 dark:text-slate-300">PPTXは編集可能・PDFは印刷用</p>
         </div>
-        <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-5 grid gap-3 sm:grid-cols-2">
           {[
             ["編集可能PowerPoint", "fall-prevention-training.pptx", Presentation],
             ["投影・印刷用PDF", "fall-prevention-training.pdf", FileText],
-            ["講師用台本", "fall-prevention-instructor-script.pdf", FileText],
-            ["参加者配布用1枚資料", "fall-prevention-handout.pdf", FileCheck2],
-            ["現場確認チェックリスト", "fall-prevention-field-checklist.pdf", CheckCircle2],
-            ["5問クイズ・解答解説", "fall-prevention-quiz-and-answers.pdf", FileCheck2],
-            ["出典一覧", "fall-prevention-sources.pdf", FileText],
           ].map(([label, file, Icon]) => (
             <a
               key={String(file)}
@@ -210,6 +208,28 @@ export default function FallPreventionSeminarPage() {
             </a>
           ))}
         </div>
+        <details className="mt-4 rounded-2xl border border-slate-300 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
+          <summary className="min-h-11 cursor-pointer py-2 font-black text-slate-950 dark:text-white">講師・配布用の補助資料を開く（5点）</summary>
+          <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {[
+              ["講師用台本", "fall-prevention-instructor-script.pdf", FileText],
+              ["参加者配布用1枚資料", "fall-prevention-handout.pdf", FileCheck2],
+              ["現場確認チェックリスト", "fall-prevention-field-checklist.pdf", CheckCircle2],
+              ["5問クイズ・解答解説", "fall-prevention-quiz-and-answers.pdf", FileCheck2],
+              ["出典一覧", "fall-prevention-sources.pdf", FileText],
+            ].map(([label, file, Icon]) => (
+              <a
+                key={String(file)}
+                href={`${DOWNLOAD_BASE}/${file}`}
+                download
+                className="group flex min-h-16 items-center justify-between gap-3 rounded-2xl border border-slate-300 p-4 font-black text-slate-950 hover:border-teal-600 hover:bg-teal-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:text-white dark:hover:bg-teal-950/40"
+              >
+                <span className="inline-flex items-center gap-3"><Icon className="h-5 w-5 text-teal-700 dark:text-teal-300" aria-hidden="true" />{String(label)}</span>
+                <Download className="h-5 w-5 text-slate-500 group-hover:text-teal-700" aria-hidden="true" />
+              </a>
+            ))}
+          </div>
+        </details>
         <p className="mt-4 text-sm leading-6 text-slate-600 dark:text-slate-300">
           社内安全研修、朝礼、協力会社教育、現場教育、自社資料への組込みに無料で利用・編集・社内配布できます。根拠脚注は原則として残してください。詳細は
           <Link href="/training/safety-seminars/terms" className="font-bold text-teal-800 underline underline-offset-4 dark:text-teal-300">利用条件・注意事項</Link>
@@ -260,19 +280,18 @@ export default function FallPreventionSeminarPage() {
         style={{ contentVisibility: "auto", containIntrinsicSize: "auto 700px" }}
       >
         <h2 id="quiz-title" className="text-3xl font-black text-slate-950 dark:text-white">5問の確認クイズ</h2>
-        <div className="mt-5 space-y-3">
-          {quizJson.questions.map((question, index) => (
-            <details key={question.id} className="rounded-2xl border border-slate-300 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
-              <summary className="min-h-11 cursor-pointer py-2 font-black text-slate-950 dark:text-white">Q{index + 1}. {question.question}</summary>
-              <ol className="mt-2 list-[upper-alpha] space-y-1 pl-6 text-sm leading-6">
-                {question.choices.map((choice) => <li key={choice}>{choice}</li>)}
-              </ol>
-              <p className="mt-3 rounded-xl bg-teal-50 p-3 text-sm font-bold leading-6 text-teal-950 dark:bg-teal-950/50 dark:text-teal-100">
-                正解: {String.fromCharCode(65 + question.correctIndex)}。{question.explanation}
-              </p>
-            </details>
-          ))}
-        </div>
+        <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">選択すると、4肢それぞれの理由と公的根拠を表示します。進捗はこの端末にだけ保存します。</p>
+        <SeminarQuiz courseId={training.id} quiz={quiz} sources={sources} />
+        <noscript>
+          <ol className="mt-5 space-y-4">
+            {quiz.questions.map((question, index) => (
+              <li key={question.id} className="rounded-2xl border border-slate-300 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
+                <h3 className="font-black text-slate-950 dark:text-white">Q{index + 1}. {question.question}</h3>
+                <ol className="mt-2 list-[upper-alpha] space-y-1 pl-6 text-sm leading-6">{question.choices.map((choice) => <li key={choice}>{choice}</li>)}</ol>
+              </li>
+            ))}
+          </ol>
+        </noscript>
       </section>
 
       <section

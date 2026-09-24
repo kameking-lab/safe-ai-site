@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import FallPreventionSeminarPage, { generateMetadata } from "./page";
 
@@ -14,6 +14,7 @@ describe("/training/safety-seminars/fall-prevention", () => {
     expect(screen.getByText("20枚")).toBeTruthy();
     expect(screen.getByRole("link", { name: "編集可能PowerPoint" }).getAttribute("href")).toMatch(/\.pptx$/u);
     expect(screen.getByRole("link", { name: "投影・印刷用PDF" }).getAttribute("href")).toMatch(/\.pdf$/u);
+    fireEvent.click(screen.getByText("講師・配布用の補助資料を開く（5点）"));
     expect(screen.getByRole("link", { name: "参加者配布用1枚資料" })).toBeTruthy();
     expect(screen.getByRole("link", { name: "5問クイズ・解答解説" })).toBeTruthy();
     const custom = container.querySelector("#customize-title")?.closest("section");

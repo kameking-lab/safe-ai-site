@@ -1,8 +1,15 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SeminarQuiz } from "./seminar-quiz";
+import quizJson from "@/data/safety-seminars/safety-management-basics-osh-law-quiz.json";
+import sourcesJson from "@/data/safety-seminars/safety-management-basics-osh-law-source-registry.json";
+import fallQuizJson from "@/data/safety-seminars/quiz.json";
+import fallSourcesJson from "@/data/safety-seminars/source-registry.json";
+import type { TrainingQuiz, TrainingSource } from "@/data/safety-seminars/types";
 
 const COURSE_ID = "safety-management-basics-osh-law";
+const quizProps = { courseId: COURSE_ID, quiz: quizJson as TrainingQuiz, sources: sourcesJson as TrainingSource[] };
+const fallProps = { courseId: "fall-prevention", quiz: fallQuizJson as TrainingQuiz, sources: fallSourcesJson as TrainingSource[] };
 
 describe("SeminarQuiz", () => {
   beforeEach(() => window.localStorage.clear());
@@ -12,7 +19,7 @@ describe("SeminarQuiz", () => {
     for (const method of ["getItem", "setItem", "removeItem"] as const) {
       vi.spyOn(Storage.prototype, method).mockImplementation(() => { throw new DOMException("Storage blocked", "SecurityError"); });
     }
-    render(<SeminarQuiz courseId={COURSE_ID} />);
+    render(<SeminarQuiz {...quizProps} />);
     for (let index = 0; index < 5; index++) {
       fireEvent.click(screen.getByRole("group", { name: /問目の選択肢/u }).querySelector("button")!);
       fireEvent.click(screen.getByRole("button", { name: index === 4 ? "結果を見る" : "次の問題" }));
@@ -28,13 +35,13 @@ describe("SeminarQuiz", () => {
     { queue: [0, 1], position: 1, responses: {}, complete: false },
   ])("壊れた保存データを捨てて問題を表示する: %j", (saved) => {
     window.localStorage.setItem(`seminar-quiz:${COURSE_ID}:1.0.0`, JSON.stringify(saved));
-    render(<SeminarQuiz courseId={COURSE_ID} />);
+    render(<SeminarQuiz {...quizProps} />);
     expect(screen.getByText("問題 1/5")).toBeTruthy();
     expect(screen.queryByRole("button", { name: "続きから" })).toBeNull();
   });
 
   it("選択前は正解と理由をDOMへ出さず、選択後に4件の理由と根拠を表示して結果へフォーカスする", async () => {
-    render(<SeminarQuiz courseId={COURSE_ID} />);
+    render(<SeminarQuiz {...quizProps} />);
     expect(screen.queryByText(/正解です/u)).toBeNull();
     expect(screen.queryByText(/本人だけを確認すると/u)).toBeNull();
     expect(screen.queryByText(/個人の行動だけで終えると/u)).toBeNull();
@@ -51,7 +58,7 @@ describe("SeminarQuiz", () => {
   });
 
   it("5問を10タップで完了し、結果と再開始を表示する", () => {
-    render(<SeminarQuiz courseId={COURSE_ID} />);
+    render(<SeminarQuiz {...quizProps} />);
     const correctChoices = [
       /人、設備、作業方法/u,
       /現行法と関係政省令/u,
@@ -69,7 +76,7 @@ describe("SeminarQuiz", () => {
   });
 
   it("誤答だけを結果画面から1タップで再挑戦できる", () => {
-    render(<SeminarQuiz courseId={COURSE_ID} />);
+    render(<SeminarQuiz {...quizProps} />);
     const choices = [
       /本人の不注意だけ/u,
       /現行法と関係政省令/u,
@@ -89,15 +96,44 @@ describe("SeminarQuiz", () => {
   });
 
   it("localStorageから進捗を復元できる", async () => {
-    const first = render(<SeminarQuiz courseId={COURSE_ID} />);
+    const first = render(<SeminarQuiz {...quizProps} />);
     fireEvent.click(screen.getByRole("button", { name: /人、設備、作業方法/u }));
     fireEvent.click(screen.getByRole("button", { name: "次の問題" }));
     await waitFor(() => expect(window.localStorage.getItem(`seminar-quiz:${COURSE_ID}:1.0.0`)).toContain('"position":1'));
     first.unmount();
 
-    render(<SeminarQuiz courseId={COURSE_ID} />);
+    render(<SeminarQuiz {...quizProps} />);
     expect(await screen.findByRole("button", { name: "続きから" })).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "続きから" }));
     expect(screen.getByText(/現場で守るべき基準/u)).toBeTruthy();
+  });
+});
+
+describe("墜落防止の既存5問", () => {
+  beforeEach(() => window.localStorage.clear());
+
+  it("回答前に正解を出さず、誤答後に4肢の理由と国内公的資料を表示する", async () => {
+    render(<SeminarQuiz {...fallProps} />);
+    expect(screen.queryByText(/器具の配布だけでは/u)).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: /フルハーネスを全員へ配る/u }));
+    expect(screen.getByText(/× 不正解です/u)).toBeTruthy();
+    for (const reason of [/器具の配布だけでは/u, /地上組立を含む/u, /注意喚起は設備/u, /教育を追加しても/u]) {
+      expect(screen.getByText(reason)).toBeTruthy();
+    }
+    const evidence = screen.getByRole("link", { name: /根拠:/u });
+    expect(evidence.getAttribute("href")).toMatch(/^https:\/\/www\.mhlw\.go\.jp\//u);
+    await waitFor(() => expect(document.activeElement).toBe(screen.getByRole("status")));
+  });
+
+  it("教材ごとの保存キーを分離し、再訪で回答済みの続きに戻れる", async () => {
+    const first = render(<SeminarQuiz {...fallProps} />);
+    fireEvent.click(screen.getByRole("button", { name: /地上組立や作業床/u }));
+    fireEvent.click(screen.getByRole("button", { name: "次の問題" }));
+    await waitFor(() => expect(window.localStorage.getItem("seminar-quiz:fall-prevention:1.0.0")).toContain('"position":1'));
+    expect(window.localStorage.getItem(`seminar-quiz:${COURSE_ID}:1.0.0`)).toBeNull();
+    first.unmount();
+    render(<SeminarQuiz {...fallProps} />);
+    fireEvent.click(await screen.findByRole("button", { name: "続きから" }));
+    expect(screen.getByText(/5mと6.75m/u)).toBeTruthy();
   });
 });

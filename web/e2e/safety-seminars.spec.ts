@@ -121,13 +121,14 @@ test.describe("安全研修ライブラリ", () => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto(DETAIL);
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", `https://www.anzen-ai-portal.jp${DETAIL}`);
-    const progress = page.locator('[role="progressbar"] > div');
+    const progress = page.getByRole("progressbar", { name: "教材全体の進捗" }).locator(":scope > div");
     await expect(progress).toHaveCSS("transition-property", "none");
 
     await page.goto(`${DETAIL}?slide=4&captions=1`);
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/u);
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", `https://www.anzen-ai-portal.jp${DETAIL}`);
 
+    await page.getByText("講師・配布用の補助資料を開く（5点）").click();
     for (const name of ["編集可能PowerPoint", "投影・印刷用PDF", "講師用台本", "参加者配布用1枚資料", "現場確認チェックリスト", "5問クイズ・解答解説", "出典一覧"]) {
       const href = await page.getByRole("link", { name }).getAttribute("href");
       expect(href).toBeTruthy();
@@ -137,6 +138,38 @@ test.describe("安全研修ライブラリ", () => {
     }
   });
 
+  test("墜落防止5問は誤答理由・根拠・復習・再訪を示し、基本教材の回答を保つ", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(DETAIL);
+    await expect(page.getByText(/器具の配布だけでは/u)).toHaveCount(0);
+    const answers = [0, 2, 2, 2, 2];
+    for (const [index, answer] of answers.entries()) {
+      await page.getByRole("group", { name: /問目の選択肢/u }).getByRole("button").nth(answer).click();
+      const status = page.locator('[role="status"]').filter({ hasText: index === 0 ? /不正解です/u : /正解です/u });
+      await expect(status).toBeFocused();
+      await expect(page.getByText(/未選択：/u)).toHaveCount(index === 0 ? 2 : 3);
+      for (const link of await status.getByRole("link", { name: /根拠:/u }).all()) {
+        expect(await link.getAttribute("href")).toMatch(/^https:\/\/(www\.mhlw\.go\.jp|laws\.e-gov\.go\.jp|www\.jniosh\.johas\.go\.jp)\//u);
+      }
+      await page.getByRole("button", { name: index === 4 ? "結果を見る" : "次の問題" }).click();
+    }
+    await expect(page.getByText("4/5問 正解")).toBeVisible();
+    await page.getByRole("button", { name: "間違えた問題だけ再挑戦" }).click();
+    await expect(page.getByText("問題 1/1", { exact: true })).toBeVisible();
+    await page.getByRole("group", { name: /問目の選択肢/u }).getByRole("button").nth(1).click();
+    await page.reload();
+    await page.getByRole("button", { name: "続きから" }).click();
+    await expect(page.getByText("回答済み 1/1問", { exact: true })).toBeVisible();
+    await page.getByRole("navigation", { name: "パンくず" }).getByRole("link", { name: "安全研修ライブラリ" }).click();
+    await expect(page).toHaveURL(/\/training\/safety-seminars$/u);
+    await page.goBack();
+    const resume = page.getByRole("button", { name: "続きから" });
+    if (await resume.isVisible()) await resume.click();
+    await expect(page.getByText("回答済み 1/1問", { exact: true })).toBeVisible();
+    await page.goto(OSH_DETAIL);
+    await expect(page.getByText("問題 1/5", { exact: true })).toBeVisible();
+  });
+
   test("JavaScript無効でもH1・全20枚・注意・downloadを読める", async ({ browser, baseURL }) => {
     const context = await browser.newContext({ javaScriptEnabled: false, baseURL });
     const page = await context.newPage();
@@ -144,7 +177,7 @@ test.describe("安全研修ライブラリ", () => {
     expect(response?.status()).toBe(200);
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     await expect(page.getByRole("heading", { name: "JavaScriptを使わずに読む" })).toBeVisible();
-    await expect(page.locator("noscript ol > li")).toHaveCount(20);
+    await expect(page.getByRole("heading", { name: "JavaScriptを使わずに読む" }).locator("..").locator("ol > li")).toHaveCount(20);
     await expect(page.getByText(/法定の特別教育等を代替/u).first()).toBeVisible();
     await expect(page.getByRole("link", { name: "編集可能PowerPoint" })).toBeVisible();
     await context.close();
