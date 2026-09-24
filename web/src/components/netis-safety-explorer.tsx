@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ExternalLink, RotateCcw, Search, ShieldCheck, X } from "lucide-react";
+import { ExternalLink, ImageOff, RotateCcw, Search, ShieldCheck, X } from "lucide-react";
 import {
   FEATURED_NETIS_TECHNOLOGIES,
   isNetisSafetyCategoryId,
@@ -27,6 +27,48 @@ function focusResults(heading: HTMLHeadingElement | null) {
       : "smooth",
     block: "start",
   });
+}
+
+// 同じタブでNETIS公式詳細へ移動し、戻るで絞り込み（URL）とスクロール位置・フォーカスを復元する
+const RETURN_POSITION_KEY = "netis-safety-return-position";
+
+function rememberReturnPosition(registrationNumber: string) {
+  try {
+    window.sessionStorage.setItem(
+      RETURN_POSITION_KEY,
+      JSON.stringify({
+        href: `${window.location.pathname}${window.location.search}`,
+        scrollY: window.scrollY,
+        registrationNumber,
+      }),
+    );
+  } catch {
+    // ストレージ不可（プライベートモード等）でも遷移自体は妨げない
+  }
+}
+
+function restoreReturnPosition() {
+  try {
+    const raw = window.sessionStorage.getItem(RETURN_POSITION_KEY);
+    if (!raw) return;
+    window.sessionStorage.removeItem(RETURN_POSITION_KEY);
+    const saved = JSON.parse(raw) as {
+      href?: unknown;
+      scrollY?: unknown;
+      registrationNumber?: unknown;
+    };
+    if (saved.href !== `${window.location.pathname}${window.location.search}`) return;
+    if (typeof saved.scrollY === "number") {
+      window.scrollTo({ top: saved.scrollY, behavior: "instant" });
+    }
+    if (typeof saved.registrationNumber === "string") {
+      document
+        .getElementById(`netis-tech-${saved.registrationNumber}`)
+        ?.focus({ preventScroll: true });
+    }
+  } catch {
+    // 破損した値は無視する
+  }
 }
 
 function normalizeSearchText(value: string) {
@@ -76,7 +118,14 @@ export function NetisSafetyExplorer() {
   );
 
   useEffect(() => {
+    restoreReturnPosition();
+    // bfcacheから戻った場合もスクロール位置の記録を消費する
+    const onPageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) restoreReturnPosition();
+    };
+    window.addEventListener("pageshow", onPageShow);
     explorerRef.current?.setAttribute("data-netis-explorer-ready", "true");
+    return () => window.removeEventListener("pageshow", onPageShow);
   }, []);
 
   useEffect(() => {
@@ -324,31 +373,72 @@ export function NetisSafetyExplorer() {
                   key={technology.registrationNumber}
                   className="overflow-hidden rounded-2xl border border-emerald-200 bg-white shadow-sm dark:border-emerald-900 dark:bg-slate-900"
                 >
-                  <div>
-                    <div className="p-4 sm:p-5">
-                      <div className="flex flex-wrap items-center gap-2">
-                        {technology.categoryIds.map((categoryId) => (
-                          <span
-                            key={categoryId}
-                            className="rounded-full bg-emerald-100 px-2.5 py-1 text-[11px] font-black text-emerald-900 dark:bg-emerald-950 dark:text-emerald-200"
-                          >
-                            {categoryFor(categoryId).label}
-                          </span>
-                        ))}
-                        <span className="font-mono text-xs font-black text-sky-800 dark:text-sky-300">
-                          {technology.registrationNumber}
+                  {/* 画像はカード名リンクと同じNETIS公式詳細へ。キーボード操作は名称リンクに一本化する */}
+                  <a
+                    href={netisDetailUrl(technology.registrationNumber)}
+                    tabIndex={-1}
+                    aria-hidden="true"
+                    onClick={() => rememberReturnPosition(technology.registrationNumber)}
+                    className="group relative block h-40 overflow-hidden border-b border-slate-200 bg-slate-100 sm:h-48 dark:border-slate-800 dark:bg-slate-800"
+                  >
+                    {technology.productImage.status === "verified" ? (
+                      <Image
+                        src={technology.productImage.src}
+                        alt=""
+                        fill
+                        sizes="(max-width: 1024px) 92vw, 560px"
+                        className="object-contain p-2 transition duration-300 group-hover:scale-[1.02]"
+                      />
+                    ) : (
+                      <span className="flex h-full flex-col items-center justify-center gap-1.5 px-4 text-center">
+                        <ImageOff className="h-7 w-7 text-slate-500 dark:text-slate-400" />
+                        <span className="text-sm font-black text-slate-800 dark:text-slate-100">
+                          製品画像は未掲載
                         </span>
-                        <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
-                          出典確認：{technology.checkedAt}
+                        <span className="text-xs font-semibold leading-5 text-slate-600 dark:text-slate-300">
+                          利用許諾を確認中。汎用写真やAI画像では代替していません
                         </span>
-                      </div>
-                      <h4 className="mt-3 text-base font-black leading-6 text-slate-950 dark:text-white">
-                        {technology.name}
-                      </h4>
-                      <p className="mt-2 text-sm leading-6 text-slate-700 dark:text-slate-200">
-                        {technology.summary}
-                      </p>
+                      </span>
+                    )}
+                  </a>
+                  <div className="p-4 sm:p-5">
+                    <div className="flex flex-wrap items-center gap-2">
+                      {technology.categoryIds.map((categoryId) => (
+                        <span
+                          key={categoryId}
+                          className="rounded-full bg-emerald-100 px-2.5 py-1 text-[11px] font-black text-emerald-900 dark:bg-emerald-950 dark:text-emerald-200"
+                        >
+                          {categoryFor(categoryId).label}
+                        </span>
+                      ))}
+                      <span className="font-mono text-xs font-black text-sky-800 dark:text-sky-300">
+                        {technology.registrationNumber}
+                      </span>
+                      <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
+                        出典確認：{technology.checkedAt}
+                      </span>
                     </div>
+                    <h4 className="mt-2 text-base font-black leading-6 text-slate-950 dark:text-white">
+                      <a
+                        id={`netis-tech-${technology.registrationNumber}`}
+                        href={netisDetailUrl(technology.registrationNumber)}
+                        onClick={() => rememberReturnPosition(technology.registrationNumber)}
+                        className="flex min-h-11 items-center break-words underline decoration-sky-300 underline-offset-4 hover:text-sky-900 focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-sky-600 dark:hover:text-sky-200"
+                      >
+                        <span>
+                          {technology.name}
+                          <span className="sr-only">（NETIS公式の詳細を開く）</span>
+                        </span>
+                      </a>
+                    </h4>
+                    <p className="mt-1 text-sm leading-6 text-slate-700 dark:text-slate-200">
+                      {technology.summary}
+                    </p>
+                    <p className="mt-2 text-[11px] font-semibold leading-5 text-slate-500 dark:text-slate-400">
+                      {technology.productImage.status === "verified"
+                        ? `製品画像：${technology.productImage.credit}（${technology.productImage.retrievedAt}取得）`
+                        : "製品画像：未掲載（利用許諾の確認待ち）"}
+                    </p>
                   </div>
 
                   <details className="border-t border-slate-200 px-4 py-2 open:pb-4 dark:border-slate-800 sm:px-5">

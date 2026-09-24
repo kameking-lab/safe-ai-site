@@ -6,6 +6,33 @@ export const NETIS_RELEASE_URL =
 
 export const NETIS_CHECKED_AT = "2026年9月24日確認";
 
+/**
+ * 製品画像の掲載状態。
+ * - verified: 製品・NETIS番号の対応、取得元URL、利用根拠、取得日を記録済みの実写画像のみ。
+ * - pending: 利用根拠を文書で確認できていない。汎用写真・AI生成画像で代替せず未掲載と明示する。
+ */
+export type NetisProductImage =
+  | {
+      status: "verified";
+      src: string;
+      alt: string;
+      sourceUrl: string;
+      credit: string;
+      usageBasis: string;
+      retrievedAt: string;
+    }
+  | {
+      status: "pending";
+      reason: string;
+    };
+
+function pendingProductImage(): NetisProductImage {
+  return {
+    status: "pending",
+    reason: "提供元の第三者利用許諾を文書で確認できていないため未掲載",
+  };
+}
+
 export const NETIS_SAFETY_CATEGORIES = [
   {
     id: "machine-collision",
@@ -85,6 +112,7 @@ export const FEATURED_NETIS_TECHNOLOGIES = [
     limitations:
       "ICタグを携帯する作業員が検知対象です。タグは金属・電子機器から離し、現場の電磁ノイズ、機器ごとの動作温度、検知範囲と警報を事前確認します。電池管理と誘導・目視確認を併用します。",
     checkedAt: NETIS_CHECKED_AT,
+    productImage: pendingProductImage(),
     productUrl:
       "https://matrix-inc.co.jp/product/hiyarihunter/hiyari-v2.html",
   },
@@ -100,6 +128,7 @@ export const FEATURED_NETIS_TECHNOLOGIES = [
     limitations:
       "人と物体を識別しません。豪雨・降雪・強風時は適用外で、動作温度は-10～50℃です。DC12/24V電源と後方約3mの確認スペースを確保し、取付位置・検知範囲・警報を始業前に点検します。",
     checkedAt: NETIS_CHECKED_AT,
+    productImage: pendingProductImage(),
     productUrl: "https://www.tukusi.co.jp/commodity/list/631.html",
   },
   {
@@ -114,6 +143,7 @@ export const FEATURED_NETIS_TECHNOLOGIES = [
     limitations:
       "人物検知は8mまでで、LTE/Wi-Fi環境と機器の設置スペースを確認します。画角外や遮蔽、天候・照明条件では検知できない場合があります。レンズを清掃し、安全確認や誘導員を併用します。",
     checkedAt: NETIS_CHECKED_AT,
+    productImage: pendingProductImage(),
     productUrl:
       "https://www.iwasakinet.co.jp/rental/construction-ict-support/xacti-doboleko-jk/",
   },
@@ -129,6 +159,7 @@ export const FEATURED_NETIS_TECHNOLOGIES = [
     limitations:
       "設定エリア内でフック不使用時に警報が出るか使用前に確認し、充電・電池を管理します。エリアセンサーの使用温度は-20～60℃です。親綱への適切な掛け方や法定の墜落防止措置を自動確認するものではありません。",
     checkedAt: NETIS_CHECKED_AT,
+    productImage: pendingProductImage(),
     productUrl:
       "https://ronk-jp.com/wp-content/uploads/2024/08/923a78cb58e3840064f71fca56ccd563.pdf",
   },
@@ -144,6 +175,7 @@ export const FEATURED_NETIS_TECHNOLOGIES = [
     limitations:
       "安定したdocomo通信、AC100V電源、1m四方の設置場所が必要です。月明かり未満の照度や遮蔽では検知できない場合があり、赤外線対応には別条件があります。通信・電源断やメール遅延を想定し、立入防止措置と巡視を併用します。",
     checkedAt: NETIS_CHECKED_AT,
+    productImage: pendingProductImage(),
     productUrl: "https://assistyou-m.com/mics/mics_ai/",
   },
   {
@@ -158,6 +190,7 @@ export const FEATURED_NETIS_TECHNOLOGIES = [
     limitations:
       "フックをホルダから外した状態を検知し、親綱等への正しい掛け方は確認しません。水中と100/200V引込線の中心から半径2m以内は適用外です。警告まで2～3秒かかり、設定機1台につき最大20タグです。作業前の警報確認と電池管理が必要です。",
     checkedAt: NETIS_CHECKED_AT,
+    productImage: pendingProductImage(),
     productUrl: "https://ykc-amulet.net/harnessalert/",
   },
   {
@@ -172,6 +205,7 @@ export const FEATURED_NETIS_TECHNOLOGIES = [
     limitations:
       "医療機器ではありません。センサーを肌へ密着させ、表示にかかわらず体調が悪い場合は休憩し、現場の熱中症対策を継続します。",
     checkedAt: NETIS_CHECKED_AT,
+    productImage: pendingProductImage(),
     productUrl:
       "https://sooki.co.jp/irental/allproduct/ct15/i-bow-2025/",
   },
@@ -187,6 +221,7 @@ export const FEATURED_NETIS_TECHNOLOGIES = [
     limitations:
       "BluetoothおよびLTEの通信環境に支障がないことが条件で、医療機器ではありません。強い直射日光で端末電源が落ちる場合があり、装着位置の調整が必要です。",
     checkedAt: NETIS_CHECKED_AT,
+    productImage: pendingProductImage(),
     productUrl: "https://www.tecraft.co.jp/topics/2584/",
   },
   {
@@ -201,6 +236,7 @@ export const FEATURED_NETIS_TECHNOLOGIES = [
     limitations:
       "豪雨・降雪時は適用外です。設置スペースと配線を確保し、センサーの高さ・方向、検知距離、電池や動作を作業前に確認します。",
     checkedAt: NETIS_CHECKED_AT,
+    productImage: pendingProductImage(),
     productUrl: "https://tsucumore.com/backsensor-hatto/",
   },
   {
@@ -215,6 +251,7 @@ export const FEATURED_NETIS_TECHNOLOGIES = [
     limitations:
       "目視で2m先を確認できる環境が条件です。機種ごとに停止可否を検討し、画角・検知レベルを調整して従来の安全確認を継続します。",
     checkedAt: NETIS_CHECKED_AT,
+    productImage: pendingProductImage(),
     productUrl: "https://www.nishio-tm.co.jp/netis/",
   },
 ] as const;
