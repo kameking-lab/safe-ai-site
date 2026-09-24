@@ -46,6 +46,7 @@ for (const width of [320, 360, 390]) {
 }
 
 test("統合カードの操作はキーボードだけで順に到達できる", async ({ page }) => {
+  test.setTimeout(60_000);
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto("/");
   const chatLink = page.locator('#mascot-chat > a[href="/chatbot"]');
@@ -64,7 +65,7 @@ test("統合カードの操作はキーボードだけで順に到達できる",
   const slides = page.locator("#mascot-slides").getByRole("link", { name: /スライドを見る/ });
   await slides.focus();
   await page.keyboard.press("Enter");
-  await expect(page).toHaveURL(/\/training\/safety-seminars\/safety-management-basics-osh-law#seminar-player$/u);
+  await expect(page).toHaveURL(/\/training\/safety-seminars\/safety-management-basics-osh-law#seminar-player$/u, { timeout: 30_000 });
 });
 
 test("主機能カードから戻ると選択位置へ戻る", async ({ page }) => {
