@@ -35,7 +35,7 @@ test.describe("9つの主機能を案内するホームの圧縮予算", () => {
     await expect(quickNav.getByRole("link")).toHaveCount(3);
     const services = page.getByRole("region", { name: "仕事から選ぶ、9つの主機能" });
     await expect(services.getByRole("listitem")).toHaveCount(9);
-    await expect(services.getByRole("listitem").getByRole("link")).toHaveCount(9);
+    await expect(services.locator("ul > li > a")).toHaveCount(9);
     await expect(page.locator('[data-home-section="heat"]')).toHaveCount(0);
     await expect(page.locator('[data-home-section="quality"]')).toHaveCount(0);
     await expect(page.locator('main [data-warning-card], main [role="alert"]')).toHaveCount(0);
