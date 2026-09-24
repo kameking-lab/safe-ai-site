@@ -1,6 +1,26 @@
-import { render, screen, within } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { render as rtlRender, screen, within } from "@testing-library/react";
+import type { ReactElement } from "react";
+import { describe, expect, it, vi } from "vitest";
+import { TransientQueryBridgeProvider } from "@/components/home-safety-cockpit/transient-query-bridge";
 import { HomeRelaunch } from "./home-relaunch";
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: vi.fn(),
+    prefetch: vi.fn(),
+  }),
+}));
+
+function render(ui: ReactElement) {
+  return rtlRender(<TransientQueryBridgeProvider>{ui}</TransientQueryBridgeProvider>);
+}
+
+function serviceItem(name: string): HTMLElement {
+  const heading = screen.getByRole("heading", { level: 3, name });
+  const item = heading.closest("li");
+  if (!item) throw new Error(`${name} card is missing`);
+  return item;
+}
 
 describe("HomeRelaunch", () => {
   it("見出し階層と主要な1クリック導線をサーバー描画する", () => {
@@ -87,5 +107,48 @@ describe("HomeRelaunch", () => {
     expect(
       priority.compareDocumentPosition(directory) & Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
+  });
+
+  it("旧5機能パネルの操作を対応する主機能カードへ統合し、リンク内に入れ子にしない", () => {
+    render(<HomeRelaunch />);
+
+    expect(screen.queryByRole("heading", { name: "5つの機能をすぐ使う" })).toBeNull();
+    expect(screen.queryByRole("navigation", { name: "チワワと試す5機能" })).toBeNull();
+
+    const cards = screen
+      .getByRole("heading", { level: 2, name: "仕事から選ぶ、9つの主機能" })
+      .closest("section")
+      ?.querySelectorAll(":scope ul > li > a");
+    expect(cards).toHaveLength(9);
+
+    const chat = serviceItem("安衛法AI");
+    expect(chat.id).toBe("mascot-chat");
+    expect(within(chat).getByRole("textbox", { name: "安衛法AIへの質問" })).toBeDefined();
+    expect(within(chat).getByRole("button", { name: "質問する" })).toBeDefined();
+
+    const chemical = serviceItem("化学物質RA");
+    expect(chemical.id).toBe("mascot-chemical");
+    expect(within(chemical).getByRole("combobox", { name: "化学物質を検索" })).toBeDefined();
+
+    const accident = serviceItem("国内の死亡事故速報");
+    expect(within(accident).getByRole("link").getAttribute("href")).toBe("/accident-news");
+    const laws = serviceItem("法改正速報");
+    expect(within(laws).getByRole("link").getAttribute("href")).toBe("/laws");
+
+    const slides = serviceItem("自由に使えるスライド");
+    expect(slides.id).toBe("mascot-slides");
+    expect(
+      within(slides)
+        .getByRole("link", { name: /安全管理の基本と安衛法のスライドを見る/ })
+        .getAttribute("href"),
+    ).toBe("/training/safety-seminars/safety-management-basics-osh-law#seminar-player");
+
+    const interactive = "a, button, input, textarea, select, [role='combobox']";
+    for (const link of document.querySelectorAll<HTMLElement>(".hs-card")) {
+      expect(link.querySelector(interactive)).toBeNull();
+    }
+    for (const control of document.querySelectorAll<HTMLElement>("[data-hs-tool] :is(button, input, textarea)")) {
+      expect(control.closest("a, button:not(:scope)")).toBeNull();
+    }
   });
 });

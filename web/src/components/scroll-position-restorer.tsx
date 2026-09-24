@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
+import { PRESERVE_NAVIGATION_SCROLL } from "@/lib/preserve-navigation-scroll";
 
 const STORAGE_PREFIX = "anzen-ai:scroll:";
 
@@ -46,6 +47,10 @@ export function ScrollPositionRestorer() {
       }
     };
     const saveOnScroll = () => save();
+    const saveBeforeClientNavigation = () => {
+      save();
+      navigationStarted.current = true;
+    };
     const restoreHistoryEntry = () => {
       save();
       const key = currentStorageKey();
@@ -67,6 +72,7 @@ export function ScrollPositionRestorer() {
       }
     };
     document.addEventListener("click", saveBeforeLink, true);
+    window.addEventListener(PRESERVE_NAVIGATION_SCROLL, saveBeforeClientNavigation);
     window.addEventListener("scroll", saveOnScroll, { passive: true });
     window.addEventListener("popstate", restoreHistoryEntry);
     window.addEventListener("hashchange", restoreHistoryEntry);
@@ -74,6 +80,7 @@ export function ScrollPositionRestorer() {
     return () => {
       save();
       document.removeEventListener("click", saveBeforeLink, true);
+      window.removeEventListener(PRESERVE_NAVIGATION_SCROLL, saveBeforeClientNavigation);
       window.removeEventListener("scroll", saveOnScroll);
       window.removeEventListener("popstate", restoreHistoryEntry);
       window.removeEventListener("hashchange", restoreHistoryEntry);

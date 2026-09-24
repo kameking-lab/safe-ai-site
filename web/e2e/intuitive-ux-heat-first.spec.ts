@@ -51,7 +51,8 @@ async function expectMainServices(page: Page) {
   for (const [title, href] of MAIN_SERVICES) {
     const card = cards.filter({ has: page.getByRole("heading", { level: 3, name: title, exact: true }) });
     await expect(card).toHaveCount(1);
-    await expect(card.getByRole("link")).toHaveAttribute("href", href);
+    // カード本体リンク（li > a）。下段の操作・noscript代替リンクはリンク外の兄弟要素
+    await expect(card.locator(":scope > a")).toHaveAttribute("href", href);
     await expect(card.getByRole("img")).toHaveAccessibleName(/チワワ/);
   }
 }
@@ -70,7 +71,7 @@ test("ホームはチワワの案内、9つの主機能、更新情報、カテ�
   expect(await page.locator("main section[aria-labelledby]").evaluateAll((sections) =>
     sections.map((section) => section.getAttribute("aria-labelledby")),
   )).toEqual([
-    "home-relaunch-title", "home-action-cockpit-title", "home-updates-title", "main-services-title",
+    "home-relaunch-title", "home-updates-title", "main-services-title",
     "home-automation-samples", "home-feature-directory", "home-automation-heading",
   ]);
   await expect(page.locator('[data-home-section="heat"]')).toHaveCount(0);
@@ -109,7 +110,6 @@ test("モバイルは9機能とSafety Labsを区別し、重複のないメニ�
     page.getByRole("region", {
       name: /小さな気づきが、\s*大きな事故を防ぐ。/u,
     }),
-    page.getByRole("region", { name: "5つの機能をすぐ使う" }),
     page.locator('[data-home-section="updates"]'),
     page.getByRole("region", { name: "仕事から選ぶ、9つの主機能" }),
     page.getByRole("region", { name: "カテゴリから探す" }),

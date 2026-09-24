@@ -2,6 +2,7 @@
 import { act, render } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ScrollPositionRestorer } from "./scroll-position-restorer";
+import { preserveNavigationScroll } from "@/lib/preserve-navigation-scroll";
 
 let pathname = "/goods";
 vi.mock("next/navigation", () => ({ usePathname: () => pathname }));
@@ -77,4 +78,26 @@ describe("ScrollPositionRestorer", () => {
     homeLink.remove();
     view.unmount();
   });
+
+  it.each(["/chatbot", "/chemical-ra#chemical-ra-start"])(
+    "preserves the home input position across a form navigation to %s",
+    (destination) => {
+      pathname = "/";
+      window.history.replaceState({}, "", "/");
+      const view = render(<ScrollPositionRestorer />);
+      act(() => preserveNavigationScroll());
+      Object.defineProperty(window, "scrollY", { configurable: true, value: 0 });
+      act(() => window.dispatchEvent(new Event("scroll")));
+      expect(window.sessionStorage.getItem("anzen-ai:scroll:/")).toBe("640");
+      pathname = destination.split("#")[0]!;
+      window.history.replaceState({}, "", destination);
+      view.rerender(<ScrollPositionRestorer />);
+      window.history.replaceState({}, "", "/");
+      act(() => window.dispatchEvent(new PopStateEvent("popstate")));
+      pathname = "/";
+      view.rerender(<ScrollPositionRestorer />);
+      expect(window.scrollTo).toHaveBeenCalledWith({ top: 640, left: 0 });
+      view.unmount();
+    },
+  );
 });
