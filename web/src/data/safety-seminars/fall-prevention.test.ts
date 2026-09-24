@@ -201,6 +201,15 @@ describe("墜落・転落防止研修の共通正本", () => {
       expect(question.correctIndex).toBeGreaterThanOrEqual(0);
       expect(question.correctIndex).toBeLessThan(4);
       expect(question.explanation.length).toBeGreaterThan(10);
+      expect(question.choiceRationales).toHaveLength(4);
+      expect(question.choiceRationales.every((reason) => reason.length > 10)).toBe(true);
+      expect(question.refs.length).toBeGreaterThan(0);
+      for (const ref of question.refs) {
+        const source = sourceById.get(ref.sourceId);
+        expect(source, `${question.id}: ${ref.sourceId}`).toBeDefined();
+        expect(source?.url).toMatch(/^https:\/\/(www\.mhlw\.go\.jp|laws\.e-gov\.go\.jp|www\.jniosh\.johas\.go\.jp)\//u);
+        expect(source?.status).toBe("verified");
+      }
       for (const claimId of question.claimIds) expect(claimById.has(claimId)).toBe(true);
     }
   });

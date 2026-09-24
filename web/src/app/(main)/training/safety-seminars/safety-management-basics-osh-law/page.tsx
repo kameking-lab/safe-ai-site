@@ -10,7 +10,7 @@ import claimsJson from "@/data/safety-seminars/safety-management-basics-osh-law-
 import quizJson from "@/data/safety-seminars/safety-management-basics-osh-law-quiz.json";
 import sourcesJson from "@/data/safety-seminars/safety-management-basics-osh-law-source-registry.json";
 import trainingJson from "@/data/safety-seminars/safety-management-basics-osh-law.json";
-import type { TrainingClaim, TrainingCourse, TrainingSource } from "@/data/safety-seminars/types";
+import type { TrainingClaim, TrainingCourse, TrainingQuiz, TrainingSource } from "@/data/safety-seminars/types";
 import { SITE_URL, withSiteAlternates, withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
 
 const PATH = "/training/safety-seminars/safety-management-basics-osh-law";
@@ -20,6 +20,7 @@ const DESCRIPTION =
 const training = trainingJson as TrainingCourse;
 const claims = claimsJson as TrainingClaim[];
 const sources = sourcesJson as TrainingSource[];
+const quiz = quizJson as TrainingQuiz;
 const DOWNLOAD_BASE = `${PATH}/downloads`;
 
 export async function generateMetadata({
@@ -184,7 +185,7 @@ export default function SafetyManagementBasicsOshLawPage() {
         <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
           選択すると、4つの選択肢それぞれの理由と確認済みの根拠を表示します。進捗はこの端末にだけ保存します。
         </p>
-        <SeminarQuiz courseId={training.id} />
+        <SeminarQuiz courseId={training.id} quiz={quiz} sources={sources} />
         <noscript>
           <ol className="mt-5 space-y-4">
             {quizJson.questions.map((question, index) => (

@@ -33,7 +33,7 @@ test.describe("AI実務研修と建設計算ツール", () => {
     );
   });
 
-  test("AI教材は20枚、手動音声、字幕、原稿、演習、7成果物を提供する", async ({ page }) => {
+  test("AI教材は20枚、手動音声、常時字幕、5操作、原稿、演習、7成果物を提供する", async ({ page }) => {
     await page.goto(AI_DETAIL);
     await expect(page.getByRole("heading", { level: 1, name: "AIチャット仕事術" })).toBeVisible();
     await expect(page.getByText("01 / 20")).toBeVisible();
@@ -63,10 +63,10 @@ test.describe("AI実務研修と建設計算ツール", () => {
     await expect(page.getByText("03 / 20")).toBeVisible();
     await page.keyboard.press("ArrowLeft");
     await expect(page.getByText("02 / 20")).toBeVisible();
+    await expect(page.getByTestId("seminar-controls").getByRole("button")).toHaveCount(5);
+    await expect(page.getByRole("button", { name: "字幕", exact: true })).toHaveCount(0);
     await expect(page.locator('[role="status"]')).toBeVisible();
-    await page.getByRole("button", { name: "字幕" }).click();
-    await expect(page.locator('[role="status"]')).toHaveCount(0);
-    await page.getByRole("button", { name: "字幕" }).click();
+    await page.keyboard.press("c");
     await expect(page.locator('[role="status"]')).toBeVisible();
     await page.getByRole("button", { name: "音声原稿を読む" }).click();
     await expect(page.getByRole("heading", { name: "講師向け補足" })).toBeVisible();

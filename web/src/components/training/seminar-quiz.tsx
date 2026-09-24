@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import quizJson from "@/data/safety-seminars/safety-management-basics-osh-law-quiz.json";
-import sourcesJson from "@/data/safety-seminars/safety-management-basics-osh-law-source-registry.json";
 import type {
   TrainingArticleRef,
   TrainingQuiz,
@@ -17,11 +15,7 @@ type QuizState = {
   complete: boolean;
 };
 
-const quiz = quizJson as TrainingQuiz;
-const sources = sourcesJson as TrainingSource[];
-const sourceById = new Map(sources.map((source) => [source.sourceId, source]));
-
-function initialState(): QuizState {
+function initialState(quiz: TrainingQuiz): QuizState {
   return {
     queue: quiz.questions.map((_, index) => index),
     position: 0,
@@ -30,7 +24,7 @@ function initialState(): QuizState {
   };
 }
 
-function isQuizState(value: unknown): value is QuizState {
+function isQuizState(value: unknown, quiz: TrainingQuiz): value is QuizState {
   if (!value || typeof value !== "object") return false;
   const candidate = value as Partial<QuizState>;
   const { queue, position, responses, complete } = candidate;
@@ -58,7 +52,7 @@ function isArticleRef(
   return "article" in ref;
 }
 
-function refLink(ref: TrainingQuizQuestion["refs"][number]) {
+function refLink(ref: TrainingQuizQuestion["refs"][number], sourceById: Map<string, TrainingSource>) {
   if (isArticleRef(ref)) {
     const useInternalNavi = ref.article.includes("の") && Boolean(ref.naviPath);
     return {
@@ -68,16 +62,30 @@ function refLink(ref: TrainingQuizQuestion["refs"][number]) {
     };
   }
   const source = sourceById.get(ref.sourceId);
+  const article = source?.url.startsWith("https://laws.e-gov.go.jp/")
+    ? ref.locator.match(/^第(\d+)条/u)?.[1]
+    : undefined;
+  const pdfPage = source?.url.toLowerCase().endsWith(".pdf")
+    ? ref.locator.match(/PDF p(\d+)/u)?.[1]
+    : undefined;
   return {
-    href: source?.url ?? "#sources-title",
-    label: source?.title ?? ref.locator,
+    href: source ? `${source.url}${article ? `#Mp-At_${article}` : pdfPage ? `#page=${pdfPage}` : ""}` : "#sources-title",
+    label: source ? `${source.title}：${ref.locator}` : ref.locator,
     external: Boolean(source),
   };
 }
 
-export function SeminarQuiz({ courseId }: { courseId: string }) {
+export function SeminarQuiz({ courseId, quiz, sources }: {
+  courseId: string;
+  quiz: TrainingQuiz;
+  sources: TrainingSource[];
+}) {
   const storageKey = `seminar-quiz:${courseId}:${quiz.version}`;
-  const [state, setState] = useState<QuizState>(initialState);
+  const sourceById = useMemo(
+    () => new Map(sources.map((source) => [source.sourceId, source])),
+    [sources],
+  );
+  const [state, setState] = useState<QuizState>(() => initialState(quiz));
   const [savedState, setSavedState] = useState<QuizState | null>(null);
   const [loaded, setLoaded] = useState(false);
   const feedbackRef = useRef<HTMLDivElement>(null);
@@ -87,7 +95,7 @@ export function SeminarQuiz({ courseId }: { courseId: string }) {
       const raw = window.localStorage.getItem(storageKey);
       if (raw) {
         const parsed: unknown = JSON.parse(raw);
-        if (isQuizState(parsed) && Object.keys(parsed.responses).length > 0) {
+        if (isQuizState(parsed, quiz) && Object.keys(parsed.responses).length > 0) {
           setSavedState(parsed);
         }
       }
@@ -96,7 +104,7 @@ export function SeminarQuiz({ courseId }: { courseId: string }) {
     } finally {
       setLoaded(true);
     }
-  }, [storageKey]);
+  }, [storageKey, quiz]);
 
   useEffect(() => {
     if (!loaded || savedState) return;
@@ -113,7 +121,7 @@ export function SeminarQuiz({ courseId }: { courseId: string }) {
   const answered = selectedIndex !== undefined;
   const incorrect = useMemo(
     () => state.queue.filter((index) => state.responses[index] !== quiz.questions[index]?.correctIndex),
-    [state.queue, state.responses],
+    [state.queue, state.responses, quiz.questions],
   );
   const score = state.queue.length - incorrect.length;
 
@@ -128,7 +136,7 @@ export function SeminarQuiz({ courseId }: { courseId: string }) {
       // 保存状態を消せなくても、現在の画面は初期化する。
     }
     setSavedState(null);
-    setState(initialState());
+    setState(initialState(quiz));
   };
 
   if (!question) return null;
@@ -274,14 +282,14 @@ export function SeminarQuiz({ courseId }: { courseId: string }) {
           <p className="mt-1">{question.explanation}</p>
           <div className="mt-3 flex flex-wrap gap-2" aria-label="この問題の根拠">
             {question.refs.map((ref) => {
-              const link = refLink(ref);
+              const link = refLink(ref, sourceById);
               return (
                 <a
                   key={`${ref.sourceId}-${link.href}`}
                   href={link.href}
                   target={link.external ? "_blank" : undefined}
                   rel={link.external ? "noopener noreferrer" : undefined}
-                  className="inline-flex min-h-11 items-center rounded-full border border-teal-700 px-3 font-black text-teal-800 underline underline-offset-4 dark:border-teal-500 dark:text-teal-200"
+                  className="inline-flex min-h-11 max-w-full items-center break-words rounded-full border border-teal-700 px-3 font-black text-teal-800 underline underline-offset-4 dark:border-teal-500 dark:text-teal-200"
                 >
                   根拠: {link.label}
                 </a>

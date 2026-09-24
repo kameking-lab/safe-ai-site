@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import {
-  Captions,
   ChevronLeft,
   ChevronRight,
   Expand,
@@ -73,7 +72,6 @@ export function SafetySeminarPlayer({
   const [audioFailed, setAudioFailed] = useState(false);
   const [speechProgress, setSpeechProgress] = useState(0);
   const [caption, setCaption] = useState(slides[0]?.message ?? "");
-  const [captionsVisible, setCaptionsVisible] = useState(true);
   const [transcriptVisible, setTranscriptVisible] = useState(false);
   const [listVisible, setListVisible] = useState(false);
   const [muted] = useState(false);
@@ -299,7 +297,6 @@ export function SafetySeminarPlayer({
         if (statusRef.current === "playing") pause();
         else play();
       }
-      if (event.key.toLowerCase() === "c") setCaptionsVisible((value) => !value);
       if (event.key.toLowerCase() === "f") void enterFullscreen();
     };
     window.addEventListener("keydown", onKeyDown);
@@ -452,7 +449,7 @@ export function SafetySeminarPlayer({
         )}
       </div>
 
-      {captionsVisible && (!slide.stage || speechStatus === "playing") ? (
+      {(!slide.stage || speechStatus === "playing") ? (
         <div
           role="status"
           aria-live="polite"
@@ -553,14 +550,6 @@ export function SafetySeminarPlayer({
             disabled={currentIndex === slides.length - 1}
             icon={ChevronRight}
           />
-          {!slide.stage ? (
-            <ControlButton
-              label="字幕"
-              onClick={() => setCaptionsVisible((value) => !value)}
-              pressed={captionsVisible}
-              icon={Captions}
-            />
-          ) : null}
           <ControlButton
             label={slide.stage ? `${slides.length}枚` : "スライド一覧"}
             onClick={() => setListVisible((value) => !value)}
@@ -607,16 +596,6 @@ export function SafetySeminarPlayer({
                 <ul className="mt-2 list-disc space-y-1 pl-5">
                   {slide.body.map((item) => <li key={item}>{item}</li>)}
                 </ul>
-                <label className="mt-4 flex min-h-11 items-center gap-3 font-bold text-white">
-                  <input
-                    type="checkbox"
-                    checked={captionsVisible}
-                    onChange={(event) => setCaptionsVisible(event.currentTarget.checked)}
-                    className="h-5 w-5"
-                    style={{ accentColor: "#5eead4" }}
-                  />
-                  再生中に字幕を表示
-                </label>
                 <h4 className="mt-4 font-black text-white">音声原稿</h4>
               </>
             ) : null}
@@ -665,7 +644,7 @@ export function SafetySeminarPlayer({
           </ol>
         ) : null}
         <p className={`${slide.stage ? "hidden lg:block lg:text-sm" : "text-xs"} text-slate-400`}>
-          キーボード: Space 再生/一時停止、←/→ 移動、C 字幕、F 全画面
+          キーボード: Space 再生/一時停止、←/→ 移動、F 全画面
         </p>
       </div>
     </section>
