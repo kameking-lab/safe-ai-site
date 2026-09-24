@@ -11,6 +11,7 @@ import {
 } from "react";
 import type { MergedChemical } from "@/lib/mhlw-chemicals";
 import { useTransientQueryBridge } from "./transient-query-bridge";
+import { preserveNavigationScroll } from "@/lib/preserve-navigation-scroll";
 
 const CHEMICAL_INPUT_MAX = 120;
 
@@ -239,6 +240,7 @@ export function HomeDirectChemicalClient() {
           });
         })
         .catch(() => undefined);
+      preserveNavigationScroll();
       router.push("/chemical-ra#chemical-ra-start");
     },
     [router, stageChemicalQuery],

@@ -98,3 +98,42 @@ test("統合カード下段のリンクから戻っても選択位置へ戻る",
   await expect.poll(() => page.evaluate(() => window.scrollY), { timeout: 10_000 }).toBeGreaterThan(before - 320);
   await expect(slides).toBeInViewport();
 });
+
+test("カード内で質問を送って戻ると入力した位置へ戻る", async ({ page }) => {
+  test.setTimeout(60_000);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+  const question = page.getByRole("textbox", { name: "安衛法AIへの質問" });
+  await question.fill("フルハーネスの特別教育は必要？");
+  const submit = page.locator("#mascot-chat").getByRole("button", { name: "質問する" });
+  await submit.scrollIntoViewIfNeeded();
+  const before = await page.evaluate(() => window.scrollY);
+  expect(before).toBeGreaterThan(400);
+  await submit.click();
+  await expect(page).toHaveURL(/\/chatbot$/u, { timeout: 30_000 });
+  await expect(page.getByRole("heading", { name: "安衛法AI", exact: true })).toBeVisible();
+  await expect(page.getByRole("article", { name: "あなたの質問" })).toBeVisible();
+  await page.goBack();
+  await expect(question).toBeVisible({ timeout: 15_000 });
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(before - 320);
+  await expect(question).toBeInViewport();
+});
+
+test("カード内で化学物質を検索して戻ると入力した位置へ戻る", async ({ page }) => {
+  test.setTimeout(60_000);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+  const query = page.getByRole("combobox", { name: "化学物質を検索" });
+  await query.fill("トルエン");
+  const submit = page.locator("#mascot-chemical").getByRole("button", { name: "検索", exact: true });
+  await submit.scrollIntoViewIfNeeded();
+  const before = await page.evaluate(() => window.scrollY);
+  expect(before).toBeGreaterThan(400);
+  await submit.click();
+  await expect(page).toHaveURL(/\/chemical-ra#chemical-ra-start$/u, { timeout: 30_000 });
+  await expect(page.getByRole("heading", { name: "化学物質RA", exact: true })).toBeVisible();
+  await page.goBack();
+  await expect(query).toBeVisible({ timeout: 15_000 });
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(before - 320);
+  await expect(query).toBeInViewport();
+});
