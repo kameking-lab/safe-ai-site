@@ -15,6 +15,7 @@ type ProductResponse = {
 
 export function GoodsProductCarousel({ categoryId, categoryName, featureId }: { categoryId: string; categoryName: string; featureId?: string }) {
   const [result, setResult] = useState<ProductResponse | null>(null);
+  const [failedImages, setFailedImages] = useState<ReadonlySet<string>>(() => new Set());
   const listRef = useRef<HTMLUListElement>(null);
   const scrollKey = `goods-carousel:${categoryId}:${featureId ?? "all"}`;
   const [position, setPosition] = useState({ first: 1, atStart: true, atEnd: true, scrollable: false });
@@ -93,7 +94,7 @@ export function GoodsProductCarousel({ categoryId, categoryName, featureId }: { 
             {result.items.map((item) => (
               <li key={item.id} className="w-48 shrink-0 snap-start rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
                 <div className="flex h-36 items-center justify-center bg-white">
-                  <Image src={item.imageUrl} alt={`${item.name}の商品写真（楽天市場掲載）`} width={128} height={128} unoptimized className="h-32 w-32 object-contain" />
+                  {failedImages.has(item.id) ? <p role="status" className="px-2 text-center text-xs font-bold leading-5 text-amber-900">写真を読み込めませんでした。販売先で確認してください。</p> : <Image src={item.imageUrl} alt={`${item.name}の商品写真（楽天市場掲載）`} width={128} height={128} unoptimized onError={() => setFailedImages((previous) => new Set(previous).add(item.id))} className="h-32 w-32 object-contain" />}
                 </div>
                 <p className="mt-2 line-clamp-2 min-h-10 text-sm font-bold leading-5 text-slate-950">{item.name}</p>
                 <p className="mt-2 text-sm font-black text-amber-800" aria-label={`購入者評価5点満点中${item.rating}、レビュー${item.reviewCount}件`}>
