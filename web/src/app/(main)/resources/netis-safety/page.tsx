@@ -14,20 +14,19 @@ export const metadata: Metadata = {
 
 export default function NetisSafetyPage() {
   return (
-    <div className="bg-amber-50 px-4 py-9 sm:px-6 sm:py-12 dark:bg-slate-950">
+    <div className="bg-amber-50 px-3 py-5 sm:px-6 sm:py-9 dark:bg-slate-950">
       <PageJsonLd name={TITLE} description={DESCRIPTION} path="/resources/netis-safety" />
       <div className="mx-auto max-w-6xl">
         <header className="max-w-4xl">
-          <p className="text-sm font-black tracking-[.14em] text-sky-800 dark:text-sky-300">NETIS SAFETY GUIDE</p>
-          <h1 className="mt-2 text-4xl font-black tracking-[-.04em] text-slate-950 sm:text-5xl dark:text-white">
+          <p className="text-xs font-black tracking-[.14em] text-sky-800 dark:text-sky-300">NETIS SAFETY GUIDE</p>
+          <h1 className="mt-1 text-3xl font-black tracking-[-.04em] text-slate-950 sm:text-5xl dark:text-white">
             安全課題からNETISを探す
           </h1>
-          <p className="mt-4 text-base font-semibold leading-8 text-slate-700 dark:text-slate-200">
-            国土交通省のNETISは技術検索・チャット・比較支援を備えています。
-            このページでは、安全担当者が公式検索へ入る前に、課題と比較条件を短く整理できます。
+          <p className="mt-2 text-sm font-semibold leading-6 text-slate-700 sm:text-base dark:text-slate-200">
+            商品名が分からなくても、現場の危険を選ぶだけで掲載技術を確認できます。
           </p>
         </header>
-        <div className="mt-8"><NetisSafetyGuide /></div>
+        <div className="mt-4"><NetisSafetyGuide /></div>
       </div>
     </div>
   );
