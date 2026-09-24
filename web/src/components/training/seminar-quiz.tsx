@@ -62,9 +62,15 @@ function refLink(ref: TrainingQuizQuestion["refs"][number], sourceById: Map<stri
     };
   }
   const source = sourceById.get(ref.sourceId);
+  const article = source?.url.startsWith("https://laws.e-gov.go.jp/")
+    ? ref.locator.match(/^第(\d+)条/u)?.[1]
+    : undefined;
+  const pdfPage = source?.url.toLowerCase().endsWith(".pdf")
+    ? ref.locator.match(/PDF p(\d+)/u)?.[1]
+    : undefined;
   return {
-    href: source?.url ?? "#sources-title",
-    label: source?.title ?? ref.locator,
+    href: source ? `${source.url}${article ? `#Mp-At_${article}` : pdfPage ? `#page=${pdfPage}` : ""}` : "#sources-title",
+    label: source ? `${source.title}：${ref.locator}` : ref.locator,
     external: Boolean(source),
   };
 }
@@ -115,7 +121,7 @@ export function SeminarQuiz({ courseId, quiz, sources }: {
   const answered = selectedIndex !== undefined;
   const incorrect = useMemo(
     () => state.queue.filter((index) => state.responses[index] !== quiz.questions[index]?.correctIndex),
-    [state.queue, state.responses],
+    [state.queue, state.responses, quiz.questions],
   );
   const score = state.queue.length - incorrect.length;
 
@@ -283,7 +289,7 @@ export function SeminarQuiz({ courseId, quiz, sources }: {
                   href={link.href}
                   target={link.external ? "_blank" : undefined}
                   rel={link.external ? "noopener noreferrer" : undefined}
-                  className="inline-flex min-h-11 items-center rounded-full border border-teal-700 px-3 font-black text-teal-800 underline underline-offset-4 dark:border-teal-500 dark:text-teal-200"
+                  className="inline-flex min-h-11 max-w-full items-center break-words rounded-full border border-teal-700 px-3 font-black text-teal-800 underline underline-offset-4 dark:border-teal-500 dark:text-teal-200"
                 >
                   根拠: {link.label}
                 </a>

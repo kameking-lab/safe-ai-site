@@ -28,7 +28,7 @@ test.describe("安全研修ライブラリ", () => {
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", `https://www.anzen-ai-portal.jp${HUB}`);
   });
 
-  test("音声の再生・一時停止、スライド移動、字幕、原稿、keyboardを操作できる", async ({ page }) => {
+  test("音声の再生・一時停止、スライド移動、常時字幕、原稿、keyboardを操作できる", async ({ page }) => {
     await page.goto(DETAIL);
     const audio = page.locator("audio");
     await expect(audio).toHaveCount(1);
@@ -46,8 +46,9 @@ test.describe("安全研修ライブラリ", () => {
     await page.keyboard.press("ArrowLeft");
     await expect(page.getByText("02 / 20")).toBeVisible();
 
-    await page.getByRole("button", { name: "字幕" }).click();
-    await expect(page.locator('[role="status"]')).toHaveCount(0);
+    await expect(page.getByTestId("seminar-controls").getByRole("button")).toHaveCount(5);
+    await expect(page.getByRole("button", { name: "字幕" })).toHaveCount(0);
+    await expect(page.locator('[role="status"]')).toBeVisible();
     await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
     await page.keyboard.press("c");
     await expect(page.locator('[role="status"]')).toBeVisible();
@@ -150,6 +151,18 @@ test.describe("安全研修ライブラリ", () => {
       await expect(page.getByText(/未選択：/u)).toHaveCount(index === 0 ? 2 : 3);
       for (const link of await status.getByRole("link", { name: /根拠:/u }).all()) {
         expect(await link.getAttribute("href")).toMatch(/^https:\/\/(www\.mhlw\.go\.jp|laws\.e-gov\.go\.jp|www\.jniosh\.johas\.go\.jp)\//u);
+      }
+      if (index === 2) {
+        await expect(status.getByRole("link", { name: /第36条第41号/u }))
+          .toHaveAttribute("href", /#Mp-At_36$/u);
+      }
+      if (index === 4) {
+        await expect(status.getByRole("link", { name: /冊子p80／PDF p84/u }))
+          .toHaveAttribute("href", /#page=84$/u);
+        await expect(status.getByRole("link", { name: /第7の1（落下衝撃後の使用禁止）/u })).toBeVisible();
+        await page.setViewportSize({ width: 320, height: 844 });
+        expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth))
+          .toBeLessThanOrEqual(1);
       }
       await page.getByRole("button", { name: index === 4 ? "結果を見る" : "次の問題" }).click();
     }

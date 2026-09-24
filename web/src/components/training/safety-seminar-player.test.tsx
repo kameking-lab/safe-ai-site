@@ -141,12 +141,11 @@ describe("SafetySeminarPlayer", () => {
     expect(screen.getByRole("img", { name: /非ゼロ起点/u })).toBeTruthy();
   });
 
-  it("字幕と全文原稿を読め、音声設定は表示しない", () => {
+  it("字幕を常時読め、主操作は5個で、音声設定は表示しない", () => {
     renderPlayer();
     expect(screen.getByRole("status")).toBeTruthy();
-    fireEvent.click(screen.getByRole("button", { name: "字幕" }));
-    expect(screen.queryByRole("status")).toBeNull();
-    fireEvent.click(screen.getByRole("button", { name: "字幕" }));
+    expect(screen.getByTestId("seminar-controls").querySelectorAll("button")).toHaveLength(5);
+    expect(screen.queryByRole("button", { name: "字幕" })).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "音声原稿を読む" }));
     expect(screen.getByText(training.slides[0].narration)).toBeTruthy();
     expect(
@@ -164,7 +163,7 @@ describe("SafetySeminarPlayer", () => {
     fireEvent.keyDown(window, { key: "ArrowRight" });
     expect(screen.getByText("02 / 20")).toBeTruthy();
     fireEvent.keyDown(window, { key: "c" });
-    expect(screen.queryByRole("status")).toBeNull();
+    expect(screen.getByRole("status")).toBeTruthy();
     fireEvent.keyDown(window, { key: "f" });
     expect(HTMLElement.prototype.requestFullscreen).toHaveBeenCalled();
     expect(container.querySelector('[class*="motion-reduce:transition-none"]')).not.toBeNull();
@@ -191,7 +190,7 @@ describe("SafetySeminarPlayer", () => {
     fireEvent.click(screen.getByRole("button", { name: "詳しく" }));
     expect(screen.getByText(oshTraining.slides[0].body[0]!)).toBeTruthy();
     expect(screen.getByText(oshTraining.slides[0].narration)).toBeTruthy();
-    expect(screen.getByRole("checkbox", { name: "再生中に字幕を表示" })).toBeTruthy();
+    expect(screen.queryByRole("checkbox", { name: "再生中に字幕を表示" })).toBeNull();
 
     fireEvent.click(screen.getByRole("button", { name: "詳しく閉じる" }));
     fireEvent.click(screen.getByRole("button", { name: "次のスライド" }));

@@ -122,7 +122,26 @@ describe("墜落防止の既存5問", () => {
     }
     const evidence = screen.getByRole("link", { name: /根拠:/u });
     expect(evidence.getAttribute("href")).toMatch(/^https:\/\/www\.mhlw\.go\.jp\//u);
+    expect(evidence.textContent).toContain("第1・第4");
     await waitFor(() => expect(document.activeElement).toBe(screen.getByRole("status")));
+  });
+
+  it("法令条番号と資料ページを根拠リンクに表示し、直接開ける", () => {
+    const quiz = {
+      ...fallProps.quiz,
+      questions: [fallProps.quiz.questions[2]!, fallProps.quiz.questions[4]!],
+    };
+    const first = render(<SeminarQuiz {...fallProps} quiz={quiz} />);
+    fireEvent.click(screen.getByRole("button", { name: /高さ2m以上の作業はすべて対象/u }));
+    expect(screen.getByRole("link", { name: /労働安全衛生規則.*第36条第41号/u }).getAttribute("href"))
+      .toBe("https://laws.e-gov.go.jp/law/347M50002000032#Mp-At_36");
+    first.unmount();
+
+    render(<SeminarQuiz {...fallProps} courseId="fall-evidence-page" quiz={{ ...quiz, questions: [quiz.questions[1]!] }} />);
+    fireEvent.click(screen.getByRole("button", { name: /15分は安全なので状況を見る/u }));
+    expect(screen.getByRole("link", { name: /冊子p80／PDF p84/u }).getAttribute("href"))
+      .toBe("https://www.jniosh.johas.go.jp/publication/doc/ar/ar_2009.pdf#page=84");
+    expect(screen.getByRole("link", { name: /第7の1（落下衝撃後の使用禁止）/u })).toBeTruthy();
   });
 
   it("教材ごとの保存キーを分離し、再訪で回答済みの続きに戻れる", async () => {
