@@ -16,6 +16,7 @@ import { FeatureMascotCompanion } from "@/components/feature-mascot-companion";
 import { NetisSafetyGuide } from "@/components/netis-safety-guide";
 import { SafetyGoodsWizard } from "@/components/safety-goods-wizard";
 import { GoodsProductCarousel } from "@/components/goods-product-carousel";
+import { GOODS_PRODUCT_FEATURES, getGoodsProductFeature } from "@/data/goods-product-features";
 
 const OFFICIAL_SELECTION_SOURCES = [
   {
@@ -65,9 +66,19 @@ function currentCategory() {
   return PUBLIC_SAFETY_GOODS_CATEGORIES.some((category) => category.id === id) ? id : null;
 }
 
+function currentFeature() {
+  const params = new URLSearchParams(window.location.search);
+  const categoryId = params.get("category") ?? "";
+  const featureId = params.get("feature");
+  return getGoodsProductFeature(categoryId, featureId)?.id ?? null;
+}
+
 export function SafetyGoodsPanel() {
   const selectedCategoryId = useSyncExternalStore(subscribeCategory, currentCategory, () => null);
+  const selectedFeatureId = useSyncExternalStore(subscribeCategory, currentFeature, () => null);
   const selectedCategory = PUBLIC_SAFETY_GOODS_CATEGORIES.find((category) => category.id === selectedCategoryId);
+  const featureOptions = selectedCategory ? GOODS_PRODUCT_FEATURES[selectedCategory.id] : undefined;
+  const selectedFeature = selectedCategory ? getGoodsProductFeature(selectedCategory.id, selectedFeatureId) : null;
   const lastCategory = useRef<string | null>(null);
 
   useEffect(() => {
@@ -85,18 +96,31 @@ export function SafetyGoodsPanel() {
   function selectCategory(categoryId: string) {
     const url = new URL(window.location.href);
     url.searchParams.set("category", categoryId);
+    url.searchParams.delete("feature");
     window.history.pushState({ goodsCategoryFromDirectory: true }, "", url);
     window.dispatchEvent(new Event(GOODS_CATEGORY_EVENT));
   }
 
+  function selectFeature(featureId: string) {
+    const url = new URL(window.location.href);
+    url.searchParams.set("feature", featureId);
+    window.history.pushState({ goodsFeatureFromCategory: true }, "", url);
+    window.dispatchEvent(new Event(GOODS_CATEGORY_EVENT));
+    window.requestAnimationFrame(() => document.getElementById("goods-feature-results")?.scrollIntoView({ block: "start", behavior: "instant" }));
+  }
+
+  function returnToFeatures() {
+    const url = new URL(window.location.href);
+    url.searchParams.delete("feature");
+    window.history.pushState({}, "", url);
+    window.dispatchEvent(new Event(GOODS_CATEGORY_EVENT));
+  }
+
   function returnToCategories() {
-    if (window.history.state?.goodsCategoryFromDirectory) {
-      window.history.back();
-      return;
-    }
     const url = new URL(window.location.href);
     url.searchParams.delete("category");
-    window.history.replaceState(null, "", url);
+    url.searchParams.delete("feature");
+    window.history.pushState({}, "", url);
     window.dispatchEvent(new Event(GOODS_CATEGORY_EVENT));
   }
 
@@ -147,18 +171,29 @@ export function SafetyGoodsPanel() {
               <ArrowLeft aria-hidden="true" className="h-4 w-4" />用品一覧に戻る
             </button>
             <p className="mt-3 rounded-xl bg-slate-100 p-3 text-sm font-semibold leading-6 text-slate-800">選ぶポイント：{selectedCategory.selectionPrompt}</p>
-            <GoodsProductCarousel key={selectedCategory.id} categoryId={selectedCategory.id} categoryName={selectedCategory.name} />
-            <div className="mt-4 rounded-xl border border-slate-200 bg-white p-4">
+            {featureOptions && !selectedFeature ? (
+              <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+                <h3 className="text-lg font-black text-emerald-950">まず、必要な特徴を選ぶ</h3>
+                <p className="mt-1 text-sm text-slate-700">選んだ条件に近い商品を探します。商品ごとの適合はメーカー資料で確認してください。</p>
+                <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                  {featureOptions.map((feature) => <button key={feature.id} type="button" onClick={() => selectFeature(feature.id)} className="min-h-20 rounded-xl border border-emerald-300 bg-white p-3 text-left hover:border-emerald-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700"><span className="block font-bold text-slate-950">{feature.label}</span><span className="mt-1 block text-sm text-slate-700">{feature.detail}</span></button>)}
+                </div>
+              </div>
+            ) : null}
+            {selectedFeature ? <div id="goods-feature-results" className="mt-4 scroll-mt-24 rounded-xl border border-emerald-200 bg-emerald-50 p-4"><p className="text-sm font-black text-emerald-950">選択中: {selectedFeature.label}</p><p className="mt-1 text-sm text-slate-700">購入前の確認: {selectedFeature.check}</p><button type="button" onClick={returnToFeatures} className="mt-2 min-h-11 text-sm font-bold text-emerald-800 underline">特徴を選び直す</button></div> : null}
+            {(!featureOptions || selectedFeature) && selectedFeature?.searchQuery !== null ? <GoodsProductCarousel key={`${selectedCategory.id}:${selectedFeatureId ?? "all"}`} categoryId={selectedCategory.id} categoryName={selectedCategory.name} featureId={selectedFeatureId ?? undefined} /> : null}
+            {(!featureOptions || selectedFeature) && selectedFeature?.searchQuery === null ? <p role="status" className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm font-bold text-amber-950">有害物質と酸素濃度が不明な状態では製品を絞れません。SDS・測定結果を確認してから特徴を選び直してください。</p> : null}
+            {(!featureOptions || selectedFeature?.searchQuery) ? <div className="mt-4 rounded-xl border border-slate-200 bg-white p-4">
               <p className="text-sm font-bold text-slate-800">販売サイトでほかの候補も探す</p>
               <div className="mt-3 flex flex-wrap gap-2">
-                <a href={generateAmazonHighRatedSearchUrl(selectedCategory.searchQuery)} target="_blank" rel="noopener noreferrer sponsored" onClick={() => affiliateClick("amazon", selectedCategory.id, selectedCategory.name)} className="inline-flex min-h-11 items-center justify-center gap-1 rounded-lg bg-amber-700 px-3 text-sm font-bold text-white hover:bg-amber-800">
+                <a href={generateAmazonHighRatedSearchUrl(selectedFeature?.searchQuery ?? selectedCategory.searchQuery)} target="_blank" rel="noopener noreferrer sponsored" onClick={() => affiliateClick("amazon", selectedCategory.id, selectedCategory.name)} className="inline-flex min-h-11 items-center justify-center gap-1 rounded-lg bg-amber-700 px-3 text-sm font-bold text-white hover:bg-amber-800">
                   <Search className="h-4 w-4" aria-hidden="true" />Amazonで探す
                 </a>
-                <a href={generateRakutenSearchUrl(selectedCategory.searchQuery)} target="_blank" rel="noopener noreferrer sponsored" onClick={() => affiliateClick("rakuten", selectedCategory.id, selectedCategory.name)} className="inline-flex min-h-11 items-center justify-center gap-1 rounded-lg bg-rose-700 px-3 text-sm font-bold text-white hover:bg-rose-800">
+                <a href={generateRakutenSearchUrl(selectedFeature?.searchQuery ?? selectedCategory.searchQuery)} target="_blank" rel="noopener noreferrer sponsored" onClick={() => affiliateClick("rakuten", selectedCategory.id, selectedCategory.name)} className="inline-flex min-h-11 items-center justify-center gap-1 rounded-lg bg-rose-700 px-3 text-sm font-bold text-white hover:bg-rose-800">
                   <Search className="h-4 w-4" aria-hidden="true" />楽天で探す
                 </a>
               </div>
-            </div>
+            </div> : null}
           </div>
         ) : null}
         <p className="mt-2 text-xs font-semibold leading-6 text-slate-600">

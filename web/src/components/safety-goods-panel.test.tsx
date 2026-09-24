@@ -27,7 +27,9 @@ describe("SafetyGoodsPanel", () => {
     }));
     render(<SafetyGoodsPanel />);
     fireEvent.click(screen.getByRole("button", { name: "保護帽" }));
-    expect(await screen.findByText(/実商品写真・購入者評価は現在表示できません/u)).toBeDefined();
+    expect(screen.getByRole("heading", { name: "まず、必要な特徴を選ぶ" })).toBeDefined();
+    fireEvent.click(screen.getByRole("button", { name: /墜落時の頭部保護/u }));
+    expect(await screen.findByText(/商品データの接続準備中です/u)).toBeDefined();
     expect(screen.queryByText(/★4\.\d \(/u)).toBeNull();
   });
 });
