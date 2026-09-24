@@ -200,3 +200,61 @@ test("320px・390px・1440pxで横にはみ出さず詳細と公式リンクを�
     await expect(details).not.toHaveAttribute("open", "");
   }
 });
+
+test("カードの名称・画像からNETIS公式詳細へ進み、戻るで絞り込み・検索・位置・フォーカスを復元する", async ({ page }) => {
+  // 外部NETISはテストで叩かず、同一タブ遷移先をスタブする
+  await page.route("https://www.netis.mlit.go.jp/**", (route) =>
+    route.fulfill({ status: 200, contentType: "text/html", body: "<title>NETIS stub</title><p>NETIS detail stub</p>" }),
+  );
+  for (const viewport of [
+    { width: 320, height: 800 },
+    { width: 390, height: 844 },
+  ]) {
+    await page.setViewportSize(viewport);
+    await page.goto(`${ROUTE}?risk=machine-collision&q=${encodeURIComponent("センサー")}`, { waitUntil: "domcontentloaded" });
+    await expect(page.locator('[data-netis-explorer-ready="true"]')).toBeVisible();
+    await expect(page.locator("#netis-technology-results article")).toHaveCount(2);
+    expect(
+      await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth),
+    ).toBeLessThanOrEqual(1);
+
+    for (const article of await page.locator("#netis-technology-results article").all()) {
+      await expect(article.locator("a[aria-hidden='true']")).toBeVisible();
+      await expect(article.getByRole("heading", { level: 4 })).toBeVisible();
+      await expect(article.getByText(/^[A-Z]{2}-\d{6}-(?:A|VE)$/)).toBeVisible();
+      const box = await article.boundingBox();
+      expect(box!.x).toBeGreaterThanOrEqual(0);
+      expect(box!.x + box!.width).toBeLessThanOrEqual(viewport.width);
+    }
+
+    // キーボード：名称リンクをEnterで開く
+    const nameLink = page.getByRole("link", { name: /ハッとセンサー\s*（NETIS公式の詳細を開く）/ });
+    await nameLink.scrollIntoViewIfNeeded();
+    const scrollBefore = await page.evaluate(() => window.scrollY);
+    expect(scrollBefore).toBeGreaterThan(0);
+    await nameLink.focus();
+    await page.keyboard.press("Enter");
+    await expect(page).toHaveURL(/netis\.mlit\.go\.jp\/netis\/pubsearch\/details\?regNo=KK-210002/);
+
+    await page.goBack({ waitUntil: "domcontentloaded" });
+    await expect(page).toHaveURL(/risk=machine-collision&q=/);
+    await expect(page.locator('[data-netis-explorer-ready="true"]')).toBeVisible();
+    await expect(page.getByLabel(/名称・登録番号・用途/)).toHaveValue("センサー");
+    await expect(nameLink).toBeFocused();
+    await expect
+      .poll(() => page.evaluate(() => window.scrollY))
+      .toBeGreaterThan(scrollBefore - 40);
+    expect(await page.evaluate(() => window.scrollY)).toBeLessThan(scrollBefore + 40);
+
+    // 画像クリックも同じ詳細へ
+    await page
+      .locator("article")
+      .filter({ hasText: "KT-180097-VE" })
+      .locator("a[aria-hidden='true']")
+      .click();
+    await expect(page).toHaveURL(/regNo=KT-180097/);
+    await page.goBack({ waitUntil: "domcontentloaded" });
+    await expect(page).toHaveURL(/risk=machine-collision&q=/);
+    await expect(page.getByRole("heading", { name: "重機接触：2件" })).toBeVisible();
+  }
+});
