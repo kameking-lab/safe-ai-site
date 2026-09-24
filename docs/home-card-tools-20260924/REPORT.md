@@ -53,8 +53,11 @@ Astra事前レビュー指摘「『5つの機能をすぐ使う』パネルと�
 
 ## スクリーンショット
 
+リポジトリのストレージ予算（`storage-budget.yml`：JSON/画像の追加は125件まで）に収めるため、PNGはコミットしていない。PRのセッションで、オーナーへ直接渡している。
+
 - 変更前：`before-{320,390,1440}-five-feature-panel.png`（5機能パネル）、`before-{320,390,1440}-services.png`（9機能セクション）
 - 変更後：`after-{320,390,1440}-services.png`
+- 再取得の手順：`main` と本ブランチの dev server を起動し、`/` の `#mascot-tools` と `section[aria-labelledby="main-services-title"]` を、幅320・390・1440pxで要素スクリーンショットする（上の計測表は同じ手順で取得）
 
 ## 検証コマンド
 
