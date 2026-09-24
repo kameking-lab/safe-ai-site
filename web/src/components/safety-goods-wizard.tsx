@@ -68,6 +68,15 @@ function photoCategoryId(categoryId: string, taskId: string): string {
   return "safety-footwear";
 }
 
+function photoFeatureId(categoryId: string, taskId: string): string | undefined {
+  if (categoryId === "respiratory") return taskId === "dust" ? "dust" : taskId === "vapor" ? "gas" : undefined;
+  if (categoryId === "fall" && taskId === "scaffold") return "harness";
+  if (categoryId === "chemical" && taskId === "splash") return "splash";
+  if (categoryId === "noise" && taskId === "welding") return "light";
+  if (categoryId === "noise" && taskId === "grinding") return "impact";
+  return undefined;
+}
+
 const CATEGORIES: readonly Option[] = [
   { id: "respiratory", label: "呼吸用保護具", detail: "粉じん・蒸気・ガス・酸欠が気になる" },
   { id: "fall", label: "墜落・転落対策", detail: "高所・足場・開口部で作業する" },
@@ -306,6 +315,7 @@ export function SafetyGoodsWizard() {
   const photoCategory = category && task
     ? PUBLIC_SAFETY_GOODS_CATEGORIES.find((item) => item.id === photoCategoryId(category.id, task.id))
     : null;
+  const photoFeature = category && task ? photoFeatureId(category.id, task.id) : undefined;
 
   function chooseCategory(id: string) {
     setCategoryId(id);
@@ -403,7 +413,7 @@ export function SafetyGoodsWizard() {
               </div>
             ) : null}
             {!recommendation.withholdPurchase && photoCategory ? (
-              <GoodsProductCarousel key={photoCategory.id} categoryId={photoCategory.id} categoryName={photoCategory.name} />
+              <GoodsProductCarousel key={`${photoCategory.id}:${photoFeature ?? "all"}`} categoryId={photoCategory.id} categoryName={photoCategory.name} featureId={photoFeature} />
             ) : null}
             <div className="mt-5 grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
               <div>

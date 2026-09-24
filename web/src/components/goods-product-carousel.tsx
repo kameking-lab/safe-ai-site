@@ -7,14 +7,17 @@ import { trackEvent } from "@/components/Analytics";
 import { MIN_GOODS_RATING, MIN_GOODS_REVIEWS, type RatedGoodsProduct } from "@/lib/goods/rakuten-products";
 
 type ProductResponse = {
-  status: "ready" | "not_configured" | "unavailable" | "no_qualified_items";
+  status: "ready" | "not_configured" | "unavailable" | "no_qualified_items" | "selection_required";
   items: RatedGoodsProduct[];
   checkedAt: string | null;
+  reason?: "credentials_missing" | "authorization_failed" | "rate_limited" | "upstream_error" | "timeout" | null;
 };
 
-export function GoodsProductCarousel({ categoryId, categoryName }: { categoryId: string; categoryName: string }) {
+export function GoodsProductCarousel({ categoryId, categoryName, featureId }: { categoryId: string; categoryName: string; featureId?: string }) {
   const [result, setResult] = useState<ProductResponse | null>(null);
+  const [failedImages, setFailedImages] = useState<ReadonlySet<string>>(() => new Set());
   const listRef = useRef<HTMLUListElement>(null);
+  const scrollKey = `goods-carousel:${categoryId}:${featureId ?? "all"}`;
   const [position, setPosition] = useState({ first: 1, atStart: true, atEnd: true, scrollable: false });
   const updatePosition = useCallback(() => {
     const list = listRef.current;
@@ -31,13 +34,19 @@ export function GoodsProductCarousel({ categoryId, categoryName }: { categoryId:
 
   useEffect(() => {
     if (result?.status !== "ready") return;
-    const frame = window.requestAnimationFrame(updatePosition);
+    const frame = window.requestAnimationFrame(() => {
+      try {
+        const previous = Number(window.sessionStorage.getItem(scrollKey));
+        if (listRef.current && Number.isFinite(previous) && previous > 0) listRef.current.scrollLeft = previous;
+      } catch { /* Storage can be unavailable in private browsing. */ }
+      updatePosition();
+    });
     window.addEventListener("resize", updatePosition);
     return () => {
       window.cancelAnimationFrame(frame);
       window.removeEventListener("resize", updatePosition);
     };
-  }, [result, updatePosition]);
+  }, [result, scrollKey, updatePosition]);
 
   function moveProducts(direction: -1 | 1) {
     const list = listRef.current;
@@ -48,12 +57,14 @@ export function GoodsProductCarousel({ categoryId, categoryName }: { categoryId:
 
   useEffect(() => {
     const controller = new AbortController();
-    fetch(`/api/goods-products?category=${encodeURIComponent(categoryId)}`, { signal: controller.signal })
+    const params = new URLSearchParams({ category: categoryId });
+    if (featureId) params.set("feature", featureId);
+    fetch(`/api/goods-products?${params}`, { signal: controller.signal })
       .then(async (response) => response.ok ? response.json() as Promise<ProductResponse> : Promise.reject(new Error("Product search failed")))
       .then((data) => setResult(data))
       .catch(() => { if (!controller.signal.aborted) setResult({ status: "unavailable", items: [], checkedAt: null }); });
     return () => controller.abort();
-  }, [categoryId]);
+  }, [categoryId, featureId]);
 
   return (
     <section aria-label={`${categoryName}の実商品写真`} className="mt-4 rounded-2xl border-2 border-emerald-200 bg-emerald-50 p-4 sm:p-5">
@@ -71,7 +82,10 @@ export function GoodsProductCarousel({ categoryId, categoryName }: { categoryId:
               <button type="button" aria-label="次の商品を見る" onClick={() => moveProducts(1)} disabled={position.atEnd} className="flex h-11 w-11 items-center justify-center rounded-full border border-emerald-700 bg-white text-emerald-950 disabled:opacity-35"><ChevronRight aria-hidden="true" className="h-5 w-5" /></button>
             </div> : null}
           </div>
-          <ul ref={listRef} tabIndex={0} onScroll={updatePosition} onKeyDown={(event) => {
+          <ul ref={listRef} tabIndex={0} onScroll={() => {
+            updatePosition();
+            try { window.sessionStorage.setItem(scrollKey, String(listRef.current?.scrollLeft ?? 0)); } catch { /* Optional position memory. */ }
+          }} onKeyDown={(event) => {
             if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
               event.preventDefault();
               moveProducts(event.key === "ArrowLeft" ? -1 : 1);
@@ -80,7 +94,7 @@ export function GoodsProductCarousel({ categoryId, categoryName }: { categoryId:
             {result.items.map((item) => (
               <li key={item.id} className="w-48 shrink-0 snap-start rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
                 <div className="flex h-36 items-center justify-center bg-white">
-                  <Image src={item.imageUrl} alt={`${item.name}の商品写真（楽天市場掲載）`} width={128} height={128} unoptimized className="h-32 w-32 object-contain" />
+                  {failedImages.has(item.id) ? <p role="status" className="px-2 text-center text-xs font-bold leading-5 text-amber-900">写真を読み込めませんでした。販売先で確認してください。</p> : <Image src={item.imageUrl} alt={`${item.name}の商品写真（楽天市場掲載）`} width={128} height={128} unoptimized onError={() => setFailedImages((previous) => new Set(previous).add(item.id))} className="h-32 w-32 object-contain" />}
                 </div>
                 <p className="mt-2 line-clamp-2 min-h-10 text-sm font-bold leading-5 text-slate-950">{item.name}</p>
                 <p className="mt-2 text-sm font-black text-amber-800" aria-label={`購入者評価5点満点中${item.rating}、レビュー${item.reviewCount}件`}>
@@ -95,9 +109,10 @@ export function GoodsProductCarousel({ categoryId, categoryName }: { categoryId:
           <p className="mt-2 text-xs text-slate-600">確認: {result.checkedAt ? new Date(result.checkedAt).toLocaleString("ja-JP") : "未確認"}。最新の仕様・価格・在庫は販売店で確認してください。</p>
         </>
       ) : null}
-      {result?.status === "not_configured" ? <p role="status" className="mt-4 rounded-xl bg-white p-3 text-sm text-slate-700">実商品写真・購入者評価は現在表示できません。下の販売サイトから写真と最新評価をご確認ください。</p> : null}
-      {result?.status === "unavailable" ? <p role="status" className="mt-4 rounded-xl bg-white p-3 text-sm text-slate-700">商品データへ接続できませんでした。写真・評価は未確認です。販売サイトでご確認ください。</p> : null}
+      {result?.status === "not_configured" ? <p role="status" className="mt-4 rounded-xl bg-white p-3 text-sm text-slate-700">商品データの接続準備中です。実商品写真・購入者評価は未確認です。接続後にこの画面で比較できます。</p> : null}
+      {result?.status === "unavailable" ? <p role="status" className="mt-4 rounded-xl bg-white p-3 text-sm text-slate-700">{result.reason === "rate_limited" ? "商品データの取得回数制限に達しました。" : result.reason === "authorization_failed" ? "商品データの認証を確認中です。" : result.reason === "timeout" ? "商品データの応答が間に合いませんでした。" : "商品データへ接続できませんでした。"}写真・評価は未確認です。時間をおいて再度お試しください。</p> : null}
       {result?.status === "no_qualified_items" ? <p role="status" className="mt-4 rounded-xl bg-white p-3 text-sm text-slate-700">このカテゴリでは、写真・評価・レビュー件数の条件を満たす商品が見つかりませんでした。</p> : null}
+      {result?.status === "selection_required" ? <p role="status" className="mt-4 rounded-xl bg-white p-3 text-sm text-slate-700">物質と酸素濃度が分かるまで商品候補を表示しません。SDS・測定結果を確認してください。</p> : null}
       {result?.status === "ready" || result?.status === "no_qualified_items" ? (
         <p className="mt-3 text-xs text-slate-600">
           商品写真・評価の出典: 楽天市場商品検索API。掲載順は広告料ではなくレビュー件数順です。<br />
