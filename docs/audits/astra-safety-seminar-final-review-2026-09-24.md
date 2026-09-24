@@ -41,6 +41,6 @@ Local landing evidence is `../seminar-review-evidence/egov-{1,3,4,28-2,29,30,59,
 
 ## Release decision
 
-**Local UX and implementation: PASS after fixes. Draft remains pending the owner rationale review and the final head's GitHub checks.** CI outcomes must be read at the exact pushed head; earlier successful checks are not a substitute.
+**Local UX and implementation: PASS after fixes.** The project owner subsequently confirmed completion of the owner-side rationale and publication prerequisites; see [owner release attestation](owner-safety-seminar-release-attestation-2026-09-24.md). Release still requires the exact final head's GitHub checks. CI outcomes must be read at the exact pushed head; earlier successful checks are not a substitute.
 
 The unavailable bundled presentation renderer and missing manual e-Gov screenshots are no longer blockers. Remaining human scope is the labor-safety consultant's approval of the static rationale table in the PR. Actual-phone use, projected slide-show testing and production Lighthouse are post-merge verification rather than evidence claimed here. No merge, production deployment or Draft removal was performed.
