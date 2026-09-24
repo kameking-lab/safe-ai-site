@@ -6,6 +6,9 @@ export const NETIS_RELEASE_URL =
 
 export const NETIS_CHECKED_AT = "2026年9月24日確認";
 
+/** カテゴリ写真・製品画像候補の取得/権利確認日（証跡: docs/netis-safety-visual-provenance-2026-09-24.md） */
+export const NETIS_IMAGE_RETRIEVED_AT = "2026-09-24";
+
 /**
  * 製品画像の掲載状態。
  * - verified: 製品・NETIS番号の対応、取得元URL、利用根拠、取得日を記録済みの実写画像のみ。
@@ -38,12 +41,18 @@ export const NETIS_SAFETY_CATEGORIES = [
     id: "machine-collision",
     label: "重機接触",
     title: "重機接触を減らす",
-    image: "/safety-images/library/previews/collision-hazard.webp",
-    imageAlt: "重機との接触危険を示す安全イラスト",
-    imageLedgerId: "S040",
-    imageSource:
-      "安全AIポータル自作（OpenAI image generation、原本 collision-hazard.png）",
-    imageRights: "portal-owned-commercial-editable",
+    image: "/netis-safety/categories/machine-collision.webp",
+    imageAlt:
+      "解体現場で稼働する油圧ショベル2台と、その手前に立つ安全ベスト姿の作業員（東京、実写）",
+    imageCredit: {
+      title: "Polka Dot Machinery (14699068438).jpg",
+      sourceUrl:
+        "https://commons.wikimedia.org/wiki/File:Polka_Dot_Machinery_(14699068438).jpg",
+      author: "George Alexander Ishida Newman",
+      license: "CC BY 2.0",
+      licenseUrl: "https://creativecommons.org/licenses/by/2.0/",
+      retrievedAt: NETIS_IMAGE_RETRIEVED_AT,
+    },
     searchTerms: "重機 接触 人検知 接近警報",
     description:
       "カメラ、AI画像認識、ICタグ、センサーで接近を検知し、運転者や作業員へ知らせる技術。",
@@ -53,12 +62,18 @@ export const NETIS_SAFETY_CATEGORIES = [
     id: "restricted-zone",
     label: "立入禁止",
     title: "立入禁止区域を守る",
-    image: "/safety-images/library/previews/equipment-swing-zone.webp",
-    imageAlt: "重機の旋回範囲への立入禁止を示す安全イラスト",
-    imageLedgerId: "S042",
-    imageSource:
-      "安全AIポータル自作（OpenAI image generation、原本 equipment-swing-zone.png）",
-    imageRights: "portal-owned-commercial-editable",
+    image: "/netis-safety/categories/restricted-zone.webp",
+    imageAlt:
+      "「安全第一」と書かれた工事用バリケードとカラーコーン・コーンバーで区画された歩道（滋賀県草津市、実写）",
+    imageCredit: {
+      title: "Anzen-daiichi fence, Kusatsu, Shiga.jpg",
+      sourceUrl:
+        "https://commons.wikimedia.org/wiki/File:Anzen-daiichi_fence,_Kusatsu,_Shiga.jpg",
+      author: "運動会プロテインパワー",
+      license: "CC BY-SA 4.0",
+      licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/",
+      retrievedAt: NETIS_IMAGE_RETRIEVED_AT,
+    },
     searchTerms: "立入 検知 警報 区画",
     description:
       "侵入検知や無線通知で、旋回範囲・掘削部など危険区域への立入りを知らせる技術。",
@@ -68,12 +83,18 @@ export const NETIS_SAFETY_CATEGORIES = [
     id: "fall-prevention",
     label: "墜落・転落",
     title: "墜落・転落を防ぐ",
-    image: "/safety-images/library/previews/fall-hazard.webp",
-    imageAlt: "高所からの墜落危険を示す安全イラスト",
-    imageLedgerId: "S031",
-    imageSource:
-      "安全AIポータル自作（OpenAI image generation、原本 fall-hazard.png）",
-    imageRights: "portal-owned-commercial-editable",
+    image: "/netis-safety/categories/fall-prevention.webp",
+    imageAlt:
+      "建設中の建物の開口端で、ハーネスを親綱に接続して脚立上で作業する作業員（米国、実写）",
+    imageCredit: {
+      title: "On Edge (8744516460).jpg",
+      sourceUrl:
+        "https://commons.wikimedia.org/wiki/File:On_Edge_(8744516460).jpg",
+      author: "National Institute for Occupational Safety and Health (NIOSH)",
+      license: "パブリックドメイン（米国連邦政府機関の著作物）",
+      licenseUrl: "",
+      retrievedAt: NETIS_IMAGE_RETRIEVED_AT,
+    },
     searchTerms: "墜落 転落 高所 足場 安全",
     description:
       "高所作業の状態把握、開口部対策、足場点検、フルハーネス使用確認を支援する技術。",
@@ -83,12 +104,18 @@ export const NETIS_SAFETY_CATEGORIES = [
     id: "heat-environment",
     label: "暑熱・作業環境",
     title: "暑熱・作業環境を見える化",
-    image: "/safety-images/library/previews/wbgt-display.webp",
-    imageAlt: "WBGT値による暑熱環境の確認を示す安全イラスト",
-    imageLedgerId: "S092",
-    imageSource:
-      "安全AIポータル自作（OpenAI image generation、原本 wbgt-display.png）",
-    imageRights: "portal-owned-commercial-editable",
+    image: "/netis-safety/categories/heat-environment.webp",
+    imageAlt:
+      "屋外の三脚に設置された黒球付きのWBGT（暑さ指数）測定器（実写）",
+    imageCredit: {
+      title: "Bioenvironmental engineering team defends against the heatwave with exact measurements (9775034).jpg",
+      sourceUrl:
+        "https://commons.wikimedia.org/wiki/File:Bioenvironmental_engineering_team_defends_against_the_heatwave_with_exact_measurements_(9775034).jpg",
+      author: "U.S. Air Force photo by Senior Airman Darius Frazier",
+      license: "パブリックドメイン（米国連邦政府機関の著作物）",
+      licenseUrl: "",
+      retrievedAt: NETIS_IMAGE_RETRIEVED_AT,
+    },
     searchTerms: "暑熱 WBGT 作業環境 遠隔監視",
     description:
       "WBGT、温湿度、作業者状態を計測・共有し、休憩や作業中止の判断を支援する技術。",

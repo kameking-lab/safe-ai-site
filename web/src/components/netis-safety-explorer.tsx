@@ -226,7 +226,7 @@ export function NetisSafetyExplorer() {
                   fill
                   loading="eager"
                   sizes="(max-width: 1024px) 46vw, 280px"
-                  className={`transition duration-300 group-hover:scale-[1.03] ${category.id === "heat-environment" ? "object-cover object-top" : "object-contain"}`}
+                  className="object-cover transition duration-300 group-hover:scale-[1.03]"
                 />
               </span>
               <span className="flex min-h-16 items-center justify-between gap-2 px-3 py-2.5 sm:px-4">
@@ -247,19 +247,41 @@ export function NetisSafetyExplorer() {
         })}
       </div>
       <p className="mt-2 text-xs text-slate-600 dark:text-slate-300">
-        カテゴリ画像は危険の図解です。製品写真ではありません。
+        カテゴリ写真は危険場面の代表例（実写）です。NETIS掲載製品の写真ではありません。
       </p>
       <p className="mt-2 text-sm leading-6 text-slate-700 dark:text-slate-200">
         当サイトで出典を確認した{FEATURED_NETIS_TECHNOLOGIES.length}件を掲載しています。NETIS全登録技術の一覧ではありません。
       </p>
       <details className="mt-1 text-xs text-slate-600 dark:text-slate-300">
         <summary className="flex min-h-11 cursor-pointer items-center font-bold underline underline-offset-4">
-          カテゴリ画像の出典・権利を確認
+          写真の出典・ライセンスを確認
         </summary>
-        <ul className="space-y-1.5 pb-2">
+        <ul className="space-y-1.5 pb-2 leading-5">
           {NETIS_SAFETY_CATEGORIES.map((category) => (
-            <li key={category.id}>
-              <span className="font-black">{category.label}</span>：{category.imageSource}／権利記録 {category.imageRights}（生成台帳 {category.imageLedgerId}）
+            <li key={category.id} className="break-words">
+              <span className="font-black">{category.label}</span>：
+              <a
+                href={category.imageCredit.sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-h-11 min-w-11 items-center underline underline-offset-2"
+              >
+                {category.imageCredit.title}
+              </a>
+              ／{category.imageCredit.author}／
+              {category.imageCredit.licenseUrl ? (
+                <a
+                  href={category.imageCredit.licenseUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex min-h-11 min-w-11 items-center underline underline-offset-2"
+                >
+                  {category.imageCredit.license}
+                </a>
+              ) : (
+                category.imageCredit.license
+              )}
+              ／Wikimedia Commonsより{category.imageCredit.retrievedAt}取得、縮小・WebP変換
             </li>
           ))}
         </ul>
@@ -379,7 +401,9 @@ export function NetisSafetyExplorer() {
                     tabIndex={-1}
                     aria-hidden="true"
                     onClick={() => rememberReturnPosition(technology.registrationNumber)}
-                    className="group relative block h-40 overflow-hidden border-b border-slate-200 bg-slate-100 sm:h-48 dark:border-slate-800 dark:bg-slate-800"
+                    className={`group relative block overflow-hidden border-b border-slate-200 bg-slate-100 dark:border-slate-800 dark:bg-slate-800 ${
+                      technology.productImage.status === "verified" ? "h-40 sm:h-48" : "h-28 sm:h-32"
+                    }`}
                   >
                     {technology.productImage.status === "verified" ? (
                       <Image
@@ -434,11 +458,11 @@ export function NetisSafetyExplorer() {
                     <p className="mt-1 text-sm leading-6 text-slate-700 dark:text-slate-200">
                       {technology.summary}
                     </p>
-                    <p className="mt-2 text-[11px] font-semibold leading-5 text-slate-500 dark:text-slate-400">
-                      {technology.productImage.status === "verified"
-                        ? `製品画像：${technology.productImage.credit}（${technology.productImage.retrievedAt}取得）`
-                        : "製品画像：未掲載（利用許諾の確認待ち）"}
-                    </p>
+                    {technology.productImage.status === "verified" ? (
+                      <p className="mt-2 text-[11px] font-semibold leading-5 text-slate-500 dark:text-slate-400">
+                        製品画像：{technology.productImage.credit}（{technology.productImage.retrievedAt}取得）
+                      </p>
+                    ) : null}
                   </div>
 
                   <details className="border-t border-slate-200 px-4 py-2 open:pb-4 dark:border-slate-800 sm:px-5">

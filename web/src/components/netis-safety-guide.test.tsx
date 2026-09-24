@@ -1,4 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
+import { existsSync } from "node:fs";
+import path from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   FEATURED_NETIS_TECHNOLOGIES,
@@ -50,6 +52,22 @@ describe("NetisSafetyGuide", () => {
           (technology.categoryIds as readonly string[]).includes(category.id),
         ).length,
       ).toBeGreaterThanOrEqual(2);
+    }
+  });
+
+  it("4カテゴリの写真はローカル保存済みで、Commonsの出典・作者・ライセンス・取得日を持つ", () => {
+    for (const category of NETIS_SAFETY_CATEGORIES) {
+      expect(category.image).toMatch(/^\/netis-safety\/categories\/[a-z-]+\.webp$/);
+      expect(existsSync(path.join(process.cwd(), "public", category.image))).toBe(true);
+      expect(category.imageCredit.sourceUrl).toMatch(
+        /^https:\/\/commons\.wikimedia\.org\/wiki\/File:/,
+      );
+      expect(category.imageCredit.author.length).toBeGreaterThan(0);
+      expect(category.imageCredit.license).toMatch(/CC BY|パブリックドメイン/);
+      if (category.imageCredit.license.startsWith("CC")) {
+        expect(category.imageCredit.licenseUrl).toMatch(/^https:\/\/creativecommons\.org\//);
+      }
+      expect(category.imageCredit.retrievedAt).toBe("2026-09-24");
     }
   });
 
@@ -145,7 +163,7 @@ describe("NetisSafetyGuide", () => {
         // 権利未確認の製品は汎用写真・AI画像で埋めず、未掲載と明示する
         expect(article.querySelector("img")).toBeNull();
         expect(article.textContent).toContain("製品画像は未掲載");
-        expect(article.textContent).toContain("製品画像：未掲載（利用許諾の確認待ち）");
+        expect(article.textContent).toContain("利用許諾を確認中");
       }
     }
     expect(container.querySelectorAll("article")).toHaveLength(10);
