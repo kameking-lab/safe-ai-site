@@ -196,12 +196,12 @@ describe("NetisSafetyGuide", () => {
     window.history.replaceState(null, "", "/");
   });
 
-  it("効率化タブで第1・第2陣17件を探せ、安全10件と混同しない", () => {
+  it("効率化タブで第1・第2陣18件を探せ、安全10件と混同しない", () => {
     navigation.query = "purpose=efficiency";
     const { container } = render(<NetisSafetyExplorer />);
     expect(screen.getByRole("button", { name: "作業を効率化" }).getAttribute("aria-pressed")).toBe("true");
-    expect(screen.getByText("作業効率化候補：17件")).toBeDefined();
-    expect(container.querySelectorAll("article")).toHaveLength(17);
+    expect(screen.getByText("作業効率化候補：18件")).toBeDefined();
+    expect(container.querySelectorAll("article")).toHaveLength(18);
     expect(screen.queryByText(/ヒヤリハンター/)).toBeNull();
     for (const category of NETIS_EFFICIENCY_CATEGORIES) {
       expect(screen.getByRole("button", { name: category.label })).toBeDefined();
@@ -239,11 +239,12 @@ describe("NetisSafetyGuide", () => {
     }
   });
 
-  it("第2陣を含む30件の基番号は重複せず、資料時点を明示する", () => {
+  it("第2陣を含む31件の基番号は重複せず、資料時点を明示する", () => {
     const all = [...FEATURED_NETIS_TECHNOLOGIES, ...NETIS_EFFICIENCY_TECHNOLOGIES, ...NETIS_WAVE2_TECHNOLOGIES];
-    expect(all).toHaveLength(30);
-    expect(new Set(all.map((item) => item.registrationNumber)).size).toBe(30);
-    expect(NETIS_WAVE2_TECHNOLOGIES).toHaveLength(14);
+    expect(all).toHaveLength(31);
+    expect(new Set(all.map((item) => item.registrationNumber)).size).toBe(31);
+    expect(NETIS_WAVE2_TECHNOLOGIES).toHaveLength(15);
+    expect(NETIS_WAVE2_TECHNOLOGIES.filter((item) => item.categoryIds.includes("wave2-roadwork"))).toHaveLength(3);
     for (const item of NETIS_WAVE2_TECHNOLOGIES) {
       expect(item.sourceBasis).toContain("2026年4月公式一覧掲載");
       expect(item.sourceBasis).toContain("9月現行NETIS個別状態未確認");
