@@ -248,7 +248,9 @@ describe("墜落・転落防止研修の共通正本", () => {
       for (const ref of slide?.articleRefs ?? []) {
         expect(sourceById.has(ref.sourceId), slideId).toBe(true);
         const lawId = ref.lawShort === "安衛法" ? "347AC0000000057" : "347M50002000032";
+        expect(ref.sourceId, slideId).toBe(ref.lawShort === "安衛法" ? "LAW-EGOV-001" : "LAW-EGOV-003");
         expect(ref.egovUrl, slideId).toMatch(new RegExp(`^https://laws\\.e-gov\\.go\\.jp/law/${lawId}#Mp-`));
+        expect(ref.egovUrl, slideId).toMatch(new RegExp(`-At_${ref.naviPath?.split("/").at(-1)}$`));
       }
     }
   });
