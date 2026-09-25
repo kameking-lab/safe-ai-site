@@ -371,7 +371,7 @@ describe("NetisSafetyGuide", () => {
     expect(container.textContent).toContain("クラウド計測システム 『クラウド16』");
     expect(container.textContent).toContain("調査した技術の例");
     expect(container.querySelector("article a[id^='netis-tech-']")?.getAttribute("href")).toBe("https://www.netis.mlit.go.jp/netis/pubsearch/details?regNo=KT-180043");
-    expect((screen.getByRole("textbox", { name: "技術名や番号で検索" }) as HTMLInputElement).value).toBe("KT-180043-VE");
+    expect((screen.getByRole("searchbox", { name: /名称・登録番号・用途/ }) as HTMLInputElement).value).toBe("KT-180043-VE");
     unmount();
 
     navigation.query = "purpose=quality&q=防水 コネクタ";
