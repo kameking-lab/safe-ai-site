@@ -81,23 +81,25 @@ describe("SafetySeminarPlayer", () => {
     });
   });
 
-  function renderPlayer() {
+  function renderPlayer(audioEnabled = true) {
     return render(
       <SafetySeminarPlayer
         slides={training.slides}
         claims={claims}
         sources={sources}
+        audioEnabled={audioEnabled}
       />,
     );
   }
 
-  function renderStagePlayer() {
+  function renderStagePlayer(audioEnabled = true) {
     return render(
       <SafetySeminarPlayer
         slides={oshTraining.slides}
         claims={oshClaims}
         sources={oshSources}
         audioBasePath="/training/safety-seminars/safety-management-basics-osh-law/audio"
+        audioEnabled={audioEnabled}
       />,
     );
   }
@@ -111,6 +113,23 @@ describe("SafetySeminarPlayer", () => {
     fireEvent.click(screen.getByRole("button", { name: "一時停止" }));
     expect(pause).toHaveBeenCalled();
     expect(screen.queryByRole("button", { name: "停止" })).toBeNull();
+  });
+
+  it.each(["fall", "management"])("%sの無音モードは音声DOMと操作・処理を作らない", (course) => {
+    const { container, unmount } = course === "fall" ? renderPlayer(false) : renderStagePlayer(false);
+    expect(container.querySelector("audio")).toBeNull();
+    expect(screen.queryByRole("button", { name: "再生" })).toBeNull();
+    expect(screen.queryByRole("status")).toBeNull();
+    expect(screen.getByTestId("seminar-controls").querySelectorAll("button")).toHaveLength(3);
+    fireEvent.click(screen.getByRole("button", { name: "次のスライド" }));
+    expect(container.querySelector('[aria-live="polite"]')?.textContent).toContain("2枚目／全");
+    fireEvent.click(screen.getByRole("button", { name: "スライド一覧" }));
+    fireEvent.click(screen.getByRole("button", { name: "詳しく" }));
+    fireEvent.keyDown(window, { key: " " });
+    unmount();
+    expect(play).not.toHaveBeenCalled();
+    expect(speak).not.toHaveBeenCalled();
+    expect(cancel).not.toHaveBeenCalled();
   });
 
   it("前へ・次へ・一覧で移動し、進捗を更新する", () => {

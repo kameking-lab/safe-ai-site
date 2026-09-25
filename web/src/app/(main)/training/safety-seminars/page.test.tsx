@@ -76,13 +76,13 @@ describe("/training/safety-seminars", () => {
     ).toHaveLength(18);
     expect(SAFETY_SEMINAR_CORE_20).toHaveLength(20);
     expect(COMING_SOON_SAFETY_CORE_20).toHaveLength(18);
-    expect(screen.getAllByText("音声あり")).toHaveLength(2);
+    expect(screen.queryByText("音声あり")).toBeNull();
     expect(screen.getAllByText("PowerPoint・PDF")).toHaveLength(2);
     expect(screen.getByText("12枚")).toBeDefined();
     expect(screen.getByText("20枚")).toBeDefined();
     expect(screen.getByText("おすすめ")).toBeDefined();
     expect(screen.queryByText("FIRST RELEASE")).toBeNull();
-    expect(screen.getAllByText("AUDIO & SLIDES")).toHaveLength(2);
+    expect(screen.getAllByText("SLIDES & QUIZ")).toHaveLength(2);
     expect(
       container
         .querySelector('[data-seminar-status="published"]')
