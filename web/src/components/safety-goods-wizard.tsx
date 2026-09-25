@@ -62,7 +62,7 @@ type ConditionProfile = {
 function photoCategoryId(categoryId: string, taskId: string): string {
   if (categoryId === "respiratory") return taskId === "confined" ? "gas-detectors" : "respiratory";
   if (categoryId === "fall") return taskId === "scaffold" ? "fall-protection" : "fall-accessories";
-  if (categoryId === "chemical") return taskId === "splash" ? "eye-face-protection" : "chemical-gloves";
+  if (categoryId === "chemical") return taskId === "splash" ? "eye-face-protection" : taskId === "mix" ? "chemical-clothing" : "chemical-gloves";
   if (categoryId === "machine") return taskId === "moving" ? "machine-lockout" : "signs-barriers";
   if (categoryId === "noise") return taskId === "loud" ? "hearing" : "eye-face-protection";
   return "safety-footwear";
@@ -72,6 +72,8 @@ function photoFeatureId(categoryId: string, taskId: string): string | undefined 
   if (categoryId === "respiratory") return taskId === "dust" ? "dust" : taskId === "vapor" ? "gas" : undefined;
   if (categoryId === "fall" && taskId === "scaffold") return "harness";
   if (categoryId === "chemical" && taskId === "splash") return "splash";
+  if (categoryId === "chemical" && taskId === "contact") return "cleaning";
+  if (categoryId === "chemical" && taskId === "mix") return "splash";
   if (categoryId === "noise" && taskId === "welding") return "light";
   if (categoryId === "noise" && taskId === "grinding") return "impact";
   return undefined;
@@ -150,6 +152,17 @@ const CONDITIONS: Record<string, readonly Option[]> = {
 
 function buildRecommendation(selection: Selection): Recommendation {
   const { category, task, condition } = selection;
+  if (category.id === "chemical" && condition.id === "no-sds") {
+    return {
+      title: "成分が分かるまで、保護具の購入候補を保留します",
+      summary: "対象物質・濃度・接触時間が不明なままでは、手袋や防護服の耐透過性を照合できません。供給者からSDSを入手し、作業と飛散範囲を確認してください。",
+      officialHref: "https://www.mhlw.go.jp/content/11300000/001670143.pdf",
+      officialLabel: "厚生労働省｜皮膚障害等防止用保護具の選定マニュアル",
+      checks: ["供給者からSDSと物質名・濃度を入手する", "接触時間・飛散範囲・混合の有無を確認する", "保護具の素材と耐透過データを責任者と照合する"],
+      urgent: true,
+      withholdPurchase: true,
+    };
+  }
   if (category.id === "respiratory") {
     const limitedVentilation = condition.id === "limited";
     if (task.id === "unknown") {

@@ -89,6 +89,18 @@ describe("SafetyGoodsWizard", () => {
     expect(screen.getByText(/SDS・酸素濃度・作業環境を確認/)).toBeDefined();
   });
 
+  it.each(["薬液の飛散・注入", "洗浄・拭取り・配管", "混合・調製"])("化学物質の成分が不明な場合（%s）は通販候補を出さない", (task) => {
+    render(<SafetyGoodsWizard />);
+    fireEvent.click(screen.getByRole("button", { name: /薬液・化学物質/ }));
+    fireEvent.click(screen.getByRole("button", { name: new RegExp(task) }));
+    fireEvent.click(screen.getByRole("button", { name: /SDS・成分が未確認/ }));
+
+    expect(screen.getByRole("heading", { name: "成分が分かるまで、保護具の購入候補を保留します" })).toBeDefined();
+    expect(screen.queryByRole("link", { name: /Amazonで候補を見る/ })).toBeNull();
+    expect(screen.queryByRole("link", { name: /楽天で候補を見る/ })).toBeNull();
+    expect(screen.queryByRole("heading", { name: /実商品写真と高評価候補/ })).toBeNull();
+  });
+
   it.each([
     ["呼吸用保護具", "塗装・洗浄・接着", "換気が効いている", "6001"],
     ["墜落・転落対策", "足場・屋根・高所", "取付設備がある", "1114080N"],

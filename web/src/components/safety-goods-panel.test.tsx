@@ -32,4 +32,27 @@ describe("SafetyGoodsPanel", () => {
     expect(await screen.findByText(/商品データの接続準備中です/u)).toBeDefined();
     expect(screen.queryByText(/★4\.\d \(/u)).toBeNull();
   });
+
+  it("身体用保護具を先に示し、補助用品と別名検索でも目的のカテゴリへ進める", () => {
+    render(<SafetyGoodsPanel />);
+    expect(screen.getByRole("button", { name: "保護帽" })).toBeDefined();
+    expect(screen.getByRole("button", { name: "化学防護服" })).toBeDefined();
+    expect(screen.queryByRole("button", { name: "ガス検知器・酸素濃度計" })).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: /現場の補助用品/u }));
+    expect(screen.getByRole("button", { name: "ガス検知器・酸素濃度計" })).toBeDefined();
+    expect(screen.queryByRole("button", { name: "保護帽" })).toBeNull();
+
+    fireEvent.change(screen.getByRole("searchbox", { name: "用品名・作業から探す" }), { target: { value: "防塵" } });
+    expect(screen.getByRole("button", { name: "呼吸用保護具" })).toBeDefined();
+    expect(screen.queryByRole("button", { name: "ガス検知器・酸素濃度計" })).toBeNull();
+  });
+
+  it("補助用品の直リンクから一覧に戻っても元の分類を表示する", () => {
+    window.history.replaceState(null, "", "/goods?category=gas-detectors");
+    render(<SafetyGoodsPanel />);
+    fireEvent.click(screen.getByRole("button", { name: /用品一覧に戻る/ }));
+    expect(screen.getByRole("button", { name: "ガス検知器・酸素濃度計" })).toBeDefined();
+    expect(screen.getByRole("button", { name: /現場の補助用品/ }).getAttribute("aria-pressed")).toBe("true");
+  });
 });

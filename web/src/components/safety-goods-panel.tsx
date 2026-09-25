@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { ArrowLeft, ExternalLink, Search } from "lucide-react";
 import {
   generateAmazonHighRatedSearchUrl,
@@ -74,11 +74,18 @@ function currentFeature() {
 }
 
 export function SafetyGoodsPanel() {
+  const [categoryGroup, setCategoryGroup] = useState<"ppe" | "support" | "all">("ppe");
+  const [categoryQuery, setCategoryQuery] = useState("");
   const selectedCategoryId = useSyncExternalStore(subscribeCategory, currentCategory, () => null);
   const selectedFeatureId = useSyncExternalStore(subscribeCategory, currentFeature, () => null);
   const selectedCategory = PUBLIC_SAFETY_GOODS_CATEGORIES.find((category) => category.id === selectedCategoryId);
   const featureOptions = selectedCategory ? GOODS_PRODUCT_FEATURES[selectedCategory.id] : undefined;
   const selectedFeature = selectedCategory ? getGoodsProductFeature(selectedCategory.id, selectedFeatureId) : null;
+  const normalizedQuery = categoryQuery.normalize("NFKC").trim().toLowerCase();
+  const visibleCategories = PUBLIC_SAFETY_GOODS_CATEGORIES.filter((category) => {
+    if (categoryGroup !== "all" && category.group !== categoryGroup) return false;
+    return !normalizedQuery || `${category.name} ${category.keywords ?? ""} ${category.searchQuery}`.normalize("NFKC").toLowerCase().includes(normalizedQuery);
+  });
   const lastCategory = useRef<string | null>(null);
 
   useEffect(() => {
@@ -86,7 +93,7 @@ export function SafetyGoodsPanel() {
     if (selectedCategoryId) lastCategory.current = selectedCategoryId;
     if (!targetId) return;
     const frame = window.requestAnimationFrame(() => {
-      const target = document.getElementById(targetId);
+      const target = document.getElementById(targetId) ?? document.getElementById("goods-category-search");
       target?.focus({ preventScroll: true });
       target?.scrollIntoView({ block: "start", behavior: "instant" });
     });
@@ -117,6 +124,10 @@ export function SafetyGoodsPanel() {
   }
 
   function returnToCategories() {
+    if (selectedCategory) {
+      setCategoryGroup(selectedCategory.group);
+      setCategoryQuery("");
+    }
     const url = new URL(window.location.href);
     url.searchParams.delete("category");
     url.searchParams.delete("feature");
@@ -135,15 +146,6 @@ export function SafetyGoodsPanel() {
           「何から見ればいい？」を、危険・作業・現場条件の順に整理。
           そのまま購入候補と公式資料へ進めます。
         </p>
-        <FeatureMascotCompanion
-          variant="ppe-check"
-          eyebrow="装備点検チワワ"
-          title="作業に合う道具を、いっしょに絞ろう。"
-          message="まずは危険と作業を選べばOK。次に見るポイントまで案内します。"
-          tone="cream"
-          compact
-          className="mt-4 max-w-3xl"
-        />
       </header>
 
       <section aria-labelledby="goods-categories-title">
@@ -153,8 +155,31 @@ export function SafetyGoodsPanel() {
         <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-700">
           用品を選んで、必要な特徴と商品候補を確認します。カテゴリの画像はイラストです。
         </p>
+        <div className={selectedCategory ? "hidden" : "mt-4 space-y-3"}>
+          <label htmlFor="goods-category-search" className="block text-sm font-bold text-slate-800">用品名・作業から探す</label>
+          <input
+            id="goods-category-search"
+            type="search"
+            value={categoryQuery}
+            onChange={(event) => { setCategoryQuery(event.target.value); if (event.target.value.trim()) setCategoryGroup("all"); }}
+            placeholder="例：ヘルメット、防毒、研削"
+            className="min-h-12 w-full max-w-xl rounded-xl border border-slate-400 bg-white px-4 text-base text-slate-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700"
+          />
+          <div className="flex flex-wrap gap-2" role="group" aria-label="用品の分類">
+            {([
+              ["ppe", "身につける保護具", PUBLIC_SAFETY_GOODS_CATEGORIES.filter((category) => category.group === "ppe").length],
+              ["support", "現場の補助用品", PUBLIC_SAFETY_GOODS_CATEGORIES.filter((category) => category.group === "support").length],
+              ["all", "すべて", PUBLIC_SAFETY_GOODS_CATEGORIES.length],
+            ] as const).map(([id, label, count]) => (
+              <button key={id} type="button" aria-pressed={categoryGroup === id} onClick={() => setCategoryGroup(id)} className={`min-h-11 rounded-full border px-4 text-sm font-bold ${categoryGroup === id ? "border-emerald-800 bg-emerald-900 text-white" : "border-slate-300 bg-white text-slate-800 hover:border-emerald-700"}`}>
+                {label} {count}
+              </button>
+            ))}
+          </div>
+          <p className="text-sm font-semibold text-slate-700">{visibleCategories.length}カテゴリを表示</p>
+        </div>
         <ul hidden={Boolean(selectedCategory)} className={selectedCategory ? "hidden" : "mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5"} aria-label="安全用品カテゴリの画像一覧">
-          {PUBLIC_SAFETY_GOODS_CATEGORIES.map((category) => (
+          {visibleCategories.map((category) => (
             <li key={category.id} id={`goods-${category.id}`}>
               <button id={`goods-choice-${category.id}`} type="button" onClick={() => selectCategory(category.id)} className="group flex h-full w-full scroll-mt-24 flex-col items-center rounded-2xl border border-slate-300 bg-white p-3 text-center shadow-sm hover:border-emerald-600 hover:bg-emerald-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700">
                 <span className="relative block h-24 w-full sm:h-28">
@@ -165,6 +190,7 @@ export function SafetyGoodsPanel() {
             </li>
           ))}
         </ul>
+        {!selectedCategory && visibleCategories.length === 0 ? <p className="mt-3 text-sm text-slate-700">該当する用品がありません。別の用品名や危険で探してください。</p> : null}
         {selectedCategory ? (
           <div id="goods-product-panel" role="region" tabIndex={-1} aria-label={`${selectedCategory.name}の商品候補`} className="mt-4 scroll-mt-24 rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700">
             <button type="button" onClick={returnToCategories} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 text-sm font-bold text-slate-800 hover:bg-slate-50">
@@ -180,9 +206,9 @@ export function SafetyGoodsPanel() {
                 </div>
               </div>
             ) : null}
-            {selectedFeature ? <div id="goods-feature-results" className="mt-4 scroll-mt-24 rounded-xl border border-emerald-200 bg-emerald-50 p-4"><p className="text-sm font-black text-emerald-950">選択中: {selectedFeature.label}</p><p className="mt-1 text-sm text-slate-700">購入前の確認: {selectedFeature.check}</p><button type="button" onClick={returnToFeatures} className="mt-2 min-h-11 text-sm font-bold text-emerald-800 underline">特徴を選び直す</button></div> : null}
+            {selectedFeature ? <div id="goods-feature-results" className="mt-4 scroll-mt-24 rounded-xl border border-emerald-200 bg-emerald-50 p-4"><p className="text-sm font-black text-emerald-950">選択中: {selectedFeature.label}</p><p className="mt-1 text-sm text-slate-700">購入前の確認: {selectedFeature.check}</p>{selectedFeature.officialSource ? <a href={selectedFeature.officialSource.url} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex min-h-11 items-center text-sm font-bold text-emerald-800 underline">{selectedFeature.officialSource.label}で確認<span className="sr-only">（新しいタブで開く）</span></a> : null}<button type="button" onClick={returnToFeatures} className="mt-2 min-h-11 text-sm font-bold text-emerald-800 underline">特徴を選び直す</button></div> : null}
             {(!featureOptions || selectedFeature) && selectedFeature?.searchQuery !== null ? <GoodsProductCarousel key={`${selectedCategory.id}:${selectedFeatureId ?? "all"}`} categoryId={selectedCategory.id} categoryName={selectedCategory.name} featureId={selectedFeatureId ?? undefined} /> : null}
-            {(!featureOptions || selectedFeature) && selectedFeature?.searchQuery === null ? <p role="status" className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm font-bold text-amber-950">有害物質と酸素濃度が不明な状態では製品を絞れません。SDS・測定結果を確認してから特徴を選び直してください。</p> : null}
+            {(!featureOptions || selectedFeature) && selectedFeature?.searchQuery === null ? <p role="status" className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm font-bold text-amber-950">対象の物質や作業条件が分かるまで、商品候補は表示しません。SDSなどを確認してから選び直してください。</p> : null}
             {(!featureOptions || selectedFeature?.searchQuery) ? <div className="mt-4 rounded-xl border border-slate-200 bg-white p-4">
               <p className="text-sm font-bold text-slate-800">販売サイトでほかの候補も探す</p>
               <div className="mt-3 flex flex-wrap gap-2">
@@ -200,6 +226,16 @@ export function SafetyGoodsPanel() {
           検索結果は推奨や適合証明ではありません。APIで取得できた評価のみサイト内に表示します。最新の評価・価格・在庫と安全規格の適合は、販売ページと一次資料で確認してください。商品データ: <a href={PUBLIC_GOODS_RATING_DISCLOSURE.sourceUrl} target="_blank" rel="noopener noreferrer" className="underline">{PUBLIC_GOODS_RATING_DISCLOSURE.sourceLabel}</a>
         </p>
       </section>
+
+      <FeatureMascotCompanion
+        variant="ppe-check"
+        eyebrow="装備点検チワワ"
+        title="作業に合う道具を、いっしょに絞ろう。"
+        message="カテゴリと用途を選んだ後は、製品ごとの規格と装着性まで確認しよう。"
+        tone="cream"
+        compact
+        className="max-w-3xl"
+      />
 
       <SafetyGoodsWizard />
 

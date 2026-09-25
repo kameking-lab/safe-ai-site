@@ -1,6 +1,8 @@
 export type PublicSafetyGoodsCategory = {
   id: string;
   name: string;
+  group: "ppe" | "support";
+  keywords?: string;
   searchQuery: string;
   icon: string;
   image: string;
@@ -24,6 +26,8 @@ export const PUBLIC_SAFETY_GOODS_CATEGORIES: readonly PublicSafetyGoodsCategory[
     {
       id: "fall-protection",
       name: "墜落制止用器具",
+      group: "ppe",
+      keywords: "フルハーネス 安全帯 高所",
       searchQuery: "墜落制止用器具 フルハーネス",
       icon: "🪢",
       image: "/safety-images/library/previews/full-body-harness-required.webp",
@@ -32,6 +36,7 @@ export const PUBLIC_SAFETY_GOODS_CATEGORIES: readonly PublicSafetyGoodsCategory[
     {
       id: "fall-accessories",
       name: "親綱・安全ブロック・取付設備",
+      group: "support",
       searchQuery: "親綱 安全ブロック 墜落防止",
       icon: "🧗",
       image: "/safety-images/library/previews/fall-restraint-required.webp",
@@ -40,6 +45,8 @@ export const PUBLIC_SAFETY_GOODS_CATEGORIES: readonly PublicSafetyGoodsCategory[
     {
       id: "respiratory",
       name: "呼吸用保護具",
+      group: "ppe",
+      keywords: "防じん 防塵マスク 防毒マスク 粉じん ガス 研削 塗装",
       searchQuery: "呼吸用保護具 防じん 防毒",
       icon: "😷",
       image:
@@ -49,6 +56,8 @@ export const PUBLIC_SAFETY_GOODS_CATEGORIES: readonly PublicSafetyGoodsCategory[
     {
       id: "head-protection",
       name: "保護帽",
+      group: "ppe",
+      keywords: "ヘルメット",
       searchQuery: "産業用 保護帽 墜落時保護",
       icon: "⛑️",
       image: "/safety-images/library/previews/helmet-required.webp",
@@ -57,6 +66,8 @@ export const PUBLIC_SAFETY_GOODS_CATEGORIES: readonly PublicSafetyGoodsCategory[
     {
       id: "eye-face-protection",
       name: "目・顔面の保護具",
+      group: "ppe",
+      keywords: "保護メガネ ゴーグル フェイスシールド 研削 切断",
       searchQuery: "保護めがね フェイスシールド 作業用",
       icon: "🥽",
       image: "/safety-images/library/previews/goggles-required.webp",
@@ -65,6 +76,8 @@ export const PUBLIC_SAFETY_GOODS_CATEGORIES: readonly PublicSafetyGoodsCategory[
     {
       id: "hearing",
       name: "聴覚保護具",
+      group: "ppe",
+      keywords: "耳栓 耳せん イヤーマフ 耳当て 騒音",
       searchQuery: "耳栓 イヤーマフ 騒音 作業用",
       icon: "🎧",
       image: "/safety-images/library/previews/earplugs-required.webp",
@@ -72,15 +85,29 @@ export const PUBLIC_SAFETY_GOODS_CATEGORIES: readonly PublicSafetyGoodsCategory[
     },
     {
       id: "chemical-gloves",
-      name: "化学防護手袋・防護服",
-      searchQuery: "化学防護手袋 防護服 耐透過",
+      name: "化学防護手袋",
+      group: "ppe",
+      keywords: "保護手袋 耐薬品 手袋 グローブ",
+      searchQuery: "化学防護手袋 耐透過",
       icon: "🧤",
       image: "/safety-images/library/previews/protective-gloves-required.webp",
       selectionPrompt: "SDSと耐透過・劣化・浸透データ、使用時間を確認",
     },
     {
+      id: "chemical-clothing",
+      name: "化学防護服",
+      group: "ppe",
+      keywords: "防護服 防護衣 エプロン つなぎ",
+      searchQuery: "化学防護服 作業用",
+      icon: "🥼",
+      image: "/safety-images/library/previews/protective-clothing-required.webp",
+      selectionPrompt: "SDSの皮膚ばく露条件と素材の耐透過性、縫い目、脱衣方法を確認",
+    },
+    {
       id: "safety-footwear",
       name: "安全靴・作業靴",
+      group: "ppe",
+      keywords: "長靴 滑り 耐滑 踏抜き 先芯",
       searchQuery: "安全靴 耐滑 踏抜き 作業用",
       icon: "🥾",
       image: "/safety-images/library/previews/safety-shoes-required.webp",
@@ -89,6 +116,7 @@ export const PUBLIC_SAFETY_GOODS_CATEGORIES: readonly PublicSafetyGoodsCategory[
     {
       id: "gas-detectors",
       name: "ガス検知器・酸素濃度計",
+      group: "support",
       searchQuery: "酸素濃度計 ガス検知器 校正",
       icon: "📟",
       image: "/safety-images/library/previews/oxygen-deficiency-hazard.webp",
@@ -97,6 +125,7 @@ export const PUBLIC_SAFETY_GOODS_CATEGORIES: readonly PublicSafetyGoodsCategory[
     {
       id: "environment-meters",
       name: "騒音・照度・温湿度の測定器",
+      group: "support",
       searchQuery: "騒音計 照度計 温湿度計 作業環境",
       icon: "📏",
       image: "/safety-images/library/previews/wbgt-display.webp",
@@ -105,6 +134,7 @@ export const PUBLIC_SAFETY_GOODS_CATEGORIES: readonly PublicSafetyGoodsCategory[
     {
       id: "heat-cold",
       name: "暑熱・寒冷対策用品",
+      group: "support",
       searchQuery: "作業用 WBGT 暑熱 寒冷 対策",
       icon: "🌡️",
       image: "/safety-images/library/previews/heat-illness-prevention.webp",
@@ -113,6 +143,7 @@ export const PUBLIC_SAFETY_GOODS_CATEGORIES: readonly PublicSafetyGoodsCategory[
     {
       id: "machine-lockout",
       name: "ロックアウト・機械停止表示",
+      group: "support",
       searchQuery: "ロックアウト タグアウト 作業用",
       icon: "🔒",
       image: "/safety-images/library/previews/do-not-operate.webp",
@@ -121,6 +152,7 @@ export const PUBLIC_SAFETY_GOODS_CATEGORIES: readonly PublicSafetyGoodsCategory[
     {
       id: "harmful-organisms",
       name: "有害生物対策用品",
+      group: "support",
       searchQuery: "作業用 蜂 虫 動物 対策",
       icon: "🐝",
       image:
@@ -130,6 +162,7 @@ export const PUBLIC_SAFETY_GOODS_CATEGORIES: readonly PublicSafetyGoodsCategory[
     {
       id: "signs-barriers",
       name: "標識・バリケード・区画用品",
+      group: "support",
       searchQuery: "作業用 安全標識 バリケード 区画",
       icon: "🚧",
       image: "/safety-images/library/previews/no-entry.webp",
@@ -138,6 +171,7 @@ export const PUBLIC_SAFETY_GOODS_CATEGORIES: readonly PublicSafetyGoodsCategory[
     {
       id: "first-aid",
       name: "救急用品・AED周辺備品",
+      group: "support",
       searchQuery: "事業場 救急用品 AED 備品",
       icon: "🩹",
       image: "/safety-images/library/previews/first-aid-kit.webp",
