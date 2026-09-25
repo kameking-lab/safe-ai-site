@@ -394,7 +394,7 @@ describe("NetisSafetyGuide", () => {
 
     navigation.query = "purpose=all&q=KT-180043-VE";
     const { container } = render(<NetisSafetyExplorer />);
-    expect(screen.getByText("当サイト掲載：1件")).toBeDefined();
+    expect(screen.getByText("安全・効率化・品質候補：1件")).toBeDefined();
     expect(container.textContent).toContain("クラウド計測システム 『クラウド16』");
   });
 
