@@ -1,0 +1,14 @@
+# Rakuten goods cache rollout
+
+The goods-products route needs `RakutenGoodsCache` and `RakutenApplicationGate` in the existing Neon/Postgres database. If they are absent or unreachable, the route returns `unavailable` and makes no Rakuten request. Deploy the additive migration before the application code.
+
+1. Confirm the production Neon target fingerprint and create and verify an encrypted logical backup using the existing `scripts/audit/operations-growth-encrypted-backup.mjs --create --gap-closure` process. Keep the backup and key in the private `.vercel/backups` directory; do not commit them.
+2. With the confirmed production `DATABASE_URL` set in the deployment shell, run `prisma db execute --schema prisma/schema.prisma --file prisma/operations/rakuten-goods-shared-cache-2026-09-26-up.sql` from `web/`. This file contains only additive `CREATE TABLE IF NOT EXISTS` and `CREATE INDEX IF NOT EXISTS` statements. Do not use `prisma db push` on production.
+3. Verify both relations and their columns in Postgres before deploying the route. Run `prisma validate --schema prisma/schema.prisma` and CI checks. The route requires the tables before it can contact Rakuten.
+4. If rolling back application code, retain the tables during rollback so that older and newer instances can overlap safely. The down script is only for a separate maintenance window after all readers are gone and the backup has been verified.
+
+The cache stores the API response for five minutes, short negative results for five seconds, and authorization failures for one minute. Cold misses prune at most 64 entries whose TTL expired over an hour ago, so previous IDs do not stay in the cache indefinitely. A 429 response sets an application-wide cooldown using `Retry-After` when supplied. The rate gate holds a lease across the complete upstream request and waits at least 1.1 seconds after completion before granting another request for the same application ID. Different-key misses fail quickly while the gate is occupied; there is no unbounded upstream queue. Same-key followers wait at most 8.5 seconds, with a maximum of 32 followers per process.
+
+For 401/403 diagnostics, server logs contain only the HTTP status and an allowlisted `error` code from a bounded response body. The API still returns `authorization_failed`; descriptions, request URLs, and credentials never enter logs or browser responses. An `unknown` code means the upstream value was absent or outside the allowlist, not that credentials were valid.
+
+The [Rakuten API documentation](https://webservice.rakuten.co.jp/documentation/ichiba-item-search) specifies the endpoint and required credentials. The [Rakuten usage-limit FAQ](https://webservice.faq.rakuten.net/hc/ja/articles/900001974383) specifies at most one API request per second per application ID. Cache duration is an application choice within the [official cache rules](https://webservice.faq.rakuten.net/hc/ja/articles/900001974343).
