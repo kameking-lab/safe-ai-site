@@ -336,10 +336,11 @@ export function NetisSafetyExplorer() {
         ))}
       </div>
 
+      <div className="flex flex-col">
       <form
         role="search"
         aria-label="当サイト掲載NETIS技術を検索"
-        className="mt-3 rounded-2xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-900"
+        className="order-2 mt-3 rounded-2xl border border-slate-200 bg-slate-50 p-3 sm:order-1 dark:border-slate-800 dark:bg-slate-900"
         onSubmit={(event) => {
           event.preventDefault();
           updateSearch(searchInput);
@@ -387,7 +388,7 @@ export function NetisSafetyExplorer() {
       </form>
 
       <div
-        className="mt-3 grid grid-cols-2 gap-2.5 sm:gap-4 lg:grid-cols-4"
+        className="order-1 mt-3 grid grid-cols-2 gap-2.5 sm:order-2 sm:gap-4 lg:grid-cols-4"
         role="group"
         aria-label={purpose === "safety" ? "安全課題カテゴリ" : "技術カテゴリ"}
       >
@@ -445,6 +446,7 @@ export function NetisSafetyExplorer() {
             </button>
           );
         })}
+      </div>
       </div>
       <p className="mt-2 text-xs text-slate-600 dark:text-slate-300">
         カテゴリ代表画像には現場写真・3D図・AI作成イメージが含まれます。掲載技術固有の製品写真・画面ではありません。

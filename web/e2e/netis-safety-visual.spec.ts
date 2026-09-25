@@ -41,7 +41,7 @@ test("390px初期画面で画像カテゴリを先に選べる", async ({ page }
         naturalWidth: (image as HTMLImageElement).naturalWidth,
       })),
     );
-  expect(loadedImages).toHaveLength(8);
+  expect(loadedImages).toHaveLength(9);
   expect(loadedImages.every(({ complete, naturalWidth }) => complete && naturalWidth > 0)).toBe(true);
 });
 
@@ -279,8 +279,8 @@ test("効率化参考技術を目的・分類・検索から探し、現行登�
     await page.setViewportSize({ width, height: 844 });
     await page.goto(`${ROUTE}?purpose=efficiency`, { waitUntil: "domcontentloaded" });
     await expect(page.locator('[data-netis-explorer-ready="true"]')).toBeVisible();
-    await expect(page.getByRole("heading", { name: "作業効率化候補：32件" })).toBeVisible();
-    await expect(page.locator("#netis-technology-results article")).toHaveCount(32);
+    await expect(page.getByRole("heading", { name: "作業効率化候補：55件" })).toBeVisible();
+    await expect(page.locator("#netis-technology-results article")).toHaveCount(55);
     for (const category of ["測量・出来形", "記録・点検", "現場測量・土量", "施工計画・3D記録", "重機・機械化", "道路作業・区画線"]) {
       const button = page.getByRole("button", { name: category });
       await button.scrollIntoViewIfNeeded();
@@ -289,7 +289,7 @@ test("効率化参考技術を目的・分類・検索から探し、現行登�
     }
     await page.evaluate(() => window.scrollTo(0, 0));
     await page.screenshot({ path: testInfo.outputPath(`efficiency-categories-${width}.png`), fullPage: false });
-    await expect(page.getByText("追加14件は2026年9月25日にNETIS個別ページの名称・番号を確認。従来の効率化・品質候補36件は公式一覧等の照合で、個別の現行状態は未確認です。")).toBeVisible();
+    await expect(page.getByText("第5・6陣の40件は2026年9月26日にNETIS個別ページの名称・番号・概要を確認した「調査した技術の例」です。従来掲載分を含め、最新の掲載状況・適用条件は各公式ページで確認してください。")).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
     await page.getByRole("button", { name: "測量・出来形" }).click();
     await expect(page).toHaveURL(/purpose=efficiency.*risk=survey-measurement|risk=survey-measurement.*purpose=efficiency/);
@@ -324,7 +324,7 @@ test("カテゴリ解除と検索を続けても古いriskが戻らず、ブラ�
 
   await page.goBack();
   await expect(page).toHaveURL(/purpose=efficiency/);
-  await expect(page.getByRole("heading", { name: "作業効率化候補：32件" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "作業効率化候補：55件" })).toBeVisible();
   expect(new URL(page.url()).searchParams.has("risk")).toBe(false);
 });
 
@@ -332,8 +332,8 @@ test("品質・道路作業の追加技術を目的別に探し、資料時点�
   for (const width of [320, 390, 1440]) {
     await page.setViewportSize({ width, height: 844 });
     await page.goto(`${ROUTE}?purpose=quality`, { waitUntil: "domcontentloaded" });
-    await expect(page.getByRole("heading", { name: "品質・検査候補：6件" })).toBeVisible();
-    await expect(page.locator("#netis-technology-results article")).toHaveCount(6);
+    await expect(page.getByRole("heading", { name: "品質・検査候補：22件" })).toBeVisible();
+    await expect(page.locator("#netis-technology-results article")).toHaveCount(22);
     const qualityButton = page.getByRole("group", { name: "技術カテゴリ" }).getByRole("button", { name: "品質・検査", exact: true });
     await qualityButton.scrollIntoViewIfNeeded();
     await expect(qualityButton.locator("img")).toBeVisible();
@@ -346,8 +346,8 @@ test("品質・道路作業の追加技術を目的別に探し、資料時点�
   await expect(page.getByRole("link", { name: "A Road Roller working on an arterial road in Amaravati.jpg" })).toBeVisible();
   await page.getByRole("button", { name: "作業を効率化" }).click();
   await page.getByRole("button", { name: "道路作業・区画線" }).click();
-  await expect(page.getByRole("heading", { name: "道路作業・区画線：5件" })).toBeVisible();
-  await expect(page.locator("#netis-technology-results article")).toHaveCount(5);
+  await expect(page.getByRole("heading", { name: "道路作業・区画線：8件" })).toBeVisible();
+  await expect(page.locator("#netis-technology-results article")).toHaveCount(8);
   await expect(page.locator("#netis-technology-results article")).toContainText(["ハードラインアクア＃２１　ＭＤ工法"]);
   await page.getByRole("button", { name: "絞り込みを解除" }).click();
   await page.getByLabel(/名称・登録番号・用途/).fill("KT-230092-A");

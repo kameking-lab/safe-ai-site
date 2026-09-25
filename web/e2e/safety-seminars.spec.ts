@@ -236,7 +236,7 @@ test.describe("安全研修ライブラリ", () => {
       }
       if (index === 2) {
         await expect(status.getByRole("link", { name: /第36条第41号/u }))
-          .toHaveAttribute("href", /#Mp-At_36$/u);
+          .toHaveAttribute("href", /#Mp-Pa_1-Ch_4-At_36$/u);
       }
       if (index === 4) {
         await expect(status.getByRole("link", { name: /冊子p80／PDF p84/u }))
