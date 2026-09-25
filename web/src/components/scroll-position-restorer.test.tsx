@@ -51,6 +51,14 @@ describe("ScrollPositionRestorer", () => {
     expect(window.sessionStorage.getItem("anzen-ai:scroll:/goods")).toBe("640");
   });
 
+  it("restores the top of the home page when its saved position is zero", () => {
+    render(<ScrollPositionRestorer />);
+    window.sessionStorage.setItem("anzen-ai:scroll:/", "0");
+    window.history.replaceState({}, "", "/");
+    act(() => window.dispatchEvent(new PopStateEvent("popstate")));
+    expect(window.scrollTo).toHaveBeenCalledWith({ top: 0, left: 0 });
+  });
+
   it("preserves the home section across a Next client link and return", () => {
     pathname = "/";
     window.history.replaceState({}, "", "/");
