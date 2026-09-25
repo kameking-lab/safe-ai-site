@@ -51,6 +51,26 @@ function affiliateClick(
 }
 
 const GOODS_CATEGORY_EVENT = "goods-category-change";
+type CategoryGroup = "ppe" | "support" | "all";
+type GoodsDirectoryState = { group: CategoryGroup; query: string; lastCategory: string | null };
+
+function readDirectoryState(): GoodsDirectoryState | null {
+  const state = window.history.state;
+  const directory = state && typeof state === "object" ? state.goodsDirectory : null;
+  if (!directory || typeof directory !== "object") return null;
+  if (directory.group !== "ppe" && directory.group !== "support" && directory.group !== "all") return null;
+  if (typeof directory.query !== "string" || directory.query.length > 80) return null;
+  return {
+    group: directory.group,
+    query: directory.query,
+    lastCategory: typeof directory.lastCategory === "string" && PUBLIC_SAFETY_GOODS_CATEGORIES.some((category) => category.id === directory.lastCategory) ? directory.lastCategory : null,
+  };
+}
+
+function writeDirectoryState(directory: GoodsDirectoryState) {
+  const state = window.history.state;
+  window.history.replaceState({ ...(state && typeof state === "object" ? state : {}), goodsDirectory: directory }, "", window.location.href);
+}
 
 function subscribeCategory(listener: () => void) {
   window.addEventListener("popstate", listener);
@@ -74,7 +94,7 @@ function currentFeature() {
 }
 
 export function SafetyGoodsPanel() {
-  const [categoryGroup, setCategoryGroup] = useState<"ppe" | "support" | "all">("ppe");
+  const [categoryGroup, setCategoryGroup] = useState<CategoryGroup>("ppe");
   const [categoryQuery, setCategoryQuery] = useState("");
   const selectedCategoryId = useSyncExternalStore(subscribeCategory, currentCategory, () => null);
   const selectedFeatureId = useSyncExternalStore(subscribeCategory, currentFeature, () => null);
@@ -89,6 +109,24 @@ export function SafetyGoodsPanel() {
   const lastCategory = useRef<string | null>(null);
 
   useEffect(() => {
+    const saved = readDirectoryState();
+    if (saved) {
+      setCategoryGroup(saved.group);
+      setCategoryQuery(saved.query);
+      lastCategory.current = saved.lastCategory;
+    } else {
+      const category = PUBLIC_SAFETY_GOODS_CATEGORIES.find((item) => item.id === currentCategory());
+      if (category) setCategoryGroup(category.group);
+    }
+  }, []);
+
+  function updateDirectory(group: CategoryGroup, query: string, category = lastCategory.current) {
+    setCategoryGroup(group);
+    setCategoryQuery(query);
+    writeDirectoryState({ group, query, lastCategory: category });
+  }
+
+  useEffect(() => {
     const targetId = selectedCategoryId ? "goods-product-panel" : lastCategory.current ? `goods-choice-${lastCategory.current}` : null;
     if (selectedCategoryId) lastCategory.current = selectedCategoryId;
     if (!targetId) return;
@@ -101,17 +139,19 @@ export function SafetyGoodsPanel() {
   }, [selectedCategoryId]);
 
   function selectCategory(categoryId: string) {
+    lastCategory.current = categoryId;
+    writeDirectoryState({ group: categoryGroup, query: categoryQuery, lastCategory: categoryId });
     const url = new URL(window.location.href);
     url.searchParams.set("category", categoryId);
     url.searchParams.delete("feature");
-    window.history.pushState({ goodsCategoryFromDirectory: true }, "", url);
+    window.history.pushState({ goodsCategoryFromDirectory: true, goodsDirectory: readDirectoryState() }, "", url);
     window.dispatchEvent(new Event(GOODS_CATEGORY_EVENT));
   }
 
   function selectFeature(featureId: string) {
     const url = new URL(window.location.href);
     url.searchParams.set("feature", featureId);
-    window.history.pushState({ goodsFeatureFromCategory: true }, "", url);
+    window.history.pushState({ goodsFeatureFromCategory: true, goodsDirectory: readDirectoryState() }, "", url);
     window.dispatchEvent(new Event(GOODS_CATEGORY_EVENT));
     window.requestAnimationFrame(() => document.getElementById("goods-feature-results")?.scrollIntoView({ block: "start", behavior: "instant" }));
   }
@@ -119,19 +159,18 @@ export function SafetyGoodsPanel() {
   function returnToFeatures() {
     const url = new URL(window.location.href);
     url.searchParams.delete("feature");
-    window.history.pushState({}, "", url);
+    window.history.pushState({ goodsDirectory: readDirectoryState() }, "", url);
     window.dispatchEvent(new Event(GOODS_CATEGORY_EVENT));
   }
 
   function returnToCategories() {
-    if (selectedCategory) {
-      setCategoryGroup(selectedCategory.group);
-      setCategoryQuery("");
-    }
+    const saved = readDirectoryState();
+    if (saved) updateDirectory(saved.group, saved.query, selectedCategory?.id ?? saved.lastCategory);
+    else if (selectedCategory) updateDirectory(selectedCategory.group, "", selectedCategory.id);
     const url = new URL(window.location.href);
     url.searchParams.delete("category");
     url.searchParams.delete("feature");
-    window.history.pushState({}, "", url);
+    window.history.pushState({ goodsDirectory: readDirectoryState() }, "", url);
     window.dispatchEvent(new Event(GOODS_CATEGORY_EVENT));
   }
 
@@ -161,7 +200,8 @@ export function SafetyGoodsPanel() {
             id="goods-category-search"
             type="search"
             value={categoryQuery}
-            onChange={(event) => { setCategoryQuery(event.target.value); if (event.target.value.trim()) setCategoryGroup("all"); }}
+            onChange={(event) => { const query = event.target.value.slice(0, 80); updateDirectory(query.trim() ? "all" : categoryGroup, query); }}
+            maxLength={80}
             placeholder="例：ヘルメット、防毒、研削"
             className="min-h-12 w-full max-w-xl rounded-xl border border-slate-400 bg-white px-4 text-base text-slate-950 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700"
           />
@@ -171,12 +211,12 @@ export function SafetyGoodsPanel() {
               ["support", "現場の補助用品", PUBLIC_SAFETY_GOODS_CATEGORIES.filter((category) => category.group === "support").length],
               ["all", "すべて", PUBLIC_SAFETY_GOODS_CATEGORIES.length],
             ] as const).map(([id, label, count]) => (
-              <button key={id} type="button" aria-pressed={categoryGroup === id} onClick={() => setCategoryGroup(id)} className={`min-h-11 rounded-full border px-4 text-sm font-bold ${categoryGroup === id ? "border-emerald-800 bg-emerald-900 text-white" : "border-slate-300 bg-white text-slate-800 hover:border-emerald-700"}`}>
+              <button key={id} type="button" aria-pressed={categoryGroup === id} onClick={() => updateDirectory(id, categoryQuery)} className={`min-h-11 rounded-full border px-4 text-sm font-bold ${categoryGroup === id ? "border-emerald-800 bg-emerald-900 text-white" : "border-slate-300 bg-white text-slate-800 hover:border-emerald-700"}`}>
                 {label} {count}
               </button>
             ))}
           </div>
-          <p className="text-sm font-semibold text-slate-700">{visibleCategories.length}カテゴリを表示</p>
+          <p role="status" aria-live="polite" className="text-sm font-semibold text-slate-700">{visibleCategories.length}カテゴリを表示{categoryQuery ? `・「${categoryQuery}」で検索中` : ""}</p>
         </div>
         <ul hidden={Boolean(selectedCategory)} className={selectedCategory ? "hidden" : "mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5"} aria-label="安全用品カテゴリの画像一覧">
           {visibleCategories.map((category) => (
