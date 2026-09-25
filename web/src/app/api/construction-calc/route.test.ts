@@ -49,7 +49,7 @@ describe("/api/construction-calc deterministic explanation", () => {
     expect(fetchSpy).toHaveBeenCalledOnce();
     const [url, init] = fetchSpy.mock.calls[0] as [string, RequestInit];
     expect(url).toBe(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent",
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent",
     );
     expect(url).not.toContain("provider-test-key");
     expect(init.headers).toMatchObject({
@@ -59,6 +59,12 @@ describe("/api/construction-calc deterministic explanation", () => {
     expect(String(init.body)).not.toMatch(
       /"(?:temperature|topP|topK|top_p|top_k|candidateCount|candidate_count|thinkingBudget|thinking_budget)"\s*:/u,
     );
+    expect(JSON.parse(String(init.body))).toMatchObject({
+      generationConfig: {
+        thinkingConfig: { thinkingLevel: "LOW" },
+        responseMimeType: "application/json",
+      },
+    });
   });
 
   it("rejects URL-serialized calculator inputs", async () => {
