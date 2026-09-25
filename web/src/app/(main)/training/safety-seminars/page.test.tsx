@@ -47,16 +47,17 @@ const EXPECTED_TITLES = [
 ] as const;
 
 describe("/training/safety-seminars", () => {
-  it("29テーマを公開中2件とComing Soon 27件に分ける", () => {
+  it("29テーマを公開中3件とComing Soon 26件に分ける", () => {
     expect(SAFETY_SEMINARS.map((seminar) => seminar.title)).toEqual(
       EXPECTED_TITLES,
     );
-    expect(PUBLISHED_SAFETY_SEMINARS).toHaveLength(2);
+    expect(PUBLISHED_SAFETY_SEMINARS).toHaveLength(3);
     expect(PUBLISHED_SAFETY_SEMINARS.map((seminar) => seminar.href)).toEqual([
       SAFETY_MANAGEMENT_BASICS_OSH_LAW_SEMINAR_PATH,
       FALL_PREVENTION_SEMINAR_PATH,
+      "/training/safety-seminars/chemicals-sds-risk-assessment",
     ]);
-    expect(COMING_SOON_SAFETY_SEMINARS).toHaveLength(27);
+    expect(COMING_SOON_SAFETY_SEMINARS).toHaveLength(26);
     expect(
       COMING_SOON_SAFETY_SEMINARS.every((seminar) => !("href" in seminar)),
     ).toBe(true);
@@ -70,19 +71,20 @@ describe("/training/safety-seminars", () => {
     ).toBeDefined();
     expect(
       container.querySelectorAll('[data-seminar-status="published"]'),
-    ).toHaveLength(2);
+    ).toHaveLength(3);
     expect(
       container.querySelectorAll('[data-seminar-status="coming-soon"]'),
-    ).toHaveLength(18);
+    ).toHaveLength(17);
     expect(SAFETY_SEMINAR_CORE_20).toHaveLength(20);
-    expect(COMING_SOON_SAFETY_CORE_20).toHaveLength(18);
+    expect(COMING_SOON_SAFETY_CORE_20).toHaveLength(17);
     expect(screen.queryByText("音声あり")).toBeNull();
     expect(screen.getAllByText("PowerPoint・PDF")).toHaveLength(2);
-    expect(screen.getByText("12枚")).toBeDefined();
+    expect(screen.getByText("Webスライド・確認クイズ")).toBeDefined();
+    expect(screen.getAllByText("12枚")).toHaveLength(2);
     expect(screen.getByText("20枚")).toBeDefined();
     expect(screen.getByText("おすすめ")).toBeDefined();
     expect(screen.queryByText("FIRST RELEASE")).toBeNull();
-    expect(screen.getAllByText("SLIDES & QUIZ")).toHaveLength(2);
+    expect(screen.getAllByText("SLIDES & QUIZ")).toHaveLength(3);
     expect(
       container
         .querySelector('[data-seminar-status="published"]')
@@ -92,6 +94,7 @@ describe("/training/safety-seminars", () => {
       .toEqual([
         SAFETY_MANAGEMENT_BASICS_OSH_LAW_SEMINAR_PATH,
         FALL_PREVENTION_SEMINAR_PATH,
+        "/training/safety-seminars/chemicals-sds-risk-assessment",
       ]);
   });
 
