@@ -9,7 +9,7 @@ test("保護具カテゴリから実商品パネルを開き、取得不能を�
   await page.getByRole("button", { name: "保護帽", exact: true }).click();
   await expect(page.getByRole("heading", { name: "まず、必要な特徴を選ぶ" })).toBeVisible();
   await page.getByRole("button", { name: /墜落時の頭部保護/u }).click();
-  await expect(page.getByRole("heading", { name: "保護帽の実商品写真と高評価候補" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "保護帽の商品候補" })).toBeVisible();
   await expect(page.getByText(/商品データの接続準備中です/u)).toBeVisible();
   await expect(page.locator('[aria-label="実商品写真を左右にスライド"]')).toHaveCount(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(1);
@@ -83,7 +83,7 @@ test("保護具8分類と補助用品8分類を選べ、戻る・再読込で現
   await helmet.click();
   await page.getByRole("button", { name: /墜落時の頭部保護/u }).click();
   await page.reload();
-  await expect(page.getByRole("heading", { name: "保護帽の実商品写真と高評価候補" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "保護帽の商品候補" })).toBeVisible();
   await page.getByRole("button", { name: "用品一覧に戻る" }).click();
   await expect(directory).toBeVisible();
   await expect(helmet).toBeFocused();
