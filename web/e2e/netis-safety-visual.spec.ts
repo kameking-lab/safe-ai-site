@@ -120,10 +120,10 @@ test("暑熱3件を表示し、検索・再読込・解除をURLから復元す�
 
   await page.getByRole("button", { name: "絞り込みを解除" }).click();
   await expect(page).toHaveURL(new RegExp(`${ROUTE}$`));
-  await expect(page.getByRole("heading", { name: "当サイト掲載：22件" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "当サイト掲載：23件" })).toBeVisible();
 });
 
-test("選択済みカテゴリの再操作でも結果へ移動し、未知の値は安全22件へ戻す", async ({ page }) => {
+test("選択済みカテゴリの再操作でも結果へ移動し、未知の値は安全23件へ戻す", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto(`${ROUTE}?risk=restricted-zone&from=review`);
   await expect(page.locator('[data-netis-explorer-ready="true"]')).toBeVisible();
@@ -138,9 +138,9 @@ test("選択済みカテゴリの再操作でも結果へ移動し、未知の�
 
   await page.getByRole("button", { name: "絞り込みを解除" }).click();
   await expect(page).toHaveURL(`${page.url().split("?")[0]}?from=review`);
-  await expect(page.locator("#netis-technology-results article")).toHaveCount(22);
+  await expect(page.locator("#netis-technology-results article")).toHaveCount(23);
   await page.goto(`${ROUTE}?risk=unknown`);
-  await expect(page.getByRole("heading", { name: "当サイト掲載：22件" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "当サイト掲載：23件" })).toBeVisible();
   await expect(page.getByText("カテゴリ代表画像には現場写真・3D図・AI作成イメージが含まれます。掲載技術固有の製品写真・画面ではありません。")).toBeVisible();
 });
 
@@ -156,15 +156,15 @@ test("カテゴリと結果のARIA・コントラストに問題がない", asyn
   }
 });
 
-test("安全22件へ戻す操作で検索も解除し、戻るで条件を復元する", async ({ page }) => {
+test("安全23件へ戻す操作で検索も解除し、戻るで条件を復元する", async ({ page }) => {
   await page.goto(`${ROUTE}?risk=heat-environment&q=存在しない技術&from=review`);
   await expect(page.locator('[data-netis-explorer-ready="true"]')).toBeVisible();
   await expect(page.getByRole("heading", { name: "暑熱・作業環境：0件" })).toBeVisible();
   await page.getByRole("button", { name: "絞り込みを解除" }).click();
   await expect(page).toHaveURL(`${page.url().split("?")[0]}?from=review`);
-  await expect(page.locator("#netis-technology-results article")).toHaveCount(22);
+  await expect(page.locator("#netis-technology-results article")).toHaveCount(23);
   await expect(page.getByLabel(/名称・登録番号・用途/)).toHaveValue("");
-  await expect(page.getByRole("heading", { name: "当サイト掲載：22件" })).toBeFocused();
+  await expect(page.getByRole("heading", { name: "当サイト掲載：23件" })).toBeFocused();
   await page.goBack({ waitUntil: "domcontentloaded" });
   await expect(page.getByLabel(/名称・登録番号・用途/)).toHaveValue("存在しない技術");
   await expect(page.getByRole("heading", { name: "暑熱・作業環境：0件" })).toBeVisible();

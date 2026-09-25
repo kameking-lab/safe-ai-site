@@ -274,11 +274,18 @@ export function NetisSafetyExplorer() {
   function updateSearch(value: string) {
     const queryValue = value.trim();
     const params = latestParams();
-    if (queryValue === (params.get("q")?.trim() ?? "")) {
+    // The landing state shows safety examples, but a user entering an unknown
+    // registration number expects to search the whole catalog. Preserve an
+    // explicitly chosen purpose or category when one exists.
+    const expandDefaultSearch = Boolean(queryValue) && !params.has("purpose") && !params.has("risk");
+    if (queryValue === (params.get("q")?.trim() ?? "") && !expandDefaultSearch) {
       focusResults(resultsHeadingRef.current);
       return;
     }
-    if (queryValue) params.set("q", queryValue);
+    if (queryValue) {
+      if (expandDefaultSearch) params.set("purpose", "all");
+      params.set("q", queryValue);
+    }
     else params.delete("q");
     searchInputDirtyRef.current = false;
     pushParams(params);

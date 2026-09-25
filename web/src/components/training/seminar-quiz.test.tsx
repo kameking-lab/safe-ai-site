@@ -137,6 +137,12 @@ describe("墜落防止の既存5問", () => {
       .toBe("https://laws.e-gov.go.jp/law/347M50002000032#Mp-Pa_1-Ch_4-At_36");
     first.unmount();
 
+    const second = render(<SeminarQuiz {...fallProps} courseId="fall-evidence-521" quiz={{ ...quiz, questions: [fallProps.quiz.questions[3]!] }} />);
+    fireEvent.click(screen.getByRole("group", { name: /問目の選択肢/u }).querySelector("button")!);
+    expect(screen.getByRole("link", { name: /労働安全衛生規則.*第521条/u }).getAttribute("href"))
+      .toBe("https://laws.e-gov.go.jp/law/347M50002000032#Mp-Pa_2-Ch_9-Se_1-At_521");
+    second.unmount();
+
     render(<SeminarQuiz {...fallProps} courseId="fall-evidence-page" quiz={{ ...quiz, questions: [quiz.questions[1]!] }} />);
     fireEvent.click(screen.getByRole("button", { name: /15分は安全なので状況を見る/u }));
     expect(screen.getByRole("link", { name: /冊子p80／PDF p84/u }).getAttribute("href"))

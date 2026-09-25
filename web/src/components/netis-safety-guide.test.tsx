@@ -380,6 +380,24 @@ describe("NetisSafetyGuide", () => {
     expect(screen.getByText("EGy防水コネクタ")).toBeDefined();
   });
 
+  it("初期の安全タブから登録番号を検索すると全100件を対象にする", () => {
+    const { unmount } = render(<NetisSafetyExplorer />);
+    fireEvent.change(screen.getByRole("searchbox", { name: /名称・登録番号・用途/ }), {
+      target: { value: "KT-180043-VE" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "掲載技術を検索" }));
+    expect(navigation.push).toHaveBeenCalledWith(
+      "/resources/netis-safety?purpose=all&q=KT-180043-VE",
+      { scroll: false },
+    );
+    unmount();
+
+    navigation.query = "purpose=all&q=KT-180043-VE";
+    const { container } = render(<NetisSafetyExplorer />);
+    expect(screen.getByText("当サイト掲載：1件")).toBeDefined();
+    expect(container.textContent).toContain("クラウド計測システム 『クラウド16』");
+  });
+
   it("目的タブの直後に検索を置き、画像カテゴリを巡回せず絞り込める", () => {
     const { container } = render(<NetisSafetyExplorer />);
     const purposeGroup = screen.getByRole("group", { name: "探す目的" });
