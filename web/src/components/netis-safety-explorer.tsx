@@ -26,10 +26,11 @@ import {
   isNetisWave2CategoryId,
   type NetisWave2CategoryId,
 } from "./netis-wave2-data";
+import { NETIS_WAVE3_TECHNOLOGIES } from "./netis-wave3-data";
 
 type CategoryId = NetisSafetyCategoryId | NetisEfficiencyCategoryId | NetisWave2CategoryId;
 type Purpose = "safety" | "efficiency" | "quality" | "all";
-const ALL_TECHNOLOGIES = [...FEATURED_NETIS_TECHNOLOGIES, ...NETIS_EFFICIENCY_TECHNOLOGIES, ...NETIS_WAVE2_TECHNOLOGIES];
+const ALL_TECHNOLOGIES = [...FEATURED_NETIS_TECHNOLOGIES, ...NETIS_EFFICIENCY_TECHNOLOGIES, ...NETIS_WAVE2_TECHNOLOGIES, ...NETIS_WAVE3_TECHNOLOGIES];
 
 function categoryFor(id: CategoryId) {
   return [...NETIS_SAFETY_CATEGORIES, ...NETIS_EFFICIENCY_CATEGORIES, ...NETIS_WAVE2_CATEGORIES].find(
@@ -364,10 +365,10 @@ export function NetisSafetyExplorer() {
         カテゴリ代表画像には現場・機材の写真と3Dモデル図が含まれます。掲載技術固有の製品写真・画面ではありません。
       </p>
       <p className="mt-2 text-sm leading-6 text-slate-700 dark:text-slate-200">
-        当サイトで出典を確認した{FEATURED_NETIS_TECHNOLOGIES.length}件を掲載しています。NETIS全登録技術の一覧ではありません。
+        当サイトで出典を確認した{ALL_TECHNOLOGIES.length}件を掲載しています。NETIS全登録技術の一覧ではありません。
       </p>
       <p className="mt-1 text-sm leading-6 text-slate-700 dark:text-slate-200">
-        効率化の第1陣{NETIS_EFFICIENCY_TECHNOLOGIES.length}件のうち5件は国交省の2026年4月一覧、1件は過去の地方整備局資料で確認しました。第2陣{NETIS_WAVE2_TECHNOLOGIES.length}件は同4月一覧の参考技術です。2026年9月時点の現行NETIS個別状態は未確認です。
+        効率化・品質の候補{NETIS_EFFICIENCY_TECHNOLOGIES.length + NETIS_WAVE2_TECHNOLOGIES.length + NETIS_WAVE3_TECHNOLOGIES.length}件は国交省の公式一覧・紹介資料で技術名と番号を照合しました。2026年9月時点の現行NETIS個別状態は未確認です。
       </p>
       <details className="mt-1 text-xs text-slate-600 dark:text-slate-300">
         <summary className="flex min-h-11 cursor-pointer items-center font-bold underline underline-offset-4">
