@@ -62,6 +62,7 @@ export function HomeDirectChemicalClient() {
   const [activeIndex, setActiveIndex] = useState(-1);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [confirming, setConfirming] = useState(false);
   const [checked, setChecked] = useState(false);
   const [unavailable, setUnavailable] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -256,6 +257,7 @@ export function HomeDirectChemicalClient() {
         navigateToQuery(candidate.primaryName);
         return;
       }
+      setConfirming(true);
       setLoading(true);
       try {
         const { confirmChemicalCatalogSelection } = await import(
@@ -273,6 +275,7 @@ export function HomeDirectChemicalClient() {
         );
         inputRef.current?.focus();
       } finally {
+        setConfirming(false);
         setLoading(false);
       }
     },
@@ -343,6 +346,7 @@ export function HomeDirectChemicalClient() {
           (alias) => normalizeIdentity(alias) === identityQuery,
         );
       if (exactIdentity && candidate.cas) {
+        setConfirming(true);
         setLoading(true);
         try {
           const { confirmChemicalCatalogSelection } = await import(
@@ -362,6 +366,7 @@ export function HomeDirectChemicalClient() {
           setOpen(true);
           inputRef.current?.focus();
         } finally {
+          setConfirming(false);
           setLoading(false);
         }
         return;
@@ -477,10 +482,10 @@ export function HomeDirectChemicalClient() {
           </div>
           <button
             type="submit"
-            disabled={loading || !query.trim()}
+            disabled={confirming || !query.trim()}
             className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-lg bg-amber-800 px-3 text-sm font-black text-white disabled:cursor-wait disabled:opacity-60"
           >
-            {loading ? "確認中" : "検索"}
+            {confirming ? "確認中" : "検索"}
           </button>
         </div>
       </form>
