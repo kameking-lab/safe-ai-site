@@ -3,12 +3,27 @@ import AxeBuilder from "@axe-core/playwright";
 
 const ROUTE = "/resources/netis-safety";
 
+test("第4陣の海上と仮設敷設を直接URL・検索・戻るで探せる", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(`${ROUTE}?risk=marine-underwater&q=HRK-190002-VE`);
+  await expect(page.getByRole("heading", { name: "海上・水中作業：1件" })).toBeVisible();
+  await expect(page.getByRole("link", { name: /水中据付作業可視化システム/ })).toHaveAttribute("href", "https://www.netis.mlit.go.jp/netis/pubsearch/details?regNo=HRK-190002");
+  await expect(page.locator("#netis-technology-results article")).toContainText("2026年9月25日NETIS個別ページの名称・番号を確認");
+  await page.goto(`${ROUTE}?risk=temporary-mats&q=HK-190004`);
+  await expect(page.getByRole("heading", { name: "養生・仮設敷設：1件" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "作業を効率化" })).toHaveAttribute("aria-pressed", "true");
+  await page.getByRole("button", { name: "安全を高める" }).click();
+  await expect(page).toHaveURL(`${ROUTE}?q=HK-190004`);
+  await page.goBack();
+  await expect(page.getByRole("heading", { name: "養生・仮設敷設：1件" })).toBeVisible();
+});
+
 test("390px初期画面で画像カテゴリを先に選べる", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto(ROUTE, { waitUntil: "domcontentloaded" });
   await expect(page.locator('[data-netis-explorer-ready="true"]')).toBeVisible();
 
-  const categories = ["重機接触", "立入禁止", "墜落・転落", "暑熱・作業環境"];
+  const categories = ["重機接触", "立入禁止", "墜落・足場", "暑熱・作業環境"];
   for (const label of categories) {
     const button = page.getByRole("button", { name: label, exact: true });
     await expect(button).toBeVisible();
@@ -17,7 +32,7 @@ test("390px初期画面で画像カテゴリを先に選べる", async ({ page }
     expect(box!.y + box!.height).toBeLessThanOrEqual(844);
   }
 
-  await expect(page.getByText("当サイトで出典を確認した46件を掲載しています。NETIS全登録技術の一覧ではありません。")).toBeVisible();
+  await expect(page.getByText("当サイトで出典を確認した60件を掲載しています。NETIS全登録技術の一覧ではありません。")).toBeVisible();
   const loadedImages = await page
     .locator('[aria-label="安全課題カテゴリ"] img')
     .evaluateAll((images) =>
@@ -26,7 +41,7 @@ test("390px初期画面で画像カテゴリを先に選べる", async ({ page }
         naturalWidth: (image as HTMLImageElement).naturalWidth,
       })),
     );
-  expect(loadedImages).toHaveLength(4);
+  expect(loadedImages).toHaveLength(8);
   expect(loadedImages.every(({ complete, naturalWidth }) => complete && naturalWidth > 0)).toBe(true);
 });
 
@@ -47,9 +62,9 @@ test("カテゴリ選択、URL再読込、戻るで同じ絞り込みを復元�
   await expect(page.getByRole("heading", { name: "重機接触：5件" })).toBeVisible();
   await expect(page.getByRole("button", { name: "重機接触" })).toHaveAttribute("aria-pressed", "true");
 
-  await page.getByRole("button", { name: "墜落・転落", exact: true }).click();
+  await page.getByRole("button", { name: "墜落・足場", exact: true }).click();
   await expect(page).toHaveURL(/risk=fall-prevention/);
-  await expect(page.getByRole("heading", { name: "墜落・転落：2件" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "墜落・足場：4件" })).toBeVisible();
   await expect(page.getByText(/ハーネスノーティファイ/)).toBeVisible();
   await expect(page.getByText(/ヒヤリハンター/)).toHaveCount(0);
 
@@ -58,7 +73,7 @@ test("カテゴリ選択、URL再読込、戻るで同じ絞り込みを復元�
   await expect(page.getByRole("heading", { name: "重機接触：5件" })).toBeVisible();
 });
 
-test("暑熱2件を表示し、検索・再読込・解除をURLから復元する", async ({ page }) => {
+test("暑熱3件を表示し、検索・再読込・解除をURLから復元する", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto(ROUTE, { waitUntil: "domcontentloaded" });
   await expect(page.locator('[data-netis-explorer-ready="true"]')).toBeVisible();
@@ -74,7 +89,7 @@ test("暑熱2件を表示し、検索・再読込・解除をURLから復元す�
   await heatButton.focus();
   await page.keyboard.press("Space");
   await expect(page).toHaveURL(/risk=heat-environment/);
-  await expect(page.getByRole("heading", { name: "暑熱・作業環境：2件" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "暑熱・作業環境：3件" })).toBeVisible();
   await expect(page.getByRole("heading", { name: /熱中対策バンド/ })).toBeVisible();
   await expect(page.getByRole("heading", { name: /TECHNO BAND/ })).toBeVisible();
 
@@ -95,20 +110,20 @@ test("暑熱2件を表示し、検索・再読込・解除をURLから復元す�
   await expect(page.getByRole("heading", { name: "暑熱・作業環境：0件" })).toBeVisible();
   await page.getByRole("button", { name: "検索を解除" }).click();
   await expect(page).toHaveURL(/risk=heat-environment$/);
-  await expect(page.getByRole("heading", { name: "暑熱・作業環境：2件" })).toBeFocused();
+  await expect(page.getByRole("heading", { name: "暑熱・作業環境：3件" })).toBeFocused();
   await page.goBack({ waitUntil: "domcontentloaded" });
   await expect(page.getByLabel(/名称・登録番号・用途/)).toHaveValue("存在しない技術");
   await expect(page.getByRole("heading", { name: "暑熱・作業環境：0件" })).toBeVisible();
   await page.goForward({ waitUntil: "domcontentloaded" });
   await expect(page.getByLabel(/名称・登録番号・用途/)).toHaveValue("");
-  await expect(page.getByRole("heading", { name: "暑熱・作業環境：2件" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "暑熱・作業環境：3件" })).toBeVisible();
 
-  await page.getByRole("button", { name: "掲載全10件を見る" }).click();
+  await page.getByRole("button", { name: "絞り込みを解除" }).click();
   await expect(page).toHaveURL(new RegExp(`${ROUTE}$`));
-  await expect(page.getByRole("heading", { name: "当サイト掲載：10件" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "当サイト掲載：22件" })).toBeVisible();
 });
 
-test("選択済みカテゴリの再操作でも結果へ移動し、未知の値は全10件へ戻す", async ({ page }) => {
+test("選択済みカテゴリの再操作でも結果へ移動し、未知の値は安全22件へ戻す", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto(`${ROUTE}?risk=restricted-zone&from=review`);
   await expect(page.locator('[data-netis-explorer-ready="true"]')).toBeVisible();
@@ -121,12 +136,12 @@ test("選択済みカテゴリの再操作でも結果へ移動し、未知の�
   await page.keyboard.press("Enter");
   await expect(page.getByRole("heading", { name: "立入禁止：3件" })).toBeFocused();
 
-  await page.getByRole("button", { name: "掲載全10件を見る" }).click();
+  await page.getByRole("button", { name: "絞り込みを解除" }).click();
   await expect(page).toHaveURL(`${page.url().split("?")[0]}?from=review`);
-  await expect(page.locator("#netis-technology-results article")).toHaveCount(10);
+  await expect(page.locator("#netis-technology-results article")).toHaveCount(22);
   await page.goto(`${ROUTE}?risk=unknown`);
-  await expect(page.getByRole("heading", { name: "当サイト掲載：10件" })).toBeVisible();
-  await expect(page.getByText("カテゴリ代表画像には現場・機材の写真と3Dモデル図が含まれます。掲載技術固有の製品写真・画面ではありません。")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "当サイト掲載：22件" })).toBeVisible();
+  await expect(page.getByText("カテゴリ代表画像には現場写真・3D図・AI作成イメージが含まれます。掲載技術固有の製品写真・画面ではありません。")).toBeVisible();
 });
 
 test("カテゴリと結果のARIA・コントラストに問題がない", async ({ page }) => {
@@ -141,15 +156,15 @@ test("カテゴリと結果のARIA・コントラストに問題がない", asyn
   }
 });
 
-test("全10件へ戻す操作で検索も解除し、戻るで条件を復元する", async ({ page }) => {
+test("安全22件へ戻す操作で検索も解除し、戻るで条件を復元する", async ({ page }) => {
   await page.goto(`${ROUTE}?risk=heat-environment&q=存在しない技術&from=review`);
   await expect(page.locator('[data-netis-explorer-ready="true"]')).toBeVisible();
   await expect(page.getByRole("heading", { name: "暑熱・作業環境：0件" })).toBeVisible();
-  await page.getByRole("button", { name: "掲載全10件を見る" }).click();
+  await page.getByRole("button", { name: "絞り込みを解除" }).click();
   await expect(page).toHaveURL(`${page.url().split("?")[0]}?from=review`);
-  await expect(page.locator("#netis-technology-results article")).toHaveCount(10);
+  await expect(page.locator("#netis-technology-results article")).toHaveCount(22);
   await expect(page.getByLabel(/名称・登録番号・用途/)).toHaveValue("");
-  await expect(page.getByRole("heading", { name: "当サイト掲載：10件" })).toBeFocused();
+  await expect(page.getByRole("heading", { name: "当サイト掲載：22件" })).toBeFocused();
   await page.goBack({ waitUntil: "domcontentloaded" });
   await expect(page.getByLabel(/名称・登録番号・用途/)).toHaveValue("存在しない技術");
   await expect(page.getByRole("heading", { name: "暑熱・作業環境：0件" })).toBeVisible();
@@ -264,8 +279,8 @@ test("効率化参考技術を目的・分類・検索から探し、現行登�
     await page.setViewportSize({ width, height: 844 });
     await page.goto(`${ROUTE}?purpose=efficiency`, { waitUntil: "domcontentloaded" });
     await expect(page.locator('[data-netis-explorer-ready="true"]')).toBeVisible();
-    await expect(page.getByRole("heading", { name: "作業効率化候補：30件" })).toBeVisible();
-    await expect(page.locator("#netis-technology-results article")).toHaveCount(30);
+    await expect(page.getByRole("heading", { name: "作業効率化候補：32件" })).toBeVisible();
+    await expect(page.locator("#netis-technology-results article")).toHaveCount(32);
     for (const category of ["測量・出来形", "記録・点検", "現場測量・土量", "施工計画・3D記録", "重機・機械化", "道路作業・区画線"]) {
       const button = page.getByRole("button", { name: category });
       await button.scrollIntoViewIfNeeded();
@@ -274,7 +289,7 @@ test("効率化参考技術を目的・分類・検索から探し、現行登�
     }
     await page.evaluate(() => window.scrollTo(0, 0));
     await page.screenshot({ path: testInfo.outputPath(`efficiency-categories-${width}.png`), fullPage: false });
-    await expect(page.getByText("効率化・品質の候補36件は国交省の公式一覧・紹介資料で技術名と番号を照合しました。2026年9月時点の現行NETIS個別状態は未確認です。")).toBeVisible();
+    await expect(page.getByText("追加14件は2026年9月25日にNETIS個別ページの名称・番号を確認。従来の効率化・品質候補36件は公式一覧等の照合で、個別の現行状態は未確認です。")).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
     await page.getByRole("button", { name: "測量・出来形" }).click();
     await expect(page).toHaveURL(/purpose=efficiency.*risk=survey-measurement|risk=survey-measurement.*purpose=efficiency/);
@@ -309,7 +324,7 @@ test("カテゴリ解除と検索を続けても古いriskが戻らず、ブラ�
 
   await page.goBack();
   await expect(page).toHaveURL(/purpose=efficiency/);
-  await expect(page.getByRole("heading", { name: "作業効率化候補：30件" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "作業効率化候補：32件" })).toBeVisible();
   expect(new URL(page.url()).searchParams.has("risk")).toBe(false);
 });
 

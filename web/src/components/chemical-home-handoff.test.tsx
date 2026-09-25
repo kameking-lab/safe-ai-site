@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { OptionalThirdPartyScripts } from "./OptionalThirdPartyScripts";
 import { ScrollPositionRestorer } from "./scroll-position-restorer";
@@ -45,6 +45,10 @@ it.each([["granted", "candidate"], ["denied", "candidate"], ["granted", "submit"
   view.rerender(<App destination />);
   await waitFor(() => expect(mocks.find).toHaveBeenCalledWith("108-88-3"));
   await waitFor(() => expect((screen.getByRole("combobox") as HTMLInputElement).value).toBe("トルエン"));
+  // Wait for the destination's automatic assessment before unmounting it.
+  // Otherwise its async fetch can outlive jsdom teardown in the full CI suite.
+  await waitFor(() => expect(fetch).toHaveBeenCalledWith("/api/chemical-ra", expect.any(Object)));
+  await act(async () => {});
   expect(consumeTransientChemicalNavigation()).toBe(false);
   expect(gtag).toHaveBeenCalledWith("consent", "update", expect.objectContaining({ analytics_storage: "denied", ad_storage: "denied" }));
   expect(JSON.stringify(window.history.state)).not.toContain("108-88-3");
