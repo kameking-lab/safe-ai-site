@@ -272,7 +272,7 @@ export function NetisSafetyExplorer() {
             ? NETIS_WAVE2_CATEGORIES.filter((category) => category.purpose === "quality")
             : purpose === "all"
               ? [...NETIS_SAFETY_CATEGORIES, ...NETIS_EFFICIENCY_CATEGORIES, ...NETIS_WAVE2_CATEGORIES]
-              : NETIS_SAFETY_CATEGORIES).map((category) => {
+              : NETIS_SAFETY_CATEGORIES).map((category, index) => {
           const selected = selectedCategoryId === category.id;
           const visualCategory = "image" in category ? category : null;
           return (
@@ -295,7 +295,7 @@ export function NetisSafetyExplorer() {
                     src={visualCategory.image}
                     alt={visualCategory.imageAlt}
                     fill
-                    loading="eager"
+                    loading={purpose === "safety" || purpose === "quality" || (purpose === "efficiency" && index < 2) ? "eager" : "lazy"}
                     sizes="(max-width: 1024px) 46vw, 280px"
                     className="object-cover transition duration-300 group-hover:scale-[1.03]"
                   />
@@ -332,7 +332,7 @@ export function NetisSafetyExplorer() {
       </p>
       <details className="mt-1 text-xs text-slate-600 dark:text-slate-300">
         <summary className="flex min-h-11 cursor-pointer items-center font-bold underline underline-offset-4">
-          写真の出典・ライセンスを確認
+          画像の出典・ライセンスを確認
         </summary>
         <ul className="space-y-1.5 pb-2 leading-5">
           {[...NETIS_SAFETY_CATEGORIES, ...NETIS_EFFICIENCY_CATEGORIES, ...NETIS_WAVE2_CATEGORIES].map((category) => (

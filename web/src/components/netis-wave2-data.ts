@@ -161,6 +161,16 @@ export const NETIS_WAVE2_TECHNOLOGIES: readonly Wave2Technology[] = [
     officialSourceUrl: NETIS_WAVE2_SOURCE_URL, sourceBasis: sourceBasis(4), providerSourceUrl: "https://www.nipponliner.co.jp/productslist/303/",
   },
   {
+    categoryIds: ["wave2-roadwork"], primaryPurpose: "efficiency",
+    name: "ハードラインアクア＃２１　ＭＤ工法",
+    registrationNumber: "KT-220235", sourceRegistrationNumber: "KT-220235-VE", sourcePage: 4, sourceWorkType: "付属施設", sourceSelection: "令和8年度 推奨技術",
+    provider: "アトミクス株式会社", summary: "水性路面標示塗料の乾燥を早める区画線工法です。",
+    mechanism: "水性路面標示塗料に乾燥促進剤を組み合わせ、塗装後に促進液を散布します。",
+    useCase: "区画線施工後の乾燥待ちと交通開放までの時間短縮。",
+    limitations: "対応塗料、促進剤の使用量、気温・湿度、降雨予測と交通規制を確認します。",
+    officialSourceUrl: NETIS_WAVE2_SOURCE_URL, sourceBasis: sourceBasis(4), providerSourceUrl: "https://www.atomix.co.jp/product_items/md/",
+  },
+  {
     categoryIds: ["wave2-quality"], primaryPurpose: "quality",
     name: "固化材含有量計測システム「ｅ－セメダス」",
     registrationNumber: "KT-210023", sourceRegistrationNumber: "KT-210023-VE", sourcePage: 1, sourceWorkType: "共通工", sourceSelection: "令和8年度 推奨技術",
