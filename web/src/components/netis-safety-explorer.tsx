@@ -111,7 +111,10 @@ export function NetisSafetyExplorer() {
     ? categoryFor(selectedCategoryId)
     : null;
   const resultsHeadingRef = useRef<HTMLHeadingElement>(null);
-  const shouldFocusResultsRef = useRef(false);
+  const committedQuery = searchParams.toString();
+  const pendingNavigationRef = useRef<{ latest: string; lineage: Set<string> } | null>(null);
+  const focusAfterQueryRef = useRef<string | null>(null);
+  const searchInputDirtyRef = useRef(false);
   const explorerRef = useRef<HTMLElement>(null);
   const [searchInput, setSearchInput] = useState(rawSearch);
 
@@ -150,29 +153,70 @@ export function NetisSafetyExplorer() {
     restoreReturnPosition();
     // bfcacheから戻った場合もスクロール位置の記録を消費する
     const onPageShow = (event: PageTransitionEvent) => {
-      if (event.persisted) restoreReturnPosition();
+      if (event.persisted) {
+        pendingNavigationRef.current = null;
+        focusAfterQueryRef.current = null;
+        searchInputDirtyRef.current = false;
+        restoreReturnPosition();
+      }
+    };
+    const onPopState = () => {
+      pendingNavigationRef.current = null;
+      focusAfterQueryRef.current = null;
+      searchInputDirtyRef.current = false;
     };
     window.addEventListener("pageshow", onPageShow);
+    window.addEventListener("popstate", onPopState);
     explorerRef.current?.setAttribute("data-netis-explorer-ready", "true");
-    return () => window.removeEventListener("pageshow", onPageShow);
+    return () => {
+      window.removeEventListener("pageshow", onPageShow);
+      window.removeEventListener("popstate", onPopState);
+    };
   }, []);
 
   useEffect(() => {
-    setSearchInput(rawSearch);
-  }, [rawSearch]);
+    const pending = pendingNavigationRef.current;
+    if (pending && !pending.lineage.has(committedQuery)) pendingNavigationRef.current = null;
+    else if (pending?.latest === committedQuery) pendingNavigationRef.current = null;
 
-  useEffect(() => {
-    if (!shouldFocusResultsRef.current) return;
-    shouldFocusResultsRef.current = false;
-    focusResults(resultsHeadingRef.current);
-  }, [purpose, rawSearch, selectedCategoryId]);
+    let cancelled = false;
+    if (!searchInputDirtyRef.current && (!pending || pending.latest === committedQuery || !pending.lineage.has(committedQuery))) {
+      queueMicrotask(() => {
+        const latestPending = pendingNavigationRef.current;
+        if (!cancelled && !searchInputDirtyRef.current && (!latestPending || latestPending.latest === committedQuery || !latestPending.lineage.has(committedQuery))) {
+          setSearchInput(rawSearch);
+        }
+      });
+    }
+
+    if (focusAfterQueryRef.current === committedQuery) {
+      focusAfterQueryRef.current = null;
+      focusResults(resultsHeadingRef.current);
+    }
+    return () => { cancelled = true; };
+  }, [committedQuery, rawSearch]);
+
+  function latestParams() {
+    const pending = pendingNavigationRef.current;
+    return new URLSearchParams(pending?.lineage.has(committedQuery) ? pending.latest : committedQuery);
+  }
+
+  function pushParams(params: URLSearchParams) {
+    const query = params.toString();
+    const pending = pendingNavigationRef.current;
+    const lineage = pending?.lineage.has(committedQuery) ? pending.lineage : new Set([committedQuery]);
+    lineage.add(query);
+    pendingNavigationRef.current = { latest: query, lineage };
+    focusAfterQueryRef.current = query;
+    router.push(query ? `${pathname}?${query}` : pathname, { scroll: false });
+  }
 
   function updateCategory(categoryId: CategoryId | null) {
-    if (categoryId === selectedCategoryId) {
+    const params = latestParams();
+    if (categoryId === (params.get("risk") ?? null)) {
       focusResults(resultsHeadingRef.current);
       return;
     }
-    const params = new URLSearchParams(searchParams.toString());
     if (categoryId) {
       params.set("risk", categoryId);
       if (isNetisEfficiencyCategoryId(categoryId)) params.set("purpose", "efficiency");
@@ -183,33 +227,28 @@ export function NetisSafetyExplorer() {
       params.delete("risk");
       params.delete("q");
     }
-    const query = params.toString();
-    shouldFocusResultsRef.current = true;
-    router.push(query ? `${pathname}?${query}` : pathname, { scroll: false });
+    pushParams(params);
   }
 
   function updatePurpose(nextPurpose: Purpose) {
-    const params = new URLSearchParams(searchParams.toString());
+    const params = latestParams();
     if (nextPurpose === "safety") params.delete("purpose");
     else params.set("purpose", nextPurpose);
     params.delete("risk");
-    shouldFocusResultsRef.current = true;
-    const query = params.toString();
-    router.push(query ? `${pathname}?${query}` : pathname, { scroll: false });
+    pushParams(params);
   }
 
   function updateSearch(value: string) {
     const queryValue = value.trim();
-    if (queryValue === rawSearch) {
+    const params = latestParams();
+    if (queryValue === (params.get("q")?.trim() ?? "")) {
       focusResults(resultsHeadingRef.current);
       return;
     }
-    const params = new URLSearchParams(searchParams.toString());
     if (queryValue) params.set("q", queryValue);
     else params.delete("q");
-    const query = params.toString();
-    shouldFocusResultsRef.current = true;
-    router.push(query ? `${pathname}?${query}` : pathname, { scroll: false });
+    searchInputDirtyRef.current = false;
+    pushParams(params);
   }
 
   return (
@@ -385,7 +424,10 @@ export function NetisSafetyExplorer() {
             id="netis-catalog-search"
             type="search"
             value={searchInput}
-            onChange={(event) => setSearchInput(event.target.value)}
+            onChange={(event) => {
+              searchInputDirtyRef.current = true;
+              setSearchInput(event.target.value);
+            }}
             placeholder="例：WBGT、ハーネス、KK-210002"
             className="min-h-11 min-w-0 flex-1 rounded-xl border border-slate-300 bg-white px-3 text-base text-slate-950 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
           />
