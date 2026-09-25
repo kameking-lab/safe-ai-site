@@ -28,39 +28,77 @@ test.describe("安全研修ライブラリ", () => {
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", `https://www.anzen-ai-portal.jp${HUB}`);
   });
 
-  test("音声の再生・一時停止、スライド移動、常時字幕、原稿、keyboardを操作できる", async ({ page }) => {
-    await page.goto(DETAIL);
-    const audio = page.locator("audio");
-    await expect(audio).toHaveCount(1);
-    expect(await audio.evaluate((element) => (element as HTMLAudioElement).paused)).toBe(true);
-
-    await page.getByRole("button", { name: "再生" }).click();
-    await expect.poll(() => audio.evaluate((element) => (element as HTMLAudioElement).currentTime)).toBeGreaterThan(0);
-    await page.getByRole("button", { name: "一時停止" }).click();
-    expect(await audio.evaluate((element) => (element as HTMLAudioElement).paused)).toBe(true);
-    await page.getByRole("button", { name: "次のスライド" }).click();
-    await expect(page.getByText("02 / 20")).toBeVisible();
-    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
-    await page.keyboard.press("ArrowRight");
-    await expect(page.getByText("03 / 20")).toBeVisible();
-    await page.keyboard.press("ArrowLeft");
-    await expect(page.getByText("02 / 20")).toBeVisible();
-
-    await expect(page.getByTestId("seminar-controls").getByRole("button")).toHaveCount(5);
-    await expect(page.getByRole("button", { name: "字幕" })).toHaveCount(0);
-    await expect(page.locator('[role="status"]')).toBeVisible();
-    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
-    await page.keyboard.press("c");
-    await expect(page.locator('[role="status"]')).toBeVisible();
-    await page.getByRole("button", { name: "音声原稿を読む" }).click();
-    await expect(page.getByRole("heading", { name: "講師向け補足" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "停止" })).toHaveCount(0);
-    await expect(page.getByRole("combobox", { name: "再生速度" })).toHaveCount(0);
+  test("安全2教材は音声を作らず、移動・一覧・詳説を使える", async ({ page }) => {
+    await page.addInitScript(() => {
+      const state = (window as Window & { __silentAudioCalls?: { play: number; speak: number } }).__silentAudioCalls = { play: 0, speak: 0 };
+      const nativePlay = HTMLMediaElement.prototype.play;
+      HTMLMediaElement.prototype.play = function (...args) {
+        state.play += 1;
+        return nativePlay.apply(this, args);
+      };
+      if (window.speechSynthesis) {
+        const nativeSpeak = window.speechSynthesis.speak.bind(window.speechSynthesis);
+        window.speechSynthesis.speak = (utterance) => {
+          state.speak += 1;
+          return nativeSpeak(utterance);
+        };
+      }
+    });
+    for (const [path, count] of [[DETAIL, 20], [OSH_DETAIL, 12]] as const) {
+      const audioRequests: string[] = [];
+      const onRequest = (request: { url: () => string }) => {
+        if (/\/audio\/slide-\d+\.mp3/u.test(request.url())) audioRequests.push(request.url());
+      };
+      page.on("request", onRequest);
+      await page.goto(path);
+      const player = page.getByRole("region", { name: /研修スライド/u });
+      await expect(player).not.toContainText("音声付き");
+      await expect(page.locator("audio")).toHaveCount(0);
+      await expect(page.getByRole("button", { name: "再生" })).toHaveCount(0);
+      await expect(page.getByTestId("seminar-controls").getByRole("button")).toHaveCount(3);
+      await page.getByRole("button", { name: "次のスライド" }).click();
+      await expect(page.getByText(`02 / ${count}`)).toBeVisible();
+      await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+      await page.keyboard.press("ArrowRight");
+      await expect(page.getByText(`02 / ${count}`)).toBeVisible();
+      await expect(page.getByText(`03 / ${count}`)).toHaveCount(0);
+      await player.focus();
+      await page.keyboard.press("ArrowRight");
+      await expect(page.getByText(`03 / ${count}`)).toBeVisible();
+      const scrollBeforeSpace = await page.evaluate(() => window.scrollY);
+      await page.keyboard.press("Space");
+      await expect(page.getByText(`03 / ${count}`)).toBeVisible();
+      expect(await page.evaluate(() => window.scrollY)).toBe(scrollBeforeSpace);
+      await page.getByRole("button", { name: "スライド一覧" }).click();
+      await expect(page.getByRole("button", { name: new RegExp(`^${count}\\.`) })).toBeVisible();
+      await page.getByRole("button", { name: "詳しく" }).click();
+      await expect(page.getByRole("heading", { name: "講師向け補足" })).toBeVisible();
+      await expect(page.getByRole("button", { name: "全画面" })).toBeVisible();
+      await page.getByRole("button", { name: "全画面" }).click();
+      await expect.poll(() => page.evaluate(() => Boolean(document.fullscreenElement))).toBe(true);
+      await page.keyboard.press("ArrowRight");
+      await expect(page.getByText(`04 / ${count}`)).toBeVisible();
+      await page.evaluate(() => document.exitFullscreen());
+      expect(audioRequests, path).toEqual([]);
+      expect(await page.evaluate(() => (window as Window & { __silentAudioCalls?: { play: number; speak: number } }).__silentAudioCalls)).toEqual({ play: 0, speak: 0 });
+      page.off("request", onRequest);
+    }
   });
 
-  test("320/390/768/1440pxと400%相当で横溢れしない", async ({ page }) => {
-    for (const width of [320, 390, 768, 1440]) {
-      await page.setViewportSize({ width, height: width <= 390 ? 844 : 900 });
+  test("AI研修の既存音声プレイヤーは再生操作を維持する", async ({ page }) => {
+    await page.goto("/training/ai-seminars/ai-chat-work");
+    const audio = page.locator("audio");
+    await expect(audio).toHaveCount(1);
+    await expect(page.getByTestId("seminar-controls").getByRole("button")).toHaveCount(5);
+    await page.getByRole("button", { name: "再生" }).click();
+    await expect(page.getByRole("button", { name: "一時停止" })).toBeVisible();
+    await expect.poll(() => audio.evaluate((element) => (element as HTMLAudioElement).currentTime)).toBeGreaterThan(0);
+  });
+
+  test("320/390/768/1440/1920pxと400%相当で横溢れしない", async ({ page }) => {
+    test.setTimeout(90_000);
+    for (const width of [320, 390, 768, 1440, 1920]) {
+      await page.setViewportSize({ width, height: width <= 390 ? 844 : width === 1920 ? 1080 : 900 });
       await page.goto(DETAIL);
       const overflow = await page.evaluate(
         () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
@@ -75,7 +113,7 @@ test.describe("安全研修ライブラリ", () => {
         () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
       ),
     ).toBeLessThanOrEqual(1);
-    await expect(page.getByRole("button", { name: "再生" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "次のスライド" })).toBeVisible();
   });
 
   test("light/darkの全viewportと原稿open状態にserious/criticalのAxe違反がない", async ({ page }) => {
@@ -86,7 +124,7 @@ test.describe("安全研修ライブラリ", () => {
         await page.setViewportSize({ width, height: width <= 390 ? 844 : 900 });
         await page.goto(DETAIL);
         if (width === 320) {
-          await page.getByRole("button", { name: "音声原稿を読む" }).click();
+          await page.getByRole("button", { name: "詳しく" }).click();
         }
         const results = await new AxeBuilder({ page }).analyze();
         const highImpact = results.violations.filter(
@@ -219,9 +257,9 @@ test.describe("安全研修ライブラリ", () => {
 });
 
 test.describe("安全管理の基本と安衛法 PR1", () => {
-  test("320/390/1440pxで投影面の寸法・文字・5操作・タップ対象を満たす", async ({ page }) => {
-    for (const width of [320, 390, 1440]) {
-      await page.setViewportSize({ width, height: width <= 390 ? 844 : 900 });
+  test("320/390/1440/1920pxで投影面の寸法・文字・3主操作・タップ対象を満たす", async ({ page }) => {
+    for (const width of [320, 390, 1440, 1920]) {
+      await page.setViewportSize({ width, height: width <= 390 ? 844 : width === 1920 ? 1080 : 900 });
       await page.goto(OSH_DETAIL);
       const overflow = await page.evaluate(
         () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
@@ -230,18 +268,18 @@ test.describe("安全管理の基本と安衛法 PR1", () => {
 
       const stage = page.getByTestId("seminar-stage");
       const controls = page.getByTestId("seminar-controls");
-      const play = page.getByRole("button", { name: "再生" });
-      await expect(controls.locator("button")).toHaveCount(5);
-      const [stageBox, controlsBox, playBox] = await Promise.all([
+      const next = page.getByRole("button", { name: "次のスライド" });
+      await expect(controls.locator("button")).toHaveCount(3);
+      const [stageBox, controlsBox, nextBox] = await Promise.all([
         stage.boundingBox(),
         controls.boundingBox(),
-        play.boundingBox(),
+        next.boundingBox(),
       ]);
       expect(stageBox).toBeTruthy();
       expect(controlsBox).toBeTruthy();
-      expect(playBox).toBeTruthy();
+      expect(nextBox).toBeTruthy();
       if (width <= 390) {
-        expect(playBox!.y - stageBox!.y, `${width}px stage to play`).toBeLessThanOrEqual(640);
+        expect(nextBox!.y - stageBox!.y, `${width}px stage to next`).toBeLessThanOrEqual(640);
       } else {
         expect(controlsBox!.y + controlsBox!.height - stageBox!.y, "desktop stage and controls")
           .toBeLessThanOrEqual(820);

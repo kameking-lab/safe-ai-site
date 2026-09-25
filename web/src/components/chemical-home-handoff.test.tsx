@@ -59,3 +59,14 @@ it.each([["granted", "candidate"], ["denied", "candidate"], ["granted", "submit"
   view.rerender(<App />);
   expect(window.scrollTo).toHaveBeenCalledWith({ top: 640, left: 0 });
 });
+
+it("submits while the background candidate search is still loading", async () => {
+  mocks.search.mockImplementation(() => new Promise(() => undefined));
+  render(<App />);
+  fireEvent.change(screen.getByRole("combobox", { name: "化学物質を検索" }), { target: { value: "トルエン" } });
+  await waitFor(() => expect(mocks.search).toHaveBeenCalled());
+  const submit = screen.getByRole("button", { name: "検索" }) as HTMLButtonElement;
+  expect(submit.disabled).toBe(false);
+  fireEvent.click(submit);
+  await waitFor(() => expect(mocks.push).toHaveBeenCalledWith("/chemical-ra#chemical-ra-start"));
+});

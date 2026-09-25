@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Download, FileText, Headphones, Presentation } from "lucide-react";
+import { ArrowRight, Download, FileText, Presentation } from "lucide-react";
 import { JsonLd } from "@/components/json-ld";
 import { PageContainer } from "@/components/layout";
 import { SafetySeminarPlayer } from "@/components/training/safety-seminar-player";
@@ -14,9 +14,9 @@ import type { TrainingClaim, TrainingCourse, TrainingQuiz, TrainingSource } from
 import { SITE_URL, withSiteAlternates, withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
 
 const PATH = "/training/safety-seminars/safety-management-basics-osh-law";
-const TITLE = "安全管理の基本と安衛法｜無料・音声付き安全研修";
+const TITLE = "安全管理の基本と安衛法｜無料安全研修";
 const DESCRIPTION =
-  "安衛法の目的、役割分担、OSHMS、リスクアセスメント、対策の優先順位、変更時の停止判断を12枚で学ぶ無料の音声付き安全研修。";
+  "安衛法の目的、役割分担、OSHMS、リスクアセスメント、対策の優先順位、変更時の停止判断を12枚で学ぶ無料の安全研修。";
 const training = trainingJson as TrainingCourse;
 const claims = claimsJson as TrainingClaim[];
 const sources = sourcesJson as TrainingSource[];
@@ -45,10 +45,6 @@ export async function generateMetadata({
 }
 
 export default function SafetyManagementBasicsOshLawPage() {
-  const estimatedMinutes = Math.round(
-    (training.standardMinutes.audioMin + training.standardMinutes.audioMax) / 2,
-  );
-
   return (
     <PageContainer width="full" className="pb-20">
       <JsonLd
@@ -97,13 +93,12 @@ export default function SafetyManagementBasicsOshLawPage() {
           </h1>
           <p className="mt-4 max-w-3xl text-base leading-7 text-emerald-50 sm:text-lg">{training.subtitle}</p>
           <div className="mt-5 flex flex-wrap gap-2 text-xs font-bold sm:text-sm">
-            <span className="rounded-full bg-white/10 px-3 py-2"><Headphones className="mr-1 inline h-4 w-4" aria-hidden="true" />音声 約{estimatedMinutes}分</span>
             <span className="rounded-full bg-white/10 px-3 py-2"><Presentation className="mr-1 inline h-4 w-4" aria-hidden="true" />12枚</span>
             <span className="rounded-full bg-white/10 px-3 py-2">基準日 {training.asOf}</span>
           </div>
           <p className="mt-5 rounded-xl border border-amber-200 bg-black/20 p-3 font-bold leading-6 text-amber-50">{training.boundary}</p>
           <a href="#seminar-player" className="mt-6 inline-flex min-h-11 items-center gap-2 rounded-xl bg-emerald-200 px-5 py-3 font-black text-emerald-950 hover:bg-emerald-100">
-            今すぐ再生 <ArrowRight className="h-5 w-5" aria-hidden="true" />
+            スライドを見る <ArrowRight className="h-5 w-5" aria-hidden="true" />
           </a>
         </div>
         <div className="relative bg-emerald-50" style={{ minHeight: 320 }}>
@@ -123,8 +118,8 @@ export default function SafetyManagementBasicsOshLawPage() {
           slides={training.slides}
           claims={claims}
           sources={sources}
-          audioBasePath={`${PATH}/audio`}
-          playerLabel="安全管理の基本と安衛法の音声付き研修"
+          audioEnabled={false}
+          playerLabel="安全管理の基本と安衛法の研修スライド"
           transcriptId="safety-management-basics-transcript"
         />
       </section>
@@ -166,7 +161,7 @@ export default function SafetyManagementBasicsOshLawPage() {
       </section>
 
       <section aria-labelledby="outline-title" className="mt-12" style={{ contentVisibility: "auto", containIntrinsicSize: "auto 1500px" }}>
-        <h2 id="outline-title" className="text-3xl font-black text-slate-950 dark:text-white">12枚の構成と音声原稿</h2>
+        <h2 id="outline-title" className="text-3xl font-black text-slate-950 dark:text-white">12枚の構成と講師用の詳説</h2>
         <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">この章では、災害を起こさない安全管理と現行法を扱います。</p>
         <div className="mt-5 grid gap-3 lg:grid-cols-2">
           {training.slides.map((slide) => (

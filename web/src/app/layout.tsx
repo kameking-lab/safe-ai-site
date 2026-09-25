@@ -12,7 +12,7 @@ import { getRumServerReadiness } from "@/lib/rum/server-readiness";
 import { DeferredGlobalEnhancements } from "@/components/deferred-global-enhancements";
 import { CspNonceProvider } from "@/components/csp-nonce-context";
 import { ScrollPositionRestorer } from "@/components/scroll-position-restorer";
-import { adsenseAccountMetadata } from "@/lib/adsense-account";
+import { adsenseAccountMetadata, configuredAdsensePublisherId } from "@/lib/adsense-account";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -138,7 +138,7 @@ export default async function RootLayout({
     rawRumBuildId.replace(/[^A-Za-z0-9_-]/g, "").slice(0, 80) ||
     "production-build";
   const adsEnabled =
-    !PREVIEW_SAFETY_MODE && Boolean(process.env.NEXT_PUBLIC_ADSENSE_PUB_ID);
+    !PREVIEW_SAFETY_MODE && Boolean(configuredAdsensePublisherId(process.env.NEXT_PUBLIC_ADSENSE_PUB_ID));
   return (
     <html lang="ja" className="h-full antialiased" suppressHydrationWarning>
       <head>
