@@ -43,8 +43,8 @@ function categoryFor(id: CategoryId) {
 
 function focusResults(heading: HTMLHeadingElement | null) {
   heading?.focus({ preventScroll: true });
-  heading?.scrollIntoView({
-    behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  heading?.scrollIntoView?.({
+    behavior: (typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches)
       ? "instant"
       : "smooth",
     block: "start",

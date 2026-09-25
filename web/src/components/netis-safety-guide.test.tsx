@@ -308,7 +308,7 @@ describe("NetisSafetyGuide", () => {
     expect(screen.getByText("養生・仮設敷設：1件")).toBeDefined();
     expect(screen.getByRole("button", { name: "作業を効率化" }).getAttribute("aria-pressed")).toBe("true");
     fireEvent.click(screen.getByRole("button", { name: "安全を高める" }));
-    expect(navigation.push).toHaveBeenCalledWith("/resources/netis-safety?purpose=safety&q=HK-190004", { scroll: false });
+    expect(navigation.push).toHaveBeenCalledWith("/resources/netis-safety?q=HK-190004&purpose=safety", { scroll: false });
   });
 
   it("第5陣26件と第6陣14件を限定紹介として加え、全100件の基番号と正式名称を重複させない", () => {

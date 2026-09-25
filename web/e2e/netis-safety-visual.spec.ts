@@ -13,7 +13,7 @@ test("第4陣の海上と仮設敷設を直接URL・検索・戻るで探せる"
   await expect(page.getByRole("heading", { name: "養生・仮設敷設：1件" })).toBeVisible();
   await expect(page.getByRole("button", { name: "作業を効率化" })).toHaveAttribute("aria-pressed", "true");
   await page.getByRole("button", { name: "安全を高める" }).click();
-  await expect(page).toHaveURL(`${ROUTE}?purpose=safety&q=HK-190004`);
+  await expect(page).toHaveURL(`${ROUTE}?q=HK-190004&purpose=safety`);
   await page.goBack();
   await expect(page.getByRole("heading", { name: "養生・仮設敷設：1件" })).toBeVisible();
 });
