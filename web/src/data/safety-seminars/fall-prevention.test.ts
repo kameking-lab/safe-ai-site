@@ -233,6 +233,26 @@ describe("墜落・転落防止研修の共通正本", () => {
     expect(mascotPaths.size).toBe(4);
   });
 
+  it("教育・演習・現場確認の5枚は確認済み条文へ直接たどれる", () => {
+    const refsBySlide: Record<string, string[]> = {
+      "harness-special-education": ["安衛法|第59条第3項|59", "安衛則|第36条第41号|36"],
+      "different-systems": ["安衛則|第36条第41号|36", "安衛則|第38条|38"],
+      "anchor-clearance": ["安衛則|第521条|521"],
+      "visual-ky": ["安衛則|第519条|519", "安衛則|第527条|527", "安衛則|第528条|528", "安衛則|第563条|563"],
+      "field-checklist": ["安衛則|第518条|518", "安衛則|第519条|519", "安衛則|第521条|521", "安衛則|第36条第41号|36"],
+    };
+    for (const [slideId, expected] of Object.entries(refsBySlide)) {
+      const slide = training.slides.find((item) => item.id === slideId);
+      expect(slide?.articleRefs?.map(({ lawShort, article, naviPath }) =>
+        `${lawShort}|${article}|${naviPath?.split("/").at(-1)}`), slideId).toEqual(expected);
+      for (const ref of slide?.articleRefs ?? []) {
+        expect(sourceById.has(ref.sourceId), slideId).toBe(true);
+        const lawId = ref.lawShort === "安衛法" ? "347AC0000000057" : "347M50002000032";
+        expect(ref.egovUrl, slideId).toMatch(new RegExp(`^https://laws\\.e-gov\\.go\\.jp/law/${lawId}#Mp-`));
+      }
+    }
+  });
+
   it("まとめスライドのPPTX用3メッセージを共通データで管理する", () => {
     const summary = training.slides.find((slide) => slide.id === "summary");
     expect(summary?.visual.type).toBe("image");
