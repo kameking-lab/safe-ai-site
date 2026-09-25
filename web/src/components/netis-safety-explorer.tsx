@@ -27,11 +27,12 @@ import {
 } from "./netis-wave2-data";
 import { NETIS_WAVE3_TECHNOLOGIES } from "./netis-wave3-data";
 import { NETIS_WAVE4_CATEGORIES, NETIS_WAVE4_TECHNOLOGIES, isNetisWave4CategoryId, type NetisWave4CategoryId } from "./netis-wave4-data";
+import { NETIS_WAVE5_CATEGORIES, NETIS_WAVE5_TECHNOLOGIES, isNetisWave5CategoryId, type NetisWave5CategoryId } from "./netis-wave5-data";
 
-type CategoryId = NetisSafetyCategoryId | NetisEfficiencyCategoryId | NetisWave2CategoryId | NetisWave4CategoryId;
+type CategoryId = NetisSafetyCategoryId | NetisEfficiencyCategoryId | NetisWave2CategoryId | NetisWave4CategoryId | NetisWave5CategoryId;
 type Purpose = "safety" | "efficiency" | "quality" | "all";
-const ALL_TECHNOLOGIES = [...FEATURED_NETIS_TECHNOLOGIES, ...NETIS_EFFICIENCY_TECHNOLOGIES, ...NETIS_WAVE2_TECHNOLOGIES, ...NETIS_WAVE3_TECHNOLOGIES, ...NETIS_WAVE4_TECHNOLOGIES];
-const ALL_CATEGORIES = [...NETIS_SAFETY_CATEGORIES, ...NETIS_EFFICIENCY_CATEGORIES, ...NETIS_WAVE2_CATEGORIES, ...NETIS_WAVE4_CATEGORIES];
+const ALL_TECHNOLOGIES = [...FEATURED_NETIS_TECHNOLOGIES, ...NETIS_EFFICIENCY_TECHNOLOGIES, ...NETIS_WAVE2_TECHNOLOGIES, ...NETIS_WAVE3_TECHNOLOGIES, ...NETIS_WAVE4_TECHNOLOGIES, ...NETIS_WAVE5_TECHNOLOGIES];
+const ALL_CATEGORIES = [...NETIS_SAFETY_CATEGORIES, ...NETIS_EFFICIENCY_CATEGORIES, ...NETIS_WAVE2_CATEGORIES, ...NETIS_WAVE4_CATEGORIES, ...NETIS_WAVE5_CATEGORIES];
 
 function categoryFor(id: CategoryId) {
   return ALL_CATEGORIES.find(
@@ -104,10 +105,11 @@ export function NetisSafetyExplorer() {
   const rawPurpose = searchParams.get("purpose");
   const wave2Category = NETIS_WAVE2_CATEGORIES.find((category) => category.id === rawCategory);
   const wave4Category = NETIS_WAVE4_CATEGORIES.find((category) => category.id === rawCategory);
+  const wave5Category = NETIS_WAVE5_CATEGORIES.find((category) => category.id === rawCategory);
   const purpose: Purpose = rawPurpose === "efficiency" || rawPurpose === "quality" || rawPurpose === "all"
     ? rawPurpose
-    : wave4Category?.purpose ?? wave2Category?.purpose ?? (isNetisEfficiencyCategoryId(rawCategory) ? "efficiency" : "safety");
-  const candidateCategoryId: CategoryId | null = isNetisSafetyCategoryId(rawCategory) || isNetisEfficiencyCategoryId(rawCategory) || isNetisWave2CategoryId(rawCategory) || isNetisWave4CategoryId(rawCategory)
+    : wave5Category?.purpose ?? wave4Category?.purpose ?? wave2Category?.purpose ?? (isNetisEfficiencyCategoryId(rawCategory) ? "efficiency" : "safety");
+  const candidateCategoryId: CategoryId | null = isNetisSafetyCategoryId(rawCategory) || isNetisEfficiencyCategoryId(rawCategory) || isNetisWave2CategoryId(rawCategory) || isNetisWave4CategoryId(rawCategory) || isNetisWave5CategoryId(rawCategory)
     ? rawCategory
     : null;
   const candidatePurpose = candidateCategoryId
@@ -117,6 +119,8 @@ export function NetisSafetyExplorer() {
         ? wave2Category?.purpose
         : isNetisWave4CategoryId(candidateCategoryId)
           ? wave4Category?.purpose
+          : isNetisWave5CategoryId(candidateCategoryId)
+            ? wave5Category?.purpose
           : "safety"
     : null;
   const selectedCategoryId: CategoryId | null = candidateCategoryId && (purpose === "all" || candidatePurpose === purpose)
@@ -136,8 +140,13 @@ export function NetisSafetyExplorer() {
   const technologies = useMemo(
     () =>
       ALL_TECHNOLOGIES.filter((technology) => {
-        const isSafety = !("officialSourceUrl" in technology) || ("primaryPurpose" in technology && technology.primaryPurpose === "safety");
-        const isQuality = "primaryPurpose" in technology && technology.primaryPurpose === "quality";
+        const technologyPurpose = "primaryPurpose" in technology
+          ? technology.primaryPurpose
+          : "officialSourceUrl" in technology
+            ? "efficiency"
+            : "safety";
+        const isSafety = technologyPurpose === "safety";
+        const isQuality = technologyPurpose === "quality";
         if (purpose === "safety" && !isSafety) return false;
         if (purpose === "efficiency" && (isSafety || isQuality)) return false;
         if (purpose === "quality" && !isQuality) return false;
@@ -155,9 +164,11 @@ export function NetisSafetyExplorer() {
             technology.registrationNumber,
             "sourceRegistrationNumber" in technology ? technology.sourceRegistrationNumber : "",
             technology.summary,
-            technology.mechanism,
-            technology.useCase,
-            technology.limitations,
+            "mechanism" in technology ? technology.mechanism : "",
+            "useCase" in technology ? technology.useCase : "",
+            "limitations" in technology ? technology.limitations : "",
+            "searchTerms" in technology ? technology.searchTerms : "",
+            "categoryLabel" in technology ? technology.categoryLabel : "",
           ].join(" "),
         ).includes(query);
       }),
@@ -241,6 +252,7 @@ export function NetisSafetyExplorer() {
         if (categoryPurpose === "safety") params.delete("purpose");
         else params.set("purpose", categoryPurpose);
       }
+      else if (isNetisWave5CategoryId(categoryId)) params.delete("purpose");
       else params.delete("purpose");
     }
     else {
@@ -331,7 +343,7 @@ export function NetisSafetyExplorer() {
             ? NETIS_WAVE2_CATEGORIES.filter((category) => category.purpose === "quality")
             : purpose === "all"
               ? ALL_CATEGORIES
-              : [...NETIS_SAFETY_CATEGORIES, ...NETIS_WAVE4_CATEGORIES.filter((category) => category.purpose === "safety")]).map((category, index) => {
+              : [...NETIS_SAFETY_CATEGORIES, ...NETIS_WAVE4_CATEGORIES.filter((category) => category.purpose === "safety"), ...NETIS_WAVE5_CATEGORIES]).map((category, index) => {
           const selected = selectedCategoryId === category.id;
           const visualCategory = "image" in category ? category : null;
           return (
@@ -387,7 +399,7 @@ export function NetisSafetyExplorer() {
         当サイトで出典を確認した{ALL_TECHNOLOGIES.length}件を掲載しています。NETIS全登録技術の一覧ではありません。
       </p>
       <p className="mt-1 text-sm leading-6 text-slate-700 dark:text-slate-200">
-        追加14件は2026年9月25日にNETIS個別ページの名称・番号を確認。従来の効率化・品質候補{NETIS_EFFICIENCY_TECHNOLOGIES.length + NETIS_WAVE2_TECHNOLOGIES.length + NETIS_WAVE3_TECHNOLOGIES.length}件は公式一覧等の照合で、個別の現行状態は未確認です。
+        第5陣26件は2026年9月26日にNETIS個別ページの名称・番号・概要を確認した「調査した技術例」です。最新の掲載状況・適用条件は各公式ページで確認してください。
       </p>
       <details className="mt-1 text-xs text-slate-600 dark:text-slate-300">
         <summary className="flex min-h-11 cursor-pointer items-center font-bold underline underline-offset-4">
@@ -523,6 +535,24 @@ export function NetisSafetyExplorer() {
           <div className="mt-4 grid gap-4 lg:grid-cols-2">
             {technologies.map((technology) => {
               const primaryCategory = categoryFor(technology.categoryIds[0]);
+              if ("limitedIntroduction" in technology) {
+                return (
+                  <article key={technology.registrationNumber} className="min-w-0 rounded-2xl border border-sky-200 bg-white p-4 shadow-sm dark:border-sky-900 dark:bg-slate-900 sm:p-5">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="rounded-full bg-sky-100 px-2.5 py-1 text-[11px] font-black text-sky-900 dark:bg-sky-950 dark:text-sky-200">{technology.categoryLabel}</span>
+                      <span className="break-all font-mono text-xs font-black text-sky-800 dark:text-sky-300">{technology.registrationNumber}</span>
+                    </div>
+                    <h4 className="mt-2 text-base font-black leading-6 text-slate-950 dark:text-white">
+                      <a id={`netis-tech-${technology.registrationNumber}`} href={technology.individualUrl} onClick={() => rememberReturnPosition(technology.registrationNumber)} className="flex min-h-11 items-center break-words underline decoration-sky-300 underline-offset-4 hover:text-sky-900 focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-sky-600 dark:hover:text-sky-200">
+                        {technology.name}<span className="sr-only">（NETIS公式の詳細を開く）</span>
+                      </a>
+                    </h4>
+                    <p className="mt-1 text-sm leading-6 text-slate-700 dark:text-slate-200">{technology.summary}</p>
+                    <p className="mt-2 text-xs font-semibold leading-5 text-slate-600 dark:text-slate-300">調査した技術の例。{technology.checkedAt}に公式個別ページで名称・番号・概要を確認。最新の掲載状況・適用条件は公式ページで確認してください。</p>
+                    {technology.registrationNumber === "KTK-210013-A" ? <p className="mt-2 text-xs font-bold leading-5 text-amber-900 dark:text-amber-200">防災用の水際設備です。作業員用保護具や避難判断を代替しません。</p> : null}
+                  </article>
+                );
+              }
               const reference = "officialSourceUrl" in technology;
               const productImage = "productImage" in technology ? technology.productImage : null;
               const mainUrl = reference

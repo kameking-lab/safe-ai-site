@@ -13,6 +13,7 @@ import {
 import { NETIS_WAVE2_CATEGORIES, NETIS_WAVE2_TECHNOLOGIES } from "./netis-wave2-data";
 import { NETIS_WAVE3_TECHNOLOGIES } from "./netis-wave3-data";
 import { NETIS_WAVE4_CATEGORIES, NETIS_WAVE4_TECHNOLOGIES } from "./netis-wave4-data";
+import { NETIS_WAVE5_CATEGORIES, NETIS_WAVE5_TECHNOLOGIES } from "./netis-wave5-data";
 import { NetisSafetyExplorer } from "./netis-safety-explorer";
 import { NetisSafetyGuide } from "./netis-safety-guide";
 
@@ -173,7 +174,7 @@ describe("NetisSafetyGuide", () => {
         expect(article.textContent).toContain("利用許諾を確認中");
       }
     }
-    expect(container.querySelectorAll("article")).toHaveLength(22);
+    expect(container.querySelectorAll("article")).toHaveLength(23);
   });
 
   it("同じタブの詳細から戻ったとき、保存したスクロール位置と名称リンクへのフォーカスを復元する", () => {
@@ -202,8 +203,8 @@ describe("NetisSafetyGuide", () => {
     navigation.query = "purpose=efficiency";
     const { container } = render(<NetisSafetyExplorer />);
     expect(screen.getByRole("button", { name: "作業を効率化" }).getAttribute("aria-pressed")).toBe("true");
-    expect(screen.getByText("作業効率化候補：32件")).toBeDefined();
-    expect(container.querySelectorAll("article")).toHaveLength(32);
+    expect(screen.getByText("作業効率化候補：47件")).toBeDefined();
+    expect(container.querySelectorAll("article")).toHaveLength(47);
     expect(screen.queryByText(/ヒヤリハンター/)).toBeNull();
     for (const category of NETIS_EFFICIENCY_CATEGORIES) {
       expect(screen.getByRole("button", { name: category.label })).toBeDefined();
@@ -238,8 +239,8 @@ describe("NetisSafetyGuide", () => {
   it("品質・検査6件を独立した目的として表示し、効率化件数に混ぜない", () => {
     navigation.query = "purpose=quality";
     const { container } = render(<NetisSafetyExplorer />);
-    expect(screen.getByText("品質・検査候補：6件")).toBeDefined();
-    expect(container.querySelectorAll("article")).toHaveLength(6);
+    expect(screen.getByText("品質・検査候補：16件")).toBeDefined();
+    expect(container.querySelectorAll("article")).toHaveLength(16);
     for (const technology of [...NETIS_WAVE2_TECHNOLOGIES, ...NETIS_WAVE3_TECHNOLOGIES].filter((item) => item.primaryPurpose === "quality")) {
       expect(container.textContent).toContain(technology.name);
     }
@@ -307,6 +308,40 @@ describe("NetisSafetyGuide", () => {
     expect(screen.getByRole("button", { name: "作業を効率化" }).getAttribute("aria-pressed")).toBe("true");
     fireEvent.click(screen.getByRole("button", { name: "安全を高める" }));
     expect(navigation.push).toHaveBeenCalledWith("/resources/netis-safety?q=HK-190004", { scroll: false });
+  });
+
+  it("第5陣26件を限定紹介として加え、全86件の基番号と正式名称を重複させない", () => {
+    const all = [...FEATURED_NETIS_TECHNOLOGIES, ...NETIS_EFFICIENCY_TECHNOLOGIES, ...NETIS_WAVE2_TECHNOLOGIES, ...NETIS_WAVE3_TECHNOLOGIES, ...NETIS_WAVE4_TECHNOLOGIES, ...NETIS_WAVE5_TECHNOLOGIES];
+    expect(all).toHaveLength(86);
+    expect(new Set(all.map((item) => item.registrationNumber.replace(/-(?:A|V[ER])$/i, ""))).size).toBe(86);
+    expect(new Set(all.map((item) => item.name.normalize("NFKC").toLocaleLowerCase("ja"))).size).toBe(86);
+    expect(NETIS_WAVE5_TECHNOLOGIES).toHaveLength(26);
+    expect(NETIS_WAVE5_TECHNOLOGIES.filter((item) => item.primaryPurpose === "safety")).toHaveLength(1);
+    expect(NETIS_WAVE5_TECHNOLOGIES.filter((item) => item.primaryPurpose === "efficiency")).toHaveLength(15);
+    expect(NETIS_WAVE5_TECHNOLOGIES.filter((item) => item.primaryPurpose === "quality")).toHaveLength(10);
+    for (const item of NETIS_WAVE5_TECHNOLOGIES) {
+      expect(item.limitedIntroduction).toBe(true);
+      expect(item.individualUrl).toBe(`https://www.netis.mlit.go.jp/netis/pubsearch/details?regNo=${item.registrationNumber.replace(/-(?:A|V[ER])$/i, "")}`);
+      expect(item.checkedAt).toBe("2026年9月26日");
+      expect(item.summary.length).toBeGreaterThan(15);
+    }
+  });
+
+  it("第5陣は番号・用途語・防災カテゴリのURLから探せ、誤認防止文を表示する", () => {
+    navigation.query = "purpose=quality&q=KK-150069-VE";
+    const { container, unmount } = render(<NetisSafetyExplorer />);
+    expect(screen.getByText("品質・検査候補：1件")).toBeDefined();
+    expect(container.textContent).toContain("鋼製埋設部路面境界部の損傷判定、診断方法");
+    expect(container.textContent).toContain("調査した技術の例");
+    expect(container.textContent).toContain("最新の掲載状況・適用条件は公式ページで確認");
+    expect(container.querySelector("article a[id^='netis-tech-']")?.getAttribute("href")).toBe("https://www.netis.mlit.go.jp/netis/pubsearch/details?regNo=KK-150069");
+    unmount();
+
+    navigation.query = "risk=flood-defense&q=アクリル";
+    render(<NetisSafetyExplorer />);
+    expect(screen.getByText("洪水・高潮（防災）：1件")).toBeDefined();
+    expect(screen.getByText(/作業員用保護具や避難判断を代替しません/)).toBeDefined();
+    expect(screen.getByRole("button", { name: "洪水・高潮（防災）" }).getAttribute("aria-pressed")).toBe("true");
   });
 
   it("効率化候補は資料の末尾付き番号でも検索できる", () => {
