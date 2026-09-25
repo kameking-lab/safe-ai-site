@@ -1,5 +1,7 @@
 "use client";
 
+import { beginTransientChemicalNavigation } from "@/lib/transient-chemical-navigation";
+
 import { useRouter } from "next/navigation";
 import {
   useCallback,
@@ -11,6 +13,7 @@ import {
 } from "react";
 import type { MergedChemical } from "@/lib/mhlw-chemicals";
 import { useTransientQueryBridge } from "./transient-query-bridge";
+import { preserveNavigationScroll } from "@/lib/preserve-navigation-scroll";
 
 const CHEMICAL_INPUT_MAX = 120;
 
@@ -239,6 +242,8 @@ export function HomeDirectChemicalClient() {
           });
         })
         .catch(() => undefined);
+      beginTransientChemicalNavigation();
+      preserveNavigationScroll();
       router.push("/chemical-ra#chemical-ra-start");
     },
     [router, stageChemicalQuery],
