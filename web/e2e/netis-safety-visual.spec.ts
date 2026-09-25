@@ -259,13 +259,19 @@ test("カードの名称・画像からNETIS公式詳細へ進み、戻るで絞
   }
 });
 
-test("効率化参考技術を目的・分類・検索から探し、現行登録未確認を表示する", async ({ page }) => {
-  for (const width of [320, 390]) {
+test("効率化参考技術を目的・分類・検索から探し、現行登録未確認を表示する", async ({ page }, testInfo) => {
+  for (const width of [320, 390, 1440]) {
     await page.setViewportSize({ width, height: 844 });
     await page.goto(`${ROUTE}?purpose=efficiency`, { waitUntil: "domcontentloaded" });
     await expect(page.locator('[data-netis-explorer-ready="true"]')).toBeVisible();
     await expect(page.getByRole("heading", { name: "作業効率化候補：6件" })).toBeVisible();
     await expect(page.locator("#netis-technology-results article")).toHaveCount(6);
+    for (const category of ["測量・出来形", "記録・点検"]) {
+      const button = page.getByRole("button", { name: category });
+      await expect(button.locator("img")).toBeVisible();
+      expect(await button.locator("img").evaluate((image: HTMLImageElement) => image.naturalWidth)).toBeGreaterThan(0);
+    }
+    await page.screenshot({ path: testInfo.outputPath(`efficiency-categories-${width}.png`), fullPage: false });
     await expect(page.getByText("効率化の追加6件のうち5件は国交省の2026年4月一覧、1件は過去の地方整備局資料で確認した参考技術です。2026年9月時点の現行NETIS登録は未確認です。")).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
     await page.getByRole("button", { name: "測量・出来形" }).click();
@@ -276,4 +282,11 @@ test("効率化参考技術を目的・分類・検索から探し、現行登�
     await expect(page.getByRole("heading", { name: "測量・出来形：1件" })).toBeVisible();
     await expect(page.locator("#netis-technology-results article")).toContainText(["現行登録未確認"]);
   }
+});
+
+test("末尾付きNETIS番号で効率化候補を一意に探せる", async ({ page }) => {
+  await page.goto(`${ROUTE}?purpose=efficiency&q=KT-210020-A`, { waitUntil: "domcontentloaded" });
+  await expect(page.getByRole("heading", { name: "作業効率化候補：1件" })).toBeVisible();
+  await expect(page.locator("#netis-technology-results article")).toHaveCount(1);
+  await expect(page.locator("#netis-technology-results article")).toContainText("ScanX");
 });

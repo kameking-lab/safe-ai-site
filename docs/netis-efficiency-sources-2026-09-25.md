@@ -14,3 +14,12 @@
 既存安全10件はPR #1013から維持し、新規は6件。測量・出来形3件、記録・点検3件の2分類のみ公開する。搬送・運搬、土工・締固めは、この確認済み集合では各3件に達しないため分類を増やさない。計16件はNETIS全件一覧でも「24件達成」でもない。
 
 新規製品画像は6件とも権利未確認のため未掲載。公開資料に写真があることを転載許諾とみなさない。導入前にNETIS本体と提供元で現行掲載、現場適合、通信・機材、契約条件を確認する。NETISへの登録は効果保証や安全認証を意味しない。
+
+## 効率化カテゴリの代表写真
+
+2026-09-25にWikimedia Commonsの元ファイルページで作者・ライセンスを確認し、提供される960px縮小版を取得した。**カテゴリの作業場面・機材を示す写真であり、掲載技術や製品固有の写真ではない。** 画面上にもその区別と作者・ライセンスを表示する。ローカルで画像編集はしていないが、画面表示時にCSSの`object-cover`で切り抜く。
+
+| カテゴリ | 代表写真・権利根拠 | 保存ファイル／SHA-256 |
+|---|---|---|
+| 測量・出来形 | [Surveying prism and total station, for land surveying, in Shibuya-ku.jpg](https://commons.wikimedia.org/wiki/File:Surveying_prism_and_total_station,_for_land_surveying,_in_Shibuya-ku.jpg)、作者Syced、[CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | `web/public/netis-safety/categories/surveying.jpg`／`4B00B841B5E9115C3AB5556A141D845590624CE05941FFDC9343F02829528E3E` |
+| 記録・点検 | [BRIDGE 2021.02.23 BasnightBridgeInspection -32.jpg](https://commons.wikimedia.org/wiki/File:BRIDGE_2021.02.23_BasnightBridgeInspection_-32.jpg)、作者NCDOTcommunications、[CC BY 2.0](https://creativecommons.org/licenses/by/2.0/)。CommonsのFlickreviewRが元Flickrのライセンスを確認済み | `web/public/netis-safety/categories/bridge-inspection.jpg`／`7EB62E510336B31981109E8E1851518E6F2EFC84B8D98D80B7010071F4C351E3` |

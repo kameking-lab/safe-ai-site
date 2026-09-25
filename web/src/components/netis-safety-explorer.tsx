@@ -124,6 +124,7 @@ export function NetisSafetyExplorer() {
           [
             technology.name,
             technology.registrationNumber,
+            "sourceRegistrationNumber" in technology ? technology.sourceRegistrationNumber : "",
             technology.summary,
             technology.mechanism,
             technology.useCase,
@@ -254,7 +255,7 @@ export function NetisSafetyExplorer() {
       >
         {(purpose === "efficiency" ? NETIS_EFFICIENCY_CATEGORIES : purpose === "all" ? [...NETIS_SAFETY_CATEGORIES, ...NETIS_EFFICIENCY_CATEGORIES] : NETIS_SAFETY_CATEGORIES).map((category) => {
           const selected = selectedCategoryId === category.id;
-          const safetyCategory = "image" in category ? category : null;
+          const visualCategory = "image" in category ? category : null;
           return (
             <button
               key={category.id}
@@ -263,17 +264,17 @@ export function NetisSafetyExplorer() {
               aria-pressed={selected}
               aria-controls="netis-technology-results"
               onClick={() => updateCategory(category.id)}
-              className={`group overflow-hidden rounded-2xl border-2 bg-white text-left shadow-sm transition focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-sky-600 dark:bg-slate-900 ${safetyCategory ? "min-h-44 sm:min-h-56" : "min-h-24"} ${
+              className={`group overflow-hidden rounded-2xl border-2 bg-white text-left shadow-sm transition focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-sky-600 dark:bg-slate-900 ${visualCategory ? "min-h-44 sm:min-h-56" : "min-h-24"} ${
                 selected
                   ? "border-sky-700 ring-2 ring-sky-200 dark:border-sky-300"
                   : "border-slate-200 hover:border-sky-500 dark:border-slate-700"
               }`}
             >
-              {safetyCategory ? (
+              {visualCategory ? (
                 <span className="relative block h-24 overflow-hidden bg-slate-100 sm:h-36 dark:bg-slate-800">
                   <Image
-                    src={safetyCategory.image}
-                    alt={safetyCategory.imageAlt}
+                    src={visualCategory.image}
+                    alt={visualCategory.imageAlt}
                     fill
                     loading="eager"
                     sizes="(max-width: 1024px) 46vw, 280px"
@@ -294,13 +295,13 @@ export function NetisSafetyExplorer() {
                   }`}
                 />
               </span>
-              {!safetyCategory ? <span className="block px-3 pb-3 text-xs leading-5 text-slate-600 dark:text-slate-300">{category.description}</span> : null}
+              <span className="block px-3 pb-3 text-xs leading-5 text-slate-600 dark:text-slate-300">{category.description}</span>
             </button>
           );
         })}
       </div>
       <p className="mt-2 text-xs text-slate-600 dark:text-slate-300">
-        カテゴリ写真は危険場面の代表例（実写）です。NETIS掲載製品の写真ではありません。
+        カテゴリ写真は作業場面・機材の代表例（実写）です。NETIS掲載製品の写真ではありません。
       </p>
       <p className="mt-2 text-sm leading-6 text-slate-700 dark:text-slate-200">
         当サイトで出典を確認した{FEATURED_NETIS_TECHNOLOGIES.length}件を掲載しています。NETIS全登録技術の一覧ではありません。
@@ -313,7 +314,7 @@ export function NetisSafetyExplorer() {
           写真の出典・ライセンスを確認
         </summary>
         <ul className="space-y-1.5 pb-2 leading-5">
-          {NETIS_SAFETY_CATEGORIES.map((category) => (
+          {[...NETIS_SAFETY_CATEGORIES, ...NETIS_EFFICIENCY_CATEGORIES].map((category) => (
             <li key={category.id} className="break-words">
               <span className="font-black">{category.label}</span>：
               <a
@@ -337,7 +338,7 @@ export function NetisSafetyExplorer() {
               ) : (
                 category.imageCredit.license
               )}
-              ／Wikimedia Commonsより{category.imageCredit.retrievedAt}取得、縮小・WebP変換
+              ／Wikimedia Commonsより{category.imageCredit.retrievedAt}取得、{ "changeNote" in category.imageCredit ? category.imageCredit.changeNote : "縮小・WebP変換" }
             </li>
           ))}
         </ul>

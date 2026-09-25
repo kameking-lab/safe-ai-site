@@ -204,6 +204,10 @@ describe("NetisSafetyGuide", () => {
     expect(screen.queryByText(/ヒヤリハンター/)).toBeNull();
     for (const category of NETIS_EFFICIENCY_CATEGORIES) {
       expect(screen.getByRole("button", { name: category.label })).toBeDefined();
+      expect(screen.getByAltText(category.imageAlt)).toBeDefined();
+      expect(existsSync(path.join(process.cwd(), "public", category.image))).toBe(true);
+      expect(category.imageCredit.sourceUrl).toMatch(/^https:\/\/commons\.wikimedia\.org\/wiki\/File:/);
+      expect(category.imageCredit.licenseUrl).toMatch(/^https:\/\/creativecommons\.org\//);
     }
     for (const technology of NETIS_EFFICIENCY_TECHNOLOGIES) {
       const link = screen.getByRole("link", {
@@ -213,6 +217,14 @@ describe("NetisSafetyGuide", () => {
       expect(link.closest("article")?.textContent).toContain("現行登録未確認");
       expect(link.closest("article")?.textContent).toContain("製品画像は未掲載");
     }
+  });
+
+  it("効率化候補は資料の末尾付き番号でも検索できる", () => {
+    navigation.query = "purpose=efficiency&q=KT-210020-A";
+    const { container } = render(<NetisSafetyExplorer />);
+    expect(screen.getByText("作業効率化候補：1件")).toBeDefined();
+    expect(container.querySelectorAll("article")).toHaveLength(1);
+    expect(container.querySelector("article")?.textContent).toContain("ScanX");
   });
 
   it("効率化カテゴリの直リンクと検索を保ち、既存のrisk形式を利用する", () => {
