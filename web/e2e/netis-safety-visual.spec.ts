@@ -41,7 +41,7 @@ test("390px初期画面で画像カテゴリを先に選べる", async ({ page }
         naturalWidth: (image as HTMLImageElement).naturalWidth,
       })),
     );
-  expect(loadedImages).toHaveLength(9);
+  expect(loadedImages).toHaveLength(8);
   expect(loadedImages.every(({ complete, naturalWidth }) => complete && naturalWidth > 0)).toBe(true);
 });
 
