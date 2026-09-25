@@ -1,6 +1,7 @@
 import Script from 'next/script';
+import { configuredAdsensePublisherId } from '@/lib/adsense-account';
 
-const PUB_ID = process.env.NEXT_PUBLIC_ADSENSE_PUB_ID;
+const PUB_ID = configuredAdsensePublisherId(process.env.NEXT_PUBLIC_ADSENSE_PUB_ID);
 
 export default function AdSenseScript({ nonce }: { nonce?: string }) {
   if (!PUB_ID) return null;

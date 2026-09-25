@@ -1,4 +1,5 @@
 import { isGaEnabled } from "@/lib/analytics-env";
+import { configuredAdsensePublisherId } from "@/lib/adsense-account";
 import { getRumServerReadiness } from "@/lib/rum/server-readiness";
 import { isPreviewSafetyMode } from "@/lib/server/deployment-safety";
 
@@ -8,7 +9,7 @@ export function PrivacyCookieStatus() {
   const gaEnabled = isGaEnabled();
   // Keep the capability condition aligned with the root layout's adsEnabled.
   const adsEnabled =
-    !isPreviewSafetyMode() && Boolean(process.env.NEXT_PUBLIC_ADSENSE_PUB_ID);
+    !isPreviewSafetyMode() && Boolean(configuredAdsensePublisherId(process.env.NEXT_PUBLIC_ADSENSE_PUB_ID));
   const rumReadiness = getRumServerReadiness();
 
   return (

@@ -10,10 +10,11 @@ afterEach(() => vi.unstubAllEnvs());
 
 describe("AdSense privacy disclosure follows deployment capability", () => {
   it.each([
-    ["production", "", "ca-pub-1234567890123456", true],
+    ["production", "", "ca-pub-8751260838396451", true],
     ["production", "", "", false],
-    ["preview", "", "ca-pub-1234567890123456", false],
-    ["production", "true", "ca-pub-1234567890123456", false],
+    ["production", "", "ca-pub-1234567890123456", false],
+    ["preview", "", "ca-pub-8751260838396451", false],
+    ["production", "true", "ca-pub-8751260838396451", false],
   ])(
     "env=%s staging=%s publisher=%s",
     (environment, staging, publisher, enabled) => {
