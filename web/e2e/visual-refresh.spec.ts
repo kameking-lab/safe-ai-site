@@ -28,8 +28,8 @@ const HOME_SERVICE_HREFS = [
 function routePrimaryAction(page: Page, route: string) {
   if (route === "/") {
     return page
-      .getByRole("navigation", { name: "すぐに使う主要機能" })
-      .getByRole("link", { name: /安衛法AIを開く/u });
+      .getByRole("region", { name: "チワワと試す5機能" })
+      .getByRole("link", { name: "安衛法AI", exact: true });
   }
   if (route === "/contact/automation-email") {
     return page.getByRole("button", { name: "メールで相談する" });
@@ -71,7 +71,7 @@ test("ホームはチワワ主導の9主機能導線で、熱中症キャンペ�
     page.locator('img[src*="mascot-chat-talk-v4.webp"]:visible').first(),
   ).toBeVisible();
   await expect(
-    page.getByRole("navigation", { name: "すぐに使う主要機能" }),
+    page.getByRole("region", { name: "チワワと試す5機能" }),
   ).toBeVisible();
 
   const serviceLinks = page.locator(
@@ -178,8 +178,8 @@ test("ホームの主要導線はキーボードで開ける", async ({
   await page.goto("/", { waitUntil: "domcontentloaded" });
 
   const primary = page
-    .getByRole("navigation", { name: "すぐに使う主要機能" })
-    .getByRole("link", { name: /安衛法AIを開く/u });
+    .getByRole("region", { name: "チワワと試す5機能" })
+    .getByRole("link", { name: "安衛法AI", exact: true });
   await primary.focus();
   await expect(primary).toBeFocused();
   await Promise.all([page.waitForURL("**/chatbot"), page.keyboard.press("Enter")]);

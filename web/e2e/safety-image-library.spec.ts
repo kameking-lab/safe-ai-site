@@ -5,7 +5,7 @@ const hubPath = "/materials/safety-images";
 const detailPath = `${hubPath}/helmet-required`;
 
 test.describe("market-grounded safety sign library", () => {
-  test("lists 100 signs, filters progressively, and exposes six compact entry points", async ({ page }) => {
+  test("lists 100 signs, filters progressively, and keeps extra filters in details", async ({ page }) => {
     const response = await page.goto(hubPath);
     expect(response?.status()).toBe(200);
     await expect(page.getByRole("heading", { level: 1, name: "現場安全看板ライブラリ" })).toBeVisible();
@@ -13,6 +13,7 @@ test.describe("market-grounded safety sign library", () => {
     await expect(page.getByText("検索結果 100点")).toBeVisible();
     await expect(page.getByRole("button", { name: "次の20点を表示" })).toBeVisible();
     await expect(page.getByRole("article")).toHaveCount(20);
+    await page.locator("summary").filter({ hasText: "詳細条件" }).click();
     for (const label of ["よく使う看板", "保護具", "立入・禁止", "重機・吊り荷", "多言語優先", "数値編集"]) {
       await expect(page.getByRole("button", { name: label })).toBeVisible();
     }
@@ -54,12 +55,15 @@ test.describe("market-grounded safety sign library", () => {
     expect(Math.abs((await page.evaluate(() => window.scrollY)) - before)).toBeLessThanOrEqual(50);
 
     await page.getByRole("searchbox").fill("保護帽");
+    await page.locator("summary").filter({ hasText: "詳細条件" }).click();
     await page.getByRole("button", { name: "保護具", exact: true }).click();
     await page.getByLabel("並び順").selectOption("new");
     await expect(page.getByRole("heading", { level: 3, name: "保護帽着用" })).toBeVisible();
     await page.getByRole("link", { name: /保護帽着用.*看板を開く/u }).click();
     await page.getByRole("link", { name: "現場安全看板ライブラリへ" }).click();
     await expect(page.getByRole("searchbox")).toHaveValue("保護帽");
+    await expect(page.getByText("条件あり", { exact: true })).toBeVisible();
+    await page.locator("summary").filter({ hasText: "詳細条件" }).click();
     await expect(page.getByRole("button", { name: "保護具", exact: true })).toHaveAttribute("aria-pressed", "true");
     await expect(page.getByLabel("並び順")).toHaveValue("new");
   });
@@ -98,10 +102,11 @@ test.describe("market-grounded safety sign library", () => {
   test("edits a five-language sign without placing custom text in the URL", async ({ page }) => {
     await page.goto(detailPath);
     await expect(page.getByRole("heading", { level: 1, name: "保護帽着用" })).toBeVisible();
-    await expect(page.getByRole("link", { name: "そのままダウンロード" })).toHaveAttribute("href", /mode=default/u);
+    await expect(page.getByRole("button", { name: "この看板をダウンロード" })).toBeVisible();
     for (const language of ["日本語", "英語", "ベトナム語", "中国語（簡体）", "インドネシア語"]) {
       await expect(page.getByLabel(language, { exact: true })).toBeVisible();
     }
+    await page.getByText("詳細設定（文字・サイズ・形式）", { exact: true }).click();
     await expect(page.getByLabel("印刷・看板サイズ").locator("option")).toHaveCount(13);
     await page.getByLabel("ベトナム語", { exact: true }).check();
     await expect(page.getByLabel("表示する文字（ベトナム語）")).toHaveValue("Đội mũ bảo hộ");
@@ -109,7 +114,7 @@ test.describe("market-grounded safety sign library", () => {
     await expect(page.getByRole("img", { name: /^文字編集プレビュー:/u })).toHaveAttribute("lang", "ja");
     await page.getByLabel("表示する文字（ベトナム語）").fill("THÔNG ĐIỆP THỬ NGHIỆM");
     await expect(page.getByText("THÔNG ĐIỆP THỬ NGHIỆM").first()).toBeVisible();
-    await page.getByText("詳細設定", { exact: true }).click();
+    await page.getByText("文字の装飾", { exact: true }).click();
     await page.getByLabel("チワワ・©").uncheck();
     await expect(page.getByAltText("安全AIポータルのチワワ")).toHaveCount(0);
     expect(page.url()).not.toContain("THÔNG");
@@ -130,11 +135,52 @@ test.describe("market-grounded safety sign library", () => {
     }
   });
 
+  test("downloads the size, format and languages shown beside the preview", async ({ page }) => {
+    test.setTimeout(120_000);
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(detailPath);
+    await page.getByRole("button", { name: "A4横", exact: true }).click();
+    await page.getByLabel("ベトナム語", { exact: true }).check();
+    await page.getByLabel("英語", { exact: true }).check();
+    await page.getByText("詳細設定（文字・サイズ・形式）", { exact: true }).click();
+    await page.getByRole("combobox", { name: "形式" }).selectOption("png");
+    await expect(page.getByText("A4横・PNG・日本語／ベトナム語／英語")).toBeVisible();
+    await expect(page.locator('[data-preview-fit="pass"]')).toBeVisible();
+    const [response, download] = await Promise.all([
+      page.waitForResponse((item) => item.url().endsWith("/api/safety-images/helmet-required/download") && item.request().method() === "POST"),
+      page.waitForEvent("download"),
+      page.getByRole("button", { name: "この看板をダウンロード" }).click(),
+    ]);
+    expect(response.status()).toBe(200);
+    expect(response.headers()["content-type"]).toContain("image/png");
+    expect(response.request().postDataJSON()).toMatchObject({
+      size: "a4-landscape",
+      format: "png",
+      settings: { languages: ["ja", "vi", "en"] },
+    });
+    expect(download.suggestedFilename()).toBe("helmet-required-ja-vi-en-a4-landscape.png");
+  });
+
+  test("keeps the numeric value visible on numeric sign templates", async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 900 });
+    await page.goto(`${hubPath}/site-speed-limit`);
+    const numeric = page.getByLabel("数値・連絡先");
+    await expect(numeric).toBeVisible();
+    await numeric.fill("8");
+    await expect(page.getByText(/8 km\/h/u).first()).toBeVisible();
+  });
+
   test("keeps five-language text clear of the illustration in both orientations", async ({ page }) => {
     test.setTimeout(120_000);
     for (const width of [320, 390, 1440]) {
       await page.setViewportSize({ width, height: 900 });
-      await page.goto(detailPath);
+      await page.goto(detailPath, { waitUntil: "domcontentloaded" });
+      await page.waitForFunction(() => {
+        const button = [...document.querySelectorAll("button")].find((item) => item.textContent === "A4横");
+        return button && Object.keys(button).some((key) => key.startsWith("__reactFiber$"));
+      });
+      await page.getByRole("button", { name: "A4横", exact: true }).click();
+      await expect(page.getByRole("button", { name: "A4横", exact: true })).toHaveAttribute("aria-pressed", "true");
       for (const language of ["インドネシア語", "英語", "中国語（簡体）", "ベトナム語"]) {
         const checkbox = page.getByLabel(language, { exact: true });
         await checkbox.focus();
@@ -231,8 +277,9 @@ test.describe("market-grounded safety sign library", () => {
   test("fits maximum custom text in the shared preview model at 320px", async ({ page }) => {
     await page.setViewportSize({ width: 320, height: 900 });
     await page.goto(detailPath);
+    await page.getByText("詳細設定（文字・サイズ・形式）", { exact: true }).click();
     await page.getByLabel("表示する文字").fill("W".repeat(180));
-    await page.getByText("詳細設定", { exact: true }).click();
+    await page.getByText("文字の装飾", { exact: true }).click();
     await page.getByRole("radio", { name: "大", exact: true }).first().check({ force: true });
     await page.getByLabel(/行間/u).fill("1.8");
     await expect(page.locator('[data-preview-fit="pass"]')).toBeVisible();

@@ -20,9 +20,9 @@ test("ホームは400%ズーム相当幅でも横スクロールなく主導線�
       name: /小さな気づきが、\s*大きな事故を防ぐ。/u,
     }),
   ).toBeVisible();
-  const quickNav = page.getByRole("navigation", { name: "すぐに使う主要機能" });
-  await expect(quickNav.getByRole("link")).toHaveCount(3);
-  for (const link of await quickNav.getByRole("link").all()) {
+  const mascotTools = page.getByRole("region", { name: "チワワと試す5機能" });
+  await expect(mascotTools.getByRole("link")).toHaveCount(5);
+  for (const link of await mascotTools.getByRole("link").all()) {
     await link.focus();
     await expect(link).toBeFocused();
     await expect(link).toBeInViewport();

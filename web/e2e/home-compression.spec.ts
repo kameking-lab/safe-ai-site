@@ -31,8 +31,8 @@ test.describe("9つの主機能を案内するホームの圧縮予算", () => {
         name: /小さな気づきが、\s*大きな事故を防ぐ。/u,
       }),
     ).toBeVisible();
-    const quickNav = page.getByRole("navigation", { name: "すぐに使う主要機能" });
-    await expect(quickNav.getByRole("link")).toHaveCount(3);
+    const mascotTools = page.getByRole("region", { name: "チワワと試す5機能" });
+    await expect(mascotTools.getByRole("link")).toHaveCount(5);
     const services = page.getByRole("region", { name: "仕事から選ぶ、9つの主機能" });
     await expect(services.getByRole("listitem")).toHaveCount(9);
     await expect(services.locator("ul > li > a")).toHaveCount(9);
@@ -50,7 +50,7 @@ test.describe("9つの主機能を案内するホームの圧縮予算", () => {
       return {
         screens: document.documentElement.scrollHeight / viewportHeight,
         heroHeight: height('section[aria-labelledby="home-relaunch-title"]'),
-        quickNavScreen: top('nav[aria-label="すぐに使う主要機能"]') / viewportHeight,
+        mascotToolsScreen: top('[data-mascot-toolbox]') / viewportHeight,
         servicesTop: top('section[aria-labelledby="main-services-title"]'),
         updatesTop: top('[data-home-section="updates"]'),
         directoryTop: top('section[aria-labelledby="home-feature-directory"]'),
@@ -60,7 +60,7 @@ test.describe("9つの主機能を案内するホームの圧縮予算", () => {
 
     expect(metrics.screens).toBeLessThanOrEqual(13);
     expect(metrics.heroHeight).toBeLessThanOrEqual(1_200);
-    expect(metrics.quickNavScreen).toBeLessThanOrEqual(1);
+    expect(metrics.mascotToolsScreen).toBeLessThanOrEqual(1);
     expect(metrics.updatesTop).toBeLessThan(metrics.servicesTop);
     expect(metrics.servicesTop).toBeLessThan(metrics.directoryTop);
     expect(metrics.mainDom).toBeLessThanOrEqual(1_050);
@@ -220,8 +220,8 @@ test("ホームから開いた化学物質RAの入力をURL・storage・request 
   await page.setViewportSize(MOBILE_VIEWPORT);
   await page.goto("/chemical-ra", { waitUntil: "domcontentloaded" });
   await page.goto("/", { waitUntil: "networkidle" });
-  const chemicalLink = page.getByRole("navigation", { name: "すぐに使う主要機能" })
-    .getByRole("link", { name: "化学物質RAを開く" });
+  const chemicalLink = page.getByRole("region", { name: "チワワと試す5機能" })
+    .getByRole("link", { name: "化学物質RA", exact: true });
   await expect(chemicalLink).toHaveAttribute("href", "/chemical-ra");
   await Promise.all([
     page.waitForURL(/\/chemical-ra$/, { timeout: 15_000 }),
