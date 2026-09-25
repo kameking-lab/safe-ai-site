@@ -126,7 +126,7 @@ test("選択済みカテゴリの再操作でも結果へ移動し、未知の�
   await expect(page.locator("#netis-technology-results article")).toHaveCount(10);
   await page.goto(`${ROUTE}?risk=unknown`);
   await expect(page.getByRole("heading", { name: "当サイト掲載：10件" })).toBeVisible();
-  await expect(page.getByText("カテゴリ写真は危険場面の代表例（実写）です。NETIS掲載製品の写真ではありません。")).toBeVisible();
+  await expect(page.getByText("カテゴリ写真は作業場面・機材の代表例（実写）です。NETIS掲載製品の写真ではありません。")).toBeVisible();
 });
 
 test("カテゴリと結果のARIA・コントラストに問題がない", async ({ page }) => {

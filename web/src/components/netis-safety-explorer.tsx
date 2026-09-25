@@ -295,7 +295,9 @@ export function NetisSafetyExplorer() {
                   }`}
                 />
               </span>
-              <span className="block px-3 pb-3 text-xs leading-5 text-slate-600 dark:text-slate-300">{category.description}</span>
+              {visualCategory && isNetisEfficiencyCategoryId(category.id) ? (
+                <span className="block px-3 pb-3 text-xs leading-5 text-slate-600 dark:text-slate-300">{category.description}</span>
+              ) : null}
             </button>
           );
         })}
