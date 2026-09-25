@@ -157,10 +157,11 @@ describe.each([
       expect(providerState.calls).toBe(1);
       expect(providerState.requests).toHaveLength(1);
       expect(providerState.requests[0]).toMatchObject({
-        model: "gemini-3.6-flash",
+        model: "gemini-3.8-flash",
         contents: expect.any(String),
         config: {
           systemInstruction: expect.any(String),
+          thinkingConfig: { thinkingLevel: "low" },
           abortSignal: expect.anything(),
         },
       });
