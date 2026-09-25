@@ -85,14 +85,14 @@ describe("SafetyGoodsPanel", () => {
     fireEvent.click(screen.getByRole("button", { name: /酸素欠乏のおそれ/u }));
     expect(window.location.search).toContain("feature=oxygen");
     expect(screen.getByText(/対象の物質や作業条件が分かるまで、商品候補は表示しません/u)).toBeDefined();
-    expect(screen.queryByText(/Amazonで探す/u)).toBeNull();
+    expect(screen.queryByText(/Amazonで一般検索/u)).toBeNull();
   });
 
   it("確認済み条件だけ候補へ進み、直リンクのfeatureだけでは迂回できない", () => {
     window.history.replaceState(null, "", "/goods?category=respiratory&intent=dust&feature=dust");
     const view = render(<SafetyGoodsPanel />);
     expect(screen.getByRole("heading", { name: "次に、6つの安全条件を確認する" })).toBeDefined();
-    expect(screen.queryByText(/Amazonで探す/u)).toBeNull();
+    expect(screen.queryByText(/Amazonで一般検索/u)).toBeNull();
     view.unmount();
 
     window.history.replaceState(null, "", "/goods?category=respiratory&intent=dust");
@@ -107,7 +107,8 @@ describe("SafetyGoodsPanel", () => {
     ]) fireEvent.click(screen.getByRole("checkbox", { name: label }));
     fireEvent.click(screen.getByRole("button", { name: "条件を確認して商品例を見る" }));
     expect(window.location.search).toContain("conditions=confirmed");
-    expect(screen.getByText(/Amazonで探す/u)).toBeDefined();
+    expect(screen.getByText(/Amazonで一般検索/u)).toBeDefined();
+    expect(screen.getByText(/購入者評価で絞り込まれておらず/u)).toBeDefined();
   });
 
   it("呼吸・送気の検索でも呼吸用入口を失わない", () => {
@@ -124,7 +125,7 @@ describe("SafetyGoodsPanel", () => {
     window.history.replaceState(null, "", `/goods?category=respiratory&intent=${intent}`);
     render(<SafetyGoodsPanel />);
     expect(screen.getByText(/対象の物質や作業条件が分かるまで、商品候補は表示しません/u)).toBeDefined();
-    expect(screen.queryByText(/Amazonで探す/u)).toBeNull();
+    expect(screen.queryByText(/Amazonで一般検索/u)).toBeNull();
     expect(screen.queryByText(/楽天(?:市場)?で探す/u)).toBeNull();
   });
 
@@ -132,7 +133,7 @@ describe("SafetyGoodsPanel", () => {
     window.history.replaceState(null, "", "/goods?category=respiratory&intent=supplied&feature=supplied");
     render(<SafetyGoodsPanel />);
     expect(screen.getByText(/対象の物質や作業条件が分かるまで、商品候補は表示しません/u)).toBeDefined();
-    expect(screen.queryByText(/Amazonで探す/u)).toBeNull();
+    expect(screen.queryByText(/Amazonで一般検索/u)).toBeNull();
     expect(screen.queryByText(/楽天(?:市場)?で探す/u)).toBeNull();
   });
 });

@@ -68,9 +68,9 @@ export function GoodsProductCarousel({ categoryId, categoryName, featureId }: { 
 
   return (
     <section aria-label={`${categoryName}の商品候補`} className="mt-4 rounded-2xl border-2 border-emerald-200 bg-emerald-50 p-4 sm:p-5">
-      <h3 className="text-lg font-black text-emerald-950">{categoryName}の{result?.status === "ready" ? "実商品写真と高評価候補" : "商品候補"}</h3>
+      <h3 className="text-lg font-black text-emerald-950">{categoryName}の{result?.status === "ready" ? "実商品写真と購入者評価" : "商品データ"}</h3>
       <p className="mt-1 text-xs leading-6 text-emerald-950">
-        楽天市場の購入者評価が★{MIN_GOODS_RATING}以上・{MIN_GOODS_REVIEWS}件以上の在庫あり商品だけを表示します。評価は安全規格への適合を示しません。
+        楽天市場APIで購入者評価が★{MIN_GOODS_RATING}以上・{MIN_GOODS_REVIEWS}件以上と確認できた在庫あり商品だけを表示します。購入者評価は、安全性能や国家検定・JIS等への適合を示しません。
       </p>
       {!result ? <p role="status" className="mt-4 text-sm text-slate-700">商品写真と評価を確認中…</p> : null}
       {result?.status === "ready" ? (
@@ -97,16 +97,16 @@ export function GoodsProductCarousel({ categoryId, categoryName, featureId }: { 
                   {failedImages.has(item.id) ? <p role="status" className="px-2 text-center text-xs font-bold leading-5 text-amber-900">写真を読み込めませんでした。販売先で確認してください。</p> : <Image src={item.imageUrl} alt={`${item.name}の商品写真（楽天市場掲載）`} width={128} height={128} unoptimized onError={() => setFailedImages((previous) => new Set(previous).add(item.id))} className="h-32 w-32 object-contain" />}
                 </div>
                 <p className="mt-2 line-clamp-2 min-h-10 text-sm font-bold leading-5 text-slate-950">{item.name}</p>
-                <p className="mt-2 text-sm font-black text-amber-800" aria-label={`購入者評価5点満点中${item.rating}、レビュー${item.reviewCount}件`}>
+                <p className="mt-2 text-sm font-black text-amber-800" aria-label={`楽天市場の購入者評価5点満点中${item.rating}、レビュー${item.reviewCount}件`}>
                   ★{item.rating.toFixed(1)} <span className="text-xs font-semibold text-slate-600">({item.reviewCount}件)</span>
                 </p>
                 <a href={item.affiliateUrl} target="_blank" rel="noopener noreferrer sponsored" onClick={() => trackEvent("affiliate_click", { platform: "rakuten", product_id: item.id, product_name: item.name, page_location: "goods_real_product_carousel" })} className="mt-3 inline-flex min-h-11 w-full items-center justify-center gap-1 rounded-lg bg-emerald-800 px-2 text-xs font-bold text-white">
-                  写真と仕様を販売店で確認 <ExternalLink className="h-4 w-4" aria-hidden="true" />
+                  販売店で写真・仕様を確認 <ExternalLink className="h-4 w-4" aria-hidden="true" />
                 </a>
               </li>
             ))}
           </ul>
-          <p className="mt-2 text-xs text-slate-600">確認: {result.checkedAt ? new Date(result.checkedAt).toLocaleString("ja-JP") : "未確認"}。最新の仕様・価格・在庫は販売店で確認してください。</p>
+          <p className="mt-2 text-xs font-semibold leading-6 text-slate-700">確認: {result.checkedAt ? new Date(result.checkedAt).toLocaleString("ja-JP") : "未確認"}。掲載は購入者評価による絞り込みで、当サイトによる推薦順位ではありません。該当する国家検定・JIS等への適合は、製品表示とメーカー一次資料で確認してください。</p>
         </>
       ) : null}
       {result?.status === "not_configured" ? <p role="status" className="mt-4 rounded-xl bg-white p-3 text-sm text-slate-700">商品データの接続準備中です。実商品写真・購入者評価は未確認です。接続後にこの画面で比較できます。</p> : null}
