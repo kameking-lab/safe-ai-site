@@ -272,4 +272,27 @@ describe("NetisSafetyGuide", () => {
       { scroll: false },
     );
   });
+
+  it("カテゴリ解除直後の検索は未確定URLを継ぎ、古いriskと検索語を復活させない", () => {
+    navigation.query = "purpose=efficiency&risk=wave2-roadwork&q=old";
+    render(<NetisSafetyExplorer />);
+
+    // router がまだ新しい searchParams を渡していない間に続けて検索する。
+    fireEvent.click(screen.getByRole("button", { name: "絞り込みを解除" }));
+    expect(navigation.push).toHaveBeenNthCalledWith(
+      1,
+      "/resources/netis-safety?purpose=efficiency",
+      { scroll: false },
+    );
+    fireEvent.change(screen.getByLabelText(/名称・登録番号・用途/), {
+      target: { value: "KT-230092-A" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "掲載技術を検索" }));
+
+    expect(navigation.push).toHaveBeenNthCalledWith(
+      2,
+      "/resources/netis-safety?purpose=efficiency&q=KT-230092-A",
+      { scroll: false },
+    );
+  });
 });

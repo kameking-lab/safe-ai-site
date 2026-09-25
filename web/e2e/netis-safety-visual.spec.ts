@@ -293,6 +293,26 @@ test("末尾付きNETIS番号で効率化候補を一意に探せる", async ({ 
   await expect(page.locator("#netis-technology-results article")).toContainText("ScanX");
 });
 
+test("カテゴリ解除と検索を続けても古いriskが戻らず、ブラウザーで前状態へ戻れる", async ({ page }) => {
+  await page.goto(`${ROUTE}?purpose=efficiency&risk=wave2-roadwork&q=old`, { waitUntil: "domcontentloaded" });
+  await expect(page.locator('[data-netis-explorer-ready="true"]')).toBeVisible();
+  await page.getByRole("button", { name: "絞り込みを解除" }).click();
+  await page.getByLabel(/名称・登録番号・用途/).fill("KT-230092-A");
+  await page.getByRole("button", { name: "掲載技術を検索" }).click();
+
+  await expect(page.getByRole("heading", { name: "作業効率化候補：1件" })).toBeVisible();
+  await expect(page.getByLabel(/名称・登録番号・用途/)).toHaveValue("KT-230092-A");
+  const finalUrl = new URL(page.url());
+  expect(finalUrl.searchParams.get("purpose")).toBe("efficiency");
+  expect(finalUrl.searchParams.get("q")).toBe("KT-230092-A");
+  expect(finalUrl.searchParams.has("risk")).toBe(false);
+
+  await page.goBack();
+  await expect(page).toHaveURL(/purpose=efficiency/);
+  await expect(page.getByRole("heading", { name: "作業効率化候補：18件" })).toBeVisible();
+  expect(new URL(page.url()).searchParams.has("risk")).toBe(false);
+});
+
 test("第2陣15件を目的別に探し、資料時点と写真権利を確認できる", async ({ page }, testInfo) => {
   for (const width of [320, 390, 1440]) {
     await page.setViewportSize({ width, height: 844 });
