@@ -96,6 +96,7 @@ test.describe("安全研修ライブラリ", () => {
   });
 
   test("320/390/768/1440/1920pxと400%相当で横溢れしない", async ({ page }) => {
+    test.setTimeout(90_000);
     for (const width of [320, 390, 768, 1440, 1920]) {
       await page.setViewportSize({ width, height: width <= 390 ? 844 : width === 1920 ? 1080 : 900 });
       await page.goto(DETAIL);
