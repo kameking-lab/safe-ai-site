@@ -380,6 +380,15 @@ describe("NetisSafetyGuide", () => {
     expect(screen.getByText("EGy防水コネクタ")).toBeDefined();
   });
 
+  it("目的タブの直後に検索を置き、画像カテゴリを巡回せず絞り込める", () => {
+    const { container } = render(<NetisSafetyExplorer />);
+    const purposeGroup = screen.getByRole("group", { name: "探す目的" });
+    const search = screen.getByRole("search", { name: "当サイト掲載NETIS技術を検索" });
+    const categoryGroup = screen.getByRole("group", { name: "安全課題カテゴリ" });
+    expect(purposeGroup.compareDocumentPosition(search) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(search.compareDocumentPosition(categoryGroup) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
   it("効率化候補は資料の末尾付き番号でも検索できる", () => {
     navigation.query = "purpose=efficiency&q=KT-210020-A";
     const { container } = render(<NetisSafetyExplorer />);

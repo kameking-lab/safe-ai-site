@@ -334,8 +334,8 @@
       "label": "法定義務",
       "claimIds": ["C-LAW-013", "C-LAW-014", "C-LAW-015", "C-LAW-016", "C-GUIDE-002"],
       "articleRefs": [
-        { "lawShort": "安衛法", "article": "第59条第3項", "sourceId": "LAW-EGOV-001", "egovUrl": "https://laws.e-gov.go.jp/law/347AC0000000057#Mp-At_59", "naviPath": "/law-navi/347AC0000000057/59" },
-        { "lawShort": "安衛則", "article": "第36条第41号", "sourceId": "LAW-EGOV-003", "egovUrl": "https://laws.e-gov.go.jp/law/347M50002000032#Mp-At_36", "naviPath": "/law-navi/347M50002000032/36" }
+        { "lawShort": "安衛法", "article": "第59条第3項", "sourceId": "LAW-EGOV-001", "egovUrl": "https://laws.e-gov.go.jp/law/347AC0000000057#Mp-Ch_6-At_59", "naviPath": "/law-navi/347AC0000000057/59" },
+        { "lawShort": "安衛則", "article": "第36条第41号", "sourceId": "LAW-EGOV-003", "egovUrl": "https://laws.e-gov.go.jp/law/347M50002000032#Mp-Pa_1-Ch_4-At_36", "naviPath": "/law-navi/347M50002000032/36" }
       ],
       "narration": "ここでは二つの高さを混同しないでください。法令上、高さが6.75メートルを超える箇所ではフルハーネス型を使用します。一方、行政ガイドラインは、一般的な建設作業では5メートルを超える箇所でフルハーネス型を使用することが適当としています。5メートルは行政上の選定目安、6.75メートル超は法的な使用境界です。5メートル未満だから胴ベルト型で安全、6.75メートル以下ならフルハーネス不要、という意味ではありません。落下距離と地面等への到達も確認します。特別教育の対象は別に判定します。高さ2メートル以上で、作業床を設けることが困難な場所において、フルハーネス型を使用して行う作業に係る業務が対象です。ロープ高所作業はこの教育の対象から除かれ、別制度で扱われます。特別教育の標準カリキュラムは学科と実技を合わせて6時間です。実施記録は3年間保存します。この社内研修を視聴した時間を、そのまま法定特別教育の時間や記録へ置き換えることはできません。",
       "instructorNotes": ["5mを行政推奨、6.75m超を法的境界と常時表示する。", "経験等による科目省略の適用は、この教材で自己判断させない。"],
@@ -356,8 +356,8 @@
       "label": "法定義務",
       "claimIds": ["C-LAW-014", "C-LAW-015", "C-LAW-016"],
       "articleRefs": [
-        { "lawShort": "安衛則", "article": "第36条第41号", "sourceId": "LAW-EGOV-003", "egovUrl": "https://laws.e-gov.go.jp/law/347M50002000032#Mp-At_36", "naviPath": "/law-navi/347M50002000032/36" },
-        { "lawShort": "安衛則", "article": "第38条", "sourceId": "LAW-EGOV-003", "egovUrl": "https://laws.e-gov.go.jp/law/347M50002000032#Mp-At_38", "naviPath": "/law-navi/347M50002000032/38" }
+        { "lawShort": "安衛則", "article": "第36条第41号", "sourceId": "LAW-EGOV-003", "egovUrl": "https://laws.e-gov.go.jp/law/347M50002000032#Mp-Pa_1-Ch_4-At_36", "naviPath": "/law-navi/347M50002000032/36" },
+        { "lawShort": "安衛則", "article": "第38条", "sourceId": "LAW-EGOV-003", "egovUrl": "https://laws.e-gov.go.jp/law/347M50002000032#Mp-Pa_1-Ch_4-At_38", "naviPath": "/law-navi/347M50002000032/38" }
       ],
       "narration": "電気工事士などの職種資格を持っていることと、フルハーネス型を使用する業務の特別教育を受けていることは、別に確認します。資格名だけから特別教育が不要だと判断しないでください。判定に使うのは、実際の作業高さ、作業床を設けることが困難か、フルハーネス型を使用する業務かという条件です。元請、協力会社、短期入場者を問わず、従事させる業務と教育記録を照合します。この教材は、統計、法令の考え方、現場確認を学ぶ社内研修です。法定教育の実技、講師要件、科目、時間、記録を満たしたと表示せず、修了証発行へ転用しません。",
       "instructorNotes": ["有資格者だから大丈夫という発言が出たら、作業条件と教育記録へ話を戻す。", "受講履歴にも法定教育の修了記録ではないと表示する。"],
@@ -464,7 +464,7 @@
         { "lawShort": "安衛則", "article": "第518条", "sourceId": "LAW-EGOV-003", "egovUrl": "https://laws.e-gov.go.jp/law/347M50002000032#Mp-Pa_2-Ch_9-Se_1-At_518", "naviPath": "/law-navi/347M50002000032/518" },
         { "lawShort": "安衛則", "article": "第519条", "sourceId": "LAW-EGOV-003", "egovUrl": "https://laws.e-gov.go.jp/law/347M50002000032#Mp-Pa_2-Ch_9-Se_1-At_519", "naviPath": "/law-navi/347M50002000032/519" },
         { "lawShort": "安衛則", "article": "第521条", "sourceId": "LAW-EGOV-003", "egovUrl": "https://laws.e-gov.go.jp/law/347M50002000032#Mp-Pa_2-Ch_9-Se_1-At_521", "naviPath": "/law-navi/347M50002000032/521" },
-        { "lawShort": "安衛則", "article": "第36条第41号", "sourceId": "LAW-EGOV-003", "egovUrl": "https://laws.e-gov.go.jp/law/347M50002000032#Mp-At_36", "naviPath": "/law-navi/347M50002000032/36" }
+        { "lawShort": "安衛則", "article": "第36条第41号", "sourceId": "LAW-EGOV-003", "egovUrl": "https://laws.e-gov.go.jp/law/347M50002000032#Mp-Pa_1-Ch_4-At_36", "naviPath": "/law-navi/347M50002000032/36" }
       ],
       "narration": "作業開始前は、まず高所作業をなくせるかを確認します。次に、作業床、端部、開口部、昇降設備を現物で見ます。いつも同じではなく、その日の工程変更、天候、周辺作業も確認します。続いて、作業高さ、作業床の設置可能性、使用器具から、フルハーネス型の選定と特別教育の要否を確認します。取付設備の強度と位置、器具表示の落下距離、使用質量、実際の下方空間も照合します。最後に、器具の点検、救助方法、担当者、機材、連絡方法、作業中止条件を確認します。一項目でも確認できなければ、推測で開始せず、責任者へエスカレーションします。チェック欄だけでなく、不適合を直した結果も記録します。",
       "instructorNotes": ["自社帳票へ組み込む場合もclaim脚注を残す。", "適・否だけでなく、是正担当・期限・再確認を記録させる。"],

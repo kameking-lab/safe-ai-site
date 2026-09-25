@@ -134,7 +134,7 @@ describe("墜落防止の既存5問", () => {
     const first = render(<SeminarQuiz {...fallProps} quiz={quiz} />);
     fireEvent.click(screen.getByRole("button", { name: /高さ2m以上の作業はすべて対象/u }));
     expect(screen.getByRole("link", { name: /労働安全衛生規則.*第36条第41号/u }).getAttribute("href"))
-      .toBe("https://laws.e-gov.go.jp/law/347M50002000032#Mp-At_36");
+      .toBe("https://laws.e-gov.go.jp/law/347M50002000032#Mp-Pa_1-Ch_4-At_36");
     first.unmount();
 
     render(<SeminarQuiz {...fallProps} courseId="fall-evidence-page" quiz={{ ...quiz, questions: [quiz.questions[1]!] }} />);

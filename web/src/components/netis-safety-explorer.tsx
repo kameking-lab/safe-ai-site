@@ -333,6 +333,56 @@ export function NetisSafetyExplorer() {
         ))}
       </div>
 
+      <form
+        role="search"
+        aria-label="当サイト掲載NETIS技術を検索"
+        className="mt-3 rounded-2xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-900"
+        onSubmit={(event) => {
+          event.preventDefault();
+          updateSearch(searchInput);
+        }}
+      >
+        <label
+          htmlFor="netis-catalog-search"
+          className="text-sm font-black text-slate-950 dark:text-white"
+        >
+          名称・登録番号・用途で掲載技術を検索
+        </label>
+        <div className="mt-2 flex flex-col gap-2 sm:flex-row">
+          <input
+            id="netis-catalog-search"
+            type="search"
+            value={searchInput}
+            onChange={(event) => {
+              searchInputDirtyRef.current = true;
+              setSearchInput(event.target.value);
+            }}
+            placeholder="例：WBGT、ハーネス、KK-210002"
+            className="min-h-11 min-w-0 flex-1 rounded-xl border border-slate-300 bg-white px-3 text-base text-slate-950 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+          />
+          <button
+            type="submit"
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-sky-800 px-4 text-sm font-black text-white hover:bg-sky-900"
+          >
+            <Search className="h-4 w-4" aria-hidden="true" />
+            掲載技術を検索
+          </button>
+          {rawSearch ? (
+            <button
+              type="button"
+              onClick={() => {
+                setSearchInput("");
+                updateSearch("");
+              }}
+              className="inline-flex min-h-11 items-center justify-center gap-1 rounded-xl border border-slate-300 bg-white px-3 text-sm font-black text-slate-800 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
+            >
+              <X className="h-4 w-4" aria-hidden="true" />
+              検索を解除
+            </button>
+          ) : null}
+        </div>
+      </form>
+
       <div
         className="mt-3 grid grid-cols-2 gap-2.5 sm:gap-4 lg:grid-cols-4"
         role="group"
@@ -430,55 +480,7 @@ export function NetisSafetyExplorer() {
         </ul>
       </details>
 
-      <form
-        role="search"
-        aria-label="当サイト掲載NETIS技術を検索"
-        className="mt-3 rounded-2xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-900"
-        onSubmit={(event) => {
-          event.preventDefault();
-          updateSearch(searchInput);
-        }}
-      >
-        <label
-          htmlFor="netis-catalog-search"
-          className="text-sm font-black text-slate-950 dark:text-white"
-        >
-          名称・登録番号・用途で掲載技術を検索
-        </label>
-        <div className="mt-2 flex flex-col gap-2 sm:flex-row">
-          <input
-            id="netis-catalog-search"
-            type="search"
-            value={searchInput}
-            onChange={(event) => {
-              searchInputDirtyRef.current = true;
-              setSearchInput(event.target.value);
-            }}
-            placeholder="例：WBGT、ハーネス、KK-210002"
-            className="min-h-11 min-w-0 flex-1 rounded-xl border border-slate-300 bg-white px-3 text-base text-slate-950 dark:border-slate-700 dark:bg-slate-950 dark:text-white"
-          />
-          <button
-            type="submit"
-            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-sky-800 px-4 text-sm font-black text-white hover:bg-sky-900"
-          >
-            <Search className="h-4 w-4" aria-hidden="true" />
-            掲載技術を検索
-          </button>
-          {rawSearch ? (
-            <button
-              type="button"
-              onClick={() => {
-                setSearchInput("");
-                updateSearch("");
-              }}
-              className="inline-flex min-h-11 items-center justify-center gap-1 rounded-xl border border-slate-300 bg-white px-3 text-sm font-black text-slate-800 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
-            >
-              <X className="h-4 w-4" aria-hidden="true" />
-              検索を解除
-            </button>
-          ) : null}
-        </div>
-      </form>
+
 
       <div
         id="netis-technology-results"
