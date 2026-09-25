@@ -16,9 +16,6 @@ const MHLW_DUST_MASK_GUIDANCE_URL =
   "https://www.mhlw.go.jp/web/t_doc?dataId=00tc2747&dataType=1";
 const MHLW_SAFETY_FOOTWEAR_URL =
   "https://www.mhlw.go.jp/web/t_doc?dataId=74003000&dataType=0&pageNo=9";
-const NETIS_SEARCH_URL =
-  "https://www.netis.mlit.go.jp/netis/input/pubsearch/search";
-
 type Option = { id: string; label: string; detail: string };
 
 type Selection = {
@@ -237,8 +234,8 @@ function buildRecommendation(selection: Selection): Recommendation {
         href: "https://www.3mcompany.jp/3M/ja_JP/p/d/v100838081/",
       },
     },
-    { categoryId: "fall", taskIds: ["opening"], title: "開口部を塞ぐ養生・手すりの候補", query: "開口部 養生 手すり 親綱 支柱 転落防止", summary: "開口部・縁端では、個人用保護具より先に蓋・囲い・手すりで落下経路をなくす候補を絞ります。", officialHref: "https://www.mhlw.go.jp/web/t_doc?dataId=74ab6770&dataType=0&pageNo=1", officialLabel: "厚生労働省｜墜落制止用器具の規格", checks: ["開口部を固定蓋または手すりで塞げるか", "蓋の固定・表示と復旧責任者を確認", "残る危険に対する取付点と器具を確認"] },
-    { categoryId: "fall", taskIds: ["ladder"], title: "脚立・はしごの安定対策候補", query: "脚立 はしご 転倒防止 アウトリガー 作業用", summary: "脚立・はしごでは、より安全な作業床への置換を検討し、使用する場合は安定・固定用品を絞ります。", officialHref: "https://www.mhlw.go.jp/web/t_doc?dataId=74ab6770&dataType=0&pageNo=1", officialLabel: "厚生労働省｜墜落制止用器具の規格", checks: ["作業台・足場に置き換えられないか", "設置角度、天板使用禁止、転位防止を確認", "昇降時に三点支持を保てるか"] },
+    { categoryId: "fall", taskIds: ["opening"], title: "開口部を塞ぐ養生・手すりの候補", query: "開口部 養生 手すり 親綱 支柱 転落防止", summary: "開口部・縁端では、個人用保護具より先に蓋・囲い・手すりで落下経路をなくす候補を絞ります。", officialHref: "https://www.mhlw.go.jp/content/001234814.pdf", officialLabel: "厚生労働省｜労働安全衛生規則第519条（開口部等）", checks: ["開口部を固定蓋または手すりで塞げるか", "蓋の固定・表示と復旧責任者を確認", "残る危険に対する取付点と器具を確認"] },
+    { categoryId: "fall", taskIds: ["ladder"], title: "脚立・はしごの安定対策候補", query: "脚立 はしご 転倒防止 アウトリガー 作業用", summary: "脚立・はしごでは、より安全な作業床への置換を検討し、使用する場合は安定・固定用品を絞ります。", officialHref: "https://www.mhlw.go.jp/new-info/kobetu/roudou/gyousei/anzen/dl/170322-1.pdf", officialLabel: "厚生労働省｜はしご・脚立の安全使用", checks: ["作業台・足場に置き換えられないか", "設置角度、天板使用禁止、転位防止を確認", "昇降時に三点支持を保てるか"] },
     {
       categoryId: "chemical", taskIds: ["splash"], title: "薬液飛散用ゴーグル・フェイスシールド候補", query: "薬液 ゴーグル フェイスシールド 間接通気", summary: "注入・移し替えでは、正面・側面からの飛沫を防ぐ目・顔面保護具を中心に絞ります。",
       officialHref: "https://www.mhlw.go.jp/content/11300000/001670143.pdf",
@@ -249,20 +246,20 @@ function buildRecommendation(selection: Selection): Recommendation {
     { categoryId: "chemical", taskIds: ["mix"], title: "混合・調製用の全身防護候補", query: "化学防護服 エプロン ゴーグル 耐薬品 混合", summary: "混合・調製では反応・発熱・飛散範囲も確認し、手・目だけでなく衣類を含む防護を絞ります。", officialHref: "https://www.mhlw.go.jp/content/11300000/001670143.pdf", officialLabel: "厚生労働省｜保護具の選定マニュアル", checks: ["混合禁止・反応性・発熱をSDSで確認", "飛散範囲に応じた手・目・顔・身体の防護を確認", "局所排気と緊急時手順を確認"] },
     {
       categoryId: "machine", taskIds: ["vehicle"], title: "車両接近警報・動線分離用品の候補", query: "フォークリフト 接近警報 人車分離 LED ライン", summary: "重機・フォークリフトでは、人車分離を基本に死角を補う警報・表示用品を絞ります。",
-      officialHref: NETIS_SEARCH_URL,
-      officialLabel: "国土交通省｜NETIS公式検索",
+      officialHref: "https://www.mhlw.go.jp/content/11300000/000628483.pdf",
+      officialLabel: "厚生労働省｜フォークリフトの接触防止（安衛則第151条の7）",
       checks: ["人と車両の動線を物理的に分けられるか", "死角・後退・交差箇所を現地確認", "警報の検知範囲と停止ルールを確認"],
     },
-    { categoryId: "machine", taskIds: ["moving"], title: "機械停止・ロックアウト用品の候補", query: "ロックアウト タグアウト キット 機械 メンテナンス", summary: "回転体・搬送機・プレスでは、接近警報ではなく停止・隔離・施錠を軸に用品を絞ります。", officialHref: NETIS_SEARCH_URL, officialLabel: "国土交通省｜NETIS公式検索", checks: ["清掃・調整・復旧時に動力を遮断できるか", "残留エネルギーと再起動を防げるか", "施錠者と解除手順を決めたか"] },
-    { categoryId: "machine", taskIds: ["restricted"], title: "危険区域の区画・立入表示候補", query: "立入禁止 バリケード コーンバー 危険区域 表示", summary: "吊り荷下・旋回範囲などには、境界が一目で分かり勝手に外れにくい区画用品を絞ります。", officialHref: NETIS_SEARCH_URL, officialLabel: "国土交通省｜NETIS公式検索", checks: ["危険区域を現場で見える形にできるか", "区画の移設・解除権限を決めたか", "多言語表示と夜間視認性を確認"] },
+    { categoryId: "machine", taskIds: ["moving"], title: "機械停止・ロックアウト用品の候補", query: "ロックアウト タグアウト キット 機械 メンテナンス", summary: "回転体・搬送機・プレスでは、接近警報ではなく停止・隔離・施錠を軸に用品を絞ります。", officialHref: "https://www.mhlw.go.jp/web/t_doc?dataId=74003000&dataType=0&pageNo=4", officialLabel: "厚生労働省｜労働安全衛生規則第107・108条（掃除等の運転停止）", checks: ["清掃・調整・復旧時に動力を遮断できるか", "残留エネルギーと再起動を防げるか", "施錠者と解除手順を決めたか"] },
+    { categoryId: "machine", taskIds: ["restricted"], title: "危険区域の区画・立入表示候補", query: "立入禁止 バリケード コーンバー 危険区域 表示", summary: "吊り荷下・旋回範囲などには、境界が一目で分かり勝手に外れにくい区画用品を絞ります。", officialHref: "https://www.mhlw.go.jp/content/11300000/001124694.pdf", officialLabel: "厚生労働省｜危険区域の立入禁止措置", checks: ["危険区域を現場で見える形にできるか", "区画の移設・解除権限を決めたか", "多言語表示と夜間視認性を確認"] },
     {
       categoryId: "noise", taskIds: ["grinding"], title: "研削用の耳・目・顔面保護候補", query: "研削 フェイスシールド 保護めがね イヤーマフ", summary: "研削・切断では、騒音に加えて高速飛来物から目・顔を守る組合せを絞ります。",
-      officialHref: "https://www.mhlw.go.jp/web/t_doc?dataId=00tc7618&dataType=1&pageNo=1",
-      officialLabel: "厚生労働省｜騒音障害防止ガイドライン",
+      officialHref: "https://www.mhlw.go.jp/content/11300000/000609001.pdf",
+      officialLabel: "厚生労働省｜研削作業時の保護めがね",
       checks: ["砥石・切粉の飛散方向を確認", "保護めがねとフェイスシールドの併用を確認", "騒音値と必要な遮音性能を確認"],
     },
     { categoryId: "noise", taskIds: ["loud"], title: "騒音レベルに合う耳栓・イヤーマフ候補", query: "耳栓 イヤーマフ SNR NRR 工場 騒音", summary: "大きな機械音では、測定値とばく露時間に合い、警報・会話も考慮できる聴覚保護具を絞ります。", officialHref: "https://www.mhlw.go.jp/web/t_doc?dataId=00tc7618&dataType=1&pageNo=1", officialLabel: "厚生労働省｜騒音障害防止ガイドライン", checks: ["騒音値とばく露時間を測る", "必要以上の遮音で警報を聞き逃さないか確認", "耳栓の装着教育と衛生管理を確認"] },
-    { categoryId: "noise", taskIds: ["welding"], title: "溶接光・火花用の遮光面候補", query: "溶接面 自動遮光 遮光度 保護めがね", summary: "溶接では、工程に合う遮光度と火花への耐性を備えた面・保護めがねを絞ります。", officialHref: "https://www.mhlw.go.jp/web/t_doc?dataId=00tc7618&dataType=1&pageNo=1", officialLabel: "厚生労働省｜騒音障害防止ガイドライン", checks: ["溶接方法・電流に合う遮光度を確認", "側方光・飛散物への保護範囲を確認", "呼吸用保護具・ヘルメットとの干渉を確認"] },
+    { categoryId: "noise", taskIds: ["welding"], title: "溶接光・火花用の遮光面候補", query: "溶接面 自動遮光 遮光度 保護めがね", summary: "溶接では、工程に合う遮光度と火花への耐性を備えた面・保護めがねを絞ります。", officialHref: "https://www.mhlw.go.jp/content/11300000/001411590.pdf", officialLabel: "厚生労働省｜溶接・熱切断時の有害光線対策", checks: ["溶接方法・電流に合う遮光度を確認", "側方光・飛散物への保護範囲を確認", "呼吸用保護具・ヘルメットとの干渉を確認"] },
     {
       categoryId: "foot", taskIds: ["slip"], title: "床面に合う耐滑作業靴候補", query: "耐滑 作業靴 油 水 SRC 厨房 倉庫", summary: "濡れ・油のある床では、床材と汚れに合う耐滑性と靴底形状を軸に絞ります。",
       officialHref: MHLW_SAFETY_FOOTWEAR_URL,
