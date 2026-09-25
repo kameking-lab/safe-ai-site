@@ -113,13 +113,38 @@ export function SafetySeminarPlayer({
       label: `${ref.lawShort} ${ref.article}`,
       external: !(ref.article.includes("の") && ref.naviPath),
     }));
-    if (articleLinks.length > 0) return articleLinks;
+    if (articleLinks.length > 0) {
+      const articleSourceIds = new Set(slide.articleRefs?.map((ref) => ref.sourceId));
+      const supplementalLinks = slideSources
+        .filter((source) => !articleSourceIds.has(source.sourceId))
+        .map((source) => ({
+          href: source.url,
+          label: source.title,
+          external: true,
+        }));
+      if (slide.id === "harness-special-education") {
+        const primarySourceIds = ["LAW-MHLW-004", "GUIDE-MHLW-001"];
+        const primaryLinks = primarySourceIds
+          .map((sourceId) => slideSources.find((source) => source.sourceId === sourceId))
+          .filter((source): source is TrainingSource => Boolean(source))
+          .map((source) => ({
+            href: source.url,
+            label: source.sourceId === "LAW-MHLW-004"
+              ? "厚労省告示（6.75m）"
+              : "厚労省ガイドライン（5m）",
+            external: true,
+          }));
+        const primaryUrls = new Set(primaryLinks.map((link) => link.href));
+        return [...primaryLinks, ...articleLinks, ...supplementalLinks.filter((link) => !primaryUrls.has(link.href))];
+      }
+      return [...articleLinks, ...supplementalLinks];
+    }
     return slideSources.slice(0, 2).map((source) => ({
       href: source.url,
       label: sourceLabel(source),
       external: true,
     }));
-  }, [slide.articleRefs, slideSources]);
+  }, [slide.articleRefs, slide.id, slideSources]);
 
   useEffect(() => {
     statusRef.current = speechStatus;
