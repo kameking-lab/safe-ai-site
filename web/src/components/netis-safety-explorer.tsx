@@ -28,10 +28,11 @@ import {
 import { NETIS_WAVE3_TECHNOLOGIES } from "./netis-wave3-data";
 import { NETIS_WAVE4_CATEGORIES, NETIS_WAVE4_TECHNOLOGIES, isNetisWave4CategoryId, type NetisWave4CategoryId } from "./netis-wave4-data";
 import { NETIS_WAVE5_CATEGORIES, NETIS_WAVE5_TECHNOLOGIES, isNetisWave5CategoryId, type NetisWave5CategoryId } from "./netis-wave5-data";
+import { NETIS_WAVE6_TECHNOLOGIES } from "./netis-wave6-data";
 
 type CategoryId = NetisSafetyCategoryId | NetisEfficiencyCategoryId | NetisWave2CategoryId | NetisWave4CategoryId | NetisWave5CategoryId;
 type Purpose = "safety" | "efficiency" | "quality" | "all";
-const ALL_TECHNOLOGIES = [...FEATURED_NETIS_TECHNOLOGIES, ...NETIS_EFFICIENCY_TECHNOLOGIES, ...NETIS_WAVE2_TECHNOLOGIES, ...NETIS_WAVE3_TECHNOLOGIES, ...NETIS_WAVE4_TECHNOLOGIES, ...NETIS_WAVE5_TECHNOLOGIES];
+const ALL_TECHNOLOGIES = [...FEATURED_NETIS_TECHNOLOGIES, ...NETIS_EFFICIENCY_TECHNOLOGIES, ...NETIS_WAVE2_TECHNOLOGIES, ...NETIS_WAVE3_TECHNOLOGIES, ...NETIS_WAVE4_TECHNOLOGIES, ...NETIS_WAVE5_TECHNOLOGIES, ...NETIS_WAVE6_TECHNOLOGIES];
 const ALL_CATEGORIES = [...NETIS_SAFETY_CATEGORIES, ...NETIS_EFFICIENCY_CATEGORIES, ...NETIS_WAVE2_CATEGORIES, ...NETIS_WAVE4_CATEGORIES, ...NETIS_WAVE5_CATEGORIES];
 
 function categoryFor(id: CategoryId) {

@@ -14,6 +14,7 @@ import { NETIS_WAVE2_CATEGORIES, NETIS_WAVE2_TECHNOLOGIES } from "./netis-wave2-
 import { NETIS_WAVE3_TECHNOLOGIES } from "./netis-wave3-data";
 import { NETIS_WAVE4_CATEGORIES, NETIS_WAVE4_TECHNOLOGIES } from "./netis-wave4-data";
 import { NETIS_WAVE5_CATEGORIES, NETIS_WAVE5_TECHNOLOGIES } from "./netis-wave5-data";
+import { NETIS_WAVE6_TECHNOLOGIES } from "./netis-wave6-data";
 import { NetisSafetyExplorer } from "./netis-safety-explorer";
 import { NetisSafetyGuide } from "./netis-safety-guide";
 
@@ -203,8 +204,8 @@ describe("NetisSafetyGuide", () => {
     navigation.query = "purpose=efficiency";
     const { container } = render(<NetisSafetyExplorer />);
     expect(screen.getByRole("button", { name: "作業を効率化" }).getAttribute("aria-pressed")).toBe("true");
-    expect(screen.getByText("作業効率化候補：47件")).toBeDefined();
-    expect(container.querySelectorAll("article")).toHaveLength(47);
+    expect(screen.getByText("作業効率化候補：55件")).toBeDefined();
+    expect(container.querySelectorAll("article")).toHaveLength(55);
     expect(screen.queryByText(/ヒヤリハンター/)).toBeNull();
     for (const category of NETIS_EFFICIENCY_CATEGORIES) {
       expect(screen.getByRole("button", { name: category.label })).toBeDefined();
@@ -239,8 +240,8 @@ describe("NetisSafetyGuide", () => {
   it("品質・検査6件を独立した目的として表示し、効率化件数に混ぜない", () => {
     navigation.query = "purpose=quality";
     const { container } = render(<NetisSafetyExplorer />);
-    expect(screen.getByText("品質・検査候補：16件")).toBeDefined();
-    expect(container.querySelectorAll("article")).toHaveLength(16);
+    expect(screen.getByText("品質・検査候補：22件")).toBeDefined();
+    expect(container.querySelectorAll("article")).toHaveLength(22);
     for (const technology of [...NETIS_WAVE2_TECHNOLOGIES, ...NETIS_WAVE3_TECHNOLOGIES].filter((item) => item.primaryPurpose === "quality")) {
       expect(container.textContent).toContain(technology.name);
     }
@@ -310,11 +311,11 @@ describe("NetisSafetyGuide", () => {
     expect(navigation.push).toHaveBeenCalledWith("/resources/netis-safety?q=HK-190004", { scroll: false });
   });
 
-  it("第5陣26件を限定紹介として加え、全86件の基番号と正式名称を重複させない", () => {
-    const all = [...FEATURED_NETIS_TECHNOLOGIES, ...NETIS_EFFICIENCY_TECHNOLOGIES, ...NETIS_WAVE2_TECHNOLOGIES, ...NETIS_WAVE3_TECHNOLOGIES, ...NETIS_WAVE4_TECHNOLOGIES, ...NETIS_WAVE5_TECHNOLOGIES];
-    expect(all).toHaveLength(86);
-    expect(new Set(all.map((item) => item.registrationNumber.replace(/-(?:A|V[ER])$/i, ""))).size).toBe(86);
-    expect(new Set(all.map((item) => item.name.normalize("NFKC").toLocaleLowerCase("ja"))).size).toBe(86);
+  it("第5陣26件と第6陣14件を限定紹介として加え、全100件の基番号と正式名称を重複させない", () => {
+    const all = [...FEATURED_NETIS_TECHNOLOGIES, ...NETIS_EFFICIENCY_TECHNOLOGIES, ...NETIS_WAVE2_TECHNOLOGIES, ...NETIS_WAVE3_TECHNOLOGIES, ...NETIS_WAVE4_TECHNOLOGIES, ...NETIS_WAVE5_TECHNOLOGIES, ...NETIS_WAVE6_TECHNOLOGIES];
+    expect(all).toHaveLength(100);
+    expect(new Set(all.map((item) => item.registrationNumber.replace(/-(?:A|V[ER])$/i, ""))).size).toBe(100);
+    expect(new Set(all.map((item) => item.name.normalize("NFKC").toLocaleLowerCase("ja"))).size).toBe(100);
     expect(NETIS_WAVE5_TECHNOLOGIES).toHaveLength(26);
     expect(NETIS_WAVE5_TECHNOLOGIES.filter((item) => item.primaryPurpose === "safety")).toHaveLength(1);
     expect(NETIS_WAVE5_TECHNOLOGIES.filter((item) => item.primaryPurpose === "efficiency")).toHaveLength(15);
@@ -324,6 +325,14 @@ describe("NetisSafetyGuide", () => {
       expect(item.individualUrl).toBe(`https://www.netis.mlit.go.jp/netis/pubsearch/details?regNo=${item.registrationNumber.replace(/-(?:A|V[ER])$/i, "")}`);
       expect(item.checkedAt).toBe("2026年9月26日");
       expect(item.summary.length).toBeGreaterThan(15);
+    }
+    expect(NETIS_WAVE6_TECHNOLOGIES).toHaveLength(14);
+    expect(NETIS_WAVE6_TECHNOLOGIES.filter((item) => item.primaryPurpose === "efficiency")).toHaveLength(8);
+    expect(NETIS_WAVE6_TECHNOLOGIES.filter((item) => item.primaryPurpose === "quality")).toHaveLength(6);
+    for (const item of NETIS_WAVE6_TECHNOLOGIES) {
+      expect(item.limitedIntroduction).toBe(true);
+      expect(item.checkedAt).toBe("2026年9月26日");
+      expect(item.individualUrl).toBe(`https://www.netis.mlit.go.jp/netis/pubsearch/details?regNo=${item.registrationNumber.replace(/-(?:A|V[ER])$/i, "")}`);
     }
   });
 
@@ -342,6 +351,22 @@ describe("NetisSafetyGuide", () => {
     expect(screen.getByText("洪水・高潮（防災）：1件")).toBeDefined();
     expect(screen.getByText(/作業員用保護具や避難判断を代替しません/)).toBeDefined();
     expect(screen.getByRole("button", { name: "洪水・高潮（防災）" }).getAttribute("aria-pressed")).toBe("true");
+  });
+
+  it("第6陣は公式番号と用途語から探せ、検索状態と公式個別URLを保持する", () => {
+    navigation.query = "purpose=efficiency&q=KT-180043-VE";
+    const { container, unmount } = render(<NetisSafetyExplorer />);
+    expect(screen.getByText("作業効率化候補：1件")).toBeDefined();
+    expect(container.textContent).toContain("クラウド計測システム 『クラウド16』");
+    expect(container.textContent).toContain("調査した技術の例");
+    expect(container.querySelector("article a[id^='netis-tech-']")?.getAttribute("href")).toBe("https://www.netis.mlit.go.jp/netis/pubsearch/details?regNo=KT-180043");
+    expect((screen.getByRole("textbox", { name: "技術名や番号で検索" }) as HTMLInputElement).value).toBe("KT-180043-VE");
+    unmount();
+
+    navigation.query = "purpose=quality&q=防水 コネクタ";
+    render(<NetisSafetyExplorer />);
+    expect(screen.getByText("品質・検査候補：1件")).toBeDefined();
+    expect(screen.getByText("EGy防水コネクタ")).toBeDefined();
   });
 
   it("効率化候補は資料の末尾付き番号でも検索できる", () => {
