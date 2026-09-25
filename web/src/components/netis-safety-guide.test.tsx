@@ -1,4 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
+import { existsSync } from "node:fs";
+import path from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   FEATURED_NETIS_TECHNOLOGIES,
@@ -50,6 +52,22 @@ describe("NetisSafetyGuide", () => {
           (technology.categoryIds as readonly string[]).includes(category.id),
         ).length,
       ).toBeGreaterThanOrEqual(2);
+    }
+  });
+
+  it("4カテゴリの写真はローカル保存済みで、Commonsの出典・作者・ライセンス・取得日を持つ", () => {
+    for (const category of NETIS_SAFETY_CATEGORIES) {
+      expect(category.image).toMatch(/^\/netis-safety\/categories\/[a-z-]+\.webp$/);
+      expect(existsSync(path.join(process.cwd(), "public", category.image))).toBe(true);
+      expect(category.imageCredit.sourceUrl).toMatch(
+        /^https:\/\/commons\.wikimedia\.org\/wiki\/File:/,
+      );
+      expect(category.imageCredit.author.length).toBeGreaterThan(0);
+      expect(category.imageCredit.license).toMatch(/CC BY|パブリックドメイン/);
+      if (category.imageCredit.license.startsWith("CC")) {
+        expect(category.imageCredit.licenseUrl).toMatch(/^https:\/\/creativecommons\.org\//);
+      }
+      expect(category.imageCredit.retrievedAt).toBe("2026-09-24");
     }
   });
 
@@ -117,5 +135,59 @@ describe("NetisSafetyGuide", () => {
       "/resources/netis-safety?risk=heat-environment&q=KT-260019",
       { scroll: false },
     );
+  });
+
+  it("全10件のカードが画像枠・名称・登録番号・特徴を持ち、画像と名称がNETIS公式詳細へつながる", () => {
+    const { container } = render(<NetisSafetyExplorer />);
+
+    for (const technology of FEATURED_NETIS_TECHNOLOGIES) {
+      const detailUrl = `https://www.netis.mlit.go.jp/netis/pubsearch/details?regNo=${technology.registrationNumber.replace(/-(?:A|V?E)$/i, "")}`;
+      const nameLink = screen.getByRole("link", {
+        name: `${technology.name}（NETIS公式の詳細を開く）`,
+      });
+      expect(nameLink.getAttribute("href")).toBe(detailUrl);
+      // 戻るで絞り込み・位置を復元できるよう同じタブで開く
+      expect(nameLink.getAttribute("target")).toBeNull();
+      const article = nameLink.closest("article")!;
+      expect(article.textContent).toContain(technology.registrationNumber);
+      expect(article.textContent).toContain(technology.summary);
+      const imageLink = article.querySelector('a[aria-hidden="true"]')!;
+      expect(imageLink.getAttribute("href")).toBe(detailUrl);
+      expect(imageLink.getAttribute("tabindex")).toBe("-1");
+
+      if (technology.productImage.status === "verified") {
+        expect(technology.productImage.sourceUrl).toMatch(/^https:\/\//);
+        expect(technology.productImage.usageBasis.length).toBeGreaterThan(10);
+        expect(article.querySelector("img")).not.toBeNull();
+      } else {
+        // 権利未確認の製品は汎用写真・AI画像で埋めず、未掲載と明示する
+        expect(article.querySelector("img")).toBeNull();
+        expect(article.textContent).toContain("製品画像は未掲載");
+        expect(article.textContent).toContain("利用許諾を確認中");
+      }
+    }
+    expect(container.querySelectorAll("article")).toHaveLength(10);
+  });
+
+  it("同じタブの詳細から戻ったとき、保存したスクロール位置と名称リンクへのフォーカスを復元する", () => {
+    navigation.query = "risk=fall-prevention";
+    window.history.replaceState(null, "", "/resources/netis-safety?risk=fall-prevention");
+    const scrollTo = vi.spyOn(window, "scrollTo").mockImplementation(() => {});
+    window.sessionStorage.setItem(
+      "netis-safety-return-position",
+      JSON.stringify({
+        href: "/resources/netis-safety?risk=fall-prevention",
+        scrollY: 640,
+        registrationNumber: "KT-230282-A",
+      }),
+    );
+
+    render(<NetisSafetyExplorer />);
+
+    expect(scrollTo).toHaveBeenCalledWith({ top: 640, behavior: "instant" });
+    expect(document.activeElement?.id).toBe("netis-tech-KT-230282-A");
+    expect(window.sessionStorage.getItem("netis-safety-return-position")).toBeNull();
+    scrollTo.mockRestore();
+    window.history.replaceState(null, "", "/");
   });
 });
