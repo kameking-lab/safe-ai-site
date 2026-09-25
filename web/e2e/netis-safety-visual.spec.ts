@@ -289,7 +289,7 @@ test("効率化参考技術を目的・分類・検索から探し、現行登�
     }
     await page.evaluate(() => window.scrollTo(0, 0));
     await page.screenshot({ path: testInfo.outputPath(`efficiency-categories-${width}.png`), fullPage: false });
-    await expect(page.getByText("効率化・品質の候補36件は国交省の公式一覧・紹介資料で技術名と番号を照合しました。2026年9月時点の現行NETIS個別状態は未確認です。")).toBeVisible();
+    await expect(page.getByText("追加14件は2026年9月25日にNETIS個別ページの名称・番号を確認。従来の効率化・品質候補36件は公式一覧等の照合で、個別の現行状態は未確認です。")).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
     await page.getByRole("button", { name: "測量・出来形" }).click();
     await expect(page).toHaveURL(/purpose=efficiency.*risk=survey-measurement|risk=survey-measurement.*purpose=efficiency/);
