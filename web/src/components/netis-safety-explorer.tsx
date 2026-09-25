@@ -107,9 +107,9 @@ export function NetisSafetyExplorer() {
   const wave2Category = NETIS_WAVE2_CATEGORIES.find((category) => category.id === rawCategory);
   const wave4Category = NETIS_WAVE4_CATEGORIES.find((category) => category.id === rawCategory);
   const wave5Category = NETIS_WAVE5_CATEGORIES.find((category) => category.id === rawCategory);
-  const purpose: Purpose = rawPurpose === "efficiency" || rawPurpose === "quality" || rawPurpose === "all"
+  const purpose: Purpose = rawPurpose === "safety" || rawPurpose === "efficiency" || rawPurpose === "quality" || rawPurpose === "all"
     ? rawPurpose
-    : wave5Category?.purpose ?? wave4Category?.purpose ?? wave2Category?.purpose ?? (isNetisEfficiencyCategoryId(rawCategory) ? "efficiency" : "safety");
+    : wave5Category?.purpose ?? wave4Category?.purpose ?? wave2Category?.purpose ?? (isNetisEfficiencyCategoryId(rawCategory) ? "efficiency" : rawSearch && !rawCategory ? "all" : "safety");
   const candidateCategoryId: CategoryId | null = isNetisSafetyCategoryId(rawCategory) || isNetisEfficiencyCategoryId(rawCategory) || isNetisWave2CategoryId(rawCategory) || isNetisWave4CategoryId(rawCategory) || isNetisWave5CategoryId(rawCategory)
     ? rawCategory
     : null;
@@ -265,8 +265,7 @@ export function NetisSafetyExplorer() {
 
   function updatePurpose(nextPurpose: Purpose) {
     const params = latestParams();
-    if (nextPurpose === "safety") params.delete("purpose");
-    else params.set("purpose", nextPurpose);
+    params.set("purpose", nextPurpose);
     params.delete("risk");
     pushParams(params);
   }
@@ -274,16 +273,13 @@ export function NetisSafetyExplorer() {
   function updateSearch(value: string) {
     const queryValue = value.trim();
     const params = latestParams();
-    // The landing state shows safety examples, but a user entering an unknown
-    // registration number expects to search the whole catalog. Preserve an
-    // explicitly chosen purpose or category when one exists.
-    const expandDefaultSearch = Boolean(queryValue) && !params.has("purpose") && !params.has("risk");
-    if (queryValue === (params.get("q")?.trim() ?? "") && !expandDefaultSearch) {
+    // No explicit purpose or category means the query searches the full catalog.
+    // An explicitly chosen tab remains a filter, including the safety tab.
+    if (queryValue === (params.get("q")?.trim() ?? "")) {
       focusResults(resultsHeadingRef.current);
       return;
     }
     if (queryValue) {
-      if (expandDefaultSearch) params.set("purpose", "all");
       params.set("q", queryValue);
     }
     else params.delete("q");

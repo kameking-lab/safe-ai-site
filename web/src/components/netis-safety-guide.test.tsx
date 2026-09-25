@@ -308,7 +308,7 @@ describe("NetisSafetyGuide", () => {
     expect(screen.getByText("養生・仮設敷設：1件")).toBeDefined();
     expect(screen.getByRole("button", { name: "作業を効率化" }).getAttribute("aria-pressed")).toBe("true");
     fireEvent.click(screen.getByRole("button", { name: "安全を高める" }));
-    expect(navigation.push).toHaveBeenCalledWith("/resources/netis-safety?q=HK-190004", { scroll: false });
+    expect(navigation.push).toHaveBeenCalledWith("/resources/netis-safety?purpose=safety&q=HK-190004", { scroll: false });
   });
 
   it("第5陣26件と第6陣14件を限定紹介として加え、全100件の基番号と正式名称を重複させない", () => {
@@ -387,15 +387,35 @@ describe("NetisSafetyGuide", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: "掲載技術を検索" }));
     expect(navigation.push).toHaveBeenCalledWith(
-      "/resources/netis-safety?purpose=all&q=KT-180043-VE",
+      "/resources/netis-safety?q=KT-180043-VE",
       { scroll: false },
     );
     unmount();
 
-    navigation.query = "purpose=all&q=KT-180043-VE";
+    navigation.query = "q=KT-180043-VE";
     const { container } = render(<NetisSafetyExplorer />);
     expect(screen.getByText("安全・効率化・品質候補：1件")).toBeDefined();
     expect(container.textContent).toContain("クラウド計測システム 『クラウド16』");
+    navigation.push.mockClear();
+    fireEvent.click(screen.getByRole("button", { name: "掲載技術を検索" }));
+    expect(navigation.push).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "検索を解除" }));
+    expect(navigation.push).toHaveBeenCalledWith("/resources/netis-safety", { scroll: false });
+  });
+
+  it("明示した安全タブは番号検索でも保持する", () => {
+    const { unmount } = render(<NetisSafetyExplorer />);
+    fireEvent.click(screen.getByRole("button", { name: "安全を高める" }));
+    expect(navigation.push).toHaveBeenCalledWith("/resources/netis-safety?purpose=safety", { scroll: false });
+    unmount();
+
+    navigation.query = "purpose=safety";
+    render(<NetisSafetyExplorer />);
+    fireEvent.change(screen.getByRole("searchbox", { name: /名称・登録番号・用途/ }), {
+      target: { value: "KT-180043-VE" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "掲載技術を検索" }));
+    expect(navigation.push).toHaveBeenCalledWith("/resources/netis-safety?purpose=safety&q=KT-180043-VE", { scroll: false });
   });
 
   it("目的タブの直後に検索を置き、画像カテゴリを巡回せず絞り込める", () => {

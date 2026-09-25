@@ -13,7 +13,7 @@ test("第4陣の海上と仮設敷設を直接URL・検索・戻るで探せる"
   await expect(page.getByRole("heading", { name: "養生・仮設敷設：1件" })).toBeVisible();
   await expect(page.getByRole("button", { name: "作業を効率化" })).toHaveAttribute("aria-pressed", "true");
   await page.getByRole("button", { name: "安全を高める" }).click();
-  await expect(page).toHaveURL(`${ROUTE}?q=HK-190004`);
+  await expect(page).toHaveURL(`${ROUTE}?purpose=safety&q=HK-190004`);
   await page.goBack();
   await expect(page.getByRole("heading", { name: "養生・仮設敷設：1件" })).toBeVisible();
 });
@@ -32,7 +32,7 @@ test("390px初期画面で画像カテゴリを先に選べる", async ({ page }
     expect(box!.y + box!.height).toBeLessThanOrEqual(844);
   }
 
-  await expect(page.getByText("当サイトで出典を確認した60件を掲載しています。NETIS全登録技術の一覧ではありません。")).toBeVisible();
+  await expect(page.getByText("当サイトで出典を確認した100件を掲載しています。NETIS全登録技術の一覧ではありません。")).toBeVisible();
   const loadedImages = await page
     .locator('[aria-label="安全課題カテゴリ"] img')
     .evaluateAll((images) =>
