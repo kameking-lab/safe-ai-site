@@ -20,13 +20,19 @@ import {
   isNetisEfficiencyCategoryId,
   type NetisEfficiencyCategoryId,
 } from "./netis-efficiency-data";
+import {
+  NETIS_WAVE2_CATEGORIES,
+  NETIS_WAVE2_TECHNOLOGIES,
+  isNetisWave2CategoryId,
+  type NetisWave2CategoryId,
+} from "./netis-wave2-data";
 
-type CategoryId = NetisSafetyCategoryId | NetisEfficiencyCategoryId;
-type Purpose = "safety" | "efficiency" | "all";
-const ALL_TECHNOLOGIES = [...FEATURED_NETIS_TECHNOLOGIES, ...NETIS_EFFICIENCY_TECHNOLOGIES];
+type CategoryId = NetisSafetyCategoryId | NetisEfficiencyCategoryId | NetisWave2CategoryId;
+type Purpose = "safety" | "efficiency" | "quality" | "all";
+const ALL_TECHNOLOGIES = [...FEATURED_NETIS_TECHNOLOGIES, ...NETIS_EFFICIENCY_TECHNOLOGIES, ...NETIS_WAVE2_TECHNOLOGIES];
 
 function categoryFor(id: CategoryId) {
-  return [...NETIS_SAFETY_CATEGORIES, ...NETIS_EFFICIENCY_CATEGORIES].find(
+  return [...NETIS_SAFETY_CATEGORIES, ...NETIS_EFFICIENCY_CATEGORIES, ...NETIS_WAVE2_CATEGORIES].find(
     (category) => category.id === id,
   )!;
 }
@@ -94,8 +100,11 @@ export function NetisSafetyExplorer() {
   const rawCategory = searchParams.get("risk");
   const rawSearch = searchParams.get("q")?.trim() ?? "";
   const rawPurpose = searchParams.get("purpose");
-  const purpose: Purpose = rawPurpose === "efficiency" || rawPurpose === "all" ? rawPurpose : isNetisEfficiencyCategoryId(rawCategory) ? "efficiency" : "safety";
-  const selectedCategoryId: CategoryId | null = isNetisSafetyCategoryId(rawCategory) || isNetisEfficiencyCategoryId(rawCategory)
+  const wave2Category = NETIS_WAVE2_CATEGORIES.find((category) => category.id === rawCategory);
+  const purpose: Purpose = rawPurpose === "efficiency" || rawPurpose === "quality" || rawPurpose === "all"
+    ? rawPurpose
+    : wave2Category?.purpose ?? (isNetisEfficiencyCategoryId(rawCategory) ? "efficiency" : "safety");
+  const selectedCategoryId: CategoryId | null = isNetisSafetyCategoryId(rawCategory) || isNetisEfficiencyCategoryId(rawCategory) || isNetisWave2CategoryId(rawCategory)
     ? rawCategory
     : null;
   const selectedCategory = selectedCategoryId
@@ -109,9 +118,11 @@ export function NetisSafetyExplorer() {
   const technologies = useMemo(
     () =>
       ALL_TECHNOLOGIES.filter((technology) => {
-        const isEfficiency = "officialSourceUrl" in technology;
-        if (purpose === "safety" && isEfficiency) return false;
-        if (purpose === "efficiency" && !isEfficiency) return false;
+        const isReference = "officialSourceUrl" in technology;
+        const isQuality = "primaryPurpose" in technology && technology.primaryPurpose === "quality";
+        if (purpose === "safety" && isReference) return false;
+        if (purpose === "efficiency" && (!isReference || isQuality)) return false;
+        if (purpose === "quality" && !isQuality) return false;
         const categoryMatches = selectedCategoryId
           ? (technology.categoryIds as readonly string[]).includes(
               selectedCategoryId,
@@ -165,6 +176,7 @@ export function NetisSafetyExplorer() {
     if (categoryId) {
       params.set("risk", categoryId);
       if (isNetisEfficiencyCategoryId(categoryId)) params.set("purpose", "efficiency");
+      else if (isNetisWave2CategoryId(categoryId)) params.set("purpose", NETIS_WAVE2_CATEGORIES.find((category) => category.id === categoryId)!.purpose);
       else params.delete("purpose");
     }
     else {
@@ -230,10 +242,11 @@ export function NetisSafetyExplorer() {
         </a>
       </div>
 
-      <div className="mt-3 grid grid-cols-3 gap-2" role="group" aria-label="探す目的">
+      <div className="mt-3 grid grid-cols-4 gap-1.5 sm:gap-2" role="group" aria-label="探す目的">
         {([
           ["safety", "安全を高める"],
           ["efficiency", "作業を効率化"],
+          ["quality", "品質・検査"],
           ["all", "すべて"],
         ] as const).map(([id, label]) => (
           <button
@@ -253,7 +266,13 @@ export function NetisSafetyExplorer() {
         role="group"
         aria-label={purpose === "safety" ? "安全課題カテゴリ" : "技術カテゴリ"}
       >
-        {(purpose === "efficiency" ? NETIS_EFFICIENCY_CATEGORIES : purpose === "all" ? [...NETIS_SAFETY_CATEGORIES, ...NETIS_EFFICIENCY_CATEGORIES] : NETIS_SAFETY_CATEGORIES).map((category) => {
+        {(purpose === "efficiency"
+          ? [...NETIS_EFFICIENCY_CATEGORIES, ...NETIS_WAVE2_CATEGORIES.filter((category) => category.purpose === "efficiency")]
+          : purpose === "quality"
+            ? NETIS_WAVE2_CATEGORIES.filter((category) => category.purpose === "quality")
+            : purpose === "all"
+              ? [...NETIS_SAFETY_CATEGORIES, ...NETIS_EFFICIENCY_CATEGORIES, ...NETIS_WAVE2_CATEGORIES]
+              : NETIS_SAFETY_CATEGORIES).map((category) => {
           const selected = selectedCategoryId === category.id;
           const visualCategory = "image" in category ? category : null;
           return (
@@ -295,7 +314,7 @@ export function NetisSafetyExplorer() {
                   }`}
                 />
               </span>
-              {visualCategory && isNetisEfficiencyCategoryId(category.id) ? (
+              {visualCategory && !isNetisSafetyCategoryId(category.id) ? (
                 <span className="block px-3 pb-3 text-xs leading-5 text-slate-600 dark:text-slate-300">{category.description}</span>
               ) : null}
             </button>
@@ -309,14 +328,14 @@ export function NetisSafetyExplorer() {
         当サイトで出典を確認した{FEATURED_NETIS_TECHNOLOGIES.length}件を掲載しています。NETIS全登録技術の一覧ではありません。
       </p>
       <p className="mt-1 text-sm leading-6 text-slate-700 dark:text-slate-200">
-        効率化の追加{NETIS_EFFICIENCY_TECHNOLOGIES.length}件のうち5件は国交省の2026年4月一覧、1件は過去の地方整備局資料で確認した参考技術です。2026年9月時点の現行NETIS登録は未確認です。
+        効率化の第1陣{NETIS_EFFICIENCY_TECHNOLOGIES.length}件のうち5件は国交省の2026年4月一覧、1件は過去の地方整備局資料で確認しました。第2陣{NETIS_WAVE2_TECHNOLOGIES.length}件は同4月一覧の参考技術です。2026年9月時点の現行NETIS個別状態は未確認です。
       </p>
       <details className="mt-1 text-xs text-slate-600 dark:text-slate-300">
         <summary className="flex min-h-11 cursor-pointer items-center font-bold underline underline-offset-4">
           写真の出典・ライセンスを確認
         </summary>
         <ul className="space-y-1.5 pb-2 leading-5">
-          {[...NETIS_SAFETY_CATEGORIES, ...NETIS_EFFICIENCY_CATEGORIES].map((category) => (
+          {[...NETIS_SAFETY_CATEGORIES, ...NETIS_EFFICIENCY_CATEGORIES, ...NETIS_WAVE2_CATEGORIES].map((category) => (
             <li key={category.id} className="break-words">
               <span className="font-black">{category.label}</span>：
               <a
@@ -401,7 +420,7 @@ export function NetisSafetyExplorer() {
         <div className="flex flex-wrap items-end justify-between gap-3 border-b border-slate-200 pb-3 dark:border-slate-800">
           <div>
             <p className="text-xs font-black text-emerald-800 dark:text-emerald-300">
-              {selectedCategory ? "選択中" : "掲載技術"} ・ {purpose === "safety" ? NETIS_CHECKED_AT : "効率化候補の現行NETIS掲載は未照合"}
+              {selectedCategory ? "選択中" : "掲載技術"} ・ {purpose === "safety" ? NETIS_CHECKED_AT : "2026年9月の現行NETIS個別状態は未照合"}
             </p>
             <h3
               ref={resultsHeadingRef}
@@ -411,7 +430,7 @@ export function NetisSafetyExplorer() {
             >
               {selectedCategory
                 ? `${selectedCategory.label}：${technologies.length}件`
-                : `${purpose === "safety" ? "当サイト掲載" : purpose === "efficiency" ? "作業効率化候補" : "安全・効率化候補"}：${technologies.length}件`}
+                : `${purpose === "safety" ? "当サイト掲載" : purpose === "efficiency" ? "作業効率化候補" : purpose === "quality" ? "品質・検査候補" : "安全・効率化・品質候補"}：${technologies.length}件`}
             </h3>
             {rawSearch ? (
               <p className="mt-1 text-sm font-bold text-slate-600 dark:text-slate-300">
@@ -451,7 +470,9 @@ export function NetisSafetyExplorer() {
               const primaryCategory = categoryFor(technology.categoryIds[0]);
               const efficiency = "officialSourceUrl" in technology;
               const productImage = efficiency ? null : technology.productImage;
-              const mainUrl = efficiency ? technology.officialSourceUrl : netisDetailUrl(technology.registrationNumber);
+              const mainUrl = efficiency
+                ? "sourcePage" in technology ? `${technology.officialSourceUrl}#page=${technology.sourcePage}` : technology.officialSourceUrl
+                : netisDetailUrl(technology.registrationNumber);
               return (
                 <article
                   key={technology.registrationNumber}
@@ -528,6 +549,7 @@ export function NetisSafetyExplorer() {
                     {efficiency ? (
                       <p className="mt-2 text-xs font-semibold leading-5 text-slate-600 dark:text-slate-300">
                         開発会社：{technology.provider}／確認資料記載番号：{technology.sourceRegistrationNumber}
+                        {"sourceWorkType" in technology ? `／工種：${technology.sourceWorkType}／${technology.sourceSelection}` : ""}
                       </p>
                     ) : null}
                   </div>
