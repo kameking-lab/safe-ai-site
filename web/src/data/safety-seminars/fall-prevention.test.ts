@@ -2,6 +2,7 @@ import { existsSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import trainingJson from "./fall-prevention.json";
+import safetyManagementJson from "./safety-management-basics-osh-law.json";
 import claimsJson from "./claims.json";
 import quizJson from "./quiz.json";
 import sourcesJson from "./source-registry.json";
@@ -184,6 +185,52 @@ describe("墜落・転落防止研修の共通正本", () => {
       const imagePath = join(process.cwd(), "public", src.replace(/^\//u, ""));
       expect(existsSync(imagePath), `${slide.id} -> ${src}`).toBe(true);
     }
+  });
+
+  it("墜落防止の主要4場面は短い投影面と該当する安衛則へ直接移動できる", () => {
+    const articleBySlide: Record<string, number[]> = {
+      "case-scaffold": [563, 567],
+      "case-roof-opening": [519, 524],
+      "case-ladder": [527, 528],
+      "legal-collective-protection": [518, 519, 521],
+    };
+    const mascotPaths = new Set<string>();
+    const otherCourseMascots = new Set(
+      safetyManagementJson.slides.map((slide) => slide.stage?.mascot?.src).filter(Boolean),
+    );
+    for (const [slideId, articles] of Object.entries(articleBySlide)) {
+      const slide = training.slides.find((item) => item.id === slideId);
+      expect(slide?.stage?.headline, slideId).toBeTruthy();
+      expect(slide?.stage?.headline.length, slideId).toBeLessThanOrEqual(36);
+      expect(slide?.stage?.keyPoints, slideId).toHaveLength(3);
+      expect(slide?.stage?.keyPoints.every((point) => point.length <= 16), slideId).toBe(true);
+      expect(slide?.stage?.caveat?.length, slideId).toBeLessThanOrEqual(30);
+      expect(slide?.stage?.mascot?.alt, slideId).toContain("チワワ");
+      const mascotPath = slide?.stage?.mascot?.src;
+      expect(mascotPath, slideId).toBeTruthy();
+      if (mascotPath) {
+        expect(existsSync(join(process.cwd(), "public", mascotPath.slice(1)))).toBe(true);
+        expect(otherCourseMascots.has(mascotPath)).toBe(false);
+        mascotPaths.add(mascotPath);
+      }
+      expect(slide?.articleRefs?.map((ref) => ref.article), slideId).toEqual(
+        articles.map((article) => `第${article}条`),
+      );
+      for (const [index, article] of articles.entries()) {
+        const ref = slide?.articleRefs?.[index];
+        expect(ref?.sourceId, slideId).toBe("LAW-EGOV-003");
+        const anchor = article === 563
+          ? "Mp-Pa_2-Ch_10-Se_2-Ss_1-At_563"
+          : article === 567
+            ? "Mp-Pa_2-Ch_10-Se_2-Ss_2-At_567"
+            : `Mp-Pa_2-Ch_9-Se_1-At_${article}`;
+        expect(ref?.egovUrl, slideId).toBe(
+          `https://laws.e-gov.go.jp/law/347M50002000032#${anchor}`,
+        );
+        expect(ref?.naviPath, slideId).toBe(`/law-navi/347M50002000032/${article}`);
+      }
+    }
+    expect(mascotPaths.size).toBe(4);
   });
 
   it("まとめスライドのPPTX用3メッセージを共通データで管理する", () => {

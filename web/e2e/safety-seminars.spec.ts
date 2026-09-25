@@ -85,6 +85,50 @@ test.describe("安全研修ライブラリ", () => {
     }
   });
 
+  test("墜落防止の法令4場面は短い投影文と条文リンクを読める", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(DETAIL);
+    await page.getByRole("button", { name: "スライド一覧" }).click();
+    for (const [number, heading, article] of [
+      [7, "足場は床と手すりを確認", 563],
+      [8, "開口部と踏み抜きを別々に防ぐ", 519],
+      [9, "はしご・脚立の条件を確認", 527],
+      [11, "2m以上で墜落の危険があれば設備で防ぐ", 518],
+    ] as const) {
+      await page.getByRole("button", { name: new RegExp(`^${number}\\.`) }).click();
+      await expect(page.getByTestId("stage-headline")).toHaveText(heading);
+      const anchor = article === 563
+        ? "Mp-Pa_2-Ch_10-Se_2-Ss_1-At_563"
+        : `Mp-Pa_2-Ch_9-Se_1-At_${article}`;
+      await expect(page.getByRole("link", { name: `安衛則 第${article}条` })).toHaveAttribute(
+        "href",
+        `https://laws.e-gov.go.jp/law/347M50002000032#${anchor}`,
+      );
+      const mascot = page.getByRole("region", { name: /研修スライド/u }).getByRole("img", { name: /チワワ/u });
+      await expect(mascot).toBeVisible();
+      await expect.poll(() => mascot.evaluate((image) => (image as HTMLImageElement).naturalWidth))
+        .toBeGreaterThan(0);
+      if (number === 7) {
+        await page.getByRole("button", { name: "詳しく" }).click();
+        await expect(page.getByRole("img", { name: "足場の組立区域と資材を扱う作業者を描いた教材用オリジナルイラスト" }))
+          .toBeVisible();
+        await page.getByRole("button", { name: "詳しく閉じる" }).click();
+      }
+      if (number === 11) {
+        await page.getByRole("button", { name: "詳しく" }).click();
+        await expect(page.getByRole("link", { name: "安衛則 第521条" })).toHaveAttribute(
+          "href",
+          "https://laws.e-gov.go.jp/law/347M50002000032#Mp-Pa_2-Ch_9-Se_1-At_521",
+        );
+        await expect(page.getByText("✓ 覆いは固定・識別したか")).toBeVisible();
+        await expect(page.getByText("✓ 安全な取付設備か")).toBeVisible();
+        await page.getByRole("button", { name: "詳しく閉じる" }).click();
+      }
+      expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth))
+        .toBeLessThanOrEqual(1);
+    }
+  });
+
   test("AI研修の既存音声プレイヤーは再生操作を維持する", async ({ page }) => {
     await page.goto("/training/ai-seminars/ai-chat-work");
     const audio = page.locator("audio");

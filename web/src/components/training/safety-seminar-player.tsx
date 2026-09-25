@@ -108,7 +108,7 @@ export function SafetySeminarPlayer({
       .filter((source): source is TrainingSource => Boolean(source));
   }, [claimById, slide.claimIds, sourceById]);
   const slideEvidenceLinks = useMemo(() => {
-    const articleLinks = (slide.articleRefs ?? []).slice(0, 2).map((ref) => ({
+    const articleLinks = (slide.articleRefs ?? []).map((ref) => ({
       href: ref.article.includes("の") && ref.naviPath ? ref.naviPath : ref.egovUrl,
       label: `${ref.lawShort} ${ref.article}`,
       external: !(ref.article.includes("の") && ref.naviPath),
@@ -417,7 +417,7 @@ export function SafetySeminarPlayer({
               ) : null}
               {slideEvidenceLinks.length > 0 ? (
                 <div className="flex flex-wrap gap-2" aria-label="このスライドの根拠">
-                  {slideEvidenceLinks.map((link) => (
+                  {slideEvidenceLinks.slice(0, 2).map((link) => (
                     <a
                       key={`${link.href}-${link.label}`}
                       href={link.href}
@@ -634,7 +634,7 @@ export function SafetySeminarPlayer({
                 : `${slide.number}枚目の音声原稿と講師向け補足`
               : `${slide.number}枚目の講師用の詳説と根拠`}
             tabIndex={0}
-            className="max-h-64 overflow-y-auto rounded-xl border border-slate-700 bg-slate-950 p-4 text-sm leading-7 text-slate-200 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300"
+            className="max-h-[70vh] overflow-y-auto rounded-xl border border-slate-700 bg-slate-950 p-4 text-sm leading-7 text-slate-200 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300"
           >
             {slide.stage ? (
               <>
@@ -643,6 +643,23 @@ export function SafetySeminarPlayer({
                 <ul className="mt-2 list-disc space-y-1 pl-5">
                   {slide.body.map((item) => <li key={item}>{item}</li>)}
                 </ul>
+                {slide.visual.type === "image" || slide.visual.type === "ky" ? (
+                  <Image
+                    src={slide.visual.type === "image" ? slide.visual.src : slide.visual.image}
+                    alt={slide.visual.alt}
+                    width={640}
+                    height={400}
+                    sizes="(max-width: 640px) 80vw, 480px"
+                    className="mt-3 max-h-80 w-auto max-w-full rounded-lg object-contain"
+                  />
+                ) : null}
+                {slide.visual.type === "checklist" ? (
+                  <ul className="mt-3 grid gap-2 sm:grid-cols-2">
+                    {slide.visual.items.map((item) => (
+                      <li key={item} className="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2">✓ {item}</li>
+                    ))}
+                  </ul>
+                ) : null}
                 <h4 className="mt-4 font-black text-white">{audioEnabled ? "音声原稿" : "講師用の詳説"}</h4>
               </>
             ) : null}

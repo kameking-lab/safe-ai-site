@@ -11,6 +11,7 @@ import {
   NETIS_EFFICIENCY_TECHNOLOGIES,
 } from "./netis-efficiency-data";
 import { NETIS_WAVE2_CATEGORIES, NETIS_WAVE2_TECHNOLOGIES } from "./netis-wave2-data";
+import { NETIS_WAVE3_TECHNOLOGIES } from "./netis-wave3-data";
 import { NetisSafetyExplorer } from "./netis-safety-explorer";
 import { NetisSafetyGuide } from "./netis-safety-guide";
 
@@ -196,12 +197,12 @@ describe("NetisSafetyGuide", () => {
     window.history.replaceState(null, "", "/");
   });
 
-  it("効率化タブで第1・第2陣18件を探せ、安全10件と混同しない", () => {
+  it("効率化タブで公式資料を照合した30件を探せ、安全10件と混同しない", () => {
     navigation.query = "purpose=efficiency";
     const { container } = render(<NetisSafetyExplorer />);
     expect(screen.getByRole("button", { name: "作業を効率化" }).getAttribute("aria-pressed")).toBe("true");
-    expect(screen.getByText("作業効率化候補：18件")).toBeDefined();
-    expect(container.querySelectorAll("article")).toHaveLength(18);
+    expect(screen.getByText("作業効率化候補：30件")).toBeDefined();
+    expect(container.querySelectorAll("article")).toHaveLength(30);
     expect(screen.queryByText(/ヒヤリハンター/)).toBeNull();
     for (const category of NETIS_EFFICIENCY_CATEGORIES) {
       expect(screen.getByRole("button", { name: category.label })).toBeDefined();
@@ -227,29 +228,43 @@ describe("NetisSafetyGuide", () => {
       expect(container.textContent).toContain(technology.name);
       expect(container.textContent).toContain(technology.sourceBasis);
     }
+    for (const technology of NETIS_WAVE3_TECHNOLOGIES.filter((item) => item.primaryPurpose === "efficiency")) {
+      expect(container.textContent).toContain(technology.name);
+      expect(container.textContent).toContain(technology.sourceBasis);
+    }
   });
 
-  it("品質・検査3件を独立した目的として表示し、効率化件数に混ぜない", () => {
+  it("品質・検査6件を独立した目的として表示し、効率化件数に混ぜない", () => {
     navigation.query = "purpose=quality";
     const { container } = render(<NetisSafetyExplorer />);
-    expect(screen.getByText("品質・検査候補：3件")).toBeDefined();
-    expect(container.querySelectorAll("article")).toHaveLength(3);
-    for (const technology of NETIS_WAVE2_TECHNOLOGIES.filter((item) => item.primaryPurpose === "quality")) {
+    expect(screen.getByText("品質・検査候補：6件")).toBeDefined();
+    expect(container.querySelectorAll("article")).toHaveLength(6);
+    for (const technology of [...NETIS_WAVE2_TECHNOLOGIES, ...NETIS_WAVE3_TECHNOLOGIES].filter((item) => item.primaryPurpose === "quality")) {
       expect(container.textContent).toContain(technology.name);
     }
   });
 
-  it("第2陣を含む31件の基番号は重複せず、資料時点を明示する", () => {
-    const all = [...FEATURED_NETIS_TECHNOLOGIES, ...NETIS_EFFICIENCY_TECHNOLOGIES, ...NETIS_WAVE2_TECHNOLOGIES];
-    expect(all).toHaveLength(31);
-    expect(new Set(all.map((item) => item.registrationNumber)).size).toBe(31);
+  it("第3陣を含む46件の基番号は重複せず、公式資料と提供元を示す", () => {
+    const all = [...FEATURED_NETIS_TECHNOLOGIES, ...NETIS_EFFICIENCY_TECHNOLOGIES, ...NETIS_WAVE2_TECHNOLOGIES, ...NETIS_WAVE3_TECHNOLOGIES];
+    expect(all).toHaveLength(46);
+    expect(new Set(all.map((item) => item.registrationNumber.replace(/-(?:A|VE)$/i, ""))).size).toBe(46);
     expect(NETIS_WAVE2_TECHNOLOGIES).toHaveLength(15);
+    expect(NETIS_WAVE3_TECHNOLOGIES).toHaveLength(15);
     expect(NETIS_WAVE2_TECHNOLOGIES.filter((item) => item.categoryIds.includes("wave2-roadwork"))).toHaveLength(3);
     for (const item of NETIS_WAVE2_TECHNOLOGIES) {
       expect(item.sourceBasis).toContain("2026年4月公式一覧掲載");
       expect(item.sourceBasis).toContain("9月現行NETIS個別状態未確認");
       expect(item.officialSourceUrl).toMatch(/^https:\/\/www\.cgr\.mlit\.go\.jp\//);
       expect(item.providerSourceUrl).toMatch(/^https:\/\//);
+    }
+    for (const item of NETIS_WAVE3_TECHNOLOGIES) {
+      expect(item.sourceBasis).toContain("2026年4月公式一覧掲載");
+      expect(item.sourceBasis).toContain("9月現行NETIS個別状態未確認");
+      expect(item.officialSourceUrl).toMatch(/^https:\/\/www\.cgr\.mlit\.go\.jp\//);
+      expect(item.providerSourceUrl).toMatch(/^https:\/\//);
+      expect(item.sourceRegistrationNumber.startsWith(item.registrationNumber)).toBe(true);
+      expect(item.summary.length).toBeLessThanOrEqual(60);
+      expect(item.limitations.length).toBeGreaterThan(20);
     }
   });
 
@@ -259,6 +274,13 @@ describe("NetisSafetyGuide", () => {
     expect(screen.getByText("作業効率化候補：1件")).toBeDefined();
     expect(container.querySelectorAll("article")).toHaveLength(1);
     expect(container.querySelector("article")?.textContent).toContain("ScanX");
+  });
+
+  it("追加した現場技術は名称・末尾付き番号・既存カテゴリで発見できる", () => {
+    navigation.query = "purpose=efficiency&risk=wave2-roadwork&q=SK-190003-VE";
+    const { container } = render(<NetisSafetyExplorer />);
+    expect(screen.getByText("道路作業・区画線：1件")).toBeDefined();
+    expect(container.querySelector("article")?.textContent).toContain("冬用タイヤ自動判別システム");
   });
 
   it("効率化カテゴリの直リンクと検索を保ち、既存のrisk形式を利用する", () => {

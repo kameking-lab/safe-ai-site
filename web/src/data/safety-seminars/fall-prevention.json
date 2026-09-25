@@ -125,6 +125,37 @@
       "claimIds": ["C-LAW-007", "C-LAW-008", "C-LAW-009", "C-GUIDE-006", "SCI-HIER-001"],
       "narration": "教材用のケースです。資材を受け渡すため、一時的に足場の手すりを外しました。受け渡し後も復旧されず、その近くを別の作業者が通ります。事故は一人の不注意ではなく、工程変更と復旧確認の欠落から始まっています。足場の作業床、床材間の隙間、端部の手すり等、昇降設備、組立・解体時の作業方法には、それぞれ法令上の要件があります。実際の足場種類や作業条件に応じて、該当条文と組立図を確認してください。行政ガイドラインでは、手すりを先行して設置する方法等が示されています。現場では外した人が戻すだけに頼らず、外す前の許可、代替措置、立入管理、復旧確認者、作業再開条件を決めます。",
       "instructorNotes": ["実災害の再現ではなく、複数要因を学ぶ教材用ケースと明示する。", "誰が悪いかではなく、手すりを外さず済む受渡し方法を先に問う。"],
+      "stage": {
+        "headline": "足場は床と手すりを確認",
+        "keyPoints": [
+          "作業床と端部を確認",
+          "不要になれば直ちに原状へ",
+          "作業開始前に点検者が点検"
+        ],
+        "caveat": "足場の種類と作業条件で適用条文を確認",
+        "mascot": {
+          "src": "/training/safety-seminars/fall-prevention/mascots/scaffold-check.webp",
+          "alt": "足場の作業床と手すりを確認するチワワ",
+          "width": 640,
+          "height": 640
+        }
+      },
+      "articleRefs": [
+        {
+          "lawShort": "安衛則",
+          "article": "第563条",
+          "sourceId": "LAW-EGOV-003",
+          "egovUrl": "https://laws.e-gov.go.jp/law/347M50002000032#Mp-Pa_2-Ch_10-Se_2-Ss_1-At_563",
+          "naviPath": "/law-navi/347M50002000032/563"
+        },
+        {
+          "lawShort": "安衛則",
+          "article": "第567条",
+          "sourceId": "LAW-EGOV-003",
+          "egovUrl": "https://laws.e-gov.go.jp/law/347M50002000032#Mp-Pa_2-Ch_10-Se_2-Ss_2-At_567",
+          "naviPath": "/law-navi/347M50002000032/567"
+        }
+      ],
       "estimatedSeconds": 110
     },
     {
@@ -139,6 +170,37 @@
       "claimIds": ["C-LAW-003", "C-LAW-005", "C-LAW-007", "SCI-HIER-001", "SCI-HF-001", "SCI-HF-002"],
       "narration": "屋根作業では、端から落ちる危険だけでなく、スレート等の弱い屋根材を踏み抜く危険、天窓や開口部、屋根への昇降経路を分けて確認します。同じ屋根上という一語でまとめないことが重要です。弱い材料でふかれた屋根には、所定の歩み板を設け、防網を張る等の踏み抜き防止措置が必要です。端部や開口部には、囲い、手すり、覆い等を設けます。覆いは動かないようにし、開口だと分かる管理も必要です。復旧漏れは注意してくださいだけでは防ぎにくい問題です。覆いを外す作業の許可、仮置き防止、復旧の相互確認、工程変更時の再KYなど、抜けを発見できる仕組みにします。",
       "instructorNotes": ["法令の具体寸法は使用する屋根・設備条件を確認して別資料に載せる。", "写真を使う場合、開口へ不用意に近づいて撮影しない。"],
+      "stage": {
+        "headline": "開口部と踏み抜きを別々に防ぐ",
+        "keyPoints": [
+          "開口部は囲い・覆い",
+          "弱い屋根は歩み板等",
+          "復旧は現場手順で確認"
+        ],
+        "caveat": "開口部は高さ2m以上、屋根は踏抜き危険時",
+        "mascot": {
+          "src": "/training/safety-seminars/fall-prevention/mascots/roof-opening-check.webp",
+          "alt": "覆いと囲いを設けた開口部を調べるチワワ",
+          "width": 640,
+          "height": 640
+        }
+      },
+      "articleRefs": [
+        {
+          "lawShort": "安衛則",
+          "article": "第519条",
+          "sourceId": "LAW-EGOV-003",
+          "egovUrl": "https://laws.e-gov.go.jp/law/347M50002000032#Mp-Pa_2-Ch_9-Se_1-At_519",
+          "naviPath": "/law-navi/347M50002000032/519"
+        },
+        {
+          "lawShort": "安衛則",
+          "article": "第524条",
+          "sourceId": "LAW-EGOV-003",
+          "egovUrl": "https://laws.e-gov.go.jp/law/347M50002000032#Mp-Pa_2-Ch_9-Se_1-At_524",
+          "naviPath": "/law-navi/347M50002000032/524"
+        }
+      ],
       "estimatedSeconds": 110
     },
     {
@@ -153,6 +215,37 @@
       "claimIds": ["C-LAW-006", "SCI-HIER-001", "SCI-HIER-002", "SCI-HF-001"],
       "narration": "脚立やはしごは手軽なため、少しだけ、すぐ終わるという判断で使われがちです。しかし、作業床の代わりとして常に適切とは限りません。まず地上作業や安定した作業台へ置き換えられないかを確認します。移動はしごと脚立には、丈夫な構造、著しい損傷や腐食がないこと、滑り止めや開き止め等について法令上の要件があります。使用する製品の取扱説明書と現物状態も確認してください。現場では、傾斜や段差、ぬれ、通行人、扉、車両、頭上設備、工具を持った昇降、身の乗り出しを確認します。条件が変わったら、一度止めて設置方法から見直します。",
       "instructorNotes": ["一律に脚立禁止とせず、置換可能性と適合条件を確認させる。", "現物を使う実演は平坦な安全区域で行う。"],
+      "stage": {
+        "headline": "はしご・脚立の条件を確認",
+        "keyPoints": [
+          "移動はしごの転位防止",
+          "脚立は開き止め等を確認",
+          "作業床への置換も検討"
+        ],
+        "caveat": "はしごと脚立で法令要件が異なる",
+        "mascot": {
+          "src": "/training/safety-seminars/fall-prevention/mascots/ladder-check.webp",
+          "alt": "脚立の開き止めと足元を確認するチワワ",
+          "width": 640,
+          "height": 640
+        }
+      },
+      "articleRefs": [
+        {
+          "lawShort": "安衛則",
+          "article": "第527条",
+          "sourceId": "LAW-EGOV-003",
+          "egovUrl": "https://laws.e-gov.go.jp/law/347M50002000032#Mp-Pa_2-Ch_9-Se_1-At_527",
+          "naviPath": "/law-navi/347M50002000032/527"
+        },
+        {
+          "lawShort": "安衛則",
+          "article": "第528条",
+          "sourceId": "LAW-EGOV-003",
+          "egovUrl": "https://laws.e-gov.go.jp/law/347M50002000032#Mp-Pa_2-Ch_9-Se_1-At_528",
+          "naviPath": "/law-navi/347M50002000032/528"
+        }
+      ],
       "estimatedSeconds": 95
     },
     {
@@ -185,6 +278,44 @@
       "claimIds": ["C-LAW-001", "C-LAW-002", "C-LAW-003", "C-LAW-004"],
       "narration": "労働者が墜落するおそれのある場所では、事業者に危険防止措置が求められます。高さ2メートル以上の作業箇所では、原則として作業床を設けます。まず、この作業床を設けられない理由が本当にあるかを確認します。作業床の端や開口部等で墜落のおそれがある場所には、囲い、手すり、覆い等を設けます。作業の性質上これらが著しく困難な場合は、防網を張り、要求性能墜落制止用器具を使用させる等の代替措置が必要です。墜落制止用器具を使わせる場合は、安全に取り付ける設備を設け、その設備に異常がないか随時点検します。フックを掛けられそうな配管や手すりが、そのまま安全な取付設備とは限りません。",
       "instructorNotes": ["2m未満なら対策不要とは説明しない。2mはこれら条文の境界で、危険防止判断は残る。", "作業床が難しいという現場判断を無条件で認めない。"],
+      "stage": {
+        "headline": "2m以上で墜落の危険があれば設備で防ぐ",
+        "keyPoints": [
+          "危険時は作業床",
+          "端・開口は囲い等",
+          "例外は条文別に判定"
+        ],
+        "caveat": "2m未満も危険を評価する",
+        "mascot": {
+          "src": "/training/safety-seminars/fall-prevention/mascots/work-platform-check.webp",
+          "alt": "囲い付き作業床を指して説明するチワワ",
+          "width": 640,
+          "height": 640
+        }
+      },
+      "articleRefs": [
+        {
+          "lawShort": "安衛則",
+          "article": "第518条",
+          "sourceId": "LAW-EGOV-003",
+          "egovUrl": "https://laws.e-gov.go.jp/law/347M50002000032#Mp-Pa_2-Ch_9-Se_1-At_518",
+          "naviPath": "/law-navi/347M50002000032/518"
+        },
+        {
+          "lawShort": "安衛則",
+          "article": "第519条",
+          "sourceId": "LAW-EGOV-003",
+          "egovUrl": "https://laws.e-gov.go.jp/law/347M50002000032#Mp-Pa_2-Ch_9-Se_1-At_519",
+          "naviPath": "/law-navi/347M50002000032/519"
+        },
+        {
+          "lawShort": "安衛則",
+          "article": "第521条",
+          "sourceId": "LAW-EGOV-003",
+          "egovUrl": "https://laws.e-gov.go.jp/law/347M50002000032#Mp-Pa_2-Ch_9-Se_1-At_521",
+          "naviPath": "/law-navi/347M50002000032/521"
+        }
+      ],
       "estimatedSeconds": 110
     },
     {

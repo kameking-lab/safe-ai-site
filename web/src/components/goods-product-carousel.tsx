@@ -67,8 +67,8 @@ export function GoodsProductCarousel({ categoryId, categoryName, featureId }: { 
   }, [categoryId, featureId]);
 
   return (
-    <section aria-label={`${categoryName}の実商品写真`} className="mt-4 rounded-2xl border-2 border-emerald-200 bg-emerald-50 p-4 sm:p-5">
-      <h3 className="text-lg font-black text-emerald-950">{categoryName}の実商品写真と高評価候補</h3>
+    <section aria-label={`${categoryName}の商品候補`} className="mt-4 rounded-2xl border-2 border-emerald-200 bg-emerald-50 p-4 sm:p-5">
+      <h3 className="text-lg font-black text-emerald-950">{categoryName}の{result?.status === "ready" ? "実商品写真と高評価候補" : "商品候補"}</h3>
       <p className="mt-1 text-xs leading-6 text-emerald-950">
         楽天市場の購入者評価が★{MIN_GOODS_RATING}以上・{MIN_GOODS_REVIEWS}件以上の在庫あり商品だけを表示します。評価は安全規格への適合を示しません。
       </p>

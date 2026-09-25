@@ -358,7 +358,7 @@ export function SafetyGoodsWizard() {
       <div className="p-5 sm:p-7">
         <ol className="grid grid-cols-4 gap-1 text-center text-[11px] font-black sm:gap-2 sm:text-xs" aria-label="選定の手順">
           {["危険", "作業", "条件", "候補"].map((label, index) => (
-            <li key={label} className={`rounded-full px-2 py-2 ${step >= index + 1 ? "bg-emerald-700 text-white" : "bg-slate-100 text-slate-500"}`}>{index + 1}. {label}</li>
+            <li key={label} className={`rounded-full px-2 py-2 ${step >= index + 1 ? "bg-emerald-700 text-white" : "bg-slate-100 text-slate-600"}`}>{index + 1}. {label}</li>
           ))}
         </ol>
 
