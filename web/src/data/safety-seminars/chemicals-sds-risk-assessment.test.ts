@@ -22,6 +22,7 @@ describe("化学物質・SDS・リスクアセスメント入門の正本", () =
     expect(images[0]?.visual.type === "image" && images[0].visual.src).toContain("chemicals-sds-risk-assessment");
     for (const slide of training.slides) {
       expect(slide.visual.type).not.toBe("ky");
+      expect(slide.label, `${slide.id}: kickerとlabelが重複`).not.toBe(slide.kicker);
       expect(slide.message.length, slide.id).toBeLessThanOrEqual(55);
       expect(slide.narration.length, slide.id).toBeLessThanOrEqual(190);
     }

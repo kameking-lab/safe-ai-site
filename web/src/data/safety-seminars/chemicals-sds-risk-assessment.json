@@ -13,7 +13,7 @@
       "id": "work-change", "number": 1, "title": "同じ洗浄剤でも変わる", "kicker": "演習例", "message": "拭き取りから噴霧へ変えると、ばく露のしかたが変わります。",
       "body": ["薬剤は同じ", "ミストが発生", "作業単位で確認"],
       "visual": { "type": "image", "src": "/training/safety-seminars/chemicals-sds-risk-assessment/chemical-sds-training-v1.png", "alt": "密閉した洗浄剤とSDSを前に、拭き取りから噴霧への作業変更を説明するチワワ講師" },
-      "label": "演習例", "claimIds": ["CHEM-RA-TIMING"],
+      "label": "作業変更", "claimIds": ["CHEM-RA-TIMING"],
       "narration": "床用洗浄剤を布で拭き取る作業から、噴霧器で吹き付ける作業へ変える例で学びます。製品が同じでも、空気中へ広がる量や吸入・皮膚接触の機会は変わります。作業方法の変更前に、SDSと実際の条件を結び付けて評価します。",
       "instructorNotes": ["教材内の洗浄剤は演習例です", "実際の製品SDSを必ず確認します"], "estimatedSeconds": 85,
       "stage": { "headline": "製品名が同じでも、作業方法が変われば再確認", "keyPoints": ["拭き取り", "噴霧", "作業開始前の見直し"], "caveat": "演習例。対象物への該当性は実際のSDSと法令で確認します。", "mascot": {"src":"/mascot/mascot-chemical-lab.webp","alt":"洗浄剤の作業変更を確認するチワワ","width":160,"height":160} },
@@ -64,7 +64,7 @@
     {
       "id": "mandatory-ra", "number": 7, "title": "対象作業を評価する", "kicker": "法定義務", "message": "リスクアセスメント対象物を扱う作業は、危険有害性を調査します。",
       "body": ["作業ごとに特定", "リスクを見積る", "結果を対策へ"], "visual": {"type":"steps","steps":[{"label":"特定","detail":"危険有害性と作業を洗い出す"},{"label":"見積り","detail":"ばく露と結果の重さを考える"},{"label":"検討","detail":"低減措置を決める"}]},
-      "label": "法定義務", "claimIds": ["CHEM-RA-DUTY"],
+      "label": "リスク調査", "claimIds": ["CHEM-RA-DUTY"],
       "narration": "安衛法第57条の3第1項は、リスクアセスメント対象物について危険性または有害性等の調査を事業者に義務付けています。SDSを保存して終わりではなく、実際の噴霧作業の条件を含めて見積もります。",
       "instructorNotes": ["一般消費者向け製品等の適用条件は個別に確認します"], "estimatedSeconds": 82,
       "stage": {"headline":"SDS入手だけではリスクアセスメント完了ではない","keyPoints":["対象確認","作業単位","結果を対策へ"]},
@@ -82,7 +82,7 @@
     {
       "id": "minimum-exposure", "number": 9, "title": "法定措置は残る", "kicker": "法定義務", "message": "評価が低くても、適用される法定措置を省略する理由にはなりません。",
       "body": ["ばく露を最小限度", "濃度基準を確認", "個別規則も確認"], "visual": {"type":"checklist","items":["ばく露を最小限度にする","濃度基準値の適用を確認","特別規則の措置を確認","評価点だけで免除しない"]},
-      "label": "法定義務", "claimIds": ["CHEM-EXPOSURE-DUTY"],
+      "label": "法定措置", "claimIds": ["CHEM-EXPOSURE-DUTY"],
       "narration": "安衛則第577条の2は、リスクアセスメント対象物へのばく露を最小限度とすることを求めます。濃度基準値が設定された物質では、屋内作業場の空気中濃度を基準以下とする義務もあります。低リスク判定は法定措置の免除ではありません。",
       "instructorNotes": ["対象物・作業場・濃度基準の適用条件を個別確認します"], "estimatedSeconds": 88,
       "stage": {"headline":"低リスク判定 ≠ 法定措置の免除","keyPoints":["最小限度","濃度基準","個別規則"]},
