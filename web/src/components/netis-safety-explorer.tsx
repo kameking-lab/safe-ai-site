@@ -388,7 +388,7 @@ export function NetisSafetyExplorer() {
       </form>
 
       <div
-        className="order-1 mt-3 grid grid-cols-2 gap-2.5 sm:order-2 sm:gap-4 lg:grid-cols-4"
+        className="order-1 mt-1 grid grid-cols-2 gap-1.5 sm:order-2 sm:mt-3 sm:gap-4 lg:grid-cols-4"
         role="group"
         aria-label={purpose === "safety" ? "安全課題カテゴリ" : "技術カテゴリ"}
       >

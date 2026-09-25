@@ -23,13 +23,15 @@ test("390px初期画面で画像カテゴリを先に選べる", async ({ page }
   await page.goto(ROUTE, { waitUntil: "domcontentloaded" });
   await expect(page.locator('[data-netis-explorer-ready="true"]')).toBeVisible();
 
+  const bottomNav = await page.locator('[data-mobile-nav="bottom"]').boundingBox();
+  expect(bottomNav).not.toBeNull();
   const categories = ["重機接触", "立入禁止", "墜落・足場", "暑熱・作業環境"];
   for (const label of categories) {
     const button = page.getByRole("button", { name: label, exact: true });
     await expect(button).toBeVisible();
     const box = await button.boundingBox();
     expect(box).not.toBeNull();
-    expect(box!.y + box!.height).toBeLessThanOrEqual(844);
+    expect(box!.y + box!.height).toBeLessThanOrEqual(bottomNav!.y);
   }
 
   await expect(page.getByText("当サイトで出典を確認した100件を掲載しています。NETIS全登録技術の一覧ではありません。")).toBeVisible();
