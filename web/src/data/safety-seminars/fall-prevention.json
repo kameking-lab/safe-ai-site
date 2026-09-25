@@ -333,6 +333,10 @@
       ]},
       "label": "法定義務",
       "claimIds": ["C-LAW-013", "C-LAW-014", "C-LAW-015", "C-LAW-016", "C-GUIDE-002"],
+      "articleRefs": [
+        { "lawShort": "安衛法", "article": "第59条第3項", "sourceId": "LAW-EGOV-001", "egovUrl": "https://laws.e-gov.go.jp/law/347AC0000000057#Mp-Ch_6-At_59", "naviPath": "/law-navi/347AC0000000057/59" },
+        { "lawShort": "安衛則", "article": "第36条第41号", "sourceId": "LAW-EGOV-003", "egovUrl": "https://laws.e-gov.go.jp/law/347M50002000032#Mp-Pa_1-Ch_4-At_36", "naviPath": "/law-navi/347M50002000032/36" }
+      ],
       "narration": "ここでは二つの高さを混同しないでください。法令上、高さが6.75メートルを超える箇所ではフルハーネス型を使用します。一方、行政ガイドラインは、一般的な建設作業では5メートルを超える箇所でフルハーネス型を使用することが適当としています。5メートルは行政上の選定目安、6.75メートル超は法的な使用境界です。5メートル未満だから胴ベルト型で安全、6.75メートル以下ならフルハーネス不要、という意味ではありません。落下距離と地面等への到達も確認します。特別教育の対象は別に判定します。高さ2メートル以上で、作業床を設けることが困難な場所において、フルハーネス型を使用して行う作業に係る業務が対象です。ロープ高所作業はこの教育の対象から除かれ、別制度で扱われます。特別教育の標準カリキュラムは学科と実技を合わせて6時間です。実施記録は3年間保存します。この社内研修を視聴した時間を、そのまま法定特別教育の時間や記録へ置き換えることはできません。",
       "instructorNotes": ["5mを行政推奨、6.75m超を法的境界と常時表示する。", "経験等による科目省略の適用は、この教材で自己判断させない。"],
       "estimatedSeconds": 120
@@ -351,6 +355,10 @@
       ]},
       "label": "法定義務",
       "claimIds": ["C-LAW-014", "C-LAW-015", "C-LAW-016"],
+      "articleRefs": [
+        { "lawShort": "安衛則", "article": "第36条第41号", "sourceId": "LAW-EGOV-003", "egovUrl": "https://laws.e-gov.go.jp/law/347M50002000032#Mp-Pa_1-Ch_4-At_36", "naviPath": "/law-navi/347M50002000032/36" },
+        { "lawShort": "安衛則", "article": "第38条", "sourceId": "LAW-EGOV-003", "egovUrl": "https://laws.e-gov.go.jp/law/347M50002000032#Mp-Pa_1-Ch_4-At_38", "naviPath": "/law-navi/347M50002000032/38" }
+      ],
       "narration": "電気工事士などの職種資格を持っていることと、フルハーネス型を使用する業務の特別教育を受けていることは、別に確認します。資格名だけから特別教育が不要だと判断しないでください。判定に使うのは、実際の作業高さ、作業床を設けることが困難か、フルハーネス型を使用する業務かという条件です。元請、協力会社、短期入場者を問わず、従事させる業務と教育記録を照合します。この教材は、統計、法令の考え方、現場確認を学ぶ社内研修です。法定教育の実技、講師要件、科目、時間、記録を満たしたと表示せず、修了証発行へ転用しません。",
       "instructorNotes": ["有資格者だから大丈夫という発言が出たら、作業条件と教育記録へ話を戻す。", "受講履歴にも法定教育の修了記録ではないと表示する。"],
       "estimatedSeconds": 95
@@ -365,6 +373,9 @@
       "visual": { "type": "image", "src": "/safety-images/library/originals/fall-restraint-required.png", "alt": "フルハーネスと頭上の取付点を描いた教材用オリジナルイラスト" },
       "label": "科学的知見",
       "claimIds": ["C-LAW-004", "C-LAW-012", "C-GUIDE-003", "SCI-FALL-001", "SCI-FALL-002", "SCI-FALL-003"],
+      "articleRefs": [
+        { "lawShort": "安衛則", "article": "第521条", "sourceId": "LAW-EGOV-003", "egovUrl": "https://laws.e-gov.go.jp/law/347M50002000032#Mp-Pa_2-Ch_9-Se_1-At_521", "naviPath": "/law-navi/347M50002000032/521" }
+      ],
       "narration": "自由落下距離は、フルハーネス側のランヤード接続位置から取付設備の位置を差し引き、ランヤード長を加えて考えます。同じ長さなら、取付点がD環より低いほど自由落下距離は増えます。落下距離は自由落下距離だけではありません。ショックアブソーバ、ランヤード、ハーネス等の伸びが加わります。そのためランヤードが2メートルだから、2メートル空いていればよいとは判断できません。行政ガイドラインでは、取付設備をできるだけ高い位置に設けます。腰より高い位置への取付けを前提とする第一種と、足元取付けを想定する第二種のショックアブソーバを、作業条件に合わせて選びます。器具の組合せもメーカー表示で確認します。現場では、器具表示の落下距離、使用可能質量、取付位置、実際の床・梁・設備までの下方空間、振られによる衝突、鋭い端部への接触を確認します。全国共通の固定クリアランス値は使いません。",
       "instructorNotes": ["実演は実際に採用する製品の表示・説明書を使用する。", "頭上取付けでも、強度、適合、振られ、端部接触を省略しない。"],
       "estimatedSeconds": 120
@@ -429,6 +440,12 @@
       "visual": { "type": "ky", "image": "/visual-ky/scenarios/scaffold-fall.webp", "alt": "床材と手すりが一部欠けた足場で作業する人を観察する教材用Visual KYイラスト", "prompts": ["見える危険条件は？", "先に直す設備は？", "器具・取付点・下方空間は？", "救助と開始不可条件は？"] },
       "label": "演習",
       "claimIds": ["C-LAW-003", "C-LAW-006", "C-LAW-008", "C-GUIDE-003", "C-GUIDE-005", "SCI-HIER-001", "SCI-RESCUE-001", "SCI-HF-002"],
+      "articleRefs": [
+        { "lawShort": "安衛則", "article": "第519条", "sourceId": "LAW-EGOV-003", "egovUrl": "https://laws.e-gov.go.jp/law/347M50002000032#Mp-Pa_2-Ch_9-Se_1-At_519", "naviPath": "/law-navi/347M50002000032/519" },
+        { "lawShort": "安衛則", "article": "第527条", "sourceId": "LAW-EGOV-003", "egovUrl": "https://laws.e-gov.go.jp/law/347M50002000032#Mp-Pa_2-Ch_9-Se_1-At_527", "naviPath": "/law-navi/347M50002000032/527" },
+        { "lawShort": "安衛則", "article": "第528条", "sourceId": "LAW-EGOV-003", "egovUrl": "https://laws.e-gov.go.jp/law/347M50002000032#Mp-Pa_2-Ch_9-Se_1-At_528", "naviPath": "/law-navi/347M50002000032/528" },
+        { "lawShort": "安衛則", "article": "第563条", "sourceId": "LAW-EGOV-003", "egovUrl": "https://laws.e-gov.go.jp/law/347M50002000032#Mp-Pa_2-Ch_10-Se_2-Ss_1-At_563", "naviPath": "/law-navi/347M50002000032/563" }
+      ],
       "narration": "これから一枚の現場画像を見ます。最初の問いは、誰が危ないことをしているか、ではありません。墜落を生む設備、工程、環境の条件を、画像から確認できる事実として挙げてください。次に、対策を順番に並べます。高所作業をなくせるか、作業床、手すり、覆い、安定した昇降設備を整えられるかを先に検討します。その後に、必要な器具、取付点、下方空間、点検状態を確認します。最後に、墜落を制止した場合の救助方法、担当者、機材、連絡方法と、作業を始めてはいけない条件を決めます。個人作業2分、グループ討議4分、全体確認3分です。",
       "instructorNotes": ["説明後に9分の演習時間を取る。", "正解数競争ではなく、対策の優先順位と画像だけでは確認不能な事項を評価する。"],
       "estimatedSeconds": 105
@@ -443,6 +460,12 @@
       "visual": { "type": "checklist", "items": ["高所作業を回避できる", "作業床・端部・開口・昇降が適合", "器具と教育記録が作業条件に適合", "取付点と下方空間を照合", "器具と設備を点検", "救助・連絡・中止条件が明確"] },
       "label": "サイト提案",
       "claimIds": ["C-LAW-002", "C-LAW-003", "C-LAW-004", "C-LAW-014", "C-GUIDE-001", "C-GUIDE-003", "C-GUIDE-005", "SCI-RESCUE-001", "SCI-HF-002"],
+      "articleRefs": [
+        { "lawShort": "安衛則", "article": "第518条", "sourceId": "LAW-EGOV-003", "egovUrl": "https://laws.e-gov.go.jp/law/347M50002000032#Mp-Pa_2-Ch_9-Se_1-At_518", "naviPath": "/law-navi/347M50002000032/518" },
+        { "lawShort": "安衛則", "article": "第519条", "sourceId": "LAW-EGOV-003", "egovUrl": "https://laws.e-gov.go.jp/law/347M50002000032#Mp-Pa_2-Ch_9-Se_1-At_519", "naviPath": "/law-navi/347M50002000032/519" },
+        { "lawShort": "安衛則", "article": "第521条", "sourceId": "LAW-EGOV-003", "egovUrl": "https://laws.e-gov.go.jp/law/347M50002000032#Mp-Pa_2-Ch_9-Se_1-At_521", "naviPath": "/law-navi/347M50002000032/521" },
+        { "lawShort": "安衛則", "article": "第36条第41号", "sourceId": "LAW-EGOV-003", "egovUrl": "https://laws.e-gov.go.jp/law/347M50002000032#Mp-Pa_1-Ch_4-At_36", "naviPath": "/law-navi/347M50002000032/36" }
+      ],
       "narration": "作業開始前は、まず高所作業をなくせるかを確認します。次に、作業床、端部、開口部、昇降設備を現物で見ます。いつも同じではなく、その日の工程変更、天候、周辺作業も確認します。続いて、作業高さ、作業床の設置可能性、使用器具から、フルハーネス型の選定と特別教育の要否を確認します。取付設備の強度と位置、器具表示の落下距離、使用質量、実際の下方空間も照合します。最後に、器具の点検、救助方法、担当者、機材、連絡方法、作業中止条件を確認します。一項目でも確認できなければ、推測で開始せず、責任者へエスカレーションします。チェック欄だけでなく、不適合を直した結果も記録します。",
       "instructorNotes": ["自社帳票へ組み込む場合もclaim脚注を残す。", "適・否だけでなく、是正担当・期限・再確認を記録させる。"],
       "estimatedSeconds": 105

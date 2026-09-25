@@ -219,4 +219,37 @@ describe("SafetySeminarPlayer", () => {
     expect(screen.getByRole("link", { name: "安衛法 第1条" }).getAttribute("href"))
       .toBe("https://laws.e-gov.go.jp/law/347AC0000000057#Mp-At_1");
   });
+
+  it("高さの主張に対応する厚労省根拠と教育条文を詳細で読める", () => {
+    render(
+      <SafetySeminarPlayer
+        slides={[training.slides.find((slide) => slide.id === "harness-special-education")!]}
+        claims={claims}
+        sources={sources}
+        audioEnabled={false}
+      />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "詳しく" }));
+    expect(screen.getByRole("link", { name: "厚労省告示（6.75m）" }).getAttribute("href"))
+      .toBe("https://www.mhlw.go.jp/web/t_doc?dataId=74ab6770&dataType=0&pageNo=1");
+    expect(screen.getByRole("link", { name: "厚労省ガイドライン（5m）" }).getAttribute("href"))
+      .toBe("https://www.mhlw.go.jp/web/t_doc?dataId=00tc4287&dataType=1&pageNo=1");
+    expect(screen.getByRole("link", { name: "安衛法 第59条第3項" })).toBeTruthy();
+    expect(screen.getByRole("link", { name: "安衛則 第36条第41号" })).toBeTruthy();
+  });
+
+  it("取付点の条文追加後も落下距離を支える厚労省資料を詳細に残す", () => {
+    render(
+      <SafetySeminarPlayer
+        slides={[training.slides.find((slide) => slide.id === "anchor-clearance")!]}
+        claims={claims}
+        sources={sources}
+        audioEnabled={false}
+      />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "詳しく" }));
+    expect(screen.getByRole("link", { name: "安衛則 第521条" })).toBeTruthy();
+    expect(screen.getByRole("link", { name: "墜落制止用器具の安全な使用に関するガイドライン" }))
+      .toBeTruthy();
+  });
 });
