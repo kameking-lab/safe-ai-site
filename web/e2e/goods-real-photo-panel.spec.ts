@@ -55,14 +55,19 @@ test("API画像が読み込めないときは写真を表示済みと見なさ�
 });
 
 
-test("15カテゴリを一覧し、選択・戻る・再読込で現在位置を保つ", async ({ page }) => {
+test("保護具8分類と補助用品8分類を選べ、戻る・再読込で現在位置を保つ", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.route("**/api/goods-products?*", async (route) => {
     await route.fulfill({ contentType: "application/json", body: JSON.stringify({ status: "not_configured", items: [], checkedAt: null }) });
   });
   await page.goto("/goods");
   const directory = page.getByRole("list", { name: "安全用品カテゴリの画像一覧" });
-  await expect(directory.getByRole("button")).toHaveCount(15);
+  await expect(directory.getByRole("button")).toHaveCount(8);
+  await page.getByRole("button", { name: "現場の補助用品 8" }).click();
+  await expect(directory.getByRole("button")).toHaveCount(8);
+  await page.getByRole("button", { name: "すべて 16" }).click();
+  await expect(directory.getByRole("button")).toHaveCount(16);
+  await page.getByRole("button", { name: "身につける保護具 8" }).click();
   expect(await directory.evaluate((element) => element.scrollWidth <= element.clientWidth + 1)).toBe(true);
   const helmet = page.getByRole("button", { name: "保護帽", exact: true });
   await helmet.click();
@@ -141,7 +146,7 @@ test("呼吸用保護具・フルハーネス・保護眼鏡を特徴から探�
   await page.goto("/goods");
   await page.getByRole("button", { name: "呼吸用保護具", exact: true }).click();
   await page.getByRole("button", { name: /物質・酸素濃度が不明/u }).click();
-  await expect(page.getByText(/有害物質と酸素濃度が不明/u)).toBeVisible();
+  await expect(page.getByRole("status").filter({ hasText: /対象の物質や作業条件が分かるまで、商品候補は表示しません/u })).toBeVisible();
   await expect(page.getByRole("list", { name: "実商品写真を左右にスライド" })).toHaveCount(0);
   expect(requested).toHaveLength(0);
   await page.getByRole("button", { name: "特徴を選び直す" }).click();
