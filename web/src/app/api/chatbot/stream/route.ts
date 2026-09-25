@@ -23,7 +23,7 @@
  */
 
 import { GoogleGenAI } from "@google/genai";
-import { GEMINI_FLASH_MODEL } from "@/lib/gemini-model";
+import { GEMINI_FAST_THINKING_CONFIG, GEMINI_FLASH_MODEL } from "@/lib/gemini-model";
 import { externalGenerativeAiAllowed } from "@/lib/server/deployment-safety";
 import {
   searchRelevantArticlesWithScore,
@@ -677,6 +677,7 @@ export async function POST(request: Request) {
                 contents: userPrompt,
                 config: {
                   systemInstruction: SYSTEM_PROMPT,
+                  thinkingConfig: GEMINI_FAST_THINKING_CONFIG,
                   abortSignal: request.signal,
                 },
               });
