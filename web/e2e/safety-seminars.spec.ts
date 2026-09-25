@@ -97,9 +97,12 @@ test.describe("安全研修ライブラリ", () => {
     ] as const) {
       await page.getByRole("button", { name: new RegExp(`^${number}\\.`) }).click();
       await expect(page.getByTestId("stage-headline")).toHaveText(heading);
+      const anchor = article === 563
+        ? "Mp-Pa_2-Ch_10-Se_2-Ss_1-At_563"
+        : `Mp-Pa_2-Ch_9-Se_1-At_${article}`;
       await expect(page.getByRole("link", { name: `安衛則 第${article}条` })).toHaveAttribute(
         "href",
-        `https://laws.e-gov.go.jp/law/347M50002000032#Mp-At_${article}`,
+        `https://laws.e-gov.go.jp/law/347M50002000032#${anchor}`,
       );
       const mascot = page.getByRole("region", { name: /研修スライド/u }).getByRole("img", { name: /チワワ/u });
       await expect(mascot).toBeVisible();
@@ -115,7 +118,7 @@ test.describe("安全研修ライブラリ", () => {
         await page.getByRole("button", { name: "詳しく" }).click();
         await expect(page.getByRole("link", { name: "安衛則 第521条" })).toHaveAttribute(
           "href",
-          "https://laws.e-gov.go.jp/law/347M50002000032#Mp-At_521",
+          "https://laws.e-gov.go.jp/law/347M50002000032#Mp-Pa_2-Ch_9-Se_1-At_521",
         );
         await expect(page.getByText("✓ 覆いは固定・識別したか")).toBeVisible();
         await expect(page.getByText("✓ 安全な取付設備か")).toBeVisible();
