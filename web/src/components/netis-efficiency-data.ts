@@ -1,4 +1,4 @@
-/** 国交省中国地方整備局の公開紹介と、同ページからリンクされた提供者資料を照合。NETIS本体の現行掲載状態は未確認。 */
+/** 国交省中国地方整備局の2026年4月一覧（5件）と過去のDX紹介（ALB）を照合。NETIS本体の2026年9月時点の個別掲載状態は未確認。 */
 export const NETIS_EFFICIENCY_CATEGORIES = [
   {
     id: "survey-measurement",
@@ -25,6 +25,8 @@ export function isNetisEfficiencyCategoryId(
 
 const OFFICIAL_LIST =
   "https://www.cgr.mlit.go.jp/ctc/innfra-dx/infra-technology-list.html";
+const APRIL_2026_LIST =
+  "https://www.cgr.mlit.go.jp/ctc/pdf/technology/netis/recommend-skill-2026.pdf";
 
 export const NETIS_EFFICIENCY_TECHNOLOGIES = [
   {
@@ -37,7 +39,8 @@ export const NETIS_EFFICIENCY_TECHNOLOGIES = [
     mechanism: "レーザー測量機器などの点群をオンラインで処理し、分類・解析・共有するソフトウェアです。",
     useCase: "土量や出来形を確認するための点群処理と関係者間の共有。",
     limitations: "計測精度は元の測量データと処理条件に左右されるため、対象工事の要求精度とデータ取扱条件を確認します。",
-    officialSourceUrl: OFFICIAL_LIST,
+    officialSourceUrl: APRIL_2026_LIST,
+    sourceBasis: "2026年4月の国交省一覧 p.6・22／現行登録未確認",
     providerSourceUrl: "https://www.cgr.mlit.go.jp/ctc/pdf/innfra-dx/netis/4_ScanX.pdf",
   },
   {
@@ -50,7 +53,8 @@ export const NETIS_EFFICIENCY_TECHNOLOGIES = [
     mechanism: "レーザートラッカーと計測球によって橋梁部材を計測し、従来のターゲット設置作業を減らします。",
     useCase: "橋梁部材の出来形確認と製作時の計測。",
     limitations: "測定対象、設置場所、要求精度、計測球の適用条件を導入前に確認します。",
-    officialSourceUrl: OFFICIAL_LIST,
+    officialSourceUrl: APRIL_2026_LIST,
+    sourceBasis: "2026年4月の国交省一覧 p.6・24／現行登録未確認",
     providerSourceUrl: "https://www.cgr.mlit.go.jp/ctc/pdf/innfra-dx/netis/7_20250203kansoku.pdf",
   },
   {
@@ -64,19 +68,21 @@ export const NETIS_EFFICIENCY_TECHNOLOGIES = [
     useCase: "河川・海岸を含む広い範囲の地形把握。",
     limitations: "水質や水深など対象水域の条件、航空計測の可否、必要な精度を確認します。",
     officialSourceUrl: OFFICIAL_LIST,
+    sourceBasis: "過去の地方整備局資料に掲載／現行登録未確認",
     providerSourceUrl: "https://www.pasco.co.jp/biz/tech/aerial-leser/",
   },
   {
     categoryIds: ["records-inspection"] as const,
     name: "ANDPAD",
     registrationNumber: "KT-180049",
-    sourceRegistrationNumber: "KT-180049-A",
+    sourceRegistrationNumber: "KT-180049-VE",
     provider: "株式会社アンドパッド",
     summary: "監督者と作業員の連絡や現場情報の共有を支援します。",
     mechanism: "図面、工程、写真などの現場情報をクラウド上で共有し、連絡調整を支援します。",
     useCase: "現場の変更連絡、写真・施工記録の共有。",
     limitations: "利用する機能、通信環境、関係者の権限設定と記録の保存方法を確認します。",
-    officialSourceUrl: OFFICIAL_LIST,
+    officialSourceUrl: APRIL_2026_LIST,
+    sourceBasis: "2026年4月の国交省一覧 p.7・23／現行登録未確認",
     providerSourceUrl: "https://andpad.jp/products/construction_management",
   },
   {
@@ -89,7 +95,8 @@ export const NETIS_EFFICIENCY_TECHNOLOGIES = [
     mechanism: "地中の杭・地盤改良の施工情報をリアルタイムに表示し、記録します。",
     useCase: "杭施工や地盤改良の位置・出来形の確認。",
     limitations: "対応工法、計測機器、施工情報の取得・記録条件を確認します。",
-    officialSourceUrl: OFFICIAL_LIST,
+    officialSourceUrl: APRIL_2026_LIST,
+    sourceBasis: "2026年4月の国交省一覧 p.3・36／現行登録未確認",
     providerSourceUrl: "https://www.cgr.mlit.go.jp/ctc/pdf/innfra-dx/netis/6_3D.pdf",
   },
   {
@@ -102,7 +109,8 @@ export const NETIS_EFFICIENCY_TECHNOLOGIES = [
     mechanism: "走行車両から覆工面のカラー画像と3次元位置データを取得し、変状図の作成を支援します。",
     useCase: "道路トンネルの定期点検と変状の記録。",
     limitations: "通行条件、計測可能な速度と精度、近接目視など必要な点検手順との役割分担を確認します。",
-    officialSourceUrl: OFFICIAL_LIST,
+    officialSourceUrl: APRIL_2026_LIST,
+    sourceBasis: "2026年4月の国交省一覧 p.7・35／現行登録未確認",
     providerSourceUrl: "https://www.keisokukensa.co.jp/MIMM",
   },
 ] as const;

@@ -266,7 +266,7 @@ test("効率化参考技術を目的・分類・検索から探し、現行登�
     await expect(page.locator('[data-netis-explorer-ready="true"]')).toBeVisible();
     await expect(page.getByRole("heading", { name: "作業効率化候補：6件" })).toBeVisible();
     await expect(page.locator("#netis-technology-results article")).toHaveCount(6);
-    await expect(page.getByText("効率化の追加6件は過去の地方整備局資料に掲載された参考技術です。現行NETIS登録は未確認です。")).toBeVisible();
+    await expect(page.getByText("効率化の追加6件のうち5件は国交省の2026年4月一覧、1件は過去の地方整備局資料で確認した参考技術です。2026年9月時点の現行NETIS登録は未確認です。")).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
     await page.getByRole("button", { name: "測量・出来形" }).click();
     await expect(page).toHaveURL(/purpose=efficiency.*risk=survey-measurement|risk=survey-measurement.*purpose=efficiency/);

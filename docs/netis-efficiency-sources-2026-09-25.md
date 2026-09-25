@@ -1,15 +1,15 @@
 # NETIS作業効率化候補の出典照合
 
-2026-09-25確認。国土交通省中国地方整備局の[DX技術紹介](https://www.cgr.mlit.go.jp/ctc/innfra-dx/infra-technology-list.html)で登録番号・名称・開発会社・概要を同じ行で確認した。同ページからリンクされる提供者資料、または提供者自身のページで用途を確認した。NETIS本体の個別詳細はこの環境から取得できず、**現行の掲載期限、評価記号、提供可否は6件とも未照合**。UIの番号は末尾記号を外した基番号とし、地域資料の表記を別に表示する。
+2026-09-25確認。国土交通省中国地方整備局の[2026年4月時点のNETIS推奨技術等一覧](https://www.cgr.mlit.go.jp/ctc/pdf/technology/netis/recommend-skill-2026.pdf)で5件の登録番号・名称・工種・掲載区分を確認した。残るALBは同局の[過去のDX技術紹介](https://www.cgr.mlit.go.jp/ctc/innfra-dx/infra-technology-list.html)で確認した。提供者資料または提供者自身のページでも用途を照合した。**2026年9月時点のNETIS本体個別詳細・掲載期限・提供可否は6件とも未照合**。4月の一覧掲載を9月時点の現行登録の証明とは扱わない。UIの番号は末尾記号を外した基番号とし、確認資料の表記を別に表示する。
 
-| 基番号 | 地域資料の表記 | 主目的 | 提供者の一次資料 | 現行NETIS本体 |
+| 基番号 | 確認資料の表記 | 2026年4月一覧の掲載箇所 | 主目的 | 提供者の一次資料 | 9月時点のNETIS本体 |
 |---|---|---|---|---|
-| KT-210020 | KT-210020-A | 点群処理・共有 | [ScanX資料（国交省サイトに掲載）](https://www.cgr.mlit.go.jp/ctc/pdf/innfra-dx/netis/4_ScanX.pdf) | 未照合 |
-| KT-140030 | KT-140030-VR | 橋梁部材の3D計測 | [簡測くん資料（国交省サイトに掲載）](https://www.cgr.mlit.go.jp/ctc/pdf/innfra-dx/netis/7_20250203kansoku.pdf) | 未照合 |
-| KK-160016 | KK-160016-VE | 陸域・水域の測量 | [パスコの技術紹介](https://www.pasco.co.jp/biz/tech/aerial-leser/) | 未照合 |
-| KT-180049 | KT-180049-A | 現場情報・連絡の共有 | [ANDPAD施工管理](https://andpad.jp/products/construction_management) | 未照合。別の国交省ガイドでは `KT-180049-VE` と表記されており、末尾を現在値として表示しない |
-| KT-170030 | KT-170030-VE | 杭施工情報の可視化 | [3Dパイルビューアー資料（国交省サイトに掲載）](https://www.cgr.mlit.go.jp/ctc/pdf/innfra-dx/netis/6_3D.pdf) | 未照合 |
-| KK-130026 | KK-130026-VE | トンネル覆工面点検 | [計測検査のMIMM紹介](https://www.keisokukensa.co.jp/MIMM) | 未照合 |
+| KT-210020 | KT-210020-A | p.6（調査試験）・p.22 | 点群処理・共有 | [ScanX資料（国交省サイトに掲載）](https://www.cgr.mlit.go.jp/ctc/pdf/innfra-dx/netis/4_ScanX.pdf) | 未照合 |
+| KT-140030 | KT-140030-VR | p.6（橋梁上部工）・p.24 | 橋梁部材の3D計測 | [簡測くん資料（国交省サイトに掲載）](https://www.cgr.mlit.go.jp/ctc/pdf/innfra-dx/netis/7_20250203kansoku.pdf) | 未照合 |
+| KK-160016 | KK-160016-VE | 掲載を確認できず。過去のDX技術紹介のみ | 陸域・水域の測量 | [パスコの技術紹介](https://www.pasco.co.jp/biz/tech/aerial-leser/) | 未照合 |
+| KT-180049 | KT-180049-VE | p.7（CALS関連技術）・p.23。過去のDX紹介は `-A` | 現場情報・連絡の共有 | [ANDPAD施工管理](https://andpad.jp/products/construction_management) | 未照合。`-VE` を9月の現在値と断定しない |
+| KT-170030 | KT-170030-VE | p.3（共通工）・p.36 | 杭施工情報の可視化 | [3Dパイルビューアー資料（国交省サイトに掲載）](https://www.cgr.mlit.go.jp/ctc/pdf/innfra-dx/netis/6_3D.pdf) | 未照合 |
+| KK-130026 | KK-130026-VE | p.7（調査試験）・p.35 | トンネル覆工面点検 | [計測検査のMIMM紹介](https://www.keisokukensa.co.jp/MIMM) | 未照合 |
 
 既存安全10件はPR #1013から維持し、新規は6件。測量・出来形3件、記録・点検3件の2分類のみ公開する。搬送・運搬、土工・締固めは、この確認済み集合では各3件に達しないため分類を増やさない。計16件はNETIS全件一覧でも「24件達成」でもない。
 

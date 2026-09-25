@@ -306,7 +306,7 @@ export function NetisSafetyExplorer() {
         当サイトで出典を確認した{FEATURED_NETIS_TECHNOLOGIES.length}件を掲載しています。NETIS全登録技術の一覧ではありません。
       </p>
       <p className="mt-1 text-sm leading-6 text-slate-700 dark:text-slate-200">
-        効率化の追加{NETIS_EFFICIENCY_TECHNOLOGIES.length}件は過去の地方整備局資料に掲載された参考技術です。現行NETIS登録は未確認です。
+        効率化の追加{NETIS_EFFICIENCY_TECHNOLOGIES.length}件のうち5件は国交省の2026年4月一覧、1件は過去の地方整備局資料で確認した参考技術です。2026年9月時点の現行NETIS登録は未確認です。
       </p>
       <details className="mt-1 text-xs text-slate-600 dark:text-slate-300">
         <summary className="flex min-h-11 cursor-pointer items-center font-bold underline underline-offset-4">
@@ -498,7 +498,7 @@ export function NetisSafetyExplorer() {
                         {technology.registrationNumber}
                       </span>
                       <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
-                        {efficiency ? "過去の地方整備局資料に掲載された参考技術／現行登録未確認" : `出典確認：${technology.checkedAt}`}
+                        {efficiency ? technology.sourceBasis : `出典確認：${technology.checkedAt}`}
                       </span>
                     </div>
                     <h4 className="mt-2 text-base font-black leading-6 text-slate-950 dark:text-white">
@@ -524,7 +524,7 @@ export function NetisSafetyExplorer() {
                     ) : null}
                     {efficiency ? (
                       <p className="mt-2 text-xs font-semibold leading-5 text-slate-600 dark:text-slate-300">
-                        開発会社：{technology.provider}／地域資料記載番号：{technology.sourceRegistrationNumber}
+                        開発会社：{technology.provider}／確認資料記載番号：{technology.sourceRegistrationNumber}
                       </p>
                     ) : null}
                   </div>
