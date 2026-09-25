@@ -9,7 +9,7 @@ test("保護具カテゴリから実商品パネルを開き、取得不能を�
   await page.getByRole("button", { name: "保護帽", exact: true }).click();
   await expect(page.getByRole("heading", { name: "まず、必要な特徴を選ぶ" })).toBeVisible();
   await page.getByRole("button", { name: /墜落時の頭部保護/u }).click();
-  await expect(page.getByRole("heading", { name: "保護帽の商品候補" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "保護帽の商品データ" })).toBeVisible();
   await expect(page.getByText(/商品データの接続準備中です/u)).toBeVisible();
   await expect(page.locator('[aria-label="実商品写真を左右にスライド"]')).toHaveCount(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(1);
@@ -41,7 +41,7 @@ test("取得した商品写真・評価を販売ページへ進む前に表示�
   await expect(products.getByRole("img", { name: /作業用ヘルメット 型番Aの商品写真/u })).toHaveAttribute("src", /thumbnail\.image\.rakuten\.co\.jp/u);
   await expect.poll(() => products.getByRole("img", { name: /作業用ヘルメット 型番Aの商品写真/u }).evaluate((image: HTMLImageElement) => image.naturalWidth)).toBeGreaterThan(0);
   await expect(products.getByText("★4.6")).toBeVisible();
-  await expect(products.getByRole("link", { name: /写真と仕様を販売店で確認/u })).toHaveAttribute("href", "https://item.rakuten.co.jp/shop/helmet-1/");
+  await expect(products.getByRole("link", { name: /販売店で写真・仕様を確認/u })).toHaveAttribute("href", "https://item.rakuten.co.jp/shop/helmet-1/");
 });
 
 test("API画像が読み込めないときは写真を表示済みと見なさない", async ({ page }) => {
@@ -51,7 +51,7 @@ test("API画像が読み込めないときは写真を表示済みと見なさ�
   });
   await page.goto("/goods?category=head-protection&feature=fall");
   await expect(page.getByText(/写真を読み込めませんでした/u)).toBeVisible();
-  await expect(page.getByRole("link", { name: /写真と仕様を販売店で確認/u })).toHaveAttribute("href", "https://item.rakuten.co.jp/shop/helmet-1/");
+  await expect(page.getByRole("link", { name: /販売店で写真・仕様を確認/u })).toHaveAttribute("href", "https://item.rakuten.co.jp/shop/helmet-1/");
 });
 
 
@@ -87,7 +87,7 @@ test("保護具9入口と補助用品8分類を選べ、戻る・再読込で現
   await helmet.click();
   await page.getByRole("button", { name: /墜落時の頭部保護/u }).click();
   await page.reload();
-  await expect(page.getByRole("heading", { name: "保護帽の商品候補" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "保護帽の商品データ" })).toBeVisible();
   await page.getByRole("button", { name: "用品一覧に戻る" }).click();
   await expect(directory).toBeVisible();
   await expect(helmet).toBeFocused();
