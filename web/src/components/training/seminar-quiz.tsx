@@ -15,6 +15,13 @@ type QuizState = {
   complete: boolean;
 };
 
+// e-Gov's DOM IDs include chapter/section paths for these provisions. A
+// shortened #Mp-At_N anchor silently lands at the law top instead of the rule.
+const verifiedEgovAnchors: Record<string, string> = {
+  "347M50002000032:36": "Mp-Pa_1-Ch_4-At_36",
+  "347M50002000032:521": "Mp-Pa_2-Ch_9-Se_1-At_521",
+};
+
 function initialState(quiz: TrainingQuiz): QuizState {
   return {
     queue: quiz.questions.map((_, index) => index),
@@ -65,11 +72,13 @@ function refLink(ref: TrainingQuizQuestion["refs"][number], sourceById: Map<stri
   const article = source?.url.startsWith("https://laws.e-gov.go.jp/")
     ? ref.locator.match(/^第(\d+)条/u)?.[1]
     : undefined;
+  const lawId = source?.url.match(/^https:\/\/laws\.e-gov\.go\.jp\/law\/([^/?#]+)/u)?.[1];
+  const verifiedAnchor = lawId && article ? verifiedEgovAnchors[`${lawId}:${article}`] : undefined;
   const pdfPage = source?.url.toLowerCase().endsWith(".pdf")
     ? ref.locator.match(/PDF p(\d+)/u)?.[1]
     : undefined;
   return {
-    href: source ? `${source.url}${article ? `#Mp-At_${article}` : pdfPage ? `#page=${pdfPage}` : ""}` : "#sources-title",
+    href: source ? `${source.url}${verifiedAnchor ? `#${verifiedAnchor}` : pdfPage ? `#page=${pdfPage}` : ""}` : "#sources-title",
     label: source ? `${source.title}：${ref.locator}` : ref.locator,
     external: Boolean(source),
   };
