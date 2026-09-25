@@ -12,6 +12,7 @@ import {
 } from "./netis-efficiency-data";
 import { NETIS_WAVE2_CATEGORIES, NETIS_WAVE2_TECHNOLOGIES } from "./netis-wave2-data";
 import { NETIS_WAVE3_TECHNOLOGIES } from "./netis-wave3-data";
+import { NETIS_WAVE4_CATEGORIES, NETIS_WAVE4_TECHNOLOGIES } from "./netis-wave4-data";
 import { NetisSafetyExplorer } from "./netis-safety-explorer";
 import { NetisSafetyGuide } from "./netis-safety-guide";
 
@@ -109,7 +110,7 @@ describe("NetisSafetyGuide", () => {
     );
   });
 
-  it("重機接触は5件、墜落・転落は2件の定義済み技術を表示する", () => {
+  it("重機接触は5件、墜落・足場は4件の定義済み技術を表示する", () => {
     navigation.query = "risk=machine-collision";
     const { unmount } = render(<NetisSafetyExplorer />);
     expect(screen.getByText("重機接触：5件")).toBeDefined();
@@ -120,17 +121,17 @@ describe("NetisSafetyGuide", () => {
 
     navigation.query = "risk=fall-prevention";
     render(<NetisSafetyExplorer />);
-    expect(screen.getByText("墜落・転落：2件")).toBeDefined();
+    expect(screen.getByText("墜落・足場：4件")).toBeDefined();
     expect(screen.getByText(/ハーネスノーティファイ/)).toBeDefined();
     expect(screen.getByText(/ハーネスアラート/)).toBeDefined();
     expect(screen.queryByText(/ヒヤリハンター/)).toBeNull();
   });
 
-  it("暑熱・作業環境は2件を表示し、名称検索をURLへ同期する", () => {
+  it("暑熱・作業環境は3件を表示し、名称検索をURLへ同期する", () => {
     navigation.query = "risk=heat-environment";
     render(<NetisSafetyExplorer />);
 
-    expect(screen.getByText("暑熱・作業環境：2件")).toBeDefined();
+    expect(screen.getByText("暑熱・作業環境：3件")).toBeDefined();
     expect(screen.getByText(/熱中対策バンド/)).toBeDefined();
     expect(screen.getByText(/TECHNO BAND/)).toBeDefined();
     fireEvent.change(screen.getByLabelText(/名称・登録番号・用途/), {
@@ -143,7 +144,7 @@ describe("NetisSafetyGuide", () => {
     );
   });
 
-  it("全10件のカードが画像枠・名称・登録番号・特徴を持ち、画像と名称がNETIS公式詳細へつながる", () => {
+  it("安全22件のカードが名称・登録番号・特徴を持ち、既存10件はNETIS公式詳細へつながる", () => {
     const { container } = render(<NetisSafetyExplorer />);
 
     for (const technology of FEATURED_NETIS_TECHNOLOGIES) {
@@ -172,7 +173,7 @@ describe("NetisSafetyGuide", () => {
         expect(article.textContent).toContain("利用許諾を確認中");
       }
     }
-    expect(container.querySelectorAll("article")).toHaveLength(10);
+    expect(container.querySelectorAll("article")).toHaveLength(22);
   });
 
   it("同じタブの詳細から戻ったとき、保存したスクロール位置と名称リンクへのフォーカスを復元する", () => {
@@ -197,12 +198,12 @@ describe("NetisSafetyGuide", () => {
     window.history.replaceState(null, "", "/");
   });
 
-  it("効率化タブで公式資料を照合した30件を探せ、安全10件と混同しない", () => {
+  it("効率化タブで公式資料を照合した32件を探せ、安全22件と混同しない", () => {
     navigation.query = "purpose=efficiency";
     const { container } = render(<NetisSafetyExplorer />);
     expect(screen.getByRole("button", { name: "作業を効率化" }).getAttribute("aria-pressed")).toBe("true");
-    expect(screen.getByText("作業効率化候補：30件")).toBeDefined();
-    expect(container.querySelectorAll("article")).toHaveLength(30);
+    expect(screen.getByText("作業効率化候補：32件")).toBeDefined();
+    expect(container.querySelectorAll("article")).toHaveLength(32);
     expect(screen.queryByText(/ヒヤリハンター/)).toBeNull();
     for (const category of NETIS_EFFICIENCY_CATEGORIES) {
       expect(screen.getByRole("button", { name: category.label })).toBeDefined();
@@ -266,6 +267,42 @@ describe("NetisSafetyGuide", () => {
       expect(item.summary.length).toBeLessThanOrEqual(60);
       expect(item.limitations.length).toBeGreaterThan(20);
     }
+  });
+
+  it("第4陣を合わせた60件を安全22・効率32・品質6に分け、個別照合の範囲を限定する", () => {
+    const all = [...FEATURED_NETIS_TECHNOLOGIES, ...NETIS_EFFICIENCY_TECHNOLOGIES, ...NETIS_WAVE2_TECHNOLOGIES, ...NETIS_WAVE3_TECHNOLOGIES, ...NETIS_WAVE4_TECHNOLOGIES];
+    expect(all).toHaveLength(60);
+    expect(new Set(all.map((item) => item.registrationNumber.replace(/-(?:A|VE)$/i, ""))).size).toBe(60);
+    expect(NETIS_WAVE4_TECHNOLOGIES).toHaveLength(14);
+    expect(NETIS_WAVE4_TECHNOLOGIES.filter((item) => item.primaryPurpose === "safety")).toHaveLength(12);
+    expect(NETIS_WAVE4_TECHNOLOGIES.filter((item) => item.primaryPurpose === "efficiency")).toHaveLength(2);
+    for (const item of NETIS_WAVE4_TECHNOLOGIES) {
+      expect(item.sourceBasis).toContain("2026年9月25日NETIS個別ページの名称・番号を確認");
+      expect(item.sourceBasis).toContain("販売・現場適合は未確認");
+      expect(item.individualUrl).toBe(`https://www.netis.mlit.go.jp/netis/pubsearch/details?regNo=${item.registrationNumber.replace(/-(?:A|VE)$/i, "")}`);
+      expect(item.officialSourceUrl).toMatch(/^https:\/\/www\.cgr\.mlit\.go\.jp\//);
+      expect(item.limitations.length).toBeGreaterThan(20);
+    }
+    for (const category of NETIS_WAVE4_CATEGORIES) {
+      expect(existsSync(path.join(process.cwd(), "public", category.image))).toBe(true);
+      expect(category.imageAlt).toContain("製品写真ではありません");
+      expect(category.imageCredit.sourceUrl).toBe("");
+    }
+  });
+
+  it("新カテゴリの直接URL、番号検索、目的切替を保持する", () => {
+    navigation.query = "risk=marine-underwater&q=HRK-190002-VE";
+    const { container, unmount } = render(<NetisSafetyExplorer />);
+    expect(screen.getByText("海上・水中作業：1件")).toBeDefined();
+    expect(container.querySelector("article")?.textContent).toContain("水中据付作業可視化システム");
+    expect(container.querySelector("article a[id^='netis-tech-']")?.getAttribute("href")).toBe("https://www.netis.mlit.go.jp/netis/pubsearch/details?regNo=HRK-190002");
+    unmount();
+    navigation.query = "risk=temporary-mats&q=HK-190004";
+    render(<NetisSafetyExplorer />);
+    expect(screen.getByText("養生・仮設敷設：1件")).toBeDefined();
+    expect(screen.getByRole("button", { name: "作業を効率化" }).getAttribute("aria-pressed")).toBe("true");
+    fireEvent.click(screen.getByRole("button", { name: "安全を高める" }));
+    expect(navigation.push).toHaveBeenCalledWith("/resources/netis-safety?q=HK-190004", { scroll: false });
   });
 
   it("効率化候補は資料の末尾付き番号でも検索できる", () => {

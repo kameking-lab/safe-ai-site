@@ -81,7 +81,7 @@ export const NETIS_SAFETY_CATEGORIES = [
   },
   {
     id: "fall-prevention",
-    label: "墜落・転落",
+    label: "墜落・足場",
     title: "墜落・転落を防ぐ",
     image: "/netis-safety/categories/fall-prevention.webp",
     imageAlt:
