@@ -326,6 +326,16 @@ export function SafetyGoodsWizard() {
     ? PUBLIC_SAFETY_GOODS_CATEGORIES.find((item) => item.id === photoCategoryId(category.id, task.id))
     : null;
   const photoFeature = category && task ? photoFeatureId(category.id, task.id) : undefined;
+  const respiratorySharedIntent = category?.id === "respiratory"
+    ? task?.id === "dust" ? "dust" : task?.id === "vapor" ? "gas" : "unknown"
+    : null;
+  const respiratorySharedHref = respiratorySharedIntent
+    ? condition?.id === "oxygen" || task?.id === "confined"
+      ? "/goods?category=respiratory&intent=unknown&feature=oxygen"
+      : task?.id === "unknown"
+        ? "/goods?category=respiratory&intent=unknown&feature=unknown"
+        : `/goods?category=respiratory&intent=${respiratorySharedIntent}`
+    : null;
 
   function chooseCategory(id: string) {
     setCategoryId(id);
@@ -393,7 +403,7 @@ export function SafetyGoodsWizard() {
               <button type="button" onClick={reset} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-emerald-700 bg-white px-3 text-sm font-black text-emerald-800 hover:bg-emerald-100"><RotateCcw className="h-4 w-4" />選び直す</button>
             </div>
             <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-700">{recommendation.summary}</p>
-            {recommendation.verifiedCandidate ? (
+            {recommendation.verifiedCandidate && !respiratorySharedIntent ? (
               <div className="mt-4 rounded-2xl border-2 border-emerald-700 bg-white p-4">
                 <p className="text-xs font-black tracking-[.12em] text-emerald-800">
                   公式情報を確認した具体候補
@@ -422,7 +432,7 @@ export function SafetyGoodsWizard() {
                 </div>
               </div>
             ) : null}
-            {!recommendation.withholdPurchase && photoCategory ? (
+            {!respiratorySharedIntent && !recommendation.withholdPurchase && photoCategory ? (
               <GoodsProductCarousel key={`${photoCategory.id}:${photoFeature ?? "all"}`} categoryId={photoCategory.id} categoryName={photoCategory.name} featureId={photoFeature} />
             ) : null}
             <div className="mt-5 grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
@@ -434,7 +444,9 @@ export function SafetyGoodsWizard() {
               </div>
               <div className="grid gap-2 sm:grid-cols-3 lg:grid-cols-1">
                 <a href={recommendation.officialHref} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-emerald-700 bg-white px-4 text-sm font-black text-emerald-900 hover:bg-emerald-100">公式資料 <ExternalLink className="h-4 w-4" /></a>
-                {recommendation.withholdPurchase ? (
+                {respiratorySharedIntent ? (
+                  <a href={respiratorySharedHref ?? "/goods?category=respiratory"} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-emerald-800 px-4 text-center text-sm font-black text-white hover:bg-emerald-900 sm:col-span-2 lg:col-span-1"><ShieldCheck className="h-4 w-4 shrink-0" />{condition?.id === "oxygen" || task?.id === "confined" || task?.id === "unknown" ? "停止条件を確認する" : "6つの安全条件を確認する"}</a>
+                ) : recommendation.withholdPurchase ? (
                   <a href="/contact/automation-email?subject=ppe-selection" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-emerald-800 px-4 text-sm font-black text-white hover:bg-emerald-900 sm:col-span-2 lg:col-span-1"><ShieldCheck className="h-4 w-4" />選定を相談する</a>
                 ) : recommendation.query ? (
                   <>
@@ -445,7 +457,7 @@ export function SafetyGoodsWizard() {
               </div>
             </div>
             <p className={`mt-5 rounded-xl px-4 py-3 text-xs font-semibold leading-6 ${recommendation.urgent ? "bg-rose-100 text-rose-950" : "bg-white text-slate-700"}`}>
-              {recommendation.withholdPurchase ? "危険有害性が特定できるまで、通販の商品候補は表示しません。SDS・酸素濃度・作業環境を確認し、判断できない場合は専門家へ相談してください。" : recommendation.urgent ? "酸欠・有害ガスのおそれがある場所では、安易に入らず、測定・換気・監視・救助手順を先に確認してください。" : "これは選んだ条件からの購入候補（製品群）です。型式・規格・価格・在庫・適合性は、公式資料と製品説明で購入前に確認してください。"}
+              {respiratorySharedIntent ? recommendation.urgent ? "酸欠・有害ガスのおそれがある場所では、安易に入らず、測定・換気・監視・救助手順を先に確認してください。通常の商品候補は表示しません。" : "呼吸用保護具は、この結果だけで商品を表示しません。共通フローで酸素・物質・濃度・混在・緊急用途・給気式の要否を個別に確認してください。" : recommendation.withholdPurchase ? "危険有害性が特定できるまで、通販の商品候補は表示しません。SDS・酸素濃度・作業環境を確認し、判断できない場合は専門家へ相談してください。" : recommendation.urgent ? "酸欠・有害ガスのおそれがある場所では、安易に入らず、測定・換気・監視・救助手順を先に確認してください。" : "これは選んだ条件からの購入候補（製品群）です。型式・規格・価格・在庫・適合性は、公式資料と製品説明で購入前に確認してください。"}
             </p>
           </div>
         )}

@@ -20,9 +20,14 @@ export const GOODS_PRODUCT_FEATURES: Readonly<Record<string, readonly GoodsProdu
     { id: "lanyard", label: "ランヤード", detail: "既存ハーネスに適合する部品を探す", searchQuery: "墜落制止用器具 ランヤード", check: "器具本体との組合せと落下距離をメーカー資料で確認" },
   ],
   respiratory: [
-    { id: "dust", label: "粉じん", detail: "研削・解体・清掃など", searchQuery: "防じんマスク 国家検定", check: "粉じんの種類・濃度・必要区分と顔への密着を確認" },
-    { id: "gas", label: "蒸気・ガス", detail: "塗装・洗浄・接着など", searchQuery: "防毒マスク 吸収缶", check: "SDSの対象物質・濃度・吸収缶の種類・破過時間を確認" },
-    { id: "unknown", label: "物質・酸素濃度が不明", detail: "槽・ピット・密閉空間を含む", searchQuery: null, check: "物質と酸素濃度を測定し、ろ過式マスクの使用可否を先に判断" },
+    { id: "dust", label: "粉じんのみ・必要条件を確認済み", detail: "物質・濃度・酸素を確認し、ガス・蒸気の併存がない", searchQuery: "防じんマスク 国家検定", check: "粉じんの種類・濃度・必要区分、酸素濃度、顔への密着を確認", officialSource: { label: "厚生労働省 防じんマスクの適正な選択等", url: "https://www.mhlw.go.jp/web/t_doc?dataId=00tc2747&dataType=1" } },
+    { id: "gas", label: "ガス・蒸気のみ・必要条件を確認済み", detail: "物質・濃度・酸素を確認し、粉じんの併存条件も確認した", searchQuery: "防毒マスク 吸収缶", check: "SDSの対象物質・濃度・酸素濃度、吸収缶の種類・破過時間、粉じん併存を確認", officialSource: { label: "厚生労働省 防毒マスクの適正な選択等", url: "https://www.mhlw.go.jp/web/t_doc?dataId=00tc2748&dataType=1&pageNo=1" } },
+    { id: "mixed", label: "粉じんとガス・蒸気が混在", detail: "両方の機能と製品の認証範囲を照合する必要がある", searchQuery: null, check: "対象物質・各濃度・酸素濃度と、防じん・防毒両機能のメーカー指定組合せを選定担当者が確認" },
+    { id: "oxygen", label: "酸素欠乏のおそれ・測定状況が不明", detail: "酸素18%未満のおそれ、槽・ピット・密閉空間を含む", searchQuery: null, check: "ろ過式マスクの商品選定を止め、酸素・有害ガス測定、換気、監視、救助手順を管理者が確認" },
+    { id: "concentration-unknown", label: "物質名または濃度が不明", detail: "SDSだけで実際のばく露濃度を確定しない", searchQuery: null, check: "SDS、測定結果、作業条件がそろうまで商品候補を出さない" },
+    { id: "supplied", label: "給気式・空気呼吸器を検討", detail: "送気設備、供給空気、ホース、救助手順が必要", searchQuery: null, check: "給気式なら自動的に安全とは扱わず、指定防護係数と設備・運用を専門担当者が確認" },
+    { id: "emergency", label: "緊急・救助用途", detail: "通常の商品検索では選ばない", searchQuery: null, check: "通常購入を止め、救助計画と専門装備を管理者・専門担当者が確認" },
+    { id: "unknown", label: "何が必要か分からない", detail: "SDSや測定結果、作業条件をまだ確認していない", searchQuery: null, check: "物質・濃度・酸素・作業条件が分かるまで候補を推測しない" },
   ],
   "eye-face-protection": [
     { id: "impact", label: "飛来物・粉じん", detail: "切断・研削・清掃など", searchQuery: "作業用 保護めがね 飛来物", check: "側面保護・耐衝撃性と他の保護具との干渉を確認" },

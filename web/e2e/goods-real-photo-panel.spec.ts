@@ -55,19 +55,19 @@ test("API画像が読み込めないときは写真を表示済みと見なさ�
 });
 
 
-test("保護具8分類と補助用品8分類を選べ、戻る・再読込で現在位置を保つ", async ({ page }) => {
+test("保護具9入口と補助用品8分類を選べ、戻る・再読込で現在位置を保つ", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.route("**/api/goods-products?*", async (route) => {
     await route.fulfill({ contentType: "application/json", body: JSON.stringify({ status: "not_configured", items: [], checkedAt: null }) });
   });
   await page.goto("/goods");
   const directory = page.getByRole("list", { name: "安全用品カテゴリの画像一覧" });
-  await expect(directory.getByRole("button")).toHaveCount(8);
+  await expect(directory.getByRole("button")).toHaveCount(9);
   await page.getByRole("button", { name: "現場の補助用品 8" }).click();
   await expect(directory.getByRole("button")).toHaveCount(8);
-  await page.getByRole("button", { name: "すべて 16" }).click();
-  await expect(directory.getByRole("button")).toHaveCount(16);
-  await page.getByRole("button", { name: "身につける保護具 8" }).click();
+  await page.getByRole("button", { name: "すべて 17" }).click();
+  await expect(directory.getByRole("button")).toHaveCount(17);
+  await page.getByRole("button", { name: "身につける保護具 9" }).click();
   expect(await directory.evaluate((element) => element.scrollWidth <= element.clientWidth + 1)).toBe(true);
   const helmet = page.getByRole("button", { name: "保護帽", exact: true });
   await helmet.click();
@@ -144,13 +144,23 @@ test("呼吸用保護具・フルハーネス・保護眼鏡を特徴から探�
     await route.fulfill({ contentType: "application/json", body: JSON.stringify({ status: "no_qualified_items", items: [], checkedAt: "2026-09-25T00:00:00.000Z" }) });
   });
   await page.goto("/goods");
-  await page.getByRole("button", { name: "呼吸用保護具", exact: true }).click();
-  await page.getByRole("button", { name: /物質・酸素濃度が不明/u }).click();
+  await page.getByRole("button", { name: /防じんマスク/u }).click();
+  const unknownConcentration = page.getByRole("button", { name: "物質名・濃度が不明", exact: true });
+  await unknownConcentration.scrollIntoViewIfNeeded();
+  await unknownConcentration.click();
   await expect(page.getByRole("status").filter({ hasText: /対象の物質や作業条件が分かるまで、商品候補は表示しません/u })).toBeVisible();
   await expect(page.getByRole("list", { name: "実商品写真を左右にスライド" })).toHaveCount(0);
   expect(requested).toHaveLength(0);
   await page.getByRole("button", { name: "特徴を選び直す" }).click();
-  await page.getByRole("region", { name: "呼吸用保護具の商品候補" }).getByRole("button", { name: /粉じん/u }).click();
+  for (const label of [
+    /酸素濃度を測定/u,
+    /対象物質名をSDS/u,
+    /実際のばく露濃度/u,
+    /混在有無/u,
+    /緊急・救助用途ではない/u,
+    /給気式を専門担当者/u,
+  ]) await page.getByRole("checkbox", { name: label }).click();
+  await page.getByRole("button", { name: "条件を確認して商品例を見る" }).click();
   await expect.poll(() => requested.some((url) => url.includes("category=respiratory&feature=dust"))).toBe(true);
   await page.getByRole("button", { name: "用品一覧に戻る" }).click();
   await page.getByRole("button", { name: "墜落制止用器具", exact: true }).click();
