@@ -1,5 +1,7 @@
 "use client";
 
+import { beginTransientChemicalNavigation } from "@/lib/transient-chemical-navigation";
+
 import { useRouter } from "next/navigation";
 import {
   useCallback,
@@ -240,6 +242,7 @@ export function HomeDirectChemicalClient() {
           });
         })
         .catch(() => undefined);
+      beginTransientChemicalNavigation();
       preserveNavigationScroll();
       router.push("/chemical-ra#chemical-ra-start");
     },

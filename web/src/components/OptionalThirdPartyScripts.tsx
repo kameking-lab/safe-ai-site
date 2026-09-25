@@ -13,6 +13,7 @@ import {
 } from "@/lib/analytics-privacy";
 import { removeGoogleOptionalCookies } from "@/lib/google-cookie-privacy";
 import { consumeTransientChatNavigation } from "@/lib/transient-chat-navigation";
+import { consumeTransientChemicalNavigation, isExactTransientChemicalUrl } from "@/lib/transient-chemical-navigation";
 
 type Consent = "granted" | "denied" | null;
 
@@ -42,6 +43,7 @@ export function OptionalThirdPartyScripts({
   const [editing, setEditing] = useState(false);
   const configured = analyticsEnabled || adsEnabled || rumEnabled;
   const committedTransientChatNavigationRef = useRef(false);
+  const committedTransientChemicalNavigationRef = useRef(false);
 
   useEffect(() => {
     if (!configured) return;
@@ -119,6 +121,12 @@ export function OptionalThirdPartyScripts({
     const originalPushState = window.history.pushState.bind(window.history);
     const originalReplaceState = window.history.replaceState.bind(window.history);
     const guardedPushState: History["pushState"] = (data, unused, url) => {
+      if (isExactTransientChemicalUrl(url) && consumeTransientChemicalNavigation()) {
+        denyGoogleProcessing();
+        committedTransientChemicalNavigationRef.current = true;
+        originalPushState(data, unused, url);
+        return;
+      }
       if (
         isExactChatbotUrl(url) &&
         consumeTransientChatNavigation()
@@ -135,6 +143,12 @@ export function OptionalThirdPartyScripts({
       originalPushState(data, unused, url);
     };
     const guardedReplaceState: History["replaceState"] = (data, unused, url) => {
+      if (isExactTransientChemicalUrl(url) && consumeTransientChemicalNavigation()) {
+        denyGoogleProcessing();
+        committedTransientChemicalNavigationRef.current = true;
+        originalReplaceState(data, unused, url);
+        return;
+      }
       if (
         isExactChatbotUrl(url) &&
         consumeTransientChatNavigation()
@@ -170,6 +184,15 @@ export function OptionalThirdPartyScripts({
 
   useEffect(() => {
     if (!configured || isOptionalTrackingUrl(window.location.href)) return;
+    if (
+      isExactTransientChemicalUrl(window.location.href) &&
+      committedTransientChemicalNavigationRef.current
+    ) {
+      committedTransientChemicalNavigationRef.current = false;
+      denyGoogleProcessing();
+      return;
+    }
+    committedTransientChemicalNavigationRef.current = false;
     if (
       pathname === "/chatbot" &&
       committedTransientChatNavigationRef.current
