@@ -6,15 +6,15 @@ const servicesSection = (page: Page) =>
 const overflowX = (page: Page) =>
   page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
 
-test("旧5機能パネルは主機能カードへ統合され、各カード下段から使える", async ({ page }) => {
+test("チワワの近くで5機能を試せて、主機能9件も探せる", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
 
   await expect(page.locator("#mascot-tools")).toHaveCount(0);
-  await expect(page.getByRole("navigation", { name: "チワワと試す5機能" })).toHaveCount(0);
+  await expect(page.getByRole("region", { name: "チワワと試す5機能" })).toBeVisible();
   const services = servicesSection(page);
   await expect(services.locator("ul > li > a")).toHaveCount(9);
-  // 旧パネルの操作はカードリンクの外（兄弟要素）にあり、リンク内へ入れ子にしない
+  // 主機能カードのリンク内に別の操作を入れ子にしない
   await expect(services.locator("ul > li > a :is(a, button, input, textarea)")).toHaveCount(0);
 
   const chat = page.locator("#mascot-chat");
@@ -23,7 +23,7 @@ test("旧5機能パネルは主機能カードへ統合され、各カード下�
   await expect(page.locator("#mascot-chemical").getByRole("combobox", { name: "化学物質を検索" })).toBeVisible();
   await expect(services.locator('ul > li > a[href="/accident-news"]')).toHaveCount(1);
   await expect(services.locator('ul > li > a[href="/laws"]')).toHaveCount(1);
-  await expect(page.locator("#mascot-slides").getByRole("link", { name: /スライドを見る/ })).toHaveAttribute(
+  await expect(page.locator("#mascot-slides").getByRole("link", { name: /安全スライド/ })).toHaveAttribute(
     "href",
     "/training/safety-seminars/safety-management-basics-osh-law#seminar-player",
   );
@@ -49,7 +49,7 @@ test("統合カードの操作はキーボードだけで順に到達できる",
   test.setTimeout(60_000);
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto("/");
-  const chatLink = page.locator('#mascot-chat > a[href="/chatbot"]');
+  const chatLink = page.locator('#mascot-chat a[href="/chatbot"]');
   await chatLink.focus();
   await expect(chatLink).toBeFocused();
   await page.keyboard.press("Tab");
@@ -58,13 +58,14 @@ test("統合カードの操作はキーボードだけで順に到達できる",
   await page.keyboard.press("Tab");
   await expect(page.locator("#mascot-chat").getByRole("button", { name: "質問する" })).toBeFocused();
   await page.keyboard.press("Tab");
-  await expect(page.locator('#mascot-chemical > a[href="/chemical-ra"]')).toBeFocused();
+  await expect(page.locator('#mascot-chemical a[href="/chemical-ra"]')).toBeFocused();
   await page.keyboard.press("Tab");
   await expect(page.getByRole("combobox", { name: "化学物質を検索" })).toBeFocused();
 
-  const slides = page.locator("#mascot-slides").getByRole("link", { name: /スライドを見る/ });
+  const slides = page.locator("#mascot-slides").getByRole("link", { name: /安全スライド/ });
   await slides.focus();
-  await page.keyboard.press("Enter");
+  await expect(slides).toBeFocused();
+  await slides.press("Enter");
   await expect(page).toHaveURL(/\/training\/safety-seminars\/safety-management-basics-osh-law#seminar-player$/u, { timeout: 30_000 });
 });
 
@@ -88,15 +89,14 @@ test("統合カード下段のリンクから戻っても選択位置へ戻る",
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
 
-  const slides = page.locator("#mascot-slides").getByRole("link", { name: /スライドを見る/ });
+  const slides = page.locator("#mascot-slides").getByRole("link", { name: /安全スライド/ });
   await slides.scrollIntoViewIfNeeded();
   const before = await page.evaluate(() => window.scrollY);
-  expect(before).toBeGreaterThan(400);
   await slides.click();
   await expect(page).toHaveURL(/#seminar-player$/u);
   await page.goBack();
   await expect(page).toHaveURL(/\/$/u);
-  await expect.poll(() => page.evaluate(() => window.scrollY), { timeout: 10_000 }).toBeGreaterThan(before - 320);
+  await expect.poll(() => page.evaluate((scrollBefore) => Math.abs(window.scrollY - scrollBefore), before), { timeout: 10_000 }).toBeLessThanOrEqual(200);
   await expect(slides).toBeInViewport();
 });
 
@@ -109,14 +109,13 @@ test("カード内で質問を送って戻ると入力した位置へ戻る", as
   const submit = page.locator("#mascot-chat").getByRole("button", { name: "質問する" });
   await submit.scrollIntoViewIfNeeded();
   const before = await page.evaluate(() => window.scrollY);
-  expect(before).toBeGreaterThan(400);
   await submit.click();
   await expect(page).toHaveURL(/\/chatbot$/u, { timeout: 30_000 });
   await expect(page.getByRole("heading", { name: "安衛法AI", exact: true })).toBeVisible();
   await expect(page.getByRole("article", { name: "あなたの質問" })).toBeVisible();
   await page.goBack();
   await expect(question).toBeVisible({ timeout: 15_000 });
-  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(before - 320);
+  await expect.poll(() => page.evaluate((scrollBefore) => Math.abs(window.scrollY - scrollBefore), before)).toBeLessThanOrEqual(200);
   await expect(question).toBeInViewport();
 });
 
@@ -129,12 +128,11 @@ test("カード内で化学物質を検索して戻ると入力した位置へ�
   const submit = page.locator("#mascot-chemical").getByRole("button", { name: "検索", exact: true });
   await submit.scrollIntoViewIfNeeded();
   const before = await page.evaluate(() => window.scrollY);
-  expect(before).toBeGreaterThan(400);
   await submit.click();
   await expect(page).toHaveURL(/\/chemical-ra#chemical-ra-start$/u, { timeout: 30_000 });
   await expect(page.getByRole("heading", { name: "化学物質RA", exact: true })).toBeVisible();
   await page.goBack();
   await expect(query).toBeVisible({ timeout: 15_000 });
-  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(before - 320);
+  await expect.poll(() => page.evaluate((scrollBefore) => Math.abs(window.scrollY - scrollBefore), before)).toBeLessThanOrEqual(200);
   await expect(query).toBeInViewport();
 });

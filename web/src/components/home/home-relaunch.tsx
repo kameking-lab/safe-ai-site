@@ -19,34 +19,6 @@ import {
   Sparkles,
   Workflow,
 } from "lucide-react";
-import { HomeDirectChatClient } from "@/components/home-safety-cockpit/home-chat-quick-ask";
-import { HomeDirectChemicalClient } from "@/components/home-safety-cockpit/home-chemical-quick-search";
-import { SAFETY_MANAGEMENT_BASICS_OSH_LAW_SEMINAR_PATH } from "@/data/safety-seminars/themes";
-
-// 旧「5つの機能をすぐ使う」パネルの操作は、対応する主機能カードの下段へ統合した。
-// カード本体のリンク（li > a）と下段の操作は兄弟要素にし、操作をリンク内へ入れ子にしない。
-type ServiceTool = "chat" | "chemical" | "slides";
-const SERVICE_TOOLS: Partial<Record<string, { id: string; tool: ServiceTool }>> = {
-  "/chatbot": { id: "mascot-chat", tool: "chat" },
-  "/chemical-ra": { id: "mascot-chemical", tool: "chemical" },
-  "/training/safety-seminars": { id: "mascot-slides", tool: "slides" },
-};
-const RECOMMENDED_SEMINAR_HREF = `${SAFETY_MANAGEMENT_BASICS_OSH_LAW_SEMINAR_PATH}#seminar-player`;
-
-function ServiceToolPanel({ tool }: { tool: ServiceTool }) {
-  if (tool === "chat") return <HomeDirectChatClient />;
-  if (tool === "chemical") return <HomeDirectChemicalClient />;
-  return (
-    <Link href={RECOMMENDED_SEMINAR_HREF} prefetch={false} className="hs-tool-link">
-      <Presentation aria-hidden="true" />
-      <span>
-        <span className="hs-tool-kicker">おすすめ・全12枚</span>
-        安全管理の基本と安衛法のスライドを見る
-      </span>
-      <ArrowRight className="hs-arrow" aria-hidden="true" />
-    </Link>
-  );
-}
 const MAIN_SERVICES = [
   {
     href: "/chatbot",
@@ -131,7 +103,7 @@ const MAIN_SERVICES = [
   {
     href: "/training/safety-seminars",
     title: "自由に使えるスライド",
-    description: "安全20テーマ・AI20テーマを軸に、音声・PPTX・PDFで展開。",
+    description: "公開中の安全教材をスライドと確認クイズで学べます。",
     action: "公開資料を見る",
     icon: Presentation,
     mascot: "/mascot/mascot-teacher.webp",
@@ -144,7 +116,7 @@ const MAIN_SERVICES = [
   {
     href: "/materials/safety-images",
     title: "自由に使える画像集",
-    description: "立入禁止と着用・表示を中心に、最初の5+5案を公開。",
+    description: "安全看板100点。縦横と複数の言語を選んで使えます。",
     action: "画像を確認",
     icon: Images,
     mascot: "/mascot/mascot-pointing.webp",
@@ -210,7 +182,7 @@ export function HomeRelaunch({
       <style>{SERVICE_STYLES}</style>
       <section
         aria-labelledby="home-relaunch-title"
-        className="relative border-b border-white/10 px-4 py-8 sm:px-6 sm:py-12 lg:py-16"
+        className="relative border-b border-white/10 px-4 py-5 sm:px-6 sm:py-8"
       >
         <div
           className="pointer-events-none absolute inset-0 opacity-70"
@@ -220,12 +192,12 @@ export function HomeRelaunch({
               "radial-gradient(circle at 10% 20%, rgba(52,211,153,.22), transparent 32%), radial-gradient(circle at 78% 18%, rgba(14,165,233,.18), transparent 34%), linear-gradient(145deg,#071b17 0%,#0b2720 50%,#07141e 100%)",
           }}
         />
-        <div className="relative mx-auto grid max-w-7xl gap-7 min-[1360px]:grid-cols-[minmax(0,1.25fr)_minmax(20rem,.75fr)] min-[1360px]:items-center">
+        <div className="relative mx-auto flex max-w-7xl items-center gap-4 sm:gap-8">
           <div>
             <div className="flex items-start justify-between gap-3">
-              <p className="inline-flex items-center gap-2 rounded-full border border-emerald-300/30 bg-emerald-300/10 px-3 py-1.5 text-xs font-black tracking-[.14em] text-emerald-200">
-                <Sparkles className="h-4 w-4" aria-hidden="true" />
-                現場の声を聴く、小さな安全相棒
+              <p className="inline-flex min-w-0 items-center gap-2 rounded-full border border-emerald-300/30 bg-emerald-300/10 px-3 py-1.5 text-xs font-black tracking-[.08em] text-emerald-200">
+                <Sparkles className="h-4 w-4 shrink-0" aria-hidden="true" />
+                チワワと確認
               </p>
               <Image
                 src="/mascot/mascot-chat-talk-v4.webp"
@@ -233,125 +205,55 @@ export function HomeRelaunch({
                 width={112}
                 height={112}
                 priority
-                className="-mt-3 h-28 w-28 shrink-0 object-contain drop-shadow-xl sm:hidden"
+                className="-mt-3 h-[112px] w-[112px] shrink-0 object-contain drop-shadow-xl sm:hidden"
               />
             </div>
             <h1
               id="home-relaunch-title"
-              className="mt-5 max-w-5xl text-[clamp(1.9rem,7vw,4rem)] font-black leading-[1.08] tracking-[-.045em] sm:leading-[1.05]"
+              className="mt-3 max-w-5xl text-[clamp(1.75rem,6vw,3.25rem)] font-black leading-[1.12] tracking-[-.04em]"
             >
-              <span className="block whitespace-nowrap">小さな気づきが、</span>
-              <span className="block whitespace-nowrap bg-gradient-to-r from-emerald-300 via-cyan-200 to-sky-300 bg-clip-text text-transparent forced-colors:bg-none forced-colors:text-[CanvasText]">
+              <span className="block">小さな気づきが、</span>
+              <span className="block bg-gradient-to-r from-emerald-300 via-cyan-200 to-sky-300 bg-clip-text text-transparent forced-colors:bg-none forced-colors:text-[CanvasText]">
                 大きな事故を防ぐ。
               </span>
             </h1>
-            <p className="mt-5 max-w-2xl text-base font-bold leading-8 text-slate-200 sm:text-lg">
-              大きな耳で現場の声を聴き、わずかな違和感を見逃さない。
-              チワワは、安全を上から指導するのではなく、そばで確認を手伝う小さな相棒です。
+            <p className="mt-3 max-w-2xl text-sm font-bold leading-6 text-slate-200 sm:text-base">
+              気になる現場のことを、チワワと一緒にすぐ確認できます。
             </p>
-
-            <nav
-              aria-label="すぐに使う主要機能"
-              className="mt-6 grid gap-2 sm:grid-cols-3"
-            >
-              <Link
-                href="/chatbot"
-                prefetch={false}
-                className={`group inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl bg-emerald-300 px-4 text-sm font-black text-slate-950 shadow-[0_14px_36px_-16px_rgba(52,211,153,.9)] hover:bg-emerald-200 motion-safe:transition motion-safe:hover:-translate-y-0.5 ${focusRing}`}
-              >
-                <Bot className="h-5 w-5" aria-hidden="true" />
-                安衛法AIを開く
-                <ArrowRight
-                  className="h-4 w-4 motion-safe:transition-transform motion-safe:group-hover:translate-x-1"
-                  aria-hidden="true"
-                />
-              </Link>
-              <Link
-                href="/chemical-ra"
-                prefetch={false}
-                className={`inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-4 text-sm font-black text-white hover:bg-white/15 motion-safe:transition-colors ${focusRing}`}
-              >
-                <FlaskConical
-                  className="h-5 w-5 text-amber-200"
-                  aria-hidden="true"
-                />
-                化学物質RAを開く
-              </Link>
-              <Link
-                href="/resources/netis-safety"
-                prefetch={false}
-                className={`inline-flex min-h-14 items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-4 text-sm font-black text-white hover:bg-white/15 motion-safe:transition-colors ${focusRing}`}
-              >
-                <Boxes className="h-5 w-5 text-sky-200" aria-hidden="true" />
-                安全技術を探す
-              </Link>
-            </nav>
-
-            <ul
-              aria-label="サービスの特徴"
-              className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-xs font-bold text-slate-300"
-            >
-              <li className="inline-flex items-center gap-1.5">
-                <ShieldCheck
-                  className="h-4 w-4 text-emerald-300"
-                  aria-hidden="true"
-                />
-                一次資料へのリンク表示
-              </li>
-              <li className="inline-flex items-center gap-1.5">
-                <ShieldCheck
-                  className="h-4 w-4 text-emerald-300"
-                  aria-hidden="true"
-                />
-                主要機能は登録なしで利用可
-              </li>
-              <li className="inline-flex items-center gap-1.5">
-                <ShieldCheck
-                  className="h-4 w-4 text-emerald-300"
-                  aria-hidden="true"
-                />
-                労働安全衛生コンサルタント監修
-              </li>
-            </ul>
           </div>
 
-          <div className="relative mx-auto hidden w-full sm:block sm:max-w-[18rem] lg:max-w-[20rem] min-[1360px]:max-w-none">
+          <div className="relative ml-auto hidden w-36 shrink-0 sm:block lg:w-44">
             <div
               className="absolute -inset-5 rounded-[2.5rem] bg-gradient-to-br from-emerald-300/20 via-cyan-300/5 to-transparent blur-2xl"
               aria-hidden="true"
             />
             <div className="relative overflow-hidden rounded-[2.2rem] border border-white/20 bg-[#102b24] p-2 shadow-2xl shadow-black/40">
-              <div className="relative aspect-[4/5] overflow-hidden rounded-[1.8rem] bg-[#d9efe6]">
+              <div className="relative aspect-square overflow-hidden rounded-[1.8rem] bg-[#d9efe6]">
                 <Image
                   src="/mascot/mascot-chat-talk-v4.webp"
                   alt="吹き出しと一緒に相談を案内する安全AIポータルのチワワ"
                   fill
                   priority
-                  sizes="(max-width: 1023px) 18rem, (max-width: 1359px) 20rem, 34vw"
-                  className="object-contain p-2 sm:p-4"
+                  sizes="(max-width: 1023px) 9rem, 11rem"
+                  className="object-contain p-2"
                 />
-                <div className="absolute inset-x-3 bottom-3 hidden rounded-2xl border border-white/60 bg-white/92 p-4 text-slate-950 shadow-lg backdrop-blur sm:block">
-                  <p className="text-xs font-black tracking-[.12em] text-emerald-800">
-                    YOUR SAFETY PARTNER
-                  </p>
-                  <p className="mt-1 text-xl font-black">
-                    気になること、聞いてみる？
-                  </p>
-                  <p className="mt-1 text-xs font-bold text-slate-600">
-                    法令確認から保護具選びまで、必要な仕事へ案内します。
-                  </p>
-                </div>
               </div>
             </div>
           </div>
         </div>
-      </section>
-
-      {mascotContent ? (
-        <div className="relative mx-auto w-full max-w-7xl px-4 pb-5 sm:px-6" data-mascot-toolbox>
-          {mascotContent}
+        {mascotContent ? (
+          <div className="relative mx-auto mt-4 w-full max-w-7xl" data-mascot-toolbox>
+            {mascotContent}
+          </div>
+        ) : null}
+        <div className="relative mx-auto mt-3 flex max-w-7xl flex-wrap items-center gap-x-5 gap-y-1 text-xs font-bold text-slate-300">
+          <Link href="/resources/netis-safety" prefetch={false} className={`inline-flex min-h-11 items-center gap-1 underline underline-offset-4 ${focusRing}`}>
+            <Boxes className="h-4 w-4" aria-hidden="true" />安全技術を探す
+          </Link>
+          <span className="inline-flex items-center gap-1"><ShieldCheck className="h-4 w-4 text-emerald-300" aria-hidden="true" />一次資料へのリンク表示</span>
+          <span className="inline-flex items-center gap-1"><ShieldCheck className="h-4 w-4 text-emerald-300" aria-hidden="true" />登録なしで利用可</span>
         </div>
-      ) : null}
+      </section>
 
       {priorityContent}
 
@@ -436,12 +338,10 @@ export function HomeRelaunch({
                   </div>
                 </>
               );
-              const tool = SERVICE_TOOLS[service.href];
               return (
                 <li
                   key={service.title}
-                  id={tool?.id}
-                  className={tool ? "hs-item hs-item-tool" : "hs-item"}
+                  className="hs-item"
                   style={palette}
                 >
                   <Link
@@ -451,11 +351,6 @@ export function HomeRelaunch({
                   >
                     {content}
                   </Link>
-                  {tool ? (
-                    <div className="hs-tool" data-hs-tool={tool.tool}>
-                      <ServiceToolPanel tool={tool.tool} />
-                    </div>
-                  ) : null}
                 </li>
               );
             })}

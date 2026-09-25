@@ -63,7 +63,7 @@ export function ScrollPositionRestorer() {
       } catch {
         saved = 0;
       }
-      if (Number.isFinite(saved) && saved > 0) {
+      if (Number.isFinite(saved) && saved >= 0) {
         window.requestAnimationFrame(() => {
           window.requestAnimationFrame(() =>
             window.scrollTo({ top: saved, left: 0 }),
@@ -99,7 +99,7 @@ export function ScrollPositionRestorer() {
       } catch {
         saved = 0;
       }
-      if (Number.isFinite(saved) && saved > 0) {
+      if (Number.isFinite(saved) && saved >= 0) {
         window.requestAnimationFrame(() => window.requestAnimationFrame(() => {
           window.scrollTo({ top: saved, left: 0 });
           pendingRestoreKey.current = "";

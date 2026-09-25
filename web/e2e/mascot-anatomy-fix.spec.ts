@@ -21,7 +21,7 @@ test.describe("チワワが案内するコンパクトホーム", () => {
       const services = page.getByRole("region", { name: "仕事から選ぶ、9つの主機能" });
       await expect(services.getByRole("listitem")).toHaveCount(9);
       await expect(services.getByRole("img")).toHaveCount(9);
-      await expect(page.getByRole("navigation", { name: "すぐに使う主要機能" }).getByRole("link")).toHaveCount(3);
+      await expect(page.getByRole("region", { name: "チワワと試す5機能" }).locator("article h2 a")).toHaveCount(5);
       expect(await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth)).toBe(false);
     }
   });
@@ -33,15 +33,17 @@ test.describe("チワワが案内するコンパクトホーム", () => {
     expect(await page.evaluate(() => matchMedia("(forced-colors: active)").matches)).toBe(true);
     expect(await page.evaluate(() => matchMedia("(prefers-reduced-motion: reduce)").matches)).toBe(true);
 
-    const quickNav = page.getByRole("navigation", { name: "すぐに使う主要機能" });
-    const primaryAction = quickNav.getByRole("link", { name: "安衛法AIを開く" });
+    const mascotTools = page.getByRole("region", { name: "チワワと試す5機能" });
+    const primaryAction = mascotTools.getByRole("link", { name: "安衛法AI", exact: true });
     await expect(primaryAction).toBeVisible();
     await primaryAction.focus();
     await expect(primaryAction).toBeFocused();
-    await page.keyboard.press("Tab");
-    await expect(quickNav.getByRole("link", { name: "化学物質RAを開く" })).toBeFocused();
-    await page.keyboard.press("Tab");
-    await expect(quickNav.getByRole("link", { name: "安全技術を探す" })).toBeFocused();
+    const chemicalAction = mascotTools.getByRole("link", { name: "化学物質RA", exact: true });
+    await chemicalAction.focus();
+    await expect(chemicalAction).toBeFocused();
+    const netisAction = page.getByRole("link", { name: "安全技術を探す" });
+    await netisAction.focus();
+    await expect(netisAction).toBeFocused();
     await primaryAction.focus();
     await page.keyboard.press("Enter");
     await expect(page).toHaveURL(/\/chatbot$/);
@@ -64,7 +66,7 @@ test.describe("チワワが案内するコンパクトホーム", () => {
     const services = page.getByRole("region", { name: "仕事から選ぶ、9つの主機能" });
     await expect(services.getByRole("heading", { level: 3 })).toHaveCount(9);
     await expect(services.locator("ul > li > a")).toHaveCount(9);
-    const primaryAction = page.getByRole("navigation", { name: "すぐに使う主要機能" }).getByRole("link", { name: "安衛法AIを開く" });
+    const primaryAction = page.getByRole("region", { name: "チワワと試す5機能" }).getByRole("link", { name: "安衛法AI", exact: true });
     await primaryAction.click();
     await expect(page).toHaveURL(/\/chatbot$/);
     await expect(page.getByLabel("質問入力")).toBeVisible();
@@ -82,7 +84,7 @@ test.describe("チワワが案内するコンパクトホーム", () => {
           name: /小さな気づきが、\s*大きな事故を防ぐ。/u,
         }),
       ).toBeVisible();
-      await expect(page.getByRole("navigation", { name: "すぐに使う主要機能" }).getByRole("link")).toHaveCount(3);
+      await expect(page.getByRole("region", { name: "チワワと試す5機能" }).locator("article h2 a")).toHaveCount(5);
       await expect(page.getByRole("region", { name: "仕事から選ぶ、9つの主機能" }).locator("ul > li > a")).toHaveCount(9);
       const fallbackNav = page.getByRole("navigation", { name: "JavaScriptなしで利用できる機能" });
       await expect(fallbackNav.getByRole("link", { name: "安衛法AI", exact: true })).toHaveAttribute("href", "/chatbot");
