@@ -85,10 +85,10 @@ test("ホームは6幅でチワワの案内と9つの主機能から主要タス
         name: /小さな気づきが、\s*大きな事故を防ぐ。/u,
       }),
     ).toBeVisible();
-    const quickNav = page.getByRole("navigation", { name: "すぐに使う主要機能" });
-    await expect(quickNav.getByRole("link", { name: "安衛法AIを開く" })).toHaveAttribute("href", "/chatbot");
-    await expect(quickNav.getByRole("link", { name: "化学物質RAを開く" })).toHaveAttribute("href", "/chemical-ra");
-    await expect(quickNav.getByRole("link", { name: "安全技術を探す" })).toHaveAttribute("href", "/resources/netis-safety");
+    const mascotTools = page.getByRole("region", { name: "チワワと試す5機能" });
+    await expect(mascotTools.getByRole("link", { name: "安衛法AI", exact: true })).toHaveAttribute("href", "/chatbot");
+    await expect(mascotTools.getByRole("link", { name: "化学物質RA", exact: true })).toHaveAttribute("href", "/chemical-ra");
+    await expect(page.getByRole("link", { name: "安全技術を探す" })).toHaveAttribute("href", "/resources/netis-safety");
     await expect(page.locator('[data-home-section="heat"]')).toHaveCount(0);
     await expect(page.getByRole("tab")).toHaveCount(0);
     await expect(

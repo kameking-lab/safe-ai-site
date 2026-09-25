@@ -171,9 +171,9 @@ test("JavaScript無効でも9機能・事故の確認状態・通常リンクを
       await expect(accidentCard).not.toContainText("事故なし");
     }
     await expect(page.getByText(/産業医が辞任・解任・退任したとき/).first()).toBeVisible();
-    const quickNav = page.getByRole("navigation", { name: "すぐに使う主要機能" });
-    await expect(quickNav.getByRole("link", { name: "化学物質RAを開く" })).toHaveAttribute("href", "/chemical-ra");
-    await expect(quickNav.getByRole("link", { name: "安衛法AIを開く" })).toHaveAttribute("href", "/chatbot");
+    const mascotTools = page.getByRole("region", { name: "チワワと試す5機能" });
+    await expect(mascotTools.getByRole("link", { name: "化学物質RA", exact: true })).toHaveAttribute("href", "/chemical-ra");
+    await expect(mascotTools.getByRole("link", { name: "安衛法AI", exact: true })).toHaveAttribute("href", "/chatbot");
     await expect(page.locator('[data-feature-tier="3"]')).toHaveCount(3);
     await expect(page.locator('section[aria-labelledby="home-automation-samples"]').getByRole("link", { name: "サンプルをすべて見る" })).toHaveAttribute("href", "/automation-examples");
     await expect(page.getByRole("region", { name: "仕事から選ぶ、9つの主機能" }).getByRole("link", { name: "すべての機能", exact: true })).toHaveAttribute("href", "/features");

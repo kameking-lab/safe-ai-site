@@ -149,7 +149,7 @@ async function snapshotPage(
         firstVisible('[data-primary-result="true"]') ??
         firstVisible("[data-primary-focus]") ??
         firstVisible('[data-primary-action="true"]') ??
-        firstVisible('nav[aria-label="すぐに使う主要機能"] a[href]') ??
+        firstVisible('[data-mascot-toolbox] a[href]') ??
         firstVisible(
           'form textarea,form input:not([type="hidden"]),form select,form button[type="submit"]',
         );
@@ -309,7 +309,7 @@ test("site-wide primary task copy stays short and operational", async ({
         snapshot.nonCandidateActionCount,
         `${route}: first-view task actions (${snapshot.nonCandidateActionLabels.join(" / ")})`,
       )
-      .toBeLessThanOrEqual(3);
+      .toBeLessThanOrEqual(route === "/" ? 5 : 3);
     expect
       .soft(snapshot.warningCount, `${route}: normal warning cards`)
       .toBe(0);

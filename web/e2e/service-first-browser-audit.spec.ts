@@ -32,7 +32,7 @@ type BrowserCopyBudgetSnapshot = ServiceCopyBudgetSnapshot & {
 const COPY_BUDGET_LIMIT_OVERRIDES: Partial<
   Record<string, Partial<ServiceCopyBudgetLimits>>
 > = {
-  "/": { introDescriptionLength: 70, mascotCount: 10 },
+  "/": { introDescriptionLength: 70, mascotCount: 10, firstViewportActionCount: 5 },
   "/chemical-ra": { visibleCharactersBeforePrimaryAction: 130 },
   "/laws": { visibleCharactersBeforePrimaryAction: 130 },
 };
@@ -144,7 +144,7 @@ async function snapshotPage(
       visibleElements('[data-primary-result="true"]')[0] ??
       visibleElements("[data-primary-focus]")[0] ??
       visibleElements('[data-primary-action="true"]')[0] ??
-      visibleElements('nav[aria-label="すぐに使う主要機能"] a[href]')[0] ??
+      visibleElements('[data-mascot-toolbox] a[href]')[0] ??
       visibleElements(
         'form textarea, form input:not([type="hidden"]), form select, form button[type="submit"], form input[type="submit"]',
       )[0] ??
@@ -825,7 +825,7 @@ test("normal states avoid warning walls and the relaunch home has no heat campai
     await page.locator("[data-warning-card]:not([data-warning-trigger])").count(),
   ).toBe(0);
   await expect(
-    page.getByRole("navigation", { name: "すぐに使う主要機能" }),
+    page.getByRole("region", { name: "チワワと試す5機能" }),
   ).toBeVisible();
   await expect(
     page.getByRole("heading", { name: "仕事から選ぶ、9つの主機能" }),
