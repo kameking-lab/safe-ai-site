@@ -23,7 +23,7 @@
 
 ## カテゴリ代表写真の権利台帳
 
-各写真はWikimedia Commonsの元ファイルページで著作者・ライセンスを確認し、960px縮小版を2026-09-25に取得した。`wave2-survey.jpg`と`wave2-roadwork.jpg`は公開用検査に合わせImageMagickでEXIF/XMPメタデータを除去した。表示時にCSSで切り抜く。製品・NETIS技術を写した写真として扱わず、UI内にもこの区別と個別の出典を表示する。
+各画像はWikimedia Commonsの元ファイルページで著作者・ライセンスを確認し、960px縮小版を2026-09-25に取得した。`wave2-records.jpg`はBIMの3Dモデル図であり実写ではない。他の4枚は写真。`wave2-survey.jpg`と`wave2-roadwork.jpg`は公開用検査に合わせImageMagickでEXIF/XMPメタデータを除去した。表示時にCSSで切り抜く。製品・NETIS技術を写した画像として扱わず、UI内にもこの区別と個別の出典を表示する。
 
 | ファイル／SHA-256 | 元ファイル・著作者 | ライセンス |
 |---|---|---|
