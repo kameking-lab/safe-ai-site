@@ -234,7 +234,7 @@ function buildRecommendation(selection: Selection): Recommendation {
         href: "https://www.3mcompany.jp/3M/ja_JP/p/d/v100838081/",
       },
     },
-    { categoryId: "fall", taskIds: ["opening"], title: "開口部を塞ぐ養生・手すりの候補", query: "開口部 養生 手すり 親綱 支柱 転落防止", summary: "開口部・縁端では、個人用保護具より先に蓋・囲い・手すりで落下経路をなくす候補を絞ります。", officialHref: "https://www.mhlw.go.jp/content/001234814.pdf", officialLabel: "厚生労働省｜労働安全衛生規則第519条（開口部等）", checks: ["開口部を固定蓋または手すりで塞げるか", "蓋の固定・表示と復旧責任者を確認", "残る危険に対する取付点と器具を確認"] },
+    { categoryId: "fall", taskIds: ["opening"], title: "開口部を塞ぐ養生・手すりの候補", query: "開口部 養生 手すり 親綱 支柱 転落防止", summary: "開口部・縁端では、個人用保護具より先に蓋・囲い・手すりで落下経路をなくす候補を絞ります。", officialHref: "https://www.mhlw.go.jp/web/t_doc?dataId=74003000&dataType=0&pageNo=9", officialLabel: "厚生労働省｜労働安全衛生規則第519条（開口部等）", checks: ["開口部を固定蓋または手すりで塞げるか", "蓋の固定・表示と復旧責任者を確認", "残る危険に対する取付点と器具を確認"] },
     { categoryId: "fall", taskIds: ["ladder"], title: "脚立・はしごの安定対策候補", query: "脚立 はしご 転倒防止 アウトリガー 作業用", summary: "脚立・はしごでは、より安全な作業床への置換を検討し、使用する場合は安定・固定用品を絞ります。", officialHref: "https://www.mhlw.go.jp/new-info/kobetu/roudou/gyousei/anzen/dl/170322-1.pdf", officialLabel: "厚生労働省｜はしご・脚立の安全使用", checks: ["作業台・足場に置き換えられないか", "設置角度、天板使用禁止、転位防止を確認", "昇降時に三点支持を保てるか"] },
     {
       categoryId: "chemical", taskIds: ["splash"], title: "薬液飛散用ゴーグル・フェイスシールド候補", query: "薬液 ゴーグル フェイスシールド 間接通気", summary: "注入・移し替えでは、正面・側面からの飛沫を防ぐ目・顔面保護具を中心に絞ります。",
