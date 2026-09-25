@@ -3,6 +3,8 @@ export const SAFETY_MANAGEMENT_BASICS_OSH_LAW_SEMINAR_PATH =
   "/training/safety-seminars/safety-management-basics-osh-law";
 export const FALL_PREVENTION_SEMINAR_PATH =
   "/training/safety-seminars/fall-prevention";
+export const CHEMICALS_SDS_RISK_ASSESSMENT_PATH =
+  "/training/safety-seminars/chemicals-sds-risk-assessment";
 
 export type PublishedSafetySeminar = {
   id: string;
@@ -12,7 +14,7 @@ export type PublishedSafetySeminar = {
   standardDuration: string;
   slideCount: number;
   hasAudio: boolean;
-  formats: readonly ["PowerPoint", "PDF"];
+  formats: readonly string[];
   href: string;
 };
 
@@ -76,9 +78,14 @@ export const SAFETY_SEMINARS: readonly SafetySeminar[] = [
   },
   {
     id: "chemicals-sds-risk-assessment",
-    status: "coming-soon",
+    status: "published",
     title: "化学物質・SDS・リスクアセスメント入門",
     audience: "化学物質を扱う作業者・管理者",
+    standardDuration: "約15〜20分",
+    slideCount: 12,
+    hasAudio: false,
+    formats: ["Webスライド", "確認クイズ"],
+    href: CHEMICALS_SDS_RISK_ASSESSMENT_PATH,
   },
   {
     id: "electrical-work",

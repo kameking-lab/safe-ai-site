@@ -4,14 +4,15 @@ import AxeBuilder from "@axe-core/playwright";
 const HUB = "/training/safety-seminars";
 const DETAIL = `${HUB}/fall-prevention`;
 const OSH_DETAIL = `${HUB}/safety-management-basics-osh-law`;
+const CHEMICAL_DETAIL = `${HUB}/chemicals-sds-risk-assessment`;
 
 test.describe("安全研修ライブラリ", () => {
-  test("一覧は全20テーマ（公開2件、Coming Soon 18件）で空の個別CTAがない", async ({ page }) => {
+  test("一覧は全20テーマ（公開3件、Coming Soon 17件）で空の個別CTAがない", async ({ page }) => {
     const response = await page.goto(HUB);
     expect(response?.status()).toBe(200);
     await expect(page.getByRole("heading", { level: 1, name: "安全研修ライブラリ" })).toBeVisible();
     const publishedCards = page.locator('[data-seminar-status="published"]');
-    await expect(publishedCards).toHaveCount(2);
+    await expect(publishedCards).toHaveCount(3);
     expect(
       await publishedCards
         .getByRole("link", { name: "今すぐ見る" })
@@ -19,8 +20,9 @@ test.describe("安全研修ライブラリ", () => {
     ).toEqual([
       `${HUB}/safety-management-basics-osh-law`,
       DETAIL,
+      CHEMICAL_DETAIL,
     ]);
-    await expect(page.locator('[data-seminar-status="coming-soon"]')).toHaveCount(18);
+    await expect(page.locator('[data-seminar-status="coming-soon"]')).toHaveCount(17);
     for (const card of await page.locator('[data-seminar-status="coming-soon"]').all()) {
       await expect(card.locator("a, button")).toHaveCount(0);
       await expect(card.getByText("Coming Soon", { exact: true })).toBeVisible();
@@ -297,6 +299,35 @@ test.describe("安全研修ライブラリ", () => {
         "https://www.anzen-ai-portal.jp/services/automation",
       );
     }
+  });
+});
+
+test.describe("化学物質・SDS・リスクアセスメント入門", () => {
+  test("12枚を無音で表示し、5問を回答して誤答だけ再挑戦できる", async ({ page }) => {
+    const response = await page.goto(CHEMICAL_DETAIL);
+    expect(response?.status()).toBe(200);
+    await expect(page.getByRole("heading", { level: 1, name: /化学物質・SDS/u })).toBeVisible();
+    await expect(page.getByText("01 / 12")).toBeVisible();
+    await expect(page.locator("audio")).toHaveCount(0);
+    await expect(page.getByRole("combobox", { name: "音声の種類" })).toHaveCount(0);
+    for (let index = 0; index < 5; index += 1) {
+      await page.getByRole("group", { name: `${index + 1}問目の選択肢` }).getByRole("button").first().click();
+      await expect(page.getByText(/^根拠:/u).first()).toBeVisible();
+      await page.getByRole("button", { name: index === 4 ? "結果を見る" : "次の問題" }).click();
+    }
+    await expect(page.getByRole("button", { name: "間違えた問題だけ再挑戦" })).toBeVisible();
+    await page.getByRole("button", { name: "間違えた問題だけ再挑戦" }).click();
+    await expect(page.getByText(/問題 1\//u)).toBeVisible();
+  });
+
+  test("320/390/768/1440pxで横溢れせず、重大なaxe違反がない", async ({ page }) => {
+    for (const width of [320, 390, 768, 1440]) {
+      await page.setViewportSize({ width, height: width <= 390 ? 844 : 900 });
+      await page.goto(CHEMICAL_DETAIL);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
+    }
+    const results = await new AxeBuilder({ page }).analyze();
+    expect(results.violations.filter((violation) => violation.impact === "serious" || violation.impact === "critical")).toEqual([]);
   });
 });
 

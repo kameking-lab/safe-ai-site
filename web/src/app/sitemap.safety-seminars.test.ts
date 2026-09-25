@@ -17,7 +17,7 @@ describe("安全研修ライブラリのsitemap境界", () => {
     expect(
       urls.filter((url) => url.startsWith(`${BASE}/training/safety-seminars/`)),
     ).toEqual(PUBLISHED_SAFETY_SEMINARS.map((seminar) => `${BASE}${seminar.href}`));
-    expect(urls.filter((url) => url.startsWith(`${BASE}/training/safety-seminars`))).toHaveLength(3);
+    expect(urls.filter((url) => url.startsWith(`${BASE}/training/safety-seminars`))).toHaveLength(4);
   });
 
   it("Coming Soon個別URL・利用条件・再生状態URLを収載しない", () => {
@@ -35,6 +35,7 @@ describe("安全研修ライブラリのsitemap境界", () => {
       .map((entry) => entry.name)
       .sort();
     expect(directories).toEqual([
+      "chemicals-sds-risk-assessment",
       "fall-prevention",
       "safety-management-basics-osh-law",
       "terms",
