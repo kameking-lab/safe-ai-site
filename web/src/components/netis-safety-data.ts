@@ -6,17 +6,53 @@ export const NETIS_RELEASE_URL =
 
 export const NETIS_CHECKED_AT = "2026年9月24日確認";
 
+/** カテゴリ写真・製品画像候補の取得/権利確認日（証跡: docs/netis-safety-visual-provenance-2026-09-24.md） */
+export const NETIS_IMAGE_RETRIEVED_AT = "2026-09-24";
+
+/**
+ * 製品画像の掲載状態。
+ * - verified: 製品・NETIS番号の対応、取得元URL、利用根拠、取得日を記録済みの実写画像のみ。
+ * - pending: 利用根拠を文書で確認できていない。汎用写真・AI生成画像で代替せず未掲載と明示する。
+ */
+export type NetisProductImage =
+  | {
+      status: "verified";
+      src: string;
+      alt: string;
+      sourceUrl: string;
+      credit: string;
+      usageBasis: string;
+      retrievedAt: string;
+    }
+  | {
+      status: "pending";
+      reason: string;
+    };
+
+function pendingProductImage(): NetisProductImage {
+  return {
+    status: "pending",
+    reason: "提供元の第三者利用許諾を文書で確認できていないため未掲載",
+  };
+}
+
 export const NETIS_SAFETY_CATEGORIES = [
   {
     id: "machine-collision",
     label: "重機接触",
     title: "重機接触を減らす",
-    image: "/safety-images/library/previews/collision-hazard.webp",
-    imageAlt: "重機との接触危険を示す安全イラスト",
-    imageLedgerId: "S040",
-    imageSource:
-      "安全AIポータル自作（OpenAI image generation、原本 collision-hazard.png）",
-    imageRights: "portal-owned-commercial-editable",
+    image: "/netis-safety/categories/machine-collision.webp",
+    imageAlt:
+      "解体現場で稼働する油圧ショベル2台と、その手前に立つ安全ベスト姿の作業員（東京、実写）",
+    imageCredit: {
+      title: "Polka Dot Machinery (14699068438).jpg",
+      sourceUrl:
+        "https://commons.wikimedia.org/wiki/File:Polka_Dot_Machinery_(14699068438).jpg",
+      author: "George Alexander Ishida Newman",
+      license: "CC BY 2.0",
+      licenseUrl: "https://creativecommons.org/licenses/by/2.0/",
+      retrievedAt: NETIS_IMAGE_RETRIEVED_AT,
+    },
     searchTerms: "重機 接触 人検知 接近警報",
     description:
       "カメラ、AI画像認識、ICタグ、センサーで接近を検知し、運転者や作業員へ知らせる技術。",
@@ -26,12 +62,18 @@ export const NETIS_SAFETY_CATEGORIES = [
     id: "restricted-zone",
     label: "立入禁止",
     title: "立入禁止区域を守る",
-    image: "/safety-images/library/previews/equipment-swing-zone.webp",
-    imageAlt: "重機の旋回範囲への立入禁止を示す安全イラスト",
-    imageLedgerId: "S042",
-    imageSource:
-      "安全AIポータル自作（OpenAI image generation、原本 equipment-swing-zone.png）",
-    imageRights: "portal-owned-commercial-editable",
+    image: "/netis-safety/categories/restricted-zone.webp",
+    imageAlt:
+      "「安全第一」と書かれた工事用バリケードとカラーコーン・コーンバーで区画された歩道（滋賀県草津市、実写）",
+    imageCredit: {
+      title: "Anzen-daiichi fence, Kusatsu, Shiga.jpg",
+      sourceUrl:
+        "https://commons.wikimedia.org/wiki/File:Anzen-daiichi_fence,_Kusatsu,_Shiga.jpg",
+      author: "運動会プロテインパワー",
+      license: "CC BY-SA 4.0",
+      licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/",
+      retrievedAt: NETIS_IMAGE_RETRIEVED_AT,
+    },
     searchTerms: "立入 検知 警報 区画",
     description:
       "侵入検知や無線通知で、旋回範囲・掘削部など危険区域への立入りを知らせる技術。",
@@ -41,12 +83,18 @@ export const NETIS_SAFETY_CATEGORIES = [
     id: "fall-prevention",
     label: "墜落・転落",
     title: "墜落・転落を防ぐ",
-    image: "/safety-images/library/previews/fall-hazard.webp",
-    imageAlt: "高所からの墜落危険を示す安全イラスト",
-    imageLedgerId: "S031",
-    imageSource:
-      "安全AIポータル自作（OpenAI image generation、原本 fall-hazard.png）",
-    imageRights: "portal-owned-commercial-editable",
+    image: "/netis-safety/categories/fall-prevention.webp",
+    imageAlt:
+      "建設中の建物の開口端で、ハーネスを親綱に接続して脚立上で作業する作業員（米国、実写）",
+    imageCredit: {
+      title: "On Edge (8744516460).jpg",
+      sourceUrl:
+        "https://commons.wikimedia.org/wiki/File:On_Edge_(8744516460).jpg",
+      author: "National Institute for Occupational Safety and Health (NIOSH)",
+      license: "パブリックドメイン（米国連邦政府機関の著作物）",
+      licenseUrl: "",
+      retrievedAt: NETIS_IMAGE_RETRIEVED_AT,
+    },
     searchTerms: "墜落 転落 高所 足場 安全",
     description:
       "高所作業の状態把握、開口部対策、足場点検、フルハーネス使用確認を支援する技術。",
@@ -56,12 +104,18 @@ export const NETIS_SAFETY_CATEGORIES = [
     id: "heat-environment",
     label: "暑熱・作業環境",
     title: "暑熱・作業環境を見える化",
-    image: "/safety-images/library/previews/wbgt-display.webp",
-    imageAlt: "WBGT値による暑熱環境の確認を示す安全イラスト",
-    imageLedgerId: "S092",
-    imageSource:
-      "安全AIポータル自作（OpenAI image generation、原本 wbgt-display.png）",
-    imageRights: "portal-owned-commercial-editable",
+    image: "/netis-safety/categories/heat-environment.webp",
+    imageAlt:
+      "屋外の三脚に設置された黒球付きのWBGT（暑さ指数）測定器（実写）",
+    imageCredit: {
+      title: "Bioenvironmental engineering team defends against the heatwave with exact measurements (9775034).jpg",
+      sourceUrl:
+        "https://commons.wikimedia.org/wiki/File:Bioenvironmental_engineering_team_defends_against_the_heatwave_with_exact_measurements_(9775034).jpg",
+      author: "U.S. Air Force photo by Senior Airman Darius Frazier",
+      license: "パブリックドメイン（米国連邦政府機関の著作物）",
+      licenseUrl: "",
+      retrievedAt: NETIS_IMAGE_RETRIEVED_AT,
+    },
     searchTerms: "暑熱 WBGT 作業環境 遠隔監視",
     description:
       "WBGT、温湿度、作業者状態を計測・共有し、休憩や作業中止の判断を支援する技術。",
@@ -85,6 +139,7 @@ export const FEATURED_NETIS_TECHNOLOGIES = [
     limitations:
       "ICタグを携帯する作業員が検知対象です。タグは金属・電子機器から離し、現場の電磁ノイズ、機器ごとの動作温度、検知範囲と警報を事前確認します。電池管理と誘導・目視確認を併用します。",
     checkedAt: NETIS_CHECKED_AT,
+    productImage: pendingProductImage(),
     productUrl:
       "https://matrix-inc.co.jp/product/hiyarihunter/hiyari-v2.html",
   },
@@ -100,6 +155,7 @@ export const FEATURED_NETIS_TECHNOLOGIES = [
     limitations:
       "人と物体を識別しません。豪雨・降雪・強風時は適用外で、動作温度は-10～50℃です。DC12/24V電源と後方約3mの確認スペースを確保し、取付位置・検知範囲・警報を始業前に点検します。",
     checkedAt: NETIS_CHECKED_AT,
+    productImage: pendingProductImage(),
     productUrl: "https://www.tukusi.co.jp/commodity/list/631.html",
   },
   {
@@ -114,6 +170,7 @@ export const FEATURED_NETIS_TECHNOLOGIES = [
     limitations:
       "人物検知は8mまでで、LTE/Wi-Fi環境と機器の設置スペースを確認します。画角外や遮蔽、天候・照明条件では検知できない場合があります。レンズを清掃し、安全確認や誘導員を併用します。",
     checkedAt: NETIS_CHECKED_AT,
+    productImage: pendingProductImage(),
     productUrl:
       "https://www.iwasakinet.co.jp/rental/construction-ict-support/xacti-doboleko-jk/",
   },
@@ -129,6 +186,7 @@ export const FEATURED_NETIS_TECHNOLOGIES = [
     limitations:
       "設定エリア内でフック不使用時に警報が出るか使用前に確認し、充電・電池を管理します。エリアセンサーの使用温度は-20～60℃です。親綱への適切な掛け方や法定の墜落防止措置を自動確認するものではありません。",
     checkedAt: NETIS_CHECKED_AT,
+    productImage: pendingProductImage(),
     productUrl:
       "https://ronk-jp.com/wp-content/uploads/2024/08/923a78cb58e3840064f71fca56ccd563.pdf",
   },
@@ -144,6 +202,7 @@ export const FEATURED_NETIS_TECHNOLOGIES = [
     limitations:
       "安定したdocomo通信、AC100V電源、1m四方の設置場所が必要です。月明かり未満の照度や遮蔽では検知できない場合があり、赤外線対応には別条件があります。通信・電源断やメール遅延を想定し、立入防止措置と巡視を併用します。",
     checkedAt: NETIS_CHECKED_AT,
+    productImage: pendingProductImage(),
     productUrl: "https://assistyou-m.com/mics/mics_ai/",
   },
   {
@@ -158,6 +217,7 @@ export const FEATURED_NETIS_TECHNOLOGIES = [
     limitations:
       "フックをホルダから外した状態を検知し、親綱等への正しい掛け方は確認しません。水中と100/200V引込線の中心から半径2m以内は適用外です。警告まで2～3秒かかり、設定機1台につき最大20タグです。作業前の警報確認と電池管理が必要です。",
     checkedAt: NETIS_CHECKED_AT,
+    productImage: pendingProductImage(),
     productUrl: "https://ykc-amulet.net/harnessalert/",
   },
   {
@@ -172,6 +232,7 @@ export const FEATURED_NETIS_TECHNOLOGIES = [
     limitations:
       "医療機器ではありません。センサーを肌へ密着させ、表示にかかわらず体調が悪い場合は休憩し、現場の熱中症対策を継続します。",
     checkedAt: NETIS_CHECKED_AT,
+    productImage: pendingProductImage(),
     productUrl:
       "https://sooki.co.jp/irental/allproduct/ct15/i-bow-2025/",
   },
@@ -187,6 +248,7 @@ export const FEATURED_NETIS_TECHNOLOGIES = [
     limitations:
       "BluetoothおよびLTEの通信環境に支障がないことが条件で、医療機器ではありません。強い直射日光で端末電源が落ちる場合があり、装着位置の調整が必要です。",
     checkedAt: NETIS_CHECKED_AT,
+    productImage: pendingProductImage(),
     productUrl: "https://www.tecraft.co.jp/topics/2584/",
   },
   {
@@ -201,6 +263,7 @@ export const FEATURED_NETIS_TECHNOLOGIES = [
     limitations:
       "豪雨・降雪時は適用外です。設置スペースと配線を確保し、センサーの高さ・方向、検知距離、電池や動作を作業前に確認します。",
     checkedAt: NETIS_CHECKED_AT,
+    productImage: pendingProductImage(),
     productUrl: "https://tsucumore.com/backsensor-hatto/",
   },
   {
@@ -215,6 +278,7 @@ export const FEATURED_NETIS_TECHNOLOGIES = [
     limitations:
       "目視で2m先を確認できる環境が条件です。機種ごとに停止可否を検討し、画角・検知レベルを調整して従来の安全確認を継続します。",
     checkedAt: NETIS_CHECKED_AT,
+    productImage: pendingProductImage(),
     productUrl: "https://www.nishio-tm.co.jp/netis/",
   },
 ] as const;
