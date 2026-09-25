@@ -3,19 +3,19 @@ export const NETIS_WAVE2_SOURCE_URL =
   "https://www.cgr.mlit.go.jp/ctc/pdf/technology/netis/recommend-skill-2026.pdf";
 
 export const NETIS_WAVE2_CATEGORIES = [
-  { id: "wave2-survey", label: "現場測量・土量", description: "UAVやスマートフォンで地形と土量を把握", checks: "測量対象、要求精度、機材・通信", purpose: "efficiency",
+  { id: "wave2-survey", label: "現場測量・土量", description: "UAV・レーザー・スマートフォンで地形と土量を把握", checks: "測量対象、要求精度、機材・通信", purpose: "efficiency",
     image: "/netis-safety/categories/wave2-survey.jpg", imageAlt: "上空から撮影した道路現場の実写。掲載技術の製品写真ではありません。",
     imageCredit: { title: "Drone view of the worksite (51697906251).jpg", sourceUrl: "https://commons.wikimedia.org/wiki/File:Drone_view_of_the_worksite_(51697906251).jpg", author: "Oregon Department of Transportation", license: "CC BY 2.0", licenseUrl: "https://creativecommons.org/licenses/by/2.0/", retrievedAt: "2026-09-25", changeNote: "960px縮小版のEXIF/XMPを除去。表示時にCSSで切り抜き。" } },
   { id: "wave2-records", label: "施工計画・3D記録", description: "点群とCIMモデルで施工情報を共有", checks: "入力データ、設計との整合、共有先", purpose: "efficiency",
     image: "/netis-safety/categories/wave2-records.jpg", imageAlt: "BIMの3Dモデル画面。掲載技術の製品画面ではありません。",
     imageCredit: { title: "BIM for residential construction.jpg", sourceUrl: "https://commons.wikimedia.org/wiki/File:BIM_for_residential_construction.jpg", author: "Aadbuild", license: "CC BY-SA 3.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/3.0/", retrievedAt: "2026-09-25", changeNote: "Wikimediaの960px縮小版を取得。表示時にCSSで切り抜き。" } },
-  { id: "wave2-mechanization", label: "重機・機械化", description: "積込み・転圧・鉄筋結束を支援", checks: "対応機種、設置条件、運転者の確認", purpose: "efficiency",
+  { id: "wave2-mechanization", label: "重機・機械化", description: "積込み・転圧・遠隔操作・トンネル施工を支援", checks: "対応機種、設置条件、運転者の確認", purpose: "efficiency",
     image: "/netis-safety/categories/wave2-mechanization.jpg", imageAlt: "道路用ローラーの実写。掲載技術の製品写真ではありません。",
     imageCredit: { title: "A Road Roller working on an arterial road in Amaravati.jpg", sourceUrl: "https://commons.wikimedia.org/wiki/File:A_Road_Roller_working_on_an_arterial_road_in_Amaravati.jpg", author: "IM3847", license: "CC BY-SA 4.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/", retrievedAt: "2026-09-25", changeNote: "Wikimediaの縮小版を取得。表示時にCSSで切り抜き。" } },
-  { id: "wave2-roadwork", label: "道路作業・区画線", description: "罫書と標示の施工時間を短縮", checks: "路面・天候・照度・交通規制", purpose: "efficiency",
+  { id: "wave2-roadwork", label: "道路作業・区画線", description: "区画線・側溝・交通規制の作業を支援", checks: "路面・天候・照度・交通規制", purpose: "efficiency",
     image: "/netis-safety/categories/wave2-roadwork.jpg", imageAlt: "路面標示機械の操作訓練の実写。掲載技術の製品写真ではありません。",
     imageCredit: { title: "Training Improves NAVFAC Hawaii Worker Operating Knowledge of Riding Paint Striping Machine (29957285503).jpg", sourceUrl: "https://commons.wikimedia.org/wiki/File:Training_Improves_NAVFAC_Hawaii_Worker_Operating_Knowledge_of_Riding_Paint_Striping_Machine_(29957285503).jpg", author: "NAVFAC / Denise Emsley", license: "CC BY 2.0", licenseUrl: "https://creativecommons.org/licenses/by/2.0/", retrievedAt: "2026-09-25", changeNote: "960px縮小版のEXIF/XMPを除去。表示時にCSSで切り抜き。" } },
-  { id: "wave2-quality", label: "品質・検査", description: "地盤、吹付け、溶接の確認を支援", checks: "測定条件、品質基準、校正・記録", purpose: "quality",
+  { id: "wave2-quality", label: "品質・検査", description: "地盤、コンクリート、溶接、塗布量を確認", checks: "測定条件、品質基準、校正・記録", purpose: "quality",
     image: "/netis-safety/categories/wave2-quality.jpg", imageAlt: "コンクリートのスランプ試験を行う技術者の実写。掲載技術の製品写真ではありません。",
     imageCredit: { title: "DOT project technicians performing slump test on latex concrete.jpg", sourceUrl: "https://commons.wikimedia.org/wiki/File:DOT_project_technicians_performing_slump_test_on_latex_concrete.jpg", author: "NCDOTcommunications", license: "CC BY 2.0", licenseUrl: "https://creativecommons.org/licenses/by/2.0/", retrievedAt: "2026-09-25", changeNote: "Wikimediaの960px縮小版を取得。表示時にCSSで切り抜き。" } },
 ] as const;
@@ -26,7 +26,7 @@ export function isNetisWave2CategoryId(value: string | null): value is NetisWave
   return NETIS_WAVE2_CATEGORIES.some((category) => category.id === value);
 }
 
-type Wave2Technology = {
+export type Wave2Technology = {
   categoryIds: readonly NetisWave2CategoryId[];
   primaryPurpose: "efficiency" | "quality";
   name: string;
