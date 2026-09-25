@@ -3,6 +3,7 @@ import { HomeAutomationService } from "@/components/home/home-automation-service
 import { HomeAutomationSamples } from "@/components/home/home-automation-samples";
 import { HomeFeatureDirectory } from "@/components/home/home-feature-directory";
 import { HomeRelaunch } from "@/components/home/home-relaunch";
+import { HomeMascotToolbox } from "@/components/home/home-mascot-toolbox";
 import { HomeSafetyUpdates } from "@/components/home/home-safety-updates";
 import { PageJsonLd } from "@/components/page-json-ld";
 import {
@@ -79,6 +80,7 @@ export default async function HomePage() {
         </nav>
       </noscript>
       <HomeRelaunch
+        mascotContent={<HomeMascotToolbox latestNews={latestAccidentNews} />}
         priorityContent={<HomeSafetyUpdates latestNews={latestAccidentNews} />}
       />
       <HomeAutomationSamples />
