@@ -10,6 +10,7 @@ import {
   NETIS_EFFICIENCY_CATEGORIES,
   NETIS_EFFICIENCY_TECHNOLOGIES,
 } from "./netis-efficiency-data";
+import { NETIS_WAVE2_CATEGORIES, NETIS_WAVE2_TECHNOLOGIES } from "./netis-wave2-data";
 import { NetisSafetyExplorer } from "./netis-safety-explorer";
 import { NetisSafetyGuide } from "./netis-safety-guide";
 
@@ -195,12 +196,12 @@ describe("NetisSafetyGuide", () => {
     window.history.replaceState(null, "", "/");
   });
 
-  it("効率化タブで2分類と6件を探せ、安全10件と混同しない", () => {
+  it("効率化タブで第1・第2陣17件を探せ、安全10件と混同しない", () => {
     navigation.query = "purpose=efficiency";
     const { container } = render(<NetisSafetyExplorer />);
     expect(screen.getByRole("button", { name: "作業を効率化" }).getAttribute("aria-pressed")).toBe("true");
-    expect(screen.getByText("作業効率化候補：6件")).toBeDefined();
-    expect(container.querySelectorAll("article")).toHaveLength(6);
+    expect(screen.getByText("作業効率化候補：17件")).toBeDefined();
+    expect(container.querySelectorAll("article")).toHaveLength(17);
     expect(screen.queryByText(/ヒヤリハンター/)).toBeNull();
     for (const category of NETIS_EFFICIENCY_CATEGORIES) {
       expect(screen.getByRole("button", { name: category.label })).toBeDefined();
@@ -216,6 +217,38 @@ describe("NetisSafetyGuide", () => {
       expect(link.getAttribute("href")).toBe(technology.officialSourceUrl);
       expect(link.closest("article")?.textContent).toContain("現行登録未確認");
       expect(link.closest("article")?.textContent).toContain("製品画像は未掲載");
+    }
+    for (const category of NETIS_WAVE2_CATEGORIES.filter((item) => item.purpose === "efficiency")) {
+      expect(screen.getByRole("button", { name: category.label })).toBeDefined();
+      expect(screen.getByAltText(category.imageAlt)).toBeDefined();
+      expect(existsSync(path.join(process.cwd(), "public", category.image))).toBe(true);
+    }
+    for (const technology of NETIS_WAVE2_TECHNOLOGIES.filter((item) => item.primaryPurpose === "efficiency")) {
+      expect(container.textContent).toContain(technology.name);
+      expect(container.textContent).toContain(technology.sourceBasis);
+    }
+  });
+
+  it("品質・検査3件を独立した目的として表示し、効率化件数に混ぜない", () => {
+    navigation.query = "purpose=quality";
+    const { container } = render(<NetisSafetyExplorer />);
+    expect(screen.getByText("品質・検査候補：3件")).toBeDefined();
+    expect(container.querySelectorAll("article")).toHaveLength(3);
+    for (const technology of NETIS_WAVE2_TECHNOLOGIES.filter((item) => item.primaryPurpose === "quality")) {
+      expect(container.textContent).toContain(technology.name);
+    }
+  });
+
+  it("第2陣を含む30件の基番号は重複せず、資料時点を明示する", () => {
+    const all = [...FEATURED_NETIS_TECHNOLOGIES, ...NETIS_EFFICIENCY_TECHNOLOGIES, ...NETIS_WAVE2_TECHNOLOGIES];
+    expect(all).toHaveLength(30);
+    expect(new Set(all.map((item) => item.registrationNumber)).size).toBe(30);
+    expect(NETIS_WAVE2_TECHNOLOGIES).toHaveLength(14);
+    for (const item of NETIS_WAVE2_TECHNOLOGIES) {
+      expect(item.sourceBasis).toContain("2026年4月公式一覧掲載");
+      expect(item.sourceBasis).toContain("9月現行NETIS個別状態未確認");
+      expect(item.officialSourceUrl).toMatch(/^https:\/\/www\.cgr\.mlit\.go\.jp\//);
+      expect(item.providerSourceUrl).toMatch(/^https:\/\//);
     }
   });
 

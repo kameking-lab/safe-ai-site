@@ -264,15 +264,15 @@ test("効率化参考技術を目的・分類・検索から探し、現行登�
     await page.setViewportSize({ width, height: 844 });
     await page.goto(`${ROUTE}?purpose=efficiency`, { waitUntil: "domcontentloaded" });
     await expect(page.locator('[data-netis-explorer-ready="true"]')).toBeVisible();
-    await expect(page.getByRole("heading", { name: "作業効率化候補：6件" })).toBeVisible();
-    await expect(page.locator("#netis-technology-results article")).toHaveCount(6);
-    for (const category of ["測量・出来形", "記録・点検"]) {
+    await expect(page.getByRole("heading", { name: "作業効率化候補：17件" })).toBeVisible();
+    await expect(page.locator("#netis-technology-results article")).toHaveCount(17);
+    for (const category of ["測量・出来形", "記録・点検", "現場測量・土量", "施工計画・3D記録", "重機・機械化", "道路作業・区画線"]) {
       const button = page.getByRole("button", { name: category });
       await expect(button.locator("img")).toBeVisible();
       expect(await button.locator("img").evaluate((image: HTMLImageElement) => image.naturalWidth)).toBeGreaterThan(0);
     }
     await page.screenshot({ path: testInfo.outputPath(`efficiency-categories-${width}.png`), fullPage: false });
-    await expect(page.getByText("効率化の追加6件のうち5件は国交省の2026年4月一覧、1件は過去の地方整備局資料で確認した参考技術です。2026年9月時点の現行NETIS登録は未確認です。")).toBeVisible();
+    await expect(page.getByText(/効率化の第1陣6件のうち5件は国交省の2026年4月一覧.*第2陣14件は同4月一覧の参考技術です/)).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
     await page.getByRole("button", { name: "測量・出来形" }).click();
     await expect(page).toHaveURL(/purpose=efficiency.*risk=survey-measurement|risk=survey-measurement.*purpose=efficiency/);
@@ -289,4 +289,25 @@ test("末尾付きNETIS番号で効率化候補を一意に探せる", async ({ 
   await expect(page.getByRole("heading", { name: "作業効率化候補：1件" })).toBeVisible();
   await expect(page.locator("#netis-technology-results article")).toHaveCount(1);
   await expect(page.locator("#netis-technology-results article")).toContainText("ScanX");
+});
+
+test("第2陣14件を目的別に探し、資料時点と写真権利を確認できる", async ({ page }, testInfo) => {
+  for (const width of [320, 390, 1440]) {
+    await page.setViewportSize({ width, height: 844 });
+    await page.goto(`${ROUTE}?purpose=quality`, { waitUntil: "domcontentloaded" });
+    await expect(page.getByRole("heading", { name: "品質・検査候補：3件" })).toBeVisible();
+    const qualityButton = page.getByRole("button", { name: "品質・検査", exact: true });
+    await expect(qualityButton.locator("img")).toBeVisible();
+    expect(await qualityButton.locator("img").evaluate((image: HTMLImageElement) => image.naturalWidth)).toBeGreaterThan(0);
+    await page.screenshot({ path: testInfo.outputPath(`wave2-quality-${width}.png`), fullPage: false });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
+  }
+  await page.getByText("写真の出典・ライセンスを確認").click();
+  await expect(page.getByRole("link", { name: "A Road Roller working on an arterial road in Amaravati.jpg" })).toBeVisible();
+  await page.getByRole("button", { name: "作業を効率化" }).click();
+  await page.getByLabel(/名称・登録番号・用途/).fill("KT-230092-A");
+  await page.getByRole("button", { name: "掲載技術を検索" }).click();
+  await expect(page.getByRole("heading", { name: "作業効率化候補：1件" })).toBeVisible();
+  await expect(page.locator("#netis-technology-results article")).toContainText("2026年4月公式一覧掲載");
+  await expect(page.locator("#netis-technology-results article")).toContainText("9月現行NETIS個別状態未確認");
 });
