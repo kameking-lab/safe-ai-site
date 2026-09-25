@@ -3,6 +3,8 @@ import type { ReactElement } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { TransientQueryBridgeProvider } from "@/components/home-safety-cockpit/transient-query-bridge";
 import { HomeRelaunch } from "./home-relaunch";
+import { HomeMascotToolbox } from "./home-mascot-toolbox";
+import type { HomeLatestAccidentNews } from "@/lib/home/home-accident-server";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
@@ -22,9 +24,18 @@ function serviceItem(name: string): HTMLElement {
   return item;
 }
 
+const noNews: HomeLatestAccidentNews = {
+  status: "unavailable",
+  checkedAt: "2026-09-25T00:00:00.000Z",
+  items: [],
+  sourceLabel: "報道RSS",
+  sourceUrl: "https://news.google.com/",
+  message: "取得不可",
+};
+
 describe("HomeRelaunch", () => {
   it("見出し階層と主要な1クリック導線をサーバー描画する", () => {
-    render(<HomeRelaunch />);
+    render(<HomeRelaunch mascotContent={<HomeMascotToolbox latestNews={noNews} />} />);
 
     expect(
       screen.getByRole("heading", {
@@ -39,24 +50,13 @@ describe("HomeRelaunch", () => {
       }),
     ).toBeDefined();
 
-    const quickNav = screen.getByRole("navigation", {
-      name: "すぐに使う主要機能",
-    });
-    expect(
-      within(quickNav)
-        .getByRole("link", { name: /安衛法AIを開く/ })
-        .getAttribute("href"),
-    ).toBe("/chatbot");
-    expect(
-      within(quickNav)
-        .getByRole("link", { name: /化学物質RAを開く/ })
-        .getAttribute("href"),
-    ).toBe("/chemical-ra");
-    expect(
-      within(quickNav)
-        .getByRole("link", { name: /安全技術を探す/ })
-        .getAttribute("href"),
-    ).toBe("/resources/netis-safety");
+    const hero = screen.getByRole("heading", { level: 1 }).closest("section");
+    expect(hero).not.toBeNull();
+    expect(hero?.querySelector("[data-mascot-toolbox]")).not.toBeNull();
+    expect(within(hero!).getByRole("region", { name: "チワワと試す5機能" })).toBeDefined();
+    expect(within(hero!).getByRole("link", { name: /安衛法AI/ }).getAttribute("href")).toBe("/chatbot");
+    expect(within(hero!).getByRole("link", { name: /化学物質RA/ }).getAttribute("href")).toBe("/chemical-ra");
+    expect(within(hero!).getByRole("link", { name: /安全技術を探す/ }).getAttribute("href")).toBe("/resources/netis-safety");
   });
 
   it("LCP画像、タップ領域、フォーカス、動きの低減を明示する", () => {
@@ -68,12 +68,9 @@ describe("HomeRelaunch", () => {
     expect(desktopMascot.getAttribute("sizes")).toContain("max-width: 1023px");
     expect(desktopMascot.getAttribute("loading")).not.toBe("lazy");
 
-    const primaryLink = screen.getByRole("link", { name: /安衛法AIを開く/ });
-    expect(primaryLink.className).toContain("min-h-14");
+    const primaryLink = screen.getByRole("link", { name: /安全技術を探す/ });
+    expect(primaryLink.className).toContain("min-h-11");
     expect(primaryLink.className).toContain("focus-visible:ring-4");
-    expect(primaryLink.className).toContain(
-      "motion-safe:hover:-translate-y-0.5",
-    );
 
     const serviceLink = screen
       .getAllByRole("link", { name: /事故分析ダッシュボード/ })
@@ -109,11 +106,11 @@ describe("HomeRelaunch", () => {
     ).toBeTruthy();
   });
 
-  it("旧5機能パネルの操作を対応する主機能カードへ統合し、リンク内に入れ子にしない", () => {
-    render(<HomeRelaunch />);
+  it("5機能をチワワの欄で試し、下段にフォームを重複させない", () => {
+    render(<HomeRelaunch mascotContent={<HomeMascotToolbox latestNews={noNews} />} />);
 
     expect(screen.queryByRole("heading", { name: "5つの機能をすぐ使う" })).toBeNull();
-    expect(screen.queryByRole("navigation", { name: "チワワと試す5機能" })).toBeNull();
+    expect(document.querySelectorAll("[data-home-mascot-five-tools]")).toHaveLength(1);
 
     const cards = screen
       .getByRole("heading", { level: 2, name: "仕事から選ぶ、9つの主機能" })
@@ -121,25 +118,25 @@ describe("HomeRelaunch", () => {
       ?.querySelectorAll(":scope ul > li > a");
     expect(cards).toHaveLength(9);
 
-    const chat = serviceItem("安衛法AI");
+    const chat = document.getElementById("mascot-chat")!;
     expect(chat.id).toBe("mascot-chat");
     expect(within(chat).getByRole("textbox", { name: "安衛法AIへの質問" })).toBeDefined();
     expect(within(chat).getByRole("button", { name: "質問する" })).toBeDefined();
 
-    const chemical = serviceItem("化学物質RA");
+    const chemical = document.getElementById("mascot-chemical")!;
     expect(chemical.id).toBe("mascot-chemical");
     expect(within(chemical).getByRole("combobox", { name: "化学物質を検索" })).toBeDefined();
 
-    const accident = serviceItem("国内の死亡事故速報");
+    const accident = document.getElementById("mascot-accident")!;
     expect(within(accident).getByRole("link").getAttribute("href")).toBe("/accident-news");
-    const laws = serviceItem("法改正速報");
-    expect(within(laws).getByRole("link").getAttribute("href")).toBe("/laws");
+    const laws = document.getElementById("mascot-laws")!;
+    expect(within(laws).getByRole("link").getAttribute("href")).toContain("/laws#");
 
-    const slides = serviceItem("自由に使えるスライド");
+    const slides = document.getElementById("mascot-slides")!;
     expect(slides.id).toBe("mascot-slides");
     expect(
       within(slides)
-        .getByRole("link", { name: /安全管理の基本と安衛法のスライドを見る/ })
+        .getByRole("link", { name: /安全スライド/ })
         .getAttribute("href"),
     ).toBe("/training/safety-seminars/safety-management-basics-osh-law#seminar-player");
 
@@ -147,8 +144,12 @@ describe("HomeRelaunch", () => {
     for (const link of document.querySelectorAll<HTMLElement>(".hs-card")) {
       expect(link.querySelector(interactive)).toBeNull();
     }
-    for (const control of document.querySelectorAll<HTMLElement>("[data-hs-tool] :is(button, input, textarea)")) {
+    for (const control of document.querySelectorAll<HTMLElement>("[data-home-mascot-five-tools] :is(button, input, textarea)")) {
       expect(control.closest("a, button:not(:scope)")).toBeNull();
     }
+    expect(document.querySelectorAll("#mascot-chat, #mascot-chemical, #mascot-slides")).toHaveLength(3);
+    expect(document.querySelectorAll("[data-home-chat-quick-ask], [data-home-chemical-quick-search]")).toHaveLength(2);
+    expect(serviceItem("安衛法AI").querySelector("form")).toBeNull();
+    expect(serviceItem("化学物質RA").querySelector("form")).toBeNull();
   });
 });
