@@ -277,6 +277,9 @@ describe("NetisSafetyGuide", () => {
     expect(NETIS_WAVE4_TECHNOLOGIES.filter((item) => item.primaryPurpose === "safety")).toHaveLength(12);
     expect(NETIS_WAVE4_TECHNOLOGIES.filter((item) => item.primaryPurpose === "efficiency")).toHaveLength(2);
     for (const item of NETIS_WAVE4_TECHNOLOGIES) {
+      const knownCategories = new Set([...NETIS_SAFETY_CATEGORIES, ...NETIS_EFFICIENCY_CATEGORIES, ...NETIS_WAVE2_CATEGORIES, ...NETIS_WAVE4_CATEGORIES].map((category) => category.id));
+      expect(item.categoryIds.length).toBeGreaterThan(0);
+      expect(item.categoryIds.every((id) => knownCategories.has(id))).toBe(true);
       expect(item.sourceBasis).toContain("2026年9月25日NETIS個別ページの名称・番号を確認");
       expect(item.sourceBasis).toContain("販売・現場適合は未確認");
       expect(item.individualUrl).toBe(`https://www.netis.mlit.go.jp/netis/pubsearch/details?regNo=${item.registrationNumber.replace(/-(?:A|VE)$/i, "")}`);
@@ -284,6 +287,7 @@ describe("NetisSafetyGuide", () => {
       expect(item.limitations.length).toBeGreaterThan(20);
     }
     for (const category of NETIS_WAVE4_CATEGORIES) {
+      expect(NETIS_WAVE4_TECHNOLOGIES.some((item) => item.categoryIds.includes(category.id))).toBe(true);
       expect(existsSync(path.join(process.cwd(), "public", category.image))).toBe(true);
       expect(category.imageAlt).toContain("製品写真ではありません");
       expect(category.imageCredit.sourceUrl).toBe("");

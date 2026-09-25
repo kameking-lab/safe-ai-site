@@ -107,8 +107,20 @@ export function NetisSafetyExplorer() {
   const purpose: Purpose = rawPurpose === "efficiency" || rawPurpose === "quality" || rawPurpose === "all"
     ? rawPurpose
     : wave4Category?.purpose ?? wave2Category?.purpose ?? (isNetisEfficiencyCategoryId(rawCategory) ? "efficiency" : "safety");
-  const selectedCategoryId: CategoryId | null = isNetisSafetyCategoryId(rawCategory) || isNetisEfficiencyCategoryId(rawCategory) || isNetisWave2CategoryId(rawCategory) || isNetisWave4CategoryId(rawCategory)
+  const candidateCategoryId: CategoryId | null = isNetisSafetyCategoryId(rawCategory) || isNetisEfficiencyCategoryId(rawCategory) || isNetisWave2CategoryId(rawCategory) || isNetisWave4CategoryId(rawCategory)
     ? rawCategory
+    : null;
+  const candidatePurpose = candidateCategoryId
+    ? isNetisEfficiencyCategoryId(candidateCategoryId)
+      ? "efficiency"
+      : isNetisWave2CategoryId(candidateCategoryId)
+        ? wave2Category?.purpose
+        : isNetisWave4CategoryId(candidateCategoryId)
+          ? wave4Category?.purpose
+          : "safety"
+    : null;
+  const selectedCategoryId: CategoryId | null = candidateCategoryId && (purpose === "all" || candidatePurpose === purpose)
+    ? candidateCategoryId
     : null;
   const selectedCategory = selectedCategoryId
     ? categoryFor(selectedCategoryId)
@@ -579,7 +591,9 @@ export function NetisSafetyExplorer() {
                     <p className="mt-1 text-sm leading-6 text-slate-700 dark:text-slate-200">
                       {technology.summary}
                     </p>
+                    {"individualUrl" in technology ? <p className="mt-1 text-xs text-slate-600 dark:text-slate-300">概要は当サイトの要約です。仕様・適用範囲はNETIS個別ページで確認してください。</p> : null}
                     <p className="mt-1 text-xs font-semibold leading-5 text-amber-900 dark:text-amber-200">対象：{technology.useCase}　確認：{technology.limitations}</p>
+                    {technology.registrationNumber === "CB-190009-VE" ? <a href="/goods?category=respiratory&intent=supplied&feature=supplied" className="mt-2 inline-flex min-h-11 items-center text-xs font-black text-sky-900 underline underline-offset-4 dark:text-sky-200">ブラスト作業の送気式保護具について停止条件を確認</a> : null}
                     {productImage?.status === "verified" ? (
                       <p className="mt-2 text-[11px] font-semibold leading-5 text-slate-500 dark:text-slate-400">
                         製品画像：{productImage.credit}（{productImage.retrievedAt}取得）

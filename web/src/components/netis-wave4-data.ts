@@ -11,9 +11,9 @@ const imageCredit = (title: string) => ({
 });
 
 export const NETIS_WAVE4_CATEGORIES = [
-  { id: "slope-safety", label: "法面・斜面", purpose: "safety", description: "通路・作業構台・斜面保護を用途別に比較", checks: "斜面勾配、地盤、設置方法、作業床・通路の区別", image: "/netis-safety/categories/wave4-slope.webp", imageAlt: "法面の階段と作業構台を描いたカテゴリイメージ。特定技術の製品写真ではありません。", imageCredit: imageCredit("法面・斜面のカテゴリイメージ") },
+  { id: "slope-safety", label: "法面・斜面", purpose: "safety", description: "通路・作業構台・構造物としての斜面保護を区別", checks: "斜面勾配、地盤、設置方法、作業床・通路の区別", image: "/netis-safety/categories/wave4-slope.webp", imageAlt: "法面の階段と作業構台を描いたカテゴリイメージ。特定技術の製品写真ではありません。", imageCredit: imageCredit("法面・斜面のカテゴリイメージ") },
   { id: "containment-fire", label: "飛散・防炎養生", purpose: "safety", description: "塗装・剥離現場の飛散防止と防炎養生", checks: "対象物質、飛散範囲、防炎性能、固定方法", image: "/netis-safety/categories/wave4-containment.webp", imageAlt: "橋梁を養生シートで囲うカテゴリイメージ。特定技術の製品写真ではありません。", imageCredit: imageCredit("飛散・防炎養生のカテゴリイメージ") },
-  { id: "road-visibility", label: "道路の視認・区画", purpose: "safety", description: "道路設備と工事区間の夜間視認を支援", checks: "対象道路、設備規格、夜間照度、設置と維持管理", image: "/netis-safety/categories/wave4-road-visibility.webp", imageAlt: "夜間道路工事の視認設備を描いたカテゴリイメージ。特定技術の製品写真ではありません。", imageCredit: imageCredit("道路の視認・区画のカテゴリイメージ") },
+  { id: "road-visibility", label: "道路の視認・区画", purpose: "safety", description: "常設の道路設備と工事区間の夜間視認を区別", checks: "対象道路、設備規格、夜間照度、設置と維持管理", image: "/netis-safety/categories/wave4-road-visibility.webp", imageAlt: "夜間道路工事の視認設備を描いたカテゴリイメージ。特定技術の製品写真ではありません。", imageCredit: imageCredit("道路の視認・区画のカテゴリイメージ") },
   { id: "marine-underwater", label: "海上・水中作業", purpose: "safety", description: "船舶・潜水士・吊荷の位置把握や機械化", checks: "船舶・潜水士・吊荷の対象、通信、監視員、停止手順", image: "/netis-safety/categories/wave4-marine.webp", imageAlt: "作業船と消波ブロックのカテゴリイメージ。特定技術の製品写真ではありません。", imageCredit: imageCredit("海上・水中作業のカテゴリイメージ") },
   { id: "temporary-mats", label: "養生・仮設敷設", purpose: "efficiency", description: "法面養生と仮設マットの敷設作業を効率化", checks: "地盤、荷重、風雪、固定・撤去方法", image: "/netis-safety/categories/wave4-temp-mats.webp", imageAlt: "仮設マットを敷設するカテゴリイメージ。特定技術の製品写真ではありません。", imageCredit: imageCredit("養生・仮設敷設のカテゴリイメージ") },
 ] as const;
