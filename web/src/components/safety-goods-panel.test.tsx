@@ -101,7 +101,7 @@ describe("SafetyGoodsPanel", () => {
       /酸素濃度を測定/u,
       /対象物質名をSDS/u,
       /実際のばく露濃度/u,
-      /混在有無/u,
+      /混在していない/u,
       /緊急・救助用途ではない/u,
       /給気式を専門担当者/u,
     ]) fireEvent.click(screen.getByRole("checkbox", { name: label }));
@@ -122,6 +122,14 @@ describe("SafetyGoodsPanel", () => {
 
   it.each(["unknown", "supplied"])("%s の直リンクは商品候補を出さず停止案内を表示する", (intent) => {
     window.history.replaceState(null, "", `/goods?category=respiratory&intent=${intent}`);
+    render(<SafetyGoodsPanel />);
+    expect(screen.getByText(/対象の物質や作業条件が分かるまで、商品候補は表示しません/u)).toBeDefined();
+    expect(screen.queryByText(/Amazonで探す/u)).toBeNull();
+    expect(screen.queryByText(/楽天市場で探す/u)).toBeNull();
+  });
+
+  it("NETISのブラスト専用装備から来た給気式直リンクは通販候補を出さない", () => {
+    window.history.replaceState(null, "", "/goods?category=respiratory&intent=supplied&feature=supplied");
     render(<SafetyGoodsPanel />);
     expect(screen.getByText(/対象の物質や作業条件が分かるまで、商品候補は表示しません/u)).toBeDefined();
     expect(screen.queryByText(/Amazonで探す/u)).toBeNull();

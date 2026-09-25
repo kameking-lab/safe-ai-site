@@ -70,7 +70,7 @@ const RESPIRATORY_SAFETY_CHECKS = [
   ["oxygen", "酸素濃度を測定し、酸素欠乏のおそれがない"],
   ["substance", "対象物質名をSDS等で確定している"],
   ["concentration", "実際のばく露濃度を確認している"],
-  ["mixture", "粉じんとガス・蒸気の混在有無を確認している"],
+  ["mixture", "粉じんとガス・蒸気が混在していないことを確認した"],
   ["emergency", "緊急・救助用途ではない"],
   ["supplied", "給気式を専門担当者と検討すべき条件ではない"],
 ] as const;

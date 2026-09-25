@@ -55,7 +55,7 @@ test("API画像が読み込めないときは写真を表示済みと見なさ�
 });
 
 
-test("保護具9入口と補助用品8分類を選べ、戻る・再読込で現在位置を保つ", async ({ page }) => {
+test("保護具9入口と補助用品8分類を選べ、戻る・再読込で現在位置を保つ", async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.route("**/api/goods-products?*", async (route) => {
     await route.fulfill({ contentType: "application/json", body: JSON.stringify({ status: "not_configured", items: [], checkedAt: null }) });
@@ -63,6 +63,10 @@ test("保護具9入口と補助用品8分類を選べ、戻る・再読込で現
   await page.goto("/goods");
   const directory = page.getByRole("list", { name: "安全用品カテゴリの画像一覧" });
   await expect(directory.getByRole("button")).toHaveCount(9);
+  await page.screenshot({ path: testInfo.outputPath("ppe-categories-390.png"), fullPage: false });
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.screenshot({ path: testInfo.outputPath("ppe-categories-1440.png"), fullPage: false });
+  await page.setViewportSize({ width: 390, height: 844 });
   await page.getByRole("button", { name: "現場の補助用品 8" }).click();
   await expect(directory.getByRole("button")).toHaveCount(8);
   await page.getByRole("button", { name: "すべて 17" }).click();
@@ -88,6 +92,13 @@ test("保護具9入口と補助用品8分類を選べ、戻る・再読込で現
   await expect(directory).toBeVisible();
   await expect(helmet).toBeFocused();
   expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(1);
+});
+
+test("NETISの給気式直リンクでは商品・通販を表示しない", async ({ page }) => {
+  await page.goto("/goods?category=respiratory&intent=supplied&feature=supplied");
+  await expect(page.getByText(/対象の物質や作業条件が分かるまで、商品候補は表示しません/u)).toBeVisible();
+  await expect(page.getByRole("link", { name: /Amazonで探す|楽天市場で探す/u })).toHaveCount(0);
+  await expect(page.getByRole("list", { name: "実商品写真を左右にスライド" })).toHaveCount(0);
 });
 
 test("直接開いたカテゴリからも一覧へ戻れる", async ({ page }) => {
@@ -156,7 +167,7 @@ test("呼吸用保護具・フルハーネス・保護眼鏡を特徴から探�
     /酸素濃度を測定/u,
     /対象物質名をSDS/u,
     /実際のばく露濃度/u,
-    /混在有無/u,
+    /混在していない/u,
     /緊急・救助用途ではない/u,
     /給気式を専門担当者/u,
   ]) await page.getByRole("checkbox", { name: label }).click();
