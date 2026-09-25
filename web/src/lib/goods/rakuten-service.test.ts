@@ -47,7 +47,7 @@ function cluster() {
   return { instance, cache, gates };
 }
 
-afterEach(() => { vi.useRealTimers(); vi.restoreAllMocks(); });
+afterEach(() => { vi.useRealTimers(); vi.restoreAllMocks(); vi.unstubAllEnvs(); });
 
 describe("shared Rakuten product service", () => {
   it("aggregates a same-key miss across two isolated instances and reuses the warm result", async () => {
@@ -149,6 +149,67 @@ describe("shared Rakuten product service", () => {
       httpStatus: 401, errorCode: "unknown",
     });
     expect(JSON.stringify(logger.mock.calls)).not.toContain(search.accessKey);
+  });
+
+  it("probes header versus query only once across instances behind the shared gate", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-09-26T00:00:00Z"));
+    vi.stubEnv("VERCEL_ENV", "production");
+    const logger = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const shared = cluster();
+    const starts: number[] = [];
+    const fetcher = vi.fn(async (_url: URL, init?: RequestInit) => {
+      starts.push(Date.now());
+      return (init?.headers as Record<string, string> | undefined)?.accessKey
+        ? Response.json({ error: "unlisted_code", error_description: `secret ${search.accessKey}` }, { status: 403 })
+        : Response.json({ items: [product] });
+    }) as unknown as typeof fetch;
+    const a = createRakutenGoodsService(shared.instance(), fetcher);
+    const b = createRakutenGoodsService(shared.instance(), fetcher);
+    const firstPromise = a(search);
+    await vi.runAllTimersAsync();
+    expect(await firstPromise).toMatchObject({ status: "unavailable", reason: "authorization_failed", items: [] });
+    const calls = (fetcher as ReturnType<typeof vi.fn>).mock.calls;
+    expect(calls).toHaveLength(2);
+    expect(starts[1]! - starts[0]!).toBeGreaterThanOrEqual(1_000);
+    const headerUrl = new URL(calls[0]![0] as URL);
+    const queryUrl = new URL(calls[1]![0] as URL);
+    expect(headerUrl.searchParams.has("accessKey")).toBe(false);
+    expect(queryUrl.searchParams.get("accessKey")).toBe(search.accessKey);
+    queryUrl.searchParams.delete("accessKey");
+    expect(queryUrl.toString()).toBe(headerUrl.toString());
+    expect((calls[1]![1] as RequestInit).headers).toBeUndefined();
+    expect(logger).toHaveBeenCalledWith("[rakuten-goods] auth_transport_probe", {
+      headerStatus: 403, headerCode: "unknown", queryStatus: 200, queryCode: null,
+    });
+    for (const value of [search.applicationId, search.accessKey, search.affiliateId]) {
+      expect(JSON.stringify(logger.mock.calls)).not.toContain(value);
+    }
+    await vi.advanceTimersByTimeAsync(60_001);
+    expect((await b({ ...search, categoryId: "hearing" })).reason).toBe("authorization_failed");
+    expect((fetcher as ReturnType<typeof vi.fn>).mock.calls).toHaveLength(3);
+    expect(logger.mock.calls.filter(([message]) => message === "[rakuten-goods] auth_transport_probe")).toHaveLength(1);
+  });
+
+  it("shares a 429 cooldown from the one-time query probe", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-09-26T00:00:00Z"));
+    vi.stubEnv("VERCEL_ENV", "production");
+    vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const shared = cluster();
+    const fetcher = vi.fn()
+      .mockResolvedValueOnce(Response.json({ error: "unknown" }, { status: 403 }))
+      .mockResolvedValueOnce(new Response("", { status: 429, headers: { "retry-after": "10" } }))
+      .mockResolvedValue(Response.json({ items: [product] })) as typeof fetch;
+    const a = createRakutenGoodsService(shared.instance(), fetcher);
+    const b = createRakutenGoodsService(shared.instance(), fetcher);
+    const first = a(search);
+    await vi.runAllTimersAsync();
+    expect((await first).reason).toBe("authorization_failed");
+    expect((await b({ ...search, categoryId: "hearing" })).reason).toBe("rate_limited");
+    expect((fetcher as ReturnType<typeof vi.fn>).mock.calls).toHaveLength(2);
+    await vi.advanceTimersByTimeAsync(10_001);
+    expect((await b({ ...search, categoryId: "eye-face-protection" })).status).toBe("ready");
   });
 
   it("treats malformed success and timeouts as short unavailable results", async () => {
