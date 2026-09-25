@@ -55,4 +55,20 @@ describe("SafetyGoodsPanel", () => {
     expect(screen.getByRole("button", { name: "ガス検知器・酸素濃度計" })).toBeDefined();
     expect(screen.getByRole("button", { name: /現場の補助用品/ }).getAttribute("aria-pressed")).toBe("true");
   });
+
+  it("検索語と分類を保ったまま詳細を開き、一覧に戻れる", () => {
+    render(<SafetyGoodsPanel />);
+    const search = screen.getByRole("searchbox", { name: "用品名・作業から探す" });
+    fireEvent.change(search, { target: { value: "防塵" } });
+    expect(screen.getByText(/1カテゴリを表示/)).toBeDefined();
+    expect(screen.getByRole("button", { name: "呼吸用保護具" })).toBeDefined();
+
+    fireEvent.click(screen.getByRole("button", { name: "呼吸用保護具" }));
+    expect(window.location.search).toBe("?category=respiratory");
+    expect(window.history.state.goodsDirectory).toMatchObject({ group: "all", query: "防塵", lastCategory: "respiratory" });
+    fireEvent.click(screen.getByRole("button", { name: /用品一覧に戻る/ }));
+    expect(search).toHaveProperty("value", "防塵");
+    expect(screen.getByRole("button", { name: "呼吸用保護具" })).toBeDefined();
+    expect(window.location.search).toBe("");
+  });
 });

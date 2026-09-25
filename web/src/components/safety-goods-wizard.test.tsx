@@ -29,7 +29,7 @@ describe("SafetyGoodsWizard", () => {
     fireEvent.click(screen.getByRole("button", { name: /換気が効いている/ }));
 
     expect(screen.getByRole("heading", { name: "防じんマスク（製品群）の購入候補" })).toBeDefined();
-    expect(screen.getByRole("heading", { name: "呼吸用保護具の実商品写真と高評価候補" })).toBeDefined();
+    expect(screen.getByRole("heading", { name: "呼吸用保護具の商品候補" })).toBeDefined();
     expect(screen.getByRole("link", { name: /Amazonで候補を見る/ }).getAttribute("href")).toContain("amazon.co.jp/s");
     expect(decodeURIComponent(screen.getByRole("link", { name: /Amazonで候補を見る/ }).getAttribute("href") ?? "")).toContain("DD02V-S2-2K");
     expect(screen.getByRole("link", { name: /楽天で候補を見る/ }).getAttribute("href")).toContain("rakuten.co.jp");
