@@ -107,7 +107,11 @@ describe("SafetyGoodsPanel", () => {
     ]) fireEvent.click(screen.getByRole("checkbox", { name: label }));
     fireEvent.click(screen.getByRole("button", { name: "条件を確認して商品例を見る" }));
     expect(window.location.search).toContain("conditions=confirmed");
-    expect(screen.getByText(/Amazonで一般検索/u)).toBeDefined();
+    const amazon = screen.getByRole("link", { name: /Amazonで一般検索/u });
+    const rakuten = screen.getByRole("link", { name: /楽天で一般検索/u });
+    expect(amazon).toBeDefined();
+    expect(new URL(amazon.getAttribute("href") ?? "https://invalid.example").searchParams.has("rh")).toBe(false);
+    expect(decodeURIComponent(rakuten.getAttribute("href") ?? "")).not.toMatch(/review|rating|star|p_72/u);
     expect(screen.getByText(/購入者評価で絞り込まれておらず/u)).toBeDefined();
   });
 

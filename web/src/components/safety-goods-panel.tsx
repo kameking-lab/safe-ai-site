@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { ArrowLeft, ExternalLink, Search } from "lucide-react";
 import {
-  generateAmazonHighRatedSearchUrl,
+  generateAmazonAffiliateUrl,
   generateRakutenSearchUrl,
 } from "@/lib/affiliate-url";
 import { trackEvent } from "@/components/Analytics";
@@ -453,7 +453,7 @@ export function SafetyGoodsPanel() {
               <p className="text-sm font-bold text-slate-800">販売サイトの一般検索</p>
               <p className="mt-1 text-xs font-semibold leading-5 text-slate-600">この検索は購入者評価で絞り込まれておらず、当サイトの推薦ではありません。商品ごとの規格・用途・評価を販売先で確認してください。</p>
               <div className="mt-3 flex flex-wrap gap-2">
-                <a href={generateAmazonHighRatedSearchUrl(selectedFeature?.searchQuery ?? selectedCategory.searchQuery)} target="_blank" rel="noopener noreferrer sponsored" onClick={() => affiliateClick("amazon", selectedCategory.id, selectedCategory.name)} className="inline-flex min-h-11 items-center justify-center gap-1 rounded-lg bg-amber-700 px-3 text-sm font-bold text-white hover:bg-amber-800">
+                <a href={generateAmazonAffiliateUrl(selectedFeature?.searchQuery ?? selectedCategory.searchQuery)} target="_blank" rel="noopener noreferrer sponsored" onClick={() => affiliateClick("amazon", selectedCategory.id, selectedCategory.name)} className="inline-flex min-h-11 items-center justify-center gap-1 rounded-lg bg-amber-700 px-3 text-sm font-bold text-white hover:bg-amber-800">
                   <Search className="h-4 w-4" aria-hidden="true" />Amazonで一般検索
                 </a>
                 <a href={generateRakutenSearchUrl(selectedFeature?.searchQuery ?? selectedCategory.searchQuery)} target="_blank" rel="noopener noreferrer sponsored" onClick={() => affiliateClick("rakuten", selectedCategory.id, selectedCategory.name)} className="inline-flex min-h-11 items-center justify-center gap-1 rounded-lg bg-rose-700 px-3 text-sm font-bold text-white hover:bg-rose-800">
