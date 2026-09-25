@@ -14,9 +14,21 @@ import {
   netisDetailUrl,
   type NetisSafetyCategoryId,
 } from "./netis-safety-data";
+import {
+  NETIS_EFFICIENCY_CATEGORIES,
+  NETIS_EFFICIENCY_TECHNOLOGIES,
+  isNetisEfficiencyCategoryId,
+  type NetisEfficiencyCategoryId,
+} from "./netis-efficiency-data";
 
-function categoryFor(id: NetisSafetyCategoryId) {
-  return NETIS_SAFETY_CATEGORIES.find((category) => category.id === id)!;
+type CategoryId = NetisSafetyCategoryId | NetisEfficiencyCategoryId;
+type Purpose = "safety" | "efficiency" | "all";
+const ALL_TECHNOLOGIES = [...FEATURED_NETIS_TECHNOLOGIES, ...NETIS_EFFICIENCY_TECHNOLOGIES];
+
+function categoryFor(id: CategoryId) {
+  return [...NETIS_SAFETY_CATEGORIES, ...NETIS_EFFICIENCY_CATEGORIES].find(
+    (category) => category.id === id,
+  )!;
 }
 
 function focusResults(heading: HTMLHeadingElement | null) {
@@ -81,7 +93,9 @@ export function NetisSafetyExplorer() {
   const searchParams = useSearchParams();
   const rawCategory = searchParams.get("risk");
   const rawSearch = searchParams.get("q")?.trim() ?? "";
-  const selectedCategoryId = isNetisSafetyCategoryId(rawCategory)
+  const rawPurpose = searchParams.get("purpose");
+  const purpose: Purpose = rawPurpose === "efficiency" || rawPurpose === "all" ? rawPurpose : isNetisEfficiencyCategoryId(rawCategory) ? "efficiency" : "safety";
+  const selectedCategoryId: CategoryId | null = isNetisSafetyCategoryId(rawCategory) || isNetisEfficiencyCategoryId(rawCategory)
     ? rawCategory
     : null;
   const selectedCategory = selectedCategoryId
@@ -94,7 +108,10 @@ export function NetisSafetyExplorer() {
 
   const technologies = useMemo(
     () =>
-      FEATURED_NETIS_TECHNOLOGIES.filter((technology) => {
+      ALL_TECHNOLOGIES.filter((technology) => {
+        const isEfficiency = "officialSourceUrl" in technology;
+        if (purpose === "safety" && isEfficiency) return false;
+        if (purpose === "efficiency" && !isEfficiency) return false;
         const categoryMatches = selectedCategoryId
           ? (technology.categoryIds as readonly string[]).includes(
               selectedCategoryId,
@@ -107,6 +124,7 @@ export function NetisSafetyExplorer() {
           [
             technology.name,
             technology.registrationNumber,
+            "sourceRegistrationNumber" in technology ? technology.sourceRegistrationNumber : "",
             technology.summary,
             technology.mechanism,
             technology.useCase,
@@ -114,7 +132,7 @@ export function NetisSafetyExplorer() {
           ].join(" "),
         ).includes(query);
       }),
-    [rawSearch, selectedCategoryId],
+    [purpose, rawSearch, selectedCategoryId],
   );
 
   useEffect(() => {
@@ -136,21 +154,35 @@ export function NetisSafetyExplorer() {
     if (!shouldFocusResultsRef.current) return;
     shouldFocusResultsRef.current = false;
     focusResults(resultsHeadingRef.current);
-  }, [rawSearch, selectedCategoryId]);
+  }, [purpose, rawSearch, selectedCategoryId]);
 
-  function updateCategory(categoryId: NetisSafetyCategoryId | null) {
+  function updateCategory(categoryId: CategoryId | null) {
     if (categoryId === selectedCategoryId) {
       focusResults(resultsHeadingRef.current);
       return;
     }
     const params = new URLSearchParams(searchParams.toString());
-    if (categoryId) params.set("risk", categoryId);
+    if (categoryId) {
+      params.set("risk", categoryId);
+      if (isNetisEfficiencyCategoryId(categoryId)) params.set("purpose", "efficiency");
+      else params.delete("purpose");
+    }
     else {
       params.delete("risk");
       params.delete("q");
     }
     const query = params.toString();
     shouldFocusResultsRef.current = true;
+    router.push(query ? `${pathname}?${query}` : pathname, { scroll: false });
+  }
+
+  function updatePurpose(nextPurpose: Purpose) {
+    const params = new URLSearchParams(searchParams.toString());
+    if (nextPurpose === "safety") params.delete("purpose");
+    else params.set("purpose", nextPurpose);
+    params.delete("risk");
+    shouldFocusResultsRef.current = true;
+    const query = params.toString();
     router.push(query ? `${pathname}?${query}` : pathname, { scroll: false });
   }
 
@@ -178,13 +210,13 @@ export function NetisSafetyExplorer() {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="text-xs font-black tracking-[.14em] text-sky-800 dark:text-sky-300">
-            危険から1クリックで絞り込み
+            現場の目的から1クリックで絞り込み
           </p>
           <h2
             id="netis-category-title"
             className="mt-1 text-xl font-black tracking-tight text-slate-950 sm:text-2xl dark:text-white"
           >
-            現場の課題を画像で選ぶ
+            現場の安全・省力化技術を探す
           </h2>
         </div>
         <a
@@ -198,13 +230,32 @@ export function NetisSafetyExplorer() {
         </a>
       </div>
 
+      <div className="mt-3 grid grid-cols-3 gap-2" role="group" aria-label="探す目的">
+        {([
+          ["safety", "安全を高める"],
+          ["efficiency", "作業を効率化"],
+          ["all", "すべて"],
+        ] as const).map(([id, label]) => (
+          <button
+            key={id}
+            type="button"
+            aria-pressed={purpose === id}
+            onClick={() => updatePurpose(id)}
+            className={`min-h-11 rounded-xl border px-2 py-2 text-xs font-black sm:text-sm ${purpose === id ? "border-sky-800 bg-sky-800 text-white" : "border-slate-300 bg-white text-slate-800 dark:border-slate-700 dark:bg-slate-900 dark:text-white"}`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
       <div
         className="mt-3 grid grid-cols-2 gap-2.5 sm:gap-4 lg:grid-cols-4"
         role="group"
-        aria-label="安全課題カテゴリ"
+        aria-label={purpose === "safety" ? "安全課題カテゴリ" : "技術カテゴリ"}
       >
-        {NETIS_SAFETY_CATEGORIES.map((category) => {
+        {(purpose === "efficiency" ? NETIS_EFFICIENCY_CATEGORIES : purpose === "all" ? [...NETIS_SAFETY_CATEGORIES, ...NETIS_EFFICIENCY_CATEGORIES] : NETIS_SAFETY_CATEGORIES).map((category) => {
           const selected = selectedCategoryId === category.id;
+          const visualCategory = "image" in category ? category : null;
           return (
             <button
               key={category.id}
@@ -213,22 +264,24 @@ export function NetisSafetyExplorer() {
               aria-pressed={selected}
               aria-controls="netis-technology-results"
               onClick={() => updateCategory(category.id)}
-              className={`group min-h-44 overflow-hidden rounded-2xl border-2 bg-white text-left shadow-sm transition focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-sky-600 sm:min-h-56 dark:bg-slate-900 ${
+              className={`group overflow-hidden rounded-2xl border-2 bg-white text-left shadow-sm transition focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-sky-600 dark:bg-slate-900 ${visualCategory ? "min-h-44 sm:min-h-56" : "min-h-24"} ${
                 selected
                   ? "border-sky-700 ring-2 ring-sky-200 dark:border-sky-300"
                   : "border-slate-200 hover:border-sky-500 dark:border-slate-700"
               }`}
             >
-              <span className="relative block h-24 overflow-hidden bg-slate-100 sm:h-36 dark:bg-slate-800">
-                <Image
-                  src={category.image}
-                  alt={category.imageAlt}
-                  fill
-                  loading="eager"
-                  sizes="(max-width: 1024px) 46vw, 280px"
-                  className="object-cover transition duration-300 group-hover:scale-[1.03]"
-                />
-              </span>
+              {visualCategory ? (
+                <span className="relative block h-24 overflow-hidden bg-slate-100 sm:h-36 dark:bg-slate-800">
+                  <Image
+                    src={visualCategory.image}
+                    alt={visualCategory.imageAlt}
+                    fill
+                    loading="eager"
+                    sizes="(max-width: 1024px) 46vw, 280px"
+                    className="object-cover transition duration-300 group-hover:scale-[1.03]"
+                  />
+                </span>
+              ) : null}
               <span className="flex min-h-16 items-center justify-between gap-2 px-3 py-2.5 sm:px-4">
                 <span className="text-sm font-black leading-5 text-slate-950 sm:text-lg dark:text-white">
                   {category.label}
@@ -242,22 +295,28 @@ export function NetisSafetyExplorer() {
                   }`}
                 />
               </span>
+              {visualCategory && isNetisEfficiencyCategoryId(category.id) ? (
+                <span className="block px-3 pb-3 text-xs leading-5 text-slate-600 dark:text-slate-300">{category.description}</span>
+              ) : null}
             </button>
           );
         })}
       </div>
       <p className="mt-2 text-xs text-slate-600 dark:text-slate-300">
-        カテゴリ写真は危険場面の代表例（実写）です。NETIS掲載製品の写真ではありません。
+        カテゴリ写真は作業場面・機材の代表例（実写）です。NETIS掲載製品の写真ではありません。
       </p>
       <p className="mt-2 text-sm leading-6 text-slate-700 dark:text-slate-200">
         当サイトで出典を確認した{FEATURED_NETIS_TECHNOLOGIES.length}件を掲載しています。NETIS全登録技術の一覧ではありません。
+      </p>
+      <p className="mt-1 text-sm leading-6 text-slate-700 dark:text-slate-200">
+        効率化の追加{NETIS_EFFICIENCY_TECHNOLOGIES.length}件のうち5件は国交省の2026年4月一覧、1件は過去の地方整備局資料で確認した参考技術です。2026年9月時点の現行NETIS登録は未確認です。
       </p>
       <details className="mt-1 text-xs text-slate-600 dark:text-slate-300">
         <summary className="flex min-h-11 cursor-pointer items-center font-bold underline underline-offset-4">
           写真の出典・ライセンスを確認
         </summary>
         <ul className="space-y-1.5 pb-2 leading-5">
-          {NETIS_SAFETY_CATEGORIES.map((category) => (
+          {[...NETIS_SAFETY_CATEGORIES, ...NETIS_EFFICIENCY_CATEGORIES].map((category) => (
             <li key={category.id} className="break-words">
               <span className="font-black">{category.label}</span>：
               <a
@@ -281,7 +340,7 @@ export function NetisSafetyExplorer() {
               ) : (
                 category.imageCredit.license
               )}
-              ／Wikimedia Commonsより{category.imageCredit.retrievedAt}取得、縮小・WebP変換
+              ／Wikimedia Commonsより{category.imageCredit.retrievedAt}取得、{ "changeNote" in category.imageCredit ? category.imageCredit.changeNote : "縮小・WebP変換" }
             </li>
           ))}
         </ul>
@@ -300,7 +359,7 @@ export function NetisSafetyExplorer() {
           htmlFor="netis-catalog-search"
           className="text-sm font-black text-slate-950 dark:text-white"
         >
-          名称・登録番号・用途で掲載10件を検索
+          名称・登録番号・用途で掲載技術を検索
         </label>
         <div className="mt-2 flex flex-col gap-2 sm:flex-row">
           <input
@@ -342,7 +401,7 @@ export function NetisSafetyExplorer() {
         <div className="flex flex-wrap items-end justify-between gap-3 border-b border-slate-200 pb-3 dark:border-slate-800">
           <div>
             <p className="text-xs font-black text-emerald-800 dark:text-emerald-300">
-              {selectedCategory ? "選択中" : "出典確認済み技術"} ・ {NETIS_CHECKED_AT}
+              {selectedCategory ? "選択中" : "掲載技術"} ・ {purpose === "safety" ? NETIS_CHECKED_AT : "効率化候補の現行NETIS掲載は未照合"}
             </p>
             <h3
               ref={resultsHeadingRef}
@@ -352,7 +411,7 @@ export function NetisSafetyExplorer() {
             >
               {selectedCategory
                 ? `${selectedCategory.label}：${technologies.length}件`
-                : `当サイト掲載：${technologies.length}件`}
+                : `${purpose === "safety" ? "当サイト掲載" : purpose === "efficiency" ? "作業効率化候補" : "安全・効率化候補"}：${technologies.length}件`}
             </h3>
             {rawSearch ? (
               <p className="mt-1 text-sm font-bold text-slate-600 dark:text-slate-300">
@@ -374,7 +433,7 @@ export function NetisSafetyExplorer() {
                 className="inline-flex min-h-11 items-center gap-1 rounded-xl bg-slate-900 px-3 text-sm font-black text-white dark:bg-white dark:text-slate-950"
               >
                 <RotateCcw className="h-4 w-4" aria-hidden="true" />
-                掲載全{FEATURED_NETIS_TECHNOLOGIES.length}件を見る
+                {purpose === "safety" ? `掲載全${FEATURED_NETIS_TECHNOLOGIES.length}件を見る` : "絞り込みを解除"}
               </button>
             </div>
           ) : null}
@@ -390,24 +449,27 @@ export function NetisSafetyExplorer() {
           <div className="mt-4 grid gap-4 lg:grid-cols-2">
             {technologies.map((technology) => {
               const primaryCategory = categoryFor(technology.categoryIds[0]);
+              const efficiency = "officialSourceUrl" in technology;
+              const productImage = efficiency ? null : technology.productImage;
+              const mainUrl = efficiency ? technology.officialSourceUrl : netisDetailUrl(technology.registrationNumber);
               return (
                 <article
                   key={technology.registrationNumber}
                   className="overflow-hidden rounded-2xl border border-emerald-200 bg-white shadow-sm dark:border-emerald-900 dark:bg-slate-900"
                 >
-                  {/* 画像はカード名リンクと同じNETIS公式詳細へ。キーボード操作は名称リンクに一本化する */}
+                  {/* 画像枠と名称は同じ一次資料へ。キーボード操作は名称リンクに一本化する */}
                   <a
-                    href={netisDetailUrl(technology.registrationNumber)}
+                    href={mainUrl}
                     tabIndex={-1}
                     aria-hidden="true"
                     onClick={() => rememberReturnPosition(technology.registrationNumber)}
                     className={`group relative block overflow-hidden border-b border-slate-200 bg-slate-100 dark:border-slate-800 dark:bg-slate-800 ${
-                      technology.productImage.status === "verified" ? "h-40 sm:h-48" : "h-28 sm:h-32"
+                      productImage?.status === "verified" ? "h-40 sm:h-48" : "h-28 sm:h-32"
                     }`}
                   >
-                    {technology.productImage.status === "verified" ? (
+                    {productImage?.status === "verified" ? (
                       <Image
-                        src={technology.productImage.src}
+                        src={productImage.src}
                         alt=""
                         fill
                         sizes="(max-width: 1024px) 92vw, 560px"
@@ -439,28 +501,33 @@ export function NetisSafetyExplorer() {
                         {technology.registrationNumber}
                       </span>
                       <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
-                        出典確認：{technology.checkedAt}
+                        {efficiency ? technology.sourceBasis : `出典確認：${technology.checkedAt}`}
                       </span>
                     </div>
                     <h4 className="mt-2 text-base font-black leading-6 text-slate-950 dark:text-white">
                       <a
                         id={`netis-tech-${technology.registrationNumber}`}
-                        href={netisDetailUrl(technology.registrationNumber)}
+                        href={mainUrl}
                         onClick={() => rememberReturnPosition(technology.registrationNumber)}
                         className="flex min-h-11 items-center break-words underline decoration-sky-300 underline-offset-4 hover:text-sky-900 focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-sky-600 dark:hover:text-sky-200"
                       >
                         <span>
                           {technology.name}
-                          <span className="sr-only">（NETIS公式の詳細を開く）</span>
+                          <span className="sr-only">{efficiency ? "（国交省の紹介資料を開く）" : "（NETIS公式の詳細を開く）"}</span>
                         </span>
                       </a>
                     </h4>
                     <p className="mt-1 text-sm leading-6 text-slate-700 dark:text-slate-200">
                       {technology.summary}
                     </p>
-                    {technology.productImage.status === "verified" ? (
+                    {productImage?.status === "verified" ? (
                       <p className="mt-2 text-[11px] font-semibold leading-5 text-slate-500 dark:text-slate-400">
-                        製品画像：{technology.productImage.credit}（{technology.productImage.retrievedAt}取得）
+                        製品画像：{productImage.credit}（{productImage.retrievedAt}取得）
+                      </p>
+                    ) : null}
+                    {efficiency ? (
+                      <p className="mt-2 text-xs font-semibold leading-5 text-slate-600 dark:text-slate-300">
+                        開発会社：{technology.provider}／確認資料記載番号：{technology.sourceRegistrationNumber}
                       </p>
                     ) : null}
                   </div>
@@ -498,14 +565,15 @@ export function NetisSafetyExplorer() {
                         <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
                       </a>
                       <a
-                        href={technology.productUrl}
+                        href={efficiency ? technology.providerSourceUrl : technology.productUrl}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex min-h-11 items-center gap-1 text-emerald-900 underline underline-offset-4 dark:text-emerald-200"
                       >
-                        提供元の技術情報
+                        {efficiency ? "提供元の技術資料" : "提供元の技術情報"}
                         <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
                       </a>
+                      {efficiency ? <a href={technology.officialSourceUrl} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center gap-1 text-sky-900 underline underline-offset-4 dark:text-sky-200">国交省の紹介一覧<ExternalLink className="h-3.5 w-3.5" aria-hidden="true" /></a> : null}
                     </div>
                   </details>
                 </article>
@@ -518,7 +586,7 @@ export function NetisSafetyExplorer() {
               条件に合う当サイト掲載技術は0件です
             </h4>
             <p className="mt-2 text-sm leading-6 text-slate-700 dark:text-slate-200">
-              無関係な技術は表示していません。NETIS公式検索で「{rawSearch || selectedCategory?.searchTerms}」を検索し、登録状態と適用条件を確認してください。
+              無関係な技術は表示していません。NETIS公式検索で「{rawSearch || selectedCategory?.label || "現場の課題"}」を検索し、登録状態と適用条件を確認してください。
             </p>
             <a
               href={NETIS_SEARCH_URL}
