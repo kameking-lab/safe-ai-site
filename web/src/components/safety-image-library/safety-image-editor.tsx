@@ -1,17 +1,16 @@
 "use client";
 
 import Image from "next/image";
-import { useId, useMemo, useState } from "react";
+import { useId, useState } from "react";
 import {
   ChevronDown,
-  Download,
   FileImage,
   FileText,
-  PencilLine,
   RotateCcw,
   ShieldCheck,
 } from "lucide-react";
 import {
+  SAFETY_IMAGE_LANGUAGES,
   SAFETY_IMAGE_LANGUAGE_LABELS,
   type SafetyImageLanguage,
 } from "@/data/safety-image-library/client-metadata";
@@ -33,7 +32,6 @@ import {
 } from "@/lib/safety-image-library/text-fit";
 import { getSafetyImageComposition } from "@/lib/safety-image-library/composition";
 
-type DownloadMode = "clean" | "default" | "edited";
 type FontSize = "small" | "standard" | "large";
 type TextPosition = "top" | "center" | "bottom";
 type TextAlign = "left" | "center" | "right";
@@ -41,10 +39,9 @@ type Padding = "small" | "standard" | "large";
 type WritingMode = "horizontal" | "vertical";
 type Format = "jpeg" | "pdf" | "png";
 
-const LANGUAGE_OPTIONS = Object.entries(SAFETY_IMAGE_LANGUAGE_LABELS) as [
-  SafetyImageLanguage,
-  string,
-][];
+const LANGUAGE_OPTIONS = SAFETY_IMAGE_LANGUAGES.map(
+  (value) => [value, SAFETY_IMAGE_LANGUAGE_LABELS[value]] as const,
+);
 const MAX_EDIT_TEXT_LINES = 12;
 
 function limitEditableText(value: string): string {
@@ -71,6 +68,8 @@ export function SafetyImageEditor({ theme }: { theme: SafetyImageTheme }) {
     theme.recommendedSize,
     theme.orientation,
   );
+  const initialOutputSize: SafetySignOutputSize =
+    theme.orientation === "portrait" ? "a4-portrait" : "a4-landscape";
   const [languages, setLanguages] = useState<SafetyImageLanguage[]>(["ja"]);
   const [texts, setTexts] = useState<Record<SafetyImageLanguage, string>>({
     ...theme.texts,
@@ -91,11 +90,8 @@ export function SafetyImageEditor({ theme }: { theme: SafetyImageTheme }) {
   const [numericUnit, setNumericUnit] = useState(
     theme.numericTemplate?.unit ?? "",
   );
-  // The editable preview and the primary download must represent the same sign.
-  const [downloadMode, setDownloadMode] = useState<DownloadMode>("edited");
-  const [outputSize, setOutputSize] = useState<SafetySignOutputSize>(
-    recommendedOutputSize,
-  );
+  const [outputSize, setOutputSize] =
+    useState<SafetySignOutputSize>(initialOutputSize);
   const [format, setFormat] = useState<Format>("jpeg");
   const [downloading, setDownloading] = useState(false);
   const [error, setError] = useState("");
@@ -120,9 +116,13 @@ export function SafetyImageEditor({ theme }: { theme: SafetyImageTheme }) {
   });
   const displayText = displaySegments.map((segment) => segment.text).join("\n");
   const previewDescriptionId = `${textFieldsId}-preview-languages`;
+  const fitHelpId = `${textFieldsId}-fit-help`;
   const previewDimensions = outputSizePixels(outputSize);
   const composition = getSafetyImageComposition(previewDimensions, {
-    mode: "edited", languages, position, brand,
+    mode: "edited",
+    languages,
+    position,
+    brand,
   });
   const regionStyle = (region: typeof composition.artwork) => ({
     left: `${(region.x / previewDimensions.width) * 100}%`,
@@ -145,17 +145,11 @@ export function SafetyImageEditor({ theme }: { theme: SafetyImageTheme }) {
     },
   });
   const downloadEndpoint = `/api/safety-images/${theme.slug}/download`;
-  const normalDownloadHref = useMemo(() => {
-    const params = new URLSearchParams({
-      mode: downloadMode === "clean" ? "clean" : "default",
-      lang: language,
-      brand: brand ? "branded" : "none",
-      size: outputSize,
-      format,
-    });
-    return `${downloadEndpoint}?${params.toString()}`;
-  }, [brand, downloadEndpoint, downloadMode, format, language, outputSize]);
   const recommendedHref = `${downloadEndpoint}?mode=default&lang=ja&brand=branded&size=${recommendedOutputSize}&format=jpeg`;
+  const cleanHref = `${downloadEndpoint}?mode=clean&lang=ja&brand=none&size=${recommendedOutputSize}&format=png`;
+  const outputSizeLabel =
+    SAFETY_SIGN_OUTPUT_SIZES.find((size) => size.id === outputSize)?.label ??
+    outputSize;
 
   const reset = () => {
     setLanguages(["ja"]);
@@ -174,9 +168,8 @@ export function SafetyImageEditor({ theme }: { theme: SafetyImageTheme }) {
     setSubMessage("");
     setNumericValue("");
     setNumericUnit(theme.numericTemplate?.unit ?? "");
-    setOutputSize(recommendedOutputSize);
+    setOutputSize(initialOutputSize);
     setFormat("jpeg");
-    setDownloadMode("edited");
     setError("");
   };
 
@@ -201,9 +194,7 @@ export function SafetyImageEditor({ theme }: { theme: SafetyImageTheme }) {
       const selectedTexts = Object.fromEntries(
         languages.map((selectedLanguage) => [
           selectedLanguage,
-          downloadMode === "default"
-            ? theme.texts[selectedLanguage]
-            : texts[selectedLanguage],
+          texts[selectedLanguage],
         ]),
       );
       const response = await fetch(downloadEndpoint, {
@@ -217,10 +208,7 @@ export function SafetyImageEditor({ theme }: { theme: SafetyImageTheme }) {
             mode: "edited",
             language: renderLanguage,
             languages,
-            text:
-              downloadMode === "default"
-                ? theme.texts[renderLanguage]
-                : texts[renderLanguage],
+            text: texts[renderLanguage],
             texts: selectedTexts,
             fontSize,
             position,
@@ -265,55 +253,126 @@ export function SafetyImageEditor({ theme }: { theme: SafetyImageTheme }) {
   return (
     <>
       <div data-safety-sign-editor>
-        <div className="grid gap-3 sm:grid-cols-2" aria-label="主な操作">
-          <a
-            href={recommendedHref}
-            className="inline-flex min-h-16 items-center justify-center gap-2 rounded-2xl bg-emerald-800 px-5 text-lg font-black text-white shadow-sm hover:bg-emerald-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-300"
-          >
-            <Download className="h-6 w-6" aria-hidden="true" />
-            そのままダウンロード
-          </a>
-          <a
-            href="#edit-controls"
-            className="inline-flex min-h-16 items-center justify-center gap-2 rounded-2xl border-2 border-emerald-800 bg-white px-5 text-lg font-black text-emerald-900 hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-200 dark:bg-slate-950 dark:text-emerald-100"
-          >
-            <PencilLine className="h-6 w-6" aria-hidden="true" />
-            文字を編集
-          </a>
-        </div>
-
         <section
           id="edit"
-          className="mt-7 scroll-mt-24"
+          className="scroll-mt-24"
           aria-labelledby="edit-heading"
         >
-          <div className="grid gap-6 xl:grid-cols-[minmax(20rem,1.05fr)_minmax(22rem,.95fr)]">
-            <div className="min-w-0 xl:sticky xl:top-24 xl:self-start">
-              <h2
-                id="edit-heading"
-                className="text-2xl font-black text-slate-950 dark:text-white"
-              >
-                プレビュー
-              </h2>
-              <fieldset className="mt-3">
-                <legend className="text-sm font-black text-slate-800 dark:text-slate-100">縦型・横型を選ぶ</legend>
-                <div className="mt-2 grid grid-cols-2 gap-2">
-                  {(["portrait", "landscape"] as const).map((direction) => {
-                    const size = `a4-${direction}` as SafetySignOutputSize;
-                    return (
-                      <button
-                        key={direction}
-                        type="button"
-                        aria-pressed={outputSize === size}
-                        onClick={() => setOutputSize(size)}
-                        className={`min-h-11 rounded-xl border-2 px-3 text-sm font-black focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-200 ${outputSize === size ? "border-emerald-800 bg-emerald-800 text-white" : "border-slate-300 bg-white text-slate-800 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"}`}
-                      >
-                        A4{direction === "portrait" ? "縦" : "横"}
-                      </button>
-                    );
-                  })}
+          <h2
+            id="edit-heading"
+            className="text-2xl font-black text-slate-950 dark:text-white"
+          >
+            看板を作る
+          </h2>
+          <p className="mt-2 text-sm font-bold text-slate-700 dark:text-slate-200">
+            向きと言語を選んで、プレビューどおりに保存できます。
+          </p>
+          <div className="mt-5 grid gap-4 rounded-3xl border border-emerald-200 bg-emerald-50/70 p-4 sm:grid-cols-2 sm:p-5 dark:border-emerald-900 dark:bg-emerald-950/50">
+            <fieldset>
+              <legend className="text-sm font-black text-slate-900 dark:text-white">
+                A4の向き
+              </legend>
+              <div className="mt-2 grid grid-cols-2 gap-2">
+                {(["portrait", "landscape"] as const).map((direction) => {
+                  const size = `a4-${direction}` as SafetySignOutputSize;
+                  return (
+                    <button
+                      key={direction}
+                      type="button"
+                      aria-pressed={outputSize === size}
+                      onClick={() => setOutputSize(size)}
+                      className={`min-h-11 rounded-xl border-2 px-3 text-sm font-black focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-200 ${outputSize === size ? "border-emerald-800 bg-emerald-800 text-white" : "border-slate-300 bg-white text-slate-800 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"}`}
+                    >
+                      A4{direction === "portrait" ? "縦" : "横"}
+                    </button>
+                  );
+                })}
+              </div>
+            </fieldset>
+            <fieldset>
+              <legend className="text-sm font-black text-slate-900 dark:text-white">
+                表示する言語（複数選択可）
+              </legend>
+              <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                {LANGUAGE_OPTIONS.map(([value, label]) => {
+                  const checked = languages.includes(value);
+                  return (
+                    <label
+                      key={value}
+                      className="flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border border-emerald-200 bg-white px-3 text-sm font-black text-slate-900 dark:border-emerald-800 dark:bg-slate-900 dark:text-white"
+                    >
+                      <input
+                        type="checkbox"
+                        value={value}
+                        checked={checked}
+                        disabled={checked && languages.length === 1}
+                        onChange={(event) =>
+                          toggleLanguage(value, event.target.checked)
+                        }
+                        className="h-5 w-5 accent-emerald-800 disabled:cursor-not-allowed"
+                      />
+                      {label}
+                    </label>
+                  );
+                })}
+              </div>
+            </fieldset>
+          </div>
+          <div className="mt-4">
+            {theme.numericTemplate ? (
+              <fieldset className="rounded-2xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-900 dark:bg-amber-950">
+                <legend className="px-1 text-sm font-black text-amber-950 dark:text-amber-100">
+                  数値テンプレート
+                </legend>
+                <div className="grid gap-3 sm:grid-cols-[1fr_minmax(10rem,.75fr)]">
+                  <label className="text-xs font-black text-slate-700 dark:text-slate-200">
+                    数値・連絡先
+                    <input
+                      inputMode={numericUnit ? "decimal" : "text"}
+                      value={numericValue}
+                      onChange={(event) =>
+                        setNumericValue(event.target.value.slice(0, 24))
+                      }
+                      placeholder={theme.numericTemplate.placeholder || "空欄"}
+                      className="mt-1 min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-base font-bold text-slate-950 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                    />
+                  </label>
+                  {languages.length === 1 ? (
+                    <label className="text-xs font-black text-slate-700 dark:text-slate-200">
+                      単位
+                      <input
+                        lang={language}
+                        value={numericUnit}
+                        onChange={(event) =>
+                          setNumericUnit(event.target.value.slice(0, 16))
+                        }
+                        placeholder="単位"
+                        className="mt-1 min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-base font-bold text-slate-950 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                      />
+                    </label>
+                  ) : (
+                    <div className="rounded-lg border border-amber-300 bg-white px-3 py-2 text-xs font-bold leading-5 text-slate-700 dark:border-amber-800 dark:bg-slate-900 dark:text-slate-200">
+                      <span className="block font-black">単位</span>
+                      各言語の既定単位を使います
+                      <span className="mt-1 block" aria-label="言語ごとの単位">
+                        {languages
+                          .map(
+                            (selectedLanguage) =>
+                              `${SAFETY_IMAGE_LANGUAGE_LABELS[selectedLanguage]}：${theme.numericTemplate?.units[selectedLanguage] || "単位なし"}`,
+                          )
+                          .join("／")}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </fieldset>
+            ) : null}
+          </div>
+          <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(20rem,1.05fr)_minmax(22rem,.95fr)]">
+            <div className="min-w-0 xl:sticky xl:top-24 xl:self-start">
+              <h3 className="text-xl font-black text-slate-950 dark:text-white">
+                プレビュー
+              </h3>
               <div
                 className="relative mx-auto mt-4 max-w-full overflow-hidden rounded-2xl border-2 border-slate-200 bg-[#eef7f7] shadow-lg"
                 style={{
@@ -327,7 +386,11 @@ export function SafetyImageEditor({ theme }: { theme: SafetyImageTheme }) {
                 }}
                 data-preview-fit={previewFit ? "pass" : "overflow"}
               >
-                <div className="absolute" style={regionStyle(composition.artwork)} data-safety-sign-artwork>
+                <div
+                  className="absolute"
+                  style={regionStyle(composition.artwork)}
+                  data-safety-sign-artwork
+                >
                   <Image
                     src={theme.originalPath}
                     alt={`${theme.title}の文字なしクリーンマスター。文字編集プレビュー`}
@@ -338,7 +401,11 @@ export function SafetyImageEditor({ theme }: { theme: SafetyImageTheme }) {
                   />
                 </div>
                 {displayText && previewFit ? (
-                  <div className="absolute" style={regionStyle(composition.text)} data-safety-sign-text>
+                  <div
+                    className="absolute"
+                    style={regionStyle(composition.text)}
+                    data-safety-sign-text
+                  >
                     <SafetyImageTextPreview
                       fit={previewFit}
                       dimensions={composition.text}
@@ -393,269 +460,237 @@ export function SafetyImageEditor({ theme }: { theme: SafetyImageTheme }) {
 
             <div
               id="edit-controls"
-              className="scroll-mt-24 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6 dark:border-slate-800 dark:bg-slate-950"
+              className="scroll-mt-24 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6 xl:self-start dark:border-slate-800 dark:bg-slate-950"
             >
-              <h2 className="text-2xl font-black text-slate-950 dark:text-white">
-                かんたん編集
-              </h2>
-              <div className="mt-5 space-y-5">
-                <fieldset className="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-4 dark:border-emerald-900 dark:bg-emerald-950/50">
-                  <legend className="px-1 text-sm font-black text-slate-900 dark:text-white">
-                    表示する言語（複数選択可）
-                  </legend>
-                  <p className="mt-1 text-xs font-bold leading-5 text-slate-600 dark:text-slate-300">
-                    チェックした言語を、上から順に1枚の看板へ表示します。
-                  </p>
-                  <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                    {LANGUAGE_OPTIONS.map(([value, label]) => {
-                      const checked = languages.includes(value);
+              <details>
+                <summary className="min-h-11 cursor-pointer text-lg font-black text-slate-950 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-200 dark:text-white">
+                  詳細設定（文字・サイズ・形式）
+                </summary>
+                <div className="mt-5 space-y-5">
+                  <div className="space-y-4">
+                    {languages.map((selectedLanguage) => {
+                      const label =
+                        SAFETY_IMAGE_LANGUAGE_LABELS[selectedLanguage];
+                      const textId = `${textFieldsId}-safety-sign-text-${selectedLanguage}`;
+                      const limitId = `safety-sign-text-limit-${selectedLanguage.replace(/[^a-z]/giu, "-")}`;
                       return (
                         <label
-                          key={value}
-                          className="flex min-h-11 cursor-pointer items-center gap-3 rounded-xl border border-emerald-200 bg-white px-3 font-black text-slate-900 dark:border-emerald-800 dark:bg-slate-900 dark:text-white"
+                          key={selectedLanguage}
+                          htmlFor={textId}
+                          className="block"
                         >
-                          <input
-                            type="checkbox"
-                            value={value}
-                            checked={checked}
-                            disabled={checked && languages.length === 1}
+                          <span className="text-sm font-black text-slate-800 dark:text-slate-100">
+                            表示する文字（{label}）
+                          </span>
+                          <textarea
+                            id={textId}
+                            lang={selectedLanguage}
+                            aria-label={`表示する文字（${label}）`}
+                            value={texts[selectedLanguage]}
                             onChange={(event) =>
-                              toggleLanguage(value, event.target.checked)
+                              setTexts((current) => ({
+                                ...current,
+                                [selectedLanguage]: limitEditableText(
+                                  event.target.value,
+                                ),
+                              }))
                             }
-                            className="h-5 w-5 accent-emerald-800 disabled:cursor-not-allowed"
+                            rows={2}
+                            maxLength={180}
+                            aria-describedby={limitId}
+                            className="mt-1 w-full rounded-xl border border-slate-300 bg-white p-3 text-base font-bold text-slate-950 focus:border-emerald-700 focus:ring-4 focus:ring-emerald-100 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
                           />
-                          {label}
+                          <span
+                            id={limitId}
+                            className="mt-1 block text-right text-xs font-bold text-slate-500"
+                          >
+                            最大180文字・12行　{texts[selectedLanguage].length}
+                            /180
+                          </span>
                         </label>
                       );
                     })}
                   </div>
-                </fieldset>
-                <div className="space-y-4">
-                  {languages.map((selectedLanguage) => {
-                    const label =
-                      SAFETY_IMAGE_LANGUAGE_LABELS[selectedLanguage];
-                    const textId = `${textFieldsId}-safety-sign-text-${selectedLanguage}`;
-                    const limitId = `safety-sign-text-limit-${selectedLanguage.replace(/[^a-z]/giu, "-")}`;
-                    return (
-                      <label
-                        key={selectedLanguage}
-                        htmlFor={textId}
-                        className="block"
-                      >
-                        <span className="text-sm font-black text-slate-800 dark:text-slate-100">
-                          表示する文字（{label}）
-                        </span>
-                        <textarea
-                          id={textId}
-                          lang={selectedLanguage}
-                          aria-label={`表示する文字（${label}）`}
-                          value={texts[selectedLanguage]}
-                          onChange={(event) =>
-                            setTexts((current) => ({
-                              ...current,
-                              [selectedLanguage]: limitEditableText(
-                                event.target.value,
-                              ),
-                            }))
-                          }
-                          rows={2}
-                          maxLength={180}
-                          aria-describedby={limitId}
-                          className="mt-1 w-full rounded-xl border border-slate-300 bg-white p-3 text-base font-bold text-slate-950 focus:border-emerald-700 focus:ring-4 focus:ring-emerald-100 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
-                        />
-                        <span
-                          id={limitId}
-                          className="mt-1 block text-right text-xs font-bold text-slate-500"
-                        >
-                          最大180文字・12行　{texts[selectedLanguage].length}
-                          /180
-                        </span>
-                      </label>
-                    );
-                  })}
-                </div>
 
-                {theme.numericTemplate ? (
-                  <fieldset className="rounded-2xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-900 dark:bg-amber-950">
-                    <legend className="px-1 text-sm font-black text-amber-950 dark:text-amber-100">
-                      数値テンプレート
-                    </legend>
-                    <div className="grid gap-3 sm:grid-cols-[1fr_minmax(10rem,.75fr)]">
-                      <label className="text-xs font-black text-slate-700 dark:text-slate-200">
-                        数値・連絡先
-                        <input
-                          inputMode={numericUnit ? "decimal" : "text"}
-                          value={numericValue}
-                          onChange={(event) =>
-                            setNumericValue(event.target.value.slice(0, 24))
-                          }
-                          placeholder={
-                            theme.numericTemplate.placeholder || "空欄"
-                          }
-                          className="mt-1 min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-base font-bold text-slate-950 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
-                        />
-                      </label>
-                      {languages.length === 1 ? (
-                        <label className="text-xs font-black text-slate-700 dark:text-slate-200">
-                          単位
-                          <input
-                            lang={language}
-                            value={numericUnit}
-                            onChange={(event) =>
-                              setNumericUnit(event.target.value.slice(0, 16))
-                            }
-                            placeholder="単位"
-                            className="mt-1 min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-base font-bold text-slate-950 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
-                          />
-                        </label>
-                      ) : (
-                        <div className="rounded-lg border border-amber-300 bg-white px-3 py-2 text-xs font-bold leading-5 text-slate-700 dark:border-amber-800 dark:bg-slate-900 dark:text-slate-200">
-                          <span className="block font-black">単位</span>
-                          各言語の既定単位を使います
-                          <span
-                            className="mt-1 block"
-                            aria-label="言語ごとの単位"
-                          >
-                            {languages
-                              .map(
-                                (selectedLanguage) =>
-                                  `${SAFETY_IMAGE_LANGUAGE_LABELS[selectedLanguage]}：${theme.numericTemplate?.units[selectedLanguage] || "単位なし"}`,
-                              )
-                              .join("／")}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </fieldset>
-                ) : null}
-
-                <details className="group rounded-2xl border border-slate-200 dark:border-slate-700">
-                  <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between px-4 font-black text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-200 dark:text-white">
-                    詳細設定{" "}
-                    <ChevronDown
-                      className="h-5 w-5 transition group-open:rotate-180"
-                      aria-hidden="true"
-                    />
-                  </summary>
-                  <div className="space-y-4 border-t border-slate-200 p-4 dark:border-slate-700">
-                    <RadioGroup
-                      label="文字サイズ"
-                      value={fontSize}
-                      values={[
-                        ["small", "小"],
-                        ["standard", "標準"],
-                        ["large", "大"],
-                      ]}
-                      onChange={(value) => setFontSize(value as FontSize)}
-                    />
-                    <RadioGroup
-                      label="文字位置"
-                      value={position}
-                      values={[
-                        ["top", "上"],
-                        ["center", "中央"],
-                        ["bottom", "下"],
-                      ]}
-                      onChange={(value) => setPosition(value as TextPosition)}
-                    />
-                    <div className="grid grid-cols-2 gap-3">
-                      <ColorControl
-                        label="文字色"
-                        value={textColor}
-                        onChange={setTextColor}
+                  <details className="group rounded-2xl border border-slate-200 dark:border-slate-700">
+                    <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between px-4 font-black text-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-200 dark:text-white">
+                      文字の装飾{" "}
+                      <ChevronDown
+                        className="h-5 w-5 transition group-open:rotate-180"
+                        aria-hidden="true"
                       />
-                      <ToggleControl
-                        label="背景帯"
-                        checked={band}
-                        onChange={setBand}
-                      />
-                    </div>
-                    <ToggleControl
-                      label="チワワ・©"
-                      checked={brand}
-                      onChange={setBrand}
-                    />
-                    <label className="block text-sm font-black text-slate-800 dark:text-slate-100">
-                      サブメッセージ
-                      <input
-                        value={subMessage}
-                        onChange={(event) =>
-                          setSubMessage(event.target.value.slice(0, 72))
-                        }
-                        maxLength={72}
-                        className="mt-1 min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 font-bold text-slate-950 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
-                      />
-                    </label>
-                    <label className="block text-sm font-black text-slate-800 dark:text-slate-100">
-                      行間 {lineHeight.toFixed(2)}
-                      <input
-                        type="range"
-                        min="0.9"
-                        max="1.8"
-                        step="0.05"
-                        value={lineHeight}
-                        onChange={(event) =>
-                          setLineHeight(Number(event.target.value))
-                        }
-                        className="mt-2 w-full accent-emerald-800"
-                      />
-                    </label>
-                    <RadioGroup
-                      label="文字揃え"
-                      value={align}
-                      values={[
-                        ["left", "左"],
-                        ["center", "中央"],
-                        ["right", "右"],
-                      ]}
-                      onChange={(value) => setAlign(value as TextAlign)}
-                    />
-                    <div className="grid grid-cols-2 gap-3">
-                      <ColorControl
-                        label="背景帯の色"
-                        value={bandColor}
-                        onChange={setBandColor}
-                      />
-                      <ToggleControl
-                        label="枠線"
-                        checked={border}
-                        onChange={setBorder}
-                      />
-                    </div>
-                    <RadioGroup
-                      label="余白"
-                      value={padding}
-                      values={[
-                        ["small", "小"],
-                        ["standard", "標準"],
-                        ["large", "大"],
-                      ]}
-                      onChange={(value) => setPadding(value as Padding)}
-                    />
-                    {languages.length === 1 && language === "ja" ? (
+                    </summary>
+                    <div className="space-y-4 border-t border-slate-200 p-4 dark:border-slate-700">
                       <RadioGroup
-                        label="文字方向"
-                        value={writingMode}
+                        label="文字サイズ"
+                        value={fontSize}
                         values={[
-                          ["horizontal", "横書き"],
-                          ["vertical", "縦書き"],
+                          ["small", "小"],
+                          ["standard", "標準"],
+                          ["large", "大"],
                         ]}
-                        onChange={(value) =>
-                          setWritingMode(value as WritingMode)
-                        }
+                        onChange={(value) => setFontSize(value as FontSize)}
                       />
-                    ) : null}
-                    <button
-                      type="button"
-                      onClick={reset}
-                      className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-slate-400 bg-white font-black text-slate-800 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-200 dark:bg-slate-900 dark:text-slate-100"
-                    >
-                      <RotateCcw className="h-4 w-4" aria-hidden="true" />
-                      元に戻す
-                    </button>
+                      <RadioGroup
+                        label="文字位置"
+                        value={position}
+                        values={[
+                          ["top", "上"],
+                          ["center", "中央"],
+                          ["bottom", "下"],
+                        ]}
+                        onChange={(value) => setPosition(value as TextPosition)}
+                      />
+                      <div className="grid grid-cols-2 gap-3">
+                        <ColorControl
+                          label="文字色"
+                          value={textColor}
+                          onChange={setTextColor}
+                        />
+                        <ToggleControl
+                          label="背景帯"
+                          checked={band}
+                          onChange={setBand}
+                        />
+                      </div>
+                      <ToggleControl
+                        label="チワワ・©"
+                        checked={brand}
+                        onChange={setBrand}
+                      />
+                      <label className="block text-sm font-black text-slate-800 dark:text-slate-100">
+                        サブメッセージ
+                        <input
+                          value={subMessage}
+                          onChange={(event) =>
+                            setSubMessage(event.target.value.slice(0, 72))
+                          }
+                          maxLength={72}
+                          className="mt-1 min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 font-bold text-slate-950 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                        />
+                      </label>
+                      <label className="block text-sm font-black text-slate-800 dark:text-slate-100">
+                        行間 {lineHeight.toFixed(2)}
+                        <input
+                          type="range"
+                          min="0.9"
+                          max="1.8"
+                          step="0.05"
+                          value={lineHeight}
+                          onChange={(event) =>
+                            setLineHeight(Number(event.target.value))
+                          }
+                          className="mt-2 w-full accent-emerald-800"
+                        />
+                      </label>
+                      <RadioGroup
+                        label="文字揃え"
+                        value={align}
+                        values={[
+                          ["left", "左"],
+                          ["center", "中央"],
+                          ["right", "右"],
+                        ]}
+                        onChange={(value) => setAlign(value as TextAlign)}
+                      />
+                      <div className="grid grid-cols-2 gap-3">
+                        <ColorControl
+                          label="背景帯の色"
+                          value={bandColor}
+                          onChange={setBandColor}
+                        />
+                        <ToggleControl
+                          label="枠線"
+                          checked={border}
+                          onChange={setBorder}
+                        />
+                      </div>
+                      <RadioGroup
+                        label="余白"
+                        value={padding}
+                        values={[
+                          ["small", "小"],
+                          ["standard", "標準"],
+                          ["large", "大"],
+                        ]}
+                        onChange={(value) => setPadding(value as Padding)}
+                      />
+                      {languages.length === 1 && language === "ja" ? (
+                        <RadioGroup
+                          label="文字方向"
+                          value={writingMode}
+                          values={[
+                            ["horizontal", "横書き"],
+                            ["vertical", "縦書き"],
+                          ]}
+                          onChange={(value) =>
+                            setWritingMode(value as WritingMode)
+                          }
+                        />
+                      ) : null}
+                    </div>
+                  </details>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <label className="text-sm font-black text-slate-800 dark:text-slate-100">
+                      印刷・看板サイズ
+                      <select
+                        value={outputSize}
+                        onChange={(event) =>
+                          setOutputSize(
+                            event.target.value as SafetySignOutputSize,
+                          )
+                        }
+                        className="mt-2 min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 font-bold text-slate-950 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                      >
+                        {SAFETY_SIGN_OUTPUT_SIZES.map((size) => (
+                          <option key={size.id} value={size.id}>
+                            {size.label}
+                            {size.id === recommendedOutputSize
+                              ? "（推奨）"
+                              : ""}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <label className="text-sm font-black text-slate-800 dark:text-slate-100">
+                      形式
+                      <select
+                        value={format}
+                        onChange={(event) =>
+                          setFormat(event.target.value as Format)
+                        }
+                        className="mt-2 min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 font-bold text-slate-950 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                      >
+                        <option value="jpeg">JPEG</option>
+                        <option value="pdf">PDF</option>
+                        <option value="png">PNG</option>
+                      </select>
+                    </label>
                   </div>
-                </details>
-              </div>
+                  <div className="flex flex-wrap gap-4 text-sm font-bold text-emerald-800 dark:text-emerald-300">
+                    <a
+                      href={recommendedHref}
+                      className="min-h-11 content-center underline underline-offset-4"
+                    >
+                      初期設定の日本語JPEG（推奨サイズ）
+                    </a>
+                    <a
+                      href={cleanHref}
+                      className="min-h-11 content-center underline underline-offset-4"
+                    >
+                      文字なしPNG（推奨サイズ）
+                    </a>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={reset}
+                    className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-slate-400 bg-white font-black text-slate-800 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-200 dark:bg-slate-900 dark:text-slate-100"
+                  >
+                    <RotateCcw className="h-4 w-4" aria-hidden="true" />
+                    元に戻す
+                  </button>
+                </div>
+              </details>
             </div>
           </div>
         </section>
@@ -670,82 +705,33 @@ export function SafetyImageEditor({ theme }: { theme: SafetyImageTheme }) {
           >
             ダウンロード
           </h2>
-          <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <label className="text-sm font-black text-slate-800 dark:text-slate-100">
-              出力内容
-              <select
-                value={downloadMode}
-                onChange={(event) => setDownloadMode(event.target.value as DownloadMode)}
-                className="mt-2 min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 font-bold text-slate-950 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
-              >
-                <option value="edited">プレビューどおり</option>
-                <option value="default">推奨文字入り</option>
-                <option value="clean">文字なし</option>
-              </select>
-            </label>
-            <label className="block text-sm font-black text-slate-800 sm:col-span-2 dark:text-slate-100">
-              印刷・看板サイズ
-              <select
-                value={outputSize}
-                onChange={(event) =>
-                  setOutputSize(event.target.value as SafetySignOutputSize)
-                }
-                className="mt-2 min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 font-bold text-slate-950 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
-              >
-                {SAFETY_SIGN_OUTPUT_SIZES.map((size) => (
-                  <option key={size.id} value={size.id}>
-                    {size.label}
-                    {size.id === recommendedOutputSize ? "（推奨）" : ""}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="text-sm font-black text-slate-800 dark:text-slate-100">
-              形式
-              <select
-                value={format}
-                onChange={(event) => setFormat(event.target.value as Format)}
-                className="mt-2 min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 font-bold text-slate-950 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
-              >
-                <option value="jpeg">JPEG</option>
-                <option value="pdf">PDF</option>
-                <option value="png">PNG</option>
-              </select>
-            </label>
-          </div>
-
-          {downloadMode === "edited" ||
-          (downloadMode === "default" && languages.length > 1) ? (
-            <button
-              type="button"
-              disabled={downloading}
-              onClick={downloadCustomized}
-              className="mt-5 inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-xl bg-emerald-800 px-6 text-lg font-black text-white shadow-sm hover:bg-emerald-900 disabled:cursor-wait disabled:opacity-60 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-300 sm:w-auto"
-            >
-              {format === "pdf" ? (
-                <FileText className="h-5 w-5" aria-hidden="true" />
-              ) : (
-                <FileImage className="h-5 w-5" aria-hidden="true" />
-              )}
-              {downloading
-                ? "生成中…"
-                : `${SAFETY_SIGN_OUTPUT_SIZES.find((size) => size.id === outputSize)?.label ?? outputSize} ${format.toUpperCase()}をダウンロード`}
-            </button>
-          ) : (
-            <a
-              href={normalDownloadHref}
-              className="mt-5 inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-xl bg-emerald-800 px-6 text-lg font-black text-white shadow-sm hover:bg-emerald-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-300 sm:w-auto"
-            >
-              {format === "pdf" ? (
-                <FileText className="h-5 w-5" aria-hidden="true" />
-              ) : (
-                <FileImage className="h-5 w-5" aria-hidden="true" />
-              )}
-              {SAFETY_SIGN_OUTPUT_SIZES.find((size) => size.id === outputSize)
-                ?.label ?? outputSize}{" "}
-              {format.toUpperCase()}をダウンロード
-            </a>
-          )}
+          <p className="mt-2 text-sm font-bold text-emerald-950 dark:text-emerald-100">
+            {outputSizeLabel}・{format.toUpperCase()}・
+            {languages
+              .map((selected) => SAFETY_IMAGE_LANGUAGE_LABELS[selected])
+              .join("／")}
+          </p>
+          {!previewFit ? (
+            <p id={fitHelpId} role="alert" className="mt-3 text-sm font-black text-red-800 dark:text-red-200">
+              {displayText
+                ? "文字が収まりません。詳細設定で文字量・サイズ・行間を調整してください。"
+                : "表示する文字を詳細設定で入力してください。"}
+            </p>
+          ) : null}
+          <button
+            type="button"
+            disabled={downloading || !previewFit}
+            aria-describedby={!previewFit ? fitHelpId : undefined}
+            onClick={downloadCustomized}
+            className="mt-4 inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-xl bg-emerald-800 px-6 text-lg font-black text-white shadow-sm hover:bg-emerald-900 disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-300 sm:w-auto"
+          >
+            {format === "pdf" ? (
+              <FileText className="h-5 w-5" aria-hidden="true" />
+            ) : (
+              <FileImage className="h-5 w-5" aria-hidden="true" />
+            )}
+            {downloading ? "生成中…" : "この看板をダウンロード"}
+          </button>
           <p
             role="status"
             aria-live="polite"

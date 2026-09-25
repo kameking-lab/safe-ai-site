@@ -55,8 +55,7 @@ describe("SafetyImageEditor", () => {
     expect((screen.getByLabelText("単位") as HTMLInputElement).value).toBe("km/jam");
     fireEvent.change(screen.getByLabelText("数値・連絡先"), { target: { value: "8" } });
     expect(screen.getAllByText(/8 km\/jam/u).length).toBeGreaterThan(0);
-    expect((screen.getByLabelText("出力内容") as HTMLSelectElement).value).toBe("edited");
-    const downloadButton = screen.getByRole("button", { name: /JPEGをダウンロード/u });
+    const downloadButton = screen.getByRole("button", { name: "この看板をダウンロード" });
     expect(downloadButton.hasAttribute("disabled")).toBe(false);
     expect(document.body.innerHTML).not.toContain("8%20km");
   });
@@ -113,18 +112,21 @@ describe("SafetyImageEditor", () => {
     expect(screen.queryByRole("alert")).toBeNull();
   });
 
-  it("exposes clean, recommended and edited downloads plus A-paper and market sizes", () => {
+  it("keeps A4 and languages visible while placing alternate downloads and sizes in details", () => {
     const theme = getSafetyImageTheme("no-under-suspended-load");
     if (!theme) throw new Error("theme missing");
     render(<SafetyImageEditor theme={theme} />);
-    expect(screen.getByRole("link", { name: "そのままダウンロード" }).getAttribute("href")).toContain("mode=default");
+    expect(screen.queryByRole("link", { name: "そのままダウンロード" })).toBeNull();
+    expect(screen.getByRole("button", { name: "この看板をダウンロード" })).not.toBeNull();
+    const details = screen.getByText("詳細設定（文字・サイズ・形式）").closest("details");
+    expect(details?.open).toBe(false);
+    fireEvent.click(screen.getByText("詳細設定（文字・サイズ・形式）"));
+    expect(details?.open).toBe(true);
+    expect(screen.getByRole("link", { name: /初期設定の日本語JPEG/u }).getAttribute("href")).toContain("mode=default");
+    expect(screen.getByRole("link", { name: /文字なしPNG/u }).getAttribute("href")).toContain("mode=clean");
     for (const label of ["A4縦", "A4横", "A3縦", "A3横", "平板 600×450mm（推奨）", "垂れ幕 450×1800mm"]) {
       expect(screen.getByRole("option", { name: label })).not.toBeNull();
     }
-    expect((screen.getByLabelText("出力内容") as HTMLSelectElement).value).toBe("edited");
-    expect(screen.getByRole("option", { name: "プレビューどおり" })).not.toBeNull();
-    expect(screen.getByRole("option", { name: "推奨文字入り" })).not.toBeNull();
-    expect(screen.getByRole("option", { name: "文字なし" })).not.toBeNull();
     expect(screen.getByRole("option", { name: "JPEG" })).not.toBeNull();
     expect(screen.getByRole("option", { name: "PDF" })).not.toBeNull();
     expect(screen.getByRole("option", { name: "PNG" })).not.toBeNull();
@@ -152,8 +154,7 @@ describe("SafetyImageEditor", () => {
         target: { value: "選択解除後は送信しない文言" },
       });
       fireEvent.click(screen.getByLabelText("ベトナム語"));
-      expect((screen.getByLabelText("出力内容") as HTMLSelectElement).value).toBe("edited");
-      fireEvent.click(screen.getByRole("button", { name: /JPEGをダウンロード/u }));
+      fireEvent.click(screen.getByRole("button", { name: "この看板をダウンロード" }));
 
       await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
       const init = fetchMock.mock.calls[0]?.[1] as RequestInit;

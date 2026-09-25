@@ -28,6 +28,14 @@ type QuickFilter =
   | "heavy"
   | "multilingual"
   | "numeric";
+const QUICK_FILTER_LABELS: Record<Exclude<QuickFilter, "all">, string> = {
+  recommended: "よく使う看板",
+  ppe: "保護具",
+  prohibition: "立入・禁止",
+  heavy: "重機・吊り荷",
+  multilingual: "多言語優先",
+  numeric: "数値編集",
+};
 
 const USES: readonly SafetyImageUse[] = [
   "掲示",
@@ -198,8 +206,31 @@ export function SafetyImageLibraryClient({
   ]);
 
   const visible = filtered.slice(0, visibleCount);
+  const hasConditions = Boolean(
+    query || category !== "all" || use !== "all" || signFormat !== "all" ||
+    numericOnly || documentOnly || quickFilter !== "all" || sort !== "recommended",
+  );
+  const hiddenConditionLabels = [
+    quickFilter !== "all" ? QUICK_FILTER_LABELS[quickFilter] : null,
+    signFormat !== "all" ? signFormat : null,
+    use !== "all" ? use : null,
+    numericOnly ? "数値を編集できる" : null,
+    documentOnly ? "施工計画・報告書向け" : null,
+    sort === "new" ? "新着順" : sort === "order" ? "登録順" : null,
+  ].filter((label): label is string => label !== null);
   const updateFilter = (callback: () => void) => {
     callback();
+    setVisibleCount(20);
+  };
+  const clearFilters = () => {
+    setQuery("");
+    setCategory("all");
+    setUse("all");
+    setSignFormat("all");
+    setNumericOnly(false);
+    setDocumentOnly(false);
+    setQuickFilter("all");
+    setSort("recommended");
     setVisibleCount(20);
   };
 
@@ -240,7 +271,17 @@ export function SafetyImageLibraryClient({
             }))}
           />
         </div>
-        <div className="mt-3 flex flex-wrap gap-2" aria-label="よく使う絞り込み">
+        {hasConditions ? (
+          <div className="mt-3 flex flex-wrap items-center gap-3 text-sm font-bold text-emerald-900 dark:text-emerald-200">
+            <span>条件あり</span>
+            {hiddenConditionLabels.length ? <span>詳細: {hiddenConditionLabels.join("・")}</span> : null}
+            <button type="button" onClick={clearFilters} className="min-h-11 rounded-lg px-2 underline underline-offset-4 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-200">絞り込みを解除</button>
+          </div>
+        ) : null}
+        <details className="mt-3 rounded-xl border border-slate-200 px-3 py-2 dark:border-slate-700">
+          <summary className="min-h-11 cursor-pointer py-3 text-sm font-black text-slate-800 dark:text-slate-100">詳細条件{hasConditions ? "（条件あり）" : ""}</summary>
+          <div className="pb-3">
+        <div className="flex flex-wrap gap-2" aria-label="よく使う絞り込み">
           {[
             ["recommended", "よく使う看板"],
             ["ppe", "保護具"],
@@ -270,9 +311,7 @@ export function SafetyImageLibraryClient({
             </button>
           ))}
         </div>
-        <details className="mt-3 rounded-xl border border-slate-200 px-3 py-2 dark:border-slate-700">
-          <summary className="min-h-11 cursor-pointer py-3 text-sm font-black text-slate-800 dark:text-slate-100">詳細条件</summary>
-          <div className="grid gap-3 pb-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <FilterSelect
             label="看板形式"
             value={signFormat}
@@ -312,6 +351,15 @@ export function SafetyImageLibraryClient({
             施工計画・報告書向け
           </label>
           </div>
+          <label className="mt-3 flex items-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-200">
+            並び順
+            <select value={sort} onChange={(event) => setSort(event.target.value as SortMode)} className="min-h-11 rounded-lg border border-slate-300 bg-white px-3 font-bold dark:border-slate-700 dark:bg-slate-900">
+              <option value="recommended">おすすめ順</option>
+              <option value="order">登録順</option>
+              <option value="new">新着順</option>
+            </select>
+          </label>
+          </div>
         </details>
       </div>
       <noscript>
@@ -347,18 +395,6 @@ export function SafetyImageLibraryClient({
             看板から選ぶ
           </h2>
         </div>
-        <label className="flex items-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-200">
-          並び順
-          <select
-            value={sort}
-            onChange={(event) => setSort(event.target.value as SortMode)}
-            className="min-h-11 rounded-lg border border-slate-300 bg-white px-3 font-bold dark:border-slate-700 dark:bg-slate-900"
-          >
-            <option value="recommended">おすすめ順</option>
-            <option value="order">登録順</option>
-            <option value="new">新着順</option>
-          </select>
-        </label>
       </div>
 
       {visible.length ? (
@@ -421,16 +457,7 @@ export function SafetyImageLibraryClient({
           </p>
           <button
             type="button"
-            onClick={() => {
-              setQuery("");
-              setCategory("all");
-              setUse("all");
-              setSignFormat("all");
-              setNumericOnly(false);
-              setDocumentOnly(false);
-              setQuickFilter("all");
-              setVisibleCount(20);
-            }}
+            onClick={clearFilters}
             className="mt-4 min-h-11 rounded-lg bg-emerald-800 px-5 text-sm font-black text-white"
           >
             絞り込みを解除

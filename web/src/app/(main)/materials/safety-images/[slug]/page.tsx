@@ -87,7 +87,7 @@ export default async function SafetyImageDetailPage({ params }: PageProps) {
           representativeOfPage: true,
         }}
       />
-      <header className="border-b border-emerald-100 bg-gradient-to-br from-emerald-50 via-white to-sky-50 px-4 pb-8 pt-3 sm:px-6 dark:border-emerald-950 dark:from-slate-950 dark:to-emerald-950">
+      <header className="border-b border-emerald-100 bg-gradient-to-br from-emerald-50 via-white to-sky-50 px-4 pb-8 pt-3 sm:px-6 dark:border-emerald-950 dark:from-slate-950 dark:via-slate-950 dark:to-emerald-950">
         <div className="mx-auto max-w-7xl">
           <SafetyImageLibraryReturnLink />
           <div className="mt-3 grid items-center gap-7 lg:grid-cols-[minmax(18rem,.78fr)_minmax(25rem,1.22fr)]">
@@ -114,15 +114,15 @@ export default async function SafetyImageDetailPage({ params }: PageProps) {
       <div className="mx-auto max-w-7xl px-4 pt-8 sm:px-6">
         <SafetyImageEditor theme={theme} />
 
-        <section className="mt-6 rounded-2xl border border-slate-300 bg-white p-5 dark:border-slate-700 dark:bg-slate-950">
-          <h2 className="font-black text-slate-950 dark:text-white">JavaScriptなしで利用する</h2>
+        <details className="mt-6 rounded-2xl border border-slate-300 bg-white p-5 dark:border-slate-700 dark:bg-slate-950">
+          <summary className="min-h-11 cursor-pointer font-black text-slate-950 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-200 dark:text-white">JavaScriptなしで利用する</summary>
           <p className="mt-2 text-sm font-bold text-slate-600 dark:text-slate-300">文字なし画像、既定の日本語PDF、印刷用HTMLは通常リンクで開けます。</p>
           <div className="mt-3 flex flex-wrap gap-4">
             <a href={theme.originalPath} download={`${theme.slug}-clean-master.png`} className="font-black text-emerald-800 underline dark:text-emerald-300">文字なしPNG</a>
             <a href={`/api/safety-images/${theme.slug}/download?mode=default&lang=ja&brand=branded&size=${outputSize}&format=pdf`} className="font-black text-emerald-800 underline dark:text-emerald-300">推奨サイズPDF</a>
             <a href={`${theme.detailPath}/print`} className="font-black text-emerald-800 underline dark:text-emerald-300">印刷用HTML</a>
           </div>
-        </section>
+        </details>
 
         <section className="mt-10" aria-labelledby="related-heading">
           <h2 id="related-heading" className="text-2xl font-black text-slate-950 dark:text-white">同じカテゴリの看板</h2>
