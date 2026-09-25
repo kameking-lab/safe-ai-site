@@ -12,6 +12,7 @@ function request(category: string, feature?: string) {
 function configure() {
   vi.stubEnv("RAKUTEN_APPLICATION_ID", "test-application");
   vi.stubEnv("RAKUTEN_ACCESS_KEY", "test-access-key");
+  vi.stubEnv("RAKUTEN_GOODS_AFFILIATE_ID", "test-goods-affiliate");
   vi.stubEnv("NEXT_PUBLIC_RAKUTEN_AFFILIATE_ID", "test-affiliate");
 }
 
@@ -47,6 +48,7 @@ describe("goods product feed", () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
     const [url, options] = fetchMock.mock.calls[0] as [URL, RequestInit];
     expect(url.searchParams.get("keyword")).toBe("産業用 保護帽 墜落時保護");
+    expect(url.searchParams.get("affiliateId")).toBe("test-goods-affiliate");
     expect(options.headers).toEqual({ accessKey: "test-access-key" });
     expect(JSON.stringify(first)).not.toContain("test-access-key");
   });

@@ -28,7 +28,9 @@ export async function GET(request: NextRequest) {
 
   const applicationId = process.env.RAKUTEN_APPLICATION_ID?.trim();
   const accessKey = process.env.RAKUTEN_ACCESS_KEY?.trim();
-  const affiliateId = process.env.NEXT_PUBLIC_RAKUTEN_AFFILIATE_ID?.trim();
+  // The product gallery uses the affiliate ID issued with its Rakuten app.
+  // Keep the existing site-wide ID as a fallback for previews and migration.
+  const affiliateId = process.env.RAKUTEN_GOODS_AFFILIATE_ID?.trim() || process.env.NEXT_PUBLIC_RAKUTEN_AFFILIATE_ID?.trim();
   if (!applicationId || !accessKey || !affiliateId) return reply({ status: "not_configured", items: [], checkedAt: null, reason: "credentials_missing" });
 
   const cacheKey = `${applicationId}:${affiliateId}:${categoryId}:${featureId ?? "all"}`;
