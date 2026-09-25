@@ -258,3 +258,22 @@ test("カードの名称・画像からNETIS公式詳細へ進み、戻るで絞
     await expect(page.getByRole("heading", { name: "重機接触：2件" })).toBeVisible();
   }
 });
+
+test("効率化参考技術を目的・分類・検索から探し、現行登録未確認を表示する", async ({ page }) => {
+  for (const width of [320, 390]) {
+    await page.setViewportSize({ width, height: 844 });
+    await page.goto(`${ROUTE}?purpose=efficiency`, { waitUntil: "domcontentloaded" });
+    await expect(page.locator('[data-netis-explorer-ready="true"]')).toBeVisible();
+    await expect(page.getByRole("heading", { name: "作業効率化候補：6件" })).toBeVisible();
+    await expect(page.locator("#netis-technology-results article")).toHaveCount(6);
+    await expect(page.getByText("効率化の追加6件は過去の地方整備局資料に掲載された参考技術です。現行NETIS登録は未確認です。")).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
+    await page.getByRole("button", { name: "測量・出来形" }).click();
+    await expect(page).toHaveURL(/purpose=efficiency.*risk=survey-measurement|risk=survey-measurement.*purpose=efficiency/);
+    await expect(page.getByRole("heading", { name: "測量・出来形：3件" })).toBeVisible();
+    await page.getByLabel(/名称・登録番号・用途/).fill("ScanX");
+    await page.getByRole("button", { name: "掲載技術を検索" }).click();
+    await expect(page.getByRole("heading", { name: "測量・出来形：1件" })).toBeVisible();
+    await expect(page.locator("#netis-technology-results article")).toContainText(["現行登録未確認"]);
+  }
+});

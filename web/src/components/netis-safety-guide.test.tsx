@@ -6,6 +6,10 @@ import {
   FEATURED_NETIS_TECHNOLOGIES,
   NETIS_SAFETY_CATEGORIES,
 } from "./netis-safety-data";
+import {
+  NETIS_EFFICIENCY_CATEGORIES,
+  NETIS_EFFICIENCY_TECHNOLOGIES,
+} from "./netis-efficiency-data";
 import { NetisSafetyExplorer } from "./netis-safety-explorer";
 import { NetisSafetyGuide } from "./netis-safety-guide";
 
@@ -189,5 +193,37 @@ describe("NetisSafetyGuide", () => {
     expect(window.sessionStorage.getItem("netis-safety-return-position")).toBeNull();
     scrollTo.mockRestore();
     window.history.replaceState(null, "", "/");
+  });
+
+  it("効率化タブで2分類と6件を探せ、安全10件と混同しない", () => {
+    navigation.query = "purpose=efficiency";
+    const { container } = render(<NetisSafetyExplorer />);
+    expect(screen.getByRole("button", { name: "作業を効率化" }).getAttribute("aria-pressed")).toBe("true");
+    expect(screen.getByText("作業効率化候補：6件")).toBeDefined();
+    expect(container.querySelectorAll("article")).toHaveLength(6);
+    expect(screen.queryByText(/ヒヤリハンター/)).toBeNull();
+    for (const category of NETIS_EFFICIENCY_CATEGORIES) {
+      expect(screen.getByRole("button", { name: category.label })).toBeDefined();
+    }
+    for (const technology of NETIS_EFFICIENCY_TECHNOLOGIES) {
+      const link = screen.getByRole("link", {
+        name: `${technology.name}（国交省の紹介資料を開く）`,
+      });
+      expect(link.getAttribute("href")).toBe(technology.officialSourceUrl);
+      expect(link.closest("article")?.textContent).toContain("現行登録未確認");
+      expect(link.closest("article")?.textContent).toContain("製品画像は未掲載");
+    }
+  });
+
+  it("効率化カテゴリの直リンクと検索を保ち、既存のrisk形式を利用する", () => {
+    navigation.query = "risk=survey-measurement&q=ScanX";
+    render(<NetisSafetyExplorer />);
+    expect(screen.getByText("測量・出来形：1件")).toBeDefined();
+    expect(screen.getByRole("button", { name: "作業を効率化" }).getAttribute("aria-pressed")).toBe("true");
+    fireEvent.click(screen.getByRole("button", { name: "記録・点検" }));
+    expect(navigation.push).toHaveBeenCalledWith(
+      "/resources/netis-safety?risk=records-inspection&q=ScanX&purpose=efficiency",
+      { scroll: false },
+    );
   });
 });
