@@ -7,7 +7,6 @@ import {
   Download,
   FileCheck2,
   FileText,
-  Headphones,
   Presentation,
 } from "lucide-react";
 import { PageContainer } from "@/components/layout";
@@ -64,10 +63,6 @@ export async function generateMetadata({
 }
 
 export default function FallPreventionSeminarPage() {
-  const audioSeconds = training.slides.reduce(
-    (total, slide) => total + slide.estimatedSeconds,
-    0,
-  );
   return (
     <PageContainer width="full" className="pb-20">
       <JsonLd
@@ -139,7 +134,6 @@ export default function FallPreventionSeminarPage() {
             {training.subtitle}
           </p>
           <div className="mt-5 flex flex-wrap gap-2 text-xs font-bold sm:text-sm">
-            <span className="rounded-full bg-white/10 px-3 py-2"><Headphones className="mr-1 inline h-4 w-4" aria-hidden="true" />音声 約{Math.round(audioSeconds / 60)}分</span>
             <span className="rounded-full bg-white/10 px-3 py-2"><Presentation className="mr-1 inline h-4 w-4" aria-hidden="true" />20枚</span>
             <span className="rounded-full bg-white/10 px-3 py-2">演習込み 約60分</span>
             <span className="rounded-full bg-white/10 px-3 py-2">基準日 {training.asOf}</span>
@@ -148,7 +142,7 @@ export default function FallPreventionSeminarPage() {
             {training.boundary}
           </p>
           <a href="#seminar-player" className="mt-6 inline-flex min-h-11 items-center gap-2 rounded-xl bg-teal-300 px-5 py-3 font-black text-slate-950 hover:bg-teal-200 dark:text-slate-950">
-            教材を再生する <ArrowRight className="h-5 w-5" aria-hidden="true" />
+            スライドを見る <ArrowRight className="h-5 w-5" aria-hidden="true" />
           </a>
         </div>
       </header>
@@ -158,13 +152,13 @@ export default function FallPreventionSeminarPage() {
         className="mt-8 scroll-mt-24"
         style={{ contentVisibility: "auto", containIntrinsicSize: "auto 900px" }}
       >
-        <SafetySeminarPlayer slides={training.slides} claims={claims} sources={sources} />
+        <SafetySeminarPlayer slides={training.slides} claims={claims} sources={sources} audioEnabled={false} playerLabel="墜落・転落防止の安全研修スライド" />
       </section>
 
       <noscript>
         <section className="mt-8 rounded-2xl border-2 border-amber-500 bg-amber-50 p-5 text-amber-950">
           <h2 className="text-xl font-black">JavaScriptを使わずに読む</h2>
-          <p className="mt-2 leading-7">音声操作は利用できません。以下の全スライド本文・原稿とPDFをご利用ください。</p>
+          <p className="mt-2 leading-7">以下の全スライド本文・講師用の詳説とPDFをご利用ください。</p>
           <ol className="mt-4 space-y-5">
             {training.slides.map((slide) => (
               <li key={slide.id}>
@@ -258,8 +252,8 @@ export default function FallPreventionSeminarPage() {
         className="mt-12"
         style={{ contentVisibility: "auto", containIntrinsicSize: "auto 2200px" }}
       >
-        <h2 id="outline-title" className="text-3xl font-black text-slate-950 dark:text-white">20枚の構成と音声原稿</h2>
-        <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">音声原稿合計 {Math.round(audioSeconds / 60)}分目安。各スライドの主張はclaim IDから一次資料へ追跡できます。</p>
+        <h2 id="outline-title" className="text-3xl font-black text-slate-950 dark:text-white">20枚の構成と講師用の詳説</h2>
+        <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">各スライドの主張はclaim IDから一次資料へ追跡できます。</p>
         <div className="mt-5 grid gap-3 lg:grid-cols-2">
           {training.slides.map((slide) => (
             <details key={slide.id} className="rounded-2xl border border-slate-300 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">

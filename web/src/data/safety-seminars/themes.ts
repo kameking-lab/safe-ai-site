@@ -11,7 +11,7 @@ export type PublishedSafetySeminar = {
   audience: string;
   standardDuration: string;
   slideCount: number;
-  hasAudio: true;
+  hasAudio: boolean;
   formats: readonly ["PowerPoint", "PDF"];
   href: string;
 };
@@ -33,9 +33,9 @@ export const SAFETY_SEMINARS: readonly SafetySeminar[] = [
     status: "published",
     title: "安全管理の基本と安衛法",
     audience: "全作業者・職長・現場責任者・安全衛生担当者",
-    standardDuration: "音声約8分／確認込み約12〜15分",
+    standardDuration: "確認込み約12〜15分",
     slideCount: 12,
-    hasAudio: true,
+    hasAudio: false,
     formats: ["PowerPoint", "PDF"],
     href: SAFETY_MANAGEMENT_BASICS_OSH_LAW_SEMINAR_PATH,
   },
@@ -44,9 +44,9 @@ export const SAFETY_SEMINARS: readonly SafetySeminar[] = [
     status: "published",
     title: "墜落・転落防止とフルハーネスの実務",
     audience: "建設現場の作業者・職長・安全衛生担当者",
-    standardDuration: "音声約30〜35分／演習込み約60分",
+    standardDuration: "演習込み約60分",
     slideCount: 20,
-    hasAudio: true,
+    hasAudio: false,
     formats: ["PowerPoint", "PDF"],
     href: FALL_PREVENTION_SEMINAR_PATH,
   },

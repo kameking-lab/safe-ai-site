@@ -5,7 +5,6 @@ import {
   CheckCircle2,
   Clock3,
   FileDown,
-  Headphones,
   Presentation,
   Users,
 } from "lucide-react";
@@ -24,7 +23,7 @@ import { FeatureMascotCompanion } from "@/components/feature-mascot-companion";
 
 const TITLE = "安全研修ライブラリ｜現場で使える社内安全研修";
 const DESCRIPTION =
-  "統計と一次資料に基づく社内安全研修を、音声付きスライド、PowerPoint、PDFで利用できます。安全管理の基本から個別災害の防止まで、公開教材を無料で活用できます。";
+  "統計と一次資料に基づく社内安全研修を、スライド、PowerPoint、PDFで利用できます。安全管理の基本から個別災害の防止まで、公開教材を無料で活用できます。";
 
 type SearchParams = Promise<
   Record<string, string | string[] | undefined>
@@ -102,7 +101,7 @@ export default function SafetySeminarLibraryPage() {
               variant="teacher"
               eyebrow="安全講師チワワ"
               title="そのまま朝礼で使える教材から始めよう。"
-              message="見る・聞く・配る。現場に合う方法で使えます。"
+              message="見る・配る・問い直す。現場に合う方法で使えます。"
               tone="cream"
               compact
               className="mt-6 max-w-2xl"
@@ -178,13 +177,6 @@ export default function SafetySeminarLibraryPage() {
                         </div>
                         <div className="rounded-xl bg-slate-100 p-3 dark:bg-slate-800">
                           <dt className="flex items-center gap-2 text-xs font-black text-slate-600 dark:text-slate-300">
-                            <Headphones className="h-4 w-4" aria-hidden="true" />
-                            音声
-                          </dt>
-                          <dd className="mt-1 text-sm font-black">音声あり</dd>
-                        </div>
-                        <div className="rounded-xl bg-slate-100 p-3 dark:bg-slate-800">
-                          <dt className="flex items-center gap-2 text-xs font-black text-slate-600 dark:text-slate-300">
                             <FileDown className="h-4 w-4" aria-hidden="true" />
                             ダウンロード
                           </dt>
@@ -198,10 +190,10 @@ export default function SafetySeminarLibraryPage() {
                     <div className="flex flex-col justify-between bg-slate-950 p-5 text-white sm:p-7">
                       <div>
                         <p className="text-xs font-black tracking-[.12em] text-emerald-300">
-                          AUDIO &amp; SLIDES
+                          SLIDES &amp; QUIZ
                         </p>
                         <p className="mt-3 text-sm leading-6 text-slate-200">
-                          音声付きスライドで要点を確認し、朝礼投影・社内研修・配布資料として活用できます。
+                          スライドと確認クイズで要点を学び、朝礼投影・社内研修・配布資料として活用できます。
                         </p>
                       </div>
                       <Link
