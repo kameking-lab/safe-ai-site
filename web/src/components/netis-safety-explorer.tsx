@@ -400,7 +400,7 @@ export function NetisSafetyExplorer() {
         当サイトで出典を確認した{ALL_TECHNOLOGIES.length}件を掲載しています。NETIS全登録技術の一覧ではありません。
       </p>
       <p className="mt-1 text-sm leading-6 text-slate-700 dark:text-slate-200">
-        第5陣26件は2026年9月26日にNETIS個別ページの名称・番号・概要を確認した「調査した技術例」です。最新の掲載状況・適用条件は各公式ページで確認してください。
+        第5・6陣の40件は2026年9月26日にNETIS個別ページの名称・番号・概要を確認した「調査した技術の例」です。従来掲載分を含め、最新の掲載状況・適用条件は各公式ページで確認してください。
       </p>
       <details className="mt-1 text-xs text-slate-600 dark:text-slate-300">
         <summary className="flex min-h-11 cursor-pointer items-center font-bold underline underline-offset-4">

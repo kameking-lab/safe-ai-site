@@ -333,7 +333,18 @@ describe("NetisSafetyGuide", () => {
       expect(item.limitedIntroduction).toBe(true);
       expect(item.checkedAt).toBe("2026年9月26日");
       expect(item.individualUrl).toBe(`https://www.netis.mlit.go.jp/netis/pubsearch/details?regNo=${item.registrationNumber.replace(/-(?:A|V[ER])$/i, "")}`);
+      expect(item.summary.length).toBeGreaterThan(15);
     }
+    const added = [...NETIS_WAVE5_TECHNOLOGIES, ...NETIS_WAVE6_TECHNOLOGIES];
+    const searchable = added.map((item) => `${item.name} ${item.summary} ${item.searchTerms} ${item.categoryLabel}`).join(" ");
+    for (const term of ["橋梁", "排水", "電気", "地盤", "計測"]) expect(searchable).toContain(term);
+    for (const forbidden of ["現役", "期限内", "推奨技術です", "性能を保証", "販売可能"]) {
+      expect(added.map((item) => item.summary).join(" ")).not.toContain(forbidden);
+    }
+    expect(NETIS_WAVE6_TECHNOLOGIES.find((item) => item.registrationNumber === "KT-180043-VE")).toMatchObject({
+      name: "クラウド計測システム 『クラウド16』",
+      summary: "最大16台の計測器の情報をクラウドへ蓄積し、環境・気象等の計測管理を行う。",
+    });
   });
 
   it("第5陣は番号・用途語・防災カテゴリのURLから探せ、誤認防止文を表示する", () => {
