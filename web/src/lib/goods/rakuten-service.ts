@@ -12,6 +12,12 @@ const AUTH_FAILURE_TTL_MS = 60_000;
 const MAX_FOLLOWERS_PER_INSTANCE = 32;
 const FOLLOWER_WAIT_MS = 8_500;
 const FOLLOWER_POLL_MS = 100;
+const MAX_ERROR_BODY_BYTES = 2_048;
+const RAKUTEN_AUTH_ERROR_CODES = new Set([
+  "access_denied", "forbidden", "invalid_access_key", "invalid_application_id",
+  "invalid_credentials", "invalid_token", "not_authorized", "unauthorized",
+  "wrong_parameter",
+]);
 let followers = 0;
 
 export type GoodsSearch = {
@@ -39,6 +45,31 @@ function retryAfterMs(value: string | null, now: number): number {
 
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function readAuthErrorCode(response: Response): Promise<string> {
+  const reader = response.body?.getReader();
+  if (!reader) return "unknown";
+  const decoder = new TextDecoder();
+  let body = "";
+  let bytes = 0;
+  try {
+    while (bytes <= MAX_ERROR_BODY_BYTES) {
+      const chunk = await reader.read();
+      if (chunk.done) break;
+      bytes += chunk.value.byteLength;
+      if (bytes > MAX_ERROR_BODY_BYTES) return "unknown";
+      body += decoder.decode(chunk.value, { stream: true });
+    }
+    body += decoder.decode();
+    const parsed: unknown = JSON.parse(body);
+    const code = parsed && typeof parsed === "object" && "error" in parsed ? parsed.error : null;
+    return typeof code === "string" && RAKUTEN_AUTH_ERROR_CODES.has(code) ? code : "unknown";
+  } catch {
+    return "unknown";
+  } finally {
+    void reader.cancel().catch(() => undefined);
+  }
 }
 
 /** The store is shared by all server instances; no process-local result cache is used. */
@@ -109,6 +140,12 @@ export function createRakutenGoodsService(store: RakutenGoodsStore | null, fetch
           } else if (response.status === 401 || response.status === 403) {
             result = unavailable("authorization_failed");
             ttlMs = AUTH_FAILURE_TTL_MS;
+            // Only a fixed error code leaves this process. Descriptions may
+            // echo credentials or request URLs and are never logged.
+            console.warn("[rakuten-goods] authorization_failed", {
+              httpStatus: response.status,
+              errorCode: await readAuthErrorCode(response),
+            });
           } else if (response.status === 429) {
             result = unavailable("rate_limited");
             cooldownMs = retryAfterMs(response.headers.get("retry-after"), Date.now());

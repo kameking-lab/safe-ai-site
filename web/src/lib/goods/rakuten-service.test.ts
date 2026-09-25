@@ -107,6 +107,7 @@ describe("shared Rakuten product service", () => {
   it("expires zero-item results and briefly caches authorization failures without inventing products", async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-09-26T00:00:00Z"));
+    vi.spyOn(console, "warn").mockImplementation(() => undefined);
     const shared = cluster();
     const fetcher = vi.fn()
       .mockImplementationOnce(async () => Response.json({ items: [] }))
@@ -122,6 +123,32 @@ describe("shared Rakuten product service", () => {
     expect((fetcher as ReturnType<typeof vi.fn>).mock.calls).toHaveLength(2);
     await vi.advanceTimersByTimeAsync(60_001);
     expect((await service(search)).status).toBe("ready");
+  });
+
+  it("logs only an allowlisted 401/403 code even when the body contains credentials and URLs", async () => {
+    const logger = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const secretBody = { error: "invalid_access_key",
+      error_description: `accessKey=${search.accessKey} applicationId=${search.applicationId} affiliateId=${search.affiliateId} https://openapi.rakuten.co.jp/private` };
+    const fetcher = vi.fn(async () => Response.json(secretBody, { status: 403 })) as unknown as typeof fetch;
+    const service = createRakutenGoodsService(cluster().instance(), fetcher);
+    const result = await service(search);
+    expect(result).toMatchObject({ status: "unavailable", reason: "authorization_failed", items: [], checkedAt: null });
+    expect(logger).toHaveBeenCalledExactlyOnceWith("[rakuten-goods] authorization_failed", {
+      httpStatus: 403, errorCode: "invalid_access_key",
+    });
+    const output = JSON.stringify({ result, logs: logger.mock.calls });
+    for (const value of [search.applicationId, search.accessKey, search.affiliateId, secretBody.error_description]) {
+      expect(output).not.toContain(value);
+    }
+
+    logger.mockClear();
+    const malicious = vi.fn(async () => Response.json({ error: search.accessKey, error_description: "do not log me" }, { status: 401 })) as unknown as typeof fetch;
+    const second = createRakutenGoodsService(cluster().instance(), malicious);
+    expect((await second(search)).reason).toBe("authorization_failed");
+    expect(logger).toHaveBeenCalledExactlyOnceWith("[rakuten-goods] authorization_failed", {
+      httpStatus: 401, errorCode: "unknown",
+    });
+    expect(JSON.stringify(logger.mock.calls)).not.toContain(search.accessKey);
   });
 
   it("treats malformed success and timeouts as short unavailable results", async () => {
