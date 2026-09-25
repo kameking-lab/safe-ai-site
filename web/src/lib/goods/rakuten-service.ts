@@ -13,6 +13,8 @@ const MAX_FOLLOWERS_PER_INSTANCE = 32;
 const FOLLOWER_WAIT_MS = 8_500;
 const FOLLOWER_POLL_MS = 100;
 const MAX_ERROR_BODY_BYTES = 2_048;
+const AUTH_PROBE_TTL_MS = 24 * 60 * 60_000;
+const AUTH_PROBE_GATE_WAIT_MS = 4_000;
 const RAKUTEN_AUTH_ERROR_CODES = new Set([
   "access_denied", "forbidden", "invalid_access_key", "invalid_application_id",
   "invalid_credentials", "invalid_token", "not_authorized", "unauthorized",
@@ -47,6 +49,21 @@ function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+function searchUrl(search: GoodsSearch): URL {
+  const url = new URL(API_URL);
+  url.searchParams.set("applicationId", search.applicationId);
+  url.searchParams.set("affiliateId", search.affiliateId);
+  url.searchParams.set("keyword", search.keyword);
+  url.searchParams.set("formatVersion", "2");
+  url.searchParams.set("hits", "30");
+  url.searchParams.set("sort", "-reviewCount");
+  url.searchParams.set("imageFlag", "1");
+  url.searchParams.set("hasReviewFlag", "1");
+  url.searchParams.set("availability", "1");
+  url.searchParams.set("elements", "itemCode,itemName,affiliateUrl,mediumImageUrls,reviewAverage,reviewCount,availability");
+  return url;
+}
+
 async function readAuthErrorCode(response: Response): Promise<string> {
   const reader = response.body?.getReader();
   if (!reader) return "unknown";
@@ -74,6 +91,49 @@ async function readAuthErrorCode(response: Response): Promise<string> {
 
 /** The store is shared by all server instances; no process-local result cache is used. */
 export function createRakutenGoodsService(store: RakutenGoodsStore | null, fetcher: typeof fetch = fetch) {
+  async function probeQueryAuthorization(search: GoodsSearch, applicationHash: string,
+    headerStatus: number, headerCode: string): Promise<void> {
+    if (!store || search.environment !== "production" || process.env.VERCEL_ENV !== "production") return;
+    // One diagnostic attempt per credential version, across all instances.
+    // The marker contains only a digest and expires without a cleanup job.
+    const probeKey = digest("rakuten-auth-header-query-probe-v1", search.applicationId, search.accessKey);
+    const token = randomUUID();
+    try {
+      if (!await store.claim(probeKey, token)) return;
+      let gateHeld = false;
+      let cooldownMs = 0;
+      try {
+        const until = Date.now() + AUTH_PROBE_GATE_WAIT_MS;
+        while (Date.now() < until && !gateHeld) {
+          gateHeld = await store.acquireGate(applicationHash, token);
+          if (!gateHeld) await delay(200);
+        }
+        if (!gateHeld) return;
+        const url = searchUrl(search);
+        url.searchParams.set("accessKey", search.accessKey);
+        const response = await fetcher(url, { cache: "no-store", signal: AbortSignal.timeout(7_000) });
+        const queryCode = response.status === 401 || response.status === 403
+          ? await readAuthErrorCode(response) : null;
+        if (response.status === 429) cooldownMs = retryAfterMs(response.headers.get("retry-after"), Date.now());
+        if (response.status !== 401 && response.status !== 403) {
+          void response.body?.cancel().catch(() => undefined);
+        }
+        // No request URL, headers, raw body, identifiers, or credentials leave this process.
+        console.warn("[rakuten-goods] auth_transport_probe", {
+          headerStatus, headerCode, queryStatus: response.status, queryCode,
+        });
+      } catch {
+        // A network failure has no safe status/code to report. The marker
+        // still prevents unbounded retries on later public page visits.
+      } finally {
+        if (gateHeld) await store.releaseGate(applicationHash, token, cooldownMs);
+        await store.complete(probeKey, token, unavailable("authorization_failed"), AUTH_PROBE_TTL_MS);
+      }
+    } catch {
+      // Shared-state failure never falls back to an unthrottled probe.
+    }
+  }
+
   return async function getProducts(search: GoodsSearch): Promise<ProductResult> {
     if (!store) return unavailable("upstream_error");
     const keyHash = digest(CACHE_VERSION, search.environment, API_URL, search.applicationId,
@@ -108,20 +168,11 @@ export function createRakutenGoodsService(store: RakutenGoodsStore | null, fetch
       let ttlMs = FAILURE_TTL_MS;
       let gateHeld = false;
       let cooldownMs = 0;
+      let authFailure: { status: number; code: string } | null = null;
       try {
         gateHeld = await store.acquireGate(applicationHash, token);
         if (gateHeld) {
-          const url = new URL(API_URL);
-          url.searchParams.set("applicationId", search.applicationId);
-          url.searchParams.set("affiliateId", search.affiliateId);
-          url.searchParams.set("keyword", search.keyword);
-          url.searchParams.set("formatVersion", "2");
-          url.searchParams.set("hits", "30");
-          url.searchParams.set("sort", "-reviewCount");
-          url.searchParams.set("imageFlag", "1");
-          url.searchParams.set("hasReviewFlag", "1");
-          url.searchParams.set("availability", "1");
-          url.searchParams.set("elements", "itemCode,itemName,affiliateUrl,mediumImageUrls,reviewAverage,reviewCount,availability");
+          const url = searchUrl(search);
           const response = await fetcher(url, {
             headers: { accessKey: search.accessKey },
             cache: "no-store",
@@ -140,11 +191,13 @@ export function createRakutenGoodsService(store: RakutenGoodsStore | null, fetch
           } else if (response.status === 401 || response.status === 403) {
             result = unavailable("authorization_failed");
             ttlMs = AUTH_FAILURE_TTL_MS;
+            const code = await readAuthErrorCode(response);
+            authFailure = { status: response.status, code };
             // Only a fixed error code leaves this process. Descriptions may
             // echo credentials or request URLs and are never logged.
             console.warn("[rakuten-goods] authorization_failed", {
               httpStatus: response.status,
-              errorCode: await readAuthErrorCode(response),
+              errorCode: code,
             });
           } else if (response.status === 429) {
             result = unavailable("rate_limited");
@@ -163,6 +216,8 @@ export function createRakutenGoodsService(store: RakutenGoodsStore | null, fetch
         if (gateHeld) await store.releaseGate(applicationHash, token, cooldownMs);
         await store.complete(keyHash, token, result, ttlMs);
       }
+      if (authFailure) await probeQueryAuthorization(search, applicationHash,
+        authFailure.status, authFailure.code);
       return result;
     } catch {
       // Shared state is mandatory. Never fall back to a process-local cache or
