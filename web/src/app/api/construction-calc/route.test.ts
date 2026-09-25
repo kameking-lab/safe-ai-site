@@ -61,7 +61,7 @@ describe("/api/construction-calc deterministic explanation", () => {
     );
     expect(JSON.parse(String(init.body))).toMatchObject({
       generationConfig: {
-        thinkingConfig: { thinkingLevel: "low" },
+        thinkingConfig: { thinkingLevel: "LOW" },
         responseMimeType: "application/json",
       },
     });

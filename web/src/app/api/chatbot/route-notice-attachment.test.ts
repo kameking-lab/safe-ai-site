@@ -161,7 +161,7 @@ describe.each([
         contents: expect.any(String),
         config: {
           systemInstruction: expect.any(String),
-          thinkingConfig: { thinkingLevel: "low" },
+          thinkingConfig: { thinkingLevel: "LOW" },
           abortSignal: expect.anything(),
         },
       });

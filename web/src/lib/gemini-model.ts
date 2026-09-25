@@ -1,3 +1,5 @@
+import type { ThinkingLevel } from "@google/genai";
+
 /**
  * Production Gemini model policy.
  *
@@ -10,4 +12,8 @@ export const GEMINI_FLASH_MODEL = "gemini-3.8-flash" as const;
 // Chat responses are evidence-only, and calculator routing is validated by
 // deterministic code. Keep those latency-sensitive requests at low thinking
 // effort; KY hazard proposals retain the model's medium default.
-export const GEMINI_FAST_THINKING_CONFIG = { thinkingLevel: "low" } as const;
+// The SDK types this wire value as an enum; the REST endpoint accepts "LOW".
+// A type-only import keeps the calculator's raw REST route independent of the SDK bundle.
+export const GEMINI_FAST_THINKING_CONFIG = {
+  thinkingLevel: "LOW" as ThinkingLevel,
+} as const;
