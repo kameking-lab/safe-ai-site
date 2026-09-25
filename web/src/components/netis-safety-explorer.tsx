@@ -322,7 +322,7 @@ export function NetisSafetyExplorer() {
         })}
       </div>
       <p className="mt-2 text-xs text-slate-600 dark:text-slate-300">
-        カテゴリ写真は作業場面・機材の代表例（実写）です。NETIS掲載製品の写真ではありません。
+        カテゴリ代表画像には現場・機材の写真と3Dモデル図が含まれます。掲載技術固有の製品写真・画面ではありません。
       </p>
       <p className="mt-2 text-sm leading-6 text-slate-700 dark:text-slate-200">
         当サイトで出典を確認した{FEATURED_NETIS_TECHNOLOGIES.length}件を掲載しています。NETIS全登録技術の一覧ではありません。
