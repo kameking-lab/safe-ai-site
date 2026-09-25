@@ -97,7 +97,7 @@ test("保護具9入口と補助用品8分類を選べ、戻る・再読込で現
 test("NETISの給気式直リンクでは商品・通販を表示しない", async ({ page }) => {
   await page.goto("/goods?category=respiratory&intent=supplied&feature=supplied");
   await expect(page.getByText(/対象の物質や作業条件が分かるまで、商品候補は表示しません/u)).toBeVisible();
-  await expect(page.getByRole("link", { name: /Amazonで探す|楽天市場で探す/u })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: /Amazonで探す|楽天(?:市場)?で探す/u })).toHaveCount(0);
   await expect(page.getByRole("list", { name: "実商品写真を左右にスライド" })).toHaveCount(0);
 });
 

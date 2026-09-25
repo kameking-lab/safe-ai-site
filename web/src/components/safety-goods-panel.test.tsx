@@ -125,7 +125,7 @@ describe("SafetyGoodsPanel", () => {
     render(<SafetyGoodsPanel />);
     expect(screen.getByText(/対象の物質や作業条件が分かるまで、商品候補は表示しません/u)).toBeDefined();
     expect(screen.queryByText(/Amazonで探す/u)).toBeNull();
-    expect(screen.queryByText(/楽天市場で探す/u)).toBeNull();
+    expect(screen.queryByText(/楽天(?:市場)?で探す/u)).toBeNull();
   });
 
   it("NETISのブラスト専用装備から来た給気式直リンクは通販候補を出さない", () => {
@@ -133,6 +133,6 @@ describe("SafetyGoodsPanel", () => {
     render(<SafetyGoodsPanel />);
     expect(screen.getByText(/対象の物質や作業条件が分かるまで、商品候補は表示しません/u)).toBeDefined();
     expect(screen.queryByText(/Amazonで探す/u)).toBeNull();
-    expect(screen.queryByText(/楽天市場で探す/u)).toBeNull();
+    expect(screen.queryByText(/楽天(?:市場)?で探す/u)).toBeNull();
   });
 });
