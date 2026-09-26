@@ -1,6 +1,7 @@
 import "server-only";
 import { createHash, randomUUID } from "node:crypto";
-import { rakutenItemList, selectHighRatedGoodsProducts } from "./rakuten-products";
+import { describeRakutenResponse, rakutenItemList, selectGoodsProductsWithStats,
+  type RakutenResponseShape } from "./rakuten-products";
 import { unavailable, type ProductResult } from "./product-result";
 import type { RakutenGoodsStore } from "./rakuten-store";
 import { SITE_URL } from "@/lib/seo-metadata";
@@ -10,7 +11,7 @@ const API_URL = "https://openapi.rakuten.co.jp/ichibams/api/IchibaItem/Search/20
 // サーバー側fetchは既定で両方とも送らないため、自サイトの正規URLだけを明示する。
 // Node.jsランタイムのfetchはこの2ヘッダーを送出する（Edge化すると除去され得るので注意）。
 const REQUEST_CONTEXT_HEADERS = { Referer: `${SITE_URL}/`, Origin: SITE_URL } as const;
-const CACHE_VERSION = "goods-search-v3";
+const CACHE_VERSION = "goods-search-v4";
 const SUCCESS_TTL_MS = 5 * 60_000;
 const FAILURE_TTL_MS = 5_000;
 const AUTH_FAILURE_TTL_MS = 60_000;
@@ -83,7 +84,9 @@ function searchUrl(search: GoodsSearch): URL {
   url.searchParams.set("imageFlag", "1");
   url.searchParams.set("hasReviewFlag", "1");
   url.searchParams.set("availability", "1");
-  url.searchParams.set("elements", "itemCode,itemName,affiliateUrl,mediumImageUrls,reviewAverage,reviewCount,availability");
+  // `elements` limits the response to the listed fields, so the documented
+  // top-level `count` is requested explicitly to recognise a genuine 0-hit search.
+  url.searchParams.set("elements", "count,itemCode,itemName,affiliateUrl,mediumImageUrls,reviewAverage,reviewCount,availability");
   return url;
 }
 
@@ -200,7 +203,7 @@ export function createRakutenGoodsService(store: RakutenGoodsStore | null, fetch
       let cooldownMs = 0;
       let authFailure: { status: number; code: string } | null = null;
       // Fixed categories only; the upstream body is never read into logs.
-      let upstreamFailure: { httpStatus: number | null; category: string } | null = null;
+      let upstreamFailure: { httpStatus: number | null; category: string } & Partial<RakutenResponseShape> | null = null;
       try {
         gateHeld = await store.acquireGate(applicationHash, token);
         if (gateHeld) {
@@ -220,16 +223,23 @@ export function createRakutenGoodsService(store: RakutenGoodsStore | null, fetch
               if (name === "TimeoutError" || name === "AbortError") throw error;
               upstreamFailure = { httpStatus: response.status, category: "invalid_json" };
             }
+            const shape = describeRakutenResponse(payload);
+            // Only an explicit official count of 0 without errors is an empty
+            // result. Any other body lacking an item array stays an error.
+            const emptyResult = shape.count === 0 && shape.itemsKey === "absent" && !shape.hasErrors;
             if (upstreamFailure) {
               result = unavailable("upstream_error");
-            } else if (!rakutenItemList(payload)) {
+            } else if (!rakutenItemList(payload) && !emptyResult) {
               result = unavailable("upstream_error");
-              upstreamFailure = { httpStatus: response.status, category: "missing_items_array" };
+              upstreamFailure = { httpStatus: response.status, category: "missing_items_array",
+                count: shape.count, itemsKey: shape.itemsKey, hasErrors: shape.hasErrors };
             } else {
-              const items = selectHighRatedGoodsProducts(payload);
+              const { items, stats } = selectGoodsProductsWithStats(payload);
               result = { status: items.length ? "ready" : "no_qualified_items", items,
                 checkedAt: new Date().toISOString(), reason: null };
               ttlMs = SUCCESS_TTL_MS;
+              // Counts only; no names, codes, URLs or search terms.
+              console.info("[rakuten-goods] search_result", { count: shape.count, ...stats });
             }
           } else if (response.status === 401 || response.status === 403) {
             result = unavailable("authorization_failed");

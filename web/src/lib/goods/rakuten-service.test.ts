@@ -266,7 +266,7 @@ describe("shared Rakuten product service", () => {
     const service = createRakutenGoodsService(cluster().instance(), fetcher);
     for (const expected of [
       { httpStatus: 400, category: "http_status" },
-      { httpStatus: 200, category: "missing_items_array" },
+      { httpStatus: 200, category: "missing_items_array", count: null, itemsKey: "absent", hasErrors: true },
       { httpStatus: 200, category: "invalid_json" },
       { httpStatus: null, category: "request_failed" },
     ]) {
@@ -275,6 +275,87 @@ describe("shared Rakuten product service", () => {
       expect(logger).toHaveBeenCalledExactlyOnceWith("[rakuten-goods] upstream_error", expected);
       expect(JSON.stringify(logger.mock.calls)).not.toContain(search.accessKey);
       await vi.advanceTimersByTimeAsync(5_001);
+    }
+  });
+
+  it("requests the documented count field so a 0-hit search is recognisable", async () => {
+    const fetcher = vi.fn(async () => Response.json({ count: 0 })) as unknown as typeof fetch;
+    await createRakutenGoodsService(cluster().instance(), fetcher)(search);
+    const [url] = (fetcher as ReturnType<typeof vi.fn>).mock.calls[0] as [URL];
+    expect(url.searchParams.get("elements")?.split(",")).toEqual(["count", "itemCode", "itemName",
+      "affiliateUrl", "mediumImageUrls", "reviewAverage", "reviewCount", "availability"]);
+  });
+
+  it("treats only an explicit count of 0 as an empty result; other array-less bodies stay upstream errors", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-09-26T00:00:00Z"));
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const info = vi.spyOn(console, "info").mockImplementation(() => undefined);
+    const secret = `accessKey=${search.accessKey}`;
+    const cases: [unknown, Record<string, unknown>, Record<string, unknown> | null][] = [
+      [{ count: 0, hits: 0, pageCount: 0 }, { status: "no_qualified_items", reason: null, items: [] }, null],
+      [{ count: 0, Items: [] }, { status: "no_qualified_items", reason: null, items: [] }, null],
+      [{ count: 120 }, { status: "unavailable", reason: "upstream_error" },
+        { count: 120, itemsKey: "absent", hasErrors: false }],
+      [{ count: "0" }, { status: "unavailable", reason: "upstream_error" }, { count: null, itemsKey: "absent", hasErrors: false }],
+      [{}, { status: "unavailable", reason: "upstream_error" }, { count: null, itemsKey: "absent", hasErrors: false }],
+      [{ count: 0, errors: { errorMessage: secret } }, { status: "unavailable", reason: "upstream_error" },
+        { count: 0, itemsKey: "absent", hasErrors: true }],
+      [{ count: 0, Items: {} }, { status: "unavailable", reason: "upstream_error" }, { count: 0, itemsKey: "object", hasErrors: false }],
+      [{ count: 1, Items: { 0: { itemCode: "A" } } }, { status: "unavailable", reason: "upstream_error" },
+        { count: 1, itemsKey: "object", hasErrors: false }],
+      [{ count: 1, secret_token: secret, Items: "ERR_TXT" }, { status: "unavailable", reason: "upstream_error" },
+        { count: 1, itemsKey: "other", hasErrors: false }],
+      [true, { status: "unavailable", reason: "upstream_error" }, { count: null, itemsKey: "absent", hasErrors: false }],
+      [[product], { status: "unavailable", reason: "upstream_error" }, { count: null, itemsKey: "absent", hasErrors: false }],
+      [{ count: -1 }, { status: "unavailable", reason: "upstream_error" }, { count: null, itemsKey: "absent", hasErrors: false }],
+    ];
+    for (const [body, expected, log] of cases) {
+      warn.mockClear();
+      const fetcher = vi.fn(async () => Response.json(body)) as unknown as typeof fetch;
+      expect(await createRakutenGoodsService(cluster().instance(), fetcher)(search)).toMatchObject(expected);
+      if (log) {
+        expect(warn).toHaveBeenCalledExactlyOnceWith("[rakuten-goods] upstream_error",
+          { httpStatus: 200, category: "missing_items_array", ...log });
+      } else {
+        expect(warn).not.toHaveBeenCalled();
+      }
+      for (const value of [search.accessKey, "ERR_TXT", "secret_token"]) {
+        expect(JSON.stringify([...warn.mock.calls, ...info.mock.calls])).not.toContain(value);
+      }
+    }
+  });
+
+  it("caches a genuine empty result like any other success", async () => {
+    vi.spyOn(console, "info").mockImplementation(() => undefined);
+    const fetcher = vi.fn(async () => Response.json({ count: 0 })) as unknown as typeof fetch;
+    const service = createRakutenGoodsService(cluster().instance(), fetcher);
+    expect((await service(search)).status).toBe("no_qualified_items");
+    expect((await service(search)).status).toBe("no_qualified_items");
+    expect((fetcher as ReturnType<typeof vi.fn>).mock.calls).toHaveLength(1);
+  });
+
+  it("logs search counts and exclusion reasons as numbers only", async () => {
+    const info = vi.spyOn(console, "info").mockImplementation(() => undefined);
+    const fetcher = vi.fn(async () => Response.json({ count: 812, Items: [
+      product,
+      { ...product, itemCode: "no-name", itemName: "" },
+      { ...product, itemCode: "no-photo", mediumImageUrls: [] },
+      { ...product, itemCode: "outside-link", affiliateUrl: "https://example.com/x" },
+      product,
+      { ...product, itemCode: "low", reviewAverage: 4.1 },
+      { ...product, itemCode: "few", reviewCount: 9 },
+      { ...product, itemCode: "sold-out", availability: 0 },
+    ] })) as unknown as typeof fetch;
+    const result = await createRakutenGoodsService(cluster().instance(), fetcher)(search);
+    expect(result).toMatchObject({ status: "ready", items: [{ id: product.itemCode }] });
+    expect(info).toHaveBeenCalledExactlyOnceWith("[rakuten-goods] search_result", {
+      count: 812, received: 8, qualified: 1, missingFields: 1, badImage: 1, badAffiliate: 1,
+      duplicate: 1, lowRating: 1, fewReviews: 1, unavailable: 1,
+    });
+    const logged = JSON.stringify(info.mock.calls);
+    for (const value of [product.itemName, product.itemCode, search.keyword, "example.com"]) {
+      expect(logged).not.toContain(value);
     }
   });
 
