@@ -43,7 +43,7 @@ describe("public safety goods category contract", () => {
     expect(helmet.find((feature) => feature.id === "flying")?.searchQuery).toBe("保護帽 飛来 落下");
     // 防災用品など使用区分を名乗らない出品を墜落・飛来落下の一覧に出さない（本番で1件混入を確認）。
     expect(helmet.find((feature) => feature.id === "fall")?.nameMustInclude).toEqual(["墜落"]);
-    expect(helmet.find((feature) => feature.id === "flying")?.nameMustInclude).toEqual(["飛来", "落下"]);
+    expect(helmet.find((feature) => feature.id === "flying")?.nameMustInclude).toEqual(["飛来", "落下物"]);
     for (const feature of helmet) {
       expect(feature.searchQuery).toContain("保護帽");
       expect(feature.searchQuery).toMatch(/墜落時保護|飛来|電気用/);
