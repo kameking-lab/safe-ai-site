@@ -11,8 +11,8 @@ export type GoodsProductFeature = {
 // A null query deliberately withholds products until the hazard is identified.
 export const GOODS_PRODUCT_FEATURES: Readonly<Record<string, readonly GoodsProductFeature[]>> = {
   "head-protection": [
-    { id: "flying", label: "飛来・落下物", detail: "資材や工具が頭に当たるおそれ", searchQuery: "産業用 保護帽 飛来 落下", check: "型式の使用区分と飛来・落下物への適合をメーカー資料で確認" },
-    { id: "fall", label: "墜落時の頭部保護", detail: "高所作業や足場で使う", searchQuery: "産業用 保護帽 墜落時保護", check: "墜落時保護の使用区分とあごひもの仕様をメーカー資料で確認" },
+    { id: "flying", label: "飛来・落下物", detail: "資材や工具が頭に当たるおそれ", searchQuery: "保護帽 飛来 落下", check: "型式の使用区分と飛来・落下物への適合をメーカー資料で確認" },
+    { id: "fall", label: "墜落時の頭部保護", detail: "高所作業や足場で使う", searchQuery: "保護帽 墜落時保護", check: "墜落時保護の使用区分とあごひもの仕様をメーカー資料で確認" },
     { id: "electric", label: "電気作業", detail: "充電部への接近や電気設備の作業", searchQuery: "電気用 保護帽 作業", check: "絶縁性能の有無と作業電圧・使用期限をメーカー資料で確認" },
   ],
   "fall-protection": [
