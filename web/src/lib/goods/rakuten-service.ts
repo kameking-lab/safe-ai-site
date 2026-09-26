@@ -214,7 +214,10 @@ export function createRakutenGoodsService(store: RakutenGoodsStore | null, fetch
             let payload: unknown = null;
             try {
               payload = await response.json();
-            } catch {
+            } catch (error) {
+              // The request timeout also covers the body; keep reporting it as a timeout.
+              const name = error && typeof error === "object" && "name" in error ? error.name : null;
+              if (name === "TimeoutError" || name === "AbortError") throw error;
               upstreamFailure = { httpStatus: response.status, category: "invalid_json" };
             }
             if (upstreamFailure) {
@@ -243,6 +246,7 @@ export function createRakutenGoodsService(store: RakutenGoodsStore | null, fetch
             result = unavailable("rate_limited");
             cooldownMs = retryAfterMs(response.headers.get("retry-after"), Date.now());
             ttlMs = Math.min(cooldownMs, SUCCESS_TTL_MS);
+            void response.body?.cancel().catch(() => undefined);
           } else {
             result = unavailable("upstream_error");
             upstreamFailure = { httpStatus: response.status, category: "http_status" };

@@ -278,6 +278,15 @@ describe("shared Rakuten product service", () => {
     }
   });
 
+  it("reports a stalled success body as a timeout, not invalid_json", async () => {
+    const logger = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const stalled = new ReadableStream({ start(controller) { controller.error(new DOMException("timeout", "TimeoutError")); } });
+    const fetcher = vi.fn(async () => new Response(stalled, { status: 200 })) as unknown as typeof fetch;
+    expect(await createRakutenGoodsService(cluster().instance(), fetcher)(search))
+      .toMatchObject({ status: "unavailable", reason: "timeout", items: [] });
+    expect(logger).not.toHaveBeenCalled();
+  });
+
   it("treats malformed success and timeouts as short unavailable results", async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-09-26T00:00:00Z"));
