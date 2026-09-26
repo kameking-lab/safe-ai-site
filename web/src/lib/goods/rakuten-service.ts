@@ -3,9 +3,14 @@ import { createHash, randomUUID } from "node:crypto";
 import { selectHighRatedGoodsProducts } from "./rakuten-products";
 import { unavailable, type ProductResult } from "./product-result";
 import type { RakutenGoodsStore } from "./rakuten-store";
+import { SITE_URL } from "@/lib/seo-metadata";
 
 const API_URL = "https://openapi.rakuten.co.jp/ichibams/api/IchibaItem/Search/20260701";
-const CACHE_VERSION = "goods-search-v2";
+// 楽天2026 APIはアプリの「許可されたWebサイト」とReferer/Originを照合する。
+// サーバー側fetchは既定で両方とも送らないため、自サイトの正規URLだけを明示する。
+// Node.jsランタイムのfetchはこの2ヘッダーを送出する（Edge化すると除去され得るので注意）。
+const REQUEST_CONTEXT_HEADERS = { Referer: `${SITE_URL}/`, Origin: SITE_URL } as const;
+const CACHE_VERSION = "goods-search-v3";
 const SUCCESS_TTL_MS = 5 * 60_000;
 const FAILURE_TTL_MS = 5_000;
 const AUTH_FAILURE_TTL_MS = 60_000;
@@ -20,6 +25,24 @@ const RAKUTEN_AUTH_ERROR_CODES = new Set([
   "invalid_credentials", "invalid_token", "not_authorized", "unauthorized",
   "wrong_parameter",
 ]);
+// Rakuten 2026 errors.errorMessage values observed for this endpoint, mapped
+// to fixed internal codes. Upstream text itself is never logged.
+const RAKUTEN_2026_ERROR_MESSAGES = new Map([
+  ["Invalid Access Key", "invalid_access_key"],
+  ["REQUEST_CONTEXT_BODY_HTTP_REFERRER_MISSING", "referrer_missing"],
+]);
+
+/** Maps an upstream error string to a fixed internal code, or null. */
+function authErrorCode(errorMessage: unknown, legacyError: unknown): string | null {
+  if (typeof errorMessage === "string") {
+    const known = RAKUTEN_2026_ERROR_MESSAGES.get(errorMessage);
+    if (known) return known;
+    // Unlisted request-context rejections (e.g. a website mismatch) are only
+    // reported as a family so the upstream string cannot reach logs.
+    if (errorMessage.startsWith("REQUEST_CONTEXT_")) return "request_context_other";
+  }
+  return typeof legacyError === "string" && RAKUTEN_AUTH_ERROR_CODES.has(legacyError) ? legacyError : null;
+}
 let followers = 0;
 
 export type GoodsSearch = {
@@ -80,8 +103,11 @@ async function readAuthErrorCode(response: Response): Promise<string> {
     }
     body += decoder.decode();
     const parsed: unknown = JSON.parse(body);
-    const code = parsed && typeof parsed === "object" && "error" in parsed ? parsed.error : null;
-    return typeof code === "string" && RAKUTEN_AUTH_ERROR_CODES.has(code) ? code : "unknown";
+    if (!parsed || typeof parsed !== "object") return "unknown";
+    // 2026 API: {"errors":{"errorCode":403,"errorMessage":"..."}}; legacy: {"error":"..."}.
+    const errors = "errors" in parsed && parsed.errors && typeof parsed.errors === "object" ? parsed.errors : null;
+    const message = errors && "errorMessage" in errors ? errors.errorMessage : null;
+    return authErrorCode(message, "error" in parsed ? parsed.error : null) ?? "unknown";
   } catch {
     return "unknown";
   } finally {
@@ -111,7 +137,11 @@ export function createRakutenGoodsService(store: RakutenGoodsStore | null, fetch
         if (!gateHeld) return;
         const url = searchUrl(search);
         url.searchParams.set("accessKey", search.accessKey);
-        const response = await fetcher(url, { cache: "no-store", signal: AbortSignal.timeout(7_000) });
+        const response = await fetcher(url, {
+          headers: { ...REQUEST_CONTEXT_HEADERS },
+          cache: "no-store",
+          signal: AbortSignal.timeout(7_000),
+        });
         const queryCode = response.status === 401 || response.status === 403
           ? await readAuthErrorCode(response) : null;
         if (response.status === 429) cooldownMs = retryAfterMs(response.headers.get("retry-after"), Date.now());
@@ -174,7 +204,7 @@ export function createRakutenGoodsService(store: RakutenGoodsStore | null, fetch
         if (gateHeld) {
           const url = searchUrl(search);
           const response = await fetcher(url, {
-            headers: { accessKey: search.accessKey },
+            headers: { ...REQUEST_CONTEXT_HEADERS, accessKey: search.accessKey },
             cache: "no-store",
             signal: AbortSignal.timeout(7_000),
           });
