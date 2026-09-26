@@ -42,6 +42,18 @@ describe("selectHighRatedGoodsProducts", () => {
     expect(selectGoodsProductsWithStats(null).stats.received).toBe(0);
   });
 
+  it("使用区分語の指定があれば商品名に含むものだけ残し、他の条件は変えない", () => {
+    const raw = { Items: [
+      { ...valid, itemCode: "a", itemName: "保護帽 墜落時保護用" },
+      { ...valid, itemCode: "b", itemName: "防災ヘルメット" },
+      { ...valid, itemCode: "c", itemName: "保護帽 墜落時保護用", reviewAverage: 4.0 },
+    ] };
+    const { items, stats } = selectGoodsProductsWithStats(raw, { nameMustInclude: ["墜落"] });
+    expect(items.map((item) => item.id)).toEqual(["a"]);
+    expect(stats).toMatchObject({ received: 3, qualified: 1, offTopic: 1, lowRating: 1 });
+    expect(selectGoodsProductsWithStats(raw, { nameMustInclude: [] }).stats).toMatchObject({ offTopic: 0, qualified: 2 });
+  });
+
   it("応答の形は件数・キー有無/型だけで要約する", () => {
     expect(describeRakutenResponse({ count: 0 })).toEqual({ count: 0, itemsKey: "absent", hasErrors: false });
     expect(describeRakutenResponse({ count: 3, items: [], Items: {} })).toEqual({ count: 3, itemsKey: "array", hasErrors: false });
