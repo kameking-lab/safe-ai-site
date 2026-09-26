@@ -318,7 +318,10 @@ describe("shared Rakuten product service", () => {
         expect(warn).toHaveBeenCalledExactlyOnceWith("[rakuten-goods] upstream_error",
           { httpStatus: 200, category: "missing_items_array", ...log });
       } else {
-        expect(warn).not.toHaveBeenCalled();
+        expect(warn).toHaveBeenCalledExactlyOnceWith("[rakuten-goods] search_result", {
+          count: 0, received: 0, qualified: 0, missingFields: 0, badImage: 0, badAffiliate: 0,
+          duplicate: 0, lowRating: 0, fewReviews: 0, unavailable: 0,
+        });
       }
       for (const value of [search.accessKey, "ERR_TXT", "secret_token"]) {
         expect(JSON.stringify([...warn.mock.calls, ...info.mock.calls])).not.toContain(value);
@@ -326,8 +329,24 @@ describe("shared Rakuten product service", () => {
     }
   });
 
+  it("logs a zero-product search as a counts-only warning", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const info = vi.spyOn(console, "info").mockImplementation(() => undefined);
+    const fetcher = vi.fn(async () => Response.json({ count: 57, Items: [
+      { ...product, itemCode: "low", reviewAverage: 3.9 },
+      { ...product, itemCode: "few", reviewCount: 2 },
+    ] })) as unknown as typeof fetch;
+    expect((await createRakutenGoodsService(cluster().instance(), fetcher)(search)).status).toBe("no_qualified_items");
+    expect(info).not.toHaveBeenCalled();
+    expect(warn).toHaveBeenCalledExactlyOnceWith("[rakuten-goods] search_result", {
+      count: 57, received: 2, qualified: 0, missingFields: 0, badImage: 0, badAffiliate: 0,
+      duplicate: 0, lowRating: 1, fewReviews: 1, unavailable: 0,
+    });
+    expect(JSON.stringify(warn.mock.calls)).not.toContain(search.keyword);
+  });
+
   it("caches a genuine empty result like any other success", async () => {
-    vi.spyOn(console, "info").mockImplementation(() => undefined);
+    vi.spyOn(console, "warn").mockImplementation(() => undefined);
     const fetcher = vi.fn(async () => Response.json({ count: 0 })) as unknown as typeof fetch;
     const service = createRakutenGoodsService(cluster().instance(), fetcher);
     expect((await service(search)).status).toBe("no_qualified_items");
@@ -347,8 +366,10 @@ describe("shared Rakuten product service", () => {
       { ...product, itemCode: "few", reviewCount: 9 },
       { ...product, itemCode: "sold-out", availability: 0 },
     ] })) as unknown as typeof fetch;
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
     const result = await createRakutenGoodsService(cluster().instance(), fetcher)(search);
     expect(result).toMatchObject({ status: "ready", items: [{ id: product.itemCode }] });
+    expect(warn).not.toHaveBeenCalled();
     expect(info).toHaveBeenCalledExactlyOnceWith("[rakuten-goods] search_result", {
       count: 812, received: 8, qualified: 1, missingFields: 1, badImage: 1, badAffiliate: 1,
       duplicate: 1, lowRating: 1, fewReviews: 1, unavailable: 1,

@@ -238,8 +238,10 @@ export function createRakutenGoodsService(store: RakutenGoodsStore | null, fetch
               result = { status: items.length ? "ready" : "no_qualified_items", items,
                 checkedAt: new Date().toISOString(), reason: null };
               ttlMs = SUCCESS_TTL_MS;
-              // Counts only; no names, codes, URLs or search terms.
-              console.info("[rakuten-goods] search_result", { count: shape.count, ...stats });
+              // Counts only; no names, codes, URLs or search terms. A category
+              // showing no products is actionable, so it is logged as a warning.
+              const log = items.length ? console.info : console.warn;
+              log("[rakuten-goods] search_result", { count: shape.count, ...stats });
             }
           } else if (response.status === 401 || response.status === 403) {
             result = unavailable("authorization_failed");
