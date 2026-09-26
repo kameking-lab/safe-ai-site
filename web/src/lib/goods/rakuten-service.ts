@@ -8,6 +8,7 @@ import { SITE_URL } from "@/lib/seo-metadata";
 const API_URL = "https://openapi.rakuten.co.jp/ichibams/api/IchibaItem/Search/20260701";
 // 楽天2026 APIはアプリの「許可されたWebサイト」とReferer/Originを照合する。
 // サーバー側fetchは既定で両方とも送らないため、自サイトの正規URLだけを明示する。
+// Node.jsランタイムのfetchはこの2ヘッダーを送出する（Edge化すると除去され得るので注意）。
 const REQUEST_CONTEXT_HEADERS = { Referer: `${SITE_URL}/`, Origin: SITE_URL } as const;
 const CACHE_VERSION = "goods-search-v3";
 const SUCCESS_TTL_MS = 5 * 60_000;

@@ -170,15 +170,19 @@ describe("shared Rakuten product service", () => {
       [{ errors: { errorCode: 403, errorMessage: `REQUEST_CONTEXT_${search.applicationId}` } }, "request_context_other"],
       [{ errors: { errorCode: 403, errorMessage: "REQUEST_CONTEXT_ORIGIN_https://evil.example" } }, "request_context_other"],
       [{ errors: { errorCode: 403, errorMessage: search.accessKey }, error: "invalid_access_key" }, "invalid_access_key"],
+      [{ errors: { errorCode: 403, errorMessage: 403 } }, "unknown"],
+      [{ errors: "REQUEST_CONTEXT_BODY_HTTP_REFERRER_MISSING" }, "unknown"],
+      [{ errors: null }, "unknown"],
+      [{ errors: ["Invalid Access Key"] }, "unknown"],
     ];
     for (const [body, errorCode] of bodies) {
       logger.mockClear();
       const fetcher = vi.fn(async () => Response.json(body, { status: 403 })) as unknown as typeof fetch;
       expect((await createRakutenGoodsService(cluster().instance(), fetcher)(search)).reason).toBe("authorization_failed");
       expect(logger).toHaveBeenCalledExactlyOnceWith("[rakuten-goods] authorization_failed", { httpStatus: 403, errorCode });
-    }
-    for (const value of [search.applicationId, search.accessKey, "evil.example"]) {
-      expect(JSON.stringify(logger.mock.calls)).not.toContain(value);
+      for (const value of [search.applicationId, search.accessKey, "evil.example"]) {
+        expect(JSON.stringify(logger.mock.calls)).not.toContain(value);
+      }
     }
   });
 
