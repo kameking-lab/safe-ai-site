@@ -322,6 +322,7 @@ describe("shared Rakuten product service", () => {
           count: 0, received: 0, qualified: 0, missingFields: 0, badImage: 0, badAffiliate: 0,
           duplicate: 0, lowRating: 0, fewReviews: 0, unavailable: 0,
         });
+        expect(info).not.toHaveBeenCalled();
       }
       for (const value of [search.accessKey, "ERR_TXT", "secret_token"]) {
         expect(JSON.stringify([...warn.mock.calls, ...info.mock.calls])).not.toContain(value);

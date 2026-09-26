@@ -240,8 +240,9 @@ export function createRakutenGoodsService(store: RakutenGoodsStore | null, fetch
               ttlMs = SUCCESS_TTL_MS;
               // Counts only; no names, codes, URLs or search terms. A category
               // showing no products is actionable, so it is logged as a warning.
-              const log = items.length ? console.info : console.warn;
-              log("[rakuten-goods] search_result", { count: shape.count, ...stats });
+              const counts = { count: shape.count, ...stats };
+              if (items.length) console.info("[rakuten-goods] search_result", counts);
+              else console.warn("[rakuten-goods] search_result", counts);
             }
           } else if (response.status === 401 || response.status === 403) {
             result = unavailable("authorization_failed");
