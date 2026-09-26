@@ -24,15 +24,23 @@ const RAKUTEN_AUTH_ERROR_CODES = new Set([
   "invalid_credentials", "invalid_token", "not_authorized", "unauthorized",
   "wrong_parameter",
 ]);
-// Rakuten 2026 constants such as REQUEST_CONTEXT_BODY_HTTP_REFERRER_MISSING.
-// Letters and underscores only, so a credential or URL cannot pass through.
-const RAKUTEN_REQUEST_CONTEXT_CODE = /^request_context_[a-z_]{1,80}$/;
+// Rakuten 2026 errors.errorMessage values observed for this endpoint, mapped
+// to fixed internal codes. Upstream text itself is never logged.
+const RAKUTEN_2026_ERROR_MESSAGES = new Map([
+  ["Invalid Access Key", "invalid_access_key"],
+  ["REQUEST_CONTEXT_BODY_HTTP_REFERRER_MISSING", "referrer_missing"],
+]);
 
-/** Maps an upstream error string to a fixed code; anything else is "unknown". */
-function authErrorCode(value: unknown): string | null {
-  if (typeof value !== "string") return null;
-  const code = value.trim().toLowerCase().replace(/ /g, "_");
-  return RAKUTEN_AUTH_ERROR_CODES.has(code) || RAKUTEN_REQUEST_CONTEXT_CODE.test(code) ? code : null;
+/** Maps an upstream error string to a fixed internal code, or null. */
+function authErrorCode(errorMessage: unknown, legacyError: unknown): string | null {
+  if (typeof errorMessage === "string") {
+    const known = RAKUTEN_2026_ERROR_MESSAGES.get(errorMessage);
+    if (known) return known;
+    // Unlisted request-context rejections (e.g. a website mismatch) are only
+    // reported as a family so the upstream string cannot reach logs.
+    if (errorMessage.startsWith("REQUEST_CONTEXT_")) return "request_context_other";
+  }
+  return typeof legacyError === "string" && RAKUTEN_AUTH_ERROR_CODES.has(legacyError) ? legacyError : null;
 }
 let followers = 0;
 
@@ -98,7 +106,7 @@ async function readAuthErrorCode(response: Response): Promise<string> {
     // 2026 API: {"errors":{"errorCode":403,"errorMessage":"..."}}; legacy: {"error":"..."}.
     const errors = "errors" in parsed && parsed.errors && typeof parsed.errors === "object" ? parsed.errors : null;
     const message = errors && "errorMessage" in errors ? errors.errorMessage : null;
-    return authErrorCode(message) ?? authErrorCode("error" in parsed ? parsed.error : null) ?? "unknown";
+    return authErrorCode(message, "error" in parsed ? parsed.error : null) ?? "unknown";
   } catch {
     return "unknown";
   } finally {

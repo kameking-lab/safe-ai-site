@@ -163,11 +163,13 @@ describe("shared Rakuten product service", () => {
   it("reads allowlisted 2026 errors.errorMessage codes and drops anything that may echo secrets", async () => {
     const logger = vi.spyOn(console, "warn").mockImplementation(() => undefined);
     const bodies: [unknown, string][] = [
-      [{ errors: { errorCode: 403, errorMessage: "REQUEST_CONTEXT_BODY_HTTP_REFERRER_MISSING" } }, "request_context_body_http_referrer_missing"],
+      [{ errors: { errorCode: 403, errorMessage: "REQUEST_CONTEXT_BODY_HTTP_REFERRER_MISSING" } }, "referrer_missing"],
       [{ errors: { errorCode: 403, errorMessage: "Invalid Access Key" } }, "invalid_access_key"],
       [{ errors: { errorCode: 403, errorMessage: `Invalid Access Key ${search.accessKey}` } }, "unknown"],
-      [{ errors: { errorCode: 403, errorMessage: `REQUEST_CONTEXT_${search.applicationId}` } }, "unknown"],
-      [{ errors: { errorCode: 403, errorMessage: "REQUEST_CONTEXT_ORIGIN_https://evil.example" } }, "unknown"],
+      [{ errors: { errorCode: 403, errorMessage: "invalid access key" } }, "unknown"],
+      [{ errors: { errorCode: 403, errorMessage: `REQUEST_CONTEXT_${search.applicationId}` } }, "request_context_other"],
+      [{ errors: { errorCode: 403, errorMessage: "REQUEST_CONTEXT_ORIGIN_https://evil.example" } }, "request_context_other"],
+      [{ errors: { errorCode: 403, errorMessage: search.accessKey }, error: "invalid_access_key" }, "invalid_access_key"],
     ];
     for (const [body, errorCode] of bodies) {
       logger.mockClear();
