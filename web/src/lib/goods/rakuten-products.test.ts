@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { selectHighRatedGoodsProducts } from "./rakuten-products";
+import { describeRakutenResponse, selectGoodsProductsWithStats, selectHighRatedGoodsProducts } from "./rakuten-products";
 
 const valid = {
   itemCode: "shop:helmet-1",
@@ -32,6 +32,21 @@ describe("selectHighRatedGoodsProducts", () => {
     expect(selectHighRatedGoodsProducts({ Items: [{ Item: {
       ...valid, mediumImageUrls: [{ imageUrl: valid.mediumImageUrls[0] }] } }] })).toEqual([expect.objectContaining(expected)]);
     expect(selectHighRatedGoodsProducts({ Items: [{ ...valid, mediumImageUrls: [{ imageUrl: "https://example.com/x.jpg" }] }] })).toEqual([]);
+  });
+
+  it("表示は6件までのまま、内訳は受信した全件を数える", () => {
+    const list = Array.from({ length: 9 }, (_, i) => ({ ...valid, itemCode: `shop:helmet-${i}` }));
+    const { items, stats } = selectGoodsProductsWithStats({ Items: [...list, { ...valid, itemCode: "low", reviewAverage: 4.19 }] });
+    expect(items).toHaveLength(6);
+    expect(stats).toMatchObject({ received: 10, qualified: 9, lowRating: 1 });
+    expect(selectGoodsProductsWithStats(null).stats.received).toBe(0);
+  });
+
+  it("応答の形は件数・キー有無/型だけで要約する", () => {
+    expect(describeRakutenResponse({ count: 0 })).toEqual({ count: 0, itemsKey: "absent", hasErrors: false });
+    expect(describeRakutenResponse({ count: 3, items: [], Items: {} })).toEqual({ count: 3, itemsKey: "array", hasErrors: false });
+    expect(describeRakutenResponse({ count: 1.5, Items: "x", error: "e" })).toEqual({ count: null, itemsKey: "other", hasErrors: true });
+    expect(describeRakutenResponse({ count: 20_000_000, Items: null })).toEqual({ count: null, itemsKey: "other", hasErrors: false });
   });
 
   it("API値がないとき商品を捏造しない", () => {

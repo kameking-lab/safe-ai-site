@@ -49,32 +49,76 @@ function unwrapItem(entry: unknown): RakutenItem | null {
   return entry as RakutenItem;
 }
 
-/** Rakuten API由来の実画像・購入者評価が確認できた商品だけを公開する。 */
-export function selectHighRatedGoodsProducts(raw: unknown): RatedGoodsProduct[] {
-  const list = rakutenItemList(raw);
-  if (!list) return [];
-  const result: RatedGoodsProduct[] = [];
+/** 選別の内訳（件数のみ）。各商品は最初に該当した除外理由だけで数える。 */
+export type GoodsSelectionStats = {
+  received: number;
+  qualified: number;
+  missingFields: number;
+  badImage: number;
+  badAffiliate: number;
+  duplicate: number;
+  lowRating: number;
+  fewReviews: number;
+  unavailable: number;
+};
+
+const MAX_GOODS_ITEMS = 6;
+
+/** 実画像・購入者評価の条件で選別し、表示商品と除外理由別の件数を返す。 */
+export function selectGoodsProductsWithStats(raw: unknown): { items: RatedGoodsProduct[]; stats: GoodsSelectionStats } {
+  const list = rakutenItemList(raw) ?? [];
+  const stats: GoodsSelectionStats = { received: list.length, qualified: 0, missingFields: 0, badImage: 0,
+    badAffiliate: 0, duplicate: 0, lowRating: 0, fewReviews: 0, unavailable: 0 };
+  const items: RatedGoodsProduct[] = [];
   const seen = new Set<string>();
   for (const entry of list) {
     const item = unwrapItem(entry);
-    if (!item || typeof item !== "object") continue;
+    const name = item && typeof item.itemName === "string" ? item.itemName.trim() : "";
+    const id = item && typeof item.itemCode === "string" ? item.itemCode : "";
+    if (!item || typeof item !== "object" || !id || !name) { stats.missingFields += 1; continue; }
     const rating = Number(item.reviewAverage);
     const reviewCount = Number(item.reviewCount);
-    const name = typeof item.itemName === "string" ? item.itemName.trim() : "";
-    const id = typeof item.itemCode === "string" ? item.itemCode : "";
     const images = Array.isArray(item.mediumImageUrls) ? item.mediumImageUrls : [];
     // formatVersion=2 は文字列配列、formatVersion=1 は {imageUrl} の配列。
     const firstImage: unknown = images[0] && typeof images[0] === "object" && "imageUrl" in images[0]
       ? (images[0] as { imageUrl: unknown }).imageUrl : images[0];
     const imageUrl = allowedHttpsUrl(firstImage, ["rakuten.co.jp", "rakuten.ne.jp"]);
     const affiliateUrl = allowedHttpsUrl(item.affiliateUrl, ["rakuten.co.jp"]);
-    if (!id || !name || !imageUrl || !affiliateUrl || seen.has(id)) continue;
-    if (!Number.isFinite(rating) || rating < MIN_GOODS_RATING || rating > 5) continue;
-    if (!Number.isInteger(reviewCount) || reviewCount < MIN_GOODS_REVIEWS) continue;
-    if (Number(item.availability) !== 1) continue;
+    if (!imageUrl) { stats.badImage += 1; continue; }
+    if (!affiliateUrl) { stats.badAffiliate += 1; continue; }
+    if (seen.has(id)) { stats.duplicate += 1; continue; }
+    if (!Number.isFinite(rating) || rating < MIN_GOODS_RATING || rating > 5) { stats.lowRating += 1; continue; }
+    if (!Number.isInteger(reviewCount) || reviewCount < MIN_GOODS_REVIEWS) { stats.fewReviews += 1; continue; }
+    if (Number(item.availability) !== 1) { stats.unavailable += 1; continue; }
     seen.add(id);
-    result.push({ id, name, imageUrl, rating, reviewCount, affiliateUrl });
-    if (result.length === 6) break;
+    stats.qualified += 1;
+    if (items.length < MAX_GOODS_ITEMS) items.push({ id, name, imageUrl, rating, reviewCount, affiliateUrl });
   }
-  return result;
+  return { items, stats };
+}
+
+/** Rakuten API由来の実画像・購入者評価が確認できた商品だけを公開する。 */
+export function selectHighRatedGoodsProducts(raw: unknown): RatedGoodsProduct[] {
+  return selectGoodsProductsWithStats(raw).items;
+}
+
+export type RakutenResponseShape = {
+  /** 公式出力の `count`（総ヒット数）。0〜1e7の整数以外は null。 */
+  count: number | null;
+  /** `items`/`Items` キーの有無と型。値そのものは返さない。 */
+  itemsKey: "absent" | "array" | "object" | "other";
+  hasErrors: boolean;
+};
+
+/** 応答本文の形だけを固定値・数値で要約する（上流の文字列は含めない）。 */
+export function describeRakutenResponse(raw: unknown): RakutenResponseShape {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return { count: null, itemsKey: "absent", hasErrors: false };
+  const record = raw as Record<string, unknown>;
+  const count = typeof record.count === "number" && Number.isInteger(record.count)
+    && record.count >= 0 && record.count <= 10_000_000 ? record.count : null;
+  const present = ["items", "Items"].filter((key) => key in record).map((key) => record[key]);
+  const itemsKey = present.some(Array.isArray) ? "array"
+    : present.length === 0 ? "absent"
+      : present.some((value) => value !== null && typeof value === "object") ? "object" : "other";
+  return { count, itemsKey, hasErrors: "errors" in record || "error" in record };
 }
