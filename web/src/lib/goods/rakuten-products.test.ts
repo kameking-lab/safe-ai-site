@@ -26,6 +26,14 @@ describe("selectHighRatedGoodsProducts", () => {
     expect(items[0]).toMatchObject({ id: "shop:helmet-1", rating: 4.6, reviewCount: 34 });
   });
 
+  it("実応答の大文字キー Items/Item と {imageUrl} 形式の画像も読む", () => {
+    const expected = { id: "shop:helmet-1", imageUrl: valid.mediumImageUrls[0], rating: 4.6, reviewCount: 34 };
+    expect(selectHighRatedGoodsProducts({ Items: [valid] })).toEqual([expect.objectContaining(expected)]);
+    expect(selectHighRatedGoodsProducts({ Items: [{ Item: {
+      ...valid, mediumImageUrls: [{ imageUrl: valid.mediumImageUrls[0] }] } }] })).toEqual([expect.objectContaining(expected)]);
+    expect(selectHighRatedGoodsProducts({ Items: [{ ...valid, mediumImageUrls: [{ imageUrl: "https://example.com/x.jpg" }] }] })).toEqual([]);
+  });
+
   it("API値がないとき商品を捏造しない", () => {
     expect(selectHighRatedGoodsProducts({ items: [{ itemName: "写真なし", reviewAverage: 5 }] })).toEqual([]);
     expect(selectHighRatedGoodsProducts(null)).toEqual([]);

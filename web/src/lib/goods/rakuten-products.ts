@@ -31,22 +31,42 @@ function allowedHttpsUrl(value: unknown, hosts: readonly string[]): string | nul
   }
 }
 
+/**
+ * 商品配列を取り出す。公式ドキュメントの例は `items`/`item` だが、楽天市場APIの
+ * 実応答は従来 `Items`/`Item` の大文字キーを返すため両方を受け付ける。
+ */
+export function rakutenItemList(raw: unknown): unknown[] | null {
+  if (!raw || typeof raw !== "object") return null;
+  const record = raw as { items?: unknown; Items?: unknown };
+  if (Array.isArray(record.items)) return record.items;
+  return Array.isArray(record.Items) ? record.Items : null;
+}
+
+function unwrapItem(entry: unknown): RakutenItem | null {
+  if (!entry || typeof entry !== "object") return null;
+  if ("item" in entry) return (entry as { item: RakutenItem }).item;
+  if ("Item" in entry) return (entry as { Item: RakutenItem }).Item;
+  return entry as RakutenItem;
+}
+
 /** Rakuten API由来の実画像・購入者評価が確認できた商品だけを公開する。 */
 export function selectHighRatedGoodsProducts(raw: unknown): RatedGoodsProduct[] {
-  if (!raw || typeof raw !== "object" || !Array.isArray((raw as { items?: unknown }).items)) return [];
+  const list = rakutenItemList(raw);
+  if (!list) return [];
   const result: RatedGoodsProduct[] = [];
   const seen = new Set<string>();
-  for (const entry of (raw as { items: unknown[] }).items) {
-    const item = (entry && typeof entry === "object" && "item" in entry
-      ? (entry as { item: RakutenItem }).item
-      : entry) as RakutenItem | null;
+  for (const entry of list) {
+    const item = unwrapItem(entry);
     if (!item || typeof item !== "object") continue;
     const rating = Number(item.reviewAverage);
     const reviewCount = Number(item.reviewCount);
     const name = typeof item.itemName === "string" ? item.itemName.trim() : "";
     const id = typeof item.itemCode === "string" ? item.itemCode : "";
     const images = Array.isArray(item.mediumImageUrls) ? item.mediumImageUrls : [];
-    const imageUrl = allowedHttpsUrl(images[0], ["rakuten.co.jp", "rakuten.ne.jp"]);
+    // formatVersion=2 は文字列配列、formatVersion=1 は {imageUrl} の配列。
+    const firstImage: unknown = images[0] && typeof images[0] === "object" && "imageUrl" in images[0]
+      ? (images[0] as { imageUrl: unknown }).imageUrl : images[0];
+    const imageUrl = allowedHttpsUrl(firstImage, ["rakuten.co.jp", "rakuten.ne.jp"]);
     const affiliateUrl = allowedHttpsUrl(item.affiliateUrl, ["rakuten.co.jp"]);
     if (!id || !name || !imageUrl || !affiliateUrl || seen.has(id)) continue;
     if (!Number.isFinite(rating) || rating < MIN_GOODS_RATING || rating > 5) continue;
