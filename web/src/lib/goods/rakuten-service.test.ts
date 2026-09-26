@@ -247,6 +247,46 @@ describe("shared Rakuten product service", () => {
     expect((await b({ ...search, categoryId: "eye-face-protection" })).status).toBe("ready");
   });
 
+  it("accepts the capitalized Items response key", async () => {
+    const fetcher = vi.fn(async () => Response.json({ count: 1, page: 1, Items: [product] })) as unknown as typeof fetch;
+    expect(await createRakutenGoodsService(cluster().instance(), fetcher)(search))
+      .toMatchObject({ status: "ready", items: [{ id: product.itemCode, rating: 4.6, reviewCount: 34 }] });
+  });
+
+  it("logs only a fixed category and status for upstream errors, never the body", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-09-26T00:00:00Z"));
+    const logger = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const secret = `accessKey=${search.accessKey} https://openapi.rakuten.co.jp/private`;
+    const fetcher = vi.fn()
+      .mockResolvedValueOnce(Response.json({ errors: { errorCode: 400, errorMessage: secret } }, { status: 400 }))
+      .mockResolvedValueOnce(Response.json({ errors: { errorMessage: secret } }))
+      .mockResolvedValueOnce(new Response(`not json ${secret}`, { status: 200 }))
+      .mockRejectedValueOnce(new TypeError(secret)) as typeof fetch;
+    const service = createRakutenGoodsService(cluster().instance(), fetcher);
+    for (const expected of [
+      { httpStatus: 400, category: "http_status" },
+      { httpStatus: 200, category: "missing_items_array" },
+      { httpStatus: 200, category: "invalid_json" },
+      { httpStatus: null, category: "request_failed" },
+    ]) {
+      logger.mockClear();
+      expect(await service(search)).toMatchObject({ status: "unavailable", reason: "upstream_error", items: [] });
+      expect(logger).toHaveBeenCalledExactlyOnceWith("[rakuten-goods] upstream_error", expected);
+      expect(JSON.stringify(logger.mock.calls)).not.toContain(search.accessKey);
+      await vi.advanceTimersByTimeAsync(5_001);
+    }
+  });
+
+  it("reports a stalled success body as a timeout, not invalid_json", async () => {
+    const logger = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const stalled = new ReadableStream({ start(controller) { controller.error(new DOMException("timeout", "TimeoutError")); } });
+    const fetcher = vi.fn(async () => new Response(stalled, { status: 200 })) as unknown as typeof fetch;
+    expect(await createRakutenGoodsService(cluster().instance(), fetcher)(search))
+      .toMatchObject({ status: "unavailable", reason: "timeout", items: [] });
+    expect(logger).not.toHaveBeenCalled();
+  });
+
   it("treats malformed success and timeouts as short unavailable results", async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-09-26T00:00:00Z"));

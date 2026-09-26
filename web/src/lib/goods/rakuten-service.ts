@@ -1,6 +1,6 @@
 import "server-only";
 import { createHash, randomUUID } from "node:crypto";
-import { selectHighRatedGoodsProducts } from "./rakuten-products";
+import { rakutenItemList, selectHighRatedGoodsProducts } from "./rakuten-products";
 import { unavailable, type ProductResult } from "./product-result";
 import type { RakutenGoodsStore } from "./rakuten-store";
 import { SITE_URL } from "@/lib/seo-metadata";
@@ -199,6 +199,8 @@ export function createRakutenGoodsService(store: RakutenGoodsStore | null, fetch
       let gateHeld = false;
       let cooldownMs = 0;
       let authFailure: { status: number; code: string } | null = null;
+      // Fixed categories only; the upstream body is never read into logs.
+      let upstreamFailure: { httpStatus: number | null; category: string } | null = null;
       try {
         gateHeld = await store.acquireGate(applicationHash, token);
         if (gateHeld) {
@@ -209,9 +211,20 @@ export function createRakutenGoodsService(store: RakutenGoodsStore | null, fetch
             signal: AbortSignal.timeout(7_000),
           });
           if (response.ok) {
-            const payload: unknown = await response.json();
-            if (!payload || typeof payload !== "object" || !Array.isArray((payload as { items?: unknown }).items)) {
+            let payload: unknown = null;
+            try {
+              payload = await response.json();
+            } catch (error) {
+              // The request timeout also covers the body; keep reporting it as a timeout.
+              const name = error && typeof error === "object" && "name" in error ? error.name : null;
+              if (name === "TimeoutError" || name === "AbortError") throw error;
+              upstreamFailure = { httpStatus: response.status, category: "invalid_json" };
+            }
+            if (upstreamFailure) {
               result = unavailable("upstream_error");
+            } else if (!rakutenItemList(payload)) {
+              result = unavailable("upstream_error");
+              upstreamFailure = { httpStatus: response.status, category: "missing_items_array" };
             } else {
               const items = selectHighRatedGoodsProducts(payload);
               result = { status: items.length ? "ready" : "no_qualified_items", items,
@@ -233,19 +246,24 @@ export function createRakutenGoodsService(store: RakutenGoodsStore | null, fetch
             result = unavailable("rate_limited");
             cooldownMs = retryAfterMs(response.headers.get("retry-after"), Date.now());
             ttlMs = Math.min(cooldownMs, SUCCESS_TTL_MS);
+            void response.body?.cancel().catch(() => undefined);
           } else {
             result = unavailable("upstream_error");
+            upstreamFailure = { httpStatus: response.status, category: "http_status" };
+            void response.body?.cancel().catch(() => undefined);
           }
         }
       } catch (error) {
         const name = error && typeof error === "object" && "name" in error ? error.name : null;
         const timedOut = name === "TimeoutError" || name === "AbortError";
         result = unavailable(timedOut ? "timeout" : "upstream_error");
+        if (!timedOut) upstreamFailure = { httpStatus: null, category: "request_failed" };
       } finally {
         // A failed database write leaves the 15-second gate lease in place.
         if (gateHeld) await store.releaseGate(applicationHash, token, cooldownMs);
         await store.complete(keyHash, token, result, ttlMs);
       }
+      if (upstreamFailure) console.warn("[rakuten-goods] upstream_error", upstreamFailure);
       if (authFailure) await probeQueryAuthorization(search, applicationHash,
         authFailure.status, authFailure.code);
       return result;
