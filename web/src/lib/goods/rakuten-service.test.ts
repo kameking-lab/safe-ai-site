@@ -319,7 +319,7 @@ describe("shared Rakuten product service", () => {
           { httpStatus: 200, category: "missing_items_array", ...log });
       } else {
         expect(warn).toHaveBeenCalledExactlyOnceWith("[rakuten-goods] search_result", {
-          count: 0, received: 0, qualified: 0, missingFields: 0, badImage: 0, badAffiliate: 0,
+          count: 0, received: 0, qualified: 0, missingFields: 0, offTopic: 0, badImage: 0, badAffiliate: 0,
           duplicate: 0, lowRating: 0, fewReviews: 0, unavailable: 0,
         });
         expect(info).not.toHaveBeenCalled();
@@ -340,7 +340,7 @@ describe("shared Rakuten product service", () => {
     expect((await createRakutenGoodsService(cluster().instance(), fetcher)(search)).status).toBe("no_qualified_items");
     expect(info).not.toHaveBeenCalled();
     expect(warn).toHaveBeenCalledExactlyOnceWith("[rakuten-goods] search_result", {
-      count: 57, received: 2, qualified: 0, missingFields: 0, badImage: 0, badAffiliate: 0,
+      count: 57, received: 2, qualified: 0, missingFields: 0, offTopic: 0, badImage: 0, badAffiliate: 0,
       duplicate: 0, lowRating: 1, fewReviews: 1, unavailable: 0,
     });
     expect(JSON.stringify(warn.mock.calls)).not.toContain(search.keyword);
@@ -372,13 +372,36 @@ describe("shared Rakuten product service", () => {
     expect(result).toMatchObject({ status: "ready", items: [{ id: product.itemCode }] });
     expect(warn).not.toHaveBeenCalled();
     expect(info).toHaveBeenCalledExactlyOnceWith("[rakuten-goods] search_result", {
-      count: 812, received: 8, qualified: 1, missingFields: 1, badImage: 1, badAffiliate: 1,
+      count: 812, received: 8, qualified: 1, missingFields: 1, offTopic: 0, badImage: 1, badAffiliate: 1,
       duplicate: 1, lowRating: 1, fewReviews: 1, unavailable: 1,
     });
     const logged = JSON.stringify(info.mock.calls);
     for (const value of [product.itemName, product.itemCode, search.keyword, "example.com"]) {
       expect(logged).not.toContain(value);
     }
+  });
+
+  it("shows only listings whose names state the required use category, keyed separately in the cache", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const info = vi.spyOn(console, "info").mockImplementation(() => undefined);
+    const shared = cluster();
+    const fetcher = vi.fn(async () => Response.json({ count: 3, Items: [
+      { ...product, itemCode: "fall-certified", itemName: "保護帽 飛来・落下物用 墜落時保護用 国家検定合格品" },
+      { ...product, itemCode: "disaster-only", itemName: "防災ヘルメット ライナー入り 避難" },
+      { ...product, itemCode: "flying-only", itemName: "保護帽 飛来・落下物用" },
+    ] })) as unknown as typeof fetch;
+    const service = createRakutenGoodsService(shared.instance(), fetcher);
+    const fall = await service({ ...search, nameMustInclude: ["墜落"] });
+    expect(fall).toMatchObject({ status: "ready", items: [{ id: "fall-certified" }] });
+    expect(fall.items).toHaveLength(1);
+    expect(info).toHaveBeenCalledExactlyOnceWith("[rakuten-goods] search_result", expect.objectContaining({
+      received: 3, qualified: 1, offTopic: 2 }));
+    expect(JSON.stringify(info.mock.calls)).not.toContain("防災");
+    await new Promise((resolve) => setTimeout(resolve, 1_150));
+    const unrestricted = await service(search);
+    expect(unrestricted.items.map((item) => item.id)).toEqual(["fall-certified", "disaster-only", "flying-only"]);
+    expect((fetcher as ReturnType<typeof vi.fn>).mock.calls).toHaveLength(2);
+    expect(warn).not.toHaveBeenCalled();
   });
 
   it("reports a stalled success body as a timeout, not invalid_json", async () => {

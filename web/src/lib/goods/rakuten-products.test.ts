@@ -42,6 +42,26 @@ describe("selectHighRatedGoodsProducts", () => {
     expect(selectGoodsProductsWithStats(null).stats.received).toBe(0);
   });
 
+  it("使用区分語の指定があれば商品名に含むものだけ残し、他の条件は変えない", () => {
+    const raw = { Items: [
+      { ...valid, itemCode: "a", itemName: "保護帽 墜落時保護用" },
+      { ...valid, itemCode: "b", itemName: "防災ヘルメット" },
+      { ...valid, itemCode: "c", itemName: "保護帽 墜落時保護用", reviewAverage: 4.0 },
+    ] };
+    const { items, stats } = selectGoodsProductsWithStats(raw, { nameMustInclude: ["墜落"] });
+    expect(items.map((item) => item.id)).toEqual(["a"]);
+    expect(stats).toMatchObject({ received: 3, qualified: 1, offTopic: 1, lowRating: 1 });
+    expect(selectGoodsProductsWithStats(raw, { nameMustInclude: [] }).stats).toMatchObject({ offTopic: 0, qualified: 2 });
+  });
+
+  it("使用区分語はいずれか1語で足り、落下防止など別用途の語では通さない", () => {
+    const names = ["保護帽 飛来用", "保護帽 落下物用", "安全帯 落下防止 ランヤード", "ヘルメット 落下距離 計算"];
+    const raw = { Items: names.map((itemName, i) => ({ ...valid, itemCode: `x${i}`, itemName })) };
+    const { items, stats } = selectGoodsProductsWithStats(raw, { nameMustInclude: ["飛来", "落下物"] });
+    expect(items.map((item) => item.name)).toEqual(["保護帽 飛来用", "保護帽 落下物用"]);
+    expect(stats).toMatchObject({ received: 4, qualified: 2, offTopic: 2 });
+  });
+
   it("応答の形は件数・キー有無/型だけで要約する", () => {
     expect(describeRakutenResponse({ count: 0 })).toEqual({ count: 0, itemsKey: "absent", hasErrors: false });
     expect(describeRakutenResponse({ count: 3, items: [], Items: {} })).toEqual({ count: 3, itemsKey: "array", hasErrors: false });

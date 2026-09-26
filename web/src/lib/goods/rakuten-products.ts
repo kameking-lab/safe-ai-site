@@ -54,6 +54,7 @@ export type GoodsSelectionStats = {
   received: number;
   qualified: number;
   missingFields: number;
+  offTopic: number;
   badImage: number;
   badAffiliate: number;
   duplicate: number;
@@ -65,9 +66,11 @@ export type GoodsSelectionStats = {
 const MAX_GOODS_ITEMS = 6;
 
 /** 実画像・購入者評価の条件で選別し、表示商品と除外理由別の件数を返す。 */
-export function selectGoodsProductsWithStats(raw: unknown): { items: RatedGoodsProduct[]; stats: GoodsSelectionStats } {
+export function selectGoodsProductsWithStats(raw: unknown, options: { nameMustInclude?: readonly string[] } = {}):
+  { items: RatedGoodsProduct[]; stats: GoodsSelectionStats } {
   const list = rakutenItemList(raw) ?? [];
-  const stats: GoodsSelectionStats = { received: list.length, qualified: 0, missingFields: 0, badImage: 0,
+  const required = options.nameMustInclude ?? [];
+  const stats: GoodsSelectionStats = { received: list.length, qualified: 0, missingFields: 0, offTopic: 0, badImage: 0,
     badAffiliate: 0, duplicate: 0, lowRating: 0, fewReviews: 0, unavailable: 0 };
   const items: RatedGoodsProduct[] = [];
   const seen = new Set<string>();
@@ -76,6 +79,7 @@ export function selectGoodsProductsWithStats(raw: unknown): { items: RatedGoodsP
     const name = item && typeof item.itemName === "string" ? item.itemName.trim() : "";
     const id = item && typeof item.itemCode === "string" ? item.itemCode : "";
     if (!item || typeof item !== "object" || !id || !name) { stats.missingFields += 1; continue; }
+    if (required.length && !required.some((term) => name.includes(term))) { stats.offTopic += 1; continue; }
     const rating = Number(item.reviewAverage);
     const reviewCount = Number(item.reviewCount);
     const images = Array.isArray(item.mediumImageUrls) ? item.mediumImageUrls : [];

@@ -31,6 +31,7 @@ export async function GET(request: NextRequest) {
     categoryId,
     featureId,
     keyword: feature?.searchQuery ?? category.searchQuery,
+    nameMustInclude: feature?.nameMustInclude ?? [],
     applicationId,
     accessKey,
     affiliateId,

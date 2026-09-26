@@ -50,6 +50,8 @@ export type GoodsSearch = {
   categoryId: string;
   featureId: string | null;
   keyword: string;
+  /** Product names must contain one of these terms when non-empty. */
+  nameMustInclude?: readonly string[];
   applicationId: string;
   accessKey: string;
   affiliateId: string;
@@ -170,7 +172,8 @@ export function createRakutenGoodsService(store: RakutenGoodsStore | null, fetch
   return async function getProducts(search: GoodsSearch): Promise<ProductResult> {
     if (!store) return unavailable("upstream_error");
     const keyHash = digest(CACHE_VERSION, search.environment, API_URL, search.applicationId,
-      search.accessKey, search.affiliateId, search.categoryId, search.featureId ?? "all", search.keyword);
+      search.accessKey, search.affiliateId, search.categoryId, search.featureId ?? "all", search.keyword,
+      (search.nameMustInclude ?? []).join("|"));
     const applicationHash = digest("rakuten-application-v1", search.applicationId);
     try {
       const cached = await store.read(keyHash);
@@ -234,7 +237,8 @@ export function createRakutenGoodsService(store: RakutenGoodsStore | null, fetch
               upstreamFailure = { httpStatus: response.status, category: "missing_items_array",
                 count: shape.count, itemsKey: shape.itemsKey, hasErrors: shape.hasErrors };
             } else {
-              const { items, stats } = selectGoodsProductsWithStats(payload);
+              const { items, stats } = selectGoodsProductsWithStats(payload,
+                { nameMustInclude: search.nameMustInclude });
               result = { status: items.length ? "ready" : "no_qualified_items", items,
                 checkedAt: new Date().toISOString(), reason: null };
               ttlMs = SUCCESS_TTL_MS;
