@@ -10,6 +10,7 @@ const product = { itemCode: "shop:helmet-1", itemName: "産業用保護帽",
 const search: GoodsSearch = { categoryId: "head-protection", featureId: "fall",
   keyword: "産業用 保護帽 墜落時保護", applicationId: "test-application",
   accessKey: "test-access-key", affiliateId: "test-affiliate", environment: "production" };
+const siteContext = { Referer: "https://www.anzen-ai-portal.jp/", Origin: "https://www.anzen-ai-portal.jp" };
 
 function cluster() {
   const cache = new Map<string, { result: ProductResult | null; expiresAt: number; token: string | null; leaseUntil: number }>();
@@ -151,6 +152,34 @@ describe("shared Rakuten product service", () => {
     expect(JSON.stringify(logger.mock.calls)).not.toContain(search.accessKey);
   });
 
+  it("sends this site's own Referer and Origin with the header accessKey", async () => {
+    const fetcher = vi.fn(async () => Response.json({ items: [product] })) as unknown as typeof fetch;
+    expect((await createRakutenGoodsService(cluster().instance(), fetcher)(search)).status).toBe("ready");
+    const [url, init] = (fetcher as ReturnType<typeof vi.fn>).mock.calls[0] as [URL, RequestInit];
+    expect(init.headers).toEqual({ ...siteContext, accessKey: search.accessKey });
+    expect(url.searchParams.has("accessKey")).toBe(false);
+  });
+
+  it("reads allowlisted 2026 errors.errorMessage codes and drops anything that may echo secrets", async () => {
+    const logger = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const bodies: [unknown, string][] = [
+      [{ errors: { errorCode: 403, errorMessage: "REQUEST_CONTEXT_BODY_HTTP_REFERRER_MISSING" } }, "request_context_body_http_referrer_missing"],
+      [{ errors: { errorCode: 403, errorMessage: "Invalid Access Key" } }, "invalid_access_key"],
+      [{ errors: { errorCode: 403, errorMessage: `Invalid Access Key ${search.accessKey}` } }, "unknown"],
+      [{ errors: { errorCode: 403, errorMessage: `REQUEST_CONTEXT_${search.applicationId}` } }, "unknown"],
+      [{ errors: { errorCode: 403, errorMessage: "REQUEST_CONTEXT_ORIGIN_https://evil.example" } }, "unknown"],
+    ];
+    for (const [body, errorCode] of bodies) {
+      logger.mockClear();
+      const fetcher = vi.fn(async () => Response.json(body, { status: 403 })) as unknown as typeof fetch;
+      expect((await createRakutenGoodsService(cluster().instance(), fetcher)(search)).reason).toBe("authorization_failed");
+      expect(logger).toHaveBeenCalledExactlyOnceWith("[rakuten-goods] authorization_failed", { httpStatus: 403, errorCode });
+    }
+    for (const value of [search.applicationId, search.accessKey, "evil.example"]) {
+      expect(JSON.stringify(logger.mock.calls)).not.toContain(value);
+    }
+  });
+
   it("probes header versus query only once across instances behind the shared gate", async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-09-26T00:00:00Z"));
@@ -178,7 +207,7 @@ describe("shared Rakuten product service", () => {
     expect(queryUrl.searchParams.get("accessKey")).toBe(search.accessKey);
     queryUrl.searchParams.delete("accessKey");
     expect(queryUrl.toString()).toBe(headerUrl.toString());
-    expect((calls[1]![1] as RequestInit).headers).toBeUndefined();
+    expect((calls[1]![1] as RequestInit).headers).toEqual(siteContext);
     expect(logger).toHaveBeenCalledWith("[rakuten-goods] auth_transport_probe", {
       headerStatus: 403, headerCode: "unknown", queryStatus: 200, queryCode: null,
     });
