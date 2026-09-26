@@ -41,6 +41,9 @@ describe("public safety goods category contract", () => {
     const helmet = GOODS_PRODUCT_FEATURES["head-protection"] ?? [];
     expect(helmet.find((feature) => feature.id === "fall")?.searchQuery).toBe("保護帽 墜落時保護");
     expect(helmet.find((feature) => feature.id === "flying")?.searchQuery).toBe("保護帽 飛来 落下");
-    for (const feature of helmet) expect(feature.searchQuery).toContain("保護帽");
+    for (const feature of helmet) {
+      expect(feature.searchQuery).toContain("保護帽");
+      expect(feature.searchQuery).toMatch(/墜落時保護|飛来|電気用/);
+    }
   });
 });
