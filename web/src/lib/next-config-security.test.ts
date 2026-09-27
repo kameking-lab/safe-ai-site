@@ -42,8 +42,12 @@ describe("production browser security configuration", () => {
   it("AdSenseの実測した広告品質確認先を両CSPで許可する", () => {
     for (const policy of [productionCsp, buildPreviewEnforcedContentSecurityPolicy(false)]) {
       const connectSource = policy.split(";").find((directive) => directive.trim().startsWith("connect-src "));
+      const frameSource = policy.split(";").find((directive) => directive.trim().startsWith("frame-src "));
       expect(connectSource).toContain("https://ep1.adtrafficquality.google");
       expect(connectSource?.split(/\s+/)).not.toContain("https://*.google");
+      expect(frameSource).toContain("https://ep2.adtrafficquality.google");
+      expect(frameSource).toContain("https://www.google.com");
+      expect(frameSource?.split(/\s+/)).not.toContain("https://*.adtrafficquality.google");
     }
   });
 
