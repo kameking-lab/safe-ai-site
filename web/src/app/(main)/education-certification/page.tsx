@@ -39,6 +39,12 @@ const qualificationGuides = [
     access: "無料",
   },
   {
+    title: "建設用リフトの特別教育はいつ必要？",
+    detail: "荷物専用設備と工事用エレベーターを区別し、運転者への教育を確認します。",
+    href: "https://note.com/anzen_ai_jp/n/n995c64038dd7",
+    access: "無料",
+  },
+  {
     title: "移動式クレーン運転士の力学を演習",
     detail: "学科の計算を独自問題6問で練習できます。",
     href: "https://note.com/anzen_ai_jp/n/nbd15c4e43c98",
@@ -223,21 +229,24 @@ export default function EducationCertificationPage() {
                 </Link>
               </nav>
             </CollapsibleDetail>
+            <UsageNotesLink className="mb-4 inline-flex min-h-11 items-center text-blue-700" />
           </details>
           <section aria-labelledby="qualification-note-guides-title" className="mb-6 rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-900">
             <h2 id="qualification-note-guides-title" className="text-xl font-black text-slate-950 dark:text-white">資格と特別教育を記事で確認</h2>
-            <p className="mt-2 text-sm leading-6 text-slate-700 dark:text-slate-200">資格候補を絞ったあと、クレーン免許・産業用ロボット・ずい道工事の教育と資格をもう少し詳しく知りたい方へ。安全AI編集部のnote記事です。</p>
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              {qualificationGuides.map((guide) => (
-                <a key={guide.href} href={guide.href} target="_blank" rel="noopener noreferrer" className="block rounded-xl border border-slate-300 p-4 text-slate-950 hover:border-blue-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-300 dark:border-slate-600 dark:text-white">
-                  <span className="text-xs font-bold text-blue-700 dark:text-blue-300">{guide.access} · note</span>
-                  <span className="mt-1 block font-black underline underline-offset-4">{guide.title}</span>
-                  <span className="mt-2 block text-sm leading-6 text-slate-700 dark:text-slate-200">{guide.detail}</span>
-                </a>
-              ))}
-            </div>
+            <details className="mt-3 rounded-xl border border-slate-200 px-3 dark:border-slate-700">
+              <summary className="flex min-h-11 cursor-pointer items-center text-sm font-bold">資格別の解説記事を開く</summary>
+              <p className="border-t border-slate-200 pt-3 text-sm leading-6 text-slate-700 dark:text-slate-200">資格候補を絞ったあと、クレーン免許・産業用ロボット・ずい道工事・建設用リフトの教育と資格をもう少し詳しく知りたい方へ。安全AI編集部のnote記事です。</p>
+              <div className="my-4 grid gap-3 sm:grid-cols-2">
+                {qualificationGuides.map((guide) => (
+                  <a key={guide.href} href={guide.href} target="_blank" rel="noopener noreferrer" className="block rounded-xl border border-slate-300 p-4 text-slate-950 hover:border-blue-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-300 dark:border-slate-600 dark:text-white">
+                    <span className="text-xs font-bold text-blue-700 dark:text-blue-300">{guide.access} · note</span>
+                    <span className="mt-1 block font-black underline underline-offset-4">{guide.title}</span>
+                    <span className="mt-2 block text-sm leading-6 text-slate-700 dark:text-slate-200">{guide.detail}</span>
+                  </a>
+                ))}
+              </div>
+            </details>
           </section>
-          <UsageNotesLink className="mb-6 inline-flex min-h-11 items-center text-blue-700" />
         </div>
       </div>
     </>
