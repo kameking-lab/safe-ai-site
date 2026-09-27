@@ -33,6 +33,12 @@ const qualificationGuides = [
     access: "無料",
   },
   {
+    title: "ずい道等の掘削等作業主任者はいつ必要？",
+    detail: "選任が必要な作業と技能講習の受講資格を整理します。",
+    href: "https://note.com/anzen_ai_jp/n/n3c02293eeffc",
+    access: "無料",
+  },
+  {
     title: "移動式クレーン運転士の力学を演習",
     detail: "学科の計算を独自問題6問で練習できます。",
     href: "https://note.com/anzen_ai_jp/n/nbd15c4e43c98",
@@ -220,7 +226,7 @@ export default function EducationCertificationPage() {
           </details>
           <section aria-labelledby="qualification-note-guides-title" className="mb-6 rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-900">
             <h2 id="qualification-note-guides-title" className="text-xl font-black text-slate-950 dark:text-white">資格と特別教育を記事で確認</h2>
-            <p className="mt-2 text-sm leading-6 text-slate-700 dark:text-slate-200">資格候補を絞ったあと、クレーン免許と産業用ロボットの特別教育をもう少し詳しく知りたい方へ。安全AI編集部のnote記事です。</p>
+            <p className="mt-2 text-sm leading-6 text-slate-700 dark:text-slate-200">資格候補を絞ったあと、クレーン免許・産業用ロボット・ずい道工事の教育と資格をもう少し詳しく知りたい方へ。安全AI編集部のnote記事です。</p>
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
               {qualificationGuides.map((guide) => (
                 <a key={guide.href} href={guide.href} target="_blank" rel="noopener noreferrer" className="block rounded-xl border border-slate-300 p-4 text-slate-950 hover:border-blue-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-300 dark:border-slate-600 dark:text-white">
