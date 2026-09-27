@@ -180,7 +180,7 @@ export default function EducationCertificationPage() {
         keywords={["特別教育 候補検索", "技能講習 確認", "フルハーネス 特別教育", "作業主任者 適用条件", "資格 公式資料"]}
       />
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
-        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
+        <div className="mx-auto flex min-h-screen max-w-7xl flex-col px-4 py-6 sm:px-6">
           <header>
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="text-3xl font-black tracking-tight text-slate-950 sm:text-4xl dark:text-white">作業から資格を確認</h1>
@@ -229,7 +229,6 @@ export default function EducationCertificationPage() {
                 </Link>
               </nav>
             </CollapsibleDetail>
-            <UsageNotesLink className="mb-4 inline-flex min-h-11 items-center text-blue-700" />
           </details>
           <section aria-labelledby="qualification-note-guides-title" className="mb-6 rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-900">
             <h2 id="qualification-note-guides-title" className="text-xl font-black text-slate-950 dark:text-white">資格と特別教育を記事で確認</h2>
@@ -247,6 +246,7 @@ export default function EducationCertificationPage() {
               </div>
             </details>
           </section>
+          <UsageNotesLink className="mt-auto inline-flex min-h-11 items-center self-start text-blue-700" />
         </div>
       </div>
     </>
