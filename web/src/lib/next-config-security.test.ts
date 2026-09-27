@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
-import { buildContentSecurityPolicy } from "@/lib/security/csp";
+import { buildContentSecurityPolicy, buildPreviewEnforcedContentSecurityPolicy } from "@/lib/security/csp";
 
 describe("production browser security configuration", () => {
   const source = readFileSync(resolve(process.cwd(), "next.config.ts"), "utf8");
@@ -37,6 +37,14 @@ describe("production browser security configuration", () => {
       .find((directive) => directive.trim().startsWith("connect-src "));
     expect(connectSource).toBeDefined();
     expect(connectSource).not.toContain("generativelanguage.googleapis.com");
+  });
+
+  it("AdSenseの実測した広告品質確認先を両CSPで許可する", () => {
+    for (const policy of [productionCsp, buildPreviewEnforcedContentSecurityPolicy(false)]) {
+      const connectSource = policy.split(";").find((directive) => directive.trim().startsWith("connect-src "));
+      expect(connectSource).toContain("https://ep1.adtrafficquality.google");
+      expect(connectSource?.split(/\s+/)).not.toContain("https://*.google");
+    }
   });
 
   it("本番でも障害通知用のwarn/errorを保持する", () => {
