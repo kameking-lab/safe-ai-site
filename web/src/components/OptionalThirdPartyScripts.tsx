@@ -5,6 +5,8 @@ import { usePathname } from "next/navigation";
 import Analytics from "@/components/Analytics";
 import AdSenseScript from "@/components/AdSenseScript";
 import {
+  isAdEligiblePath,
+  isAdEligibleUrl,
   hasPrivacySignalOptOut,
   isOptionalTrackingPath,
   isOptionalTrackingUrl,
@@ -25,6 +27,12 @@ function denyGoogleProcessing() {
     ad_personalization: "denied",
   });
   removeGoogleOptionalCookies();
+}
+
+function adRuntimePresent(): boolean {
+  return Boolean(
+    document.querySelector('script[src*="pagead2.googlesyndication.com/pagead/js/adsbygoogle"]'),
+  );
 }
 
 export function OptionalThirdPartyScripts({
@@ -68,7 +76,9 @@ export function OptionalThirdPartyScripts({
       if (value == null) return false;
       try {
         const target = new URL(String(value), window.location.href);
-        return target.origin === window.location.origin && !isOptionalTrackingUrl(target);
+        if (target.origin !== window.location.origin) return false;
+        return !isOptionalTrackingUrl(target) ||
+          (adsEnabled && adRuntimePresent() && !isAdEligibleUrl(target));
       } catch {
         return true;
       }
@@ -167,7 +177,8 @@ export function OptionalThirdPartyScripts({
     window.history.pushState = guardedPushState;
     window.history.replaceState = guardedReplaceState;
     const onPopState = () => {
-      if (!isOptionalTrackingUrl(window.location.href)) {
+      if (!isOptionalTrackingUrl(window.location.href) ||
+        (adsEnabled && adRuntimePresent() && !isAdEligibleUrl(window.location.href))) {
         denyGoogleProcessing();
         window.location.replace(window.location.href);
       }
@@ -180,10 +191,13 @@ export function OptionalThirdPartyScripts({
       if (window.history.pushState === guardedPushState) window.history.pushState = originalPushState;
       if (window.history.replaceState === guardedReplaceState) window.history.replaceState = originalReplaceState;
     };
-  }, [configured]);
+  }, [configured, adsEnabled]);
 
   useEffect(() => {
-    if (!configured || isOptionalTrackingUrl(window.location.href)) return;
+    if (!configured) return;
+    const adMustLeave = adsEnabled && adRuntimePresent() &&
+      !isAdEligibleUrl(window.location.href);
+    if (isOptionalTrackingUrl(window.location.href) && !adMustLeave) return;
     if (
       isExactTransientChemicalUrl(window.location.href) &&
       committedTransientChemicalNavigationRef.current
@@ -208,7 +222,7 @@ export function OptionalThirdPartyScripts({
     );
     denyGoogleProcessing();
     if (tagWasLoaded) window.location.replace(window.location.href);
-  }, [configured, pathname]);
+  }, [configured, adsEnabled, pathname]);
 
   function choose(next: Exclude<Consent, null>) {
     try {
@@ -222,6 +236,11 @@ export function OptionalThirdPartyScripts({
     );
     if (next === "denied") {
       denyGoogleProcessing();
+      // Auto Ads keeps running after React unmounts the loader. Reload with
+      // the persisted denial so the already-inserted runtime leaves the page.
+      if (adRuntimePresent()) {
+        window.location.replace(window.location.href);
+      }
     }
     setConsent(next);
     setEditing(false);
@@ -234,11 +253,13 @@ export function OptionalThirdPartyScripts({
     !hasPrivacySignalOptOut() &&
     trackingPath &&
     (typeof window === "undefined" || isOptionalTrackingUrl(window.location.href));
+  const allowAds = allowScripts && isAdEligiblePath(pathname) &&
+    (typeof window === "undefined" || isAdEligibleUrl(window.location.href));
 
   return (
     <>
       {allowScripts && analyticsEnabled ? <Analytics nonce={nonce} /> : null}
-      {allowScripts && adsEnabled ? <AdSenseScript nonce={nonce} /> : null}
+      {allowAds && adsEnabled ? <AdSenseScript nonce={nonce} /> : null}
       {trackingPath && showChoice ? (
         <section
           aria-label="任意Cookieの設定"

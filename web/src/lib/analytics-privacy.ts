@@ -32,6 +32,25 @@ const SENSITIVE_URL_PARAM = /^(?:q|query|question|search|keyword|token|access_?t
 const BLOCKED_PARAM_NAME =
   /(?:query|question|search|email|phone|name|message|text|description|token|secret|url|location)/i;
 
+// Ads are limited to public reading pages. Analytics may run on a broader set
+// of routes, including tools where an ad could interrupt a safety workflow.
+const AD_READING_PAGES = new Set([
+  "/laws",
+  "/laws/glossary",
+  "/laws/bcp",
+  "/laws/gig-work",
+  "/laws/freelance-rosai",
+  "/guides/ky-sheet",
+  "/guides/safety-signage",
+  "/guides/chemical-ra-create-simple",
+  "/guides/industry-accident-reports",
+]);
+// The circular detail route also serves a large unverified, noindex archive.
+// Keep the ad surface tied to individually verified public documents only.
+const AD_VERIFIED_DETAIL_PAGES = new Set([
+  "/circulars/mhlw-notice-0014",
+]);
+
 export function isOptionalTrackingPath(pathname: string): boolean {
   let normalized = pathname;
   try {
@@ -70,6 +89,27 @@ export function isOptionalTrackingUrl(value: string | URL): boolean {
     if (SENSITIVE_URL_PARAM.test(key)) return false;
   }
   return !/(?:token|access[_-]?token|id[_-]?token|secret)=/i.test(url.hash);
+}
+
+export function isAdEligiblePath(pathname: string): boolean {
+  if (!isOptionalTrackingPath(pathname)) return false;
+  let normalized: string;
+  try {
+    normalized = decodeURIComponent(pathname).replace(/\/$/u, "") || "/";
+  } catch {
+    return false;
+  }
+  return AD_READING_PAGES.has(normalized) || AD_VERIFIED_DETAIL_PAGES.has(normalized);
+}
+
+export function isAdEligibleUrl(value: string | URL): boolean {
+  if (!isOptionalTrackingUrl(value)) return false;
+  try {
+    const url = value instanceof URL ? value : new URL(value, "https://privacy.invalid");
+    return isAdEligiblePath(url.pathname);
+  } catch {
+    return false;
+  }
 }
 
 export function sanitizedAnalyticsLocation(value: string | URL): {
