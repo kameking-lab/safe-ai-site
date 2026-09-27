@@ -181,6 +181,17 @@ describe("OptionalThirdPartyScripts consent lifecycle", () => {
     expect(localStorage.getItem(OPTIONAL_TRACKING_CONSENT_KEY)).toBe("granted");
   });
 
+  it("keeps analytics consent while excluding ads from an interactive print page", async () => {
+    currentPathname = "/training/visual-ky/scaffold-fall/print";
+    window.history.replaceState(null, "", currentPathname);
+    localStorage.setItem(OPTIONAL_TRACKING_CONSENT_KEY, "granted");
+
+    render(<OptionalThirdPartyScripts analyticsEnabled adsEnabled />);
+
+    expect(await screen.findByTestId("analytics-script")).toBeTruthy();
+    expect(screen.queryByTestId("ads-script")).toBeNull();
+  });
+
   it("withdraws consent, sends Consent Mode denial, and unmounts scripts", async () => {
     localStorage.setItem(OPTIONAL_TRACKING_CONSENT_KEY, "granted");
     const gtag = vi.fn();

@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  isAdEligiblePath,
+  isAdEligibleUrl,
   isOptionalTrackingPath,
   isOptionalTrackingUrl,
   hasPrivacySignalOptOut,
@@ -8,6 +10,38 @@ import {
 } from "./analytics-privacy";
 
 describe("analytics privacy", () => {
+  it("limits ads to public reading pages", () => {
+    for (const path of [
+      "/laws",
+      "/laws/bcp",
+      "/guides/ky-sheet",
+      "/circulars/mhlw-notice-0014",
+    ]) {
+      expect(isAdEligiblePath(path), path).toBe(true);
+    }
+    for (const path of [
+      "/",
+      "/search",
+      "/chatbot",
+      "/training/visual-ky/scaffold-fall/print",
+      "/training/visual-ky/scaffold-fall/facilitator",
+      "/guides/annual-safety-plan-generator",
+      "/construction-calc",
+      "/e-learning/exams/qualification",
+      "/heat-illness-prevention/wbgt-calculator",
+      "/articles/fall-prevention/print",
+      "/articles/unknown",
+      "/articles/heat-stroke-2025-mandatory",
+      "/circulars/notice-2026",
+      "/circulars/mhlw-notice-9999",
+      "/circulars/mhlw-notice-0015",
+    ]) {
+      expect(isAdEligiblePath(path), path).toBe(false);
+    }
+    expect(isAdEligibleUrl("https://example.test/articles/fall-prevention?q=worker-name")).toBe(false);
+    expect(isAdEligibleUrl("https://example.test/guides/ky-sheet")).toBe(true);
+  });
+
   it("excludes free-text and private workflows", () => {
     for (const path of [
       "/search",
