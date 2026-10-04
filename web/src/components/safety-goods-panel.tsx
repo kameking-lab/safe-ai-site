@@ -516,6 +516,7 @@ export function SafetyGoodsPanel() {
       </details>
 
       <p className="rounded-xl bg-slate-100 p-4 text-xs leading-6 text-slate-700">
+        Amazonのアソシエイトとして、安全AIポータルは適格販売により収入を得ています。
         本ページはアフィリエイトリンクを含みます。リンク先で購入された場合、当サイトに紹介料が支払われることがあります。
         紹介料の有無は、製品の安全性・適合性・掲載順の評価根拠には使用していません。
       </p>
