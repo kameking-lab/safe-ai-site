@@ -7,16 +7,20 @@
  *   - 楽天:   NEXT_PUBLIC_RAKUTEN_AFFILIATE_ID
  */
 
-const AMAZON_TAG = (
+const DEFAULT_AMAZON_TAG = "safeaisite202-22";
+const CONFIGURED_AMAZON_TAG = (
   process.env.NEXT_PUBLIC_AMAZON_AFFILIATE_ID ||
   process.env.NEXT_PUBLIC_AMAZON_ASSOCIATE_TAG ||
   ""
 ).trim();
+// 公開リンクで使用していた旧ストアIDだけを、新登録のIDへ移行する。
+const AMAZON_TAG = !CONFIGURED_AMAZON_TAG || CONFIGURED_AMAZON_TAG === "safeaisite22-22"
+  ? DEFAULT_AMAZON_TAG
+  : CONFIGURED_AMAZON_TAG;
 
 const RAKUTEN_AFFID = (process.env.NEXT_PUBLIC_RAKUTEN_AFFILIATE_ID || "").trim();
 
 if (process.env.NODE_ENV === "development") {
-  if (!AMAZON_TAG) console.warn("[affiliate-url] NEXT_PUBLIC_AMAZON_AFFILIATE_ID is not set — Amazon affiliate links disabled");
   if (!RAKUTEN_AFFID) console.warn("[affiliate-url] NEXT_PUBLIC_RAKUTEN_AFFILIATE_ID is not set — Rakuten affiliate links disabled");
 }
 
