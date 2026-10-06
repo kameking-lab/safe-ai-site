@@ -142,7 +142,7 @@ describe("legal source preservation manifest", () => {
     );
     expect(sha256(historicalManifest)).toBe("c11874864aaae54e7c0727a6f6efa49e09bae397a2482c9a589e5b5972db4568");
     const archiveBytes = readCanonicalContent(
-      resolve(archivePath, "egov-revisions-before-d3017a75.json"), "archived.json",
+      resolve(repositoryRoot, "web/src/fixtures/egov-revisions-before-d3017a75.json"), "archived.json",
     );
     expect(sha256(archiveBytes)).toBe("637a1d2eccf81029ae5ac345f53e1c64dbf7231537ae06ff62c2b6cee7ff21fe");
     const archived = JSON.parse(archiveBytes.toString("utf8")) as { revisions: unknown[] };
