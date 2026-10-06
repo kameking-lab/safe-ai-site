@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { LawArticle } from "@/data/laws/law-types";
 import { withVerifiedRevisionMetadata } from "@/data/laws/law-revision-metadata";
+import revisionSnapshot from "@/data/law-revisions/egov-revisions.json";
 import { verifiedLawArticles } from "@/data/laws/verified-corpus";
 
 describe("verified e-Gov revision metadata", () => {
@@ -22,6 +23,22 @@ describe("verified e-Gov revision metadata", () => {
         sourceUrl: "https://laws.e-gov.go.jp/law/347AC0000000057",
       },
     ]);
+  });
+
+  it("keeps October metadata separate from the preserved April full-text revision", () => {
+    const sourceUrl = "https://laws.e-gov.go.jp/law/347AC0000000057";
+    expect([...revisionSnapshot.revisions, ...revisionSnapshot.revisionHistory]
+      .some((record) => record.source_url === sourceUrl && record.enforcement_date === "2026-10-01"))
+      .toBe(true);
+    expect(revisionSnapshot.revisionHistory.find((record) => record.source_url === sourceUrl)?.enforcement_date)
+      .toBe("2026-04-01");
+
+    const april = verifiedLawArticles.find(
+      (record) => record.lawShort === "安衛法" && record.articleNum === "第1条",
+    );
+    expect(april?.sourceRevisionId).toBe("20260401_507AC0000000033");
+    expect(april?.amendmentHistory?.[0]?.effectiveOn).toBe("2026-04-01");
+    expect(april?.amendmentPromulgatedOn).toBe("2025-05-14");
   });
 
   it("does not infer a date when the committed revision record is absent", () => {

@@ -53,20 +53,24 @@ jobs:
         env:
           NODE_OPTIONS: "--no-warnings"
 
+      - name: Verify preserved source pair before promotion
+        run: npx vitest run src/data/law-revisions/egov-revisions-fetch.test.ts src/data/laws/law-revision-metadata.test.ts src/app/api/chatbot/route-source.test.ts src/data/source-snapshots/legal-source-preservation-manifest.test.ts
+
       - name: Prepare exact data artifact
         id: payload
         working-directory: .
         run: |
-          if git diff --quiet -- web/src/data/law-revisions/egov-revisions.json; then
+          if git diff --quiet -- web/src/data/law-revisions/egov-revisions.json web/src/data/legal-source-preservation-manifest-current.json; then
             echo "No e-Gov revision changes"
             echo "changed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          path=web/src/data/law-revisions/egov-revisions.json
           repo_root="$(git rev-parse --show-toplevel)"
-          test -f "$path" && test ! -L "$path"
-          test "$(realpath -e -- "$path")" = "$repo_root/$path"
-          install -D -m 0644 -- "$path" "$RUNNER_TEMP/storage-payload/$path"
+          for path in web/src/data/law-revisions/egov-revisions.json web/src/data/legal-source-preservation-manifest-current.json; do
+            test -f "$path" && test ! -L "$path"
+            test "$(realpath -e -- "$path")" = "$repo_root/$path"
+            install -D -m 0644 -- "$path" "$RUNNER_TEMP/storage-payload/$path"
+          done
           echo "changed=true" >> "$GITHUB_OUTPUT"
 
       - name: Freeze artifact identity
@@ -113,5 +117,5 @@ jobs:
           EXPECTED_BASE_SHA: ${{ needs.fetch.outputs.base_sha }}
           STORAGE_ARTIFACT_ROOT: ${{ runner.temp }}/storage-payload
           STORAGE_COMMIT_MESSAGE: "chore(news): e-Gov law revisions update [skip ci]"
-          STORAGE_ALLOWED_PATHS: web/src/data/law-revisions/egov-revisions.json
+          STORAGE_ALLOWED_PATHS: web/src/data/law-revisions/egov-revisions.json:web/src/data/legal-source-preservation-manifest-current.json
           TARGET_BRANCH: ${{ github.event.repository.default_branch }}
