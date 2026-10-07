@@ -26,7 +26,7 @@ type LegalSourcePreservationManifest = {
 const repositoryRoot = resolve(process.cwd(), "..");
 const manifestPath = resolve(
   repositoryRoot,
-  "docs/audits/archive/legal-source-preservation-manifest.json",
+  "web/src/data/legal-source-preservation-manifest-current.json",
 );
 const testFilePattern = /\.(?:spec|test)\.[^/\\]+$/u;
 const expectedCorpora = [
@@ -135,6 +135,28 @@ const inventory = (roots: readonly string[]) => {
 };
 
 describe("legal source preservation manifest", () => {
+  it("preserves the historical manifest and all twenty pre-October revision records", () => {
+    const archivePath = resolve(repositoryRoot, "docs/audits/archive");
+    const historicalManifest = readCanonicalContent(
+      resolve(archivePath, "legal-source-preservation-manifest.json"), "historical.json",
+    );
+    expect(sha256(historicalManifest)).toBe("c11874864aaae54e7c0727a6f6efa49e09bae397a2482c9a589e5b5972db4568");
+    const archiveBytes = readCanonicalContent(
+      resolve(repositoryRoot, "web/src/fixtures/egov-revisions-before-d3017a75.json"), "archived.json",
+    );
+    expect(sha256(archiveBytes)).toBe("637a1d2eccf81029ae5ac345f53e1c64dbf7231537ae06ff62c2b6cee7ff21fe");
+    const archived = JSON.parse(archiveBytes.toString("utf8")) as { revisions: unknown[] };
+    const current = JSON.parse(readFileSync(
+      resolve(repositoryRoot, "web/src/data/law-revisions/egov-revisions.json"), "utf8",
+    )) as { revisions: unknown[]; revisionHistory: unknown[]; total: number };
+    expect(archived.revisions).toHaveLength(20);
+    expect(current.revisions).toHaveLength(current.total);
+    expect(current.total).toBeGreaterThan(0);
+    for (const oldRecord of archived.revisions) {
+      expect(current.revisionHistory).toContainEqual(oldRecord);
+    }
+  });
+
   it("matches every current verified source root", () => {
     const manifest = JSON.parse(
       readFileSync(manifestPath, "utf8"),

@@ -4,12 +4,17 @@ import {
   readdirSync,
   rmSync,
   writeFileSync,
+  mkdirSync,
 } from "node:fs";
+import { createHash } from "node:crypto";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import {
   EgovRevisionQualityError,
+  buildRecord,
+  writeSnapshotAndManifest,
+  writeUtf8Atomic,
   runCli,
   runEgovRevisionFetch,
   type EgovRevisionSnapshot,
@@ -116,9 +121,108 @@ describe("e-Gov revisions ETL fail-closed guard", () => {
     expect(readdirSync(join(outputPath, ".."))).toEqual(["egov-revisions.json"]);
   });
 
+  it("retains every old generation and skipped law while keeping latest counts separate", async () => {
+    const outputPath = temporaryOutputPath();
+    const oldLaw = validLawFixture(target(1).lawId);
+    const oldRecord = buildRecord(target(1).lawShort, oldLaw)!;
+    const skippedRecord = buildRecord(target(2).lawShort, validLawFixture(target(2).lawId))!;
+    const historicalLaw = validLawFixture(target(1).lawId);
+    (historicalLaw.revision_info as Record<string, unknown>).amendment_enforcement_date = "2026-01-01";
+    const historicalRecord = buildRecord(target(1).lawShort, historicalLaw)!;
+    writeFileSync(outputPath, JSON.stringify({
+      revisions: [oldRecord, skippedRecord], revisionHistory: [historicalRecord],
+    }), "utf-8");
+    const newLaw = validLawFixture(target(1).lawId);
+    (newLaw.revision_info as Record<string, unknown>).amendment_enforcement_date = "2026-10-01";
+    const options = {
+      outputPath, targets: [target(1), target(2)], minimumSuccessRate: 0.5,
+      fetchLaw: async (lawId: string) => lawId === target(1).lawId ? newLaw : null,
+      delayMs: 0, logger: { log: () => undefined, error: () => undefined },
+    };
+    await runEgovRevisionFetch(options);
+    const first = JSON.parse(readFileSync(outputPath, "utf-8")) as EgovRevisionSnapshot;
+    expect(first.total).toBe(1);
+    expect(first.revisions).toHaveLength(1);
+    expect(first.revisions[0].enforcement_date).toBe("2026-10-01");
+    expect(first.revisionHistory).toEqual([historicalRecord, oldRecord, skippedRecord]);
+    await runEgovRevisionFetch(options);
+    const second = JSON.parse(readFileSync(outputPath, "utf-8")) as EgovRevisionSnapshot;
+    expect(second.revisionHistory).toEqual([...first.revisionHistory, first.revisions[0]]);
+    await runEgovRevisionFetch(options);
+    const third = JSON.parse(readFileSync(outputPath, "utf-8")) as EgovRevisionSnapshot;
+    expect(third.revisionHistory).toEqual(second.revisionHistory);
+  });
+
+  it.each([
+    "not valid JSON\n",
+    JSON.stringify({ revisions: [], revisionHistory: [{ id: "corrupt" }] }),
+  ])("rejects a malformed existing snapshot without altering any bytes", async (previous) => {
+    const outputPath = temporaryOutputPath();
+    writeFileSync(outputPath, previous, "utf-8");
+    const exitCode = await runCli({
+      outputPath, targets: [target(1)],
+      fetchLaw: async (lawId) => validLawFixture(lawId), delayMs: 0,
+      logger: { log: () => undefined, error: () => undefined },
+    });
+    expect(exitCode).toBe(1);
+    expect(readFileSync(outputPath, "utf-8")).toBe(previous);
+    expect(readdirSync(join(outputPath, ".."))).toEqual(["egov-revisions.json"]);
+  });
+
+  it("restores both old files when writing the second member of the pair fails", () => {
+    const dataPath = temporaryOutputPath();
+    const manifestPath = join(dataPath, "..", "manifest.json");
+    writeFileSync(dataPath, "old data\r\n", "utf-8");
+    writeFileSync(manifestPath, "old manifest\r\n", "utf-8");
+    expect(() => writeSnapshotAndManifest(dataPath, "new data", manifestPath, "new manifest", (path, content) => {
+      if (path === manifestPath) throw new Error("synthetic second write failure");
+      writeUtf8Atomic(path, content);
+    })).toThrow("synthetic second write failure");
+    expect(readFileSync(dataPath, "utf-8")).toBe("old data\r\n");
+    expect(readFileSync(manifestPath, "utf-8")).toBe("old manifest\r\n");
+  });
+
+  it("advances the manifest only for the preserved data candidate and rejects unrelated drift", async () => {
+    const dataPath = temporaryOutputPath();
+    const repositoryRoot = join(dataPath, "..");
+    const manifestDirectory = join(repositoryRoot, "web", "src", "data");
+    mkdirSync(manifestDirectory, { recursive: true });
+    const manifestPath = join(manifestDirectory, "current.json");
+    const oldRecord = buildRecord(target(1).lawShort, validLawFixture(target(1).lawId))!;
+    const oldData = JSON.stringify({ revisions: [oldRecord] }) + "\n";
+    writeFileSync(dataPath, oldData, "utf-8");
+    const unrelatedPath = join(repositoryRoot, "other.json");
+    writeFileSync(unrelatedPath, "original other source\n", "utf-8");
+    const hash = (text: string) => createHash("sha256").update(text).digest("hex");
+    const initialManifest = JSON.stringify({
+      schemaVersion: 1, generatedAtJst: "2026-01-01T00:00:00+09:00",
+      corpora: [{ id: "fixture", roots: ["egov-revisions.json", "other.json"], fileCount: 2,
+        bytes: Buffer.byteLength(oldData) + Buffer.byteLength("original other source\n"),
+        manifestSha256: hash(`${hash(oldData)}  egov-revisions.json\n${hash("original other source\n")}  other.json\n`),
+      }],
+    });
+    writeFileSync(manifestPath, initialManifest, "utf-8");
+    const newLaw = validLawFixture(target(1).lawId);
+    (newLaw.revision_info as Record<string, unknown>).amendment_enforcement_date = "2026-10-01";
+    const options = { outputPath: dataPath, manifestPath, targets: [target(1)],
+      fetchLaw: async () => newLaw, delayMs: 0,
+      logger: { log: () => undefined, error: () => undefined },
+    };
+    await runEgovRevisionFetch(options);
+    const committedData = readFileSync(dataPath, "utf-8");
+    const committedManifest = readFileSync(manifestPath, "utf-8");
+    expect(JSON.parse(committedData).revisionHistory).toEqual([oldRecord]);
+    const corpus = JSON.parse(committedManifest).corpora[0];
+    expect(corpus.manifestSha256).toBe(hash(`${hash(committedData)}  egov-revisions.json\n${hash("original other source\n")}  other.json\n`));
+    writeFileSync(unrelatedPath, "unreviewed other source\n", "utf-8");
+    await expect(runEgovRevisionFetch(options)).rejects.toThrow("Current source preservation mismatch: fixture");
+    expect(readFileSync(dataPath, "utf-8")).toBe(committedData);
+    expect(readFileSync(manifestPath, "utf-8")).toBe(committedManifest);
+  });
+
   it("最低成功率ちょうどなら時刻を分離して原子的に完全なsnapshotへ置換する", async () => {
     const outputPath = temporaryOutputPath();
-    writeFileSync(outputPath, "previous snapshot\n", "utf-8");
+    writeFileSync(outputPath, JSON.stringify({ revisions: [] }) + "\n", "utf-8");
     const targets = [target(1), target(2), target(3), target(4), target(5)];
     const logs: string[] = [];
 

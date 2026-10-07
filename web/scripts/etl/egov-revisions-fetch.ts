@@ -21,6 +21,7 @@
 import {
   existsSync,
   mkdirSync,
+  readFileSync,
   renameSync,
   unlinkSync,
   writeFileSync,
@@ -28,6 +29,8 @@ import {
 import { randomUUID } from "node:crypto";
 import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+
+import { prepareRevisionPreservationManifest } from "./egov-revisions-preservation";
 
 const API_BASE = "https://laws.e-gov.go.jp/api/2/laws";
 const OUT_PATH = join(process.cwd(), "src/data/law-revisions/egov-revisions.json");
@@ -203,10 +206,14 @@ export type EgovRevisionSnapshot = {
   successRate: number;
   minimumSuccessRate: number;
   revisions: LawRevisionRecord[];
+  /** Immutable prior records; latest bulletin counts remain scoped to revisions. */
+  revisionHistory: LawRevisionRecord[];
 };
 
 export type EgovRevisionRunOptions = {
   outputPath?: string;
+  /** CLI updates data and its current manifest together; custom fixture outputs opt in. */
+  manifestPath?: string;
   targets?: ReadonlyArray<{ lawId: string; lawShort: string }>;
   minimumSuccessRate?: number;
   fetchLaw?: (lawId: string) => Promise<Record<string, unknown> | null>;
@@ -275,6 +282,67 @@ export function writeUtf8Atomic(outputPath: string, contents: string): void {
   }
 }
 
+/** Roll back both files if a recoverable write fails; only the complete pair is promoted. */
+export function writeSnapshotAndManifest(
+  dataPath: string, data: string, manifestPath: string, manifest: string,
+  writeAtomic: typeof writeUtf8Atomic = writeUtf8Atomic,
+): void {
+  const previousData = readFileSync(dataPath, "utf-8");
+  const previousManifest = readFileSync(manifestPath, "utf-8");
+  try {
+    writeAtomic(dataPath, data);
+    writeAtomic(manifestPath, manifest);
+  } catch (error) {
+    // Each rename is atomic. Roll back a partial pair before reporting failure;
+    // the workflow uploads only after this operation returns successfully.
+    writeUtf8Atomic(dataPath, previousData);
+    writeUtf8Atomic(manifestPath, previousManifest);
+    throw error;
+  }
+}
+
+/** Reject malformed previous data rather than replacing and losing it. */
+function preservedRevisionHistory(outputPath: string): LawRevisionRecord[] {
+  if (!existsSync(outputPath)) return [];
+  const previous: unknown = JSON.parse(readFileSync(outputPath, "utf-8"));
+  if (!previous || typeof previous !== "object" || Array.isArray(previous)) {
+    throw new Error("Existing e-Gov snapshot is not an object");
+  }
+  const snapshot = previous as { revisions?: unknown; revisionHistory?: unknown };
+  if (
+    !Array.isArray(snapshot.revisions) ||
+    (snapshot.revisionHistory !== undefined && !Array.isArray(snapshot.revisionHistory))
+  ) {
+    throw new Error("Existing e-Gov snapshot has invalid revision arrays");
+  }
+  const candidates: unknown[] = [
+    ...((snapshot.revisionHistory ?? []) as unknown[]),
+    ...snapshot.revisions,
+  ];
+  const history: LawRevisionRecord[] = [];
+  const seen = new Set<string>();
+  for (const candidate of candidates) {
+    if (!candidate || typeof candidate !== "object" || Array.isArray(candidate)) {
+      throw new Error("Existing e-Gov revision is not an object");
+    }
+    const record = candidate as Partial<LawRevisionRecord>;
+    if (
+      typeof record.id !== "string" || !record.id ||
+      typeof record.source_url !== "string" || !record.source_url ||
+      typeof record.publication_date !== "string" ||
+      typeof record.enforcement_date !== "string" ||
+      typeof record.revisionNumber !== "string"
+    ) {
+      throw new Error("Existing e-Gov revision has invalid preservation fields");
+    }
+    const identity = JSON.stringify(candidate);
+    if (seen.has(identity)) continue;
+    seen.add(identity);
+    history.push(candidate as LawRevisionRecord);
+  }
+  return history;
+}
+
 function assertMinimumSuccessRate(rate: number): void {
   if (!Number.isFinite(rate) || rate <= 0 || rate > 1) {
     throw new RangeError("minimumSuccessRate must be greater than 0 and at most 1");
@@ -285,6 +353,9 @@ export async function runEgovRevisionFetch(
   options: EgovRevisionRunOptions = {},
 ): Promise<EgovRevisionRunResult> {
   const outputPath = options.outputPath ?? OUT_PATH;
+  const manifestPath = options.manifestPath ?? (options.outputPath === undefined
+    ? resolve(process.cwd(), "src/data/legal-source-preservation-manifest-current.json")
+    : undefined);
   const targets = options.targets ?? TARGET_LAWS;
   const minimumSuccessRate = options.minimumSuccessRate ?? MINIMUM_SUCCESS_RATE;
   const fetchLaw = options.fetchLaw ?? fetchLawFromEgov;
@@ -342,6 +413,7 @@ export async function runEgovRevisionFetch(
 
   records.sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
 
+  const revisionHistory = preservedRevisionHistory(outputPath);
   const lastSuccessAt = now().toISOString();
   const payload: EgovRevisionSnapshot = {
     fetchedAt: lastSuccessAt,
@@ -354,8 +426,19 @@ export async function runEgovRevisionFetch(
     successRate: Number(successRate.toFixed(4)),
     minimumSuccessRate,
     revisions: records,
+    revisionHistory,
   };
-  writeUtf8Atomic(outputPath, JSON.stringify(payload, null, 2) + "\n");
+  const candidateData = JSON.stringify(payload, null, 2) + "\n";
+  // History comes from the validated old snapshot and is copied verbatim before
+  // inventory generation. Never advance a baseline for unrelated source drift.
+  if (manifestPath) {
+    const manifest = prepareRevisionPreservationManifest(
+      manifestPath, outputPath, candidateData, lastSuccessAt,
+    );
+    writeSnapshotAndManifest(outputPath, candidateData, manifestPath, manifest);
+  } else {
+    writeUtf8Atomic(outputPath, candidateData);
+  }
   logger.log(
     `[egov-revisions] wrote ${records.length} revisions ` +
       `(skipped ${failedLaws.length}${failedLaws.length ? ": " + failedLaws.map(({ lawShort }) => lawShort).join(",") : ""}, ` +
