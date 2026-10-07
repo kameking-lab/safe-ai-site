@@ -15,6 +15,7 @@ type RevisionRecord = {
 
 type RevisionSnapshot = {
   revisions?: unknown;
+  revisionHistory?: unknown;
 };
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -37,8 +38,13 @@ function amendmentStatus(
     : undefined;
 }
 
-const revisionByLawId = new Map<string, RevisionRecord>();
-const revisions = (revisionSnapshot as RevisionSnapshot).revisions;
+// Latest bulletin records and preserved earlier generations must be matched to
+// the full-text snapshot's effective date, never just the first row for a law.
+const revisionByLawAndDate = new Map<string, RevisionRecord>();
+const snapshot = revisionSnapshot as RevisionSnapshot;
+const revisions = [snapshot.revisions, snapshot.revisionHistory].flatMap(
+  (records) => (Array.isArray(records) ? records : []),
+);
 
 if (Array.isArray(revisions)) {
   for (const candidate of revisions) {
@@ -48,8 +54,9 @@ if (Array.isArray(revisions)) {
       typeof record.source_url === "string"
         ? EGOV_LAW_URL.exec(record.source_url)
         : null;
-    if (!sourceMatch || revisionByLawId.has(sourceMatch[1])) continue;
-    revisionByLawId.set(sourceMatch[1], record);
+    if (!sourceMatch || !isIsoDate(record.enforcement_date)) continue;
+    const key = `${sourceMatch[1]}:${record.enforcement_date.replaceAll("-", "")}`;
+    if (!revisionByLawAndDate.has(key)) revisionByLawAndDate.set(key, record);
   }
 }
 
@@ -70,7 +77,9 @@ export function withVerifiedRevisionMetadata(article: LawArticle): LawArticle {
   }
 
   const revisionIdMatch = REVISION_ID.exec(article.sourceRevisionId);
-  const record = revisionByLawId.get(article.sourceLawId);
+  const record = revisionIdMatch
+    ? revisionByLawAndDate.get(`${article.sourceLawId}:${revisionIdMatch[1]}`)
+    : undefined;
   if (!revisionIdMatch || !record) return article;
 
   const sourceUrl = record.source_url;
