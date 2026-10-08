@@ -4,33 +4,12 @@ import { z } from "zod";
 z.config({ jitless: true });
 import { readLimitedJson } from "@/lib/http/read-limited-json";
 import { automationConsultationTypes } from "./prefill";
+import { AUTOMATION_CONSULT_LIMITS as LIMITS, AUTOMATION_CONSULT_SOURCE_PAGES, automationConsultTimings, automationConsultBudgets, automationConsultDeliveryPreferences } from "./form-contract";
+export { automationConsultTimings, automationConsultBudgets, automationConsultDeliveryPreferences } from "./form-contract";
 
 export { automationConsultationTypes } from "./prefill";
 
 export const AUTOMATION_CONSULT_MAX_BODY_BYTES = 16 * 1024;
-
-export const automationConsultTimings = [
-  "asap",
-  "within-1-month",
-  "within-3-months",
-  "undecided",
-] as const;
-
-export const automationConsultBudgets = [
-  "under-50000",
-  "50000-100000",
-  "100000-300000",
-  "300000-500000",
-  "over-500000",
-  "undecided",
-] as const;
-
-export const automationConsultDeliveryPreferences = [
-  "online",
-  "onsite",
-  "either",
-  "undecided",
-] as const;
 
 const SINGLE_LINE_CONTROL_CHARACTERS = /[\u0000-\u001f\u007f]/;
 const MULTILINE_CONTROL_CHARACTERS = /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/;
@@ -71,28 +50,33 @@ function optionalWhenBlank<T extends z.ZodType>(schema: T) {
 export const automationConsultSchema = z
   .object({
     consultationType: z.enum(automationConsultationTypes),
-    name: singleLine({ min: 1, max: 100 }),
+    name: singleLine({ min: 0, max: LIMITS.name }).default(""),
     email: z
       .string()
       .trim()
-      .max(254)
+      .max(LIMITS.email)
       .email()
       .refine((value) => !SINGLE_LINE_CONTROL_CHARACTERS.test(value), {
         message: "control_characters_not_allowed",
       })
       .transform((value) => value.toLowerCase()),
-    organization: optionalWhenBlank(singleLine({ min: 1, max: 160 })),
-    currentProblem: multiline({ min: 10, max: 2_000 }),
-    desiredSupport: multiline({ min: 2, max: 2_000 }),
-    currentTools: optionalWhenBlank(multiline({ min: 1, max: 500 })),
+    organization: optionalWhenBlank(singleLine({ min: 1, max: LIMITS.organization })),
+    currentProblem: multiline({ min: LIMITS.problemMin, max: LIMITS.problemMax }),
+    desiredSupport: multiline({ min: 0, max: LIMITS.supportMax }).default(""),
+    currentTools: optionalWhenBlank(multiline({ min: 1, max: LIMITS.currentTools })),
     timing: z.enum(automationConsultTimings),
     budget: optionalWhenBlank(z.enum(automationConsultBudgets)),
     deliveryPreference: optionalWhenBlank(z.enum(automationConsultDeliveryPreferences)),
     privacyConsent: z.literal(true),
     website: z.string().max(200).optional().default(""),
-    sourcePage: z.literal("/services/automation"),
+    sourcePage: z.enum(AUTOMATION_CONSULT_SOURCE_PAGES),
   })
-  .strict();
+  .strict()
+  .superRefine((value, context) => {
+    if (value.sourcePage !== "/services/automation") return;
+    if (!value.name) context.addIssue({ code: "custom", path: ["name"], message: "お名前を入力してください。" });
+    if (value.desiredSupport.length < LIMITS.supportMin) context.addIssue({ code: "custom", path: ["desiredSupport"], message: "希望する支援を2文字以上で入力してください。" });
+  });
 
 export type AutomationConsultInput = z.infer<typeof automationConsultSchema>;
 

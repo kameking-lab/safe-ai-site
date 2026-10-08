@@ -281,4 +281,33 @@ describe("POST /api/automation-consult", () => {
     warn.mockRestore();
     error.mockRestore();
   });
+  it("new LP partial acknowledgement failure retains the same reference on exact-key retry", async () => {
+    const body = { ...validBody, sourcePage: "/", name: "", desiredSupport: "" };
+    mocks.deliverAutomationConsultEmails.mockResolvedValueOnce({ delivered: false, reason: "reply_failed" }).mockResolvedValueOnce({ delivered: true });
+    const key = testKey("lp-partial");
+    const first = await POST(request(body, { key }));
+    const failed = await first.json();
+    expect(first.status).toBe(503); expect(failed.ok).toBe(false);
+    expect(failed.error.message).toContain("一部の通知が届いている可能性");
+    expect(failed.error.referenceId).toMatch(/^AC-\d{8}-[A-F0-9]{12}$/);
+    const retry = await POST(request(body, { key }));
+    expect(retry.status).toBe(200);
+    expect((await retry.json()).referenceId).toBe(failed.error.referenceId);
+    expect(mocks.deliverAutomationConsultEmails.mock.calls[0][0].idempotencyKey).toBe(mocks.deliverAutomationConsultEmails.mock.calls[1][0].idempotencyKey);
+  });
+
+  it("new LP processing response provides a reference without claiming delivery", async () => {
+    let release!: () => void;
+    mocks.deliverAutomationConsultEmails.mockImplementationOnce(() => new Promise(resolve => { release = () => resolve({ delivered: true }); }));
+    const key = testKey("lp-processing");
+    const first = POST(request(validBody, { key }));
+    while (mocks.deliverAutomationConsultEmails.mock.calls.length === 0) await new Promise(resolve => setTimeout(resolve, 0));
+    const duplicate = await POST(request(validBody, { key }));
+    const processing = await duplicate.json();
+    expect(duplicate.status).toBe(409); expect(processing.ok).toBe(false);
+    expect(processing.error.code).toBe("request_in_progress");
+    expect(processing.error.referenceId).toMatch(/^AC-\d{8}-[A-F0-9]{12}$/);
+    release(); await first;
+  });
+
 });
