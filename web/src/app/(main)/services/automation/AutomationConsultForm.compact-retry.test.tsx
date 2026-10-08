@@ -73,4 +73,29 @@ describe("compact LP consultation and honest retry", () => {
     await waitFor(() => expect(screen.getByLabelText(/呼び名/).getAttribute("aria-invalid")).toBe("true"));
     expect(fetch).not.toHaveBeenCalled();
   });
+  it.each([
+    ["delivery_failed", "rate_limited"], ["delivery_failed", "intake_unavailable"],
+    ["timeout", "rate_limited"], ["timeout", "intake_unavailable"],
+  ])("preserves prior uncertain %s across a later %s rejection", async (firstCode, secondCode) => {
+    const fetch = vi.fn();
+    if (firstCode === "timeout") fetch.mockRejectedValueOnce(new Error("timeout"));
+    else fetch.mockResolvedValueOnce(response(503, { ok: false, error: { code: firstCode, referenceId } }));
+    fetch.mockResolvedValueOnce(response(secondCode === "rate_limited" ? 429 : 503, { ok: false, error: { code: secondCode } }));
+    fetch.mockResolvedValueOnce(response(200, { ok: true, referenceId }));
+    vi.stubGlobal("fetch", fetch); render(<AutomationConsultForm compact />); fill();
+    fireEvent.click(screen.getByRole("button", { name: "相談を送信する" }));
+    await screen.findByRole("alert");
+    fireEvent.click(screen.getByRole("button", { name: "同じ送信を確認する" }));
+    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(screen.getByRole("button", { name: "同じ送信を確認する" }).hasAttribute("disabled")).toBe(false));
+    expect(screen.getByLabelText(/困っている作業/).matches(":disabled")).toBe(true);
+    fireEvent.click(screen.getByRole("button", { name: "同じ送信を確認する" }));
+    await screen.findByText(`受付番号: ${referenceId}`);
+    expect(fetch).toHaveBeenCalledTimes(3);
+    for (const call of fetch.mock.calls.slice(1)) {
+      expect(call[1].body).toBe(fetch.mock.calls[0][1].body);
+      expect(call[1].headers["Idempotency-Key"]).toBe(fetch.mock.calls[0][1].headers["Idempotency-Key"]);
+    }
+  });
+
 });

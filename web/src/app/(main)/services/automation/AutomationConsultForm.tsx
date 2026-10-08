@@ -372,6 +372,7 @@ export function AutomationConsultForm({
       return;
     }
 
+    const hadUnresolvedSubmission = unresolvedSubmission;
     submittingRef.current = true;
     setErrors({});
     setFailureMessage("");
@@ -430,7 +431,7 @@ export function AutomationConsultForm({
         if (Object.keys(serverErrors).length) reportValidation(serverErrors);
         setFailureMessage(safeFailureMessage(data?.error?.code));
         setStatus("error");
-        if (["validation_error", "invalid_submission", "rate_limited", "payload_too_large", "invalid_origin", "unsupported_media_type", "intake_unavailable", "missing_idempotency_key"].includes(data?.error?.code ?? "")) {
+        if (!hadUnresolvedSubmission && ["validation_error", "invalid_submission", "rate_limited", "payload_too_large", "invalid_origin", "unsupported_media_type", "intake_unavailable", "missing_idempotency_key"].includes(data?.error?.code ?? "")) {
           setUnresolvedSubmission(false);
           idempotencyKeyRef.current = null;
         }
