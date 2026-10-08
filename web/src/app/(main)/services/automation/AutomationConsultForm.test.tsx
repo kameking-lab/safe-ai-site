@@ -178,7 +178,7 @@ describe("AutomationConsultForm", () => {
     const fetchMock = vi.fn().mockResolvedValue(
       jsonResponse(200, {
         ok: true,
-        referenceId: "AUTO-PRIVATE-001",
+        referenceId: "AC-20261008-000000000001",
         receivedAt: "2026-07-23T10:00:00+09:00",
       }),
     );
@@ -209,7 +209,7 @@ describe("AutomationConsultForm", () => {
       website: "",
       sourcePage: "/services/automation",
     });
-    expect(screen.queryByText("AUTO-PRIVATE-001")).toBeNull();
+    expect(screen.getByText("受付番号: AC-20261008-000000000001")).not.toBeNull();
   });
 
   it("送信中の連打を1回に抑え、同じ相談を二重送信しない", async () => {
@@ -228,7 +228,7 @@ describe("AutomationConsultForm", () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect((submit as HTMLButtonElement).disabled).toBe(true);
 
-    resolveFetch?.(jsonResponse(200, { ok: true, referenceId: "PRIVATE" }));
+    resolveFetch?.(jsonResponse(200, { ok: true, referenceId: "AC-20261008-000000000004" }));
     await screen.findByRole("status");
   });
 
@@ -238,7 +238,7 @@ describe("AutomationConsultForm", () => {
       vi.fn().mockResolvedValue(
         jsonResponse(200, {
           ok: true,
-          referenceId: "AUTO-PRIVATE-DRYRUN",
+          referenceId: "AC-20261008-000000000002",
           deliveryMode: "dry-run",
         }),
       ),
@@ -252,7 +252,7 @@ describe("AutomationConsultForm", () => {
     expect(status.textContent).toContain("入力内容を検証しました");
     expect(status.textContent).toContain("実際のメール送信");
     expect(status.textContent).toContain("正式な相談受付");
-    expect(status.textContent).not.toContain("AUTO-PRIVATE-DRYRUN");
+    expect(status.textContent).toContain("受付番号: AC-20261008-000000000002");
     expect(screen.queryByText("相談を受け付けました")).toBeNull();
   });
 
@@ -270,7 +270,7 @@ describe("AutomationConsultForm", () => {
     fireEvent.click(screen.getByRole("button", { name: /無料相談を送信/ }));
 
     const alert = await screen.findByRole("alert");
-    expect(alert.textContent).toContain("相談受付の準備中");
+    expect(alert.textContent).toContain("相談の送信経路を確認できません");
     expect(alert.textContent).not.toContain("internal detail");
     expect(screen.queryByText("相談を受け付けました")).toBeNull();
   });
@@ -279,7 +279,7 @@ describe("AutomationConsultForm", () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(
-        jsonResponse(200, { ok: true, referenceId: "AUTO-SECRET-123" }),
+        jsonResponse(200, { ok: true, referenceId: "AC-20261008-000000000003" }),
       ),
     );
     render(<AutomationConsultForm />);
@@ -293,7 +293,7 @@ describe("AutomationConsultForm", () => {
     expect(analyticsPayload).not.toContain("yamada@example.com");
     expect(analyticsPayload).not.toContain("テスト建設");
     expect(analyticsPayload).not.toContain("CSVを自動");
-    expect(analyticsPayload).not.toContain("AUTO-SECRET-123");
+    expect(analyticsPayload).not.toContain("AC-20261008-000000000003");
     expect(trackEvent).toHaveBeenCalledWith("automation_form_success", {
       page: "/services/automation",
       consultation_type: "automation",

@@ -5,6 +5,8 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, CheckCircle2, LoaderCircle, Send } from "lucide-react";
 import { trackAutomationEvent } from "@/lib/automation-consult/analytics";
 import { parseAutomationConsultationTypePrefill } from "@/lib/automation-consult/prefill";
+import { automationConsultSchema } from "@/lib/automation-consult/schema";
+import { AUTOMATION_CONSULT_LIMITS as LIMITS, type AutomationConsultSourcePage } from "@/lib/automation-consult/form-contract";
 
 const SERVICE_PATH = "/services/automation";
 // サーバーは運営者通知（並列・最大10秒）後に自動返信（最大10秒）を送る。
@@ -118,47 +120,20 @@ const FIELD_LABELS: Record<FieldName, string> = {
   privacyConsent: "個人情報の取扱いへの同意",
 };
 
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
 function validateStepOne(form: FormState): FieldErrors {
   const errors: FieldErrors = {};
   if (!form.consultationType) errors.consultationType = "相談種別を選択してください。";
   const problemLength = form.currentProblem.trim().length;
-  if (problemLength < 10) {
+  if (problemLength < LIMITS.problemMin) {
     errors.currentProblem = "困っていることを10文字以上で入力してください。";
-  } else if (problemLength > 2_000) {
+  } else if (problemLength > LIMITS.problemMax) {
     errors.currentProblem = "困っていることは2,000文字以内で入力してください。";
   }
   const supportLength = form.desiredSupport.trim().length;
-  if (supportLength < 10) {
-    errors.desiredSupport = "希望する支援を10文字以上で入力してください。";
-  } else if (supportLength > 2_000) {
+  if (supportLength < LIMITS.supportMin) {
+    errors.desiredSupport = "希望する支援を2文字以上で入力してください。";
+  } else if (supportLength > LIMITS.supportMax) {
     errors.desiredSupport = "希望する支援は2,000文字以内で入力してください。";
-  }
-  return errors;
-}
-
-function validateStepTwo(form: FormState): FieldErrors {
-  const errors: FieldErrors = {};
-  const nameLength = form.name.trim().length;
-  if (!nameLength) errors.name = "お名前・担当者名を入力してください。";
-  else if (nameLength > 80) errors.name = "お名前・担当者名は80文字以内で入力してください。";
-
-  const email = form.email.trim();
-  if (!email) errors.email = "返信用メールアドレスを入力してください。";
-  else if (email.length > 254 || !EMAIL_PATTERN.test(email)) {
-    errors.email = "有効なメールアドレスを入力してください。";
-  }
-
-  if (form.organization.trim().length > 120) {
-    errors.organization = "会社・団体名は120文字以内で入力してください。";
-  }
-  if (form.currentTools.trim().length > 500) {
-    errors.currentTools = "利用中のツールは500文字以内で入力してください。";
-  }
-  if (!form.timing) errors.timing = "希望時期を選択してください。";
-  if (!form.privacyConsent) {
-    errors.privacyConsent = "個人情報の取扱いを確認し、同意してください。";
   }
   return errors;
 }
@@ -171,9 +146,9 @@ function createIdempotencyKey(): string {
   return `${prefix}.automation-${Math.random().toString(36).slice(2, 20)}`;
 }
 
-function analyticsClassification(form: FormState) {
+function analyticsClassification(form: FormState, page: AutomationConsultSourcePage) {
   return {
-    page: SERVICE_PATH as "/services/automation",
+    page,
     ...(form.consultationType ? { consultation_type: form.consultationType } : {}),
     ...(form.budget ? { budget_band: form.budget } : {}),
   };
@@ -181,20 +156,14 @@ function analyticsClassification(form: FormState) {
 
 function safeFailureMessage(code?: string): string {
   switch (code) {
-    case "rate_limited":
-      return "短時間に送信が集中しています。時間をおいてから、もう一度お試しください。";
-    case "delivery_not_configured":
-      return "現在、相談受付の準備中です。運営側の設定完了後に、もう一度お試しください。";
-    case "delivery_failed":
-      return "通知を送信できなかったため、受付は完了していません。時間をおいて再度お試しください。";
-    case "idempotency_conflict":
-      return "送信内容が更新されています。内容を確認して、もう一度送信してください。";
-    case "payload_too_large":
-      return "入力内容が長すぎます。要点を短くして、もう一度お試しください。";
-    case "invalid_origin":
-      return "このページから送信を確認できませんでした。ページを再読み込みしてお試しください。";
-    default:
-      return "送信を完了できませんでした。入力内容は受付されていません。時間をおいて再度お試しください。";
+    case "rate_limited": return "短時間に送信が集中しています。時間をおいてから、もう一度お試しください。";
+    case "delivery_not_configured": return "現在、相談の送信経路を確認できません。同じ内容のまま、時間をおいてお試しください。";
+    case "delivery_failed": return "送達の完了を確認できませんでした。一部の通知が届いている可能性があります。同じ内容のまま再度お試しください。";
+    case "request_in_progress": return "同じ相談を処理中です。内容を変えずに、少し待ってから同じ送信を確認してください。";
+    case "idempotency_conflict": return "同じ識別子と送信内容が一致しません。新しい相談を送らず、受付状況を確認してください。";
+    case "payload_too_large": return "入力内容が長すぎます。要点を短くして、もう一度お試しください。";
+    case "invalid_origin": return "このページからの送信を確認できませんでした。ページを再読み込みしてからお試しください。";
+    default: return "受付状況を確認できませんでした。入力内容を変えずに、同じ送信の確認をもう一度お試しください。";
   }
 }
 
@@ -256,21 +225,28 @@ function describedBy(field: FieldName, errors: FieldErrors, hintId?: string) {
 
 export function AutomationConsultForm({
   initialConsultationType = "",
+  compact = false,
+  sourcePage = compact ? "/" : SERVICE_PATH,
 }: {
   initialConsultationType?: ConsultationType;
+  compact?: boolean;
+  sourcePage?: AutomationConsultSourcePage;
 }) {
-  const [step, setStep] = useState<1 | 2>(1);
+  const [step, setStep] = useState<1 | 2>(compact ? 2 : 1);
   const [form, setForm] = useState<FormState>(() => ({
     ...INITIAL_FORM,
-    consultationType: initialConsultationType,
+    consultationType: compact ? "other" : initialConsultationType,
+    timing: compact ? "undecided" : "",
   }));
   const [errors, setErrors] = useState<FieldErrors>({});
   const [isReady, setIsReady] = useState(false);
   const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
   const [successDeliveryMode, setSuccessDeliveryMode] = useState<
-    "delivery" | "dry-run"
+    "delivery" | "dry-run" | "queued"
   >("delivery");
   const [failureMessage, setFailureMessage] = useState("");
+  const [unresolvedSubmission, setUnresolvedSubmission] = useState(false);
+  const [referenceId, setReferenceId] = useState<string | null>(null);
   const errorSummaryRef = useRef<HTMLDivElement>(null);
   const stepHeadingRef = useRef<HTMLHeadingElement>(null);
   const successRef = useRef<HTMLDivElement>(null);
@@ -279,7 +255,7 @@ export function AutomationConsultForm({
   const idempotencyKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
-    if (initialConsultationType) return;
+    if (compact || initialConsultationType) return;
     const prefill = parseAutomationConsultationTypePrefill(
       window.location.search,
     );
@@ -289,7 +265,7 @@ export function AutomationConsultForm({
         ? current
         : { ...current, consultationType: prefill },
     );
-  }, [initialConsultationType]);
+  }, [compact, initialConsultationType]);
 
   useEffect(() => {
     if (Object.keys(errors).length > 0) errorSummaryRef.current?.focus();
@@ -329,12 +305,13 @@ export function AutomationConsultForm({
     if (formStartedRef.current) return;
     formStartedRef.current = true;
     trackAutomationEvent("automation_form_start", {
-      ...analyticsClassification(form),
+      ...analyticsClassification(form, sourcePage),
       success: true,
     });
   }
 
   function updateField<K extends keyof FormState>(field: K, value: FormState[K]) {
+    if (submittingRef.current || unresolvedSubmission) return;
     setForm((current) => ({ ...current, [field]: value }));
     setErrors((current) => {
       if (!(field in current)) return current;
@@ -352,7 +329,7 @@ export function AutomationConsultForm({
   function reportValidation(validationErrors: FieldErrors) {
     setErrors(validationErrors);
     trackAutomationEvent("automation_form_validation_error", {
-      ...analyticsClassification(form),
+      ...analyticsClassification(form, sourcePage),
       success: false,
     });
   }
@@ -382,10 +359,14 @@ export function AutomationConsultForm({
     }
     if (submittingRef.current) return;
 
-    const validationErrors = {
-      ...validateStepOne(form),
-      ...validateStepTwo(form),
-    };
+    const parsed = automationConsultSchema.safeParse({ ...form, sourcePage });
+    const validationErrors: FieldErrors = {};
+    if (!parsed.success) {
+      for (const issue of parsed.error.issues) {
+        const field = issue.path[0];
+        if (typeof field === "string" && field in FIELD_IDS) validationErrors[field as FieldName] = `${FIELD_LABELS[field as FieldName]}の入力内容を確認してください。`;
+      }
+    }
     if (Object.keys(validationErrors).length) {
       reportValidation(validationErrors);
       return;
@@ -395,6 +376,7 @@ export function AutomationConsultForm({
     setErrors({});
     setFailureMessage("");
     setStatus("sending");
+    setUnresolvedSubmission(true);
     const controller = new AbortController();
     const timeout = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
     if (!idempotencyKeyRef.current) idempotencyKeyRef.current = createIdempotencyKey();
@@ -420,18 +402,21 @@ export function AutomationConsultForm({
           deliveryPreference: form.deliveryPreference || undefined,
           privacyConsent: true,
           website: form.website,
-          sourcePage: SERVICE_PATH,
+          sourcePage,
         }),
       });
       const data = (await response.json().catch(() => null)) as
         | {
             ok?: boolean;
             deliveryMode?: unknown;
-            error?: { code?: string; fieldErrors?: Record<string, string | string[]> };
+            referenceId?: unknown;
+            error?: { code?: string; referenceId?: unknown; fieldErrors?: Record<string, string | string[]> };
           }
         | null;
 
-      if (!response.ok || !data?.ok) {
+      const responseReference = data?.referenceId ?? data?.error?.referenceId;
+      if (typeof responseReference === "string" && /^AC-\d{8}-[A-F0-9]{12}$/u.test(responseReference)) setReferenceId(responseReference);
+      if (!response.ok || !data?.ok || typeof responseReference !== "string" || !/^AC-\d{8}-[A-F0-9]{12}$/u.test(responseReference)) {
         const serverErrors: FieldErrors = {};
         if (data?.error?.fieldErrors) {
           for (const [key, value] of Object.entries(data.error.fieldErrors)) {
@@ -445,19 +430,23 @@ export function AutomationConsultForm({
         if (Object.keys(serverErrors).length) reportValidation(serverErrors);
         setFailureMessage(safeFailureMessage(data?.error?.code));
         setStatus("error");
-        if (data?.error?.code === "idempotency_conflict") idempotencyKeyRef.current = null;
+        if (["validation_error", "invalid_submission", "rate_limited", "payload_too_large", "invalid_origin", "unsupported_media_type", "intake_unavailable", "missing_idempotency_key"].includes(data?.error?.code ?? "")) {
+          setUnresolvedSubmission(false);
+          idempotencyKeyRef.current = null;
+        }
         return;
       }
 
       trackAutomationEvent("automation_form_success", {
-        ...analyticsClassification(form),
+        ...analyticsClassification(form, sourcePage),
         success: true,
       });
       setForm(INITIAL_FORM);
       setErrors({});
       setSuccessDeliveryMode(
-        data.deliveryMode === "dry-run" ? "dry-run" : "delivery",
+        data.deliveryMode === "dry-run" ? "dry-run" : data.deliveryMode === "queued" ? "queued" : "delivery",
       );
+      setUnresolvedSubmission(false);
       setStatus("success");
       idempotencyKeyRef.current = null;
     } catch {
@@ -486,7 +475,8 @@ export function AutomationConsultForm({
             ? "入力内容を検証しました"
             : "相談を受け付けました"}
         </h2>
-        {successDeliveryMode === "dry-run" ? (
+        {referenceId && <p className="mt-3 font-mono text-sm">受付番号: {referenceId}</p>}
+        {successDeliveryMode === "queued" ? <p className="mt-3 leading-7">相談を受付待ちの一覧に登録しました。メールの送達完了はまだ確認していません。</p> : successDeliveryMode === "dry-run" ? (
           <>
             <p className="mt-3 leading-7">
               この検証環境では、入力・送信元・重複送信防止・送信回数・メール構造までを確認しました。
@@ -508,7 +498,9 @@ export function AutomationConsultForm({
         <button
           type="button"
           onClick={() => {
-            setStep(1);
+            setStep(compact ? 2 : 1);
+            setForm({ ...INITIAL_FORM, consultationType: compact ? "other" : initialConsultationType, timing: compact ? "undecided" : "" });
+            setReferenceId(null);
             setStatus("idle");
             setSuccessDeliveryMode("delivery");
             formStartedRef.current = false;
@@ -535,7 +527,7 @@ export function AutomationConsultForm({
       onFocusCapture={markFormStarted}
       className="space-y-6"
     >
-      <div role="group" aria-labelledby="automation-form-progress">
+      {!compact && <div role="group" aria-labelledby="automation-form-progress">
         <p
           id="automation-form-progress"
           className="text-sm font-bold text-slate-800"
@@ -565,10 +557,20 @@ export function AutomationConsultForm({
             2. 返信先・条件
           </li>
         </ol>
-      </div>
+      </div>}
 
       <ErrorSummary errors={errors} summaryRef={errorSummaryRef} />
 
+      <p className="text-sm leading-6 text-slate-600">健康情報、機密情報、第三者の個人情報、パスワードは入力しないでください。会社名・現場名・電話番号・添付ファイルは不要です。</p>
+      <fieldset disabled={status === "sending" || unresolvedSubmission} className="min-w-0 space-y-5">
+      {compact ? <section aria-label="相談内容" className="space-y-5">
+        <div><label htmlFor={FIELD_IDS.email} className="block text-sm font-bold">返信先メール（必須）</label><input id={FIELD_IDS.email} type="email" autoComplete="email" value={form.email} onChange={(event) => updateField("email", event.target.value)} maxLength={LIMITS.email} className={inputClass} aria-invalid={Boolean(errors.email)} aria-describedby={describedBy("email", errors)} /><FieldError field="email" errors={errors} /></div>
+        <div><label htmlFor={FIELD_IDS.currentProblem} className="block text-sm font-bold">困っている作業（必須）</label><textarea id={FIELD_IDS.currentProblem} rows={5} value={form.currentProblem} onChange={(event) => updateField("currentProblem", event.target.value)} maxLength={LIMITS.problemMax} className={`${inputClass} min-h-32`} aria-invalid={Boolean(errors.currentProblem)} aria-describedby={describedBy("currentProblem", errors, "compact-problem-hint")} /><p id="compact-problem-hint" className="mt-1 text-sm">10〜2,000文字で、作業の流れと困っている点を教えてください。</p><FieldError field="currentProblem" errors={errors} /></div>
+        <div><label htmlFor={FIELD_IDS.name} className="block text-sm font-bold">呼び名（任意）</label><input id={FIELD_IDS.name} autoComplete="nickname" value={form.name} onChange={(event) => updateField("name", event.target.value)} maxLength={LIMITS.name} className={inputClass} aria-invalid={Boolean(errors.name)} aria-describedby={describedBy("name", errors)} /><FieldError field="name" errors={errors} /></div>
+        <div><label htmlFor={FIELD_IDS.timing} className="block text-sm font-bold">希望時期（任意）</label><select id={FIELD_IDS.timing} value={form.timing} onChange={(event) => updateField("timing", event.target.value as Timing)} className={inputClass}>{TIMING_OPTIONS.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}</select></div>
+        <label htmlFor={FIELD_IDS.privacyConsent} className="flex min-h-[44px] items-center gap-3 text-sm"><input id={FIELD_IDS.privacyConsent} type="checkbox" checked={form.privacyConsent} onChange={(event) => updateField("privacyConsent", event.target.checked)} className="h-5 w-5" aria-invalid={Boolean(errors.privacyConsent)} aria-describedby={describedBy("privacyConsent", errors)} /><span><Link href="/privacy" className="underline">個人情報の取扱い</Link>を確認し、相談への回答に入力内容を利用することに同意します。</span></label><FieldError field="privacyConsent" errors={errors} />
+        <div className="sr-only" aria-hidden="true"><label htmlFor="automation-consult-website">ウェブサイト</label><input id="automation-consult-website" value={form.website} onChange={(event) => updateField("website", event.target.value)} tabIndex={-1} autoComplete="off" /></div>
+      </section> : (
       <section aria-labelledby={`automation-form-step-${step}`}>
         <h2
           ref={stepHeadingRef}
@@ -617,7 +619,7 @@ export function AutomationConsultForm({
                 value={form.currentProblem}
                 onChange={(event) => updateField("currentProblem", event.target.value)}
                 rows={5}
-                maxLength={2_000}
+                maxLength={LIMITS.problemMax}
                 aria-invalid={Boolean(errors.currentProblem)}
                 aria-describedby={describedBy(
                   "currentProblem",
@@ -642,7 +644,7 @@ export function AutomationConsultForm({
                 value={form.desiredSupport}
                 onChange={(event) => updateField("desiredSupport", event.target.value)}
                 rows={5}
-                maxLength={2_000}
+                maxLength={LIMITS.supportMax}
                 aria-invalid={Boolean(errors.desiredSupport)}
                 aria-describedby={describedBy(
                   "desiredSupport",
@@ -670,7 +672,7 @@ export function AutomationConsultForm({
                   value={form.name}
                   onChange={(event) => updateField("name", event.target.value)}
                   autoComplete="name"
-                  maxLength={80}
+                  maxLength={LIMITS.name}
                   aria-invalid={Boolean(errors.name)}
                   aria-describedby={describedBy("name", errors)}
                   className={inputClass}
@@ -688,7 +690,7 @@ export function AutomationConsultForm({
                   value={form.email}
                   onChange={(event) => updateField("email", event.target.value)}
                   autoComplete="email"
-                  maxLength={254}
+                  maxLength={LIMITS.email}
                   spellCheck={false}
                   aria-invalid={Boolean(errors.email)}
                   aria-describedby={describedBy("email", errors)}
@@ -707,7 +709,7 @@ export function AutomationConsultForm({
                 value={form.organization}
                 onChange={(event) => updateField("organization", event.target.value)}
                 autoComplete="organization"
-                maxLength={120}
+                maxLength={LIMITS.organization}
                 aria-invalid={Boolean(errors.organization)}
                 aria-describedby={describedBy("organization", errors)}
                 className={inputClass}
@@ -724,7 +726,7 @@ export function AutomationConsultForm({
                 value={form.currentTools}
                 onChange={(event) => updateField("currentTools", event.target.value)}
                 rows={3}
-                maxLength={500}
+                maxLength={LIMITS.currentTools}
                 aria-invalid={Boolean(errors.currentTools)}
                 aria-describedby={describedBy(
                   "currentTools",
@@ -851,7 +853,8 @@ export function AutomationConsultForm({
             </div>
           </div>
         )}
-      </section>
+      </section>)}
+      </fieldset>
 
       {status === "error" && (
         <div
@@ -859,11 +862,13 @@ export function AutomationConsultForm({
           className="rounded-xl border-2 border-red-700 bg-red-50 p-4 text-sm font-semibold leading-6 text-red-950"
         >
           {failureMessage}
+          {referenceId && <p className="mt-2 font-mono">照会番号: {referenceId}</p>}
+          {unresolvedSubmission && <p className="mt-2">重複を避けるため内容を保持しています。同じ内容・同じ識別子で再試行します。</p>}
         </div>
       )}
 
       <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between">
-        {step === 2 ? (
+        {step === 2 && !compact ? (
           <button
             type="button"
             onClick={goToStepOne}
@@ -901,15 +906,15 @@ export function AutomationConsultForm({
             ) : (
               <>
                 <Send className="h-4 w-4" aria-hidden="true" />
-                内容に同意して無料相談を送信
+                {unresolvedSubmission ? "同じ送信を確認する" : compact ? "相談を送信する" : "内容に同意して無料相談を送信"}
               </>
             )}
           </button>
         )}
       </div>
-      <p className="text-sm leading-6 text-slate-600">
+      {!compact && <p className="text-sm leading-6 text-slate-600">
         送信後に費用は発生しません。正式見積への同意前に制作・設定を開始することはありません。
-      </p>
+      </p>}
     </form>
   );
 }
