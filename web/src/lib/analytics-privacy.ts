@@ -1,3 +1,5 @@
+import { isUnfinishedPublicReadingPath } from "@/lib/public-reading-status";
+
 export const OPTIONAL_TRACKING_CONSENT_KEY = "safe-ai:optional-tracking-consent:v1";
 export const OPTIONAL_TRACKING_CONSENT_EVENT =
   "safe-ai:optional-tracking-consent-change";
@@ -37,9 +39,6 @@ const BLOCKED_PARAM_NAME =
 const AD_READING_PAGES = new Set([
   "/laws",
   "/laws/glossary",
-  "/laws/bcp",
-  "/laws/gig-work",
-  "/laws/freelance-rosai",
   "/guides/ky-sheet",
   "/guides/safety-signage",
   "/guides/chemical-ra-create-simple",
@@ -99,6 +98,7 @@ export function isAdEligiblePath(pathname: string): boolean {
   } catch {
     return false;
   }
+  if (isUnfinishedPublicReadingPath(normalized)) return false;
   return AD_READING_PAGES.has(normalized) || AD_VERIFIED_DETAIL_PAGES.has(normalized);
 }
 

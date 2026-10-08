@@ -53,7 +53,12 @@ describe("LAW_METADATA とコーパスの lawShort 同期", () => {
       "有機則",
       "酸欠則",
     ] as const) {
-      expect(LAW_METADATA[lawShort].latestRevision).toContain("現在施行中");
+      if (lawShort === "安衛法" || lawShort === "安衛則") {
+        expect(LAW_METADATA[lawShort].latestRevision).toContain("2026-10-01施行版");
+        expect(LAW_METADATA[lawShort].latestRevision).toContain("本則snapshot更新");
+      } else {
+        expect(LAW_METADATA[lawShort].latestRevision).toContain("現在施行中");
+      }
       expect(LAW_METADATA[lawShort].auditedAt).toBe("2026-08-03");
     }
     expect(LAW_NAVI_METADATA.電気工事士法).toEqual({

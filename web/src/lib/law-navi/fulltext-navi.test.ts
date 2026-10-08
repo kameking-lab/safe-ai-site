@@ -31,9 +31,9 @@ describe("fulltextArtSlug — sortKey 由来の slug（全階層枝番保持）"
 });
 
 describe("getFulltextNaviEntries — 安衛則ギャップ充填（dual-exclusion）", () => {
-  it("curated に無い条だけを 1,063 件埋める（118 curated収録 + 1 slug占有 を除外）", async () => {
+  it("curated に無い条だけを 1,065 件埋める（118 curated収録 + 1 slug占有 を除外）", async () => {
     const gap = await getFulltextNaviEntries(EGOV);
-    expect(gap.length).toBe(1063);
+    expect(gap.length).toBe(1065);
     expect(gap.every((e) => e.origin === "fulltext")).toBe(true);
   });
 

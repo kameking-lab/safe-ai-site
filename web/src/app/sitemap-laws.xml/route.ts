@@ -33,7 +33,7 @@ export async function GET() {
   const urls = entries.map(
     (e) => `  <url>
     <loc>${escapeXml(`${BASE}${e.path}`)}</loc>
-    <lastmod>${CORPUS_LASTMOD}</lastmod>
+    <lastmod>${e.article.sourceContentChangedOn ?? CORPUS_LASTMOD}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>`

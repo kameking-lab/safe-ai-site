@@ -21,6 +21,7 @@
  */
 
 import { createHash } from "node:crypto";
+import { lawResponseXml } from "./egov-law-response.ts";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 
@@ -402,7 +403,7 @@ async function fetchXml(lawId: string): Promise<string | null> {
     headers: { Accept: "application/xml" },
   });
   if (!res.ok) return null;
-  return await res.text();
+  return lawResponseXml(await res.text(), lawId);
 }
 
 function buildLaw(lawId: string, xml: string): FulltextLaw {

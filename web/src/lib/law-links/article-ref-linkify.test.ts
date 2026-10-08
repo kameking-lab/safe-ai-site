@@ -97,6 +97,27 @@ describe('linkifyArticleReferences（O18 条文参照リンカー）', () => {
     expect(links(segs)).toHaveLength(0);
   });
 
+  it('does not drop branch numbers onto a collected base article', () => {
+    const text = '鉛則第五十二条の三第二項、特化則第三十六条の三第二項';
+    const segs = linkifyArticleReferences(text, '労働安全衛生規則');
+    expect(links(segs)).toHaveLength(0);
+    expect(segs.map((s) => s.text).join('')).toBe(text);
+  });
+
+  it('keeps multiple branch levels whole without linking the first branch or base', () => {
+    const text = '有機則第二十八条の三の二第三項、第五十二条の三の二第三項';
+    const segs = linkifyArticleReferences(text, '労働安全衛生規則');
+    expect(links(segs)).toHaveLength(0);
+    expect(segs.map((s) => s.text).join('')).toBe(text);
+  });
+
+  it('does not change an omitted foreign-law continuation into the displayed law', () => {
+    const text = '鉛則第五十二条の三第二項若しくは第五十二条の三第二項に規定する。';
+    const segs = linkifyArticleReferences(text, '労働安全衛生規則');
+    expect(links(segs)).toHaveLength(0);
+    expect(segs.map((s) => s.text).join('')).toBe(text);
+  });
+
   it('未知の法令名接頭はリンクしない', () => {
     const segs = linkifyArticleReferences('民法第709条による。', '労働安全衛生法');
     expect(links(segs)).toHaveLength(0);

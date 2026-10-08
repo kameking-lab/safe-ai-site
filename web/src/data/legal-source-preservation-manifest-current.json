@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAtJst": "2026-10-06T10:06:35+09:00",
+  "generatedAtJst": "2026-10-08T23:33:19+09:00",
   "algorithm": "sha256(sorted lines: <canonical-file-sha256><two spaces><repo-relative-path><LF>); CRLF in .ts/.json/.jsonl is normalized to LF; all other files are raw",
   "excludes": [
     "test files",
@@ -14,8 +14,8 @@
         "web/src/data/laws-fulltext"
       ],
       "fileCount": 25,
-      "bytes": 6562218,
-      "manifestSha256": "ac988b993654b0b127b9ebb27713613dbc244e7f2d8a489ac968afb5f8b73d41"
+      "bytes": 6568875,
+      "manifestSha256": "3a1db33df270a184bdaeef2d1e93cf0790fad237d4e00169ceb17e11e027f9bf"
     },
     {
       "id": "laws-and-metadata",
@@ -26,8 +26,8 @@
         "web/src/data/law-navi"
       ],
       "fileCount": 70,
-      "bytes": 7911079,
-      "manifestSha256": "cc39158cbcce85d79be9fbf6febef84e83eb307b39d01d193dc6dbd6dcf4dc8d"
+      "bytes": 7923506,
+      "manifestSha256": "4c4fc990188db3bf32d99850710e6441d65cbf34f245cfc7e2c6caaa18becf25"
     },
     {
       "id": "verified-notices-and-circulars",

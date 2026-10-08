@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { POST } from "./route";
 import { POST as POST_STREAM } from "./stream/route";
 import { __resetChatbotCacheForTests } from "@/lib/chatbot-cache";
@@ -2444,4 +2444,18 @@ describe("電気の二段chipは行為・電圧・充電状態を累積して反
       }
     }
   }, 90_000);
+});
+
+// These semantic contracts explicitly exercise the frozen August basis and
+// pre-update safety records. Current October refusal is tested without mocks
+// in current-unverified-electrical.test.ts and route-safety.test.ts.
+vi.mock("@/lib/legal-answer-temporal", async (importOriginal) => {
+  const original = await importOriginal<typeof import("@/lib/legal-answer-temporal")>();
+  return { ...original, LEGAL_ANSWER_BASIS_DATE_JST: "2026-08-09",
+    legalAnswerBasisNow: () => new Date("2026-08-09T00:00:00+09:00") };
+});
+vi.mock("@/data/laws/egov-verified-corpus.generated", async (importOriginal) => {
+  const original = await importOriginal<typeof import("@/data/laws/egov-verified-corpus.generated")>();
+  const { historicalSafetyCorpus } = await import("@/fixtures/legal-safety-history-2026-08-09");
+  return { ...original, verifiedLawArticles: historicalSafetyCorpus(original.verifiedLawArticles) };
 });
