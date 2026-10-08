@@ -50,7 +50,7 @@ test("LPの6機能から専用入力画面と全機能を利用でき、JavaScri
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
   await expect(page.locator("#mascot-tools")).toHaveCount(0);
-  await expect(page.getByRole("region", { name: "今日の仕事を、少し軽く。" })).toBeVisible();
+  await expect(page.getByRole("region", { name: "今日の仕事に、すぐ使える。" })).toBeVisible();
   await expect(tools(page)).toHaveCount(6);
   expect(await tools(page).evaluateAll((links) => links.map((link) => link.getAttribute("href")))).toEqual(toolPaths);
   await expect(tools(page).locator("a, button, input, textarea")).toHaveCount(0);

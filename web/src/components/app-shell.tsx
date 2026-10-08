@@ -16,7 +16,7 @@ export function AppShell({
   footerSlot,
 }: AppShellProps) {
   return (
-    <div className="grid min-h-full w-full grid-cols-1 grid-rows-[auto_minmax(0,1fr)_auto] bg-background lg:grid-cols-[240px_minmax(0,1fr)]">
+    <div data-app-shell className="grid min-h-full w-full grid-cols-1 grid-rows-[auto_minmax(0,1fr)_auto] bg-background lg:grid-cols-[240px_minmax(0,1fr)]">
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:inline-flex focus:min-h-11 focus:items-center focus:rounded-[var(--radius-sm)] focus:bg-brand-primary-solid focus:px-4 focus:py-2 focus:text-sm focus:font-bold focus:text-white focus:shadow-[var(--shadow-sm)] focus:outline-none focus:ring-4 focus:ring-brand-primary/25"
@@ -96,10 +96,11 @@ export function AppShell({
           data-app-shell-header=""
           className="relative border-b border-portal-border bg-portal-surface lg:hidden print:!hidden"
         >
-          <div className="flex min-h-[64px] items-center gap-[8px] px-[12px] py-[10px] pr-[104px]">
+          <div data-home-header-row className="flex min-h-[64px] items-center gap-[8px] px-[12px] py-[10px] pr-[104px]">
             <Link
               href="/"
               prefetch={false}
+              data-home-brand
               className="flex min-w-0 flex-1 items-center gap-2 rounded-[var(--radius-sm)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-primary/25"
             >
               <MascotBadge
@@ -113,6 +114,11 @@ export function AppShell({
                 </span>
               </span>
             </Link>
+            <nav className="hidden" data-home-toplinks aria-label="ホームのご案内">
+              <Link href="/#tools" prefetch={false}>道具</Link>
+              <Link href="/about/project-story" prefetch={false}>サイトについて</Link>
+              <Link href="/#consult" prefetch={false}>相談</Link>
+            </nav>
             <Link
               href="/search"
               prefetch={false}
@@ -170,6 +176,7 @@ export function AppShell({
                 >
                   ログイン・マイページ
                 </Link>
+                <Link href="/features" prefetch={false} data-home-menu-features className="hidden min-h-11 items-center rounded-xl px-3 text-xs font-bold text-emerald-800">全機能一覧</Link>
               </div>
 
               <details

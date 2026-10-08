@@ -68,11 +68,19 @@ test("ホームは道具、原点、相談、最新情報の順で使える", as
   ]);
   await expect(page.locator('[data-home-section="heat"]')).toHaveCount(0);
   await expect(page.locator('main [data-warning-card], main [role="alert"]')).toHaveCount(0);
-  const nav = page.getByRole("navigation", { name: "サイト全体ナビゲーション", exact: true });
-  await expect(nav).toBeVisible();
-  await expect(nav.getByRole("link")).toHaveCount(DESKTOP_NAV.length);
+  const nav = page.getByRole("navigation", { name: "サイト全体ナビゲーション", exact: true, includeHidden: true });
+  await expect(nav).toBeHidden();
+  const homeNavigation = page.getByRole("navigation", { name: "ホームのご案内", exact: true });
+  await expect(homeNavigation).toBeVisible();
+  expect(await homeNavigation.getByRole("link").evaluateAll(links => links.map(link => link.getAttribute("href")))).toEqual(["/#tools", "/about/project-story", "/#consult"]);
+  await page.getByRole("button", { name: "メニューを開閉" }).click();
+  const fullMenu = page.getByRole("region", { name: "モバイルサイトメニュー。Escキーで閉じます" });
+  await expect(fullMenu).toBeVisible();
+  await expect(fullMenu.getByRole("link", { name: "全機能一覧", exact: true })).toHaveAttribute("href", "/features");
+  await page.keyboard.press("Escape");
+  await expect(nav.getByRole("link", { includeHidden: true })).toHaveCount(DESKTOP_NAV.length);
   for (const [label, href] of DESKTOP_NAV) {
-    const link = nav.getByRole("link", { name: label, exact: true });
+    const link = nav.getByRole("link", { name: label, exact: true, includeHidden: true });
     await expect(link).toHaveCount(1);
     await expect(link).toHaveAttribute("href", href);
   }

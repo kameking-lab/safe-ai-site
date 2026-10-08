@@ -6,7 +6,7 @@ import ProjectStoryPage, { metadata } from "./page";
 describe("the approved project origin", () => {
   it("retains canonical identity and truthful AboutPage metadata", () => {
     const url = "https://www.anzen-ai-portal.jp/about/project-story";
-    expect(metadata.title).toBe("このサイトに込めた思い");
+    expect(metadata.title).toBe("このサイトについて");
     expect(metadata.alternates?.canonical).toBe(url);
     expect(sitemap().some((entry) => entry.url === url)).toBe(true);
     const { container } = render(<ProjectStoryPage />);
@@ -22,8 +22,10 @@ describe("the approved project origin", () => {
     expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
     const article = container.querySelector("[data-project-story]");
     const text = article?.textContent ?? "";
-    expect(text).toContain("私は、死亡事故で同僚を失いました。安全な計画を立てていれば、防げたかもしれない。あの時、現場に行けば、防げたかもしれない。");
-    expect(text).toContain("文系を専攻した私が建設業に進んだ背景");
+    expect(text).toContain("私は、死亡事故で同僚を失いました。この経験が、現場の安全に関わる取り組みを続ける背景にあります。");
+    expect(text).not.toContain("防げたかもしれない");
+    expect(article?.querySelectorAll("[data-story-copy] p")).toHaveLength(4);
+    expect(text).toContain("定型的な作業の負担を減らし");
     for (const unsupported of ["断トツ", "私がうつ病", "私がパワハラ", "事故を防げたはず", "勤務先", "氏名"]) expect(text).not.toContain(unsupported);
     expect(article?.querySelector("img")).toBeNull();
     expect(screen.getByRole("link", { name: "道具を使う" }).getAttribute("href")).toBe("/#tools");

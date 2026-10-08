@@ -9,7 +9,7 @@ test.describe("project story and landing-page separation", () => {
     const response = await page.goto(STORY_PATH);
     expect(response?.status()).toBe(200);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-      /仲間を守りたい。\s*それが、出発点です。/,
+      /現場に向き合う時間を、つくる。/,
     );
     await expect(page.locator("main h1")).toHaveCount(1);
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
@@ -119,9 +119,9 @@ test.describe("project story and landing-page separation", () => {
     for (const [path, expectedText, minimum, maximum] of [
       [
         STORY_PATH,
-        "私は、死亡事故で同僚を失いました。安全な計画を立てていれば、防げたかもしれない。あの時、現場に行けば、防げたかもしれない。",
-        350,
-        800,
+        "私は、死亡事故で同僚を失いました。この経験が、現場の安全に関わる取り組みを続ける背景にあります。",
+        280,
+        500,
       ],
       [
         "/safety-ai",
@@ -149,7 +149,7 @@ test.describe("project story and landing-page separation", () => {
       expect(snapshot.mainCharacters, path).toBeLessThanOrEqual(maximum);
       expect(snapshot.links, path).toBeGreaterThanOrEqual(path === STORY_PATH ? 3 : 6);
       if (path === STORY_PATH) {
-        await expect(page.locator("[data-story-copy] p")).toHaveCount(5);
+        await expect(page.locator("[data-story-copy] p")).toHaveCount(4);
         for (const href of ["/#tools", "/about/quality", "/about/data-sources"]) {
           await expect(page.locator(`[data-project-story] a[href="${href}"]`)).toBeVisible();
         }
