@@ -1,6 +1,9 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
+import { HomeLP } from "@/components/home/home-lp";
 
 const REQUIRED_ENTRY_FILES = [
   "src/components/app-shell-navigation.tsx",
@@ -31,20 +34,27 @@ function source(relativePath: string): string {
 }
 
 describe("業務自動化相談のクロール可能な入口", () => {
-  it("ホームでは主機能→安全の新着→サンプル→全機能→自動化相談の順に置く", () => {
-    const home = source("src/app/(main)/page.tsx");
-    const orderedComponents = [
-      "<HomeRelaunch",
-      "<HomeSafetyUpdates",
-      "<HomeAutomationSamples",
-      "<HomeFeatureDirectory",
-      "<HomeAutomationService",
-    ];
-    const positions = orderedComponents.map((component) =>
-      home.indexOf(component),
-    );
-    expect(positions.every((position) => position >= 0)).toBe(true);
-    expect(positions).toEqual([...positions].sort((a, b) => a - b));
+  it("ホームでは道具の入口→原点→自動化相談→最新情報をSSRで届ける", () => {
+    const markup = renderToStaticMarkup(createElement(HomeLP, {
+      availability: {
+        status: "paused", accepting: false, webFormEnabled: false,
+        contactMode: null, intakeMode: null, retentionDays: null,
+        label: "受付停止中", message: "停止中",
+      },
+      latestNews: {
+        status: "unavailable", checkedAt: "2026-10-08T00:00:00Z", items: [],
+        sourceLabel: "公開RSS", sourceUrl: "https://news.google.com/", message: "未取得",
+      },
+    }));
+    const document = new DOMParser().parseFromString(markup, "text/html");
+    const sections = [...document.querySelectorAll("[data-home-lp] > section")];
+    expect(sections.map((section) => section.getAttribute("aria-labelledby"))).toEqual([
+      "home-lp-title", "home-tools-heading", "home-origin-heading",
+      "home-consult-heading", "home-news-heading",
+    ]);
+    expect(document.querySelector('a[href="#tools"]')).not.toBeNull();
+    expect(document.querySelector('a[href="#consult"]')).not.toBeNull();
+    expect(document.querySelector('#consult a')?.getAttribute("href")).toBe("/services/automation");
   });
 
   it.each(REQUIRED_ENTRY_FILES)(
