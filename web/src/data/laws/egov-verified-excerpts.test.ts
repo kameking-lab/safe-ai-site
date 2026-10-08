@@ -64,7 +64,7 @@ function loadSnapshot(lawId: string): Snapshot {
 
 describe("generated e-Gov verified excerpts", () => {
   it("copies exact non-deleted text from a hash-valid committed snapshot", () => {
-    expect(egovVerifiedExcerpts).toHaveLength(63);
+    expect(egovVerifiedExcerpts).toHaveLength(66);
     const snapshots = new Map<string, Snapshot>();
 
     for (const excerpt of egovVerifiedExcerpts) {
@@ -141,13 +141,13 @@ describe("generated e-Gov verified excerpts", () => {
       {
         lawId: "347M50002000032",
         articleNum: "第41条",
-        revisionId: "20260801_508M60000100086",
+        revisionId: "20261001_508M60000100116",
         text: "別表第三",
       },
       {
         lawId: "347M50002000032",
         articleNum: "第350条",
-        revisionId: "20260801_508M60000100086",
+        revisionId: "20261001_508M60000100116",
         text: "作業の指揮者",
       },
       {

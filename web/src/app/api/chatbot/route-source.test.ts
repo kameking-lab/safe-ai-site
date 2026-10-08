@@ -58,10 +58,10 @@ describe("chatbot source metadata", () => {
 
     expect(source.amendmentPromulgatedOn).toBe("2025-05-14");
     expect(source.amendmentHistory?.[0]).toMatchObject({
-      revisionId: "20260401_507AC0000000033",
+      revisionId: "20261001_507AC0000000033",
       amendmentLawNumber: "令和七年法律第三十三号",
       promulgatedOn: "2025-05-14",
-      effectiveOn: "2026-04-01",
+      effectiveOn: "2026-10-01",
     });
   });
 

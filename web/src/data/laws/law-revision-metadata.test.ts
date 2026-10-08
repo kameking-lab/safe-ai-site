@@ -11,21 +11,21 @@ describe("verified e-Gov revision metadata", () => {
         candidate.lawShort === "安衛法" && candidate.articleNum === "第1条",
     );
 
-    expect(article?.sourceRevisionId).toBe("20260401_507AC0000000033");
+    expect(article?.sourceRevisionId).toBe("20261001_507AC0000000033");
     expect(article?.amendmentPromulgatedOn).toBe("2025-05-14");
     expect(article?.amendmentHistory).toEqual([
       {
-        revisionId: "20260401_507AC0000000033",
+        revisionId: "20261001_507AC0000000033",
         amendmentLawNumber: "令和七年法律第三十三号",
         promulgatedOn: "2025-05-14",
-        effectiveOn: "2026-04-01",
+        effectiveOn: "2026-10-01",
         status: "enforced",
         sourceUrl: "https://laws.e-gov.go.jp/law/347AC0000000057",
       },
     ]);
   });
 
-  it("keeps October metadata separate from the preserved April full-text revision", () => {
+  it("matches current October full text without rewriting the preserved April revision history", () => {
     const sourceUrl = "https://laws.e-gov.go.jp/law/347AC0000000057";
     expect([...revisionSnapshot.revisions, ...revisionSnapshot.revisionHistory]
       .some((record) => record.source_url === sourceUrl && record.enforcement_date === "2026-10-01"))
@@ -33,12 +33,12 @@ describe("verified e-Gov revision metadata", () => {
     expect(revisionSnapshot.revisionHistory.find((record) => record.source_url === sourceUrl)?.enforcement_date)
       .toBe("2026-04-01");
 
-    const april = verifiedLawArticles.find(
+    const october = verifiedLawArticles.find(
       (record) => record.lawShort === "安衛法" && record.articleNum === "第1条",
     );
-    expect(april?.sourceRevisionId).toBe("20260401_507AC0000000033");
-    expect(april?.amendmentHistory?.[0]?.effectiveOn).toBe("2026-04-01");
-    expect(april?.amendmentPromulgatedOn).toBe("2025-05-14");
+    expect(october?.sourceRevisionId).toBe("20261001_507AC0000000033");
+    expect(october?.amendmentHistory?.[0]?.effectiveOn).toBe("2026-10-01");
+    expect(october?.amendmentPromulgatedOn).toBe("2025-05-14");
   });
 
   it("does not infer a date when the committed revision record is absent", () => {

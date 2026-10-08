@@ -1749,10 +1749,12 @@ describe("安衛則97条の労働者死傷病報告期限を回答する", () =>
   it("現行の電子申請文言を昭和47年施行と誤表示しない", () => {
     const query = "休業災害の報告書を出す決まりは？";
     const sources = expandVerifiedLegalEvidenceArticles(query, []);
-    const answer = buildServiceFirstLegalAnswer({ query, articles: sources });
-
-    expect(answer).toContain("公式原文を確認");
-    expect(answer).not.toContain("昭和47年9月30日施行");
+    const current = buildServiceFirstLegalAnswer({ query, articles: sources, now: new Date("2026-10-08T23:00:00+09:00") });
+    const historical = buildServiceFirstLegalAnswer({ query, articles: sources, now: new Date("2026-08-09T00:00:00+09:00") });
+    expect(current).toContain("公式本文を2026-10-08確認");
+    expect(historical).toContain("公式原文を確認");
+    expect(current).not.toContain("昭和47年9月30日施行");
+    expect(historical).not.toContain("昭和47年9月30日施行");
   });
 });
 

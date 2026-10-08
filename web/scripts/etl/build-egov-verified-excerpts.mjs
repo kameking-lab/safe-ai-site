@@ -24,6 +24,14 @@ const CORPUS_OUTPUT_FILE = join(
   "src/data/laws/egov-verified-corpus.generated.ts",
 );
 
+// Dates identify reviewed content deltas, not fresh fetches of unchanged articles.
+const CONTENT_CHANGE_CONFIRMED_ON = new Map([
+  ...["第2条", "第65条の3", "第65条の4", "第65条の5", "第119条"]
+    .map((num) => [`347AC0000000057|20261001_507AC0000000033|${num}`, "2026-10-08"]),
+  ...["第42条の5", "第42条の6", "第52条の22", "第86条", "第100条"]
+    .map((num) => [`347M50002000032|20261001_508M60000100116|${num}`, "2026-10-08"]),
+]);
+
 const LAW_TARGETS = [
   {
     lawId: "335AC0000000139",
@@ -58,6 +66,8 @@ const LAW_TARGETS = [
     displayLaw: "労働安全衛生法",
     lawShort: "安衛法",
     articles: [
+      { articleNum: "第2条", keywords: ["定義", "ばく露の程度", "作業環境測定"] },
+      { articleNum: "第119条", keywords: ["罰則", "作業時間の制限"] },
       {
         articleNum: "第15条の3",
         keywords: [
@@ -102,6 +112,7 @@ const LAW_TARGETS = [
     displayLaw: "労働安全衛生規則",
     lawShort: "安衛則",
     articles: [
+      { articleNum: "第86条", keywords: ["作業環境測定", "検査"] },
       {
         articleNum: "第41条",
         keywords: [
@@ -635,6 +646,9 @@ for (const target of LAW_TARGETS) {
       sourceLawId: target.lawId,
       sourceRevisionId: snapshot.revisionId,
       sourceFetchedAt: snapshot.fetchedAt,
+      sourceContentChangedOn: CONTENT_CHANGE_CONFIRMED_ON.get(
+        `${target.lawId}|${snapshot.revisionId}|${article.articleNum}`,
+      ),
       sourceHash: snapshot.sha256,
       contentHash: sha256(canonicalArticleJson(article)),
       verificationStatus: "snapshot-hash-verified",

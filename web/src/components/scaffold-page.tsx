@@ -2,6 +2,7 @@ import Link from "next/link";
 import { BookOpen, ExternalLink, Sparkles, Wrench } from "lucide-react";
 import { Breadcrumb } from "@/components/breadcrumb";
 import { JsonLd } from "@/components/json-ld";
+import { isPublicRouteAvailable } from "@/lib/public-content-policy";
 
 export type ScaffoldLink = {
   label: string;
@@ -57,6 +58,11 @@ export function ScaffoldPage({
   officialRefs = [],
   cta,
 }: ScaffoldPageProps) {
+  const availableLink = (link: ScaffoldLink) =>
+    link.external || !link.href.startsWith("/") || isPublicRouteAvailable(link.href);
+  relatedLaws = relatedLaws.filter(availableLink);
+  resources = resources.filter(availableLink);
+  if (cta && !availableLink(cta)) cta = undefined;
   const sectionName = backLabel.replace(/に戻る$/, "");
   const breadcrumbLd = canonicalPath
     ? {

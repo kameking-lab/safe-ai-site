@@ -1146,6 +1146,8 @@ export const OFFICIAL_CAPTIONS_ANZEN_EISEI_KISOKU: Record<string, string> = {
   "第680条": "共用部分における昇降するための設備の設置等",
   "第681条": "共用部分の通路",
   "第682条": "共用部分の通路の照明",
+  "第42条の5": "法第六十五条の三第一項の厚生労働省令で定めるとき",
+  "第42条の6": "法第六十五条の三第二項の厚生労働省令で定めるとき",
 };
 
 export const OFFICIAL_CAPTIONS_RODO_ANZEN_EISEI_HO: Record<string, string> = {
@@ -1252,8 +1254,8 @@ export const OFFICIAL_CAPTIONS_RODO_ANZEN_EISEI_HO: Record<string, string> = {
   "第64条": "削除",
   "第65条": "作業環境測定",
   "第65条の2": "作業環境測定の結果の評価等",
-  "第65条の3": "作業の管理",
-  "第65条の4": "作業時間の制限",
+  "第65条の3": "健康障害の防止のための措置等に当たつて行う作業環境測定",
+  "第65条の4": "作業の管理",
   "第66条": "健康診断",
   "第66条の2": "自発的健康診断の結果の提出",
   "第66条の3": "健康診断の結果の記録",
@@ -1359,6 +1361,7 @@ export const OFFICIAL_CAPTIONS_RODO_ANZEN_EISEI_HO: Record<string, string> = {
   "第122条": "厚生労働省令への委任*",
   "第122条の2": "厚生労働省令への委任*",
   "第123条": "厚生労働省令への委任*",
+  "第65条の5": "作業時間の制限",
 };
 
 /**

@@ -250,7 +250,7 @@ describe("chatbot route executable safety boundary", () => {
   });
 
   it.each(executableRouteModes)(
-    "実行時計が監査日を超えても回答・出典を2026-08-09基準に固定する ($label)",
+    "実行時計が監査日を超えても回答・出典を2026-10-08基準に固定する ($label)",
     async ({ post, mode }) => {
       vi.useFakeTimers();
       vi.setSystemTime(new Date("2030-01-01T00:00:00.000Z"));
@@ -258,20 +258,20 @@ describe("chatbot route executable safety boundary", () => {
       const current = await callRoute(post, mode, "酸欠作業の監視人は必要？");
       expect(current.response.status).toBe(200);
       expectAnswerFirst(current.payload);
-      expect(current.payload.answer).toContain("回答基準日: 2026-08-09 JST");
+      expect(current.payload.answer).toContain("回答基準日: 2026-10-08 JST");
       expect(current.payload.answer).not.toContain("2030-01-01");
       expect(current.payload.sources.length).toBeGreaterThan(0);
       expect(
-        current.payload.sources.every((item) => item.asOf === "2026-08-09"),
+        current.payload.sources.every((item) => item.asOf === "2026-10-08"),
       ).toBe(true);
 
       const future = await callRoute(
         post,
         mode,
-        "2026年8月10日時点の足場の手すり高さは？",
+        "2026年10月9日時点の足場の手すり高さは？",
       );
       expect(future.response.status).toBe(200);
-      expect(future.payload.answer).toContain("回答基準日: 2026-08-09 JST");
+      expect(future.payload.answer).toContain("回答基準日: 2026-10-08 JST");
       expect(future.payload.answer).toContain("回答を保留");
       expect(future.payload.sources).toEqual([]);
     },
@@ -284,14 +284,14 @@ describe("chatbot route executable safety boundary", () => {
 
     const first = await callRoute(postJson, "json", message);
     expect(first.response.headers.get("X-Cache-Hit")).toBe("false");
-    expect(first.payload.answer).toContain("回答基準日: 2026-08-09 JST");
+    expect(first.payload.answer).toContain("回答基準日: 2026-10-08 JST");
 
     vi.setSystemTime(new Date("2026-08-08T01:00:00.000Z"));
     const second = await callRoute(postJson, "json", message);
     expect(second.response.headers.get("X-Cache-Hit")).toBe("true");
-    expect(second.payload.answer).toContain("回答基準日: 2026-08-09 JST");
+    expect(second.payload.answer).toContain("回答基準日: 2026-10-08 JST");
     expect(
-      second.payload.sources.every((item) => item.asOf === "2026-08-09"),
+      second.payload.sources.every((item) => item.asOf === "2026-10-08"),
     ).toBe(true);
   });
 
@@ -1208,7 +1208,7 @@ describe("chatbot route executable safety boundary", () => {
 
       expect(response.status).toBe(200);
       expect(raw).not.toContain("STALE-PREVIOUS-DAY");
-      expect(payload.answer).toContain("回答基準日: 2026-08-09 JST");
+      expect(payload.answer).toContain("回答基準日: 2026-10-08 JST");
       expectSupportedAsbestosParagraphSource(payload);
       if (mode === "json") {
         expect(response.headers.get("X-Cache-Hit")).toBe("false");
@@ -1404,7 +1404,7 @@ describe("chatbot route executable safety boundary", () => {
           Date.parse("2026-07-23T00:00:00.000Z"),
         );
         expect(fetchedAt).toBeLessThanOrEqual(
-          Date.parse("2026-08-09T00:00:00.000Z"),
+          Date.parse("2026-10-08T23:59:59.999+09:00"),
         );
         expect(item.humanReviewStatus).toBe("not-reviewed");
       }
@@ -1492,8 +1492,9 @@ describe("chatbot route executable safety boundary", () => {
       expect(payload.sources.length).toBeGreaterThan(0);
       expect(payload.citations?.length ?? 0).toBeGreaterThan(0);
       expect(payload.effectiveDateStatus).toMatchObject({
-        status: "current",
-        asOf: "2026-08-09",
+        // Mixed evidence includes an older decree; advancing the anchor must not promote it.
+        status: "unknown",
+        asOf: "2026-10-08",
       });
     },
   );

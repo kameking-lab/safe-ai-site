@@ -13,13 +13,15 @@ describe("analytics privacy", () => {
   it("limits ads to public reading pages", () => {
     for (const path of [
       "/laws",
-      "/laws/bcp",
       "/guides/ky-sheet",
       "/circulars/mhlw-notice-0014",
     ]) {
       expect(isAdEligiblePath(path), path).toBe(true);
     }
     for (const path of [
+      "/laws/bcp",
+      "/laws/gig-work",
+      "/laws/freelance-rosai",
       "/",
       "/search",
       "/chatbot",
@@ -40,6 +42,15 @@ describe("analytics privacy", () => {
     }
     expect(isAdEligibleUrl("https://example.test/articles/fall-prevention?q=worker-name")).toBe(false);
     expect(isAdEligibleUrl("https://example.test/guides/ky-sheet")).toBe(true);
+  });
+
+  it("denies unfinished reading routes including encoded and trailing-slash variants", () => {
+    for (const path of ["/laws/bcp", "/laws/gig-work", "/laws/freelance-rosai"]) {
+      for (const variant of [path, `${path}/`, path.replace("laws", "%6caws"), `${path}/print`]) {
+        expect(isAdEligiblePath(variant)).toBe(false);
+        expect(isAdEligibleUrl(`https://example.test${variant}?year=2026`)).toBe(false);
+      }
+    }
   });
 
   it("excludes free-text and private workflows", () => {

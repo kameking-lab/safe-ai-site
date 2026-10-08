@@ -16,11 +16,17 @@ const NOW = new Date("2026-07-28T03:00:00Z");
 
 describe("法令回答の共通時点管理", () => {
   it("一次資料の監査済み上限を実行時計と独立した基準日にする", () => {
-    expect(LEGAL_ANSWER_BASIS_DATE_JST).toBe("2026-08-09");
-    expect(legalAnswerAsOf(legalAnswerBasisNow())).toBe("2026-08-09");
-    expect(hasFutureLegalPremise("2026年8月10日時点の義務", legalAnswerBasisNow())).toBe(
+    expect(LEGAL_ANSWER_BASIS_DATE_JST).toBe("2026-10-08");
+    expect(legalAnswerAsOf(legalAnswerBasisNow())).toBe("2026-10-08");
+    expect(hasFutureLegalPremise("2026年10月9日時点の義務", legalAnswerBasisNow())).toBe(
       true,
     );
+  });
+
+  it("preserves the explicit August historical basis independently of the current anchor", () => {
+    const historicalBasis = new Date("2026-08-09T00:00:00+09:00");
+    expect(legalAnswerAsOf(historicalBasis)).toBe("2026-08-09");
+    expect(hasFutureLegalPremise("2026年8月10日時点の義務", historicalBasis)).toBe(true);
   });
 
   it("JSTの回答基準日を決定的に生成する", () => {
