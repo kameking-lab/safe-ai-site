@@ -1,4 +1,4 @@
-import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { OptionalThirdPartyScripts } from "./OptionalThirdPartyScripts";
 import { ScrollPositionRestorer } from "./scroll-position-restorer";
@@ -12,7 +12,10 @@ let pathname = "/";
 const mocks = vi.hoisted(() => ({ push: vi.fn(), search: vi.fn(), confirm: vi.fn(), find: vi.fn() }));
 vi.mock("next/navigation", () => ({ usePathname: () => pathname, useRouter: () => ({ push: mocks.push, prefetch: vi.fn() }) }));
 vi.mock("@/lib/chemical/search-client", () => ({ searchChemicalCatalog: mocks.search, confirmChemicalCatalogSelection: mocks.confirm, findChemicalByCas: mocks.find }));
-vi.mock("./Analytics", () => ({ default: () => null }));
+vi.mock("./Analytics", async (importOriginal) => ({
+  ...await importOriginal<typeof import("./Analytics")>(),
+  default: () => null,
+}));
 vi.mock("./AdSenseScript", () => ({ default: () => null }));
 const toluene = { cas: "108-88-3", primaryName: "トルエン", aliases: [], flags: { carcinogenic: false, concentration: true, skin: false, label_sds: true }, appliedDates: {}, notes: [], entryCount: 1 };
 
@@ -28,7 +31,7 @@ beforeEach(() => {
   Object.defineProperty(window, "scrollY", { configurable: true, value: 640 });
   window.scrollTo = vi.fn();
   window.requestAnimationFrame = (callback) => { callback(0); return 1; };
-  vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => ({ chemicalName: "トルエン", casNumber: "108-88-3", ghsHazards: [], ppeRecommendations: [], safetyMeasures: [], emergencyMeasures: [], regulatoryNotes: [], aiStatus: "disabled_for_safety", assessmentStatus: "unavailable", assessmentNotice: "公式SDSと公式ツールで確認してください。" }) }));
+  vi.stubGlobal("fetch", vi.fn().mockImplementation(async () => Response.json({ chemicalName: "トルエン", casNumber: "108-88-3", ghsHazards: [], ppeRecommendations: [], safetyMeasures: [], emergencyMeasures: [], regulatoryNotes: [], aiStatus: "disabled_for_safety", assessmentStatus: "unavailable", assessmentNotice: "公式SDSと公式ツールで確認してください。" })));
 });
 afterEach(() => { cleanup(); consumeTransientChemicalNavigation(); localStorage.clear(); sessionStorage.clear(); Reflect.deleteProperty(window, "gtag"); vi.unstubAllGlobals(); vi.clearAllMocks(); });
 
@@ -45,10 +48,11 @@ it.each([["granted", "candidate"], ["denied", "candidate"], ["granted", "submit"
   view.rerender(<App destination />);
   await waitFor(() => expect(mocks.find).toHaveBeenCalledWith("108-88-3"));
   await waitFor(() => expect((screen.getByRole("combobox") as HTMLInputElement).value).toBe("トルエン"));
-  // Wait for the destination's automatic assessment before unmounting it.
-  // Otherwise its async fetch can outlive jsdom teardown in the full CI suite.
+  // Wait for the terminal unavailable result and loading completion, not only
+  // fetch dispatch. Automatic assessment must finish before Back/unmount.
   await waitFor(() => expect(fetch).toHaveBeenCalledWith("/api/chemical-ra", expect.any(Object)));
-  await act(async () => {});
+  await screen.findByRole("link", { name: "公式CREATE-SIMPLEで判定" });
+  await waitFor(() => expect(document.querySelector("button[data-primary-action='true']")?.getAttribute("aria-busy")).toBe("false"));
   expect(consumeTransientChemicalNavigation()).toBe(false);
   expect(gtag).toHaveBeenCalledWith("consent", "update", expect.objectContaining({ analytics_storage: "denied", ad_storage: "denied" }));
   expect(JSON.stringify(window.history.state)).not.toContain("108-88-3");
