@@ -128,7 +128,7 @@ export async function POST(req: Request) {
   ${body.prefecture ? `<p>対象地域：<strong>${escapeHtml(body.prefecture)}</strong></p>` : ""}
   <p>配信停止はこちら：<a href="${escapeHtml(unsubscribeUrl)}" style="color:#6b7280;">配信停止</a></p>
   <hr style="border:none;border-top:1px solid #e2e8f0;margin:24px 0;" />
-  <p style="font-size:12px;color:#94a3b8;">安全AIポータル ─ 根拠から、現場の行動へ</p>
+  <p style="font-size:12px;color:#94a3b8;">安全AIポータル ─ その書類、AIに任せて、現場に行こう。</p>
 </body>
 </html>`,
   });
