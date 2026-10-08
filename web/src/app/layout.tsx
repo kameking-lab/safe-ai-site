@@ -46,7 +46,7 @@ const metadataDefinition: Metadata = {
     apple: { url: "/apple-touch-icon.png", sizes: "180x180" },
   },
   title: {
-    default: "安全AIポータル｜根拠から、現場の行動へ",
+    default: "安全AIポータル｜その書類、AIに任せて、現場に行こう。",
     template: "%s｜安全AIポータル",
   },
   ...(process.env.GOOGLE_SITE_VERIFICATION
@@ -79,7 +79,7 @@ const metadataDefinition: Metadata = {
     locale: SITE_LOCALE,
     siteName: SITE_NAME,
     title: {
-      default: "安全AIポータル｜根拠から、現場の行動へ",
+      default: "安全AIポータル｜その書類、AIに任せて、現場に行こう。",
       template: "%s｜安全AIポータル",
     },
     description:
@@ -89,14 +89,14 @@ const metadataDefinition: Metadata = {
         url: "/api/og",
         width: 1200,
         height: 630,
-        alt: "安全AIポータル — 根拠から、現場の行動へ",
+        alt: "安全AIポータル — その書類、AIに任せて、現場に行こう。",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
     title: {
-      default: "安全AIポータル｜根拠から、現場の行動へ",
+      default: "安全AIポータル｜その書類、AIに任せて、現場に行こう。",
       template: "%s｜安全AIポータル",
     },
     description:

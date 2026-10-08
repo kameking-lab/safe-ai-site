@@ -18,7 +18,7 @@ import { loadHomeLatestAccidentNews } from "@/lib/home/home-accident-server";
 
 export const revalidate = 3_600;
 
-const _title = "安全AIポータル｜根拠から、現場の行動へ";
+const _title = "安全AIポータル｜その書類、AIに任せて、現場に行こう。";
 const _desc =
   "安衛法AI、化学物質RA、労災事故速報、法改正、事故統計、教材、安全グッズを、出典と更新状態を確認しながら使える労働安全ポータルです。";
 
@@ -36,10 +36,11 @@ export const metadata: Metadata = {
   openGraph: withSiteOpenGraph("/", {
     title: { absolute: _title },
     description: _desc,
-    images: [{ url: ogImageUrl("根拠から、現場の行動へ"), width: 1200, height: 630 }],
+    images: [{ url: ogImageUrl("その書類、AIに任せて、現場に行こう。"), width: 1200, height: 630 }],
   }),
   twitter: withSiteTwitter({
-    images: [ogImageUrl("根拠から、現場の行動へ")],
+    title: { absolute: _title },
+    images: [ogImageUrl("その書類、AIに任せて、現場に行こう。")],
   }),
 };
 
