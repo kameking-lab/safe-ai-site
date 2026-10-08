@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, CheckCircle2, LoaderCircle, Send } from "lucide-react";
 import { trackAutomationEvent } from "@/lib/automation-consult/analytics";
 import { parseAutomationConsultationTypePrefill } from "@/lib/automation-consult/prefill";
-import { automationConsultSchema } from "@/lib/automation-consult/schema";
+import { parseAutomationConsultForm, normalizeAutomationConsultMultiline } from "@/lib/automation-consult/form-validation";
 import { AUTOMATION_CONSULT_LIMITS as LIMITS, type AutomationConsultSourcePage } from "@/lib/automation-consult/form-contract";
 
 const SERVICE_PATH = "/services/automation";
@@ -123,13 +123,13 @@ const FIELD_LABELS: Record<FieldName, string> = {
 function validateStepOne(form: FormState): FieldErrors {
   const errors: FieldErrors = {};
   if (!form.consultationType) errors.consultationType = "相談種別を選択してください。";
-  const problemLength = form.currentProblem.trim().length;
+  const problemLength = normalizeAutomationConsultMultiline(form.currentProblem).length;
   if (problemLength < LIMITS.problemMin) {
     errors.currentProblem = "困っていることを10文字以上で入力してください。";
   } else if (problemLength > LIMITS.problemMax) {
     errors.currentProblem = "困っていることは2,000文字以内で入力してください。";
   }
-  const supportLength = form.desiredSupport.trim().length;
+  const supportLength = normalizeAutomationConsultMultiline(form.desiredSupport).length;
   if (supportLength < LIMITS.supportMin) {
     errors.desiredSupport = "希望する支援を2文字以上で入力してください。";
   } else if (supportLength > LIMITS.supportMax) {
@@ -359,7 +359,7 @@ export function AutomationConsultForm({
     }
     if (submittingRef.current) return;
 
-    const parsed = automationConsultSchema.safeParse({ ...form, sourcePage });
+    const parsed = parseAutomationConsultForm({ ...form, sourcePage });
     const validationErrors: FieldErrors = {};
     if (!parsed.success) {
       for (const issue of parsed.error.issues) {

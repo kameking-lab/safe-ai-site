@@ -4,34 +4,12 @@ import { z } from "zod";
 z.config({ jitless: true });
 import { readLimitedJson } from "@/lib/http/read-limited-json";
 import { automationConsultationTypes } from "./prefill";
-import { AUTOMATION_CONSULT_LIMITS as LIMITS, AUTOMATION_CONSULT_SOURCE_PAGES } from "./form-contract";
+import { AUTOMATION_CONSULT_LIMITS as LIMITS, AUTOMATION_CONSULT_SOURCE_PAGES, automationConsultTimings, automationConsultBudgets, automationConsultDeliveryPreferences } from "./form-contract";
+export { automationConsultTimings, automationConsultBudgets, automationConsultDeliveryPreferences } from "./form-contract";
 
 export { automationConsultationTypes } from "./prefill";
 
 export const AUTOMATION_CONSULT_MAX_BODY_BYTES = 16 * 1024;
-
-export const automationConsultTimings = [
-  "asap",
-  "within-1-month",
-  "within-3-months",
-  "undecided",
-] as const;
-
-export const automationConsultBudgets = [
-  "under-50000",
-  "50000-100000",
-  "100000-300000",
-  "300000-500000",
-  "over-500000",
-  "undecided",
-] as const;
-
-export const automationConsultDeliveryPreferences = [
-  "online",
-  "onsite",
-  "either",
-  "undecided",
-] as const;
 
 const SINGLE_LINE_CONTROL_CHARACTERS = /[\u0000-\u001f\u007f]/;
 const MULTILINE_CONTROL_CHARACTERS = /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/;
