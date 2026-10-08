@@ -4,7 +4,8 @@ import { HomeChihuahuaCompanion } from "./home-chihuahua-companion";
 import { HOME_FEATURED_LAW_REFORM } from "@/lib/home/effect-first-data";
 import type { AutomationConsultAvailability } from "@/lib/automation-consult/availability";
 import type { HomeLatestAccidentNews } from "@/lib/home/home-accident-server";
-import styles from "./home-lp.module.css";
+import { homeLpClasses as styles } from "./home-lp-classes";
+import { homeLpCriticalCss } from "./home-lp-critical-css";
 
 const tools = [
   { href: "/ky/paper", title: "KY用紙", copy: "作業の危険と対策を整理し、用紙にまとめる。", icon: ClipboardList, kind: "ky" },
@@ -33,6 +34,7 @@ export function HomeLP({ availability, latestNews }: { availability: AutomationC
   const consultHref = availability.webFormEnabled === true ? "/services/automation#consult-form" : availability.contactMode === "mail_client" ? "/contact/automation-email" : "/services/automation";
   return (
     <div data-home-lp className={styles.root}>
+      <style data-home-lp-critical>{homeLpCriticalCss}</style>
       <section aria-labelledby="home-lp-title" className={styles.hero}>
         <div className={styles.heroGrid}>
           <div className={styles.heroCopy}>

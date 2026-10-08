@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import styles from "./home-lp.module.css";
+import { homeLpClasses as styles } from "./home-lp-classes";
 
 const steps = [
   ["作業", "作業内容・場所・条件を入力"],
