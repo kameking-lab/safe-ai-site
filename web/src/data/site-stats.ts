@@ -39,13 +39,13 @@ export const SITE_STATS = {
   /** 公開条文検索へ出すhash検証済みe-Gov抜粋の法源数。 */
   lawSourceCount: "25",
   /** /law-searchへ出すhash検証済みe-Gov抜粋条文数。 */
-  lawArticleCount: "63",
+  lawArticleCount: "66",
   /** AIが根拠候補として使うhash検証済みe-Govスナップショット法源数。 */
   ragSourceCount: "25",
   /**
    * RAG 検索（chatbot/法令要約）対応のhash検証済み全条文数。
    */
-  ragArticleCount: "2,933",
+  ragArticleCount: "2,936",
   /** 対応教育の種類数（特別教育・法定・労働衛生、要相談含む） */
   specialEdKinds: "12+",
   /** 公式一次資料との文書同一性と該当抜粋を個別照合した通達・告示・指針件数 */
@@ -59,7 +59,7 @@ export const SITE_STATS = {
    * 全文由来ギャップ getAllFulltextNaviEntries、非indexable分含む「全文含め」の総数）。
    * sitemap-laws.xml の掲載件数（indexableのみ）とは異なる。
    */
-  lawNaviTotalArticleCount: "1,965",
+  lawNaviTotalArticleCount: "1,968",
   /** 個別原文確認済みレコードのうち docType==="通達" の件数 */
   mhlwCircularCount: "1",
   /** 個別原文確認済みレコードのうち docType==="告示" の件数 */

@@ -9,7 +9,7 @@
   "retrieval_accuracy": 1,
   "precision5": 0.23921568627450945,
   "mrr": 0.8756535947712418,
-  "quality_metrics_generated_at": "2026-08-08T04:37:15.356Z",
+  "quality_metrics_generated_at": "2026-10-08T14:33:32.233Z",
   "safe_hold_total": 22,
   "safe_hold_correct": 22,
   "safe_hold_rate": 1,
