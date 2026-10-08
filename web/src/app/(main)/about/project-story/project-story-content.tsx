@@ -4,6 +4,11 @@ export function ProjectStoryContent() {
   const link = "inline-flex min-h-11 items-center underline underline-offset-4 focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-[#638332]";
   return (
     <article data-project-story className="bg-[#F4F1E8] px-5 py-14 text-[#19251F] lg:px-10 lg:py-24 forced-colors:bg-[Canvas] forced-colors:text-[CanvasText]">
+      <style>{`
+        [data-project-story] h1 { font-size: 2rem; line-height: 1.5; }
+        @media(min-width:1024px) { [data-project-story] h1 { font-size: 2.25rem; } }
+        html.large-font [data-project-story] h1 { font-size: 1.5rem; }
+      `}</style>
       <div className="mx-auto max-w-[680px]">
         <p className="text-sm tracking-[.12em]">このサイトの原点</p>
         <h1 className="mt-4 text-3xl font-bold leading-relaxed lg:text-4xl">仲間を守りたい。<br />それが、出発点です。</h1>

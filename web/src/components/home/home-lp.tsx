@@ -25,6 +25,18 @@ export function HomeLP({ availability, latestNews }: { availability: AutomationC
   return (
     <div data-home-lp className="bg-[#F4F1E8] text-[#19251F] forced-colors:bg-[Canvas] forced-colors:text-[CanvasText]">
       <style>{`
+        #home-lp-title { font-size: 40px; line-height: 1.22; }
+        [data-home-lp] h2 { font-size: 1.875rem; line-height: 1.45; }
+        [data-lp-tool] h3 { font-size: 1.25rem; }
+        #home-news-heading { font-size: 1.5rem; }
+        @media(min-width:1024px) {
+          #home-lp-title { font-size: 72px; }
+          [data-home-lp] h2 { font-size: 2.25rem; }
+          #home-news-heading { font-size: 1.5rem; }
+        }
+        html.large-font #home-lp-title { font-size: 1.5rem; }
+        html.large-font [data-home-lp] h2 { font-size: 1.375rem; }
+        html.large-font [data-lp-tool] h3 { font-size: 1.25rem; }
         html.high-contrast [data-home-lp],
         html.high-contrast [data-home-lp] :where(section,aside,article,div,p,h1,h2,h3,span,figcaption,button) {
           background-color: #fff !important; color: #000 !important;
