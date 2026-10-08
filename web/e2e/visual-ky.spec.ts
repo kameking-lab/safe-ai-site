@@ -22,7 +22,7 @@ test.describe("ビジュアルKYT", () => {
       }),
     ).toBeVisible();
     await expect(
-      page.getByRole("heading", { name: "今日の仕事を、少し軽く。" }),
+      page.getByRole("heading", { name: "今日の仕事に、すぐ使える。" }),
     ).toBeVisible();
     await page.getByRole("link", { name: "すべての機能を見る", exact: true }).click();
     await expect(page).toHaveURL(/\/features$/);

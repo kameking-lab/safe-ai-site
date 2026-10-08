@@ -264,8 +264,9 @@ test.describe("relevance-guarded task completion", () => {
     await expect(details).toHaveAttribute("open", "");
     expect(page.url()).toBe(initialUrl);
     await expect(
-      page.locator('#mobile-site-menu a[href="/features"]'),
+      page.locator('#mobile-site-menu a[href="/features"]:visible'),
     ).toHaveCount(0);
+    await expect(page.locator('[data-home-menu-features]')).toBeHidden();
     await expect(
       page.locator(
         'nav[data-mobile-nav="bottom"] a[href="/features"]',

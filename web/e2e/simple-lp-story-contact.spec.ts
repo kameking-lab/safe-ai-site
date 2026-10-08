@@ -58,9 +58,10 @@ test.describe("simple LP, story, and mail contact", () => {
   test("story presents the approved origin without personal identity or unsupported career claims", async ({ page }) => {
     await page.setViewportSize({ width: 320, height: 900 });
     await page.goto("/about/project-story", { waitUntil: "domcontentloaded" });
-    await expect(page.locator("[data-story-copy] p")).toHaveCount(5);
-    await expect(page.getByText("私は、死亡事故で同僚を失いました。安全な計画を立てていれば、防げたかもしれない。あの時、現場に行けば、防げたかもしれない。", { exact: true })).toBeVisible();
-    await expect(page.getByText(/文系を専攻した私が建設業に進んだ背景/)).toBeVisible();
+    await expect(page.locator("[data-story-copy] p")).toHaveCount(4);
+    await expect(page.getByText("私は、死亡事故で同僚を失いました。この経験が、現場の安全に関わる取り組みを続ける背景にあります。", { exact: true })).toBeVisible();
+    await expect(page.getByText(/定型的な作業の負担を減らし/)).toBeVisible();
+    await expect(page.getByText(/防げたかもしれない/)).toHaveCount(0);
     const body = await page.locator("body").innerText();
     for (const term of [
       "一級土木施工管理技士",

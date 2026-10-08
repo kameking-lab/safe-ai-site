@@ -25,7 +25,7 @@ test.describe("新しい安全AIポータルのホーム", () => {
     await expect(
       page.getByRole("heading", {
         level: 2,
-        name: "今日の仕事を、少し軽く。",
+        name: "今日の仕事に、すぐ使える。",
       }),
     ).toBeVisible();
     await expect(page.getByText("今日の熱中症リスク")).toHaveCount(0);

@@ -87,7 +87,7 @@ test("ホームは6幅で6つの道具と控えめなチワワから主要タス
     ).toBeVisible();
     const mascotTools = page.locator("[data-home-lp]");
     await expect(mascotTools.getByRole("link", { name: "安衛法AI", exact: true })).toHaveAttribute("href", "/chatbot");
-    await expect(mascotTools.getByRole("link", { name: "化学物質RA", exact: true })).toHaveAttribute("href", "/chemical-ra");
+    await expect(mascotTools.getByRole("link", { name: /化学物質RA/u })).toHaveAttribute("href", "/chemical-ra");
     await expect(page.getByRole("link", { name: "すべての機能を見る", exact: true })).toHaveAttribute("href", "/features");
     await expect(page.locator('[data-home-section="heat"]')).toHaveCount(0);
     await expect(page.getByRole("tab")).toHaveCount(0);

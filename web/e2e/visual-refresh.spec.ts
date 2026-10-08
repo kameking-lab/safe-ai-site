@@ -155,7 +155,7 @@ test("forced colorsでも見出しと主操作が残る", async ({
 
   await page.goto("/", { waitUntil: "domcontentloaded" });
   await expect(
-    page.getByRole("heading", { name: "今日の仕事を、少し軽く。" }),
+    page.getByRole("heading", { name: "今日の仕事に、すぐ使える。" }),
   ).toBeVisible();
   await expect(
     page.locator('#tools a[data-lp-tool]'),

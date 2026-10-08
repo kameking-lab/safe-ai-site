@@ -3,26 +3,18 @@ import Link from "next/link";
 export function ProjectStoryContent() {
   const link = "inline-flex min-h-11 items-center underline underline-offset-4 focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-[#638332]";
   return (
-    <article data-project-story className="bg-[#F4F1E8] px-5 py-14 text-[#19251F] lg:px-10 lg:py-24 forced-colors:bg-[Canvas] forced-colors:text-[CanvasText]">
-      <style>{`
-        [data-project-story] h1 { font-size: 2rem; line-height: 1.5; }
-        @media(min-width:1024px) { [data-project-story] h1 { font-size: 2.25rem; } }
-        html.large-font [data-project-story] h1 { font-size: 2rem; }
-        @media(min-width:1024px) { html.large-font [data-project-story] h1 { font-size: 2.25rem; } }
-        [data-story-copy] p { font-size: 1.125rem; line-height: 1.9; }
-        html.large-font [data-story-copy] p { font-size: 1.125rem; }
-      `}</style>
+    <article data-project-story className="bg-[#F4F1E8] px-5 py-14 text-[#172C25] lg:px-10 lg:py-24 forced-colors:bg-[Canvas] forced-colors:text-[CanvasText]">
+      <style>{`[data-project-story][data-project-story] h1{font-size:2rem;line-height:1.5;}@media(min-width:1024px){[data-project-story][data-project-story] h1{font-size:2.25rem;}}[data-project-story] [data-story-copy] p{font-size:1.125rem;line-height:1.9;}html.high-contrast [data-project-story],html.high-contrast [data-project-story] :where(div,p,h1){background:#fff!important;color:#000!important;}`}</style>
       <div className="mx-auto max-w-[680px]">
-        <p className="text-sm tracking-[.12em]">このサイトの原点</p>
-        <h1 className="mt-4 text-3xl font-bold leading-relaxed lg:text-4xl">仲間を守りたい。<br />それが、出発点です。</h1>
-        <div data-story-copy className="mt-9 space-y-7 text-lg leading-[1.9]">
-          <p>私は、死亡事故で同僚を失いました。安全な計画を立てていれば、防げたかもしれない。あの時、現場に行けば、防げたかもしれない。</p>
-          <p>「なぜ仕事で大けがをしたり、命を落としたりしなければならないのか。」文系を専攻した私が建設業に進んだ背景には、この疑問がありました。</p>
-          <p>仲間を守りたい。その思いを出発点に、必要な知識を学び、専門家とも意見を交わして、現場をよくしていきたいと考えました。亡くなった同僚への思いも、この仕事を続ける理由です。</p>
-          <p>忙しさや責任の重さで、仕事の楽しさも、心と体の健康も、誇りも失ってほしくありません。防災や社会基盤を支える現場の仕事は、簡単にAIに置き換えられるものではありません。</p>
-          <p>だからこそ、その現場を支える人の負担を少しでも軽くしたい。書類や調べ物に追われる時間を減らし、仲間と向き合う時間をつくりたい。そのための道具を、このサイトに集めています。</p>
+        <p className="text-sm tracking-[.12em]">この取り組みの背景</p>
+        <h1 className="mt-4 font-bold">現場に向き合う時間を、つくる。</h1>
+        <div data-story-copy className="mt-9 space-y-7">
+          <p>安全AIポータルは、現場を支える人の書類づくりや調べ物を助けるためのサイトです。定型的な作業の負担を減らし、現場の確認や仲間との対話に使える時間を増やすことを目指しています。</p>
+          <p>私は、死亡事故で同僚を失いました。この経験が、現場の安全に関わる取り組みを続ける背景にあります。</p>
+          <p>安全の仕事には、知識と経験、現場ごとの条件を踏まえた判断が必要です。このサイトでは、AIを下書きや情報整理の補助として活用し、一次資料の確認や専門的な判断につなげることを大切にしています。</p>
+          <p>防災や社会基盤を支える仕事に、誇りを持って向き合えるように。そのための道具を、少しずつ整えています。</p>
         </div>
-        <nav aria-label="次に読む" className="mt-10 flex flex-wrap gap-x-7 gap-y-2 border-t border-[#B79A62]/40 pt-6"><Link href="/#tools" className={link}>道具を使う</Link><Link href="/about/quality" className={link}>品質について</Link><Link href="/about/data-sources" className={link}>出典について</Link></nav>
+        <nav aria-label="次に読む" className="mt-10 flex flex-wrap gap-x-7 gap-y-2 border-t border-[#C6AD70]/40 pt-6"><Link href="/#tools" className={link}>道具を使う</Link><Link href="/about/quality" className={link}>品質について</Link><Link href="/about/data-sources" className={link}>出典について</Link></nav>
       </div>
     </article>
   );

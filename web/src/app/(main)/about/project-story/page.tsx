@@ -10,9 +10,9 @@ import {
 } from "@/lib/seo-metadata";
 import { ProjectStoryContent } from "./project-story-content";
 
-const TITLE = "このサイトに込めた思い";
+const TITLE = "このサイトについて";
 const DESCRIPTION =
-  "仲間を守りたいという思いから、現場を支える人の負担を軽くし、仲間と向き合う時間をつくるために。安全AIポータルの原点を紹介します。";
+  "現場を支える人の書類づくりや調べ物を助け、現場の確認や仲間との対話に使える時間を増やす。安全AIポータルの取り組みの背景を紹介します。";
 const PATH = "/about/project-story";
 const URL = `${SITE_URL}${PATH}`;
 const PUBLISHED_AT = "2026-08-01";
@@ -51,7 +51,7 @@ export default function ProjectStoryPage() {
             "@id": URL,
             url: URL,
             name: TITLE,
-            headline: "仲間を守りたい。それが、出発点です。",
+            headline: "現場に向き合う時間を、つくる。",
             description: DESCRIPTION,
             inLanguage: "ja",
             datePublished: PUBLISHED_AT,

@@ -13,7 +13,10 @@ describe("the approved homepage LP", () => {
     expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
     expect(screen.getByRole("link", { name: "道具を使う" }).getAttribute("href")).toBe("#tools");
     expect([...container.querySelectorAll<HTMLAnchorElement>("[data-lp-tool]")].map((a) => a.getAttribute("href"))).toEqual(["/ky/paper", "/chatbot", "/chemical-ra", "/training/safety-seminars", "/materials/safety-images", "/construction-calc"]);
-    expect(container.textContent).toContain("私は、死亡事故で同僚を失いました。安全な計画を立てていれば、防げたかもしれない。あの時、現場に行けば、防げたかもしれない。");
+    expect(container.textContent).toContain("現場に向き合う時間を、もっと。");
+    expect(container.textContent).not.toContain("死亡事故で同僚を失いました");
+    expect(container.querySelectorAll("[data-tool-sketch]")).toHaveLength(6);
+    expect(container.querySelector("[data-ky-scene]")?.textContent).toContain("候補は現場に合わせて確認・編集");
     expect(container.querySelector("form")).toBeNull();
     expect(container.querySelectorAll('[data-lp-news="law"]')).toHaveLength(1);
     expect(container.querySelectorAll('[data-lp-news="accident"]')).toHaveLength(1);
@@ -39,8 +42,9 @@ describe("the approved homepage LP", () => {
 
   it("replays the optional greeting only when the user asks", () => {
     const { container } = render(<HomeLP availability={paused} latestNews={unavailable} />);
-    const image = container.querySelector(".home-companion-greeting");
-    fireEvent.click(screen.getByRole("button", { name: "チワワをなでる" }));
-    expect(container.querySelector(".home-companion-greeting")).not.toBe(image);
+    const image = container.querySelector("[data-mascot-greeting]");
+    fireEvent.click(screen.getByRole("button", { name: "チワワにあいさつ" }));
+    expect(container.querySelector("[data-mascot-greeting]")).not.toBe(image);
+    expect(screen.getByRole("status").textContent).toBe("今日も、一つずつ確認していこう。");
   });
 });
