@@ -31,18 +31,52 @@ test.describe("業務自動化・講習・資料作成サービス", () => {
     page,
   }) => {
     await page.goto("/");
-    const homeCta = page.getByRole("link", {
-      name: /無料相談を始める|メールで相談する|料金と例を見る/,
-    }).first();
+    const newHome = page.locator("[data-home-lp]");
+    const legacyHome = page.locator("#home-relaunch-title");
+    let homeCta;
+    if (await newHome.count()) {
+      await expect(newHome).toHaveCount(1);
+      await expect(legacyHome).toHaveCount(0);
+      homeCta = newHome.locator("#consult").getByRole("link", {
+        name: "自動化について相談する", exact: true,
+      });
+      const mode = await newHome.locator("[data-consult-mode]").getAttribute("data-consult-mode");
+      if (mode === "mail_client") {
+        await expect(homeCta).toHaveAttribute("href", "/contact/automation-email");
+        await expect(newHome.locator("#consult")).toContainText("メールアプリを使います");
+      } else if (mode === "web_form") {
+        await expect(homeCta).toHaveAttribute("href", "/services/automation#consult-form");
+      } else {
+        expect(mode).toBe("unavailable");
+        await expect(homeCta).toHaveAttribute("href", "/services/automation");
+        await expect(newHome.locator("#consult")).toContainText("受付停止中");
+      }
+    } else {
+      await expect(legacyHome).toHaveCount(1);
+      homeCta = page.locator('#home-automation [data-automation-cta-position="home_primary"]');
+      const label = (await homeCta.innerText()).trim();
+      expect(["無料相談を始める", "メールで相談する", "料金と例を見る"]).toContain(label);
+      await expect(homeCta).toHaveAttribute("href", label === "メールで相談する"
+        ? "/contact/automation-email" : "/services/automation#consult-form");
+      if (label === "料金と例を見る") {
+        await expect(page.locator("#home-automation")).toContainText("相談受付を停止");
+      }
+    }
     await expect(homeCta).toBeVisible();
+    const destination = await homeCta.getAttribute("href");
     await homeCta.click();
-    await expect(page).toHaveURL(new RegExp(`${SERVICE_PATH}(?:#.*)?$`));
-    await expect(
-      page.getByRole("heading", {
-        level: 1,
-        name: /業務自動化・講習を\s*小さな一件から。/,
-      }),
-    ).toBeVisible();
+    if (destination === "/contact/automation-email") {
+      await expect(page).toHaveURL(/\/contact\/automation-email$/);
+      await expect(page.getByRole("heading", {
+        level: 1, name: "メールアプリで相談文を作成", exact: true,
+      })).toBeVisible();
+      await expect(page.getByText("送信前の注意", { exact: true })).toBeVisible();
+    } else {
+      await expect(page).toHaveURL(new RegExp(`${SERVICE_PATH}(?:#.*)?$`));
+      await expect(page.getByRole("heading", {
+        level: 1, name: /業務自動化・講習を\s*小さな一件から。/,
+      })).toBeVisible();
+    }
 
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto("/");
@@ -59,7 +93,7 @@ test.describe("業務自動化・講習・資料作成サービス", () => {
 
     await page.goto("/safety-ai");
     await expect(
-      page.getByRole("link", { name: /自動化例・料金を見る/ }),
+      page.getByRole("main").getByRole("link", { name: "自動化例・料金を見る", exact: true }),
     ).toHaveAttribute("href", "/services/automation");
   });
 

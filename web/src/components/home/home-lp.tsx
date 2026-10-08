@@ -65,7 +65,6 @@ export function HomeLP({ availability, latestNews }: { availability: AutomationC
             </div>
             <nav aria-label="すぐ使う道具" className="mt-6 flex flex-wrap gap-x-5 gap-y-1 text-sm">
               {tools.slice(0, 3).map((tool) => <Link key={tool.href} href={tool.href} className="inline-flex min-h-11 min-w-11 items-center underline underline-offset-4 focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-[#DCEF9A]">{tool.title}</Link>)}
-              <Link href="/features" className="inline-flex min-h-11 min-w-11 items-center underline underline-offset-4 focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-[#DCEF9A]">全機能</Link>
             </nav>
           </div>
           <HomeChihuahuaCompanion />

@@ -12,7 +12,7 @@ async function warmKyPaperRoute(page: Page) {
   await page.waitForLoadState("networkidle", { timeout: 30_000 });
 }
 
-test.describe("9つの主機能を案内するホームの圧縮予算", () => {
+test.describe("6つの道具を案内するホームの圧縮予算", () => {
   test.beforeEach(async ({ page }) => {
     await page.setViewportSize(MOBILE_VIEWPORT);
     await page.setExtraHTTPHeaders({
@@ -21,21 +21,21 @@ test.describe("9つの主機能を案内するホームの圧縮予算", () => {
     });
   });
 
-  test("主要導線と9機能を先に配置し、事故・法改正の根拠表示を保つ", async ({
+  test("主要導線と6道具を先に配置し、事故・法改正の根拠表示を保つ", async ({
     page,
   }) => {
     await page.goto("/", { waitUntil: "domcontentloaded" });
     await expect(
       page.getByRole("heading", {
         level: 1,
-        name: /小さな気づきが、\s*大きな事故を防ぐ。/u,
+        name: /その書類、\s*AIに任せて、\s*現場に行こう。/u,
       }),
     ).toBeVisible();
-    const mascotTools = page.getByRole("region", { name: "チワワと試す5機能" });
-    await expect(mascotTools.getByRole("link")).toHaveCount(5);
-    const services = page.getByRole("region", { name: "仕事から選ぶ、9つの主機能" });
-    await expect(services.getByRole("listitem")).toHaveCount(9);
-    await expect(services.locator("ul > li > a")).toHaveCount(9);
+    const immediateTools = page.locator('nav[aria-label="すぐ使う道具"]');
+    await expect(immediateTools.getByRole("link")).toHaveCount(3);
+    const services = page.locator("#tools");
+    await expect(services.locator("a[data-lp-tool]")).toHaveCount(6);
+    await expect(services.getByRole("heading", { level: 3 })).toHaveCount(6);
     await expect(page.locator('[data-home-section="heat"]')).toHaveCount(0);
     await expect(page.locator('[data-home-section="quality"]')).toHaveCount(0);
     await expect(page.locator('main [data-warning-card], main [role="alert"]')).toHaveCount(0);
@@ -49,11 +49,11 @@ test.describe("9つの主機能を案内するホームの圧縮予算", () => {
         Number.POSITIVE_INFINITY;
       return {
         screens: document.documentElement.scrollHeight / viewportHeight,
-        heroHeight: height('section[aria-labelledby="home-relaunch-title"]'),
-        mascotToolsScreen: top('[data-mascot-toolbox]') / viewportHeight,
-        servicesTop: top('section[aria-labelledby="main-services-title"]'),
-        updatesTop: top('[data-home-section="updates"]'),
-        directoryTop: top('section[aria-labelledby="home-feature-directory"]'),
+        heroHeight: height('section[aria-labelledby="home-lp-title"]'),
+        mascotToolsScreen: top('nav[aria-label="すぐ使う道具"]') / viewportHeight,
+        servicesTop: top('section[aria-labelledby="home-tools-heading"]'),
+        updatesTop: top('section[aria-labelledby="home-news-heading"]'),
+        directoryTop: top('#consult'),
         mainDom: document.querySelector("main")?.querySelectorAll("*").length ?? 0,
       };
     }, { viewportHeight: MOBILE_VIEWPORT.height });
@@ -61,19 +61,18 @@ test.describe("9つの主機能を案内するホームの圧縮予算", () => {
     expect(metrics.screens).toBeLessThanOrEqual(13);
     expect(metrics.heroHeight).toBeLessThanOrEqual(1_200);
     expect(metrics.mascotToolsScreen).toBeLessThanOrEqual(1);
-    expect(metrics.updatesTop).toBeLessThan(metrics.servicesTop);
+    expect(metrics.servicesTop).toBeLessThan(metrics.updatesTop);
     expect(metrics.servicesTop).toBeLessThan(metrics.directoryTop);
     expect(metrics.mainDom).toBeLessThanOrEqual(1_050);
 
-    await expect(page.locator('[data-accident-origin="official"]')).toHaveCount(1);
-    expect(
-      await page.locator('[data-accident-origin="reported-unverified"]').count(),
-    ).toBeLessThanOrEqual(2);
-    await expect(page.locator('[data-home-update="accidents"]')).not.toContainText(
-      "事故なし",
-    );
-    await expect(page.locator("[data-law-source-state]")).toHaveCount(3);
-    await expect(page.locator('section[aria-labelledby="home-feature-directory"] article')).toHaveCount(8);
+    await expect(page.locator('[data-lp-news="law"]')).toHaveCount(1);
+    await expect(page.locator('[data-lp-news="law"]')).toContainText(/確認時点の状態/);
+    await expect(page.locator('[data-lp-news="law"] a[href^="https://"]')).toHaveCount(1);
+    await expect(page.locator('[data-lp-news="accident"]')).toHaveCount(1);
+    await expect(page.locator('[data-lp-news="accident"]')).toContainText("報道見出し・原因未確認");
+    expect(await page.locator('[data-lp-news="accident"] h3 a').count()).toBeLessThanOrEqual(1);
+    await expect(page.locator('[data-lp-news="accident"]')).not.toContainText("事故なし");
+    await expect(page.locator("#tools a[data-lp-tool]")).toHaveCount(6);
   });
 
   test("320pxでも横にはみ出さず、同じ節の操作重複とDOMを予算内に保つ", async ({
@@ -120,13 +119,13 @@ test.describe("9つの主機能を案内するホームの圧縮予算", () => {
 
   test("見出し参照は一意で、更新・相談のアンカーは固定UI用offsetを持つ", async ({ page }) => {
     await page.goto("/", { waitUntil: "domcontentloaded" });
-    for (const id of ["home-relaunch-title", "main-services-title", "home-feature-directory"]) {
+    for (const id of ["home-lp-title", "home-tools-heading", "home-origin-heading", "home-consult-heading", "home-news-heading"]) {
       await expect(page.locator(`#${id}`)).toHaveCount(1);
       await expect(page.locator(`section[aria-labelledby="${id}"]`)).toHaveCount(1);
     }
     for (const id of [
-      "home-updates",
-      "home-automation",
+      "tools",
+      "consult",
     ]) {
       await expect(page.locator(`#${id}`)).toHaveCount(1);
       expect(
@@ -157,33 +156,22 @@ test("事故カードは判断材料を先に示し、KYへ未確認内容を自
   await page.setViewportSize(MOBILE_VIEWPORT);
   await warmKyPaperRoute(page);
   await page.goto("/", { waitUntil: "networkidle" });
-  const accidentCard = page.locator('[data-home-update="accidents"]');
+  const accidentCard = page.locator('[data-lp-news="accident"]');
   await expect(accidentCard.getByRole("link", { name: /KYを作る/ })).toHaveCount(0);
   await expect(accidentCard.getByText(/報道内容はKYへ引き継ぎません/)).toHaveCount(0);
-  await expect(accidentCard.getByRole("heading", { level: 3, name: "国内の死亡事故報道" })).toBeVisible();
-  if (
-    (await accidentCard.locator('[data-accident-origin="reported-unverified"]').count()) >
-    0
-  ) {
-    const reportedAccidents = accidentCard.locator(
-      '[data-accident-origin="reported-unverified"]',
-    );
-    for (let index = 0; index < (await reportedAccidents.count()); index += 1) {
-      const reportedAccident = reportedAccidents.nth(index);
-      await expect(reportedAccident.locator("time")).toHaveCount(1);
-      await expect(reportedAccident.locator("[data-accident-source]")).toHaveText(
-        /出典：\S/u,
-      );
-    }
+  await expect(accidentCard).toContainText("報道見出し・原因未確認");
+  await expect(accidentCard).toContainText(/出典：\S/u);
+  const report = accidentCard.locator("h3 a");
+  if (await report.count()) {
+    await expect(report).toBeVisible();
+    await expect(accidentCard.locator("time").first()).toHaveAttribute("datetime", /\d{4}-\d{2}-\d{2}/);
   } else {
-    await expect(accidentCard.getByRole("status")).toContainText(
-      "取得できません",
-    );
-    await expect(accidentCard).not.toContainText("事故なし");
+    await expect(accidentCard).toContainText("取得できません");
+    await expect(accidentCard).toContainText("事故がなかったことを示すものではありません");
   }
-  await expect(accidentCard.getByRole("link", { name: "事故速報をすべて見る" })).toHaveCount(1);
+  await expect(accidentCard.getByRole("link", { name: "事故速報の一覧を見る" })).toHaveCount(1);
 
-  const link = page.getByRole("region", { name: "カテゴリから探す" }).getByRole("link", { name: "KY用紙", exact: true });
+  const link = page.locator('#tools a[data-lp-tool][href="/ky/paper"]');
   const href = await link.getAttribute("href");
 
   expect(href).toBe("/ky/paper");
@@ -220,8 +208,7 @@ test("ホームから開いた化学物質RAの入力をURL・storage・request 
   await page.setViewportSize(MOBILE_VIEWPORT);
   await page.goto("/chemical-ra", { waitUntil: "domcontentloaded" });
   await page.goto("/", { waitUntil: "networkidle" });
-  const chemicalLink = page.getByRole("region", { name: "チワワと試す5機能" })
-    .getByRole("link", { name: "化学物質RA", exact: true });
+  const chemicalLink = page.locator('#tools a[data-lp-tool][href="/chemical-ra"]');
   await expect(chemicalLink).toHaveAttribute("href", "/chemical-ra");
   await Promise.all([
     page.waitForURL(/\/chemical-ra$/, { timeout: 15_000 }),

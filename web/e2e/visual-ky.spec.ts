@@ -18,17 +18,22 @@ test.describe("ビジュアルKYT", () => {
     await expect(
       page.getByRole("heading", {
         level: 1,
-        name: /小さな気づきが、.*大きな事故を防ぐ。/,
+        name: /その書類、\s*AIに任せて、\s*現場に行こう。/,
       }),
     ).toBeVisible();
     await expect(
-      page.getByRole("heading", { name: "仕事から選ぶ、9つの主機能" }),
+      page.getByRole("heading", { name: "今日の仕事を、少し軽く。" }),
     ).toBeVisible();
-    await expect(
-      page.locator("main").getByRole("link", { name: /ビジュアルKYT/u }).first(),
-    ).toBeVisible();
-
-    await page.goto(HUB);
+    await page.getByRole("link", { name: "すべての機能を見る", exact: true }).click();
+    await expect(page).toHaveURL(/\/features$/);
+    const visualKy = page.locator(`main a[href="${HUB}"]`).first();
+    const category = visualKy.locator("xpath=ancestor::details[1]");
+    if (await category.count() && !await category.evaluate((node: HTMLDetailsElement) => node.open)) {
+      await category.locator(":scope > summary").click();
+    }
+    await expect(visualKy).toHaveAttribute("href", HUB);
+    await visualKy.click();
+    await expect(page).toHaveURL(new RegExp(`${HUB}$`));
     await expect(
       page.getByRole("heading", {
         level: 1,

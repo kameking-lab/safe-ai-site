@@ -9,7 +9,7 @@ test.describe("project story and landing-page separation", () => {
     const response = await page.goto(STORY_PATH);
     expect(response?.status()).toBe(200);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-      "労働安全と生成AIを、根拠を確認できる形へ。",
+      /仲間を守りたい。\s*それが、出発点です。/,
     );
     await expect(page.locator("main h1")).toHaveCount(1);
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
@@ -87,7 +87,7 @@ test.describe("project story and landing-page separation", () => {
     await page.emulateMedia({ reducedMotion: "reduce", forcedColors: "active" });
     await page.goto(STORY_PATH);
 
-    const primary = page.getByRole("link", { name: "安全AIポータルを使う" });
+    const primary = page.getByRole("link", { name: "道具を使う" });
     let reachedPrimary = false;
     for (let index = 0; index < 50; index += 1) {
       await page.keyboard.press("Tab");
@@ -119,9 +119,9 @@ test.describe("project story and landing-page separation", () => {
     for (const [path, expectedText, minimum, maximum] of [
       [
         STORY_PATH,
-        "安全AIポータルは、労働安全の一次資料と現場で使う道具を、探しやすく確認しやすい形へ整える公開Webプロジェクトです。目的、編集体制、品質の境界をここで説明します。",
-        900,
-        1400,
+        "私は、死亡事故で同僚を失いました。安全な計画を立てていれば、防げたかもしれない。あの時、現場に行けば、防げたかもしれない。",
+        350,
+        800,
       ],
       [
         "/safety-ai",
@@ -147,8 +147,15 @@ test.describe("project story and landing-page separation", () => {
       expect(snapshot.overflow, path).toBe(false);
       expect(snapshot.mainCharacters, path).toBeGreaterThanOrEqual(minimum);
       expect(snapshot.mainCharacters, path).toBeLessThanOrEqual(maximum);
-      expect(snapshot.links, path).toBeGreaterThan(5);
-      await expect(page.locator("main h2"), path).not.toHaveCount(0);
+      expect(snapshot.links, path).toBeGreaterThanOrEqual(path === STORY_PATH ? 3 : 6);
+      if (path === STORY_PATH) {
+        await expect(page.locator("[data-story-copy] p")).toHaveCount(5);
+        for (const href of ["/#tools", "/about/quality", "/about/data-sources"]) {
+          await expect(page.locator(`[data-project-story] a[href="${href}"]`)).toBeVisible();
+        }
+      } else {
+        await expect(page.locator("main h2"), path).not.toHaveCount(0);
+      }
     }
     await context.close();
   });
