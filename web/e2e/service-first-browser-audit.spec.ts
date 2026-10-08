@@ -829,7 +829,7 @@ test("normal states avoid warning walls and the relaunch home has no heat campai
     page.locator("[data-home-lp]"),
   ).toBeVisible();
   await expect(
-    page.getByRole("heading", { name: "今日の仕事を、少し軽く。" }),
+    page.getByRole("heading", { name: "今日の仕事に、すぐ使える。" }),
   ).toBeVisible();
   await expect(page.locator('[data-home-section="heat"]')).toHaveCount(0);
   await expect(page.locator("[data-home-heat-slide-deck]")).toHaveCount(0);

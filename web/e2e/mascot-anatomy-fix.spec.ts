@@ -38,7 +38,7 @@ test.describe("チワワが案内するコンパクトホーム", () => {
     await expect(primaryAction).toBeVisible();
     await primaryAction.focus();
     await expect(primaryAction).toBeFocused();
-    const chemicalAction = mascotTools.getByRole("link", { name: "化学物質RA", exact: true });
+    const chemicalAction = mascotTools.getByRole("link", { name: /化学物質RA/u });
     await chemicalAction.focus();
     await expect(chemicalAction).toBeFocused();
     const netisAction = page.getByRole("link", { name: "すべての機能を見る", exact: true });

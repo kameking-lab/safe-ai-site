@@ -1,4 +1,5 @@
 .root { --lp-green:#10261f; --lp-cream:#f4f1e8; --lp-ink:#172c25; --lp-brass:#c6ad70; background:var(--lp-cream); color:var(--lp-ink); }
+.root section[id] { scroll-margin-top:6rem; }
 .root :where(a,button):focus-visible { outline:3px solid #638332; outline-offset:5px; }
 .hero { background:radial-gradient(ellipse at 85% 25%,#28483a 0,transparent 55%),var(--lp-green); color:var(--lp-cream); overflow:hidden; position:relative; }
 .hero::before { content:""; position:absolute; inset:0; pointer-events:none; opacity:.13; background-image:linear-gradient(#c6ad70 1px,transparent 1px),linear-gradient(90deg,#c6ad70 1px,transparent 1px); background-size:80px 80px; mask-image:linear-gradient(90deg,transparent,#000); }

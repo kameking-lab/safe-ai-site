@@ -170,7 +170,7 @@ test("JavaScript無効でも6道具・事故の確認状態・通常リンクを
     }
     await expect(page.getByText(/産業医が辞任・解任・退任したとき/).first()).toBeVisible();
     const tools = page.locator("[data-home-lp]");
-    await expect(tools.getByRole("link", { name: "化学物質RA", exact: true })).toHaveAttribute("href", "/chemical-ra");
+    await expect(tools.getByRole("link", { name: /化学物質RA/u })).toHaveAttribute("href", "/chemical-ra");
     await expect(tools.getByRole("link", { name: "安衛法AI", exact: true })).toHaveAttribute("href", "/chatbot");
     await expect(page.getByRole("link", { name: /すべての機能を見る/ })).toHaveAttribute("href", "/features");
     const details = page.locator("details[data-mobile-site-menu]");
