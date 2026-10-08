@@ -7,12 +7,15 @@ export function ProjectStoryContent() {
       <style>{`
         [data-project-story] h1 { font-size: 2rem; line-height: 1.5; }
         @media(min-width:1024px) { [data-project-story] h1 { font-size: 2.25rem; } }
-        html.large-font [data-project-story] h1 { font-size: 1.5rem; }
+        html.large-font [data-project-story] h1 { font-size: 2rem; }
+        @media(min-width:1024px) { html.large-font [data-project-story] h1 { font-size: 2.25rem; } }
+        [data-story-copy] p { font-size: 1.125rem; line-height: 1.9; }
+        html.large-font [data-story-copy] p { font-size: 1.125rem; }
       `}</style>
       <div className="mx-auto max-w-[680px]">
         <p className="text-sm tracking-[.12em]">このサイトの原点</p>
         <h1 className="mt-4 text-3xl font-bold leading-relaxed lg:text-4xl">仲間を守りたい。<br />それが、出発点です。</h1>
-        <div className="mt-9 space-y-7 text-lg leading-[1.9]">
+        <div data-story-copy className="mt-9 space-y-7 text-lg leading-[1.9]">
           <p>私は、死亡事故で同僚を失いました。安全な計画を立てていれば、防げたかもしれない。あの時、現場に行けば、防げたかもしれない。</p>
           <p>「なぜ仕事で大けがをしたり、命を落としたりしなければならないのか。」文系を専攻した私が建設業に進んだ背景には、この疑問がありました。</p>
           <p>仲間を守りたい。その思いを出発点に、必要な知識を学び、専門家とも意見を交わして、現場をよくしていきたいと考えました。亡くなった同僚への思いも、この仕事を続ける理由です。</p>

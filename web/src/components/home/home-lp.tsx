@@ -25,18 +25,24 @@ export function HomeLP({ availability, latestNews }: { availability: AutomationC
   return (
     <div data-home-lp className="bg-[#F4F1E8] text-[#19251F] forced-colors:bg-[Canvas] forced-colors:text-[CanvasText]">
       <style>{`
-        #home-lp-title { font-size: 40px; line-height: 1.22; }
+        #home-lp-title { font-size: 2.5rem; line-height: 1.22; }
         [data-home-lp] h2 { font-size: 1.875rem; line-height: 1.45; }
         [data-lp-tool] h3 { font-size: 1.25rem; }
         #home-news-heading { font-size: 1.5rem; }
         @media(min-width:1024px) {
-          #home-lp-title { font-size: 72px; }
+          #home-lp-title { font-size: 4.5rem; }
           [data-home-lp] h2 { font-size: 2.25rem; }
           #home-news-heading { font-size: 1.5rem; }
         }
-        html.large-font #home-lp-title { font-size: 1.5rem; }
-        html.large-font [data-home-lp] h2 { font-size: 1.375rem; }
+        html.large-font #home-lp-title { font-size: 2.5rem; }
+        html.large-font [data-home-lp] h2 { font-size: 1.875rem; }
         html.large-font [data-lp-tool] h3 { font-size: 1.25rem; }
+        [data-origin-copy] p { font-size: 1.125rem; line-height: 1.9; }
+        html.large-font [data-origin-copy] p { font-size: 1.125rem; }
+        @media(min-width:1024px) {
+          html.large-font #home-lp-title { font-size: 4.5rem; }
+          html.large-font [data-home-lp] h2 { font-size: 2.25rem; }
+        }
         html.high-contrast [data-home-lp],
         html.high-contrast [data-home-lp] :where(section,aside,article,div,p,h1,h2,h3,span,figcaption,button) {
           background-color: #fff !important; color: #000 !important;
@@ -86,7 +92,7 @@ export function HomeLP({ availability, latestNews }: { availability: AutomationC
         <div className="mx-auto max-w-[680px]">
           <p className="text-sm tracking-[.12em]">このサイトの原点</p>
           <h2 id="home-origin-heading" className="mt-4 text-3xl font-bold leading-relaxed">仲間を守りたい。<br />それが、出発点です。</h2>
-          <div className="mt-8 space-y-6 text-lg leading-[1.9]">
+          <div data-origin-copy className="mt-8 space-y-6 text-lg leading-[1.9]">
             <p>私は、死亡事故で同僚を失いました。安全な計画を立てていれば、防げたかもしれない。あの時、現場に行けば、防げたかもしれない。その思いが、このサイトの原点です。</p>
             <p>防災や社会基盤を支える現場には、人が見て、考え、声をかける仕事があります。その仕事を担う人に、もう少し楽に、効率よく、誇りを持って働いてほしい。AIで手間を減らし、現場に向き合う時間を支えたいと考えています。</p>
           </div>
