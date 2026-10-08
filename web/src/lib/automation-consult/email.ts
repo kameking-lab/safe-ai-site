@@ -141,7 +141,7 @@ export function buildAutomationConsultOwnerEmail(input: {
     `受付番号: ${referenceId}`,
     `受付基準日時（送信開始時刻・JST）: ${submissionStartedAtJst}`,
     `相談種別: ${consultationType}`,
-    `名前: ${consultation.name}`,
+    `名前: ${consultation.name || "ご相談者"}`,
     `返信用メール: ${consultation.email}`,
     `会社・団体名: ${organization}`,
     "",
@@ -213,7 +213,7 @@ export function buildAutomationConsultAcknowledgementEmail(input: {
     "返信時期は相談内容を確認したうえでご案内します。見積前に費用は発生しません。";
 
   const text = [
-    `${consultation.name} 様`,
+    `${consultation.name || "ご相談者"} 様`,
     "",
     "安全AIポータルへご相談いただき、ありがとうございます。",
     `受付番号: ${referenceId}`,
@@ -228,7 +228,7 @@ export function buildAutomationConsultAcknowledgementEmail(input: {
   ].join("\n");
 
   const html = [
-    `<p>${escapeAutomationConsultHtml(consultation.name)} 様</p>`,
+    `<p>${escapeAutomationConsultHtml(consultation.name || "ご相談者")} 様</p>`,
     "<p>安全AIポータルへご相談いただき、ありがとうございます。</p>",
     `<p><strong>受付番号:</strong> ${escapeAutomationConsultHtml(referenceId)}<br>`,
     `<strong>相談種別:</strong> ${escapeAutomationConsultHtml(consultationType)}</p>`,
