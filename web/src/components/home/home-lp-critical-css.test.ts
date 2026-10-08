@@ -22,5 +22,7 @@ describe("home-only SSR critical CSS", () => {
     expect(home).toContain("<style data-home-lp-critical>{homeLpCriticalCss}</style>");
     expect(home.indexOf("<style data-home-lp-critical>")).toBeLessThan(home.indexOf('<section aria-labelledby="home-lp-title"'));
     expect(homeLpCriticalCss).not.toContain("</style");
+    const utilities = readFileSync(new URL("../../app/globals.css", import.meta.url), "utf8");
+    expect(utilities).toContain('@source not "../components/home/home-lp-critical-css.ts";');
   });
 });

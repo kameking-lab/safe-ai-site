@@ -9,6 +9,8 @@
 @source not "../**/*.spec.*";
 @source not "../**/__tests__";
 @source not "../**/__snapshots__";
+/* Literal SSR CSS is already complete; it must not generate Tailwind utilities. */
+@source not "../components/home/home-lp-critical-css.ts";
 /* Admin utilities are emitted by the two admin layouts, not sent to public routes. */
 @source not "../app/admin";
 @source not "../app/(main)/admin";
