@@ -195,7 +195,7 @@ test.describe("業務自動化・講習・資料作成サービス", () => {
         contentType: "application/json",
         body: JSON.stringify({
           ok: true,
-          referenceId: "AUTO-DO-NOT-EXPOSE",
+          referenceId: "AC-20260723-ABCDEF012345",
           receivedAt: "2026-07-23T10:00:00+09:00",
         }),
       });
@@ -215,7 +215,9 @@ test.describe("業務自動化・講習・資料作成サービス", () => {
     await expect(success).toBeFocused();
     await expect(success).toContainText("相談を受け付けました");
     await expect(page).toHaveURL(`${SERVICE_PATH}#consult-form`);
-    await expect(page.getByText("AUTO-DO-NOT-EXPOSE")).toHaveCount(0);
+    await expect(success).toContainText("AC-20260723-ABCDEF012345");
+    expect(page.url()).not.toContain("AC-20260723-ABCDEF012345");
+    expect(page.url()).not.toContain("tester@example.invalid");
   });
 
   test("エラー要約から項目へ移動でき、スクリーンリーダー名がある", async ({ page }) => {
@@ -277,9 +279,32 @@ test.describe("業務自動化・講習・資料作成サービス", () => {
     await fillStepOne(page);
     await fillStepTwo(page);
     await page.getByRole("button", { name: /無料相談を送信/ }).click();
-    const alert = page.getByRole("alert").filter({ hasText: "受付は完了していません" });
-    await expect(alert).toContainText("受付は完了していません");
+    const alert = page.getByRole("alert").filter({ hasText: "一部の通知が届いている可能性" });
+    await expect(alert).toContainText("一部の通知が届いている可能性");
+    await expect(alert).toContainText("同じ内容・同じ識別子で再試行");
+    await expect(page.getByLabel(/返信用メールアドレス/)).toBeDisabled();
     await expect(alert).not.toContainText("provider secret");
     await expect(page.getByText("相談を受け付けました")).toHaveCount(0);
   });
+  test("arbitrary reference stays hidden and unresolved with the same retry", async ({ page }) => {
+    const requests: Array<{ key: string | undefined; body: string | null }> = [];
+    await page.route("**/api/automation-consult", async route => {
+      requests.push({ key: route.request().headers()["idempotency-key"], body: route.request().postData() });
+      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, referenceId: "AUTO-DO-NOT-EXPOSE" }) });
+    });
+    await page.goto(`${SERVICE_PATH}#consult-form`);
+    await fillStepOne(page);
+    await fillStepTwo(page);
+    await page.getByRole("button", { name: /無料相談を送信/ }).click();
+    await expect(page.getByRole("alert").filter({ hasText: "受付状況を確認できません" })).toBeVisible();
+    await expect(page.getByText("AUTO-DO-NOT-EXPOSE")).toHaveCount(0);
+    await expect(page.getByText("相談を受け付けました")).toHaveCount(0);
+    await expect(page.getByLabel(/返信用メールアドレス/)).toBeDisabled();
+    await page.getByRole("button", { name: "同じ送信を確認する" }).click();
+    await expect.poll(() => requests.length).toBe(2);
+    expect(requests[1]).toEqual(requests[0]);
+    expect(page.url()).not.toContain("AUTO-DO-NOT-EXPOSE");
+    expect(page.url()).not.toContain("tester@example.invalid");
+  });
+
 });

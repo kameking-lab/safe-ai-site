@@ -562,7 +562,8 @@ export function AutomationConsultForm({
 
       <ErrorSummary errors={errors} summaryRef={errorSummaryRef} />
 
-      <p className="text-sm leading-6 text-slate-600">健康情報、機密情報、第三者の個人情報、パスワードは入力しないでください。会社名・現場名・電話番号・添付ファイルは不要です。</p>
+      <p className="text-sm leading-6 text-slate-600">入力前の注意。健康情報・機密情報・第三者の個人情報・パスワードは入力しないでください。</p>
+      <details className="text-sm leading-6 text-slate-600"><summary className="cursor-pointer">入力内容の補足</summary><p>会社名・現場名・電話番号・添付ファイルは不要です。</p></details>
       <fieldset disabled={status === "sending" || unresolvedSubmission} className="min-w-0 space-y-5">
       {compact ? <section aria-label="相談内容" className="space-y-5">
         <div><label htmlFor={FIELD_IDS.email} className="block text-sm font-bold">返信先メール（必須）</label><input id={FIELD_IDS.email} type="email" autoComplete="email" value={form.email} onChange={(event) => updateField("email", event.target.value)} maxLength={LIMITS.email} className={inputClass} aria-invalid={Boolean(errors.email)} aria-describedby={describedBy("email", errors)} /><FieldError field="email" errors={errors} /></div>
