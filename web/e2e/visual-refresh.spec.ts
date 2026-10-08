@@ -14,21 +14,14 @@ const VISUAL_ROUTES = [
 ] as const;
 
 const HOME_SERVICE_HREFS = [
-  "/chatbot",
-  "/chemical-ra",
-  "/accident-news",
-  "/laws",
-  "/contact/automation-email",
-  "/goods",
-  "/training/safety-seminars",
-  "/materials/safety-images",
-  "/accidents-analytics",
+  "/ky/paper", "/chatbot", "/chemical-ra", "/training/safety-seminars",
+  "/materials/safety-images", "/construction-calc",
 ] as const;
 
 function routePrimaryAction(page: Page, route: string) {
   if (route === "/") {
     return page
-      .getByRole("region", { name: "チワワと試す5機能" })
+      .locator("[data-home-lp]")
       .getByRole("link", { name: "安衛法AI", exact: true });
   }
   if (route === "/contact/automation-email") {
@@ -55,7 +48,7 @@ test("1280pxを400%拡大した相当幅（320 CSS px）でも主要画面がリ
   }
 });
 
-test("ホームはチワワ主導の9主機能導線で、熱中症キャンペーンを表示しない", async ({
+test("ホームは6つの道具への入口と控えめなチワワで、熱中症キャンペーンを表示しない", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
@@ -64,18 +57,18 @@ test("ホームはチワワ主導の9主機能導線で、熱中症キャンペ�
   await expect(
     page.getByRole("heading", {
       level: 1,
-      name: /小さな気づきが、\s*大きな事故を防ぐ。/u,
+      name: /その書類、\s*AIに任せて、\s*現場に行こう。/u,
     }),
   ).toBeVisible();
   await expect(
-    page.locator('img[src*="mascot-chat-talk-v4.webp"]:visible').first(),
+    page.locator('img[src*="mascot-tablet-dx.webp"]:visible').first(),
   ).toBeVisible();
   await expect(
-    page.getByRole("region", { name: "チワワと試す5機能" }),
+    page.locator("[data-home-lp]"),
   ).toBeVisible();
 
   const serviceLinks = page.locator(
-    'section[aria-labelledby="main-services-title"] ul > li > a',
+    '#tools a[data-lp-tool]',
   );
   await expect(serviceLinks).toHaveCount(HOME_SERVICE_HREFS.length);
   await expect
@@ -98,7 +91,7 @@ test("追加画像には代替テキストがあり、主要画像の表示領�
   for (const { route, imageSelector } of [
     {
       route: "/",
-      imageSelector: 'img[src*="mascot-chat-talk-v4.webp"]',
+      imageSelector: 'img[src*="mascot-tablet-dx.webp"]',
     },
     {
       route: "/materials/safety-images",
@@ -120,7 +113,7 @@ test("追加画像には代替テキストがあり、主要画像の表示領�
       });
     if (route === "/") {
       await expect(
-        page.locator('img[alt*="安全AIポータルのチワワ"]'),
+        page.locator('img[alt="ヘルメットをかぶり、タブレットを持つチワワ"]'),
       ).toHaveCount(1);
     } else {
       expect(imageMetrics.alt?.trim().length ?? 0, route).toBeGreaterThan(0);
@@ -162,11 +155,11 @@ test("forced colorsでも見出しと主操作が残る", async ({
 
   await page.goto("/", { waitUntil: "domcontentloaded" });
   await expect(
-    page.getByRole("heading", { name: "仕事から選ぶ、9つの主機能" }),
+    page.getByRole("heading", { name: "今日の仕事を、少し軽く。" }),
   ).toBeVisible();
   await expect(
-    page.locator('section[aria-labelledby="main-services-title"] ul > li > a'),
-  ).toHaveCount(9);
+    page.locator('#tools a[data-lp-tool]'),
+  ).toHaveCount(6);
   await expect(page.locator('[data-home-section="heat"]')).toHaveCount(0);
   await context.close();
 });
@@ -178,7 +171,7 @@ test("ホームの主要導線はキーボードで開ける", async ({
   await page.goto("/", { waitUntil: "domcontentloaded" });
 
   const primary = page
-    .getByRole("region", { name: "チワワと試す5機能" })
+    .locator("[data-home-lp]")
     .getByRole("link", { name: "安衛法AI", exact: true });
   await primary.focus();
   await expect(primary).toBeFocused();

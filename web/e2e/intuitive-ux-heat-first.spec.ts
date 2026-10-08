@@ -33,37 +33,29 @@ const MOBILE_NAV = [
 ] as const;
 
 const MAIN_SERVICES = [
-  ["安衛法AI", "/chatbot"],
-  ["化学物質RA", "/chemical-ra"],
-  ["国内の死亡事故速報", "/accident-news"],
-  ["法改正速報", "/laws"],
-  ["自動化相談", "/contact/automation-email"],
-  ["安全グッズ", "/goods"],
-  ["自由に使えるスライド", "/training/safety-seminars"],
-  ["自由に使える画像集", "/materials/safety-images"],
-  ["事故分析ダッシュボード", "/accidents-analytics"],
+  ["KY用紙", "/ky/paper"], ["安衛法AI", "/chatbot"],
+  ["化学物質RA", "/chemical-ra"], ["安全研修スライド", "/training/safety-seminars"],
+  ["現場安全看板", "/materials/safety-images"], ["建設計算ツール", "/construction-calc"],
 ] as const;
 
 async function expectMainServices(page: Page) {
-  const services = page.getByRole("region", { name: "仕事から選ぶ、9つの主機能" });
-  const cards = services.getByRole("listitem");
+  const cards = page.locator("#tools a[data-lp-tool]");
   await expect(cards).toHaveCount(MAIN_SERVICES.length);
   for (const [title, href] of MAIN_SERVICES) {
     const card = cards.filter({ has: page.getByRole("heading", { level: 3, name: title, exact: true }) });
     await expect(card).toHaveCount(1);
-    // カード本体リンク（li > a）。下段の操作・noscript代替リンクはリンク外の兄弟要素
-    await expect(card.locator(":scope > a")).toHaveAttribute("href", href);
-    await expect(card.getByRole("img")).toHaveAccessibleName(/チワワ/);
+    await expect(card).toHaveAttribute("href", href);
   }
+  await expect(page.getByRole("img", { name: "ヘルメットをかぶり、タブレットを持つチワワ" })).toBeVisible();
 }
 
-test("ホームはチワワの案内、9つの主機能、更新情報、カテゴリの順で使える", async ({ page }) => {
+test("ホームは道具、原点、相談、最新情報の順で使える", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/", { waitUntil: "domcontentloaded" });
   await expect(
     page.getByRole("heading", {
       level: 1,
-      name: /小さな気づきが、\s*大きな事故を防ぐ。/u,
+      name: /その書類、\s*AIに任せて、\s*現場に行こう。/u,
     }),
   ).toBeVisible();
   await expect(page.locator("main h1")).toHaveCount(1);
@@ -71,8 +63,8 @@ test("ホームはチワワの案内、9つの主機能、更新情報、カテ�
   expect(await page.locator("main section[aria-labelledby]").evaluateAll((sections) =>
     sections.map((section) => section.getAttribute("aria-labelledby")),
   )).toEqual([
-    "home-relaunch-title", "home-updates-title", "main-services-title",
-    "home-automation-samples", "home-feature-directory", "home-automation-heading",
+    "home-lp-title", "home-tools-heading", "home-origin-heading",
+    "home-consult-heading", "home-news-heading",
   ]);
   await expect(page.locator('[data-home-section="heat"]')).toHaveCount(0);
   await expect(page.locator('main [data-warning-card], main [role="alert"]')).toHaveCount(0);
@@ -85,19 +77,17 @@ test("ホームはチワワの案内、9つの主機能、更新情報、カテ�
     await expect(link).toHaveAttribute("href", href);
   }
   await expect(page.locator("[data-primary-navigation]")).toHaveCount(0);
-  await expect(page.locator('[data-home-update="accidents"]').getByRole("link", { name: "事故速報をすべて見る" })).toHaveAttribute("href", "/accident-news");
-  await expect(page.locator('[data-home-update="law-reform"]').getByRole("link", { name: "法改正一覧を見る" })).toHaveAttribute("href", "/laws");
-  await expect(page.getByRole("region", { name: "カテゴリから探す" }).getByRole("link", { name: "KY用紙", exact: true })).toHaveAttribute("href", "/ky/paper");
+  await expect(page.locator('[data-lp-news="accident"]').getByRole("link", { name: "事故速報の一覧を見る" })).toHaveAttribute("href", "/accident-news");
+  await expect(page.locator('[data-lp-news="law"]').getByRole("link", { name: "法改正の一覧を見る" })).toHaveAttribute("href", "/laws");
+  await expect(page.locator("#tools a[data-lp-tool][href=\"/ky/paper\"]")).toHaveAttribute("href", "/ky/paper");
 });
 
-test("モバイルは9機能とSafety Labsを区別し、重複のないメニューをキーボードで閉じられる", async ({ page }) => {
+test("モバイルは6道具と最新情報を区別し、重複のないメニューをキーボードで閉じられる", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/", { waitUntil: "domcontentloaded" });
   await expectMainServices(page);
-  await expect(page.locator('[data-home-section="updates"] article')).toHaveCount(2);
-  await expect(page.locator('[data-feature-tier="3"][data-feature-role="automation-sample"]')).toHaveCount(3);
-  await expect(page.getByRole("link", { name: "サンプルをすべて見る" })).toHaveAttribute("href", "/automation-examples");
-  await expect(page.getByRole("link", { name: "すべての機能", exact: true })).toHaveAttribute("href", "/features");
+  await expect(page.locator("[data-lp-news]")).toHaveCount(2);
+  await expect(page.getByRole("link", { name: /すべての機能を見る/ })).toHaveAttribute("href", "/features");
   const mobileNav = page.getByRole("navigation", { name: "モバイル ボトムナビゲーション" });
   await expect(mobileNav.getByRole("link")).toHaveCount(MOBILE_NAV.length);
   for (const [label, href] of MOBILE_NAV) {
@@ -107,12 +97,11 @@ test("モバイルは9機能とSafety Labsを区別し、重複のないメニ�
   }
   await expect(mobileNav.getByRole("link", { name: "熱中症", exact: true })).toHaveCount(0);
   const sections = [
-    page.getByRole("region", {
-      name: /小さな気づきが、\s*大きな事故を防ぐ。/u,
-    }),
-    page.locator('[data-home-section="updates"]'),
-    page.getByRole("region", { name: "仕事から選ぶ、9つの主機能" }),
-    page.getByRole("region", { name: "カテゴリから探す" }),
+    page.locator('section[aria-labelledby="home-lp-title"]'),
+    page.locator("#tools"),
+    page.locator('section[aria-labelledby="home-origin-heading"]'),
+    page.locator("#consult"),
+    page.locator('section[aria-labelledby="home-news-heading"]'),
   ];
   const boxes = await Promise.all(sections.map((section) => section.boundingBox()));
   for (let index = 0; index < boxes.length - 1; index += 1) {
@@ -148,7 +137,7 @@ test("モバイルは9機能とSafety Labsを区別し、重複のないメニ�
   await expect(menuButton).toBeFocused();
 });
 
-test("JavaScript無効でも9機能・事故の確認状態・通常リンクをSSR HTMLに保持する", async ({ browser, baseURL }) => {
+test("JavaScript無効でも6道具・事故の確認状態・通常リンクをSSR HTMLに保持する", async ({ browser, baseURL }) => {
   const context = await browser.newContext({ baseURL, javaScriptEnabled: false, viewport: { width: 390, height: 844 }, locale: "ja-JP" });
   try {
     const page = await context.newPage();
@@ -160,29 +149,27 @@ test("JavaScript無効でも9機能・事故の確認状態・通常リンクを
       links.map((link) => link.getAttribute("href")),
     )).toEqual(["/chatbot", "/chemical-ra", "/accident-news", "/laws"]);
     await expectMainServices(page);
-    const accidentCard = page.locator('[data-home-update="accidents"]');
-    const reportedAccidents = accidentCard.locator('[data-accident-origin="reported-unverified"]');
-    if ((await reportedAccidents.count()) > 0) {
-      await expect(reportedAccidents.first()).toBeVisible();
-      await expect(reportedAccidents.first().locator("time")).toHaveAttribute("datetime", /\d{4}-\d{2}-\d{2}/);
-      await expect(reportedAccidents.first().locator("[data-accident-source]")).toHaveText(/出典：\S/u);
+    const accidentCard = page.locator('[data-lp-news="accident"]');
+    await expect(accidentCard).toContainText("報道見出し・原因未確認");
+    await expect(accidentCard).toContainText(/出典：\S/u);
+    const report = accidentCard.locator("h3 a");
+    if (await report.count()) {
+      await expect(report).toBeVisible();
+      await expect(accidentCard.locator("time").first()).toHaveAttribute("datetime", /\d{4}-\d{2}-\d{2}/);
     } else {
-      await expect(accidentCard.getByRole("status")).toContainText("取得できません");
-      await expect(accidentCard).not.toContainText("事故なし");
+      await expect(accidentCard).toContainText("取得できません");
+      await expect(accidentCard).toContainText("事故がなかったことを示すものではありません");
     }
     await expect(page.getByText(/産業医が辞任・解任・退任したとき/).first()).toBeVisible();
-    const mascotTools = page.getByRole("region", { name: "チワワと試す5機能" });
-    await expect(mascotTools.getByRole("link", { name: "化学物質RA", exact: true })).toHaveAttribute("href", "/chemical-ra");
-    await expect(mascotTools.getByRole("link", { name: "安衛法AI", exact: true })).toHaveAttribute("href", "/chatbot");
-    await expect(page.locator('[data-feature-tier="3"]')).toHaveCount(3);
-    await expect(page.locator('section[aria-labelledby="home-automation-samples"]').getByRole("link", { name: "サンプルをすべて見る" })).toHaveAttribute("href", "/automation-examples");
-    await expect(page.getByRole("region", { name: "仕事から選ぶ、9つの主機能" }).getByRole("link", { name: "すべての機能", exact: true })).toHaveAttribute("href", "/features");
-    const directory = page.getByRole("region", { name: "カテゴリから探す" });
-    const details = directory.locator("details").first();
-    await details.locator("summary").focus();
+    const tools = page.locator("[data-home-lp]");
+    await expect(tools.getByRole("link", { name: "化学物質RA", exact: true })).toHaveAttribute("href", "/chemical-ra");
+    await expect(tools.getByRole("link", { name: "安衛法AI", exact: true })).toHaveAttribute("href", "/chatbot");
+    await expect(page.getByRole("link", { name: /すべての機能を見る/ })).toHaveAttribute("href", "/features");
+    const details = page.locator("details[data-mobile-site-menu]");
+    await details.locator(":scope > summary").focus();
     await page.keyboard.press("Enter");
     await expect(details).toHaveAttribute("open", "");
-    await expect(details.getByRole("link", { name: "通知設定" })).toBeVisible();
+    await expect(details.getByRole("link", { name: "通知", exact: true })).toBeVisible();
   } finally {
     await context.close();
   }

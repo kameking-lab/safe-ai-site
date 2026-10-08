@@ -13,39 +13,39 @@ const MAIN_ROUTES = [
 ] as const;
 
 test.describe("新しい安全AIポータルのホーム", () => {
-  test("PCで理念、修正済みチワワ、9つの主機能を先頭に表示する", async ({
+  test("PCで原点、チワワ、6つの既存道具への入口を表示する", async ({
     page,
   }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto("/");
 
     const heroHeading = page.getByRole("heading", { level: 1 });
-    await expect(heroHeading).toContainText("小さな気づきが、");
-    await expect(heroHeading).toContainText("大きな事故を防ぐ。");
+    await expect(heroHeading).toContainText("その書類、");
+    await expect(heroHeading).toContainText("現場に行こう。");
     await expect(
       page.getByRole("heading", {
         level: 2,
-        name: "仕事から選ぶ、9つの主機能",
+        name: "今日の仕事を、少し軽く。",
       }),
     ).toBeVisible();
     await expect(page.getByText("今日の熱中症リスク")).toHaveCount(0);
 
     const heroMascot = page.getByAltText(
-      "吹き出しと一緒に相談を案内する安全AIポータルのチワワ",
+      "ヘルメットをかぶり、タブレットを持つチワワ",
     );
     await expect(heroMascot).toBeVisible();
     await expect(heroMascot).toHaveAttribute(
       "src",
-      /mascot-chat-talk-v4/u,
+      /mascot-tablet-dx/u,
     );
 
     const mainCards = page
-      .locator('section[aria-labelledby="main-services-title"] ul > li > a');
-    await expect(mainCards).toHaveCount(9);
+      .locator('#tools a[data-lp-tool]');
+    await expect(mainCards).toHaveCount(6);
     const cardHrefs = await mainCards.evaluateAll((links) =>
       links.map((link) => link.getAttribute("href")),
     );
-    expect(cardHrefs).toEqual(MAIN_ROUTES);
+    expect(cardHrefs).toEqual(["/ky/paper", "/chatbot", "/chemical-ra", "/training/safety-seminars", "/materials/safety-images", "/construction-calc"]);
   });
 
   test("スマホで横にはみ出さず、季節機能を固定ナビから外す", async ({
@@ -56,7 +56,7 @@ test.describe("新しい安全AIポータルのホーム", () => {
 
     await expect(
       page.getByRole("heading", { level: 1 }),
-    ).toContainText("大きな事故を防ぐ。");
+    ).toContainText("現場に行こう。");
     expect(
       await page.evaluate(
         () =>

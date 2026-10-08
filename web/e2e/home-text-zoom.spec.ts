@@ -17,29 +17,23 @@ test("ホームは400%ズーム相当幅でも横スクロールなく主導線�
   await expect(
     page.getByRole("heading", {
       level: 1,
-      name: /小さな気づきが、\s*大きな事故を防ぐ。/u,
+      name: /その書類、\s*AIに任せて、\s*現場に行こう。/u,
     }),
   ).toBeVisible();
-  const mascotTools = page.getByRole("region", { name: "チワワと試す5機能" });
-  await expect(mascotTools.getByRole("link")).toHaveCount(5);
-  for (const link of await mascotTools.getByRole("link").all()) {
-    await link.focus();
-    await expect(link).toBeFocused();
-    await expect(link).toBeInViewport();
-  }
-  const services = page.getByRole("region", { name: "仕事から選ぶ、9つの主機能" });
-  await expect(services.getByRole("listitem")).toHaveCount(9);
-  for (const link of await services.getByRole("listitem").getByRole("link").all()) {
+  const services = page.locator("#tools");
+  const cards = services.locator("a[data-lp-tool]");
+  await expect(cards).toHaveCount(6);
+  for (const link of await cards.all()) {
     await link.scrollIntoViewIfNeeded();
     await link.focus();
     await expect(link).toBeFocused();
     await expect(link).toBeInViewport();
   }
   for (const selector of [
-    '[data-home-section="updates"]',
-    '[data-home-section="safety-labs"]',
-    'section[aria-labelledby="home-feature-directory"]',
-    '[data-home-section="automation-consult"]',
+    'section[aria-labelledby="home-news-heading"]',
+    'section[aria-labelledby="home-origin-heading"]',
+    '#tools',
+    '#consult',
   ]) {
     const section = page.locator(selector);
     await section.scrollIntoViewIfNeeded();

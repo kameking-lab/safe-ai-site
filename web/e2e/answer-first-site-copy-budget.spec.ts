@@ -149,6 +149,7 @@ async function snapshotPage(
         firstVisible('[data-primary-result="true"]') ??
         firstVisible("[data-primary-focus]") ??
         firstVisible('[data-primary-action="true"]') ??
+        firstVisible('[data-home-lp] a[href="#tools"]') ??
         firstVisible('[data-mascot-toolbox] a[href]') ??
         firstVisible(
           'form textarea,form input:not([type="hidden"]),form select,form button[type="submit"]',

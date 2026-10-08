@@ -70,7 +70,7 @@ test.afterAll(() => {
   );
 });
 
-test("ホームは6幅でチワワの案内と9つの主機能から主要タスクへ進める", async ({ page }) => {
+test("ホームは6幅で6つの道具と控えめなチワワから主要タスクへ進める", async ({ page }) => {
   collectErrors(page);
   for (const width of [320, 360, 390, 768, 1024, 1440]) {
     await page.setViewportSize({
@@ -82,27 +82,27 @@ test("ホームは6幅でチワワの案内と9つの主機能から主要タス
     await expect(
       page.getByRole("heading", {
         level: 1,
-        name: /小さな気づきが、\s*大きな事故を防ぐ。/u,
+        name: /その書類、\s*AIに任せて、\s*現場に行こう。/u,
       }),
     ).toBeVisible();
-    const mascotTools = page.getByRole("region", { name: "チワワと試す5機能" });
+    const mascotTools = page.locator("[data-home-lp]");
     await expect(mascotTools.getByRole("link", { name: "安衛法AI", exact: true })).toHaveAttribute("href", "/chatbot");
     await expect(mascotTools.getByRole("link", { name: "化学物質RA", exact: true })).toHaveAttribute("href", "/chemical-ra");
-    await expect(page.getByRole("link", { name: "安全技術を探す" })).toHaveAttribute("href", "/resources/netis-safety");
+    await expect(page.getByRole("link", { name: "すべての機能を見る", exact: true })).toHaveAttribute("href", "/features");
     await expect(page.locator('[data-home-section="heat"]')).toHaveCount(0);
     await expect(page.getByRole("tab")).toHaveCount(0);
     await expect(
-      page.getByRole("link", { name: "事故速報をすべて見る" }),
+      page.getByRole("link", { name: "事故速報の一覧を見る" }),
     ).toHaveAttribute(
       "href",
       "/accident-news",
     );
     await expect(
-      page.getByRole("link", { name: "法改正一覧を見る" }),
+      page.getByRole("link", { name: "法改正の一覧を見る" }),
     ).toHaveAttribute("href", "/laws");
     await expect(
-      page.getByRole("region", { name: "仕事から選ぶ、9つの主機能" }).getByRole("listitem"),
-    ).toHaveCount(9);
+      page.locator("#tools a[data-lp-tool]"),
+    ).toHaveCount(6);
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth - window.innerWidth,

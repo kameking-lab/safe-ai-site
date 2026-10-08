@@ -144,6 +144,7 @@ async function snapshotPage(
       visibleElements('[data-primary-result="true"]')[0] ??
       visibleElements("[data-primary-focus]")[0] ??
       visibleElements('[data-primary-action="true"]')[0] ??
+      visibleElements('[data-home-lp] a[href="#tools"]')[0] ??
       visibleElements('[data-mascot-toolbox] a[href]')[0] ??
       visibleElements(
         'form textarea, form input:not([type="hidden"]), form select, form button[type="submit"], form input[type="submit"]',
@@ -825,10 +826,10 @@ test("normal states avoid warning walls and the relaunch home has no heat campai
     await page.locator("[data-warning-card]:not([data-warning-trigger])").count(),
   ).toBe(0);
   await expect(
-    page.getByRole("region", { name: "チワワと試す5機能" }),
+    page.locator("[data-home-lp]"),
   ).toBeVisible();
   await expect(
-    page.getByRole("heading", { name: "仕事から選ぶ、9つの主機能" }),
+    page.getByRole("heading", { name: "今日の仕事を、少し軽く。" }),
   ).toBeVisible();
   await expect(page.locator('[data-home-section="heat"]')).toHaveCount(0);
   await expect(page.locator("[data-home-heat-slide-deck]")).toHaveCount(0);
