@@ -14,15 +14,15 @@ const VISUAL_ROUTES = [
 ] as const;
 
 const HOME_SERVICE_HREFS = [
-  "/ky/paper", "/chatbot", "/chemical-ra", "/training/safety-seminars",
-  "/materials/safety-images", "/construction-calc",
+  "/chatbot", "/chemical-database", "/laws", "/accident-news",
+  "/accidents-analytics", "/construction-calc", "/goods",
 ] as const;
 
 function routePrimaryAction(page: Page, route: string) {
   if (route === "/") {
     return page
       .locator("[data-home-lp]")
-      .getByRole("link", { name: "安衛法AI", exact: true });
+      .locator('[data-lp-tool][href="/chatbot"]');
   }
   if (route === "/contact/automation-email") {
     return page.getByRole("button", { name: "メールで相談する" });
@@ -48,7 +48,7 @@ test("1280pxを400%拡大した相当幅（320 CSS px）でも主要画面がリ
   }
 });
 
-test("ホームは6つの道具への入口と控えめなチワワで、熱中症キャンペーンを表示しない", async ({
+test("ホームは7つの道具への入口と控えめなチワワで、熱中症キャンペーンを表示しない", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
@@ -61,7 +61,7 @@ test("ホームは6つの道具への入口と控えめなチワワで、熱中�
     }),
   ).toBeVisible();
   await expect(
-    page.locator('img[src*="mascot-tablet-dx.webp"]:visible').first(),
+    page.locator('img[src*="mascot-law-reading.webp"]:visible').first(),
   ).toBeVisible();
   await expect(
     page.locator("[data-home-lp]"),
@@ -91,7 +91,7 @@ test("追加画像には代替テキストがあり、主要画像の表示領�
   for (const { route, imageSelector } of [
     {
       route: "/",
-      imageSelector: 'img[src*="mascot-tablet-dx.webp"]',
+      imageSelector: 'img[src*="mascot-law-reading.webp"]',
     },
     {
       route: "/materials/safety-images",
@@ -113,7 +113,7 @@ test("追加画像には代替テキストがあり、主要画像の表示領�
       });
     if (route === "/") {
       await expect(
-        page.locator('img[alt="ヘルメットをかぶり、タブレットを持つチワワ"]'),
+        page.locator('img[alt="ヘルメットをかぶり、法令の本を持つチワワ"]'),
       ).toHaveCount(1);
     } else {
       expect(imageMetrics.alt?.trim().length ?? 0, route).toBeGreaterThan(0);
@@ -159,7 +159,7 @@ test("forced colorsでも見出しと主操作が残る", async ({
   ).toBeVisible();
   await expect(
     page.locator('#tools a[data-lp-tool]'),
-  ).toHaveCount(6);
+  ).toHaveCount(7);
   await expect(page.locator('[data-home-section="heat"]')).toHaveCount(0);
   await context.close();
 });
@@ -172,7 +172,7 @@ test("ホームの主要導線はキーボードで開ける", async ({
 
   const primary = page
     .locator("[data-home-lp]")
-    .getByRole("link", { name: "安衛法AI", exact: true });
+    .locator('[data-lp-tool][href="/chatbot"]');
   await primary.focus();
   await expect(primary).toBeFocused();
   await Promise.all([page.waitForURL("**/chatbot"), page.keyboard.press("Enter")]);

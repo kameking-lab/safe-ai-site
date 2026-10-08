@@ -22,7 +22,7 @@ test("ホームは400%ズーム相当幅でも横スクロールなく主導線�
   ).toBeVisible();
   const services = page.locator("#tools");
   const cards = services.locator("a[data-lp-tool]");
-  await expect(cards).toHaveCount(6);
+  await expect(cards).toHaveCount(7);
   for (const link of await cards.all()) {
     await link.scrollIntoViewIfNeeded();
     await link.focus();

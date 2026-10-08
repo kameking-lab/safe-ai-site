@@ -1,8 +1,8 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
 
-const toolPaths = ["/ky/paper", "/chatbot", "/chemical-ra", "/training/safety-seminars", "/materials/safety-images", "/construction-calc"];
+const toolPaths = ["/chatbot", "/chemical-database", "/laws", "/accident-news", "/accidents-analytics", "/construction-calc", "/goods"];
 const tools = (page: Page) => page.locator('#tools a[data-lp-tool]');
-const toolLink = (page: Page, href: string) => page.locator(`#tools a[data-lp-tool][href="${href}"]`);
+const toolLink = (page: Page, href: string) => page.locator(`#tools a[data-lp-tool][href="${href}"], #tools nav[aria-label="ほかの現場支援ツール"] a[href="${href}"]`);
 const overflowX = (page: Page) => page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
 
 async function minimumTarget(control: Locator) {
@@ -46,15 +46,15 @@ test.beforeEach(async ({ page, baseURL }) => {
   });
 });
 
-test("LPの6機能から専用入力画面と全機能を利用でき、JavaScriptなしでも入口とdetailsが使える", async ({ page, browser, baseURL }) => {
+test("LPの7機能から専用入力画面と全機能を利用でき、JavaScriptなしでも入口とdetailsが使える", async ({ page, browser, baseURL }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
   await expect(page.locator("#mascot-tools")).toHaveCount(0);
   await expect(page.getByRole("region", { name: "今日の仕事に、すぐ使える。" })).toBeVisible();
-  await expect(tools(page)).toHaveCount(6);
+  await expect(tools(page)).toHaveCount(7);
   expect(await tools(page).evaluateAll((links) => links.map((link) => link.getAttribute("href")))).toEqual(toolPaths);
   await expect(tools(page).locator("a, button, input, textarea")).toHaveCount(0);
-  for (let index = 0; index < 6; index += 1) await minimumTarget(tools(page).nth(index));
+  for (let index = 0; index < toolPaths.length; index += 1) await minimumTarget(tools(page).nth(index));
   await toolLink(page, "/chatbot").click();
   await expect(page.locator("[data-chatbot-composer] textarea")).toBeVisible();
   await expect(page.locator('[data-chatbot-composer] button[type="submit"]')).toBeVisible();
@@ -75,7 +75,7 @@ test("LPの6機能から専用入力画面と全機能を利用でき、JavaScri
     const plain = await noScript.newPage();
     await plain.route("**/*", (route) => new URL(route.request().url()).origin === new URL(baseURL!).origin && route.request().method() === "GET" ? route.continue() : route.abort());
     await plain.goto("/");
-    await expect(tools(plain)).toHaveCount(6);
+    await expect(tools(plain)).toHaveCount(7);
     await toolLink(plain, "/chatbot").click();
     await expect(plain.locator("#chatbot-no-script-message")).toBeVisible();
     await minimumTarget(plain.getByRole("button", { name: "送信", exact: true }));
@@ -95,10 +95,10 @@ test("LPの6機能から専用入力画面と全機能を利用でき、JavaScri
 });
 
 for (const width of [320, 360, 390]) {
-  test(`${width}px幅で6機能カードと専用入力が横にはみ出さない`, async ({ page }) => {
+  test(`${width}px幅で7機能カードと専用入力が横にはみ出さない`, async ({ page }) => {
     await page.setViewportSize({ width, height: 844 });
     await page.goto("/");
-    for (let index = 0; index < 6; index += 1) {
+    for (let index = 0; index < toolPaths.length; index += 1) {
       const card = tools(page).nth(index);
       await card.scrollIntoViewIfNeeded();
       const box = await card.boundingBox();
@@ -118,14 +118,14 @@ for (const width of [320, 360, 390]) {
   });
 }
 
-test("6機能から専用入力とスライドへキーボードだけで到達できる", async ({ page }) => {
+test("7機能から専用入力とスライドへキーボードだけで到達できる", async ({ page }) => {
   test.setTimeout(60_000);
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto("/");
   await tools(page).first().focus();
-  for (let index = 0; index < 6; index += 1) {
+  for (let index = 0; index < toolPaths.length; index += 1) {
     await expect(tools(page).nth(index)).toBeFocused();
-    if (index < 5) await page.keyboard.press("Tab");
+    if (index < toolPaths.length - 1) await page.keyboard.press("Tab");
   }
   await toolLink(page, "/chatbot").focus();
   await page.keyboard.press("Enter");

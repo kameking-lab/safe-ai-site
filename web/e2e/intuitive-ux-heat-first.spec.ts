@@ -33,20 +33,21 @@ const MOBILE_NAV = [
 ] as const;
 
 const MAIN_SERVICES = [
-  ["KY用紙", "/ky/paper"], ["安衛法AI", "/chatbot"],
-  ["化学物質RA", "/chemical-ra"], ["安全研修スライド", "/training/safety-seminars"],
-  ["現場安全看板", "/materials/safety-images"], ["建設計算ツール", "/construction-calc"],
+  ["安衛法AI", "/chatbot"], ["化学物質検索", "/chemical-database"],
+  ["法改正", "/laws"], ["労災事故速報", "/accident-news"],
+  ["事故統計ダッシュボード", "/accidents-analytics"], ["現場計算ツール", "/construction-calc"],
+  ["保護具の選び方", "/goods"],
 ] as const;
 
 async function expectMainServices(page: Page) {
   const cards = page.locator("#tools a[data-lp-tool]");
   await expect(cards).toHaveCount(MAIN_SERVICES.length);
   for (const [title, href] of MAIN_SERVICES) {
-    const card = cards.filter({ has: page.getByRole("heading", { level: 3, name: title, exact: true }) });
+    const card = cards.filter({ has: page.getByRole("heading", { level: 4, name: title, exact: true }) });
     await expect(card).toHaveCount(1);
     await expect(card).toHaveAttribute("href", href);
   }
-  await expect(page.getByRole("img", { name: "ヘルメットをかぶり、タブレットを持つチワワ" })).toBeVisible();
+  await expect(page.getByRole("img", { name: "ヘルメットをかぶり、法令の本を持つチワワ" })).toBeVisible();
 }
 
 test("ホームは道具、原点、相談、最新情報の順で使える", async ({ page }) => {
@@ -87,10 +88,10 @@ test("ホームは道具、原点、相談、最新情報の順で使える", as
   await expect(page.locator("[data-primary-navigation]")).toHaveCount(0);
   await expect(page.locator('[data-lp-news="accident"]').getByRole("link", { name: "事故速報の一覧を見る" })).toHaveAttribute("href", "/accident-news");
   await expect(page.locator('[data-lp-news="law"]').getByRole("link", { name: "法改正の一覧を見る" })).toHaveAttribute("href", "/laws");
-  await expect(page.locator("#tools a[data-lp-tool][href=\"/ky/paper\"]")).toHaveAttribute("href", "/ky/paper");
+  await expect(page.locator("#tools nav[aria-label=\"ほかの現場支援ツール\"] a[href=\"/ky/paper\"]")).toHaveAttribute("href", "/ky/paper");
 });
 
-test("モバイルは6道具と最新情報を区別し、重複のないメニューをキーボードで閉じられる", async ({ page }) => {
+test("モバイルは7道具と最新情報を区別し、重複のないメニューをキーボードで閉じられる", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/", { waitUntil: "domcontentloaded" });
   await expectMainServices(page);
@@ -145,7 +146,7 @@ test("モバイルは6道具と最新情報を区別し、重複のないメニ�
   await expect(menuButton).toBeFocused();
 });
 
-test("JavaScript無効でも6道具・事故の確認状態・通常リンクをSSR HTMLに保持する", async ({ browser, baseURL }) => {
+test("JavaScript無効でも7道具・事故の確認状態・通常リンクをSSR HTMLに保持する", async ({ browser, baseURL }) => {
   const context = await browser.newContext({ baseURL, javaScriptEnabled: false, viewport: { width: 390, height: 844 }, locale: "ja-JP" });
   try {
     const page = await context.newPage();
@@ -171,7 +172,7 @@ test("JavaScript無効でも6道具・事故の確認状態・通常リンクを
     await expect(page.getByText(/産業医が辞任・解任・退任したとき/).first()).toBeVisible();
     const tools = page.locator("[data-home-lp]");
     await expect(tools.getByRole("link", { name: /化学物質RA/u })).toHaveAttribute("href", "/chemical-ra");
-    await expect(tools.getByRole("link", { name: "安衛法AI", exact: true })).toHaveAttribute("href", "/chatbot");
+    await expect(tools.locator('[data-lp-tool][href="/chatbot"]')).toHaveAttribute("href", "/chatbot");
     await expect(page.getByRole("link", { name: /すべての機能を見る/ })).toHaveAttribute("href", "/features");
     const details = page.locator("details[data-mobile-site-menu]");
     await details.locator(":scope > summary").focus();

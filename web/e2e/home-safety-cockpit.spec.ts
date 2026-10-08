@@ -13,7 +13,7 @@ const MAIN_ROUTES = [
 ] as const;
 
 test.describe("新しい安全AIポータルのホーム", () => {
-  test("PCで原点、チワワ、6つの既存道具への入口を表示する", async ({
+  test("PCで原点、チワワ、7つの既存道具への入口を表示する", async ({
     page,
   }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
@@ -31,21 +31,21 @@ test.describe("新しい安全AIポータルのホーム", () => {
     await expect(page.getByText("今日の熱中症リスク")).toHaveCount(0);
 
     const heroMascot = page.getByAltText(
-      "ヘルメットをかぶり、タブレットを持つチワワ",
+      "ヘルメットをかぶり、法令の本を持つチワワ",
     );
     await expect(heroMascot).toBeVisible();
     await expect(heroMascot).toHaveAttribute(
       "src",
-      /mascot-tablet-dx/u,
+      /mascot-law-reading/u,
     );
 
     const mainCards = page
       .locator('#tools a[data-lp-tool]');
-    await expect(mainCards).toHaveCount(6);
+    await expect(mainCards).toHaveCount(7);
     const cardHrefs = await mainCards.evaluateAll((links) =>
       links.map((link) => link.getAttribute("href")),
     );
-    expect(cardHrefs).toEqual(["/ky/paper", "/chatbot", "/chemical-ra", "/training/safety-seminars", "/materials/safety-images", "/construction-calc"]);
+    expect(cardHrefs).toEqual(["/chatbot", "/chemical-database", "/laws", "/accident-news", "/accidents-analytics", "/construction-calc", "/goods"]);
   });
 
   test("スマホで横にはみ出さず、季節機能を固定ナビから外す", async ({
