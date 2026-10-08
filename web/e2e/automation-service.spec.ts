@@ -34,6 +34,7 @@ test.describe("業務自動化・講習・資料作成サービス", () => {
     const newHome = page.locator("[data-home-lp]");
     const legacyHome = page.locator("#home-relaunch-title");
     let homeCta;
+    let consultationMode = "unavailable";
     if (await newHome.count()) {
       await expect(newHome).toHaveCount(1);
       await expect(legacyHome).toHaveCount(0);
@@ -41,6 +42,7 @@ test.describe("業務自動化・講習・資料作成サービス", () => {
         name: "自動化について相談する", exact: true,
       });
       const mode = await newHome.locator("[data-consult-mode]").getAttribute("data-consult-mode");
+      consultationMode = mode ?? "unknown";
       if (mode === "mail_client") {
         await expect(homeCta).toHaveAttribute("href", "/contact/automation-email");
         await expect(newHome.locator("#consult")).toContainText("メールアプリを使います");
@@ -56,6 +58,8 @@ test.describe("業務自動化・講習・資料作成サービス", () => {
       homeCta = page.locator('#home-automation [data-automation-cta-position="home_primary"]');
       const label = (await homeCta.innerText()).trim();
       expect(["無料相談を始める", "メールで相談する", "料金と例を見る"]).toContain(label);
+      consultationMode = label === "メールで相談する" ? "mail_client"
+        : label === "無料相談を始める" ? "web_form" : "unavailable";
       await expect(homeCta).toHaveAttribute("href", label === "メールで相談する"
         ? "/contact/automation-email" : "/services/automation#consult-form");
       if (label === "料金と例を見る") {
@@ -92,9 +96,15 @@ test.describe("業務自動化・講習・資料作成サービス", () => {
     ).toHaveAttribute("href", "/services/automation");
 
     await page.goto("/safety-ai");
-    await expect(
-      page.getByRole("main").getByRole("link", { name: "自動化例・料金を見る", exact: true }),
-    ).toHaveAttribute("href", "/services/automation");
+    const safetyLabel = consultationMode === "mail_client" ? "メールで相談する"
+      : consultationMode === "web_form" ? "自社向けに相談する" : "自動化例・料金を見る";
+    const safetyHref = consultationMode === "mail_client" ? "/contact/automation-email"
+      : consultationMode === "web_form" ? "/services/automation#consult-form" : "/services/automation";
+    const safetyCta = page.locator('[data-lp-section="hero"]').getByRole("link", {
+      name: safetyLabel, exact: true,
+    });
+    await expect(safetyCta).toBeVisible();
+    await expect(safetyCta).toHaveAttribute("href", safetyHref);
   });
 
   test("答えに必要な5セクションだけで、料金3件と想定例3件を先に示す", async ({ page }) => {
