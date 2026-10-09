@@ -2,28 +2,15 @@ import { expect, test, type Page } from "@playwright/test";
 
 const SERVICE_PATH = "/services/automation";
 
-async function fillStepOne(page: Page) {
+async function fillCompactForm(page: Page) {
   await expect(
     page.locator('form[data-automation-consult-ready="true"]'),
   ).toBeVisible();
-  await page.getByLabel(/相談種別/).selectOption("automation");
-  await page
-    .getByLabel(/現在困っていること/)
-    .fill("毎週5つのCSVを手作業で結合し、重複確認と集計に3時間かかっています。");
-  await page
-    .getByLabel(/自動化・講習・資料作成の希望/)
-    .fill("CSVを自動で結合し、定型レポートを作成できるようにしたいです。");
-  await page.getByRole("button", { name: /返信先の入力へ進む/ }).click();
-}
-
-async function fillStepTwo(page: Page) {
-  await page.getByLabel(/お名前・担当者名/).fill("テスト担当者");
-  await page.getByLabel(/返信用メールアドレス/).fill("tester@example.invalid");
-  await page.getByLabel(/会社・団体名/).fill("テスト団体");
-  await page.getByLabel(/希望時期/).selectOption("within-1-month");
-  await page.getByLabel(/予算帯/).selectOption("100000-300000");
-  await page.getByLabel(/オンライン・現地等の希望/).selectOption("online");
-  await page.getByRole("checkbox", { name: /個人情報の取扱いに同意する/ }).check();
+  await page.getByLabel("返信先メール（必須）", { exact: true }).fill("tester@example.invalid");
+  await page.getByLabel("困っている作業（必須）", { exact: true }).fill(
+    "毎週5つのCSVを手作業で結合し、重複確認と集計に3時間かかっています。",
+  );
+  await page.getByRole("checkbox", { name: /個人情報の取扱い.*同意/ }).check();
 }
 
 test.describe("業務自動化・講習・資料作成サービス", () => {
@@ -205,7 +192,8 @@ test.describe("業務自動化・講習・資料作成サービス", () => {
       ),
     ).toBeLessThanOrEqual(2);
     await page.locator("#consult-form").scrollIntoViewIfNeeded();
-    await expect(page.getByLabel(/相談種別/)).toBeVisible();
+    await expect(page.getByLabel("返信先メール（必須）", { exact: true })).toBeVisible();
+    await expect(page.getByLabel("困っている作業（必須）", { exact: true })).toBeVisible();
   });
 
   test("JavaScript無効でも料金・想定例・対象業務と相談代替を確認できる", async ({
@@ -228,7 +216,7 @@ test.describe("業務自動化・講習・資料作成サービス", () => {
     await context.close();
   });
 
-  test("キーボードで段階フォームを進み、成功時に入力や受付番号をURLへ出さない", async ({
+  test("キーボードで2必須項目の相談を送信し、受理時に入力や受付番号をURLへ出さない", async ({
     page,
   }) => {
     await page.route("**/api/automation-consult", async (route) => {
@@ -246,20 +234,30 @@ test.describe("業務自動化・講習・資料作成サービス", () => {
     });
     await page.goto(`${SERVICE_PATH}#consult-form`);
 
-    await page.getByLabel(/相談種別/).focus();
-    await fillStepOne(page);
-    await expect(page.getByRole("heading", { name: "返信先と希望条件を教えてください" })).toBeFocused();
-    await fillStepTwo(page);
-    await page.getByRole("button", { name: /無料相談を送信/ }).focus();
+    await expect(page.locator('form[data-automation-consult-ready="true"]')).toBeVisible();
+    const email = page.getByLabel("返信先メール（必須）", { exact: true });
+    const problem = page.getByLabel("困っている作業（必須）", { exact: true });
+    await email.focus();
+    await page.keyboard.type("tester@example.invalid");
+    await page.keyboard.press("Tab");
+    await expect(problem).toBeFocused();
+    await page.keyboard.type("毎週5つのCSVを手作業で結合し、重複確認と集計に3時間かかっています。");
+    await page.getByRole("checkbox", { name: /個人情報の取扱い.*同意/ }).focus();
+    await page.keyboard.press("Space");
+    await expect(page.getByRole("checkbox", { name: /個人情報の取扱い.*同意/ })).toBeChecked();
+    await page.getByRole("button", { name: "相談を送信する", exact: true }).focus();
     await page.keyboard.press("Enter");
 
     const success = page
       .getByRole("status")
-      .filter({ hasText: "相談を受け付けました" });
+      .filter({ hasText: "運営者への送信が受理されました" });
     await expect(success).toBeFocused();
-    await expect(success).toContainText("相談を受け付けました");
+    await expect(success).toContainText("運営者への送信が受理されました");
     await expect(page).toHaveURL(`${SERVICE_PATH}#consult-form`);
     await expect(success).toContainText("AC-20260723-ABCDEF012345");
+    await expect(success).toContainText("受信箱への到着は、この画面では確認できません");
+    await expect(success).toContainText("受付メールの自動返信はありません");
+    await expect(success).not.toContainText("受付メールを送信しました");
     expect(page.url()).not.toContain("AC-20260723-ABCDEF012345");
     expect(page.url()).not.toContain("tester@example.invalid");
   });
@@ -269,16 +267,16 @@ test.describe("業務自動化・講習・資料作成サービス", () => {
     await expect(
       page.locator('form[data-automation-consult-ready="true"]'),
     ).toBeVisible();
-    await page.getByRole("button", { name: /返信先の入力へ進む/ }).click();
+    await page.getByRole("button", { name: "相談を送信する", exact: true }).click();
     const summary = page.getByRole("alert", { name: "入力内容を確認してください" });
     await expect(summary).toBeFocused();
     const errorLink = summary.getByRole("link", {
-      name: /相談種別：相談種別を選択してください/,
+      name: /返信用メールアドレス：/,
     });
-    await expect(errorLink).toHaveAttribute("href", "#automation-consult-type");
+    await expect(errorLink).toHaveAttribute("href", "#automation-consult-email");
     await errorLink.click();
-    await expect(page.getByLabel(/相談種別/)).toBeFocused();
-    await expect(page.getByLabel(/相談種別/)).toHaveAttribute("aria-invalid", "true");
+    await expect(page.getByLabel("返信先メール（必須）", { exact: true })).toBeFocused();
+    await expect(page.getByLabel("返信先メール（必須）", { exact: true })).toHaveAttribute("aria-invalid", "true");
   });
 
   test("送信連打はAPIを1回だけ呼び、送信中ボタンを無効化する", async ({ page }) => {
@@ -289,13 +287,12 @@ test.describe("業務自動化・講習・資料作成サービス", () => {
       await route.fulfill({
         status: 200,
         contentType: "application/json",
-        body: JSON.stringify({ ok: true, referenceId: "PRIVATE" }),
+        body: JSON.stringify({ ok: true, referenceId: "AC-20260723-ABCDEF012345" }),
       });
     });
     await page.goto(`${SERVICE_PATH}#consult-form`);
-    await fillStepOne(page);
-    await fillStepTwo(page);
-    const submit = page.getByRole("button", { name: /無料相談を送信/ });
+    await fillCompactForm(page);
+    const submit = page.getByRole("button", { name: "相談を送信する", exact: true });
     await submit.evaluate((button: HTMLButtonElement) => {
       button.click();
       button.click();
@@ -320,15 +317,14 @@ test.describe("業務自動化・講習・資料作成サービス", () => {
       }),
     );
     await page.goto(`${SERVICE_PATH}#consult-form`);
-    await fillStepOne(page);
-    await fillStepTwo(page);
-    await page.getByRole("button", { name: /無料相談を送信/ }).click();
+    await fillCompactForm(page);
+    await page.getByRole("button", { name: "相談を送信する", exact: true }).click();
     const alert = page.getByRole("alert").filter({ hasText: "一部の通知が届いている可能性" });
     await expect(alert).toContainText("一部の通知が届いている可能性");
     await expect(alert).toContainText("同じ内容・同じ識別子で再試行");
-    await expect(page.getByLabel(/返信用メールアドレス/)).toBeDisabled();
+    await expect(page.getByLabel("返信先メール（必須）", { exact: true })).toBeDisabled();
     await expect(alert).not.toContainText("provider secret");
-    await expect(page.getByText("相談を受け付けました")).toHaveCount(0);
+    await expect(page.getByText("運営者への送信が受理されました")).toHaveCount(0);
   });
   test("arbitrary reference stays hidden and unresolved with the same retry", async ({ page }) => {
     const requests: Array<{ key: string | undefined; body: string | null }> = [];
@@ -337,13 +333,12 @@ test.describe("業務自動化・講習・資料作成サービス", () => {
       await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, referenceId: "AUTO-DO-NOT-EXPOSE" }) });
     });
     await page.goto(`${SERVICE_PATH}#consult-form`);
-    await fillStepOne(page);
-    await fillStepTwo(page);
-    await page.getByRole("button", { name: /無料相談を送信/ }).click();
+    await fillCompactForm(page);
+    await page.getByRole("button", { name: "相談を送信する", exact: true }).click();
     await expect(page.getByRole("alert").filter({ hasText: "受付状況を確認できません" })).toBeVisible();
     await expect(page.getByText("AUTO-DO-NOT-EXPOSE")).toHaveCount(0);
-    await expect(page.getByText("相談を受け付けました")).toHaveCount(0);
-    await expect(page.getByLabel(/返信用メールアドレス/)).toBeDisabled();
+    await expect(page.getByText("運営者への送信が受理されました")).toHaveCount(0);
+    await expect(page.getByLabel("返信先メール（必須）", { exact: true })).toBeDisabled();
     await page.getByRole("button", { name: "同じ送信を確認する" }).click();
     await expect.poll(() => requests.length).toBe(2);
     expect(requests[1]).toEqual(requests[0]);

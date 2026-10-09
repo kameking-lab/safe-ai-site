@@ -285,7 +285,7 @@ export function AutomationServiceContent({
         <p className="mt-2 text-sm text-slate-700">{availability.label}</p>
         {webFormAvailable ? (
           <>
-            <AutomationConsultForm />
+            <AutomationConsultForm compact sourcePage="/services/automation" />
             <noscript>
               <style>{`[data-automation-consult-ready]{display:none!important}`}</style>
               <p className="mt-4 text-sm font-bold text-slate-800">

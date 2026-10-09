@@ -88,10 +88,6 @@ export function parseAutomationConsultForm(input: unknown): ParseResult {
   const currentTools = blank("currentTools") ? undefined : multiline("currentTools", 1, LIMITS.currentTools);
   const budget = blank("budget") ? undefined : enumValue("budget", automationConsultBudgets);
   const deliveryPreference = blank("deliveryPreference") ? undefined : enumValue("deliveryPreference", automationConsultDeliveryPreferences);
-  if (sourcePage === "/services/automation") {
-    if (!name) reject("name");
-    if (desiredSupport.length < LIMITS.supportMin) reject("desiredSupport");
-  }
   if (issues.length) return { success: false, error: { issues } };
   const data: AutomationConsultFormData = {
     consultationType, name, email, currentProblem, desiredSupport, timing,

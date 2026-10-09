@@ -9,8 +9,7 @@ import { parseAutomationConsultForm, normalizeAutomationConsultMultiline } from 
 import { AUTOMATION_CONSULT_LIMITS as LIMITS, type AutomationConsultSourcePage } from "@/lib/automation-consult/form-contract";
 
 const SERVICE_PATH = "/services/automation";
-// サーバーは運営者通知（並列・最大10秒）後に自動返信（最大10秒）を送る。
-// 正常処理中の誤タイムアウトを避けつつ、30秒で必ず中断する。
+// 運営者への送信処理中の誤タイムアウトを避け、30秒で必ず中断する。
 const REQUEST_TIMEOUT_MS = 30_000;
 
 const CONSULTATION_TYPES = [
@@ -194,7 +193,10 @@ function ErrorSummary({
               href={`#${FIELD_IDS[field]}`}
               onClick={(event) => {
                 event.preventDefault();
-                document.getElementById(FIELD_IDS[field])?.focus();
+                const input = document.getElementById(FIELD_IDS[field]);
+                const disclosure = input?.closest("details");
+                if (disclosure) disclosure.open = true;
+                input?.focus();
               }}
               className="inline-flex min-h-[44px] items-center underline decoration-2 underline-offset-2"
             >
@@ -235,7 +237,7 @@ export function AutomationConsultForm({
   const [step, setStep] = useState<1 | 2>(compact ? 2 : 1);
   const [form, setForm] = useState<FormState>(() => ({
     ...INITIAL_FORM,
-    consultationType: compact ? "other" : initialConsultationType,
+    consultationType: compact ? initialConsultationType || "other" : initialConsultationType,
     timing: compact ? "undecided" : "",
   }));
   const [errors, setErrors] = useState<FieldErrors>({});
@@ -255,17 +257,17 @@ export function AutomationConsultForm({
   const idempotencyKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
-    if (compact || initialConsultationType) return;
+    if ((compact && sourcePage !== SERVICE_PATH) || initialConsultationType) return;
     const prefill = parseAutomationConsultationTypePrefill(
       window.location.search,
     );
     if (!prefill) return;
     setForm((current) =>
-      current.consultationType
+      current.consultationType && (!compact || current.consultationType !== "other")
         ? current
         : { ...current, consultationType: prefill },
     );
-  }, [compact, initialConsultationType]);
+  }, [compact, initialConsultationType, sourcePage]);
 
   useEffect(() => {
     if (Object.keys(errors).length > 0) errorSummaryRef.current?.focus();
@@ -474,7 +476,9 @@ export function AutomationConsultForm({
         <h2 className="mt-3 text-2xl font-bold">
           {successDeliveryMode === "dry-run"
             ? "入力内容を検証しました"
-            : "相談を受け付けました"}
+            : successDeliveryMode === "queued"
+              ? "相談を送信待ちにしました"
+              : "運営者への送信が受理されました"}
         </h2>
         {referenceId && <p className="mt-3 font-mono text-sm">受付番号: {referenceId}</p>}
         {successDeliveryMode === "queued" ? <p className="mt-3 leading-7">相談を受付待ちの一覧に登録しました。メールの送達完了はまだ確認していません。</p> : successDeliveryMode === "dry-run" ? (
@@ -489,10 +493,10 @@ export function AutomationConsultForm({
         ) : (
           <>
             <p className="mt-3 leading-7">
-              ご入力のメールアドレスへ受付メールを送信しました。返信時期や連絡方法は、受付メールの案内をご確認ください。
+              受信箱への到着は、この画面では確認できません。受付番号を控えておいてください。
             </p>
             <p className="mt-2 text-sm leading-6">
-              機密資料や追加の個人情報は、運営者から安全な共有方法をご案内するまで送らないでください。
+              受付メールの自動返信はありません。機密資料や追加の個人情報は、安全な共有方法の案内があるまで送らないでください。
             </p>
           </>
         )}
@@ -500,7 +504,7 @@ export function AutomationConsultForm({
           type="button"
           onClick={() => {
             setStep(compact ? 2 : 1);
-            setForm({ ...INITIAL_FORM, consultationType: compact ? "other" : initialConsultationType, timing: compact ? "undecided" : "" });
+            setForm({ ...INITIAL_FORM, consultationType: compact ? initialConsultationType || "other" : initialConsultationType, timing: compact ? "undecided" : "" });
             setReferenceId(null);
             setStatus("idle");
             setSuccessDeliveryMode("delivery");
@@ -566,11 +570,16 @@ export function AutomationConsultForm({
       <details className="text-sm leading-6 text-slate-600"><summary className="cursor-pointer">入力内容の補足</summary><p>会社名・現場名・電話番号・添付ファイルは不要です。</p></details>
       <fieldset disabled={status === "sending" || unresolvedSubmission} className="min-w-0 space-y-5">
       {compact ? <section aria-label="相談内容" className="space-y-5">
-        <div><label htmlFor={FIELD_IDS.email} className="block text-sm font-bold">返信先メール（必須）</label><input id={FIELD_IDS.email} type="email" autoComplete="email" value={form.email} onChange={(event) => updateField("email", event.target.value)} maxLength={LIMITS.email} className={inputClass} aria-invalid={Boolean(errors.email)} aria-describedby={describedBy("email", errors)} /><FieldError field="email" errors={errors} /></div>
-        <div><label htmlFor={FIELD_IDS.currentProblem} className="block text-sm font-bold">困っている作業（必須）</label><textarea id={FIELD_IDS.currentProblem} rows={5} value={form.currentProblem} onChange={(event) => updateField("currentProblem", event.target.value)} maxLength={LIMITS.problemMax} className={`${inputClass} min-h-32`} aria-invalid={Boolean(errors.currentProblem)} aria-describedby={describedBy("currentProblem", errors, "compact-problem-hint")} /><p id="compact-problem-hint" className="mt-1 text-sm">10〜2,000文字で、作業の流れと困っている点を教えてください。</p><FieldError field="currentProblem" errors={errors} /></div>
+        <div><label htmlFor={FIELD_IDS.email} className="block text-sm font-bold">返信先メール（必須）</label><input id={FIELD_IDS.email} type="email" autoComplete="email" required value={form.email} onChange={(event) => updateField("email", event.target.value)} maxLength={LIMITS.email} className={inputClass} aria-invalid={Boolean(errors.email)} aria-describedby={describedBy("email", errors)} /><FieldError field="email" errors={errors} /></div>
+        <div><label htmlFor={FIELD_IDS.currentProblem} className="block text-sm font-bold">困っている作業（必須）</label><textarea id={FIELD_IDS.currentProblem} rows={5} required value={form.currentProblem} onChange={(event) => updateField("currentProblem", event.target.value)} maxLength={LIMITS.problemMax} className={`${inputClass} min-h-32`} aria-invalid={Boolean(errors.currentProblem)} aria-describedby={describedBy("currentProblem", errors, "compact-problem-hint")} /><p id="compact-problem-hint" className="mt-1 text-sm">10〜2,000文字で、作業の流れと困っている点を教えてください。</p><FieldError field="currentProblem" errors={errors} /></div>
+        <details className="rounded-xl border border-slate-300 px-4">
+          <summary className="flex min-h-[44px] cursor-pointer items-center text-sm font-bold">呼び名・希望時期を添える（任意）</summary>
+          <div className="space-y-4 pb-4">
         <div><label htmlFor={FIELD_IDS.name} className="block text-sm font-bold">呼び名（任意）</label><input id={FIELD_IDS.name} autoComplete="nickname" value={form.name} onChange={(event) => updateField("name", event.target.value)} maxLength={LIMITS.name} className={inputClass} aria-invalid={Boolean(errors.name)} aria-describedby={describedBy("name", errors)} /><FieldError field="name" errors={errors} /></div>
         <div><label htmlFor={FIELD_IDS.timing} className="block text-sm font-bold">希望時期（任意）</label><select id={FIELD_IDS.timing} value={form.timing} onChange={(event) => updateField("timing", event.target.value as Timing)} className={inputClass}>{TIMING_OPTIONS.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}</select></div>
-        <label htmlFor={FIELD_IDS.privacyConsent} className="flex min-h-[44px] items-center gap-3 text-sm"><input id={FIELD_IDS.privacyConsent} type="checkbox" checked={form.privacyConsent} onChange={(event) => updateField("privacyConsent", event.target.checked)} className="h-5 w-5" aria-invalid={Boolean(errors.privacyConsent)} aria-describedby={describedBy("privacyConsent", errors)} /><span><Link href="/privacy" className="underline">個人情報の取扱い</Link>を確認し、相談への回答に入力内容を利用することに同意します。</span></label><FieldError field="privacyConsent" errors={errors} />
+          </div>
+        </details>
+        <label htmlFor={FIELD_IDS.privacyConsent} className="flex min-h-[44px] items-center gap-3 text-sm"><input id={FIELD_IDS.privacyConsent} type="checkbox" required checked={form.privacyConsent} onChange={(event) => updateField("privacyConsent", event.target.checked)} className="h-5 w-5" aria-invalid={Boolean(errors.privacyConsent)} aria-describedby={describedBy("privacyConsent", errors)} /><span><Link href="/privacy" className="underline">個人情報の取扱い</Link>を確認し、相談への回答に入力内容を利用することに同意します。</span></label><FieldError field="privacyConsent" errors={errors} />
         <div className="sr-only" aria-hidden="true"><label htmlFor="automation-consult-website">ウェブサイト</label><input id="automation-consult-website" value={form.website} onChange={(event) => updateField("website", event.target.value)} tabIndex={-1} autoComplete="off" /></div>
       </section> : (
       <section aria-labelledby={`automation-form-step-${step}`}>

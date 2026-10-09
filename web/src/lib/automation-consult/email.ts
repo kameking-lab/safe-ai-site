@@ -1,3 +1,4 @@
+import { getAutomationMailRecipients } from "./mail-draft";
 import { createHash, randomBytes } from "node:crypto";
 import {
   sendEmailSafe,
@@ -59,23 +60,22 @@ const DELIVERY_LABELS: Record<
 };
 
 type AutomationConsultEmailConfiguration =
-  | { ok: true; from: string; recipients: [string, string] }
+  | { ok: true; from: string; recipients: [string] }
   | { ok: false };
 
 export type AutomationConsultEmailDeliveryResult =
   | { delivered: true }
-  | { delivered: false; reason: "not_configured" | "owner_delivery_failed" | "reply_failed" };
+  | { delivered: false; reason: "not_configured" | "owner_delivery_failed" };
 
 export function getAutomationConsultEmailConfiguration(): AutomationConsultEmailConfiguration {
-  const rawRecipients = process.env.AUTOMATION_CONSULT_RECIPIENTS;
+  const recipients = getAutomationMailRecipients();
   const explicitFrom = process.env.AUTOMATION_CONSULT_FROM;
   const rawFrom = explicitFrom?.trim() ? explicitFrom : process.env.NOTIFY_FROM;
   const from = rawFrom?.trim();
   if (
-    !rawRecipients ||
+    !recipients ||
     !rawFrom ||
     !from ||
-    HEADER_CONTROL_CHARACTERS.test(rawRecipients) ||
     (explicitFrom !== undefined && HEADER_CONTROL_CHARACTERS.test(explicitFrom)) ||
     rawFrom.length > 254 ||
     HEADER_CONTROL_CHARACTERS.test(rawFrom) ||
@@ -84,20 +84,7 @@ export function getAutomationConsultEmailConfiguration(): AutomationConsultEmail
     return { ok: false };
   }
 
-  const recipients = [
-    ...new Set(rawRecipients.split(",").map((value) => value.trim()).filter(Boolean)),
-  ];
-  if (
-    recipients.length !== 2 ||
-    recipients.some(
-      (recipient) =>
-        !EMAIL_PATTERN.test(recipient) || HEADER_CONTROL_CHARACTERS.test(recipient)
-    )
-  ) {
-    return { ok: false };
-  }
-
-  return { ok: true, from, recipients: [recipients[0], recipients[1]] };
+  return { ok: true, from, recipients: [recipients.to] };
 }
 
 function isSafeFromAddress(value: string): boolean {
@@ -210,61 +197,10 @@ export function buildAutomationConsultOwnerEmail(input: {
   };
 }
 
-export function buildAutomationConsultAcknowledgementEmail(input: {
-  consultation: AutomationConsultInput;
-  referenceId: string;
-}): Pick<SafeEmailParams, "subject" | "text" | "html"> {
-  const { consultation, referenceId } = input;
-  const consultationType = CONSULTATION_TYPE_LABELS[consultation.consultationType];
-  const summary =
-    consultation.currentProblem.length > 400
-      ? `${consultation.currentProblem.slice(0, 400)}…`
-      : consultation.currentProblem;
-  const confidentialityNotice =
-    "追加の個人情報、営業秘密、顧客情報、SDS原文などの機密資料は、このメールへ送信しないでください。必要な場合は、内容を確認後に安全な受け渡し方法をご案内します。";
-  const replyNotice =
-    "このメールは自動送信専用です。このメールへ返信しても相談の追加受付はできません。";
-  const responseNotice =
-    "返信時期は相談内容を確認したうえでご案内します。見積前に費用は発生しません。";
-
-  const text = [
-    `${consultation.name || "ご相談者"} 様`,
-    "",
-    "安全AIポータルへご相談いただき、ありがとうございます。",
-    `受付番号: ${referenceId}`,
-    `相談種別: ${consultationType}`,
-    "",
-    "相談内容の要約:",
-    summary,
-    "",
-    responseNotice,
-    confidentialityNotice,
-    replyNotice,
-  ].join("\n");
-
-  const html = [
-    `<p>${escapeAutomationConsultHtml(consultation.name || "ご相談者")} 様</p>`,
-    "<p>安全AIポータルへご相談いただき、ありがとうございます。</p>",
-    `<p><strong>受付番号:</strong> ${escapeAutomationConsultHtml(referenceId)}<br>`,
-    `<strong>相談種別:</strong> ${escapeAutomationConsultHtml(consultationType)}</p>`,
-    "<p><strong>相談内容の要約:</strong><br>",
-    `${multilineAutomationConsultHtml(summary)}</p>`,
-    `<p>${escapeAutomationConsultHtml(responseNotice)}</p>`,
-    `<p>${escapeAutomationConsultHtml(confidentialityNotice)}</p>`,
-    `<p>${escapeAutomationConsultHtml(replyNotice)}</p>`,
-  ].join("");
-
-  return {
-    subject: `[安全AIポータル] 業務相談を受け付けました - ${referenceId}`,
-    text,
-    html,
-  };
-}
-
 export type AutomationConsultDryRunSummary = {
   mode: "dry-run";
-  ownerDeliveryCount: 2;
-  acknowledgementDeliveryCount: 1;
+  ownerDeliveryCount: 1;
+  acknowledgementDeliveryCount: 0;
   replyToValidated: true;
   bodiesGenerated: true;
 };
@@ -280,32 +216,18 @@ export function prepareAutomationConsultEmailDryRun(input: {
   idempotencyKey: string;
 }): AutomationConsultDryRunSummary {
   const ownerEmail = buildAutomationConsultOwnerEmail(input);
-  const acknowledgement = buildAutomationConsultAcknowledgementEmail(input);
   if (
     ownerEmail.replyTo !== input.consultation.email ||
     !ownerEmail.subject ||
     !ownerEmail.text ||
-    !ownerEmail.html ||
-    !acknowledgement.subject ||
-    !acknowledgement.text ||
-    !acknowledgement.html
+    !ownerEmail.html
   ) {
     throw new Error("automation_consult_dry_run_structure_invalid");
   }
-  // Production delivery uses these exact stable suffixes for two individual
-  // owner messages and one acknowledgement. Do not expose configured recipients.
-  const plannedIdempotencyKeys = [
-    `${input.idempotencyKey}.owner-1`,
-    `${input.idempotencyKey}.owner-2`,
-    `${input.idempotencyKey}.ack`,
-  ];
-  if (new Set(plannedIdempotencyKeys).size !== 3) {
-    throw new Error("automation_consult_dry_run_idempotency_invalid");
-  }
   return {
     mode: "dry-run",
-    ownerDeliveryCount: 2,
-    acknowledgementDeliveryCount: 1,
+    ownerDeliveryCount: 1,
+    acknowledgementDeliveryCount: 0,
     replyToValidated: true,
     bodiesGenerated: true,
   };
@@ -323,31 +245,17 @@ export async function deliverAutomationConsultEmails(input: {
 
   const sendEmail = input.sendEmail ?? sendEmailSafe;
   const ownerEmail = buildAutomationConsultOwnerEmail(input);
-  const ownerDeliveries = await Promise.all(
-    configuration.recipients.map((recipient, index) =>
-      sendEmail({
-        tag: `automation-consult-owner-${index + 1}`,
-        idempotencyKey: `${input.idempotencyKey}.owner-${index + 1}`,
-        from: configuration.from,
-        to: recipient,
-        ...ownerEmail,
-      })
-    )
-  );
-
-  if (ownerDeliveries.some((delivery) => !delivery.delivered)) {
+  const ownerDelivery = await sendEmail({
+    tag: "automation-consult-owner-1",
+    idempotencyKey: `${input.idempotencyKey}.owner-1`,
+    from: configuration.from,
+    to: configuration.recipients[0],
+    ...ownerEmail,
+  });
+  if (!ownerDelivery.delivered) {
     return { delivered: false, reason: "owner_delivery_failed" };
   }
-
-  const acknowledgement = buildAutomationConsultAcknowledgementEmail(input);
-  const replyDelivery = await sendEmail({
-    tag: "automation-consult-acknowledgement",
-    idempotencyKey: `${input.idempotencyKey}.ack`,
-    from: configuration.from,
-    to: input.consultation.email,
-    ...acknowledgement,
-  });
-
-  if (!replyDelivery.delivered) return { delivered: false, reason: "reply_failed" };
+  // Receipt is shown on the page. Do not send an automatic response to an
+  // unverified user-entered address or duplicate the owner's test message.
   return { delivered: true };
 }
