@@ -68,10 +68,25 @@ export type AutomationConsultEmailDeliveryResult =
 
 export function getAutomationConsultEmailConfiguration(): AutomationConsultEmailConfiguration {
   const rawRecipients = process.env.AUTOMATION_CONSULT_RECIPIENTS;
-  const from = process.env.AUTOMATION_CONSULT_FROM ?? process.env.NOTIFY_FROM;
-  if (!rawRecipients || !from || !isSafeFromAddress(from)) return { ok: false };
+  const explicitFrom = process.env.AUTOMATION_CONSULT_FROM;
+  const rawFrom = explicitFrom?.trim() ? explicitFrom : process.env.NOTIFY_FROM;
+  const from = rawFrom?.trim();
+  if (
+    !rawRecipients ||
+    !rawFrom ||
+    !from ||
+    HEADER_CONTROL_CHARACTERS.test(rawRecipients) ||
+    (explicitFrom !== undefined && HEADER_CONTROL_CHARACTERS.test(explicitFrom)) ||
+    rawFrom.length > 254 ||
+    HEADER_CONTROL_CHARACTERS.test(rawFrom) ||
+    !isSafeFromAddress(from)
+  ) {
+    return { ok: false };
+  }
 
-  const recipients = [...new Set(rawRecipients.split(",").map((value) => value.trim()))];
+  const recipients = [
+    ...new Set(rawRecipients.split(",").map((value) => value.trim()).filter(Boolean)),
+  ];
   if (
     recipients.length !== 2 ||
     recipients.some(
