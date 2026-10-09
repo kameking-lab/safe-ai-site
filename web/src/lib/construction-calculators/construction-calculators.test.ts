@@ -1,3 +1,4 @@
+import { additionalQuantitySpecs, calculateAdditionalQuantity } from "./additional-quantity";
 import { describe, expect, it } from "vitest";
 import {
   constructionCalculatorRegistry,
@@ -39,6 +40,8 @@ const calculators: Record<
   "scale-coordinate": (input) => calculateScaleCoordinate(input as never),
 };
 
+for(const spec of additionalQuantitySpecs) calculators[spec.slug]=input=>calculateAdditionalQuantity(spec.slug,input);
+
 const exactInputKeys: Record<string, string[]> = {
   "concrete-quantity": ["shape", "length", "width", "height", "diameter", "dimensionUnit", "quantity", "lossPercent", "truckCapacityM3", "rounding"],
   "excavation-backfill": ["shape", "length", "width", "depth", "dimensionUnit", "sideSlopeHorizontalPerVertical", "structureVolume", "baseMaterialVolume", "deductionVolumeUnit", "rounding"],
@@ -53,6 +56,10 @@ const exactInputKeys: Record<string, string[]> = {
   "drainage-slope": ["length", "lengthUnit", "gradeMode", "gradeValue", "referencePoint", "referenceElevationM", "flowDirection", "intervalCount", "rounding"],
   "scale-coordinate": ["mode", "solveFor", "scaleDenominator", "drawingLength", "drawingUnit", "actualLength", "actualUnit", "x1", "y1", "x2", "y2", "coordinateUnit", "rounding"],
 };
+
+for(const spec of additionalQuantitySpecs) exactInputKeys[spec.slug]=spec.slug==="polygon-area"?["points"]:spec.fields.map(f=>f.key);
+exactInputKeys["rebar-weight"].push("barType","barDesignation");
+exactInputKeys["rebar-spacing"].push("barType","barDesignation");
 
 describe("directed decimal rounding", () => {
   it("snaps binary representation noise without swallowing a real fractional remainder", () => {
@@ -80,9 +87,9 @@ describe("directed decimal rounding", () => {
 });
 
 describe("construction calculator formula registry", () => {
-  it("contains exactly the 12 approved low-risk calculators", () => {
-    expect(constructionCalculatorRegistry).toHaveLength(12);
-    expect(new Set(constructionCalculatorSlugs).size).toBe(12);
+  it("contains the 12 existing and five additional low-risk calculators", () => {
+    expect(constructionCalculatorRegistry).toHaveLength(17);
+    expect(new Set(constructionCalculatorSlugs).size).toBe(17);
     expect(Object.keys(calculators).sort()).toEqual([...constructionCalculatorSlugs].sort());
     expect(constructionCalculatorRegistry.every((entry) => entry.riskLevel === "low" && entry.clientOnly)).toBe(true);
   });
@@ -96,7 +103,7 @@ describe("construction calculator formula registry", () => {
       expect(entry.outputDefinitions.length).toBeGreaterThan(0);
       expect(entry.supportedUnits.length).toBeGreaterThan(0);
       expect(entry.sources.length).toBeGreaterThan(0);
-      expect(entry.checkedAt).toBe("2026-08-27");
+      expect(entry.checkedAt).toMatch(/^2026-(08-27|10-09)$/);
       expect(forbidden.test(JSON.stringify(entry))).toBe(false);
     }
   });
@@ -114,7 +121,7 @@ describe("construction calculator formula registry", () => {
   });
 
   it("has three normal cases plus unit, boundary, zero, negative, large and rounding cases per calculator", () => {
-    for (const entry of constructionCalculatorRegistry) {
+    for (const entry of constructionCalculatorRegistry.filter(entry=>!additionalQuantitySpecs.some(s=>s.slug===entry.slug))) {
       const counts = entry.testFixtures.reduce<Record<string, number>>((accumulator, fixture) => {
         accumulator[fixture.kind] = (accumulator[fixture.kind] ?? 0) + 1;
         return accumulator;

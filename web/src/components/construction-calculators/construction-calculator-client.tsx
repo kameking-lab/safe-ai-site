@@ -32,6 +32,9 @@ import type {
   ValidationIssue,
 } from "@/lib/construction-calculators/types";
 
+import { additionalQuantitySpecs } from "@/lib/construction-calculators/additional-quantity";
+import { CalculatorInputGuide, INPUT_COLORS, inputUnit } from "./calculator-input-guide";
+
 type PublicFormulaDefinition = Omit<FormulaRegistryEntry, "testFixtures">;
 type RawInput = Record<string, unknown>;
 type GenericCalculator = CalculatorFunction<never>;
@@ -63,6 +66,11 @@ const loaders: Record<string, () => Promise<GenericCalculator>> = {
     (await import("@/lib/construction-calculators/scale-coordinate")).calculateScaleCoordinate as GenericCalculator,
 };
 
+for (const spec of additionalQuantitySpecs) loaders[spec.slug] = async () => {
+ const { calculateAdditionalQuantity } = await import("@/lib/construction-calculators/additional-quantity");
+ return ((input: Record<string,unknown>) => calculateAdditionalQuantity(spec.slug,input)) as GenericCalculator;
+};
+
 const calculatorPromises = new Map<string, Promise<GenericCalculator>>();
 
 function loadCalculator(slug: string): Promise<GenericCalculator> {
@@ -79,6 +87,7 @@ function loadCalculator(slug: string): Promise<GenericCalculator> {
 }
 
 const OPTION_LABELS: Record<string, Record<string, string>> = {
+  barType: { deformed: "異形鉄筋（規格表）", round: "丸鋼（直径から概算）" },
   shape: {
     rectangular: "直方体",
     slab: "床版・土間",
@@ -119,7 +128,11 @@ function optionLabel(key: string, value: string) {
 }
 
 function visibleField(slug: string, field: InputDefinition, raw: RawInput) {
-  if (field.type === "segments") return true;
+  if (field.type === "segments" || field.type === "points") return true;
+  if (["rebar-weight","rebar-spacing"].includes(slug)) {
+    if(field.key === "diameterMm") return raw.barType !== "deformed";
+    if(field.key === "barDesignation") return raw.barType === "deformed";
+  }
   if (slug === "concrete-quantity") {
     const circular = raw.shape === "cylinder" || raw.shape === "circular-foundation";
     if (field.key === "diameter") return circular;
@@ -155,22 +168,32 @@ function visibleField(slug: string, field: InputDefinition, raw: RawInput) {
   return true;
 }
 
+function inputNumber(value: unknown): number {
+ return value === null || value === undefined || (typeof value === "string" && value.trim() === "") ? Number.NaN : Number(value);
+}
+
+function emptyInput(definition: PublicFormulaDefinition, input: RawInput): RawInput {
+ return Object.fromEntries(definition.inputDefinitions.map(field=>[field.key, field.type==="number"||field.type==="integer"?"":field.type==="points"?[{x:"",y:""},{x:"",y:""},{x:"",y:""}]:field.type==="segments"?[{startArea:"",endArea:"",length:""}]:input[field.key]]));
+}
+
 function prepareInput(definition: PublicFormulaDefinition, raw: RawInput, rounding: RoundingConfig): Record<string, unknown> {
   const prepared: Record<string, unknown> = {};
   for (const field of definition.inputDefinitions) {
     const value = raw[field.key];
-    if (field.type === "number" || field.type === "integer") prepared[field.key] = Number(value);
+    if (field.type === "number" || field.type === "integer") prepared[field.key] = inputNumber(value);
+    else if (field.type === "points") prepared[field.key] = (Array.isArray(value) ? value : []).map((p)=>({x:inputNumber((p as Record<string,unknown>).x),y:inputNumber((p as Record<string,unknown>).y)}));
     else if (field.type === "segments") {
       prepared[field.key] = (Array.isArray(value) ? value : []).map((segment) => {
         const record = segment as Record<string, unknown>;
         return {
-          startArea: Number(record.startArea),
-          endArea: Number(record.endArea),
-          length: Number(record.length),
+          startArea: inputNumber(record.startArea),
+          endArea: inputNumber(record.endArea),
+          length: inputNumber(record.length),
         };
       });
     } else prepared[field.key] = String(value ?? "");
   }
+  if(definition.slug==="excavation-backfill" && raw.shape==="vertical") prepared.sideSlopeHorizontalPerVertical=0;
   prepared.rounding = rounding;
   return prepared;
 }
@@ -201,11 +224,17 @@ function Field({
   value,
   onChange,
   issue,
+  number,
+  unit,
+  example,
 }: {
   field: InputDefinition;
   value: unknown;
   onChange: (value: string) => void;
   issue?: string;
+  number?: number;
+  unit?: string;
+  example?: unknown;
 }) {
   const id = `construction-calculator-${field.key}`;
   const helpId = `${id}-help`;
@@ -229,15 +258,15 @@ function Field({
             <option key={option} value={option}>{optionLabel(field.key, option)}</option>
           ))}
         </select>
-        <span id={helpId} className="mt-1 block text-xs leading-5 text-slate-600 dark:text-slate-300">{field.help}</span>
+        <details className="mt-1 text-xs leading-5 text-slate-600 dark:text-slate-300"><summary className="cursor-pointer">入力のヒント</summary><span id={helpId}>{field.help}</span></details>
         {issue ? <span id={errorId} className="mt-1 block text-sm font-bold text-rose-700 dark:text-rose-300">{issue}</span> : null}
       </label>
     );
   }
   return (
-    <label className="block" htmlFor={id}>
+    <label className={"block rounded-xl border-l-4 p-3 " + INPUT_COLORS[((number ?? 1)-1)%4]} htmlFor={id}>
       <span className="text-sm font-black text-slate-900 dark:text-white">
-        {field.label}{field.units?.length === 1 ? `（${optionLabel(field.key, field.units[0])}）` : ""}
+        {number ? <span className="mr-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-white text-xs text-slate-950">{number}</span> : null}{field.label}{unit ? `（${unit}）` : ""}
       </span>
       <input
         id={id}
@@ -246,6 +275,7 @@ function Field({
         aria-invalid={issue ? true : undefined}
         aria-describedby={describedBy}
         type="number"
+        placeholder={example === undefined ? undefined : `例：${String(example)}`}
         inputMode="decimal"
         value={typeof value === "number" || typeof value === "string" ? value : ""}
         min={field.min}
@@ -254,7 +284,7 @@ function Field({
         onChange={(event) => onChange(event.target.value)}
         className="mt-1 min-h-11 w-full rounded-xl border-2 border-slate-300 bg-white px-3 text-base text-slate-950 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-300 dark:border-slate-600 dark:bg-slate-950 dark:text-white"
       />
-      <span id={helpId} className="mt-1 block text-xs leading-5 text-slate-600 dark:text-slate-300">{field.help}</span>
+      <details className="mt-1 text-xs leading-5 text-slate-600 dark:text-slate-300"><summary className="cursor-pointer">入力のヒント</summary><span id={helpId}>{field.help}</span></details>
       {issue ? <span id={errorId} className="mt-1 block text-sm font-bold text-rose-700 dark:text-rose-300">{issue}</span> : null}
     </label>
   );
@@ -263,17 +293,25 @@ function Field({
 export function ConstructionCalculatorClient({
   definition,
   defaultInput,
+  startEmpty = false,
 }: {
   definition: PublicFormulaDefinition;
   defaultInput: Record<string, unknown>;
+  startEmpty?: boolean;
 }) {
   const [mounted, setMounted] = useState(false);
-  const [raw, setRaw] = useState<RawInput>(() => ({ ...defaultInput }));
+  const [raw, setRaw] = useState<RawInput>(() => startEmpty ? emptyInput(definition, defaultInput) : ({ ...defaultInput }));
   const defaultRounding = (defaultInput.rounding as RoundingConfig | undefined) ?? { decimalPlaces: 2, mode: "round" };
   const [rounding, setRounding] = useState<RoundingConfig>(defaultRounding);
   const [result, setResult] = useState<CalculationResult | null>(null);
   const [errors, setErrors] = useState<ValidationIssue[]>([]);
+  const [usingExample, setUsingExample] = useState(!startEmpty);
+  const [exampleEdited, setExampleEdited] = useState(false);
+  const focusResult = useRef(false);
+  const liveRevision = useRef(0);
   const [loading, setLoading] = useState(false);
+  const inputOrigin = usingExample ? (exampleEdited ? "例の数字を一部変更（残りの例も要確認）" : "例の数字（実測値ではありません）") : "入力した数値による概算";
+  const annotateResult = (value: CalculationResult): CalculationResult => ({...value,usedInputs:{...value.usedInputs,inputOrigin}});
   const [copied, setCopied] = useState(false);
   const [history, setHistory] = useState<ConstructionCalculatorHistoryEntry[]>([]);
   const [printReady, setPrintReady] = useState(false);
@@ -290,7 +328,7 @@ export function ConstructionCalculatorClient({
   }, [definition.slug]);
 
   useEffect(() => {
-    if (result) window.requestAnimationFrame(() => resultRef.current?.focus());
+    if (result && focusResult.current) { focusResult.current = false; window.requestAnimationFrame(() => resultRef.current?.focus()); }
   }, [result]);
 
   useEffect(() => {
@@ -317,7 +355,24 @@ export function ConstructionCalculatorClient({
     [definition, errors],
   );
 
+  useEffect(() => {
+    if (!mounted) return;
+    const revision = ++liveRevision.current;
+    const timer = window.setTimeout(() => {
+      void loadCalculator(definition.slug).then(calculate => {
+        if(revision !== liveRevision.current) return;
+        const input = prepareInput(definition, raw, rounding);
+        const missing = definition.inputDefinitions.some(f=>visibleField(definition.slug,f,raw)&&f.required&&(f.type==="number"||f.type==="integer")&&!Number.isFinite(input[f.key] as number));
+        const outcome = missing ? null : calculate(input as never);
+        setResult(outcome?.ok ? {...outcome.result,usedInputs:{...outcome.result.usedInputs,inputOrigin}} : null);
+      }).catch(()=>setResult(null));
+    }, 300);
+    return () => { window.clearTimeout(timer); ++liveRevision.current; };
+  }, [mounted, definition, raw, rounding, inputOrigin]);
+
   const change = (key: string, value: unknown) => {
+    if(usingExample) setExampleEdited(true);
+    ++liveRevision.current;
     setRaw((current) => ({ ...current, [key]: value }));
     setResult(null);
     setErrors([]);
@@ -325,14 +380,18 @@ export function ConstructionCalculatorClient({
   };
 
   const submit = async () => {
+    focusResult.current = true;
+    ++liveRevision.current;
     setLoading(true);
     setErrors([]);
     setCopied(false);
     const input = prepareInput(definition, raw, rounding);
     try {
       const calculate = await loadCalculator(definition.slug);
-      const outcome = calculate(input as never) as CalculationOutcome;
+      const missing = definition.inputDefinitions.filter(f=>visibleField(definition.slug,f,raw)&&f.required&&(f.type==="number"||f.type==="integer")&&!Number.isFinite(input[f.key] as number)).map(f=>({field:f.key,code:"required" as const,message:"数値を入力してください。0の場合は0を入力します。"}));
+      const outcome: CalculationOutcome = missing.length ? {ok:false,errors:missing} : calculate(input as never);
       if (!outcome.ok) {
+        focusResult.current = false;
         setResult(null);
         setErrors(outcome.errors);
         const first = outcome.errors[0]?.field.replaceAll(".", "-");
@@ -345,18 +404,20 @@ export function ConstructionCalculatorClient({
         });
         return;
       }
-      setResult(outcome.result);
+      const finalResult = annotateResult(outcome.result);
+      setResult(finalResult);
       const createdAt = new Date().toISOString();
       const entry: ConstructionCalculatorHistoryEntry = {
         id: `${definition.slug}:${createdAt}:${Math.random().toString(36).slice(2, 8)}`,
         slug: definition.slug,
         title: definition.title,
         createdAt,
-        input: portableInput(input),
-        result: outcome.result,
+        input: {...portableInput(input),_exampleInput:usingExample,_exampleEdited:exampleEdited},
+        result: finalResult,
       };
       setHistory(addConstructionCalculatorHistory(window.localStorage, entry));
     } catch {
+      focusResult.current = false;
       setResult(null);
       setErrors([{ field: "calculator", code: "not-finite", message: "計算できません。入力値と単位を確認してください。" }]);
     } finally {
@@ -365,7 +426,9 @@ export function ConstructionCalculatorClient({
   };
 
   const reset = () => {
-    setRaw({ ...defaultInput });
+    setRaw(startEmpty ? emptyInput(definition, defaultInput) : { ...defaultInput });
+    setUsingExample(!startEmpty);
+    setExampleEdited(false);
     setRounding(defaultRounding);
     setResult(null);
     setErrors([]);
@@ -402,6 +465,7 @@ export function ConstructionCalculatorClient({
     return <p data-calculator-loading className="rounded-xl border border-slate-300 p-4 font-bold">計算フォームを準備しています。</p>;
   }
 
+  const points = Array.isArray(raw.points) ? raw.points as Record<string,unknown>[] : [];
   const segments = Array.isArray(raw.segments) ? (raw.segments as Record<string, unknown>[]) : [];
 
   return (
@@ -417,8 +481,13 @@ export function ConstructionCalculatorClient({
         >
           <h2 className="flex items-center gap-2 text-2xl font-black">
             <Calculator className="h-6 w-6 text-emerald-800 dark:text-emerald-300" aria-hidden="true" />
-            条件を入力
+            数字を入れる
           </h2>
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <button type="button" onClick={()=>{setRaw({...defaultInput});setUsingExample(true);setExampleEdited(false);setErrors([]);}} className="min-h-11 rounded-lg border-2 border-emerald-700 px-3 text-sm font-bold">例の数字で試す</button>
+            <span className="text-xs font-bold text-slate-600 dark:text-slate-300">{usingExample?(exampleEdited?"例の数字を一部変更した概算です。残りの例も確認してください。":"例の数字です。現場の実測値ではありません。"):"図の番号と同じ欄に、現場の数字を入れます。"}</span>
+          </div>
+          <CalculatorInputGuide slug={definition.slug} fields={visibleDefinitions} raw={raw}/>
           {errors.length ? (
             <div
               ref={errorSummaryRef}
@@ -434,11 +503,14 @@ export function ConstructionCalculatorClient({
             </div>
           ) : null}
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
-            {visibleDefinitions.filter((field) => field.type !== "segments").map((field) => (
+            {visibleDefinitions.filter((field) => field.type !== "segments" && field.type !== "points").map((field) => (
               <Field
                 key={field.key}
                 field={field}
                 value={raw[field.key]}
+                number={field.type === "select" ? undefined : visibleDefinitions.filter(f=>f.type === "number" || f.type === "integer").findIndex(f=>f.key===field.key)+1}
+                unit={inputUnit(field,raw)}
+                example={defaultInput[field.key]}
                 issue={issuesByField.get(field.key)}
                 onChange={(value) => change(field.key, value)}
               />
@@ -460,7 +532,7 @@ export function ConstructionCalculatorClient({
                       const errorId = `${id}-error`;
                       return (
                         <label key={key} htmlFor={id} className="text-sm font-black">
-                          {label}
+                          {label}（{key === "length" ? String(raw.lengthUnit ?? "m") : String(raw.areaUnit ?? "m2").replace("m2","m²")}）
                           <input
                             id={id}
                             required
@@ -500,7 +572,14 @@ export function ConstructionCalculatorClient({
               </button>
             </fieldset>
           ) : null}
-          <fieldset className="mt-5 grid gap-4 rounded-xl border border-slate-300 p-4 sm:grid-cols-2 dark:border-slate-600">
+          {visibleDefinitions.some(f=>f.type==="points")?<fieldset id="construction-calculator-points" className="mt-4 rounded-xl border p-3">
+            <legend className="font-bold">角の座標を外周順に入力（m）</legend>
+            <p className="mb-2 text-xs">X＝北方向、Y＝東方向。緯度・経度は使えません。</p>
+            {points.map((point,index)=><div key={index} className="mb-2 grid grid-cols-[1.8rem_1fr_1fr_auto] items-end gap-2"><span className="pb-3 font-bold">{index+1}</span>{["x","y"].map(axis=><label key={axis} className="text-xs font-bold">{axis==="x"?"X 北":"Y 東"}（m）<input id={"construction-calculator-point-"+index+"-"+axis} aria-label={"点"+(index+1)+" "+axis.toUpperCase()+"（m）"} type="number" step="any" inputMode="decimal" value={String(point[axis]??"")} onChange={e=>change("points",points.map((p,i)=>i===index?{...p,[axis]:e.target.value}:p))} className="mt-1 min-h-11 w-full rounded-lg border-2 bg-white px-2 text-base dark:bg-slate-950"/></label>)}<button type="button" disabled={points.length<=3} aria-label={"点"+(index+1)+"を削除"} onClick={()=>change("points",points.filter((_,i)=>i!==index))} className="min-h-11 rounded-lg border px-2 disabled:opacity-40">削除</button></div>)}
+            <button type="button" disabled={points.length>=100} onClick={()=>change("points",[...points,{x:"",y:""}])} className="min-h-11 rounded-lg border-2 px-3 font-bold">点を追加</button>
+            {issuesByField.get("points")?<p role="alert" className="mt-2 text-sm font-bold text-rose-700">{issuesByField.get("points")}</p>:null}
+          </fieldset>:null}
+          <details className="mt-5 rounded-xl border border-slate-300 p-3 dark:border-slate-600"><summary className="min-h-8 cursor-pointer text-sm font-bold">表示の丸め：小数{rounding.decimalPlaces}桁・{optionLabel("roundingMode",rounding.mode)}</summary><fieldset className="mt-3 grid gap-4 sm:grid-cols-2">
             <legend className="px-2 font-black">丸め方法</legend>
             <label className="text-sm font-black">
               小数点桁数
@@ -528,13 +607,14 @@ export function ConstructionCalculatorClient({
                 {(["round", "ceil", "floor"] as const).map((mode) => <option key={mode} value={mode}>{optionLabel("roundingMode", mode)}</option>)}
               </select>
             </label>
-          </fieldset>
-          <div className="mt-5 flex flex-wrap gap-3">
+          </fieldset></details>
+          <p className="mt-4 text-xs font-bold text-slate-600 dark:text-slate-300">入力に合わせて概算を更新。計算ボタンで結果を履歴に保存します。</p>
+          <div className="mt-3 flex flex-wrap gap-3">
             <button type="submit" disabled={loading} className="min-h-12 rounded-xl bg-emerald-800 px-6 py-3 font-black text-white hover:bg-emerald-900 disabled:bg-slate-400">
               {loading ? "計算中…" : "計算する"}
             </button>
             <button type="button" onClick={reset} className="inline-flex min-h-12 items-center gap-2 rounded-xl border-2 border-slate-500 px-5 py-3 font-black">
-              <RotateCcw className="h-5 w-5" aria-hidden="true" />入力をリセット
+              <RotateCcw className="h-5 w-5" aria-hidden="true" />入力をリセット（現場の数字を入れる）
             </button>
           </div>
         </form>
@@ -542,7 +622,7 @@ export function ConstructionCalculatorClient({
         {result ? (
           <section aria-labelledby="calculation-result-title" className="rounded-2xl border-2 border-emerald-700 bg-emerald-50 p-5 text-slate-950 dark:bg-emerald-950 dark:text-white sm:p-6">
             <h2 id="calculation-result-title" ref={resultRef} tabIndex={-1} className="text-2xl font-black focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-400">
-              結果
+              結果{usingExample ? (exampleEdited ? "（例から一部変更）" : "（例の数字）") : "（入力に連動）"}
             </h2>
             <dl className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {result.displayValues.map((item) => (
@@ -605,7 +685,7 @@ export function ConstructionCalculatorClient({
                 <li key={entry.id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-slate-100 p-3 dark:bg-slate-800">
                   <div><p className="font-black">{entry.result.displayValues[0]?.label}: {entry.result.displayValues[0]?.value}{entry.result.displayValues[0]?.unit}</p><p className="text-xs text-slate-600 dark:text-slate-300">{new Date(entry.createdAt).toLocaleString("ja-JP")}</p></div>
                   <div className="flex gap-2">
-                    <button type="button" onClick={() => { setRaw(entry.input); setRounding((entry.input.rounding as unknown as RoundingConfig) ?? defaultRounding); setResult(null); setErrors([]); }} className="min-h-11 rounded-xl border-2 border-emerald-700 px-3 text-sm font-black">入力を復元</button>
+                    <button type="button" onClick={() => { setRaw(entry.input); setRounding((entry.input.rounding as unknown as RoundingConfig) ?? defaultRounding); setResult(null); setErrors([]); setUsingExample(entry.input._exampleInput === true); setExampleEdited(entry.input._exampleEdited === true); }} className="min-h-11 rounded-xl border-2 border-emerald-700 px-3 text-sm font-black">入力を復元</button>
                     <button type="button" aria-label="この履歴を削除" onClick={() => setHistory(removeConstructionCalculatorHistory(window.localStorage, entry.id))} className="min-h-11 rounded-xl border-2 border-slate-400 px-3"><Trash2 className="h-4 w-4" aria-hidden="true" /></button>
                   </div>
                 </li>

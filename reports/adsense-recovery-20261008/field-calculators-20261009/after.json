@@ -1,0 +1,616 @@
+[
+  {
+    "slug": "concrete-quantity",
+    "initialNumbersBlank": true,
+    "exampleToExplicitCalculation": true,
+    "historySaved": true,
+    "inputY": 854.890625,
+    "horizontalOverflow": 0,
+    "numericLabels": [
+      {
+        "id": "construction-calculator-length",
+        "value": "10",
+        "label": "1長さ（m）\n入力のヒント"
+      },
+      {
+        "id": "construction-calculator-width",
+        "value": "5",
+        "label": "2幅（m）\n入力のヒント"
+      },
+      {
+        "id": "construction-calculator-height",
+        "value": "0.23",
+        "label": "3高さ・厚さ（m）\n入力のヒント"
+      },
+      {
+        "id": "construction-calculator-quantity",
+        "value": "1",
+        "label": "4個数（個）\n入力のヒント"
+      },
+      {
+        "id": "construction-calculator-lossPercent",
+        "value": "8",
+        "label": "5ロス率（%）\n入力のヒント"
+      },
+      {
+        "id": "construction-calculator-truckCapacityM3",
+        "value": "4",
+        "label": "61台の積載量（m³）\n入力のヒント"
+      }
+    ],
+    "consoleErrors": [],
+    "result": "正味体積\n11.5m³\nロス込み体積\n12.42m³\n生コン車台数\n4台\n最終車の数量\n0.42m³"
+  },
+  {
+    "slug": "excavation-backfill",
+    "initialNumbersBlank": true,
+    "exampleToExplicitCalculation": true,
+    "historySaved": true,
+    "inputY": 831.09375,
+    "horizontalOverflow": 0,
+    "numericLabels": [
+      {
+        "id": "construction-calculator-length",
+        "value": "10",
+        "label": "1長さ（m）\n入力のヒント"
+      },
+      {
+        "id": "construction-calculator-width",
+        "value": "2",
+        "label": "2幅（m）\n入力のヒント"
+      },
+      {
+        "id": "construction-calculator-depth",
+        "value": "3",
+        "label": "3深さ（m）\n入力のヒント"
+      },
+      {
+        "id": "construction-calculator-structureVolume",
+        "value": "10",
+        "label": "4構造物体積（m³）\n入力のヒント"
+      },
+      {
+        "id": "construction-calculator-baseMaterialVolume",
+        "value": "2",
+        "label": "5基礎材体積（m³）\n入力のヒント"
+      }
+    ],
+    "consoleErrors": [],
+    "result": "掘削量\n60m³\n控除量\n12m³\n埋戻し量\n48m³"
+  },
+  {
+    "slug": "average-end-area",
+    "initialNumbersBlank": true,
+    "exampleToExplicitCalculation": true,
+    "historySaved": true,
+    "inputY": 961.78125,
+    "horizontalOverflow": 0,
+    "numericLabels": [
+      {
+        "id": "construction-calculator-segments-0-startArea",
+        "value": "10",
+        "label": "前断面積（m²）"
+      },
+      {
+        "id": "construction-calculator-segments-0-endArea",
+        "value": "20",
+        "label": "後断面積（m²）"
+      },
+      {
+        "id": "construction-calculator-segments-0-length",
+        "value": "5",
+        "label": "区間長（m）"
+      }
+    ],
+    "consoleErrors": [],
+    "result": "合計土量\n75m³"
+  },
+  {
+    "slug": "earthwork-conversion-dump-trucks",
+    "initialNumbersBlank": true,
+    "exampleToExplicitCalculation": true,
+    "historySaved": true,
+    "inputY": 739.40625,
+    "horizontalOverflow": 0,
+    "numericLabels": [
+      {
+        "id": "construction-calculator-bankVolume",
+        "value": "100",
+        "label": "1地山土量（m³）\n入力のヒント"
+      },
+      {
+        "id": "construction-calculator-bulkingFactor",
+        "value": "1.2",
+        "label": "2ほぐし率L（比）\n入力のヒント"
+      },
+      {
+        "id": "construction-calculator-compactionFactor",
+        "value": "0.9",
+        "label": "3締固め率C（比）\n入力のヒント"
+      },
+      {
+        "id": "construction-calculator-density",
+        "value": "1800",
+        "label": "4土の密度（kg/m³）\n入力のヒント"
+      },
+      {
+        "id": "construction-calculator-truckPayload",
+        "value": "10",
+        "label": "5ダンプ積載量（t）\n入力のヒント"
+      },
+      {
+        "id": "construction-calculator-loadingRatePercent",
+        "value": "100",
+        "label": "6積載率（%）\n入力のヒント"
+      }
+    ],
+    "consoleErrors": [],
+    "result": "ほぐし土量\n120m³\n締固め後土量\n90m³\n重量\n180t\n必要台数\n18台"
+  },
+  {
+    "slug": "aggregate-base-quantity",
+    "initialNumbersBlank": true,
+    "exampleToExplicitCalculation": true,
+    "historySaved": true,
+    "inputY": 759.703125,
+    "horizontalOverflow": 0,
+    "numericLabels": [
+      {
+        "id": "construction-calculator-area",
+        "value": "100",
+        "label": "1面積（m²）\n入力のヒント"
+      },
+      {
+        "id": "construction-calculator-thickness",
+        "value": "0.15",
+        "label": "2厚さ（m）\n入力のヒント"
+      },
+      {
+        "id": "construction-calculator-density",
+        "value": "2000",
+        "label": "3密度（kg/m³）\n入力のヒント"
+      },
+      {
+        "id": "construction-calculator-lossPercent",
+        "value": "5",
+        "label": "4ロス率（%）\n入力のヒント"
+      },
+      {
+        "id": "construction-calculator-vehicleCapacity",
+        "value": "10",
+        "label": "5車両積載量（t）\n入力のヒント"
+      }
+    ],
+    "consoleErrors": [],
+    "result": "必要体積\n15.75m³\n必要重量\n31.5t\n車両台数\n4台"
+  },
+  {
+    "slug": "asphalt-mixture-quantity",
+    "initialNumbersBlank": true,
+    "exampleToExplicitCalculation": true,
+    "historySaved": true,
+    "inputY": 780,
+    "horizontalOverflow": 0,
+    "numericLabels": [
+      {
+        "id": "construction-calculator-area",
+        "value": "1000",
+        "label": "1面積（m²）\n入力のヒント"
+      },
+      {
+        "id": "construction-calculator-thickness",
+        "value": "50",
+        "label": "2舗装厚（mm）\n入力のヒント"
+      },
+      {
+        "id": "construction-calculator-density",
+        "value": "2350",
+        "label": "3締固め後密度（kg/m³）\n入力のヒント"
+      },
+      {
+        "id": "construction-calculator-lossPercent",
+        "value": "3",
+        "label": "4ロス率（%）\n入力のヒント"
+      },
+      {
+        "id": "construction-calculator-vehicleCapacity",
+        "value": "10",
+        "label": "51台積載量（t）\n入力のヒント"
+      }
+    ],
+    "consoleErrors": [],
+    "result": "必要体積\n51.5m³\n必要重量\n121.03t\n車両台数\n13台"
+  },
+  {
+    "slug": "rebar-weight",
+    "initialNumbersBlank": true,
+    "exampleToExplicitCalculation": true,
+    "historySaved": true,
+    "inputY": 970.375,
+    "horizontalOverflow": 0,
+    "numericLabels": [
+      {
+        "id": "construction-calculator-length",
+        "value": "12",
+        "label": "11本長さ（m）\n入力のヒント"
+      },
+      {
+        "id": "construction-calculator-quantity",
+        "value": "10",
+        "label": "2本数（本）\n入力のヒント"
+      }
+    ],
+    "consoleErrors": [],
+    "result": "1m当たり重量（規格表）\n0.995kg/m\n1本重量\n11.94kg\n総延長\n120m\n総重量\n119.4kg\nt換算\n0.119t"
+  },
+  {
+    "slug": "rebar-spacing",
+    "initialNumbersBlank": true,
+    "exampleToExplicitCalculation": true,
+    "historySaved": true,
+    "inputY": 970.375,
+    "horizontalOverflow": 0,
+    "numericLabels": [
+      {
+        "id": "construction-calculator-constructionWidth",
+        "value": "5",
+        "label": "1施工幅（m）\n入力のヒント"
+      },
+      {
+        "id": "construction-calculator-leftCover",
+        "value": "0.05",
+        "label": "2左かぶり（m）\n入力のヒント"
+      },
+      {
+        "id": "construction-calculator-rightCover",
+        "value": "0.05",
+        "label": "3右かぶり（m）\n入力のヒント"
+      },
+      {
+        "id": "construction-calculator-requestedPitch",
+        "value": "0.2",
+        "label": "4指定ピッチ（m）\n入力のヒント"
+      },
+      {
+        "id": "construction-calculator-barLength",
+        "value": "6",
+        "label": "51本長さ（m）\n入力のヒント"
+      },
+      {
+        "id": "construction-calculator-layers",
+        "value": "2",
+        "label": "6段数（段）\n入力のヒント"
+      }
+    ],
+    "consoleErrors": [],
+    "result": "有効幅\n4.887m\n必要本数\n52本\n実際の配置間隔\n0.195m\n総延長\n312m\n重量（規格表）\n310.44kg"
+  },
+  {
+    "slug": "formwork-area",
+    "initialNumbersBlank": true,
+    "exampleToExplicitCalculation": true,
+    "historySaved": true,
+    "inputY": 854.890625,
+    "horizontalOverflow": 0,
+    "numericLabels": [
+      {
+        "id": "construction-calculator-length",
+        "value": "4",
+        "label": "1長さ（m）\n入力のヒント"
+      },
+      {
+        "id": "construction-calculator-width",
+        "value": "3",
+        "label": "2幅（m）\n入力のヒント"
+      },
+      {
+        "id": "construction-calculator-height",
+        "value": "1",
+        "label": "3高さ（m）\n入力のヒント"
+      },
+      {
+        "id": "construction-calculator-deductionArea",
+        "value": "2",
+        "label": "4控除面積（1個当たり）（m²）\n入力のヒント"
+      },
+      {
+        "id": "construction-calculator-quantity",
+        "value": "2",
+        "label": "5個数（個）\n入力のヒント"
+      }
+    ],
+    "consoleErrors": [],
+    "result": "面別面積合計\n14m²\n控除面積（1個当たり）\n2m²\n控除後面積\n12m²/個\n合計面積\n24m²"
+  },
+  {
+    "slug": "slope-angle-length",
+    "initialNumbersBlank": true,
+    "exampleToExplicitCalculation": true,
+    "historySaved": true,
+    "inputY": 854.890625,
+    "horizontalOverflow": 0,
+    "numericLabels": [
+      {
+        "id": "construction-calculator-horizontalDistance",
+        "value": "10",
+        "label": "1水平距離（m）\n入力のヒント"
+      },
+      {
+        "id": "construction-calculator-rise",
+        "value": "1",
+        "label": "2高低差（m）\n入力のヒント"
+      }
+    ],
+    "consoleErrors": [],
+    "result": "勾配\n10%\n勾配\n100‰\n比率\n1:10\n角度\n5.71°\n高低差\n1m\n斜長\n10.05m"
+  },
+  {
+    "slug": "drainage-slope",
+    "initialNumbersBlank": true,
+    "exampleToExplicitCalculation": true,
+    "historySaved": true,
+    "inputY": 739.40625,
+    "horizontalOverflow": 0,
+    "numericLabels": [
+      {
+        "id": "construction-calculator-length",
+        "value": "100",
+        "label": "1延長（m）\n入力のヒント"
+      },
+      {
+        "id": "construction-calculator-gradeValue",
+        "value": "1",
+        "label": "2勾配値（%）\n入力のヒント"
+      },
+      {
+        "id": "construction-calculator-referenceElevationM",
+        "value": "100",
+        "label": "3基準標高（m）\n入力のヒント"
+      },
+      {
+        "id": "construction-calculator-intervalCount",
+        "value": "10",
+        "label": "4区間数（区間）\n入力のヒント"
+      }
+    ],
+    "consoleErrors": [],
+    "result": "必要高低差\n1m\n始点標高\n100m\n終点標高\n99m\n逆勾配警告\nなし"
+  },
+  {
+    "slug": "scale-coordinate",
+    "initialNumbersBlank": true,
+    "exampleToExplicitCalculation": true,
+    "historySaved": true,
+    "inputY": 970.375,
+    "horizontalOverflow": 0,
+    "numericLabels": [
+      {
+        "id": "construction-calculator-scaleDenominator",
+        "value": "100",
+        "label": "1縮尺分母N（比）\n入力のヒント"
+      },
+      {
+        "id": "construction-calculator-drawingLength",
+        "value": "10",
+        "label": "2図上寸法（mm）\n入力のヒント"
+      }
+    ],
+    "consoleErrors": [],
+    "result": "図上寸法\n10mm\n実寸\n1m"
+  },
+  {
+    "slug": "curing-sheet-quantity",
+    "initialNumbersBlank": true,
+    "exampleToExplicitCalculation": true,
+    "historySaved": true,
+    "inputY": 812.296875,
+    "horizontalOverflow": 0,
+    "numericLabels": [
+      {
+        "id": "construction-calculator-coverLength",
+        "value": "4",
+        "label": "1覆う範囲の長さ（m）\n入力のヒント"
+      },
+      {
+        "id": "construction-calculator-coverWidth",
+        "value": "3",
+        "label": "2覆う範囲の幅（m）\n入力のヒント"
+      },
+      {
+        "id": "construction-calculator-pieceWidth",
+        "value": "2",
+        "label": "31枚の幅（m）\n入力のヒント"
+      },
+      {
+        "id": "construction-calculator-pieceLength",
+        "value": "2",
+        "label": "41枚の長さ（m）\n入力のヒント"
+      },
+      {
+        "id": "construction-calculator-overlap",
+        "value": "0.2",
+        "label": "5縦横の重ね幅（m）\n入力のヒント"
+      },
+      {
+        "id": "construction-calculator-lossPercent",
+        "value": "5",
+        "label": "6見込むロス（%）\n入力のヒント"
+      }
+    ],
+    "consoleErrors": [],
+    "result": "そのまま向きの枚数\n6枚\n90度回転した枚数\n6枚\n少ない向きの枚数\n6枚\n予備込み枚数\n7枚"
+  },
+  {
+    "slug": "paint-quantity",
+    "initialNumbersBlank": true,
+    "exampleToExplicitCalculation": true,
+    "historySaved": true,
+    "inputY": 780,
+    "horizontalOverflow": 0,
+    "numericLabels": [
+      {
+        "id": "construction-calculator-area",
+        "value": "100",
+        "label": "1塗る面積（m²）\n入力のヒント"
+      },
+      {
+        "id": "construction-calculator-coats",
+        "value": "2",
+        "label": "2塗る回数（回）\n入力のヒント"
+      },
+      {
+        "id": "construction-calculator-consumption",
+        "value": "0.13",
+        "label": "31回の標準使用量（kg/m²）\n入力のヒント"
+      },
+      {
+        "id": "construction-calculator-packMass",
+        "value": "20",
+        "label": "41缶・1袋の内容量（kg）\n入力のヒント"
+      },
+      {
+        "id": "construction-calculator-lossPercent",
+        "value": "5",
+        "label": "5見込むロス（%）\n入力のヒント"
+      }
+    ],
+    "consoleErrors": [],
+    "result": "ロス込み材料量\n27.3kg\n必要な缶・袋数\n2個"
+  },
+  {
+    "slug": "board-panel-quantity",
+    "initialNumbersBlank": true,
+    "exampleToExplicitCalculation": true,
+    "historySaved": true,
+    "inputY": 812.296875,
+    "horizontalOverflow": 0,
+    "numericLabels": [
+      {
+        "id": "construction-calculator-coverLength",
+        "value": "4",
+        "label": "1覆う範囲の長さ（m）\n入力のヒント"
+      },
+      {
+        "id": "construction-calculator-coverWidth",
+        "value": "3",
+        "label": "2覆う範囲の幅（m）\n入力のヒント"
+      },
+      {
+        "id": "construction-calculator-pieceWidth",
+        "value": "910",
+        "label": "31枚の幅（mm）\n入力のヒント"
+      },
+      {
+        "id": "construction-calculator-pieceLength",
+        "value": "1820",
+        "label": "41枚の長さ（mm）\n入力のヒント"
+      },
+      {
+        "id": "construction-calculator-overlap",
+        "value": "0",
+        "label": "5縦横の重ね幅（mm）\n入力のヒント"
+      },
+      {
+        "id": "construction-calculator-lossPercent",
+        "value": "5",
+        "label": "6見込むロス（%）\n入力のヒント"
+      }
+    ],
+    "consoleErrors": [],
+    "result": "そのまま向きの枚数\n10枚\n90度回転した枚数\n12枚\n少ない向きの枚数\n10枚\n予備込み枚数\n11枚"
+  },
+  {
+    "slug": "wire-mesh-quantity",
+    "initialNumbersBlank": true,
+    "exampleToExplicitCalculation": true,
+    "historySaved": true,
+    "inputY": 812.296875,
+    "horizontalOverflow": 0,
+    "numericLabels": [
+      {
+        "id": "construction-calculator-coverLength",
+        "value": "4",
+        "label": "1覆う範囲の長さ（m）\n入力のヒント"
+      },
+      {
+        "id": "construction-calculator-coverWidth",
+        "value": "3",
+        "label": "2覆う範囲の幅（m）\n入力のヒント"
+      },
+      {
+        "id": "construction-calculator-pieceWidth",
+        "value": "2",
+        "label": "31枚の幅（m）\n入力のヒント"
+      },
+      {
+        "id": "construction-calculator-pieceLength",
+        "value": "2",
+        "label": "41枚の長さ（m）\n入力のヒント"
+      },
+      {
+        "id": "construction-calculator-overlap",
+        "value": "0.2",
+        "label": "5縦横の重ね幅（m）\n入力のヒント"
+      },
+      {
+        "id": "construction-calculator-lossPercent",
+        "value": "5",
+        "label": "6見込むロス（%）\n入力のヒント"
+      }
+    ],
+    "consoleErrors": [],
+    "result": "そのまま向きの枚数\n6枚\n90度回転した枚数\n6枚\n少ない向きの枚数\n6枚\n予備込み枚数\n7枚"
+  },
+  {
+    "slug": "polygon-area",
+    "initialNumbersBlank": true,
+    "exampleToExplicitCalculation": true,
+    "historySaved": true,
+    "inputY": 775.703125,
+    "horizontalOverflow": 0,
+    "numericLabels": [
+      {
+        "id": "construction-calculator-point-0-x",
+        "value": "0",
+        "label": "X 北（m）"
+      },
+      {
+        "id": "construction-calculator-point-0-y",
+        "value": "0",
+        "label": "Y 東（m）"
+      },
+      {
+        "id": "construction-calculator-point-1-x",
+        "value": "4",
+        "label": "X 北（m）"
+      },
+      {
+        "id": "construction-calculator-point-1-y",
+        "value": "0",
+        "label": "Y 東（m）"
+      },
+      {
+        "id": "construction-calculator-point-2-x",
+        "value": "4",
+        "label": "X 北（m）"
+      },
+      {
+        "id": "construction-calculator-point-2-y",
+        "value": "3",
+        "label": "Y 東（m）"
+      },
+      {
+        "id": "construction-calculator-point-3-x",
+        "value": "0",
+        "label": "X 北（m）"
+      },
+      {
+        "id": "construction-calculator-point-3-y",
+        "value": "3",
+        "label": "Y 東（m）"
+      }
+    ],
+    "consoleErrors": [],
+    "result": "面積\n12m²\n外周の長さ\n14m"
+  }
+]
