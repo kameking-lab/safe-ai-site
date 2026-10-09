@@ -1,148 +1,63 @@
-import { fireEvent, render, screen } from "@testing-library/react";
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
-import { describe, expect, it, vi } from "vitest";
-import { SafetyGoodsWizard } from "./safety-goods-wizard";
+import { fireEvent, render, screen, act } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { SafetyGoodsWizard } from './safety-goods-wizard';
+vi.mock('@/components/Analytics',()=>({trackEvent:vi.fn()}));
+afterEach(()=>window.history.replaceState(null,'','/goods'));
+const choose=(name:RegExp)=>fireEvent.click(screen.getByRole('button',{name}));
+describe('絵から選ぶ保護具確認',()=>{
+ it('最初は作業の絵6枚を表示し、未入力の商品リンクを表示しない',()=>{
+  render(<SafetyGoodsWizard/>);
+  expect(screen.getByRole('heading',{name:'何の作業・危険に備えますか？'})).toBeDefined();
+  expect(screen.getByRole('button',{name:'高所・足場の作業'}).querySelector('img')).not.toBeNull();
+  expect(screen.queryByRole('link',{name:/Amazon/})).toBeNull();
+ });
+ it('化学防護のSDS未確認を保持し、具体的な入手方法を表示',()=>{
+  render(<SafetyGoodsWizard/>); choose(/薬液を扱う作業/); choose(/洗浄・拭取り・配管/); choose(/SDS・成分が未確認/);
+  expect(screen.getByRole('heading',{name:'物質名・混合成分・濃度は分かりますか？'})).toBeDefined();
+  choose(/未確認のまま確認事項を見る/);
+  expect(screen.getByText('選定を保留・確認が必要')).toBeDefined();
+  expect(screen.getAllByText(/希釈後の使用濃度/)[0]).toBeDefined();
+  expect(screen.queryByRole('link',{name:/Amazon/})).toBeNull();
+ });
+ it('墜落は身長・質量・空間・取付点・救助を順に確認する',()=>{
+  render(<SafetyGoodsWizard/>); choose(/高所・足場の作業/); choose(/足場・屋根・高所/); choose(/取付設備がある/);
+  for(const heading of ['身長・体格に合うサイズですか？','体重＋装備の質量を照合しましたか？','落下しても下の床・障害物に届きませんか？','取付点と器具の組合せを照合しましたか？','始業前点検と救助方法を決めましたか？']) {
+   expect(screen.getByRole('heading',{name:heading})).toBeDefined(); choose(/記録・資料で確認した/);
+  }
+  expect(screen.getByText('条件の整理が完了・適合の確認は別途必要')).toBeDefined();
+  expect(screen.queryByText(/1114080N/)).toBeNull();
+  choose(/ひとつ戻る/); expect(screen.getByRole('heading',{name:'始業前点検と救助方法を決めましたか？'})).toBeDefined();
+  choose(/分からない・未確認/); expect(screen.getByText('選定を保留・確認が必要')).toBeDefined();
+  expect(screen.queryByRole('link',{name:/Amazon/})).toBeNull();
+ });
+ it('呼吸は酸素18%未満の禁止を見える状態で示し、未確認は保留',()=>{
+  render(<SafetyGoodsWizard/>); choose(/粉じん・ガスを吸う作業/); choose(/粉じん・研削・清掃/); choose(/換気が効いている/);
+  expect(screen.getByRole('heading',{name:'酸素濃度を測りましたか？'})).toBeDefined();
+  expect(screen.getByText(/酸素18%未満/)).toBeDefined();
+  choose(/分からない・未確認/); choose(/未確認のまま確認事項を見る/);
+  expect(screen.getByText(/不足条件が確認できるまで/)).toBeDefined();
+  expect(screen.getAllByText(/酸素測定の記録/)[0]).toBeDefined();
+ });
+ it('ブラウザ戻るで前の質問が復元し、回答変更時は下流を破棄',()=>{
+  render(<SafetyGoodsWizard/>); choose(/高所・足場の作業/); choose(/足場・屋根・高所/); choose(/取付設備がある/);
+  const previous=window.history.state; choose(/記録・資料で確認した/);
+  act(()=>{window.history.replaceState(previous,'','/goods');window.dispatchEvent(new PopStateEvent('popstate'));});
+  expect(screen.getByRole('heading',{name:'身長・体格に合うサイズですか？'})).toBeDefined();
+  choose(/分からない・未確認/); choose(/未確認のまま確認事項を見る/);
+  expect(screen.getByText('選定を保留・確認が必要')).toBeDefined();
+  expect(window.history.state.ppeSelection).toEqual(['fall','scaffold','anchor','unknown','result']);
+  choose(/作業を選び直す/); expect(screen.getByRole('heading',{name:'何の作業・危険に備えますか？'})).toBeDefined();
+  choose(/音・切粉・溶接光/); choose(/溶接・光を使う作業/); choose(/未確認のまま確認事項を見る/);
+  expect(screen.getByRole('heading',{name:'作業に合う遮光面・目と顔の保護'})).toBeDefined();
+ });
+});
 
-const { trackEventMock } = vi.hoisted(() => ({ trackEventMock: vi.fn() }));
-vi.mock("@/components/Analytics", () => ({ trackEvent: trackEventMock }));
 
-describe("SafetyGoodsWizard", () => {
-  it("選定根拠は該当する厚労省の法令・資料へつなぐ", () => {
-    const source = readFileSync(
-      resolve(process.cwd(), "src/components/safety-goods-wizard.tsx"),
-      "utf8",
-    );
-
-    expect(source).not.toContain("0000187558.html");
-    expect(source).not.toContain("www.mlit.go.jp/tec/tec_tk_000067.html");
-    expect(source).toContain("dataId=00tc2747&dataType=1");
-    expect(source).toContain("dataId=74003000&dataType=0&pageNo=9");
-    expect(source).toContain("dataId=74003000&dataType=0&pageNo=4");
-  });
-
-  it("作業・条件を順に選んでも、呼吸用保護具は共通安全フローへ進める", () => {
-    render(<SafetyGoodsWizard />);
-
-    fireEvent.click(screen.getByRole("button", { name: /呼吸用保護具/ }));
-    fireEvent.click(screen.getByRole("button", { name: /粉じん・研削・清掃/ }));
-    fireEvent.click(screen.getByRole("button", { name: /換気が効いている/ }));
-
-    expect(screen.getByRole("heading", { name: "防じんマスク（製品群）の購入候補" })).toBeDefined();
-    expect(screen.queryByRole("heading", { name: "呼吸用保護具の商品候補" })).toBeNull();
-    expect(screen.queryByRole("link", { name: /Amazonで候補を見る/ })).toBeNull();
-    expect(screen.queryByRole("link", { name: /楽天で候補を見る/ })).toBeNull();
-    expect(screen.getByText(/国家検定合格標章/)).toBeDefined();
-    expect(screen.getByRole("link", { name: /6つの安全条件を確認する/u }).getAttribute("href")).toBe("/goods?category=respiratory&intent=dust");
-  });
-
-  it("酸欠のおそれを選ぶと、ろ過式マスクを候補にせず測定へ導く", () => {
-    render(<SafetyGoodsWizard />);
-
-    fireEvent.click(screen.getByRole("button", { name: /呼吸用保護具/ }));
-    fireEvent.click(screen.getByRole("button", { name: /マンホール・槽・ピット/ }));
-    fireEvent.click(screen.getByRole("button", { name: /酸素濃度が不明・低いおそれ/ }));
-
-    expect(screen.getByRole("heading", { name: "まず酸素・有害ガスを測るための候補" })).toBeDefined();
-    expect(screen.getByText(/防じん・防毒マスクを先に買う入口ではありません/)).toBeDefined();
-    expect(screen.getByText(/安易に入らず/u)).toBeDefined();
-    expect(screen.getByRole("link", { name: /停止条件を確認する/u }).getAttribute("href")).toBe("/goods?category=respiratory&intent=unknown&feature=oxygen");
-  });
-
-  it("換気が弱い呼吸用保護具では濃度測定と換気改善を購入条件へ反映する", () => {
-    render(<SafetyGoodsWizard />);
-
-    fireEvent.click(screen.getByRole("button", { name: /呼吸用保護具/ }));
-    fireEvent.click(screen.getByRole("button", { name: /塗装・洗浄・接着/ }));
-    fireEvent.click(screen.getByRole("button", { name: /換気が弱い・屋内/ }));
-
-    expect(screen.getByText(/購入前に濃度測定と局所排気の改善を優先/)).toBeDefined();
-    expect(screen.getByText(/改善後に必要な防護係数/)).toBeDefined();
-    expect(screen.queryByRole("link", { name: /Amazonで候補を見る/ })).toBeNull();
-    expect(screen.getByRole("link", { name: /6つの安全条件を確認する/u }).getAttribute("href")).toBe("/goods?category=respiratory&intent=gas");
-  });
-
-  it.each(["換気が効いている", "酸素濃度が不明・低いおそれ"])("危険有害性が不明な場合（%s）は通販候補を出さず、確認と相談へ導く", (condition) => {
-    render(<SafetyGoodsWizard />);
-
-    fireEvent.click(screen.getByRole("button", { name: /呼吸用保護具/ }));
-    fireEvent.click(screen.getByRole("button", { name: /何が出ているか不明/ }));
-    fireEvent.click(screen.getByRole("button", { name: new RegExp(condition) }));
-
-    expect(screen.getByRole("heading", { name: "危険有害性が分かるまで、製品推薦を保留します" })).toBeDefined();
-    expect(screen.queryByRole("link", { name: /Amazonで候補を見る/ })).toBeNull();
-    expect(screen.queryByRole("link", { name: /楽天で候補を見る/ })).toBeNull();
-    expect(screen.queryByRole("heading", { name: /実商品写真と高評価候補/ })).toBeNull();
-    const stopLink = screen.getByRole("link", { name: /停止条件を確認する/u });
-    expect(stopLink.getAttribute("href")).toBe(condition === "酸素濃度が不明・低いおそれ"
-      ? "/goods?category=respiratory&intent=unknown&feature=oxygen"
-      : "/goods?category=respiratory&intent=unknown&feature=unknown");
-    if (condition === "酸素濃度が不明・低いおそれ") {
-      expect(screen.getByText(/安易に入らず/u)).toBeDefined();
-    }
-  });
-
-  it.each(["薬液の飛散・注入", "洗浄・拭取り・配管", "混合・調製"])("化学物質の成分が不明な場合（%s）は通販候補を出さない", (task) => {
-    render(<SafetyGoodsWizard />);
-    fireEvent.click(screen.getByRole("button", { name: /薬液・化学物質/ }));
-    fireEvent.click(screen.getByRole("button", { name: new RegExp(task) }));
-    fireEvent.click(screen.getByRole("button", { name: /SDS・成分が未確認/ }));
-
-    expect(screen.getByRole("heading", { name: "成分が分かるまで、保護具の購入候補を保留します" })).toBeDefined();
-    expect(screen.queryByRole("link", { name: /Amazonで候補を見る/ })).toBeNull();
-    expect(screen.queryByRole("link", { name: /楽天で候補を見る/ })).toBeNull();
-    expect(screen.queryByRole("heading", { name: /実商品写真と高評価候補/ })).toBeNull();
-  });
-
-  it.each([
-    ["墜落・転落対策", "足場・屋根・高所", "取付設備がある", "1114080N"],
-  ])("公式確認済み候補 %s/%s は型式指定の購入検索を使う", (category, task, condition, model) => {
-    render(<SafetyGoodsWizard />);
-    fireEvent.click(screen.getByRole("button", { name: new RegExp(category) }));
-    fireEvent.click(screen.getByRole("button", { name: new RegExp(task) }));
-    fireEvent.click(screen.getByRole("button", { name: new RegExp(condition) }));
-
-    const href = decodeURIComponent(screen.getByRole("link", { name: /Amazonで候補を見る/ }).getAttribute("href") ?? "");
-    expect(href).toContain(model);
-  });
-
-  it.each([
-    ["墜落・転落対策", "足場・屋根・高所", "取付設備がある", "はしご・脚立", "取付設備がある"],
-    ["薬液・化学物質", "薬液の飛散・注入", "SDSが手元にある", "洗浄・拭取り・配管", "SDSが手元にある"],
-    ["重機・機械まわり", "重機・フォークリフト周辺", "動線を区画できる", "稼働中の機械の近く", "動線を区画できる"],
-    ["騒音・飛来物", "研削・切断・はつり", "短時間・断続的", "溶接・光を使う作業", "短時間・断続的"],
-    ["足元・移動", "濡れた床・油・段差", "屋外・不整地", "釘・金属片・解体材", "屋外・不整地"],
-  ])("%s は作業を変えると購入検索が変わる", (category, firstTask, firstCondition, secondTask, secondCondition) => {
-    const first = render(<SafetyGoodsWizard />);
-    fireEvent.click(screen.getByRole("button", { name: new RegExp(category) }));
-    fireEvent.click(screen.getByRole("button", { name: new RegExp(firstTask) }));
-    fireEvent.click(screen.getByRole("button", { name: new RegExp(firstCondition) }));
-    const firstHref = screen.getByRole("link", { name: /Amazonで候補を見る/ }).getAttribute("href");
-    first.unmount();
-
-    render(<SafetyGoodsWizard />);
-    fireEvent.click(screen.getByRole("button", { name: new RegExp(category) }));
-    fireEvent.click(screen.getByRole("button", { name: new RegExp(secondTask) }));
-    fireEvent.click(screen.getByRole("button", { name: new RegExp(secondCondition) }));
-    const secondHref = screen.getByRole("link", { name: /Amazonで候補を見る/ }).getAttribute("href");
-    expect(secondHref).not.toBe(firstHref);
-  });
-
-  it("同じ作業でも現場条件を変えると購入検索と確認事項が変わる", () => {
-    const first = render(<SafetyGoodsWizard />);
-    fireEvent.click(screen.getByRole("button", { name: /重機・機械まわり/ }));
-    fireEvent.click(screen.getByRole("button", { name: /重機・フォークリフト周辺/ }));
-    fireEvent.click(screen.getByRole("button", { name: /動線を区画できる/ }));
-    const firstHref = screen.getByRole("link", { name: /Amazonで候補を見る/ }).getAttribute("href");
-    expect(screen.getByText(/区画が作業中に外されない/)).toBeDefined();
-    first.unmount();
-
-    render(<SafetyGoodsWizard />);
-    fireEvent.click(screen.getByRole("button", { name: /重機・機械まわり/ }));
-    fireEvent.click(screen.getByRole("button", { name: /重機・フォークリフト周辺/ }));
-    fireEvent.click(screen.getByRole("button", { name: /人と機械の動線が重なる/ }));
-    const secondHref = screen.getByRole("link", { name: /Amazonで候補を見る/ }).getAttribute("href");
-    expect(secondHref).not.toBe(firstHref);
-    expect(screen.getByText(/交差点ごとの優先ルール/)).toBeDefined();
-  });
+it('必須適合条件は折り畳みに入れず、詳細の確認方法だけを閉じる', () => {
+ render(<SafetyGoodsWizard/>);choose(/高所・足場の作業/);choose(/足場・屋根・高所/);choose(/未確認のまま確認事項を見る/);
+ const required = screen.getByRole('heading', { name: '必要な規格・適合条件' });
+ expect(required.closest('details')).toBeNull();
+ const mass = screen.getByText(/体重＋装備が使用可能質量以内/);
+ expect(mass.closest('details')).toBeNull();
+ expect(screen.getByText('詳しい確認方法・選定根拠を見る').closest('details')?.open).toBe(false);
 });

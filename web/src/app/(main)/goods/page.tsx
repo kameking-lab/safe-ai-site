@@ -5,9 +5,9 @@ import { ogImageUrl } from "@/lib/og-url";
 import { withSiteOpenGraph, withSiteTwitter, SITE_URL } from "@/lib/seo-metadata";
 import { JsonLd, webPageSchema, breadcrumbSchema } from "@/components/json-ld";
 
-const _title = "安全用品・保護具の選び方｜作業から購入候補を絞る";
+const _title = "保護具の選び方｜作業の絵から条件を確認";
 const _desc =
-  "呼吸用保護具・墜落制止用器具・化学防護手袋などを、危険・作業・現場条件の順に選んで購入候補へ。公式資料とNETIS安全技術も確認できます。";
+  "作業の絵から呼吸用保護具・墜落制止用器具・化学防護具の確認条件をひとつずつ整理。情報が足りないときは選定を保留し、確認方法と公式資料を案内します。";
 
 export const metadata: Metadata = {
   title: _title,
