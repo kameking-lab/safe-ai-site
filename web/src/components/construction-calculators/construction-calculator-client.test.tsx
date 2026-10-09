@@ -1,3 +1,4 @@
+import { renderToStaticMarkup } from "react-dom/server";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { constructionCalculatorRegistry } from "@/data/construction-calculators/formula-registry";
@@ -84,5 +85,40 @@ describe("建設計算のエラー案内", () => {
     fireEvent.click(screen.getByRole("button", { name: "計算する" }));
     await waitFor(() => expect(document.getElementById("calculation-result-title")).not.toBeNull());
     expect(screen.getAllByText(/異形鉄筋の公称単位質量ではありません/u).length).toBeGreaterThanOrEqual(2);
+  });
+});
+
+describe("現場入力と例の区別",()=>{
+ it("初期入力を空にし、例は明示ボタンだけで入れ、自動概算を履歴へ保存しない",async()=>{const definition=constructionCalculatorRegistry[0];const fixture=definition.testFixtures[0];const {testFixtures:_fixtures,...publicDefinition}=definition;render(<ConstructionCalculatorClient definition={publicDefinition} defaultInput={fixture.input} startEmpty/>);await waitFor(()=>expect(document.getElementById("construction-calculator-length")).not.toBeNull());expect((document.getElementById("construction-calculator-length") as HTMLInputElement).value).toBe("");fireEvent.click(screen.getByRole("button",{name:"例の数字で試す"}));await waitFor(()=>expect(document.getElementById("calculation-result-title")).not.toBeNull());expect(screen.getByText("例の数字です。現場の実測値ではありません。")).toBeTruthy();expect(JSON.parse(localStorage.getItem(CONSTRUCTION_CALCULATOR_HISTORY_KEY)??"[]")).toHaveLength(0);fireEvent.change(document.getElementById("construction-calculator-lossPercent") as HTMLInputElement,{target:{value:""}});fireEvent.click(screen.getByRole("button",{name:"計算する"}));await waitFor(()=>expect(screen.getByRole("alert").textContent).toContain("ロス率"));expect(document.getElementById("calculation-result-title")).toBeNull();});
+ it("鉛直掘削で表示しない法勾配の空欄が計算を妨げない",async()=>{const definition=constructionCalculatorRegistry.find(d=>d.slug==="excavation-backfill")!;const fixture=definition.testFixtures.find(f=>f.kind==="normal")!;const {testFixtures:_fixtures,...publicDefinition}=definition;render(<ConstructionCalculatorClient definition={publicDefinition} defaultInput={{...fixture.input,shape:"vertical",sideSlopeHorizontalPerVertical:""}}/>);await waitFor(()=>expect(screen.getByRole("button",{name:"計算する"})).toBeTruthy());fireEvent.click(screen.getByRole("button",{name:"計算する"}));await waitFor(()=>expect(document.getElementById("calculation-result-title")).not.toBeNull());});
+});
+
+describe("initial server-rendered calculator layout", () => {
+  it.each(constructionCalculatorRegistry)("$slug reserves its real blank form before hydration", (definition) => {
+    const fixture = definition.testFixtures.find(item => item.kind === "normal" && item.expectedOk);
+    const { testFixtures: _fixtures, ...publicDefinition } = definition;
+    const getItem = vi.spyOn(Storage.prototype, "getItem");
+    const setItem = vi.spyOn(Storage.prototype, "setItem");
+    const host = document.createElement("div");
+    host.innerHTML = renderToStaticMarkup(<ConstructionCalculatorClient definition={publicDefinition} defaultInput={fixture?.input ?? {}} startEmpty />);
+    const form = host.querySelector("form");
+    expect(form).not.toBeNull();
+    expect(host.querySelector("[data-calculator-loading]")).toBeNull();
+    const inputs = [...host.querySelectorAll<HTMLInputElement>('form input[type="number"]')];
+    expect(inputs.length).toBeGreaterThan(0);
+    expect(inputs.every(input => input.value === "")).toBe(true);
+    expect(inputs.every(input => input.matches(":disabled"))).toBe(true);
+    expect(form?.querySelector("fieldset")?.disabled).toBe(true);
+    expect(host.querySelector("#calculation-result-title")).toBeNull();
+    const historySection = host.querySelector("#calculator-history-title")?.closest("section");
+    expect(historySection).not.toBeNull();
+    expect(historySection?.querySelector("ul")).toBeNull();
+    for (const input of inputs) {
+      const field = definition.inputDefinitions.find(item => "construction-calculator-" + item.key === input.id);
+      if (field?.required) expect(input.required).toBe(true);
+    }
+    expect(getItem).not.toHaveBeenCalled();
+    expect(setItem).not.toHaveBeenCalled();
+    getItem.mockRestore(); setItem.mockRestore();
   });
 });

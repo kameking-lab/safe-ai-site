@@ -123,7 +123,9 @@ test("追加画像には代替テキストがあり、主要画像の表示領�
   }
 
   await page.goto("/services/automation", { waitUntil: "domcontentloaded" });
-  const automationMascot = page.locator("[data-automation-service] img");
+  const automationMascot = page.locator(
+    '[data-automation-service] [data-feature-mascot-companion="calendar-plan"] img',
+  );
   await expect(automationMascot).toHaveCount(1);
   await expect(automationMascot).toBeVisible();
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();

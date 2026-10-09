@@ -74,3 +74,9 @@
 @media(min-width:1024px) { .purposeGrid { grid-template-columns:repeat(3,minmax(0,1fr)); }.purposeTitle { min-height:3.2em; }.mascotGreeting { width:160px; } }
 @media(max-width:389px) { .companion { gap:12px; }.mascotGreeting { width:120px; } }
 @media(prefers-reduced-motion:reduce) { .mascotGreeting { animation:none!important; transform:none!important; } }
+
+/* Keep mobile hero spacing compact when primary buttons include decorations. */
+@media (max-width:639px) {
+  .heroGrid { gap:20px; padding-bottom:24px; }
+  .actions { margin-top:20px; }
+}

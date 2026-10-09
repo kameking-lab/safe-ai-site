@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ChihuahuaButtonContent } from "@/components/chihuahua-button-content";
 import { useEffect, useRef } from "react";
 import { trackAutomationEvent } from "@/lib/automation-consult/analytics";
 import type { AutomationAnalyticsPage } from "@/lib/automation-consult/analytics";
@@ -67,6 +68,7 @@ const CTA_PAGE_BY_POSITION: Record<
 type AutomationConsultCtaProps = {
   children: React.ReactNode;
   position: AutomationCtaPosition;
+  mascot?: boolean;
   href?: string;
   className?: string;
   title?: string;
@@ -85,6 +87,7 @@ type AutomationConsultCtaProps = {
 export function AutomationConsultCta({
   children,
   position,
+  mascot = position === "hero" || position === "home_primary" || position === "home_hero" || position === "final",
   href = `${SERVICE_PATH}#consult-form`,
   className = "",
   title,
@@ -116,7 +119,7 @@ export function AutomationConsultCta({
       data-nav-active={navActive}
       data-primary-action={primaryAction}
     >
-      {children}
+      {mascot ? <ChihuahuaButtonContent>{children}</ChihuahuaButtonContent> : children}
     </Link>
   );
 }

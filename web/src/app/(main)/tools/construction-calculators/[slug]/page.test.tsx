@@ -8,7 +8,7 @@ import ConstructionCalculatorDetailPage, {
 } from "./page";
 
 describe("/tools/construction-calculators/[slug]", () => {
-  it("公開12件だけを静的生成し、式とJavaScript無効fallbackをSSRする", async () => {
+  it("statically generates published tools and renders blank disabled inputs with No-JS guidance", async () => {
     expect(dynamicParams).toBe(false);
     expect(generateStaticParams()).toEqual(
       constructionCalculatorRegistry.map(({ slug }) => ({ slug })),
@@ -21,8 +21,20 @@ describe("/tools/construction-calculators/[slug]", () => {
     expect(html).toContain("コンクリート数量・生コン車台数");
     expect(html).toContain("直方体 V=L×W×H");
     expect(html).toContain("JavaScriptを使わずに確認する");
-    expect(html).toContain("計算フォームを準備しています");
-    expect(html).not.toContain("<form");
+    const page = document.createElement("div");
+    page.innerHTML = html;
+    const form = page.querySelector("form");
+    expect(form).not.toBeNull();
+    expect(form?.querySelector("fieldset")?.hasAttribute("disabled")).toBe(true);
+    const numericInputs = form?.querySelectorAll<HTMLInputElement>('input[type="number"]');
+    expect(numericInputs?.length).toBeGreaterThan(0);
+    for (const input of numericInputs ?? []) {
+      expect(input.value).toBe("");
+      expect(input.required).toBe(true);
+    }
+    expect(page.querySelector("[data-calculator-loading]")).toBeNull();
+    expect(page.querySelector("#calculator-result-title")).toBeNull();
+    expect(html).toContain("JavaScriptが無効な間は計算や履歴保存を使えません");
     expect(html).not.toContain("安全です");
     expect(html).not.toContain("法令に適合します");
   });

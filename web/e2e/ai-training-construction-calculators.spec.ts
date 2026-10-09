@@ -17,6 +17,11 @@ const CALCULATOR_SLUGS = [
   "slope-angle-length",
   "drainage-slope",
   "scale-coordinate",
+  "polygon-area",
+  "curing-sheet-quantity",
+  "board-panel-quantity",
+  "paint-quantity",
+  "wire-mesh-quantity",
 ] as const;
 
 test.describe("AI実務研修と建設計算ツール", () => {
@@ -94,12 +99,12 @@ test.describe("AI実務研修と建設計算ツール", () => {
     }
   });
 
-  test("建設計算一覧は公開12件、Coming Soon 23件で個別URLは公開分だけ", async ({ page }) => {
+  test("建設計算一覧は公開17件、Coming Soon 18件で個別URLは公開分だけ", async ({ page }) => {
     const response = await page.goto(CALCULATOR_HUB);
     expect(response?.status()).toBe(200);
     await expect(page.getByRole("heading", { level: 1, name: "建設計算ツール" })).toBeVisible();
-    await expect(page.locator('[data-calculator-status="published"]')).toHaveCount(12);
-    await expect(page.locator('[data-calculator-status="coming-soon"]')).toHaveCount(23);
+    await expect(page.locator('[data-calculator-status="published"]')).toHaveCount(17);
+    await expect(page.locator('[data-calculator-status="coming-soon"]')).toHaveCount(18);
     await expect(page.locator('[data-calculator-status="coming-soon"] a')).toHaveCount(0);
     const publishedHrefs = await page
       .locator('[data-calculator-status="published"] a')
@@ -109,18 +114,19 @@ test.describe("AI実務研修と建設計算ツール", () => {
     );
   });
 
-  test("12計算は入力途中に結果を出さず、明示ボタン後だけ概算結果を出す", async ({ page }) => {
+  test("17計算は初期空欄から例を明示して概算を試せる", async ({ page }) => {
     test.setTimeout(120_000);
     for (const slug of CALCULATOR_SLUGS) {
       const response = await page.goto(`${CALCULATOR_HUB}/${slug}`);
       expect(response?.status(), slug).toBe(200);
       await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-      await expect(page.getByRole("heading", { name: "結果", exact: true })).toHaveCount(0);
+      await expect(page.locator("#calculation-result-title")).toHaveCount(0);
+      await page.getByRole("button", { name: "例の数字で試す" }).click();
       await page.getByRole("button", { name: "計算する" }).click();
-      await expect(page.getByRole("heading", { name: "結果", exact: true })).toBeVisible();
+      await expect(page.locator("#calculation-result-title")).toBeVisible();
       await expect(
         page
-          .getByRole("region", { name: "結果" })
+          .getByRole("region", { name: /^結果/ })
           .getByText("概算結果です。設計図書、仕様書、実測値を確認してください。", { exact: true }),
       ).toBeVisible();
       expect(new URL(page.url()).search).toBe("");
@@ -136,6 +142,7 @@ test.describe("AI実務研修と建設計算ツール", () => {
       });
     });
     await page.goto(`${CALCULATOR_HUB}/concrete-quantity`);
+    await page.getByRole("button", { name: "例の数字で試す" }).click();
     await page.getByRole("button", { name: "計算する" }).click();
     const primaryResult = await page.locator("#calculation-result-title + dl dd").first().innerText();
 
@@ -163,11 +170,12 @@ test.describe("AI実務研修と建設計算ツール", () => {
   test("表示済みの計算ページは通信断後も明示ボタンで計算できる", async ({ page, context }) => {
     await page.goto(`${CALCULATOR_HUB}/concrete-quantity`);
     await expect(page.getByRole("button", { name: "計算する" })).toBeVisible();
+    await page.getByRole("button", { name: "例の数字で試す" }).click();
     await page.waitForLoadState("networkidle");
     await context.setOffline(true);
     try {
       await page.getByRole("button", { name: "計算する" }).click();
-      await expect(page.getByRole("heading", { name: "結果", exact: true })).toBeVisible();
+      await expect(page.locator("#calculation-result-title")).toBeVisible();
     } finally {
       await context.setOffline(false);
     }
@@ -209,7 +217,7 @@ test.describe("AI実務研修と建設計算ツール", () => {
     ).toEqual([]);
   });
 
-  test("JavaScript無効でも教材全文と計算式を読め、動かないフォームを出さない", async ({ browser, baseURL }) => {
+  test("No-JS keeps formulas readable and SSR inputs disabled", async ({ browser, baseURL }) => {
     const context = await browser.newContext({ javaScriptEnabled: false, baseURL });
     const page = await context.newPage();
     await page.goto(AI_DETAIL);
@@ -217,8 +225,13 @@ test.describe("AI実務研修と建設計算ツール", () => {
     await expect(page.getByRole("link", { name: "研修PDFを開く" })).toBeVisible();
     await page.goto(`${CALCULATOR_HUB}/concrete-quantity`);
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "計算式" })).toBeVisible();
-    await expect(page.locator("form")).toHaveCount(0);
+    await page.getByText("計算式",{exact:true}).click();
+    await expect(page.getByText("直方体 V=L×W×H",{exact:true})).toBeVisible();
+    await expect(page.locator("form")).toHaveCount(1);
+    await expect(page.locator("form > fieldset")).toHaveAttribute("disabled", "");
+    await expect(page.getByRole("button", { name: "例の数字で試す", exact: true })).toBeDisabled();
+    await expect(page.locator("#construction-calculator-length")).toHaveValue("");
+    await expect(page.locator("#construction-calculator-length")).toBeDisabled();
     await context.close();
   });
 });
