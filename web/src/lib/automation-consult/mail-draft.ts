@@ -65,7 +65,6 @@ export function getConsultationMailDraft(kind: ConsultationMailKind): {
 
 export type AutomationMailRecipients = {
   to: string;
-  bcc: string;
 };
 
 function isSafeEmail(value: string): boolean {
@@ -79,29 +78,28 @@ function isSafeEmail(value: string): boolean {
 /**
  * 宛先はserver-only環境変数から解決する。
  * 検証済みGmailは手動送信fallbackのToとしてserver-renderできるが、
- * OutlookのBccはHTMLやclient propsへ返さない。
+ * 旧設定にOutlookが残っていても送信先には使用しない。
  */
 export function getAutomationMailRecipients(
   env: Record<string, string | undefined> = process.env,
 ): AutomationMailRecipients | null {
+  const rawRecipients = env.AUTOMATION_CONSULT_RECIPIENTS ?? "";
+  if (HEADER_CONTROLS.test(rawRecipients)) return null;
   const recipients = [
     ...new Set(
-      (env.AUTOMATION_CONSULT_RECIPIENTS ?? "")
+      rawRecipients
         .split(",")
-        .map((value) => value.trim())
+        .map((value) => value.trim().toLowerCase())
         .filter(Boolean),
     ),
   ];
-  if (recipients.length !== 2 || !recipients.every(isSafeEmail)) return null;
-
-  const to = recipients.find((value) =>
-    value.toLowerCase().endsWith("@gmail.com"),
-  );
-  const bcc = recipients.find((value) =>
-    value.toLowerCase().endsWith("@outlook.com"),
-  );
-  if (!to || !bcc || to === bcc) return null;
-  return { to, bcc };
+  if (recipients.length < 1 || recipients.length > 2 || !recipients.every(isSafeEmail)) return null;
+  const gmail = recipients.filter((value) => value.endsWith("@gmail.com"));
+  if (gmail.length !== 1) return null;
+  // Accept the legacy two-address configuration without sending to its
+  // unverified secondary address. Never infer another recipient.
+  if (recipients.some(value => !value.endsWith("@gmail.com") && !value.endsWith("@outlook.com"))) return null;
+  return { to: gmail[0] };
 }
 
 export function buildAutomationMailto(
@@ -120,7 +118,6 @@ export function buildConsultationMailto(
   const draft = getConsultationMailDraft(kind);
 
   const params = new URLSearchParams({
-    bcc: recipients.bcc,
     subject: draft.subject,
     body: draft.template,
   });

@@ -71,12 +71,7 @@ export const automationConsultSchema = z
     website: z.string().max(200).optional().default(""),
     sourcePage: z.enum(AUTOMATION_CONSULT_SOURCE_PAGES),
   })
-  .strict()
-  .superRefine((value, context) => {
-    if (value.sourcePage !== "/services/automation") return;
-    if (!value.name) context.addIssue({ code: "custom", path: ["name"], message: "お名前を入力してください。" });
-    if (value.desiredSupport.length < LIMITS.supportMin) context.addIssue({ code: "custom", path: ["desiredSupport"], message: "希望する支援を2文字以上で入力してください。" });
-  });
+  .strict();
 
 export type AutomationConsultInput = z.infer<typeof automationConsultSchema>;
 

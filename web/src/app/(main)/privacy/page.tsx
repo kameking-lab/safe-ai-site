@@ -46,7 +46,7 @@ export default function PrivacyPage() {
             </li>
             <li className="list-disc">
               <span className="font-semibold text-slate-700">業務自動化相談フォーム（/services/automation）</span>
-              から取得する情報：相談種別、氏名・担当者名、返信用メールアドレス、会社・組織名（任意）、現在困っていること、希望する支援、現在使っているツール（任意）、希望時期、予算帯（任意）、オンライン・現地等の希望（任意）、送信元ページ。受付基盤が準備中のときは個人情報入力欄を表示せず、取得しません
+              から取得する情報：返信先メールアドレス、相談内容、呼び名（任意）、希望時期（任意）、相談種別・送信元ページ。入力内容は相談への回答と見積案内のため、メール配信サービスを経由して運営者へ送信します。入力した返信先への自動受付メールは送信しません。受付基盤が準備中のときは個人情報入力欄を表示せず、取得しません
             </li>
             <li className="list-disc">
               <span className="font-semibold text-slate-700">アクセスログ</span>

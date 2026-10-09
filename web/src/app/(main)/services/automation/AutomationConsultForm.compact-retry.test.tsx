@@ -11,16 +11,21 @@ function fill() {
 }
 describe("compact LP consultation and honest retry", () => {
   beforeEach(() => { vi.unstubAllGlobals(); });
-  it("submits only the required reply and task with optional defaults and displays the reference", async () => {
+  it.each(["/", "/services/automation"] as const)("submits only reply and task with optional defaults from %s and displays owner acceptance", async sourcePage => {
     const fetch = vi.fn().mockResolvedValue(response(200, { ok: true, referenceId })); vi.stubGlobal("fetch", fetch);
-    render(<AutomationConsultForm compact />); fill();
+    render(<AutomationConsultForm compact sourcePage={sourcePage} />); fill();
     expect(screen.queryByLabelText(/会社・団体名/)).toBeNull();
     expect(screen.queryByText(/無料相談/)).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "相談を送信する" }));
     await screen.findByText(`受付番号: ${referenceId}`);
     const body = JSON.parse(fetch.mock.calls[0][1].body);
-    expect(body).toMatchObject({ sourcePage: "/", name: "", desiredSupport: "", timing: "undecided", email: "reply@example.test" });
+    expect(body).toMatchObject({ sourcePage, name: "", desiredSupport: "", timing: "undecided", email: "reply@example.test" });
     expect(fetch).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole("heading", { name: "運営者への送信が受理されました" })).not.toBeNull();
+    expect(screen.getByText(/受信箱への到着は、この画面では確認できません/)).not.toBeNull();
+    expect(screen.getByText(/受付メールの自動返信はありません/)).not.toBeNull();
+    expect(screen.queryByText(/受付メールを送信しました/)).toBeNull();
+    expect(window.localStorage.length).toBe(0);
   });
   it.each(["request_in_progress", "delivery_failed"])("freezes input and retries exactly the same payload and key for %s", async code => {
     const fetch = vi.fn().mockResolvedValueOnce(response(code === "request_in_progress" ? 409 : 503, { ok: false, error: { code, referenceId } })).mockResolvedValueOnce(response(200, { ok: true, referenceId })); vi.stubGlobal("fetch", fetch);
@@ -57,6 +62,8 @@ describe("compact LP consultation and honest retry", () => {
     await screen.findByText(`受付番号: ${referenceId}`);
     expect(screen.queryByText(/受付メールを送信しました/)).toBeNull();
     expect(screen.getByText(deliveryMode === "queued" ? /送達完了はまだ確認していません/ : /実際のメール送信/)).not.toBeNull();
+    expect(screen.queryByRole("heading", { name: "運営者への送信が受理されました" })).toBeNull();
+    expect(screen.getByRole("heading", { name: deliveryMode === "queued" ? "相談を送信待ちにしました" : "入力内容を検証しました" })).not.toBeNull();
   });
   it("rejects a success-shaped response without a valid public reference", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(response(200, { ok: true })));
@@ -72,6 +79,10 @@ describe("compact LP consultation and honest retry", () => {
     fireEvent.click(screen.getByRole("button", { name: "相談を送信する" }));
     await waitFor(() => expect(screen.getByLabelText(/呼び名/).getAttribute("aria-invalid")).toBe("true"));
     expect(fetch).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("link", { name: /お名前・担当者名/ }));
+    const name = screen.getByLabelText(/呼び名/);
+    expect(name.closest("details")?.open).toBe(true);
+    expect(document.activeElement).toBe(name);
   });
   it.each([
     ["delivery_failed", "rate_limited"], ["delivery_failed", "intake_unavailable"],
