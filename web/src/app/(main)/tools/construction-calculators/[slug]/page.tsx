@@ -139,7 +139,7 @@ export default async function ConstructionCalculatorDetailPage({ params }: PageP
       <noscript>
         <section className="mt-8 rounded-2xl border-2 border-amber-500 bg-amber-50 p-5 text-amber-950">
           <h2 className="text-xl font-black">JavaScriptを使わずに確認する</h2>
-          <p className="mt-2 leading-7">このページでは動かない入力フォームを表示しません。上記の式、入力条件、前提を確認し、通常リンクから別の計算を選べます。</p>
+          <p className="mt-2 leading-7">入力欄は表示されますが、JavaScriptが無効な間は計算や履歴保存を使えません。上記の式、入力条件、前提を確認し、通常リンクから別の計算を選べます。</p>
           <Link href={CONSTRUCTION_CALCULATOR_HUB_PATH} className="mt-3 inline-flex min-h-11 items-center font-black underline underline-offset-4">建設計算ツール一覧へ</Link>
         </section>
       </noscript>
