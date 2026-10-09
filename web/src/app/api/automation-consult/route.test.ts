@@ -8,7 +8,8 @@ const mocks = vi.hoisted(() => ({
   getAutomationConsultAvailability: vi.fn(),
 }));
 
-vi.mock("@/lib/automation-consult/availability", () => ({
+vi.mock("@/lib/automation-consult/availability", async (importOriginal) => ({
+  ...await importOriginal<typeof import("@/lib/automation-consult/availability")>(),
   getAutomationConsultAvailability: mocks.getAutomationConsultAvailability,
 }));
 

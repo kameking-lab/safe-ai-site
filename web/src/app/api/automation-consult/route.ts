@@ -30,6 +30,7 @@ import {
 } from "@/lib/automation-consult/email";
 import { isPreviewSafetyMode } from "@/lib/server/deployment-safety";
 import { getAutomationConsultAvailability } from "@/lib/automation-consult/availability";
+import { logAutomationConsultReadinessFailure } from "@/lib/automation-consult/readiness-log";
 import {
   automationConsultQueueConfiguration,
   enqueueAutomationConsult,
@@ -82,6 +83,7 @@ export async function POST(request: Request) {
     !previewSafetyMode &&
     availability.webFormEnabled !== true
   ) {
+    logAutomationConsultReadinessFailure();
     return errorResponse(
       503,
       "intake_unavailable",
