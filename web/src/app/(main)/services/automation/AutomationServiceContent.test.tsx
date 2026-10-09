@@ -87,7 +87,9 @@ describe("AutomationServiceContent", () => {
     const { container } = render(
       <AutomationServiceContent availability={AVAILABLE} />,
     );
-    const images = container.querySelectorAll("img");
+    const images = container.querySelectorAll(
+      '[data-feature-mascot-companion="calendar-plan"] img',
+    );
     expect(images).toHaveLength(1);
     expect(images[0]?.getAttribute("loading")).toBe("lazy");
     expect(images[0]?.getAttribute("fetchpriority")).not.toBe("high");
