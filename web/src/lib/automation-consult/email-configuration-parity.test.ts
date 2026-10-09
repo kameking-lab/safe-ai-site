@@ -36,18 +36,18 @@ describe("consultation configuration normalization parity", () => {
       expect(getAutomationConsultEmailConfiguration()).toEqual({
         ok: true,
         from: completeEnvironment.NOTIFY_FROM,
-        recipients: ["primary@gmail.com", "audit@outlook.com"],
+        recipients: ["primary@gmail.com"],
       });
     }
   });
 
-  it("ignores only empty recipient entries and preserves configured recipient order", () => {
+  it("ignores empty entries and selects only the Gmail regardless of legacy order", () => {
     vi.stubEnv("AUTOMATION_CONSULT_RECIPIENTS", " audit@outlook.com, primary@gmail.com, ");
     expect(getAutomationConsultAvailability().webFormEnabled).toBe(true);
     expect(getAutomationConsultEmailConfiguration()).toEqual({
       ok: true,
       from: completeEnvironment.AUTOMATION_CONSULT_FROM,
-      recipients: ["audit@outlook.com", "primary@gmail.com"],
+      recipients: ["primary@gmail.com"],
     });
   });
 
@@ -55,7 +55,7 @@ describe("consultation configuration normalization parity", () => {
     ["nonempty invalid explicit sender", { AUTOMATION_CONSULT_FROM: "invalid sender" }],
     ["empty sender without fallback", { AUTOMATION_CONSULT_FROM: "   ", NOTIFY_FROM: "" }],
     ["three nonempty recipients", { AUTOMATION_CONSULT_RECIPIENTS: "primary@gmail.com,audit@outlook.com,third@example.test" }],
-    ["one unique recipient", { AUTOMATION_CONSULT_RECIPIENTS: "primary@gmail.com,primary@gmail.com," }],
+    ["two different Gmail recipients", { AUTOMATION_CONSULT_RECIPIENTS: "primary@gmail.com,other@gmail.com," }],
     ["control-only explicit sender", { AUTOMATION_CONSULT_FROM: "\r\n" }],
     ["control-only recipient entry", { AUTOMATION_CONSULT_RECIPIENTS: "primary@gmail.com,audit@outlook.com,\r\n" }],
     ["sender header injection", { AUTOMATION_CONSULT_FROM: "Portal <noreply@example.test>\r\nBcc:third@example.test" }],

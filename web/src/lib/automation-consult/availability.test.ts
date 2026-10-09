@@ -125,7 +125,7 @@ describe("getAutomationConsultAvailability", () => {
     "one@gmail.com,two@gmail.com",
     "one@outlook.com,two@outlook.com",
     "",
-  ])("stops intake when recipients cannot produce the required To/Bcc draft (%s)", (recipients) => {
+  ])("stops intake when recipients cannot produce the single Gmail draft (%s)", (recipients) => {
     expect(
       getAutomationConsultAvailability({
         ...COMPLETE_ENV,

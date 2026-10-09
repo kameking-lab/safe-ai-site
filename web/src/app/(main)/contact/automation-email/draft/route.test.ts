@@ -27,7 +27,8 @@ describe("/contact/automation-email/draft", () => {
     const [address, query] = location.slice("mailto:".length).split("?");
     const params = new URLSearchParams(query);
     expect(decodeURIComponent(address)).toBe("primary@gmail.com");
-    expect(params.get("bcc")).toBe("audit@outlook.com");
+    expect(params.has("bcc")).toBe(false);
+    expect(location).not.toContain("outlook");
     expect(params.get("subject")).toBe(
       "安全AIポータル｜業務自動化・講習の相談",
     );
