@@ -43,8 +43,8 @@ export function HomeLP({ availability, latestNews }: { availability: AutomationC
             <h1 id="home-lp-title" className={styles.title}><span>その書類、</span><span>AIに任せて、</span><span>現場に行こう。</span></h1>
             <p className={styles.heroDescription}>安衛法や化学物質を調べる。法改正や事故の情報を確かめる。計算や保護具選定に使う。必要な情報への道筋をつくり、現場で判断する時間を支えます。</p>
             <div className={styles.actions}>
-              <Link href="#tools" className={styles.primary}><ChihuahuaButtonContent variant="tools">道具を使う <ArrowUpRight size={16} aria-hidden="true" /></ChihuahuaButtonContent></Link>
-              <Link href="#consult" className={styles.secondary}><ChihuahuaButtonContent variant="consult">自動化を相談する <ArrowUpRight size={16} aria-hidden="true" /></ChihuahuaButtonContent></Link>
+              <Link href="#tools" className={styles.primary}><ChihuahuaButtonContent variant="tools" trailing={<ArrowUpRight size={16} aria-hidden="true" />}>道具を使う</ChihuahuaButtonContent></Link>
+              <Link href="#consult" className={styles.secondary}><ChihuahuaButtonContent variant="consult" trailing={<ArrowUpRight size={16} aria-hidden="true" />}>自動化を相談する</ChihuahuaButtonContent></Link>
             </div>
           </div>
           <div>
@@ -75,7 +75,7 @@ export function HomeLP({ availability, latestNews }: { availability: AutomationC
         <div className={styles.valueGrid}><p className={styles.sectionLabel}>TIME FOR THE FIELD</p><div><h2 id="home-origin-heading">現場に向き合う時間を、もっと。</h2><div data-origin-copy><p>安全な仕事を支えるのは、現場を知る人の目と判断です。書類づくりや情報整理の負担を減らし、現場を確かめ、仲間と話す時間を増やす。安全AIポータルは、そのための道具をつくっています。</p><p>仲間を守り、仕事に誇りを持って働ける毎日を支えたいと考えています。</p></div><Link href="/about/project-story" className={`${quietLink} mt-7`}>このサイトについて <ArrowUpRight size={16} aria-hidden="true" /></Link></div></div>
       </section>
       <section id="consult" aria-labelledby="home-consult-heading" className={styles.consult}>
-        <div className={styles.consultGrid}><div><p className={styles.sectionLabel}>WORK WITH YOU</p><h2 id="home-consult-heading">その「毎回同じ作業」、<br />一緒に見直しませんか。</h2></div><div><p>転記、Excelの集計、通知、研修資料の準備。KY用紙などの帳票は現場ごとに書式や運用が異なります。いつもの手順と必要な項目を伺い、案件に合ったカスタマイズや自動化をご案内します。</p><Link href={consultHref} prefetch={false} className={`${styles.primary} mt-7`}><ChihuahuaButtonContent>自動化について相談する <ArrowUpRight size={16} aria-hidden="true" /></ChihuahuaButtonContent></Link><p className={styles.consultNote}>対応できる内容や費用は、相談内容に応じてご案内します。</p><p className={styles.consultNote} data-consult-mode={availability.contactMode ?? "unavailable"}>現在の受付状態：{availability.label}{availability.contactMode === "mail_client" ? "（メールアプリを使います）" : !availability.accepting ? "。現在は受付停止中です。サービス内容は確認できます。" : ""}</p></div></div>
+        <div className={styles.consultGrid}><div><p className={styles.sectionLabel}>WORK WITH YOU</p><h2 id="home-consult-heading">その「毎回同じ作業」、<br />一緒に見直しませんか。</h2></div><div><p>転記、Excelの集計、通知、研修資料の準備。KY用紙などの帳票は現場ごとに書式や運用が異なります。いつもの手順と必要な項目を伺い、案件に合ったカスタマイズや自動化をご案内します。</p><Link href={consultHref} prefetch={false} className={`${styles.primary} mt-7`}><ChihuahuaButtonContent trailing={<ArrowUpRight size={16} aria-hidden="true" />}>自動化について相談する</ChihuahuaButtonContent></Link><p className={styles.consultNote}>対応できる内容や費用は、相談内容に応じてご案内します。</p><p className={styles.consultNote} data-consult-mode={availability.contactMode ?? "unavailable"}>現在の受付状態：{availability.label}{availability.contactMode === "mail_client" ? "（メールアプリを使います）" : !availability.accepting ? "。現在は受付停止中です。サービス内容は確認できます。" : ""}</p></div></div>
       </section>
       <section aria-labelledby="home-news-heading" className={`${wrap} py-14 lg:py-24`}>
         <h2 id="home-news-heading" className="text-2xl font-bold">現場に関わる、最近の情報。</h2>

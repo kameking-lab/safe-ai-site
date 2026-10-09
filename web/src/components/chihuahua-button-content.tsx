@@ -12,9 +12,11 @@ const assets = {
 export function ChihuahuaButtonContent({
   children,
   variant = "consult",
+  trailing,
 }: {
   children: ReactNode;
   variant?: ChihuahuaButtonVariant;
+  trailing?: ReactNode;
 }) {
   const asset = assets[variant];
   return (
@@ -30,6 +32,7 @@ export function ChihuahuaButtonContent({
         className="pointer-events-none h-10 w-10 shrink-0 object-contain"
       />
       <span className="min-w-0 text-left leading-snug [overflow-wrap:anywhere]">{children}</span>
+      {trailing ? <span aria-hidden="true" className="shrink-0">{trailing}</span> : null}
     </span>
   );
 }
