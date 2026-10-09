@@ -1,9 +1,9 @@
 import { expect, test } from "@playwright/test";
 
-const HOME_MASCOT_SELECTOR = 'img[src*="mascot-tablet-dx.webp"]:visible';
+const HOME_MASCOT_SELECTOR = 'img[src*="mascot-law-reading.webp"]:visible';
 
 test.describe("チワワが案内するコンパクトホーム", () => {
-  test("320〜1440pxと200%・400%相当幅でチワワと6つの道具を横にはみ出さず表示する", async ({ page }) => {
+  test("320〜1440pxと200%・400%相当幅でチワワと7つの道具を横にはみ出さず表示する", async ({ page }) => {
     for (const width of [320, 390, 720, 768, 1440]) {
       await page.setViewportSize({ width, height: 900 });
       await page.goto("/");
@@ -20,8 +20,8 @@ test.describe("チワワが案内するコンパクトホーム", () => {
       expect(box!.x).toBeGreaterThanOrEqual(0);
       expect(box!.x + box!.width).toBeLessThanOrEqual(width);
       const services = page.locator("#tools");
-      await expect(services.locator("a[data-lp-tool]")).toHaveCount(6);
-      await expect(services.getByRole("heading", { level: 3 })).toHaveCount(6);
+      await expect(services.locator("a[data-lp-tool]")).toHaveCount(7);
+      await expect(services.getByRole("heading", { level: 3 })).toHaveCount(3);
       expect(await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth)).toBe(false);
     }
   });
@@ -34,7 +34,7 @@ test.describe("チワワが案内するコンパクトホーム", () => {
     expect(await page.evaluate(() => matchMedia("(prefers-reduced-motion: reduce)").matches)).toBe(true);
 
     const mascotTools = page.locator("[data-home-lp]");
-    const primaryAction = mascotTools.getByRole("link", { name: "安衛法AI", exact: true });
+    const primaryAction = mascotTools.locator('[data-lp-tool][href="/chatbot"]');
     await expect(primaryAction).toBeVisible();
     await primaryAction.focus();
     await expect(primaryAction).toBeFocused();
@@ -50,7 +50,7 @@ test.describe("チワワが案内するコンパクトホーム", () => {
     await expect(page.getByLabel("質問入力")).toBeVisible();
   });
 
-  test("画像読み込み失敗時も案内文と6つの道具への通常リンクを残す", async ({ page }) => {
+  test("画像読み込み失敗時も案内文と7つの道具への通常リンクを残す", async ({ page }) => {
     await page.route("**/*", (route) => route.request().resourceType() === "image" ? route.abort() : route.continue());
     await page.goto("/");
 
@@ -64,9 +64,9 @@ test.describe("チワワが案内するコンパクトホーム", () => {
       }),
     ).toBeVisible();
     const services = page.locator("#tools");
-    await expect(services.getByRole("heading", { level: 3 })).toHaveCount(6);
-    await expect(services.locator("a[data-lp-tool]")).toHaveCount(6);
-    const primaryAction = page.locator("[data-home-lp]").getByRole("link", { name: "安衛法AI", exact: true });
+    await expect(services.getByRole("heading", { level: 3 })).toHaveCount(3);
+    await expect(services.locator("a[data-lp-tool]")).toHaveCount(7);
+    const primaryAction = page.locator("[data-home-lp]").locator('[data-lp-tool][href="/chatbot"]');
     await primaryAction.click();
     await expect(page).toHaveURL(/\/chatbot$/);
     await expect(page.getByLabel("質問入力")).toBeVisible();
@@ -84,8 +84,8 @@ test.describe("チワワが案内するコンパクトホーム", () => {
           name: /その書類、\s*AIに任せて、\s*現場に行こう。/u,
         }),
       ).toBeVisible();
-      await expect(page.locator("[data-home-lp] a[data-lp-tool]")).toHaveCount(6);
-      await expect(page.locator("#tools a[data-lp-tool]")).toHaveCount(6);
+      await expect(page.locator("[data-home-lp] a[data-lp-tool]")).toHaveCount(7);
+      await expect(page.locator("#tools a[data-lp-tool]")).toHaveCount(7);
       const fallbackNav = page.getByRole("navigation", { name: "JavaScriptなしで利用できる機能" });
       await expect(fallbackNav.getByRole("link", { name: "安衛法AI", exact: true })).toHaveAttribute("href", "/chatbot");
       await expect(fallbackNav.getByRole("link", { name: "化学物質RA", exact: true })).toHaveAttribute("href", "/chemical-ra");

@@ -12,11 +12,15 @@ describe("the approved homepage LP", () => {
     const { container } = render(<HomeLP availability={paused} latestNews={unavailable} />);
     expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
     expect(screen.getByRole("link", { name: "道具を使う" }).getAttribute("href")).toBe("#tools");
-    expect([...container.querySelectorAll<HTMLAnchorElement>("[data-lp-tool]")].map((a) => a.getAttribute("href"))).toEqual(["/ky/paper", "/chatbot", "/chemical-ra", "/training/safety-seminars", "/materials/safety-images", "/construction-calc"]);
+    expect([...container.querySelectorAll<HTMLAnchorElement>("[data-lp-tool]")].map((a) => a.getAttribute("href"))).toEqual(["/chatbot", "/chemical-database", "/laws", "/accident-news", "/accidents-analytics", "/construction-calc", "/goods"]);
     expect(container.textContent).toContain("現場に向き合う時間を、もっと。");
     expect(container.textContent).not.toContain("死亡事故で同僚を失いました");
-    expect(container.querySelectorAll("[data-tool-sketch]")).toHaveLength(6);
-    expect(container.querySelector("[data-ky-scene]")?.textContent).toContain("候補は現場に合わせて確認・編集");
+    expect(container.querySelectorAll("[data-lp-use]")).toHaveLength(3);
+    expect(container.querySelector("[data-information-preview]")?.textContent).toContain("条文や出典、集計の対象");
+    expect(container.querySelector("[data-ky-scene]")).toBeNull();
+    expect(screen.getByRole("link", { name: "KY用紙" }).getAttribute("href")).toBe("/ky/paper");
+    expect(container.textContent).toContain("帳票は現場ごとに書式や運用が異なります");
+    expect(new Set([...container.querySelectorAll("img")].map(img => img.getAttribute("src"))).size).toBe(5);
     expect(container.querySelector("form")).toBeNull();
     expect(container.querySelectorAll('[data-lp-news="law"]')).toHaveLength(1);
     expect(container.querySelectorAll('[data-lp-news="accident"]')).toHaveLength(1);

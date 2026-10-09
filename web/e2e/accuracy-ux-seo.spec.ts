@@ -70,7 +70,7 @@ test.afterAll(() => {
   );
 });
 
-test("ホームは6幅で6つの道具と控えめなチワワから主要タスクへ進める", async ({ page }) => {
+test("ホームは6幅で7つの道具と控えめなチワワから主要タスクへ進める", async ({ page }) => {
   collectErrors(page);
   for (const width of [320, 360, 390, 768, 1024, 1440]) {
     await page.setViewportSize({
@@ -86,7 +86,7 @@ test("ホームは6幅で6つの道具と控えめなチワワから主要タス
       }),
     ).toBeVisible();
     const mascotTools = page.locator("[data-home-lp]");
-    await expect(mascotTools.getByRole("link", { name: "安衛法AI", exact: true })).toHaveAttribute("href", "/chatbot");
+    await expect(mascotTools.locator('[data-lp-tool][href="/chatbot"]')).toHaveAttribute("href", "/chatbot");
     await expect(mascotTools.getByRole("link", { name: /化学物質RA/u })).toHaveAttribute("href", "/chemical-ra");
     await expect(page.getByRole("link", { name: "すべての機能を見る", exact: true })).toHaveAttribute("href", "/features");
     await expect(page.locator('[data-home-section="heat"]')).toHaveCount(0);
@@ -102,7 +102,7 @@ test("ホームは6幅で6つの道具と控えめなチワワから主要タス
     ).toHaveAttribute("href", "/laws");
     await expect(
       page.locator("#tools a[data-lp-tool]"),
-    ).toHaveCount(6);
+    ).toHaveCount(7);
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth - window.innerWidth,
