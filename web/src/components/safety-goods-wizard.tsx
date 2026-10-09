@@ -1,467 +1,98 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { ArrowLeft, Check, ExternalLink, RotateCcw, Search, ShieldCheck } from "lucide-react";
-import {
-  generateAmazonAffiliateUrl,
-  generateRakutenSearchUrl,
-} from "@/lib/affiliate-url";
-import { trackEvent } from "@/components/Analytics";
-import { GoodsProductCarousel } from "@/components/goods-product-carousel";
-import { PUBLIC_SAFETY_GOODS_CATEGORIES } from "@/data/public-safety-goods-categories";
+import Image from 'next/image';
+import { useEffect, useRef, useSyncExternalStore } from 'react';
+import { ArrowLeft, ArrowRight, Check, CircleHelp, ExternalLink, RotateCcw, ShieldCheck, TriangleAlert } from 'lucide-react';
+import { Mascot } from '@/components/mascot';
+import { generateAmazonAffiliateUrl, generateRakutenSearchUrl } from '@/lib/affiliate-url';
+import { trackEvent } from '@/components/Analytics';
+import { CATEGORIES, TASKS, CONDITIONS, PPE_WORK_IMAGES, PPE_WORK_LABELS, getPpeQuestions, getPpeResult, normalizePpeAnswers } from '@/lib/ppe-guided-selection';
 
-const MHLW_OXYGEN_RULES_URL =
-  "https://anzeninfo.mhlw.go.jp/horei/hor1-45/hor1-45-33-1-5.html";
-const MHLW_DUST_MASK_GUIDANCE_URL =
-  "https://www.mhlw.go.jp/web/t_doc?dataId=00tc2747&dataType=1";
-const MHLW_SAFETY_FOOTWEAR_URL =
-  "https://www.mhlw.go.jp/web/t_doc?dataId=74003000&dataType=0&pageNo=9";
-type Option = { id: string; label: string; detail: string };
-
-type Selection = {
-  category: Option;
-  task: Option;
-  condition: Option;
-};
-
-type Recommendation = {
-  title: string;
-  query?: string;
-  summary: string;
-  officialHref: string;
-  officialLabel: string;
-  checks: readonly string[];
-  verifiedCandidate?: {
-    name: string;
-    maker: string;
-    reason: string;
-    href: string;
-  };
-  urgent?: boolean;
-  withholdPurchase?: boolean;
-};
-
-type RecommendationProfile = Omit<Recommendation, "query"> & {
-  categoryId: string;
-  taskIds: readonly string[];
-  query: string;
-};
-
-type ConditionProfile = {
-  categoryId: string;
-  conditionIds: readonly string[];
-  label: string;
-  queryTerms: string;
-  guidance: string;
-  check: string;
-};
-
-function photoCategoryId(categoryId: string, taskId: string): string {
-  if (categoryId === "respiratory") return taskId === "confined" ? "gas-detectors" : "respiratory";
-  if (categoryId === "fall") return taskId === "scaffold" ? "fall-protection" : "fall-accessories";
-  if (categoryId === "chemical") return taskId === "splash" ? "eye-face-protection" : taskId === "mix" ? "chemical-clothing" : "chemical-gloves";
-  if (categoryId === "machine") return taskId === "moving" ? "machine-lockout" : "signs-barriers";
-  if (categoryId === "noise") return taskId === "loud" ? "hearing" : "eye-face-protection";
-  return "safety-footwear";
+const EVENT = 'ppe-selection-change';
+function subscribe(listener: () => void) {
+ window.addEventListener('popstate', listener); window.addEventListener(EVENT, listener);
+ return () => { window.removeEventListener('popstate', listener); window.removeEventListener(EVENT, listener); };
+}
+function readSnapshot() {
+ const saved = window.history.state?.ppeSelection;
+ return JSON.stringify(normalizePpeAnswers(saved));
+}
+function navigate(answers: string[]) {
+ window.history.pushState({ ...window.history.state, ppeSelection: answers }, '', window.location.href);
+ window.dispatchEvent(new Event(EVENT));
 }
 
-function photoFeatureId(categoryId: string, taskId: string): string | undefined {
-  if (categoryId === "respiratory") return taskId === "dust" ? "dust" : taskId === "vapor" ? "gas" : undefined;
-  if (categoryId === "fall" && taskId === "scaffold") return "harness";
-  if (categoryId === "chemical" && taskId === "splash") return "splash";
-  if (categoryId === "chemical" && taskId === "contact") return "cleaning";
-  if (categoryId === "chemical" && taskId === "mix") return "splash";
-  if (categoryId === "noise" && taskId === "welding") return "light";
-  if (categoryId === "noise" && taskId === "grinding") return "impact";
-  return undefined;
-}
-
-const CATEGORIES: readonly Option[] = [
-  { id: "respiratory", label: "呼吸用保護具", detail: "粉じん・蒸気・ガス・酸欠が気になる" },
-  { id: "fall", label: "墜落・転落対策", detail: "高所・足場・開口部で作業する" },
-  { id: "chemical", label: "薬液・化学物質", detail: "手や目、皮膚への付着が気になる" },
-  { id: "machine", label: "重機・機械まわり", detail: "接触・巻き込まれ・立入を防ぎたい" },
-  { id: "noise", label: "騒音・飛来物", detail: "音、切粉、研削火花、飛散物がある" },
-  { id: "foot", label: "足元・移動", detail: "踏抜き、滑り、落下物、つまずきがある" },
-] as const;
-
-const TASKS: Record<string, readonly Option[]> = {
-  respiratory: [
-    { id: "dust", label: "粉じん・研削・清掃", detail: "固体の粉じん、ヒューム、繊維が舞う" },
-    { id: "vapor", label: "塗装・洗浄・接着", detail: "有機溶剤などの蒸気・ガスが出る" },
-    { id: "confined", label: "マンホール・槽・ピット", detail: "酸欠や有害ガスの可能性がある" },
-    { id: "unknown", label: "何が出ているか不明", detail: "SDSや作業環境の情報をまだ確認していない" },
-  ],
-  fall: [
-    { id: "scaffold", label: "足場・屋根・高所", detail: "墜落のおそれがある場所で作業する" },
-    { id: "opening", label: "開口部・縁端", detail: "床の穴、端部、昇降口の近くで作業する" },
-    { id: "ladder", label: "はしご・脚立", detail: "昇降や短時間の高所作業を行う" },
-  ],
-  chemical: [
-    { id: "splash", label: "薬液の飛散・注入", detail: "液体が手・目・顔にかかるおそれがある" },
-    { id: "contact", label: "洗浄・拭取り・配管", detail: "皮膚に触れる時間が長い、または繰り返す" },
-    { id: "mix", label: "混合・調製", detail: "複数の薬剤を取り扱う" },
-  ],
-  machine: [
-    { id: "vehicle", label: "重機・フォークリフト周辺", detail: "車両との接触や死角が気になる" },
-    { id: "moving", label: "稼働中の機械の近く", detail: "回転体・搬送機・プレス等がある" },
-    { id: "restricted", label: "危険区域への立入り", detail: "吊り荷下、旋回範囲、開口部を区画したい" },
-  ],
-  noise: [
-    { id: "grinding", label: "研削・切断・はつり", detail: "騒音と飛散物が同時にある" },
-    { id: "loud", label: "大きな機械音", detail: "耳への負担や会話のしづらさがある" },
-    { id: "welding", label: "溶接・光を使う作業", detail: "火花や光線から目・顔を守りたい" },
-  ],
-  foot: [
-    { id: "slip", label: "濡れた床・油・段差", detail: "滑り・つまずきの可能性がある" },
-    { id: "puncture", label: "釘・金属片・解体材", detail: "踏抜きや足のけがが気になる" },
-    { id: "impact", label: "荷役・落下物", detail: "つま先への落下・挟まれが気になる" },
-  ],
-};
-
-const CONDITIONS: Record<string, readonly Option[]> = {
-  respiratory: [
-    { id: "ventilated", label: "換気が効いている", detail: "局所排気や十分な換気がある" },
-    { id: "limited", label: "換気が弱い・屋内", detail: "濃度や空気の流れを確認したい" },
-    { id: "oxygen", label: "酸素濃度が不明・低いおそれ", detail: "密閉空間、槽、ピットなど" },
-  ],
-  fall: [
-    { id: "anchor", label: "取付設備がある", detail: "親綱・フック取付点を確認できる" },
-    { id: "no-anchor", label: "取付設備が未確認", detail: "先に足場・手すり・取付方法を整えたい" },
-  ],
-  chemical: [
-    { id: "sds", label: "SDSが手元にある", detail: "対象物質・濃度・使用時間を確認できる" },
-    { id: "no-sds", label: "SDS・成分が未確認", detail: "容器表示だけ、または混合物で不明" },
-  ],
-  machine: [
-    { id: "layout", label: "動線を区画できる", detail: "人と車両・機械を分ける場所がある" },
-    { id: "shared", label: "人と機械の動線が重なる", detail: "見通しや合図の方法に不安がある" },
-  ],
-  noise: [
-    { id: "short", label: "短時間・断続的", detail: "限定した時間だけ発生する" },
-    { id: "long", label: "長時間・毎日", detail: "ばく露の確認と継続対策が必要" },
-  ],
-  foot: [
-    { id: "outdoor", label: "屋外・不整地", detail: "雨天、泥、段差がある" },
-    { id: "indoor", label: "屋内・倉庫", detail: "油、水、通路の混雑がある" },
-  ],
-};
-
-function buildRecommendation(selection: Selection): Recommendation {
-  const { category, task, condition } = selection;
-  if (category.id === "chemical" && condition.id === "no-sds") {
-    return {
-      title: "成分が分かるまで、保護具の購入候補を保留します",
-      summary: "対象物質・濃度・接触時間が不明なままでは、手袋や防護服の耐透過性を照合できません。供給者からSDSを入手し、作業と飛散範囲を確認してください。",
-      officialHref: "https://www.mhlw.go.jp/content/11300000/001670143.pdf",
-      officialLabel: "厚生労働省｜皮膚障害等防止用保護具の選定マニュアル",
-      checks: ["供給者からSDSと物質名・濃度を入手する", "接触時間・飛散範囲・混合の有無を確認する", "保護具の素材と耐透過データを責任者と照合する"],
-      urgent: true,
-      withholdPurchase: true,
-    };
-  }
-  if (category.id === "respiratory") {
-    const limitedVentilation = condition.id === "limited";
-    if (task.id === "unknown") {
-      return {
-        title: "危険有害性が分かるまで、製品推薦を保留します",
-        summary: "何を吸うおそれがあるか不明な状態では、ろ過式マスクを選べません。SDS・容器表示を入手し、粉じん／蒸気・ガス／酸欠を切り分け、酸素濃度・濃度・換気を確認してから選定を再開してください。",
-        officialHref: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000099121_00005.html",
-        officialLabel: "厚生労働省｜化学物質による労働災害防止",
-        checks: ["SDSと容器表示を入手する", "入場前に酸素濃度と有害ガスの可能性を確認する", "粉じん・蒸気・ガスを切り分け、濃度・換気・作業時間を確認する"],
-        urgent: true,
-        withholdPurchase: true,
-      };
-    }
-    if (task.id === "confined" || condition.id === "oxygen") {
-      return {
-        title: "まず酸素・有害ガスを測るための候補",
-        query: "酸素濃度計 ガス検知器 作業用 校正",
-        summary: "酸欠や有害ガスのおそれがある場所は、防じん・防毒マスクを先に買う入口ではありません。入る前に測定、換気、監視、救助手順を整えるための機器・体制を確認します。",
-        officialHref: MHLW_OXYGEN_RULES_URL,
-        officialLabel: "厚生労働省｜酸素欠乏症等防止対策",
-        checks: ["酸素濃度と有害ガスを入坑前・作業中に測れるか", "換気、監視人、救助手順を先に決めたか", "必要な呼吸用保護具の方式は責任者・専門家と確認したか"],
-        urgent: true,
-      };
-    }
-    if (task.id === "vapor") {
-      return {
-        title: "有機ガス用防毒マスク（製品群）の購入候補",
-        query: `スリーエム ジャパン 面体 6000 有機ガス用吸収缶 6001${limitedVentilation ? " 屋内 換気 濃度測定" : ""}`,
-        summary: `塗装・洗浄などの蒸気には、対象物質に合う吸収缶を使う防毒マスクの製品群から探します。粉じん用だけで置き換えず、SDSの記載を基に絞り込みます。${limitedVentilation ? "換気が弱い場所では、購入前に濃度測定と局所排気の改善を優先します。" : ""}`,
-        officialHref: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000099121_00005.html",
-        officialLabel: "厚生労働省｜化学物質による労働災害防止",
-        checks: ["SDSで対象物質と吸収缶の対象を照合", "国家検定合格標章と面体・吸収缶の組み合わせを確認", "交換時期、フィット、換気対策を確認", ...(limitedVentilation ? ["作業環境の濃度を測定し、局所排気の改善後に必要な防護係数を確認"] : [])],
-        verifiedCandidate: {
-          name: "3M 面体6000シリーズ＋有機ガス用吸収缶6001",
-          maker: "スリーエム ジャパン",
-          reason:
-            "メーカー公式で6001を有機ガス用・国家検定合格品とし、面体6000シリーズとの組合せを明記。面体サイズと対象物質・濃度の確認が必要です。",
-          href: "https://www.3mcompany.jp/3M/ja_JP/p/d/v101817450/",
-        },
-      };
-    }
-    return {
-      title: "防じんマスク（製品群）の購入候補",
-      query: `重松製作所 DD02V-S2-2K DS2 排気弁付${limitedVentilation ? " 屋内 集じん 換気" : ""}`,
-      summary: `研削・清掃などの粉じん作業では、国家検定合格表示のある防じんマスクの製品群から、粉じんの性状と作業条件に合うものを探します。${limitedVentilation ? "換気が弱い場所では、集じん・局所排気と濃度確認を先に組み合わせます。" : ""}`,
-      officialHref: MHLW_DUST_MASK_GUIDANCE_URL,
-      officialLabel: "厚生労働省｜粉じん障害防止対策",
-      checks: ["粉じんの種類・濃度・作業時間を確認", "国家検定合格標章とろ過材の区分を確認", "顔への密着、ひげ・眼鏡との干渉、交換時期を確認", ...(limitedVentilation ? ["集じん・局所排気を改善し、改善後の濃度で必要な区分を確認"] : [])],
-      verifiedCandidate: {
-        name: "DD02V-S2-2K（DS2・排気弁付）",
-        maker: "重松製作所",
-        reason:
-          "メーカー公式の使い捨て式防じんマスク一覧でDS2・排気弁付を確認。顔面との密着性と、対象粉じんに必要な区分を確認して選びます。",
-        href: "https://www.sts-japan.com/products/dd/",
-      },
-    };
-  }
-
-  const profiles: readonly RecommendationProfile[] = [
-    {
-      categoryId: "fall", taskIds: ["scaffold"],
-      title: "足場・屋根用フルハーネスの候補", query: "フルハーネス 足場 屋根 新規格 ランヤード",
-      summary: "足場・屋根では、作業高さ、移動範囲、落下距離に合うフルハーネスとランヤードを絞ります。",
-      officialHref: "https://www.mhlw.go.jp/web/t_doc?dataId=74ab6770&dataType=0&pageNo=1",
-      officialLabel: "厚生労働省｜墜落制止用器具の規格",
-      checks: ["作業高さ、落下距離、取付点を確認", "使用可能質量とランヤードの仕様を確認", "始業前点検・救助計画を確認"],
-      verifiedCandidate: {
-        name: "3M DBI-サラ エグゾフィット ライト 1114080N",
-        maker: "スリーエム ジャパン",
-        reason:
-          "メーカー公式で墜落制止用器具の規格適合を確認できるSサイズの具体候補です。体格に応じたサイズ、ランヤード、取付設備、落下距離は別に照合します。",
-        href: "https://www.3mcompany.jp/3M/ja_JP/p/d/v100838081/",
-      },
-    },
-    { categoryId: "fall", taskIds: ["opening"], title: "開口部を塞ぐ養生・手すりの候補", query: "開口部 養生 手すり 親綱 支柱 転落防止", summary: "開口部・縁端では、個人用保護具より先に蓋・囲い・手すりで落下経路をなくす候補を絞ります。", officialHref: "https://www.mhlw.go.jp/web/t_doc?dataId=74003000&dataType=0&pageNo=9", officialLabel: "厚生労働省｜労働安全衛生規則第519条（開口部等）", checks: ["開口部を固定蓋または手すりで塞げるか", "蓋の固定・表示と復旧責任者を確認", "残る危険に対する取付点と器具を確認"] },
-    { categoryId: "fall", taskIds: ["ladder"], title: "脚立・はしごの安定対策候補", query: "脚立 はしご 転倒防止 アウトリガー 作業用", summary: "脚立・はしごでは、より安全な作業床への置換を検討し、使用する場合は安定・固定用品を絞ります。", officialHref: "https://www.mhlw.go.jp/new-info/kobetu/roudou/gyousei/anzen/dl/170322-1.pdf", officialLabel: "厚生労働省｜はしご・脚立の安全使用", checks: ["作業台・足場に置き換えられないか", "設置角度、天板使用禁止、転位防止を確認", "昇降時に三点支持を保てるか"] },
-    {
-      categoryId: "chemical", taskIds: ["splash"], title: "薬液飛散用ゴーグル・フェイスシールド候補", query: "薬液 ゴーグル フェイスシールド 間接通気", summary: "注入・移し替えでは、正面・側面からの飛沫を防ぐ目・顔面保護具を中心に絞ります。",
-      officialHref: "https://www.mhlw.go.jp/content/11300000/001670143.pdf",
-      officialLabel: "厚生労働省｜保護具の選定マニュアル",
-      checks: ["SDSの眼・皮膚有害性を確認", "ゴーグルと顔面保護を組み合わせる必要を確認", "緊急洗眼・シャワーまでの動線を確認"],
-    },
-    { categoryId: "chemical", taskIds: ["contact"], title: "長時間接触用の化学防護手袋候補", query: "化学防護手袋 耐透過 長時間 洗浄", summary: "洗浄・拭取りでは、対象物質と接触時間に合う耐透過・耐劣化データのある手袋を絞ります。", officialHref: "https://www.mhlw.go.jp/content/11300000/001670143.pdf", officialLabel: "厚生労働省｜保護具の選定マニュアル", checks: ["SDSの物質名・濃度・接触時間を確認", "メーカーの耐透過時間と劣化データを照合", "交換頻度と脱着・廃棄手順を決める"] },
-    { categoryId: "chemical", taskIds: ["mix"], title: "混合・調製用の全身防護候補", query: "化学防護服 エプロン ゴーグル 耐薬品 混合", summary: "混合・調製では反応・発熱・飛散範囲も確認し、手・目だけでなく衣類を含む防護を絞ります。", officialHref: "https://www.mhlw.go.jp/content/11300000/001670143.pdf", officialLabel: "厚生労働省｜保護具の選定マニュアル", checks: ["混合禁止・反応性・発熱をSDSで確認", "飛散範囲に応じた手・目・顔・身体の防護を確認", "局所排気と緊急時手順を確認"] },
-    {
-      categoryId: "machine", taskIds: ["vehicle"], title: "車両接近警報・動線分離用品の候補", query: "フォークリフト 接近警報 人車分離 LED ライン", summary: "重機・フォークリフトでは、人車分離を基本に死角を補う警報・表示用品を絞ります。",
-      officialHref: "https://www.mhlw.go.jp/content/11300000/000628483.pdf",
-      officialLabel: "厚生労働省｜フォークリフトの接触防止（安衛則第151条の7）",
-      checks: ["人と車両の動線を物理的に分けられるか", "死角・後退・交差箇所を現地確認", "警報の検知範囲と停止ルールを確認"],
-    },
-    { categoryId: "machine", taskIds: ["moving"], title: "機械停止・ロックアウト用品の候補", query: "ロックアウト タグアウト キット 機械 メンテナンス", summary: "回転体・搬送機・プレスでは、接近警報ではなく停止・隔離・施錠を軸に用品を絞ります。", officialHref: "https://www.mhlw.go.jp/web/t_doc?dataId=74003000&dataType=0&pageNo=4", officialLabel: "厚生労働省｜労働安全衛生規則第107・108条（掃除等の運転停止）", checks: ["清掃・調整・復旧時に動力を遮断できるか", "残留エネルギーと再起動を防げるか", "施錠者と解除手順を決めたか"] },
-    { categoryId: "machine", taskIds: ["restricted"], title: "危険区域の区画・立入表示候補", query: "立入禁止 バリケード コーンバー 危険区域 表示", summary: "吊り荷下・旋回範囲などには、境界が一目で分かり勝手に外れにくい区画用品を絞ります。", officialHref: "https://www.mhlw.go.jp/content/11300000/001124694.pdf", officialLabel: "厚生労働省｜危険区域の立入禁止措置", checks: ["危険区域を現場で見える形にできるか", "区画の移設・解除権限を決めたか", "多言語表示と夜間視認性を確認"] },
-    {
-      categoryId: "noise", taskIds: ["grinding"], title: "研削用の耳・目・顔面保護候補", query: "研削 フェイスシールド 保護めがね イヤーマフ", summary: "研削・切断では、騒音に加えて高速飛来物から目・顔を守る組合せを絞ります。",
-      officialHref: "https://www.mhlw.go.jp/content/11300000/000609001.pdf",
-      officialLabel: "厚生労働省｜研削作業時の保護めがね",
-      checks: ["砥石・切粉の飛散方向を確認", "保護めがねとフェイスシールドの併用を確認", "騒音値と必要な遮音性能を確認"],
-    },
-    { categoryId: "noise", taskIds: ["loud"], title: "騒音レベルに合う耳栓・イヤーマフ候補", query: "耳栓 イヤーマフ SNR NRR 工場 騒音", summary: "大きな機械音では、測定値とばく露時間に合い、警報・会話も考慮できる聴覚保護具を絞ります。", officialHref: "https://www.mhlw.go.jp/web/t_doc?dataId=00tc7618&dataType=1&pageNo=1", officialLabel: "厚生労働省｜騒音障害防止ガイドライン", checks: ["騒音値とばく露時間を測る", "必要以上の遮音で警報を聞き逃さないか確認", "耳栓の装着教育と衛生管理を確認"] },
-    { categoryId: "noise", taskIds: ["welding"], title: "溶接光・火花用の遮光面候補", query: "溶接面 自動遮光 遮光度 保護めがね", summary: "溶接では、工程に合う遮光度と火花への耐性を備えた面・保護めがねを絞ります。", officialHref: "https://www.mhlw.go.jp/content/11300000/001411590.pdf", officialLabel: "厚生労働省｜溶接・熱切断時の有害光線対策", checks: ["溶接方法・電流に合う遮光度を確認", "側方光・飛散物への保護範囲を確認", "呼吸用保護具・ヘルメットとの干渉を確認"] },
-    {
-      categoryId: "foot", taskIds: ["slip"], title: "床面に合う耐滑作業靴候補", query: "耐滑 作業靴 油 水 SRC 厨房 倉庫", summary: "濡れ・油のある床では、床材と汚れに合う耐滑性と靴底形状を軸に絞ります。",
-      officialHref: MHLW_SAFETY_FOOTWEAR_URL,
-      officialLabel: "厚生労働省｜労働安全衛生規則（履物）",
-      checks: ["水・油・粉体など滑りの原因を確認", "床材に合う耐滑性能と靴底を確認", "清掃方法と靴底の交換基準を決める"],
-    },
-    { categoryId: "foot", taskIds: ["puncture"], title: "踏抜き防止板入り安全靴候補", query: "踏抜き防止 安全靴 踏抜き抵抗 解体", summary: "釘・金属片・解体材には、靴底の踏抜き抵抗を確認できる安全靴を絞ります。", officialHref: MHLW_SAFETY_FOOTWEAR_URL, officialLabel: "厚生労働省｜労働安全衛生規則（履物）", checks: ["釘・金属片の長さと散在範囲を確認", "踏抜き抵抗を示す規格・仕様を確認", "中敷きだけに頼らず靴全体の適合を確認"] },
-    { categoryId: "foot", taskIds: ["impact"], title: "先芯・甲プロテクタ付き安全靴候補", query: "安全靴 先芯 甲プロテクタ 荷役 JIS", summary: "荷役・落下物には、つま先保護と必要に応じ甲部保護を備える安全靴を絞ります。", officialHref: MHLW_SAFETY_FOOTWEAR_URL, officialLabel: "厚生労働省｜労働安全衛生規則（履物）", checks: ["落下物の重量・形状と挟まれ箇所を確認", "先芯・甲プロテクタの規格を確認", "サイズ、足幅、歩行時の安定性を確認"] },
-  ];
-
-  const conditionProfiles: readonly ConditionProfile[] = [
-    { categoryId: "fall", conditionIds: ["anchor"], label: "取付設備を確認済み", queryTerms: "取付点 適合", guidance: "取付点の位置と強度を確認し、落下距離に合う器具へ絞ります。", check: "取付設備の位置・強度・使用人数を記録する" },
-    { categoryId: "fall", conditionIds: ["no-anchor"], label: "取付設備は未確認", queryTerms: "仮設手すり 親綱 支柱", guidance: "個人用保護具の購入より先に、作業床・手すり・親綱と取付方法を計画します。", check: "取付点が確定するまで高所作業を開始しない" },
-    { categoryId: "chemical", conditionIds: ["sds"], label: "SDS照合が可能", queryTerms: "耐透過 データ", guidance: "SDSの物質名・濃度をメーカーの耐透過表と照合して候補を狭めます。", check: "SDSの版、物質名、濃度を製品選定記録に残す" },
-    { categoryId: "chemical", conditionIds: ["no-sds"], label: "成分確認を優先", queryTerms: "SDS 取り寄せ 保護具", guidance: "成分不明のまま材質を決めず、供給者からSDSを入手するまで暫定措置を取ります。", check: "SDS入手前は接触・混合を避け、責任者に確認する" },
-    { categoryId: "machine", conditionIds: ["layout"], label: "物理分離できる現場", queryTerms: "固定柵 ガードレール", guidance: "警報だけに頼らず、固定柵や専用通路による物理分離を優先します。", check: "区画が作業中に外されない固定方法を確認する" },
-    { categoryId: "machine", conditionIds: ["shared"], label: "交差動線を重点対策", queryTerms: "交差点 センサー 警告灯", guidance: "動線が重なる箇所を限定し、一時停止・合図・検知を組み合わせます。", check: "交差点ごとの優先ルールと停止位置を表示する" },
-    { categoryId: "noise", conditionIds: ["short"], label: "短時間作業向け", queryTerms: "着脱 短時間", guidance: "着脱しやすさと確実な装着を重視し、短時間でも保護具なしの作業をなくします。", check: "作業開始前から終了まで装着できる運用を確認する" },
-    { categoryId: "noise", conditionIds: ["long"], label: "長時間ばく露向け", queryTerms: "長時間 低圧迫 測定", guidance: "測定と工学的対策を優先し、長時間装着できる圧迫感・通気性も確認します。", check: "個人ばく露測定と休止・ローテーションを検討する" },
-    { categoryId: "foot", conditionIds: ["outdoor"], label: "屋外・不整地向け", queryTerms: "防水 不整地 ラグソール", guidance: "泥・雨・傾斜で目詰まりしにくい靴底と防水性を軸に絞ります。", check: "泥・雨天・斜面でのグリップと足首支持を確認する" },
-    { categoryId: "foot", conditionIds: ["indoor"], label: "屋内・倉庫向け", queryTerms: "倉庫 油床 軽量", guidance: "床面の油・水への耐滑性と、長時間歩行の負担を軸に絞ります。", check: "床材・油への耐滑性と通路での取り回しを確認する" },
-  ];
-
-  const profile = profiles.find((item) => item.categoryId === category.id && item.taskIds.includes(task.id));
-  const conditionProfile = conditionProfiles.find((item) => item.categoryId === category.id && item.conditionIds.includes(condition.id));
-  if (!profile || !conditionProfile) {
-    throw new Error(`Safety goods recommendation profile is missing: ${category.id}/${task.id}/${condition.id}`);
-  }
-  const verifiedCandidate = category.id === "fall" && task.id === "scaffold" && condition.id === "anchor" ? profile.verifiedCandidate : undefined;
-  return {
-    ...profile,
-    title: `${profile.title}｜${conditionProfile.label}`,
-    query: verifiedCandidate
-      ? `${verifiedCandidate.maker} ${verifiedCandidate.name}`
-      : `${profile.query} ${conditionProfile.queryTerms}`,
-    summary: `${profile.summary}${conditionProfile.guidance}`,
-    checks: [...profile.checks, conditionProfile.check],
-    verifiedCandidate,
-  };
-}
-
-function affiliateClick(platform: "amazon" | "rakuten", recommendation: Recommendation) {
-  trackEvent("affiliate_click", {
-    platform,
-    product_id: `wizard-${recommendation.query ?? "withheld"}`,
-    product_name: recommendation.title,
-    page_location: "goods_selection_wizard",
-  });
-}
-
-export function SafetyGoodsWizard() {
-  const [categoryId, setCategoryId] = useState<string | null>(null);
-  const [taskId, setTaskId] = useState<string | null>(null);
-  const [conditionId, setConditionId] = useState<string | null>(null);
-
-  const category = CATEGORIES.find((item) => item.id === categoryId) ?? null;
-  const task = category ? TASKS[category.id].find((item) => item.id === taskId) ?? null : null;
-  const condition = category ? CONDITIONS[category.id].find((item) => item.id === conditionId) ?? null : null;
-  const recommendation = useMemo(
-    () => (category && task && condition ? buildRecommendation({ category, task, condition }) : null),
-    [category, task, condition],
-  );
-  const photoCategory = category && task
-    ? PUBLIC_SAFETY_GOODS_CATEGORIES.find((item) => item.id === photoCategoryId(category.id, task.id))
-    : null;
-  const photoFeature = category && task ? photoFeatureId(category.id, task.id) : undefined;
-  const respiratorySharedIntent = category?.id === "respiratory"
-    ? task?.id === "dust" ? "dust" : task?.id === "vapor" ? "gas" : "unknown"
-    : null;
-  const respiratorySharedHref = respiratorySharedIntent
-    ? condition?.id === "oxygen" || task?.id === "confined"
-      ? "/goods?category=respiratory&intent=unknown&feature=oxygen"
-      : task?.id === "unknown"
-        ? "/goods?category=respiratory&intent=unknown&feature=unknown"
-        : `/goods?category=respiratory&intent=${respiratorySharedIntent}`
-    : null;
-
-  function chooseCategory(id: string) {
-    setCategoryId(id);
-    setTaskId(null);
-    setConditionId(null);
-  }
-
-  function reset() {
-    setCategoryId(null);
-    setTaskId(null);
-    setConditionId(null);
-  }
-
-  const step = recommendation ? 4 : condition ? 4 : task ? 3 : category ? 2 : 1;
-  const options = !category ? CATEGORIES : !task ? TASKS[category.id] : CONDITIONS[category.id];
-  const prompt = !category
-    ? "1. どの危険がいちばん近いですか？"
-    : !task
-      ? "2. どんな作業ですか？"
-      : "3. 現場の条件は？";
-
-  return (
-    <section aria-labelledby="goods-wizard-title" className="overflow-hidden rounded-[2rem] border border-emerald-200 bg-white shadow-sm">
-      <div className="bg-gradient-to-r from-emerald-800 via-emerald-700 to-teal-700 px-5 py-6 text-white sm:px-7">
-        <p className="text-xs font-black tracking-[.16em] text-emerald-100">PPE PICKER</p>
-        <h2 id="goods-wizard-title" className="mt-2 text-2xl font-black tracking-tight sm:text-3xl">3つ選んで保護具候補を見る</h2>
-        <p className="mt-2 max-w-3xl text-sm font-medium leading-6 text-emerald-50">カテゴリ → 作業 → 現場条件の3つを選ぶだけ。型式を決め打ちせず、確認すべき条件と購入検索を一緒に出します。</p>
-      </div>
-
-      <div className="p-5 sm:p-7">
-        <ol className="grid grid-cols-4 gap-1 text-center text-[11px] font-black sm:gap-2 sm:text-xs" aria-label="選定の手順">
-          {["危険", "作業", "条件", "候補"].map((label, index) => (
-            <li key={label} className={`rounded-full px-2 py-2 ${step >= index + 1 ? "bg-emerald-700 text-white" : "bg-slate-100 text-slate-600"}`}>{index + 1}. {label}</li>
-          ))}
-        </ol>
-
-        {!recommendation ? (
-          <div className="mt-6">
-            <div className="flex items-center justify-between gap-3">
-              <h3 className="text-lg font-black text-slate-950">{prompt}</h3>
-              {category ? <button type="button" onClick={reset} className="inline-flex min-h-10 items-center gap-1 rounded-lg px-2 text-xs font-bold text-slate-600 hover:bg-slate-100"><RotateCcw className="h-3.5 w-3.5" />最初から</button> : null}
-            </div>
-            <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {options.map((option) => (
-                <button
-                  key={option.id}
-                  type="button"
-                  onClick={() => !category ? chooseCategory(option.id) : !task ? setTaskId(option.id) : setConditionId(option.id)}
-                  className="group min-h-28 rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-emerald-500 hover:bg-emerald-50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:ring-offset-2"
-                >
-                  <span className="flex items-start justify-between gap-3"><span className="text-base font-black text-slate-950 group-hover:text-emerald-900">{option.label}</span><span className="flex h-6 w-6 items-center justify-center rounded-full bg-slate-100 text-slate-500 group-hover:bg-emerald-700 group-hover:text-white">›</span></span>
-                  <span className="mt-2 block text-sm leading-6 text-slate-600">{option.detail}</span>
-                </button>
-              ))}
-            </div>
-            {category ? <button type="button" onClick={() => { setTaskId(null); setConditionId(null); setCategoryId(null); }} className="mt-4 inline-flex min-h-11 items-center gap-2 text-sm font-bold text-emerald-800 hover:underline"><ArrowLeft className="h-4 w-4" />危険の選択に戻る</button> : null}
-          </div>
-        ) : (
-          <div className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50/70 p-5 sm:p-6">
-            <div className="flex flex-wrap items-start justify-between gap-4">
-              <div>
-                <p className="inline-flex items-center gap-2 text-xs font-black tracking-[.14em] text-emerald-800"><ShieldCheck className="h-4 w-4" />YOUR NEXT STEP</p>
-                <h3 className="mt-2 text-xl font-black text-slate-950 sm:text-2xl">{recommendation.title}</h3>
-              </div>
-              <button type="button" onClick={reset} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-emerald-700 bg-white px-3 text-sm font-black text-emerald-800 hover:bg-emerald-100"><RotateCcw className="h-4 w-4" />選び直す</button>
-            </div>
-            <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-700">{recommendation.summary}</p>
-            {recommendation.verifiedCandidate && !respiratorySharedIntent ? (
-              <div className="mt-4 rounded-2xl border-2 border-emerald-700 bg-white p-4">
-                <p className="text-xs font-black tracking-[.12em] text-emerald-800">
-                  公式情報を確認した具体候補
-                </p>
-                <div className="mt-2 flex flex-wrap items-start justify-between gap-3">
-                  <div>
-                    <h4 className="text-lg font-black text-slate-950">
-                      {recommendation.verifiedCandidate.name}
-                    </h4>
-                    <p className="text-xs font-bold text-slate-600">
-                      {recommendation.verifiedCandidate.maker}
-                    </p>
-                    <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-700">
-                      {recommendation.verifiedCandidate.reason}
-                    </p>
-                  </div>
-                  <a
-                    href={recommendation.verifiedCandidate.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-emerald-700 px-4 text-sm font-black text-emerald-900 hover:bg-emerald-50"
-                  >
-                    メーカー公式
-                    <ExternalLink className="h-4 w-4" aria-hidden="true" />
-                  </a>
-                </div>
-              </div>
-            ) : null}
-            {!respiratorySharedIntent && !recommendation.withholdPurchase && photoCategory ? (
-              <GoodsProductCarousel key={`${photoCategory.id}:${photoFeature ?? "all"}`} categoryId={photoCategory.id} categoryName={photoCategory.name} featureId={photoFeature} />
-            ) : null}
-            <div className="mt-5 grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
-              <div>
-                <p className="text-xs font-black tracking-[.12em] text-slate-700">購入前に見ること</p>
-                <ul className="mt-2 space-y-2">
-                  {recommendation.checks.map((check) => <li key={check} className="flex gap-2 text-sm leading-6 text-slate-800"><Check className="mt-1 h-4 w-4 shrink-0 text-emerald-700" />{check}</li>)}
-                </ul>
-              </div>
-              <div className="grid gap-2 sm:grid-cols-3 lg:grid-cols-1">
-                <a href={recommendation.officialHref} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-emerald-700 bg-white px-4 text-sm font-black text-emerald-900 hover:bg-emerald-100">公式資料 <ExternalLink className="h-4 w-4" /></a>
-                {respiratorySharedIntent ? (
-                  <a href={respiratorySharedHref ?? "/goods?category=respiratory"} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-emerald-800 px-4 text-center text-sm font-black text-white hover:bg-emerald-900 sm:col-span-2 lg:col-span-1"><ShieldCheck className="h-4 w-4 shrink-0" />{condition?.id === "oxygen" || task?.id === "confined" || task?.id === "unknown" ? "停止条件を確認する" : "6つの安全条件を確認する"}</a>
-                ) : recommendation.withholdPurchase ? (
-                  <a href="/contact/automation-email?subject=ppe-selection" className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-emerald-800 px-4 text-sm font-black text-white hover:bg-emerald-900 sm:col-span-2 lg:col-span-1"><ShieldCheck className="h-4 w-4" />選定を相談する</a>
-                ) : recommendation.query ? (
-                  <>
-                    <a href={generateAmazonAffiliateUrl(recommendation.query)} target="_blank" rel="noopener noreferrer sponsored" onClick={() => affiliateClick("amazon", recommendation)} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-amber-700 px-4 text-sm font-black text-white hover:bg-amber-800"><Search className="h-4 w-4" />Amazonで候補を見る</a>
-                    <a href={generateRakutenSearchUrl(recommendation.query)} target="_blank" rel="noopener noreferrer sponsored" onClick={() => affiliateClick("rakuten", recommendation)} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-rose-700 px-4 text-sm font-black text-white hover:bg-rose-800"><Search className="h-4 w-4" />楽天で候補を見る</a>
-                  </>
-                ) : null}
-              </div>
-            </div>
-            <p className={`mt-5 rounded-xl px-4 py-3 text-xs font-semibold leading-6 ${recommendation.urgent ? "bg-rose-100 text-rose-950" : "bg-white text-slate-700"}`}>
-              {respiratorySharedIntent ? recommendation.urgent ? "酸欠・有害ガスのおそれがある場所では、安易に入らず、測定・換気・監視・救助手順を先に確認してください。通常の商品候補は表示しません。" : "呼吸用保護具は、この結果だけで商品を表示しません。共通フローで酸素・物質・濃度・混在・緊急用途・給気式の要否を個別に確認してください。" : recommendation.withholdPurchase ? "危険有害性が特定できるまで、通販の商品候補は表示しません。SDS・酸素濃度・作業環境を確認し、判断できない場合は専門家へ相談してください。" : recommendation.urgent ? "酸欠・有害ガスのおそれがある場所では、安易に入らず、測定・換気・監視・救助手順を先に確認してください。" : "これは選んだ条件からの購入候補（製品群）です。型式・規格・価格・在庫・適合性は、公式資料と製品説明で購入前に確認してください。"}
-            </p>
-          </div>
-        )}
-      </div>
-    </section>
-  );
+export function SafetyGoodsWizard({ initialCategory, onReturnToDirectory }: { initialCategory?: string; onReturnToDirectory?: () => void }) {
+ const snapshot = useSyncExternalStore(subscribe, readSnapshot, () => '[]');
+ const saved: string[] = JSON.parse(snapshot);
+ const answers = initialCategory && saved[0] !== initialCategory ? [initialCategory] : saved;
+ const category = CATEGORIES.find(item => item.id === answers[0]);
+ const task = category && TASKS[category.id]?.find(item => item.id === answers[1]);
+ const questions = category ? getPpeQuestions(category.id) : [];
+ const finished = Boolean(task && (answers.length >= questions.length + 3 || answers.at(-1) === 'result'));
+ const result = task && finished ? getPpeResult(answers.filter(value => value !== 'result')) : null;
+ const index = Math.max(0, answers.length - 3);
+ const question = task && answers.length >= 3 ? questions[index] : null;
+ const options = !category ? CATEGORIES : !task ? TASKS[category.id] : answers.length < 3 ? [...CONDITIONS[category.id], { id: 'unknown', label: '分からない・未確認', detail: '確認方法を結果で見られます' }] : [
+  { id: 'confirmed', label: question?.id === 'emergency' ? '通常作業・救助用途ではない' : question?.id === 'supplied' ? '担当者と照合・ろ過式を検討可能' : '記録・資料で確認した', detail: question?.id === 'mixture' ? '混在の有無と必要機能を照合済み' : '必要な条件を担当者・資料と照合済み' },
+  { id: 'unknown', label: '分からない・未確認', detail: '推測せず、確認事項を残す' },
+  { id: 'unsafe', label: question?.id === 'emergency' ? '緊急・救助で使う' : question?.id === 'supplied' ? '給気式が必要・検討中' : '条件を満たせない', detail: '通常の商品候補を保留する' },
+ ];
+ const heading = useRef<HTMLHeadingElement>(null);
+ const previous = useRef(snapshot);
+ useEffect(() => {
+  if (previous.current === snapshot) return;
+  previous.current = snapshot;
+  heading.current?.focus({ preventScroll: true });
+  heading.current?.scrollIntoView?.({ block: 'start', behavior: 'instant' });
+ }, [snapshot]);
+ const title = !category ? '何の作業・危険に備えますか？' : !task ? 'どんな作業ですか？' : answers.length < 3 ? '現場の条件は？' : question?.title ?? '確認結果';
+ const reset = () => { if (initialCategory) onReturnToDirectory?.(); navigate([]); };
+ const back = () => { if (answers.length <= 1) { reset(); return; } navigate(answers.slice(0, -1)); };
+ return (
+  <section id="goods-guided-selection" tabIndex={-1} aria-labelledby="goods-wizard-title" className="scroll-mt-24 overflow-hidden rounded-3xl border border-emerald-200 bg-white shadow-sm">
+   <div className="flex items-center justify-between gap-3 bg-emerald-900 px-4 py-4 text-white sm:px-6">
+    <div><p className="text-xs font-bold text-emerald-100">作業 → 条件 → 確認結果</p><h2 id="goods-wizard-title" className="mt-1 text-xl font-black sm:text-2xl">絵から選んで、ひとつずつ確認</h2><p className="mt-1 text-sm text-emerald-50">分からない項目は、そのまま進めて大丈夫。</p></div>
+    <Mascot variant="ppe-check" size="lg" alt="" className="hidden shrink-0 sm:block" />
+   </div>
+   <div className="p-4 sm:p-6">
+    <div className="mb-4 flex flex-wrap items-center gap-2 text-xs font-bold text-slate-600" aria-label="選択した作業">
+     <span className="rounded-full bg-emerald-50 px-3 py-2 text-emerald-900">{category ? PPE_WORK_LABELS[category.id] : '作業を選ぶ'}</span>
+     {task && <><ArrowRight className="h-3 w-3" aria-hidden="true" /><span>{task.label}</span></>}
+     {task && !result && <span className="ml-auto">条件 {Math.min(answers.length - 1, questions.length + 1)} / {questions.length + 1}</span>}
+    </div>
+    {!result ? <>
+     <h3 ref={heading} tabIndex={-1} className="scroll-mt-24 text-lg font-black text-slate-950 focus:outline-none">{title}</h3>
+     {question && <p className="mt-2 text-sm leading-6 text-slate-700">{question.detail}</p>}
+     {question?.prohibition && <p className="mt-3 rounded-xl bg-amber-50 p-3 text-sm font-semibold leading-6 text-amber-950">{question.prohibition}</p>}
+     <div className={category ? 'mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3' : 'mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3'}>
+      {options?.map(option => <button key={option.id} type="button" onClick={() => navigate([...answers, option.id])} className="group flex min-h-24 flex-col rounded-2xl border-2 border-slate-200 bg-white p-3 text-left hover:border-emerald-700 hover:bg-emerald-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700 sm:p-4">
+       {!category && <span className="relative mb-2 block h-24 w-full sm:h-28"><Image src={PPE_WORK_IMAGES[option.id]} alt="" fill sizes="(max-width: 640px) 150px, 240px" className="object-contain" /></span>}
+       <span className="text-sm font-black leading-6 text-slate-950 sm:text-base">{!category ? PPE_WORK_LABELS[option.id] : option.label}</span>
+       {category && !question && <span className="mt-1 text-xs leading-5 text-slate-600">{option.detail}</span>}
+       {question && <span className="mt-1 text-xs leading-5 text-slate-600">{option.detail}</span>}
+      </button>)}
+     </div>
+     {question && <details className="mt-3 rounded-xl border border-slate-200 p-3"><summary className="flex min-h-11 cursor-pointer items-center gap-2 text-sm font-bold text-slate-700"><CircleHelp className="h-4 w-4" aria-hidden="true" />確認方法を見る</summary><p className="mt-2 text-sm leading-7 text-slate-700">{question.check}</p></details>}
+     {task && <button type="button" onClick={() => navigate([...answers, 'result'])} className="mt-3 min-h-11 text-sm font-semibold text-emerald-800 underline">未確認のまま確認事項を見る</button>}
+    </> : <div aria-live="polite">
+     <p className={result.blocked ? 'inline-flex items-center gap-2 rounded-full bg-amber-100 px-3 py-2 text-sm font-bold text-amber-950' : 'inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-2 text-sm font-bold text-emerald-950'}>{result.blocked ? <TriangleAlert className="h-4 w-4" aria-hidden="true" /> : <ShieldCheck className="h-4 w-4" aria-hidden="true" />}{result.blocked ? '選定を保留・確認が必要' : '条件の整理が完了・適合の確認は別途必要'}</p>
+     <h3 ref={heading} tabIndex={-1} className="mt-3 scroll-mt-24 text-xl font-black text-slate-950 focus:outline-none">{result.title}</h3>
+     <p className="mt-2 text-sm leading-6 text-slate-700">これは保護具の種類と確認事項の整理です。製品の適合や作業の安全を証明しません。</p>
+     {result.prohibition && <p className="mt-3 rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm font-bold leading-6 text-amber-950">{result.prohibition}</p>}
+     {result.blocked && <div className="mt-4 rounded-xl border border-amber-200 p-4"><h4 className="font-black text-slate-950">選べない理由・次に確認すること</h4><ul className="mt-2 space-y-2">{result.missing.map((check, i) => <li key={i} className="text-sm leading-6 text-slate-800">・{check}</li>)}</ul><p role="status" className="mt-3 text-sm font-bold text-amber-950">不足条件が確認できるまで、商品候補は表示しません。</p></div>}
+     <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4"><h4 className="font-black text-slate-950">必要な規格・適合条件</h4><ul className="mt-2 space-y-2">{result.importantConditions.map(check => <li key={check} className="text-sm leading-6 text-slate-800">・{check}</li>)}</ul></div>
+     <details className="mt-3 rounded-xl border border-slate-200 p-4"><summary className="min-h-11 cursor-pointer font-black text-slate-950">詳しい確認方法・選定根拠を見る</summary><ul className="mt-3 space-y-2">{result.checks.map((check, i) => <li key={i} className="flex gap-2 text-sm leading-6 text-slate-800"><Check className="mt-1 h-4 w-4 shrink-0 text-emerald-700" aria-hidden="true" />{check}</li>)}</ul></details>
+     <details className="mt-3 rounded-xl border border-slate-200 p-4"><summary className="min-h-11 cursor-pointer text-sm font-bold text-slate-800">回答を確認する・変更する</summary><div className="mt-2 grid gap-2">{[{ title: '現場条件', label: result.condition?.label ?? '未回答', position: 2 }, ...result.questions.map((q, i) => ({ title: q.title, label: answers[i + 3] === 'confirmed' ? '確認した' : answers[i + 3] === 'unsafe' ? '条件を満たせない・専門検討' : '分からない・未回答', position: i + 3 }))].map(row => <button key={row.position} type="button" onClick={() => navigate(answers.slice(0, row.position))} className="min-h-12 rounded-lg bg-slate-50 p-3 text-left text-sm text-slate-800"><span className="font-bold">{row.title}</span><span className="mt-1 block text-xs">{row.label}・変更する</span></button>)}</div></details>
+     <a href={result.officialHref} target="_blank" rel="noopener noreferrer" className="mt-4 inline-flex min-h-12 items-center gap-2 rounded-xl border border-emerald-700 px-4 text-sm font-bold text-emerald-900">{result.officialLabel}<ExternalLink className="h-4 w-4 shrink-0" aria-hidden="true" /><span className="sr-only">（新しいタブで開く）</span></a>
+     {result.category.id === 'fall' && <a href="https://www.mhlw.go.jp/web/t_doc?dataId=74ab6770&dataType=0&pageNo=1" target="_blank" rel="noopener noreferrer" className="ml-3 inline-flex min-h-11 items-center text-sm font-bold text-emerald-800 underline">器具の規格を確認<span className="sr-only">（新しいタブで開く）</span></a>}
+     {result.category.id === 'chemical' && <a href="https://www.mhlw.go.jp/content/11300000/001670143.pdf" target="_blank" rel="noopener noreferrer" className="ml-3 inline-flex min-h-11 items-center text-sm font-bold text-emerald-800 underline">第3版選定マニュアル<span className="sr-only">（PDFを新しいタブで開く）</span></a>}
+     {!result.blocked && result.query && <details className="mt-4 rounded-xl border border-slate-200 p-4"><summary className="min-h-11 cursor-pointer text-sm font-bold text-slate-800">種類に近い商品を一般検索する</summary><p className="mt-2 text-xs leading-6 text-slate-600">検索は規格適合の確認や当サイトの推薦ではありません。最新の製品仕様をメーカー資料で照合してください。</p><div className="mt-3 flex flex-wrap gap-2">{(['amazon', 'rakuten'] as const).map(platform => <a key={platform} href={platform === 'amazon' ? generateAmazonAffiliateUrl(result.query!) : generateRakutenSearchUrl(result.query!)} target="_blank" rel="noopener noreferrer sponsored" onClick={() => trackEvent('affiliate_click', { platform, product_id: 'wizard-' + result.categoryId, product_name: result.title, page_location: 'goods_selection_wizard' })} className="inline-flex min-h-12 items-center rounded-xl bg-emerald-800 px-4 text-sm font-bold text-white">{platform === 'amazon' ? 'Amazon' : '楽天'}で一般検索<span className="sr-only">（新しいタブで開く）</span></a>)}</div></details>}
+     {result.blocked && <a href="/contact/automation-email?subject=ppe-selection" className="mt-3 inline-flex min-h-12 items-center rounded-xl bg-emerald-800 px-4 text-sm font-bold text-white">選定を相談する</a>}
+    </div>}
+    {category && <div className="mt-5 flex flex-wrap justify-between gap-3 border-t border-slate-200 pt-3"><button type="button" onClick={back} className="inline-flex min-h-12 items-center gap-2 text-sm font-bold text-emerald-800"><ArrowLeft className="h-4 w-4" aria-hidden="true" />ひとつ戻る</button><button type="button" onClick={reset} className="inline-flex min-h-12 items-center gap-2 text-sm font-bold text-slate-700"><RotateCcw className="h-4 w-4" aria-hidden="true" />作業を選び直す</button></div>}
+    {onReturnToDirectory && <button type="button" onClick={onReturnToDirectory} className="mt-2 min-h-11 text-sm font-bold text-slate-700 underline">用品一覧に戻る</button>}
+   </div>
+  </section>
+ );
 }

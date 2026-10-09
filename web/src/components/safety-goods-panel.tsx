@@ -12,7 +12,7 @@ import {
   PUBLIC_GOODS_RATING_DISCLOSURE,
   PUBLIC_SAFETY_GOODS_CATEGORIES,
 } from "@/data/public-safety-goods-categories";
-import { FeatureMascotCompanion } from "@/components/feature-mascot-companion";
+import { getPpeDirectoryRoute } from "@/lib/ppe-guided-selection";
 import { NetisSafetyGuide } from "@/components/netis-safety-guide";
 import { SafetyGoodsWizard } from "@/components/safety-goods-wizard";
 import { GoodsProductCarousel } from "@/components/goods-product-carousel";
@@ -163,6 +163,7 @@ function currentRespiratoryIntent(): RespiratoryIntent | null {
 }
 
 export function SafetyGoodsPanel() {
+  const [directoryVisited, setDirectoryVisited] = useState(false);
   const [categoryGroup, setCategoryGroup] = useState<CategoryGroup>("ppe");
   const [categoryQuery, setCategoryQuery] = useState("");
   const selectedCategoryId = useSyncExternalStore(subscribeCategory, currentCategory, () => null);
@@ -171,6 +172,7 @@ export function SafetyGoodsPanel() {
   const respiratorySafety = useSyncExternalStore(subscribeCategory, currentRespiratorySafety, () => "");
   const respiratorySafetySet = new Set(respiratorySafety.split(",").filter(Boolean));
   const respiratorySafetyComplete = respiratorySafety === REQUIRED_RESPIRATORY_SAFETY;
+  const guidedCategory = selectedCategoryId ? getPpeDirectoryRoute(selectedCategoryId, selectedFeatureId) : undefined;
   const selectedCategory = PUBLIC_SAFETY_GOODS_CATEGORIES.find((category) => category.id === selectedCategoryId);
   const featureOptions = selectedCategory ? GOODS_PRODUCT_FEATURES[selectedCategory.id] : undefined;
   const selectedFeature = selectedCategory ? getGoodsProductFeature(selectedCategory.id, selectedFeatureId) : null;
@@ -202,8 +204,11 @@ export function SafetyGoodsPanel() {
   }
 
   useEffect(() => {
-    const targetId = selectedCategoryId ? "goods-product-panel" : lastEntry.current ? `goods-choice-${lastEntry.current}` : lastCategory.current ? `goods-choice-${lastCategory.current}` : null;
-    if (selectedCategoryId) lastCategory.current = selectedCategoryId;
+    const targetId = selectedCategoryId ? (getPpeDirectoryRoute(selectedCategoryId, selectedFeatureId) ? "goods-guided-selection" : "goods-product-panel") : lastEntry.current ? `goods-choice-${lastEntry.current}` : lastCategory.current ? `goods-choice-${lastCategory.current}` : null;
+    if (selectedCategoryId) {
+      lastCategory.current = selectedCategoryId;
+      setDirectoryVisited(true);
+    }
     if (!targetId) return;
     const frame = window.requestAnimationFrame(() => {
       const target = document.getElementById(targetId) ?? document.getElementById("goods-category-search");
@@ -211,7 +216,7 @@ export function SafetyGoodsPanel() {
       target?.scrollIntoView({ block: "start", behavior: "instant" });
     });
     return () => window.cancelAnimationFrame(frame);
-  }, [selectedCategoryId]);
+  }, [selectedCategoryId, selectedFeatureId]);
 
   useEffect(() => {
     if (selectedCategoryId !== "respiratory") return;
@@ -294,17 +299,20 @@ export function SafetyGoodsPanel() {
   return (
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 lg:px-8">
       <header>
-        <p className="text-sm font-semibold text-emerald-700">作業から選べる購入入口</p>
+        <p className="text-sm font-semibold text-emerald-700">作業から、必要な保護具を整理</p>
         <h1 className="mt-1 text-2xl font-bold text-slate-950 sm:text-3xl">
-          安全用品・保護具を、迷わず選ぶ
+          保護具の選び方
         </h1>
         <p className="mt-3 max-w-4xl text-sm leading-7 text-slate-700">
-          「何から見ればいい？」を、危険・作業・現場条件の順に整理。
-          そのまま購入候補と公式資料へ進めます。
+          作業の絵を選ぶと、必要な条件をひとつずつ確認できます。
         </p>
       </header>
 
-      <section aria-labelledby="goods-categories-title">
+      {!selectedCategory || guidedCategory ? <SafetyGoodsWizard key={guidedCategory ?? "start"} initialCategory={guidedCategory} onReturnToDirectory={guidedCategory ? returnToCategories : undefined} /> : null}
+
+      <details open={Boolean(selectedCategory && !guidedCategory) || Boolean(!selectedCategory && directoryVisited)} className="rounded-2xl border border-slate-200 bg-white p-4">
+        <summary className="min-h-11 cursor-pointer font-bold text-slate-900">用品名が分かるときは、カテゴリから探す</summary>
+      <section className="mt-3" aria-labelledby="goods-categories-title">
         <h2 id="goods-categories-title" className="text-xl font-bold text-slate-950">
           用品カテゴリから実商品を探す
         </h2>
@@ -349,7 +357,7 @@ export function SafetyGoodsPanel() {
           ))}
         </ul>
         {!selectedCategory && visibleCategories.length === 0 ? <p className="mt-3 text-sm text-slate-700">該当する用品がありません。別の用品名や危険で探してください。</p> : null}
-        {selectedCategory ? (
+        {selectedCategory && !guidedCategory ? (
           <div id="goods-product-panel" role="region" tabIndex={-1} aria-label={`${selectedCategory.name}の商品候補`} className="mt-4 scroll-mt-24 rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700">
             <button type="button" onClick={returnToCategories} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 text-sm font-bold text-slate-800 hover:bg-slate-50">
               <ArrowLeft aria-hidden="true" className="h-4 w-4" />用品一覧に戻る
@@ -467,18 +475,8 @@ export function SafetyGoodsPanel() {
           検索結果は推奨や適合証明ではありません。APIで取得できた評価のみサイト内に表示します。最新の評価・価格・在庫と安全規格の適合は、販売ページと一次資料で確認してください。商品データ: <a href={PUBLIC_GOODS_RATING_DISCLOSURE.sourceUrl} target="_blank" rel="noopener noreferrer" className="underline">{PUBLIC_GOODS_RATING_DISCLOSURE.sourceLabel}</a>
         </p>
       </section>
+      </details>
 
-      <FeatureMascotCompanion
-        variant="ppe-check"
-        eyebrow="装備点検チワワ"
-        title="作業に合う道具を、いっしょに絞ろう。"
-        message="カテゴリと用途を選んだ後は、製品ごとの規格と装着性まで確認しよう。"
-        tone="cream"
-        compact
-        className="max-w-3xl"
-      />
-
-      <SafetyGoodsWizard />
 
       <NetisSafetyGuide compact />
 
