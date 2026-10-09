@@ -20,7 +20,7 @@ describe("the approved homepage LP", () => {
     expect(container.querySelector("[data-ky-scene]")).toBeNull();
     expect(screen.getByRole("link", { name: "KY用紙" }).getAttribute("href")).toBe("/ky/paper");
     expect(container.textContent).toContain("帳票は現場ごとに書式や運用が異なります");
-    expect(new Set([...container.querySelectorAll("img")].map(img => img.getAttribute("src"))).size).toBe(5);
+    expect(new Set([...container.querySelectorAll("img")].map(img => img.getAttribute("src"))).size).toBe(6);
     expect(container.querySelector("form")).toBeNull();
     expect(container.querySelectorAll('[data-lp-news="law"]')).toHaveLength(1);
     expect(container.querySelectorAll('[data-lp-news="accident"]')).toHaveLength(1);
