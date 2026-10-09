@@ -42,3 +42,18 @@ describe("preimplementation independent quantity contract",()=>{
    expect(calculate("base",{...base,concreteThickness:value}).ok).toBe(false);
  });
 });
+
+describe("pipe bedding fit boundary",()=>{
+ it.each(["m", "mm"])("accepts an exact decimal fit in %s without changing volumes",unit=>{
+   const scale=unit==="mm"?1000:1;
+   const result=calculate("trench",{unit,length:10*scale,width:scale,depth:.3*scale,outerDiameter:.2*scale,bedWidth:scale,bedThickness:.1*scale,bedPosition:"below-pipe-no-overlap"});
+   expect(result.ok).toBe(true);if(!result.ok)return;
+   expect(result.result.rawOutputs.excavationVolumeM3).toBeCloseTo(3,12);
+   expect(result.result.rawOutputs.pipeVolumeM3).toBeCloseTo(Math.PI/10,12);
+   expect(result.result.rawOutputs.bedVolumeM3).toBeCloseTo(1,12);
+   expect(result.result.rawOutputs.backfillVolumeM3).toBeCloseTo(2-Math.PI/10,12);
+ });
+ it.each([.299999,.3-1e-12])("rejects an actual height overrun at depth %s",depth=>{
+   expect(calculate("trench",{unit:"m",length:10,width:1,depth,outerDiameter:.2,bedWidth:1,bedThickness:.1,bedPosition:"below-pipe-no-overlap"}).ok).toBe(false);
+ });
+});

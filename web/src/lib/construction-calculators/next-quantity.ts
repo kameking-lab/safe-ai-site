@@ -37,7 +37,9 @@ export function calculatePipeTrench(input: PipeTrenchInput): CalculationOutcome 
   const l=toMetres(input.length,input.dimensionUnit), w=toMetres(input.width,input.dimensionUnit), h=toMetres(input.depth,input.dimensionUnit), d=toMetres(input.outerDiameter,input.dimensionUnit), b=toMetres(input.bedWidth,input.dimensionUnit), t=toMetres(input.bedThickness,input.dimensionUnit);
   if(d>w) return invalid([inconsistent("outerDiameter","管外径が掘削幅を超えています。")]);
   if(b>w) return invalid([inconsistent("bedWidth","床付け材の幅が掘削幅を超えています。")]);
-  if(t+d>h) return invalid([inconsistent("bedThickness","床材厚さと管外径の合計が掘削深さを超えています。")]);
+  const pipeTop=t+d;
+  const fitRoundingAllowance=Number.EPSILON*Math.max(Math.abs(pipeTop),Math.abs(h),Math.abs(t),Math.abs(d))*2;
+  if(pipeTop-h>fitRoundingAllowance) return invalid([inconsistent("bedThickness","床材厚さと管外径の合計が掘削深さを超えています。")]);
   const excavationVolumeM3=w*h*l, pipeVolumeM3=Math.PI*d*d*l/4, bedVolumeM3=b*t*l;
   return finish("excavation-backfill",{shape:input.shape,length:input.length,width:input.width,depth:input.depth,dimensionUnit:input.dimensionUnit,outerDiameter:input.outerDiameter,bedWidth:input.bedWidth,bedThickness:input.bedThickness,bedPosition:input.bedPosition},{excavationVolumeM3,pipeVolumeM3,bedVolumeM3,bedAreaM2:b*l,deductionVolumeM3:pipeVolumeM3+bedVolumeM3,backfillVolumeM3:excavationVolumeM3-pipeVolumeM3-bedVolumeM3},[["excavationVolumeM3","掘削・地山体積","m³"],["pipeVolumeM3","管の外形体積","m³"],["bedVolumeM3","床材の施工体積","m³"],["backfillVolumeM3","埋戻し施工体積","m³"]],["掘削量=底幅×深さ×延長","管外形=π×外径²×延長/4","床材=床材幅×厚さ×延長","埋戻し=掘削−管外形−床材"],["鉛直壁・一定断面の直線1区間。管は矩形床材の上に接し、両者は重ならない。","管と床材の延長は同じ。内径・重複する包絡断面は使わない。","土量変化、余掘り、ほぐし搬入量は含めない。"],input.rounding);
 }
