@@ -217,7 +217,7 @@ test.describe("AI実務研修と建設計算ツール", () => {
     ).toEqual([]);
   });
 
-  test("JavaScript無効でも教材全文と計算式を読め、動かないフォームを出さない", async ({ browser, baseURL }) => {
+  test("No-JS keeps formulas readable and SSR inputs disabled", async ({ browser, baseURL }) => {
     const context = await browser.newContext({ javaScriptEnabled: false, baseURL });
     const page = await context.newPage();
     await page.goto(AI_DETAIL);
@@ -227,7 +227,11 @@ test.describe("AI実務研修と建設計算ツール", () => {
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     await page.getByText("計算式",{exact:true}).click();
     await expect(page.getByText("直方体 V=L×W×H",{exact:true})).toBeVisible();
-    await expect(page.locator("form")).toHaveCount(0);
+    await expect(page.locator("form")).toHaveCount(1);
+    await expect(page.locator("form > fieldset")).toHaveAttribute("disabled", "");
+    await expect(page.getByRole("button", { name: "例の数字で試す", exact: true })).toBeDisabled();
+    await expect(page.locator("#construction-calculator-length")).toHaveValue("");
+    await expect(page.locator("#construction-calculator-length")).toBeDisabled();
     await context.close();
   });
 });

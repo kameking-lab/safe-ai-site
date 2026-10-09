@@ -461,10 +461,6 @@ export function ConstructionCalculatorClient({
     URL.revokeObjectURL(url);
   };
 
-  if (!mounted) {
-    return <p data-calculator-loading className="rounded-xl border border-slate-300 p-4 font-bold">計算フォームを準備しています。</p>;
-  }
-
   const points = Array.isArray(raw.points) ? raw.points as Record<string,unknown>[] : [];
   const segments = Array.isArray(raw.segments) ? (raw.segments as Record<string, unknown>[]) : [];
 
@@ -479,6 +475,7 @@ export function ConstructionCalculatorClient({
           noValidate
           className="rounded-2xl border-2 border-slate-300 bg-white p-4 dark:border-slate-700 dark:bg-slate-900 sm:p-6"
         >
+          <fieldset disabled={!mounted} aria-label="計算入力" className="m-0 min-w-0 border-0 p-0">
           <h2 className="flex items-center gap-2 text-2xl font-black">
             <Calculator className="h-6 w-6 text-emerald-800 dark:text-emerald-300" aria-hidden="true" />
             数字を入れる
@@ -617,6 +614,7 @@ export function ConstructionCalculatorClient({
               <RotateCcw className="h-5 w-5" aria-hidden="true" />入力をリセット（現場の数字を入れる）
             </button>
           </div>
+          </fieldset>
         </form>
 
         {result ? (
