@@ -99,12 +99,12 @@ test.describe("AI実務研修と建設計算ツール", () => {
     }
   });
 
-  test("建設計算一覧は公開19件、Coming Soon 15件で個別URLは公開分だけ", async ({ page }) => {
+  test("建設計算一覧は公開19件、Coming Soon 16件で個別URLは公開分だけ", async ({ page }) => {
     const response = await page.goto(CALCULATOR_HUB);
     expect(response?.status()).toBe(200);
     await expect(page.getByRole("heading", { level: 1, name: "建設計算ツール" })).toBeVisible();
     await expect(page.locator('[data-calculator-status="published"]')).toHaveCount(19);
-    await expect(page.locator('[data-calculator-status="coming-soon"]')).toHaveCount(15);
+    await expect(page.locator('[data-calculator-status="coming-soon"]')).toHaveCount(16);
     await expect(page.locator('[data-calculator-status="coming-soon"] a')).toHaveCount(0);
     const publishedHrefs = await page
       .locator('[data-calculator-status="published"] a')
