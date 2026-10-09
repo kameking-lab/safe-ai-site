@@ -32,6 +32,7 @@ import type {
   ValidationIssue,
 } from "@/lib/construction-calculators/types";
 
+import { nextModeExample } from "@/data/construction-calculators/next-mode-examples";
 import { additionalQuantitySpecs } from "@/lib/construction-calculators/additional-quantity";
 import { CalculatorInputGuide, INPUT_COLORS, inputUnit } from "./calculator-input-guide";
 
@@ -40,6 +41,8 @@ type RawInput = Record<string, unknown>;
 type GenericCalculator = CalculatorFunction<never>;
 
 const loaders: Record<string, () => Promise<GenericCalculator>> = {
+  "curb-quantity": async () => (await import("@/lib/construction-calculators/next-quantity")).calculateCurbQuantity as GenericCalculator,
+  "sealant-quantity": async () => (await import("@/lib/construction-calculators/next-quantity")).calculateSealantQuantity as GenericCalculator,
   "concrete-quantity": async () =>
     (await import("@/lib/construction-calculators/concrete")).calculateConcrete as GenericCalculator,
   "excavation-backfill": async () =>
@@ -93,6 +96,7 @@ const OPTION_LABELS: Record<string, Record<string, string>> = {
     slab: "床版・土間",
     cylinder: "円柱",
     "circular-foundation": "円形基礎",
+    "pipe-trench": "配管・床材・埋戻し（鉛直壁）",
     vertical: "鉛直掘削",
     "sloped-trench": "法付き溝",
     "sloped-pit": "四辺法付き掘削",
@@ -103,7 +107,14 @@ const OPTION_LABELS: Record<string, Record<string, string>> = {
     "slab-edge": "床版端部",
     custom: "任意面",
   },
+  bedPosition: {"below-pipe-no-overlap":"床材の上に管が接する（重ならない）","pipe-within-bed-envelope":"管と床材が重なる（計算対象外）"},
+  section: {uniform:"一定勾配の平面",variable:"変化・曲面・小段あり（計算対象外）"},
+  purchaseMode: {"installed-only":"施工体積のみ",purchase:"搬入・購入体積も求める"},
+  massMode: {none:"質量は求めない",loose:"搬入状態の密度から質量も求める"},
   mode: {
+    "single-layer":"単層の路盤材（従来）","two-layers":"砕石・捨てコンの二層基礎","face-area":"高さ・比・延長から法面積",
+    "physical-plus-internal-joints":"製品の物理長＋内部目地","effective-module":"メーカーの目地込み有効長",
+    "container-loss":"容器内の損失率","extra-volume":"施工量に追加する率",
     "rise-run": "水平距離＋高低差",
     "percent-run": "勾配%＋水平距離",
     "angle-run": "角度＋水平距離",
@@ -127,7 +138,16 @@ function optionLabel(key: string, value: string) {
   return OPTION_LABELS[key]?.[value] ?? value.replace("m2", "m²").replace("m3", "m³");
 }
 
+function normalizeModeInput(definition:PublicFormulaDefinition,input:RawInput):RawInput {
+ const normalized={...input};
+ for(const field of definition.inputDefinitions) if(field.type==="select" && field.key!=="rounding" && (normalized[field.key]===undefined||normalized[field.key]==="")) normalized[field.key]=field.options?.[0];
+ return normalized;
+}
+
 function visibleField(slug: string, field: InputDefinition, raw: RawInput) {
+  if(field.condition && !field.condition.split("&").every(condition=>{const [key,values]=condition.split("=");return values.split("|").includes(String(raw[key]));})) return false;
+  if(slug==="excavation-backfill" && raw.shape==="pipe-trench" && ["sideSlopeHorizontalPerVertical","structureVolume","baseMaterialVolume","deductionVolumeUnit"].includes(field.key)) return false;
+  if(slug==="slope-angle-length" && raw.mode==="face-area" && ["horizontalDistance","rise","slopePercent","angleDegrees","ratioN","lengthUnit"].includes(field.key)) return false;
   if (field.type === "segments" || field.type === "points") return true;
   if (["rebar-weight","rebar-spacing"].includes(slug)) {
     if(field.key === "diameterMm") return raw.barType !== "deformed";
@@ -139,7 +159,7 @@ function visibleField(slug: string, field: InputDefinition, raw: RawInput) {
     if (field.key === "length" || field.key === "width") return !circular;
   }
   if (slug === "excavation-backfill" && field.key === "sideSlopeHorizontalPerVertical") {
-    return raw.shape !== "vertical";
+    return raw.shape !== "vertical" && raw.shape !== "pipe-trench";
   }
   if (slug === "formwork-area") {
     if (field.key === "width") return ["foundation", "column", "beam", "custom"].includes(String(raw.shape));
@@ -173,12 +193,14 @@ function inputNumber(value: unknown): number {
 }
 
 function emptyInput(definition: PublicFormulaDefinition, input: RawInput): RawInput {
- return Object.fromEntries(definition.inputDefinitions.map(field=>[field.key, field.type==="number"||field.type==="integer"?"":field.type==="points"?[{x:"",y:""},{x:"",y:""},{x:"",y:""}]:field.type==="segments"?[{startArea:"",endArea:"",length:""}]:input[field.key]]));
+ return Object.fromEntries(definition.inputDefinitions.map(field=>[field.key, field.type==="number"||field.type==="integer"?"":field.type==="points"?[{x:"",y:""},{x:"",y:""},{x:"",y:""}]:field.type==="segments"?[{startArea:"",endArea:"",length:""}]:input[field.key] ?? field.options?.[0]]));
 }
 
 function prepareInput(definition: PublicFormulaDefinition, raw: RawInput, rounding: RoundingConfig): Record<string, unknown> {
   const prepared: Record<string, unknown> = {};
   for (const field of definition.inputDefinitions) {
+    if((raw.shape==="pipe-trench"||raw.mode==="face-area"||raw.mode==="two-layers"||definition.slug==="curb-quantity") && !visibleField(definition.slug,field,raw)) continue;
+    if(["outerDiameter","bedWidth","bedThickness","bedPosition","height","heightUnit","horizontalPerVertical","lengthM","section","stoneAreaM2","stoneThickness","concreteAreaM2","concreteThickness","purchaseMode","loosePerCompacted","concreteExtraPercent","massMode","densityState","looseDensityTPerM3"].includes(field.key) && !visibleField(definition.slug,field,raw)) continue;
     const value = raw[field.key];
     if (field.type === "number" || field.type === "integer") prepared[field.key] = inputNumber(value);
     else if (field.type === "points") prepared[field.key] = (Array.isArray(value) ? value : []).map((p)=>({x:inputNumber((p as Record<string,unknown>).x),y:inputNumber((p as Record<string,unknown>).y)}));
@@ -300,7 +322,8 @@ export function ConstructionCalculatorClient({
   startEmpty?: boolean;
 }) {
   const [mounted, setMounted] = useState(false);
-  const [raw, setRaw] = useState<RawInput>(() => startEmpty ? emptyInput(definition, defaultInput) : ({ ...defaultInput }));
+  const [raw, setRaw] = useState<RawInput>(() => normalizeModeInput(definition,startEmpty ? emptyInput(definition, defaultInput) : ({ ...defaultInput })));
+  const exampleInput = nextModeExample(definition.slug,raw,defaultInput);
   const defaultRounding = (defaultInput.rounding as RoundingConfig | undefined) ?? { decimalPlaces: 2, mode: "round" };
   const [rounding, setRounding] = useState<RoundingConfig>(defaultRounding);
   const [result, setResult] = useState<CalculationResult | null>(null);
@@ -343,7 +366,7 @@ export function ConstructionCalculatorClient({
   const visibleDefinitions = useMemo(
     () => definition.inputDefinitions.filter(
       (field) => field.key !== "rounding" && visibleField(definition.slug, field, raw),
-    ),
+    ).map(field=>definition.slug==="sealant-quantity" && field.key==="percent"?{...field,label:raw.mode==="container-loss"?"容器内損失率":"施工量に追加する率"}:definition.slug==="curb-quantity" && field.key==="productLengthM"?{...field,label:raw.mode==="effective-module"?"メーカーの目地込み有効長":"1本の製品の物理長"}:field),
     [definition, raw],
   );
   const currentHistory = useMemo(
@@ -426,7 +449,7 @@ export function ConstructionCalculatorClient({
   };
 
   const reset = () => {
-    setRaw(startEmpty ? emptyInput(definition, defaultInput) : { ...defaultInput });
+    setRaw(normalizeModeInput(definition,startEmpty ? emptyInput(definition, defaultInput) : { ...defaultInput }));
     setUsingExample(!startEmpty);
     setExampleEdited(false);
     setRounding(defaultRounding);
@@ -481,7 +504,7 @@ export function ConstructionCalculatorClient({
             数字を入れる
           </h2>
           <div className="mt-3 flex flex-wrap items-center gap-2">
-            <button type="button" onClick={()=>{setRaw({...defaultInput});setUsingExample(true);setExampleEdited(false);setErrors([]);}} className="min-h-11 rounded-lg border-2 border-emerald-700 px-3 text-sm font-bold">例の数字で試す</button>
+            <button type="button" onClick={()=>{setRaw(normalizeModeInput(definition,{...exampleInput}));setUsingExample(true);setExampleEdited(false);setErrors([]);}} className="min-h-11 rounded-lg border-2 border-emerald-700 px-3 text-sm font-bold">例の数字で試す</button>
             <span className="text-xs font-bold text-slate-600 dark:text-slate-300">{usingExample?(exampleEdited?"例の数字を一部変更した概算です。残りの例も確認してください。":"例の数字です。現場の実測値ではありません。"):"図の番号と同じ欄に、現場の数字を入れます。"}</span>
           </div>
           <CalculatorInputGuide slug={definition.slug} fields={visibleDefinitions} raw={raw}/>
@@ -507,7 +530,7 @@ export function ConstructionCalculatorClient({
                 value={raw[field.key]}
                 number={field.type === "select" ? undefined : visibleDefinitions.filter(f=>f.type === "number" || f.type === "integer").findIndex(f=>f.key===field.key)+1}
                 unit={inputUnit(field,raw)}
-                example={defaultInput[field.key]}
+                example={exampleInput[field.key]}
                 issue={issuesByField.get(field.key)}
                 onChange={(value) => change(field.key, value)}
               />
@@ -683,7 +706,7 @@ export function ConstructionCalculatorClient({
                 <li key={entry.id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-slate-100 p-3 dark:bg-slate-800">
                   <div><p className="font-black">{entry.result.displayValues[0]?.label}: {entry.result.displayValues[0]?.value}{entry.result.displayValues[0]?.unit}</p><p className="text-xs text-slate-600 dark:text-slate-300">{new Date(entry.createdAt).toLocaleString("ja-JP")}</p></div>
                   <div className="flex gap-2">
-                    <button type="button" onClick={() => { setRaw(entry.input); setRounding((entry.input.rounding as unknown as RoundingConfig) ?? defaultRounding); setResult(null); setErrors([]); setUsingExample(entry.input._exampleInput === true); setExampleEdited(entry.input._exampleEdited === true); }} className="min-h-11 rounded-xl border-2 border-emerald-700 px-3 text-sm font-black">入力を復元</button>
+                    <button type="button" onClick={() => { setRaw(normalizeModeInput(definition,entry.input)); setRounding((entry.input.rounding as unknown as RoundingConfig) ?? defaultRounding); setResult(null); setErrors([]); setUsingExample(entry.input._exampleInput === true); setExampleEdited(entry.input._exampleEdited === true); }} className="min-h-11 rounded-xl border-2 border-emerald-700 px-3 text-sm font-black">入力を復元</button>
                     <button type="button" aria-label="この履歴を削除" onClick={() => setHistory(removeConstructionCalculatorHistory(window.localStorage, entry.id))} className="min-h-11 rounded-xl border-2 border-slate-400 px-3"><Trash2 className="h-4 w-4" aria-hidden="true" /></button>
                   </div>
                 </li>

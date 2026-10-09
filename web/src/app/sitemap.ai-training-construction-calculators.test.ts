@@ -30,7 +30,7 @@ describe("AI研修と建設計算のsitemap境界", () => {
     for (const calculator of constructionCalculatorRegistry) {
       expect(calculatorUrls).toContain(`${prefix}/${calculator.slug}`);
     }
-    expect(COMING_SOON_CONSTRUCTION_CALCULATORS).toHaveLength(18);
+    expect(COMING_SOON_CONSTRUCTION_CALCULATORS).toHaveLength(15);
   });
 
   it("Coming Soonの空詳細ディレクトリとquery URLを作らない", () => {

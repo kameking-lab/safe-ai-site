@@ -1,3 +1,4 @@
+import { calculateSlopeFace, type SlopeFaceInput } from "./next-quantity";
 import {
   MAX_LINEAR_METRES,
   applyRounding,
@@ -14,7 +15,7 @@ import type { CalculationOutcome, LengthUnit, RoundingConfig } from "./types";
 import { toMetres } from "./units";
 
 export const SLOPE_CALCULATOR_ID = "slope-angle-length";
-export const SLOPE_FORMULA_VERSION = "1.0.0";
+export const SLOPE_FORMULA_VERSION = "1.1.0";
 
 const MAX_SLOPE_PERCENT = 100_000_000;
 const MAX_SLOPE_PERMILLE = 1_000_000_000;
@@ -31,7 +32,8 @@ export type SlopeInput = {
   | { mode: "ratio-run"; ratioN: number }
 );
 
-export function calculateSlope(input: SlopeInput): CalculationOutcome {
+export function calculateSlope(input: SlopeInput | SlopeFaceInput): CalculationOutcome {
+  if (input.mode === "face-area") return calculateSlopeFace(input);
   const modeIssue =
     input.mode === "rise-run"
       ? finiteIssue("rise", input.rise)
