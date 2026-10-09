@@ -163,6 +163,7 @@ function currentRespiratoryIntent(): RespiratoryIntent | null {
 }
 
 export function SafetyGoodsPanel() {
+  const [directoryVisited, setDirectoryVisited] = useState(false);
   const [categoryGroup, setCategoryGroup] = useState<CategoryGroup>("ppe");
   const [categoryQuery, setCategoryQuery] = useState("");
   const selectedCategoryId = useSyncExternalStore(subscribeCategory, currentCategory, () => null);
@@ -204,7 +205,10 @@ export function SafetyGoodsPanel() {
 
   useEffect(() => {
     const targetId = selectedCategoryId ? (getPpeDirectoryRoute(selectedCategoryId, selectedFeatureId) ? "goods-guided-selection" : "goods-product-panel") : lastEntry.current ? `goods-choice-${lastEntry.current}` : lastCategory.current ? `goods-choice-${lastCategory.current}` : null;
-    if (selectedCategoryId) lastCategory.current = selectedCategoryId;
+    if (selectedCategoryId) {
+      lastCategory.current = selectedCategoryId;
+      setDirectoryVisited(true);
+    }
     if (!targetId) return;
     const frame = window.requestAnimationFrame(() => {
       const target = document.getElementById(targetId) ?? document.getElementById("goods-category-search");
@@ -306,7 +310,7 @@ export function SafetyGoodsPanel() {
 
       {!selectedCategory || guidedCategory ? <SafetyGoodsWizard key={guidedCategory ?? "start"} initialCategory={guidedCategory} onReturnToDirectory={guidedCategory ? returnToCategories : undefined} /> : null}
 
-      <details open={Boolean(selectedCategory && !guidedCategory)} className="rounded-2xl border border-slate-200 bg-white p-4">
+      <details open={Boolean(selectedCategory && !guidedCategory) || Boolean(!selectedCategory && directoryVisited)} className="rounded-2xl border border-slate-200 bg-white p-4">
         <summary className="min-h-11 cursor-pointer font-bold text-slate-900">用品名が分かるときは、カテゴリから探す</summary>
       <section className="mt-3" aria-labelledby="goods-categories-title">
         <h2 id="goods-categories-title" className="text-xl font-bold text-slate-950">

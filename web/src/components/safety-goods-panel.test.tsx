@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { SafetyGoodsPanel } from './safety-goods-panel';
 afterEach(()=>{vi.unstubAllGlobals();window.history.replaceState(null,'','/goods');});
-const directory=()=>fireEvent.click(screen.getByText('用品名が分かるときは、カテゴリから探す'));
+const directory=()=>{ const summary=screen.getByText('用品名が分かるときは、カテゴリから探す'); if (!summary.closest('details')?.open) fireEvent.click(summary); };
 describe('SafetyGoodsPanel',()=>{
  it('先頭に作業の絵を置き、用品一覧は折り畳む',()=>{
   render(<SafetyGoodsPanel/>);
@@ -76,4 +76,15 @@ describe('薬液ゴーグルの経路境界', () => {
   expect(screen.queryByRole('link',{name:/Amazonで一般検索/})).toBeNull();
   expect(fetchMock).not.toHaveBeenCalled();
  });
+});
+
+
+it('用品一覧へ戻ると折り畳みを開き、元の検索と分類を保持する', () => {
+ render(<SafetyGoodsPanel/>);directory();
+ fireEvent.change(screen.getByRole('searchbox',{name:'用品名・作業から探す'}),{target:{value:'防塵'}});
+ fireEvent.click(screen.getByRole('button',{name:/防じんマスク/}));
+ fireEvent.click(screen.getByRole('button',{name:'用品一覧に戻る'}));
+ expect(screen.getByText('用品名が分かるときは、カテゴリから探す').closest('details')?.open).toBe(true);
+ expect(screen.getByRole('searchbox',{name:'用品名・作業から探す'})).toHaveProperty('value','防塵');
+ expect(screen.getByRole('button',{name:/すべて/}).getAttribute('aria-pressed')).toBe('true');
 });
