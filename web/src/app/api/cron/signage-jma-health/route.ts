@@ -13,6 +13,7 @@
 
 import { NextResponse } from "next/server";
 import { getJmaEarthquakesRuntime, getJmaWarningsRuntime, getJmaWeatherRuntime } from "@/lib/jma/fetch-jma-runtime";
+import { assessJmaWarningTrust } from "@/lib/jma/jma-region-trust";
 import { ageHours, isDataStale } from "@/lib/jma/data-freshness";
 import { bearerAuthError, verifyBearerSecret } from "@/lib/server/bearer-auth";
 
@@ -25,13 +26,13 @@ export async function GET(request: Request) {
   const auth = verifyBearerSecret(request, process.env.CRON_SECRET);
   if (!auth.ok) return bearerAuthError(auth);
 
-  const now = new Date();
   const [warnings, weather, earthquakes] = await Promise.all([
     getJmaWarningsRuntime(),
     getJmaWeatherRuntime(),
     getJmaEarthquakesRuntime(),
   ]);
 
+  const now = new Date();
   const sources = [
     { name: "warnings", fetchedAt: warnings.fetchedAt, quality: warnings.quality },
     { name: "weather", fetchedAt: weather.fetchedAt, quality: weather.quality },
@@ -42,7 +43,8 @@ export async function GET(request: Request) {
     ...s,
     ageHours: ageHours(s.fetchedAt, now),
     stale: isDataStale(s.fetchedAt, STALE_THRESHOLD_HOURS, now),
-    degraded: s.quality?.status !== "live",
+    degraded: s.quality?.status !== "live" ||
+      (s.name === "warnings" && assessJmaWarningTrust(warnings, now).status !== "live"),
   }));
 
   const unhealthySources = report.filter((r) => r.stale || r.degraded);

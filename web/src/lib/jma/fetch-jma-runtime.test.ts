@@ -1,3 +1,4 @@
+import { warningOfficeAreas } from './warning-areas.mjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import warningsFallback from "@/data/jma/warnings.json";
 import weatherFallback from "@/data/jma/weather.json";
@@ -14,6 +15,14 @@ import {
   jmaWarningJsonCodesForIso2,
   jmaWarningJsonUrl,
 } from "./jma-warning-codes";
+
+function warningResponse(body: string, init: ResponseInit = {}) {
+  return new Response(body, {...init, headers: {date: new Date().toUTCString(), "content-type": "application/json", ...init.headers}});
+}
+
+function r8(payload: {reportDatetime: string; publishingOffice: string; headlineText: string; areaTypes: Array<{areas: Array<{code: string; warnings: Array<{code?: string; status: string}>}>}>}) {
+  return [{controlDatetime: payload.reportDatetime, reportDatetime: payload.reportDatetime, publishingOffice: payload.publishingOffice, headlineText: payload.headlineText, dataTypeCode: "VPWW55", warning: {class10Items: warningOfficeAreas["130000"].class10.map(areaCode=>({areaCode,kinds:payload.areaTypes[0].areas[0].warnings.length ? payload.areaTypes[0].areas[0].warnings : [{status:"発表警報・注意報はなし"}]})), class20Items: payload.areaTypes.flatMap(t=>t.areas.map(a=>({areaCode:a.code, kinds:a.warnings.length ? a.warnings : [{status:"発表警報・注意報はなし"}]})))}}];
+}
 
 describe("JMA runtime fail-closed fallback", () => {
   beforeEach(() => {
@@ -49,15 +58,15 @@ describe("JMA runtime fail-closed fallback", () => {
 
   it("HTTP 200でも空・型違い・必須欠落は成功数に入れない", async () => {
     const fetchMock = vi.fn()
-      .mockResolvedValueOnce(new Response("{}", { status: 200 }))
-      .mockResolvedValueOnce(new Response("[]", { status: 200 }))
-      .mockResolvedValue(new Response(JSON.stringify("<html>error</html>"), { status: 200 }));
+      .mockResolvedValueOnce(warningResponse("{}", { status: 200 }))
+      .mockResolvedValueOnce(warningResponse("[]", { status: 200 }))
+      .mockResolvedValue(warningResponse(JSON.stringify("<html>error</html>"), { status: 200 }));
     vi.stubGlobal("fetch", fetchMock);
     const warnings = await fetchWarningsLive();
     expect(warnings.quality).toMatchObject({ status: "fallback", succeeded: 0 });
   });
 
-  it("全地域が同じ空応答ならスキーマ通過後でもliveにしない", async () => {
+  it("同一予報区の応答を全地域の警報なしとして扱わない", async () => {
     const empty = {
       reportDatetime: new Date().toISOString(),
       publishingOffice: "気象庁",
@@ -65,19 +74,19 @@ describe("JMA runtime fail-closed fallback", () => {
       areaTypes: [{ areas: [{ code: "130010", warnings: [] }] }],
     };
     vi.stubGlobal("fetch", vi.fn().mockImplementation(() => Promise.resolve(
-      new Response(JSON.stringify(empty), { status: 200, headers: { "content-type": "application/json" } }),
+      warningResponse(JSON.stringify(r8(empty)), { status: 200, headers: { "content-type": "application/json" } }),
     )));
     const warnings = await fetchWarningsLive();
-    expect(warnings.quality).toMatchObject({ status: "fallback", succeeded: 0 });
-    expect(warnings.quality?.issues).toContain("unverified");
+    expect(warnings.quality).toMatchObject({ status: "degraded", succeeded: 1 });
+    expect(warnings.byIso["JP-04"].sourceStatus).toBe("fallback");
+    expect(warnings.quality?.issues).toContain("schema-mismatch");
   });
 
-  it("PF-003: 未来・異常・staleなreport日時をlive/警報なしにせず理由付きfallbackへ伝播する", async () => {
+  it("PF-003: 未来・異常なreport日時をlive/警報なしにせず理由付きfallbackへ伝播する", async () => {
     for (const [reportDatetime, issue] of [
       ["2099-01-01T00:00:00Z", "future-datetime"],
       ["1900-01-01T00:00:00Z", "abnormal-datetime"],
-      ["2026-01-01T00:00:00Z", "stale"],
-    ] as const) {
+          ] as const) {
       const response = {
         reportDatetime,
         publishingOffice: "気象庁",
@@ -96,7 +105,7 @@ describe("JMA runtime fail-closed fallback", () => {
       vi.stubGlobal(
         "fetch",
         vi.fn().mockImplementation(() => Promise.resolve(
-          new Response(JSON.stringify(response), {
+          warningResponse(JSON.stringify(r8(response)), {
             status: 200,
             headers: { "content-type": "application/json" },
           }),
@@ -115,7 +124,7 @@ describe("JMA runtime fail-closed fallback", () => {
   it("天気{}と地震[]のHTTP 200をliveにしない", async () => {
     vi.stubGlobal("fetch", vi.fn().mockImplementation((url: string) => {
       const body = url.includes("quake") ? [] : {};
-      return Promise.resolve(new Response(JSON.stringify(body), { status: 200 }));
+      return Promise.resolve(warningResponse(JSON.stringify(body), { status: 200 }));
     }));
     const weather = await fetchWeatherLive();
     const earthquakes = await fetchEarthquakesLive();
@@ -147,7 +156,7 @@ describe("JMA runtime fail-closed fallback", () => {
       vi.fn((url: string) =>
         tokyoUrls.has(url)
           ? Promise.resolve(
-              new Response(JSON.stringify(tokyoWarning), {
+              warningResponse(JSON.stringify(r8(tokyoWarning)), {
                 status: 200,
                 headers: { "content-type": "application/json" },
               }),
@@ -167,5 +176,31 @@ describe("JMA runtime fail-closed fallback", () => {
       sourceStatus: "fallback",
       sourceFetchedAt: warningsFallback.fetchedAt,
     });
+  });
+});
+
+describe('JMA current snapshot and transport freshness',()=>{
+  afterEach(()=>vi.unstubAllGlobals());
+  it('古い発表時刻を保持した新鮮なR8取得で正常な現在状態を返す',async()=>{
+    vi.stubGlobal('fetch', vi.fn((url: string) => {
+      const code = url.split('/').at(-1)!.slice(0, 2);
+      const data = r8({reportDatetime:'2026-05-28T01:16:00Z', publishingOffice:url, headlineText:'', areaTypes:[{areas:[{code:code+'10400',warnings:[{status:'発表警報・注意報はなし'}]}]}]});
+      const office = warningOfficeAreas[url.split('/').at(-1)!.slice(0,6)];
+      data[0].warning.class10Items = office.class10.map(areaCode=>({areaCode,kinds:[{status:'発表警報・注意報はなし'}]}));
+      data[0].warning.class20Items[0].areaCode = office.class20[0] ?? code+'10400';
+      return Promise.resolve(warningResponse(JSON.stringify(data)));
+    }));
+    const result=await fetchWarningsLive();
+    expect(result.quality).toMatchObject({status:'live',attempted:57,succeeded:57});
+    expect(result.byIso['JP-01'].entries.map(e=>e.sourceCode)).toContain('014100');
+    expect(result.byIso['JP-13'].entries[0].reportDatetime).toBe('2026-05-28T01:16:00Z');
+    expect(result.byIso['JP-13'].sourceFetchedAt).not.toBe('2026-05-28T01:16:00Z');
+  });
+  it.each([{date:new Date().toUTCString(),age:'901'}, {date:'Thu, 01 Jan 2026 00:00:00 GMT'}, {}] as Array<Record<string,string>>)('古いまたは検証できないHTTP取得は停止する %#',async headers=>{
+    vi.stubGlobal('fetch',vi.fn(()=>Promise.resolve(new Response('[]',{status:200,headers}))));
+    const result=await fetchWarningsLive();
+    expect(result.quality?.status).toBe('fallback');
+    expect(result.byIso['JP-13'].sourceFetchedAt).toBe(warningsFallback.fetchedAt);
+    expect(result.byIso['JP-13'].sourceIssue).toBe(headers.date ? 'stale' : 'unverified');
   });
 });

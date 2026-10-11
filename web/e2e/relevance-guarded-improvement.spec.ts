@@ -300,9 +300,8 @@ test.describe("relevance-guarded task completion", () => {
 
     await page.keyboard.press("Escape");
     await expect(details).not.toHaveAttribute("open", "");
-    expect(await summary.evaluate((node) => document.activeElement === node)).toBe(
-      true,
-    );
+    // Escape restores focus on the next animation frame. Wait for that observable result.
+    await expect(summary).toBeFocused();
 
     await page.setViewportSize({ width: 844, height: 390 });
     await summary.click();

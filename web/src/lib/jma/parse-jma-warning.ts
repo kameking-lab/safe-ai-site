@@ -1,3 +1,4 @@
+import { warningLevel } from './warning-snapshot.mjs';
 /** 気象庁 bosai warning JSON から都道府県塗り分け用の最大レベルを算出 */
 
 export type JmaMapLevel = "none" | "advisory" | "warning" | "special";
@@ -36,50 +37,7 @@ export function isActiveWarningStatus(status: string | undefined): boolean {
 }
 
 function levelFromCode(code: string | undefined): JmaMapLevel | null {
-  if (!code || code.length === 0) return null;
-  // 2026年の新体系と旧体系の双方を明示的に扱う。未知コードを
-  // 「注意報らしい」と推測せず null にして未確認へ倒す。
-  const specialCodes = new Set(["32", "33", "35", "36", "38"]);
-  const warningCodes = new Set([
-    "02",
-    "03",
-    "04",
-    "05",
-    "06",
-    "07",
-    "08",
-    "43",
-    "44",
-    "45",
-    "46",
-    "48",
-    "49",
-  ]);
-  const advisoryCodes = new Set([
-    "10",
-    "12",
-    "13",
-    "14",
-    "15",
-    "16",
-    "17",
-    "18",
-    "19",
-    "20",
-    "21",
-    "22",
-    "23",
-    "24",
-    "25",
-    "26",
-    "27",
-    "28",
-    "29",
-  ]);
-  if (specialCodes.has(code)) return "special";
-  if (warningCodes.has(code)) return "warning";
-  if (advisoryCodes.has(code)) return "advisory";
-  return null;
+  return warningLevel(code);
 }
 
 /** 気象庁コードの警報/注意報/特別警報区分（先頭桁）を公開版として提供 */

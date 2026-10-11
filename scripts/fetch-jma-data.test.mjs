@@ -1,3 +1,4 @@
+import { warningOfficeAreas } from '../web/src/lib/jma/warning-areas.mjs';
 import assert from "node:assert/strict";
 import { mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -79,6 +80,7 @@ function httpResponse(data, { ok = true, status = 200 } = {}) {
   return {
     ok,
     status,
+    headers: new Headers({ date: new Date(ATTEMPT).toUTCString() }),
     async json() {
       return data;
     },
@@ -86,13 +88,14 @@ function httpResponse(data, { ok = true, status = 200 } = {}) {
 }
 
 function successResponseFor(url) {
-  if (url.includes("/warning/data/warning/")) {
-    return httpResponse({
+  if (url.includes("/warning/data/r8/")) {
+    const office=warningOfficeAreas[url.split("/").at(-1).slice(0,6)];
+    return httpResponse([{
       headlineText: "synthetic warning",
-      reportDatetime: ATTEMPT,
-      publishingOffice: "synthetic office",
-      areaTypes: [{ areas: [{ code: "000000", warnings: [{ code: "03", status: "発表" }] }] }],
-    });
+      reportDatetime: ATTEMPT, controlDatetime: ATTEMPT, infoType: "発表",
+      publishingOffice: "synthetic office", dataTypeCode: "VPWW55",
+      warning: { class10Items: office.class10.map(areaCode=>({areaCode,kinds:[{code:"03",status:"発表"}]})), class20Items: [{ areaCode: office.class20[0] ?? url.split("/").at(-1).slice(0,2) + "10400", kinds: [{ code: "03", status: "発表" }] }] },
+    }]);
   }
   if (url.includes("/forecast/data/forecast/")) {
     return httpResponse([{
@@ -147,7 +150,7 @@ test("高い警報取得失敗率では部分結果を公開しない", async (t
     env: {},
     outDir,
     fetchImpl: async (url) => {
-      const match = url.match(/\/warning\/data\/warning\/(\d+)\.json$/);
+      const match = url.match(/\/warning\/data\/r8\/(\d+)\.json$/);
       if (match && Number(match[1].slice(0, 2)) <= 25) {
         return httpResponse(null, { ok: false, status: 502 });
       }
@@ -172,7 +175,7 @@ test("警報1件だけの失敗でも安全側に倒して公開しない", asyn
     args: [],
     env: {},
     outDir,
-    fetchImpl: async (url) => url.endsWith("/warning/data/warning/130000.json")
+    fetchImpl: async (url) => url.endsWith("/warning/data/r8/130000.json")
       ? httpResponse(null, { ok: false, status: 504 })
       : successResponseFor(url),
     now: () => new Date(ATTEMPT),
@@ -267,4 +270,52 @@ test("mock検証は既存データの鮮度時刻を書き換えない", async (
   assert.equal(exitCode, 0);
   const after = await Promise.all(names.map((name) => readFile(join(outDir, name), "utf8")));
   assert.deepEqual(after, before);
+});
+
+test('古い発表でも現行R8の新鮮な取得は成功し、発表時刻を書き換えない', async t => {
+  const outDir=await makeFixture(t);
+  const seen=[];
+  const exitCode=await runCli({args:[],env:{},outDir,now:()=>new Date(ATTEMPT),logger:SILENT_LOGGER,
+    fetchImpl:async url=>{
+      seen.push(url);
+      const res=successResponseFor(url);
+      if(url.includes('/warning/')) {
+        const data=await res.json();
+        data[0].reportDatetime=data[0].controlDatetime='2026-05-28T01:16:00Z';
+        data[0].warning.class20Items[0].kinds[0].code='43'; data[0].warning.class10Items.forEach(a=>a.kinds[0].code='43');
+        return httpResponse(data);
+      }
+      return res;
+    }});
+  assert.equal(exitCode,0);
+  const data=await readJson(join(outDir,'warnings.json'));
+  assert.equal(data.fetchedAt,ATTEMPT);
+  assert.equal(data.byIso['JP-13'].entries[0].reportDatetime,'2026-05-28T01:16:00Z');
+  assert.equal(data.byIso['JP-13'].level,'warning');
+  assert.ok(seen.includes('https://www.jma.go.jp/bosai/warning/data/r8/014100.json'));
+});
+test('旧形式・期限切れHTTP応答・未知コードは既存snapshotを更新しない',async t=>{
+  for(const issue of ['legacy','stale-http','unknown-code']) {
+    const outDir=await makeFixture(t), before=await snapshotBytes(outDir);
+    const exitCode=await runCli({args:[],env:{},outDir,now:()=>new Date(ATTEMPT),logger:SILENT_LOGGER,
+      fetchImpl:async url=>{
+        const res=successResponseFor(url);
+        if(!url.includes('/warning/')) return res;
+        if(issue==='legacy') return httpResponse({reportDatetime:ATTEMPT,areaTypes:[{areas:[]}]});
+        if(issue==='stale-http') res.headers.set('age','901');
+        if(issue==='unknown-code') {const data=await res.json(); data[0].warning.class20Items[0].kinds[0].code='99'; return httpResponse(data);}
+        return res;
+      }});
+    assert.equal(exitCode,1,issue);
+    assert.deepEqual(await snapshotBytes(outDir),before,issue);
+  }
+});
+test('取得日時だけの変化はファイルを変更せず、再デプロイ候補を作らない',async t=>{
+  const outDir=await makeFixture(t);
+  const options={args:[],env:{},outDir,now:()=>new Date(ATTEMPT),logger:SILENT_LOGGER,fetchImpl:async url=>successResponseFor(url)};
+  assert.equal(await runCli(options),0);
+  const names=['warnings.json','weather.json','earthquakes.json','index.json'];
+  const before=await Promise.all(names.map(n=>readFile(join(outDir,n),'utf8')));
+  assert.equal(await runCli({...options,now:()=>new Date(Date.parse(ATTEMPT)+600000)}),0);
+  assert.deepEqual(await Promise.all(names.map(n=>readFile(join(outDir,n),'utf8'))),before);
 });

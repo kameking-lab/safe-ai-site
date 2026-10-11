@@ -42,6 +42,18 @@ function fixture(status: "live" | "degraded" | "fallback"): JmaWarningsFile {
 }
 
 describe("buildSignageJmaSnapshot", () => {
+  it("degrades aggregate trust when the cached HTTP response expires", () => {
+    const data = fixture("live");
+    data.byIso["JP-13"].sourceStatus = "live";
+    data.byIso["JP-13"].entries[0].sourceHttpDate = "Wed, 22 Jul 2026 00:46:00 GMT";
+    data.byIso["JP-13"].entries[0].sourceHttpAgeSeconds = 840;
+    const result = buildSignageJmaSnapshot(data, "JP-13", "1310410", new Date("2026-07-22T01:02:00Z"));
+    expect(result.degraded).toBe(true);
+    expect(result.selectedWarningState).toBe("degraded");
+    expect(result.verifiedPrefectureCount).toBe(46);
+    expect(result.prefectureLevels["JP-13"]).toBeUndefined();
+  });
+
   it("liveデータは選択地点の警報と都道府県レベルを返す", () => {
     const result = buildSignageJmaSnapshot(fixture("live"), "JP-13", "1310410", new Date("2026-07-22T01:10:00Z"));
     expect(result.degraded).toBe(false);
