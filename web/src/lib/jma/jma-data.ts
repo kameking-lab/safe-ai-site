@@ -23,6 +23,9 @@ export type JmaFetchQuality = {
 
 export type JmaWarningEntry = {
   sourceCode: string;
+  /** HTTP confirmation metadata; distinct from reportDatetime and sourceFetchedAt. */
+  sourceHttpDate?: string | null;
+  sourceHttpAgeSeconds?: number;
   level: JmaMapLevel;
   headline: string | null;
   reportDatetime: string | null;

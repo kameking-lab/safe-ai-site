@@ -1,6 +1,5 @@
 import type { JmaMapLevel, JmaWarningsFile } from "@/lib/jma/jma-data";
-import { assessJmaDataTrust } from "@/lib/jma/jma-data-trust";
-import { isCurrentJmaWarningRegion } from "@/lib/jma/jma-region-trust";
+import { assessJmaWarningTrust, isCurrentJmaWarningRegion } from "@/lib/jma/jma-region-trust";
 import { isActiveWarningStatus } from "@/lib/jma/parse-jma-warning";
 
 export type SignageJmaSnapshot = {
@@ -48,13 +47,7 @@ export function buildSignageJmaSnapshot(
   const newest = newestEntry(entries);
   const selectedWarnings: Array<{ code: string; status: string }> = [];
   const seen = new Set<string>();
-  const trust = assessJmaDataTrust({
-    fetchedAt: warnings.fetchedAt,
-    quality: warnings.quality,
-    actualCoverage: Object.keys(warnings.byIso).length,
-    expectedCoverage: 47,
-    now,
-  });
+  const trust = assessJmaWarningTrust(warnings, now);
 
   if (cityCode) {
     for (const entry of entries) {

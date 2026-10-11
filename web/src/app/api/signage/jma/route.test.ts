@@ -14,7 +14,7 @@ vi.mock("@/lib/jma/fetch-jma-runtime", () => ({
 
 import { GET } from "./route";
 
-function isoMap(count: number) {
+function isoMap(count: number): import("@/lib/jma/jma-data").JmaWarningsFile["byIso"] {
   return Object.fromEntries(Array.from({ length: count }, (_, index) => [
     `JP-${String(index + 1).padStart(2, "0")}`,
     { level: "none", entries: [] },
@@ -48,6 +48,29 @@ describe("GET /api/signage/jma freshness aggregation", () => {
     expect((await response.json()).degraded).toBe(false);
     expect(response.headers.get("cache-control")).toBe("no-store");
     expect(response.headers.get("cache-control")).not.toContain("stale-while-revalidate");
+  });
+
+  it("reports expired cached HTTP responses consistently with region trust", async () => {
+    const byIso = isoMap(47);
+    byIso["JP-13"] = {
+      level: "none",
+      entries: [{
+        sourceCode: "130000", level: "none", headline: null,
+        reportDatetime: "2026-07-20T00:00:00+09:00", publishingOffice: "気象庁", warnings: [],
+        sourceHttpDate: "Thu, 23 Jul 2026 02:44:00 GMT", sourceHttpAgeSeconds: 840,
+      }],
+      sourceStatus: "live", sourceFetchedAt: "2026-07-23T02:58:00Z",
+    };
+    runtime.warnings.mockResolvedValueOnce({
+      fetchedAt: "2026-07-23T02:58:00Z", byIso,
+      quality: { status: "live", attempted: 47, succeeded: 47, failed: 0 },
+    });
+    const response = await GET();
+    const body = await response.json();
+    expect(body.trust.warnings.status).toBe("degraded");
+    expect(body.trust.warnings.reasons).toContain("coverage-partial");
+    expect(body.degraded).toBe(true);
+    expect(response.headers.get("x-data-source")).toBe("jma-runtime-degraded");
   });
 
   it("degrades stale and partial-region data despite quality.status=live", async () => {

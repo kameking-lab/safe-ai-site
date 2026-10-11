@@ -2,8 +2,8 @@ name: JMA data update
 
 on:
   schedule:
-    # 15分間隔（cron は最短5分だが、レート制限と運用余裕のため15分）
-    - cron: "*/15 * * * *"
+    # Runtime uses its existing 10-minute cache; bundled recovery snapshots run at most 4 times/day.
+    - cron: "17 */6 * * *"
   repository_dispatch:
     types: [jma-data-update]
 permissions:
