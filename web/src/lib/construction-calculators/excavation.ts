@@ -1,3 +1,4 @@
+import { calculatePipeTrench, type PipeTrenchInput } from "./next-quantity";
 import {
   MAX_LINEAR_METRES,
   MAX_VOLUME_M3,
@@ -15,9 +16,9 @@ import type { CalculationOutcome, LengthUnit, RoundingConfig, VolumeUnit } from 
 import { toCubicMetres, toMetres } from "./units";
 
 export const EXCAVATION_CALCULATOR_ID = "excavation-backfill";
-export const EXCAVATION_FORMULA_VERSION = "1.0.0";
+export const EXCAVATION_FORMULA_VERSION = "1.1.0";
 
-export interface ExcavationInput {
+export interface LegacyExcavationInput {
   shape: "vertical" | "sloped-trench" | "sloped-pit";
   length: number;
   width: number;
@@ -30,7 +31,10 @@ export interface ExcavationInput {
   rounding?: RoundingConfig;
 }
 
+export type ExcavationInput = LegacyExcavationInput | PipeTrenchInput;
+
 export function calculateExcavation(input: ExcavationInput): CalculationOutcome {
+  if (input.shape === "pipe-trench") return calculatePipeTrench(input);
   const issues = compactIssues([
     enumIssue("shape", input.shape, ["vertical", "sloped-trench", "sloped-pit"]),
     enumIssue("dimensionUnit", input.dimensionUnit, ["mm", "cm", "m"]),

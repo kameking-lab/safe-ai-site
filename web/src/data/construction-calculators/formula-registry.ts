@@ -1,3 +1,4 @@
+import { extendNextFiveDefinition, nextQuantityRegistry } from "./next-five-registry";
 import { DEFORMED_REBAR_TABLE } from "@/lib/construction-calculators/rebar-weight";
 import { additionalQuantityRegistry } from "@/lib/construction-calculators/additional-quantity";
 import type {
@@ -125,7 +126,7 @@ function output(key: string, label: string, unit: string, integer = false): Outp
 const rebarSource: FormulaSource = {sourceId:"SRC-JFE-REBAR-TABLE",title:"建材ナビゲーター：異形棒鋼の寸法・単位質量",publisher:"JFEスチール",url:"https://www.jfe-steel.co.jp/products/kennavi/assets/pdf/kennavi_all.pdf",applicableYear:null,locator:"PDF p.70（紙面2-12）寸法・単位質量表。JFE条鋼2025.01寸法・重量表PDF p.5と12径照合。",checkedAt:"2026-10-09",sourceKind:"official"};
 const barInputs: InputDefinition[] = [selectInput("barType","鉄筋の種類",["deformed","round"],"異形棒鋼は規格表、丸鋼は直径の真円計算。"),selectInput("barDesignation","異形鉄筋の呼び名",Object.keys(DEFORMED_REBAR_TABLE),"D13の公称径は12.7mm、単位質量0.995kg/m。" )];
 
-export const constructionCalculatorRegistry: readonly FormulaRegistryEntry[] = [
+const existingConstructionCalculatorRegistry: readonly FormulaRegistryEntry[] = [
   {
     calculatorId: "concrete-quantity",
     slug: "concrete-quantity",
@@ -226,6 +227,8 @@ export const constructionCalculatorRegistry: readonly FormulaRegistryEntry[] = [
   },
   ...additionalQuantityRegistry(mathSource),
 ] as const;
+
+export const constructionCalculatorRegistry: readonly FormulaRegistryEntry[] = [...existingConstructionCalculatorRegistry.map(extendNextFiveDefinition), ...nextQuantityRegistry(mathSource)];
 
 export type ConstructionCalculatorSlug =
   (typeof constructionCalculatorRegistry)[number]["slug"];

@@ -1,3 +1,4 @@
+import { calculateCurbQuantity, calculateSealantQuantity } from "./next-quantity";
 import { additionalQuantitySpecs, calculateAdditionalQuantity } from "./additional-quantity";
 import { describe, expect, it } from "vitest";
 import {
@@ -25,6 +26,8 @@ const calculators: Record<
   string,
   (input: Record<string, unknown>) => CalculationOutcome
 > = {
+  "curb-quantity": input => calculateCurbQuantity(input as never),
+  "sealant-quantity": input => calculateSealantQuantity(input as never),
   "concrete-quantity": (input) => calculateConcrete(input as never),
   "excavation-backfill": (input) => calculateExcavation(input as never),
   "average-end-area": (input) => calculateAverageEndArea(input as never),
@@ -61,6 +64,12 @@ for(const spec of additionalQuantitySpecs) exactInputKeys[spec.slug]=spec.slug==
 exactInputKeys["rebar-weight"].push("barType","barDesignation");
 exactInputKeys["rebar-spacing"].push("barType","barDesignation");
 
+exactInputKeys["excavation-backfill"].push("outerDiameter","bedWidth","bedThickness","bedPosition");
+exactInputKeys["slope-angle-length"].push("height","heightUnit","horizontalPerVertical","lengthM","section");
+exactInputKeys["aggregate-base-quantity"].push("mode","stoneAreaM2","stoneThickness","concreteAreaM2","concreteThickness","purchaseMode","loosePerCompacted","concreteExtraPercent","massMode","densityState","looseDensityTPerM3");
+exactInputKeys["curb-quantity"]=["mode","runM","productLengthM","jointM"];
+exactInputKeys["sealant-quantity"]=["widthMm","depthMm","lengthM","capacityMl","mode","percent"];
+
 describe("directed decimal rounding", () => {
   it("snaps binary representation noise without swallowing a real fractional remainder", () => {
     expect(applyRounding(12.420000000000002, { decimalPlaces: 2, mode: "ceil" })).toBe(12.42);
@@ -87,9 +96,9 @@ describe("directed decimal rounding", () => {
 });
 
 describe("construction calculator formula registry", () => {
-  it("contains the 12 existing and five additional low-risk calculators", () => {
-    expect(constructionCalculatorRegistry).toHaveLength(17);
-    expect(new Set(constructionCalculatorSlugs).size).toBe(17);
+  it("contains 19 URLs with existing calculators extended in place", () => {
+    expect(constructionCalculatorRegistry).toHaveLength(19);
+    expect(new Set(constructionCalculatorSlugs).size).toBe(19);
     expect(Object.keys(calculators).sort()).toEqual([...constructionCalculatorSlugs].sort());
     expect(constructionCalculatorRegistry.every((entry) => entry.riskLevel === "low" && entry.clientOnly)).toBe(true);
   });
@@ -121,7 +130,7 @@ describe("construction calculator formula registry", () => {
   });
 
   it("has three normal cases plus unit, boundary, zero, negative, large and rounding cases per calculator", () => {
-    for (const entry of constructionCalculatorRegistry.filter(entry=>!additionalQuantitySpecs.some(s=>s.slug===entry.slug))) {
+    for (const entry of constructionCalculatorRegistry.filter(entry=>!additionalQuantitySpecs.some(s=>s.slug===entry.slug) && !["curb-quantity","sealant-quantity"].includes(entry.slug))) {
       const counts = entry.testFixtures.reduce<Record<string, number>>((accumulator, fixture) => {
         accumulator[fixture.kind] = (accumulator[fixture.kind] ?? 0) + 1;
         return accumulator;
