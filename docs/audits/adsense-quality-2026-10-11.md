@@ -52,7 +52,7 @@ node scripts/etl/build-legal-preservation-manifest.mjs
 - `git diff --check`: 成功。
 - 全ユニットテスト892ファイル: **8,183成功・2skip・未解消の失敗0**。全体実行では8,171成功・12失敗・2skip。その12件は参照資料の読込時点・未展開画像・改正前gold条番号で、環境と正解の2条番号を修正後、該当8ファイル34件を再実行して成功した。全体をもう一度まとめて再実行した結果ではない。
 
-[機械可読な検証記録](adsense-quality-2026-10-11-verification.json)に、PDFのページ数・本文確認・SHA-256を収録した。試験入力のPDF原本はローカルの `../safeai-adsense-quality-evidence-20261011/audit-evidence/pdf/chemical-{CAS}.pdf` に保存し、リポジトリの証拠ディレクトリ除外方針に従ってコミットしない。
+下のJSONブロックに、PDFのページ数・本文確認・SHA-256を収録した。機械可読JSONの原本はリポジトリ外の一時証拠フォルダにも保存した。試験入力のPDF原本はローカルの `../safeai-adsense-quality-evidence-20261011/audit-evidence/pdf/chemical-{CAS}.pdf` に保存し、リポジトリの証拠ディレクトリ除外方針に従ってコミットしない。
 
 ## 実行環境と公開前の未確認事項
 
@@ -61,3 +61,123 @@ node scripts/etl/build-legal-preservation-manifest.mjs
 全体テスト用の画像・講習資料は基点Gitのblobと一致する334ファイルを確認して既存コピーを参照した。必須アイコン等の小さなファイルのみ約1MBを展開した。チワワの画像・UIは変更していない。draft PRの完全なpreviewで実物を確認し、広告の許可画面、スマホ、印刷、相談メール起動を親のAstraで再レビューする。メール送信・ログイン・申請操作は行わない。
 
 今回のコード修正だけでサイト全体の独自価値が十分になったとは結論しない。RSS・化学詳細・未完成の機能導線について、次の内容改善と独立レビューを続ける。
+
+## 機械可読な検証記録
+
+非実行用JSON・画像の125ファイル制限に合わせ、短い検証記録は本Markdownへ集約する。容量ガードの制限は変更していない。
+
+```json
+{
+  "baseCommit": "a9e27880a32f05a92ed1c5a40b73c4611b7fe867",
+  "relatedUnitTests": {
+    "files": 108,
+    "tests": 2658,
+    "passed": 2658,
+    "failed": 0
+  },
+  "typecheck": "passed",
+  "printPlaywright": {
+    "passed": 3,
+    "failed": 0
+  },
+  "pdfEvidence": [
+    {
+      "cas": "108-88-3",
+      "ghsClassifications": 7,
+      "pages": 1,
+      "pageSizePoints": [
+        594.95996,
+        841.91998
+      ],
+      "sha256": "fff48182bc66d075af2919e6b85626526feb510423dcfc66f12f9d8e8e122398",
+      "sizeBytes": 115780,
+      "casPresent": true,
+      "durationOneHourPresent": true,
+      "unassessedNoticePresent": true,
+      "inputAndMissingFieldsPresent": true,
+      "visualReview": "Poppler page images inspected; no overlap, clipping or orphan signoff page",
+      "localEvidenceFile": "../safeai-adsense-quality-evidence-20261011/audit-evidence/pdf/chemical-108-88-3.pdf"
+    },
+    {
+      "cas": "67-64-1",
+      "ghsClassifications": 5,
+      "pages": 1,
+      "pageSizePoints": [
+        594.95996,
+        841.91998
+      ],
+      "sha256": "69e5ee8ff4544a80b633bc55f6548ccfa6f7b35b9ee48a66d781b585c380ec91",
+      "sizeBytes": 112350,
+      "casPresent": true,
+      "durationOneHourPresent": true,
+      "unassessedNoticePresent": true,
+      "inputAndMissingFieldsPresent": true,
+      "visualReview": "Poppler page images inspected; no overlap, clipping or orphan signoff page",
+      "localEvidenceFile": "../safeai-adsense-quality-evidence-20261011/audit-evidence/pdf/chemical-67-64-1.pdf"
+    },
+    {
+      "cas": "64-17-5",
+      "ghsClassifications": 6,
+      "pages": 1,
+      "pageSizePoints": [
+        594.95996,
+        841.91998
+      ],
+      "sha256": "a3b9759b7615128d7634e31f9cc789f95ed163dfed311468ebc358f8e0b976df",
+      "sizeBytes": 113212,
+      "casPresent": true,
+      "durationOneHourPresent": true,
+      "unassessedNoticePresent": true,
+      "inputAndMissingFieldsPresent": true,
+      "visualReview": "Poppler page images inspected; no overlap, clipping or orphan signoff page",
+      "localEvidenceFile": "../safeai-adsense-quality-evidence-20261011/audit-evidence/pdf/chemical-64-17-5.pdf"
+    }
+  ],
+  "productionBuild": "not run locally; clean CI required",
+  "productionDeployment": "not performed",
+  "adsenseApplication": "unchanged; pending",
+  "remainingReview": [
+    "independent preview review",
+    "source-backed editorial content for news and chemical detail pages",
+    "long saved/multipage RA print records"
+  ],
+  "additionalPropagationTests": {
+    "files": 9,
+    "tests": 151,
+    "passed": 151,
+    "failed": 0
+  },
+  "changedSourceLint": {
+    "files": 84,
+    "errors": 0,
+    "warnings": 3
+  },
+  "assetReuse": {
+    "filesMatchingBaseBlobs": 334,
+    "copies": "read-only use of existing assets; about 1MB of small files materialized"
+  },
+  "fullUnitTests": {
+    "method": "Full 892-file run, followed by rerun of eight affected suites after materializing missing verification assets and updating two renumbered gold citations",
+    "files": 892,
+    "tests": 8185,
+    "passed": 8183,
+    "failed": 0,
+    "skipped": 2,
+    "rerunFiles": 8,
+    "rerunTests": 34,
+    "rerunPassed": 34,
+    "rerunFailed": 0,
+    "originalFullRun": {
+      "passed": 8171,
+      "failed": 12,
+      "skipped": 2
+    }
+  },
+  "previewDeployment": {
+    "firstCommit": "941300f0d8c1665548902343a5ba704300f31b7f",
+    "initialStatus": "ignored by existing storage deployment guard",
+    "cause": "Adding one non-runtime audit JSON exceeded the 125-file count budget",
+    "resolution": "Consolidate compact verification JSON in the existing audit Markdown; keep raw evidence outside Git"
+  }
+}
+```
