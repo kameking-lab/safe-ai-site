@@ -59,12 +59,11 @@ export function OfficialAccidentFlash() {
               {snapshot.label}を、現場の重点確認へ
             </h2>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-200">
-              2026年1月1日〜7月31日に発生し、8月7日までに報告された全国累計です。
-              「8月中の事故件数」ではありません。
+              2026年1月1日〜{Number(snapshot.occurredThrough.slice(5, 7))}月{Number(snapshot.occurredThrough.slice(8))}日に発生・{Number(snapshot.reportAsOf.slice(5, 7))}月{Number(snapshot.reportAsOf.slice(8))}日までの報告累計。
             </p>
           </div>
           <span className="rounded-full border border-white/30 bg-white/10 px-3 py-1 text-xs font-black">
-            一次資料確認 2026-09-19
+            一次資料確認 {snapshot.verifiedAt}
           </span>
         </div>
 
@@ -83,7 +82,7 @@ export function OfficialAccidentFlash() {
 
         <div className="mt-4 flex flex-wrap gap-2">
           <a href={snapshot.sourcePdfUrl} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-white px-4 text-sm font-black text-slate-950">
-            8月速報PDFで検算 <ExternalLink className="h-4 w-4" aria-hidden="true" />
+            {snapshot.publishedMonth}速報PDFで検算 <ExternalLink className="h-4 w-4" aria-hidden="true" />
           </a>
           <a href={snapshot.sourcePageUrl} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/40 px-4 text-sm font-black text-white">
             厚労省の最新月を確認 <ExternalLink className="h-4 w-4" aria-hidden="true" />

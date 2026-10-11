@@ -50,7 +50,7 @@ describe("事故速報と死亡事故データベースの役割分離", () => {
   });
 
   it("公式データと集約した注意事項だけを短く案内する", () => {
-    expect(fatalSource).toContain("SERIOUS_CASES_META.sourceUrl");
+    expect(fatalSource).toContain("SERIOUS_CASES_META.sources.map");
     expect(fatalSource).toContain("<UsageNotesLink");
     expect(fatalSource).not.toContain("公式検索への自動引継ぎ: 停止中");
     expect(fatalSource).not.toContain("出典・公式データ・取り扱い");

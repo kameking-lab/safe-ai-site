@@ -8,8 +8,7 @@ import { buildGhsHazardsFromNite } from "@/lib/chemical/nite-ghs-hazards";
 import { verifiedMhlwPublicDocumentUrl } from "@/lib/chemical/official-source-url";
 import type { ChemicalRaResponse } from "@/app/api/chemical-ra/route";
 
-const ASSESSMENT_NOTICE =
-  "本サイトは作業条件からCREATE-SIMPLEの判定値やばく露濃度を推定しません。製品固有の最新SDS、実測値、厚生労働省の公式CREATE-SIMPLEを使い、化学物質管理者または専門家が確認してください。";
+import { CHEMICAL_ASSESSMENT_NOTICE as ASSESSMENT_NOTICE } from "@/lib/chemical/response-safety";
 
 function normalizeLookup(value: string): string {
   return value

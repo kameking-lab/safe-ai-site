@@ -1,6 +1,6 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
 
-const toolPaths = ["/chatbot", "/chemical-database", "/laws", "/accident-news", "/accidents-analytics", "/construction-calc", "/goods"];
+const toolPaths = ["/chatbot", "/chemical-database", "/laws", "/accident-news", "/accidents-analytics", "/tools/construction-calculators", "/goods"];
 const tools = (page: Page) => page.locator('#tools a[data-lp-tool]');
 const toolLink = (page: Page, href: string) => page.locator(`#tools a[data-lp-tool][href="${href}"], #tools nav[aria-label="ほかの現場支援ツール"] a[href="${href}"]`);
 const overflowX = (page: Page) => page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
@@ -156,12 +156,12 @@ test("7機能から専用入力とスライドへキーボードだけで到達�
 test("主機能カードから戻ると選択位置へ戻る", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
-  const href = "/construction-calc";
+  const href = "/tools/construction-calculators";
   await toolLink(page, href).scrollIntoViewIfNeeded();
   const beforeY = await page.evaluate(() => window.scrollY);
   expect(beforeY).toBeGreaterThan(400);
   await toolLink(page, href).click();
-  await expect(page).toHaveURL(/\/construction-calc$/);
+  await expect(page).toHaveURL(/\/tools\/construction-calculators$/);
   await page.goBack();
   await restoreToolPosition(page, href, beforeY);
 });

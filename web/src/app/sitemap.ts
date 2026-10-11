@@ -998,21 +998,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     changeFrequency: "monthly",
   }));
 
-  // 建設計算: ハブ＋個別計算機（registry から列挙＝計算機の量産に自動追従）
-  const constructionCalcPages: typeof pages = [
-    {
-      url: "/construction-calc",
-      lastModified: "2026-07-12",
-      priority: 0.8,
-      changeFrequency: "weekly",
-    },
-    ...CONSTRUCTION_CALCULATORS.map((c) => ({
-      url: `/construction-calc/${c.slug}`,
-      lastModified: "2026-07-12",
-      priority: 0.8,
-      changeFrequency: "monthly" as Freq,
-    })),
-  ];
+  // 入力方式の異なる旧個別計算機は維持し、転送する旧一覧は載せない。
+  const constructionCalcPages: typeof pages = CONSTRUCTION_CALCULATORS.map((calc) => ({
+    url: `/construction-calc/${calc.slug}`,
+    lastModified: "2026-07-12",
+    priority: 0.8,
+    changeFrequency: "monthly" as Freq,
+  }));
 
   const illnessGuidePages: typeof pages = ILLNESS_CATEGORIES.map((c) => ({
     url: `/treatment-work-balance/illness-guide/${c.id}`,

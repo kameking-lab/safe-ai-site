@@ -15,7 +15,7 @@ const VISUAL_ROUTES = [
 
 const HOME_SERVICE_HREFS = [
   "/chatbot", "/chemical-database", "/laws", "/accident-news",
-  "/accidents-analytics", "/construction-calc", "/goods",
+  "/accidents-analytics", "/tools/construction-calculators", "/goods",
 ] as const;
 
 function routePrimaryAction(page: Page, route: string) {

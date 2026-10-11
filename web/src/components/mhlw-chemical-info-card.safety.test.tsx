@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import type { MergedChemical } from "@/lib/mhlw-chemicals";
 import { findByCas } from "@/lib/mhlw-chemicals";
+import { findByCasSlim } from "@/lib/mhlw-chemicals-slim";
 import { MhlwChemicalInfoCard } from "./mhlw-chemical-info-card";
 
 const xyleneWithUnconfirmedLegacyFlag: MergedChemical = {
@@ -24,6 +25,19 @@ const xyleneWithUnconfirmedLegacyFlag: MergedChemical = {
 };
 
 describe("MHLW化学物質カードの安全境界", () => {
+  it("RAの軽量検索用アセトンから省略されたGHSを未収録と断定しない", () => {
+    const acetone = findByCasSlim("67-64-1");
+    expect(acetone).toBeDefined();
+    expect(acetone?.details?.limits?.niteGhsClassifications).toBeUndefined();
+    render(<MhlwChemicalInfoCard chemical={acetone!} showGhs={false} />);
+
+    expect(screen.getByText("アセトン")).toBeTruthy();
+    expect(screen.getByRole("link", { name: /DB詳細/ }).getAttribute("href")).toBe("/chemical-database/67-64-1");
+    expect(screen.queryByText("政府版GHS分類（NITE・主要有害性）")).toBeNull();
+    expect(screen.queryByText(/政府版GHSの主要有害性区分は未収録です/)).toBeNull();
+    expect(screen.getByRole("heading", { name: "政府版GHS分類", exact: true })).toBeTruthy();
+    expect(screen.getByText("ラベル・SDS対象物質")).toBeTruthy();
+  });
   it("未収録フラグを法的な非該当と断定しない", () => {
     render(<MhlwChemicalInfoCard chemical={xyleneWithUnconfirmedLegacyFlag} />);
 

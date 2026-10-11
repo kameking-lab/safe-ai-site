@@ -12,17 +12,17 @@ describe("effect-first home verified data", () => {
     expect(preview.featured.synthetic).toBe(false);
     expect(preview.featured.status).toContain("official");
     expect(preview.featured.period.normalize("NFKC")).toContain("令和8年");
-    expect(preview.featured.checkedAt).toBe("2026-09-15");
-    expect(preview.featured.deaths).toBe(301);
-    expect(preview.featured.injuries).toBe(67_945);
-    expect(preview.featured.sourceUrl).toMatch(/^https:\/\/anzeninfo\.mhlw\.go\.jp\//);
+    expect(preview.featured.checkedAt).toBe("2026-10-11");
+    expect(preview.featured.deaths).toBe(365);
+    expect(preview.featured.injuries).toBe(79_954);
+    expect(preview.featured.sourceUrl).toMatch(/^https:\/\/www\.mhlw\.go\.jp\//);
   });
 
   it("keeps the featured reform's date, audience, action, and primary source together", () => {
     expect(HOME_FEATURED_LAW_REFORM.promulgatedAt).toBe("2026-04-28");
     expect(HOME_FEATURED_LAW_REFORM.effectiveAt).toBe("2026-08-01");
     expect(HOME_FEATURED_LAW_REFORM.target).toContain("産業医");
-    expect(HOME_FEATURED_LAW_REFORM.action).toContain("8月1日");
+    expect(HOME_FEATURED_LAW_REFORM.action).toContain("報告担当");
     expect(HOME_FEATURED_LAW_REFORM.sourceState).toBe("一次資料確認済み");
     expect(HOME_FEATURED_LAW_REFORM.sourceUrl).toMatch(/^https:\/\/www\.mhlw\.go\.jp\//);
     expect(HOME_ADDITIONAL_LAW_REFORMS).toHaveLength(2);

@@ -21,7 +21,13 @@ import {
  * 収録フラグは法的な非該当判定に使わず、未収録は「未確認」と表示する。
  * 測定条件・単位・平均時間を検証できないため、濃度の自動適否判定は行わない。
  */
-export function MhlwChemicalInfoCard({ chemical }: { chemical: MergedChemical }) {
+export function MhlwChemicalInfoCard({
+  chemical,
+  showGhs = true,
+}: {
+  chemical: MergedChemical;
+  showGhs?: boolean;
+}) {
   const reg = regulatoryLabels(chemical.flags);
   const laws = relatedLawTexts(chemical.flags);
   // RA結果と同じ政府版GHSを使う。旧50物質の手入力補助表では補完しない。
@@ -108,7 +114,7 @@ export function MhlwChemicalInfoCard({ chemical }: { chemical: MergedChemical })
         物質リストの収録状況です。製品の含有率や取扱業務など、実際の適用条件は各法令で確認してください。
       </p>
 
-      {ghsHazards.length > 0 ? (
+      {showGhs && (ghsHazards.length > 0 ? (
         <div className="mt-3 rounded-lg bg-white p-3">
           <p className="text-xs font-semibold text-slate-700">政府版GHS分類（NITE・主要有害性）</p>
           <dl className="mt-2 space-y-2 text-xs">
@@ -133,7 +139,7 @@ export function MhlwChemicalInfoCard({ chemical }: { chemical: MergedChemical })
         <p className="mt-3 rounded-lg bg-white p-3 text-xs leading-5 text-slate-600">
           政府版GHSの主要有害性区分は未収録です。危険有害性がないという意味ではありません。最新の製品SDSと公的資料で確認してください。
         </p>
-      )}
+      ))}
 
       {reg.length > 0 && (
         <div className="mt-3 rounded-lg bg-white p-3">

@@ -25,6 +25,7 @@ describe("JMA runtime fail-closed fallback", () => {
   it("全面警報取得失敗時は新しい『警報なし』を作らず既知snapshotを保持する", async () => {
     const result = await fetchWarningsLive();
     expect(result.fetchedAt).toBe(warningsFallback.fetchedAt);
+    expect(vi.mocked(fetch).mock.calls.every(([, options]) => options?.cache === "no-store")).toBe(true);
     expect(Object.keys(result.byIso)).toEqual(Object.keys(warningsFallback.byIso));
     for (const [iso, fallbackEntry] of Object.entries(warningsFallback.byIso)) {
       expect(result.byIso[iso]).toMatchObject({

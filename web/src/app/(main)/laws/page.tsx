@@ -50,7 +50,7 @@ export default function LawsPage() {
         <header>
           <p className="text-xs font-black tracking-[.14em] text-violet-800">法改正・公式情報</p>
           <h1 className="mt-1 text-3xl font-black leading-tight tracking-tight text-slate-950 sm:text-4xl">
-            {HOME_FEATURED_LAW_REFORM.title}
+            {_title}
           </h1>
           <p className="mt-2 text-sm leading-6 text-slate-700">施行日、対象者、今やることを確認できます。</p>
           <FeatureMascotCompanion
@@ -83,7 +83,7 @@ export default function LawsPage() {
               {HOME_FEATURED_LAW_REFORM.status}
             </span>
           </div>
-          <h2 className="sr-only">最新改正の施行情報</h2>
+          <h2 className="mt-3 text-xl font-black">{HOME_FEATURED_LAW_REFORM.title}</h2>
           <dl className="mt-5 grid gap-3 sm:grid-cols-2">
             <div className="rounded-2xl bg-white p-4">
               <dt className="text-xs font-black text-violet-800">施行日</dt>

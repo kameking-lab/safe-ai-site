@@ -5,6 +5,29 @@ import { getSafetyImageTheme } from "@/data/safety-image-library";
 import { SafetyImageEditor } from "./safety-image-editor";
 
 describe("SafetyImageEditor", () => {
+  it("blocks a multilingual download after an edit until every selected language is confirmed, and invalidates confirmation on re-edit", () => {
+    const theme = getSafetyImageTheme("helmet-required")!;
+    const fetchMock = vi.spyOn(globalThis, "fetch");
+    render(<SafetyImageEditor theme={theme} />);
+    fireEvent.click(screen.getByLabelText("英語"));
+    const button = screen.getByRole("button", { name: "この看板をダウンロード" }) as HTMLButtonElement;
+    expect(button.disabled).toBe(false);
+    fireEvent.change(screen.getByLabelText("表示する文字（日本語）"), { target: { value: "保護帽と保護眼鏡を着用" } });
+    expect(button.disabled).toBe(true);
+    fireEvent.click(button);
+    expect(fetchMock).not.toHaveBeenCalled();
+    fireEvent.change(screen.getByLabelText("表示する文字（英語）"), { target: { value: "Wear a helmet and safety glasses" } });
+    fireEvent.click(screen.getByLabelText("日本語の意味を確認した"));
+    expect(button.disabled).toBe(true);
+    fireEvent.click(screen.getByLabelText("英語の意味を確認した"));
+    expect(button.disabled).toBe(false);
+    fireEvent.change(screen.getByLabelText("表示する文字（日本語）"), { target: { value: "保護帽を着用" } });
+    expect(button.disabled).toBe(true);
+    fireEvent.click(screen.getByRole("button", { name: "元に戻す" }));
+    expect(button.disabled).toBe(false);
+    fetchMock.mockRestore();
+  });
+
   it("selects several Japanese-labelled languages, edits them together and resets", () => {
     const theme = getSafetyImageTheme("helmet-required");
     if (!theme) throw new Error("theme missing");
