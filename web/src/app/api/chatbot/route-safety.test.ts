@@ -148,6 +148,21 @@ const executableRouteModes = [
 
 describe("回転刃物の手袋使用: 新規相談と誤分類からの訂正", () => {
   afterEach(() => { __resetChatbotCacheForTests(); __resetRateLimitForTests(); });
+  it.each(executableRouteModes)("$label は配線・感電を否定した訂正でも実対象を保持する", async ({ post, mode }) => {
+    for (const message of [
+      "電気の配線ではなく、ボール盤の回転刃への軍手の巻き込まれについて聞いています",
+      "ボール盤の感電ではなく、回転刃に軍手が巻き込まれる危険を聞いています",
+    ]) {
+      for (const context of [undefined, { topicDomain: "electrical", equipment: "電気盤", voltageClass: "低圧", confirmedChoices: ["盤外から見る"] }]) {
+        const { response, payload } = await callRoute(post, mode, message,
+          context ? [{ role: "assistant", content: "低圧設備を盤外から見る点検の資格について確認します。" }] : undefined, context);
+        expect(response.status).toBe(200);
+        expect(payload.substantiveAnswer, JSON.stringify(payload)).not.toMatch(/低圧|電気工事士|盤外/);
+        expect(payload.sources.some((source) => /111条/.test(source.article)) ||
+          (payload.effectiveDateStatus?.status === "unknown" && /保留|確定できません/.test(payload.substantiveAnswer)), JSON.stringify(payload)).toBe(true);
+      }
+    }
+  });
   it.each(executableRouteModes)("$label はボール盤/回転ドリルを電気盤へ流さない", async ({ post, mode }) => {
     for (const message of [
       "ボール盤で穴あけするとき、軍手を使ってよいですか？",

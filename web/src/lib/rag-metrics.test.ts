@@ -9,8 +9,8 @@ import { evaluateChatbotSafety } from "@/lib/chatbot-safety";
 
 /**
  * RAG metrics benchmark — computes Recall@5 / Precision@5 / MRR
- * for both fixture sets and writes to docs/rag-metrics-latest.json
- * for failure-analysis tooling.
+ * for both fixture sets. An explicit RAG_METRICS_REPORT_PATH may export the
+ * current run; ordinary tests never rewrite the published audit snapshot.
  */
 
 const TOP_K = 5;
@@ -202,11 +202,9 @@ describe("RAG metrics (Recall@5 / Precision@5 / MRR)", () => {
       law_inventory: lawInventory,
     };
 
-    const outPath = resolve(process.cwd(), "../docs/rag-metrics-latest.json");
-    try {
-      writeFileSync(outPath, JSON.stringify(out, null, 2) + "\n", "utf8");
-    } catch {
-      /* ignore */
+    const reportPath = process.env.RAG_METRICS_REPORT_PATH;
+    if (reportPath) {
+      writeFileSync(resolve(reportPath), JSON.stringify(out, null, 2) + "\n", "utf8");
     }
 
     console.log(

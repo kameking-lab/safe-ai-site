@@ -1425,6 +1425,12 @@ export function ChemicalRaPanel({
                 workContent={workContent}
                 exposureBand=""
                 payload={savePayload ?? result}
+                onSaved={(record) => {
+                  setRestoredPayloadState(inspectChemicalRaRecordPayload(record.payload));
+                  setRestoredAt(record.savedAt);
+                  const params = new URLSearchParams({ raId: record.raId });
+                  window.history.replaceState(window.history.state, "", `/chemical-ra?${params}`);
+                }}
               />
               <button
                 type="button"

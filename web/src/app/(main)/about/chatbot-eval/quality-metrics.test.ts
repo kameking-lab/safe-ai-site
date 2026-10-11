@@ -5,6 +5,7 @@ import mainPageMetrics from "@/data/chatbot-eval-results.json";
 import freshPageMetrics from "@/data/chatbot-eval-fresh-results.json";
 
 type RawMetrics = {
+  generated_at: string;
   main: { precision5: number; mrr: number };
   fresh: { precision5: number; mrr: number };
 };
@@ -17,6 +18,9 @@ describe("PF-028 public retrieval quality metrics", () => {
         "utf8",
       ),
     ) as RawMetrics;
+
+    expect(mainPageMetrics.quality_metrics_generated_at).toBe(raw.generated_at);
+    expect(freshPageMetrics.quality_metrics_generated_at).toBe(raw.generated_at);
 
     expect(mainPageMetrics.precision5).toBe(raw.main.precision5);
     expect(mainPageMetrics.mrr).toBe(raw.main.mrr);

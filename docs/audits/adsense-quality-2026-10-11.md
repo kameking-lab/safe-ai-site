@@ -60,7 +60,25 @@ node scripts/etl/build-legal-preservation-manifest.mjs
 
 全体テスト用の画像・講習資料は基点Gitのblobと一致する334ファイルを確認して既存コピーを参照した。必須アイコン等の小さなファイルのみ約1MBを展開した。チワワの画像・UIは変更していない。draft PRの完全なpreviewで実物を確認し、広告の許可画面、スマホ、印刷、相談メール起動を親のAstraで再レビューする。メール送信・ログイン・申請操作は行わない。
 
-今回のコード修正だけでサイト全体の独自価値が十分になったとは結論しない。RSS・化学詳細・未完成の機能導線について、次の内容改善と独立レビューを続ける。
+今回のコード修正だけでサイト全体の独自価値が十分になったとは結論しない。下記の追加修正・編集解説を含め、最終previewで親のAstraによる独立レビューが必要である。
+
+## Astra追加指摘の修正と実物確認
+
+- 「電気の配線ではなく、ボール盤の回転刃への軍手の巻き込まれ」「ボール盤の感電ではなく、回転刃に軍手が巻き込まれる」は、旧電気文脈が残る誤答をJSON/SSEで再現した。明示的に否定した電気作業語だけを分類から除外し、残る配線・結線・感電防止の相談は電気作業として扱う。旧2表現と追加2表現の新規/訂正×JSON/SSEの実HTTP16ケース、フォークリフト0.8t/1tの両経路4ケースで本文・条文・基準日を確認した。未確認版を保留する既存fixtureも対象単体テストで維持した。
+- 保存RAを1時間/SDS旧版から8時間/SDS-v2へ編集して別記録保存すると、元の復元payloadを印刷する不具合を修正。保存後に実際の保存レコードをローカルで読み、画面の印刷対象・記録日・再読み込みURLを同じ新記録へ更新する。元記録は上書きしない。未保存の編集では元の印刷条件を保持する。クラウド同意なしでは送信ゼロ。
+- 架空の長い印刷試験入力（作業25行・既存対策18行・追加案22行・保護具12行、長い製品版文字列）を実APIから保存/復元/編集/再保存/再読込。A4 **3ページ**を全文抽出・全ページ目視し、77行・8時間・SDS-v2・2026-10-20の記録日・未確認/未評価・出典が欠けないことを確認。試験日付は固定時計による架空日付であり、実際のRA実績ではない。
+- コンクリート10m×5m×0.2m、ロス5%、積載4.5m³の画面/CSV/1ページPDFが、正味10m³・ロス込み10.5m³・3台・最終車1.5m³で一致することを確認。積載量0では旧結果・印刷を消去する。375pxでチャット/RA/法改正/相談種別切替に横あふれがなく、相談を送信しないことを確認。
+- 10月の2改正の要点・対象条件・対応・改正前後の一次資料リンクと、未解説の有機則カードに空の対応/業種見出しを出さないことを実ブラウザで確認した。
+- 化学詳細（トルエン/アセトン）は、引火性液体の日本語ラベル、部分収録、収録データ版、原典取得日時未収録、製品SDS第2/3/8項の確認、同じCASのNITE原典を表示。物質が異なる/偽装されたURLはリンクに使わない。新たな濃度値・分類や製品への適用判定を追加しない。
+- 事故速報は、厚労省No.100003/100005の過去事例2件について、確認できた経過・原典で分からない点・自社条件を折りたたみで追加。原典に発生日の記載はない。No.100005の隔離済み旧データは感電/重傷になっていたため墜落/死亡へ訂正したが、人手確認whitelistを拡張せず詳細ページの404を維持する。直近RSSの裏付けや件数には使わない。原典の「安全帯」の旧手法を現在の設備へそのまま適用させない。
+- CIのMRR一致検査の原因は、通常ベンチマークがコミット済み `docs/rag-metrics-latest.json` を上書きし、並列テストの順番で公開値と不一致になることだった。公開値と10/8原本（MRR 0.8756535947712418）は一致している。通常テストの書き込みを止め、明示した `RAG_METRICS_REPORT_PATH` へだけ現在の測定を出力する。原本・公開値・判定閾値は変更しない。照合日も一致検査へ加えた。
+- 追加コア検証6ファイル189件成功。その後の**全892ファイル再実行は8,195成功・2skip・失敗0（全8,197件）**。さらに化学詳細2ファイル10件、事故出典4ファイル20件と最終訂正1ファイル2件を検証した。型検査、追加差分lint、CI/previewの最終結果は下の記録とPRに記載する。
+
+追加原典の取得HTMLはコミットせず、SHA-256を記録する。
+
+- No.100003: `60e3e695c91aa3e9f4029bf331f5f321e58bd9a89ce7be566e097a2022c14e4d`
+- No.100005: `d32d3cf902fc42bdf0291676665bc7e51cacd64c2150948f0cb840eab304d2ba`
+- 長い保存RA PDF（3ページ）: `7953e7d8f540ea23e61a9a3fc81fad8e6d28dc3484be0b94f179497082a79922`
 
 ## 機械可読な検証記録
 
@@ -133,13 +151,11 @@ node scripts/etl/build-legal-preservation-manifest.mjs
       "localEvidenceFile": "../safeai-adsense-quality-evidence-20261011/audit-evidence/pdf/chemical-64-17-5.pdf"
     }
   ],
-  "productionBuild": "not run locally; clean CI required",
+  "productionBuild": "Clean CI builds passed on c3d9772; final followup check results are linked on draft PR1068",
   "productionDeployment": "not performed",
   "adsenseApplication": "unchanged; pending",
   "remainingReview": [
-    "independent preview review",
-    "source-backed editorial content for news and chemical detail pages",
-    "long saved/multipage RA print records"
+    "Astra independent review of final preview"
   ],
   "additionalPropagationTests": {
     "files": 9,
@@ -178,6 +194,102 @@ node scripts/etl/build-legal-preservation-manifest.mjs
     "initialStatus": "ignored by existing storage deployment guard",
     "cause": "Adding one non-runtime audit JSON exceeded the 125-file count budget",
     "resolution": "Consolidate compact verification JSON in the existing audit Markdown; keep raw evidence outside Git"
+  },
+  "astraFollowup": {
+    "coreUnit": {
+      "files": 6,
+      "tests": 189,
+      "passed": 189
+    },
+    "fullUnit": {
+      "files": 892,
+      "tests": 8197,
+      "passed": 8195,
+      "failed": 0,
+      "skipped": 2,
+      "scope": "before final chemical/accident editorial additions"
+    },
+    "incrementalUnit": [
+      {
+        "files": 2,
+        "tests": 10,
+        "passed": 10
+      },
+      {
+        "files": 4,
+        "tests": 20,
+        "passed": 20
+      },
+      {
+        "files": 1,
+        "tests": 2,
+        "passed": 2
+      }
+    ],
+    "http": {
+      "rotatingToolNewAndCorrection": 16,
+      "forkliftBranches": 4,
+      "transports": [
+        "JSON",
+        "SSE"
+      ],
+      "passed": 20
+    },
+    "browser": {
+      "regressionCases": 8,
+      "method": "seven passed in full run, remaining source-case boundary corrected and passed in targeted rerun",
+      "unresolvedFailures": 0,
+      "longRaRealApi": 1,
+      "shortRaRealApi": 3,
+      "cloudRequestsWithoutConsent": 0,
+      "inquirySubmissions": 0,
+      "viewportWidth": 375
+    },
+    "longRaPdf": {
+      "pages": 3,
+      "sha256": "7953e7d8f540ea23e61a9a3fc81fad8e6d28dc3484be0b94f179497082a79922",
+      "uniqueInputLines": 77,
+      "allInputLinesPresent": true,
+      "editedCopyDurationHours": 8,
+      "editedCopySdsVersion": "SDS-v2",
+      "originalRecordUnchanged": true,
+      "allPagesVisuallyChecked": true
+    },
+    "concrete": {
+      "input": {
+        "lengthM": 10,
+        "widthM": 5,
+        "heightM": 0.2,
+        "lossPercent": 5,
+        "truckCapacityM3": 4.5
+      },
+      "screenCsvPdfMatch": true,
+      "pdfPages": 1,
+      "netVolumeM3": 10,
+      "volumeWithLossM3": 10.5,
+      "truckCount": 3,
+      "finalTruckVolumeM3": 1.5,
+      "capacityZeroClearsOldResult": true
+    },
+    "metricsRace": {
+      "publishedSnapshotPreserved": "2026-10-08T14:33:32.233Z",
+      "publishedMrrPreserved": 0.8756535947712418,
+      "ordinaryTestWritesHistoricalReport": false,
+      "explicitExportVariable": "RAG_METRICS_REPORT_PATH"
+    },
+    "newEditorial": {
+      "verifiedPastCaseNotes": 2,
+      "caseIds": [
+        "100003",
+        "100005"
+      ],
+      "humanWhitelistExpanded": false,
+      "case100005DetailStatus": 404,
+      "chemicalDetailCases": [
+        "108-88-3",
+        "67-64-1"
+      ]
+    }
   }
 }
 ```
