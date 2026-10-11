@@ -1,6 +1,7 @@
 import type { LawArticle } from "@/data/laws";
 import { verifiedLawArticles } from "@/data/laws/verified-corpus";
 import { verifiedPrimaryNoticeArticles } from "@/data/laws/verified-primary-notices";
+import { verifiedFrameScaffoldArticle } from "@/data/laws/verified-primary-scaffold";
 import { getProvisionEffectiveDate } from "@/data/law-metadata";
 import {
   classifyLegalQuestionTime,
@@ -27,6 +28,19 @@ function compact(value: string): string {
   return normalizeLegalConversationText(value).replace(
     /[\s　、。,!?！？]/g,
     "",
+  );
+}
+
+/**
+ * 足場の手すりについて、利用者が「わく組足場」を確定したか。
+ * 判定は会話文脈と同じ閉じた選択肢抽出に委ね、「わく組足場以外」を取り違えない。
+ */
+function selectsFrameScaffoldHandrail(query: string): boolean {
+  const context = extractLegalConversationContext(query);
+  return Boolean(
+    /足場/.test(context.workType ?? "") &&
+      /(?:手すり|中さん|中桟)/.test(compact(query)) &&
+      context.confirmedChoices?.includes("わく組足場"),
   );
 }
 
@@ -736,6 +750,8 @@ export function expandVerifiedLegalEvidenceArticles(
       );
     }
   }
+  const frameScaffoldHandrail =
+    selectsFrameScaffoldHandrail(query) && Boolean(verifiedFrameScaffoldArticle);
   if (
     /(?:足場|第?563条)/.test(normalized) &&
     /(?:手すり|中さん|中桟|高さ|何センチ|何cm)/i.test(normalized)
@@ -1119,6 +1135,11 @@ export function expandVerifiedLegalEvidenceArticles(
   }
 
   const primarySources = [
+    // わく組足場の細目（第1項第3号イ(1)(2)）は公式XMLから補完した563条だけが持つ。
+    // 同じ条番号の重複は下の filter で先勝ちとなり、snapshot版は外れる。
+    ...(frameScaffoldHandrail && verifiedFrameScaffoldArticle
+      ? [verifiedFrameScaffoldArticle]
+      : []),
     ...verifiedLawArticles,
     ...verifiedPrimaryNoticeArticles,
   ];
@@ -2159,6 +2180,12 @@ function nextQuestion(
     return null;
   }
   if (/(?:施行日|施行済み|施行されて|有効|現行|適用時点)/.test(query)) {
+    return null;
+  }
+  if (
+    confirmedChoices.has("わく組足場") ||
+    confirmedChoices.has("わく組足場以外の足場")
+  ) {
     return null;
   }
   if (!context.height && /墜落|足場/.test(context.workType ?? "")) {
@@ -4797,6 +4824,26 @@ function knownConclusion(
       conclusion: `高さ2m以上の作業床の端や開口部で墜落のおそれがある箇所には、囲い・手すり・覆い等を設ける必要があります。${marker(openingProtection)}`,
       conditions: [
         `囲い等を設けることが著しく困難な場合や、作業上いったん外す場合は、防網や要求性能墜落制止用器具の使用等の代替措置が必要です。${marker(openingProtection)}`,
+      ],
+    };
+  }
+  const frameScaffold = articleIndex(
+    articles,
+    (article) =>
+      article.lawShort === "安衛則" &&
+      /^第?563条$/.test(article.articleNum) &&
+      article.text.includes("妻面に係る部分を除く。ロにおいて同じ。") &&
+      article.text.includes(
+        "交さ筋かい及び高さ十五センチメートル以上四十センチメートル以下の桟若しくは高さ十五センチメートル以上の幅木又はこれらと同等以上の機能を有する設備",
+      ) &&
+      article.text.includes("手すりわく") &&
+      article.text.includes("わく組足場以外の足場　手すり等及び中桟等"),
+  );
+  if (selectsFrameScaffoldHandrail(query) && frameScaffold >= 0) {
+    return {
+      conclusion: `一側足場を除く足場の、高さ2m以上の作業場所で、墜落により危険を及ぼすおそれのある箇所のうち、わく組足場（妻面に係る部分を除く）の部分には、交さ筋かいに加えて高さ15cm以上40cm以下の桟もしくは高さ15cm以上の幅木（またはこれらと同等以上の機能を有する設備）を設けるか、手すりわくを設けます。${marker(frameScaffold)}`,
+      conditions: [
+        `わく組足場の妻面に係る部分は「わく組足場以外の足場」として、手すり等及び中桟等が必要です。${marker(frameScaffold)}`,
       ],
     };
   }

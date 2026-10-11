@@ -24,6 +24,7 @@ import equipmentDb from "@/data/safety-equipment-db.json";
 import { getPublishedArticleIndex } from "@/lib/articles";
 import { CONCENTRATION_LIMITS } from "@/lib/mhlw-chemicals";
 import { latestIsoDate } from "@/lib/sitemap/lastmod";
+import { lawsRevisionListChangedOn } from "@/lib/sitemap/content-changes";
 
 /** 各サイトマップセクションの実データ最新日（YYYY-MM-DD）。 */
 export interface SitemapFreshness {
@@ -31,6 +32,8 @@ export interface SitemapFreshness {
   freshestNews: string;
   /** /laws が扱う法改正の最新公表日。 */
   freshestLawRevision: string;
+  /** /laws の lastmod: 最新公表日と、一覧の表示内容が実際に変わった日の新しい方。 */
+  lawsContentUpdated: string;
   /** /circulars が扱う通達の最新発出日（sitemap-circulars.xml の正本）。 */
   freshestNotice: string;
   /** /court-cases が扱う判例の最新判決日。 */
@@ -66,6 +69,12 @@ export function computeSitemapFreshness(buildToday: string): SitemapFreshness {
     "2026-04-19",
     buildToday,
   );
+  // 内容同一の再取得では動かない（lib/sitemap/content-changes.ts）。
+  const lawsContentUpdated = latestIsoDate(
+    [freshestLawRevision, lawsRevisionListChangedOn()],
+    freshestLawRevision,
+    buildToday,
+  );
   const freshestNotice = latestIsoDate(
     mhlwNotices.map((n) => n.issuedDate),
     "2026-04-28",
@@ -93,7 +102,7 @@ export function computeSitemapFreshness(buildToday: string): SitemapFreshness {
     buildToday,
   );
   const siteFreshest = latestIsoDate(
-    [freshestNews, freshestLawRevision, freshestNotice, freshestCourtCase, accidentsDataUpdated],
+    [freshestNews, lawsContentUpdated, freshestNotice, freshestCourtCase, accidentsDataUpdated],
     "2026-04-19",
     buildToday,
   );
@@ -101,6 +110,7 @@ export function computeSitemapFreshness(buildToday: string): SitemapFreshness {
   return {
     freshestNews,
     freshestLawRevision,
+    lawsContentUpdated,
     freshestNotice,
     freshestCourtCase,
     accidentsDataUpdated,
