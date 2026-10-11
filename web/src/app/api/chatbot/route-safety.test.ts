@@ -146,6 +146,46 @@ const executableRouteModes = [
   { label: "SSE", post: postStream, mode: "sse" },
 ] as const;
 
+describe("回転刃物の手袋使用: 新規相談と誤分類からの訂正", () => {
+  afterEach(() => { __resetChatbotCacheForTests(); __resetRateLimitForTests(); });
+  it.each(executableRouteModes)("$label は配線・感電を否定した訂正でも実対象を保持する", async ({ post, mode }) => {
+    for (const message of [
+      "電気の配線ではなく、ボール盤の回転刃への軍手の巻き込まれについて聞いています",
+      "ボール盤の感電ではなく、回転刃に軍手が巻き込まれる危険を聞いています",
+    ]) {
+      for (const context of [undefined, { topicDomain: "electrical", equipment: "電気盤", voltageClass: "低圧", confirmedChoices: ["盤外から見る"] }]) {
+        const { response, payload } = await callRoute(post, mode, message,
+          context ? [{ role: "assistant", content: "低圧設備を盤外から見る点検の資格について確認します。" }] : undefined, context);
+        expect(response.status).toBe(200);
+        expect(payload.substantiveAnswer, JSON.stringify(payload)).not.toMatch(/低圧|電気工事士|盤外/);
+        expect(payload.sources.some((source) => /111条/.test(source.article)) ||
+          (payload.effectiveDateStatus?.status === "unknown" && /保留|確定できません/.test(payload.substantiveAnswer)), JSON.stringify(payload)).toBe(true);
+      }
+    }
+  });
+  it.each(executableRouteModes)("$label はボール盤/回転ドリルを電気盤へ流さない", async ({ post, mode }) => {
+    for (const message of [
+      "ボール盤で穴あけするとき、軍手を使ってよいですか？",
+      "回転するドリルで穴を開ける時に軍手を着けてよいですか？",
+    ]) {
+      const { response, payload } = await callRoute(post, mode, message);
+      expect(response.status).toBe(200);
+      expect(payload.substantiveAnswer).toContain("手袋を使ってはいけません");
+      expect(payload.substantiveAnswer).not.toMatch(/低圧|電気工事士|盤外/);
+      expect(payload.sources).toHaveLength(1);
+      expect(payload.sources[0]?.article).toContain("111条");
+      expect(payload.quickReplies.map((reply) => reply.label).join(" ")).not.toMatch(/盤外|盤を開け|配線/);
+    }
+    const { payload } = await callRoute(post, mode,
+      "電気の資格ではなく、回転するドリル刃への軍手の巻き込まれについて聞いています",
+      undefined, { topicDomain: "electrical", equipment: "電気盤", voltageClass: "低圧", confirmedChoices: ["盤外から見る"] });
+    expect(payload.substantiveAnswer).toContain("手袋を使ってはいけません");
+    expect(payload.context?.topicDomain).toBe("general");
+    expect(payload.context?.voltageClass).toBeUndefined();
+    expect(payload.substantiveAnswer).not.toMatch(/低圧|電気工事士|盤外/);
+  });
+});
+
 function hasLegalSource(
   payload: RoutePayload,
   lawPattern: RegExp,
@@ -250,7 +290,7 @@ describe("chatbot route executable safety boundary", () => {
   });
 
   it.each(executableRouteModes)(
-    "実行時計が監査日を超えても回答・出典を2026-10-08基準に固定する ($label)",
+    "実行時計が監査日を超えても回答・出典を2026-10-12基準に固定する ($label)",
     async ({ post, mode }) => {
       vi.useFakeTimers();
       vi.setSystemTime(new Date("2030-01-01T00:00:00.000Z"));
@@ -258,20 +298,20 @@ describe("chatbot route executable safety boundary", () => {
       const current = await callRoute(post, mode, "酸欠作業の監視人は必要？");
       expect(current.response.status).toBe(200);
       expectAnswerFirst(current.payload);
-      expect(current.payload.answer).toContain("回答基準日: 2026-10-08 JST");
+      expect(current.payload.answer).toContain("回答基準日: 2026-10-12 JST");
       expect(current.payload.answer).not.toContain("2030-01-01");
       expect(current.payload.sources.length).toBeGreaterThan(0);
       expect(
-        current.payload.sources.every((item) => item.asOf === "2026-10-08"),
+        current.payload.sources.every((item) => item.asOf === "2026-10-12"),
       ).toBe(true);
 
       const future = await callRoute(
         post,
         mode,
-        "2026年10月9日時点の足場の手すり高さは？",
+        "2026年10月13日時点の足場の手すり高さは？",
       );
       expect(future.response.status).toBe(200);
-      expect(future.payload.answer).toContain("回答基準日: 2026-10-08 JST");
+      expect(future.payload.answer).toContain("回答基準日: 2026-10-12 JST");
       expect(future.payload.answer).toContain("回答を保留");
       expect(future.payload.sources).toEqual([]);
     },
@@ -284,14 +324,14 @@ describe("chatbot route executable safety boundary", () => {
 
     const first = await callRoute(postJson, "json", message);
     expect(first.response.headers.get("X-Cache-Hit")).toBe("false");
-    expect(first.payload.answer).toContain("回答基準日: 2026-10-08 JST");
+    expect(first.payload.answer).toContain("回答基準日: 2026-10-12 JST");
 
     vi.setSystemTime(new Date("2026-08-08T01:00:00.000Z"));
     const second = await callRoute(postJson, "json", message);
     expect(second.response.headers.get("X-Cache-Hit")).toBe("true");
-    expect(second.payload.answer).toContain("回答基準日: 2026-10-08 JST");
+    expect(second.payload.answer).toContain("回答基準日: 2026-10-12 JST");
     expect(
-      second.payload.sources.every((item) => item.asOf === "2026-10-08"),
+      second.payload.sources.every((item) => item.asOf === "2026-10-12"),
     ).toBe(true);
   });
 
@@ -1208,7 +1248,7 @@ describe("chatbot route executable safety boundary", () => {
 
       expect(response.status).toBe(200);
       expect(raw).not.toContain("STALE-PREVIOUS-DAY");
-      expect(payload.answer).toContain("回答基準日: 2026-10-08 JST");
+      expect(payload.answer).toContain("回答基準日: 2026-10-12 JST");
       expectSupportedAsbestosParagraphSource(payload);
       if (mode === "json") {
         expect(response.headers.get("X-Cache-Hit")).toBe("false");
@@ -1404,7 +1444,7 @@ describe("chatbot route executable safety boundary", () => {
           Date.parse("2026-07-23T00:00:00.000Z"),
         );
         expect(fetchedAt).toBeLessThanOrEqual(
-          Date.parse("2026-10-08T23:59:59.999+09:00"),
+          Date.parse("2026-10-12T23:59:59.999+09:00"),
         );
         expect(item.humanReviewStatus).toBe("not-reviewed");
       }
@@ -1492,9 +1532,9 @@ describe("chatbot route executable safety boundary", () => {
       expect(payload.sources.length).toBeGreaterThan(0);
       expect(payload.citations?.length ?? 0).toBeGreaterThan(0);
       expect(payload.effectiveDateStatus).toMatchObject({
-        // Mixed evidence includes an older decree; advancing the anchor must not promote it.
-        status: "unknown",
-        asOf: "2026-10-08",
+        // Source currency is verified separately from the unresolved crane load.
+        status: "current",
+        asOf: "2026-10-12",
       });
     },
   );

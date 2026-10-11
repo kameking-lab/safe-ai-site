@@ -8,6 +8,7 @@ import { PageJsonLd } from "@/components/page-json-ld";
 import { buildLegacyFatalAccidentsRedirect } from "@/lib/accident-news/legacy-route";
 import { loadHomeLatestAccidentNews } from "@/lib/home/home-accident-server";
 import { ogImageUrl } from "@/lib/og-url";
+import { VERIFIED_CASE_NOTES } from "@/lib/accident-news/verified-case-notes";
 
 const TITLE = "国内の死亡事故速報｜直近の報道を公表日時順に確認";
 const DESCRIPTION =
@@ -98,9 +99,13 @@ export default async function AccidentNewsPage({
               <p className="mt-1 text-xs leading-5 text-slate-600">{latestNews.message}</p>
             </div>
             <span className="rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-black text-slate-700">
-              掲載 {latestNews.items.length}件
+              掲載 {latestNews.items.length}記事
             </span>
           </div>
+
+          <p className="mt-2 text-xs leading-5 text-slate-600">
+            件数は報道記事の数です。同じ事故の続報を含む場合があり、全国の事故発生件数を示すものではありません。
+          </p>
 
           {latestNews.items.length > 0 ? (
             <ol
@@ -159,6 +164,22 @@ export default async function AccidentNewsPage({
               取得できない状態を「事故なし」とは表示していません。時間をおいて再確認するか、下の死亡事故データベース・公式統計を確認してください。
             </div>
           )}
+        </section>
+
+        <section aria-labelledby="verified-case-heading" className="mb-8">
+          <h2 id="verified-case-heading" className="text-xl font-black text-slate-950">一次資料で確認した過去事例</h2>
+          <p className="mt-2 text-xs leading-6 text-slate-600">直近報道の裏付けや事故件数には使いません。2026年10月11日に厚労省の個票を照合した編集解説です。</p>
+          <div className="mt-3 grid gap-3 md:grid-cols-2">{VERIFIED_CASE_NOTES.map((item) => (
+            <details key={item.id} data-verified-case={item.id} className="rounded-xl border border-slate-300 bg-white px-4">
+              <summary className="flex min-h-11 cursor-pointer items-center py-2 text-sm font-bold text-slate-900">{item.title}</summary>
+              <dl className="space-y-3 border-t border-slate-200 py-3 text-xs leading-6 text-slate-700">
+                <div><dt className="font-bold">確認できた経過</dt><dd>{item.facts}</dd></div>
+                <div><dt className="font-bold">この資料では分からないこと</dt><dd>{item.unknown}</dd></div>
+                <div><dt className="font-bold">自社で先に確認する条件</dt><dd>{item.check}</dd></div>
+              </dl>
+              <a href={item.sourceUrl} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center text-sm text-sky-800 underline">厚労省 個票No.{item.id}で確認</a>
+            </details>
+          ))}</div>
         </section>
 
         <section aria-labelledby="accident-next-heading" className="mb-10 rounded-2xl bg-slate-950 p-5 text-white sm:p-7">

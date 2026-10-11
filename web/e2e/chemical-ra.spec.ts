@@ -28,12 +28,121 @@ async function openSaveReadyChemicalRa(page: Page) {
 }
 
 test.describe("化学物質RA", () => {
+  test("長い条件記録を保存・再表示しても原本の条件と記録日を印刷に保持する", async ({ page }, testInfo) => {
+    test.setTimeout(120_000);
+    // 架空の印刷試験入力。安全性や対策効果を主張する実施記録ではない。
+    const lines = (label: string, count: number) => Array.from({ length: count }, (_, index) =>
+      `${label}${String(index + 1).padStart(2, "0")}: 印刷試験用の架空条件です。作業場所、容器、確認事項を別々に記録し、現場への適用は人が確認します。`,
+    ).join("\n");
+    const work = lines("作業行", 25);
+    const existing = lines("既存行", 18);
+    const additional = lines("追加行", 22);
+    const ppe = lines("保護具行", 12);
+    const componentVersion = `印刷試験製品版-${"VERSION1234567890".repeat(12)}-VERSION-END`;
+    let cloudRequests = 0;
+    let assessmentRequests = 0;
+    page.on("request", (request) => {
+      if (request.url().endsWith("/api/chemical-ra") && request.method() === "POST") assessmentRequests += 1;
+    });
+    await page.route("**/api/chemical/ra-records", async (route) => {
+      cloudRequests += 1;
+      await route.fulfill({ status: 500, body: "{}" });
+    });
+    await page.clock.setFixedTime(new Date("2026-10-08T03:00:00Z"));
+    const search = page.waitForResponse((response) => response.url().includes("/api/chemical/search") && response.request().method() === "POST");
+    await page.goto("/chemical-ra?cas=108-88-3");
+    expect((await search).status()).toBe(200);
+    await expect(page.getByRole("combobox", { name: "物質名・CAS番号・SDS記載名" })).toHaveValue("トルエン");
+    await page.getByRole("button", { name: "作業条件へ進む", exact: true }).click();
+    await page.getByLabel("作業内容（任意）— 最新SDS・公式ツール確認用のメモ").fill(work);
+    await page.getByLabel("作業時間（時間/日）", { exact: true }).fill("1");
+    await page.getByRole("combobox", { name: "SDS確認状況", exact: true }).selectOption("not-confirmed");
+    await page.getByLabel("SDS発行日", { exact: true }).fill("2026-10-01");
+    await page.getByLabel("成分・製品版", { exact: true }).fill(componentVersion);
+    await page.getByRole("combobox", { name: "換気", exact: true }).selectOption("local");
+    await page.getByRole("combobox", { name: "全体換気", exact: true }).selectOption("yes");
+    await page.getByRole("combobox", { name: "局所排気", exact: true }).selectOption("yes");
+    await page.getByRole("combobox", { name: "取扱量", exact: true }).selectOption("small");
+    await page.getByLabel("使用温度（℃）", { exact: true }).fill("25");
+    await page.getByRole("combobox", { name: "作業頻度", exact: true }).selectOption("weekly");
+    await page.getByRole("combobox", { name: "飛散・噴霧の状態", exact: true }).selectOption("vapor");
+    await page.getByRole("combobox", { name: "皮膚接触の可能性", exact: true }).selectOption("yes");
+    await page.getByRole("textbox", { name: /^使用する保護具/ }).fill(ppe);
+    await page.getByRole("combobox", { name: "保護具の適合性", exact: true }).selectOption("not-confirmed");
+    await page.getByRole("combobox", { name: "代替物質の検討", exact: true }).selectOption("not-considered");
+    await page.getByRole("textbox", { name: /^既存措置/ }).fill(existing);
+    await page.getByRole("textbox", { name: /^追加措置/ }).fill(additional);
+    await page.getByLabel("担当", { exact: true }).fill("印刷試験の記録担当");
+    await page.getByLabel("期限", { exact: true }).fill("2026-10-15");
+    await page.getByLabel("再評価日", { exact: true }).fill("2026-10-16");
+    const [response] = await Promise.all([
+      page.waitForResponse((value) => value.url().endsWith("/api/chemical-ra") && value.request().method() === "POST"),
+      page.getByRole("button", { name: "公的情報を確認", exact: true }).click(),
+    ]);
+    expect(response.status()).toBe(200);
+    await page.getByRole("button", { name: "この結果を保存", exact: true }).click();
+    await expect(page.getByText(/クラウドへは送信していません/).first()).toBeVisible();
+    const saved = await page.evaluate(() => JSON.parse(localStorage.getItem("safe-ai:chemical-ra-records:v1")!)[0] as {
+      raId: string; savedAt: string; payload: { assessmentSnapshot: { workContent: string; controls: { existing: string; additional: string }; ppe: { description: string } } };
+    });
+    expect(saved.payload.assessmentSnapshot.workContent).toBe(work);
+    expect(saved.payload.assessmentSnapshot.controls).toEqual({ existing, additional });
+    expect(saved.payload.assessmentSnapshot.ppe.description).toBe(ppe);
+    await page.clock.setFixedTime(new Date("2026-10-20T03:00:00Z"));
+    await page.goto(`/chemical-ra?raId=${encodeURIComponent(saved.raId)}`);
+    await expect(page.getByText("保存済みの参考情報記録を表示中", { exact: true })).toBeVisible();
+    await expect(page.getByText("変更を印刷に反映するには保存してください。", { exact: true })).toBeVisible();
+    await expect(page.getByLabel("作業内容（任意）— 最新SDS・公式ツール確認用のメモ")).toHaveValue(work);
+    await expect(page.getByLabel("作業時間（時間/日）", { exact: true })).toHaveValue("1");
+    // 未保存の編集を、保存当時の記録や分類に混ぜない。
+    await page.getByLabel("作業内容（任意）— 最新SDS・公式ツール確認用のメモ").fill("未保存の編集内容");
+    await page.getByLabel("作業時間（時間/日）", { exact: true }).fill("9");
+    await page.emulateMedia({ media: "print" });
+    const report = page.getByTestId("chemical-ra-print-report");
+    await expect(report).toBeVisible();
+    for (const value of [work, existing, additional, ppe, componentVersion, "記録日: 2026年10月8日", "1 時間/日", "SDS確認", "不足・未確認", "未評価", "VERSION-END", "参照資料", "確認欄"]) {
+      await expect(report).toContainText(value);
+    }
+    await expect(report).not.toContainText("未保存の編集内容");
+    await expect(report).not.toContainText("9 時間/日");
+    await expect(report.locator("tbody tr")).toHaveCount(7);
+    await page.emulateMedia({ media: "screen" });
+    await page.getByLabel("作業内容（任意）— 最新SDS・公式ツール確認用のメモ").fill(work);
+    await page.getByLabel("作業時間（時間/日）", { exact: true }).fill("8");
+    const editedComponentVersion = `${componentVersion} / SDS-v2`;
+    await page.getByLabel("成分・製品版", { exact: true }).fill(editedComponentVersion);
+    await page.getByLabel("SDS発行日", { exact: true }).fill("2026-10-19");
+    await page.getByRole("button", { name: "この結果を保存", exact: true }).click();
+    await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem("safe-ai:chemical-ra-records:v1")!).length)).toBe(2);
+    const copies = await page.evaluate(() => JSON.parse(localStorage.getItem("safe-ai:chemical-ra-records:v1")!) as typeof saved[]);
+    expect(copies.find((record) => record.raId === saved.raId)).toEqual(saved);
+    const latest = copies.find((record) => record.raId !== saved.raId)!;
+    await page.emulateMedia({ media: "print" });
+    await expect(report).toContainText("8 時間/日");
+    await expect(report).toContainText("SDS-v2");
+    await expect(report).toContainText("2026-10-19");
+    await expect(report).toContainText("記録日: 2026年10月20日");
+    await expect(page).toHaveURL(new RegExp(`raId=${latest.raId}`));
+    await page.emulateMedia({ media: "screen" });
+    await page.reload();
+    await expect(page.getByLabel("作業時間（時間/日）", { exact: true })).toHaveValue("8");
+    await expect(page.getByLabel("成分・製品版", { exact: true })).toHaveValue(editedComponentVersion);
+    await page.emulateMedia({ media: "print" });
+    for (const value of [work, existing, additional, ppe, editedComponentVersion, "8 時間/日", "記録日: 2026年10月20日", "不足・未確認", "未評価", "参照資料", "確認欄"]) await expect(report).toContainText(value);
+    const pdfPath = testInfo.outputPath("long-saved-ra.pdf");
+    await page.pdf({ path: pdfPath, format: "A4", preferCSSPageSize: true, printBackground: false });
+    await testInfo.attach("長い保存RA-A4", { path: pdfPath, contentType: "application/pdf" });
+    await testInfo.attach("入力条件", { body: JSON.stringify({ work, existing, additional, ppe, componentVersion: editedComponentVersion, savedAt: latest.savedAt }), contentType: "application/json" });
+    expect(assessmentRequests).toBe(1);
+    expect(cloudRequests).toBe(0);
+  });
+
   for (const item of [
     { cas: "108-88-3", name: "トルエン", count: 7 },
     { cas: "67-64-1", name: "アセトン", count: 5 },
     { cas: "64-17-5", name: "エタノール", count: 6 },
   ]) {
-    test(`${item.name}の実API分類・炎・一部収録注記を印刷にも保持する @smoke`, async ({ page }) => {
+    test(`${item.name}の実API分類・炎・一部収録注記を印刷にも保持する @smoke`, async ({ page }, testInfo) => {
       test.setTimeout(90_000);
       const searchPromise = page.waitForResponse((response) =>
         response.url().includes("/api/chemical/search") && response.request().method() === "POST",
@@ -42,6 +151,8 @@ test.describe("化学物質RA", () => {
       expect((await searchPromise).status()).toBe(200);
       await expect(page.getByRole("combobox", { name: "物質名・CAS番号・SDS記載名" })).toHaveValue(item.name);
       await page.getByRole("button", { name: "作業条件へ進む", exact: true }).click();
+      await page.getByLabel("作業時間（時間/日）", { exact: true }).fill("1");
+      await page.getByLabel("作業内容（任意）— 最新SDS・公式ツール確認用のメモ").fill("容器から移す");
       const [response] = await Promise.all([
         page.waitForResponse((value) => value.url().endsWith("/api/chemical-ra") && value.request().method() === "POST"),
         page.getByRole("button", { name: "公的情報を確認", exact: true }).click(),
@@ -58,6 +169,10 @@ test.describe("化学物質RA", () => {
       await expect(report).toBeVisible();
       await expect(report.getByTestId("ghs-picto-flame")).toBeVisible();
       await expect(report.getByTestId("chemical-ra-print-coverage")).toContainText("未確認");
+      await expect(report).toContainText("1 時間/日");
+      await expect(report).toContainText("容器から移す");
+      await expect(report).toContainText("不足・未確認");
+      await expect(report).toContainText("正式なRA結果ではありません");
       await expect(report.locator("tbody tr")).toHaveCount(item.count);
       for (const hazard of data.ghsHazards) {
         await expect(report).toContainText(hazard.category);
@@ -65,6 +180,9 @@ test.describe("化学物質RA", () => {
       }
       await expect(conclusion).toBeHidden();
       await expect(page.locator("[data-primary-task]")).toBeHidden();
+      const pdfPath = testInfo.outputPath(`chemical-${item.cas}.pdf`);
+      await page.pdf({ path: pdfPath, format: "A4", preferCSSPageSize: true, printBackground: false });
+      await testInfo.attach(`A4-${item.cas}`, { path: pdfPath, contentType: "application/pdf" });
       await page.emulateMedia({ media: "screen" });
       await expect(conclusion).toBeVisible();
       // 既存のKY導線は維持する。今回の変更は印刷だけ。

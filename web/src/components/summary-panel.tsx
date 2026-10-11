@@ -88,7 +88,7 @@ export function SummaryPanel({
       <p className="mt-1 text-sm font-medium text-slate-700">{selectedRevisionTitle}</p>
 
       <div className="mt-4 rounded-xl border border-slate-100 bg-slate-50/70 p-3">
-        <h3 className="text-sm font-semibold text-slate-900">3行要約</h3>
+        <h3 className="text-sm font-semibold text-slate-900">{summaryContent.verification ? "変更点と適用条件" : "収録されている改正情報"}</h3>
         <ul className="mt-2 space-y-2">
           {summaryContent.threeLineSummary.map((line) => (
             <li
@@ -101,16 +101,16 @@ export function SummaryPanel({
         </ul>
       </div>
 
-      <div className="mt-4 rounded-xl border border-slate-100 bg-slate-50/70 p-3">
+      {summaryContent.workplaceActions.length > 0 && <div className="mt-4 rounded-xl border border-slate-100 bg-slate-50/70 p-3">
         <h3 className="text-sm font-semibold text-slate-900">現場でやること</h3>
         <ul className="mt-2 list-disc space-y-1 pl-5 text-sm leading-6 text-slate-700">
           {summaryContent.workplaceActions.map((action) => (
             <li key={action}><EasyJapaneseText>{action}</EasyJapaneseText></li>
           ))}
         </ul>
-      </div>
+      </div>}
 
-      <div className="mt-4 rounded-xl border border-slate-100 bg-slate-50/70 p-3">
+      {summaryContent.targetIndustries.length > 0 && <div className="mt-4 rounded-xl border border-slate-100 bg-slate-50/70 p-3">
         <h3 className="text-sm font-semibold text-slate-900">対象業種</h3>
         <div className="mt-2 flex flex-wrap gap-2">
           {summaryContent.targetIndustries.map((industry) => (
@@ -122,10 +122,15 @@ export function SummaryPanel({
             </span>
           ))}
         </div>
-      </div>
-      <p className="mt-4 rounded-lg border border-amber-100 bg-amber-50 px-3 py-2 text-[11px] leading-5 text-amber-800">
-        ※ この要約はAIが生成したものです。正確な内容はe-Gov法令検索で原文をご確認ください。
-      </p>
+      </div>}
+      {summaryContent.verification ? <div className="mt-4 space-y-2 text-xs leading-5 text-slate-700">
+        <p>一次資料の照合日: {summaryContent.verification.checkedOn}</p>
+        <p>確認範囲: {summaryContent.verification.scope}</p>
+        <p>対象は業種名だけでは決まりません。上の作業場・測定条件を確認してください。</p>
+        <ul className="space-y-2">{summaryContent.verification.sources.map((source) => <li key={source.url}><a href={source.url} target="_blank" rel="noopener noreferrer" className="text-emerald-800 underline">{source.label}</a></li>)}</ul>
+      </div> : <p className="mt-4 rounded-lg border border-amber-100 bg-amber-50 px-3 py-2 text-xs leading-5 text-amber-800">
+        収録した改正情報の抜粋です。変更箇所・適用条件・対応事項の解説は未収録です。カードの公式原文から対象の条文と改正資料を確認してください。
+      </p>}
     </section>
   );
 }

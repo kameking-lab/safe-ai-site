@@ -1,3 +1,4 @@
+import { hasRotatingToolGloveIntent } from "@/lib/rotating-tool-work-model";
 import {
   requestedLegalPeriod,
   type LegalDatePrecision,
@@ -390,6 +391,7 @@ const TOPICS: Array<{
   workType: string;
   equipment?: string;
 }> = [
+  { pattern: /回転刃物の手袋使用/, workType: "回転刃物の手袋使用", equipment: "回転刃物" },
   {
     pattern:
       /(?:電気|電源|電工|でんき|電気設備|配線|結線|活線|充電部|充電電路|制御盤|分電盤|配電盤|受電盤|キュービクル|ブレ[ーイ]カー|遮断器|開閉器|テスター|絶縁測定|低圧教育|特高|高圧受電)/,
@@ -852,7 +854,9 @@ export function extractLegalConversationContext(
 ): LegalConversationContext {
   const text = normalize(value);
   const electricalMeaning = extractElectricalMeaning(text);
-  const inferredTopic = TOPICS.find(({ pattern }) => pattern.test(text));
+  const inferredTopic = hasRotatingToolGloveIntent(text)
+    ? { workType: "回転刃物の手袋使用", equipment: "回転刃物" }
+    : TOPICS.find(({ pattern }) => pattern.test(text));
   // 「作業床なし」「作業床を設けにくい」は、直前の墜落制止用器具の
   // 確認に対する条件であり、新しい「開口部・作業床」の相談ではない。
   const conditionOnlyWorkFloor =

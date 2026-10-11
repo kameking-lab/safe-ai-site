@@ -1,4 +1,5 @@
 import type { LawArticle } from "@/data/laws";
+import { hasRotatingToolGloveIntent } from "@/lib/rotating-tool-work-model";
 import { verifiedLawArticles } from "@/data/laws/verified-corpus";
 import { verifiedPrimaryNoticeArticles } from "@/data/laws/verified-primary-notices";
 import { verifiedFrameScaffoldArticle } from "@/data/laws/verified-primary-scaffold";
@@ -20,6 +21,7 @@ import {
   extractRequestedLegalItem,
 } from "@/lib/legal-unit-extract";
 import { kanjiToArabic } from "@/lib/article-number-normalize";
+import { verifiedCurrentPrimaryDate, verifiedCurrentRevisionDate } from "@/lib/legal-current-revision";
 import { detectForkliftQueryIntent } from "@/lib/rag/forklift-intent";
 import { detectHighLiftQueryIntent } from "@/lib/rag/high-lift-intent";
 import { hasElectricalDomainSignal } from "@/lib/electrical-work-model";
@@ -492,6 +494,12 @@ export function expandVerifiedLegalEvidenceArticles(
   candidates: LawArticle[],
 ): LawArticle[] {
   const normalized = compact(query);
+  if (hasRotatingToolGloveIntent(query)) {
+    // Do not carry unrelated high-ranked electrical citations into this answer.
+    return verifiedLawArticles.filter((article) =>
+      article.lawShort === "安衛則" && article.articleNum === "第111条",
+    );
+  }
   const load = loadRangeInTons(normalized);
   const forkliftIntent = detectForkliftQueryIntent(query);
   const highLiftIntent = detectHighLiftQueryIntent(query);
@@ -1934,13 +1942,7 @@ export function legalEffectiveStatusConclusion(
   return `${article.lawShort}${article.articleNum}は${effectiveText}です。${temporal.requestedDate ? "指定時点で施行済みです。" : "現在施行中です。"}`;
 }
 
-function jstDateKey(date: Date): string {
-  return new Date(date.getTime() + 9 * 60 * 60 * 1_000)
-    .toISOString()
-    .slice(0, 10);
-}
-
-/** 現行e-Gov本文の取得日を返す。古い取得物や未来時刻は現在扱いしない。 */
+/** 公式本文・版・ハッシュの再照合日。取得日だけで現行版と扱わない。 */
 export function verifiedCurrentSnapshotDate(
   article: LawArticle | undefined,
   now: Date,
@@ -1958,14 +1960,17 @@ export function verifiedCurrentSnapshotDate(
   ) {
     return null;
   }
-  const fetched = new Date(article.sourceFetchedAt);
-  if (Number.isNaN(fetched.getTime())) return null;
-  const checkedOn = jstDateKey(fetched);
-  const today = jstDateKey(now);
-  const ageDays =
-    (Date.parse(`${today}T00:00:00Z`) - Date.parse(`${checkedOn}T00:00:00Z`)) /
-    86_400_000;
-  return ageDays >= 0 && ageDays <= 31 ? checkedOn : null;
+  if (article.sourceKind === "egov-fulltext-snapshot") {
+    return verifiedCurrentRevisionDate(article, now);
+  }
+  return verifiedCurrentPrimaryDate(article, now);
+}
+
+/** Binding-law/qualification conclusions require each important legal source to match. */
+function requiresCurrentLegalVerification(article: LawArticle): boolean {
+  return article.sourceKind === "egov-fulltext-snapshot" ||
+    article.sourceKind === "government-official-primary" ||
+    article.lawShort === "厚労省告示276号";
 }
 
 export function legalApplicationStatusLine(
@@ -2012,6 +2017,10 @@ export function legalApplicationStatusLine(
     }
     return `過去時点（${requestedPeriod ? requestedPeriodLabel(requestedPeriod) : (temporal.requestedDate ?? "日付不明")}）`;
   }
+  if (articles.some((article) => requiresCurrentLegalVerification(article) &&
+      !verifiedCurrentSnapshotDate(article, now))) {
+    return "確認不能（根拠の現行版を再確認）";
+  }
   if (!effectiveText || !effectiveDate) {
     const snapshotDate = verifiedCurrentSnapshotDate(articles[0], now);
     if (snapshotDate) {
@@ -2033,6 +2042,10 @@ export function legalApplicationStatusEvidenceIndex(
   now: Date,
 ): number {
   const statusLine = legalApplicationStatusLine(query, [...articles], now);
+  if (statusLine === "確認不能（根拠の現行版を再確認）") {
+    return Math.max(0, articles.findIndex((article) => requiresCurrentLegalVerification(article) &&
+      !verifiedCurrentSnapshotDate(article, now)));
+  }
   const datedIndex = articles.findIndex((article) => {
     const effectiveText = applicableLegalProvisionEffectiveDate(article, query);
     return Boolean(effectiveText && statusLine.includes(effectiveText));
@@ -2864,8 +2877,22 @@ function presentationConclusion(
 function knownConclusion(
   query: string,
   articles: LawArticle[],
+  now: Date,
 ): { conclusion: string; conditions: string[] } | null {
   const normalized = compact(query);
+  if (hasRotatingToolGloveIntent(query)) {
+    const gloves = articleIndex(articles, (article) =>
+      article.lawShort === "安衛則" && /^第?111条$/.test(article.articleNum) &&
+      /回転する刃物/.test(article.text) && /手袋を使用させてはならない/.test(article.text),
+    );
+    if (gloves < 0) return null;
+    return {
+      conclusion: `ボール盤などの回転する刃物に手が巻き込まれるおそれがある作業では、軍手を含む手袋を使ってはいけません。安衛則111条1項は事業者に手袋を使用させないこと、2項は使用を禁止された労働者に従うことを求めています。${marker(gloves)}`,
+      conditions: [
+        `対象は「回転する刃物への巻き込まれのおそれがあるとき」です。停止した材料の運搬など別の作業まで、一律に手袋禁止とは判断しません。${marker(gloves)}`,
+      ],
+    };
+  }
   const conversationContext = extractLegalConversationContext(query);
   const lacksWorkContext = Boolean(
     !conversationContext.workType && !conversationContext.equipment,
@@ -3306,6 +3333,8 @@ function knownConclusion(
     articles,
     (article) => article.lawShort === "経産省電工Q&A",
   );
+  const confirmedMetiElectricianQa = metiElectricianQa >= 0 &&
+    verifiedCurrentPrimaryDate(articles[metiElectricianQa]!, now) !== null;
   const metiNonInvasiveMeasurementAttachment =
     /(?:経産省|経済産業省).*(?:電気工事士|電工).*Q&AQ?10/i.test(
       normalized,
@@ -4077,7 +4106,9 @@ function knownConclusion(
           ? `充電中の低圧設備でテスター測定する場合は、充電電路を直接取り扱い感電の危険があれば安衛則346条の絶縁用保護具または活線作業用器具、電路・支持物の点検等で充電部へ接触するおそれがあれば347条により事業者が充電電路へ装着する絶縁用防具を確認します。${markers(...testerLiveSources)} 対地電圧50V以下の電気機械器具・配線・移動電線には、安衛則354条により電気による危険防止の章を適用しません。${marker(lowVoltageChapterExclusion)}`
           : `充電中の盤内でテスター測定する条件を選んだため、停電測定ではなく活線・近接側の安全措置を先に確認します。低圧は安衛則346条・347条、高圧は341条・342条で条件が分かれます。${markers(...testerLiveSources)}`,
       conditions: [
-        `配線を傷付けず測定器をクリップ留め・巻き付けるだけなら電気工事士を要しない場合もありますが、それで感電防止措置や特別教育の確認が不要になるわけではありません。${markers(metiElectricianQa, electricSpecialEducationWork, ...testerLiveSources)}`,
+        confirmedMetiElectricianQa
+          ? `配線を傷付けず測定器をクリップ留め・巻き付けるだけなら電気工事士を要しない場合もありますが、それで感電防止措置や特別教育の確認が不要になるわけではありません。${markers(metiElectricianQa, electricSpecialEducationWork, ...testerLiveSources)}`
+          : `感電防止措置と、行為別の特別教育の対象を確認してください。${markers(electricSpecialEducationWork, ...testerLiveSources)}`,
       ],
     };
   }
@@ -4177,7 +4208,7 @@ function knownConclusion(
     electricSpecialEducationWork >= 0
   ) {
     return {
-      conclusion: `${metiElectricianQa >= 0 ? `配線を傷付けず、測定器をクリップ留め又は巻き付けるだけなら、経済産業省の電気工事士Q&A Q10では電気工事士が工事する必要はありません。自家用電気工作物構内の配電盤など危険を伴う場所では、電気主任技術者の指示確認が望ましいとされています。${marker(metiElectricianQa)} ` : ""}盤を開けてテスターを当てる作業は「見るだけ」ではありません。充電中なら、測定で充電電路を直接取り扱うのか、電路・支持物の点検等を充電部に近接して行い接触のおそれがあるのかを、電圧区分ごとの規定に照らします。${markers(lowVoltageLiveWork, lowVoltageProximityWork, highVoltageLiveWork, highVoltageProximityWork)}`,
+      conclusion: `${confirmedMetiElectricianQa ? `配線を傷付けず、測定器をクリップ留め又は巻き付けるだけなら、経済産業省の電気工事士Q&A Q10では電気工事士が工事する必要はありません。自家用電気工作物構内の配電盤など危険を伴う場所では、電気主任技術者の指示確認が望ましいとされています。${marker(metiElectricianQa)} ` : ""}盤を開けてテスターを当てる作業は「見るだけ」ではありません。充電中なら、測定で充電電路を直接取り扱うのか、電路・支持物の点検等を充電部に近接して行い接触のおそれがあるのかを、電圧区分ごとの規定に照らします。${markers(lowVoltageLiveWork, lowVoltageProximityWork, highVoltageLiveWork, highVoltageProximityWork)}`,
       conditions: [
         `低圧で充電電路を直接取り扱い感電の危険がある場合は、安衛則346条の絶縁用保護具または活線作業用器具が必要です。低圧充電電路に近接して電路・支持物の敷設・点検・修理等を行い、充電電路へ接触するおそれがある場合は、347条の絶縁用防具が原則で、絶縁用保護具を着用し他の身体部分が接触するおそれがない場合が例外です。${markers(lowVoltageLiveWork, lowVoltageProximityWork)}`,
         `低圧特別教育の法定対象は、対地電圧50V以下及び電信・電話用等で感電危害のおそれがない回路を除く充電電路の敷設・修理と、同じ除外条件のある区画された配電盤室等の露出充電部付き開閉器操作です。全ての低圧測定が一律対象ではありません。${marker(electricSpecialEducationWork)}`,
@@ -6453,6 +6484,10 @@ export function buildServiceFirstLegalAnswer(input: {
   now?: Date;
 }): string {
   const now = input.now ?? new Date();
+  if (hasRotatingToolGloveIntent(input.query) && !input.articles.some((article) =>
+    article.lawShort === "安衛則" && /^第?111条$/.test(article.articleNum))) {
+    return buildServiceFirstNoHitAnswer(input.query, now);
+  }
   // Routes expand verified cross-hierarchy evidence before this formatter.
   // Keep this pass index-stable: routes intentionally rebuild with only cited
   // sources, and re-expanding here would restore pruned sources and leave old
@@ -6471,7 +6506,7 @@ export function buildServiceFirstLegalAnswer(input: {
     return buildServiceFirstNoHitAnswer(input.query, now);
 
   const context = extractLegalConversationContext(input.query);
-  const known = knownConclusion(input.query, articles);
+  const known = knownConclusion(input.query, articles, now);
   const effectiveStatus = legalEffectiveStatusConclusion(
     input.query,
     articles[0]!,
@@ -6645,6 +6680,9 @@ export function buildServiceFirstLegalAnswer(input: {
   const unverifiedFutureText =
     questionTime.status === "future" &&
     applicationStatusLine.startsWith("確認不能（");
+  const unverifiedCurrentText = questionTime.status === "current" &&
+    applicationStatusArticles.some((article) => requiresCurrentLegalVerification(article) &&
+      !verifiedCurrentSnapshotDate(article, now));
   const unverifiedHistoricalText =
     questionTime.status === "past" &&
     !predatesCurrentProvision &&
@@ -6652,7 +6690,9 @@ export function buildServiceFirstLegalAnswer(input: {
     !hasVerifiedHistoricalLegalText(articles, requestedPeriod);
   const temporalEvidenceIndex =
     changedProvision?.index ?? applicationStatusEvidenceIndex;
-  const conclusion = unverifiedFutureText
+  const conclusion = unverifiedCurrentText
+    ? `根拠の現行版を確認できないため、この条件の義務・資格は確定できません。${marker(applicationStatusEvidenceIndex)}`
+    : unverifiedFutureText
     ? `対象日の施行内容を確認できないため、回答を保留します。${marker(applicationStatusEvidenceIndex)}`
     : predatesCurrentProvision
       ? `対象時点では、収録しているこの規定はまだ施行前です。当時の義務は確定できません。${marker(temporalEvidenceIndex)}`
@@ -6673,7 +6713,9 @@ export function buildServiceFirstLegalAnswer(input: {
                 ? `確認できた規定では、${directSentence}。${marker(0)}`
                 : `条文は確認できましたが、この条件だけでは該当箇所を短文で特定できません。${marker(0)}`));
   const conditions = (
-    unverifiedFutureText
+    unverifiedCurrentText
+      ? [`表示した公式原文で、対象日と作業条件を確認してください。${marker(applicationStatusEvidenceIndex)}`]
+      : unverifiedFutureText
       ? [
           `対象日版の公式本文または公布済みの改正法令を確認してください。${marker(applicationStatusEvidenceIndex)}`,
         ]
@@ -6756,6 +6798,8 @@ export function buildServiceFirstNoHitAnswer(
   now: Date = new Date(),
 ): string {
   const temporal = classifyLegalQuestionTime(query, now);
+  const context = extractLegalConversationContext(query);
+  const hasWorkContext = Boolean(context.workType || context.equipment);
   const time =
     temporal.status === "past"
       ? `過去時点（${temporal.requestedDate ?? "日付不明"}）`
@@ -6767,7 +6811,7 @@ export function buildServiceFirstNoHitAnswer(
     "この条件に直接対応する根拠を確認できないため、回答を保留します。",
     "",
     "条件",
-    "・作業、設備、数値条件を一つ追加してください。",
+    hasWorkContext ? "・入力済みの作業条件に対応する公式原文を確認してください。" : "・作業、設備、数値条件を一つ追加してください。",
     "",
     "根拠",
     "・確認できる条文はありません。",
@@ -6776,7 +6820,7 @@ export function buildServiceFirstNoHitAnswer(
     `・${time}`,
     "",
     "次の質問",
-    "どの作業・設備について知りたいですか？",
+    hasWorkContext ? "どの安全措置や作業条件を確認したいですか？" : "どの作業・設備について知りたいですか？",
   ].join("\n");
 }
 

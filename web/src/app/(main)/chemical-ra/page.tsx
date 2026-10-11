@@ -115,13 +115,13 @@ export default async function ChemicalRaPage({
             ) : null}
           </div>
           <p className="mt-2 text-sm leading-6 text-slate-700">
-            物質名・CAS番号・SDS記載名から始めます。
+            公的情報と条件を整理します。リスク値は計算せず、公式CREATE-SIMPLEへつなぎます。
           </p>
           <FeatureMascotCompanion
             variant="chemical-lab"
             eyebrow="化学物質の確認係"
-            title="まずは容器やSDSに書かれた名前を一緒に確認しましょう。"
-            message="検索結果は候補です。実際の製品の最新SDSと照らして進めます。"
+            title="容器やSDSの名前から始めましょう。"
+            message="候補を製品の最新SDSと照合します。"
             tone="amber"
             compact
             className="mt-4 max-w-3xl"

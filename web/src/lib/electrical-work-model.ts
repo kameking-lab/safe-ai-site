@@ -1,3 +1,5 @@
+import { hasRotatingToolGloveIntent } from "@/lib/rotating-tool-work-model";
+
 export type LegalTopicDomain =
   | "electrical"
   | "forklift"
@@ -88,7 +90,11 @@ export function normalizeElectricalWorkText(value: string): string {
 }
 
 export function hasElectricalDomainSignal(value: string): boolean {
-  return ELECTRICAL_DOMAIN_PATTERN.test(normalizeElectricalWorkText(value));
+  if (hasRotatingToolGloveIntent(value)) return false;
+  // 「ボール盤で」「旋盤の外」 must not match the electrical shorthand 「盤で」.
+  const text = normalizeElectricalWorkText(value)
+    .replace(/ボール盤|面取り盤|旋盤|フライス盤|定盤|文字盤/g, "工作機械");
+  return ELECTRICAL_DOMAIN_PATTERN.test(text);
 }
 
 export function hasMultipleElectricalVoltageClasses(value: string): boolean {
@@ -279,6 +285,7 @@ function extractWorkAction(text: string): ElectricalWorkAction | undefined {
 
 export function extractElectricalMeaning(value: string): ElectricalMeaning {
   const text = normalizeElectricalWorkText(value);
+  if (hasRotatingToolGloveIntent(text)) return {};
   const topicDomain = hasElectricalDomainSignal(text) ? "electrical" : undefined;
   const workAction = extractWorkAction(text);
   const voltageClass =

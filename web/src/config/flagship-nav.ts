@@ -246,7 +246,6 @@ const ALL_FLAGSHIP_FEATURES: FlagshipFeature[] = [
           "10業種の重点課題・関連法令・通達・推奨機能への動線をワンページに集約",
       },
       // P1-J: /stats はサンプル表示が露出するため主要機能ナビから除外
-      { label: "リスク予測", href: "/risk-prediction" },
     ],
   },
   {

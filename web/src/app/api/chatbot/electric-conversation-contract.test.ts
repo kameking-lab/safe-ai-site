@@ -36,7 +36,7 @@ async function requestAnswer(
   return JSON.parse(meta!) as ChatbotResponse;
 }
 
-function expectNormalContract(payload: ChatbotResponse) {
+function expectNormalContract(payload: ChatbotResponse, current = true) {
   expect(payload.directAnswer.trim().length).toBeGreaterThan(20);
   expect(payload.substantiveAnswer).toBe(payload.directAnswer);
   expect(payload.answer).toContain(payload.directAnswer);
@@ -49,15 +49,15 @@ function expectNormalContract(payload: ChatbotResponse) {
   expect(payload.clarificationQuestion?.match(/[？?]/g)?.length ?? 0).toBeLessThanOrEqual(1);
   expect(payload.confidence).toMatch(/^(?:high|medium|low)$/);
   expect(payload.effectiveDateStatus).toMatchObject({
-    asOf: "2026-08-09",
-    status: "current",
+    asOf: "2026-10-12",
+    status: current ? "current" : "unknown",
   });
   expect(payload.directAnswer).not.toMatch(/^(?:必要な資格は作業で変わります|条件によって異なります)/);
   expect(payload.directAnswer).not.toBe(payload.clarificationQuestion);
   expect(payload.directAnswer).not.toMatch(/酸欠|有機溶剤|石綿|玉掛け/);
   for (const source of payload.sources) {
     expect(source.url).toMatch(/^https:\/\/(?:laws\.e-gov\.go\.jp|www\.mhlw\.go\.jp|www\.meti\.go\.jp)\//);
-    expect(source.applicationStatus).toBe("current");
+    expect(source.applicationStatus).toBe(source.lawShort === "経産省電工Q&A" ? "unknown" : "current");
   }
 }
 
@@ -399,20 +399,13 @@ describe("電気会話のanswer-first API契約", () => {
         expect(source.snippet).toMatch(supportedText);
       }
 
-      const metiQa = requiredSource(payload, "経産省電工Q&A", "Q9・Q10");
-      expect(payload.directAnswer).toContain(metiQa.marker);
-      expect(metiQa.source.item).toBe("Q10");
-      expect(metiQa.source.snippet).toMatch(
-        /Q10[\s\S]*測定器をクリップ留め又は巻き付ける場合[\s\S]*電気工事士が工事する必要はありません[\s\S]*電気主任技術者の指示確認/,
-      );
-      expect(metiQa.source.url).toBe(
-        "https://www.meti.go.jp/policy/safety_security/industrial_safety/sangyo/electric/files/kouzi-si-QA201803.pdf",
-      );
+      expect(payload.directAnswer).not.toContain("電気工事士が工事する必要はありません");
+      expect(payload.sources.some((source) => source.lawShort === "経産省電工Q&A")).toBe(false);
     },
   );
 
   it.each(MODES)(
-    "経産省Q10の測定器取付け自然文へ電工士要否を先に答え、同じ一次資料を表示する ($label)",
+    "経産省Q10の現行版が未確認なら電工士要否を先頭で保留し、根拠を表示する ($label)",
     async ({ post, mode }) => {
       vi.stubEnv("GEMINI_EXTERNAL_AI_ENABLED", "false");
       for (const message of [
@@ -427,17 +420,13 @@ describe("電気会話のanswer-first API契約", () => {
           context: {},
           lawCategory: "all",
         });
-        expectNormalContract(payload);
+        expectNormalContract(payload, false);
         expect(payload.context).toMatchObject({
           topicDomain: "electrical",
           workAction: "tester-measurement",
         });
-        expect(payload.directAnswer).toMatch(
-          /配線を傷付けず[\s\S]*クリップ留め又は巻き付ける[\s\S]*電気工事士が工事する必要はない/,
-        );
-        expect(payload.directAnswer).toMatch(
-          /自家用電気工作物[\s\S]*電気主任技術者の指示確認/,
-        );
+        expect(payload.directAnswer).toContain("根拠の現行版を確認できない");
+        expect(payload.directAnswer).not.toContain("工事する必要はない");
 
         const qa = requiredSource(payload, "経産省電工Q&A", "Q9・Q10");
         expect(payload.directAnswer).toContain(qa.marker);
@@ -449,12 +438,9 @@ describe("電気会話のanswer-first API契約", () => {
           "https://www.meti.go.jp/policy/safety_security/industrial_safety/sangyo/electric/files/kouzi-si-QA201803.pdf",
         );
 
-        const live = requiredSource(payload, "安衛則", "第346条");
-        const proximity = requiredSource(payload, "安衛則", "第347条");
         const substance = `${payload.directAnswer} ${payload.importantConditions.join(" ")}`;
-        expect(substance).toContain(live.marker);
-        expect(substance).toContain(proximity.marker);
-        expect(substance).toMatch(/直接取り扱い[\s\S]*接触するおそれ/);
+        expect(qa.source.applicationStatus).toBe("unknown");
+        expect(substance).toContain("公式原文");
         expect(
           payload.sources.map((source) => source.lawShort).join(" "),
         ).not.toMatch(/酸欠則|有機則|石綿則|クレーン則/);
@@ -846,18 +832,4 @@ describe("電気会話のanswer-first API契約", () => {
       expect(followup.answer).not.toMatch(/346条.*必要|347条.*必要/);
     },
   );
-});
-
-// These semantic contracts explicitly exercise the frozen August basis and
-// pre-update safety records. Current October refusal is tested without mocks
-// in current-unverified-electrical.test.ts and route-safety.test.ts.
-vi.mock("@/lib/legal-answer-temporal", async (importOriginal) => {
-  const original = await importOriginal<typeof import("@/lib/legal-answer-temporal")>();
-  return { ...original, LEGAL_ANSWER_BASIS_DATE_JST: "2026-08-09",
-    legalAnswerBasisNow: () => new Date("2026-08-09T00:00:00+09:00") };
-});
-vi.mock("@/data/laws/egov-verified-corpus.generated", async (importOriginal) => {
-  const original = await importOriginal<typeof import("@/data/laws/egov-verified-corpus.generated")>();
-  const { historicalSafetyCorpus } = await import("@/fixtures/legal-safety-history-2026-08-09");
-  return { ...original, verifiedLawArticles: historicalSafetyCorpus(original.verifiedLawArticles) };
 });

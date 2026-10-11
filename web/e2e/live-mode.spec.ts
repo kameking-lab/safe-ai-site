@@ -52,13 +52,35 @@ test.describe("live mode", () => {
     const revisionList = page.getByRole("region", { name: "法改正一覧" });
     await expect(revisionList.locator("li").first()).toBeVisible();
 
-    // 先頭カードの収録要点を開く（生成AIの出力とは表示しない）
-    await openFirstRevisionActions(page);
-    await revisionList.locator("li").first().getByRole("button", { name: "収録要点を見る" }).click();
-    await expect(page.getByRole("heading", { name: "3行要約" })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "現場でやること" })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "対象業種", exact: true })).toBeVisible();
-    await page.waitForTimeout(700);
+    // 解説を実際に収録した個人ばく露測定の改正を開く。
+    // 一覧の先頭は解説未収録の場合もあるため、空の説明欄を要求しない。
+    const curatedRevision = page.locator("#rev-lr-egov-347M50002000032-20261001");
+    await expect.poll(async () => {
+      if (await curatedRevision.count() > 0) return true;
+      const more = page.getByRole("button", { name: /^もっと見る/ });
+      if (await more.isVisible()) await more.click();
+      return await curatedRevision.count() > 0;
+    }, { timeout: 20_000 }).toBe(true);
+    await curatedRevision.scrollIntoViewIfNeeded();
+    await curatedRevision.locator("summary").click();
+    const summaryResponsePromise = page.waitForResponse(
+      (response) => {
+        const url = new URL(response.url());
+        return url.pathname === "/api/summaries" &&
+          url.searchParams.get("revisionId") === "lr-egov-347M50002000032-20261001";
+      },
+      { timeout: 20_000 },
+    );
+    await curatedRevision.getByRole("button", { name: "収録要点を見る", exact: true }).click();
+    expect((await summaryResponsePromise).status()).toBe(200);
+    const summary = page.getByRole("region", { name: "収録要点", exact: true });
+    await expect(summary.getByRole("heading", { name: "変更点と適用条件", exact: true })).toBeVisible();
+    await expect(summary.getByRole("heading", { name: "現場でやること", exact: true })).toBeVisible();
+    await expect(summary).toContainText("第三管理区分");
+    await expect(summary).toContainText("対象は業種名だけでは決まりません");
+    await expect(summary.getByRole("heading", { name: "対象業種", exact: true })).toHaveCount(0);
+    await expect(summary).toContainText("個人ばく露測定");
+    await expect(summary.locator('a[href*="001736054.pdf"]')).toBeVisible();
 
     await page.getByRole("button", { name: "質問チャット" }).click();
     await expect(page.getByText("個人情報は入力しない", { exact: true })).toBeVisible();
@@ -380,7 +402,10 @@ test.describe("live mode", () => {
     await expect(page.getByText("要約の取得に失敗しました")).toBeVisible();
 
     await page.getByRole("button", { name: "要約を再取得" }).click();
-    await expect(page.getByText("3行要約")).toBeVisible();
+    const summary = page.getByRole("region", { name: "収録要点", exact: true });
+    await expect(summary.getByRole("heading", { name: /^(変更点と適用条件|収録されている改正情報)$/ })).toBeVisible();
+    await expect(summary.locator("ul li").first()).toBeVisible();
+    await expect(page.getByText("要約の取得に失敗しました", { exact: true })).toHaveCount(0);
     expect(attempts).toBe(2);
   });
 

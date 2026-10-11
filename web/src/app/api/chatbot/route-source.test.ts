@@ -4,6 +4,7 @@ import { verifiedLawArticles } from "@/data/laws/verified-corpus";
 import { verifiedPrimaryElectricalArticles } from "@/data/laws/verified-primary-electrical";
 import { buildServiceFirstLegalAnswer } from "@/lib/legal-extractive-answer";
 import { lawArticleToSource } from "@/lib/chatbot-route-shared";
+import { legalAnswerBasisNow } from "@/lib/legal-answer-temporal";
 
 const scaffoldArticle: LawArticle = {
   law: "労働安全衛生規則",
@@ -118,7 +119,7 @@ describe("chatbot source metadata", () => {
     expect(source.applicationStatus).toBe("unknown");
   });
 
-  it("直近に取得・検証したe-Gov現行本文は施行日推測なしで現在資料と示す", () => {
+  it("直近の取得日時と自己申告のハッシュ確認だけでは現行本文と認定しない", () => {
     const source = lawArticleToSource(
       {
         ...scaffoldArticle,
@@ -130,8 +131,16 @@ describe("chatbot source metadata", () => {
       "安衛則第999条は現在有効？",
       new Date("2026-08-02T12:00:00+09:00"),
     );
+    expect(source.applicationStatus).toBe("unknown");
+    expect(source.effectiveOn).toBeUndefined();
+  });
+
+  it("現行版台帳と一致する実本文は、条文の施行日を推測せず確認済みと示す", () => {
+    const article = verifiedLawArticles.find((value) => value.lawShort === "安衛則" && value.articleNum === "第111条")!;
+    const source = lawArticleToSource(article, "回転する刃物への手袋使用は？", legalAnswerBasisNow());
     expect(source.applicationStatus).toBe("current");
     expect(source.effectiveOn).toBeUndefined();
+    expect(source.asOf).toBe("2026-10-12");
   });
 
   it("クライアントへ条文全文を送らず短い抜粋だけを返す", () => {
@@ -297,7 +306,7 @@ describe("chatbot source metadata", () => {
     const answer = buildServiceFirstLegalAnswer({
       query,
       articles: [article as LawArticle],
-      now: new Date("2026-08-03T00:00:00+09:00"),
+      now: legalAnswerBasisNow(),
     });
 
     expect(source.item).toBe("第1号・第2号・第5号");

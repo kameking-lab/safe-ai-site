@@ -602,24 +602,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
     },
     {
-      url: "/laws/bcp",
-      lastModified: "2026-04-01",
-      priority: 0.7,
-      changeFrequency: "monthly",
-    },
-    {
-      url: "/laws/freelance-rosai",
-      lastModified: "2026-04-01",
-      priority: 0.7,
-      changeFrequency: "monthly",
-    },
-    {
-      url: "/laws/gig-work",
-      lastModified: "2026-04-01",
-      priority: 0.6,
-      changeFrequency: "monthly",
-    },
-    {
       url: "/treatment-work-balance",
       lastModified: "2026-05-16",
       priority: 0.85,
@@ -676,23 +658,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.6,
       changeFrequency: "monthly",
     },
-    {
-      url: "/notifications",
-      lastModified: "2026-03-01",
-      priority: 0.6,
-      changeFrequency: "monthly",
-    },
-    // 自社プロファイル登録（index:true・自己canonical・OGP付きの実在ページ＝全機能の初期表示
-    // 最適化の入口）。逆カバレッジガード（下記 sitemap.test.ts）で検出した「indexable なのに
-    // どの sitemap にも載っていなかった」発見性の穴を収載。
-    // ※ /organization（事業所ダッシュボード）は「正式リリース前デモ版モック」として意図的に非収載
-    //   （sitemap.test.ts の非収載境界テストで固定）。noindex 化されれば逆ガードも自動追従する。
-    {
-      url: "/profile",
-      lastModified: "2026-05-29",
-      priority: 0.6,
-      changeFrequency: "monthly",
-    },
+    // /profile and /notifications are local input/settings screens (noindex).
     {
       url: "/goods",
       lastModified: "2026-03-01",

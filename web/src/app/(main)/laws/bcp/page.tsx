@@ -7,6 +7,7 @@ const DESCRIPTION =
   "2024年4月から介護施設等で義務化された BCP（事業継続計画）の策定。安衛法の作業場の措置、労働契約法の安全への配慮と BCP の接続、中小事業者向けのテンプレート運用論点を整理します。";
 
 export const metadata: Metadata = {
+  robots: { index: false, follow: true },
   alternates: { canonical: "/laws/bcp" },
   title: TITLE,
   description: DESCRIPTION,

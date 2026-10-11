@@ -51,7 +51,7 @@ describe("/contact 柱C-10 コンサル相談CVパス（2タブ化）", () => {
     renderForm();
     fireEvent.click(screen.getByRole("tab", { name: "法人・コンサルのご相談" }));
     const link = screen.getByRole("link", {
-      name: "専用の相談フォームを開く",
+      name: "相談の受付方法を見る",
     });
     expect(link.getAttribute("href")).toBe("/services/automation#consult-form");
     expect(screen.queryByLabelText(/件名/)).toBeNull();

@@ -1,4 +1,19 @@
-import type { CalculationResult, PortableValue } from "@/lib/construction-calculators/types";
+import type { CalculationResult, InputDefinition, PortableValue } from "@/lib/construction-calculators/types";
+
+const SHAPE_LABELS: Record<string, string> = { rectangular: "直方体", slab: "床版・土間", cylinder: "円柱", "circular-foundation": "円形基礎" };
+
+export function calculationInputRows(result: CalculationResult, inputDefinitions: readonly InputDefinition[]) {
+  return Object.entries(result.usedInputs)
+    .filter(([key, value]) => key !== "rounding" && value !== null && value !== undefined && !(typeof value === "number" && !Number.isFinite(value)))
+    .map(([key, value]) => {
+      const field = inputDefinitions.find((input) => input.key === key);
+      const label = field?.label ?? (key === "inputOrigin" ? "入力方法" : key);
+      const display = key === "shape" ? (SHAPE_LABELS[String(value)] ?? formatPortable(value)) : formatPortable(value);
+      const selectedUnit = [result.usedInputs.dimensionUnit, result.usedInputs.lengthUnit].find((unit) => typeof unit === "string" && field?.units?.includes(unit));
+      const unit = typeof value === "number" ? (selectedUnit ?? (field?.units?.length === 1 ? field.units[0] : "")) : "";
+      return { key, label, value: display, unit: String(unit ?? "") };
+    });
+}
 
 function formatPortable(value: PortableValue): string {
   if (value === null) return "";
@@ -18,13 +33,13 @@ function roundingLabel(mode: CalculationResult["rounding"]["mode"]): string {
   }[mode];
 }
 
-export function buildCalculationCopyText(title: string, result: CalculationResult): string {
+export function buildCalculationCopyText(title: string, result: CalculationResult, inputDefinitions: readonly InputDefinition[]): string {
   return [
     title,
     ...result.displayValues.map((item) => `${item.label}: ${item.value}${item.unit}`),
     "",
     "使用した入力値",
-    ...Object.entries(result.usedInputs).map(([key, value]) => `${key}: ${formatPortable(value)}`),
+    ...calculationInputRows(result, inputDefinitions).map((row) => `${row.label}: ${row.value}${row.unit}`),
     "",
     "計算式",
     ...result.formula,
@@ -37,7 +52,7 @@ export function buildCalculationCopyText(title: string, result: CalculationResul
   ].join("\n");
 }
 
-export function buildCalculationCsv(title: string, result: CalculationResult): string {
+export function buildCalculationCsv(title: string, result: CalculationResult, inputDefinitions: readonly InputDefinition[]): string {
   const rows: string[][] = [
     ["calculator", title],
     ["calculatorId", result.calculatorId],
@@ -46,7 +61,7 @@ export function buildCalculationCsv(title: string, result: CalculationResult): s
     ["section", "result"],
     ...result.displayValues.map((item) => [item.label, String(item.value), item.unit]),
     ["section", "inputs"],
-    ...Object.entries(result.usedInputs).map(([key, value]) => [key, formatPortable(value)]),
+    ...calculationInputRows(result, inputDefinitions).map((row) => [row.label, row.value, row.unit]),
     ["section", "formula"],
     ...result.formula.map((line, index) => [`formula-${index + 1}`, line]),
     ["roundingMode", result.rounding.mode],

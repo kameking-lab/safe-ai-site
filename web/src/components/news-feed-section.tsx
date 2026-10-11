@@ -57,7 +57,7 @@ export function NewsFeedSection() {
       </div>
 
       <p className="mt-2 text-[11px] text-amber-950/80">
-        公開 {total}件 ／ 一覧更新 {updatedLabel} ／ 事故統計には含めません
+        公開 {total}記事 ／ 一覧更新 {updatedLabel} ／ 同一事故の続報を含む場合があります。事故統計には含めません
       </p>
 
       <ul className="mt-3 space-y-2">

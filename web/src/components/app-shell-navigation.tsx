@@ -393,13 +393,6 @@ export const NAV_CATEGORIES: AppShellNavCategory[] = [
         icon: Users2,
         description: "LGBTQ・障害・外国人労働者の安全配慮",
       },
-      {
-        id: "risk-prediction",
-        label: "AIリスク予測",
-        href: "/risk-prediction",
-        icon: Brain,
-        description: "作業内容から潜在リスクをAIが予測",
-      },
     ],
   },
   {

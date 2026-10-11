@@ -93,6 +93,12 @@ export type LawRevisionSummary = {
   threeLineSummary: [string, string, string];
   workplaceActions: string[];
   targetIndustries: string[];
+  /** Scope and sources of a fixed, source-checked explanation; no expert-review claim. */
+  verification?: {
+    checkedOn: string;
+    scope: string;
+    sources: Array<{ label: string; url: string }>;
+  };
 };
 
 export type ChatMessage = {
