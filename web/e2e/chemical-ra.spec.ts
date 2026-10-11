@@ -28,6 +28,27 @@ async function openSaveReadyChemicalRa(page: Page) {
 }
 
 test.describe("化学物質RA", () => {
+  test("トルエンの実API分類に引火性と炎を保持し、印刷とKYも一部収録を示す @smoke", async ({ page }) => {
+    await page.goto("/chemical-ra?cas=108-88-3&run=1");
+    const conclusion = page.getByTestId("ra-conclusion");
+    await expect(conclusion.getByTestId("ghs-picto-flame")).toBeVisible();
+    await expect(conclusion).toContainText("引火性液体");
+    await expect(conclusion).toContainText("GHS分類は一部収録です");
+    const heading = page.getByRole("heading", { name: "GHSハザード分類（一部収録・7項目）", exact: true });
+    await expect(heading).toBeVisible();
+    const hazards = heading.locator("..");
+    await expect(hazards).toContainText("引火性液体");
+    await expect(hazards).toContainText("区分2");
+    await expect(hazards).toContainText("生殖毒性");
+    await expect(hazards).toContainText("区分1A");
+    await page.emulateMedia({ media: "print" });
+    await expect(page.getByTestId("ghs-coverage-notice")).toBeVisible();
+    await expect(hazards).toContainText("引火性液体");
+    await page.emulateMedia({ media: "screen" });
+    await page.getByRole("link", { name: "この作業条件をKYへ", exact: true }).click();
+    await expect(page).toHaveURL(/\/ky\/paper/);
+    await expect(page.getByText(/化学物質条件を候補として読み込みました。GHS分類は一部収録です/)).toBeVisible();
+  });
   test("ページが表示される @smoke", async ({ page }) => {
     const res = await page.goto("/chemical-ra");
     expect(res?.status()).toBeLessThan(400);

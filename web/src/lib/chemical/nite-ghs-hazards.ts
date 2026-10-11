@@ -26,6 +26,7 @@ type FieldDef = {
 };
 
 const FIELDS: FieldDef[] = [
+  { key: "flammableLiquids", category: "引火性液体", signal: (n) => (n <= 2 ? "危険" : "警告") },
   { key: "carcinogen", category: "発がん性", signal: (n) => (n <= 1 ? "危険" : "警告") },
   { key: "mutagen", category: "生殖細胞変異原性", signal: (n) => (n <= 1 ? "危険" : "警告") },
   { key: "reproTox", category: "生殖毒性", signal: (n) => (n <= 1 ? "危険" : "警告") },
@@ -70,6 +71,8 @@ export function buildGhsHazardsFromNite(
   for (const f of FIELDS) {
     const value = nite[f.key];
     if (!value) continue;
+    // 引火性液体の区分は1〜4のみ。未確認値に注意喚起語を推定しない。
+    if (f.key === "flammableLiquids" && !/^区分\s*[1-4]$/.test(value.normalize("NFKC").trim())) continue;
     if (/該当しない|分類できない|分類対象外/.test(value)) continue;
     const severest = severestCategoryNumber(value);
     if (severest === null) continue;

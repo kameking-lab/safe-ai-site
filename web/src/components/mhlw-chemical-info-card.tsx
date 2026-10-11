@@ -1,5 +1,6 @@
 "use client";
 
+import { GHS_PARTIAL_COVERAGE_NOTICE } from "@/lib/chemical/ghs-coverage";
 import Link from "next/link";
 import { BookOpen, Database, ExternalLink, Gauge, ArrowRight } from "lucide-react";
 import type { MergedChemical, ConcentrationLimitEntry } from "@/lib/mhlw-chemicals";
@@ -126,7 +127,7 @@ export function MhlwChemicalInfoCard({
             ))}
           </dl>
           <p className="mt-2 text-[11px] leading-5 text-slate-600">
-            収録済みの政府分類です。ここにない危険有害性と、製品・混合物の分類は最新の製品SDSで確認してください。
+            {GHS_PARTIAL_COVERAGE_NOTICE}
           </p>
           {ghsSourceUrl && (
             <a href={ghsSourceUrl} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-emerald-800 underline">
