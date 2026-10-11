@@ -6,8 +6,8 @@ for (const width of [1280, 390]) {
 
     test("法令の例から該当条文と公式法令に進める", async ({ page }) => {
       await page.goto("/law-search");
-      await page.getByRole("combobox", { name: "法令で絞り込む" }).selectOption("労働基準法");
       await page.getByRole("searchbox", { name: "法令フリーワード検索" }).fill("賃金");
+      await page.getByRole("combobox", { name: "法令で絞り込む" }).selectOption("労働基準法");
       await page.getByRole("button", { name: "安衛法 第61条", exact: true }).click();
       await expect(page.getByRole("combobox", { name: "法令で絞り込む" })).toHaveValue("労働安全衛生法");
       await expect(page.getByRole("searchbox", { name: "条番号で検索" })).toHaveValue("第61条");
