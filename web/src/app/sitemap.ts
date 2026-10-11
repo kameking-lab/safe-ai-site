@@ -21,6 +21,7 @@ import { CANONICAL_HAZARD_TYPES } from "@/lib/accidents/type-normalization";
 import { EDUCATION_DECKS } from "@/data/education-decks";
 import { latestIsoDate } from "@/lib/sitemap/lastmod";
 import { computeSitemapFreshness } from "@/lib/sitemap/freshness";
+import { routeContentChangedOn } from "@/lib/sitemap/content-changes";
 import { SITE_URL } from "@/lib/seo-metadata";
 import { isPublicRouteAvailable } from "@/lib/public-content-policy";
 import { PUBLIC_VISUAL_KY_SCENARIOS } from "@/data/visual-ky";
@@ -44,7 +45,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const buildToday = new Date().toISOString().slice(0, 10);
   const {
     freshestNews, // /whats-new・トップが集約する新着の最新日
-    freshestLawRevision, // /laws の法改正最新公表日
+    lawsContentUpdated, // /laws の公表日・一覧内容変更日の新しい方
     freshestNotice, // /circulars の通達最新発出日
     accidentsDataUpdated, // 死亡災害DBスナップショット生成日
     freshestArticle, // /articles 一覧の最新更新日
@@ -257,9 +258,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.85,
       changeFrequency: "monthly" as const,
     })),
+    // 公表日だけでなく、一覧に表示する改正内容が実際に変わった日も見る
+    //（取得のみ・内容同一の再取得では動かない。lib/sitemap/content-changes.ts）。
     {
       url: "/laws",
-      lastModified: freshestLawRevision,
+      lastModified: lawsContentUpdated,
       priority: 0.9,
       changeFrequency: "weekly",
     },
@@ -325,7 +328,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: "/chatbot",
-      lastModified: "2026-04-01",
+      lastModified: routeContentChangedOn("/chatbot"),
       priority: 0.8,
       changeFrequency: "monthly",
     },
@@ -349,13 +352,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: "/chemical-ra",
-      lastModified: "2026-04-01",
+      lastModified: routeContentChangedOn("/chemical-ra"),
       priority: 0.7,
       changeFrequency: "monthly",
     },
     {
       url: "/chemical-database",
-      lastModified: "2026-04-01",
+      lastModified: routeContentChangedOn("/chemical-database"),
       priority: 0.7,
       changeFrequency: "monthly",
     },
@@ -828,7 +831,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: "/chemical-ra/product-search",
-      lastModified: "2026-04-01",
+      lastModified: routeContentChangedOn("/chemical-ra/product-search"),
       priority: 0.6,
       changeFrequency: "monthly",
     },

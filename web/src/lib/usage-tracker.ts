@@ -39,14 +39,17 @@ export const SNOOZE_DAYS_DEFAULT = 30;
 // 会話・入力・判定・朝礼表示の最中は、フィードバックや固定シェアを
 // 一切出さない（第三者レビュー §C 是正）。
 // 印刷ビューは別途 CSS（print:hidden）で抑止する。
+// 計算ツールは入力欄と結果・図を縦に並べるため、現行URLと旧URLの両方を保護する。
 const WORK_CONTEXT_PREFIXES = [
   "/chatbot",
   "/chemical-ra",
+  "/construction-calc",
   "/ky",
   "/law-search",
   "/risk",
   "/services/automation",
   "/signage",
+  "/tools/construction-calculators",
   "/training/visual-ky",
 ] as const;
 
