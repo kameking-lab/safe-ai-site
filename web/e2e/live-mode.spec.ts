@@ -63,7 +63,16 @@ test.describe("live mode", () => {
     }, { timeout: 20_000 }).toBe(true);
     await curatedRevision.scrollIntoViewIfNeeded();
     await curatedRevision.locator("summary").click();
+    const summaryResponsePromise = page.waitForResponse(
+      (response) => {
+        const url = new URL(response.url());
+        return url.pathname === "/api/summaries" &&
+          url.searchParams.get("revisionId") === "lr-egov-347M50002000032-20261001";
+      },
+      { timeout: 20_000 },
+    );
     await curatedRevision.getByRole("button", { name: "収録要点を見る", exact: true }).click();
+    expect((await summaryResponsePromise).status()).toBe(200);
     const summary = page.getByRole("region", { name: "収録要点", exact: true });
     await expect(summary.getByRole("heading", { name: "変更点と適用条件", exact: true })).toBeVisible();
     await expect(summary.getByRole("heading", { name: "現場でやること", exact: true })).toBeVisible();
@@ -393,7 +402,10 @@ test.describe("live mode", () => {
     await expect(page.getByText("要約の取得に失敗しました")).toBeVisible();
 
     await page.getByRole("button", { name: "要約を再取得" }).click();
-    await expect(page.getByText("3行要約")).toBeVisible();
+    const summary = page.getByRole("region", { name: "収録要点", exact: true });
+    await expect(summary.getByRole("heading", { name: /^(変更点と適用条件|収録されている改正情報)$/ })).toBeVisible();
+    await expect(summary.locator("ul li").first()).toBeVisible();
+    await expect(page.getByText("要約の取得に失敗しました", { exact: true })).toHaveCount(0);
     expect(attempts).toBe(2);
   });
 
