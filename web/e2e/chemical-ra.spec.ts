@@ -29,7 +29,19 @@ async function openSaveReadyChemicalRa(page: Page) {
 
 test.describe("化学物質RA", () => {
   test("トルエンの実API分類に引火性と炎を保持し、印刷とKYも一部収録を示す @smoke", async ({ page }) => {
-    await page.goto("/chemical-ra?cas=108-88-3&run=1");
+    test.setTimeout(60_000);
+    const searchPromise = page.waitForResponse((item) =>
+      item.url().includes("/api/chemical/search") && item.request().method() === "POST",
+    );
+    await page.goto("/chemical-ra?cas=108-88-3");
+    expect((await searchPromise).status()).toBe(200);
+    await expect(page.getByRole("combobox", { name: "物質名・CAS番号・SDS記載名" })).toHaveValue("トルエン");
+    await page.getByRole("button", { name: "作業条件へ進む", exact: true }).click();
+    const [response] = await Promise.all([
+      page.waitForResponse((item) => item.url().endsWith("/api/chemical-ra") && item.request().method() === "POST"),
+      page.getByRole("button", { name: "公的情報を確認", exact: true }).click(),
+    ]);
+    expect(response.status()).toBe(200);
     const conclusion = page.getByTestId("ra-conclusion");
     await expect(conclusion.getByTestId("ghs-picto-flame")).toBeVisible();
     await expect(conclusion).toContainText("引火性液体");
