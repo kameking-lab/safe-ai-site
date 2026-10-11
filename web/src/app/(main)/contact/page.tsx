@@ -7,7 +7,7 @@ import InquiryForm from "./InquiryForm";
 
 const title = "ご意見・ご質問・お問い合わせ";
 const description =
-  "安全AIポータルのデータ訂正、機能改善、ご質問を受け付ける窓口です。業務自動化・講習・資料作成の相談は保護された専用フォームへ案内します。";
+  "安全AIポータルのデータ訂正、機能改善、ご質問を受け付ける窓口です。業務自動化・講習・資料作成の相談は専用ページで受付方法を確認できます。";
 
 export const metadata: Metadata = {
   title,

@@ -248,19 +248,19 @@ export default function InquiryForm() {
         <div className="rounded-xl border-2 border-emerald-300 bg-white p-5 text-sm text-slate-800">
           <p className="font-bold text-emerald-900">
             {isEn
-              ? "Business inquiries use the protected consultation form"
-              : "法人・自動化・講習相談は保護された専用フォームへ統合しました"}
+              ? "Choose a contact method on the consultation page"
+              : "法人・自動化・講習相談は専用ページで受付方法を確認できます"}
           </p>
           <p className="mt-2 text-xs leading-6 text-slate-700">
             {isEn
-              ? "The dedicated route provides shared rate limiting, idempotency, origin checks, body limits, and fail-closed delivery."
-              : "共有レート制限、冪等性、Origin検査、本文上限、配信設定未完了時のfail-closedを備えた正規経路です。相談本文や連絡先をanalyticsへ送信しません。"}
+              ? "You can prepare the message and send it with your email app. Web-form delivery is available only when its operating requirements have been verified."
+              : "相談内容を整理し、ご自身のメールアプリから送信できます。Webフォーム方式は配信運用の確認条件が整う場合だけ表示します。"}
           </p>
           <Link
             href="/services/automation#consult-form"
             className="mt-4 inline-flex min-h-[44px] items-center justify-center rounded-lg bg-emerald-700 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-800"
           >
-            {isEn ? "Open protected consultation form" : "専用の相談フォームを開く"}
+            {isEn ? "View consultation options" : "相談の受付方法を見る"}
           </Link>
         </div>
       ) : status === "success" ? (

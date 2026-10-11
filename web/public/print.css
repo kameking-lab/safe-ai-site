@@ -377,16 +377,23 @@
   .chemical-ra-print-ghs thead { display: table-header-group; }
   .chemical-ra-print-ghs tr { break-inside: avoid; }
   .chemical-ra-print-ghs th,
-  .chemical-ra-print-ghs td { border: 1px solid #555; padding: 2mm; text-align: left; vertical-align: top; overflow-wrap: anywhere; font-size: 10pt; }
+  .chemical-ra-print-ghs td { border: 1px solid #555; padding: 1mm 1.5mm; text-align: left; vertical-align: top; overflow-wrap: anywhere; font-size: 9pt; }
   .chemical-ra-print-ghs thead th { background: #fff; }
   .chemical-ra-print-ghs h2 { margin: 0; font-size: 12pt; }
   .chemical-ra-print-repeat-identity { font-size: 9pt; font-weight: normal; }
   .chemical-ra-print-coverage { margin-top: 2mm !important; font-size: 9pt; font-weight: normal; line-height: 1.5; }
-  .chemical-ra-print-sources { margin-top: 4mm; }
+  .chemical-ra-print-sources { margin-top: 2mm; }
+  .chemical-ra-print-conditions { margin: 3mm 0; font-size: 9pt; }
+  .chemical-ra-print-conditions h2 { font-size: 10pt; break-after: avoid; }
+  .chemical-ra-print-conditions dl { display: grid; grid-template-columns: 22mm 1fr; gap: 1mm 2mm; margin: 2mm 0; }
+  .chemical-ra-print-conditions dt { font-weight: bold; }
+  .chemical-ra-print-conditions dd { margin: 0; overflow-wrap: anywhere; }
+  .chemical-ra-print-conditions p { line-height: 1.5; break-inside: avoid; }
   .chemical-ra-print-sources h2 { margin: 0; font-size: 10pt; break-after: avoid; }
   .chemical-ra-print-sources p { break-inside: avoid; font-size: 9pt; overflow-wrap: anywhere; }
   .chemical-ra-print-sources a { margin-right: 2mm; font-weight: bold; }
-  .chemical-ra-print-signoff { margin-top: 3mm; }
+  .chemical-ra-print-signoff { margin-top: 2mm; }
+  .chemical-ra-print-signoff .h-20 { height: 15mm; }
   .chemical-ra-print-signoff p,
   .chemical-ra-print-signoff span { font-size: 9pt; color: #111 !important; }
   .chemical-ra-print-signoff [class*="border"] { border-color: #555; }

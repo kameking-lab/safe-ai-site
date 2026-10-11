@@ -7,6 +7,7 @@ const DESCRIPTION =
   "タイミー・シェアフル・メルカリ ハロ等のスポットワークにおける雇用関係の判別、労災適用、危険作業時の事業者の義務と満18歳未満の就業制限を確認するための論点を示します。";
 
 export const metadata: Metadata = {
+  robots: { index: false, follow: true },
   alternates: { canonical: "/laws/gig-work" },
   title: TITLE,
   description: DESCRIPTION,

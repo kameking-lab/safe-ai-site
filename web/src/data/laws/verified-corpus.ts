@@ -10,6 +10,8 @@
  */
 import { verifiedLawArticles as generatedVerifiedLawArticles } from "./egov-verified-corpus.generated";
 import { withVerifiedRevisionMetadata } from "./law-revision-metadata";
+import currentRevisionVerification from "./current-revision-verification.json";
+import primaryCurrentVerification from "./primary-current-verification.json";
 
 export const verifiedLawArticles = generatedVerifiedLawArticles.map(
   withVerifiedRevisionMetadata,
@@ -46,4 +48,8 @@ const verifiedSnapshotIdentities = [
   ),
 ].sort();
 
-export const VERIFIED_LEGAL_SOURCE_VERSION = `egov-${verifiedSnapshotIdentities.length}-${snapshotVersionHash(verifiedSnapshotIdentities)}`;
+export const VERIFIED_LEGAL_SOURCE_VERSION = `egov-${verifiedSnapshotIdentities.length}-${snapshotVersionHash([
+  ...verifiedSnapshotIdentities,
+  JSON.stringify(currentRevisionVerification),
+  JSON.stringify(primaryCurrentVerification),
+])}`;

@@ -115,7 +115,7 @@ export default async function ChemicalRaPage({
             ) : null}
           </div>
           <p className="mt-2 text-sm leading-6 text-slate-700">
-            物質名・CAS番号・SDS記載名から始めます。
+            物質名・CAS番号・SDS記載名から始めます。公的情報と作業条件を整理するツールです。リスクレベルは計算せず、最新SDSと公式CREATE-SIMPLEでの評価へつなぎます。
           </p>
           <FeatureMascotCompanion
             variant="chemical-lab"

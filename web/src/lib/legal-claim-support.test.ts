@@ -1,3 +1,4 @@
+import { legalAnswerBasisNow } from "./legal-answer-temporal";
 import type { LawArticle } from "@/data/laws";
 import { verifiedLawArticles } from "@/data/laws/verified-corpus";
 import {
@@ -9,7 +10,7 @@ import { validateServiceFirstLegalClaimSupport } from "@/lib/legal-claim-support
 import { searchRelevantArticlesWithScore } from "@/lib/rag-search";
 import { describe, expect, it } from "vitest";
 
-const NOW = new Date("2026-08-02T00:00:00+09:00");
+const NOW = legalAnswerBasisNow();
 
 function article(lawShort: string, articleNum: string): LawArticle {
   const found = verifiedLawArticles.find(
@@ -46,7 +47,7 @@ describe("サービス先行の定型回答に対する主張単位の引用支�
   ])(
     "必須通常ケースをruntime同順の取得・展開・引用絞込み後にも強検証する: %s",
     (query) => {
-      const now = new Date("2026-08-03T12:00:00+09:00");
+      const now = legalAnswerBasisNow();
       const searched = searchRelevantArticlesWithScore(query, 10).articles;
       const expanded = expandVerifiedLegalEvidenceArticles(query, searched);
       const initialAnswer = buildServiceFirstLegalAnswer({

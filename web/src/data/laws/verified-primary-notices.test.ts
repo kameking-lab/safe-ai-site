@@ -16,8 +16,10 @@ describe("確認済み厚労省一次資料", () => {
     expect(notice).toMatchObject({
       sourceKind: "mhlw-official-primary",
       verificationStatus: "primary-source-verified",
-      humanReviewStatus: "reviewed",
+      humanReviewStatus: "not-reviewed",
     });
+    expect(notice.text).toContain("封じ込め又は囲い込みを含む。");
+    expect(notice.text).toContain("次項第三号の修了考査に合格した者");
     expect(notice.text).toMatch(/船舶石綿含有資材調査者/);
     expect(notice.text).toMatch(/工作物石綿事前調査者/);
   });

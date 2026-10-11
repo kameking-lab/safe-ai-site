@@ -70,7 +70,7 @@ describe("POST /api/chat safe compatibility route", () => {
     vi.unstubAllEnvs();
   });
 
-  it("legacy APIも実行時計ではなく2026-08-09を回答・施行判定の基準にする", async () => {
+  it("legacy APIも実行時計ではなく2026-10-12を回答・施行判定の基準にする", async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2030-01-01T00:00:00.000Z"));
 
@@ -78,16 +78,16 @@ describe("POST /api/chat safe compatibility route", () => {
     const body = (await response.json()) as LegacyAnswerFirstPayload;
     expect(response.status).toBe(200);
     expectAnswerFirst(body);
-    expect(body.answer).toContain("回答基準日: 2026-08-09 JST");
+    expect(body.answer).toContain("回答基準日: 2026-10-12 JST");
     expect(body.answer).not.toContain("2030-01-01");
     expect(body.sources.length).toBeGreaterThan(0);
-    expect(body.sources.every((item) => item.asOf === "2026-08-09")).toBe(true);
+    expect(body.sources.every((item) => item.asOf === "2026-10-12")).toBe(true);
 
     const futureResponse = await POST(
-      request("2026年8月10日時点の足場の手すり高さは？"),
+      request("2026年10月13日時点の足場の手すり高さは？"),
     );
     const future = (await futureResponse.json()) as LegacyAnswerFirstPayload;
-    expect(future.answer).toContain("回答基準日: 2026-08-09 JST");
+    expect(future.answer).toContain("回答基準日: 2026-10-12 JST");
     expect(future.answer).toContain("回答を保留");
     expect(future.sources).toEqual([]);
   });
@@ -689,18 +689,4 @@ describe("POST /api/chat safe compatibility route", () => {
     expect(body.citations.length).toBeGreaterThan(0);
     expect(generateContent).not.toHaveBeenCalled();
   });
-});
-
-// These semantic contracts explicitly exercise the frozen August basis and
-// pre-update safety records. Current October refusal is tested without mocks
-// in current-unverified-electrical.test.ts and route-safety.test.ts.
-vi.mock("@/lib/legal-answer-temporal", async (importOriginal) => {
-  const original = await importOriginal<typeof import("@/lib/legal-answer-temporal")>();
-  return { ...original, LEGAL_ANSWER_BASIS_DATE_JST: "2026-08-09",
-    legalAnswerBasisNow: () => new Date("2026-08-09T00:00:00+09:00") };
-});
-vi.mock("@/data/laws/egov-verified-corpus.generated", async (importOriginal) => {
-  const original = await importOriginal<typeof import("@/data/laws/egov-verified-corpus.generated")>();
-  const { historicalSafetyCorpus } = await import("@/fixtures/legal-safety-history-2026-08-09");
-  return { ...original, verifiedLawArticles: historicalSafetyCorpus(original.verifiedLawArticles) };
 });

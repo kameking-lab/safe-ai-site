@@ -17,10 +17,10 @@ import {
   type ChemicalRaPayloadInspection,
   type ChemicalRaPpeSuitability,
   type ChemicalRaSdsStatus,
-  type ChemicalRaSnapshotMissingField,
   type ChemicalRaSubstitutionStatus,
   type ChemicalRaTriState,
 } from "@/lib/chemical/ra-cloud";
+import { SNAPSHOT_MISSING_LABEL } from "@/lib/chemical/ra-record-labels";
 import { MainFeatureNextActions } from "@/components/main-feature-next-actions";
 import type { MergedChemical } from "@/lib/mhlw-chemicals";
 import { UnifiedChemicalSearch, type LegalNameHit } from "@/components/chemical/unified-chemical-search";
@@ -217,37 +217,6 @@ const QUICK_CHEMICALS = [
   "溶接ヒューム",
   "キシレン",
 ];
-
-const SNAPSHOT_MISSING_LABEL: Record<
-  ChemicalRaSnapshotMissingField,
-  string
-> = {
-  "work-content": "作業内容",
-  "sds-confirmation": "SDS確認",
-  "sds-issued-on": "SDS発行日",
-  "component-version": "成分・製品版",
-  ventilation: "換気",
-  "general-ventilation": "全体換気の有無",
-  "local-exhaust": "局所排気の有無",
-  amount: "取扱量",
-  "duration-hours": "作業時間",
-  frequency: "作業頻度",
-  "use-temperature": "使用温度",
-  dispersion: "飛散・噴霧の状態",
-  "skin-contact": "皮膚接触の可能性",
-  ppe: "使用する保護具",
-  "ppe-suitability": "保護具の適合性確認",
-  substitution: "代替物質の検討",
-  "existing-controls": "既存措置",
-  "additional-controls": "追加措置",
-  "action-owner": "追加措置の担当",
-  "action-due-on": "追加措置の期限",
-  "reassessment-on": "再評価日",
-  "measured-concentration": "測定濃度",
-  "measured-unit": "測定単位",
-  "rule-version": "記録ルール版",
-  "captured-at": "保存時刻",
-};
 
 // ────────────────────────────────────────────────────────────
 // メインパネル
@@ -1351,7 +1320,8 @@ export function ChemicalRaPanel({
           data-chemical-ra-result=""
           className="space-y-6 scroll-mt-20 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 print:space-y-3"
         >
-          <ChemicalRaPrintReport result={result} recordDateIso={restoredAt ?? undefined} />
+          <ChemicalRaPrintReport result={result} recordDateIso={restoredAt ?? undefined}
+            snapshot={restoredAt ? restoredPayloadState?.assessmentSnapshot : savePayload?.assessmentSnapshot} />
           {/* 柱0: 結論カード（1画面1メッセージ）— リスクレベルのデカ表示＋I〜IV色帯＋
               GHS絵表示＋まず行う対策＋保護具動線。旧「まず押さえる要点」の内容を統合
               （hazards/actions/regulations は keyPoints から表示・正確性は不変）。
@@ -1461,7 +1431,7 @@ export function ChemicalRaPanel({
                 onClick={() => window.print()}
                 className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 shadow-sm hover:bg-slate-50"
               >
-                <Printer className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />A4実施レポート印刷 / PDF保存
+                <Printer className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />A4参考情報・条件記録を印刷 / PDF保存
               </button>
             </div>
           </div>

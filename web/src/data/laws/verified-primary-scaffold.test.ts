@@ -74,7 +74,7 @@ describe("安衛則563条 わく組足場細目の公式補完", () => {
 
   describe("claim support for the frame handrail answer", () => {
     const query = "足場の手すり 足場 確認済み選択肢:わく組足場 わく組足場です";
-    const now = new Date("2026-10-11T09:00:00+09:00");
+    const now = new Date("2026-10-12T09:00:00+09:00");
     const articles = [verifiedFrameScaffoldArticle!];
     const answer = buildServiceFirstLegalAnswer({ query, articles, now });
 

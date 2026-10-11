@@ -220,9 +220,9 @@ export const KEYWORD_LANDINGS: KeywordLanding[] = [
         description: "評価方法と直近の結果を確認",
       },
       {
-        href: "/guides/annual-safety-plan-generator",
-        label: "ガイド：年次安全衛生計画 業種別 ジェネレーター",
-        description: "AIチャットの回答を年次計画書に落とし込むときの導線解説",
+        href: "/about/quality",
+        label: "情報品質・確認範囲",
+        description: "法令版の照合と個別回答の確認状態を確認",
       },
       {
         href: "/guides/chemical-ra-create-simple",

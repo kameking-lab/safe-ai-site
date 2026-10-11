@@ -4,6 +4,7 @@ import { GET } from "./route";
 import { lawRevisionCores } from "@/data/mock/law-revisions";
 import { egovLawRevisions } from "@/data/law-revisions/egov-revisions-loaded";
 import { mockSummaryService } from "@/lib/services/summary-service";
+import { curatedRevisionSummary } from "@/lib/laws/curated-revision-summary";
 
 const ORIGINAL_KEY = process.env.GEMINI_API_KEY;
 
@@ -52,7 +53,7 @@ describe("GET /api/summaries — 一覧に出る全改正が要約404になら�
   });
 
   it("未作成要約のfallbackは対象業種や現場措置を推測しない", async () => {
-    const target = egovLawRevisions.find((item) => !item.id.startsWith("lr-001"))!;
+    const target = egovLawRevisions.find((item) => !curatedRevisionSummary(item))!;
     const res = await GET(requestFor(target.id));
     const body = (await res.json()) as {
       data?: { summary?: { workplaceActions?: string[]; targetIndustries?: string[] } };

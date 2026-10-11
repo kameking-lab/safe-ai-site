@@ -190,11 +190,11 @@ export function normalizeValues(
       const n = typeof input === "number" ? input : Number(String(input).trim());
       if (!Number.isFinite(n)) {
         values[field.id] = field.defaultValue;
-        errors.push(`「${field.label}」は数値で入力してください（既定値 ${field.defaultValue}${field.unit} を使用）`);
+        errors.push(`「${field.label}」は数値で入力してください。結果は計算しません。`);
       } else if (n < field.min || n > field.max) {
         values[field.id] = field.defaultValue;
         errors.push(
-          `「${field.label}」は ${field.min}〜${field.max}${field.unit} の範囲で入力してください（既定値 ${field.defaultValue}${field.unit} を使用）`,
+          `「${field.label}」は ${field.min}〜${field.max}${field.unit} の範囲で入力してください。結果は計算しません。`,
         );
       } else {
         values[field.id] = n;
@@ -210,7 +210,7 @@ export function normalizeValues(
         values[field.id] = hit.value;
       } else {
         values[field.id] = field.defaultValue;
-        errors.push(`「${field.label}」の選択値が不正です（既定値を使用）`);
+        errors.push(`「${field.label}」の選択値が不正です。結果は計算しません。`);
       }
     }
   }

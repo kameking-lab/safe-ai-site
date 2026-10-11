@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { StatsDashboard } from "./StatsDashboard";
 import { withSiteOpenGraph, withSiteTwitter, SITE_URL } from "@/lib/seo-metadata";
 import { JsonLd, webPageSchema, breadcrumbSchema } from "@/components/json-ld";
+import { hasAdminPageAccess } from "@/lib/server/admin-access";
+import Link from "next/link";
+import { PageContainer } from "@/components/layout";
 
 const _title = "利用統計ダッシュボード";
 const _desc =
@@ -25,7 +28,18 @@ export const metadata: Metadata = {
   }),
 };
 
-export default function StatsPage() {
+export default async function StatsPage() {
+  if (!(await hasAdminPageAccess())) {
+    return <PageContainer width="narrow" paddingY="tight">
+      <h1 className="text-xl font-bold">サイト利用統計</h1>
+      <p className="mt-3 text-sm leading-7">アクセス解析は運営者向けです。一般公開の利用人数や成果は掲載していません。</p>
+      <p className="mt-2 text-sm leading-7">労働災害の件数・死亡者数を調べる場合は、事故統計をご利用ください。</p>
+      <div className="mt-4 flex flex-wrap gap-4 text-sm font-semibold underline">
+        <Link href="/accidents-analytics">労働災害の統計を見る</Link>
+        <Link href="/about/quality">情報の出典・確認状態を見る</Link>
+      </div>
+    </PageContainer>;
+  }
   const url = `${SITE_URL}/stats`;
   return (
     <>

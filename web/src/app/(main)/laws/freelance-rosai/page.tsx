@@ -7,6 +7,7 @@ const DESCRIPTION =
   "業務災害・通勤災害に対する労災保険の特別加入制度。加入団体の選び方・業種別の保険料・給付範囲を確認するための論点と公式参照先を示します。";
 
 export const metadata: Metadata = {
+  robots: { index: false, follow: true },
   alternates: { canonical: "/laws/freelance-rosai" },
   title: TITLE,
   description: DESCRIPTION,

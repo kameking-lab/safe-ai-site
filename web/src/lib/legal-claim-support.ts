@@ -292,6 +292,10 @@ function inlineReviewedLocatorSupported(input: {
 }
 
 function knownClaimSupported(text: string, evidence: string): boolean | null {
+  if (text === "感電防止措置と、行為別の特別教育の対象を確認してください。") {
+    return evidenceHasAll(evidence, ["法第59条第3項の厚生労働省令で定める危険又は有害な業務", "充電電路"]) &&
+      evidenceHasAny(evidence, ["絶縁用保護具", "感電の危険"]);
+  }
   // Rule 36(4) expressly excludes ground voltage at or below 50 V and
   // telecom/telephone circuits that present no electric-shock hazard.  Any
   // reviewed claim that describes the low-voltage special-education scope
@@ -2660,6 +2664,16 @@ export function validateServiceFirstLegalClaimSupport(input: {
         claim.citationIndexes[0] !== expectedStatusEvidenceIndex
       ) {
         failures.push("適用時点:evidence-marker");
+      }
+      continue;
+    }
+    if (
+      /^根拠の現行版を確認できないため、この条件の義務・資格は確定できません。$/.test(claim.text) ||
+      /^表示した公式原文で、対象日と作業条件を確認してください。$/.test(claim.text)
+    ) {
+      if (expectedStatusLine !== "確認不能（根拠の現行版を再確認）" ||
+          claim.citationIndexes.length !== 1 || claim.citationIndexes[0] !== expectedStatusEvidenceIndex) {
+        failures.push(`${claim.section}:current-source-state`);
       }
       continue;
     }

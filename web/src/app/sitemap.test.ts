@@ -541,8 +541,12 @@ describe("sitemap.xml（逆カバレッジガード: 実在 indexable ページ�
     expect(search && isExcludedBySource(search)).toBe(true); // /search は index:false
     expect(ky && isExcludedBySource(ky)).toBe(true); // /ky はクエリを維持する permanentRedirect
     expect(pdf && isExcludedBySource(pdf)).toBe(true); // /pdf は permanentRedirect スタブ
-    // 本ガード新設で収載した /profile は sitemap 側に載っている（回帰固定）。
-    expect(sitemapPaths.has("/profile")).toBe(true);
+    // 端末設定と、解説本文が未完成の特集は検索用sitemapに載せない。
+    expect(sitemapPaths.has("/profile")).toBe(false);
+    expect(sitemapPaths.has("/notifications")).toBe(false);
+    expect(sitemapPaths.has("/laws/bcp")).toBe(false);
+    expect(sitemapPaths.has("/laws/freelance-rosai")).toBe(false);
+    expect(sitemapPaths.has("/laws/gig-work")).toBe(false);
     // (d) /organization はリリース前デモのため明示noindex、sitemap非収載。
     expect(byRoute.has("/organization")).toBe(true); // ルートは実在
     const org = byRoute.get("/organization");

@@ -13,7 +13,9 @@ import {
   expandVerifiedLegalEvidenceArticles,
 } from "@/lib/legal-extractive-answer";
 
-const NOW = new Date("2026-08-09T00:00:00+09:00");
+import { legalAnswerBasisNow } from "@/lib/legal-answer-temporal";
+
+const NOW = legalAnswerBasisNow();
 
 function answerTurn(
   message: string,

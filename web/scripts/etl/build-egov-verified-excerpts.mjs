@@ -402,7 +402,7 @@ const LAW_TARGETS = [
     lawShort: "均等法",
     articles: [
       { articleNum: "第11条", keywords: ["セクシュアルハラスメント", "セクハラ"] },
-      { articleNum: "第11条の3", keywords: ["妊娠", "出産", "ハラスメント", "マタハラ"] },
+      { articleNum: "第15条", keywords: ["妊娠", "出産", "ハラスメント", "マタハラ"] },
     ],
   },
   {
@@ -508,7 +508,7 @@ const LAW_TARGETS = [
     lawShort: "労施法",
     articles: [
       {
-        articleNum: "第30条の2",
+        articleNum: "第31条",
         keywords: [
           "パワーハラスメント",
           "パワハラ",

@@ -60,7 +60,7 @@ function computeSlopeRatioConvert(values: CalcValues): CalcOutcome {
   const warnings: string[] = [
     "本計算は幾何学的な換算のみです。掘削面の法定上限勾配は地山の種類・掘削面の高さ等で条件が分かれるため、e-Gov法令検索の現行条文と現場条件を人が確認してください。",
   ];
-  if (outAngle >= 45) {
+  if (outAngle > 45) {
     warnings.push("角度45°（1:1）を超える急勾配です。法面保護・土留め等の措置の要否を確認してください。");
   }
 

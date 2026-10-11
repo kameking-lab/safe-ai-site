@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { POST } from "./route";
 import { POST as POST_STREAM } from "./stream/route";
 import { __resetChatbotCacheForTests } from "@/lib/chatbot-cache";
@@ -1545,7 +1545,7 @@ describe("main14の生成quick replyをactual次turnで消費する", () => {
         expect(second.citations.length, `${id}: citations`).toBeGreaterThan(0);
         expect(second.effectiveDateStatus, `${id}: effective date`).toMatchObject({
           status: "current",
-          asOf: "2026-08-09",
+          asOf: "2026-10-12",
         });
         expect(second.clarificationQuestion, `${id}: same question repeated`).not.toBe(
           first.clarificationQuestion,
@@ -1883,7 +1883,7 @@ describe("酸欠タンクの換気例外をanswer-firstで適用する", () => {
       /同時に就業する労働者の人数と同数以上[\s\S]*空気呼吸器[\s\S]*酸素呼吸器[\s\S]*送気マスク[\s\S]*使用させなければならない/,
     );
     expect(response.effectiveDateStatus).toMatchObject({
-      asOf: "2026-08-09",
+      asOf: "2026-10-12",
       status: "current",
     });
   });
@@ -2170,7 +2170,7 @@ describe("生成chipの二段目でも選択済み条件を先頭回答へ消費
       );
       expect(detail.effectiveDateStatus).toMatchObject({
         status: "current",
-        asOf: "2026-08-09",
+        asOf: "2026-10-12",
       });
       expect(visible).not.toMatch(/短文では作業条件を特定できません/);
     }
@@ -2444,18 +2444,4 @@ describe("電気の二段chipは行為・電圧・充電状態を累積して反
       }
     }
   }, 90_000);
-});
-
-// These semantic contracts explicitly exercise the frozen August basis and
-// pre-update safety records. Current October refusal is tested without mocks
-// in current-unverified-electrical.test.ts and route-safety.test.ts.
-vi.mock("@/lib/legal-answer-temporal", async (importOriginal) => {
-  const original = await importOriginal<typeof import("@/lib/legal-answer-temporal")>();
-  return { ...original, LEGAL_ANSWER_BASIS_DATE_JST: "2026-08-09",
-    legalAnswerBasisNow: () => new Date("2026-08-09T00:00:00+09:00") };
-});
-vi.mock("@/data/laws/egov-verified-corpus.generated", async (importOriginal) => {
-  const original = await importOriginal<typeof import("@/data/laws/egov-verified-corpus.generated")>();
-  const { historicalSafetyCorpus } = await import("@/fixtures/legal-safety-history-2026-08-09");
-  return { ...original, verifiedLawArticles: historicalSafetyCorpus(original.verifiedLawArticles) };
 });

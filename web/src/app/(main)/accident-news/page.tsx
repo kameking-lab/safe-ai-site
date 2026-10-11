@@ -98,9 +98,13 @@ export default async function AccidentNewsPage({
               <p className="mt-1 text-xs leading-5 text-slate-600">{latestNews.message}</p>
             </div>
             <span className="rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-black text-slate-700">
-              掲載 {latestNews.items.length}件
+              掲載 {latestNews.items.length}記事
             </span>
           </div>
+
+          <p className="mt-2 text-xs leading-5 text-slate-600">
+            件数は報道記事の数です。同じ事故の続報を含む場合があり、全国の事故発生件数を示すものではありません。
+          </p>
 
           {latestNews.items.length > 0 ? (
             <ol

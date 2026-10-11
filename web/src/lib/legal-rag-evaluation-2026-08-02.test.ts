@@ -1,3 +1,5 @@
+// Keep the frozen question set; evaluate current-law claims at the verified runtime basis.
+import { legalAnswerBasisNow } from "./legal-answer-temporal";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -105,7 +107,7 @@ describe("2026-08-02 legal RAG frozen evaluation", () => {
     const unsupported = await evaluateLegalRagDataset({
       cases: [exactCase!],
       frozenAt: LEGAL_RAG_EVALUATION_FROZEN_AT,
-      now: new Date("2026-08-02T00:00:00+09:00"),
+      now: legalAnswerBasisNow(),
       adapters: {
         buildAnswer: () =>
           [
@@ -141,7 +143,7 @@ describe("2026-08-02 legal RAG frozen evaluation", () => {
     const hiddenContradiction = await evaluateLegalRagDataset({
       cases: [qualificationCase!],
       frozenAt: LEGAL_RAG_EVALUATION_FROZEN_AT,
-      now: new Date("2026-08-02T00:00:00+09:00"),
+      now: legalAnswerBasisNow(),
       adapters: {
         buildAnswer: ({ query, articles, now }) =>
           buildServiceFirstLegalAnswer({ query, articles, now }).replace(
@@ -161,7 +163,7 @@ describe("2026-08-02 legal RAG frozen evaluation", () => {
     const safeHold = await evaluateLegalRagDataset({
       cases: [pastCase!],
       frozenAt: LEGAL_RAG_EVALUATION_FROZEN_AT,
-      now: new Date("2026-08-02T00:00:00+09:00"),
+      now: legalAnswerBasisNow(),
     });
     expect(safeHold.cases[0]).toMatchObject({
       actualDisposition: "abstain",
@@ -184,7 +186,7 @@ describe("2026-08-02 legal RAG frozen evaluation", () => {
       const report = await evaluateLegalRagDataset({
         cases: [testCase!],
         frozenAt: LEGAL_RAG_EVALUATION_FROZEN_AT,
-        now: new Date("2026-08-02T00:00:00+09:00"),
+        now: legalAnswerBasisNow(),
         adapters: {
           buildAnswer: ({ query, articles, now }) =>
             buildServiceFirstLegalAnswer({ query, articles, now }).replace(
@@ -224,7 +226,7 @@ describe("2026-08-02 legal RAG frozen evaluation", () => {
         },
       ],
       frozenAt: LEGAL_RAG_EVALUATION_FROZEN_AT,
-      now: new Date("2026-08-02T00:00:00+09:00"),
+      now: legalAnswerBasisNow(),
       adapters: {
         resolveConversationQuery: () => ({
           query: "労働安全衛生法第1条を示してください。",
@@ -256,7 +258,7 @@ describe("2026-08-02 legal RAG frozen evaluation", () => {
     const scoped = await evaluateLegalRagDataset({
       cases: [testCase!],
       frozenAt: LEGAL_RAG_EVALUATION_FROZEN_AT,
-      now: new Date("2026-08-02T00:00:00+09:00"),
+      now: legalAnswerBasisNow(),
       adapters: {
         buildClarification: () => ({
           question:
@@ -275,7 +277,7 @@ describe("2026-08-02 legal RAG frozen evaluation", () => {
     const vague = await evaluateLegalRagDataset({
       cases: [testCase!],
       frozenAt: LEGAL_RAG_EVALUATION_FROZEN_AT,
-      now: new Date("2026-08-02T00:00:00+09:00"),
+      now: legalAnswerBasisNow(),
       adapters: {
         buildClarification: () => ({
           question: "どの作業ですか？",
@@ -297,7 +299,7 @@ describe("2026-08-02 legal RAG frozen evaluation", () => {
       const closed = await evaluateLegalRagDataset({
         cases: [testCase!],
         frozenAt: LEGAL_RAG_EVALUATION_FROZEN_AT,
-        now: new Date("2026-08-02T00:00:00+09:00"),
+        now: legalAnswerBasisNow(),
         adapters: {
           buildClarification: () => ({
             question: closedQuestion,
@@ -327,7 +329,7 @@ describe("2026-08-02 legal RAG frozen evaluation", () => {
       const report = await evaluateLegalRagDataset({
         cases: LEGAL_RAG_EVALUATION_2026_08_02,
         frozenAt: LEGAL_RAG_EVALUATION_FROZEN_AT,
-        now: new Date("2026-08-02T00:00:00+09:00"),
+        now: legalAnswerBasisNow(),
         adapters: {
           resolveConversationQuery: resolveLegalConversationQuery,
           buildClarification: buildLegalClarification,

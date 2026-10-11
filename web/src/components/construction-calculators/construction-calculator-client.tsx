@@ -13,6 +13,7 @@ import {
 import {
   buildCalculationCopyText,
   buildCalculationCsv,
+  calculationInputRows,
 } from "@/lib/construction-calculator-exports";
 import {
   addConstructionCalculatorHistory,
@@ -650,8 +651,8 @@ export function ConstructionCalculatorClient({
             <details className="mt-5 rounded-xl border border-emerald-800 bg-white p-4 dark:bg-slate-900">
               <summary className="min-h-11 cursor-pointer font-black">使用した入力値・式・前提</summary>
               <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
-                {Object.entries(result.usedInputs).map(([key, value]) => (
-                  <div key={key} className="rounded-lg bg-slate-100 p-2 dark:bg-slate-800"><dt className="font-black">{key}</dt><dd className="break-words">{typeof value === "object" ? JSON.stringify(value) : String(value)}</dd></div>
+                {calculationInputRows(result).map((row) => (
+                  <div key={row.key} className="rounded-lg bg-slate-100 p-2 dark:bg-slate-800"><dt className="font-black">{row.label}</dt><dd className="break-words">{row.value}{row.unit}</dd></div>
                 ))}
               </dl>
               <h3 className="mt-4 font-black">計算式</h3>
@@ -700,7 +701,7 @@ export function ConstructionCalculatorClient({
           <h2 className="mt-5 text-lg font-black">結果</h2>
           <table className="mt-2 w-full border-collapse text-sm"><tbody>{result.displayValues.map((item) => <tr key={item.key}><th className="border border-black p-2 text-left">{item.label}</th><td className="border border-black p-2">{String(item.value)} {item.unit}</td></tr>)}</tbody></table>
           <h2 className="mt-5 text-lg font-black">使用した入力値</h2>
-          <pre className="mt-2 whitespace-pre-wrap border border-black p-3 text-xs">{JSON.stringify(result.usedInputs, null, 2)}</pre>
+          <dl className="mt-2 border border-black p-3 text-xs">{calculationInputRows(result).map((row) => <div key={row.key} className="mb-1"><dt className="font-bold">{row.label}</dt><dd>{row.value}{row.unit}</dd></div>)}</dl>
           <h2 className="mt-5 text-lg font-black">計算式</h2>
           <ol className="mt-2 list-decimal pl-6 text-sm">{result.formula.map((line) => <li key={line}>{line}</li>)}</ol>
           <p className="mt-4 text-sm font-bold">丸め：{optionLabel("roundingMode", result.rounding.mode)}・小数{result.rounding.decimalPlaces}桁</p>

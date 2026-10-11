@@ -5,6 +5,7 @@ import { AlertTriangle, CheckCircle2, Clock3, Database, ShieldCheck } from "luci
 import { PageJsonLd } from "@/components/page-json-ld";
 import { getPublicSourceRegistry } from "@/data/source-registry";
 import { SOURCE_REGISTRY_STATUS_LABELS } from "@/lib/evidence/types";
+import currentRevisionVerification from "@/data/laws/current-revision-verification.json";
 
 const TITLE = "情報品質・更新状態・訂正履歴";
 const DESCRIPTION =
@@ -18,6 +19,12 @@ export const metadata: Metadata = {
 };
 
 const CORRECTIONS = [
+  {
+    date: "2026-10-11",
+    area: "法令チャット・法改正・化学物質の印刷",
+    change: "回転刃物の手袋質問が電気盤へ誤分類される処理を修正。e-Gov現行施行版と保存本文の版・ハッシュを照合し、未確認の重要根拠では本文の結論も保留します。10月改正の個人ばく露測定等を前後の本文と施行通達で整理しました。",
+    impact: "化学物質の印刷は参考情報・入力条件・不足事項・未評価事項の記録です。正式なRA結果や専門家による適合確認を証明しません。",
+  },
   {
     date: "2026-07-29",
     area: "運用計測と相談導線",
@@ -108,7 +115,7 @@ export default function QualityPage() {
             不明値は推測で埋めず、確認待ち・stale・quarantine・取得不能として止めます。
           </p>
           <p className="mt-2 text-sm font-semibold text-slate-600">
-            このページの集計基準日: {AS_OF} JST（リアルタイム稼働保証ではありません）
+            入口URLレジストリの集計基準日: {AS_OF} JST。下の訂正・法令版照合とは確認範囲が異なります。
           </p>
           <p className="mt-3 text-sm leading-6 text-slate-700">
             初めて利用する方は
@@ -148,7 +155,7 @@ export default function QualityPage() {
               <ul className="mt-2 list-disc space-y-1 pl-5 text-sm leading-6 text-slate-800">
                 <li>今日の現場リスク、警報・気象・WBGTの確認</li>
                 <li>法令・事故検索、安衛法チャットボット</li>
-                <li>化学物質リスクアセスメントの簡易スクリーニング</li>
+                <li>化学物質の公的情報と作業条件の整理（リスク値は未算出）</li>
                 <li>KY用紙、工程書、資格finder、安全サイネージ</li>
                 <li>安全AIの使い方・限界・一次資料への案内</li>
               </ul>
@@ -172,6 +179,17 @@ export default function QualityPage() {
               </p>
             </div>
           </div>
+        </section>
+
+        <section aria-labelledby="legal-version-check-title" className="mt-8 rounded-2xl border border-slate-300 bg-white p-5">
+          <h2 id="legal-version-check-title" className="text-xl font-bold text-slate-950">法令版の機械照合と個別回答の確認範囲</h2>
+          <p className="mt-3 text-sm leading-6 text-slate-700">
+            2026年10月11日に、チャット用の{currentRevisionVerification.records.length}法令でe-Govの現行施行版と保存本文の版・ハッシュを照合しました。これは収録本文の同一性と版の確認です。法的解釈、個別作業への適用、外部専門家による各回答のレビューを意味しません。
+          </p>
+          <p className="mt-2 text-sm leading-6 text-slate-700">
+            回答ごとに根拠の取得版・確認状態・対象日を表示します。法改正の要点には一次資料の照合日と確認範囲を表示し、解説未収録の改正を完成済みの要点として表示しません。
+          </p>
+          <Link href="/about/chatbot-eval" className="mt-3 inline-flex min-h-11 items-center text-sm font-bold text-emerald-800 underline">チャットの評価方法と未確認事項</Link>
         </section>
 
         <section aria-labelledby="registry-status-title" className="mt-8">

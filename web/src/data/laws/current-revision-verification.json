@@ -1,0 +1,255 @@
+{
+  "schemaVersion": 1,
+  "records": [
+    {
+      "lawId": "322AC0000000049",
+      "revisionId": "20260717_508AC0000000060",
+      "snapshotHash": "1cae56babdfb9053823620a83287d80326b37d1d5638df444d878d9c66a6bc09",
+      "checkedAt": "2026-10-11T14:36:30.684Z",
+      "effectiveOn": "2026-07-17",
+      "status": "CurrentEnforced",
+      "sourceUrl": "https://laws.e-gov.go.jp/api/2/law_data/322AC0000000049",
+      "responseSha256": "e1455250372f68608258a1836b9fe029e63ccc1c3aa74ccce990a5ddec41165d"
+    },
+    {
+      "lawId": "322AC0000000050",
+      "revisionId": "20260717_508AC0000000060",
+      "snapshotHash": "290db67b2f64261558787e4d4f12594adf34df6cd7ce6bc9f25256519c196ce0",
+      "checkedAt": "2026-10-11T14:36:30.709Z",
+      "effectiveOn": "2026-07-17",
+      "status": "CurrentEnforced",
+      "sourceUrl": "https://laws.e-gov.go.jp/api/2/law_data/322AC0000000050",
+      "responseSha256": "90201e233a3f6f7f5c63017ace1093ff795d27813766dfc35b15b9fff6680089"
+    },
+    {
+      "lawId": "329M50002000013",
+      "revisionId": "20210401_502M60000100203",
+      "snapshotHash": "ac5dcfabde14a0a889bef9c7b15d43865056ed1bd35aae462829efe6214000e5",
+      "checkedAt": "2026-10-11T14:36:30.922Z",
+      "effectiveOn": "2021-04-01",
+      "status": "CurrentEnforced",
+      "sourceUrl": "https://laws.e-gov.go.jp/api/2/law_data/329M50002000013",
+      "responseSha256": "cb11f4b2b64a1e49dd717213b4ee8fca33a913bed86f0d8238e2c1e2410fb506"
+    },
+    {
+      "lawId": "335AC0000000030",
+      "revisionId": "20200401_429AC0000000045",
+      "snapshotHash": "b09eeed0c3da642be2f74d9bb330adf59f7951c01f62ae75ac78994767a93ac1",
+      "checkedAt": "2026-10-11T14:36:31.062Z",
+      "effectiveOn": "2020-04-01",
+      "status": "CurrentEnforced",
+      "sourceUrl": "https://laws.e-gov.go.jp/api/2/law_data/335AC0000000030",
+      "responseSha256": "cc22b104ba2fe891494ebb4b3dbd3beb266287d34c00c41cabfd4253fad7ef64"
+    },
+    {
+      "lawId": "335AC0000000139",
+      "revisionId": "20250601_504AC0000000068",
+      "snapshotHash": "7730334fb4200c90402d59d01726cad474a2e1b3f0b943507dbff1f3d0b99ac5",
+      "checkedAt": "2026-10-11T14:36:31.208Z",
+      "effectiveOn": "2025-06-01",
+      "status": "CurrentEnforced",
+      "sourceUrl": "https://laws.e-gov.go.jp/api/2/law_data/335AC0000000139",
+      "responseSha256": "dd383a12f4df26fb5831a329ee135d51cef7c62a84c6d84d6dc49847b73524fe"
+    },
+    {
+      "lawId": "341AC0000000132",
+      "revisionId": "20261001_507AC0000000063",
+      "snapshotHash": "06b6eb0458239e2bacdf2461a3f5173cbbef9fd1503743e0627826a3695ad8da",
+      "checkedAt": "2026-10-11T14:36:31.222Z",
+      "effectiveOn": "2026-10-01",
+      "status": "CurrentEnforced",
+      "sourceUrl": "https://laws.e-gov.go.jp/api/2/law_data/341AC0000000132",
+      "responseSha256": "2121102565613bf6027d341ba934dcb628573a1dfe953ed6ad34635636095b2b"
+    },
+    {
+      "lawId": "347AC0000000057",
+      "revisionId": "20261001_507AC0000000033",
+      "snapshotHash": "653bc6dd049a0770c81cdba08e8d346b6f30a51287e009f8c7bf30e9c6f8ea96",
+      "checkedAt": "2026-10-11T14:36:31.256Z",
+      "effectiveOn": "2026-10-01",
+      "status": "CurrentEnforced",
+      "sourceUrl": "https://laws.e-gov.go.jp/api/2/law_data/347AC0000000057",
+      "responseSha256": "381bd40370393e07a505b3213a0eec96e9f0f9d52a455928098b0f9fdaeeeb9c"
+    },
+    {
+      "lawId": "347AC0000000113",
+      "revisionId": "20261001_507AC0000000063",
+      "snapshotHash": "9264d4a16031991babe8afefcc03a7bdadfa0da60b52cbd3bb1f3f579e18c35b",
+      "checkedAt": "2026-10-11T14:36:31.385Z",
+      "effectiveOn": "2026-10-01",
+      "status": "CurrentEnforced",
+      "sourceUrl": "https://laws.e-gov.go.jp/api/2/law_data/347AC0000000113",
+      "responseSha256": "c5498f6d884bf7a61682cc59d1923b6cde3eeee848dc420cf19562f12e967cdb"
+    },
+    {
+      "lawId": "347CO0000000318",
+      "revisionId": "20261001_508CO0000000196",
+      "snapshotHash": "f1ab430be612956965282f709081b6c733ce182be9d923da92548675f85e4bc9",
+      "checkedAt": "2026-10-11T14:36:31.543Z",
+      "effectiveOn": "2026-10-01",
+      "status": "CurrentEnforced",
+      "sourceUrl": "https://laws.e-gov.go.jp/api/2/law_data/347CO0000000318",
+      "responseSha256": "e5a01fc1301246bda47894ee2d2e357f9246a972bbb188a00113f6295a24eed2"
+    },
+    {
+      "lawId": "347M50002000032",
+      "revisionId": "20261001_508M60000100116",
+      "snapshotHash": "75c93931bd902207e698cbdb1a3728c43bf691534c13b541cb657f10804c24ee",
+      "checkedAt": "2026-10-11T14:36:32.115Z",
+      "effectiveOn": "2026-10-01",
+      "status": "CurrentEnforced",
+      "sourceUrl": "https://laws.e-gov.go.jp/api/2/law_data/347M50002000032",
+      "responseSha256": "a0a1b8d118122e5d94c26b40c6c7693824efa0790b9121ff56ceab4e58f68735"
+    },
+    {
+      "lawId": "347M50002000033",
+      "revisionId": "20260401_508M60000100003",
+      "snapshotHash": "12e2dfe6b30307ae00e684dff4b1e2ca7e6a423ffaf77e527f02d2b25de318a0",
+      "checkedAt": "2026-10-11T14:36:32.315Z",
+      "effectiveOn": "2026-04-01",
+      "status": "CurrentEnforced",
+      "sourceUrl": "https://laws.e-gov.go.jp/api/2/law_data/347M50002000033",
+      "responseSha256": "16b58bd2b3e63bd7b917fdc2b8a18ea23828b552d31d83539c08def0d371f426"
+    },
+    {
+      "lawId": "347M50002000034",
+      "revisionId": "20260401_508M60000100003",
+      "snapshotHash": "7465f8ee1a97952a8bee693d7b01974491b166bdab46354cf82fe4f6354baee4",
+      "checkedAt": "2026-10-11T14:36:32.458Z",
+      "effectiveOn": "2026-04-01",
+      "status": "CurrentEnforced",
+      "sourceUrl": "https://laws.e-gov.go.jp/api/2/law_data/347M50002000034",
+      "responseSha256": "03d16ec106bc805a6335bdfbd77bbcc837d75e1e54ae989a3499fde191ea2c54"
+    },
+    {
+      "lawId": "347M50002000035",
+      "revisionId": "20260401_508M60000100003",
+      "snapshotHash": "6b5f1055beb3cae8336eb8c3c1f283690161714b5e80067903deb9bde1e4c3eb",
+      "checkedAt": "2026-10-11T14:36:32.591Z",
+      "effectiveOn": "2026-04-01",
+      "status": "CurrentEnforced",
+      "sourceUrl": "https://laws.e-gov.go.jp/api/2/law_data/347M50002000035",
+      "responseSha256": "411e61784c216c16e83b6d95ee3ec8ba1e401484176e8d7a6761acd961f79a15"
+    },
+    {
+      "lawId": "347M50002000036",
+      "revisionId": "20261001_508M60000100116",
+      "snapshotHash": "2b95391cc5cce1918eb2f86869fe450bff82ee78f1b77279aa3e4a9119dbb6bd",
+      "checkedAt": "2026-10-11T14:36:32.745Z",
+      "effectiveOn": "2026-10-01",
+      "status": "CurrentEnforced",
+      "sourceUrl": "https://laws.e-gov.go.jp/api/2/law_data/347M50002000036",
+      "responseSha256": "5c73c0b32f32bb25682cbab4ed2ee5aed6ccc18fd00690c439febae6fff4ecec"
+    },
+    {
+      "lawId": "347M50002000037",
+      "revisionId": "20261001_508M60000100116",
+      "snapshotHash": "51e5b60fa8848877cd3d310838742e3536c82452cfc1542f5c315446f5c40d40",
+      "checkedAt": "2026-10-11T14:36:32.862Z",
+      "effectiveOn": "2026-10-01",
+      "status": "CurrentEnforced",
+      "sourceUrl": "https://laws.e-gov.go.jp/api/2/law_data/347M50002000037",
+      "responseSha256": "a4068372eba0d2d2358fc84f2fd07f7d3f4e27f0ba869a4e3ec768af95528de1"
+    },
+    {
+      "lawId": "347M50002000039",
+      "revisionId": "20261001_508M60000100116",
+      "snapshotHash": "af75f83a4b52edacacf72814e71ce11d57f4dc1d0485b15277d893da5c8777df",
+      "checkedAt": "2026-10-11T14:36:33.030Z",
+      "effectiveOn": "2026-10-01",
+      "status": "CurrentEnforced",
+      "sourceUrl": "https://laws.e-gov.go.jp/api/2/law_data/347M50002000039",
+      "responseSha256": "4ffd114b5ca7b9867f73e1fba7dddfecc8a8e0281b8dc9855960a38bba9e9788"
+    },
+    {
+      "lawId": "347M50002000041",
+      "revisionId": "20260401_508M60000100003",
+      "snapshotHash": "7f1cb8384fdb612da67a3a6c570b2501a612fb06f3d4d4b9621cb70861f0930c",
+      "checkedAt": "2026-10-11T14:36:33.199Z",
+      "effectiveOn": "2026-04-01",
+      "status": "CurrentEnforced",
+      "sourceUrl": "https://laws.e-gov.go.jp/api/2/law_data/347M50002000041",
+      "responseSha256": "2fc3e2de7bc5ee0c0e2a8e7cd8210a8c8cd2368e5d12d5747b54d3e0a5274a7e"
+    },
+    {
+      "lawId": "347M50002000042",
+      "revisionId": "20260401_508M60000100003",
+      "snapshotHash": "f23ccc737f19d7e72fe091b997cdb60a3aeadf36b1cf1fa39372713d251d83b0",
+      "checkedAt": "2026-10-11T14:36:33.308Z",
+      "effectiveOn": "2026-04-01",
+      "status": "CurrentEnforced",
+      "sourceUrl": "https://laws.e-gov.go.jp/api/2/law_data/347M50002000042",
+      "responseSha256": "5f410a3276d942058ca98e6a5c07ef6bcbdbd6ed93e508f96c260215331c556f"
+    },
+    {
+      "lawId": "347M50002000043",
+      "revisionId": "20221201_503M60000100188",
+      "snapshotHash": "d31f6421f6124d96ca7dc14bd5c0eeb0752d84d0ff6938b7a1a65915efe33e12",
+      "checkedAt": "2026-10-11T14:36:33.437Z",
+      "effectiveOn": "2022-12-01",
+      "status": "CurrentEnforced",
+      "sourceUrl": "https://laws.e-gov.go.jp/api/2/law_data/347M50002000043",
+      "responseSha256": "b9b63a8a11ef1c291520bc85c6e0bb7af962335e46edc5a93bd0bd40a7f5d1dc"
+    },
+    {
+      "lawId": "350AC0000000028",
+      "revisionId": "20261001_507AC0000000033",
+      "snapshotHash": "21e0b9afa6ac3cba75282ad57a06829ebcbe4dbaa2f57ae3c3a4e42f6be8ec76",
+      "checkedAt": "2026-10-11T14:36:33.603Z",
+      "effectiveOn": "2026-10-01",
+      "status": "CurrentEnforced",
+      "sourceUrl": "https://laws.e-gov.go.jp/api/2/law_data/350AC0000000028",
+      "responseSha256": "593ff6077994c8d58123f1e43d9496c396e6562e663285c43ff806573185b09d"
+    },
+    {
+      "lawId": "354M50002000018",
+      "revisionId": "20261001_508M60000100116",
+      "snapshotHash": "853800481a8509b0c6ecdac90c91055189570c1981cd2049125d124b67890ded",
+      "checkedAt": "2026-10-11T14:36:33.765Z",
+      "effectiveOn": "2026-10-01",
+      "status": "CurrentEnforced",
+      "sourceUrl": "https://laws.e-gov.go.jp/api/2/law_data/354M50002000018",
+      "responseSha256": "9a4b5efa76cfd58d1fc3a89db71f689a2bf6c926ce31e7fdc7cceb6d55699fd1"
+    },
+    {
+      "lawId": "360AC0000000088",
+      "revisionId": "20261001_507AC0000000063",
+      "snapshotHash": "5ba470d3b249f5f2009a6fd1b2599a4d8cb00ac4d3b487d8aed2c709417fd6e3",
+      "checkedAt": "2026-10-11T14:36:33.790Z",
+      "effectiveOn": "2026-10-01",
+      "status": "CurrentEnforced",
+      "sourceUrl": "https://laws.e-gov.go.jp/api/2/law_data/360AC0000000088",
+      "responseSha256": "c24a95d5ec27386d2b9220a6062d95057629f653847323d17f90e8c5db8821ae"
+    },
+    {
+      "lawId": "361M50002000003",
+      "revisionId": "20190507_501M60000100001",
+      "snapshotHash": "ec8e962f65aa22645a57473ebbf9b12708e8ddf32824a02ee22c09c936b66956",
+      "checkedAt": "2026-10-11T14:36:33.926Z",
+      "effectiveOn": "2019-05-07",
+      "status": "CurrentEnforced",
+      "sourceUrl": "https://laws.e-gov.go.jp/api/2/law_data/361M50002000003",
+      "responseSha256": "0ff40882c4c0031b47b857857b93e659ef8edc81619ba6eb40d56dd2b3d2fa4c"
+    },
+    {
+      "lawId": "403AC0000000076",
+      "revisionId": "20261001_507AC0000000063",
+      "snapshotHash": "6b1d27c601d2b1c7e5e20cc19ee4f5609641dc30123d764a2ec88253ba29c297",
+      "checkedAt": "2026-10-11T14:36:33.960Z",
+      "effectiveOn": "2026-10-01",
+      "status": "CurrentEnforced",
+      "sourceUrl": "https://laws.e-gov.go.jp/api/2/law_data/403AC0000000076",
+      "responseSha256": "45c85cd26aad1c4b8a6853690ccb3b70a209c4a9834bf6bd2f5e9efb726ea9b6"
+    },
+    {
+      "lawId": "417M60000100021",
+      "revisionId": "20260401_508M60000100003",
+      "snapshotHash": "4b0599cd6fa7d949649ed0a52c1d1176625f46ea999d8c6d0fc43b46f909bd0b",
+      "checkedAt": "2026-10-11T14:36:34.129Z",
+      "effectiveOn": "2026-04-01",
+      "status": "CurrentEnforced",
+      "sourceUrl": "https://laws.e-gov.go.jp/api/2/law_data/417M60000100021",
+      "responseSha256": "9d2e6e274664880dbd3f7befcd8ca9081ac90234207cb3f264cb235221ba4871"
+    }
+  ]
+}

@@ -33,7 +33,7 @@ test.describe("化学物質RA", () => {
     { cas: "67-64-1", name: "アセトン", count: 5 },
     { cas: "64-17-5", name: "エタノール", count: 6 },
   ]) {
-    test(`${item.name}の実API分類・炎・一部収録注記を印刷にも保持する @smoke`, async ({ page }) => {
+    test(`${item.name}の実API分類・炎・一部収録注記を印刷にも保持する @smoke`, async ({ page }, testInfo) => {
       test.setTimeout(90_000);
       const searchPromise = page.waitForResponse((response) =>
         response.url().includes("/api/chemical/search") && response.request().method() === "POST",
@@ -42,6 +42,8 @@ test.describe("化学物質RA", () => {
       expect((await searchPromise).status()).toBe(200);
       await expect(page.getByRole("combobox", { name: "物質名・CAS番号・SDS記載名" })).toHaveValue(item.name);
       await page.getByRole("button", { name: "作業条件へ進む", exact: true }).click();
+      await page.getByLabel("作業時間（時間/日）", { exact: true }).fill("1");
+      await page.getByLabel("作業内容（任意）— 最新SDS・公式ツール確認用のメモ").fill("容器から移す");
       const [response] = await Promise.all([
         page.waitForResponse((value) => value.url().endsWith("/api/chemical-ra") && value.request().method() === "POST"),
         page.getByRole("button", { name: "公的情報を確認", exact: true }).click(),
@@ -58,6 +60,10 @@ test.describe("化学物質RA", () => {
       await expect(report).toBeVisible();
       await expect(report.getByTestId("ghs-picto-flame")).toBeVisible();
       await expect(report.getByTestId("chemical-ra-print-coverage")).toContainText("未確認");
+      await expect(report).toContainText("1 時間/日");
+      await expect(report).toContainText("容器から移す");
+      await expect(report).toContainText("不足・未確認");
+      await expect(report).toContainText("正式なRA結果ではありません");
       await expect(report.locator("tbody tr")).toHaveCount(item.count);
       for (const hazard of data.ghsHazards) {
         await expect(report).toContainText(hazard.category);
@@ -65,6 +71,9 @@ test.describe("化学物質RA", () => {
       }
       await expect(conclusion).toBeHidden();
       await expect(page.locator("[data-primary-task]")).toBeHidden();
+      const pdfPath = testInfo.outputPath(`chemical-${item.cas}.pdf`);
+      await page.pdf({ path: pdfPath, format: "A4", preferCSSPageSize: true, printBackground: false });
+      await testInfo.attach(`A4-${item.cas}`, { path: pdfPath, contentType: "application/pdf" });
       await page.emulateMedia({ media: "screen" });
       await expect(conclusion).toBeVisible();
       // 既存のKY導線は維持する。今回の変更は印刷だけ。

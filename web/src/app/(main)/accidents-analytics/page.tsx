@@ -258,32 +258,32 @@ export default async function AccidentsAnalyticsPage({
             </li>
             <li>
               <Link
-                href="/accidents-reports"
+                href="/accidents"
                 className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-slate-700 hover:bg-slate-50"
               >
                 <Tag className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                業種別レポート
+                事故事例検索
               </Link>
             </li>
             <li>
               <Link
-                href="/stats"
+                href="/about/quality"
                 className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-slate-700 hover:bg-slate-50"
               >
                 <BarChart3
                   className="h-3.5 w-3.5 shrink-0"
                   aria-hidden="true"
                 />
-                サイト利用統計
+                出典・確認状態
               </Link>
             </li>
             <li>
               <Link
-                href="/risk-prediction"
+                href="/risk"
                 className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-slate-700 hover:bg-slate-50"
               >
                 <Sparkles className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                AIリスク予測
+                今日の安全確認
               </Link>
             </li>
             <li>
