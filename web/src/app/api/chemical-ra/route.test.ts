@@ -1,7 +1,62 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+// 検証では実DBへ接続しない。本番のDB必須境界は503で確認する。
+vi.mock("@/lib/prisma", () => ({ prisma: null }));
+
 describe("POST /api/chemical-ra safety boundary", () => {
-  afterEach(() => vi.unstubAllEnvs());
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.useRealTimers();
+  });
+
+  it("serves bundled acetone GHS without credentials in preview and rejects request 31 in the same process", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("VERCEL_ENV", "preview");
+    vi.stubEnv("VERCEL_GIT_COMMIT_SHA", "a67ce70120261011");
+    vi.stubEnv("SHARED_STATE_HMAC_SECRET", "");
+    vi.stubEnv("AUTOMATION_CONSULT_STATE_HASH_SECRET", "");
+    vi.stubEnv("DATABASE_URL", "");
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-10-11T00:00:00Z"));
+    const { POST } = await import("./route");
+    const request = () => new Request("http://localhost/api/chemical-ra", {
+      method: "POST", headers: { "content-type": "application/json" },
+      body: JSON.stringify({ chemicalName: "アセトン", casNumber: "67-64-1" }),
+    });
+
+    const response = await POST(request());
+    expect(response.status).toBe(200);
+    const result = await response.json();
+    expect(result.casNumber).toBe("67-64-1");
+    expect(result.ghsHazards).toHaveLength(4);
+    expect(result.aiStatus).toBe("disabled_for_safety");
+    expect(result.assessmentStatus).toBe("unavailable");
+    expect(result.createSimple).toBeUndefined();
+    for (let count = 2; count <= 30; count++) {
+      expect((await POST(request())).status).toBe(200);
+    }
+    const limited = await POST(request());
+    expect(limited.status).toBe(429);
+    expect((await limited.json()).error.code).toBe("rate_limited");
+  });
+
+  it.each(["", "safe-ai-local-test-shared-state-secret-20260731"])(
+    "keeps production stopped without shared storage even with preview option and HMAC fixture %s",
+    async (secret) => {
+      vi.stubEnv("NODE_ENV", "production");
+      vi.stubEnv("VERCEL_ENV", "production");
+      vi.stubEnv("SHARED_STATE_HMAC_SECRET", secret);
+      vi.stubEnv("AUTOMATION_CONSULT_STATE_HASH_SECRET", "");
+      vi.stubEnv("DATABASE_URL", "");
+      const { POST } = await import("./route");
+      const response = await POST(new Request("http://localhost/api/chemical-ra", {
+        method: "POST", headers: { "content-type": "application/json" },
+        body: JSON.stringify({ chemicalName: "アセトン", casNumber: "67-64-1" }),
+      }));
+      expect(response.status).toBe(503);
+      expect((await response.json()).error.code).toBe("shared_rate_limit_unavailable");
+    },
+  );
 
   it("keeps the real acetone CAS and stored NITE GHS classifications without enabling numeric assessment", async () => {
     const { POST } = await import("./route");

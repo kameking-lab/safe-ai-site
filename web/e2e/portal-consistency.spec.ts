@@ -47,8 +47,18 @@ for (const width of [1280, 390]) {
 
     test("アセトンDBから同じCASの公的GHS分類を確認できる", async ({ page }) => {
       await page.goto("/chemical-database/67-64-1");
+      const searchResponsePromise = page.waitForResponse((item) =>
+        item.url().endsWith("/api/chemical/search") &&
+        item.request().method() === "POST" &&
+        item.request().postDataJSON()?.query === "67-64-1",
+      );
       await page.locator('a[href="/chemical-ra?cas=67-64-1"]').first().click();
-      await expect(page.getByRole("textbox", { name: "物質名・CAS番号・SDS記載名" })).toHaveValue("アセトン");
+      const input = page.getByRole("combobox", { name: "物質名・CAS番号・SDS記載名" });
+      await input.waitFor({ state: "visible" });
+      const searchResponse = await searchResponsePromise;
+      expect(searchResponse.status()).toBe(200);
+      expect((await searchResponse.json()).items).toContainEqual(expect.objectContaining({ cas: "67-64-1", primaryName: "アセトン" }));
+      await expect(input).toHaveValue("アセトン");
       await page.getByRole("button", { name: "作業条件へ進む", exact: true }).click();
       const [response] = await Promise.all([
         page.waitForResponse((item) => item.url().endsWith("/api/chemical-ra") && item.request().method() === "POST"),
