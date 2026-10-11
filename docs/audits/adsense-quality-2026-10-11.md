@@ -64,6 +64,8 @@ node scripts/etl/build-legal-preservation-manifest.mjs
 
 ## Astra追加指摘の修正と実物確認
 
+親のAstraは `48bc4a9473e390187bfb187ede7f411f0c833473` の限定的な否定除外、保存後の実記録再取得、元記録保護、厚労省2事例の原典照合を独立確認し、新しい公開阻止所見なしとした。その後の短いUI補足として、保存記録の印刷ボタン付近に「変更を印刷に反映するには保存してください。」を追加した。未保存編集では原本を印刷する仕様を変更していない。
+
 - 「電気の配線ではなく、ボール盤の回転刃への軍手の巻き込まれ」「ボール盤の感電ではなく、回転刃に軍手が巻き込まれる」は、旧電気文脈が残る誤答をJSON/SSEで再現した。明示的に否定した電気作業語だけを分類から除外し、残る配線・結線・感電防止の相談は電気作業として扱う。旧2表現と追加2表現の新規/訂正×JSON/SSEの実HTTP16ケース、フォークリフト0.8t/1tの両経路4ケースで本文・条文・基準日を確認した。未確認版を保留する既存fixtureも対象単体テストで維持した。
 - 保存RAを1時間/SDS旧版から8時間/SDS-v2へ編集して別記録保存すると、元の復元payloadを印刷する不具合を修正。保存後に実際の保存レコードをローカルで読み、画面の印刷対象・記録日・再読み込みURLを同じ新記録へ更新する。元記録は上書きしない。未保存の編集では元の印刷条件を保持する。クラウド同意なしでは送信ゼロ。
 - 架空の長い印刷試験入力（作業25行・既存対策18行・追加案22行・保護具12行、長い製品版文字列）を実APIから保存/復元/編集/再保存/再読込。A4 **3ページ**を全文抽出・全ページ目視し、77行・8時間・SDS-v2・2026-10-20の記録日・未確認/未評価・出典が欠けないことを確認。試験日付は固定時計による架空日付であり、実際のRA実績ではない。
@@ -155,7 +157,7 @@ node scripts/etl/build-legal-preservation-manifest.mjs
   "productionDeployment": "not performed",
   "adsenseApplication": "unchanged; pending",
   "remainingReview": [
-    "Astra independent review of final preview"
+    "Final head CI completion; core changes independently reviewed by parent Astra"
   ],
   "additionalPropagationTests": {
     "files": 9,
@@ -289,6 +291,15 @@ node scripts/etl/build-legal-preservation-manifest.mjs
         "108-88-3",
         "67-64-1"
       ]
+    },
+    "printNotice": {
+      "parentIndependentReviewedCommit": "48bc4a9473e390187bfb187ede7f411f0c833473",
+      "unitFiles": 2,
+      "unitPassed": 15,
+      "unitFailed": 0,
+      "longRaBrowserPassed": 1,
+      "pdfPages": 3,
+      "allPdfTextMatchesPriorVerifiedPdf": true
     }
   }
 }

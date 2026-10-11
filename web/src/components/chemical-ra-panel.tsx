@@ -1417,7 +1417,7 @@ export function ChemicalRaPanel({
             )}
           <div className="flex flex-wrap items-center justify-between gap-2 print:hidden">
             <p className="text-xs font-bold text-emerald-700">A4 参考情報記録（正式なリスクアセスメント様式ではありません）</p>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               {/* P1-5: RA結果のクラウド保管（localStorage即時＋クラウド背景同期） */}
               <ChemicalRaSaveButton
                 chemicalName={result.chemicalName}
@@ -1440,6 +1440,7 @@ export function ChemicalRaPanel({
                 <Printer className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />A4参考情報・条件記録を印刷 / PDF保存
               </button>
             </div>
+            {restoredAt && <p className="w-full text-xs text-slate-600">変更を印刷に反映するには保存してください。</p>}
           </div>
           {/* P1-1: 印刷時のみA4記録様式ヘッダ（自社情報・実施日・実施者）。台帳から再表示時は実施日を保存当時に固定。 */}
           <ChemicalRaReportHeader recordDateIso={restoredAt ?? undefined} />

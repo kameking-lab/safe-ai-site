@@ -91,6 +91,7 @@ test.describe("化学物質RA", () => {
     await page.clock.setFixedTime(new Date("2026-10-20T03:00:00Z"));
     await page.goto(`/chemical-ra?raId=${encodeURIComponent(saved.raId)}`);
     await expect(page.getByText("保存済みの参考情報記録を表示中", { exact: true })).toBeVisible();
+    await expect(page.getByText("変更を印刷に反映するには保存してください。", { exact: true })).toBeVisible();
     await expect(page.getByLabel("作業内容（任意）— 最新SDS・公式ツール確認用のメモ")).toHaveValue(work);
     await expect(page.getByLabel("作業時間（時間/日）", { exact: true })).toHaveValue("1");
     // 未保存の編集を、保存当時の記録や分類に混ぜない。
