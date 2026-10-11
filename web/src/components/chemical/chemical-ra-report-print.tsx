@@ -7,6 +7,8 @@
  * 記入は印刷後の手書き運用を想定（入力強制なし＝「現場に何かさせない」方針を遵守）。
  */
 
+import { GHS_PARTIAL_COVERAGE_NOTICE } from "@/lib/chemical/ghs-coverage";
+
 function todayJa(): string {
   const d = new Date();
   return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
@@ -41,6 +43,7 @@ export function ChemicalRaReportHeader({ recordDateIso }: { recordDateIso?: stri
       <p className="mt-1 text-[10px] text-slate-600">
         ※ 本様式は収録済み公的情報の参考記録であり、正式なリスクアセスメント結果ではありません。最新SDS・実測値・公式CREATE-SIMPLEで確認してください。
       </p>
+      <p className="mt-1 text-[10px] text-slate-600">{GHS_PARTIAL_COVERAGE_NOTICE}</p>
     </div>
   );
 }

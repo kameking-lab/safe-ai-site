@@ -1,3 +1,4 @@
+import { GHS_PARTIAL_COVERAGE_NOTICE } from "@/lib/chemical/ghs-coverage";
 import { isCanonicalAreaId } from "@/lib/area/official-area-resolver";
 import type {
   KyControlLevel,
@@ -371,7 +372,7 @@ function labelForSource(source: KyHandoffSource): string {
     case "visual-kyt":
       return "reviewed Visual KYTを候補として読み込みました。";
     case "chemical-ra":
-      return "確認済み化学物質条件を候補として読み込みました。";
+      return `化学物質条件を候補として読み込みました。${GHS_PARTIAL_COVERAGE_NOTICE}`;
     case "meeting":
       return "工程打合せ書の作業・危険・指示を候補として読み込みました。";
     default:

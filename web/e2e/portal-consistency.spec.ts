@@ -67,11 +67,11 @@ for (const width of [1280, 390]) {
       expect(response.status()).toBe(200);
       const result = await response.json();
       expect(result.casNumber).toBe("67-64-1");
-      expect(result.ghsHazards).toHaveLength(4);
+      expect(result.ghsHazards).toHaveLength(5);
       expect(result.aiStatus).toBe("disabled_for_safety");
       expect(result.assessmentStatus).toBe("unavailable");
-      await expect(page.getByRole("heading", { name: "GHSハザード分類 (4項目)", exact: true })).toBeVisible();
-      const ghsSection = page.getByRole("heading", { name: "GHSハザード分類 (4項目)", exact: true }).locator("..");
+      await expect(page.getByRole("heading", { name: "GHSハザード分類（一部収録・5項目）", exact: true })).toBeVisible();
+      const ghsSection = page.getByRole("heading", { name: "GHSハザード分類（一部収録・5項目）", exact: true }).locator("..");
       for (const hazard of result.ghsHazards) {
         const category = ghsSection.getByText(hazard.category, { exact: true });
         await expect(category).toBeVisible();
