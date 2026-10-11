@@ -309,3 +309,85 @@
     min-width: 0 !important;
   }
 }
+
+
+/* 化学RAの参照記録だけを印刷。画面・他の帳票には適用しない。 */
+@media print {
+  @page chemical-ra-report {
+    size: A4;
+    margin: 12mm;
+  }
+
+  body:has([data-chemical-ra-print-report])
+    :not(:has([data-chemical-ra-print-report])):not([data-chemical-ra-print-report]):not([data-chemical-ra-print-report] *) {
+    display: none !important;
+  }
+
+  body:has([data-chemical-ra-print-report]) [data-app-shell],
+  body:has([data-chemical-ra-print-report]) #main-content,
+  body:has([data-chemical-ra-print-report]) #main-content > div,
+  body:has([data-chemical-ra-print-report]) #chemical-ra-js,
+  body:has([data-chemical-ra-print-report]) #chemical-ra-start,
+  [data-chemical-ra-panel]:has([data-chemical-ra-print-report]),
+  [data-chemical-ra-result]:has([data-chemical-ra-print-report]) {
+    display: block !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    outline: none !important;
+  }
+
+  [data-chemical-ra-print-report] {
+    page: chemical-ra-report;
+    display: block !important;
+    font-size: 10pt;
+    line-height: 1.5;
+    color: #111 !important;
+  }
+
+  [data-chemical-ra-print-report] :where(p, th, td, h1, h2, span, strong, a) {
+    color: #111 !important;
+  }
+  [data-chemical-ra-print-report] p { margin: 0; }
+  [data-chemical-ra-print-report] a[href]::after { content: none; }
+
+  .chemical-ra-print-record-header,
+  .chemical-ra-print-identity,
+  .chemical-ra-print-signoff { break-inside: avoid; }
+  .chemical-ra-print-record-header > div {
+    margin: 0 0 4mm;
+    padding: 3mm;
+    border: 1px solid #555;
+  }
+  .chemical-ra-print-record-header p { font-size: 9pt; line-height: 1.5; }
+  .chemical-ra-print-record-header > div > div:first-child p:first-child { font-size: 11pt; }
+  .chemical-ra-print-identity { margin: 0 0 4mm; }
+  .chemical-ra-print-identity h1 { margin: 0; font-size: 20pt; line-height: 1.3; }
+  .chemical-ra-print-cas { font-size: 10pt; }
+  .chemical-ra-print-signal { margin-top: 2mm !important; }
+  .chemical-ra-print-signal strong { border: 2px solid #111; padding: 0.5mm 2mm; font-size: 12pt; }
+  .chemical-ra-print-signal > span { margin-left: 2mm; font-size: 9pt; }
+  .chemical-ra-print-symbols { display: flex; flex-wrap: wrap; gap: 5mm; margin-top: 3mm; }
+  .chemical-ra-print-symbols > div { display: flex; align-items: center; gap: 1.5mm; font-size: 9pt; }
+
+  .chemical-ra-print-ghs { width: 100%; border-collapse: collapse; table-layout: fixed; }
+  .chemical-ra-print-category-column { width: 31%; }
+  .chemical-ra-print-signal-column { width: 16%; }
+  .chemical-ra-print-ghs thead { display: table-header-group; }
+  .chemical-ra-print-ghs tr { break-inside: avoid; }
+  .chemical-ra-print-ghs th,
+  .chemical-ra-print-ghs td { border: 1px solid #555; padding: 2mm; text-align: left; vertical-align: top; overflow-wrap: anywhere; font-size: 10pt; }
+  .chemical-ra-print-ghs thead th { background: #fff; }
+  .chemical-ra-print-ghs h2 { margin: 0; font-size: 12pt; }
+  .chemical-ra-print-repeat-identity { font-size: 9pt; font-weight: normal; }
+  .chemical-ra-print-coverage { margin-top: 2mm !important; font-size: 9pt; font-weight: normal; line-height: 1.5; }
+  .chemical-ra-print-sources { margin-top: 4mm; }
+  .chemical-ra-print-sources h2 { margin: 0; font-size: 10pt; break-after: avoid; }
+  .chemical-ra-print-sources p { break-inside: avoid; font-size: 9pt; overflow-wrap: anywhere; }
+  .chemical-ra-print-sources a { margin-right: 2mm; font-weight: bold; }
+  .chemical-ra-print-signoff { margin-top: 3mm; }
+  .chemical-ra-print-signoff p,
+  .chemical-ra-print-signoff span { font-size: 9pt; color: #111 !important; }
+  .chemical-ra-print-signoff [class*="border"] { border-color: #555; }
+}

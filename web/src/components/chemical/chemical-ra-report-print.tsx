@@ -7,6 +7,9 @@
  * 記入は印刷後の手書き運用を想定（入力強制なし＝「現場に何かさせない」方針を遵守）。
  */
 
+import type { ChemicalRaResponse } from "@/app/api/chemical-ra/route";
+import { GhsPictogram } from "./ghs-pictogram";
+import { collectGhsSymbols, GHS_SYMBOL_LABEL } from "@/lib/chemical/ghs-pictogram-map";
 import { GHS_PARTIAL_COVERAGE_NOTICE } from "@/lib/chemical/ghs-coverage";
 
 function todayJa(): string {
@@ -27,7 +30,7 @@ function formatRecordDate(iso?: string): string {
  * recordDateIso を渡すと「実施日」をその日付で固定する（台帳から保存済み記録を再印刷する場合に、
  * 当日ではなく実施当時の日付を保つ）。未指定なら当日（新規実施時）。
  */
-export function ChemicalRaReportHeader({ recordDateIso }: { recordDateIso?: string } = {}) {
+export function ChemicalRaReportHeader({ recordDateIso, includeCoverageNotice = true }: { recordDateIso?: string; includeCoverageNotice?: boolean } = {}) {
   return (
     <div className="hidden print:block border border-slate-400 p-3 mb-3 text-[11px] text-slate-900">
       <div className="flex items-center justify-between">
@@ -43,7 +46,7 @@ export function ChemicalRaReportHeader({ recordDateIso }: { recordDateIso?: stri
       <p className="mt-1 text-[10px] text-slate-600">
         ※ 本様式は収録済み公的情報の参考記録であり、正式なリスクアセスメント結果ではありません。最新SDS・実測値・公式CREATE-SIMPLEで確認してください。
       </p>
-      <p className="mt-1 text-[10px] text-slate-600">{GHS_PARTIAL_COVERAGE_NOTICE}</p>
+      {includeCoverageNotice && <p className="mt-1 text-[10px] text-slate-600">{GHS_PARTIAL_COVERAGE_NOTICE}</p>}
     </div>
   );
 }
@@ -66,5 +69,71 @@ export function ChemicalRaSignoffBoxes() {
         ※ 記録は事業場で保存してください（特別管理物質に係る記録は30年保存等、法令に従う）。
       </p>
     </div>
+  );
+}
+
+
+/** 画面の操作UIを混ぜず、同じ分類をA4の参照記録に保持する。 */
+export function ChemicalRaPrintReport({ result, recordDateIso }: {
+  result: ChemicalRaResponse;
+  recordDateIso?: string;
+}) {
+  const symbols = collectGhsSymbols(result.ghsHazards);
+  // 分類の出典は画面と同じCAS一致条件。別物質のURLを転載しない。
+  const sources = (result.sourceLinks ?? []).filter((source) => result.casNumber &&
+    source.url === `https://www.chem-info.nite.go.jp/chem/ghs/m-nite-${result.casNumber}.html`);
+  const signal = result.ghsHazards.some((hazard) => hazard.signal === "危険")
+    ? "危険"
+    : result.ghsHazards.some((hazard) => hazard.signal === "警告") ? "警告" : "分類情報未確認";
+  return (
+    <article data-chemical-ra-print-report="" data-testid="chemical-ra-print-report" className="hidden print:block">
+      <div className="chemical-ra-print-record-header">
+        <ChemicalRaReportHeader recordDateIso={recordDateIso} includeCoverageNotice={false} />
+      </div>
+      <section className="chemical-ra-print-identity" aria-label="対象物質とGHS絵表示">
+        <h1>{result.chemicalName}</h1>
+        <p className="chemical-ra-print-cas">CAS番号: {result.casNumber || "未確認"}</p>
+        <p className="chemical-ra-print-signal"><strong>{signal}</strong> <span>収録済みGHS分類の注意喚起語</span></p>
+        {symbols.length > 0 ? (
+          <div className="chemical-ra-print-symbols">
+            {symbols.map((symbol) => (
+              <div key={symbol}>
+                <GhsPictogram symbol={symbol} />
+                <span>{GHS_SYMBOL_LABEL[symbol]}</span>
+              </div>
+            ))}
+          </div>
+        ) : <p>絵表示の表示データがありません。危険性の有無は未確認です。</p>}
+      </section>
+      <table className="chemical-ra-print-ghs" aria-labelledby="chemical-ra-print-ghs-title">
+        <colgroup><col className="chemical-ra-print-category-column" /><col /><col className="chemical-ra-print-signal-column" /></colgroup>
+        <thead>
+          <tr><th colSpan={3}>
+            <h2 id="chemical-ra-print-ghs-title">GHSハザード分類（一部収録・{result.ghsHazards.length}項目）</h2>
+            <p className="chemical-ra-print-repeat-identity">{result.chemicalName} / CAS番号: {result.casNumber || "未確認"}</p>
+            <p className="chemical-ra-print-coverage" data-testid="chemical-ra-print-coverage">{GHS_PARTIAL_COVERAGE_NOTICE}</p>
+          </th></tr>
+          <tr><th scope="col">危険性・有害性</th><th scope="col">収録されている分類</th><th scope="col">注意喚起語</th></tr>
+        </thead>
+        <tbody>
+          {result.ghsHazards.length > 0 ? result.ghsHazards.map((hazard, index) => (
+            <tr key={index}>
+              <th scope="row">{hazard.category}</th>
+              <td>{hazard.classification}</td>
+              <td><strong>{hazard.signal}</strong></td>
+            </tr>
+          )) : <tr><td colSpan={3}>表示できる分類がありません。危険性の有無は未確認です。最新の製品SDSで確認してください。</td></tr>}
+        </tbody>
+      </table>
+      {sources.length > 0 && (
+        <section className="chemical-ra-print-sources" aria-label="分類の参照資料">
+          <h2>参照資料</h2>
+          {sources.map((source) => (
+            <p key={source.url}><a href={source.url}>{source.label}</a><span>{source.url}</span></p>
+          ))}
+        </section>
+      )}
+      <div className="chemical-ra-print-signoff"><ChemicalRaSignoffBoxes /></div>
+    </article>
   );
 }

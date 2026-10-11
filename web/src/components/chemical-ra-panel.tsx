@@ -7,7 +7,7 @@ import { AlertTriangle, BookOpen, Database, FileText, FlaskConical, FolderOpen, 
 import { TextareaWithVoice } from "@/components/voice-input-field";
 import { getChemicalKeyPoints, hasKeyPoints } from "@/lib/chemical/key-points";
 import { auditedRegulationTags, type LegalProfileTagSource } from "@/lib/chemical/legal-profile-tags";
-import { ChemicalRaReportHeader, ChemicalRaSignoffBoxes } from "@/components/chemical/chemical-ra-report-print";
+import { ChemicalRaPrintReport, ChemicalRaReportHeader, ChemicalRaSignoffBoxes } from "@/components/chemical/chemical-ra-report-print";
 import {
   createChemicalRaRecordPayload,
   getChemicalRaRecord,
@@ -798,7 +798,7 @@ export function ChemicalRaPanel({
   }, [urlParams]);
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 lg:px-8">
+    <div data-chemical-ra-panel="" className="mx-auto max-w-7xl space-y-6 px-4 py-6 lg:px-8">
       {/* 検索フォーム（入力UI。印刷=A4実施記録では不要なので隠す） */}
       <div
         data-primary-task=""
@@ -1348,8 +1348,10 @@ export function ChemicalRaPanel({
           ref={resultAnchorRef}
           tabIndex={-1}
           aria-label="化学物質情報"
+          data-chemical-ra-result=""
           className="space-y-6 scroll-mt-20 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 print:space-y-3"
         >
+          <ChemicalRaPrintReport result={result} recordDateIso={restoredAt ?? undefined} />
           {/* 柱0: 結論カード（1画面1メッセージ）— リスクレベルのデカ表示＋I〜IV色帯＋
               GHS絵表示＋まず行う対策＋保護具動線。旧「まず押さえる要点」の内容を統合
               （hazards/actions/regulations は keyPoints から表示・正確性は不変）。
