@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { buildGhsHazardsFromNite, severestCategoryNumber } from "./nite-ghs-hazards";
+import { collectGhsSymbols } from "./ghs-pictogram-map";
+import { buildOfficialResponse } from "./official-ra-response";
 import { findByCas } from "@/lib/mhlw-chemicals";
 
 // NITE政府版GHS分類 → GhsHazard 変換（AI不通フォールバック強化）の回帰ガード。
@@ -15,6 +17,37 @@ describe("severestCategoryNumber", () => {
 });
 
 describe("buildGhsHazardsFromNite", () => {
+  it.each(["108-88-3", "67-64-1", "64-17-5"])(
+    "公式SDS照合済みCAS %sの引火性区分2をAPI応答・炎の絵表示へ保持する",
+    (cas) => {
+      const chemical = findByCas(cas)!;
+      const result = buildOfficialResponse(chemical);
+      expect(result.ghsHazards).toContainEqual({
+        category: "引火性液体", classification: "区分2", signal: "危険",
+      });
+      expect(collectGhsSymbols(result.ghsHazards)).toContain("flame");
+      expect(result.sourceLinks).toContainEqual({
+        label: "NITE-CHRIP", url: chemical.details?.limits?.niteChripUrl,
+      });
+      expect(result.assessmentStatus).toBe("unavailable");
+      expect(result.createSimple).toBeUndefined();
+    },
+  );
+
+  it.each([["区分1", "危険", "flame"], ["区分2", "危険", "flame"],
+    ["区分3", "警告", "flame"], ["区分4", "警告", undefined]] as const)(
+    "引火性液体 %s の注意喚起語と絵表示を区別する",
+    (classification, signal, symbol) => {
+      const hazards = buildGhsHazardsFromNite({ flammableLiquids: classification });
+      expect(hazards).toEqual([{ category: "引火性液体", classification, signal }]);
+      expect(collectGhsSymbols(hazards)).toEqual(symbol ? [symbol] : []);
+    },
+  );
+
+  it.each(["分類できない", "区分外", "区分に該当しない", "区分5", "区分2か不明"])(
+    "未確認の引火性 %s から分類・注意喚起語を推定しない",
+    (flammableLiquids) => expect(buildGhsHazardsFromNite({ flammableLiquids })).toEqual([]),
+  );
   it("発がん性区分1A=危険 / 皮膚刺激区分2=警告（GHS標準割当）", () => {
     const hazards = buildGhsHazardsFromNite({
       carcinogen: "区分1A",

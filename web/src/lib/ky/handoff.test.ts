@@ -53,6 +53,8 @@ describe("privacy-preserving KY handoff", () => {
     expect(href).not.toContain(rawWork);
     const parsed = parseKyHandoffFromLocation("");
     expect(parsed?.workDraft).toBe(rawWork);
+    expect(parsed?.label).toContain("GHS分類は一部収録です");
+    expect(parsed?.label).toContain("未確認");
     expect(parsed?.measureDrafts[0]).toMatchObject({
       text: "局所排気を有効な位置で使用する",
       level: "engineering",

@@ -28,7 +28,7 @@ describe("POST /api/chemical-ra safety boundary", () => {
     expect(response.status).toBe(200);
     const result = await response.json();
     expect(result.casNumber).toBe("67-64-1");
-    expect(result.ghsHazards).toHaveLength(4);
+    expect(result.ghsHazards).toHaveLength(5);
     expect(result.aiStatus).toBe("disabled_for_safety");
     expect(result.assessmentStatus).toBe("unavailable");
     expect(result.createSimple).toBeUndefined();
@@ -68,7 +68,7 @@ describe("POST /api/chemical-ra safety boundary", () => {
       const result = await response.json();
       expect(response.status).toBe(200);
       expect(result.casNumber).toBe("67-64-1");
-      expect(result.ghsHazards).toHaveLength(4);
+      expect(result.ghsHazards).toHaveLength(5);
       expect(result.sourceLinks.some((source: { url: string }) => source.url.includes("67-64-1"))).toBe(true);
       expect(result.aiStatus).toBe("disabled_for_safety");
       expect(result.assessmentStatus).toBe("unavailable");

@@ -1,3 +1,4 @@
+import { GHS_PARTIAL_COVERAGE_NOTICE } from "@/lib/chemical/ghs-coverage";
 import { AlertTriangle } from "lucide-react";
 import type { ChemicalRaResponse } from "@/app/api/chemical-ra/route";
 import type { ChemicalKeyPoints } from "@/lib/chemical/key-points";
@@ -68,6 +69,10 @@ export function RaConclusionCard({ result, keyPoints }: RaConclusionCardProps) {
           )}
         </div>
       </div>
+
+      <p className="mt-2 text-xs leading-5" data-testid="ghs-coverage-notice">
+        {GHS_PARTIAL_COVERAGE_NOTICE}
+      </p>
 
       {/* I〜IV 色帯（順序尺度・現在レベルの中央に▼）。印刷では出さない */}
       {conclusion.kind === "level" && (

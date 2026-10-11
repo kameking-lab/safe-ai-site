@@ -1,5 +1,6 @@
 "use client";
 
+import { GHS_PARTIAL_COVERAGE_NOTICE } from "@/lib/chemical/ghs-coverage";
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AlertTriangle, BookOpen, Database, FileText, FlaskConical, FolderOpen, Gauge, Printer } from "lucide-react";
@@ -1525,7 +1526,7 @@ export function ChemicalRaPanel({
             <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
               <h2 className="mb-3 flex items-center gap-2 text-sm font-bold text-slate-900">
                 <AlertTriangle className="h-4 w-4 text-amber-500" />
-                GHSハザード分類 ({result.ghsHazards.length}項目)
+                GHSハザード分類（一部収録・{result.ghsHazards.length}項目）
               </h2>
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
                 {result.ghsHazards.map((hazard, i) => (
@@ -1533,7 +1534,7 @@ export function ChemicalRaPanel({
                 ))}
               </div>
               <p className="mt-3 text-xs text-slate-600">
-                製品・混合物の分類は最新の製品SDSで確認してください。
+                {GHS_PARTIAL_COVERAGE_NOTICE}
               </p>
               {ghsSourceUrl && (
                 <a href={ghsSourceUrl} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex min-h-11 items-center text-xs font-bold text-emerald-800 underline">
