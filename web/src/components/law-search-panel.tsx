@@ -85,20 +85,24 @@ export function LawSearchPanel({
       <nav aria-label={isEn ? "Search examples" : "検索例"} className="flex flex-wrap gap-2">
         {(isEn
           ? [
-              ["Article 61", "Article 61"],
-              ["Heat illness", "Heat illness"],
-              ["Full harness training", "Full harness training"],
+              { label: "Article 61", query: "", article: "第61条", law: "労働安全衛生法" },
+              { label: "Heat illness", query: "", article: "第612条の2", law: "労働安全衛生規則" },
+              { label: "Full harness training", query: "フルハーネス 特別教育", article: "", law: "労働安全衛生規則" },
             ]
           : [
-              ["安衛法 第61条", "第61条"],
-              ["熱中症 安衛則612条の2", "熱中症"],
-              ["フルハーネス 特別教育", "フルハーネス 特別教育"],
+              { label: "安衛法 第61条", query: "", article: "第61条", law: "労働安全衛生法" },
+              { label: "熱中症 安衛則612条の2", query: "", article: "第612条の2", law: "労働安全衛生規則" },
+              { label: "フルハーネス 特別教育", query: "フルハーネス 特別教育", article: "", law: "労働安全衛生規則" },
             ]
-        ).map(([label, value]) => (
+        ).map(({ label, query: keyword, article, law }) => (
           <button
             key={label}
             type="button"
-            onClick={() => setQuery(value)}
+            onClick={() => {
+              setQuery(keyword);
+              setArticleNumQuery(article);
+              setSelectedLaw(law);
+            }}
             className="inline-flex min-h-11 items-center rounded-full border border-slate-300 bg-white px-3 py-2 text-xs font-bold text-slate-800 hover:border-emerald-600 focus-visible:ring-4 focus-visible:ring-emerald-300"
           >
             {label}

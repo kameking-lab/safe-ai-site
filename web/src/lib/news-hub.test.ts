@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { buildNewsHubItems, isRecent, NEWS_HUB_CATEGORY_LABEL } from "@/lib/news-hub";
 import { buildIndustryDigest, filterItemsForIndustry } from "@/lib/news-digest";
+import { OFFICIAL_ACCIDENT_SNAPSHOT } from "@/data/accidents/official-current";
 
 describe("P1-2/P1-3 新着ハブ アグリゲータ", () => {
   const items = buildNewsHubItems();
@@ -19,6 +20,16 @@ describe("P1-2/P1-3 新着ハブ アグリゲータ", () => {
       expect(i.url.length).toBeGreaterThan(0);
       expect(NEWS_HUB_CATEGORY_LABEL[i.category]).toBeTruthy();
     }
+  });
+
+  it("月次速報はトップと同じ公式PDF・数値を使い、2024年の事例は死傷病報告へリンクする", () => {
+    const monthly = items.find((item) => item.id === "news-accident-monthly-sokuhou");
+    expect(monthly?.url).toBe(OFFICIAL_ACCIDENT_SNAPSHOT.sourcePdfUrl);
+    expect(monthly?.summary).toContain(`死亡者${OFFICIAL_ACCIDENT_SNAPSHOT.deaths.total}人`);
+    expect(monthly?.summary).toContain("建設業116人");
+    const currentCases = items.filter((item) => item.category === "serious-case" && item.title.endsWith("2024年"));
+    expect(currentCases.length).toBeGreaterThan(0);
+    expect(currentCases.every((item) => item.url.endsWith("anst00_r06.html"))).toBe(true);
   });
 
   it("日付降順でソートされている", () => {

@@ -1,17 +1,19 @@
 /**
  * P0-1: 重大災害事例ブラウザ（accident-news-deep-audit 2026-05-29）
  *
- * データ源: 厚労省 死亡災害DB（`deaths-mhlw/compact.json`）。**全件匿名**（会社名・発注者・
+ * データ源: 厚労省 死亡災害DB（2019〜2023年）と死傷病報告の死亡分（2024年）。**全件匿名**（会社名・発注者・
  * 被災者氏名を含まない）。死亡＝重大災害として、業種/事故型/年で類型検索し、同種事故頻度を
  * 添える。会社名・発注者は扱わない（法的リスク回避、docs/accident-news-deep-audit-2026-05-26/04）。
  *
- * 出典は厚労省 職場のあんぜんサイト 死亡災害DB。ただしローカルIDから公式Excelの
+ * 出典は収録データごとに保持する。ただしローカルIDから公式Excelの
  * 行へ逆引きする対応表は未整備であり、追跡性はデータセット単位に限る。
  */
 import deathsCompact from "@/data/deaths-mhlw/compact.json";
+import { load2024Records } from "@/lib/accidents-analytics/loader";
 
 export type DeathRecord = {
   id: string;
+  dataset?: "death-db" | "death-opendata";
   year: number;
   month: number | null;
   description: string;
@@ -34,8 +36,23 @@ type Compact = {
   entries: DeathRecord[];
 };
 
-const compact = deathsCompact as unknown as Compact;
-const compactYears = [...(compact.years ?? [])].sort((a, b) => a - b);
+const base = deathsCompact as unknown as Compact;
+const additionalRecords: DeathRecord[] = load2024Records().map((record) => ({
+  id: record.id,
+  dataset: "death-opendata",
+  year: record.year,
+  month: record.month,
+  description: record.description ?? "この収録データに発生状況の本文はありません。",
+  industry: record.industry?.majorName ?? null,
+  industryMedium: record.industry?.mediumName ?? null,
+  cause: record.cause?.majorName ?? null,
+  type: record.accidentType?.name ?? null,
+  workplaceSize: record.workplaceSize ?? null,
+  occurrenceTime: record.occurrenceTime ?? null,
+}));
+const entries = [...base.entries, ...additionalRecords];
+const compact = { ...base, entries, total: entries.length };
+const compactYears = [...new Set(entries.map((record) => record.year))].sort((a, b) => a - b);
 
 export const SERIOUS_CASES_META = {
   total: compact.total ?? compact.entries?.length ?? 0,
@@ -45,10 +62,19 @@ export const SERIOUS_CASES_META = {
     compactYears.length > 0
       ? `${compactYears[0]}〜${compactYears[compactYears.length - 1]}年`
       : "対象年不明",
-  sourceLabel: "厚生労働省 職場のあんぜんサイト 死亡災害データベース",
+  sourceLabel: "厚生労働省 死亡災害DB・死傷病報告オープンデータ（死亡分）",
+  sources: [
+    { label: "死亡災害DB（2019〜2023年）", url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SIB_FND.html", total: base.entries.length },
+    { label: "死傷病報告オープンデータ・死亡分（2024年）", url: "https://anzeninfo.mhlw.go.jp/user/anzen/tok/anst00_r06.html", total: additionalRecords.length },
+  ],
+  coverageNote: "2019〜2023年は死亡災害DB、2024年は死傷病報告の死亡分。報告・集計の仕組みが異なるため、全国の死亡災害確定値や年別増減とは区別します。",
   sourceUrl: "https://anzeninfo.mhlw.go.jp/anzen_pg/SIB_FND.html",
   traceability: "dataset-only",
 } as const;
+
+export function getSeriousCaseSource(record: Pick<DeathRecord, "dataset">) {
+  return SERIOUS_CASES_META.sources[record.dataset === "death-opendata" ? 1 : 0];
+}
 
 function countMap(records: readonly DeathRecord[], key: "type" | "industry"): Record<string, number> {
   const m: Record<string, number> = {};
@@ -59,8 +85,8 @@ function countMap(records: readonly DeathRecord[], key: "type" | "industry"): Re
   return m;
 }
 
-const TYPE_COUNTS = compact.byType ?? countMap(compact.entries ?? [], "type");
-const INDUSTRY_COUNTS = compact.byIndustry ?? countMap(compact.entries ?? [], "industry");
+const TYPE_COUNTS = countMap(compact.entries, "type");
+const INDUSTRY_COUNTS = countMap(compact.entries, "industry");
 
 export type FilterOption = { value: string; count: number };
 export type SeriousCaseFilters = {

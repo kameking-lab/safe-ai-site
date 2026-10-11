@@ -127,6 +127,8 @@ export type WeatherAlert = {
 };
 
 export type OfficialWeatherWarningState = {
+  /** 取得診断用。失敗や古い発表を「警報なし」に変換しない。 */
+  sourceIssue?: import("@/lib/jma/jma-data").JmaSourceIssue;
   status: "live" | "degraded" | "unresolved" | "unavailable";
   warnings: Array<{
     code: string;

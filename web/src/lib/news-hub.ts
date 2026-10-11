@@ -15,9 +15,9 @@ import { publicMhlwNotices as mhlwNotices } from "@/data/public-mhlw-notices";
 import { buildEnforcementBadge } from "@/lib/law-revision-status";
 import { deriveIndustryTags } from "@/lib/law-revision-industry-tags";
 import { egovRevisionsMeta } from "@/data/law-revisions/egov-revisions-loaded";
-import monthlySokuhou from "@/data/accidents/monthly-sokuhou.json";
+import { OFFICIAL_ACCIDENT_SNAPSHOT as snapshot } from "@/data/accidents/official-current";
 import newsFeed from "@/data/news-feed/approved/index.json";
-import { filterSeriousCases, SERIOUS_CASES_META } from "@/lib/accident-news/serious-cases";
+import { filterSeriousCases, getSeriousCaseSource } from "@/lib/accident-news/serious-cases";
 import type { NewsHubItem } from "@/lib/news-hub-types";
 
 export type { NewsHubCategory, NewsHubItem } from "@/lib/news-hub-types";
@@ -106,28 +106,17 @@ function mediaItems(limit: number): NewsHubItem[] {
     .slice(0, limit);
 }
 
-function accidentSokuhouItem(): NewsHubItem | null {
-  const data = monthlySokuhou as {
-    fetchedAt?: string;
-    sibou?: { period?: string; sourceUrl?: string; rows?: Array<{ name: string; total: number }> };
-  };
-  const sibou = data.sibou;
-  if (!sibou?.period) return null;
-  const top = (sibou.rows ?? [])
-    .filter((r) => typeof r.total === "number" && r.total > 0)
-    .sort((a, b) => b.total - a.total)
-    .slice(0, 3)
-    .map((r) => `${r.name}${r.total}件`)
+function accidentSokuhouItem(): NewsHubItem {
+  const top = snapshot.fatalIndustries.slice(0, 3)
+    .map((row) => `${row.name}${row.total}人`)
     .join("・");
   return {
     id: "news-accident-monthly-sokuhou",
     category: "accident",
-    title: `労働災害 月次速報（${sibou.period.split("/")[0].trim()}）`,
-    summary: top
-      ? `死亡災害が多い業種（速報・累計）: ${top}。確定値は年次プレス・e-Statを参照。`
-      : "厚労省の月次速報（業種別）を更新しました。確定値は年次プレス・e-Statを参照。",
-    date: toYmd(data.fetchedAt),
-    url: sibou.sourceUrl || "https://anzeninfo.mhlw.go.jp/information/sokuhou.html",
+    title: `労働災害 月次速報（${snapshot.label}）`,
+    summary: `死亡者${snapshot.deaths.total}人。死亡災害が多い業種（速報・累計）: ${top}。確定値は年次公表資料を参照。`,
+    date: snapshot.reportAsOf,
+    url: snapshot.sourcePdfUrl,
     internalHref: "/accident-news",
   };
 }
@@ -140,7 +129,7 @@ function seriousCaseItems(limit: number): NewsHubItem[] {
     title: `${c.type ?? "重大災害"}（${c.industry ?? "業種不明"}）${c.year}年`,
     summary: `${c.description}${c.type && c.sameTypeTotal > 0 ? `（同種事故 収録${c.sameTypeTotal}件）` : ""}`,
     date: `${c.year}-${String(c.month ?? 1).padStart(2, "0")}-01`,
-    url: SERIOUS_CASES_META.sourceUrl,
+    url: getSeriousCaseSource(c).url,
     internalHref: "/fatal-accidents",
   }));
 }
@@ -175,11 +164,10 @@ export function getNewsHubMeta(): {
   accidentSokuhouFetchedAt: string | null;
   newsFeedUpdatedAt: string | null;
 } {
-  const sokuhou = monthlySokuhou as { fetchedAt?: string };
   const feed = newsFeed as { updatedAt?: string };
   return {
     lawRevisionsFetchedAt: egovRevisionsMeta.fetchedAt ?? null,
-    accidentSokuhouFetchedAt: sokuhou.fetchedAt ?? null,
+    accidentSokuhouFetchedAt: snapshot.verifiedAt,
     newsFeedUpdatedAt: feed.updatedAt ?? null,
   };
 }

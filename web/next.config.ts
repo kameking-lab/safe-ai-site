@@ -102,6 +102,8 @@ const nextConfig: NextConfig = {
         destination: "/contact?category=demo",
         permanent: true,
       },
+      // 計算の入口を現行一覧へ統合。入力方式が異なる旧個別URLは互換性を保つ。
+      { source: "/construction-calc", destination: "/tools/construction-calculators", permanent: true },
       // 廃止・移動ページ
       { source: "/cases", destination: "/", permanent: true },
       { source: "/cases/:slug", destination: "/", permanent: true },

@@ -105,8 +105,9 @@ export default async function AccidentNewsPrintPage({
 
       {/* 出典・免責フッタ */}
       <footer className="mt-4 border-t border-slate-300 pt-2 text-[11px] leading-relaxed text-slate-500">
-        出典: {SERIOUS_CASES_META.sourceLabel}（{SERIOUS_CASES_META.sourceUrl}）。
-        対象: {SERIOUS_CASES_META.yearRange}。生成日時: {SERIOUS_CASES_META.generatedAt ?? "不明"}。
+        出典: {SERIOUS_CASES_META.sources.map((source) => `${source.label}（${source.url}）`).join("／")}。
+        {SERIOUS_CASES_META.coverageNote}
+        対象: {SERIOUS_CASES_META.yearRange}。2019〜2023年分の生成日時: {SERIOUS_CASES_META.generatedAt ?? "不明"}。
         出典はデータセット単位で、ローカルIDから公式Excelの個別行へは逆引きできません。
         本資料は公表事実の引用であり、会社名・発注者名・被災者氏名は含みません。
         「起因物分類」は直接原因・背景要因・管理要因ではなく、それらを本データから推測していません。

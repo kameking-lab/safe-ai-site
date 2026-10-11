@@ -20,7 +20,7 @@ const uses = [
     { href: "/accidents-analytics", title: "事故統計ダッシュボード", copy: "公式統計と収録事例を区別し、業種や事故型の傾向を確認。", icon: BarChart3 },
   ] },
   { id: "practice", title: "計算・保護具選定に使う", copy: "条件を整理して、次の確認へ進む。", mascot: "ppe-check", alt: "墜落制止用器具を確認し、保護具の選び方を案内するチワワ", tools: [
-    { href: "/construction-calc", title: "現場計算ツール", copy: "数量や換算を条件とともに計算。安全適合の判定には使いません。", icon: Calculator },
+    { href: "/tools/construction-calculators", title: "現場計算ツール", copy: "数量や換算を条件とともに計算。安全適合の判定には使いません。", icon: Calculator },
     { href: "/goods", title: "保護具の選び方", copy: "危険・作業・現場条件から、選定時に確認することを整理。", icon: ShieldCheck },
   ] },
 ] as const;
@@ -66,7 +66,7 @@ export function HomeLP({ availability, latestNews }: { availability: AutomationC
         <div className={styles.purposeGrid}>{uses.map((use, index) => <div key={use.id} data-lp-use={use.id} className={styles.purpose}>
           <div className={styles.purposeHeading}><span className={styles.purposeNumber}>0{index + 1}</span><Image src={`/mascot/mascot-${use.mascot}.webp`} alt={use.alt} width={120} height={140} sizes="120px" className={styles.purposeMascot} /></div>
           <h3 className={styles.purposeTitle}>{use.title}</h3><p className={styles.purposeCopy}>{use.copy}</p>
-          <div className={styles.toolGrid}>{use.tools.map(({ href, title, copy, icon: Icon }) => <Link key={href} href={href} prefetch={false} data-lp-tool className={styles.tool}><div className={styles.toolCaption}><Icon size={22} aria-hidden="true" />{href === "/construction-calc" ? <Image src="/mascot/mascot-calculator.webp" alt="電卓を持ち、計算を案内するチワワ" width={72} height={84} sizes="72px" /> : <ArrowUpRight size={20} aria-hidden="true" />}</div><h4>{title}</h4><p>{copy}</p></Link>)}</div>
+          <div className={styles.toolGrid}>{use.tools.map(({ href, title, copy, icon: Icon }) => <Link key={href} href={href} prefetch={false} data-lp-tool className={styles.tool}><div className={styles.toolCaption}><Icon size={22} aria-hidden="true" />{href === "/tools/construction-calculators" ? <Image src="/mascot/mascot-calculator.webp" alt="電卓を持ち、計算を案内するチワワ" width={72} height={84} sizes="72px" /> : <ArrowUpRight size={20} aria-hidden="true" />}</div><h4>{title}</h4><p>{copy}</p></Link>)}</div>
         </div>)}</div>
         <nav aria-label="ほかの現場支援ツール" className={styles.supportLinks}><Link href="/chemical-ra" prefetch={false}>化学物質RA</Link><Link href="/ky/paper" prefetch={false}>KY用紙</Link><Link href="/training/safety-seminars" prefetch={false}>安全研修スライド</Link><Link href="/materials/safety-images" prefetch={false}>現場安全看板</Link></nav>
 

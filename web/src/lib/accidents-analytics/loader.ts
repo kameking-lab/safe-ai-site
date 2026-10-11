@@ -56,7 +56,7 @@ type CompactJson = {
   entries: CompactRecord[];
 };
 
-type DeathsRecord2024 = {
+export type DeathsRecord2024 = {
   id: string;
   year: number;
   month: number;
@@ -92,7 +92,7 @@ function parseYearMonth(iso: string | undefined): { year: number; month: number 
   };
 }
 
-function load2024Records(): DeathsRecord2024[] {
+export function load2024Records(): DeathsRecord2024[] {
   // src/data/deaths-mhlw/records-2024.jsonl ships in the repo. Read via fs
   // so this only runs at build time / on the server.
   const filePath = path.join(process.cwd(), "src", "data", "deaths-mhlw", "records-2024.jsonl");

@@ -74,6 +74,16 @@ export function SafetyImageEditor({ theme }: { theme: SafetyImageTheme }) {
   const [texts, setTexts] = useState<Record<SafetyImageLanguage, string>>({
     ...theme.texts,
   });
+  const [reviewedTexts, setReviewedTexts] = useState<Partial<Record<SafetyImageLanguage, string>>>({});
+  const messageEdited = SAFETY_IMAGE_LANGUAGES.some((value) => texts[value] !== theme.texts[value]);
+  const pendingLanguages = languages.length > 1 && messageEdited
+    ? languages.filter((value) => reviewedTexts[value] !== texts[value])
+    : [];
+  const translationsReady = pendingLanguages.length === 0;
+  function updateText(value: SafetyImageLanguage, next: string) {
+    setTexts((current) => ({ ...current, [value]: limitEditableText(next) }));
+    setReviewedTexts({});
+  }
   const [fontSize, setFontSize] = useState<FontSize>("standard");
   const [position, setPosition] = useState<TextPosition>(defaultPosition);
   const [textColor, setTextColor] = useState("#082f49");
@@ -154,6 +164,7 @@ export function SafetyImageEditor({ theme }: { theme: SafetyImageTheme }) {
   const reset = () => {
     setLanguages(["ja"]);
     setTexts({ ...theme.texts });
+    setReviewedTexts({});
     setFontSize("standard");
     setPosition(defaultPosition);
     setTextColor("#082f49");
@@ -188,6 +199,7 @@ export function SafetyImageEditor({ theme }: { theme: SafetyImageTheme }) {
   }
 
   async function downloadCustomized() {
+    if (!previewFit || !translationsReady) return;
     setDownloading(true);
     setError("");
     try {
@@ -487,14 +499,7 @@ export function SafetyImageEditor({ theme }: { theme: SafetyImageTheme }) {
                             lang={selectedLanguage}
                             aria-label={`表示する文字（${label}）`}
                             value={texts[selectedLanguage]}
-                            onChange={(event) =>
-                              setTexts((current) => ({
-                                ...current,
-                                [selectedLanguage]: limitEditableText(
-                                  event.target.value,
-                                ),
-                              }))
-                            }
+                            onChange={(event) => updateText(selectedLanguage, event.target.value)}
                             rows={2}
                             maxLength={180}
                             aria-describedby={limitId}
@@ -718,9 +723,23 @@ export function SafetyImageEditor({ theme }: { theme: SafetyImageTheme }) {
                 : "表示する文字を詳細設定で入力してください。"}
             </p>
           ) : null}
+          {languages.length > 1 && messageEdited && (
+            <fieldset className="mt-3 rounded-xl border border-amber-300 bg-white p-3 text-slate-900">
+              <legend className="px-1 text-sm font-bold">各言語の意味を確認</legend>
+              <p className="text-xs text-slate-700">文言を変えたら、各言語を編集し、同じ意味か確認してください。</p>
+              {languages.map((value) => (
+                <label key={value} className="flex min-h-11 items-center gap-2 text-sm font-bold">
+                  <input type="checkbox" checked={reviewedTexts[value] === texts[value]}
+                    onChange={(event) => setReviewedTexts((current) => ({ ...current, [value]: event.target.checked ? texts[value] : undefined }))} />
+                  {SAFETY_IMAGE_LANGUAGE_LABELS[value]}の意味を確認した
+                </label>
+              ))}
+              {!translationsReady && <p role="status" className="text-xs font-bold text-amber-900">未確認：{pendingLanguages.map((value) => SAFETY_IMAGE_LANGUAGE_LABELS[value]).join("／")}</p>}
+            </fieldset>
+          )}
           <button
             type="button"
-            disabled={downloading || !previewFit}
+            disabled={downloading || !previewFit || !translationsReady}
             aria-describedby={!previewFit ? fitHelpId : undefined}
             onClick={downloadCustomized}
             className="mt-4 inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-xl bg-emerald-800 px-6 text-lg font-black text-white shadow-sm hover:bg-emerald-900 disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-300 sm:w-auto"

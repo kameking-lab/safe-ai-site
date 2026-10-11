@@ -147,6 +147,7 @@ export function CalculatorPanel({ slug }: { slug: string }) {
   }, [printSeq]);
 
   const handlePrintReport = () => {
+    if (!result?.outcome) return;
     const stamp = new Date().toLocaleString("ja-JP", {
       year: "numeric",
       month: "2-digit",
@@ -161,13 +162,13 @@ export function CalculatorPanel({ slug }: { slug: string }) {
   const result = useMemo(() => {
     if (!calc) return null;
     const { values, errors } = normalizeValues(calc, raw);
-    return { values, errors, outcome: calc.compute(values) };
+    return { values, errors, outcome: errors.length === 0 ? calc.compute(values) : null };
   }, [calc, raw]);
 
   if (!calc || !result) return null;
   const { outcome, errors, values } = result;
-  const tone = SAFETY_TONE[outcome.tone];
-  const ToneIcon = TONE_DEFAULT_ICON[outcome.tone];
+  const tone = outcome ? SAFETY_TONE[outcome.tone] : null;
+  const ToneIcon = outcome ? TONE_DEFAULT_ICON[outcome.tone] : null;
 
   const setField = (id: string, v: string) => {
     setRaw((prev) => ({ ...prev, [id]: v }));
@@ -175,6 +176,7 @@ export function CalculatorPanel({ slug }: { slug: string }) {
   };
 
   const fetchExplanation = async () => {
+    if (!outcome) return;
     setAiLoading(true);
     setAiText(null);
     try {
@@ -254,6 +256,7 @@ export function CalculatorPanel({ slug }: { slug: string }) {
           )}
         </section>
 
+        {outcome && tone && ToneIcon && (<>
         {/* 結論（柱0: 1画面1メッセージ・デカ数字） */}
         <section
           role="status"
@@ -381,11 +384,12 @@ export function CalculatorPanel({ slug }: { slug: string }) {
             ))}
           </ol>
         </CollapsibleDetail>
+        </>)}
       </div>
 
       {/* 提出用計算書（画面では非表示・印刷/PDF時のみ）。registry 定義から自動生成。 */}
       <div className="hidden print:block">
-        {printedAt && (
+        {printedAt && outcome && (
           <CalcReportSheet
             calc={calc}
             values={values}

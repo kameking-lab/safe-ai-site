@@ -174,7 +174,7 @@ describe("production remediation fixed-ID P1 regression", () => {
     expect(browser).toContain('method: "POST"');
     expect(filter).not.toContain('params.set("q"');
     expect(browser).not.toContain('params.set("q"');
-    expect(page).toContain("SERIOUS_CASES_META.sourceUrl");
+    expect(page).toContain("SERIOUS_CASES_META.sources.map");
   });
 
   it("PF-010 consult capability fails closed before PII when production config is incomplete", () => {

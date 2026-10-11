@@ -12,7 +12,7 @@ describe("the approved homepage LP", () => {
     const { container } = render(<HomeLP availability={paused} latestNews={unavailable} />);
     expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
     expect(screen.getByRole("link", { name: "道具を使う" }).getAttribute("href")).toBe("#tools");
-    expect([...container.querySelectorAll<HTMLAnchorElement>("[data-lp-tool]")].map((a) => a.getAttribute("href"))).toEqual(["/chatbot", "/chemical-database", "/laws", "/accident-news", "/accidents-analytics", "/construction-calc", "/goods"]);
+    expect([...container.querySelectorAll<HTMLAnchorElement>("[data-lp-tool]")].map((a) => a.getAttribute("href"))).toEqual(["/chatbot", "/chemical-database", "/laws", "/accident-news", "/accidents-analytics", "/tools/construction-calculators", "/goods"]);
     expect(container.textContent).toContain("現場に向き合う時間を、もっと。");
     expect(container.textContent).not.toContain("死亡事故で同僚を失いました");
     expect(container.querySelectorAll("[data-lp-use]")).toHaveLength(3);

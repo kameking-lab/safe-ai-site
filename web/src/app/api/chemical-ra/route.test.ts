@@ -3,6 +3,25 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 describe("POST /api/chemical-ra safety boundary", () => {
   afterEach(() => vi.unstubAllEnvs());
 
+  it("keeps the real acetone CAS and stored NITE GHS classifications without enabling numeric assessment", async () => {
+    const { POST } = await import("./route");
+    for (const chemicalName of ["アセトン", "67-64-1"]) {
+      const response = await POST(new Request("http://localhost/api/chemical-ra", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chemicalName, casNumber: "67-64-1" }),
+      }));
+      const result = await response.json();
+      expect(response.status).toBe(200);
+      expect(result.casNumber).toBe("67-64-1");
+      expect(result.ghsHazards).toHaveLength(4);
+      expect(result.sourceLinks.some((source: { url: string }) => source.url.includes("67-64-1"))).toBe(true);
+      expect(result.aiStatus).toBe("disabled_for_safety");
+      expect(result.assessmentStatus).toBe("unavailable");
+      expect(result.createSimple).toBeUndefined();
+      expect(result.exposureLimit).toBeUndefined();
+    }
+  });
+
   it("fails closed for an unknown substance instead of returning a toluene demo", async () => {
     vi.stubEnv("GEMINI_API_KEY", "dummy");
     const { POST } = await import("./route");

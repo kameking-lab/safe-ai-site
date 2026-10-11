@@ -81,6 +81,7 @@ async function loadOfficialWarning(
         snapshot.selectedWarningState === "live"
           ? "live"
           : "degraded",
+      sourceIssue: warnings.byIso[region.prefectureIso]?.sourceIssue,
       warnings: activeWarnings,
       headline: snapshot.jmaHeadline,
       fetchedAt: snapshot.sourceFetchedAt || null,

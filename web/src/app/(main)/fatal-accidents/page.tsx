@@ -20,12 +20,12 @@ import { FatalAccidentsResultsFallback } from "./fatal-accidents-results-fallbac
 export const metadata: Metadata = {
   title: "死亡事故データベース｜業種・起因物・事故型で検索（無料）",
   description:
-    "厚生労働省 死亡災害データベースの2019〜2023年分を、業種・事故型・起因物分類・年で検索。出典範囲を表示し、直接原因等は推測しません。",
+    "厚生労働省の死亡災害DBと死傷病報告オープンデータ（死亡分）の2019〜2024年分を、業種・事故型・起因物分類・年で検索。出典範囲を表示し、直接原因等は推測しません。",
   alternates: { canonical: "/fatal-accidents" },
   openGraph: {
     title: "死亡事故データベース｜業種・起因物・事故型で検索",
     description:
-      "厚生労働省 死亡災害データベースの2019〜2023年分を類型検索。出典範囲と個別追跡の限界を表示します。",
+      "厚生労働省の死亡災害DBと死傷病報告オープンデータ（死亡分）の2019〜2024年分を類型検索。出典範囲と個別追跡の限界を表示します。",
     images: [{ url: ogImageUrl("死亡事故データベース"), width: 1200, height: 630 }],
   },
 };
@@ -56,7 +56,7 @@ export default async function FatalAccidentsPage({
       <PageContainer width="wide">
         <PageJsonLd
           name="死亡事故データベース"
-          description="厚生労働省 死亡災害データベースの2019〜2023年分を業種・事故型・起因物分類・年で類型検索。データセット単位の出典と限界を表示。"
+          description="厚生労働省の死亡災害DBと死傷病報告オープンデータ（死亡分）の2019〜2024年分を業種・事故型・起因物分類・年で類型検索。データセット単位の出典と限界を表示。"
           path="/fatal-accidents"
         />
         <header className="pt-6 sm:pt-9">
@@ -142,14 +142,12 @@ async function FatalAccidentResults({
         corpusYearRange={SERIOUS_CASES_META.yearRange}
       >
         <nav aria-label="死亡事故データの関連情報" className="mt-1 flex flex-wrap gap-x-5 gap-y-1">
-          <a
-            href={SERIOUS_CASES_META.sourceUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex min-h-[44px] items-center text-sm font-bold text-sky-800 underline decoration-sky-300 underline-offset-4"
-          >
-            厚生労働省の公式データ<span className="sr-only">（外部サイト）</span>
-          </a>
+          {SERIOUS_CASES_META.sources.map((source) => (
+            <a key={source.url} href={source.url} target="_blank" rel="noopener noreferrer"
+              className="inline-flex min-h-[44px] items-center text-sm font-bold text-sky-800 underline decoration-sky-300 underline-offset-4">
+              {source.label}<span className="sr-only">（外部サイト）</span>
+            </a>
+          ))}
           <UsageNotesLink className="text-sky-800" />
         </nav>
 
@@ -187,11 +185,9 @@ async function FatalAccidentResults({
       </FatalAccidentsBrowser>
 
       <p className="mt-6 text-[11px] leading-relaxed text-slate-600 dark:text-slate-400">
-        出典: {" "}
-        <a href={SERIOUS_CASES_META.sourceUrl} target="_blank" rel="noopener noreferrer" className="underline">
-          {SERIOUS_CASES_META.sourceLabel}
-        </a>
-        （対象 {SERIOUS_CASES_META.yearRange}・収録 {SERIOUS_CASES_META.total.toLocaleString()} 件・生成日時 {" "}
+        出典: {SERIOUS_CASES_META.sourceLabel}。
+        {SERIOUS_CASES_META.coverageNote}
+        （対象 {SERIOUS_CASES_META.yearRange}・収録 {SERIOUS_CASES_META.total.toLocaleString()} 件・2019〜2023年分の生成日時 {" "}
         {SERIOUS_CASES_META.generatedAt ? (
           <time dateTime={SERIOUS_CASES_META.generatedAt}>
             {new Intl.DateTimeFormat("ja-JP", {
