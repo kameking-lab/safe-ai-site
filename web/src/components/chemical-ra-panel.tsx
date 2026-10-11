@@ -374,6 +374,12 @@ export function ChemicalRaPanel({
   }, [detailedMode]);
 
   const displayedMhlw = mhlwSelected;
+  const ghsSourceUrl = result?.casNumber
+    ? result.sourceLinks?.find(
+        (source) => source.url ===
+          `https://www.chem-info.nite.go.jp/chem/ghs/m-nite-${result.casNumber}.html`,
+      )?.url
+    : undefined;
 
   // P0是正: RA結果が出たら、その物質の監査済み法令プロファイルを取得してバッジ源にする。
   // クエリの優先順位は法令名称選択 → DB選択のCAS → AI応答のCAS → 入力名
@@ -1287,7 +1293,8 @@ export function ChemicalRaPanel({
       </div>
 
       {/* MHLW 物質詳細（選択時 or 名称一致時に即表示） */}
-      {displayedMhlw && <MhlwChemicalInfoCard chemical={displayedMhlw} />}
+      {/* 検索用データはGHS分類を省略するため、分類は下の公的情報確認結果に一本化する。 */}
+      {displayedMhlw && <MhlwChemicalInfoCard chemical={displayedMhlw} showGhs={false} />}
 
       {/* ローディング */}
       {loading && (
@@ -1525,7 +1532,20 @@ export function ChemicalRaPanel({
                   <GhsHazardCard key={i} hazard={hazard} />
                 ))}
               </div>
+              <p className="mt-3 text-xs text-slate-600">
+                製品・混合物の分類は最新の製品SDSで確認してください。
+              </p>
+              {ghsSourceUrl && (
+                <a href={ghsSourceUrl} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex min-h-11 items-center text-xs font-bold text-emerald-800 underline">
+                  NITE 政府版GHS分類の出典
+                </a>
+              )}
             </div>
+          )}
+          {result.ghsHazards.length === 0 && (
+            <p className="rounded-xl border border-slate-200 bg-white p-4 text-xs text-slate-600">
+              GHS分類を表示できません。最新の製品SDSで確認してください。
+            </p>
           )}
 
           {/* 旧生成PPEが混入した場合も商品へ誘導せず隔離する。 */}

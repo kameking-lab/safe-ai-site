@@ -45,6 +45,35 @@ for (const width of [1280, 390]) {
       expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
     });
 
+    test("アセトンDBから同じCASの公的GHS分類を確認できる", async ({ page }) => {
+      await page.goto("/chemical-database/67-64-1");
+      await page.locator('a[href="/chemical-ra?cas=67-64-1"]').first().click();
+      await expect(page.getByRole("textbox", { name: "物質名・CAS番号・SDS記載名" })).toHaveValue("アセトン");
+      await page.getByRole("button", { name: "作業条件へ進む", exact: true }).click();
+      const [response] = await Promise.all([
+        page.waitForResponse((item) => item.url().endsWith("/api/chemical-ra") && item.request().method() === "POST"),
+        page.getByRole("button", { name: "公的情報を確認", exact: true }).click(),
+      ]);
+      expect(response.status()).toBe(200);
+      const result = await response.json();
+      expect(result.casNumber).toBe("67-64-1");
+      expect(result.ghsHazards).toHaveLength(4);
+      expect(result.aiStatus).toBe("disabled_for_safety");
+      expect(result.assessmentStatus).toBe("unavailable");
+      await expect(page.getByRole("heading", { name: "GHSハザード分類 (4項目)", exact: true })).toBeVisible();
+      const ghsSection = page.getByRole("heading", { name: "GHSハザード分類 (4項目)", exact: true }).locator("..");
+      for (const hazard of result.ghsHazards) {
+        const category = ghsSection.getByText(hazard.category, { exact: true });
+        await expect(category).toBeVisible();
+        await expect(category.locator("..").locator("..").getByText(hazard.classification, { exact: true })).toBeVisible();
+      }
+      await expect(page.getByText(/政府版GHSの主要有害性区分は未収録です/)).toHaveCount(0);
+      await expect(page.getByText(/GHS分類を表示できません/)).toHaveCount(0);
+      await expect(page.getByRole("link", { name: "NITE 政府版GHS分類の出典", exact: true })).toHaveAttribute("href", "https://www.chem-info.nite.go.jp/chem/ghs/m-nite-67-64-1.html");
+      await expect(page.getByText("未算出", { exact: true })).toBeVisible();
+      expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
+    });
+
     test("多言語看板は文言変更後に両言語を確認して保存できる", async ({ page }) => {
       await page.goto("/materials/safety-images/helmet-required");
       await page.getByLabel("英語", { exact: true }).check();
