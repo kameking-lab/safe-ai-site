@@ -11,8 +11,16 @@ async function openAsEligibleVisitor(page: Page, path: string) {
   });
   await page.clock.install();
   await page.goto(path);
-  // 補助UIは DeferredMainEnhancements が15秒後に読み込む。
-  await page.clock.fastForward(16_000);
+  // 補助UIは DeferredMainEnhancements がhydrate後15秒で読み込む。hydrate前に
+  // 時計を進めるとタイマーが未登録のため、固定シェア（同じ遅延で出る）が
+  // 現れるまで時計を進めて、遅延読み込みの完了を待つ。
+  await expect
+    .poll(async () => {
+      await page.clock.fastForward(16_000);
+      return page.locator('button[aria-label*="シェア"], button[aria-label*="共有"]').count();
+    })
+    .toBeGreaterThan(0)
+    .catch(() => undefined);
 }
 
 test("home: feedback is a small in-flow entry that never opens by itself", async ({ page }) => {
