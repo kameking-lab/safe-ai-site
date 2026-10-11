@@ -124,8 +124,9 @@ describe("ChemicalRaPanel 保存記録の条件復元", () => {
     }, "mismatched-source-ra");
     renderPanel();
 
-    expect(await screen.findByRole("heading", { name: "GHSハザード分類（一部収録・1項目）" })).toBeTruthy();
-    expect(screen.getByText("検証用分類")).toBeTruthy();
+    expect(await screen.findAllByRole("heading", { name: "GHSハザード分類（一部収録・1項目）" })).toHaveLength(2);
+    expect(screen.getAllByText("検証用分類")).toHaveLength(2);
+    expect(screen.queryByRole("link", { name: "NITE-CHRIP" })).toBeNull();
     expect(screen.queryByRole("link", { name: "NITE 政府版GHS分類の出典" })).toBeNull();
   });
 

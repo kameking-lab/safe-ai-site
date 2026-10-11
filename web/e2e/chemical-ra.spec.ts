@@ -28,39 +28,53 @@ async function openSaveReadyChemicalRa(page: Page) {
 }
 
 test.describe("化学物質RA", () => {
-  test("トルエンの実API分類に引火性と炎を保持し、印刷とKYも一部収録を示す @smoke", async ({ page }) => {
-    test.setTimeout(60_000);
-    const searchPromise = page.waitForResponse((item) =>
-      item.url().includes("/api/chemical/search") && item.request().method() === "POST",
-    );
-    await page.goto("/chemical-ra?cas=108-88-3");
-    expect((await searchPromise).status()).toBe(200);
-    await expect(page.getByRole("combobox", { name: "物質名・CAS番号・SDS記載名" })).toHaveValue("トルエン");
-    await page.getByRole("button", { name: "作業条件へ進む", exact: true }).click();
-    const [response] = await Promise.all([
-      page.waitForResponse((item) => item.url().endsWith("/api/chemical-ra") && item.request().method() === "POST"),
-      page.getByRole("button", { name: "公的情報を確認", exact: true }).click(),
-    ]);
-    expect(response.status()).toBe(200);
-    const conclusion = page.getByTestId("ra-conclusion");
-    await expect(conclusion.getByTestId("ghs-picto-flame")).toBeVisible();
-    await expect(conclusion).toContainText("引火性液体");
-    await expect(conclusion).toContainText("GHS分類は一部収録です");
-    const heading = page.getByRole("heading", { name: "GHSハザード分類（一部収録・7項目）", exact: true });
-    await expect(heading).toBeVisible();
-    const hazards = heading.locator("..");
-    await expect(hazards).toContainText("引火性液体");
-    await expect(hazards).toContainText("区分2");
-    await expect(hazards).toContainText("生殖毒性");
-    await expect(hazards).toContainText("区分1A");
-    await page.emulateMedia({ media: "print" });
-    await expect(page.getByTestId("ghs-coverage-notice")).toBeVisible();
-    await expect(hazards).toContainText("引火性液体");
-    await page.emulateMedia({ media: "screen" });
-    await page.getByRole("link", { name: "この作業条件をKYへ", exact: true }).click();
-    await expect(page).toHaveURL(/\/ky\/paper/);
-    await expect(page.getByText(/化学物質条件を候補として読み込みました。GHS分類は一部収録です/)).toBeVisible();
-  });
+  for (const item of [
+    { cas: "108-88-3", name: "トルエン", count: 7 },
+    { cas: "67-64-1", name: "アセトン", count: 5 },
+    { cas: "64-17-5", name: "エタノール", count: 6 },
+  ]) {
+    test(`${item.name}の実API分類・炎・一部収録注記を印刷にも保持する @smoke`, async ({ page }) => {
+      test.setTimeout(90_000);
+      const searchPromise = page.waitForResponse((response) =>
+        response.url().includes("/api/chemical/search") && response.request().method() === "POST",
+      );
+      await page.goto(`/chemical-ra?cas=${item.cas}`);
+      expect((await searchPromise).status()).toBe(200);
+      await expect(page.getByRole("combobox", { name: "物質名・CAS番号・SDS記載名" })).toHaveValue(item.name);
+      await page.getByRole("button", { name: "作業条件へ進む", exact: true }).click();
+      const [response] = await Promise.all([
+        page.waitForResponse((value) => value.url().endsWith("/api/chemical-ra") && value.request().method() === "POST"),
+        page.getByRole("button", { name: "公的情報を確認", exact: true }).click(),
+      ]);
+      expect(response.status()).toBe(200);
+      const data = await response.json();
+      const conclusion = page.getByTestId("ra-conclusion");
+      await expect(conclusion.getByTestId("ghs-picto-flame")).toBeVisible();
+      await expect(conclusion).toContainText("引火性液体");
+      await expect(conclusion).toContainText("GHS分類は一部収録です");
+      const report = page.getByTestId("chemical-ra-print-report");
+      await expect(report).toBeHidden();
+      await page.emulateMedia({ media: "print" });
+      await expect(report).toBeVisible();
+      await expect(report.getByTestId("ghs-picto-flame")).toBeVisible();
+      await expect(report.getByTestId("chemical-ra-print-coverage")).toContainText("未確認");
+      await expect(report.locator("tbody tr")).toHaveCount(item.count);
+      for (const hazard of data.ghsHazards) {
+        await expect(report).toContainText(hazard.category);
+        await expect(report).toContainText(hazard.classification);
+      }
+      await expect(conclusion).toBeHidden();
+      await expect(page.locator("[data-primary-task]")).toBeHidden();
+      await page.emulateMedia({ media: "screen" });
+      await expect(conclusion).toBeVisible();
+      // 既存のKY導線は維持する。今回の変更は印刷だけ。
+      if (item.cas === "108-88-3") {
+        await page.getByRole("link", { name: "この作業条件をKYへ", exact: true }).click();
+        await expect(page).toHaveURL(/\/ky\/paper/);
+        await expect(page.getByText(/化学物質条件を候補として読み込みました。GHS分類は一部収録です/)).toBeVisible();
+      }
+    });
+  }
   test("ページが表示される @smoke", async ({ page }) => {
     const res = await page.goto("/chemical-ra");
     expect(res?.status()).toBeLessThan(400);
