@@ -79,7 +79,7 @@ describe("安衛則563条 わく組足場細目の公式補完", () => {
     const answer = buildServiceFirstLegalAnswer({ query, articles, now });
 
     it("states the 563(1) applicability and passes only with the restored official text", () => {
-      expect(answer).toContain("高さ2m以上の作業場所がある一側足場を除く足場で");
+      expect(answer).toContain("一側足場を除く足場の、高さ2m以上の作業場所で、");
       expect(answer).toContain("手すりわく");
       expect(answer).not.toMatch(/取り外す|取外し/);
       expect(validateServiceFirstLegalClaimSupport({ query, answer, articles, now })).toMatchObject({
@@ -99,7 +99,7 @@ describe("安衛則563条 わく組足場細目の公式補完", () => {
     });
 
     it("rejects the frame claim if the applicability conditions are dropped", () => {
-      const tampered = answer.replace("高さ2m以上の作業場所がある一側足場を除く足場で、", "");
+      const tampered = answer.replace("一側足場を除く足場の、高さ2m以上の作業場所で、", "");
       expect(tampered).not.toBe(answer);
       const result = validateServiceFirstLegalClaimSupport({ query, answer: tampered, articles, now });
       expect(result.supported).toBe(false);

@@ -69,7 +69,7 @@ describe.each(MODES)("scaffold handrail follow-ups via $label", ({ post, mode })
     expect(visible(second)).toMatch(/15cm以上40cm以下の桟/);
     expect(visible(second)).toMatch(/妻面/);
     // 563条1項の適用範囲（高さ2m以上の作業場所・一側足場を除く）を落とさない。
-    expect(second.directAnswer).toMatch(/^高さ2m以上の作業場所がある一側足場を除く足場で/);
+    expect(second.directAnswer).toMatch(/^一側足場を除く足場の、高さ2m以上の作業場所で、/);
     // 取外しを無条件に許すような例外文は出さない。
     expect(visible(second)).not.toMatch(/取り外す|取外し/);
     expect(second.directAnswer).not.toMatch(/わく組足場以外の部分には/);

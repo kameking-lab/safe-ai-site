@@ -4841,7 +4841,7 @@ function knownConclusion(
   );
   if (selectsFrameScaffoldHandrail(query) && frameScaffold >= 0) {
     return {
-      conclusion: `高さ2m以上の作業場所がある一側足場を除く足場で、墜落により危険を及ぼすおそれのある箇所のうち、わく組足場（妻面に係る部分を除く）の部分には、交さ筋かいに加えて高さ15cm以上40cm以下の桟もしくは高さ15cm以上の幅木（またはこれらと同等以上の機能を有する設備）を設けるか、手すりわくを設けます。${marker(frameScaffold)}`,
+      conclusion: `一側足場を除く足場の、高さ2m以上の作業場所で、墜落により危険を及ぼすおそれのある箇所のうち、わく組足場（妻面に係る部分を除く）の部分には、交さ筋かいに加えて高さ15cm以上40cm以下の桟もしくは高さ15cm以上の幅木（またはこれらと同等以上の機能を有する設備）を設けるか、手すりわくを設けます。${marker(frameScaffold)}`,
       conditions: [
         `わく組足場の妻面に係る部分は「わく組足場以外の足場」として、手すり等及び中桟等が必要です。${marker(frameScaffold)}`,
       ],
