@@ -438,7 +438,7 @@ export function ConstructionCalculatorClient({
 
   const copy = async () => {
     if (!result) return;
-    const text = buildCalculationCopyText(definition.title, result);
+    const text = buildCalculationCopyText(definition.title, result, definition.inputDefinitions);
     if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(text);
     else {
       const textarea = document.createElement("textarea");
@@ -453,7 +453,7 @@ export function ConstructionCalculatorClient({
 
   const downloadCsv = () => {
     if (!result) return;
-    const blob = new Blob([buildCalculationCsv(definition.title, result)], { type: "text/csv;charset=utf-8" });
+    const blob = new Blob([buildCalculationCsv(definition.title, result, definition.inputDefinitions)], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement("a");
     anchor.href = url;
@@ -651,7 +651,7 @@ export function ConstructionCalculatorClient({
             <details className="mt-5 rounded-xl border border-emerald-800 bg-white p-4 dark:bg-slate-900">
               <summary className="min-h-11 cursor-pointer font-black">使用した入力値・式・前提</summary>
               <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
-                {calculationInputRows(result).map((row) => (
+                {calculationInputRows(result, definition.inputDefinitions).map((row) => (
                   <div key={row.key} className="rounded-lg bg-slate-100 p-2 dark:bg-slate-800"><dt className="font-black">{row.label}</dt><dd className="break-words">{row.value}{row.unit}</dd></div>
                 ))}
               </dl>
@@ -701,7 +701,7 @@ export function ConstructionCalculatorClient({
           <h2 className="mt-5 text-lg font-black">結果</h2>
           <table className="mt-2 w-full border-collapse text-sm"><tbody>{result.displayValues.map((item) => <tr key={item.key}><th className="border border-black p-2 text-left">{item.label}</th><td className="border border-black p-2">{String(item.value)} {item.unit}</td></tr>)}</tbody></table>
           <h2 className="mt-5 text-lg font-black">使用した入力値</h2>
-          <dl className="mt-2 border border-black p-3 text-xs">{calculationInputRows(result).map((row) => <div key={row.key} className="mb-1"><dt className="font-bold">{row.label}</dt><dd>{row.value}{row.unit}</dd></div>)}</dl>
+          <dl className="mt-2 border border-black p-3 text-xs">{calculationInputRows(result, definition.inputDefinitions).map((row) => <div key={row.key} className="mb-1"><dt className="font-bold">{row.label}</dt><dd>{row.value}{row.unit}</dd></div>)}</dl>
           <h2 className="mt-5 text-lg font-black">計算式</h2>
           <ol className="mt-2 list-decimal pl-6 text-sm">{result.formula.map((line) => <li key={line}>{line}</li>)}</ol>
           <p className="mt-4 text-sm font-bold">丸め：{optionLabel("roundingMode", result.rounding.mode)}・小数{result.rounding.decimalPlaces}桁</p>
