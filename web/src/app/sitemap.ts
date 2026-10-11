@@ -4,6 +4,7 @@ import {
   FEATURE_CATEGORIES,
   getFeaturesByCategory,
 } from "@/data/features-catalog";
+import { CONSTRUCTION_CALCULATORS } from "@/lib/construction-calc/registry";
 import { constructionCalculatorRegistry } from "@/data/construction-calculators/formula-registry";
 import { CONSTRUCTION_CALCULATOR_HUB_PATH } from "@/data/construction-calculators/coming-soon";
 import {
@@ -997,8 +998,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     changeFrequency: "monthly",
   }));
 
-  // 計算一覧の正規入口は現行レジストリ。旧個別URLの入力互換性は維持する。
-  const constructionCalcPages: typeof pages = [];
+  // 入力方式の異なる旧個別計算機は維持し、転送する旧一覧は載せない。
+  const constructionCalcPages: typeof pages = CONSTRUCTION_CALCULATORS.map((calc) => ({
+    url: `/construction-calc/${calc.slug}`,
+    lastModified: "2026-07-12",
+    priority: 0.8,
+    changeFrequency: "monthly" as Freq,
+  }));
 
   const illnessGuidePages: typeof pages = ILLNESS_CATEGORIES.map((c) => ({
     url: `/treatment-work-balance/illness-guide/${c.id}`,

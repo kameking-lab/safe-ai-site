@@ -26,6 +26,14 @@ describe("sitemap.xml（柱C-3-3 欠落ページ追加）", () => {
 
   const has = (path: string) => urlSet.has(`${BASE}${path}`);
 
+  it("計算一覧は現行入口を収載し、入力方式の異なる旧個別計算機も維持する", () => {
+    expect(has("/construction-calc")).toBe(false);
+    expect(has("/tools/construction-calculators")).toBe(true);
+    for (const slug of ["soil-volume-conversion", "slope-ratio-convert", "rebar-mass", "concrete-volume"]) {
+      expect(has(`/construction-calc/${slug}`)).toBe(true);
+    }
+  });
+
   it("新着ハブ /whats-new を収載する", () => {
     expect(has("/whats-new")).toBe(true);
   });
@@ -465,6 +473,8 @@ describe("sitemap.xml（逆カバレッジガード: 実在 indexable ページ�
   // (d) 当班が意図的に非収載とする indexable ページ（index:true のまま sitemap から外す少数例）。
   // 追加時は理由を必須とし、上の「非収載境界」describe の該当アサーションと対で管理する。
   const SEO_INTENTIONALLY_EXCLUDED = new Set<string>([
+    // next.config.tsで現行一覧へ恒久転送する入口。個別の旧計算URLは収載を維持。
+    "/construction-calc",
     // 事業所・部署ダッシュボード。「正式リリース前デモ版モック」のため公開検索面へは出さない
     // （非収載境界テストで has("/organization")===false を固定）。noindex 化されれば削除してよい。
     "/organization",
