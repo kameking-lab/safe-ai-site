@@ -3,6 +3,8 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { verifiedLawArticles } from "./verified-corpus";
+import { buildServiceFirstLegalAnswer } from "@/lib/legal-extractive-answer";
+import { validateServiceFirstLegalClaimSupport } from "@/lib/legal-claim-support";
 import {
   buildFrameScaffoldPrimaryArticle,
   FRAME_SCAFFOLD_OFFICIAL_SUBITEMS,
@@ -68,5 +70,39 @@ describe("安衛則563条 わく組足場細目の公式補完", () => {
       }),
     ).toBeUndefined();
     expect(buildFrameScaffoldPrimaryArticle(undefined)).toBeUndefined();
+  });
+
+  describe("claim support for the frame handrail answer", () => {
+    const query = "足場の手すり 足場 確認済み選択肢:わく組足場 わく組足場です";
+    const now = new Date("2026-10-11T09:00:00+09:00");
+    const articles = [verifiedFrameScaffoldArticle!];
+    const answer = buildServiceFirstLegalAnswer({ query, articles, now });
+
+    it("states the 563(1) applicability and passes only with the restored official text", () => {
+      expect(answer).toContain("高さ2m以上の作業場所がある一側足場を除く足場で");
+      expect(answer).toContain("手すりわく");
+      expect(answer).not.toMatch(/取り外す|取外し/);
+      expect(validateServiceFirstLegalClaimSupport({ query, answer, articles, now })).toMatchObject({
+        supported: true,
+        failures: [],
+      });
+    });
+
+    it("fails closed when the cited text lacks the Subitem2 provisions", () => {
+      const result = validateServiceFirstLegalClaimSupport({
+        query,
+        answer,
+        articles: [corpus563],
+        now,
+      });
+      expect(result.supported).toBe(false);
+    });
+
+    it("rejects the frame claim if the applicability conditions are dropped", () => {
+      const tampered = answer.replace("高さ2m以上の作業場所がある一側足場を除く足場で、", "");
+      expect(tampered).not.toBe(answer);
+      const result = validateServiceFirstLegalClaimSupport({ query, answer: tampered, articles, now });
+      expect(result.supported).toBe(false);
+    });
   });
 });

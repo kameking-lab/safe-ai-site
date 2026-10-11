@@ -7,7 +7,6 @@
  *  - 下の各ルートは、従来の固定値（/chatbot・化学物質系 2026-04-01）や公表日だけの値
  *    （/laws）が、その後の実変更より古かったため是正した。
  */
-import { egovRevisionsMeta } from "@/data/law-revisions/egov-revisions-loaded";
 import { lawRevisionCores } from "@/data/mock/law-revisions";
 import type { LawRevisionCore } from "@/lib/types/domain";
 
@@ -22,10 +21,10 @@ export type RouteContentChange = {
 
 export const ROUTE_CONTENT_CHANGES = {
   "/chatbot": {
-    changedOn: "2026-10-08",
+    changedOn: "2026-10-11",
     evidence:
-      "ca75fb8b (#1055): 回答根拠の安衛法・安衛則 snapshot を2026-10-01施行版へ更新。egov-verified-corpus の sourceContentChangedOn=2026-10-08（build-egov-verified-excerpts.mjs の CONTENT_CHANGE_CONFIRMED_ON）",
-    change: "チャットボットが引用・回答する現行条文本文（10条）の内容変更",
+      "PR #1066（2026-10-11）: 「足場の手すりは？」→「わく組足場です」の続き質問で、主題と足場種類を nine-key context で保持し安衛則563条1項3号イ(1)(2)で回答する挙動変更。直前の内容変更は ca75fb8b (#1055) の回答根拠 snapshot 更新（sourceContentChangedOn=2026-10-08）",
+    change: "足場の手すりの続き質問に対する回答挙動（同じ確認質問の繰り返しを解消）",
   },
   "/chemical-ra": {
     changedOn: "2026-10-11",
@@ -84,30 +83,40 @@ export function lawRevisionListFingerprint(
 }
 
 /**
- * 一覧内容を最後に確認した版。d3017a75（2026-10-05 取得）で 2026-10-01 施行の
- * 改正（安衛則ほか）へ一覧が切り替わった。以後の 164052b（2026-10-07）は
- * 一覧に出ない revisionHistory の追加、104499be（2026-09-28）は取得時刻のみの更新。
+ * /laws 一覧の表示内容ごとの「内容変更を確認した日」。指紋 → 日付の明示対応だけを使う。
+ *  - 20-lznpni: d3017a75（2026-10-05 取得）で 2026-10-01 施行の改正（安衛則ほか）へ
+ *    一覧が切り替わった版。以後の 164052b（2026-10-07）は一覧に出ない
+ *    revisionHistory の追加だけで、指紋は同じ。
+ * 新しい一覧が取り込まれても、取得時刻だけでは内容変更日を証明できないため推測しない。
+ * 登録外の版は、ここで最後に確認した日付のまま据え置く（再取得のたびに進めない）。
+ * 新しい版の変更日を確認したら、根拠コミットとともにここへ追記する。
  */
-export const LAWS_REVISION_LIST_BASELINE = {
-  fingerprint: "20-lznpni",
-  changedOn: "2026-10-05",
-  evidence: "d3017a75 chore(news): e-Gov law revisions update（fetchedAt 2026-10-05）",
-} as const;
+export const LAWS_REVISION_LIST_VERSIONS: Readonly<
+  Record<string, { changedOn: string; evidence: string }>
+> = {
+  "20-lznpni": {
+    changedOn: "2026-10-05",
+    evidence: "d3017a75 chore(news): e-Gov law revisions update（fetchedAt 2026-10-05）",
+  },
+};
+
+/** 登録済みの版のうち最新の確認日（登録外の版のときの据え置き値）。 */
+export const LAWS_REVISION_LIST_LAST_VERIFIED_ON = Object.values(
+  LAWS_REVISION_LIST_VERSIONS,
+)
+  .map(({ changedOn }) => changedOn)
+  .sort()
+  .at(-1)!;
 
 /**
- * /laws の法改正一覧が最後に実際に変わった日。
- * 指紋が基準版と同じなら基準日。異なる（自動取得で一覧が変わった）場合は、
- * その内容を取り込んだ取得日（fetchedAt）を上限として採る。内容が同じ再取得では動かない。
+ * /laws の法改正一覧が最後に実際に変わったと確認できた日。
+ * 登録済みの指紋ならその確認日、登録外なら最後に確認した日。取得時刻は使わない。
  */
 export function lawsRevisionListChangedOn(
   revisions: readonly LawRevisionCore[] = lawRevisionCores,
-  fetchedAt: string | null = egovRevisionsMeta.fetchedAt,
 ): string {
-  if (lawRevisionListFingerprint(revisions) === LAWS_REVISION_LIST_BASELINE.fingerprint) {
-    return LAWS_REVISION_LIST_BASELINE.changedOn;
-  }
-  const fetchedOn = fetchedAt?.slice(0, 10);
-  return fetchedOn && /^\d{4}-\d{2}-\d{2}$/.test(fetchedOn)
-    ? fetchedOn
-    : LAWS_REVISION_LIST_BASELINE.changedOn;
+  return (
+    LAWS_REVISION_LIST_VERSIONS[lawRevisionListFingerprint(revisions)]?.changedOn ??
+    LAWS_REVISION_LIST_LAST_VERIFIED_ON
+  );
 }
