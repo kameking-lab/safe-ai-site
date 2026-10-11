@@ -511,8 +511,20 @@ export function lawArticleToSource(
   const scaffoldHandrailItem = scaffoldChapeau
     ? matchedItem?.snippet
     : undefined;
-  const scaffoldCitationExcerpt =
+  // わく組足場の細目は公式XMLから補完した563条（verified-primary-scaffold）だけが
+  // 持つ。その本文を引用したときは、ロではなくイ(1)(2)を逐語で示す。
+  const frameScaffoldCitationExcerpt =
     article.lawShort === "安衛則" &&
+    /^第?563条$/.test(article.articleNum) &&
+    /(?:手すり|中さん|中桟)/.test(query) &&
+    article.text.includes(
+      "イ　わく組足場（妻面に係る部分を除く。ロにおいて同じ。）　次のいずれかの設備　（１）　交さ筋かい及び高さ十五センチメートル以上四十センチメートル以下の桟若しくは高さ十五センチメートル以上の幅木又はこれらと同等以上の機能を有する設備　（２）　手すりわく　ロ　わく組足場以外の足場　手すり等及び中桟等",
+    )
+      ? "第三号イ「わく組足場（妻面に係る部分を除く。ロにおいて同じ。）　次のいずれかの設備」（１）「交さ筋かい及び高さ十五センチメートル以上四十センチメートル以下の桟若しくは高さ十五センチメートル以上の幅木又はこれらと同等以上の機能を有する設備」（２）「手すりわく」／ロ「わく組足場以外の足場　手すり等及び中桟等」"
+      : undefined;
+  const scaffoldCitationExcerpt =
+    frameScaffoldCitationExcerpt ??
+    (article.lawShort === "安衛則" &&
     /^第?563条$/.test(article.articleNum) &&
     provisionUnit.item === "第3号" &&
     article.text.includes("一側足場を除く。第三号において同じ。") &&
@@ -528,7 +540,7 @@ export function lawArticleToSource(
             "高さ三十五センチメートル以上五十センチメートル以下",
           )
         ? "第四号「墜落の危険のある箇所」／イ「高さ八十五センチメートル以上の手すり」／ロ「高さ三十五センチメートル以上五十センチメートル以下の桟」"
-        : undefined;
+        : undefined);
   const scaffoldWorkFloorExcerpt =
     article.lawShort === "安衛則" &&
     /^第?563条$/.test(article.articleNum) &&
