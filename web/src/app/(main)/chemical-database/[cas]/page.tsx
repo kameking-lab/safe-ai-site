@@ -102,14 +102,13 @@ export default async function ChemicalDetailPage({
           )}
         </header>
 
-        {/* P0-2/P1-2/P1-6/P2-3: 全法律ワンストップ・サマリー（該当法律＋土壌＋物性型要確認＋特殊健診）を最上部に。 */}
-        <RegulationSummarySection cas={cas} regulationTags={entry.regulationTags} />
-
-        <ConcentrationLimitsBlock entry={entry} />
-
         {entry.niteGhsClassifications && (
           <NiteGhsBlock classifications={entry.niteGhsClassifications} cas={cas} sourceUrl={entry.niteChripUrl} />
         )}
+
+        <RegulationSummarySection cas={cas} regulationTags={entry.regulationTags} />
+
+        <ConcentrationLimitsBlock entry={entry} />
 
         {/* P0-009 (usability-audit-day2): 安衛法 特別則 (特化則/有機則/酸欠則/
             粉じん則/石綿則) を CAS から自動引き当てて表示。製造業/建設業の

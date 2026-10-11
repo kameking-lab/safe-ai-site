@@ -7,6 +7,8 @@ export const VERIFIED_CASE_NOTES = [
     unknown: "発生日は個票に記載されていません。現在の速報との対応、現行仕様の墜落防止設備の適否は、この個票だけでは分かりません。",
     check: "自社では、剪定位置への到達・姿勢変更・降下を含めて作業床や昇降設備を検討します。高さ、足場、取付箇所の強度、器具の仕様を確認し、過去資料の「安全帯」の方法をそのまま現在の設備へ適用しないでください。",
     sourceUrl: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=100003",
+    nextCheckUrl: "https://www.mhlw.go.jp/new-info/kobetu/roudou/gyousei/anzen/dl/170322-1.pdf",
+    nextCheckLabel: "厚労省｜はしご・脚立を使う前の確認（PDF）",
   },
   {
     id: "100005",
@@ -15,5 +17,7 @@ export const VERIFIED_CASE_NOTES = [
     unknown: "発生日は個票に記載されていません。この事例は感電事故を示しておらず、周囲の充電状況や現場の電気的安全性は別途確認が必要です。",
     check: "自社では、固定側の脱落防止、作業員数に合う設備、乗り移り・部材移動時の手順を確認します。現在使う器具と取付箇所の仕様・強度、墜落防止措置の適合性は、現行法令と施工計画に照らして確認してください。",
     sourceUrl: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=100005",
+    nextCheckUrl: "https://www.mhlw.go.jp/web/t_doc?dataId=00tc4287&dataType=1&pageNo=1",
+    nextCheckLabel: "厚労省｜墜落制止用器具の安全使用ガイドライン",
   },
 ] as const;
