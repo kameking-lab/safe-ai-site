@@ -1,9 +1,10 @@
 #!/usr/bin/env node
+import { inspectR8WarningSnapshot, warningHttpIssue, warningLevel, jmaWarningJsonCodesForIso2, jmaWarningJsonUrl } from '../web/src/lib/jma/warning-snapshot.mjs';
 /**
  * 気象庁の防災情報・天気予報・地震情報を取得して
  * web/src/data/jma/ に JSON 保存するバッチ。
  *
- * - 警報・注意報（都道府県別）: bosai/warning/data/warning/{code}.json
+ * - 警報・注意報（都道府県別）: bosai/warning/data/r8/{code}.json
  * - 天気予報（地方）           : bosai/forecast/data/forecast/{code}.json
  * - 地震情報（直近）            : bosai/quake/data/list.json + 個別XML JSON
  *
@@ -30,20 +31,7 @@ const FETCH_TIMEOUT_MS = 15_000;
 export const FETCH_CONCURRENCY = 8;
 const EXPECTED_PREFECTURE_COUNT = 47;
 
-const PREFECTURE_CODES = [
-  // 北海道は複数細分（特殊）、46/47も特殊だが、最大レベル算出だけなら 010000～470000 で代表させる
-  // 実運用に合わせて全47都道府県のヘッドラインを取得
-  "011000", "012000", "013000", "014100", "015000", "016000", "017000",
-  "020000", "030000", "040000", "050000", "060000", "070000",
-  "080000", "090000", "100000", "110000", "120000", "130000",
-  "140000", "150000", "160000", "170000", "180000", "190000",
-  "200000", "210000", "220000", "230000", "240000", "250000",
-  "260000", "270000", "280000", "290000", "300000",
-  "310000", "320000", "330000", "340000", "350000",
-  "360000", "370000", "380000", "390000",
-  "400000", "410000", "420000", "430000", "440000", "450000",
-  "460040", "460100", "471000", "472000", "473000", "474000",
-];
+const PREFECTURE_CODES = Array.from({ length: 47 }, (_, i) => `JP-${String(i + 1).padStart(2, '0')}`).flatMap(jmaWarningJsonCodesForIso2);
 
 // 警報JSONコード → ISO 3166-2:JP マッピング
 function isoFromWarningCode(code) {
@@ -104,13 +92,14 @@ export function createJsonFetcher({
     try {
       const res = await fetchImpl(url, {
         headers: { Accept: "application/json", "User-Agent": USER_AGENT },
+        cache: "no-store",
         signal: ac.signal,
       });
       if (!res.ok) {
         return { ok: false, status: res.status, error: `HTTP ${res.status}` };
       }
       const json = await res.json();
-      return { ok: true, data: json };
+      return { ok: true, data: json, headers: res.headers };
     } catch (err) {
       return { ok: false, error: compactError(err) };
     } finally {
@@ -122,16 +111,11 @@ export function createJsonFetcher({
 function isActiveWarning(status) {
   if (!status) return false;
   if (status.includes("なし") || status.includes("解除")) return false;
-  return status === "発表" || status === "継続";
+  return status === "発表" || status === "継続" || status.includes("警報から注意報");
 }
 
 function levelFromCode(code) {
-  if (!code) return null;
-  const head = String(code)[0];
-  if (head === "3") return "special";
-  if (head === "0") return "warning";
-  if (head === "1" || head === "2") return "advisory";
-  return "advisory";
+  return warningLevel(code);
 }
 
 const RANK = { none: 0, advisory: 1, warning: 2, special: 3 };
@@ -166,17 +150,14 @@ function summarizeWarningPayload(payload) {
   };
 }
 
-function isWarningPayload(payload) {
-  return Boolean(payload) && typeof payload === "object" && Array.isArray(payload.areaTypes);
-}
 
-async function fetchWarnings(fetchJson) {
+async function fetchWarnings(fetchJson, now) {
   const byIso = {};
   const errors = [];
   const successfulCodes = [];
 
   const results = await Promise.all(PREFECTURE_CODES.map(async (code) => {
-    const url = `https://www.jma.go.jp/bosai/warning/data/warning/${code}.json`;
+    const url = jmaWarningJsonUrl(code);
     const r = await fetchJson(url);
     return { code, ...r };
   }));
@@ -189,16 +170,20 @@ async function fetchWarnings(fetchJson) {
       errors.push({ code, status: r.status ?? null, error: r.error });
       continue;
     }
-    if (!isWarningPayload(r.data)) {
-      errors.push({ code, status: null, error: "invalid payload" });
+    const issue = warningHttpIssue(r.headers, now);
+    const inspected = inspectR8WarningSnapshot(r.data, now, code);
+    if (issue || !inspected.ok) {
+      errors.push({ code, status: null, error: issue ?? inspected.issue });
       continue;
     }
     successfulCodes.push(code);
-    const summary = summarizeWarningPayload(r.data);
+    const summary = summarizeWarningPayload(inspected.payload);
     if (!byIso[iso]) byIso[iso] = { level: "none", entries: [] };
     byIso[iso].level = maxLevel(byIso[iso].level, summary.level);
     byIso[iso].entries.push({
       sourceCode: code,
+      sourceHttpDate: r.headers.get("date"),
+      sourceHttpAgeSeconds: Number(r.headers.get("age") ?? 0),
       level: summary.level,
       headline: summary.headline,
       reportDatetime: summary.reportDatetime,
@@ -416,6 +401,11 @@ export function assessFetchQuality(warnings, forecast, earthquakes) {
   return { ok: failures.length === 0, failures, quality };
 }
 
+function warningContent(byIso) {
+  if (!byIso) return undefined;
+  return JSON.stringify(byIso, (key, value) => ["sourceHttpDate", "sourceHttpAgeSeconds"].includes(key) ? undefined : value);
+}
+
 function storedCounts(previous) {
   return {
     warningsPrefectures: Object.keys(previous.warnings?.byIso ?? {}).length,
@@ -511,7 +501,7 @@ export async function runJmaUpdate({
   logger.log(`[fetch-jma-data] fetching from jma.go.jp (concurrency=${maxConcurrency}) …`);
   const fetchJson = createJsonFetcher({ fetchImpl, timeoutMs, maxConcurrency });
   const [warnings, forecast, earthquakes] = await Promise.all([
-    fetchWarnings(fetchJson),
+    fetchWarnings(fetchJson, new Date(attemptedAt)),
     fetchForecast(fetchJson),
     fetchEarthquakes(fetchJson),
   ]);
@@ -545,6 +535,13 @@ export async function runJmaUpdate({
     };
   }
 
+  // Runtime refreshes validate freshness. A bundled fallback is not renewed by a timestamp-only commit.
+  if (warningContent(previous.warnings?.byIso) === warningContent(warnings.byIso) &&
+      JSON.stringify(previous.weather?.byIso) === JSON.stringify(forecast.byIso) &&
+      JSON.stringify(previous.earthquakes?.items) === JSON.stringify(earthquakes.items)) {
+    logger.log('[fetch-jma-data] validated unchanged source content; no files changed');
+    return { ok: true, status: 'unchanged', published: false, quality: assessment.quality };
+  }
   const warningSnapshot = { fetchedAt: attemptedAt, byIso: warnings.byIso };
   const weatherSnapshot = { fetchedAt: attemptedAt, byIso: forecast.byIso };
   const earthquakeSnapshot = { fetchedAt: attemptedAt, items: earthquakes.items };

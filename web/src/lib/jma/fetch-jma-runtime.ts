@@ -1,3 +1,4 @@
+import { inspectR8WarningSnapshot, warningHttpIssue } from './warning-snapshot.mjs';
 /**
  * /api/signage/jma のランタイムデータ取得。
  *
@@ -21,7 +22,6 @@ import { parseEarthquakeList } from "./parse-jma-earthquakes";
 import {
   parseJmaEarthquakeResponse,
   parseJmaForecastResponse,
-  inspectJmaWarningResponse,
   warningPayloadFingerprint,
 } from "./jma-runtime-schema";
 import type {
@@ -37,7 +37,7 @@ const REVALIDATE_SECONDS = 600; // 10分: UIの15分鮮度上限内で再取得�
 const USER_AGENT = "safe-ai-portal-signage-jma/1.0 (+https://www.anzen-ai-portal.jp/about)";
 const FETCH_TIMEOUT_MS = 8000;
 
-async function fetchJson(url: string): Promise<unknown | null> {
+async function fetchJson(url: string, warningNow?: Date): Promise<unknown | null> {
   const ac = new AbortController();
   const timer = setTimeout(() => ac.abort(), FETCH_TIMEOUT_MS);
   try {
@@ -47,6 +47,11 @@ async function fetchJson(url: string): Promise<unknown | null> {
       signal: ac.signal,
     });
     if (!res.ok) return null;
+    if (warningNow) {
+      const issue = warningHttpIssue(res.headers, warningNow);
+      if (issue) return { transportIssue: issue };
+      return { warningBody: await res.json() as unknown, sourceHttpDate: res.headers.get("date"), sourceHttpAgeSeconds: Number(res.headers.get("age") ?? 0) };
+    }
     return await res.json() as unknown;
   } catch {
     return null;
@@ -71,15 +76,15 @@ export async function fetchWarningsLive(): Promise<JmaWarningsFile> {
     jmaWarningJsonCodesForIso2(iso).map((code) => ({ iso, code })),
   );
   type WarningFetchResult =
-    | { iso: string; code: string; payload: JmaWarningPayload; issue: null }
+    | { iso: string; code: string; payload: JmaWarningPayload; issue: null; sourceHttpDate?: string | null; sourceHttpAgeSeconds?: number }
     | {
         iso: string;
         code: string;
         payload: null;
-        issue: Exclude<JmaSourceIssue, "unverified">;
+        issue: JmaSourceIssue;
       };
   const results: WarningFetchResult[] = await Promise.all(requests.map(async ({ iso, code }) => {
-    const raw = await fetchJson(jmaWarningJsonUrl(code));
+    const raw = await fetchJson(jmaWarningJsonUrl(code), now);
     if (raw === null) {
       return {
         iso,
@@ -88,9 +93,13 @@ export async function fetchWarningsLive(): Promise<JmaWarningsFile> {
         issue: "fetch-failed" as const,
       };
     }
-    const inspected = inspectJmaWarningResponse(raw, now);
+    if (typeof raw === "object" && "transportIssue" in raw) {
+      return { iso, code, payload: null, issue: raw.transportIssue as JmaSourceIssue };
+    }
+    const response = raw as {warningBody: unknown; sourceHttpDate: string | null; sourceHttpAgeSeconds: number};
+    const inspected = inspectR8WarningSnapshot(response.warningBody, now, code);
     return inspected.ok
-      ? { iso, code, payload: inspected.payload, issue: null }
+      ? { iso, code, payload: inspected.payload, issue: null, sourceHttpDate: response.sourceHttpDate, sourceHttpAgeSeconds: response.sourceHttpAgeSeconds }
       : { iso, code, payload: null, issue: inspected.issue };
   }));
 
@@ -102,6 +111,8 @@ export async function fetchWarningsLive(): Promise<JmaWarningsFile> {
       code: string;
       payload: JmaWarningPayload;
       issue: null;
+      sourceHttpDate?: string | null;
+      sourceHttpAgeSeconds?: number;
     } => result.payload !== null,
   );
   const uniformEmpty = valid.length === requests.length && valid.length > 1 &&
@@ -124,11 +135,14 @@ export async function fetchWarningsLive(): Promise<JmaWarningsFile> {
     const entries: JmaWarningEntry[] = [];
     for (const code of codes) {
       if (!acceptedKeys.has(`${iso}:${code}`)) continue;
-      const payload = accepted.find((result) => result.iso === iso && result.code === code)?.payload;
+      const sourceResult = accepted.find((result) => result.iso === iso && result.code === code);
+      const payload = sourceResult?.payload;
       if (!payload) continue;
       const summary = summarizeWarningPayload(payload);
       entries.push({
         sourceCode: code,
+        sourceHttpDate: sourceResult?.sourceHttpDate,
+        sourceHttpAgeSeconds: sourceResult?.sourceHttpAgeSeconds,
         level: summary.level,
         headline: summary.headline,
         reportDatetime: summary.reportDatetime,
@@ -259,7 +273,7 @@ export async function fetchEarthquakesLive(): Promise<JmaEarthquakesFile> {
 // Bump the cache generation whenever accepted upstream warning semantics
 // change. Vercel's Data Cache is shared across deployments, so reusing the
 // previous key could serve output computed by the old strict parser.
-export const getJmaWarningsRuntime = unstable_cache(fetchWarningsLive, ["signage-jma-warnings-runtime-r8-v3"], {
+export const getJmaWarningsRuntime = unstable_cache(fetchWarningsLive, ["signage-jma-warnings-runtime-r8-v4"], {
   revalidate: REVALIDATE_SECONDS,
 });
 

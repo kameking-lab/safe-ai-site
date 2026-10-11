@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getJmaEarthquakesRuntime, getJmaWarningsRuntime, getJmaWeatherRuntime } from "@/lib/jma/fetch-jma-runtime";
 import { assessJmaDataTrust } from "@/lib/jma/jma-data-trust";
+import { assessJmaWarningTrust } from "@/lib/jma/jma-region-trust";
 
 // 気象庁 bosai JSON をリクエスト時に直接 fetch（30分キャッシュ）。旧実装は
 // @/data/jma/*.json を静的 import(force-static) していたため、Vercel が
@@ -23,7 +24,7 @@ export async function GET() {
 
   const now = new Date();
   const assessments = [
-    assessJmaDataTrust({ fetchedAt: warnings.fetchedAt, quality: warnings.quality, actualCoverage: Object.keys(warnings.byIso).length, expectedCoverage: 47, now }),
+    assessJmaWarningTrust(warnings, now),
     assessJmaDataTrust({ fetchedAt: weather.fetchedAt, quality: weather.quality, actualCoverage: Object.keys(weather.byIso).length, expectedCoverage: 7, now }),
     assessJmaDataTrust({ fetchedAt: earthquakes.fetchedAt, quality: earthquakes.quality, now }),
   ];

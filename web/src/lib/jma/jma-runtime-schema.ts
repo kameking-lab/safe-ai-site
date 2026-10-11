@@ -1,3 +1,4 @@
+import { inspectR8WarningSnapshot } from './warning-snapshot.mjs';
 import { z } from "zod";
 
 // Preserve the production CSP by disabling Zod's Function-based parser JIT.
@@ -78,91 +79,6 @@ const legacyWarningSchema = z.object({
     }).passthrough()).min(1),
   }).passthrough()).min(1),
 }).passthrough();
-
-const r8KindSchema = z
-  .object({
-    code: warningCode.optional(),
-    status: warningStatus,
-  })
-  .passthrough()
-  .superRefine((kind, ctx) => {
-    const inactive = INACTIVE_WARNING_STATUSES.has(kind.status);
-    if (!inactive && !kind.code) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["code"],
-        message: "active warning code required",
-      });
-    }
-  });
-
-const r8AreaSchema = z
-  .object({
-    areaCode: numericAreaCode,
-    kinds: z.array(r8KindSchema).min(1),
-  })
-  .passthrough();
-
-const r8WarningReportSchema = z
-  .object({
-    controlDatetime: explicitIsoDatetime,
-    reportDatetime: explicitIsoDatetime,
-    publishingOffice: z.string().trim().min(1),
-    headlineText: z.string().optional(),
-    dataTypeCode: z.string().regex(/^VPWW\d{2}$/),
-    warning: z
-      .object({
-        class10Items: z.array(r8AreaSchema).optional(),
-        class20Items: z.array(r8AreaSchema).optional(),
-      })
-      .passthrough(),
-  })
-  .passthrough()
-  .superRefine((report, ctx) => {
-    const count =
-      (report.warning.class10Items?.length ?? 0) +
-      (report.warning.class20Items?.length ?? 0);
-    if (count === 0) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["warning"],
-        message: "warning area items required",
-      });
-    }
-  });
-
-const r8WarningSchema = z.array(r8WarningReportSchema).min(1);
-
-type R8WarningReport = z.infer<typeof r8WarningReportSchema>;
-
-function normalizeR8WarningReports(
-  reports: R8WarningReport[],
-): JmaWarningPayload {
-  const newest = [...reports].sort(
-    (a, b) => Date.parse(b.reportDatetime) - Date.parse(a.reportDatetime),
-  )[0]!;
-  const areas = reports.flatMap((report) =>
-    [
-      ...(report.warning.class10Items ?? []),
-      ...(report.warning.class20Items ?? []),
-    ].map((area) => ({
-      code: area.areaCode,
-      warnings: area.kinds.map((kind) => ({
-        code: kind.code,
-        status: kind.status,
-      })),
-    })),
-  );
-  const headlines = reports
-    .map((report) => report.headlineText?.trim())
-    .filter((value): value is string => Boolean(value));
-  return {
-    reportDatetime: newest.reportDatetime,
-    publishingOffice: newest.publishingOffice,
-    headlineText: [...new Set(headlines)].join(" / "),
-    areaTypes: [{ areas }],
-  };
-}
 
 const forecastAreaSchema = z.object({
   area: z.object({ code: numericAreaCode }).passthrough(),
@@ -277,6 +193,7 @@ export function inspectJmaWarningResponse(
   value: unknown,
   now: Date = new Date(),
 ): JmaWarningParseResult {
+  if (Array.isArray(value)) return inspectR8WarningSnapshot(value, now);
   const temporalIssue = warningDatetimeIssue(value, now);
   if (temporalIssue) return { ok: false, issue: temporalIssue };
 
@@ -284,10 +201,7 @@ export function inspectJmaWarningResponse(
   if (legacy.success) {
     return { ok: true, payload: legacy.data as JmaWarningPayload };
   }
-  const r8 = r8WarningSchema.safeParse(value);
-  return r8.success
-    ? { ok: true, payload: normalizeR8WarningReports(r8.data) }
-    : { ok: false, issue: "schema-mismatch" };
+  return { ok: false, issue: "schema-mismatch" };
 }
 
 export function parseJmaForecastResponse(value: unknown): JmaForecastReport[] | null {

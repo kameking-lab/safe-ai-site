@@ -1,4 +1,6 @@
+import { warningHttpIssue } from './warning-snapshot.mjs';
 import type { JmaWarningsFile } from "@/lib/jma/jma-data";
+import { assessJmaDataTrust, type JmaTrustAssessment } from "./jma-data-trust";
 import { dataFreshness } from "@/lib/time/jst-date";
 
 /**
@@ -20,6 +22,14 @@ export function isCurrentJmaWarningRegion(
     return false;
   }
   if (prefecture.sourceStatus === "live") {
+    // HTTP freshness includes time spent in the runtime cache, independently of announcement age.
+    const receivedAt = Date.parse(prefecture.sourceFetchedAt ?? warnings.fetchedAt);
+    for (const entry of prefecture.entries) {
+      if (entry.sourceHttpDate !== undefined) {
+        const cachedAge = (entry.sourceHttpAgeSeconds ?? 0) + Math.max(0, now.getTime() - receivedAt) / 1000;
+        if (warningHttpIssue(new Headers({date: entry.sourceHttpDate ?? "", age: String(Math.ceil(cachedAge))}), now)) return false;
+      }
+    }
     return dataFreshness(
       prefecture.sourceFetchedAt ?? warnings.fetchedAt,
       now,
@@ -30,4 +40,20 @@ export function isCurrentJmaWarningRegion(
     warnings.quality?.status === "live" &&
     dataFreshness(warnings.fetchedAt, now) === "fresh"
   );
+}
+
+/** Aggregate trust counts only regions that are still current after runtime caching. */
+export function assessJmaWarningTrust(
+  warnings: JmaWarningsFile,
+  now: Date = new Date(),
+): JmaTrustAssessment {
+  return assessJmaDataTrust({
+    fetchedAt: warnings.fetchedAt,
+    quality: warnings.quality,
+    actualCoverage: Object.keys(warnings.byIso).filter((iso) =>
+      isCurrentJmaWarningRegion(warnings, iso, now),
+    ).length,
+    expectedCoverage: 47,
+    now,
+  });
 }
