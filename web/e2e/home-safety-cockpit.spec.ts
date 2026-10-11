@@ -45,7 +45,7 @@ test.describe("新しい安全AIポータルのホーム", () => {
     const cardHrefs = await mainCards.evaluateAll((links) =>
       links.map((link) => link.getAttribute("href")),
     );
-    expect(cardHrefs).toEqual(["/chatbot", "/chemical-database", "/laws", "/accident-news", "/accidents-analytics", "/construction-calc", "/goods"]);
+    expect(cardHrefs).toEqual(["/chatbot", "/chemical-database", "/laws", "/accident-news", "/accidents-analytics", "/tools/construction-calculators", "/goods"]);
   });
 
   test("スマホで横にはみ出さず、季節機能を固定ナビから外す", async ({

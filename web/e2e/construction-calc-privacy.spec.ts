@@ -3,14 +3,15 @@ import { expect, test } from "@playwright/test";
 test.describe("construction calculator URL privacy", () => {
   test("public calculator links use fixed routes", async ({ page }) => {
     await page.goto("/construction-calc");
+    await expect(page).toHaveURL(/\/tools\/construction-calculators$/);
 
     const hrefs = await page
-      .locator('main a[href^="/construction-calc/"]')
+      .locator('main a[href^="/tools/construction-calculators/"]')
       .evaluateAll((links) =>
         links.map((link) => (link as HTMLAnchorElement).getAttribute("href")),
       );
 
-    expect(hrefs.length).toBeGreaterThan(0);
+    expect(hrefs).toHaveLength(17);
     for (const href of hrefs) {
       expect(href).not.toContain("?");
       expect(href).not.toContain("#");

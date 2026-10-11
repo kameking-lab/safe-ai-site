@@ -35,7 +35,7 @@ const MOBILE_NAV = [
 const MAIN_SERVICES = [
   ["安衛法AI", "/chatbot"], ["化学物質検索", "/chemical-database"],
   ["法改正", "/laws"], ["労災事故速報", "/accident-news"],
-  ["事故統計ダッシュボード", "/accidents-analytics"], ["現場計算ツール", "/construction-calc"],
+  ["事故統計ダッシュボード", "/accidents-analytics"], ["現場計算ツール", "/tools/construction-calculators"],
   ["保護具の選び方", "/goods"],
 ] as const;
 

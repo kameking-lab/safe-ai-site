@@ -267,7 +267,7 @@ test.describe("死亡事故データベースの疎結果・最終ページ", ()
     await page.goto(
       `/fatal-accidents?industry=${encodeURIComponent("官公署")}`,
     );
-    await expect(page.locator(results)).toHaveAttribute("data-result-count", "3");
+    await expect(page.locator(results)).toHaveAttribute("data-result-count", "4");
 
     for (const width of [320, 360, 390, 768, 1024, 1440]) {
       await page.setViewportSize({ width, height: 900 });

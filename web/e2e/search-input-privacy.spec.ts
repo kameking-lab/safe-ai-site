@@ -14,7 +14,9 @@ test.describe("任意検索本文のURL非露出", () => {
     expect(page.url()).not.toContain(encodeURIComponent(keyword));
 
     await page.getByRole("button", { name: "安衛法 第61条" }).click();
-    await expect(input).toHaveValue("第61条");
+    await expect(input).toHaveValue("");
+    await expect(page.getByRole("searchbox", { name: "条番号で検索" })).toHaveValue("第61条");
+    await expect(page.getByRole("combobox", { name: "法令で絞り込む" })).toHaveValue("労働安全衛生法");
     await expect(page).toHaveURL(initialUrl);
   });
 
