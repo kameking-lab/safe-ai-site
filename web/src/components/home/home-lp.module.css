@@ -87,3 +87,6 @@
 @media (max-width:639px) and (max-height:700px) {
   :global(body):has([data-cookie-settings-trigger]) .previewLinks a:first-child { margin-left:72px; }
 }
+@media (max-width:359px) {
+  .previewLinks a:first-child { margin-right:8px; }
+}
