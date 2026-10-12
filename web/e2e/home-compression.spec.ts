@@ -32,6 +32,46 @@ test.describe("7つの道具を案内するホームの圧縮予算", () => {
     expect(positions.entryBottom).toBeLessThan(positions.reservedTop);
   });
 
+  for (const width of [320, 390, 400]) {
+    test(`${width}×606で共有ボタンが最初の道具を覆わず、共有とコピーを操作できる`, async ({ page, context }) => {
+      await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+      await page.setViewportSize({ width, height: 606 });
+      await page.goto("/", { waitUntil: "domcontentloaded" });
+
+      const share = page.getByRole("button", { name: "シェアメニューを開く" });
+      await expect(share).toBeVisible({ timeout: 30_000 });
+      const geometry = await page.evaluate(() => {
+        const rect = (selector: string) =>
+          document.querySelector(selector)?.getBoundingClientRect();
+        const overlap = (a?: DOMRect, b?: DOMRect) =>
+          a && b
+            ? Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left)) *
+              Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top))
+            : Number.POSITIVE_INFINITY;
+        const shareRect = rect('button[aria-label="シェアメニューを開く"]');
+        const cardRect = rect(".hlp_previewLinks a");
+        const entryRect = rect(".hlp_mobileEntry");
+        return {
+          cardShare: overlap(cardRect, shareRect),
+          entryShare: overlap(entryRect, shareRect),
+          shareSize: shareRect ? Math.min(shareRect.width, shareRect.height) : 0,
+        };
+      });
+      expect(geometry.cardShare).toBe(0);
+      expect(geometry.entryShare).toBe(0);
+      expect(geometry.shareSize).toBeGreaterThanOrEqual(44);
+
+      await share.click();
+      const dialog = page.getByRole("dialog", { name: "シェアメニュー" });
+      await expect(dialog).toBeVisible();
+      await dialog.getByRole("button", { name: "URLをコピー" }).click();
+      await expect(dialog.getByText("コピー済")).toBeVisible();
+      expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(page.url());
+      await dialog.getByRole("button", { name: "閉じる" }).click();
+      await expect(dialog).toHaveCount(0);
+    });
+  }
+
   test.beforeEach(async ({ page }) => {
     await page.setViewportSize(MOBILE_VIEWPORT);
     await page.setExtraHTTPHeaders({
