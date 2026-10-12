@@ -21,6 +21,8 @@ describe("化学DBの保存済み規制情報による絞り込み", () => {
 
     const row = screen.getByRole("row", { name: new RegExp(cas) });
     expect(within(row).getByRole("button", { name: label })).toBeTruthy();
+    expect(screen.getByText("収録情報に一致")).toBeTruthy();
+    expect(screen.getByText(/各法令の全対象を網羅する一覧ではありません/)).toBeTruthy();
     expect(screen.queryByText("検索結果0件")).toBeNull();
   });
 

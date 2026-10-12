@@ -190,8 +190,8 @@ export function ChemicalDatabaseClient() {
               tone: "info",
               value: filteredMhlw.length.toLocaleString(),
               unit: "件",
-              title: "該当",
-              description: `全 ${mhlwCount.toLocaleString()} 物質から絞り込み中。`,
+              title: "収録情報に一致",
+              description: `収録済み ${mhlwCount.toLocaleString()} 物質から絞り込み中。各法令の全対象を網羅する一覧ではありません。`,
             }
           : {
               tone: "warning",

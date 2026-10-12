@@ -3,6 +3,9 @@ import { expect, test } from "@playwright/test";
 test("有機則第二種の検索結果から、同じ区分と根拠を持つトルエン詳細を開ける", async ({ page }) => {
   await page.goto("/chemical-database", { waitUntil: "domcontentloaded" });
   await page.getByRole("button", { name: "有機則 第二種", exact: true }).first().click();
+  await expect(page.getByRole("status", { name: /収録情報に一致/ })).toContainText(
+    "各法令の全対象を網羅する一覧ではありません",
+  );
 
   const toluene = page.getByRole("row", { name: /108-88-3/ });
   await expect(toluene).toBeVisible();
