@@ -125,9 +125,9 @@ export const REGULATION_TAGS: Record<RegulationTag, RegulationTagInfo> = {
     shortLabel: "毒劇法",
     fullLabel: "毒物及び劇物取締法",
     summary:
-      "毒物又は劇物の指定に関する参照先です。濃度・製剤の除外規定、用途、製造・輸入・販売・業務上取扱いの別で適用が異なります。登録、表示、保管等の要件を該当条文で確認してください。",
+      "毒物・劇物の定義、指定と検索方法を確認する厚生労働省の案内です。濃度・製剤の除外規定、用途、製造・輸入・販売・業務上取扱いの別で適用が異なります。登録、表示、保管等の要件を該当条文で確認してください。",
     officialUrl:
-      "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000051379.html",
+      "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/kenkou_iryou/iyakuhin/dokugeki_database_00001.html",
     category: "poison-waste",
     badgeClass: "bg-purple-100 text-purple-900 border-purple-300",
   },
