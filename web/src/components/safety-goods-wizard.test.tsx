@@ -30,6 +30,16 @@ describe('絵から選ぶ保護具確認',()=>{
   choose(/分からない・未確認/); expect(screen.getByText('選定を保留・確認が必要')).toBeDefined();
   expect(screen.queryByRole('link',{name:/Amazon/})).toBeNull();
  });
+ it('はしご・脚立を選んだ直後から置換を確認し、作業を戻すと案内を外す',()=>{
+  render(<SafetyGoodsWizard/>); choose(/高所・足場の作業/); choose(/はしご・脚立/);
+  expect(screen.getByRole('heading',{name:'現場の条件は？'})).toBeDefined();
+  expect(screen.getByText('まず、作業台・足場に置き換えられないか確認してください。').closest('details')).toBeNull();
+  expect(screen.queryByRole('link',{name:/Amazon/})).toBeNull();
+  choose(/ひとつ戻る/);
+  expect(screen.queryByText('まず、作業台・足場に置き換えられないか確認してください。')).toBeNull();
+  choose(/足場・屋根・高所/);
+  expect(screen.queryByText('まず、作業台・足場に置き換えられないか確認してください。')).toBeNull();
+ });
  it('呼吸は酸素18%未満の禁止を見える状態で示し、未確認は保留',()=>{
   render(<SafetyGoodsWizard/>); choose(/粉じん・ガスを吸う作業/); choose(/粉じん・研削・清掃/); choose(/換気が効いている/);
   expect(screen.getByRole('heading',{name:'酸素濃度を測りましたか？'})).toBeDefined();

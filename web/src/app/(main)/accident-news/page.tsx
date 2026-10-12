@@ -178,6 +178,12 @@ export default async function AccidentNewsPage({
                 <div><dt className="font-bold">自社で先に確認する条件</dt><dd>{item.check}</dd></div>
               </dl>
               <a href={item.sourceUrl} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center text-sm text-sky-800 underline">厚労省 個票No.{item.id}で確認</a>
+              <div className="border-t border-slate-200 py-3">
+                <p className="text-xs font-bold text-slate-700">次に確認する</p>
+                <a href={item.nextCheckUrl} target="_blank" rel="noopener noreferrer" className="mt-1 inline-flex min-h-11 items-center gap-1 text-sm text-sky-800 underline">
+                  {item.nextCheckLabel}<ExternalLink className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                </a>
+              </div>
             </details>
           ))}</div>
         </section>
