@@ -68,7 +68,9 @@ export function RegulationTagsSection({
           return (
             <div key={cat} className="space-y-2">
               <h3 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">
-                {TAG_CATEGORY_LABELS[cat]}
+                {cat === "poison-waste"
+                  ? catTags.map((tag) => REGULATION_TAGS[tag].shortLabel).join("・")
+                  : TAG_CATEGORY_LABELS[cat]}
               </h3>
               <ul className="space-y-2">
                 {catTags.map((t) => {
