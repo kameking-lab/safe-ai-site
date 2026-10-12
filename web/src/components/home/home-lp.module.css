@@ -84,3 +84,6 @@
   .mobileSummary { display:block; font-size:.875rem; line-height:1.7; color:#e2e7df; }
   .mobileEntry { display:inline-flex; align-items:center; justify-content:center; min-height:48px; margin-top:14px; padding:8px 12px; border:1px solid #dce8ba; border-radius:5px; background:#dce8ba; color:#10261f; font-size:.875rem; font-weight:650; }
 }
+@media (max-width:639px) and (max-height:700px) {
+  :global(body):has([data-cookie-settings-trigger]) .previewLinks a:first-child { margin-left:72px; }
+}
