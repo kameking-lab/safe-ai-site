@@ -9,6 +9,7 @@
 .title { font-size:2.5rem; font-weight:750; letter-spacing:-.04em; line-height:1.22; margin:24px 0; }
 .title span { display:block; white-space:nowrap; }
 .heroDescription { max-width:36em; font-size:1rem; line-height:1.9; color:#e2e7df; }
+.mobileSummary,.mobileEntry { display:none; }
 .actions { display:flex; flex-wrap:wrap; gap:12px; margin-top:28px; }
 .primary,.secondary { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:48px; padding:12px; border-radius:5px; font-size:.875rem; font-weight:650; }
 .primary { background:#dce8ba; color:#10261f; border:1px solid #dce8ba; }
@@ -75,8 +76,11 @@
 @media(max-width:389px) { .companion { gap:12px; }.mascotGreeting { width:120px; } }
 @media(prefers-reduced-motion:reduce) { .mascotGreeting { animation:none!important; transform:none!important; } }
 
-/* Keep mobile hero spacing compact when primary buttons include decorations. */
+/* Show an existing tool before the fixed mobile controls and consent shortcut. */
 @media (max-width:639px) {
-  .heroGrid { gap:20px; padding-bottom:24px; }
-  .actions { margin-top:20px; }
+  .heroGrid { gap:20px; padding-top:20px; padding-bottom:24px; }
+  .title { font-size:2.25rem; margin:16px 0 12px; }
+  .heroDescription,.actions { display:none; }
+  .mobileSummary { display:block; font-size:.875rem; line-height:1.7; color:#e2e7df; }
+  .mobileEntry { display:inline-flex; align-items:center; justify-content:center; min-height:48px; margin-top:14px; padding:8px 12px; border:1px solid #dce8ba; border-radius:5px; background:#dce8ba; color:#10261f; font-size:.875rem; font-weight:650; }
 }

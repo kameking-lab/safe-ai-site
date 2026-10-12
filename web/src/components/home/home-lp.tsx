@@ -42,6 +42,8 @@ export function HomeLP({ availability, latestNews }: { availability: AutomationC
             <p className={styles.eyebrow}>現場を支える人のための、安全と業務の道具。</p>
             <h1 id="home-lp-title" className={styles.title}><span>その書類、</span><span>AIに任せて、</span><span>現場に行こう。</span></h1>
             <p className={styles.heroDescription}>安衛法や化学物質を調べる。法改正や事故の情報を確かめる。計算や保護具選定に使う。必要な情報への道筋をつくり、現場で判断する時間を支えます。</p>
+            <p className={styles.mobileSummary}>安衛法AIで、条文と根拠を確認。</p>
+            <Link href="/chatbot" prefetch={false} className={styles.mobileEntry}><ChihuahuaButtonContent variant="tools" trailing={<ArrowUpRight size={16} aria-hidden="true" />}>安衛法AIを使う</ChihuahuaButtonContent></Link>
             <div className={styles.actions}>
               <Link href="#tools" className={styles.primary}><ChihuahuaButtonContent variant="tools" trailing={<ArrowUpRight size={16} aria-hidden="true" />}>道具を使う</ChihuahuaButtonContent></Link>
               <Link href="#consult" className={styles.secondary}><ChihuahuaButtonContent variant="consult" trailing={<ArrowUpRight size={16} aria-hidden="true" />}>自動化を相談する</ChihuahuaButtonContent></Link>

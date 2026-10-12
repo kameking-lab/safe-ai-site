@@ -24,6 +24,8 @@ export const homeLpClasses = {
   "heroDescription": "hlp_heroDescription",
   "heroGrid": "hlp_heroGrid",
   "majorTool": "hlp_majorTool",
+  "mobileEntry": "hlp_mobileEntry",
+  "mobileSummary": "hlp_mobileSummary",
   "mascot": "hlp_mascot",
   "mascotGreeting": "hlp_mascotGreeting",
   "mascotPosition": "hlp_mascotPosition",
