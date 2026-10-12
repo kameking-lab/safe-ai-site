@@ -290,6 +290,7 @@ export function OptionalThirdPartyScripts({
       ) : trackingPath ? (
         <button
           type="button"
+          data-cookie-settings-trigger
           onClick={() => setEditing(true)}
           className="fixed left-2 z-[90] min-h-[44px] rounded-lg border border-slate-300 bg-white/95 px-3 py-2 text-xs font-semibold text-slate-700 shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 [bottom:calc(var(--mobile-bottom-nav-h,0px)+env(safe-area-inset-bottom,0px)+12px)]"
         >

@@ -13,6 +13,25 @@ async function warmKyPaperRoute(page: Page) {
 }
 
 test.describe("7つの道具を案内するホームの圧縮予算", () => {
+  test("400×606で説明と安衛法AIの入口を固定UIより上に表示する", async ({ page }) => {
+    await page.setViewportSize({ width: 400, height: 606 });
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+
+    const summary = page.locator(".hlp_mobileSummary");
+    const entry = page.locator('.hlp_mobileEntry[href="/chatbot"]');
+    await expect(summary).toBeVisible();
+    await expect(entry).toBeVisible();
+    const positions = await page.evaluate(() => {
+      const summary = document.querySelector(".hlp_mobileSummary")?.getBoundingClientRect();
+      const entry = document.querySelector(".hlp_mobileEntry")?.getBoundingClientRect();
+      const bottomNav = Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--mobile-bottom-nav-h")) || 0;
+      const lineHeight = document.querySelector(".hlp_mobileSummary") ? Number.parseFloat(getComputedStyle(document.querySelector(".hlp_mobileSummary")!).lineHeight) : 0;
+      return { summaryLines: summary && lineHeight ? summary.height / lineHeight : Infinity, entryBottom: entry?.bottom ?? Infinity, reservedTop: 606 - bottomNav - 12 - 44 };
+    });
+    expect(positions.summaryLines).toBeLessThanOrEqual(1.1);
+    expect(positions.entryBottom).toBeLessThan(positions.reservedTop);
+  });
+
   test.beforeEach(async ({ page }) => {
     await page.setViewportSize(MOBILE_VIEWPORT);
     await page.setExtraHTTPHeaders({
