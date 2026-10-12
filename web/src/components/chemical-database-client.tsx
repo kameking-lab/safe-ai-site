@@ -24,7 +24,7 @@ import {
   type ChemicalSubstance,
 } from "@/data/mock/chemical-substances-db";
 import type { MergedChemical } from "@/lib/mhlw-chemicals";
-import { getAllMergedChemicalsSlim as getAllMergedChemicals, MHLW_MERGED_CHEMICAL_COUNT_SLIM } from "@/lib/mhlw-chemicals-slim";
+import { getAllMergedChemicalsSlim as getAllMergedChemicals } from "@/lib/mhlw-chemicals-slim";
 import { ChemicalPpeSelectionBoundary } from "@/components/chemical/chemical-ppe-selection-boundary";
 import { ChemicalNotFoundRescue } from "@/components/chemical/chemical-not-found-rescue";
 import { TransientChemicalLink } from "@/components/home-safety-cockpit/transient-chemical-link";
@@ -35,6 +35,7 @@ import {
   TAG_CATEGORY_LABELS,
   CONSTRUCTION_PRIORITY_CAS_SET,
   normalizeTags,
+  oshaTagsForCas,
   type RegulationTag,
 } from "@/lib/regulation-tag-labels";
 import { RegulationTagBadgeList } from "@/components/regulation-tag-badge";
@@ -84,6 +85,14 @@ function matchesMhlw(c: MergedChemical, q: string): boolean {
     (c.cas !== null && normalizeMhlw(c.cas).includes(n)) ||
     c.aliases.some((a) => normalizeMhlw(a).includes(n))
   );
+}
+
+function regulationTagsForChemical(c: MergedChemical): RegulationTag[] {
+  // 詳細ページと同じ保存済みCAS情報を参照し、入力から新たな規制指定を推測しない。
+  return [...new Set(normalizeTags([
+    ...(c.details?.limits?.regulationTags ?? []),
+    ...oshaTagsForCas(c.cas),
+  ]))];
 }
 
 export function ChemicalDatabaseClient() {
@@ -138,7 +147,7 @@ export function ChemicalDatabaseClient() {
       }
       // 規制タグフィルタ
       if (selectedTags.size > 0) {
-        const tags = new Set(normalizeTags(c.details?.limits?.regulationTags));
+        const tags = new Set(regulationTagsForChemical(c));
         if (tagMatchMode === "and") {
           for (const t of selectedTags) if (!tags.has(t)) return false;
         } else {
@@ -181,14 +190,14 @@ export function ChemicalDatabaseClient() {
               tone: "info",
               value: filteredMhlw.length.toLocaleString(),
               unit: "件",
-              title: "該当",
-              description: `全 ${mhlwCount.toLocaleString()} 物質から絞り込み中。`,
+              title: "収録情報に一致",
+              description: `収録済み ${mhlwCount.toLocaleString()} 物質から絞り込み中。各法令の全対象を網羅する一覧ではありません。`,
             }
           : {
               tone: "warning",
-              title: "該当なし",
+              title: "検索結果0件",
               description:
-                "条件に一致する物質がありません。キーワードや規制法令の絞り込みを見直してください。",
+                "条件に一致する収録情報はありません。規制対象外の判定ではありません。条件を見直し、SDSと公式一覧で確認してください。",
             }
         : {
             tone: "info",
@@ -328,6 +337,10 @@ export function ChemicalDatabaseClient() {
                 )}
               </div>
             </div>
+            <p className="mb-3 text-xs leading-5 text-slate-600">
+              収録済みの規制情報で絞り込みます。タグは製品・作業への適用確定ではありません。
+              詳細の根拠と適用条件を確認してください。
+            </p>
             <div className="space-y-2">
               {TAG_CATEGORY_ORDER.map((cat) => {
                 const tagsInCat = ALL_REGULATION_TAGS.filter(
@@ -366,11 +379,11 @@ export function ChemicalDatabaseClient() {
               <ChemicalNotFoundRescue
                 query={query}
                 ai={{ query }}
-                catalogNote={`統合DB ${MHLW_MERGED_CHEMICAL_COUNT_SLIM.toLocaleString()}物質に見つかりません`}
+                catalogNote="現在の検索条件に一致する収録情報はありません"
               />
             ) : (
               <p className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-6 text-center text-sm text-slate-500">
-                該当する物質が見つかりませんでした。別の語句でお試しください。
+                条件に一致する収録情報はありません。検索条件を見直してください。
               </p>
             )
           ) : (
@@ -389,7 +402,7 @@ export function ChemicalDatabaseClient() {
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {filteredMhlw.slice(0, 100).map((c, i) => {
-                    const tags = c.details?.limits?.regulationTags;
+                    const tags = regulationTagsForChemical(c);
                     const isPriority = c.cas && CONSTRUCTION_PRIORITY_CAS_SET.has(c.cas);
                     return (
                       <tr
