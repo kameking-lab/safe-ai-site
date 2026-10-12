@@ -79,6 +79,7 @@ export default async function SafetyImageDetailPage({ params }: PageProps) {
           description,
           contentUrl: `${SITE_URL}${theme.originalPath}`,
           thumbnailUrl: `${SITE_URL}${theme.previewPath}`,
+          license: `${SITE_URL}${SAFETY_IMAGE_LIBRARY_RIGHTS_PATH}`,
           acquireLicensePage: `${SITE_URL}${SAFETY_IMAGE_LIBRARY_RIGHTS_PATH}`,
           creditText: "安全AIポータル作成",
           copyrightNotice: "© 安全AIポータル",
