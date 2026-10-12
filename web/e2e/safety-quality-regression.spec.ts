@@ -135,7 +135,7 @@ test("速報とは別の過去2事例は原典・不明点・現場条件を持�
     await card.locator("summary").click();
     await expect(card).toContainText("発生日は個票に記載されていません");
     await expect(card).toContainText("自社で先に確認する条件");
-    await expect(card.locator("a")).toHaveAttribute("href", `https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=${id}`);
+    await expect(card.getByRole("link", { name: `厚労省 個票No.${id}で確認`, exact: true })).toHaveAttribute("href", `https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=${id}`);
   }
   await expect(page.locator('[data-verified-case="100005"]')).toContainText("事故型は墜落・転落");
   // 既存個票の人手確認whitelistは今回の機械照合で拡張しない。

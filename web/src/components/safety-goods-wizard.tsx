@@ -63,6 +63,7 @@ export function SafetyGoodsWizard({ initialCategory, onReturnToDirectory }: { in
     </div>
     {!result ? <>
      <h3 ref={heading} tabIndex={-1} className="scroll-mt-24 text-lg font-black text-slate-950 focus:outline-none">{title}</h3>
+     {category?.id === 'fall' && task?.id === 'ladder' && <p className="mt-3 rounded-xl bg-amber-50 p-3 text-sm font-semibold leading-6 text-amber-950">まず、作業台・足場に置き換えられないか確認してください。</p>}
      {question && <p className="mt-2 text-sm leading-6 text-slate-700">{question.detail}</p>}
      {question?.prohibition && <p className="mt-3 rounded-xl bg-amber-50 p-3 text-sm font-semibold leading-6 text-amber-950">{question.prohibition}</p>}
      <div className={category ? 'mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3' : 'mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3'}>
