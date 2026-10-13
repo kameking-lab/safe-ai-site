@@ -1,14 +1,16 @@
 export const CALCULATOR_TASKS: Record<string, string> = {
+    "curb-quantity": "直線に何本並べるか。製品長と目地、または目地込み有効長を入力。",
+    "sealant-quantity": "目地の幅・充填深さ・延長から、シーリング材が何本要るかを出す。",
     "concrete-quantity": "長さ・幅・厚さから、必要な生コン量と車の台数を出す。",
     "excavation-backfill": "溝の底幅・深さ・延長から、掘削量と埋戻し量を出す。",
     "average-end-area": "前後の断面積と区間の長さから、区間ごとの土量を出す。",
     "earthwork-conversion-dump-trucks": "地山土量から、ほぐした土の量とダンプの台数を出す。",
-    "aggregate-base-quantity": "施工面積・厚さ・確認した密度から、砕石の量と重量を出す。",
+    "aggregate-base-quantity": "砕石と捨てコンの範囲・厚さから施工量を出し、搬入量は別に求める。",
     "asphalt-mixture-quantity": "舗装面積・厚さ・確認した密度から、混合物の量と重量を出す。",
     "rebar-weight": "鉄筋の種類・長さ・本数から、1本と全体の重量を出す。",
     "rebar-spacing": "施工幅・かぶり・指定ピッチから、鉄筋本数と間隔を出す。",
     "formwork-area": "部材の大きさと型枠を付ける面から、必要面積を出す。",
-    "slope-angle-length": "水平距離と高低差などから、勾配・角度・斜めの長さを出す。",
+    "slope-angle-length": "勾配を換算。高さ・比・延長から法長と法面積も求める。",
     "drainage-slope": "水平の延長と勾配から、必要な高低差と始点・終点の高さを出す。",
     "scale-coordinate": "図で測った長さを実寸へ換算。2点の座標から距離も求める。",
 };

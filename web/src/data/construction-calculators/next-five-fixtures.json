@@ -1,0 +1,612 @@
+{
+  "status": "PREIMPLEMENTATION_REFERENCE_ONLY",
+  "sourceCodeImported": false,
+  "independentValidCasesVerified": 21,
+  "invalidCasesAreContractExpectations": true,
+  "tolerance": {
+    "continuousAbsolute": 1e-09,
+    "integers": "exact"
+  },
+  "commonInvalidInputs": [
+    "required-empty-string",
+    "missing-required-key",
+    "NaN",
+    "Infinity",
+    "negative-required-dimension"
+  ],
+  "cases": [
+    {
+      "id": "trench-requested",
+      "kind": "trench",
+      "inputs": {
+        "width": 1,
+        "depth": 1,
+        "length": 10,
+        "outerDiameter": 0.3,
+        "bedWidth": 1,
+        "bedThickness": 0.1,
+        "unit": "m",
+        "bedPosition": "below-pipe-no-overlap"
+      },
+      "expected": {
+        "excavationM3": 10,
+        "pipeM3": 0.7068583470577035,
+        "bedM3": 1,
+        "backfillM3": 8.293141652942296
+      }
+    },
+    {
+      "id": "trench-mm-equivalence",
+      "kind": "trench",
+      "inputs": {
+        "width": 1000,
+        "depth": 1000,
+        "length": 10000,
+        "outerDiameter": 300,
+        "bedWidth": 1000,
+        "bedThickness": 100,
+        "unit": "mm",
+        "bedPosition": "below-pipe-no-overlap"
+      },
+      "expected": {
+        "excavationM3": 10,
+        "pipeM3": 0.7068583470577035,
+        "bedM3": 1,
+        "backfillM3": 8.293141652942296
+      }
+    },
+    {
+      "id": "trench-zero-bed",
+      "kind": "trench",
+      "inputs": {
+        "width": 1,
+        "depth": 1,
+        "length": 10,
+        "outerDiameter": 0.3,
+        "bedWidth": 1,
+        "bedThickness": 0,
+        "unit": "m",
+        "bedPosition": "below-pipe-no-overlap"
+      },
+      "expected": {
+        "excavationM3": 10,
+        "pipeM3": 0.7068583470577035,
+        "bedM3": 0,
+        "backfillM3": 9.293141652942296
+      }
+    },
+    {
+      "id": "trench-overlap",
+      "kind": "trench",
+      "inputs": {
+        "width": 1,
+        "depth": 1,
+        "length": 10,
+        "outerDiameter": 0.3,
+        "bedWidth": 1,
+        "bedThickness": 0.1,
+        "unit": "m",
+        "bedPosition": "pipe-within-bed-envelope"
+      },
+      "expectedError": "unresolved-overlap"
+    },
+    {
+      "id": "trench-pipe-too-wide",
+      "kind": "trench",
+      "inputs": {
+        "width": 1,
+        "depth": 1,
+        "length": 10,
+        "outerDiameter": 1.1,
+        "bedWidth": 1,
+        "bedThickness": 0.1,
+        "unit": "m",
+        "bedPosition": "below-pipe-no-overlap"
+      },
+      "expectedError": "pipe-outside-trench"
+    },
+    {
+      "id": "trench-too-shallow",
+      "kind": "trench",
+      "inputs": {
+        "width": 1,
+        "depth": 0.39,
+        "length": 10,
+        "outerDiameter": 0.3,
+        "bedWidth": 1,
+        "bedThickness": 0.1,
+        "unit": "m",
+        "bedPosition": "below-pipe-no-overlap"
+      },
+      "expectedError": "bed-plus-pipe-exceeds-depth"
+    },
+    {
+      "id": "trench-negative-layer",
+      "kind": "trench",
+      "inputs": {
+        "width": 1,
+        "depth": 1,
+        "length": 10,
+        "outerDiameter": 0.3,
+        "bedWidth": 1,
+        "bedThickness": -0.1,
+        "unit": "m",
+        "bedPosition": "below-pipe-no-overlap"
+      },
+      "expectedError": "negative"
+    },
+    {
+      "id": "trench-no-pipe-diameter",
+      "kind": "trench",
+      "inputs": {
+        "width": 1,
+        "depth": 1,
+        "length": 10,
+        "outerDiameter": "",
+        "bedWidth": 1,
+        "bedThickness": 0.1,
+        "unit": "m",
+        "bedPosition": "below-pipe-no-overlap"
+      },
+      "expectedError": "required-blank"
+    },
+    {
+      "id": "curb-ten-metres",
+      "kind": "curb",
+      "inputs": {
+        "mode": "physical-plus-internal-joints",
+        "runM": 10,
+        "productLengthM": 0.6,
+        "jointM": 0.01
+      },
+      "expected": {
+        "pieces": 17,
+        "joints": 16,
+        "grossRunM": 10.36,
+        "trimM": 0.36
+      }
+    },
+    {
+      "id": "curb-exact-boundary",
+      "kind": "curb",
+      "inputs": {
+        "mode": "physical-plus-internal-joints",
+        "runM": 6.09,
+        "productLengthM": 0.6,
+        "jointM": 0.01
+      },
+      "expected": {
+        "pieces": 10,
+        "joints": 9,
+        "grossRunM": 6.09,
+        "trimM": 0
+      }
+    },
+    {
+      "id": "curb-one-mm-over",
+      "kind": "curb",
+      "inputs": {
+        "mode": "physical-plus-internal-joints",
+        "runM": 6.091,
+        "productLengthM": 0.6,
+        "jointM": 0.01
+      },
+      "expected": {
+        "pieces": 11,
+        "joints": 10,
+        "grossRunM": 6.7,
+        "trimM": 0.609
+      }
+    },
+    {
+      "id": "curb-zero-joint",
+      "kind": "curb",
+      "inputs": {
+        "mode": "physical-plus-internal-joints",
+        "runM": 6,
+        "productLengthM": 0.6,
+        "jointM": 0
+      },
+      "expected": {
+        "pieces": 10,
+        "joints": 9,
+        "grossRunM": 6,
+        "trimM": 0
+      }
+    },
+    {
+      "id": "curb-effective-joint-included",
+      "kind": "curb",
+      "inputs": {
+        "mode": "effective-module",
+        "runM": 10,
+        "productLengthM": 2
+      },
+      "expected": {
+        "pieces": 5
+      }
+    },
+    {
+      "id": "curb-double-joint",
+      "kind": "curb",
+      "inputs": {
+        "mode": "effective-module",
+        "runM": 10,
+        "productLengthM": 2,
+        "jointM": 0.01
+      },
+      "expectedError": "joint-already-included"
+    },
+    {
+      "id": "curb-arc",
+      "kind": "curb",
+      "inputs": {
+        "mode": "physical-plus-internal-joints",
+        "runM": 10,
+        "productLengthM": 0.6,
+        "jointM": 0.01,
+        "alignment": "arc"
+      },
+      "expectedError": "unsupported-alignment"
+    },
+    {
+      "id": "curb-zero-product",
+      "kind": "curb",
+      "inputs": {
+        "mode": "physical-plus-internal-joints",
+        "runM": 10,
+        "productLengthM": 0,
+        "jointM": 0.01
+      },
+      "expectedError": "nonpositive-product-length"
+    },
+    {
+      "id": "curb-zero-run",
+      "kind": "curb",
+      "inputs": {
+        "mode": "physical-plus-internal-joints",
+        "runM": 0,
+        "productLengthM": 0.6,
+        "jointM": 0.01
+      },
+      "expectedError": "nonpositive-run"
+    },
+    {
+      "id": "sealant-loss20-requested",
+      "kind": "sealant",
+      "inputs": {
+        "widthMm": 10,
+        "depthMm": 10,
+        "lengthM": 150,
+        "capacityMl": 320,
+        "mode": "container-loss",
+        "percent": 20
+      },
+      "expected": {
+        "installedMl": 15000,
+        "effectiveCapacityMl": 256,
+        "pieces": 59
+      }
+    },
+    {
+      "id": "sealant-extra20-different",
+      "kind": "sealant",
+      "inputs": {
+        "widthMm": 10,
+        "depthMm": 10,
+        "lengthM": 150,
+        "capacityMl": 320,
+        "mode": "extra-volume",
+        "percent": 20
+      },
+      "expected": {
+        "installedMl": 15000,
+        "purchaseTargetMl": 18000,
+        "pieces": 57
+      }
+    },
+    {
+      "id": "sealant-zero-loss",
+      "kind": "sealant",
+      "inputs": {
+        "widthMm": 10,
+        "depthMm": 10,
+        "lengthM": 150,
+        "capacityMl": 320,
+        "mode": "container-loss",
+        "percent": 0
+      },
+      "expected": {
+        "installedMl": 15000,
+        "effectiveCapacityMl": 320,
+        "pieces": 47
+      }
+    },
+    {
+      "id": "sealant-exact-container",
+      "kind": "sealant",
+      "inputs": {
+        "widthMm": 10,
+        "depthMm": 10,
+        "lengthM": 2.56,
+        "capacityMl": 320,
+        "mode": "container-loss",
+        "percent": 20
+      },
+      "expected": {
+        "installedMl": 256,
+        "effectiveCapacityMl": 256,
+        "pieces": 1
+      }
+    },
+    {
+      "id": "sealant-over-container",
+      "kind": "sealant",
+      "inputs": {
+        "widthMm": 10,
+        "depthMm": 10,
+        "lengthM": 2.56001,
+        "capacityMl": 320,
+        "mode": "container-loss",
+        "percent": 20
+      },
+      "expected": {
+        "installedMl": 256.001,
+        "effectiveCapacityMl": 256,
+        "pieces": 2
+      }
+    },
+    {
+      "id": "sealant-all-lost",
+      "kind": "sealant",
+      "inputs": {
+        "widthMm": 10,
+        "depthMm": 10,
+        "lengthM": 150,
+        "capacityMl": 320,
+        "mode": "container-loss",
+        "percent": 100
+      },
+      "expectedError": "zero-usable-capacity"
+    },
+    {
+      "id": "sealant-zero-depth",
+      "kind": "sealant",
+      "inputs": {
+        "widthMm": 10,
+        "depthMm": 0,
+        "lengthM": 150,
+        "capacityMl": 320,
+        "mode": "container-loss",
+        "percent": 20
+      },
+      "expectedError": "nonpositive-joint-depth"
+    },
+    {
+      "id": "sealant-double-loss-mode",
+      "kind": "sealant",
+      "inputs": {
+        "widthMm": 10,
+        "depthMm": 10,
+        "lengthM": 150,
+        "capacityMl": 320,
+        "mode": "container-loss",
+        "percent": 20,
+        "extraPercent": 20
+      },
+      "expectedError": "mutually-exclusive-loss-modes"
+    },
+    {
+      "id": "slope-requested",
+      "kind": "slope",
+      "inputs": {
+        "height": 3,
+        "heightUnit": "m",
+        "horizontalPerVertical": 1.5,
+        "lengthM": 10
+      },
+      "expected": {
+        "horizontalM": 4.5,
+        "slantM": 5.408326913195984,
+        "faceAreaM2": 54.08326913195984
+      }
+    },
+    {
+      "id": "slope-3-4-5",
+      "kind": "slope",
+      "inputs": {
+        "height": 3,
+        "heightUnit": "m",
+        "horizontalPerVertical": 1.3333333333333333,
+        "lengthM": 10
+      },
+      "expected": {
+        "horizontalM": 4,
+        "slantM": 5,
+        "faceAreaM2": 50
+      }
+    },
+    {
+      "id": "slope-mm-equivalence",
+      "kind": "slope",
+      "inputs": {
+        "height": 3000,
+        "heightUnit": "mm",
+        "horizontalPerVertical": 1.5,
+        "lengthM": 10
+      },
+      "expected": {
+        "horizontalM": 4.5,
+        "slantM": 5.408326913195984,
+        "faceAreaM2": 54.08326913195984
+      }
+    },
+    {
+      "id": "slope-vertical-geometry",
+      "kind": "slope",
+      "inputs": {
+        "height": 3,
+        "heightUnit": "m",
+        "horizontalPerVertical": 0,
+        "lengthM": 10
+      },
+      "expected": {
+        "horizontalM": 0,
+        "slantM": 3,
+        "faceAreaM2": 30
+      }
+    },
+    {
+      "id": "slope-negative-ratio",
+      "kind": "slope",
+      "inputs": {
+        "height": 3,
+        "heightUnit": "m",
+        "horizontalPerVertical": -1.5,
+        "lengthM": 10
+      },
+      "expectedError": "negative-ratio"
+    },
+    {
+      "id": "slope-zero-height",
+      "kind": "slope",
+      "inputs": {
+        "height": 0,
+        "heightUnit": "m",
+        "horizontalPerVertical": 1.5,
+        "lengthM": 10
+      },
+      "expectedError": "nonpositive-height"
+    },
+    {
+      "id": "slope-variable-section",
+      "kind": "slope",
+      "inputs": {
+        "height": 3,
+        "heightUnit": "m",
+        "horizontalPerVertical": 1.5,
+        "lengthM": 10,
+        "section": "variable"
+      },
+      "expectedError": "unsupported-face-geometry"
+    },
+    {
+      "id": "base-two-layers",
+      "kind": "base",
+      "inputs": {
+        "stoneAreaM2": 10,
+        "stoneThickness": 150,
+        "concreteAreaM2": 10,
+        "concreteThickness": 50,
+        "thicknessUnit": "mm"
+      },
+      "expected": {
+        "installedStoneM3": 1.5,
+        "installedConcreteM3": 0.5
+      }
+    },
+    {
+      "id": "base-m-equivalence",
+      "kind": "base",
+      "inputs": {
+        "stoneAreaM2": 10,
+        "stoneThickness": 0.15,
+        "concreteAreaM2": 10,
+        "concreteThickness": 0.05,
+        "thicknessUnit": "m"
+      },
+      "expected": {
+        "installedStoneM3": 1.5,
+        "installedConcreteM3": 0.5
+      }
+    },
+    {
+      "id": "base-purchase-separated",
+      "kind": "base",
+      "inputs": {
+        "stoneAreaM2": 10,
+        "stoneThickness": 150,
+        "concreteAreaM2": 10,
+        "concreteThickness": 50,
+        "thicknessUnit": "mm",
+        "loosePerCompacted": 1.2,
+        "looseDensityTPerM3": 1.6,
+        "concreteExtraPercent": 5
+      },
+      "expected": {
+        "installedStoneM3": 1.5,
+        "installedConcreteM3": 0.5,
+        "looseStoneM3": 1.8,
+        "looseStoneMassT": 2.88,
+        "concretePurchaseM3": 0.525
+      }
+    },
+    {
+      "id": "base-no-stone-layer",
+      "kind": "base",
+      "inputs": {
+        "stoneAreaM2": 10,
+        "stoneThickness": 0,
+        "concreteAreaM2": 10,
+        "concreteThickness": 50,
+        "thicknessUnit": "mm"
+      },
+      "expected": {
+        "installedStoneM3": 0,
+        "installedConcreteM3": 0.5
+      }
+    },
+    {
+      "id": "base-no-layers",
+      "kind": "base",
+      "inputs": {
+        "stoneAreaM2": 10,
+        "stoneThickness": 0,
+        "concreteAreaM2": 10,
+        "concreteThickness": 0,
+        "thicknessUnit": "mm"
+      },
+      "expectedError": "both-layers-absent"
+    },
+    {
+      "id": "base-negative-layer",
+      "kind": "base",
+      "inputs": {
+        "stoneAreaM2": 10,
+        "stoneThickness": -150,
+        "concreteAreaM2": 10,
+        "concreteThickness": 50,
+        "thicknessUnit": "mm"
+      },
+      "expectedError": "negative-thickness"
+    },
+    {
+      "id": "base-zero-conversion",
+      "kind": "base",
+      "inputs": {
+        "stoneAreaM2": 10,
+        "stoneThickness": 150,
+        "concreteAreaM2": 10,
+        "concreteThickness": 50,
+        "thicknessUnit": "mm",
+        "loosePerCompacted": 0
+      },
+      "expectedError": "nonpositive-volume-factor"
+    },
+    {
+      "id": "base-density-state-mismatch",
+      "kind": "base",
+      "inputs": {
+        "stoneAreaM2": 10,
+        "stoneThickness": 150,
+        "concreteAreaM2": 10,
+        "concreteThickness": 50,
+        "thicknessUnit": "mm",
+        "loosePerCompacted": 1.2,
+        "compactedDensityTPerM3": 1.92,
+        "massVolumeState": "loose"
+      },
+      "expectedError": "density-volume-state-mismatch"
+    }
+  ]
+}

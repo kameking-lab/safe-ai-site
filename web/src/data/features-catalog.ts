@@ -186,7 +186,7 @@ const ALL_FEATURES: FeatureItem[] = [
     category: "ky",
     tags: ["打合せ書", "記録"],
   },
-  {slug:"construction-quantity-tools",title:"数量・材料の現場計算ツール",summary:"図を見て入力。シート・ボード・塗装・メッシュの数量も計算",description:"生コン、土量、鉄筋、型枠、勾配、図面換算に加え、不整形面積と材料の割付を計算。例の数字と実測値を区別し、結果を端末内で扱います。",href:"/tools/construction-calculators",category:"construction-calc",tags:["数量","材料","割付"]},
+  {slug:"construction-quantity-tools",title:"数量・材料の現場計算ツール",summary:"図を見て入力。枚数・本数・土量・法面積を計算",description:"生コン、土量、鉄筋、型枠、勾配、図面換算、割付に加え、配管床材、縁石、シーリング、法面積、砕石・捨てコンを計算。例と実測を区別し、端末内で結果を扱います。",href:"/tools/construction-calculators",category:"construction-calc",tags:["数量","材料","割付"]},
   // 建設計算
   {
     slug: "construction-calc",

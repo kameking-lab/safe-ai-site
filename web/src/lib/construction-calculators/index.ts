@@ -12,3 +12,5 @@ export * from "./formwork";
 export * from "./slope";
 export * from "./drainage-slope";
 export * from "./scale-coordinate";
+
+export * from "./next-quantity";

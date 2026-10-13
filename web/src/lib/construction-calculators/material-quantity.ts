@@ -1,3 +1,4 @@
+import { calculateFoundationLayers, NEXT_QUANTITY_VERSION, type FoundationLayersInput } from "./next-quantity";
 import {
   MAX_AREA_M2,
   MAX_LINEAR_METRES,
@@ -83,7 +84,7 @@ function calculateMaterial(
   };
   return validResult({
     calculatorId,
-    formulaVersion: MATERIAL_QUANTITY_FORMULA_VERSION,
+    formulaVersion: calculatorId === AGGREGATE_BASE_CALCULATOR_ID ? NEXT_QUANTITY_VERSION : MATERIAL_QUANTITY_FORMULA_VERSION,
     rawOutputs: { netVolumeM3, requiredVolumeM3, requiredMassKg, requiredMassT: requiredMassKg / 1_000, vehicleCount },
     outputs,
     displayValues: [
@@ -107,8 +108,14 @@ function calculateMaterial(
   });
 }
 
-export const calculateAggregateBase = (input: MaterialQuantityInput): CalculationOutcome =>
-  calculateMaterial(input, AGGREGATE_BASE_CALCULATOR_ID);
+export const calculateAggregateBase = (input: MaterialQuantityInput | FoundationLayersInput): CalculationOutcome => {
+  if ("mode" in input) {
+    const modeIssue = enumIssue("mode", input.mode, ["single-layer", "two-layers"]);
+    if (modeIssue) return invalid([modeIssue]);
+    if (input.mode === "two-layers") return calculateFoundationLayers(input);
+  }
+  return calculateMaterial(input as MaterialQuantityInput, AGGREGATE_BASE_CALCULATOR_ID);
+};
 
 export const calculateAsphaltMixture = (input: MaterialQuantityInput): CalculationOutcome =>
   calculateMaterial(input, ASPHALT_MIXTURE_CALCULATOR_ID);

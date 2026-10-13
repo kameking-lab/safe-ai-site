@@ -6,7 +6,7 @@ export function inputUnit(field: InputDefinition, raw: Record<string, unknown>):
         return ({ quantity: field.label.includes("本") ? "本" : "個", layers: "段", faces: "面", intervalCount: "区間" } as Record<string, string>)[field.key] ?? "";
     if (field.units.length === 1)
         return field.units[0].replace("m2", "m²").replace("m3", "m³");
-    const unitKeys: Record<string, string> = { structureVolume: "deductionVolumeUnit", baseMaterialVolume: "deductionVolumeUnit", drawingLength: "drawingUnit", actualLength: "actualUnit", x1: "coordinateUnit", y1: "coordinateUnit", x2: "coordinateUnit", y2: "coordinateUnit" };
+    const unitKeys: Record<string, string> = { stoneThickness:"thicknessUnit", concreteThickness:"thicknessUnit", structureVolume: "deductionVolumeUnit", baseMaterialVolume: "deductionVolumeUnit", drawingLength: "drawingUnit", actualLength: "actualUnit", x1: "coordinateUnit", y1: "coordinateUnit", x2: "coordinateUnit", y2: "coordinateUnit" };
     if (field.key === "gradeValue")
         return raw.gradeMode === "permille" ? "‰" : raw.gradeMode === "ratio" ? "1:n" : "%";
     const unit = raw[unitKeys[field.key] ?? field.key + "Unit"] ?? raw.dimensionUnit ?? raw.lengthUnit ?? field.units[0];
@@ -59,10 +59,20 @@ export function CalculatorInputGuide({ slug, fields, raw }: {
         const circular = raw.shape === "cylinder" || raw.shape === "circular-foundation";
         visual = <><g fill="#e2e8f0" stroke="#64748b" strokeWidth="2">{circular ? circle : box}</g>{circular ? marker("diameter", 180, 17, "M115 40H245", "直径") : marker("length", 170, 151, "M100 137H245", "長さ")}{marker("height", 80, 90, "M93 55V125")}{!circular ? marker("width", 288, 28, "M254 48L287 24") : null}</>;
     }
+    else if (slug === "curb-quantity")
+        visual = <><g fill="#e2e8f0" stroke="#64748b" strokeWidth="2">{[65,117,169,221].map(x=><rect key={x} x={x} y="63" width="47" height="40"/>)}</g>{marker("runM",160,148,"M65 127H268","並べる総延長")}{marker("productLengthM",80,30,"M65 52H112",raw.mode==="effective-module"?"目地込み有効長":"製品の物理長")}{marker("jointM",235,29,"M216 52H221","内部目地")}<text x="80" y="119" fill="currentColor" fontSize="11">両端目地なし・最後は切断</text></>;
+    else if (slug === "sealant-quantity")
+        visual = <><g fill="#e2e8f0" stroke="#64748b" strokeWidth="2"><path d="M75 40H120V105H75Z M155 40H200V105H155Z"/><rect x="120" y="70" width="35" height="35" fill="#99f6e4"/><rect x="285" y="52" width="35" height="80"/><path d="M300 52V30h7v22"/></g>{marker("widthMm",128,25,"M120 52H155","目地幅")}{marker("depthMm",230,88,"M215 70V105","充填深さ")}{marker("lengthM",155,152,undefined,"同じ断面の延長")}{marker("capacityMl",277,152,undefined,"1本容量")}</>;
+    else if (slug === "excavation-backfill" && raw.shape === "pipe-trench")
+        visual = <><g fill="#e2e8f0" stroke="#64748b" strokeWidth="2"><path d="M65 32V120H260V32"/><rect x="91" y="103" width="142" height="17" fill="#fed7aa"/><circle cx="162" cy="74" r="29" fill="#e0f2fe"/></g>{marker("width",150,151,"M65 135H260","底幅")}{marker("depth",306,70,"M283 32V120")}{marker("outerDiameter",110,55,"M133 74H191","管外径")}{marker("bedThickness",285,120,undefined,"床材厚さ")}{marker("bedWidth",45,113,undefined,"床材幅")}<text x="58" y="21" fill="currentColor" fontSize="11">管は床材の上・非重複。延長は溝方向。</text></>;
     else if (slug === "excavation-backfill")
         visual = <><g fill="#e2e8f0" stroke="#64748b" strokeWidth="2"><path d={raw.shape === "vertical" ? "M75 40H280V125H75Z" : "M55 40H300L260 125H95Z"}/></g>{marker("width", 177, 148, "M95 137H260", "底幅")}{marker("depth", 326, 83, "M310 40V125")}{raw.shape !== "vertical" ? marker("sideSlopeHorizontalPerVertical", 40, 83, undefined, "法勾配") : null}<text x="84" y="25" fill="currentColor" fontSize="12">延長は溝に沿って測る（図は断面）</text></>;
+    else if (slug === "slope-angle-length" && raw.mode === "face-area")
+        visual = <><g fill="#e2e8f0" stroke="#64748b" strokeWidth="2"><path d="M65 125H215V45Z"/><path d="M65 125l65-30 150-80-65 30Z" fill="#c7d2fe"/><path d="M215 125l65-30V15l-65 30" fill="none"/></g>{marker("height",240,120,"M225 45V125","高さH")}{marker("horizontalPerVertical",100,24,undefined,"鉛直1:水平s")}{marker("lengthM",300,62,"M235 43L285 18","延長L")}<text x="75" y="151" fill="currentColor" fontSize="11">断面：水平幅R=H×s　斜長S</text><text x="160" y="166" fill="currentColor" fontSize="11">延長Lは断面に直交</text></>;
     else if (slug === "slope-angle-length" || slug === "drainage-slope")
         visual = <><g fill="#e2e8f0" stroke="#64748b" strokeWidth="2"><path d="M65 125H275V35Z"/></g>{marker(slug === "drainage-slope" ? "length" : "horizontalDistance", 160, 150, "M65 138H275", "水平距離")}{marker("rise", 310, 80, "M292 35V125")}{marker("gradeValue", 167, 66, undefined, "勾配")}{marker("slopePercent", 167, 66, undefined, "勾配")}{marker("angleDegrees", 85, 107, undefined, "角度")}{marker("ratioN", 167, 66, undefined, "1:n")}{marker("referenceElevationM", 30, 95, undefined, "標高")}</>;
+    else if (slug === "aggregate-base-quantity" && raw.mode === "two-layers")
+        visual = <><g stroke="#64748b" strokeWidth="2"><path d="M60 80H255V130H60Z M60 80l35-25h195l-35 25v50l35-25V55" fill="#fed7aa"/><path d="M85 45H245V80H85Z M85 45l35-20h160l-35 20v35l35-20V25" fill="#e2e8f0"/></g>{marker("concreteAreaM2",155,25,undefined,"捨てコン面積")}{marker("concreteThickness",310,51,"M295 25V60")}{marker("stoneAreaM2",115,117,undefined,"砕石面積")}{marker("stoneThickness",285,127,"M277 81V130")}<text x="30" y="156" fill="currentColor" fontSize="11">各層の範囲を別入力・厚さ0はその層なし</text></>;
     else if (slug === "aggregate-base-quantity" || slug === "asphalt-mixture-quantity")
         visual = <><g fill="#e2e8f0" stroke="#64748b" strokeWidth="2">{box}</g>{marker("area", 164, 83, undefined, "施工面積")}{marker("thickness", 308, 92, "M292 55V125", "厚さ")}<text x="108" y="152" fill="currentColor" fontSize="12">密度は材料の仕様書から入力</text></>;
     else if (slug === "rebar-weight")
@@ -82,6 +92,6 @@ export function CalculatorInputGuide({ slug, fields, raw }: {
     return <figure className="mt-3 rounded-xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-600 dark:bg-slate-800" aria-label="図の番号と同じ番号の欄へ入力">
   <figcaption className="text-xs font-bold">図の番号を押すと入力欄へ。図は概略です。</figcaption>
   <svg viewBox="0 0 360 170" role="group" aria-label="測る場所と入力欄の関係" className="mx-auto h-28 w-full max-w-md text-slate-900 dark:text-white">{visual}</svg>
-  <div className="mt-1 grid grid-cols-3 gap-1">{numeric.slice(0, panel ? 4 : 3).map((field, i) => <button key={field.key} type="button" onClick={() => focus(field.key)} className={"min-h-11 rounded-md border-l-4 p-1 text-left text-xs font-bold " + INPUT_COLORS[i % 4]}>{i + 1}. {field.label}<span className="block tabular-nums">{raw[field.key] === "" || raw[field.key] == null ? "未入力" : String(raw[field.key])} {inputUnit(field, raw)}</span></button>)}</div>
+  <div className="mt-1 grid grid-cols-3 gap-1">{numeric.slice(0, panel || raw.mode === "two-layers" || slug === "sealant-quantity" ? 4 : raw.shape === "pipe-trench" ? 6 : 3).map((field, i) => <button key={field.key} type="button" onClick={() => focus(field.key)} className={"min-h-11 rounded-md border-l-4 p-1 text-left text-xs font-bold " + INPUT_COLORS[i % 4]}>{i + 1}. {field.label}<span className="block tabular-nums">{raw[field.key] === "" || raw[field.key] == null ? "未入力" : String(raw[field.key])} {inputUnit(field, raw)}</span></button>)}</div>
  </figure>;
 }
