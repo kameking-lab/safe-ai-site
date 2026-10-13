@@ -10,14 +10,6 @@ export async function assertNoJsAccidentNews(
     recent.getByRole("heading", { level: 2, name: "直近の報道", exact: true }),
   ).toBeVisible({ timeout: timeoutMs });
   const message = recent.locator("h2 + p");
-  await expect(message).toBeVisible({ timeout: timeoutMs });
-  await expect(message).toHaveText(/\S/, { timeout: timeoutMs });
-  await expect(
-    recent.getByText(
-      "件数は報道記事の数です。同じ事故の続報を含む場合があり、全国の事故発生件数を示すものではありません。",
-      { exact: true },
-    ),
-  ).toBeVisible({ timeout: timeoutMs });
 
   const results = recent.locator("[data-accident-news-results]");
   const fallback = recent.getByRole("status");
@@ -29,6 +21,10 @@ export async function assertNoJsAccidentNews(
 
   if ((await results.count()) === 1) {
     await expect(results).toBeVisible({ timeout: timeoutMs });
+    await expect(message).toHaveCount(0, { timeout: timeoutMs });
+    await expect(recent.getByText(/報道・内容未確認。公表日時は記事の掲載日時であり、事故発生日ではありません。/)).toHaveCount(1, { timeout: timeoutMs });
+    await expect(recent.getByText(/発生経緯・原因・法的評価は一次資料で未確認です。/)).toHaveCount(1, { timeout: timeoutMs });
+    await expect(recent.getByText("掲載件数は報道記事の数です。同じ事故の続報を含む場合があり、全国の事故発生件数ではありません。", { exact: true })).toBeVisible({ timeout: timeoutMs });
     const countText = await results.getAttribute("data-result-count", {
       timeout: timeoutMs,
     });
@@ -45,15 +41,18 @@ export async function assertNoJsAccidentNews(
       await expect(title).toBeVisible({ timeout: timeoutMs });
       await expect(title).toHaveText(/\S/, { timeout: timeoutMs });
       await expect(title.getByRole("link")).toHaveAttribute("href", /^https?:\/\//, { timeout: timeoutMs });
-      await expect(report.locator(":scope > p").first()).toBeVisible({ timeout: timeoutMs });
-      await expect(report.locator(":scope > p").first()).toHaveText(/\S/, { timeout: timeoutMs });
-      await expect(report.getByText(/報道・内容未確認.*出典媒体/)).toBeVisible({ timeout: timeoutMs });
+      await expect(report.locator("time[datetime]")).toHaveCount(1, { timeout: timeoutMs });
+      await expect(report.locator(":scope > p").first()).toContainText("記事公表", { timeout: timeoutMs });
+      await expect(report.getByText(/^報道媒体：\S+/)).toBeVisible({ timeout: timeoutMs });
+      await expect(report.getByRole("link", { name: "元記事で確認する" })).toHaveAttribute("href", /^https?:\/\//, { timeout: timeoutMs });
+      await expect(report.getByText(/報道・内容未確認/)).toHaveCount(0, { timeout: timeoutMs });
     }
     return { state: "reports", recordedArticles: count };
   }
 
   await expect(results).toHaveCount(0, { timeout: timeoutMs });
   await expect(fallback).toBeVisible({ timeout: timeoutMs });
+  await expect(message).toBeVisible({ timeout: timeoutMs });
   await expect(message).toHaveText(
     /^(?:14日以内の国内労災報道を確認できませんでした。0件・事故なしとは判定しません。|報道RSSを取得できませんでした。0件・事故なしとは判定せず、厚労省速報集計を表示します。)$/,
     { timeout: timeoutMs },

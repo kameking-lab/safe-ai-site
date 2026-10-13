@@ -59,7 +59,6 @@ for (const width of [1280, 390]) {
       expect(searchResponse.status()).toBe(200);
       expect((await searchResponse.json()).items).toContainEqual(expect.objectContaining({ cas: "67-64-1", primaryName: "アセトン" }));
       await expect(input).toHaveValue("アセトン");
-      await page.getByRole("button", { name: "作業条件へ進む", exact: true }).click();
       const [response] = await Promise.all([
         page.waitForResponse((item) => item.url().endsWith("/api/chemical-ra") && item.request().method() === "POST"),
         page.getByRole("button", { name: "公的情報を確認", exact: true }).click(),

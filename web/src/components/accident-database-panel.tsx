@@ -29,8 +29,20 @@ import {
   readTransientAccidentKeyword,
 } from "@/lib/accidents/transient-search";
 import { Mascot } from "@/components/mascot";
+import {
+  ACCIDENT_TYPE_TO_HAZARD_SLUG,
+  CANONICAL_HAZARD_TYPES,
+} from "@/lib/accidents/type-normalization";
+import {
+  filterCaseSearchResults,
+  readCaseSearchFilters,
+  type CaseSearchFilters,
+} from "@/lib/accidents-analytics/case-search-filters";
 
 const PAGE_SIZE = 40;
+const SEARCHABLE_HAZARD_OPTIONS = CANONICAL_HAZARD_TYPES.filter((item) =>
+  Object.values(ACCIDENT_TYPE_TO_HAZARD_SLUG).includes(item.slug),
+);
 
 type IndustryKey =
   | "construction"
@@ -131,6 +143,65 @@ export function AccidentDatabasePanel({
   const previousKeywordRef = useRef(keyword);
   const [selectedWorkerAttribute, setSelectedWorkerAttribute] = useState<WorkerAttributeFilter>("すべて");
   const [selectedCompanySize, setSelectedCompanySize] = useState<CompanySizeFilter>("全規模");
+  const [caseSearchFilters, setCaseSearchFilters] = useState<CaseSearchFilters>({
+    hazard: null,
+    year: null,
+    severity: null,
+  });
+
+  useEffect(() => {
+    const restore = () => {
+      const params = new URLSearchParams(window.location.search);
+      setCaseSearchFilters(readCaseSearchFilters(params));
+      setSelectedIndustriesState(parseIndustriesParam(params.get("acc_industries")));
+      const attr = params.get("acc_attr");
+      setSelectedWorkerAttribute(
+        attr && (WORKER_ATTRIBUTE_OPTIONS as readonly string[]).includes(attr)
+          ? (attr as WorkerAttributeFilter)
+          : "すべて",
+      );
+      const size = params.get("acc_size");
+      setSelectedCompanySize(
+        size && (COMPANY_SIZE_OPTIONS as readonly string[]).includes(size)
+          ? (size as CompanySizeFilter)
+          : "全規模",
+      );
+      const pageParam = Number.parseInt(params.get("acc_page") ?? "", 10);
+      setPage(Number.isFinite(pageParam) && pageParam > 0 ? pageParam - 1 : 0);
+    };
+    restore();
+    window.addEventListener("popstate", restore);
+    return () => window.removeEventListener("popstate", restore);
+  }, []);
+
+  const updateCaseSearchFilters = (changes: Partial<CaseSearchFilters>) => {
+    const next = { ...caseSearchFilters, ...changes };
+    setCaseSearchFilters(next);
+    setPage(0);
+    const params = new URLSearchParams(window.location.search);
+    if (next.hazard) params.set("acc_hazard", next.hazard); else params.delete("acc_hazard");
+    if (next.year !== null) params.set("acc_year", String(next.year)); else params.delete("acc_year");
+    if (next.severity) params.set("acc_severity", next.severity); else params.delete("acc_severity");
+    if (next.hazard) params.delete("acc_type");
+    params.delete("acc_page");
+    window.history.replaceState(null, "", `?${params.toString()}`);
+  };
+
+  const clearAllFilters = () => {
+    setCaseSearchFilters({ hazard: null, year: null, severity: null });
+    setSelectedIndustriesState(new Set());
+    setSelectedWorkerAttribute("すべて");
+    setSelectedCompanySize("全規模");
+    setKeyword("");
+    setPage(0);
+    onSelectType("すべて");
+    onSelectCategory("すべて");
+    const params = new URLSearchParams(window.location.search);
+    for (const key of ["acc_hazard", "acc_year", "acc_severity", "acc_industries", "acc_attr", "acc_size", "acc_kw", "q", "acc_page", "acc_type"]) {
+      params.delete(key);
+    }
+    window.history.replaceState(null, "", `?${params.toString()}`);
+  };
 
   useEffect(() => {
     const input = keywordInputRef.current;
@@ -259,7 +330,7 @@ export function AccidentDatabasePanel({
   }, [updateIndustriesUrl, setPage]);
 
   const filteredByIndustry = useMemo(() => {
-    const filtered = cases.filter((c) => {
+    const filtered = filterCaseSearchResults(cases, caseSearchFilters).filter((c) => {
       if (!matchesAnyIndustry(c.workCategory, selectedIndustries)) return false;
       if (selectedWorkerAttribute !== "すべて") {
         const attrs = c.worker_attribute;
@@ -272,9 +343,21 @@ export function AccidentDatabasePanel({
       return true;
     });
     return rankAccidents(filtered, keyword);
-  }, [cases, selectedIndustries, selectedWorkerAttribute, selectedCompanySize, keyword]);
+  }, [cases, caseSearchFilters, selectedIndustries, selectedWorkerAttribute, selectedCompanySize, keyword]);
 
   const totalCasesForDisplay = filteredByIndustry.length;
+  const yearOptions = Array.from(new Set([
+    ...allCases.map((item) => Number(item.occurredOn.slice(0, 4)))
+      .filter((year) => Number.isInteger(year) && year >= 1800 && year <= 2099),
+    ...(caseSearchFilters.year === null ? [] : [caseSearchFilters.year]),
+  ])).sort((a, b) => b - a);
+  const activeConditions = [
+    ...INDUSTRY_OPTIONS.filter((option) => selectedIndustries.has(option.key)).map((option) => `業種: ${option.label}`),
+    ...(selectedType === "すべて" ? [] : [`事故の型: ${selectedType}`]),
+    ...(caseSearchFilters.hazard ? [`事故の型: ${SEARCHABLE_HAZARD_OPTIONS.find((item) => item.slug === caseSearchFilters.hazard)?.label ?? caseSearchFilters.hazard}`] : []),
+    ...(caseSearchFilters.year === null ? [] : [`年: ${caseSearchFilters.year}年`]),
+    ...(caseSearchFilters.severity ? [`重症度: ${caseSearchFilters.severity}`] : []),
+  ];
   const totalPages = Math.max(1, Math.ceil(totalCasesForDisplay / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages - 1);
   const pageItems = useMemo(() => {
@@ -304,6 +387,14 @@ export function AccidentDatabasePanel({
         </div>
         <Mascot variant="detective" size="md" alt="" className="hidden shrink-0 sm:block" />
       </div>
+
+      {activeConditions.length > 0 ? (
+        <div className="mt-3 flex flex-wrap items-center gap-2 text-xs" aria-label="事例検索の適用条件">
+          <span className="font-bold text-slate-700">適用条件</span>
+          {activeConditions.map((condition) => <span key={condition} className="rounded-full bg-sky-50 px-2 py-1 text-sky-900">{condition}</span>)}
+          <button type="button" onClick={clearAllFilters} className="min-h-11 font-semibold text-sky-800 underline underline-offset-2">すべての絞り込みを解除</button>
+        </div>
+      ) : null}
 
       <details className="mt-3 rounded-xl border border-slate-200 px-3 print:hidden">
         <summary className="flex min-h-[44px] cursor-pointer items-center text-sm font-bold text-slate-800">
@@ -435,6 +526,7 @@ export function AccidentDatabasePanel({
             value={selectedType}
             onChange={(event) => {
               onSelectType(event.target.value as AccidentType | "すべて");
+              updateCaseSearchFilters({ hazard: null });
               setPage(0);
             }}
             className="mt-1 w-full max-w-md rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-emerald-500 focus:outline-none"
@@ -445,6 +537,37 @@ export function AccidentDatabasePanel({
               </option>
             ))}
           </select>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-3">
+          <div>
+            <label htmlFor="accident-hazard-filter" className="block text-xs font-semibold text-slate-700">統計から引き継いだ事故の型</label>
+            <select id="accident-hazard-filter" value={caseSearchFilters.hazard ?? ""} onChange={(event) => {
+              if (event.target.value) onSelectType("すべて");
+              updateCaseSearchFilters({ hazard: event.target.value ? event.target.value as CaseSearchFilters["hazard"] : null });
+            }} className="mt-1 min-h-11 w-full rounded-lg border border-slate-300 bg-white px-2 text-sm">
+              <option value="">指定なし</option>
+              {SEARCHABLE_HAZARD_OPTIONS.map((item) => (
+                <option key={item.slug} value={item.slug}>{item.label}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label htmlFor="accident-year-filter" className="block text-xs font-semibold text-slate-700">発生年</label>
+            <select id="accident-year-filter" value={caseSearchFilters.year ?? ""} onChange={(event) => updateCaseSearchFilters({ year: event.target.value ? Number(event.target.value) : null })} className="mt-1 min-h-11 w-full rounded-lg border border-slate-300 bg-white px-2 text-sm">
+              <option value="">指定なし</option>
+              {yearOptions.map((year) => <option key={year} value={year}>{year}年</option>)}
+            </select>
+          </div>
+          <div>
+            <label htmlFor="accident-severity-filter" className="block text-xs font-semibold text-slate-700">重症度</label>
+            <select id="accident-severity-filter" value={caseSearchFilters.severity ?? ""} onChange={(event) => updateCaseSearchFilters({ severity: event.target.value ? event.target.value as CaseSearchFilters["severity"] : null })} className="mt-1 min-h-11 w-full rounded-lg border border-slate-300 bg-white px-2 text-sm">
+              <option value="">指定なし</option>
+              <option value="軽傷">軽傷</option>
+              <option value="中等傷">中等傷</option>
+              <option value="重傷">重傷</option>
+              <option value="死亡">死亡</option>
+            </select>
+          </div>
         </div>
         </div>
       </details>

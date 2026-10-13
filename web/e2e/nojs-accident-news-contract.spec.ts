@@ -11,18 +11,19 @@ const safeFallback = "取得できない状態を「事故なし」とは表示�
 function fixture(message: string, count: number, content: string): string {
   return `<main><h1>国内の死亡事故速報</h1>
     <section aria-labelledby="latest-report-heading">
-      <div><h2 id="latest-report-heading">直近の報道</h2><p>${message}</p><span>掲載 ${count}記事</span></div>
-      <p>件数は報道記事の数です。同じ事故の続報を含む場合があり、全国の事故発生件数を示すものではありません。</p>
+      <div><h2 id="latest-report-heading">直近の報道</h2>${count ? "" : `<p>${message}</p>`}<span>掲載 ${count}記事</span></div>
+      ${count ? `<div><p>報道・内容未確認。公表日時は記事の掲載日時であり、事故発生日ではありません。発生経緯・原因・法的評価は一次資料で未確認です。</p><p>掲載件数は報道記事の数です。同じ事故の続報を含む場合があり、全国の事故発生件数ではありません。</p></div>` : ""}
       ${content}
     </section></main>`;
 }
 
 const report = `<li data-accident-origin="reported-unverified">
+  <p>記事公表 <time datetime="2026-10-13T01:00:00.000Z">2026/10/13 10:00</time> JST</p>
   <h3><a href="https://example.invalid/report">テスト用の報道見出し</a></h3>
-  <p>テスト用の報道概要。</p><div><p>報道・内容未確認 ／ 出典媒体：テスト媒体</p></div>
+  <p>報道媒体：テスト媒体</p><div><a href="https://example.invalid/report">元記事で確認する</a></div>
 </li>`;
 
-test("no-JS: 記事ありでは件数・一覧構造・見出し・本文を検証する", async ({ page }) => {
+test("no-JS: 記事ありでは共通注意と各カードの日時・媒体・元記事を検証する", async ({ page }) => {
   await page.setContent(fixture("公表日時順。報道見出しであり、行政・捜査機関による事故確定情報ではありません。", 1,
     `<ol data-accident-news-results data-result-count="1">${report}</ol>`));
   await expect(assertNoJsAccidentNews(page)).resolves.toEqual({ state: "reports", recordedArticles: 1 });
@@ -38,6 +39,23 @@ for (const [label, message] of [["直近記事未確認", emptyMessage], ["RSS�
 test("no-JS: 記事件数と実際の一覧件数が違えば拒否する", async ({ page }) => {
   await page.setContent(fixture("公表日時順。", 2,
     `<ol data-accident-news-results data-result-count="2">${report}</ol>`));
+  await expect(assertNoJsAccidentNews(page, { timeoutMs: 200 })).rejects.toThrow();
+});
+
+test("no-JS: 公表日時と発生日の区別が欠けた共通注意を拒否する", async ({ page }) => {
+  await page.setContent(fixture("公表日時順。", 1,
+    `<ol data-accident-news-results data-result-count="1">${report}</ol>`)
+    .replace("公表日時は記事の掲載日時であり、事故発生日ではありません。", ""));
+  await expect(assertNoJsAccidentNews(page, { timeoutMs: 200 })).rejects.toThrow();
+});
+
+test("no-JS: カードから媒体または元記事確認が欠ければ拒否する", async ({ page }) => {
+  const content = `<ol data-accident-news-results data-result-count="1">${report.replace("報道媒体：テスト媒体", "媒体不明")}</ol>`;
+  await page.setContent(fixture("公表日時順。", 1, content));
+  await expect(assertNoJsAccidentNews(page, { timeoutMs: 200 })).rejects.toThrow();
+
+  await page.setContent(fixture("公表日時順。", 1,
+    `<ol data-accident-news-results data-result-count="1">${report.replace("元記事で確認する", "詳細")}</ol>`));
   await expect(assertNoJsAccidentNews(page, { timeoutMs: 200 })).rejects.toThrow();
 });
 

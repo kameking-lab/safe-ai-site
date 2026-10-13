@@ -28,6 +28,11 @@ describe("事故速報と死亡事故データベースの役割分離", () => {
     expect(source).toContain("report.publishedAt");
     expect(source).toContain("report.publisher");
     expect(source).toContain("報道・内容未確認");
+    expect(source).toContain("公表日時は記事の掲載日時であり、事故発生日ではありません");
+    expect(source).toContain("報道媒体：{report.publisher}");
+    expect(source).toContain('<time dateTime={report.publishedAt}>');
+    expect(source).not.toContain("{report.summary}");
+    expect(source.match(/報道・内容未確認/g)).toHaveLength(1);
     expect(source).toContain('href="/fatal-accidents"');
     expect(source).not.toContain("SERIOUS_CASES_META");
   });

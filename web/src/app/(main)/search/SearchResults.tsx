@@ -360,14 +360,17 @@ export function SearchResults() {
         <div className="flex items-center gap-2 rounded-[var(--radius-md)] border border-portal-border bg-portal-surface px-3 py-2.5 shadow-[var(--shadow-xs)] focus-within:border-brand-primary focus-within:ring-4 focus-within:ring-brand-primary/20">
           <Search className="h-5 w-5 shrink-0 text-slate-400" aria-hidden="true" />
           <input
-            type="search"
+            type="text"
+            role="searchbox"
+            inputMode="search"
+            enterKeyHint="search"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="キーワードを入力（例: アーク溶接、トルエン、安全配慮義務）"
             aria-label="サイト内を横断検索"
             autoComplete="off"
             disabled={!isClientReady}
-            className="min-h-[28px] min-w-0 flex-1 bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-400 dark:text-slate-100"
+            className="min-h-11 min-w-0 flex-1 bg-transparent text-base text-slate-900 outline-none placeholder:text-slate-400 sm:text-sm dark:text-slate-100"
           />
           {input && (
             <button
@@ -377,7 +380,7 @@ export function SearchResults() {
                 runSearch('', activeCategory);
               }}
               aria-label="検索語をクリア"
-              className="shrink-0 rounded p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+              className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded text-slate-500 hover:text-slate-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-primary dark:hover:text-slate-200"
             >
               <X className="h-4 w-4" />
             </button>

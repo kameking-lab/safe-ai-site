@@ -96,16 +96,24 @@ export default async function AccidentNewsPage({
               <h2 id="latest-report-heading" className="text-xl font-black text-slate-950 sm:text-2xl">
                 直近の報道
               </h2>
-              <p className="mt-1 text-xs leading-5 text-slate-600">{latestNews.message}</p>
+              {latestNews.items.length === 0 ? (
+                <p className="mt-1 text-xs leading-5 text-slate-600">{latestNews.message}</p>
+              ) : null}
             </div>
             <span className="rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-black text-slate-700">
               掲載 {latestNews.items.length}記事
             </span>
           </div>
 
-          <p className="mt-2 text-xs leading-5 text-slate-600">
-            件数は報道記事の数です。同じ事故の続報を含む場合があり、全国の事故発生件数を示すものではありません。
-          </p>
+          {latestNews.items.length > 0 ? (
+            <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs leading-6 text-amber-950">
+              <p className="flex items-start gap-2 font-bold">
+                <ShieldAlert className="mt-1 h-4 w-4 shrink-0" aria-hidden="true" />
+                <span>報道・内容未確認。公表日時は記事の掲載日時であり、事故発生日ではありません。発生経緯・原因・法的評価は一次資料で未確認です。</span>
+              </p>
+              <p className="mt-1 pl-6">掲載件数は報道記事の数です。同じ事故の続報を含む場合があり、全国の事故発生件数ではありません。</p>
+            </div>
+          ) : null}
 
           {latestNews.items.length > 0 ? (
             <ol
@@ -119,13 +127,9 @@ export default async function AccidentNewsPage({
                   className="flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
                   data-accident-origin="reported-unverified"
                 >
-                  <div className="flex flex-wrap gap-2 text-[11px] font-black">
-                    <span className="rounded-full bg-slate-100 px-2.5 py-1 text-slate-700">
-                      公表 {dateTimeFormatter.format(new Date(report.publishedAt))} JST
-                    </span>
-                    <span className="rounded-full bg-sky-50 px-2.5 py-1 text-sky-800">{report.industry}</span>
-                    <span className="rounded-full bg-rose-50 px-2.5 py-1 text-rose-800">{report.accidentType}</span>
-                  </div>
+                  <p className="text-xs font-bold text-slate-600">
+                    記事公表 <time dateTime={report.publishedAt}>{dateTimeFormatter.format(new Date(report.publishedAt))}</time> JST
+                  </p>
                   <h3 className="mt-3 text-lg font-black leading-7 text-slate-950">
                     <a
                       href={report.href}
@@ -137,15 +141,16 @@ export default async function AccidentNewsPage({
                       <span className="sr-only">（外部サイト）</span>
                     </a>
                   </h3>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">{report.summary}</p>
-                  <div className="mt-4 rounded-xl bg-emerald-50 p-3 text-xs font-bold leading-5 text-emerald-950">
-                    一般的な関連対策：{report.measure}
+                  <p className="mt-2 text-sm font-bold text-slate-700">報道媒体：{report.publisher}</p>
+                  <div className="mt-3 flex flex-wrap gap-2 text-[11px] font-bold">
+                    <span className="rounded-full bg-sky-50 px-2.5 py-1 text-sky-800">{report.industry}</span>
+                    <span className="rounded-full bg-rose-50 px-2.5 py-1 text-rose-800">{report.accidentType}</span>
                   </div>
-                  <div className="mt-auto pt-4">
-                    <p className="inline-flex items-start gap-1.5 text-xs font-bold leading-5 text-amber-800">
-                      <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-                      報道・内容未確認 ／ 出典媒体：{report.publisher}
-                    </p>
+                  <div className="mt-auto pt-3">
+                    <details className="rounded-xl bg-emerald-50 px-3 py-2 text-xs leading-5 text-emerald-950">
+                      <summary className="min-h-8 cursor-pointer font-bold">一般的な関連対策</summary>
+                      <p className="pb-1">{report.measure}</p>
+                    </details>
                     <a
                       href={report.href}
                       target="_blank"
