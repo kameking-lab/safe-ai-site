@@ -1,5 +1,8 @@
 "use client";
 
+import { SourceProvenanceView } from "@/components/law-navi/source-provenance-view";
+import { normalizeSourceProvenance } from "@/lib/source-provenance";
+
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Check, Copy, RotateCcw, Send, Square, X } from "lucide-react";
 import type {
@@ -1182,6 +1185,9 @@ function SourceDetails({ message }: { message: ChatMessage }) {
                 <p className="mt-1 whitespace-pre-wrap text-slate-700 dark:text-slate-200">
                   該当箇所: {excerpt}
                 </p>
+                {(source?.sourceProvenance || source?.sourceFetchedAt) && (
+                  <SourceProvenanceView source={source.sourceProvenance ?? normalizeSourceProvenance({ url: source.url, fetchedAt: source.sourceFetchedAt })} />
+                )}
                 {officialUrl && (
                   <a
                     href={officialUrl}

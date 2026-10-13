@@ -11,7 +11,7 @@
  */
 
 import { readFile, writeFile } from "node:fs/promises";
-import { dirname, join } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -54,6 +54,34 @@ function extractKeywords(text, articleNum) {
   return [...tokens].slice(0, 12);
 }
 
+// Import facts are preserved only when explicitly supplied. Parsing time,
+// source filenames and generatedAt are not acquisition or confirmation dates.
+export function compactLawRecord(row) {
+  if (!row || typeof row.articleNumber !== "string" || !row.articleNumber.trim()) return null;
+  const text = flattenVerticalText(row.text);
+  if (!text || text.length < 12) return null;
+  const hint = LAW_NAME_HINTS[row.sourceFile] ?? ["MHLW省令原文", "MHLW原文"];
+  const article = {
+    law: hint[0], lawShort: hint[1], articleNum: row.articleNumber,
+    articleTitle: row.heading ?? "", text, keywords: extractKeywords(text, row.articleNumber),
+    sourceFile: row.sourceFile, page: row.page,
+  };
+  if (typeof row.sourceUrl === "string") {
+    try {
+      const url = new URL(row.sourceUrl);
+      if (url.protocol === "https:" && url.hostname.endsWith(".go.jp") && !url.username && !url.password) article.sourceUrl = row.sourceUrl;
+    } catch { /* Missing/invalid metadata remains unknown. */ }
+  }
+  if (typeof row.sourceLawId === "string" && /^[0-9A-Z]{15}$/.test(row.sourceLawId)) article.sourceLawId = row.sourceLawId;
+  if (typeof row.sourceRevisionId === "string" && /^(?:[0-9A-Z]{15}_)?\d{8}_[0-9A-Z]{15}$/.test(row.sourceRevisionId)) article.sourceRevisionId = row.sourceRevisionId;
+  if (typeof row.sourceHash === "string" && /^[a-f0-9]{64}$/.test(row.sourceHash)) article.sourceHash = row.sourceHash;
+  if (typeof row.sourceFetchedAt === "string" && /^\d{4}-\d{2}-\d{2}(?:T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2}))?$/.test(row.sourceFetchedAt)) {
+    const [year, month, day] = row.sourceFetchedAt.slice(0, 10).split("-").map(Number);
+    if (new Date(Date.UTC(year, month - 1, day)).toISOString().slice(0, 10) === row.sourceFetchedAt.slice(0, 10) && Number.isFinite(Date.parse(row.sourceFetchedAt)) && (row.sourceFetchedAt.length === 10 || (Number(row.sourceFetchedAt.slice(11, 13)) <= 23 && Number(row.sourceFetchedAt.slice(14, 16)) <= 59 && Number(row.sourceFetchedAt.slice(17, 19)) <= 59))) article.sourceFetchedAt = row.sourceFetchedAt;
+  }
+  return article;
+}
+
 async function main() {
   const raw = await readFile(SRC, "utf8");
   const rows = raw.split("\n").filter((l) => l.trim());
@@ -67,26 +95,9 @@ async function main() {
       skipped += 1;
       continue;
     }
-    if (!row.articleNumber) {
-      skipped += 1;
-      continue;
-    }
-    const text = flattenVerticalText(row.text);
-    if (!text || text.length < 12) {
-      skipped += 1;
-      continue;
-    }
-    const hint = LAW_NAME_HINTS[row.sourceFile] ?? ["MHLW省令改正等", "MHLW改正"];
-    articles.push({
-      law: hint[0],
-      lawShort: hint[1],
-      articleNum: row.articleNumber,
-      articleTitle: row.heading ?? "",
-      text,
-      keywords: extractKeywords(text, row.articleNumber),
-      sourceFile: row.sourceFile,
-      page: row.page,
-    });
+    const article = compactLawRecord(row);
+    if (article) articles.push(article);
+    else skipped += 1;
   }
   const output = {
     generatedAt: new Date().toISOString(),
@@ -102,7 +113,9 @@ async function main() {
   console.error(`  wrote: ${DST}`);
 }
 
-main().catch((err) => {
-  console.error("[build-laws-compact] error:", err);
-  process.exitCode = 1;
-});
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  main().catch((err) => {
+    console.error("[build-laws-compact] error:", err);
+    process.exitCode = 1;
+  });
+}

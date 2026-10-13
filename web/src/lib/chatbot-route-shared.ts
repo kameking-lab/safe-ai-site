@@ -1,3 +1,4 @@
+import { lawSourceProvenance } from "@/lib/legal-source-provenance";
 import type { LawArticle } from "@/data/laws";
 import { getLawMetadata as getCitationLawMetadata } from "@/data/laws/law-metadata";
 import type { MlitResource } from "@/data/mlit-resources";
@@ -1144,6 +1145,7 @@ export function lawArticleToSource(
     verificationStatus: article.verificationStatus,
     sourceKind: article.sourceKind,
     sourceFetchedAt: article.sourceFetchedAt,
+    sourceProvenance: lawSourceProvenance(article),
     humanReviewStatus: article.humanReviewStatus,
   };
 }

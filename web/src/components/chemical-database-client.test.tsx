@@ -200,3 +200,16 @@ it("開いていた規制欄を復帰時に戻し、元の一覧高でスクロ�
     window.history.replaceState(null, "", originalUrl);
   }
 });
+
+
+it("mobile cards retain identity, four recorded states and the same detail destination", () => {
+  render(<ChemicalDatabaseClient />);
+  fireEvent.change(screen.getByRole("searchbox"), { target: { value: "108-88-3" } });
+  const card = document.querySelector('[data-chemical-mobile-card][data-cas="108-88-3"]') as HTMLElement;
+  expect(card).toBeTruthy();
+  expect(within(card).getByRole("heading", { name: "トルエン" })).toBeTruthy();
+  for (const label of ["がん原性", "皮膚等障害", "濃度基準", "SDS交付"]) expect(within(card).getByText(label)).toBeTruthy();
+  expect(within(card).getByRole("link", { name: "詳細を見る" }).getAttribute("href")).toBe("/chemical-database/108-88-3");
+  expect(document.querySelector('[data-chemical-comparison-table] table')).toBeTruthy();
+  expect(document.getElementById("chemical-list-legend")?.textContent).toContain("法的な対象外判定ではありません");
+});

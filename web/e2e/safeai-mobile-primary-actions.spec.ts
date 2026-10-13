@@ -91,7 +91,7 @@ for (const width of [375, 390]) {
 
       await page.goto("/chemical-database");
       const chemicalInput = page.getByRole("searchbox", { name: "物質名・CAS番号で検索" }).first();
-      const filteredRows = page.locator('table[aria-describedby="chemical-list-legend"] tbody tr');
+      const filteredRows = page.locator('[data-chemical-mobile-card]');
       const chemicalRow = filteredRows.filter({ hasText: "108-88-3" }).first();
       // 化学物質一覧もhydration後に絞り込みが機能するまで待つ。
       await expect(async () => {

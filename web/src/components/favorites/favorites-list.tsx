@@ -9,6 +9,7 @@
  */
 
 import Link from "next/link";
+import { SourceProvenanceView } from "@/components/law-navi/source-provenance-view";
 import { useEffect, useState } from "react";
 import { Star, Trash2 } from "lucide-react";
 import {
@@ -172,6 +173,7 @@ export function FavoritesList() {
               >
                 {e.title}
               </Link>
+              {e.sourceProvenance && <SourceProvenanceView source={e.sourceProvenance} />}
             </div>
             <button
               type="button"

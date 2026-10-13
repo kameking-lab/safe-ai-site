@@ -1,3 +1,4 @@
+import type { SourceProvenance } from "@/lib/source-provenance";
 import type { LawArticle } from "@/data/laws";
 import type {
   DigDeeperLink,
@@ -64,6 +65,7 @@ export type ChatbotSource = {
   verificationStatus?: LawArticle["verificationStatus"];
   sourceKind?: LawArticle["sourceKind"];
   sourceFetchedAt?: string;
+  sourceProvenance?: SourceProvenance;
   humanReviewStatus?: LawArticle["humanReviewStatus"];
 };
 

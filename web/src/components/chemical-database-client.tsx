@@ -389,13 +389,37 @@ export function ChemicalDatabaseClient() {
               </p>
             )
           ) : (
-            <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
+            <div className="rounded-xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-950">
               <p id="chemical-list-legend" className="border-b border-slate-200 bg-slate-50 px-3 py-2 text-xs leading-5 text-slate-700">
                 ●＝当サイト収録の厚労省公表リストに掲載あり。空欄＝当サイト収録データで掲載を確認できない状態で、法的な対象外判定ではありません。
                 製品の含有量・施行日・取扱条件は
                 <Link href="https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000099121_00005.html" target="_blank" rel="noopener noreferrer" className="underline">厚労省の対象物質一覧</Link>
                 と製品 SDS で確認してください。
               </p>
+              <ul aria-label="物質検索結果" className="space-y-3 p-3 md:hidden">
+                {filteredMhlw.slice(0, 100).map((c, i) => {
+                  const tags = regulationTagsForChemical(c);
+                  const states = [
+                    ["がん原性", c.flags.carcinogenic],
+                    ["皮膚等障害", c.flags.skin],
+                    ["濃度基準", c.flags.concentration],
+                    ["SDS交付", c.flags.label_sds],
+                  ] as const;
+                  return (
+                    <li key={c.cas ?? `${c.primaryName}-${i}`} data-chemical-mobile-card="" data-cas={c.cas ?? undefined} className="rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900">
+                      <h3 className="break-words text-sm font-semibold text-slate-900 dark:text-slate-100">{c.primaryName}</h3>
+                      <p className="mt-1 text-xs text-slate-600 dark:text-slate-300">CAS <span className="font-mono">{c.cas ?? "未登録"}</span></p>
+                      {c.cas && CONSTRUCTION_PRIORITY_CAS_SET.has(c.cas) && <p className="mt-1 text-xs font-semibold text-amber-800 dark:text-amber-200">建設業頻出</p>}
+                      {tags && tags.length > 0 && <div className="mt-2"><RegulationTagBadgeList tags={tags} maxVisible={4} size="xs" onTagClick={(t) => toggleTag(t)} /></div>}
+                      <dl className="mt-3 grid grid-cols-2 gap-2 text-xs text-slate-700 dark:text-slate-300">
+                        {states.map(([label, included]) => <div key={label}><dt className="font-semibold">{label}</dt><dd>{included ? "掲載あり" : "掲載未確認"}</dd></div>)}
+                      </dl>
+                      {c.cas ? <Link href={`/chemical-database/${encodeURIComponent(c.cas)}`} onClick={rememberDetailNavigation} className="mt-3 inline-flex min-h-11 items-center rounded-lg border border-emerald-300 bg-emerald-50 px-3 text-xs font-semibold text-emerald-900 dark:border-emerald-700 dark:bg-emerald-900 dark:text-emerald-100">詳細を見る</Link> : <p className="mt-3 text-xs text-slate-600 dark:text-slate-300">CAS番号が未登録のため、原典の名称で確認してください。</p>}
+                    </li>
+                  );
+                })}
+              </ul>
+              <div className="hidden overflow-x-auto md:block" data-chemical-comparison-table="">
               <table className="w-full text-xs" aria-describedby="chemical-list-legend">
                 <thead className="border-b border-slate-200 bg-slate-50">
                   <tr>
@@ -460,6 +484,7 @@ export function ChemicalDatabaseClient() {
                   })}
                 </tbody>
               </table>
+              </div>
               {filteredMhlw.length > 100 && (
                 <p className="px-4 py-3 text-center text-xs text-slate-400">
                   さらに {(filteredMhlw.length - 100).toLocaleString()} 件 — キーワードを入力して絞り込んでください
