@@ -48,17 +48,16 @@ for (const width of [375, 390]) {
       await expect(send).toBeEnabled();
       await expectTouchSize(question);
       await expectTouchSize(send);
-      const navOverlap = await page.evaluate(() => {
-        const sendButton = document.querySelector<HTMLButtonElement>('form button[type="submit"]');
-        const bottomNav = [...document.querySelectorAll("nav")].find((nav) => {
-          const rect = nav.getBoundingClientRect();
-          return getComputedStyle(nav).position === "fixed" && rect.width > 0 && rect.height > 0;
-        });
-        if (!sendButton || !bottomNav) return null;
-        return sendButton.getBoundingClientRect().bottom - bottomNav.getBoundingClientRect().top;
-      });
-      expect(navOverlap).not.toBeNull();
-      expect(navOverlap!).toBeLessThanOrEqual(0);
+      const bottomNav = page.locator('[data-mobile-nav="bottom"]');
+      // 入力中は下部ナビを隠す設計。フォーカスを外した後の重なりを実測する。
+      await expect(bottomNav).toBeHidden();
+      await question.evaluate((element) => element.blur());
+      await expect(bottomNav).toBeVisible();
+      const sendBounds = await send.boundingBox();
+      const navBounds = await bottomNav.boundingBox();
+      expect(sendBounds).not.toBeNull();
+      expect(navBounds).not.toBeNull();
+      expect(sendBounds!.y + sendBounds!.height).toBeLessThanOrEqual(navBounds!.y);
       await expectNoHorizontalOverflow(page);
       await capture(page, testInfo, "chat-composer");
       // AIへの送信は行わない。
