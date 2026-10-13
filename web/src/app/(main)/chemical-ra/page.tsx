@@ -74,7 +74,6 @@ export default async function ChemicalRaPage({
   const params = await searchParams;
   if (hasUnsafeDirectChemicalQuery(params)) redirect("/chemical-ra");
   const initialQuery = safeInitialChemicalQuery(params);
-  const directStart = Boolean(initialQuery);
   return (
     <>
       <PageJsonLd
@@ -105,14 +104,6 @@ export default async function ChemicalRaPage({
             <h1 className="text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
               化学物質RA準備
             </h1>
-            {directStart ? (
-              <span
-                data-status-badge
-                className="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-bold text-emerald-900"
-              >
-                候補を検索中
-              </span>
-            ) : null}
           </div>
           <p className="mt-2 text-sm leading-6 text-slate-700">
             公的情報と条件を整理します。リスク値は計算せず、公式CREATE-SIMPLEへつなぎます。

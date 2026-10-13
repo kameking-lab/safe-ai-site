@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { BASE_TERMS } from "./page";
+import { BASE_TERMS } from "@/data/glossary/base-terms";
 
 describe("glossary WBGT source", () => {
   it("廃止前の誤通達番号を使わず現行ガイドラインへ案内する", () => {

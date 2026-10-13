@@ -1,3 +1,4 @@
+import { calculationDisplayValues } from "@/lib/construction-calculators/core";
 import type { CalculationResult, InputDefinition, PortableValue } from "@/lib/construction-calculators/types";
 
 const SHAPE_LABELS: Record<string, string> = { rectangular: "直方体", slab: "床版・土間", cylinder: "円柱", "circular-foundation": "円形基礎" };
@@ -36,7 +37,7 @@ function roundingLabel(mode: CalculationResult["rounding"]["mode"]): string {
 export function buildCalculationCopyText(title: string, result: CalculationResult, inputDefinitions: readonly InputDefinition[]): string {
   return [
     title,
-    ...result.displayValues.map((item) => `${item.label}: ${item.value}${item.unit}`),
+    ...calculationDisplayValues(result).map((item) => `${item.label}: ${item.value}${item.unit}`),
     "",
     "使用した入力値",
     ...calculationInputRows(result, inputDefinitions).map((row) => `${row.label}: ${row.value}${row.unit}`),
@@ -59,7 +60,7 @@ export function buildCalculationCsv(title: string, result: CalculationResult, in
     ["formulaVersion", result.formulaVersion],
     ["estimate", "true"],
     ["section", "result"],
-    ...result.displayValues.map((item) => [item.label, String(item.value), item.unit]),
+    ...calculationDisplayValues(result).map((item) => [item.label, String(item.value), item.unit]),
     ["section", "inputs"],
     ...calculationInputRows(result, inputDefinitions).map((row) => [row.label, row.value, row.unit]),
     ["section", "formula"],

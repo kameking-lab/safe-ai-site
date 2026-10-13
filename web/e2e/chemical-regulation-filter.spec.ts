@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 
 test("有機則第二種の検索結果から、同じ区分と根拠を持つトルエン詳細を開ける", async ({ page }) => {
   await page.goto("/chemical-database", { waitUntil: "domcontentloaded" });
+  await page.getByText("規制で絞り込む", { exact: true }).click();
   await page.getByRole("button", { name: "有機則 第二種", exact: true }).first().click();
   await expect(page.getByRole("status", { name: /収録情報に一致/ })).toContainText(
     "各法令の全対象を網羅する一覧ではありません",
@@ -20,6 +21,7 @@ test("有機則第二種の検索結果から、同じ区分と根拠を持つ�
 
 test("規制情報のAND/ORと0件の注意を保ち、収録済み物質をDB未収録と表示しない", async ({ page }) => {
   await page.goto("/chemical-database", { waitUntil: "domcontentloaded" });
+  await page.getByText("規制で絞り込む", { exact: true }).click();
   await page.getByRole("searchbox", { name: "物質名・CAS番号で検索", exact: true }).fill("108-88-3");
   await page.getByRole("button", { name: "有機則 第二種", exact: true }).first().click();
   await page.getByRole("button", { name: "特化則 第二類", exact: true }).first().click();
@@ -32,7 +34,7 @@ test("規制情報のAND/ORと0件の注意を保ち、収録済み物質をDB�
 
   await page.getByRole("button", { name: "いずれか (OR)", exact: true }).click();
   await expect(page.getByRole("row", { name: /108-88-3/ })).toBeVisible();
-  await page.getByRole("button", { name: "クリア", exact: true }).click();
+  await page.getByRole("button", { name: "絞り込みを解除", exact: true }).click();
   await expect(page.getByRole("row", { name: /108-88-3/ })).toBeVisible();
 });
 
@@ -40,6 +42,7 @@ test("検索から詳細へ進み、戻ると検索・規制フィルター・�
   const requests: string[] = [];
   page.on("request", (request) => requests.push(request.url()));
   await page.goto("/chemical-database", { waitUntil: "domcontentloaded" });
+  await page.getByText("規制で絞り込む", { exact: true }).click();
   const search = page.getByRole("searchbox", { name: "物質名・CAS番号で検索", exact: true });
   await search.fill("トルエン");
   await page.getByRole("button", { name: "有機則 第二種", exact: true }).first().click();
@@ -53,6 +56,7 @@ test("検索から詳細へ進み、戻ると検索・規制フィルター・�
   await page.goBack();
   await expect(search).toHaveValue("トルエン");
   await expect(page.getByRole("row", { name: /108-88-3/ })).toBeVisible();
+  await expect(page.locator("[data-chemical-regulation-filters]")).toHaveJSProperty("open", true);
   await expect(page.getByRole("button", { name: "いずれか (OR)", exact: true })).toHaveClass(/bg-slate-800/);
   await expect(page.getByText("1 件選択中")).toBeVisible();
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(previousY);

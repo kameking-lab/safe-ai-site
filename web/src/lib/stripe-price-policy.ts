@@ -1,4 +1,5 @@
 import { externalCredentialedServicesAllowed } from "@/lib/server/deployment-safety";
+import { PAID_MODE } from "@/lib/paid-mode";
 
 export type PaidPlanName = "standard" | "pro";
 
@@ -14,8 +15,8 @@ export function resolveStripePlan(priceId: string | null | undefined): PaidPlanN
 
 export function isPaidModeReady(): boolean {
   return (
+    PAID_MODE &&
     externalCredentialedServicesAllowed() &&
-    process.env.NEXT_PUBLIC_PAID_MODE === "true" &&
     Boolean(process.env.STRIPE_SECRET_KEY) &&
     Boolean(process.env.NEXT_PUBLIC_STRIPE_PRICE_PREMIUM?.trim()) &&
     Boolean(process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO?.trim())

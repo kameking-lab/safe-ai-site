@@ -58,6 +58,7 @@ export type ChemicalListSnapshot = {
   tagMatchMode: "and" | "or";
   constructionOnly: boolean;
   scrollY: number;
+  regulationFiltersOpen?: boolean;
 };
 
 type StagedSnapshot = { value: ChemicalListSnapshot; stagedAt: number };

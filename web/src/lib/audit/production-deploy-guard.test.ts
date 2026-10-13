@@ -10,11 +10,48 @@ import {
   normalizeBuiltRoute,
   readSourceFiles,
   routeFromAppFile,
+  runBuildBoundary,
 } from "../../../scripts/production-deploy-guard.mjs";
 
 const SHA = "917f061acf565eb09d009e7a2ff3b3cdb6244f24";
 
 describe("production deploy guard", () => {
+  it("checks the configured build manifests without falling back to a different build", () => {
+    const fixtureRoot = mkdtempSync(join(tmpdir(), "production-build-route-guard-"));
+    const webRoot = join(fixtureRoot, "web");
+    const customDir = ".next/reviewed-build";
+    const manifests = (dir: string, route: string) => {
+      mkdirSync(join(webRoot, dir, "server"), { recursive: true });
+      writeFileSync(join(webRoot, dir, "server", "app-paths-manifest.json"), JSON.stringify({ [route]: "app/resources/page.js" }));
+      writeFileSync(join(webRoot, dir, "routes-manifest.json"), JSON.stringify({ staticRoutes: [{ page: route }], dynamicRoutes: [] }));
+    };
+    try {
+      mkdirSync(join(webRoot, "src", "app"), { recursive: true });
+      manifests(".next", "/resources/page");
+      expect(runBuildBoundary({ repositoryRoot: fixtureRoot, webRoot, environment: { NODE_ENV: "test" } }).builtRoutesChecked).toBe(2);
+      expect(() => runBuildBoundary({ repositoryRoot: fixtureRoot, webRoot, environment: { NODE_ENV: "test", NEXT_DIST_DIR: customDir } })).toThrow("build route manifests are missing");
+      manifests(customDir, "/exam-quiz/page");
+      expect(() => runBuildBoundary({ repositoryRoot: fixtureRoot, webRoot, environment: { NODE_ENV: "test", NEXT_DIST_DIR: customDir } })).toThrow("forbidden exam route would be published");
+      manifests(customDir, "/resources/page");
+      expect(runBuildBoundary({ repositoryRoot: fixtureRoot, webRoot, environment: { NODE_ENV: "test", NEXT_DIST_DIR: customDir } }).builtRoutesChecked).toBe(2);
+      for (const dir of ["../outside", "..\\outside", "/tmp/outside", "C:/outside", "."]) {
+        expect(() => runBuildBoundary({ repositoryRoot: fixtureRoot, webRoot, environment: { NODE_ENV: "test", NEXT_DIST_DIR: dir } })).toThrow("build directory must stay inside web");
+      }
+      const external = join(fixtureRoot, "external-build");
+      mkdirSync(join(external, "server"), { recursive: true });
+      writeFileSync(join(external, "server", "app-paths-manifest.json"), "{}");
+      writeFileSync(join(external, "routes-manifest.json"), "{}");
+      symlinkSync(external, join(webRoot, "linked-build"), "junction");
+      expect(() => runBuildBoundary({ repositoryRoot: fixtureRoot, webRoot, environment: { NODE_ENV: "test", NEXT_DIST_DIR: "linked-build" } })).toThrow("build manifests must be regular files inside web");
+      mkdirSync(join(webRoot, "shifted-build"), { recursive: true });
+      symlinkSync(join(external, "server"), join(webRoot, "shifted-build", "server"), "junction");
+      writeFileSync(join(webRoot, "shifted-build", "routes-manifest.json"), "{}");
+      expect(() => runBuildBoundary({ repositoryRoot: fixtureRoot, webRoot, environment: { NODE_ENV: "test", NEXT_DIST_DIR: "shifted-build" } })).toThrow("build manifests must be regular files inside web");
+    } finally {
+      rmSync(fixtureRoot, { recursive: true, force: true });
+    }
+  });
+
   it("accepts only a clean main checkout at exact origin/main", () => {
     expect(
       assertProductionGitState({

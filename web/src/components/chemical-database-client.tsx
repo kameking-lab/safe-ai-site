@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, type MouseEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
 import Link from "next/link";
 import { PageContainer } from "@/components/layout";
 import { ConclusionCard } from "@/components/ui/conclusion-card";
@@ -76,6 +76,8 @@ export function ChemicalDatabaseClient() {
   const [selectedTags, setSelectedTags] = useState<Set<RegulationTag>>(new Set());
   const [tagMatchMode, setTagMatchMode] = useState<"and" | "or">("and");
   const [constructionOnly, setConstructionOnly] = useState(false);
+  const [regulationFiltersOpen, setRegulationFiltersOpen] = useState(false);
+  const regulationFiltersRef = useRef<HTMLDetailsElement>(null);
 
   /* eslint-disable react-hooks/set-state-in-effect -- Restore client-only navigation state after hydration. */
   useEffect(() => {
@@ -93,6 +95,7 @@ export function ChemicalDatabaseClient() {
       setSelectedTags(new Set(restored.selectedTags));
       setTagMatchMode(restored.tagMatchMode);
       setConstructionOnly(restored.constructionOnly);
+      setRegulationFiltersOpen(restored.regulationFiltersOpen === true);
       // Let React commit the restored result list before returning to its prior position.
       requestAnimationFrame(() => requestAnimationFrame(() => window.scrollTo(0, restored.scrollY)));
       return;
@@ -107,6 +110,7 @@ export function ChemicalDatabaseClient() {
       sourcePathAndSearch: window.location.pathname + window.location.search,
       mode, query, category, skinOnly, selectedTags: [...selectedTags], tagMatchMode,
       constructionOnly, scrollY: window.scrollY,
+      regulationFiltersOpen: regulationFiltersRef.current?.open ?? regulationFiltersOpen,
     });
   };
 
@@ -256,11 +260,18 @@ export function ChemicalDatabaseClient() {
                 className="min-h-[44px] w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
               />
             </label>
-            <p className="mt-2 text-xs text-slate-500">
+            <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+            <p className="text-xs text-slate-500">
               {query || selectedTags.size > 0 || constructionOnly
                 ? `${filteredMhlw.length.toLocaleString()} 件 / 全 ${mhlwCount.toLocaleString()} 件`
                 : `全 ${mhlwCount.toLocaleString()} 件`}（CAS 統合）
             </p>
+              {(selectedTags.size > 0 || constructionOnly) && (
+                <button type="button" onClick={clearTagFilter} className="inline-flex min-h-[44px] items-center gap-1 rounded border border-slate-300 px-3 text-xs font-semibold text-slate-700 hover:bg-slate-50">
+                  <X className="h-3 w-3" aria-hidden="true" />絞り込みを解除
+                </button>
+              )}
+            </div>
           </div>
 
         </section>
@@ -284,17 +295,17 @@ export function ChemicalDatabaseClient() {
 
       {mode === "mhlw" && (
         <section className="space-y-4">
-          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-              <div className="flex items-center gap-2 text-sm font-bold text-slate-800">
+          <details className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm" data-chemical-regulation-filters ref={regulationFiltersRef} open={regulationFiltersOpen} onToggle={(event) => setRegulationFiltersOpen(event.currentTarget.open)}>
+              <summary className="flex min-h-[44px] cursor-pointer flex-wrap items-center gap-2 text-sm font-bold text-slate-800">
                 <Filter className="h-4 w-4 text-slate-400" aria-hidden="true" />
-                規制法令で絞り込み
+                規制で絞り込む
                 {selectedTags.size > 0 && (
                   <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs text-emerald-800">
                     {selectedTags.size} 件選択中
                   </span>
                 )}
-              </div>
+              </summary>
+            <div className="mb-3 mt-3 flex flex-wrap items-center justify-between gap-2">
               <div className="flex flex-wrap items-center gap-2">
                 <label className="inline-flex items-center gap-1.5 text-xs text-slate-700">
                   <input
@@ -325,16 +336,7 @@ export function ChemicalDatabaseClient() {
                     </button>
                   ))}
                 </div>
-                {(selectedTags.size > 0 || constructionOnly) && (
-                  <button
-                    type="button"
-                    onClick={clearTagFilter}
-                    className="inline-flex min-h-[44px] items-center gap-1 rounded border border-slate-300 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50"
-                  >
-                    <X className="h-3 w-3" aria-hidden="true" />
-                    クリア
-                  </button>
-                )}
+
               </div>
             </div>
             <p className="mb-3 text-xs leading-5 text-slate-600">
@@ -373,7 +375,7 @@ export function ChemicalDatabaseClient() {
                 );
               })}
             </div>
-          </div>
+          </details>
           {filteredMhlw.length === 0 ? (
             query.trim().length >= 2 ? (
               <ChemicalNotFoundRescue

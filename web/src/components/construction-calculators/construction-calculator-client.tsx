@@ -35,6 +35,7 @@ import type {
 } from "@/lib/construction-calculators/types";
 
 import { additionalQuantitySpecs } from "@/lib/construction-calculators/additional-quantity";
+import { calculationDisplayValues } from "@/lib/construction-calculators/core";
 import { changeConcreteDimensionUnit } from "@/lib/construction-calculators/concrete-unit-change";
 import { CalculatorInputGuide, INPUT_COLORS, inputUnit } from "./calculator-input-guide";
 
@@ -635,7 +636,7 @@ export function ConstructionCalculatorClient({
               結果{usingExample ? (exampleEdited ? "（例から一部変更）" : "（例の数字）") : "（入力に連動）"}
             </h2>
             <dl className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {result.displayValues.map((item) => (
+              {calculationDisplayValues(result).map((item) => (
                 <div key={item.key} className="rounded-xl bg-white p-4 shadow-sm dark:bg-slate-900">
                   <dt className="text-sm font-black text-slate-600 dark:text-slate-300">{item.label}</dt>
                   <dd className="mt-1 text-3xl font-black">{String(item.value)}<span className="ml-1 text-base">{item.unit}</span></dd>
@@ -693,7 +694,7 @@ export function ConstructionCalculatorClient({
             <ul className="mt-4 space-y-2">
               {currentHistory.map((entry) => (
                 <li key={entry.id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-slate-100 p-3 dark:bg-slate-800">
-                  <div><p className="font-black">{entry.result.displayValues[0]?.label}: {entry.result.displayValues[0]?.value}{entry.result.displayValues[0]?.unit}</p><p className="text-xs text-slate-600 dark:text-slate-300">{new Date(entry.createdAt).toLocaleString("ja-JP")}</p></div>
+                  <div><p className="font-black">{calculationDisplayValues(entry.result)[0]?.label}: {calculationDisplayValues(entry.result)[0]?.value}{calculationDisplayValues(entry.result)[0]?.unit}</p><p className="text-xs text-slate-600 dark:text-slate-300">{new Date(entry.createdAt).toLocaleString("ja-JP")}</p></div>
                   <div className="flex gap-2">
                     <button type="button" onClick={() => { setRaw(entry.input); setRounding((entry.input.rounding as unknown as RoundingConfig) ?? defaultRounding); setResult(null); setErrors([]); setUsingExample(entry.input._exampleInput === true); setExampleEdited(entry.input._exampleEdited === true); }} className="min-h-11 rounded-xl border-2 border-emerald-700 px-3 text-sm font-black">入力を復元</button>
                     <button type="button" aria-label="この履歴を削除" onClick={() => setHistory(removeConstructionCalculatorHistory(window.localStorage, entry.id))} className="min-h-11 rounded-xl border-2 border-slate-400 px-3"><Trash2 className="h-4 w-4" aria-hidden="true" /></button>
@@ -710,7 +711,7 @@ export function ConstructionCalculatorClient({
           <h1 className="text-2xl font-black">{definition.title} 計算結果</h1>
           <p className="mt-1 text-sm">安全AIポータル / {new Date().toLocaleString("ja-JP")}</p>
           <h2 className="mt-5 text-lg font-black">結果</h2>
-          <table className="mt-2 w-full border-collapse text-sm"><tbody>{result.displayValues.map((item) => <tr key={item.key}><th className="border border-black p-2 text-left">{item.label}</th><td className="border border-black p-2">{String(item.value)} {item.unit}</td></tr>)}</tbody></table>
+          <table className="mt-2 w-full border-collapse text-sm"><tbody>{calculationDisplayValues(result).map((item) => <tr key={item.key}><th className="border border-black p-2 text-left">{item.label}</th><td className="border border-black p-2">{String(item.value)} {item.unit}</td></tr>)}</tbody></table>
           <h2 className="mt-5 text-lg font-black">使用した入力値</h2>
           <dl className="mt-2 border border-black p-3 text-xs">{calculationInputRows(result, definition.inputDefinitions).map((row) => <div key={row.key} className="mb-1"><dt className="font-bold">{row.label}</dt><dd>{row.value}{row.unit}</dd></div>)}</dl>
           <h2 className="mt-5 text-lg font-black">計算式</h2>
@@ -724,6 +725,20 @@ export function ConstructionCalculatorClient({
               <ul className="mt-2 list-disc pl-6 text-sm">{result.warnings.map((line) => <li key={line}>{line}</li>)}</ul>
             </>
           ) : null}
+          <section className="mt-5 break-inside-avoid" aria-label="計算の根拠資料">
+            <h2 className="text-lg font-black">根拠資料</h2>
+            <p className="mt-1 text-xs">計算式の版：{result.formulaVersion}</p>
+            <ul className="mt-2 space-y-3 text-xs leading-5">
+              {definition.sources.map((source) => (
+                <li key={source.sourceId} className="break-inside-avoid">
+                  <p className="font-bold">{source.title} — {source.publisher}</p>
+                  <p>{source.applicableYear ? `${source.applicableYear} / ` : ""}{source.locator}</p>
+                  <p>資料確認日：{source.checkedAt}</p>
+                  <a href={source.url} className="break-all underline">{source.url}</a>
+                </li>
+              ))}
+            </ul>
+          </section>
           <p className="mt-5 border-2 border-black p-3 font-black">概算結果です。設計図書、仕様書、実測値を確認してください。</p>
         </article>
       ) : null}

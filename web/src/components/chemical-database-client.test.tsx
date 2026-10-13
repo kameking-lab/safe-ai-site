@@ -16,6 +16,8 @@ function snapshotForReturn(sourcePathAndSearch: string, query: string): Chemical
 }
 
 function selectTag(label: string) {
+  const disclosure = screen.getByText("規制で絞り込む").closest("details")!;
+  if (!disclosure.open) fireEvent.click(screen.getByText("規制で絞り込む"));
   fireEvent.click(screen.getAllByRole("button", { name: label })[0]!);
 }
 
@@ -149,7 +151,7 @@ describe("化学DBの保存済み規制情報による絞り込み", () => {
     fireEvent.click(screen.getByRole("button", { name: "いずれか (OR)" }));
     expect(screen.getByRole("row", { name: /108-88-3/ })).toBeTruthy();
 
-    fireEvent.click(screen.getByRole("button", { name: "クリア" }));
+    fireEvent.click(screen.getByRole("button", { name: "絞り込みを解除" }));
     expect(screen.getByRole("row", { name: /108-88-3/ })).toBeTruthy();
   });
 
@@ -161,4 +163,40 @@ describe("化学DBの保存済み規制情報による絞り込み", () => {
     expect(screen.queryByRole("row", { name: /1310-73-2/ })).toBeNull();
     expect(screen.getByText(/規制対象外の判定ではありません/)).toBeTruthy();
   });
+});
+
+
+it("規制は閉じて開始し、閉じたまま検索語を保持して絞り込みを解除できる", () => {
+  render(<ChemicalDatabaseClient />);
+  const search = screen.getByRole("searchbox", { name: "物質名・CAS番号で検索" });
+  const summary = screen.getByText("規制で絞り込む");
+  const disclosure = summary.closest("details")!;
+  expect(disclosure.open).toBe(false);
+  fireEvent.change(search, { target: { value: "108-88-3" } });
+  selectTag("有機則 第二種");
+  fireEvent.click(summary);
+  expect(disclosure.open).toBe(false);
+  const clear = screen.getByRole("button", { name: "絞り込みを解除" });
+  expect(clear.closest("details")).toBeNull();
+  expect(search.compareDocumentPosition(clear) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  fireEvent.click(clear);
+  expect((search as HTMLInputElement).value).toBe("108-88-3");
+  expect(screen.getByRole("row", { name: /108-88-3/ })).toBeTruthy();
+  expect(screen.queryByText("1 件選択中")).toBeNull();
+});
+
+
+it("開いていた規制欄を復帰時に戻し、元の一覧高でスクロールを復元する", () => {
+  const originalUrl = window.location.href;
+  window.history.replaceState(null, "", "/chemical-database");
+  stageChemicalListSnapshot({ ...snapshotForReturn("/chemical-database", "トルエン"), regulationFiltersOpen: true, scrollY: 800 });
+  vi.stubGlobal("requestAnimationFrame", vi.fn(() => 1));
+  try {
+    render(<ChemicalDatabaseClient />);
+    expect(screen.getByText("規制で絞り込む").closest("details")?.open).toBe(true);
+    expect(screen.getByText("1 件選択中")).toBeTruthy();
+  } finally {
+    vi.unstubAllGlobals();
+    window.history.replaceState(null, "", originalUrl);
+  }
 });

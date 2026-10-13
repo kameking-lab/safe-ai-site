@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
 import { execFileSync } from "node:child_process";
-import { existsSync, readFileSync, readdirSync } from "node:fs";
-import { dirname, resolve, sep } from "node:path";
+import { existsSync, lstatSync, readFileSync, readdirSync, realpathSync } from "node:fs";
+import { dirname, isAbsolute, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
 export const PRODUCTION_BRANCH = "main";
@@ -131,12 +131,32 @@ export function readSourceFiles(repositoryRoot = REPOSITORY_ROOT) {
   return files;
 }
 
-function readBuildRoutes(webRoot = WEB_ROOT) {
+function readBuildRoutes(webRoot = WEB_ROOT, distDir = ".next") {
   const routes = [];
-  const appPathsManifest = resolve(webRoot, ".next", "server", "app-paths-manifest.json");
-  const routesManifest = resolve(webRoot, ".next", "routes-manifest.json");
+  const normalizedDir = distDir.replaceAll("\\", "/");
+  if (isAbsolute(normalizedDir) || /^[a-z]:/iu.test(normalizedDir) || normalizedDir.split("/").includes("..")) {
+    fail("Next.js build directory must stay inside web");
+  }
+  const buildRoot = resolve(webRoot, normalizedDir);
+  const relativeRoot = relative(resolve(webRoot), buildRoot);
+  if (!relativeRoot || isAbsolute(relativeRoot) || relativeRoot.startsWith(`..${sep}`)) {
+    fail("Next.js build directory must stay inside web");
+  }
+  const appPathsManifest = resolve(buildRoot, "server", "app-paths-manifest.json");
+  const routesManifest = resolve(buildRoot, "routes-manifest.json");
   if (!existsSync(appPathsManifest) || !existsSync(routesManifest)) {
     fail("Next.js build route manifests are missing");
+  }
+  const realRelativeRoot = relative(realpathSync(webRoot), realpathSync(buildRoot));
+  if (!realRelativeRoot || isAbsolute(realRelativeRoot) || realRelativeRoot === ".." || realRelativeRoot.startsWith(`..${sep}`)
+    || !lstatSync(appPathsManifest).isFile() || !lstatSync(routesManifest).isFile()) {
+    fail("Next.js build manifests must be regular files inside web");
+  }
+  for (const manifest of [appPathsManifest, routesManifest]) {
+    const relativeManifest = relative(realpathSync(webRoot), realpathSync(manifest));
+    if (isAbsolute(relativeManifest) || relativeManifest === ".." || relativeManifest.startsWith(`..${sep}`)) {
+      fail("Next.js build manifests must be regular files inside web");
+    }
   }
   const appManifest = JSON.parse(readFileSync(appPathsManifest, "utf8"));
   routes.push(...Object.keys(appManifest));
@@ -165,7 +185,7 @@ export function runBuildBoundary({
   assertProductionBuildEnvironment(environment);
   return assertNoForbiddenRoutes({
     sourceFiles: readSourceFiles(repositoryRoot),
-    builtRoutes: readBuildRoutes(webRoot),
+    builtRoutes: readBuildRoutes(webRoot, environment.NEXT_DIST_DIR?.trim() || ".next"),
   });
 }
 

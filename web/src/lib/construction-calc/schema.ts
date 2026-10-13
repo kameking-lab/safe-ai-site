@@ -1,3 +1,4 @@
+import { belowDisplayPrecisionLabel } from "@/lib/construction-calculators/core";
 /**
  * 建設計算コーナー 共通スキーマ（宣言的計算機定義）
  *
@@ -227,5 +228,8 @@ export function kgfToKn(kgf: number): number {
 
 /** 数値の表示用整形（有効桁を保ちつつ桁区切り） */
 export function formatNumber(n: number, maxFractionDigits = 1): string {
-  return n.toLocaleString("ja-JP", { maximumFractionDigits: maxFractionDigits });
+  const formatted = n.toLocaleString("ja-JP", { maximumFractionDigits: maxFractionDigits });
+  return Number.isFinite(n) && n !== 0 && Number(formatted.replaceAll(",", "")) === 0
+    ? belowDisplayPrecisionLabel(n)
+    : formatted;
 }

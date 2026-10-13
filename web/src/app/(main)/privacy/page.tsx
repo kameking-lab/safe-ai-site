@@ -106,7 +106,7 @@ export default function PrivacyPage() {
             </li>
             <li className="list-disc">
               <span className="font-semibold text-slate-700">決済</span>
-              ：Stripe, Inc.（米国）— 月額プランの決済処理。当サイトはカード番号を保持せず、Stripeに委託しています
+              ：本サイトの月額課金・オンライン決済は提供していません。サイト機能の利用にカード登録は不要です
             </li>
             <li className="list-disc">
               <span className="font-semibold text-slate-700">メール送信</span>
