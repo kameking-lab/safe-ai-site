@@ -77,7 +77,7 @@ export function PublishedSeminarList({ seminars }: { seminars: readonly Publishe
                 </div>
                 <div className="flex flex-col justify-between bg-slate-950 p-5 text-white sm:p-7">
                   <div><p className="text-xs font-black tracking-[.12em] text-emerald-300">SLIDES &amp; QUIZ</p><p className="mt-3 text-sm leading-6 text-slate-200">スライドと確認クイズで要点を学び、朝礼・社内研修・配布資料として活用できます。</p></div>
-                  <Link href={published.href} className="mt-6 inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-emerald-400 px-5 py-3 font-black text-slate-950 hover:bg-emerald-300 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white">今すぐ見る<ArrowRight className="h-5 w-5" aria-hidden="true" /></Link>
+                  <Link href={published.href} className="mt-6 inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-emerald-400 px-5 py-3 font-black text-slate-950 hover:bg-emerald-300 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white dark:text-slate-950">今すぐ見る<ArrowRight className="h-5 w-5" aria-hidden="true" /></Link>
                 </div>
               </div>
             </article>

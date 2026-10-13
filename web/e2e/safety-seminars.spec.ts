@@ -22,11 +22,22 @@ test.describe("安全研修ライブラリ", () => {
       DETAIL,
       CHEMICAL_DETAIL,
     ]);
-    await expect(page.locator('[data-seminar-status="coming-soon"]')).toHaveCount(17);
-    for (const card of await page.locator('[data-seminar-status="coming-soon"]').all()) {
-      await expect(card.locator("a, button")).toHaveCount(0);
-      await expect(card.getByText("Coming Soon", { exact: true })).toBeVisible();
+    const pending = page.locator('[data-seminar-status="coming-soon"]');
+    const details = page.locator("details").filter({ has: pending.first() });
+    const summary = details.locator("summary");
+    await expect(pending).toHaveCount(17);
+    expect(await publishedCards.count() + await pending.count()).toBe(20);
+    await expect(details).not.toHaveAttribute("open", "");
+    await expect(pending.first()).not.toBeVisible();
+    await summary.click();
+    await expect(details).toHaveAttribute("open", "");
+    for (const item of await pending.all()) {
+      await expect(item.locator("a, button")).toHaveCount(0);
+      await expect(item.getByText("準備中", { exact: true })).toBeVisible();
     }
+    await summary.click();
+    await expect(details).not.toHaveAttribute("open", "");
+    await expect(pending.first()).not.toBeVisible();
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", `https://www.anzen-ai-portal.jp${HUB}`);
   });
 
@@ -162,7 +173,7 @@ test.describe("安全研修ライブラリ", () => {
     await expect(page.getByRole("button", { name: "次のスライド" })).toBeVisible();
   });
 
-  test("light/darkの全viewportと原稿open状態にserious/criticalのAxe違反がない", async ({ page }) => {
+  test("light/darkの全viewportと原稿open状態にserious/criticalのAxe違反がない", async ({ page }, testInfo) => {
     test.setTimeout(120_000);
     for (const colorScheme of ["light", "dark"] as const) {
       await page.emulateMedia({ colorScheme });
@@ -189,6 +200,10 @@ test.describe("安全研修ライブラリ", () => {
         (violation) => violation.impact === "serious" || violation.impact === "critical",
       );
       expect(hubHighImpact, `${colorScheme}/hub: ${JSON.stringify(hubHighImpact)}`).toEqual([]);
+      if (colorScheme === "dark") {
+        await page.locator('[data-seminar-status="published"] a').first().scrollIntoViewIfNeeded();
+        await page.screenshot({ path: testInfo.outputPath("064-dark-published-cta-320.png") });
+      }
 
       await page.goto(`${HUB}/terms`);
       const termsResults = await new AxeBuilder({ page }).analyze();
