@@ -103,7 +103,7 @@ export function MixtureRaPanel() {
       const result = await saveChemicalRaRecord({
         substance: label,
         cas: "",
-        workContent: "混合物RA",
+        workContent: "混合物RA準備",
         exposureBand: agg.hasCarcinogen ? "発がん性成分あり" : "",
         payload: {
           type: "mixture",
@@ -134,7 +134,7 @@ export function MixtureRaPanel() {
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="flex items-center gap-2 text-base font-bold text-slate-900">
           <FlaskConical className="h-5 w-5 text-violet-600" aria-hidden="true" />
-          混合物RA（複数成分の合成リスク）
+          混合物RA準備（成分情報の整理）
         </h2>
         {rows.length > 0 && (
           <div className="flex items-center gap-2 print:hidden">
@@ -231,7 +231,7 @@ export function MixtureRaPanel() {
       {rows.length > 0 && (
         <div className="space-y-3 rounded-xl border border-slate-200 bg-white p-4">
           <p className="text-sm font-bold text-slate-900">
-            合成リスク集約（{agg.componentCount}成分 / 合計 {agg.totalPercent}%）
+            成分情報の集約（{agg.componentCount}成分 / 合計 {agg.totalPercent}%）
           </p>
           {agg.warnings.map((w) => (
             <p key={w} className="text-xs font-semibold text-amber-700"><AlertTriangle className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />{w}</p>
@@ -242,7 +242,7 @@ export function MixtureRaPanel() {
             </p>
           )}
           <div>
-            <p className="text-xs font-semibold text-slate-600">該当する規制法（和集合）</p>
+            <p className="text-xs font-semibold text-slate-600">各成分に収録された規制情報（和集合）</p>
             {agg.lawFamilies.length > 0 ? (
               <ul className="mt-1 flex flex-wrap gap-1.5">
                 {agg.lawFamilies.map((f) => (

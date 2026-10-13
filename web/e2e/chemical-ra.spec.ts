@@ -221,16 +221,20 @@ test.describe("化学物質RA", () => {
     expect(hasRelevant).toBe(true);
   });
 
-  test("化学物質DB → リスクアセスメントへの相互導線が機能する", async ({ page }) => {
+  test("化学物質DB → RA準備への相互導線が機能する", async ({ page }) => {
     await page.goto("/chemical-database");
     await page.waitForLoadState("networkidle");
     // 本文の使い分け案内から、表示中のRA導線へ到達できる。
     const raLink = page
       .getByRole("main")
-      .getByRole("link", { name: "化学物質RA", exact: true })
-      .first();
+      .getByText("このページの使い分け：", { exact: true })
+      .locator("..")
+      .getByRole("link", { name: "化学物質RA準備", exact: true });
     await expect(raLink).toBeVisible({ timeout: 5000 });
     await expect(raLink).toHaveAttribute("href", "/chemical-ra");
+    await raLink.click();
+    await expect(page).toHaveURL(/\/chemical-ra$/u);
+    await expect(page.getByRole("heading", { level: 1, name: "化学物質RA準備", exact: true })).toBeVisible();
   });
 
   test("例の物質名をURLへ載せず同一タブで検索欄へ引き継ぐ", async ({ page }) => {

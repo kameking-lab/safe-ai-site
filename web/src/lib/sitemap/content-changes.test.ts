@@ -29,18 +29,18 @@ afterEach(() => vi.useRealTimers());
 
 describe("sitemap lastmod は実際の内容変更日だけを使う", () => {
   it("traces /laws, /chatbot and chemical pages to recorded content changes", () => {
-    expect(lastmodAt("2026-10-11T09:00:00+09:00")).toEqual({
-      "/laws": "2026-10-05",
+    expect(lastmodAt("2026-10-13T09:00:00+09:00")).toEqual({
+      "/laws": "2026-10-13",
       "/chatbot": "2026-10-11",
-      "/chemical-ra": "2026-10-11",
-      "/chemical-database": "2026-08-08",
+      "/chemical-ra": "2026-10-13",
+      "/chemical-database": "2026-10-13",
       "/chemical-ra/product-search": "2026-08-08",
     });
   });
 
   it("does not move when the build day or clock advances", () => {
-    const today = lastmodAt("2026-10-11T09:00:00+09:00");
-    expect(lastmodAt("2026-10-12T09:00:00+09:00")).toEqual(today);
+    const today = lastmodAt("2026-10-13T09:00:00+09:00");
+    expect(lastmodAt("2026-10-14T09:00:00+09:00")).toEqual(today);
     expect(lastmodAt("2027-04-01T09:00:00+09:00")).toEqual(today);
   });
 
@@ -56,8 +56,8 @@ describe("sitemap lastmod は実際の内容変更日だけを使う", () => {
 
   it("maps the current displayed revision list to its verified change date", () => {
     const fingerprint = lawRevisionListFingerprint(lawRevisionCores);
-    expect(LAWS_REVISION_LIST_VERSIONS[fingerprint]?.changedOn).toBe("2026-10-05");
-    expect(lawsRevisionListChangedOn(lawRevisionCores)).toBe("2026-10-05");
+    expect(LAWS_REVISION_LIST_VERSIONS[fingerprint]?.changedOn).toBe("2026-10-13");
+    expect(lawsRevisionListChangedOn(lawRevisionCores)).toBe("2026-10-13");
   });
 
   it("never advances /laws for the same unregistered list on later re-fetches", () => {
@@ -86,7 +86,7 @@ describe("sitemap lastmod は実際の内容変更日だけを使う", () => {
       };
     });
     const { lawsRevisionListChangedOn: reloaded } = await import("./content-changes");
-    expect(reloaded()).toBe("2026-10-05");
+    expect(reloaded()).toBe("2026-10-13");
     vi.doUnmock("@/data/law-revisions/egov-revisions-loaded");
     vi.resetModules();
   });

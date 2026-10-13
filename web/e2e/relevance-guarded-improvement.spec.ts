@@ -167,9 +167,9 @@ test.describe("relevance-guarded task completion", () => {
     await expect(other.locator("li")).toHaveCount(20);
     const firstPageHref = await other.locator("li a").first().getAttribute("href");
     await expect(other.locator("li").first()).toContainText("種別:");
-    await expect(other.locator("li").first()).toContainText("一致理由:");
+    await expect(other.locator("li").first()).toContainText("一致: 正式名・関連語");
     await expect(other.locator("li").first()).toContainText("検証状態:");
-    await expect(other.locator("li").first()).toContainText("一致抜粋:");
+    await expect(other.locator("li").first()).toContainText("出典: 厚生労働省 化学物質情報");
 
     const next = other.getByRole("button", { name: "次の20件" });
     await next.click();
@@ -189,11 +189,21 @@ test.describe("relevance-guarded task completion", () => {
     await search.fill("法令");
     await search.press("Enter");
     await expect(page).toHaveURL(/\/search$/);
-    const destinations = page.locator(
-      '[data-search-result-section="search-destinations"] li',
-    );
+    const destinationSection = page.locator('[data-search-result-section="search-destinations"]');
+    const destinations = destinationSection.locator("li");
     await expect(destinations.first()).toBeVisible();
     expect(await destinations.count()).toBeLessThanOrEqual(5);
+    const destinationTotal = Number((await destinationSection.locator("p").first().textContent())?.match(/全(\d+)件/u)?.[1]);
+    expect(destinationTotal).toBeGreaterThanOrEqual(await destinations.count());
+    if (destinationTotal > 5) {
+      const destinationHref = await destinations.first().locator("a").first().getAttribute("href");
+      await destinationSection.getByRole("button", { name: "次の5件" }).click();
+      await expect(page).toHaveURL(/\/search$/);
+      expect(await destinations.count()).toBeLessThanOrEqual(5);
+      await expect(destinations.first().locator("a").first()).not.toHaveAttribute("href", destinationHref!);
+      await destinationSection.getByRole("button", { name: "前の5件" }).click();
+      await expect(destinations.first().locator("a").first()).toHaveAttribute("href", destinationHref!);
+    }
 
     await search.fill("安衛法 第14条");
     await search.press("Enter");
@@ -203,8 +213,8 @@ test.describe("relevance-guarded task completion", () => {
     );
     await expect(documents.first()).toBeVisible();
     expect(await documents.count()).toBeLessThanOrEqual(20);
-    await expect(documents.first()).toContainText("一次資料:");
-    await expect(documents.first()).toContainText(/施行日:|更新日・対象時点:/);
+    await expect(documents.first()).toContainText("検証状態:");
+    await expect(documents.first().locator(".portal-status").first()).not.toBeEmpty();
   });
 
   test("公開検索の自由入力はURL・履歴・リンクへ複製せず、画面内で結果を更新する", async ({
