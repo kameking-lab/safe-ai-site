@@ -3,12 +3,9 @@ import Link from "next/link";
 import {
   ArrowRight,
   CheckCircle2,
-  Clock3,
-  FileDown,
-  Presentation,
-  Users,
 } from "lucide-react";
 import { PageJsonLd } from "@/components/page-json-ld";
+import { PublishedSeminarList } from "./published-seminar-list";
 import { TrainingLibrarySwitcher } from "@/components/training/training-library-switcher";
 import {
   COMING_SOON_SAFETY_CORE_20,
@@ -129,123 +126,28 @@ export default function SafetySeminarLibraryPage() {
               </p>
             </div>
 
-            <div className="mt-5 grid gap-6">
-              {PUBLISHED_SAFETY_SEMINARS.map((published, index) => (
-                <article
-                  key={published.id}
-                  data-seminar-status="published"
-                  data-seminar-id={published.id}
-                  className="overflow-hidden rounded-3xl border-2 border-slate-900 bg-white shadow-[7px_7px_0_#0f766e] dark:border-slate-500 dark:bg-slate-900"
-                >
-                  <div className="grid lg:grid-cols-[minmax(0,1fr)_18rem]">
-                    <div className="p-5 sm:p-7">
-                      <div className="flex flex-wrap gap-2">
-                        <span className="inline-flex rounded-full bg-emerald-100 px-3 py-1 text-xs font-black text-emerald-950 dark:bg-emerald-950 dark:text-emerald-200">
-                          公開中
-                        </span>
-                        {index === 0 ? (
-                          <span className="inline-flex rounded-full bg-amber-100 px-3 py-1 text-xs font-black text-amber-950 dark:bg-amber-950 dark:text-amber-200">
-                            おすすめ
-                          </span>
-                        ) : null}
-                      </div>
-                      <h3 className="mt-3 max-w-3xl text-2xl font-black leading-tight sm:text-3xl">
-                        {published.title}
-                      </h3>
-                      <p className="mt-3 flex items-start gap-2 text-sm font-semibold leading-6 text-slate-700 dark:text-slate-200">
-                        <Users className="mt-0.5 h-5 w-5 shrink-0 text-emerald-800 dark:text-emerald-300" aria-hidden="true" />
-                        対象：{published.audience}
-                      </p>
-                      <dl className="mt-5 grid gap-3 sm:grid-cols-2">
-                        <div className="rounded-xl bg-slate-100 p-3 dark:bg-slate-800">
-                          <dt className="flex items-center gap-2 text-xs font-black text-slate-600 dark:text-slate-300">
-                            <Clock3 className="h-4 w-4" aria-hidden="true" />
-                            標準時間
-                          </dt>
-                          <dd className="mt-1 text-sm font-black">
-                            {published.standardDuration}
-                          </dd>
-                        </div>
-                        <div className="rounded-xl bg-slate-100 p-3 dark:bg-slate-800">
-                          <dt className="flex items-center gap-2 text-xs font-black text-slate-600 dark:text-slate-300">
-                            <Presentation className="h-4 w-4" aria-hidden="true" />
-                            スライド枚数
-                          </dt>
-                          <dd className="mt-1 text-sm font-black">
-                            {published.slideCount}枚
-                          </dd>
-                        </div>
-                        <div className="rounded-xl bg-slate-100 p-3 dark:bg-slate-800">
-                          <dt className="flex items-center gap-2 text-xs font-black text-slate-600 dark:text-slate-300">
-                            <FileDown className="h-4 w-4" aria-hidden="true" />
-                            ダウンロード
-                          </dt>
-                          <dd className="mt-1 text-sm font-black">
-                            {published.formats.join("・")}
-                          </dd>
-                        </div>
-                      </dl>
-                    </div>
-
-                    <div className="flex flex-col justify-between bg-slate-950 p-5 text-white sm:p-7">
-                      <div>
-                        <p className="text-xs font-black tracking-[.12em] text-emerald-300">
-                          SLIDES &amp; QUIZ
-                        </p>
-                        <p className="mt-3 text-sm leading-6 text-slate-200">
-                          スライドと確認クイズで要点を学び、朝礼投影・社内研修・配布資料として活用できます。
-                        </p>
-                      </div>
-                      <Link
-                        href={published.href}
-                        className="mt-6 inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-emerald-400 px-5 py-3 font-black text-slate-950 hover:bg-emerald-300 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white dark:text-slate-950"
-                      >
-                        今すぐ見る
-                        <ArrowRight className="h-5 w-5" aria-hidden="true" />
-                      </Link>
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
+            <PublishedSeminarList seminars={PUBLISHED_SAFETY_SEMINARS} />
             <p className="mt-4 text-sm font-bold leading-6 text-slate-700 dark:text-slate-200">
               この教材は社内安全研修用です。法定の特別教育等を代替するものではありません。
             </p>
           </section>
 
-          <section
-            aria-labelledby="coming-soon-title"
-            className="mt-14"
-            style={{ contentVisibility: "auto", containIntrinsicSize: "auto 1400px" }}
-          >
-            <p className="text-sm font-black text-amber-800 dark:text-amber-300">
-              NEXT TOPICS
-            </p>
-            <h2
-              id="coming-soon-title"
-              className="mt-1 text-3xl font-black tracking-tight"
-            >
-              全20テーマの目次（公開{PUBLISHED_SAFETY_SEMINARS.length}・準備中{COMING_SOON_SAFETY_CORE_20.length}）
-            </h2>
-            <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-              {COMING_SOON_SAFETY_CORE_20.map((seminar) => (
-                <article
-                  key={seminar.id}
-                  data-seminar-status="coming-soon"
-                  className="flex min-h-44 flex-col rounded-2xl border border-slate-300 bg-white p-5 dark:border-slate-700 dark:bg-slate-900"
-                >
-                  <h3 className="text-lg font-black leading-7">
-                    {seminar.title}
-                  </h3>
-                  <p className="mt-3 text-sm font-semibold leading-6 text-slate-600 dark:text-slate-300">
-                    対象：{seminar.audience}
-                  </p>
-                  <span className="mt-auto pt-4 text-xs font-black tracking-[.12em] text-amber-800 dark:text-amber-300">
-                    Coming Soon
-                  </span>
-                </article>
-              ))}
-            </div>
+          <section aria-labelledby="coming-soon-title" className="mt-14">
+            <details className="rounded-2xl border-2 border-slate-300 bg-white dark:border-slate-700 dark:bg-slate-900">
+              <summary className="flex min-h-14 cursor-pointer items-center justify-between gap-4 px-5 py-3 font-black">
+                <span id="coming-soon-title">準備中のテーマ目次（{COMING_SOON_SAFETY_CORE_20.length}件）</span>
+                <span className="text-xs text-slate-600 dark:text-slate-300">目次を開く</span>
+              </summary>
+              <ul className="divide-y divide-slate-200 border-t border-slate-200 dark:divide-slate-700 dark:border-slate-700">
+                {COMING_SOON_SAFETY_CORE_20.map((seminar) => (
+                  <li key={seminar.id} data-seminar-status="coming-soon" className="grid gap-1 px-5 py-3 sm:grid-cols-[minmax(0,1fr)_14rem_auto] sm:items-center sm:gap-4">
+                    <span className="font-black">{seminar.title}</span>
+                    <span className="text-sm text-slate-600 dark:text-slate-300">対象：{seminar.audience}</span>
+                    <span className="text-xs font-black tracking-[.08em] text-amber-800 dark:text-amber-300">準備中</span>
+                  </li>
+                ))}
+              </ul>
+            </details>
           </section>
         </div>
       </div>

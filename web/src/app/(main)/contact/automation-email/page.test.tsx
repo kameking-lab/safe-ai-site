@@ -80,15 +80,9 @@ describe("/contact/automation-email", () => {
     expect(
       screen.getByRole("heading", { name: "保護具選定をメールで相談" }),
     ).toBeDefined();
-    expect(container.querySelector("form")?.getAttribute("action")).toBe(
-      "/contact/automation-email/draft?type=ppe-selection",
-    );
-    expect(
-      screen.getByRole("textbox", { name: "コピー用の件名" }),
-    ).toHaveProperty("value", "安全AIポータル｜保護具選定の相談");
-    expect(
-      screen.getByRole("textbox", { name: "コピー用の相談テンプレート" }),
-    ).toHaveProperty("value", expect.stringContaining("【危険有害要因】"));
+    expect(container.querySelector("form")).toBeNull();
+    expect(await screen.findByRole("textbox", { name: "相談文（編集できます）" })).toHaveProperty("disabled", false);
+    expect(screen.getByRole("link", { name: "内容を確認してメールアプリを開く" }).getAttribute("href")).toContain("mailto:");
     expect(screen.getByRole("link", { name: /安全グッズへ戻る/ })).toHaveProperty(
       "pathname",
       "/goods",

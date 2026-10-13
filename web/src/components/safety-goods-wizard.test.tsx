@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, act } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { SafetyGoodsWizard } from './safety-goods-wizard';
+vi.mock('next/navigation', () => ({ useRouter: () => ({ push: vi.fn() }) }));
 vi.mock('@/components/Analytics',()=>({trackEvent:vi.fn()}));
 afterEach(()=>window.history.replaceState(null,'','/goods'));
 const choose=(name:RegExp)=>fireEvent.click(screen.getByRole('button',{name}));

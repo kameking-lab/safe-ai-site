@@ -1,12 +1,14 @@
 "use client";
 
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useSyncExternalStore } from 'react';
 import { ArrowLeft, ArrowRight, Check, CircleHelp, ExternalLink, RotateCcw, ShieldCheck, TriangleAlert } from 'lucide-react';
 import { Mascot } from '@/components/mascot';
 import { generateAmazonAffiliateUrl, generateRakutenSearchUrl } from '@/lib/affiliate-url';
 import { trackEvent } from '@/components/Analytics';
 import { CATEGORIES, TASKS, CONDITIONS, PPE_WORK_IMAGES, PPE_WORK_LABELS, getPpeQuestions, getPpeResult, normalizePpeAnswers } from '@/lib/ppe-guided-selection';
+import { preparePpeConsultDraft } from '@/lib/ppe-consult-draft';
 
 const EVENT = 'ppe-selection-change';
 function subscribe(listener: () => void) {
@@ -23,6 +25,7 @@ function navigate(answers: string[]) {
 }
 
 export function SafetyGoodsWizard({ initialCategory, onReturnToDirectory }: { initialCategory?: string; onReturnToDirectory?: () => void }) {
+ const router = useRouter();
  const snapshot = useSyncExternalStore(subscribe, readSnapshot, () => '[]');
  const saved: string[] = JSON.parse(snapshot);
  const answers = initialCategory && saved[0] !== initialCategory ? [initialCategory] : saved;
@@ -90,7 +93,7 @@ export function SafetyGoodsWizard({ initialCategory, onReturnToDirectory }: { in
      {result.category.id === 'fall' && <a href="https://www.mhlw.go.jp/web/t_doc?dataId=74ab6770&dataType=0&pageNo=1" target="_blank" rel="noopener noreferrer" className="ml-3 inline-flex min-h-11 items-center text-sm font-bold text-emerald-800 underline">器具の規格を確認<span className="sr-only">（新しいタブで開く）</span></a>}
      {result.category.id === 'chemical' && <a href="https://www.mhlw.go.jp/content/11300000/001670143.pdf" target="_blank" rel="noopener noreferrer" className="ml-3 inline-flex min-h-11 items-center text-sm font-bold text-emerald-800 underline">第3版選定マニュアル<span className="sr-only">（PDFを新しいタブで開く）</span></a>}
      {!result.blocked && result.query && <details className="mt-4 rounded-xl border border-slate-200 p-4"><summary className="min-h-11 cursor-pointer text-sm font-bold text-slate-800">種類に近い商品を一般検索する</summary><p className="mt-2 text-xs leading-6 text-slate-600">検索は規格適合の確認や当サイトの推薦ではありません。最新の製品仕様をメーカー資料で照合してください。</p><div className="mt-3 flex flex-wrap gap-2">{(['amazon', 'rakuten'] as const).map(platform => <a key={platform} href={platform === 'amazon' ? generateAmazonAffiliateUrl(result.query!) : generateRakutenSearchUrl(result.query!)} target="_blank" rel="noopener noreferrer sponsored" onClick={() => trackEvent('affiliate_click', { platform, product_id: 'wizard-' + result.categoryId, product_name: result.title, page_location: 'goods_selection_wizard' })} className="inline-flex min-h-12 items-center rounded-xl bg-emerald-800 px-4 text-sm font-bold text-white">{platform === 'amazon' ? 'Amazon' : '楽天'}で一般検索<span className="sr-only">（新しいタブで開く）</span></a>)}</div></details>}
-     {result.blocked && <a href="/contact/automation-email?subject=ppe-selection" className="mt-3 inline-flex min-h-12 items-center rounded-xl bg-emerald-800 px-4 text-sm font-bold text-white">選定を相談する</a>}
+     {result.blocked && <button type="button" onClick={() => { preparePpeConsultDraft(answers); router.push('/contact/automation-email?subject=ppe-selection'); }} className="mt-3 inline-flex min-h-12 items-center rounded-xl bg-emerald-800 px-4 text-sm font-bold text-white">選定を相談する</button>}
     </div>}
     {category && <div className="mt-5 flex flex-wrap justify-between gap-3 border-t border-slate-200 pt-3"><button type="button" onClick={back} className="inline-flex min-h-12 items-center gap-2 text-sm font-bold text-emerald-800"><ArrowLeft className="h-4 w-4" aria-hidden="true" />ひとつ戻る</button><button type="button" onClick={reset} className="inline-flex min-h-12 items-center gap-2 text-sm font-bold text-slate-700"><RotateCcw className="h-4 w-4" aria-hidden="true" />作業を選び直す</button></div>}
     {onReturnToDirectory && <button type="button" onClick={onReturnToDirectory} className="mt-2 min-h-11 text-sm font-bold text-slate-700 underline">用品一覧に戻る</button>}

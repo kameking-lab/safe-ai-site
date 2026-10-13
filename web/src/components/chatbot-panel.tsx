@@ -477,6 +477,17 @@ export function ChatbotPanel({
     }
   }
 
+  function prefillExampleQuestion(question: string) {
+    setInput(question);
+    setLocalSafetyNotice(null);
+    const composer = composerRef.current;
+    if (composer) {
+      composer.value = question;
+      composer.focus();
+      composer.setSelectionRange(question.length, question.length);
+    }
+  }
+
   useEffect(() => {
     if (
       initialQuestionConsumedRef.current ||
@@ -604,7 +615,7 @@ export function ChatbotPanel({
                   type="button"
                   data-chatbot-question-chip=""
                   disabled={isSending}
-                  onClick={() => void handleSend(question)}
+                  onClick={() => prefillExampleQuestion(question)}
                   className="min-h-11 rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-medium leading-4 text-slate-700 hover:border-blue-300 hover:bg-blue-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
                 >
                   {question}

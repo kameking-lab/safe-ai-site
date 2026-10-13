@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, Mail, ShieldCheck } from "lucide-react";
 import { AutomationConsultCopyButton } from "@/app/(main)/services/automation/AutomationConsultCopyButton";
+import { PpeConsultDraft } from "./PpeConsultDraft";
 import {
   AUTOMATION_MAIL_SUBJECT,
   AUTOMATION_MAIL_TEMPLATE,
@@ -82,7 +83,15 @@ export default async function AutomationEmailContactPage({
           </ul>
         </aside>
 
-        {mailReady ? (
+        {isPpeSelection && (
+          <PpeConsultDraft
+            recipient={mailRecipients?.to ?? null}
+            subject={mailSubject}
+            template={mailTemplate}
+          />
+        )}
+
+        {!isPpeSelection && mailReady ? (
           <form
             method="post"
             action={draftAction}
@@ -96,15 +105,15 @@ export default async function AutomationEmailContactPage({
               メールで相談する
             </button>
           </form>
-        ) : (
+        ) : !isPpeSelection ? (
           <p role="status" className="mt-6 rounded-xl border border-slate-400 bg-slate-100 p-4 font-bold text-slate-800">
             {isPpeSelection
               ? "現在、メール相談を開始できません。安全グッズの選定フローで作業条件を整理してください。"
               : "現在、メール相談を開始できません。料金と自動化例は引き続き確認できます。"}
           </p>
-        )}
+        ) : null}
 
-        <section aria-labelledby="mail-template-title" className="mt-8 border-t border-slate-200 pt-6">
+        {!isPpeSelection && <section aria-labelledby="mail-template-title" className="mt-8 border-t border-slate-200 pt-6">
           <h2 id="mail-template-title" className="text-xl font-black text-slate-950">
             メールアプリが開かない場合
           </h2>
@@ -160,7 +169,7 @@ export default async function AutomationEmailContactPage({
               上の宛先・件名・本文を選択し、端末のコピー操作をご利用ください。
             </p>
           </noscript>
-        </section>
+        </section>}
       </article>
     </div>
   );
