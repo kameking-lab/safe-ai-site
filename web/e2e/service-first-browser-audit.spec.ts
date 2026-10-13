@@ -654,8 +654,10 @@ test("chatbot: composer, question chips, quick reply and source details remain o
   const sources = page.locator("[data-chatbot-source-details]").first();
   await expect(sources).toBeVisible({ timeout: 20_000 });
   expect(await sources.evaluate((element) => (element as HTMLDetailsElement).open)).toBe(false);
-  const summary = sources.locator("summary");
+  const summary = sources.locator(":scope > summary");
+  await expect(summary).toHaveCount(1);
   await summary.focus();
+  await expect(summary).toBeFocused();
   await summary.press("Enter");
   expect(await sources.evaluate((element) => (element as HTMLDetailsElement).open)).toBe(true);
   const actionCounts = await page

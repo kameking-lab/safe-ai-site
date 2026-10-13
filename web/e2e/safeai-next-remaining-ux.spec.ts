@@ -50,7 +50,10 @@ test("048 規制は閉じて開始し、閉じたまま絞り込みを解除で�
   await expect(clear).toBeVisible();
   await clear.click();
   await expect(search).toHaveValue("108-88-3");
-  await expect(page.getByRole("row", { name: /108-88-3/ })).toBeVisible();
+  const card = page.locator('[data-chemical-mobile-card][data-cas="108-88-3"]');
+  await expect(card).toBeVisible();
+  await expect(card.getByRole("heading", { name: "トルエン", exact: true })).toBeVisible();
+  await expect(card.getByRole("link", { name: "詳細を見る", exact: true })).toHaveAttribute("href", "/chemical-database/108-88-3");
   await expect(page.getByText("1 件選択中", { exact: true })).toHaveCount(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBe(0);
   await page.screenshot({ path: testInfo.outputPath("048-filter-320.png"), fullPage: true });
