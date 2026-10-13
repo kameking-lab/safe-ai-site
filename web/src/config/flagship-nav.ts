@@ -92,15 +92,15 @@ const ALL_FLAGSHIP_FEATURES: FlagshipFeature[] = [
   },
   {
     id: "chemical-ra",
-    label: "化学物質RA",
+    label: "化学物質RA準備",
     icon: "⚗️",
     iconSrc: "/icons/icon-chemical.webp",
-    cardTitle: "化学物質リスクアセスメント",
+    cardTitle: "化学物質RA準備",
     cardDescription:
       "CAS番号を正本に化学物質DB・SDS・作業条件を照合し、公式CREATE-SIMPLEで評価する前の不足情報を確認できます。",
     href: "/chemical-ra",
     subItems: [
-      { label: "新規アセスメント", href: "/chemical-ra" },
+      { label: "RA前の不足情報を確認", href: "/chemical-ra" },
       { label: "化学物質検索", href: "/chemical-database" },
       { label: "濃度基準値", href: "/chemical-database#limits" },
     ],

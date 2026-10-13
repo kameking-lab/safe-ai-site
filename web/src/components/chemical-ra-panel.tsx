@@ -44,6 +44,7 @@ import { parseExposureLimit } from "@/lib/chemical/concentration-comparison";
 import { inspectChemicalNavigationQuery } from "@/lib/chemical/query-safety";
 import { fetchChemicalLegalProfile } from "@/lib/chemical/legal-profile-client";
 import { KyHandoffLink } from "@/components/ky-handoff-link";
+import { controlsFromVentilation, ventilationFromControls, type VentilationSelection } from "@/lib/chemical/ventilation-selection";
 
 const ChemicalRaSaveButton = dynamic(
   () =>
@@ -270,7 +271,6 @@ export function ChemicalRaPanel({
   const [workContent, setWorkContent] = useState("");
   const [measuredConc, setMeasuredConc] = useState("");
   const [measuredUnit, setMeasuredUnit] = useState("");
-  const [ventilation, setVentilation] = useState<"none" | "general" | "local" | "">("");
   const [amount, setAmount] = useState<"small" | "medium" | "large" | "">("");
   const [durationHours, setDurationHours] = useState<string>("");
   const [sdsStatus, setSdsStatus] = useState<ChemicalRaSdsStatus>("unknown");
@@ -280,6 +280,12 @@ export function ChemicalRaPanel({
     useState<ChemicalRaTriState>("unknown");
   const [localExhaust, setLocalExhaust] =
     useState<ChemicalRaTriState>("unknown");
+  const ventilation = ventilationFromControls(generalVentilation, localExhaust);
+  function selectVentilation(selection: VentilationSelection) {
+    const controls = controlsFromVentilation(selection);
+    setGeneralVentilation(controls.generalVentilation);
+    setLocalExhaust(controls.localExhaust);
+  }
   const [frequency, setFrequency] = useState<ChemicalRaFrequency>(null);
   const [useTemperatureC, setUseTemperatureC] = useState("");
   const [dispersion, setDispersion] = useState<ChemicalRaDispersion>(null);
@@ -494,7 +500,6 @@ export function ChemicalRaPanel({
           setSdsStatus(snapshot.sds.status);
           setSdsIssuedOn(snapshot.sds.issuedOn ?? "");
           setComponentVersion(snapshot.sds.componentVersion ?? "");
-          setVentilation(snapshot.ventilation ?? "");
           setGeneralVentilation(
             snapshot.engineeringControls.generalVentilation,
           );
@@ -871,13 +876,14 @@ export function ChemicalRaPanel({
                 換気
                 <select
                   value={ventilation}
-                  onChange={(e) => setVentilation(e.target.value as "none" | "general" | "local" | "")}
+                  onChange={(e) => selectVentilation(e.target.value as VentilationSelection)}
                   className="mt-1 w-full rounded-md border border-slate-300 bg-white px-2 py-1 text-xs"
                 >
-                  <option value="">選択してください</option>
-                  <option value="none">換気なし</option>
-                  <option value="general">全体換気</option>
-                  <option value="local">局所排気</option>
+                  <option value="">不明・未確認</option>
+                  <option value="none">全体換気・局所排気ともになし</option>
+                  <option value="general">全体換気のみ</option>
+                  <option value="local">局所排気のみ</option>
+                  <option value="both">全体換気と局所排気を併用</option>
                 </select>
               </label>
               <label className="text-[11px] text-slate-700">
@@ -993,15 +999,7 @@ export function ChemicalRaPanel({
                   全体換気
                   <select
                     value={generalVentilation}
-                    onChange={(event) => {
-                      const next = event.target.value as ChemicalRaTriState;
-                      setGeneralVentilation(next);
-                      if (next === "yes" && localExhaust !== "yes") {
-                        setVentilation("general");
-                      } else if (next === "no" && localExhaust === "no") {
-                        setVentilation("none");
-                      }
-                    }}
+                    onChange={(event) => setGeneralVentilation(event.target.value as ChemicalRaTriState)}
                     className="mt-1 min-h-[44px] w-full rounded-md border border-slate-300 bg-white px-2 text-xs"
                   >
                     <option value="unknown">不明・未確認</option>
@@ -1013,20 +1011,7 @@ export function ChemicalRaPanel({
                   局所排気
                   <select
                     value={localExhaust}
-                    onChange={(event) => {
-                      const next = event.target.value as ChemicalRaTriState;
-                      setLocalExhaust(next);
-                      if (next === "yes") {
-                        setVentilation("local");
-                      } else if (next === "no" && generalVentilation === "yes") {
-                        setVentilation("general");
-                      } else if (
-                        next === "no" &&
-                        generalVentilation === "no"
-                      ) {
-                        setVentilation("none");
-                      }
-                    }}
+                    onChange={(event) => setLocalExhaust(event.target.value as ChemicalRaTriState)}
                     className="mt-1 min-h-[44px] w-full rounded-md border border-slate-300 bg-white px-2 text-xs"
                   >
                     <option value="unknown">不明・未確認</option>
@@ -1036,7 +1021,7 @@ export function ChemicalRaPanel({
                 </label>
               </div>
               <p className="mt-2 text-[10px] leading-4 text-slate-600">
-                「あり」は設備の存在だけでなく、対象作業で稼働し、点検状態と捕捉位置を人が確認した場合に選択してください。
+                上の換気区分と連動します。どちらかが未確認なら区分も未確認です。「あり」は対象作業での稼働・点検・捕捉位置を確認した場合に選択してください。
               </p>
             </fieldset>
             <fieldset className="mt-3 rounded-lg border border-blue-200 bg-white/70 p-3">

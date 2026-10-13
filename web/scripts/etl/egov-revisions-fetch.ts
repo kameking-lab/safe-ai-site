@@ -90,7 +90,7 @@ export type LawRevisionRecord = {
   title: string;
   publishedAt: string;
   revisionNumber: string;
-  kind: "law" | "ordinance" | "notice" | "guideline" | "other";
+    kind: "law" | "cabinet_order" | "ordinance" | "notice" | "guideline" | "other";
   category: string;
   issuer: string;
   summary: string;
@@ -110,7 +110,8 @@ function validYmd(s: unknown): s is string {
 
 function kindFromLawType(lawType: string): LawRevisionRecord["kind"] {
   if (lawType === "Act") return "law";
-  if (lawType === "CabinetOrder" || lawType === "MinisterialOrdinance") return "ordinance";
+  if (lawType === "CabinetOrder") return "cabinet_order";
+  if (lawType === "MinisterialOrdinance") return "ordinance";
   return "other";
 }
 function categoryFromLawType(lawType: string): string {
@@ -180,7 +181,7 @@ export function buildRecord(
     revisionNumber: amendmentNum,
     kind: kindFromLawType(lawType),
     category: categoryFromLawType(lawType),
-    issuer: "厚生労働省",
+    issuer: lawType === "CabinetOrder" ? "内閣" : "厚生労働省",
     summary,
     source: { url: egovUrl, label: `e-Gov ${lawTitle}` },
     official_notice_number: "",

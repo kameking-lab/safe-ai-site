@@ -38,6 +38,17 @@ describe("MHLW化学物質カードの安全境界", () => {
     expect(screen.getByRole("heading", { name: "政府版GHS分類" })).toBeTruthy();
     expect(screen.getByText("ラベル・SDS対象物質")).toBeTruthy();
   });
+  it("●と未確認の意味を説明し、厚労省の対象物質一覧へ案内する", () => {
+    render(<MhlwChemicalInfoCard chemical={xyleneWithUnconfirmedLegacyFlag} showGhs={false} />);
+
+    expect(screen.getByText("濃度基準値設定").parentElement?.textContent).toContain("● リスト収録あり");
+    expect(screen.getByText("ラベル・SDS対象物質").parentElement?.textContent).toContain("収録データ上未確認");
+    expect(screen.getByText(/空欄・「未確認」は、収録データで掲載を確認できない状態/)).toBeTruthy();
+    expect(screen.getByRole("link", { name: "厚生労働省の対象物質一覧" }).getAttribute("href")).toBe(
+      "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000099121_00005.html",
+    );
+  });
+
   it("未収録フラグを法的な非該当と断定しない", () => {
     render(<MhlwChemicalInfoCard chemical={xyleneWithUnconfirmedLegacyFlag} />);
 

@@ -3,8 +3,9 @@ import {
   filterAnalyticsCases,
   getAnalyticsAggregates,
   normalizeOccurrenceTimeBucket,
+  normalizeWorkplaceSize,
 } from "./aggregators";
-import type { CombinedCase } from "./loader";
+import { loadCombinedCases, type CombinedCase } from "./loader";
 
 function accident(id: string, values: Partial<CombinedCase>): CombinedCase {
   return {
@@ -119,5 +120,34 @@ describe("事故統計の交差フィルタ", () => {
       expect(coverage.missingRatePercent).toBeGreaterThanOrEqual(0);
       expect(coverage.missingRatePercent).toBeLessThanOrEqual(100);
     }
+  });
+});
+
+describe("事業場規模の表記統合", () => {
+  it("10～29 / 10~29 を同一表示にし、元の個票は書き換えない", () => {
+    expect(normalizeWorkplaceSize("10～29")).toBe("10～29人");
+    expect(normalizeWorkplaceSize("10~29人")).toBe("10～29人");
+    const records = [
+      accident("wave", { workplaceSize: "10～29" }),
+      accident("tilde", { workplaceSize: "10~29" }),
+    ];
+    expect(filterAnalyticsCases(records, { workplaceSize: "10～29人" })).toHaveLength(2);
+    expect(records.map((item) => item.workplaceSize)).toEqual(["10～29", "10~29"]);
+  });
+
+  it("年度別に統合後の規模別件数が原票の既知件数と一致する", () => {
+    const official = loadCombinedCases().filter((item) => item.source !== "curated");
+    const years = [...new Set(official.map((item) => item.year))];
+    for (const year of years) {
+      const raw = official.filter((item) => item.year === year);
+      const known = raw.filter((item) => normalizeWorkplaceSize(item.workplaceSize)).length;
+      const aggregate = getAnalyticsAggregates({ year });
+      expect(aggregate.workplaceSizeRanking.reduce((sum, row) => sum + row.count, 0)).toBe(known);
+      expect(aggregate.meta.coverage.workplaceSize.known).toBe(known);
+      expect(aggregate.meta.filteredCases).toBe(raw.length);
+    }
+    const all = getAnalyticsAggregates();
+    expect(all.meta.filterOptions.workplaceSizes).toContain("10～29人");
+    expect(all.meta.filterOptions.workplaceSizes).not.toContain("10~29");
   });
 });

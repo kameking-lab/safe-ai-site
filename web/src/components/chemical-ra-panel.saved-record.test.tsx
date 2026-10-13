@@ -176,7 +176,7 @@ describe("ChemicalRaPanel 保存記録の条件復元", () => {
         (screen.getByLabelText("成分・製品版") as HTMLInputElement).value,
       ).toBe("製品A / 第3版");
       expect((screen.getByLabelText("換気") as HTMLSelectElement).value).toBe(
-        "local",
+        "both",
       );
       expect(
         (screen.getByLabelText("取扱量") as HTMLSelectElement).value,

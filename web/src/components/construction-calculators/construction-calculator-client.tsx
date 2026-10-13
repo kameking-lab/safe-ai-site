@@ -28,12 +28,14 @@ import type {
   CalculatorFunction,
   FormulaRegistryEntry,
   InputDefinition,
+  LengthUnit,
   PortableValue,
   RoundingConfig,
   ValidationIssue,
 } from "@/lib/construction-calculators/types";
 
 import { additionalQuantitySpecs } from "@/lib/construction-calculators/additional-quantity";
+import { changeConcreteDimensionUnit } from "@/lib/construction-calculators/concrete-unit-change";
 import { CalculatorInputGuide, INPUT_COLORS, inputUnit } from "./calculator-input-guide";
 
 type PublicFormulaDefinition = Omit<FormulaRegistryEntry, "testFixtures">;
@@ -308,6 +310,7 @@ export function ConstructionCalculatorClient({
   const [errors, setErrors] = useState<ValidationIssue[]>([]);
   const [usingExample, setUsingExample] = useState(!startEmpty);
   const [exampleEdited, setExampleEdited] = useState(false);
+  const [unitChangeNotice, setUnitChangeNotice] = useState("");
   const focusResult = useRef(false);
   const liveRevision = useRef(0);
   const [loading, setLoading] = useState(false);
@@ -374,7 +377,13 @@ export function ConstructionCalculatorClient({
   const change = (key: string, value: unknown) => {
     if(usingExample) setExampleEdited(true);
     ++liveRevision.current;
-    setRaw((current) => ({ ...current, [key]: value }));
+    if (definition.slug === "concrete-quantity" && key === "dimensionUnit") {
+      setRaw((current) => changeConcreteDimensionUnit(current, value as LengthUnit));
+      setUnitChangeNotice(`入力済みの長さ・幅・高さ・直径を${String(value)}に換算しました。実寸は同じです。`);
+    } else {
+      setRaw((current) => ({ ...current, [key]: value }));
+      setUnitChangeNotice("");
+    }
     setResult(null);
     setErrors([]);
     setCopied(false);
@@ -434,6 +443,7 @@ export function ConstructionCalculatorClient({
     setResult(null);
     setErrors([]);
     setCopied(false);
+    setUnitChangeNotice("");
   };
 
   const copy = async () => {
@@ -482,7 +492,7 @@ export function ConstructionCalculatorClient({
             数字を入れる
           </h2>
           <div className="mt-3 flex flex-wrap items-center gap-2">
-            <button type="button" onClick={()=>{setRaw({...defaultInput});setUsingExample(true);setExampleEdited(false);setErrors([]);}} className="min-h-11 rounded-lg border-2 border-emerald-700 px-3 text-sm font-bold">例の数字で試す</button>
+            <button type="button" onClick={()=>{setRaw({...defaultInput});setUsingExample(true);setExampleEdited(false);setErrors([]);setUnitChangeNotice("");}} className="min-h-11 rounded-lg border-2 border-emerald-700 px-3 text-sm font-bold">例の数字で試す</button>
             <span className="text-xs font-bold text-slate-600 dark:text-slate-300">{usingExample?(exampleEdited?"例の数字を一部変更した概算です。残りの例も確認してください。":"例の数字です。現場の実測値ではありません。"):"図の番号と同じ欄に、現場の数字を入れます。"}</span>
           </div>
           <CalculatorInputGuide slug={definition.slug} fields={visibleDefinitions} raw={raw}/>
@@ -514,6 +524,7 @@ export function ConstructionCalculatorClient({
               />
             ))}
           </div>
+          {unitChangeNotice ? <p role="status" className="mt-3 text-sm font-bold text-emerald-800 dark:text-emerald-300">{unitChangeNotice}</p> : null}
           {visibleDefinitions.some((field) => field.type === "segments") ? (
             <fieldset className="mt-5 rounded-xl border border-slate-300 p-4 dark:border-slate-600">
               <legend className="px-2 font-black">複数区間</legend>

@@ -15,7 +15,7 @@ export type ChemicalRaRequest = {
   chemicalName: string;
   workContent?: string;
   casNumber?: string;
-  ventilation?: "none" | "general" | "local";
+  ventilation?: "none" | "general" | "local" | "both";
   amount?: "small" | "medium" | "large";
   durationHours?: number;
 };
@@ -112,7 +112,7 @@ export async function POST(request: Request) {
   ) {
     return validationError("作業時間は0〜24時間で入力してください。");
   }
-  if (body.ventilation && !["none", "general", "local"].includes(body.ventilation)) {
+  if (body.ventilation && !["none", "general", "local", "both"].includes(body.ventilation)) {
     return validationError("換気条件が不正です。");
   }
   if (body.amount && !["small", "medium", "large"].includes(body.amount)) {

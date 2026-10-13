@@ -112,7 +112,8 @@ export function MhlwChemicalInfoCard({
         <FlagBadge label="がん原性物質リスト" on={chemical.flags.carcinogenic} />
       </div>
       <p className="mt-2 text-[11px] leading-5 text-slate-600">
-        物質リストの収録状況です。製品の含有率や取扱業務など、実際の適用条件は各法令で確認してください。
+        ●は当サイトに収録した厚生労働省の公表リストに掲載があることを示します。空欄・「未確認」は、収録データで掲載を確認できない状態であり、法的な対象外判定ではありません。製品の含有率・施行日・取扱条件は、製品SDSと
+        {" "}<a href="https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000099121_00005.html" target="_blank" rel="noopener noreferrer" className="font-semibold text-emerald-800 underline">厚生労働省の対象物質一覧</a>で確認してください。
       </p>
 
       {showGhs && (ghsHazards.length > 0 ? (
@@ -341,7 +342,7 @@ function FlagBadge({ label, on }: { label: string; on: boolean }) {
     >
       <span className="text-xs font-semibold">{label}</span>
       <span className="text-xs font-bold">
-        {on ? "リスト収録あり" : "収録データ上未確認"}
+        {on ? "● リスト収録あり" : "収録データ上未確認"}
       </span>
     </div>
   );

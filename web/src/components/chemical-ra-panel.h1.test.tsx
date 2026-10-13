@@ -43,4 +43,27 @@ describe("ChemicalRaPanel 見出し階層（多重h1の是正）", () => {
     expect(container.querySelector("#chemical-ra-work-conditions")).toBeTruthy();
     expect(screen.getByRole("button", { name: "公的情報を確認" })).toBeTruthy();
   });
+  it("換気の一括選択・詳細変更・未確認が同じ条件を表示する", () => {
+    renderPanel();
+    fireEvent.change(screen.getByRole("combobox", { name: /物質名・CAS番号・SDS記載名/ }), { target: { value: "トルエン" } });
+    fireEvent.click(screen.getByRole("button", { name: "作業条件へ進む" }));
+    const summary = screen.getByLabelText("換気") as HTMLSelectElement;
+    const general = screen.getByLabelText("全体換気") as HTMLSelectElement;
+    const local = screen.getByLabelText("局所排気") as HTMLSelectElement;
+    fireEvent.change(summary, { target: { value: "both" } });
+    expect(general.value).toBe("yes");
+    expect(local.value).toBe("yes");
+    fireEvent.change(local, { target: { value: "no" } });
+    expect(summary.value).toBe("general");
+    fireEvent.change(general, { target: { value: "unknown" } });
+    expect(summary.value).toBe("");
+    expect(local.value).toBe("no");
+    fireEvent.change(summary, { target: { value: "local" } });
+    expect(general.value).toBe("no");
+    expect(local.value).toBe("yes");
+    fireEvent.change(summary, { target: { value: "" } });
+    expect(general.value).toBe("unknown");
+    expect(local.value).toBe("unknown");
+  });
+
 });

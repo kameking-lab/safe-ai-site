@@ -16,7 +16,11 @@ describe("the approved homepage LP", () => {
     expect(container.textContent).toContain("現場に向き合う時間を、もっと。");
     expect(container.textContent).not.toContain("死亡事故で同僚を失いました");
     expect(container.querySelectorAll("[data-lp-use]")).toHaveLength(3);
-    expect(container.querySelector("[data-information-preview]")?.textContent).toContain("条文や出典、集計の対象");
+    expect(container.querySelector("[data-information-preview]")?.textContent).toContain("出典と確認状態");
+    expect([...container.querySelectorAll<HTMLAnchorElement>('nav[aria-label="すぐ使う道具"] a')].map((a) => a.getAttribute("href"))).toEqual(["/chatbot", "/chemical-ra", "/accident-news"]);
+    expect(container.innerHTML.indexOf('nav aria-label="すぐ使う道具"')).toBeLessThan(container.innerHTML.indexOf('href="#tools"'));
+    expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("その書類、AIに任せて、現場に行こう。");
+    expect(container.textContent).toContain("初回30分の相談は無料。業務自動化は税込33,000円から。");
     expect(container.querySelector("[data-ky-scene]")).toBeNull();
     expect(screen.getByRole("link", { name: "KY用紙" }).getAttribute("href")).toBe("/ky/paper");
     expect(container.textContent).toContain("帳票は現場ごとに書式や運用が異なります");
@@ -28,12 +32,12 @@ describe("the approved homepage LP", () => {
   });
 
   it.each([
-    [paused, "/services/automation"],
-    [{ ...paused, status: "mail_available", accepting: true, contactMode: "mail_client", label: "メール相談受付中" }, "/contact/automation-email"],
-    [{ ...paused, status: "available", accepting: true, webFormEnabled: true, contactMode: "web_form", intakeMode: "email", label: "Webフォーム受付中" }, "/services/automation#consult-form"],
-  ] as const)("routes consultation according to the existing actual availability", (availability, href) => {
+    [paused, "/services/automation", "料金・受付状況を見る"],
+    [{ ...paused, status: "mail_available", accepting: true, contactMode: "mail_client", label: "メール相談受付中" }, "/contact/automation-email", "自動化について相談する"],
+    [{ ...paused, status: "available", accepting: true, webFormEnabled: true, contactMode: "web_form", intakeMode: "email", label: "Webフォーム受付中" }, "/services/automation#consult-form", "自動化について相談する"],
+  ] as const)("routes consultation according to the existing actual availability", (availability, href, label) => {
     render(<HomeLP availability={availability} latestNews={unavailable} />);
-    expect(screen.getByRole("link", { name: "自動化について相談する" }).getAttribute("href")).toBe(href);
+    expect(screen.getByRole("link", { name: label }).getAttribute("href")).toBe(href);
   });
 
   it("shows only the first current report with its source and unresolved verification", () => {

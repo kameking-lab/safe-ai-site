@@ -51,6 +51,20 @@ describe.each(constructionCalculatorRegistry)("$title の共通UI", (definition)
 });
 
 describe("建設計算のエラー案内", () => {
+  it("コンクリートの寸法単位変更では入力値を換算し、案内を表示する", async () => {
+    const definition = constructionCalculatorRegistry.find((item) => item.slug === "concrete-quantity");
+    expect(definition).toBeDefined();
+    if (!definition) return;
+    const { testFixtures: _testFixtures, ...publicDefinition } = definition;
+    render(<ConstructionCalculatorClient definition={publicDefinition} defaultInput={{ shape: "rectangular", length: 5, width: 4, height: 0.5, diameter: 2, dimensionUnit: "m", quantity: 1, lossPercent: 3, truckCapacityM3: 4.5 }} />);
+    await waitFor(() => expect(document.getElementById("construction-calculator-dimensionUnit")).not.toBeNull());
+    fireEvent.change(document.getElementById("construction-calculator-dimensionUnit") as HTMLSelectElement, { target: { value: "cm" } });
+    expect((document.getElementById("construction-calculator-length") as HTMLInputElement).value).toBe("500");
+    expect((document.getElementById("construction-calculator-width") as HTMLInputElement).value).toBe("400");
+    expect((document.getElementById("construction-calculator-height") as HTMLInputElement).value).toBe("50");
+    expect(screen.getByRole("status").textContent).toContain("実寸は同じ");
+  });
+
   it("内部キーを日本語ラベルへ置き換え、エラー入力を読み上げ可能にしてfocusする", async () => {
     const definition = constructionCalculatorRegistry.find((item) => item.slug === "concrete-quantity");
     expect(definition).toBeDefined();

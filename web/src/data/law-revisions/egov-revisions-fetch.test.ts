@@ -66,6 +66,18 @@ function fixedClock(...isoTimes: string[]): () => Date {
 }
 
 describe("e-Gov revisions ETL fail-closed guard", () => {
+  it("CabinetOrderを省令扱いせず政令・内閣として保存する", () => {
+    const decree = validLawFixture("347CO0000000318");
+    Object.assign(decree.revision_info as Record<string, unknown>, {
+      law_type: "CabinetOrder",
+      amendment_law_num: "令和八年政令第百九十六号",
+    });
+    const record = buildRecord("安衛令", decree);
+    expect(record?.kind).toBe("cabinet_order");
+    expect(record?.category).toBe("政令");
+    expect(record?.issuer).toBe("内閣");
+  });
+
   it("全面障害は非0終了し、既存snapshotをバイト単位で保持する", async () => {
     const outputPath = temporaryOutputPath();
     const previousSnapshot = '{"sentinel":"previous-success"}\n';

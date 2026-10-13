@@ -36,7 +36,7 @@
 .consultGrid { max-width:1152px; margin:auto; display:grid; gap:24px; }.consult .sectionLabel { color:#c6ad70; }.consult p:not(.sectionLabel) { font-size:1rem; line-height:1.9; }.consult .consultNote { font-size:.875rem; margin-top:18px; color:#d3dece; }
 .quality { padding-block:28px; border-top:1px solid #c6ad7070; font-size:.875rem; line-height:1.9; }
 .companion { position:relative; width:100%; min-width:0; margin:0; }
-.demoPaper { position:relative; border:1px solid #e5e4cf; border-radius:7px; background:#f4f1e8; color:#172c25; padding:24px; box-shadow:0 24px 60px #0003; }
+.demoPaper { margin-top:24px; position:relative; border:1px solid #e5e4cf; border-radius:7px; background:#f4f1e8; color:#172c25; padding:24px; box-shadow:0 24px 60px #0003; }
 .demoHeading { display:flex; align-items:center; justify-content:space-between; gap:10px; border-bottom:1px solid #c6ad7060; padding-bottom:12px; font-size:.75rem; }.demoHeading span:first-child { font-weight:750; font-size:1rem; }.demoIntro { font-size:.875rem; margin:16px 0; }
 .companionCaption { font-size:.875rem; text-align:center; margin-top:10px; color:#dce6d6; }.demoControls { display:flex; flex-wrap:wrap; justify-content:center; gap:8px 16px; margin-top:5px; }.demoControls button { min-width:44px; min-height:44px; font-size:.8125rem; color:#e5ebdb; border-bottom:1px solid #89967c; background:transparent; padding:7px 2px; }.greetingResponse { min-height:24px; line-height:1.8; text-align:center; font-size:.75rem; color:#dce8ba; margin-top:10px; }
 @keyframes lp-enter { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:none; } }

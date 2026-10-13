@@ -10,6 +10,7 @@ import { lawRevisionCores } from "@/data/mock/law-revisions";
 import { HOME_FEATURED_LAW_REFORM } from "@/lib/home/effect-first-data";
 import { UsageNotesLink } from "@/components/usage-notes-link";
 import { FeatureMascotCompanion } from "@/components/feature-mascot-companion";
+import { lawRevisionHeadline } from "@/lib/laws/revision-presentation";
 
 const _title = "労働安全衛生関係法令の改正情報";
 const _desc =
@@ -35,7 +36,7 @@ export const revalidate = 86400;
 export default function LawsPage() {
   const lawSchema = articleListSchema(
     lawRevisionCores.map((r) => ({
-      headline: r.title,
+      headline: lawRevisionHeadline(r),
       datePublished: r.publishedAt,
       url: r.source_url ?? `${SITE_URL}/laws`,
       description: r.summary,

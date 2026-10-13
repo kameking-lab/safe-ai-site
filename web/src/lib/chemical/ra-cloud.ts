@@ -1,3 +1,5 @@
+import { ventilationFromControls } from "./ventilation-selection";
+
 /**
  * P1-5 化学物質RA結果のローカルファースト保管＋クラウド同期（client）。
  *
@@ -21,6 +23,7 @@ export type ChemicalRaVentilation =
   | "none"
   | "general"
   | "local"
+  | "both"
   | null;
 export type ChemicalRaAmount = "small" | "medium" | "large" | null;
 export type ChemicalRaTriState = "yes" | "no" | "unknown";
@@ -304,7 +307,8 @@ function normalizeSnapshot(
   const ventilation: ChemicalRaVentilation =
     value.ventilation === "none" ||
     value.ventilation === "general" ||
-    value.ventilation === "local"
+    value.ventilation === "local" ||
+    value.ventilation === "both"
       ? value.ventilation
       : null;
   const amount: ChemicalRaAmount =
@@ -461,7 +465,7 @@ export function createChemicalRaRecordPayload(
       issuedOn: input.sdsIssuedOn,
       componentVersion: input.componentVersion,
     },
-    ventilation: input.ventilation || null,
+    ventilation: ventilationFromControls(input.generalVentilation || "unknown", input.localExhaust || "unknown") || null,
     engineeringControls: {
       generalVentilation: input.generalVentilation || "unknown",
       localExhaust: input.localExhaust || "unknown",

@@ -107,6 +107,14 @@ function macroCategoryFor(item: SearchItem): SearchMacroCategory {
   return "tool";
 }
 
+export function countSearchResultsByCategory(results: SearchItem[]) {
+  const macro = Object.fromEntries(
+    SEARCH_MACRO_CATEGORIES.map((category) => [category, 0]),
+  ) as Record<SearchMacroCategory, number>;
+  for (const item of results) macro[macroCategoryFor(item)] += 1;
+  return { all: results.length, ...macro };
+}
+
 function canonicalResultKey(item: SearchItem): string {
   return (item.canonicalUrl || item.url).replace(/[?#].*$/, '').replace(/\/$/, '') || '/';
 }
@@ -117,22 +125,27 @@ export type SearchResultGroups = {
   others: SearchItem[];
 };
 
+export function deduplicateSearchResults(results: SearchItem[]): SearchItem[] {
+  const seen = new Set<string>();
+  return results.filter((item) => {
+    const canonical = canonicalResultKey(item);
+    if (seen.has(canonical)) return false;
+    seen.add(canonical);
+    return true;
+  });
+}
+
 /**
  * rankerの順序を変えず、canonical重複だけを先勝ちで除去して表示用途へ分類する。
  */
 export function classifySearchResults(results: SearchItem[]): SearchResultGroups {
-  const seen = new Set<string>();
   const groups: SearchResultGroups = {
     destinations: [],
     documents: [],
     others: [],
   };
 
-  for (const item of results) {
-    const canonical = canonicalResultKey(item);
-    if (seen.has(canonical)) continue;
-    seen.add(canonical);
-
+  for (const item of deduplicateSearchResults(results)) {
     if (item.informationKind === 'tool' || item.category === 'feature') {
       groups.destinations.push(item);
     } else if (
@@ -228,6 +241,7 @@ export function SearchResults() {
   const [requestedDocumentPage, setRequestedDocumentPage] = useState(() =>
     positivePage(searchParams.get('docPage')),
   );
+  const [requestedDestinationPage, setRequestedDestinationPage] = useState(1);
   const [requestedOtherPage, setRequestedOtherPage] = useState(() =>
     positivePage(searchParams.get('otherPage')),
   );
@@ -273,10 +287,11 @@ export function SearchResults() {
 
   const index = indexBuild.items;
 
-  const allResults = useMemo(
+  const rankedResults = useMemo(
     () => (submittedQuery ? searchItems(index, submittedQuery, 'all', RESULT_LIMIT) : []),
     [index, submittedQuery],
   );
+  const allResults = useMemo(() => deduplicateSearchResults(rankedResults), [rankedResults]);
   const results = useMemo(
     () =>
       activeCategory === 'all'
@@ -286,15 +301,7 @@ export function SearchResults() {
           ),
     [activeCategory, allResults],
   );
-  const counts = useMemo(() => {
-    const macro = Object.fromEntries(
-      SEARCH_MACRO_CATEGORIES.map((category) => [category, 0]),
-    ) as Record<SearchMacroCategory, number>;
-    for (const item of allResults) {
-      macro[macroCategoryFor(item)] += 1;
-    }
-    return { all: allResults.length, ...macro };
-  }, [allResults]);
+  const counts = useMemo(() => countSearchResultsByCategory(allResults), [allResults]);
   const suggestion = useMemo(
     () =>
       submittedQuery && results.length === 0
@@ -303,9 +310,9 @@ export function SearchResults() {
     [index, results.length, submittedQuery],
   );
   const groupedResults = useMemo(() => classifySearchResults(results), [results]);
-  const visibleDestinations = groupedResults.destinations.slice(
-    0,
-    SEARCH_DESTINATION_LIMIT,
+  const destinationPage = useMemo(
+    () => paginateSearchResults(groupedResults.destinations, requestedDestinationPage, SEARCH_DESTINATION_LIMIT),
+    [groupedResults.destinations, requestedDestinationPage],
   );
   const documentPage = useMemo(
     () => paginateSearchResults(groupedResults.documents, requestedDocumentPage),
@@ -315,17 +322,14 @@ export function SearchResults() {
     () => paginateSearchResults(groupedResults.others, requestedOtherPage),
     [groupedResults.others, requestedOtherPage],
   );
-  const dedupedResultCount =
-    groupedResults.destinations.length +
-    groupedResults.documents.length +
-    groupedResults.others.length;
+  const resultCount = results.length;
 
   // 本文は送らず、件数などの非識別情報だけを解析する。
   useEffect(() => {
     if (submittedQuery && !loading) {
       trackEvent('search_results_view', {
         category: activeCategory,
-        result_count: results.length,
+        result_count: resultCount,
         query_length: submittedQuery.length,
       });
     }
@@ -337,6 +341,7 @@ export function SearchResults() {
     (q: string, cat: 'all' | SearchMacroCategory) => {
       setSubmittedQuery(q.trim());
       setActiveCategory(cat);
+      setRequestedDestinationPage(1);
       setRequestedDocumentPage(1);
       setRequestedOtherPage(1);
     },
@@ -465,19 +470,28 @@ export function SearchResults() {
         ) : (
           <>
             <p className="mb-2 text-xs text-slate-500 dark:text-slate-400" aria-live="polite">
-              「{submittedQuery}」の検索結果 {dedupedResultCount}件
-              {dedupedResultCount !== results.length &&
-                `（canonical重複 ${results.length - dedupedResultCount}件を統合）`}
-              {results.length >= RESULT_LIMIT && '（上位のみ表示）'}
+              「{submittedQuery}」の検索結果 {resultCount}件
+              {rankedResults.length !== allResults.length &&
+                `（canonical重複 ${rankedResults.length - allResults.length}件を統合）`}
+              {rankedResults.length >= RESULT_LIMIT && '（上位のみ表示）'}
             </p>
             {groupedResults.destinations.length > 0 ? (
               <SearchResultSection
                 id="search-destinations"
                 heading="目的の機能・ページ"
-                description={`上位${SEARCH_DESTINATION_LIMIT}件まで表示`}
+                description={`${SEARCH_DESTINATION_LIMIT}件ずつ表示`}
                 count={groupedResults.destinations.length}
-                items={visibleDestinations}
+                items={destinationPage.items}
                 query={submittedQuery}
+                page={destinationPage.page}
+                pageCount={destinationPage.pageCount}
+                pageSize={SEARCH_DESTINATION_LIMIT}
+                onPrevious={destinationPage.page > 1
+                  ? () => setRequestedDestinationPage((page) => Math.max(1, page - 1))
+                  : undefined}
+                onNext={destinationPage.page < destinationPage.pageCount
+                  ? () => setRequestedDestinationPage((page) => page + 1)
+                  : undefined}
               />
             ) : null}
             {groupedResults.documents.length > 0 ? (
@@ -540,6 +554,7 @@ function SearchResultSection({
   query,
   page = 1,
   pageCount = 1,
+  pageSize = SEARCH_PAGE_SIZE,
   onPrevious,
   onNext,
 }: {
@@ -551,6 +566,7 @@ function SearchResultSection({
   query: string;
   page?: number;
   pageCount?: number;
+  pageSize?: number;
   onPrevious?: () => void;
   onNext?: () => void;
 }) {
@@ -582,14 +598,14 @@ function SearchResultSection({
               onClick={onPrevious}
               className="inline-flex min-h-11 items-center rounded-lg border border-portal-border bg-portal-surface px-4 text-sm font-bold"
             >
-              前の{SEARCH_PAGE_SIZE}件
+              前の{pageSize}件
             </button>
           ) : (
             <span
               aria-disabled="true"
               className="inline-flex min-h-11 items-center rounded-lg border border-portal-border bg-portal-surface px-4 text-sm font-bold opacity-45"
             >
-              前の{SEARCH_PAGE_SIZE}件
+              前の{pageSize}件
             </span>
           )}
           {onNext ? (
@@ -598,14 +614,14 @@ function SearchResultSection({
               onClick={onNext}
               className="inline-flex min-h-11 items-center rounded-lg border border-portal-border bg-portal-surface px-4 text-sm font-bold"
             >
-              次の{SEARCH_PAGE_SIZE}件
+              次の{pageSize}件
             </button>
           ) : (
             <span
               aria-disabled="true"
               className="inline-flex min-h-11 items-center rounded-lg border border-portal-border bg-portal-surface px-4 text-sm font-bold opacity-45"
             >
-              次の{SEARCH_PAGE_SIZE}件
+              次の{pageSize}件
             </span>
           )}
         </nav>
@@ -630,13 +646,16 @@ function SearchResultRow({ item, query }: { item: SearchItem; query: string }) {
           : match.field === 'summary'
             ? '要約'
             : '表記展開';
-  const isPrimary =
-    item.informationKind === 'primary' ||
-    item.informationKind === 'officialAccident';
   const isFlagship = item.keywords?.includes('主力機能') ?? false;
   const isSample =
     macroCategory === 'automation-sample' ||
     (item.keywords?.includes('自動化サンプル') ?? false);
+  const showSafetyWarning =
+    item.verification === 'quarantine' ||
+    item.informationKind === 'preliminary' ||
+    item.provenance === 'preliminary' ||
+    item.informationKind === 'synthetic' ||
+    item.provenance === 'synthetic';
 
   return (
     <li>
@@ -648,28 +667,31 @@ function SearchResultRow({ item, query }: { item: SearchItem; query: string }) {
           <CategoryIcon category={macroCategory} />
         </span>
         <span className="min-w-0 flex-1">
-          <span className="block truncate text-sm font-semibold text-brand-secondary dark:text-white">
+          <span className="block line-clamp-2 text-sm font-semibold text-brand-secondary dark:text-white">
             {item.title}
           </span>
-          <span className="mt-0.5 block truncate text-xs text-slate-500 dark:text-slate-400">
+          <span className="mt-0.5 block line-clamp-2 text-xs text-slate-500 dark:text-slate-400">
             {item.subtitle}
-          </span>
-          <span className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-slate-600 dark:text-slate-300">
-            <span>一次資料: {isPrimary ? 'はい' : 'いいえ'}</span>
-            <span>法的位置付け: {documentType}</span>
-            <span>一致理由: {matchField}</span>
-            <span>一致抜粋: 「{match.snippet.slice(0, 64)}」</span>
-            <span>更新日・対象時点: {item.asOf || '未登録'}</span>
-            <span>施行日: {item.effectiveDate || '個別資料で確認'}</span>
-            <span>出典: {item.sourceTitle || '詳細画面で要確認'}</span>
           </span>
           <span className="mt-2 flex flex-wrap gap-1.5">
             <span title={trust.description} className={`inline-flex rounded border px-2 py-0.5 text-[10px] font-bold ${trust.className}`}>
               検証状態: {trust.label}
             </span>
-            {isPrimary ? <span className="portal-status border-semantic-official text-semantic-official">公式情報</span> : null}
+            <span className="sr-only">{trust.description}</span>
+            <span className="portal-status border-portal-border text-portal-muted">{documentType}</span>
             {isFlagship ? <span className="portal-status border-brand-primary text-brand-primary">主力機能</span> : null}
             {isSample ? <span className="portal-status portal-status-sample">自動化サンプル</span> : null}
+          </span>
+          {showSafetyWarning ? (
+            <span className="mt-1 block text-xs font-medium text-amber-900 dark:text-amber-200">
+              {trust.description}
+            </span>
+          ) : null}
+          <span className="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] text-slate-600 dark:text-slate-300">
+            {match.field !== 'title' && <span>一致: {matchField}「{match.snippet.slice(0, 64)}」</span>}
+            {item.sourceTitle && <span>出典: {item.sourceTitle}</span>}
+            {item.asOf && <span>対象時点: {item.asOf}</span>}
+            {item.effectiveDate && <span>施行日: {item.effectiveDate}</span>}
           </span>
         </span>
         <span className={`shrink-0 rounded bg-portal-surface-emphasis px-1.5 py-0.5 text-[10px] font-bold ${macroMeta.className}`}>

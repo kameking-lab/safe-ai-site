@@ -59,7 +59,7 @@ export function RegulationTagsSection({
         関連制度・法令 ({tags.length} 件)
       </h2>
       <p className="text-xs text-slate-600 dark:text-slate-400">
-        収録データに基づく参照先です。物質の指定と、事業場・製品・作業に課される義務は区別し、含有率や取扱条件を公式資料で確認してください。
+        ここに示す収録タグは参照候補であり、法令該当・対象外の確定判定ではありません。物質の指定と、事業場・製品・作業に課される義務は区別し、含有率や取扱条件を公式資料で確認してください。
       </p>
       <div className="space-y-3">
         {TAG_CATEGORY_ORDER.map((cat) => {

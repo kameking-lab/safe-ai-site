@@ -155,7 +155,7 @@ describe("評価条件のimmutable snapshot", () => {
         issuedOn: "2026-06-01",
         componentVersion: "製品A / 第3版",
       },
-      ventilation: "local",
+      ventilation: "both",
       engineeringControls: {
         generalVentilation: "yes",
         localExhaust: "yes",

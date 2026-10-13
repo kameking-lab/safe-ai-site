@@ -262,4 +262,16 @@ describe("POST /api/chemical-ra safety boundary", () => {
       code: "SDS_INSUFFICIENT",
     });
   });
+  it("accepts combined ventilation as a condition without computing a risk score", async () => {
+    const { POST } = await import("./route");
+    const response = await POST(new Request("http://localhost/api/chemical-ra", {
+      method: "POST", headers: { "content-type": "application/json" },
+      body: JSON.stringify({ chemicalName: "アセトン", casNumber: "67-64-1", ventilation: "both" }),
+    }));
+    expect(response.status).toBe(200);
+    const result = await response.json();
+    expect(result.assessmentStatus).toBe("unavailable");
+    expect(result.createSimple).toBeUndefined();
+  });
+
 });
