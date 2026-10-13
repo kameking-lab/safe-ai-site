@@ -89,7 +89,10 @@ test("desktop keeps comparison table and the four recording columns", async ({ p
   await expect(table.getByRole("link", { name: "開く", exact: true })).toHaveAttribute("href", "/chemical-database/108-88-3");
 });
 
-test("law source facts survive an explicit favorite save and full reload", async ({ page }, testInfo) => {
+for (const colorScheme of ["light", "dark"] as const) {
+  test.describe(`favorite source ${colorScheme}`, () => {
+    test.use({ viewport: { width: 390, height: 844 }, colorScheme });
+    test("law source facts survive an explicit favorite save and full reload", async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/law-navi/347AC0000000057/2");
   const source = page.locator("details").filter({ has: page.getByText("原典情報", { exact: false }) });
@@ -109,10 +112,12 @@ test("law source facts survive an explicit favorite save and full reload", async
   await expect(favoriteSource).toContainText(snapshot.revisionId);
   await expect(favoriteSource).toContainText(dateInJapan(currentProof.checkedAt));
   await favoriteSource.scrollIntoViewIfNeeded();
-  await geometry(page, testInfo, "favorite-source");
+  await geometry(page, testInfo, `favorite-source-${colorScheme}`);
   await accessibility(page, testInfo, "favorite-source");
-  await page.screenshot({ path: testInfo.outputPath("favorite-source-390.png") });
+  await page.screenshot({ path: testInfo.outputPath(`favorite-source-390-${colorScheme}.png`) });
 });
+  });
+}
 
 test("chat source details display the existing full e-Gov revision unchanged", async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 390, height: 844 });

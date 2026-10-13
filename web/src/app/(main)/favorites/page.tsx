@@ -25,10 +25,10 @@ export default function FavoritesPage() {
             お気に入り (条文・通達)
           </h1>
           <p className="mt-2 text-sm text-slate-600">
-            /law-search と /circulars で<Star className="inline h-3.5 w-3.5 align-[-2px] text-amber-500" aria-hidden="true" />を押した条文・通達がここに保存されます。
+            条文の詳細や通達一覧で<Star className="inline h-3.5 w-3.5 align-[-2px] text-amber-500" aria-hidden="true" />を押した条文・通達がここに保存されます。
             最大 50 件まで端末内 (localStorage) に保持。
           </p>
-          <p className="mt-1 text-xs text-slate-500">
+          <p className="mt-1 text-xs text-slate-600 dark:text-slate-300">
             ※ サーバーには送信されません。本端末でのみ参照できます (機種変更時はエクスポート不可)。
           </p>
         </header>
