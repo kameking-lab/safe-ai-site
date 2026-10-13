@@ -234,7 +234,7 @@ export function ChemicalDatabaseClient() {
             className={`inline-flex min-h-[44px] items-center justify-center rounded-lg px-4 py-1.5 text-sm font-semibold transition-colors ${
               mode === tab.id
                 ? "bg-white text-slate-900 shadow-sm"
-                : "text-slate-500 hover:text-slate-700"
+                : "text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-slate-100"
             }`}
           >
             {tab.label}

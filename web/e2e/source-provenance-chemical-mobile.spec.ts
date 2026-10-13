@@ -92,7 +92,7 @@ test("desktop keeps comparison table and the four recording columns", async ({ p
 test("law source facts survive an explicit favorite save and full reload", async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/law-navi/347AC0000000057/2");
-  const source = page.locator("details").filter({ has: page.getByText("原典情報", { exact: true }) });
+  const source = page.locator("details").filter({ has: page.getByText("原典情報", { exact: false }) });
   await source.locator("summary").click();
   await expect(source).toContainText(snapshot.revisionId);
   await expect(source).toContainText(dateInJapan(snapshot.fetchedAt));
@@ -104,7 +104,7 @@ test("law source facts survive an explicit favorite save and full reload", async
   expect(saved[0]?.sourceProvenance).toEqual({ url: `https://laws.e-gov.go.jp/law/${snapshot.lawId}`, version: snapshot.revisionId, fetchedAt: snapshot.fetchedAt, checkedAt: currentProof.checkedAt, checkKind: "revision" });
   await page.goto("/favorites");
   await page.reload();
-  const favoriteSource = page.locator("details").filter({ has: page.getByText("原典情報", { exact: true }) });
+  const favoriteSource = page.locator("details").filter({ has: page.getByText("原典情報", { exact: false }) });
   await favoriteSource.locator("summary").click();
   await expect(favoriteSource).toContainText(snapshot.revisionId);
   await expect(favoriteSource).toContainText(dateInJapan(currentProof.checkedAt));
