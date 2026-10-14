@@ -35,7 +35,7 @@
 
 - 独立Astraレビューの初回P2指摘2件に対応：IT通常枠の賃上げを「1人当たり給与支給総額」と明記。簡易試算は単一方法・非定額制に限定し、混合・通信制・定額制・専門実践指定講座は選択時に計算を停止する。ガイドには例外上限も追記。
 
-- 専用worktree: `C:\Users\kanet\20260522\note-automation\.worktrees\safe-ai-automation-grants-20261014`
+- 専用worktree: `note-automation/.worktrees/safe-ai-automation-grants-20261014`（ローカル固有の絶対パスは非公開の検証記録を参照）。
 - 起点: `origin/main` `08b78d37cbeade46b947f7fac05e7b4e0086f3ac`。
 - `fix/safeai-final-regression-20261013` の `265a73549a87d68dfd751d2ddf19871a29c9fa88` は取り込まず、refを保持。共有checkoutには変更しない。
 - 本番公開は既存のmain限定production guardと独立最終レビューを通す。実装済みと公開済みは区別して報告する。
