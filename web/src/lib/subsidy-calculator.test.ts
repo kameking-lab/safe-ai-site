@@ -9,6 +9,16 @@ const BASE: TrainingEstimateInput = {
 };
 
 describe("リスキリングの1人分経費助成の参考式", () => {
+  it("混合・定額制・通信制・専門実践の指定講座などは単純試算をしない", () => {
+    expect(
+      estimateReskillingCost({
+        ...BASE,
+        method: "other",
+        hours: 80,
+        eligibleCostPerPerson: 600_000,
+      }),
+    ).toBeNull();
+  });
   it.each([
     ["small", 10, 300_000],
     ["small", 99.9, 300_000],

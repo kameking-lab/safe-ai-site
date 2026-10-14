@@ -2,7 +2,7 @@ import { RESKILLING_RULES } from "@/data/business-funding";
 
 export type TrainingEstimateInput = {
   companySize: "small" | "large";
-  method: "classroom" | "elearning";
+  method: "classroom" | "elearning" | "other";
   hours: number;
   eligibleCostPerPerson: number;
   conditionsConfirmed: boolean;
@@ -12,6 +12,7 @@ export type TrainingEstimateInput = {
 export function estimateReskillingCost(input: TrainingEstimateInput) {
   if (
     !input.conditionsConfirmed ||
+    input.method === "other" ||
     !Number.isFinite(input.hours) ||
     input.hours < RESKILLING_RULES.minimumHours ||
     !Number.isSafeInteger(input.eligibleCostPerPerson) ||

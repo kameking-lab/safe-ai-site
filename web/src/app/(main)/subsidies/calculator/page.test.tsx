@@ -15,5 +15,9 @@ describe("研修の参考試算", () => {
     fireEvent.change(screen.getByLabelText(/対象経費・1人分/), { target: { value: "1000000" } });
     fireEvent.click(calculate);
     expect(screen.getByText("経費助成 150,000円")).toBeDefined();
+    fireEvent.change(screen.getByLabelText("訓練方法"), { target: { value: "other" } });
+    expect(screen.queryByText("経費助成 150,000円")).toBeNull();
+    expect((calculate as HTMLButtonElement).disabled).toBe(true);
+    expect(screen.getByText(/専門実践教育訓練の指定講座は/)).toBeDefined();
   });
 });

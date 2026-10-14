@@ -32,7 +32,7 @@ export default function SubsidiesCalculatorPage() {
     <div className="mx-auto w-full max-w-3xl px-4 py-6 sm:px-6 sm:py-10">
       <h1 className="text-3xl font-black text-slate-950">研修の経費助成・参考試算</h1>
       <p className="mt-3 text-sm leading-6 text-slate-700">
-        事業展開等リスキリング支援コースの、対象条件を確認済みの研修について1人分を試算します。申請資格や支給額の判定ではありません。
+        事業展開等リスキリング支援コースの、対象条件を確認済みの単一方法・非定額制の研修について1人分を試算します。申請資格や支給額の判定ではありません。
       </p>
       <p className="mt-2 text-sm text-slate-700">
         公式情報の確認日：<time dateTime={FUNDING_VERIFIED_ON}>2026年10月14日</time>
@@ -77,8 +77,9 @@ export default function SubsidiesCalculatorPage() {
                 update("method", event.target.value as TrainingEstimateInput["method"])
               }
             >
-              <option value="classroom">対面・同時双方向</option>
-              <option value="elearning">eラーニング</option>
+              <option value="classroom">対面・同時双方向のみ</option>
+              <option value="elearning">eラーニングのみ（非定額制）</option>
+              <option value="other">その他（併用・定額制・指定講座など）</option>
             </select>
           </label>
           <label className="text-sm font-bold text-slate-900">
@@ -106,6 +107,9 @@ export default function SubsidiesCalculatorPage() {
             />
           </label>
         </div>
+        <p className="text-sm leading-6 text-slate-700">
+          混合（対面＋eラーニング等）・通信制・定額制・専門実践教育訓練の指定講座は、この簡易試算の対象外です。上の「その他」を選び、公式窓口で個別の上限・条件を確認してください。
+        </p>
         <p className="text-sm leading-6 text-slate-700">
           設備費・対象外の講座費用・値引き等を除いた、労働局で確認した対象経費を入力してください。掲載の60分・90分講習だけでは10時間要件を満たしません。
         </p>
