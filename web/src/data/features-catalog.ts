@@ -664,10 +664,10 @@ const ALL_FEATURES: FeatureItem[] = [
   },
   {
     slug: "subsidies-calculator",
-    title: "助成金シミュレーター",
-    summary: "活用できる助成金を即時試算",
+    title: "研修の経費助成・参考試算",
+    summary: "対象条件を確認した研修の1人分を試算",
     description:
-      "事業規模・業種・取り組み内容を入力すると、エイジフレンドリー補助金・人材開発支援助成金などの試算を表示します。",
+      "事業展開等リスキリング支援コースの対象条件を公式窓口で確認後、企業区分・訓練方法・時間・対象経費から1人分の参考額を計算します。申請資格や支給額は確定しません。",
     href: "/subsidies/calculator",
     category: "management",
     tags: ["助成金"],
