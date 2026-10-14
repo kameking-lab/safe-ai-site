@@ -86,7 +86,7 @@ export default function AutomationServicePage() {
             description: PAGE_DESCRIPTION,
             url: PAGE_URL,
             datePublished: "2026-07-23",
-            dateModified: "2026-08-01",
+            dateModified: "2026-10-14",
             keywords: [
               "業務自動化",
               "AI活用",

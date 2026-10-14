@@ -123,7 +123,7 @@ describe("AutomationServiceContent", () => {
     expect(screen.queryByRole("link", { name: /許容荷重|構造計算|安全判定/u })).toBeNull();
   });
 
-  it("答えに必要な4セクションを料金・事例・サービス・相談の順に持つ", () => {
+  it("料金・事例・サービス・補助金候補・相談の順に持つ", () => {
     const { container } = render(
       <AutomationServiceContent availability={AVAILABLE} />,
     );
@@ -135,6 +135,7 @@ describe("AutomationServiceContent", () => {
       "pricing",
       "model-cases",
       "services",
+      "funding",
       "consult-form",
     ]);
   });
