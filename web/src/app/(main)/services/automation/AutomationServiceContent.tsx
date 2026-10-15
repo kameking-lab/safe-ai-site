@@ -5,6 +5,7 @@ import type { AutomationConsultAvailability } from "@/lib/automation-consult/ava
 import { AutomationConsultForm } from "./AutomationConsultForm";
 import { AutomationConsultPreparation } from "./AutomationConsultPreparation";
 import { FeatureMascotCompanion } from "@/components/feature-mascot-companion";
+import { BusinessFundingGuide } from "@/components/automation/business-funding-guide";
 
 const buttonPrimary =
   "inline-flex min-h-[44px] items-center justify-center rounded-xl bg-emerald-800 px-5 py-3 text-center text-sm font-black text-white hover:bg-emerald-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-700/30 forced-colors:border-2 forced-colors:border-[LinkText] forced-colors:bg-[Canvas] forced-colors:text-[LinkText]";
@@ -150,6 +151,7 @@ export function AutomationServiceContent({
         </h2>
         <p className="mt-2 text-sm text-slate-700">
           表示額はすべて消費税込み。初回相談後、作業前に範囲と総額を見積ります。
+          <Link href="#funding" className="ml-1 inline-flex min-h-[44px] items-center font-bold text-emerald-900 underline underline-offset-4">補助金・助成金の候補を見る</Link>
         </p>
         <div className="mt-4 grid gap-3 lg:grid-cols-3" data-primary-pricing>
           {PRIMARY_PRICES.map((item) => (
@@ -273,6 +275,8 @@ export function AutomationServiceContent({
           </li>
         </ul>
       </section>
+
+      <BusinessFundingGuide availability={availability} />
 
       <section
         id="consult-form"

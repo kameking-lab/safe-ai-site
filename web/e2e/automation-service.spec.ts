@@ -94,7 +94,7 @@ test.describe("業務自動化・講習・資料作成サービス", () => {
     await expect(safetyCta).toHaveAttribute("href", safetyHref);
   });
 
-  test("答えに必要な5セクションだけで、料金3件と想定例3件を先に示す", async ({ page }) => {
+  test("料金・事例・補助金候補を6セクションで示す", async ({ page }) => {
     const response = await page.goto(SERVICE_PATH, { waitUntil: "domcontentloaded" });
     expect(response?.status()).toBe(200);
     const sections = [
@@ -102,12 +102,13 @@ test.describe("業務自動化・講習・資料作成サービス", () => {
       "pricing",
       "model-cases",
       "services",
+      "funding",
       "consult-form",
     ];
-    expect(sections).toHaveLength(5);
+    expect(sections).toHaveLength(6);
     await expect(
       page.locator("[data-automation-service] > section[id]"),
-    ).toHaveCount(5);
+    ).toHaveCount(6);
     for (const id of sections) {
       await expect(page.locator(`#${id}`), id).toHaveCount(1);
     }
