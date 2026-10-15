@@ -13,6 +13,7 @@ import { collectGhsSymbols, GHS_SYMBOL_LABEL } from "@/lib/chemical/ghs-pictogra
 import { GHS_PARTIAL_COVERAGE_NOTICE } from "@/lib/chemical/ghs-coverage";
 import type { ChemicalRaAssessmentSnapshot } from "@/lib/chemical/ra-cloud";
 import { SNAPSHOT_MISSING_LABEL } from "@/lib/chemical/ra-record-labels";
+import { ventilationFromControls, ventilationLabel } from "@/lib/chemical/ventilation-selection";
 
 function todayJa(): string {
   const d = new Date();
@@ -114,7 +115,7 @@ export function ChemicalRaPrintReport({ result, recordDateIso, snapshot }: {
           <dl>
             <dt>作業内容</dt><dd>{snapshot.workContent || "未入力"}</dd>
             <dt>作業時間</dt><dd>{snapshot.durationHours === null ? "未入力" : `${snapshot.durationHours} 時間/日`}</dd>
-            <dt>換気</dt><dd>{snapshot.ventilation === "local" ? "局所排気" : snapshot.ventilation === "general" ? "全体換気" : snapshot.ventilation === "none" ? "なし" : "未確認"}</dd>
+            <dt>換気</dt><dd>{ventilationLabel(ventilationFromControls(snapshot.engineeringControls.generalVentilation, snapshot.engineeringControls.localExhaust))}</dd>
             {(snapshot.engineeringControls.generalVentilation !== "unknown" || snapshot.engineeringControls.localExhaust !== "unknown") && <><dt>換気設備</dt><dd>全体換気: {snapshot.engineeringControls.generalVentilation === "yes" ? "あり" : snapshot.engineeringControls.generalVentilation === "no" ? "なし" : "未確認"} / 局所排気: {snapshot.engineeringControls.localExhaust === "yes" ? "あり" : snapshot.engineeringControls.localExhaust === "no" ? "なし" : "未確認"}（入力内容。能力・効果は未評価）</dd></>}
             <dt>取扱量</dt><dd>{snapshot.amount === "small" ? "少量" : snapshot.amount === "medium" ? "中量" : snapshot.amount === "large" ? "多量" : "未確認"}（入力した区分。実際の数量は未評価）</dd>
             <dt>SDS確認</dt><dd>{snapshot.sds.status === "confirmed" ? "確認したとの入力" : "未確認"} / 発行日: {snapshot.sds.issuedOn || "未入力"} / 成分・製品版: {snapshot.sds.componentVersion || "未入力"}</dd>

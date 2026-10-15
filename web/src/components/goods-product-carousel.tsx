@@ -110,7 +110,7 @@ export function GoodsProductCarousel({ categoryId, categoryName, featureId }: { 
         </>
       ) : null}
       {result?.status === "not_configured" ? <p role="status" className="mt-4 rounded-xl bg-white p-3 text-sm text-slate-700">商品データの接続準備中です。実商品写真・購入者評価は未確認です。接続後にこの画面で比較できます。</p> : null}
-      {result?.status === "unavailable" ? <p role="status" className="mt-4 rounded-xl bg-white p-3 text-sm text-slate-700">{result.reason === "rate_limited" ? "商品データの取得回数制限に達しました。" : result.reason === "authorization_failed" ? "商品データの認証を確認中です。" : result.reason === "timeout" ? "商品データの応答が間に合いませんでした。" : "商品データへ接続できませんでした。"}写真・評価は未確認です。時間をおいて再度お試しください。</p> : null}
+      {result?.status === "unavailable" ? <p role="status" className="mt-4 rounded-xl bg-white p-3 text-sm text-slate-700">{result.reason === "rate_limited" ? "商品データを一時的に取得できません。" : result.reason === "authorization_failed" ? "商品データの認証を確認中です。" : result.reason === "timeout" ? "商品データの応答が間に合いませんでした。" : "商品データへ接続できませんでした。"}写真・評価は未確認です。時間をおいて再度お試しください。</p> : null}
       {result?.status === "no_qualified_items" ? <p role="status" className="mt-4 rounded-xl bg-white p-3 text-sm text-slate-700">このカテゴリでは、写真・評価・レビュー件数の条件を満たす商品が見つかりませんでした。</p> : null}
       {result?.status === "selection_required" ? <p role="status" className="mt-4 rounded-xl bg-white p-3 text-sm text-slate-700">物質と酸素濃度が分かるまで商品候補を表示しません。SDS・測定結果を確認してください。</p> : null}
       {result?.status === "ready" || result?.status === "no_qualified_items" ? (

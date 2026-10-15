@@ -28,6 +28,14 @@ function caseHazardLabel(c: CombinedCase): string | null {
   return c.type ? normalizeHazardLabel(c.type) : null;
 }
 
+/** 原票は保持し、画面の絞り込み・集計だけで同じ人数帯を揃える。 */
+export function normalizeWorkplaceSize(value: string | null | undefined): string | null {
+  const trimmed = value?.trim();
+  if (!trimmed) return null;
+  const match = trimmed.match(/^(\d+)\s*[~～〜-]\s*(\d+)\s*(?:人)?$/u);
+  return match ? `${Number(match[1])}～${Number(match[2])}人` : trimmed;
+}
+
 function normalizeFilters(filters: AnalyticsFilters = {}) {
   return {
     industry: filters.industry?.trim() || null,
@@ -45,7 +53,7 @@ function normalizeFilters(filters: AnalyticsFilters = {}) {
         : null,
     industryMedium: filters.industryMedium?.trim() || null,
     cause: filters.cause?.trim() || null,
-    workplaceSize: filters.workplaceSize?.trim() || null,
+    workplaceSize: normalizeWorkplaceSize(filters.workplaceSize),
     occurrenceTime: normalizeOccurrenceTimeBucket(filters.occurrenceTime),
     prefecture: filters.prefecture?.trim() || null,
     age: filters.age?.trim() || null,
@@ -99,7 +107,7 @@ export function filterAnalyticsCases(
     if (normalized.cause && c.cause !== normalized.cause) return false;
     if (
       normalized.workplaceSize &&
-      c.workplaceSize !== normalized.workplaceSize
+      normalizeWorkplaceSize(c.workplaceSize) !== normalized.workplaceSize
     )
       return false;
     if (
@@ -190,7 +198,7 @@ function buildFilterOptions(cases: CombinedCase[]): AnalyticsFilterOptions {
       countBy(cases, (c) => c.industryMedium),
     ).map((x) => x.name),
     causes: allRanked(countBy(cases, (c) => c.cause)).map((x) => x.name),
-    workplaceSizes: allRanked(countBy(cases, (c) => c.workplaceSize)).map(
+    workplaceSizes: allRanked(countBy(cases, (c) => normalizeWorkplaceSize(c.workplaceSize))).map(
       (x) => x.name,
     ),
     occurrenceTimes: allRanked(
@@ -401,7 +409,7 @@ function aggregatePrefectureRanking(cases: CombinedCase[]) {
 }
 
 function aggregateWorkplaceSize(cases: CombinedCase[]) {
-  return allRanked(countBy(cases, (c) => c.workplaceSize));
+  return allRanked(countBy(cases, (c) => normalizeWorkplaceSize(c.workplaceSize)));
 }
 
 function aggregateCause(cases: CombinedCase[]) {

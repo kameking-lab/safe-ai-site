@@ -16,7 +16,39 @@ afterEach(() => {
   window.localStorage.clear();
 });
 
+function submitExample(name: string) {
+  fireEvent.click(screen.getByRole("button", { name }));
+  fireEvent.click(screen.getByRole("button", { name: "送信" }));
+}
+
 describe("ChatbotPanel a11y", () => {
+  it("puts an example in the composer and sends only the edited question", async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    render(<ChatbotPanel />);
+
+    fireEvent.click(screen.getByRole("button", { name: "電気作業の資格は？" }));
+    const composer = screen.getByRole("textbox", {
+      name: "質問入力",
+    }) as HTMLTextAreaElement;
+    expect(composer.value).toBe("電気作業の資格は？");
+    expect(document.activeElement).toBe(composer);
+    expect(fetchMock).not.toHaveBeenCalled();
+
+    fireEvent.change(composer, {
+      target: { value: "低圧の電気作業に必要な資格は？" },
+    });
+    expect(composer.value).toBe("低圧の電気作業に必要な資格は？");
+    expect(fetchMock).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole("button", { name: "送信" }));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+    const request = JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body)) as {
+      message?: string;
+    };
+    expect(request.message).toBe("低圧の電気作業に必要な資格は？");
+  });
+
   it("reduced motionでは会話の自動スクロールを滑らかに動かさない", async () => {
     const scrollToMock = vi.mocked(Element.prototype.scrollTo);
     scrollToMock.mockClear();
@@ -39,9 +71,7 @@ describe("ChatbotPanel a11y", () => {
     );
     render(<ChatbotPanel />);
 
-    fireEvent.click(
-      screen.getByRole("button", { name: "フォークリフトの資格は？" }),
-    );
+    submitExample("フォークリフトの資格は？");
 
     await waitFor(() => {
       expect(scrollToMock).toHaveBeenCalledWith(
@@ -59,7 +89,7 @@ describe("ChatbotPanel a11y", () => {
     );
     render(<ChatbotPanel />);
 
-    fireEvent.click(screen.getByRole("button", { name: "足場の手すりは？" }));
+    submitExample("足場の手すりは？");
 
     await waitFor(() => {
       expect(
@@ -82,7 +112,7 @@ describe("ChatbotPanel a11y", () => {
     vi.stubGlobal("fetch", fetchMock);
     render(<ChatbotPanel />);
 
-    fireEvent.click(screen.getByRole("button", { name: "足場の手すりは？" }));
+    submitExample("足場の手すりは？");
 
     await waitFor(() => {
       const alert = screen.getByRole("alert");
@@ -120,9 +150,7 @@ describe("ChatbotPanel a11y", () => {
     vi.stubGlobal("fetch", fetchMock);
     render(<ChatbotPanel />);
 
-    fireEvent.click(
-      screen.getByRole("button", { name: "フォークリフトの資格は？" }),
-    );
+    submitExample("フォークリフトの資格は？");
     await screen.findByText("フォークリフトの資格は最大荷重で分かれます。");
 
     const liveRegion = document.querySelector("[data-chatbot-live-region]");
@@ -159,7 +187,7 @@ describe("ChatbotPanel a11y", () => {
     vi.stubGlobal("fetch", fetchMock);
     render(<ChatbotPanel />);
 
-    fireEvent.click(screen.getByRole("button", { name: "足場の手すりは？" }));
+    submitExample("足場の手すりは？");
     fireEvent.click(await screen.findByRole("button", { name: "生成を停止" }));
 
     const alert = await screen.findByRole("alert");
@@ -264,7 +292,7 @@ describe("ChatbotPanel AI safety boundary", () => {
     vi.stubGlobal("fetch", fetchMock);
     render(<ChatbotPanel />);
 
-    fireEvent.click(screen.getByRole("button", { name: "足場の手すりは？" }));
+    submitExample("足場の手すりは？");
     await waitFor(() => {
       expect(
         screen
@@ -374,7 +402,7 @@ describe("ChatbotPanel AI safety boundary", () => {
     vi.stubGlobal("fetch", fetchMock);
     render(<ChatbotPanel />);
 
-    fireEvent.click(screen.getByRole("button", { name: "電気作業の資格は？" }));
+    submitExample("電気作業の資格は？");
     await screen.findByText(/見るだけか、盤内測定か/);
 
     fireEvent.click(
@@ -554,9 +582,7 @@ describe("ChatbotPanel conversation UI", () => {
     vi.stubGlobal("fetch", fetchMock);
     render(<ChatbotPanel />);
 
-    fireEvent.click(
-      screen.getByRole("button", { name: "フォークリフトの資格は？" }),
-    );
+    submitExample("フォークリフトの資格は？");
 
     await screen.findByText(/最大荷重1トン以上は技能講習/);
     expect(screen.getAllByText("最大荷重はどれですか？")).toHaveLength(1);
@@ -598,7 +624,7 @@ describe("ChatbotPanel conversation UI", () => {
     vi.stubGlobal("fetch", fetchMock);
     render(<ChatbotPanel />);
 
-    fireEvent.click(screen.getByRole("button", { name: "電気作業の資格は？" }));
+    submitExample("電気作業の資格は？");
 
     await screen.findByText(/見るだけの点検なら/);
     expect(screen.queryByText("旧フィールドの回答です。")).toBeNull();
@@ -652,7 +678,7 @@ describe("ChatbotPanel conversation UI", () => {
     vi.stubGlobal("fetch", fetchMock);
     render(<ChatbotPanel />);
 
-    fireEvent.click(screen.getByRole("button", { name: "電気作業の資格は？" }));
+    submitExample("電気作業の資格は？");
     await screen.findByText(/電気点検は行為と充電状態/);
 
     const composer = screen.getByLabelText("質問入力");
@@ -748,7 +774,7 @@ describe("ChatbotPanel conversation UI", () => {
     );
     render(<ChatbotPanel />);
 
-    fireEvent.click(screen.getByRole("button", { name: "足場の手すりは？" }));
+    submitExample("足場の手すりは？");
 
     await waitFor(() => {
       const panel = document.querySelector(
@@ -825,7 +851,7 @@ describe("ChatbotPanel conversation UI", () => {
     vi.stubGlobal("fetch", fetchMock);
     render(<ChatbotPanel />);
 
-    fireEvent.click(screen.getByRole("button", { name: "電気作業の資格は？" }));
+    submitExample("電気作業の資格は？");
     await screen.findByText(/電気作業の資格・教育は、配線や設備工事/);
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(

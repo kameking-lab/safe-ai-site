@@ -107,7 +107,7 @@ export default async function ChemicalRaLedgerPage() {
         </h2>
         {[
           {
-            title: "簡易スクリーニング",
+            title: "化学物質RA準備",
             text: "匿名で物質・SDS・不足条件を整理。正式評価ではありません。",
             href: "/chemical-ra",
             link: "簡易確認を開く",
@@ -170,7 +170,7 @@ export default async function ChemicalRaLedgerPage() {
                 href="/chemical-ra"
                 className="mt-3 inline-flex min-h-11 items-center font-bold text-amber-950 underline underline-offset-4"
               >
-                匿名の簡易スクリーニングを使う
+                匿名で化学物質RAを準備する
               </Link>
             </div>
           </div>

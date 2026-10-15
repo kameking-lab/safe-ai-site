@@ -54,6 +54,7 @@ export function SafetyImageLibraryClient({
   const pathname = usePathname();
   const [restored, setRestored] = useState(false);
   const leaving = useRef(false);
+  const departureVersion = useRef(0);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<SafetyImageCategory | "all">(
     initialCategory,
@@ -65,12 +66,31 @@ export function SafetyImageLibraryClient({
   const [quickFilter, setQuickFilter] = useState<QuickFilter>("all");
   const [sort, setSort] = useState<SortMode>("recommended");
   const [visibleCount, setVisibleCount] = useState(20);
+  const [restoreEpoch, setRestoreEpoch] = useState(0);
+
+  useEffect(() => {
+    const restoreOnReturn = () => {
+      if (!leaving.current || window.location.pathname !== pathname || !isLibraryPath(pathname)) return;
+      // A cached list can retain its leaving flag after browser Back.
+      // Rehydrate before enabling automatic writes so return-time scroll cannot overwrite the snapshot.
+      setRestored(false);
+      setRestoreEpoch((epoch) => epoch + 1);
+    };
+    window.addEventListener("popstate", restoreOnReturn);
+    window.addEventListener("pageshow", restoreOnReturn);
+    return () => {
+      window.removeEventListener("popstate", restoreOnReturn);
+      window.removeEventListener("pageshow", restoreOnReturn);
+    };
+  }, [pathname]);
 
   useEffect(() => {
     if (!isLibraryPath(pathname)) return;
     let cancelled = false;
     let savedScroll = 0;
+    const restoringVersion = departureVersion.current;
     const hydrate = window.setTimeout(() => {
+      if (cancelled || departureVersion.current !== restoringVersion || window.location.pathname !== pathname) return;
       try {
         const raw = window.sessionStorage.getItem(listStorageKey(pathname));
         if (raw) {
@@ -90,15 +110,17 @@ export function SafetyImageLibraryClient({
         // Malformed or unavailable session storage falls back to ordinary filters.
       }
       if (savedScroll === 0) {
+        leaving.current = false;
         setRestored(true);
         return;
       }
       let attempts = 0;
       const restoreScroll = () => {
-        if (cancelled) return;
+        if (cancelled || departureVersion.current !== restoringVersion || window.location.pathname !== pathname) return;
         const maximum = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
         if (maximum >= savedScroll || attempts > 30) {
           window.scrollTo({ top: savedScroll, left: 0, behavior: "instant" });
+          leaving.current = false;
           setRestored(true);
           return;
         }
@@ -112,10 +134,10 @@ export function SafetyImageLibraryClient({
       cancelled = true;
       window.clearTimeout(hydrate);
     };
-  }, [pathname, themes]);
+  }, [pathname, themes, restoreEpoch]);
 
-  const persist = useCallback(() => {
-    if (!restored || leaving.current || !isLibraryPath(pathname)) return;
+  const writeSnapshot = useCallback(() => {
+    if (!isLibraryPath(pathname)) return;
     try {
       window.sessionStorage.setItem(listStorageKey(pathname), JSON.stringify({
         query, category, use, signFormat, numericOnly, documentOnly,
@@ -124,7 +146,12 @@ export function SafetyImageLibraryClient({
     } catch {
       // Browsers can disable session storage; navigation remains usable.
     }
-  }, [restored, pathname, query, category, use, signFormat, numericOnly, documentOnly, quickFilter, sort, visibleCount]);
+  }, [pathname, query, category, use, signFormat, numericOnly, documentOnly, quickFilter, sort, visibleCount]);
+
+  const persist = useCallback(() => {
+    if (!restored || leaving.current) return;
+    writeSnapshot();
+  }, [restored, writeSnapshot]);
 
   useEffect(() => {
     persist();
@@ -133,8 +160,11 @@ export function SafetyImageLibraryClient({
   }, [persist]);
 
   const rememberBeforeDetail = () => {
-    persist();
+    // Explicit navigation must save the visible filters even while scroll restoration
+    // is pending or a cached list still carries the previous leaving flag.
+    writeSnapshot();
     try { window.sessionStorage.setItem(RETURN_PATH_KEY, pathname); } catch { /* ordinary hub link still works */ }
+    departureVersion.current += 1;
     leaving.current = true;
   };
 

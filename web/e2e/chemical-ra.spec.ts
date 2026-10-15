@@ -28,6 +28,27 @@ async function openSaveReadyChemicalRa(page: Page) {
 }
 
 test.describe("化学物質RA", () => {
+  test("公的情報を先に示し、任意の作業記録を閉じても入力と印刷条件を保持する", async ({ page }) => {
+    await openSaveReadyChemicalRa(page);
+    await expect(page.locator("#chemical-ra-work-conditions")).toHaveCount(0);
+    await expect(page.getByText("未算出", { exact: true })).toBeVisible();
+    await expect(page.getByRole("link", { name: "公式CREATE-SIMPLEで判定" })).toBeVisible();
+
+    await page.getByRole("button", { name: "必要な人向け：作業条件・測定値を記録する" }).click();
+    const work = page.getByLabel("作業内容（任意）— 最新SDS・公式ツール確認用のメモ");
+    await work.fill("屋内で製品SDSを照合した作業記録");
+    await page.getByRole("button", { name: "作業条件・測定値の記録を閉じる" }).click();
+    await expect(page.locator("#chemical-ra-work-conditions")).toHaveCount(0);
+    await page.getByRole("button", { name: "必要な人向け：作業条件・測定値を記録する" }).click();
+    await expect(work).toHaveValue("屋内で製品SDSを照合した作業記録");
+
+    await page.getByRole("button", { name: "この結果を保存", exact: true }).click();
+    await page.emulateMedia({ media: "print" });
+    const report = page.getByTestId("chemical-ra-print-report");
+    await expect(report).toContainText("屋内で製品SDSを照合した作業記録");
+    await expect(report).toContainText("正式なRA結果ではありません");
+  });
+
   test("長い条件記録を保存・再表示しても原本の条件と記録日を印刷に保持する", async ({ page }, testInfo) => {
     test.setTimeout(120_000);
     // 架空の印刷試験入力。安全性や対策効果を主張する実施記録ではない。
@@ -53,7 +74,7 @@ test.describe("化学物質RA", () => {
     await page.goto("/chemical-ra?cas=108-88-3");
     expect((await search).status()).toBe(200);
     await expect(page.getByRole("combobox", { name: "物質名・CAS番号・SDS記載名" })).toHaveValue("トルエン");
-    await page.getByRole("button", { name: "作業条件へ進む", exact: true }).click();
+    await page.getByRole("button", { name: "必要な人向け：作業条件・測定値を記録する", exact: true }).click();
     await page.getByLabel("作業内容（任意）— 最新SDS・公式ツール確認用のメモ").fill(work);
     await page.getByLabel("作業時間（時間/日）", { exact: true }).fill("1");
     await page.getByRole("combobox", { name: "SDS確認状況", exact: true }).selectOption("not-confirmed");
@@ -150,14 +171,15 @@ test.describe("化学物質RA", () => {
       await page.goto(`/chemical-ra?cas=${item.cas}`);
       expect((await searchPromise).status()).toBe(200);
       await expect(page.getByRole("combobox", { name: "物質名・CAS番号・SDS記載名" })).toHaveValue(item.name);
-      await page.getByRole("button", { name: "作業条件へ進む", exact: true }).click();
-      await page.getByLabel("作業時間（時間/日）", { exact: true }).fill("1");
-      await page.getByLabel("作業内容（任意）— 最新SDS・公式ツール確認用のメモ").fill("容器から移す");
       const [response] = await Promise.all([
         page.waitForResponse((value) => value.url().endsWith("/api/chemical-ra") && value.request().method() === "POST"),
         page.getByRole("button", { name: "公的情報を確認", exact: true }).click(),
       ]);
       expect(response.status()).toBe(200);
+      await expect(page.getByText("未算出", { exact: true })).toBeVisible();
+      await page.getByRole("button", { name: "必要な人向け：作業条件・測定値を記録する", exact: true }).click();
+      await page.getByLabel("作業時間（時間/日）", { exact: true }).fill("1");
+      await page.getByLabel("作業内容（任意）— 最新SDS・公式ツール確認用のメモ").fill("容器から移す");
       const data = await response.json();
       const conclusion = page.getByTestId("ra-conclusion");
       await expect(conclusion.getByTestId("ghs-picto-flame")).toBeVisible();
@@ -221,16 +243,20 @@ test.describe("化学物質RA", () => {
     expect(hasRelevant).toBe(true);
   });
 
-  test("化学物質DB → リスクアセスメントへの相互導線が機能する", async ({ page }) => {
+  test("化学物質DB → RA準備への相互導線が機能する", async ({ page }) => {
     await page.goto("/chemical-database");
     await page.waitForLoadState("networkidle");
     // 本文の使い分け案内から、表示中のRA導線へ到達できる。
     const raLink = page
       .getByRole("main")
-      .getByRole("link", { name: "化学物質RA", exact: true })
-      .first();
+      .getByText("このページの使い分け：", { exact: true })
+      .locator("..")
+      .getByRole("link", { name: "化学物質RA準備", exact: true });
     await expect(raLink).toBeVisible({ timeout: 5000 });
     await expect(raLink).toHaveAttribute("href", "/chemical-ra");
+    await raLink.click();
+    await expect(page).toHaveURL(/\/chemical-ra$/u);
+    await expect(page.getByRole("heading", { level: 1, name: "化学物質RA準備", exact: true })).toBeVisible();
   });
 
   test("例の物質名をURLへ載せず同一タブで検索欄へ引き継ぐ", async ({ page }) => {
@@ -290,7 +316,7 @@ test.describe("化学物質RA", () => {
 
     await expect(page).toHaveURL(/\/chemical-ra$/u);
     await expect(page.locator("#chemical-onebox-input")).toHaveValue("トルエン");
-    await page.getByRole("button", { name: "作業条件へ進む" }).click();
+    await page.getByRole("button", { name: "必要な人向け：作業条件・測定値を記録する" }).click();
     await expect(
       page.getByLabel("作業内容（任意）— 最新SDS・公式ツール確認用のメモ"),
     ).toBeVisible();

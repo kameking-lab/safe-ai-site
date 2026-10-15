@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import {
   COMING_SOON_SAFETY_SEMINARS,
@@ -98,23 +98,64 @@ describe("/training/safety-seminars", () => {
       ]);
   });
 
-  it("Coming Soonカードにはテーマ名・対象者・Coming Soonだけを表示し、操作を置かない", () => {
+  it("公開教材を時間・対象・形式で絞り込み、解除すると3件に戻る", () => {
     const { container } = render(<SafetySeminarLibraryPage />);
-    const cards = [
-      ...container.querySelectorAll<HTMLElement>(
-        '[data-seminar-status="coming-soon"]',
-      ),
-    ];
+    const published = () => container.querySelectorAll('[data-seminar-status="published"]');
+    expect(published()).toHaveLength(3);
 
-    for (const card of cards) {
-      expect(card.children).toHaveLength(3);
-      expect(card.querySelector("h3")).not.toBeNull();
-      expect(card.querySelector("p")?.textContent).toMatch(/^対象：/u);
-      expect(card.querySelector("span")?.textContent?.trim()).toBe(
-        "Coming Soon",
-      );
-      expect(card.querySelector("a, button")).toBeNull();
+    fireEvent.change(screen.getByLabelText("標準時間で絞り込む"), {
+      target: { value: PUBLISHED_SAFETY_SEMINARS[1].standardDuration },
+    });
+    expect(published()).toHaveLength(1);
+    expect(published()[0].getAttribute("data-seminar-id")).toBe(PUBLISHED_SAFETY_SEMINARS[1].id);
+
+    fireEvent.change(screen.getByLabelText("標準時間で絞り込む"), { target: { value: "" } });
+    fireEvent.change(screen.getByLabelText("対象で絞り込む"), {
+      target: { value: PUBLISHED_SAFETY_SEMINARS[2].audience },
+    });
+    expect(published()).toHaveLength(1);
+
+    fireEvent.change(screen.getByLabelText("対象で絞り込む"), { target: { value: "" } });
+    fireEvent.change(screen.getByLabelText("形式で絞り込む"), { target: { value: "PDF" } });
+    expect(published()).toHaveLength(2);
+    fireEvent.change(screen.getByLabelText("形式で絞り込む"), { target: { value: "" } });
+    expect(published()).toHaveLength(3);
+  });
+
+  it("0件になった複数条件を1操作で解除し、公開3件に戻す", () => {
+    const { container } = render(<SafetySeminarLibraryPage />);
+    const published = () => container.querySelectorAll('[data-seminar-status="published"]');
+    expect(screen.queryByRole("button", { name: "絞り込みを解除" })).toBeNull();
+
+    fireEvent.change(screen.getByLabelText("標準時間で絞り込む"), {
+      target: { value: PUBLISHED_SAFETY_SEMINARS[0].standardDuration },
+    });
+    fireEvent.change(screen.getByLabelText("形式で絞り込む"), {
+      target: { value: "Webスライド" },
+    });
+    expect(published()).toHaveLength(0);
+    expect(screen.getByRole("status").textContent).toContain("0件");
+
+    fireEvent.click(screen.getByRole("button", { name: "絞り込みを解除" }));
+    expect(published()).toHaveLength(3);
+    expect(screen.getByRole("status").textContent).toContain("3件");
+    expect(screen.queryByRole("button", { name: "絞り込みを解除" })).toBeNull();
+    expect(screen.getByLabelText<HTMLSelectElement>("標準時間で絞り込む").value).toBe("");
+    expect(screen.getByLabelText<HTMLSelectElement>("形式で絞り込む").value).toBe("");
+  });
+
+  it("準備中の既存テーマは閉じた目次にまとめ、架空のリンクや予定日を出さない", () => {
+    const { container } = render(<SafetySeminarLibraryPage />);
+    const details = container.querySelector("details");
+    expect(details).not.toBeNull();
+    expect(details?.hasAttribute("open")).toBe(false);
+    const items = [...container.querySelectorAll<HTMLElement>('[data-seminar-status="coming-soon"]')];
+    expect(items).toHaveLength(17);
+    for (const item of items) {
+      expect(item.querySelector("a, button, input, form")).toBeNull();
+      expect(item.textContent).toContain("準備中");
     }
+    expect(details?.textContent).not.toMatch(/公開予定|リリース予定/u);
   });
 
   it("self canonicalを保ち、query付きだけnoindexにする", async () => {

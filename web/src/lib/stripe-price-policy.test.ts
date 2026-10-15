@@ -14,14 +14,14 @@ describe("Stripe server-side price policy", () => {
     expect(resolveStripePlan(null)).toBeNull();
   });
 
-  it("課金フラグ・秘密鍵・両Priceの全設定が揃わない限り無効", () => {
+  it("旧課金フラグ・秘密鍵・両Priceが揃っても無料方針では決済を開始しない", () => {
     vi.stubEnv("NEXT_PUBLIC_PAID_MODE", "true");
     vi.stubEnv("STRIPE_SECRET_KEY", "synthetic-secret-not-real");
     vi.stubEnv("NEXT_PUBLIC_STRIPE_PRICE_PREMIUM", "price_standard_synthetic");
     vi.stubEnv("NEXT_PUBLIC_STRIPE_PRICE_PRO", "");
     expect(isPaidModeReady()).toBe(false);
     vi.stubEnv("NEXT_PUBLIC_STRIPE_PRICE_PRO", "price_pro_synthetic");
-    expect(isPaidModeReady()).toBe(true);
+    expect(isPaidModeReady()).toBe(false);
   });
 
   it("Webhookも未知のPriceをstandardへ昇格させずDB更新前に拒否する", async () => {

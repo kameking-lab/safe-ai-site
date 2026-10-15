@@ -1,6 +1,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { expect, test, type Browser, type Page } from "@playwright/test";
+import { assertNoJsAccidentNews } from "./support/nojs-accident-news";
 import {
   SERVICE_FIRST_COPY_LIMITS,
   countDisclaimerCharacters,
@@ -653,8 +654,10 @@ test("chatbot: composer, question chips, quick reply and source details remain o
   const sources = page.locator("[data-chatbot-source-details]").first();
   await expect(sources).toBeVisible({ timeout: 20_000 });
   expect(await sources.evaluate((element) => (element as HTMLDetailsElement).open)).toBe(false);
-  const summary = sources.locator("summary");
+  const summary = sources.locator(":scope > summary");
+  await expect(summary).toHaveCount(1);
   await summary.focus();
+  await expect(summary).toBeFocused();
   await summary.press("Enter");
   expect(await sources.evaluate((element) => (element as HTMLDetailsElement).open)).toBe(true);
   const actionCounts = await page
@@ -798,12 +801,12 @@ async function auditWithoutJavaScript(browser: Browser): Promise<void> {
         }
       }
       if (enforce && route === "/accident-news") {
-        await expect(
-          page.getByRole("heading", { level: 2, name: "直近の報道" }),
-        ).toBeVisible();
-        expect(
-          Number(await page.locator("[data-accident-news-results]").getAttribute("data-result-count")),
-        ).toBeGreaterThan(0);
+        evidence.push({
+          kind: "no-js-news",
+          phase,
+          route,
+          ...(await assertNoJsAccidentNews(page)),
+        });
       }
       if (enforce && route === "/signage") {
         await expect(page.locator("[data-signage-live]")).toBeHidden();

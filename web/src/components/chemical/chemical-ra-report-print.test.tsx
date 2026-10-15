@@ -49,4 +49,15 @@ describe("ChemicalRaPrintReport", () => {
     expect(screen.queryByTestId("ghs-picto-flame")).toBeNull();
     expect(container.textContent).not.toContain("安全です");
   });
+  it("換気の併用と部分未確認を印刷にも保持する", () => {
+    const result = buildOfficialResponse(findByCas("108-88-3")!);
+    const combined = createChemicalRaRecordPayload(result, { generalVentilation: "yes", localExhaust: "yes" }).assessmentSnapshot;
+    const { container, rerender } = render(<ChemicalRaPrintReport result={result} snapshot={combined} />);
+    expect(container.textContent).toContain("全体換気と局所排気を併用");
+    const partial = createChemicalRaRecordPayload(result, { generalVentilation: "unknown", localExhaust: "yes" }).assessmentSnapshot;
+    rerender(<ChemicalRaPrintReport result={result} snapshot={partial} />);
+    expect(container.textContent).toContain("全体換気: 未確認 / 局所排気: あり");
+    expect(container.textContent).not.toContain("全体換気と局所排気を併用");
+  });
+
 });

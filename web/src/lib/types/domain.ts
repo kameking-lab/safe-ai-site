@@ -4,7 +4,7 @@ import type {
   ChatbotSource,
 } from "@/lib/chatbot-contract";
 
-export type RevisionKind = "law" | "ordinance" | "notice" | "guideline" | "other";
+export type RevisionKind = "law" | "cabinet_order" | "ordinance" | "notice" | "guideline" | "other";
 
 export type RevisionCategory =
   | "労働安全衛生法"

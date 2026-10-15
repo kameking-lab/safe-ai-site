@@ -726,7 +726,7 @@ test.describe("KY zero-friction builder", () => {
       .click();
     expect((await confirmationResponse).status()).toBe(200);
     await expect(page.locator("#chemical-onebox-input")).toHaveValue("トルエン");
-    await page.getByRole("button", { name: "作業条件へ進む" }).click();
+    await page.getByRole("button", { name: "必要な人向け：作業条件・測定値を記録する" }).click();
     const workContent = page.getByRole("textbox", {
       name: /作業内容（任意）/,
     });

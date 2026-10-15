@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
 import Link from "next/link";
 import { PageContainer } from "@/components/layout";
 import { ConclusionCard } from "@/components/ui/conclusion-card";
@@ -21,9 +21,9 @@ import {
   chemicalSubstances,
   chemicalCategoryInfo,
   type ChemicalCategory,
-  type ChemicalSubstance,
 } from "@/data/mock/chemical-substances-db";
 import type { MergedChemical } from "@/lib/mhlw-chemicals";
+import { inspectChemicalNavigationQuery } from "@/lib/chemical/query-safety";
 import { getAllMergedChemicalsSlim as getAllMergedChemicals } from "@/lib/mhlw-chemicals-slim";
 import { ChemicalPpeSelectionBoundary } from "@/components/chemical/chemical-ppe-selection-boundary";
 import { ChemicalNotFoundRescue } from "@/components/chemical/chemical-not-found-rescue";
@@ -39,6 +39,12 @@ import {
   type RegulationTag,
 } from "@/lib/regulation-tag-labels";
 import { RegulationTagBadgeList } from "@/components/regulation-tag-badge";
+import {
+  consumeChemicalListSnapshot,
+  rankCuratedChemicals,
+  rankMergedChemicals,
+  stageChemicalListSnapshot,
+} from "@/components/chemical/chemical-list-search";
 
 
 const CATEGORY_FILTERS: ChemicalCategory[] = [
@@ -50,42 +56,6 @@ const CATEGORY_FILTERS: ChemicalCategory[] = [
   "皮膚等障害化学物質等",
   "リスクアセスメント対象物",
 ];
-
-function normalize(v: string): string {
-  return v.toLowerCase().replace(/\s+/g, "");
-}
-
-function matches(sub: ChemicalSubstance, q: string): boolean {
-  if (!q) return true;
-  const n = normalize(q);
-  const haystack = [
-    sub.name,
-    sub.name_en ?? "",
-    sub.cas,
-    ...(sub.synonyms ?? []),
-    sub.uses,
-    sub.health_effects,
-    ...sub.categories,
-    ...sub.related_laws,
-  ]
-    .map(normalize)
-    .join(" ");
-  return haystack.includes(n);
-}
-
-function normalizeMhlw(v: string): string {
-  return v.toLowerCase().replace(/\s+/g, "");
-}
-
-function matchesMhlw(c: MergedChemical, q: string): boolean {
-  if (!q) return true;
-  const n = normalizeMhlw(q);
-  return (
-    normalizeMhlw(c.primaryName).includes(n) ||
-    (c.cas !== null && normalizeMhlw(c.cas).includes(n)) ||
-    c.aliases.some((a) => normalizeMhlw(a).includes(n))
-  );
-}
 
 function regulationTagsForChemical(c: MergedChemical): RegulationTag[] {
   // 詳細ページと同じ保存済みCAS情報を参照し、入力から新たな規制指定を推測しない。
@@ -106,15 +76,43 @@ export function ChemicalDatabaseClient() {
   const [selectedTags, setSelectedTags] = useState<Set<RegulationTag>>(new Set());
   const [tagMatchMode, setTagMatchMode] = useState<"and" | "or">("and");
   const [constructionOnly, setConstructionOnly] = useState(false);
+  const [regulationFiltersOpen, setRegulationFiltersOpen] = useState(false);
+  const regulationFiltersRef = useRef<HTMLDetailsElement>(null);
 
-  // CR2-T1: 他機能・横断検索から ?q=物質名 で深リンクできるよう、マウント後に URL から取り込む。
-  // useSearchParams は静的プリレンダーを Suspense フォールバックへ落とし LCP を悪化させるため
-  // 使わず、window.location から復元する（/laws と同方針）。
+  /* eslint-disable react-hooks/set-state-in-effect -- Restore client-only navigation state after hydration. */
   useEffect(() => {
-    const q = new URLSearchParams(window.location.search).get("q");
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    if (q && q.trim()) setQuery(q.trim());
+    // A snapshot belongs only to the exact list URL that opened the detail.
+    // Reject a sensitive explicit query even if a stale snapshot exists for it.
+    const params = new URLSearchParams(window.location.search);
+    const inspected = params.has("q") ? inspectChemicalNavigationQuery(params.get("q")) : null;
+    const restored = consumeChemicalListSnapshot();
+    if (inspected && !inspected.allowed) return;
+    if (restored?.sourcePathAndSearch === window.location.pathname + window.location.search) {
+      setMode(restored.mode);
+      setQuery(restored.query);
+      setCategory(restored.category);
+      setSkinOnly(restored.skinOnly);
+      setSelectedTags(new Set(restored.selectedTags));
+      setTagMatchMode(restored.tagMatchMode);
+      setConstructionOnly(restored.constructionOnly);
+      setRegulationFiltersOpen(restored.regulationFiltersOpen === true);
+      // Let React commit the restored result list before returning to its prior position.
+      requestAnimationFrame(() => requestAnimationFrame(() => window.scrollTo(0, restored.scrollY)));
+      return;
+    }
+    if (inspected?.allowed) setQuery(inspected.normalized);
   }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
+
+  const rememberDetailNavigation = (event: MouseEvent<HTMLAnchorElement>) => {
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    stageChemicalListSnapshot({
+      sourcePathAndSearch: window.location.pathname + window.location.search,
+      mode, query, category, skinOnly, selectedTags: [...selectedTags], tagMatchMode,
+      constructionOnly, scrollY: window.scrollY,
+      regulationFiltersOpen: regulationFiltersRef.current?.open ?? regulationFiltersOpen,
+    });
+  };
 
   const toggleTag = (t: RegulationTag) => {
     setSelectedTags((prev) => {
@@ -130,8 +128,7 @@ export function ChemicalDatabaseClient() {
   };
 
   const filtered = useMemo(() => {
-    return chemicalSubstances.filter((s) => {
-      if (!matches(s, query)) return false;
+    return rankCuratedChemicals(chemicalSubstances, query).filter((s) => {
       if (category && !s.categories.includes(category)) return false;
       if (skinOnly && !s.skin_hazard) return false;
       return true;
@@ -139,8 +136,7 @@ export function ChemicalDatabaseClient() {
   }, [query, category, skinOnly]);
 
   const filteredMhlw = useMemo(() => {
-    return mhlwChemicals.filter((c) => {
-      if (!matchesMhlw(c, query)) return false;
+    return rankMergedChemicals(mhlwChemicals, query).filter((c) => {
       // 建設業頻出物質プリセット
       if (constructionOnly) {
         if (!c.cas || !CONSTRUCTION_PRIORITY_CAS_SET.has(c.cas)) return false;
@@ -210,15 +206,6 @@ export function ChemicalDatabaseClient() {
 
   return (
     <PageContainer width="wide">
-      <ConclusionCard
-        tone={conclusion.tone}
-        value={conclusion.value}
-        unit={conclusion.unit}
-        title={conclusion.title}
-        description={conclusion.description}
-        icon={conclusion.tone === "info" ? FlaskConical : undefined}
-        className="mb-5"
-      />
       <header className="mb-5">
         <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-emerald-700">
           <FlaskConical className="h-4 w-4" aria-hidden="true" />
@@ -227,10 +214,6 @@ export function ChemicalDatabaseClient() {
         <h1 className="mt-2 text-2xl font-bold text-slate-900 sm:text-3xl">
           化学物質データベース（MHLW {mhlwCount.toLocaleString()}物質 ＋ 専門解説50物質）
         </h1>
-        <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slate-700">
-          厚生労働省の公開 4 リスト（皮膚等障害・SDS交付義務・がん原性・濃度基準値）を CAS 番号で統合した
-          {mhlwCount.toLocaleString()} 物質を CAS・物質名で横断検索。一次資料と区別したサイト独自解説 50 物質も併読できます。
-        </p>
         <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
           <AlertTriangle className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />最終判断は必ず厚生労働省 <Link href="https://anzeninfo.mhlw.go.jp/" className="font-semibold underline" target="_blank" rel="noopener noreferrer">職場のあんぜんサイト</Link>
           と各物質の SDS をご確認ください。本データベースは管理補助を目的としています。
@@ -251,7 +234,7 @@ export function ChemicalDatabaseClient() {
             className={`inline-flex min-h-[44px] items-center justify-center rounded-lg px-4 py-1.5 text-sm font-semibold transition-colors ${
               mode === tab.id
                 ? "bg-white text-slate-900 shadow-sm"
-                : "text-slate-500 hover:text-slate-700"
+                : "text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-slate-100"
             }`}
           >
             {tab.label}
@@ -260,7 +243,7 @@ export function ChemicalDatabaseClient() {
       </div>
 
       {mode === "mhlw" && (
-        <section className="space-y-4">
+        <section aria-label="化学物質を検索" className="mb-4">
           <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
             <div className="mb-3 flex items-center gap-2 text-sm font-bold text-slate-800">
               <Search className="h-4 w-4 text-slate-400" aria-hidden="true" />
@@ -277,24 +260,52 @@ export function ChemicalDatabaseClient() {
                 className="min-h-[44px] w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
               />
             </label>
-            <p className="mt-2 text-xs text-slate-500">
+            <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+            <p className="text-xs text-slate-500">
               {query || selectedTags.size > 0 || constructionOnly
                 ? `${filteredMhlw.length.toLocaleString()} 件 / 全 ${mhlwCount.toLocaleString()} 件`
                 : `全 ${mhlwCount.toLocaleString()} 件`}（CAS 統合）
             </p>
+              {(selectedTags.size > 0 || constructionOnly) && (
+                <button type="button" onClick={clearTagFilter} className="inline-flex min-h-[44px] items-center gap-1 rounded border border-slate-300 px-3 text-xs font-semibold text-slate-700 hover:bg-slate-50">
+                  <X className="h-3 w-3" aria-hidden="true" />絞り込みを解除
+                </button>
+              )}
+            </div>
           </div>
 
-          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-              <div className="flex items-center gap-2 text-sm font-bold text-slate-800">
+        </section>
+      )}
+
+      <div className="mb-4">
+        <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slate-700">
+          厚生労働省の公開 4 リスト（皮膚等障害・SDS交付義務・がん原性・濃度基準値）を CAS 番号で統合した
+          {mhlwCount.toLocaleString()} 物質を CAS・物質名で横断検索。一次資料と区別したサイト独自解説 50 物質も併読できます。
+        </p>
+      </div>
+      <ConclusionCard
+        tone={conclusion.tone}
+        value={conclusion.value}
+        unit={conclusion.unit}
+        title={conclusion.title}
+        description={conclusion.description}
+        icon={conclusion.tone === "info" ? FlaskConical : undefined}
+        className="mb-5"
+      />
+
+      {mode === "mhlw" && (
+        <section className="space-y-4">
+          <details className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm" data-chemical-regulation-filters ref={regulationFiltersRef} open={regulationFiltersOpen} onToggle={(event) => setRegulationFiltersOpen(event.currentTarget.open)}>
+              <summary className="flex min-h-[44px] cursor-pointer flex-wrap items-center gap-2 text-sm font-bold text-slate-800">
                 <Filter className="h-4 w-4 text-slate-400" aria-hidden="true" />
-                規制法令で絞り込み
+                規制で絞り込む
                 {selectedTags.size > 0 && (
                   <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs text-emerald-800">
                     {selectedTags.size} 件選択中
                   </span>
                 )}
-              </div>
+              </summary>
+            <div className="mb-3 mt-3 flex flex-wrap items-center justify-between gap-2">
               <div className="flex flex-wrap items-center gap-2">
                 <label className="inline-flex items-center gap-1.5 text-xs text-slate-700">
                   <input
@@ -325,16 +336,7 @@ export function ChemicalDatabaseClient() {
                     </button>
                   ))}
                 </div>
-                {(selectedTags.size > 0 || constructionOnly) && (
-                  <button
-                    type="button"
-                    onClick={clearTagFilter}
-                    className="inline-flex min-h-[44px] items-center gap-1 rounded border border-slate-300 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50"
-                  >
-                    <X className="h-3 w-3" aria-hidden="true" />
-                    クリア
-                  </button>
-                )}
+
               </div>
             </div>
             <p className="mb-3 text-xs leading-5 text-slate-600">
@@ -373,7 +375,7 @@ export function ChemicalDatabaseClient() {
                 );
               })}
             </div>
-          </div>
+          </details>
           {filteredMhlw.length === 0 ? (
             query.trim().length >= 2 ? (
               <ChemicalNotFoundRescue
@@ -387,8 +389,38 @@ export function ChemicalDatabaseClient() {
               </p>
             )
           ) : (
-            <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
-              <table className="w-full text-xs">
+            <div className="rounded-xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-950">
+              <p id="chemical-list-legend" className="border-b border-slate-200 bg-slate-50 px-3 py-2 text-xs leading-5 text-slate-700">
+                ●＝当サイト収録の厚労省公表リストに掲載あり。空欄＝当サイト収録データで掲載を確認できない状態で、法的な対象外判定ではありません。
+                製品の含有量・施行日・取扱条件は
+                <Link href="https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000099121_00005.html" target="_blank" rel="noopener noreferrer" className="underline">厚労省の対象物質一覧</Link>
+                と製品 SDS で確認してください。
+              </p>
+              <ul aria-label="物質検索結果" className="space-y-3 p-3 md:hidden">
+                {filteredMhlw.slice(0, 100).map((c, i) => {
+                  const tags = regulationTagsForChemical(c);
+                  const states = [
+                    ["がん原性", c.flags.carcinogenic],
+                    ["皮膚等障害", c.flags.skin],
+                    ["濃度基準", c.flags.concentration],
+                    ["SDS交付", c.flags.label_sds],
+                  ] as const;
+                  return (
+                    <li key={c.cas ?? `${c.primaryName}-${i}`} data-chemical-mobile-card="" data-cas={c.cas ?? undefined} className="rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900">
+                      <h3 className="break-words text-sm font-semibold text-slate-900 dark:text-slate-100">{c.primaryName}</h3>
+                      <p className="mt-1 text-xs text-slate-600 dark:text-slate-300">CAS <span className="font-mono">{c.cas ?? "未登録"}</span></p>
+                      {c.cas && CONSTRUCTION_PRIORITY_CAS_SET.has(c.cas) && <p className="mt-1 text-xs font-semibold text-amber-800 dark:text-amber-200">建設業頻出</p>}
+                      {tags && tags.length > 0 && <div className="mt-2"><RegulationTagBadgeList tags={tags} maxVisible={4} size="xs" onTagClick={(t) => toggleTag(t)} /></div>}
+                      <dl className="mt-3 grid grid-cols-2 gap-2 text-xs text-slate-700 dark:text-slate-300">
+                        {states.map(([label, included]) => <div key={label}><dt className="font-semibold">{label}</dt><dd>{included ? "掲載あり" : "掲載未確認"}</dd></div>)}
+                      </dl>
+                      {c.cas ? <Link href={`/chemical-database/${encodeURIComponent(c.cas)}`} onClick={rememberDetailNavigation} className="mt-3 inline-flex min-h-11 items-center rounded-lg border border-emerald-300 bg-emerald-50 px-3 text-xs font-semibold text-emerald-900 dark:border-emerald-700 dark:bg-emerald-900 dark:text-emerald-100">詳細を見る</Link> : <p className="mt-3 text-xs text-slate-600 dark:text-slate-300">CAS番号が未登録のため、原典の名称で確認してください。</p>}
+                    </li>
+                  );
+                })}
+              </ul>
+              <div className="hidden overflow-x-auto md:block" data-chemical-comparison-table="">
+              <table className="w-full text-xs" aria-describedby="chemical-list-legend">
                 <thead className="border-b border-slate-200 bg-slate-50">
                   <tr>
                     <th className="px-3 py-2 text-left font-semibold text-slate-700">CAS番号</th>
@@ -438,6 +470,7 @@ export function ChemicalDatabaseClient() {
                           {c.cas ? (
                             <Link
                               href={`/chemical-database/${encodeURIComponent(c.cas)}`}
+                              onClick={rememberDetailNavigation}
                               className="inline-flex items-center gap-0.5 text-emerald-700 hover:text-emerald-900 underline text-[11px]"
                             >
                               開く
@@ -451,6 +484,7 @@ export function ChemicalDatabaseClient() {
                   })}
                 </tbody>
               </table>
+              </div>
               {filteredMhlw.length > 100 && (
                 <p className="px-4 py-3 text-center text-xs text-slate-400">
                   さらに {(filteredMhlw.length - 100).toLocaleString()} 件 — キーワードを入力して絞り込んでください
@@ -607,7 +641,7 @@ export function ChemicalDatabaseClient() {
                           className="inline-flex min-h-[44px] items-center gap-1 rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white shadow hover:bg-emerald-700"
                         >
                           <ClipboardCheck className="h-3.5 w-3.5" aria-hidden="true" />
-                          この物質のリスクアセスメントを実施
+                          この物質でRAを準備
                         </Link>
                       ) : (
                         <TransientChemicalLink
@@ -615,7 +649,7 @@ export function ChemicalDatabaseClient() {
                           className="inline-flex min-h-[44px] items-center gap-1 rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white shadow hover:bg-emerald-700"
                         >
                           <ClipboardCheck className="h-3.5 w-3.5" aria-hidden="true" />
-                          この物質のリスクアセスメントを実施
+                          この物質でRAを準備
                         </TransientChemicalLink>
                       )}
                       {s.sds_url && (
@@ -656,7 +690,7 @@ export function ChemicalDatabaseClient() {
               href="/chemical-ra"
               className="inline-flex min-h-[44px] items-center rounded-md border border-emerald-300 bg-white px-3 py-1.5 font-semibold text-emerald-700 hover:bg-emerald-50"
             >
-              化学物質リスクアセスメント
+              化学物質RA準備
             </Link>
           </li>
           <li>

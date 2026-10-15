@@ -1,4 +1,5 @@
 import type { SafetyTone } from "@/lib/design/safety-tone";
+import { PAID_MODE } from "@/lib/paid-mode";
 
 /**
  * マイページ(/account)の結論カード用ロジック（柱0・1画面1メッセージ）。
@@ -12,6 +13,8 @@ export interface AccountConclusionInput {
   periodEndLabel: string | null;
   /** プラン照会そのものが失敗し、planName/statusが既定値のままか（真の「フリープラン」と区別する） */
   lookupFailed?: boolean;
+  /** 旧契約表示の互換テスト用。公開画面はサイトの無料方針に従う。 */
+  paidMode?: boolean;
 }
 
 export interface AccountConclusion {
@@ -25,7 +28,15 @@ export function computeAccountConclusion({
   status,
   periodEndLabel,
   lookupFailed,
+  paidMode = PAID_MODE,
 }: AccountConclusionInput): AccountConclusion {
+  if (!paidMode) {
+    return {
+      tone: "info",
+      title: "全機能を無料で利用できます",
+      description: "利用回数による機能制限はありません。",
+    };
+  }
   if (lookupFailed) {
     return {
       tone: "neutral",
@@ -61,7 +72,7 @@ export function computeAccountConclusion({
     return {
       tone: "info",
       title: "フリープラン",
-      description: "有料プランで機能を拡張できます。",
+      description: "サイト機能は無料で利用できます。",
     };
   }
   return {

@@ -11,9 +11,9 @@ import { PageJsonLd } from "@/components/page-json-ld";
 import { JsonLd } from "@/components/json-ld";
 import { ChemicalRaNoScriptFallback } from "./chemical-ra-noscript";
 import { FeatureMascotCompanion } from "@/components/feature-mascot-companion";
-const _title = "化学物質リスクアセスメント無料確認｜CAS・SDS・混合物";
+const _title = "化学物質RA準備｜CAS・SDS・作業条件を整理";
 const _desc =
-  "CAS番号・最新SDS・混合物の成分と作業条件を整理する無料の簡易スクリーニング。独自の自動判定はせず、厚生労働省の公式CREATE-SIMPLEと人による最終確認へ案内します。";
+  "CAS番号で公的情報を確認し、製品の最新SDS・作業条件・対策を記録する無料のRA準備ツール。リスク値は計算せず、厚生労働省の公式CREATE-SIMPLEでの評価へつなぎます。";
 
 type SearchParams = Record<string, string | string[] | undefined>;
 
@@ -74,11 +74,10 @@ export default async function ChemicalRaPage({
   const params = await searchParams;
   if (hasUnsafeDirectChemicalQuery(params)) redirect("/chemical-ra");
   const initialQuery = safeInitialChemicalQuery(params);
-  const directStart = Boolean(initialQuery);
   return (
     <>
       <PageJsonLd
-        name="化学物質の公的情報確認支援"
+        name="化学物質RA準備"
         description={_desc}
         path="/chemical-ra"
       />
@@ -86,7 +85,7 @@ export default async function ChemicalRaPage({
         schema={{
           "@context": "https://schema.org",
           "@type": "SoftwareApplication",
-          name: "化学物質の公的情報・SDS確認支援",
+          name: "化学物質RA準備",
           description: _desc,
           url: "https://www.anzen-ai-portal.jp/chemical-ra",
           applicationCategory: "BusinessApplication",
@@ -103,16 +102,8 @@ export default async function ChemicalRaPage({
         <header>
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
-              化学物質RA
+              化学物質RA準備
             </h1>
-            {directStart ? (
-              <span
-                data-status-badge
-                className="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-bold text-emerald-900"
-              >
-                候補を検索中
-              </span>
-            ) : null}
           </div>
           <p className="mt-2 text-sm leading-6 text-slate-700">
             公的情報と条件を整理します。リスク値は計算せず、公式CREATE-SIMPLEへつなぎます。

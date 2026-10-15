@@ -44,6 +44,7 @@ import { parseExposureLimit } from "@/lib/chemical/concentration-comparison";
 import { inspectChemicalNavigationQuery } from "@/lib/chemical/query-safety";
 import { fetchChemicalLegalProfile } from "@/lib/chemical/legal-profile-client";
 import { KyHandoffLink } from "@/components/ky-handoff-link";
+import { controlsFromVentilation, ventilationFromControls, type VentilationSelection } from "@/lib/chemical/ventilation-selection";
 
 const ChemicalRaSaveButton = dynamic(
   () =>
@@ -270,7 +271,6 @@ export function ChemicalRaPanel({
   const [workContent, setWorkContent] = useState("");
   const [measuredConc, setMeasuredConc] = useState("");
   const [measuredUnit, setMeasuredUnit] = useState("");
-  const [ventilation, setVentilation] = useState<"none" | "general" | "local" | "">("");
   const [amount, setAmount] = useState<"small" | "medium" | "large" | "">("");
   const [durationHours, setDurationHours] = useState<string>("");
   const [sdsStatus, setSdsStatus] = useState<ChemicalRaSdsStatus>("unknown");
@@ -280,6 +280,12 @@ export function ChemicalRaPanel({
     useState<ChemicalRaTriState>("unknown");
   const [localExhaust, setLocalExhaust] =
     useState<ChemicalRaTriState>("unknown");
+  const ventilation = ventilationFromControls(generalVentilation, localExhaust);
+  function selectVentilation(selection: VentilationSelection) {
+    const controls = controlsFromVentilation(selection);
+    setGeneralVentilation(controls.generalVentilation);
+    setLocalExhaust(controls.localExhaust);
+  }
   const [frequency, setFrequency] = useState<ChemicalRaFrequency>(null);
   const [useTemperatureC, setUseTemperatureC] = useState("");
   const [dispersion, setDispersion] = useState<ChemicalRaDispersion>(null);
@@ -310,7 +316,7 @@ export function ChemicalRaPanel({
   const [restoredAt, setRestoredAt] = useState<string | null>(null);
   const [restoredPayloadState, setRestoredPayloadState] =
     useState<ChemicalRaPayloadInspection | null>(null);
-  // 詳細モードでは作業条件と測定値の記録欄を表示する。独自のばく露推定には使わない。
+  // 記録が必要な人だけ作業条件と測定値を開く。独自のばく露推定には使わない。
   const [detailedMode, setDetailedMode] = useState(false);
   const conditionsAnchorRef = useRef<HTMLDivElement | null>(null);
   const resultAnchorRef = useRef<HTMLDivElement | null>(null);
@@ -494,7 +500,6 @@ export function ChemicalRaPanel({
           setSdsStatus(snapshot.sds.status);
           setSdsIssuedOn(snapshot.sds.issuedOn ?? "");
           setComponentVersion(snapshot.sds.componentVersion ?? "");
-          setVentilation(snapshot.ventilation ?? "");
           setGeneralVentilation(
             snapshot.engineeringControls.generalVentilation,
           );
@@ -798,419 +803,6 @@ export function ChemicalRaPanel({
             />
           )}
 
-          {/* ③ 作業条件メモ（詳細モードのみ） */}
-          {detailedMode && (
-          <div
-            ref={conditionsAnchorRef}
-            id="chemical-ra-work-conditions"
-            tabIndex={-1}
-            className="scroll-mt-24 rounded-lg border border-blue-200 bg-blue-50/40 p-3 focus:outline-none focus-visible:ring-4 focus-visible:ring-blue-300"
-          >
-            <p className="text-xs font-semibold text-blue-900">
-              作業条件
-            </p>
-            <label className="mt-2 block text-[11px] font-semibold text-blue-950">
-              作業内容（任意）— 最新SDS・公式ツール確認用のメモ
-              <TextareaWithVoice
-                rows={2}
-                value={workContent}
-                onChange={(event) => setWorkContent(event.target.value)}
-                placeholder="例: 屋内で刷毛塗り、1日2時間"
-                className="mt-1 text-xs"
-              />
-            </label>
-            <fieldset className="mt-2 rounded-lg border border-blue-200 bg-white/70 p-3">
-              <legend className="px-1 text-[11px] font-bold text-blue-950">
-                製品固有SDSの確認記録
-              </legend>
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-                <label className="text-[11px] text-slate-700">
-                  SDS確認状況
-                  <select
-                    value={sdsStatus}
-                    onChange={(event) =>
-                      setSdsStatus(
-                        event.target.value as ChemicalRaSdsStatus,
-                      )
-                    }
-                    className="mt-1 w-full rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs"
-                  >
-                    <option value="unknown">未選択・不明</option>
-                    <option value="not-confirmed">未確認</option>
-                    <option value="confirmed">製品固有のSDSを確認済み</option>
-                  </select>
-                </label>
-                <label className="text-[11px] text-slate-700">
-                  SDS発行日
-                  <input
-                    type="date"
-                    value={sdsIssuedOn}
-                    onChange={(event) => setSdsIssuedOn(event.target.value)}
-                    className="mt-1 min-h-[44px] w-full rounded-md border border-slate-300 bg-white px-2 text-xs"
-                  />
-                </label>
-                <label className="text-[11px] text-slate-700">
-                  成分・製品版
-                  <input
-                    type="text"
-                    value={componentVersion}
-                    onChange={(event) =>
-                      setComponentVersion(event.target.value)
-                    }
-                    placeholder="例: 製品A / 第3版"
-                    className="mt-1 min-h-[44px] w-full rounded-md border border-slate-300 bg-white px-2 text-xs"
-                  />
-                </label>
-              </div>
-              <p className="mt-2 text-[10px] leading-4 text-slate-600">
-                「確認済み」は、使用する製品と成分版が一致するSDSを人が確認した場合だけ選んでください。
-              </p>
-            </fieldset>
-            <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
-              <label className="text-[11px] text-slate-700">
-                換気
-                <select
-                  value={ventilation}
-                  onChange={(e) => setVentilation(e.target.value as "none" | "general" | "local" | "")}
-                  className="mt-1 w-full rounded-md border border-slate-300 bg-white px-2 py-1 text-xs"
-                >
-                  <option value="">選択してください</option>
-                  <option value="none">換気なし</option>
-                  <option value="general">全体換気</option>
-                  <option value="local">局所排気</option>
-                </select>
-              </label>
-              <label className="text-[11px] text-slate-700">
-                取扱量
-                <select
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value as "small" | "medium" | "large" | "")}
-                  className="mt-1 w-full rounded-md border border-slate-300 bg-white px-2 py-1 text-xs"
-                >
-                  <option value="">選択してください</option>
-                  <option value="small">少量（&lt;1L/日）</option>
-                  <option value="medium">中量（1〜10L/日）</option>
-                  <option value="large">大量（&gt;10L/日）</option>
-                </select>
-              </label>
-              <label className="text-[11px] text-slate-700">
-                作業時間（時間/日）
-                <input
-                  type="number"
-                  min="0"
-                  max="24"
-                  step="0.5"
-                  value={durationHours}
-                  onChange={(e) => setDurationHours(e.target.value)}
-                  placeholder="例: 4"
-                  className="mt-1 w-full rounded-md border border-slate-300 bg-white px-2 py-1 text-xs"
-                />
-              </label>
-            </div>
-            <fieldset className="mt-3 rounded-lg border border-blue-200 bg-white/70 p-3">
-              <legend className="px-1 text-[11px] font-bold text-blue-950">
-                使用条件
-              </legend>
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
-                <label className="text-[11px] text-slate-700">
-                  使用温度（℃）
-                  <input
-                    type="number"
-                    min="-50"
-                    max="200"
-                    step="0.1"
-                    value={useTemperatureC}
-                    onChange={(event) =>
-                      setUseTemperatureC(event.target.value)
-                    }
-                    placeholder="例: 25"
-                    className="mt-1 min-h-[44px] w-full rounded-md border border-slate-300 bg-white px-2 text-xs"
-                  />
-                </label>
-                <label className="text-[11px] text-slate-700">
-                  作業頻度
-                  <select
-                    value={frequency ?? ""}
-                    onChange={(event) =>
-                      setFrequency(
-                        (event.target.value || null) as ChemicalRaFrequency,
-                      )
-                    }
-                    className="mt-1 min-h-[44px] w-full rounded-md border border-slate-300 bg-white px-2 text-xs"
-                  >
-                    <option value="">未選択</option>
-                    <option value="one-off">単発</option>
-                    <option value="daily">毎日</option>
-                    <option value="weekly">毎週</option>
-                    <option value="monthly">毎月</option>
-                    <option value="less-than-monthly">月1回未満</option>
-                  </select>
-                </label>
-                <label className="text-[11px] text-slate-700">
-                  飛散・噴霧の状態
-                  <select
-                    value={dispersion ?? ""}
-                    onChange={(event) =>
-                      setDispersion(
-                        (event.target.value || null) as ChemicalRaDispersion,
-                      )
-                    }
-                    className="mt-1 min-h-[44px] w-full rounded-md border border-slate-300 bg-white px-2 text-xs"
-                  >
-                    <option value="">未選択</option>
-                    <option value="none">飛散なし</option>
-                    <option value="dust">粉じん</option>
-                    <option value="mist">ミスト</option>
-                    <option value="spray">スプレー・噴霧</option>
-                    <option value="vapor">蒸気</option>
-                    <option value="other">その他</option>
-                  </select>
-                </label>
-                <label className="text-[11px] text-slate-700">
-                  皮膚接触の可能性
-                  <select
-                    value={skinContact}
-                    onChange={(event) =>
-                      setSkinContact(
-                        event.target.value as ChemicalRaTriState,
-                      )
-                    }
-                    className="mt-1 min-h-[44px] w-full rounded-md border border-slate-300 bg-white px-2 text-xs"
-                  >
-                    <option value="unknown">不明・未確認</option>
-                    <option value="yes">あり</option>
-                    <option value="no">なし</option>
-                  </select>
-                </label>
-              </div>
-            </fieldset>
-            <fieldset className="mt-3 rounded-lg border border-blue-200 bg-white/70 p-3">
-              <legend className="px-1 text-[11px] font-bold text-blue-950">
-                換気設備
-              </legend>
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                <label className="text-[11px] text-slate-700">
-                  全体換気
-                  <select
-                    value={generalVentilation}
-                    onChange={(event) => {
-                      const next = event.target.value as ChemicalRaTriState;
-                      setGeneralVentilation(next);
-                      if (next === "yes" && localExhaust !== "yes") {
-                        setVentilation("general");
-                      } else if (next === "no" && localExhaust === "no") {
-                        setVentilation("none");
-                      }
-                    }}
-                    className="mt-1 min-h-[44px] w-full rounded-md border border-slate-300 bg-white px-2 text-xs"
-                  >
-                    <option value="unknown">不明・未確認</option>
-                    <option value="yes">あり</option>
-                    <option value="no">なし</option>
-                  </select>
-                </label>
-                <label className="text-[11px] text-slate-700">
-                  局所排気
-                  <select
-                    value={localExhaust}
-                    onChange={(event) => {
-                      const next = event.target.value as ChemicalRaTriState;
-                      setLocalExhaust(next);
-                      if (next === "yes") {
-                        setVentilation("local");
-                      } else if (next === "no" && generalVentilation === "yes") {
-                        setVentilation("general");
-                      } else if (
-                        next === "no" &&
-                        generalVentilation === "no"
-                      ) {
-                        setVentilation("none");
-                      }
-                    }}
-                    className="mt-1 min-h-[44px] w-full rounded-md border border-slate-300 bg-white px-2 text-xs"
-                  >
-                    <option value="unknown">不明・未確認</option>
-                    <option value="yes">あり</option>
-                    <option value="no">なし</option>
-                  </select>
-                </label>
-              </div>
-              <p className="mt-2 text-[10px] leading-4 text-slate-600">
-                「あり」は設備の存在だけでなく、対象作業で稼働し、点検状態と捕捉位置を人が確認した場合に選択してください。
-              </p>
-            </fieldset>
-            <fieldset className="mt-3 rounded-lg border border-blue-200 bg-white/70 p-3">
-              <legend className="px-1 text-[11px] font-bold text-blue-950">
-                保護具・代替物質
-              </legend>
-              <div className="grid grid-cols-1 gap-2 lg:grid-cols-2">
-                <label className="text-[11px] text-slate-700">
-                  使用する保護具
-                  <TextareaWithVoice
-                    value={ppeDescription}
-                    onChange={(event) =>
-                      setPpeDescription(event.target.value)
-                    }
-                    placeholder="例: SDSと作業条件に基づき選定した防毒マスク、耐薬品手袋、保護眼鏡"
-                    className="mt-1 min-h-20 bg-white"
-                  />
-                </label>
-                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                  <label className="text-[11px] text-slate-700">
-                    保護具の適合性
-                    <select
-                      value={ppeSuitability}
-                      onChange={(event) =>
-                        setPpeSuitability(
-                          event.target.value as ChemicalRaPpeSuitability,
-                        )
-                      }
-                      className="mt-1 min-h-[44px] w-full rounded-md border border-slate-300 bg-white px-2 text-xs"
-                    >
-                      <option value="unknown">不明・未確認</option>
-                      <option value="not-confirmed">未確認</option>
-                      <option value="confirmed">
-                        SDS・作業条件・製品仕様で確認済み
-                      </option>
-                    </select>
-                  </label>
-                  <label className="text-[11px] text-slate-700">
-                    代替物質の検討
-                    <select
-                      value={substitution}
-                      onChange={(event) =>
-                        setSubstitution(
-                          event.target.value as ChemicalRaSubstitutionStatus,
-                        )
-                      }
-                      className="mt-1 min-h-[44px] w-full rounded-md border border-slate-300 bg-white px-2 text-xs"
-                    >
-                      <option value="unknown">不明・未確認</option>
-                      <option value="considered">検討済み</option>
-                      <option value="not-considered">未検討</option>
-                      <option value="not-applicable">該当なし（理由を記録）</option>
-                    </select>
-                  </label>
-                </div>
-              </div>
-            </fieldset>
-            <fieldset className="mt-3 rounded-lg border border-blue-200 bg-white/70 p-3">
-              <legend className="px-1 text-[11px] font-bold text-blue-950">
-                措置・担当・期限
-              </legend>
-              <div className="grid grid-cols-1 gap-2 lg:grid-cols-2">
-                <label className="text-[11px] text-slate-700">
-                  既存措置
-                  <TextareaWithVoice
-                    value={existingControls}
-                    onChange={(event) =>
-                      setExistingControls(event.target.value)
-                    }
-                    placeholder="現在実施している代替、密閉、換気、作業手順、教育、保護具など"
-                    className="mt-1 min-h-20 bg-white"
-                  />
-                </label>
-                <label className="text-[11px] text-slate-700">
-                  追加措置
-                  <TextareaWithVoice
-                    value={additionalControls}
-                    onChange={(event) =>
-                      setAdditionalControls(event.target.value)
-                    }
-                    placeholder="追加で実施する措置。不要の場合も、その理由を記録してください"
-                    className="mt-1 min-h-20 bg-white"
-                  />
-                </label>
-              </div>
-              <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
-                <label className="text-[11px] text-slate-700">
-                  担当
-                  <input
-                    type="text"
-                    value={actionOwner}
-                    onChange={(event) => setActionOwner(event.target.value)}
-                    placeholder="例: 化学物質管理者"
-                    className="mt-1 min-h-[44px] w-full rounded-md border border-slate-300 bg-white px-2 text-xs"
-                  />
-                </label>
-                <label className="text-[11px] text-slate-700">
-                  期限
-                  <input
-                    type="date"
-                    value={actionDueOn}
-                    onChange={(event) => setActionDueOn(event.target.value)}
-                    className="mt-1 min-h-[44px] w-full rounded-md border border-slate-300 bg-white px-2 text-xs"
-                  />
-                </label>
-                <label className="text-[11px] text-slate-700">
-                  再評価日
-                  <input
-                    type="date"
-                    value={reassessmentOn}
-                    onChange={(event) =>
-                      setReassessmentOn(event.target.value)
-                    }
-                    className="mt-1 min-h-[44px] w-full rounded-md border border-slate-300 bg-white px-2 text-xs"
-                  />
-                </label>
-              </div>
-            </fieldset>
-            <p className="mt-1 text-[10px] text-slate-500">
-              ※ 本サイトではこの条件から判定値を算出しません。製品固有の最新SDSと厚生労働省の公式CREATE-SIMPLEへ入力し、化学物質管理者または専門家が確認してください。
-            </p>
-          </div>
-          )}
-
-          {/* ④ 測定濃度は記録のみ。時間基準・採取法・代表性を確認できないため自動比較しない。 */}
-          {detailedMode && (
-          <div className="rounded-lg border border-amber-200 bg-amber-50/50 p-3">
-            <label className="flex items-center gap-1.5 text-xs font-semibold text-amber-900">
-              <Gauge className="h-3.5 w-3.5" />
-              ④ 作業環境の測定値メモ（任意）— 自動判定しません
-            </label>
-            <div className="mt-2 flex flex-wrap items-center gap-2">
-              <input
-                type="text"
-                inputMode="decimal"
-                value={measuredConc}
-                onChange={(e) => setMeasuredConc(e.target.value)}
-                placeholder="例: 15"
-                className="w-32 rounded-md border border-amber-300 bg-white px-2.5 py-1.5 text-sm"
-                aria-label="測定濃度の数値"
-              />
-              <label className="text-xs font-semibold text-amber-900">
-                単位
-                <select
-                  value={measuredUnit}
-                  onChange={(event) => setMeasuredUnit(event.target.value)}
-                  className="ml-1 min-h-[44px] rounded-md border border-amber-300 bg-white px-2 text-sm"
-                >
-                  <option value="">選択必須</option>
-                  <option value="ppm">ppm</option>
-                  <option value="mg/m3">mg/m³</option>
-                  {activeLimitUnit && !["ppm", "mg/m3"].includes(activeLimitUnit) && (
-                    <option value={activeLimitUnit}>{activeLimitUnit}</option>
-                  )}
-                </select>
-              </label>
-              <span className="text-xs text-amber-800">
-                {activeLimit ? (
-                  <>
-                    参照値: <span className="font-bold">{activeLimit}</span>（自動比較には使用しません）
-                  </>
-                ) : (
-                  untraceableStoredLimit
-                    ? "一次資料URLを個別確認できない収録値のため、数値比較を停止しています"
-                    : "物質を選択し、追跡可能な基準値がある場合だけ比較できます"
-                )}
-              </span>
-            </div>
-            <p className="mt-2 text-xs font-semibold leading-5 text-amber-950">
-              8時間TWA・短時間値・天井値と測定値は、時間基準、採取法、単位、代表性を確認しないと比較できません。
-              ここでは測定メモだけを保存し、超過／非超過は判定しません。公式CREATE-SIMPLE、作業環境測定機関または専門家で確認してください。
-            </p>
-          </div>
-          )}
         </div>
 
         {/* 初期表示の候補は3件まで。自由入力も常に使える。 */}
@@ -1236,13 +828,7 @@ export function ChemicalRaPanel({
           <button
             type="button"
             data-primary-action="true"
-            onClick={() => {
-              if (detailedMode) {
-                void handleSearch();
-                return;
-              }
-              setDetailedMode(true);
-            }}
+            onClick={() => void handleSearch()}
             disabled={!chemicalName.trim() || loading}
             aria-busy={loading}
             className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-3 text-sm font-bold text-white shadow hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
@@ -1255,9 +841,20 @@ export function ChemicalRaPanel({
             ) : (
               <>
                 <FileText className="h-4 w-4" aria-hidden="true" />
-                {detailedMode ? "公的情報を確認" : "作業条件へ進む"}
+                公的情報を確認
               </>
             )}
+          </button>
+          <p className="mt-2 text-xs leading-5 text-slate-600">
+            物質名・CAS番号から収録情報を確認できます。使用製品の成分と最新版SDSは人が照合してください。
+          </p>
+          <button
+            type="button"
+            aria-expanded={detailedMode}
+            onClick={() => setDetailedMode((open) => !open)}
+            className="mt-3 inline-flex min-h-11 items-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+          >
+            {detailedMode ? "作業条件・測定値の記録を閉じる" : "必要な人向け：作業条件・測定値を記録する"}
           </button>
         </div>
       </div>
@@ -1641,6 +1238,401 @@ export function ChemicalRaPanel({
           <MainFeatureNextActions exclude="chemical-ra" contextLabel={result.chemicalName} />
         </div>
       )}
+      <div className="space-y-3 print:hidden">
+          {/* ③ 作業条件メモ（詳細モードのみ） */}
+          {detailedMode && (
+          <div
+            ref={conditionsAnchorRef}
+            id="chemical-ra-work-conditions"
+            tabIndex={-1}
+            className="scroll-mt-24 rounded-lg border border-blue-200 bg-blue-50/40 p-3 focus:outline-none focus-visible:ring-4 focus-visible:ring-blue-300"
+          >
+            <p className="text-xs font-semibold text-blue-900">
+              作業条件
+            </p>
+            <label className="mt-2 block text-[11px] font-semibold text-blue-950">
+              作業内容（任意）— 最新SDS・公式ツール確認用のメモ
+              <TextareaWithVoice
+                rows={2}
+                value={workContent}
+                onChange={(event) => setWorkContent(event.target.value)}
+                placeholder="例: 屋内で刷毛塗り、1日2時間"
+                className="mt-1 text-xs"
+              />
+            </label>
+            <fieldset className="mt-2 rounded-lg border border-blue-200 bg-white/70 p-3">
+              <legend className="px-1 text-[11px] font-bold text-blue-950">
+                製品固有SDSの確認記録
+              </legend>
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                <label className="text-[11px] text-slate-700">
+                  SDS確認状況
+                  <select
+                    value={sdsStatus}
+                    onChange={(event) =>
+                      setSdsStatus(
+                        event.target.value as ChemicalRaSdsStatus,
+                      )
+                    }
+                    className="mt-1 w-full rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs"
+                  >
+                    <option value="unknown">未選択・不明</option>
+                    <option value="not-confirmed">未確認</option>
+                    <option value="confirmed">製品固有のSDSを確認済み</option>
+                  </select>
+                </label>
+                <label className="text-[11px] text-slate-700">
+                  SDS発行日
+                  <input
+                    type="date"
+                    value={sdsIssuedOn}
+                    onChange={(event) => setSdsIssuedOn(event.target.value)}
+                    className="mt-1 min-h-[44px] w-full rounded-md border border-slate-300 bg-white px-2 text-xs"
+                  />
+                </label>
+                <label className="text-[11px] text-slate-700">
+                  成分・製品版
+                  <input
+                    type="text"
+                    value={componentVersion}
+                    onChange={(event) =>
+                      setComponentVersion(event.target.value)
+                    }
+                    placeholder="例: 製品A / 第3版"
+                    className="mt-1 min-h-[44px] w-full rounded-md border border-slate-300 bg-white px-2 text-xs"
+                  />
+                </label>
+              </div>
+              <p className="mt-2 text-[10px] leading-4 text-slate-600">
+                「確認済み」は、使用する製品と成分版が一致するSDSを人が確認した場合だけ選んでください。
+              </p>
+            </fieldset>
+            <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
+              <label className="text-[11px] text-slate-700">
+                換気
+                <select
+                  value={ventilation}
+                  onChange={(e) => selectVentilation(e.target.value as VentilationSelection)}
+                  className="mt-1 w-full rounded-md border border-slate-300 bg-white px-2 py-1 text-xs"
+                >
+                  <option value="">不明・未確認</option>
+                  <option value="none">全体換気・局所排気ともになし</option>
+                  <option value="general">全体換気のみ</option>
+                  <option value="local">局所排気のみ</option>
+                  <option value="both">全体換気と局所排気を併用</option>
+                </select>
+              </label>
+              <label className="text-[11px] text-slate-700">
+                取扱量
+                <select
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value as "small" | "medium" | "large" | "")}
+                  className="mt-1 w-full rounded-md border border-slate-300 bg-white px-2 py-1 text-xs"
+                >
+                  <option value="">選択してください</option>
+                  <option value="small">少量（&lt;1L/日）</option>
+                  <option value="medium">中量（1〜10L/日）</option>
+                  <option value="large">大量（&gt;10L/日）</option>
+                </select>
+              </label>
+              <label className="text-[11px] text-slate-700">
+                作業時間（時間/日）
+                <input
+                  type="number"
+                  min="0"
+                  max="24"
+                  step="0.5"
+                  value={durationHours}
+                  onChange={(e) => setDurationHours(e.target.value)}
+                  placeholder="例: 4"
+                  className="mt-1 w-full rounded-md border border-slate-300 bg-white px-2 py-1 text-xs"
+                />
+              </label>
+            </div>
+            <fieldset className="mt-3 rounded-lg border border-blue-200 bg-white/70 p-3">
+              <legend className="px-1 text-[11px] font-bold text-blue-950">
+                使用条件
+              </legend>
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+                <label className="text-[11px] text-slate-700">
+                  使用温度（℃）
+                  <input
+                    type="number"
+                    min="-50"
+                    max="200"
+                    step="0.1"
+                    value={useTemperatureC}
+                    onChange={(event) =>
+                      setUseTemperatureC(event.target.value)
+                    }
+                    placeholder="例: 25"
+                    className="mt-1 min-h-[44px] w-full rounded-md border border-slate-300 bg-white px-2 text-xs"
+                  />
+                </label>
+                <label className="text-[11px] text-slate-700">
+                  作業頻度
+                  <select
+                    value={frequency ?? ""}
+                    onChange={(event) =>
+                      setFrequency(
+                        (event.target.value || null) as ChemicalRaFrequency,
+                      )
+                    }
+                    className="mt-1 min-h-[44px] w-full rounded-md border border-slate-300 bg-white px-2 text-xs"
+                  >
+                    <option value="">未選択</option>
+                    <option value="one-off">単発</option>
+                    <option value="daily">毎日</option>
+                    <option value="weekly">毎週</option>
+                    <option value="monthly">毎月</option>
+                    <option value="less-than-monthly">月1回未満</option>
+                  </select>
+                </label>
+                <label className="text-[11px] text-slate-700">
+                  飛散・噴霧の状態
+                  <select
+                    value={dispersion ?? ""}
+                    onChange={(event) =>
+                      setDispersion(
+                        (event.target.value || null) as ChemicalRaDispersion,
+                      )
+                    }
+                    className="mt-1 min-h-[44px] w-full rounded-md border border-slate-300 bg-white px-2 text-xs"
+                  >
+                    <option value="">未選択</option>
+                    <option value="none">飛散なし</option>
+                    <option value="dust">粉じん</option>
+                    <option value="mist">ミスト</option>
+                    <option value="spray">スプレー・噴霧</option>
+                    <option value="vapor">蒸気</option>
+                    <option value="other">その他</option>
+                  </select>
+                </label>
+                <label className="text-[11px] text-slate-700">
+                  皮膚接触の可能性
+                  <select
+                    value={skinContact}
+                    onChange={(event) =>
+                      setSkinContact(
+                        event.target.value as ChemicalRaTriState,
+                      )
+                    }
+                    className="mt-1 min-h-[44px] w-full rounded-md border border-slate-300 bg-white px-2 text-xs"
+                  >
+                    <option value="unknown">不明・未確認</option>
+                    <option value="yes">あり</option>
+                    <option value="no">なし</option>
+                  </select>
+                </label>
+              </div>
+            </fieldset>
+            <fieldset className="mt-3 rounded-lg border border-blue-200 bg-white/70 p-3">
+              <legend className="px-1 text-[11px] font-bold text-blue-950">
+                換気設備
+              </legend>
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <label className="text-[11px] text-slate-700">
+                  全体換気
+                  <select
+                    value={generalVentilation}
+                    onChange={(event) => setGeneralVentilation(event.target.value as ChemicalRaTriState)}
+                    className="mt-1 min-h-[44px] w-full rounded-md border border-slate-300 bg-white px-2 text-xs"
+                  >
+                    <option value="unknown">不明・未確認</option>
+                    <option value="yes">あり</option>
+                    <option value="no">なし</option>
+                  </select>
+                </label>
+                <label className="text-[11px] text-slate-700">
+                  局所排気
+                  <select
+                    value={localExhaust}
+                    onChange={(event) => setLocalExhaust(event.target.value as ChemicalRaTriState)}
+                    className="mt-1 min-h-[44px] w-full rounded-md border border-slate-300 bg-white px-2 text-xs"
+                  >
+                    <option value="unknown">不明・未確認</option>
+                    <option value="yes">あり</option>
+                    <option value="no">なし</option>
+                  </select>
+                </label>
+              </div>
+              <p className="mt-2 text-[10px] leading-4 text-slate-600">
+                上の換気区分と連動します。どちらかが未確認なら区分も未確認です。「あり」は対象作業での稼働・点検・捕捉位置を確認した場合に選択してください。
+              </p>
+            </fieldset>
+            <fieldset className="mt-3 rounded-lg border border-blue-200 bg-white/70 p-3">
+              <legend className="px-1 text-[11px] font-bold text-blue-950">
+                保護具・代替物質
+              </legend>
+              <div className="grid grid-cols-1 gap-2 lg:grid-cols-2">
+                <label className="text-[11px] text-slate-700">
+                  使用する保護具
+                  <TextareaWithVoice
+                    value={ppeDescription}
+                    onChange={(event) =>
+                      setPpeDescription(event.target.value)
+                    }
+                    placeholder="例: SDSと作業条件に基づき選定した防毒マスク、耐薬品手袋、保護眼鏡"
+                    className="mt-1 min-h-20 bg-white"
+                  />
+                </label>
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  <label className="text-[11px] text-slate-700">
+                    保護具の適合性
+                    <select
+                      value={ppeSuitability}
+                      onChange={(event) =>
+                        setPpeSuitability(
+                          event.target.value as ChemicalRaPpeSuitability,
+                        )
+                      }
+                      className="mt-1 min-h-[44px] w-full rounded-md border border-slate-300 bg-white px-2 text-xs"
+                    >
+                      <option value="unknown">不明・未確認</option>
+                      <option value="not-confirmed">未確認</option>
+                      <option value="confirmed">
+                        SDS・作業条件・製品仕様で確認済み
+                      </option>
+                    </select>
+                  </label>
+                  <label className="text-[11px] text-slate-700">
+                    代替物質の検討
+                    <select
+                      value={substitution}
+                      onChange={(event) =>
+                        setSubstitution(
+                          event.target.value as ChemicalRaSubstitutionStatus,
+                        )
+                      }
+                      className="mt-1 min-h-[44px] w-full rounded-md border border-slate-300 bg-white px-2 text-xs"
+                    >
+                      <option value="unknown">不明・未確認</option>
+                      <option value="considered">検討済み</option>
+                      <option value="not-considered">未検討</option>
+                      <option value="not-applicable">該当なし（理由を記録）</option>
+                    </select>
+                  </label>
+                </div>
+              </div>
+            </fieldset>
+            <fieldset className="mt-3 rounded-lg border border-blue-200 bg-white/70 p-3">
+              <legend className="px-1 text-[11px] font-bold text-blue-950">
+                措置・担当・期限
+              </legend>
+              <div className="grid grid-cols-1 gap-2 lg:grid-cols-2">
+                <label className="text-[11px] text-slate-700">
+                  既存措置
+                  <TextareaWithVoice
+                    value={existingControls}
+                    onChange={(event) =>
+                      setExistingControls(event.target.value)
+                    }
+                    placeholder="現在実施している代替、密閉、換気、作業手順、教育、保護具など"
+                    className="mt-1 min-h-20 bg-white"
+                  />
+                </label>
+                <label className="text-[11px] text-slate-700">
+                  追加措置
+                  <TextareaWithVoice
+                    value={additionalControls}
+                    onChange={(event) =>
+                      setAdditionalControls(event.target.value)
+                    }
+                    placeholder="追加で実施する措置。不要の場合も、その理由を記録してください"
+                    className="mt-1 min-h-20 bg-white"
+                  />
+                </label>
+              </div>
+              <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
+                <label className="text-[11px] text-slate-700">
+                  担当
+                  <input
+                    type="text"
+                    value={actionOwner}
+                    onChange={(event) => setActionOwner(event.target.value)}
+                    placeholder="例: 化学物質管理者"
+                    className="mt-1 min-h-[44px] w-full rounded-md border border-slate-300 bg-white px-2 text-xs"
+                  />
+                </label>
+                <label className="text-[11px] text-slate-700">
+                  期限
+                  <input
+                    type="date"
+                    value={actionDueOn}
+                    onChange={(event) => setActionDueOn(event.target.value)}
+                    className="mt-1 min-h-[44px] w-full rounded-md border border-slate-300 bg-white px-2 text-xs"
+                  />
+                </label>
+                <label className="text-[11px] text-slate-700">
+                  再評価日
+                  <input
+                    type="date"
+                    value={reassessmentOn}
+                    onChange={(event) =>
+                      setReassessmentOn(event.target.value)
+                    }
+                    className="mt-1 min-h-[44px] w-full rounded-md border border-slate-300 bg-white px-2 text-xs"
+                  />
+                </label>
+              </div>
+            </fieldset>
+            <p className="mt-1 text-[10px] text-slate-500">
+              ※ 本サイトではこの条件から判定値を算出しません。製品固有の最新SDSと厚生労働省の公式CREATE-SIMPLEへ入力し、化学物質管理者または専門家が確認してください。
+            </p>
+          </div>
+          )}
+
+          {/* ④ 測定濃度は記録のみ。時間基準・採取法・代表性を確認できないため自動比較しない。 */}
+          {detailedMode && (
+          <div className="rounded-lg border border-amber-200 bg-amber-50/50 p-3">
+            <label className="flex items-center gap-1.5 text-xs font-semibold text-amber-900">
+              <Gauge className="h-3.5 w-3.5" />
+              ④ 作業環境の測定値メモ（任意）— 自動判定しません
+            </label>
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <input
+                type="text"
+                inputMode="decimal"
+                value={measuredConc}
+                onChange={(e) => setMeasuredConc(e.target.value)}
+                placeholder="例: 15"
+                className="w-32 rounded-md border border-amber-300 bg-white px-2.5 py-1.5 text-sm"
+                aria-label="測定濃度の数値"
+              />
+              <label className="text-xs font-semibold text-amber-900">
+                単位
+                <select
+                  value={measuredUnit}
+                  onChange={(event) => setMeasuredUnit(event.target.value)}
+                  className="ml-1 min-h-[44px] rounded-md border border-amber-300 bg-white px-2 text-sm"
+                >
+                  <option value="">選択必須</option>
+                  <option value="ppm">ppm</option>
+                  <option value="mg/m3">mg/m³</option>
+                  {activeLimitUnit && !["ppm", "mg/m3"].includes(activeLimitUnit) && (
+                    <option value={activeLimitUnit}>{activeLimitUnit}</option>
+                  )}
+                </select>
+              </label>
+              <span className="text-xs text-amber-800">
+                {activeLimit ? (
+                  <>
+                    参照値: <span className="font-bold">{activeLimit}</span>（自動比較には使用しません）
+                  </>
+                ) : (
+                  untraceableStoredLimit
+                    ? "一次資料URLを個別確認できない収録値のため、数値比較を停止しています"
+                    : "物質を選択し、追跡可能な基準値がある場合だけ比較できます"
+                )}
+              </span>
+            </div>
+            <p className="mt-2 text-xs font-semibold leading-5 text-amber-950">
+              8時間TWA・短時間値・天井値と測定値は、時間基準、採取法、単位、代表性を確認しないと比較できません。
+              ここでは測定メモだけを保存し、超過／非超過は判定しません。公式CREATE-SIMPLE、作業環境測定機関または専門家で確認してください。
+            </p>
+          </div>
+          )}
+      </div>
     </div>
   );
 }

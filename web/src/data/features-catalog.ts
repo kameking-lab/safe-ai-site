@@ -59,8 +59,8 @@ export const FEATURE_CATEGORIES: FeatureCategory[] = [
   },
   {
     id: "chemical-ra",
-    title: "化学物質リスクアセスメント",
-    summary: "CAS・SDS記載名と作業条件の確認を支援",
+    title: "化学物質RA準備",
+    summary: "CAS・SDS記載名と作業条件を整理し、公式評価へ",
     description:
       "CAS番号による同一性確認、GHS分類・SDS・作業条件の整理、公式CREATE-SIMPLEへの案内、確認記録の作成を支援します。公式評価ロジックの代替ではありません。",
     accent: "violet",
@@ -147,7 +147,7 @@ const ALL_FEATURES: FeatureItem[] = [
   },
   {
     slug: "chemical-ra",
-    title: "化学物質リスクアセスメント",
+    title: "化学物質RA準備",
     summary: "公式CREATE-SIMPLEを利用する前の入力整理支援",
     description:
       "CAS・SDS記載名と作業条件を整理します。ばく露濃度やリスクレベルは本サイトで判定せず、厚生労働省のCREATE-SIMPLEによる公式評価へ案内します。",

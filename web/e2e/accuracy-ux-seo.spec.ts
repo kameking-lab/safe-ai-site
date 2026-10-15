@@ -86,8 +86,14 @@ test("ホームは6幅で7つの道具と控えめなチワワから主要タス
       }),
     ).toBeVisible();
     const mascotTools = page.locator("[data-home-lp]");
+    const mainEntrances = mascotTools.getByRole("navigation", { name: "すぐ使う道具" });
+    expect(await mainEntrances.getByRole("link").evaluateAll((links) =>
+      links.map((link) => link.getAttribute("href")),
+    )).toEqual(["/chatbot", "/chemical-ra", "/accident-news"]);
+    await expect(mainEntrances.getByRole("link", { name: /化学物質RA準備/u })).toHaveAttribute("href", "/chemical-ra");
+    await expect(mascotTools.getByRole("navigation", { name: "ほかの現場支援ツール" })
+      .getByRole("link", { name: "化学物質RA準備", exact: true })).toHaveAttribute("href", "/chemical-ra");
     await expect(mascotTools.locator('[data-lp-tool][href="/chatbot"]')).toHaveAttribute("href", "/chatbot");
-    await expect(mascotTools.getByRole("link", { name: /化学物質RA/u })).toHaveAttribute("href", "/chemical-ra");
     await expect(page.getByRole("link", { name: "すべての機能を見る", exact: true })).toHaveAttribute("href", "/features");
     await expect(page.locator('[data-home-section="heat"]')).toHaveCount(0);
     await expect(page.getByRole("tab")).toHaveCount(0);

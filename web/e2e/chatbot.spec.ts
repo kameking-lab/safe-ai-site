@@ -86,7 +86,14 @@ test.describe("チャットボット", () => {
     });
     await page.goto("/chatbot");
 
-    await page.locator("[data-chatbot-question-chip]").first().click();
+    const example = page.locator("[data-chatbot-question-chip]").first();
+    const exampleQuestion = await example.innerText();
+    await example.click();
+    await expect(page.locator("[data-chatbot-composer] textarea")).toHaveValue(
+      exampleQuestion,
+    );
+    expect(requestCount).toBe(0);
+    await page.locator('[data-chatbot-composer] button[type="submit"]').click();
     for (let turn = 1; turn <= 4; turn += 1) {
       await expect.poll(() => requestCount).toBe(turn);
       const submit = page.locator(

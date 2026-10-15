@@ -90,4 +90,24 @@ describe("HomeLatestAccidents", () => {
       "取得不能を「事故なし」へ変換していません",
     );
   });
+
+  it("shows one shared verification note while each report keeps its date, publisher, and source link", () => {
+    const first = live.items[0];
+    if (!first) throw new Error("fixture report is missing");
+    const { container } = render(
+      <HomeLatestAccidents
+        latestNews={{
+          ...live,
+          items: [first, { ...first, id: "report-2", publicId: "rpt-second", title: "別の事故報道" }],
+        }}
+      />,
+    );
+
+    expect(container.textContent?.match(/報道・内容未確認/g)).toHaveLength(1);
+    expect(container.textContent).toContain("記事の公表日と事故発生日は異なります");
+    expect(container.querySelectorAll('time[dateTime="2026-07-30T01:00:00.000Z"]')).toHaveLength(2);
+    expect(container.textContent?.match(/報道媒体：確認媒体/g)).toHaveLength(2);
+    expect(screen.getAllByRole("link", { name: "元記事で確認する" })).toHaveLength(2);
+    expect(container.textContent).not.toContain(first.summary);
+  });
 });

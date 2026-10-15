@@ -9,6 +9,7 @@
  */
 
 import Link from "next/link";
+import { SourceProvenanceView } from "@/components/law-navi/source-provenance-view";
 import { useEffect, useState } from "react";
 import { Star, Trash2 } from "lucide-react";
 import {
@@ -87,7 +88,7 @@ export function FavoritesList() {
       <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6">
         <p className="text-sm font-bold text-amber-900">まだお気に入りはありません</p>
         <p className="mt-2 text-xs leading-relaxed text-amber-800">
-          /law-search の条文カードや /circulars の通達一覧で「<Star className="inline h-3.5 w-3.5 align-[-2px] text-amber-500" aria-hidden="true" /> お気に入り」を押すと、ここに保存されます。
+          条文の詳細や通達一覧で「<Star className="inline h-3.5 w-3.5 align-[-2px] text-amber-500" aria-hidden="true" /> お気に入り」を押すと、ここに保存されます。
           最大 50 件まで端末内 (localStorage) に保持。
         </p>
         <div className="mt-3 flex flex-wrap gap-2">
@@ -124,7 +125,7 @@ export function FavoritesList() {
               onClick={() => setTab(k)}
               className={
                 isActive
-                  ? "inline-flex min-h-[44px] items-center rounded-full border border-emerald-600 bg-emerald-600 px-4 py-1.5 text-sm font-semibold text-white"
+                  ? "inline-flex min-h-[44px] items-center rounded-full border border-emerald-800 bg-emerald-800 px-4 py-1.5 text-sm font-semibold text-white dark:border-emerald-900 dark:bg-emerald-900"
                   : "inline-flex min-h-[44px] items-center rounded-full border border-slate-300 bg-white px-4 py-1.5 text-sm font-medium text-slate-700 hover:border-emerald-300"
               }
             >
@@ -162,8 +163,8 @@ export function FavoritesList() {
                   {KIND_BADGE[e.kind].label}
                 </span>
                 <span className="text-slate-500">{e.subtitle}</span>
-                <span className="ml-auto text-[10px] text-slate-400">
-                  {formatDate(e.addedAt)}
+                <span className="ml-auto text-[10px] text-slate-600 dark:text-slate-300">
+                  保存 {formatDate(e.addedAt)}
                 </span>
               </div>
               <Link
@@ -172,6 +173,7 @@ export function FavoritesList() {
               >
                 {e.title}
               </Link>
+              {e.sourceProvenance && <SourceProvenanceView source={e.sourceProvenance} />}
             </div>
             <button
               type="button"

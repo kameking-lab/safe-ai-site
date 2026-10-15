@@ -1,5 +1,5 @@
 /**
- * sitemap lastmod 用の「実際の内容・挙動変更日」レジストリ（2026-10-11）。
+ * sitemap lastmod 用の「実際の内容・挙動変更日」レジストリ（2026-10-13）。
  *
  * 方針:
  *  - 取得・照合しただけ（内容差分なし）の日付は使わない。ビルド日・現在時刻も使わない。
@@ -27,14 +27,14 @@ export const ROUTE_CONTENT_CHANGES = {
     change: "足場の手すりの続き質問に対する回答挙動（同じ確認質問の繰り返しを解消）",
   },
   "/chemical-ra": {
-    changedOn: "2026-10-11",
-    evidence: "71dd7d66 (#1063): chemical-ra-panel のGHS分類表示を公的情報確認結果へ一本化",
-    change: "RA結果画面のGHS分類・出典表示の変更",
+    changedOn: "2026-10-13",
+    evidence: "1ecc8bc5 (#1076): 化学物質RAを準備記録として明示し、保存記録の作業条件・SDS確認導線とPDF表示を更新",
+    change: "RA準備画面の表示範囲・保存記録・SDS確認導線の変更",
   },
   "/chemical-database": {
-    changedOn: "2026-08-08",
-    evidence: "852ecff2: chemical-database-client の解説表記・RA導線を変更（concentration-limits.json の最終変更 9f05e2f2 は 2026-07-12）",
-    change: "一覧画面の説明文・導線の変更",
+    changedOn: "2026-10-13",
+    evidence: "1ecc8bc5 (#1076): 化学物質DB一覧に公式対象情報の確認表示、検索順位と詳細からの条件復元、RA準備への案内を追加・修正",
+    change: "物質一覧の検索・復元挙動、対象情報の説明、RA準備導線の変更",
   },
   "/chemical-ra/product-search": {
     changedOn: "2026-08-08",
@@ -87,6 +87,8 @@ export function lawRevisionListFingerprint(
  *  - 20-lznpni: d3017a75（2026-10-05 取得）で 2026-10-01 施行の改正（安衛則ほか）へ
  *    一覧が切り替わった版。以後の 164052b（2026-10-07）は一覧に出ない
  *    revisionHistory の追加だけで、指紋は同じ。
+ *  - 20-4lxkqd: 1ecc8bc5（2026-10-13）で政令196号の種別・発令者を
+ *    修正し、改正対象と引用表記の変更を一次資料に沿って表示した版。
  * 新しい一覧が取り込まれても、取得時刻だけでは内容変更日を証明できないため推測しない。
  * 登録外の版は、ここで最後に確認した日付のまま据え置く（再取得のたびに進めない）。
  * 新しい版の変更日を確認したら、根拠コミットとともにここへ追記する。
@@ -97,6 +99,10 @@ export const LAWS_REVISION_LIST_VERSIONS: Readonly<
   "20-lznpni": {
     changedOn: "2026-10-05",
     evidence: "d3017a75 chore(news): e-Gov law revisions update（fetchedAt 2026-10-05）",
+  },
+  "20-4lxkqd": {
+    changedOn: "2026-10-13",
+    evidence: "1ecc8bc5 (#1076): 政令第196号の種別・発令者を一次資料で照合し修正。/laws は改正政令名、対象の附則抜粋、引用表記の変更、施行日を表示",
   },
 };
 

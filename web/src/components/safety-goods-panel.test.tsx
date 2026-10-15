@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { SafetyGoodsPanel } from './safety-goods-panel';
+vi.mock('next/navigation', () => ({ useRouter: () => ({ push: vi.fn() }) }));
 afterEach(()=>{vi.unstubAllGlobals();window.history.replaceState(null,'','/goods');});
 const directory=()=>{ const summary=screen.getByText('用品名が分かるときは、カテゴリから探す'); if (!summary.closest('details')?.open) fireEvent.click(summary); };
 describe('SafetyGoodsPanel',()=>{

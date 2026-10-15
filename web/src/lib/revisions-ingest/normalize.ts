@@ -23,6 +23,7 @@ function normalizeKind(input: string | null | undefined): RevisionKind {
   const trimmed = input?.trim();
   if (
     trimmed === "law" ||
+    trimmed === "cabinet_order" ||
     trimmed === "ordinance" ||
     trimmed === "notice" ||
     trimmed === "guideline" ||
@@ -69,6 +70,9 @@ function normalizeCategoryFromKind(kind: RevisionKind): RevisionCategory {
   if (kind === "ordinance") {
     return "省令";
   }
+  if (kind === "cabinet_order") {
+    return "政令";
+  }
   if (kind === "guideline") {
     return "ガイドライン";
   }
@@ -91,6 +95,9 @@ function normalizeKindFromAmendmentType(
   }
   if (value.includes("省令")) {
     return "ordinance";
+  }
+  if (value.includes("政令")) {
+    return "cabinet_order";
   }
   if (value.includes("通達") || value.includes("告示")) {
     return "notice";

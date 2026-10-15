@@ -38,18 +38,24 @@ test("法令検索は初期フォームと第61条の正本確認導線をSSRで
   await expect(page.getByRole("link", { name: "e-Gov" }).first()).toBeVisible();
 });
 
-test("横断検索は結果の種別・一次性・法的位置付け・一致・対象時点・検証状態を明示する @smoke", async ({
+test("横断検索は一次資料の検証・法的位置付け・一致と実在する出典を明示する @smoke", async ({
   page,
 }) => {
   await page.goto("/search?q=%E5%AE%89%E8%A1%9B%E6%B3%95%20%E7%AC%AC61%E6%9D%A1");
 
   const firstResult = page.locator("main li").filter({ hasText: "第61条" }).first();
   await expect(firstResult).toBeVisible({ timeout: 20_000 });
-  await expect(firstResult).toContainText("種別:");
-  await expect(firstResult).toContainText("一次資料:");
-  await expect(firstResult).toContainText("法的位置付け:");
-  await expect(firstResult).toContainText("一致理由:");
-  await expect(firstResult).toContainText("一致抜粋:");
-  await expect(firstResult).toContainText("更新日・対象時点:");
-  await expect(firstResult).toContainText("検証状態:");
+  await expect(firstResult).toContainText("種別: 資格");
+  await expect(firstResult).toContainText("検証状態: 一次資料・内容確認待ち");
+  await expect(firstResult.locator(".portal-status").first()).toHaveText("省令");
+  await expect(firstResult).toContainText("一致: 要約");
+  await expect(firstResult).not.toContainText("更新日・対象時点: 未登録");
+
+  const search = page.getByRole("searchbox", { name: "サイト内を横断検索" });
+  await search.fill("CAS");
+  await search.press("Enter");
+  const sourcedResult = page.locator('[data-search-result-section="search-other-results"] li').filter({ hasText: "CAS 79-74-3" }).first();
+  await expect(sourcedResult).toBeVisible();
+  await expect(sourcedResult).toContainText("出典: 厚生労働省 化学物質情報");
+  await expect(sourcedResult).toContainText("検証状態:");
 });

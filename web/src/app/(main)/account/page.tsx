@@ -7,11 +7,12 @@ import { ManagePlanButton } from "./manage-plan-button";
 import { PageContainer } from "@/components/layout";
 import { ConclusionCard } from "@/components/ui/conclusion-card";
 import { computeAccountConclusion } from "@/lib/account-conclusion";
+import { PAID_MODE } from "@/lib/paid-mode";
 
 import { PageJsonLd } from "@/components/page-json-ld";
 export const metadata: Metadata = {
   title: "マイページ",
-  description: "プラン状況と契約管理",
+  description: "無料のサイト機能と保存された検索履歴",
   robots: { index: false, follow: false },
 };
 
@@ -41,7 +42,7 @@ export default async function AccountPage({ searchParams }: Props) {
   let currentPeriodEnd: Date | null = null;
   let hasStripeCustomer = false;
   let subscriptionLookupFailed = false;
-  let sdsHistoryFailed = false;
+  let sdsHistoryFailed = !prisma || !userId;
   let sdsHistory: Array<{
     id: string;
     productName: string;
@@ -50,7 +51,7 @@ export default async function AccountPage({ searchParams }: Props) {
   }> = [];
 
   if (prisma && userId) {
-    try {
+    if (PAID_MODE) try {
       const sub = await prisma.subscription.findUnique({ where: { userId } });
       if (sub) {
         planName = sub.planName;
@@ -96,12 +97,12 @@ export default async function AccountPage({ searchParams }: Props) {
   return (
     <PageContainer width="narrow" paddingY="none" className="py-8">
       {/* SEO: WebPage + BreadcrumbList */}
-      <PageJsonLd name="マイページ" description="プラン状況と契約管理" path="/account" />
+      <PageJsonLd name="マイページ" description="無料のサイト機能と保存された検索履歴" path="/account" />
       <h1 className="text-2xl font-bold text-slate-900">マイページ</h1>
       <p className="mt-2 text-sm text-slate-500">{session.user.email}</p>
 
       {/* ポータル返遷成功バナー（一時的な確認メッセージ・状態カードとは別枠） */}
-      {portal_return === "1" && (
+      {PAID_MODE && portal_return === "1" && (
         <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
           プラン情報を更新しました。反映まで数分かかる場合があります。
         </div>
@@ -109,17 +110,17 @@ export default async function AccountPage({ searchParams }: Props) {
 
       <ConclusionCard
         tone={conclusion.tone}
-        value={planLabel}
+        value={PAID_MODE ? planLabel : "無料"}
         title={conclusion.title}
         description={conclusion.description}
         action={
-          !subscriptionLookupFailed && !hasStripeCustomer
+          PAID_MODE && !subscriptionLookupFailed && !hasStripeCustomer
             ? { href: "/pricing", label: "プランをアップグレード" }
             : undefined
         }
         className="mt-8"
       >
-        {hasStripeCustomer && (
+        {PAID_MODE && hasStripeCustomer && (
           <>
             <ManagePlanButton />
             {/* フリープランまたは解約済みでStripe顧客あり → アップグレード誘導 */}
@@ -135,12 +136,6 @@ export default async function AccountPage({ searchParams }: Props) {
         )}
       </ConclusionCard>
 
-      {!prisma && (
-        <p className="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs leading-5 text-amber-800">
-          データベース未設定のため、プラン情報を読み込めませんでした。
-        </p>
-      )}
-
       <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <div className="flex items-center justify-between gap-3">
           <h2 className="text-base font-bold text-slate-800">SDS検索＋RA履歴</h2>
@@ -153,11 +148,13 @@ export default async function AccountPage({ searchParams }: Props) {
         </div>
         {sdsHistoryFailed ? (
           <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs leading-5 text-amber-800">
-            履歴の読み込みに失敗しました。時間をおいてページを再読み込みしてください。
+            {!prisma || !userId
+              ? "保存済みの検索履歴を読み込めません。サイト機能は引き続き無料で利用できます。"
+              : "履歴の読み込みに失敗しました。時間をおいてページを再読み込みしてください。"}
           </p>
         ) : sdsHistory.length === 0 ? (
           <p className="mt-3 text-xs text-slate-500">
-            まだ履歴がありません。製品検索＋自動RAを実行すると、ここに最新10件が表示されます。
+            保存された検索履歴はありません。このページには保存済みの最新10件が表示されます。
           </p>
         ) : (
           <ul className="mt-3 divide-y divide-slate-100">
@@ -180,7 +177,7 @@ export default async function AccountPage({ searchParams }: Props) {
         )}
       </section>
 
-      <section className="mt-6 rounded-2xl border border-slate-100 bg-slate-50 p-6 text-xs leading-6 text-slate-600">
+      {PAID_MODE ? <section className="mt-6 rounded-2xl border border-slate-100 bg-slate-50 p-6 text-xs leading-6 text-slate-600">
         <p className="font-semibold text-slate-700">プラン管理について</p>
         <ul className="mt-2 list-disc space-y-1 pl-5">
           <li>プラン変更・解約・支払い方法の更新は「プラン管理」から行えます。</li>
@@ -188,7 +185,7 @@ export default async function AccountPage({ searchParams }: Props) {
           <li>領収書・請求履歴もプラン管理から確認できます。</li>
           <li>再加入時は以前の顧客情報が引き継がれます。</li>
         </ul>
-      </section>
+      </section> : null}
     </PageContainer>
   );
 }

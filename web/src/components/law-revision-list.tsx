@@ -13,6 +13,7 @@ import { Cluster } from "@/components/layout";
 import { loadProfile, profileIndustryToTag, relevanceScore, type CompanyProfile } from "@/lib/company-profile";
 import { buildEnforcementBadge, getEnforcementStatus, type EnforcementStatus } from "@/lib/law-revision-status";
 import { compactLawRevisionSummary } from "@/lib/laws/revision-summary";
+import { CABINET_ORDER_196_SOURCE, lawRevisionFacts, lawRevisionHeadline, lawRevisionKindLabel } from "@/lib/laws/revision-presentation";
 
 function formatDate(value: string) {
   if (!value) return null;
@@ -28,24 +29,13 @@ function resolveSourceLabel(revision: LawRevision) {
 }
 
 function resolveKindLabel(revision: LawRevision) {
-  switch (revision.kind) {
-    case "ordinance":
-      return "省令";
-    case "law":
-      return "法律";
-    case "guideline":
-      return "ガイドライン";
-    case "other":
-      return "告示";
-    case "notice":
-    default:
-      return "通達";
-  }
+  return lawRevisionKindLabel(revision);
 }
 
 const KIND_BADGE_CLASS: Record<string, string> = {
   法律: "bg-red-100 text-red-800",
   省令: "bg-orange-100 text-orange-800",
+  政令: "bg-amber-100 text-amber-900",
   通達: "bg-blue-100 text-blue-800",
   告示: "bg-purple-100 text-purple-800",
   ガイドライン: "bg-green-100 text-green-800",
@@ -714,7 +704,7 @@ export function LawRevisionList({
       <div className="mt-3">
         <p className="text-xs font-semibold text-slate-700">種別フィルタ</p>
         <Cluster gap="sm" className="mt-1">
-          {["すべて", "法律", "省令", "通達", "告示", "ガイドライン"].map((k) => (
+            {["すべて", "法律", "政令", "省令", "通達", "告示", "ガイドライン"].map((k) => (
             <button
               key={k}
               type="button"
@@ -854,10 +844,10 @@ export function LawRevisionList({
         {visibleRevisions.map((revision) => {
           const isSelected = selectedRevisionId === revision.id;
           const isLoadingSummary = loadingRevisionId === revision.id;
-          const hasEnfDate = revision.enforcement_date && revision.enforcement_date !== "";
           const hasPubDate = revision.publication_date && revision.publication_date !== "";
           const hasNoticeNum = revision.official_notice_number && revision.official_notice_number !== "";
           const eGovUrl = revision.source_url && revision.source_url !== "" ? revision.source_url : null;
+          const facts = lawRevisionFacts(revision);
 
           const isArticleMatch = articleFilterResult.matchedIds.has(revision.id);
           return (
@@ -886,7 +876,7 @@ export function LawRevisionList({
                       <Zap className="mr-0.5 h-3 w-3" aria-hidden="true" />該当
                     </span>
                   )}
-                  {revision.title}
+                  {lawRevisionHeadline(revision)}
                   {profile?.wizardCompleted && scoreFor(revision) >= 18 && (
                     <span
                       className="ml-2 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800"
@@ -897,17 +887,12 @@ export function LawRevisionList({
                   )}
                 </h3>
 
-                {/* 日付行：公布日 / 施行日 / 施行ステータスバッジ（P0-1） */}
+                {/* 公布日と施行ステータス。施行日は下の要点欄にまとめる。 */}
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-portal-muted">
                   {hasPubDate ? (
                     <span>公布日: {formatDate(revision.publication_date!)}</span>
                   ) : (
                     <span>発行日: {formatDate(revision.publishedAt)}</span>
-                  )}
-                  {hasEnfDate && (
-                    <span className="font-medium text-slate-700">
-                      施行日: {formatDate(revision.enforcement_date!)}
-                    </span>
                   )}
                   {(() => {
                     const badge = buildEnforcementBadge(revision);
@@ -954,9 +939,14 @@ export function LawRevisionList({
                   </p>
                 )}
 
-                <p className="text-sm leading-6 text-slate-700">
-                  {compactLawRevisionSummary(revision.summary)}
-                </p>
+                <dl className="grid gap-x-4 gap-y-1 rounded-lg bg-slate-50 p-3 text-sm leading-6 sm:grid-cols-[auto_1fr]">
+                  <dt className="font-semibold text-slate-700">改正対象</dt>
+                  <dd className="text-slate-900">{facts.target}</dd>
+                  <dt className="font-semibold text-slate-700">実際の変更</dt>
+                  <dd className="text-slate-900">{facts.change}</dd>
+                  <dt className="font-semibold text-slate-700">施行日</dt>
+                  <dd className="text-slate-900">{facts.effectiveDate ? formatDate(facts.effectiveDate) : "未確認"}</dd>
+                </dl>
 
                 <details
                   data-law-revision-actions
@@ -966,6 +956,7 @@ export function LawRevisionList({
                     詳細・原文
                   </summary>
                   <div className="space-y-3 border-t border-slate-200 py-3">
+                <p className="text-sm leading-6 text-slate-700">{compactLawRevisionSummary(revision.summary)}</p>
                 {/* 5.3 自社版書き換え */}
                 {profile?.wizardCompleted && (
                   <div className="space-y-1">
@@ -1029,6 +1020,14 @@ export function LawRevisionList({
                   >
                     e-Govで現行法令を確認 →
                   </a>
+                )}
+                {revision.id === CABINET_ORDER_196_SOURCE.revisionId && (
+                  <p className="text-xs leading-5 text-amber-900">
+                    改正政令の原文: {" "}
+                    <a href={CABINET_ORDER_196_SOURCE.url} target="_blank" rel="noopener noreferrer" className="font-semibold underline">
+                      {CABINET_ORDER_196_SOURCE.label}
+                    </a>
+                  </p>
                 )}
               </div>
 

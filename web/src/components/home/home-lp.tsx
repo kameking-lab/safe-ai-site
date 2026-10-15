@@ -41,24 +41,24 @@ export function HomeLP({ availability, latestNews }: { availability: AutomationC
           <div className={styles.heroCopy}>
             <p className={styles.eyebrow}>現場を支える人のための、安全と業務の道具。</p>
             <h1 id="home-lp-title" className={styles.title}><span>その書類、</span><span>AIに任せて、</span><span>現場に行こう。</span></h1>
-            <p className={styles.heroDescription}>安衛法や化学物質を調べる。法改正や事故の情報を確かめる。計算や保護具選定に使う。必要な情報への道筋をつくり、現場で判断する時間を支えます。</p>
-            <p className={styles.mobileSummary}>安衛法AIで、条文と根拠を確認。</p>
+            <p className={styles.heroDescription}>法令の根拠を確かめる。化学物質RAの準備を進める。事故報道の出典と確認状態を見る。現場で判断するための情報整理を支えます。</p>
+            <p className={styles.mobileSummary}>法令・化学物質・事故の確認を、ここから。</p>
             <Link href="/chatbot" prefetch={false} data-primary-action="true" className={styles.mobileEntry}><ChihuahuaButtonContent variant="tools" trailing={<ArrowUpRight size={16} aria-hidden="true" />}>安衛法AIを使う</ChihuahuaButtonContent></Link>
+            <div className={styles.demoPaper} data-information-preview>
+              <div className={styles.demoHeading}><span>まず使う3つの機能</span><span>出典を確認</span></div>
+              <nav aria-label="すぐ使う道具" className={styles.previewLinks}>
+                <Link href="/chatbot" prefetch={false}><Bot size={20} aria-hidden="true" /><span><strong>安衛法AI</strong><small>条件に合う条文候補から公式原文へ</small></span><ArrowUpRight size={16} aria-hidden="true" /></Link>
+                <Link href="/chemical-ra" prefetch={false}><FlaskConical size={20} aria-hidden="true" /><span><strong>化学物質RA準備</strong><small>CAS・SDS・作業条件の不足を確認</small></span><ArrowUpRight size={16} aria-hidden="true" /></Link>
+                <Link href="/accident-news" prefetch={false}><Siren size={20} aria-hidden="true" /><span><strong>労災事故速報</strong><small>報道の出典と原因の確認状態を見る</small></span><ArrowUpRight size={16} aria-hidden="true" /></Link>
+              </nav>
+              <p className={styles.demoFoot}>各ページで出典と確認状態を確かめ、判断に使ってください。</p>
+            </div>
             <div className={styles.actions}>
               <Link href="#tools" className={styles.primary}><ChihuahuaButtonContent variant="tools" trailing={<ArrowUpRight size={16} aria-hidden="true" />}>道具を使う</ChihuahuaButtonContent></Link>
-              <Link href="#consult" className={styles.secondary}><ChihuahuaButtonContent variant="consult" trailing={<ArrowUpRight size={16} aria-hidden="true" />}>自動化を相談する</ChihuahuaButtonContent></Link>
+              <Link href="#consult" className={styles.secondary}><ChihuahuaButtonContent variant="consult" trailing={<ArrowUpRight size={16} aria-hidden="true" />}>{availability.accepting ? "自動化を相談する" : "相談の料金を見る"}</ChihuahuaButtonContent></Link>
             </div>
           </div>
           <div>
-            <div className={styles.demoPaper} data-information-preview>
-              <div className={styles.demoHeading}><span>調べる、確かめる。</span><span>機能の案内</span></div>
-              <nav aria-label="すぐ使う道具" className={styles.previewLinks}>
-                <Link href="/chatbot" prefetch={false}><Bot size={20} aria-hidden="true" /><span><strong>安衛法AI</strong><small>作業条件 → 条文・公式根拠</small></span><ArrowUpRight size={16} aria-hidden="true" /></Link>
-                <Link href="/chemical-database" prefetch={false}><FlaskConical size={20} aria-hidden="true" /><span><strong>化学物質検索</strong><small>物質名・CAS番号 → 収録情報・出典</small></span><ArrowUpRight size={16} aria-hidden="true" /></Link>
-                <Link href="/accidents-analytics" prefetch={false}><BarChart3 size={20} aria-hidden="true" /><span><strong>事故統計</strong><small>公式統計と収録事例を分けて確認</small></span><ArrowUpRight size={16} aria-hidden="true" /></Link>
-              </nav>
-              <p className={styles.demoFoot}>条文や出典、集計の対象を、各機能で確認できます。</p>
-            </div>
             <HomeChihuahuaCompanion />
           </div>
         </div>
@@ -70,14 +70,14 @@ export function HomeLP({ availability, latestNews }: { availability: AutomationC
           <h3 className={styles.purposeTitle}>{use.title}</h3><p className={styles.purposeCopy}>{use.copy}</p>
           <div className={styles.toolGrid}>{use.tools.map(({ href, title, copy, icon: Icon }) => <Link key={href} href={href} prefetch={false} data-lp-tool className={styles.tool}><div className={styles.toolCaption}><Icon size={22} aria-hidden="true" />{href === "/tools/construction-calculators" ? <Image src="/mascot/mascot-calculator.webp" alt="電卓を持ち、計算を案内するチワワ" width={72} height={84} sizes="72px" /> : <ArrowUpRight size={20} aria-hidden="true" />}</div><h4>{title}</h4><p>{copy}</p></Link>)}</div>
         </div>)}</div>
-        <nav aria-label="ほかの現場支援ツール" className={styles.supportLinks}><Link href="/chemical-ra" prefetch={false}>化学物質RA</Link><Link href="/ky/paper" prefetch={false}>KY用紙</Link><Link href="/training/safety-seminars" prefetch={false}>安全研修スライド</Link><Link href="/materials/safety-images" prefetch={false}>現場安全看板</Link></nav>
+        <nav aria-label="ほかの現場支援ツール" className={styles.supportLinks}><Link href="/chemical-ra" prefetch={false}>化学物質RA準備</Link><Link href="/ky/paper" prefetch={false}>KY用紙</Link><Link href="/training/safety-seminars" prefetch={false}>安全研修スライド</Link><Link href="/materials/safety-images" prefetch={false}>現場安全看板</Link></nav>
 
       </section>
       <section aria-labelledby="home-origin-heading" className={styles.value}>
         <div className={styles.valueGrid}><p className={styles.sectionLabel}>TIME FOR THE FIELD</p><div><h2 id="home-origin-heading">現場に向き合う時間を、もっと。</h2><div data-origin-copy><p>安全な仕事を支えるのは、現場を知る人の目と判断です。書類づくりや情報整理の負担を減らし、現場を確かめ、仲間と話す時間を増やす。安全AIポータルは、そのための道具をつくっています。</p><p>仲間を守り、仕事に誇りを持って働ける毎日を支えたいと考えています。</p></div><Link href="/about/project-story" className={`${quietLink} mt-7`}>このサイトについて <ArrowUpRight size={16} aria-hidden="true" /></Link></div></div>
       </section>
       <section id="consult" aria-labelledby="home-consult-heading" className={styles.consult}>
-        <div className={styles.consultGrid}><div><p className={styles.sectionLabel}>WORK WITH YOU</p><h2 id="home-consult-heading">その「毎回同じ作業」、<br />一緒に見直しませんか。</h2></div><div><p>転記、Excelの集計、通知、研修資料の準備。KY用紙などの帳票は現場ごとに書式や運用が異なります。いつもの手順と必要な項目を伺い、案件に合ったカスタマイズや自動化をご案内します。</p><Link href={consultHref} prefetch={false} className={`${styles.primary} mt-7`}><ChihuahuaButtonContent trailing={<ArrowUpRight size={16} aria-hidden="true" />}>自動化について相談する</ChihuahuaButtonContent></Link><p className={styles.consultNote}>対応できる内容や費用は、相談内容に応じてご案内します。</p><p className={styles.consultNote} data-consult-mode={availability.contactMode ?? "unavailable"}>現在の受付状態：{availability.label}{availability.contactMode === "mail_client" ? "（メールアプリを使います）" : !availability.accepting ? "。現在は受付停止中です。サービス内容は確認できます。" : ""}</p></div></div>
+        <div className={styles.consultGrid}><div><p className={styles.sectionLabel}>WORK WITH YOU</p><h2 id="home-consult-heading">その「毎回同じ作業」、<br />一緒に見直しませんか。</h2></div><div><p>転記、Excelの集計、通知、研修資料の準備。KY用紙などの帳票は現場ごとに書式や運用が異なります。いつもの手順と必要な項目を伺い、案件に合ったカスタマイズや自動化をご案内します。</p><Link href={consultHref} prefetch={false} className={`${styles.primary} mt-7`}><ChihuahuaButtonContent trailing={<ArrowUpRight size={16} aria-hidden="true" />}>{availability.accepting ? "自動化について相談する" : "料金・受付状況を見る"}</ChihuahuaButtonContent></Link><p className={styles.consultNote}>初回30分の相談は無料。業務自動化は税込33,000円から。対応範囲と総額は事前のお見積りでご案内します。</p><p className={styles.consultNote} data-consult-mode={availability.contactMode ?? "unavailable"}>現在の受付状態：{availability.label}{availability.contactMode === "mail_client" ? "（メールアプリを使います）" : !availability.accepting ? "。現在は受付停止中です。サービス内容は確認できます。" : ""}</p></div></div>
       </section>
       <section aria-labelledby="home-news-heading" className={`${wrap} py-14 lg:py-24`}>
         <h2 id="home-news-heading" className="text-2xl font-bold">現場に関わる、最近の情報。</h2>

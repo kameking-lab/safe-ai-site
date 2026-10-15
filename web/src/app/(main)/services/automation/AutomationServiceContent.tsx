@@ -102,7 +102,7 @@ export function AutomationServiceContent({
           業務自動化・講習を小さな一件から。
         </h1>
         <p className="mt-3 max-w-2xl text-base leading-7 text-slate-700">
-          Excel集計、通知、手順書、社内講習を、税込33,000円から相談できます。
+          Excel集計や通知の自動化は税込33,000円から。手順書・社内講習も対応。
         </p>
         <div className="mt-4 flex flex-wrap items-center gap-3">
           <span

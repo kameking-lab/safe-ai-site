@@ -32,6 +32,7 @@ import {
   analyticsToCsv,
   analyticsToSummaryText,
 } from "@/lib/accidents-analytics/export";
+import { buildCaseSearchLink } from "@/lib/accidents-analytics/case-search-link";
 
 const PALETTE = [
   "#ef4444",
@@ -379,6 +380,7 @@ export function AnalyticsDashboardImpl({
   const industryFilter = filterState.industry;
   const typeFilter = filterState.type;
   const yearFilter = filterState.year;
+  const caseSearch = buildCaseSearchLink(aggregates.meta.filters);
 
   const replaceFilters = (changes: Partial<FilterState>) => {
     const next = { ...filterState, ...changes };
@@ -674,6 +676,16 @@ export function AnalyticsDashboardImpl({
             ) : (
               <p className="text-xs text-slate-600">図・代替表・CSVは対象{formatNumber(aggregates.meta.filteredCases)}件の同じ条件で集計しています。</p>
             )}
+          </div>
+          <div className="mt-3 rounded-lg border border-sky-200 bg-white p-3 text-xs text-slate-700" data-testid="analytics-case-handoff">
+            <Link href={caseSearch.href} className="inline-flex min-h-11 items-center font-bold text-sky-800 underline underline-offset-2">
+              この条件に対応する事例を探す
+            </Link>
+            <p className="mt-1">事例検索は別のデータベースです。統計の対象件数と事例検索の件数は一致しません。</p>
+            <p className="mt-1">引き継ぐ条件: {caseSearch.transferred.length ? caseSearch.transferred.join(" / ") : "なし"}</p>
+            {caseSearch.omitted.length > 0 ? (
+              <p className="mt-1 text-amber-800">引き継げない条件: {caseSearch.omitted.join(" / ")}</p>
+            ) : null}
           </div>
         </section>
         <div className="space-y-2 rounded-lg border border-slate-200 bg-white p-3">

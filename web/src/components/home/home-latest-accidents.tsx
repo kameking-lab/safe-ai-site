@@ -147,9 +147,14 @@ export function HomeLatestAccidents({
               JST・公表日時順
             </p>
           </div>
-          <p className="mt-2 text-xs leading-5 text-slate-300">
-            {latestNews.message}
-          </p>
+          {latestNews.items.length > 0 ? (
+            <p className="mt-2 flex items-start gap-2 text-xs leading-5 text-amber-100">
+              <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+              <span>報道・内容未確認。記事の公表日と事故発生日は異なります。原因・法的評価は一次資料で未確認です。報道記事数は事故件数ではありません。</span>
+            </p>
+          ) : (
+            <p className="mt-2 text-xs leading-5 text-slate-300">{latestNews.message}</p>
+          )}
           {latestNews.items.length > 0 ? (
             <ul className="mt-3 grid gap-3 lg:grid-cols-2">
             {latestNews.items.slice(0, 2).map((record) => (
@@ -158,20 +163,9 @@ export function HomeLatestAccidents({
                 className="flex flex-col rounded-2xl border border-white/20 bg-white/5 p-4"
                 data-accident-origin="reported-unverified"
               >
-                <div className="flex flex-wrap gap-2 text-[11px] font-black">
-                  <span className="rounded-full bg-white/10 px-2 py-1">
-                    公表{" "}
-                    <time dateTime={record.publishedAt}>
-                      {dateFormatter.format(new Date(record.publishedAt))}
-                    </time>
-                  </span>
-                  <span className="rounded-full bg-white/10 px-2 py-1">
-                    {record.industry}
-                  </span>
-                  <span className="rounded-full bg-rose-500/20 px-2 py-1 text-rose-100">
-                    {record.accidentType}
-                  </span>
-                </div>
+                <p className="text-xs font-bold text-slate-300">
+                  記事公表 <time dateTime={record.publishedAt}>{dateFormatter.format(new Date(record.publishedAt))}</time> JST
+                </p>
                 <h4 className="mt-3 font-black leading-6">
                   <a
                     href={record.href}
@@ -182,16 +176,20 @@ export function HomeLatestAccidents({
                     {record.title}
                   </a>
                 </h4>
-                <p className="mt-2 flex-1 text-sm leading-6 text-slate-200">
-                  {record.summary}
-                </p>
-                <p className="mt-3 rounded-xl bg-emerald-950/70 p-3 text-xs font-bold leading-5 text-emerald-100">
-                  関連対策：{record.measure}
-                </p>
-                <p className="mt-2 inline-flex items-start gap-1 text-[11px] leading-5 text-amber-200">
-                  <ShieldAlert className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                  報道・内容未確認 ／ 出典：{record.publisher}
-                </p>
+                <p className="mt-2 text-sm font-bold text-slate-200">報道媒体：{record.publisher}</p>
+                <div className="mt-3 flex flex-wrap gap-2 text-[11px] font-bold">
+                  <span className="rounded-full bg-white/10 px-2 py-1">{record.industry}</span>
+                  <span className="rounded-full bg-rose-500/20 px-2 py-1 text-rose-100">{record.accidentType}</span>
+                </div>
+                <div className="mt-auto pt-3">
+                  <details className="rounded-xl bg-emerald-950/70 px-3 py-2 text-xs leading-5 text-emerald-100">
+                    <summary className="min-h-8 cursor-pointer font-bold">一般的な関連対策</summary>
+                    <p className="pb-1">{record.measure}</p>
+                  </details>
+                  <a href={record.href} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex min-h-11 items-center gap-1 text-sm font-bold text-white underline underline-offset-4">
+                    元記事で確認する <ExternalLink className="h-4 w-4" aria-hidden="true" />
+                  </a>
+                </div>
               </li>
             ))}
             </ul>
