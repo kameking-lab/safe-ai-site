@@ -1,10 +1,10 @@
 {
   "source": "厚生労働省 職場のあんぜんサイト 労働災害発生状況（速報値・分析用Excel）",
-  "fetchedAt": "2026-09-15T04:09:14.490Z",
+  "fetchedAt": "2026-10-15T03:56:03.273Z",
   "note": "速報・累計値。業種小分類別の全国計を厚労省Excelからそのまま抽出（編集・加工: 集計列の抽出のみ）。確定値は年次プレス・e-Statを参照。",
   "sibou": {
-    "period": "令和８年業種別局別死亡災害発生状況（７月末累計） / 令和８年８月(速報）※　新型コロナウイルス感染症のり患による労働災害を除いたもの。",
-    "sourceUrl": "https://anzeninfo.mhlw.go.jp/information/r8_08_sibou_bunseki.xlsx",
+    "period": "令和８年業種別局別死亡災害発生状況（８月末累計） / 令和８年９月(速報）※　新型コロナウイルス感染症のり患による労働災害を除いたもの。",
+    "sourceUrl": "https://anzeninfo.mhlw.go.jp/information/r8_09_sibou_bunseki.xlsx",
     "rows": [
       {
         "bigCode": 1,
@@ -79,12 +79,12 @@
       {
         "bigCode": 1,
         "name": "製材業",
-        "total": 1
+        "total": 2
       },
       {
         "bigCode": 1,
         "name": "合板製造業",
-        "total": 0
+        "total": 1
       },
       {
         "bigCode": 1,
@@ -119,7 +119,7 @@
       {
         "bigCode": 1,
         "name": "紙加工品製造業",
-        "total": 0
+        "total": 1
       },
       {
         "bigCode": 1,
@@ -159,7 +159,7 @@
       {
         "bigCode": 1,
         "name": "石油製品・石炭製品製造業",
-        "total": 0
+        "total": 1
       },
       {
         "bigCode": 1,
@@ -184,7 +184,7 @@
       {
         "bigCode": 1,
         "name": "化学肥料製造業",
-        "total": 0
+        "total": 1
       },
       {
         "bigCode": 1,
@@ -194,7 +194,7 @@
       {
         "bigCode": 1,
         "name": "セメント・同製品製造業",
-        "total": 4
+        "total": 5
       },
       {
         "bigCode": 1,
@@ -274,12 +274,12 @@
       {
         "bigCode": 1,
         "name": "その他の金属製品製造業",
-        "total": 4
+        "total": 10
       },
       {
         "bigCode": 1,
         "name": "機械（精密機械を除く。）器具製造業",
-        "total": 3
+        "total": 4
       },
       {
         "bigCode": 1,
@@ -394,7 +394,7 @@
       {
         "bigCode": 2,
         "name": "砂利採取業",
-        "total": 0
+        "total": 1
       },
       {
         "bigCode": 2,
@@ -434,7 +434,7 @@
       {
         "bigCode": 3,
         "name": "鉄道軌道建設工事業",
-        "total": 0
+        "total": 2
       },
       {
         "bigCode": 3,
@@ -444,12 +444,12 @@
       {
         "bigCode": 3,
         "name": "道路建設工事業",
-        "total": 10
+        "total": 11
       },
       {
         "bigCode": 3,
         "name": "河川土木工事業",
-        "total": 3
+        "total": 5
       },
       {
         "bigCode": 3,
@@ -474,22 +474,22 @@
       {
         "bigCode": 3,
         "name": "その他の土木工事業",
-        "total": 17
+        "total": 26
       },
       {
         "bigCode": 3,
         "name": "鉄骨・鉄筋コンクリート造家屋建築工事業",
-        "total": 9
-      },
-      {
-        "bigCode": 3,
-        "name": "木造家屋建築工事業",
         "total": 10
       },
       {
         "bigCode": 3,
+        "name": "木造家屋建築工事業",
+        "total": 12
+      },
+      {
+        "bigCode": 3,
         "name": "建築設備工事業",
-        "total": 2
+        "total": 3
       },
       {
         "bigCode": 3,
@@ -499,7 +499,7 @@
       {
         "bigCode": 3,
         "name": "電気通信工事業",
-        "total": 5
+        "total": 7
       },
       {
         "bigCode": 3,
@@ -544,7 +544,7 @@
       {
         "bigCode": 4,
         "name": "一般貨物自動車運送業",
-        "total": 37
+        "total": 41
       },
       {
         "bigCode": 4,
@@ -564,7 +564,7 @@
       {
         "bigCode": 4,
         "name": "その他の運輸交通業－その他",
-        "total": 0
+        "total": 1
       },
       {
         "bigCode": 5,
@@ -589,17 +589,17 @@
       {
         "bigCode": 6,
         "name": "農業",
-        "total": 3
+        "total": 4
       },
       {
         "bigCode": 6,
         "name": "木材伐出業",
-        "total": 9
+        "total": 14
       },
       {
         "bigCode": 6,
         "name": "その他の林業",
-        "total": 2
+        "total": 3
       },
       {
         "bigCode": 7,
@@ -654,12 +654,12 @@
       {
         "bigCode": 8,
         "name": "新聞販売業",
-        "total": 11
+        "total": 13
       },
       {
         "bigCode": 8,
         "name": "その他の小売業",
-        "total": 6
+        "total": 7
       },
       {
         "bigCode": 8,
@@ -729,7 +729,7 @@
       {
         "bigCode": 11,
         "name": "通信業",
-        "total": 1
+        "total": 2
       },
       {
         "bigCode": 12,
@@ -744,7 +744,7 @@
       {
         "bigCode": 12,
         "name": "その他の教育研究業",
-        "total": 3
+        "total": 4
       },
       {
         "bigCode": 13,
@@ -784,7 +784,7 @@
       {
         "bigCode": 14,
         "name": "一般飲食店",
-        "total": 0
+        "total": 1
       },
       {
         "bigCode": 14,
@@ -794,7 +794,7 @@
       {
         "bigCode": 14,
         "name": "ゴルフ場",
-        "total": 0
+        "total": 1
       },
       {
         "bigCode": 14,
@@ -809,17 +809,17 @@
       {
         "bigCode": 15,
         "name": "ビルメンテナンス業",
-        "total": 7
+        "total": 8
       },
       {
         "bigCode": 15,
         "name": "産業廃棄物処理業",
-        "total": 10
+        "total": 11
       },
       {
         "bigCode": 15,
         "name": "その他の廃棄物処理業",
-        "total": 1
+        "total": 2
       },
       {
         "bigCode": 15,
@@ -849,7 +849,7 @@
       {
         "bigCode": 17,
         "name": "警備業",
-        "total": 13
+        "total": 17
       },
       {
         "bigCode": 17,
@@ -859,49 +859,49 @@
       {
         "bigCode": 17,
         "name": "その他の事業－その他",
-        "total": 10
+        "total": 14
       }
     ],
     "skipped": 0
   },
   "sisyou": {
-    "period": "令和８年業種別局別労働災害発生状況（７月末累計） / 令和８年８月(速報）※　新型コロナウイルス感染症のり患による労働災害を除いたもの。",
-    "sourceUrl": "https://anzeninfo.mhlw.go.jp/information/r8_08_sisyou_bunseki.xlsx",
+    "period": "令和８年業種別局別労働災害発生状況（８月末累計） / 令和８年９月(速報）※　新型コロナウイルス感染症のり患による労働災害を除いたもの。",
+    "sourceUrl": "https://anzeninfo.mhlw.go.jp/information/r8_09_sisyou_bunseki.xlsx",
     "rows": [
       {
         "bigCode": 1,
         "name": "肉製品、乳製品製造業",
-        "total": 549
+        "total": 638
       },
       {
         "bigCode": 1,
         "name": "水産食料品製造業",
-        "total": 486
+        "total": 556
       },
       {
         "bigCode": 1,
         "name": "農産保存食料品製造業",
-        "total": 121
+        "total": 139
       },
       {
         "bigCode": 1,
         "name": "パン、菓子製造業",
-        "total": 682
+        "total": 791
       },
       {
         "bigCode": 1,
         "name": "酒類製造業",
-        "total": 62
+        "total": 71
       },
       {
         "bigCode": 1,
         "name": "飲料（酒類を除く。）製造業",
-        "total": 76
+        "total": 84
       },
       {
         "bigCode": 1,
         "name": "その他の食料品製造業",
-        "total": 2162
+        "total": 2521
       },
       {
         "bigCode": 1,
@@ -911,302 +911,302 @@
       {
         "bigCode": 1,
         "name": "紡績業",
-        "total": 17
-      },
-      {
-        "bigCode": 1,
-        "name": "織物業",
         "total": 20
       },
       {
         "bigCode": 1,
+        "name": "織物業",
+        "total": 24
+      },
+      {
+        "bigCode": 1,
         "name": "染色整理業",
-        "total": 29
+        "total": 36
       },
       {
         "bigCode": 1,
         "name": "その他の繊維工業",
-        "total": 67
+        "total": 73
       },
       {
         "bigCode": 1,
         "name": "外衣下着製造業",
-        "total": 26
+        "total": 31
       },
       {
         "bigCode": 1,
         "name": "その他の繊維製品製造業",
-        "total": 88
+        "total": 101
       },
       {
         "bigCode": 1,
         "name": "製材業",
-        "total": 262
+        "total": 311
       },
       {
         "bigCode": 1,
         "name": "合板製造業",
-        "total": 94
+        "total": 112
       },
       {
         "bigCode": 1,
         "name": "その他の木材・木製品製造業",
-        "total": 118
+        "total": 140
       },
       {
         "bigCode": 1,
         "name": "木製家具製造業",
-        "total": 78
+        "total": 88
       },
       {
         "bigCode": 1,
         "name": "金属製家具製造業",
-        "total": 16
+        "total": 17
       },
       {
         "bigCode": 1,
         "name": "建具製造業",
-        "total": 28
+        "total": 31
       },
       {
         "bigCode": 1,
         "name": "その他の家具・装備品製造業",
-        "total": 32
-      },
-      {
-        "bigCode": 1,
-        "name": "パルプ・紙製造業",
-        "total": 47
-      },
-      {
-        "bigCode": 1,
-        "name": "紙加工品製造業",
-        "total": 193
-      },
-      {
-        "bigCode": 1,
-        "name": "その他のパルプ・紙・紙加工品製造業",
-        "total": 93
-      },
-      {
-        "bigCode": 1,
-        "name": "印刷業",
-        "total": 190
-      },
-      {
-        "bigCode": 1,
-        "name": "製本業",
-        "total": 42
-      },
-      {
-        "bigCode": 1,
-        "name": "その他の印刷・製本業",
-        "total": 24
-      },
-      {
-        "bigCode": 1,
-        "name": "無機・有機化学工業製品製造業",
-        "total": 164
-      },
-      {
-        "bigCode": 1,
-        "name": "化学繊維製造業",
-        "total": 26
-      },
-      {
-        "bigCode": 1,
-        "name": "医薬品製造業",
-        "total": 91
-      },
-      {
-        "bigCode": 1,
-        "name": "石油製品・石炭製品製造業",
-        "total": 24
-      },
-      {
-        "bigCode": 1,
-        "name": "プラスチック製品製造業",
-        "total": 509
-      },
-      {
-        "bigCode": 1,
-        "name": "ゴム製品製造業",
-        "total": 145
-      },
-      {
-        "bigCode": 1,
-        "name": "皮革・同製品製造業",
-        "total": 22
-      },
-      {
-        "bigCode": 1,
-        "name": "塗料製造業",
-        "total": 19
-      },
-      {
-        "bigCode": 1,
-        "name": "化学肥料製造業",
-        "total": 24
-      },
-      {
-        "bigCode": 1,
-        "name": "その他の化学工業",
-        "total": 171
-      },
-      {
-        "bigCode": 1,
-        "name": "セメント・同製品製造業",
-        "total": 332
-      },
-      {
-        "bigCode": 1,
-        "name": "ガラス・同製品製造業",
-        "total": 51
-      },
-      {
-        "bigCode": 1,
-        "name": "陶磁器・同関連製品製造業",
-        "total": 29
-      },
-      {
-        "bigCode": 1,
-        "name": "耐火物製造業",
-        "total": 13
-      },
-      {
-        "bigCode": 1,
-        "name": "その他の窯業",
-        "total": 7
-      },
-      {
-        "bigCode": 1,
-        "name": "その他の土石製品製造業",
-        "total": 131
-      },
-      {
-        "bigCode": 1,
-        "name": "製鉄・製鋼・圧延業",
-        "total": 153
-      },
-      {
-        "bigCode": 1,
-        "name": "鋳物業",
-        "total": 111
-      },
-      {
-        "bigCode": 1,
-        "name": "その他の鉄鋼業",
-        "total": 124
-      },
-      {
-        "bigCode": 1,
-        "name": "非鉄金属精錬・圧延業",
-        "total": 75
-      },
-      {
-        "bigCode": 1,
-        "name": "非鉄金属鋳物業",
-        "total": 63
-      },
-      {
-        "bigCode": 1,
-        "name": "その他の非鉄金属製造業",
-        "total": 82
-      },
-      {
-        "bigCode": 1,
-        "name": "洋食器・刃物製造業",
-        "total": 43
-      },
-      {
-        "bigCode": 1,
-        "name": "ねじ等製造業",
-        "total": 42
-      },
-      {
-        "bigCode": 1,
-        "name": "金属プレス製品製造業",
-        "total": 198
-      },
-      {
-        "bigCode": 1,
-        "name": "めっき業",
-        "total": 70
-      },
-      {
-        "bigCode": 1,
-        "name": "その他の金属製品製造業",
-        "total": 1436
-      },
-      {
-        "bigCode": 1,
-        "name": "機械（精密機械を除く。）器具製造業",
-        "total": 719
-      },
-      {
-        "bigCode": 1,
-        "name": "光学機械・レンズ製造業",
-        "total": 19
-      },
-      {
-        "bigCode": 1,
-        "name": "その他の精密機械器具製造業",
         "total": 35
       },
       {
         "bigCode": 1,
+        "name": "パルプ・紙製造業",
+        "total": 60
+      },
+      {
+        "bigCode": 1,
+        "name": "紙加工品製造業",
+        "total": 227
+      },
+      {
+        "bigCode": 1,
+        "name": "その他のパルプ・紙・紙加工品製造業",
+        "total": 107
+      },
+      {
+        "bigCode": 1,
+        "name": "印刷業",
+        "total": 214
+      },
+      {
+        "bigCode": 1,
+        "name": "製本業",
+        "total": 50
+      },
+      {
+        "bigCode": 1,
+        "name": "その他の印刷・製本業",
+        "total": 27
+      },
+      {
+        "bigCode": 1,
+        "name": "無機・有機化学工業製品製造業",
+        "total": 184
+      },
+      {
+        "bigCode": 1,
+        "name": "化学繊維製造業",
+        "total": 27
+      },
+      {
+        "bigCode": 1,
+        "name": "医薬品製造業",
+        "total": 97
+      },
+      {
+        "bigCode": 1,
+        "name": "石油製品・石炭製品製造業",
+        "total": 27
+      },
+      {
+        "bigCode": 1,
+        "name": "プラスチック製品製造業",
+        "total": 609
+      },
+      {
+        "bigCode": 1,
+        "name": "ゴム製品製造業",
+        "total": 170
+      },
+      {
+        "bigCode": 1,
+        "name": "皮革・同製品製造業",
+        "total": 23
+      },
+      {
+        "bigCode": 1,
+        "name": "塗料製造業",
+        "total": 20
+      },
+      {
+        "bigCode": 1,
+        "name": "化学肥料製造業",
+        "total": 28
+      },
+      {
+        "bigCode": 1,
+        "name": "その他の化学工業",
+        "total": 202
+      },
+      {
+        "bigCode": 1,
+        "name": "セメント・同製品製造業",
+        "total": 386
+      },
+      {
+        "bigCode": 1,
+        "name": "ガラス・同製品製造業",
+        "total": 58
+      },
+      {
+        "bigCode": 1,
+        "name": "陶磁器・同関連製品製造業",
+        "total": 35
+      },
+      {
+        "bigCode": 1,
+        "name": "耐火物製造業",
+        "total": 16
+      },
+      {
+        "bigCode": 1,
+        "name": "その他の窯業",
+        "total": 8
+      },
+      {
+        "bigCode": 1,
+        "name": "その他の土石製品製造業",
+        "total": 153
+      },
+      {
+        "bigCode": 1,
+        "name": "製鉄・製鋼・圧延業",
+        "total": 176
+      },
+      {
+        "bigCode": 1,
+        "name": "鋳物業",
+        "total": 128
+      },
+      {
+        "bigCode": 1,
+        "name": "その他の鉄鋼業",
+        "total": 138
+      },
+      {
+        "bigCode": 1,
+        "name": "非鉄金属精錬・圧延業",
+        "total": 90
+      },
+      {
+        "bigCode": 1,
+        "name": "非鉄金属鋳物業",
+        "total": 72
+      },
+      {
+        "bigCode": 1,
+        "name": "その他の非鉄金属製造業",
+        "total": 93
+      },
+      {
+        "bigCode": 1,
+        "name": "洋食器・刃物製造業",
+        "total": 48
+      },
+      {
+        "bigCode": 1,
+        "name": "ねじ等製造業",
+        "total": 48
+      },
+      {
+        "bigCode": 1,
+        "name": "金属プレス製品製造業",
+        "total": 225
+      },
+      {
+        "bigCode": 1,
+        "name": "めっき業",
+        "total": 85
+      },
+      {
+        "bigCode": 1,
+        "name": "その他の金属製品製造業",
+        "total": 1664
+      },
+      {
+        "bigCode": 1,
+        "name": "機械（精密機械を除く。）器具製造業",
+        "total": 835
+      },
+      {
+        "bigCode": 1,
+        "name": "光学機械・レンズ製造業",
+        "total": 22
+      },
+      {
+        "bigCode": 1,
+        "name": "その他の精密機械器具製造業",
+        "total": 46
+      },
+      {
+        "bigCode": 1,
         "name": "重電機製造業",
-        "total": 143
+        "total": 165
       },
       {
         "bigCode": 1,
         "name": "軽電機製造業",
-        "total": 79
+        "total": 89
       },
       {
         "bigCode": 1,
         "name": "電子機器用・通信機器用部分品製造業",
-        "total": 215
+        "total": 251
       },
       {
         "bigCode": 1,
         "name": "その他の電気機械器具製造業",
-        "total": 213
+        "total": 249
       },
       {
         "bigCode": 1,
         "name": "造船業",
-        "total": 182
+        "total": 221
       },
       {
         "bigCode": 1,
         "name": "自動車・同付属品製造業",
-        "total": 709
+        "total": 834
       },
       {
         "bigCode": 1,
         "name": "鉄道車両・同部分品製造業",
-        "total": 33
+        "total": 41
       },
       {
         "bigCode": 1,
         "name": "その他の輸送用機械等製造業",
-        "total": 141
+        "total": 168
       },
       {
         "bigCode": 1,
         "name": "電気業",
-        "total": 40
+        "total": 45
       },
       {
         "bigCode": 1,
         "name": "ガス業",
-        "total": 12
+        "total": 19
       },
       {
         "bigCode": 1,
         "name": "水道業",
-        "total": 32
+        "total": 41
       },
       {
         "bigCode": 1,
@@ -1216,17 +1216,17 @@
       {
         "bigCode": 1,
         "name": "自動車整備業",
-        "total": 313
+        "total": 366
       },
       {
         "bigCode": 1,
         "name": "機械修理業",
-        "total": 82
+        "total": 97
       },
       {
         "bigCode": 1,
         "name": "クリーニング業",
-        "total": 315
+        "total": 384
       },
       {
         "bigCode": 1,
@@ -1236,7 +1236,7 @@
       {
         "bigCode": 1,
         "name": "その他の製造業－その他",
-        "total": 478
+        "total": 569
       },
       {
         "bigCode": 2,
@@ -1251,17 +1251,17 @@
       {
         "bigCode": 2,
         "name": "採石業",
-        "total": 51
+        "total": 57
       },
       {
         "bigCode": 2,
         "name": "砂利採取業",
-        "total": 19
+        "total": 24
       },
       {
         "bigCode": 2,
         "name": "その他の土石採取業",
-        "total": 6
+        "total": 7
       },
       {
         "bigCode": 2,
@@ -1276,17 +1276,17 @@
       {
         "bigCode": 2,
         "name": "その他の鉱業－その他",
-        "total": 9
+        "total": 10
       },
       {
         "bigCode": 3,
         "name": "水力発電所等建設工事業",
-        "total": 5
+        "total": 6
       },
       {
         "bigCode": 3,
         "name": "トンネル建設工事業",
-        "total": 28
+        "total": 30
       },
       {
         "bigCode": 3,
@@ -1296,257 +1296,257 @@
       {
         "bigCode": 3,
         "name": "鉄道軌道建設工事業",
-        "total": 28
+        "total": 35
       },
       {
         "bigCode": 3,
         "name": "橋梁建設工事業",
-        "total": 36
+        "total": 41
       },
       {
         "bigCode": 3,
         "name": "道路建設工事業",
-        "total": 334
+        "total": 384
       },
       {
         "bigCode": 3,
         "name": "河川土木工事業",
-        "total": 94
+        "total": 115
       },
       {
         "bigCode": 3,
         "name": "砂防工事業",
-        "total": 26
-      },
-      {
-        "bigCode": 3,
-        "name": "土地整理土木工事業",
-        "total": 105
-      },
-      {
-        "bigCode": 3,
-        "name": "上下水道工事業",
-        "total": 77
-      },
-      {
-        "bigCode": 3,
-        "name": "港湾海岸工事業",
         "total": 33
       },
       {
         "bigCode": 3,
+        "name": "土地整理土木工事業",
+        "total": 128
+      },
+      {
+        "bigCode": 3,
+        "name": "上下水道工事業",
+        "total": 92
+      },
+      {
+        "bigCode": 3,
+        "name": "港湾海岸工事業",
+        "total": 38
+      },
+      {
+        "bigCode": 3,
         "name": "その他の土木工事業",
-        "total": 1046
+        "total": 1215
       },
       {
         "bigCode": 3,
         "name": "鉄骨・鉄筋コンクリート造家屋建築工事業",
-        "total": 799
+        "total": 947
       },
       {
         "bigCode": 3,
         "name": "木造家屋建築工事業",
-        "total": 589
+        "total": 709
       },
       {
         "bigCode": 3,
         "name": "建築設備工事業",
-        "total": 184
+        "total": 217
       },
       {
         "bigCode": 3,
         "name": "その他の建築工事業",
-        "total": 1235
+        "total": 1458
       },
       {
         "bigCode": 3,
         "name": "電気通信工事業",
-        "total": 415
+        "total": 474
       },
       {
         "bigCode": 3,
         "name": "機械器具設置工事業",
-        "total": 242
+        "total": 282
       },
       {
         "bigCode": 3,
         "name": "その他の建設業－その他",
-        "total": 1071
+        "total": 1232
       },
       {
         "bigCode": 4,
         "name": "鉄道・軌道業",
-        "total": 220
+        "total": 252
       },
       {
         "bigCode": 4,
         "name": "水運業",
-        "total": 31
+        "total": 37
       },
       {
         "bigCode": 4,
         "name": "航空業",
-        "total": 172
+        "total": 203
       },
       {
         "bigCode": 4,
         "name": "ハイヤー・タクシー業",
-        "total": 688
+        "total": 786
       },
       {
         "bigCode": 4,
         "name": "バス業",
-        "total": 453
+        "total": 523
       },
       {
         "bigCode": 4,
         "name": "その他の道路旅客運送業",
-        "total": 40
+        "total": 47
       },
       {
         "bigCode": 4,
         "name": "一般貨物自動車運送業",
-        "total": 7352
+        "total": 8546
       },
       {
         "bigCode": 4,
         "name": "特定貨物自動車運送業",
-        "total": 159
+        "total": 182
       },
       {
         "bigCode": 4,
         "name": "貨物軽自動車運送業",
-        "total": 71
+        "total": 79
       },
       {
         "bigCode": 4,
         "name": "その他の道路貨物運送業",
-        "total": 55
+        "total": 67
       },
       {
         "bigCode": 4,
         "name": "その他の運輸交通業－その他",
-        "total": 37
+        "total": 49
       },
       {
         "bigCode": 5,
         "name": "陸上貨物取扱業",
-        "total": 645
+        "total": 747
       },
       {
         "bigCode": 5,
         "name": "一般港湾運送業",
-        "total": 36
+        "total": 41
       },
       {
         "bigCode": 5,
         "name": "港湾荷役業",
-        "total": 132
+        "total": 161
       },
       {
         "bigCode": 5,
         "name": "その他の港湾運送業",
-        "total": 11
+        "total": 13
       },
       {
         "bigCode": 6,
         "name": "農業",
-        "total": 732
+        "total": 865
       },
       {
         "bigCode": 6,
         "name": "木材伐出業",
-        "total": 318
+        "total": 370
       },
       {
         "bigCode": 6,
         "name": "その他の林業",
-        "total": 230
+        "total": 271
       },
       {
         "bigCode": 7,
         "name": "畜産業",
-        "total": 633
+        "total": 740
       },
       {
         "bigCode": 7,
         "name": "漁業",
-        "total": 118
+        "total": 139
       },
       {
         "bigCode": 7,
         "name": "その他の水産業",
-        "total": 74
+        "total": 85
       },
       {
         "bigCode": 8,
         "name": "各種商品卸売業",
-        "total": 164
+        "total": 189
       },
       {
         "bigCode": 8,
         "name": "家具・建具・じゅう器等卸売業",
-        "total": 17
+        "total": 20
       },
       {
         "bigCode": 8,
         "name": "その他の卸売業",
-        "total": 1706
+        "total": 1991
       },
       {
         "bigCode": 8,
         "name": "各種商品小売業",
-        "total": 1443
+        "total": 1708
       },
       {
         "bigCode": 8,
         "name": "自動車小売業",
-        "total": 214
+        "total": 253
       },
       {
         "bigCode": 8,
         "name": "家具・建具・じゅう器小売業",
-        "total": 81
-      },
-      {
-        "bigCode": 8,
-        "name": "燃料小売業",
-        "total": 276
-      },
-      {
-        "bigCode": 8,
-        "name": "新聞販売業",
-        "total": 913
-      },
-      {
-        "bigCode": 8,
-        "name": "その他の小売業",
-        "total": 5331
-      },
-      {
-        "bigCode": 8,
-        "name": "理容業",
-        "total": 23
-      },
-      {
-        "bigCode": 8,
-        "name": "美容業",
         "total": 93
       },
       {
         "bigCode": 8,
+        "name": "燃料小売業",
+        "total": 325
+      },
+      {
+        "bigCode": 8,
+        "name": "新聞販売業",
+        "total": 1025
+      },
+      {
+        "bigCode": 8,
+        "name": "その他の小売業",
+        "total": 6252
+      },
+      {
+        "bigCode": 8,
+        "name": "理容業",
+        "total": 24
+      },
+      {
+        "bigCode": 8,
+        "name": "美容業",
+        "total": 113
+      },
+      {
+        "bigCode": 8,
         "name": "倉庫業",
-        "total": 613
+        "total": 737
       },
       {
         "bigCode": 8,
         "name": "その他の商業－その他",
-        "total": 746
+        "total": 882
       },
       {
         "bigCode": 9,
         "name": "銀行・信託業",
-        "total": 106
+        "total": 125
       },
       {
         "bigCode": 9,
@@ -1556,172 +1556,172 @@
       {
         "bigCode": 9,
         "name": "保険業",
-        "total": 372
+        "total": 425
       },
       {
         "bigCode": 9,
         "name": "その他の金融業",
-        "total": 10
+        "total": 13
       },
       {
         "bigCode": 9,
         "name": "旅行業",
-        "total": 22
+        "total": 29
       },
       {
         "bigCode": 9,
         "name": "その他の広告・あっせん業",
-        "total": 82
+        "total": 106
       },
       {
         "bigCode": 10,
         "name": "映画製作・配給業",
-        "total": 9
+        "total": 13
       },
       {
         "bigCode": 10,
         "name": "映画館",
-        "total": 4
+        "total": 5
       },
       {
         "bigCode": 10,
         "name": "その他の映画・演劇業",
-        "total": 23
+        "total": 28
       },
       {
         "bigCode": 11,
         "name": "通信業",
-        "total": 1384
+        "total": 1581
       },
       {
         "bigCode": 12,
         "name": "自動車教習所",
-        "total": 46
+        "total": 50
       },
       {
         "bigCode": 12,
         "name": "ソフトウェア業",
-        "total": 28
+        "total": 32
       },
       {
         "bigCode": 12,
         "name": "その他の教育研究業",
-        "total": 682
+        "total": 804
       },
       {
         "bigCode": 13,
         "name": "病院",
-        "total": 1706
+        "total": 2026
       },
       {
         "bigCode": 13,
         "name": "一般診療所",
-        "total": 224
+        "total": 268
       },
       {
         "bigCode": 13,
         "name": "その他の医療保健業",
-        "total": 632
+        "total": 779
       },
       {
         "bigCode": 13,
         "name": "社会福祉施設",
-        "total": 6630
+        "total": 7973
       },
       {
         "bigCode": 13,
         "name": "浴場業",
-        "total": 48
+        "total": 61
       },
       {
         "bigCode": 13,
         "name": "その他の保健衛生業－その他",
-        "total": 50
+        "total": 55
       },
       {
         "bigCode": 14,
         "name": "旅館業",
-        "total": 940
+        "total": 1114
       },
       {
         "bigCode": 14,
         "name": "一般飲食店",
-        "total": 2704
+        "total": 3254
       },
       {
         "bigCode": 14,
         "name": "その他の飲食店",
-        "total": 205
+        "total": 241
       },
       {
         "bigCode": 14,
         "name": "ゴルフ場",
-        "total": 533
+        "total": 639
       },
       {
         "bigCode": 14,
         "name": "公園・遊園地",
-        "total": 147
+        "total": 184
       },
       {
         "bigCode": 14,
         "name": "その他の接客娯楽業－その他",
-        "total": 577
+        "total": 679
       },
       {
         "bigCode": 15,
         "name": "ビルメンテナンス業",
-        "total": 1896
+        "total": 2252
       },
       {
         "bigCode": 15,
         "name": "産業廃棄物処理業",
-        "total": 798
+        "total": 920
       },
       {
         "bigCode": 15,
         "name": "その他の廃棄物処理業",
-        "total": 651
+        "total": 780
       },
       {
         "bigCode": 15,
         "name": "火葬業",
-        "total": 6
+        "total": 10
       },
       {
         "bigCode": 15,
         "name": "と畜業",
-        "total": 26
+        "total": 31
       },
       {
         "bigCode": 15,
         "name": "その他の清掃・と畜業",
-        "total": 214
+        "total": 257
       },
       {
         "bigCode": 16,
         "name": "官公署",
-        "total": 119
+        "total": 153
       },
       {
         "bigCode": 17,
         "name": "派遣業",
-        "total": 121
+        "total": 143
       },
       {
         "bigCode": 17,
         "name": "警備業",
-        "total": 1170
+        "total": 1383
       },
       {
         "bigCode": 17,
         "name": "情報処理サービス業",
-        "total": 34
+        "total": 41
       },
       {
         "bigCode": 17,
         "name": "その他の事業－その他",
-        "total": 1951
+        "total": 2353
       }
     ],
     "skipped": 0
