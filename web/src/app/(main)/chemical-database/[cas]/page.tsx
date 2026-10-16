@@ -45,7 +45,7 @@ export async function generateMetadata({
   return {
     // root layout の title template でサイト名を一度だけ付与する。
     title: `${name}（CAS ${cas}）｜化学物質DB`,
-    description: `${name} の収録済みGHS区分・関連法令区分候補と公的参照先を確認できます。製品SDSと作業条件を確認してRAへ進みます。`,
+    description: `${name} の収録済みGHS区分・関連法令区分候補と公的参照先を確認できます。製品SDSと作業条件を整理するRA準備へ進めます。`,
     alternates: { canonical: `/chemical-database/${cas}` },
     robots: isIndexableChemical(normalizeCas(cas), entry)
       ? { index: true, follow: true }
@@ -278,10 +278,10 @@ function CrossLinksBlock({ cas, name }: { cas: string; name: string }) {
     <section className="rounded-2xl border border-amber-200 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800 p-5 flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between print:hidden">
       <div>
         <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-          この物質でリスクアセスメントを開始
+          この物質でRAの準備記録を作る
         </p>
         <p className="text-xs text-slate-600 dark:text-slate-400">
-          {name} を選択した状態で /chemical-ra に遷移します。
+          {name} の製品SDSと作業条件を整理します。リスク値の算出・安全判定は行いません。
         </p>
       </div>
       <div className="flex gap-2">
@@ -289,7 +289,7 @@ function CrossLinksBlock({ cas, name }: { cas: string; name: string }) {
           href={`/chemical-ra?cas=${encodeURIComponent(cas)}`}
           className="inline-flex min-h-[44px] items-center gap-1 rounded-md bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 text-sm font-medium"
         >
-          RAを開始
+          RAを準備
           <ArrowRight className="w-4 h-4" aria-hidden="true" />
         </Link>
         <Link

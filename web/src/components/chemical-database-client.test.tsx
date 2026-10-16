@@ -213,3 +213,16 @@ it("mobile cards retain identity, four recorded states and the same detail desti
   expect(document.querySelector('[data-chemical-comparison-table] table')).toBeTruthy();
   expect(document.getElementById("chemical-list-legend")?.textContent).toContain("法的な対象外判定ではありません");
 });
+
+it.each(["141-90-2", "28553-12-0", "13598-36-2"])("%sの未収録詳細へPC・モバイルからリンクしない", (cas) => {
+  render(<ChemicalDatabaseClient />);
+  fireEvent.change(screen.getByRole("searchbox"), { target: { value: cas } });
+  const card = document.querySelector(`[data-chemical-mobile-card][data-cas="${cas}"]`) as HTMLElement;
+  expect(card).toBeTruthy();
+  expect(within(card).getByText(/詳細未収録/)).toBeTruthy();
+  expect(within(card).getByText(/製品SDS/)).toBeTruthy();
+  const row = screen.getByRole("row", { name: new RegExp(cas) });
+  expect(within(row).getByText("詳細未収録")).toBeTruthy();
+  expect(document.querySelector(`a[href="/chemical-database/${cas}"]`)).toBeNull();
+  expect(screen.getByRole("link", { name: "厚労省の対象物質一覧" })).toBeTruthy();
+});
