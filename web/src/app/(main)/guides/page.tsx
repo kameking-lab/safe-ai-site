@@ -112,7 +112,7 @@ const NEW_WORKER_ASSET_IDS = [
   "heat-response",
 ] as const;
 
-export default async function GuidesHubPage({ searchParams }: GuidesPageProps = {}) {
+export default async function GuidesHubPage({ searchParams }: GuidesPageProps) {
   const params = searchParams ? await searchParams : {};
   const audience = Array.isArray(params.audience)
     ? params.audience[0]
