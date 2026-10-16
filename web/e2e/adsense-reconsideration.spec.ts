@@ -1,9 +1,21 @@
 import { expect, test } from "@playwright/test";
 
+// この限定検証はローカルサーバーだけを使い、広告・計測等の外部通信を送らない。
+test.beforeEach(async ({ context }) => {
+  await context.route("**/*", async (route) => {
+    const url = new URL(route.request().url());
+    if (url.hostname === "127.0.0.1" || url.hostname === "localhost") {
+      await route.continue();
+    } else {
+      await route.abort("blockedbyclient");
+    }
+  });
+});
+
 test("@smoke 法令検索の説明を開いても低い画面で入力欄を使える", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 480 });
   await page.goto("/chatbot");
-  await expect(page.getByText("収録法令の検索と定型回答です。外部生成AIは使いません。", { exact: true })).toBeVisible();
+  await expect(page.getByText("作業の言葉から、関連する条文と確認条件を探せます。", { exact: true })).toBeVisible();
   await page.getByText("回答の仕組み・評価方法", { exact: true }).click();
   await expect(page.getByRole("link", { name: "評価方法と確認範囲" })).toBeVisible();
   const input = page.locator("[data-chatbot-composer] textarea");

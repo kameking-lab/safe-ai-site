@@ -8,7 +8,7 @@ import genqualitySnapshot from "@/data/chatbot-genquality-latest.json";
 import { PageJsonLd } from "@/components/page-json-ld";
 import { withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
 import { ogImageUrl } from "@/lib/og-url";
-import { LEGAL_GENERATION_ENABLED, LEGAL_SEARCH_MODE_SUMMARY } from "@/lib/chatbot-generation-policy";
+import { LEGAL_GENERATION_ENABLED, LEGAL_SEARCH_MODE_LABEL } from "@/lib/chatbot-generation-policy";
 
 const SITE = "https://www.anzen-ai-portal.jp";
 const _title = "AIチャットボット評価（根拠検索と安全保留）";
@@ -164,7 +164,7 @@ export default function ChatbotEvalPage() {
       </h1>
       {!LEGAL_GENERATION_ENABLED && (
         <p className="mt-3 rounded-lg border border-sky-200 bg-sky-50 p-4 text-sm leading-6 text-slate-800">
-          現在の提供方式：{LEGAL_SEARCH_MODE_SUMMARY}
+          現在の提供方式：{LEGAL_SEARCH_MODE_LABEL}。
           以下の検索評価は記載した測定日時の結果です。現在の本番回答を再測定した値ではありません。
         </p>
       )}

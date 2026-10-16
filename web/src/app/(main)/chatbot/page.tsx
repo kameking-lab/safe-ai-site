@@ -15,7 +15,7 @@ import { ChatbotBody } from "./ChatbotBody";
 
 const TITLE = "安衛法AI｜現場の言葉で法令を確認";
 const DESCRIPTION =
-  "普段の言葉から収録済みの労働安全衛生法令を検索し、定型回答と公式根拠を確認できます。外部生成AIは使いません。個別作業への適用は原文と担当者の確認が必要です。";
+  "作業や設備を普段の言葉で入力して収録済み法令を検索し、関連条文・確認条件・公式根拠を探せます。個別作業への適用は原文と担当者の確認が必要です。";
 
 type SearchParams = Record<string, string | string[] | undefined>;
 

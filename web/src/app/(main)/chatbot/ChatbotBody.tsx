@@ -49,7 +49,7 @@ export function ChatbotBody() {
           </div>
           <div className="mt-1 flex min-h-11 flex-wrap items-center gap-3">
             <p className="min-w-0 flex-1 text-xs text-slate-600 dark:text-slate-300 sm:text-sm">
-              作業や設備について、普段の言葉で質問できます。
+              {LEGAL_SEARCH_MODE_SUMMARY}
             </p>
             <Link
               href="/about/usage-notes"
@@ -64,11 +64,6 @@ export function ChatbotBody() {
               NETIS安全技術5選
             </Link>
           </div>
-          {!LEGAL_GENERATION_ENABLED && (
-            <p className="mt-1 text-xs leading-5 text-slate-600 dark:text-slate-300">
-              {LEGAL_SEARCH_MODE_SUMMARY}
-            </p>
-          )}
         </header>
 
         <noscript>

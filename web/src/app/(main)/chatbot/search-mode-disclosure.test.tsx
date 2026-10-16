@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { LEGAL_GENERATION_ENABLED, LEGAL_SEARCH_MODE_SUMMARY } from "@/lib/chatbot-generation-policy";
+import { LEGAL_GENERATION_ENABLED, LEGAL_SEARCH_MODE_SUMMARY, LEGAL_SEARCH_MODE_LABEL } from "@/lib/chatbot-generation-policy";
 import { ChatbotBody } from "./ChatbotBody";
 import ChatbotEvalPage from "../about/chatbot-eval/page";
 import genqualitySnapshot from "@/data/chatbot-genquality-latest.json";
@@ -13,6 +13,7 @@ describe("法令検索・定型回答の公開説明", () => {
     expect(LEGAL_GENERATION_ENABLED).toBe(false);
     expect(screen.getByRole("textbox", { name: "作業を質問" })).toBeTruthy();
     expect(screen.getByText(LEGAL_SEARCH_MODE_SUMMARY)).toBeTruthy();
+    expect(screen.getByText(LEGAL_SEARCH_MODE_SUMMARY).closest("header")?.textContent).not.toContain("外部生成AI");
     const summary = screen.getByText("回答の仕組み・評価方法");
     const detail = summary.closest("details")!;
     expect(detail.closest("section")).toBeNull();
@@ -25,7 +26,7 @@ describe("法令検索・定型回答の公開説明", () => {
 
   it("現在の提供方式と測定日時を表示し、過去の生成回答率は閉じた参考記録に保持する", () => {
     render(<ChatbotEvalPage />);
-    expect(screen.getByText(/現在の提供方式：/).textContent).toContain(LEGAL_SEARCH_MODE_SUMMARY);
+    expect(screen.getByText(/現在の提供方式：/).textContent).toContain(LEGAL_SEARCH_MODE_LABEL);
     expect(screen.getByText(/現在の本番回答を再測定した値ではありません/)).toBeTruthy();
     const history = screen.getByText(/過去の生成回答チェック（/).closest("details")!;
     expect(history.open).toBe(false);
