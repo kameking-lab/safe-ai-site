@@ -7,9 +7,13 @@
  */
 export const LEGAL_GENERATION_ENABLED = false;
 
+export const LEGAL_SEARCH_MODE_SUMMARY =
+  "作業の言葉から、関連する条文と確認条件を探せます。";
+export const LEGAL_SEARCH_MODE_LABEL = "収録法令の検索・定型回答";
+
 export const LEGAL_GENERATION_OFF_NOTICE = {
-  ja: "現在、生成AIによる法的回答は停止しています。質問と履歴を外部生成AIへ送信せず、サイト内の法令本文から確認用の根拠候補だけを検索します。結果は判定済みではありません。",
-  en: "Generative legal answers are currently disabled. Questions and history are not sent to an external generative-AI provider; the tool only searches the site's law-text corpus for evidence candidates. Results are not verified decisions.",
+  ja: "現在、生成AIによる法的回答は停止しています。質問と履歴を外部生成AIへ送信せず、収録した法令本文を検索し、収録条件に沿った定型回答と確認用の根拠候補を表示します。結果は個別作業への適用を判定済みではありません。",
+  en: "Generative legal answers are currently disabled. Questions and history are not sent to an external generative-AI provider; the tool searches the site's law-text corpus and displays rule-based answers and evidence candidates. Results are not verified decisions about an individual task.",
 } as const;
 
 export const LEGAL_GENERATION_ALTERNATIVES =

@@ -12,7 +12,7 @@ const themes: SafetyImageLibraryCardTheme[] = Array.from({ length: 45 }, (_, ind
   title: `保護帽 ${index + 1}`,
   category: "protective-equipment",
   categoryLabel: "保護具",
-  signFormat: "立て標識",
+  signFormat: "平板標識",
   recommendedSize: "A4",
   commonWording: "保護帽",
   multilingualPriority: "high",

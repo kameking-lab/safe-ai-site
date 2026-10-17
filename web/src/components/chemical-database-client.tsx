@@ -23,6 +23,7 @@ import {
   type ChemicalCategory,
 } from "@/data/mock/chemical-substances-db";
 import type { MergedChemical } from "@/lib/mhlw-chemicals";
+import { hasChemicalDetail } from "@/lib/chemical/detail-availability";
 import { inspectChemicalNavigationQuery } from "@/lib/chemical/query-safety";
 import { getAllMergedChemicalsSlim as getAllMergedChemicals } from "@/lib/mhlw-chemicals-slim";
 import { ChemicalPpeSelectionBoundary } from "@/components/chemical/chemical-ppe-selection-boundary";
@@ -414,7 +415,7 @@ export function ChemicalDatabaseClient() {
                       <dl className="mt-3 grid grid-cols-2 gap-2 text-xs text-slate-700 dark:text-slate-300">
                         {states.map(([label, included]) => <div key={label}><dt className="font-semibold">{label}</dt><dd>{included ? "掲載あり" : "掲載未確認"}</dd></div>)}
                       </dl>
-                      {c.cas ? <Link href={`/chemical-database/${encodeURIComponent(c.cas)}`} onClick={rememberDetailNavigation} className="mt-3 inline-flex min-h-11 items-center rounded-lg border border-emerald-300 bg-emerald-50 px-3 text-xs font-semibold text-emerald-900 dark:border-emerald-700 dark:bg-emerald-900 dark:text-emerald-100">詳細を見る</Link> : <p className="mt-3 text-xs text-slate-600 dark:text-slate-300">CAS番号が未登録のため、原典の名称で確認してください。</p>}
+                      {hasChemicalDetail(c) && c.cas ? <Link href={`/chemical-database/${encodeURIComponent(c.cas)}`} onClick={rememberDetailNavigation} className="mt-3 inline-flex min-h-11 items-center rounded-lg border border-emerald-300 bg-emerald-50 px-3 text-xs font-semibold text-emerald-900 dark:border-emerald-700 dark:bg-emerald-900 dark:text-emerald-100">詳細を見る</Link> : <p className="mt-3 text-xs text-slate-600 dark:text-slate-300">{c.cas ? "詳細未収録。掲載情報は上の厚労省の対象物質一覧と製品SDSで確認してください。" : "CAS番号が未登録のため、原典の名称で確認してください。"}</p>}
                     </li>
                   );
                 })}
@@ -467,7 +468,7 @@ export function ChemicalDatabaseClient() {
                         <td className="px-3 py-2 text-center text-blue-600 align-top">{c.flags.concentration ? "●" : ""}</td>
                         <td className="px-3 py-2 text-center text-emerald-600 align-top">{c.flags.label_sds ? "●" : ""}</td>
                         <td className="px-3 py-2 text-center align-top">
-                          {c.cas ? (
+                          {hasChemicalDetail(c) && c.cas ? (
                             <Link
                               href={`/chemical-database/${encodeURIComponent(c.cas)}`}
                               onClick={rememberDetailNavigation}
@@ -476,7 +477,7 @@ export function ChemicalDatabaseClient() {
                               開く
                             </Link>
                           ) : (
-                            <span className="text-slate-300">—</span>
+                            <span className="text-slate-600">{c.cas ? "詳細未収録" : "CAS未登録"}</span>
                           )}
                         </td>
                       </tr>
