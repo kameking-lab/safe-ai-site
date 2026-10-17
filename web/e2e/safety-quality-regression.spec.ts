@@ -124,7 +124,7 @@ test("建設で使う2物質の詳細も収録範囲・版・製品SDS・同じC
     await expect(page.getByText(/収録データ版:.*分類原典の取得日時は未収録/)).toBeVisible();
     const source = page.getByRole("link", { name: "このCASのNITE政府版GHS原典を確認", exact: true });
     await expect(source).toHaveAttribute("href", `https://www.chem-info.nite.go.jp/chem/ghs/m-nite-${cas}.html`);
-    await expect(page.getByRole("link", { name: "RAを開始", exact: true })).toHaveAttribute("href", `/chemical-ra?cas=${cas}`);
+    await expect(page.getByRole("link", { name: "RAを準備", exact: true })).toHaveAttribute("href", `/chemical-ra?cas=${cas}`);
   }
 });
 
