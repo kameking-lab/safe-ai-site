@@ -60,6 +60,7 @@ describe("サイドバーナビ(NAV_CATEGORIES)のIA不変条件", () => {
       "/accidents-analytics",
       "/safety-ai",
       "/search",
+      "/articles",
       "/features",
     ];
     const mobileDate = new Date("2026-08-03T00:00:00+09:00");
@@ -74,7 +75,7 @@ describe("サイドバーナビ(NAV_CATEGORIES)のIA不変条件", () => {
         category.items.map((item) => item.href),
       );
     const desktop = hrefs("desktop");
-    expect(desktop).toHaveLength(21);
+    expect(desktop).toHaveLength(22);
     expect(new Set(desktop).size).toBe(desktop.length);
     expect(desktop).toEqual(expect.arrayContaining(requiredDesktop));
     expect(
@@ -82,7 +83,7 @@ describe("サイドバーナビ(NAV_CATEGORIES)のIA不変条件", () => {
         .flatMap((category) => category.items.map((item) => item.href))
         .filter((href) => mobilePrimary.has(href)),
     ).toEqual([]);
-    expect(hrefs("mobile").length).toBeLessThanOrEqual(16);
+    expect(hrefs("mobile").length).toBeLessThanOrEqual(17);
   });
 
   it.each([
@@ -122,6 +123,7 @@ describe("サイドバーナビ(NAV_CATEGORIES)のIA不変条件", () => {
         "/accidents-analytics",
         "/safety-ai",
         "/features",
+        "/articles",
       ];
 
       expect([...allReachable]).toEqual(expect.arrayContaining(criticalRoutes));

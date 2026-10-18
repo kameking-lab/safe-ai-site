@@ -624,6 +624,12 @@ const COMPACT_NAV_CATEGORIES: AppShellNavCategory[] = [
     label: "学ぶ・相談する",
     items: [
       {
+        id: "articles",
+        label: "安全の解説記事",
+        href: "/articles",
+        icon: FileText,
+      },
+      {
         id: "visual-ky",
         label: "5分ビジュアルKYT",
         href: "/training/visual-ky",

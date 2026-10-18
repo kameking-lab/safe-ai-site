@@ -1036,8 +1036,8 @@ export async function buildSearchIndexWithStatus(): Promise<SearchIndexBuild> {
     // lawRevisionCores は JSON＋純関数のみのブラウザ安全モジュール（node:fs 非依存）で、
     // NEXT_PUBLIC_REVISIONS_INGEST_SOURCE で source を切替（server 専用 payload 環境変数は
     // ブラウザでは undefined＝sample+egov+real の統合パスへフォールバックし常にデータを返す）。
-    // 個別の法改正詳細ページは未実装のため url は /laws 一覧ハブへ寄せる（glossary→/glossary・
-    // faq→/faq と同方針）。読込失敗時の placeholder（lr-fallback-*）は索引に載せない。
+    // 個別の法改正詳細ページは未実装。既存の /laws 一覧内カードへ直接着地させる。
+    // 読込失敗時の placeholder（lr-fallback-*）は索引に載せない。
     // kind は英語コード（law/ordinance/notice…）のため keywords から除外＝日本語検索のノイズ回避。
     import("@/data/mock/law-revisions").then(({ lawRevisionCores }) => {
       const seen = new Set<string>();
@@ -1057,7 +1057,7 @@ export async function buildSearchIndexWithStatus(): Promise<SearchIndexBuild> {
             r.official_notice_number ?? "",
             r.industry_detail ?? "",
           ].filter(Boolean),
-          url: "/laws",
+          url: `/laws#rev-${r.id}`,
         });
       }
     }),
