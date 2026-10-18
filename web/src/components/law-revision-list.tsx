@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import { useRouter } from "next/navigation";
 import { MessageSquare, Pencil, RotateCcw, Sparkles, Zap } from "lucide-react";
 import type { IndustryTag, LawRevision, RevisionImpact } from "@/lib/types/domain";
@@ -43,6 +43,7 @@ const KIND_BADGE_CLASS: Record<string, string> = {
 
 export type LawRevisionListProps = {
   revisions: LawRevision[];
+  consumedHashRef?: RefObject<string | null>;
   selectedRevisionId: string;
   loadingRevisionId: string | null;
   error?: ServiceError | null;
@@ -180,6 +181,7 @@ const PARAM_TO_STATUS: Record<string, EnforcementStatus> = {
 
 export function LawRevisionList({
   revisions,
+  consumedHashRef,
   selectedRevisionId,
   loadingRevisionId,
   error,
@@ -190,6 +192,8 @@ export function LawRevisionList({
   onSelectForQuestion,
 }: LawRevisionListProps) {
   const router = useRouter();
+  const localConsumedHashRef = useRef<string | null>(null);
+  const activeConsumedHashRef = consumedHashRef ?? localConsumedHashRef;
 
   const [search, setSearch] = useState("");
   const [articleHighlights, setArticleHighlights] = useState<string[]>([]);
@@ -516,20 +520,29 @@ export function LawRevisionList({
       }
       setShowAllRevisions(true);
       setHashTargetId(target.id);
-      setPendingHashScrollId(target.id);
+      setPendingHashScrollId(activeConsumedHashRef.current === window.location.hash ? null : target.id);
     };
     revealHashTarget();
-    window.addEventListener("hashchange", revealHashTarget);
-    return () => window.removeEventListener("hashchange", revealHashTarget);
-  }, [revisions]);
+    const onHashChange = () => {
+      activeConsumedHashRef.current = null;
+      revealHashTarget();
+    };
+    window.addEventListener("hashchange", onHashChange);
+    return () => window.removeEventListener("hashchange", onHashChange);
+  }, [revisions, activeConsumedHashRef]);
 
   useEffect(() => {
     if (!pendingHashScrollId || !showAllRevisions || !filtered.some((revision) => revision.id === pendingHashScrollId)) return;
     const target = document.getElementById(`rev-${pendingHashScrollId}`);
     if (!target) return;
+    if (window.location.hash !== `#rev-${pendingHashScrollId}`) {
+      setPendingHashScrollId(null);
+      return;
+    }
     target.scrollIntoView?.({ block: "center" });
+    activeConsumedHashRef.current = window.location.hash;
     setPendingHashScrollId(null);
-  }, [pendingHashScrollId, showAllRevisions, filtered]);
+  }, [pendingHashScrollId, showAllRevisions, filtered, activeConsumedHashRef]);
 
   return (
     <section

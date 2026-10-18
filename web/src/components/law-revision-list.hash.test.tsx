@@ -11,9 +11,21 @@ describe("法改正一覧の個別着地", () => {
     window.localStorage.clear();
   });
 
-  it("初期12件より後の改正へ一度だけスクロールし、後の絞り込みでは戻らない", async () => {
-    expect(lawRevisionCores.length).toBeGreaterThan(12);
+  it("データ差し替えと一覧再マウントでは再スクロールせず、新しいハッシュ遷移では着地する", async () => {
+    expect(lawRevisionCores.length).toBeGreaterThan(13);
     const target = lawRevisionCores[12]!;
+    const nextTarget = lawRevisionCores[13]!;
+    const consumedHashRef = { current: null as string | null };
+    const list = (revisions = lawRevisionCores) => (
+      <LawRevisionList
+        revisions={revisions}
+        consumedHashRef={consumedHashRef}
+        selectedRevisionId=""
+        loadingRevisionId={null}
+        onSelectSummary={vi.fn()}
+        onSelectForQuestion={vi.fn()}
+      />
+    );
     window.history.replaceState(null, "", `/laws#rev-${target.id}`);
     const originalScroll = Object.getOwnPropertyDescriptor(Element.prototype, "scrollIntoView");
     const scrollIntoView = vi.fn();
@@ -23,15 +35,7 @@ describe("法改正一覧の個別着地", () => {
     });
 
     try {
-      render(
-        <LawRevisionList
-          revisions={lawRevisionCores}
-          selectedRevisionId=""
-          loadingRevisionId={null}
-          onSelectSummary={vi.fn()}
-          onSelectForQuestion={vi.fn()}
-        />,
-      );
+      const view = render(list());
 
       await waitFor(() => {
         expect(document.getElementById(`rev-${target.id}`)).not.toBeNull();
@@ -42,6 +46,19 @@ describe("法改正一覧の個別着地", () => {
       });
       expect(document.getElementById(`rev-${target.id}`)).not.toBeNull();
       expect(scrollIntoView).toHaveBeenCalledTimes(1);
+
+      view.rerender(list([...lawRevisionCores]));
+      expect(scrollIntoView).toHaveBeenCalledTimes(1);
+      view.unmount();
+      render(list());
+      expect(scrollIntoView).toHaveBeenCalledTimes(1);
+
+      window.history.replaceState(null, "", `/laws#rev-${nextTarget.id}`);
+      fireEvent(window, new Event("hashchange"));
+      await waitFor(() => {
+        expect(document.getElementById(`rev-${nextTarget.id}`)).not.toBeNull();
+        expect(scrollIntoView).toHaveBeenCalledTimes(2);
+      });
     } finally {
       if (originalScroll) {
         Object.defineProperty(Element.prototype, "scrollIntoView", originalScroll);
