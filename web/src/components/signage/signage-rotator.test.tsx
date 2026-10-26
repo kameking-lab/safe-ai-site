@@ -35,6 +35,7 @@ describe("SignageRotator", () => {
 
   afterEach(() => {
     vi.useRealTimers();
+    vi.unstubAllGlobals();
   });
 
   it("件数0では何も描画しない", () => {
@@ -138,5 +139,29 @@ describe("SignageRotator", () => {
     fireEvent.click(screen.getByRole("button", { name: "テストパネルの自動切替を再開" }));
     act(() => vi.advanceTimersByTime(1000));
     expect(screen.getByText("1件目")).toBeDefined();
+  });
+
+  it("responds to motion preference changes and removes its listener", () => {
+    let matches = false;
+    const listeners = new Set<() => void>();
+    vi.stubGlobal("matchMedia", () => ({
+      get matches() { return matches; },
+      addEventListener: (_: string, fn: () => void) => listeners.add(fn),
+      removeEventListener: (_: string, fn: () => void) => listeners.delete(fn),
+    }));
+    const { unmount } = renderRotator();
+    act(() => vi.advanceTimersByTime(1000));
+    expect(screen.getByText("2件目")).toBeDefined();
+    act(() => { matches = true; listeners.forEach((fn) => fn()); });
+    act(() => vi.advanceTimersByTime(5000));
+    expect(screen.getByText("2件目")).toBeDefined();
+    expect(screen.getByRole("button", { name: "テストパネルの自動切替は端末設定で停止中" }).hasAttribute("disabled")).toBe(true);
+    fireEvent.click(screen.getAllByRole("tab")[0]!);
+    expect(screen.getByText("1件目")).toBeDefined();
+    act(() => { matches = false; listeners.forEach((fn) => fn()); });
+    act(() => vi.advanceTimersByTime(1000));
+    expect(screen.getByText("2件目")).toBeDefined();
+    unmount();
+    expect(listeners.size).toBe(0);
   });
 });

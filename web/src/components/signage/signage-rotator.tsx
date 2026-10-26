@@ -1,6 +1,16 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
+
+const MOTION_QUERY = "(prefers-reduced-motion: reduce)";
+function subscribeMotion(onChange: () => void) {
+  const query = window.matchMedia?.(MOTION_QUERY);
+  query?.addEventListener("change", onChange);
+  return () => query?.removeEventListener("change", onChange);
+}
+function motionSnapshot() {
+  return window.matchMedia?.(MOTION_QUERY).matches ?? false;
+}
 
 /**
  * サイネージの「動かない掲示板」問題（Fable診断01 T5）を解消する汎用ローテーター。
@@ -33,21 +43,16 @@ export function SignageRotator<T>({
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const [userPaused, setUserPaused] = useState(false);
-  const reducedMotionRef = useRef(false);
+  const reducedMotion = useSyncExternalStore(subscribeMotion, motionSnapshot, () => true);
 
   useEffect(() => {
-    if (typeof window === "undefined" || !window.matchMedia) return;
-    reducedMotionRef.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  }, []);
-
-  useEffect(() => {
-    if (items.length <= 1 || paused || userPaused || reducedMotionRef.current) return;
+    if (items.length <= 1 || paused || userPaused || reducedMotion) return;
     const timer = window.setInterval(() => {
       if (typeof document !== "undefined" && document.visibilityState === "hidden") return;
       setIndex((i) => (i + 1) % items.length);
     }, intervalMs);
     return () => window.clearInterval(timer);
-  }, [items.length, intervalMs, paused, userPaused]);
+  }, [items.length, intervalMs, paused, userPaused, reducedMotion]);
 
   if (items.length === 0) return null;
   // 件数が変わった（フィルタ・再取得後）直後は index が範囲外を指し得るため、都度 modulo で補正する
@@ -65,12 +70,13 @@ export function SignageRotator<T>({
       {items.length > 1 && (
         <button
           type="button"
-          aria-pressed={userPaused}
-          aria-label={`${ariaLabel}の自動切替を${userPaused ? "再開" : "停止"}`}
+          aria-pressed={userPaused || reducedMotion}
+          disabled={reducedMotion}
+          aria-label={reducedMotion ? `${ariaLabel}の自動切替は端末設定で停止中` : `${ariaLabel}の自動切替を${userPaused ? "再開" : "停止"}`}
           onClick={() => setUserPaused((value) => !value)}
           className="mb-1 min-h-[44px] shrink-0 self-end rounded-lg border border-slate-500 px-3 text-sm text-slate-100"
         >
-          {userPaused ? "自動切替を再開" : "自動切替を停止"}
+          {reducedMotion ? "端末設定で自動切替停止中" : userPaused ? "自動切替を再開" : "自動切替を停止"}
         </button>
       )}
       <div
