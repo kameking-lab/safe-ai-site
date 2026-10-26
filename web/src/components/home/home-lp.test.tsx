@@ -24,7 +24,8 @@ describe("the approved homepage LP", () => {
     expect(container.querySelector("[data-ky-scene]")).toBeNull();
     expect(screen.getByRole("link", { name: "KY用紙" }).getAttribute("href")).toBe("/ky/paper");
     expect(container.textContent).toContain("帳票は現場ごとに書式や運用が異なります");
-    expect(new Set([...container.querySelectorAll("img")].map(img => img.getAttribute("src"))).size).toBe(6);
+    expect(container.querySelector("[data-pet-static]")?.getAttribute("src")).toBe("/mascot/anzen-wanko-v1/static.webp");
+    expect(container.querySelector("[data-pet-strip]")).toBeNull();
     expect(container.querySelector("form")).toBeNull();
     expect(container.querySelectorAll('[data-lp-news="law"]')).toHaveLength(1);
     expect(container.querySelectorAll('[data-lp-news="accident"]')).toHaveLength(1);
@@ -48,11 +49,11 @@ describe("the approved homepage LP", () => {
     expect(screen.getByText(/報道見出し・原因未確認/)).toBeTruthy();
   });
 
-  it("replays the optional greeting only when the user asks", () => {
+  it("lets the user hide and restore the optional companion", () => {
     const { container } = render(<HomeLP availability={paused} latestNews={unavailable} />);
-    const image = container.querySelector("[data-mascot-greeting]");
-    fireEvent.click(screen.getByRole("button", { name: "チワワにあいさつ" }));
-    expect(container.querySelector("[data-mascot-greeting]")).not.toBe(image);
-    expect(screen.getByRole("status").textContent).toBe("今日も、一つずつ確認していこう。");
+    fireEvent.click(screen.getByRole("button", { name: "安全わんこを非表示" }));
+    expect(container.querySelector("[data-pet-viewport]")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "安全わんこを再表示" }));
+    expect(container.querySelector("[data-pet-viewport]")).not.toBeNull();
   });
 });

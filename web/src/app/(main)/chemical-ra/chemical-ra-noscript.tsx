@@ -11,7 +11,7 @@ export function ChemicalRaNoScriptFallback() {
         物質名・CAS番号を確認
       </h2>
       <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-700">
-        SDSの第1項で物質名とCAS番号を確認し、公式検索で一致する物質を選んでください。
+        SDSの第1項で製品名・供給者を確認し、第3項（組成及び成分情報）で成分の物質名・CAS番号・含有量を確認してください。公式検索では製品名と成分名を区別して、一致する物質を選んでください。
       </p>
       <nav
         aria-label="JavaScriptなしの化学物質確認"
@@ -53,7 +53,7 @@ export function ChemicalRaNoScriptFallback() {
         </a>
       </nav>
       <p className="mt-2 text-xs font-bold text-slate-600">
-        物質名とCAS番号が一致しない場合は評価を始めず、製品の最新SDSを確認してください。
+        物質名とCAS番号が一致しない場合は評価を始めず、製品の最新SDSを確認してください。CAS番号などが記載されていない場合は推測せず、供給者に確認してください。
       </p>
     </section>
   );

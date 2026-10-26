@@ -53,16 +53,27 @@ async function warmKyHandoffDestination(page: Page) {
 }
 
 async function mockWeather(page: Page) {
+  const now = new Date();
+  // Keep client-side freshness checks on the fixture's clock; callers also
+  // set the work day explicitly because SSR uses the server's own clock.
+  await page.clock.setFixedTime(now);
+  const targetAt = now.toISOString();
+  const todayJst = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Tokyo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(now);
   await page.route("**/api/weather-risk?area=tokyo-shinjuku*", (route) =>
     route.fulfill({
       status: 200,
       contentType: "application/json",
       body: JSON.stringify({
         provider: "open-meteo",
-        fetchedAt: new Date().toISOString(),
+        fetchedAt: targetAt,
         snapshot: {
           regionName: "東京都 新宿区",
-          date: "2026-08-01",
+          date: todayJst,
           overview: "晴れ",
           temperatureCelsius: 34,
           windSpeedMs: 3,
@@ -72,14 +83,14 @@ async function mockWeather(page: Page) {
         current: {
           temperatureCelsius: 31.2,
           relativeHumidityPercent: 71,
-          targetAt: new Date().toISOString(),
+          targetAt,
         },
         officialWarning: {
           status: "live",
           warnings: [],
           headline: null,
-          fetchedAt: new Date().toISOString(),
-          reportAt: new Date().toISOString(),
+          fetchedAt: targetAt,
+          reportAt: targetAt,
           sourceUrl: "https://www.jma.go.jp/bosai/warning/",
         },
       }),
@@ -94,13 +105,13 @@ async function mockWeather(page: Page) {
         areaLabel: "東京都 新宿区",
         scopeLabel: "東京都内提供地点",
         provider: "環境省 熱中症予防情報サイト",
-        retrievedAt: new Date().toISOString(),
+        retrievedAt: targetAt,
         degraded: false,
         wbgt: {
           status: "estimated",
           valueCelsius: 29.1,
           label: "推定値",
-          targetAt: new Date().toISOString(),
+          targetAt,
           stale: false,
           stationCount: 2,
           expectedStationCount: 2,
@@ -108,12 +119,13 @@ async function mockWeather(page: Page) {
         alerts: {
           heatAlert: "active",
           specialHeatAlert: "inactive",
-          targetDate: "2026-08-01",
-          reportAt: new Date().toISOString(),
+          targetDate: todayJst,
+          reportAt: targetAt,
         },
       }),
     }),
   );
+  return todayJst;
 }
 
 async function selectFallAndMeasure(page: Page) {
@@ -250,8 +262,9 @@ test.describe("KY zero-friction builder", () => {
         requested.push(request.url());
       }
     });
-    await mockWeather(page);
+    const todayJst = await mockWeather(page);
     await page.goto("/ky/paper");
+    await page.getByLabel("作業日", { exact: true }).fill(todayJst);
     await page.locator("#ky-location").fill("中央区");
     await expect(page.getByText(/同名地域です/)).toBeVisible();
     await page.waitForTimeout(400);
@@ -262,6 +275,8 @@ test.describe("KY zero-friction builder", () => {
     await expect(page.getByText("湿度 71%")).toBeVisible();
     expect(requested.length).toBe(2);
     expect(requested.every((url) => url.includes("area=tokyo-shinjuku"))).toBe(true);
+    const weatherRequest = requested.find((url) => url.includes("/api/weather-risk"));
+    expect(new URL(weatherRequest!).searchParams.get("date")).toBe(todayJst);
     expect(requested.join(" ")).not.toContain(encodeURIComponent("新宿区"));
   });
 
@@ -395,7 +410,7 @@ test.describe("KY zero-friction builder", () => {
   });
 
   test("heat, risk, accident, Visual KYT and chemical handoffs remain candidate-only", async ({ page }) => {
-    await mockWeather(page);
+    const todayJst = await mockWeather(page);
     const cases = [
       {
         href: "/ky/paper?source=heat&area=tokyo-shinjuku",
@@ -450,6 +465,7 @@ test.describe("KY zero-friction builder", () => {
       await expect(page.locator("[data-ky-handoff-banner]")).toContainText(
         "候補として読み込みました",
       );
+      await page.getByLabel("作業日", { exact: true }).fill(todayJst);
       const candidate = page.getByRole("checkbox", { name: item.candidate }).first();
       await expect(candidate).toBeVisible({ timeout: 2_000 });
       await expect(candidate).not.toBeChecked();

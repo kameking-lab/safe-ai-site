@@ -44,6 +44,7 @@ const WORK_CONTEXT_PREFIXES = [
   "/chatbot",
   "/chemical-ra",
   "/construction-calc",
+  "/goods",
   "/ky",
   "/law-search",
   "/risk",

@@ -12,7 +12,9 @@ describe("/chemical-ra JavaScriptなしの確認導線", () => {
     ).toBeDefined();
     expect(container.querySelector("input, textarea, select, button")).toBeNull();
     expect(container.querySelector("[disabled]")).toBeNull();
-    expect(container.textContent).toContain("SDSの第1項");
+    expect(container.textContent).toContain("第1項で製品名・供給者");
+    expect(container.textContent).toContain("第3項（組成及び成分情報）で成分の物質名・CAS番号・含有量");
+    expect(container.textContent).toContain("記載されていない場合は推測せず");
     expect(container.textContent).toContain(
       "物質名とCAS番号が一致しない場合は評価を始めず",
     );
