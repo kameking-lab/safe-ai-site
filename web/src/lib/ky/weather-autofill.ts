@@ -46,17 +46,16 @@ export function todayLocalISO(now: Date = new Date()): string {
   return `${y}-${m}-${d}`;
 }
 
-/** レスポンスから指定地域・指定日の予報を取り出す。無ければ地域の先頭日にフォールバック。 */
+/** 指定地域・指定日の予報だけを取り出す。無い場合は手入力を促す。 */
 export function pickForecast(
   res: WeatherForecastLite | null | undefined,
   regionId: string,
   dateISO: string
 ): ForecastDayLite | null {
   if (!res || !Array.isArray(res.regions)) return null;
-  const region =
-    res.regions.find((r) => r.regionId === regionId) ?? res.regions[0];
+  const region = res.regions.find((r) => r.regionId === regionId);
   if (!region || !Array.isArray(region.days) || region.days.length === 0) return null;
-  return region.days.find((d) => d.date === dateISO) ?? region.days[0];
+  return region.days.find((d) => d.date === dateISO) ?? null;
 }
 
 export type WeatherFields = { weather: string; temperature: string };

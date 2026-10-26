@@ -36,13 +36,13 @@ describe("pickForecast", () => {
     const d = pickForecast(SAMPLE, "kanto", "2026-05-26");
     expect(d?.weatherLabel).toBe("雨");
   });
-  it("日付未一致なら地域の先頭日にフォールバック", () => {
+  it("日付未一致なら別日の値を使わない", () => {
     const d = pickForecast(SAMPLE, "kanto", "2099-01-01");
-    expect(d?.date).toBe("2026-05-25");
+    expect(d).toBeNull();
   });
-  it("地域未一致なら先頭地域にフォールバック", () => {
+  it("地域未一致なら別地域の値を使わない", () => {
     const d = pickForecast(SAMPLE, "unknown", "2026-05-25");
-    expect(d?.weatherLabel).toBe("晴れ");
+    expect(d).toBeNull();
   });
   it("null/空は null", () => {
     expect(pickForecast(null, "kanto", "2026-05-25")).toBeNull();
