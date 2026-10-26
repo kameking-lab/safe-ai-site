@@ -54,8 +54,8 @@ async function warmKyHandoffDestination(page: Page) {
 
 async function mockWeather(page: Page) {
   const now = new Date();
-  // Keep the page's default work day and the fixture on the same JST date,
-  // including a run that crosses midnight. Timers continue to run normally.
+  // Keep client-side freshness checks on the fixture's clock; callers also
+  // set the work day explicitly because SSR uses the server's own clock.
   await page.clock.setFixedTime(now);
   const targetAt = now.toISOString();
   const todayJst = new Intl.DateTimeFormat("en-CA", {
@@ -264,6 +264,7 @@ test.describe("KY zero-friction builder", () => {
     });
     const todayJst = await mockWeather(page);
     await page.goto("/ky/paper");
+    await page.getByLabel("作業日", { exact: true }).fill(todayJst);
     await page.locator("#ky-location").fill("中央区");
     await expect(page.getByText(/同名地域です/)).toBeVisible();
     await page.waitForTimeout(400);
@@ -409,7 +410,7 @@ test.describe("KY zero-friction builder", () => {
   });
 
   test("heat, risk, accident, Visual KYT and chemical handoffs remain candidate-only", async ({ page }) => {
-    await mockWeather(page);
+    const todayJst = await mockWeather(page);
     const cases = [
       {
         href: "/ky/paper?source=heat&area=tokyo-shinjuku",
@@ -464,6 +465,7 @@ test.describe("KY zero-friction builder", () => {
       await expect(page.locator("[data-ky-handoff-banner]")).toContainText(
         "候補として読み込みました",
       );
+      await page.getByLabel("作業日", { exact: true }).fill(todayJst);
       const candidate = page.getByRole("checkbox", { name: item.candidate }).first();
       await expect(candidate).toBeVisible({ timeout: 2_000 });
       await expect(candidate).not.toBeChecked();
