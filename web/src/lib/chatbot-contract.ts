@@ -67,6 +67,12 @@ export type ChatbotSource = {
   sourceKind?: LawArticle["sourceKind"];
   sourceFetchedAt?: string;
   sourceProvenance?: SourceProvenance;
+  /** Local XML experiment: identity never aliases supplementary/appendix text to a main article. */
+  legalEvidence?: {
+    documentId: string; kind: "main" | "supplementary" | "appendix";
+    xmlPath: string; snapshotAsOf: string; xmlSha256: string;
+    figuresPending: boolean; hasTables: boolean;
+  };
   humanReviewStatus?: LawArticle["humanReviewStatus"];
 };
 

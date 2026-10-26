@@ -1038,6 +1038,9 @@ function trustedSourceLocator(
   source: ChatbotSource | undefined,
   citation: StructuredCitation | undefined,
 ): TrustedSourceLocator {
+  if (source?.legalEvidence && source.legalEvidence.kind !== "main") {
+    return { article: null, paragraph: null, item: null, rawPosition: source.article };
+  }
   const candidates = [source?.article, citation?.articleNum]
     .map((value) => value?.trim() ?? "")
     .filter(Boolean);
@@ -1083,7 +1086,9 @@ function SourceDetails({ message }: { message: ChatMessage }) {
     const citationIndex = citations.findIndex(
       (citation, index) =>
         !matchedCitationIndexes.has(index) &&
-        source.article.includes(citation.articleNum) &&
+        (source.legalEvidence
+          ? source.article === citation.articleNum && citation.searchHref === `/api/chatbot/local-evidence?documentId=${encodeURIComponent(source.legalEvidence.documentId)}`
+          : source.article.includes(citation.articleNum)) &&
         (source.law.includes(citation.lawShort) ||
           source.law.includes(citation.fullName)),
     );
@@ -1196,6 +1201,16 @@ function SourceDetails({ message }: { message: ChatMessage }) {
                     className="mt-1 inline-flex min-h-11 items-center font-semibold text-blue-800 underline-offset-4 hover:underline dark:text-blue-300"
                   >
                     公式原文
+                  </a>
+                )}
+                {source?.legalEvidence && (
+                  <a
+                    href={`/api/chatbot/local-evidence?documentId=${encodeURIComponent(source.legalEvidence.documentId)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-1 ml-3 inline-flex min-h-11 items-center font-semibold text-blue-800 underline-offset-4 hover:underline dark:text-blue-300"
+                  >
+                    保存原文を全文で確認
                   </a>
                 )}
               </li>

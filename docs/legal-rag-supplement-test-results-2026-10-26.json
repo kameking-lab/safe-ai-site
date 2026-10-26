@@ -1,0 +1,106 @@
+{
+  "success": true,
+  "uniqueTests": 727.0,
+  "pythonExporterTests": 9,
+  "initialRun": {
+    "passed": 725,
+    "failed": 0,
+    "total": 725,
+    "skipped": 0
+  },
+  "finalAffectedRun": {
+    "passed": 188,
+    "failed": 0,
+    "total": 188,
+    "skipped": 0
+  },
+  "workers": 1,
+  "nodeHeapLimitMb": 1024,
+  "files": [
+    {
+      "path": "web/src/app/api/chatbot/cross-domain-answer-first.test.ts",
+      "tests": 52,
+      "status": "passed"
+    },
+    {
+      "path": "web/src/app/api/chatbot/no-script/route.test.ts",
+      "tests": 112,
+      "status": "passed"
+    },
+    {
+      "path": "web/src/app/api/chatbot/route-source.test.ts",
+      "tests": 42,
+      "status": "passed"
+    },
+    {
+      "path": "web/src/app/api/chatbot/stream/route-safety.test.ts",
+      "tests": 3,
+      "status": "passed"
+    },
+    {
+      "path": "web/src/components/chatbot-panel.test.tsx",
+      "tests": 40,
+      "status": "passed"
+    },
+    {
+      "path": "web/src/lib/chatbot-contract.test.ts",
+      "tests": 7,
+      "status": "passed"
+    },
+    {
+      "path": "web/src/lib/chatbot-enrichment.test.ts",
+      "tests": 29,
+      "status": "passed"
+    },
+    {
+      "path": "web/src/lib/laws-fulltext/rag-fallback.test.ts",
+      "tests": 23,
+      "status": "passed"
+    },
+    {
+      "path": "web/src/lib/legal-answer-temporal.test.ts",
+      "tests": 33,
+      "status": "passed"
+    },
+    {
+      "path": "web/src/lib/legal-citation-link.test.ts",
+      "tests": 26,
+      "status": "passed"
+    },
+    {
+      "path": "web/src/lib/legal-current-revision.test.ts",
+      "tests": 3,
+      "status": "passed"
+    },
+    {
+      "path": "web/src/lib/legal-extractive-answer.test.ts",
+      "tests": 196,
+      "status": "passed"
+    },
+    {
+      "path": "web/src/lib/legal-response-consistency.test.ts",
+      "tests": 11,
+      "status": "passed"
+    },
+    {
+      "path": "web/src/lib/legal-source-provenance.test.ts",
+      "tests": 23,
+      "status": "passed"
+    },
+    {
+      "path": "web/src/lib/legal-supplements/local-integration.test.ts",
+      "tests": 36,
+      "status": "passed"
+    },
+    {
+      "path": "web/src/lib/rag-search.test.ts",
+      "tests": 89,
+      "status": "passed"
+    },
+    {
+      "path": "web/src/lib/search-quality-holdout.test.ts",
+      "tests": 2,
+      "status": "passed"
+    }
+  ]
+}

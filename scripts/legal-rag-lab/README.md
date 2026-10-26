@@ -1,6 +1,6 @@
 # e-Gov 5法令のXML構造化試験
 
-Webアプリから呼ばない、Python標準ライブラリだけのローカル実験。
+取得・構造化・検証はPython標準ライブラリだけのローカル実験。後続の検索接続も明示フラグを必要とするローカル限定。
 法令本文の取得は無料公開APIの5件に限定する。対象日と許可法令/履歴は `egov_xml_lab.py` に固定。
 
 保存先はリポジトリの兄弟 `../legal-rag-lab-2026-10-26/` のみ。既存コーパス、DB、公開ファイルに接続しない。
@@ -30,4 +30,17 @@ Article/Paragraph/Item/Subitemの識別は `revision:path`。同じ第1条でも
 
 `verify_experiment` の11受入確認は原文・構造の保持確認。準用91→56の読み替えや玉掛け/酸欠の関連箇所を保存できたことを示すが、条文を適用して法律上の結論を出す試験ではない。
 
-附則に含まれる過去・経過・未施行規定の適用判定、期間別XMLの比較、添付画像の取得、RAG本体への接続は対象外。APIのcurrent_revision_statusやscheduled_enforcement_dateを過去指定日の効力判定へ転用しない。
+附則に含まれる過去・経過・未施行規定の適用判定、期間別XMLの比較、添付画像の取得は対象外。APIのcurrent_revision_statusやscheduled_enforcement_dateを過去指定日の効力判定へ転用しない。
+
+## ローカルRAG接続
+
+`export_rag_dataset.py` は既存の5法令の検証を再実行し、固定実験フォルダに `rag-dataset-v1.json` を新規保存する。既存ファイルが違えば停止する。再取得・DB操作・embeddingは行わない。
+
+```powershell
+python -B scripts/legal-rag-lab/export_rag_dataset.py ../legal-rag-lab-2026-10-26
+python -B -m unittest discover -s scripts/legal-rag-lab -p test_export_rag_dataset.py -v
+```
+
+Web側は `web/src/data/legal-supplement-lab-manifest.json` のhashと法令/履歴/原XML hashを照合する。起動ディレクトリは `web`。`SAFE_AI_LOCAL_SUPPLEMENTS=true` のときだけJSON/SSE/no-JSの附則・別表等の質問を検索する。production/Vercelではフラグにかかわらず無効。データセットは公開ディレクトリにコピーしない。
+
+回答の全文確認は `/api/chatbot/local-evidence?documentId=...`。固定データセット内のIDで解決し、利用者がファイルパスを指定する機能はない。図は未取得と表示し、画像は読み込まない。適用状態は常に未確認。複数法令の資料番号指定・保存対象日以外は確認質問を返す。

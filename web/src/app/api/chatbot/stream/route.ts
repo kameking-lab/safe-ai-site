@@ -1,3 +1,4 @@
+import { isLocalSupplementRequest, localSupplementResponse } from "@/lib/legal-supplements/response";
 /**
  * P0-001 (usability-audit-day2-2026-05-24):
  * 安衛法AIチャットの SSE ストリーミング応答エンドポイント。
@@ -274,7 +275,8 @@ export async function POST(request: Request) {
     context: rehydratePublicLegalConversationContext(body.context),
   });
 
-  if (hasFutureLegalPremise(message, legalAnswerNow)) {
+  const localSupplement = isLocalSupplementRequest(resolvedConversation.query);
+  if (!localSupplement && hasFutureLegalPremise(message, legalAnswerNow)) {
     const payload = finalizeChatbotResponse({
       requiresHumanReview: true,
       answer: buildFutureLegalHoldAnswer(message, legalAnswerNow),
@@ -402,6 +404,13 @@ export async function POST(request: Request) {
   }
 
   const lawCategory: LawCategoryFilter = body?.lawCategory ?? "all";
+  if (localSupplement) {
+    return immediateSseResponse(finalizeChatbotResponse({
+      ...await localSupplementResponse(retrievalQuery, lawCategory),
+      context: resolvedConversation.context,
+    }));
+  }
+
   const apiKey = externalGenerativeAiAllowed()
     ? process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY
     : null;
