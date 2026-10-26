@@ -246,6 +246,20 @@ describe("KY weather prefill", () => {
     }
   });
 
+  it.each([null, {}, "invalid"])("rejects malformed snapshot %s without throwing", async (snapshot) => {
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = (async () => new Response(JSON.stringify({
+      ...weatherPayload(), snapshot,
+    }))) as typeof fetch;
+    try {
+      expect(await fetchKyWeatherPrefill({
+        areaId: "tokyo-shinjuku", workDate: "2026-08-01", now: NOW,
+      })).toEqual({ ok: false, reason: "unavailable", snapshot: null });
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
+
   it("does not substitute current conditions outside the forecast range", async () => {
     const originalFetch = globalThis.fetch;
     let calls = 0;

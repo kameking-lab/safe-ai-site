@@ -219,6 +219,7 @@ export async function fetchKyWeatherPrefill(input: {
   if (weather && "snapshot" in weather) {
     const currentTarget = validIso(weather.current?.targetAt);
     if (
+      !isRecord(weather.snapshot) ||
       weather.snapshot.date !== input.workDate ||
       (weather.current && (!currentTarget || jstDateTimeParts(new Date(currentTarget)).date !== input.workDate))
     ) {
