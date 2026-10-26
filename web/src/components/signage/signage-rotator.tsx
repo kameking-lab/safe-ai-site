@@ -32,6 +32,7 @@ export function SignageRotator<T>({
 }: SignageRotatorProps<T>) {
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
+  const [userPaused, setUserPaused] = useState(false);
   const reducedMotionRef = useRef(false);
 
   useEffect(() => {
@@ -40,13 +41,13 @@ export function SignageRotator<T>({
   }, []);
 
   useEffect(() => {
-    if (items.length <= 1 || paused || reducedMotionRef.current) return;
+    if (items.length <= 1 || paused || userPaused || reducedMotionRef.current) return;
     const timer = window.setInterval(() => {
       if (typeof document !== "undefined" && document.visibilityState === "hidden") return;
       setIndex((i) => (i + 1) % items.length);
     }, intervalMs);
     return () => window.clearInterval(timer);
-  }, [items.length, intervalMs, paused]);
+  }, [items.length, intervalMs, paused, userPaused]);
 
   if (items.length === 0) return null;
   // 件数が変わった（フィルタ・再取得後）直後は index が範囲外を指し得るため、都度 modulo で補正する
@@ -61,6 +62,17 @@ export function SignageRotator<T>({
       onFocus={() => setPaused(true)}
       onBlur={() => setPaused(false)}
     >
+      {items.length > 1 && (
+        <button
+          type="button"
+          aria-pressed={userPaused}
+          aria-label={`${ariaLabel}の自動切替を${userPaused ? "再開" : "停止"}`}
+          onClick={() => setUserPaused((value) => !value)}
+          className="mb-1 min-h-[44px] shrink-0 self-end rounded-lg border border-slate-500 px-3 text-sm text-slate-100"
+        >
+          {userPaused ? "自動切替を再開" : "自動切替を停止"}
+        </button>
+      )}
       <div
         className={`min-h-0 flex-1 ${compactAtWide ? "xl:hidden" : ""}`}
         role="group"

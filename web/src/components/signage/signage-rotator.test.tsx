@@ -123,4 +123,20 @@ describe("SignageRotator", () => {
     });
     expect(screen.getByText("2件目")).toBeDefined();
   });
+
+  it("explicit stop survives leaving the controls and still permits manual selection", () => {
+    const { container } = renderRotator();
+    const root = container.firstElementChild as HTMLElement;
+    fireEvent.click(screen.getByRole("button", { name: "テストパネルの自動切替を停止" }));
+    fireEvent.mouseLeave(root);
+    fireEvent.blur(root);
+    act(() => vi.advanceTimersByTime(5000));
+    expect(screen.getByText("1件目")).toBeDefined();
+    fireEvent.click(screen.getAllByRole("tab")[2]!);
+    act(() => vi.advanceTimersByTime(5000));
+    expect(screen.getByText("3件目")).toBeDefined();
+    fireEvent.click(screen.getByRole("button", { name: "テストパネルの自動切替を再開" }));
+    act(() => vi.advanceTimersByTime(1000));
+    expect(screen.getByText("1件目")).toBeDefined();
+  });
 });
