@@ -1,0 +1,97 @@
+{
+  "verifiedAtUtc": "2026-10-26T14:30:42Z",
+  "success": true,
+  "total": 760,
+  "passed": 760,
+  "failed": 0,
+  "skipped": 0,
+  "workers": 1,
+  "nodeHeapLimitMb": 1024,
+  "files": [
+    {
+      "tests": 43,
+      "path": "web/src/components/chatbot-panel.test.tsx",
+      "status": "passed"
+    },
+    {
+      "tests": 7,
+      "path": "web/src/lib/chatbot-contract.test.ts",
+      "status": "passed"
+    },
+    {
+      "tests": 29,
+      "path": "web/src/lib/chatbot-enrichment.test.ts",
+      "status": "passed"
+    },
+    {
+      "tests": 33,
+      "path": "web/src/lib/legal-answer-temporal.test.ts",
+      "status": "passed"
+    },
+    {
+      "tests": 26,
+      "path": "web/src/lib/legal-citation-link.test.ts",
+      "status": "passed"
+    },
+    {
+      "tests": 3,
+      "path": "web/src/lib/legal-current-revision.test.ts",
+      "status": "passed"
+    },
+    {
+      "tests": 196,
+      "path": "web/src/lib/legal-extractive-answer.test.ts",
+      "status": "passed"
+    },
+    {
+      "tests": 11,
+      "path": "web/src/lib/legal-response-consistency.test.ts",
+      "status": "passed"
+    },
+    {
+      "tests": 23,
+      "path": "web/src/lib/legal-source-provenance.test.ts",
+      "status": "passed"
+    },
+    {
+      "tests": 89,
+      "path": "web/src/lib/rag-search.test.ts",
+      "status": "passed"
+    },
+    {
+      "tests": 2,
+      "path": "web/src/lib/search-quality-holdout.test.ts",
+      "status": "passed"
+    },
+    {
+      "tests": 23,
+      "path": "web/src/lib/laws-fulltext/rag-fallback.test.ts",
+      "status": "passed"
+    },
+    {
+      "tests": 66,
+      "path": "web/src/lib/legal-supplements/local-integration.test.ts",
+      "status": "passed"
+    },
+    {
+      "tests": 52,
+      "path": "web/src/app/api/chatbot/cross-domain-answer-first.test.ts",
+      "status": "passed"
+    },
+    {
+      "tests": 42,
+      "path": "web/src/app/api/chatbot/route-source.test.ts",
+      "status": "passed"
+    },
+    {
+      "tests": 112,
+      "path": "web/src/app/api/chatbot/no-script/route.test.ts",
+      "status": "passed"
+    },
+    {
+      "tests": 3,
+      "path": "web/src/app/api/chatbot/stream/route-safety.test.ts",
+      "status": "passed"
+    }
+  ]
+}

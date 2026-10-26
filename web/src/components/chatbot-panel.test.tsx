@@ -1,8 +1,11 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import { ChatbotPanel } from "./chatbot-panel";
+import { supplementResponse } from "@/lib/legal-supplements/response";
+import { finalizeChatbotResponse } from "@/lib/chatbot-contract";
+import type { SupplementDataset } from "@/lib/legal-supplements/types";
 
 vi.mock("next/navigation", () => ({
   useSearchParams: () => ({ get: () => null }),
@@ -22,6 +25,21 @@ function submitExample(name: string) {
 }
 
 describe("ChatbotPanel a11y", () => {
+  it.skipIf(!existsSync(resolve("../../legal-rag-lab-2026-10-26/rag-dataset-v1.json"))).each([
+    ["玉掛け資格は？", "0.5トン未満だから特別教育不要", "揚貨装置"],
+    ["酸欠主任者と特別教育は？", "大臣指定", "酸素及び硫化水素"],
+    ["クレーン則91条の準用は？", "所轄労働基準監督署長", "必要かどうか"],
+  ])("keeps actual representative conditions visible for %s", async (query, first, last) => {
+    const dataset = JSON.parse(readFileSync(resolve("../../legal-rag-lab-2026-10-26/rag-dataset-v1.json"), "utf8")) as SupplementDataset;
+    const payload = finalizeChatbotResponse(supplementResponse(dataset, query));
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(chatbotStream(payload)));
+    render(<ChatbotPanel />);
+    submitExample("電気作業の資格は？");
+    await screen.findByText(payload.directAnswer);
+    expect(document.body.textContent).toContain(first);
+    expect(document.body.textContent).toContain(last);
+    for (const condition of payload.importantConditions) expect(document.body.textContent).toContain(condition);
+  });
   it("matches local article citations by identity even when their order differs", async () => {
     const articles = ["第三十四条の二", "第三十四条"];
     const sources = articles.map((article, index) => ({

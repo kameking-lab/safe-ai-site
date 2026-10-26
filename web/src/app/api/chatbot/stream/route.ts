@@ -406,7 +406,7 @@ export async function POST(request: Request) {
   const lawCategory: LawCategoryFilter = body?.lawCategory ?? "all";
   if (localSupplement) {
     return immediateSseResponse(finalizeChatbotResponse({
-      ...await localSupplementResponse(retrievalQuery, lawCategory),
+      ...await localSupplementResponse(retrievalQuery, lawCategory, message),
       context: resolvedConversation.context,
     }));
   }

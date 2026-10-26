@@ -28,7 +28,7 @@ function grams(query: string): string[] {
     .flatMap((word) => Array.from({ length: word.length - 1 }, (_, i) => word.slice(i, i + 2))))];
 }
 
-export function searchSupplements(dataset: SupplementDataset, query: string, category = "all") {
+export function supplementLawScope(dataset: SupplementDataset, query: string) {
   const q = normalized(query);
   const namesFor = (law: SupplementDataset["laws"][number]) => [...new Set([
     law.title, law.lawShort, ...(LAW_ALIAS_GROUPS.find(group => group.includes(law.lawShort)) ?? []),
@@ -40,13 +40,19 @@ export function searchSupplements(dataset: SupplementDataset, query: string, cat
   })).filter((mention, index, all) => !all.some((other, otherIndex) => index !== otherIndex &&
     other.start <= mention.start && other.end >= mention.end && other.end - other.start > mention.end - mention.start));
   const laws = [...new Map(mentions.map(mention => [mention.law.lawId, mention.law])).values()];
-  const selectedIds = new Set(laws.map(law => law.lawId));
   const namedOtherLaw = (withoutAmendmentIdentityDates(dataset, query).replace(/附則|付則|本則|別表|様式|準用|読み替/g, " ").match(/[一-龯ァ-ヴー]+(?:法|則|令)/g) ?? [])
     .some(name => !["附則", "本則", "法令", "規則", "政令", "省令"].includes(name) &&
       !dataset.laws.some(law => namesFor(law).some(alias => normalized(alias) === name)));
   const unknownLaw = namedOtherLaw || LAW_ALIAS_GROUPS.some(group =>
     !dataset.laws.some(law => group.includes(law.lawShort) || group.includes(law.title)) &&
     group.some(name => name.length > 1 && q.includes(normalized(name))));
+  return { laws, mentions, unknownLaw };
+}
+
+export function searchSupplements(dataset: SupplementDataset, query: string, category = "all") {
+  const q = normalized(query);
+  const { laws, unknownLaw } = supplementLawScope(dataset, query);
+  const selectedIds = new Set(laws.map(law => law.lawId));
   if (unknownLaw || (laws.length === 0 && !oxygenPlace(query))) {
     return { documents: [], total: 0, unknownLaw: true, ambiguousScope: false };
   }
