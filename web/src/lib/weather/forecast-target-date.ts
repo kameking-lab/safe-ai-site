@@ -19,6 +19,8 @@ export function resolveForecastTargetDate(
   const targetMs = Date.parse(`${date}T00:00:00+09:00`);
   const todayMs = Date.parse(`${today}T00:00:00+09:00`);
   if (!Number.isFinite(targetMs) || !Number.isFinite(todayMs)) return null;
+  // Date.parse normalizes impossible days (e.g. February 30) into March.
+  if (jstDate(new Date(targetMs)) !== date) return null;
   const daysAhead = Math.round((targetMs - todayMs) / 86_400_000);
   if (daysAhead < 0 || daysAhead > MAX_FORECAST_DAYS) return null;
   return { date, daysAhead };

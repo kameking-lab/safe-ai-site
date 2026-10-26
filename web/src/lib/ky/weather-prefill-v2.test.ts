@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { EnvironmentWbgtStatus } from "@/lib/heat-illness/environment-wbgt";
 import type { WeatherRiskApiResponse } from "@/lib/types/api";
 import {
@@ -78,6 +78,15 @@ function wbgtPayload(
 }
 
 describe("KY weather prefill", () => {
+  it("rejects impossible work days before making a request", async () => {
+    const fetchSpy = vi.spyOn(globalThis, "fetch");
+    try {
+      expect(await fetchKyWeatherPrefill({
+        areaId: "tokyo-shinjuku", workDate: "2026-02-30", now: new Date("2026-02-27T00:00:00+09:00"),
+      })).toEqual({ ok: false, reason: "forecast-out-of-range", snapshot: null });
+      expect(fetchSpy).not.toHaveBeenCalled();
+    } finally { fetchSpy.mockRestore(); }
+  });
   it("combines temperature, humidity, WBGT, JMA warnings and provenance", () => {
     const snapshot = combineKyWeatherPayloads({
       areaId: "tokyo-shinjuku",
