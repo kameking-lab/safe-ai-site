@@ -41,18 +41,19 @@ export function SignageRotator<T>({
   compactAtWide = false,
 }: SignageRotatorProps<T>) {
   const [index, setIndex] = useState(0);
-  const [paused, setPaused] = useState(false);
+  const [hovered, setHovered] = useState(false);
+  const [focused, setFocused] = useState(false);
   const [userPaused, setUserPaused] = useState(false);
   const reducedMotion = useSyncExternalStore(subscribeMotion, motionSnapshot, () => true);
 
   useEffect(() => {
-    if (items.length <= 1 || paused || userPaused || reducedMotion) return;
+    if (items.length <= 1 || hovered || focused || userPaused || reducedMotion) return;
     const timer = window.setInterval(() => {
       if (typeof document !== "undefined" && document.visibilityState === "hidden") return;
       setIndex((i) => (i + 1) % items.length);
     }, intervalMs);
     return () => window.clearInterval(timer);
-  }, [items.length, intervalMs, paused, userPaused, reducedMotion]);
+  }, [items.length, intervalMs, hovered, focused, userPaused, reducedMotion]);
 
   if (items.length === 0) return null;
   // 件数が変わった（フィルタ・再取得後）直後は index が範囲外を指し得るため、都度 modulo で補正する
@@ -62,10 +63,12 @@ export function SignageRotator<T>({
   return (
     <div
       className="flex min-h-0 w-full flex-1 flex-col overflow-hidden"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-      onFocus={() => setPaused(true)}
-      onBlur={() => setPaused(false)}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      onFocus={() => setFocused(true)}
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) setFocused(false);
+      }}
     >
       {items.length > 1 && (
         <button

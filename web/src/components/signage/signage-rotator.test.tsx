@@ -164,4 +164,34 @@ describe("SignageRotator", () => {
     unmount();
     expect(listeners.size).toBe(0);
   });
+
+  it("keeps keyboard focus paused after the pointer leaves, including focus within controls", () => {
+    const { container } = renderRotator();
+    const root = container.firstElementChild as HTMLElement;
+    const tabs = screen.getAllByRole("tab");
+    fireEvent.mouseEnter(root);
+    fireEvent.focus(tabs[0]!);
+    fireEvent.mouseLeave(root);
+    act(() => vi.advanceTimersByTime(5000));
+    expect(screen.getByText("1件目")).toBeDefined();
+    fireEvent.blur(tabs[0]!, { relatedTarget: tabs[1] });
+    act(() => vi.advanceTimersByTime(5000));
+    expect(screen.getByText("1件目")).toBeDefined();
+    fireEvent.blur(tabs[1]!, { relatedTarget: null });
+    act(() => vi.advanceTimersByTime(1000));
+    expect(screen.getByText("2件目")).toBeDefined();
+  });
+
+  it("keeps hovering paused after keyboard focus leaves", () => {
+    const { container } = renderRotator();
+    const root = container.firstElementChild as HTMLElement;
+    fireEvent.mouseEnter(root);
+    fireEvent.focus(root);
+    fireEvent.blur(root, { relatedTarget: null });
+    act(() => vi.advanceTimersByTime(5000));
+    expect(screen.getByText("1件目")).toBeDefined();
+    fireEvent.mouseLeave(root);
+    act(() => vi.advanceTimersByTime(1000));
+    expect(screen.getByText("2件目")).toBeDefined();
+  });
 });
