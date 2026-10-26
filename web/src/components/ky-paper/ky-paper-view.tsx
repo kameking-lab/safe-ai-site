@@ -268,6 +268,10 @@ export function KyPaperView({
   const [zoom, setZoom] = useState(1);
   const [region, setRegion] = useState(DEFAULT_WEATHER_REGION);
   const [weatherBusy, setWeatherBusy] = useState(false);
+  const weatherRequest = useRef<AbortController | null>(null);
+  // A response belongs to the exact form being edited. Cancel when any input
+  // changes (including date/region) so a late response cannot overwrite it.
+  useEffect(() => () => weatherRequest.current?.abort(), [region, record]);
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [savedLabel, setSavedLabel] = useState("記入すると自動保存されます");
   // 柱0: 通知も色の文法に乗せる（成功=緑 / 失敗・要対応=黄 / 案内=青）。従来は失敗まで緑だった。
@@ -506,22 +510,27 @@ export function KyPaperView({
   const temps = useMemo(() => temperatureOptions(), []);
 
   const handleWeather = async () => {
+    weatherRequest.current?.abort();
+    const request = new AbortController();
+    weatherRequest.current = request;
+    const workDate = `${record.workDateYear}-${String(record.workDateMonth).padStart(2, "0")}-${String(record.workDateDay).padStart(2, "0")}`;
     setWeatherBusy(true);
     try {
-      const w = await fetchWeatherAutofill(region);
+      const w = await fetchWeatherAutofill(region, workDate, request.signal);
+      if (request.signal.aborted) return;
       if (w) {
         patch({ weather: w.weather, temperature: w.temperature });
         setNotice(
-          `天気を自動取得しました（${WEATHER_REGIONS.find((r) => r.id === region)?.label ?? ""}: ${w.weather} ${w.temperature}℃）`,
+          `${workDate}の予報を取得しました（${WEATHER_REGIONS.find((r) => r.id === region)?.label ?? ""}: ${w.weather} 最高${w.temperature}℃）`,
         );
       } else {
         setNotice(
-          "天気の自動取得に失敗しました。手動で入力してください。",
+          "作業日・地域に一致する予報を取得できませんでした。手動で入力してください。",
           "warning",
         );
       }
     } finally {
-      setWeatherBusy(false);
+      if (weatherRequest.current === request) setWeatherBusy(false);
     }
   };
 

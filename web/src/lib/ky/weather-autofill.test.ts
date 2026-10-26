@@ -1,11 +1,14 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import {
   todayLocalISO,
+  fetchWeatherAutofill,
   pickForecast,
   toWeatherFields,
   WEATHER_REGIONS,
   type WeatherForecastLite,
 } from "./weather-autofill";
+
+afterEach(() => vi.unstubAllGlobals());
 
 const SAMPLE: WeatherForecastLite = {
   regions: [
@@ -66,5 +69,20 @@ describe("WEATHER_REGIONS", () => {
   it("8地域", () => {
     expect(WEATHER_REGIONS.length).toBe(8);
     expect(WEATHER_REGIONS.map((r) => r.id)).toContain("kanto");
+  });
+});
+
+describe("fetchWeatherAutofill", () => {
+  it("uses the work date rather than today's first forecast and forwards cancellation", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify(SAMPLE)));
+    vi.stubGlobal("fetch", fetchMock);
+    const controller = new AbortController();
+    expect(await fetchWeatherAutofill("kanto", "2026-05-26", controller.signal))
+      .toEqual({ weather: "雨", temperature: "19" });
+    expect(fetchMock).toHaveBeenCalledWith("/api/weather-forecast", { method: "GET", signal: controller.signal });
+  });
+  it("leaves unavailable work dates for manual input", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify(SAMPLE))));
+    expect(await fetchWeatherAutofill("kanto", "2099-01-01")).toBeNull();
   });
 });

@@ -68,19 +68,20 @@ export function toWeatherFields(day: ForecastDayLite | null): WeatherFields | nu
 }
 
 /**
- * 既存 /api/weather-forecast を叩いて当日の天気・気温を返す。
+ * 既存 /api/weather-forecast を叩いて指定作業日の天気・最高気温を返す。
  * 取得失敗時は null（呼び出し側はフォールバックして手入力を促す）。
  */
 export async function fetchWeatherAutofill(
   regionId: string = DEFAULT_WEATHER_REGION,
-  now: Date = new Date()
+  dateISO: string = todayLocalISO(),
+  signal?: AbortSignal,
 ): Promise<WeatherFields | null> {
   if (typeof window === "undefined") return null;
   try {
-    const res = await fetch("/api/weather-forecast", { method: "GET" });
+    const res = await fetch("/api/weather-forecast", { method: "GET", signal });
     if (!res.ok) return null;
     const json = (await res.json()) as WeatherForecastLite;
-    const day = pickForecast(json, regionId, todayLocalISO(now));
+    const day = pickForecast(json, regionId, dateISO);
     return toWeatherFields(day);
   } catch {
     return null;
