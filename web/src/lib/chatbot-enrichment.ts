@@ -4,6 +4,7 @@ import { LAW_SHORT_SET, LAW_FULL_NAME_SET } from "@/lib/law-name-registry";
 import { getFreshPlainArticle } from "@/data/plain";
 import { articlePermalink } from "@/lib/law-navi/permalink";
 import { isPublicRouteAvailable } from "@/lib/public-content-policy";
+import { legalCitationLink } from "@/lib/legal-citation-link";
 
 /**
  * Structured citation for a single law article, exposing the
@@ -317,11 +318,7 @@ export function buildStructuredCitations(articles: LawArticle[]): StructuredCita
       issuer: meta.issuer,
       effectiveDate: effective,
       searchHref: `/law-search?q=${encodeURIComponent(a.lawShort + a.articleNum)}`,
-      egovHref: meta.egovLawId
-        ? `https://laws.e-gov.go.jp/law/${meta.egovLawId}`
-        : a.lawShort === "経産省電工Q&A"
-          ? a.sourceUrl
-          : undefined,
+      egovHref: legalCitationLink(a, meta.egovLawId),
       plainHref: plain ? articlePermalink(a) ?? undefined : undefined,
     });
   }

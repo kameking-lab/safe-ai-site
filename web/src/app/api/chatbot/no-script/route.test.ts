@@ -504,7 +504,7 @@ describe("JavaScript無効時の法令対話", () => {
     expect(html).toMatch(/電気事業法[^<]*第43条/);
     expect(html).toContain("発出機関 経済産業省");
     expect(html).toContain(
-      'href="https://laws.e-gov.go.jp/law/339AC0000000170"',
+      'href="https://laws.e-gov.go.jp/law/339AC0000000170?occasion_date=20260809#Mp-At_43"',
     );
   });
 
@@ -522,10 +522,10 @@ describe("JavaScript無効時の法令対話", () => {
     );
     for (const url of [
       "https://laws.e-gov.go.jp/law/335AC0000000139",
-      "https://laws.e-gov.go.jp/law/335CO0000000260",
-      "https://laws.e-gov.go.jp/law/335M50000400097",
+      "https://laws.e-gov.go.jp/law/335CO0000000260?occasion_date=20260809#Mp-At_1",
+      "https://laws.e-gov.go.jp/law/335M50000400097?occasion_date=20260809#Mp-At_2",
     ]) {
-      expect(html).toContain(`href="${url}"`);
+      expect([...html.matchAll(/href="([^"]+)"/g)].map((match) => match[1]).join("\n")).toContain(url);
     }
   });
 

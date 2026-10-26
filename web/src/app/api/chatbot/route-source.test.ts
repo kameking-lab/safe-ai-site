@@ -87,7 +87,9 @@ describe("chatbot source metadata", () => {
     expect(source.applicationStatus).toBe("current");
     expect(source.effectiveOn).toContain("平成21年6月1日");
     expect(source.asOf).toBe("2026-08-02");
-    expect(source.url).toMatch(/^https:\/\/laws\.e-gov\.go\.jp\//);
+    // This synthetic source has no verified provenance; do not replace it with
+    // a generic law link that would hide the missing source verification.
+    expect(source.url).toBeUndefined();
   });
 
   it("対象時点より後の施行本文を過去時点の現行規定と誤表示しない", () => {
