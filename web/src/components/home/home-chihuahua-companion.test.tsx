@@ -96,11 +96,10 @@ describe("approved companion motion controls", () => {
     visibility.mockRestore();
   });
 
-  it("keeps the static fallback on image failure and makes no safety approval claim", () => {
+  it("keeps the static fallback on image failure", () => {
     render(<HomeChihuahuaCompanion />); viewport(true);
     fireEvent.error(strip()!);
     expect(strip()).toBeNull();
     expect(screen.getByRole("status").textContent).toContain("静止画");
-    expect(screen.getByText("応援役です。安全性の判定や作業許可は行いません。")).toBeDefined();
   });
 });

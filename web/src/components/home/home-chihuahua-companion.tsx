@@ -83,7 +83,6 @@ export function HomeChihuahuaCompanion() {
             </select>
           </label>
         </div>
-        <p className={styles.greetingResponse}>応援役です。安全性の判定や作業許可は行いません。</p>
         {failed === src && <p role="status">動きを読み込めなかったため、静止画で表示しています。</p>}
       </div>
     </>}
