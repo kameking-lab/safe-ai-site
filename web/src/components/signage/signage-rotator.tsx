@@ -83,8 +83,9 @@ export function SignageRotator<T>({
         </button>
       )}
       <div
-        className={`min-h-0 flex-1 ${compactAtWide ? "xl:hidden" : ""}`}
+        className={`min-h-0 flex-1 overflow-y-auto ${compactAtWide ? "xl:hidden" : ""}`}
         role="group"
+        tabIndex={0}
         aria-label={`${ariaLabel}（${safeIndex + 1}/${items.length}件目）`}
       >
         {renderItem(current, safeIndex)}
@@ -127,8 +128,9 @@ export function SignageRotator<T>({
             ‹
           </button>
           <div
-            className="min-h-0 min-w-0 overflow-hidden"
+            className="min-h-0 min-w-0 overflow-y-auto"
             role="group"
+            tabIndex={0}
             aria-label={`${ariaLabel}（${safeIndex + 1}/${items.length}件目）`}
           >
             {renderItem(current, safeIndex)}

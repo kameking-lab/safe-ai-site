@@ -21,7 +21,10 @@ describe("KY paper deferred weather", () => {
     const weather = screen.getByPlaceholderText("天気") as HTMLInputElement;
     fireEvent.change(weather, { target: { value: "手入力" } });
     fireEvent.click(screen.getByRole("button", { name: "自動取得", exact: true }));
-    if (change === "date") fireEvent.change(screen.getByLabelText("日", { exact: true }), { target: { value: "1" } });
+    if (change === "date") {
+      const day = screen.getByLabelText("日", { exact: true }) as HTMLSelectElement;
+      fireEvent.change(day, { target: { value: day.value === "1" ? "2" : "1" } });
+    }
     if (change === "region") fireEvent.change(screen.getByLabelText("地域", { exact: true }), { target: { value: "kinki" } });
     if (change === "manual") fireEvent.change(weather, { target: { value: "現場で確認" } });
     expect(signal?.aborted).toBe(true);
