@@ -155,6 +155,18 @@ describe("KY weather prefill", () => {
     expect(snapshot?.fetchedAt).toBe("2026-07-31T18:00:00.000Z");
   });
 
+  it.each([undefined, "", "invalid"])("does not invent a retrieval timestamp for %s", (fetchedAt) => {
+    const snapshot = combineKyWeatherPayloads({
+      areaId: "tokyo-shinjuku",
+      weather: weatherPayload({ fetchedAt }),
+      wbgt: wbgtPayload(),
+      now: NOW,
+    });
+    expect(snapshot?.fetchedAt).toBe("");
+    expect(snapshot?.stale).toBe(true);
+    expect(snapshot?.availability).toBe("stale");
+  });
+
   it("marks every manual override and does not call it measured", () => {
     const base = combineKyWeatherPayloads({
       areaId: "tokyo-shinjuku",

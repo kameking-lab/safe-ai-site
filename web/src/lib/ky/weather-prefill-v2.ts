@@ -82,7 +82,6 @@ export function combineKyWeatherPayloads(input: {
   const area = officialAreaCandidateById(input.areaId);
   if (!area) return null;
   const now = input.now ?? new Date();
-  const retrievedAt = now.toISOString();
   const weather = input.weather;
   const weatherSnapshot =
     weather && "snapshot" in weather ? weather.snapshot : null;
@@ -91,7 +90,7 @@ export function combineKyWeatherPayloads(input: {
   const wbgtValue = wbgt?.wbgt;
   const warning = warningState(weather);
   const weatherFetchedAt =
-    validIso(weather?.fetchedAt) ?? retrievedAt;
+    validIso(weather?.fetchedAt) ?? "";
   const weatherAgeMs = now.getTime() - Date.parse(weatherFetchedAt);
   const weatherStale =
     !Number.isFinite(weatherAgeMs) ||
