@@ -20,7 +20,7 @@ describe("KY paper deferred weather", () => {
     render(<KyPaperView consultAvailability={getAutomationConsultAvailability({})} />);
     const weather = screen.getByPlaceholderText("天気") as HTMLInputElement;
     fireEvent.change(weather, { target: { value: "手入力" } });
-    fireEvent.click(screen.getByRole("button", { name: "自動取得", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: "自動取得" }));
     if (change === "date") {
       const day = screen.getByLabelText("日", { exact: true }) as HTMLSelectElement;
       fireEvent.change(day, { target: { value: day.value === "1" ? "2" : "1" } });
