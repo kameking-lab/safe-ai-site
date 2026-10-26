@@ -214,6 +214,17 @@ export async function fetchKyWeatherPrefill(input: {
   const weather = isWeatherPayload(weatherResult.value)
     ? weatherResult.value
     : null;
+  // The requested day is part of the evidence: never label a different day's
+  // response as this KY record's conditions, even when the API returns 200.
+  if (weather && "snapshot" in weather) {
+    const currentTarget = validIso(weather.current?.targetAt);
+    if (
+      weather.snapshot.date !== input.workDate ||
+      (weather.current && (!currentTarget || jstDateTimeParts(new Date(currentTarget)).date !== input.workDate))
+    ) {
+      return { ok: false, reason: "unavailable", snapshot: null };
+    }
+  }
   const wbgt = isEnvironmentWbgtPayload(wbgtResult.value, area.id)
     ? wbgtResult.value
     : null;
