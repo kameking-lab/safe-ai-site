@@ -13,7 +13,8 @@
     },
     "manualStopAndMotionChanges": "pass",
     "horizontalOverflow": false,
-    "finalParagraphReachable": true
+    "finalParagraphReachable": true,
+    "nextItemStartsAtTop": true
   },
   {
     "viewport": {
@@ -29,7 +30,8 @@
     },
     "manualStopAndMotionChanges": "pass",
     "horizontalOverflow": false,
-    "finalParagraphReachable": true
+    "finalParagraphReachable": true,
+    "nextItemStartsAtTop": true
   },
   {
     "viewport": {
@@ -45,6 +47,7 @@
     },
     "manualStopAndMotionChanges": "pass",
     "horizontalOverflow": false,
-    "finalParagraphReachable": true
+    "finalParagraphReachable": true,
+    "nextItemStartsAtTop": true
   }
 ]

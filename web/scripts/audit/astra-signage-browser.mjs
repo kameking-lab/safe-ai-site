@@ -40,6 +40,13 @@ try {
     assert.equal(reachable, true, 'final paragraph remains reachable by keyboard scrolling');
     evidence.push({ viewport, metrics, manualStopAndMotionChanges:'pass', horizontalOverflow:overflow, finalParagraphReachable:reachable });
     await page.screenshot({ path:fileURLToPath(new URL(`signage-${viewport.width}.png`,output)), fullPage:true });
+    if (viewport.width >= 1280) {
+      await page.getByRole('button',{name:'検証ニュースの次の項目'}).click();
+    } else {
+      await page.getByRole('tab',{name:'2件目を表示'}).click();
+    }
+    assert.equal(await page.locator('[role="group"]:visible').evaluate((element) => element.scrollTop), 0);
+    evidence.at(-1).nextItemStartsAtTop = true;
     await page.close();
   }
   console.log(JSON.stringify(evidence,null,2));

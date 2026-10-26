@@ -83,6 +83,7 @@ export function SignageRotator<T>({
         </button>
       )}
       <div
+        key={`regular-${getKey(current, safeIndex)}`}
         className={`min-h-0 flex-1 overflow-y-auto ${compactAtWide ? "xl:hidden" : ""}`}
         role="group"
         tabIndex={0}
@@ -128,6 +129,7 @@ export function SignageRotator<T>({
             ‹
           </button>
           <div
+            key={`wide-${getKey(current, safeIndex)}`}
             className="min-h-0 min-w-0 overflow-y-auto"
             role="group"
             tabIndex={0}
