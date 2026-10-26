@@ -107,6 +107,7 @@ export function HomeScreen({
   const [revisions, setRevisions] = useState(
     () => initialRevisions ?? services.revision.getCachedRevisions()
   );
+  const consumedRevisionHashRef = useRef<string | null>(null);
   const [activeTab, setActiveTab] = useState<TabId>(() => initialLawTab ?? "laws");
   const [selectedRevisionId, setSelectedRevisionId] = useState(
     () => initialRevisions?.[0]?.id ?? services.revision.getInitialRevisionId() ?? ""
@@ -558,6 +559,7 @@ export function HomeScreen({
             {activeTab === "laws" && LawsListComponent && (
               <LawsListComponent
                 revisions={revisions}
+                consumedHashRef={consumedRevisionHashRef}
                 selectedRevisionId={selectedRevisionId}
                 loadingRevisionId={loadingRevisionId}
                 status={revisionStatus}
@@ -601,6 +603,7 @@ export function HomeScreen({
             {activeTab !== "laws" && LawsListComponent && (
               <LawsListComponent
                 revisions={revisions}
+                consumedHashRef={consumedRevisionHashRef}
                 selectedRevisionId={selectedRevisionId}
                 loadingRevisionId={loadingRevisionId}
                 status={revisionStatus}

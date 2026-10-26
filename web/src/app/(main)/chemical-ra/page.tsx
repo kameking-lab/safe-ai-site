@@ -100,11 +100,9 @@ export default async function ChemicalRaPage({
       />
       <PageContainer paddingY="none" className="pt-6 print:hidden">
         <header>
-          <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
-              化学物質RA準備
-            </h1>
-          </div>
+          <h1 className="text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
+            化学物質RA準備
+          </h1>
           <p className="mt-2 text-sm leading-6 text-slate-700">
             公的情報と条件を整理します。リスク値は計算せず、公式CREATE-SIMPLEへつなぎます。
           </p>

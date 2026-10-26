@@ -14,6 +14,7 @@ const DESKTOP_NAV = [
   ["国内の死亡事故速報", "/accident-news"],
   ["死亡事故DB", "/fatal-accidents"],
   ["事故分析", "/accidents-analytics"],
+  ["安全の解説記事", "/articles"],
   ["5分ビジュアルKYT", "/training/visual-ky"],
   ["教育・資格", "/education-certification"],
   ["自動化相談", "/services/automation"],
