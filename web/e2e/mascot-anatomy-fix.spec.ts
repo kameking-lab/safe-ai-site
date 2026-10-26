@@ -1,17 +1,20 @@
 import { expect, test } from "@playwright/test";
 
-const HOME_MASCOT_SELECTOR = 'img[src*="mascot-law-reading.webp"]:visible';
+const HOME_MASCOT_SELECTOR = 'img[data-pet-static]';
+const HOME_MASCOT_LABEL = "緑のヘルメットをかぶった安全わんこ";
 
 test.describe("チワワが案内するコンパクトホーム", () => {
+  test.use({ reducedMotion: "reduce" });
   test("320〜1440pxと200%・400%相当幅でチワワと7つの道具を横にはみ出さず表示する", async ({ page }) => {
     for (const width of [320, 390, 720, 768, 1440]) {
       await page.setViewportSize({ width, height: 900 });
       await page.goto("/");
 
       const mascot = page.locator(HOME_MASCOT_SELECTOR).first();
+      await expect(page.getByRole("img", { name: HOME_MASCOT_LABEL, exact: true })).toBeVisible();
       await expect(mascot).toBeVisible();
       await expect(mascot).toHaveJSProperty("complete", true);
-      expect(await mascot.evaluate((image: HTMLImageElement) => image.naturalWidth)).toBeGreaterThan(0);
+      await expect.poll(() => mascot.evaluate((image: HTMLImageElement) => image.naturalWidth)).toBeGreaterThan(0);
       // The approved mobile order places the optional mascot after direct tool links.
       await mascot.scrollIntoViewIfNeeded();
       const box = await mascot.boundingBox();
@@ -59,6 +62,8 @@ test.describe("チワワが案内するコンパクトホーム", () => {
     const mascot = page.locator(HOME_MASCOT_SELECTOR).first();
     await expect(mascot).toHaveJSProperty("complete", true);
     await expect(mascot).toHaveJSProperty("naturalWidth", 0);
+    await expect(page.getByRole("img", { name: HOME_MASCOT_LABEL, exact: true })).toBeVisible();
+    await expect(page.getByText("安全わんこと、ひとつずつ確認しよう。", { exact: true })).toBeVisible();
     await expect(
       page.getByRole("heading", {
         level: 1,
@@ -74,12 +79,79 @@ test.describe("チワワが案内するコンパクトホーム", () => {
     await expect(page.getByLabel("質問入力")).toBeVisible();
   });
 
+  test("動きの読込失敗では読み込めた静止画と主リンクへ戻る", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.route("**/mascot/anzen-wanko-v1/idle.webp", (route) => route.abort());
+    await page.goto("/");
+    await page.locator("[data-pet-companion]").scrollIntoViewIfNeeded();
+    await expect(page.getByRole("status").filter({ hasText: "動きを読み込めなかったため、静止画で表示しています。" })).toBeVisible();
+    const mascot = page.locator(HOME_MASCOT_SELECTOR);
+    await expect(mascot).toBeVisible();
+    await expect(mascot).toHaveJSProperty("complete", true);
+    await expect.poll(() => mascot.evaluate((image: HTMLImageElement) => image.naturalWidth)).toBeGreaterThan(0);
+    await expect(page.locator("[data-pet-strip]")).toHaveCount(0);
+    await expect(page.locator("#tools a[data-lp-tool]")).toHaveCount(7);
+    await expect(page.locator('#tools a[data-lp-tool][href="/chatbot"]')).toHaveAttribute("href", "/chatbot");
+  });
+
+  test("動作設定の変更と非表示・再表示でも手動停止とフォーカスを保つ", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 900 });
+    const stripRequests: string[] = [];
+    page.on("request", (request) => {
+      if (/\/mascot\/anzen-wanko-v1\/(idle|waving|activework|review)\.webp(?:\?|$)/.test(request.url())) {
+        stripRequests.push(request.url());
+      }
+    });
+    await page.goto("/");
+    const companion = page.locator("[data-pet-companion]");
+    const mascot = page.locator(HOME_MASCOT_SELECTOR);
+    await companion.scrollIntoViewIfNeeded();
+    await expect(companion.getByRole("button", { name: "端末の設定で動きを停止中" })).toBeDisabled();
+    await expect(mascot).toBeVisible();
+    await expect(mascot).toHaveJSProperty("complete", true);
+    await expect(page.locator("[data-pet-strip]")).toHaveCount(0);
+    expect(stripRequests).toEqual([]);
+
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await expect(page.locator('[data-pet-strip][data-pet-playing="true"]')).toBeVisible();
+    await companion.getByRole("button", { name: "わんこの動きを停止", exact: true }).click();
+    await expect(page.locator("[data-pet-strip]")).toHaveCount(0);
+    await expect(mascot).toBeVisible();
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await expect(companion.getByRole("button", { name: "端末の設定で動きを停止中" })).toBeDisabled();
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    const resume = companion.getByRole("button", { name: "わんこの動きを再開", exact: true });
+    await expect(resume).toHaveAttribute("aria-pressed", "true");
+    await expect(page.locator("[data-pet-strip]")).toHaveCount(0);
+
+    await companion.getByRole("button", { name: "安全わんこを非表示", exact: true }).click();
+    const restore = companion.getByRole("button", { name: "安全わんこを再表示", exact: true });
+    await expect(restore).toBeFocused();
+    await expect(companion.getByRole("img", { name: HOME_MASCOT_LABEL })).toHaveCount(0);
+    await restore.click();
+    await expect(resume).toBeFocused();
+    await expect(resume).toHaveAttribute("aria-pressed", "true");
+    await expect(page.locator("[data-pet-strip]")).toHaveCount(0);
+    await resume.click();
+    await expect(page.locator('[data-pet-strip][data-pet-playing="true"]')).toBeVisible();
+
+    await companion.getByRole("button", { name: "安全わんこを非表示", exact: true }).click();
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await restore.click();
+    await expect(companion.getByRole("combobox", { name: "わんこのしぐさ" })).toBeFocused();
+    await expect(mascot).toBeVisible();
+    await expect(page.locator("[data-pet-strip]")).toHaveCount(0);
+  });
+
   test("JavaScript無効でもチワワの説明と主操作を利用できる", async ({ browser, baseURL }) => {
-    const context = await browser.newContext({ baseURL, javaScriptEnabled: false, viewport: { width: 390, height: 900 } });
+    const context = await browser.newContext({ baseURL, javaScriptEnabled: false, reducedMotion: "reduce", viewport: { width: 390, height: 900 } });
     try {
       const page = await context.newPage();
       await page.goto("/");
       await expect(page.locator(HOME_MASCOT_SELECTOR).first()).toBeVisible();
+      await expect(page.getByRole("img", { name: HOME_MASCOT_LABEL, exact: true })).toBeVisible();
+      await expect(page.locator(HOME_MASCOT_SELECTOR)).toHaveJSProperty("complete", true);
+      await expect.poll(() => page.locator(HOME_MASCOT_SELECTOR).evaluate((image: HTMLImageElement) => image.naturalWidth)).toBeGreaterThan(0);
       await expect(
         page.getByRole("heading", {
           level: 1,

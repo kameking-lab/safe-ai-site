@@ -13,6 +13,7 @@ const MAIN_ROUTES = [
 ] as const;
 
 test.describe("新しい安全AIポータルのホーム", () => {
+  test.use({ reducedMotion: "reduce" });
   test("PCで原点、チワワ、7つの既存道具への入口を表示する", async ({
     page,
   }) => {
@@ -30,14 +31,15 @@ test.describe("新しい安全AIポータルのホーム", () => {
     ).toBeVisible();
     await expect(page.getByText("今日の熱中症リスク")).toHaveCount(0);
 
-    const heroMascot = page.getByAltText(
-      "ヘルメットをかぶり、法令の本を持つチワワ",
-    );
+    await expect(page.getByRole("img", { name: "緑のヘルメットをかぶった安全わんこ", exact: true })).toBeVisible();
+    const heroMascot = page.locator("[data-pet-static]");
     await expect(heroMascot).toBeVisible();
     await expect(heroMascot).toHaveAttribute(
       "src",
-      /mascot-law-reading/u,
+      "/mascot/anzen-wanko-v1/static.webp",
     );
+    await expect(heroMascot).toHaveJSProperty("complete", true);
+    await expect.poll(() => heroMascot.evaluate((image: HTMLImageElement) => image.naturalWidth)).toBeGreaterThan(0);
 
     const mainCards = page
       .locator('#tools a[data-lp-tool]');
