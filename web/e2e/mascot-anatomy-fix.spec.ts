@@ -4,7 +4,7 @@ const HOME_MASCOT_SELECTOR = 'img[data-pet-static]';
 const HOME_MASCOT_LABEL = "緑のヘルメットをかぶった安全わんこ";
 
 test.describe("チワワが案内するコンパクトホーム", () => {
-  test.use({ reducedMotion: "reduce" });
+  test.use({ contextOptions: { reducedMotion: "reduce" } });
   test("320〜1440pxと200%・400%相当幅でチワワと7つの道具を横にはみ出さず表示する", async ({ page }) => {
     for (const width of [320, 390, 720, 768, 1440]) {
       await page.setViewportSize({ width, height: 900 });

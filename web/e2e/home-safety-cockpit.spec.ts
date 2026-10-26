@@ -13,7 +13,7 @@ const MAIN_ROUTES = [
 ] as const;
 
 test.describe("新しい安全AIポータルのホーム", () => {
-  test.use({ reducedMotion: "reduce" });
+  test.use({ contextOptions: { reducedMotion: "reduce" } });
   test("PCで原点、チワワ、7つの既存道具への入口を表示する", async ({
     page,
   }) => {

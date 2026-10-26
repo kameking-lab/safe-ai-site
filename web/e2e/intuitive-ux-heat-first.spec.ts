@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 
-test.use({ reducedMotion: "reduce" });
+test.use({ contextOptions: { reducedMotion: "reduce" } });
 
 const DESKTOP_NAV = [
   ["今日の安全", "/risk"],
