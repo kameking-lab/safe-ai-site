@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import supplementRelease from "./src/data/legal-supplement-release.json";
 
 // GA4 (gtag.js) loads from www.googletagmanager.com and beacons to
 // www.google-analytics.com / *.analytics.google.com. AdSense loads from
@@ -37,6 +38,10 @@ const nextConfig: NextConfig = {
   turbopack: {},
   // /admin/status が同階層の report.md をサーバ読込するため明示的にトレース
   outputFileTracingIncludes: {
+    "/api/chatbot": [`./${supplementRelease.file}`],
+    "/api/chatbot/stream": [`./${supplementRelease.file}`],
+    "/api/chatbot/no-script": [`./${supplementRelease.file}`],
+    "/api/chatbot/local-evidence": [`./${supplementRelease.file}`],
     "/admin/status": ["./src/app/admin/status/report.md"],
     "/api/safety-images/*/download": [
       "./src/assets/safety-image-library/fonts/NotoSansCJKjp-Bold.otf",

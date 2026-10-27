@@ -1,13 +1,13 @@
 import "server-only";
 import type { ChatbotResponseDraft, ChatbotSource } from "@/lib/chatbot-contract";
 import { classifyLegalQuestionTime, requestedLegalPeriod } from "@/lib/legal-answer-temporal";
-import { localSupplementsEnabled, loadLocalSupplements } from "./loader";
+import { supplementsRequested, loadSupplements } from "./loader";
 import { searchSupplements, supplementContext, supplementQueryIntent, withoutAmendmentIdentityDates } from "./search";
 import type { SupplementDataset } from "./types";
 import { representativeIntent, representativeResult, validateRepresentativeReferenceScope } from "./representative";
 
 export function isLocalSupplementRequest(query: string): boolean {
-  return localSupplementsEnabled() && (supplementQueryIntent(query) || representativeIntent(query));
+  return supplementsRequested() && (supplementQueryIntent(query) || representativeIntent(query));
 }
 
 function hold(message: string, asOf: string | null, clarification: string): ChatbotResponseDraft {
@@ -100,7 +100,7 @@ export function supplementResponse(dataset: SupplementDataset, query: string, ca
 
 export async function localSupplementResponse(query: string, category = "all", originalQuery = query): Promise<ChatbotResponseDraft> {
   try {
-    return supplementResponse(await loadLocalSupplements(), query, category, originalQuery);
+    return supplementResponse(await loadSupplements(), query, category, originalQuery);
   } catch {
     return hold("附則・別表の検証済み資料または関連条文を読み込めません。別の本文で補わず、原典の確認が必要です。", null,
       "確認する法令名と資料名を教えてください。");

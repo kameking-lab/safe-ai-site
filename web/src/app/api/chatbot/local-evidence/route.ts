@@ -1,14 +1,14 @@
-import { loadLocalSupplements, localSupplementsEnabled } from "@/lib/legal-supplements/loader";
+import { loadSupplements, supplementsEnabled } from "@/lib/legal-supplements/loader";
 import { renderSupplementDocument } from "@/lib/legal-supplements/render";
 
 export const runtime = "nodejs";
 
 export async function GET(request: Request): Promise<Response> {
-  if (!localSupplementsEnabled()) return new Response("Not found", { status: 404 });
+  if (!supplementsEnabled()) return new Response("Not found", { status: 404 });
   const id = new URL(request.url).searchParams.get("documentId");
   if (!id || id.length > 1000) return new Response("Not found", { status: 404 });
   try {
-    const dataset = await loadLocalSupplements();
+    const dataset = await loadSupplements();
     const document = dataset.documents.find(item => item.id === id);
     if (!document) return new Response("Not found", { status: 404 });
     return new Response(renderSupplementDocument(dataset, document), { headers: {

@@ -1,4 +1,3 @@
-import { existsSync } from "node:fs";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { POST } from "@/app/api/chatbot/route";
 import { POST as STREAM } from "@/app/api/chatbot/stream/route";
@@ -7,17 +6,21 @@ import { GET as EVIDENCE } from "@/app/api/chatbot/local-evidence/route";
 import { __resetRateLimitForTests } from "@/lib/chatbot-rate-limit";
 import { __resetChatbotCacheForTests } from "@/lib/chatbot-cache";
 import { finalizeChatbotResponse, type ChatbotResponse } from "@/lib/chatbot-contract";
-import { decodeSupplementBytes, loadLocalSupplements, localSupplementFile, localSupplementsEnabled } from "./loader";
+import { decodeSupplementBytes, loadSupplements, localSupplementsEnabled } from "./loader";
 import { searchSupplements, supplementContext, supplementQueryIntent } from "./search";
 import { supplementResponse } from "./response";
 import { renderXmlNode } from "./render";
 import { normalizeSourceProvenance } from "@/lib/source-provenance";
 import { representativeResult, resolveRepresentativeRef } from "./representative";
+import release from "@/data/legal-supplement-release.json";
+import * as rateLimiter from "@/lib/chatbot-rate-limit";
 
 beforeEach(() => {
   vi.stubEnv("NODE_ENV", "test");
   vi.stubEnv("SAFE_AI_LOCAL_SUPPLEMENTS", "true");
   vi.stubEnv("VERCEL", ""); vi.stubEnv("VERCEL_ENV", "");
+  vi.stubEnv("SAFE_AI_LEGAL_SUPPLEMENTS_RELEASE", "");
+  vi.stubEnv("SAFE_AI_LEGAL_SUPPLEMENTS_DISABLED", ""); vi.stubEnv("SAFE_AI_STAGING_MODE", "");
   __resetRateLimitForTests(); __resetChatbotCacheForTests();
   vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("network forbidden in this local experiment"));
 });
@@ -66,10 +69,38 @@ describe("local supplement guard and rendering", () => {
   });
 });
 
-// Requires the separately verified PC-local experiment, never a production DB.
-describe.skipIf(!existsSync(localSupplementFile()))("five-law local route E2E", () => {
+// The pinned server package must exist in every checkout; absence is a failure.
+describe("five-law local route E2E", () => {
+  it("serves pinned production-mode evidence via JSON/SSE/no-JS and the full-text viewer", async () => {
+    const query = "2026年10月26日の玉掛け資格は？";
+    const baseline = await ask(query);
+    // Production shared-state availability has its own tests. Keep this local
+    // transport/package test offline; never connect the production rate-limit DB.
+    vi.spyOn(rateLimiter, "checkRateLimit").mockResolvedValue({ allowed: true, retryAfterSec: 0 });
+    vi.stubEnv("NODE_ENV", "production"); vi.stubEnv("VERCEL", "1"); vi.stubEnv("VERCEL_ENV", "production");
+    vi.stubEnv("SAFE_AI_LOCAL_SUPPLEMENTS", ""); vi.stubEnv("SAFE_AI_LEGAL_SUPPLEMENTS_RELEASE", release.release);
+    for (const stream of [false, true]) {
+      const answer = await ask(query, stream);
+      expect(answer.sources).toEqual(baseline.sources); expect(answer.answer).toBe(baseline.answer);
+    }
+    const html = await (await NO_SCRIPT(new Request("http://localhost/api/chatbot/no-script", {
+      method: "POST", headers: { "content-type": "application/x-www-form-urlencoded", origin: "http://localhost", "sec-fetch-site": "same-origin" },
+      body: new URLSearchParams({ message: query }),
+    }))).text();
+    expect(html).toContain(encodeURIComponent(baseline.sources[0]!.legalEvidence!.documentId));
+    const url = `http://localhost${baseline.citations[0]!.searchHref}`;
+    const page = await EVIDENCE(new Request(url));
+    expect(page.status).toBe(200); expect(page.headers.get("cache-control")).toBe("no-store");
+    expect(await page.text()).toContain(baseline.sources[0]!.revision);
+    vi.stubEnv("SAFE_AI_LEGAL_SUPPLEMENTS_DISABLED", "true");
+    expect((await EVIDENCE(new Request(url))).status).toBe(404);
+    vi.stubEnv("SAFE_AI_LEGAL_SUPPLEMENTS_DISABLED", ""); vi.stubEnv("SAFE_AI_LEGAL_SUPPLEMENTS_RELEASE", "unreviewed");
+    const held = await ask(query);
+    expect(held.sources).toHaveLength(0); expect(held.answer).toContain("読み込めません");
+    expect((await EVIDENCE(new Request(url))).status).toBe(404);
+  });
   it("loads all five snapshots and retains separate supplementary/appendix kinds", async () => {
-    const dataset = await loadLocalSupplements();
+    const dataset = await loadSupplements();
     expect(dataset.laws).toHaveLength(5);
     expect(dataset.documents.filter(d => d.kind === "supplementary")).toHaveLength(372);
     expect(dataset.documents.filter(d => d.kind === "appendix")).toHaveLength(119);
@@ -133,7 +164,7 @@ describe.skipIf(!existsSync(localSupplementFile()))("five-law local route E2E", 
     expect(response.sources.every(source => source.legalEvidence?.kind === "appendix")).toBe(true);
   });
   it("can identify an amendment without using its promulgation year as the requested work date", async () => {
-    const dataset = await loadLocalSupplements();
+    const dataset = await loadSupplements();
     const document = dataset.documents.find(d => d.kind === "supplementary" && d.lawId === "347AC0000000057" && d.node.attributes.AmendLawNum)!;
     const response = await ask(`安衛法${document.node.attributes.AmendLawNum}の附則を確認`);
     expect(response.sources.length).toBeGreaterThan(0);
@@ -152,7 +183,7 @@ describe.skipIf(!existsSync(localSupplementFile()))("five-law local route E2E", 
     expect(response.sources.every(s => s.lawShort === "クレーン則")).toBe(true);
   });
   it("fails closed when required same-snapshot context is absent", async () => {
-    const dataset = await loadLocalSupplements();
+    const dataset = await loadSupplements();
     const primary = searchSupplements(dataset, "安衛令別表6は？").documents;
     expect(() => supplementContext({ ...dataset, documents: dataset.documents.filter(d => d.lawId !== "347M50002000042") }, primary)).toThrow(/context/);
   });
@@ -163,7 +194,7 @@ describe.skipIf(!existsSync(localSupplementFile()))("five-law local route E2E", 
     expect(sse.scopeWarnings).toEqual(json.scopeWarnings); expect(sse.effectiveDateStatus).toEqual(json.effectiveDateStatus);
   });
   it("shows missing figures in the no-JS answer and the full evidence viewer", async () => {
-    const dataset = await loadLocalSupplements();
+    const dataset = await loadSupplements();
     const example = dataset.documents.find(d => d.kind === "appendix" && d.hasFigures)!;
     const law = dataset.laws.find(l => l.lawId === example.lawId)!;
     const query = `${law.lawShort}${example.label}を確認したい`;
@@ -212,7 +243,7 @@ describe.skipIf(!existsSync(localSupplementFile()))("five-law local route E2E", 
     expect(revised.effectiveDateStatus).toEqual(old.effectiveDateStatus);
   });
   it("the final contract never promotes imported supplements to current", async () => {
-    const dataset = await loadLocalSupplements();
+    const dataset = await loadSupplements();
     const response = finalizeChatbotResponse(supplementResponse(dataset, "安衛法附則"));
     expect(response.sources.every(s => s.applicationStatus === "unknown")).toBe(true);
     expect(response.effectiveDateStatus.status).toBe("unknown");
@@ -258,7 +289,7 @@ describe.skipIf(!existsSync(localSupplementFile()))("five-law local route E2E", 
     expect(response.sources.find(source => source.article.includes("第26号"))?.text).toContain("酸素欠乏危険場所");
   });
   it("resolves annex legal item titles instead of their non-semantic XML Num", async () => {
-    const dataset = await loadLocalSupplements();
+    const dataset = await loadSupplements();
     const item = resolveRepresentativeRef(dataset, { lawId: "347CO0000000318", appendix: "6", item: "3の3" });
     expect(item.path).toMatch(/AppdxTable\[6\]\/Item\[5\]$/);
     expect(item.text).toContain("海水"); expect(item.text).not.toContain("雨水");
@@ -279,7 +310,7 @@ describe.skipIf(!existsSync(localSupplementFile()))("five-law local route E2E", 
     expect(response.effectiveDateStatus.status).toBe("unknown");
   });
   it("holds a cross-law representative case when a filter would discard part of the evidence", async () => {
-    const dataset = await loadLocalSupplements();
+    const dataset = await loadSupplements();
     expect(() => representativeResult(dataset, "玉掛け資格は？", "クレーン則")).toThrow(/category/);
   });
   it("retains raw newline boundaries in SSE and no-JS as well as JSON", async () => {
@@ -293,7 +324,7 @@ describe.skipIf(!existsSync(localSupplementFile()))("five-law local route E2E", 
     expect(html).not.toContain('href="/api/chatbot/local-evidence');
   });
   it("does not complete a bundle with a missing legal definition or educational exception", async () => {
-    const dataset = await loadLocalSupplements();
+    const dataset = await loadSupplements();
     const broken = { ...dataset, documents: dataset.documents.filter(doc => !(doc.lawId === "347M50002000032" && doc.articleNums.includes("第37条"))) };
     expect(() => representativeResult(broken, "玉掛け資格は？")).toThrow(/evidence/);
   });
