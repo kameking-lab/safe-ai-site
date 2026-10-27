@@ -47,3 +47,9 @@
 TTS側のモデル解放確認後、候補 `0160cace` に単一tscを1回実行した。02:13:36開始、02:14:05終了、29.14秒、終了コード2。ピークworking set 2,966MiB、空きRAM最小8.55GiB、heap上限3,072MiB。資源による中断なし。他担当のprocessは停止していない。
 
 診断は `deployment.test.ts:34` の環境fixtureに必須 `NODE_ENV` がないTS2345の1件。このテストfixtureに `NODE_ENV: "production"` を追加した。製品コードは変更していない。今回許可された全体検査1回は終了したため、修正後の再検査は未実行で、PASSとは扱わない。自tsc PID56768の終了と残存0を確認済み。実行ログは作業領域の `rag-release-tsc-attempt1-20261027.*` に保持する。
+
+## 02:17 UTCの修正後全体型検査
+
+再検査の許可を受け、候補 `0e6bac241cada2264e2f5942745655f446315aa9` に同じ監視付き単一tscを実行した。02:17:02開始、02:17:28終了、26.13秒、終了コード0、診断0件。ピークworking set 2,937MiB、空きRAM最小5.38GiB。自tsc PID57640の終了と残存0を02:18:13 UTCに確認した。証跡は作業領域の `rag-release-tsc-attempt2-20261027.*` と `rag-release-tsc-handoff-20261027.json` に保持する。上記の初回失敗記録も残す。
+
+02:22 UTCにこの候補の通常PR・必要CI・本番release ID設定・Vercel本番build/deploy1回の公開承認を受領した。PR #1081の初回CIは、旧XML調査メモに残ったローカル絶対パスを公開情報ガードが検出して停止したため、相対パス表記へ修正した。ガードは変更していない。この時点でVercelのPreview/本番buildはともに0回。
