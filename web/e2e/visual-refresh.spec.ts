@@ -1,5 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 
+test.use({ contextOptions: { reducedMotion: "reduce" } });
+
 const VISUAL_ROUTES = [
   "/",
   "/chatbot",
@@ -61,7 +63,7 @@ test("ホームは7つの道具への入口と控えめなチワワで、熱中�
     }),
   ).toBeVisible();
   await expect(
-    page.locator('img[src*="mascot-law-reading.webp"]:visible').first(),
+    page.locator("[data-pet-static]"),
   ).toBeVisible();
   await expect(
     page.locator("[data-home-lp]"),
@@ -91,7 +93,7 @@ test("追加画像には代替テキストがあり、主要画像の表示領�
   for (const { route, imageSelector } of [
     {
       route: "/",
-      imageSelector: 'img[src*="mascot-law-reading.webp"]',
+      imageSelector: 'img[data-pet-static]',
     },
     {
       route: "/materials/safety-images",
@@ -102,6 +104,9 @@ test("追加画像には代替テキストがあり、主要画像の表示領�
     await page.goto(route, { waitUntil: "domcontentloaded" });
     const visibleImage = page.locator(`${imageSelector}:visible`).first();
     await expect(visibleImage, route).toBeVisible();
+    await visibleImage.scrollIntoViewIfNeeded();
+    await expect(visibleImage).toHaveJSProperty("complete", true);
+    await expect.poll(() => visibleImage.evaluate((image: HTMLImageElement) => image.naturalWidth)).toBeGreaterThan(0);
     await expect(page.locator("main img:not([alt])"), route).toHaveCount(0);
     const imageMetrics = await visibleImage.evaluate((image) => {
         const rect = image.getBoundingClientRect();
@@ -113,8 +118,10 @@ test("追加画像には代替テキストがあり、主要画像の表示領�
       });
     if (route === "/") {
       await expect(
-        page.locator('img[alt="ヘルメットをかぶり、法令の本を持つチワワ"]'),
+        page.getByRole("img", { name: "緑のヘルメットをかぶった安全わんこ", exact: true }),
       ).toHaveCount(1);
+      // The labelled sprite viewport owns the accessible name; its image is decorative.
+      await expect(visibleImage).toHaveAttribute("alt", "");
     } else {
       expect(imageMetrics.alt?.trim().length ?? 0, route).toBeGreaterThan(0);
     }

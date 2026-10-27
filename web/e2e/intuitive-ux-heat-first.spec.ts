@@ -1,5 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 
+test.use({ contextOptions: { reducedMotion: "reduce" } });
+
 const DESKTOP_NAV = [
   ["今日の安全", "/risk"],
   ["熱中症対策", "/heat-illness-prevention"],
@@ -14,6 +16,7 @@ const DESKTOP_NAV = [
   ["国内の死亡事故速報", "/accident-news"],
   ["死亡事故DB", "/fatal-accidents"],
   ["事故分析", "/accidents-analytics"],
+  ["安全の解説記事", "/articles"],
   ["5分ビジュアルKYT", "/training/visual-ky"],
   ["教育・資格", "/education-certification"],
   ["自動化相談", "/services/automation"],
@@ -47,7 +50,11 @@ async function expectMainServices(page: Page) {
     await expect(card).toHaveCount(1);
     await expect(card).toHaveAttribute("href", href);
   }
-  await expect(page.getByRole("img", { name: "ヘルメットをかぶり、法令の本を持つチワワ" })).toBeVisible();
+  await expect(page.getByRole("img", { name: "緑のヘルメットをかぶった安全わんこ", exact: true })).toBeVisible();
+  const mascot = page.locator("[data-pet-static]");
+  await expect(mascot).toBeVisible();
+  await expect(mascot).toHaveJSProperty("complete", true);
+  await expect.poll(() => mascot.evaluate((image: HTMLImageElement) => image.naturalWidth)).toBeGreaterThan(0);
 }
 
 test("ホームは道具、原点、相談、最新情報の順で使える", async ({ page }) => {
@@ -147,7 +154,7 @@ test("モバイルは7道具と最新情報を区別し、重複のないメニ�
 });
 
 test("JavaScript無効でも7道具・事故の確認状態・通常リンクをSSR HTMLに保持する", async ({ browser, baseURL }) => {
-  const context = await browser.newContext({ baseURL, javaScriptEnabled: false, viewport: { width: 390, height: 844 }, locale: "ja-JP" });
+  const context = await browser.newContext({ baseURL, javaScriptEnabled: false, reducedMotion: "reduce", viewport: { width: 390, height: 844 }, locale: "ja-JP" });
   try {
     const page = await context.newPage();
     const response = await page.goto("/", { waitUntil: "domcontentloaded" });

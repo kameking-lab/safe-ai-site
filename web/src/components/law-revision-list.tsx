@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import { useRouter } from "next/navigation";
 import { MessageSquare, Pencil, RotateCcw, Sparkles, Zap } from "lucide-react";
 import type { IndustryTag, LawRevision, RevisionImpact } from "@/lib/types/domain";
@@ -43,6 +43,7 @@ const KIND_BADGE_CLASS: Record<string, string> = {
 
 export type LawRevisionListProps = {
   revisions: LawRevision[];
+  consumedHashRef?: RefObject<string | null>;
   selectedRevisionId: string;
   loadingRevisionId: string | null;
   error?: ServiceError | null;
@@ -180,6 +181,7 @@ const PARAM_TO_STATUS: Record<string, EnforcementStatus> = {
 
 export function LawRevisionList({
   revisions,
+  consumedHashRef,
   selectedRevisionId,
   loadingRevisionId,
   error,
@@ -190,6 +192,8 @@ export function LawRevisionList({
   onSelectForQuestion,
 }: LawRevisionListProps) {
   const router = useRouter();
+  const localConsumedHashRef = useRef<string | null>(null);
+  const activeConsumedHashRef = consumedHashRef ?? localConsumedHashRef;
 
   const [search, setSearch] = useState("");
   const [articleHighlights, setArticleHighlights] = useState<string[]>([]);
@@ -496,8 +500,49 @@ export function LawRevisionList({
   // C-1/C-6: 初期表示は12件（120件全描画は SSR HTML・hydration とも重い）。
   // 「もっと見る」で全件展開。フィルタ・検索は全件に対して効く（filtered が母集合）。
   const [showAllRevisions, setShowAllRevisions] = useState(false);
+  const [hashTargetId, setHashTargetId] = useState<string | null>(null);
+  const [pendingHashScrollId, setPendingHashScrollId] = useState<string | null>(null);
   const visibleRevisions = showAllRevisions ? filtered : filtered.slice(0, INITIAL_LIST_COUNT);
   const hiddenRevisionCount = filtered.length - visibleRevisions.length;
+
+  useEffect(() => {
+    const revealHashTarget = () => {
+      const target = revisions.find((revision) => window.location.hash === `#rev-${revision.id}`);
+      if (!target) {
+        setHashTargetId(null);
+        setPendingHashScrollId(null);
+        return;
+      }
+      const year = Number(target.publishedAt.slice(0, 4));
+      if (Number.isFinite(year)) {
+        setYearFrom((current) => Math.min(current, year));
+        setYearTo((current) => Math.max(current, year));
+      }
+      setShowAllRevisions(true);
+      setHashTargetId(target.id);
+      setPendingHashScrollId(activeConsumedHashRef.current === window.location.hash ? null : target.id);
+    };
+    revealHashTarget();
+    const onHashChange = () => {
+      activeConsumedHashRef.current = null;
+      revealHashTarget();
+    };
+    window.addEventListener("hashchange", onHashChange);
+    return () => window.removeEventListener("hashchange", onHashChange);
+  }, [revisions, activeConsumedHashRef]);
+
+  useEffect(() => {
+    if (!pendingHashScrollId || !showAllRevisions || !filtered.some((revision) => revision.id === pendingHashScrollId)) return;
+    const target = document.getElementById(`rev-${pendingHashScrollId}`);
+    if (!target) return;
+    if (window.location.hash !== `#rev-${pendingHashScrollId}`) {
+      setPendingHashScrollId(null);
+      return;
+    }
+    target.scrollIntoView?.({ block: "center" });
+    activeConsumedHashRef.current = window.location.hash;
+    setPendingHashScrollId(null);
+  }, [pendingHashScrollId, showAllRevisions, filtered, activeConsumedHashRef]);
 
   return (
     <section
@@ -859,7 +904,7 @@ export function LawRevisionList({
                 containIntrinsicSize: "auto 280px",
               }}
               className={`scroll-mt-24 rounded-xl border bg-white p-4 transition ${
-                isSelected
+                isSelected || hashTargetId === revision.id
                   ? "border-emerald-300 bg-emerald-50/30 ring-1 ring-emerald-200"
                   : isArticleMatch
                     ? "border-violet-300 bg-violet-50/40 ring-1 ring-violet-200"
