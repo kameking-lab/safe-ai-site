@@ -1,5 +1,7 @@
 # 5法令の公式XML取得・附則/別表構造化試験
 
+> 2026-10-27追記: この文書が参照する旧検証JSONは、結果を変えず[旧検証の保存先](legal-rag-historical-evidence-2026-10-26.md)へ整理した。以下は当時の検証記録。
+
 ## 結果
 
 2026-10-26基準の安衛法・令・則・クレーン則・酸欠則を、親が指定した公式e-Gov APIで5件取得した。リクエストはlaw_id指定、`asof=2026-10-26&response_format=json&law_full_text_format=xml&omit_amendment_suppl_provision=false`。各履歴IDは共有済みの期待値と一致。Base64を厳密に復号し、原レスポンスと原XMLを別々にhash保存した。

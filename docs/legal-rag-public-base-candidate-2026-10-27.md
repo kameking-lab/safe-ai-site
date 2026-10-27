@@ -1,5 +1,7 @@
 # 本番コードと整合した法令RAGローカル候補
 
+> 続きのローカル実装・検証は[配備準備と更新方針](legal-rag-release-readiness-2026-10-27.md)を参照。以下はdb0b708d段階の記録。
+
 ## 対象と変更
 
 専用worktree `safe-ai`、ローカル枝 `codex/legal-rag-public-base-20261027`。旧枝 `codex/legal-rag-five-law-mvp-20261026` は `2cd1a990` に保持した。未コミット作業がないことを確認してから、本番 `bbc4bb730d77ee425ec463e9dce26d606b81556a` をmerge `5f3b4522` で取り込んだ。競合解決は不要だった。
