@@ -31,7 +31,7 @@ it("requires exact opt-in and honors off/staging/preview even with the local fla
     { SAFE_AI_LEGAL_SUPPLEMENTS_RELEASE: release.release, VERCEL_ENV: "preview" },
     { SAFE_AI_LEGAL_SUPPLEMENTS_RELEASE: release.release, SAFE_AI_STAGING_MODE: " TRUE " },
   ]) expect(supplementsEnabled(env as NodeJS.ProcessEnv)).toBe(false);
-  expect(supplementsRequested({ SAFE_AI_LEGAL_SUPPLEMENTS_RELEASE: "wrong" })).toBe(true);
+  expect(supplementsRequested({ NODE_ENV: "production", SAFE_AI_LEGAL_SUPPLEMENTS_RELEASE: "wrong" })).toBe(true);
 });
 
 it("single-flights cold reads, reuses a verified package, and disables a warm cache", async () => {
