@@ -113,6 +113,18 @@ describe.skipIf(!existsSync(localSupplementFile()))("five-law local route E2E", 
     expect(response.effectiveDateStatus.status).toBe("unknown");
     expect(response.directAnswer).toContain("確定できません");
   });
+  it("does not reinterpret today or current law as the fixed snapshot date", async () => {
+    for (const query of ["今日の玉掛け資格は？", "現行の安衛令別表6は？", "最新の酸欠作業者教育は？", "2026年10月26日の現在のクレーン則91条は？"]) {
+      const response = await ask(query);
+      expect(response.sources).toHaveLength(0);
+      expect(response.effectiveDateStatus.status).toBe("unknown");
+      expect(response.directAnswer).toContain("確定できません");
+      expect(response.clarificationQuestion).toContain("年月日");
+    }
+    const fixedDate = await ask("2026年10月26日の玉掛け資格は？");
+    expect(fixedDate.sources.length).toBeGreaterThan(0);
+    expect(fixedDate.sources.every(source => source.asOf === "2026-10-26")).toBe(true);
+  });
   it.each(["安衛法別表1と安衛令別表6を確認", "労働安全衛生法別表1と労働安全衛生法施行令別表6を確認"])("keeps each appendix paired to its own law: %s", async query => {
     const response = await ask(query);
     expect(response.sources).toHaveLength(2);

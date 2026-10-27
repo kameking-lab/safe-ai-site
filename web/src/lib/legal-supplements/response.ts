@@ -20,6 +20,12 @@ function hold(message: string, asOf: string | null, clarification: string): Chat
 
 export function supplementResponse(dataset: SupplementDataset, query: string, category = "all", originalQuery = query): ChatbotResponseDraft {
   const temporalQuery = withoutAmendmentIdentityDates(dataset, query);
+  // A fixed snapshot date is not the runtime date or proof of current law.
+  // Ask for an explicit work date even when a relative request accompanies it.
+  if (/今日|本日|現在|現時点|現行|最新|今朝|今夜|今週|今月|今年|いま|今(?:の|は|も|、|，|？|\?|$)/.test(temporalQuery.normalize("NFKC"))) {
+    return hold(`保存資料は${dataset.asOf}を指定して取得した版です。現在・最新の施行状態をこの版だけで確定できません。`,
+      null, "確認する作業日を年月日で指定してください。");
+  }
   const period = requestedLegalPeriod(temporalQuery);
   const time = classifyLegalQuestionTime(temporalQuery, new Date(`${dataset.asOf}T00:00:00+09:00`));
   const dateMentions = temporalQuery.match(/(?:\d{4}年\d+月\d+日|\d{4}[-/.]\d+[-/.]\d+|(?:令和|平成|昭和)(?:元|\d+)年\d+月\d+日)/g) ?? [];
