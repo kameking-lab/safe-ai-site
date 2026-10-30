@@ -1,8 +1,11 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import { ChatbotPanel } from "./chatbot-panel";
+import { supplementResponse } from "@/lib/legal-supplements/response";
+import { finalizeChatbotResponse } from "@/lib/chatbot-contract";
+import type { SupplementDataset } from "@/lib/legal-supplements/types";
 
 vi.mock("next/navigation", () => ({
   useSearchParams: () => ({ get: () => null }),
@@ -22,6 +25,59 @@ function submitExample(name: string) {
 }
 
 describe("ChatbotPanel a11y", () => {
+  it.skipIf(!existsSync(resolve("../../legal-rag-lab-2026-10-26/rag-dataset-v1.json"))).each([
+    ["玉掛け資格は？", "0.5トン未満だから特別教育不要", "揚貨装置"],
+    ["酸欠主任者と特別教育は？", "大臣指定", "酸素及び硫化水素"],
+    ["クレーン則91条の準用は？", "所轄労働基準監督署長", "必要かどうか"],
+  ])("keeps actual representative conditions visible for %s", async (query, first, last) => {
+    const dataset = JSON.parse(readFileSync(resolve("../../legal-rag-lab-2026-10-26/rag-dataset-v1.json"), "utf8")) as SupplementDataset;
+    const payload = finalizeChatbotResponse(supplementResponse(dataset, query));
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(chatbotStream(payload)));
+    render(<ChatbotPanel />);
+    submitExample("電気作業の資格は？");
+    await screen.findByText(payload.directAnswer);
+    expect(document.body.textContent).toContain(first);
+    expect(document.body.textContent).toContain(last);
+    for (const condition of payload.importantConditions) expect(document.body.textContent).toContain(condition);
+  });
+  it("matches local article citations by identity even when their order differs", async () => {
+    const articles = ["第三十四条の二", "第三十四条"];
+    const sources = articles.map((article, index) => ({
+      law: "労働安全衛生規則", lawShort: "安衛則", article, text: `本文${index}`, articleTitle: `資料${index}`,
+      legalEvidence: { documentId: `document-${index}`, kind: "main", xmlPath: `/Article[${index}]`, snapshotAsOf: "2026-10-26", xmlSha256: "a".repeat(64), figuresPending: false, hasTables: false },
+    }));
+    const citations = sources.map(source => ({ lawShort: source.lawShort, fullName: source.law,
+      articleNum: source.article, articleTitle: source.articleTitle, searchHref: `/api/chatbot/local-evidence?documentId=${source.legalEvidence.documentId}` })).reverse();
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(chatbotStream({ answer: "結論\n原文を確認できます。", substantiveAnswer: "原文を確認できます。", sources, citations, source_type: "rag", requiresHumanReview: true })));
+    render(<ChatbotPanel />);
+    submitExample("電気作業の資格は？");
+    await screen.findByText("原文を確認できます。");
+    const entries = [...document.querySelectorAll("[data-chatbot-source-entry]")];
+    expect(entries).toHaveLength(2);
+    for (let index = 0; index < 2; index++) {
+      expect(entries[index]?.textContent).toContain(`資料${index}`);
+      expect(entries[index]?.textContent).toContain(`本文${index}`);
+      expect(entries[index]?.querySelector('a[href^="/api/chatbot/local-evidence"]')?.getAttribute("href")).toBe(`/api/chatbot/local-evidence?documentId=document-${index}`);
+    }
+  });
+  it("keeps appendix positions separate from article numbers and exposes the stored full original", async () => {
+    const id = "347CO0000000318_20261001_508CO0000000196:/Law[1]/LawBody[1]/AppdxTable[6]";
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(chatbotStream({
+      answer: "結論\n別表の適用条件は未確認です。", substantiveAnswer: "別表の適用条件は未確認です。",
+      assumptions: [], conditions: [], citations: [], clarificationQuestion: null, quickReplies: [],
+      sources: [{ law: "労働安全衛生法施行令", lawShort: "安衛令", article: "別表第六（第六条関係）", text: "酸素欠乏危険場所", applicationStatus: "unknown",
+        legalEvidence: { documentId: id, kind: "appendix", xmlPath: "/Law[1]/LawBody[1]/AppdxTable[6]", snapshotAsOf: "2026-10-26", xmlSha256: "a".repeat(64), figuresPending: false, hasTables: false } }],
+      source_type: "rag", requiresHumanReview: true,
+    })));
+    render(<ChatbotPanel />);
+    submitExample("電気作業の資格は？");
+    await screen.findByText("別表の適用条件は未確認です。");
+    const locator = document.querySelector("[data-chatbot-source-locator]");
+    expect(locator?.textContent).toContain("資料内位置:");
+    expect(locator?.textContent).toContain("別表第六（第六条関係）");
+    const link = document.querySelector('a[href^="/api/chatbot/local-evidence"]');
+    expect(link?.getAttribute("href")).toBe(`/api/chatbot/local-evidence?documentId=${encodeURIComponent(id)}`);
+  });
   it("puts an example in the composer and sends only the edited question", async () => {
     const fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);

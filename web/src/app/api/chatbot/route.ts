@@ -1,3 +1,4 @@
+import { isLocalSupplementRequest, localSupplementResponse } from "@/lib/legal-supplements/response";
 import { NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
 import { GEMINI_FAST_THINKING_CONFIG, GEMINI_FLASH_MODEL } from "@/lib/gemini-model";
@@ -217,7 +218,8 @@ export async function POST(request: Request) {
     context: rehydratePublicLegalConversationContext(body.context),
   });
 
-  if (hasFutureLegalPremise(message, legalAnswerNow)) {
+  const localSupplement = isLocalSupplementRequest(resolvedConversation.query);
+  if (!localSupplement && hasFutureLegalPremise(message, legalAnswerNow)) {
     return NextResponse.json<ChatbotResponse>(finalizeChatbotResponse({
       requiresHumanReview: true,
       answer: buildFutureLegalHoldAnswer(message, legalAnswerNow),
@@ -306,6 +308,13 @@ export async function POST(request: Request) {
   }
 
   const lawCategory: LawCategoryFilter = body?.lawCategory ?? "all";
+  if (localSupplement) {
+    return NextResponse.json<ChatbotResponse>(finalizeChatbotResponse({
+      ...await localSupplementResponse(retrievalQuery, lawCategory, message),
+      context: resolvedConversation.context,
+    }));
+  }
+
   const relatedNotices = searchRelevantNotices(retrievalQuery, 3);
 
   // Cache lookup. Only safe for stateless (no-history) requests: with a

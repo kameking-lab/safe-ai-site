@@ -6,6 +6,7 @@ import { lawArticleToSource } from "@/lib/chatbot-route-shared";
 import type { LawArticle } from "@/data/laws/law-types";
 import { lawSourceProvenance } from "./legal-source-provenance";
 import { formatSourceProvenance, normalizeSourceProvenance } from "./source-provenance";
+import { buildStructuredCitations } from "./chatbot-enrichment";
 
 const electricalArticles: readonly LawArticle[] = verifiedPrimaryElectricalArticles;
 const record = verification.records[0]!;
@@ -14,6 +15,27 @@ const article: LawArticle = {
   sourceUrl: `https://laws.e-gov.go.jp/law/${record.lawId}`, sourceLawId: record.lawId,
   sourceRevisionId: record.revisionId, sourceHash: record.snapshotHash, sourceFetchedAt: "2026-07-20T03:00:00.000Z",
 };
+
+describe("chat source citation links", () => {
+  it.each(electricalArticles)("shares the preserved official URL for $lawShort $articleNum", (item) => {
+    const source = lawArticleToSource(item, "条文", new Date("2026-10-12T00:00:00+09:00"));
+    expect(source.url).toBe(item.sourceUrl);
+    expect(source.sourceProvenance?.url).toBe(item.sourceUrl);
+    expect(source.url).toBe(buildStructuredCitations([item])[0]?.egovHref);
+  });
+
+  it.each([
+    "javascript:alert(1)",
+    "https://laws.e-gov.go.jp.evil.example/law/339AC0000000170",
+    "https://laws.e-gov.go.jp/law/347AC0000000057",
+  ])("does not expose a rejected URL through the source fallback: %s", (sourceUrl) => {
+    const item = { ...electricalArticles[0]!, sourceUrl };
+    const source = lawArticleToSource(item, "条文");
+    expect(source.url).toBeUndefined();
+    expect(source.sourceProvenance?.url).toBeUndefined();
+    expect(buildStructuredCitations([item])[0]?.egovHref).toBeUndefined();
+  });
+});
 
 describe("item-level source facts", () => {
   it("preserves acquisition and the exact committed revision confirmation as separate facts", () => {

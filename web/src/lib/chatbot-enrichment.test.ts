@@ -10,6 +10,7 @@ import {
   sanitizePlaceholderCitations,
 } from "@/lib/chatbot-enrichment";
 import { isPublicRouteAvailable } from "@/lib/public-content-policy";
+import { verifiedPrimaryElectricalArticles } from "@/data/laws/verified-primary-electrical";
 
 const article: LawArticle = {
   law: "労働安全衛生規則",
@@ -21,6 +22,26 @@ const article: LawArticle = {
 };
 
 describe("buildStructuredCitations", () => {
+  it("preserves existing verified primary-source dates, anchors and ministry URLs", () => {
+    const sources = verifiedPrimaryElectricalArticles.map((source) => ({
+      ...source, keywords: [...source.keywords],
+    }));
+    const citations = buildStructuredCitations(sources);
+    expect(citations.map((citation) => citation.egovHref)).toEqual(sources.map((source) => source.sourceUrl));
+    expect(citations.map((citation) => citation.articleNum)).toEqual(sources.map((source) => source.articleNum));
+  });
+
+  it("does not launder a rejected source URL into a generic official citation", () => {
+    const source = verifiedPrimaryElectricalArticles[0];
+    const citations = buildStructuredCitations([{
+      ...source,
+      keywords: [...source.keywords],
+      sourceUrl: "https://laws.e-gov.go.jp.evil.example/law/339AC0000000170",
+    }]);
+    expect(citations[0]?.egovHref).toBeUndefined();
+    expect(citations[0]?.articleNum).toBe(source.articleNum);
+  });
+
   it("returns triple (article + issuer + effective date)", () => {
     const result = buildStructuredCitations([article]);
     expect(result).toHaveLength(1);
