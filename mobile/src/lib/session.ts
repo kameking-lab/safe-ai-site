@@ -36,11 +36,11 @@ async function writeSessionToken(token:string|null) {
   memoryToken=token;window.dispatchEvent(new Event('anzen-session-changed'));
 }
 export async function setSessionToken(token:string|null){return serializeSession(()=>writeSessionToken(token));}
-export async function eraseSessionDataIfCurrent(binding:string,erase:()=>Promise<void>){
+export async function eraseSessionDataIfCurrent(binding:string,erase:()=>Promise<void>,completed:()=>Promise<void>){
   return serializeSession(async()=>{
     if(await sessionBinding()!==binding)return false;
     // Login cannot install another member's session while account data is being erased.
-    await erase();await writeSessionToken(null);await writeLogin(null);return true;
+    await erase();await writeSessionToken(null);await writeLogin(null);await completed();return true;
   });
 }
 export async function siteApi(path:string,body?:unknown,method?:string) {

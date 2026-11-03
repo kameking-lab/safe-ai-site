@@ -1,13 +1,13 @@
 import { beforeEach,afterEach,it,expect,vi } from 'vitest';
-const state=vi.hoisted(()=>({prefs:new Map<string,string>(),vault:new Map<string,string>(),local:new Map<string,string>(),content:new Map<string,string>(),status:'completed',fetch:vi.fn(),remove:vi.fn(),forget:vi.fn(async()=>{})}));
-vi.mock('@capacitor/core',()=>({Capacitor:{isNativePlatform:()=>true},CapacitorHttp:{request:async({url,data}:any)=>{const r=await state.fetch(url,{body:JSON.stringify(data)});return {url,status:r.status,data:await r.json()};}},registerPlugin:()=>({get:async(options?:{purpose?:string})=>({value:state.vault.get(options?.purpose??'session')}),set:async({purpose,value}:any)=>{state.vault.set(purpose??'session',value);},clear:async(options?:{purpose?:string})=>{state.vault.delete(options?.purpose??'session');}})}));
+const state=vi.hoisted(()=>({prefs:new Map<string,string>(),vault:new Map<string,string>(),local:new Map<string,string>(),content:new Map<string,string>(),status:'completed',failClear:false,fetch:vi.fn(),remove:vi.fn(),forget:vi.fn(async()=>{})}));
+vi.mock('@capacitor/core',()=>({Capacitor:{isNativePlatform:()=>true},CapacitorHttp:{request:async({url,data}:any)=>{const r=await state.fetch(url,{body:JSON.stringify(data)});return {url,status:r.status,data:await r.json()};}},registerPlugin:()=>({get:async(options?:{purpose?:string})=>({value:state.vault.get(options?.purpose??'session')}),set:async({purpose,value}:any)=>{state.vault.set(purpose??'session',value);},clear:async(options?:{purpose?:string})=>{if(!options?.purpose&&state.failClear){state.failClear=false;throw new Error('keychain');}state.vault.delete(options?.purpose??'session');}})}));
 vi.mock('@capacitor/push-notifications',()=>({PushNotifications:{unregister:vi.fn(async()=>{})}}));
 vi.mock('@capacitor/preferences',()=>({Preferences:{get:async({key}:any)=>({value:state.prefs.get(key)??null}),set:async({key,value}:any)=>{state.prefs.set(key,value);},remove:async({key}:any)=>{state.prefs.delete(key);}}}));
 vi.mock('../src/lib/billing',()=>({billing:{forget:state.forget}}));
 vi.mock('../src/lib/native',()=>({settingsStore:{get:async(k:string)=>state.prefs.get('anzen.'+k)??null,set:async(k:string,v:string)=>{state.prefs.set('anzen.'+k,v);},remove:async(k:string)=>{state.prefs.delete('anzen.'+k);}},contentStore:{remove:state.remove}}));
 vi.mock('@/lib/local-data-registry',()=>({collectAppLocalStorageKeys:()=>[...state.local.keys()]}));
 beforeEach(()=>{
-  vi.resetModules();vi.clearAllMocks();state.prefs.clear();state.vault.clear();state.local.clear();state.content.clear();state.status='completed';
+  vi.resetModules();vi.clearAllMocks();state.prefs.clear();state.vault.clear();state.local.clear();state.content.clear();state.status='completed';state.failClear=false;
   vi.stubGlobal('window',{dispatchEvent:vi.fn()});vi.stubGlobal('localStorage',{removeItem:(k:string)=>state.local.delete(k)});
   state.remove.mockImplementation(async(k:string)=>{state.content.delete(k);});
   state.fetch.mockImplementation(async(_url:string,options:any)=>{const body=JSON.parse(options.body);return {status:200,json:async()=>body.action==='prepare'?{id:'deletion-a',receipt:'r'.repeat(43),confirmation:'c'.repeat(43),expiresAt:new Date().toISOString(),subject:'member-a'}:{status:state.status,completedAt:null}};});vi.stubGlobal('fetch',state.fetch);
@@ -41,4 +41,9 @@ it('waits for every removal after a disk error before installing another member 
   const deleting=deletion.confirmDeletion(preparation).catch(e=>(e as Error).message);await vi.waitFor(()=>expect(finish).toBeTypeOf('function'));
   let installed=false;const login=session.setSessionToken('session-b').then(()=>{installed=true;saveB();});await Promise.resolve();expect(installed).toBe(false);expect(await session.sessionToken()).toBe('session-a');
   finish();expect(await deleting).toBe('disk');await login;await deletion.checkDeletion();expect(await session.sessionToken()).toBe('session-b');expect(state.content.get('saved')).toBe('member-b');
+});
+it('does not mark erasure complete until the originating Keychain session is cleared',async()=>{
+  const {session,deletion,preparation}=await start();state.failClear=true;await expect(deletion.confirmDeletion(preparation)).rejects.toThrow('keychain');
+  expect(JSON.parse(state.prefs.get('anzen.deletion-receipt')!).erased).toBe(false);expect(await session.sessionToken()).toBe('session-a');
+  await deletion.checkDeletion();expect(await session.sessionToken()).toBeNull();expect(JSON.parse(state.prefs.get('anzen.deletion-receipt')!).erased).toBe(true);
 });

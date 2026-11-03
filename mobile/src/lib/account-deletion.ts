@@ -24,8 +24,8 @@ export async function prepareDeletion(){
 }
 async function eraseReceiptData(record:Receipt){
   if(record.erased)return;
-  await eraseSessionDataIfCurrent(record.sessionBinding,async()=>{
-    await clearDeletedAccountData();record.erased=true;
+  await eraseSessionDataIfCurrent(record.sessionBinding,clearDeletedAccountData,async()=>{
+    record.erased=true;
     await settingsStore.set('deletion-receipt',JSON.stringify(record));
   });
 }
