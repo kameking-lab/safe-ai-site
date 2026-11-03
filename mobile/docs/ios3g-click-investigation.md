@@ -13,8 +13,8 @@ assertion fails. This was observed twice, with traces retained.
 The deletion panel now follows the static account heading, ahead of all
 asynchronous membership content. No API completion is added to its availability
 conditions. Hydration, busy state, confirmation, reauthentication and session
-erasure remain unchanged. The added test checks one preparation request and an
-unchanged button position while membership arrives during the press.
+erasure remain unchanged. The added tests hold membership and account details
+separately, checking one preparation request and an unchanged button position.
 
 The original intermittent WebKit failure has **not** been reproduced in the
 baseline experiments. The controlled layout failure is proven on Desktop; it
@@ -39,6 +39,6 @@ The child environment removes credential variables and blocks outbound Node
 HTTP. Browser HTTPS is mocked or blocked by the tests.
 
 No timeout increase, configured retry, forced click or existing test removal is
-part of this change. The original 78 cases are retained; the additional press
-test runs in all three projects, making 81 cases. The evidence and final counts
+part of this change. The original 78 cases are retained; the two additional press
+tests run in all three projects, making 84 cases. The evidence and final counts
 are recorded outside the repository in the requested IOS3G report.
