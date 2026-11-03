@@ -1,18 +1,19 @@
 'use client';
-import { useCallback,useEffect,useState } from 'react';
+import { useCallback,useEffect,useRef,useState } from 'react';
 import { billing,isVerifiedPro,type BillingConfig,type MemberEntitlement } from '../lib/billing';
 import { logout,startLogin,siteApi } from '../lib/session';
 import { openSource } from '../lib/native';
 import { NativeAccountDetails } from './native-account-details';
 const messages:Record<string,string>={UNAUTHORIZED:'既存の安全AI会員でログインしてください。',BILLING_NOT_CONFIGURED:'App Store商品の設定待ちです。購入はまだできません。',ALREADY_SUBSCRIBED:'購入済みです。追加の購入は不要です。',PURCHASE_PENDING:'購入処理が保留中です。購入を繰り返さず「権利を再確認」または復元をお試しください。',ENTITLEMENT_SYNC_PENDING:'権利を確認できません。二重購入を避けるため、新規購入を停止しています。',PRODUCT_MISMATCH:'App Storeの商品・価格が設定と一致しないため販売を停止しています。',PURCHASE_OWNED_BY_OTHER_ACCOUNT:'この購入は別の会員に紐付いています。元の会員でログインしてください。'};
 export function AccountPanel(){
+  const refreshGeneration=useRef(0);
   const [config,setConfig]=useState<BillingConfig|null>(null);const [member,setMember]=useState<MemberEntitlement|null>(null);const [price,setPrice]=useState('');const [message,setMessage]=useState('');const [busy,setBusy]=useState(false);
-  const refresh=useCallback(async()=>{setPrice('');try{const c=await billing.config();setConfig(c);const m=await billing.entitlement();setMember(m);if(m.plan==='free' && m.syncState==='verified' && c.ready){const p=await billing.offering(c,m);setPrice(p.product.priceString);}setMessage('会員の権利を確認しました。');}catch(e){setMember(null);setMessage(messages[(e as Error).message]??'会員情報を確認できません。時間をおいて再確認してください。');}},[]);
+  const refresh=useCallback(async()=>{const ticket=++refreshGeneration.current;setPrice('');setMember(null);try{const c=await billing.config();if(ticket!==refreshGeneration.current)return;setConfig(c);const m=await billing.entitlement();if(ticket!==refreshGeneration.current)return;setMember(m);if(m.plan==='free' && m.syncState==='verified' && c.ready){const p=await billing.offering(c,m);if(ticket!==refreshGeneration.current)return;setPrice(p.product.priceString);}setMessage('会員の権利を確認しました。');}catch(e){if(ticket!==refreshGeneration.current)return;setMember(null);setMessage(messages[(e as Error).message]??'会員情報を確認できません。時間をおいて再確認してください。');}},[]);
   useEffect(()=>{
     void refresh();const handler=()=>{void refresh();};window.addEventListener('anzen-session-changed',handler);
     window.addEventListener('anzen-app-active',handler);
     const timer=setInterval(()=>{void refresh();},60000);
-    return()=>{clearInterval(timer);window.removeEventListener('anzen-session-changed',handler);window.removeEventListener('anzen-app-active',handler);};
+    return()=>{refreshGeneration.current++;clearInterval(timer);window.removeEventListener('anzen-session-changed',handler);window.removeEventListener('anzen-app-active',handler);};
   },[refresh]);
   async function action(fn:()=>Promise<unknown>){if(busy)return;setBusy(true);try{await fn();await refresh();}catch(e){const err=e as {message?:string;userCancelled?:boolean;code?:string};setMember(await billing.entitlement().catch(()=>null));setMessage(err.userCancelled || err.code==='1'?'購入をキャンセルしました。権利は変更していません。':err.code==='20'?'App Storeで購入が保留されています。承認後に権利を再確認してください。':messages[err.message??'']??'処理を完了できません。購入が完了している場合は復元・再確認をお試しください。');}finally{setBusy(false);}}
   const pro=isVerifiedPro(member);const pending=member?.syncState!=='verified' || member?.purchasePending;

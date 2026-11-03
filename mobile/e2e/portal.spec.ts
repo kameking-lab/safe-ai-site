@@ -2,6 +2,7 @@ import { expect, test, type BrowserContext } from '@playwright/test';
 import { capability, aiResult } from '../tests/fixtures';
 import seed from '../src/data/seed.json' with { type: 'json' };
 const host = 'https://www.anzen-ai-portal.jp';
+test.beforeEach(async({context})=>{await context.route('https://**/*',route=>route.abort());});
 function signage(sourceFetchedAt = new Date().toISOString()) {
   return { fetchedAt: new Date().toISOString(), degradedSources: [],
     laborTrend: [{ title: 'ローカル試験：事故速報の見出し', link: 'https://example.org/report/1', pubDate: new Date().toISOString() }],

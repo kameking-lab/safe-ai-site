@@ -64,3 +64,20 @@ test('loads authenticated fleet rows using the selected organization instead of 
   });
   await page.goto('/signage/manage/?organization=mock-org');await expect(page.getByRole('heading',{name:'モック組織 の実端末'})).toBeVisible();await expect(page.getByRole('cell',{name:'情報期限切れ'})).toBeVisible();expect(organization).toBe('mock-org');
 });
+
+test('keeps the complete weather location catalog and stops a live display after a failed refresh',async({page,context})=>{
+  let failWeather=false;
+  await context.route('https://www.anzen-ai-portal.jp/api/**',async route=>{
+    const url=new URL(route.request().url());let body:unknown;
+    if(url.pathname==='/api/signage-data'){
+      if(failWeather)return route.abort();
+      const now=new Date().toISOString();body={fetchedAt:now,degradedSources:[],laborTrend:[],jmaSourceFetchedAt:now,jmaSelectedState:'live',jmaHeadline:null,jmaReportTime:now,selectedWarnings:[],locationLabel:'モック地点'};
+    }else if(url.pathname==='/api/me/weather-locations')body={locations:[],limit:10,notifications:true};else return route.abort();
+    await route.fulfill({status:200,contentType:'application/json',headers:{'Access-Control-Allow-Origin':'http://127.0.0.1:3213','Access-Control-Allow-Credentials':'true','Access-Control-Allow-Headers':'content-type,authorization,x-anzen-native'},body:JSON.stringify(body)});
+  });
+  await page.goto('/notifications/');const panel=page.locator('section.native-panel');
+  await expect(panel.getByText('気象庁のデータを取得済み',{exact:true})).toBeVisible();
+  const catalog=panel.getByRole('combobox');expect(await catalog.first().locator('option').count()).toBeGreaterThan(47);expect(await catalog.nth(1).locator('option').count()).toBe(await catalog.first().locator('option').count());
+  failWeather=true;await page.evaluate(()=>window.dispatchEvent(new Event('anzen-app-active')));
+  await expect(panel.getByText('気象庁のデータを取得済み',{exact:true})).toHaveCount(0);await expect(panel.getByText(/現在の警報状況は未確認です/)).toBeVisible();await expect(panel.getByText(/現在の警報情報を取得できません/)).toBeVisible();
+});
