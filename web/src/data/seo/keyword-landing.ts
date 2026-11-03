@@ -220,9 +220,9 @@ export const KEYWORD_LANDINGS: KeywordLanding[] = [
         description: "評価方法と直近の結果を確認",
       },
       {
-        href: "/guides/annual-safety-plan-generator",
-        label: "ガイド：年次安全衛生計画 業種別 ジェネレーター",
-        description: "AIチャットの回答を年次計画書に落とし込むときの導線解説",
+        href: "/about/quality",
+        label: "情報品質・確認範囲",
+        description: "法令版の照合と個別回答の確認状態を確認",
       },
       {
         href: "/guides/chemical-ra-create-simple",
@@ -354,8 +354,8 @@ export const KEYWORD_LANDINGS: KeywordLanding[] = [
       },
       {
         href: "/accidents-analytics",
-        label: "事故統計ダッシュボード（25軸）",
-        description: "年次推移・年代別・業種別など25軸で可視化",
+        label: "事故分析ダッシュボード（12種類）",
+        description: "年・月・業種・事故種類・地域・規模など12種類の条件で分析",
       },
       {
         href: "/guides/annual-safety-plan-generator",

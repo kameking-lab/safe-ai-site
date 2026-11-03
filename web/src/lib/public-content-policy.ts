@@ -9,6 +9,7 @@
  * search, sitemap and feature catalogs can apply the same fail-closed rule.
  */
 import { isArticleQuarantined } from "@/lib/article-quarantine";
+import { hasApprovedPublicContentRevalidation,requiresPublicContentRevalidation } from './public-content-revalidation';
 import { EXAM_ID_PATTERN, EXAM_LIBRARY_PATH } from '@/lib/exam-library-model';
 
 export const PUBLIC_CONSTRUCTION_CALCULATOR_SLUGS = [
@@ -59,6 +60,7 @@ export function isPublishedExamLibraryPath(path:string):boolean {
 
 export function isQuarantinedPublicPath(href: string): boolean {
   const path = pathOnly(href);
+  if(requiresPublicContentRevalidation(path))return !hasApprovedPublicContentRevalidation(path);
 
   if (
     path === "/faq" ||
@@ -71,8 +73,6 @@ export function isQuarantinedPublicPath(href: string): boolean {
     path.startsWith("/health-checkup-scheduler/") ||
     path === "/accidents-reports" ||
     path.startsWith("/accidents-reports/") ||
-    path === "/accidents-analytics" ||
-    path.startsWith("/accidents-analytics/") ||
     (path.startsWith("/accidents/") && path !== "/accidents/mhlw-100620") ||
     path === "/strategy/plan-generator" ||
     path.startsWith("/strategy/plan-generator/") ||

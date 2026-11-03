@@ -15,7 +15,7 @@ describe("P0-1 重大災害事例ブラウザ（匿名・データセット出�
     expect(SERIOUS_CASES_META.sourceUrl).toBe(
       "https://anzeninfo.mhlw.go.jp/anzen_pg/SIB_FND.html",
     );
-    expect(SERIOUS_CASES_META.years).toEqual([2019, 2020, 2021, 2022, 2023]);
+    expect(SERIOUS_CASES_META.years).toEqual([2019, 2020, 2021, 2022, 2023, 2024]);
     expect(SERIOUS_CASES_META.generatedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);
     expect(SERIOUS_CASES_META.traceability).toBe("dataset-only");
   });

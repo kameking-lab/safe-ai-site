@@ -46,13 +46,89 @@ export type AnalyticsKpi = {
   fatalRatePercent: number;
 };
 
+export type AnalyticsSourceFilter =
+  | "official"
+  | "mhlw-deaths-compact"
+  | "mhlw-deaths-2024"
+  | "curated"
+  | "all";
+
+export type AnalyticsFilters = {
+  industry?: string | null;
+  type?: string | null;
+  year?: number | null;
+  month?: number | null;
+  industryMedium?: string | null;
+  cause?: string | null;
+  workplaceSize?: string | null;
+  occurrenceTime?: string | null;
+  prefecture?: string | null;
+  age?: string | null;
+  severity?: SeverityKey | null;
+  /** 省略時は公式死亡災害個票（curated を除外）。 */
+  source?: AnalyticsSourceFilter;
+};
+
+export type AnalyticsFilterOptions = {
+  industries: string[];
+  types: string[];
+  years: number[];
+  months: number[];
+  industryMediums: string[];
+  causes: string[];
+  workplaceSizes: string[];
+  occurrenceTimes: string[];
+  prefectures: string[];
+  ages: string[];
+  severities: SeverityKey[];
+  sources: AnalyticsSourceFilter[];
+};
+
+export type AnalyticsFieldCoverage = {
+  known: number;
+  missing: number;
+  missingRatePercent: number;
+};
+
+export type AnalyticsCoverage = {
+  industry: AnalyticsFieldCoverage;
+  type: AnalyticsFieldCoverage;
+  month: AnalyticsFieldCoverage;
+  prefecture: AnalyticsFieldCoverage;
+  workplaceSize: AnalyticsFieldCoverage;
+  cause: AnalyticsFieldCoverage;
+  occurrenceTime: AnalyticsFieldCoverage;
+  age: AnalyticsFieldCoverage;
+  weekday: AnalyticsFieldCoverage;
+};
+
 export type AnalyticsAggregates = {
   generatedAt: string;
   meta: {
     curatedCases: number;
     mhlwDeathsCount: number;
     mhlwFullDbCount: number;
+    /** 選択データ源における、他条件で絞り込む前の総件数。 */
+    datasetCases: number;
+    /** 現在の全ANDフィルタに該当する件数。 */
+    filteredCases: number;
     yearsCovered: { from: number; to: number };
+    filters: {
+      industry: string | null;
+      type: string | null;
+      year: number | null;
+      month: number | null;
+      industryMedium: string | null;
+      cause: string | null;
+      workplaceSize: string | null;
+      occurrenceTime: string | null;
+      prefecture: string | null;
+      age: string | null;
+      severity: SeverityKey | null;
+      source: AnalyticsSourceFilter;
+    };
+    filterOptions: AnalyticsFilterOptions;
+    coverage: AnalyticsCoverage;
   };
   kpi: AnalyticsKpi;
   /** A: 時系列軸 */

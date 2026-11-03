@@ -79,9 +79,7 @@
       "source": "web/src/app/(main)/accidents-analytics/page.tsx",
       "implementation": "direct canonical import",
       "state": "shared",
-      "modes": [
-        "AnalyticsDashboard"
-      ]
+      "modes": []
     },
     {
       "route": "/accidents-reports/[industry]",
@@ -657,6 +655,22 @@
     {
       "route": "/faq/search",
       "source": "web/src/app/(main)/faq/search/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/fatal-accidents",
+      "source": "web/src/app/(main)/fatal-accidents/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": [
+        "FatalAccidentsBrowser"
+      ]
+    },
+    {
+      "route": "/fatal-accidents/print",
+      "source": "web/src/app/(main)/fatal-accidents/print/page.tsx",
       "implementation": "direct canonical import",
       "state": "shared",
       "modes": []
@@ -1573,6 +1587,15 @@
       "modes": []
     },
     {
+      "route": "/training/safety-seminars/chemicals-sds-risk-assessment",
+      "source": "web/src/app/(main)/training/safety-seminars/chemicals-sds-risk-assessment/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": [
+        "SafetySeminarPlayer"
+      ]
+    },
+    {
       "route": "/training/safety-seminars/fall-prevention",
       "source": "web/src/app/(main)/training/safety-seminars/fall-prevention/page.tsx",
       "implementation": "direct canonical import",
@@ -1587,6 +1610,15 @@
       "implementation": "direct canonical import",
       "state": "shared",
       "modes": []
+    },
+    {
+      "route": "/training/safety-seminars/safety-management-basics-osh-law",
+      "source": "web/src/app/(main)/training/safety-seminars/safety-management-basics-osh-law/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": [
+        "SafetySeminarPlayer"
+      ]
     },
     {
       "route": "/training/safety-seminars/terms",

@@ -1,17 +1,10 @@
-import type { Metadata } from "next";
-import { Suspense } from "react";
-import Link from "next/link";
-import { BarChart3, ClipboardList, Siren, Sparkles, Tag } from "lucide-react";
-import { AnalyticsDashboard } from "./AnalyticsDashboard";
-import { getAnalyticsAggregates } from "@/lib/accidents-analytics";
-import { JsonLd } from "@/components/json-ld";
 import { ogImageUrl } from "@/lib/og-url";
 import { withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
-import { SITE_STATS } from "@/data/site-stats";
-import { AccidentHubNav } from "@/components/accident-hub-nav";
-
-const title = "事故統計ダッシュボード";
-const description = `労働災害 ${SITE_STATS.accidents10yCount} 件を年・月・業種・事故種類・地域・規模・原因など多軸で集計したダッシュボード。厚労省死亡災害DB（${SITE_STATS.mhlwDeathsCount} 件）と curated 事例を統合し、25 種類の分析軸で可視化。`;
+import type { Metadata } from "next";
+import { AnalyticsPageView } from "./analytics-page-view";
+const title = "事故分析ダッシュボード";
+const description =
+  "厚労省死亡災害DBを、年・月・業種・事故種類・地域・規模・原因など12種類の条件で絞り込む事故分析ダッシュボード。公式統計と収録事例の傾向を区別して表示します。";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/accidents-analytics" },
@@ -27,125 +20,6 @@ export const metadata: Metadata = {
   }),
 };
 
-export default function AccidentsAnalyticsPage() {
-  const aggregates = getAnalyticsAggregates();
-
-  // JSON-LD: Dataset describing the analytics dataset.
-  const datasetSchema = {
-    "@context": "https://schema.org",
-    "@type": "Dataset",
-    name: "労働災害 統合事故統計データセット",
-    description,
-    url: "https://www.anzen-ai-portal.jp/accidents-analytics",
-    license: "https://creativecommons.org/licenses/by/4.0/",
-    keywords: [
-      "労働災害",
-      "事故統計",
-      "死亡災害",
-      "業種別",
-      "事故種類",
-      "厚生労働省",
-      "労働安全",
-    ],
-    creator: {
-      "@type": "Organization",
-      name: "安全AIポータル",
-    },
-    temporalCoverage: `${aggregates.meta.yearsCovered.from}/${aggregates.meta.yearsCovered.to}`,
-    variableMeasured: [
-      "年別事故件数",
-      "月別事故件数",
-      "業種別事故件数",
-      "事故種類別件数",
-      "都道府県別件数",
-      "事業所規模別件数",
-      "起因物別件数",
-      "時間帯別件数",
-      "年齢別件数",
-      "重傷度内訳",
-    ],
-    isBasedOn: [
-      {
-        "@type": "Dataset",
-        name: "厚生労働省 職場のあんぜんサイト 死亡災害DB",
-        url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SIB_FND.aspx",
-      },
-      {
-        "@type": "Dataset",
-        name: "厚生労働省 労働者死傷病報告オープンデータ",
-        url: "https://anzeninfo.mhlw.go.jp/information/sokuhou.html",
-      },
-    ],
-  };
-
-  return (
-    <>
-      <JsonLd schema={datasetSchema} />
-      <AccidentHubNav current="accidents-analytics" />
-      <Suspense
-        fallback={
-          <div className="mx-auto max-w-7xl space-y-3 px-4 py-6">
-            <div className="h-8 w-2/3 animate-pulse rounded bg-slate-200" />
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="h-24 animate-pulse rounded-lg bg-slate-100" />
-              ))}
-            </div>
-          </div>
-        }
-      >
-        <AnalyticsDashboard aggregates={aggregates} />
-      </Suspense>
-      <nav
-        aria-label="関連ページ"
-        className="mx-auto max-w-7xl px-4 pb-8 sm:px-6 lg:px-8"
-      >
-        <div className="rounded-lg border border-slate-200 bg-white p-3 sm:p-4">
-          <p className="text-sm font-semibold text-slate-900">関連ページ</p>
-          <ul className="mt-2 flex flex-wrap gap-2 text-xs">
-            <li>
-              <Link
-                href="/accidents"
-                className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-slate-700 hover:bg-slate-50"
-              >
-                <Siren className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />事故データベース
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/accidents-reports"
-                className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-slate-700 hover:bg-slate-50"
-              >
-                <Tag className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />業種別レポート
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/stats"
-                className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-slate-700 hover:bg-slate-50"
-              >
-                <BarChart3 className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />サイト利用統計
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/risk-prediction"
-                className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-slate-700 hover:bg-slate-50"
-              >
-                <Sparkles className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />AIリスク予測
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/ky"
-                className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-slate-700 hover:bg-slate-50"
-              >
-                <ClipboardList className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />KY用紙
-              </Link>
-            </li>
-          </ul>
-        </div>
-      </nav>
-    </>
-  );
+export default async function AccidentsAnalyticsPage({searchParams}:{searchParams:Promise<Record<string,string|string[]|undefined>>}) {
+  return <AnalyticsPageView initialQuery={await searchParams}/>;
 }

@@ -12,7 +12,50 @@ const FIXTURE: AnalyticsAggregates = {
     curatedCases: 300,
     mhlwDeathsCount: 3700,
     mhlwFullDbCount: 504415,
+    datasetCases: 4000,
+    filteredCases: 4000,
     yearsCovered: { from: 2019, to: 2024 },
+    filters: {
+      industry: null,
+      type: null,
+      year: null,
+      month: null,
+      industryMedium: null,
+      cause: null,
+      workplaceSize: null,
+      occurrenceTime: null,
+      prefecture: null,
+      age: null,
+      severity: null,
+      source: "official",
+    },
+    filterOptions: {
+      industries: ["建設業", "製造業"],
+      types: ["墜落・転落"],
+      years: [2024, 2023],
+      months: [1, 2],
+      industryMediums: [],
+      causes: [],
+      workplaceSizes: [],
+      occurrenceTimes: ["0～2"],
+      prefectures: ["東京都"],
+      ages: [],
+      severities: ["軽傷", "中等傷", "重傷", "死亡"],
+      sources: ["official", "mhlw-deaths-compact", "mhlw-deaths-2024", "curated", "all"],
+    },
+    coverage: Object.fromEntries(
+      [
+        "industry",
+        "type",
+        "month",
+        "prefecture",
+        "workplaceSize",
+        "cause",
+        "occurrenceTime",
+        "age",
+        "weekday",
+      ].map((key) => [key, { known: 4000, missing: 0, missingRatePercent: 0 }]),
+    ) as AnalyticsAggregates["meta"]["coverage"],
   },
   kpi: {
     curatedTotal: 300,
@@ -44,7 +87,9 @@ const FIXTURE: AnalyticsAggregates = {
     { name: "建設業", count: 1200 },
     { name: "製造業", count: 900 },
   ],
-  industryDeathRate: [{ industry: "建設業", total: 1200, fatal: 150, rate: 12.5 }],
+  industryDeathRate: [
+    { industry: "建設業", total: 1200, fatal: 150, rate: 12.5 },
+  ],
   industryTypeMatrix: { industries: [], types: [], matrix: [] },
   typeRanking: [{ name: "墜落・転落", count: 800 }],
   typeTrendByYear: { years: [], series: [] },
@@ -89,7 +134,7 @@ describe("analyticsToSummaryText", () => {
   it("結論（最新年件数・前年比・死亡率）とTOP3を含む", () => {
     const text = analyticsToSummaryText(FIXTURE);
     expect(text).toContain("2024年の事故件数：820件（前年比 +5.1%）");
-    expect(text).toContain("死亡災害比率：12.5%");
+    expect(text).toContain("死亡事例の構成比：12.5%");
     expect(text).toContain("1.建設業(1,200件)");
     expect(text).toContain("1.墜落・転落(800件)");
   });

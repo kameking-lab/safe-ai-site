@@ -2,6 +2,7 @@
 import { readdir, readFile, writeFile, mkdir, cp, unlink } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import '../../web/scripts/generate-shared-case-data.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const web = path.join(root, 'web/src/app');
 const app = path.join(root, 'mobile/src/app/(shared)');

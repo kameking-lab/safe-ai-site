@@ -81,3 +81,12 @@ test('keeps the complete weather location catalog and stops a live display after
   failWeather=true;await page.evaluate(()=>window.dispatchEvent(new Event('anzen-app-active')));
   await expect(panel.getByText('気象庁のデータを取得済み',{exact:true})).toHaveCount(0);await expect(panel.getByText(/現在の警報状況は未確認です/)).toBeVisible();await expect(panel.getByText(/現在の警報情報を取得できません/)).toBeVisible();
 });
+
+test('includes the published fatal accident database, analytics modes and the two newer training courses',async({page,context})=>{
+  await context.route('https://**/*',route=>route.abort());
+  await page.goto('/fatal-accidents/?year=2024');await expect(page.getByRole('heading',{level:1})).toContainText('死亡事故データベース');await expect(page.locator('select[name="year"]')).toHaveValue('2024');
+  await page.goto('/fatal-accidents/print/?q=IOS3B-no-matching-accident');await expect(page.getByText('該当する事例がありません。',{exact:true})).toBeVisible();
+  await page.goto('/accidents-analytics/?year=2024');await expect(page.getByRole('heading',{level:1})).toContainText('事故分析');await expect(page.getByText('出典・安全性を再確認中です',{exact:true})).toHaveCount(0);
+  await page.goto('/accidents-analytics/?view=flash');await expect(page.getByText(/収録事例の2019〜2024年系列には接続していません/)).toBeVisible();
+  for(const path of ['chemicals-sds-risk-assessment','safety-management-basics-osh-law']){await page.goto('/training/safety-seminars/'+path+'/');await expect(page.getByRole('heading',{level:1})).toBeVisible();await expect(page.getByRole('button',{name:/次|スライド/}).first()).toBeVisible();}
+});

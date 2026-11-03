@@ -709,8 +709,8 @@ export function IndustryReportView({ report }: { report: IndustryReport }) {
               href="/accidents-analytics"
               className="group rounded-lg border border-slate-200 bg-white p-4 transition hover:border-emerald-300 hover:shadow-sm dark:border-slate-800 dark:bg-slate-900"
             >
-              <p className="text-sm font-semibold text-slate-900 dark:text-slate-100"><BarChart3 className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />事故統計ダッシュボード</p>
-              <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">25軸の多角分析で本業種以外も横断比較。</p>
+              <p className="text-sm font-semibold text-slate-900 dark:text-slate-100"><BarChart3 className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />事故分析ダッシュボード</p>
+              <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">12種類の条件で本業種以外も横断比較。</p>
             </Link>
             <Link
               href="/risk-prediction"

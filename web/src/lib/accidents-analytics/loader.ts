@@ -1,5 +1,4 @@
-import { readFileSync } from "node:fs";
-import path from "node:path";
+import records2024 from "@/data/deaths-mhlw/records-2024.generated.json";
 import deathsCompact from "@/data/deaths-mhlw/compact.json";
 import { getAccidentCasesDataset } from "@/data/mock/accident-cases";
 import type { AccidentCase } from "@/lib/types/domain";
@@ -56,7 +55,7 @@ type CompactJson = {
   entries: CompactRecord[];
 };
 
-type DeathsRecord2024 = {
+export type DeathsRecord2024 = {
   id: string;
   year: number;
   month: number;
@@ -92,28 +91,7 @@ function parseYearMonth(iso: string | undefined): { year: number; month: number 
   };
 }
 
-function load2024Records(): DeathsRecord2024[] {
-  // src/data/deaths-mhlw/records-2024.jsonl ships in the repo. Read via fs
-  // so this only runs at build time / on the server.
-  const filePath = path.join(process.cwd(), "src", "data", "deaths-mhlw", "records-2024.jsonl");
-  let raw: string;
-  try {
-    raw = readFileSync(filePath, "utf8");
-  } catch {
-    return [];
-  }
-  const out: DeathsRecord2024[] = [];
-  for (const line of raw.split(/\r?\n/)) {
-    const trimmed = line.trim();
-    if (!trimmed) continue;
-    try {
-      out.push(JSON.parse(trimmed));
-    } catch {
-      // Skip malformed lines silently — these jsonl files are author-managed.
-    }
-  }
-  return out;
-}
+export function load2024Records(): DeathsRecord2024[] { return records2024 as DeathsRecord2024[]; }
 
 function fromCompact(rec: CompactRecord): CombinedCase {
   return {

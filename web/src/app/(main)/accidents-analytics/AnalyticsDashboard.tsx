@@ -1,7 +1,10 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import type { AnalyticsAggregates } from "@/lib/accidents-analytics/types";
+import type {
+  AnalyticsAggregates,
+  TypeComposition,
+} from "@/lib/accidents-analytics";
 
 const AnalyticsDashboardImpl = dynamic(
   () =>
@@ -26,8 +29,15 @@ const AnalyticsDashboardImpl = dynamic(
 
 export function AnalyticsDashboard({
   aggregates,
+  typeComposition,
 }: {
   aggregates: AnalyticsAggregates;
+  typeComposition: TypeComposition | null;
 }) {
-  return <AnalyticsDashboardImpl aggregates={aggregates} />;
+  return (
+    <AnalyticsDashboardImpl
+      aggregates={aggregates}
+      typeComposition={typeComposition}
+    />
+  );
 }

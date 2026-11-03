@@ -258,7 +258,7 @@ export default function AccidentsReportsHubPage() {
               href="/accidents-analytics"
               className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
             >
-              <BarChart3 className="h-4 w-4 shrink-0" aria-hidden="true" />事故統計ダッシュボード（25軸）
+              <BarChart3 className="h-4 w-4 shrink-0" aria-hidden="true" />事故分析ダッシュボード（12種類）
             </Link>
             <Link
               href="/risk-prediction"
