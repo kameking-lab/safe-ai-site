@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import Link from "next/link";
+import { useNativeQuery } from '@/lib/use-native-query';
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { Menu } from "lucide-react";
 import { EarthquakeAlertModal } from "./earthquake-alert-modal";
@@ -119,6 +120,8 @@ function persistSeenQuakes(set: Set<string>) {
 }
 
 export function SignageMapClient({ initialFullscreen = false }: { initialFullscreen?: boolean }) {
+  const nativeQuery=useNativeQuery();
+  const fullscreen=nativeQuery && window.location.pathname.replace(/\/$/,'')==='/signage/display' ? nativeQuery.get('fullscreen')!=='false' : initialFullscreen;
   const [bundle, setBundle] = useState<ApiBundle | null>(null);
   const [bundleStatus, setBundleStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [lastRefreshedAt, setLastRefreshedAt] = useState<string>("起動中…");
@@ -136,7 +139,7 @@ export function SignageMapClient({ initialFullscreen = false }: { initialFullscr
 
   // 無人で1日流しっぱなしのフルスクリーン表示中は画面スリープを抑止する
   // （非対応ブラウザでは無害な no-op）。地図編集モードでは抑止しない。
-  useWakeLock(initialFullscreen);
+  useWakeLock(fullscreen);
 
   // 地図表示用フォーカス（ピンクリック時の中心移動）
   const [focusOverride, setFocusOverride] = useState<{ lat: number; lng: number; zoom: number } | null>(null);
@@ -282,7 +285,7 @@ export function SignageMapClient({ initialFullscreen = false }: { initialFullscr
   return (
     <main
       id="main-content"
-      className={`relative ${initialFullscreen ? "h-screen w-screen" : "h-[100svh] min-h-[640px] w-full"} bg-slate-900 text-slate-100`}
+      className={`relative ${fullscreen ? "h-screen w-screen" : "h-[100svh] min-h-[640px] w-full"} bg-slate-900 text-slate-100`}
     >
       <h1 className="sr-only">サイネージ地図 — 全国の気象警報・地震情報</h1>
       <div className="absolute inset-0 flex">

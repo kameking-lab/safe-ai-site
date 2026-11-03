@@ -19,12 +19,13 @@ import {
   getVisualKyScenarioBySlug,
 } from "@/data/visual-ky";
 import { getAutomationConsultAvailability } from "@/lib/automation-consult/availability";
-import { getNextVisualKyScenario, selectDailyVisualKy } from "@/lib/visual-ky/daily";
+import { getNextVisualKyScenario } from "@/lib/visual-ky/daily";
 import {
   SITE_URL,
   withSiteOpenGraph,
   withSiteTwitter,
 } from "@/lib/seo-metadata";
+import { VisualKyTodayBadge } from "@/components/visual-ky/daily-hero";
 import { UsageNotesLink } from "@/components/usage-notes-link";
 
 const HUB_PATH = "/training/visual-ky";
@@ -90,8 +91,6 @@ export default async function VisualKyScenarioPage({
   }
   const category = getVisualKyCategory(scenario.category);
   const next = getNextVisualKyScenario(scenario.id);
-  const daily = selectDailyVisualKy();
-  const isToday = daily.scenario.id === scenario.id;
   const path = `${HUB_PATH}/${scenario.slug}`;
   const availability = getAutomationConsultAvailability();
   const description = `${scenario.title}。画像と同等のテキスト教材、一次資料、KY・事故・法令・資格への導線を備えた5分KYTです。`;
@@ -150,7 +149,7 @@ export default async function VisualKyScenarioPage({
               ビジュアルKYT一覧
             </Link>
             <p className="mt-3 text-xs font-black tracking-[0.15em] text-teal-800 uppercase dark:text-teal-300">
-              {isToday ? "今日の5分KYT · " : ""}
+              <VisualKyTodayBadge scenarioId={scenario.id} initialTimestamp={new Date().toISOString()}/>
               {scenario.id} · {category.label}
             </p>
             <h1 className="mt-2 max-w-4xl text-3xl font-black tracking-tight text-slate-950 dark:text-white sm:text-4xl">
