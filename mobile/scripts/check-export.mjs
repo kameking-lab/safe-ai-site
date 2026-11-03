@@ -1,0 +1,10 @@
+import { readFile, stat } from 'node:fs/promises';
+import assert from 'node:assert/strict';
+const config = await readFile(new URL('../capacitor.config.ts', import.meta.url), 'utf8');
+assert(!/server\s*:\s*\{[^}]*\burl\s*:/.test(config), 'Remote WebView must never be configured');
+assert(!/allowNavigation|allowMixedContent\s*:\s*true/.test(config));
+assert(config.includes("appId: 'jp.anzen-ai-portal.app'"));
+const html = await readFile(new URL('../out/index.html', import.meta.url), 'utf8');
+assert(html.includes('事故速報') && html.includes('安全AIポータル'));
+assert(!(await stat(new URL('../out/index.html', import.meta.url))).isDirectory());
+console.log('Local static export and Capacitor bundle boundary verified.');

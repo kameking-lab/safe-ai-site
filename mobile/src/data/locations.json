@@ -1,0 +1,347 @@
+[
+  {
+    "id": "tokyo-shinjuku",
+    "label": "東京都 新宿区",
+    "cityCode": "1310400"
+  },
+  {
+    "id": "tokyo-chiyoda",
+    "label": "東京都 千代田区",
+    "cityCode": "1310100"
+  },
+  {
+    "id": "tokyo-chuo",
+    "label": "東京都 中央区",
+    "cityCode": "1310200"
+  },
+  {
+    "id": "tokyo-minato",
+    "label": "東京都 港区",
+    "cityCode": "1310300"
+  },
+  {
+    "id": "tokyo-bunkyo",
+    "label": "東京都 文京区",
+    "cityCode": "1310500"
+  },
+  {
+    "id": "tokyo-taito",
+    "label": "東京都 台東区",
+    "cityCode": "1310600"
+  },
+  {
+    "id": "tokyo-sumida",
+    "label": "東京都 墨田区",
+    "cityCode": "1310700"
+  },
+  {
+    "id": "tokyo-koto",
+    "label": "東京都 江東区",
+    "cityCode": "1310800"
+  },
+  {
+    "id": "tokyo-shinagawa",
+    "label": "東京都 品川区",
+    "cityCode": "1310900"
+  },
+  {
+    "id": "tokyo-meguro",
+    "label": "東京都 目黒区",
+    "cityCode": "1311000"
+  },
+  {
+    "id": "tokyo-ota",
+    "label": "東京都 大田区",
+    "cityCode": "1311100"
+  },
+  {
+    "id": "tokyo-setagaya",
+    "label": "東京都 世田谷区",
+    "cityCode": "1311200"
+  },
+  {
+    "id": "tokyo-shibuya",
+    "label": "東京都 渋谷区",
+    "cityCode": "1311300"
+  },
+  {
+    "id": "tokyo-nakano",
+    "label": "東京都 中野区",
+    "cityCode": "1311400"
+  },
+  {
+    "id": "tokyo-suginami",
+    "label": "東京都 杉並区",
+    "cityCode": "1311500"
+  },
+  {
+    "id": "tokyo-toshima",
+    "label": "東京都 豊島区",
+    "cityCode": "1311600"
+  },
+  {
+    "id": "tokyo-kita",
+    "label": "東京都 北区",
+    "cityCode": "1311700"
+  },
+  {
+    "id": "tokyo-arakawa",
+    "label": "東京都 荒川区",
+    "cityCode": "1311800"
+  },
+  {
+    "id": "tokyo-itabashi",
+    "label": "東京都 板橋区",
+    "cityCode": "1311900"
+  },
+  {
+    "id": "tokyo-nerima",
+    "label": "東京都 練馬区",
+    "cityCode": "1312000"
+  },
+  {
+    "id": "tokyo-adachi",
+    "label": "東京都 足立区",
+    "cityCode": "1312100"
+  },
+  {
+    "id": "tokyo-katsushika",
+    "label": "東京都 葛飾区",
+    "cityCode": "1312200"
+  },
+  {
+    "id": "tokyo-edogawa",
+    "label": "東京都 江戸川区",
+    "cityCode": "1312300"
+  },
+  {
+    "id": "aomori-aomori",
+    "label": "青森県 青森市",
+    "cityCode": null
+  },
+  {
+    "id": "iwate-morioka",
+    "label": "岩手県 盛岡市",
+    "cityCode": null
+  },
+  {
+    "id": "akita-akita",
+    "label": "秋田県 秋田市",
+    "cityCode": null
+  },
+  {
+    "id": "yamagata-yamagata",
+    "label": "山形県 山形市",
+    "cityCode": null
+  },
+  {
+    "id": "fukushima-fukushima",
+    "label": "福島県 福島市",
+    "cityCode": null
+  },
+  {
+    "id": "ibaraki-mito",
+    "label": "茨城県 水戸市",
+    "cityCode": null
+  },
+  {
+    "id": "tochigi-utsunomiya",
+    "label": "栃木県 宇都宮市",
+    "cityCode": null
+  },
+  {
+    "id": "gunma-maebashi",
+    "label": "群馬県 前橋市",
+    "cityCode": null
+  },
+  {
+    "id": "saitama-saitama",
+    "label": "埼玉県 さいたま市",
+    "cityCode": null
+  },
+  {
+    "id": "chiba-chiba",
+    "label": "千葉県 千葉市",
+    "cityCode": null
+  },
+  {
+    "id": "kanagawa-yokohama",
+    "label": "神奈川県 横浜市",
+    "cityCode": null
+  },
+  {
+    "id": "niigata-niigata",
+    "label": "新潟県 新潟市",
+    "cityCode": null
+  },
+  {
+    "id": "toyama-toyama",
+    "label": "富山県 富山市",
+    "cityCode": null
+  },
+  {
+    "id": "ishikawa-kanazawa",
+    "label": "石川県 金沢市",
+    "cityCode": null
+  },
+  {
+    "id": "fukui-fukui",
+    "label": "福井県 福井市",
+    "cityCode": null
+  },
+  {
+    "id": "yamanashi-kofu",
+    "label": "山梨県 甲府市",
+    "cityCode": null
+  },
+  {
+    "id": "nagano-nagano",
+    "label": "長野県 長野市",
+    "cityCode": null
+  },
+  {
+    "id": "gifu-gifu",
+    "label": "岐阜県 岐阜市",
+    "cityCode": null
+  },
+  {
+    "id": "shizuoka-shizuoka",
+    "label": "静岡県 静岡市",
+    "cityCode": null
+  },
+  {
+    "id": "mie-tsu",
+    "label": "三重県 津市",
+    "cityCode": null
+  },
+  {
+    "id": "shiga-otsu",
+    "label": "滋賀県 大津市",
+    "cityCode": null
+  },
+  {
+    "id": "kyoto-kyoto",
+    "label": "京都府 京都市",
+    "cityCode": null
+  },
+  {
+    "id": "hyogo-kobe",
+    "label": "兵庫県 神戸市",
+    "cityCode": null
+  },
+  {
+    "id": "nara-nara",
+    "label": "奈良県 奈良市",
+    "cityCode": null
+  },
+  {
+    "id": "wakayama-wakayama",
+    "label": "和歌山県 和歌山市",
+    "cityCode": null
+  },
+  {
+    "id": "tottori-tottori",
+    "label": "鳥取県 鳥取市",
+    "cityCode": null
+  },
+  {
+    "id": "shimane-matsue",
+    "label": "島根県 松江市",
+    "cityCode": null
+  },
+  {
+    "id": "okayama-okayama",
+    "label": "岡山県 岡山市",
+    "cityCode": null
+  },
+  {
+    "id": "yamaguchi-yamaguchi",
+    "label": "山口県 山口市",
+    "cityCode": null
+  },
+  {
+    "id": "tokushima-tokushima",
+    "label": "徳島県 徳島市",
+    "cityCode": null
+  },
+  {
+    "id": "ehime-matsuyama",
+    "label": "愛媛県 松山市",
+    "cityCode": null
+  },
+  {
+    "id": "kochi-kochi",
+    "label": "高知県 高知市",
+    "cityCode": null
+  },
+  {
+    "id": "saga-saga",
+    "label": "佐賀県 佐賀市",
+    "cityCode": null
+  },
+  {
+    "id": "nagasaki-nagasaki",
+    "label": "長崎県 長崎市",
+    "cityCode": null
+  },
+  {
+    "id": "kumamoto-kumamoto",
+    "label": "熊本県 熊本市",
+    "cityCode": null
+  },
+  {
+    "id": "oita-oita",
+    "label": "大分県 大分市",
+    "cityCode": null
+  },
+  {
+    "id": "miyazaki-miyazaki",
+    "label": "宮崎県 宮崎市",
+    "cityCode": null
+  },
+  {
+    "id": "kagoshima-kagoshima",
+    "label": "鹿児島県 鹿児島市",
+    "cityCode": null
+  },
+  {
+    "id": "okinawa-naha",
+    "label": "沖縄県 那覇市",
+    "cityCode": null
+  },
+  {
+    "id": "hokkaido-sapporo",
+    "label": "北海道 札幌市",
+    "cityCode": null
+  },
+  {
+    "id": "miyagi-sendai",
+    "label": "宮城県 仙台市",
+    "cityCode": null
+  },
+  {
+    "id": "aichi-nagoya",
+    "label": "愛知県 名古屋市",
+    "cityCode": null
+  },
+  {
+    "id": "osaka-osaka",
+    "label": "大阪府 大阪市",
+    "cityCode": null
+  },
+  {
+    "id": "hiroshima-hiroshima",
+    "label": "広島県 広島市",
+    "cityCode": null
+  },
+  {
+    "id": "kagawa-takamatsu",
+    "label": "香川県 高松市",
+    "cityCode": null
+  },
+  {
+    "id": "fukuoka-fukuoka",
+    "label": "福岡県 福岡市",
+    "cityCode": null
+  }
+]

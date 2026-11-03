@@ -1,0 +1,44 @@
+workflows:
+  anzen-ios-v1-unsigned:
+    name: Anzen AI v1 · unsigned validation only
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    working_directory: mobile
+    environment:
+      node: 24.13.1
+      xcode: latest
+      vars:
+        CI: "true"
+        NEXT_TELEMETRY_DISABLED: "1"
+        CAPACITOR_TELEMETRY_DISABLED: "1"
+    scripts:
+      - name: Install locked mobile dependencies
+        script: npm ci --no-audit --no-fund
+      - name: Typecheck and contract tests
+        script: |
+          npm run typecheck
+          npm test
+      - name: Build bundled screens (no Web deployment)
+        script: npm run build
+      - name: Generate iOS project on macOS only
+        script: npm run ios:prepare
+      - name: Compile unsigned iPhone simulator
+        script: |
+          set -euo pipefail
+          mkdir -p build
+          xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Debug -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath build/simulator CODE_SIGNING_ALLOWED=NO build > build/simulator.log 2>&1 || { tail -n 100 build/simulator.log; exit 1; }
+          test -f build/simulator/Build/Products/Debug-iphonesimulator/App.app/PrivacyInfo.xcprivacy
+          test -f build/simulator/Build/Products/Debug-iphonesimulator/App.app/public/index.html
+          ditto -c -k --sequesterRsrc --keepParent build/simulator/Build/Products/Debug-iphonesimulator/App.app build/AnzenAI-simulator.zip
+      - name: Create unsigned archive (no signing, export, upload or submission)
+        script: |
+          set -euo pipefail
+          xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Release -sdk iphoneos -destination 'generic/platform=iOS' -archivePath build/AnzenAI.xcarchive CODE_SIGNING_ALLOWED=NO archive > build/archive.log 2>&1 || { tail -n 100 build/archive.log; exit 1; }
+          ditto -c -k --sequesterRsrc --keepParent build/AnzenAI.xcarchive build/AnzenAI-unsigned.xcarchive.zip
+    artifacts:
+      - mobile/build/AnzenAI-simulator.zip
+      - mobile/build/AnzenAI-unsigned.xcarchive.zip
+      - mobile/build/*.log
+      - mobile/ios/App/App.xcodeproj/project.pbxproj
+      - mobile/ios/App/**/Package.resolved
+      - mobile/src/data/manifest.json
