@@ -5,6 +5,7 @@ export type PaidPlanName = "standard" | "pro";
 /** Stripe Price ID を、サーバー側の固定 allowlist で付与プランへ解決する。未知の値は fail-closed。 */
 export function resolveStripePlan(priceId: string | null | undefined): PaidPlanName | null {
   if (!priceId) return null;
+  if (priceId === process.env.STRIPE_ANZEN_PRO_MONTHLY_PRICE_ID?.trim()) return 'pro';
   const standard = process.env.NEXT_PUBLIC_STRIPE_PRICE_PREMIUM?.trim();
   const pro = process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO?.trim();
   if (standard && priceId === standard) return "standard";
@@ -13,6 +14,7 @@ export function resolveStripePlan(priceId: string | null | undefined): PaidPlanN
 }
 
 export function isPaidModeReady(): boolean {
+  if (process.env.MOBILE_LEDGER_ENABLED==='true') return externalCredentialedServicesAllowed() && process.env.NEXT_PUBLIC_PAID_MODE==='true' && !!process.env.STRIPE_SECRET_KEY && !!process.env.STRIPE_ANZEN_PRO_MONTHLY_PRICE_ID?.trim();
   return (
     externalCredentialedServicesAllowed() &&
     process.env.NEXT_PUBLIC_PAID_MODE === "true" &&

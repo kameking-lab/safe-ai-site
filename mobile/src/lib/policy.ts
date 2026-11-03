@@ -1,21 +1,17 @@
 import type { Capability, Feature } from './contracts';
+import product from '@/lib/mobile/product-policy.json';
 
 // Product limits are separate from abuse limits and the server's cost ledger.
-export const PLAN_LIMITS = {
-  free: { law_chat: 3, chemical_ra: 1, weatherLocations: 1, notifications: false },
-  pro: { law_chat: 50, chemical_ra: 10, weatherLocations: 10, notifications: true },
-} as const;
+export const PLAN_LIMITS = product.limits;
 export interface EntitlementProvider {
   getPlan(): Promise<'free' | 'pro'>;
 }
-// v1.1 replaces this implementation after server verification + RevenueCat/IAP.
-// No local flag, purchase UI, login or remote-config upgrade path in v1.
-export const v1Entitlements: EntitlementProvider = { async getPlan() { return 'free'; } };
+export const v1Entitlements: EntitlementProvider = { async getPlan() { const {billing}=await import('./billing');const member=await billing.entitlement();if(member.syncState!=='verified')throw new Error('ENTITLEMENT_SYNC_PENDING');return member.plan; } };
 export function canExecute(c: Capability | null, feature: Feature, now = Date.now()) {
-  return !!c && c.plan === 'free' && Date.parse(c.expiresAt) > now &&
+  return !!c && (c.plan === 'free' || (c.plan==='pro' && c.session==='member')) && Date.parse(c.expiresAt) > now &&
     Date.parse(c.expiresAt) <= now + 5 * 60_000 &&
     c.features[feature].available &&
-    c.features[feature].quota.limit === PLAN_LIMITS.free[feature] &&
+    c.features[feature].quota.limit === PLAN_LIMITS[c.plan][feature] &&
     c.features[feature].quota.remaining > 0 && Date.parse(c.features[feature].quota.resetAt) > now;
 }
 export function quotaLow(remaining: number, limit: number) { return remaining / limit <= 0.2; }
@@ -23,6 +19,7 @@ export function errorMessage(code: string, retryAfter?: string, resetAt?: string
   const messages: Record<string, string> = {
     DAILY_LIMIT_REACHED: `本日の上限に達しました。日本時間の次の0時に回復します${resetAt ? `（${formatDate(resetAt)}）` : ''}。`,
     OPERATION_PENDING: '処理中です。同じ操作の結果を確認してください。',
+    OPERATION_RELEASED: '前の操作は完了していません。もう一度送信すると新しい操作として確認します。',
     BURST_LIMITED: `短時間の利用が集中しています。${retryAfter ? `${retryAfter}秒後に` : '時間をおいて'}再度お試しください。`,
     ABUSE_RATE_LIMITED: `現在混雑しています。${retryAfter ? `${retryAfter}秒後に` : '時間をおいて'}再度お試しください。`,
     AI_BUDGET_FREE_PAUSED: 'AIは月間原価上限に備えて一時停止しています。無料情報は引き続き閲覧できます。',

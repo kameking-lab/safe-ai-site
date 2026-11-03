@@ -5,7 +5,7 @@ const base = resolve('out');
 const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.txt': 'text/plain', '.ico': 'image/x-icon' };
 export const server = createServer(async (req, res) => {
   const pathname = decodeURIComponent(new URL(req.url ?? '/', 'http://localhost').pathname);
-  const file = resolve(base, `.${pathname.endsWith('/') ? `${pathname}index.html` : pathname}`);
+  const file = resolve(base, `.${!extname(pathname) ? `${pathname.replace(/\/$/,'')}/index.html` : pathname}`);
   if (!file.startsWith(`${base}${sep}`)) { res.writeHead(403); res.end(); return; }
   try { const data = await readFile(file); res.writeHead(200, { 'Content-Type': types[extname(file)] ?? 'application/octet-stream', 'Cache-Control': 'no-store' }); res.end(data); }
   catch { res.writeHead(404); res.end(); }

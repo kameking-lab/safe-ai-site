@@ -1,3 +1,5 @@
+import { withProviderBudget } from "@/lib/mobile/usage";
+import { withUsage } from "@/lib/mobile/usage";
 import { NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
 import { GEMINI_FLASH_MODEL } from "@/lib/gemini-model";
@@ -101,7 +103,7 @@ function jsonError(status: number, message: string, retryable = false) {
   return NextResponse.json<ApiErrorBody>({ error: message, retryable }, { status });
 }
 
-export async function POST(request: Request) {
+async function handlePost(request: Request) {
   const requestBoundary = validateChatbotRequestBoundary(request);
   if (!requestBoundary.allowed) {
     return jsonError(requestBoundary.status, requestBoundary.message);
@@ -655,14 +657,15 @@ export async function POST(request: Request) {
           });
           // Prior turns are reduced to allowlisted work conditions in
           // retrievalQuery; raw conversation text is never forwarded.
-          const result = await genAI.models.generateContent({
+          const result = await withProviderBudget(() => genAI.models.generateContent({
             model: GEMINI_FLASH_MODEL,
             contents: userPrompt,
             config: {
               systemInstruction: SYSTEM_PROMPT,
+              maxOutputTokens: 2048,
               abortSignal: request.signal,
             },
-          });
+          }),{model:GEMINI_FLASH_MODEL,inputBytes:Buffer.byteLength(SYSTEM_PROMPT+userPrompt,'utf8'),maxOutputTokens:2048});
           // SYSTEM_PROMPTのフォーマット例「YYYY年MM月」等をGeminiがテンプレートのまま
           // 出力してしまう事故を防ぐ（本番実測で1問中3箇所の漏出を確認）
           return sanitizePlaceholderCitations(result.text ?? "");
@@ -854,3 +857,5 @@ export async function POST(request: Request) {
     },
   });
 }
+
+export async function POST(request: Request) { return withUsage(request, "law_chat", handlePost); }

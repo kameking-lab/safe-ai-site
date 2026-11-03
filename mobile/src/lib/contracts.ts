@@ -35,7 +35,7 @@ export const quotaSchema = z.object({
 }).refine(q => q.remaining === Math.max(0, q.limit - q.used - q.reserved), 'inconsistent quota');
 export const capabilitySchema = z.object({
   version: z.literal(1), expiresAt: isoDate,
-  plan: z.enum(['free', 'pro']), session: z.literal('anonymous'), csrfToken: z.string().min(32).max(256),
+  plan: z.enum(['free', 'pro']), session: z.enum(['anonymous','member']), csrfToken: z.string().min(32).max(256),
   safety: z.object({ originalEvidence: z.literal(true), dangerousAssertionsBlocked: z.literal(true),
     sharedMonthlyBudgetYen: z.literal(50000), serverSideEnforced: z.literal(true) }),
   features: z.object({

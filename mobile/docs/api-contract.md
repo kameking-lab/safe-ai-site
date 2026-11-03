@@ -1,53 +1,47 @@
-# モバイルAPI境界 v1
+# IOS3B API契約
 
-## 現在存在する公開API
+M3で未実装だったAPIをサイトのRoute Handlerとして実装。認証・共通権利・AIの安全条件をクライアントから緩和しない。
 
-APIホストは `https://www.anzen-ai-portal.jp` 固定。変更可能なURL設定・秘密キーはアプリに持たない。ネイティブはCapacitorHttpの明示呼出し（fetch全面patchなし）。読み取り専用APIの利用とAIの認可を分ける。Originが省略されるネイティブHTTPを認証の代わりにしない。
+## 認証・権利
 
-| 経路 | 用途と検証 |
-|---|---|
-| GET `/api/signage-data?locationId=...` | 日々の報道RSSと気象庁警報。`degradedSources` の `labor-rss` は速報の更新失敗。JMAの `jmaSelectedState`・`jmaSourceFetchedAt`・発表日時を別に表示。Open-Meteoの予測から公式警報を生成しない |
-| GET `/api/revisions` | 公開ゲート通過分の履歴全件。`publishedAt`・施行日・原文URL・検証状態を保持 |
+- `POST /api/mobile/v1/auth/start`：S256 PKCE。10分有効の認可フローを作成。
+- `GET /api/mobile/v1/auth/authorize`：AppleまたはGoogleのサイト認証。Googleを有効にする場合はAppleも必須。認可codeだけを `anzenai://auth/callback` へ返す。
+- `POST /api/mobile/v1/auth/exchange`：code・verifierを照合して一度だけセッションを発行。保存はハッシュのみ。端末はKeychainを使用。
+- `POST /api/mobile/v1/auth/logout`：本人のセッションを失効し、関連する通知登録を停止。
+- `GET /api/me/entitlements`：DBのStripe状態・検証済みApple権利を投影する。古いJWTのplanやクライアントのPro申告を正本にしない。
+- `GET /api/mobile/v1/account`：本人のSDS履歴とアカウント情報。
 
-既存統計はサーバー／クライアントへのJSON importであり、無料の統計JSON APIではない。`/api/stats` は運用統計、`/api/accidents/estat` と `/api/mhlw/search` は停止・隔離経路なので流用しない。
+会員APIはprivate/no-store。無効なBearerを別会員のCookie認証へフォールバックしない。Cookie認証の更新にはOrigin検査を行う。
 
-## 新設が必要な契約（未実装・未配備）
+## 購入・照合
 
-### GET `/api/mobile/v1/statistics`
+- `GET /api/mobile/v1/billing/config`：公開SDKキー・商品・Offering・価格ポリシー・認証の準備状態。秘密APIキーは返さない。
+- `POST /api/billing/purchase-intents`：Apple/Stripeを再確認し、会員ごとの排他ロックで購入予約。時間経過だけで保留を解放しない。
+- `POST /api/billing/reconcile`：RevenueCatの最新subscriberを確認し、商品・store・環境・有効期限・`anzen_pro`を照合する。
+- `POST /api/billing/cancel-intent`：StoreKitの明示的キャンセル後に再照合して解放。保留購入は解放しない。
+- `POST /api/webhooks/revenuecat`：Authorizationを必須とし、任意でraw body HMACと5分の時刻検査。永続inboxで重複を除去し、順序を信用せず最新状態を再照合する。
+- `POST /api/mobile/v1/maintenance`：専用認証でinbox再試行・警報outbox・期限切れ短期情報を処理。cron設定は変更していない。
 
-`src/lib/contracts.ts` の `statisticsSchema`。`source`, `sourceUrl`, `sourceUpdatedAt`, `note`, `years[{year,count,types}]`。政府公開データの検証済み収録範囲だけを返す。全国総数への置換、未収録年の0件補完、隔離コーパスの再公開をしない。未提供ならアプリは最後の取得分／同梱版を維持する。
+権利は5分を超えたら提供元へ再照合する。障害時の既確認権利の猶予は最大24時間かつ支払済期限まで。失効・未払い・未確認は新規購入で解決させず確認待ちにする。通常会員にSandbox権利を付与しない。審査・テスト用は所有者がDBで指定する `MobileIdentity.billingEnvironment=SANDBOX` の会員のみ。今回DB指定は行っていない。
 
-### GET `/api/mobile/v1/capabilities`
+既存Stripeの有効会員は優先してPro表示。Stripe Checkoutも共通購入予約を確認する。Stripe Portalはサーバーで指定した管理専用Configurationを要求する。旧契約の価格・数量・期間は自動変更しない。
 
-`capabilitySchema`。例はテストの `tests/fixtures.ts`（ローカル試験専用）。次をすべてサーバーで保証してから公開する。
+## AI・データ
 
-- v1はログインなし。サーバー発行の推測困難な匿名セッションをSecure・HttpOnly Cookie等で結び、同じセッションのチャット／RA日次枠を共有する。任意の端末ID・申告残数・IPだけを信用しない。インストール単位の匿名枠は会員のWeb/iOS共有枠ではない。
-- `session: anonymous`, `plan: free`, 5分以内の `expiresAt`、CSRF token。
-- `safety.originalEvidence=true`, `dangerousAssertionsBlocked=true`, `sharedMonthlyBudgetYen=50000`, `serverSideEnforced=true`。
-- `features.law_chat`: 3回／JST日、`features.chemical_ra`: 1件／JST日。`available` は実際の評価可否。`quota={limit,used,reserved,remaining,resetAt}`。
-- `remaining=max(0,limit-used-reserved)`。サーバーのJST日付を使用。原価停止・burst・機能未提供で枠を成功消費しない。
-- 匿名セッション作成の濫用制限、再送、予約、月間原価集約はサーバー側で実装する。ローカルカウンターへフォールバックしない。
+- `GET /api/mobile/v1/capabilities`：サーバー安全契約・権利・日次枠・残数と停止状態。
+- `POST /api/mobile/v1/ai`：既存chatbot処理を使い、同じ同意・根拠・安全検証を行う。requestIdを共通操作IDとして扱う。
+- `/api/chatbot`・`/stream`・`/no-script`・`/api/chat`：会員のJST日次枠を共有し、Proは60秒10回まで。同じ操作の再送で再実行・再消費しない。
+- `GET /api/mobile/v1/statistics`・`home-news`：既存公開データを投影。
+- `GET /api/mobile/v1/chemical-ledger`：本人が所属する組織の台帳だけを取得。
 
-### POST `/api/mobile/v1/ai`
+原価予約はKYを含む実際のGemini呼び出し境界に適用する。未価格のモデルや上限不明の推論は停止。UTF-8入力サイズ・出力最大2048トークン・設定単価・安全係数で上限を予約し、提供者失敗も保守的に計上する。DB不明時に原価ガードを迂回しない。月5万円上限、無料分は4.5万円で先行停止。
 
-入力：`{version:1,feature:law_chat|chemical_ra,input,requestId:UUID,privacyConfirmed:true}`。`X-Anzen-CSRF`を付ける。Cookie等の匿名セッションを検証し、capabilitiesの提示内容を認可の正本として信頼しない。
+現行のRA評価生成はウェブと同じ停止中。公的物質情報・SDS検索だけでRA完了や利用枠消費にしない。検証不能・同意不成立・根拠なしの結果を有料AI成功と偽装しない。ネイティブHTTPのSSEは受信完了後に既存リーダーへ渡すため、途中経過はまとめて表示される。
 
-処理：入力サイズ・個人／機密情報・送信同意・Origin/CSRF→既存安全レート→requestId冪等性／同一入力→匿名日次枠・原価の原子的予約→既存サイトの安全なチャット／RAサービス→根拠照合・危険な断定の遮断→結果保存・枠確定。既存月間5万円停止が確認／実装されるまで利用不可。呼出しごとに追加最大原価を予約し、Webを含む全対象経路を集計する。
+## 地点・通知
 
-返却は `aiResultSchema`。完成時は `status:completed`, `evidence[{title,original,url,asOf,verification}]`, `conditions`, `safety.reviewed=true` と危険断定遮断状態、サーバー残数。requestIdとfeatureは要求に一致させる。安全拒否・fallback・評価未提供は `charged:false`。原文なしの完成回答はアプリも拒否する。
+`GET/POST/PATCH/DELETE /api/me/weather-locations` は本人の地点を所有者検査・排他ロック付きで保存。無料1地点、Pro10地点。主地点を保持し、失効時の追加地点は削除せず停止する。全国地図や別地域の一時閲覧は無料。
 
-旧 `/api/chatbot`・`/api/chemical-ra` を無条件に直接呼ばない。capabilitiesのフラグだけ追加して旧APIへ迂回させることも不可。安全なサービス呼出しと、入口ごとの強制・共有台帳が必要。
+`POST/DELETE /api/me/push-devices` は本人の有効セッションとPro権利を確認してAPNs先を保存。workerは送信直前にも権利・セッション・地点を再検査する。鮮度不明や取得失敗を警報解除としない。都道府県単位の通知であり、市町村精度を保証しない。同じ警報は安定IDで重複排除する。
 
-エラーは `{error:{code,resetAt?}}`。`DAILY_LIMIT_REACHED`, `OPERATION_PENDING`, `BURST_LIMITED`, `ABUSE_RATE_LIMITED`, `AI_BUDGET_FREE_PAUSED`, `AI_BUDGET_STOPPED`, `FEATURE_UNAVAILABLE` を区別。burst／abuseは `Retry-After`。月次停止を翌日0時回復と表示しない。
-
-同じrequestIdの再送は二重消費させない。v1クライアントは通信失敗後の同一入力再送でrequestIdを維持し、成功時だけ破棄する。プロセス再起動後の処理中結果回収はサーバー契約完成時の追加検証項目。AI本文は端末へ永続保存しない。
-
-## 通信・認可の公開条件
-
-- iOSのネイティブCookie永続性・リダイレクト・再起動・消去を実機で確認。Cookieを手作業で移植しない。
-- ブラウザー検証用には許可origin、OPTIONS、`Content-Type` と `X-Anzen-CSRF`、credentialsを限定。既存same-origin検査を緩和しない。
-- APIホスト以外へのredirect禁止。外部リンクはHTTPS限定のシステムブラウザーへ分離。アプリWebView内に遠隔サイトをロードしない。
-- AI・capabilitiesは `Cache-Control: private, no-store`。予算台帳／原価不明・安全装置停止・機能未提供なら503。無料情報と気象表示は継続。
-- v1.1の会員認証、RevenueCat、課金／復元、WebとiOSの合算利用、10地点・APNsは別契約。匿名セッションIDを会員IDとして昇格させない。
-
-これらのAPIは実際に存在しない状態をfixtureで隠して本番接続済みとしない。`FEATURE_UNAVAILABLE`、404、503、ネットワーク断でもアプリが安全に停止することを検証する。
+APIセッションの期限は30日。長期未利用やログアウトで通知は停止し、再ログイン・再登録が必要。共通台帳を有効にする際は旧匿名Web Pushの登録・送信を停止し、無料通知への迂回を防ぐ。WebのPro通知移行は所有者側の公開前確認事項。

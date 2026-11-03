@@ -23,15 +23,48 @@ info.update({
     'UIFileSharingEnabled': False,
     'LSSupportsOpeningDocumentsInPlace': False,
     'NSAppTransportSecurity': {'NSAllowsArbitraryLoads': False},
+    'CFBundleURLTypes': [{'CFBundleURLName': 'jp.anzen-ai-portal.auth', 'CFBundleURLSchemes': ['anzenai']}],
+    'NSMicrophoneUsageDescription': '入力欄へ音声で文字を入力するためにマイクを使用します。音声入力を選んだ時だけ起動します。',
+    'NSSpeechRecognitionUsageDescription': '入力欄への音声入力に端末内の音声認識を使用します。認識した文字は確認後に利用できます。',
 })
 with info_path.open('wb') as stream:
     plistlib.dump(info, stream)
+entitlements = app / 'App.entitlements'
+with entitlements.open('wb') as stream:
+    plistlib.dump({'aps-environment': 'production' if os.environ.get('ANZEN_APNS_ENVIRONMENT') == 'production' else 'development'}, stream)
 
 # Place the manifest in the explicit Resources build phase (not merely on disk).
 manifest = app / 'PrivacyInfo.xcprivacy'
 manifest.write_bytes(Path('ios-resources/PrivacyInfo.xcprivacy').read_bytes())
 project = Path('ios/App/App.xcodeproj/project.pbxproj')
 text = project.read_text()
+# Register the local Keychain plugin in the generated target, not just on disk.
+(app / 'NativeVault.swift').write_bytes(Path('ios-resources/NativeVault.swift').read_bytes())
+if 'NativeVault.swift in Sources' not in text:
+    text = text.replace('/* Begin PBXBuildFile section */', '/* Begin PBXBuildFile section */\n\t\tA33300000000000000000003 /* NativeVault.swift in Sources */ = {isa = PBXBuildFile; fileRef = A33300000000000000000004 /* NativeVault.swift */; };')
+    text = text.replace('/* Begin PBXFileReference section */', '/* Begin PBXFileReference section */\n\t\tA33300000000000000000004 /* NativeVault.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeVault.swift; sourceTree = "<group>"; };')
+    text, count = re.subn(r'(isa = PBXSourcesBuildPhase;\s*buildActionMask = \d+;\s*files = \()', r'\1\n\t\t\t\tA33300000000000000000003 /* NativeVault.swift in Sources */,', text, count=1)
+    assert count == 1, 'Sources phase not found'
+    text, count = re.subn(r'(/\* App \*/ = \{\s*isa = PBXGroup;\s*children = \()', r'\1\n\t\t\t\tA33300000000000000000004 /* NativeVault.swift */,', text, count=1)
+    assert count == 1, 'App group not found'
+storyboard = app / 'Base.lproj/Main.storyboard'
+story = storyboard.read_text()
+story = story.replace('customClass="CAPBridgeViewController" customModule="Capacitor"', 'customClass="AnzenBridgeViewController" customModule="App" customModuleProvider="target"')
+storyboard.write_text(story)
+# The Push plugin needs explicit AppDelegate forwarding even for locally bundled apps.
+delegate = app / 'AppDelegate.swift'
+delegate_text = delegate.read_text()
+if 'didRegisterForRemoteNotificationsWithDeviceToken' not in delegate_text:
+    at = delegate_text.rfind('}')
+    delegate_text = delegate_text[:at] + '''
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        NotificationCenter.default.post(name: .capacitorDidRegisterForRemoteNotifications, object: deviceToken)
+    }
+    func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
+        NotificationCenter.default.post(name: .capacitorDidFailToRegisterForRemoteNotifications, object: error)
+    }
+''' + delegate_text[at:]
+delegate.write_text(delegate_text)
 if 'PrivacyInfo.xcprivacy in Resources' not in text:
     text = text.replace('/* Begin PBXBuildFile section */', '/* Begin PBXBuildFile section */\n\t\tA33300000000000000000001 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = A33300000000000000000002 /* PrivacyInfo.xcprivacy */; };')
     text = text.replace('/* Begin PBXFileReference section */', '/* Begin PBXFileReference section */\n\t\tA33300000000000000000002 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };')
@@ -40,6 +73,7 @@ if 'PrivacyInfo.xcprivacy in Resources' not in text:
     text, count = re.subn(r'(/\* App \*/ = \{\s*isa = PBXGroup;\s*children = \()', r'\1\n\t\t\t\tA33300000000000000000002 /* PrivacyInfo.xcprivacy */,', text, count=1)
     assert count == 1, 'App group not found'
 text = re.sub(r'TARGETED_DEVICE_FAMILY = [^;]+;', 'TARGETED_DEVICE_FAMILY = 1;', text)
+text = re.sub(r'(PRODUCT_BUNDLE_IDENTIFIER = [^;]+;)', r'\1\n\t\t\t\tCODE_SIGN_ENTITLEMENTS = App/App.entitlements;', text)
 text = re.sub(r'MARKETING_VERSION = [^;]+;', 'MARKETING_VERSION = 1.0.0;', text)
 text = re.sub(r'IPHONEOS_DEPLOYMENT_TARGET = [^;]+;', 'IPHONEOS_DEPLOYMENT_TARGET = 16.0;', text)
 project.write_text(text)

@@ -280,6 +280,14 @@ export default function PrivacyPage() {
             よりご連絡ください。
           </p>
         </section>
+        <section id="ios-app" className="space-y-3">
+          <h2 className="text-base font-bold text-slate-900">iOSアプリで扱う情報</h2>
+          <p className="text-sm leading-7 text-slate-600">ログイン・購読を利用する場合は、本人の会員識別情報、購入元・商品・有効期限・購入イベント、利用枠をサーバーで管理します。Apple／Googleのログインは本人が選んだ認証サービスを利用します。アプリの認証情報は端末のKeychainに保存し、端末にひも付けて保護します。購入の確認にはRevenueCatを利用し、メールアドレスではなく安全AI専用のランダムな会員対応IDを送ります。カード情報やApple Accountのパスワードをアプリが受け取ることはありません。</p>
+          <p className="text-sm leading-7 text-slate-600">Proの警報通知を有効にすると、登録地点、通知許可、会員との対応、APNsの通知先トークンを管理します。トークンは共有画面・ログ・バックアップファイルには含めません。ログアウト・通知停止・権利失効を確認して配信を止めます。通知が不要な場合はアプリの通知設定またはiOSの設定から停止できます。</p>
+          <p className="text-sm leading-7 text-slate-600">速報・出典・教材・保存した記事は端末で閲覧でき、過去問の回答やメモは「この端末に保存する」を選んだ場合に端末へ保存します。会員の購読権利・AI利用回数・警報登録地点はサーバーと共有します。認証の一時コードは短時間・一度だけ使用し、AIの再送確認用の応答は短期間のキャッシュとして扱います。購入監査情報は、購読管理・不正対策・必要な会計対応のため、端末削除とは分けて管理します。</p>
+          <p className="text-sm leading-7 text-slate-600">アプリの音声入力は、利用時のOS許可と端末内音声認識が使える場合に限ります。アプリの実装から音声を外部の認識APIへ送信しません。認識した文字を確認してから入力欄に反映し、AIへの送信同意は別に確認します。端末の対応状況により利用できない場合があります。</p>
+          <p className="text-sm leading-7 text-slate-600"><a className="underline" href="https://www.revenuecat.com/privacy/">RevenueCatのプライバシー</a> · <a className="underline" href="/contact">アカウント情報・購入の照合・削除の問い合わせ</a></p>
+        </section>
     </PageContainer>
   );
 }

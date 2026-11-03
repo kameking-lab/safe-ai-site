@@ -1,66 +1,43 @@
-# 安全AIポータル iOS v1
+# 安全AIポータル iOS v1 — IOS3B
 
-2026-11-03 / Bundle ID（仮）`jp.anzen-ai-portal.app` / iPhone・iOS 16以降。
+iPhone / iOS 16以降 / Capacitor 8 / RevenueCat公式SDK 14。M3の閲覧アプリを、ウェブと共通の全公開画面および初版からのIAPへ拡張。
 
-Next.js App Router + TypeScript + Tailwindの静的画面をCapacitor 8へ同梱する。`web/`は変更しない。`server.url`、任意ホストのブリッジ許可、ダウンロードしたコードの実行は使わない。
+## 共通実装
 
-## 実装範囲
+`web/src` をReact・データ・計算の唯一の正本として直接importする。`scripts/share-web.mjs` はimportだけのApp Routerページとpublic assetsを生成する。生成画面・資産はGit対象外で、mobile側に別の問題データを保守しない。
 
-- 事故速報：既存 `/api/signage-data` の `laborTrend`（GoogleニュースRSS）。見出しと元記事リンクのみ。記事本文の転載・原因推定なし。
-- 事故統計：既存Webで公開する月別DB集計の2006〜2021年・16年分を同梱。年・事故型のフィルタ。収録件数であり、全国の年間発生総数ではないと表示。
-- 法改正履歴：既存 `/api/revisions` の全公開レコード。同梱20件。年・キーワード検索。機械検証と人手未確認を区別。
-- 最終取得分と保存記事をネイティブFilesystemの `LibraryNoCloud` へ保存。初回圏外は同梱の公的資料と統計・改正が読める。取得失敗・破損・保存失敗では旧データを破棄しない。
-- 保存記事、読みやすい文字サイズ、ネイティブ共有シート、Safari View Controllerで出典閲覧、ネットワーク／復帰検知。端末データ削除。
-- 安衛法チャット・化学物質RA：入力と同意、残数・停止理由、根拠原文・基準日・不足条件を表示。**サイト側の安全契約が未提供なら送信しない**。
-- 気象警報：地点1件を保存、既存気象庁集約APIから画面表示。市町村コードなしの地点は代表地点と明示。元データの取得日時を使い、15分超・取得失敗・通信断を「現在警報なし」としない。
-- ログイン・KY／ヒヤリハット記録・広告SDK・課金導線・Push／ローカル通知は含めない。
+全247ルートの対応は [web-parity.json](docs/web-parity.json)、各モードは [ios3b-modes.md](docs/ios3b-modes.md)、全78試験・1,972問の検証は [web-parity-result.json](docs/web-parity-result.json)。KY記録・ヒヤリハット記録は所有者指定により除外。ビジュアルKYTは提供する。管理者・開発者画面は一般向けアプリの資産に含めない。
 
-## 重要な未接続境界
+画面は同梱HTML・Reactで動作する。`server.url` を使ってサイト全体を遠隔表示する方式ではない。AI・認証・最新情報はサイトAPIへ接続する。
 
-これは**アプリ実装と未署名クラウドビルド定義**。本番サイトの疎通・Codemagic実行・実機・審査は未実施。
-
-現行コミットには、統計更新API、匿名AI利用のサーバー日次枠、月5万円の原価停止を保証するアプリ向け契約がない。RAには公的データ照合のみで評価実行を停止する経路がある。新契約 `/api/mobile/v1/*` はこのタスクではサーバーへ実装／配備していない。したがって現在のサイトへ接続しても、AIは安全側で停止、統計は同梱版を維持する。これを本番提供済み・審査提出可能と扱わない。[API契約](docs/api-contract.md)に接続条件を記載。
-
-## Windowsでの確認
+## ローカル確認
 
 ```powershell
-cd mobile
-npm ci --no-audit --no-fund
+cd web
+npm ci --ignore-scripts
+npx prisma generate
+cd ../mobile
+npm ci --ignore-scripts
 npm run typecheck
 npm test
 npm run build
-npx playwright install chromium webkit
 npm run test:e2e
 ```
 
-`npm run build` はアプリの静的ファイル `mobile/out/` のローカル生成のみ。WebやVercelのビルド・デプロイは行わない。`npm run ios:prepare` はWindowsでは即時拒否する。iOSの生成・コンパイルはCodemagicだけ。
+Prisma generateはローカルの型生成のみ。DB接続・migrate deploy・db pushを行わない。購入・配信・外部AIはモックで検証する。ビルド中は外向き通信を遮断し、同梱データだけで全ページを生成する。省略なしの成果物は展開状態で約1.13 GiB。WindowsではXcodeのビルド・署名・実機動作は検証できない。
 
-ブラウザー試験は公開サイトへの通信をすべてfixtureまたは失敗へ置換し、AI実キー・外部APIを呼ばない。ブラウザーの圏外試験はサイト通信の遮断とnavigator状態の模擬。ネイティブの機内モード試験の代用ではない。
+## ネイティブ機能
 
-## Codemagic（定義のみ、実行しない）
+FilesystemのLibraryNoCloudに取得済み資料を保存し、通信失敗後も参照できる。購入権利はサーバーを正本とし、オフラインの自己申告でProにしない。認証トークンはKeychainへ保存。Share・ファイル出力・UIPrintInteractionController・APNs通知・Speechの端末内認識を接続した。
 
-ルートの `codemagic.yaml` は `working_directory: mobile`。固定npm lockから型・契約テスト→静的画面→macOSでSPM形式のiOSプロジェクト生成→Privacy Manifest・バージョン・アイコン注入→Simulatorビルド→未署名archive。
+`ios-resources/NativeVault.swift` はKeychain・ローカルプラグイン登録・深いURLの静的Router・印刷・音声を実装する。音声はon-device認識が利用できる場合のみ有効。権限は利用時に求める。APNs操作はサイト側で会員と有効なPro権利を確認する。
 
-- `CODE_SIGNING_ALLOWED=NO`。Apple Team・証明書・provisioning・App Store Connectキーは不要。署名・export IPA・upload・publish・提出ステップなし。
-- 成果物：Simulator `.app` zip、未署名 `.xcarchive` zip、ビルドログ、Swift Package解決結果。未署名archiveは実機へインストール／ストア提出できない。
-- `ios/`は生成物としてignore。プロジェクト差分は `scripts/configure-ios.py` と `ios-resources/` で再現する。
-- XcodeはCodemagicの `latest`。実行時のXcode・SDK・Swift Package.resolvedを成果物で確認し、その結果でピン留めする。WindowsでXcodeの動作を検証したとはしない。
+## 課金・サーバー
 
-## v1.1への差込点
+共通設定は `web/src/lib/mobile/product-policy.json`。無料：チャット3回/日、RA1件/日、警報1地点・通知なし。Pro：チャット50回/日、RA10件/日、警報10地点・通知あり。月額980円税込の自動更新1種、entitlement `anzen_pro`。
 
-`src/lib/policy.ts` の `EntitlementProvider` を、認証済みサーバーの共通権利とRevenueCat `anzen_pro` を照合する実装に差し替える。`PLAN_LIMITS` は無料3/1/1地点・通知なし、Pro50/10/10地点・通知あり。月額980円税込。v1はfree固定で、端末フラグや遠隔設定によるPro昇格経路なし。
+既存Stripe購読を優先表示し、IAPの二重購入を止める。SDKのcustomerInfoだけではProに昇格しない。購入・復元後もサーバーで照合する。AppleとGoogleのサイト認証をPKCE経由で利用する。
 
-商品枠と既存の短期安全レート／月5万円停止は別レイヤー。端末で消費数を正本化しない。認証・IAP・復元・権利共有・APNs・通知サーバーはv1.1で別実装／実機検証する。権利providerを交換するだけで課金や通知が完成するわけではない。
+追加スキーマは提案DDLのみ。本番DBへの適用・Apple/RevenueCat/APNs設定・実キーの投入は行っていない。各API・安全停止・必要設定は [API契約](docs/api-contract.md) と [公開前確認](docs/release-checklist.md) を参照。
 
-## データ更新
-
-同梱資料は `npm run pack:seed` で元リポジトリの公開JSONだけから再生成。`src/data/manifest.json` に出典パス・元生成日時・SHA-256を保存。元ファイルの更新時のみ再生成する。報道本文、画像、SDS、法令全文、秘密設定、アカウント情報は同梱しない。
-
-## 公式参照
-
-- [Capacitor設定](https://capacitorjs.com/docs/config)、[HTTP](https://capacitorjs.com/docs/apis/http)、[FilesystemとPrivacy Manifest](https://capacitorjs.com/docs/apis/filesystem)、[Preferences](https://capacitorjs.com/docs/apis/preferences)
-- [Next.js静的export](https://nextjs.org/docs/app/guides/static-exports)
-- [Codemagic Capacitor](https://docs.codemagic.io/yaml-quick-start/building-an-ionic-app/)
-- [Apple審査基準](https://developer.apple.com/app-store/review/guidelines/)
-
-最終確認は2026-11-03。4.2の審査結果は保証しない。オフライン資料、端末保存、ネイティブ共有と表示設定を実際の使用手順で審査担当へ説明する。
+Codemagicの未署名macOSビルド定義にはwebの依存導入とPrisma型生成を追加した。実行・設定変更は行っていない。Simulator・実機・Sandbox購入・復元・通知・審査は別途確認が必要。

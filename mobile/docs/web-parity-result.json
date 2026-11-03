@@ -1,0 +1,415 @@
+{
+  "schema": 1,
+  "routeFamilies": 247,
+  "states": {
+    "shared": 208,
+    "native": 8,
+    "operator-only": 16,
+    "owner-excluded": 15
+  },
+  "htmlPages": 6995,
+  "bundledBytes": 1214337095,
+  "exam": {
+    "papers": 78,
+    "questions": 1972,
+    "scored": 1508,
+    "unscored": 464,
+    "figureReferences": 2075,
+    "sourceHash": "80580800c7fab657722dca860902629ae4fefb907ed3b581f154caa71e0f7a05",
+    "items": [
+      {
+        "id": "lckohyo-LC20260401-2",
+        "questions": 24,
+        "scored": 0
+      },
+      {
+        "id": "lckohyo-LC20251101",
+        "questions": 24,
+        "scored": 0
+      },
+      {
+        "id": "lckohyo-LC20260402-1",
+        "questions": 40,
+        "scored": 40
+      },
+      {
+        "id": "lckohyo-LC20252102",
+        "questions": 40,
+        "scored": 40
+      },
+      {
+        "id": "lckohyo-LC20260403",
+        "questions": 40,
+        "scored": 40
+      },
+      {
+        "id": "lckohyo-LC20252103",
+        "questions": 40,
+        "scored": 40
+      },
+      {
+        "id": "lckohyo-LC20260404-1",
+        "questions": 40,
+        "scored": 40
+      },
+      {
+        "id": "lckohyo-LC20252104",
+        "questions": 40,
+        "scored": 40
+      },
+      {
+        "id": "lckohyo-LC20260405-2",
+        "questions": 40,
+        "scored": 40
+      },
+      {
+        "id": "lckohyo-LC20252105",
+        "questions": 40,
+        "scored": 40
+      },
+      {
+        "id": "lckohyo-LC20260406",
+        "questions": 30,
+        "scored": 30
+      },
+      {
+        "id": "lckohyo-LC20252106",
+        "questions": 30,
+        "scored": 30
+      },
+      {
+        "id": "lckohyo-LC20260407-1",
+        "questions": 40,
+        "scored": 40
+      },
+      {
+        "id": "lckohyo-LC20252107",
+        "questions": 40,
+        "scored": 40
+      },
+      {
+        "id": "lckohyo-LC20260408-1",
+        "questions": 40,
+        "scored": 40
+      },
+      {
+        "id": "lckohyo-LC20252108",
+        "questions": 40,
+        "scored": 40
+      },
+      {
+        "id": "lckohyo-LC20260409-1",
+        "questions": 40,
+        "scored": 40
+      },
+      {
+        "id": "lckohyo-LC20252109",
+        "questions": 40,
+        "scored": 40
+      },
+      {
+        "id": "lckohyo-LC20260410-1",
+        "questions": 40,
+        "scored": 40
+      },
+      {
+        "id": "lckohyo-LC20252110",
+        "questions": 40,
+        "scored": 40
+      },
+      {
+        "id": "lckohyo-LC20260411-1",
+        "questions": 20,
+        "scored": 20
+      },
+      {
+        "id": "lckohyo-LC20252111",
+        "questions": 20,
+        "scored": 20
+      },
+      {
+        "id": "lckohyo-LC20260412-1",
+        "questions": 20,
+        "scored": 20
+      },
+      {
+        "id": "lckohyo-LC20252112",
+        "questions": 20,
+        "scored": 20
+      },
+      {
+        "id": "lckohyo-LC20260413-1",
+        "questions": 40,
+        "scored": 40
+      },
+      {
+        "id": "lckohyo-LC20252113",
+        "questions": 40,
+        "scored": 40
+      },
+      {
+        "id": "lckohyo-LC20260415-1",
+        "questions": 44,
+        "scored": 44
+      },
+      {
+        "id": "lckohyo-LC20252114",
+        "questions": 44,
+        "scored": 44
+      },
+      {
+        "id": "lckohyo-LC20260414-1",
+        "questions": 30,
+        "scored": 30
+      },
+      {
+        "id": "lckohyo-LC20252115",
+        "questions": 30,
+        "scored": 30
+      },
+      {
+        "id": "lckohyo-LC20260416-1",
+        "questions": 40,
+        "scored": 40
+      },
+      {
+        "id": "lckohyo-LC20252116",
+        "questions": 40,
+        "scored": 40
+      },
+      {
+        "id": "lckohyo-LC20260417-1",
+        "questions": 40,
+        "scored": 40
+      },
+      {
+        "id": "lckohyo-LC20252117",
+        "questions": 40,
+        "scored": 40
+      },
+      {
+        "id": "lckohyo-LC20260418-1",
+        "questions": 40,
+        "scored": 40
+      },
+      {
+        "id": "lckohyo-LC20252118",
+        "questions": 40,
+        "scored": 40
+      },
+      {
+        "id": "lckohyo-LC20260419-1",
+        "questions": 40,
+        "scored": 40
+      },
+      {
+        "id": "lckohyo-LC20252119",
+        "questions": 40,
+        "scored": 40
+      },
+      {
+        "id": "emkohyo-EM20261801",
+        "questions": 20,
+        "scored": 0
+      },
+      {
+        "id": "emkohyo-20260217",
+        "questions": 20,
+        "scored": 0
+      },
+      {
+        "id": "emkohyo-EM20261802",
+        "questions": 20,
+        "scored": 0
+      },
+      {
+        "id": "emkohyo-20260217-2",
+        "questions": 20,
+        "scored": 0
+      },
+      {
+        "id": "emkohyo-EM20261803",
+        "questions": 20,
+        "scored": 0
+      },
+      {
+        "id": "emkohyo-20260217-3",
+        "questions": 20,
+        "scored": 0
+      },
+      {
+        "id": "emkohyo-EM20261804",
+        "questions": 20,
+        "scored": 0
+      },
+      {
+        "id": "emkohyo-20260217-4",
+        "questions": 20,
+        "scored": 0
+      },
+      {
+        "id": "emkohyo-EM20261805",
+        "questions": 20,
+        "scored": 0
+      },
+      {
+        "id": "emkohyo-EM20251805",
+        "questions": 20,
+        "scored": 0
+      },
+      {
+        "id": "emkohyo-EM20261806",
+        "questions": 20,
+        "scored": 0
+      },
+      {
+        "id": "emkohyo-EM20251806",
+        "questions": 20,
+        "scored": 0
+      },
+      {
+        "id": "emkohyo-EM20261807",
+        "questions": 20,
+        "scored": 0
+      },
+      {
+        "id": "emkohyo-EM20251807",
+        "questions": 20,
+        "scored": 0
+      },
+      {
+        "id": "emkohyo-EM20261808",
+        "questions": 20,
+        "scored": 0
+      },
+      {
+        "id": "emkohyo-EM20251808",
+        "questions": 20,
+        "scored": 0
+      },
+      {
+        "id": "emkohyo-EM20261809",
+        "questions": 20,
+        "scored": 0
+      },
+      {
+        "id": "emkohyo-EM20251809",
+        "questions": 20,
+        "scored": 0
+      },
+      {
+        "id": "cskohyo-CS20251901",
+        "questions": 30,
+        "scored": 30
+      },
+      {
+        "id": "cskohyo-CS20241901",
+        "questions": 30,
+        "scored": 30
+      },
+      {
+        "id": "cskohyo-CS20251902",
+        "questions": 15,
+        "scored": 15
+      },
+      {
+        "id": "cskohyo-CS20241902",
+        "questions": 15,
+        "scored": 15
+      },
+      {
+        "id": "cskohyo-CS20251903",
+        "questions": 4,
+        "scored": 0
+      },
+      {
+        "id": "cskohyo-CS20241903",
+        "questions": 4,
+        "scored": 0
+      },
+      {
+        "id": "cskohyo-CS20251904",
+        "questions": 4,
+        "scored": 0
+      },
+      {
+        "id": "cskohyo-CS20241904",
+        "questions": 4,
+        "scored": 0
+      },
+      {
+        "id": "cskohyo-CS20251905",
+        "questions": 4,
+        "scored": 0
+      },
+      {
+        "id": "cskohyo-CS20241905",
+        "questions": 4,
+        "scored": 0
+      },
+      {
+        "id": "cskohyo-CS20251906",
+        "questions": 4,
+        "scored": 0
+      },
+      {
+        "id": "cskohyo-CS20241906",
+        "questions": 4,
+        "scored": 0
+      },
+      {
+        "id": "cskohyo-CS20251907",
+        "questions": 4,
+        "scored": 0
+      },
+      {
+        "id": "cskohyo-CS20241907",
+        "questions": 4,
+        "scored": 0
+      },
+      {
+        "id": "cskohyo-CS20251908",
+        "questions": 30,
+        "scored": 30
+      },
+      {
+        "id": "cskohyo-CS20241908",
+        "questions": 30,
+        "scored": 30
+      },
+      {
+        "id": "cskohyo-CS20251909",
+        "questions": 15,
+        "scored": 15
+      },
+      {
+        "id": "cskohyo-CS20241909",
+        "questions": 15,
+        "scored": 15
+      },
+      {
+        "id": "cskohyo-CS20251910",
+        "questions": 4,
+        "scored": 0
+      },
+      {
+        "id": "cskohyo-CS20241910",
+        "questions": 4,
+        "scored": 0
+      },
+      {
+        "id": "cskohyo-CS20251911",
+        "questions": 4,
+        "scored": 0
+      },
+      {
+        "id": "cskohyo-CS20241911",
+        "questions": 4,
+        "scored": 0
+      }
+    ]
+  },
+  "delivery": "local static files and canonical web components; no remote application WebView",
+  "networkDuringBuild": "blocked",
+  "nativeDeviceVerification": "not run on Windows"
+}

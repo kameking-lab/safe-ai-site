@@ -1,3 +1,4 @@
+import { withProviderBudget } from "@/lib/mobile/usage";
 /**
  * KY全面再設計 Phase 5: Gemini 本接続による危険箇所の提案。
  *
@@ -184,14 +185,15 @@ const defaultGenerate: GeminiGenerate = async (system, user) => {
     apiKey: key,
     httpOptions: { timeout: GEMINI_REQUEST_TIMEOUT_MS },
   });
-  const result = await genAI.models.generateContent({
+  const result = await withProviderBudget(() => genAI.models.generateContent({
     model: GEMINI_FLASH_MODEL,
     contents: user,
     config: {
       systemInstruction: system,
+      maxOutputTokens: 2048,
       abortSignal: AbortSignal.timeout(GEMINI_REQUEST_TIMEOUT_MS),
     },
-  });
+  }),{model:GEMINI_FLASH_MODEL,inputBytes:Buffer.byteLength(system+user,'utf8'),maxOutputTokens:2048});
   return result.text ?? "";
 };
 

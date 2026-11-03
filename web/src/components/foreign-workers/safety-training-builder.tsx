@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect,useMemo, useState } from "react";
+import { useNativeQuery } from '@/lib/use-native-query';
 import { useRouter } from "next/navigation";
 import { Image as ImageIcon } from "lucide-react";
 import {
@@ -72,12 +73,17 @@ function LangCell({
 }
 
 export function SafetyTrainingBuilder({
-  materials,
+  materials: serverMaterials,
   industries,
   topics,
-  currentIndustry,
+  currentIndustry: serverIndustry,
 }: BuilderProps) {
   const router = useRouter();
+  const query=useNativeQuery();
+  const [nativeMaterials,setNativeMaterials]=useState<SafetyMaterial[]|null>(null);
+  const currentIndustry=process.env.NEXT_PUBLIC_ANZEN_NATIVE==='true' && industries.includes(query?.get('industry') as MaterialIndustry)?query!.get('industry') as MaterialIndustry:serverIndustry;
+  const materials=nativeMaterials??serverMaterials;
+  useEffect(()=>{if(process.env.NEXT_PUBLIC_ANZEN_NATIVE!=='true')return;let active=true;void import('@/data/foreign-worker-materials').then(({SAFETY_MATERIAL_INDEX})=>{if(active)setNativeMaterials(SAFETY_MATERIAL_INDEX.byIndustry[currentIndustry]??[]);});return()=>{active=false;};},[currentIndustry]);
   const [topic, setTopic] = useState<MaterialTopic>(topics[0]);
   const [selectedLangs, setSelectedLangs] = useState<MaterialLanguage[]>([
     "ja-easy",

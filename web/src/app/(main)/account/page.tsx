@@ -1,3 +1,4 @@
+import { AccountSdsHistory } from "@/components/account-sds-history";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -7,6 +8,7 @@ import { ManagePlanButton } from "./manage-plan-button";
 import { PageContainer } from "@/components/layout";
 import { ConclusionCard } from "@/components/ui/conclusion-card";
 import { computeAccountConclusion } from "@/lib/account-conclusion";
+import { getEntitlement } from '@/lib/mobile/billing-service';
 
 import { PageJsonLd } from "@/components/page-json-ld";
 export const metadata: Metadata = {
@@ -40,6 +42,7 @@ export default async function AccountPage({ searchParams }: Props) {
   let status = "active";
   let currentPeriodEnd: Date | null = null;
   let hasStripeCustomer = false;
+  let appStoreMember = false;
   let subscriptionLookupFailed = false;
   let sdsHistoryFailed = false;
   let sdsHistory: Array<{
@@ -76,6 +79,10 @@ export default async function AccountPage({ searchParams }: Props) {
     }
   }
 
+  if (userId && process.env.MOBILE_LEDGER_ENABLED === 'true') {
+    try {const rights=await getEntitlement(userId);planName=rights.plan;appStoreMember=rights.source==='app_store';if(rights.expiresAt)currentPeriodEnd=new Date(rights.expiresAt);if(rights.syncState!=='verified')subscriptionLookupFailed=true;}
+    catch {subscriptionLookupFailed=true;}
+  }
   const planLabel = PLAN_LABEL[planName] ?? planName;
   const isFree = planName === "free";
   const isCanceled = status === "canceled";
@@ -113,12 +120,13 @@ export default async function AccountPage({ searchParams }: Props) {
         title={conclusion.title}
         description={conclusion.description}
         action={
-          !subscriptionLookupFailed && !hasStripeCustomer
+          !subscriptionLookupFailed && !hasStripeCustomer && !appStoreMember
             ? { href: "/pricing", label: "プランをアップグレード" }
             : undefined
         }
         className="mt-8"
       >
+        {appStoreMember ? <a href="https://apps.apple.com/account/subscriptions" className="inline-flex min-h-11 items-center underline">App Storeの購読管理・解約</a> : null}
         {hasStripeCustomer && (
           <>
             <ManagePlanButton />
@@ -141,44 +149,7 @@ export default async function AccountPage({ searchParams }: Props) {
         </p>
       )}
 
-      <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="flex items-center justify-between gap-3">
-          <h2 className="text-base font-bold text-slate-800">SDS検索＋RA履歴</h2>
-          <Link
-            href="/chemical-ra/product-search"
-            className="text-xs font-semibold text-emerald-700 hover:underline"
-          >
-            新規検索 →
-          </Link>
-        </div>
-        {sdsHistoryFailed ? (
-          <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs leading-5 text-amber-800">
-            履歴の読み込みに失敗しました。時間をおいてページを再読み込みしてください。
-          </p>
-        ) : sdsHistory.length === 0 ? (
-          <p className="mt-3 text-xs text-slate-500">
-            まだ履歴がありません。製品検索＋自動RAを実行すると、ここに最新10件が表示されます。
-          </p>
-        ) : (
-          <ul className="mt-3 divide-y divide-slate-100">
-            {sdsHistory.map((h) => (
-              <li key={h.id} className="flex items-center justify-between py-2 text-sm">
-                <div>
-                  <p className="font-medium text-slate-800">{h.productName}</p>
-                  <p className="text-[11px] text-slate-500">
-                    {new Date(h.createdAt).toLocaleString("ja-JP")}
-                  </p>
-                </div>
-                {h.riskLevel && (
-                  <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-700">
-                    {h.riskLevel}
-                  </span>
-                )}
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
+      <AccountSdsHistory sdsHistory={sdsHistory} sdsHistoryFailed={sdsHistoryFailed}/>
 
       <section className="mt-6 rounded-2xl border border-slate-100 bg-slate-50 p-6 text-xs leading-6 text-slate-600">
         <p className="font-semibold text-slate-700">プラン管理について</p>

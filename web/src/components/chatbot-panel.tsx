@@ -34,6 +34,7 @@ import {
   type PublicLegalConversationContext,
 } from "@/lib/legal-conversation-public-context";
 
+class ServerRequestError extends Error { constructor(message:string){super(message);this.name='ServerRequestError';} }
 type ChatMessage = {
   id: string;
   role: "user" | "assistant";
@@ -319,7 +320,7 @@ export function ChatbotPanel({
         (response.status === 422 || response.status === 428)
       ) {
         const blocked = (await response.json().catch(() => null)) as {
-          error?: string;
+          error?: string | {message?:string};
           message?: string;
         } | null;
         setMessages((previous) =>
@@ -332,12 +333,17 @@ export function ChatbotPanel({
           kind: "privacy",
           message:
             blocked?.message ??
-            blocked?.error ??
+            (typeof blocked?.error==='string'?blocked.error:blocked?.error?.message) ??
             "個人情報を除いて、もう一度入力してください。",
         });
         return;
       }
-      if (!response.ok || !response.body) {
+      if(!response.ok){
+        const failed=await response.json().catch(()=>null) as {error?:string|{message?:string};message?:string}|null;
+        const message=failed?.message??(typeof failed?.error==='string'?failed.error:failed?.error?.message);
+        throw new ServerRequestError(message??'サーバーの実行条件を確認できません。会員の権利と利用枠を確認してください。');
+      }
+      if (!response.body) {
         throw new Error("response-unavailable");
       }
 
@@ -459,6 +465,8 @@ export function ChatbotPanel({
             ? "回答がタイムアウトしました。再試行できます。"
             : "応答を停止しました。再試行できます。",
         );
+      } else if(streamError instanceof ServerRequestError){
+        setError(streamError.message);
       } else {
         setError("回答を取得できませんでした。自動再送はしていません。");
       }

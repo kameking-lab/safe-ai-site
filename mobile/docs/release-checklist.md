@@ -1,16 +1,22 @@
-# v1 実機・公開前の検証事項
+# IOS3B 公開前確認・所有者対応待ち
 
-このタスクではApp Store Connect登録、署名、提出、Codemagic実行、Vercel設定／デプロイを行っていない。以下は残作業。
+今回のコード作業では本番DB・外部設定・実キー呼び出し・push・デプロイを行っていない。
 
-1. サイト担当がAPI契約を実装し、匿名の日次3/1、同一操作再送、失敗取消、既存短期安全制限、全経路合算の月5万円停止をテスト。RA未提供を評価済みとして表示しない。
-2. `codemagic.yaml` を手動実行し、SPM依存・XcodeでSimulatorビルドと未署名archiveが成立することを確認。生成されたAppにPrivacyInfo・ローカルHTML・アイコンが含まれることを確認。署名と提出は別の所有者作業。
-3. iPhoneで初回機内モード→同梱資料閲覧、オンラインで取得→強制終了→機内モード→最後の全取得分・保存記事・文字サイズが復元。圏外で外部出典／AIが安全に停止すること。
-4. ファイル保存失敗・不正JSON・互換版不一致・RSS失敗で旧資料を失わないこと。削除後は同梱データに戻り、サーバー利用数はリセットされないこと。
-5. 共有シートの成功／取消、Safari View Controllerから復帰、OS文字拡大、VoiceOver、ノッチ・ホームインジケータ、縦横表示を確認。
-6. 気象の市区町村コード有無、15分超、地域切替、情報欠落、警報発表・解除、通信断を確認。古い空配列を警報解除と表示しない。v1は通知権限を要求しない。
-7. AI同意前の送信なし、根拠原文・施行時点・不足条件、危険な作業許可／適合断定の遮断、残数・日次／burst／月次停止の表示を確認。質問に実名・現場住所・機密を使わない。
-8. サイト側のAI提供者名・保持／学習利用・ログ保持を所有者が確認し、アプリ同意文とプライバシーポリシーを一致させる。Privacy ManifestのAPI理由はPreferences（CA92.1）、Filesystem（C617.1）を反映済み。サーバーの入力保持が不明なので、App Privacyを「データ収集なし」と断定しない。
-9. 統計の収録期間と範囲、同梱法改正の内容／権利、出典到達性を確認。元JSONの生成日時は古い。同梱資料を最新・今年の全国事故件数として宣伝しない。
-10. 審査ノートは事故速報・統計・法改正の無料閲覧、オフライン検索・保存、ネイティブ共有、読みやすさを実操作で説明。KY／ヒヤリハット、Pro課金、通知のスクリーンショットをv1に使わない。未接続AIを提供中として提出しない。
+1. `web/prisma/migrations/20261103000000_ios3b_shared_entitlements/migration.sql` は追加13テーブルの提案DDL。所有者承認後にバックアップ・影響確認・移行・復旧手順を準備して適用する。今回migrate deploy/db pushは禁止のため未実施。
+2. 独立した検証DBで競合する最終1枠・購入予約・Webhook重複と逆順・返金・権利失効・アカウント切替・送信直前の通知停止を確認する。今回の競合テストはモックDBであり、実PostgreSQL確認ではない。
+3. Appleに税込月額980円の自動更新1商品、RevenueCatに同じ商品・Offering・`anzen_pro`を設定する。実商品IDとキーは環境設定へ保存。購入の別会員移管方針は所有者が固定し、既存Stripe会員の有効期間・二重購入防止を確認する。
+4. 必要な設定名：`MOBILE_LEDGER_ENABLED`、`MOBILE_IAP_ENABLED`、`REVENUECAT_IOS_PUBLIC_SDK_KEY`、`REVENUECAT_IOS_PRODUCT_ID`、`REVENUECAT_IOS_OFFERING_ID`、`REVENUECAT_SECRET_API_KEY`、`REVENUECAT_WEBHOOK_AUTHORIZATION`、任意の `REVENUECAT_WEBHOOK_SIGNING_SECRET`。秘密値をGit・ログ・報告へ書かない。
+5. Apple認証：`AUTH_APPLE_ID`・`AUTH_APPLE_SECRET`とApple側のReturn URL・アプリ関連設定。Google有効時はApple必須。会員統合をメール一致で自動実施しない。審査用Sandbox会員は所有者がDBで明示指定する。
+6. AI単価：`MOBILE_AI_PRICED_MODEL`、`MOBILE_AI_INPUT_JPY_PER_MILLION`、`MOBILE_AI_OUTPUT_JPY_PER_MILLION`、`MOBILE_AI_COST_MARGIN`（1.25以上）を確認する。未設定・価格不明では有料推論を止める。月5万円の原価ガードを外さない。
+7. APNs：`MOBILE_APNS_ENABLED`、`MOBILE_APNS_ENVIRONMENT`、`APNS_KEY_ID`、`APNS_TEAM_ID`、`APNS_PRIVATE_KEY`、`APNS_TOPIC`、ビルド時の `ANZEN_APNS_ENVIRONMENT`。署名・APNs権限・worker起動を整備する。`MOBILE_MAINTENANCE_AUTHORIZATION` を専用管理する。旧Web Push停止とWebのPro通知移行を公開前に確認する。
+8. Stripe：`STRIPE_ANZEN_PRO_MONTHLY_PRICE_ID` と `STRIPE_MANAGE_ONLY_PORTAL_CONFIGURATION_ID` を用意する。新販売の価格・税込・規約を整合させる。既存契約の値上げ・減額・移管は勝手に行わない。旧有料会員の台帳照合・価格移行は所有者承認後。
+9. macOSでSPM・Swift・Keychain・静的Router・印刷・Speech・Push・IAPをビルド検証する。WindowsではiOSコンパイルと実機検証ができない。Codemagic実行・署名・App Store申請は未実施。
+10. 実機とSandboxで購入・取消・保留・復元・更新・返金・失効・Apple/Google切替・再インストール・オフライン・通知の背景受信を確認する。APIセッションは30日で失効し、通知継続には再ログインが必要。約1.13 GiBの展開済み同梱資産について、IPA圧縮後サイズと初回起動を確認する。
+11. 利用規約・プライバシー・App Privacy・審査説明を確認する。端末認識音声・RevenueCatへの会員ID/購入情報・通知先の保存を反映する。RA生成はサイト側で停止中であることを商品説明にも一致させる。4.2のオフライン・共有・通知は実機で証跡を残す。
 
-v1.1は月980円、RevenueCat `anzen_pro`、IAP・復元・失効・返金・二重購入防止と会員認証、Pro50/10・10地点＋APNsをまとめて追加する。商品枠を広げても安全ゲート・月5万円停止は維持する。
+一次資料：
+
+- https://www.revenuecat.com/docs/getting-started/installation/capacitor
+- https://www.revenuecat.com/docs/integrations/webhooks
+- https://www.revenuecat.com/docs/customers/identifying-customers
+- https://developer.apple.com/app-store/review/guidelines/

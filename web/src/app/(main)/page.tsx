@@ -57,7 +57,7 @@ export const metadata: Metadata = {
 
 export default async function HomePage() {
   const automationConsultAvailability = getAutomationConsultAvailability();
-  const [requestHeaders, cookieStore] = await Promise.all([
+  const [requestHeaders, cookieStore] = process.env.ANZEN_NATIVE_BUILD === 'true' ? [new Headers(), {get: (_name: string) => undefined}] : await Promise.all([
     headers(),
     cookies(),
   ]);

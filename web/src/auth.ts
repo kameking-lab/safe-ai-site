@@ -7,6 +7,10 @@
 
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
+import Apple from "next-auth/providers/apple";
+import { mobileAuthSession } from "@/lib/mobile/session";
+import { getEntitlement } from "@/lib/mobile/billing-service";
+import { headers } from 'next/headers';
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 import { externalCredentialedServicesAllowed } from "@/lib/server/deployment-safety";
@@ -18,8 +22,8 @@ const noopAuth = async () => null;
 export const isAuthConfigured = Boolean(
   externalCredentialedServicesAllowed() &&
   process.env.AUTH_SECRET &&
-  process.env.AUTH_GOOGLE_ID &&
-  process.env.AUTH_GOOGLE_SECRET,
+  ((process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET) ||
+    (process.env.AUTH_APPLE_ID && process.env.AUTH_APPLE_SECRET)),
 );
 
 const initialized = isAuthConfigured
@@ -27,10 +31,14 @@ const initialized = isAuthConfigured
       adapter: prisma ? PrismaAdapter(prisma) : undefined,
       session: { strategy: "jwt" },
       providers: [
-        Google({
+        ...(process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET ? [Google({
           clientId: process.env.AUTH_GOOGLE_ID!,
           clientSecret: process.env.AUTH_GOOGLE_SECRET!,
-        }),
+        })] : []),
+        ...(process.env.AUTH_APPLE_ID && process.env.AUTH_APPLE_SECRET ? [Apple({
+          clientId: process.env.AUTH_APPLE_ID,
+          clientSecret: process.env.AUTH_APPLE_SECRET,
+        })] : []),
       ],
       pages: {
         signIn: "/auth/signin",
@@ -83,6 +91,10 @@ const initialized = isAuthConfigured
           } else {
             (session.user as { planName?: string }).planName = "free";
           }
+          if (token.sub && process.env.MOBILE_LEDGER_ENABLED === 'true') {
+            const rights = await getEntitlement(token.sub);
+            (session.user as {planName?: string}).planName = rights.plan;
+          }
           return session;
         },
         async jwt({ token, user }) {
@@ -101,4 +113,8 @@ export const handlers = initialized?.handlers ?? {
 };
 export const signIn = initialized?.signIn ?? noopAuth;
 export const signOut = initialized?.signOut ?? noopAuth;
-export const auth = initialized?.auth ?? noopAuth;
+export async function auth() {
+  // An invalid native credential must not fall back to a different browser-cookie account.
+  if ((await headers()).get('authorization')?.startsWith('Bearer ')) return mobileAuthSession();
+  return initialized ? initialized.auth() : noopAuth();
+}

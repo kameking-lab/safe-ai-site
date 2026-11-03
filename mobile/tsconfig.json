@@ -21,7 +21,9 @@
         "name": "next"
       }
     ],
-    "allowJs": true
+    "allowJs": true,
+    "allowImportingTsExtensions": true,
+    "paths": { "@/*": ["../web/src/*"] }
   },
   "include": [
     "next-env.d.ts",

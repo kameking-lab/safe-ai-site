@@ -23,7 +23,7 @@ async function fixtures(context: BrowserContext, options: { ai?: boolean; oldWea
       executions++; const input = route.request().postDataJSON(); data = aiResult(input.requestId, input.feature);
       if (input.feature === 'chemical_ra' && options.unavailableRa) { status = 503; data = { error: { code: 'FEATURE_UNAVAILABLE' } }; }
     } else { status = 404; data = { error: { code: 'UNAVAILABLE' } }; }
-    await route.fulfill({ status, contentType: 'application/json', headers: { 'Access-Control-Allow-Origin': 'http://127.0.0.1:3213', 'Access-Control-Allow-Credentials': 'true', 'Access-Control-Allow-Headers': 'content-type,x-anzen-csrf' }, body: JSON.stringify(data) });
+    await route.fulfill({ status, contentType: 'application/json', headers: { 'Access-Control-Allow-Origin': 'http://127.0.0.1:3213', 'Access-Control-Allow-Credentials': 'true', 'Access-Control-Allow-Headers': 'content-type,x-anzen-csrf,x-anzen-native,x-operation-id,authorization' }, body: JSON.stringify(data) });
   });
   return () => executions;
 }

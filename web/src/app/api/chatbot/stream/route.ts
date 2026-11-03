@@ -1,3 +1,5 @@
+import { withProviderBudget } from "@/lib/mobile/usage";
+import { withUsage } from "@/lib/mobile/usage";
 /**
  * P0-001 (usability-audit-day2-2026-05-24):
  * 安衛法AIチャットの SSE ストリーミング応答エンドポイント。
@@ -138,7 +140,7 @@ function immediateSseResponse(payload: ChatbotResponse): Response {
   );
 }
 
-export async function POST(request: Request) {
+async function handlePost(request: Request) {
   const requestBoundary = validateChatbotRequestBoundary(request);
   if (!requestBoundary.allowed) {
     return new Response(
@@ -672,14 +674,15 @@ export async function POST(request: Request) {
                   });
               // Prior turns are reduced to allowlisted work conditions in
               // retrievalQuery; raw conversation text is never forwarded.
-              const streamResult = await genAI.models.generateContentStream({
+              const streamResult = await withProviderBudget(() => genAI.models.generateContentStream({
                 model: GEMINI_FLASH_MODEL,
                 contents: userPrompt,
                 config: {
                   systemInstruction: SYSTEM_PROMPT,
+                  maxOutputTokens: 2048,
                   abortSignal: request.signal,
                 },
-              });
+              }),{model:GEMINI_FLASH_MODEL,inputBytes:Buffer.byteLength(SYSTEM_PROMPT+userPrompt,'utf8'),maxOutputTokens:2048});
               for await (const chunkResponse of streamResult) {
                 if (cancelled || request.signal.aborted) {
                   throw new DOMException("Request aborted", "AbortError");
@@ -877,3 +880,5 @@ export async function POST(request: Request) {
     },
   });
 }
+
+export async function POST(request: Request) { return withUsage(request, "law_chat", handlePost); }

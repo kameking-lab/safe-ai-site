@@ -25,6 +25,136 @@ model User {
   subscription Subscription?
 }
 
+// Additive iOS/website shared billing ledger. Apply only after owner approval.
+model MobileIdentity {
+  userId      String @id
+  appUserId   String @unique @default(uuid())
+  billingEnvironment String @default("PRODUCTION")
+  createdAt   DateTime @default(now())
+}
+
+model MobileGrant {
+  id                    String @id @default(cuid())
+  userId                String
+  provider              String
+  originalTransactionId String
+  productId             String
+  environment           String
+  expiresAt             DateTime
+  checkedAt             DateTime
+  revoked               Boolean @default(false)
+  @@unique([provider, originalTransactionId, environment])
+  @@index([userId, expiresAt])
+}
+
+model MobileBillingEvent {
+  id          String @id
+  appUserId   String?
+  relatedAppUserIds Json?
+  type        String
+  occurredAt  DateTime
+  receivedAt  DateTime @default(now())
+  status      String @default("pending")
+  attempts    Int @default(0)
+  nextAttempt DateTime @default(now())
+  // Minimal IDs only; never persist authorization headers or entire purchase receipts.
+  @@index([status, nextAttempt])
+}
+
+model MobilePurchaseIntent {
+  userId    String @id
+  id        String @unique @default(uuid())
+  status    String @default("pending")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model MobileAuthFlow {
+  id          String @id @default(uuid())
+  challenge   String
+  codeHash    String? @unique
+  userId      String?
+  expiresAt   DateTime
+  consumedAt  DateTime?
+}
+
+model MobileSession {
+  tokenHash String @id
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model MobileWeatherLocation {
+  id         String @id @default(uuid())
+  userId     String
+  locationId String
+  label      String
+  primary    Boolean @default(false)
+  createdAt  DateTime @default(now())
+  @@unique([userId, locationId])
+}
+
+model MobilePushDevice {
+  id          String @id @default(uuid())
+  userId      String
+  token       String @unique
+  environment String
+  sessionHash String
+  enabled     Boolean @default(true)
+  createdAt   DateTime @default(now())
+  @@index([userId, enabled])
+}
+
+model MobileWeatherState {
+  area        String @id
+  alerts      Json
+  sourceAt    DateTime
+}
+
+model MobileUsageOperation {
+  id          String @id
+  userId      String
+  feature     String
+  day         String
+  requestHash String
+  status      String @default("reserved")
+  response    Json?
+  createdAt   DateTime @default(now())
+  expiresAt   DateTime
+  @@index([userId, feature, day, status])
+}
+
+model MobileBudgetMonth {
+  month       String @id
+  committedYen Int @default(0)
+  reservedYen Int @default(0)
+}
+
+model MobileProviderReservation {
+  id          String @id @default(uuid())
+  month       String
+  amountYen   Int
+  status      String @default("reserved")
+  createdAt   DateTime @default(now())
+}
+
+model MobilePushOutbox {
+  id          String @id @default(uuid())
+  deviceId    String
+  eventId     String
+  locationId  String
+  payload     Json
+  expiresAt   DateTime
+  status      String @default("pending")
+  attempts    Int @default(0)
+  nextAttempt DateTime @default(now())
+  @@unique([deviceId, eventId])
+  @@index([status, nextAttempt])
+}
+
 model Account {
   id                String  @id @default(cuid())
   userId            String

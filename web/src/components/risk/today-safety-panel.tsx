@@ -26,6 +26,7 @@ import type { EnvironmentWbgtStatus } from "@/lib/heat-illness/environment-wbgt"
 import type { KyWeatherSnapshot } from "@/lib/ky/zero-friction-types";
 import { formatJmaWarning, jmaWarningName } from "@/lib/jma/warning-label";
 import { UsageNotesLink } from "@/components/usage-notes-link";
+import { useNativeQuery } from '@/lib/use-native-query';
 
 const WEATHER_STALE_AFTER_MS = 15 * 60 * 1000;
 const FUTURE_CLOCK_TOLERANCE_MS = 5 * 60 * 1000;
@@ -342,6 +343,8 @@ export function TodaySafetyPanel({
   const [selectedAreaId, setSelectedAreaId] = useState(
     initialLocation?.id ?? null,
   );
+  const nativeQuery=useNativeQuery();
+  useEffect(()=>{if(!nativeQuery)return;const requested=getSignageLocationById(nativeQuery.get('area')??'');if(requested)setSelectedAreaId(requested.id);},[nativeQuery]);
   const [selectedRegionName, setSelectedRegionName] = useState(
     initialLocation?.regionName ?? "",
   );

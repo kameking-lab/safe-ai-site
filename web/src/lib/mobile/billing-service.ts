@@ -1,0 +1,80 @@
+import { Prisma } from '@prisma/client';
+import { prisma } from '../prisma';
+import { assertPurchasable, projectEntitlement, type EntitlementSnapshot } from './entitlement';
+import { fetchSubscriber, verifiedAppleGrant } from './revenuecat';
+import { reconcileStripe } from './stripe-reconcile';
+export function billingDb() { if(!prisma || process.env.MOBILE_LEDGER_ENABLED!=='true') throw new Error('ENTITLEMENT_SYNC_PENDING');return prisma; }
+export async function lockMember(tx:Prisma.TransactionClient,userId:string) { await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`anzen:${userId}`},0))`; }
+async function identity(tx:Prisma.TransactionClient,userId:string) { return tx.mobileIdentity.upsert({where:{userId},create:{userId},update:{}}); }
+export async function entitlementInTransaction(tx:Prisma.TransactionClient,userId:string):Promise<EntitlementSnapshot> {
+  const member=await identity(tx,userId);
+  const [legacy,grants,intent]=await Promise.all([tx.subscription.findUnique({where:{userId}}),tx.mobileGrant.findMany({where:{userId}}),tx.mobilePurchaseIntent.findUnique({where:{userId}})]);
+  const rights=projectEntitlement(member.appUserId,legacy,grants,new Date(),member.billingEnvironment==='SANDBOX'?'SANDBOX':'PRODUCTION');
+  if(rights.plan==='pro' && intent?.status==='pending')await tx.mobilePurchaseIntent.updateMany({where:{userId,status:'pending'},data:{status:'completed'}});
+  const pending=rights.plan!=='pro' && intent?.status==='pending';
+  return {...rights,purchasePending:pending,purchaseIntentId:pending?intent.id:null};
+}
+export async function getEntitlement(userId:string) {
+  const db=billingDb();const now=Date.now();
+  const [legacy,grants]=await Promise.all([db.subscription.findUnique({where:{userId}}),db.mobileGrant.findMany({where:{userId,revoked:false,expiresAt:{gt:new Date()}}})]);
+  if(grants.some(g=>now-g.checkedAt.getTime()>300000)){try{return await reconcile(userId);}catch{/* bounded 24-hour previously verified fallback below */}}
+  else if(legacy?.stripeSubscriptionId && now-legacy.updatedAt.getTime()>300000){
+    try{return await db.$transaction(async tx=>{await lockMember(tx,userId);await reconcileStripe(tx,userId);return entitlementInTransaction(tx,userId);},{timeout:15000});}catch{/* unknown rights never become an offer to repurchase */}
+  }
+  return db.$transaction(tx=>entitlementInTransaction(tx,userId));
+}
+export async function reconcile(userId:string) {
+  return billingDb().$transaction(async tx=>{
+    await lockMember(tx,userId);const member=await identity(tx,userId);
+    const environment=member.billingEnvironment==='SANDBOX'?'SANDBOX':'PRODUCTION';
+    await reconcileStripe(tx,userId);
+    const productId=process.env.REVENUECAT_IOS_PRODUCT_ID;
+    if(!productId) throw new Error('ENTITLEMENT_SYNC_PENDING');
+    const raw=await fetchSubscriber(member.appUserId);
+    const grant=verifiedAppleGrant(raw,productId,new Date(),environment);const checkedAt=new Date();
+    // Fetch the latest authoritative subscriber state, rather than applying event order.
+    await tx.mobileGrant.updateMany({where:{userId,provider:'app_store',environment},data:{revoked:true,checkedAt}});
+    if(grant) {
+      const owner=await tx.mobileGrant.findUnique({where:{provider_originalTransactionId_environment:{provider:'app_store',originalTransactionId:grant.originalTransactionId,environment}}});
+      if(owner && owner.userId!==userId) throw new Error('PURCHASE_OWNED_BY_OTHER_ACCOUNT');
+      await tx.mobileGrant.upsert({where:{provider_originalTransactionId_environment:{provider:'app_store',originalTransactionId:grant.originalTransactionId,environment}},
+        create:{...grant,userId,provider:'app_store',environment,checkedAt},update:{...grant,checkedAt,revoked:false}});
+      await tx.mobilePurchaseIntent.updateMany({where:{userId},data:{status:'completed'}});
+    }
+    return entitlementInTransaction(tx,userId);
+  },{timeout:20000});
+}
+export async function reservePurchase(userId:string) {
+  // Refresh Apple before reserving. Website rights are always read from the database.
+  await reconcile(userId);
+  return billingDb().$transaction(async tx=>{
+    await lockMember(tx,userId);const current=await entitlementInTransaction(tx,userId);assertPurchasable(current);
+    const existing=await tx.mobilePurchaseIntent.findUnique({where:{userId}});
+    if(existing?.status==='pending') throw new Error('PURCHASE_PENDING');
+    // Never unlock a potentially pending StoreKit transaction simply because time passed.
+    return tx.mobilePurchaseIntent.upsert({where:{userId},create:{userId},update:{id:crypto.randomUUID(),status:'pending',createdAt:new Date()}});
+  });
+}
+export async function cancelPurchase(userId:string,id:string){
+  await reconcile(userId);
+  return billingDb().$transaction(async tx=>{await lockMember(tx,userId);const rights=await entitlementInTransaction(tx,userId);assertPurchasable(rights);
+    await tx.mobilePurchaseIntent.updateMany({where:{userId,id,status:'pending'},data:{status:'cancelled'}});return entitlementInTransaction(tx,userId);});
+}
+export async function processBillingEvents(limit=20,deadline=Date.now()+45000) {
+  const db=billingDb();const events=await db.mobileBillingEvent.findMany({where:{status:'pending',nextAttempt:{lte:new Date()}},take:limit,orderBy:{receivedAt:'asc'}});
+  for(const event of events) {
+    if(Date.now()>deadline)break;
+    try {
+      const ids=[...new Set([event.appUserId,...(Array.isArray(event.relatedAppUserIds)?event.relatedAppUserIds.filter((id):id is string=>typeof id==='string'):[])].filter((id):id is string=>!!id))];
+      const members=await db.mobileIdentity.findMany({where:{appUserId:{in:ids}}});
+      if(!members.length) {await db.mobileBillingEvent.update({where:{id:event.id},data:{status:'unassigned'}});continue;}
+      // Reconcile both sides without merging accounts or silently moving purchase ownership.
+      for(const member of members)await reconcile(member.userId);
+      await db.mobileBillingEvent.update({where:{id:event.id},data:{status:'completed'}});
+    }catch{
+      const attempts=event.attempts+1;
+      await db.mobileBillingEvent.update({where:{id:event.id},data:{attempts,status:attempts>=10?'failed':'pending',nextAttempt:new Date(Date.now()+Math.min(3600000,2**attempts*10000))}});
+    }
+  }
+  return {processed:events.length};
+}

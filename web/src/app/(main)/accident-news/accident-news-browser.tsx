@@ -5,6 +5,7 @@ import { Printer } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { TransientChatLink } from "@/components/home-safety-cockpit/transient-chat-link";
 import { ConclusionCard } from "@/components/ui/conclusion-card";
+import { useNativeQuery } from '@/lib/use-native-query';
 import type {
   SeriousCase,
   SeriousCaseFilters,
@@ -38,7 +39,7 @@ export function buildAccidentNewsPageHref(
 export function AccidentNewsBrowser({
   children,
   options,
-  selected,
+  selected: initialSelected,
   initialResult,
   initialPage,
   initialPageCount,
@@ -54,6 +55,8 @@ export function AccidentNewsBrowser({
   corpusTotal: number;
   corpusYearRange: string;
 }) {
+  const nativeQuery=useNativeQuery();
+  const selected=nativeQuery?{industry:nativeQuery.get('industry')??'',type:nativeQuery.get('type')??'',year:nativeQuery.get('year')??'',q:nativeQuery.get('q')??''}:initialSelected;
   const [keyword, setKeyword] = useState(selected.q);
   const [result, setResult] = useState<BrowserResult>({
     ...initialResult,
@@ -82,6 +85,11 @@ export function AccidentNewsBrowser({
       abortRef.current = controller;
       setIsPending(true);
       try {
+        if(process.env.NEXT_PUBLIC_ANZEN_NATIVE==='true' && !navigator.onLine){
+          const {filterSeriousCasesPage}=await import('@/lib/accident-news/serious-cases');
+          const data=filterSeriousCasesPage({industry:selected.industry||undefined,type:selected.type||undefined,year:Number(selected.year)||undefined,q:query||undefined,limit:PAGE_SIZE,offset:(page-1)*PAGE_SIZE});
+          setResult({...data,page,pageCount:Math.max(1,Math.ceil(data.total/PAGE_SIZE))});return;
+        }
         const response = await fetch("/api/accident-news/search", {
           method: "POST",
           headers: { "content-type": "application/json" },
@@ -121,6 +129,7 @@ export function AccidentNewsBrowser({
     setKeyword("");
     void search(1, "");
   };
+  useEffect(()=>{if(!nativeQuery)return;setKeyword(nativeQuery.get('q')??'');void search(Math.max(1,Number(nativeQuery.get('page'))||1),nativeQuery.get('q')??'');},[nativeQuery,search]);
   const hasFilter = Boolean(
     selected.industry || selected.type || selected.year || keyword.trim(),
   );

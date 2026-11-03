@@ -3,6 +3,7 @@ import { withSiteOpenGraph } from "@/lib/seo-metadata";
 import { PageContainer } from "@/components/layout";
 
 import { PageJsonLd } from "@/components/page-json-ld";
+import product from '@/lib/mobile/product-policy.json';
 export const metadata: Metadata = {
   title: "利用規約",
   description: "安全AIポータルの利用規約。本サービスの利用条件について説明しています。",
@@ -174,6 +175,14 @@ export default function TermsPage() {
             本サービスに関して紛争が生じた場合は、運営者の所在地を管轄する裁判所を
             第一審の専属的合意管轄裁判所とします。
           </p>
+        </section>
+        <section id="ios-subscription" className="space-y-3">
+          <h2 className="text-base font-bold text-slate-900">iOSアプリのPro購読</h2>
+          <p className="text-sm leading-7 text-slate-600">iOSの安全AI Proは月額{product.monthlyPrice.toLocaleString('ja-JP')}円（税込）、期間1か月の自動更新購読です。購入時に表示されるApp Storeの商品・価格を確認してください。支払いと更新はApple Accountで管理されます。更新日の24時間前までにApp Storeの購読管理画面で解約できます。解約後も確認済みの有効期限までは利用できます。</p>
+          <p className="text-sm leading-7 text-slate-600">同じ安全AI会員でログインすると、確認済みのウェブ購読またはアプリ内購入の権利を共有します。ウェブで有効な購読がある方はアプリでの追加購入は不要です。復元はアプリの「購入を復元」から行えます。解約・返金の手続きは購入元の案内に従ってください。アカウント削除やアプリの削除だけでは自動更新購読は解約されません。</p>
+          <p className="text-sm leading-7 text-slate-600">無料の上限はチャット1日{product.limits.free.law_chat}回、RA1日{product.limits.free.chemical_ra}件、警報登録{product.limits.free.weatherLocations}地点・通知なしです。Proの上限はチャット1日{product.limits.pro.law_chat}回、RA1日{product.limits.pro.chemical_ra}件、警報登録{product.limits.pro.weatherLocations}地点・警報通知ありです。利用回数はウェブ・アプリで合算し、日本時間の0時を日次の境界とします。</p>
+          <p className="text-sm leading-7 text-slate-600">機能の提供停止・安全検証・通信障害・運営の月間API原価上限によりAIを実行できない場合があります。評価を提供していないRAや参考情報だけの応答を評価完了として消費しません。警報通知は登録地点の都道府県単位であり、遅延・不達があり得ます。最新の公式情報も確認してください。</p>
+          <p className="text-sm leading-7 text-slate-600"><a className="underline" href="https://apps.apple.com/account/subscriptions">App Storeの購読管理・解約</a> · <a className="underline" href="/privacy#ios-app">アプリのプライバシー</a></p>
         </section>
     </PageContainer>
   );

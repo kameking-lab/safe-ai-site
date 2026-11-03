@@ -12,7 +12,8 @@ export type Transport = (path: string, body?: unknown, extraHeaders?: Record<str
 export const transport: Transport = async (path, body, extraHeaders = {}) => {
   if (!PATHS.includes(path.split('?')[0] as typeof PATHS[number])) throw new ApiError('INVALID_ENDPOINT');
   const url = `${SITE}${path}`;
-  const headers = { Accept: 'application/json', ...(body ? { 'Content-Type': 'application/json' } : {}), ...extraHeaders };
+  const {sessionToken}=await import('./session');const token=await sessionToken();
+  const headers = { Accept: 'application/json', Origin:SITE,'X-Anzen-Native':'1', ...(token?{Authorization:`Bearer ${token}`} : {}), ...(body ? { 'Content-Type': 'application/json' } : {}), ...extraHeaders };
   if (Capacitor.isNativePlatform()) {
     const response = await CapacitorHttp.request({ url, method: body ? 'POST' : 'GET', headers,
       ...(body ? { data: body } : {}), responseType: 'json', connectTimeout: 15000, readTimeout: 25000, disableRedirects: true });

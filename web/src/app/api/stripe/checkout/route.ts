@@ -11,6 +11,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { isPaidModeReady, resolveStripePlan } from "@/lib/stripe-price-policy";
 import { privateJson, readBoundedJson } from "@/lib/server/cloud-owner";
+import { reservePurchase } from '@/lib/mobile/billing-service';
 
 function getStripe(): Stripe | null {
   const key = process.env.STRIPE_SECRET_KEY;
@@ -46,6 +47,14 @@ export async function POST(req: Request) {
   const planName = typeof priceId === "string" ? resolveStripePlan(priceId) : null;
   if (!planName || typeof priceId !== "string") {
     return privateJson({ error: "選択されたプランは利用できません。" }, 400);
+  }
+
+  let purchaseIntentId: string | undefined;
+  if (process.env.MOBILE_LEDGER_ENABLED === 'true') {
+    // iOS and web reserve against the same member, preventing concurrent double checkout.
+    if (priceId !== process.env.STRIPE_ANZEN_PRO_MONTHLY_PRICE_ID) return privateJson({error:'選択されたプランは利用できません。'},400);
+    try { purchaseIntentId = (await reservePurchase(userId)).id; }
+    catch (e) { const code=e instanceof Error?e.message:'ENTITLEMENT_SYNC_PENDING';return privateJson({error:{code}},code==='ALREADY_SUBSCRIBED'||code==='PURCHASE_PENDING'?409:503); }
   }
 
   let customerId: string | undefined;
@@ -92,7 +101,7 @@ export async function POST(req: Request) {
       subscription_data: {
         metadata: { userId, planName },
       },
-    });
+    }, purchaseIntentId ? { idempotencyKey: purchaseIntentId } : undefined);
 
     return privateJson({ url: checkoutSession.url });
   } catch {

@@ -17,6 +17,10 @@ type BrowserSpeechRecognition = {
 };
 
 export function describeVoiceError(err: string | undefined): string {
+  if(process.env.NEXT_PUBLIC_ANZEN_NATIVE==='true'){
+    if(['not-allowed','NotAllowedError','permission-denied'].includes(err??''))return '音声入力が許可されていません。iOSの設定でマイクと音声認識の許可を確認してください。';
+    if(['not-supported','service-not-allowed','language-not-supported'].includes(err??''))return '端末内の日本語音声認識を利用できません。対応状況とiOSの音声認識設定を確認してください。文字入力は利用できます。';
+  }
   switch (err) {
     case "not-allowed":
     case "NotAllowedError":

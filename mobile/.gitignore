@@ -6,3 +6,6 @@ ios/
 playwright-report/
 test-results/
 .DS_Store
+src/app/(shared)/**/page.tsx
+public/
+.cache/

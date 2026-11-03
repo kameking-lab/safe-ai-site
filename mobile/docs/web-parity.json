@@ -1,0 +1,1842 @@
+{
+  "schema": 1,
+  "source": "web/src/app/**/page.tsx",
+  "routes": [
+    {
+      "route": "/about/cases",
+      "source": "web/src/app/(main)/about/cases/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/about/chatbot-eval",
+      "source": "web/src/app/(main)/about/chatbot-eval/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/about/data-sources",
+      "source": "web/src/app/(main)/about/data-sources/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/about/news-feed",
+      "source": "web/src/app/(main)/about/news-feed/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/about",
+      "source": "web/src/app/(main)/about/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/about/project-story",
+      "source": "web/src/app/(main)/about/project-story/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/about/quality",
+      "source": "web/src/app/(main)/about/quality/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/about/usage-notes",
+      "source": "web/src/app/(main)/about/usage-notes/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/accident-news",
+      "source": "web/src/app/(main)/accident-news/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": [
+        "AccidentNewsBrowser"
+      ]
+    },
+    {
+      "route": "/accident-news/print",
+      "source": "web/src/app/(main)/accident-news/print/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/accidents-analytics",
+      "source": "web/src/app/(main)/accidents-analytics/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": [
+        "AnalyticsDashboard"
+      ]
+    },
+    {
+      "route": "/accidents-reports/[industry]",
+      "source": "web/src/app/(main)/accidents-reports/[industry]/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/accidents-reports/compare",
+      "source": "web/src/app/(main)/accidents-reports/compare/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/accidents-reports",
+      "source": "web/src/app/(main)/accidents-reports/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/accidents/[id]",
+      "source": "web/src/app/(main)/accidents/[id]/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/accidents",
+      "source": "web/src/app/(main)/accidents/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/account",
+      "source": "web/src/app/(main)/account/page.tsx",
+      "implementation": "native",
+      "state": "native",
+      "modes": []
+    },
+    {
+      "route": "/admin/newsletter",
+      "source": "web/src/app/(main)/admin/newsletter/page.tsx",
+      "implementation": "operator-only",
+      "state": "operator-only",
+      "modes": []
+    },
+    {
+      "route": "/api-docs",
+      "source": "web/src/app/(main)/api-docs/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/articles/[slug]",
+      "source": "web/src/app/(main)/articles/[slug]/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/articles",
+      "source": "web/src/app/(main)/articles/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/asbestos-management/investigation-checker",
+      "source": "web/src/app/(main)/asbestos-management/investigation-checker/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/asbestos-management/notification-builder",
+      "source": "web/src/app/(main)/asbestos-management/notification-builder/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/asbestos-management",
+      "source": "web/src/app/(main)/asbestos-management/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/asbestos-management/qualifications",
+      "source": "web/src/app/(main)/asbestos-management/qualifications/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/asbestos-management/work-plan-template",
+      "source": "web/src/app/(main)/asbestos-management/work-plan-template/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/auth/error",
+      "source": "web/src/app/(main)/auth/error/page.tsx",
+      "implementation": "native",
+      "state": "native",
+      "modes": []
+    },
+    {
+      "route": "/auth/signin",
+      "source": "web/src/app/(main)/auth/signin/page.tsx",
+      "implementation": "native",
+      "state": "native",
+      "modes": []
+    },
+    {
+      "route": "/automation-examples",
+      "source": "web/src/app/(main)/automation-examples/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/bcp",
+      "source": "web/src/app/(main)/bcp/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/chatbot",
+      "source": "web/src/app/(main)/chatbot/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/chatbot/share/[id]",
+      "source": "web/src/app/(main)/chatbot/share/[id]/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/chatbot/share",
+      "source": "web/src/app/(main)/chatbot/share/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/chemical-database/[cas]",
+      "source": "web/src/app/(main)/chemical-database/[cas]/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/chemical-database",
+      "source": "web/src/app/(main)/chemical-database/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": [
+        "ChemicalDatabaseClient"
+      ]
+    },
+    {
+      "route": "/chemical-ra/ledger",
+      "source": "web/src/app/(main)/chemical-ra/ledger/page.tsx",
+      "implementation": "native",
+      "state": "native",
+      "modes": []
+    },
+    {
+      "route": "/chemical-ra",
+      "source": "web/src/app/(main)/chemical-ra/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": [
+        "ChemicalRaPanel",
+        "LazySdsUploadPanel",
+        "LazyMixtureRaPanel"
+      ]
+    },
+    {
+      "route": "/chemical-ra/product-search",
+      "source": "web/src/app/(main)/chemical-ra/product-search/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": [
+        "ProductSearchPanel"
+      ]
+    },
+    {
+      "route": "/circulars/[id]",
+      "source": "web/src/app/(main)/circulars/[id]/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/circulars",
+      "source": "web/src/app/(main)/circulars/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/construction-calc/[slug]",
+      "source": "web/src/app/(main)/construction-calc/[slug]/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": [
+        "CalculatorPanel"
+      ]
+    },
+    {
+      "route": "/construction-calc",
+      "source": "web/src/app/(main)/construction-calc/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/contact/automation-email",
+      "source": "web/src/app/(main)/contact/automation-email/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/contact",
+      "source": "web/src/app/(main)/contact/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/court-cases/[id]",
+      "source": "web/src/app/(main)/court-cases/[id]/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/court-cases/employer-liability",
+      "source": "web/src/app/(main)/court-cases/employer-liability/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/court-cases",
+      "source": "web/src/app/(main)/court-cases/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/court-cases/print",
+      "source": "web/src/app/(main)/court-cases/print/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/dev/layout-preview",
+      "source": "web/src/app/(main)/dev/layout-preview/page.tsx",
+      "implementation": "operator-only",
+      "state": "operator-only",
+      "modes": []
+    },
+    {
+      "route": "/diversity/disability",
+      "source": "web/src/app/(main)/diversity/disability/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/diversity/elderly",
+      "source": "web/src/app/(main)/diversity/elderly/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/diversity/foreign-workers",
+      "source": "web/src/app/(main)/diversity/foreign-workers/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/diversity/lgbtq",
+      "source": "web/src/app/(main)/diversity/lgbtq/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/diversity/non-regular",
+      "source": "web/src/app/(main)/diversity/non-regular/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/diversity",
+      "source": "web/src/app/(main)/diversity/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/diversity/remote",
+      "source": "web/src/app/(main)/diversity/remote/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/diversity/sogi",
+      "source": "web/src/app/(main)/diversity/sogi/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/diversity/women",
+      "source": "web/src/app/(main)/diversity/women/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/dpa",
+      "source": "web/src/app/(main)/dpa/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/e-learning/exams/[id]",
+      "source": "web/src/app/(main)/e-learning/exams/[id]/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": [
+        "ExamQuestionPlayer"
+      ]
+    },
+    {
+      "route": "/e-learning/exams",
+      "source": "web/src/app/(main)/e-learning/exams/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": [
+        "ExamCatalogBrowser"
+      ]
+    },
+    {
+      "route": "/e-learning",
+      "source": "web/src/app/(main)/e-learning/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/e-learning/safety/[courseId]",
+      "source": "web/src/app/(main)/e-learning/safety/[courseId]/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": [
+        "SafetyQuestionPlayer"
+      ]
+    },
+    {
+      "route": "/e-learning/safety",
+      "source": "web/src/app/(main)/e-learning/safety/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/education-certification/finder",
+      "source": "web/src/app/(main)/education-certification/finder/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": [
+        "CertFinderClient"
+      ]
+    },
+    {
+      "route": "/education-certification",
+      "source": "web/src/app/(main)/education-certification/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/education/hazard-slides/[slug]",
+      "source": "web/src/app/(main)/education/hazard-slides/[slug]/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/education/hazard-slides",
+      "source": "web/src/app/(main)/education/hazard-slides/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/education/hoteikyoiku/chemical-ra",
+      "source": "web/src/app/(main)/education/hoteikyoiku/chemical-ra/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/education/hoteikyoiku/shokucho",
+      "source": "web/src/app/(main)/education/hoteikyoiku/shokucho/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/education/pack/[slug]",
+      "source": "web/src/app/(main)/education/pack/[slug]/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/education/pack",
+      "source": "web/src/app/(main)/education/pack/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/education/pack/terms",
+      "source": "web/src/app/(main)/education/pack/terms/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/education",
+      "source": "web/src/app/(main)/education/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/education/progress",
+      "source": "web/src/app/(main)/education/progress/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/education/roudoueisei/necchu",
+      "source": "web/src/app/(main)/education/roudoueisei/necchu/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/education/roudoueisei/shindou",
+      "source": "web/src/app/(main)/education/roudoueisei/shindou/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/education/roudoueisei/souon",
+      "source": "web/src/app/(main)/education/roudoueisei/souon/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/education/roudoueisei/youtsu-yobou",
+      "source": "web/src/app/(main)/education/roudoueisei/youtsu-yobou/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/education/tokubetsu/ashiba",
+      "source": "web/src/app/(main)/education/tokubetsu/ashiba/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/education/tokubetsu/fullharness",
+      "source": "web/src/app/(main)/education/tokubetsu/fullharness/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/education/tokubetsu/kensaku-toishi",
+      "source": "web/src/app/(main)/education/tokubetsu/kensaku-toishi/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/education/tokubetsu/sankesu",
+      "source": "web/src/app/(main)/education/tokubetsu/sankesu/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/education/tokubetsu/tamakake",
+      "source": "web/src/app/(main)/education/tokubetsu/tamakake/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/education/tokubetsu/teiatsu-denki",
+      "source": "web/src/app/(main)/education/tokubetsu/teiatsu-denki/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/equipment-finder",
+      "source": "web/src/app/(main)/equipment-finder/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/equipment/[id]",
+      "source": "web/src/app/(main)/equipment/[id]/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/equipment",
+      "source": "web/src/app/(main)/equipment/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/faq/[category]",
+      "source": "web/src/app/(main)/faq/[category]/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/faq",
+      "source": "web/src/app/(main)/faq/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/faq/search",
+      "source": "web/src/app/(main)/faq/search/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/favorites",
+      "source": "web/src/app/(main)/favorites/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/features/[category]",
+      "source": "web/src/app/(main)/features/[category]/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/features/comparison",
+      "source": "web/src/app/(main)/features/comparison/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/features",
+      "source": "web/src/app/(main)/features/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": [
+        "FeaturesIndexClient"
+      ]
+    },
+    {
+      "route": "/features/print",
+      "source": "web/src/app/(main)/features/print/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": [
+        "PrintFeaturesClient"
+      ]
+    },
+    {
+      "route": "/features/quick-tour",
+      "source": "web/src/app/(main)/features/quick-tour/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/features/use-cases",
+      "source": "web/src/app/(main)/features/use-cases/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/feedback",
+      "source": "web/src/app/(main)/feedback/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/for/construction",
+      "source": "web/src/app/(main)/for/construction/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/for/consultant",
+      "source": "web/src/app/(main)/for/consultant/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/for/manager",
+      "source": "web/src/app/(main)/for/manager/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/for/solo",
+      "source": "web/src/app/(main)/for/solo/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/foreign-workers",
+      "source": "web/src/app/(main)/foreign-workers/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/foreign-workers/safety-training",
+      "source": "web/src/app/(main)/foreign-workers/safety-training/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/foreign-workers/status/[status]",
+      "source": "web/src/app/(main)/foreign-workers/status/[status]/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/glossary",
+      "source": "web/src/app/(main)/glossary/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/goods",
+      "source": "web/src/app/(main)/goods/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": [
+        "SafetyGoodsPanel"
+      ]
+    },
+    {
+      "route": "/guides/annual-safety-plan-generator",
+      "source": "web/src/app/(main)/guides/annual-safety-plan-generator/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/guides/anzeneho-ai-chatbot",
+      "source": "web/src/app/(main)/guides/anzeneho-ai-chatbot/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/guides/chemical-ra-create-simple",
+      "source": "web/src/app/(main)/guides/chemical-ra-create-simple/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/guides/industry-accident-reports",
+      "source": "web/src/app/(main)/guides/industry-accident-reports/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/guides/ky-sheet",
+      "source": "web/src/app/(main)/guides/ky-sheet/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/guides",
+      "source": "web/src/app/(main)/guides/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/guides/safety-signage",
+      "source": "web/src/app/(main)/guides/safety-signage/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/health-checkup-scheduler",
+      "source": "web/src/app/(main)/health-checkup-scheduler/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/health-checkup-scheduler/result",
+      "source": "web/src/app/(main)/health-checkup-scheduler/result/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/heat-illness-prevention/acclimatization",
+      "source": "web/src/app/(main)/heat-illness-prevention/acclimatization/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": [
+        "AcclimatizationClient"
+      ]
+    },
+    {
+      "route": "/heat-illness-prevention/elearning",
+      "source": "web/src/app/(main)/heat-illness-prevention/elearning/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/heat-illness-prevention/industry-risk",
+      "source": "web/src/app/(main)/heat-illness-prevention/industry-risk/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": [
+        "IndustryRiskClient"
+      ]
+    },
+    {
+      "route": "/heat-illness-prevention/log",
+      "source": "web/src/app/(main)/heat-illness-prevention/log/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/heat-illness-prevention",
+      "source": "web/src/app/(main)/heat-illness-prevention/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/heat-illness-prevention/poster",
+      "source": "web/src/app/(main)/heat-illness-prevention/poster/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": [
+        "PosterClient"
+      ]
+    },
+    {
+      "route": "/heat-illness-prevention/r7-compliance",
+      "source": "web/src/app/(main)/heat-illness-prevention/r7-compliance/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": [
+        "R7ComplianceClient"
+      ]
+    },
+    {
+      "route": "/heat-illness-prevention/slides",
+      "source": "web/src/app/(main)/heat-illness-prevention/slides/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/heat-illness-prevention/wbgt-calculator",
+      "source": "web/src/app/(main)/heat-illness-prevention/wbgt-calculator/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/industries/[industry]",
+      "source": "web/src/app/(main)/industries/[industry]/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/industries",
+      "source": "web/src/app/(main)/industries/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/insurance",
+      "source": "web/src/app/(main)/insurance/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/ky-examples",
+      "source": "web/src/app/(main)/ky-examples/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": [
+        "KyExamplesBrowser"
+      ]
+    },
+    {
+      "route": "/ky/list",
+      "source": "web/src/app/(main)/ky/list/page.tsx",
+      "implementation": "owner-excluded",
+      "state": "owner-excluded",
+      "modes": [
+        "KyListClient"
+      ]
+    },
+    {
+      "route": "/ky",
+      "source": "web/src/app/(main)/ky/page.tsx",
+      "implementation": "owner-excluded",
+      "state": "owner-excluded",
+      "modes": []
+    },
+    {
+      "route": "/ky/paper",
+      "source": "web/src/app/(main)/ky/paper/page.tsx",
+      "implementation": "owner-excluded",
+      "state": "owner-excluded",
+      "modes": []
+    },
+    {
+      "route": "/ky/workers",
+      "source": "web/src/app/(main)/ky/workers/page.tsx",
+      "implementation": "owner-excluded",
+      "state": "owner-excluded",
+      "modes": [
+        "WorkersMasterClient"
+      ]
+    },
+    {
+      "route": "/law-hierarchy",
+      "source": "web/src/app/(main)/law-hierarchy/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/law-navi/[lawId]/[artSlug]",
+      "source": "web/src/app/(main)/law-navi/[lawId]/[artSlug]/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/law-navi/beppyo",
+      "source": "web/src/app/(main)/law-navi/beppyo/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/law-navi",
+      "source": "web/src/app/(main)/law-navi/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/law-navi/topics/[topicId]",
+      "source": "web/src/app/(main)/law-navi/topics/[topicId]/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/law-search",
+      "source": "web/src/app/(main)/law-search/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": [
+        "LawSearchPanel"
+      ]
+    },
+    {
+      "route": "/laws/bcp",
+      "source": "web/src/app/(main)/laws/bcp/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/laws/freelance-rosai",
+      "source": "web/src/app/(main)/laws/freelance-rosai/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/laws/gig-work",
+      "source": "web/src/app/(main)/laws/gig-work/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/laws/glossary",
+      "source": "web/src/app/(main)/laws/glossary/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/laws",
+      "source": "web/src/app/(main)/laws/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": [
+        "LawsPageClient"
+      ]
+    },
+    {
+      "route": "/leaflet",
+      "source": "web/src/app/(main)/leaflet/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/lms",
+      "source": "web/src/app/(main)/lms/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": [
+        "LmsPanel"
+      ]
+    },
+    {
+      "route": "/materials/safety-images/[slug]",
+      "source": "web/src/app/(main)/materials/safety-images/[slug]/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/materials/safety-images/[slug]/print",
+      "source": "web/src/app/(main)/materials/safety-images/[slug]/print/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/materials/safety-images/category/[category]",
+      "source": "web/src/app/(main)/materials/safety-images/category/[category]/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": [
+        "SafetyImageLibraryClient"
+      ]
+    },
+    {
+      "route": "/materials/safety-images",
+      "source": "web/src/app/(main)/materials/safety-images/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": [
+        "SafetyImageLibraryClient"
+      ]
+    },
+    {
+      "route": "/materials/safety-images/terms",
+      "source": "web/src/app/(main)/materials/safety-images/terms/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/mental-health-management/interview-guidance",
+      "source": "web/src/app/(main)/mental-health-management/interview-guidance/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/mental-health-management",
+      "source": "web/src/app/(main)/mental-health-management/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/mental-health-management/small-business",
+      "source": "web/src/app/(main)/mental-health-management/small-business/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/mental-health-management/stress-check",
+      "source": "web/src/app/(main)/mental-health-management/stress-check/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/mental-health",
+      "source": "web/src/app/(main)/mental-health/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/morning-briefing",
+      "source": "web/src/app/(main)/morning-briefing/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/newsletter",
+      "source": "web/src/app/(main)/newsletter/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": [
+        "NewsletterPanel"
+      ]
+    },
+    {
+      "route": "/notifications",
+      "source": "web/src/app/(main)/notifications/page.tsx",
+      "implementation": "native",
+      "state": "native",
+      "modes": [
+        "NotificationSettingsPanel",
+        "PushSubscribePanel"
+      ]
+    },
+    {
+      "route": "/organization",
+      "source": "web/src/app/(main)/organization/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/",
+      "source": "web/src/app/(main)/page.tsx",
+      "implementation": "native",
+      "state": "native",
+      "modes": []
+    },
+    {
+      "route": "/pdf",
+      "source": "web/src/app/(main)/pdf/page.tsx",
+      "implementation": "owner-excluded",
+      "state": "owner-excluded",
+      "modes": []
+    },
+    {
+      "route": "/pricing",
+      "source": "web/src/app/(main)/pricing/page.tsx",
+      "implementation": "native",
+      "state": "native",
+      "modes": []
+    },
+    {
+      "route": "/pricing/success",
+      "source": "web/src/app/(main)/pricing/success/page.tsx",
+      "implementation": "native",
+      "state": "native",
+      "modes": []
+    },
+    {
+      "route": "/privacy",
+      "source": "web/src/app/(main)/privacy/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/profile",
+      "source": "web/src/app/(main)/profile/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/quick",
+      "source": "web/src/app/(main)/quick/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/resources/mlit",
+      "source": "web/src/app/(main)/resources/mlit/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": [
+        "MlitResourcesClient"
+      ]
+    },
+    {
+      "route": "/resources/netis-safety",
+      "source": "web/src/app/(main)/resources/netis-safety/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/resources",
+      "source": "web/src/app/(main)/resources/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": [
+        "ResourcesClient"
+      ]
+    },
+    {
+      "route": "/risk-prediction",
+      "source": "web/src/app/(main)/risk-prediction/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": [
+        "RiskPredictionPanel"
+      ]
+    },
+    {
+      "route": "/risk",
+      "source": "web/src/app/(main)/risk/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": [
+        "TodaySafetyPanel"
+      ]
+    },
+    {
+      "route": "/safety-ai",
+      "source": "web/src/app/(main)/safety-ai/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/safety-diary/[id]",
+      "source": "web/src/app/(main)/safety-diary/[id]/page.tsx",
+      "implementation": "owner-excluded",
+      "state": "owner-excluded",
+      "modes": []
+    },
+    {
+      "route": "/safety-diary/[id]/print",
+      "source": "web/src/app/(main)/safety-diary/[id]/print/page.tsx",
+      "implementation": "owner-excluded",
+      "state": "owner-excluded",
+      "modes": []
+    },
+    {
+      "route": "/safety-diary/contribute/[token]",
+      "source": "web/src/app/(main)/safety-diary/contribute/[token]/page.tsx",
+      "implementation": "owner-excluded",
+      "state": "owner-excluded",
+      "modes": []
+    },
+    {
+      "route": "/safety-diary/list",
+      "source": "web/src/app/(main)/safety-diary/list/page.tsx",
+      "implementation": "owner-excluded",
+      "state": "owner-excluded",
+      "modes": [
+        "MeetingListClient"
+      ]
+    },
+    {
+      "route": "/safety-diary/monthly/[ym]",
+      "source": "web/src/app/(main)/safety-diary/monthly/[ym]/page.tsx",
+      "implementation": "owner-excluded",
+      "state": "owner-excluded",
+      "modes": []
+    },
+    {
+      "route": "/safety-diary/new/detail",
+      "source": "web/src/app/(main)/safety-diary/new/detail/page.tsx",
+      "implementation": "owner-excluded",
+      "state": "owner-excluded",
+      "modes": []
+    },
+    {
+      "route": "/safety-diary/new",
+      "source": "web/src/app/(main)/safety-diary/new/page.tsx",
+      "implementation": "owner-excluded",
+      "state": "owner-excluded",
+      "modes": []
+    },
+    {
+      "route": "/safety-diary",
+      "source": "web/src/app/(main)/safety-diary/page.tsx",
+      "implementation": "owner-excluded",
+      "state": "owner-excluded",
+      "modes": []
+    },
+    {
+      "route": "/safety-signs/category/[category]",
+      "source": "web/src/app/(main)/safety-signs/category/[category]/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/safety-signs/industry/[industry]",
+      "source": "web/src/app/(main)/safety-signs/industry/[industry]/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/safety-signs",
+      "source": "web/src/app/(main)/safety-signs/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/safety-signs/sign/[id]",
+      "source": "web/src/app/(main)/safety-signs/sign/[id]/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/search",
+      "source": "web/src/app/(main)/search/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/security",
+      "source": "web/src/app/(main)/security/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/services/automation",
+      "source": "web/src/app/(main)/services/automation/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/site-records/calendar",
+      "source": "web/src/app/(main)/site-records/calendar/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": [
+        "SafetyCalendarClient"
+      ]
+    },
+    {
+      "route": "/site-records/committee",
+      "source": "web/src/app/(main)/site-records/committee/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": [
+        "CommitteeClient"
+      ]
+    },
+    {
+      "route": "/site-records/incident-report",
+      "source": "web/src/app/(main)/site-records/incident-report/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": [
+        "IncidentReportClient"
+      ]
+    },
+    {
+      "route": "/site-records/induction",
+      "source": "web/src/app/(main)/site-records/induction/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": [
+        "InductionClient"
+      ]
+    },
+    {
+      "route": "/site-records/inspection",
+      "source": "web/src/app/(main)/site-records/inspection/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": [
+        "InspectionClient"
+      ]
+    },
+    {
+      "route": "/site-records/monthly",
+      "source": "web/src/app/(main)/site-records/monthly/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": [
+        "MonthlyReportClient"
+      ]
+    },
+    {
+      "route": "/site-records/near-miss",
+      "source": "web/src/app/(main)/site-records/near-miss/page.tsx",
+      "implementation": "owner-excluded",
+      "state": "owner-excluded",
+      "modes": [
+        "NearMissClient"
+      ]
+    },
+    {
+      "route": "/site-records",
+      "source": "web/src/app/(main)/site-records/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/site-records/patrol",
+      "source": "web/src/app/(main)/site-records/patrol/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": [
+        "PatrolClient"
+      ]
+    },
+    {
+      "route": "/site-records/procedure",
+      "source": "web/src/app/(main)/site-records/procedure/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": [
+        "ProcedureClient"
+      ]
+    },
+    {
+      "route": "/site-records/qualifications",
+      "source": "web/src/app/(main)/site-records/qualifications/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": [
+        "QualificationClient"
+      ]
+    },
+    {
+      "route": "/stats",
+      "source": "web/src/app/(main)/stats/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": [
+        "StatsDashboard"
+      ]
+    },
+    {
+      "route": "/strategy",
+      "source": "web/src/app/(main)/strategy/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/strategy/plan-generator",
+      "source": "web/src/app/(main)/strategy/plan-generator/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/strategy/plan-generator/preview/[id]",
+      "source": "web/src/app/(main)/strategy/plan-generator/preview/[id]/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/subsidies/calculator",
+      "source": "web/src/app/(main)/subsidies/calculator/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/subsidies",
+      "source": "web/src/app/(main)/subsidies/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/terms",
+      "source": "web/src/app/(main)/terms/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/tools/construction-calculators/[slug]",
+      "source": "web/src/app/(main)/tools/construction-calculators/[slug]/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": [
+        "ConstructionCalculatorClient"
+      ]
+    },
+    {
+      "route": "/tools/construction-calculators",
+      "source": "web/src/app/(main)/tools/construction-calculators/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/training/ai-seminars/ai-chat-work",
+      "source": "web/src/app/(main)/training/ai-seminars/ai-chat-work/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": [
+        "SafetySeminarPlayer"
+      ]
+    },
+    {
+      "route": "/training/ai-seminars",
+      "source": "web/src/app/(main)/training/ai-seminars/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/training/safety-seminars/fall-prevention",
+      "source": "web/src/app/(main)/training/safety-seminars/fall-prevention/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": [
+        "SafetySeminarPlayer"
+      ]
+    },
+    {
+      "route": "/training/safety-seminars",
+      "source": "web/src/app/(main)/training/safety-seminars/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/training/safety-seminars/terms",
+      "source": "web/src/app/(main)/training/safety-seminars/terms/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/training/visual-ky/[slug]/facilitator",
+      "source": "web/src/app/(main)/training/visual-ky/[slug]/facilitator/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/training/visual-ky/[slug]",
+      "source": "web/src/app/(main)/training/visual-ky/[slug]/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": [
+        "VisualKyPlayer"
+      ]
+    },
+    {
+      "route": "/training/visual-ky/[slug]/print",
+      "source": "web/src/app/(main)/training/visual-ky/[slug]/print/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/training/visual-ky/category/[category]",
+      "source": "web/src/app/(main)/training/visual-ky/category/[category]/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/training/visual-ky",
+      "source": "web/src/app/(main)/training/visual-ky/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/training/visual-ky/today",
+      "source": "web/src/app/(main)/training/visual-ky/today/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/treatment-work-balance/illness-guide/[illness]",
+      "source": "web/src/app/(main)/treatment-work-balance/illness-guide/[illness]/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/treatment-work-balance",
+      "source": "web/src/app/(main)/treatment-work-balance/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/treatment-work-balance/plan-builder",
+      "source": "web/src/app/(main)/treatment-work-balance/plan-builder/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": [
+        "PlanBuilderClient"
+      ]
+    },
+    {
+      "route": "/whats-new",
+      "source": "web/src/app/(main)/whats-new/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": [
+        "WhatsNewClient"
+      ]
+    },
+    {
+      "route": "/work-environment-measurement/management-class-judge",
+      "source": "web/src/app/(main)/work-environment-measurement/management-class-judge/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/work-environment-measurement",
+      "source": "web/src/app/(main)/work-environment-measurement/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/work-environment-measurement/target-finder",
+      "source": "web/src/app/(main)/work-environment-measurement/target-finder/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/admin/audits/brand-consistency",
+      "source": "web/src/app/admin/audits/brand-consistency/page.tsx",
+      "implementation": "operator-only",
+      "state": "operator-only",
+      "modes": []
+    },
+    {
+      "route": "/admin/audits/content-quality-cleanup",
+      "source": "web/src/app/admin/audits/content-quality-cleanup/page.tsx",
+      "implementation": "operator-only",
+      "state": "operator-only",
+      "modes": []
+    },
+    {
+      "route": "/admin/audits/news-feed-stats",
+      "source": "web/src/app/admin/audits/news-feed-stats/page.tsx",
+      "implementation": "operator-only",
+      "state": "operator-only",
+      "modes": []
+    },
+    {
+      "route": "/admin/audits/p1-batch-plan",
+      "source": "web/src/app/admin/audits/p1-batch-plan/page.tsx",
+      "implementation": "operator-only",
+      "state": "operator-only",
+      "modes": []
+    },
+    {
+      "route": "/admin/audits/p2-batch-plan",
+      "source": "web/src/app/admin/audits/p2-batch-plan/page.tsx",
+      "implementation": "operator-only",
+      "state": "operator-only",
+      "modes": []
+    },
+    {
+      "route": "/admin/audits/p3-batch-plan",
+      "source": "web/src/app/admin/audits/p3-batch-plan/page.tsx",
+      "implementation": "operator-only",
+      "state": "operator-only",
+      "modes": []
+    },
+    {
+      "route": "/admin/audits/post-2week-regression",
+      "source": "web/src/app/admin/audits/post-2week-regression/page.tsx",
+      "implementation": "operator-only",
+      "state": "operator-only",
+      "modes": []
+    },
+    {
+      "route": "/admin/audits/review-dashboard",
+      "source": "web/src/app/admin/audits/review-dashboard/page.tsx",
+      "implementation": "operator-only",
+      "state": "operator-only",
+      "modes": []
+    },
+    {
+      "route": "/admin/automation-consult-queue",
+      "source": "web/src/app/admin/automation-consult-queue/page.tsx",
+      "implementation": "operator-only",
+      "state": "operator-only",
+      "modes": []
+    },
+    {
+      "route": "/admin/env-audit",
+      "source": "web/src/app/admin/env-audit/page.tsx",
+      "implementation": "operator-only",
+      "state": "operator-only",
+      "modes": []
+    },
+    {
+      "route": "/admin/health-check",
+      "source": "web/src/app/admin/health-check/page.tsx",
+      "implementation": "operator-only",
+      "state": "operator-only",
+      "modes": [
+        "ReadinessPanel"
+      ]
+    },
+    {
+      "route": "/admin/health",
+      "source": "web/src/app/admin/health/page.tsx",
+      "implementation": "operator-only",
+      "state": "operator-only",
+      "modes": []
+    },
+    {
+      "route": "/admin/operations",
+      "source": "web/src/app/admin/operations/page.tsx",
+      "implementation": "operator-only",
+      "state": "operator-only",
+      "modes": []
+    },
+    {
+      "route": "/admin/status",
+      "source": "web/src/app/admin/status/page.tsx",
+      "implementation": "operator-only",
+      "state": "operator-only",
+      "modes": []
+    },
+    {
+      "route": "/ky/morning",
+      "source": "web/src/app/ky/morning/page.tsx",
+      "implementation": "owner-excluded",
+      "state": "owner-excluded",
+      "modes": []
+    },
+    {
+      "route": "/quick-start",
+      "source": "web/src/app/quick-start/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/signage/display",
+      "source": "web/src/app/signage/display/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": [
+        "SignageMapClient"
+      ]
+    },
+    {
+      "route": "/signage/manage",
+      "source": "web/src/app/signage/manage/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
+      "route": "/signage/map",
+      "source": "web/src/app/signage/map/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": [
+        "SignageMapClient"
+      ]
+    },
+    {
+      "route": "/signage",
+      "source": "web/src/app/signage/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    }
+  ]
+}

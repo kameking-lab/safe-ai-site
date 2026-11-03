@@ -18,4 +18,8 @@ describe('cloud-only unsigned iOS pipeline', () => {
     expect(template).toMatch(/\/\* App \*\/ = \{\s*isa = PBXGroup;\s*children = \(/);
     expect(template).toContain('MARKETING_VERSION = 1.0;');
   });
+  it('routes cold starts to the matching bundled Next page and stores session credentials in Keychain',async()=>{
+    const swift=await readFile(new URL('../ios-resources/NativeVault.swift',import.meta.url),'utf8');
+    expect(swift).toContain('override func router() -> Router');expect(swift).toContain('candidate.appendingPathComponent("index.html")');expect(swift).toContain('candidate.path.hasPrefix(base.path + "/")');expect(swift).toContain('kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly');expect(swift).toContain('UIPrintInteractionController.shared');
+  });
 });
