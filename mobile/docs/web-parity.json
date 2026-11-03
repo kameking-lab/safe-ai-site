@@ -1818,8 +1818,8 @@
     {
       "route": "/signage/manage",
       "source": "web/src/app/signage/manage/page.tsx",
-      "implementation": "direct canonical import",
-      "state": "shared",
+      "implementation": "native",
+      "state": "native",
       "modes": []
     },
     {

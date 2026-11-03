@@ -30,3 +30,37 @@ test('shows existing website Pro rights and prevents double purchase',async({pag
   });
   await page.goto('/account/');await expect(page.getByText('Pro 購入済み（ウェブ購読）',{exact:true})).toBeVisible();await expect(page.getByRole('button',{name:'購入済み',exact:true})).toBeDisabled();await expect(page.getByRole('button',{name:'購入を復元'})).toBeVisible();await expect(page.getByRole('button',{name:'App Storeの購読管理・解約'})).toBeVisible();await expect(page.getByRole('link',{name:'利用規約'})).toBeVisible();
 });
+
+test('preserves all six visual KYT print formats offline',async({page,context})=>{
+  await context.route('https://**/*',route=>route.abort());
+  await page.goto('/training/visual-ky/scaffold-fall/print/');
+  for(const [label,id] of [['問題だけ','problem'],['問題＋記入欄','worksheet'],['解答・解説','answer'],['朝礼用1枚','morning'],['講師進行台本','script'],['参加者配布用','participant']]){
+    await page.getByRole('navigation',{name:'印刷形式'}).getByRole('link',{name:label,exact:true}).click();
+    await expect(page.getByRole('navigation',{name:'印刷形式'}).getByRole('link',{name:label,exact:true})).toHaveAttribute('aria-current','page');
+    await expect(page.locator('article.visual-ky-print-sheet').first()).toContainText(label);
+    expect(new URL(page.url()).searchParams.get('format')).toBe(id);
+  }
+});
+
+test('restores the newcomer guide audience from the same web URL',async({page,context})=>{
+  await context.route('https://**/*',route=>route.abort());
+  await page.goto('/guides/?audience=new-worker');await expect(page.getByRole('heading',{name:'最初に確認する4項目'})).toBeVisible();
+  await page.goto('/guides/');await expect(page.getByRole('heading',{name:'最初に確認する4項目'})).toHaveCount(0);
+});
+
+test('prints only the selected accident search and restores it after cold reload',async({page,context})=>{
+  await context.route('https://**/*',route=>route.abort());
+  await page.goto('/accident-news/print/?q=IOS3B-no-matching-accident&limit=1');
+  await expect(page.getByText('該当する事例がありません。',{exact:true})).toBeVisible();
+  await expect(page.getByRole('link',{name:'← 一覧に戻る'})).toHaveAttribute('href',/q=IOS3B-no-matching-accident/);
+  await page.reload();await expect(page.getByText('該当する事例がありません。',{exact:true})).toBeVisible();
+});
+
+test('loads authenticated fleet rows using the selected organization instead of a build-time empty page',async({page,context})=>{
+  let organization='';
+  await context.route('https://www.anzen-ai-portal.jp/api/mobile/v1/signage-fleet**',async route=>{
+    organization=new URL(route.request().url()).searchParams.get('organization')??'';
+    await route.fulfill({status:200,contentType:'application/json',headers:{'Access-Control-Allow-Origin':'http://127.0.0.1:3213','Access-Control-Allow-Credentials':'true'},body:JSON.stringify({organizationName:'モック組織',records:[{siteId:'site',siteName:'検証拠点',siteCode:'s1',deviceId:'dev',deviceName:'検証サイネージ',effectiveStatus:'stale',lastSeenAt:'2026-11-03T01:00:00Z',softwareVersion:'1.0',configurationVersion:1,assignedLayout:'map',rolloutStatus:'pending',rolloutStage:'canary',acknowledgedAt:null}],unavailable:null})});
+  });
+  await page.goto('/signage/manage/?organization=mock-org');await expect(page.getByRole('heading',{name:'モック組織 の実端末'})).toBeVisible();await expect(page.getByRole('cell',{name:'情報期限切れ'})).toBeVisible();expect(organization).toBe('mock-org');
+});
