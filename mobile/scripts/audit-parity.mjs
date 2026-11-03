@@ -29,5 +29,5 @@ const output=await files('out');let bytes=0;for(const file of output)bytes+=(awa
 const result={schema:1,routeFamilies:inventory.routes.length,states:inventory.routes.reduce((n,r)=>(n[r.state]=(n[r.state]??0)+1,n),{}),
   htmlPages:output.filter(f=>f.endsWith('.html')).length,bundledBytes:bytes,exam:{papers:papers.length,questions,scored,unscored:questions-scored,figureReferences:figures,sourceHash:createHash('sha256').update(hashes.join('\n')).digest('hex'),items:papers},
   delivery:'local static files and canonical web components; no remote application WebView',networkDuringBuild:'blocked',nativeDeviceVerification:'not run on Windows'};
-await writeFile('docs/web-parity-result.json',JSON.stringify(result,null,2)+'\n');
+await writeFile(process.env.ANZEN_PARITY_REPORT ?? 'docs/web-parity-result.json',JSON.stringify(result,null,2)+'\n');
 console.log(`Parity verified: ${papers.length} papers / ${questions} questions (${scored} scored); ${result.htmlPages} HTML pages. Owner-excluded records absent.`);
