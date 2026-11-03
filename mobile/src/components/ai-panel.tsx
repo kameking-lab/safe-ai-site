@@ -5,6 +5,7 @@ import { canExecute, errorMessage, formatDate, PLAN_LIMITS, quotaLow } from '../
 import type { AiResult, Capability, Feature } from '../lib/contracts';
 import { openSource } from '../lib/native';
 import { TextareaWithVoice } from '@/components/voice-input-field';
+import { inspectAiOutbound } from '@/lib/ai-outbound-safety';
 
 export function AiPanel({ online }: { online: boolean }) {
   const [feature, setFeature] = useState<Feature>('law_chat');
@@ -30,6 +31,7 @@ export function AiPanel({ online }: { online: boolean }) {
   const quota = capability?.features[feature].quota;
   const limit = PLAN_LIMITS[capability?.plan??'free'][feature];
   const allowed = canExecute(capability, feature, clock);
+  const safety = input.trim() ? inspectAiOutbound({purpose:'mobile-home',texts:[input],consent,contextPolicy:'approved-server-corpus'}) : null;
   function changeFeature(next: Feature) {
     if (next === feature) return;
     setFeature(next); setInput(''); setConsent(false); setResult(null); setMessage(''); pending.current = null;
@@ -59,8 +61,9 @@ export function AiPanel({ online }: { online: boolean }) {
       <form onSubmit={submit}>
         <label>{feature === 'law_chat' ? '法令についての質問' : '評価対象と作業条件'}<TextareaWithVoice maxLength={2000} rows={6} disabled={busy} value={input} onChange={e => { setInput(e.target.value); setConsent(false); }} placeholder={feature === 'law_chat' ? '作業の種類と、確認したい条件を入力' : '物質名・CAS番号・SDS発行元と版・濃度・取扱量・作業時間・換気・保護具を入力'} /></label>
         <p className="muted">氏名、会社名、住所、連絡先、機密情報を入力しないでください。質問は端末には保存しません。</p>
+        {safety && !safety.allowed && safety.reason!=='consent_required'?<p role="alert" className="notice">{safety.message}</p>:null}
         <label className="check"><input type="checkbox" checked={consent} disabled={busy} onChange={e => setConsent(e.target.checked)} />入力内容を確認し、サイトの安全確認APIおよびサイトに設定された外部AI事業者への送信に同意します。</label>
-        <button className="primary" disabled={busy || !online || !allowed || !consent || !input.trim()}>{busy ? 'サイトで確認中…' : '確認して送信する'}</button>
+        <button className="primary" disabled={busy || !online || !allowed || !consent || !input.trim() || safety?.allowed===false}>{busy ? 'サイトで確認中…' : '確認して送信する'}</button>
       </form>
       <p role="status">{message}</p>
     </section>

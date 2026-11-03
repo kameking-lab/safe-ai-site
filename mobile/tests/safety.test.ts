@@ -7,6 +7,17 @@ import { canExecute, PLAN_LIMITS, quotaLow, errorMessage, weatherFresh } from '.
 import { safeExternalUrl } from '../src/lib/native';
 const id = 'a92c8879-453a-41c0-b51e-ed99dc286477';
 describe('server-enforced safety boundary', () => {
+  it('preserves emergency and privacy guidance from a safety response',async()=>{
+    for(const [code,message,reason] of [['SAFETY_BLOCKED','作業を止め、安全な場所から119番へ連絡してください。','emergency'],['SAFETY_BLOCKED','個人情報を匿名化してください。','sensitive_data'],['CONSENT_REQUIRED','送信への同意を確認してください。','consent_required']]){
+      await expect(request('/api/mobile/v1/ai',async()=>({status:422,data:{error:{code,message,reason}},headers:{}}))).rejects.toMatchObject({code,message,reason});
+    }
+  });
+  it('blocks emergency and private input before even fetching capabilities',async()=>{
+    const send=vi.fn(async()=>({status:503,data:{},headers:{}}));
+    await expect(executeAi('law_chat','作業員が倒れて意識がない',id,send)).rejects.toThrow(/119/);
+    await expect(executeAi('law_chat','連絡先はtaro@example.comです',id,send)).rejects.toThrow(/個人|匿名/);
+    expect(send).not.toHaveBeenCalled();
+  });
   it('pins free and future Pro independently from safety limits', () => {
     expect(PLAN_LIMITS.free).toEqual({ law_chat: 3, chemical_ra: 1, weatherLocations: 1, notifications: false });
     expect(PLAN_LIMITS.pro).toEqual({ law_chat: 50, chemical_ra: 10, weatherLocations: 10, notifications: true });

@@ -2,11 +2,14 @@ import { Capacitor, CapacitorHttp } from '@capacitor/core';
 import { z } from 'zod';
 import { articleSchema, capabilitySchema, aiResultSchema, isoDate, statisticsSchema, type Feature, type Article, type Weather } from './contracts';
 import { canExecute, errorMessage } from './policy';
+import { inspectAiOutbound } from '@/lib/ai-outbound-safety';
 
 export const SITE = 'https://www.anzen-ai-portal.jp';
 const PATHS = ['/api/signage-data', '/api/revisions', '/api/mobile/v1/statistics', '/api/mobile/v1/capabilities', '/api/mobile/v1/ai'] as const;
 export class ApiError extends Error {
-  constructor(public code: string, public retryAfter?: string, public resetAt?: string) { super(errorMessage(code, retryAfter, resetAt)); }
+  constructor(public code: string, public retryAfter?: string, public resetAt?: string, guidance?: string, public reason?: string) {
+    super(['SAFETY_BLOCKED','CONSENT_REQUIRED'].includes(code) && guidance ? guidance : errorMessage(code, retryAfter, resetAt));
+  }
 }
 export type Transport = (path: string, body?: unknown, extraHeaders?: Record<string, string>) => Promise<{ status: number; data: unknown; headers: Record<string, string> }>;
 export const transport: Transport = async (path, body, extraHeaders = {}) => {
@@ -27,9 +30,9 @@ export const transport: Transport = async (path, body, extraHeaders = {}) => {
 export async function request(path: string, send: Transport = transport, body?: unknown, headers?: Record<string, string>) {
   const response = await send(path, body, headers);
   if (response.status < 200 || response.status >= 300) {
-    const parsed = z.object({ error: z.object({ code: z.string(), resetAt: isoDate.optional() }) }).safeParse(response.data);
+    const parsed = z.object({ error: z.object({ code: z.string(), message: z.string().max(8000).optional(), reason:z.string().optional(), resetAt: isoDate.optional() }) }).safeParse(response.data);
     const retry = Object.entries(response.headers).find(([k]) => k.toLowerCase() === 'retry-after')?.[1];
-    throw new ApiError(parsed.success ? parsed.data.error.code : 'UNAVAILABLE', retry && /^\d{1,5}$/.test(retry) ? retry : undefined, parsed.success ? parsed.data.error.resetAt : undefined);
+    throw new ApiError(parsed.success ? parsed.data.error.code : 'UNAVAILABLE', retry && /^\d{1,5}$/.test(retry) ? retry : undefined, parsed.success ? parsed.data.error.resetAt : undefined, parsed.success ? parsed.data.error.message : undefined, parsed.success ? parsed.data.error.reason : undefined);
   }
   return response.data;
 }
@@ -71,6 +74,8 @@ export async function loadWeather(locationId: string, send = transport): Promise
 export async function loadStatistics(send = transport) { return statisticsSchema.parse(await request('/api/mobile/v1/statistics', send)); }
 export async function loadCapabilities(send = transport) { return capabilitySchema.parse(await request('/api/mobile/v1/capabilities', send)); }
 export async function executeAi(feature: Feature, input: string, requestId: string, send = transport) {
+  const safety=inspectAiOutbound({purpose:'mobile-home',texts:[input],consent:true,contextPolicy:'approved-server-corpus'});
+  if(!safety.allowed)throw new ApiError(safety.reason==='consent_required'?'CONSENT_REQUIRED':'SAFETY_BLOCKED',undefined,undefined,safety.message,safety.reason);
   // Re-check immediately before every execution. A cached response never grants permission.
   const capability = await loadCapabilities(send).catch(() => { throw new ApiError('SAFETY_UNVERIFIED'); });
   if (!canExecute(capability, feature)) throw new ApiError(capability.features[feature].quota.remaining === 0 ? 'DAILY_LIMIT_REACHED' : 'SAFETY_UNVERIFIED', undefined, capability.features[feature].quota.resetAt);
