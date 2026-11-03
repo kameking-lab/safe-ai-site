@@ -32,6 +32,6 @@ Set `ANZEN_PARITY_REPORT` to an external evidence path to avoid modifying the
 tracked historical parity snapshot during final-HEAD verification.
 
 Store command start/end times, HEAD, exit codes, complete logs, and Playwright
-JSON results outside the repository. The requested final report is
-`C:/Users/kanet/Documents/Codex/2026-11-02/task-2/ios3e-report.md`.
+JSON results outside the repository in the task's evidence directory. Keep the
+requested `ios3e-report.md` there; do not commit user-local absolute paths.
 C4 is outside this change. RA remains unavailable. No push or deployment.
