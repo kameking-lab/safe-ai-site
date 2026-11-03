@@ -31,8 +31,13 @@ export async function sessionToken() {
 }
 async function writeSessionToken(token:string|null) {
   await sessionBinding();
-  if(Capacitor.isNativePlatform()) {await initializeVault();if(token)await vault.set({value:token});else await vault.clear();}
-  const binding=crypto.randomUUID();await Preferences.set({key:'anzen.session-incarnation',value:binding});bindingRead=Promise.resolve(binding);
+  if(Capacitor.isNativePlatform())await initializeVault();
+  const rotate=async()=>{const binding=crypto.randomUUID();await Preferences.set({key:'anzen.session-incarnation',value:binding});bindingRead=Promise.resolve(binding);};
+  // Persist the new owner boundary BEFORE installing a login credential. A crash
+  // between Keychain and Preferences must never leave B under A's erasure authority.
+  if(token)await rotate();
+  if(Capacitor.isNativePlatform()){if(token)await vault.set({value:token});else await vault.clear();}
+  if(!token)await rotate();
   memoryToken=token;window.dispatchEvent(new Event('anzen-session-changed'));
 }
 export async function setSessionToken(token:string|null){return serializeSession(()=>writeSessionToken(token));}
