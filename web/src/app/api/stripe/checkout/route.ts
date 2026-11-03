@@ -22,6 +22,8 @@ function getStripe(): Stripe | null {
 }
 
 export async function POST(req: Request) {
+  // Retired clients must not start an unreserved legacy checkout outside the shared ledger.
+  if(process.env.MOBILE_LEDGER_ENABLED!=='true')return privateJson({error:'共通の購入管理を確認できないため、新規購入を停止しています。'},503);
   if (!isPaidModeReady() || !prisma) {
     return privateJson({ error: "決済機能は現在ご利用いただけません。" }, 503);
   }

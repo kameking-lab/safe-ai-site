@@ -9,7 +9,7 @@ import { SITE } from '../lib/api';
 import { SharedUsageMeter } from './shared-usage-meter';
 export function SharedShell({ children }: { children: ReactNode }) {
   const [message,setMessage]=useState('');
-  const pathname=usePathname();
+  const pathname=usePathname().replace(/\/$/,'')||'/';
   useEffect(() => {
     installWebTransport();
     const feeds=(event:MouseEvent)=>{const anchor=(event.target as Element|null)?.closest('a');if(!anchor)return;const url=new URL(anchor.href,location.href);if(url.origin===location.origin && url.pathname.startsWith('/feed/')){event.preventDefault();void openSource(SITE+url.pathname+url.search).catch(()=>setMessage('フィードを開けませんでした。'));}};

@@ -26,6 +26,11 @@ test('all display preferences survive page changes, cold reload and print media'
   await expect(page.locator('html')).toHaveClass(/large-font/);await expect(page.locator('html')).toHaveClass(/high-contrast/);await expect(page.locator('html')).toHaveClass(/dark/);
   expect(await page.evaluate(()=>[localStorage.getItem('furigana-enabled'),localStorage.getItem('easy-japanese-enabled')])).toEqual(['true','true']);
 });
+test('shared quota meter warns at 20 percent and shows the JST recovery date',async({page,context})=>{
+  const cap=capability();cap.plan='pro';cap.session='member';cap.features.law_chat.quota={...cap.features.law_chat.quota,limit:50,used:40,reserved:0,remaining:10};cap.features.chemical_ra.quota={...cap.features.chemical_ra.quota,limit:10,used:8,reserved:0,remaining:2};
+  await context.route(host+'/api/mobile/v1/capabilities',r=>r.fulfill({json:cap,headers:cors}));
+  await page.goto('/chatbot/');const meter=page.getByLabel('会員の共通利用枠');await expect(meter.locator('[data-quota-low="true"]')).toHaveCount(2);await expect(meter).toContainText('残り10／50');await expect(meter).toContainText('残り2／10');await expect(meter).toContainText(/回復：.+（日本時間）/);
+});
 async function accountFixtures(context:BrowserContext,reauth=false){
   let deleted=false;let confirmations=0;
   await context.route(host+'/api/**',async route=>{
