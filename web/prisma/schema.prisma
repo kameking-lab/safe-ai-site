@@ -65,6 +65,11 @@ model MobilePurchaseIntent {
   userId    String @id
   id        String @unique @default(uuid())
   status    String @default("pending")
+  source    String @default("legacy_unknown")
+  stage     String @default("prepared")
+  providerSessionId String? @unique
+  checkoutUrl String? @db.Text
+  providerRequest Json?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -76,6 +81,23 @@ model MobileAuthFlow {
   userId      String?
   expiresAt   DateTime
   consumedAt  DateTime?
+  createdAt   DateTime @default(now())
+  authenticatedAt DateTime?
+}
+
+model MobileAccountDeletion {
+  id String @id @default(uuid())
+  userId String? @unique
+  confirmationHash String
+  receiptHash String @unique
+  sessionHash String
+  status String @default("prepared")
+  expiresAt DateTime
+  requestedAt DateTime @default(now())
+  completedAt DateTime?
+  auditSubject String @default(uuid())
+  auditRetainUntil DateTime
+  @@index([status, requestedAt])
 }
 
 model MobileSession {
@@ -122,6 +144,7 @@ model MobileUsageOperation {
   requestHash String
   status      String @default("reserved")
   response    Json?
+  providerStartedAt DateTime?
   createdAt   DateTime @default(now())
   expiresAt   DateTime
   @@index([userId, feature, day, status])
@@ -199,6 +222,7 @@ model Subscription {
   stripePriceId        String?
   planName             String    @default("free")
   status               String    @default("active")
+  billingHold          Boolean   @default(false)
   currentPeriodEnd     DateTime?
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt

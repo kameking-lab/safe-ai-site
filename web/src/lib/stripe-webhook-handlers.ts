@@ -47,6 +47,7 @@ export async function handleCheckoutCompleted(
     console.warn("[stripe/webhook] checkout.completed without userId metadata");
     return;
   }
+  if(session.payment_status!=='paid'&&session.payment_status!=='no_payment_required')return;
 
   const customerId = typeof session.customer === "string" ? session.customer : session.customer?.id;
   const subscriptionId =
@@ -96,6 +97,19 @@ export async function handleCheckoutCompleted(
       },
     }),
   );
+  if(process.env.MOBILE_LEDGER_ENABLED==='true'){
+    await prisma.mobilePurchaseIntent.updateMany({where:{userId,source:'stripe',status:'pending',OR:[{providerSessionId:session.id},...(session.metadata?.purchaseIntentId?[{id:session.metadata.purchaseIntentId}]:[])]},data:{status:'completed',stage:'completed',checkoutUrl:null}});
+    const apple=await prisma.mobileGrant.findFirst({where:{userId,provider:'app_store',revoked:false,expiresAt:{gt:new Date()}}});
+    if(apple)await prisma.mobileBillingEvent.upsert({where:{id:`duplicate:${session.id}`},create:{id:`duplicate:${session.id}`,type:'DUPLICATE_PURCHASE_REVIEW',appUserId:null,occurredAt:new Date(),status:'failed'},update:{}});
+  }
+}
+
+/** Refunds, disputes and fraud warnings stop access until provider-side review. Never auto-refund. */
+export async function handleBillingRisk(prisma:StripeDb,charge:Stripe.Charge){
+  const customer=typeof charge.customer==='string'?charge.customer:charge.customer?.id;if(!customer)return;
+  const owners=await prisma.subscription.findMany({where:{stripeCustomerId:customer},select:{userId:true}});
+  await prisma.subscription.updateMany({where:{stripeCustomerId:customer},data:{billingHold:true}});
+  if(process.env.MOBILE_LEDGER_ENABLED==='true')await prisma.mobileGrant.updateMany({where:{provider:'stripe',userId:{in:owners.map(owner=>owner.userId)}},data:{revoked:true,checkedAt:new Date()}});
 }
 
 export async function handleSubscriptionUpdated(

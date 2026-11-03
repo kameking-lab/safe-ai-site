@@ -8,13 +8,13 @@ vi.mock('@/lib/prisma',()=>{
     mobileIdentity:{upsert:async()=>({appUserId:'mock_immutable_revenuecat_id'})},
     mobilePurchaseIntent:{findUnique:async()=>null},
     subscription:{findUnique:async()=>state.paid?{planName:'pro',status:'active',stripeSubscriptionId:'mock_stripe',currentPeriodEnd:new Date(Date.now()+86400000),updatedAt:new Date()}:null},
-    mobileGrant:{findMany:async()=>[]},
+    mobileGrant:{findMany:async()=>state.paid?[{provider:'stripe',environment:'PRODUCTION',revoked:false,expiresAt:new Date(Date.now()+86400000),checkedAt:new Date()}]:[]},
     mobileUsageOperation:{
       findUnique:async({where}:{where:{id:string}})=>state.operations.find(o=>o.id===where.id)??null,
       findMany:async({where}:{where:{userId:string;feature:string;day:string;status:{in:string[]}}})=>state.operations.filter(o=>o.userId===where.userId&&o.feature===where.feature&&o.day===where.day&&where.status.in.includes(o.status)),
       count:async({where}:{where:{userId:string;feature:string;createdAt:{gt:Date}}})=>state.operations.filter(o=>o.userId===where.userId&&o.feature===where.feature&&o.createdAt>where.createdAt.gt).length,
       create:async({data}:{data:typeof state.operations[number]})=>{const row={...data,status:'reserved',createdAt:new Date()};state.operations.push(row);return row;},
-      updateMany:async({where,data}:{where:{id:string;status:string};data:{status:string;response?:unknown}})=>{const o=state.operations.find(o=>o.id===where.id&&o.status===where.status);if(!o)return{count:0};Object.assign(o,data);return{count:1};}
+      updateMany:async({where,data}:{where:{id:string;status:string};data:{status:string;response?:unknown}})=>{const o=where.id?state.operations.find(o=>o.id===where.id&&o.status===where.status):undefined;if(!o)return{count:0};Object.assign(o,data);return{count:1};}
     }
   };
   const prisma={...tx,$transaction:<T>(run:(db:typeof tx)=>Promise<T>)=>{const next=state.tail.then(()=>run(tx));state.tail=next.catch(()=>{});return next;}};
@@ -25,6 +25,14 @@ const request=(id=crypto.randomUUID())=>new Request('https://example.test/api/ch
 const answer=()=>Response.json({answer:'公式根拠を確認してください。',source_type:'rag',sources:[{text:'原文',url:'https://laws.e-gov.go.jp/law/mock',asOf:new Date().toISOString()}]});
 beforeEach(()=>{state.operations=[];state.tail=Promise.resolve();state.paid=false;vi.stubEnv('MOBILE_LEDGER_ENABLED','true');});afterEach(()=>vi.unstubAllEnvs());
 describe('shared daily AI accounting',()=>{
+  it.each(['/api/chatbot','/api/chatbot/stream','/api/mobile/v1/ai'])('returns emergency guidance before membership, reservation or inference on %s',async path=>{
+    const run=vi.fn(async()=>answer());const response=await withUsage(new Request('https://example.test'+path,{method:'POST',headers:{'Content-Type':'application/json',Origin:'https://example.test'},body:JSON.stringify({message:'作業員が倒れて意識がない',privacyConfirmed:false})}),'law_chat',run);
+    expect(response.status).toBe(422);expect(await response.json()).toMatchObject({error:{code:'SAFETY_BLOCKED',reason:'emergency',message:expect.stringContaining('119')}});expect(run).not.toHaveBeenCalled();expect(state.operations).toHaveLength(0);
+  });
+  it('distinguishes reserved last slots from daily completed consumption',async()=>{
+    for(let i=0;i<3;i++)state.operations.push({id:crypto.randomUUID(),userId:'mock_member',feature:'law_chat',day:jstKeys().day,status:'reserved',createdAt:new Date(),requestHash:'prior'});
+    const run=vi.fn(async()=>answer());const response=await withUsage(request(),'law_chat',run);expect(await response.json()).toMatchObject({error:{code:'OPERATION_PENDING'}});expect(run).not.toHaveBeenCalled();
+  });
   it('allows only one of 20 competing requests for the last free slot',async()=>{
     for(let i=0;i<2;i++)state.operations.push({id:crypto.randomUUID(),userId:'mock_member',feature:'law_chat',day:jstKeys().day,status:'completed',createdAt:new Date(),requestHash:'prior'});
     const run=vi.fn(async()=>answer());const responses=await Promise.all(Array.from({length:20},()=>withUsage(request(),'law_chat',run)));

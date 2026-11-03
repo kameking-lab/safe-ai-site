@@ -64,6 +64,9 @@ const initialized = isAuthConfigured
       },
       callbacks: {
         async session({ session, token }) {
+          if(prisma && token.sub && !await prisma.user.findUnique({where:{id:token.sub},select:{id:true}}))return {...session,user:undefined} as unknown as typeof session;
+          if(prisma && token.sub && process.env.MOBILE_LEDGER_ENABLED==='true' && (await prisma.mobileAccountDeletion.findUnique({where:{userId:token.sub}}))?.status==='pending')return {...session,user:undefined} as unknown as typeof session;
+          if(token.signedInAt && session.user)(session.user as {signedInAt?:string}).signedInAt=String(token.signedInAt);
           if (token.sub) {
             (session.user as { id?: string }).id = token.sub;
           }
@@ -97,9 +100,11 @@ const initialized = isAuthConfigured
           }
           return session;
         },
-        async jwt({ token, user }) {
+        async jwt({ token, user, account }) {
           if (user) {
             token.sub = user.id;
+            token.signedInAt = new Date().toISOString();
+            if(prisma&&account?.provider==='apple'&&account.refresh_token)await prisma.account.updateMany({where:{userId:user.id,provider:'apple'},data:{refresh_token:account.refresh_token,access_token:account.access_token}});
           }
           return token;
         },

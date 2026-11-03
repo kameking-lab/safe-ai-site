@@ -6,7 +6,7 @@ import { product,type Plan } from './entitlement';
 import { member,json } from './http';
 import { inspectAiOutbound } from '../ai-outbound-safety';
 import { validateChatbotRequestBoundary } from '../server/chatbot-request-boundary';
-const context=new AsyncLocalStorage<{plan:Plan}>();
+const context=new AsyncLocalStorage<{plan:Plan;operationId?:string}>();
 export type AiFeature='law_chat'|'chemical_ra';
 export function jstKeys(now=new Date()){
   const jst=new Date(now.getTime()+9*3600000).toISOString();const day=jst.slice(0,10);
@@ -27,6 +27,8 @@ export async function withProviderBudget<T>(run:()=>Promise<T>,bound:ProviderBou
   if(process.env.MOBILE_LEDGER_ENABLED!=='true')return run();
   const db=billingDb();const amount=maximumProviderCost(bound,{model:process.env.MOBILE_AI_PRICED_MODEL,inputJpyPerMillion:Number(process.env.MOBILE_AI_INPUT_JPY_PER_MILLION),outputJpyPerMillion:Number(process.env.MOBILE_AI_OUTPUT_JPY_PER_MILLION),margin:Number(process.env.MOBILE_AI_COST_MARGIN)});const {month}=jstKeys();
   const plan=context.getStore()?.plan??'free';
+  const operationId=context.getStore()?.operationId;
+  if(operationId){const marked=await db.mobileUsageOperation.updateMany({where:{id:operationId,status:'reserved',expiresAt:{gt:new Date()}},data:{providerStartedAt:new Date()}});if(marked.count!==1)throw new Error('OPERATION_RELEASED');}
   const reservation=await db.$transaction(async tx=>{
     await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`anzen-budget:${month}`},0))`;
     const budget=await tx.mobileBudgetMonth.upsert({where:{month},create:{month},update:{}});
@@ -46,8 +48,9 @@ export async function withProviderBudget<T>(run:()=>Promise<T>,bound:ProviderBou
 }
 export async function quota(userId:string,feature:AiFeature,tx?:Prisma.TransactionClient){
   const db=tx??billingDb();const rights=await getEntitlement(userId);const {day,resetAt}=jstKeys();
+  if(!tx)await billingDb().$transaction(async session=>{await lockMember(session,userId);await recoverUsageLeases(session,userId);});
   const rows=await db.mobileUsageOperation.groupBy({by:['status'],where:{userId,feature,day},_count:true});
-  const used=rows.find(r=>r.status==='completed')?._count??0;const reserved=rows.find(r=>r.status==='reserved')?._count??0;const limit=rights.limits[feature];
+  const used=rows.find(r=>r.status==='completed')?._count??0;const reserved=(rows.find(r=>r.status==='reserved')?._count??0)+(rows.find(r=>r.status==='uncertain')?._count??0);const limit=rights.limits[feature];
   return {limit,used,reserved,remaining:Math.max(0,limit-used-reserved),resetAt};
 }
 async function reserve(request:Request,userId:string,feature:AiFeature){
@@ -56,23 +59,30 @@ async function reserve(request:Request,userId:string,feature:AiFeature){
   const requestHash=createHash('sha256').update(raw).digest('hex');
   const id=request.headers.get('x-operation-id')??randomUUID();if(!/^[0-9a-f-]{36}$/i.test(id))throw new Error('INVALID_REQUEST');
   const {day}=jstKeys();
+  await billingDb().$transaction(async tx=>{await lockMember(tx,userId);await recoverUsageLeases(tx,userId);});
   return billingDb().$transaction(async tx=>{
     await lockMember(tx,userId);
     const rights=await entitlementInTransaction(tx,userId);if(rights.syncState!=='verified')throw new Error('ENTITLEMENT_SYNC_PENDING');
     const previous=await tx.mobileUsageOperation.findUnique({where:{id}});
     if(previous){if(previous.userId!==userId || previous.feature!==feature || previous.requestHash!==requestHash)throw new Error('INVALID_REQUEST');
       if(previous.status==='completed' && previous.response)return {id,plan:rights.plan,replay:previous.response};throw new Error(previous.status==='released'?'OPERATION_RELEASED':'OPERATION_PENDING');}
-    const rows=await tx.mobileUsageOperation.findMany({where:{userId,feature,day,status:{in:['completed','reserved']}},select:{createdAt:true}});
-    if(rows.length>=rights.limits[feature])throw new Error('DAILY_LIMIT_REACHED');
+    const rows=await tx.mobileUsageOperation.findMany({where:{userId,feature,day,status:{in:['completed','reserved','uncertain']}},select:{createdAt:true,status:true}});
+    if(rows.length>=rights.limits[feature])throw new Error(rows.some(r=>r.status!=='completed')?'OPERATION_PENDING':'DAILY_LIMIT_REACHED');
     const recent=await tx.mobileUsageOperation.count({where:{userId,feature,createdAt:{gt:new Date(Date.now()-60000)}}});
     if(rights.plan==='pro' && recent>=product.proBurstPerMinute)throw new Error('BURST_LIMITED');
-    await tx.mobileUsageOperation.create({data:{id,userId,feature,day,requestHash,expiresAt:new Date(Date.now()+86400000)}});
+    await tx.mobileUsageOperation.create({data:{id,userId,feature,day,requestHash,expiresAt:new Date(Date.now()+300000)}});
     return {id,plan:rights.plan,replay:null};
   });
 }
 function chargeable(value:unknown,feature:AiFeature){
   const r=value as {source_type?:string;sources?:Array<{text?:string;url?:string;asOf?:string}>;assessmentStatus?:string};
   return feature==='law_chat' ? r.source_type==='rag' && Array.isArray(r.sources) && r.sources.some(s=>s.text && s.url?.startsWith('https:') && s.asOf && Number.isFinite(Date.parse(s.asOf))) : r.assessmentStatus==='completed';
+}
+/** Reclaim only expired, never-dispatched leases. Unknown provider results keep a slot. */
+export async function recoverUsageLeases(tx:Prisma.TransactionClient,userId:string){
+  await tx.mobileUsageOperation.updateMany({where:{userId,status:'reserved',expiresAt:{lte:new Date()},providerStartedAt:null},data:{status:'released'}});
+  await tx.mobileUsageOperation.updateMany({where:{userId,status:'reserved',expiresAt:{lte:new Date()},providerStartedAt:{not:null}},data:{status:'uncertain'}});
+  // Provider cost reservations are deliberately untouched, including on process termination.
 }
 export async function withUsage(request:Request,feature:AiFeature,run:(request:Request)=>Promise<Response>){
   if(process.env.MOBILE_LEDGER_ENABLED!=='true'){
@@ -88,13 +98,13 @@ export async function withUsage(request:Request,feature:AiFeature,run:(request:R
     const body=await request.clone().json().catch(()=>null) as {message?:unknown;question?:unknown;privacyConfirmed?:unknown;history?:Array<{content?:unknown}>}|null;
     if(!body)return json({error:{code:'INVALID_REQUEST',message:'JSON形式の入力を確認してください。'}},400);
     const check=inspectAiOutbound({purpose:'shared-law-chat',texts:[body.message??body.question,...(Array.isArray(body.history)?body.history.map(h=>h?.content):[])],consent:body.privacyConfirmed===true,maxChars:12000,contextPolicy:'approved-server-corpus'});
-    if(!check.allowed)return json({error:{code:check.reason==='consent_required'?'CONSENT_REQUIRED':'SAFETY_BLOCKED',message:check.message}},check.status);
+    if(!check.allowed)return json({error:{code:check.reason==='consent_required'?'CONSENT_REQUIRED':'SAFETY_BLOCKED',reason:check.reason,message:check.message}},check.status);
   }
   let operation:{id:string;plan:Plan;replay:Prisma.JsonValue|null}|undefined;
   try{
     const userId=await member(request);operation=await reserve(request,userId,feature);
     if(operation.replay){if(new URL(request.url).pathname.endsWith('/stream'))return new Response(`event: meta\ndata: ${JSON.stringify(operation.replay)}\n\n`,{headers:{'Content-Type':'text/event-stream','Cache-Control':'no-store'}});return json(operation.replay);}
-    const response=await context.run({plan:operation.plan},()=>run(request));
+    const response=await context.run({plan:operation.plan,operationId:operation.id},()=>run(request));
     const settle=async(value:unknown,completed:boolean)=>{await billingDb().mobileUsageOperation.updateMany({where:{id:operation!.id,status:'reserved'},data:{status:completed?'completed':'released',...(completed?{response:value as Prisma.InputJsonValue}:{})}});};
     if(response.headers.get('content-type')?.includes('text/event-stream') && response.body){
       const reader=response.body.getReader();let collected='';const decoder=new TextDecoder();

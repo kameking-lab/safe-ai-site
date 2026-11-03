@@ -1,8 +1,9 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, afterEach, describe, expect, it, vi } from "vitest";
 import { isPaidModeReady, resolveStripePlan } from "./stripe-price-policy";
 import { handleSubscriptionUpdated } from "./stripe-webhook-handlers";
 
 describe("Stripe server-side price policy", () => {
+  beforeEach(()=>{vi.stubEnv('SAFE_AI_STAGING_MODE','false');vi.stubEnv('VERCEL_ENV','development');vi.stubEnv('MOBILE_LEDGER_ENABLED','false');});
   afterEach(() => vi.unstubAllEnvs());
 
   it("設定済みの2価格だけを対応プランへ解決し、未知のPriceを拒否する", () => {

@@ -17,9 +17,11 @@ export async function startFlow(challenge:string) {
   if(!/^[A-Za-z0-9_-]{43}$/.test(challenge)) throw new Error('INVALID_REQUEST');
   return billingDb().mobileAuthFlow.create({data:{challenge,expiresAt:new Date(Date.now()+10*60000)}});
 }
-export async function authorizeFlow(id:string,userId:string) {
+export async function authorizeFlow(id:string,userId:string,authenticatedAt?:Date) {
+  const flow=await billingDb().mobileAuthFlow.findUnique({where:{id}});
+  if(!flow || !authenticatedAt || !Number.isFinite(authenticatedAt.getTime()) || authenticatedAt<flow.createdAt || Date.now()-authenticatedAt.getTime()>300000)throw new Error('REAUTH_REQUIRED');
   const code=randomBytes(32).toString('base64url');
-  const result=await billingDb().mobileAuthFlow.updateMany({where:{id,expiresAt:{gt:new Date()},consumedAt:null,codeHash:null},data:{userId,codeHash:digest(code)}});
+  const result=await billingDb().mobileAuthFlow.updateMany({where:{id,expiresAt:{gt:new Date()},consumedAt:null,codeHash:null},data:{userId,codeHash:digest(code),authenticatedAt}});
   if(result.count!==1) throw new Error('AUTH_FLOW_EXPIRED');
   return code;
 }
@@ -28,7 +30,7 @@ export async function exchangeFlow(id:string,code:string,verifier:string) {
   return billingDb().$transaction(async tx=>{
     const flow=await tx.mobileAuthFlow.findUnique({where:{id}});
     const actual=createHash('sha256').update(verifier).digest('base64url');
-    if(!flow?.userId || flow.consumedAt || flow.expiresAt<=new Date() || flow.codeHash!==digest(code) || flow.challenge.length!==actual.length || !timingSafeEqual(Buffer.from(flow.challenge),Buffer.from(actual))) throw new Error('AUTH_FLOW_EXPIRED');
+    if(!flow?.userId || !flow.authenticatedAt || flow.consumedAt || flow.expiresAt<=new Date() || flow.codeHash!==digest(code) || flow.challenge.length!==actual.length || !timingSafeEqual(Buffer.from(flow.challenge),Buffer.from(actual))) throw new Error('AUTH_FLOW_EXPIRED');
     const taken=await tx.mobileAuthFlow.updateMany({where:{id,consumedAt:null},data:{consumedAt:new Date()}});
     if(taken.count!==1) throw new Error('AUTH_FLOW_EXPIRED');
     const token=randomBytes(32).toString('base64url');

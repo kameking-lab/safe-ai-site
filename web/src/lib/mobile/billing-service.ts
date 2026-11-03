@@ -3,6 +3,8 @@ import { prisma } from '../prisma';
 import { assertPurchasable, projectEntitlement, type EntitlementSnapshot } from './entitlement';
 import { fetchSubscriber, verifiedAppleGrant,fetchAppleOwnership } from './revenuecat';
 import { reconcileStripe } from './stripe-reconcile';
+import { assertResume,canReleasePrepared,type PurchaseSource } from './purchase-state';
+import { expireStripeIntent } from './stripe-purchase';
 export function billingDb() { if(!prisma || process.env.MOBILE_LEDGER_ENABLED!=='true') throw new Error('ENTITLEMENT_SYNC_PENDING');return prisma; }
 export async function lockMember(tx:Prisma.TransactionClient,userId:string) { await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`anzen:${userId}`},0))`; }
 export async function lockPushDevice(tx:Prisma.TransactionClient,token:string) { await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`anzen-push:${token}`},0))`; }
@@ -11,16 +13,16 @@ export async function entitlementInTransaction(tx:Prisma.TransactionClient,userI
   const member=await identity(tx,userId);
   const [legacy,grants,intent]=await Promise.all([tx.subscription.findUnique({where:{userId}}),tx.mobileGrant.findMany({where:{userId}}),tx.mobilePurchaseIntent.findUnique({where:{userId}})]);
   const rights=projectEntitlement(member.appUserId,legacy,grants,new Date(),member.billingEnvironment==='SANDBOX'?'SANDBOX':'PRODUCTION');
-  if(rights.plan==='pro' && intent?.status==='pending')await tx.mobilePurchaseIntent.updateMany({where:{userId,status:'pending'},data:{status:'completed'}});
-  const pending=rights.plan!=='pro' && intent?.status==='pending';
-  return {...rights,purchasePending:pending,purchaseIntentId:pending?intent.id:null};
+  if(rights.source==='stripe'&&!grants.some(g=>g.provider==='stripe'&&!g.revoked&&g.expiresAt>new Date()&&g.environment===(member.billingEnvironment==='SANDBOX'?'SANDBOX':'PRODUCTION')))rights.syncState='pending';
+  const pending=intent?.status==='pending';
+  return {...rights,purchasePending:pending,purchaseIntentId:pending?intent.id:null,purchaseSource:pending?intent.source:null,purchaseStage:pending?intent.stage:null};
 }
 export async function getEntitlement(userId:string) {
   const db=billingDb();const now=Date.now();
   const [legacy,grants]=await Promise.all([db.subscription.findUnique({where:{userId}}),db.mobileGrant.findMany({where:{userId,revoked:false,expiresAt:{gt:new Date()}}})]);
   if(grants.some(g=>now-g.checkedAt.getTime()>300000)){try{return await reconcile(userId);}catch{/* bounded 24-hour previously verified fallback below */}}
-  else if(legacy?.stripeSubscriptionId && now-legacy.updatedAt.getTime()>300000){
-    try{return await db.$transaction(async tx=>{await lockMember(tx,userId);await reconcileStripe(tx,userId);return entitlementInTransaction(tx,userId);},{timeout:15000});}catch{/* unknown rights never become an offer to repurchase */}
+  else if(legacy?.stripeSubscriptionId && (now-legacy.updatedAt.getTime()>300000||!grants.some(g=>g.provider==='stripe'))){
+    try{return await db.$transaction(async tx=>{await lockMember(tx,userId);await identity(tx,userId);await reconcileStripe(tx,userId);return entitlementInTransaction(tx,userId);},{timeout:30000});}catch{/* unknown rights never become an offer to repurchase */}
   }
   return db.$transaction(tx=>entitlementInTransaction(tx,userId));
 }
@@ -41,26 +43,37 @@ export async function reconcile(userId:string) {
       if(owner && owner.userId!==userId) throw new Error('PURCHASE_OWNED_BY_OTHER_ACCOUNT');
       await tx.mobileGrant.upsert({where:{provider_originalTransactionId_environment:{provider:'app_store',originalTransactionId,environment}},
         create:{...grant,originalTransactionId,userId,provider:'app_store',environment,checkedAt},update:{...grant,checkedAt,revoked:false}});
-      await tx.mobilePurchaseIntent.updateMany({where:{userId},data:{status:'completed'}});
+      const intent=await tx.mobilePurchaseIntent.findUnique({where:{userId}});
+      if(intent?.status==='pending'&&intent.source==='stripe')await expireStripeIntent(tx,intent);
+      await tx.mobilePurchaseIntent.updateMany({where:{userId,source:'app_store',status:'pending'},data:{status:'completed',stage:'completed'}});
     }
     return entitlementInTransaction(tx,userId);
   },{timeout:20000});
 }
-export async function reservePurchase(userId:string) {
+export async function reservePurchase(userId:string,source:PurchaseSource='app_store') {
   // Refresh Apple before reserving. Website rights are always read from the database.
   await reconcile(userId);
   return billingDb().$transaction(async tx=>{
     await lockMember(tx,userId);const current=await entitlementInTransaction(tx,userId);assertPurchasable(current);
     const existing=await tx.mobilePurchaseIntent.findUnique({where:{userId}});
-    if(existing?.status==='pending') throw new Error('PURCHASE_PENDING');
+    if(existing?.status==='pending'){assertResume(existing,source);return existing;}
     // Never unlock a potentially pending StoreKit transaction simply because time passed.
-    return tx.mobilePurchaseIntent.upsert({where:{userId},create:{userId},update:{id:crypto.randomUUID(),status:'pending',createdAt:new Date()}});
+    return tx.mobilePurchaseIntent.upsert({where:{userId},create:{userId,source},update:{id:crypto.randomUUID(),source,stage:'prepared',providerSessionId:null,checkoutUrl:null,providerRequest:Prisma.DbNull,status:'pending',createdAt:new Date()}});
   });
 }
-export async function cancelPurchase(userId:string,id:string){
-  await reconcile(userId);
+export async function cancelPurchase(userId:string,id:string,source:PurchaseSource){
+  return billingDb().$transaction(async tx=>{await lockMember(tx,userId);
+    const intent=await tx.mobilePurchaseIntent.findUnique({where:{userId}});
+    if(!intent||intent.id!==id||intent.source!==source)throw new Error('INVALID_REQUEST');
+    if(source==='stripe')await expireStripeIntent(tx,intent);
+    else if(canReleasePrepared(intent,source))await tx.mobilePurchaseIntent.updateMany({where:{userId,id,status:'pending',stage:'prepared'},data:{status:'cancelled',stage:'cancelled'}});
+    else throw new Error('PURCHASE_PENDING');
+    return entitlementInTransaction(tx,userId);});
+}
+export async function markStoreStarted(userId:string,id:string){
   return billingDb().$transaction(async tx=>{await lockMember(tx,userId);const rights=await entitlementInTransaction(tx,userId);assertPurchasable(rights);
-    await tx.mobilePurchaseIntent.updateMany({where:{userId,id,status:'pending'},data:{status:'cancelled'}});return entitlementInTransaction(tx,userId);});
+    const changed=await tx.mobilePurchaseIntent.updateMany({where:{userId,id,source:'app_store',status:'pending'},data:{stage:'store_started'}});
+    if(changed.count!==1)throw new Error('INVALID_REQUEST');return {id};});
 }
 export async function processBillingEvents(limit=20,deadline=Date.now()+45000) {
   const db=billingDb();const events=await db.mobileBillingEvent.findMany({where:{status:'pending',nextAttempt:{lte:new Date()}},take:limit,orderBy:{receivedAt:'asc'}});
