@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { GuidesAudienceSection } from '@/components/guides-audience-section';
 import {
   ArrowRight,
   Accessibility,
@@ -162,7 +163,7 @@ export default async function GuidesHubPage({ searchParams }: GuidesPageProps = 
           </p>
         </header>
 
-        {isNewWorker ? (
+        <GuidesAudienceSection initialNewWorker={isNewWorker}>
           <section
             aria-labelledby="new-worker-start-title"
             className="mt-6 rounded-2xl border-2 border-teal-300 bg-teal-50 p-5"
@@ -196,7 +197,7 @@ export default async function GuidesHubPage({ searchParams }: GuidesPageProps = 
               ))}
             </ol>
           </section>
-        ) : null}
+        </GuidesAudienceSection>
 
         <Section title="ガイド一覧" spacing="default" className="mt-8">
           <ul className="grid gap-4">
