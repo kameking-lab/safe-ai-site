@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { Check, Minus, Star } from "lucide-react";
 import {
   PLAN_IDS,
@@ -77,7 +76,7 @@ function FeatureCell({ value }: { value: FeatureValue }) {
 export function PricingMatrix() {
   const { language } = useTranslation();
   const isEn = language === "en";
-  const [cycle, setCycle] = useState<BillingCycle>("monthly");
+  const cycle:BillingCycle="monthly";
 
   return (
     <section className="mt-12">
@@ -87,39 +86,12 @@ export function PricingMatrix() {
           {isEn ? "Plan Comparison" : "プラン機能比較"}
         </h2>
 
-        {/* Billing toggle */}
-        <div className="flex items-center gap-1 rounded-xl border border-slate-200 bg-slate-50 p-1 text-xs font-semibold">
-          <button
-            type="button"
-            onClick={() => setCycle("monthly")}
-            className={`rounded-lg px-3 py-1.5 transition-colors ${
-              cycle === "monthly"
-                ? "bg-white text-slate-800 shadow-sm"
-                : "text-slate-500 hover:text-slate-700"
-            }`}
-          >
-            {isEn ? "Monthly" : "月払い"}
-          </button>
-          <button
-            type="button"
-            onClick={() => setCycle("annual")}
-            className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 transition-colors ${
-              cycle === "annual"
-                ? "bg-white text-slate-800 shadow-sm"
-                : "text-slate-500 hover:text-slate-700"
-            }`}
-          >
-            {isEn ? "Annual" : "年払い"}
-            <span className="rounded-full bg-emerald-500 px-1.5 py-0.5 text-[9px] text-white">
-              {isEn ? "-17%" : "17%オフ"}
-            </span>
-          </button>
-        </div>
+
       </div>
 
       {/* Table wrapper — overflow-x for narrow screens */}
       <div className="overflow-x-auto rounded-2xl border border-slate-200 shadow-sm">
-        <table className="w-full min-w-[640px] border-collapse text-sm">
+        <table className="w-full min-w-[480px] border-collapse text-sm">
           {/* Sticky header */}
           <thead>
             <tr>

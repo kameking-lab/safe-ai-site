@@ -78,7 +78,7 @@ export async function executeAi(feature: Feature, input: string, requestId: stri
   if(!safety.allowed)throw new ApiError(safety.reason==='consent_required'?'CONSENT_REQUIRED':'SAFETY_BLOCKED',undefined,undefined,safety.message,safety.reason);
   // Re-check immediately before every execution. A cached response never grants permission.
   const capability = await loadCapabilities(send).catch(() => { throw new ApiError('SAFETY_UNVERIFIED'); });
-  if (!canExecute(capability, feature)) throw new ApiError(capability.features[feature].quota.remaining === 0 ? 'DAILY_LIMIT_REACHED' : 'SAFETY_UNVERIFIED', undefined, capability.features[feature].quota.resetAt);
+  if (!canExecute(capability, feature)) throw new ApiError(capability.features[feature].quota.remaining === 0 ? capability.features[feature].quota.reserved>0?'OPERATION_PENDING':'DAILY_LIMIT_REACHED' : 'SAFETY_UNVERIFIED', undefined, capability.features[feature].quota.resetAt);
   const result = aiResultSchema.parse(await request('/api/mobile/v1/ai', send, { version: 1, feature, input, requestId, privacyConfirmed: true }, { 'X-Anzen-CSRF': capability.csrfToken }));
   if (result.requestId !== requestId || result.feature !== feature) throw new ApiError('SAFETY_UNVERIFIED');
   return result;

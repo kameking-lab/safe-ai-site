@@ -57,7 +57,8 @@ export function AiPanel({ online }: { online: boolean }) {
       <h3>{feature === 'law_chat' ? '根拠を確かめながら、法令を調べる' : '化学物質のリスクアセスメント'}</h3>
       <p>{capability?.plan==='pro'?'Pro':'無料'}：1日{limit}{feature === 'law_chat' ? '回' : '件'}（日本時間）。AIはオンライン専用です。作業の安全・法令適合の最終判断は責任者と専門家が行ってください。</p>
       <p className={quota && quotaLow(quota.remaining, quota.limit) ? 'notice' : 'muted'}>{quota ? `サーバー確認：残り${quota.remaining} / ${quota.limit}、処理中${quota.reserved}。次の更新：${formatDate(quota.resetAt)}` : '残数はサイトのサーバーで確認します。端末側では回数を付け替えません。'}</p>
-      {!online ? <p className="notice">{errorMessage('OFFLINE')}</p> : !allowed ? <p className="notice">{quota?.remaining === 0 ? errorMessage('DAILY_LIMIT_REACHED', undefined, quota.resetAt) : capability && !capability.features[feature].available ? errorMessage('FEATURE_UNAVAILABLE') : errorMessage('SAFETY_UNVERIFIED')}</p> : null}
+      {!online ? <p className="notice">{errorMessage('OFFLINE')}</p> : !allowed ? <p className="notice">{quota?.remaining === 0 ? errorMessage(quota.reserved>0?'OPERATION_PENDING':'DAILY_LIMIT_REACHED', undefined, quota.resetAt) : capability && !capability.features[feature].available ? errorMessage('FEATURE_UNAVAILABLE') : errorMessage('SAFETY_UNVERIFIED')}</p> : null}
+      <p className="muted">残数0・通信停止時も、AIを使わない<a href="/law-search/">法令の検索</a>・<a href="/laws/">同梱資料</a>を無料で閲覧できます。</p>
       <form onSubmit={submit}>
         <label>{feature === 'law_chat' ? '法令についての質問' : '評価対象と作業条件'}<TextareaWithVoice maxLength={2000} rows={6} disabled={busy} value={input} onChange={e => { setInput(e.target.value); setConsent(false); }} placeholder={feature === 'law_chat' ? '作業の種類と、確認したい条件を入力' : '物質名・CAS番号・SDS発行元と版・濃度・取扱量・作業時間・換気・保護具を入力'} /></label>
         <p className="muted">氏名、会社名、住所、連絡先、機密情報を入力しないでください。質問は端末には保存しません。</p>

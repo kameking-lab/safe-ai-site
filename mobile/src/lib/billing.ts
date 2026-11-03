@@ -3,7 +3,7 @@ import { Capacitor } from '@capacitor/core';
 import { z } from 'zod';
 import product from '@/lib/mobile/product-policy.json';
 import { siteApi } from './session';
-const snapshotSchema=z.object({plan:z.enum(['free','pro']),source:z.enum(['stripe','app_store']).nullable(),syncState:z.enum(['verified','pending','unavailable']),expiresAt:z.string().nullable(),appUserId:z.string().min(16),verifiedAt:z.string().datetime(),purchasePending:z.boolean().default(false),purchaseIntentId:z.string().nullable().default(null),limits:z.object({law_chat:z.number(),chemical_ra:z.number(),weatherLocations:z.number(),notifications:z.boolean()})})
+const snapshotSchema=z.object({plan:z.enum(['free','pro']),source:z.enum(['stripe','app_store']).nullable(),syncState:z.enum(['verified','pending','unavailable']),expiresAt:z.string().nullable(),appUserId:z.string().min(16),verifiedAt:z.string().datetime(),purchasePending:z.boolean().default(false),purchaseIntentId:z.string().nullable().default(null),purchaseSource:z.string().nullable().default(null),purchaseStage:z.string().nullable().default(null),limits:z.object({law_chat:z.number(),chemical_ra:z.number(),weatherLocations:z.number(),notifications:z.boolean()})})
   .refine(s=>JSON.stringify(s.limits)===JSON.stringify(product.limits[s.plan]))
   .refine(s=>s.plan!=='pro' || (!!s.expiresAt && Number.isFinite(Date.parse(s.expiresAt))));
 export type MemberEntitlement=z.infer<typeof snapshotSchema>;
@@ -37,14 +37,15 @@ export class BillingController {
     try{
       const member=await this.entitlement();
       if(member.plan==='pro')throw new Error('ALREADY_SUBSCRIBED');
-      if(member.purchasePending)throw new Error('PURCHASE_PENDING');
+      if(member.purchasePending && member.purchaseSource!=='app_store')throw new Error('PURCHASE_PENDING');
       if(member.syncState!=='verified')throw new Error('ENTITLEMENT_SYNC_PENDING');
       const p=await this.offering(config,member);
       const intent=await this.send('/api/billing/purchase-intents',{}) as {id:string};
       // Re-check identity after the asynchronous reservation and before opening StoreKit.
       const latest=await this.entitlement();
       if(latest.appUserId!==member.appUserId || latest.plan==='pro' || latest.syncState!=='verified' || latest.purchaseIntentId!==intent.id)throw new Error('ENTITLEMENT_SYNC_PENDING');
-      try{await this.sdk.purchasePackage({aPackage:p});}catch(e){const error=e as {userCancelled?:boolean;code?:string};if(error.userCancelled || error.code==='1')await this.send('/api/billing/cancel-intent',{id:intent.id,reason:'store_cancelled'}).catch(()=>{});throw e;}
+      await this.send('/api/billing/store-started',{id:intent.id});
+      try{await this.sdk.purchasePackage({aPackage:p});}catch(e){const error=e as {userCancelled?:boolean;code?:string};if(error.userCancelled || error.code==='1')await this.send('/api/billing/cancel-intent',{id:intent.id,source:'app_store'}).catch(()=>{});throw e;}
       // SDK customerInfo is deliberately ignored for authorization.
       return await this.sync();
     }finally{this.busy=false;}

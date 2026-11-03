@@ -124,7 +124,7 @@ export default function TermsPage() {
           </p>
           <p className="text-sm leading-7 text-slate-600">
             <span className="font-semibold text-slate-700">現在の状態：</span>
-            本サイト上の月額有料プラン申込、オンライン決済、マイページでの解約・返金機能は提供していません。受付状態は業務自動化相談ページで、個人情報の入力前に表示します。
+            個別受託業務の申込・決済条件は、業務自動化相談ページで個人情報の入力前に表示します。安全AI Proの提供状態は料金ページで確認でき、有効な購読の管理・解約は会員画面から購入元で行います。
           </p>
           <p className="text-sm leading-7 text-slate-600">
             具体的な解約・変更・返金条件は、契約成立前に個別の見積・契約へ明記します。サイトに未実装の決済機能を利用できるものとして案内しません。

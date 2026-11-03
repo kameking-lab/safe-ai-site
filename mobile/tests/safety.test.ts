@@ -39,7 +39,7 @@ describe('server-enforced safety boundary', () => {
   it('refuses execution with exhausted or reserved last quota', async () => {
     const c = capability(); c.features.law_chat.quota = { ...c.features.law_chat.quota, used: 2, reserved: 1, remaining: 0 };
     const send = vi.fn(async () => ({ status: 200, data: c, headers: {} }));
-    await expect(executeAi('law_chat', 'question', id, send)).rejects.toThrow('上限'); expect(send).toHaveBeenCalledTimes(1);
+    await expect(executeAi('law_chat', 'question', id, send)).rejects.toThrow('処理中'); expect(send).toHaveBeenCalledTimes(1);
   });
   it('passes idempotency and consent, validates original evidence and identity', async () => {
     const send = vi.fn(async (path: string) => ({ status: 200, data: path.includes('capabilities') ? capability() : aiResult(id), headers: {} }));

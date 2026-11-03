@@ -2,7 +2,13 @@ import { describe, expect, it } from 'vitest';
 import { readFile } from 'node:fs/promises';
 import { execFileSync } from 'node:child_process';
 import { parse } from 'yaml';
+import { sanitizePdfjsBrowserPath } from '../scripts/pdfjs-browser-path.mjs';
 describe('cloud-only unsigned iOS pipeline', () => {
+  it('removes build-host paths only from PDF.js Node canvas fallback',()=>{
+    const hostUrl='file:///'+['C:','Users','build-agent','node_modules','pdfjs-dist','pdf.mjs'].join('/');
+    const source=`createWorker(new URL("pdf.worker.mjs",import.meta.url)); module.createRequire("${hostUrl}")("@napi-rs/canvas")`;
+    const output=sanitizePdfjsBrowserPath(source);expect(output).not.toContain('build-agent');expect(output).toContain('file:///anzen-native/pdfjs.mjs');expect(output).toContain('new URL("pdf.worker.mjs",import.meta.url)');expect(sanitizePdfjsBrowserPath('other.createRequire("file:///data/document.mjs")')).toContain('file:///data/document.mjs');
+  });
   it('has no remote webview, signing or publishing configuration', async () => {
     const config = await readFile(new URL('../capacitor.config.ts', import.meta.url), 'utf8');
     expect(config).not.toMatch(/\burl\s*:|allowNavigation|allowMixedContent/);

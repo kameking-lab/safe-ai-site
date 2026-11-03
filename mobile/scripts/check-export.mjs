@@ -1,5 +1,14 @@
-import { readFile, stat } from 'node:fs/promises';
+import { readFile, writeFile, readdir, stat } from 'node:fs/promises';
 import assert from 'node:assert/strict';
+import { sanitizePdfjsBrowserPath } from './pdfjs-browser-path.mjs';
+async function sanitizeChunks(directory){
+  for(const entry of await readdir(directory,{withFileTypes:true})){
+    const file=new URL(entry.name+(entry.isDirectory()?'/':''),directory);
+    if(entry.isDirectory())await sanitizeChunks(file);
+    else if(entry.name.endsWith('.js')){const before=await readFile(file,'utf8');const after=sanitizePdfjsBrowserPath(before);if(after!==before)await writeFile(file,after);}
+  }
+}
+await sanitizeChunks(new URL('../out/_next/',import.meta.url));
 const config = await readFile(new URL('../capacitor.config.ts', import.meta.url), 'utf8');
 assert(!/server\s*:\s*\{[^}]*\burl\s*:/.test(config), 'Remote WebView must never be configured');
 assert(!/allowNavigation|allowMixedContent\s*:\s*true/.test(config));

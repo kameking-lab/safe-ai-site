@@ -70,3 +70,4 @@ export async function logout() {
   // Revoke the server device/session before deleting the local credential.
   await siteApi('/api/mobile/v1/auth/logout',{});await setSessionToken(null);await writeLogin(null);
 }
+export async function forgetLocalSession(){await setSessionToken(null);await writeLogin(null);}
