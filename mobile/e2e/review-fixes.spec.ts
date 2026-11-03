@@ -39,7 +39,7 @@ async function accountFixtures(context:BrowserContext,reauth=false){
     else if(path==='/api/me/entitlements'){if(deleted){status=401;data={error:{code:'UNAUTHORIZED'}};}else data={plan:'free',source:null,syncState:'verified',expiresAt:null,appUserId:'88888888-1111-4111-8111-111111111111',verifiedAt:new Date().toISOString(),limits:product.limits.free};}
     else if(path.endsWith('/account/delete')){
       const body=route.request().postDataJSON();
-      if(body.action==='prepare'){if(reauth){status=401;data={error:{code:'REAUTH_REQUIRED'}};}else data={id:'88888888-2222-4222-8222-222222222222',confirmation:'c'.repeat(43),receipt:'r'.repeat(43),expiresAt:new Date(Date.now()+600000).toISOString()};}
+      if(body.action==='prepare'){if(reauth){status=401;data={error:{code:'REAUTH_REQUIRED'}};}else data={id:'88888888-2222-4222-8222-222222222222',confirmation:'c'.repeat(43),receipt:'r'.repeat(43),expiresAt:new Date(Date.now()+600000).toISOString(),subject:'member-a'};}
       else if(body.action==='confirm'){confirmations++;deleted=true;data={status:'completed',completedAt:new Date().toISOString()};}else data={status:'completed',completedAt:new Date().toISOString()};
     }else if(path.endsWith('/account'))data={displayName:'試験会員',email:null,sdsHistory:[]};else{status=503;data={error:{code:'UNAVAILABLE'}};}
     await route.fulfill({status,json:data,headers:cors});

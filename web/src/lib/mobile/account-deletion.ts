@@ -25,7 +25,7 @@ export async function prepareAccountDeletion(request:Request,userId:string){
     const data={confirmationHash:digest(confirmation),receiptHash:digest(receipt),sessionHash,expiresAt:new Date(Date.now()+600000),status:'prepared',auditRetainUntil:new Date(Date.now()+7*365.25*86400000)};
     return tx.mobileAccountDeletion.upsert({where:{userId},create:{userId,...data},update:data});
   });
-  return {id:record.id,confirmation,receipt,expiresAt:record.expiresAt.toISOString()};
+  return {id:record.id,confirmation,receipt,expiresAt:record.expiresAt.toISOString(),subject:userId};
 }
 export async function confirmAccountDeletion(request:Request,userId:string,id:string,confirmation:string){
   const sessionHash=await recentSession(request,userId);

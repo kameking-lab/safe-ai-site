@@ -6,6 +6,7 @@ export function AccountDeletionPanel(){
   const [preparation,setPreparation]=useState<DeletionPreparation|null>(null);const [confirmation,setConfirmation]=useState('');const [busy,setBusy]=useState(false);const [message,setMessage]=useState('');
   const show=(status:DeletionStatus|null)=>{if(status)setMessage(status.status==='completed'?'アカウントと関連する個人データの削除が完了しました。':status.status==='pending'?'削除を受け付けました。ログイン・通知は無効です。Apple連携の解除等を自動処理中です。「削除状況を確認」で完了を確認できます。':'削除はまだ確定していません。本人確認後にもう一度開始してください。');};
   useEffect(()=>{let active=true;void checkDeletion().then(status=>{if(active)show(status);}).catch(()=>{});return()=>{active=false;};},[]);
+  useEffect(()=>{const changed=()=>{setPreparation(null);setConfirmation('');};window.addEventListener('anzen-session-changed',changed);return()=>window.removeEventListener('anzen-session-changed',changed);},[]);
   async function action(run:()=>Promise<void>){if(busy)return;setBusy(true);try{await run();}catch(e){setMessage(e instanceof Error&&e.message==='REAUTH_REQUIRED'?'削除には直近5分以内の本人確認が必要です。「本人確認のため再ログイン」からログインし、もう一度開始してください。':'処理結果を確認できません。「削除状況を確認」を押してください。未確定の場合は再ログイン後に開始できます。');}finally{setBusy(false);}}
   return <section aria-label="アカウントの削除" className="space-y-3 rounded border border-red-300 p-4"><h2 className="font-bold">アカウントの削除</h2>
     <p>会員情報、学習・SDS検索履歴、利用履歴、警報地点、ログインと通知の登録を削除します。組織で共有する業務記録は投稿者情報を匿名化します。購入所有者の照合・不正防止に必要な最小限の取引識別子は匿名の監査情報として7年間保持します。端末に保存したアプリのデータも削除します。</p>

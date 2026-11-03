@@ -8,6 +8,16 @@ let memoryToken:string|null=null;
 let pendingLogin:string|null=null;
 const completing=new Map<string,Promise<boolean>>();
 let initialized:Promise<void>|undefined;
+let sessionMutations:Promise<unknown>=Promise.resolve();
+let bindingRead:Promise<string>|undefined;
+function serializeSession<T>(run:()=>Promise<T>):Promise<T>{const next=sessionMutations.then(run);sessionMutations=next.catch(()=>{});return next;}
+// A persisted, non-secret incarnation changes on every login/logout, including the same member.
+export function sessionBinding(){
+  return bindingRead??=(async()=>{const key='anzen.session-incarnation';const stored=(await Preferences.get({key})).value;
+    if(stored)return stored;
+    const value=crypto.randomUUID();await Preferences.set({key,value});return value;
+  })().catch(error=>{bindingRead=undefined;throw error;});
+}
 async function initializeVault(){
   initialized??=(async()=>{const key='anzen.install.session-initialized';if(!(await Preferences.get({key})).value){await vault.clear();await vault.clear({purpose:'login'});await Preferences.set({key,value:'1'});}})().catch(error=>{initialized=undefined;throw error;});
   return initialized;
@@ -19,9 +29,18 @@ export async function sessionToken() {
   await initializeVault();
   return (await vault.get()).value??null;
 }
-export async function setSessionToken(token:string|null) {
+async function writeSessionToken(token:string|null) {
   if(Capacitor.isNativePlatform()) {await initializeVault();if(token)await vault.set({value:token});else await vault.clear();}
+  const binding=crypto.randomUUID();await Preferences.set({key:'anzen.session-incarnation',value:binding});bindingRead=Promise.resolve(binding);
   memoryToken=token;window.dispatchEvent(new Event('anzen-session-changed'));
+}
+export async function setSessionToken(token:string|null){return serializeSession(()=>writeSessionToken(token));}
+export async function eraseSessionDataIfCurrent(binding:string,erase:()=>Promise<void>){
+  return serializeSession(async()=>{
+    if(await sessionBinding()!==binding)return false;
+    // Login cannot install another member's session while account data is being erased.
+    await erase();await writeSessionToken(null);await writeLogin(null);return true;
+  });
 }
 export async function siteApi(path:string,body?:unknown,method?:string) {
   if(!/^\/api\/(?:mobile\/v1\/|me\/|billing\/|stripe\/portal$)/.test(path) || path.includes('..') || path.includes('://'))throw new Error('INVALID_ENDPOINT');

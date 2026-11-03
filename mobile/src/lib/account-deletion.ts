@@ -1,27 +1,44 @@
-import { siteApi,forgetLocalSession } from './session';
+import { siteApi,sessionBinding,eraseSessionDataIfCurrent } from './session';
 import { Capacitor } from '@capacitor/core';
 import { PushNotifications } from '@capacitor/push-notifications';
 import { contentStore,settingsStore } from './native';
 import { collectAppLocalStorageKeys } from '@/lib/local-data-registry';
 import { billing } from './billing';
-export type DeletionPreparation={id:string;confirmation:string;receipt:string;expiresAt:string};
+export type DeletionPreparation={id:string;confirmation:string;receipt:string;expiresAt:string;subject:string;sessionBinding:string};
 export type DeletionStatus={status:'prepared'|'pending'|'completed';completedAt:string|null};
-export async function clearDeletedAccountData(){
-  await forgetLocalSession();await billing.forget().catch(()=>{});
+type Receipt={receipt:string;subject:string;sessionBinding:string;erased:boolean};
+async function clearDeletedAccountData(){
+  await billing.forget().catch(()=>{});
   if(Capacitor.isNativePlatform())await PushNotifications.unregister().catch(()=>{});
   await Promise.all(['news','revisions','statistics','weather','saved'].map(k=>contentStore.remove(k)));
   await Promise.all(['location','large'].map(k=>settingsStore.remove(k)));
   for(const key of collectAppLocalStorageKeys(localStorage))localStorage.removeItem(key);
 }
-export async function prepareDeletion(){return await siteApi('/api/mobile/v1/account/delete',{action:'prepare'}) as DeletionPreparation;}
+export async function prepareDeletion(){
+  const binding=await sessionBinding();
+  const result=await siteApi('/api/mobile/v1/account/delete',{action:'prepare'}) as Omit<DeletionPreparation,'sessionBinding'>;
+  if(await sessionBinding()!==binding||!result.subject)throw new Error('REAUTH_REQUIRED');
+  return {...result,sessionBinding:binding};
+}
+async function eraseReceiptData(record:Receipt){
+  if(record.erased)return;
+  await eraseSessionDataIfCurrent(record.sessionBinding,async()=>{
+    await clearDeletedAccountData();record.erased=true;
+    await settingsStore.set('deletion-receipt',JSON.stringify(record));
+  });
+}
 export async function confirmDeletion(preparation:DeletionPreparation){
+  if(await sessionBinding()!==preparation.sessionBinding)throw new Error('REAUTH_REQUIRED');
   // Save the status-only receipt before sending. A lost response must remain recoverable.
-  await settingsStore.set('deletion-receipt',preparation.receipt);
+  const record:Receipt={receipt:preparation.receipt,subject:preparation.subject,sessionBinding:preparation.sessionBinding,erased:false};
+  await settingsStore.set('deletion-receipt',JSON.stringify(record));
   const result=await siteApi('/api/mobile/v1/account/delete',{action:'confirm',id:preparation.id,confirmation:preparation.confirmation,confirmationText:'削除'}) as DeletionStatus;
-  await clearDeletedAccountData();return result;
+  if(result.status!=='prepared')await eraseReceiptData(record);return result;
 }
 export async function checkDeletion(){
-  const receipt=await settingsStore.get('deletion-receipt');if(!receipt)return null;
-  const result=await siteApi('/api/mobile/v1/account/delete',{action:'status',receipt}) as DeletionStatus;
-  if(result.status!=='prepared')await clearDeletedAccountData();return result;
+  const stored=await settingsStore.get('deletion-receipt');if(!stored)return null;
+  // Older unbound receipts can only query status; they never authorize local deletion.
+  const record:Receipt|null=stored.startsWith('{')?JSON.parse(stored):null;
+  const result=await siteApi('/api/mobile/v1/account/delete',{action:'status',receipt:record?.receipt??stored}) as DeletionStatus;
+  if(record&&record.subject&&result.status!=='prepared')await eraseReceiptData(record);return result;
 }
