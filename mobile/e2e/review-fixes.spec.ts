@@ -1,4 +1,5 @@
-import { test,expect,type BrowserContext } from '@playwright/test';
+import type { BrowserContext } from '@playwright/test';
+import { test,expect } from './fixtures';
 import { capability } from '../tests/fixtures';
 import product from '../../web/src/lib/mobile/product-policy.json' with {type:'json'};
 const host='https://www.anzen-ai-portal.jp';

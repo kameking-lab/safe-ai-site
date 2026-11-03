@@ -1,4 +1,5 @@
-import { expect, test, type BrowserContext } from '@playwright/test';
+import type { BrowserContext } from '@playwright/test';
+import { expect, test } from './fixtures';
 import { capability, aiResult } from '../tests/fixtures';
 import seed from '../src/data/seed.json' with { type: 'json' };
 const host = 'https://www.anzen-ai-portal.jp';

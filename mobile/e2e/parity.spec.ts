@@ -1,4 +1,4 @@
-import { test,expect } from '@playwright/test';
+import { test,expect } from './fixtures';
 import product from '../../web/src/lib/mobile/product-policy.json' with {type:'json'};
 test.beforeEach(async({context})=>{await context.route('https://**/*',route=>route.abort());});
 test('bundles the complete exam catalog, scored practice, and saved progress offline',async({page},info)=>{
