@@ -15,13 +15,13 @@ public class NativeVaultPlugin: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "set", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "clear", returnType: CAPPluginReturnPromise)
     ]
-    private var query: [String: Any] {
+    private func query(_ call: CAPPluginCall) -> [String: Any] {
         [kSecClass as String: kSecClassGenericPassword,
          kSecAttrService as String: "jp.anzen-ai-portal.session",
-         kSecAttrAccount as String: "member-session"]
+         kSecAttrAccount as String: call.getString("purpose") == "login" ? "pending-login" : "member-session"]
     }
     @objc func get(_ call: CAPPluginCall) {
-        var request = query
+        var request = query(call)
         request[kSecReturnData as String] = true
         request[kSecMatchLimit as String] = kSecMatchLimitOne
         var result: CFTypeRef?
@@ -35,21 +35,21 @@ public class NativeVaultPlugin: CAPPlugin, CAPBridgedPlugin {
     }
     @objc func set(_ call: CAPPluginCall) {
         guard let value = call.getString("value"),
-              value.range(of: "^[A-Za-z0-9_-]{43}$", options: .regularExpression) != nil,
+              value.range(of: call.getString("purpose") == "login" ? "^[0-9a-f-]{36}:[A-Za-z0-9_-]{43}:[0-9]{13}$" : "^[A-Za-z0-9_-]{43}$", options: .regularExpression) != nil,
               let data = value.data(using: .utf8) else {
             call.reject("Invalid session credential"); return
         }
         let attributes: [String: Any] = [kSecValueData as String: data,
             kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly]
-        let update = SecItemUpdate(query as CFDictionary, attributes as CFDictionary)
+        let update = SecItemUpdate(query(call) as CFDictionary, attributes as CFDictionary)
         if update == errSecItemNotFound {
-            let status = SecItemAdd(query.merging(attributes) { _, new in new } as CFDictionary, nil)
+            let status = SecItemAdd(query(call).merging(attributes) { _, new in new } as CFDictionary, nil)
             guard status == errSecSuccess else { call.reject("Secure storage write failed"); return }
         } else if update != errSecSuccess { call.reject("Secure storage write failed"); return }
         call.resolve()
     }
     @objc func clear(_ call: CAPPluginCall) {
-        let status = SecItemDelete(query as CFDictionary)
+        let status = SecItemDelete(query(call) as CFDictionary)
         guard status == errSecSuccess || status == errSecItemNotFound else {
             call.reject("Secure storage removal failed"); return
         }
