@@ -55,6 +55,44 @@ test('deletion requires confirmation, completes in-app and clears saved personal
 test('stale authentication offers reauthentication without claiming deletion succeeded',async({page,context})=>{
   const count=await accountFixtures(context,true);await page.goto('/account/');await page.getByRole('button',{name:'アカウント削除を開始',exact:true}).click();await expect(page.getByText(/削除には直近5分以内の本人確認/)).toBeVisible();expect(count()).toBe(0);await expect(page.getByRole('button',{name:'本人確認のため再ログイン'})).toBeVisible();
 });
+test('deletion waits for hydration and accepts its first click exactly once before showing confirmation',async({page,context},info)=>{
+  await accountFixtures(context);
+  const events:string[]=[];let prepares=0;
+  let releaseScripts!:()=>void;const scripts=new Promise<void>(resolve=>{releaseScripts=resolve;});
+  let releasePreparation!:()=>void;const preparation=new Promise<void>(resolve=>{releasePreparation=resolve;});
+  let preparationRequested!:()=>void;const requested=new Promise<void>(resolve=>{preparationRequested=resolve;});
+  await context.route('http://127.0.0.1:3213/_next/static/**/*.js',async route=>{await scripts;await route.continue();});
+  await context.route(host+'/api/mobile/v1/account/delete',async route=>{
+    expect(route.request().postDataJSON().action).toBe('prepare');prepares++;events.push('prepare-request');preparationRequested();
+    await preparation;
+    await route.fulfill({headers:cors,json:{id:'88888888-2222-4222-8222-222222222222',confirmation:'c'.repeat(43),receipt:'r'.repeat(43),expiresAt:new Date(Date.now()+600000).toISOString(),subject:'member-a'}});
+  });
+  try{
+    await page.goto('/account/',{waitUntil:'commit'});
+    const panel=page.getByRole('region',{name:'アカウントの削除',exact:true});
+    const start=panel.getByRole('button',{name:'アカウント削除を開始',exact:true});
+    await expect(start).toBeVisible();
+    // Static HTML must advertise unavailability, even with no JS loaded.
+    for(const button of await panel.getByRole('button').all())await expect(button).toBeDisabled();
+    await expect(panel).toHaveAttribute('aria-busy','true');await expect(panel.getByRole('status')).toHaveText('削除操作を準備しています。');
+    expect(prepares).toBe(0);events.push('prerender-disabled');
+    // Ordinary first click: no sleep, readiness selector, force click or retry.
+    const firstClick=start.click();releaseScripts();events.push('scripts-released');
+    await firstClick;await requested;
+    await expect(start).toBeDisabled();await expect(panel).toHaveAttribute('aria-busy','true');
+    await expect(panel.getByLabel('確認のため「削除」と入力')).toHaveCount(0);expect(prepares).toBe(1);events.push('pending-prepare-disabled');
+    releasePreparation();
+    const input=panel.getByLabel('確認のため「削除」と入力');await expect(input).toBeVisible();
+    await expect(panel).toHaveAttribute('aria-busy','false');await expect(panel.getByRole('button',{name:'アカウントを完全に削除する',exact:true})).toBeDisabled();
+    await input.fill('削除');await expect(panel.getByRole('button',{name:'アカウントを完全に削除する',exact:true})).toBeEnabled();
+    await panel.getByRole('button',{name:'戻る',exact:true}).click();await expect(input).toHaveCount(0);await expect(start).toBeEnabled();
+    expect(prepares).toBe(1);events.push('confirmation-and-cancel-complete');
+  }finally{
+    releaseScripts();releasePreparation();
+    await info.attach('deletion-readiness-transitions',{body:JSON.stringify({prepares,events}),contentType:'application/json'});
+  }
+});
+
 for(const pending of [false,true])test(`old deletion receipt preserves member B across navigation, restart and manual checks (${pending?'pending with lost response':'completed'})`,async({page,context})=>{
   await accountFixtures(context,false,pending?'pending':'completed',pending);await page.goto('/account/');
   await page.getByRole('button',{name:'アカウント削除を開始',exact:true}).click();await page.getByLabel('確認のため「削除」と入力').fill('削除');await page.getByRole('button',{name:'アカウントを完全に削除する',exact:true}).click();
