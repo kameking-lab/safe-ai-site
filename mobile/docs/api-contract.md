@@ -18,6 +18,8 @@ M3で未実装だったAPIをサイトのRoute Handlerとして実装。認証�
 - `GET /api/mobile/v1/billing/config`：公開SDKキー・商品・Offering・価格ポリシー・認証の準備状態。秘密APIキーは返さない。
 - `POST /api/billing/purchase-intents`：Apple/Stripeを再確認し、会員ごとの排他ロックで購入予約。時間経過だけで保留を解放しない。
 - `POST /api/billing/reconcile`：RevenueCatの最新subscriberを確認し、商品・store・環境・有効期限・`anzen_pro`を照合する。
+
+  有効なApple権利はRevenueCat v2のcustomer subscriptionsとも照合。設定されたproduct resource ID・store・環境・元会員・安定した`store_subscription_identifier`を確認し、別会員への自動移管を拒否。v1の更新取引IDや購入日時は所有者キーに使わない。v2不明・ページング不正・所有者不明では新規付与しない。
 - `POST /api/billing/cancel-intent`：StoreKitの明示的キャンセル後に再照合して解放。保留購入は解放しない。
 - `POST /api/webhooks/revenuecat`：Authorizationを必須とし、任意でraw body HMACと5分の時刻検査。永続inboxで重複を除去し、順序を信用せず最新状態を再照合する。
 - `POST /api/mobile/v1/maintenance`：専用認証でinbox再試行・警報outbox・期限切れ短期情報を処理。cron設定は変更していない。
@@ -33,6 +35,7 @@ M3で未実装だったAPIをサイトのRoute Handlerとして実装。認証�
 - `/api/chatbot`・`/stream`・`/no-script`・`/api/chat`：会員のJST日次枠を共有し、Proは60秒10回まで。同じ操作の再送で再実行・再消費しない。
 - `GET /api/mobile/v1/statistics`・`home-news`：既存公開データを投影。
 - `GET /api/mobile/v1/chemical-ledger`：本人が所属する組織の台帳だけを取得。
+- `GET /api/mobile/v1/signage-fleet?organization=…`：ウェブと同じ組織viewer権限で多拠点・端末・配信状態を取得。認証/DB/所属不明は運用中と表示しない。会員情報を静的同梱しない。
 
 原価予約はKYを含む実際のGemini呼び出し境界に適用する。未価格のモデルや上限不明の推論は停止。UTF-8入力サイズ・出力最大2048トークン・設定単価・安全係数で上限を予約し、提供者失敗も保守的に計上する。DB不明時に原価ガードを迂回しない。月5万円上限、無料分は4.5万円で先行停止。
 

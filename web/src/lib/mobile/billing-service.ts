@@ -1,7 +1,7 @@
 import { Prisma } from '@prisma/client';
 import { prisma } from '../prisma';
 import { assertPurchasable, projectEntitlement, type EntitlementSnapshot } from './entitlement';
-import { fetchSubscriber, verifiedAppleGrant } from './revenuecat';
+import { fetchSubscriber, verifiedAppleGrant,fetchAppleOwnership } from './revenuecat';
 import { reconcileStripe } from './stripe-reconcile';
 export function billingDb() { if(!prisma || process.env.MOBILE_LEDGER_ENABLED!=='true') throw new Error('ENTITLEMENT_SYNC_PENDING');return prisma; }
 export async function lockMember(tx:Prisma.TransactionClient,userId:string) { await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`anzen:${userId}`},0))`; }
@@ -35,10 +35,11 @@ export async function reconcile(userId:string) {
     // Fetch the latest authoritative subscriber state, rather than applying event order.
     await tx.mobileGrant.updateMany({where:{userId,provider:'app_store',environment},data:{revoked:true,checkedAt}});
     if(grant) {
-      const owner=await tx.mobileGrant.findUnique({where:{provider_originalTransactionId_environment:{provider:'app_store',originalTransactionId:grant.originalTransactionId,environment}}});
+      const originalTransactionId=await fetchAppleOwnership(member.appUserId,environment);
+      const owner=await tx.mobileGrant.findUnique({where:{provider_originalTransactionId_environment:{provider:'app_store',originalTransactionId,environment}}});
       if(owner && owner.userId!==userId) throw new Error('PURCHASE_OWNED_BY_OTHER_ACCOUNT');
-      await tx.mobileGrant.upsert({where:{provider_originalTransactionId_environment:{provider:'app_store',originalTransactionId:grant.originalTransactionId,environment}},
-        create:{...grant,userId,provider:'app_store',environment,checkedAt},update:{...grant,checkedAt,revoked:false}});
+      await tx.mobileGrant.upsert({where:{provider_originalTransactionId_environment:{provider:'app_store',originalTransactionId,environment}},
+        create:{...grant,originalTransactionId,userId,provider:'app_store',environment,checkedAt},update:{...grant,checkedAt,revoked:false}});
       await tx.mobilePurchaseIntent.updateMany({where:{userId},data:{status:'completed'}});
     }
     return entitlementInTransaction(tx,userId);
