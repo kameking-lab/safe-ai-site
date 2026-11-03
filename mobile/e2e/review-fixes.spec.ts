@@ -78,7 +78,7 @@ test('deletion waits for hydration and accepts its first click exactly once befo
     expect(prepares).toBe(0);events.push('prerender-disabled');
     // Ordinary first click: no sleep, readiness selector, force click or retry.
     const firstClick=start.click();releaseScripts();events.push('scripts-released');
-    await firstClick;await requested;
+    await firstClick;await test.step('wait for the first deletion prepare request',()=>requested);
     await expect(start).toBeDisabled();await expect(panel).toHaveAttribute('aria-busy','true');
     await expect(panel.getByLabel('確認のため「削除」と入力')).toHaveCount(0);expect(prepares).toBe(1);events.push('pending-prepare-disabled');
     releasePreparation();

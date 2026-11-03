@@ -20,7 +20,11 @@ export function AccountPanel(){
   },[refresh]);
   async function action(fn:()=>Promise<unknown>){if(busy)return;setBusy(true);try{await fn();await refresh();}catch(e){const err=e as Error;setMember(await billing.entitlement().catch(()=>null));setMessage(purchaseMessages[err.message]??messages[err.message]??'処理を完了できません。購入が完了している場合は復元・再確認をお試しください。');}finally{setBusy(false);}}
   const pro=isVerifiedPro(member);const pending=member?.syncState!=='verified' || (member?.purchasePending && (member.purchaseSource!=='app_store'||member.purchaseStage!=='prepared'));
-  return <section className="native-panel mx-auto max-w-2xl space-y-5 p-5 text-slate-900"><h1 className="text-2xl font-bold">会員・安全AI Pro</h1><p role="status">{message}</p>
+  // Keep destructive-action targets above asynchronously inserted account data.
+  // Otherwise a member/history response can move a button between down and up.
+  return <section className="native-panel mx-auto max-w-2xl space-y-5 p-5 text-slate-900"><h1 className="text-2xl font-bold">会員・安全AI Pro</h1>
+    <AccountDeletionPanel/>
+    <p role="status">{message}</p>
     {!member?<><p>ウェブで購入済みの会員は同じアカウントでログインするとProを利用できます。</p><button disabled={busy || !config?.login.apple} onClick={()=>void action(startLogin)}>Apple / Googleでログイン</button></>:<><p>{pro?'Pro 購入済み':pending?'権利の確認待ち':'無料会員'}{member.source==='stripe'?'（ウェブ購読）':member.source==='app_store'?'（App Store購読）':''}</p>{member.expiresAt?<p>確認済み有効期限：{new Date(member.expiresAt).toLocaleString('ja-JP')}</p>:null}<button disabled={busy} onClick={()=>void action(async()=>{setMember(null);await logout();await billing.forget();})}>ログアウト</button></>}
     <p className="rounded border border-amber-400 bg-amber-50 p-3">化学物質RAの評価生成は現在提供停止中です。Proでも生成できません。資料検索は利用でき、停止中の評価は回数を消費しません。</p>
     <p>無料：チャット1日3回・RA1日1件・警報1地点（通知なし）。Pro：チャット1日50回・RA1日10件・警報10地点と通知。ウェブとアプリの利用回数は合算します。</p>
@@ -35,7 +39,6 @@ export function AccountPanel(){
     <button onClick={()=>void openSource('https://apps.apple.com/account/subscriptions')}>App Storeの購読管理・解約</button>
     {member?.source==='stripe'?<><p>ウェブ契約の管理・解約は購入元で行います。アプリでの追加購入は不要です。</p><button disabled={busy} onClick={()=>void action(async()=>{const result=await siteApi('/api/stripe/portal',{}) as {url:string};const url=new URL(result.url);if(url.origin!=='https://billing.stripe.com'||url.username||url.password)throw new Error('INVALID_ENDPOINT');await openSource(url.href);})}>ウェブ購読の管理・解約</button></>:null}
     {member?<NativeAccountDetails key={member.appUserId}/>:null}
-    <AccountDeletionPanel/>
     <p><a href="/terms">利用規約</a> · <a href="/privacy">プライバシーポリシー</a> · <a href="/contact">問い合わせ</a></p>
   </section>;
 }
