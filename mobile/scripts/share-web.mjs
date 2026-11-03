@@ -1,5 +1,5 @@
 /** Build projection, never a second source tree. All pages import the canonical web modules. */
-import { readdir, readFile, writeFile, mkdir, cp, unlink } from 'node:fs/promises';
+import { readdir, readFile, writeFile, mkdir, cp, unlink, access } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import '../../web/scripts/generate-shared-case-data.mjs';
@@ -55,5 +55,14 @@ for (const file of (await walk(web)).filter(f => f.endsWith(`${path.sep}page.tsx
 await mkdir(path.join(root,'mobile/docs'), { recursive:true });
 await writeFile(path.join(root,'mobile/docs/web-parity.json'), JSON.stringify({ schema:1, source:'web/src/app/**/page.tsx', routes:rows },null,2)+'\n');
 // Build artifacts only. Assets remain single-source in web/public.
+// Remove orphaned projection files too: quarantined source assets must not survive a rebuild.
+const projectedPublic=path.resolve(root,'mobile/public');
+if(projectedPublic!==path.join(root,'mobile','public'))throw new Error('Unexpected generated asset directory');
+await mkdir(projectedPublic,{recursive:true});
+for(const file of await walk(projectedPublic)){
+  const relative=path.relative(projectedPublic,file);
+  if(relative.startsWith('..')||path.isAbsolute(relative))throw new Error('Generated asset escaped projection');
+  try{await access(path.join(root,'web/public',relative));}catch(error){if(error.code!=='ENOENT')throw error;await unlink(file);}
+}
 await cp(path.join(root,'web/public'),path.join(root,'mobile/public'), {recursive:true, filter:s=>!/(?:\.DS_Store|Thumbs\.db)$/.test(s)});
 console.log(`Audited ${rows.length} route families; ${rows.filter(r=>r.state==='shared').length} canonical page imports.`);

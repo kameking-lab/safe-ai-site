@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Download, FileText, Presentation } from "lucide-react";
+import { ArrowRight, Presentation } from "lucide-react";
 import { JsonLd } from "@/components/json-ld";
 import { PageContainer } from "@/components/layout";
 import { SafetySeminarPlayer } from "@/components/training/safety-seminar-player";
@@ -21,7 +21,6 @@ const training = trainingJson as TrainingCourse;
 const claims = claimsJson as TrainingClaim[];
 const sources = sourcesJson as TrainingSource[];
 const quiz = quizJson as TrainingQuiz;
-const DOWNLOAD_BASE = `${PATH}/downloads`;
 
 export async function generateMetadata({
   searchParams,
@@ -140,19 +139,8 @@ export default function SafetyManagementBasicsOshLawPage() {
       </noscript>
 
       <section aria-labelledby="downloads-title" className="mt-12">
-        <p className="text-sm font-black text-teal-800 dark:text-teal-300">無料ダウンロード</p>
-        <h2 id="downloads-title" className="mt-1 text-3xl font-black text-slate-950 dark:text-white">研修で使う2形式</h2>
-        <div className="mt-5 grid gap-3 sm:grid-cols-2">
-          {[
-            ["編集可能PowerPoint", "safety-management-basics-osh-law-training.pptx", Presentation],
-            ["投影・印刷用PDF", "safety-management-basics-osh-law-training.pdf", FileText],
-          ].map(([label, file, Icon]) => (
-            <a key={String(file)} href={`${DOWNLOAD_BASE}/${file}`} download className="group flex min-h-16 items-center justify-between gap-3 rounded-2xl border border-slate-300 bg-white p-4 font-black text-slate-950 shadow-sm hover:border-teal-600 hover:bg-teal-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:hover:bg-teal-950/40">
-              <span className="inline-flex items-center gap-3"><Icon className="h-5 w-5 text-teal-700 dark:text-teal-300" aria-hidden="true" />{String(label)}</span>
-              <Download className="h-5 w-5 text-slate-500 group-hover:text-teal-700" aria-hidden="true" />
-            </a>
-          ))}
-        </div>
+        <h2 id="downloads-title" className="mt-1 text-3xl font-black text-slate-950 dark:text-white">研修資料のダウンロード</h2>
+        <p className="mt-5 rounded-2xl border border-amber-400 bg-amber-50 p-4 text-amber-950">PowerPoint・PDFは公開前の確認中です。このページのスライドと詳説をお使いください。</p>
         <p className="mt-4 text-sm leading-6 text-slate-600 dark:text-slate-300">
           社内安全研修、朝礼、協力会社教育で無料利用できます。根拠脚注は残してください。詳細は
           <Link href="/training/safety-seminars/terms" className="font-bold text-teal-800 underline underline-offset-4 dark:text-teal-300">利用条件・注意事項</Link>
