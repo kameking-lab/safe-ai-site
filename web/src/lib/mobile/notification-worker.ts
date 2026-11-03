@@ -1,5 +1,5 @@
 import { Prisma } from '@prisma/client';
-import { billingDb,getEntitlement,entitlementInTransaction,lockMember } from './billing-service';
+import { billingDb,getEntitlement,entitlementInTransaction,lockMember,lockPushDevice } from './billing-service';
 import { getJmaWarningsRuntime } from '@/lib/jma/fetch-jma-runtime';
 import { isCurrentJmaWarningRegion } from '@/lib/jma/jma-region-trust';
 import { buildWeatherNotifications,isAlertLevel } from '@/lib/notifications/weather-notifications';
@@ -50,6 +50,7 @@ export async function deliverWeather(send=sendApns,deadline=Date.now()+45000){
       if(!device || !device.enabled || item.expiresAt<=new Date()){await db.mobilePushOutbox.update({where:{id:item.id},data:{status:'discarded'}});continue;}
       await getEntitlement(device.userId);
       await db.$transaction(async tx=>{
+        await lockPushDevice(tx,device.token);
         await lockMember(tx,device.userId);
         const latest=await tx.mobilePushDevice.findUnique({where:{id:device.id}});
         const session=await tx.mobileSession.findUnique({where:{tokenHash:device.sessionHash}});
@@ -59,7 +60,7 @@ export async function deliverWeather(send=sendApns,deadline=Date.now()+45000){
         const state=area?await tx.mobileWeatherState.findUnique({where:{area}}):null;
         const alerts=(state?.alerts??[]) as Alert[];const relativeId=item.eventId.slice((area?.length??0)+1);
         const stillCurrent=state && Date.now()-state.sourceAt.getTime()<=15*60000 && (relativeId.startsWith('clear:')?!alerts.some(a=>alertKey(a.id)===alertKey(relativeId.slice(6))):alerts.some(a=>a.id===relativeId));
-        if(!latest?.enabled || !session || session.expiresAt<=new Date() || !stillCurrent || rights.syncState!=='verified' || !rights.limits.notifications || !locations.slice(0,rights.limits.weatherLocations).some(l=>l.locationId===item.locationId)){
+        if(!latest?.enabled || latest.userId!==device.userId || latest.sessionHash!==device.sessionHash || latest.token!==device.token || !session || session.userId!==device.userId || session.expiresAt<=new Date() || !stillCurrent || rights.syncState!=='verified' || !rights.limits.notifications || !locations.slice(0,rights.limits.weatherLocations).some(l=>l.locationId===item.locationId)){
           await tx.mobilePushOutbox.update({where:{id:item.id},data:{status:'discarded'}});return;
         }
         const config:ApnsConfig={keyId:process.env.APNS_KEY_ID??'',teamId:process.env.APNS_TEAM_ID??'',privateKey:process.env.APNS_PRIVATE_KEY??'',topic:process.env.APNS_TOPIC??'',environment:device.environment==='production'?'production':'sandbox'};

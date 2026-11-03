@@ -5,6 +5,7 @@ import { fetchSubscriber, verifiedAppleGrant,fetchAppleOwnership } from './reven
 import { reconcileStripe } from './stripe-reconcile';
 export function billingDb() { if(!prisma || process.env.MOBILE_LEDGER_ENABLED!=='true') throw new Error('ENTITLEMENT_SYNC_PENDING');return prisma; }
 export async function lockMember(tx:Prisma.TransactionClient,userId:string) { await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`anzen:${userId}`},0))`; }
+export async function lockPushDevice(tx:Prisma.TransactionClient,token:string) { await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`anzen-push:${token}`},0))`; }
 async function identity(tx:Prisma.TransactionClient,userId:string) { return tx.mobileIdentity.upsert({where:{userId},create:{userId},update:{}}); }
 export async function entitlementInTransaction(tx:Prisma.TransactionClient,userId:string):Promise<EntitlementSnapshot> {
   const member=await identity(tx,userId);
