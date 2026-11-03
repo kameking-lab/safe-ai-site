@@ -6,9 +6,10 @@ const appUserId='88888888-1111-4111-8111-111111111111';const intentId='88888888-
 const free=()=>({plan:'free',source:null,syncState:'verified',expiresAt:null,appUserId,verifiedAt:new Date().toISOString(),limits:product.limits.free,purchasePending:false,purchaseIntentId:null});
 const pro=()=>({...free(),plan:'pro',source:'stripe',expiresAt:new Date(Date.now()+86400000).toISOString(),limits:product.limits.pro});
 const config:BillingConfig={ready:true,publicKey:'mock_public_sdk',productId:'mock_monthly',offeringId:'mock_offering',policy:product,login:{apple:true,google:true},terms:'https://example.test/terms',privacy:'https://example.test/privacy',manage:'https://apps.apple.com/account/subscriptions'};
-function setup(options:{paid?:boolean;syncPending?:boolean;cancelled?:boolean;storePending?:boolean;wrongPrice?:boolean;switchAccount?:boolean}={}){
+function setup(options:{paid?:boolean;syncPending?:boolean;cancelled?:boolean;storePending?:boolean;unknown?:boolean;cancelFlagOnly?:boolean;startOffline?:boolean;wrongPrice?:boolean;switchAccount?:boolean}={}){
   let reserved=false;let reads=0;
-  const send=vi.fn(async(path:string)=>{
+  const send=vi.fn(async(path:string,_body?:unknown)=>{
+    if(path==='/api/billing/store-started'&&options.startOffline)throw new Error('offline');
     if(path==='/api/me/entitlements'){reads++;return options.paid?pro():{...free(),syncState:options.syncPending?'pending':'verified',...(reserved?{purchasePending:true,purchaseIntentId:intentId}:{}),...(options.switchAccount&&reads>1?{appUserId:'other-member-id-value'}:{})};}
     if(path==='/api/billing/purchase-intents'){reserved=true;return {id:intentId};}
     if(path==='/api/billing/reconcile')return {...free(),purchasePending:true,purchaseIntentId:intentId};
@@ -16,7 +17,7 @@ function setup(options:{paid?:boolean;syncPending?:boolean;cancelled?:boolean;st
   });
   const packageFixture={identifier:'mock_package',packageType:'MONTHLY',product:{identifier:'mock_monthly',price:options.wrongPrice?981:product.monthlyPrice,priceString:'¥980',currencyCode:'JPY',subscriptionPeriod:'P1M'}} as unknown as PurchasesPackage;
   const sdk={configure:vi.fn(async()=>{}),logIn:vi.fn(async()=>({}) as never),logOut:vi.fn(async()=>({}) as never),getOfferings:vi.fn(async()=>({all:{mock_offering:{availablePackages:[packageFixture]}}}) as never),
-    purchasePackage:vi.fn(async()=>{if(options.cancelled)throw {userCancelled:true,code:'1'};if(options.storePending)throw {code:'20'};return {customerInfo:{entitlements:{active:{anzen_pro:{isActive:true}}}}} as never;}),restorePurchases:vi.fn(async()=>({customerInfo:{entitlements:{active:{anzen_pro:{isActive:true}}}}}) as never)};
+    purchasePackage:vi.fn(async()=>{if(options.cancelled)throw {userCancelled:true,code:'1'};if(options.storePending)throw {code:'20'};if(options.cancelFlagOnly)throw {userCancelled:true};if(options.unknown)throw {code:'10'};return {customerInfo:{entitlements:{active:{anzen_pro:{isActive:true}}}}} as never;}),restorePurchases:vi.fn(async()=>({customerInfo:{entitlements:{active:{anzen_pro:{isActive:true}}}}}) as never)};
   return {send,sdk,controller:new BillingController(send,sdk,()=>true)};
 }
 describe('iOS IAP uses server rights before StoreKit',()=>{
@@ -25,10 +26,12 @@ describe('iOS IAP uses server rights before StoreKit',()=>{
     for(const options of [{syncPending:true},{switchAccount:true},{wrongPrice:true}]){const s=setup(options);await expect(s.controller.purchase(config)).rejects.toThrow();expect(s.sdk.purchasePackage).not.toHaveBeenCalled();}
   });
   it('reserves on the server, purchases once, then trusts only the reconciliation result',async()=>{const s=setup();const result=await s.controller.purchase(config);expect(s.sdk.purchasePackage).toHaveBeenCalledTimes(1);expect(s.sdk.configure).toHaveBeenCalledWith({apiKey:'mock_public_sdk',appUserID:appUserId});expect(result.plan).toBe('free');expect(result.purchasePending).toBe(true);expect(isVerifiedPro(result)).toBe(false);expect(s.send.mock.calls.map(c=>c[0])).toEqual(['/api/me/entitlements','/api/billing/purchase-intents','/api/me/entitlements','/api/billing/store-started','/api/billing/reconcile']);});
-  it('only explicit StoreKit cancellation requests release of the pending intent',async()=>{
-    const cancelled=setup({cancelled:true});await expect(cancelled.controller.purchase(config)).rejects.toMatchObject({code:'1'});expect(cancelled.send.mock.calls.map(c=>c[0])).toContain('/api/billing/cancel-intent');
-    const pending=setup({storePending:true});await expect(pending.controller.purchase(config)).rejects.toMatchObject({code:'20'});expect(pending.send.mock.calls.map(c=>c[0])).not.toContain('/api/billing/cancel-intent');
+  it('distinguishes cancelled, deferred and unknown without authorizing release from client reports',async()=>{
+    for(const [options,error,outcome] of [[{cancelled:true},'STORE_CANCELLED','cancelled'],[{storePending:true},'STORE_DEFERRED','deferred'],[{unknown:true},'STORE_UNKNOWN','unknown'],[{cancelFlagOnly:true},'STORE_UNKNOWN','unknown']] as const){
+      const s=setup(options);await expect(s.controller.purchase(config)).rejects.toThrow(error);expect(s.send).toHaveBeenCalledWith('/api/billing/store-outcome',{id:intentId,outcome});expect(s.send.mock.calls.map(c=>c[0])).not.toContain('/api/billing/cancel-intent');
+    }
   });
+  it('reports pre-SDK network failure separately and never invokes StoreKit',async()=>{const s=setup({startOffline:true});await expect(s.controller.purchase(config)).rejects.toThrow('STORE_NOT_OPENED');expect(s.sdk.purchasePackage).not.toHaveBeenCalled();expect(s.send).toHaveBeenCalledWith('/api/billing/cancel-intent',{id:intentId,source:'app_store'});expect(s.send).toHaveBeenCalledWith('/api/billing/store-outcome',{id:intentId,outcome:'not_opened'});});
   it('restores through the SDK and rechecks the server rather than granting from customerInfo',async()=>{const s=setup();const result=await s.controller.restore(config);expect(s.sdk.restorePurchases).toHaveBeenCalledTimes(1);expect(result.plan).toBe('free');await s.controller.forget();expect(s.sdk.logOut).toHaveBeenCalledTimes(1);});
   it('does not allow an expired or stale Pro display',async()=>{const s=setup({paid:true});const result=await s.controller.entitlement();expect(isVerifiedPro(result)).toBe(true);expect(isVerifiedPro({...result,expiresAt:new Date(Date.now()-1).toISOString()})).toBe(false);expect(isVerifiedPro({...result,verifiedAt:new Date(Date.now()-300001).toISOString()})).toBe(false);});
 });

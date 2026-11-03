@@ -30,6 +30,7 @@ export async function sessionToken() {
   return (await vault.get()).value??null;
 }
 async function writeSessionToken(token:string|null) {
+  await sessionBinding();
   if(Capacitor.isNativePlatform()) {await initializeVault();if(token)await vault.set({value:token});else await vault.clear();}
   const binding=crypto.randomUUID();await Preferences.set({key:'anzen.session-incarnation',value:binding});bindingRead=Promise.resolve(binding);
   memoryToken=token;window.dispatchEvent(new Event('anzen-session-changed'));

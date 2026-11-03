@@ -38,18 +38,32 @@ export class BillingController {
       const member=await this.entitlement();
       if(member.plan==='pro')throw new Error('ALREADY_SUBSCRIBED');
       if(member.purchasePending && member.purchaseSource!=='app_store')throw new Error('PURCHASE_PENDING');
+      if(member.purchasePending && member.purchaseStage!=='prepared')throw new Error('PURCHASE_REVIEW_REQUIRED');
       if(member.syncState!=='verified')throw new Error('ENTITLEMENT_SYNC_PENDING');
       const p=await this.offering(config,member);
       const intent=await this.send('/api/billing/purchase-intents',{}) as {id:string};
       // Re-check identity after the asynchronous reservation and before opening StoreKit.
       const latest=await this.entitlement();
       if(latest.appUserId!==member.appUserId || latest.plan==='pro' || latest.syncState!=='verified' || latest.purchaseIntentId!==intent.id)throw new Error('ENTITLEMENT_SYNC_PENDING');
-      await this.send('/api/billing/store-started',{id:intent.id});
-      try{await this.sdk.purchasePackage({aPackage:p});}catch(e){const error=e as {userCancelled?:boolean;code?:string};if(error.userCancelled || error.code==='1')await this.send('/api/billing/cancel-intent',{id:intent.id,source:'app_store'}).catch(()=>{});throw e;}
+      try{await this.send('/api/billing/store-started',{id:intent.id});}
+      catch{
+        // No SDK call was made. The server may still have committed store_started.
+        await this.send('/api/billing/cancel-intent',{id:intent.id,source:'app_store'}).catch(()=>{});
+        await this.send('/api/billing/store-outcome',{id:intent.id,outcome:'not_opened'}).catch(()=>{});
+        throw new Error('STORE_NOT_OPENED');
+      }
+      try{await this.sdk.purchasePackage({aPackage:p});}catch(e){
+        const code=String((e as {code?:string|number}).code??'');
+        const outcome=code==='1'?'cancelled':code==='20'?'deferred':'unknown';
+        // A userCancelled flag alone is not an SDK-confirmed cancellation.
+        await this.send('/api/billing/store-outcome',{id:intent.id,outcome}).catch(()=>{});
+        throw new Error(outcome==='cancelled'?'STORE_CANCELLED':outcome==='deferred'?'STORE_DEFERRED':'STORE_UNKNOWN');
+      }
       // SDK customerInfo is deliberately ignored for authorization.
-      return await this.sync();
+      try{return await this.sync();}catch{await this.send('/api/billing/store-outcome',{id:intent.id,outcome:'unknown'}).catch(()=>{});throw new Error('STORE_UNKNOWN');}
     }finally{this.busy=false;}
   }
+  async cancelPrepared(){const member=await this.entitlement();if(!member.purchasePending||member.purchaseSource!=='app_store'||member.purchaseStage!=='prepared'||!member.purchaseIntentId)throw new Error('PURCHASE_REVIEW_REQUIRED');return snapshotSchema.parse(await this.send('/api/billing/cancel-intent',{id:member.purchaseIntentId,source:'app_store'}));}
   async restore(config:BillingConfig){
     if(this.busy)throw new Error('PURCHASE_PENDING');this.busy=true;
     try{const member=await this.entitlement();await this.identify(config,member);await this.sdk.restorePurchases();return await this.sync();}finally{this.busy=false;}

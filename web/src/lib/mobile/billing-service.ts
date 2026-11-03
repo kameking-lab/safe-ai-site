@@ -3,7 +3,7 @@ import { prisma } from '../prisma';
 import { assertPurchasable, projectEntitlement, type EntitlementSnapshot } from './entitlement';
 import { fetchSubscriber, verifiedAppleGrant,fetchAppleOwnership } from './revenuecat';
 import { reconcileStripe } from './stripe-reconcile';
-import { assertResume,canReleasePrepared,type PurchaseSource } from './purchase-state';
+import { assertResume,canReleasePrepared,appleOutcomeStage,type ApplePurchaseOutcome,type PurchaseSource } from './purchase-state';
 import { expireStripeIntent } from './stripe-purchase';
 export function billingDb() { if(!prisma || process.env.MOBILE_LEDGER_ENABLED!=='true') throw new Error('ENTITLEMENT_SYNC_PENDING');return prisma; }
 export async function lockMember(tx:Prisma.TransactionClient,userId:string) { await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`anzen:${userId}`},0))`; }
@@ -72,8 +72,21 @@ export async function cancelPurchase(userId:string,id:string,source:PurchaseSour
 }
 export async function markStoreStarted(userId:string,id:string){
   return billingDb().$transaction(async tx=>{await lockMember(tx,userId);const rights=await entitlementInTransaction(tx,userId);assertPurchasable(rights);
-    const changed=await tx.mobilePurchaseIntent.updateMany({where:{userId,id,source:'app_store',status:'pending'},data:{stage:'store_started'}});
+    const changed=await tx.mobilePurchaseIntent.updateMany({where:{userId,id,source:'app_store',status:'pending',stage:'prepared'},data:{stage:'store_started'}});
     if(changed.count!==1)throw new Error('INVALID_REQUEST');return {id};});
+}
+/** Client outcomes describe the UI only. They never release a dispatched reservation. */
+export async function reportAppleOutcome(userId:string,id:string,outcome:ApplePurchaseOutcome){
+  return billingDb().$transaction(async tx=>{await lockMember(tx,userId);
+    const intent=await tx.mobilePurchaseIntent.findUnique({where:{userId}});
+    if(!intent||intent.id!==id||intent.source!=='app_store')throw new Error('INVALID_REQUEST');
+    if(intent.status==='pending'&&intent.stage!=='prepared'){
+      // Deferred approval cannot be downgraded by a later cancellation/unknown claim.
+      const stage=intent.stage==='store_deferred'?'store_deferred':appleOutcomeStage[outcome];
+      await tx.mobilePurchaseIntent.updateMany({where:{userId,id,status:'pending'},data:{stage}});
+    }
+    return entitlementInTransaction(tx,userId);
+  });
 }
 export async function processBillingEvents(limit=20,deadline=Date.now()+45000) {
   const db=billingDb();const events=await db.mobileBillingEvent.findMany({where:{status:'pending',nextAttempt:{lte:new Date()}},take:limit,orderBy:{receivedAt:'asc'}});
