@@ -47,3 +47,10 @@ it('does not mark erasure complete until the originating Keychain session is cle
   expect(JSON.parse(state.prefs.get('anzen.deletion-receipt')!).erased).toBe(false);expect(await session.sessionToken()).toBe('session-a');
   await deletion.checkDeletion();expect(await session.sessionToken()).toBeNull();expect(JSON.parse(state.prefs.get('anzen.deletion-receipt')!).erased).toBe(true);
 });
+it('preserves B after process termination between its Keychain write and login completion',async()=>{
+  const {session,deletion,preparation}=await start();state.fetch.mockRejectedValueOnce(new Error('offline'));await expect(deletion.confirmDeletion(preparation)).rejects.toThrow('offline');
+  const originalSet=state.vault.set.bind(state.vault);const interrupted=vi.spyOn(state.vault,'set').mockImplementation((key,value)=>{const result=originalSet(key,value);if(key==='session'&&value==='session-b'){expect(state.prefs.get('anzen.session-incarnation')).not.toBe(preparation.sessionBinding);throw new Error('terminated');}return result;});
+  try{await expect(session.setSessionToken('session-b')).rejects.toThrow('terminated');}finally{interrupted.mockRestore();}
+  saveB();vi.resetModules();const restarted=await import('../src/lib/account-deletion');await restarted.checkDeletion();const restartedSession=await import('../src/lib/session');
+  expect(await restartedSession.sessionToken()).toBe('session-b');expect(state.local.get('company-profile')).toBe('member-b');expect(state.content.get('saved')).toBe('member-b');
+});
