@@ -2,6 +2,7 @@ import { existsSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import trainingJson from "./fall-prevention.json";
+import safetyManagementJson from "./safety-management-basics-osh-law.json";
 import claimsJson from "./claims.json";
 import quizJson from "./quiz.json";
 import sourcesJson from "./source-registry.json";
@@ -18,7 +19,7 @@ const claimById = new Map(claims.map((claim) => [claim.claimId, claim]));
 const sourceById = new Map(sources.map((source) => [source.sourceId, source]));
 
 describe("墜落・転落防止研修の共通正本", () => {
-  it("20枚が連番で、音声原稿は35〜50分の設計値を持つ", () => {
+  it("20枚が連番で、音声原稿は30〜35分の設計値を持つ", () => {
     expect(training.slideCount).toBe(20);
     expect(training.slides).toHaveLength(20);
     expect(training.slides.map((slide) => slide.number)).toEqual(
@@ -28,8 +29,8 @@ describe("墜落・転落防止研修の共通正本", () => {
       (total, slide) => total + slide.estimatedSeconds,
       0,
     );
-    expect(seconds).toBeGreaterThanOrEqual(35 * 60);
-    expect(seconds).toBeLessThanOrEqual(50 * 60);
+    expect(seconds).toBeGreaterThanOrEqual(30 * 60);
+    expect(seconds).toBeLessThanOrEqual(35 * 60);
     expect(training.slides.every((slide) => slide.narration.length >= 150)).toBe(true);
   });
 
@@ -186,6 +187,74 @@ describe("墜落・転落防止研修の共通正本", () => {
     }
   });
 
+  it("墜落防止の主要4場面は短い投影面と該当する安衛則へ直接移動できる", () => {
+    const articleBySlide: Record<string, number[]> = {
+      "case-scaffold": [563, 567],
+      "case-roof-opening": [519, 524],
+      "case-ladder": [527, 528],
+      "legal-collective-protection": [518, 519, 521],
+    };
+    const mascotPaths = new Set<string>();
+    const otherCourseMascots = new Set(
+      safetyManagementJson.slides.map((slide) => slide.stage?.mascot?.src).filter(Boolean),
+    );
+    for (const [slideId, articles] of Object.entries(articleBySlide)) {
+      const slide = training.slides.find((item) => item.id === slideId);
+      expect(slide?.stage?.headline, slideId).toBeTruthy();
+      expect(slide?.stage?.headline.length, slideId).toBeLessThanOrEqual(36);
+      expect(slide?.stage?.keyPoints, slideId).toHaveLength(3);
+      expect(slide?.stage?.keyPoints.every((point) => point.length <= 16), slideId).toBe(true);
+      expect(slide?.stage?.caveat?.length, slideId).toBeLessThanOrEqual(30);
+      expect(slide?.stage?.mascot?.alt, slideId).toContain("チワワ");
+      const mascotPath = slide?.stage?.mascot?.src;
+      expect(mascotPath, slideId).toBeTruthy();
+      if (mascotPath) {
+        expect(existsSync(join(process.cwd(), "public", mascotPath.slice(1)))).toBe(true);
+        expect(otherCourseMascots.has(mascotPath)).toBe(false);
+        mascotPaths.add(mascotPath);
+      }
+      expect(slide?.articleRefs?.map((ref) => ref.article), slideId).toEqual(
+        articles.map((article) => `第${article}条`),
+      );
+      for (const [index, article] of articles.entries()) {
+        const ref = slide?.articleRefs?.[index];
+        expect(ref?.sourceId, slideId).toBe("LAW-EGOV-003");
+        const anchor = article === 563
+          ? "Mp-Pa_2-Ch_10-Se_2-Ss_1-At_563"
+          : article === 567
+            ? "Mp-Pa_2-Ch_10-Se_2-Ss_2-At_567"
+            : `Mp-Pa_2-Ch_9-Se_1-At_${article}`;
+        expect(ref?.egovUrl, slideId).toBe(
+          `https://laws.e-gov.go.jp/law/347M50002000032#${anchor}`,
+        );
+        expect(ref?.naviPath, slideId).toBe(`/law-navi/347M50002000032/${article}`);
+      }
+    }
+    expect(mascotPaths.size).toBe(4);
+  });
+
+  it("教育・演習・現場確認の5枚は確認済み条文へ直接たどれる", () => {
+    const refsBySlide: Record<string, string[]> = {
+      "harness-special-education": ["安衛法|第59条第3項|59", "安衛則|第36条第41号|36"],
+      "different-systems": ["安衛則|第36条第41号|36", "安衛則|第38条|38"],
+      "anchor-clearance": ["安衛則|第521条|521"],
+      "visual-ky": ["安衛則|第519条|519", "安衛則|第527条|527", "安衛則|第528条|528", "安衛則|第563条|563"],
+      "field-checklist": ["安衛則|第518条|518", "安衛則|第519条|519", "安衛則|第521条|521", "安衛則|第36条第41号|36"],
+    };
+    for (const [slideId, expected] of Object.entries(refsBySlide)) {
+      const slide = training.slides.find((item) => item.id === slideId);
+      expect(slide?.articleRefs?.map(({ lawShort, article, naviPath }) =>
+        `${lawShort}|${article}|${naviPath?.split("/").at(-1)}`), slideId).toEqual(expected);
+      for (const ref of slide?.articleRefs ?? []) {
+        expect(sourceById.has(ref.sourceId), slideId).toBe(true);
+        const lawId = ref.lawShort === "安衛法" ? "347AC0000000057" : "347M50002000032";
+        expect(ref.sourceId, slideId).toBe(ref.lawShort === "安衛法" ? "LAW-EGOV-001" : "LAW-EGOV-003");
+        expect(ref.egovUrl, slideId).toMatch(new RegExp(`^https://laws\\.e-gov\\.go\\.jp/law/${lawId}#Mp-`));
+        expect(ref.egovUrl, slideId).toMatch(new RegExp(`-At_${ref.naviPath?.split("/").at(-1)}$`));
+      }
+    }
+  });
+
   it("まとめスライドのPPTX用3メッセージを共通データで管理する", () => {
     const summary = training.slides.find((slide) => slide.id === "summary");
     expect(summary?.visual.type).toBe("image");
@@ -201,6 +270,15 @@ describe("墜落・転落防止研修の共通正本", () => {
       expect(question.correctIndex).toBeGreaterThanOrEqual(0);
       expect(question.correctIndex).toBeLessThan(4);
       expect(question.explanation.length).toBeGreaterThan(10);
+      expect(question.choiceRationales).toHaveLength(4);
+      expect(question.choiceRationales.every((reason) => reason.length > 10)).toBe(true);
+      expect(question.refs.length).toBeGreaterThan(0);
+      for (const ref of question.refs) {
+        const source = sourceById.get(ref.sourceId);
+        expect(source, `${question.id}: ${ref.sourceId}`).toBeDefined();
+        expect(source?.url).toMatch(/^https:\/\/(www\.mhlw\.go\.jp|laws\.e-gov\.go\.jp|www\.jniosh\.johas\.go\.jp)\//u);
+        expect(source?.status).toBe("verified");
+      }
       for (const claimId of question.claimIds) expect(claimById.has(claimId)).toBe(true);
     }
   });

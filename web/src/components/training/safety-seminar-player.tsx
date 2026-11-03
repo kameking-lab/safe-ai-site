@@ -2,16 +2,12 @@
 
 import Image from "next/image";
 import {
-  Captions,
   ChevronLeft,
   ChevronRight,
   Expand,
   List,
   Pause,
   Play,
-  RotateCcw,
-  Volume2,
-  VolumeX,
 } from "lucide-react";
 import {
   useCallback,
@@ -27,8 +23,13 @@ import type {
 } from "@/data/safety-seminars/types";
 
 type SpeechStatus = "idle" | "playing" | "paused" | "unavailable";
+type VoiceMode = "recorded" | "device-primary" | "device-secondary";
 
-const RATE_OPTIONS = [0.75, 1, 1.25, 1.5] as const;
+
+function deviceVoice(voices: SpeechSynthesisVoice[], mode: VoiceMode) {
+  const japanese = voices.filter((voice) => voice.lang.toLowerCase().startsWith("ja"));
+  return mode === "device-secondary" ? japanese[1] ?? japanese[0] : japanese[0];
+}
 
 function sentenceAt(text: string, charIndex: number) {
   const chunks = text.match(/[^。！？]+[。！？]?/g) ?? [text];
@@ -41,13 +42,23 @@ function sentenceAt(text: string, charIndex: number) {
   return chunks.at(-1)?.trim() ?? text;
 }
 
+function sourceLabel(source: TrainingSource) {
+  if (source.sourceId === "GUIDE-MHLW-OSHMS") return "厚労省 OSHMS指針";
+  if (source.sourceId === "GUIDE-MHLW-RA") return "厚労省 RA指針";
+  if (source.sourceId === "LAW-R7-33-AMENDMENT") return "厚労省 令和7年改正法";
+  if (source.sourceId === "LAW-MHLW-OSH") return "e-Gov 労働安全衛生法";
+  return source.publisher;
+}
+
 export function SafetySeminarPlayer({
   slides,
   claims,
   sources,
   audioBasePath = "/training/safety-seminars/fall-prevention/audio",
-  playerLabel = "音声付き安全研修スライド",
+  playerLabel,
   transcriptId = "safety-seminar-transcript",
+  sourcesAnchorId = "sources-title",
+  audioEnabled = true,
 }: {
   slides: TrainingSlide[];
   claims: TrainingClaim[];
@@ -55,18 +66,21 @@ export function SafetySeminarPlayer({
   audioBasePath?: string;
   playerLabel?: string;
   transcriptId?: string;
+  sourcesAnchorId?: string;
+  audioEnabled?: boolean;
 }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [speechStatus, setSpeechStatus] = useState<SpeechStatus>("idle");
   const [audioFailed, setAudioFailed] = useState(false);
   const [speechProgress, setSpeechProgress] = useState(0);
   const [caption, setCaption] = useState(slides[0]?.message ?? "");
-  const [captionsVisible, setCaptionsVisible] = useState(true);
   const [transcriptVisible, setTranscriptVisible] = useState(false);
   const [listVisible, setListVisible] = useState(false);
-  const [muted, setMuted] = useState(false);
-  const [volume, setVolume] = useState(1);
-  const [rate, setRate] = useState<(typeof RATE_OPTIONS)[number]>(1);
+  const [muted] = useState(false);
+  const [volume] = useState(1);
+  const [rate] = useState(1);
+  const [voiceMode] = useState<VoiceMode>("recorded");
+  const [deviceVoices, setDeviceVoices] = useState<SpeechSynthesisVoice[]>([]);
   const playerRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
@@ -74,6 +88,7 @@ export function SafetySeminarPlayer({
   const currentIndexRef = useRef(0);
   const statusRef = useRef<SpeechStatus>("idle");
   const slide = slides[currentIndex];
+  const useRecordedAudio = voiceMode === "recorded" && !audioFailed;
 
   const claimById = useMemo(
     () => new Map(claims.map((claim) => [claim.claimId, claim])),
@@ -92,16 +107,65 @@ export function SafetySeminarPlayer({
       .map((sourceId) => sourceById.get(sourceId))
       .filter((source): source is TrainingSource => Boolean(source));
   }, [claimById, slide.claimIds, sourceById]);
+  const slideEvidenceLinks = useMemo(() => {
+    const articleLinks = (slide.articleRefs ?? []).map((ref) => ({
+      href: ref.article.includes("の") && ref.naviPath ? ref.naviPath : ref.egovUrl,
+      label: `${ref.lawShort} ${ref.article}`,
+      external: !(ref.article.includes("の") && ref.naviPath),
+    }));
+    if (articleLinks.length > 0) {
+      const articleSourceIds = new Set(slide.articleRefs?.map((ref) => ref.sourceId));
+      const supplementalLinks = slideSources
+        .filter((source) => !articleSourceIds.has(source.sourceId))
+        .map((source) => ({
+          href: source.url,
+          label: source.title,
+          external: true,
+        }));
+      if (slide.id === "harness-special-education") {
+        const primarySourceIds = ["LAW-MHLW-004", "GUIDE-MHLW-001"];
+        const primaryLinks = primarySourceIds
+          .map((sourceId) => slideSources.find((source) => source.sourceId === sourceId))
+          .filter((source): source is TrainingSource => Boolean(source))
+          .map((source) => ({
+            href: source.url,
+            label: source.sourceId === "LAW-MHLW-004"
+              ? "厚労省告示（6.75m）"
+              : "厚労省ガイドライン（5m）",
+            external: true,
+          }));
+        const primaryUrls = new Set(primaryLinks.map((link) => link.href));
+        return [...primaryLinks, ...articleLinks, ...supplementalLinks.filter((link) => !primaryUrls.has(link.href))];
+      }
+      return [...articleLinks, ...supplementalLinks];
+    }
+    return slideSources.slice(0, 2).map((source) => ({
+      href: source.url,
+      label: sourceLabel(source),
+      external: true,
+    }));
+  }, [slide.articleRefs, slide.id, slideSources]);
 
   useEffect(() => {
     statusRef.current = speechStatus;
   }, [speechStatus]);
 
+  useEffect(() => {
+    if (!audioEnabled) return;
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+    if (typeof window.speechSynthesis.getVoices !== "function") return;
+    const updateVoices = () => setDeviceVoices(window.speechSynthesis.getVoices());
+    updateVoices();
+    window.speechSynthesis.addEventListener?.("voiceschanged", updateVoices);
+    return () => window.speechSynthesis.removeEventListener?.("voiceschanged", updateVoices);
+  }, [audioEnabled]);
+
   const cancelSpeech = useCallback(() => {
+    if (!audioEnabled) return;
     if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
     window.speechSynthesis.cancel();
     utteranceRef.current = null;
-  }, []);
+  }, [audioEnabled]);
 
   const resetSlideState = useCallback(
     (next: number) => {
@@ -115,6 +179,7 @@ export function SafetySeminarPlayer({
   );
 
   const speakCurrent = useCallback(() => {
+    if (!audioEnabled) return;
     if (
       typeof window === "undefined" ||
       !("speechSynthesis" in window) ||
@@ -127,39 +192,49 @@ export function SafetySeminarPlayer({
     const activeSlide = slides[currentIndexRef.current];
     const utterance = new SpeechSynthesisUtterance(activeSlide.narration);
     utterance.lang = "ja-JP";
+    if (voiceMode !== "recorded") {
+      const selectedVoice = deviceVoice(deviceVoices, voiceMode);
+      if (selectedVoice) utterance.voice = selectedVoice;
+    }
     utterance.rate = rate;
     utterance.volume = muted ? 0 : volume;
     utterance.onboundary = (event) => {
+      if (utteranceRef.current !== utterance) return;
       const index = Math.max(0, event.charIndex ?? 0);
       setSpeechProgress(Math.min(99, (index / activeSlide.narration.length) * 100));
       setCaption(sentenceAt(activeSlide.narration, index));
     };
     utterance.onend = () => {
+      if (utteranceRef.current !== utterance) return;
       utteranceRef.current = null;
       setSpeechProgress(100);
       if (statusRef.current !== "playing") return;
       if (currentIndexRef.current < slides.length - 1) {
+        if (voiceMode !== "recorded") pendingSpeechRestartRef.current = true;
         resetSlideState(currentIndexRef.current + 1);
       } else {
         setSpeechStatus("idle");
       }
     };
     utterance.onerror = () => {
+      if (utteranceRef.current !== utterance) return;
       utteranceRef.current = null;
       setSpeechStatus("idle");
     };
     utteranceRef.current = utterance;
     setCaption(sentenceAt(activeSlide.narration, 0));
     window.speechSynthesis.speak(utterance);
-  }, [cancelSpeech, muted, rate, resetSlideState, slides, volume]);
+  }, [audioEnabled, cancelSpeech, deviceVoices, muted, rate, resetSlideState, slides, voiceMode, volume]);
 
   useEffect(() => {
+    if (!audioEnabled) return;
     return () => cancelSpeech();
-  }, [cancelSpeech]);
+  }, [audioEnabled, cancelSpeech]);
 
   useEffect(() => {
+    if (!audioEnabled) return;
     const audio = audioRef.current;
-    if (!audio || audioFailed) return;
+    if (!audio || !useRecordedAudio) return;
     audio.playbackRate = rate;
     audio.volume = volume;
     audio.muted = muted;
@@ -169,10 +244,11 @@ export function SafetySeminarPlayer({
         speakCurrent();
       });
     }
-  }, [audioFailed, currentIndex, muted, rate, speakCurrent, speechStatus, volume]);
+  }, [audioEnabled, currentIndex, muted, rate, speakCurrent, speechStatus, useRecordedAudio, volume]);
 
   const play = useCallback(() => {
-    if (!audioFailed && audioRef.current) {
+    if (!audioEnabled) return;
+    if (useRecordedAudio && audioRef.current) {
       void audioRef.current.play().then(
         () => setSpeechStatus("playing"),
         () => {
@@ -190,10 +266,11 @@ export function SafetySeminarPlayer({
     }
     setSpeechStatus("playing");
     speakCurrent();
-  }, [audioFailed, speakCurrent, speechStatus]);
+  }, [audioEnabled, speakCurrent, speechStatus, useRecordedAudio]);
 
   const pause = useCallback(() => {
-    if (!audioFailed && audioRef.current) {
+    if (!audioEnabled) return;
+    if (useRecordedAudio && audioRef.current) {
       audioRef.current.pause();
       setSpeechStatus("paused");
       return;
@@ -202,46 +279,29 @@ export function SafetySeminarPlayer({
       window.speechSynthesis.pause();
       setSpeechStatus("paused");
     }
-  }, [audioFailed]);
-
-  const stop = useCallback(() => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-    }
-    cancelSpeech();
-    setSpeechProgress(0);
-    setCaption(slide.message);
-    setSpeechStatus("idle");
-  }, [cancelSpeech, slide.message]);
+  }, [audioEnabled, useRecordedAudio]);
 
   const goTo = useCallback(
     (index: number) => {
       const next = Math.min(slides.length - 1, Math.max(0, index));
-      audioRef.current?.pause();
-      cancelSpeech();
+      if (audioEnabled) {
+        const wasPlaying = statusRef.current === "playing";
+        const wasPaused = statusRef.current === "paused";
+        audioRef.current?.pause();
+        cancelSpeech();
+        pendingSpeechRestartRef.current = voiceMode !== "recorded" && wasPlaying;
+        if (voiceMode !== "recorded" && wasPaused) setSpeechStatus("idle");
+      }
       resetSlideState(next);
     },
-    [cancelSpeech, resetSlideState, slides.length],
-  );
-
-  const restartForSetting = useCallback(
-    (callback: () => void) => {
-      const wasPlaying = statusRef.current === "playing";
-      const wasPaused = statusRef.current === "paused";
-      if (audioFailed && wasPlaying) pendingSpeechRestartRef.current = true;
-      cancelSpeech();
-      callback();
-      if (audioFailed && wasPaused) setSpeechStatus("idle");
-      else if (wasPlaying) setSpeechStatus("playing");
-    },
-    [audioFailed, cancelSpeech],
+    [audioEnabled, cancelSpeech, resetSlideState, slides.length, voiceMode],
   );
 
   useEffect(() => {
+    if (!audioEnabled) return;
     if (
       !pendingSpeechRestartRef.current ||
-      !audioFailed ||
+      useRecordedAudio ||
       speechStatus !== "playing"
     )
       return;
@@ -253,7 +313,7 @@ export function SafetySeminarPlayer({
     return () => {
       active = false;
     };
-  }, [audioFailed, muted, rate, speakCurrent, speechStatus, volume]);
+  }, [audioEnabled, currentIndex, muted, rate, speakCurrent, speechStatus, useRecordedAudio, voiceMode, volume]);
 
   const enterFullscreen = useCallback(async () => {
     if (playerRef.current?.requestFullscreen) await playerRef.current.requestFullscreen();
@@ -262,45 +322,142 @@ export function SafetySeminarPlayer({
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       const target = event.target;
+      if (event.ctrlKey || event.metaKey || event.altKey || event.isComposing) return;
+      if (!audioEnabled) {
+        const insidePlayer = target instanceof Node && Boolean(playerRef.current?.contains(target));
+        if (!insidePlayer && document.fullscreenElement !== playerRef.current) return;
+        if (target instanceof Node && document.getElementById(transcriptId)?.contains(target)) return;
+      }
+      const silentMainControl = !audioEnabled && target instanceof Element && Boolean(target.closest('[data-testid="seminar-controls"] button'));
       if (
         target instanceof Element &&
-        target.closest("button, a, input, select, summary, textarea, [contenteditable='true']")
+        target.closest("button, a, input, select, summary, textarea, [contenteditable='true']") &&
+        !silentMainControl
       )
         return;
       if (event.key === "ArrowRight") goTo(currentIndexRef.current + 1);
       if (event.key === "ArrowLeft") goTo(currentIndexRef.current - 1);
-      if (event.key === " ") {
+      if (audioEnabled && event.key === " ") {
         event.preventDefault();
         if (statusRef.current === "playing") pause();
         else play();
       }
-      if (event.key.toLowerCase() === "m")
-        restartForSetting(() => setMuted((value) => !value));
-      if (event.key.toLowerCase() === "c") setCaptionsVisible((value) => !value);
+      if (!audioEnabled && event.key === " " && target === playerRef.current) event.preventDefault();
       if (event.key.toLowerCase() === "f") void enterFullscreen();
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [enterFullscreen, goTo, pause, play, restartForSetting]);
+  }, [audioEnabled, enterFullscreen, goTo, pause, play, transcriptId]);
 
   return (
     <section
       ref={playerRef}
+      tabIndex={audioEnabled ? undefined : 0}
+      aria-keyshortcuts={audioEnabled ? undefined : "ArrowLeft ArrowRight F"}
       aria-labelledby="seminar-player-title"
-      className="overflow-hidden rounded-[1.75rem] border border-slate-700 bg-slate-950 text-white shadow-2xl print:border-0 print:shadow-none"
+      className="overflow-hidden rounded-[1.75rem] border border-slate-700 bg-slate-950 text-white shadow-2xl focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 print:border-0 print:shadow-none"
     >
       <h2 id="seminar-player-title" className="sr-only">
-        {playerLabel}
+        {playerLabel ?? (audioEnabled ? "音声付き安全研修スライド" : "安全研修スライド")}
       </h2>
-      <div className="relative min-h-[680px] overflow-hidden bg-slate-950 p-5 sm:min-h-[620px] sm:p-8 lg:aspect-video lg:min-h-0 lg:p-12">
+      {!audioEnabled ? <p className="sr-only" aria-live="polite" aria-atomic="true">
+        {currentIndex + 1}枚目／全{slides.length}枚：{slide.title}
+      </p> : null}
+      <div
+        data-testid="seminar-stage"
+        className={`relative overflow-hidden bg-slate-950 p-5 sm:p-8 lg:aspect-video lg:min-h-0 lg:p-10 ${
+          slide.stage ? "" : "min-h-[680px] sm:min-h-[620px]"
+        }`}
+      >
         <div
-          className="pointer-events-none absolute inset-0 opacity-35"
+          className="pointer-events-none absolute inset-0 opacity-30"
           aria-hidden="true"
           style={{
             background:
               "radial-gradient(circle at 10% 15%, #0f766e 0, transparent 30%), radial-gradient(circle at 88% 80%, #f97316 0, transparent 24%)",
           }}
         />
+        {slide.stage ? (
+          <div className="relative flex h-full flex-col" style={{ minHeight: 440 }}>
+            <header className="flex items-start justify-between gap-3 text-sm lg:text-xl">
+              <div>
+                <p className="font-black text-teal-200" style={{ letterSpacing: "0.08em" }}>
+                  {slide.kicker}
+                </p>
+                <p className="mt-1 font-bold text-slate-200">{slide.label}</p>
+              </div>
+              <p className="shrink-0 font-mono text-slate-200">
+                {String(slide.number).padStart(2, "0")} / {slides.length}
+              </p>
+            </header>
+            <div
+              className="grid min-h-0 flex-1 items-center gap-3 sm:gap-6 lg:gap-8"
+              style={{ gridTemplateColumns: "minmax(0, 1fr) minmax(92px, 34%)" }}
+            >
+              <div className="min-w-0">
+                <h3
+                  data-testid="stage-title"
+                  style={{ fontSize: "clamp(24px, 4vw, 40px)" }}
+                  className="font-black leading-tight tracking-tight"
+                >
+                  {slide.title}
+                </h3>
+                <p
+                  data-testid="stage-headline"
+                  style={{ fontSize: "clamp(18px, 2.5vw, 24px)" }}
+                  className="mt-4 text-lg font-black leading-7 text-white sm:text-xl lg:text-2xl"
+                >
+                  {slide.stage.headline}
+                </p>
+                <ul className="mt-4 space-y-2 text-sm font-bold leading-6 text-slate-100 lg:text-xl lg:leading-8">
+                  {slide.stage.keyPoints.map((item) => (
+                    <li key={item} className="flex gap-2">
+                      <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-orange-300" aria-hidden="true" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              {slide.stage.mascot ? (
+                <Image
+                  src={slide.stage.mascot.src}
+                  alt={slide.stage.mascot.alt}
+                  width={slide.stage.mascot.width}
+                  height={slide.stage.mascot.height}
+                  sizes="(max-width: 639px) 34vw, (max-width: 1023px) 32vw, 280px"
+                  loading={slide.number === 1 ? "eager" : "lazy"}
+                  style={{
+                    maxHeight: 250,
+                    maxWidth: Math.min(280, slide.stage.mascot.width),
+                  }}
+                  className="mx-auto h-auto w-full object-contain"
+                />
+              ) : null}
+            </div>
+            <div className="space-y-2 text-sm lg:text-xl">
+              {slide.stage.caveat ? (
+                <p data-testid="stage-caveat" className="rounded-lg border border-amber-300/60 bg-amber-950/70 px-3 py-2 font-bold text-amber-100">
+                  条件: {slide.stage.caveat}
+                </p>
+              ) : null}
+              {slideEvidenceLinks.length > 0 ? (
+                <div className="flex flex-wrap gap-2" aria-label="このスライドの根拠">
+                  {slideEvidenceLinks.slice(0, 2).map((link) => (
+                    <a
+                      key={`${link.href}-${link.label}`}
+                      href={link.href}
+                      target={link.external ? "_blank" : undefined}
+                      rel={link.external ? "noopener noreferrer" : undefined}
+                      className="inline-flex min-h-11 items-center rounded-full border border-teal-300 bg-teal-950 px-3 font-black text-teal-100 underline underline-offset-4"
+                    >
+                      {link.label}
+                    </a>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+          </div>
+        ) : (
         <div className="relative flex h-full flex-col">
           <header className="flex items-start justify-between gap-4">
             <div>
@@ -315,7 +472,7 @@ export function SafetySeminarPlayer({
               {String(slide.number).padStart(2, "0")} / {slides.length}
             </p>
           </header>
-          <div className="mt-3 grid min-h-0 flex-1 items-center gap-5 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-10">
+          <div className="mt-3 grid min-h-0 flex-1 items-center gap-5 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-8">
             <div>
               <h3 className="text-2xl font-black leading-tight tracking-tight sm:text-3xl lg:text-5xl">
                 {slide.title}
@@ -336,13 +493,14 @@ export function SafetySeminarPlayer({
             </div>
             <SlideVisual slide={slide} />
           </div>
-          <p className="mt-2 truncate text-[10px] text-slate-400">
-            出典: {slideSources.map((source) => source.sourceId).join(" / ") || "サイト独自構成"}
-          </p>
+          <a href={`#${sourcesAnchorId}`} className="mt-2 block truncate text-[10px] text-slate-300 underline underline-offset-2">
+            根拠: {slideSources.map((source) => source.title).join(" / ") || "教材内の確認事項"}
+          </a>
         </div>
+        )}
       </div>
 
-      {captionsVisible ? (
+      {(audioEnabled && (!slide.stage || speechStatus === "playing")) ? (
         <div
           role="status"
           aria-live="polite"
@@ -353,11 +511,12 @@ export function SafetySeminarPlayer({
       ) : null}
 
       <div className="space-y-4 bg-slate-900 p-4 sm:p-5">
-        <audio
+        {audioEnabled ? <audio
           ref={audioRef}
           preload="metadata"
           src={`${audioBasePath}/slide-${String(slide.number).padStart(2, "0")}.mp3`}
           onError={() => {
+            if (voiceMode !== "recorded") return;
             setAudioFailed(true);
             if (
               typeof window === "undefined" ||
@@ -394,7 +553,7 @@ export function SafetySeminarPlayer({
               setSpeechStatus("idle");
             }
           }}
-        />
+        /> : null}
         <div className="flex items-center gap-3" aria-label="教材の進捗">
           <span className="w-14 text-xs font-bold text-slate-300">
             {currentIndex + 1}/{slides.length}
@@ -405,27 +564,29 @@ export function SafetySeminarPlayer({
             aria-valuemin={0}
             aria-valuemax={100}
             aria-valuenow={Math.round(
-              ((currentIndex + speechProgress / 100) / slides.length) * 100,
+              ((currentIndex + (audioEnabled ? speechProgress / 100 : 1)) / slides.length) * 100,
             )}
-            aria-valuetext={`${currentIndex + 1}枚目、スライド内${Math.round(speechProgress)}%`}
+            aria-valuetext={audioEnabled
+              ? `${currentIndex + 1}枚目、スライド内${Math.round(speechProgress)}%`
+              : `${currentIndex + 1}枚目、全${slides.length}枚`}
             className="h-2 flex-1 overflow-hidden rounded-full bg-slate-700"
           >
             <div
               className="h-full bg-teal-400 transition-[width] motion-reduce:transition-none"
               style={{
-                width: `${((currentIndex + speechProgress / 100) / slides.length) * 100}%`,
+                width: `${((currentIndex + (audioEnabled ? speechProgress / 100 : 1)) / slides.length) * 100}%`,
               }}
             />
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
+        <div data-testid="seminar-controls" className="flex flex-wrap items-center gap-2">
           <ControlButton
             label="前のスライド"
             onClick={() => goTo(currentIndex - 1)}
             disabled={currentIndex === 0}
             icon={ChevronLeft}
           />
-          {speechStatus === "playing" ? (
+          {!audioEnabled ? null : speechStatus === "playing" ? (
             <ControlButton label="一時停止" onClick={pause} icon={Pause} primary />
           ) : (
             <ControlButton
@@ -436,98 +597,118 @@ export function SafetySeminarPlayer({
               primary
             />
           )}
-          <ControlButton label="停止" onClick={stop} icon={RotateCcw} />
           <ControlButton
             label="次のスライド"
             onClick={() => goTo(currentIndex + 1)}
             disabled={currentIndex === slides.length - 1}
             icon={ChevronRight}
           />
-          <ControlButton
-            label={muted ? "ミュート解除" : "ミュート"}
-            onClick={() => restartForSetting(() => setMuted((value) => !value))}
-            icon={muted ? VolumeX : Volume2}
-          />
-          <label className="flex min-h-11 items-center gap-2 rounded-xl border border-slate-600 px-3 text-sm font-bold">
-            音量
-            <input
-              aria-label="音量"
-              type="range"
-              min="0"
-              max="1"
-              step="0.1"
-              value={volume}
-              onChange={(event) => {
-                const next = Number(event.target.value);
-                restartForSetting(() => setVolume(next));
-              }}
-              className="w-20 accent-teal-400"
-            />
-          </label>
-          <label className="flex min-h-11 items-center gap-2 rounded-xl border border-slate-600 px-3 text-sm font-bold">
-            速度
-            <select
-              aria-label="再生速度"
-              value={rate}
-              onChange={(event) => {
-                const next = Number(event.target.value) as (typeof RATE_OPTIONS)[number];
-                restartForSetting(() => setRate(next));
-              }}
-              className="rounded bg-slate-950 px-2 py-1 text-white"
-            >
-              {RATE_OPTIONS.map((option) => (
-                <option key={option} value={option}>
-                  {option}倍
-                </option>
-              ))}
-            </select>
-          </label>
-          <ControlButton
-            label="字幕"
-            onClick={() => setCaptionsVisible((value) => !value)}
-            pressed={captionsVisible}
-            icon={Captions}
-          />
+          {audioEnabled ? <ControlButton
+            label={slide.stage ? `${slides.length}枚` : "スライド一覧"}
+            onClick={() => setListVisible((value) => !value)}
+            pressed={listVisible}
+            icon={List}
+          /> : null}
+          <ControlButton label="全画面" onClick={() => void enterFullscreen()} icon={Expand} />
+        </div>
+        {!audioEnabled ? <div className="flex flex-wrap items-center gap-4 border-t border-slate-700 pt-3">
           <ControlButton
             label="スライド一覧"
             onClick={() => setListVisible((value) => !value)}
             pressed={listVisible}
             icon={List}
           />
-          <ControlButton label="全画面" onClick={() => void enterFullscreen()} icon={Expand} />
-        </div>
-        {speechStatus === "unavailable" ? (
+          <button
+            type="button"
+            className="min-h-11 text-sm font-bold text-teal-200 underline underline-offset-4 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300"
+            onClick={() => setTranscriptVisible((value) => !value)}
+            aria-expanded={transcriptVisible}
+            aria-controls={transcriptId}
+          >
+            {transcriptVisible ? "詳しく閉じる" : "詳しく"}
+          </button>
+        </div> : null}
+        {audioEnabled && speechStatus === "unavailable" ? (
           <p className="rounded-xl bg-amber-100 p-3 text-sm font-bold text-amber-950">
             このブラウザーでは読み上げを利用できません。字幕と全文原稿をご利用ください。
           </p>
         ) : null}
-        {audioFailed && speechStatus !== "unavailable" ? (
+        {audioEnabled && audioFailed && voiceMode === "recorded" && speechStatus !== "unavailable" ? (
           <p className="text-xs text-amber-200">
             音声ファイルを取得できないため、ブラウザー読み上げへ切り替えました。
           </p>
         ) : null}
-        <button
+        {audioEnabled ? <button
           type="button"
           className="min-h-11 text-sm font-bold text-teal-200 underline underline-offset-4"
           onClick={() => setTranscriptVisible((value) => !value)}
           aria-expanded={transcriptVisible}
           aria-controls={transcriptId}
         >
-          {transcriptVisible ? "音声原稿を閉じる" : "音声原稿を読む"}
-        </button>
+          {slide.stage
+            ? transcriptVisible ? "詳しく閉じる" : "詳しく"
+            : transcriptVisible ? "音声原稿を閉じる" : "音声原稿を読む"}
+        </button> : null}
         {transcriptVisible ? (
           <div
             id={transcriptId}
             role="region"
-            aria-label={`${slide.number}枚目の音声原稿と講師向け補足`}
+            aria-label={audioEnabled
+              ? slide.stage
+                ? `${slide.number}枚目の詳しい内容、音声原稿、講師向け補足、根拠`
+                : `${slide.number}枚目の音声原稿と講師向け補足`
+              : `${slide.number}枚目の講師用の詳説と根拠`}
             tabIndex={0}
-            className="max-h-64 overflow-y-auto rounded-xl border border-slate-700 bg-slate-950 p-4 text-sm leading-7 text-slate-200 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300"
+            className="max-h-[70vh] overflow-y-auto rounded-xl border border-slate-700 bg-slate-950 p-4 text-sm leading-7 text-slate-200 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300"
           >
-            <p>{slide.narration}</p>
+            {slide.stage ? (
+              <>
+                <h4 className="font-black text-white">詳しい内容</h4>
+                <p className="mt-2 font-bold">{slide.message}</p>
+                <ul className="mt-2 list-disc space-y-1 pl-5">
+                  {slide.body.map((item) => <li key={item}>{item}</li>)}
+                </ul>
+                {slide.visual.type === "image" || slide.visual.type === "ky" ? (
+                  <Image
+                    src={slide.visual.type === "image" ? slide.visual.src : slide.visual.image}
+                    alt={slide.visual.alt}
+                    width={640}
+                    height={400}
+                    sizes="(max-width: 640px) 80vw, 480px"
+                    className="mt-3 max-h-80 w-auto max-w-full rounded-lg object-contain"
+                  />
+                ) : null}
+                {slide.visual.type === "checklist" ? (
+                  <ul className="mt-3 grid gap-2 sm:grid-cols-2">
+                    {slide.visual.items.map((item) => (
+                      <li key={item} className="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2">✓ {item}</li>
+                    ))}
+                  </ul>
+                ) : null}
+                <h4 className="mt-4 font-black text-white">{audioEnabled ? "音声原稿" : "講師用の詳説"}</h4>
+              </>
+            ) : null}
+            {!slide.stage && !audioEnabled ? <h4 className="font-black text-white">講師用の詳説</h4> : null}
+            <p className={slide.stage ? "mt-2" : undefined}>{slide.narration}</p>
             <h4 className="mt-4 font-black text-white">講師向け補足</h4>
             <ul className="mt-2 list-disc space-y-1 pl-5">
               {slide.instructorNotes.map((note) => (
                 <li key={note}>{note}</li>
+              ))}
+            </ul>
+            <h4 className="mt-4 font-black text-white">根拠</h4>
+            <ul className="mt-2 space-y-2">
+              {slideEvidenceLinks.map((link) => (
+                <li key={`${link.href}-${link.label}`}>
+                  <a
+                    href={link.href}
+                    target={link.external ? "_blank" : undefined}
+                    rel={link.external ? "noopener noreferrer" : undefined}
+                    className="inline-flex min-h-11 items-center font-bold text-teal-200 underline underline-offset-4"
+                  >
+                    {link.label}
+                  </a>
+                </li>
               ))}
             </ul>
           </div>
@@ -552,8 +733,10 @@ export function SafetySeminarPlayer({
             ))}
           </ol>
         ) : null}
-        <p className="text-xs text-slate-400">
-          キーボード: Space 再生/一時停止、←/→ 移動、M ミュート、C 字幕、F 全画面
+        <p className={`${slide.stage && audioEnabled ? "hidden lg:block lg:text-sm" : "text-xs"} text-slate-400`}>
+          {audioEnabled
+            ? "キーボード: Space 再生/一時停止、←/→ 移動、F 全画面"
+            : "キーボード: プレイヤーにフォーカスして ←/→ 移動、F 全画面"}
         </p>
       </div>
     </section>
@@ -592,7 +775,7 @@ function ControlButton({
       }`}
     >
       <Icon className="h-4 w-4" aria-hidden="true" />
-      <span className={primary ? "inline" : "sr-only sm:not-sr-only"}>{label}</span>
+      <span className={primary ? "inline" : "hidden sm:inline"}>{label}</span>
     </button>
   );
 }
@@ -615,7 +798,7 @@ function SlideVisual({ slide }: { slide: TrainingSlide }) {
   }
   if (visual.type === "ky") {
     return (
-      <div className="grid gap-3 sm:grid-cols-[1.2fr_0.8fr]">
+      <div className="grid gap-3 sm:grid-cols-2">
         <div className="relative aspect-[4/3] overflow-hidden rounded-2xl border-2 border-orange-400">
           <Image src={visual.image} alt={visual.alt} fill sizes="40vw" className="object-cover" />
         </div>
@@ -647,7 +830,11 @@ function SlideVisual({ slide }: { slide: TrainingSlide }) {
     return (
       <div className="space-y-2 rounded-2xl border border-white/15 bg-white/5 p-4">
         {visual.bars.map((bar) => (
-          <div key={bar.label} className="grid grid-cols-[6rem_1fr_3.8rem] items-center gap-2 text-xs sm:grid-cols-[8rem_1fr_4.5rem] sm:text-sm">
+          <div
+            key={bar.label}
+            className="grid items-center gap-2 text-xs sm:text-sm"
+            style={{ gridTemplateColumns: "minmax(6rem, 8rem) minmax(0, 1fr) 4.5rem" }}
+          >
             <span className="break-words font-bold leading-4" title={bar.label}>{bar.label}</span>
             <div className="h-5 overflow-hidden rounded bg-slate-800">
               <div className="h-full rounded bg-teal-400" style={{ width: `${Math.max(3, (bar.value / visual.max) * 100)}%` }} />
@@ -692,7 +879,11 @@ function SlideVisual({ slide }: { slide: TrainingSlide }) {
     return (
       <ol className="space-y-2">
         {visual.steps.map((step, index) => (
-          <li key={step.label} className="grid grid-cols-[2.5rem_1fr] gap-3 rounded-2xl border border-white/15 bg-white/10 p-3">
+          <li
+            key={step.label}
+            className="grid gap-3 rounded-2xl border border-white/15 bg-white/10 p-3"
+            style={{ gridTemplateColumns: "2.5rem minmax(0, 1fr)" }}
+          >
             <span className="flex h-10 w-10 items-center justify-center rounded-full bg-teal-300 font-black text-slate-950">{index + 1}</span>
             <span><strong className="block text-base">{step.label}</strong><span className="text-xs leading-5 text-slate-300">{step.detail}</span></span>
           </li>

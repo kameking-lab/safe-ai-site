@@ -1,0 +1,11 @@
+[
+  {"claimId":"CHEM-LABEL-SDS","claimType":"law-duty","statement":"安衛法第57条・第57条の2は、対象物の譲渡・提供時の表示・通知を定める。","sourceIds":["CHEM-LAW-ACT"]},
+  {"claimId":"CHEM-RA-DUTY","claimType":"law-duty","statement":"安衛法第57条の3第1項は、リスクアセスメント対象物の危険性又は有害性等の調査を事業者に義務付ける。","sourceIds":["CHEM-LAW-ACT"]},
+  {"claimId":"CHEM-RA-MEASURES","claimType":"law-duty","statement":"安衛法第57条の3第2項は、調査結果に基づく必要な措置を講ずるよう努めることを定める。","sourceIds":["CHEM-LAW-ACT"],"caveat":"同項は努力義務。別条文による法定措置は免除されない。"},
+  {"claimId":"CHEM-RA-TIMING","claimType":"law-duty","statement":"安衛則第34条の2の7は、作業方法・手順の新規採用又は変更時などをリスクアセスメントの実施時期とする。","sourceIds":["CHEM-LAW-RULES"]},
+  {"claimId":"CHEM-RECORDS","claimType":"law-duty","statement":"安衛則第34条の2の8は、結果等の記録・保存と対象労働者への周知を定める。","sourceIds":["CHEM-LAW-RULES"]},
+  {"claimId":"CHEM-EXPOSURE-DUTY","claimType":"law-duty","statement":"安衛則第577条の2は、リスクアセスメント対象物へのばく露を最小限度とし、濃度基準値設定物質は所定条件で基準以下とすることを定める。","sourceIds":["CHEM-LAW-RULES"]},
+  {"claimId":"CHEM-MANAGERS","claimType":"law-duty","statement":"安衛則第12条の5・第12条の6は、適用条件に応じ化学物質管理者と保護具着用管理責任者の選任・管理事項を定める。","sourceIds":["CHEM-LAW-RULES"]},
+  {"claimId":"CHEM-SDS-SECTIONS","claimType":"official-guidance","statement":"厚労省Q&Aは、リスク見積りで主に活用するSDS情報として2・8・9・10・11項を示す。","sourceIds":["CHEM-MHLW-QA"]},
+  {"claimId":"CHEM-RA-PROCESS","claimType":"administrative-recommendation","statement":"厚労省指針は、作業単位の特定、見積り、代替・工学的対策・管理的対策・保護具の検討手順を示す。","sourceIds":["CHEM-MHLW-GUIDANCE"]}
+]

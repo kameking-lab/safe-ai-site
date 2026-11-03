@@ -1,0 +1,118 @@
+{
+  "id": "chemicals-sds-risk-assessment",
+  "title": "化学物質・SDS・リスクアセスメント入門",
+  "subtitle": "洗浄剤の作業変更を例に、SDSを現場の対策へつなげる",
+  "asOf": "2026-09-26",
+  "version": "1.0.0",
+  "audience": ["化学物質を扱う作業者", "職長", "化学物質管理者"],
+  "standardMinutes": { "audioMin": 15, "audioMax": 20, "workshop": 20 },
+  "boundary": "本教材は入門研修です。法定教育、個別物質のSDS確認、専門家による評価を代替しません。",
+  "slideCount": 12,
+  "slides": [
+    {
+      "id": "work-change", "number": 1, "title": "同じ洗浄剤でも変わる", "kicker": "演習例", "message": "拭き取りから噴霧へ変えると、ばく露のしかたが変わります。",
+      "body": ["薬剤は同じ", "ミストが発生", "作業単位で確認"],
+      "visual": { "type": "image", "src": "/training/safety-seminars/chemicals-sds-risk-assessment/chemical-sds-training-v1.png", "alt": "密閉した洗浄剤とSDSを前に、拭き取りから噴霧への作業変更を説明するチワワ講師" },
+      "label": "作業変更", "claimIds": ["CHEM-RA-TIMING"],
+      "narration": "床用洗浄剤を布で拭き取る作業から、噴霧器で吹き付ける作業へ変える例で学びます。製品が同じでも、空気中へ広がる量や吸入・皮膚接触の機会は変わります。作業方法の変更前に、SDSと実際の条件を結び付けて評価します。",
+      "instructorNotes": ["教材内の洗浄剤は演習例です", "実際の製品SDSを必ず確認します"], "estimatedSeconds": 85,
+      "stage": { "headline": "製品名が同じでも、作業方法が変われば再確認", "keyPoints": ["拭き取り", "噴霧", "作業開始前の見直し"], "caveat": "演習例。対象物への該当性は実際のSDSと法令で確認します。", "mascot": {"src":"/mascot/mascot-chemical-lab.webp","alt":"洗浄剤の作業変更を確認するチワワ","width":160,"height":160} },
+      "articleRefs": [{"lawShort":"安衛則","article":"第34条の2の7","sourceId":"CHEM-LAW-RULES","egovUrl":"https://laws.e-gov.go.jp/law/347M50002000032#Mp-At_34_2_7"}]
+    },
+    {
+      "id": "label-first", "number": 2, "title": "まずラベルを見る", "kicker": "表示", "message": "名称、絵表示、注意喚起語から危険有害性の入口をつかみます。",
+      "body": ["製品名を照合", "絵表示を確認", "注意事項を読む"], "visual": {"type":"checklist","items":["名称と製品の一致","GHS絵表示","危険有害性情報","取扱い上の注意"]},
+      "label": "法定義務", "claimIds": ["CHEM-LABEL-SDS"],
+      "narration": "ラベルは作業前に危険有害性を知る入口です。安衛法第57条の表示義務は対象物を譲渡・提供する側に課されます。使用する事業場は、受け取ったラベルを製品と照合し、SDSの詳しい情報へ進みます。",
+      "instructorNotes": ["譲渡・提供者の義務と使用事業場の対応を分けます"], "estimatedSeconds": 75,
+      "stage": {"headline":"ラベルは入口。詳しい条件はSDSで確認","keyPoints":["名称","絵表示","注意喚起語"],"mascot":{"src":"/mascot/mascot-law-reading.webp","alt":"ラベルと法令を確認するチワワ","width":160,"height":160}},
+      "articleRefs": [{"lawShort":"安衛法","article":"第57条","sourceId":"CHEM-LAW-ACT","egovUrl":"https://laws.e-gov.go.jp/law/347AC0000000057#Mp-At_57"}]
+    },
+    {
+      "id": "match-sds", "number": 3, "title": "製品とSDSを合わせる", "kicker": "SDS", "message": "製品名・供給者・改訂日を照合し、対象製品の最新版を使います。",
+      "body": ["製品名", "供給者", "改訂日"], "visual": {"type":"checklist","items":["容器の製品名と一致","供給者が一致","改訂日を確認","古い版を混ぜない"]},
+      "label": "法定義務", "claimIds": ["CHEM-LABEL-SDS"],
+      "narration": "SDSを入手しただけで評価は完了しません。まず使用中の製品とSDSが一致するかを確認します。安衛法第57条の2は、対象物を譲渡・提供する側に名称や成分、危険有害性などの通知を求めています。",
+      "instructorNotes": ["SDS交付義務の主体を誤解させないよう説明します"], "estimatedSeconds": 78,
+      "stage": {"headline":"別製品・旧版のSDSで判断しない","keyPoints":["名称","供給者","改訂日"],"caveat":"SDS入手はリスクアセスメントの開始点です。"},
+      "articleRefs": [{"lawShort":"安衛法","article":"第57条の2","sourceId":"CHEM-LAW-ACT","egovUrl":"https://laws.e-gov.go.jp/law/347AC0000000057#Mp-At_57_2"}]
+    },
+    {
+      "id": "sds-sections", "number": 4, "title": "SDSの読む場所", "kicker": "情報源", "message": "危険性、取扱い、保護措置、性質、有害性、法規制を結び付けます。",
+      "body": ["2・3項", "7・8項", "9・10・11・15項"], "visual": {"type":"steps","steps":[{"label":"危険を知る","detail":"2・3・9・10・11項"},{"label":"扱いを決める","detail":"7・8項"},{"label":"規制を確かめる","detail":"15項"}]},
+      "label": "厚労省一次資料", "claimIds": ["CHEM-SDS-SECTIONS"],
+      "narration": "厚労省Q&Aは、見積りで主に使うSDS情報として2、8、9、10、11項を示します。現場では成分、取扱い、法規制も合わせて確認します。第8項は、ばく露防止、許容濃度、保護具の情報を探す場所です。",
+      "instructorNotes": ["手法により使う項目は異なるという限定を残します"], "estimatedSeconds": 86,
+      "stage": {"headline":"第8項だけで完結させず、作業条件と照合","keyPoints":["危険有害性","ばく露防止","物性・反応性"]}
+    },
+    {
+      "id": "work-conditions", "number": 5, "title": "作業条件を書き出す", "kicker": "現場条件", "message": "量、時間、換気、温度、飛散、接触のしかたを具体化します。",
+      "body": ["使用量と頻度", "換気と温度", "飛散と接触"], "visual": {"type":"checklist","items":["1回と1日の使用量","作業時間・頻度","局所排気・全体換気","噴霧・加熱・皮膚接触"]},
+      "label": "行政指針", "claimIds": ["CHEM-RA-PROCESS"],
+      "narration": "SDSは製品の情報で、現場の使い方までは決めてくれません。同じ洗浄剤でも、少量の拭き取りと、狭い室内での連続噴霧では条件が違います。使用量、時間、換気、温度、飛散、接触を作業単位で整理します。",
+      "instructorNotes": ["現場の実測値や作業観察を優先します"], "estimatedSeconds": 82,
+      "stage": {"headline":"SDS × 実際の作業条件で考える","keyPoints":["量・時間","換気","飛散・接触"],"mascot":{"src":"/mascot/mascot-measure-meter.webp","alt":"作業条件を測って記録するチワワ","width":160,"height":160}}
+    },
+    {
+      "id": "exposure-routes", "number": 6, "title": "経路ごとに分ける", "kicker": "危険有害性", "message": "吸入、皮膚・眼、火災・反応を分けて、起こり方を考えます。",
+      "body": ["吸入", "皮膚・眼", "火災・反応"], "visual": {"type":"checklist","items":["ミストの吸入","飛沫の眼への接触","手袋内への浸透","着火源・混触反応"]},
+      "label": "行政指針", "claimIds": ["CHEM-RA-PROCESS"],
+      "narration": "危険を一つの点数だけで終わらせません。噴霧では吸入が増える可能性があり、飛沫による眼や皮膚への接触も考えます。引火性や混ぜたときの反応は、健康影響とは別に確認します。",
+      "instructorNotes": ["SDSにない安全性を画像や臭いから推測しません"], "estimatedSeconds": 76,
+      "stage": {"headline":"吸入・接触・火災を別々に確認","keyPoints":["吸入","皮膚・眼","火災・反応"]}
+    },
+    {
+      "id": "mandatory-ra", "number": 7, "title": "対象作業を評価する", "kicker": "法定義務", "message": "リスクアセスメント対象物を扱う作業は、危険有害性を調査します。",
+      "body": ["作業ごとに特定", "リスクを見積る", "結果を対策へ"], "visual": {"type":"steps","steps":[{"label":"特定","detail":"危険有害性と作業を洗い出す"},{"label":"見積り","detail":"ばく露と結果の重さを考える"},{"label":"検討","detail":"低減措置を決める"}]},
+      "label": "リスク調査", "claimIds": ["CHEM-RA-DUTY"],
+      "narration": "安衛法第57条の3第1項は、リスクアセスメント対象物について危険性または有害性等の調査を事業者に義務付けています。SDSを保存して終わりではなく、実際の噴霧作業の条件を含めて見積もります。",
+      "instructorNotes": ["一般消費者向け製品等の適用条件は個別に確認します"], "estimatedSeconds": 82,
+      "stage": {"headline":"SDS入手だけではリスクアセスメント完了ではない","keyPoints":["対象確認","作業単位","結果を対策へ"]},
+      "articleRefs": [{"lawShort":"安衛法","article":"第57条の3","sourceId":"CHEM-LAW-ACT","egovUrl":"https://laws.e-gov.go.jp/law/347AC0000000057#Mp-At_57_3"}]
+    },
+    {
+      "id": "control-hierarchy", "number": 8, "title": "上位の対策から選ぶ", "kicker": "行政指針", "message": "代替・工程変更、密閉・換気、管理、保護具の順で検討します。",
+      "body": ["代替・工程変更", "密閉・局所排気", "管理・保護具"], "visual": {"type":"steps","steps":[{"label":"1 代替・変更","detail":"噴霧をやめる、より有害性の低い製品"},{"label":"2 工学的対策","detail":"密閉、局所排気、全体換気"},{"label":"3 管理・保護具","detail":"時間管理、手順、適切な保護具"}]},
+      "label": "努力義務・行政指針", "claimIds": ["CHEM-RA-MEASURES", "CHEM-RA-PROCESS"],
+      "narration": "安衛法第57条の3第2項は、調査結果に基づいて必要な措置を講ずるよう努めることを定めます。厚労省指針では、まず代替や工程変更、次に密閉や局所排気などを検討し、最後に残るリスクへ適切な保護具を組み合わせます。",
+      "instructorNotes": ["努力義務と別条文の法定措置を混同しません"], "estimatedSeconds": 88,
+      "stage": {"headline":"保護具を最初の答えにしない","keyPoints":["代替","工学的対策","管理・保護具"],"mascot":{"src":"/mascot/mascot-ppe-check.webp","alt":"対策の順序と保護具を確認するチワワ","width":160,"height":160}},
+      "articleRefs": [{"lawShort":"安衛法","article":"第57条の3第2項","sourceId":"CHEM-LAW-ACT","egovUrl":"https://laws.e-gov.go.jp/law/347AC0000000057#Mp-At_57_3"}]
+    },
+    {
+      "id": "minimum-exposure", "number": 9, "title": "法定措置は残る", "kicker": "法定義務", "message": "評価が低くても、適用される法定措置を省略する理由にはなりません。",
+      "body": ["ばく露を最小限度", "濃度基準を確認", "個別規則も確認"], "visual": {"type":"checklist","items":["ばく露を最小限度にする","濃度基準値の適用を確認","特別規則の措置を確認","評価点だけで免除しない"]},
+      "label": "法定措置", "claimIds": ["CHEM-EXPOSURE-DUTY"],
+      "narration": "安衛則第577条の2は、リスクアセスメント対象物へのばく露を最小限度とすることを求めます。濃度基準値が設定された物質では、屋内作業場で当該業務に従事する労働者のばく露の程度を濃度基準値以下にする義務もあります。低リスク判定は法定措置の免除ではありません。",
+      "instructorNotes": ["対象物・作業場・濃度基準の適用条件を個別確認します"], "estimatedSeconds": 88,
+      "stage": {"headline":"低リスク判定 ≠ 法定措置の免除","keyPoints":["最小限度","濃度基準","個別規則"]},
+      "articleRefs": [{"lawShort":"安衛則","article":"第577条の2","sourceId":"CHEM-LAW-RULES","egovUrl":"https://laws.e-gov.go.jp/law/347M50002000032#Mp-At_577_2"}]
+    },
+    {
+      "id": "reassess-change", "number": 10, "title": "変更前に再評価する", "kicker": "実施時期", "message": "拭き取りから噴霧へ変える前に、新しい条件で評価し直します。",
+      "body": ["方法変更前", "SDS更新時", "知見の変化時"], "visual": {"type":"steps","steps":[{"label":"止める","detail":"変更前に新条件を整理"},{"label":"評価する","detail":"吸入・接触・火災を再見積り"},{"label":"決める","detail":"対策後に作業開始"}]},
+      "label": "法定義務", "claimIds": ["CHEM-RA-TIMING"],
+      "narration": "安衛則第34条の2の7は、原材料などを新規採用・変更するときや、作業方法・手順を新規採用・変更するときなどを実施時期として定めます。噴霧を始めてからではなく、変更前に評価し対策を決めます。",
+      "instructorNotes": ["設備・知見・SDSの変化も見直し契機です"], "estimatedSeconds": 84,
+      "stage": {"headline":"変更前に評価し、対策後に開始","keyPoints":["変更前","新条件","対策確認"]},
+      "articleRefs": [{"lawShort":"安衛則","article":"第34条の2の7","sourceId":"CHEM-LAW-RULES","egovUrl":"https://laws.e-gov.go.jp/law/347M50002000032#Mp-At_34_2_7"}]
+    },
+    {
+      "id": "management", "number": 11, "title": "担当と記録を決める", "kicker": "管理体制", "message": "管理者の役割を分け、結果・措置・周知を記録して次回へ残します。",
+      "body": ["化学物質管理者", "保護具管理責任者", "記録・保存・周知"], "visual": {"type":"checklist","items":["化学物質管理者が技術事項を管理","条件に応じ保護具着用管理責任者","結果と措置を記録・保存","対象労働者へ周知"]},
+      "label": "法定義務", "claimIds": ["CHEM-MANAGERS", "CHEM-RECORDS"],
+      "narration": "安衛則第12条の5は対象事業場ごとの化学物質管理者、第12条の6は条件に該当する場合の保護具着用管理責任者を定めます。第34条の2の8に基づき、調査対象、結果、措置などを記録・保存し、対象労働者へ周知します。",
+      "instructorNotes": ["保存期間は条文の条件をそのまま確認し、一律の短縮表現にしません"], "estimatedSeconds": 92,
+      "stage": {"headline":"担当・結果・次の見直しを残す","keyPoints":["管理者","記録・保存","労働者へ周知"],"mascot":{"src":"/mascot/mascot-stamp-doc.webp","alt":"評価結果を記録するチワワ","width":160,"height":160}},
+      "articleRefs": [{"lawShort":"安衛則","article":"第12条の5・第12条の6","sourceId":"CHEM-LAW-RULES","egovUrl":"https://laws.e-gov.go.jp/law/347M50002000032","naviPath":"/laws/347M50002000032?article=12-5"},{"lawShort":"安衛則","article":"第34条の2の8","sourceId":"CHEM-LAW-RULES","egovUrl":"https://laws.e-gov.go.jp/law/347M50002000032#Mp-At_34_2_8"}]
+    },
+    {
+      "id": "summary", "number": 12, "title": "作業前の3点", "kicker": "まとめ", "message": "SDSを合わせる、条件を評価する、対策と記録を確認する。",
+      "body": ["製品とSDS", "作業条件とRA", "対策・記録・周知"], "visual": {"type":"steps","steps":[{"label":"1 合わせる","detail":"製品・SDS・改訂日"},{"label":"2 評価する","detail":"量・時間・換気・経路"},{"label":"3 確認する","detail":"対策・担当・記録・周知"}]},
+      "label": "行動確認", "claimIds": ["CHEM-RA-DUTY", "CHEM-RA-PROCESS", "CHEM-RECORDS"],
+      "narration": "作業前に三つを確認します。第一に製品と最新版SDSを合わせる。第二に実際の量、時間、換気、経路で評価する。第三に上位の対策から選び、担当、記録、周知まで確認する。続く5問で、判断の要点を確かめましょう。",
+      "instructorNotes": ["クイズ後に誤答箇所のスライドへ戻って復習します"], "estimatedSeconds": 76,
+      "stage": {"headline":"SDS → 作業条件 → 対策・記録","keyPoints":["合わせる","評価する","確認する"],"mascot":{"src":"/mascot/mascot-teacher.webp","alt":"作業前の三つの確認を案内するチワワ","width":160,"height":160}}
+    }
+  ]
+}

@@ -1,5 +1,37 @@
 [
   {
+    "sourceId": "MHLW-SUSPENSION-EXPERIMENT-2024",
+    "sourceType": "scientific",
+    "title": "墜落防止用保護具に関する規制のあり方に関する検討会 資料2：ぶら下がり実験例",
+    "publisher": "厚生労働省",
+    "url": "https://www.mhlw.go.jp/content/11300000/001367652.pdf",
+    "publishedAt": null,
+    "updatedAt": null,
+    "checkedAt": "2026-09-25T00:00:00+09:00",
+    "applicableDate": "2026-09-25",
+    "finalOrPreliminary": "committee-material",
+    "locator": "資料2・ぶら下がり時間の範囲とばらつき（委員提出資料、法定時間基準ではない）",
+    "claimIds": ["SCI-SUSP-001"],
+    "checksum": "sha256:4734016ba8ece8446acdcf84e1d643655916ffbe761e0ec0d9da61a911746125",
+    "status": "verified"
+  },
+  {
+    "sourceId": "JNIOSH-HARNESS-RESCUE-2009",
+    "sourceType": "scientific",
+    "title": "労働安全衛生総合研究所 平成21年度年報：フルハーネス型安全帯の普及に関する調査研究",
+    "publisher": "労働安全衛生総合研究所",
+    "url": "https://www.jniosh.johas.go.jp/publication/doc/ar/ar_2009.pdf",
+    "publishedAt": null,
+    "updatedAt": null,
+    "checkedAt": "2026-09-25T00:00:00+09:00",
+    "applicableDate": "2009-12-31",
+    "finalOrPreliminary": "research",
+    "locator": "フルハーネス型安全帯の普及に関する調査研究・研究成果（吊り下げ時の身体負担と速やかな救助）",
+    "claimIds": ["SCI-SUSP-002"],
+    "checksum": "sha256:f60c02c3306186b17a163025ac5aaecd0b4b0028a1d01b8261f8156c5eafce13",
+    "status": "verified"
+  },
+  {
     "sourceId": "LAW-EGOV-001",
     "sourceType": "law",
     "title": "労働安全衛生法",

@@ -1,6 +1,10 @@
 export const SAFETY_SEMINAR_HUB_PATH = "/training/safety-seminars";
+export const SAFETY_MANAGEMENT_BASICS_OSH_LAW_SEMINAR_PATH =
+  "/training/safety-seminars/safety-management-basics-osh-law";
 export const FALL_PREVENTION_SEMINAR_PATH =
   "/training/safety-seminars/fall-prevention";
+export const CHEMICALS_SDS_RISK_ASSESSMENT_PATH =
+  "/training/safety-seminars/chemicals-sds-risk-assessment";
 
 export type PublishedSafetySeminar = {
   id: string;
@@ -9,8 +13,8 @@ export type PublishedSafetySeminar = {
   audience: string;
   standardDuration: string;
   slideCount: number;
-  hasAudio: true;
-  formats: readonly ["PowerPoint", "PDF"];
+  hasAudio: boolean;
+  formats: readonly string[];
   href: string;
 };
 
@@ -27,13 +31,24 @@ export type SafetySeminar =
 
 export const SAFETY_SEMINARS: readonly SafetySeminar[] = [
   {
+    id: "safety-management-basics-osh-law",
+    status: "published",
+    title: "安全管理の基本と安衛法",
+    audience: "全作業者・職長・現場責任者・安全衛生担当者",
+    standardDuration: "確認込み約12〜15分",
+    slideCount: 12,
+    hasAudio: false,
+    formats: ["PowerPoint", "PDF"],
+    href: SAFETY_MANAGEMENT_BASICS_OSH_LAW_SEMINAR_PATH,
+  },
+  {
     id: "fall-prevention",
     status: "published",
     title: "墜落・転落防止とフルハーネスの実務",
     audience: "建設現場の作業者・職長・安全衛生担当者",
-    standardDuration: "約35〜50分（演習込み約60分）",
+    standardDuration: "演習込み約60分",
     slideCount: 20,
-    hasAudio: true,
+    hasAudio: false,
     formats: ["PowerPoint", "PDF"],
     href: FALL_PREVENTION_SEMINAR_PATH,
   },
@@ -63,9 +78,14 @@ export const SAFETY_SEMINARS: readonly SafetySeminar[] = [
   },
   {
     id: "chemicals-sds-risk-assessment",
-    status: "coming-soon",
+    status: "published",
     title: "化学物質・SDS・リスクアセスメント入門",
     audience: "化学物質を扱う作業者・管理者",
+    standardDuration: "約15〜20分",
+    slideCount: 12,
+    hasAudio: false,
+    formats: ["Webスライド", "確認クイズ"],
+    href: CHEMICALS_SDS_RISK_ASSESSMENT_PATH,
   },
   {
     id: "electrical-work",
@@ -209,4 +229,10 @@ export const PUBLISHED_SAFETY_SEMINARS = SAFETY_SEMINARS.filter(
 export const COMING_SOON_SAFETY_SEMINARS = SAFETY_SEMINARS.filter(
   (seminar): seminar is ComingSoonSafetySeminar =>
     seminar.status === "coming-soon",
+);
+
+/** おすすめ教材を先頭に、公開順を固定した最初の20テーマ。残りは次期候補として保持する。 */
+export const SAFETY_SEMINAR_CORE_20 = SAFETY_SEMINARS.slice(0, 20);
+export const COMING_SOON_SAFETY_CORE_20 = SAFETY_SEMINAR_CORE_20.filter(
+  (seminar): seminar is ComingSoonSafetySeminar => seminar.status === "coming-soon",
 );
