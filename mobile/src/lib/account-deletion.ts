@@ -7,11 +7,13 @@ import { billing } from './billing';
 export type DeletionPreparation={id:string;confirmation:string;receipt:string;expiresAt:string;subject:string;sessionBinding:string};
 export type DeletionStatus={status:'prepared'|'pending'|'completed';completedAt:string|null};
 type Receipt={receipt:string;subject:string;sessionBinding:string;erased:boolean};
+async function finishRemovals(tasks:Promise<void>[]){const results=await Promise.allSettled(tasks);const failed=results.find(result=>result.status==='rejected');if(failed?.status==='rejected')throw failed.reason;}
 async function clearDeletedAccountData(){
   await billing.forget().catch(()=>{});
   if(Capacitor.isNativePlatform())await PushNotifications.unregister().catch(()=>{});
-  await Promise.all(['news','revisions','statistics','weather','saved'].map(k=>contentStore.remove(k)));
-  await Promise.all(['location','large'].map(k=>settingsStore.remove(k)));
+  // Do not release the session lock while a sibling removal is still running after a failure.
+  await finishRemovals(['news','revisions','statistics','weather','saved'].map(k=>contentStore.remove(k)));
+  await finishRemovals(['location','large'].map(k=>settingsStore.remove(k)));
   for(const key of collectAppLocalStorageKeys(localStorage))localStorage.removeItem(key);
 }
 export async function prepareDeletion(){

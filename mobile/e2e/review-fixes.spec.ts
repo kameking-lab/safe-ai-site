@@ -31,7 +31,7 @@ test('shared quota meter warns at 20 percent and shows the JST recovery date',as
   await context.route(host+'/api/mobile/v1/capabilities',r=>r.fulfill({json:cap,headers:cors}));
   await page.goto('/chatbot/');const meter=page.getByLabel('会員の共通利用枠');await expect(meter.locator('[data-quota-low="true"]')).toHaveCount(2);await expect(meter).toContainText('残り10／50');await expect(meter).toContainText('残り2／10');await expect(meter).toContainText(/回復：.+（日本時間）/);
 });
-async function accountFixtures(context:BrowserContext,reauth=false){
+async function accountFixtures(context:BrowserContext,reauth=false,deletionResult:'completed'|'pending'='completed',lostConfirmation=false){
   let deleted=false;let confirmations=0;
   await context.route(host+'/api/**',async route=>{
     const path=new URL(route.request().url()).pathname;let status=200;let data:unknown={};
@@ -40,7 +40,7 @@ async function accountFixtures(context:BrowserContext,reauth=false){
     else if(path.endsWith('/account/delete')){
       const body=route.request().postDataJSON();
       if(body.action==='prepare'){if(reauth){status=401;data={error:{code:'REAUTH_REQUIRED'}};}else data={id:'88888888-2222-4222-8222-222222222222',confirmation:'c'.repeat(43),receipt:'r'.repeat(43),expiresAt:new Date(Date.now()+600000).toISOString(),subject:'member-a'};}
-      else if(body.action==='confirm'){confirmations++;deleted=true;data={status:'completed',completedAt:new Date().toISOString()};}else data={status:'completed',completedAt:new Date().toISOString()};
+      else if(body.action==='confirm'){confirmations++;deleted=true;if(lostConfirmation)return route.abort();data={status:deletionResult,completedAt:deletionResult==='completed'?new Date().toISOString():null};}else data={status:deletionResult,completedAt:deletionResult==='completed'?new Date().toISOString():null};
     }else if(path.endsWith('/account'))data={displayName:'試験会員',email:null,sdsHistory:[]};else{status=503;data={error:{code:'UNAVAILABLE'}};}
     await route.fulfill({status,json:data,headers:cors});
   });return ()=>confirmations;
@@ -53,6 +53,19 @@ test('deletion requires confirmation, completes in-app and clears saved personal
 });
 test('stale authentication offers reauthentication without claiming deletion succeeded',async({page,context})=>{
   const count=await accountFixtures(context,true);await page.goto('/account/');await page.getByRole('button',{name:'アカウント削除を開始',exact:true}).click();await expect(page.getByText(/削除には直近5分以内の本人確認/)).toBeVisible();expect(count()).toBe(0);await expect(page.getByRole('button',{name:'本人確認のため再ログイン'})).toBeVisible();
+});
+for(const pending of [false,true])test(`old deletion receipt preserves member B across navigation, restart and manual checks (${pending?'pending with lost response':'completed'})`,async({page,context})=>{
+  await accountFixtures(context,false,pending?'pending':'completed',pending);await page.goto('/account/');
+  await page.getByRole('button',{name:'アカウント削除を開始',exact:true}).click();await page.getByLabel('確認のため「削除」と入力').fill('削除');await page.getByRole('button',{name:'アカウントを完全に削除する',exact:true}).click();
+  await expect(page.getByRole('status').filter({hasText:pending?'処理結果を確認できません':'削除が完了しました'})).toBeVisible();
+  // Browser harness models the persisted incarnation written by native setSessionToken(B).
+  // Unit coverage uses the real session mutation API and verifies Keychain-token preservation.
+  await page.evaluate(()=>{localStorage.setItem('CapacitorStorage.anzen.session-incarnation','member-b-session');localStorage.setItem('company-profile','member-b-profile');localStorage.setItem('anzen.content.saved','member-b-saved');});
+  await context.route(host+'/api/me/entitlements',route=>route.fulfill({headers:cors,json:{plan:'free',source:null,syncState:'verified',expiresAt:null,appUserId:'99999999-1111-4111-8111-111111111111',verifiedAt:new Date().toISOString(),limits:product.limits.free}}));
+  await page.goto('/law-search/');await page.goto('/account/');await page.reload();
+  await expect(page.getByText('無料会員',{exact:true})).toBeVisible();
+  for(let i=0;i<2;i++)await page.getByRole('button',{name:'削除状況を確認',exact:true}).click();
+  expect(await page.evaluate(()=>[localStorage.getItem('company-profile'),localStorage.getItem('anzen.content.saved')])).toEqual(['member-b-profile','member-b-saved']);
 });
 test('purchase screen states RA is unavailable before purchase and exposes deletion',async({page,context})=>{
   await accountFixtures(context);await page.goto('/account/');await expect(page.getByText(/Proでも生成できません/)).toBeVisible();await expect(page.getByRole('button',{name:'App StoreでProを購入',exact:true})).toBeDisabled();await expect(page.getByRole('heading',{name:'アカウントの削除',exact:true})).toBeVisible();
