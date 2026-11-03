@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "packedFrom": "repository public data only",
-  "seedSha256": "614ee997400aaf0e229b8021aef1a5353182fd736b1846c4c2472d303d79b200",
+  "seedSha256": "6355a38b056522c666be3a5c0dad5eb06cc1beaf2d13aa61e058b8c847889141",
   "sources": [
     {
       "path": "web/src/data/law-revisions/egov-revisions.json",
@@ -9,7 +9,7 @@
     },
     {
       "path": "web/src/data/accidents/monthly-sokuhou.json",
-      "sha256": "d85ab0a66ecfc0c89ac98cc634a6863551bbcb7382bf213831c269b5b97b73be"
+      "sha256": "0ed321dd406d776eb39aed067b7fc48c695c141333d277bf79531fa929cf13c0"
     },
     {
       "path": "web/src/data/aggregates-mhlw/accidents-by-year.json",
@@ -24,6 +24,6 @@
   "sourceDates": {
     "revisions": "2026-07-06T03:50:37.208Z",
     "statistics": "2026-04-18T16:55:37.648827+00:00",
-    "monthly": "2026-07-31T09:29:48.412Z"
+    "monthly": "2026-10-15T03:56:03.273Z"
   }
 }
