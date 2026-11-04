@@ -20,7 +20,9 @@ describe("公開画面の権威・監修表示境界", () => {
         }),
       ).not.toThrow();
     },
-    30_000,
+    // This scans the entire repository plus PDF/Office assets. Concurrent
+    // Windows builds exceeded 30s during SEC3; keep every assertion enabled.
+    90_000,
   );
 
   it("uses the editorial identity and qualification without a registration number", () => {
