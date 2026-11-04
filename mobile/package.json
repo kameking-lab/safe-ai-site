@@ -13,6 +13,8 @@
     "test": "vitest run",
     "test:e2e": "playwright test",
     "ios:prepare": "node scripts/prepare-ios.mjs",
+    "ios:test": "node --test scripts/ios-project.test.mjs",
+    "capacitor:sync:after": "node scripts/finalize-ios.mjs",
     "pack:seed": "node scripts/pack-seed.mjs",
     "share:web": "node scripts/share-web.mjs"
   },

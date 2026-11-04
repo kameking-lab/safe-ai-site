@@ -40,4 +40,8 @@ FilesystemのLibraryNoCloudに取得済み資料を保存し、通信失敗後�
 
 追加スキーマは提案DDLのみ。本番DBへの適用・Apple/RevenueCat/APNs設定・実キーの投入は行っていない。各API・安全停止・必要設定は [API契約](docs/api-contract.md) と [公開前確認](docs/release-checklist.md) を参照。
 
-Codemagicの未署名macOSビルド定義にはwebの依存導入とPrisma型生成を追加した。実行・設定変更は行っていない。Simulator・実機・Sandbox購入・復元・通知・審査は別途確認が必要。
+CodemagicはiOSブランチの関連変更pushで署名付きIPAを作成し、App Store Connectへアップロードする定義。TestFlight配布・審査提出は自動実行しない。現時点では外部設定の仮置きがあり、CI実行・外部設定変更は行っていない。設定と提出の引継ぎは [IOS3H](docs/ios3h-release.md) を参照。
+
+生成用の `capacitor.config.ts` のappIdは `jp.anzenaiportal.app`。CLIがハイフンを拒否するための生成専用IDで、Apple側には登録しない。`capacitor:sync:after` フックが `configure-ios.rb` を呼び、直接CLIでadd/syncした場合にも全App構成とnative runtimeを登録済み `jp.anzen-ai-portal.app` へ戻す。`verify-ios.rb` が生成後・署名設定後に検証する。認証復帰schemeは引き続き `anzenai`。
+
+Windowsでのnativeファイル確認にはRubyとxcodeproj 1.27.0、Python 3が必要。上のbuild完了後に `npm run ios:prepare -- --allow-non-macos` と `npm run ios:test` を実行する。`BUILD_NUMBER` は正の整数、Store用は `ANZEN_APNS_ENVIRONMENT=production` とする。Windowsの成功はSwiftコンパイル・実profile・署名・アップロードの成功を意味しない。

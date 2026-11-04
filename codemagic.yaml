@@ -1,49 +1,105 @@
 workflows:
-  anzen-ios-v1-unsigned:
-    name: Anzen AI v1 · unsigned validation only
+  anzen-ios-app-store:
+    name: Anzen AI - App Store Connect upload only
     instance_type: mac_mini_m2
     max_build_duration: 60
     working_directory: mobile
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: "feat/ios-app-*"
+          include: true
+          source: true
+      cancel_previous_builds: true
+    when:
+      changeset:
+        includes:
+          - "mobile/**"
+          - "web/**"
+          - "codemagic.yaml"
+    integrations:
+      # Create/select this integration in the Codemagic team before enabling CI.
+      app_store_connect: TODO_ANZEN_APP_STORE_CONNECT
     environment:
-      node: 24.13.1
-      xcode: latest
+      groups:
+        - anzen_ios
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: jp.anzen-ai-portal.app
       vars:
+        APP_STORE_APPLE_ID: "TODO_ANZEN_APPLE_ID"
+        ANZEN_APNS_ENVIRONMENT: production
         CI: "true"
         NEXT_TELEMETRY_DISABLED: "1"
         CAPACITOR_TELEMETRY_DISABLED: "1"
+      node: "22.23.4"
+      xcode: latest
     scripts:
-      - name: Install locked mobile dependencies
-        script: npm ci --no-audit --no-fund
-      - name: Install canonical shared web modules without lifecycle side effects
+      - name: Install locked app and canonical web dependencies
         script: |
-          cd ../web
+          set -euo pipefail
+          cd "$CM_BUILD_DIR/web"
           npm ci --ignore-scripts --no-audit --no-fund
-          npx prisma generate --no-hints
-      - name: Typecheck and contract tests
+          npx --no-install prisma generate --no-hints
+          cd "$CM_BUILD_DIR/mobile"
+          npm ci --no-audit --no-fund
+          gem install xcodeproj -v 1.27.0 --no-document
+      - name: Typecheck, test and bundle local screens (outbound network blocked)
         script: |
+          set -euo pipefail
+          cd "$CM_BUILD_DIR/mobile"
           npm run typecheck
           npm test
-      - name: Build bundled screens (no Web deployment)
-        script: npm run build
-      - name: Generate iOS project on macOS only
-        script: npm run ios:prepare
-      - name: Compile unsigned iPhone simulator
+          npm run build
+      - name: Select next App Store Connect build number
         script: |
           set -euo pipefail
-          mkdir -p build
-          xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Debug -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath build/simulator CODE_SIGNING_ALLOWED=NO build > build/simulator.log 2>&1 || { tail -n 100 build/simulator.log; exit 1; }
-          test -f build/simulator/Build/Products/Debug-iphonesimulator/App.app/PrivacyInfo.xcprivacy
-          test -f build/simulator/Build/Products/Debug-iphonesimulator/App.app/public/index.html
-          ditto -c -k --sequesterRsrc --keepParent build/simulator/Build/Products/Debug-iphonesimulator/App.app build/AnzenAI-simulator.zip
-      - name: Create unsigned archive (no signing, export, upload or submission)
+          if [[ ! "$APP_STORE_APPLE_ID" =~ ^[0-9]+$ ]]; then
+            echo "Replace APP_STORE_APPLE_ID with the numeric ID of the Anzen app record." >&2
+            exit 1
+          fi
+          LATEST_BUILD_NUMBER=$(app-store-connect get-latest-testflight-build-number "$APP_STORE_APPLE_ID")
+          # A successful empty response means first upload; API failures must stop.
+          LATEST_BUILD_NUMBER=${LATEST_BUILD_NUMBER:-0}
+          if [[ ! "$LATEST_BUILD_NUMBER" =~ ^[0-9]+$ ]]; then
+            echo "Expected an integer App Store Connect build number." >&2
+            exit 1
+          fi
+          echo "BUILD_NUMBER=$((10#$LATEST_BUILD_NUMBER + 1))" >> "$CM_ENV"
+      - name: Generate and verify native SPM project
         script: |
           set -euo pipefail
-          xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Release -sdk iphoneos -destination 'generic/platform=iOS' -archivePath build/AnzenAI.xcarchive CODE_SIGNING_ALLOWED=NO archive > build/archive.log 2>&1 || { tail -n 100 build/archive.log; exit 1; }
-          ditto -c -k --sequesterRsrc --keepParent build/AnzenAI.xcarchive build/AnzenAI-unsigned.xcarchive.zip
+          cd "$CM_BUILD_DIR/mobile"
+          npm run ios:prepare
+          npm run ios:test
+          plutil -lint ios/App/App/Info.plist ios/App/App/PrivacyInfo.xcprivacy ios/App/App/App.entitlements
+      - name: Apply and verify App Store provisioning
+        script: |
+          set -euo pipefail
+          cd "$CM_BUILD_DIR/mobile"
+          mkdir -p build/ios
+          xcode-project use-profiles \
+            --project ios/App/App.xcodeproj \
+            --export-options-plist build/ios/export_options.plist
+          ruby scripts/verify-ios.rb build/ios/export_options.plist
+      - name: Build signed IPA
+        script: |
+          set -euo pipefail
+          cd "$CM_BUILD_DIR/mobile"
+          xcode-project build-ipa \
+            --project ios/App/App.xcodeproj \
+            --scheme App \
+            --config Release \
+            --export-options-plist build/ios/export_options.plist \
+            --ipa-directory build/ios/ipa
     artifacts:
-      - mobile/build/AnzenAI-simulator.zip
-      - mobile/build/AnzenAI-unsigned.xcarchive.zip
-      - mobile/build/*.log
-      - mobile/ios/App/App.xcodeproj/project.pbxproj
-      - mobile/ios/App/**/Package.resolved
-      - mobile/src/data/manifest.json
+      - mobile/build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+      - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.dSYM
+    publishing:
+      app_store_connect:
+        auth: integration
+        # Upload only: no TestFlight distribution, beta groups or App Review submission.
+        submit_to_testflight: false
+        submit_to_app_store: false

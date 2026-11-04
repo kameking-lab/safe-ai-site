@@ -3,20 +3,28 @@ import { readFile } from 'node:fs/promises';
 import { execFileSync } from 'node:child_process';
 import { parse } from 'yaml';
 import { sanitizePdfjsBrowserPath } from '../scripts/pdfjs-browser-path.mjs';
-describe('cloud-only unsigned iOS pipeline', () => {
+describe('iOS pipeline boundaries', () => {
   it('removes build-host paths only from PDF.js Node canvas fallback',()=>{
     const hostUrl='file:///'+['C:','Users','build-agent','node_modules','pdfjs-dist','pdf.mjs'].join('/');
     const source=`createWorker(new URL("pdf.worker.mjs",import.meta.url)); module.createRequire("${hostUrl}")("@napi-rs/canvas")`;
     const output=sanitizePdfjsBrowserPath(source);expect(output).not.toContain('build-agent');expect(output).toContain('file:///anzen-native/pdfjs.mjs');expect(output).toContain('new URL("pdf.worker.mjs",import.meta.url)');expect(sanitizePdfjsBrowserPath('other.createRequire("file:///data/document.mjs")')).toContain('file:///data/document.mjs');
   });
-  it('has no remote webview, signing or publishing configuration', async () => {
+  it('bundles local screens and uploads without beta distribution or review submission', async () => {
     const config = await readFile(new URL('../capacitor.config.ts', import.meta.url), 'utf8');
     expect(config).not.toMatch(/\burl\s*:|allowNavigation|allowMixedContent/);
-    const workflow = parse(await readFile(new URL('../../codemagic.yaml', import.meta.url), 'utf8')).workflows['anzen-ios-v1-unsigned'];
-    expect(workflow.working_directory).toBe('mobile'); expect(workflow.publishing).toBeUndefined();
-    expect(workflow.environment.ios_signing).toBeUndefined();
-    expect(JSON.stringify(workflow.scripts)).toContain('CODE_SIGNING_ALLOWED=NO');
-    expect(JSON.stringify(workflow)).not.toMatch(/app_store_connect|api_key|vercel|git push/);
+    const workflow = parse(await readFile(new URL('../../codemagic.yaml', import.meta.url), 'utf8')).workflows['anzen-ios-app-store'];
+    expect(workflow.working_directory).toBe('mobile');
+    expect(workflow.publishing.app_store_connect).toEqual({auth:'integration',submit_to_testflight:false,submit_to_app_store:false});
+    expect(workflow.environment.ios_signing).toEqual({distribution_type:'app_store',bundle_identifier:'jp.anzen-ai-portal.app'});
+    expect(workflow.triggering.events).toEqual(['push']);
+    expect(workflow.when.changeset.includes).toContain('web/**');
+    const scripts=workflow.scripts.map((step:{script:string})=>step.script).join('\n');
+    expect(scripts).toContain('get-latest-testflight-build-number');
+    expect(scripts).not.toContain('|| true');
+    expect(scripts).toContain('ruby scripts/verify-ios.rb build/ios/export_options.plist');
+    expect(scripts).toContain('--ipa-directory build/ios/ipa');
+    expect(workflow.artifacts).toContain('mobile/build/ios/ipa/*.ipa');
+    expect(scripts).not.toMatch(/CODE_SIGNING_ALLOWED=NO|vercel|git push/);
   });
   it('matches resource injection against the installed Capacitor template without generating iOS', () => {
     const template = execFileSync('tar', ['-xOf', 'node_modules/@capacitor/cli/assets/ios-spm-template.tar.gz', 'App/App.xcodeproj/project.pbxproj'], { encoding: 'utf8' });
