@@ -11,9 +11,6 @@ import DiversityNonRegularPage from "@/app/(main)/diversity/non-regular/page";
 import DiversityRemotePage from "@/app/(main)/diversity/remote/page";
 import DiversitySogiPage from "@/app/(main)/diversity/sogi/page";
 import HealthCheckupSchedulerResultPage from "@/app/(main)/health-checkup-scheduler/result/page";
-import LawsBcpPage from "@/app/(main)/laws/bcp/page";
-import LawsFreelanceRosaiPage from "@/app/(main)/laws/freelance-rosai/page";
-import LawsGigWorkPage from "@/app/(main)/laws/gig-work/page";
 import MlitResourcesPage from "@/app/(main)/resources/mlit/page";
 import { AppShell } from "@/components/app-shell";
 
@@ -43,9 +40,6 @@ const APP_SHELL_ROUTE_MANIFEST: ReadonlyArray<{
     pathname: "/health-checkup-scheduler/result",
     Page: HealthCheckupSchedulerResultPage,
   },
-  { pathname: "/laws/bcp", Page: LawsBcpPage },
-  { pathname: "/laws/freelance-rosai", Page: LawsFreelanceRosaiPage },
-  { pathname: "/laws/gig-work", Page: LawsGigWorkPage },
   { pathname: "/resources/mlit", Page: MlitResourcesPage },
 ];
 
