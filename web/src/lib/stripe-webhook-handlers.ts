@@ -40,14 +40,15 @@ function verifiedData(sub: Stripe.Subscription, expectedId: string, customerId: 
   }
   const priceId = sub.items.data[0]?.price.id ?? null;
   const configuredPlan = resolveStripePlan(priceId);
-  if (!configuredPlan) throw new Error("unrecognized Stripe price");
   const currentPeriodEnd = periodEnd(sub);
   const entitled =
     (sub.status === "active" || sub.status === "trialing") &&
     currentPeriodEnd !== null && currentPeriodEnd.getTime() > Date.now();
   return {
     stripePriceId: priceId,
-    planName: entitled ? configuredPlan : "free",
+    // Unknown canonical prices cannot grant a plan, including retaining an
+    // older paid grant. Do not abort before revoking that stale entitlement.
+    planName: entitled && configuredPlan ? configuredPlan : "free",
     status: sub.status,
     currentPeriodEnd,
   };
@@ -101,7 +102,6 @@ export async function handleCheckoutCompleted(database: StripeDb, session: Strip
 }
 
 export async function handleSubscriptionUpdated(database: StripeDb, sub: Stripe.Subscription): Promise<void> {
-  if (!resolveStripePlan(sub.items.data[0]?.price.id)) throw new Error("unrecognized Stripe price");
   await reconcileBoundSubscription(database, sub.id, objectId(sub.customer));
 }
 

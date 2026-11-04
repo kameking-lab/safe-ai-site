@@ -71,6 +71,22 @@ describe("SEC3-H3 authoritative Stripe reconciliation", () => {
     expect(db.updateMany).not.toHaveBeenCalled();
   });
 
+  it("removes stale paid rights when the canonical price is outside the server allowlist", async () => {
+    const db = database();
+    const canonical = subscription();
+    canonical.items.data[0].price.id = "price_unrecognized";
+    provider.retrieve.mockResolvedValue(canonical);
+    await handleSubscriptionUpdated(db.client, subscription());
+    expect(db.row).toMatchObject({ planName: "free", status: "active" });
+  });
+
+  it("still revokes when a delayed event contains a retired price", async () => {
+    const db = database(); provider.retrieve.mockResolvedValue(subscription("canceled"));
+    const stale = subscription(); stale.items.data[0].price.id = "price_retired";
+    await handleSubscriptionUpdated(db.client, stale);
+    expect(db.row).toMatchObject({ planName: "free", status: "canceled" });
+  });
+
   it.each(["past_due", "unpaid", "incomplete", "incomplete_expired", "paused", "canceled"])("does not grant a paid plan for %s", async (status) => {
     const db = database(); provider.retrieve.mockResolvedValue(subscription(status));
     await handleSubscriptionUpdated(db.client, subscription());
