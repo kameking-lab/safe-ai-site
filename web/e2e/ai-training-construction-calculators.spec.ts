@@ -25,13 +25,15 @@ const CALCULATOR_SLUGS = [
 ] as const;
 
 test.describe("AI実務研修と建設計算ツール", () => {
-  test("AI一覧は全20テーマ（公開1件、Coming Soon 19件）で空詳細リンクを作らない", async ({ page }) => {
+  test("AI一覧は公開教材1件だけを案内し、準備中の計画を表示しない", async ({ page }) => {
     const response = await page.goto(AI_HUB);
     expect(response?.status()).toBe(200);
     await expect(page.getByRole("heading", { level: 1, name: "AI実務研修" })).toBeVisible();
     await expect(page.locator('[data-ai-seminar-status="published"]')).toHaveCount(1);
-    await expect(page.locator('[data-ai-seminar-status="coming-soon"]')).toHaveCount(19);
-    await expect(page.locator('[data-ai-seminar-status="coming-soon"] a')).toHaveCount(0);
+    // ADA: 未完成の計画は内部データに保持し、公開一覧には掲載しない。
+    await expect(page.locator('[data-ai-seminar-status="coming-soon"]')).toHaveCount(0);
+    await expect(page.getByRole("main")).not.toContainText(/Coming Soon|準備中/u);
+    await expect(page.locator('[data-ai-seminar-status="published"] a')).toHaveAttribute("href", AI_DETAIL);
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
       "href",
       `https://www.anzen-ai-portal.jp${AI_HUB}`,
@@ -99,13 +101,14 @@ test.describe("AI実務研修と建設計算ツール", () => {
     }
   });
 
-  test("建設計算一覧は公開17件、Coming Soon 18件で個別URLは公開分だけ", async ({ page }) => {
+  test("建設計算一覧は公開17件だけを案内し、準備中の計画を表示しない", async ({ page }) => {
     const response = await page.goto(CALCULATOR_HUB);
     expect(response?.status()).toBe(200);
     await expect(page.getByRole("heading", { level: 1, name: "建設計算ツール" })).toBeVisible();
     await expect(page.locator('[data-calculator-status="published"]')).toHaveCount(17);
-    await expect(page.locator('[data-calculator-status="coming-soon"]')).toHaveCount(18);
-    await expect(page.locator('[data-calculator-status="coming-soon"] a')).toHaveCount(0);
+    // ADA: Coming Soon 18件は内部の計画であり、公開コンテンツではない。
+    await expect(page.locator('[data-calculator-status="coming-soon"]')).toHaveCount(0);
+    await expect(page.getByRole("main")).not.toContainText(/Coming Soon|準備中/u);
     const publishedHrefs = await page
       .locator('[data-calculator-status="published"] a')
       .evaluateAll((anchors) => anchors.map((anchor) => anchor.getAttribute("href")));

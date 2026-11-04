@@ -7,7 +7,7 @@ const OSH_DETAIL = `${HUB}/safety-management-basics-osh-law`;
 const CHEMICAL_DETAIL = `${HUB}/chemicals-sds-risk-assessment`;
 
 test.describe("安全研修ライブラリ", () => {
-  test("一覧は全20テーマ（公開3件、Coming Soon 17件）で空の個別CTAがない", async ({ page }) => {
+  test("一覧は公開教材3件だけを案内し、準備中の計画を表示しない", async ({ page }) => {
     const response = await page.goto(HUB);
     expect(response?.status()).toBe(200);
     await expect(page.getByRole("heading", { level: 1, name: "安全研修ライブラリ" })).toBeVisible();
@@ -23,21 +23,10 @@ test.describe("安全研修ライブラリ", () => {
       CHEMICAL_DETAIL,
     ]);
     const pending = page.locator('[data-seminar-status="coming-soon"]');
-    const details = page.locator("details").filter({ has: pending.first() });
-    const summary = details.locator("summary");
-    await expect(pending).toHaveCount(17);
-    expect(await publishedCards.count() + await pending.count()).toBe(20);
-    await expect(details).not.toHaveAttribute("open", "");
-    await expect(pending.first()).not.toBeVisible();
-    await summary.click();
-    await expect(details).toHaveAttribute("open", "");
-    for (const item of await pending.all()) {
-      await expect(item.locator("a, button")).toHaveCount(0);
-      await expect(item.getByText("準備中", { exact: true })).toBeVisible();
-    }
-    await summary.click();
-    await expect(details).not.toHaveAttribute("open", "");
-    await expect(pending.first()).not.toBeVisible();
+    // ADA: 内部の研修計画は公開せず、公開済み3教材への導線を維持する。
+    await expect(pending).toHaveCount(0);
+    await expect(page.locator('section[aria-labelledby="coming-soon-title"]')).toHaveCount(0);
+    await expect(page.getByRole("main")).not.toContainText(/Coming Soon|準備中/u);
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", `https://www.anzen-ai-portal.jp${HUB}`);
   });
 

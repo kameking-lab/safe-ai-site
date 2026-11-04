@@ -82,19 +82,15 @@ test.describe("editable questions, PPE consultation and published learning @smok
     // メールアプリ起動・メール送信は行わない。
   });
 
-  test("064 公開教材を先に選び、準備中を閉じたまま絞り込みと解除ができる", async ({ page }, testInfo) => {
+  test("064 公開教材だけを案内し、絞り込みと解除ができる", async ({ page }, testInfo) => {
     await page.goto("/training/safety-seminars");
     const published = page.locator('section[aria-labelledby="published-seminars-title"]');
     const cards = published.locator('[data-seminar-status="published"]');
-    const pending = page.locator('section[aria-labelledby="coming-soon-title"] details');
+    const pending = page.locator('[data-seminar-status="coming-soon"], section[aria-labelledby="coming-soon-title"]');
     await expect(cards).toHaveCount(3);
-    await expect(pending).toHaveJSProperty("open", false);
-    await expect(pending.locator('[data-seminar-status="coming-soon"]')).toHaveCount(17);
-    expect(await page.evaluate(() => {
-      const ready = document.querySelector('[data-seminar-status="published"]')!;
-      const future = document.querySelector('section[aria-labelledby="coming-soon-title"]')!;
-      return Boolean(ready.compareDocumentPosition(future) & Node.DOCUMENT_POSITION_FOLLOWING);
-    })).toBe(true);
+    // ADA: 準備中は折り畳み表示も撤去し、利用できる教材だけを案内する。
+    await expect(pending).toHaveCount(0);
+    await expect(page.getByRole("main")).not.toContainText(/Coming Soon|準備中/u);
     await expect(async () => {
       await published.getByRole("combobox", { name: "形式で絞り込む" }).selectOption("Webスライド");
       await expect(cards).toHaveCount(1, { timeout: 1_000 });
@@ -111,7 +107,7 @@ test.describe("editable questions, PPE consultation and published learning @smok
     await expect(cards.first()).toContainText("墜落・転落防止");
     await published.getByRole("button", { name: "絞り込みを解除", exact: true }).click();
     await expect(cards).toHaveCount(3);
-    await expect(pending).toHaveJSProperty("open", false);
+    await expect(pending).toHaveCount(0);
     await published.scrollIntoViewIfNeeded();
     await expectNoHorizontalOverflow(page);
     await capture(page, testInfo, "064-published-seminars-390");
