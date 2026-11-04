@@ -12,7 +12,9 @@ await sanitizeChunks(new URL('../out/_next/',import.meta.url));
 const config = await readFile(new URL('../capacitor.config.ts', import.meta.url), 'utf8');
 assert(!/server\s*:\s*\{[^}]*\burl\s*:/.test(config), 'Remote WebView must never be configured');
 assert(!/allowNavigation|allowMixedContent\s*:\s*true/.test(config));
-assert(config.includes("appId: 'jp.anzen-ai-portal.app'"));
+// This is the CLI input, not the shipped Apple identity. Native identity is
+// restored by capacitor:sync:after and checked by verify-ios.rb after prepare.
+assert(config.includes("appId: 'jp.anzenaiportal.app'"), 'Capacitor generation requires a valid CLI appId');
 const html = await readFile(new URL('../out/index.html', import.meta.url), 'utf8');
 assert(html.includes('事故速報') && html.includes('安全AIポータル'));
 assert(!(await stat(new URL('../out/index.html', import.meta.url))).isDirectory());
