@@ -52,6 +52,20 @@ const rejects = (cwd, message, ...args) => {
   assert.match(result.stderr, message);
 };
 
+test("generated custom plugins match the source and compile in App exactly once", () => {
+  const source = "NativeVault.swift";
+  assert.equal(readFileSync(join(mobile, "ios/App/App", source), "utf8"),
+    readFileSync(join(mobile, "ios-resources", source), "utf8"), "rerun ios:prepare");
+  const compiled = JSON.parse(ruby(mobile, `
+    project = Xcodeproj::Project.open('ios/App/App.xcodeproj')
+    target = project.targets.find { |t| t.name == 'App' }
+    puts JSON.generate(target.source_build_phase.files_references.map(&:path))
+  `));
+  assert.equal(compiled.filter(path => path === source).length, 1);
+  assert.match(readFileSync(join(mobile, "ios/App/App/Base.lproj/Main.storyboard"), "utf8"),
+    /customClass="AnzenBridgeViewController" customModule="App"/);
+});
+
 test("the pinned CLI accepts the generation ID and rejects the registered Apple ID", async () => {
   const config = await loadConfig();
   assert.equal(config.app.appId, "jp.anzenaiportal.app");

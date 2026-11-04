@@ -1,6 +1,6 @@
 # 安全AIポータル iOS v1 — IOS3B
 
-iPhone / iOS 16以降 / Capacitor 8 / RevenueCat公式SDK 14。M3の閲覧アプリを、ウェブと共通の全公開画面および初版からのIAPへ拡張。
+iPhone / iOS 16以降 / Capacitor 8 / RevenueCat公式SDK 13.8.0（固定）。M3の閲覧アプリを、ウェブと共通の全公開画面および初版からのIAPへ拡張。
 
 ## 共通実装
 
@@ -45,3 +45,11 @@ CodemagicはiOSブランチの関連変更pushで署名付きIPAを作成し、A
 生成用の `capacitor.config.ts` のappIdは `jp.anzenaiportal.app`。CLIがハイフンを拒否するための生成専用IDで、Apple側には登録しない。`capacitor:sync:after` フックが `configure-ios.rb` を呼び、直接CLIでadd/syncした場合にも全App構成とnative runtimeを登録済み `jp.anzen-ai-portal.app` へ戻す。`verify-ios.rb` が生成後・署名設定後に検証する。認証復帰schemeは引き続き `anzenai`。
 
 Windowsでのnativeファイル確認にはRubyとxcodeproj 1.27.0、Python 3が必要。上のbuild完了後に `npm run ios:prepare -- --allow-non-macos` と `npm run ios:test` を実行する。`BUILD_NUMBER` は正の整数、Store用は `ANZEN_APNS_ENVIRONMENT=production` とする。Windowsの成功はSwiftコンパイル・実profile・署名・アップロードの成功を意味しない。
+
+## CMX: Codemagic前の互換性検査（2026-11-05）
+
+RevenueCatはCM5と同じ13.8.0へ固定。lockfileも更新し、SDK付属のSPM/PodspecがともにPurchasesHybridCommon 19.17.0を要求することをテストする。SPMを維持する。
+
+`tests/native-plugin-contract.test.ts` は自作NativeVault/NativeSpeech/NativeDocumentsの全3プラグインについて、CAPBridgedPlugin、明示的な `[CAPPluginMethod]`、識別子・@objc・Promiseメソッド・JS登録・capacitorDidLoadでの登録を検査する。addListenerはCapacitor基底APIとして除外する。Git管理下/未追跡のnativeソースと原本ディレクトリの一覧も照合し、検査対象漏れを検出する。既存の `npm test` で実行される。
+
+`ios:test` は生成先のSwiftと原本の一致、App Sourcesへの1回だけの登録、storyboardの自作ViewController指定も確認する。静的/生成ファイル検査であり、SwiftコンパイルはmacOSで別途必要。appId復元は既存の実CLI add/syncテストを継承。Node 22.23.4の通常typecheck/test/buildでCM2のESM/CJS問題を確認し、不要なcreateRequire移植は行わない。
