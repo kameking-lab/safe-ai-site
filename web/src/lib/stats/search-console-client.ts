@@ -1,4 +1,6 @@
+import "server-only";
 import { buildMockSearchConsoleResponse } from "@/data/mock/search-console-mock";
+import { externalCredentialedServicesAllowed } from "@/lib/server/deployment-safety";
 import type {
   SearchConsoleCountryRow,
   SearchConsoleDeviceRow,
@@ -38,7 +40,8 @@ const TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
 
 function isConfigured(): boolean {
   return Boolean(
-    process.env.GSC_OAUTH_CLIENT_ID &&
+    externalCredentialedServicesAllowed() &&
+      process.env.GSC_OAUTH_CLIENT_ID &&
       process.env.GSC_OAUTH_CLIENT_SECRET &&
       process.env.GSC_OAUTH_REFRESH_TOKEN,
   );
