@@ -9,13 +9,14 @@ import { parseAutomationConsultationTypePrefill } from "@/lib/automation-consult
 import ConstructionCalculatorsPage, { generateMetadata } from "./page";
 
 describe("/tools/construction-calculators", () => {
-  it("低リスクの公開17件とリンクなしComing Soon 18件だけを表示する", () => {
+  it("計画データを保持し、公開済みツールだけを一覧に表示する", () => {
     const { container } = render(<ConstructionCalculatorsPage />);
     expect(screen.getByRole("heading", { level: 1, name: "建設計算ツール" })).toBeTruthy();
     expect(constructionCalculatorRegistry).toHaveLength(17);
     expect(COMING_SOON_CONSTRUCTION_CALCULATORS).toHaveLength(18);
     expect(container.querySelectorAll('[data-calculator-status="published"]')).toHaveLength(17);
-    expect(container.querySelectorAll('[data-calculator-status="coming-soon"]')).toHaveLength(18);
+    expect(container.querySelectorAll('[data-calculator-status="coming-soon"]')).toHaveLength(0);
+    expect(container.textContent).not.toContain("Coming Soon");
     for (const item of container.querySelectorAll('[data-calculator-status="coming-soon"]')) {
       expect(item.querySelector("a, button, input, form")).toBeNull();
     }
