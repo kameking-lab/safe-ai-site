@@ -1,6 +1,6 @@
 # セッション引き継ぎ書 — 2026-04-21
 
-> **閲覧方法:** [https://anzen-ai-portal.jp/handover?key=handover2026](https://anzen-ai-portal.jp/handover?key=handover2026)
+> **閲覧方法:** [https://anzen-ai-portal.jp/handover?key=<REDACTED>](https://anzen-ai-portal.jp/handover?key=<REDACTED>)
 
 ---
 
@@ -200,4 +200,4 @@ scripts/generate-seminar-pptx.mjs      ← 生成スクリプト
 ---
 
 *このドキュメントは 2026-04-21 時点の状態を記録しています。*  
-*閲覧URL: https://anzen-ai-portal.jp/handover?key=handover2026*
+*閲覧URL: https://anzen-ai-portal.jp/handover?key=<REDACTED>*
