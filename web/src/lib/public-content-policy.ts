@@ -9,6 +9,7 @@
  * search, sitemap and feature catalogs can apply the same fail-closed rule.
  */
 import { isArticleQuarantined } from "@/lib/article-quarantine";
+import { isUnfinishedPublicReadingPath } from "@/lib/public-reading-status";
 import {
   hasApprovedPublicContentRevalidation,
   requiresPublicContentRevalidation,
@@ -54,6 +55,8 @@ function isPublishedSafetyLearningPath(path: string): boolean {
 
 export function isQuarantinedPublicPath(href: string): boolean {
   const path = pathOnly(href);
+
+  if (isUnfinishedPublicReadingPath(path)) return true;
 
   if (
     requiresPublicContentRevalidation(path) &&

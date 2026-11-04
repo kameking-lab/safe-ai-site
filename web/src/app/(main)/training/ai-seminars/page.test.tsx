@@ -11,7 +11,7 @@ import {
 import AiSeminarLibraryPage, { generateMetadata } from "./page";
 
 describe("/training/ai-seminars", () => {
-  it("25テーマを保持しつつ最初の20テーマを目次表示する", () => {
+  it("計画データを保持し、公開一覧は利用できる教材と実践手順を表示する", () => {
     const { container } = render(<AiSeminarLibraryPage />);
     expect(AI_SEMINAR_THEMES).toHaveLength(25);
     expect(PUBLISHED_AI_SEMINARS).toHaveLength(1);
@@ -19,10 +19,9 @@ describe("/training/ai-seminars", () => {
     expect(AI_SEMINAR_CORE_20).toHaveLength(20);
     expect(COMING_SOON_AI_CORE_20).toHaveLength(19);
     expect(container.querySelectorAll('[data-ai-seminar-status="published"]')).toHaveLength(1);
-    expect(container.querySelectorAll('[data-ai-seminar-status="coming-soon"]')).toHaveLength(19);
-    for (const item of container.querySelectorAll('[data-ai-seminar-status="coming-soon"]')) {
-      expect(item.querySelector("a, button, input, form")).toBeNull();
-    }
+    expect(container.querySelectorAll('[data-ai-seminar-status="coming-soon"]')).toHaveLength(0);
+    expect(screen.queryByText(/Coming Soon|準備中/)).toBeNull();
+    expect(screen.getByRole("heading", { name: "研修を仕事の改善につなげる手順" })).toBeDefined();
     expect(screen.getByRole("link", { name: /今すぐ見る/u }).getAttribute("href")).toBe("/training/ai-seminars/ai-chat-work");
   });
 

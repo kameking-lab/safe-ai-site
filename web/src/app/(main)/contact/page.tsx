@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
 import { PageContainer } from "@/components/layout";
 import { PageJsonLd } from "@/components/page-json-ld";
 import { withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
-import InquiryForm from "./InquiryForm";
+import InquiryForm, { type InquiryInitialParams } from "./InquiryForm";
 
 const title = "ご意見・ご質問・お問い合わせ";
 const description =
@@ -17,30 +16,32 @@ export const metadata: Metadata = {
   twitter: withSiteTwitter({ card: "summary", title, description }),
 };
 
-function ContactFallback() {
-  return (
-    <PageContainer width="narrow" className="space-y-4">
-      <header className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-        <p className="text-sm font-semibold text-emerald-700">お問い合わせ窓口</p>
-        <h1 className="mt-2 text-2xl font-bold text-slate-950 sm:text-3xl">
-          {title}
-        </h1>
-        <p className="mt-3 text-sm leading-7 text-slate-700">{description}</p>
-      </header>
-      <p role="status" className="text-sm text-slate-600">
-        入力フォームを読み込んでいます。
-      </p>
-    </PageContainer>
-  );
-}
-
-export default function ContactPage() {
+export default async function ContactPage({ searchParams }: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const query = await searchParams;
+  const initialParams: InquiryInitialParams = {};
+  for (const key of ["course", "topic", "tab", "category", "industry"] as const) {
+    const value = query[key];
+    if (typeof value === "string") initialParams[key] = value;
+  }
   return (
     <>
       <PageJsonLd name={title} description={description} path="/contact" />
-      <Suspense fallback={<ContactFallback />}>
-        <InquiryForm />
-      </Suspense>
+      <div data-inquiry-form>
+        <InquiryForm key={JSON.stringify(initialParams)} initialParams={initialParams} />
+      </div>
+      <noscript>
+        <style>{`[data-inquiry-form] form, [data-inquiry-form] [role="tablist"] { display: none !important; }`}</style>
+        <PageContainer width="narrow" className="space-y-3">
+          <p className="text-sm leading-7 text-slate-700">
+            フォーム送信にはJavaScriptが必要です。メールでの連絡は、受付方法のページからご利用ください。
+          </p>
+          <a href="/contact/automation-email" className="inline-flex min-h-11 items-center font-bold text-emerald-800 underline">
+            メールでの受付方法を確認する
+          </a>
+        </PageContainer>
+      </noscript>
     </>
   );
 }

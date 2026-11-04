@@ -1,22 +1,17 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import InquiryForm from "./InquiryForm";
+import InquiryForm, { type InquiryInitialParams } from "./InquiryForm";
 import { LanguageProvider } from "@/contexts/language-context";
 import { FuriganaProvider } from "@/contexts/furigana-context";
 import { EasyJapaneseProvider } from "@/contexts/easy-japanese-context";
 
-// next/navigation はクライアントフックなのでモック。既定では query なし（一般タブ起動）。
-vi.mock("next/navigation", () => ({
-  useSearchParams: () => ({ get: () => null }),
-}));
-
 // TranslatedPageHeader 配下の RubyText/EasyJapaneseText が各Providerを要求するためラップする。
-function renderForm() {
+function renderForm(initialParams?: InquiryInitialParams) {
   return render(
     <LanguageProvider>
       <FuriganaProvider>
         <EasyJapaneseProvider>
-          <InquiryForm />
+          <InquiryForm initialParams={initialParams} />
         </EasyJapaneseProvider>
       </FuriganaProvider>
     </LanguageProvider>,
@@ -24,6 +19,16 @@ function renderForm() {
 }
 
 describe("/contact 柱C-10 コンサル相談CVパス（2タブ化）", () => {
+  it("サーバーで読んだqueryから相談タブと教育相談を引き継ぐ", () => {
+    renderForm({ course: "fullharness", topic: "edu-pack", industry: "建設・土木" });
+    expect(screen.getByRole("tab", { name: "法人・コンサルのご相談" }).getAttribute("aria-selected")).toBe("true");
+    expect(screen.getByRole("link", { name: "相談の受付方法を見る" }).getAttribute("href")).toBe("/services/automation#consult-form");
+  });
+
+  it("サーバーから指定した業種を一般フォームへ引き継ぐ", () => {
+    renderForm({ industry: "建設・土木" });
+    expect(screen.getByLabelText(/業種/)).toHaveProperty("value", "建設・土木");
+  });
   it("既定は「ご意見・ご質問」タブでカテゴリ選択を表示する", () => {
     renderForm();
     expect(

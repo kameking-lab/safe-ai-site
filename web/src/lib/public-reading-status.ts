@@ -1,4 +1,4 @@
-/** Unfinished reading pages stay reachable and labelled, but never serve ads. */
+/** Outline-only reading pages stay unpublished until their editorial content is complete. */
 export const UNFINISHED_PUBLIC_READING_PATHS = [
   "/laws/bcp",
   "/laws/gig-work",
