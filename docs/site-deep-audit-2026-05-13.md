@@ -117,7 +117,7 @@
 
 **P2-06 — /handover route reachable in production via gate-key**
 - file: [web/src/app/(main)/handover/page.tsx](web/src/app/(main)/handover/page.tsx)
-- Issue: Gated by `?key=handover2026` but reachable. Contains internal-table copy ("Claude Code 活用支援  個別見積") and "事故データベース（Vercel Blob） 504,415 件" — internal info. Not P0 (404s without key).
+- Issue: Gated by `?key=<REDACTED>` but reachable. Contains internal-table copy ("Claude Code 活用支援  個別見積") and "事故データベース（Vercel Blob） 504,415 件" — internal info. Not P0 (404s without key).
 - Recommendation: Already has `robots: { index: false }` per agent finding — acceptable. Leave but track.
 
 **P2-07 — partnership page sales-flow language**

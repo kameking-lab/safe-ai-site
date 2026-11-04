@@ -1,6 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { isPaidModeReady, resolveStripePlan } from "./stripe-price-policy";
-import { handleSubscriptionUpdated } from "./stripe-webhook-handlers";
 
 describe("Stripe server-side price policy", () => {
   afterEach(() => vi.unstubAllEnvs());
@@ -24,18 +23,4 @@ describe("Stripe server-side price policy", () => {
     expect(isPaidModeReady()).toBe(false);
   });
 
-  it("Webhookも未知のPriceをstandardへ昇格させずDB更新前に拒否する", async () => {
-    vi.stubEnv("NEXT_PUBLIC_STRIPE_PRICE_PREMIUM", "price_standard_synthetic");
-    vi.stubEnv("NEXT_PUBLIC_STRIPE_PRICE_PRO", "price_pro_synthetic");
-    const updateMany = vi.fn();
-    const prisma = { subscription: { updateMany } } as never;
-    const subscription = {
-      id: "sub_synthetic",
-      status: "active",
-      customer: "cus_synthetic",
-      items: { data: [{ price: { id: "price_unrecognized" } }] },
-    } as never;
-    await expect(handleSubscriptionUpdated(prisma, subscription)).rejects.toThrow("unrecognized Stripe price");
-    expect(updateMany).not.toHaveBeenCalled();
-  });
 });

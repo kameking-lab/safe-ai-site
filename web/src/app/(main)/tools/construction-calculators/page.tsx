@@ -6,7 +6,6 @@ import { ArrowRight, CheckCircle2, History, Smartphone } from "lucide-react";
 import { JsonLd } from "@/components/json-ld";
 import { PageContainer } from "@/components/layout";
 import {
-  COMING_SOON_CONSTRUCTION_CALCULATORS,
   CONSTRUCTION_CALCULATOR_HUB_PATH,
 } from "@/data/construction-calculators/coming-soon";
 import { constructionCalculatorRegistry } from "@/data/construction-calculators/formula-registry";
@@ -102,22 +101,6 @@ export default function ConstructionCalculatorsPage() {
           </h2>
           <ConstructionCalculatorDirectory items={constructionCalculatorRegistry.map(c=>({slug:c.slug,title:c.title,purpose:CALCULATOR_TASKS[c.slug]??c.purpose,category:c.category}))}/>
 
-        </section>
-
-        <section aria-labelledby="calculator-coming-soon" className="mt-14">
-          <details className="rounded-2xl border-2 border-slate-300 bg-white dark:border-slate-700 dark:bg-slate-900">
-            <summary className="flex min-h-14 cursor-pointer items-center justify-between gap-4 px-5 py-3 font-black">
-              <span id="calculator-coming-soon">Coming Soon {COMING_SOON_CONSTRUCTION_CALCULATORS.length}件</span>
-              <span className="text-xs text-slate-600 dark:text-slate-300">候補一覧を開く</span>
-            </summary>
-            <ol className="columns-1 gap-8 border-t border-slate-200 px-5 py-4 text-sm sm:columns-2 lg:columns-3 dark:border-slate-700">
-              {COMING_SOON_CONSTRUCTION_CALCULATORS.map((title) => (
-                <li key={title} data-calculator-status="coming-soon" className="mb-2 break-inside-avoid font-bold leading-6">
-                  {title} <span className="ml-1 text-xs font-black text-amber-800 dark:text-amber-300">Coming Soon</span>
-                </li>
-              ))}
-            </ol>
-          </details>
         </section>
 
         <section aria-labelledby="calculator-customize" className="mt-14 rounded-[2rem] border-2 border-emerald-700 bg-emerald-50 p-5 sm:p-8 dark:bg-emerald-950/30">

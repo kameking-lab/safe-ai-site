@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ShieldCheck } from "lucide-react";
 import { TranslatedPageHeader } from "@/components/translated-page-header";
@@ -73,17 +72,18 @@ function createInquiryIdempotencyKey(): string {
   return `${prefix}.inquiry-${Math.random().toString(36).slice(2, 20)}`;
 }
 
-export default function InquiryForm() {
+export type InquiryInitialParams = Partial<Record<"course" | "topic" | "tab" | "category" | "industry", string>>;
+
+export default function InquiryForm({ initialParams = {} }: { initialParams?: InquiryInitialParams }) {
   const { language } = useLanguage();
   const isEn = language === "en";
-  const searchParams = useSearchParams();
   const CATEGORIES = isEn ? CATEGORIES_EN : CATEGORIES_JA;
   const TABS = isEn ? TABS_EN : TABS_JA;
   const INDUSTRY_OPTIONS = isEn ? INDUSTRY_OPTIONS_EN : INDUSTRY_OPTIONS_JA;
   // 教育パック導線（企画06章・EDU-R2）: course/topic を読み business タブ初期選択＋件名プレフィル。
   // /api/inquiry のスキーマは不変（course は subject に載せる＝env追加なし）。
-  const courseParam = searchParams?.get("course") ?? "";
-  const topicParam = searchParams?.get("topic") ?? "";
+  const courseParam = initialParams.course ?? "";
+  const topicParam = initialParams.topic ?? "";
   const isEduContext = Boolean(courseParam) || topicParam === "edu-pack";
   const COURSE_LABELS: Record<string, string> = {
     fullharness: "フルハーネス型墜落制止用器具 特別教育",
@@ -96,8 +96,8 @@ export default function InquiryForm() {
       : `【教育パック】${courseLabel ? `${courseLabel} ` : ""}カスタマイズ相談`
     : "";
   const initialTab: Tab =
-    searchParams?.get("tab") === "business" ||
-    searchParams?.get("category") === "business" ||
+    initialParams.tab === "business" ||
+    initialParams.category === "business" ||
     isEduContext
       ? "business"
       : "general";
@@ -105,7 +105,7 @@ export default function InquiryForm() {
   const [form, setForm] = useState({
     name: "",
     email: "",
-    industry: searchParams?.get("industry") ?? "",
+    industry: initialParams.industry ?? "",
     category: (initialTab === "business" ? "business" : "question") as Category,
     subject: initialSubject,
     message: "",
@@ -480,8 +480,11 @@ export default function InquiryForm() {
           </p>
           <p className="text-[11px] text-slate-500">
             {isEn
-              ? "If the form is unavailable, wait a while and try again. Contact addresses are not published to reduce misuse."
-              : "フォームが使えない場合は、時間をおいて再度お試しください。迷惑利用防止のため連絡先メールアドレスは公開していません。"}
+              ? "If the form is unavailable, you can also check how to contact us by email."
+              : "フォームが使えない場合は、メールでの受付方法も確認できます。"}
+            <Link href="/contact/automation-email" className="ml-1 inline-flex min-h-11 items-center font-bold underline">
+              {isEn ? "Email contact options" : "メールでの受付方法"}
+            </Link>
           </p>
         </form>
       )}

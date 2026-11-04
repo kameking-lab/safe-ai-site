@@ -74,7 +74,9 @@ describe("/training/safety-seminars", () => {
     ).toHaveLength(3);
     expect(
       container.querySelectorAll('[data-seminar-status="coming-soon"]'),
-    ).toHaveLength(17);
+    ).toHaveLength(0);
+    expect(screen.queryByText(/Coming Soon|準備中/)).toBeNull();
+    expect(screen.getByRole("heading", { name: "現場に合わせて教材を使う手順" })).toBeDefined();
     expect(SAFETY_SEMINAR_CORE_20).toHaveLength(20);
     expect(COMING_SOON_SAFETY_CORE_20).toHaveLength(17);
     expect(screen.queryByText("音声あり")).toBeNull();
@@ -144,18 +146,14 @@ describe("/training/safety-seminars", () => {
     expect(screen.getByLabelText<HTMLSelectElement>("形式で絞り込む").value).toBe("");
   });
 
-  it("準備中の既存テーマは閉じた目次にまとめ、架空のリンクや予定日を出さない", () => {
+  it("未完成のテーマは公開一覧から外し、利用手順を本文で案内する", () => {
     const { container } = render(<SafetySeminarLibraryPage />);
     const details = container.querySelector("details");
-    expect(details).not.toBeNull();
-    expect(details?.hasAttribute("open")).toBe(false);
+    expect(details).toBeNull();
     const items = [...container.querySelectorAll<HTMLElement>('[data-seminar-status="coming-soon"]')];
-    expect(items).toHaveLength(17);
-    for (const item of items) {
-      expect(item.querySelector("a, button, input, form")).toBeNull();
-      expect(item.textContent).toContain("準備中");
-    }
-    expect(details?.textContent).not.toMatch(/公開予定|リリース予定/u);
+    expect(items).toHaveLength(0);
+    expect(container.textContent).not.toMatch(/公開予定|リリース予定|準備中/u);
+    expect(screen.getByRole("heading", { name: "現場に合わせて教材を使う手順" })).toBeDefined();
   });
 
   it("self canonicalを保ち、query付きだけnoindexにする", async () => {

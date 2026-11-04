@@ -8,7 +8,6 @@ import { PageJsonLd } from "@/components/page-json-ld";
 import { PublishedSeminarList } from "./published-seminar-list";
 import { TrainingLibrarySwitcher } from "@/components/training/training-library-switcher";
 import {
-  COMING_SOON_SAFETY_CORE_20,
   PUBLISHED_SAFETY_SEMINARS,
   SAFETY_SEMINAR_HUB_PATH,
 } from "@/data/safety-seminars/themes";
@@ -132,22 +131,16 @@ export default function SafetySeminarLibraryPage() {
             </p>
           </section>
 
-          <section aria-labelledby="coming-soon-title" className="mt-14">
-            <details className="rounded-2xl border-2 border-slate-300 bg-white dark:border-slate-700 dark:bg-slate-900">
-              <summary className="flex min-h-14 cursor-pointer items-center justify-between gap-4 px-5 py-3 font-black">
-                <span id="coming-soon-title">準備中のテーマ目次（{COMING_SOON_SAFETY_CORE_20.length}件）</span>
-                <span className="text-xs text-slate-600 dark:text-slate-300">目次を開く</span>
-              </summary>
-              <ul className="divide-y divide-slate-200 border-t border-slate-200 dark:divide-slate-700 dark:border-slate-700">
-                {COMING_SOON_SAFETY_CORE_20.map((seminar) => (
-                  <li key={seminar.id} data-seminar-status="coming-soon" className="grid gap-1 px-5 py-3 sm:grid-cols-[minmax(0,1fr)_14rem_auto] sm:items-center sm:gap-4">
-                    <span className="font-black">{seminar.title}</span>
-                    <span className="text-sm text-slate-600 dark:text-slate-300">対象：{seminar.audience}</span>
-                    <span className="text-xs font-black tracking-[.08em] text-amber-800 dark:text-amber-300">準備中</span>
-                  </li>
-                ))}
-              </ul>
-            </details>
+          <section aria-labelledby="safety-training-usage" className="mt-14 rounded-2xl border border-slate-300 bg-white p-5 dark:border-slate-700 dark:bg-slate-900">
+            <h2 id="safety-training-usage" className="text-2xl font-black">現場に合わせて教材を使う手順</h2>
+            <ol className="mt-4 list-decimal space-y-3 pl-5 text-sm leading-7">
+              <li>受講者の作業と経験に合う公開教材を選び、担当者がスライドの出典と確認時点を読みます。現場の設備・作業手順との違いを先に書き出します。</li>
+              <li>教材の事例を見て「自分たちの作業ならどこで起きるか」を話し合います。災害の名前を覚えるだけで終わらせず、作業開始前に確かめる条件を一つ選びます。</li>
+              <li>確認クイズがある教材は、答えだけでなく理由を振り返ります。理解が分かれた点は教材の出典へ戻り、現場で誰が何を確認するかを決めます。</li>
+            </ol>
+            <p className="mt-4 text-sm leading-7 text-slate-700 dark:text-slate-200">
+              朝礼では全編を急いで読むより、作業に関係するスライドを選び、最後に確認行動を共有する使い方ができます。配布する場合は各教材ページで提供形式と利用条件を確認してください。
+            </p>
           </section>
         </div>
       </div>

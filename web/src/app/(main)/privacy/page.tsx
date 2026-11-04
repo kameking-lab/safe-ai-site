@@ -21,7 +21,7 @@ export default function PrivacyPage() {
       <PageJsonLd name="プライバシーポリシー" description="安全AIポータルのプライバシーポリシー。個人情報の取り扱いについて説明しています。" path="/privacy" />
         <div>
           <h1 className="text-xl font-bold text-slate-900">プライバシーポリシー</h1>
-          <p className="mt-2 text-sm text-slate-500">最終更新日: 2026年9月20日</p>
+          <p className="mt-2 text-sm text-slate-500">最終更新日: 2026年11月4日</p>
         </div>
 
         <section className="space-y-3">
@@ -42,7 +42,7 @@ export default function PrivacyPage() {
           <ul className="ml-4 space-y-1 text-sm text-slate-600">
             <li className="list-disc">
               <span className="font-semibold text-slate-700">お問い合わせフォーム（/contact）</span>
-              から取得する情報：会社名、担当者氏名、メールアドレス、電話番号（任意）、相談カテゴリ、ご予算感、希望相談方法、相談内容、希望機能、料金プランの選択（任意）
+              から取得する情報：カテゴリ、件名、本文、お名前（任意）、メールアドレス（任意・返信希望時）、業種（任意）、個人情報取扱いへの同意。法人・自動化・講習相談は専用ページの受付方法へ案内します。
             </li>
             <li className="list-disc">
               <span className="font-semibold text-slate-700">業務自動化相談フォーム（/services/automation）</span>

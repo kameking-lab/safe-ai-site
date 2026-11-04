@@ -370,7 +370,7 @@ audit during cleanup:
 ### E-2 — `/strategy` hard-coded password in client source (P2, also a security note)
 
 - File: `(main)/strategy/page.tsx:13`
-  > `const STRATEGY_PASSWORD = "anzenai2026";`
+  > `const STRATEGY_PASSWORD = "<REDACTED>";`
 - Page is noindex'd but the password is in the client JS bundle, accessible
   via View Source. Internal-doc-pretending-to-be-gated is not a brand-damage
   issue per se, but if leadership ever cites it as "confidential", that
