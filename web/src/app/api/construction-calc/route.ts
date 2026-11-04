@@ -24,6 +24,7 @@ import {
 } from "@/lib/server/ai-outbound-safety";
 import { externalGenerativeAiAllowed } from "@/lib/server/deployment-safety";
 import { GEMINI_FAST_THINKING_CONFIG, GEMINI_FLASH_MODEL } from "@/lib/gemini-model";
+import { checkRateLimit, getClientIp } from "@/lib/chatbot-rate-limit";
 
 /**
  * 建設計算コーナーの AI 入口/出口。
@@ -161,6 +162,29 @@ export async function POST(req: Request) {
       { error: `text は${MAX_TEXT_LENGTH}文字以内で入力してください` },
       { status: 400 },
     );
+  }
+
+  // Reuse the existing shared AI bucket without introducing or changing any
+  // numeric allowance. Local deterministic fallback never spends AI quota.
+  const key = process.env.GEMINI_API_KEY?.trim();
+  if (externalGenerativeAiAllowed() && key && key !== "dummy") {
+    try {
+      const rate = await checkRateLimit(getClientIp(req));
+      if (!rate.allowed) {
+        return NextResponse.json(
+          { error: "rate_limited" },
+          {
+            status: 429,
+            headers: { ...noStoreHeaders(), "Retry-After": String(rate.retryAfterSec) },
+          },
+        );
+      }
+    } catch {
+      return NextResponse.json(
+        { error: "shared_rate_limit_unavailable" },
+        { status: 503, headers: { ...noStoreHeaders(), "Retry-After": "60" } },
+      );
+    }
   }
 
   const prompt =
