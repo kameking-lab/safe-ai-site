@@ -22,7 +22,9 @@ export default async function ContactPage({ searchParams }: {
   const query = await searchParams;
   const initialParams: InquiryInitialParams = {};
   for (const key of ["course", "topic", "tab", "category", "industry"] as const) {
-    const value = query[key];
+    const raw = query[key];
+    // Match URLSearchParams.get(): repeated keys use their first value.
+    const value = Array.isArray(raw) ? raw[0] : raw;
     if (typeof value === "string") initialParams[key] = value;
   }
   return (
