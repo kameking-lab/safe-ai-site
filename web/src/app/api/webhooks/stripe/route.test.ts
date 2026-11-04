@@ -110,8 +110,16 @@ describe("Stripe webhook safety", () => {
       data: { object: {} },
     });
     mocks.transaction.mockRejectedValue({ code: "P2002" });
+    mocks.findUnique.mockResolvedValueOnce(null).mockResolvedValueOnce({ stripeEventId: "evt_duplicate" });
     const response = await POST(request());
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toEqual({ received: true, idempotent: true });
+  });
+
+  it("別制約のunique競合をイベント処理済みと誤認しない", async () => {
+    mocks.constructEvent.mockReturnValue({ id: "evt_unprocessed", type: "unhandled.synthetic", data: { object: {} } });
+    mocks.transaction.mockRejectedValue({ code: "P2002" });
+    const response = await POST(request());
+    expect(response.status).toBe(503);
   });
 });

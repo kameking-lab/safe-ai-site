@@ -1,198 +1,126 @@
-// Stripe webhookイベント処理のヘルパー。
-// prismaがnull（DATABASE_URL未設定）の場合は呼び出し側でskipする想定。
-
+// Webhook payloads are authenticated notifications, not current entitlement state.
+// Callers must wrap the handler and StripeEvent insert in one DB transaction.
 import type Stripe from "stripe";
 import type { Prisma, PrismaClient } from "@prisma/client";
 import { resolveStripePlan } from "@/lib/stripe-price-policy";
 
 type StripeDb = PrismaClient | Prisma.TransactionClient;
+type Owner = {
+  userId: string;
+  stripeCustomerId: string | null;
+  stripeSubscriptionId: string | null;
+};
 
-// 最大3回、指数バックオフでリトライ（DBの一時障害に対応）
-async function withRetry<T>(
-  fn: () => Promise<T>,
-  attempts = 3,
-  baseDelayMs = 200,
-): Promise<T> {
-  let lastErr: unknown;
-  for (let i = 0; i < attempts; i++) {
-    try {
-      return await fn();
-    } catch (err) {
-      lastErr = err;
-      if (i < attempts - 1) {
-        await new Promise((r) => setTimeout(r, baseDelayMs * 2 ** i));
-      }
-    }
-  }
-  throw lastErr;
+function objectId(value: string | { id: string } | null | undefined): string | null {
+  return typeof value === "string" ? value : value?.id ?? null;
 }
 
 function periodEnd(sub: Stripe.Subscription): Date | null {
-  // Stripe APIバージョンによりcurrent_period_end位置が異なる可能性に対応
   const top = (sub as unknown as { current_period_end?: number }).current_period_end;
-  if (typeof top === "number") return new Date(top * 1000);
-  const item = sub.items?.data?.[0] as { current_period_end?: number } | undefined;
-  if (item && typeof item.current_period_end === "number") {
-    return new Date(item.current_period_end * 1000);
-  }
-  return null;
+  const end = typeof top === "number" ? top : sub.items?.data?.[0]?.current_period_end;
+  return typeof end === "number" && Number.isFinite(end) ? new Date(end * 1000) : null;
 }
 
-export async function handleCheckoutCompleted(
-  prisma: StripeDb,
-  session: Stripe.Checkout.Session,
-): Promise<void> {
-  const userId = session.metadata?.userId;
-  if (!userId) {
-    console.warn("[stripe/webhook] checkout.completed without userId metadata");
-    return;
-  }
-
-  const customerId = typeof session.customer === "string" ? session.customer : session.customer?.id;
-  const subscriptionId =
-    typeof session.subscription === "string" ? session.subscription : session.subscription?.id;
-
-  let priceId: string | null = null;
-  let currentPeriodEnd: Date | null = null;
-
-  if (subscriptionId) {
-    try {
-      const Stripe = (await import("stripe")).default;
-      const stripeKey = process.env.STRIPE_SECRET_KEY;
-      if (stripeKey) {
-        const stripe = new Stripe(stripeKey);
-        const sub = await stripe.subscriptions.retrieve(subscriptionId);
-        priceId = sub.items.data[0]?.price.id ?? null;
-        currentPeriodEnd = periodEnd(sub);
-      }
-    } catch {
-      console.error("[stripe/webhook] failed to retrieve subscription");
-      throw new Error("Stripe subscription lookup failed");
-    }
-  }
-
-  const planName = resolveStripePlan(priceId);
-  if (!planName) throw new Error("unrecognized Stripe price");
-
-  await withRetry(() =>
-    prisma.subscription.upsert({
-      where: { userId },
-      create: {
-        userId,
-        stripeCustomerId: customerId ?? null,
-        stripeSubscriptionId: subscriptionId ?? null,
-        stripePriceId: priceId,
-        planName,
-        status: "active",
-        currentPeriodEnd,
-      },
-      update: {
-        stripeCustomerId: customerId ?? undefined,
-        stripeSubscriptionId: subscriptionId ?? undefined,
-        stripePriceId: priceId ?? undefined,
-        planName,
-        status: "active",
-        currentPeriodEnd: currentPeriodEnd ?? undefined,
-      },
-    }),
-  );
+async function retrieveSubscription(id: string): Promise<Stripe.Subscription> {
+  const key = process.env.STRIPE_SECRET_KEY;
+  if (!key) throw new Error("Stripe subscription lookup unavailable");
+  const Stripe = (await import("stripe")).default;
+  return new Stripe(key, { timeout: 4_000, maxNetworkRetries: 0 }).subscriptions.retrieve(id);
 }
 
-export async function handleSubscriptionUpdated(
-  prisma: StripeDb,
-  sub: Stripe.Subscription,
-): Promise<void> {
+async function lockOwner(database: StripeDb, userId: string): Promise<void> {
+  // Same transaction as the event record: serialize lookup + provider read +
+  // mutation for this member, so an older fetch cannot overwrite a newer one.
+  await database.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`stripe-member:${userId}`}, 0))`;
+}
+
+function verifiedData(sub: Stripe.Subscription, expectedId: string, customerId: string) {
+  if (sub.id !== expectedId || objectId(sub.customer) !== customerId) {
+    throw new Error("Stripe subscription ownership mismatch");
+  }
   const priceId = sub.items.data[0]?.price.id ?? null;
-  const planName = resolveStripePlan(priceId);
-  if (!planName) throw new Error("unrecognized Stripe price");
+  const configuredPlan = resolveStripePlan(priceId);
+  if (!configuredPlan) throw new Error("unrecognized Stripe price");
   const currentPeriodEnd = periodEnd(sub);
+  const entitled =
+    (sub.status === "active" || sub.status === "trialing") &&
+    currentPeriodEnd !== null && currentPeriodEnd.getTime() > Date.now();
+  return {
+    stripePriceId: priceId,
+    planName: entitled ? configuredPlan : "free",
+    status: sub.status,
+    currentPeriodEnd,
+  };
+}
 
-  const result = await withRetry(() =>
-    prisma.subscription.updateMany({
-      where: { stripeSubscriptionId: sub.id },
-      data: {
-        stripePriceId: priceId,
-        planName,
-        status: sub.status,
-        currentPeriodEnd: currentPeriodEnd ?? undefined,
-      },
-    }),
-  );
+async function reconcileBoundSubscription(database: StripeDb, triggerId: string, customerId?: string | null) {
+  let owner: Owner | null = await database.subscription.findUnique({ where: { stripeSubscriptionId: triggerId } });
+  if (!owner && customerId) owner = await database.subscription.findUnique({ where: { stripeCustomerId: customerId } });
+  // Unknown ownership is never inferred from subscription metadata or email.
+  if (!owner) return;
+  await lockOwner(database, owner.userId);
+  owner = await database.subscription.findUnique({ where: { userId: owner.userId } });
+  if (!owner?.stripeCustomerId) throw new Error("Stripe customer mapping unavailable");
+  if (customerId && owner.stripeCustomerId !== customerId) throw new Error("Stripe customer mismatch");
+  const subscriptionId = owner.stripeSubscriptionId ?? triggerId;
+  const canonical = await retrieveSubscription(subscriptionId);
+  const data = verifiedData(canonical, subscriptionId, owner.stripeCustomerId);
+  // Customer-only recovery may fill a missing binding, never replace one.
+  const changed = await database.subscription.updateMany({
+    where: { userId: owner.userId, stripeCustomerId: owner.stripeCustomerId, stripeSubscriptionId: owner.stripeSubscriptionId },
+    data: { ...data, stripeSubscriptionId: subscriptionId },
+  });
+  if (changed.count !== 1) throw new Error("Stripe mapping changed during reconciliation");
+}
 
-  // 自己修復: subscriptionIdで見つからない場合、customerId経由で紐付けを修正
-  if (result.count === 0) {
-    const customerId =
-      typeof sub.customer === "string" ? sub.customer : (sub.customer as { id: string } | null)?.id ?? null;
-    if (!customerId) {
-      console.warn("[stripe/webhook] subscription not found and cannot recover");
-      return;
+export async function handleCheckoutCompleted(database: StripeDb, session: Stripe.Checkout.Session): Promise<void> {
+  if (session.mode !== "subscription" || !["paid", "no_payment_required"].includes(session.payment_status)) return;
+  const userId = session.metadata?.userId;
+  const customerId = objectId(session.customer);
+  const subscriptionId = objectId(session.subscription);
+  if (!userId || !customerId || !subscriptionId) throw new Error("Stripe checkout mapping unavailable");
+  await lockOwner(database, userId);
+  const owner = await database.subscription.findUnique({ where: { userId } });
+  // Checkout creation persists the customer mapping before contacting Stripe.
+  if (!owner || owner.stripeCustomerId !== customerId) throw new Error("Stripe checkout ownership mismatch");
+  const canonical = await retrieveSubscription(subscriptionId);
+  const data = verifiedData(canonical, subscriptionId, customerId);
+  if (owner.stripeSubscriptionId && owner.stripeSubscriptionId !== subscriptionId) {
+    const current = await retrieveSubscription(owner.stripeSubscriptionId);
+    if (current.id !== owner.stripeSubscriptionId || objectId(current.customer) !== customerId) {
+      throw new Error("Stripe subscription ownership mismatch");
     }
-    const recovered = await withRetry(() =>
-      prisma.subscription.updateMany({
-        where: { stripeCustomerId: customerId },
-        data: {
-          stripeSubscriptionId: sub.id,
-          stripePriceId: priceId,
-          planName,
-          status: sub.status,
-          currentPeriodEnd: currentPeriodEnd ?? undefined,
-        },
-      }),
-    );
-    if (recovered.count === 0) {
-      console.warn("[stripe/webhook] self-heal found no matching record");
-    } else {
-      console.info("[stripe/webhook] self-healed subscription mapping");
-    }
+    // A delayed checkout must not replace a newer contract or an active one.
+    if (!["canceled", "incomplete_expired"].includes(current.status) || canonical.created <= current.created) return;
   }
+  const changed = await database.subscription.updateMany({
+    where: { userId, stripeCustomerId: customerId, stripeSubscriptionId: owner.stripeSubscriptionId },
+    data: { ...data, stripeSubscriptionId: subscriptionId },
+  });
+  if (changed.count !== 1) throw new Error("Stripe mapping changed during checkout");
 }
 
-export async function handleSubscriptionDeleted(
-  prisma: StripeDb,
-  sub: Stripe.Subscription,
-): Promise<void> {
-  await withRetry(() =>
-    prisma.subscription.updateMany({
-      where: { stripeSubscriptionId: sub.id },
-      data: {
-        planName: "free",
-        status: "canceled",
-      },
-    }),
-  );
+export async function handleSubscriptionUpdated(database: StripeDb, sub: Stripe.Subscription): Promise<void> {
+  if (!resolveStripePlan(sub.items.data[0]?.price.id)) throw new Error("unrecognized Stripe price");
+  await reconcileBoundSubscription(database, sub.id, objectId(sub.customer));
 }
 
-export async function handleInvoicePaymentFailed(
-  prisma: StripeDb,
-  invoice: Stripe.Invoice,
-): Promise<void> {
-  const subId =
-    (invoice as unknown as { subscription?: string | { id: string } | null }).subscription;
-  const stripeSubscriptionId = typeof subId === "string" ? subId : subId?.id;
-  if (!stripeSubscriptionId) return;
-
-  await withRetry(() =>
-    prisma.subscription.updateMany({
-      where: { stripeSubscriptionId },
-      data: { status: "past_due" },
-    }),
-  );
+export async function handleSubscriptionDeleted(database: StripeDb, sub: Stripe.Subscription): Promise<void> {
+  await reconcileBoundSubscription(database, sub.id, objectId(sub.customer));
 }
 
-// 支払い回復時にactive状態へ復元（past_due → active の自己修復）
-export async function handleInvoicePaymentSucceeded(
-  prisma: StripeDb,
-  invoice: Stripe.Invoice,
-): Promise<void> {
-  const subId =
-    (invoice as unknown as { subscription?: string | { id: string } | null }).subscription;
-  const stripeSubscriptionId = typeof subId === "string" ? subId : subId?.id;
-  if (!stripeSubscriptionId) return;
+function invoiceSubscription(invoice: Stripe.Invoice): string | null {
+  // Current Stripe API uses parent.subscription_details; retain legacy event compatibility.
+  const legacy = (invoice as unknown as { subscription?: string | { id: string } | null }).subscription;
+  return objectId(invoice.parent?.subscription_details?.subscription) ?? objectId(legacy);
+}
 
-  await withRetry(() =>
-    prisma.subscription.updateMany({
-      where: { stripeSubscriptionId },
-      data: { status: "active" },
-    }),
-  );
+export async function handleInvoicePaymentFailed(database: StripeDb, invoice: Stripe.Invoice): Promise<void> {
+  const subscriptionId = invoiceSubscription(invoice);
+  if (subscriptionId) await reconcileBoundSubscription(database, subscriptionId, objectId(invoice.customer));
+}
+
+export async function handleInvoicePaymentSucceeded(database: StripeDb, invoice: Stripe.Invoice): Promise<void> {
+  const subscriptionId = invoiceSubscription(invoice);
+  if (subscriptionId) await reconcileBoundSubscription(database, subscriptionId, objectId(invoice.customer));
 }

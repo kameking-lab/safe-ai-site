@@ -7,6 +7,7 @@
 //   DATABASE_URL         - 必須。未設定時は決済をfail-closed
 
 import Stripe from "stripe";
+import { createHash } from "node:crypto";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { isPaidModeReady, resolveStripePlan } from "@/lib/stripe-price-policy";
@@ -15,7 +16,7 @@ import { privateJson, readBoundedJson } from "@/lib/server/cloud-owner";
 function getStripe(): Stripe | null {
   const key = process.env.STRIPE_SECRET_KEY;
   if (!key) return null;
-  return new Stripe(key);
+  return new Stripe(key, { timeout: 8_000, maxNetworkRetries: 0 });
 }
 
 export async function POST(req: Request) {
@@ -50,27 +51,30 @@ export async function POST(req: Request) {
 
   let customerId: string | undefined;
   try {
-      const sub = await prisma.subscription.findUnique({ where: { userId } });
+    customerId = await prisma.$transaction(async (tx) => {
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`stripe-member:${userId}`}, 0))`;
+      const sub = await tx.subscription.findUnique({ where: { userId } });
       if (sub?.stripeCustomerId) {
-        customerId = sub.stripeCustomerId;
-      } else {
+        return sub.stripeCustomerId;
+      }
+      const idempotencyKey = createHash("sha256").update(`stripe-customer:${userId}`).digest("hex");
         const customer = await stripe.customers.create({
           email,
           name,
           metadata: { userId },
-        });
-        customerId = customer.id;
-        await prisma.subscription.upsert({
+        }, { idempotencyKey });
+        await tx.subscription.upsert({
           where: { userId },
           create: {
             userId,
-            stripeCustomerId: customerId,
+            stripeCustomerId: customer.id,
             planName: "free",
             status: "active",
           },
-          update: { stripeCustomerId: customerId },
+          update: { stripeCustomerId: customer.id },
         });
-      }
+      return customer.id;
+    }, { maxWait: 5_000, timeout: 15_000 });
   } catch {
     console.error("[stripe/checkout] customer mapping failed");
     return privateJson({ error: "決済の準備に失敗しました。時間をおいて再試行してください。" }, 503);
