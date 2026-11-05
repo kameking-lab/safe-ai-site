@@ -9,3 +9,12 @@ test-results/
 src/app/(shared)/**/page.tsx
 public/
 .cache/
+build/
+vendor/bundle/
+.bundle/
+fastlane/report.xml
+!fastlane/screenshots/
+fastlane/screenshots/*
+!fastlane/screenshots/ja/
+!fastlane/screenshots/ja/*.jpg
+!fastlane/screenshots/manifest.json

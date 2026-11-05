@@ -1,0 +1,72 @@
+require_relative "../scripts/asc_config"
+require_relative "../scripts/asc_token"
+require_relative "../scripts/asc_build"
+asc_root = File.expand_path("..", __dir__)
+
+default_platform(:ios)
+
+platform :ios do
+  desc "Upload Japanese listing/screenshots only; never submit for review"
+  lane :asc_metadata do
+    require "spaceship"
+    require "json"
+    require "fileutils"
+    config = AscConfig.read(ENV)
+    sh("python3", File.join(asc_root, "scripts/asc_validate.py"), "--screenshots")
+    sh("node", File.join(asc_root, "scripts/asc_repository_check.mjs"))
+    Spaceship::ConnectAPI.token = AscCodemagicToken.new(in_house: false)
+    app = Spaceship::ConnectAPI::App.find("jp.anzen-ai-portal.app")
+    UI.user_error!("ASC app identity mismatch") unless app && app.id == config[:apple_id]
+    build = AscBuild.select(app_id: app.id, version: config[:version], requested: config[:build])
+    UI.message("ASC selected VALID build #{build.version} (#{build.id}); requested #{config[:build]}")
+    versions = app.get_app_store_versions(filter: { platform: "IOS", versionString: config[:version] })
+    version = versions.find { |v| v.version_string == config[:version] }
+    if version
+      allowed = %w[PREPARE_FOR_SUBMISSION DEVELOPER_REJECTED REJECTED METADATA_REJECTED]
+      UI.user_error!("Version is not editable; no automatic cancellation") unless allowed.include?(version.app_version_state || version.app_store_state)
+    else
+      existing = app.get_edit_app_store_version(platform: "IOS")
+      if existing
+        state = existing.app_version_state || existing.app_store_state
+        UI.user_error!("Another editable version exists") unless state == "PREPARE_FOR_SUBMISSION"
+        existing.update(attributes: { versionString: config[:version] })
+        version = app.get_app_store_versions(filter: { platform: "IOS", versionString: config[:version] }).find { |v| v.id == existing.id }
+        UI.user_error!("Draft version rename did not take effect") unless version
+      else
+        version = Spaceship::ConnectAPI.post_app_store_version(app_id: app.id, attributes: {
+          platform: "IOS", versionString: config[:version], releaseType: "MANUAL"
+        }).first
+      end
+    end
+    editable = app.get_edit_app_store_version(platform: "IOS")
+    UI.user_error!("deliver would target another version") unless editable && editable.id == version.id
+    version.select_build(build_id: build.id)
+    # Proven first-version fix: create an empty detail only for nil / exact No data.
+    # Do not read contact/demo values or pass review information to deliver.
+    begin
+      detail = version.fetch_app_store_review_detail
+    rescue RuntimeError => error
+      raise unless error.message == "No data"
+      detail = nil
+    end
+    Spaceship::ConnectAPI.post_app_store_review_detail(app_store_version_id: version.id, attributes: {}) unless detail
+    version.update(attributes: { releaseType: "MANUAL" })
+    deliver(
+      app_identifier: "jp.anzen-ai-portal.app", app_version: config[:version],
+      build_number: build.version, metadata_path: File.join(asc_root, "fastlane/metadata"),
+      screenshots_path: File.join(asc_root, "fastlane/screenshots"),
+      skip_binary_upload: true, skip_app_version_update: true,
+      skip_metadata: false, skip_screenshots: false, overwrite_screenshots: true,
+      submit_for_review: false, automatic_release: false,
+      force: true, reject_if_possible: false, precheck_include_in_app_purchases: false
+    )
+    FileUtils.mkdir_p(File.join(asc_root, "build/asc"))
+    File.write(File.join(asc_root, "build/asc/result.json"), JSON.pretty_generate({
+      app_id: app.id, version: config[:version], build: build.version,
+      requested_build: config[:build], build_id: build.id,
+      metadata_uploaded: true, screenshots_uploaded: true,
+      review_information_uploaded: false, submitted_for_review: false,
+      release: "manual", follow_up: "asc-api-followup.md"
+    }))
+  end
+end

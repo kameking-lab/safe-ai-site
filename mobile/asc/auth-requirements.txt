@@ -1,0 +1,3 @@
+# Pin the official credential resolver/JWT API used by asc_auth.py.
+codemagic-cli-tools==0.70.2
+cryptography==48.0.1

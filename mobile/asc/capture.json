@@ -1,0 +1,34 @@
+{
+  "bundleId": "jp.anzen-ai-portal.app",
+  "origin": "capacitor://localhost",
+  "devices": [
+    {
+      "name": "iPhone 6.9-inch equivalent",
+      "slug": "iphone-69",
+      "width": 1320,
+      "height": 2868,
+      "scale": 3
+    },
+    {
+      "name": "iPhone 6.5-inch equivalent",
+      "slug": "iphone-65",
+      "width": 1242,
+      "height": 2688,
+      "scale": 3
+    },
+    {
+      "name": "iPad Pro 13-inch equivalent",
+      "slug": "ipad-13",
+      "width": 2064,
+      "height": 2752,
+      "scale": 2
+    }
+  ],
+  "screens": [
+    "01-news",
+    "02-revisions",
+    "03-statistics",
+    "04-ky",
+    "05-laws"
+  ]
+}
