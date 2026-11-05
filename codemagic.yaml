@@ -23,8 +23,9 @@ workflows:
       app_store_connect: App Store Key
     environment:
       ios_signing:
-        distribution_type: app_store
-        bundle_identifier: jp.anzen-ai-portal.app
+        # Profiles are created/downloaded through the existing ASC integration below.
+        certificates:
+          - kameking_distribution
       vars:
         APP_STORE_APPLE_ID: "6831079439"
         ANZEN_APNS_ENVIRONMENT: production
@@ -34,6 +35,12 @@ workflows:
       node: "22.23.4"
       xcode: latest
     scripts:
+      - name: Prepare App Store profiles with the existing distribution identity
+        script: |
+          set -euo pipefail
+          python3 -m venv /tmp/cm7-signing-venv
+          /tmp/cm7-signing-venv/bin/pip install --disable-pip-version-check --quiet codemagic-cli-tools==0.70.2
+          /tmp/cm7-signing-venv/bin/python "$CM_BUILD_DIR/mobile/scripts/asc_signing.py"
       - name: Install locked app and canonical web dependencies
         script: |
           set -euo pipefail
@@ -79,6 +86,8 @@ workflows:
           mkdir -p build/ios
           xcode-project use-profiles \
             --project ios/App/App.xcodeproj \
+            --profile "$HOME/Library/MobileDevice/Provisioning Profiles/*.mobileprovision" \
+            --archive-method app-store \
             --export-options-plist build/ios/export_options.plist
           ruby scripts/verify-ios.rb build/ios/export_options.plist
       - name: Build signed IPA
