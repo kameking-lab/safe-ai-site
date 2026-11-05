@@ -40,7 +40,7 @@ FilesystemのLibraryNoCloudに取得済み資料を保存し、通信失敗後�
 
 追加スキーマは提案DDLのみ。本番DBへの適用・Apple/RevenueCat/APNs設定・実キーの投入は行っていない。各API・安全停止・必要設定は [API契約](docs/api-contract.md) と [公開前確認](docs/release-checklist.md) を参照。
 
-CodemagicはiOSブランチの関連変更pushで署名付きIPAを作成し、App Store Connectへアップロードする定義。TestFlight配布・審査提出は自動実行しない。現時点では外部設定の仮置きがあり、CI実行・外部設定変更は行っていない。設定と提出の引継ぎは [IOS3H](docs/ios3h-release.md) を参照。
+CodemagicはiOSブランチの関連変更pushで署名付きIPAを作成し、App Store Connectへアップロードする定義。TestFlight配布・審査提出は自動実行しない。CMREGでApple ID `6831079439` と既存integration `App Store Key` を設定済み。公開のビルド変数はYAML内にあり、`anzen_ios` groupの作成は不要。署名素材の登録・macOSでのCI実行は未確認。設定と提出の引継ぎは [IOS3H](docs/ios3h-release.md) を参照。
 
 生成用の `capacitor.config.ts` のappIdは `jp.anzenaiportal.app`。CLIがハイフンを拒否するための生成専用IDで、Apple側には登録しない。`capacitor:sync:after` フックが `configure-ios.rb` を呼び、直接CLIでadd/syncした場合にも全App構成とnative runtimeを登録済み `jp.anzen-ai-portal.app` へ戻す。`verify-ios.rb` が生成後・署名設定後に検証する。認証復帰schemeは引き続き `anzenai`。
 

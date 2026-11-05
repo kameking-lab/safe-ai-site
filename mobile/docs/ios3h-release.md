@@ -17,13 +17,13 @@
 | 場所 | 仮置き／予定名 | 作業 |
 |---|---|---|
 | Codemagic application | `TODO_ANZEN_CODEMAGIC_APP_ID`（文書上のみ） | 安全AIリポジトリを追加しYAML workflowを選ぶ。発行されたapplication IDは管理用。YAMLのworkflow名やApple IDとは別。Git連携・webhookも確認する |
-| Codemagic team integration | `TODO_ANZEN_APP_STORE_CONNECT`（YAML） | 安全AIにアクセスできるASC API keyのintegrationを作り、実際の表示名へ置換する |
-| Codemagic variable group | `anzen_ios`（予定名） | groupを作成・アプリへの利用を許可する。秘密値が必要な場合はsecure変数で管理。アプリのRevenueCat公開SDKキーはサーバーのbilling/configから取得するため、過去問AIの `MOBILE_RC_IOS_PUBLIC_KEY` は不要 |
-| App Store Connect | `TODO_ANZEN_APPLE_ID`（YAML） | iOSアプリレコードを作成し、発行される数字のApple IDへ置換。過去問AIのIDを流用しない |
-| Apple Developer App ID | `jp.anzen-ai-portal.app` | 既存登録を確認。Push Notificationsを有効にしてprofileを再生成。In-App Purchase、Web版Sign in with Appleとの関連も確認 |
+| Codemagic team integration | **`App Store Key`**（YAML設定済み） | 過去問AIの既存連携を同じチームで再利用。新規キー作成・秘密変数複製は不要 |
+| Codemagic variable group | `anzen_ios` は不要 | Apple ID、production APNs、CI/telemetryの公開値をYAMLのvarsへ設定済み。RevenueCat公開SDKキーはサーバーのbilling/configから取得するため `MOBILE_RC_IOS_PUBLIC_KEY` も不要。空の変数を追加しない |
+| App Store Connect | **`6831079439`**（YAML設定済み） | Claudeが2026-11-05に作成した安全AIのレコード。SKUは今回の確定値に含まれず、推測・再作成しない |
+| Apple Developer App ID | `jp.anzen-ai-portal.app` | Push＋IAP登録済み（2026-11-05の引継ぎ）。有効なApp Store profileにproduction APNs権限が含まれることを確認。Web版Sign in with Appleとの関連も別途確認 |
 | Codemagic profile | `anzen_appstore`（予定reference名、未作成） | 上記ID・正しいTeam・App Store配布用profileを作成/取得し、Codemagicに登録。期限・証明書・production APNs権限を確認する |
 | Codemagic certificate | `anzen_distribution`（予定reference名、未作成） | 対応するApple Distribution証明書と秘密鍵を安全に登録。自動選択方式なのでこのreference名自体はYAMLに不要 |
-| ASC API key | 値は記載しない | 適切なアプリへの権限・必要なロールを付与し、Key ID・Issuer ID・p8をCodemagic integrationへ安全に設定する |
+| ASC API key | 既存 `App Store Key` の値は記載しない | Key ID・Issuer ID・p8は既存integration管理。同じDeveloperチームの対象アプリ権限があるという引継ぎ。実認証は初回CIで確認 |
 
 `jp.anzenaiportal.app` はCLI生成専用。Apple、署名profile、RevenueCatのStore接続、APNs topicには **`jp.anzen-ai-portal.app`** を使用する。OAuthの `AUTH_APPLE_ID` は関連するServices IDであり、機械的にBundle IDへ置換しない。復帰は `anzenai://auth/callback`。Universal Links用のAssociated Domainsは現状使わない。
 
@@ -33,11 +33,11 @@
 
 | 作業 | 完了条件 |
 |---|---|
-| ASCアプリレコード | App Manager/Admin等の権限で日本語・iOS・名称「安全AIポータル」・登録済みBundle ID・オーナー指定SKUを登録し、数字Apple IDを引き継ぐ。bundleとSKUは慎重に確定 |
+| ASCアプリレコード | 作成済み `6831079439` / `jp.anzen-ai-portal.app` を確認する。別レコードを重複作成しない |
 | アプリ情報 | 1.0.0、カテゴリ・年齢評価の回答、著作権、配信国、サポート `/contact` とプライバシー `/privacy` の公開URL、説明・検索語を入力。公開URLの到達性は次担当が確認 |
 | IAP | 自動更新サブスクリプショングループと月額980円税込・1か月の1商品を作成。product IDはオーナーが確定した値。日本語表示名・説明・価格・配信地域・審査用購入画面を登録し、初回アプリ版と一緒に審査へ追加 |
 | RevenueCat | Apple Storeとの接続、product・Offering/package・entitlement `anzen_pro` を設定。既存Stripe契約者を追加購入させないこと、別会員への購入自動移管を拒否する方針と整合させる。v2のresource IDをApp Store product IDと混同しない |
-| Codemagic | 上のapplication・integration・group・profile/certificateを、与えられた権限と安全な資格情報投入経路で整備。仮置き置換後のpush/ビルド開始は次工程の明示許可で実施 |
+| Codemagic | 上のapplication・既存integration・profile/certificateを整備。group作成・仮置き置換は不要。登録後のpush/ビルド開始は次担当が実施 |
 | スクリーンショット登録 | 実際のiOS画面で撮った6.9インチ対応画像（例: 1320×2868、PNG/JPEG、透過なし）を1〜10枚登録。候補: ホーム、法改正、KYT/学習、資料保存、Pro/購入。RA停止中の機能を稼働中と見せない。ブラウザのモック画像は実機動作証拠には使わない |
 | App Privacy入力 | オーナー確認済みデータ取扱い表を入力。manifestが2項目だけだから「収集なし」と答えない。下記候補をサーバー/SDK/保存期間まで確認する |
 | 審査情報 | 連絡先・ログイン手順・利用可能な審査アカウント・Proと無料の確認手順・購読復元/削除・RA停止・通知条件・オフライン動作を記載。資格情報はASCの専用欄にだけ保存 |

@@ -19,16 +19,14 @@ workflows:
           - "web/**"
           - "codemagic.yaml"
     integrations:
-      # Create/select this integration in the Codemagic team before enabling CI.
-      app_store_connect: TODO_ANZEN_APP_STORE_CONNECT
+      # Reuse the existing integration in the same Apple Developer team.
+      app_store_connect: App Store Key
     environment:
-      groups:
-        - anzen_ios
       ios_signing:
         distribution_type: app_store
         bundle_identifier: jp.anzen-ai-portal.app
       vars:
-        APP_STORE_APPLE_ID: "TODO_ANZEN_APPLE_ID"
+        APP_STORE_APPLE_ID: "6831079439"
         ANZEN_APNS_ENVIRONMENT: production
         CI: "true"
         NEXT_TELEMETRY_DISABLED: "1"
