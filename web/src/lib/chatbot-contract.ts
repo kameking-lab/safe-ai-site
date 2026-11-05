@@ -1,5 +1,6 @@
 import type { SourceProvenance } from "@/lib/source-provenance";
 import type { LawArticle } from "@/data/laws";
+import { legalResponseConsistency } from "@/lib/legal-response-consistency";
 import type {
   DigDeeperLink,
   RelatedLawLink,
@@ -66,6 +67,12 @@ export type ChatbotSource = {
   sourceKind?: LawArticle["sourceKind"];
   sourceFetchedAt?: string;
   sourceProvenance?: SourceProvenance;
+  /** Local XML experiment: identity never aliases supplementary/appendix text to a main article. */
+  legalEvidence?: {
+    documentId: string; kind: "main" | "supplementary" | "appendix";
+    xmlPath: string; snapshotAsOf: string; xmlSha256: string;
+    figuresPending: boolean; hasTables: boolean;
+  };
   humanReviewStatus?: LawArticle["humanReviewStatus"];
 };
 
@@ -304,6 +311,10 @@ function effectiveDateStatus(
   draft: ChatbotResponseDraft,
   answer: string,
 ): ChatbotEffectiveDateStatus {
+  const consistency = legalResponseConsistency(draft.sources, draft.effectiveDateStatus);
+  if (consistency.warning) {
+    return { asOf: consistency.asOf, status: "unknown", label: consistency.warning };
+  }
   if (draft.effectiveDateStatus) {
     const asOf = draft.effectiveDateStatus.asOf?.trim() || null;
     return {
@@ -317,17 +328,12 @@ function effectiveDateStatus(
   }
 
   const asOf =
-    answerAsOf(answer) ??
+    consistency.asOf ?? answerAsOf(answer) ??
     draft.sources.map((source) => source.asOf?.trim()).find(Boolean) ??
     null;
   const statuses = [
     ...new Set(
-      draft.sources
-        .map((source) => source.applicationStatus)
-        .filter(
-          (status): status is NonNullable<ChatbotSource["applicationStatus"]> =>
-            Boolean(status),
-        ),
+      draft.sources.map((source) => source.applicationStatus ?? "unknown"),
     ),
   ];
   const status = statuses.length === 1 ? statuses[0]! : "unknown";
@@ -436,15 +442,25 @@ export function finalizeChatbotResponse(
     draft.importantConditions ?? draft.conditions ?? answerConditions(answer),
   );
   const finalEffectiveDateStatus = effectiveDateStatus(draft, answer);
+  const consistency = legalResponseConsistency(draft.sources, draft.effectiveDateStatus);
+  if (consistency.warning) {
+    directAnswer = consistency.warning;
+    answer = withAnswerClarification(directAnswer, clarificationQuestion
+      ? { question: clarificationQuestion, options: [] } : null);
+  }
 
   return {
     ...draft,
     answer,
     directAnswer,
     substantiveAnswer: directAnswer,
-    assumptions: normalizedList(draft.assumptions),
-    importantConditions,
-    conditions: importantConditions,
+    confidence: consistency.warning ? "low" : draft.confidence,
+    scopeWarnings: consistency.warning
+      ? [...new Set([...(draft.scopeWarnings ?? []), consistency.warning])]
+      : draft.scopeWarnings,
+    assumptions: consistency.warning ? [] : normalizedList(draft.assumptions),
+    importantConditions: consistency.warning ? [] : importantConditions,
+    conditions: consistency.warning ? [] : importantConditions,
     citations: draft.citations ?? [],
     clarificationQuestion,
     quickReplies,

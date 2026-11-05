@@ -488,7 +488,7 @@ describe("電気会話のanswer-first API契約", () => {
       ).toMatchObject({
         fullName: "電気事業法",
         issuer: "経済産業省",
-        egovHref: "https://laws.e-gov.go.jp/law/339AC0000000170",
+        egovHref: "https://laws.e-gov.go.jp/law/339AC0000000170?occasion_date=20260809#Mp-At_43",
       });
     },
   );
@@ -590,7 +590,7 @@ describe("電気会話のanswer-first API契約", () => {
       ).toMatchObject({
         fullName: "電気工事士法施行令",
         issuer: "内閣（経済産業省所管）",
-        egovHref: "https://laws.e-gov.go.jp/law/335CO0000000260",
+        egovHref: "https://laws.e-gov.go.jp/law/335CO0000000260?occasion_date=20260809#Mp-At_1",
       });
       expect(
         payload.citations.find(
@@ -599,7 +599,7 @@ describe("電気会話のanswer-first API契約", () => {
       ).toMatchObject({
         fullName: "電気工事士法施行規則",
         issuer: "経済産業省",
-        egovHref: "https://laws.e-gov.go.jp/law/335M50000400097",
+        egovHref: "https://laws.e-gov.go.jp/law/335M50000400097?occasion_date=20260809#Mp-At_2",
       });
 
       const deEnergized = requiredSource(payload, "安衛則", "第339条");

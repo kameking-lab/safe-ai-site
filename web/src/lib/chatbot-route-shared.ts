@@ -1,4 +1,6 @@
 import { lawSourceProvenance } from "@/lib/legal-source-provenance";
+import { legalCitationLink } from "@/lib/legal-citation-link";
+import { getLawMetadata as getCitationLinkMetadata } from "@/data/law-metadata";
 import type { LawArticle } from "@/data/laws";
 import { getLawMetadata as getCitationLawMetadata } from "@/data/laws/law-metadata";
 import type { MlitResource } from "@/data/mlit-resources";
@@ -383,6 +385,8 @@ export function lawArticleToSource(
   now: Date = new Date(),
 ): ChatbotSource {
   const metadata = getCitationLawMetadata(article.lawShort);
+  const citationUrl = legalCitationLink(article, getCitationLinkMetadata(article.lawShort).egovLawId);
+  const sourceProvenance = lawSourceProvenance(article);
   const questionTime = classifyLegalQuestionTime(query, now);
   const oxygenDomainQuery =
     /(?:酸欠|酸素欠乏|酸素濃度|酸素(?:が|の)?(?:少ない|薄い|足りない)(?:場所|所|現場)?|タンク(?:等)?(?:の)?(?:中|内|内部)?(?:に|へ)?(?:入る|立ち入る|入槽))/.test(
@@ -1141,11 +1145,11 @@ export function lawArticleToSource(
       sourceSnippet.length > sourceSnippetLimit
         ? `${sourceSnippet.slice(0, sourceSnippetLimit)}…`
         : sourceSnippet,
-    url: article.sourceUrl ?? metadata?.eGovUrl,
+    url: citationUrl,
     verificationStatus: article.verificationStatus,
     sourceKind: article.sourceKind,
     sourceFetchedAt: article.sourceFetchedAt,
-    sourceProvenance: lawSourceProvenance(article),
+    sourceProvenance: sourceProvenance ? { ...sourceProvenance, url: citationUrl } : undefined,
     humanReviewStatus: article.humanReviewStatus,
   };
 }

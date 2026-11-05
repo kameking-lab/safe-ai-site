@@ -304,6 +304,10 @@ function sourceForCitation(
       source.law === citation.fullName ||
       source.law === citation.lawShort ||
       source.lawShort === citation.lawShort;
+    if (source.legalEvidence) {
+      return sameLaw && source.article === citation.articleNum &&
+        citation.searchHref === `/api/chatbot/local-evidence?documentId=${encodeURIComponent(source.legalEvidence.documentId)}`;
+    }
     const sameArticle =
       source.article.includes(citation.articleNum) ||
       citation.articleNum.includes(source.article);
@@ -363,7 +367,7 @@ function renderEvidence(
     const issuer = citation.issuer
       ? `<p class="meta">発出機関 ${escapeHtml(citation.issuer)}</p>`
       : "";
-    return `<li><strong>${escapeHtml(citation.fullName)} ${escapeHtml(locator)}</strong>${timing ? `<p class="meta">${escapeHtml(timing)}</p>` : ""}${issuer}${excerpt ? `<p>${escapeHtml(excerpt)}</p>` : ""}${officialUrl ? `<a href="${escapeHtml(officialUrl)}" rel="noopener noreferrer">公式原文</a>` : ""}</li>`;
+    return `<li><strong>${escapeHtml(citation.fullName)} ${escapeHtml(locator)}</strong>${timing ? `<p class="meta">${escapeHtml(timing)}</p>` : ""}${issuer}${excerpt ? `<p>${escapeHtml(excerpt)}</p>` : ""}${officialUrl ? `<a href="${escapeHtml(officialUrl)}" rel="noopener noreferrer">公式原文</a>` : ""}${source?.legalEvidence ? `<p><a href="/api/chatbot/local-evidence?documentId=${encodeURIComponent(source.legalEvidence.documentId)}">保存原文を全文で確認</a></p>` : ""}</li>`;
   });
   const sourceItems = sources
     .filter((source) => !matchedSources.has(source))

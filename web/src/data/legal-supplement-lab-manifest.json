@@ -1,0 +1,32 @@
+{
+  "asOf": "2026-10-26",
+  "datasetSha256": "426e545590de90c0f66302a59b326c0eee83d8cd999c2b8535c48931510a6acb",
+  "documentCount": 2187,
+  "laws": [
+    {
+      "lawId": "347AC0000000057",
+      "revisionId": "347AC0000000057_20261001_507AC0000000033",
+      "xmlSha256": "73cbc46719f15b86d6dd964b364c6b99e39ad37be7c6427df9966636c4dee42d"
+    },
+    {
+      "lawId": "347CO0000000318",
+      "revisionId": "347CO0000000318_20261001_508CO0000000196",
+      "xmlSha256": "7d99a9eb41c9199a424ebdd3f4ee3f605e78d65c13693ad6b8ebd206ef8c9f0c"
+    },
+    {
+      "lawId": "347M50002000032",
+      "revisionId": "347M50002000032_20261001_508M60000100116",
+      "xmlSha256": "260666270e9b88b9047917c6f1936c71684d863cbdd24c2761e4871681045fb5"
+    },
+    {
+      "lawId": "347M50002000034",
+      "revisionId": "347M50002000034_20260401_508M60000100003",
+      "xmlSha256": "b2fd4be2e1ffdf5655dbc6c0e86d493df20e83e2c3c2e6d78ef9b2e7ffc26ed4"
+    },
+    {
+      "lawId": "347M50002000042",
+      "revisionId": "347M50002000042_20260401_508M60000100003",
+      "xmlSha256": "76a76b4818e85b2dff813b1c8ac9537f00c7b15bae84906727d6653f04c5aa26"
+    }
+  ]
+}
