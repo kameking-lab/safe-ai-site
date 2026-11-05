@@ -15,7 +15,7 @@ describe('iOS pipeline boundaries', () => {
     const workflow = parse(await readFile(new URL('../../codemagic.yaml', import.meta.url), 'utf8')).workflows['anzen-ios-app-store'];
     expect(workflow.working_directory).toBe('mobile');
     expect(workflow.publishing.app_store_connect).toEqual({auth:'integration',submit_to_testflight:false,submit_to_app_store:false});
-    expect(workflow.environment.ios_signing).toEqual({certificates:['kameking_distribution']});
+    expect(workflow.environment.ios_signing).toEqual({provisioning_profiles:['kakomon_appstore'],certificates:['kameking_distribution']});
     expect(workflow.triggering.events).toEqual(['push']);
     expect(workflow.when.changeset.includes).toContain('web/**');
     const scripts=workflow.scripts.map((step:{script:string})=>step.script).join('\n');

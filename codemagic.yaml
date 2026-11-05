@@ -23,7 +23,10 @@ workflows:
       app_store_connect: App Store Key
     environment:
       ios_signing:
-        # Profiles are created/downloaded through the existing ASC integration below.
+        # Existing Kakomon references bootstrap the signing identity before scripts.
+        # App-specific profiles are created/downloaded through the ASC API below.
+        provisioning_profiles:
+          - kakomon_appstore
         certificates:
           - kameking_distribution
       vars:

@@ -1,12 +1,16 @@
-# CM7 App Store provisioning (2026-11-06)
+# CM7 App Store provisioning, corrected by CM8 (2026-11-06)
 
-The existing Codemagic team certificate reference is `kameking_distribution`
-(recorded in `ios1sub/asc-setup-log.md`, 2026-11-04). Both workflows select only
-this certificate through `environment.ios_signing.certificates`. Codemagic
-installs the identity into its build keychain before user scripts run.
-The `distribution_type` / `bundle_identifier` selection is removed because it
-requires profiles already uploaded to Code signing identities and fails before
-scripts when none exist. Do not mix these two selection modes or add empty lists.
+The existing Codemagic team references are `kakomon_appstore` (the uploaded
+Kakomon AI App Store profile for `jp.kakomon-ai.app`) and `kameking_distribution`
+(distribution certificate and private key), both recorded in
+`ios1sub/asc-setup-log.md`, 2026-11-04. Both workflows list these under
+`environment.ios_signing.provisioning_profiles` and `certificates`, respectively.
+Codemagic installs the identity into its build keychain before user scripts run.
+CM7's certificate-only configuration was rejected before scripts: individual
+reference mode requires provisioning profiles, with certificates optional.
+Do not mix this mode with `distribution_type` / `bundle_identifier` or add empty
+lists. The Kakomon profile bootstraps the supported configuration; it cannot sign
+either app's different bundle ID. The API steps below supply their actual profiles.
 
 The first script uses an isolated venv with `codemagic-cli-tools==0.70.2` and the
 existing **App Store Key** integration. It uses the same official credential
