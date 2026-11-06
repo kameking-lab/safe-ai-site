@@ -23,7 +23,7 @@ describe('iOS pipeline boundaries', () => {
     expect(scripts).not.toContain('|| true');
     expect(scripts).toContain('ruby scripts/verify-ios.rb build/ios/export_options.plist');
     expect(scripts).toContain('--ipa-directory build/ios/ipa');
-    expect(workflow.artifacts).toContain('mobile/build/ios/ipa/*.ipa');
+    expect(workflow.artifacts).toContain('$CM_BUILD_DIR/mobile/build/ios/ipa/*.ipa');
     expect(scripts).not.toMatch(/CODE_SIGNING_ALLOWED=NO|vercel|git push/);
   });
   it('matches resource injection against the installed Capacitor template without generating iOS', () => {
