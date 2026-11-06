@@ -21,9 +21,23 @@ export default function PrivacyPage() {
       <PageJsonLd name="プライバシーポリシー" description="安全AIポータルのプライバシーポリシー。個人情報の取り扱いについて説明しています。" path="/privacy" />
         <div>
           <h1 className="text-xl font-bold text-slate-900">プライバシーポリシー</h1>
-          <p className="mt-2 text-sm text-slate-500">最終更新日: 2026年11月4日</p>
+          <p className="mt-2 text-sm text-slate-500">最終更新日: 2026年11月6日</p>
         </div>
 
+        <section id="security" className="scroll-mt-24 space-y-3">
+          <h2 className="text-base font-bold text-slate-900">情報を守るための取り組み</h2>
+          <ul className="ml-4 space-y-1 text-sm text-slate-600">
+            <li className="list-disc">通信は暗号化（HTTPS）して送受信します。</li>
+            <li className="list-disc">ログインは Google などの外部アカウントで行い、パスワードを当サイトに保存しません。</li>
+            <li className="list-disc">お問い合わせ・ご相談・メール登録の内容は、第3項の目的以外に使いません。問い合わせ受信・フィードバック・メルマガ登録のサーバーログには、氏名・メールアドレス・相談内容を記録しません。</li>
+            <li className="list-disc">AIへの質問は、名前や住所などを書かなくても使えます。個人情報らしい入力を検知した場合は外部へ送信しません。</li>
+            <li className="list-disc">
+              技術的な対策の詳細は
+              <a className="underline hover:text-emerald-700" href="/security">セキュリティページ</a>
+              をご覧ください。
+            </li>
+          </ul>
+        </section>
         <section className="space-y-3">
           <h2 className="text-base font-bold text-slate-900">1. 事業者の名称・連絡先</h2>
           <p className="text-sm leading-7 text-slate-600">

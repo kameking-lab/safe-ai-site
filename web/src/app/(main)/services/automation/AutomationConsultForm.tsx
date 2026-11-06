@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, CheckCircle2, LoaderCircle, Send } from "lucide-react";
 import { trackAutomationEvent } from "@/lib/automation-consult/analytics";
+import { PrivacyNote } from "@/components/privacy-note";
 import { parseAutomationConsultationTypePrefill } from "@/lib/automation-consult/prefill";
 import { parseAutomationConsultForm, normalizeAutomationConsultMultiline } from "@/lib/automation-consult/form-validation";
 import { AUTOMATION_CONSULT_LIMITS as LIMITS, type AutomationConsultSourcePage } from "@/lib/automation-consult/form-contract";
@@ -923,6 +924,7 @@ export function AutomationConsultForm({
           </button>
         )}
       </div>
+      {(compact || step === 2) && <PrivacyNote variant="message" />}
       {!compact && <p className="text-sm leading-6 text-slate-600">
         送信後に費用は発生しません。正式見積への同意前に制作・設定を開始することはありません。
       </p>}

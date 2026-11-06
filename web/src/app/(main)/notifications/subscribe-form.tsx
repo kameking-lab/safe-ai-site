@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Mail } from "lucide-react";
 import { trackEvent } from "@/components/Analytics";
 import { Mascot } from "@/components/mascot";
+import { PrivacyNote } from "@/components/privacy-note";
 
 const PREFECTURES = [
   "北海道", "青森県", "岩手県", "宮城県", "秋田県", "山形県", "福島県",
@@ -108,6 +109,7 @@ export function SubscribeForm() {
       <p className="text-xs text-slate-400 text-center leading-5">
         登録後は確認メールが届きます。いつでも配信停止可能です。
       </p>
+      <PrivacyNote variant="message" />
     </form>
   );
 }

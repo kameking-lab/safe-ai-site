@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { LogIn } from "lucide-react";
 import { isAuthConfigured, signIn } from "@/auth";
 import { withSiteOpenGraph } from "@/lib/seo-metadata";
+import { PrivacyNote } from "@/components/privacy-note";
 
 export const metadata: Metadata = {
   title: "ログイン",
@@ -73,6 +74,7 @@ export default function SignInPage() {
                 Googleでログイン
               </button>
             </form>
+            <PrivacyNote variant="signin" className="mt-4 text-left" />
           </>
         ) : (
           <div role="status" className="mb-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-left text-sm leading-6 text-amber-900">

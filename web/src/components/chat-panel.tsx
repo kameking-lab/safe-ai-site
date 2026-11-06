@@ -5,6 +5,7 @@ import { ErrorNotice } from "@/components/error-notice";
 import { InputWithVoice } from "@/components/voice-input-field";
 import { EasyJapaneseText } from "@/components/easy-japanese-text";
 import { Mascot } from "@/components/mascot";
+import { PrivacyNote } from "@/components/privacy-note";
 import type { ServiceError, ServiceStatus } from "@/lib/types/api";
 import type {
   ChatbotQuickReply,
@@ -182,7 +183,7 @@ export function ChatPanel({
           {isSending ? "送信中..." : "送信"}
         </button>
       </div>
-      <p className="mt-2 text-xs text-slate-600">個人情報は入力しない</p>
+      <PrivacyNote variant="ai" className="mt-2" />
       {status === "success" && !error && (
         <p className="mt-2 text-xs leading-5 text-emerald-700">
           応答を受信しました。
