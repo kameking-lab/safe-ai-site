@@ -13,6 +13,7 @@ import { DeferredGlobalEnhancements } from "@/components/deferred-global-enhance
 import { CspNonceProvider } from "@/components/csp-nonce-context";
 import { ScrollPositionRestorer } from "@/components/scroll-position-restorer";
 import { adsenseAccountMetadata, configuredAdsensePublisherId } from "@/lib/adsense-account";
+import { appStoreItunesMetadata } from "@/lib/app-store";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -38,6 +39,8 @@ const PREVIEW_ROBOTS: NonNullable<Metadata["robots"]> = {
 
 const metadataDefinition: Metadata = {
   other: adsenseAccountMetadata(),
+  // Safari の Smart App Banner。NEXT_PUBLIC_APP_STORE_LIVE=true のときだけ出す（lib/app-store.ts）。
+  itunes: appStoreItunesMetadata(),
   manifest: "/manifest.json",
   icons: {
     icon: [

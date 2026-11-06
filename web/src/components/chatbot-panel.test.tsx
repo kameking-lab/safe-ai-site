@@ -519,10 +519,11 @@ describe("ChatbotPanel conversation UI", () => {
       document.querySelector("[data-chatbot-composer]")?.className,
     ).toContain("shrink-0");
     expect(screen.getByLabelText("質問入力").getAttribute("rows")).toBe("1");
-    expect(
-      screen.getByText("個人情報は入力しない", { exact: false }).firstChild
-        ?.textContent,
-    ).toBe("個人情報は入力しない");
+    const privacyHint = document.getElementById("chatbot-input-hint");
+    expect(privacyHint?.textContent).toContain("不正アクセス対策済み");
+    expect(privacyHint?.textContent).toContain("名前や住所などは書かなくても使えます");
+    // 最初の画面の操作数予算（service-first copy budget）を増やさないよう、送信欄の安心表示はリンクなし。
+    expect(privacyHint?.querySelector("a")).toBeNull();
     expect(
       document.querySelectorAll("[data-ui-box]").length,
     ).toBeLessThanOrEqual(1);

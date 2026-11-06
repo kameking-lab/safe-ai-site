@@ -23,6 +23,7 @@ import type {
 } from "@/lib/chatbot-notice-attachment";
 import type { LawCategoryFilter } from "@/lib/law-category-options";
 import { VoiceMicButton } from "@/components/voice-input-field";
+import { PrivacyNote } from "@/components/privacy-note";
 import { clearChatHistory } from "@/lib/chat-history";
 import { trackEvent } from "@/components/Analytics";
 import { formatAnswerForDisplay } from "@/lib/chatbot-answer-format";
@@ -965,7 +966,7 @@ export function ChatbotPanel({
             }}
             placeholder="作業や設備を質問"
             aria-label="質問入力"
-            aria-describedby="chatbot-input-hint"
+            aria-describedby="chatbot-input-hint chatbot-input-keys"
             className="max-h-28 min-h-11 min-w-0 flex-1 resize-none bg-transparent px-2 py-2 text-base leading-6 text-slate-950 outline-none placeholder:text-slate-500 disabled:opacity-60 sm:text-sm dark:text-white"
             data-primary-focus=""
           />
@@ -996,15 +997,10 @@ export function ChatbotPanel({
             </button>
           )}
         </div>
-        <p
-          id="chatbot-input-hint"
-          className="mt-1 px-2 text-[11px] leading-4 text-slate-500 dark:text-slate-400"
-        >
-          個人情報は入力しない
-          <span className="sr-only">
-            。Enterで送信、Shift+Enterで改行します。
-          </span>
-        </p>
+        <PrivacyNote id="chatbot-input-hint" variant="ai" detailsLink={false} className="mt-1 px-2" />
+        <span id="chatbot-input-keys" className="sr-only">
+          Enterで送信、Shift+Enterで改行します。
+        </span>
       </form>
     </section>
   );

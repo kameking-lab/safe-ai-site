@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Mail } from "lucide-react";
 import type { Industry } from "@/lib/newsletter";
 import { Mascot } from "@/components/mascot";
+import { PrivacyNote } from "@/components/privacy-note";
 
 const INDUSTRIES: Industry[] = ["建設", "製造", "医療福祉", "運輸", "IT", "その他"];
 
@@ -82,6 +83,7 @@ export function NewsletterForm({ compact = false, onSuccess }: Props) {
         {status === "error" && (
           <p className="w-full text-xs text-red-600 sm:col-span-2">{errorMsg}</p>
         )}
+        <PrivacyNote variant="message" className="w-full" />
       </form>
     );
   }
@@ -138,6 +140,7 @@ export function NewsletterForm({ compact = false, onSuccess }: Props) {
       <p className="text-center text-xs text-slate-400 leading-5">
         週1回（月曜9時）配信。いつでも配信停止できます。無料。
       </p>
+      <PrivacyNote variant="message" />
     </form>
   );
 }

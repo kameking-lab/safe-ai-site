@@ -3,6 +3,7 @@ import { LogIn } from "lucide-react";
 import { isAuthConfigured, signIn } from "@/auth";
 import { withSiteOpenGraph } from "@/lib/seo-metadata";
 import { appReviewConfig } from "@/lib/app-review";
+import { PrivacyNote } from "@/components/privacy-note";
 import { AppReviewSignInForm } from "./app-review-form";
 
 export const metadata: Metadata = {
@@ -86,6 +87,7 @@ export default async function SignInPage({ searchParams }: { searchParams: Promi
             {appleReady ? <form action={async () => { 'use server'; await signIn('apple', { redirectTo }); }}>
               <button type="submit" className="mt-3 min-h-11 w-full rounded-xl bg-black px-5 py-3 font-semibold text-white">Appleでサインイン</button>
             </form> : nativeFlow ? <p role="status">Appleログインの設定待ちです。アプリの会員ログインはまだ利用できません。</p> : null}
+            {googleReady || appleReady ? <PrivacyNote variant="signin" className="mt-4 text-left" /> : null}
             {reviewReady ? <AppReviewSignInForm redirectTo={redirectTo} failed={params.reviewError === "1"} /> : null}
           </>
         ) : (

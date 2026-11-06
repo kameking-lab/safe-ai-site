@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ShieldCheck } from "lucide-react";
 import { TranslatedPageHeader } from "@/components/translated-page-header";
 import { PageContainer } from "@/components/layout";
+import { PrivacyNote } from "@/components/privacy-note";
 import { useLanguage } from "@/contexts/language-context";
 
 type Category =
@@ -471,13 +472,17 @@ export default function InquiryForm({ initialParams = {} }: { initialParams?: In
           >
             {status === "sending" ? (isEn ? "Sending..." : "送信中...") : (isEn ? "Submit" : "送信する")}
           </button>
-          <p className="text-[11px] text-slate-500">
-            {isEn ? "* Personal-data handling per the " : "※ 個人情報の取扱いは"}{" "}
-            <a href="/privacy" className="underline hover:text-slate-700">
-              {isEn ? "Privacy Policy" : "プライバシーポリシー"}
-            </a>{" "}
-            {isEn ? "." : "をご確認ください。"}
-          </p>
+          {isEn ? (
+            <p className="text-[11px] text-slate-500">
+              * Personal-data handling per the{" "}
+              <a href="/privacy" className="underline hover:text-slate-700">
+                Privacy Policy
+              </a>
+              .
+            </p>
+          ) : (
+            <PrivacyNote variant="message" />
+          )}
           <p className="text-[11px] text-slate-500">
             {isEn
               ? "If the form is unavailable, you can also check how to contact us by email."
