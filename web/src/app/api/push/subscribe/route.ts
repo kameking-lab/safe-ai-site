@@ -122,7 +122,6 @@ function bodyError(result: Extract<JsonReadResult, { ok: false }>) {
 }
 
 export async function POST(request: Request) {
-  if(process.env.MOBILE_LEDGER_ENABLED==='true')return json({ok:false,reason:'legacy_subscription_migration_required',message:'会員の権利に対応した通知設定を利用してください。'},503);
   const limited = await rateLimitResponse(request);
   if (limited) return limited;
   if (!isWebPushConfigured()) return notConfigured();
