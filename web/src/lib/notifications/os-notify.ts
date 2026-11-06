@@ -13,6 +13,8 @@ const SHOWN_KEY = "safe-ai:notif-os-shown:v1";
 const SHOWN_CAP = 200;
 
 export function osNotifySupported(): boolean {
+  // Native iOS delivery uses authenticated, Pro-gated APNs; never a parallel free browser path.
+  if(process.env.NEXT_PUBLIC_ANZEN_NATIVE==='true')return false;
   return typeof window !== "undefined" && "Notification" in window;
 }
 

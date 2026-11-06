@@ -1,3 +1,4 @@
+import { withUsage } from "@/lib/mobile/usage";
 import { NextResponse } from "next/server";
 import { noStoreHeaders } from "@/lib/api-cache";
 import { getLawRevisionById } from "@/data/mock/law-revisions";
@@ -102,7 +103,7 @@ function isRevisionEffectiveDateQuestion(value: string): boolean {
  * 支持されることを保証できない。この旧経路は外部AIを呼ばず、承認済み
  * サーバー法令コーパスの該当箇所と公式原文リンクだけを返す。
  */
-export async function POST(request: Request) {
+async function handlePost(request: Request) {
   const requestUrl = new URL(request.url);
   const delayMs = resolveDiagnosticDelay(requestUrl.searchParams.get("delayMs"));
   const forceError = resolveDiagnosticError(request);
@@ -424,3 +425,5 @@ export async function POST(request: Request) {
     },
   );
 }
+
+export async function POST(request: Request) { return withUsage(request, "law_chat", handlePost); }

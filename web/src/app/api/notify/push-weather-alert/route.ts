@@ -47,6 +47,7 @@ const TABLE = "push_subscriptions";
 const MAX_SUBSCRIPTIONS = 5000;
 
 export async function POST(req: Request) {
+  if(process.env.MOBILE_LEDGER_ENABLED==='true')return NextResponse.json({ok:false,reason:'legacy_subscription_migration_required'},{status:503});
   // 認証（Vercel Cron / 内部サービスのみ）。CRON_SECRET 未設定なら安全側で 401。
   const cronSecret = process.env.CRON_SECRET;
   if (!cronSecret || req.headers.get("authorization") !== `Bearer ${cronSecret}`) {

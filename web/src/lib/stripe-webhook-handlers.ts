@@ -99,6 +99,37 @@ export async function handleCheckoutCompleted(database: StripeDb, session: Strip
     data: { ...data, stripeSubscriptionId: subscriptionId },
   });
   if (changed.count !== 1) throw new Error("Stripe mapping changed during checkout");
+  if (process.env.MOBILE_LEDGER_ENABLED === "true") {
+    await database.mobilePurchaseIntent.updateMany({
+      where: {
+        userId, source: "stripe", status: "pending",
+        OR: [{ providerSessionId: session.id }, ...(session.metadata?.purchaseIntentId ? [{ id: session.metadata.purchaseIntentId }] : [])],
+      },
+      data: { status: "completed", stage: "completed", checkoutUrl: null },
+    });
+    const apple = await database.mobileGrant.findFirst({ where: { userId, provider: "app_store", revoked: false, expiresAt: { gt: new Date() } } });
+    if (apple) {
+      await database.mobileBillingEvent.upsert({
+        where: { id: `duplicate:${session.id}` },
+        create: { id: `duplicate:${session.id}`, type: "DUPLICATE_PURCHASE_REVIEW", appUserId: null, occurredAt: new Date(), status: "failed" },
+        update: {},
+      });
+    }
+  }
+}
+
+/** Refunds, disputes and fraud warnings stop access until provider-side review. Never auto-refund. */
+export async function handleBillingRisk(database: StripeDb, charge: Stripe.Charge): Promise<void> {
+  const customer = objectId(charge.customer);
+  if (!customer) return;
+  const owners = await database.subscription.findMany({ where: { stripeCustomerId: customer }, select: { userId: true } });
+  await database.subscription.updateMany({ where: { stripeCustomerId: customer }, data: { billingHold: true } });
+  if (process.env.MOBILE_LEDGER_ENABLED === "true") {
+    await database.mobileGrant.updateMany({
+      where: { provider: "stripe", userId: { in: owners.map(owner => owner.userId) } },
+      data: { revoked: true, checkedAt: new Date() },
+    });
+  }
 }
 
 export async function handleSubscriptionUpdated(database: StripeDb, sub: Stripe.Subscription): Promise<void> {
