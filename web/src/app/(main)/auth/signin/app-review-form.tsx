@@ -1,6 +1,7 @@
 import { AuthError } from "next-auth";
 import { redirect } from "next/navigation";
 import { signIn } from "@/auth";
+import { PrivacyNote } from "@/components/privacy-note";
 import { APP_REVIEW_PROVIDER_ID } from "@/lib/app-review";
 
 // Rendered only while the server-side App Review login is enabled and unexpired.
@@ -30,6 +31,7 @@ export function AppReviewSignInForm({ redirectTo, failed }: { redirectTo: string
         <input id="app-review-password" name="password" type="password" autoComplete="current-password" required maxLength={256} className="rounded-lg border border-slate-300 px-3 py-2" />
         <button type="submit" className="min-h-11 rounded-xl bg-slate-900 px-5 py-3 font-semibold text-white">審査用アカウントでログイン (Sign in)</button>
         {failed ? <p role="alert" className="text-red-700">ログインできませんでした。入力内容を確認し、時間をおいてお試しください。(Sign-in failed.)</p> : null}
+        <PrivacyNote variant="signin" />
       </form>
     </details>
   );

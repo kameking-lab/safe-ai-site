@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import type { FeedbackPayload } from "@/app/api/feedback/route";
+import { PrivacyNote } from "@/components/privacy-note";
 
 type Props = {
   articleSlug: string;
@@ -192,6 +193,7 @@ export function ArticleFeedback({ articleSlug, className = "" }: Props) {
           >
             {status === "submitting" ? "送信中…" : "送信する"}
           </button>
+          <PrivacyNote variant="message" />
         </form>
       )}
     </div>
