@@ -28,6 +28,7 @@ export const APP_LOCAL_STORAGE_PREFIXES = [
 ] as const;
 
 export function isAppLocalStorageKey(key: string): boolean {
+  if(process.env.NEXT_PUBLIC_ANZEN_NATIVE==='true' && (/^(?:ky-|safety-diary|safe-ai:ky|anzen[_-]ky)/.test(key)||/near[-_]?miss/i.test(key)))return false;
   return APP_LOCAL_STORAGE_PREFIXES.some((prefix) => key.startsWith(prefix));
 }
 

@@ -13,6 +13,7 @@ import {
   handleInvoicePaymentSucceeded,
   handleSubscriptionDeleted,
   handleSubscriptionUpdated,
+  handleBillingRisk,
 } from "@/lib/stripe-webhook-handlers";
 import { sharedRateLimitGuard } from "@/lib/security/shared-state";
 
@@ -92,8 +93,24 @@ export async function POST(req: Request) {
       async (tx) => {
         switch (event.type) {
           case "checkout.session.completed":
+          case "checkout.session.async_payment_succeeded":
             await handleCheckoutCompleted(tx, event.data.object as Stripe.Checkout.Session);
             break;
+          case 'checkout.session.expired': {
+            if(process.env.MOBILE_LEDGER_ENABLED==='true'){
+              const checkout=event.data.object as Stripe.Checkout.Session;
+              const latest=await stripe.checkout.sessions.retrieve(checkout.id);
+              if(latest.status==='expired')await tx.mobilePurchaseIntent.updateMany({where:{providerSessionId:latest.id,source:'stripe',status:'pending'},data:{status:'cancelled',stage:'expired',checkoutUrl:null}});
+            }break;
+          }
+          case 'charge.refunded':
+            await handleBillingRisk(tx,event.data.object as Stripe.Charge);break;
+          case 'charge.dispute.created':
+          case 'radar.early_fraud_warning.created': {
+            const object=event.data.object as {charge:string|{id:string}};
+            const chargeId=typeof object.charge==='string'?object.charge:object.charge.id;
+            await handleBillingRisk(tx,await stripe.charges.retrieve(chargeId));break;
+          }
           case "customer.subscription.created":
           case "customer.subscription.updated":
             await handleSubscriptionUpdated(tx, event.data.object as Stripe.Subscription);

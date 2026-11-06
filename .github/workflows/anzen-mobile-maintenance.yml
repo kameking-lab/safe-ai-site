@@ -1,0 +1,40 @@
+name: anzen-mobile-maintenance
+
+# iOS アプリ用サーバーの定期処理（RevenueCat 課金イベントの照合・退会処理の再試行・
+# APNs 天気通知・期限切れセッション掃除）を 10 分おきに起動する。
+# Vercel Cron は GET + CRON_SECRET 固定のため、POST + 専用 Authorization のこの API は呼べない。
+# secret ANZEN_MOBILE_MAINTENANCE_AUTHORIZATION は Vercel の MOBILE_MAINTENANCE_AUTHORIZATION と
+# 同じ値（"Bearer <ランダム>"）。未設定なら何もせず成功終了する。
+# 公開リポジトリのためログには HTTP ステータスだけを出し、応答本文は出さない。
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: anzen-mobile-maintenance
+  cancel-in-progress: false
+
+jobs:
+  maintenance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Run mobile maintenance
+        env:
+          MAINTENANCE_AUTHORIZATION: ${{ secrets.ANZEN_MOBILE_MAINTENANCE_AUTHORIZATION }}
+        run: |
+          if [ -z "${MAINTENANCE_AUTHORIZATION}" ]; then
+            echo "ANZEN_MOBILE_MAINTENANCE_AUTHORIZATION is not set; skipping."
+            exit 0
+          fi
+          # The route stops new work after 45 s and its function limit is 60 s.
+          # Retries cover transient 5xx/timeouts; work is idempotent and resumable.
+          status=$(curl -sS -o /dev/null -w "%{http_code}" \
+            --max-time 75 --retry 2 --retry-delay 30 --retry-connrefused \
+            -X POST "https://www.anzen-ai-portal.jp/api/mobile/v1/maintenance" \
+            -H "Authorization: ${MAINTENANCE_AUTHORIZATION}") || status="curl-error"
+          echo "maintenance HTTP status: ${status}"
+          [ "${status}" = "200" ]

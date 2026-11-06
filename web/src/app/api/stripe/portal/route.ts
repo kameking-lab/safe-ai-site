@@ -50,10 +50,13 @@ export async function POST() {
   }
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  const nativeManagementConfiguration=process.env.STRIPE_MANAGE_ONLY_PORTAL_CONFIGURATION_ID;
+  if(process.env.MOBILE_LEDGER_ENABLED==='true' && !nativeManagementConfiguration)return privateJson({error:'購読管理の設定を確認できません。'},503);
   try {
     const portal = await stripe.billingPortal.sessions.create({
       customer: sub.stripeCustomerId,
       return_url: `${siteUrl}/account?portal_return=1`,
+      ...(process.env.MOBILE_LEDGER_ENABLED==='true'?{configuration:nativeManagementConfiguration}:{}),
     });
     return privateJson({ url: portal.url });
   } catch {

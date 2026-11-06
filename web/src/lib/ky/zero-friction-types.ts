@@ -128,6 +128,7 @@ export type KyMember = {
 export type KySelectedMember = Pick<KyMember, "id" | "displayName" | "role">;
 
 export type KyHandoffSource =
+  | "morning-briefing"
   | "home"
   | "heat"
   | "risk"

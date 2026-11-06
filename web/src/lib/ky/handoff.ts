@@ -18,6 +18,7 @@ let pendingKyHandoff: KyHandoffPayload | null = null;
 const KY_HANDOFF_RUNTIME_SLOT = "__safeAiKyHandoffRuntimeV1" as const;
 
 const SOURCES: readonly KyHandoffSource[] = [
+  "morning-briefing",
   "home",
   "heat",
   "risk",

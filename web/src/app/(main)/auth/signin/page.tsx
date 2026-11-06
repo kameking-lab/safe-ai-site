@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { LogIn } from "lucide-react";
 import { isAuthConfigured, signIn } from "@/auth";
 import { withSiteOpenGraph } from "@/lib/seo-metadata";
+import { appReviewConfig } from "@/lib/app-review";
+import { AppReviewSignInForm } from "./app-review-form";
 
 export const metadata: Metadata = {
   title: "ログイン",
@@ -14,7 +16,14 @@ export const metadata: Metadata = {
   }),
 };
 
-export default function SignInPage() {
+export default async function SignInPage({ searchParams }: { searchParams: Promise<{ callbackUrl?: string; reviewError?: string }> }) {
+  const params = await searchParams;
+  const requested = params.callbackUrl;
+  const nativeFlow = typeof requested === 'string' && /^\/api\/mobile\/v1\/auth\/authorize\?flow=[0-9a-f-]{36}(?:&confirmed=1)?$/.test(requested);
+  const redirectTo = nativeFlow ? requested : '/';
+  const appleReady = !!(process.env.AUTH_APPLE_ID && process.env.AUTH_APPLE_SECRET);
+  const googleReady = !!(process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET);
+  const reviewReady = isAuthConfigured && appReviewConfig() !== null;
   return (
     <div className="mx-auto max-w-sm px-4 py-16">
       <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm text-center">
@@ -42,14 +51,15 @@ export default function SignInPage() {
                 をご確認ください。
               </p>
             </div>
-            <form
+            {googleReady ? <form
               action={async () => {
                 "use server";
-                await signIn("google", { redirectTo: "/" });
+                if (nativeFlow && !appleReady) return;
+                await signIn("google", { redirectTo }, nativeFlow ? {prompt:'select_account'} : undefined);
               }}
             >
               <button
-                type="submit"
+                type="submit" disabled={nativeFlow && !appleReady}
                 className="flex w-full items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 active:scale-[0.98]"
               >
             <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
@@ -72,7 +82,11 @@ export default function SignInPage() {
             </svg>
                 Googleでログイン
               </button>
-            </form>
+            </form> : null}
+            {appleReady ? <form action={async () => { 'use server'; await signIn('apple', { redirectTo }); }}>
+              <button type="submit" className="mt-3 min-h-11 w-full rounded-xl bg-black px-5 py-3 font-semibold text-white">Appleでサインイン</button>
+            </form> : nativeFlow ? <p role="status">Appleログインの設定待ちです。アプリの会員ログインはまだ利用できません。</p> : null}
+            {reviewReady ? <AppReviewSignInForm redirectTo={redirectTo} failed={params.reviewError === "1"} /> : null}
           </>
         ) : (
           <div role="status" className="mb-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-left text-sm leading-6 text-amber-900">
