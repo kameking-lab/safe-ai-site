@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "node scripts/production-deploy-guard.mjs --source && npm run audit:public-identity && node scripts/storage-deployment-guard.mjs --workspace && next build && node scripts/production-deploy-guard.mjs --build",
+    "build": "node scripts/production-deploy-guard.mjs --source && npm run audit:public-identity && node scripts/storage-deployment-guard.mjs --workspace && next build && node scripts/production-deploy-guard.mjs --build && node scripts/vercel-migrate.mjs",
     "start": "next start",
     "postinstall": "prisma generate --no-hints || true",
     "lint": "eslint",
