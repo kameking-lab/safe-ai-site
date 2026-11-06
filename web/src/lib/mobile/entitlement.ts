@@ -1,4 +1,4 @@
-import product from './product-policy.json';
+import product from './product-policy';
 export { product };
 export type Plan = 'free' | 'pro';
 export type EntitlementSnapshot = {
