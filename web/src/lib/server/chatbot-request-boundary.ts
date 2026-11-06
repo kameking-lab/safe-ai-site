@@ -29,6 +29,22 @@ function requestOrigins(request: Request): Set<string> {
   return origins;
 }
 
+export const CHATBOT_UNDECODABLE_TEXT_MESSAGE =
+  "文字コードを読み取れない文字が含まれています。UTF-8で送信してください。";
+
+/**
+ * `request.json()` always decodes UTF-8. A Shift_JIS / CP932 body (for
+ * example an inline Japanese string sent from Windows PowerShell 5.1 or a
+ * CP932 console curl) silently becomes U+FFFD replacement characters, which
+ * then match no law text and produce a plausible "回答を保留" no-hit answer
+ * (and a cache entry) instead of an error. Reject such text explicitly.
+ */
+export function containsUndecodableText(values: readonly unknown[]): boolean {
+  return values.some(
+    (value) => typeof value === "string" && value.includes("�"),
+  );
+}
+
 /**
  * JSON-only is the primary CSRF boundary. Browser origin metadata is checked
  * whenever it is present; origin-less requests remain available to trusted
