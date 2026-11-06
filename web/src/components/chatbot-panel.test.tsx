@@ -522,7 +522,8 @@ describe("ChatbotPanel conversation UI", () => {
     const privacyHint = document.getElementById("chatbot-input-hint");
     expect(privacyHint?.textContent).toContain("不正アクセス対策済み");
     expect(privacyHint?.textContent).toContain("名前や住所などは書かなくても使えます");
-    expect(privacyHint?.querySelector("a")?.getAttribute("href")).toBe("/privacy#security");
+    // 最初の画面の操作数予算（service-first copy budget）を増やさないよう、送信欄の安心表示はリンクなし。
+    expect(privacyHint?.querySelector("a")).toBeNull();
     expect(
       document.querySelectorAll("[data-ui-box]").length,
     ).toBeLessThanOrEqual(1);

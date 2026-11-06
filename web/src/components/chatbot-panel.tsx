@@ -997,7 +997,7 @@ export function ChatbotPanel({
             </button>
           )}
         </div>
-        <PrivacyNote id="chatbot-input-hint" variant="ai" className="mt-1 px-2" />
+        <PrivacyNote id="chatbot-input-hint" variant="ai" detailsLink={false} className="mt-1 px-2" />
         <span id="chatbot-input-keys" className="sr-only">
           Enterで送信、Shift+Enterで改行します。
         </span>

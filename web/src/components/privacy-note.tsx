@@ -22,10 +22,16 @@ export function PrivacyNote({
   variant = "general",
   className = "",
   id,
+  detailsLink = true,
 }: {
   variant?: PrivacyNoteVariant;
   className?: string;
   id?: string;
+  /**
+   * 「詳しく」リンクを出すか。最初の画面で操作数の予算が厳しい入力欄
+   * （/chatbot の送信欄など）では false にして、操作を増やさない。
+   */
+  detailsLink?: boolean;
 }) {
   return (
     <p
@@ -35,10 +41,15 @@ export function PrivacyNote({
       <Lock aria-hidden="true" className="mt-[0.2rem] h-3 w-3 shrink-0" />
       <span>
         {PRIVACY_NOTE_BASE}
-        {PRIVACY_NOTE_REASONS[variant]}{" "}
-        <Link href="/privacy#security" prefetch={false} className="underline underline-offset-2 hover:text-slate-700 dark:hover:text-slate-200">
-          詳しく
-        </Link>
+        {PRIVACY_NOTE_REASONS[variant]}
+        {detailsLink ? (
+          <>
+            {" "}
+            <Link href="/privacy#security" prefetch={false} className="underline underline-offset-2 hover:text-slate-700 dark:hover:text-slate-200">
+              詳しく
+            </Link>
+          </>
+        ) : null}
       </span>
     </p>
   );
