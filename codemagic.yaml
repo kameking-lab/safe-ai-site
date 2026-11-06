@@ -104,7 +104,7 @@ workflows:
             --export-options-plist build/ios/export_options.plist \
             --ipa-directory build/ios/ipa
     artifacts:
-      - mobile/build/ios/ipa/*.ipa
+      - $CM_BUILD_DIR/mobile/build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
       - $HOME/Library/Developer/Xcode/DerivedData/**/Build/**/*.dSYM
     publishing:
