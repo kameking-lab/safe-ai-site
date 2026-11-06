@@ -3,6 +3,7 @@ import { FooterNoteGuides } from "./footer-note-guides";
 import type { ComponentProps } from "react";
 import { getAutomationConsultAvailability } from "@/lib/automation-consult/availability";
 import { FooterStyles } from "./footer-styles";
+import { AppStorePromo } from "./app-store/app-store-promo";
 
 function Link(props: ComponentProps<typeof NextLink>) {
   return <NextLink {...props} prefetch={false} />;
@@ -86,6 +87,7 @@ export function Footer() {
               </Link>
             ))}
           </nav>
+          <AppStorePromo variant="footer" className="mt-3" />
           <p className="footer-copyright">© 2026 安全AIポータル</p>
         </div>
       </footer>
