@@ -92,16 +92,6 @@ const fall: SafetyMaterial = {
         id: "Jangan pindahkan korban jatuh, segera panggil bantuan.",
       },
     },
-    {
-      id: "call-119",
-      text: {
-        "ja-easy": "意識(いしき) や 出血(しゅっけつ) を 見(み)て 119 に 電話(でんわ)",
-        en: "Call 119 if the person is unconscious or bleeding heavily.",
-        vi: "Gọi 119 nếu nạn nhân bất tỉnh hoặc chảy máu nặng.",
-        zh: "若昏迷或大量出血立即拨打119。",
-        id: "Telepon 119 jika korban pingsan atau pendarahan parah.",
-      },
-    },
   ],
   source: "厚生労働省「製造業の安全衛生対策」",
 };
@@ -303,16 +293,6 @@ const heat: SafetyMaterial = {
         vi: "Đưa đến nơi mát và chườm đá lên cổ, nách, bẹn.",
         zh: "移至阴凉处，在颈部、腋下和腹股沟敷冰。",
         id: "Pindahkan ke tempat sejuk, kompres es di leher, ketiak, selangkangan.",
-      },
-    },
-    {
-      id: "call-119",
-      text: {
-        "ja-easy": "意識(いしき) が おかしい なら 119",
-        en: "Call 119 if the person is confused or unconscious.",
-        vi: "Gọi 119 nếu nạn nhân lú lẫn hoặc bất tỉnh.",
-        zh: "意识异常或昏迷时立即拨打119。",
-        id: "Telepon 119 jika korban bingung atau pingsan.",
       },
     },
   ],

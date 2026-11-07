@@ -148,7 +148,7 @@ const claims = {
   "HL-M-012": {
     page: "/heat-illness-prevention",
     section: "10. 緊急時対応・4",
-    text: "反応がなく正常な呼吸がないなど心停止が疑われる場合は、119番、AED手配、心肺蘇生を行い、通信指令員とAEDの案内に従う。",
+    text: "反応がなく正常な呼吸がないなど心停止が疑われる場合は、救急要請、AED手配、心肺蘇生を行い、救急隊とAEDの案内に従う。",
     source: "web/src/app/(main)/heat-illness-prevention/page.tsx",
   },
   "HL-M-013": {
@@ -196,7 +196,7 @@ const claims = {
   "HL-E-005": {
     page: "/heat-illness-prevention",
     section: "10. 緊急時対応・1",
-    text: "まず反応と意識を確認する。意識がはっきりしない、反応が異常、または判断できない場合は、ただちに119番へ連絡する。移動や冷却のために救急要請を遅らせない。",
+    text: "まず反応と意識を確認する。意識がはっきりしない、反応が異常、または判断できない場合は、ただちに救急を要請する。移動や冷却のために救急要請を遅らせない。",
     source: "web/src/app/(main)/heat-illness-prevention/page.tsx",
   },
   "HL-E-006": {

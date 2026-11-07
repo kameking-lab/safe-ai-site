@@ -221,7 +221,7 @@ export const SOURCE_REGISTRY: readonly SourceRegistryRecord[] = [
     successorUrl: null,
     status: "snapshotConfirmed",
     reviewer: null,
-    appliesTo: ["熱中症", "意識確認", "身体冷却", "119番通報", "応急対応"],
+    appliesTo: ["熱中症", "意識確認", "身体冷却", "救急要請", "応急対応"],
     disclosure: "public",
     note:
       "緊急時の判断順序を確認する公式入口。医療診断や個別治療を行うものではありません。",
@@ -272,7 +272,7 @@ export const SOURCE_REGISTRY: readonly SourceRegistryRecord[] = [
     successorUrl: null,
     status: "snapshotConfirmed",
     reviewer: null,
-    appliesTo: ["119番通報", "心肺蘇生", "AED", "応急手当"],
+    appliesTo: ["救急要請", "心肺蘇生", "AED", "応急手当"],
     disclosure: "public",
     note:
       "一般市民向け一次救命処置の公式教材。熱中症の診断や治療の正本ではありません。",

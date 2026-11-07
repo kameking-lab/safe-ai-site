@@ -120,7 +120,7 @@ describe("heat-illness learning integrity", () => {
       emergencyQuestions.find(
         (question) => question.id === "unclear-consciousness",
       )?.options.find((option) => option.id === "call-ambulance")?.label,
-    ).toContain("119");
+    ).toContain("救急隊を要請");
     expect(
       emergencyQuestions.find((question) => question.id === "unable-to-drink")
         ?.options.find((option) => option.id === "call-ambulance-no-force")

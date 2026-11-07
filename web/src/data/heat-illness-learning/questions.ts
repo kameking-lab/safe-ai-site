@@ -123,7 +123,7 @@ export const HEAT_ILLNESS_KNOWLEDGE_CHECK = [
     options: [
       {
         id: "call-ambulance",
-        label: "ただちに119へ連絡して救急隊を要請する",
+        label: "ただちに救急隊を要請する",
       },
       {
         id: "force-water",

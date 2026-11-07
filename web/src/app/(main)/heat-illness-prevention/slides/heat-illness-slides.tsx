@@ -147,7 +147,7 @@ const SLIDE_THEMES: Record<string, SlideTheme> = {
     kicker: "迷ったら対応を遅らせない",
     layout: "emergency",
   },
-  "call-119-and-aed": {
+  "call-emergency-and-aed": {
     icon: PhoneCall,
     accent: "bg-red-800 text-white",
     surface: "from-red-100 via-rose-50 to-white dark:from-red-950/70 dark:via-slate-950 dark:to-slate-950",
@@ -332,7 +332,7 @@ function SlideVisual({ slide }: { slide: HeatLearningSlide }) {
 
   if (
     slide.id === "emergency-response" ||
-    slide.id === "call-119-and-aed"
+    slide.id === "call-emergency-and-aed"
   ) {
     return (
       <div className="grid gap-3">
