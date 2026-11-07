@@ -38,6 +38,10 @@ for (const arrival of ['membership', 'details'] as const) test(`deletion keeps t
   });
   try {
     await page.goto('/account/'); await requested;
+    // Deletion sits at the bottom, collapsed. Open it from the keyboard (the press
+    // listener above fires once, on the first pointer press), then press while account data arrives.
+    await page.locator('summary', { hasText: 'アカウントの削除' }).press('Enter');
+    await expect(page.getByRole('button', { name: 'アカウント削除を開始', exact: true })).toBeVisible();
     const start = page.getByRole('button', { name: 'アカウント削除を開始', exact: true });
     await start.scrollIntoViewIfNeeded();
     const before = await start.boundingBox();

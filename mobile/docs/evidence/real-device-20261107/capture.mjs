@@ -224,12 +224,25 @@ for (const [name, scenario] of Object.entries(scenarios)) {
     }
     if (name === 'happy') {
       await page.evaluate(() => window.scrollTo(0, 0));
+      await tap(page.locator('summary', { hasText: 'アカウントの削除' }));
+      await shot('06b-delete-section-open', 600);
       await tap(page.getByRole('button', { name: 'アカウント削除を開始' }));
       await shot('07-delete-confirm', 1200);
       await page.goto(`${ORIGIN}/notifications/`); await shot('08-notifications', 2500);
       await page.goto(`${ORIGIN}/features/`); await shot('09-features', 2000);
       await tap(page.getByRole('button', { name: '戻る' }).first()); await shot('10-back', 1500);
       await page.goto(`${ORIGIN}/e-learning/exams/`); await shot('11-exams', 2000);
+      // Website parity: #1087 privacy line must be present, App Store promo must not.
+      await page.goto(`${ORIGIN}/home/`); await shot('12-home', 2500);
+      results.push({ step: 'home-app-store-promo', count: await page.getByText(/iPhoneアプリでも使えます/).count() });
+      await page.evaluate(() => window.scrollTo(0, 1600)); await shot('12b-home-scrolled', 800);
+      await page.goto(`${ORIGIN}/contact/`); await page.waitForTimeout(1500);
+      const note = page.getByText(/不正アクセス対策済み/).first();
+      results.push({ step: 'contact-privacy-note', visible: await note.isVisible().catch(() => false) });
+      if (await note.count()) await note.scrollIntoViewIfNeeded();
+      await shot('13-contact-privacy-note', 600);
+      await page.goto(`${ORIGIN}/chatbot/`); await page.waitForTimeout(2000);
+      results.push({ step: 'chatbot-privacy-note', count: await page.getByText(/不正アクセス対策済み/).count() });
     }
   } catch (e) { errors.push(`STEP FAILED: ${String(e.message).split('\n')[0]}`); await page.screenshot({ path: join(dir, 'zz-failure.png') }).catch(() => {}); }
   report[name] = { results, errors: [...new Set(errors)].slice(0, 30), externalBlocked: [...external].slice(0, 30), nativeCalls: await page.evaluate(() => window.__calls?.length ?? 0).catch(() => null) };

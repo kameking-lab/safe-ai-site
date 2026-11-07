@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import { useNativeQuery } from '@/lib/use-native-query';
+import { filterSeriousCasesPage } from '@/lib/accident-news/serious-cases';
 import { Printer } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { TransientChatLink } from "@/components/home-safety-cockpit/transient-chat-link";
 import { ConclusionCard } from "@/components/ui/conclusion-card";
-import { useNativeQuery } from '@/lib/use-native-query';
 import type {
   SeriousCase,
   SeriousCaseFilters,
@@ -39,7 +40,7 @@ export function buildFatalAccidentsPageHref(
 export function FatalAccidentsBrowser({
   children,
   options,
-  selected: initialSelected,
+  selected:initialSelected,
   initialResult,
   initialPage,
   initialPageCount,
@@ -64,6 +65,12 @@ export function FatalAccidentsBrowser({
     pageCount: initialPageCount,
   });
   const [isPending, setIsPending] = useState(false);
+  useEffect(()=>{
+    if(!nativeQuery)return;
+    const page=Math.max(1,Number(nativeQuery.get('page'))||1);
+    const data=filterSeriousCasesPage({industry:selected.industry||undefined,type:selected.type||undefined,year:Number(selected.year)||undefined,q:selected.q||undefined,limit:PAGE_SIZE,offset:(page-1)*PAGE_SIZE});
+    setKeyword(selected.q);setResult({...data,page,pageCount:Math.max(1,Math.ceil(data.total/PAGE_SIZE))});
+  },[nativeQuery,selected.industry,selected.type,selected.year,selected.q]);
   const abortRef = useRef<AbortController | null>(null);
   const fixedFilterKey = `${selected.industry}\u0000${selected.type}\u0000${selected.year}`;
   const previousFixedFilterKey = useRef(fixedFilterKey);
@@ -85,8 +92,7 @@ export function FatalAccidentsBrowser({
       abortRef.current = controller;
       setIsPending(true);
       try {
-        if(process.env.NEXT_PUBLIC_ANZEN_NATIVE==='true' && !navigator.onLine){
-          const {filterSeriousCasesPage}=await import('@/lib/accident-news/serious-cases');
+        if(process.env.NEXT_PUBLIC_ANZEN_NATIVE==='true'){
           const data=filterSeriousCasesPage({industry:selected.industry||undefined,type:selected.type||undefined,year:Number(selected.year)||undefined,q:query||undefined,limit:PAGE_SIZE,offset:(page-1)*PAGE_SIZE});
           setResult({...data,page,pageCount:Math.max(1,Math.ceil(data.total/PAGE_SIZE))});return;
         }
@@ -129,7 +135,6 @@ export function FatalAccidentsBrowser({
     setKeyword("");
     void search(1, "");
   };
-  useEffect(()=>{if(!nativeQuery)return;setKeyword(nativeQuery.get('q')??'');void search(Math.max(1,Number(nativeQuery.get('page'))||1),nativeQuery.get('q')??'');},[nativeQuery,search]);
   const hasFilter = Boolean(
     selected.industry || selected.type || selected.year || keyword.trim(),
   );

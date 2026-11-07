@@ -48,12 +48,12 @@ async function accountFixtures(context:BrowserContext,reauth=false,deletionResul
 }
 test('deletion requires confirmation, completes in-app and clears saved personal data',async({page,context})=>{
   const count=await accountFixtures(context);await page.goto('/account/');await page.evaluate(()=>localStorage.setItem('company-profile','test-profile'));
-  await page.getByRole('button',{name:'アカウント削除を開始',exact:true}).click();const confirm=page.getByRole('button',{name:'アカウントを完全に削除する',exact:true});await expect(confirm).toBeDisabled();expect(count()).toBe(0);
+  await page.locator('summary',{hasText:'アカウントの削除'}).click();await page.getByRole('button',{name:'アカウント削除を開始',exact:true}).click();const confirm=page.getByRole('button',{name:'アカウントを完全に削除する',exact:true});await expect(confirm).toBeDisabled();expect(count()).toBe(0);
   await page.getByLabel('確認のため「削除」と入力').fill('削除');await confirm.click();await expect(page.getByRole('status').filter({hasText:'削除が完了しました'})).toBeVisible();expect(count()).toBe(1);expect(await page.evaluate(()=>localStorage.getItem('company-profile'))).toBeNull();
   await page.reload();await page.getByRole('button',{name:'削除状況を確認',exact:true}).click();await expect(page.getByRole('status').filter({hasText:'削除が完了しました'})).toBeVisible();
 });
 test('stale authentication offers reauthentication without claiming deletion succeeded',async({page,context})=>{
-  const count=await accountFixtures(context,true);await page.goto('/account/');await page.getByRole('button',{name:'アカウント削除を開始',exact:true}).click();await expect(page.getByText(/削除には直近5分以内の本人確認/)).toBeVisible();expect(count()).toBe(0);await expect(page.getByRole('button',{name:'本人確認のため再ログイン'})).toBeVisible();
+  const count=await accountFixtures(context,true);await page.goto('/account/');await page.locator('summary',{hasText:'アカウントの削除'}).click();await page.getByRole('button',{name:'アカウント削除を開始',exact:true}).click();await expect(page.getByText(/削除には直近5分以内の本人確認/)).toBeVisible();expect(count()).toBe(0);await expect(page.getByRole('button',{name:'本人確認のため再ログイン'})).toBeVisible();
 });
 test('deletion waits for hydration and accepts its first click exactly once before showing confirmation',async({page,context},info)=>{
   await accountFixtures(context);
@@ -71,6 +71,8 @@ test('deletion waits for hydration and accepts its first click exactly once befo
     await page.goto('/account/',{waitUntil:'commit'});
     const panel=page.getByRole('region',{name:'アカウントの削除',exact:true});
     const start=panel.getByRole('button',{name:'アカウント削除を開始',exact:true});
+    // Collapsed by default; <details> opens without JavaScript.
+    await panel.locator('summary').click();
     await expect(start).toBeVisible();
     // Static HTML must advertise unavailability, even with no JS loaded.
     for(const button of await panel.getByRole('button').all())await expect(button).toBeDisabled();
@@ -95,7 +97,7 @@ test('deletion waits for hydration and accepts its first click exactly once befo
 
 for(const pending of [false,true])test(`old deletion receipt preserves member B across navigation, restart and manual checks (${pending?'pending with lost response':'completed'})`,async({page,context})=>{
   await accountFixtures(context,false,pending?'pending':'completed',pending);await page.goto('/account/');
-  await page.getByRole('button',{name:'アカウント削除を開始',exact:true}).click();await page.getByLabel('確認のため「削除」と入力').fill('削除');await page.getByRole('button',{name:'アカウントを完全に削除する',exact:true}).click();
+  await page.locator('summary',{hasText:'アカウントの削除'}).click();await page.getByRole('button',{name:'アカウント削除を開始',exact:true}).click();await page.getByLabel('確認のため「削除」と入力').fill('削除');await page.getByRole('button',{name:'アカウントを完全に削除する',exact:true}).click();
   await expect(page.getByRole('status').filter({hasText:pending?'処理結果を確認できません':'削除が完了しました'})).toBeVisible();
   // Browser harness models the persisted incarnation written by native setSessionToken(B).
   // Unit coverage uses the real session mutation API and verifies Keychain-token preservation.

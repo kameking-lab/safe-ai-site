@@ -77,9 +77,7 @@
       "source": "web/src/app/(main)/accidents-analytics/page.tsx",
       "implementation": "direct canonical import",
       "state": "shared",
-      "modes": [
-        "AnalyticsDashboard"
-      ]
+      "modes": []
     },
     {
       "route": "/accidents-reports/[industry]",
