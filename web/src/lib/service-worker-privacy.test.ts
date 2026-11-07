@@ -23,7 +23,7 @@ describe("service worker privacy boundary", () => {
   });
 
   it("bumps the cache version so previously cached private responses are purged", () => {
-    expect(source).toContain('const CACHE_NAME = "anzen-ai-v8"');
+    expect(source).toContain('const CACHE_NAME = "anzen-ai-v9"');
     expect(source).toContain('key.startsWith("anzen-ai-")');
   });
 
