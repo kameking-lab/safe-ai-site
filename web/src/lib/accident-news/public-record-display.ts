@@ -8,3 +8,8 @@ export function withoutEmergencyNumberSentences(text: string): string {
   const sentences = text.match(/[^。！？!?]*(?:[。！？!?]|$)/gu) ?? [text];
   return sentences.filter((sentence) => sentence && !EMERGENCY_NUMBER.test(sentence)).join("");
 }
+
+/** Preserved source metadata (legal source registry) stays verbatim; drop such labels at display. */
+export function withoutEmergencyNumberLabels(labels: readonly string[]): string[] {
+  return labels.filter((label) => !EMERGENCY_NUMBER.test(label));
+}
