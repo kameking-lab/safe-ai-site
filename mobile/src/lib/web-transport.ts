@@ -14,7 +14,8 @@ export function createSiteFetch(original:typeof fetch):typeof fetch {
     const target = SITE + url.pathname + url.search;
     if (!Capacitor.isNativePlatform()) return original(new Request(target, req), { credentials:'include', redirect:'error' });
     if (req.signal.aborted) throw new DOMException('Aborted','AbortError');
-    const token=await sessionToken();
+    // Keychain failure: continue anonymously so shared pages and public APIs keep working.
+    const token=await sessionToken().catch(()=>null);
     const headers=new Headers(req.headers);
     headers.set('Origin',SITE);headers.set('X-Anzen-Native','1');
     headers.delete('Authorization');

@@ -32,6 +32,16 @@ describe('iOS pipeline boundaries', () => {
     expect(template).toMatch(/\/\* App \*\/ = \{\s*isa = PBXGroup;\s*children = \(/);
     expect(template).toContain('MARKETING_VERSION = 1.0;');
   });
+  it('puts the plugin-registering bridge in the window the Capacitor template creates',async()=>{
+    // Capacitor 8 builds the window in SceneDelegate and ignores the storyboard class.
+    // A plain CAPBridgeViewController leaves NativeVault/NativeDocuments/NativeSpeech and the static router unregistered.
+    const scene = execFileSync('tar', ['-xOf', 'node_modules/@capacitor/cli/assets/ios-spm-template.tar.gz', 'App/App/SceneDelegate.swift'], { encoding: 'utf8' });
+    expect(scene).toContain('rootViewController = CAPBridgeViewController()');
+    const configure=await readFile(new URL('../scripts/configure-ios.rb',import.meta.url),'utf8');
+    expect(configure).toContain("scene.sub('rootViewController = CAPBridgeViewController()', 'rootViewController = AnzenBridgeViewController()')");
+    const verify=await readFile(new URL('../scripts/verify-ios.rb',import.meta.url),'utf8');
+    expect(verify).toContain('SceneDelegate bypasses the plugin bridge');
+  });
   it('routes cold starts to the matching bundled Next page and stores session credentials in Keychain',async()=>{
     const swift=await readFile(new URL('../ios-resources/NativeVault.swift',import.meta.url),'utf8');
     expect(swift).toContain('override func router() -> Router');expect(swift).toContain('candidate.appendingPathComponent("index.html")');expect(swift).toContain('candidate.path.hasPrefix(base.path + "/")');expect(swift).toContain('kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly');expect(swift).toContain('UIPrintInteractionController.shared');

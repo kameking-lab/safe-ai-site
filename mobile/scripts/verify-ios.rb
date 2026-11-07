@@ -31,6 +31,11 @@ raise 'Privacy manifest not bundled' unless target.resources_build_phase.files_r
 raise 'Privacy manifest differs from source' unless File.binread('ios/App/App/PrivacyInfo.xcprivacy') == File.binread('ios-resources/PrivacyInfo.xcprivacy')
 raise 'Native plugin differs from source' unless File.binread('ios/App/App/NativeVault.swift') == File.binread('ios-resources/NativeVault.swift')
 raise 'Bridge storyboard missing' unless File.read('ios/App/App/Base.lproj/Main.storyboard').include?('customClass="AnzenBridgeViewController" customModule="App"')
+scene_path = 'ios/App/App/SceneDelegate.swift'
+if File.exist?(scene_path)
+  scene = File.read(scene_path)
+  raise 'SceneDelegate bypasses the plugin bridge' if scene.include?('CAPBridgeViewController()') || !scene.include?('rootViewController = AnzenBridgeViewController()')
+end
 delegate = File.read('ios/App/App/AppDelegate.swift')
 raise 'Push callbacks missing' unless %w[capacitorDidRegisterForRemoteNotifications capacitorDidFailToRegisterForRemoteNotifications].all? { |name| delegate.include?(name) }
 raise 'Usage: verify-ios.rb [export_options.plist]' if ARGV.length > 1

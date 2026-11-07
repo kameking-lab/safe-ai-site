@@ -60,6 +60,18 @@ unless story.include?('customClass="AnzenBridgeViewController"')
   raise 'Unsupported Capacitor storyboard' unless story.include?('customClass="AnzenBridgeViewController"')
   File.write(storyboard_path, story)
 end
+# Capacitor 8's SPM template builds the window in SceneDelegate and ignores the
+# storyboard class. Without this, NativeVault/NativeDocuments/NativeSpeech are
+# never registered and every Keychain-backed API call rejects on a real device.
+scene_path = 'ios/App/App/SceneDelegate.swift'
+if File.exist?(scene_path)
+  scene = File.read(scene_path)
+  unless scene.include?('rootViewController = AnzenBridgeViewController()')
+    scene = scene.sub('rootViewController = CAPBridgeViewController()', 'rootViewController = AnzenBridgeViewController()')
+    raise 'Unsupported Capacitor SceneDelegate' unless scene.include?('rootViewController = AnzenBridgeViewController()')
+    File.write(scene_path, scene)
+  end
+end
 delegate_path = 'ios/App/App/AppDelegate.swift'
 delegate = File.read(delegate_path)
 unless delegate.include?('didRegisterForRemoteNotificationsWithDeviceToken')

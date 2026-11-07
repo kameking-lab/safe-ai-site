@@ -34,7 +34,7 @@ const fixture = (t) => {
   mkdirSync(join(native, "Base.lproj"), { recursive: true });
   cpSync(join(mobile, "ios/App/App.xcodeproj"), join(cwd, "ios/App/App.xcodeproj"), { recursive: true });
   cpSync(join(mobile, "ios-resources"), join(cwd, "ios-resources"), { recursive: true });
-  for (const file of ["Info.plist", "capacitor.config.json", "AppDelegate.swift", "NativeVault.swift", "PrivacyInfo.xcprivacy", "Base.lproj/Main.storyboard"]) {
+  for (const file of ["Info.plist", "capacitor.config.json", "AppDelegate.swift", "SceneDelegate.swift", "NativeVault.swift", "PrivacyInfo.xcprivacy", "Base.lproj/Main.storyboard"]) {
     cpSync(join(mobile, "ios/App/App", file), join(native, file));
   }
   success(run(cwd, "configure-ios.rb"));
@@ -127,6 +127,19 @@ test("verification rejects a stale build number and runtime ID from cap sync", (
   config.appId = "jp.anzenaiportal.app";
   writeFileSync(file, JSON.stringify(config));
   rejects(cwd, /runtime Bundle ID mismatch/);
+});
+
+test("the scene window uses the bridge that registers the custom plugins", (t) => {
+  const cwd = fixture(t);
+  const file = join(cwd, "ios/App/App/SceneDelegate.swift");
+  // Capacitor 8 builds the window here and ignores the storyboard class.
+  assert.match(readFileSync(file, "utf8"), /rootViewController = AnzenBridgeViewController\(\)/);
+  assert.doesNotMatch(readFileSync(file, "utf8"), /CAPBridgeViewController\(\)/);
+  cpSync(join(mobile, "ios/App/App/SceneDelegate.swift"), file);
+  writeFileSync(file, readFileSync(file, "utf8").replace("AnzenBridgeViewController()", "CAPBridgeViewController()"));
+  rejects(cwd, /SceneDelegate bypasses the plugin bridge/);
+  success(run(cwd, "configure-ios.rb"));
+  success(run(cwd, "verify-ios.rb"));
 });
 
 test("verification rejects a literal Info.plist Bundle ID", (t) => {

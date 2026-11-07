@@ -15,6 +15,11 @@ describe('canonical API transport in the native bundle',()=>{
     const result=await send(req,{cache:'no-store'});
     expect(await result.json()).toEqual({ok:true});expect(mock.request).toHaveBeenCalledWith(expect.objectContaining({url:site+'/api/chatbot',method:'POST',data:'{"message":"足場"}',headers:expect.objectContaining({'x-operation-id':id,authorization:'Bearer mock_session'})}));
   });
+  it('keeps working anonymously when the Keychain plugin is unavailable',async()=>{
+    mock.token.mockRejectedValue(Object.assign(new Error('"NativeVault" plugin is not implemented on ios'),{code:'UNIMPLEMENTED'}));
+    const result=await createSiteFetch(vi.fn())('/api/chatbot',{method:'POST',headers:{Authorization:'Bearer obsolete'},body:'{}'});
+    expect(await result.json()).toEqual({ok:true});expect(mock.request.mock.calls[0][0].headers.authorization).toBeUndefined();
+  });
   it('creates an operation ID only when missing and uses the current secure session',async()=>{
     await createSiteFetch(vi.fn())('/api/chatbot',{method:'POST',headers:{Authorization:'Bearer obsolete'},body:'{}'});
     const headers=mock.request.mock.calls[0][0].headers;expect(headers['x-operation-id']).toMatch(/^[0-9a-f-]{36}$/);expect(headers.authorization).toBe('Bearer mock_session');

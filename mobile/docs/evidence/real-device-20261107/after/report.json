@@ -1,0 +1,765 @@
+{
+  "happy": {
+    "results": [
+      {
+        "step": "01-launch",
+        "url": "/",
+        "issues": [
+          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
+          "small-target \"表示設定\" 369x21",
+          "small-target \"出典と確認状態\" 307x28",
+          "small-target \"出典と確認状態\" 307x28",
+          "small-target \"出典と確認状態\" 307x28",
+          "small-target \"出典と確認状態\" 307x28",
+          "small-target \"出典と確認状態\" 307x28",
+          "small-target \"出典と確認状態\" 307x28",
+          "small-target \"出典と確認状態\" 307x28",
+          "small-target \"出典と確認状態\" 307x28",
+          "small-target \"出典と確認状態\" 307x28",
+          "small-target \"出典と確認状態\" 307x28"
+        ],
+        "textLen": 1639,
+        "title": "安全AIポータル",
+        "bodyEmpty": false
+      },
+      {
+        "step": "02-ai-tab",
+        "url": "/",
+        "issues": [
+          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
+          "small-target \"表示設定\" 369x21"
+        ],
+        "textLen": 434,
+        "title": "安全AIポータル",
+        "bodyEmpty": false
+      },
+      {
+        "step": "03-ai-answer",
+        "url": "/",
+        "issues": [
+          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
+          "small-target \"表示設定\" 369x21",
+          "small-target \"労働安全衛生規則 第518条\" 307x28"
+        ],
+        "textLen": 603,
+        "title": "安全AIポータル",
+        "bodyEmpty": false
+      },
+      {
+        "step": "04-chatbot",
+        "url": "/chatbot/",
+        "issues": [
+          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
+          "small-target \"表示設定\" 369x21"
+        ],
+        "textLen": 206,
+        "title": "安全AIポータル",
+        "bodyEmpty": false
+      },
+      {
+        "step": "chatbot-composer",
+        "visible": true
+      },
+      {
+        "step": "04a-chatbot-composer",
+        "url": "/chatbot/",
+        "issues": [
+          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
+          "small-target \"表示設定\" 369x21"
+        ],
+        "textLen": 206,
+        "title": "安全AIポータル",
+        "bodyEmpty": false
+      },
+      {
+        "step": "04b-tap-account-from-portal",
+        "url": "/account/",
+        "issues": [
+          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
+          "small-target \"表示設定\" 369x21",
+          "small-target \"新規検索 →\" 74x20"
+        ],
+        "textLen": 848,
+        "title": "安全AIポータル",
+        "bodyEmpty": false
+      },
+      {
+        "step": "04c-back-button",
+        "url": "/",
+        "issues": [
+          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
+          "small-target \"表示設定\" 369x21",
+          "small-target \"出典と確認状態\" 307x28",
+          "small-target \"出典と確認状態\" 307x28",
+          "small-target \"出典と確認状態\" 307x28",
+          "small-target \"出典と確認状態\" 307x28",
+          "small-target \"出典と確認状態\" 307x28",
+          "small-target \"出典と確認状態\" 307x28",
+          "small-target \"出典と確認状態\" 307x28",
+          "small-target \"出典と確認状態\" 307x28",
+          "small-target \"出典と確認状態\" 307x28",
+          "small-target \"出典と確認状態\" 307x28"
+        ],
+        "textLen": 1639,
+        "title": "安全AIポータル",
+        "bodyEmpty": false
+      },
+      {
+        "step": "05-account",
+        "url": "/account/",
+        "issues": [
+          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
+          "small-target \"表示設定\" 369x21",
+          "small-target \"新規検索 →\" 74x20"
+        ],
+        "textLen": 848,
+        "title": "安全AIポータル",
+        "bodyEmpty": false
+      },
+      {
+        "step": "05b-account-scrolled-sticky",
+        "url": "/account/",
+        "issues": [
+          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
+          "small-target \"表示設定\" 369x21",
+          "small-target \"新規検索 →\" 74x20"
+        ],
+        "textLen": 848,
+        "title": "安全AIポータル",
+        "bodyEmpty": false
+      },
+      {
+        "step": "06-account-bottom",
+        "url": "/account/",
+        "issues": [
+          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
+          "small-target \"表示設定\" 369x21",
+          "small-target \"新規検索 →\" 74x20"
+        ],
+        "textLen": 848,
+        "title": "安全AIポータル",
+        "bodyEmpty": false
+      },
+      {
+        "step": "07-delete-confirm",
+        "url": "/account/",
+        "issues": [
+          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
+          "small-target \"表示設定\" 369x21",
+          "small-target \"新規検索 →\" 74x20"
+        ],
+        "textLen": 904,
+        "title": "安全AIポータル",
+        "bodyEmpty": false
+      },
+      {
+        "step": "08-notifications",
+        "url": "/notifications/",
+        "issues": [
+          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
+          "small-target \"表示設定\" 369x21"
+        ],
+        "textLen": 1055,
+        "title": "安全AIポータル",
+        "bodyEmpty": false
+      },
+      {
+        "step": "09-features",
+        "url": "/features/",
+        "issues": [
+          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
+          "small-target \"表示設定\" 369x21"
+        ],
+        "textLen": 2763,
+        "title": "安全AIポータル",
+        "bodyEmpty": false
+      },
+      {
+        "step": "10-back",
+        "url": "/notifications/",
+        "issues": [
+          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
+          "small-target \"表示設定\" 369x21"
+        ],
+        "textLen": 1055,
+        "title": "安全AIポータル",
+        "bodyEmpty": false
+      },
+      {
+        "step": "11-exams",
+        "url": "/e-learning/exams/",
+        "issues": [
+          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
+          "small-target \"表示設定\" 369x21"
+        ],
+        "textLen": 4334,
+        "title": "安全AIポータル",
+        "bodyEmpty": false
+      }
+    ],
+    "errors": [
+      "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    ],
+    "externalBlocked": [],
+    "nativeCalls": 4
+  },
+  "logged-out": {
+    "results": [
+      {
+        "step": "01-launch",
+        "url": "/",
+        "issues": [
+          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
+          "small-target \"表示設定\" 369x21",
+          "small-target \"出典と確認状態\" 307x28",
+          "small-target \"出典と確認状態\" 307x28",
+          "small-target \"出典と確認状態\" 307x28",
+          "small-target \"出典と確認状態\" 307x28",
+          "small-target \"出典と確認状態\" 307x28",
+          "small-target \"出典と確認状態\" 307x28",
+          "small-target \"出典と確認状態\" 307x28",
+          "small-target \"出典と確認状態\" 307x28",
+          "small-target \"出典と確認状態\" 307x28",
+          "small-target \"出典と確認状態\" 307x28"
+        ],
+        "textLen": 1639,
+        "title": "安全AIポータル",
+        "bodyEmpty": false
+      },
+      {
+        "step": "02-ai-tab",
+        "url": "/",
+        "issues": [
+          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
+          "small-target \"表示設定\" 369x21"
+        ],
+        "textLen": 455,
+        "title": "安全AIポータル",
+        "bodyEmpty": false
+      },
+      {
+        "step": "03-ai-answer",
+        "url": "/",
+        "issues": [
+          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
+          "small-target \"表示設定\" 369x21"
+        ],
+        "textLen": 455,
+        "title": "安全AIポータル",
+        "bodyEmpty": false
+      },
+      {
+        "step": "04-chatbot",
+        "url": "/chatbot/",
+        "issues": [
+          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
+          "small-target \"表示設定\" 369x21"
+        ],
+        "textLen": 194,
+        "title": "安全AIポータル",
+        "bodyEmpty": false
+      },
+      {
+        "step": "chatbot-composer",
+        "visible": true
+      },
+      {
+        "step": "04a-chatbot-composer",
+        "url": "/chatbot/",
+        "issues": [
+          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
+          "small-target \"表示設定\" 369x21"
+        ],
+        "textLen": 194,
+        "title": "安全AIポータル",
+        "bodyEmpty": false
+      },
+      {
+        "step": "05-account",
+        "url": "/account/",
+        "issues": [
+          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
+          "small-target \"表示設定\" 369x21"
+        ],
+        "textLen": 796,
+        "title": "安全AIポータル",
+        "bodyEmpty": false
+      },
+      {
+        "step": "05b-account-scrolled-sticky",
+        "url": "/account/",
+        "issues": [
+          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
+          "small-target \"表示設定\" 369x21"
+        ],
+        "textLen": 796,
+        "title": "安全AIポータル",
+        "bodyEmpty": false
+      },
+      {
+        "step": "06-account-bottom",
+        "url": "/account/",
+        "issues": [
+          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
+          "small-target \"表示設定\" 369x21"
+        ],
+        "textLen": 796,
+        "title": "安全AIポータル",
+        "bodyEmpty": false
+      },
+      {
+        "step": "login-button",
+        "enabled": true
+      },
+      {
+        "step": "login-opened",
+        "url": "https://www.anzen-ai-portal.jp/api/mobile/v1/auth/authorize?flow=11111111-2222-4333-8444-555555555555"
+      },
+      {
+        "step": "07-after-login-tap",
+        "url": "/account/",
+        "issues": [
+          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
+          "small-target \"表示設定\" 369x21"
+        ],
+        "textLen": 796,
+        "title": "安全AIポータル",
+        "bodyEmpty": false
+      }
+    ],
+    "errors": [
+      "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    ],
+    "externalBlocked": [],
+    "nativeCalls": 21
+  },
+  "build2-scene-delegate": {
+    "results": [
+      {
+        "step": "01-launch",
+        "url": "/",
+        "issues": [
+          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
+          "small-target \"表示設定\" 369x21",
+          "small-target \"出典と確認状態\" 307x28",
+          "small-target \"出典と確認状態\" 307x28",
+          "small-target \"出典と確認状態\" 307x28",
+          "small-target \"出典と確認状態\" 307x28",
+          "small-target \"出典と確認状態\" 307x28",
+          "small-target \"出典と確認状態\" 307x28",
+          "small-target \"出典と確認状態\" 307x28",
+          "small-target \"出典と確認状態\" 307x28",
+          "small-target \"出典と確認状態\" 307x28",
+          "small-target \"出典と確認状態\" 307x28"
+        ],
+        "textLen": 1639,
+        "title": "安全AIポータル",
+        "bodyEmpty": false
+      },
+      {
+        "step": "02-ai-tab",
+        "url": "/",
+        "issues": [
+          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
+          "small-target \"表示設定\" 369x21"
+        ],
+        "textLen": 455,
+        "title": "安全AIポータル",
+        "bodyEmpty": false
+      },
+      {
+        "step": "03-ai-answer",
+        "url": "/",
+        "issues": [
+          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
+          "small-target \"表示設定\" 369x21"
+        ],
+        "textLen": 455,
+        "title": "安全AIポータル",
+        "bodyEmpty": false
+      },
+      {
+        "step": "04-chatbot",
+        "url": "/chatbot/",
+        "issues": [
+          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
+          "small-target \"表示設定\" 369x21"
+        ],
+        "textLen": 194,
+        "title": "安全AIポータル",
+        "bodyEmpty": false
+      },
+      {
+        "step": "chatbot-composer",
+        "visible": true
+      },
+      {
+        "step": "04a-chatbot-composer",
+        "url": "/chatbot/",
+        "issues": [
+          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
+          "small-target \"表示設定\" 369x21"
+        ],
+        "textLen": 194,
+        "title": "安全AIポータル",
+        "bodyEmpty": false
+      },
+      {
+        "step": "05-account",
+        "url": "/account/",
+        "issues": [
+          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
+          "small-target \"表示設定\" 369x21"
+        ],
+        "textLen": 796,
+        "title": "安全AIポータル",
+        "bodyEmpty": false
+      },
+      {
+        "step": "05b-account-scrolled-sticky",
+        "url": "/account/",
+        "issues": [
+          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
+          "small-target \"表示設定\" 369x21"
+        ],
+        "textLen": 796,
+        "title": "安全AIポータル",
+        "bodyEmpty": false
+      },
+      {
+        "step": "06-account-bottom",
+        "url": "/account/",
+        "issues": [
+          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
+          "small-target \"表示設定\" 369x21"
+        ],
+        "textLen": 796,
+        "title": "安全AIポータル",
+        "bodyEmpty": false
+      },
+      {
+        "step": "login-button",
+        "enabled": true
+      },
+      {
+        "step": "login-opened",
+        "url": null
+      },
+      {
+        "step": "07-after-login-tap",
+        "url": "/account/",
+        "issues": [
+          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
+          "small-target \"表示設定\" 369x21"
+        ],
+        "textLen": 813,
+        "title": "安全AIポータル",
+        "bodyEmpty": false
+      }
+    ],
+    "errors": [
+      "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    ],
+    "externalBlocked": [],
+    "nativeCalls": 14
+  },
+  "preferences-reject": {
+    "results": [
+      {
+        "step": "01-launch",
+        "url": "/",
+        "issues": [
+          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
+          "small-target \"表示設定\" 369x21",
+          "small-target \"出典と確認状態\" 307x28"
+        ],
+        "textLen": 490,
+        "title": "安全AIポータル",
+        "bodyEmpty": false
+      },
+      {
+        "step": "02-ai-tab",
+        "url": "/",
+        "issues": [
+          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
+          "small-target \"表示設定\" 369x21"
+        ],
+        "textLen": 455,
+        "title": "安全AIポータル",
+        "bodyEmpty": false
+      },
+      {
+        "step": "05-account",
+        "url": "/account/",
+        "issues": [
+          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
+          "small-target \"表示設定\" 369x21"
+        ],
+        "textLen": 796,
+        "title": "安全AIポータル",
+        "bodyEmpty": false
+      },
+      {
+        "step": "05b-account-scrolled-sticky",
+        "url": "/account/",
+        "issues": [
+          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
+          "small-target \"表示設定\" 369x21"
+        ],
+        "textLen": 796,
+        "title": "安全AIポータル",
+        "bodyEmpty": false
+      },
+      {
+        "step": "06-account-bottom",
+        "url": "/account/",
+        "issues": [
+          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
+          "small-target \"表示設定\" 369x21"
+        ],
+        "textLen": 796,
+        "title": "安全AIポータル",
+        "bodyEmpty": false
+      }
+    ],
+    "errors": [
+      "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    ],
+    "externalBlocked": [],
+    "nativeCalls": 9
+  },
+  "filesystem-reject": {
+    "results": [
+      {
+        "step": "01-launch",
+        "url": "/",
+        "issues": [
+          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
+          "small-target \"表示設定\" 369x21",
+          "small-target \"出典と確認状態\" 307x28"
+        ],
+        "textLen": 490,
+        "title": "安全AIポータル",
+        "bodyEmpty": false
+      },
+      {
+        "step": "02-ai-tab",
+        "url": "/",
+        "issues": [
+          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
+          "small-target \"表示設定\" 369x21"
+        ],
+        "textLen": 434,
+        "title": "安全AIポータル",
+        "bodyEmpty": false
+      },
+      {
+        "step": "05-account",
+        "url": "/account/",
+        "issues": [
+          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
+          "small-target \"表示設定\" 369x21",
+          "small-target \"新規検索 →\" 74x20"
+        ],
+        "textLen": 848,
+        "title": "安全AIポータル",
+        "bodyEmpty": false
+      },
+      {
+        "step": "05b-account-scrolled-sticky",
+        "url": "/account/",
+        "issues": [
+          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
+          "small-target \"表示設定\" 369x21",
+          "small-target \"新規検索 →\" 74x20"
+        ],
+        "textLen": 848,
+        "title": "安全AIポータル",
+        "bodyEmpty": false
+      },
+      {
+        "step": "06-account-bottom",
+        "url": "/account/",
+        "issues": [
+          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
+          "small-target \"表示設定\" 369x21",
+          "small-target \"新規検索 →\" 74x20"
+        ],
+        "textLen": 848,
+        "title": "安全AIポータル",
+        "bodyEmpty": false
+      }
+    ],
+    "errors": [
+      "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    ],
+    "externalBlocked": [],
+    "nativeCalls": 17
+  },
+  "network-app-reject": {
+    "results": [
+      {
+        "step": "01-launch",
+        "url": "/",
+        "issues": [
+          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
+          "small-target \"表示設定\" 369x21",
+          "small-target \"出典と確認状態\" 307x28",
+          "small-target \"出典と確認状態\" 307x28",
+          "small-target \"出典と確認状態\" 307x28",
+          "small-target \"出典と確認状態\" 307x28",
+          "small-target \"出典と確認状態\" 307x28",
+          "small-target \"出典と確認状態\" 307x28",
+          "small-target \"出典と確認状態\" 307x28",
+          "small-target \"出典と確認状態\" 307x28",
+          "small-target \"出典と確認状態\" 307x28",
+          "small-target \"出典と確認状態\" 307x28"
+        ],
+        "textLen": 1639,
+        "title": "安全AIポータル",
+        "bodyEmpty": false
+      },
+      {
+        "step": "02-ai-tab",
+        "url": "/",
+        "issues": [
+          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
+          "small-target \"表示設定\" 369x21"
+        ],
+        "textLen": 434,
+        "title": "安全AIポータル",
+        "bodyEmpty": false
+      },
+      {
+        "step": "05-account",
+        "url": "/account/",
+        "issues": [
+          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
+          "small-target \"表示設定\" 369x21",
+          "small-target \"新規検索 →\" 74x20"
+        ],
+        "textLen": 848,
+        "title": "安全AIポータル",
+        "bodyEmpty": false
+      },
+      {
+        "step": "05b-account-scrolled-sticky",
+        "url": "/account/",
+        "issues": [
+          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
+          "small-target \"表示設定\" 369x21",
+          "small-target \"新規検索 →\" 74x20"
+        ],
+        "textLen": 848,
+        "title": "安全AIポータル",
+        "bodyEmpty": false
+      },
+      {
+        "step": "06-account-bottom",
+        "url": "/account/",
+        "issues": [
+          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
+          "small-target \"表示設定\" 369x21",
+          "small-target \"新規検索 →\" 74x20"
+        ],
+        "textLen": 848,
+        "title": "安全AIポータル",
+        "bodyEmpty": false
+      }
+    ],
+    "errors": [
+      "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    ],
+    "externalBlocked": [],
+    "nativeCalls": 17
+  },
+  "vault-push-reject": {
+    "results": [
+      {
+        "step": "01-launch",
+        "url": "/",
+        "issues": [
+          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
+          "small-target \"表示設定\" 369x21",
+          "small-target \"出典と確認状態\" 307x28",
+          "small-target \"出典と確認状態\" 307x28",
+          "small-target \"出典と確認状態\" 307x28",
+          "small-target \"出典と確認状態\" 307x28",
+          "small-target \"出典と確認状態\" 307x28",
+          "small-target \"出典と確認状態\" 307x28",
+          "small-target \"出典と確認状態\" 307x28",
+          "small-target \"出典と確認状態\" 307x28",
+          "small-target \"出典と確認状態\" 307x28",
+          "small-target \"出典と確認状態\" 307x28"
+        ],
+        "textLen": 1639,
+        "title": "安全AIポータル",
+        "bodyEmpty": false
+      },
+      {
+        "step": "02-ai-tab",
+        "url": "/",
+        "issues": [
+          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
+          "small-target \"表示設定\" 369x21"
+        ],
+        "textLen": 455,
+        "title": "安全AIポータル",
+        "bodyEmpty": false
+      },
+      {
+        "step": "05-account",
+        "url": "/account/",
+        "issues": [
+          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
+          "small-target \"表示設定\" 369x21"
+        ],
+        "textLen": 796,
+        "title": "安全AIポータル",
+        "bodyEmpty": false
+      },
+      {
+        "step": "05b-account-scrolled-sticky",
+        "url": "/account/",
+        "issues": [
+          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
+          "small-target \"表示設定\" 369x21"
+        ],
+        "textLen": 796,
+        "title": "安全AIポータル",
+        "bodyEmpty": false
+      },
+      {
+        "step": "06-account-bottom",
+        "url": "/account/",
+        "issues": [
+          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
+          "small-target \"表示設定\" 369x21"
+        ],
+        "textLen": 796,
+        "title": "安全AIポータル",
+        "bodyEmpty": false
+      }
+    ],
+    "errors": [
+      "Failed to load resource: the server responded with a status of 404 (Not Found)"
+    ],
+    "externalBlocked": [],
+    "nativeCalls": 11
+  },
+  "signin": {
+    "finalUrl": "https://www.anzen-ai-portal.jp/auth/signin",
+    "status": 200,
+    "buttons": [
+      "メニュー",
+      "Googleでログイン",
+      "Appleでサインイン"
+    ],
+    "summaries": [
+      "表示設定",
+      "メニュー",
+      "",
+      "App Store審査用ログイン (App Review sign-in)"
+    ]
+  }
+}

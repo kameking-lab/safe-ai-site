@@ -16,8 +16,10 @@ export function SharedShell({ children }: { children: ReactNode }) {
     document.addEventListener('click',feeds,true);
     return()=>{document.removeEventListener('click',feeds,true);};
   }, []);
-  return <><style>{`a[href='/ky'],a[href^='/ky/'],a[href='/safety-diary'],a[href^='/safety-diary/'],a[href='/site-records/near-miss']{display:none!important}`}</style><header hidden={pathname==='/signage/display'} className="sticky top-0 z-50 flex flex-wrap items-center gap-3 border-b bg-white p-3 pt-[max(12px,env(safe-area-inset-top))] text-slate-900 print:hidden">
-    <Link href="/">安全AI</Link><Link href="/home">ホーム</Link><Link href="/features">全機能</Link><Link href="/e-learning/exams">過去問</Link><Link href="/e-learning/safety">資格学習</Link><Link href="/notifications">警報通知</Link><Link href="/account">会員・Pro</Link>
-    <button className="rounded-lg border px-3 py-2 font-semibold" onClick={() => { void Share.share({ title: document.title, url: SITE + location.pathname + location.search }).catch(()=>{}); }}>共有</button>
+  return <><style>{`a[href='/ky'],a[href^='/ky/'],a[href='/safety-diary'],a[href^='/safety-diary/'],a[href='/site-records/near-miss']{display:none!important}`}</style><header hidden={pathname==='/signage/display'} className="sticky top-[env(safe-area-inset-top)] z-50 flex items-center gap-1 whitespace-nowrap border-b bg-white px-2 py-1 text-slate-900 print:hidden">
+    {/* No browser chrome in the app: one row, a real back button, 44pt targets. Other screens are one tap away in 全機能. */}
+    <button aria-label="戻る" className="min-h-11 min-w-11 shrink-0 rounded-lg px-2 font-semibold" onClick={() => { if (window.history.length > 1) window.history.back(); else window.location.assign('/'); }}>‹ 戻る</button>
+    <Link className="inline-flex min-h-11 shrink-0 items-center px-2" href="/">安全AI</Link><Link className="inline-flex min-h-11 shrink-0 items-center px-2" href="/features">全機能</Link><Link className="inline-flex min-h-11 shrink-0 items-center px-2" href="/account">会員・Pro</Link>
+    <button className="ml-auto min-h-11 shrink-0 rounded-lg border px-3 font-semibold" onClick={() => { void Share.share({ title: document.title, url: SITE + location.pathname + location.search }).catch(()=>{}); }}>共有</button>
   </header>{message?<p role="alert" className="bg-amber-50 p-3 text-amber-950">{message}</p>:null}{pathname==='/chatbot'||pathname==='/chemical-ra'?<SharedUsageMeter/>:null}<main className="pb-[max(24px,env(safe-area-inset-bottom))]">{children}</main></>;
 }

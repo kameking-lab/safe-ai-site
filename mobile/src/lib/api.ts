@@ -15,7 +15,9 @@ export type Transport = (path: string, body?: unknown, extraHeaders?: Record<str
 export const transport: Transport = async (path, body, extraHeaders = {}) => {
   if (!PATHS.includes(path.split('?')[0] as typeof PATHS[number])) throw new ApiError('INVALID_ENDPOINT');
   const url = `${SITE}${path}`;
-  const {sessionToken}=await import('./session');const token=await sessionToken();
+  const {sessionToken}=await import('./session');
+  // A Keychain failure must not take public feeds offline; send the request anonymously.
+  const token=await sessionToken().catch(()=>null);
   const headers = { Accept: 'application/json', Origin:SITE,'X-Anzen-Native':'1', ...(token?{Authorization:`Bearer ${token}`} : {}), ...(body ? { 'Content-Type': 'application/json' } : {}), ...extraHeaders };
   if (Capacitor.isNativePlatform()) {
     const response = await CapacitorHttp.request({ url, method: body ? 'POST' : 'GET', headers,

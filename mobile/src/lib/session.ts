@@ -50,7 +50,8 @@ export async function eraseSessionDataIfCurrent(binding:string,erase:()=>Promise
 }
 export async function siteApi(path:string,body?:unknown,method?:string) {
   if(!/^\/api\/(?:mobile\/v1\/|me\/|billing\/|stripe\/portal$)/.test(path) || path.includes('..') || path.includes('://'))throw new Error('INVALID_ENDPOINT');
-  const token=await sessionToken();
+  // An unreadable Keychain is treated as signed out (server answers UNAUTHORIZED), never as a hard failure.
+  const token=await sessionToken().catch(()=>null);
   const headers={Accept:'application/json','Content-Type':'application/json',Origin:SITE,...(token?{Authorization:`Bearer ${token}`}:{})};
   let status:number,data:unknown;
   if(Capacitor.isNativePlatform()){

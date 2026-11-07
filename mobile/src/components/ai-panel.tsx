@@ -16,18 +16,23 @@ export function AiPanel({ online }: { online: boolean }) {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const [clock, setClock] = useState(Date.now());
+  const [signedOut, setSignedOut] = useState(false);
+  const resultRef = useRef<HTMLElement>(null);
   const inFlight = useRef(false);
   const pending = useRef<{ feature: Feature; input: string; requestId: string } | null>(null);
   useEffect(() => {
     let active = true;
     const refresh = () => {
       setClock(Date.now());
-      if (online) void loadCapabilities().then(c => { if (active) setCapability(c); }).catch(() => { if (active) setCapability(null); });
+      if (online) void loadCapabilities().then(c => { if (active) { setCapability(c); setSignedOut(false); } }).catch(error => { if (active) { setCapability(null); setSignedOut(error instanceof ApiError && error.code === 'UNAUTHORIZED'); } });
       else setCapability(null);
     };
     refresh(); const timer = setInterval(refresh, 60_000);
-    return () => { active = false; clearInterval(timer); };
+    window.addEventListener('anzen-session-changed', refresh);
+    return () => { active = false; clearInterval(timer); window.removeEventListener('anzen-session-changed', refresh); };
   }, [online]);
+  // The answer renders below the form; bring it into view instead of leaving it off-screen.
+  useEffect(() => { if (result) resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, [result]);
   const quota = capability?.features[feature].quota;
   const limit = PLAN_LIMITS[capability?.plan??'free'][feature];
   const allowed = canExecute(capability, feature, clock);
@@ -57,7 +62,7 @@ export function AiPanel({ online }: { online: boolean }) {
       <h3>{feature === 'law_chat' ? '根拠を確かめながら、法令を調べる' : '化学物質のリスクアセスメント'}</h3>
       <p>{capability?.plan==='pro'?'Pro':'無料'}：1日{limit}{feature === 'law_chat' ? '回' : '件'}（日本時間）。AIはオンライン専用です。作業の安全・法令適合の最終判断は責任者と専門家が行ってください。</p>
       <p className={quota && quotaLow(quota.remaining, quota.limit) ? 'notice' : 'muted'}>{quota ? `サーバー確認：残り${quota.remaining} / ${quota.limit}、処理中${quota.reserved}。次の更新：${formatDate(quota.resetAt)}` : '残数はサイトのサーバーで確認します。端末側では回数を付け替えません。'}</p>
-      {!online ? <p className="notice">{errorMessage('OFFLINE')}</p> : !allowed ? <p className="notice">{quota?.remaining === 0 ? errorMessage(quota.reserved>0?'OPERATION_PENDING':'DAILY_LIMIT_REACHED', undefined, quota.resetAt) : capability && !capability.features[feature].available ? errorMessage('FEATURE_UNAVAILABLE') : errorMessage('SAFETY_UNVERIFIED')}</p> : null}
+      {!online ? <p className="notice">{errorMessage('OFFLINE')}</p> : signedOut ? <p className="notice">AIの利用には会員ログインが必要です。<a href="/account" className="font-bold underline">ログインする</a></p> : !allowed ? <p className="notice">{quota?.remaining === 0 ? errorMessage(quota.reserved>0?'OPERATION_PENDING':'DAILY_LIMIT_REACHED', undefined, quota.resetAt) : capability && !capability.features[feature].available ? errorMessage('FEATURE_UNAVAILABLE') : errorMessage('SAFETY_UNVERIFIED')}</p> : null}
       <p className="muted">残数0・通信停止時も、AIを使わない<a href="/law-search/">法令の検索</a>・<a href="/laws/">同梱資料</a>を無料で閲覧できます。</p>
       <form onSubmit={submit}>
         <label>{feature === 'law_chat' ? '法令についての質問' : '評価対象と作業条件'}<TextareaWithVoice maxLength={2000} rows={6} disabled={busy} value={input} onChange={e => { setInput(e.target.value); setConsent(false); }} placeholder={feature === 'law_chat' ? '作業の種類と、確認したい条件を入力' : '物質名・CAS番号・SDS発行元と版・濃度・取扱量・作業時間・換気・保護具を入力'} /></label>
@@ -68,7 +73,7 @@ export function AiPanel({ online }: { online: boolean }) {
       </form>
       <p role="status">{message}</p>
     </section>
-    {result ? <section className="card" aria-label="AI回答"><p className="eyebrow">{result.status === 'completed' ? 'AIによる情報整理' : '参考情報・評価未完了'}</p><p className="preserve">{result.answer}</p>
+    {result ? <section ref={resultRef} className="card scroll-mt-[calc(env(safe-area-inset-top)+16px)]" aria-label="AI回答"><p className="eyebrow">{result.status === 'completed' ? 'AIによる情報整理' : '参考情報・評価未完了'}</p><p className="preserve">{result.answer}</p>
       {result.conditions.length ? <><h3>条件・不足情報</h3><ul>{result.conditions.map((c, i) => <li key={i}>{c}</li>)}</ul></> : null}
       <h3>根拠原文</h3>{result.evidence.map((e, i) => <details key={i} open><summary>{e.title}</summary><blockquote className="preserve">{e.original}</blockquote><p>{e.verification} ／ 基準日：{formatDate(e.asOf)}</p><button onClick={() => { void openSource(e.url).catch(() => setMessage('出典を開けませんでした。')); }}>公式原文を開く ↗</button></details>)}
     </section> : null}
