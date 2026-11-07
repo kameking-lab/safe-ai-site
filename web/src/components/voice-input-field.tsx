@@ -19,7 +19,8 @@ type BrowserSpeechRecognition = {
 export function describeVoiceError(err: string | undefined): string {
   if(process.env.NEXT_PUBLIC_ANZEN_NATIVE==='true'){
     if(['not-allowed','NotAllowedError','permission-denied'].includes(err??''))return '音声入力が許可されていません。iOSの設定でマイクと音声認識の許可を確認してください。';
-    if(['not-supported','service-not-allowed','language-not-supported'].includes(err??''))return '端末内の日本語音声認識を利用できません。対応状況とiOSの音声認識設定を確認してください。文字入力は利用できます。';
+    if(['not-supported','service-not-allowed','language-not-supported'].includes(err??''))return 'この端末では日本語の端末内音声認識を使えません。文字で入力してください。';
+    if(err==='audio-capture')return '音声認識を開始できませんでした。iOSの「設定 > 一般 > キーボード > 音声入力」がオンか確認してください。';
   }
   switch (err) {
     case "not-allowed":

@@ -11,12 +11,14 @@ const stageMessages:Record<string,string>={prepared:'App Store起動前の購入
 export function AccountPanel(){
   const refreshGeneration=useRef(0);
   const [config,setConfig]=useState<BillingConfig|null>(null);const [member,setMember]=useState<MemberEntitlement|null>(null);const [price,setPrice]=useState('');const [message,setMessage]=useState('');const [busy,setBusy]=useState(false);
-  const refresh=useCallback(async()=>{const ticket=++refreshGeneration.current;setPrice('');setMember(null);try{const c=await billing.config();if(ticket!==refreshGeneration.current)return;setConfig(c);const m=await billing.entitlement();if(ticket!==refreshGeneration.current)return;setMember(m);if(m.plan==='free' && m.syncState==='verified' && c.ready){const p=await billing.offering(c,m);if(ticket!==refreshGeneration.current)return;setPrice(p.product.priceString);}setMessage('');}catch(e){if(ticket!==refreshGeneration.current)return;setMember(null);const code=(e as Error).message;setMessage(code==='UNAUTHORIZED'?'':messages[code]??'会員情報を確認できません。時間をおいて再確認してください。');}},[]);
+  // A failing App Store lookup (RevenueCat offering/price) is a store problem, not a logout:
+  // it used to fall into the outer catch and clear the verified member ("ログインしていません").
+  const refresh=useCallback(async()=>{const ticket=++refreshGeneration.current;setPrice('');try{const c=await billing.config();if(ticket!==refreshGeneration.current)return;setConfig(c);const m=await billing.entitlement();if(ticket!==refreshGeneration.current)return;setMember(m);if(m.plan==='free' && m.syncState==='verified' && c.ready){try{const p=await billing.offering(c,m);if(ticket!==refreshGeneration.current)return;setPrice(p.product.priceString);}catch(e){if(ticket!==refreshGeneration.current)return;const code=(e as Error).message;setMessage(messages[code]??'App Storeの商品情報を取得できません。購入は時間をおいてお試しください。');return;}}setMessage('');}catch(e){if(ticket!==refreshGeneration.current)return;setMember(null);const code=(e as Error).message;setMessage(code==='UNAUTHORIZED'?'':messages[code]??'会員情報を確認できません。時間をおいて再確認してください。');}},[]);
   useEffect(()=>{
-    void refresh();const handler=()=>{void refresh();};window.addEventListener('anzen-session-changed',handler);
+    void refresh();const handler=()=>{void refresh();};const sessionChanged=()=>{setMember(null);void refresh();};window.addEventListener('anzen-session-changed',sessionChanged);
     window.addEventListener('anzen-app-active',handler);
     const timer=setInterval(()=>{void refresh();},60000);
-    return()=>{refreshGeneration.current++;clearInterval(timer);window.removeEventListener('anzen-session-changed',handler);window.removeEventListener('anzen-app-active',handler);};
+    return()=>{refreshGeneration.current++;clearInterval(timer);window.removeEventListener('anzen-session-changed',sessionChanged);window.removeEventListener('anzen-app-active',handler);};
   },[refresh]);
   async function action(fn:()=>Promise<unknown>){if(busy)return;setBusy(true);try{await fn();await refresh();}catch(e){const err=e as Error;setMember(await billing.entitlement().catch(()=>null));setMessage(purchaseMessages[err.message]??messages[err.message]??'処理を完了できません。購入が完了している場合は復元・再確認をお試しください。');}finally{setBusy(false);}}
   const pro=isVerifiedPro(member);const pending=member?.syncState!=='verified' || (member?.purchasePending && (member.purchaseSource!=='app_store'||member.purchaseStage!=='prepared'));

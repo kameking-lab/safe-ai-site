@@ -109,3 +109,18 @@ for(const pending of [false,true])test(`old deletion receipt preserves member B 
 test('purchase screen does not sell the paused RA and exposes deletion',async({page,context})=>{
   await accountFixtures(context);await page.goto('/account/');await expect(page.getByText(/AIチャット1日50回/)).toBeVisible();await expect(page.getByText(/RA1日10件/)).toHaveCount(0);await expect(page.getByRole('button',{name:'App StoreでProを購入',exact:true})).toBeDisabled();await expect(page.getByRole('heading',{name:'アカウントの削除',exact:true})).toBeVisible();
 });
+// TestFlight build 4: a failing App Store offering lookup cleared the verified member and the
+// screen said 「ログインしていません」 right after a successful login.
+test('a failing App Store product lookup keeps the signed-in member',async({page,context})=>{
+  await context.route(host+'/api/**',async route=>{
+    const path=new URL(route.request().url()).pathname;
+    if(path.endsWith('/billing/config'))return route.fulfill({headers:cors,json:{ready:true,publicKey:'appl_fixture',productId:'jp.anzenaiportal.pro.monthly',offeringId:'default',policy:product,login:{apple:true,google:true},terms:host+'/terms',privacy:host+'/privacy',manage:'https://apps.apple.com/account/subscriptions'}});
+    if(path==='/api/me/entitlements')return route.fulfill({headers:cors,json:{plan:'free',source:null,syncState:'verified',expiresAt:null,appUserId:'88888888-1111-4111-8111-111111111111',verifiedAt:new Date().toISOString(),limits:product.limits.free}});
+    if(path.endsWith('/account'))return route.fulfill({headers:cors,json:{displayName:'試験会員',email:null,sdsHistory:[]}});
+    return route.fulfill({status:503,headers:cors,json:{error:{code:'UNAVAILABLE'}}});
+  });
+  await page.goto('/account/');
+  await expect(page.getByText('無料会員',{exact:true})).toBeVisible();
+  await expect(page.getByText('ログインしていません',{exact:true})).toHaveCount(0);
+  await expect(page.getByRole('button',{name:'ログアウト'})).toBeVisible();
+});

@@ -2,6 +2,13 @@ import { Capacitor,registerPlugin,type PluginListenerHandle } from '@capacitor/c
 type ResultEvent={text:string;final:boolean};
 const speech=registerPlugin<{start(options:{lang:string}):Promise<void>;stop():Promise<void>;abort():Promise<void>;addListener(name:'result',fn:(event:ResultEvent)=>void):Promise<PluginListenerHandle>;addListener(name:'end',fn:()=>void):Promise<PluginListenerHandle>;addListener(name:'error',fn:(event:{error:string})=>void):Promise<PluginListenerHandle>}>('NativeSpeech');
 let active=false;
+/** Keep the native reason distinguishable so the on-screen message says what to fix. */
+export function speechErrorCode(message:string){
+  if(/permission denied/i.test(message))return 'not-allowed';
+  if(/on-device speech recognition unavailable/i.test(message))return 'language-not-supported';
+  if(/already active|canceled/i.test(message))return 'aborted';
+  return 'audio-capture';
+}
 class Recognition {
   lang='ja-JP';interimResults=true;continuous=false;
   onresult:((event:{results:ArrayLike<ArrayLike<{transcript?:string}>>})=>void)|null=null;
@@ -18,7 +25,7 @@ class Recognition {
       this.listeners.push(await speech.addListener('error',event=>{this.onerror?.(event);this.end();}));
       if(this.ended){this.listeners.forEach(l=>{void l.remove();});this.listeners=[];return;}
       await speech.start({lang:this.lang});
-    })().catch(error=>{this.onerror?.({error:/permission denied/i.test(String(error?.message))?'not-allowed':'service-not-allowed'});this.end();});
+    })().catch(error=>{this.onerror?.({error:speechErrorCode(String(error?.message??''))});this.end();});
   }
   stop(){void speech.stop().catch(()=>this.end());}
   abort(){this.end();void speech.abort().catch(()=>{});}
