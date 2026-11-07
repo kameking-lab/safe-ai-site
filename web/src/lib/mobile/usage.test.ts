@@ -28,10 +28,35 @@ vi.mock('@/lib/prisma',()=>{
   const prisma={...tx,$transaction:<T>(run:(db:typeof tx)=>Promise<T>)=>{const next=state.tail.then(()=>run(tx));state.tail=next.catch(()=>{});return next;}};
   return {prisma};
 });
-import { withUsage,withProviderBudget,checkBudget,jstKeys,maximumProviderCost } from './usage';
+import { withUsage,withProviderBudget,checkBudget,jstKeys,maximumProviderCost,rebuildRequest } from './usage';
 const request=(id=crypto.randomUUID())=>new Request('https://example.test/api/chatbot',{method:'POST',headers:{Authorization:'Bearer mock_session','Content-Type':'application/json','X-Operation-ID':id},body:JSON.stringify({message:'足場の手すり',privacyConfirmed:true})});
 const answer=()=>Response.json({answer:'公式根拠を確認してください。',source_type:'rag',sources:[{text:'原文',url:'https://laws.e-gov.go.jp/law/mock',asOf:new Date().toISOString()}]});
 beforeEach(()=>{state.operations=[];state.tail=Promise.resolve();state.paid=false;state.signedIn=true;state.budget={committedYen:0,reservedYen:0};state.reservations=[];vi.stubEnv('MOBILE_LEDGER_ENABLED','true');});afterEach(()=>vi.unstubAllEnvs());
+// Vercel passes a NextRequest from another realm; `new Request(foreign, init)` stringified it
+// ("Failed to parse URL from [object Request]") and every native chat request returned 500.
+function foreignRequest(real:Request):Request{
+  return {url:real.url,method:real.method,headers:real.headers,body:real.body,signal:real.signal,bodyUsed:false,
+    clone:()=>foreignRequest(real.clone()),json:()=>real.json(),text:()=>real.text(),toString:()=>'[object Request]'} as unknown as Request;
+}
+describe('request rebuild across runtime realms',()=>{
+  it('rebuilds a foreign request from parts and keeps method, headers, body and abort',async()=>{
+    const controller=new AbortController();
+    const real=new Request('https://example.test/api/chatbot/stream',{method:'POST',headers:{'X-Anzen-Native':'1','Content-Type':'application/json'},body:'{}',signal:controller.signal});
+    expect(()=>new Request(foreignRequest(real),{body:'{"a":1}'})).toThrow();
+    const rebuilt=rebuildRequest(foreignRequest(real),'{"a":1}');
+    expect(rebuilt.url).toBe('https://example.test/api/chatbot/stream');
+    expect(rebuilt.method).toBe('POST');
+    expect(rebuilt.headers.get('x-anzen-native')).toBe('1');
+    expect(await rebuilt.json()).toEqual({a:1});
+    controller.abort();
+    expect(rebuilt.signal.aborted).toBe(true);
+  });
+  it('runs a metered native chat request that arrives as a foreign request object',async()=>{
+    const run=vi.fn(async(req:Request)=>{expect(await req.clone().json()).toMatchObject({privacyConfirmed:true});return answer();});
+    const response=await withUsage(foreignRequest(request()),'law_chat',run);
+    expect(response.status).toBe(200);expect(run).toHaveBeenCalledTimes(1);
+  });
+});
 describe('shared daily AI accounting',()=>{
   it('distinguishes reserved last slots from daily completed consumption',async()=>{
     for(let i=0;i<3;i++)state.operations.push({id:crypto.randomUUID(),userId:'mock_member',feature:'law_chat',day:jstKeys().day,status:'reserved',createdAt:new Date(),requestHash:'prior'});

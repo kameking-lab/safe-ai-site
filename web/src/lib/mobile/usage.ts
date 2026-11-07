@@ -84,6 +84,17 @@ export async function recoverUsageLeases(tx:Prisma.TransactionClient,userId:stri
   await tx.mobileUsageOperation.updateMany({where:{userId,status:'reserved',expiresAt:{lte:new Date()},providerStartedAt:{not:null}},data:{status:'uncertain'}});
   // Provider cost reservations are deliberately untouched, including on process termination.
 }
+/**
+ * Re-create the request with its already-read body from plain parts. The incoming request
+ * may come from another runtime realm (Next's NextRequest on Vercel): `new Request(request, …)`
+ * then stringifies it ("Failed to parse URL from [object Request]"). The abort signal is
+ * forwarded through a local controller for the same reason.
+ */
+export function rebuildRequest(request:Request,body:string):Request{
+  const controller=new AbortController();const source=request.signal;
+  if(source?.aborted)controller.abort();else source?.addEventListener?.('abort',()=>controller.abort(),{once:true});
+  return new Request(String(request.url),{method:request.method,headers:Array.from(request.headers.entries()).filter(([name])=>name.toLowerCase()!=='content-length'),body,signal:controller.signal});
+}
 export async function withUsage(request:Request,feature:AiFeature,run:(request:Request)=>Promise<Response>){
   if(process.env.MOBILE_LEDGER_ENABLED!=='true'){
     // Native clients cannot bypass the missing shared quota contract.
@@ -100,7 +111,7 @@ export async function withUsage(request:Request,feature:AiFeature,run:(request:R
   }
   const chunks:Uint8Array[]=[];let bytes=0;const reader=request.body?.getReader();
   if(reader)while(true){const item=await reader.read();if(item.done)break;bytes+=item.value.byteLength;if(bytes>65536){await reader.cancel();return json({error:{code:'INVALID_REQUEST',message:'入力が長すぎます。'}},413);}chunks.push(item.value);}
-  request=new Request(request,{body:Buffer.concat(chunks).toString('utf8')});
+  request=rebuildRequest(request,Buffer.concat(chunks).toString('utf8'));
   if(feature==='law_chat'){
     const boundary=validateChatbotRequestBoundary(request);if(!boundary.allowed)return json({error:{code:'INVALID_REQUEST',message:boundary.message}},boundary.status);
     const body=await request.clone().json().catch(()=>null) as {message?:unknown;question?:unknown;privacyConfirmed?:unknown;history?:Array<{content?:unknown}>}|null;
