@@ -9,6 +9,7 @@
  * 行へ逆引きする対応表は未整備であり、追跡性はデータセット単位に限る。
  */
 import deathsCompact from "@/data/deaths-mhlw/compact.json";
+import { withoutEmergencyNumberSentences } from "@/lib/accident-news/public-record-display";
 import { load2024Records } from "@/lib/accidents-analytics/loader";
 
 export type DeathRecord = {
@@ -50,7 +51,11 @@ const additionalRecords: DeathRecord[] = load2024Records().map((record) => ({
   workplaceSize: record.workplaceSize ?? null,
   occurrenceTime: record.occurrenceTime ?? null,
 }));
-const entries = [...base.entries, ...additionalRecords];
+// Verbatim public narratives: hide only sentences with emergency numbers (see public-record-display).
+const entries = [...base.entries, ...additionalRecords].map((record) => ({
+  ...record,
+  description: withoutEmergencyNumberSentences(record.description),
+}));
 const compact = { ...base, entries, total: entries.length };
 const compactYears = [...new Set(entries.map((record) => record.year))].sort((a, b) => a - b);
 

@@ -92,16 +92,6 @@ const fall: SafetyMaterial = {
         id: "Jangan pindahkan korban jatuh sampai bantuan datang.",
       },
     },
-    {
-      id: "rural-119",
-      text: {
-        "ja-easy": "場所(ばしょ) を 番地(ばんち) や 目印(めじるし) で 119 に 伝(つた)える",
-        en: "Tell 119 the address and a visible landmark — rural sites are hard to find.",
-        vi: "Cung cấp địa chỉ và điểm mốc cho 119 — vùng nông thôn khó tìm.",
-        zh: "向119说明门牌号和明显地标，乡村地区不易找到。",
-        id: "Sebutkan alamat dan tengara ke 119 — area pedesaan sulit ditemukan.",
-      },
-    },
   ],
   source: "厚生労働省「農業における労働安全衛生対策」",
 };
@@ -188,16 +178,6 @@ const chemical: SafetyMaterial = {
     },
   ],
   emergency: [
-    {
-      id: "poisoning",
-      text: {
-        "ja-easy": "気分(きぶん) が 悪(わる)く なったら 119、ラベル を 持(も)つ",
-        en: "If you feel nauseous or dizzy, call 119 and bring the pesticide label.",
-        vi: "Buồn nôn hay chóng mặt, gọi 119 và mang nhãn thuốc.",
-        zh: "出现恶心、头晕拨打119，并携带农药标签。",
-        id: "Jika mual atau pusing, telepon 119 dan bawa label pestisida.",
-      },
-    },
     {
       id: "skin-flush",
       text: {
@@ -302,16 +282,6 @@ const heat: SafetyMaterial = {
         vi: "Đưa người ngã trong nhà kính ra ngoài, nơi mát.",
         zh: "温室内倒下者立即抬出到阴凉处。",
         id: "Pindahkan korban roboh keluar rumah kaca ke tempat sejuk.",
-      },
-    },
-    {
-      id: "rural-help",
-      text: {
-        "ja-easy": "119 に 場所(ばしょ) を 詳(くわ)しく 伝(つた)える",
-        en: "Give 119 a clear description of the field location.",
-        vi: "Mô tả chi tiết vị trí ruộng cho 119.",
-        zh: "向119详细说明田地具体位置。",
-        id: "Sampaikan lokasi ladang dengan jelas ke 119.",
       },
     },
   ],

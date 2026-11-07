@@ -211,7 +211,7 @@ const rawSafetyGoodsItems: SafetyGoodsItem[] = [
     id: "ho-002",
     categoryId: "harmful-organisms",
     name: "ポイズンリムーバー（応急処置用吸引器）",
-    description: "応急器具カテゴリの一例。119番・医療機関・現場の救急手順を優先し、治療の代替には使用しないでください。刺咬傷への有効性や適用可否は確認が必要です。",
+    description: "応急器具カテゴリの一例。医療機関・現場の救急手順を優先し、治療の代替には使用しないでください。刺咬傷への有効性や適用可否は確認が必要です。",
     price: "¥1,000〜¥2,000",
     imageAlt: "ポイズンリムーバーの製品イメージ",
     amazonUrl: "https://www.amazon.co.jp/s?k=%E3%83%9D%E3%82%A4%E3%82%BA%E3%83%B3%E3%83%AA%E3%83%A0%E3%83%BC%E3%83%90%E3%83%BC",

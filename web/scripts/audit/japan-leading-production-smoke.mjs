@@ -854,18 +854,14 @@ if (getOnly) {
   record("emergency:http-200", emergency.status === 200, {
     status: emergency.status,
   });
+  // Owner decision 2026-11-07: emergency wording is answered normally, with no 110/119 notice.
   record(
-    "emergency:deterministic-safety-response",
-    emergencyPayload?.source_type === "safety" &&
-      emergencyPayload?.requiresHumanReview === true &&
-      emergencyPayload?.answer?.includes("119") &&
-      emergencyPayload?.answer?.includes("AED"),
+    "emergency:not-intercepted",
+    emergencyPayload?.safetyKind !== "emergency" &&
+      !/110番|119番/.test(emergencyPayload?.answer ?? ""),
     {
       sourceType: emergencyPayload?.source_type ?? null,
       safetyKind: emergencyPayload?.safetyKind ?? null,
-      requiresHumanReview: emergencyPayload?.requiresHumanReview ?? null,
-      includes119: emergencyPayload?.answer?.includes("119") ?? false,
-      includesAed: emergencyPayload?.answer?.includes("AED") ?? false,
     },
   );
 

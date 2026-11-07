@@ -11,7 +11,7 @@ import { getAutomationConsultAvailability } from "@/lib/automation-consult/avail
 const PAGE_PATH = "/heat-illness-prevention/slides";
 const TITLE = "熱中症を防ぐ現場ブリーフィング";
 const DESCRIPTION =
-  "熱中症の基礎からWBGT、KY、119番通報・AEDまでを14枚に整理し、2026年現行指針と安衛則第612条の2へ戻れるHTMLスライドです。";
+  "熱中症の基礎からWBGT、KY、救急要請・AEDまでを14枚に整理し、2026年現行指針と安衛則第612条の2へ戻れるHTMLスライドです。";
 
 export const metadata: Metadata = {
   title: TITLE,

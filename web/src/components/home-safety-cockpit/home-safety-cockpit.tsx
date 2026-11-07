@@ -35,7 +35,7 @@ const HOME_HEAT_SLIDES: HomeHeatSlideSummary[] = [
     eyebrow: "異常を感じたら",
     title: "一人にせず、作業を止める",
     lead: "涼しい場所へ移し、衣服を緩めて冷却します。",
-    fieldAction: "意識がない、反応がおかしい、自力で飲めない時は119へ連絡する。",
+    fieldAction: "意識がない、反応がおかしい、自力で飲めない時はすぐ救急を要請する。",
   },
 ];
 
