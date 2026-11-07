@@ -244,13 +244,13 @@ export const HEAT_ILLNESS_FIELD_BRIEFING = {
         },
       ],
       fieldAction:
-        "冷却する人、119へ連絡する人、入口で救急隊を誘導する人、付き添う人を決める。",
+        "冷却する人、救急を要請する人、入口で救急隊を誘導する人、付き添う人を決める。",
     },
     {
-      id: "call-119-and-aed",
+      id: "call-emergency-and-aed",
       number: 10,
       eyebrow: "一次救命",
-      title: "119番通報とAED",
+      title: "救急要請とAED",
       lead:
         "熱中症対応と心肺蘇生を混同せず、反応・呼吸に異常がある場合は通信指令員とAEDの音声案内に従います。",
       claims: [
@@ -258,13 +258,13 @@ export const HEAT_ILLNESS_FIELD_BRIEFING = {
           id: "aed-boundary",
           kind: "official-emergency-guidance",
           text:
-            "AEDは熱中症を診断する機器ではありません。反応がなく正常な呼吸がないなど心停止が疑われる場合は、119番通報、AEDの手配、心肺蘇生を行い、通信指令員と機器の案内に従います。",
+            "AEDは熱中症を診断する機器ではありません。反応がなく正常な呼吸がないなど心停止が疑われる場合は、救急要請、AEDの手配、心肺蘇生を行い、救急隊と機器の案内に従います。",
           sourceIds: [HEAT_LEARNING_SOURCE_IDS.aedFirstAid],
-          locator: "消防庁・応急手当WEB講習『反応の確認』『119番通報とAEDの依頼』",
+          locator: "消防庁・応急手当WEB講習『反応の確認』ほか",
         },
       ],
       fieldAction:
-        "現場住所、119通報時に伝える入口、AEDの場所、持参担当を作業前に確認する。",
+        "現場住所、救急要請時に伝える入口、AEDの場所、持参担当を作業前に確認する。",
     },
     {
       id: "work-plan",
@@ -298,7 +298,7 @@ export const HEAT_ILLNESS_FIELD_BRIEFING = {
           id: "heat-ky-fields",
           kind: "portal-explanation",
           text:
-            "地域・日付、WBGTの区分と時刻、作業内容・時間、熱源・日射・服装、休憩・水分、体調確認、単独作業、報告先、119と役割分担をKYへ記録します。",
+            "地域・日付、WBGTの区分と時刻、作業内容・時間、熱源・日射・服装、休憩・水分、体調確認、単独作業、報告先、救急要請と役割分担をKYへ記録します。",
           sourceIds: [
             HEAT_LEARNING_SOURCE_IDS.currentGuideline,
             HEAT_LEARNING_SOURCE_IDS.wbgtDefinitions,
@@ -362,7 +362,7 @@ export const HEAT_ILLNESS_FIELD_BRIEFING = {
           id: "summary-questions",
           kind: "portal-explanation",
           text:
-            "①WBGTは実測・実況推定・予測のどれか、②最初に変える作業条件は何か、③休憩と見直し時刻はいつか、④異常の報告先は誰か、⑤119とAEDの担当は誰かを答えます。",
+            "①WBGTは実測・実況推定・予測のどれか、②最初に変える作業条件は何か、③休憩と見直し時刻はいつか、④異常の報告先は誰か、⑤救急要請とAEDの担当は誰かを答えます。",
           sourceIds: [
             HEAT_LEARNING_SOURCE_IDS.currentGuideline,
             HEAT_LEARNING_SOURCE_IDS.wbgtDefinitions,

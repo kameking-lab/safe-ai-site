@@ -46,8 +46,8 @@ const STEPS: Step[] = [
   },
   {
     no: 2,
-    title: "通報（意識障害・けいれんは即119）",
-    body: "職長・現場代理人へただちに連絡。意識障害・けいれんがあれば迷わず119番通報する。",
+    title: "通報（意識障害・けいれんは即救急要請）",
+    body: "職長・現場代理人へただちに連絡。意識障害・けいれんがあれば迷わず救急を要請する。",
     ribbon: "bg-orange-600",
     band: "bg-orange-50",
   },
@@ -165,11 +165,11 @@ export function PosterClient() {
           </p>
         </header>
 
-        {/* 119 強調バー */}
+        {/* 救急要請の強調バー */}
         <div className="mt-4 flex flex-wrap items-center justify-center gap-3 rounded-xl bg-rose-600 px-4 py-3 text-white">
           <Phone className="h-7 w-7 shrink-0" aria-hidden="true" />
           <p className="text-lg font-black sm:text-2xl">
-            意識がない・けいれん・反応がおかしい → ためらわず <span className="underline">119</span>
+            意識がない・けいれん・反応がおかしい → ためらわず <span className="underline">救急要請</span>
           </p>
         </div>
 

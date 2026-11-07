@@ -210,17 +210,11 @@ const emergencyJson = await request("/api/chatbot", {
   }),
 });
 record("emergency-json:HTTP-200", emergencyJson.status === 200, emergencyJson.status);
-for (const phrase of ["119", "直接圧迫", "感染", "救急隊"]) {
-  record(
-    `emergency-json:${phrase}`,
-    emergencyJson.body.includes(phrase),
-    emergencyJson.body.slice(0, 500),
-  );
-}
+// Owner decision 2026-11-07: emergency wording is answered normally, with no 110/119 notice.
 record(
-  "emergency-json:no-normal-cta",
-  !/KYを作成|無料相談|料金を見る|検索結果/.test(emergencyJson.body),
-  "normal CTA absent",
+  "emergency-json:no-110-119",
+  !/110番|119番/.test(emergencyJson.body),
+  emergencyJson.body.slice(0, 500),
 );
 
 const emergencySse = await request("/api/chatbot/stream", {
@@ -236,13 +230,11 @@ const emergencySse = await request("/api/chatbot/stream", {
   }),
 });
 record("emergency-sse:HTTP-200", emergencySse.status === 200, emergencySse.status);
-for (const phrase of ["119", "反応", "呼吸", "AED", "胸骨圧迫", "救急隊"]) {
-  record(
-    `emergency-sse:${phrase}`,
-    emergencySse.body.includes(phrase),
-    emergencySse.body.slice(0, 600),
-  );
-}
+record(
+  "emergency-sse:no-110-119",
+  !/110番|119番/.test(emergencySse.body),
+  emergencySse.body.slice(0, 600),
+);
 
 const jmaResponse = await request("/api/signage/jma");
 let jma;

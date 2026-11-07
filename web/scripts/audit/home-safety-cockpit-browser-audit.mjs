@@ -711,20 +711,10 @@ for (const probe of [
   await waitForCockpit(page);
   await page.getByRole("tab", { name: "法令AI" }).click();
   const input = page.getByLabel("安衛法AIへの質問");
+  // Owner decision 2026-11-07: emergency wording is not intercepted and no 110/119 notice is shown.
   const emergency = "作業員が倒れて呼吸がありません";
-  await input.fill(emergency);
-  await input.press("Enter");
-  const emergencyAlert = page.locator("[data-home-chat-emergency]");
-  await emergencyAlert.waitFor();
-  const emergencyText = await emergencyAlert.textContent();
   const emergencyResult = {
-    stayedOnHome: new URL(page.url()).pathname === "/",
-    has119: emergencyText?.includes("119") ?? false,
-    hasAed: emergencyText?.includes("AED") ?? false,
-    seriousMascot:
-      (await page
-        .locator("[data-home-safety-cockpit] [data-mascot-guide]")
-        .getAttribute("data-serious")) === "true",
+    noticeShown: (await page.locator("[data-home-chat-emergency]").count()) > 0,
   };
   const pii = "連絡先はtest@example.comです";
   await input.fill(pii);

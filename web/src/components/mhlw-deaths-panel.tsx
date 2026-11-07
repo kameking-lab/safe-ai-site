@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { withoutEmergencyNumberSentences } from "@/lib/accident-news/public-record-display";
 import { AlertOctagon, Loader2, Search } from "lucide-react";
 
 type DeathEntry = {
@@ -234,7 +235,7 @@ export function MhlwDeathsPanel() {
               {entry.cause && <span>起因物: {entry.cause}</span>}
             </div>
             <p className="mt-1 text-sm text-slate-800 whitespace-pre-wrap">
-              {entry.description ?? "（概要なし）"}
+              {entry.description ? withoutEmergencyNumberSentences(entry.description) : "（概要なし）"}
             </p>
           </li>
         ))}
