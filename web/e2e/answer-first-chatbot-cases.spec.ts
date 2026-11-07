@@ -741,7 +741,7 @@ test.describe("安衛法AI answer-first 必須12会話ケース", () => {
     expect(semantic.sourceSupported).toBe(false);
   });
 
-  test("Case 11〜12: 緊急・PIIは通常回答や外部送信より前に端末内で遮断する", async ({
+  test("Case 11〜12: 緊急語は遮断せず、PIIは通常回答や外部送信より前に端末内で遮断する", async ({
     page,
   }) => {
     const chatbotRequests: string[] = [];
@@ -756,12 +756,12 @@ test.describe("安衛法AI answer-first 必須12会話ケース", () => {
       .locator("[data-chatbot-composer] textarea")
       .fill("反応がありません");
     await page.getByRole("button", { name: "送信" }).click();
+    // Owner decision 2026-11-07: emergency wording is not intercepted (no 110/119 notice).
+    await expect.poll(() => chatbotRequests.length).toBeGreaterThan(0);
     await expect(
       page.locator('[role="alert"][data-safety-kind="emergency"]'),
-    ).toContainText("119");
-    await expect(page.locator('[data-chatbot-answer=""]')).toHaveCount(0);
-    await expect(page.locator("[data-chatbot-quick-reply]")).toHaveCount(0);
-    expect(chatbotRequests).toEqual([]);
+    ).toHaveCount(0);
+    chatbotRequests.length = 0;
     recordBrowserCase({
       caseId: 11,
       route: "browser",
