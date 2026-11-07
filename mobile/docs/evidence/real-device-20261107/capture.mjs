@@ -189,6 +189,9 @@ for (const [name, scenario] of Object.entries(scenarios)) {
   try {
     await page.goto(`${ORIGIN}/`, { waitUntil: 'load' });
     await shot('01-launch', 2500);
+    await page.evaluate(() => window.scrollTo(0, 700)); await shot('01b-launch-scrolled', 600);
+    // Former native start screen, kept as the offline reader.
+    await page.goto(`${ORIGIN}/portal/`); await page.waitForTimeout(1500);
     await tap(page.getByRole('navigation', { name: 'タブ' }).getByRole('button', { name: /AI確認/ }));
     await shot('02-ai-tab');
     if (name === 'happy' || name === 'logged-out' || name === 'build2-scene-delegate') {
@@ -207,7 +210,7 @@ for (const [name, scenario] of Object.entries(scenarios)) {
     if (name === 'happy') {
       // Real taps: portal header link, then the shared header back button.
       await page.goto(`${ORIGIN}/`); await page.waitForTimeout(1500);
-      await tap(page.locator('header.app-header').getByRole('link', { name: '会員・Pro' }));
+      await tap(page.getByRole('banner').getByRole('link', { name: '会員・Pro' }));
       await page.waitForURL('**/account/**', { timeout: 15000 }).catch(() => {});
       await shot('04b-tap-account-from-portal', 2500);
       await tap(page.getByRole('button', { name: '戻る' }).first());
@@ -233,7 +236,7 @@ for (const [name, scenario] of Object.entries(scenarios)) {
       await tap(page.getByRole('button', { name: '戻る' }).first()); await shot('10-back', 1500);
       await page.goto(`${ORIGIN}/e-learning/exams/`); await shot('11-exams', 2000);
       // Website parity: #1087 privacy line must be present, App Store promo must not.
-      await page.goto(`${ORIGIN}/home/`); await shot('12-home', 2500);
+      await page.goto(`${ORIGIN}/`); await shot('12-home', 2500);
       results.push({ step: 'home-app-store-promo', count: await page.getByText(/iPhoneアプリでも使えます/).count() });
       await page.evaluate(() => window.scrollTo(0, 1600)); await shot('12b-home-scrolled', 800);
       await page.goto(`${ORIGIN}/contact/`); await page.waitForTimeout(1500);

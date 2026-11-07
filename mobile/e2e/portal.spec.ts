@@ -32,7 +32,7 @@ async function fixtures(context: BrowserContext, options: { ai?: boolean; oldWea
 test('bundled reading, saved article and font choice survive cold reload without site access', async ({ page, context }) => {
   await context.addInitScript(() => Object.defineProperty(navigator, 'onLine', { configurable: true, get: () => false }));
   await context.route('https://**/*', route => route.abort());
-  await page.goto('/');
+  await page.goto('/portal/');
   await expect(page.getByText('オフライン · 保存した情報を表示')).toBeVisible();
   await expect(page.getByRole('heading', { name: '厚生労働省 労働災害発生状況（保存資料）' })).toBeVisible();
   await page.getByRole('button', { name: '保存する', exact: true }).click();
@@ -44,7 +44,7 @@ test('bundled reading, saved article and font choice survive cold reload without
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
 });
 test('successful refresh remains readable after later network failures and restart', async ({ page, context }) => {
-  await fixtures(context); await page.goto('/');
+  await fixtures(context); await page.goto('/portal/');
   await expect(page.getByRole('heading', { name: 'ローカル試験：事故速報の見出し' })).toBeVisible();
   await page.getByRole('button', { name: '保存する', exact: true }).click();
   await context.route(`${host}/**`, route => route.abort());
@@ -55,7 +55,7 @@ test('successful refresh remains readable after later network failures and resta
   await expect(page.getByRole('button', { name: '保存済み', exact: true })).toBeVisible();
 });
 test('free revisions search and statistical filters work inside bundled screens', async ({ page, context }) => {
-  await fixtures(context); await page.goto('/');
+  await fixtures(context); await page.goto('/portal/');
   await expect(page.getByRole('heading', { name: 'ローカル試験：事故速報の見出し' })).toBeVisible();
   await page.getByRole('button', { name: '法改正', exact: true }).click();
   await expect(page.getByRole('heading', { name: '法改正', exact: true })).toBeVisible();
@@ -70,7 +70,7 @@ test('free revisions search and statistical filters work inside bundled screens'
   await expect(page.locator('.metric strong')).toContainText(seed.statistics.data.years.find(y => y.year === 2021)!.count.toLocaleString('ja-JP'));
 });
 test('missing server safety contract blocks execution after consent', async ({ page, context }) => {
-  const count = await fixtures(context); await page.goto('/');
+  const count = await fixtures(context); await page.goto('/portal/');
   await expect(page.getByRole('heading', { name: 'ローカル試験：事故速報の見出し' })).toBeVisible();
   await page.getByRole('button', { name: 'AI確認', exact: true }).click();
   await page.getByLabel('法令についての質問').fill('確認したい作業条件');
@@ -80,7 +80,7 @@ test('missing server safety contract blocks execution after consent', async ({ p
   expect(count()).toBe(0);
 });
 test('server-verified AI exposes original evidence and unavailable RA consumes no result', async ({ page, context }) => {
-  const count = await fixtures(context, { ai: true, unavailableRa: true }); await page.goto('/');
+  const count = await fixtures(context, { ai: true, unavailableRa: true }); await page.goto('/portal/');
   await expect(page.getByRole('heading', { name: 'ローカル試験：事故速報の見出し' })).toBeVisible();
   await page.getByRole('button', { name: 'AI確認', exact: true }).click();
   await page.getByLabel('法令についての質問').fill('局所排気装置の確認条件');
@@ -96,7 +96,7 @@ test('server-verified AI exposes original evidence and unavailable RA consumes n
   expect(count()).toBe(2);
 });
 test('stale weather never becomes an all-clear and explicit deletion restores bundled data', async ({ page, context }) => {
-  await fixtures(context, { oldWeather: true }); await page.goto('/');
+  await fixtures(context, { oldWeather: true }); await page.goto('/portal/');
   await expect(page.getByRole('heading', { name: 'ローカル試験：事故速報の見出し' })).toBeVisible();
   await page.getByRole('button', { name: '保存する', exact: true }).click();
   await page.getByRole('button', { name: '気象警報', exact: true }).click();

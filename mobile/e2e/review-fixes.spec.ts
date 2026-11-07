@@ -10,13 +10,13 @@ test('emergency contacts and local input guidance work offline without login or 
   await context.addInitScript(()=>Object.defineProperty(navigator,'onLine',{configurable:true,get:()=>false}));
   await page.goto('/');await expect(page.getByRole('complementary',{name:'緊急時の連絡'})).toBeVisible();
   await expect(page.getByRole('link',{name:'119番に電話'})).toHaveAttribute('href','tel:119');
-  await page.getByRole('button',{name:'AI確認',exact:true}).click();await page.getByLabel('法令についての質問').fill('作業員が倒れて意識がない');
+  await page.goto('/portal/');await page.getByRole('button',{name:'AI確認',exact:true}).click();await page.getByLabel('法令についての質問').fill('作業員が倒れて意識がない');
   await expect(page.getByRole('alert').filter({hasText:'119'})).toBeVisible();await expect(page.getByRole('button',{name:'確認して送信する'})).toBeDisabled();expect(sent).toBe(0);
 });
 test('server safety guidance is preserved on the home AI response',async({page,context})=>{
   await context.route(host+'/api/mobile/v1/capabilities',r=>r.fulfill({json:capability(),headers:cors}));
   await context.route(host+'/api/mobile/v1/ai',r=>r.fulfill({status:422,json:{error:{code:'SAFETY_BLOCKED',reason:'emergency',message:'安全な場所から119番へ連絡してください。AIの再送を待たないでください。'}},headers:cors}));
-  await page.goto('/');await page.getByRole('button',{name:'AI確認',exact:true}).click();await page.getByLabel('法令についての質問').fill('局所排気装置の点検条件');await page.getByRole('checkbox').check();await page.getByRole('button',{name:'確認して送信する'}).click();await expect(page.getByRole('status').filter({hasText:'AIの再送を待たないでください'})).toBeVisible();
+  await page.goto('/portal/');await page.getByRole('button',{name:'AI確認',exact:true}).click();await page.getByLabel('法令についての質問').fill('局所排気装置の点検条件');await page.getByRole('checkbox').check();await page.getByRole('button',{name:'確認して送信する'}).click();await expect(page.getByRole('status').filter({hasText:'AIの再送を待たないでください'})).toBeVisible();
 });
 test('all display preferences survive page changes, cold reload and print media',async({page})=>{
   await page.goto('/features/');const settings=page.locator('details[aria-label="全画面の表示設定"]');await settings.locator('summary').click();
