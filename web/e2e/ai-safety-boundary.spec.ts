@@ -1,7 +1,8 @@
 import { expect, test } from "@playwright/test";
 
-test.describe("AI emergency/privacy network boundary", () => {
-  test("emergency input reaches no chatbot API, history, analytics, or transfer CTA", async ({ page }) => {
+test.describe("AI privacy network boundary", () => {
+  // Owner decision 2026-11-07: no 110/119 interception; emergency wording is sent like any question.
+  test("emergency wording is not intercepted and shows no 110/119 notice", async ({ page }) => {
     const chatbotRequests: string[] = [];
     page.on("request", (request) => {
       if (/\/api\/chatbot(?:\/stream)?$/.test(new URL(request.url()).pathname)) {
@@ -11,19 +12,9 @@ test.describe("AI emergency/privacy network boundary", () => {
     await page.goto("/chatbot");
     await page.getByLabel("質問入力").fill("反応がありません");
     await page.getByRole("button", { name: "送信" }).click();
-
-    const alert = page.locator('[role="alert"][data-safety-kind="emergency"]');
-    await expect(alert).toContainText("119");
-    expect(chatbotRequests).toEqual([]);
-    await expect(page.getByText("反応がありません", { exact: true })).toHaveCount(0);
-    await expect(page.locator('a[href^="/ky?q="]')).toHaveCount(0);
-    const stored = await page.evaluate(() => JSON.stringify(Object.fromEntries(
-      Array.from({ length: localStorage.length }, (_, index) => {
-        const key = localStorage.key(index)!;
-        return [key, localStorage.getItem(key)];
-      }),
-    )));
-    expect(stored).not.toContain("反応がありません");
+    await expect.poll(() => chatbotRequests.length).toBeGreaterThan(0);
+    await expect(page.locator('[role="alert"][data-safety-kind="emergency"]')).toHaveCount(0);
+    await expect(page.getByText(/110番|119番/)).toHaveCount(0);
   });
 
   test("actual-value PII is blocked before browser network and local persistence", async ({ page }) => {

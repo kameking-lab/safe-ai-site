@@ -178,11 +178,11 @@ test("JavaScript無効でも7道具・事故の確認状態・通常リンクを
     }
     await expect(page.getByText(/産業医が辞任・解任・退任したとき/).first()).toBeVisible();
     const tools = page.locator("[data-home-lp]");
-    const mainEntrances = tools.getByRole("navigation", { name: "すぐ使う道具" });
+    const mainEntrances = tools.getByRole("navigation", { name: "主な機能" });
     expect(await mainEntrances.getByRole("link").evaluateAll((links) =>
       links.map((link) => link.getAttribute("href")),
-    )).toEqual(["/chatbot", "/chemical-ra", "/accident-news"]);
-    await expect(mainEntrances.getByRole("link", { name: /化学物質RA準備/u })).toHaveAttribute("href", "/chemical-ra");
+    )).toEqual(["/chatbot", "/chemical-ra"]);
+    await expect(mainEntrances.getByRole("link", { name: /化学物質リスクアセスメント/u })).toHaveAttribute("href", "/chemical-ra");
     await expect(tools.getByRole("navigation", { name: "ほかの現場支援ツール" })
       .getByRole("link", { name: "化学物質RA準備", exact: true })).toHaveAttribute("href", "/chemical-ra");
     await expect(tools.locator('[data-lp-tool][href="/chatbot"]')).toHaveAttribute("href", "/chatbot");

@@ -13,22 +13,17 @@ async function warmKyPaperRoute(page: Page) {
 }
 
 test.describe("7つの道具を案内するホームの圧縮予算", () => {
-  test("400×606で説明と安衛法AIの入口を固定UIより上に表示する", async ({ page }) => {
+  test("400×606で安衛法AIチャットの入口を固定UIより上に表示する", async ({ page }) => {
     await page.setViewportSize({ width: 400, height: 606 });
     await page.goto("/", { waitUntil: "domcontentloaded" });
 
-    const summary = page.locator(".hlp_mobileSummary");
-    const entry = page.locator('.hlp_mobileEntry[href="/chatbot"]');
-    await expect(summary).toBeVisible();
+    const entry = page.locator('[data-home-strength="law-chat"][href="/chatbot"]');
     await expect(entry).toBeVisible();
     const positions = await page.evaluate(() => {
-      const summary = document.querySelector(".hlp_mobileSummary")?.getBoundingClientRect();
-      const entry = document.querySelector(".hlp_mobileEntry")?.getBoundingClientRect();
+      const entry = document.querySelector('[data-home-strength="law-chat"]')?.getBoundingClientRect();
       const bottomNav = Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--mobile-bottom-nav-h")) || 0;
-      const lineHeight = document.querySelector(".hlp_mobileSummary") ? Number.parseFloat(getComputedStyle(document.querySelector(".hlp_mobileSummary")!).lineHeight) : 0;
-      return { summaryLines: summary && lineHeight ? summary.height / lineHeight : Infinity, entryBottom: entry?.bottom ?? Infinity, reservedTop: 606 - bottomNav - 12 - 44 };
+      return { entryBottom: entry?.bottom ?? Infinity, reservedTop: 606 - bottomNav - 12 - 44 };
     });
-    expect(positions.summaryLines).toBeLessThanOrEqual(1.1);
     expect(positions.entryBottom).toBeLessThan(positions.reservedTop);
   });
 
@@ -49,16 +44,13 @@ test.describe("7つの道具を案内するホームの圧縮予算", () => {
               Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top))
             : Number.POSITIVE_INFINITY;
         const shareRect = rect('button[aria-label="シェアメニューを開く"]');
-        const cardRect = rect(".hlp_previewLinks a");
-        const entryRect = rect(".hlp_mobileEntry");
+        const cardRect = rect('[data-home-strength="law-chat"]');
         return {
           cardShare: overlap(cardRect, shareRect),
-          entryShare: overlap(entryRect, shareRect),
           shareSize: shareRect ? Math.min(shareRect.width, shareRect.height) : 0,
         };
       });
       expect(geometry.cardShare).toBe(0);
-      expect(geometry.entryShare).toBe(0);
       expect(geometry.shareSize).toBeGreaterThanOrEqual(44);
 
       await share.click();
@@ -90,8 +82,8 @@ test.describe("7つの道具を案内するホームの圧縮予算", () => {
         name: /その書類、\s*AIに任せて、\s*現場に行こう。/u,
       }),
     ).toBeVisible();
-    const immediateTools = page.locator('nav[aria-label="すぐ使う道具"]');
-    await expect(immediateTools.getByRole("link")).toHaveCount(3);
+    const immediateTools = page.locator('nav[aria-label="主な機能"]');
+    await expect(immediateTools.getByRole("link")).toHaveCount(2);
     const services = page.locator("#tools");
     await expect(services.locator("a[data-lp-tool]")).toHaveCount(7);
     await expect(services.getByRole("heading", { level: 3 })).toHaveCount(3);
@@ -109,7 +101,7 @@ test.describe("7つの道具を案内するホームの圧縮予算", () => {
       return {
         screens: document.documentElement.scrollHeight / viewportHeight,
         heroHeight: height('section[aria-labelledby="home-lp-title"]'),
-        mascotToolsScreen: top('nav[aria-label="すぐ使う道具"]') / viewportHeight,
+        mascotToolsScreen: top('nav[aria-label="主な機能"]') / viewportHeight,
         servicesTop: top('section[aria-labelledby="home-tools-heading"]'),
         updatesTop: top('section[aria-labelledby="home-news-heading"]'),
         directoryTop: top('#consult'),
