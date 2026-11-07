@@ -304,16 +304,6 @@ const heat: SafetyMaterial = {
         id: "Pindahkan ke tempat sejuk, kompres es, beri air bergaram.",
       },
     },
-    {
-      id: "call-119",
-      text: {
-        "ja-easy": "意識(いしき) が 戻(もど)らない 時(とき) は 119",
-        en: "Call 119 if consciousness does not return quickly.",
-        vi: "Gọi 119 nếu không tỉnh lại nhanh.",
-        zh: "意识未恢复立即拨打119。",
-        id: "Telepon 119 jika kesadaran tidak pulih cepat.",
-      },
-    },
   ],
   source: "厚生労働省「STOP！熱中症 クールワーク（宿泊業）」",
 };
