@@ -70,7 +70,7 @@ test.afterAll(() => {
   );
 });
 
-test("ホームは6幅で熱中症を最上部にし、主要タスクへ進める", async ({ page }) => {
+test("ホームは6幅で7つの道具と控えめなチワワから主要タスクへ進める", async ({ page }) => {
   collectErrors(page);
   for (const width of [320, 360, 390, 768, 1024, 1440]) {
     await page.setViewportSize({
@@ -82,25 +82,32 @@ test("ホームは6幅で熱中症を最上部にし、主要タスクへ進め�
     await expect(
       page.getByRole("heading", {
         level: 1,
-        name: "今日の熱中症リスク",
+        name: /その書類、\s*AIに任せて、\s*現場に行こう。/u,
       }),
     ).toBeVisible();
-    await expect(page.locator('[data-home-section="heat"]')).toBeVisible();
-    await expect(page.locator("[data-home-heat-slide-deck]")).toBeAttached();
-    await expect(page.locator("[data-home-chemical-quick-search]")).toBeAttached();
-    await expect(page.locator("[data-home-chat-quick-ask]")).toBeAttached();
+    const mascotTools = page.locator("[data-home-lp]");
+    const mainEntrances = mascotTools.getByRole("navigation", { name: "すぐ使う道具" });
+    expect(await mainEntrances.getByRole("link").evaluateAll((links) =>
+      links.map((link) => link.getAttribute("href")),
+    )).toEqual(["/chatbot", "/chemical-ra", "/accident-news"]);
+    await expect(mainEntrances.getByRole("link", { name: /化学物質RA準備/u })).toHaveAttribute("href", "/chemical-ra");
+    await expect(mascotTools.getByRole("navigation", { name: "ほかの現場支援ツール" })
+      .getByRole("link", { name: "化学物質RA準備", exact: true })).toHaveAttribute("href", "/chemical-ra");
+    await expect(mascotTools.locator('[data-lp-tool][href="/chatbot"]')).toHaveAttribute("href", "/chatbot");
+    await expect(page.getByRole("link", { name: "すべての機能を見る", exact: true })).toHaveAttribute("href", "/features");
+    await expect(page.locator('[data-home-section="heat"]')).toHaveCount(0);
     await expect(page.getByRole("tab")).toHaveCount(0);
     await expect(
-      page.getByRole("link", { name: "関連事故を見る" }),
+      page.getByRole("link", { name: "事故速報の一覧を見る" }),
     ).toHaveAttribute(
       "href",
       "/accident-news",
     );
     await expect(
-      page.getByRole("link", { name: "法改正一覧を見る" }),
+      page.getByRole("link", { name: "法改正の一覧を見る" }),
     ).toHaveAttribute("href", "/laws");
     await expect(
-      page.locator('[data-home-section="core-features"] > div > ul > li'),
+      page.locator("#tools a[data-lp-tool]"),
     ).toHaveCount(7);
     expect(
       await page.evaluate(
@@ -117,7 +124,7 @@ test("ホームは6幅で熱中症を最上部にし、主要タスクへ進め�
   }
 });
 
-test("モバイル下部ナビは季節の5操作をキーボードで移動できる", async ({
+test("モバイル下部ナビは主要な5操作をキーボードで移動できる", async ({
   page,
 }) => {
   collectErrors(page);
@@ -126,12 +133,14 @@ test("モバイル下部ナビは季節の5操作をキーボードで移動で�
   const mobileNav = page.getByRole("navigation", {
     name: "モバイル ボトムナビゲーション",
   });
-  for (const label of ["ホーム", "熱中症", "法令AI", "学ぶ", "メニュー"]) {
+  await expect(mobileNav.getByRole("link")).toHaveCount(5);
+  for (const label of ["ホーム", "化学RA", "法令AI", "学ぶ", "メニュー"]) {
     await expect(mobileNav.getByRole("link", { name: label })).toBeVisible();
   }
-  const heat = mobileNav.getByRole("link", { name: "熱中症" });
-  await heat.focus();
-  await expect(heat).toBeFocused();
+  const chemical = mobileNav.getByRole("link", { name: "化学RA" });
+  await expect(chemical).toHaveAttribute("href", "/chemical-ra");
+  await chemical.focus();
+  await expect(chemical).toBeFocused();
   await page.keyboard.press("Tab");
   await expect(mobileNav.getByRole("link", { name: "法令AI" })).toBeFocused();
   await page.screenshot({

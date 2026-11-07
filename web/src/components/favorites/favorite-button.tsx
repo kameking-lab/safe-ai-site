@@ -15,6 +15,7 @@ import {
   isFavorited,
   toggleFavorite,
   type FavoriteKind,
+  type FavoriteEntry,
 } from "@/lib/favorites";
 
 type FavoriteButtonProps = {
@@ -23,6 +24,7 @@ type FavoriteButtonProps = {
   title: string;
   subtitle: string;
   href: string;
+  sourceProvenance?: FavoriteEntry["sourceProvenance"];
   /** ボタンサイズ。compact = アイコンのみ、normal = アイコン + ラベル */
   variant?: "compact" | "normal";
 };
@@ -33,6 +35,7 @@ export function FavoriteButton({
   title,
   subtitle,
   href,
+  sourceProvenance,
   variant = "compact",
 }: FavoriteButtonProps) {
   const [favorited, setFavorited] = useState(false);
@@ -46,7 +49,7 @@ export function FavoriteButton({
   }, [kind, id]);
 
   const handleToggle = () => {
-    const result = toggleFavorite({ kind, id, title, subtitle, href });
+    const result = toggleFavorite({ kind, id, title, subtitle, href, sourceProvenance });
     setFavorited(result.added);
   };
 

@@ -60,7 +60,7 @@ export async function generateMetadata({
   const { id } = await params;
   const accident = findPublicAccident(id);
   const title = `${accident.title}｜事故事例詳細`;
-  const description = `${accident.workCategory} ${accident.severity}「${accident.title}」（${accident.occurredOn}）の事故概要・原因・再発防止策と関連する保護具・KY起票・関連法令を確認できます。`;
+  const description = `${accident.workCategory} ${accident.severity}「${accident.title}」（${accident.occurredOn || "発生日未確認"}）の事故概要・原因・再発防止策と関連する保護具・KY起票・関連法令を確認できます。`;
   return {
     title,
     description,
@@ -186,7 +186,7 @@ export default async function AccidentDetailPage({
         schema={[
           breadcrumbSchema([
             { name: "ホーム", url: SITE_BASE },
-            { name: "事故データベース", url: `${SITE_BASE}/accidents` },
+            { name: "事故事例検索（補助）", url: `${SITE_BASE}/accidents` },
             { name: accident.title, url },
           ]),
         ]}
@@ -198,7 +198,7 @@ export default async function AccidentDetailPage({
           className="inline-flex min-h-[44px] items-center gap-1 hover:text-emerald-600 transition-colors"
         >
           <ChevronLeft className="h-3 w-3" />
-          事故データベース
+          事故事例検索（補助）
         </Link>
         <span>/</span>
         <span className="line-clamp-1 text-slate-700">{accident.title}</span>
@@ -241,7 +241,7 @@ export default async function AccidentDetailPage({
           <div className="flex items-center gap-1.5">
             <Calendar className="h-3.5 w-3.5 text-slate-400" />
             <dt className="font-bold text-slate-700">発生日:</dt>
-            <dd>{accident.occurredOn}</dd>
+            <dd>{accident.occurredOn || "未確認"}</dd>
           </div>
           <div className="flex items-center gap-1.5">
             <Building2 className="h-3.5 w-3.5 text-slate-400" />

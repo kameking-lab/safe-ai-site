@@ -151,6 +151,14 @@ function resolveRef(
     // 裸の「第N条」＝同一法令参照。ただし直前が別法令を示す文字なら諦める。
     const before = start > 0 ? text[start - 1] : '';
     if (AMBIGUOUS_PRECEDING.has(before)) return null;
+    // A preceding foreign-law reference can govern an unqualified continuation.
+    // Do not silently resolve it against the displayed law; keep the exact text.
+    const sentenceStart = text.lastIndexOf('。', start - 1) + 1;
+    const preceding = text.slice(sentenceStart, start);
+    if (_lawNames.some((name) =>
+      preceding.includes(`${name}第`) &&
+      (SHORT_TO_FULL.get(name) ?? name) !== contextLawFullName
+    )) return null;
     targetFull = contextLawFullName;
   }
   if (!targetFull) return null;
@@ -158,9 +166,9 @@ function resolveRef(
   // 内部深リンク：最も具体的な条番号表記から順に収録集合へ照合。
   const candidates: string[] = [];
   if (branch && kou) candidates.push(`第${n}条の${branch}第${kou}項`);
-  if (kou) candidates.push(`第${n}条第${kou}項`);
+  if (kou && !branch) candidates.push(`第${n}条第${kou}項`);
   if (branch) candidates.push(`第${n}条の${branch}`);
-  candidates.push(`第${n}条`);
+  if (!branch) candidates.push(`第${n}条`);
   for (const art of candidates) {
     if (CORPUS_KEYS.has(`${targetFull}|${art}`)) {
       return {
@@ -202,6 +210,9 @@ export function linkifyArticleReferences(
   while ((m = REF_RE.exec(text)) !== null) {
     const [full, prefix, nRaw, branchRaw, kouRaw] = m;
     const start = m.index;
+    // The extractor handles one branch level. A deeper reference must remain
+    // whole text instead of incorrectly linking its partially matched parent.
+    if (new RegExp(`^\\s*の\\s*${NUM}+`).test(text.slice(start + full.length))) continue;
     const resolved = resolveRef(prefix, nRaw, branchRaw, kouRaw, contextLawFullName, text, start);
     if (!resolved) continue; // 素テキストのまま（次のテキストスライスに含まれる）
     if (start > last) segments.push({ text: text.slice(last, start) });

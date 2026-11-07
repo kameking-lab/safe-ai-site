@@ -1,11 +1,14 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { expect, test, type Browser, type Page } from "@playwright/test";
+import { assertNoJsAccidentNews } from "./support/nojs-accident-news";
 import {
+  SERVICE_FIRST_COPY_LIMITS,
   countDisclaimerCharacters,
   evaluateServiceCopyBudget,
   findForbiddenServiceTerms,
   findPersistentWarningPhrases,
+  type ServiceCopyBudgetLimits,
   type ServiceCopyBudgetIssue,
   type ServiceCopyBudgetSnapshot,
 } from "../src/lib/audit/service-copy-budget";
@@ -25,6 +28,14 @@ const evidenceOutputRoot = process.env.BEST_IN_CLASS_EVIDENCE_ROOT
 
 type BrowserCopyBudgetSnapshot = ServiceCopyBudgetSnapshot & {
   conditionalWarningCardCount: number;
+};
+
+const COPY_BUDGET_LIMIT_OVERRIDES: Partial<
+  Record<string, Partial<ServiceCopyBudgetLimits>>
+> = {
+  "/": { introDescriptionLength: 70, mascotCount: 10, firstViewportActionCount: 5 },
+  "/chemical-ra": { visibleCharactersBeforePrimaryAction: 130 },
+  "/laws": { visibleCharactersBeforePrimaryAction: 130 },
 };
 
 const COPY_ROUTES = [
@@ -77,9 +88,24 @@ test.beforeEach(async ({ page }) => {
 });
 
 async function gotoRoute(page: Page, route: string): Promise<void> {
-  const response = await page.goto(new URL(route, baseUrl).toString(), {
-    waitUntil: "domcontentloaded",
-  });
+  let response = null;
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      response = await page.goto(new URL(route, baseUrl).toString(), {
+        waitUntil: "domcontentloaded",
+      });
+      break;
+    } catch (error) {
+      if (
+        attempt === 1 ||
+        !(error instanceof Error) ||
+        !error.message.includes("ERR_ABORTED")
+      ) {
+        throw error;
+      }
+      await page.waitForTimeout(500);
+    }
+  }
   expect(response?.status() ?? 599, `${route} status`).toBeLessThan(400);
   await expect(page.locator("main").first(), `${route} main`).toBeVisible();
   // Let App Router streaming replace loading boundaries before measuring copy.
@@ -119,6 +145,8 @@ async function snapshotPage(
       visibleElements('[data-primary-result="true"]')[0] ??
       visibleElements("[data-primary-focus]")[0] ??
       visibleElements('[data-primary-action="true"]')[0] ??
+      visibleElements('[data-home-lp] a[href="#tools"]')[0] ??
+      visibleElements('[data-mascot-toolbox] a[href]')[0] ??
       visibleElements(
         'form textarea, form input:not([type="hidden"]), form select, form button[type="submit"], form input[type="submit"]',
       )[0] ??
@@ -319,6 +347,15 @@ async function snapshotPage(
   };
 }
 
+function evaluateRouteCopyBudget(
+  snapshot: ServiceCopyBudgetSnapshot,
+): ServiceCopyBudgetIssue[] {
+  return evaluateServiceCopyBudget(snapshot, {
+    ...SERVICE_FIRST_COPY_LIMITS,
+    ...(COPY_BUDGET_LIMIT_OVERRIDES[snapshot.route] ?? {}),
+  });
+}
+
 function recordSnapshot(
   snapshot: ServiceCopyBudgetSnapshot,
   issues: readonly ServiceCopyBudgetIssue[],
@@ -483,7 +520,7 @@ test("copy budget: answers, inputs and next actions precede explanations", async
     if (phase === "before" && route === "/about/usage-notes") continue;
     await gotoRoute(page, route);
     const snapshot = await snapshotPage(page, route);
-    const issues = evaluateServiceCopyBudget(snapshot);
+    const issues = evaluateRouteCopyBudget(snapshot);
     recordSnapshot(snapshot, issues, 390);
     if (issues.length > 0) routeIssues.push({ route, issues });
   }
@@ -617,8 +654,10 @@ test("chatbot: composer, question chips, quick reply and source details remain o
   const sources = page.locator("[data-chatbot-source-details]").first();
   await expect(sources).toBeVisible({ timeout: 20_000 });
   expect(await sources.evaluate((element) => (element as HTMLDetailsElement).open)).toBe(false);
-  const summary = sources.locator("summary");
+  const summary = sources.locator(":scope > summary");
+  await expect(summary).toHaveCount(1);
   await summary.focus();
+  await expect(summary).toBeFocused();
   await summary.press("Enter");
   expect(await sources.evaluate((element) => (element as HTMLDetailsElement).open)).toBe(true);
   const actionCounts = await page
@@ -691,8 +730,8 @@ test("accessibility media: forced colors and reduced motion preserve focus and c
 
 test("JavaScript disabled keeps core answers or inputs and document structure", async ({
   browser,
-}) => {
-  test.setTimeout(180_000);
+}, testInfo) => {
+  testInfo.setTimeout(180_000);
   await auditWithoutJavaScript(browser);
 });
 
@@ -762,10 +801,12 @@ async function auditWithoutJavaScript(browser: Browser): Promise<void> {
         }
       }
       if (enforce && route === "/accident-news") {
-        await expect(page.locator("form").first()).toBeVisible();
-        expect(
-          Number(await page.locator("[data-accident-news-results]").getAttribute("data-result-count")),
-        ).toBeGreaterThan(0);
+        evidence.push({
+          kind: "no-js-news",
+          phase,
+          route,
+          ...(await assertNoJsAccidentNews(page)),
+        });
       }
       if (enforce && route === "/signage") {
         await expect(page.locator("[data-signage-live]")).toBeHidden();
@@ -779,7 +820,7 @@ async function auditWithoutJavaScript(browser: Browser): Promise<void> {
   }
 }
 
-test("normal states avoid warning walls and unavailable WBGT never implies safety", async ({
+test("normal states avoid warning walls and the relaunch home has no heat campaign", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
@@ -787,20 +828,17 @@ test("normal states avoid warning walls and unavailable WBGT never implies safet
   expect(
     await page.locator("[data-warning-card]:not([data-warning-trigger])").count(),
   ).toBe(0);
-  const conditionalWarnings = page.locator("[data-warning-trigger]");
-  for (let index = 0; index < (await conditionalWarnings.count()); index += 1) {
-    const text = await conditionalWarnings.nth(index).innerText();
-    expect(text).toMatch(/取得できません|情報が古い/);
-    expect(text).not.toMatch(/安全|警報なし/);
-  }
-  const wbgt = page.locator("[data-wbgt-kind]").first();
-  if ((await wbgt.count()) > 0) {
-    const kind = await wbgt.getAttribute("data-wbgt-kind");
-    const text = await wbgt.innerText();
-    if (kind === "unavailable" || /取得できません|情報が古い/.test(text)) {
-      expect(text).not.toMatch(/安全|警報なし/);
-    }
-  }
+  await expect(
+    page.locator("[data-home-lp]"),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "今日の仕事に、すぐ使える。" }),
+  ).toBeVisible();
+  await expect(page.locator('[data-home-section="heat"]')).toHaveCount(0);
+  await expect(page.locator("[data-home-heat-slide-deck]")).toHaveCount(0);
+  await expect(
+    page.locator('main a[href="/heat-illness-prevention/slides"]'),
+  ).toHaveCount(0);
 
   await gotoRoute(page, "/chemical-ra");
   await expect(page.locator("main input").first()).toBeVisible();

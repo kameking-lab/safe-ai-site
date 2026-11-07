@@ -68,7 +68,7 @@ export function ShareButtons({ title, hashtags, fixed = true }: ShareButtonsProp
           onClick={() => setOpen((v) => !v)}
           aria-expanded={open}
           aria-label={open ? "シェアメニューを閉じる" : "シェアメニューを開く"}
-          className="fixed bottom-20 right-4 z-30 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-600 text-white shadow-lg transition hover:bg-emerald-700 sm:bottom-6 sm:right-6"
+          className={`fixed bottom-20 z-30 flex items-center justify-center rounded-full bg-emerald-600 text-white shadow-lg transition hover:bg-emerald-700 sm:bottom-6 sm:right-6 sm:h-12 sm:w-12 ${pathname === "/" ? "right-0 h-11 w-11" : "right-4 h-12 w-12"}`}
         >
           <Share2 className="h-5 w-5" />
         </button>

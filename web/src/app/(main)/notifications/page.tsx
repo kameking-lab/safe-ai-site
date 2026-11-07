@@ -12,10 +12,11 @@ import { ogImageUrl } from "@/lib/og-url";
 import { PageJsonLd } from "@/components/page-json-ld";
 const _title = "安全情報 通知センター・配信設定";
 const _desc =
-  "気象警報・労働安全衛生法改正・重大災害情報のサイト内通知センター（ベル）、画面表示中のOS通知、メール配信、RSS購読の設定。重要な安全情報を見逃さない。";
+  "RSSと画面表示中の端末通知の設定。自動メール・Web Pushは配信運用の確認中で、現在は提供していません。";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/notifications" },
+  robots: { index: false, follow: true },
   title: _title,
   description: _desc,
   openGraph: {
@@ -56,8 +57,8 @@ export default function NotificationsPage() {
         <section role="alert" className="mt-4 rounded-2xl border-2 border-amber-300 bg-amber-50 p-5 text-amber-950">
           <h2 className="font-bold">自動メール・Web Pushの新規登録を一時停止しています</h2>
           <p className="mt-2 text-sm leading-7">
-            外部配信事業者、分散キュー、重複防止、部分失敗の再送、監視・アラートの本番確認が完了していません。
-            登録完了や即時配信を保証できないため、確認が終わるまでメールアドレスやPush購読情報を受け付けません。
+            配信が届くことと、配信停止が反映されることを本番環境で確認中です。
+            その間、メールアドレスやPush購読情報は受け付けません。RSSと下の端末通知設定をご利用ください。
           </p>
         </section>
         <div className="mt-6">

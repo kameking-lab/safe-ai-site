@@ -1,0 +1,59 @@
+import { fireEvent, render, screen } from "@testing-library/react";
+import { describe, expect, it } from "vitest";
+import { HomeLP } from "./home-lp";
+import type { HomeLatestAccidentNews } from "@/lib/home/home-accident-server";
+import type { AutomationConsultAvailability } from "@/lib/automation-consult/availability";
+
+const unavailable: HomeLatestAccidentNews = { status: "unavailable", checkedAt: "2026-10-08T00:00:00Z", items: [], sourceLabel: "報道RSS", sourceUrl: "https://news.google.com/", message: "未取得" };
+const paused: AutomationConsultAvailability = { status: "paused", accepting: false, webFormEnabled: false, contactMode: null, intakeMode: null, retentionDays: null, label: "受付停止中", message: "停止中" };
+
+describe("the approved homepage LP", () => {
+  it("keeps immediate tools and origin readable without a form or interaction", () => {
+    const { container } = render(<HomeLP availability={paused} latestNews={unavailable} />);
+    expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
+    expect(screen.getByRole("link", { name: "道具を使う" }).getAttribute("href")).toBe("#tools");
+    expect([...container.querySelectorAll<HTMLAnchorElement>("[data-lp-tool]")].map((a) => a.getAttribute("href"))).toEqual(["/chatbot", "/chemical-database", "/laws", "/accident-news", "/accidents-analytics", "/tools/construction-calculators", "/goods"]);
+    expect(container.textContent).toContain("現場に向き合う時間を、もっと。");
+    expect(container.textContent).not.toContain("死亡事故で同僚を失いました");
+    expect(container.querySelectorAll("[data-lp-use]")).toHaveLength(3);
+    expect(container.querySelector("[data-information-preview]")?.textContent).toContain("出典と確認状態");
+    expect([...container.querySelectorAll<HTMLAnchorElement>('nav[aria-label="すぐ使う道具"] a')].map((a) => a.getAttribute("href"))).toEqual(["/chatbot", "/chemical-ra", "/accident-news"]);
+    expect(container.innerHTML.indexOf('nav aria-label="すぐ使う道具"')).toBeLessThan(container.innerHTML.indexOf('href="#tools"'));
+    expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("その書類、AIに任せて、現場に行こう。");
+    expect(container.textContent).toContain("初回30分の相談は無料。業務自動化は税込33,000円から。");
+    expect(container.querySelector("[data-ky-scene]")).toBeNull();
+    expect(screen.getByRole("link", { name: "KY用紙" }).getAttribute("href")).toBe("/ky/paper");
+    expect(container.textContent).toContain("帳票は現場ごとに書式や運用が異なります");
+    expect(container.querySelector("[data-pet-static]")?.getAttribute("src")).toBe("/mascot/anzen-wanko-v1/static.webp");
+    expect(container.querySelector("[data-pet-strip]")).toBeNull();
+    expect(container.querySelector("form")).toBeNull();
+    expect(container.querySelectorAll('[data-lp-news="law"]')).toHaveLength(1);
+    expect(container.querySelectorAll('[data-lp-news="accident"]')).toHaveLength(1);
+    expect(container.textContent).toContain("事故がなかったことを示すものではありません");
+  });
+
+  it.each([
+    [paused, "/services/automation", "料金・受付状況を見る"],
+    [{ ...paused, status: "mail_available", accepting: true, contactMode: "mail_client", label: "メール相談受付中" }, "/contact/automation-email", "自動化について相談する"],
+    [{ ...paused, status: "available", accepting: true, webFormEnabled: true, contactMode: "web_form", intakeMode: "email", label: "Webフォーム受付中" }, "/services/automation#consult-form", "自動化について相談する"],
+  ] as const)("routes consultation according to the existing actual availability", (availability, href, label) => {
+    render(<HomeLP availability={availability} latestNews={unavailable} />);
+    expect(screen.getByRole("link", { name: label }).getAttribute("href")).toBe(href);
+  });
+
+  it("shows only the first current report with its source and unresolved verification", () => {
+    const report = { id: "fixture", publicId: "public-fixture", title: "既存報道の見出し", href: "https://example.com/report", publishedAt: "2026-10-08T00:00:00Z", publisher: "報道媒体", industry: "業種未確認", accidentType: "事故型未確認", contextAccidentType: "unknown", contextWorkCategory: "unknown", summary: "", measure: "", verification: "reported-unverified" } as const;
+    render(<HomeLP availability={paused} latestNews={{ ...unavailable, status: "live", items: [report, { ...report, title: "二番目の報道" }] }} />);
+    expect(screen.getByRole("link", { name: "既存報道の見出し" }).getAttribute("href")).toBe(report.href);
+    expect(screen.queryByText("二番目の報道")).toBeNull();
+    expect(screen.getByText(/報道見出し・原因未確認/)).toBeTruthy();
+  });
+
+  it("lets the user hide and restore the optional companion", () => {
+    const { container } = render(<HomeLP availability={paused} latestNews={unavailable} />);
+    fireEvent.click(screen.getByRole("button", { name: "安全わんこを非表示" }));
+    expect(container.querySelector("[data-pet-viewport]")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "安全わんこを再表示" }));
+    expect(container.querySelector("[data-pet-viewport]")).not.toBeNull();
+  });
+});

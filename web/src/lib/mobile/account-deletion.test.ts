@@ -1,4 +1,5 @@
 // @vitest-environment node
+/* eslint-disable @typescript-eslint/no-explicit-any -- loose test doubles for the Prisma delegate surface */
 import { beforeEach,afterEach,describe,it,expect,vi } from 'vitest';
 import { createHash } from 'node:crypto';
 const state=vi.hoisted(()=>({job:null as any,session:null as any,apple:false,db:null as any,deleted:vi.fn(),revoked:vi.fn(),fetch:vi.fn()}));

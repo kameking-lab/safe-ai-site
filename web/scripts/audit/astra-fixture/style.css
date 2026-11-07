@@ -1,0 +1,9 @@
+@import "tailwindcss" source(none);
+@source "../../../src/components/signage/signage-rotator.tsx";
+@source "./main.tsx";
+body { margin:0; background:#020617; color:#f1f5f9; font-family:Arial,sans-serif; }
+main { padding:24px; }
+h1 { font-size:20px; margin-bottom:16px; }
+section { max-width:780px; padding:12px; border:1px solid #475569; border-radius:12px; }
+.panel { display:flex; height:240px; max-width:100%; margin-top:12px; }
+@media (min-width:1280px) { section { width:42vw; } }

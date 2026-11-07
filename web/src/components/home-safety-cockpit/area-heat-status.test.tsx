@@ -171,6 +171,58 @@ describe("AreaHeatStatus", () => {
     );
   });
 
+  it("keeps a verified JMA warning from an HTTP 207 partial weather response", async () => {
+    const now = new Date().toISOString();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL) => {
+        if (String(input).startsWith("/api/weather-risk")) {
+          return new Response(
+            JSON.stringify({
+              partial: true,
+              fetchedAt: now,
+              unavailableSources: ["open-meteo"],
+              officialWarning: {
+                status: "live",
+                warnings: [{ code: "03", status: "発表", level: "warning" }],
+                headline: "東京都に大雨警報",
+                fetchedAt: now,
+                reportAt: now,
+                sourceUrl: "https://www.jma.go.jp/bosai/warning/",
+              },
+              error: {
+                code: "UNAVAILABLE",
+                message: "Open-Meteo unavailable",
+                retryable: true,
+              },
+            }),
+            { status: 207, headers: { "content-type": "application/json" } },
+          );
+        }
+        return new Response(JSON.stringify(wbgtPayload()), {
+          status: 200,
+          headers: { "content-type": "application/json" },
+        });
+      }),
+    );
+    const { container } = render(
+      <AreaHeatStatus areaId="tokyo-shinjuku" compact />,
+    );
+
+    await screen.findByText("31.4℃");
+    await waitFor(() =>
+      expect(
+        container.querySelector("[data-heat-status]")?.getAttribute(
+          "data-heat-status",
+        ),
+      ).toBe("degraded"),
+    );
+    expect(
+      screen.getByText("JMA警報・注意報").parentElement?.textContent,
+    ).toContain("警報あり");
+    expect(screen.queryByText("32.1℃")).toBeNull();
+  });
+
   it("fails closed when both sources are unavailable", async () => {
     vi.stubGlobal(
       "fetch",

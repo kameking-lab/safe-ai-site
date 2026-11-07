@@ -6415,6 +6415,7 @@
       ],
       "niteChripUrl": "https://www.chem-info.nite.go.jp/chem/ghs/m-nite-108-88-3.html",
       "niteGhsClassifications": {
+        "flammableLiquids": "区分2",
         "reproTox": "区分1A、授乳に対するまたは授乳を介した影響に関する追加区分",
         "skinCorrIrr": "区分2",
         "eyeDamageIrr": "区分2B",
@@ -7237,6 +7238,7 @@
       ],
       "niteChripUrl": "https://www.chem-info.nite.go.jp/chem/ghs/m-nite-64-17-5.html",
       "niteGhsClassifications": {
+        "flammableLiquids": "区分2",
         "carcinogen": "区分1A",
         "reproTox": "区分1A",
         "eyeDamageIrr": "区分2B",
@@ -7906,6 +7908,7 @@
       ],
       "niteChripUrl": "https://www.chem-info.nite.go.jp/chem/ghs/m-nite-67-64-1.html",
       "niteGhsClassifications": {
+        "flammableLiquids": "区分2",
         "reproTox": "区分2",
         "eyeDamageIrr": "区分2B",
         "stotSingle": "区分3 （気道刺激性、麻酔作用）",

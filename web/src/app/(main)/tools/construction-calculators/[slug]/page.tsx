@@ -1,8 +1,8 @@
+import { CALCULATOR_TASKS } from "@/data/construction-calculators/input-guide-copy";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, BookOpenCheck, Calculator } from "lucide-react";
 import { notFound } from "next/navigation";
-import { CalculatorDimensionDiagram } from "@/components/construction-calculators/calculator-dimension-diagram";
 import { ConstructionCalculatorClient } from "@/components/construction-calculators/construction-calculator-client";
 import { JsonLd } from "@/components/json-ld";
 import { PageContainer } from "@/components/layout";
@@ -48,7 +48,7 @@ export default async function ConstructionCalculatorDetailPage({ params }: PageP
   if (!calculator) notFound();
   const path = `${CONSTRUCTION_CALCULATOR_HUB_PATH}/${calculator.slug}`;
   const normalFixture = calculator.testFixtures.find((fixture) => fixture.kind === "normal" && fixture.expectedOk);
-  const defaultInput = normalFixture?.input ?? {};
+  const defaultInput = { ...(normalFixture?.input ?? {}), ...(["rebar-weight","rebar-spacing"].includes(slug) ? {barType:"deformed",barDesignation:"D13",rounding:{decimalPlaces:3,mode:"round"}} : {}) };
   const { testFixtures: _testFixtures, ...publicDefinition } = calculator;
 
   return (
@@ -87,41 +87,40 @@ export default async function ConstructionCalculatorDetailPage({ params }: PageP
         <span>{calculator.title}</span>
       </nav>
 
-      <header className="rounded-[2rem] bg-slate-950 px-5 py-8 text-white sm:px-8 lg:px-12 lg:py-10">
+      <header className="rounded-2xl bg-slate-950 px-4 py-4 text-white sm:px-6">
         <p className="flex items-center gap-2 text-sm font-black tracking-[.12em] text-emerald-300">
           <Calculator className="h-5 w-5" aria-hidden="true" />建設計算ツール
         </p>
-        <h1 className="mt-3 max-w-4xl text-3xl font-black tracking-tight sm:text-4xl lg:text-5xl">{calculator.title}</h1>
-        <p className="mt-4 max-w-4xl leading-7 text-slate-200">{calculator.purpose}</p>
-        <p className="mt-5 max-w-4xl rounded-xl border border-amber-300 bg-amber-200/10 p-3 text-sm font-black leading-6 text-amber-100">
-          概算支援です。構造設計、強度、安全可否、法令適合、発注数量を判定・保証しません。
+        <h1 className="mt-2 max-w-4xl text-2xl font-black tracking-tight sm:text-3xl">{calculator.title}</h1>
+        <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-200">{CALCULATOR_TASKS[calculator.slug]??calculator.purpose}</p>
+        <p className="mt-2 text-xs font-bold leading-5 text-amber-100">
+          概算用。安全・構造・法令適合の判定には使えません。
         </p>
       </header>
 
-      <div className="mt-8 grid gap-8 xl:grid-cols-[minmax(0,1fr)_23rem]">
+      <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1fr)_21rem]">
         <div className="min-w-0 space-y-8">
-          <CalculatorDimensionDiagram slug={calculator.slug} />
-          <ConstructionCalculatorClient definition={publicDefinition} defaultInput={defaultInput} />
+          <ConstructionCalculatorClient definition={publicDefinition} defaultInput={defaultInput} startEmpty />
         </div>
 
         <aside className="space-y-5 xl:sticky xl:top-24 xl:self-start">
-          <section aria-labelledby="formula-title" className="rounded-2xl border-2 border-slate-300 bg-white p-5 dark:border-slate-700 dark:bg-slate-900">
-            <h2 id="formula-title" className="flex items-center gap-2 text-xl font-black"><BookOpenCheck className="h-5 w-5 text-emerald-800 dark:text-emerald-300" aria-hidden="true" />計算式</h2>
+          <details aria-labelledby="formula-title" className="rounded-2xl border-2 border-slate-300 bg-white p-5 dark:border-slate-700 dark:bg-slate-900">
+            <summary id="formula-title" className="flex items-center gap-2 text-xl font-black"><BookOpenCheck className="h-5 w-5 text-emerald-800 dark:text-emerald-300" aria-hidden="true" />計算式</summary>
             <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm font-semibold leading-6">
               {calculator.formula.map((formula) => <li key={formula}>{formula}</li>)}
             </ol>
-          </section>
-          <section aria-labelledby="assumptions-title" className="rounded-2xl border-2 border-slate-300 bg-white p-5 dark:border-slate-700 dark:bg-slate-900">
-            <h2 id="assumptions-title" className="text-xl font-black">前提・適用範囲</h2>
+          </details>
+          <details aria-labelledby="assumptions-title" className="rounded-2xl border-2 border-slate-300 bg-white p-5 dark:border-slate-700 dark:bg-slate-900">
+            <summary id="assumptions-title" className="cursor-pointer text-base font-black">前提・適用範囲</summary>
             <ul className="mt-3 list-disc space-y-2 pl-5 text-sm font-semibold leading-6">
               {calculator.assumptions.map((assumption) => <li key={assumption}>{assumption}</li>)}
             </ul>
             <p className="mt-4 text-xs font-bold leading-5 text-slate-600 dark:text-slate-300">
               式バージョン {calculator.formulaVersion}／確認日 {calculator.checkedAt}
             </p>
-          </section>
-          <section aria-labelledby="sources-title" className="rounded-2xl border-2 border-slate-300 bg-white p-5 dark:border-slate-700 dark:bg-slate-900">
-            <h2 id="sources-title" className="text-xl font-black">根拠</h2>
+          </details>
+          <details aria-labelledby="sources-title" className="rounded-2xl border-2 border-slate-300 bg-white p-5 dark:border-slate-700 dark:bg-slate-900">
+            <summary id="sources-title" className="cursor-pointer text-base font-black">根拠を確認</summary>
             <ul className="mt-3 space-y-3 text-sm leading-6">
               {calculator.sources.map((source) => (
                 <li key={source.sourceId}>
@@ -130,9 +129,9 @@ export default async function ConstructionCalculatorDetailPage({ params }: PageP
                 </li>
               ))}
             </ul>
-          </section>
+          </details>
           <Link href={CONSTRUCTION_CALCULATOR_HUB_PATH} className="inline-flex min-h-11 items-center gap-2 rounded-xl border-2 border-slate-500 px-4 py-2 font-black">
-            <ArrowLeft className="h-4 w-4" aria-hidden="true" />12種類の一覧へ
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />{constructionCalculatorRegistry.length}種類の一覧へ
           </Link>
         </aside>
       </div>
@@ -140,7 +139,7 @@ export default async function ConstructionCalculatorDetailPage({ params }: PageP
       <noscript>
         <section className="mt-8 rounded-2xl border-2 border-amber-500 bg-amber-50 p-5 text-amber-950">
           <h2 className="text-xl font-black">JavaScriptを使わずに確認する</h2>
-          <p className="mt-2 leading-7">このページでは動かない入力フォームを表示しません。上記の式、入力条件、前提を確認し、通常リンクから別の計算を選べます。</p>
+          <p className="mt-2 leading-7">入力欄は表示されますが、JavaScriptが無効な間は計算や履歴保存を使えません。上記の式、入力条件、前提を確認し、通常リンクから別の計算を選べます。</p>
           <Link href={CONSTRUCTION_CALCULATOR_HUB_PATH} className="mt-3 inline-flex min-h-11 items-center font-black underline underline-offset-4">建設計算ツール一覧へ</Link>
         </section>
       </noscript>

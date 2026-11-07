@@ -18,22 +18,24 @@ export function AutomationServicePromo({
   position,
   availability,
   title = "この業務の効率化・自動化も相談できます",
-  description = "小さな定型作業から、集計・通知・帳票・社内教育まで。初回30分無料で内容と料金目安を整理します。",
+  description = "小さな定型作業から、集計・通知・帳票・社内教育まで。内容と料金目安を整理します。",
   cta = "現場業務の効率化を相談する",
   href,
 }: AutomationServicePromoProps) {
   const effectiveDescription = availability.accepting
     ? description
-    : `${availability.label}。個人情報は入力せず、料金・モデルケース・必要資料をご確認ください。受付再開後の初回30分相談は無料です。`;
+    : `${availability.label}。個人情報は入力せず、料金・モデルケース・必要資料をご確認ください。`;
   const effectiveTitle = availability.accepting
     ? title
     : "料金・対応範囲と現在の受付状況を確認できます";
   const effectiveCta = availability.accepting
     ? cta
     : "料金・受付状況を見る";
-  const effectiveHref = availability.accepting
-    ? (href ?? "/services/automation#consult-form")
-    : "/services/automation";
+  const effectiveHref = !availability.accepting
+    ? "/services/automation"
+    : availability.contactMode === "mail_client"
+      ? "/contact/automation-email"
+      : href ?? "/services/automation#consult-form";
   return (
     <aside
       aria-label="業務自動化・講習・資料作成の相談"
@@ -51,6 +53,7 @@ export function AutomationServicePromo({
           <div className="min-w-0">
             <h2 className="text-base font-bold text-sky-950 dark:text-sky-100">{effectiveTitle}</h2>
             <p className="mt-1 text-sm leading-6 text-sky-900 dark:text-sky-200">{effectiveDescription}</p>
+            <p className="mt-1 text-sm font-bold leading-6 text-sky-900 dark:text-sky-200">初回30分相談無料{availability.accepting ? "" : "（受付再開後）"}・業務自動化は税込33,000円から。</p>
           </div>
         </div>
         <Link

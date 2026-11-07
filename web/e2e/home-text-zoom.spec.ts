@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-test("ホームはテキスト400%拡大でも横スクロールなく主導線を使える", async ({
+test("ホームは400%ズーム相当幅でも横スクロールなく主導線を使える", async ({
   page,
 }) => {
   // 1440px画面を400%ズームしたときの実効CSS幅（360px）でreflowを確認する。
@@ -17,20 +17,23 @@ test("ホームはテキスト400%拡大でも横スクロールなく主導線�
   await expect(
     page.getByRole("heading", {
       level: 1,
-      name: "今日の熱中症リスク",
+      name: /その書類、\s*AIに任せて、\s*現場に行こう。/u,
     }),
   ).toBeVisible();
-  await expect(page.locator('[data-home-section="heat"]')).toBeVisible();
-  await expect(
-    page.locator('[data-home-section="chat"] textarea'),
-  ).toBeAttached();
-  await expect(
-    page.locator('[data-home-section="chemical"] input'),
-  ).toBeAttached();
+  const services = page.locator("#tools");
+  const cards = services.locator("a[data-lp-tool]");
+  await expect(cards).toHaveCount(7);
+  for (const link of await cards.all()) {
+    await link.scrollIntoViewIfNeeded();
+    await link.focus();
+    await expect(link).toBeFocused();
+    await expect(link).toBeInViewport();
+  }
   for (const selector of [
-    '[data-home-section="learning"]',
-    '[data-home-section="core-features"]',
-    '[data-home-section="automation-consult"]',
+    'section[aria-labelledby="home-news-heading"]',
+    'section[aria-labelledby="home-origin-heading"]',
+    '#tools',
+    '#consult',
   ]) {
     const section = page.locator(selector);
     await section.scrollIntoViewIfNeeded();
@@ -46,10 +49,6 @@ test("ホームはテキスト400%拡大でも横スクロールなく主導線�
   }));
   expect(reflow.scrollWidth - reflow.clientWidth).toBeLessThanOrEqual(2);
   await expect(page.locator('[data-home-section="quality"]')).toHaveCount(0);
-  const heatState = await page
-    .locator('[data-home-section="heat"] [data-heat-status]')
-    .getAttribute("data-heat-status");
-  await expect(page.locator('[data-home-section] [data-warning-card]')).toHaveCount(
-    heatState === "degraded" || heatState === "unavailable" ? 1 : 0,
-  );
+  await expect(page.locator('[data-home-section="heat"]')).toHaveCount(0);
+  await expect(page.locator('main [data-warning-card]')).toHaveCount(0);
 });

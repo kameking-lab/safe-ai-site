@@ -97,15 +97,22 @@ describe("five canonical SEO clusters", () => {
     expect(content).toContain("2026-07-31");
   });
 
-  it("keeps chemical screening separate from official CREATE-SIMPLE", () => {
+  it("keeps chemical RA preparation separate from official CREATE-SIMPLE", () => {
     const tool = source("src/app/(main)/chemical-ra/page.tsx");
     const guide = landing("chemical-ra-create-simple");
     const text = JSON.stringify(guide);
 
-    expect(tool).toContain("無料の簡易スクリーニング");
+    expect(tool).toContain("無料のRA準備ツール");
+    expect(tool).toContain("リスク値は計算せず");
+    expect(tool).toContain("厚生労働省の公式CREATE-SIMPLE");
     expect(tool).toContain("CAS");
     expect(tool).toContain("SDS");
-    expect(tool).toContain("混合物");
+    const secondary = source("src/components/chemical/chemical-ra-secondary-tools.tsx");
+    expect(secondary).toContain("<LazyMixtureRaPanel />");
+    const mixture = source("src/components/chemical/mixture-ra-panel.tsx");
+    expect(mixture).toContain("混合物RA準備（成分情報の整理）");
+    expect(mixture).toContain("安全ランクや換気・PPEの助言は出しません");
+    expect(mixture).not.toContain("合成リスク集約");
     expect(text).toContain("CREATE-SIMPLE");
     expect(text).toContain("再現・代替");
     expect(guide.dateModified).toBe("2026-07-29");

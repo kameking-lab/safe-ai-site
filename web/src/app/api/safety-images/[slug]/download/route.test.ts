@@ -7,10 +7,12 @@ import {
   GET,
   HEAD,
   POST,
+} from "./route";
+import {
   hasOnlyCanonicalQuery,
   isSafeSafetyImageMainText,
   isSafeSafetyImageUnit,
-} from "./route";
+} from "@/lib/safety-image-library/download-validation";
 
 const missingContext = { params: Promise.resolve({ slug: "legacy-missing-safety-image" }) };
 

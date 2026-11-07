@@ -6,31 +6,69 @@ import type {
 export type SafetyImageMessageSettings = {
   mode: "clean" | "default" | "edited";
   language: SafetyImageLanguage;
+  languages?: SafetyImageLanguage[];
   text: string;
+  texts?: Partial<Record<SafetyImageLanguage, string>>;
   subMessage: string;
   numericValue: string;
   numericUnit: string;
 };
 
-export function resolveSafetyImageMessage(
+export type SafetyImageMessageSegment = {
+  language: SafetyImageLanguage;
+  text: string;
+};
+
+function resolveMessageForLanguage(
   theme: SafetyImageTheme,
   settings: SafetyImageMessageSettings,
+  language: SafetyImageLanguage,
+  text: string,
+  useLocalizedUnit: boolean,
 ): string {
-  if (settings.mode === "clean") return "";
-  const base = settings.mode === "default" ? theme.texts[settings.language] : settings.text;
+  const base = settings.mode === "default" ? theme.texts[language] : text;
   const numeric = settings.numericValue.trim();
-  const unit = settings.numericUnit.trim() || theme.numericTemplate?.units[settings.language] || "";
+  const unit = useLocalizedUnit
+    ? theme.numericTemplate?.units[language] || ""
+    : settings.numericUnit.trim() || theme.numericTemplate?.units[language] || "";
   const numericToken = theme.numericTemplate
     ? numeric
       ? `${numeric}${unit ? ` ${unit}` : ""}`
       : `＿＿＿＿${unit ? ` ${unit}` : ""}`
     : "";
-  if (theme.numericTemplate) {
-    const unchangedPreset = settings.mode === "default" || settings.text.trim() === theme.texts[settings.language].trim();
-    const message = unchangedPreset
-      ? theme.numericTemplate.templates[settings.language].replaceAll("{value}", numericToken)
-      : [base, numericToken].filter(Boolean).join("\n");
-    return [message, settings.subMessage.trim()].filter(Boolean).join("\n");
-  }
-  return [base, settings.subMessage.trim()].filter(Boolean).join("\n");
+  if (!theme.numericTemplate) return base;
+  const unchangedPreset = settings.mode === "default" || text.trim() === theme.texts[language].trim();
+  return unchangedPreset
+    ? theme.numericTemplate.templates[language].replaceAll("{value}", numericToken)
+    : [base, numericToken].filter(Boolean).join("\n");
+}
+
+export function resolveSafetyImageMessageSegments(
+  theme: SafetyImageTheme,
+  settings: SafetyImageMessageSettings,
+): SafetyImageMessageSegment[] {
+  if (settings.mode === "clean") return [];
+  const languages = [...new Set(settings.languages?.length ? settings.languages : [settings.language])];
+  const segments = languages.map((language) => ({
+    language,
+    text: resolveMessageForLanguage(
+      theme,
+      settings,
+      language,
+      settings.texts?.[language] ?? (language === settings.language ? settings.text : theme.texts[language]),
+      languages.length > 1,
+    ),
+  })).filter((segment) => segment.text);
+  const subMessage = settings.subMessage.trim();
+  if (subMessage) segments.push({ language: settings.language, text: subMessage });
+  return segments;
+}
+
+export function resolveSafetyImageMessage(
+  theme: SafetyImageTheme,
+  settings: SafetyImageMessageSettings,
+): string {
+  return resolveSafetyImageMessageSegments(theme, settings)
+    .map((segment) => segment.text)
+    .join("\n");
 }

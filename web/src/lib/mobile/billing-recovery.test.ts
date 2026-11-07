@@ -1,4 +1,5 @@
 // @vitest-environment node
+/* eslint-disable @typescript-eslint/no-explicit-any -- loose test doubles for the Prisma delegate surface */
 import { beforeEach,afterEach,it,expect,vi } from 'vitest';
 const state=vi.hoisted(()=>({intent:null as any,tail:Promise.resolve() as Promise<unknown>,created:0,grantAvailable:false,grants:[] as any[]}));
 vi.mock('./revenuecat',()=>({fetchSubscriber:async()=>({}),verifiedAppleGrant:()=>state.grantAvailable?{productId:'fixture-product',expiresAt:new Date(Date.now()+86400000)}:null,fetchAppleOwnership:async()=>'original-transaction-fixture'}));

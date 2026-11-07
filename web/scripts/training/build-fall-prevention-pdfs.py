@@ -67,8 +67,12 @@ BORDER = colors.HexColor("#D7DFDC")
 PAPER = colors.HexColor("#F7F8F6")
 WHITE = colors.white
 
-AS_OF_JA = "基準日 2026年8月27日"
-VERSION = "v1.0.0"
+_COURSE_METADATA = json.loads(
+    (DATA_DIR / "fall-prevention.json").read_text(encoding="utf-8")
+)
+_as_of_year, _as_of_month, _as_of_day = map(int, _COURSE_METADATA["asOf"].split("-"))
+AS_OF_JA = f"基準日 {_as_of_year}年{_as_of_month}月{_as_of_day}日"
+VERSION = f"v{_COURSE_METADATA['version']}"
 BOUNDARY = "この教材は社内安全研修用です。法定の特別教育等を代替するものではありません。"
 
 
@@ -424,7 +428,7 @@ def build_slide_deck(
             c.rect(18, h - 12, w - 18, 12, fill=1, stroke=0)
             draw_text(c, slide["kicker"], 52, h - 58, 500, font=FONT_BOLD, size=12, color=colors.HexColor("#A7E2D0"), max_lines=1)
             draw_text(c, slide["title"], 52, h - 95, 610, font=FONT_BOLD, size=31, color=WHITE, leading=40, max_lines=3)
-            draw_text(c, slide["message"], 54, h - 220, 520, size=15, color=colors.HexColor("#D9E5EE"), leading=22, max_lines=3)
+            draw_text(c, slide["message"], 54, h - 220, 580, size=15, color=colors.HexColor("#D9E5EE"), leading=22, max_lines=3)
             for index, item in enumerate(slide.get("body", [])):
                 rounded_card(c, 54 + index * 194, 108, 180, 50, fill=colors.HexColor("#1E3C61"), stroke=colors.HexColor("#4C6683"), radius=8)
                 draw_text(c, item, 66 + index * 194, 143, 156, font=FONT_BOLD, size=11, color=WHITE, max_lines=2, align="center")
@@ -565,7 +569,7 @@ def build_instructor_script(
         Spacer(1, 5 * mm),
         Table(
             [
-                [p("標準構成", st["label"]), p("音声付き約35〜50分／演習・討議込み約60分", st["body"])],
+                [p("標準構成", st["label"]), p("音声付き約30〜35分／演習・討議込み約60分", st["body"])],
                 [p("対象", st["label"]), p("、".join(training["audience"]), st["body"])],
                 [p("使い方", st["label"]), p("スライド本文を短く示し、台本で定義・境界・注意点を補足します。Visual KY演習では音声終了後に9分停止します。", st["body"])],
             ],
@@ -639,24 +643,25 @@ def draw_handout(
     margin = 14 * mm
     content_w = w - 2 * margin
     y_top = h - 54 * mm
-    draw_text(c, "持ち帰る3点", margin, y_top, content_w, font=FONT_BOLD, size=13, color=NAVY)
+    draw_text(c, "対策の優先順位", margin, y_top, content_w, font=FONT_BOLD, size=13, color=NAVY)
     steps = [
-        ("1", "設備で防ぐ", "高所回避 → 作業床・手すり・覆い"),
-        ("2", "条件を照合", "器具・取付点・下方空間・使用質量"),
-        ("3", "救助まで決める", "方法・機材・役割・連絡・訓練"),
+        ("1", "本質安全", "高所作業の廃止・変更"),
+        ("2", "工学的対策", "作業床・手すり・覆い"),
+        ("3", "管理的対策", "計画・立入管理・点検・教育"),
+        ("4", "個人用保護具", "残るリスクへ適合器具"),
     ]
     gap = 4 * mm
-    card_w = (content_w - gap * 2) / 3
+    card_w = (content_w - gap * 3) / 4
     card_y = y_top - 36 * mm
     for idx, (number, title, detail) in enumerate(steps):
         x = margin + idx * (card_w + gap)
-        rounded_card(c, x, card_y, card_w, 29 * mm, fill=MINT if idx != 1 else BLUE_PALE, stroke=BORDER, radius=7)
+        rounded_card(c, x, card_y, card_w, 29 * mm, fill=MINT if idx % 2 == 0 else BLUE_PALE, stroke=BORDER, radius=7)
         c.setFillColor(GREEN)
         c.circle(x + 8 * mm, card_y + 20 * mm, 4.2 * mm, fill=1, stroke=0)
         c.setFillColor(WHITE)
         c.setFont(FONT_BOLD, 10)
         c.drawCentredString(x + 8 * mm, card_y + 18.6 * mm, number)
-        draw_text(c, title, x + 15 * mm, card_y + 25 * mm, card_w - 18 * mm, font=FONT_BOLD, size=10, color=NAVY, max_lines=1)
+        draw_text(c, title, x + 13 * mm, card_y + 25 * mm, card_w - 15 * mm, font=FONT_BOLD, size=8.7, color=NAVY, max_lines=1)
         draw_text(c, detail, x + 5 * mm, card_y + 13 * mm, card_w - 10 * mm, size=7.8, color=MUTED, max_lines=2, align="center")
 
     stats_y = card_y - 42 * mm
@@ -681,12 +686,12 @@ def draw_handout(
     checklist_y = stats_y - 85 * mm
     draw_text(c, "作業前に順番で確認", margin, stats_y - 8 * mm, content_w, font=FONT_BOLD, size=13, color=NAVY)
     check_items = [
-        "高所作業を回避できるか",
-        "作業床・端部・開口・昇降は適合しているか",
-        "器具・教育記録は作業条件に合うか",
-        "取付点・使用質量・落下距離・下方空間を照合したか",
-        "器具と取付設備を点検したか",
-        "救助方法・機材・担当者・連絡・中止条件を決めたか",
+        "法令で定められた墜落防止措置を実施したか",
+        "本質安全：高所作業を廃止・変更できないか",
+        "工学的対策：作業床・手すり・覆い・昇降設備は適合するか",
+        "管理的対策：作業計画・立入管理・点検・教育を確認したか",
+        "個人用保護具：器具・取付設備・下方空間は適合するか",
+        "使用前点検を行い、異常を是正したか",
     ]
     row_h = 10.2 * mm
     for idx, item in enumerate(check_items):
@@ -793,8 +798,8 @@ def build_field_checklist(output: Path) -> None:
         ("12", "振られ、端部接触、床・梁・設備への衝突を評価したか"),
         ("13", "ベルト、縫製、金具、ランヤード、アブソーバ、巻取り器を使用前点検したか"),
         ("14", "定期点検記録、使用・保管・衝撃履歴を確認し、不適合品を隔離したか"),
-        ("15", "未接続時間、急かされる工程、届かない取付点、器具混在を仕組みで防いだか"),
-        ("16", "救助方法・機材・担当者・連絡・救助者保護・中止条件を確認したか"),
+        ("15", "足場点検者をあらかじめ指名し、点検結果と補修措置を記録したか"),
+        ("16", "組立て・一部解体・変更後の点検者氏名を記録・保存したか"),
     ]
     row_h = 17 * mm
     for idx, (number, item) in enumerate(items_page2):
@@ -882,7 +887,10 @@ def build_sources(output: Path, registry: Sequence[dict[str, Any]]) -> None:
     story: list[Any] = [
         p("出典一覧", st["title"]),
         p("墜落・転落防止とフルハーネスの実務", st["h1"]),
-        p("スライド、講師用台本、配布資料、チェックリスト、確認クイズの出典番号は本一覧に対応します。確認日はすべて基準日2026年8月27日です。", st["body"]),
+        p(
+            f"スライド、講師用台本、配布資料、チェックリスト、確認クイズの出典番号は本一覧に対応します。確認日はすべて{AS_OF_JA}です。",
+            st["body"],
+        ),
     ]
     type_labels = {
         "law": "法令",

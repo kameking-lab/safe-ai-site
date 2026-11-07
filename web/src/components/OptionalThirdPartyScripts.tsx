@@ -5,6 +5,8 @@ import { usePathname } from "next/navigation";
 import Analytics from "@/components/Analytics";
 import AdSenseScript from "@/components/AdSenseScript";
 import {
+  isAdEligiblePath,
+  isAdEligibleUrl,
   hasPrivacySignalOptOut,
   isOptionalTrackingPath,
   isOptionalTrackingUrl,
@@ -13,6 +15,7 @@ import {
 } from "@/lib/analytics-privacy";
 import { removeGoogleOptionalCookies } from "@/lib/google-cookie-privacy";
 import { consumeTransientChatNavigation } from "@/lib/transient-chat-navigation";
+import { consumeTransientChemicalNavigation, isExactTransientChemicalUrl } from "@/lib/transient-chemical-navigation";
 
 type Consent = "granted" | "denied" | null;
 
@@ -24,6 +27,12 @@ function denyGoogleProcessing() {
     ad_personalization: "denied",
   });
   removeGoogleOptionalCookies();
+}
+
+function adRuntimePresent(): boolean {
+  return Boolean(
+    document.querySelector('script[src*="pagead2.googlesyndication.com/pagead/js/adsbygoogle"]'),
+  );
 }
 
 export function OptionalThirdPartyScripts({
@@ -42,6 +51,7 @@ export function OptionalThirdPartyScripts({
   const [editing, setEditing] = useState(false);
   const configured = analyticsEnabled || adsEnabled || rumEnabled;
   const committedTransientChatNavigationRef = useRef(false);
+  const committedTransientChemicalNavigationRef = useRef(false);
 
   useEffect(() => {
     if (!configured) return;
@@ -66,7 +76,9 @@ export function OptionalThirdPartyScripts({
       if (value == null) return false;
       try {
         const target = new URL(String(value), window.location.href);
-        return target.origin === window.location.origin && !isOptionalTrackingUrl(target);
+        if (target.origin !== window.location.origin) return false;
+        return !isOptionalTrackingUrl(target) ||
+          (adsEnabled && adRuntimePresent() && !isAdEligibleUrl(target));
       } catch {
         return true;
       }
@@ -119,6 +131,12 @@ export function OptionalThirdPartyScripts({
     const originalPushState = window.history.pushState.bind(window.history);
     const originalReplaceState = window.history.replaceState.bind(window.history);
     const guardedPushState: History["pushState"] = (data, unused, url) => {
+      if (isExactTransientChemicalUrl(url) && consumeTransientChemicalNavigation()) {
+        denyGoogleProcessing();
+        committedTransientChemicalNavigationRef.current = true;
+        originalPushState(data, unused, url);
+        return;
+      }
       if (
         isExactChatbotUrl(url) &&
         consumeTransientChatNavigation()
@@ -135,6 +153,12 @@ export function OptionalThirdPartyScripts({
       originalPushState(data, unused, url);
     };
     const guardedReplaceState: History["replaceState"] = (data, unused, url) => {
+      if (isExactTransientChemicalUrl(url) && consumeTransientChemicalNavigation()) {
+        denyGoogleProcessing();
+        committedTransientChemicalNavigationRef.current = true;
+        originalReplaceState(data, unused, url);
+        return;
+      }
       if (
         isExactChatbotUrl(url) &&
         consumeTransientChatNavigation()
@@ -153,7 +177,8 @@ export function OptionalThirdPartyScripts({
     window.history.pushState = guardedPushState;
     window.history.replaceState = guardedReplaceState;
     const onPopState = () => {
-      if (!isOptionalTrackingUrl(window.location.href)) {
+      if (!isOptionalTrackingUrl(window.location.href) ||
+        (adsEnabled && adRuntimePresent() && !isAdEligibleUrl(window.location.href))) {
         denyGoogleProcessing();
         window.location.replace(window.location.href);
       }
@@ -166,10 +191,22 @@ export function OptionalThirdPartyScripts({
       if (window.history.pushState === guardedPushState) window.history.pushState = originalPushState;
       if (window.history.replaceState === guardedReplaceState) window.history.replaceState = originalReplaceState;
     };
-  }, [configured]);
+  }, [configured, adsEnabled]);
 
   useEffect(() => {
-    if (!configured || isOptionalTrackingUrl(window.location.href)) return;
+    if (!configured) return;
+    const adMustLeave = adsEnabled && adRuntimePresent() &&
+      !isAdEligibleUrl(window.location.href);
+    if (isOptionalTrackingUrl(window.location.href) && !adMustLeave) return;
+    if (
+      isExactTransientChemicalUrl(window.location.href) &&
+      committedTransientChemicalNavigationRef.current
+    ) {
+      committedTransientChemicalNavigationRef.current = false;
+      denyGoogleProcessing();
+      return;
+    }
+    committedTransientChemicalNavigationRef.current = false;
     if (
       pathname === "/chatbot" &&
       committedTransientChatNavigationRef.current
@@ -185,7 +222,7 @@ export function OptionalThirdPartyScripts({
     );
     denyGoogleProcessing();
     if (tagWasLoaded) window.location.replace(window.location.href);
-  }, [configured, pathname]);
+  }, [configured, adsEnabled, pathname]);
 
   function choose(next: Exclude<Consent, null>) {
     try {
@@ -199,6 +236,11 @@ export function OptionalThirdPartyScripts({
     );
     if (next === "denied") {
       denyGoogleProcessing();
+      // Auto Ads keeps running after React unmounts the loader. Reload with
+      // the persisted denial so the already-inserted runtime leaves the page.
+      if (adRuntimePresent()) {
+        window.location.replace(window.location.href);
+      }
     }
     setConsent(next);
     setEditing(false);
@@ -211,11 +253,13 @@ export function OptionalThirdPartyScripts({
     !hasPrivacySignalOptOut() &&
     trackingPath &&
     (typeof window === "undefined" || isOptionalTrackingUrl(window.location.href));
+  const allowAds = allowScripts && isAdEligiblePath(pathname) &&
+    (typeof window === "undefined" || isAdEligibleUrl(window.location.href));
 
   return (
     <>
       {allowScripts && analyticsEnabled ? <Analytics nonce={nonce} /> : null}
-      {allowScripts && adsEnabled ? <AdSenseScript nonce={nonce} /> : null}
+      {allowAds && adsEnabled ? <AdSenseScript nonce={nonce} /> : null}
       {trackingPath && showChoice ? (
         <section
           aria-label="任意Cookieの設定"
@@ -246,6 +290,7 @@ export function OptionalThirdPartyScripts({
       ) : trackingPath ? (
         <button
           type="button"
+          data-cookie-settings-trigger
           onClick={() => setEditing(true)}
           className="fixed left-2 z-[90] min-h-[44px] rounded-lg border border-slate-300 bg-white/95 px-3 py-2 text-xs font-semibold text-slate-700 shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 [bottom:calc(var(--mobile-bottom-nav-h,0px)+env(safe-area-inset-bottom,0px)+12px)]"
         >

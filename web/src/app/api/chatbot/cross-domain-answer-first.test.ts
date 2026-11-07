@@ -1545,7 +1545,7 @@ describe("main14の生成quick replyをactual次turnで消費する", () => {
         expect(second.citations.length, `${id}: citations`).toBeGreaterThan(0);
         expect(second.effectiveDateStatus, `${id}: effective date`).toMatchObject({
           status: "current",
-          asOf: "2026-08-09",
+          asOf: "2026-10-12",
         });
         expect(second.clarificationQuestion, `${id}: same question repeated`).not.toBe(
           first.clarificationQuestion,
@@ -1883,7 +1883,7 @@ describe("酸欠タンクの換気例外をanswer-firstで適用する", () => {
       /同時に就業する労働者の人数と同数以上[\s\S]*空気呼吸器[\s\S]*酸素呼吸器[\s\S]*送気マスク[\s\S]*使用させなければならない/,
     );
     expect(response.effectiveDateStatus).toMatchObject({
-      asOf: "2026-08-09",
+      asOf: "2026-10-12",
       status: "current",
     });
   });
@@ -2170,7 +2170,7 @@ describe("生成chipの二段目でも選択済み条件を先頭回答へ消費
       );
       expect(detail.effectiveDateStatus).toMatchObject({
         status: "current",
-        asOf: "2026-08-09",
+        asOf: "2026-10-12",
       });
       expect(visible).not.toMatch(/短文では作業条件を特定できません/);
     }

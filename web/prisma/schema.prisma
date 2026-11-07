@@ -11,6 +11,29 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+/// Rakuten product responses and short negative results. Only SHA-256 keys are stored.
+model RakutenGoodsCache {
+  keyHash    String    @id @db.VarChar(64)
+  result     Json?
+  expiresAt  DateTime  @db.Timestamptz(3)
+  leaseToken String?   @db.VarChar(36)
+  leaseUntil DateTime? @db.Timestamptz(3)
+  updatedAt  DateTime  @default(now()) @db.Timestamptz(3)
+
+  @@index([expiresAt])
+  @@index([leaseUntil])
+}
+
+/// Application-wide upstream gate. The lease spans the complete HTTP request.
+model RakutenApplicationGate {
+  applicationHash String    @id @db.VarChar(64)
+  leaseToken      String?   @db.VarChar(36)
+  leaseUntil      DateTime? @db.Timestamptz(3)
+  nextAllowedAt   DateTime  @db.Timestamptz(3)
+  cooldownUntil   DateTime  @db.Timestamptz(3)
+  updatedAt       DateTime  @default(now()) @db.Timestamptz(3)
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String?

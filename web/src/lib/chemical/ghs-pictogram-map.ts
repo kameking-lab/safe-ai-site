@@ -111,6 +111,9 @@ export function resolveGhsSymbol(
   classification?: string,
 ): GhsSymbolId | undefined {
   if (!category) return undefined;
+  // GHS Table 2.6.2: 区分4は注意喚起語「警告」だが炎の絵表示はない。
+  if (/引火性液体/.test(category) && classification &&
+      /^区分\s*4$/.test(toHalfWidthDigits(classification).trim())) return undefined;
   if (/急性毒性/.test(category)) return acuteToxicitySymbol(classification);
   if (/特定標的臓器/.test(category)) return stotSymbol(category, classification);
   if (/(腐食|重篤な損傷).*刺激|刺激.*(腐食|重篤な損傷)/.test(category)) {

@@ -13,33 +13,27 @@ async function waitForVisualKyPlayer(page: Page) {
 }
 
 test.describe("ビジュアルKYT", () => {
-  test("ホームの優先順とhubのSSR一覧", async ({ page }) => {
+  test("ホームの現行導線とhubのSSR一覧", async ({ page }) => {
     await page.goto("/");
-    const heat = page.locator('[data-home-section="heat"]');
-    const learning = page.locator('[data-home-section="learning"]');
-    const tasks = page.locator('[aria-labelledby="home-core-features"]');
-    const automation = page.locator('[aria-labelledby="home-automation-heading"]');
-    await expect(heat).toBeVisible();
-    await expect(learning).toBeVisible();
-    await expect(tasks).toBeVisible();
-    await expect(automation).toBeVisible();
-    const positions = await Promise.all(
-      [heat, learning, tasks, automation].map(async (locator) => {
-        const box = await locator.boundingBox();
-        return box?.y ?? Number.POSITIVE_INFINITY;
+    await expect(
+      page.getByRole("heading", {
+        level: 1,
+        name: /その書類、\s*AIに任せて、\s*現場に行こう。/,
       }),
-    );
-    expect(positions[0]).toBeLessThan(positions[1]);
-    expect(positions[1]).toBeLessThan(positions[2]);
-    expect(positions[2]).toBeLessThan(positions[3]);
-    await expect(
-      learning.getByRole("link", { name: "問題に挑戦" }),
     ).toBeVisible();
     await expect(
-      learning.getByRole("link", { name: "5分学習を始める" }),
+      page.getByRole("heading", { name: "今日の仕事に、すぐ使える。" }),
     ).toBeVisible();
-
-    await page.goto(HUB);
+    await page.getByRole("link", { name: "すべての機能を見る", exact: true }).click();
+    await expect(page).toHaveURL(/\/features$/);
+    const visualKy = page.locator(`main a[href="${HUB}"]`).first();
+    const category = visualKy.locator("xpath=ancestor::details[1]");
+    if (await category.count() && !await category.evaluate((node: HTMLDetailsElement) => node.open)) {
+      await category.locator(":scope > summary").click();
+    }
+    await expect(visualKy).toHaveAttribute("href", HUB);
+    await visualKy.click();
+    await expect(page).toHaveURL(new RegExp(`${HUB}$`));
     await expect(
       page.getByRole("heading", {
         level: 1,

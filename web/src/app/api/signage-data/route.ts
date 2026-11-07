@@ -3,6 +3,7 @@ import { getSignageLocationById } from "@/data/signage-locations";
 import { getJmaWarningsRuntime } from "@/lib/jma/fetch-jma-runtime";
 import { buildSignageJmaSnapshot } from "@/lib/signage/signage-jma-snapshot";
 import { fetchLaborTrendItems } from "@/lib/signage/parse-labor-rss";
+import { isDomesticFatalAccidentHeadline } from "@/lib/home/latest-accident-news";
 import type { SignageDataApiResponse } from "@/lib/types/signage-data";
 import { fetchSignageHourlySeries } from "@/lib/weather/open-meteo-hourly";
 
@@ -16,11 +17,13 @@ export async function GET(request: NextRequest) {
   // サイネージは現場の常時表示前提のため 5xx を絶対に返さない。
   const [jmaResult, laborTrendResult, hourlyResult] = await Promise.allSettled([
     getJmaWarningsRuntime(),
-    fetchLaborTrendItems(10),
+    fetchLaborTrendItems(40),
     fetchSignageHourlySeries(loc.latitude, loc.longitude, 48),
   ]);
 
-  const laborTrend = laborTrendResult.status === "fulfilled" ? laborTrendResult.value : [];
+  const laborTrend = laborTrendResult.status === "fulfilled"
+    ? laborTrendResult.value.filter((item) => isDomesticFatalAccidentHeadline(item.title)).slice(0, 10)
+    : [];
   const hourly = hourlyResult.status === "fulfilled" ? hourlyResult.value : [];
   const openMeteoFetchedAt =
     hourlyResult.status === "fulfilled" && hourly.length > 0 ? new Date().toISOString() : null;

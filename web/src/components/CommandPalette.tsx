@@ -62,7 +62,8 @@ const QUICK_SHORTCUTS: Shortcut[] = [
   { id: 'visual-ky', label: '5分ビジュアルKYT', description: '現場イラストから危険を探し、優先対策を学ぶ', url: '/training/visual-ky', icon: Sparkles },
   { id: 'law-search', label: '法令条文検索', description: '安衛法・関連政令・省令の条文を全文検索', url: '/law-search', icon: Scale },
   { id: 'chatbot', label: '安衛法AI', description: '作業条件から法令本文と公式根拠を確認', url: '/chatbot', icon: MessageSquare },
-  { id: 'accident-news', label: '重大災害情報', description: '厚労省死亡災害DBの収録範囲と出典限界を確認して検索', url: '/accident-news', icon: Database },
+  { id: 'accident-news', label: '労災事故速報', description: '直近の国内労災報道を公表日時・媒体名つきで確認', url: '/accident-news', icon: Newspaper },
+  { id: 'fatal-accidents', label: '死亡事故データベース', description: '厚労省の死亡災害を業種・事故型・起因物・年で検索', url: '/fatal-accidents', icon: Database },
   { id: 'ky-paper', label: 'KY用紙', description: '作業条件を確認してKY記録を作成', url: '/ky/paper', icon: ClipboardList },
 ];
 

@@ -9,7 +9,7 @@
   "scripts": {
     "prebuild": "node scripts/generate-shared-case-data.mjs",
     "dev": "next dev",
-    "build": "npm run audit:public-identity && node scripts/storage-deployment-guard.mjs --workspace && next build",
+    "build": "node scripts/production-deploy-guard.mjs --source && npm run audit:public-identity && node scripts/storage-deployment-guard.mjs --workspace && next build && node scripts/production-deploy-guard.mjs --build && node scripts/vercel-migrate.mjs",
     "start": "next start",
     "postinstall": "prisma generate --no-hints || true",
     "lint": "eslint",
@@ -36,6 +36,9 @@
     "audit:performance-budget": "node scripts/audit/performance-budget.mjs",
     "audit:public-identity": "node scripts/audit/public-identity-guard.mjs",
     "audit:public-identity:build": "node scripts/audit/public-identity-guard.mjs --include-build",
+    "audit:production-deploy": "node scripts/production-deploy-guard.mjs --preflight",
+    "deploy:production": "node scripts/deploy-production.mjs",
+    "vercel:prod": "npm run deploy:production",
     "audit:service-first:browser": "node scripts/audit/service-first-browser-audit.mjs",
     "test:service-copy": "vitest run src/lib/audit/service-copy-budget.test.ts",
     "audit:heat-review-pack": "node scripts/audit/heat-review-pack-copy.mjs",
@@ -79,7 +82,7 @@
     "leaflet": "^1.9.4",
     "leaflet.markercluster": "^1.5.3",
     "lucide-react": "^1.7.0",
-    "next": "16.2.11",
+    "next": "16.4.1",
     "next-auth": "^5.0.0-beta.30",
     "pdfjs-dist": "6.2.108",
     "qrcode": "^1.5.4",
@@ -90,10 +93,10 @@
     "recharts": "^3.8.1",
     "resend": "^6.18.0",
     "server-only": "0.0.1",
-    "sharp": "0.35.3",
+    "sharp": "0.35.5",
     "stripe": "^22.0.1",
     "web-push": "^3.6.7",
-    "zod": "4.3.6"
+    "zod": "4.6.6"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.12.1",
@@ -117,7 +120,7 @@
     "tailwindcss": "^4",
     "typescript": "^5",
     "vite-tsconfig-paths": "^6.1.1",
-    "vitest": "^4.1.2"
+    "vitest": "^4.1.12"
   },
   "browserslist": [
     "> 0.3%",
@@ -128,27 +131,28 @@
   ],
   "overrides": {
     "deepmerge-ts": "8.0.1",
-    "brace-expansion": "5.0.9",
-    "sharp": "0.35.3",
+    "brace-expansion": "5.0.12",
+    "sharp": "0.35.5",
     "postcss": "8.5.26",
     "nanoid": "3.3.18",
-    "js-yaml": "4.3.1",
+    "js-yaml": "4.3.2",
     "tar": "^7.5.10",
-    "vite": "^8.0.5",
+    "vite": "8.1.6",
     "minimatch": "^10.2.5",
     "path-to-regexp": "^8.4.2",
     "basic-ftp": "^6.0.1",
     "@vercel/node": {
-      "undici": "^6.25.0"
+      "undici": "6.29.1"
     },
     "@vercel/blob": {
-      "undici": "6.28.0"
+      "undici": "6.29.1"
     },
     "jsdom": {
-      "undici": "7.29.0"
+      "undici": "7.30.1"
     },
     "vercel": {
       "undici": "^6.25.0"
-    }
+    },
+    "eslint-plugin-react-hooks": "7.0.1"
   }
 }

@@ -19,6 +19,8 @@ import { ArticleAiExplain } from "@/components/law-navi/article-ai-explain";
 import { ArticleRefText } from "@/components/law-navi/article-ref-text";
 import { PlainLanguageSection } from "@/components/law-navi/plain-language-section";
 import { getFreshPlainArticle } from "@/data/plain";
+import { lawSourceProvenance } from "@/lib/legal-source-provenance";
+import { SourceProvenanceView } from "@/components/law-navi/source-provenance-view";
 import { CopyCitationButton } from "@/components/favorites/copy-citation-button";
 import { FavoriteButton } from "@/components/favorites/favorite-button";
 import { formatArticleCitation } from "@/lib/favorites";
@@ -162,6 +164,7 @@ export default async function LawNaviArticlePage({
   if (!resolved) notFound();
 
   const { entry, origin, isDeleted, revisionId } = resolved;
+  const provenance = lawSourceProvenance(entry.article);
   const a = entry.article;
   const sourceVerified = hasVerifiedPrimaryText(entry);
   const egovUrl = egovUrlForEntry(entry);
@@ -320,6 +323,7 @@ export default async function LawNaviArticlePage({
                       lawFull: a.law,
                       articleNum: a.articleNum,
                       egovUrl,
+                      sourceProvenance: provenance,
                     })}
                   />
                 ) : null}
@@ -329,8 +333,10 @@ export default async function LawNaviArticlePage({
                   title={a.articleTitle ?? a.articleNum}
                   subtitle={`${a.lawShort} ${a.articleNum}`}
                   href={entry.path}
+                  sourceProvenance={provenance}
                 />
               </div>
+              <SourceProvenanceView source={provenance} />
               {sourceVerified ? (
                 <p className="mt-2 text-[11px] leading-5 text-slate-500">
                   表示本文はコミット済みe-Gov収録スナップショットとのハッシュ一致を確認しています。

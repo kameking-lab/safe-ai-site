@@ -47,4 +47,24 @@ describe("resolveSafetyImageMessage", () => {
       numericUnit: "m",
     })).toBe("指定範囲は立入禁止\n8 m\n責任者へ確認");
   });
+
+  it("combines selected language presets into one sign in a stable order", () => {
+    const theme = SAFETY_IMAGE_THEMES.find((item) => item.slug === "helmet-required");
+    if (!theme) throw new Error("theme missing");
+    expect(resolveSafetyImageMessage(theme, {
+      mode: "edited",
+      language: "ja",
+      languages: ["ja", "en", "vi", "zh-CN"],
+      text: theme.texts.ja,
+      texts: theme.texts,
+      subMessage: "",
+      numericValue: "",
+      numericUnit: "",
+    })).toBe([
+      theme.texts.ja,
+      theme.texts.en,
+      theme.texts.vi,
+      theme.texts["zh-CN"],
+    ].join("\n"));
+  });
 });

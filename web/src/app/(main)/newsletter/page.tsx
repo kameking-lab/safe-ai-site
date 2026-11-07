@@ -127,7 +127,7 @@ export default function NewsletterPage() {
         個人情報は配信目的のみに使用し、第三者には提供しません。
         配信停止はメール内のリンク1クリック。
         <br />
-        安全AIポータル ─ 根拠から、現場の行動へ
+        安全AIポータル ─ その書類、AIに任せて、現場に行こう。
       </p>
     </PageContainer>
   );

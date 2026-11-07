@@ -16,6 +16,8 @@ export const metadata: Metadata = {
   alternates: { canonical: "/organization" },
   title: _title,
   description: _desc,
+  // 実データ連携・権限管理の正式公開までは、デモ画面を検索結果へ載せない。
+  robots: { index: false, follow: true },
   openGraph: {
     title: `${_title}`,
     description: _desc,

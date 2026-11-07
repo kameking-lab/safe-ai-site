@@ -5,6 +5,7 @@ import { TransientQueryBridgeProvider } from "./home-safety-cockpit/transient-qu
 
 vi.mock("next/navigation", () => ({
   useSearchParams: () => ({ get: () => null }),
+  useRouter: () => ({ push: vi.fn(), prefetch: vi.fn() }),
 }));
 
 describe("ChemicalRaPanel エラー表示のaria-live（スクリーンリーダー通知）", () => {
@@ -13,7 +14,7 @@ describe("ChemicalRaPanel エラー表示のaria-live（スクリーンリーダ
       "fetch",
       vi.fn().mockResolvedValue({
         status: 500,
-        json: async () => ({ error: { message: "AI呼び出しに失敗しました" } }),
+        json: async () => ({ error: { message: "公的情報の取得に失敗しました" } }),
       }),
     );
   });
@@ -22,7 +23,7 @@ describe("ChemicalRaPanel エラー表示のaria-live（スクリーンリーダ
     vi.unstubAllGlobals();
   });
 
-  it("判定失敗時のエラーメッセージがrole=alertでスクリーンリーダーに通知される", async () => {
+  it("公的情報の取得失敗がrole=alertでスクリーンリーダーに通知される", async () => {
     render(
       <TransientQueryBridgeProvider>
         <ChemicalRaPanel />
@@ -32,11 +33,10 @@ describe("ChemicalRaPanel エラー表示のaria-live（スクリーンリーダ
     fireEvent.change(screen.getByLabelText(/物質名・CAS番号・SDS記載名/), {
       target: { value: "トルエン" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "作業条件へ進む" }));
     fireEvent.click(screen.getByRole("button", { name: "公的情報を確認" }));
 
     await waitFor(() => {
-      expect(screen.getByRole("alert").textContent).toContain("AI呼び出しに失敗しました");
+      expect(screen.getByRole("alert").textContent).toContain("公的情報の取得に失敗しました");
     });
   });
 });

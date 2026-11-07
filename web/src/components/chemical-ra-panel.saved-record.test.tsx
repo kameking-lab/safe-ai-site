@@ -96,8 +96,38 @@ describe("ChemicalRaPanel 保存記録の条件復元", () => {
     ).toBeTruthy();
     expect(screen.getByText("判定値")).toBeTruthy();
     expect(screen.getByText("未算出")).toBeTruthy();
+    expect(screen.getByText("GHS分類を表示できません。最新の製品SDSで確認してください。")).toBeTruthy();
     expect(screen.queryByText("自動リスク判定は行っていません")).toBeNull();
     expect(screen.queryByText(/公的データ限定モード/)).toBeNull();
+  });
+
+  it("旧生成記録の分類や別CASの出典を現在の公的分類へ補完しない", async () => {
+    seed({
+      ...safeResult(),
+      aiStatus: "generated",
+      ghsHazards: [{ category: "旧生成分類", classification: "区分1" }],
+      sourceLinks: [{ label: "NITE-CHRIP", url: "https://www.chem-info.nite.go.jp/chem/ghs/m-nite-67-64-1.html" }],
+    }, "legacy-generated-ra");
+    renderPanel();
+
+    expect(await screen.findByText("GHS分類を表示できません。最新の製品SDSで確認してください。")).toBeTruthy();
+    expect(screen.queryByText("旧生成分類")).toBeNull();
+    expect(screen.queryByRole("link", { name: "NITE 政府版GHS分類の出典" })).toBeNull();
+    expect(screen.getByText("未算出")).toBeTruthy();
+  });
+
+  it("公的情報モードでも別CASのNITE URLを分類の出典として表示しない", async () => {
+    seed({
+      ...safeResult(),
+      ghsHazards: [{ category: "検証用分類", classification: "区分2", signal: "警告" }],
+      sourceLinks: [{ label: "NITE-CHRIP", url: "https://www.chem-info.nite.go.jp/chem/ghs/m-nite-67-64-1.html" }],
+    }, "mismatched-source-ra");
+    renderPanel();
+
+    expect(await screen.findAllByRole("heading", { name: "GHSハザード分類（一部収録・1項目）" })).toHaveLength(2);
+    expect(screen.getAllByText("検証用分類")).toHaveLength(2);
+    expect(screen.queryByRole("link", { name: "NITE-CHRIP" })).toBeNull();
+    expect(screen.queryByRole("link", { name: "NITE 政府版GHS分類の出典" })).toBeNull();
   });
 
   it("v2 snapshotからSDS・換気・量・時間・濃度・単位を復元する", async () => {
@@ -146,7 +176,7 @@ describe("ChemicalRaPanel 保存記録の条件復元", () => {
         (screen.getByLabelText("成分・製品版") as HTMLInputElement).value,
       ).toBe("製品A / 第3版");
       expect((screen.getByLabelText("換気") as HTMLSelectElement).value).toBe(
-        "local",
+        "both",
       );
       expect(
         (screen.getByLabelText("取扱量") as HTMLSelectElement).value,

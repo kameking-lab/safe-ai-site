@@ -21,6 +21,9 @@ const [course, claims, sources] = await Promise.all([
   readJson(path.join(DATA_DIR, "source-registry.json")),
 ]);
 
+const [asOfYear, asOfMonth, asOfDay] = course.asOf.split("-").map(Number);
+const asOfJa = `基準日 ${asOfYear}年${asOfMonth}月${asOfDay}日`;
+
 if (course.slideCount !== 20 || course.slides.length !== 20) {
   throw new Error(`Expected 20 slides, received ${course.slides.length}.`);
 }
@@ -248,7 +251,7 @@ async function buildCover(slide, data) {
     fontSize: 16,
     color: "#C6E7E3",
   });
-  addText(slide, "cover-date", "基準日 2026年8月27日", { left: 86, top: 650, width: 350, height: 24 }, {
+  addText(slide, "cover-date", asOfJa, { left: 86, top: 650, width: 350, height: 24 }, {
     fontSize: 14,
     color: "#92CBC4",
   });
@@ -263,6 +266,40 @@ async function buildCover(slide, data) {
 
 function buildSteps(slide, data) {
   const steps = data.visual.steps;
+  if (steps.length === 4) {
+    const palette = [COLORS.teal, COLORS.orange, COLORS.navy, COLORS.red];
+    const colW = 520;
+    const colGap = 60;
+    const rowGap = 148;
+    const top = 246;
+
+    steps.forEach((step, index) => {
+      const col = index % 2;
+      const row = Math.floor(index / 2);
+      const left = FRAME_L + col * (colW + colGap);
+      const y = top + row * rowGap;
+
+      addText(slide, `step-no-${data.number}-${index}`, String(index + 1).padStart(2, "0"), { left, top: y, width: 78, height: 56 }, {
+        fontSize: 42,
+        bold: true,
+        color: palette[index],
+      });
+      addText(slide, `step-label-${data.number}-${index}`, step.label, { left: left + 92, top: y + 2, width: 420, height: 40 }, {
+        fontSize: 26,
+        bold: true,
+        color: COLORS.navy,
+      });
+      addText(slide, `step-detail-${data.number}-${index}`, step.detail, { left: left + 92, top: y + 47, width: 420, height: 42 }, {
+        fontSize: 18,
+        color: COLORS.slate,
+      });
+      addShape(slide, `step-rule-${data.number}-${index}`, "rect", { left, top: y + 105, width: colW, height: 4 }, palette[index]);
+    });
+
+    addBodyLine(slide, data, 555);
+    return;
+  }
+
   const top = 248;
   const colW = 342;
   const gap = 37;
@@ -633,18 +670,18 @@ async function buildSummary(slide, data) {
     color: COLORS.white,
   });
   const words = data.visual.summaryItems;
-  if (!Array.isArray(words) || words.length !== 3) {
-    throw new Error("Summary slide requires exactly three semantic summaryItems");
+  if (!Array.isArray(words) || words.length !== 4) {
+    throw new Error("Summary slide requires exactly four hierarchy summaryItems");
   }
   words.forEach((word, index) => {
-    const top = 250 + index * 104;
+    const top = 218 + index * 82;
     addText(slide, `summary-no-${index}`, String(index + 1).padStart(2, "0"), { left: 88, top, width: 76, height: 52 }, {
       fontSize: 36,
       bold: true,
       color: COLORS.orange,
     });
     addText(slide, `summary-word-${index}`, word, { left: 180, top, width: 500, height: 52 }, {
-      fontSize: 30,
+      fontSize: 27,
       bold: true,
       color: COLORS.white,
     });

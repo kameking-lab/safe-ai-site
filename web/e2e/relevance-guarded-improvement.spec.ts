@@ -51,7 +51,7 @@ async function waitForClientReady(page: Page) {
 
 async function activeNavigationHrefs(page: Page) {
   return page
-    .locator('a[data-app-shell-nav-href][data-nav-active="true"]')
+    .locator('a[data-nav-active="true"]')
     .evaluateAll((links) => [
       ...new Set(links.map((link) => link.getAttribute("href") ?? "")),
     ]);
@@ -100,7 +100,7 @@ test.describe("relevance-guarded task completion", () => {
     }
   });
 
-  test("検証済み地域aliasを共有resolverで解決し、曖昧区は選択必須、戻ると状態復元", async ({
+  test("検証済み地域aliasをriskとKYで解決し、曖昧区は選択必須、戻ると状態復元", async ({
     page,
   }) => {
     const queries = [
@@ -144,24 +144,6 @@ test.describe("relevance-guarded task completion", () => {
     await expect(input).toHaveValue("大阪府 大阪市");
     await expect(resolver.getByRole("combobox")).toHaveCount(1);
 
-    await page.goto("/", { waitUntil: "domcontentloaded" });
-    await waitForClientReady(page);
-    const homePicker = page.locator("details[data-home-area-picker]");
-    await expect(homePicker).toHaveAttribute(
-      "data-home-area-picker-hydrated",
-      "true",
-      { timeout: 15_000 },
-    );
-    const homeInput = page.locator("#home-area-change");
-    if (!(await homeInput.isVisible())) {
-      await page.locator("details:has(#home-area-change) summary").click();
-    }
-    const homeForm = page.locator("form").filter({ has: homeInput });
-    await homeInput.fill("横浜 港北");
-    await expect
-      .poll(() => homeForm.getByRole("option").count(), { timeout: 15_000 })
-      .toBe(1);
-
     await page.goto("/ky/paper", { waitUntil: "domcontentloaded" });
     await waitForClientReady(page);
     const kyLocation = page.locator("#ky-location");
@@ -185,9 +167,9 @@ test.describe("relevance-guarded task completion", () => {
     await expect(other.locator("li")).toHaveCount(20);
     const firstPageHref = await other.locator("li a").first().getAttribute("href");
     await expect(other.locator("li").first()).toContainText("種別:");
-    await expect(other.locator("li").first()).toContainText("一致理由:");
+    await expect(other.locator("li").first()).toContainText("一致: 正式名・関連語");
     await expect(other.locator("li").first()).toContainText("検証状態:");
-    await expect(other.locator("li").first()).toContainText("一致抜粋:");
+    await expect(other.locator("li").first()).toContainText("出典: 厚生労働省 化学物質情報");
 
     const next = other.getByRole("button", { name: "次の20件" });
     await next.click();
@@ -207,11 +189,21 @@ test.describe("relevance-guarded task completion", () => {
     await search.fill("法令");
     await search.press("Enter");
     await expect(page).toHaveURL(/\/search$/);
-    const destinations = page.locator(
-      '[data-search-result-section="search-destinations"] li',
-    );
+    const destinationSection = page.locator('[data-search-result-section="search-destinations"]');
+    const destinations = destinationSection.locator("li");
     await expect(destinations.first()).toBeVisible();
     expect(await destinations.count()).toBeLessThanOrEqual(5);
+    const destinationTotal = Number((await destinationSection.locator("p").first().textContent())?.match(/全(\d+)件/u)?.[1]);
+    expect(destinationTotal).toBeGreaterThanOrEqual(await destinations.count());
+    if (destinationTotal > 5) {
+      const destinationHref = await destinations.first().locator("a").first().getAttribute("href");
+      await destinationSection.getByRole("button", { name: "次の5件" }).click();
+      await expect(page).toHaveURL(/\/search$/);
+      expect(await destinations.count()).toBeLessThanOrEqual(5);
+      await expect(destinations.first().locator("a").first()).not.toHaveAttribute("href", destinationHref!);
+      await destinationSection.getByRole("button", { name: "前の5件" }).click();
+      await expect(destinations.first().locator("a").first()).toHaveAttribute("href", destinationHref!);
+    }
 
     await search.fill("安衛法 第14条");
     await search.press("Enter");
@@ -221,8 +213,8 @@ test.describe("relevance-guarded task completion", () => {
     );
     await expect(documents.first()).toBeVisible();
     expect(await documents.count()).toBeLessThanOrEqual(20);
-    await expect(documents.first()).toContainText("一次資料:");
-    await expect(documents.first()).toContainText(/施行日:|更新日・対象時点:/);
+    await expect(documents.first()).toContainText("検証状態:");
+    await expect(documents.first().locator(".portal-status").first()).not.toBeEmpty();
   });
 
   test("公開検索の自由入力はURL・履歴・リンクへ複製せず、画面内で結果を更新する", async ({
@@ -282,8 +274,9 @@ test.describe("relevance-guarded task completion", () => {
     await expect(details).toHaveAttribute("open", "");
     expect(page.url()).toBe(initialUrl);
     await expect(
-      page.locator('#mobile-site-menu a[href="/features"]'),
+      page.locator('#mobile-site-menu a[href="/features"]:visible'),
     ).toHaveCount(0);
+    await expect(page.locator('[data-home-menu-features]')).toBeHidden();
     await expect(
       page.locator(
         'nav[data-mobile-nav="bottom"] a[href="/features"]',
@@ -317,9 +310,8 @@ test.describe("relevance-guarded task completion", () => {
 
     await page.keyboard.press("Escape");
     await expect(details).not.toHaveAttribute("open", "");
-    expect(await summary.evaluate((node) => document.activeElement === node)).toBe(
-      true,
-    );
+    // Escape後のsummary.focus()はrequestAnimationFrameで行われるため、待機付きで確認する。
+    await expect(summary).toBeFocused();
 
     await page.setViewportSize({ width: 844, height: 390 });
     await summary.click();
@@ -346,7 +338,7 @@ test.describe("relevance-guarded task completion", () => {
     await waitForClientReady(page);
     await expect.poll(() => activeNavigationHrefs(page)).toEqual(["/"]);
     await expect(
-      page.locator('a[href="/"][data-app-shell-nav-href="/"]'),
+      page.locator('a[href="/"][data-nav-active="true"]'),
     ).toHaveAttribute("aria-current", "page");
 
     const menuDetails = page.locator("details[data-mobile-site-menu]");

@@ -58,6 +58,15 @@ export default function SafetySeminarTermsPage() {
             数値、法令、技術的判断の根拠脚注は原則として残してください。法令・統計は基準日後に改正・訂正されることがあります。実施前にリンク先の現行資料と、自社の作業条件・器具の取扱説明書を確認してください。
           </p>
         </section>
+        <section aria-labelledby="terms-audio-license">
+          <h2 id="terms-audio-license" className="text-2xl font-black text-slate-950 dark:text-white">音声モデルの利用条件</h2>
+          <p className="mt-3 leading-7">
+            録音音声にはリダの音声モデルを使用しています。モデル指定の表示先：
+            <a href="https://youtube.com/channel/UC2tX473Zo09ZCnhAUNdAvjA/join" target="_blank" rel="noopener noreferrer" className="break-all text-teal-800 underline underline-offset-4 dark:text-teal-300">
+              https://youtube.com/channel/UC2tX473Zo09ZCnhAUNdAvjA/join
+            </a>
+          </p>
+        </section>
         <section aria-labelledby="terms-prohibited">
           <h2 id="terms-prohibited" className="text-2xl font-black text-slate-950 dark:text-white">禁止・事前相談が必要な利用</h2>
           <ul className="mt-3 list-disc space-y-2 pl-6 leading-7">

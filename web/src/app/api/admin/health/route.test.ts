@@ -47,7 +47,7 @@ describe("GET /api/admin/health auth", () => {
   it("returns 401 for the old hardcoded key", async () => {
     process.env.ADMIN_HEALTH_KEY = "expected-secret";
     const res = await GET(
-      new Request("https://example.test/api/admin/health?key=anzenai2026")
+      new Request("https://example.test/api/admin/health?key=<REDACTED>")
     );
     expect(res.status).toBe(401);
   });

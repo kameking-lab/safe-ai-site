@@ -1,5 +1,8 @@
 "use client";
 
+import { SourceProvenanceView } from "@/components/law-navi/source-provenance-view";
+import { normalizeSourceProvenance } from "@/lib/source-provenance";
+
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Check, Copy, RotateCcw, Send, Square, X } from "lucide-react";
 import type {
@@ -20,6 +23,7 @@ import type {
 } from "@/lib/chatbot-notice-attachment";
 import type { LawCategoryFilter } from "@/lib/law-category-options";
 import { VoiceMicButton } from "@/components/voice-input-field";
+import { PrivacyNote } from "@/components/privacy-note";
 import { clearChatHistory } from "@/lib/chat-history";
 import { trackEvent } from "@/components/Analytics";
 import { formatAnswerForDisplay } from "@/lib/chatbot-answer-format";
@@ -485,6 +489,17 @@ export function ChatbotPanel({
     }
   }
 
+  function prefillExampleQuestion(question: string) {
+    setInput(question);
+    setLocalSafetyNotice(null);
+    const composer = composerRef.current;
+    if (composer) {
+      composer.value = question;
+      composer.focus();
+      composer.setSelectionRange(question.length, question.length);
+    }
+  }
+
   useEffect(() => {
     if (
       initialQuestionConsumedRef.current ||
@@ -612,7 +627,7 @@ export function ChatbotPanel({
                   type="button"
                   data-chatbot-question-chip=""
                   disabled={isSending}
-                  onClick={() => void handleSend(question)}
+                  onClick={() => prefillExampleQuestion(question)}
                   className="min-h-11 rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-medium leading-4 text-slate-700 hover:border-blue-300 hover:bg-blue-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
                 >
                   {question}
@@ -959,7 +974,7 @@ export function ChatbotPanel({
             }}
             placeholder="作業や設備を質問"
             aria-label="質問入力"
-            aria-describedby="chatbot-input-hint"
+            aria-describedby="chatbot-input-hint chatbot-input-keys"
             className="max-h-28 min-h-11 min-w-0 flex-1 resize-none bg-transparent px-2 py-2 text-base leading-6 text-slate-950 outline-none placeholder:text-slate-500 disabled:opacity-60 sm:text-sm dark:text-white"
             data-primary-focus=""
           />
@@ -990,15 +1005,10 @@ export function ChatbotPanel({
             </button>
           )}
         </div>
-        <p
-          id="chatbot-input-hint"
-          className="mt-1 px-2 text-[11px] leading-4 text-slate-500 dark:text-slate-400"
-        >
-          個人情報は入力しない
-          <span className="sr-only">
-            。Enterで送信、Shift+Enterで改行します。
-          </span>
-        </p>
+        <PrivacyNote id="chatbot-input-hint" variant="ai" detailsLink={false} className="mt-1 px-2" />
+        <span id="chatbot-input-keys" className="sr-only">
+          Enterで送信、Shift+Enterで改行します。
+        </span>
       </form>
     </section>
   );
@@ -1179,6 +1189,9 @@ function SourceDetails({ message }: { message: ChatMessage }) {
                 <p className="mt-1 whitespace-pre-wrap text-slate-700 dark:text-slate-200">
                   該当箇所: {excerpt}
                 </p>
+                {(source?.sourceProvenance || source?.sourceFetchedAt) && (
+                  <SourceProvenanceView source={source.sourceProvenance ?? normalizeSourceProvenance({ url: source.url, fetchedAt: source.sourceFetchedAt })} />
+                )}
                 {officialUrl && (
                   <a
                     href={officialUrl}

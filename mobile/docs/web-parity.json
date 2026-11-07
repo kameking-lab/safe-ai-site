@@ -63,9 +63,7 @@
       "source": "web/src/app/(main)/accident-news/page.tsx",
       "implementation": "direct canonical import",
       "state": "shared",
-      "modes": [
-        "AccidentNewsBrowser"
-      ]
+      "modes": []
     },
     {
       "route": "/accident-news/print",
@@ -79,7 +77,9 @@
       "source": "web/src/app/(main)/accidents-analytics/page.tsx",
       "implementation": "direct canonical import",
       "state": "shared",
-      "modes": []
+      "modes": [
+        "AnalyticsDashboard"
+      ]
     },
     {
       "route": "/accidents-reports/[industry]",
@@ -264,9 +264,7 @@
       "implementation": "direct canonical import",
       "state": "shared",
       "modes": [
-        "ChemicalRaPanel",
-        "LazySdsUploadPanel",
-        "LazyMixtureRaPanel"
+        "ChemicalRaPanel"
       ]
     },
     {

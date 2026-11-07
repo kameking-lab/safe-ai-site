@@ -82,6 +82,23 @@ describe("revisions-ingest normalize", () => {
     expect(normalized.issuer).toBe("厚生労働省");
   });
 
+  it("政令メタ情報を省令に正規化しない", () => {
+    const normalized = normalizeRevisionRecord({
+      id: "decree-196",
+      title: "関係政令の整備",
+      publishedAt: "2026-06-17",
+      summary: "一次資料で確認",
+      meta: {
+        amendmentType: "政令",
+        lawNumber: "令和八年政令第百九十六号",
+        issuedBy: "内閣",
+      },
+    });
+    expect(normalized.kind).toBe("cabinet_order");
+    expect(normalized.category).toBe("政令");
+    expect(normalized.issuer).toBe("内閣");
+  });
+
   it("id/title があるレコードのみ残し、source欠損が混在しても落ちない", () => {
     const records: RevisionImportRecord[] = [
       {

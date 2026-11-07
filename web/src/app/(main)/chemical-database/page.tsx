@@ -91,12 +91,12 @@ export default function ChemicalDatabasePage() {
             詳細情報（CAS番号・GHS分類・濃度基準値）を閲覧
           </strong>
           するDBです。 物質と作業内容を整理し、
-          <em className="font-medium">簡易スクリーニング</em>を行う場合は
+          <em className="font-medium">RAの準備記録</em>を作る場合は
           <Link
             href="/chemical-ra"
             className="ml-1 underline decoration-emerald-400 underline-offset-2 hover:text-emerald-700 dark:hover:text-emerald-100"
           >
-            化学物質RA
+            化学物質RA準備
           </Link>
           を利用できます。最終評価は公式CREATE-SIMPLE、最新SDS、実測値を用いて専門家が確認してください。
         </div>
@@ -107,11 +107,11 @@ export default function ChemicalDatabasePage() {
         pages={[
           {
             href: "/chemical-ra",
-            label: "化学物質RA ツール",
+            label: "化学物質RA準備",
             description:
               "検索した物質の収録済み公的情報を確認し、最新SDS・公式ツールでの評価へつなげます。",
             color: "emerald",
-            cta: "リスクアセスを開始",
+            cta: "準備を始める",
           },
           {
             href: "/goods",

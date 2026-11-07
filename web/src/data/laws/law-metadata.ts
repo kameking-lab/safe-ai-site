@@ -37,7 +37,7 @@ export const LAW_METADATA: Record<string, LawMetadata> = {
     fullName: "労働安全衛生法",
     promulgation: "昭和47年法律第57号",
     latestRevision:
-      "令和7年法律第33号（2026-04-01施行・2026-08-03現在施行中）",
+      "令和7年法律第33号（2026-10-01施行版・本則snapshot更新、改正差分を2026-10-08照合）",
     eGovUrl: "https://laws.e-gov.go.jp/law/347AC0000000057",
     auditedAt: "2026-08-03",
   },
@@ -53,7 +53,7 @@ export const LAW_METADATA: Record<string, LawMetadata> = {
     fullName: "労働安全衛生規則",
     promulgation: "昭和47年労働省令第32号",
     latestRevision:
-      "令和8年厚生労働省令第86号（2026-08-01施行・2026-08-03現在施行中）",
+      "令和8年厚生労働省令第116号（2026-10-01施行版・本則snapshot更新、改正差分を2026-10-08照合）",
     eGovUrl: "https://laws.e-gov.go.jp/law/347M50002000032",
     auditedAt: "2026-08-03",
   },

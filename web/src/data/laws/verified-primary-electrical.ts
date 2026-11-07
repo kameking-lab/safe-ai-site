@@ -4,9 +4,10 @@ import type { LawArticle } from "./law-types";
  * 電気作業に関する、回答生成専用の政府公式一次資料の最小抜粋。
  *
  * - e-Gov 法令 API v2 は `asof=2026-08-09` で取得した現行リビジョンを固定。
- * - 厚労省告示と経産省 Q&A は同日、各省の公式公開ページで現行公開を確認。
+ * - 当初の取得日と、primary-current-verification.json の再照合日は別に保持する。
+ * - 経産省 Q&A の現行公開本文を再取得できない場合、現在性を保証しない。
  * - `sourceHash` は、このファイルに収載した逐語本文（`text`）の UTF-8 SHA-256。
- * - 要約ではなく公式本文の抜粋であり、人手で法令名・条番号・文言を照合済み。
+ * - 再照合は公式本文との機械的な一致確認であり、専門家の法的解釈の監修ではない。
  */
 export const verifiedPrimaryElectricalArticles = [
   {

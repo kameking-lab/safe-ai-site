@@ -47,12 +47,14 @@ describe("HomeSafetyUpdates", () => {
   it("combines accident and law data and limits each stream to one featured plus two additions", () => {
     const { container } = render(<HomeSafetyUpdates latestNews={live} />);
 
-    expect(screen.getByRole("heading", { name: "最新事故" })).toBeTruthy();
+    expect(
+      screen.getByRole("heading", { name: "国内の死亡事故報道" }),
+    ).toBeTruthy();
     expect(screen.getByRole("heading", { name: "注目法改正" })).toBeTruthy();
     expect(container.querySelectorAll("[data-accident-origin]")).toHaveLength(3);
     expect(container.querySelectorAll("[data-law-source-state]")).toHaveLength(3);
     expect(container.textContent).toContain("追加2件を確認");
-    expect(container.textContent).toContain("関連事故を見る");
+    expect(container.textContent).toContain("事故速報をすべて見る");
     expect(container.textContent).toContain("施行 2026-08-01");
     expect(container.textContent).toContain("原文");
     expect(container.textContent).not.toContain("報道・内容未確認");
@@ -68,5 +70,45 @@ describe("HomeSafetyUpdates", () => {
       encodeURIComponent(live.items[0]!.title),
     );
     expect(document.body.innerHTML).not.toContain("raw-internal-1");
+  });
+
+  it("keeps unavailable reports separate from the official aggregate", () => {
+    const { container } = render(
+      <HomeSafetyUpdates latestNews={{ ...live, status: "unavailable", items: [] }} />,
+    );
+    expect(screen.getByRole("status").textContent).toContain(
+      "直近の国内死亡事故報道を取得できません。",
+    );
+    expect(container.querySelectorAll('[data-accident-origin="reported-unverified"]')).toHaveLength(0);
+    expect(container.querySelectorAll('[data-accident-origin="official"]')).toHaveLength(1);
+    expect(screen.getByRole("link", { name: "事故速報をすべて見る" })).toBeTruthy();
+  });
+
+  it("keeps a partial feed and formats publication dates in Tokyo", () => {
+    const report = { ...live.items[0]!, publishedAt: "2026-07-30T16:30:00.000Z" };
+    const { container } = render(
+      <HomeSafetyUpdates latestNews={{ ...live, items: [report] }} />,
+    );
+    expect(container.querySelectorAll('[data-accident-origin="reported-unverified"]')).toHaveLength(1);
+    expect(container.querySelector("time")?.textContent).toBe("2026/07/31");
+    expect(screen.queryByText(/追加事故／/)).toBeNull();
+    expect(screen.getByText("厚生労働省・全国速報")).toBeTruthy();
+  });
+
+  it("serializes only displayed reports and fields into the client view", () => {
+    const view = HomeSafetyUpdates({ latestNews: {
+      ...live,
+      items: [...live.items, { ...live.items[0]!, title: "Third report is not displayed" }],
+    } });
+    expect(view.props.reports).toHaveLength(2);
+    expect(Object.keys(view.props.reports[0])).toEqual([
+      "title", "href", "publishedAt", "publisher", "accidentType", "summary",
+    ]);
+    expect(Object.keys(view.props.aggregate)).toEqual(["period", "deaths", "sourceUrl"]);
+    const serialized = JSON.stringify(view.props);
+    expect(serialized).not.toContain("raw-internal-1");
+    expect(serialized).not.toContain("rpt-0123456789abcdef");
+    expect(serialized).not.toContain("Third report is not displayed");
+    expect(serialized).not.toContain("contextWorkCategory");
   });
 });

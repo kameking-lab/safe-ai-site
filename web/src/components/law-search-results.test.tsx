@@ -126,5 +126,9 @@ describe("LawSearchResults の現場ことば版バッジ", () => {
     );
     const link = screen.getByRole("link", { name: "現場ことば版で読む" });
     expect(link.getAttribute("href")).toBe("/law-navi/347M50002000032/117");
+    expect(
+      screen.getAllByRole("link", { name: "条文ページで開く" })
+        .some((articleLink) => articleLink.getAttribute("href") === "/law-navi/347M50002000032/117"),
+    ).toBe(true);
   });
 });

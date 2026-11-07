@@ -95,9 +95,17 @@ export function RegulationSummarySection({
   const byStatus = (s: LegalDesignation["status"]) =>
     profile?.designations.filter((d) => d.status === s) ?? [];
   const designated = byStatus("designated");
-  const notDesignated = byStatus("not-designated");
+  // 非該当は正本スナップショットと照合日が揃う場合だけ表示する。
+  const notDesignated = byStatus("not-designated").filter(
+    (d) => d.source?.revisionId && d.source.sha256 && d.verifiedAt,
+  );
   const unverifiedDomains = [
-    ...new Set(byStatus("unverified").map((d) => d.domain)),
+    ...new Set([
+      ...byStatus("unverified").map((d) => d.domain),
+      ...byStatus("not-designated")
+        .filter((d) => !d.source?.revisionId || !d.source.sha256 || !d.verifiedAt)
+        .map((d) => d.domain),
+    ]),
   ] as LegalDomain[];
 
   // 業務列挙型の特別則タグは旧ミラー由来で、物質単位の正本突合プロファイルではない。
@@ -268,8 +276,8 @@ export function RegulationSummarySection({
           {notDesignated.length > 0 && (
             <p className="flex flex-wrap items-center gap-1.5 text-xs text-slate-600 dark:text-slate-400">
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" aria-hidden="true" />
-              <span className="font-semibold">非該当を確認済み:</span>
-              {notDesignated.map((d) => DOMAIN_LABEL[d.domain]).join("・")}
+              <span className="font-semibold">収録正本の照合範囲で指定なし:</span>
+              {notDesignated.map((d) => `${DOMAIN_LABEL[d.domain]}（照合 ${d.verifiedAt}）`).join("・")}
               {notDesignated.some((d) => d.scopeNote) && (
                 <span className="block w-full pl-5 text-[11px] text-slate-500">
                   {notDesignated

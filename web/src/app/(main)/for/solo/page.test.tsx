@@ -47,7 +47,7 @@ describe("/for/solo 正規機能ランチャー", () => {
         "/risk",
         "/ky/paper",
         "/education-certification/finder",
-        "/accident-news",
+        "/fatal-accidents",
         "/chemical-ra",
         "/services/automation",
       ]),

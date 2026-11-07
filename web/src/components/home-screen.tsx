@@ -47,13 +47,13 @@ import {
 } from "@/lib/accidents/transient-search";
 import type { ServiceError, ServiceStatus } from "@/lib/types/api";
 import {
-  ALL_ACCIDENT_TYPES,
   type AccidentCase,
   type AccidentWorkCategory,
   type AccidentType,
   type LawRevision,
   type RevisionSummary,
 } from "@/lib/types/domain";
+import { readAccidentTypeQuery } from "@/lib/accidents-analytics/case-search-filters";
 
 // C-1（柱1是正・死コード削除）: 旧 variant（portal/risk/ky/elearning/pdf/notifications）
 // はどのルートからも描画されなくなって久しい（/ky は /ky/paper へ一本化、/e-learning は
@@ -107,6 +107,7 @@ export function HomeScreen({
   const [revisions, setRevisions] = useState(
     () => initialRevisions ?? services.revision.getCachedRevisions()
   );
+  const consumedRevisionHashRef = useRef<string | null>(null);
   const [activeTab, setActiveTab] = useState<TabId>(() => initialLawTab ?? "laws");
   const [selectedRevisionId, setSelectedRevisionId] = useState(
     () => initialRevisions?.[0]?.id ?? services.revision.getInitialRevisionId() ?? ""
@@ -139,15 +140,27 @@ export function HomeScreen({
 
   // マウント時にURLクエリから状態を復元（?tab= / ?acc_type=。laws は ?tab=chat|summary）
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
     if (variant === "accidents") {
-      const tab = readAccidentTabFromUrl(params.get("tab"));
-      if (tab) setAccidentActiveTab(tab);
-      const rawType = params.get("acc_type");
-      if (rawType && ALL_ACCIDENT_TYPES.includes(rawType as AccidentType)) {
-        setSelectedAccidentType(rawType as AccidentType);
-      }
+      const restoreAccidentUrl = () => {
+        const params = new URLSearchParams(window.location.search);
+        setAccidentActiveTab(readAccidentTabFromUrl(params.get("tab")) ?? "list");
+        const { selectedType, clearLegacyType } = readAccidentTypeQuery(params);
+        setSelectedAccidentType(selectedType);
+        if (clearLegacyType) {
+          params.delete("acc_type");
+          const query = params.toString();
+          window.history.replaceState(
+            null,
+            "",
+            `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash}`,
+          );
+        }
+      };
+      restoreAccidentUrl();
+      window.addEventListener("popstate", restoreAccidentUrl);
+      return () => window.removeEventListener("popstate", restoreAccidentUrl);
     } else if (variant === "laws") {
+      const params = new URLSearchParams(window.location.search);
       const tab = params.get("tab");
       if (tab === "chat" || tab === "summary") setActiveTab(tab);
     }
@@ -546,6 +559,7 @@ export function HomeScreen({
             {activeTab === "laws" && LawsListComponent && (
               <LawsListComponent
                 revisions={revisions}
+                consumedHashRef={consumedRevisionHashRef}
                 selectedRevisionId={selectedRevisionId}
                 loadingRevisionId={loadingRevisionId}
                 status={revisionStatus}
@@ -589,6 +603,7 @@ export function HomeScreen({
             {activeTab !== "laws" && LawsListComponent && (
               <LawsListComponent
                 revisions={revisions}
+                consumedHashRef={consumedRevisionHashRef}
                 selectedRevisionId={selectedRevisionId}
                 loadingRevisionId={loadingRevisionId}
                 status={revisionStatus}

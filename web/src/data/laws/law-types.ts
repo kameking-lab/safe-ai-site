@@ -59,6 +59,8 @@ export type LawArticle = {
   sourceValidTo?: string;
   /** Snapshot acquisition time. This is not a human review time. */
   sourceFetchedAt?: string;
+  /** Date a real per-article content change was confirmed; never inferred from fetch time. */
+  sourceContentChangedOn?: string;
   /** SHA-256 of the complete snapshot, or of the normalized official excerpt. */
   sourceHash?: string;
   /** SHA-256 of the selected canonical article object. */

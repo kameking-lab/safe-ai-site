@@ -13,14 +13,14 @@ import { PageJsonLd } from "@/components/page-json-ld";
 import { TrainingLibrarySwitcher } from "@/components/training/training-library-switcher";
 import {
   AI_SEMINAR_HUB_PATH,
-  COMING_SOON_AI_SEMINARS,
   PUBLISHED_AI_SEMINARS,
 } from "@/data/ai-seminars/themes";
 import { withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
+import { FeatureMascotCompanion } from "@/components/feature-mascot-companion";
 
 const TITLE = "AI実務研修｜生成AIを仕事で安全に使う社内研修";
 const DESCRIPTION =
-  "質問、調査、文書作成、検証、個人情報・著作権を学ぶAI実務研修。第一弾「AIチャット仕事術」を音声、PowerPoint、PDF付きで無料公開しています。";
+  "メール、報告書、一次資料調査、文章レビュー、安全な依頼への書換えを具体例で学ぶAI実務研修。第一弾「AIチャット仕事術」を音声、PowerPoint、PDF付きで無料公開しています。";
 
 export async function generateMetadata({
   searchParams,
@@ -79,6 +79,15 @@ export default function AiSeminarLibraryPage() {
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </Link>
             </div>
+            <FeatureMascotCompanion
+              variant="tablet-dx"
+              eyebrow="実務研修チワワ"
+              title="便利さだけでなく、確かめ方まで身につけよう。"
+              message="AIに任せきらない、仕事で使える手順を一緒に練習します。"
+              tone="sky"
+              compact
+              className="mt-6 max-w-2xl"
+            />
           </div>
         </header>
 
@@ -143,26 +152,16 @@ export default function AiSeminarLibraryPage() {
             </p>
           </section>
 
-          <section aria-labelledby="ai-coming-soon" className="mt-14">
-            <details className="rounded-2xl border-2 border-slate-300 bg-white dark:border-slate-700 dark:bg-slate-900">
-              <summary className="flex min-h-14 cursor-pointer items-center justify-between gap-4 px-5 py-3 font-black">
-                <span id="ai-coming-soon">Coming Soon {COMING_SOON_AI_SEMINARS.length}件</span>
-                <span className="text-xs text-slate-600 dark:text-slate-300">テーマ一覧を開く</span>
-              </summary>
-              <ul className="divide-y divide-slate-200 border-t border-slate-200 dark:divide-slate-700 dark:border-slate-700">
-                {COMING_SOON_AI_SEMINARS.map((seminar) => (
-                  <li
-                    key={seminar.id}
-                    data-ai-seminar-status="coming-soon"
-                    className="grid gap-1 px-5 py-3 sm:grid-cols-[minmax(0,1fr)_14rem_auto] sm:items-center sm:gap-4"
-                  >
-                    <span className="font-black">{seminar.title}</span>
-                    <span className="text-sm text-slate-600 dark:text-slate-300">対象：{seminar.audience}</span>
-                    <span className="text-xs font-black tracking-[.08em] text-amber-800 dark:text-amber-300">Coming Soon</span>
-                  </li>
-                ))}
-              </ul>
-            </details>
+          <section aria-labelledby="ai-training-usage" className="mt-14 rounded-2xl border border-slate-300 bg-white p-5 dark:border-slate-700 dark:bg-slate-900">
+            <h2 id="ai-training-usage" className="text-2xl font-black">研修を仕事の改善につなげる手順</h2>
+            <ol className="mt-4 list-decimal space-y-3 pl-5 text-sm leading-7">
+              <li>メールの下書きや報告書の構成など、繰り返している作業を一つ選びます。練習には架空の情報を使い、個人情報や現場機密を入力しません。</li>
+              <li>公開教材の依頼例を使い、目的、読み手、出力形式を指定します。最初の回答で不足した条件を追加し、どこが変わったかを比べます。</li>
+              <li>出力の数値・固有名詞・出典を原資料と照合し、人が直した箇所と確認に要した時間を記録します。下書きの短縮時間だけでなく、確認作業を含めて採用するか判断します。</li>
+            </ol>
+            <p className="mt-4 text-sm leading-7 text-slate-700 dark:text-slate-200">
+              社内研修では、担当者と確認者を決めてから同じ例で練習すると、AIに任せる範囲と人が確認する範囲を共有できます。教材は上の「今すぐ見る」から閲覧でき、配布資料も同じ教材ページで選べます。
+            </p>
           </section>
         </div>
       </div>

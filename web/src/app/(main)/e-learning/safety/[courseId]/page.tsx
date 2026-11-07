@@ -5,6 +5,7 @@ import { ArrowLeft, ExternalLink } from "lucide-react";
 import { JsonLd, breadcrumbSchema, webPageSchema } from "@/components/json-ld";
 import { PageContainer } from "@/components/layout";
 import { SafetyQuestionPlayer } from "@/components/safety-elearning/safety-question-player";
+import { RelatedSafetyNoteGuides } from "@/components/safety-elearning/related-note-guides";
 import { OfflineLearningStatus } from "@/components/safety-elearning/offline-learning-status";
 import {
   UnscoredDescriptivePractice,
@@ -149,6 +150,7 @@ export default async function SafetyCoursePage({ params }: CoursePageProps) {
         </ul>
       </section>
 
+      <RelatedSafetyNoteGuides courseId={course.courseId} />
       <UnscoredDescriptivePractice resources={descriptiveResources} />
     </PageContainer>
   );

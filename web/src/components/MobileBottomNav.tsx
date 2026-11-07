@@ -1,30 +1,21 @@
 import {
+  FlaskConical,
   GraduationCap,
   Home,
   LayoutGrid,
   MessageSquareText,
-  ShieldAlert,
 } from "lucide-react";
-import { isHeatIllnessCampaignSeason } from "@/lib/heat-illness/campaign-season";
 import { AppShellNavLink } from "@/components/app-shell-nav-link";
 
-export function getMobilePrimaryItems(date: Date) {
-  const seasonal = isHeatIllnessCampaignSeason(date);
+export function getMobilePrimaryItems(_date: Date) {
   return [
     { id: "home", label: "ホーム", href: "/", icon: Home },
-    seasonal
-      ? {
-          id: "heat",
-          label: "熱中症",
-          href: "/heat-illness-prevention",
-          icon: ShieldAlert,
-        }
-      : {
-          id: "today",
-          label: "今日",
-          href: "/risk",
-          icon: ShieldAlert,
-        },
+    {
+      id: "chemical-ra",
+      label: "化学RA",
+      href: "/chemical-ra",
+      icon: FlaskConical,
+    },
     {
       id: "law-ai",
       label: "法令AI",
@@ -59,11 +50,7 @@ export function MobileBottomNav({ date = new Date() }: { date?: Date } = {}) {
               className="group tap-target flex min-h-[56px] w-full min-w-0 flex-col items-center justify-center gap-[2px] px-[4px] py-[6px] text-[11px] font-bold leading-tight text-portal-muted data-[nav-active=true]:bg-portal-surface-emphasis data-[nav-active=true]:text-brand-primary"
             >
               <Icon
-                className={`h-[20px] w-[20px] ${
-                  id === "heat"
-                    ? "text-semantic-caution"
-                    : "text-brand-primary"
-                }`}
+                className="h-[20px] w-[20px] text-brand-primary"
                 aria-hidden="true"
               />
               <span className="block w-full truncate text-center">{label}</span>

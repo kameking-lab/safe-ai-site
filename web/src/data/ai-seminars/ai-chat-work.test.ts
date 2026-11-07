@@ -51,13 +51,13 @@ describe("AIチャット仕事術の共通正本", () => {
     ).toBe(true);
   });
 
-  it("20枚が連番で、実測音声に合わせた音声設計は正確に2140秒かつ35〜50分", () => {
+  it("20枚が連番で、音声設計は正確に2110秒かつ約30〜35分", () => {
     expect(training).toMatchObject({
       id: "ai-chat-work",
-      asOf: "2026-08-27",
-      version: "1.0.0",
+      asOf: "2026-08-28",
+      version: "2.0.0",
       slideCount: 20,
-      standardMinutes: { audioMin: 35, audioMax: 50, workshop: 60 },
+      standardMinutes: { audioMin: 30, audioMax: 35, workshop: 60 },
     });
     expect(training.boundary).toContain("資格・認定講座ではなく");
     expect(training.slides).toHaveLength(20);
@@ -70,9 +70,18 @@ describe("AIチャット仕事術の共通正本", () => {
       (total, slide) => total + slide.estimatedSeconds,
       0,
     );
-    expect(totalSeconds).toBe(2140);
-    expect(totalSeconds).toBeGreaterThanOrEqual(35 * 60);
-    expect(totalSeconds).toBeLessThanOrEqual(50 * 60);
+    expect(totalSeconds).toBe(2110);
+    expect(totalSeconds).toBeGreaterThanOrEqual(30 * 60);
+    expect(Math.round(totalSeconds / 60)).toBeLessThanOrEqual(35);
+    const narrationCharacters = training.slides.reduce(
+      (total, slide) => total + slide.narration.length,
+      0,
+    );
+    expect(narrationCharacters).toBeGreaterThanOrEqual(10_250);
+    expect(narrationCharacters).toBeLessThanOrEqual(10_800);
+    const naturalVoiceSeconds = Math.round((narrationCharacters / 296) * 60);
+    expect(Math.round(naturalVoiceSeconds / 60)).toBe(35);
+    expect(Math.abs(totalSeconds - naturalVoiceSeconds)).toBeLessThanOrEqual(60);
     expect(
       training.slides.every(
         (slide) =>
@@ -83,6 +92,32 @@ describe("AIチャット仕事術の共通正本", () => {
           Array.isArray(slide.instructorNotes),
       ),
     ).toBe(true);
+    expect(
+      training.slides.every(
+        (slide) =>
+          Math.abs(
+            slide.estimatedSeconds - Math.round((slide.narration.length / 296) * 60),
+          ) <= 20,
+      ),
+    ).toBe(true);
+  });
+
+  it("5つの業務ケースは、悪い依頼・改善プロンプト・出力例・人の確認点を示す", () => {
+    const casePairs = [
+      [5, 6],
+      [7, 8],
+      [9, 10],
+      [11, 12],
+      [13, 14],
+    ] as const;
+    for (const [promptSlide, resultSlide] of casePairs) {
+      expect(training.slides[promptSlide - 1].body.join(" ")).toMatch(/悪い依頼|危険な依頼/u);
+      expect(training.slides[promptSlide - 1].body.join(" ")).toMatch(/改善プロンプト|安全な書換え/u);
+      expect(training.slides[promptSlide - 1].body.join(" ")).toContain("出力例（架空・参考）");
+      expect(training.slides[promptSlide - 1].body.join(" ")).toContain("人の確認点");
+      expect(training.slides[resultSlide - 1].body.join(" ")).toContain("出力例（架空・参考）");
+      expect(["steps", "checklist"]).toContain(training.slides[resultSlide - 1].visual.type);
+    }
   });
 
   it("全visualはWebとPPTXでnative表示できる許可済みschemaだけを使う", () => {
@@ -196,9 +231,18 @@ describe("AIチャット仕事術の共通正本", () => {
     expect(promptTemplate.verification.evidenceRequest).toContain("一次資料");
     expect(promptTemplate.verification.unresolvedRequest).toContain("未確認");
     expect(promptTemplate.verification.humanCheckpoint).toContain("人が確認");
-    expect(promptTemplate.copyTemplate).toMatch(/【目的】[\s\S]+【背景】/u);
-    expect(promptTemplate.copyTemplate).toMatch(/【根拠】[\s\S]+【未確認事項】/u);
+    expect(promptTemplate.copyTemplate).toMatch(/【目的】[\s\S]+【材料】/u);
+    expect(promptTemplate.copyTemplate).toMatch(/【完成形】[\s\S]+【条件】/u);
     expect(promptTemplate.copyTemplate).toContain("【人の確認点】");
+    expect(promptTemplate.caseTemplates).toHaveLength(5);
+    expect(promptTemplate.caseTemplates.map((item) => item.id)).toEqual([
+      "email",
+      "report",
+      "research",
+      "review",
+      "confidential-rewrite",
+    ]);
+    expect(promptTemplate.caseTemplates.every((item) => item.humanChecks.length >= 3)).toBe(true);
     expect(promptTemplate.safeUseNotes.length).toBeGreaterThanOrEqual(5);
     for (const claimId of promptTemplate.claimIds) expect(claimById.has(claimId)).toBe(true);
   });

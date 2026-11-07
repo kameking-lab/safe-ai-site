@@ -6,15 +6,15 @@ vi.spyOn(HTMLMediaElement.prototype, "play").mockResolvedValue();
 vi.spyOn(HTMLMediaElement.prototype, "pause").mockImplementation(() => undefined);
 
 describe("/training/safety-seminars/safety-management-basics-osh-law", () => {
-  it("12枚のスライド、公開前確認中の資料案内、クイズと出典を表示する", () => {
+  it("12枚のスライド、2形式のダウンロード、クイズと出典を表示する", () => {
     const { container } = render(<SafetyManagementBasicsOshLawPage />);
     expect(container.querySelector("main")).toBeNull();
     expect(screen.getByRole("heading", { level: 1, name: /安全管理の基本と/u })).toBeTruthy();
     expect(screen.getAllByText("12枚").length).toBeGreaterThan(0);
     expect(screen.queryByText(/音声 約/u)).toBeNull();
     expect(screen.getAllByText(/法定の雇入れ時/u).length).toBeGreaterThan(0);
-    expect(container.querySelector('a[download]')).toBeNull();
-    expect(screen.getByText(/PowerPoint・PDFは公開前の確認中/u)).toBeTruthy();
+    expect(screen.getByRole("link", { name: "編集可能PowerPoint" }).getAttribute("href")).toMatch(/\.pptx$/u);
+    expect(screen.getByRole("link", { name: "投影・印刷用PDF" }).getAttribute("href")).toMatch(/\.pdf$/u);
     expect(screen.getByRole("heading", { level: 2, name: "5問の確認クイズ" })).toBeTruthy();
     expect(screen.getByRole("heading", { level: 2, name: "出典と確認状態" })).toBeTruthy();
     expect(container.textContent).toContain("LearningResource");

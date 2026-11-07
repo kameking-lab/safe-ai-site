@@ -261,7 +261,7 @@ export default function SafetyAiLandingPage() {
               事故から学び、危険を見る
             </h2>
             <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-700 dark:text-slate-200">
-              事故、短時間教材、Visual KYTへ直接進めます。音声付きの安全研修は
+              事故、短時間教材、Visual KYTへ直接進めます。スライドで学ぶ安全研修は
               <Link href="/training/safety-seminars" className="font-black text-emerald-800 underline underline-offset-4 dark:text-emerald-300">
                 安全研修ライブラリ
               </Link>

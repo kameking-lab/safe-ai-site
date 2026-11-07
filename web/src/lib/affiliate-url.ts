@@ -7,16 +7,20 @@
  *   - 楽天:   NEXT_PUBLIC_RAKUTEN_AFFILIATE_ID
  */
 
-const AMAZON_TAG = (
+const DEFAULT_AMAZON_TAG = "safeaisite202-22";
+const CONFIGURED_AMAZON_TAG = (
   process.env.NEXT_PUBLIC_AMAZON_AFFILIATE_ID ||
   process.env.NEXT_PUBLIC_AMAZON_ASSOCIATE_TAG ||
   ""
 ).trim();
+// 公開リンクで使用していた旧ストアIDだけを、新登録のIDへ移行する。
+const AMAZON_TAG = !CONFIGURED_AMAZON_TAG || CONFIGURED_AMAZON_TAG === "safeaisite22-22"
+  ? DEFAULT_AMAZON_TAG
+  : CONFIGURED_AMAZON_TAG;
 
 const RAKUTEN_AFFID = (process.env.NEXT_PUBLIC_RAKUTEN_AFFILIATE_ID || "").trim();
 
 if (process.env.NODE_ENV === "development") {
-  if (!AMAZON_TAG) console.warn("[affiliate-url] NEXT_PUBLIC_AMAZON_AFFILIATE_ID is not set — Amazon affiliate links disabled");
   if (!RAKUTEN_AFFID) console.warn("[affiliate-url] NEXT_PUBLIC_RAKUTEN_AFFILIATE_ID is not set — Rakuten affiliate links disabled");
 }
 
@@ -56,6 +60,13 @@ export function generateAmazonAffiliateUrl(query: string, asin?: string): string
 /** Amazon検索URLをアフィリエイトタグ付きで生成する（generateAmazonAffiliateUrl のエイリアス） */
 export function generateAmazonSearchUrl(query: string): string {
   return generateAmazonAffiliateUrl(query);
+}
+
+/** Amazonの「カスタマーレビュー4つ星以上」検索を生成する。評価は遷移先の最新表示で再確認する。 */
+export function generateAmazonHighRatedSearchUrl(query: string): string {
+  const url = new URL(generateAmazonAffiliateUrl(query));
+  url.searchParams.set("rh", "p_72:2227292051");
+  return url.toString();
 }
 
 /** 楽天市場の任意URLを hb.afl.rakuten.co.jp 経由のアフィリエイトリンクに変換する */

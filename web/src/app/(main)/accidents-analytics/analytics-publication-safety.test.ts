@@ -7,7 +7,7 @@ const readSource = (path: string) =>
 
 describe("事故分析ダッシュボードの公開表示", () => {
   it("リード直後に全国速報と収録個票の期間・母数を区別して表示する", () => {
-    const source = readSource("src/app/(main)/accidents-analytics/analytics-page-view.tsx");
+    const source = readSource("src/app/(main)/accidents-analytics/page.tsx");
     const leadIndex = source.indexOf(
       "最新の全国傾向と収録済み死亡災害個票を分け",
     );
@@ -62,7 +62,7 @@ describe("事故分析ダッシュボードの公開表示", () => {
   });
 
   it("速報と収録事例を分離し、図をフィルタ直後に置いて履歴復元を可能にする", () => {
-    const page = readSource("src/app/(main)/accidents-analytics/analytics-page-view.tsx");
+    const page = readSource("src/app/(main)/accidents-analytics/page.tsx");
     const dashboard = readSource(
       "src/app/(main)/accidents-analytics/AnalyticsDashboardImpl.tsx",
     );

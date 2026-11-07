@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { EnvironmentWbgtStatus } from "@/lib/heat-illness/environment-wbgt";
 import type { WeatherRiskApiResponse } from "@/lib/types/api";
 import {
@@ -78,6 +78,15 @@ function wbgtPayload(
 }
 
 describe("KY weather prefill", () => {
+  it("rejects impossible work days before making a request", async () => {
+    const fetchSpy = vi.spyOn(globalThis, "fetch");
+    try {
+      expect(await fetchKyWeatherPrefill({
+        areaId: "tokyo-shinjuku", workDate: "2026-02-30", now: new Date("2026-02-27T00:00:00+09:00"),
+      })).toEqual({ ok: false, reason: "forecast-out-of-range", snapshot: null });
+      expect(fetchSpy).not.toHaveBeenCalled();
+    } finally { fetchSpy.mockRestore(); }
+  });
   it("combines temperature, humidity, WBGT, JMA warnings and provenance", () => {
     const snapshot = combineKyWeatherPayloads({
       areaId: "tokyo-shinjuku",
@@ -155,6 +164,18 @@ describe("KY weather prefill", () => {
     expect(snapshot?.fetchedAt).toBe("2026-07-31T18:00:00.000Z");
   });
 
+  it.each([undefined, "", "invalid"])("does not invent a retrieval timestamp for %s", (fetchedAt) => {
+    const snapshot = combineKyWeatherPayloads({
+      areaId: "tokyo-shinjuku",
+      weather: weatherPayload({ fetchedAt }),
+      wbgt: wbgtPayload(),
+      now: NOW,
+    });
+    expect(snapshot?.fetchedAt).toBe("");
+    expect(snapshot?.stale).toBe(true);
+    expect(snapshot?.availability).toBe("stale");
+  });
+
   it("marks every manual override and does not call it measured", () => {
     const base = combineKyWeatherPayloads({
       areaId: "tokyo-shinjuku",
@@ -191,7 +212,10 @@ describe("KY weather prefill", () => {
     globalThis.fetch = (async (input: RequestInfo | URL) => {
       const url = String(input);
       calls.push(url);
-      return new Response(JSON.stringify(weatherPayload({ current: undefined })), {
+      return new Response(JSON.stringify(weatherPayload({
+        current: undefined,
+        snapshot: { ...weatherPayload().snapshot, date: "2026-08-02" },
+      })), {
         status: 200,
         headers: { "Content-Type": "application/json" },
       });
@@ -209,7 +233,37 @@ describe("KY weather prefill", () => {
       expect(result.snapshot?.wbgtKind).toBe("unavailable");
       expect(result.snapshot?.availability).toBe("degraded");
       expect(result.snapshot?.targetAt).toBeNull();
-      expect(result.snapshot?.targetDate).toBe("2026-08-01");
+      expect(result.snapshot?.targetDate).toBe("2026-08-02");
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
+
+  it.each([
+    { snapshot: { ...weatherPayload().snapshot, date: "2026-07-31" } },
+    { current: { ...weatherPayload().current!, targetAt: "2026-07-31T09:00:00+09:00" } },
+    { current: { ...weatherPayload().current!, targetAt: "invalid" } },
+  ])("rejects mismatched or unidentifiable weather target dates", async (overrides) => {
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = (async () => new Response(JSON.stringify(weatherPayload(overrides)))) as typeof fetch;
+    try {
+      expect(await fetchKyWeatherPrefill({
+        areaId: "tokyo-shinjuku", workDate: "2026-08-01", now: NOW,
+      })).toEqual({ ok: false, reason: "unavailable", snapshot: null });
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
+
+  it.each([null, {}, "invalid"])("rejects malformed snapshot %s without throwing", async (snapshot) => {
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = (async () => new Response(JSON.stringify({
+      ...weatherPayload(), snapshot,
+    }))) as typeof fetch;
+    try {
+      expect(await fetchKyWeatherPrefill({
+        areaId: "tokyo-shinjuku", workDate: "2026-08-01", now: NOW,
+      })).toEqual({ ok: false, reason: "unavailable", snapshot: null });
     } finally {
       globalThis.fetch = originalFetch;
     }

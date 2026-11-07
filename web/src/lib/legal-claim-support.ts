@@ -292,6 +292,10 @@ function inlineReviewedLocatorSupported(input: {
 }
 
 function knownClaimSupported(text: string, evidence: string): boolean | null {
+  if (text === "感電防止措置と、行為別の特別教育の対象を確認してください。") {
+    return evidenceHasAll(evidence, ["法第59条第3項の厚生労働省令で定める危険又は有害な業務", "充電電路"]) &&
+      evidenceHasAny(evidence, ["絶縁用保護具", "感電の危険"]);
+  }
   // Rule 36(4) expressly excludes ground voltage at or below 50 V and
   // telecom/telephone circuits that present no electric-shock hazard.  Any
   // reviewed claim that describes the low-voltage special-education scope
@@ -313,6 +317,34 @@ function knownClaimSupported(text: string, evidence: string): boolean | null {
       "墜落により労働者に危険を及ぼすおそれのある箇所",
       "わく組足場以外の足場",
       "手すり等及び中桟等",
+    ]);
+  }
+  if (
+    /^一側足場を除く足場の、高さ2m以上の作業場所で、墜落により危険を及ぼすおそれのある箇所のうち、わく組足場（妻面に係る部分を除く）の部分には、交さ筋かいに加えて高さ15cm以上40cm以下の桟もしくは高さ15cm以上の幅木（またはこれらと同等以上の機能を有する設備）を設けるか、手すりわくを設けます。?$/.test(
+      text,
+    )
+  ) {
+    // 安衛則563条1項（適用: 一側足場を除く足場の高さ2m以上の作業場所）と
+    // 同項3号イ(1)(2)。snapshot版には(1)(2)が無いため、公式XMLから補完した
+    // 本文を引用した場合だけ通る。
+    return evidenceHasAll(evidence, [
+      "足場（一側足場を除く。第三号において同じ。）",
+      "高さ二メートル以上の作業場所",
+      "墜落により労働者に危険を及ぼすおそれのある箇所",
+      "わく組足場（妻面に係る部分を除く。ロにおいて同じ。）",
+      "次のいずれかの設備",
+      "交さ筋かい及び高さ十五センチメートル以上四十センチメートル以下の桟若しくは高さ十五センチメートル以上の幅木又はこれらと同等以上の機能を有する設備",
+      "手すりわく",
+    ]);
+  }
+  if (
+    /^わく組足場の妻面に係る部分は「わく組足場以外の足場」として、手すり等及び中桟等が必要です。?$/.test(
+      text,
+    )
+  ) {
+    return evidenceHasAll(evidence, [
+      "わく組足場（妻面に係る部分を除く。ロにおいて同じ。）",
+      "わく組足場以外の足場　手すり等及び中桟等",
     ]);
   }
   if (/「手すり等」は高さ85cm以上、「中桟等」は高さ35〜50cm/.test(text)) {
@@ -2632,6 +2664,16 @@ export function validateServiceFirstLegalClaimSupport(input: {
         claim.citationIndexes[0] !== expectedStatusEvidenceIndex
       ) {
         failures.push("適用時点:evidence-marker");
+      }
+      continue;
+    }
+    if (
+      /^根拠の現行版を確認できないため、この条件の義務・資格は確定できません。$/.test(claim.text) ||
+      /^表示した公式原文で、対象日と作業条件を確認してください。$/.test(claim.text)
+    ) {
+      if (expectedStatusLine !== "確認不能（根拠の現行版を再確認）" ||
+          claim.citationIndexes.length !== 1 || claim.citationIndexes[0] !== expectedStatusEvidenceIndex) {
+        failures.push(`${claim.section}:current-source-state`);
       }
       continue;
     }

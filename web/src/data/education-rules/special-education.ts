@@ -393,7 +393,7 @@ export const SPECIAL_EDUCATION: EducationCert[] = [
     id: "se-36-18-lift",
     name: "建設用リフトの運転業務",
     certType: "special_education",
-    targetWork: "建設用リフト（令第1条第9号）の運転業務",
+    targetWork: "建設用リフト（令第1条第10号）の運転業務",
     relatedLaw: "安衛則第36条第18号",
     duration: "9時間以上（学科5h＋実技4h）",
     workCategories: ["construction"],

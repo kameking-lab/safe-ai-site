@@ -63,7 +63,7 @@ describe("ルート layout.tsx metadata のドメイン/ロケール単一ソー
 
   it("Preview safety modeではAdSenseを環境設定に関係なく無効化する", () => {
     expect(src).toMatch(
-      /const adsEnabled =\s*!PREVIEW_SAFETY_MODE\s*&&\s*Boolean\(process\.env\.NEXT_PUBLIC_ADSENSE_PUB_ID\)/,
+      /const adsEnabled =\s*!PREVIEW_SAFETY_MODE\s*&&\s*Boolean\(configuredAdsensePublisherId\(process\.env\.NEXT_PUBLIC_ADSENSE_PUB_ID\)\)/,
     );
   });
 });

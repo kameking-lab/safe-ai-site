@@ -1,10 +1,10 @@
 /**
- * プラン別の機能制限。
- * Free: 月3回 / Standard: 月30回 / Pro: 無制限。
- * 月次カウントは prisma の SdsSearch テーブル（createdAt）から算出。
+ * 旧プラン情報との互換性を保ちつつ、サイト機能に月次上限を設けない。
+ * 月次カウントは利用履歴であり、機能の利用可否には使わない。
  */
 
 import { prisma } from "@/lib/prisma";
+import { PAID_MODE } from "@/lib/paid-mode";
 
 export type PlanName = "free" | "standard" | "pro";
 
@@ -22,6 +22,7 @@ export function planFromSession(planName: string | null | undefined): PlanName {
 }
 
 export function sdsMonthlyLimit(plan: PlanName): number | null {
+  if (!PAID_MODE) return null;
   if (plan === "pro") return null;
   if (plan === "standard") return 30;
   return 3;
@@ -59,6 +60,7 @@ export async function getSdsSearchLimit(
 }
 
 export function isOverLimit(limit: SdsSearchLimit): boolean {
+  if (!PAID_MODE) return false;
   if (limit.monthlyLimit === null) return false;
   return limit.used >= limit.monthlyLimit;
 }

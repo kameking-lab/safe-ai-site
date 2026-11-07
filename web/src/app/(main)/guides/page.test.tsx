@@ -17,7 +17,7 @@ const QUARANTINED_KEYWORD_LANDINGS = KEYWORD_LANDINGS.filter(
 
 describe("/guides ハブ（柱0 アイコンファースト）", () => {
   it("ページ見出しを描画", async () => {
-    render(await GuidesHubPage());
+    render(await GuidesHubPage({}));
     expect(
       screen.getByRole("heading", {
         level: 1,
@@ -28,7 +28,7 @@ describe("/guides ハブ（柱0 アイコンファースト）", () => {
   });
 
   it("公開可能な4ガイドだけをカードとJSON-LDへ出し、隔離ガイドを露出しない", async () => {
-    const { container } = render(await GuidesHubPage());
+    const { container } = render(await GuidesHubPage({}));
     expect(PUBLIC_KEYWORD_LANDINGS).toHaveLength(4);
     expect(QUARANTINED_KEYWORD_LANDINGS.length).toBeGreaterThan(0);
 
@@ -59,7 +59,7 @@ describe("/guides ハブ（柱0 アイコンファースト）", () => {
   });
 
   it("各ガイドカードが3秒で見分けるためのアイコンを1つ持つ", async () => {
-    render(await GuidesHubPage());
+    render(await GuidesHubPage({}));
     for (const k of PUBLIC_KEYWORD_LANDINGS) {
       const link = document.querySelector(`a[href="/guides/${k.slug}"]`);
       // アイコンバッジ(svg) + 末尾「ガイドを読む →」の矢印svg = 2つ。
@@ -70,7 +70,7 @@ describe("/guides ハブ（柱0 アイコンファースト）", () => {
   });
 
   it("公開4ガイドのアイコン色は重複せず視覚的に弁別できる", async () => {
-    render(await GuidesHubPage());
+    render(await GuidesHubPage({}));
     const badgeClasses = PUBLIC_KEYWORD_LANDINGS.map((k) => {
       const link = document.querySelector(`a[href="/guides/${k.slug}"]`);
       const badge = link?.querySelector("span.rounded-xl");
@@ -84,7 +84,7 @@ describe("/guides ハブ（柱0 アイコンファースト）", () => {
   });
 
   it("実務資産は公開可能な正規HTMLだけを44px導線で出し、提供状態を文字でも示す", async () => {
-    render(await GuidesHubPage());
+    render(await GuidesHubPage({}));
     expect(screen.getByRole("heading", { name: "実務資産ナビ" })).toBeDefined();
     expect(screen.getByText("HTMLを利用の正本とします")).toBeDefined();
 

@@ -30,18 +30,23 @@ describe("FLAGSHIP_FEATURES config", () => {
     expect(acc).toBeDefined();
     const hrefs = (acc?.subItems ?? []).map((s) => s.href);
     expect(acc?.href).toBe("/accident-news");
-    expect(hrefs).toEqual(["/accidents", "/accident-news"]);
+    expect(hrefs).toEqual([
+      "/accidents",
+      "/accidents-analytics",
+      "/fatal-accidents",
+      "/accident-news",
+    ]);
     expect(hrefs).not.toContain("/accidents-reports");
-    expect(hrefs).not.toContain("/accidents-analytics");
+    expect(hrefs).toContain("/accidents-analytics");
     expect(hrefs).toContain("/accidents");
     expect(isPublicRouteAvailable("/accidents")).toBe(true);
     expect(isPublicRouteAvailable("/accidents/example-id")).toBe(false);
   });
 
-  it("事故 feature の表示文言は未検証件数や停止中の分析機能を宣伝しない", () => {
+  it("事故 feature の表示文言は未検証件数を宣伝せず公開中の分析へ案内する", () => {
     const acc = getFlagshipById("accidents");
     expect(acc?.label).not.toBe("重大事故ニュース");
-    expect(acc?.label).toBe("重大災害情報");
+    expect(acc?.label).toBe("労災事故情報");
     const copy = [
       acc?.label,
       acc?.cardTitle,
@@ -49,8 +54,9 @@ describe("FLAGSHIP_FEATURES config", () => {
       ...(acc?.subItems.flatMap((item) => [item.label, item.description]) ?? []),
     ].join(" ");
     expect(copy).toContain("出典");
-    expect(copy).toContain("公表事実");
-    expect(copy).not.toMatch(/約5,000件|統計ダッシュボード|自動分析レポート/);
-    expect(copy).toContain("事故DB検索");
+    expect(copy).toContain("厚労省");
+    expect(copy).not.toMatch(/約5,000件|自動分析レポート/);
+    expect(copy).toContain("事故分析ダッシュボード");
+    expect(copy).toContain("死亡事故データベース");
   });
 });

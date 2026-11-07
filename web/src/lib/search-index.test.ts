@@ -382,10 +382,14 @@ describe("buildSearchIndex — 機能ページ（feature）の収載", () => {
         (i) => i.url === "/work-environment-measurement",
       ),
     ).toBe(false);
-    expect(searchItems(index, "事故 分析", "feature")).toEqual([]);
+    expect(
+      searchItems(index, "事故 分析", "feature").some(
+        (item) => item.url === "/accidents-analytics",
+      ),
+    ).toBe(true);
     expect(
       searchItems(index, "重大災害", "feature").some(
-        (item) => item.url === "/accident-news",
+        (item) => item.url === "/fatal-accidents",
       ),
     ).toBe(true);
   });
@@ -674,12 +678,11 @@ describe("buildSearchIndex — 法改正（revision）の収載", () => {
     expect(revisions.some((i) => i.id.includes("lr-fallback"))).toBe(false);
   });
 
-  it("個別詳細ページ未実装のため全件 /laws 一覧ハブへリンクする（幽霊URL 0）", async () => {
+  it("全件が /laws 一覧内の同じ改正IDへ直接リンクする（幽霊URL 0）", async () => {
     const index = await buildSearchIndex();
     const revisions = index.filter((i) => i.category === "revision");
     expect(revisions.length).toBeGreaterThan(0);
-    // /laws は実在ハブ。glossary→/glossary・faq→/faq と同じく一覧へ寄せる。
-    expect(revisions.every((i) => i.url === "/laws")).toBe(true);
+    expect(revisions.every((i) => i.url === `/laws#rev-${i.id.replace(/^revision-/, "")}`)).toBe(true);
     expect(revisions.every((i) => i.id.startsWith("revision-"))).toBe(true);
   });
 
@@ -690,9 +693,9 @@ describe("buildSearchIndex — 法改正（revision）の収載", () => {
     expect(searchItems(index, "クレーン", "revision").length).toBeGreaterThan(
       0,
     );
-    // 発見先が /laws へ着地する（検索経由で法改正一覧へ到達できる）。
+    // 一覧内の該当改正カードへ着地する。
     expect(
-      searchItems(index, "石綿", "revision").every((i) => i.url === "/laws"),
+      searchItems(index, "石綿", "revision").every((i) => i.url === `/laws#rev-${i.id.replace(/^revision-/, "")}`),
     ).toBe(true);
   });
 });
@@ -704,15 +707,15 @@ describe("buildSearchIndex — 事故個票の隔離", () => {
     expect(accident).toEqual([]);
   });
 
-  it("事故DB本体だけを検索可能にし、詳細・分析の隔離URLを混入させない", async () => {
+  it("事故DB本体と公開中の統計分析を検索可能にし、詳細・旧レポートを混入させない", async () => {
     const index = await buildSearchIndex();
     expect(index.some((item) => item.url === "/accidents")).toBe(true);
+    expect(index.some((item) => item.url === "/accidents-analytics")).toBe(true);
     expect(
       index.some(
         (item) =>
           item.url.startsWith("/accidents/") ||
-          item.url.startsWith("/accidents-reports") ||
-          item.url.startsWith("/accidents-analytics"),
+          item.url.startsWith("/accidents-reports"),
       ),
     ).toBe(false);
   });

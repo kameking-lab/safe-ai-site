@@ -1,3 +1,5 @@
+import { DEFORMED_REBAR_TABLE } from "@/lib/construction-calculators/rebar-weight";
+import { additionalQuantityRegistry } from "@/lib/construction-calculators/additional-quantity";
 import type {
   FormulaRegistryEntry,
   FormulaSource,
@@ -120,6 +122,9 @@ function output(key: string, label: string, unit: string, integer = false): Outp
   return { key, label, unit, integer };
 }
 
+const rebarSource: FormulaSource = {sourceId:"SRC-JFE-REBAR-TABLE",title:"建材ナビゲーター：異形棒鋼の寸法・単位質量",publisher:"JFEスチール",url:"https://www.jfe-steel.co.jp/products/kennavi/assets/pdf/kennavi_all.pdf",applicableYear:null,locator:"PDF p.70（紙面2-12）寸法・単位質量表。JFE条鋼2025.01寸法・重量表PDF p.5と12径照合。",checkedAt:"2026-10-09",sourceKind:"official"};
+const barInputs: InputDefinition[] = [selectInput("barType","鉄筋の種類",["deformed","round"],"異形棒鋼は規格表、丸鋼は直径の真円計算。"),selectInput("barDesignation","異形鉄筋の呼び名",Object.keys(DEFORMED_REBAR_TABLE),"D13の公称径は12.7mm、単位質量0.995kg/m。" )];
+
 export const constructionCalculatorRegistry: readonly FormulaRegistryEntry[] = [
   {
     calculatorId: "concrete-quantity",
@@ -180,16 +185,16 @@ export const constructionCalculatorRegistry: readonly FormulaRegistryEntry[] = [
     assumptions: ["密度を固定せず利用者が確認・変更する。", "厚さは締固め後の平均値。", "舗装性能・設計適否・発注数量の確定用途ではない。"], sources: [quantitySource, mathSource], checkedAt: CHECKED_AT, riskLevel: "low", clientOnly: true, testFixtures: asphaltMixtureFixtures,
   },
   {
-    calculatorId: "rebar-weight", slug: "rebar-weight", title: "鉄筋重量", category: "材料", purpose: "呼び径を真円とみなし、鋼密度7,850kg/m³から1m重量・1本重量・総重量を幾何学的に概算する。", formula: ["断面積=π×(d/1000)²/4", "kg/m=断面積×7,850", "総重量=kg/m×長さ×本数"], formulaVersion: "1.0.0",
-    inputDefinitions: [numberInput("diameterMm", "鉄筋径", ["mm"], "呼び径。真円直径として概算。"), numberInput("length", "1本長さ", ["mm", "cm", "m"], "1本の長さ。"), selectInput("lengthUnit", "長さ単位", ["mm", "cm", "m"], "1本長さへ適用。"), integerInput("quantity", "本数", "同じ径・長さの本数。"), roundingInput],
+    calculatorId: "rebar-weight", slug: "rebar-weight", title: "鉄筋重量", category: "材料", purpose: "異形鉄筋の規格表、または丸鋼の直径から、1本と全体の重量を出す。", formula: ["異形鉄筋：kg/m=指定D呼び名の規格単位質量", "丸鋼：kg/m=π×(直径/1000)²/4×7,850", "総重量=kg/m×長さ×本数"], formulaVersion: "1.1.0",
+    inputDefinitions: [...barInputs, numberInput("diameterMm", "丸鋼の直径", ["mm"], "呼び径。真円直径として概算。"), numberInput("length", "1本長さ", ["mm", "cm", "m"], "1本の長さ。"), selectInput("lengthUnit", "長さ単位", ["mm", "cm", "m"], "1本長さへ適用。"), integerInput("quantity", "本数", "同じ径・長さの本数。"), roundingInput],
     outputDefinitions: [output("massPerMetreKg", "1m当たり重量", "kg/m"), output("massPerBarKg", "1本重量", "kg"), output("totalLengthM", "総延長", "m"), output("totalMassKg", "総重量", "kg"), output("totalMassT", "t換算", "t")], supportedUnits: ["mm", "cm", "m", "kg/m", "kg", "t"], roundingRule,
-    assumptions: ["JIS単位質量表を転載せず、呼び径の真円断面と鋼密度から独立導出。", "異形形状、許容差、加工ロスを含まない。", "製品規格・ミルシートを別途確認。"], sources: [quantitySource, mathSource], checkedAt: CHECKED_AT, riskLevel: "low", clientOnly: true, testFixtures: rebarWeightFixtures,
+    assumptions: ["異形棒鋼はJFE規格単位質量表、丸鋼は真円断面の計算。", "異形形状、許容差、加工ロスを含まない。", "製品規格・ミルシートを別途確認。"], sources: [rebarSource, quantitySource, mathSource], checkedAt: "2026-10-09", riskLevel: "low", clientOnly: true, testFixtures: rebarWeightFixtures.map(f=>({...f,input:{barType:"round",barDesignation:"D13",...f.input}})),
   },
   {
-    calculatorId: "rebar-spacing", slug: "rebar-spacing", title: "鉄筋本数・配筋ピッチ", category: "材料", purpose: "コンクリート表面からの左右かぶりと端部鉄筋を含み、指定ピッチを超えない等間隔配置の本数、中心間隔、総延長、概算重量を求める。", formula: ["中心間有効幅=施工幅−左かぶり−右かぶり−鉄筋径", "区間数=ceil(中心間有効幅/指定ピッチ)", "1段本数=区間数+1", "中心間隔=中心間有効幅/区間数", "総延長=本数×段数×1本長さ"], formulaVersion: "1.1.0",
-    inputDefinitions: [numberInput("constructionWidth", "施工幅", ["mm", "cm", "m"], "左右のコンクリート表面間の全幅。"), numberInput("leftCover", "左かぶり", ["mm", "cm", "m"], "左コンクリート表面から端部鉄筋表面まで。"), numberInput("rightCover", "右かぶり", ["mm", "cm", "m"], "右コンクリート表面から端部鉄筋表面まで。"), numberInput("requestedPitch", "指定ピッチ", ["mm", "cm", "m"], "鉄筋中心間隔の上限。超えないよう区間数を切上げる。"), numberInput("barLength", "1本長さ", ["mm", "cm", "m"], "割付方向と直交する鉄筋長。"), numberInput("diameterMm", "鉄筋径", ["mm"], "中心位置と重量概算に使用。"), selectInput("dimensionUnit", "寸法単位", ["mm", "cm", "m"], "施工幅・かぶり・ピッチ・1本長さへ共通適用。鉄筋径はmm固定。"), integerInput("layers", "段数", "同じ割付の段数。"), roundingInput],
+    calculatorId: "rebar-spacing", slug: "rebar-spacing", title: "鉄筋本数・配筋ピッチ", category: "材料", purpose: "コンクリート表面からの左右かぶりと端部鉄筋を含み、指定ピッチを超えない等間隔配置の本数、中心間隔、総延長、概算重量を求める。", formula: ["中心間有効幅=施工幅−左かぶり−右かぶり−鉄筋径", "区間数=ceil(中心間有効幅/指定ピッチ)", "1段本数=区間数+1", "中心間隔=中心間有効幅/区間数", "総延長=本数×段数×1本長さ"], formulaVersion: "1.2.0",
+    inputDefinitions: [...barInputs, numberInput("constructionWidth", "施工幅", ["mm", "cm", "m"], "左右のコンクリート表面間の全幅。"), numberInput("leftCover", "左かぶり", ["mm", "cm", "m"], "左コンクリート表面から端部鉄筋表面まで。"), numberInput("rightCover", "右かぶり", ["mm", "cm", "m"], "右コンクリート表面から端部鉄筋表面まで。"), numberInput("requestedPitch", "指定ピッチ", ["mm", "cm", "m"], "鉄筋中心間隔の上限。超えないよう区間数を切上げる。"), numberInput("barLength", "1本長さ", ["mm", "cm", "m"], "割付方向と直交する鉄筋長。"), numberInput("diameterMm", "鉄筋径", ["mm"], "中心位置と重量概算に使用。"), selectInput("dimensionUnit", "寸法単位", ["mm", "cm", "m"], "施工幅・かぶり・ピッチ・1本長さへ共通適用。鉄筋径はmm固定。"), integerInput("layers", "段数", "同じ割付の段数。"), roundingInput],
     outputDefinitions: [output("effectiveWidthM", "有効幅", "m"), output("totalBars", "必要本数", "本", true), output("actualSpacingM", "実配置間隔", "m"), output("totalLengthM", "総延長", "m"), output("totalMassKg", "重量", "kg")], supportedUnits: ["mm", "cm", "m", "本", "kg"], roundingRule,
-    assumptions: ["かぶりはコンクリート表面から鉄筋表面までの最短距離。", "両端鉄筋の中心間を、指定ピッチを超えない等間隔に割り付ける。", "必要かぶり・継手・定着・構造適否を判定しない。"], sources: [commonSpecSource, mathSource], checkedAt: CHECKED_AT, riskLevel: "low", clientOnly: true, testFixtures: rebarSpacingFixtures,
+    assumptions: ["かぶりはコンクリート表面から鉄筋表面までの最短距離。", "両端鉄筋の中心間を、指定ピッチを超えない等間隔に割り付ける。", "必要かぶり・継手・定着・構造適否を判定しない。"], sources: [rebarSource, commonSpecSource, mathSource], checkedAt: "2026-10-09", riskLevel: "low", clientOnly: true, testFixtures: rebarSpacingFixtures.map(f=>({...f,input:{barType:"round",barDesignation:"D13",...f.input}})),
   },
   {
     calculatorId: "formwork-area", slug: "formwork-area", title: "型枠面積", category: "数量", purpose: "基礎、柱、梁、壁、床版端部、任意面の選択面を分解し、控除後の型枠面積を概算する。",
@@ -219,6 +224,7 @@ export const constructionCalculatorRegistry: readonly FormulaRegistryEntry[] = [
     outputDefinitions: [output("drawingLength", "図上寸法", "選択単位"), output("actualLength", "実寸", "選択単位"), output("deltaXM", "ΔX", "m"), output("deltaYM", "ΔY", "m"), output("horizontalDistanceM", "水平距離", "m"), output("azimuthDegrees", "方位角", "°")], supportedUnits: ["mm", "cm", "m", "°"], roundingRule,
     assumptions: ["座標はX北・Y東の局所平面。", "方位角は北から時計回り。", "測地補正、地球曲率、標高補正、印刷倍率誤差を含めない。"], sources: [gsiSource, mathSource], checkedAt: CHECKED_AT, riskLevel: "low", clientOnly: true, testFixtures: scaleCoordinateFixtures,
   },
+  ...additionalQuantityRegistry(mathSource),
 ] as const;
 
 export type ConstructionCalculatorSlug =

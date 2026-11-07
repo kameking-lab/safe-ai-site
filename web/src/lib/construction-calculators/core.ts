@@ -214,6 +214,7 @@ export function validResult(args: {
 }): CalculationOutcome {
   const result: CalculationResult = {
     ...args,
+    displayValues: calculationDisplayValues(args),
     warnings: args.warnings ?? [],
     isEstimate: true,
   };
@@ -242,4 +243,23 @@ export function resultCountIssue(field: string, value: number): ValidationIssue 
         code: "too-large",
         message: "必要台数または本数が計算可能範囲を超えています。入力値と単位を確認してください。",
       };
+}
+
+
+/** 表示だけを補正する。丸め値・原値・数式・安全条件は変更しない。 */
+export function calculationDisplayValues(
+  result: Pick<CalculationResult, "displayValues" | "rawOutputs">,
+): DisplayValue[] {
+  return result.displayValues.map((item) => {
+    const raw = result.rawOutputs[item.key];
+    const ratioZero = item.key === "ratioN" && /^1:-?0(?:\.0+)?$/.test(String(item.value));
+    const numericZero = typeof item.value === "number" && item.value === 0;
+    if ((!numericZero && !ratioZero) || typeof raw !== "number" ||
+        !Number.isFinite(raw) || raw === 0) return item;
+    return { ...item, value: (ratioZero ? "1:" : "") + belowDisplayPrecisionLabel(raw) };
+  });
+}
+
+export function belowDisplayPrecisionLabel(raw: number): string {
+  return raw < 0 ? "表示精度未満（負の値）" : "表示精度未満";
 }

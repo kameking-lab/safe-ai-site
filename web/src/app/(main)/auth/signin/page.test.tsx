@@ -2,6 +2,8 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("@/auth", () => ({ isAuthConfigured: false, signIn: vi.fn() }));
+// The form only needs the AuthError class; the real package needs the Next server runtime.
+vi.mock("next-auth", () => ({ AuthError: class AuthError extends Error {} }));
 import SignInPage from "./page";
 
 describe("SignInPage fail-closed state", () => {

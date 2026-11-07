@@ -11,6 +11,9 @@ import { isPreviewSafetyMode } from "@/lib/server/deployment-safety";
 import { getRumServerReadiness } from "@/lib/rum/server-readiness";
 import { DeferredGlobalEnhancements } from "@/components/deferred-global-enhancements";
 import { CspNonceProvider } from "@/components/csp-nonce-context";
+import { ScrollPositionRestorer } from "@/components/scroll-position-restorer";
+import { adsenseAccountMetadata, configuredAdsensePublisherId } from "@/lib/adsense-account";
+import { appStoreItunesMetadata } from "@/lib/app-store";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -35,6 +38,9 @@ const PREVIEW_ROBOTS: NonNullable<Metadata["robots"]> = {
 };
 
 const metadataDefinition: Metadata = {
+  other: adsenseAccountMetadata(),
+  // Safari の Smart App Banner。NEXT_PUBLIC_APP_STORE_LIVE=true のときだけ出す（lib/app-store.ts）。
+  itunes: appStoreItunesMetadata(),
   manifest: "/manifest.json",
   icons: {
     icon: [
@@ -43,7 +49,7 @@ const metadataDefinition: Metadata = {
     apple: { url: "/apple-touch-icon.png", sizes: "180x180" },
   },
   title: {
-    default: "安全AIポータル｜根拠から、現場の行動へ",
+    default: "安全AIポータル｜その書類、AIに任せて、現場に行こう。",
     template: "%s｜安全AIポータル",
   },
   ...(process.env.GOOGLE_SITE_VERIFICATION
@@ -76,7 +82,7 @@ const metadataDefinition: Metadata = {
     locale: SITE_LOCALE,
     siteName: SITE_NAME,
     title: {
-      default: "安全AIポータル｜根拠から、現場の行動へ",
+      default: "安全AIポータル｜その書類、AIに任せて、現場に行こう。",
       template: "%s｜安全AIポータル",
     },
     description:
@@ -86,14 +92,14 @@ const metadataDefinition: Metadata = {
         url: "/api/og",
         width: 1200,
         height: 630,
-        alt: "安全AIポータル — 根拠から、現場の行動へ",
+        alt: "安全AIポータル — その書類、AIに任せて、現場に行こう。",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
     title: {
-      default: "安全AIポータル｜根拠から、現場の行動へ",
+      default: "安全AIポータル｜その書類、AIに任せて、現場に行こう。",
       template: "%s｜安全AIポータル",
     },
     description:
@@ -135,7 +141,7 @@ export default async function RootLayout({
     rawRumBuildId.replace(/[^A-Za-z0-9_-]/g, "").slice(0, 80) ||
     "production-build";
   const adsEnabled =
-    !PREVIEW_SAFETY_MODE && Boolean(process.env.NEXT_PUBLIC_ADSENSE_PUB_ID);
+    !PREVIEW_SAFETY_MODE && Boolean(configuredAdsensePublisherId(process.env.NEXT_PUBLIC_ADSENSE_PUB_ID));
   return (
     <html lang="ja" className="h-full antialiased" suppressHydrationWarning>
       <head>
@@ -180,6 +186,7 @@ export default async function RootLayout({
           </div>
         </noscript>
         <CspNonceProvider nonce={nonce}>
+          <ScrollPositionRestorer />
           <DeferredGlobalEnhancements
             analyticsEnabled={analyticsEnabled}
             adsEnabled={adsEnabled}

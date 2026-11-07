@@ -217,11 +217,11 @@
     "id": "Bahaya jatuh"
   },
   "floor-opening-hazard": {
-    "ja": "開口部注意",
-    "en": "Caution: floor opening",
-    "vi": "Chú ý lỗ mở sàn",
-    "zh-CN": "当心洞口",
-    "id": "Awas bukaan lantai"
+    "ja": "開口部 立入禁止",
+    "en": "No entry: floor opening",
+    "vi": "Cấm vào khu vực lỗ mở sàn",
+    "zh-CN": "洞口区域 禁止进入",
+    "id": "Dilarang masuk area bukaan lantai"
   },
   "falling-objects-hazard": {
     "ja": "落下物注意",

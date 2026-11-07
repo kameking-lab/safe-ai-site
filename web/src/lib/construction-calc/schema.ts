@@ -1,3 +1,4 @@
+import { belowDisplayPrecisionLabel } from "@/lib/construction-calculators/core";
 /**
  * 建設計算コーナー 共通スキーマ（宣言的計算機定義）
  *
@@ -190,11 +191,11 @@ export function normalizeValues(
       const n = typeof input === "number" ? input : Number(String(input).trim());
       if (!Number.isFinite(n)) {
         values[field.id] = field.defaultValue;
-        errors.push(`「${field.label}」は数値で入力してください（既定値 ${field.defaultValue}${field.unit} を使用）`);
+        errors.push(`「${field.label}」は数値で入力してください。結果は計算しません。`);
       } else if (n < field.min || n > field.max) {
         values[field.id] = field.defaultValue;
         errors.push(
-          `「${field.label}」は ${field.min}〜${field.max}${field.unit} の範囲で入力してください（既定値 ${field.defaultValue}${field.unit} を使用）`,
+          `「${field.label}」は ${field.min}〜${field.max}${field.unit} の範囲で入力してください。結果は計算しません。`,
         );
       } else {
         values[field.id] = n;
@@ -210,7 +211,7 @@ export function normalizeValues(
         values[field.id] = hit.value;
       } else {
         values[field.id] = field.defaultValue;
-        errors.push(`「${field.label}」の選択値が不正です（既定値を使用）`);
+        errors.push(`「${field.label}」の選択値が不正です。結果は計算しません。`);
       }
     }
   }
@@ -227,5 +228,8 @@ export function kgfToKn(kgf: number): number {
 
 /** 数値の表示用整形（有効桁を保ちつつ桁区切り） */
 export function formatNumber(n: number, maxFractionDigits = 1): string {
-  return n.toLocaleString("ja-JP", { maximumFractionDigits: maxFractionDigits });
+  const formatted = n.toLocaleString("ja-JP", { maximumFractionDigits: maxFractionDigits });
+  return Number.isFinite(n) && n !== 0 && Number(formatted.replaceAll(",", "")) === 0
+    ? belowDisplayPrecisionLabel(n)
+    : formatted;
 }

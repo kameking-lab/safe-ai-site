@@ -161,9 +161,9 @@ function stateLabel(state: KyDraftState): string {
 
 function weatherAvailabilityLabel(weather: KyWeatherSnapshot): string {
   if (weather.stale && weather.manuallyEditedFields.length) {
-    return "古い情報・手動修正あり";
+    return "古い情報・鮮度未確認・手動修正あり";
   }
-  if (weather.stale) return "古い情報";
+  if (weather.stale) return "古い情報・鮮度未確認";
   if (weather.manuallyEditedFields.length) return "手動修正あり";
   if (weather.availability === "degraded") return "一部取得不能";
   if (weather.availability === "unavailable") return "未確認";
@@ -1171,7 +1171,7 @@ export function KyZeroFrictionBuilder({
     }
     if (!draft.reviewerName.trim()) issues.push("確認者が未入力");
     if (!draft.weather) issues.push("気象・WBGTが未確認");
-    else if (draft.weather.stale) issues.push("気象に古い情報あり");
+    else if (draft.weather.stale) issues.push("気象に古い情報・鮮度未確認あり");
     else if (draft.weather.degraded) issues.push("気象の一部が取得不能");
     if (draft.handoff && !draft.handoff.reviewedAt) {
       issues.push("引継ぎ候補は人の確認が必要");

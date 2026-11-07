@@ -76,6 +76,44 @@ describe("ChemicalRaSaveButton のネットワーク表示", () => {
     payload: { confirmedByHuman: true },
   };
 
+  it("保存された実レコードを親へ渡し、印刷対象を保存内容と一致させる", async () => {
+    const saved = { ...RECORD, raId: "ra-new-copy", savedAt: "2026-10-20T03:00:00.000Z" };
+    vi.spyOn(raCloud, "saveChemicalRaRecord").mockResolvedValue({
+      raId: saved.raId, localStatus: "saved-locally", cloudStatus: "not-requested",
+    });
+    const read = vi.spyOn(raCloud, "getChemicalRaRecord").mockResolvedValue(saved);
+    const onSaved = vi.fn();
+    render(<ChemicalRaSaveButton {...props} onSaved={onSaved} />);
+    fireEvent.click(screen.getByRole("button", { name: "この結果を保存" }));
+    await waitFor(() => expect(onSaved).toHaveBeenCalledWith(saved));
+    expect(read).toHaveBeenCalledWith(saved.raId);
+  });
+
+  it("保存に失敗したときは現在の印刷対象を更新しない", async () => {
+    vi.spyOn(raCloud, "saveChemicalRaRecord").mockResolvedValue({
+      raId: "ra-failed", localStatus: "failed", cloudStatus: "not-requested",
+    });
+    const read = vi.spyOn(raCloud, "getChemicalRaRecord");
+    const onSaved = vi.fn();
+    render(<ChemicalRaSaveButton {...props} onSaved={onSaved} />);
+    fireEvent.click(screen.getByRole("button", { name: "この結果を保存" }));
+    await screen.findByText(/端末内への保存に失敗/);
+    expect(read).not.toHaveBeenCalled();
+    expect(onSaved).not.toHaveBeenCalled();
+  });
+
+  it("保存内容を再取得できないときは印刷を更新したと表示しない", async () => {
+    vi.spyOn(raCloud, "saveChemicalRaRecord").mockResolvedValue({
+      raId: "ra-unreadable", localStatus: "saved-locally", cloudStatus: "not-requested",
+    });
+    vi.spyOn(raCloud, "getChemicalRaRecord").mockResolvedValue(null);
+    const onSaved = vi.fn();
+    render(<ChemicalRaSaveButton {...props} onSaved={onSaved} />);
+    fireEvent.click(screen.getByRole("button", { name: "この結果を保存" }));
+    await screen.findByText(/印刷前に台帳から保存内容を確認/);
+    expect(onSaved).not.toHaveBeenCalled();
+  });
+
   it.each([
     ["synced", "認証済みクラウドとの同期も完了しました"],
     ["failed", "クラウド同期は失敗しました"],

@@ -8,6 +8,7 @@ import genqualitySnapshot from "@/data/chatbot-genquality-latest.json";
 import { PageJsonLd } from "@/components/page-json-ld";
 import { withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
 import { ogImageUrl } from "@/lib/og-url";
+import { LEGAL_GENERATION_ENABLED, LEGAL_SEARCH_MODE_LABEL } from "@/lib/chatbot-generation-policy";
 
 const SITE = "https://www.anzen-ai-portal.jp";
 const _title = "AIチャットボット評価（根拠検索と安全保留）";
@@ -161,6 +162,12 @@ export default function ChatbotEvalPage() {
       <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">
         AIチャットボット評価：根拠検索と安全保留
       </h1>
+      {!LEGAL_GENERATION_ENABLED && (
+        <p className="mt-3 rounded-lg border border-sky-200 bg-sky-50 p-4 text-sm leading-6 text-slate-800">
+          現在の提供方式：{LEGAL_SEARCH_MODE_LABEL}。
+          以下の検索評価は記載した測定日時の結果です。現在の本番回答を再測定した値ではありません。
+        </p>
+      )}
       <p className="mt-2 text-sm leading-6 text-slate-600">
         hash検証済みe-Gov法令本文から期待条文を検索できたかと、条件不足・誤前提・未収録の通達や指針を
         無関係な条文で代用せず回答保留できたかを、別の指標で測定しています。Recall@5は検索上位5件への
@@ -200,7 +207,7 @@ export default function ChatbotEvalPage() {
         ※ 総ケース数は {r.total} 件（条文検索 {retrievalTotal} 件、安全保留 {safeHoldTotal} 件）です。
         Precision@5は上位5候補の純度、MRRは最初の期待根拠が現れる順位を示します。
         「検索到達ゲート」はRecallと安全保留だけの限定判定であり、低いPrecisionを打ち消す総合PASSではありません。
-        生成回答は下記の自作・限定的な機械チェックで別途確認していますが、意味的正確性の評価ではありません。<br />
+        過去の生成回答の機械チェックは、下の「過去の生成回答チェック」から開けます。現在の提供方式の評価には使いません。<br />
         最終評価: {formatDate(r.generated_at)} ／ ソース:{" "}
         <code className="rounded bg-slate-100 px-1">src/lib/rag-100q.fixture.ts</code>
         ／ 実行コマンド:{" "}
@@ -211,7 +218,17 @@ export default function ChatbotEvalPage() {
       </p>
 
       {/* 生成回答の限定機械チェック */}
-      <GenQualitySection g={gq} />
+      {LEGAL_GENERATION_ENABLED ? <GenQualitySection g={gq} /> : (
+        <details className="mt-8 rounded-xl border border-slate-300 p-4">
+          <summary className="min-h-11 cursor-pointer content-center text-sm font-semibold text-slate-800">
+            過去の生成回答チェック（{gq.date}・現在の提供方式とは別）
+          </summary>
+          <p className="mt-2 text-sm leading-6 text-slate-700">
+            生成AIを利用していた時点の参考記録です。現在の検索・定型回答の正確さや安全性を示しません。
+          </p>
+          <GenQualitySection g={gq} />
+        </details>
+      )}
 
       {/* トピック別 */}
       <section className="mt-8">
@@ -296,14 +313,14 @@ export default function ChatbotEvalPage() {
             に固定。条文検索ケースと、安全上回答を保留すべきケースを分離しています。
           </li>
           <li>
-            ・本セクションの評価対象は <strong>RAG 検索の根拠条文ヒット率</strong>。生成回答は上記の限定機械チェックで公開していますが、第三者による正確性評価ではありません。
+            ・本セクションの評価対象は <strong>RAG 検索の根拠条文ヒット率</strong>。過去の生成回答は上記の開閉欄に保管しています。第三者による正確性評価ではありません。
           </li>
           <li>
             ・単一根拠のケースは期待条文が上位5件に含まれるかを確認し、複数の条文が結論に不可欠なケースは
             <code className="rounded bg-white px-1">requiredAll</code> として全条文の取得を必須にします。
           </li>
           <li>
-            ・本ベンチマークは検索段階の代理指標であり、実際の回答精度はモデル生成・プロンプト設計にも依存します。
+            ・本ベンチマークは検索段階の代理指標です。現在の定型回答についても、条件の分岐・抜粋内容・個別作業への適用を保証しません。
           </li>
           <li>
             ・評価は CI で自動再走（

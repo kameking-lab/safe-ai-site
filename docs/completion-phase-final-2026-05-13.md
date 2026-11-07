@@ -26,7 +26,7 @@ All issues identified in the 完璧化フェーズ (perfection phase) deep audit
 | A2 | i18n files had unused `"enterprise"` key in pricing section | Removed from en/pt/tl/vi/zh JSON files |
 | A3 | `site-stats.ts` — `accidentDbCount` / `mhlwDeathsCount` / `accidents10yCount` undocumented relationship | Added JSDoc comments explaining each counter's source and future divergence plan |
 | A4 | `/auth/error` page indexed by search engines | Added `robots: { index: false }` to metadata |
-| A5 | `/handover` gate used hard-coded password in source | Changed to `process.env.HANDOVER_GATE_KEY ?? "handover2026"` |
+| A5 | `/handover` gate used hard-coded password in source | Changed to `process.env.HANDOVER_GATE_KEY ?? "<REDACTED>"` |
 | A6 | `affiliate-url.ts` silently ignored missing env vars | Added `NODE_ENV=development` warnings for missing affiliate IDs |
 | A7 | `home-value-hero.tsx` imported deleted `PersonaEntry` | Import removed (handled as part of A1) |
 | A8 | `persona-entry.tsx` (lowercase) — duplicate file risk | Retained; this is the current active component (enterprise version was the dead one) |

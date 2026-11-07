@@ -32,7 +32,7 @@ export const DEFAULT_OG_IMAGE = {
   url: DEFAULT_OG_IMAGE_URL,
   width: 1200,
   height: 630,
-  alt: "安全AIポータル — 根拠から、現場の行動へ",
+  alt: "安全AIポータル — その書類、AIに任せて、現場に行こう。",
 } as const;
 
 type Override<T> = T extends object ? Partial<T> : T;

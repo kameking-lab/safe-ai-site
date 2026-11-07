@@ -26,6 +26,14 @@ describe("sitemap.xml（柱C-3-3 欠落ページ追加）", () => {
 
   const has = (path: string) => urlSet.has(`${BASE}${path}`);
 
+  it("計算一覧は現行入口を収載し、入力方式の異なる旧個別計算機も維持する", () => {
+    expect(has("/construction-calc")).toBe(false);
+    expect(has("/tools/construction-calculators")).toBe(true);
+    for (const slug of ["soil-volume-conversion", "slope-ratio-convert", "rebar-mass", "concrete-volume"]) {
+      expect(has(`/construction-calc/${slug}`)).toBe(true);
+    }
+  });
+
   it("新着ハブ /whats-new を収載する", () => {
     expect(has("/whats-new")).toBe(true);
   });
@@ -79,7 +87,8 @@ describe("sitemap.xml（柱C-3-3 欠落ページ追加）", () => {
 
 /**
  * 柱C-3-3 追補2 回帰テスト: 孤立していた実在 indexable ページの追加を固定。
- * - /accident-news（重大災害事例ブラウザ・死亡災害DB類型検索・自己canonical・revalidate）
+ * - /accident-news（直近報道ベースの労災事故速報）
+ * - /fatal-accidents（死亡災害DB類型検索・自己canonical・revalidate）
  * - /heat-illness-prevention/{acclimatization,log,poster}
  *   （令和7年6月改正安衛則対応の実在ツールページ・自己canonical・PageJsonLd付）
  * - /ky/paper（KY入力の正規ページ・robots index:true・/pdf の permanentRedirect 先）
@@ -95,8 +104,9 @@ describe("sitemap.xml（柱C-3-3 追補2: 追加した孤立ページと非収�
   const entryFor = (path: string) =>
     entries.find((e) => e.url === `${BASE}${path}`);
 
-  it("重大災害事例ブラウザ /accident-news を収載する", () => {
+  it("労災事故速報と死亡事故データベースを収載する", () => {
     expect(has("/accident-news")).toBe(true);
+    expect(has("/fatal-accidents")).toBe(true);
   });
 
   it("外部レビュー待ちの熱中症ハブと学習資産をsitemapから除外する", () => {
@@ -132,13 +142,13 @@ describe("sitemap.xml（柱C-3-3 追補2: 追加した孤立ページと非収�
     expect(has("/pdf")).toBe(false);
   });
 
-  it("/accident-news の lastmod は公開中の重大災害スナップショット更新日に追従し、隔離DBは収載しない", () => {
-    const accidentNews = entryFor("/accident-news");
+  it("/fatal-accidents の lastmod は死亡災害スナップショット更新日に追従し、隔離DBは収載しない", () => {
+    const fatalAccidents = entryFor("/fatal-accidents");
     const expected = computeSitemapFreshness(
       new Date().toISOString().slice(0, 10),
     ).accidentsDataUpdated;
-    expect(accidentNews?.lastModified).toBeDefined();
-    expect(accidentNews?.lastModified).toBe(expected);
+    expect(fatalAccidents?.lastModified).toBeDefined();
+    expect(fatalAccidents?.lastModified).toBe(expected);
     expect(entryFor("/accidents")).toBeUndefined();
   });
 
@@ -150,6 +160,7 @@ describe("sitemap.xml（柱C-3-3 追補2: 追加した孤立ページと非収�
     expect(has("/organization")).toBe(false);
     // 印刷専用ユーティリティ
     expect(has("/accident-news/print")).toBe(false);
+    expect(has("/fatal-accidents/print")).toBe(false);
   });
 });
 
@@ -462,6 +473,8 @@ describe("sitemap.xml（逆カバレッジガード: 実在 indexable ページ�
   // (d) 当班が意図的に非収載とする indexable ページ（index:true のまま sitemap から外す少数例）。
   // 追加時は理由を必須とし、上の「非収載境界」describe の該当アサーションと対で管理する。
   const SEO_INTENTIONALLY_EXCLUDED = new Set<string>([
+    // next.config.tsで現行一覧へ恒久転送する入口。個別の旧計算URLは収載を維持。
+    "/construction-calc",
     // 事業所・部署ダッシュボード。「正式リリース前デモ版モック」のため公開検索面へは出さない
     // （非収載境界テストで has("/organization")===false を固定）。noindex 化されれば削除してよい。
     "/organization",
@@ -528,12 +541,16 @@ describe("sitemap.xml（逆カバレッジガード: 実在 indexable ページ�
     expect(search && isExcludedBySource(search)).toBe(true); // /search は index:false
     expect(ky && isExcludedBySource(ky)).toBe(true); // /ky はクエリを維持する permanentRedirect
     expect(pdf && isExcludedBySource(pdf)).toBe(true); // /pdf は permanentRedirect スタブ
-    // 本ガード新設で収載した /profile は sitemap 側に載っている（回帰固定）。
-    expect(sitemapPaths.has("/profile")).toBe(true);
-    // (d) 意図的例外 /organization は index:true だが sitemap 非収載のまま（デモ）。
+    // 端末設定と、解説本文が未完成の特集は検索用sitemapに載せない。
+    expect(sitemapPaths.has("/profile")).toBe(false);
+    expect(sitemapPaths.has("/notifications")).toBe(false);
+    expect(sitemapPaths.has("/laws/bcp")).toBe(false);
+    expect(sitemapPaths.has("/laws/freelance-rosai")).toBe(false);
+    expect(sitemapPaths.has("/laws/gig-work")).toBe(false);
+    // (d) /organization はリリース前デモのため明示noindex、sitemap非収載。
     expect(byRoute.has("/organization")).toBe(true); // ルートは実在
     const org = byRoute.get("/organization");
-    expect(org && isExcludedBySource(org)).toBe(false); // noindex/redirect ではない（=例外扱いが必要）
+    expect(org && isExcludedBySource(org)).toBe(true); // noindexで機械的に除外
     expect(sitemapPaths.has("/organization")).toBe(false); // sitemap には載せない
   });
 });

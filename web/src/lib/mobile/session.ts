@@ -1,6 +1,7 @@
 import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
 import { headers } from 'next/headers';
 import { billingDb } from './billing-service';
+import { APP_REVIEW_USER_ID, appReviewConfig } from '../app-review';
 export const digest = (value:string) => createHash('sha256').update(value).digest('hex');
 export async function mobileAuthSession() {
   const authorization=(await headers()).get('authorization');
@@ -10,6 +11,8 @@ export async function mobileAuthSession() {
   const db=billingDb();
   const session=await db.mobileSession.findUnique({where:{tokenHash:digest(token)}});
   if(!session || session.expiresAt<=new Date()) return null;
+  // Disabling or expiring the App Review login also ends the reviewer's native sessions.
+  if(session.userId===APP_REVIEW_USER_ID && !appReviewConfig()) return null;
   const user=await db.user.findUnique({where:{id:session.userId},select:{id:true,name:true,email:true,image:true}});
   return user ? {user,expires:session.expiresAt.toISOString()}:null;
 }

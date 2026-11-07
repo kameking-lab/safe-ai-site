@@ -7,6 +7,7 @@ import type { EnvironmentWbgtStatus } from "@/lib/heat-illness/environment-wbgt"
 import type { KyWeatherSnapshot } from "@/lib/ky/zero-friction-types";
 import { jstDateTimeParts } from "@/lib/ky/zero-friction-types";
 import { jmaWarningName } from "@/lib/jma/warning-label";
+import { resolveForecastTargetDate } from "@/lib/weather/forecast-target-date";
 
 export type KyWeatherPrefillResult =
   | { ok: true; snapshot: KyWeatherSnapshot }
@@ -82,7 +83,6 @@ export function combineKyWeatherPayloads(input: {
   const area = officialAreaCandidateById(input.areaId);
   if (!area) return null;
   const now = input.now ?? new Date();
-  const retrievedAt = now.toISOString();
   const weather = input.weather;
   const weatherSnapshot =
     weather && "snapshot" in weather ? weather.snapshot : null;
@@ -91,7 +91,7 @@ export function combineKyWeatherPayloads(input: {
   const wbgtValue = wbgt?.wbgt;
   const warning = warningState(weather);
   const weatherFetchedAt =
-    validIso(weather?.fetchedAt) ?? retrievedAt;
+    validIso(weather?.fetchedAt) ?? "";
   const weatherAgeMs = now.getTime() - Date.parse(weatherFetchedAt);
   const weatherStale =
     !Number.isFinite(weatherAgeMs) ||
@@ -183,15 +183,10 @@ export async function fetchKyWeatherPrefill(input: {
     return { ok: false, reason: "area-invalid", snapshot: null };
   }
   const now = input.now ?? new Date();
-  const today = jstDateTimeParts(now).date;
-  const workDateMs = Date.parse(`${input.workDate}T00:00:00+09:00`);
-  const todayMs = Date.parse(`${today}T00:00:00+09:00`);
-  const daysAhead = Math.round((workDateMs - todayMs) / 86_400_000);
+  const target = resolveForecastTargetDate(input.workDate, now);
   if (
     !/^\d{4}-\d{2}-\d{2}$/u.test(input.workDate) ||
-    !Number.isFinite(workDateMs) ||
-    daysAhead < 0 ||
-    daysAhead > 6
+    !target
   ) {
     return {
       ok: false,
@@ -199,6 +194,7 @@ export async function fetchKyWeatherPrefill(input: {
       snapshot: null,
     };
   }
+  const { daysAhead } = target;
 
   const encodedArea = encodeURIComponent(area.id);
   const encodedDate = encodeURIComponent(input.workDate);
@@ -215,6 +211,18 @@ export async function fetchKyWeatherPrefill(input: {
   const weather = isWeatherPayload(weatherResult.value)
     ? weatherResult.value
     : null;
+  // The requested day is part of the evidence: never label a different day's
+  // response as this KY record's conditions, even when the API returns 200.
+  if (weather && "snapshot" in weather) {
+    const currentTarget = validIso(weather.current?.targetAt);
+    if (
+      !isRecord(weather.snapshot) ||
+      weather.snapshot.date !== input.workDate ||
+      (weather.current && (!currentTarget || jstDateTimeParts(new Date(currentTarget)).date !== input.workDate))
+    ) {
+      return { ok: false, reason: "unavailable", snapshot: null };
+    }
+  }
   const wbgt = isEnvironmentWbgtPayload(wbgtResult.value, area.id)
     ? wbgtResult.value
     : null;

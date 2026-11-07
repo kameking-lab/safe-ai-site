@@ -623,20 +623,25 @@ const compactNavigationPaths = [
   "/chemical-ra",
   "/laws",
   "/accident-news",
+  "/fatal-accidents",
+  "/accidents-analytics",
+  "/articles",
   "/training/visual-ky",
   "/education-certification",
-  "/services/automation",
+  "/contact/automation-email",
+  "/training/safety-seminars",
+  "/goods",
   "/safety-ai",
   "/search",
   "/features",
 ];
 record(
   "home:compact-navigation-contract",
-  compactNavigationPaths.length === 17 &&
-    new Set(compactNavigationPaths).size === 17 &&
+  compactNavigationPaths.length === 22 &&
+    new Set(compactNavigationPaths).size === 22 &&
     !compactNavigationPaths.includes("/resources"),
   {
-    expectedCount: 17,
+    expectedCount: 22,
     actualCount: compactNavigationPaths.length,
     uniqueCount: new Set(compactNavigationPaths).size,
     resourcesIncluded: compactNavigationPaths.includes("/resources"),

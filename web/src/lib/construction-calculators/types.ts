@@ -73,7 +73,7 @@ export interface FormulaSource {
 export interface InputDefinition {
   key: string;
   label: string;
-  type: "number" | "select" | "integer" | "segments";
+  type: "number" | "select" | "integer" | "segments" | "points";
   required: boolean;
   units?: readonly string[];
   options?: readonly string[];

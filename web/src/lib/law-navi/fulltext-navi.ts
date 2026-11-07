@@ -103,6 +103,12 @@ export async function getFulltextNaviEntries(egovLawId: string): Promise<Fulltex
       articleTitle: captionToTitle(fa.caption),
       text: fa.text,
       keywords: [],
+      sourceKind: "egov-fulltext-snapshot",
+      sourceUrl: `https://laws.e-gov.go.jp/law/${law.lawId}`,
+      sourceLawId: law.lawId,
+      sourceRevisionId: law.revisionId,
+      sourceFetchedAt: law.fetchedAt,
+      sourceHash: law.sha256,
     };
     out.push({
       article,

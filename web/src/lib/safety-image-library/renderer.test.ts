@@ -4,6 +4,7 @@ import sharp from "sharp";
 import { describe, expect, it } from "vitest";
 import {
   SAFETY_IMAGE_LANGUAGES,
+  SAFETY_IMAGE_THEMES,
   getSafetyImageTheme,
 } from "@/data/safety-image-library";
 import {
@@ -99,6 +100,49 @@ describe("safety image library renderer", () => {
       expect(metadata.format).toBe("jpeg");
       expect([metadata.width, metadata.height]).toEqual([480, 679]);
       expect(metadata.density).toBe(300);
+    }
+  });
+
+  it("renders all five selected languages together on one sign", async () => {
+    const selected = ["ja", "en", "vi", "zh-CN", "id"] as const;
+    const renderSettings: SafetyImageRenderSettings = {
+      ...settings("ja"),
+      mode: "edited",
+      languages: [...selected],
+      texts: helmet.texts,
+    };
+    const layer = buildSafetyImageTextLayer({
+      theme: helmet,
+      dimensions: common.dimensions,
+      settings: renderSettings,
+    });
+    const renderedText = layer.replace(/<[^>]+>/gu, " ").replace(/\s+/gu, " ");
+    for (const language of selected) expect(renderedText).toContain(helmet.texts[language]);
+    for (const language of selected) expect(layer).toContain(`lang="${language}"`);
+    expect(layer).toContain('font-family="Noto Sans CJK SC, sans-serif"');
+    const jpeg = await renderSafetyImage({ ...common, format: "jpeg", settings: renderSettings });
+    expect((await sharp(jpeg).metadata()).format).toBe("jpeg");
+  });
+
+  it("fits five languages on every theme in both A4 orientations", () => {
+    const selected = SAFETY_IMAGE_LANGUAGES;
+    for (const theme of SAFETY_IMAGE_THEMES) {
+      for (const outputSize of ["a4-portrait", "a4-landscape"] as const) {
+        const layer = buildSafetyImageTextLayer({
+          theme,
+          dimensions: getSafetyImageWorkingDimensions(outputSizePixels(outputSize)),
+          settings: {
+            ...settings("ja"),
+            language: "ja",
+            languages: [...selected],
+            text: theme.texts.ja,
+            texts: theme.texts,
+            numericUnit: theme.numericTemplate?.unit ?? "",
+            position: theme.orientation === "portrait" ? "top" : "bottom",
+          },
+        });
+        expect(layer, `${theme.slug}/${outputSize}`).toContain("editable-text-layer");
+      }
     }
   });
 

@@ -29,7 +29,7 @@ export function WorkSupportSection() {
           <FileText className="h-6 w-6 text-sky-700" aria-hidden="true" />
           <h3 className="mt-2 font-black">有料の受託サービス</h3>
           <p className="mt-1 text-sm leading-6">
-            購入者の資料や業務に合わせる制作・説明は、無料機能とは別の任意サービスです。取引は公開済みサービスのプラットフォーム内で完結します。
+            購入者の資料や業務に合わせる制作・説明は、無料機能とは別の任意サービスです。下記の出品サービスの取引は各プラットフォーム内で行います。サイトの自動化相談は別の受付経路です。
           </p>
         </div>
       </div>
@@ -75,7 +75,7 @@ export function WorkSupportSection() {
         })}
       </ul>
       <p className="mt-4 text-sm font-bold leading-6">
-        個人メール、電話、SNSへの誘導は行いません。AI回答や制作物は、法的判断、現場承認、行政受理を保証しません。
+        出品サービスは各プラットフォームで連絡してください。自動化相談はサイトの案内から利用者のメールアプリで送信できます。AI回答や制作物は、法的判断、現場承認、行政受理を保証しません。
       </p>
     </section>
   );

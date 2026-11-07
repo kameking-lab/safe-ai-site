@@ -1,7 +1,7 @@
 import type { ChemicalRaResponse } from "@/app/api/chemical-ra/route";
 
 export const CHEMICAL_ASSESSMENT_NOTICE =
-  "本サイトは作業条件からCREATE-SIMPLEの判定値やばく露濃度を推定しません。製品固有の最新SDS、実測値、厚生労働省の公式CREATE-SIMPLEを使い、化学物質管理者または専門家が確認してください。";
+  "作業条件だけでは濃度・リスクを判定できません。製品の最新SDS・実測値・公式CREATE-SIMPLEを使い、化学物質管理者が確認してください。";
 
 /**
  * 旧版がlocalStorage/クラウドへ保存した独自判定を、再表示時に安全判断へ使わせない。

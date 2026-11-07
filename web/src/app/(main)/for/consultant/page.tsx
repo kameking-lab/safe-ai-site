@@ -35,7 +35,7 @@ const ACTIONS: readonly RoleAction[] = [
       "サイト内索引から関連条文へ進み、判断前にe-Govの正本と専門家へ確認します。",
   },
   {
-    href: "/accident-news",
+    href: "/fatal-accidents",
     label: "出典区分付き重大災害情報",
     description:
       "公表事実、報道由来、AI要約等の区分を確認し、転用前に一次資料と適用条件を照合します。",

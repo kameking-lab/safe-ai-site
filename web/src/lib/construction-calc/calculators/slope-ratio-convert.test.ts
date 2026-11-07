@@ -67,6 +67,12 @@ describe("slope-ratio-convert: compute", () => {
     expect(out.warnings.join("\n")).toContain("急勾配");
   });
 
+  it("45°ちょうどを45°超と表示しない", () => {
+    const boundary = run({ from: "angle", angleDeg: 45 });
+    expect(boundary.warnings.join("\n")).not.toContain("45°を超える");
+    expect(run({ from: "angle", angleDeg: 45.1 }).warnings.join("\n")).toContain("急勾配");
+  });
+
   it("隔離中の法令適合判定へ誘導せず、一次資料と現場条件の確認を促す", () => {
     const out = run({ from: "ratio", ratioN: 1.5 });
     expect(out.warnings.join("\n")).toContain("e-Gov法令検索");

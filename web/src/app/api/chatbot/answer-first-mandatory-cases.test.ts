@@ -467,7 +467,7 @@ describe("answer-first mandatory conversation cases", () => {
       expect(unknown.payload.quickReplies).toEqual([]);
       expect(unknown.payload.effectiveDateStatus).toMatchObject({
         status: "current",
-        asOf: "2026-08-09",
+        asOf: "2026-10-12",
       });
       expect(unknown.payload.safetyKind).not.toBe("privacy");
     },

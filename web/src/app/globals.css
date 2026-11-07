@@ -9,6 +9,8 @@
 @source not "../**/*.spec.*";
 @source not "../**/__tests__";
 @source not "../**/__snapshots__";
+/* Literal SSR CSS is already complete; it must not generate Tailwind utilities. */
+@source not "../components/home/home-lp-critical-css.ts";
 /* Admin utilities are emitted by the two admin layouts, not sent to public routes. */
 @source not "../app/admin";
 @source not "../app/(main)/admin";
@@ -24,13 +26,10 @@
   --foreground: #132238;
   --surface: #ffffff;
   --surface-emphasis: #edf6f2;
-  --surface-inverse: #142d4c;
-  --surface-card: var(--surface);
   --surface-muted: #f1f4f2;
   --text: var(--foreground);
   --muted: #526173;
   --border: #d7dfdc;
-  --border-subtle: var(--border);
   --primary: #0b5d4b;
   --primary-hover: #08483b;
   --primary-solid: #0b5d4b;
@@ -67,20 +66,9 @@
   --radius-sm: 0.625rem;
   --radius-md: 1rem;
   --radius-lg: 1.5rem;
-  --radius-xl: 2rem;
   --space-1: 0.25rem;
   --space-2: 0.5rem;
-  --space-3: 0.75rem;
-  --space-4: 1rem;
-  --space-6: 1.5rem;
-  --space-8: 2rem;
   --type-xs: 0.75rem;
-  --type-sm: 0.875rem;
-  --type-body: 1rem;
-  --type-lead: clamp(1.05rem, 1rem + 0.25vw, 1.25rem);
-  --type-h3: clamp(1.125rem, 1rem + 0.5vw, 1.5rem);
-  --type-h2: clamp(1.5rem, 1.2rem + 1vw, 2.25rem);
-  --type-h1: clamp(2rem, 1.45rem + 2vw, 3.5rem);
 }
 
 html.dark {
@@ -88,13 +76,10 @@ html.dark {
   --foreground: #eef5f2;
   --surface: #132238;
   --surface-emphasis: #12352f;
-  --surface-inverse: #07111e;
-  --surface-card: var(--surface);
   --surface-muted: #0e1c2e;
   --text: var(--foreground);
   --muted: #b7c3cf;
   --border: #34465a;
-  --border-subtle: var(--border);
   --primary: #65d6b4;
   --primary-hover: #8be3c8;
   --primary-solid: #0b5d4b;
@@ -133,9 +118,9 @@ html.dark {
   --color-foreground: var(--foreground);
   /* 日本語・欧文ともOS標準フォントを使う。全ページ共通のWebフォント取得と
      読み込み後の字幅変化を避け、低速回線のLCPとCLSを安定させる。 */
-  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI",
-    "Hiragino Kaku Gothic ProN", "Hiragino Sans", "BIZ UDPGothic", "Yu Gothic UI",
-    Meiryo, sans-serif;
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Kaku Gothic ProN",
+    "Hiragino Sans", "BIZ UDPGothic", "Yu Gothic UI", Meiryo, sans-serif;
   --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
   /* 安全AIポータル brand / semantic colors */
   --color-brand-primary: var(--primary);
@@ -177,9 +162,6 @@ body {
   color: var(--foreground);
   /* フォントは @theme の --font-sans に一元化（Arial直書きが日本語UIをチープに見せていた） */
   font-family: var(--font-sans);
-  /* PWAプルリフレッシュを有効にする */
-  overscroll-behavior-y: auto;
-  transition: background-color 200ms ease, color 200ms ease;
 }
 
 /*
@@ -201,10 +183,7 @@ body {
       .bg-slate-100,
       .bg-slate-200,
       .bg-gray-50,
-      .bg-gray-100,
       .bg-gray-200,
-      .bg-zinc-50,
-      .bg-zinc-100,
       .bg-zinc-200
     ):not([class*="dark:bg-"]) {
     background-color: var(--surface-muted);
@@ -223,7 +202,11 @@ body {
       [class^="bg-teal-50/"],
       [class*=" bg-teal-50/"]
     ):not([class*="dark:bg-"]) {
-    background-color: color-mix(in srgb, var(--success-solid) 22%, var(--surface));
+    background-color: color-mix(
+      in srgb,
+      var(--success-solid) 22%,
+      var(--surface)
+    );
   }
 
   html.dark
@@ -233,10 +216,8 @@ body {
       .bg-sky-200,
       .bg-blue-50,
       .bg-blue-100,
-      .bg-blue-200,
       .bg-cyan-50,
       .bg-cyan-100,
-      .bg-cyan-200,
       [class^="bg-sky-50/"],
       [class*=" bg-sky-50/"],
       [class^="bg-blue-50/"],
@@ -254,10 +235,8 @@ body {
       .bg-amber-200,
       .bg-orange-50,
       .bg-orange-100,
-      .bg-orange-200,
       .bg-yellow-50,
       .bg-yellow-100,
-      .bg-yellow-200,
       [class^="bg-amber-50/"],
       [class*=" bg-amber-50/"],
       [class^="bg-orange-50/"],
@@ -265,7 +244,11 @@ body {
       [class^="bg-yellow-50/"],
       [class*=" bg-yellow-50/"]
     ):not([class*="dark:bg-"]) {
-    background-color: color-mix(in srgb, var(--caution-solid) 24%, var(--surface));
+    background-color: color-mix(
+      in srgb,
+      var(--caution-solid) 24%,
+      var(--surface)
+    );
   }
 
   html.dark
@@ -288,13 +271,11 @@ body {
     :where(
       .bg-indigo-50,
       .bg-indigo-100,
-      .bg-indigo-200,
       .bg-violet-50,
       .bg-violet-100,
       .bg-violet-200,
       .bg-purple-50,
       .bg-purple-100,
-      .bg-purple-200,
       [class^="bg-indigo-50/"],
       [class*=" bg-indigo-50/"],
       [class^="bg-violet-50/"],
@@ -410,15 +391,21 @@ body {
   }
 
   html.dark
-    :where(
-      [class^="text-rose-800/"],
-      [class*=" text-rose-800/"]
-    ):not([class*="dark:text-"]) {
+    :where([class^="text-rose-800/"], [class*=" text-rose-800/"]):not(
+      [class*="dark:text-"]
+    ) {
     color: #fecdd3;
   }
 }
 
 /* Shared visual grammar. Layouts may vary; color, radius, shadow, CTA and status do not. */
+aside [data-nav-active="true"],
+#mobile-site-menu [data-nav-active="true"] {
+  background: var(--surface-emphasis);
+  color: var(--primary);
+  font-weight: 600;
+}
+
 .portal-surface {
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
@@ -532,15 +519,6 @@ body {
   color: var(--ai);
 }
 
-.portal-evidence-card {
-  border-left: 0.3rem solid var(--official);
-  border-radius: var(--radius-md);
-  background: var(--surface);
-  padding: var(--space-4);
-  color: var(--text);
-  box-shadow: var(--shadow-xs);
-}
-
 .portal-callout-caution {
   border: 1px solid color-mix(in srgb, var(--caution) 48%, var(--border));
   border-radius: var(--radius-md);
@@ -566,31 +544,8 @@ body {
   transform: translateY(-2px);
 }
 
-.mascot-bubble {
-  position: relative;
-  border: 1px solid color-mix(in srgb, var(--primary) 32%, var(--border));
-  border-radius: var(--radius-md);
-  background: var(--surface);
-  color: var(--text);
-  box-shadow: var(--shadow-sm);
-}
-
-.mascot-bubble::before {
-  position: absolute;
-  left: -0.45rem;
-  bottom: 1rem;
-  width: 0.8rem;
-  height: 0.8rem;
-  border-left: 1px solid color-mix(in srgb, var(--primary) 32%, var(--border));
-  border-bottom: 1px solid color-mix(in srgb, var(--primary) 32%, var(--border));
-  background: var(--surface);
-  content: "";
-  transform: rotate(45deg);
-}
-
 /* スクロールバー非表示（モバイルタブ等） */
 .scrollbar-hide {
-  -ms-overflow-style: none;
   scrollbar-width: none;
 }
 .scrollbar-hide::-webkit-scrollbar {
@@ -846,11 +801,14 @@ table {
  */
 @media (max-width: 480px) {
   .text-xs:not([data-compact-text]),
-  .text-2xs:not([data-compact-text]),
   .text-\[10px\]:not([data-compact-text]),
   .text-\[11px\]:not([data-compact-text]),
   .text-\[12px\]:not([data-compact-text]),
-  .text-\[13px\]:not([data-compact-text]) {
+  .text-\[13px\]:not([data-compact-text]),
+  .footer-eyebrow,
+  .footer-availability,
+  .footer-legal-link,
+  .footer-copyright {
     font-size: 0.875rem; /* 14px */
     line-height: 1.45;
   }
@@ -939,13 +897,6 @@ table {
   svg {
     forced-color-adjust: auto;
   }
-}
-
-/* App Router may briefly retain a route fallback while the page-level
-   Suspense fallback streams in. Never show both accident loading shells. */
-main:has(#accident-news-search [data-accident-news-loading-shell])
-  [data-accident-news-route-loading] {
-  display: none;
 }
 
 /* JS無効時は送信可能なnoscriptフォームだけを残す。headのnonce付き

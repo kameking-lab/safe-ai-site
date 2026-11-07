@@ -1,3 +1,4 @@
+import { renderToStaticMarkup } from "react-dom/server";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { constructionCalculatorRegistry } from "@/data/construction-calculators/formula-registry";
@@ -33,6 +34,17 @@ describe.each(constructionCalculatorRegistry)("$title の共通UI", (definition)
     fireEvent.click(getByRole("button", { name: "計算する" }));
     await waitFor(() => expect(container.querySelector("#calculation-result-title")).not.toBeNull());
 
+    const printed = container.querySelector(".construction-calculator-print");
+    expect(printed?.textContent).toContain("計算式の版：");
+    expect(printed?.textContent).toContain(definition.formulaVersion);
+    for (const source of definition.sources) {
+      expect(printed?.textContent).toContain(source.title);
+      expect(printed?.textContent).toContain(source.publisher);
+      expect(printed?.textContent).toContain(source.locator);
+      expect(printed?.textContent).toContain(source.checkedAt);
+      expect(printed?.querySelector(`a[href="${source.url}"]`)).not.toBeNull();
+    }
+
     fireEvent.click(getByRole("button", { name: "結果をコピー" }));
     await waitFor(() => expect(clipboardWrite).toHaveBeenCalledTimes(1));
     fireEvent.click(getByRole("button", { name: "CSV" }));
@@ -50,6 +62,20 @@ describe.each(constructionCalculatorRegistry)("$title の共通UI", (definition)
 });
 
 describe("建設計算のエラー案内", () => {
+  it("コンクリートの寸法単位変更では入力値を換算し、案内を表示する", async () => {
+    const definition = constructionCalculatorRegistry.find((item) => item.slug === "concrete-quantity");
+    expect(definition).toBeDefined();
+    if (!definition) return;
+    const { testFixtures: _testFixtures, ...publicDefinition } = definition;
+    render(<ConstructionCalculatorClient definition={publicDefinition} defaultInput={{ shape: "rectangular", length: 5, width: 4, height: 0.5, diameter: 2, dimensionUnit: "m", quantity: 1, lossPercent: 3, truckCapacityM3: 4.5 }} />);
+    await waitFor(() => expect(document.getElementById("construction-calculator-dimensionUnit")).not.toBeNull());
+    fireEvent.change(document.getElementById("construction-calculator-dimensionUnit") as HTMLSelectElement, { target: { value: "cm" } });
+    expect((document.getElementById("construction-calculator-length") as HTMLInputElement).value).toBe("500");
+    expect((document.getElementById("construction-calculator-width") as HTMLInputElement).value).toBe("400");
+    expect((document.getElementById("construction-calculator-height") as HTMLInputElement).value).toBe("50");
+    expect(screen.getByRole("status").textContent).toContain("実寸は同じ");
+  });
+
   it("内部キーを日本語ラベルへ置き換え、エラー入力を読み上げ可能にしてfocusする", async () => {
     const definition = constructionCalculatorRegistry.find((item) => item.slug === "concrete-quantity");
     expect(definition).toBeDefined();
@@ -85,4 +111,57 @@ describe("建設計算のエラー案内", () => {
     await waitFor(() => expect(document.getElementById("calculation-result-title")).not.toBeNull());
     expect(screen.getAllByText(/異形鉄筋の公称単位質量ではありません/u).length).toBeGreaterThanOrEqual(2);
   });
+});
+
+describe("現場入力と例の区別",()=>{
+ it("初期入力を空にし、例は明示ボタンだけで入れ、自動概算を履歴へ保存しない",async()=>{const definition=constructionCalculatorRegistry[0];const fixture=definition.testFixtures[0];const {testFixtures:_fixtures,...publicDefinition}=definition;render(<ConstructionCalculatorClient definition={publicDefinition} defaultInput={fixture.input} startEmpty/>);await waitFor(()=>expect(document.getElementById("construction-calculator-length")).not.toBeNull());expect((document.getElementById("construction-calculator-length") as HTMLInputElement).value).toBe("");fireEvent.click(screen.getByRole("button",{name:"例の数字で試す"}));await waitFor(()=>expect(document.getElementById("calculation-result-title")).not.toBeNull());expect(screen.getByText("例の数字です。現場の実測値ではありません。")).toBeTruthy();expect(JSON.parse(localStorage.getItem(CONSTRUCTION_CALCULATOR_HISTORY_KEY)??"[]")).toHaveLength(0);fireEvent.change(document.getElementById("construction-calculator-lossPercent") as HTMLInputElement,{target:{value:""}});fireEvent.click(screen.getByRole("button",{name:"計算する"}));await waitFor(()=>expect(screen.getByRole("alert").textContent).toContain("ロス率"));expect(document.getElementById("calculation-result-title")).toBeNull();});
+ it("鉛直掘削で表示しない法勾配の空欄が計算を妨げない",async()=>{const definition=constructionCalculatorRegistry.find(d=>d.slug==="excavation-backfill")!;const fixture=definition.testFixtures.find(f=>f.kind==="normal")!;const {testFixtures:_fixtures,...publicDefinition}=definition;render(<ConstructionCalculatorClient definition={publicDefinition} defaultInput={{...fixture.input,shape:"vertical",sideSlopeHorizontalPerVertical:""}}/>);await waitFor(()=>expect(screen.getByRole("button",{name:"計算する"})).toBeTruthy());fireEvent.click(screen.getByRole("button",{name:"計算する"}));await waitFor(()=>expect(document.getElementById("calculation-result-title")).not.toBeNull());});
+});
+
+describe("initial server-rendered calculator layout", () => {
+  it.each(constructionCalculatorRegistry)("$slug reserves its real blank form before hydration", (definition) => {
+    const fixture = definition.testFixtures.find(item => item.kind === "normal" && item.expectedOk);
+    const { testFixtures: _fixtures, ...publicDefinition } = definition;
+    const getItem = vi.spyOn(Storage.prototype, "getItem");
+    const setItem = vi.spyOn(Storage.prototype, "setItem");
+    const host = document.createElement("div");
+    host.innerHTML = renderToStaticMarkup(<ConstructionCalculatorClient definition={publicDefinition} defaultInput={fixture?.input ?? {}} startEmpty />);
+    const form = host.querySelector("form");
+    expect(form).not.toBeNull();
+    expect(host.querySelector("[data-calculator-loading]")).toBeNull();
+    const inputs = [...host.querySelectorAll<HTMLInputElement>('form input[type="number"]')];
+    expect(inputs.length).toBeGreaterThan(0);
+    expect(inputs.every(input => input.value === "")).toBe(true);
+    expect(inputs.every(input => input.matches(":disabled"))).toBe(true);
+    expect(form?.querySelector("fieldset")?.disabled).toBe(true);
+    expect(host.querySelector("#calculation-result-title")).toBeNull();
+    const historySection = host.querySelector("#calculator-history-title")?.closest("section");
+    expect(historySection).not.toBeNull();
+    expect(historySection?.querySelector("ul")).toBeNull();
+    for (const input of inputs) {
+      const field = definition.inputDefinitions.find(item => "construction-calculator-" + item.key === input.id);
+      if (field?.required) expect(input.required).toBe(true);
+    }
+    expect(getItem).not.toHaveBeenCalled();
+    expect(setItem).not.toHaveBeenCalled();
+    getItem.mockRestore(); setItem.mockRestore();
+  });
+});
+
+
+it("060: 小さい非ゼロ値を画面・履歴・コピー・PDFで同じ表示にする", async () => {
+  const definition = constructionCalculatorRegistry.find(item => item.slug === "concrete-quantity")!;
+  const { testFixtures: _testFixtures, ...publicDefinition } = definition;
+  const { container } = render(<ConstructionCalculatorClient definition={publicDefinition} defaultInput={{ shape: "rectangular", length: 1, width: 1, height: 1, dimensionUnit: "mm", quantity: 1, lossPercent: 0, truckCapacityM3: 4 }} />);
+  await waitFor(() => expect(screen.getByRole("button", { name: "計算する" })).toBeTruthy());
+  fireEvent.click(screen.getByRole("button", { name: "計算する" }));
+  await waitFor(() => expect(container.querySelector("#calculation-result-title")).not.toBeNull());
+  expect(container.querySelector(".construction-calculator-print")?.textContent).toContain("表示精度未満");
+  expect(screen.getByText("正味体積: 表示精度未満m³")).toBeTruthy();
+  fireEvent.click(screen.getByRole("button", { name: "結果をコピー" }));
+  await waitFor(() => expect(clipboardWrite).toHaveBeenCalledWith(expect.stringContaining("正味体積: 表示精度未満m³")));
+  const saved = JSON.parse(localStorage.getItem(CONSTRUCTION_CALCULATOR_HISTORY_KEY) ?? "[]");
+  expect(saved[0].result.rawOutputs.netVolumeM3).toBeCloseTo(1e-9, 16);
+  expect(saved[0].result.outputs.netVolumeM3).toBe(0);
+  expect(saved[0].result.displayValues[0].value).toBe("表示精度未満");
 });

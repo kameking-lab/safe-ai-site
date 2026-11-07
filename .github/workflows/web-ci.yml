@@ -26,7 +26,7 @@ on:
 
 jobs:
   smoke:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     # A cold hosted runner currently needs about 15 minutes for install, lint,
     # build, all unit tests, browser install, and live smoke. Leave bounded
     # headroom so a fully successful final step is not cancelled at teardown.
@@ -78,8 +78,8 @@ jobs:
 
   full:
     if: github.event_name == 'push' || github.event.inputs.run_full == 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 35
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
     defaults:
       run:
         working-directory: web
@@ -102,6 +102,9 @@ jobs:
         run: npm run lint
 
       - name: Build
+        env:
+          NEXT_PUBLIC_API_MODE: "live"
+          NEXT_PUBLIC_SUPABASE_URL: "https://playwright.invalid"
         run: npm run build
 
       - name: Unit tests
@@ -111,6 +114,8 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: E2E full tests (live mode)
+        env:
+          PLAYWRIGHT_SERVER_MODE: production
         run: npm run test:e2e:ci
 
       - name: Upload Playwright artifacts (full)

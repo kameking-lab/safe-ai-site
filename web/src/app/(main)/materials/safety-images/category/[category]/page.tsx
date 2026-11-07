@@ -7,6 +7,7 @@ import { SafetyImageLibraryClient } from "@/components/safety-image-library/safe
 import {
   getSafetyImageCategory,
   SAFETY_IMAGE_CATEGORIES,
+  SAFETY_IMAGE_LIBRARY_CARD_THEMES,
   SAFETY_IMAGE_LIBRARY_PATH,
   SAFETY_IMAGE_THEMES,
   type SafetyImageCategory,
@@ -62,7 +63,7 @@ export default async function SafetyImageCategoryPage({ params }: PageProps) {
         </div>
       </header>
       <div className="mx-auto max-w-7xl px-4 pt-8 sm:px-6">
-        <SafetyImageLibraryClient themes={SAFETY_IMAGE_THEMES} initialCategory={category.id as SafetyImageCategory} />
+        <SafetyImageLibraryClient themes={SAFETY_IMAGE_LIBRARY_CARD_THEMES} initialCategory={category.id as SafetyImageCategory} />
       </div>
     </div>
   );

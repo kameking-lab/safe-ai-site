@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
+import { buildOfficialResponse } from "@/lib/chemical/official-ra-response";
+import { findByCas } from "@/lib/mhlw-chemicals";
+import { ChemicalRaReportHeader } from "./chemical-ra-report-print";
+import { GHS_PARTIAL_COVERAGE_NOTICE } from "@/lib/chemical/ghs-coverage";
 import { RaConclusionCard } from "./ra-conclusion";
 import type { ChemicalRaResponse } from "@/app/api/chemical-ra/route";
 import { getChemicalKeyPoints } from "@/lib/chemical/key-points";
@@ -46,6 +50,23 @@ function renderCard(result: ChemicalRaResponse) {
 }
 
 describe("RaConclusionCard", () => {
+  it("実データのトルエンで炎と既存健康有害性を出し、一部収録を冒頭に示す", () => {
+    const result = buildOfficialResponse(findByCas("108-88-3")!);
+    const { container } = renderCard(result);
+    expect(screen.getByTestId("ghs-picto-flame")).toBeTruthy();
+    expect(screen.getByTestId("ghs-picto-health-hazard")).toBeTruthy();
+    expect(screen.getByTestId("ra-conclusion").textContent).toContain("引火性液体");
+    const notice = screen.getByTestId("ghs-coverage-notice");
+    expect(notice.textContent).toBe(GHS_PARTIAL_COVERAGE_NOTICE);
+    expect(notice.className).not.toContain("print:hidden");
+    expect(container.textContent).not.toContain("安全です");
+  });
+
+  it("印刷記録も未表示の危険有害性を確認済みと扱わない", () => {
+    const { container } = render(<ChemicalRaReportHeader />);
+    expect(container.firstElementChild?.className).toContain("print:block");
+    expect(container.textContent).toContain(GHS_PARTIAL_COVERAGE_NOTICE);
+  });
   it("旧CREATE-SIMPLE判定を表示せずGHS注意喚起語を表示する", () => {
     const { container } = renderCard(withLevel("IV"));
     const big = screen.getByTestId("ra-big-value");

@@ -26,10 +26,10 @@ describe("server-rendered AppShell mobile drawer keyboard boundary", () => {
   it("hydration前はactive属性とaria-currentを変更しない", () => {
     history.replaceState(null, "", "/laws");
     installShell(
-      '<a href="/laws" data-app-shell-nav-href="/laws" data-nav-active="false">法改正</a>',
+      '<a href="/laws">法改正</a>',
     );
     const link = document.querySelector<HTMLAnchorElement>("a")!;
-    expect(link.dataset.navActive).toBe("false");
+    expect(link.hasAttribute("data-nav-active")).toBe(false);
     expect(link.hasAttribute("aria-current")).toBe(false);
   });
 
@@ -69,6 +69,15 @@ describe("server-rendered AppShell mobile drawer keyboard boundary", () => {
     expect(themeButton?.getAttribute("aria-label")).toBe(
       "テーマ切替。現在はダーク",
     );
+  });
+
+  it("モバイルメニュー内のリンクを選ぶとdrawerを閉じる", () => {
+    installShell(
+      '<details data-mobile-site-menu open><summary>メニュー</summary><nav id="mobile-site-menu"><a href="/laws"><span>法改正</span></a></nav></details>',
+    );
+    const details = document.querySelector<HTMLDetailsElement>("details")!;
+    document.querySelector<HTMLSpanElement>("a span")!.click();
+    expect(details.open).toBe(false);
   });
 
   it("storageを利用できなくても表示設定を同じ画面でON・OFFできる", () => {

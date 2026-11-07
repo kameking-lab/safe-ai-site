@@ -153,7 +153,7 @@ describe("suggestDigDeeperLinks", () => {
     expect(
       result
         .filter((d) => d.kind === "accidents")
-        .every((d) => d.href === "/accident-news"),
+        .every((d) => d.href === "/fatal-accidents"),
     ).toBe(true);
     expect(result.some((d) => d.href.startsWith("/accidents?"))).toBe(false);
     expect(result.some((d) => d.href.startsWith("/accidents/"))).toBe(false);
@@ -167,7 +167,7 @@ describe("suggestDigDeeperLinks", () => {
     expect(
       result
         .filter((d) => d.kind === "accidents")
-        .every((d) => d.href === "/accident-news"),
+        .every((d) => d.href === "/fatal-accidents"),
     ).toBe(true);
     expect(result.some((d) => d.href.startsWith("/accidents?"))).toBe(false);
     expect(result.some((d) => d.href.startsWith("/accidents/"))).toBe(false);

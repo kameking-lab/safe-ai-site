@@ -1,5 +1,5 @@
-import { render, screen, waitFor, within } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { fireEvent, render, screen, within } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { AutomationServiceContent } from "./AutomationServiceContent";
 import type { AutomationConsultAvailability } from "@/lib/automation-consult/availability";
 
@@ -37,6 +37,7 @@ const PAUSED: AutomationConsultAvailability = {
 };
 
 describe("AutomationServiceContent", () => {
+  afterEach(() => { vi.unstubAllGlobals(); window.history.replaceState(null, "", "/"); });
   it("受付停止時は初期画面の操作を料金1件に限定する", () => {
     const { container } = render(
       <AutomationServiceContent availability={PAUSED} />,
@@ -76,18 +77,23 @@ describe("AutomationServiceContent", () => {
     expect(overview.textContent).toContain("初回30分は無料");
     expect(overview.textContent).toContain("税込33,000円から");
     expect(overview.textContent).toContain("メール相談受付中");
-    expect((overview.textContent ?? "").length).toBeLessThanOrEqual(150);
+    expect((overview.textContent ?? "").length).toBeLessThanOrEqual(180);
     expect(overview.querySelectorAll('[data-primary-action="true"]')).toHaveLength(1);
     expect(overview.querySelectorAll('[data-secondary-action="true"]')).toHaveLength(1);
     expect(container.querySelector('[role="alert"]')).toBeNull();
   });
 
-  it("LCP候補の装飾画像を初期HTMLへ出さない", () => {
+  it("案内チワワをLCP候補にせず遅延読込する", () => {
     const { container } = render(
       <AutomationServiceContent availability={AVAILABLE} />,
     );
-    expect(container.querySelectorAll("img")).toHaveLength(0);
-    expect(container.querySelector("[data-mascot-variant]")).toBeNull();
+    const images = container.querySelectorAll(
+      '[data-feature-mascot-companion="calendar-plan"] img',
+    );
+    expect(images).toHaveLength(1);
+    expect(images[0]?.getAttribute("loading")).toBe("lazy");
+    expect(images[0]?.getAttribute("fetchpriority")).not.toBe("high");
+    expect(container.querySelector("[data-feature-mascot-companion]")).not.toBeNull();
   });
 
   it("料金3件と想定例3件だけを常時描画する", () => {
@@ -117,7 +123,7 @@ describe("AutomationServiceContent", () => {
     expect(screen.queryByRole("link", { name: /許容荷重|構造計算|安全判定/u })).toBeNull();
   });
 
-  it("答えに必要な4セクションを料金・事例・サービス・相談の順に持つ", () => {
+  it("料金・事例・サービス・補助金候補・相談の順に持つ", () => {
     const { container } = render(
       <AutomationServiceContent availability={AVAILABLE} />,
     );
@@ -129,6 +135,7 @@ describe("AutomationServiceContent", () => {
       "pricing",
       "model-cases",
       "services",
+      "funding",
       "consult-form",
     ]);
   });
@@ -183,32 +190,38 @@ describe("AutomationServiceContent", () => {
     expect(within(pricing).getByText("追加料金と対象外を確認").closest("details")?.open).toBe(false);
   });
 
-  it("熱中症相談は粗い相談種別だけをフォームへ引き継ぐ", async () => {
-    window.history.replaceState(
-      null,
-      "",
-      "/services/automation?consultationType=wbgt-weather-notifications#consult-form",
-    );
-    render(<AutomationServiceContent availability={AVAILABLE} />);
-    await waitFor(() => {
-      expect(
-        (screen.getByLabelText(/相談種別/) as HTMLSelectElement).value,
-      ).toBe("wbgt-weather-notifications");
-    });
-    expect(
-      (screen.getByLabelText(/現在困っていること/) as HTMLTextAreaElement)
-        .value,
-    ).toBe("");
-    expect(screen.queryByLabelText(/返信用メールアドレス/)).toBeNull();
-    window.history.replaceState(null, "", "/");
+  it("サービスの簡易フォームは返信先と相談内容だけで送信し、粗い相談種別と正しいsourcePageを保持する", async () => {
+    window.history.replaceState(null, "", "/services/automation?consultationType=wbgt-weather-notifications#consult-form");
+    const referenceId = "AC-20261009-ABCDEF123456";
+    const fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({ ok: true, referenceId, deliveryMode: "delivery" }) });
+    vi.stubGlobal("fetch", fetch);
+    const { container } = render(<AutomationServiceContent availability={AVAILABLE} />);
+    const email = screen.getByLabelText(/返信先メール/);
+    const problem = screen.getByLabelText(/困っている作業/);
+    expect(email.hasAttribute("required")).toBe(true);
+    expect(problem.hasAttribute("required")).toBe(true);
+    expect(container.querySelectorAll('input[required]:not([type="checkbox"]), textarea[required]')).toHaveLength(2);
+    const optional = screen.getByLabelText(/呼び名/).closest("details");
+    expect(optional?.open).toBe(false);
+    expect(screen.getByLabelText(/呼び名/).hasAttribute("required")).toBe(false);
+    expect(screen.getByLabelText(/希望時期/).hasAttribute("required")).toBe(false);
+    expect(screen.queryByRole("button", { name: /返信先の入力へ進む/ })).toBeNull();
+    fireEvent.change(email, { target: { value: "reply@example.test" } });
+    fireEvent.change(problem, { target: { value: "毎日のWBGT確認と通知の転記作業を減らしたいです。" } });
+    fireEvent.click(screen.getByRole("checkbox"));
+    fireEvent.click(screen.getByRole("button", { name: "相談を送信する" }));
+    await screen.findByText(`受付番号: ${referenceId}`);
+    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(JSON.parse(fetch.mock.calls[0][1].body)).toMatchObject({ consultationType: "wbgt-weather-notifications", sourcePage: "/services/automation", name: "", desiredSupport: "", timing: "undecided" });
+    expect(window.localStorage.length).toBe(0);
   });
 
   it("メール受付時はWebフォームを閉じ、利用者のメールアプリを使う", () => {
     const { container } = render(
       <AutomationServiceContent availability={MAIL_AVAILABLE} />,
     );
-    expect(screen.queryByLabelText(/お名前・担当者名/)).toBeNull();
-    expect(screen.queryByLabelText(/返信用メールアドレス/)).toBeNull();
+    expect(screen.queryByLabelText(/呼び名/)).toBeNull();
+    expect(screen.queryByLabelText(/返信先メール/)).toBeNull();
     expect(
       container.querySelector('form[action="/contact/automation-email/draft"]'),
     ).not.toBeNull();

@@ -70,6 +70,9 @@ function verboseGhs(short) {
 function buildGhsSummary(entry) {
   const g = entry.ghs ?? {};
   const summary = {};
+  if (/^[1-4]$/.test(g.flammableLiquids ?? "")) {
+    summary.flammableLiquids = verboseGhs(g.flammableLiquids);
+  }
   if (isHazardClass(g.carcinogen)) summary.carcinogen = verboseGhs(g.carcinogen);
   if (isHazardClass(g.mutagen)) summary.mutagen = verboseGhs(g.mutagen);
   if (isHazardClass(g.reproTox)) summary.reproTox = verboseGhs(g.reproTox);
@@ -165,6 +168,13 @@ async function main() {
       // NITE 由来の主要 GHS 区分まとめ (新フィールド: niteGhsClassifications)
       if (ghsSummary && !ex.niteGhsClassifications) {
         ex.niteGhsClassifications = ghsSummary;
+      }
+      // 既存の照合済み健康分類は保持し、欠けている引火性だけ補完する。
+      if (ghsSummary?.flammableLiquids && !ex.niteGhsClassifications?.flammableLiquids) {
+        ex.niteGhsClassifications = {
+          ...ex.niteGhsClassifications,
+          flammableLiquids: ghsSummary.flammableLiquids,
+        };
       }
       merged++;
     } else {

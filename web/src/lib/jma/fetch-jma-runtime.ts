@@ -43,7 +43,7 @@ async function fetchJson(url: string): Promise<unknown | null> {
   try {
     const res = await fetch(url, {
       headers: { Accept: "application/json", "User-Agent": USER_AGENT },
-      next: { revalidate: REVALIDATE_SECONDS },
+      cache: "no-store",
       signal: ac.signal,
     });
     if (!res.ok) return null;
@@ -259,7 +259,7 @@ export async function fetchEarthquakesLive(): Promise<JmaEarthquakesFile> {
 // Bump the cache generation whenever accepted upstream warning semantics
 // change. Vercel's Data Cache is shared across deployments, so reusing the
 // previous key could serve output computed by the old strict parser.
-export const getJmaWarningsRuntime = unstable_cache(fetchWarningsLive, ["signage-jma-warnings-runtime-r8-v2"], {
+export const getJmaWarningsRuntime = unstable_cache(fetchWarningsLive, ["signage-jma-warnings-runtime-r8-v3"], {
   revalidate: REVALIDATE_SECONDS,
 });
 

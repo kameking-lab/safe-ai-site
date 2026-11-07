@@ -35,6 +35,7 @@ describe("SignageRotator", () => {
 
   afterEach(() => {
     vi.useRealTimers();
+    vi.unstubAllGlobals();
   });
 
   it("件数0では何も描画しない", () => {
@@ -121,6 +122,76 @@ describe("SignageRotator", () => {
     act(() => {
       vi.advanceTimersByTime(1000);
     });
+    expect(screen.getByText("2件目")).toBeDefined();
+  });
+
+  it("explicit stop survives leaving the controls and still permits manual selection", () => {
+    const { container } = renderRotator();
+    const root = container.firstElementChild as HTMLElement;
+    fireEvent.click(screen.getByRole("button", { name: "テストパネルの自動切替を停止" }));
+    fireEvent.mouseLeave(root);
+    fireEvent.blur(root);
+    act(() => vi.advanceTimersByTime(5000));
+    expect(screen.getByText("1件目")).toBeDefined();
+    fireEvent.click(screen.getAllByRole("tab")[2]!);
+    act(() => vi.advanceTimersByTime(5000));
+    expect(screen.getByText("3件目")).toBeDefined();
+    fireEvent.click(screen.getByRole("button", { name: "テストパネルの自動切替を再開" }));
+    act(() => vi.advanceTimersByTime(1000));
+    expect(screen.getByText("1件目")).toBeDefined();
+  });
+
+  it("responds to motion preference changes and removes its listener", () => {
+    let matches = false;
+    const listeners = new Set<() => void>();
+    vi.stubGlobal("matchMedia", () => ({
+      get matches() { return matches; },
+      addEventListener: (_: string, fn: () => void) => listeners.add(fn),
+      removeEventListener: (_: string, fn: () => void) => listeners.delete(fn),
+    }));
+    const { unmount } = renderRotator();
+    act(() => vi.advanceTimersByTime(1000));
+    expect(screen.getByText("2件目")).toBeDefined();
+    act(() => { matches = true; listeners.forEach((fn) => fn()); });
+    act(() => vi.advanceTimersByTime(5000));
+    expect(screen.getByText("2件目")).toBeDefined();
+    expect(screen.getByRole("button", { name: "テストパネルの自動切替は端末設定で停止中" }).hasAttribute("disabled")).toBe(true);
+    fireEvent.click(screen.getAllByRole("tab")[0]!);
+    expect(screen.getByText("1件目")).toBeDefined();
+    act(() => { matches = false; listeners.forEach((fn) => fn()); });
+    act(() => vi.advanceTimersByTime(1000));
+    expect(screen.getByText("2件目")).toBeDefined();
+    unmount();
+    expect(listeners.size).toBe(0);
+  });
+
+  it("keeps keyboard focus paused after the pointer leaves, including focus within controls", () => {
+    const { container } = renderRotator();
+    const root = container.firstElementChild as HTMLElement;
+    const tabs = screen.getAllByRole("tab");
+    fireEvent.mouseEnter(root);
+    fireEvent.focus(tabs[0]!);
+    fireEvent.mouseLeave(root);
+    act(() => vi.advanceTimersByTime(5000));
+    expect(screen.getByText("1件目")).toBeDefined();
+    fireEvent.blur(tabs[0]!, { relatedTarget: tabs[1] });
+    act(() => vi.advanceTimersByTime(5000));
+    expect(screen.getByText("1件目")).toBeDefined();
+    fireEvent.blur(tabs[1]!, { relatedTarget: null });
+    act(() => vi.advanceTimersByTime(1000));
+    expect(screen.getByText("2件目")).toBeDefined();
+  });
+
+  it("keeps hovering paused after keyboard focus leaves", () => {
+    const { container } = renderRotator();
+    const root = container.firstElementChild as HTMLElement;
+    fireEvent.mouseEnter(root);
+    fireEvent.focus(root);
+    fireEvent.blur(root, { relatedTarget: null });
+    act(() => vi.advanceTimersByTime(5000));
+    expect(screen.getByText("1件目")).toBeDefined();
+    fireEvent.mouseLeave(root);
+    act(() => vi.advanceTimersByTime(1000));
     expect(screen.getByText("2件目")).toBeDefined();
   });
 });

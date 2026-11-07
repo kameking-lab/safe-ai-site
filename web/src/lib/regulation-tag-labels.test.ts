@@ -123,6 +123,25 @@ describe("Phase 1e: タグカテゴリの正確性", () => {
 });
 
 describe("特化則区分の正本整合 (令別表第3・e-Gov 2026-07-02 突合)", () => {
+  it("PRTR届出を年間取扱量だけで決定しない", () => {
+    const summary = REGULATION_TAGS.prtr1.summary;
+    expect(summary).toContain("対象業種");
+    expect(summary).toContain("常用雇用者数");
+    expect(summary).toContain("対象製品");
+    expect(summary).toContain("特別要件施設");
+    expect(summary).toContain("物質の指定だけでは届出義務を確定できません");
+  });
+
+  it("有機則の物質区分だけで設備・測定・健診の義務を断定しない", () => {
+    for (const tag of ["yuki-1", "yuki-2", "yuki-3"] as const) {
+      const summary = REGULATION_TAGS[tag].summary;
+      expect(summary).toContain("業務");
+      expect(summary).toContain("含有率");
+      expect(summary).toContain("使用量");
+      expect(summary).toContain("対象・例外");
+    }
+  });
+
   it("塩素(7782-50-5)は第二類 (令別表第3第2号7)。第三類は誤り", () => {
     expect(oshaTagsForCas("7782-50-5")).toEqual(["tokutei-2"]);
   });

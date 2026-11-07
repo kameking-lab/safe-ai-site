@@ -73,6 +73,13 @@ export function calculateConcrete(input: ConcreteInput): CalculationOutcome {
     truckCount,
     finalTruckVolumeM3: applyRounding(finalTruckVolumeM3, rounding),
   };
+  const usedInputs = { ...input, rounding: { ...rounding } };
+  if (circular) {
+    delete usedInputs.length;
+    delete usedInputs.width;
+  } else {
+    delete usedInputs.diameter;
+  }
 
   return validResult({
     calculatorId: CONCRETE_CALCULATOR_ID,
@@ -85,7 +92,7 @@ export function calculateConcrete(input: ConcreteInput): CalculationOutcome {
       { key: "truckCount", label: "生コン車台数", value: truckCount, unit: "台" },
       { key: "finalTruckVolumeM3", label: "最終車の数量", value: rounded.finalTruckVolumeM3, unit: "m³" },
     ],
-    usedInputs: { ...input, rounding: { ...rounding } },
+    usedInputs,
     formula: circular
       ? ["単体体積 = π × (直径 ÷ 2)² × 高さ", "正味体積 = 単体体積 × 個数", "ロス込み体積 = 正味体積 × (1 + ロス率 ÷ 100)", "台数 = ceil(ロス込み体積 ÷ 1台積載量)"]
       : ["単体体積 = 長さ × 幅 × 高さ", "正味体積 = 単体体積 × 個数", "ロス込み体積 = 正味体積 × (1 + ロス率 ÷ 100)", "台数 = ceil(ロス込み体積 ÷ 1台積載量)"],

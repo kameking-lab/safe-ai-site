@@ -51,6 +51,6 @@ describe("/accidents JavaScript-disabled fallback", () => {
 
     expect(html).not.toContain("data-accidents-noscript-result");
     expect(html).not.toContain("該当なし");
-    expect(html).toContain("厚労省の死亡災害データベースで探す");
+    expect(html).toContain("厚労省の死亡事故データベースで探す");
   });
 });

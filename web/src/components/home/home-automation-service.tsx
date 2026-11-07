@@ -20,7 +20,7 @@ export function HomeAutomationService({
     <section
       id="home-automation"
       aria-labelledby="home-automation-heading"
-      className="scroll-mt-24 border-y border-semantic-ai bg-brand-secondary-solid px-4 py-7 text-white forced-colors:bg-[Canvas] forced-colors:text-[CanvasText]"
+      className="home-render-skip-section home-skip-consult scroll-mt-24 border-y border-semantic-ai bg-brand-secondary-solid px-4 py-7 text-white forced-colors:bg-[Canvas] forced-colors:text-[CanvasText]"
       data-home-section="automation-consult"
     >
       <div className="mx-auto grid max-w-7xl gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,.8fr)] lg:items-center">

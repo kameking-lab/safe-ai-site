@@ -99,7 +99,8 @@ describe("Tailwind route source exclusions", () => {
       (match) => match[1],
     );
 
-    expect(excluded.length).toBeGreaterThanOrEqual(90);
+    // The dead active-marker component and its exclusion were removed together.
+    expect(excluded.length).toBeGreaterThanOrEqual(89);
     expect(new Set(excluded).size).toBe(excluded.length);
     const missing = excluded.filter(
       (sourcePath) => !statSync(join(SRC_ROOT, sourcePath), { throwIfNoEntry: false }),

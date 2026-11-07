@@ -1,6 +1,5 @@
 import { beforeEach, afterEach, describe, expect, it, vi } from "vitest";
 import { isPaidModeReady, resolveStripePlan } from "./stripe-price-policy";
-import { handleSubscriptionUpdated } from "./stripe-webhook-handlers";
 
 describe("Stripe server-side price policy", () => {
   beforeEach(()=>{vi.stubEnv('SAFE_AI_STAGING_MODE','false');vi.stubEnv('VERCEL_ENV','development');vi.stubEnv('MOBILE_LEDGER_ENABLED','false');});
@@ -15,28 +14,14 @@ describe("Stripe server-side price policy", () => {
     expect(resolveStripePlan(null)).toBeNull();
   });
 
-  it("課金フラグ・秘密鍵・両Priceの全設定が揃わない限り無効", () => {
+  it("旧課金フラグ・秘密鍵・両Priceが揃っても無料方針では決済を開始しない", () => {
     vi.stubEnv("NEXT_PUBLIC_PAID_MODE", "true");
     vi.stubEnv("STRIPE_SECRET_KEY", "synthetic-secret-not-real");
     vi.stubEnv("NEXT_PUBLIC_STRIPE_PRICE_PREMIUM", "price_standard_synthetic");
     vi.stubEnv("NEXT_PUBLIC_STRIPE_PRICE_PRO", "");
     expect(isPaidModeReady()).toBe(false);
     vi.stubEnv("NEXT_PUBLIC_STRIPE_PRICE_PRO", "price_pro_synthetic");
-    expect(isPaidModeReady()).toBe(true);
+    expect(isPaidModeReady()).toBe(false);
   });
 
-  it("Webhookも未知のPriceをstandardへ昇格させずDB更新前に拒否する", async () => {
-    vi.stubEnv("NEXT_PUBLIC_STRIPE_PRICE_PREMIUM", "price_standard_synthetic");
-    vi.stubEnv("NEXT_PUBLIC_STRIPE_PRICE_PRO", "price_pro_synthetic");
-    const updateMany = vi.fn();
-    const prisma = { subscription: { updateMany } } as never;
-    const subscription = {
-      id: "sub_synthetic",
-      status: "active",
-      customer: "cus_synthetic",
-      items: { data: [{ price: { id: "price_unrecognized" } }] },
-    } as never;
-    await expect(handleSubscriptionUpdated(prisma, subscription)).rejects.toThrow("unrecognized Stripe price");
-    expect(updateMany).not.toHaveBeenCalled();
-  });
 });

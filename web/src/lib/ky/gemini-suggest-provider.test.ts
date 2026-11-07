@@ -46,7 +46,7 @@ describe("KY Gemini provider request", () => {
     vi.unstubAllEnvs();
   });
 
-  it("uses Gemini 3.6 Flash with a timeout and no removed parameters", async () => {
+  it("uses Gemini 3.8 Flash with a timeout and no removed parameters", async () => {
     const result = await generateHazardsWithGemini("開口部付近の作業", []);
 
     expect(result).toHaveLength(1);
@@ -58,13 +58,16 @@ describe("KY Gemini provider request", () => {
     ]);
     expect(provider.requests).toHaveLength(1);
     expect(provider.requests[0]).toMatchObject({
-      model: "gemini-3.6-flash",
+      model: "gemini-3.8-flash",
       contents: expect.any(String),
       config: {
         systemInstruction: expect.any(String),
         abortSignal: expect.anything(),
       },
     });
+    expect((provider.requests[0] as { config: object }).config).not.toHaveProperty(
+      "thinkingConfig",
+    );
     expect(JSON.stringify(provider.requests[0])).not.toMatch(
       /"(?:temperature|topP|topK|top_p|top_k|candidateCount|candidate_count|thinkingBudget|thinking_budget)"\s*:/u,
     );

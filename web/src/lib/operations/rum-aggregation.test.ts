@@ -1,6 +1,7 @@
 import type { PrismaClient } from "@prisma/client";
 import { describe, expect, it, vi } from "vitest";
 import { aggregateRum, hasSufficientRumRouteData } from "./rum-aggregation";
+import { RUM_ROUTE_TEMPLATES } from "@/lib/rum/schema";
 
 const currentMetric = {
   routeTemplate: "/safety-ai",
@@ -132,7 +133,7 @@ describe("RUM route aggregation", () => {
       p75Change: -6,
       trend: "improved",
     });
-    expect(result.insufficientRouteCount).toBe(11);
+    expect(result.insufficientRouteCount).toBe(RUM_ROUTE_TEMPLATES.length);
     expect(result.deploymentComparisons[0]).toMatchObject({
       deployment: "build_one",
       metrics: [

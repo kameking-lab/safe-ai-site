@@ -24,9 +24,47 @@ export const AUTOMATION_MAIL_TEMPLATE = `【相談カテゴリ】
 ※個人情報、健康情報、会社・現場の機密、認証情報は記入しないでください。
 ※最初のメールへファイルを添付せず、必要資料は相談後に取扱方法を確認してください。`;
 
+export const PPE_SELECTION_MAIL_SUBJECT =
+  "安全AIポータル｜保護具選定の相談";
+
+export const PPE_SELECTION_MAIL_TEMPLATE = `【作業内容】
+[例：屋内で有機溶剤を使った部品洗浄を1日2時間]
+
+【危険有害要因】
+[粉じん／蒸気・ガス／薬液飛散／墜落／騒音／飛来物／その他・不明]
+
+【確認できている情報】
+[SDSの有無、物質名・CAS番号、濃度、酸素濃度、換気、作業時間など。分からない項目は「不明」]
+
+【現在使っている保護具】
+[種類・メーカー・型式。未使用なら「なし」]
+
+【相談したいこと】
+[どの条件を確認し、どの規格・製品群へ絞ればよいか]
+
+※個人情報、健康情報、会社・現場の機密、認証情報は記入しないでください。
+※危険有害性が不明な状態で製品を決めず、緊急性がある場合は作業を開始せず現場責任者へ連絡してください。
+※最初のメールへファイルを添付せず、SDS等は相談後に取扱方法を確認してください。`;
+
+export type ConsultationMailKind = "automation" | "ppe-selection";
+
+export function getConsultationMailDraft(kind: ConsultationMailKind): {
+  subject: string;
+  template: string;
+} {
+  return kind === "ppe-selection"
+    ? {
+        subject: PPE_SELECTION_MAIL_SUBJECT,
+        template: PPE_SELECTION_MAIL_TEMPLATE,
+      }
+    : {
+        subject: AUTOMATION_MAIL_SUBJECT,
+        template: AUTOMATION_MAIL_TEMPLATE,
+      };
+}
+
 export type AutomationMailRecipients = {
   to: string;
-  bcc: string;
 };
 
 function isSafeEmail(value: string): boolean {
@@ -40,41 +78,48 @@ function isSafeEmail(value: string): boolean {
 /**
  * 宛先はserver-only環境変数から解決する。
  * 検証済みGmailは手動送信fallbackのToとしてserver-renderできるが、
- * OutlookのBccはHTMLやclient propsへ返さない。
+ * 旧設定にOutlookが残っていても送信先には使用しない。
  */
 export function getAutomationMailRecipients(
   env: Record<string, string | undefined> = process.env,
 ): AutomationMailRecipients | null {
+  const rawRecipients = env.AUTOMATION_CONSULT_RECIPIENTS ?? "";
+  if (HEADER_CONTROLS.test(rawRecipients)) return null;
   const recipients = [
     ...new Set(
-      (env.AUTOMATION_CONSULT_RECIPIENTS ?? "")
+      rawRecipients
         .split(",")
-        .map((value) => value.trim())
+        .map((value) => value.trim().toLowerCase())
         .filter(Boolean),
     ),
   ];
-  if (recipients.length !== 2 || !recipients.every(isSafeEmail)) return null;
-
-  const to = recipients.find((value) =>
-    value.toLowerCase().endsWith("@gmail.com"),
-  );
-  const bcc = recipients.find((value) =>
-    value.toLowerCase().endsWith("@outlook.com"),
-  );
-  if (!to || !bcc || to === bcc) return null;
-  return { to, bcc };
+  if (recipients.length < 1 || recipients.length > 2 || !recipients.every(isSafeEmail)) return null;
+  const gmail = recipients.filter((value) => value.endsWith("@gmail.com"));
+  if (gmail.length !== 1) return null;
+  // Accept the legacy two-address configuration without sending to its
+  // unverified secondary address. Never infer another recipient.
+  if (recipients.some(value => !value.endsWith("@gmail.com") && !value.endsWith("@outlook.com"))) return null;
+  return { to: gmail[0] };
 }
 
 export function buildAutomationMailto(
   env: Record<string, string | undefined> = process.env,
 ): string | null {
+  return buildConsultationMailto("automation", env);
+}
+
+export function buildConsultationMailto(
+  kind: ConsultationMailKind,
+  env: Record<string, string | undefined> = process.env,
+): string | null {
   const recipients = getAutomationMailRecipients(env);
   if (!recipients) return null;
 
+  const draft = getConsultationMailDraft(kind);
+
   const params = new URLSearchParams({
-    bcc: recipients.bcc,
-    subject: AUTOMATION_MAIL_SUBJECT,
-    body: AUTOMATION_MAIL_TEMPLATE,
+    subject: draft.subject,
+    body: draft.template,
   });
   return `mailto:${encodeURIComponent(recipients.to)}?${params.toString()}`;
 }

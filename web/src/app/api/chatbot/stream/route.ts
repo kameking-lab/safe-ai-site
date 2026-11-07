@@ -25,7 +25,7 @@ import { withUsage } from "@/lib/mobile/usage";
  */
 
 import { GoogleGenAI } from "@google/genai";
-import { GEMINI_FLASH_MODEL } from "@/lib/gemini-model";
+import { GEMINI_FAST_THINKING_CONFIG, GEMINI_FLASH_MODEL } from "@/lib/gemini-model";
 import { externalGenerativeAiAllowed } from "@/lib/server/deployment-safety";
 import {
   searchRelevantArticlesWithScore,
@@ -76,7 +76,11 @@ import {
 import type { LawArticle } from "@/data/laws";
 import { evaluateChatbotSafety } from "@/lib/chatbot-safety";
 import { inspectAiOutbound } from "@/lib/server/ai-outbound-safety";
-import { validateChatbotRequestBoundary } from "@/lib/server/chatbot-request-boundary";
+import {
+  CHATBOT_UNDECODABLE_TEXT_MESSAGE,
+  containsUndecodableText,
+  validateChatbotRequestBoundary,
+} from "@/lib/server/chatbot-request-boundary";
 import {
   nextLegalClarification,
   normalizeLegalConversationText,
@@ -170,6 +174,19 @@ async function handlePost(request: Request) {
   if (!message) {
     return new Response(
       JSON.stringify({ error: "質問文を入力してください。", retryable: false }),
+      { status: 400, headers: { "Content-Type": "application/json" } },
+    );
+  }
+  if (
+    containsUndecodableText([
+      message,
+      ...(Array.isArray(body.history)
+        ? body.history.map((turn) => turn?.content)
+        : []),
+    ])
+  ) {
+    return new Response(
+      JSON.stringify({ error: CHATBOT_UNDECODABLE_TEXT_MESSAGE, retryable: false }),
       { status: 400, headers: { "Content-Type": "application/json" } },
     );
   }
@@ -679,6 +696,7 @@ async function handlePost(request: Request) {
                 contents: userPrompt,
                 config: {
                   systemInstruction: SYSTEM_PROMPT,
+                  thinkingConfig: GEMINI_FAST_THINKING_CONFIG,
                   maxOutputTokens: 2048,
                   abortSignal: request.signal,
                 },

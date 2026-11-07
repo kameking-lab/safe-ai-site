@@ -134,9 +134,15 @@ export async function POST(req: Request) {
       { maxWait: 5_000, timeout: 15_000 },
     );
   } catch (err) {
-    // unique競合は、別トランザクションが同じイベントを完了済み。
+    // Only an actually persisted event proves that a concurrent delivery won.
+    // A customer/subscription unique conflict must stay retryable.
     const code = (err as { code?: string }).code;
-    if (code === "P2002") return json({ received: true, idempotent: true });
+    if (code === "P2002") {
+      const completed = await prisma.stripeEvent.findUnique({
+        where: { stripeEventId: event.id },
+      }).catch(() => null);
+      if (completed) return json({ received: true, idempotent: true });
+    }
     console.error("[stripe/webhook] processing failed", { eventType: event.type });
     return json({ error: "temporarily unavailable" }, 503);
   }

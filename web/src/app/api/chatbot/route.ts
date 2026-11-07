@@ -2,7 +2,7 @@ import { withProviderBudget } from "@/lib/mobile/usage";
 import { withUsage } from "@/lib/mobile/usage";
 import { NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
-import { GEMINI_FLASH_MODEL } from "@/lib/gemini-model";
+import { GEMINI_FAST_THINKING_CONFIG, GEMINI_FLASH_MODEL } from "@/lib/gemini-model";
 import { externalGenerativeAiAllowed } from "@/lib/server/deployment-safety";
 import {
   searchRelevantArticlesWithScore,
@@ -55,7 +55,11 @@ import { getClientIp, checkRateLimit, rateLimitMessage } from "@/lib/chatbot-rat
 import { attachNoticesAndLeaflets } from "@/lib/chatbot-notice-attachment";
 import { evaluateChatbotSafety } from "@/lib/chatbot-safety";
 import { inspectAiOutbound } from "@/lib/server/ai-outbound-safety";
-import { validateChatbotRequestBoundary } from "@/lib/server/chatbot-request-boundary";
+import {
+  CHATBOT_UNDECODABLE_TEXT_MESSAGE,
+  containsUndecodableText,
+  validateChatbotRequestBoundary,
+} from "@/lib/server/chatbot-request-boundary";
 import {
   nextLegalClarification,
   normalizeLegalConversationText,
@@ -119,6 +123,16 @@ async function handlePost(request: Request) {
   const message = typeof body?.message === "string" ? body.message.trim() : "";
   if (!message) {
     return jsonError(400, "質問文を入力してください。");
+  }
+  if (
+    containsUndecodableText([
+      message,
+      ...(Array.isArray(body.history)
+        ? body.history.map((turn) => turn?.content)
+        : []),
+    ])
+  ) {
+    return jsonError(400, CHATBOT_UNDECODABLE_TEXT_MESSAGE);
   }
   const legalAnswerNow = legalAnswerBasisNow();
   const historyForSafety = Array.isArray(body.history)
@@ -662,6 +676,7 @@ async function handlePost(request: Request) {
             contents: userPrompt,
             config: {
               systemInstruction: SYSTEM_PROMPT,
+              thinkingConfig: GEMINI_FAST_THINKING_CONFIG,
               maxOutputTokens: 2048,
               abortSignal: request.signal,
             },

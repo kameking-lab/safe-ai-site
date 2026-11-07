@@ -1,11 +1,11 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ShieldCheck } from "lucide-react";
 import { TranslatedPageHeader } from "@/components/translated-page-header";
 import { PageContainer } from "@/components/layout";
+import { PrivacyNote } from "@/components/privacy-note";
 import { useLanguage } from "@/contexts/language-context";
 
 type Category =
@@ -73,17 +73,18 @@ function createInquiryIdempotencyKey(): string {
   return `${prefix}.inquiry-${Math.random().toString(36).slice(2, 20)}`;
 }
 
-export default function InquiryForm() {
+export type InquiryInitialParams = Partial<Record<"course" | "topic" | "tab" | "category" | "industry", string>>;
+
+export default function InquiryForm({ initialParams = {} }: { initialParams?: InquiryInitialParams }) {
   const { language } = useLanguage();
   const isEn = language === "en";
-  const searchParams = useSearchParams();
   const CATEGORIES = isEn ? CATEGORIES_EN : CATEGORIES_JA;
   const TABS = isEn ? TABS_EN : TABS_JA;
   const INDUSTRY_OPTIONS = isEn ? INDUSTRY_OPTIONS_EN : INDUSTRY_OPTIONS_JA;
   // 教育パック導線（企画06章・EDU-R2）: course/topic を読み business タブ初期選択＋件名プレフィル。
   // /api/inquiry のスキーマは不変（course は subject に載せる＝env追加なし）。
-  const courseParam = searchParams?.get("course") ?? "";
-  const topicParam = searchParams?.get("topic") ?? "";
+  const courseParam = initialParams.course ?? "";
+  const topicParam = initialParams.topic ?? "";
   const isEduContext = Boolean(courseParam) || topicParam === "edu-pack";
   const COURSE_LABELS: Record<string, string> = {
     fullharness: "フルハーネス型墜落制止用器具 特別教育",
@@ -96,8 +97,8 @@ export default function InquiryForm() {
       : `【教育パック】${courseLabel ? `${courseLabel} ` : ""}カスタマイズ相談`
     : "";
   const initialTab: Tab =
-    searchParams?.get("tab") === "business" ||
-    searchParams?.get("category") === "business" ||
+    initialParams.tab === "business" ||
+    initialParams.category === "business" ||
     isEduContext
       ? "business"
       : "general";
@@ -105,7 +106,7 @@ export default function InquiryForm() {
   const [form, setForm] = useState({
     name: "",
     email: "",
-    industry: searchParams?.get("industry") ?? "",
+    industry: initialParams.industry ?? "",
     category: (initialTab === "business" ? "business" : "question") as Category,
     subject: initialSubject,
     message: "",
@@ -248,19 +249,19 @@ export default function InquiryForm() {
         <div className="rounded-xl border-2 border-emerald-300 bg-white p-5 text-sm text-slate-800">
           <p className="font-bold text-emerald-900">
             {isEn
-              ? "Business inquiries use the protected consultation form"
-              : "法人・自動化・講習相談は保護された専用フォームへ統合しました"}
+              ? "Choose a contact method on the consultation page"
+              : "法人・自動化・講習相談は専用ページで受付方法を確認できます"}
           </p>
           <p className="mt-2 text-xs leading-6 text-slate-700">
             {isEn
-              ? "The dedicated route provides shared rate limiting, idempotency, origin checks, body limits, and fail-closed delivery."
-              : "共有レート制限、冪等性、Origin検査、本文上限、配信設定未完了時のfail-closedを備えた正規経路です。相談本文や連絡先をanalyticsへ送信しません。"}
+              ? "You can prepare the message and send it with your email app. Web-form delivery is available only when its operating requirements have been verified."
+              : "相談内容を整理し、ご自身のメールアプリから送信できます。Webフォーム方式は配信運用の確認条件が整う場合だけ表示します。"}
           </p>
           <Link
             href="/services/automation#consult-form"
             className="mt-4 inline-flex min-h-[44px] items-center justify-center rounded-lg bg-emerald-700 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-800"
           >
-            {isEn ? "Open protected consultation form" : "専用の相談フォームを開く"}
+            {isEn ? "View consultation options" : "相談の受付方法を見る"}
           </Link>
         </div>
       ) : status === "success" ? (
@@ -471,17 +472,24 @@ export default function InquiryForm() {
           >
             {status === "sending" ? (isEn ? "Sending..." : "送信中...") : (isEn ? "Submit" : "送信する")}
           </button>
-          <p className="text-[11px] text-slate-500">
-            {isEn ? "* Personal-data handling per the " : "※ 個人情報の取扱いは"}{" "}
-            <a href="/privacy" className="underline hover:text-slate-700">
-              {isEn ? "Privacy Policy" : "プライバシーポリシー"}
-            </a>{" "}
-            {isEn ? "." : "をご確認ください。"}
-          </p>
+          {isEn ? (
+            <p className="text-[11px] text-slate-500">
+              * Personal-data handling per the{" "}
+              <a href="/privacy" className="underline hover:text-slate-700">
+                Privacy Policy
+              </a>
+              .
+            </p>
+          ) : (
+            <PrivacyNote variant="message" />
+          )}
           <p className="text-[11px] text-slate-500">
             {isEn
-              ? "If the form is unavailable, wait a while and try again. Contact addresses are not published to reduce misuse."
-              : "フォームが使えない場合は、時間をおいて再度お試しください。迷惑利用防止のため連絡先メールアドレスは公開していません。"}
+              ? "If the form is unavailable, you can also check how to contact us by email."
+              : "フォームが使えない場合は、メールでの受付方法も確認できます。"}
+            <Link href="/contact/automation-email" className="ml-1 inline-flex min-h-11 items-center font-bold underline">
+              {isEn ? "Email contact options" : "メールでの受付方法"}
+            </Link>
           </p>
         </form>
       )}

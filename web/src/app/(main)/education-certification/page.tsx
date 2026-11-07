@@ -13,6 +13,51 @@ const TITLE = "特別教育・技能講習の候補検索｜適用条件を公�
 const DESCRIPTION =
   "作業条件から特別教育、技能講習、作業主任者、免許の候補と講習時間を確認できます。";
 
+const qualificationGuides = [
+  {
+    title: "クレーン・デリック運転士の実技試験",
+    detail: "教習所で実技免除を受ける場合と試験場で受ける場合を比べます。",
+    href: "https://note.com/anzen_ai_jp/n/n2aad90824516",
+    access: "無料",
+  },
+  {
+    title: "クレーンと移動式クレーン、どちらを先に取る？",
+    detail: "現場の機械と免許の範囲から考える無料ガイドです。",
+    href: "https://note.com/anzen_ai_jp/n/n3e686a691eb7",
+    access: "無料",
+  },
+  {
+    title: "産業用ロボットの特別教育は誰に必要？",
+    detail: "教示・検査と協働ロボットの扱いを公式資料から整理します。",
+    href: "https://note.com/anzen_ai_jp/n/nf9544b26273b",
+    access: "無料",
+  },
+  {
+    title: "ずい道等の掘削等作業主任者はいつ必要？",
+    detail: "選任が必要な作業と技能講習の受講資格を整理します。",
+    href: "https://note.com/anzen_ai_jp/n/n3c02293eeffc",
+    access: "無料",
+  },
+  {
+    title: "建設用リフトの特別教育はいつ必要？",
+    detail: "荷物専用設備と工事用エレベーターを区別し、運転者への教育を確認します。",
+    href: "https://note.com/anzen_ai_jp/n/n995c64038dd7",
+    access: "無料",
+  },
+  {
+    title: "特別教育は自社でできる？",
+    detail: "講師の知識・経験、業務別の科目と時間、受講記録の3年保存を確認します。",
+    href: "https://note.com/anzen_ai_jp/n/n5803e11d4b72",
+    access: "無料",
+  },
+  {
+    title: "移動式クレーン運転士の力学を演習",
+    detail: "学科の計算を独自問題6問で練習できます。",
+    href: "https://note.com/anzen_ai_jp/n/nbd15c4e43c98",
+    access: "有料記事の試し読み",
+  },
+] as const;
+
 export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
@@ -141,7 +186,7 @@ export default function EducationCertificationPage() {
         keywords={["特別教育 候補検索", "技能講習 確認", "フルハーネス 特別教育", "作業主任者 適用条件", "資格 公式資料"]}
       />
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
-        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
+        <div className="mx-auto flex min-h-screen max-w-7xl flex-col px-4 py-6 sm:px-6">
           <header>
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="text-3xl font-black tracking-tight text-slate-950 sm:text-4xl dark:text-white">作業から資格を確認</h1>
@@ -191,7 +236,23 @@ export default function EducationCertificationPage() {
               </nav>
             </CollapsibleDetail>
           </details>
-          <UsageNotesLink className="mb-6 inline-flex min-h-11 items-center text-blue-700" />
+          <section aria-labelledby="qualification-note-guides-title" className="mb-6 rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-900">
+            <h2 id="qualification-note-guides-title" className="text-xl font-black text-slate-950 dark:text-white">資格と特別教育を記事で確認</h2>
+            <details className="mt-3 rounded-xl border border-slate-200 px-3 dark:border-slate-700">
+              <summary className="flex min-h-11 cursor-pointer items-center text-sm font-bold">資格別の解説記事を開く</summary>
+              <p className="border-t border-slate-200 pt-3 text-sm leading-6 text-slate-700 dark:text-slate-200">資格候補を絞ったあと、クレーン免許・産業用ロボット・ずい道工事・建設用リフトの教育と資格をもう少し詳しく知りたい方へ。特別教育を社内で行う際の準備も確認できます。安全AI編集部のnote記事です。</p>
+              <div className="my-4 grid gap-3 sm:grid-cols-2">
+                {qualificationGuides.map((guide) => (
+                  <a key={guide.href} href={guide.href} target="_blank" rel="noopener noreferrer" className="block rounded-xl border border-slate-300 p-4 text-slate-950 hover:border-blue-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-300 dark:border-slate-600 dark:text-white">
+                    <span className="text-xs font-bold text-blue-700 dark:text-blue-300">{guide.access} · note</span>
+                    <span className="mt-1 block font-black underline underline-offset-4">{guide.title}</span>
+                    <span className="mt-2 block text-sm leading-6 text-slate-700 dark:text-slate-200">{guide.detail}</span>
+                  </a>
+                ))}
+              </div>
+            </details>
+          </section>
+          <UsageNotesLink className="mt-auto inline-flex min-h-11 items-center self-start text-blue-700" />
         </div>
       </div>
     </>

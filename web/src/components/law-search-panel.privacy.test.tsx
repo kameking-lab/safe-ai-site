@@ -72,7 +72,8 @@ describe("LawSearchPanel URL privacy", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "安衛法 第61条" }));
     expect(window.location.search).toBe("?law=all");
-    expect((query as HTMLInputElement).value).toBe("第61条");
+    expect((query as HTMLInputElement).value).toBe("");
+    expect((screen.getByRole("searchbox", { name: "条番号で検索" }) as HTMLInputElement).value).toBe("第61条");
   });
 
   it("JavaScript無効時にもGET成功欄にならないフォーム構造を保つ", () => {

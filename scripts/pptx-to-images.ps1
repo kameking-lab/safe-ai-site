@@ -1,10 +1,11 @@
 # PPTX → JPG 画像化（PowerPoint COM 経由）
-# Usage: pwsh -File scripts/pptx-to-images.ps1 -Pptx <path> -OutDir <dir> [-Width 1600]
+# Usage: pwsh -File scripts/pptx-to-images.ps1 -Pptx <path> -OutDir <dir> [-Width 1600] [-Pdf <path>]
 
 param(
     [Parameter(Mandatory = $true)][string]$Pptx,
     [Parameter(Mandatory = $true)][string]$OutDir,
-    [int]$Width = 1600
+    [int]$Width = 1600,
+    [string]$Pdf
 )
 
 $ErrorActionPreference = "Stop"
@@ -14,6 +15,10 @@ if (-not (Test-Path $OutDir)) {
     New-Item -ItemType Directory -Force -Path $OutDir | Out-Null
 }
 $outAbs = (Resolve-Path $OutDir).Path
+$pdfAbs = if ($Pdf) { [IO.Path]::GetFullPath($Pdf) } else { $null }
+if ($pdfAbs) {
+    New-Item -ItemType Directory -Force -Path ([IO.Path]::GetDirectoryName($pdfAbs)) | Out-Null
+}
 
 Write-Host "[export] $pptxAbs -> $outAbs (width=$Width)"
 
@@ -28,6 +33,11 @@ try {
         $outPath = Join-Path $outAbs ("slide-{0:D2}.jpg" -f $i)
         $slide.Export($outPath, "JPG", $Width, $height) | Out-Null
         Write-Host "  slide $i -> $outPath"
+    }
+    if ($pdfAbs) {
+        # ppSaveAsPDF=32。ノートを公開せず、同じPPTXの全スライドを変換する。
+        $pres.SaveAs($pdfAbs, 32)
+        Write-Host "  PDF -> $pdfAbs"
     }
     $pres.Close()
 }

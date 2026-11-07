@@ -9,8 +9,12 @@
  * search, sitemap and feature catalogs can apply the same fail-closed rule.
  */
 import { isArticleQuarantined } from "@/lib/article-quarantine";
-import { hasApprovedPublicContentRevalidation,requiresPublicContentRevalidation } from './public-content-revalidation';
-import { EXAM_ID_PATTERN, EXAM_LIBRARY_PATH } from '@/lib/exam-library-model';
+import { isUnfinishedPublicReadingPath } from "@/lib/public-reading-status";
+import { EXAM_ID_PATTERN, EXAM_LIBRARY_PATH } from "@/lib/exam-library-model";
+import {
+  hasApprovedPublicContentRevalidation,
+  requiresPublicContentRevalidation,
+} from "@/lib/public-content-revalidation";
 
 export const PUBLIC_CONSTRUCTION_CALCULATOR_SLUGS = [
   "soil-volume-conversion",
@@ -61,6 +65,15 @@ export function isPublishedExamLibraryPath(path:string):boolean {
 export function isQuarantinedPublicPath(href: string): boolean {
   const path = pathOnly(href);
   if(requiresPublicContentRevalidation(path))return !hasApprovedPublicContentRevalidation(path);
+
+  if (isUnfinishedPublicReadingPath(path)) return true;
+
+  if (
+    requiresPublicContentRevalidation(path) &&
+    !hasApprovedPublicContentRevalidation(path)
+  ) {
+    return true;
+  }
 
   if (
     path === "/faq" ||

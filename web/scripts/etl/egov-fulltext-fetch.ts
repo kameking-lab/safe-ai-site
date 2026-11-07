@@ -21,8 +21,10 @@
  */
 
 import { createHash } from "node:crypto";
+import { lawResponseXml } from "./egov-law-response.ts";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { dirname, join, resolve } from "node:path";
+import { pathToFileURL } from "node:url";
 
 const API_BASE = "https://laws.e-gov.go.jp/api/2/law_data";
 const OUT_DIR = join(process.cwd(), "src/data/laws-fulltext");
@@ -360,7 +362,7 @@ function canonicalArticlesJson(articles: FulltextArticle[]): string {
   );
 }
 
-function runGates(law: FulltextLaw, expectMax: number): string[] {
+export function runGates(law: FulltextLaw, expectMax: number): string[] {
   const errs: string[] = [];
   const arts = law.articles;
 
@@ -402,10 +404,10 @@ async function fetchXml(lawId: string): Promise<string | null> {
     headers: { Accept: "application/xml" },
   });
   if (!res.ok) return null;
-  return await res.text();
+  return lawResponseXml(await res.text(), lawId);
 }
 
-function buildLaw(lawId: string, xml: string): FulltextLaw {
+export function buildLaw(lawId: string, xml: string): FulltextLaw {
   rubyStrippedCount = 0;
   const revFull =
     firstTag(xml, "law_revision_id")?.trim() ?? "";
@@ -488,7 +490,9 @@ async function main() {
   }
 }
 
-main().catch((e) => {
-  console.error("[fulltext] fatal:", e);
-  process.exit(1);
-});
+if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
+  main().catch((e) => {
+    console.error("[fulltext] fatal:", e);
+    process.exitCode = 1;
+  });
+}

@@ -59,8 +59,8 @@ export const FEATURE_CATEGORIES: FeatureCategory[] = [
   },
   {
     id: "chemical-ra",
-    title: "化学物質リスクアセスメント",
-    summary: "CAS・SDS記載名と作業条件の確認を支援",
+    title: "化学物質RA準備",
+    summary: "CAS・SDS記載名と作業条件を整理し、公式評価へ",
     description:
       "CAS番号による同一性確認、GHS分類・SDS・作業条件の整理、公式CREATE-SIMPLEへの案内、確認記録の作成を支援します。公式評価ロジックの代替ではありません。",
     accent: "violet",
@@ -147,7 +147,7 @@ const ALL_FEATURES: FeatureItem[] = [
   },
   {
     slug: "chemical-ra",
-    title: "化学物質リスクアセスメント",
+    title: "化学物質RA準備",
     summary: "公式CREATE-SIMPLEを利用する前の入力整理支援",
     description:
       "CAS・SDS記載名と作業条件を整理します。ばく露濃度やリスクレベルは本サイトで判定せず、厚生労働省のCREATE-SIMPLEによる公式評価へ案内します。",
@@ -186,6 +186,7 @@ const ALL_FEATURES: FeatureItem[] = [
     category: "ky",
     tags: ["打合せ書", "記録"],
   },
+  {slug:"construction-quantity-tools",title:"数量・材料の現場計算ツール",summary:"図を見て入力。シート・ボード・塗装・メッシュの数量も計算",description:"生コン、土量、鉄筋、型枠、勾配、図面換算に加え、不整形面積と材料の割付を計算。例の数字と実測値を区別し、結果を端末内で扱います。",href:"/tools/construction-calculators",category:"construction-calc",tags:["数量","材料","割付"]},
   // 建設計算
   {
     slug: "construction-calc",
@@ -510,14 +511,34 @@ const ALL_FEATURES: FeatureItem[] = [
   },
   // データベース
   {
-    slug: "accidents",
-    title: "事故データベース",
-    summary: "死傷災害事例を業種・原因で検索",
+    slug: "accident-news",
+    title: "国内の死亡事故速報",
+    summary: "直近の国内死亡事故報道を確認状態つきで確認",
     description:
-      "厚労省の死亡災害データ（2019〜2023年）を業種・事故型・起因物分類で検索。出典はデータセット単位で、個別行の逆引きは未整備です。",
+      "日本国内の労働中の死亡事故報道を、媒体・確認状態・公表日時とともに掲載します。厚労省の死亡災害個票検索や統計分析とは分けて表示します。",
     href: "/accident-news",
     category: "databases",
-    tags: ["事故", "DB"],
+    tags: ["事故", "速報", "報道"],
+  },
+  {
+    slug: "fatal-accidents",
+    title: "死亡災害DB",
+    summary: "厚労省の死亡災害個票を条件検索",
+    description:
+      "厚生労働省「職場のあんぜんサイト」の死亡災害個票を、キーワード・発生年・業種・事故の型などで検索します。全国速報の総数とは分けて表示します。",
+    href: "/fatal-accidents",
+    category: "databases",
+    tags: ["事故", "死亡災害", "DB"],
+  },
+  {
+    slug: "accidents-analytics",
+    title: "事故分析ダッシュボード",
+    summary: "死亡災害個票を12種類の条件で分析",
+    description:
+      "厚労省の死亡災害個票を年・月・業種・事故種類・地域・規模・原因など12種類の条件で絞り込みます。割合は項目値が確認できる収録事例を母数とし、発生率とは区別します。",
+    href: "/accidents-analytics",
+    category: "databases",
+    tags: ["事故", "分析", "死亡災害"],
   },
   {
     slug: "law-navi",
@@ -643,10 +664,10 @@ const ALL_FEATURES: FeatureItem[] = [
   },
   {
     slug: "subsidies-calculator",
-    title: "助成金シミュレーター",
-    summary: "活用できる助成金を即時試算",
+    title: "研修の経費助成・参考試算",
+    summary: "対象条件を確認した研修の1人分を試算",
     description:
-      "事業規模・業種・取り組み内容を入力すると、エイジフレンドリー補助金・人材開発支援助成金などの試算を表示します。",
+      "事業展開等リスキリング支援コースの対象条件を公式窓口で確認後、企業区分・訓練方法・時間・対象経費から1人分の参考額を計算します。申請資格や支給額は確定しません。",
     href: "/subsidies/calculator",
     category: "management",
     tags: ["助成金"],

@@ -3,6 +3,8 @@ import type { SearchItem } from "@/lib/search-index";
 import {
   buildSearchPageHref,
   classifySearchResults,
+  countSearchResultsByCategory,
+  deduplicateSearchResults,
   paginateSearchResults,
   SEARCH_DESTINATION_LIMIT,
   SEARCH_PAGE_SIZE,
@@ -75,6 +77,33 @@ describe("/search result grouping and pagination", () => {
     ]);
 
     expect(groups.others.map((result) => result.id)).toEqual(["first", "other"]);
+  });
+
+  it("canonical統合後の総件数とカテゴリ件数が一致し、表示groupも同じ集合になる", () => {
+    const ranked = [
+      item("law-first", { canonicalUrl: "/law/one", url: "/law/one?q=first" }),
+      item("law-duplicate", { canonicalUrl: "/law/one", url: "/law/one?q=second" }),
+      item("chemical", { category: "chemical", informationKind: "primary" }),
+      item("tool", { category: "feature", informationKind: "tool" }),
+    ];
+    const distinct = deduplicateSearchResults(ranked);
+    const counts = countSearchResultsByCategory(distinct);
+    const groups = classifySearchResults(distinct);
+
+    expect(distinct.map((result) => result.id)).toEqual(["law-first", "chemical", "tool"]);
+    expect(counts.all).toBe(3);
+    expect(counts.law + counts.chemical + counts.tool).toBe(counts.all);
+    expect(groups.destinations.length + groups.documents.length + groups.others.length).toBe(counts.all);
+    expect(paginateSearchResults(groups.destinations, 1, SEARCH_DESTINATION_LIMIT).items).toHaveLength(1);
+  });
+
+  it("5件を超える目的ページも次ページから開ける", () => {
+    const destinations = Array.from({ length: 8 }, (_, index) =>
+      item(`tool-${index}`, { category: "feature", informationKind: "tool" }),
+    );
+    const page = paginateSearchResults(classifySearchResults(destinations).destinations, 2, SEARCH_DESTINATION_LIMIT);
+    expect(page.pageCount).toBe(2);
+    expect(page.items.map((result) => result.id)).toEqual(["tool-5", "tool-6", "tool-7"]);
   });
 
   it("ページリンクは検索条件と他groupのページを保ち、戻る履歴を作れるURLにする", () => {

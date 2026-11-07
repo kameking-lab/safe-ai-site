@@ -37,6 +37,8 @@ const PUBLIC_RUNTIME_EXACT_PATHS = new Set([
 ]);
 const REVIEWED_FALL_PREVENTION_PREFIX =
   "web/public/training/safety-seminars/fall-prevention/";
+const REVIEWED_SAFETY_MANAGEMENT_BASICS_PREFIX =
+  "web/public/training/safety-seminars/safety-management-basics-osh-law/";
 const REVIEWED_AI_CHAT_WORK_PREFIX =
   "web/public/training/ai-seminars/ai-chat-work/";
 const REVIEWED_TRAINING_DOWNLOAD_SUFFIXES = new Set([".pdf", ".pptx"]);
@@ -90,6 +92,15 @@ function isPublicRuntimeAllowed(filePath) {
   const directFallPreventionDownload = fallPreventionRelative.startsWith("downloads/")
     && !fallPreventionRelative.slice("downloads/".length).includes("/")
     && REVIEWED_TRAINING_DOWNLOAD_SUFFIXES.has(suffix);
+  const safetyManagementBasicsRelative = filePath.startsWith(REVIEWED_SAFETY_MANAGEMENT_BASICS_PREFIX)
+    ? filePath.slice(REVIEWED_SAFETY_MANAGEMENT_BASICS_PREFIX.length)
+    : "";
+  const directSafetyManagementBasicsAudio = safetyManagementBasicsRelative.startsWith("audio/")
+    && !safetyManagementBasicsRelative.slice("audio/".length).includes("/")
+    && /^slide-\d{2}\.mp3$/u.test(safetyManagementBasicsRelative.slice("audio/".length));
+  const directSafetyManagementBasicsDownload = safetyManagementBasicsRelative.startsWith("downloads/")
+    && !safetyManagementBasicsRelative.slice("downloads/".length).includes("/")
+    && REVIEWED_TRAINING_DOWNLOAD_SUFFIXES.has(suffix);
   const aiChatWorkRelative = filePath.startsWith(REVIEWED_AI_CHAT_WORK_PREFIX)
     ? filePath.slice(REVIEWED_AI_CHAT_WORK_PREFIX.length)
     : "";
@@ -104,6 +115,8 @@ function isPublicRuntimeAllowed(filePath) {
     || directSeminarPptx
     || directFallPreventionAudio
     || directFallPreventionDownload
+    || directSafetyManagementBasicsAudio
+    || directSafetyManagementBasicsDownload
     || directAiChatWorkAudio
     || directAiChatWorkDownload;
 }
@@ -212,15 +225,15 @@ if (committedTreeMode) {
   sourceRoot = process.cwd();
   workspacePrefix = path.basename(sourceRoot).toLowerCase() === "web" ? "web/" : "";
   const relativePaths = [];
-  const excludedRoots = new Set([".git", ".next", ".vercel", "node_modules"]);
+  const excludedRoots = new Set([".codex-finalizer", ".git", ".next", ".vercel", "node_modules"]);
   const pending = [{ absolute: sourceRoot, relative: "" }];
   try {
     while (pending.length > 0) {
       const current = pending.pop();
       for (const entry of readdirSync(current.absolute, { withFileTypes: true })) {
         const relative = current.relative ? `${current.relative}/${entry.name}` : entry.name;
+        if (!current.relative && excludedRoots.has(entry.name)) continue;
         if (entry.isDirectory()) {
-          if (!current.relative && excludedRoots.has(entry.name)) continue;
           pending.push({ absolute: path.join(current.absolute, entry.name), relative });
         } else {
           relativePaths.push(relative.replaceAll("\\", "/"));
@@ -239,10 +252,19 @@ if (!isPublicRuntimeAllowed("web/public/screenshots/runtime-guide.png")
   || !isPublicRuntimeAllowed(`${REVIEWED_FALL_PREVENTION_PREFIX}audio/slide-01.mp3`)
   || !isPublicRuntimeAllowed(`${REVIEWED_FALL_PREVENTION_PREFIX}downloads/fall-prevention-training.pdf`)
   || !isPublicRuntimeAllowed(`${REVIEWED_FALL_PREVENTION_PREFIX}downloads/fall-prevention-training.pptx`)
+  || !isPublicRuntimeAllowed(`${REVIEWED_SAFETY_MANAGEMENT_BASICS_PREFIX}safe-site-hero.webp`)
+  || !isPublicRuntimeAllowed(`${REVIEWED_SAFETY_MANAGEMENT_BASICS_PREFIX}hazard-spotting.webp`)
+  || !isPublicRuntimeAllowed(`${REVIEWED_SAFETY_MANAGEMENT_BASICS_PREFIX}audio/slide-01.mp3`)
+  || !isPublicRuntimeAllowed(`${REVIEWED_SAFETY_MANAGEMENT_BASICS_PREFIX}downloads/safety-management-basics-osh-law-training.pdf`)
+  || !isPublicRuntimeAllowed(`${REVIEWED_SAFETY_MANAGEMENT_BASICS_PREFIX}downloads/safety-management-basics-osh-law-training.pptx`)
   || !isPublicRuntimeAllowed(`${REVIEWED_AI_CHAT_WORK_PREFIX}audio/slide-01.mp3`)
   || !isPublicRuntimeAllowed(`${REVIEWED_AI_CHAT_WORK_PREFIX}downloads/ai-chat-work-training.pdf`)
   || !isPublicRuntimeAllowed(`${REVIEWED_AI_CHAT_WORK_PREFIX}downloads/ai-chat-work-training.pptx`)
   || isPublicRuntimeAllowed(`${REVIEWED_FALL_PREVENTION_PREFIX}audio/raw/slide-01.mp3`)
+  || isPublicRuntimeAllowed(`${REVIEWED_SAFETY_MANAGEMENT_BASICS_PREFIX}audio/raw/slide-01.mp3`)
+  || isPublicRuntimeAllowed(`${REVIEWED_SAFETY_MANAGEMENT_BASICS_PREFIX}downloads/raw/unreviewed.pdf`)
+  || isPublicRuntimeAllowed(`${REVIEWED_SAFETY_MANAGEMENT_BASICS_PREFIX}nested/audio/slide-01.mp3`)
+  || isPublicRuntimeAllowed(`${REVIEWED_SAFETY_MANAGEMENT_BASICS_PREFIX}audio/narration.mp3`)
   || isPublicRuntimeAllowed(`${REVIEWED_AI_CHAT_WORK_PREFIX}downloads/raw/unreviewed.pdf`)
   || isPublicRuntimeAllowed("web/public/training/safety-seminars/another-theme/audio/slide-01.mp3")
   || isPublicRuntimeAllowed("web/public/seminars/raw/unreviewed.pptx")

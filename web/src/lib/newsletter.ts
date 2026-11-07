@@ -186,7 +186,7 @@ function buildWelcomeEmail(sub: NewsletterSubscriber, unsubUrl: string): string 
   </div>
   <p style="font-size:11px;color:#94a3b8;margin:16px 0 0;text-align:center;">
     <a href="${unsubUrl}" style="color:#6b7280;">配信停止</a>
-    ｜ 安全AIポータル ─ 根拠から、現場の行動へ
+    ｜ 安全AIポータル ─ その書類、AIに任せて、現場に行こう。
   </p>
 </body>
 </html>`;
@@ -252,7 +252,7 @@ export function buildDigestEmail(opts: {
   </div>
   <p style="font-size:11px;color:#94a3b8;margin:16px 0 0;text-align:center;">
     <a href="${opts.unsubUrl}" style="color:#6b7280;">配信停止</a>
-    ｜ 安全AIポータル ─ 根拠から、現場の行動へ
+    ｜ 安全AIポータル ─ その書類、AIに任せて、現場に行こう。
   </p>
 </body>
 </html>`;

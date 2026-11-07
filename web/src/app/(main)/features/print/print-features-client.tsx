@@ -91,7 +91,7 @@ export function PrintFeaturesClient() {
               安全AIポータル — 機能一覧（社内検討資料）
             </p>
             <h2 className="mt-1 text-2xl font-bold text-slate-900">
-              根拠から、現場の行動へ
+              その書類、AIに任せて、現場に行こう。
             </h2>
             <p className="mt-1 text-xs text-slate-600">
               編集：安全AIポータル編集部 ／ 全{FEATURES.length}機能

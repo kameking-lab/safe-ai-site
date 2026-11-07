@@ -1052,14 +1052,14 @@ const RAW_CASES: RawGenQualityCase[] = [
     diagVerdict: "未",
     question: "職場のパワハラ防止のために会社がやらなければならないことは何ですか？",
     mustInclude: [["相談"], ["措置"]],
-    goldCitations: [{ lawShort: "労施法", articleNum: "第30条の2" }],
+    goldCitations: [{ lawShort: "労施法", articleNum: "第31条" }],
     corpusEvidence: [
       {
         lawShort: "労施法",
-        articleNum: "第30条の2",
+        articleNum: "第31条",
         mustContain: ["相談", "雇用管理上必要な措置"],
         anchor:
-          "労働施策総合推進法（昭和41年法律第132号）第30条の2（令和元年法律第24号改正で新設）: 職場のパワーハラスメント防止のための相談体制整備その他の雇用管理上必要な措置義務",
+          "労働施策総合推進法（昭和41年法律第132号）第31条（2026年10月1日改正後。旧第30条の2）: 職場のパワーハラスメント防止のための相談体制整備その他の雇用管理上必要な措置義務",
       },
     ],
   },

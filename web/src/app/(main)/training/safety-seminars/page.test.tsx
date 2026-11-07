@@ -1,17 +1,21 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import {
   COMING_SOON_SAFETY_SEMINARS,
+  COMING_SOON_SAFETY_CORE_20,
   FALL_PREVENTION_SEMINAR_PATH,
   PUBLISHED_SAFETY_SEMINARS,
+  SAFETY_MANAGEMENT_BASICS_OSH_LAW_SEMINAR_PATH,
   SAFETY_SEMINARS,
+  SAFETY_SEMINAR_CORE_20,
   SAFETY_SEMINAR_HUB_PATH,
 } from "@/data/safety-seminars/themes";
 import SafetySeminarLibraryPage, { generateMetadata } from "./page";
 
 const EXPECTED_TITLES = [
+  "安全管理の基本と安衛法",
   "墜落・転落防止とフルハーネスの実務",
   "熱中症対策の実装",
   "足場・脚立・開口部の安全",
@@ -43,12 +47,17 @@ const EXPECTED_TITLES = [
 ] as const;
 
 describe("/training/safety-seminars", () => {
-  it("28テーマを公開中1件とComing Soon 27件に分ける", () => {
+  it("29テーマを公開中3件とComing Soon 26件に分ける", () => {
     expect(SAFETY_SEMINARS.map((seminar) => seminar.title)).toEqual(
       EXPECTED_TITLES,
     );
-    expect(PUBLISHED_SAFETY_SEMINARS).toHaveLength(1);
-    expect(COMING_SOON_SAFETY_SEMINARS).toHaveLength(27);
+    expect(PUBLISHED_SAFETY_SEMINARS).toHaveLength(3);
+    expect(PUBLISHED_SAFETY_SEMINARS.map((seminar) => seminar.href)).toEqual([
+      SAFETY_MANAGEMENT_BASICS_OSH_LAW_SEMINAR_PATH,
+      FALL_PREVENTION_SEMINAR_PATH,
+      "/training/safety-seminars/chemicals-sds-risk-assessment",
+    ]);
+    expect(COMING_SOON_SAFETY_SEMINARS).toHaveLength(26);
     expect(
       COMING_SOON_SAFETY_SEMINARS.every((seminar) => !("href" in seminar)),
     ).toBe(true);
@@ -62,34 +71,89 @@ describe("/training/safety-seminars", () => {
     ).toBeDefined();
     expect(
       container.querySelectorAll('[data-seminar-status="published"]'),
-    ).toHaveLength(1);
+    ).toHaveLength(3);
     expect(
       container.querySelectorAll('[data-seminar-status="coming-soon"]'),
-    ).toHaveLength(27);
-    expect(screen.getByText("音声あり")).toBeDefined();
-    expect(screen.getByText("PowerPoint・PDF")).toBeDefined();
+    ).toHaveLength(0);
+    expect(screen.queryByText(/Coming Soon|準備中/)).toBeNull();
+    expect(screen.getByRole("heading", { name: "現場に合わせて教材を使う手順" })).toBeDefined();
+    expect(SAFETY_SEMINAR_CORE_20).toHaveLength(20);
+    expect(COMING_SOON_SAFETY_CORE_20).toHaveLength(17);
+    expect(screen.queryByText("音声あり")).toBeNull();
+    expect(screen.getAllByText("PowerPoint・PDF")).toHaveLength(2);
+    expect(screen.getByText("Webスライド・確認クイズ")).toBeDefined();
+    expect(screen.getAllByText("12枚")).toHaveLength(2);
     expect(screen.getByText("20枚")).toBeDefined();
-    expect(screen.getByRole("link", { name: /今すぐ見る/ }).getAttribute("href"))
-      .toBe(FALL_PREVENTION_SEMINAR_PATH);
+    expect(screen.getByText("おすすめ")).toBeDefined();
+    expect(screen.queryByText("FIRST RELEASE")).toBeNull();
+    expect(screen.getAllByText("SLIDES & QUIZ")).toHaveLength(3);
+    expect(
+      container
+        .querySelector('[data-seminar-status="published"]')
+        ?.getAttribute("data-seminar-id"),
+    ).toBe("safety-management-basics-osh-law");
+    expect(screen.getAllByRole("link", { name: /今すぐ見る/ }).map((link) => link.getAttribute("href")))
+      .toEqual([
+        SAFETY_MANAGEMENT_BASICS_OSH_LAW_SEMINAR_PATH,
+        FALL_PREVENTION_SEMINAR_PATH,
+        "/training/safety-seminars/chemicals-sds-risk-assessment",
+      ]);
   });
 
-  it("Coming Soonカードにはテーマ名・対象者・Coming Soonだけを表示し、操作を置かない", () => {
+  it("公開教材を時間・対象・形式で絞り込み、解除すると3件に戻る", () => {
     const { container } = render(<SafetySeminarLibraryPage />);
-    const cards = [
-      ...container.querySelectorAll<HTMLElement>(
-        '[data-seminar-status="coming-soon"]',
-      ),
-    ];
+    const published = () => container.querySelectorAll('[data-seminar-status="published"]');
+    expect(published()).toHaveLength(3);
 
-    for (const card of cards) {
-      expect(card.children).toHaveLength(3);
-      expect(card.querySelector("h3")).not.toBeNull();
-      expect(card.querySelector("p")?.textContent).toMatch(/^対象：/u);
-      expect(card.querySelector("span")?.textContent?.trim()).toBe(
-        "Coming Soon",
-      );
-      expect(card.querySelector("a, button")).toBeNull();
-    }
+    fireEvent.change(screen.getByLabelText("標準時間で絞り込む"), {
+      target: { value: PUBLISHED_SAFETY_SEMINARS[1].standardDuration },
+    });
+    expect(published()).toHaveLength(1);
+    expect(published()[0].getAttribute("data-seminar-id")).toBe(PUBLISHED_SAFETY_SEMINARS[1].id);
+
+    fireEvent.change(screen.getByLabelText("標準時間で絞り込む"), { target: { value: "" } });
+    fireEvent.change(screen.getByLabelText("対象で絞り込む"), {
+      target: { value: PUBLISHED_SAFETY_SEMINARS[2].audience },
+    });
+    expect(published()).toHaveLength(1);
+
+    fireEvent.change(screen.getByLabelText("対象で絞り込む"), { target: { value: "" } });
+    fireEvent.change(screen.getByLabelText("形式で絞り込む"), { target: { value: "PDF" } });
+    expect(published()).toHaveLength(2);
+    fireEvent.change(screen.getByLabelText("形式で絞り込む"), { target: { value: "" } });
+    expect(published()).toHaveLength(3);
+  });
+
+  it("0件になった複数条件を1操作で解除し、公開3件に戻す", () => {
+    const { container } = render(<SafetySeminarLibraryPage />);
+    const published = () => container.querySelectorAll('[data-seminar-status="published"]');
+    expect(screen.queryByRole("button", { name: "絞り込みを解除" })).toBeNull();
+
+    fireEvent.change(screen.getByLabelText("標準時間で絞り込む"), {
+      target: { value: PUBLISHED_SAFETY_SEMINARS[0].standardDuration },
+    });
+    fireEvent.change(screen.getByLabelText("形式で絞り込む"), {
+      target: { value: "Webスライド" },
+    });
+    expect(published()).toHaveLength(0);
+    expect(screen.getByRole("status").textContent).toContain("0件");
+
+    fireEvent.click(screen.getByRole("button", { name: "絞り込みを解除" }));
+    expect(published()).toHaveLength(3);
+    expect(screen.getByRole("status").textContent).toContain("3件");
+    expect(screen.queryByRole("button", { name: "絞り込みを解除" })).toBeNull();
+    expect(screen.getByLabelText<HTMLSelectElement>("標準時間で絞り込む").value).toBe("");
+    expect(screen.getByLabelText<HTMLSelectElement>("形式で絞り込む").value).toBe("");
+  });
+
+  it("未完成のテーマは公開一覧から外し、利用手順を本文で案内する", () => {
+    const { container } = render(<SafetySeminarLibraryPage />);
+    const details = container.querySelector("details");
+    expect(details).toBeNull();
+    const items = [...container.querySelectorAll<HTMLElement>('[data-seminar-status="coming-soon"]')];
+    expect(items).toHaveLength(0);
+    expect(container.textContent).not.toMatch(/公開予定|リリース予定|準備中/u);
+    expect(screen.getByRole("heading", { name: "現場に合わせて教材を使う手順" })).toBeDefined();
   });
 
   it("self canonicalを保ち、query付きだけnoindexにする", async () => {

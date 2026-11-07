@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Save, Loader2, Trash2, ArrowRight, FolderOpen } from "lucide-react";
 import {
   saveChemicalRaRecord,
+  getChemicalRaRecord,
   listChemicalRaRecords,
   deleteChemicalRaRecord,
   isChemicalRaCloudEnabled,
@@ -23,6 +24,7 @@ export function ChemicalRaSaveButton(props: {
   workContent: string;
   exposureBand: string;
   payload: unknown;
+  onSaved?: (record: ChemicalRaSavedRecord) => void;
 }) {
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
@@ -40,6 +42,14 @@ export function ChemicalRaSaveButton(props: {
         payload: props.payload,
         cloudConsent,
       });
+      if (result.localStatus === "saved-locally" && props.onSaved) {
+        const saved = await getChemicalRaRecord(result.raId);
+        if (!saved) {
+          setMsg("保存後の記録を読み取れませんでした。印刷前に台帳から保存内容を確認してください。");
+          return;
+        }
+        props.onSaved(saved);
+      }
       if (result.localStatus === "failed") {
         setMsg("端末内への保存に失敗しました。空き容量とブラウザ設定を確認してください。");
       } else if (result.cloudStatus === "synced") {
@@ -135,9 +145,8 @@ export function SavedRaList() {
         実施記録の台帳（{list.length}）
       </h2>
       <p className="mt-1 text-[11px] text-slate-500">
-        安衛法第57条の3の自律的管理では、リスクアセスメントの<strong className="font-semibold">記録の作成・保管</strong>が求められます。
-        各記録は「記録を開く」から<strong className="font-semibold">実施当時の実施日のまま再印刷</strong>でき、監督署対応や年次見直しに使えます。
-        （この一覧はこの端末の保存記録です。クラウド同期済みとは限りません）
+        保存時の条件・日付を開いて再印刷できます。編集後の保存は別の記録として残し、元の記録を上書きしません。
+        この一覧だけで正式なRAや法定記録の完成を示すものではありません。クラウド同期済みとは限りません。
       </p>
       <label className="mt-3 flex min-h-[44px] cursor-pointer items-center gap-2 rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-800">
         <input

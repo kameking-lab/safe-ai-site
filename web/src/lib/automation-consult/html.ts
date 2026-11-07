@@ -1,3 +1,5 @@
+import { AUTOMATION_CONSULT_SOURCE_PAGES } from "./form-contract";
+
 export function escapeAutomationConsultHtml(value: string): string {
   return value
     .replaceAll("&", "&amp;")
@@ -12,5 +14,5 @@ export function multilineAutomationConsultHtml(value: string): string {
 }
 
 export function sanitizeAutomationConsultSourcePage(value: string): string {
-  return value === "/services/automation" ? value : "/services/automation";
+  return AUTOMATION_CONSULT_SOURCE_PAGES.find((page) => page === value) ?? "/services/automation";
 }

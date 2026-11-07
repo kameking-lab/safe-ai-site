@@ -7,10 +7,16 @@
 
 /**
  * Legal answers are limited to the latest corpus date that completed primary-
- * source verification. Runtime clock time must not silently extend this legal
- * assurance window.
+ * source verification. This anchor is a response date, not a review of all laws:
+ * each source must still pass its own freshness/historical-version gates.
+ * 2026-10-11: rechecked all 25 corpus laws against e-Gov's CurrentEnforced
+ * revisions and the committed snapshot hashes. A new fetch alone does not
+ * promote a source without a matching current-revision verification record.
+ * 2026-10-12: rechecked seven additional official excerpts; unconfirmed
+ * publications remain unconfirmed.
+ * Runtime clock time must not silently extend this legal assurance window.
  */
-export const LEGAL_ANSWER_BASIS_DATE_JST = "2026-08-09";
+export const LEGAL_ANSWER_BASIS_DATE_JST = "2026-10-12";
 const LEGAL_ANSWER_BASIS_INSTANT = `${LEGAL_ANSWER_BASIS_DATE_JST}T00:00:00+09:00`;
 
 export function legalAnswerBasisNow(): Date {

@@ -5,6 +5,7 @@ import type { SummaryApiRouteResponse } from "@/lib/types/api";
 import type { LawRevision, LawRevisionSummary } from "@/lib/types/domain";
 import { cdnCacheHeaders, noStoreHeaders } from "@/lib/api-cache";
 import { resolveDiagnosticDelay, resolveDiagnosticError } from "@/lib/server/diagnostic-controls";
+import { curatedRevisionSummary } from "@/lib/laws/curated-revision-summary";
 
 // F-005: 唯一のGETルート。revisionIdごとに固定応答 → Vercel Edge Cache実効。
 // 法改正の追加は日次以下のペースなので1h保持+24h SWR。最大の削減効果が期待される。
@@ -76,7 +77,7 @@ export async function GET(request: NextRequest) {
   if (!revision) {
     return errorResponse(404, "要約データが見つかりませんでした。", "NOT_FOUND", false);
   }
-  const generated = buildSourceBoundFallback(revision);
+  const generated = curatedRevisionSummary(revision) ?? buildSourceBoundFallback(revision);
   return NextResponse.json<SummaryApiRouteResponse>(
     {
       ok: true,

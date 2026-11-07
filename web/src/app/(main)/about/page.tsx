@@ -10,6 +10,7 @@ import {
 import { PageContainer } from "@/components/layout";
 import { PageJsonLd } from "@/components/page-json-ld";
 import { WorkSupportSection } from "@/components/work-support-section";
+import { LEGAL_SEARCH_MODE_SUMMARY } from "@/lib/chatbot-generation-policy";
 
 const DESCRIPTION =
   "安全AIポータルの目的、一次資料の扱い、AIの限界、公開基準、修正報告先を説明します。";
@@ -91,10 +92,10 @@ export default function AboutPage() {
             aria-hidden="true"
           />
           <h2 className="mt-3 text-lg font-bold text-slate-950 dark:text-white">
-            AIを補助に限定する
+            法令チャットの仕組み
           </h2>
           <p className="mt-2 text-sm leading-6 text-slate-700 dark:text-slate-200">
-            AI回答やAI候補は確定情報ではありません。根拠不足では保留し、公式資料と人による確認へつなぎます。
+            {LEGAL_SEARCH_MODE_SUMMARY} 根拠不足では保留し、公式資料と人による確認へつなぎます。
           </p>
         </section>
       </div>

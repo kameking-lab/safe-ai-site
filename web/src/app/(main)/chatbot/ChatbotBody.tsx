@@ -3,6 +3,11 @@ import { Suspense } from "react";
 import { PageContainer } from "@/components/layout";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ChatbotClientBridge } from "./ChatbotClientBridge";
+import {
+  LEGAL_GENERATION_ENABLED,
+  LEGAL_GENERATION_OFF_NOTICE,
+  LEGAL_SEARCH_MODE_SUMMARY,
+} from "@/lib/chatbot-generation-policy";
 
 export function ChatbotBody() {
   return (
@@ -42,15 +47,21 @@ export function ChatbotBody() {
               法令本文検索
             </StatusBadge>
           </div>
-          <div className="mt-1 flex min-h-11 items-center gap-3">
+          <div className="mt-1 flex min-h-11 flex-wrap items-center gap-3">
             <p className="min-w-0 flex-1 text-xs text-slate-600 dark:text-slate-300 sm:text-sm">
-              作業や設備について、普段の言葉で質問できます。
+              {LEGAL_SEARCH_MODE_SUMMARY}
             </p>
             <Link
               href="/about/usage-notes"
               className="inline-flex min-h-11 shrink-0 items-center text-xs font-medium text-slate-700 underline-offset-4 hover:text-slate-950 hover:underline dark:text-slate-300 dark:hover:text-white"
             >
               注意事項
+            </Link>
+            <Link
+              href="/resources/netis-safety"
+              className="inline-flex min-h-11 shrink-0 items-center text-xs font-bold text-sky-800 underline underline-offset-4 hover:text-sky-950 dark:text-sky-300 dark:hover:text-sky-100"
+            >
+              NETIS安全技術5選
             </Link>
           </div>
         </header>
@@ -95,6 +106,17 @@ export function ChatbotBody() {
           </Suspense>
         </div>
       </section>
+      {!LEGAL_GENERATION_ENABLED && (
+        <details className="mx-auto mt-2 w-full max-w-3xl text-xs text-slate-600 dark:text-slate-300">
+          <summary className="min-h-11 cursor-pointer content-center font-medium">
+            回答の仕組み・評価方法
+          </summary>
+          <p className="pb-2 leading-5">{LEGAL_GENERATION_OFF_NOTICE.ja}</p>
+          <Link href="/about/chatbot-eval" className="inline-flex min-h-11 items-center underline">
+            評価方法と確認範囲
+          </Link>
+        </details>
+      )}
     </PageContainer>
   );
 }

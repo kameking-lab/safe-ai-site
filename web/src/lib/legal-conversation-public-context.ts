@@ -117,6 +117,8 @@ const SAFE_LITERAL_CHOICE_VALUES = [
   "100・200Vを停電して作業",
   "高圧設備を停電して作業",
   "充電中に扱う",
+  "わく組足場",
+  "わく組足場以外の足場",
 ] as const;
 
 const SAFE_LITERAL_CHOICES = new Map<string, string>(

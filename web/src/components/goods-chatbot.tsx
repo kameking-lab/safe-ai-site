@@ -6,6 +6,7 @@ import { ClipboardCheck, Send, ShieldCheck } from "lucide-react";
 import { TextareaWithVoice } from "@/components/voice-input-field";
 import type { GoodsChatResponse } from "@/app/api/goods-chat/route";
 import { evaluateChatbotSafety } from "@/lib/chatbot-safety";
+import { PUBLIC_SAFETY_GOODS_CATEGORIES } from "@/data/public-safety-goods-categories";
 
 export function GoodsChatbot() {
   const [input, setInput] = useState("");
@@ -97,8 +98,46 @@ export function GoodsChatbot() {
 
       {result ? (
         <div className="mt-4 rounded-xl border border-amber-300 bg-amber-50 p-4">
-          <p className="font-bold text-amber-950">商品推薦は保留されています</p>
+          <p className="font-bold text-amber-950">カテゴリ候補を整理しました</p>
           <p className="mt-1 text-sm leading-6 text-amber-950">{result.reply}</p>
+          {result.matchedCategories.length > 0 ? (
+            <div className="mt-4">
+              <p className="text-xs font-black tracking-wide text-slate-700">関連カテゴリ</p>
+              <ul className="mt-2 grid gap-2 sm:grid-cols-2">
+                {result.matchedCategories.map((match) => {
+                  const category = PUBLIC_SAFETY_GOODS_CATEGORIES.find(
+                    (item) => item.id === match.id,
+                  );
+                  if (!category) return null;
+                  return (
+                    <li key={match.id} className="rounded-lg border border-emerald-300 bg-white p-3">
+                      <a
+                        href={`#goods-${match.id}`}
+                        className="block min-h-11 text-sm hover:text-emerald-800"
+                      >
+                        <span className="font-black text-emerald-900">
+                          {category.icon} {category.name}
+                        </span>
+                        <span className="mt-1 block text-xs leading-5 text-slate-600">
+                          {match.reason}
+                        </span>
+                      </a>
+                      <a
+                        href={`#goods-${match.id}`}
+                        className="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-lg border border-emerald-700 bg-emerald-50 px-3 text-xs font-black text-emerald-900 hover:bg-emerald-100"
+                      >
+                        確認条件と購入先を見る
+                      </a>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ) : (
+            <p className="mt-3 rounded-lg bg-white p-3 text-sm text-slate-700">
+              危険源を特定できませんでした。「高所」「粉じん」「薬液」「騒音」「酸欠」など、作業と危険を具体的に入力してください。
+            </p>
+          )}
           <ul className="mt-3 space-y-2">
             {result.checklist.map((item) => (
               <li key={item} className="flex items-start gap-2 text-sm leading-6 text-slate-800">
@@ -107,6 +146,9 @@ export function GoodsChatbot() {
               </li>
             ))}
           </ul>
+          <p className="mt-3 text-xs font-bold leading-5 text-slate-600">
+            該当カテゴリへ移動すると確認条件と販売サイトへの広告リンクを表示します。価格・在庫・規格適合を保証するものではありません。型式と適合性を確認してから購入してください。
+          </p>
           <div className="mt-4 flex flex-wrap gap-2">
             <Link
               href="/chemical-ra"

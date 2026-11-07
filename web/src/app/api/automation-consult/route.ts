@@ -30,6 +30,7 @@ import {
 } from "@/lib/automation-consult/email";
 import { isPreviewSafetyMode } from "@/lib/server/deployment-safety";
 import { getAutomationConsultAvailability } from "@/lib/automation-consult/availability";
+import { logAutomationConsultReadinessFailure } from "@/lib/automation-consult/readiness-log";
 import {
   automationConsultQueueConfiguration,
   enqueueAutomationConsult,
@@ -46,6 +47,7 @@ function errorResponse(
   message: string,
   options?: {
     fieldErrors?: Record<string, string[]>;
+    referenceId?: string;
     headers?: Record<string, string>;
   }
 ) {
@@ -56,6 +58,7 @@ function errorResponse(
         code,
         message,
         ...(options?.fieldErrors ? { fieldErrors: options.fieldErrors } : {}),
+        ...(options?.referenceId ? { referenceId: options.referenceId } : {}),
       },
     },
     {
@@ -80,6 +83,7 @@ export async function POST(request: Request) {
     !previewSafetyMode &&
     availability.webFormEnabled !== true
   ) {
+    logAutomationConsultReadinessFailure();
     return errorResponse(
       503,
       "intake_unavailable",
@@ -153,6 +157,8 @@ export async function POST(request: Request) {
     );
   }
 
+  const referenceId = createAutomationConsultReference(submissionDate, idempotencyKey);
+
   const fingerprint = fingerprintAutomationConsultInput(
     parsed.data,
     previewSafetyMode ? PREVIEW_DRY_RUN_HASH_SECRET : undefined,
@@ -188,7 +194,8 @@ export async function POST(request: Request) {
     return errorResponse(
       409,
       "request_in_progress",
-      "同じ内容を送信中です。しばらくお待ちください。"
+      "同じ相談を処理中です。内容を変えずに、少し待ってから同じ送信を確認してください。",
+      { referenceId }
     );
   }
   if (idempotency.state === "replay") {
@@ -228,7 +235,6 @@ export async function POST(request: Request) {
     );
   }
 
-  const referenceId = createAutomationConsultReference(submissionDate, idempotencyKey);
   const receivedAt = new Date().toISOString();
 
   try {
@@ -271,7 +277,8 @@ export async function POST(request: Request) {
         return errorResponse(
           503,
           code,
-          "現在、相談を送信できません。時間をおいてお試しください。"
+          "送達の完了を確認できませんでした。一部の通知が届いている可能性があります。同じ内容・同じ識別子で再度お試しください。",
+          { referenceId }
         );
       }
     }
@@ -282,7 +289,8 @@ export async function POST(request: Request) {
     return errorResponse(
       503,
       "delivery_failed",
-      "現在、相談を送信できません。時間をおいてお試しください。"
+      "送達の完了を確認できませんでした。一部の通知が届いている可能性があります。同じ内容・同じ識別子で再度お試しください。",
+      { referenceId }
     );
   }
 

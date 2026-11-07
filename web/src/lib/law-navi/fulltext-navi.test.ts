@@ -31,9 +31,9 @@ describe("fulltextArtSlug — sortKey 由来の slug（全階層枝番保持）"
 });
 
 describe("getFulltextNaviEntries — 安衛則ギャップ充填（dual-exclusion）", () => {
-  it("curated に無い条だけを 1,063 件埋める（118 curated収録 + 1 slug占有 を除外）", async () => {
+  it("curated に無い条だけを 1,065 件埋める（118 curated収録 + 1 slug占有 を除外）", async () => {
     const gap = await getFulltextNaviEntries(EGOV);
-    expect(gap.length).toBe(1063);
+    expect(gap.length).toBe(1065);
     expect(gap.every((e) => e.origin === "fulltext")).toBe(true);
   });
 
@@ -81,8 +81,8 @@ describe("getFulltextNaviEntries — 安衛則ギャップ充填（dual-exclusio
 });
 
 describe("既存 URL 不変（追加のみ・§5-2）", () => {
-  it("生成集合は既存717件を維持したまま確認済み7条を追加する", () => {
-    expect(LAW_NAVI_ENTRIES.length).toBe(724);
+  it("生成集合は既存717件を維持し、確認済み7条と現行均等法15条を含む", () => {
+    expect(LAW_NAVI_ENTRIES.length).toBe(725);
   });
 
   it("ギャップ slug は既存 (egovLawId, artSlug) と 1 件も衝突しない", async () => {

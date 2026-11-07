@@ -47,7 +47,7 @@ describe("/for/consultant 正規機能ランチャー", () => {
         "/law-search",
         "/circulars",
         "/law-search?q=安全配慮義務",
-        "/accident-news",
+        "/fatal-accidents",
         "/chemical-database",
         "/services/automation",
       ]),

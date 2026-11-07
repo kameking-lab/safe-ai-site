@@ -4,7 +4,7 @@ import type {
   ChatbotSource,
 } from "@/lib/chatbot-contract";
 
-export type RevisionKind = "law" | "ordinance" | "notice" | "guideline" | "other";
+export type RevisionKind = "law" | "cabinet_order" | "ordinance" | "notice" | "guideline" | "other";
 
 export type RevisionCategory =
   | "労働安全衛生法"
@@ -93,6 +93,12 @@ export type LawRevisionSummary = {
   threeLineSummary: [string, string, string];
   workplaceActions: string[];
   targetIndustries: string[];
+  /** Scope and sources of a fixed, source-checked explanation; no expert-review claim. */
+  verification?: {
+    checkedOn: string;
+    scope: string;
+    sources: Array<{ label: string; url: string }>;
+  };
 };
 
 export type ChatMessage = {
@@ -127,6 +133,8 @@ export type WeatherAlert = {
 };
 
 export type OfficialWeatherWarningState = {
+  /** 取得診断用。失敗や古い発表を「警報なし」に変換しない。 */
+  sourceIssue?: import("@/lib/jma/jma-data").JmaSourceIssue;
   status: "live" | "degraded" | "unresolved" | "unavailable";
   warnings: Array<{
     code: string;

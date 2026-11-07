@@ -35,6 +35,8 @@ export type ExternalReference = {
 
 /** NITE 由来の主要 GHS 区分まとめ (Phase 1b 追加、政府版GHS分類) */
 export type NiteGhsClassifications = {
+  /** 引火性液体。公的分類を個別に照合した物質から収録。 */
+  flammableLiquids?: string;
   carcinogen?: string;
   mutagen?: string;
   reproTox?: string;

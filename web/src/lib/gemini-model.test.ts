@@ -33,7 +33,7 @@ const generationCallSites = runtimeFiles.filter((path) =>
 
 describe("Gemini production model policy", () => {
   it("pins the latest GA Flash model instead of a hot-swapped alias", () => {
-    expect(GEMINI_FLASH_MODEL).toBe("gemini-3.6-flash");
+    expect(GEMINI_FLASH_MODEL).toBe("gemini-3.8-flash");
     expect(GEMINI_FLASH_MODEL).not.toContain("latest");
     expect(GEMINI_FLASH_MODEL).not.toContain("preview");
   });
@@ -73,7 +73,7 @@ describe("Gemini production model policy", () => {
     }
   });
 
-  it("does not send parameters removed by Gemini 3.6 Flash", () => {
+  it("does not send parameters removed by Gemini 3.8 Flash", () => {
     const failures = generationCallSites.flatMap((path) =>
       DEPRECATED_CONFIG.test(readFileSync(path, "utf8"))
         ? [relativePath(path)]

@@ -64,7 +64,7 @@ function loadSnapshot(lawId: string): Snapshot {
 
 describe("generated e-Gov verified excerpts", () => {
   it("copies exact non-deleted text from a hash-valid committed snapshot", () => {
-    expect(egovVerifiedExcerpts).toHaveLength(63);
+    expect(egovVerifiedExcerpts).toHaveLength(66);
     const snapshots = new Map<string, Snapshot>();
 
     for (const excerpt of egovVerifiedExcerpts) {
@@ -135,31 +135,31 @@ describe("generated e-Gov verified excerpts", () => {
       {
         lawId: "347CO0000000318",
         articleNum: "第10条",
-        revisionId: "20260401_507CO0000000361",
+        revisionId: "20261001_508CO0000000196",
         text: "作業床を最も高く上昇させた場合",
       },
       {
         lawId: "347M50002000032",
         articleNum: "第41条",
-        revisionId: "20260801_508M60000100086",
+        revisionId: "20261001_508M60000100116",
         text: "別表第三",
       },
       {
         lawId: "347M50002000032",
         articleNum: "第350条",
-        revisionId: "20260801_508M60000100086",
+        revisionId: "20261001_508M60000100116",
         text: "作業の指揮者",
       },
       {
         lawId: "347M50002000036",
         articleNum: "第8条",
-        revisionId: "20260401_508M60000100003",
+        revisionId: "20261001_508M60000100116",
         text: "臨時に有機溶剤業務",
       },
       {
         lawId: "347M50002000036",
         articleNum: "第9条",
-        revisionId: "20260401_508M60000100003",
+        revisionId: "20261001_508M60000100116",
         text: "短時間",
       },
     ];

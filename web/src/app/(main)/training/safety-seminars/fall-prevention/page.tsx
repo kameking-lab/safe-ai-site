@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -6,12 +7,12 @@ import {
   Download,
   FileCheck2,
   FileText,
-  Headphones,
   Presentation,
 } from "lucide-react";
 import { PageContainer } from "@/components/layout";
 import { JsonLd } from "@/components/json-ld";
 import { SafetySeminarPlayer } from "@/components/training/safety-seminar-player";
+import { SeminarQuiz } from "@/components/training/seminar-quiz";
 import fallPreventionJson from "@/data/safety-seminars/fall-prevention.json";
 import claimsJson from "@/data/safety-seminars/claims.json";
 import quizJson from "@/data/safety-seminars/quiz.json";
@@ -19,6 +20,7 @@ import sourcesJson from "@/data/safety-seminars/source-registry.json";
 import type {
   FallPreventionTraining,
   TrainingClaim,
+  TrainingQuiz,
   TrainingSource,
 } from "@/data/safety-seminars/types";
 import {
@@ -31,10 +33,11 @@ import {
 const PATH = "/training/safety-seminars/fall-prevention";
 const TITLE = "墜落・転落防止とフルハーネスの実務｜無料安全研修";
 const DESCRIPTION =
-  "2025年全国確定統計、現行法令、政府資料、査読研究から、作業床・手すり、フルハーネス、取付点、落下距離、点検、救助を20枚で学ぶ社内安全研修。";
+  "2025年全国確定統計、e-Gov現行条文、厚労省リーフレットに基づき、本質安全から個人用保護具までの順序と、作業床・手すり、器具選定・取付け・点検を20枚で学ぶ社内安全研修。";
 const training = fallPreventionJson as FallPreventionTraining;
 const claims = claimsJson as TrainingClaim[];
 const sources = sourcesJson as TrainingSource[];
+const quiz = quizJson as TrainingQuiz;
 const DOWNLOAD_BASE = "/training/safety-seminars/fall-prevention/downloads";
 
 export async function generateMetadata({
@@ -44,7 +47,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const query = await searchParams;
   const hasQuery = Object.keys(query).length > 0;
-  const image = `${SITE_URL}/safety-images/library/originals/fall-restraint-required.png`;
+  const image = `${SITE_URL}${PATH}/fall-prevention-hero-v2.png`;
   return {
     title: TITLE,
     description: DESCRIPTION,
@@ -60,10 +63,6 @@ export async function generateMetadata({
 }
 
 export default function FallPreventionSeminarPage() {
-  const audioSeconds = training.slides.reduce(
-    (total, slide) => total + slide.estimatedSeconds,
-    0,
-  );
   return (
     <PageContainer width="full" className="pb-20">
       <JsonLd
@@ -109,15 +108,23 @@ export default function FallPreventionSeminarPage() {
       </nav>
 
       <header className="relative overflow-hidden rounded-[2rem] bg-slate-950 px-5 py-8 text-white shadow-2xl sm:px-8 lg:px-12 lg:py-12">
+        <Image
+          src={`${PATH}/fall-prevention-hero-v2.png`}
+          alt="親綱にフルハーネスを接続し、指差し確認を行う建設作業員"
+          fill
+          priority
+          sizes="(min-width: 1024px) 100vw, 100vw"
+          className="object-cover object-center"
+        />
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 opacity-35"
+          className="pointer-events-none absolute inset-0"
           style={{
             background:
-              "radial-gradient(circle at 10% 10%, #0f766e 0, transparent 34%), radial-gradient(circle at 90% 80%, #f97316 0, transparent 28%)",
+              "linear-gradient(90deg, rgba(2,6,23,.98) 0%, rgba(2,6,23,.92) 38%, rgba(2,6,23,.52) 64%, rgba(2,6,23,.16) 100%)",
           }}
         />
-        <div className="relative max-w-4xl">
+        <div className="relative max-w-3xl lg:max-w-[58%]">
           <p className="text-sm font-black tracking-[0.16em] text-teal-300">公開中・無料教材</p>
           <h1 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl lg:text-6xl">
             墜落・転落防止と
@@ -127,16 +134,15 @@ export default function FallPreventionSeminarPage() {
             {training.subtitle}
           </p>
           <div className="mt-5 flex flex-wrap gap-2 text-xs font-bold sm:text-sm">
-            <span className="rounded-full bg-white/10 px-3 py-2"><Headphones className="mr-1 inline h-4 w-4" aria-hidden="true" />音声 約37分</span>
             <span className="rounded-full bg-white/10 px-3 py-2"><Presentation className="mr-1 inline h-4 w-4" aria-hidden="true" />20枚</span>
             <span className="rounded-full bg-white/10 px-3 py-2">演習込み 約60分</span>
-            <span className="rounded-full bg-white/10 px-3 py-2">基準日 2026-08-27</span>
+            <span className="rounded-full bg-white/10 px-3 py-2">基準日 {training.asOf}</span>
           </div>
           <p className="mt-5 rounded-xl border border-amber-300 bg-amber-200/10 p-3 font-bold leading-6 text-amber-100">
             {training.boundary}
           </p>
           <a href="#seminar-player" className="mt-6 inline-flex min-h-11 items-center gap-2 rounded-xl bg-teal-300 px-5 py-3 font-black text-slate-950 hover:bg-teal-200 dark:text-slate-950">
-            教材を再生する <ArrowRight className="h-5 w-5" aria-hidden="true" />
+            スライドを見る <ArrowRight className="h-5 w-5" aria-hidden="true" />
           </a>
         </div>
       </header>
@@ -146,13 +152,13 @@ export default function FallPreventionSeminarPage() {
         className="mt-8 scroll-mt-24"
         style={{ contentVisibility: "auto", containIntrinsicSize: "auto 900px" }}
       >
-        <SafetySeminarPlayer slides={training.slides} claims={claims} sources={sources} />
+        <SafetySeminarPlayer slides={training.slides} claims={claims} sources={sources} audioEnabled={false} playerLabel="墜落・転落防止の安全研修スライド" />
       </section>
 
       <noscript>
         <section className="mt-8 rounded-2xl border-2 border-amber-500 bg-amber-50 p-5 text-amber-950">
           <h2 className="text-xl font-black">JavaScriptを使わずに読む</h2>
-          <p className="mt-2 leading-7">音声操作は利用できません。以下の全スライド本文・原稿とPDFをご利用ください。</p>
+          <p className="mt-2 leading-7">以下の全スライド本文・講師用の詳説とPDFをご利用ください。</p>
           <ol className="mt-4 space-y-5">
             {training.slides.map((slide) => (
               <li key={slide.id}>
@@ -177,15 +183,10 @@ export default function FallPreventionSeminarPage() {
           </div>
           <p className="text-sm text-slate-600 dark:text-slate-300">PPTXは編集可能・PDFは印刷用</p>
         </div>
-        <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-5 grid gap-3 sm:grid-cols-2">
           {[
             ["編集可能PowerPoint", "fall-prevention-training.pptx", Presentation],
             ["投影・印刷用PDF", "fall-prevention-training.pdf", FileText],
-            ["講師用台本", "fall-prevention-instructor-script.pdf", FileText],
-            ["参加者配布用1枚資料", "fall-prevention-handout.pdf", FileCheck2],
-            ["現場確認チェックリスト", "fall-prevention-field-checklist.pdf", CheckCircle2],
-            ["5問クイズ・解答解説", "fall-prevention-quiz-and-answers.pdf", FileCheck2],
-            ["出典一覧", "fall-prevention-sources.pdf", FileText],
           ].map(([label, file, Icon]) => (
             <a
               key={String(file)}
@@ -201,6 +202,28 @@ export default function FallPreventionSeminarPage() {
             </a>
           ))}
         </div>
+        <details className="mt-4 rounded-2xl border border-slate-300 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
+          <summary className="min-h-11 cursor-pointer py-2 font-black text-slate-950 dark:text-white">講師・配布用の補助資料を開く（5点）</summary>
+          <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {[
+              ["講師用台本", "fall-prevention-instructor-script.pdf", FileText],
+              ["参加者配布用1枚資料", "fall-prevention-handout.pdf", FileCheck2],
+              ["現場確認チェックリスト", "fall-prevention-field-checklist.pdf", CheckCircle2],
+              ["5問クイズ・解答解説", "fall-prevention-quiz-and-answers.pdf", FileCheck2],
+              ["出典一覧", "fall-prevention-sources.pdf", FileText],
+            ].map(([label, file, Icon]) => (
+              <a
+                key={String(file)}
+                href={`${DOWNLOAD_BASE}/${file}`}
+                download
+                className="group flex min-h-16 items-center justify-between gap-3 rounded-2xl border border-slate-300 p-4 font-black text-slate-950 hover:border-teal-600 hover:bg-teal-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-teal-300 dark:border-slate-700 dark:text-white dark:hover:bg-teal-950/40"
+              >
+                <span className="inline-flex items-center gap-3"><Icon className="h-5 w-5 text-teal-700 dark:text-teal-300" aria-hidden="true" />{String(label)}</span>
+                <Download className="h-5 w-5 text-slate-500 group-hover:text-teal-700" aria-hidden="true" />
+              </a>
+            ))}
+          </div>
+        </details>
         <p className="mt-4 text-sm leading-6 text-slate-600 dark:text-slate-300">
           社内安全研修、朝礼、協力会社教育、現場教育、自社資料への組込みに無料で利用・編集・社内配布できます。根拠脚注は原則として残してください。詳細は
           <Link href="/training/safety-seminars/terms" className="font-bold text-teal-800 underline underline-offset-4 dark:text-teal-300">利用条件・注意事項</Link>
@@ -229,8 +252,8 @@ export default function FallPreventionSeminarPage() {
         className="mt-12"
         style={{ contentVisibility: "auto", containIntrinsicSize: "auto 2200px" }}
       >
-        <h2 id="outline-title" className="text-3xl font-black text-slate-950 dark:text-white">20枚の構成と音声原稿</h2>
-        <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">音声原稿合計 {Math.round(audioSeconds / 60)}分目安。各スライドの主張はclaim IDから一次資料へ追跡できます。</p>
+        <h2 id="outline-title" className="text-3xl font-black text-slate-950 dark:text-white">20枚の構成と講師用の詳説</h2>
+        <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">各スライドの主張はclaim IDから一次資料へ追跡できます。</p>
         <div className="mt-5 grid gap-3 lg:grid-cols-2">
           {training.slides.map((slide) => (
             <details key={slide.id} className="rounded-2xl border border-slate-300 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
@@ -251,19 +274,18 @@ export default function FallPreventionSeminarPage() {
         style={{ contentVisibility: "auto", containIntrinsicSize: "auto 700px" }}
       >
         <h2 id="quiz-title" className="text-3xl font-black text-slate-950 dark:text-white">5問の確認クイズ</h2>
-        <div className="mt-5 space-y-3">
-          {quizJson.questions.map((question, index) => (
-            <details key={question.id} className="rounded-2xl border border-slate-300 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
-              <summary className="min-h-11 cursor-pointer py-2 font-black text-slate-950 dark:text-white">Q{index + 1}. {question.question}</summary>
-              <ol className="mt-2 list-[upper-alpha] space-y-1 pl-6 text-sm leading-6">
-                {question.choices.map((choice) => <li key={choice}>{choice}</li>)}
-              </ol>
-              <p className="mt-3 rounded-xl bg-teal-50 p-3 text-sm font-bold leading-6 text-teal-950 dark:bg-teal-950/50 dark:text-teal-100">
-                正解: {String.fromCharCode(65 + question.correctIndex)}。{question.explanation}
-              </p>
-            </details>
-          ))}
-        </div>
+        <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">選択すると、4肢それぞれの理由と公的根拠を表示します。進捗はこの端末にだけ保存します。</p>
+        <SeminarQuiz courseId={training.id} quiz={quiz} sources={sources} />
+        <noscript>
+          <ol className="mt-5 space-y-4">
+            {quiz.questions.map((question, index) => (
+              <li key={question.id} className="rounded-2xl border border-slate-300 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
+                <h3 className="font-black text-slate-950 dark:text-white">Q{index + 1}. {question.question}</h3>
+                <ol className="mt-2 list-[upper-alpha] space-y-1 pl-6 text-sm leading-6">{question.choices.map((choice) => <li key={choice}>{choice}</li>)}</ol>
+              </li>
+            ))}
+          </ol>
+        </noscript>
       </section>
 
       <section

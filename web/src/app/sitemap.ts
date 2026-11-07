@@ -11,12 +11,17 @@ import {
   AI_SEMINAR_HUB_PATH,
   PUBLISHED_AI_SEMINARS,
 } from "@/data/ai-seminars/themes";
+import {
+  PUBLISHED_SAFETY_SEMINARS,
+  SAFETY_SEMINAR_HUB_PATH,
+} from "@/data/safety-seminars/themes";
 import { ILLNESS_CATEGORIES } from "@/data/illness-considerations";
 import { COURT_CASES } from "@/data/court-cases";
 import { CANONICAL_HAZARD_TYPES } from "@/lib/accidents/type-normalization";
 import { EDUCATION_DECKS } from "@/data/education-decks";
 import { latestIsoDate } from "@/lib/sitemap/lastmod";
 import { computeSitemapFreshness } from "@/lib/sitemap/freshness";
+import { routeContentChangedOn } from "@/lib/sitemap/content-changes";
 import { SITE_URL } from "@/lib/seo-metadata";
 import { isPublicRouteAvailable } from "@/lib/public-content-policy";
 import { PUBLIC_VISUAL_KY_SCENARIOS } from "@/data/visual-ky";
@@ -40,7 +45,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const buildToday = new Date().toISOString().slice(0, 10);
   const {
     freshestNews, // /whats-new・トップが集約する新着の最新日
-    freshestLawRevision, // /laws の法改正最新公表日
+    lawsContentUpdated, // /laws の公表日・一覧内容変更日の新しい方
     freshestNotice, // /circulars の通達最新発出日
     accidentsDataUpdated, // 死亡災害DBスナップショット生成日
     freshestArticle, // /articles 一覧の最新更新日
@@ -88,10 +93,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
       changeFrequency: "weekly",
     },
-    // 重大災害事例ブラウザ（死亡災害DBの類型検索・自己canonical・実在indexableページ）。
-    // 死亡災害DB由来のためlastmodは accidentsDataUpdated（= SERIOUS_CASES_META.generatedAt）に追従。
+    // 直近の報道ベース労災事故速報。更新日はニュース系データの最新日に追従。
     {
       url: "/accident-news",
+      lastModified: freshestNews,
+      priority: 0.9,
+      changeFrequency: "hourly",
+    },
+    // 厚労省死亡災害DBの類型検索。スナップショット更新日に追従。
+    {
+      url: "/fatal-accidents",
       lastModified: accidentsDataUpdated,
       priority: 0.85,
       changeFrequency: "weekly",
@@ -247,9 +258,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.85,
       changeFrequency: "monthly" as const,
     })),
+    // 公表日だけでなく、一覧に表示する改正内容が実際に変わった日も見る
+    //（取得のみ・内容同一の再取得では動かない。lib/sitemap/content-changes.ts）。
     {
       url: "/laws",
-      lastModified: freshestLawRevision,
+      lastModified: lawsContentUpdated,
       priority: 0.9,
       changeFrequency: "weekly",
     },
@@ -315,7 +328,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: "/chatbot",
-      lastModified: "2026-04-01",
+      lastModified: routeContentChangedOn("/chatbot"),
       priority: 0.8,
       changeFrequency: "monthly",
     },
@@ -339,13 +352,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: "/chemical-ra",
-      lastModified: "2026-04-01",
+      lastModified: routeContentChangedOn("/chemical-ra"),
       priority: 0.7,
       changeFrequency: "monthly",
     },
     {
       url: "/chemical-database",
-      lastModified: "2026-04-01",
+      lastModified: routeContentChangedOn("/chemical-database"),
       priority: 0.7,
       changeFrequency: "monthly",
     },
@@ -589,24 +602,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
     },
     {
-      url: "/laws/bcp",
-      lastModified: "2026-04-01",
-      priority: 0.7,
-      changeFrequency: "monthly",
-    },
-    {
-      url: "/laws/freelance-rosai",
-      lastModified: "2026-04-01",
-      priority: 0.7,
-      changeFrequency: "monthly",
-    },
-    {
-      url: "/laws/gig-work",
-      lastModified: "2026-04-01",
-      priority: 0.6,
-      changeFrequency: "monthly",
-    },
-    {
       url: "/treatment-work-balance",
       lastModified: "2026-05-16",
       priority: 0.85,
@@ -663,23 +658,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.6,
       changeFrequency: "monthly",
     },
-    {
-      url: "/notifications",
-      lastModified: "2026-03-01",
-      priority: 0.6,
-      changeFrequency: "monthly",
-    },
-    // 自社プロファイル登録（index:true・自己canonical・OGP付きの実在ページ＝全機能の初期表示
-    // 最適化の入口）。逆カバレッジガード（下記 sitemap.test.ts）で検出した「indexable なのに
-    // どの sitemap にも載っていなかった」発見性の穴を収載。
-    // ※ /organization（事業所ダッシュボード）は「正式リリース前デモ版モック」として意図的に非収載
-    //   （sitemap.test.ts の非収載境界テストで固定）。noindex 化されれば逆ガードも自動追従する。
-    {
-      url: "/profile",
-      lastModified: "2026-05-29",
-      priority: 0.6,
-      changeFrequency: "monthly",
-    },
+    // /profile and /notifications are local input/settings screens (noindex).
     {
       url: "/goods",
       lastModified: "2026-03-01",
@@ -818,7 +797,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: "/chemical-ra/product-search",
-      lastModified: "2026-04-01",
+      lastModified: routeContentChangedOn("/chemical-ra/product-search"),
       priority: 0.6,
       changeFrequency: "monthly",
     },
@@ -838,6 +817,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       url: "/resources/mlit",
       lastModified: "2026-05-15",
       priority: 0.6,
+      changeFrequency: "monthly",
+    },
+    {
+      url: "/resources/netis-safety",
+      lastModified: "2026-09-20",
+      priority: 0.75,
       changeFrequency: "monthly",
     },
     {
@@ -982,21 +967,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     changeFrequency: "monthly",
   }));
 
-  // 建設計算: ハブ＋個別計算機（registry から列挙＝計算機の量産に自動追従）
-  const constructionCalcPages: typeof pages = [
-    {
-      url: "/construction-calc",
-      lastModified: "2026-07-12",
-      priority: 0.8,
-      changeFrequency: "weekly",
-    },
-    ...CONSTRUCTION_CALCULATORS.map((c) => ({
-      url: `/construction-calc/${c.slug}`,
-      lastModified: "2026-07-12",
-      priority: 0.8,
-      changeFrequency: "monthly" as Freq,
-    })),
-  ];
+  // 入力方式の異なる旧個別計算機は維持し、転送する旧一覧は載せない。
+  const constructionCalcPages: typeof pages = CONSTRUCTION_CALCULATORS.map((calc) => ({
+    url: `/construction-calc/${calc.slug}`,
+    lastModified: "2026-07-12",
+    priority: 0.8,
+    changeFrequency: "monthly" as Freq,
+  }));
 
   const illnessGuidePages: typeof pages = ILLNESS_CATEGORIES.map((c) => ({
     url: `/treatment-work-balance/illness-guide/${c.id}`,
@@ -1073,21 +1050,21 @@ export default function sitemap(): MetadataRoute.Sitemap {
     })),
   ];
 
-  // 安全研修ライブラリは公開済み教材だけを列挙する。Coming Soon 27テーマ、
+  // 安全研修ライブラリは公開済み教材だけを列挙する。Coming Soonテーマ、
   // 再生・字幕・ダウンロード状態、利用条件ページは個別のindex対象にしない。
   const safetySeminarPages: typeof pages = [
     {
-      url: "/training/safety-seminars",
-      lastModified: "2026-08-27",
+      url: SAFETY_SEMINAR_HUB_PATH,
+      lastModified: "2026-09-20",
       priority: 0.9,
       changeFrequency: "monthly" as Freq,
     },
-    {
-      url: "/training/safety-seminars/fall-prevention",
-      lastModified: "2026-08-27",
+    ...PUBLISHED_SAFETY_SEMINARS.map((seminar) => ({
+      url: seminar.href,
+      lastModified: "2026-09-20",
       priority: 0.85,
       changeFrequency: "monthly" as Freq,
-    },
+    })),
   ];
 
   // AI実務研修はハブと公開済み教材だけを収載する。Coming Soon 24件にはURLを作らない。

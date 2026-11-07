@@ -330,20 +330,28 @@ export const NAV_CATEGORIES: AppShellNavCategory[] = [
       },
       {
         id: "accidents",
-        label: "事故データベース",
+        label: "事故事例検索（補助）",
         href: "/accidents",
         icon: Database,
         description: "公式・編集済み・モデル事例を区別して収録範囲内を検索",
       },
       {
         id: "accident-news",
-        label: "重大災害事例",
+        label: "国内の死亡事故速報",
         href: "/accident-news",
-        icon: HardHat,
+        icon: Newspaper,
         badge: "NEW",
-        badgeUntil: "2026-08-31",
+        badgeUntil: "2026-10-31",
         description:
-          "死亡災害を業種・事故型・起因物分類で検索（匿名・データセット単位の出典）",
+          "直近14日以内の国内の労働中の死亡事故報道を表示",
+      },
+      {
+        id: "fatal-accidents",
+        label: "死亡事故データベース",
+        href: "/fatal-accidents",
+        icon: HardHat,
+        description:
+          "厚労省の死亡災害を業種・事故型・起因物・年で検索",
       },
       {
         id: "court-cases",
@@ -357,7 +365,7 @@ export const NAV_CATEGORIES: AppShellNavCategory[] = [
       },
       {
         id: "accidents-analytics",
-        label: "事故統計ダッシュボード",
+        label: "事故分析ダッシュボード",
         href: "/accidents-analytics",
         icon: BarChart3,
         description: "事故型・業種・経年の傾向をグラフで把握",
@@ -384,13 +392,6 @@ export const NAV_CATEGORIES: AppShellNavCategory[] = [
         href: "/diversity",
         icon: Users2,
         description: "LGBTQ・障害・外国人労働者の安全配慮",
-      },
-      {
-        id: "risk-prediction",
-        label: "AIリスク予測",
-        href: "/risk-prediction",
-        icon: Brain,
-        description: "作業内容から潜在リスクをAIが予測",
       },
     ],
   },
@@ -601,15 +602,33 @@ const COMPACT_NAV_CATEGORIES: AppShellNavCategory[] = [
       },
       {
         id: "accident-news",
-        label: "労災事故",
+        label: "国内の死亡事故速報",
         href: "/accident-news",
         icon: Newspaper,
+      },
+      {
+        id: "fatal-accidents",
+        label: "死亡事故DB",
+        href: "/fatal-accidents",
+        icon: HardHat,
+      },
+      {
+        id: "accidents-analytics",
+        label: "事故分析",
+        href: "/accidents-analytics",
+        icon: BarChart3,
       },
     ],
   },
   {
     label: "学ぶ・相談する",
     items: [
+      {
+        id: "articles",
+        label: "安全の解説記事",
+        href: "/articles",
+        icon: FileText,
+      },
       {
         id: "visual-ky",
         label: "5分ビジュアルKYT",
@@ -625,8 +644,20 @@ const COMPACT_NAV_CATEGORIES: AppShellNavCategory[] = [
       {
         id: "automation-consult",
         label: "自動化相談",
-        href: "/services/automation",
+        href: "/contact/automation-email",
         icon: Workflow,
+      },
+      {
+        id: "safety-seminars",
+        label: "自由に使えるスライド",
+        href: "/training/safety-seminars",
+        icon: LibraryBig,
+      },
+      {
+        id: "safety-goods",
+        label: "安全グッズ",
+        href: "/goods",
+        icon: ShoppingBag,
       },
       {
         id: "safety-ai",
@@ -668,7 +699,6 @@ export function getAppShellNavigationCategories(
     ...category,
     items: category.items.filter(
       (item) =>
-        !(position === "mobile" && item.id === "safety-image-library") &&
         isPublicRouteAvailable(item.href) &&
         !repeatedPrimaryHrefs.has(item.href),
     ),
@@ -677,7 +707,7 @@ export function getAppShellNavigationCategories(
 
 function navLinkClass(showBadge: boolean): string {
   const base =
-    "group flex min-h-11 w-full items-center gap-2 rounded-[var(--radius-sm)] px-3 py-2 text-left text-sm data-[nav-active=true]:bg-portal-surface-emphasis data-[nav-active=true]:font-semibold data-[nav-active=true]:text-brand-primary";
+    "group flex min-h-11 w-full items-center gap-2 rounded-[var(--radius-sm)] px-3 py-2 text-left text-sm";
   return showBadge
     ? `${base} font-semibold text-brand-secondary hover:bg-portal-surface-emphasis dark:text-slate-100`
     : `${base} font-medium text-slate-700 hover:bg-portal-surface-emphasis dark:text-slate-200`;

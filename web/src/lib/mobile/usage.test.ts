@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { beforeEach,afterEach,describe,expect,it,vi } from 'vitest';
-const state=vi.hoisted(()=>({operations:[] as Array<{id:string;userId:string;feature:string;day:string;status:string;createdAt:Date;requestHash:string;response?:unknown}>,tail:Promise.resolve() as Promise<unknown>,paid:false}));
-vi.mock('@/auth',()=>({auth:async()=>({user:{id:'mock_member'}})}));
+const state=vi.hoisted(()=>({operations:[] as Array<{id:string;userId:string;feature:string;day:string;status:string;createdAt:Date;requestHash:string;response?:unknown}>,tail:Promise.resolve() as Promise<unknown>,paid:false,signedIn:true,budget:{committedYen:0,reservedYen:0},reservations:[] as Array<{id:string;amountYen:number;status:string}>}));
+vi.mock('@/auth',()=>({auth:async()=>state.signedIn?{user:{id:'mock_member'}}:null}));
 vi.mock('@/lib/prisma',()=>{
   const tx={
     $executeRaw:async()=>1,
@@ -9,6 +9,14 @@ vi.mock('@/lib/prisma',()=>{
     mobilePurchaseIntent:{findUnique:async()=>null},
     subscription:{findUnique:async()=>state.paid?{planName:'pro',status:'active',stripeSubscriptionId:'mock_stripe',currentPeriodEnd:new Date(Date.now()+86400000),updatedAt:new Date()}:null},
     mobileGrant:{findMany:async()=>state.paid?[{provider:'stripe',environment:'PRODUCTION',revoked:false,expiresAt:new Date(Date.now()+86400000),checkedAt:new Date()}]:[]},
+    mobileBudgetMonth:{
+      upsert:async()=>({...state.budget}),
+      update:async({data}:{data:{reservedYen?:{increment?:number;decrement?:number};committedYen?:{increment:number}}})=>{state.budget.reservedYen+=(data.reservedYen?.increment??0)-(data.reservedYen?.decrement??0);state.budget.committedYen+=data.committedYen?.increment??0;return {...state.budget};}
+    },
+    mobileProviderReservation:{
+      create:async({data}:{data:{amountYen:number}})=>{const row={id:crypto.randomUUID(),amountYen:data.amountYen,status:'reserved'};state.reservations.push(row);return row;},
+      updateMany:async({where,data}:{where:{id:string;status:string};data:{status:string}})=>{const r=state.reservations.find(x=>x.id===where.id&&x.status===where.status);if(!r)return{count:0};r.status=data.status;return{count:1};}
+    },
     mobileUsageOperation:{
       findUnique:async({where}:{where:{id:string}})=>state.operations.find(o=>o.id===where.id)??null,
       findMany:async({where}:{where:{userId:string;feature:string;day:string;status:{in:string[]}}})=>state.operations.filter(o=>o.userId===where.userId&&o.feature===where.feature&&o.day===where.day&&where.status.in.includes(o.status)),
@@ -20,10 +28,10 @@ vi.mock('@/lib/prisma',()=>{
   const prisma={...tx,$transaction:<T>(run:(db:typeof tx)=>Promise<T>)=>{const next=state.tail.then(()=>run(tx));state.tail=next.catch(()=>{});return next;}};
   return {prisma};
 });
-import { withUsage,checkBudget,jstKeys,maximumProviderCost } from './usage';
+import { withUsage,withProviderBudget,checkBudget,jstKeys,maximumProviderCost } from './usage';
 const request=(id=crypto.randomUUID())=>new Request('https://example.test/api/chatbot',{method:'POST',headers:{Authorization:'Bearer mock_session','Content-Type':'application/json','X-Operation-ID':id},body:JSON.stringify({message:'足場の手すり',privacyConfirmed:true})});
 const answer=()=>Response.json({answer:'公式根拠を確認してください。',source_type:'rag',sources:[{text:'原文',url:'https://laws.e-gov.go.jp/law/mock',asOf:new Date().toISOString()}]});
-beforeEach(()=>{state.operations=[];state.tail=Promise.resolve();state.paid=false;vi.stubEnv('MOBILE_LEDGER_ENABLED','true');});afterEach(()=>vi.unstubAllEnvs());
+beforeEach(()=>{state.operations=[];state.tail=Promise.resolve();state.paid=false;state.signedIn=true;state.budget={committedYen:0,reservedYen:0};state.reservations=[];vi.stubEnv('MOBILE_LEDGER_ENABLED','true');});afterEach(()=>vi.unstubAllEnvs());
 describe('shared daily AI accounting',()=>{
   it.each(['/api/chatbot','/api/chatbot/stream','/api/mobile/v1/ai'])('returns emergency guidance before membership, reservation or inference on %s',async path=>{
     const run=vi.fn(async()=>answer());const response=await withUsage(new Request('https://example.test'+path,{method:'POST',headers:{'Content-Type':'application/json',Origin:'https://example.test'},body:JSON.stringify({message:'作業員が倒れて意識がない',privacyConfirmed:false})}),'law_chat',run);
@@ -43,4 +51,31 @@ describe('shared daily AI accounting',()=>{
   it('uses a sliding 60-second Pro burst limit including unsuccessful attempts',async()=>{state.paid=true;const run=vi.fn(async()=>Response.json({source_type:'safety'}));for(let i=0;i<10;i++)await withUsage(request(),'law_chat',run);const blocked=await withUsage(request(),'law_chat',run);expect(blocked.status).toBe(429);expect(blocked.headers.get('Retry-After')).toBe('60');expect(run).toHaveBeenCalledTimes(10);});
   it('uses JST midnight and never reserves above the shared cost ceiling',()=>{expect(jstKeys(new Date('2026-11-03T14:59:59Z')).day).toBe('2026-11-03');expect(jstKeys(new Date('2026-11-03T15:00:00Z')).day).toBe('2026-11-04');expect(()=>checkBudget(49950,0,50,'pro')).not.toThrow();expect(()=>checkBudget(49950,50,1,'pro')).toThrow('AI_BUDGET_STOPPED');expect(()=>checkBudget(44000,950,50,'free')).toThrow('AI_BUDGET_FREE_PAUSED');expect(()=>checkBudget(0,0,NaN,'pro')).toThrow('AI_BUDGET_STOPPED');});
   it('refuses unpriced model changes and unbounded inference before reserving money',()=>{const bound={model:'mock_model',inputBytes:2000,maxOutputTokens:2048};const prices={model:'mock_model',inputJpyPerMillion:100,outputJpyPerMillion:500,margin:1.25};expect(maximumProviderCost(bound,prices)).toBeGreaterThan(0);expect(()=>maximumProviderCost({...bound,model:'unpriced_model'},prices)).toThrow();expect(()=>maximumProviderCost({...bound,maxOutputTokens:2049},prices)).toThrow();expect(()=>maximumProviderCost(bound,{...prices,inputJpyPerMillion:NaN})).toThrow();});
+});
+describe('anonymous website visitors with the shared ledger on',()=>{
+  const web=(headers:Record<string,string>={})=>new Request('https://example.test/api/chatbot',{method:'POST',headers:{'Content-Type':'application/json',Origin:'https://example.test',...headers},body:JSON.stringify({message:'足場の手すり',privacyConfirmed:true})});
+  it('keep the pre-ledger route behaviour without a member quota or login',async()=>{
+    state.signedIn=false;const run=vi.fn(async()=>answer());
+    for(let i=0;i<5;i++)expect((await withUsage(web(),'law_chat',run)).status).toBe(200);
+    expect(run).toHaveBeenCalledTimes(5);expect(state.operations).toHaveLength(0);
+  });
+  it('never lets a native client fall back to the anonymous path',async()=>{
+    state.signedIn=false;const run=vi.fn(async()=>answer());
+    expect((await withUsage(web({'X-Anzen-Native':'1'}),'law_chat',run)).status).toBe(401);
+    expect((await withUsage(web({Authorization:'Bearer invalid'}),'law_chat',run)).status).toBe(401);
+    expect(run).not.toHaveBeenCalled();
+  });
+  it('keeps signed-in web members on the shared member quota',async()=>{
+    const run=vi.fn(async()=>answer());expect((await withUsage(web(),'law_chat',run)).status).toBe(200);
+    expect(state.operations).toHaveLength(1);
+  });
+  it('still reserves every anonymous provider call against the shared monthly budget as free',async()=>{
+    vi.stubEnv('MOBILE_AI_PRICED_MODEL','gemini-3.8-flash');vi.stubEnv('MOBILE_AI_INPUT_JPY_PER_MILLION','160');vi.stubEnv('MOBILE_AI_OUTPUT_JPY_PER_MILLION','960');vi.stubEnv('MOBILE_AI_COST_MARGIN','1.5');
+    const bound={model:'gemini-3.8-flash',inputBytes:20000,maxOutputTokens:2048};const provider=vi.fn(async()=>'ok');
+    expect(await withProviderBudget(provider,bound)).toBe('ok');
+    expect(state.budget.committedYen).toBeGreaterThan(0);expect(state.budget.reservedYen).toBe(0);
+    state.budget={committedYen:44999,reservedYen:0};
+    await expect(withProviderBudget(provider,bound)).rejects.toThrow('AI_BUDGET_FREE_PAUSED');
+    expect(provider).toHaveBeenCalledTimes(1);
+  });
 });

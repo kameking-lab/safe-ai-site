@@ -1,22 +1,54 @@
 // @vitest-environment jsdom
-import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 import { getSafetyImageTheme } from "@/data/safety-image-library";
 import { SafetyImageEditor } from "./safety-image-editor";
 
 describe("SafetyImageEditor", () => {
-  it("switches language, custom text, size, position, band and brand then resets", () => {
+  it("blocks a multilingual download after an edit until every selected language is confirmed, and invalidates confirmation on re-edit", () => {
+    const theme = getSafetyImageTheme("helmet-required")!;
+    const fetchMock = vi.spyOn(globalThis, "fetch");
+    render(<SafetyImageEditor theme={theme} />);
+    fireEvent.click(screen.getByLabelText("英語"));
+    const button = screen.getByRole("button", { name: "この看板をダウンロード" }) as HTMLButtonElement;
+    expect(button.disabled).toBe(false);
+    fireEvent.change(screen.getByLabelText("表示する文字（日本語）"), { target: { value: "保護帽と保護眼鏡を着用" } });
+    expect(button.disabled).toBe(true);
+    fireEvent.click(button);
+    expect(fetchMock).not.toHaveBeenCalled();
+    fireEvent.change(screen.getByLabelText("表示する文字（英語）"), { target: { value: "Wear a helmet and safety glasses" } });
+    fireEvent.click(screen.getByLabelText("日本語の意味を確認した"));
+    expect(button.disabled).toBe(true);
+    fireEvent.click(screen.getByLabelText("英語の意味を確認した"));
+    expect(button.disabled).toBe(false);
+    fireEvent.change(screen.getByLabelText("表示する文字（日本語）"), { target: { value: "保護帽を着用" } });
+    expect(button.disabled).toBe(true);
+    fireEvent.click(screen.getByRole("button", { name: "元に戻す" }));
+    expect(button.disabled).toBe(false);
+    fetchMock.mockRestore();
+  });
+
+  it("selects several Japanese-labelled languages, edits them together and resets", () => {
     const theme = getSafetyImageTheme("helmet-required");
     if (!theme) throw new Error("theme missing");
     render(<SafetyImageEditor theme={theme} />);
 
-    const text = screen.getByLabelText(/表示する文字/u) as HTMLTextAreaElement;
-    expect(text.value).toBe("保護帽を着用");
-    fireEvent.change(screen.getByLabelText("言語プリセット"), { target: { value: "en" } });
-    expect(text.value).toBe("Wear a safety helmet");
-    expect(text.getAttribute("lang")).toBe("en");
-    expect(screen.getByRole("img", { name: /^文字編集プレビュー:/u }).getAttribute("lang")).toBe("en");
-    fireEvent.change(text, { target: { value: "CUSTOM SAFETY MESSAGE" } });
+    const japanese = screen.getByLabelText("表示する文字（日本語）") as HTMLTextAreaElement;
+    expect(japanese.value).toBe("保護帽を着用");
+    fireEvent.click(screen.getByLabelText("英語"));
+    fireEvent.click(screen.getByLabelText("ベトナム語"));
+    fireEvent.click(screen.getByLabelText("中国語（簡体）"));
+    const english = screen.getByLabelText("表示する文字（英語）") as HTMLTextAreaElement;
+    expect(english.value).toBe("Wear a safety helmet");
+    expect(english.getAttribute("lang")).toBe("en");
+    expect(screen.getByRole("img", { name: /^文字編集プレビュー:/u }).getAttribute("lang")).toBe("ja");
+    expect(screen.getAllByText("Đội mũ bảo hộ").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("佩戴安全帽").length).toBeGreaterThan(0);
+    expect(document.querySelector('svg[role="img"] text[lang="en"]')).not.toBeNull();
+    expect(document.querySelector('svg[role="img"] text[lang="vi"]')).not.toBeNull();
+    expect(document.querySelector('svg[role="img"] text[lang="zh-CN"]')).not.toBeNull();
+    expect(document.querySelector('svg[role="img"] text[lang="zh-CN"]')?.getAttribute("style")).toContain("Noto Sans CJK SC");
+    fireEvent.change(english, { target: { value: "CUSTOM SAFETY MESSAGE" } });
     expect(screen.getAllByText("CUSTOM SAFETY MESSAGE").length).toBeGreaterThan(0);
 
     fireEvent.click(screen.getAllByLabelText("大")[0]);
@@ -26,7 +58,8 @@ describe("SafetyImageEditor", () => {
     expect(screen.queryByAltText("安全AIポータルのチワワ")).toBeNull();
 
     fireEvent.click(screen.getByRole("button", { name: "元に戻す" }));
-    expect(text.value).toBe("保護帽を着用");
+    expect(japanese.value).toBe("保護帽を着用");
+    expect((screen.getByLabelText("英語") as HTMLInputElement).checked).toBe(false);
     expect((screen.getByLabelText("背景帯") as HTMLInputElement).checked).toBe(true);
     expect((screen.getByLabelText("チワワ・©") as HTMLInputElement).checked).toBe(true);
     expect(screen.getByAltText("安全AIポータルのチワワ")).not.toBeNull();
@@ -36,12 +69,16 @@ describe("SafetyImageEditor", () => {
     const theme = getSafetyImageTheme("site-speed-limit");
     if (!theme) throw new Error("theme missing");
     render(<SafetyImageEditor theme={theme} />);
-    fireEvent.change(screen.getByLabelText("言語プリセット"), { target: { value: "id" } });
+    fireEvent.click(screen.getByLabelText("インドネシア語"));
+    expect(screen.queryByLabelText("単位")).toBeNull();
+    expect(screen.getByText("各言語の既定単位を使います")).not.toBeNull();
+    expect(screen.getByLabelText("言語ごとの単位").textContent).toContain("日本語：km/h");
+    expect(screen.getByLabelText("言語ごとの単位").textContent).toContain("インドネシア語：km/jam");
+    fireEvent.click(screen.getByLabelText("日本語"));
     expect((screen.getByLabelText("単位") as HTMLInputElement).value).toBe("km/jam");
     fireEvent.change(screen.getByLabelText("数値・連絡先"), { target: { value: "8" } });
-    expect(screen.getByRole("img", { name: /8 km\/jam/u })).not.toBeNull();
-    fireEvent.click(screen.getByLabelText(/3\. 編集した文字入り/u));
-    const downloadButton = screen.getByRole("button", { name: /JPEGをダウンロード/u });
+    expect(screen.getAllByText(/8 km\/jam/u).length).toBeGreaterThan(0);
+    const downloadButton = screen.getByRole("button", { name: "この看板をダウンロード" });
     expect(downloadButton.hasAttribute("disabled")).toBe(false);
     expect(document.body.innerHTML).not.toContain("8%20km");
   });
@@ -62,11 +99,14 @@ describe("SafetyImageEditor", () => {
     for (const radio of screen.getAllByRole("radio") as HTMLInputElement[]) {
       groups.set(radio.name, (groups.get(radio.name) ?? 0) + 1);
     }
-    expect([...groups.values()].filter((count) => count === 3).length).toBeGreaterThanOrEqual(5);
-    for (const [language, unit] of [["ja", "日"], ["vi", "ngày"], ["zh-CN", "天"]] as const) {
-      fireEvent.change(screen.getByLabelText("言語プリセット"), { target: { value: language } });
-      expect((screen.getByLabelText("単位") as HTMLInputElement).value).toBe(unit);
-    }
+    expect([...groups.values()].filter((count) => count === 3).length).toBeGreaterThanOrEqual(4);
+    expect((screen.getByLabelText("単位") as HTMLInputElement).value).toBe("日");
+    fireEvent.click(screen.getByLabelText("ベトナム語"));
+    fireEvent.click(screen.getByLabelText("日本語"));
+    expect((screen.getByLabelText("単位") as HTMLInputElement).value).toBe("ngày");
+    fireEvent.click(screen.getByLabelText("中国語（簡体）"));
+    fireEvent.click(screen.getByLabelText("ベトナム語"));
+    expect((screen.getByLabelText("単位") as HTMLInputElement).value).toBe("天");
   });
 
   it("uses the shared fit model instead of clipping maximum custom text", () => {
@@ -95,16 +135,62 @@ describe("SafetyImageEditor", () => {
     expect(screen.queryByRole("alert")).toBeNull();
   });
 
-  it("exposes clean, recommended and edited downloads plus A-paper and market sizes", () => {
+  it("keeps A4 and languages visible while placing alternate downloads and sizes in details", () => {
     const theme = getSafetyImageTheme("no-under-suspended-load");
     if (!theme) throw new Error("theme missing");
     render(<SafetyImageEditor theme={theme} />);
-    expect(screen.getByRole("link", { name: "そのままダウンロード" }).getAttribute("href")).toContain("mode=default");
+    expect(screen.queryByRole("link", { name: "そのままダウンロード" })).toBeNull();
+    expect(screen.getByRole("button", { name: "この看板をダウンロード" })).not.toBeNull();
+    const details = screen.getByText("詳細設定（文字・サイズ・形式）").closest("details");
+    expect(details?.open).toBe(false);
+    fireEvent.click(screen.getByText("詳細設定（文字・サイズ・形式）"));
+    expect(details?.open).toBe(true);
+    expect(screen.getByRole("link", { name: /初期設定の日本語JPEG/u }).getAttribute("href")).toContain("mode=default");
+    expect(screen.getByRole("link", { name: /文字なしPNG/u }).getAttribute("href")).toContain("mode=clean");
     for (const label of ["A4縦", "A4横", "A3縦", "A3横", "平板 600×450mm（推奨）", "垂れ幕 450×1800mm"]) {
       expect(screen.getByRole("option", { name: label })).not.toBeNull();
     }
     expect(screen.getByRole("option", { name: "JPEG" })).not.toBeNull();
     expect(screen.getByRole("option", { name: "PDF" })).not.toBeNull();
     expect(screen.getByRole("option", { name: "PNG" })).not.toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "A4縦" }));
+    expect((screen.getByLabelText("印刷・看板サイズ") as HTMLSelectElement).value).toBe("a4-portrait");
+    fireEvent.click(screen.getByRole("button", { name: "A4横" }));
+    expect((screen.getByLabelText("印刷・看板サイズ") as HTMLSelectElement).value).toBe("a4-landscape");
+  });
+
+  it("POSTには選択中の言語だけを含め、選択解除した編集文を送信しない", async () => {
+    const theme = getSafetyImageTheme("helmet-required");
+    if (!theme) throw new Error("theme missing");
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(new TextEncoder().encode("image"), {
+        status: 200,
+        headers: { "Content-Type": "image/png" },
+      }),
+    );
+    const createObjectUrl = vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:test");
+    const revokeObjectUrl = vi.spyOn(URL, "revokeObjectURL").mockImplementation(() => undefined);
+    try {
+      render(<SafetyImageEditor theme={theme} />);
+      fireEvent.click(screen.getByLabelText("ベトナム語"));
+      fireEvent.change(screen.getByLabelText("表示する文字（ベトナム語）"), {
+        target: { value: "選択解除後は送信しない文言" },
+      });
+      fireEvent.click(screen.getByLabelText("ベトナム語"));
+      fireEvent.click(screen.getByRole("button", { name: "この看板をダウンロード" }));
+
+      await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+      const init = fetchMock.mock.calls[0]?.[1] as RequestInit;
+      const payload = JSON.parse(String(init.body)) as {
+        settings: { languages: string[]; texts: Record<string, string> };
+      };
+      expect(payload.settings.languages).toEqual(["ja"]);
+      expect(payload.settings.texts).toEqual({ ja: "保護帽を着用" });
+      expect(JSON.stringify(payload)).not.toContain("選択解除後は送信しない文言");
+    } finally {
+      fetchMock.mockRestore();
+      createObjectUrl.mockRestore();
+      revokeObjectUrl.mockRestore();
+    }
   });
 });

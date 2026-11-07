@@ -22,7 +22,8 @@ import { CONSTRUCTION_PRIORITY_CAS_SET } from "@/lib/regulation-tag-labels";
 import { OshaRegulationsSection } from "@/components/chemical/osha-regulations-section";
 import { ReportPrintButton } from "@/components/accidents-reports/report-print-button";
 import { isIndexableChemical } from "@/lib/seo/index-quality";
-import { verifiedMhlwPublicDocumentUrl } from "@/lib/chemical/official-source-url";
+import { verifiedMhlwPublicDocumentUrl, verifiedNiteGhsDocumentUrl } from "@/lib/chemical/official-source-url";
+import { GHS_PARTIAL_COVERAGE_NOTICE } from "@/lib/chemical/ghs-coverage";
 
 type Params = Promise<{ cas: string }>;
 
@@ -42,8 +43,9 @@ export async function generateMetadata({
   }
   const name = entry.name ?? `CAS ${cas}`;
   return {
-    title: `${name} (CAS ${cas}) | 化学物質データベース | 安全AI`,
-    description: `${name} の濃度基準値・GHS 区分・関連法令 (化管法/PRTR・化審法・毒劇法等) を出典付きで確認できます。`,
+    // root layout の title template でサイト名を一度だけ付与する。
+    title: `${name}（CAS ${cas}）｜化学物質DB`,
+    description: `${name} の収録済みGHS区分・関連法令区分候補と公的参照先を確認できます。製品SDSと作業条件を整理するRA準備へ進めます。`,
     alternates: { canonical: `/chemical-database/${cas}` },
     robots: isIndexableChemical(normalizeCas(cas), entry)
       ? { index: true, follow: true }
@@ -100,14 +102,13 @@ export default async function ChemicalDetailPage({
           )}
         </header>
 
-        {/* P0-2/P1-2/P1-6/P2-3: 全法律ワンストップ・サマリー（該当法律＋土壌＋物性型要確認＋特殊健診）を最上部に。 */}
+        {entry.niteGhsClassifications && (
+          <NiteGhsBlock classifications={entry.niteGhsClassifications} cas={cas} sourceUrl={entry.niteChripUrl} />
+        )}
+
         <RegulationSummarySection cas={cas} regulationTags={entry.regulationTags} />
 
         <ConcentrationLimitsBlock entry={entry} />
-
-        {entry.niteGhsClassifications && (
-          <NiteGhsBlock classifications={entry.niteGhsClassifications} />
-        )}
 
         {/* P0-009 (usability-audit-day2): 安衛法 特別則 (特化則/有機則/酸欠則/
             粉じん則/石綿則) を CAS から自動引き当てて表示。製造業/建設業の
@@ -226,12 +227,17 @@ function ConcentrationLimitsBlock({
 
 function NiteGhsBlock({
   classifications,
+  cas,
+  sourceUrl,
 }: {
   classifications: NonNullable<
     (typeof CONCENTRATION_LIMITS.substances)[string]["niteGhsClassifications"]
   >;
+  cas: string;
+  sourceUrl?: string;
 }) {
   const labels: Record<string, string> = {
+    flammableLiquids: "引火性液体",
     carcinogen: "発がん性",
     mutagen: "生殖細胞変異原性",
     reproTox: "生殖毒性",
@@ -244,6 +250,7 @@ function NiteGhsBlock({
     aspiration: "誤えん有害性",
   };
   const items = Object.entries(classifications).filter(([, v]) => v);
+  const niteUrl = verifiedNiteGhsDocumentUrl(sourceUrl, cas);
   if (items.length === 0) return null;
   return (
     <section className="rounded-2xl border border-sky-200 dark:border-sky-800 bg-sky-50/50 dark:bg-sky-950/40 p-6 space-y-3">
@@ -251,6 +258,9 @@ function NiteGhsBlock({
         <ShieldAlert className="w-5 h-5 text-sky-700" aria-hidden="true" />
         政府版 GHS 主要有害性区分 (NITE)
       </h2>
+      <p className="text-xs leading-6 text-slate-700">{GHS_PARTIAL_COVERAGE_NOTICE}</p>
+      <p className="text-xs leading-6 text-slate-700">収録データ版: {CONCENTRATION_LIMITS.version}。分類原典の取得日時は未収録です。メーカーの最新製品SDSの第2・3・8項で分類、成分濃度、ばく露防止措置を確認してください。</p>
+      {niteUrl && <a href={niteUrl} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center text-sm text-sky-800 underline">このCASのNITE政府版GHS原典を確認</a>}
       <dl className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
         {items.map(([k, v]) => (
           <div key={k} className="flex justify-between gap-3 border-b border-sky-200/50 pb-1">
@@ -268,10 +278,10 @@ function CrossLinksBlock({ cas, name }: { cas: string; name: string }) {
     <section className="rounded-2xl border border-amber-200 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800 p-5 flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between print:hidden">
       <div>
         <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-          この物質でリスクアセスメントを開始
+          この物質でRAの準備記録を作る
         </p>
         <p className="text-xs text-slate-600 dark:text-slate-400">
-          {name} を選択した状態で /chemical-ra に遷移します。
+          {name} の製品SDSと作業条件を整理します。リスク値の算出・安全判定は行いません。
         </p>
       </div>
       <div className="flex gap-2">
@@ -279,7 +289,7 @@ function CrossLinksBlock({ cas, name }: { cas: string; name: string }) {
           href={`/chemical-ra?cas=${encodeURIComponent(cas)}`}
           className="inline-flex min-h-[44px] items-center gap-1 rounded-md bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 text-sm font-medium"
         >
-          RAを開始
+          RAを準備
           <ArrowRight className="w-4 h-4" aria-hidden="true" />
         </Link>
         <Link

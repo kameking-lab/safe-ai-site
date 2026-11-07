@@ -143,6 +143,9 @@ Desktop.ini
 !/web/public/training/safety-seminars/fall-prevention
 !/web/public/training/safety-seminars/fall-prevention/audio
 !/web/public/training/safety-seminars/fall-prevention/downloads
+!/web/public/training/safety-seminars/safety-management-basics-osh-law
+!/web/public/training/safety-seminars/safety-management-basics-osh-law/audio
+!/web/public/training/safety-seminars/safety-management-basics-osh-law/downloads
 !/web/public/training/ai-seminars
 !/web/public/training/ai-seminars/ai-chat-work
 !/web/public/training/ai-seminars/ai-chat-work/audio
@@ -171,6 +174,11 @@ Desktop.ini
 !/web/public/training/safety-seminars/fall-prevention/audio/slide-*.mp3
 !/web/public/training/safety-seminars/fall-prevention/downloads/*.pdf
 !/web/public/training/safety-seminars/fall-prevention/downloads/*.pptx
+!/web/public/training/safety-seminars/safety-management-basics-osh-law/safe-site-hero.webp
+!/web/public/training/safety-seminars/safety-management-basics-osh-law/hazard-spotting.webp
+!/web/public/training/safety-seminars/safety-management-basics-osh-law/audio/slide-*.mp3
+!/web/public/training/safety-seminars/safety-management-basics-osh-law/downloads/*.pdf
+!/web/public/training/safety-seminars/safety-management-basics-osh-law/downloads/*.pptx
 !/web/public/training/ai-seminars/ai-chat-work/audio/slide-*.mp3
 !/web/public/training/ai-seminars/ai-chat-work/downloads/*.pdf
 !/web/public/training/ai-seminars/ai-chat-work/downloads/*.pptx

@@ -27,8 +27,7 @@ export function AppShellNavLink({ href, ...props }: AppShellNavLinkProps) {
     <Link
       {...props}
       href={href}
-      data-app-shell-nav-href={href}
-      data-nav-active={String(active)}
+      data-nav-active={active ? "true" : undefined}
       aria-current={active ? "page" : undefined}
     />
   );

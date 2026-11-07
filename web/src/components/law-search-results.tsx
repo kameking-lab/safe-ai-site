@@ -11,7 +11,7 @@ import { SimpleMarkdown } from "@/components/simple-markdown";
 import { useLanguage } from "@/contexts/language-context";
 import { ConclusionCard } from "@/components/ui/conclusion-card";
 import { getFreshPlainArticle } from "@/data/plain";
-import { findEntryByShort } from "@/lib/law-navi/permalink";
+import { articlePermalink, findEntryByShort } from "@/lib/law-navi/permalink";
 import {
   searchLawArticles,
   type LawSearchHit,
@@ -84,6 +84,7 @@ function ArticleCard({
   const naviEntry = findEntryByShort(article.lawShort, article.articleNum);
   const plain = naviEntry ? getFreshPlainArticle(naviEntry.egovLawId, article) : undefined;
   const plainHref = plain ? naviEntry?.path : undefined;
+  const articleHref = articlePermalink(article);
   const { language } = useLanguage();
   const isEn = language === "en";
   return (
@@ -116,6 +117,14 @@ function ArticleCard({
           </span>
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          {articleHref && (
+            <a
+              href={articleHref}
+              className="min-h-[44px] inline-flex items-center rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-1 text-[11px] font-semibold text-emerald-800 hover:bg-emerald-100 transition"
+            >
+              {isEn ? "Open article page" : "条文ページで開く"}
+            </a>
+          )}
           {plainHref && (
             <a
               href={plainHref}

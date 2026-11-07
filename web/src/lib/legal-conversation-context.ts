@@ -1,3 +1,4 @@
+import { hasRotatingToolGloveIntent } from "@/lib/rotating-tool-work-model";
 import {
   requestedLegalPeriod,
   type LegalDatePrecision,
@@ -98,9 +99,36 @@ const SAFE_LEGAL_CONFIRMED_CHOICES = [
   "100・200Vを停電して作業",
   "高圧設備を停電して作業",
   "充電中に扱う",
+  "わく組足場",
+  "わく組足場以外の足場",
 ] as const;
 
 const SAFE_CONFIRMED_CHOICE_LIMIT = 5;
+
+/**
+ * 足場の種類（安衛則563条1項3号イ・ロ）の回答。「わく組足場以外」は部分文字列に
+ * 「わく組足場」を含むため、否定形を先に判定して取り違えない。
+ * わく組足場の妻面はイから除かれロ（わく組足場以外の足場）と同じ扱いになるため、
+ * 「わく組の妻面」もわく組足場（イ）へは寄せない。
+ * 「枠組み」は一般語でもあるため、足場を伴う場合か単独回答の場合だけ採る。
+ */
+const SCAFFOLD_TYPE_CHOICES = ["わく組足場", "わく組足場以外の足場"] as const;
+const NON_FRAME_SCAFFOLD =
+  /(?:(?:わく組|枠組)み?(?:足場)?(?:の妻面|以外|(?:では|じゃ)(?:ない|なく|ありません)|でない)|^妻面|非(?:わく組|枠組)|単管足場|くさび緊結式足場)/;
+const FRAME_SCAFFOLD =
+  /(?:(?:わく組|枠組)み?足場|^(?:わく組|枠組)み?(?:です|の場合|について)?[。.!！]?$)/;
+const SCAFFOLD_TYPE_REPLY =
+  /^(?:(?:わく組|枠組)み?(?:足場)?(?:の妻面(?:部分)?|以外(?:の足場)?|(?:では|じゃ)(?:ない|なく|ありません)|でない)?|妻面(?:部分)?|非(?:わく組|枠組)み?(?:足場)?|単管足場|くさび緊結式足場)(?:です|の場合|について(?:です)?|を使います|を使う)?$/;
+const SCAFFOLD_OPENING_REPLY =
+  /^(?:作業床(?:の端)?|開口部)(?:(?:や|・|と|又は|または)(?:作業床(?:の端)?|開口部))?(?:です|の場合|について(?:です)?)?$/;
+
+function scaffoldTypeChoice(
+  text: string,
+): (typeof SCAFFOLD_TYPE_CHOICES)[number] | undefined {
+  if (NON_FRAME_SCAFFOLD.test(text)) return "わく組足場以外の足場";
+  if (FRAME_SCAFFOLD.test(text)) return "わく組足場";
+  return undefined;
+}
 
 export type LegalConfirmedChoice =
   (typeof SAFE_LEGAL_CONFIRMED_CHOICES)[number];
@@ -124,7 +152,8 @@ type LegalConfirmedChoiceSlot =
   | "electricalVoltageLimit"
   | "electricalSupervisorCondition"
   | "electricalVoltageState"
-  | "tankResidue";
+  | "tankResidue"
+  | "scaffoldType";
 
 function confirmedChoiceSlot(
   choice: LegalConfirmedChoice,
@@ -249,6 +278,9 @@ function confirmedChoiceSlot(
   ) {
     return "tankResidue";
   }
+  if (choice === "わく組足場" || choice === "わく組足場以外の足場") {
+    return "scaffoldType";
+  }
   return "location";
 }
 
@@ -359,6 +391,7 @@ const TOPICS: Array<{
   workType: string;
   equipment?: string;
 }> = [
+  { pattern: /回転刃物の手袋使用/, workType: "回転刃物の手袋使用", equipment: "回転刃物" },
   {
     pattern:
       /(?:電気|電源|電工|でんき|電気設備|配線|結線|活線|充電部|充電電路|制御盤|分電盤|配電盤|受電盤|キュービクル|ブレ[ーイ]カー|遮断器|開閉器|テスター|絶縁測定|低圧教育|特高|高圧受電)/,
@@ -412,6 +445,13 @@ const TOPICS: Array<{
     pattern: /タンク(?:等)?(?:の)?(?:中|内|内部)?(?:に|へ)?(?:入る|立ち入る|入槽)/,
     workType: "タンク内作業",
     equipment: "タンク",
+  },
+  {
+    // 「足場の手すり」は主題（手すり）を閉じた分類値として保持する。
+    // ブラウザへは nine-key の equipment としてだけ渡り、自由文は渡さない。
+    pattern: /(?:足場.*(?:手すり|中桟|中さん)|(?:手すり|中桟|中さん).*足場)/,
+    workType: "足場の手すり",
+    equipment: "足場",
   },
   { pattern: /(?:足場|あしば)/, workType: "足場作業", equipment: "足場" },
   {
@@ -814,7 +854,9 @@ export function extractLegalConversationContext(
 ): LegalConversationContext {
   const text = normalize(value);
   const electricalMeaning = extractElectricalMeaning(text);
-  const inferredTopic = TOPICS.find(({ pattern }) => pattern.test(text));
+  const inferredTopic = hasRotatingToolGloveIntent(text)
+    ? { workType: "回転刃物の手袋使用", equipment: "回転刃物" }
+    : TOPICS.find(({ pattern }) => pattern.test(text));
   // 「作業床なし」「作業床を設けにくい」は、直前の墜落制止用器具の
   // 確認に対する条件であり、新しい「開口部・作業床」の相談ではない。
   const conditionOnlyWorkFloor =
@@ -860,7 +902,11 @@ export function extractLegalConversationContext(
       ? "特別教育"
       : undefined) ??
     (topic?.equipment === "研削といし" ? "特別教育" : undefined);
+  const scaffoldType = scaffoldTypeChoice(text.replace(/\s+/g, ""));
   const confirmedChoices = SAFE_LEGAL_CONFIRMED_CHOICES.filter((choice) => {
+    if ((SCAFFOLD_TYPE_CHOICES as readonly string[]).includes(choice)) {
+      return choice === scaffoldType;
+    }
     if (choice !== "クレーン") return text.includes(choice);
     // 「クレーン運転の資格は？」は機種をまだ選んでいない広い質問。
     // generic entity mentionを、機種選択chip「クレーン」の確定値へ昇格しない。
@@ -1345,11 +1391,25 @@ export function resolveLegalConversationQuery(input: {
   // The browser intentionally sends only the nine-field memory context, not
   // raw history. An allowlisted generated chip must therefore be recognised
   // as a context choice even when there is no preceding free-text turn.
-  const isStructuredMemoryChoice = Boolean(
-    hasProvidedMemoryContext &&
-      currentContext.confirmedChoices?.some((choice) =>
-        matchesClarificationChoice(choice, message),
+  // 「足場の手すりは？」への足場種類の回答（わく組／わく組以外／開口部）。
+  // 主題は直前の閉じた分類値（足場の手すり）からだけ引き継ぐ。
+  const priorScaffoldHandrail = previousContext.workType === "足場の手すり";
+  const answersScaffoldType = Boolean(
+    priorScaffoldHandrail &&
+      SCAFFOLD_TYPE_REPLY.test(compact) &&
+      currentContext.confirmedChoices?.some(
+        (choice) => confirmedChoiceSlot(choice) === "scaffoldType",
       ),
+  );
+  const answersScaffoldOpening =
+    priorScaffoldHandrail && SCAFFOLD_OPENING_REPLY.test(compact);
+  const isStructuredMemoryChoice = Boolean(
+    answersScaffoldType ||
+      answersScaffoldOpening ||
+      (hasProvidedMemoryContext &&
+        currentContext.confirmedChoices?.some((choice) =>
+          matchesClarificationChoice(choice, message),
+        )),
   );
   const answersOpenReportRecipientClarification = Boolean(
     currentHasTopic &&
@@ -1460,7 +1520,8 @@ export function resolveLegalConversationQuery(input: {
   );
   const selectsEquipment = Boolean(
     (isClarificationChoice && priorClarification?.question.includes("設備")) ||
-      (structuredChoiceSelectsEquipment && currentContext.equipment),
+      (structuredChoiceSelectsEquipment && currentContext.equipment) ||
+      answersScaffoldOpening,
   );
   const shouldUseHistory =
     hasPriorContext &&
@@ -1494,6 +1555,14 @@ export function resolveLegalConversationQuery(input: {
           currentContext.workAction ?? previousContext.workAction,
       }
     : currentContext;
+  if (answersScaffoldOpening) {
+    // 開口部・作業床の端は足場の種類ではない。足場種類の確定値を持ち越さない。
+    const remaining = context.confirmedChoices?.filter(
+      (choice) => confirmedChoiceSlot(choice) !== "scaffoldType",
+    );
+    if (remaining?.length) context.confirmedChoices = remaining;
+    else delete context.confirmedChoices;
+  }
   if (
     topicAspectFollowup &&
     !isClarificationChoice &&
@@ -1528,6 +1597,8 @@ export function resolveLegalConversationQuery(input: {
   const queryParts = [
     ...contextValues(context),
     shouldUseHistory ? priorSafeIntent : clarificationIntent,
+    // 開口部へ切り替えても、閉じた主題「手すり」だけは検索意図として残す。
+    answersScaffoldOpening ? "手すり" : "",
     message,
   ]
     .filter(Boolean)

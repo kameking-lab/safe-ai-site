@@ -23,7 +23,7 @@ import {
   rehydratePublicLegalConversationContext,
   type PublicLegalConversationContext,
 } from "@/lib/legal-conversation-public-context";
-import { ensureLegalAnswerAsOf } from "@/lib/legal-answer-temporal";
+import { ensureLegalAnswerAsOf, legalAnswerAsOf, legalAnswerBasisNow } from "@/lib/legal-answer-temporal";
 import {
   buildServiceFirstLegalAnswer,
   buildServiceFirstNoHitAnswer,
@@ -32,8 +32,8 @@ import {
 } from "@/lib/legal-extractive-answer";
 import { searchRelevantArticlesWithScore } from "@/lib/rag-search";
 
-const HOLDOUT_NOW = new Date("2026-08-09T03:00:00.000Z");
-const HOLDOUT_AS_OF = "2026-08-09";
+const HOLDOUT_NOW = legalAnswerBasisNow();
+const HOLDOUT_AS_OF = legalAnswerAsOf(HOLDOUT_NOW);
 
 const READ_ONLY_ELECTRICAL_CONTEXT_FIXTURE = Object.freeze({
   topicDomain: "electrical" as const,

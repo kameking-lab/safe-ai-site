@@ -79,8 +79,8 @@ describe("market-grounded safety sign library", () => {
       SAFETY_IMAGE_THEMES.filter((theme) => theme.category === category.id).length,
     ]))).toEqual({
       "protective-equipment": 15,
-      "entry-prohibition": 15,
-      "hazard-warning": 25,
+      "entry-prohibition": 16,
+      "hazard-warning": 24,
       "work-status": 15,
       "traffic-guidance": 10,
       "editable-numeric": 10,
@@ -154,7 +154,7 @@ describe("market-grounded safety sign library", () => {
   });
 
   it("provides five post-production language layers and exactly ten numeric templates", () => {
-    expect(SAFETY_IMAGE_LANGUAGES).toEqual(["ja", "en", "vi", "zh-CN", "id"]);
+    expect(SAFETY_IMAGE_LANGUAGES).toEqual(["ja", "vi", "zh-CN", "en", "id"]);
     for (const theme of SAFETY_IMAGE_THEMES) {
       expect(Object.keys(theme.texts)).toEqual(SAFETY_IMAGE_LANGUAGES);
       const sourceTexts = texts[theme.slug as keyof typeof texts];
@@ -172,6 +172,30 @@ describe("market-grounded safety sign library", () => {
     expect(translationRegistry.nativeReviewClaimed).toBe(false);
     expect(layouts.themes).toHaveProperty("helmet-required");
     expect(Object.keys(layouts.themes)).toHaveLength(100);
+  });
+
+  it("places all ten curated first-release messages in the reserved top band", () => {
+    const firstReleaseSlugs = new Set([
+      "no-under-suspended-load",
+      "equipment-swing-zone",
+      "floor-opening-hazard",
+      "no-vehicle-entry",
+      "operation-prohibited",
+      "helmet-required",
+      "safety-glasses-required",
+      "earplugs-required",
+      "dust-mask-required",
+      "full-body-harness-required",
+    ]);
+    const firstReleaseThemes = SAFETY_IMAGE_THEMES.filter((theme) =>
+      firstReleaseSlugs.has(theme.slug),
+    );
+    expect(firstReleaseThemes).toHaveLength(10);
+    expect(
+      firstReleaseThemes.every(
+        (theme) => theme.preferredTextPosition === "top",
+      ),
+    ).toBe(true);
   });
 
   it("has no legacy SVG-person output and explicitly handles all retired detail routes", () => {

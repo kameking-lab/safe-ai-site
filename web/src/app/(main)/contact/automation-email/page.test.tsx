@@ -24,12 +24,14 @@ describe("/contact/automation-email", () => {
     expect(metadata.alternates).toBeUndefined();
   });
 
-  it("renders verified To, fixed subject, and body without exposing Bcc", () => {
+  it("renders verified To, fixed subject, and body without exposing Bcc", async () => {
     vi.stubEnv(
       "AUTOMATION_CONSULT_RECIPIENTS",
       "audit@outlook.com,primary@gmail.com",
     );
-    const { container } = render(<AutomationEmailContactPage />);
+    const { container } = render(
+      await AutomationEmailContactPage({ searchParams: Promise.resolve({}) }),
+    );
     expect(screen.getByRole("heading", { level: 1 }).textContent).toContain(
       "メールアプリで相談文を作成",
     );
@@ -63,5 +65,27 @@ describe("/contact/automation-email", () => {
     expect(container.innerHTML).toContain("primary@gmail.com");
     expect(container.innerHTML).not.toContain("audit@outlook.com");
     expect(container.querySelector('script[type="application/ld+json"]')).toBeNull();
+  });
+
+  it("renders a dedicated PPE consultation instead of automation copy", async () => {
+    vi.stubEnv(
+      "AUTOMATION_CONSULT_RECIPIENTS",
+      "audit@outlook.com,primary@gmail.com",
+    );
+    const { container } = render(
+      await AutomationEmailContactPage({
+        searchParams: Promise.resolve({ subject: "ppe-selection" }),
+      }),
+    );
+    expect(
+      screen.getByRole("heading", { name: "保護具選定をメールで相談" }),
+    ).toBeDefined();
+    expect(container.querySelector("form")).toBeNull();
+    expect(await screen.findByRole("textbox", { name: "相談文（編集できます）" })).toHaveProperty("disabled", false);
+    expect(screen.getByRole("link", { name: "内容を確認してメールアプリを開く" }).getAttribute("href")).toContain("mailto:");
+    expect(screen.getByRole("link", { name: /安全グッズへ戻る/ })).toHaveProperty(
+      "pathname",
+      "/goods",
+    );
   });
 });

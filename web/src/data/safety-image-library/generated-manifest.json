@@ -6,12 +6,12 @@
     "generatedCleanMasters": 100,
     "generatedPreviews": 100,
     "uniqueChecksums": 100,
-    "totalGenerationCalls": 137,
-    "totalRegenerations": 37,
+    "totalGenerationCalls": 144,
+    "totalRegenerations": 44,
     "categoryCounts": {
       "protective-equipment": 15,
-      "entry-prohibition": 15,
-      "hazard-warning": 25,
+      "entry-prohibition": 16,
+      "hazard-warning": 24,
       "work-status": 15,
       "traffic-guidance": 10,
       "editable-numeric": 10,
@@ -88,14 +88,14 @@
         "width": 1024,
         "height": 1536
       },
-      "sourceChecksum": "34bcfea603f43c4cbbee2e8429c66c4ccce8e1b00f2b52ac257d3a5d1f5e2cdb",
+      "sourceChecksum": "e52b4549c9f5cd23eb55f6d2587e8f715e8820e93e6db2c11e073a1229267da6",
       "previewDimensions": {
         "width": 480,
         "height": 720
       },
-      "previewChecksum": "3357ed883c414b49652ebce8d5258a62d65ede99c1a5608353a9cb616d5c29cf",
-      "previewBytes": 31498,
-      "generationCount": 1,
+      "previewChecksum": "c69705c1e4d7dab20079a897ed555da5577ce1ea5f6166cf8abe34cb7a366332",
+      "previewBytes": 24158,
+      "generationCount": 2,
       "published": true
     },
     {
@@ -160,14 +160,14 @@
         "width": 1024,
         "height": 1536
       },
-      "sourceChecksum": "86f2da3233e39b704c3e02356ec89b7ffb29dcdcd45bebc69dc65977233a19dd",
+      "sourceChecksum": "9796e1b0957bf26408806a319b9b1082a70bc6aaa56382b1c957c1cf178206eb",
       "previewDimensions": {
         "width": 480,
         "height": 720
       },
-      "previewChecksum": "e5dbc6b20b2bd8642a608d2a0e0d7628ecaa168a9908330e31d90998f2b25ca5",
-      "previewBytes": 33636,
-      "generationCount": 1,
+      "previewChecksum": "7ad7d4c472f856046f6ebf66ca9e01fc7d108b701e9ac5a641621ffb1fa90e99",
+      "previewBytes": 24688,
+      "generationCount": 2,
       "published": true
     },
     {
@@ -301,14 +301,14 @@
         "width": 1024,
         "height": 1536
       },
-      "sourceChecksum": "dd5a3e405b0ef714a50d3805a55e0f14f0495361735665bf81c11196fc8570e7",
+      "sourceChecksum": "216a88eb0e85b753b2cf89dca62c4365d81173fed3a3cfc5bd41efb158fd7990",
       "previewDimensions": {
         "width": 480,
         "height": 720
       },
-      "previewChecksum": "37029a1a2ed7599ef1c93a798e8a098c9db82abd8d6b3dd33e793e7e5ff638b9",
-      "previewBytes": 24562,
-      "generationCount": 1,
+      "previewChecksum": "e91b6318559286a49eeb97ab1a8ed261bf78eebe8162bccda313a9b87e51d0a8",
+      "previewBytes": 25378,
+      "generationCount": 2,
       "published": true
     },
     {
@@ -373,14 +373,14 @@
         "width": 1024,
         "height": 1536
       },
-      "sourceChecksum": "1f86b04f20cbddc4ecfef4ac0c99403c688bb44c4dcdc48b0053fb96be8667f3",
+      "sourceChecksum": "d4d8a88d6e26c0f810e80dad8de3707f9ad5a8384f14ba05dbc072915f48c584",
       "previewDimensions": {
         "width": 480,
         "height": 720
       },
-      "previewChecksum": "2e2d04d42fd1fd05cca8a06d09218a94a442ba0e1e393d4ea99e25fb89ed17d5",
-      "previewBytes": 27076,
-      "generationCount": 1,
+      "previewChecksum": "16bd94fc3de1c5dab1f0568219093f03c8a866e031e7bbf20e65f61023363e4c",
+      "previewBytes": 28526,
+      "generationCount": 2,
       "published": true
     },
     {
@@ -659,17 +659,17 @@
         "pdf"
       ],
       "sourceDimensions": {
-        "width": 864,
-        "height": 1821
+        "width": 1024,
+        "height": 1536
       },
-      "sourceChecksum": "e7781e731c0d49738bc5ea2e9c097ad767428e29ed8404926b12a9c75d9632c6",
+      "sourceChecksum": "c066ae1014640c59f7e0acf97616809cedb1a73c0427d932d5ac5bf784bdab02",
       "previewDimensions": {
-        "width": 342,
+        "width": 480,
         "height": 720
       },
-      "previewChecksum": "2faf24d63f488a79735bdc537c59f7c54bd95a41a35cd7b4eebee8f1f888aa38",
-      "previewBytes": 13126,
-      "generationCount": 1,
+      "previewChecksum": "257decd806e7bb094659132d6a4670c406d6cee32484dcdb88b8ae18fff26d3e",
+      "previewBytes": 33294,
+      "generationCount": 2,
       "published": true
     },
     {
@@ -1371,14 +1371,14 @@
         "width": 1774,
         "height": 887
       },
-      "sourceChecksum": "83e2982afab8cabcdb817e6a0f3ef5be573ad500ac2f2936be7e3e9018b40029",
+      "sourceChecksum": "dc540fc643d25c14c51846846c2aebde7aac9430b4629ec02886663a505c3c29",
       "previewDimensions": {
         "width": 720,
         "height": 360
       },
-      "previewChecksum": "0f8dff058d6b75ba0f0761946fb41f7390d39851b0f2a2015663fc00aed2ab68",
-      "previewBytes": 25722,
-      "generationCount": 1,
+      "previewChecksum": "eddaf8c7db6274d5512864e31a126eeaea84b2f6bda4ae1ae54e25d8db8b93c1",
+      "previewBytes": 50900,
+      "generationCount": 2,
       "published": true
     },
     {
@@ -1438,17 +1438,17 @@
         "pdf"
       ],
       "sourceDimensions": {
-        "width": 1693,
-        "height": 929
+        "width": 1774,
+        "height": 887
       },
-      "sourceChecksum": "2bc5011bec682463a1249cb6ea7001c16bfd905289f7c4f2807bcae37d9d845b",
+      "sourceChecksum": "77457467b5462c813a25d08074693e81cc2bca12239f559c6cd921525a70c6e0",
       "previewDimensions": {
         "width": 720,
-        "height": 395
+        "height": 360
       },
-      "previewChecksum": "8d801b1fcf5bb1d644bae39ccebb0020d34e9bcd5a6cbe8bed52689bd58a692c",
-      "previewBytes": 26614,
-      "generationCount": 1,
+      "previewChecksum": "4d117af0ec9eeae160b7eb3e6d1cbc592203799ab38c083562118c26a39edbf3",
+      "previewBytes": 39760,
+      "generationCount": 2,
       "published": true
     },
     {
@@ -2233,13 +2233,13 @@
       "id": "S032",
       "order": 32,
       "slug": "floor-opening-hazard",
-      "title": "開口部注意",
-      "category": "hazard-warning",
-      "categoryLabel": "危険警告",
-      "signPurpose": "警告",
+      "title": "開口部 立入禁止",
+      "category": "entry-prohibition",
+      "categoryLabel": "立入・禁止・操作禁止",
+      "signPurpose": "禁止",
       "signFormat": "マンガ標識",
       "recommendedSize": "600×450mm",
-      "commonWording": "開口部注意",
+      "commonWording": "開口部 立入禁止",
       "multilingualPriority": "high",
       "editableNumber": false,
       "vendorCount": 3,
@@ -2248,30 +2248,29 @@
         "https://www.monotaro.com/p/2033/7327/",
         "https://ec.midori-anzen.com/shop/g/g4066100006/"
       ],
-      "constructionRelevance": "作業区域の主要危険を短時間で注意喚起",
+      "constructionRelevance": "床開口部・端部の手すり内側への立入りを禁止",
       "priority": "high",
-      "originalityPlan": "市場商品の図版・配置を複製せず、「開口部注意」の意味を独自の成人作業員・PPE・機器構図で表し、後付け文字帯の余白を分離",
+      "originalityPlan": "市場商品の図版・配置を複製せず、床開口部の立入禁止を独自の成人作業員・PPE・手すり構図で表し、後付け文字帯の余白を分離",
       "texts": {
-        "ja": "開口部注意",
-        "en": "Caution: floor opening",
-        "vi": "Chú ý lỗ mở sàn",
-        "zh-CN": "当心洞口",
-        "id": "Awas bukaan lantai"
+        "ja": "開口部 立入禁止",
+        "en": "No entry: floor opening",
+        "vi": "Cấm vào khu vực lỗ mở sàn",
+        "zh-CN": "洞口区域 禁止进入",
+        "id": "Dilarang masuk area bukaan lantai"
       },
       "tags": [
-        "開口部注意",
-        "開口部注意",
-        "警告",
+        "開口部 立入禁止",
+        "開口部 立入禁止",
+        "禁止",
         "マンガ標識",
-        "重機・吊り荷",
+        "立入・禁止",
         "floor",
         "opening",
         "hazard"
       ],
       "uses": [
         "掲示",
-        "教育",
-        "朝礼"
+        "教育"
       ],
       "orientation": "landscape",
       "recommended": true,
@@ -2292,13 +2291,13 @@
         "width": 1774,
         "height": 887
       },
-      "sourceChecksum": "45c391d69657ab0f3f23105d8982f234043b5271021a9286e2674d8e99d6986a",
+      "sourceChecksum": "ec8d9ac367895c5895c8f4f933f0248f10cbdc6def13b969b9f4ea8ff5870ff2",
       "previewDimensions": {
         "width": 720,
         "height": 360
       },
-      "previewChecksum": "7d644b6497533e79d2433b721edba8e07efb8af138d1db822c656f14d596d5b1",
-      "previewBytes": 22920,
+      "previewChecksum": "e5a15dd3fe90a46d17f5f118db857e8009c9063d9af70ff537bd05be45f9c5b4",
+      "previewBytes": 32630,
       "generationCount": 2,
       "published": true
     },
@@ -2935,16 +2934,16 @@
         "pdf"
       ],
       "sourceDimensions": {
-        "width": 1210,
-        "height": 977
+        "width": 1448,
+        "height": 1086
       },
-      "sourceChecksum": "9f9896e8f79927b4b8b2074e26f6c55bc94b6d4eae24ae74420a4109e397ec55",
+      "sourceChecksum": "02ae1fe241a87b596696ac6b47e73f66c4f07b127fee4f355ec32ba149db8844",
       "previewDimensions": {
         "width": 720,
-        "height": 581
+        "height": 540
       },
-      "previewChecksum": "bcad453866bc4336d3eb9fc1986756624a385ad04547834e027c40d829a34c60",
-      "previewBytes": 47920,
+      "previewChecksum": "5866d5d70d5d647d0adfcbce65eb44bdf1fa3fdf9ba93fcaef4709831797ea62",
+      "previewBytes": 37912,
       "generationCount": 2,
       "published": true
     },
@@ -3006,16 +3005,16 @@
         "pdf"
       ],
       "sourceDimensions": {
-        "width": 1536,
-        "height": 1024
+        "width": 1448,
+        "height": 1086
       },
-      "sourceChecksum": "12ab87f9ce9275f0e8bb37446c21402097da07b4a7558dd78a944e3e9314397e",
+      "sourceChecksum": "8de2446ce4cc3c9f6caf1390e24e3e51df7a4742e071cbb62adb438e87dd8251",
       "previewDimensions": {
         "width": 720,
-        "height": 480
+        "height": 540
       },
-      "previewChecksum": "2b5fa238751142667952438e5fca729839d11485dc40cbeac3bc29fa7b79bbd4",
-      "previewBytes": 32090,
+      "previewChecksum": "bdcb4ae472a56c08b27e578b284edddb6478370635afae0ba1826d574fed40be",
+      "previewBytes": 42056,
       "generationCount": 2,
       "published": true
     },

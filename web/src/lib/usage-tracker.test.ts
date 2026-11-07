@@ -122,6 +122,8 @@ describe("isWorkContextPath（作業画面ではフィードバック懇願を�
       "/chatbot",
       "/chatbot/share/example",
       "/chemical-ra",
+        "/goods",
+        "/goods/helmets",
       "/law-search",
       "/risk",
       "/services/automation",
@@ -135,6 +137,7 @@ describe("isWorkContextPath（作業画面ではフィードバック懇願を�
   it("接頭辞が一致するだけの別ルート（/ky-examples 等）は対象外＝閲覧は許可", () => {
     expect(isWorkContextPath("/ky-examples")).toBe(false);
     expect(isWorkContextPath("/signage-guide")).toBe(false);
+    expect(isWorkContextPath("/goods-guide")).toBe(false);
   });
 
   it("通常の機能ページでは表示を許可する", () => {

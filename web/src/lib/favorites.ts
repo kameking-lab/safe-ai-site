@@ -1,3 +1,5 @@
+import { formatSourceProvenance, normalizeSourceProvenance, type SourceProvenance } from "@/lib/source-provenance";
+
 /**
  * P0-016 (usability-audit-day3-2026-05-24):
  * 法令条文・通達のお気に入り (お気に入り = ブックマーク) を端末内に保存する
@@ -32,6 +34,8 @@ export type FavoriteEntry = {
   href: string;
   /** お気に入り追加日時 ISO */
   addedAt: string;
+  /** Source facts captured on save; addedAt is never a source confirmation date. */
+  sourceProvenance?: SourceProvenance;
 };
 
 function safeRead(): FavoriteEntry[] {
@@ -49,7 +53,7 @@ function safeRead(): FavoriteEntry[] {
         typeof e.id === "string" &&
         typeof e.title === "string" &&
         typeof e.href === "string",
-    );
+    ).map((entry) => ({ ...entry, sourceProvenance: normalizeSourceProvenance(entry.sourceProvenance) }));
   } catch {
     return [];
   }
@@ -92,6 +96,7 @@ export function toggleFavorite(entry: Omit<FavoriteEntry, "addedAt">): {
   }
   const newEntry: FavoriteEntry = {
     ...entry,
+    sourceProvenance: normalizeSourceProvenance(entry.sourceProvenance),
     addedAt: new Date().toISOString(),
   };
   const next = [newEntry, ...current].slice(0, MAX_FAVORITES);
@@ -128,11 +133,13 @@ export function formatArticleCitation(input: {
   lawFull?: string;
   articleNum: string;
   egovUrl?: string;
+  sourceProvenance?: SourceProvenance;
 }): string {
   const law = input.lawFull ? `${input.lawFull}（${input.lawShort}）` : input.lawShort;
   const meta = `${law}${input.articleNum}`;
   const url = input.egovUrl ? `、出典: ${input.egovUrl}` : "";
-  return `「${input.text.trim()}」（${meta}${url}）`;
+  const provenance = formatSourceProvenance(input.sourceProvenance);
+  return `「${input.text.trim()}」（${meta}${url}）${provenance ? `\n${provenance}` : ""}`;
 }
 
 export function formatNoticeCitation(input: {

@@ -28,12 +28,12 @@ describe("ChemicalRaPanel 入力欄のlabel関連付け（WCAG 1.3.1 / 4.1.2）"
     expect(textInputs.length).toBe(1);
   });
 
-  it("作業条件へ進むと作業内容（TextareaWithVoice）がlabelで取得できる", () => {
+  it("任意の作業記録を開くと作業内容（TextareaWithVoice）がlabelで取得できる", () => {
     renderPanel();
     fireEvent.change(screen.getByLabelText(/物質名・CAS番号・SDS記載名/), {
       target: { value: "トルエン" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "作業条件へ進む" }));
+    fireEvent.click(screen.getByRole("button", { name: /必要な人向け：作業条件・測定値を記録する/ }));
     expect(
       screen.getByLabelText("作業内容（任意）— 最新SDS・公式ツール確認用のメモ"),
     ).toBeInstanceOf(HTMLTextAreaElement);

@@ -19,7 +19,7 @@ export const AI_SEMINAR_THEMES: readonly AiSeminarTheme[] = [
     audience: "生成AIの初心者・利用者・管理職・導入担当者",
     status: "published",
     href: AI_CHAT_WORK_PATH,
-    standardDuration: "音声約35〜50分／演習込み約60分",
+    standardDuration: "音声約30〜35分／演習込み約60分",
     slideCount: 20,
     formats: ["PowerPoint", "PDF"],
   },
@@ -54,5 +54,11 @@ export const PUBLISHED_AI_SEMINARS = AI_SEMINAR_THEMES.filter(
 );
 
 export const COMING_SOON_AI_SEMINARS = AI_SEMINAR_THEMES.filter(
+  (theme) => theme.status === "coming-soon",
+);
+
+/** 提供資料の10章構成を実務導線へ組み替えた、最初の20テーマ。 */
+export const AI_SEMINAR_CORE_20 = AI_SEMINAR_THEMES.slice(0, 20);
+export const COMING_SOON_AI_CORE_20 = AI_SEMINAR_CORE_20.filter(
   (theme) => theme.status === "coming-soon",
 );

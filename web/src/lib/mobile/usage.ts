@@ -3,7 +3,7 @@ import { createHash,randomUUID } from 'node:crypto';
 import { Prisma } from '@prisma/client';
 import { billingDb,getEntitlement,lockMember,entitlementInTransaction } from './billing-service';
 import { product,type Plan } from './entitlement';
-import { member,json } from './http';
+import { member,json,isNativeRequest,webMemberId } from './http';
 import { inspectAiOutbound } from '../ai-outbound-safety';
 import { validateChatbotRequestBoundary } from '../server/chatbot-request-boundary';
 const context=new AsyncLocalStorage<{plan:Plan;operationId?:string}>();
@@ -89,6 +89,14 @@ export async function withUsage(request:Request,feature:AiFeature,run:(request:R
     // Native clients cannot bypass the missing shared quota contract.
     if(request.headers.get('x-anzen-native')==='1')return json({error:{code:'ENTITLEMENT_SYNC_PENDING',message:'サーバーの共通利用枠を確認できません。'}},503);
     return run(request);
+  }
+  // Anonymous web visitors keep the pre-ledger route behaviour (its own anonymous
+  // rate limits and counts). Per-member quotas do not apply to them, but every
+  // provider call still reserves against the shared monthly budget as plan 'free'.
+  if(!isNativeRequest(request)){
+    let signedIn:string|null;
+    try{signedIn=await webMemberId();}catch{signedIn=null;}
+    if(!signedIn)return run(request);
   }
   const chunks:Uint8Array[]=[];let bytes=0;const reader=request.body?.getReader();
   if(reader)while(true){const item=await reader.read();if(item.done)break;bytes+=item.value.byteLength;if(bytes>65536){await reader.cancel();return json({error:{code:'INVALID_REQUEST',message:'入力が長すぎます。'}},413);}chunks.push(item.value);}

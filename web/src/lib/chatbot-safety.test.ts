@@ -17,6 +17,15 @@ describe("evaluateChatbotSafety", () => {
     expect(evaluateChatbotSafety(message)?.kind).not.toBe("ambiguous");
   });
 
+  it.each([
+    "低圧充電電路に近接する作業の感電防止措置は？",
+    "高圧充電電路を点検する資格は？",
+    "充電電路の作業はどの条文を確認する？",
+  ])("充電電路を人名と誤認して通常の安全質問を止めない: %s", (message) => {
+    expect(detectChatbotSensitiveData(message)).toEqual([]);
+    expect(evaluateChatbotSafety(message)?.kind).not.toBe("privacy");
+  });
+
   it.each(["フォークリフトに資格いる？", "フォークリフトに資格はいる？"])(
     "最大荷重がないフォークリフト資格質問は確認へ進める: %s",
     (message) => {
