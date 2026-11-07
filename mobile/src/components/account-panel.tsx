@@ -11,7 +11,7 @@ const stageMessages:Record<string,string>={prepared:'App Store起動前の購入
 export function AccountPanel(){
   const refreshGeneration=useRef(0);
   const [config,setConfig]=useState<BillingConfig|null>(null);const [member,setMember]=useState<MemberEntitlement|null>(null);const [price,setPrice]=useState('');const [message,setMessage]=useState('');const [busy,setBusy]=useState(false);
-  const refresh=useCallback(async()=>{const ticket=++refreshGeneration.current;setPrice('');setMember(null);try{const c=await billing.config();if(ticket!==refreshGeneration.current)return;setConfig(c);const m=await billing.entitlement();if(ticket!==refreshGeneration.current)return;setMember(m);if(m.plan==='free' && m.syncState==='verified' && c.ready){const p=await billing.offering(c,m);if(ticket!==refreshGeneration.current)return;setPrice(p.product.priceString);}setMessage('会員の権利を確認しました。');}catch(e){if(ticket!==refreshGeneration.current)return;setMember(null);setMessage(messages[(e as Error).message]??'会員情報を確認できません。時間をおいて再確認してください。');}},[]);
+  const refresh=useCallback(async()=>{const ticket=++refreshGeneration.current;setPrice('');setMember(null);try{const c=await billing.config();if(ticket!==refreshGeneration.current)return;setConfig(c);const m=await billing.entitlement();if(ticket!==refreshGeneration.current)return;setMember(m);if(m.plan==='free' && m.syncState==='verified' && c.ready){const p=await billing.offering(c,m);if(ticket!==refreshGeneration.current)return;setPrice(p.product.priceString);}setMessage('');}catch(e){if(ticket!==refreshGeneration.current)return;setMember(null);const code=(e as Error).message;setMessage(code==='UNAUTHORIZED'?'':messages[code]??'会員情報を確認できません。時間をおいて再確認してください。');}},[]);
   useEffect(()=>{
     void refresh();const handler=()=>{void refresh();};window.addEventListener('anzen-session-changed',handler);
     window.addEventListener('anzen-app-active',handler);
@@ -25,15 +25,15 @@ export function AccountPanel(){
   // response never moves the buttons below it under a finger.
   const statusLine=!member?'ログインしていません':`${pro?'Pro 購入済み':pending?'権利の確認待ち':'無料会員'}${member.source==='stripe'?'（ウェブ購読）':member.source==='app_store'?'（App Store購読）':''}`;
   return <section className="native-panel mx-auto max-w-2xl space-y-5 p-5 text-slate-900"><h1 className="text-2xl font-bold">会員・安全AI Pro</h1>
-    <div className="min-h-[11rem] space-y-2">
+    <div className="space-y-2">
       <p className="text-lg font-bold">{statusLine}</p>
       <p className="min-h-[1.75em] text-sm">{member?.expiresAt?`有効期限：${new Date(member.expiresAt).toLocaleString('ja-JP')}`:'ウェブの購入も同じアカウントで使えます。'}</p>
       {!member?<button disabled={busy || !config?.login.apple} onClick={()=>void action(startLogin)}>Apple / Googleでログイン</button>:<button disabled={busy} onClick={()=>void action(async()=>{setMember(null);await logout();await billing.forget();})}>ログアウト</button>}
-      <p role="status" className="min-h-[3.5em] text-sm">{message}</p>
+      <p role="status" className="min-h-[1.75em] text-sm">{message}</p>
     </div>
-    <p className="rounded border border-amber-400 bg-amber-50 p-3">化学物質RAの評価生成は提供停止中です（Proでも生成できません）。資料検索は使えます。</p>
-    <p>無料：チャット1日3回・RA1日1件・警報1地点（通知なし）。Pro：チャット1日50回・RA1日10件・警報10地点と通知。回数はウェブと合算。</p>
-    <p>Proは{price?`月額${price}（税込）`:`月額${config?.policy.monthlyPrice?.toLocaleString('ja-JP')??'—'}円（税込）`}の自動更新サブスクリプションです。解約しない限り毎月更新され、Apple Accountに請求されます。更新日の24時間前までにApp Storeで解約でき、解約後も期限まで使えます。AIは原価上限・障害で止まることがあり、通知の到達は保証されません。</p>
+    {/* RA generation is paused, so the plans list only what Pro actually adds today. */}
+    <div className="text-sm"><p className="my-1">無料：AIチャット1日3回・警報1地点</p><p className="my-1">Pro：AIチャット1日50回・警報10地点と通知</p></div>
+    <p className="text-xs">Pro {price?`${price}`:`¥${config?.policy.monthlyPrice?.toLocaleString('ja-JP')??'—'}`}/月（税込）・1か月ごとの自動更新。更新日の24時間前までにApp Storeで解約しない限り自動で更新され、Apple Accountに請求されます。</p>
     <div className="flex flex-wrap gap-3"><button disabled={busy || !member || pro || pending || !config?.ready || !price} onClick={()=>config && void action(async()=>{const m=await billing.purchase(config);setMember(m);})}>{pro?'購入済み':busy?'確認中…':member?.purchasePending?'App Storeの購入手続きを再開':'App StoreでProを購入'}</button>
     <button disabled={busy || !member || !config?.ready} onClick={()=>config && void action(async()=>{setMember(await billing.restore(config));})}>購入を復元</button>
     <button disabled={busy || !member} onClick={()=>void action(async()=>{setMember(await billing.sync());})}>権利を再確認</button></div>

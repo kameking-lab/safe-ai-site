@@ -46,7 +46,7 @@ export function HomeLP({ availability, latestNews }: { availability: AutomationC
             <p className={styles.mobileSummary}>法令・化学物質・事故の確認を、ここから。</p>
             <Link href="/chatbot" prefetch={false} data-primary-action="true" className={styles.mobileEntry}><ChihuahuaButtonContent variant="tools" trailing={<ArrowUpRight size={16} aria-hidden="true" />}>安衛法AIを使う</ChihuahuaButtonContent></Link>
             <div className={styles.demoPaper} data-information-preview>
-              <div className={styles.demoHeading}><span>まず使う3つの機能</span><span>出典を確認</span></div>
+              <div className={styles.demoHeading}><span>まず使う3つの機能</span>{/* Not a link; the iOS app drops the label to keep the card header clean. */}{process.env.NEXT_PUBLIC_ANZEN_NATIVE === "true" ? null : <span>出典を確認</span>}</div>
               <nav aria-label="すぐ使う道具" className={styles.previewLinks}>
                 <Link href="/chatbot" prefetch={false}><Bot size={20} aria-hidden="true" /><span><strong>安衛法AI</strong><small>条件に合う条文候補から公式原文へ</small></span><ArrowUpRight size={16} aria-hidden="true" /></Link>
                 <Link href="/chemical-ra" prefetch={false}><FlaskConical size={20} aria-hidden="true" /><span><strong>化学物質RA準備</strong><small>CAS・SDS・作業条件の不足を確認</small></span><ArrowUpRight size={16} aria-hidden="true" /></Link>

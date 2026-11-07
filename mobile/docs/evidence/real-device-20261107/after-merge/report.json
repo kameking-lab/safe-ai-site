@@ -5,8 +5,6 @@
         "step": "01-launch",
         "url": "/",
         "issues": [
-          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
-          "small-target \"表示設定\" 369x21",
           "small-target \"出典と確認状態\" 307x28",
           "small-target \"出典と確認状態\" 307x28",
           "small-target \"出典と確認状態\" 307x28",
@@ -18,18 +16,15 @@
           "small-target \"出典と確認状態\" 307x28",
           "small-target \"出典と確認状態\" 307x28"
         ],
-        "textLen": 1639,
+        "textLen": 1636,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
       {
         "step": "02-ai-tab",
         "url": "/",
-        "issues": [
-          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
-          "small-target \"表示設定\" 369x21"
-        ],
-        "textLen": 434,
+        "issues": [],
+        "textLen": 430,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -37,22 +32,17 @@
         "step": "03-ai-answer",
         "url": "/",
         "issues": [
-          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
-          "small-target \"表示設定\" 369x21",
           "small-target \"労働安全衛生規則 第518条\" 307x28"
         ],
-        "textLen": 603,
+        "textLen": 599,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
       {
         "step": "04-chatbot",
         "url": "/chatbot/",
-        "issues": [
-          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
-          "small-target \"表示設定\" 369x21"
-        ],
-        "textLen": 267,
+        "issues": [],
+        "textLen": 241,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -63,11 +53,8 @@
       {
         "step": "04a-chatbot-composer",
         "url": "/chatbot/",
-        "issues": [
-          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
-          "small-target \"表示設定\" 369x21"
-        ],
-        "textLen": 267,
+        "issues": [],
+        "textLen": 241,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -75,11 +62,9 @@
         "step": "04b-tap-account-from-portal",
         "url": "/account/",
         "issues": [
-          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
-          "small-target \"表示設定\" 369x21",
           "small-target \"新規検索 →\" 74x20"
         ],
-        "textLen": 528,
+        "textLen": 359,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -87,8 +72,6 @@
         "step": "04c-back-button",
         "url": "/",
         "issues": [
-          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
-          "small-target \"表示設定\" 369x21",
           "small-target \"出典と確認状態\" 307x28",
           "small-target \"出典と確認状態\" 307x28",
           "small-target \"出典と確認状態\" 307x28",
@@ -100,7 +83,7 @@
           "small-target \"出典と確認状態\" 307x28",
           "small-target \"出典と確認状態\" 307x28"
         ],
-        "textLen": 1640,
+        "textLen": 1636,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -108,11 +91,9 @@
         "step": "05-account",
         "url": "/account/",
         "issues": [
-          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
-          "small-target \"表示設定\" 369x21",
           "small-target \"新規検索 →\" 74x20"
         ],
-        "textLen": 528,
+        "textLen": 359,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -120,11 +101,9 @@
         "step": "05b-account-scrolled-sticky",
         "url": "/account/",
         "issues": [
-          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
-          "small-target \"表示設定\" 369x21",
           "small-target \"新規検索 →\" 74x20"
         ],
-        "textLen": 528,
+        "textLen": 359,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -132,11 +111,9 @@
         "step": "06-account-bottom",
         "url": "/account/",
         "issues": [
-          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
-          "small-target \"表示設定\" 369x21",
           "small-target \"新規検索 →\" 74x20"
         ],
-        "textLen": 528,
+        "textLen": 359,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -144,11 +121,9 @@
         "step": "06b-delete-section-open",
         "url": "/account/",
         "issues": [
-          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
-          "small-target \"表示設定\" 369x21",
           "small-target \"新規検索 →\" 74x20"
         ],
-        "textLen": 701,
+        "textLen": 532,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -156,66 +131,49 @@
         "step": "07-delete-confirm",
         "url": "/account/",
         "issues": [
-          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
-          "small-target \"表示設定\" 369x21",
           "small-target \"新規検索 →\" 74x20"
         ],
-        "textLen": 757,
+        "textLen": 588,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
       {
         "step": "08-notifications",
         "url": "/notifications/",
-        "issues": [
-          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
-          "small-target \"表示設定\" 369x21"
-        ],
-        "textLen": 1037,
+        "issues": [],
+        "textLen": 1012,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
       {
         "step": "09-features",
         "url": "/features/",
-        "issues": [
-          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
-          "small-target \"表示設定\" 369x21"
-        ],
-        "textLen": 2927,
+        "issues": [],
+        "textLen": 2905,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
       {
         "step": "10-back",
         "url": "/notifications/",
-        "issues": [
-          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
-          "small-target \"表示設定\" 369x21"
-        ],
-        "textLen": 1037,
+        "issues": [],
+        "textLen": 1012,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
       {
         "step": "11-exams",
         "url": "/e-learning/exams/",
-        "issues": [
-          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
-          "small-target \"表示設定\" 369x21"
-        ],
-        "textLen": 4334,
+        "issues": [],
+        "textLen": 4308,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
       {
         "step": "12-home",
         "url": "/home/",
-        "issues": [
-          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
-          "small-target \"表示設定\" 369x21"
-        ],
-        "textLen": 1381,
+        "issues": [],
+        "textLen": 1350,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -226,11 +184,8 @@
       {
         "step": "12b-home-scrolled",
         "url": "/home/",
-        "issues": [
-          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
-          "small-target \"表示設定\" 369x21"
-        ],
-        "textLen": 1381,
+        "issues": [],
+        "textLen": 1350,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -241,11 +196,8 @@
       {
         "step": "13-contact-privacy-note",
         "url": "/contact/",
-        "issues": [
-          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
-          "small-target \"表示設定\" 369x21"
-        ],
-        "textLen": 592,
+        "issues": [],
+        "textLen": 566,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -266,8 +218,6 @@
         "step": "01-launch",
         "url": "/",
         "issues": [
-          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
-          "small-target \"表示設定\" 369x21",
           "small-target \"出典と確認状態\" 307x28",
           "small-target \"出典と確認状態\" 307x28",
           "small-target \"出典と確認状態\" 307x28",
@@ -279,40 +229,31 @@
           "small-target \"出典と確認状態\" 307x28",
           "small-target \"出典と確認状態\" 307x28"
         ],
-        "textLen": 1640,
+        "textLen": 1636,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
       {
         "step": "02-ai-tab",
         "url": "/",
-        "issues": [
-          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
-          "small-target \"表示設定\" 369x21"
-        ],
-        "textLen": 455,
+        "issues": [],
+        "textLen": 451,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
       {
         "step": "03-ai-answer",
         "url": "/",
-        "issues": [
-          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
-          "small-target \"表示設定\" 369x21"
-        ],
-        "textLen": 455,
+        "issues": [],
+        "textLen": 451,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
       {
         "step": "04-chatbot",
         "url": "/chatbot/",
-        "issues": [
-          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
-          "small-target \"表示設定\" 369x21"
-        ],
-        "textLen": 255,
+        "issues": [],
+        "textLen": 229,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -323,44 +264,32 @@
       {
         "step": "04a-chatbot-composer",
         "url": "/chatbot/",
-        "issues": [
-          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
-          "small-target \"表示設定\" 369x21"
-        ],
-        "textLen": 255,
+        "issues": [],
+        "textLen": 229,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
       {
         "step": "05-account",
         "url": "/account/",
-        "issues": [
-          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
-          "small-target \"表示設定\" 369x21"
-        ],
-        "textLen": 448,
+        "issues": [],
+        "textLen": 271,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
       {
         "step": "05b-account-scrolled-sticky",
         "url": "/account/",
-        "issues": [
-          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
-          "small-target \"表示設定\" 369x21"
-        ],
-        "textLen": 448,
+        "issues": [],
+        "textLen": 271,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
       {
         "step": "06-account-bottom",
         "url": "/account/",
-        "issues": [
-          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
-          "small-target \"表示設定\" 369x21"
-        ],
-        "textLen": 448,
+        "issues": [],
+        "textLen": 271,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -375,11 +304,8 @@
       {
         "step": "07-after-login-tap",
         "url": "/account/",
-        "issues": [
-          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
-          "small-target \"表示設定\" 369x21"
-        ],
-        "textLen": 448,
+        "issues": [],
+        "textLen": 271,
         "title": "安全AIポータル",
         "bodyEmpty": false
       }
@@ -396,8 +322,6 @@
         "step": "01-launch",
         "url": "/",
         "issues": [
-          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
-          "small-target \"表示設定\" 369x21",
           "small-target \"出典と確認状態\" 307x28",
           "small-target \"出典と確認状態\" 307x28",
           "small-target \"出典と確認状態\" 307x28",
@@ -409,40 +333,31 @@
           "small-target \"出典と確認状態\" 307x28",
           "small-target \"出典と確認状態\" 307x28"
         ],
-        "textLen": 1640,
+        "textLen": 1636,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
       {
         "step": "02-ai-tab",
         "url": "/",
-        "issues": [
-          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
-          "small-target \"表示設定\" 369x21"
-        ],
-        "textLen": 455,
+        "issues": [],
+        "textLen": 451,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
       {
         "step": "03-ai-answer",
         "url": "/",
-        "issues": [
-          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
-          "small-target \"表示設定\" 369x21"
-        ],
-        "textLen": 455,
+        "issues": [],
+        "textLen": 451,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
       {
         "step": "04-chatbot",
         "url": "/chatbot/",
-        "issues": [
-          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
-          "small-target \"表示設定\" 369x21"
-        ],
-        "textLen": 255,
+        "issues": [],
+        "textLen": 229,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -453,44 +368,32 @@
       {
         "step": "04a-chatbot-composer",
         "url": "/chatbot/",
-        "issues": [
-          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
-          "small-target \"表示設定\" 369x21"
-        ],
-        "textLen": 255,
+        "issues": [],
+        "textLen": 229,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
       {
         "step": "05-account",
         "url": "/account/",
-        "issues": [
-          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
-          "small-target \"表示設定\" 369x21"
-        ],
-        "textLen": 448,
+        "issues": [],
+        "textLen": 271,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
       {
         "step": "05b-account-scrolled-sticky",
         "url": "/account/",
-        "issues": [
-          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
-          "small-target \"表示設定\" 369x21"
-        ],
-        "textLen": 448,
+        "issues": [],
+        "textLen": 271,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
       {
         "step": "06-account-bottom",
         "url": "/account/",
-        "issues": [
-          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
-          "small-target \"表示設定\" 369x21"
-        ],
-        "textLen": 448,
+        "issues": [],
+        "textLen": 271,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -505,11 +408,8 @@
       {
         "step": "07-after-login-tap",
         "url": "/account/",
-        "issues": [
-          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
-          "small-target \"表示設定\" 369x21"
-        ],
-        "textLen": 465,
+        "issues": [],
+        "textLen": 309,
         "title": "安全AIポータル",
         "bodyEmpty": false
       }
@@ -526,55 +426,41 @@
         "step": "01-launch",
         "url": "/",
         "issues": [
-          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
-          "small-target \"表示設定\" 369x21",
           "small-target \"出典と確認状態\" 307x28"
         ],
-        "textLen": 490,
+        "textLen": 486,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
       {
         "step": "02-ai-tab",
         "url": "/",
-        "issues": [
-          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
-          "small-target \"表示設定\" 369x21"
-        ],
-        "textLen": 455,
+        "issues": [],
+        "textLen": 451,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
       {
         "step": "05-account",
         "url": "/account/",
-        "issues": [
-          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
-          "small-target \"表示設定\" 369x21"
-        ],
-        "textLen": 448,
+        "issues": [],
+        "textLen": 271,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
       {
         "step": "05b-account-scrolled-sticky",
         "url": "/account/",
-        "issues": [
-          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
-          "small-target \"表示設定\" 369x21"
-        ],
-        "textLen": 448,
+        "issues": [],
+        "textLen": 271,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
       {
         "step": "06-account-bottom",
         "url": "/account/",
-        "issues": [
-          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
-          "small-target \"表示設定\" 369x21"
-        ],
-        "textLen": 448,
+        "issues": [],
+        "textLen": 271,
         "title": "安全AIポータル",
         "bodyEmpty": false
       }
@@ -591,22 +477,17 @@
         "step": "01-launch",
         "url": "/",
         "issues": [
-          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
-          "small-target \"表示設定\" 369x21",
           "small-target \"出典と確認状態\" 307x28"
         ],
-        "textLen": 490,
+        "textLen": 486,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
       {
         "step": "02-ai-tab",
         "url": "/",
-        "issues": [
-          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
-          "small-target \"表示設定\" 369x21"
-        ],
-        "textLen": 434,
+        "issues": [],
+        "textLen": 430,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -614,11 +495,9 @@
         "step": "05-account",
         "url": "/account/",
         "issues": [
-          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
-          "small-target \"表示設定\" 369x21",
           "small-target \"新規検索 →\" 74x20"
         ],
-        "textLen": 528,
+        "textLen": 359,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -626,11 +505,9 @@
         "step": "05b-account-scrolled-sticky",
         "url": "/account/",
         "issues": [
-          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
-          "small-target \"表示設定\" 369x21",
           "small-target \"新規検索 →\" 74x20"
         ],
-        "textLen": 528,
+        "textLen": 359,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -638,11 +515,9 @@
         "step": "06-account-bottom",
         "url": "/account/",
         "issues": [
-          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
-          "small-target \"表示設定\" 369x21",
           "small-target \"新規検索 →\" 74x20"
         ],
-        "textLen": 528,
+        "textLen": 359,
         "title": "安全AIポータル",
         "bodyEmpty": false
       }
@@ -659,8 +534,6 @@
         "step": "01-launch",
         "url": "/",
         "issues": [
-          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
-          "small-target \"表示設定\" 369x21",
           "small-target \"出典と確認状態\" 307x28",
           "small-target \"出典と確認状態\" 307x28",
           "small-target \"出典と確認状態\" 307x28",
@@ -672,18 +545,15 @@
           "small-target \"出典と確認状態\" 307x28",
           "small-target \"出典と確認状態\" 307x28"
         ],
-        "textLen": 1640,
+        "textLen": 1636,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
       {
         "step": "02-ai-tab",
         "url": "/",
-        "issues": [
-          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
-          "small-target \"表示設定\" 369x21"
-        ],
-        "textLen": 434,
+        "issues": [],
+        "textLen": 430,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -691,11 +561,9 @@
         "step": "05-account",
         "url": "/account/",
         "issues": [
-          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
-          "small-target \"表示設定\" 369x21",
           "small-target \"新規検索 →\" 74x20"
         ],
-        "textLen": 528,
+        "textLen": 359,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -703,11 +571,9 @@
         "step": "05b-account-scrolled-sticky",
         "url": "/account/",
         "issues": [
-          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
-          "small-target \"表示設定\" 369x21",
           "small-target \"新規検索 →\" 74x20"
         ],
-        "textLen": 528,
+        "textLen": 359,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -715,11 +581,9 @@
         "step": "06-account-bottom",
         "url": "/account/",
         "issues": [
-          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
-          "small-target \"表示設定\" 369x21",
           "small-target \"新規検索 →\" 74x20"
         ],
-        "textLen": 528,
+        "textLen": 359,
         "title": "安全AIポータル",
         "bodyEmpty": false
       }
@@ -736,8 +600,6 @@
         "step": "01-launch",
         "url": "/",
         "issues": [
-          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
-          "small-target \"表示設定\" 369x21",
           "small-target \"出典と確認状態\" 307x28",
           "small-target \"出典と確認状態\" 307x28",
           "small-target \"出典と確認状態\" 307x28",
@@ -749,51 +611,39 @@
           "small-target \"出典と確認状態\" 307x28",
           "small-target \"出典と確認状態\" 307x28"
         ],
-        "textLen": 1640,
+        "textLen": 1636,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
       {
         "step": "02-ai-tab",
         "url": "/",
-        "issues": [
-          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
-          "small-target \"表示設定\" 369x21"
-        ],
-        "textLen": 455,
+        "issues": [],
+        "textLen": 451,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
       {
         "step": "05-account",
         "url": "/account/",
-        "issues": [
-          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
-          "small-target \"表示設定\" 369x21"
-        ],
-        "textLen": 448,
+        "issues": [],
+        "textLen": 271,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
       {
         "step": "05b-account-scrolled-sticky",
         "url": "/account/",
-        "issues": [
-          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
-          "small-target \"表示設定\" 369x21"
-        ],
-        "textLen": 448,
+        "issues": [],
+        "textLen": 271,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
       {
         "step": "06-account-bottom",
         "url": "/account/",
-        "issues": [
-          "small-target \"緊急時は作業を止め、安全な場所から119番へ\" 369x21",
-          "small-target \"表示設定\" 369x21"
-        ],
-        "textLen": 448,
+        "issues": [],
+        "textLen": 271,
         "title": "安全AIポータル",
         "bodyEmpty": false
       }

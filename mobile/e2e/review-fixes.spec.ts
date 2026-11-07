@@ -8,7 +8,7 @@ test.beforeEach(async({context})=>{await context.route('https://**/*',route=>rou
 test('emergency contacts and local input guidance work offline without login or consent',async({page,context})=>{
   let sent=0;page.on('request',r=>{if(r.url().startsWith(host+'/api/mobile/v1/ai'))sent++;});
   await context.addInitScript(()=>Object.defineProperty(navigator,'onLine',{configurable:true,get:()=>false}));
-  await page.goto('/');await page.getByText('緊急時は作業を止め、安全な場所から119番へ',{exact:true}).click();
+  await page.goto('/');await expect(page.getByRole('complementary',{name:'緊急時の連絡'})).toBeVisible();
   await expect(page.getByRole('link',{name:'119番に電話'})).toHaveAttribute('href','tel:119');
   await page.getByRole('button',{name:'AI確認',exact:true}).click();await page.getByLabel('法令についての質問').fill('作業員が倒れて意識がない');
   await expect(page.getByRole('alert').filter({hasText:'119'})).toBeVisible();await expect(page.getByRole('button',{name:'確認して送信する'})).toBeDisabled();expect(sent).toBe(0);
@@ -19,7 +19,7 @@ test('server safety guidance is preserved on the home AI response',async({page,c
   await page.goto('/');await page.getByRole('button',{name:'AI確認',exact:true}).click();await page.getByLabel('法令についての質問').fill('局所排気装置の点検条件');await page.getByRole('checkbox').check();await page.getByRole('button',{name:'確認して送信する'}).click();await expect(page.getByRole('status').filter({hasText:'AIの再送を待たないでください'})).toBeVisible();
 });
 test('all display preferences survive page changes, cold reload and print media',async({page})=>{
-  await page.goto('/law-search/');const settings=page.locator('details[aria-label="全画面の表示設定"]');await settings.locator('summary').click();
+  await page.goto('/features/');const settings=page.locator('details[aria-label="全画面の表示設定"]');await settings.locator('summary').click();
   for(const name of ['ふりがな','やさしい日本語','文字大','屋外表示'])await settings.getByRole('button',{name,exact:true}).click();
   await settings.getByRole('button',{name:/テーマ切替/}).click();await settings.getByRole('button',{name:/テーマ切替/}).click();
   await expect(page.locator('html')).toHaveClass(/large-font/);await expect(page.locator('html')).toHaveClass(/high-contrast/);await expect(page.locator('html')).toHaveClass(/dark/);
@@ -108,6 +108,6 @@ for(const pending of [false,true])test(`old deletion receipt preserves member B 
   for(let i=0;i<2;i++)await page.getByRole('button',{name:'削除状況を確認',exact:true}).click();
   expect(await page.evaluate(()=>[localStorage.getItem('company-profile'),localStorage.getItem('anzen.content.saved')])).toEqual(['member-b-profile','member-b-saved']);
 });
-test('purchase screen states RA is unavailable before purchase and exposes deletion',async({page,context})=>{
-  await accountFixtures(context);await page.goto('/account/');await expect(page.getByText(/Proでも生成できません/)).toBeVisible();await expect(page.getByRole('button',{name:'App StoreでProを購入',exact:true})).toBeDisabled();await expect(page.getByRole('heading',{name:'アカウントの削除',exact:true})).toBeVisible();
+test('purchase screen does not sell the paused RA and exposes deletion',async({page,context})=>{
+  await accountFixtures(context);await page.goto('/account/');await expect(page.getByText(/AIチャット1日50回/)).toBeVisible();await expect(page.getByText(/RA1日10件/)).toHaveCount(0);await expect(page.getByRole('button',{name:'App StoreでProを購入',exact:true})).toBeDisabled();await expect(page.getByRole('heading',{name:'アカウントの削除',exact:true})).toBeVisible();
 });

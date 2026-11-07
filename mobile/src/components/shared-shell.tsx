@@ -7,6 +7,7 @@ import { installWebTransport } from '../lib/web-transport';
 import { openSource } from '../lib/native';
 import { SITE } from '../lib/api';
 import { SharedUsageMeter } from './shared-usage-meter';
+import { DisplaySettings } from './display-settings';
 export function SharedShell({ children }: { children: ReactNode }) {
   const [message,setMessage]=useState('');
   const pathname=usePathname().replace(/\/$/,'')||'/';
@@ -21,5 +22,5 @@ export function SharedShell({ children }: { children: ReactNode }) {
     <button aria-label="戻る" className="min-h-11 min-w-11 shrink-0 rounded-lg px-2 font-semibold" onClick={() => { if (window.history.length > 1) window.history.back(); else window.location.assign('/'); }}>‹ 戻る</button>
     <Link className="inline-flex min-h-11 shrink-0 items-center px-2" href="/">安全AI</Link><Link className="inline-flex min-h-11 shrink-0 items-center px-2" href="/features">全機能</Link><Link className="inline-flex min-h-11 shrink-0 items-center px-2" href="/account">会員・Pro</Link>
     <button className="ml-auto min-h-11 shrink-0 rounded-lg border px-3 font-semibold" onClick={() => { void Share.share({ title: document.title, url: SITE + location.pathname + location.search }).catch(()=>{}); }}>共有</button>
-  </header>{message?<p role="alert" className="bg-amber-50 p-3 text-amber-950">{message}</p>:null}{pathname==='/chatbot'||pathname==='/chemical-ra'?<SharedUsageMeter/>:null}<main className="pb-[max(24px,env(safe-area-inset-bottom))]">{children}</main></>;
+  </header>{message?<p role="alert" className="bg-amber-50 p-3 text-amber-950">{message}</p>:null}{pathname==='/chatbot'||pathname==='/chemical-ra'?<SharedUsageMeter/>:null}{pathname==='/features'?<DisplaySettings/>:null}<main className="pb-[max(24px,env(safe-area-inset-bottom))]">{children}</main></>;
 }
