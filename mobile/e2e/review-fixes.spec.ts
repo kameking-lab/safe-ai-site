@@ -5,18 +5,16 @@ import product from '../../web/src/lib/mobile/product-policy.json' with {type:'j
 const host='https://www.anzen-ai-portal.jp';
 const cors={'Access-Control-Allow-Origin':'http://127.0.0.1:3213','Access-Control-Allow-Credentials':'true','Access-Control-Allow-Headers':'content-type,x-anzen-native,x-anzen-csrf,authorization'};
 test.beforeEach(async({context})=>{await context.route('https://**/*',route=>route.abort());});
-test('emergency contacts and local input guidance work offline without login or consent',async({page,context})=>{
-  let sent=0;page.on('request',r=>{if(r.url().startsWith(host+'/api/mobile/v1/ai'))sent++;});
-  await context.addInitScript(()=>Object.defineProperty(navigator,'onLine',{configurable:true,get:()=>false}));
-  await page.goto('/');await expect(page.getByRole('complementary',{name:'緊急時の連絡'})).toBeVisible();
-  await expect(page.getByRole('link',{name:'119番に電話'})).toHaveAttribute('href','tel:119');
+test('no 110/119 emergency notice, and emergency wording is not blocked in the app',async({page})=>{
+  await page.goto('/');await expect(page.getByRole('heading',{level:1})).toBeVisible();
+  await expect(page.getByRole('complementary',{name:'緊急時の連絡'})).toHaveCount(0);await expect(page.locator('a[href^="tel:11"]')).toHaveCount(0);
   await page.goto('/portal/');await page.getByRole('button',{name:'AI確認',exact:true}).click();await page.getByLabel('法令についての質問').fill('作業員が倒れて意識がない');
-  await expect(page.getByRole('alert').filter({hasText:'119'})).toBeVisible();await expect(page.getByRole('button',{name:'確認して送信する'})).toBeDisabled();expect(sent).toBe(0);
+  await expect(page.getByRole('alert').filter({hasText:/110|119/})).toHaveCount(0);
 });
 test('server safety guidance is preserved on the home AI response',async({page,context})=>{
   await context.route(host+'/api/mobile/v1/capabilities',r=>r.fulfill({json:capability(),headers:cors}));
-  await context.route(host+'/api/mobile/v1/ai',r=>r.fulfill({status:422,json:{error:{code:'SAFETY_BLOCKED',reason:'emergency',message:'安全な場所から119番へ連絡してください。AIの再送を待たないでください。'}},headers:cors}));
-  await page.goto('/portal/');await page.getByRole('button',{name:'AI確認',exact:true}).click();await page.getByLabel('法令についての質問').fill('局所排気装置の点検条件');await page.getByRole('checkbox').check();await page.getByRole('button',{name:'確認して送信する'}).click();await expect(page.getByRole('status').filter({hasText:'AIの再送を待たないでください'})).toBeVisible();
+  await context.route(host+'/api/mobile/v1/ai',r=>r.fulfill({status:422,json:{error:{code:'SAFETY_BLOCKED',reason:'sensitive_data',message:'個人情報を匿名化してから送信してください。'}},headers:cors}));
+  await page.goto('/portal/');await page.getByRole('button',{name:'AI確認',exact:true}).click();await page.getByLabel('法令についての質問').fill('局所排気装置の点検条件');await page.getByRole('checkbox').check();await page.getByRole('button',{name:'確認して送信する'}).click();await expect(page.getByRole('status').filter({hasText:'個人情報を匿名化してから送信してください'})).toBeVisible();
 });
 test('all display preferences survive page changes, cold reload and print media',async({page})=>{
   await page.goto('/features/');const settings=page.locator('details[aria-label="全画面の表示設定"]');await settings.locator('summary').click();

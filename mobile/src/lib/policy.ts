@@ -17,7 +17,7 @@ export function canExecute(c: Capability | null, feature: Feature, now = Date.no
 export function quotaLow(remaining: number, limit: number) { return remaining / limit <= 0.2; }
 export function errorMessage(code: string, retryAfter?: string, resetAt?: string) {
   const messages: Record<string, string> = {
-    SAFETY_BLOCKED: '安全確認のため送信を停止しました。緊急時は作業を止め、安全な場所から119番、現場責任者へ連絡してください。',
+    SAFETY_BLOCKED: '安全確認のため送信を停止しました。入力内容を見直してください。',
     CONSENT_REQUIRED: '個人情報・機密情報を除き、外部AIへの送信同意を確認してください。',
     DAILY_LIMIT_REACHED: `本日の上限に達しました。日本時間の次の0時に回復します${resetAt ? `（${formatDate(resetAt)}）` : ''}。`,
     OPERATION_PENDING: '処理中です。同じ操作の結果を確認してください。',

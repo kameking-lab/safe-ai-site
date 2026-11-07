@@ -9,6 +9,7 @@ import type { HomeLatestAccidentNews } from "@/lib/home/home-accident-server";
 import { homeLpClasses as styles } from "./home-lp-classes";
 import { homeLpCriticalCss } from "./home-lp-critical-css";
 import { AppStorePromo } from "@/components/app-store/app-store-promo";
+import { HomeLatestAccidentArticle } from "./home-latest-accident-article";
 
 const uses = [
   { id: "search", title: "安衛法・化学物質を調べる", copy: "現場の疑問を、根拠のある情報へ。", mascot: "chemical-lab", alt: "フラスコを持ち、化学物質の確認を案内するチワワ", tools: [
@@ -33,11 +34,9 @@ const strengths = [
 const wrap = "mx-auto max-w-[1280px] px-5 lg:px-10";
 const focus = "focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-[#638332]";
 const quietLink = `inline-flex min-h-11 min-w-11 items-center gap-2 underline underline-offset-4 ${focus}`;
-const dateFormatter = new Intl.DateTimeFormat("ja-JP", { timeZone: "Asia/Tokyo", year: "numeric", month: "2-digit", day: "2-digit" });
 
 export function HomeLP({ availability, latestNews }: { availability: AutomationConsultAvailability; latestNews: HomeLatestAccidentNews }) {
   const reform = HOME_FEATURED_LAW_REFORM;
-  const report = latestNews.status === "live" ? latestNews.items[0] : undefined;
   const consultHref = availability.webFormEnabled === true ? "/services/automation#consult-form" : availability.contactMode === "mail_client" ? "/contact/automation-email" : "/services/automation";
   return (
     <div data-home-lp className={styles.root}>
@@ -92,12 +91,7 @@ export function HomeLP({ availability, latestNews }: { availability: AutomationC
             <a href={reform.sourceUrl} className={`${quietLink} text-sm`}>{reform.sourceLabel}</a>
             <div><Link href="/laws" className={`${quietLink} text-sm`}>法改正の一覧を見る</Link></div>
           </article>
-          <article data-lp-news="accident" className="border-t border-[#19251F]/30 pt-5">
-            <p className="text-sm">労災事故速報 · 報道見出し・原因未確認</p>
-            {report ? <><h3 className="mt-3 text-lg font-bold leading-relaxed"><a href={report.href} className={quietLink}>{report.title}</a></h3><p className="mt-3 text-sm leading-7"><time dateTime={report.publishedAt}>{dateFormatter.format(new Date(report.publishedAt))}</time> · {report.publisher}</p></> : <p className="mt-3 leading-7">直近の報道は現在取得できません。事故がなかったことを示すものではありません。</p>}
-            <p className="mt-3 text-sm leading-7">出典：{latestNews.sourceLabel} · {latestNews.checkedAt ? <>確認日 <time dateTime={latestNews.checkedAt}>{dateFormatter.format(new Date(latestNews.checkedAt))}</time></> : "確認日未取得"}</p>
-            <Link href="/accident-news" className={`${quietLink} text-sm`}>事故速報の一覧を見る</Link>
-          </article>
+          <HomeLatestAccidentArticle latestNews={latestNews} />
         </div>
       </section>
 

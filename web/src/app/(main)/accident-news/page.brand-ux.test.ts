@@ -2,10 +2,10 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
-const source = readFileSync(
-  resolve(process.cwd(), "src/app/(main)/accident-news/page.tsx"),
-  "utf8",
-);
+// The latest-report list lives in a client component so the iOS app can refresh it.
+const source = ["page.tsx", "latest-news-client.tsx"]
+  .map((file) => readFileSync(resolve(process.cwd(), "src/app/(main)/accident-news", file), "utf8"))
+  .join(String.fromCharCode(10));
 const fatalSource = readFileSync(
   resolve(process.cwd(), "src/app/(main)/fatal-accidents/page.tsx"),
   "utf8",

@@ -1,0 +1,191 @@
+[
+  {
+    "path": "/",
+    "live": {
+      "h1": "その書類、AIに任せて、現場に行こう。",
+      "text": 1411,
+      "images": 8,
+      "mascots": 8,
+      "links": 33,
+      "forms": 1,
+      "unavailable": 0
+    },
+    "app": {
+      "h1": "その書類、AIに任せて、現場に行こう。",
+      "text": 1355,
+      "images": 9,
+      "mascots": 9,
+      "links": 26,
+      "forms": 1,
+      "unavailable": 0
+    }
+  },
+  {
+    "path": "/chatbot",
+    "live": {
+      "h1": "安衛法AI",
+      "text": 188,
+      "images": 0,
+      "mascots": 0,
+      "links": 8,
+      "forms": 1,
+      "unavailable": 0
+    },
+    "app": {
+      "h1": "安衛法AI",
+      "text": 171,
+      "images": 0,
+      "mascots": 0,
+      "links": 3,
+      "forms": 1,
+      "unavailable": 0
+    }
+  },
+  {
+    "path": "/chemical-ra",
+    "live": {
+      "h1": "化学物質RA準備",
+      "text": 336,
+      "images": 1,
+      "mascots": 1,
+      "links": 22,
+      "forms": 1,
+      "unavailable": 0
+    },
+    "app": {
+      "h1": "化学物質RA準備",
+      "text": 319,
+      "images": 1,
+      "mascots": 1,
+      "links": 17,
+      "forms": 1,
+      "unavailable": 0
+    }
+  },
+  {
+    "path": "/chemical-database",
+    "live": {
+      "h1": "化学物質データベース（MHLW 3,695物質 ＋ 専門解説50物質）",
+      "text": 13808,
+      "images": 0,
+      "mascots": 0,
+      "links": 216,
+      "forms": 2,
+      "unavailable": 0
+    },
+    "app": {
+      "h1": "化学物質データベース（MHLW 3,695物質 ＋ 専門解説50物質）",
+      "text": 13791,
+      "images": 0,
+      "mascots": 0,
+      "links": 211,
+      "forms": 2,
+      "unavailable": 0
+    }
+  },
+  {
+    "path": "/accident-news",
+    "live": {
+      "h1": "国内の死亡事故速報",
+      "text": 1403,
+      "images": 0,
+      "mascots": 0,
+      "links": 31,
+      "forms": 0,
+      "unavailable": 0
+    },
+    "app": {
+      "h1": "国内の死亡事故速報",
+      "text": 1553,
+      "images": 0,
+      "mascots": 0,
+      "links": 28,
+      "forms": 0,
+      "unavailable": 0
+    }
+  },
+  {
+    "path": "/laws",
+    "live": {
+      "h1": "労働安全衛生関係法令の改正情報",
+      "text": 341,
+      "images": 1,
+      "mascots": 1,
+      "links": 49,
+      "forms": 3,
+      "unavailable": 0
+    },
+    "app": {
+      "h1": "労働安全衛生関係法令の改正情報",
+      "text": 324,
+      "images": 1,
+      "mascots": 1,
+      "links": 44,
+      "forms": 3,
+      "unavailable": 0
+    }
+  },
+  {
+    "path": "/features",
+    "live": {
+      "h1": "目的と運用状態から機能を選ぶ",
+      "text": 2915,
+      "images": 1,
+      "mascots": 1,
+      "links": 55,
+      "forms": 0,
+      "unavailable": 1
+    },
+    "app": {
+      "h1": "目的と運用状態から機能を選ぶ",
+      "text": 2883,
+      "images": 1,
+      "mascots": 1,
+      "links": 50,
+      "forms": 0,
+      "unavailable": 1
+    }
+  },
+  {
+    "path": "/e-learning",
+    "live": {
+      "h1": "安全衛生Eラーニング",
+      "text": 287,
+      "images": 0,
+      "mascots": 0,
+      "links": 11,
+      "forms": 0,
+      "unavailable": 0
+    },
+    "app": {
+      "h1": "安全衛生Eラーニング",
+      "text": 270,
+      "images": 0,
+      "mascots": 0,
+      "links": 6,
+      "forms": 0,
+      "unavailable": 0
+    }
+  },
+  {
+    "path": "/goods",
+    "live": {
+      "h1": "保護具の選び方",
+      "text": 870,
+      "images": 15,
+      "mascots": 0,
+      "links": 21,
+      "forms": 1,
+      "unavailable": 0
+    },
+    "app": {
+      "h1": "保護具の選び方",
+      "text": 853,
+      "images": 15,
+      "mascots": 0,
+      "links": 16,
+      "forms": 1,
+      "unavailable": 0
+    }
+  }
+]
