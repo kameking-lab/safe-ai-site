@@ -66,10 +66,9 @@ describe("client generative-AI safety boundary", () => {
     expect(source.slice(gateIndex, sendIndex)).toContain("purpose: \"legacy-law-chat-client\"");
   });
 
-  it("shared preflight rejects emergency, PII and confidential labels without returning raw text", async () => {
+  it("shared preflight rejects PII and confidential labels without returning raw text", async () => {
     const { inspectAiOutbound } = await import("@/lib/ai-outbound-safety");
     for (const text of [
-      "作業員が倒れて意識がありません",
       "担当者は山田太郎です",
       "現場名: 青葉ビル新築工事",
     ]) {

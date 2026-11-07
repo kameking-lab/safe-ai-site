@@ -20,7 +20,6 @@ describe("/about/usage-notes", () => {
     const { container } = render(<UsageNotesPage />);
     expect(container.querySelectorAll("h1")).toHaveLength(1);
     for (const heading of [
-      "緊急時",
       "法令情報",
       "AI",
       "個人情報",

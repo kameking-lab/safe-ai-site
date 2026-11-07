@@ -1290,11 +1290,6 @@ export function HomeSafetyCockpitClient({
             <p className="mt-1 text-sm font-semibold text-slate-100">
               暑さ・化学物質・法令を、ここからすぐ確認できます。
             </p>
-            {safetyState === "emergency" ? (
-              <p className="mt-2 inline-flex min-h-8 items-center rounded-lg border border-rose-300 bg-rose-950/70 px-3 text-xs font-black text-white">
-                緊急時は119
-              </p>
-            ) : null}
           </div>
           <MascotGuide
             variant={safetyState === "emergency" ? "emergency" : "heat"}
@@ -1304,16 +1299,7 @@ export function HomeSafetyCockpitClient({
             eager
             title={
               safetyState === "emergency"
-                ? (
-                    <>
-                      <span className="max-[339px]:hidden">
-                        チャットを止めて、119番と救命対応を優先してね。
-                      </span>
-                      <span className="hidden max-[339px]:inline">
-                        119番と救命対応を優先してね。
-                      </span>
-                    </>
-                  )
+                ? "現場の責任者にすぐ知らせてね。"
                 : (
                     <>
                       <span className="max-[339px]:hidden">

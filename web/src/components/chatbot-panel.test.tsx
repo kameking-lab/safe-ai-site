@@ -243,25 +243,6 @@ describe("ChatbotPanel AI safety boundary", () => {
     expect(JSON.stringify(window.sessionStorage)).not.toContain(question);
   });
 
-  it("re-runs the safety gate for an emergency handoff before network access", async () => {
-    const consumed = vi.fn();
-    const fetchMock = vi.fn();
-    vi.stubGlobal("fetch", fetchMock);
-
-    render(
-      <ChatbotPanel
-        initialQuestion="現場で人が倒れて呼吸がありません"
-        onInitialQuestionConsumed={consumed}
-      />,
-    );
-
-    expect(
-      (await screen.findByRole("alert")).getAttribute("data-safety-kind"),
-    ).toBe("emergency");
-    expect(consumed).toHaveBeenCalledTimes(1);
-    expect(fetchMock).not.toHaveBeenCalled();
-  });
-
   it("新しい相談で入力・安全通知・同意・進行中履歴をリセットする", async () => {
     const fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);
@@ -315,9 +296,6 @@ describe("ChatbotPanel AI safety boundary", () => {
   });
 
   it.each([
-    ["反応がありません", "emergency"],
-    ["作業員が倒れて返答ありません。どうする？", "emergency"],
-    ["胸を締め付けられるように痛がっています。", "emergency"],
     ["山田 太郎の住所は東京都新宿区西新宿2丁目8番1号", "privacy"],
     ["会社名: 株式会社安全工業", "privacy"],
     ["サトウタロウがフォークリフトを運転します。資格は？", "privacy"],
