@@ -25,6 +25,11 @@ const uses = [
     { href: "/goods", title: "保護具の選び方", copy: "危険・作業・現場条件から、選定時に確認することを整理。", icon: ShieldCheck },
   ] },
 ] as const;
+// The two things the portal does best, first on the page for web and the iOS app alike.
+const strengths = [
+  { id: "law-chat", href: "/chatbot", title: "安衛法AIチャット", copy: "作業の言葉で質問すると、関連する条文と確認条件を探せます。", action: "質問する", mascot: "/mascot/mascot-chat-talk-v4.webp", width: 640, height: 640 },
+  { id: "chemical-ra", href: "/chemical-ra", title: "化学物質リスクアセスメント", copy: "物質名・CAS番号から法規制・SDS・対策を確認し、RAの準備を進めます。", action: "調べる", mascot: "/mascot/mascot-chemical-lab.webp", width: 240, height: 310 },
+] as const;
 const wrap = "mx-auto max-w-[1280px] px-5 lg:px-10";
 const focus = "focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-[#638332]";
 const quietLink = `inline-flex min-h-11 min-w-11 items-center gap-2 underline underline-offset-4 ${focus}`;
@@ -40,20 +45,15 @@ export function HomeLP({ availability, latestNews }: { availability: AutomationC
       <section aria-labelledby="home-lp-title" className={styles.hero}>
         <div className={styles.heroGrid}>
           <div className={styles.heroCopy}>
+            <nav aria-label="主な機能" data-home-strengths className="mb-8 grid gap-4 md:grid-cols-2">
+              {strengths.map((item, index) => <Link key={item.id} href={item.href} prefetch={false} data-home-strength={item.id} data-primary-action={index === 0 ? "true" : undefined} className="group flex min-h-36 items-center gap-4 rounded-3xl border-2 border-[#c6ad70] bg-[#fffdf5] p-4 text-[#172c25] shadow-lg transition hover:bg-white sm:p-5">
+                <Image src={item.mascot} alt="" width={item.width} height={item.height} sizes="(min-width: 768px) 132px, 104px" priority className="h-26 w-26 shrink-0 object-contain sm:h-33 sm:w-33" />
+                <span className="min-w-0"><strong className="block text-xl font-bold leading-snug sm:text-2xl">{item.title}</strong><span className="mt-1 block text-sm leading-6 text-[#43564a]">{item.copy}</span><span className="mt-2 inline-flex min-h-11 items-center gap-1 font-bold text-[#1f5d3a] underline-offset-4 group-hover:underline">{item.action}<ArrowUpRight size={16} aria-hidden="true" /></span></span>
+              </Link>)}
+            </nav>
             <p className={styles.eyebrow}>現場を支える人のための、安全と業務の道具。</p>
             <h1 id="home-lp-title" className={styles.title}><span>その書類、</span><span>AIに任せて、</span><span>現場に行こう。</span></h1>
             <p className={styles.heroDescription}>法令の根拠を確かめる。化学物質RAの準備を進める。事故報道の出典と確認状態を見る。現場で判断するための情報整理を支えます。</p>
-            <p className={styles.mobileSummary}>法令・化学物質・事故の確認を、ここから。</p>
-            <Link href="/chatbot" prefetch={false} data-primary-action="true" className={styles.mobileEntry}><ChihuahuaButtonContent variant="tools" trailing={<ArrowUpRight size={16} aria-hidden="true" />}>安衛法AIを使う</ChihuahuaButtonContent></Link>
-            <div className={styles.demoPaper} data-information-preview>
-              <div className={styles.demoHeading}><span>まず使う3つの機能</span><span>出典を確認</span></div>
-              <nav aria-label="すぐ使う道具" className={styles.previewLinks}>
-                <Link href="/chatbot" prefetch={false}><Bot size={20} aria-hidden="true" /><span><strong>安衛法AI</strong><small>条件に合う条文候補から公式原文へ</small></span><ArrowUpRight size={16} aria-hidden="true" /></Link>
-                <Link href="/chemical-ra" prefetch={false}><FlaskConical size={20} aria-hidden="true" /><span><strong>化学物質RA準備</strong><small>CAS・SDS・作業条件の不足を確認</small></span><ArrowUpRight size={16} aria-hidden="true" /></Link>
-                <Link href="/accident-news" prefetch={false}><Siren size={20} aria-hidden="true" /><span><strong>労災事故速報</strong><small>報道の出典と原因の確認状態を見る</small></span><ArrowUpRight size={16} aria-hidden="true" /></Link>
-              </nav>
-              <p className={styles.demoFoot}>各ページで出典と確認状態を確かめ、判断に使ってください。</p>
-            </div>
             <div className={styles.actions}>
               <Link href="#tools" className={styles.primary}><ChihuahuaButtonContent variant="tools" trailing={<ArrowUpRight size={16} aria-hidden="true" />}>道具を使う</ChihuahuaButtonContent></Link>
               <Link href="#consult" className={styles.secondary}><ChihuahuaButtonContent variant="consult" trailing={<ArrowUpRight size={16} aria-hidden="true" />}>{availability.accepting ? "自動化を相談する" : "相談の料金を見る"}</ChihuahuaButtonContent></Link>

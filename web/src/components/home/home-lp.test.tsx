@@ -16,9 +16,14 @@ describe("the approved homepage LP", () => {
     expect(container.textContent).toContain("現場に向き合う時間を、もっと。");
     expect(container.textContent).not.toContain("死亡事故で同僚を失いました");
     expect(container.querySelectorAll("[data-lp-use]")).toHaveLength(3);
-    expect(container.querySelector("[data-information-preview]")?.textContent).toContain("出典と確認状態");
-    expect([...container.querySelectorAll<HTMLAnchorElement>('nav[aria-label="すぐ使う道具"] a')].map((a) => a.getAttribute("href"))).toEqual(["/chatbot", "/chemical-ra", "/accident-news"]);
-    expect(container.innerHTML.indexOf('nav aria-label="すぐ使う道具"')).toBeLessThan(container.innerHTML.indexOf('href="#tools"'));
+    // The two strengths lead the page, each with the helmet chihuahua, before the catch copy and tools.
+    const strengths = [...container.querySelectorAll<HTMLAnchorElement>("[data-home-strength]")];
+    expect(strengths.map((a) => a.getAttribute("href"))).toEqual(["/chatbot", "/chemical-ra"]);
+    expect(strengths.map((a) => a.querySelector("strong")?.textContent)).toEqual(["安衛法AIチャット", "化学物質リスクアセスメント"]);
+    expect(strengths.every((a) => a.querySelector("img")?.getAttribute("src")?.includes("mascot"))).toBe(true);
+    expect(container.querySelectorAll('[data-primary-action="true"]')).toHaveLength(1);
+    expect(container.innerHTML.indexOf("data-home-strengths")).toBeLessThan(container.innerHTML.indexOf('id="home-lp-title"'));
+    expect(strengths[1].textContent).not.toMatch(/停止/);
     expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("その書類、AIに任せて、現場に行こう。");
     expect(container.textContent).toContain("初回30分の相談は無料。業務自動化は税込33,000円から。");
     expect(container.querySelector("[data-ky-scene]")).toBeNull();
