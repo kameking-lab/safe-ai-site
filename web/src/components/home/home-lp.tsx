@@ -42,14 +42,14 @@ export function HomeLP({ availability, latestNews }: { availability: AutomationC
     <div data-home-lp className={styles.root}>
       <style data-home-lp-critical>{homeLpCriticalCss}</style>
       <section aria-labelledby="home-lp-title" className={styles.hero}>
+        <nav aria-label="主な機能" data-home-strengths className="relative mx-auto grid max-w-[1280px] gap-4 px-5 pt-6 md:grid-cols-2 sm:px-[clamp(20px,4vw,64px)] lg:pt-12">
+          {strengths.map((item, index) => <Link key={item.id} href={item.href} prefetch={false} data-home-strength={item.id} data-primary-action={index === 0 ? "true" : undefined} className="group flex min-h-36 items-center gap-4 rounded-3xl border-2 border-[#c6ad70] bg-[#fffdf5] p-4 text-[#172c25] shadow-lg transition hover:bg-white sm:p-5">
+            <Image src={item.mascot} alt="" width={item.width} height={item.height} sizes="(min-width: 768px) 132px, 104px" priority className="h-26 w-26 shrink-0 object-contain sm:h-33 sm:w-33" />
+            <span className="min-w-0"><strong className="block text-xl font-bold leading-snug sm:text-2xl">{item.title}</strong><span className="mt-1 block text-sm leading-6 text-[#43564a]">{item.copy}</span><span className="mt-2 inline-flex min-h-11 items-center gap-1 font-bold text-[#1f5d3a] underline-offset-4 group-hover:underline">{item.action}<ArrowUpRight size={16} aria-hidden="true" /></span></span>
+          </Link>)}
+        </nav>
         <div className={styles.heroGrid}>
           <div className={styles.heroCopy}>
-            <nav aria-label="主な機能" data-home-strengths className="mb-8 grid gap-4 md:grid-cols-2">
-              {strengths.map((item, index) => <Link key={item.id} href={item.href} prefetch={false} data-home-strength={item.id} data-primary-action={index === 0 ? "true" : undefined} className="group flex min-h-36 items-center gap-4 rounded-3xl border-2 border-[#c6ad70] bg-[#fffdf5] p-4 text-[#172c25] shadow-lg transition hover:bg-white sm:p-5">
-                <Image src={item.mascot} alt="" width={item.width} height={item.height} sizes="(min-width: 768px) 132px, 104px" priority className="h-26 w-26 shrink-0 object-contain sm:h-33 sm:w-33" />
-                <span className="min-w-0"><strong className="block text-xl font-bold leading-snug sm:text-2xl">{item.title}</strong><span className="mt-1 block text-sm leading-6 text-[#43564a]">{item.copy}</span><span className="mt-2 inline-flex min-h-11 items-center gap-1 font-bold text-[#1f5d3a] underline-offset-4 group-hover:underline">{item.action}<ArrowUpRight size={16} aria-hidden="true" /></span></span>
-              </Link>)}
-            </nav>
             <p className={styles.eyebrow}>現場を支える人のための、安全と業務の道具。</p>
             <h1 id="home-lp-title" className={styles.title}><span>その書類、</span><span>AIに任せて、</span><span>現場に行こう。</span></h1>
             <p className={styles.heroDescription}>法令の根拠を確かめる。化学物質RAの準備を進める。事故報道の出典と確認状態を見る。現場で判断するための情報整理を支えます。</p>
