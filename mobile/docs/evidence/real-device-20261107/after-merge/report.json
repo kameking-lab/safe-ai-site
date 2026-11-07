@@ -42,7 +42,7 @@
         "step": "04-chatbot",
         "url": "/chatbot/",
         "issues": [],
-        "textLen": 241,
+        "textLen": 233,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -54,7 +54,7 @@
         "step": "04a-chatbot-composer",
         "url": "/chatbot/",
         "issues": [],
-        "textLen": 241,
+        "textLen": 233,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -141,7 +141,7 @@
         "step": "08-notifications",
         "url": "/notifications/",
         "issues": [],
-        "textLen": 1012,
+        "textLen": 1023,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -157,7 +157,7 @@
         "step": "10-back",
         "url": "/notifications/",
         "issues": [],
-        "textLen": 1012,
+        "textLen": 1023,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
