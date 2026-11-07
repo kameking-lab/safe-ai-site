@@ -141,32 +141,6 @@ describe("AI outbound route guards", () => {
     expect(prompt).not.toContain(context.reviewedAt);
   });
 
-  it("工程打合せ書の緊急文は縮退候補より先に遮断しproviderへ送らない", async () => {
-    const response = await postMeeting(
-      jsonRequest(
-        "/api/meeting/suggest",
-        {
-          workContent: "作業員が倒れて意識がない",
-          workLocation: kyConditions.workLocation,
-          plannedCount: kyConditions.peopleCount,
-          weather: kyConditions.weather,
-          machines: kyConditions.equipment,
-          changes: kyConditions.changes,
-          workDate: "2026-07-23",
-          aiProviderConsent: true,
-        },
-        "198.51.100.13"
-      )
-    );
-    expect(response.status).toBe(422);
-    await expect(response.json()).resolves.toMatchObject({
-      ok: false,
-      reason: "emergency",
-      requiresHumanReview: true,
-    });
-    expect(modelSpies.generateHazards).not.toHaveBeenCalled();
-  });
-
   it("工程打合せ書の通常入力も根拠未整備時は候補を生成せずproviderへ送らない", async () => {
     const response = await postMeeting(
       jsonRequest(

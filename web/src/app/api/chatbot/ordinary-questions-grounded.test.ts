@@ -116,16 +116,16 @@ describe("ordinary occupational-safety questions are not source gaps", () => {
 
 describe("legitimate refusals still refuse", () => {
   for (const { label, post, sse } of ROUTES) {
-    it(`${label} keeps the emergency stop`, async () => {
+    // Owner decision 2026-11-07: emergency wording is answered like any question, no 110/119 stop.
+    it(`${label} does not intercept emergency wording`, async () => {
       const { response, payload } = await call(
         post,
         sse,
         "同僚が足場から落ちて意識がありません",
       );
       expect(response.status).toBe(200);
-      expect(response.headers.get("X-AI-Used")).toBe("false");
-      expect(payload.safetyKind).toBe("emergency");
-      expect(payload.sources).toEqual([]);
+      expect(payload.safetyKind).not.toBe("emergency");
+      expect(payload.answer).not.toMatch(/110番|119番/);
     });
 
     it(`${label} keeps the privacy stop`, async () => {

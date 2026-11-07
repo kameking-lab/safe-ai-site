@@ -33,10 +33,6 @@ const request=(id=crypto.randomUUID())=>new Request('https://example.test/api/ch
 const answer=()=>Response.json({answer:'公式根拠を確認してください。',source_type:'rag',sources:[{text:'原文',url:'https://laws.e-gov.go.jp/law/mock',asOf:new Date().toISOString()}]});
 beforeEach(()=>{state.operations=[];state.tail=Promise.resolve();state.paid=false;state.signedIn=true;state.budget={committedYen:0,reservedYen:0};state.reservations=[];vi.stubEnv('MOBILE_LEDGER_ENABLED','true');});afterEach(()=>vi.unstubAllEnvs());
 describe('shared daily AI accounting',()=>{
-  it.each(['/api/chatbot','/api/chatbot/stream','/api/mobile/v1/ai'])('returns emergency guidance before membership, reservation or inference on %s',async path=>{
-    const run=vi.fn(async()=>answer());const response=await withUsage(new Request('https://example.test'+path,{method:'POST',headers:{'Content-Type':'application/json',Origin:'https://example.test'},body:JSON.stringify({message:'作業員が倒れて意識がない',privacyConfirmed:false})}),'law_chat',run);
-    expect(response.status).toBe(422);expect(await response.json()).toMatchObject({error:{code:'SAFETY_BLOCKED',reason:'emergency',message:expect.stringContaining('119')}});expect(run).not.toHaveBeenCalled();expect(state.operations).toHaveLength(0);
-  });
   it('distinguishes reserved last slots from daily completed consumption',async()=>{
     for(let i=0;i<3;i++)state.operations.push({id:crypto.randomUUID(),userId:'mock_member',feature:'law_chat',day:jstKeys().day,status:'reserved',createdAt:new Date(),requestHash:'prior'});
     const run=vi.fn(async()=>answer());const response=await withUsage(request(),'law_chat',run);expect(await response.json()).toMatchObject({error:{code:'OPERATION_PENDING'}});expect(run).not.toHaveBeenCalled();

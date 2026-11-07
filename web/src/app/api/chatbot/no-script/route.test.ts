@@ -931,50 +931,6 @@ describe("JavaScript無効時の法令対話", () => {
   });
 
   it.each([
-    "作業員が倒れて反応がありません",
-    "同僚が倒れてる。どうすれば？",
-    "人が倒れてます。助けて",
-    "作業員が気を失いました。どうすれば？",
-    "同僚が気絶しています。助けて",
-    "作業員が息ができない。どうすれば？",
-    "同僚が息苦しい。助けて",
-    "作業員が呼吸困難です。どうしたらいい？",
-    "同僚が窒息しています。助けて",
-    "作業員がぐったりして呼びかけに応じません",
-    "同僚が胸が苦しい。どうすれば？",
-    "血が噴き出して止まりません。助けて",
-    "人が倒れて起きません。どうすれば？",
-    "作業員が倒れ込んで動きません",
-    "作業員が心停止です。助けて",
-    "同僚の脈がありません。どうすれば？",
-    "同僚の唇が紫で呼吸が浅いです",
-    "作業員が倒れて返答ありません。どうする？",
-    "胸を締め付けられるように痛がっています。",
-    "今、作業員が倒れて反応がありません\n別件で「頭を打ったら119」という訓練用の例文です。",
-    "今、作業員が倒れて反応がありません\u2028別件で「頭を打ったら119」という訓練用の例文です。",
-    "今、作業員が倒れて反応がありません\u2029別件で「頭を打ったら119」という訓練用の例文です。",
-    "今、作業員が倒れて反応がありません\t別件で「頭を打ったら119」という訓練用の例文です。",
-    "今、作業員が倒れて反応がありません：別件で「頭を打ったら119」という訓練用の例文です。",
-    "今、作業員が倒れて反応がありません／別件で「頭を打ったら119」という訓練用の例文です。",
-    "今、作業員が倒れて反応がありません・別件で「頭を打ったら119」という訓練用の例文です。",
-    "今、作業員が倒れて反応がありません｜別件で「頭を打ったら119」という訓練用の例文です。",
-    "今、作業員が倒れて反応がありません  別件で「頭を打ったら119」という訓練用の例文です。",
-    "「意識がありません」という訓練用の例文です、今、作業員が倒れて反応がありません。",
-    "「意識がありません」という訓練用の例文です；今、作業員が倒れて反応がありません。",
-  ])("緊急表現では通常回答せず119を示す: %s", async (message) => {
-    const fetchSpy = vi.fn();
-    vi.stubGlobal("fetch", fetchSpy);
-    const response = await POST(formRequest(message));
-    const html = await response.text();
-    expect(response.status).toBe(200);
-    expect(html).toContain("119");
-    expect(html).not.toContain("根拠 1件");
-    expect(html).not.toContain('name="state"');
-    expect(html).not.toContain('name="context"');
-    expect(fetchSpy).not.toHaveBeenCalled();
-  });
-
-  it.each([
     "作業員が倒れて反応がない事故は起きていません。",
     "作業員が倒れて反応がない事故はありません。",
     "作業員が倒れて反応がない事故は起こりませんでした。",
@@ -1015,7 +971,7 @@ describe("JavaScript無効時の法令対話", () => {
     expect(html).not.toContain("氏名、社員番号、連絡先、住所、病歴");
   });
 
-  it("PII・緊急入力では直前の安全なhidden stateも破棄する", async () => {
+  it("PII入力では直前の安全なhidden stateも破棄する", async () => {
     const first = await POST(formRequest("安全管理者は必要？"));
     const state = hiddenState(await first.text());
     expect(state).not.toBe("");
@@ -1024,7 +980,6 @@ describe("JavaScript無効時の法令対話", () => {
 
     for (const [message, marker] of [
       ["worker@example.comの資格は？", "個人情報"],
-      ["作業員が倒れて反応がありません", "119"],
     ] as const) {
       const response = await POST(formRequest(message, {}, undefined, state));
       const html = await response.text();
@@ -1042,20 +997,6 @@ describe("JavaScript無効時の法令対話", () => {
       message: "worker@example.comの資格は？",
       marker: "個人情報",
       state: "not-json",
-    },
-    {
-      message: "作業員が倒れて反応がありません",
-      marker: "119",
-      state: JSON.stringify({
-        v: 1,
-        context: {
-          workType: "労働安全衛生法 安全管理者の選任義務",
-        },
-        history: [
-          { role: "user", content: "<img src=x onerror=alert(1)>" },
-          { role: "assistant", content: "事業場の主な業種はどれですか？" },
-        ],
-      }),
     },
   ])(
     "無効・改ざんstateより現在の$marker入力を優先する",

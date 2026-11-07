@@ -744,33 +744,6 @@ describe("answer-first mandatory conversation cases", () => {
   );
 
   it.each(ROUTES)(
-    "Case 11: 緊急表現では119案内だけを返し通常法令回答をしない ($label)",
-    async (route) => {
-      vi.stubEnv("GEMINI_API_KEY", "must-not-be-used");
-      vi.stubEnv("GEMINI_EXTERNAL_AI_ENABLED", "true");
-      const fetchSpy = vi.fn();
-      vi.stubGlobal("fetch", fetchSpy);
-
-      const { response, payload } = await callRoute(
-        route,
-        "同僚が倒れてる。どうすれば？",
-      );
-
-      expect(response.status).toBe(200);
-      expectStructuredContract(payload);
-      expect(payload.safetyKind).toBe("emergency");
-      expect(payload.source_type).toBe("safety");
-      expect(payload.answer).toContain("119");
-      expect(payload.answer).not.toMatch(
-        /労働安全衛生(?:法|規則)|安衛(?:法|則)|回答基準日/,
-      );
-      expect(payload.sources).toEqual([]);
-      expect(payload.citations).toEqual([]);
-      expect(fetchSpy).not.toHaveBeenCalled();
-    },
-  );
-
-  it.each(ROUTES)(
     "Case 12: PIIを外部送信せず匿名化案内と空の根拠を返す ($label)",
     async (route) => {
       vi.stubEnv("GEMINI_API_KEY", "must-not-be-used");

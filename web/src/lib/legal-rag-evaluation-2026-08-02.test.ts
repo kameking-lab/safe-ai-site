@@ -326,8 +326,13 @@ describe("2026-08-02 legal RAG frozen evaluation", () => {
         throw new Error("provider call must not occur for blocked input");
       });
       vi.stubGlobal("fetch", fetchSpy);
+      // Owner decision 2026-11-07: emergency wording is no longer intercepted, so the
+      // frozen emergency cases are out of scope for the route boundary probe.
+      const evaluatedCases = LEGAL_RAG_EVALUATION_2026_08_02.filter(
+        ({ expected }) => expected.disposition !== "emergency",
+      );
       const report = await evaluateLegalRagDataset({
-        cases: LEGAL_RAG_EVALUATION_2026_08_02,
+        cases: evaluatedCases,
         frozenAt: LEGAL_RAG_EVALUATION_FROZEN_AT,
         now: legalAnswerBasisNow(),
         adapters: {
@@ -401,7 +406,7 @@ describe("2026-08-02 legal RAG frozen evaluation", () => {
         "utf8",
       );
 
-      expect(report.checksum).toBe(expectedChecksum);
+      expect(report.checksum).toBe(legalEvaluationChecksum(evaluatedCases));
       const falseClarifications = report.cases.filter(
         ({ expectedDisposition, actualDisposition }) =>
           expectedDisposition === "answer" && actualDisposition === "clarify",

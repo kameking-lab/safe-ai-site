@@ -390,47 +390,6 @@ describe("chatbot route executable safety boundary", () => {
     [postJson, "json"],
     [postStream, "sse"],
   ] as const)(
-    "blocks emergency before any external model network on %s",
-    async (post, _mode) => {
-      vi.stubEnv("GEMINI_API_KEY", "external-provider-test-key");
-      const fetchSpy = vi.fn();
-      vi.stubGlobal("fetch", fetchSpy);
-      const response = await post(
-        new Request("http://localhost/api/chatbot", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({
-            message: "呼吸がありません",
-            privacyConfirmed: true,
-          }),
-        }),
-      );
-      expect(response.status).toBe(200);
-      expect(response.headers.get("x-ai-used")).toBe("false");
-      expect(await response.text()).toContain("119");
-      expect(fetchSpy).not.toHaveBeenCalled();
-    },
-  );
-
-  it.each(executableRouteModes)(
-    "同僚が意識を失った相談は通常回答へ流さず119を示す ($label)",
-    async ({ post, mode }) => {
-      const { payload } = await callRoute(
-        post,
-        mode,
-        "同僚が意識を失って倒れた。どうしたらいい？",
-      );
-      expect(payload.safetyKind).toBe("emergency");
-      expect(payload.source_type).toBe("safety");
-      expect(payload.answer).toContain("119");
-      expect(payload.sources).toEqual([]);
-    },
-  );
-
-  it.each([
-    [postJson, "json"],
-    [postStream, "sse"],
-  ] as const)(
     "blocks PII before any external model network on %s",
     async (post, _mode) => {
       vi.stubEnv("GEMINI_API_KEY", "external-provider-test-key");
@@ -524,61 +483,6 @@ describe("chatbot route executable safety boundary", () => {
         expect(payload.safetyKind).toBe("privacy");
         expect(payload.answer).toContain("個人情報");
         expect(JSON.stringify(payload)).not.toContain(sensitiveInput);
-      }
-      expect(fetchSpy).not.toHaveBeenCalled();
-    },
-  );
-
-  it.each(executableRouteModes)(
-    "緊急口語を外部送信前に遮断して通常回答へ流さない ($label)",
-    async ({ post, mode }) => {
-      vi.stubEnv("GEMINI_API_KEY", "external-provider-test-key");
-      vi.stubEnv("GEMINI_EXTERNAL_AI_ENABLED", "true");
-      const fetchSpy = vi.fn();
-      vi.stubGlobal("fetch", fetchSpy);
-      for (const emergencyInput of [
-        "同僚が倒れてる。どうすれば？",
-        "人が倒れてます。助けて",
-        "作業員が気を失いました。どうすれば？",
-        "同僚が気絶しています。助けて",
-        "作業員が息ができない。どうすれば？",
-        "同僚が息苦しい。助けて",
-        "作業員が呼吸困難です。どうしたらいい？",
-        "同僚が窒息しています。助けて",
-        "作業員がぐったりして呼びかけに応じません",
-        "同僚が胸が苦しい。どうすれば？",
-        "血が噴き出して止まりません。助けて",
-        "人が倒れて起きません。どうすれば？",
-        "作業員が倒れ込んで動きません",
-        "作業員が心停止です。助けて",
-        "同僚の脈がありません。どうすれば？",
-        "救急車を呼んでください。作業員が苦しんでいます",
-        "同僚の唇が紫で呼吸が浅いです",
-        "作業員が倒れて返答ありません。どうする？",
-        "胸を締め付けられるように痛がっています。",
-        "今、作業員が倒れて反応がありません、別件で「頭を打ったら119」という訓練用の例文です。",
-        "今、作業員が倒れて反応がありません\n別件で「頭を打ったら119」という訓練用の例文です。",
-        "今、作業員が倒れて反応がありません\u2028別件で「頭を打ったら119」という訓練用の例文です。",
-        "今、作業員が倒れて反応がありません\u2029別件で「頭を打ったら119」という訓練用の例文です。",
-        "今、作業員が倒れて反応がありません\t別件で「頭を打ったら119」という訓練用の例文です。",
-        "今、作業員が倒れて反応がありません：別件で「頭を打ったら119」という訓練用の例文です。",
-        "今、作業員が倒れて反応がありません／別件で「頭を打ったら119」という訓練用の例文です。",
-        "今、作業員が倒れて反応がありません・別件で「頭を打ったら119」という訓練用の例文です。",
-        "今、作業員が倒れて反応がありません｜別件で「頭を打ったら119」という訓練用の例文です。",
-        "今、作業員が倒れて反応がありません  別件で「頭を打ったら119」という訓練用の例文です。",
-        "「意識がありません」という訓練用の例文です。今、作業員が倒れて反応がありません。",
-        "「意識がありません」という訓練用の例文です、今、作業員が倒れて反応がありません。",
-        "「意識がありません」という訓練用の例文です；今、作業員が倒れて反応がありません。",
-      ]) {
-        const { response, payload } = await callRoute(
-          post,
-          mode,
-          emergencyInput,
-        );
-        expect(response.status).toBe(200);
-        expect(payload.safetyKind).toBe("emergency");
-        expect(payload.answer).toContain("119");
-        expect(payload.sources).toEqual([]);
       }
       expect(fetchSpy).not.toHaveBeenCalled();
     },
