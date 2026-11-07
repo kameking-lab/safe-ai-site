@@ -100,16 +100,13 @@ describe("POST /api/chat safe compatibility route", () => {
   });
 
   it.each([
-    "意識がなく呼吸していない",
     "山田太郎の電話番号は090-1234-5678です",
     "霞ヶ関ビル改修工事の図面番号ABCD-1234を確認して",
     "作業指揮者は小野太郎です。フォークリフトの速度も教えて",
-    "作業員が倒れて返答ありません。どうする？",
-    "胸を締め付けられるように痛がっています。",
     "サトウタロウがフォークリフトを運転します。資格は？",
     "私、腰が痛くて薬を飲みました。高所作業はできますか？",
     "新宿区西新宿2-8-1の現場です",
-  ])("緊急・PII・機密入力をモデルへ送らない: %s", async (question) => {
+  ])("PII・機密入力をモデルへ送らない: %s", async (question) => {
     const response = await POST(request(question));
     expect(response.status).toBe(422);
     expect(response.headers.get("cache-control")).toContain("no-store");

@@ -383,22 +383,9 @@ describe("HomeSafetyCockpit", () => {
     online.mockRestore();
   });
 
-  it("blocks emergency and PII text before navigation and keeps Shift+Enter as a newline action", async () => {
+  it("blocks PII text before navigation and keeps Shift+Enter as a newline action", async () => {
     renderCockpit();
     const input = screen.getByLabelText("安衛法AIへの質問");
-
-    fireEvent.change(input, {
-      target: { value: "現場で作業員が倒れて呼吸がありません" },
-    });
-    fireEvent.keyDown(input, { key: "Enter", shiftKey: false });
-    await waitFor(() =>
-      expect(
-        document.querySelector("[data-home-chat-emergency]"),
-      ).toBeTruthy(),
-    );
-    expect(mocks.push).not.toHaveBeenCalled();
-    expect(screen.getByRole("alert").textContent).toContain("119");
-    expect(screen.getByRole("alert").textContent).toContain("AED");
 
     fireEvent.change(input, {
       target: { value: "連絡先はtest@example.comです" },

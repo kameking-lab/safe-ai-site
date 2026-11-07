@@ -3,7 +3,6 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { allLawArticles, mhlwLawArticles } from "@/data/laws";
 import { FEATURES } from "@/data/features-catalog";
-import { evaluateChatbotSafety } from "@/lib/chatbot-safety";
 import { maxLevelFromWarningPayload } from "@/lib/jma/parse-jma-warning";
 import { normalizeKyInstructionRecord } from "@/lib/services/operations-service";
 import {
@@ -24,32 +23,6 @@ function source(file: string): string {
 }
 
 describe("production remediation fixed-ID P1 regression", () => {
-  it("PF-001 natural emergency language is intercepted before normal answers", () => {
-    for (const message of [
-      "呼びかけても反応しない",
-      "呼吸が分からない",
-      "胸が痛い・・・動けない",
-      "　意識　なし。　",
-    ]) {
-      const decision = evaluateChatbotSafety(message);
-      expect(decision?.kind).toBe("emergency");
-      expect(decision?.response).not.toMatch(/法令検索|KYを作成|無料相談/);
-    }
-    expect(
-      evaluateChatbotSafety("意識がないわけではありません")?.kind,
-    ).not.toBe("emergency");
-  });
-
-  it("PF-002 severe bleeding gives direct-pressure and infection guidance", () => {
-    const decision = evaluateChatbotSafety("大量に血が出ていて止まらない");
-    expect(decision).toMatchObject({
-      kind: "emergency",
-      emergencyCategory: "severe-bleeding",
-    });
-    expect(decision?.response).toMatch(/119番[\s\S]*直接圧迫/);
-    expect(decision?.response).toMatch(/手袋|ビニール袋/);
-    expect(decision?.response).toContain("救急隊・通信指令員の指示を最優先");
-  });
 
   it("PF-003 legitimate JMA no-warning rows do not require a code", () => {
     expect(

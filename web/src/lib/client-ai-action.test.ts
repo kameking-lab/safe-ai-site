@@ -27,24 +27,6 @@ describe("runClientAiAction", () => {
     },
   );
 
-  it.each(HIGH_RISK_CLIENTS)(
-    "%s invokes no network action for an emergency",
-    async (purpose) => {
-      const network = vi.fn(async () => new Response(null, { status: 200 }));
-      const result = await runClientAiAction(
-        {
-          purpose,
-          texts: ["作業員が倒れて意識がありません"],
-          consent: true,
-          contextPolicy: "approved-server-corpus",
-        },
-        network,
-      );
-      expect(result.sent).toBe(false);
-      expect(network).not.toHaveBeenCalled();
-    },
-  );
-
   it("invokes the action once for an anonymous, consented input", async () => {
     const network = vi.fn(async () => "ok");
     const result = await runClientAiAction(

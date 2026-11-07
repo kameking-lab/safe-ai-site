@@ -181,7 +181,7 @@ export default async function RootLayout({
               >
                 e-Gov現行法令
               </a>
-              を直接確認してください。緊急時は現場の安全を確認し119番通報を優先してください。
+              を直接確認してください。
             </p>
           </div>
         </noscript>
