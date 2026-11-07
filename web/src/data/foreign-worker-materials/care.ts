@@ -189,16 +189,6 @@ const chemical: SafetyMaterial = {
   ],
   emergency: [
     {
-      id: "swallow",
-      text: {
-        "ja-easy": "口(くち) に 入(はい)ったら 水(みず) で うがい して 119",
-        en: "If swallowed, rinse mouth with water and call 119.",
-        vi: "Nếu nuốt phải, súc miệng và gọi 119.",
-        zh: "误食后请用水漱口并拨打119。",
-        id: "Bila tertelan, kumur air dan telepon 119.",
-      },
-    },
-    {
       id: "skin-eye",
       text: {
         "ja-easy": "肌(はだ) や 目(め) に かかったら 15 分(ふん) 水(みず) で 流(なが)す",
@@ -294,16 +284,6 @@ const heat: SafetyMaterial = {
     },
   ],
   emergency: [
-    {
-      id: "cool-call",
-      text: {
-        "ja-easy": "ぐったり して いたら 体(からだ) を 冷(ひ)やして 119",
-        en: "If a resident is limp or confused, cool the body and call 119.",
-        vi: "Nếu người được chăm sóc bơ phờ hoặc lú lẫn, làm mát và gọi 119.",
-        zh: "出现虚脱或意识模糊时降温并拨打119。",
-        id: "Jika lansia lemas atau bingung, dinginkan dan telepon 119.",
-      },
-    },
     {
       id: "report-nurse",
       text: {

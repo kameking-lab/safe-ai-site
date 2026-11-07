@@ -149,9 +149,9 @@ export const HEAT_LEARNING_SOURCES = [
     sourceStatus: "url-confirmed-content-review-pending",
     reviewStatus: "editorial-review-pending",
     scope:
-      "反応確認、119番通報とAEDの手配、呼吸確認、胸骨圧迫、AEDの基本操作に関する消防庁の一般市民向け学習資料",
+      "反応確認、救急要請とAEDの手配、呼吸確認、胸骨圧迫、AEDの基本操作に関する消防庁の一般市民向け学習資料",
     limitation:
-      "熱中症の診断・治療を示す資料ではありません。反応や呼吸に異常がある場合の一次救命処置は、119番の通信指令員、AEDの音声案内、事業場の緊急手順に従います。",
+      "熱中症の診断・治療を示す資料ではありません。反応や呼吸に異常がある場合の一次救命処置は、救急隊の指示、AEDの音声案内、事業場の緊急手順に従います。",
     supersedes: null,
   },
 ] as const satisfies readonly HeatLearningSource[];

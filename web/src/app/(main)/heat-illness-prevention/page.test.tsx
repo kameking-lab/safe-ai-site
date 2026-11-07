@@ -132,7 +132,7 @@ describe("HeatIllnessPreventionPage", () => {
         .getAttribute("href"),
     ).toContain("mhlw.go.jp");
     expect(document.body.textContent).toContain(
-      "反応・意識に異常がある、または判断できない場合は119",
+      "反応・意識に異常がある、または判断できない場合はすぐ救急を要請",
     );
   });
 });

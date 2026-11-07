@@ -4,6 +4,7 @@ import { getAutomationConsultAvailability } from "@/lib/automation-consult/avail
 import { AlertTriangle, CheckCircle2, Clock3, Database, ShieldCheck } from "lucide-react";
 import { PageJsonLd } from "@/components/page-json-ld";
 import { getPublicSourceRegistry } from "@/data/source-registry";
+import { withoutEmergencyNumberLabels } from "@/lib/accident-news/public-record-display";
 import { SOURCE_REGISTRY_STATUS_LABELS } from "@/lib/evidence/types";
 import currentRevisionVerification from "@/data/laws/current-revision-verification.json";
 
@@ -266,7 +267,7 @@ export default function QualityPage() {
                       </span>
                     </td>
                     <td className="px-3 py-3">
-                      <span className="block font-semibold">{source.appliesTo.join("、")}</span>
+                      <span className="block font-semibold">{withoutEmergencyNumberLabels(source.appliesTo).join("、")}</span>
                       <span className="mt-1 block text-xs leading-5 text-slate-600">{source.note}</span>
                     </td>
                   </tr>

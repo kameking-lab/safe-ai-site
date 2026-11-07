@@ -85,7 +85,7 @@ describe("HeatIllnessElearningPage", () => {
     ).toBeGreaterThan(0);
   });
 
-  it("誤った救急分岐を要訂正として表示し、119と無理な飲水禁止へ戻す", () => {
+  it("誤った救急分岐を要訂正として表示し、救急要請と無理な飲水禁止へ戻す", () => {
     render(<HeatIllnessElearningPage />);
 
     const emergencyQuestion = HEAT_ILLNESS_KNOWLEDGE_CHECK.find(

@@ -92,16 +92,6 @@ const construction_fall: SafetyMaterial = {
   ],
   emergency: [
     {
-      id: "call-119",
-      text: {
-        "ja-easy": "ケガ を したら 119 に 電話(でんわ) する",
-        en: "Call 119 (fire/ambulance) if anyone is injured.",
-        vi: "Gọi 119 (cứu thương) khi có người bị thương.",
-        zh: "有人受伤立即拨打119（消防/救护）。",
-        id: "Telepon 119 (pemadam/ambulans) jika ada yang terluka.",
-      },
-    },
-    {
       id: "report-supervisor",
       text: {
         "ja-easy": "班長(はんちょう) と 会社(かいしゃ) に すぐ 知(し)らせる",
@@ -312,16 +302,6 @@ const construction_heat: SafetyMaterial = {
         vi: "Đưa nạn nhân vào nơi mát và làm mát cơ thể bằng nước hoặc đá.",
         zh: "立即移至阴凉处，用水或冰袋为身体降温。",
         id: "Pindahkan ke tempat sejuk, dinginkan tubuh dengan air atau es.",
-      },
-    },
-    {
-      id: "call-ambulance",
-      text: {
-        "ja-easy": "意識(いしき) が おかしい 時(とき) は すぐ 119",
-        en: "Call 119 immediately if the person is confused, unconscious or convulsing.",
-        vi: "Gọi 119 ngay nếu nạn nhân lú lẫn, bất tỉnh hoặc co giật.",
-        zh: "若出现意识模糊、昏迷或抽搐，立即拨打119。",
-        id: "Telepon 119 segera bila korban bingung, pingsan, atau kejang.",
       },
     },
   ],

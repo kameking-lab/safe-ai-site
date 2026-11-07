@@ -441,7 +441,7 @@ export const elearningThemesCatalog: LearningTheme[] = [
           "首・わきの下・足首を冷やすことはしてはいけない",
         ],
         correctIndex: 1,
-        explanation: "熱中症の応急処置はまず涼しい場所への移動と冷却が最優先です。意識がない場合は直ちに119番を要請します。",
+        explanation: "熱中症の応急処置はまず涼しい場所への移動と冷却が最優先です。意識がない場合は直ちに救急を要請します。",
       },
       {
         id: "el-heat-q5",

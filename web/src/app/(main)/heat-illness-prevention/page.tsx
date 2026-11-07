@@ -167,7 +167,7 @@ export default function HeatIllnessPreventionPage() {
           緊急時
         </h2>
         <p className="mt-3 border-l-4 border-red-700 pl-4 font-bold leading-7 text-slate-950">
-          反応・意識に異常がある、または判断できない場合は119。一人にせず冷却。
+          反応・意識に異常がある、または判断できない場合はすぐ救急を要請。一人にせず冷却。
         </p>
         <a
           href={HEAT_PRIMARY_LINKS.emergency}

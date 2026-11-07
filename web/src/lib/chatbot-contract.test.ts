@@ -177,8 +177,8 @@ describe("answer-first chatbot response contract", () => {
     const response = finalizeChatbotResponse({
       ...baseDraft,
       source_type: "safety",
-      answer: "緊急対応を優先し、直ちに119番へ通報してください。",
-      substantiveAnswer: "緊急対応を優先し、直ちに119番へ通報してください。",
+      answer: "緊急対応を優先し、直ちに救急を要請してください。",
+      substantiveAnswer: "緊急対応を優先し、直ちに救急を要請してください。",
       assumptions: [],
       conditions: [],
       citations: [],

@@ -92,16 +92,6 @@ const fall: SafetyMaterial = {
         id: "Ke klinik ortopedi bila lutut atau pinggul terbentur.",
       },
     },
-    {
-      id: "head-119",
-      text: {
-        "ja-easy": "頭(あたま) を 打(う)ったら すぐ 119",
-        en: "Call 119 immediately if the head was struck.",
-        vi: "Gọi 119 ngay nếu va đập đầu.",
-        zh: "头部撞击立即拨打119。",
-        id: "Telepon 119 segera bila kepala terbentur.",
-      },
-    },
   ],
   source: "厚生労働省「飲食店業における労働災害防止対策」",
 };
@@ -192,10 +182,10 @@ const chemical: SafetyMaterial = {
       id: "gas-evacuate",
       text: {
         "ja-easy": "ガス が 出(で)たら すぐ 外(そと) へ",
-        en: "If toxic gas is released, evacuate everyone outside and call 119.",
-        vi: "Nếu có khí độc, sơ tán ngay và gọi 119.",
-        zh: "产生毒气立即疏散人员并拨打119。",
-        id: "Jika gas beracun keluar, evakuasi semua dan telepon 119.",
+        en: "If toxic gas is released, evacuate everyone outside.",
+        vi: "Nếu có khí độc, sơ tán ngay.",
+        zh: "产生毒气立即疏散人员。",
+        id: "Jika gas beracun keluar, evakuasi semua.",
       },
     },
     {
@@ -302,16 +292,6 @@ const heat: SafetyMaterial = {
         vi: "Đưa người mệt vào nơi mát và làm mát cơ thể.",
         zh: "不适员工立即移至阴凉处并降温。",
         id: "Pindahkan pekerja yang lemas ke area sejuk dan dinginkan tubuh.",
-      },
-    },
-    {
-      id: "burn-119",
-      text: {
-        "ja-easy": "意識(いしき) が ない 時(とき) は 119",
-        en: "Call 119 if the worker loses consciousness.",
-        vi: "Gọi 119 nếu bất tỉnh.",
-        zh: "失去意识立即拨打119。",
-        id: "Telepon 119 jika pingsan.",
       },
     },
   ],
