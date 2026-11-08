@@ -16,6 +16,7 @@ import {
   handleBillingRisk,
 } from "@/lib/stripe-webhook-handlers";
 import { sharedRateLimitGuard } from "@/lib/security/shared-state";
+import { isForeignStripeEvent } from "@/lib/stripe-event-scope";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -83,6 +84,16 @@ export async function POST(req: Request) {
   } catch {
     // 冪等性を確認できない状態で副作用を実行しない。
     console.error("[stripe/webhook] idempotency check unavailable");
+    return json({ error: "temporarily unavailable" }, 503);
+  }
+
+  // 共用アカウントの他サービス（過去問AI）のイベントは、記録も変更もせず受け流す。
+  try {
+    if (await isForeignStripeEvent(prisma, event)) {
+      return json({ received: true, ignored: "not_anzen" });
+    }
+  } catch {
+    console.error("[stripe/webhook] scope check unavailable");
     return json({ error: "temporarily unavailable" }, 503);
   }
 

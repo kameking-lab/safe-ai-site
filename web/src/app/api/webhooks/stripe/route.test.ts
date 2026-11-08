@@ -17,6 +17,8 @@ const mocks = vi.hoisted(() => {
     deleted: vi.fn(),
     failed: vi.fn(),
     succeeded: vi.fn(),
+    subscriptionFind: vi.fn(),
+    userFind: vi.fn(),
   };
 });
 
@@ -29,6 +31,8 @@ vi.mock("stripe", () => ({
 vi.mock("@/lib/prisma", () => ({
   prisma: {
     stripeEvent: { findUnique: mocks.findUnique },
+    subscription: { findUnique: mocks.subscriptionFind },
+    user: { findUnique: mocks.userFind },
     $transaction: mocks.transaction,
   },
 }));
@@ -62,6 +66,8 @@ describe("Stripe webhook safety", () => {
     mocks.findUnique.mockResolvedValue(null);
     mocks.createEvent.mockResolvedValue({});
     mocks.transaction.mockImplementation(async (callback) => callback(mocks.tx));
+    mocks.subscriptionFind.mockResolvedValue(null);
+    mocks.userFind.mockResolvedValue(null);
   });
 
   afterEach(() => {
@@ -114,6 +120,35 @@ describe("Stripe webhook safety", () => {
     const response = await POST(request());
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toEqual({ received: true, idempotent: true });
+  });
+
+  it("共用アカウントの過去問AIのイベントは何も変更せず200で受け流す", async () => {
+    for (const [type, object] of [
+      ["checkout.session.completed", { id: "cs_kakomon", mode: "subscription", customer: "cus_kakomon", subscription: "sub_kakomon", metadata: { userId: "kakomon-user" } }],
+      ["customer.subscription.updated", { id: "sub_kakomon", customer: "cus_kakomon", metadata: {} }],
+      ["invoice.payment_failed", { id: "in_kakomon", customer: "cus_kakomon" }],
+      ["charge.refunded", { id: "ch_kakomon", customer: "cus_kakomon" }],
+    ] as const) {
+      mocks.constructEvent.mockReturnValue({ id: `evt_${type}`, type, data: { object } });
+      const response = await POST(request());
+      expect(response.status).toBe(200);
+      await expect(response.json()).resolves.toEqual({ received: true, ignored: "not_anzen" });
+    }
+    expect(mocks.transaction).not.toHaveBeenCalled();
+    expect(mocks.checkout).not.toHaveBeenCalled();
+    expect(mocks.createEvent).not.toHaveBeenCalled();
+  });
+
+  it("安全AIの会員の顧客・会員IDに当たるイベントは従来どおり処理する（所有者の食い違いは失敗のまま）", async () => {
+    const object = { id: "cs_anzen", mode: "subscription", customer: "cus_anzen", subscription: "sub_anzen", metadata: { userId: "anzen-member" } };
+    mocks.constructEvent.mockReturnValue({ id: "evt_anzen", type: "checkout.session.completed", data: { object } });
+    mocks.subscriptionFind.mockResolvedValueOnce({ userId: "anzen-member" });
+    expect((await POST(request())).status).toBe(200);
+    expect(mocks.checkout).toHaveBeenCalledWith(mocks.tx, object);
+    // 会員IDは安全AIのものだが顧客の対応が無い → 受け流さず、ハンドラの所有者確認に任せる
+    mocks.userFind.mockResolvedValueOnce({ id: "anzen-member" });
+    mocks.checkout.mockRejectedValueOnce(new Error("Stripe checkout ownership mismatch"));
+    expect((await POST(request())).status).toBe(503);
   });
 
   it("別制約のunique競合をイベント処理済みと誤認しない", async () => {
