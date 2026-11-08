@@ -682,7 +682,9 @@ describe("ChatbotPanel conversation UI", () => {
     const nextBody = JSON.parse(
       String(fetchMock.mock.calls[1]?.[1]?.body ?? "{}"),
     ) as Record<string, unknown>;
-    expect(nextBody).not.toHaveProperty("history");
+    // 2026-11-09: 追加質問は同じチャットの直前のやり取りを送り、話題に沿って答えさせる。
+    expect(Array.isArray(nextBody.history)).toBe(true);
+    expect((nextBody.history as Array<{ role: string }>).some((turn) => turn.role === "user")).toBe(true);
     expect(nextBody.context).toEqual({
       topicDomain: "electrical",
       workAction: "start-of-work-inspection",
@@ -775,7 +777,7 @@ describe("ChatbotPanel conversation UI", () => {
     expect(composer?.className).toContain("bottom-0");
   });
 
-  it("電気作業のfollow-upは生履歴を送らず構造化contextだけを引き継ぐ", async () => {
+  it("電気作業のfollow-upは直前のやり取りと構造化contextを引き継ぐ", async () => {
     const firstAnswer =
       "結論\n電気作業の資格・教育は作業内容で変わります。\n\n条件\n・配線工事\n・充電部付近の作業\n・設備操作\n\n次の質問\n実際の作業はどれに近いですか？";
     const secondAnswer =
@@ -854,13 +856,13 @@ describe("ChatbotPanel conversation UI", () => {
       context?: Record<string, unknown>;
     };
     expect(body.message).toBe("作業主任者");
-    expect(body).not.toHaveProperty("history");
+    expect(Array.isArray(body.history)).toBe(true);
     expect(body.context).toEqual({
       topicDomain: "electrical",
       workAction: "unknown",
       equipment: "電気設備",
     });
-    expect(JSON.stringify(body)).not.toContain(firstAnswer);
+    expect((body.history as Array<{ content: string }>).some((turn) => turn.content.includes(firstAnswer.slice(0, 20)))).toBe(true);
     expect(screen.queryByText("酸欠")).toBeNull();
     expect(screen.queryByText("有機溶剤")).toBeNull();
     expect(screen.queryByText("石綿")).toBeNull();

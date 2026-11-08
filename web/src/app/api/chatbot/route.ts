@@ -3,7 +3,7 @@ import { withUsage } from "@/lib/mobile/usage";
 import { NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
 import { GEMINI_FAST_THINKING_CONFIG, GEMINI_FLASH_MODEL } from "@/lib/gemini-model";
-import { externalGenerativeAiAllowed } from "@/lib/server/deployment-safety";
+import { legalChatAiAllowed, buildConversationBlock, noEvidenceAdviceAnswer, readGenerationMeta, logLegalChatGeneration } from "@/lib/legal-chat-ai";
 import {
   searchRelevantArticlesWithScore,
   buildContextFromArticles,
@@ -364,7 +364,7 @@ async function handlePost(request: Request) {
     }
   }
 
-  const apiKey = externalGenerativeAiAllowed()
+  const apiKey = legalChatAiAllowed()
     ? process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY
     : null;
   if (
@@ -599,7 +599,8 @@ async function handlePost(request: Request) {
     return NextResponse.json<ChatbotResponse>(
       finalizeLegalResponse({
         requiresHumanReview: true,
-        answer: ensureLegalAnswerAsOf(noHitAnswer, legalAnswerNow),
+        // 根拠が見つからない質問にも一般的な助言を返し、根拠未確認と1行添える。
+        answer: ensureLegalAnswerAsOf(noEvidenceAdviceAnswer(noHitAnswer), legalAnswerNow),
         sources: noHitSources,
         source_type: relatedForNoHit.length > 0 ? "rag" : "safety",
         confidence: "low",
@@ -647,6 +648,7 @@ async function handlePost(request: Request) {
   // Layer 2 の警告は answer 本文へ追記せず scopeWarnings（UIの警告枠）で返す
   // （ごちゃごちゃブロック根絶 2026-07-11: 本文=回答、警告・出典=構造化フィールドに分離）
   let citationWarningNote = "";
+  let generationMeta = { finishReason: null as string | null, promptTokens: null as number | null, outputTokens: null as number | null };
   const safeCitationFallback = () =>
     buildServiceFirstLegalAnswer({
       query: retrievalQuery,
@@ -663,14 +665,13 @@ async function handlePost(request: Request) {
             httpOptions: { timeout: GENERATIVE_REQUEST_TIMEOUT_MS },
           });
           // Phase 2 Layer 1: ホワイトリスト同梱プロンプト
-          const userPrompt = buildPromptWithWhitelist({
-            question: retrievalQuery,
+          const conversationTurns = Array.isArray(body?.history) ? body.history : [];
+          const userPrompt = buildConversationBlock(conversationTurns) + buildPromptWithWhitelist({
+            question: conversationTurns.length > 0 ? message : retrievalQuery,
             context,
             mlitContext: buildMlitContext(mlitMatches),
             allowed: allowedCitations,
           });
-          // Prior turns are reduced to allowlisted work conditions in
-          // retrievalQuery; raw conversation text is never forwarded.
           const result = await withProviderBudget(() => genAI.models.generateContent({
             model: GEMINI_FLASH_MODEL,
             contents: userPrompt,
@@ -683,6 +684,7 @@ async function handlePost(request: Request) {
           }),{model:GEMINI_FLASH_MODEL,inputBytes:Buffer.byteLength(SYSTEM_PROMPT+userPrompt,'utf8'),maxOutputTokens:2048});
           // SYSTEM_PROMPTのフォーマット例「YYYY年MM月」等をGeminiがテンプレートのまま
           // 出力してしまう事故を防ぐ（本番実測で1問中3箇所の漏出を確認）
+          generationMeta = readGenerationMeta(result, generationMeta);
           return sanitizePlaceholderCitations(result.text ?? "");
         },
         { failureThreshold: 4, cooldownMs: 60_000 }
@@ -693,13 +695,19 @@ async function handlePost(request: Request) {
     // 条文番号のallowlist照合だけでは、生成文の各主張が引用本文に支持されることを
     // 証明できない。候補本文は利用者へ返さず、承認済みコーパスから組み立てた
     // evidence-only案内へfail-closedする。
+    // 生成した回答をそのまま返す。外れた条文番号は警告欄で知らせ、空・途中切れだけ定型回答へ。
     const validation = validateCitations(generatedCandidate, allowedCitations);
-    answer = safeCitationFallback();
-    citationWarningNote =
-      validation.findings.length > 0
-        ? validation.warningNote
-        : "生成本文は条文番号の形式検査を通過しましたが、主張単位の引用支持を自動証明できないため表示していません。公式条文と構造化出典を確認してください。";
-    citationLayer2Status = "evidence-only";
+    const truncated = generationMeta.finishReason !== null && generationMeta.finishReason !== "STOP";
+    if (!generatedCandidate.trim() || truncated) {
+      answer = safeCitationFallback();
+      citationWarningNote = truncated ? `AIの回答が途中で終わったため（${generationMeta.finishReason}）、収録条文の案内を表示しています。` : "";
+      citationLayer2Status = "evidence-only";
+    } else {
+      answer = generatedCandidate;
+      citationWarningNote = validation.findings.length > 0 ? validation.warningNote : "";
+      citationLayer2Status = validation.findings.length > 0 ? "warned" : "passed";
+    }
+    logLegalChatGeneration({ route: "json", mode: "evidence", historyTurns: Array.isArray(body?.history) ? body.history.length : 0, answerChars: answer.length, usedGeneratedText: citationLayer2Status !== "evidence-only", ...generationMeta });
   } catch (err) {
     // 外部サービスの例外本文には入力断片が含まれる可能性があるため、生値は記録しない。
     console.error("[chatbot] Gemini API error", {
@@ -831,9 +839,7 @@ async function handlePost(request: Request) {
   let finalConfidence = confidence;
   if (citationLayer2Status === "evidence-only") {
     finalConfidence = "low";
-    scopeWarnings.push(
-      "生成本文は主張単位の引用支持を自動証明できないため非表示とし、確認用の根拠案内だけを表示しています。"
-    );
+    scopeWarnings.push("AIの回答を表示できなかったため、収録条文の案内を表示しています。");
   }
 
   // Phase 2 Layer 3 が adjacent と判定した場合も信頼度を降格
@@ -857,7 +863,7 @@ async function handlePost(request: Request) {
     attachedNotices: attached.notices.length > 0 ? attached.notices : undefined,
     attachedLeaflets: attached.leaflets.length > 0 ? attached.leaflets : undefined,
   });
-  if (key && citationLayer2Status === "evidence-only") {
+  if (key && citationLayer2Status === "passed") {
     setCachedResponse(key, responsePayload);
   }
   return NextResponse.json<ChatbotResponse>(responsePayload, {

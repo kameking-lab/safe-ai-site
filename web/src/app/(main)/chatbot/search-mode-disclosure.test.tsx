@@ -1,40 +1,25 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { LEGAL_GENERATION_ENABLED, LEGAL_SEARCH_MODE_SUMMARY, LEGAL_SEARCH_MODE_LABEL } from "@/lib/chatbot-generation-policy";
+import { LEGAL_GENERATION_ENABLED, LEGAL_SEARCH_MODE_SUMMARY } from "@/lib/chatbot-generation-policy";
 import { ChatbotBody } from "./ChatbotBody";
 import ChatbotEvalPage from "../about/chatbot-eval/page";
-import genqualitySnapshot from "@/data/chatbot-genquality-latest.json";
 
 vi.mock("./ChatbotClientBridge", () => ({ ChatbotClientBridge: () => <textarea aria-label="作業を質問" /> }));
 
-describe("法令検索・定型回答の公開説明", () => {
-  it("質問入力を残し、短い提供方式から根拠確認の説明を開ける", () => {
+// 2026-11-09 オーナー判断: 法令AIは生成AIで回答する（根拠が無いときも一般的な助言＋根拠未確認の1行）。
+describe("法令AIの公開説明（生成回答あり）", () => {
+  it("質問入力と短い説明だけを出し、生成停止中の長い注意書きは出さない", () => {
     render(<ChatbotBody />);
-    expect(LEGAL_GENERATION_ENABLED).toBe(false);
+    expect(LEGAL_GENERATION_ENABLED).toBe(true);
     expect(screen.getByRole("textbox", { name: "作業を質問" })).toBeTruthy();
     expect(screen.getByText(LEGAL_SEARCH_MODE_SUMMARY)).toBeTruthy();
-    expect(screen.getByText(LEGAL_SEARCH_MODE_SUMMARY).closest("header")?.textContent).not.toContain("外部生成AI");
-    const summary = screen.getByText("回答の仕組み・評価方法");
-    const detail = summary.closest("details")!;
-    expect(detail.closest("section")).toBeNull();
-    expect(detail.open).toBe(false);
-    fireEvent.click(summary);
-    expect(detail.open).toBe(true);
-    expect(detail.textContent).toContain("質問と履歴を外部生成AIへ送信せず");
-    expect(screen.getByRole("link", { name: "評価方法と確認範囲" }).getAttribute("href")).toBe("/about/chatbot-eval");
+    expect(screen.queryByText(/質問と履歴を外部生成AIへ送信せず/)).toBeNull();
   });
 
-  it("現在の提供方式と測定日時を表示し、過去の生成回答率は閉じた参考記録に保持する", () => {
+  it("評価ページは生成回答の機械チェックを現在の方式として表示する", () => {
     render(<ChatbotEvalPage />);
-    expect(screen.getByText(/現在の提供方式：/).textContent).toContain(LEGAL_SEARCH_MODE_LABEL);
-    expect(screen.getByText(/現在の本番回答を再測定した値ではありません/)).toBeTruthy();
-    const history = screen.getByText(/過去の生成回答チェック（/).closest("details")!;
-    expect(history.open).toBe(false);
-    expect(history.textContent).toContain(genqualitySnapshot.date);
-    expect(screen.getByRole("heading", { name: "生成回答の自作機械チェック（限定セット）" }).closest("details")).toBe(history);
-    fireEvent.click(history.querySelector("summary")!);
-    expect(history.open).toBe(true);
-    expect(screen.getByRole("heading", { name: "生成回答の自作機械チェック（限定セット）" })).toBeTruthy();
-    expect(history.textContent).toContain("現在の検索・定型回答の正確さや安全性を示しません");
+    expect(screen.queryByText(/現在の提供方式：/)).toBeNull();
+    const heading = screen.getByRole("heading", { name: "生成回答の自作機械チェック（限定セット）" });
+    expect(heading.closest("details")).toBeNull();
   });
 });

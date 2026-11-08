@@ -69,6 +69,21 @@ describe('shared daily AI accounting',()=>{
     expect(responses.filter(r=>r.status===200)).toHaveLength(1);expect(run).toHaveBeenCalledTimes(1);expect(state.operations.filter(o=>o.status==='completed')).toHaveLength(3);
   });
   it('replays the same operation without executing or charging it twice',async()=>{const id=crypto.randomUUID();const run=vi.fn(async()=>answer());expect((await withUsage(request(id),'law_chat',run)).status).toBe(200);expect((await withUsage(request(id),'law_chat',run)).status).toBe(200);expect(run).toHaveBeenCalledTimes(1);});
+  it('counts every answered law chat send (no-evidence answers and follow-ups too) and stops the 4th for free',async()=>{
+    const noEvidence=()=>Response.json({answer:'一般的な安全上の目安です。\n\nこの回答は条文の根拠を確認できていません。',source_type:'safety',sources:[]});
+    const run=vi.fn(async()=>noEvidence());
+    for(let i=0;i<3;i++)expect((await withUsage(request(),'law_chat',run)).status).toBe(200);
+    expect(state.operations.filter(o=>o.status==='completed')).toHaveLength(3);
+    const fourth=await withUsage(request(),'law_chat',run);
+    expect(fourth.status).toBe(429);
+    expect(await fourth.json()).toMatchObject({error:{code:'DAILY_LIMIT_REACHED',plan:'free'}});
+    expect(run).toHaveBeenCalledTimes(3);
+  });
+  it('does not count a send that returned no answer (server-side failure)',async()=>{
+    const run=vi.fn(async()=>Response.json({error:'回答を完了できませんでした。'},{status:503}));
+    expect((await withUsage(request(),'law_chat',run)).status).toBe(503);
+    expect(state.operations.every(o=>o.status==='released')).toBe(true);
+  });
   it('does not charge unavailable RA, validation failure or safety-only results',async()=>{const run=vi.fn(async()=>Response.json({assessmentStatus:'unavailable',source_type:'safety'}));for(let i=0;i<3;i++)expect((await withUsage(request(),'chemical_ra',run)).status).toBe(200);expect(state.operations.every(o=>o.status==='released')).toBe(true);});
   it('uses a sliding 60-second Pro burst limit including unsuccessful attempts',async()=>{state.paid=true;const run=vi.fn(async()=>Response.json({source_type:'safety'}));for(let i=0;i<10;i++)await withUsage(request(),'law_chat',run);const blocked=await withUsage(request(),'law_chat',run);expect(blocked.status).toBe(429);expect(blocked.headers.get('Retry-After')).toBe('60');expect(run).toHaveBeenCalledTimes(10);});
   it('uses JST midnight and never reserves above the shared cost ceiling',()=>{expect(jstKeys(new Date('2026-11-03T14:59:59Z')).day).toBe('2026-11-03');expect(jstKeys(new Date('2026-11-03T15:00:00Z')).day).toBe('2026-11-04');expect(()=>checkBudget(49950,0,50,'pro')).not.toThrow();expect(()=>checkBudget(49950,50,1,'pro')).toThrow('AI_BUDGET_STOPPED');expect(()=>checkBudget(44000,950,50,'free')).toThrow('AI_BUDGET_FREE_PAUSED');expect(()=>checkBudget(0,0,NaN,'pro')).toThrow('AI_BUDGET_STOPPED');});
