@@ -59,10 +59,10 @@ export const FEATURE_CATEGORIES: FeatureCategory[] = [
   },
   {
     id: "chemical-ra",
-    title: "化学物質RA準備",
-    summary: "CAS・SDS記載名と作業条件を整理し、公式評価へ",
+    title: "化学物質リスクアセスメント",
+    summary: "物質名・CASと作業条件から、リスクレベルをその場で判定",
     description:
-      "CAS番号による同一性確認、GHS分類・SDS・作業条件の整理、公式CREATE-SIMPLEへの案内、確認記録の作成を支援します。公式評価ロジックの代替ではありません。",
+      "物質名かCAS番号を入れて作業条件を数タップで選ぶだけで、吸入・経皮吸収・爆発火災のリスクレベルを判定。換気を局所排気にする等の具体策も同じ計算で再評価して表示し、結果は保存・印刷/PDF・CSVで記録できます。",
     accent: "violet",
   },
   {
@@ -147,10 +147,10 @@ const ALL_FEATURES: FeatureItem[] = [
   },
   {
     slug: "chemical-ra",
-    title: "化学物質RA準備",
-    summary: "公式CREATE-SIMPLEを利用する前の入力整理支援",
+    title: "化学物質リスクアセスメント",
+    summary: "吸入・経皮吸収・爆発火災のリスクレベルをその場で判定",
     description:
-      "CAS・SDS記載名と作業条件を整理します。ばく露濃度やリスクレベルは本サイトで判定せず、厚生労働省のCREATE-SIMPLEによる公式評価へ案内します。",
+      "物質名かCAS番号を入れて作業条件を数タップで選ぶだけで、吸入（I〜IV）・経皮吸収・爆発火災のリスクレベルを表示。レベルを下げる具体策（換気を局所排気にする等）も再評価して示します。厚生労働省 CREATE-SIMPLE の手法に基づく計算です。",
     href: "/chemical-ra",
     category: "chemical-ra",
     tags: ["化学物質", "RA"],

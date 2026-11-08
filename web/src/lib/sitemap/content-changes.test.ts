@@ -32,8 +32,8 @@ describe("sitemap lastmod は実際の内容変更日だけを使う", () => {
     expect(lastmodAt("2026-10-13T09:00:00+09:00")).toEqual({
       "/laws": "2026-10-13",
       "/chatbot": "2026-10-11",
-      "/chemical-ra": "2026-10-13",
-      "/chemical-database": "2026-10-13",
+      "/chemical-ra": "2026-11-08",
+      "/chemical-database": "2026-11-08",
       "/chemical-ra/product-search": "2026-08-08",
     });
   });

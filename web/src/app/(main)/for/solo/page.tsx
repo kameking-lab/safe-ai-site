@@ -42,9 +42,9 @@ const ACTIONS: readonly RoleAction[] = [
   },
   {
     href: "/chemical-ra",
-    label: "化学物質・SDSを確認",
+    label: "化学物質のリスクを判定",
     description:
-      "SDSや濃度等が不足する場合は簡易評価を止め、公式ツールでの確認へ進みます。",
+      "物質名かCAS番号と作業条件を選ぶだけで、吸入・経皮吸収・爆発火災のリスクレベルと下げ方を表示します。",
   },
   {
     href: "/services/automation",

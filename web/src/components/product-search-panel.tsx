@@ -60,18 +60,15 @@ export function ProductSearchPanel() {
         <p className="text-sm text-slate-600">
           内蔵データから製品と含有成分を検索し、製品固有のSDS確認を支援します。
         </p>
-        <div role="note" className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs leading-relaxed text-amber-950">
-          含有率・取扱量・換気・作業時間だけから、ばく露濃度やリスクレベルを自動推定することはできません。
-          最新SDS、実測値、厚生労働省の公式CREATE-SIMPLEを使い、化学物質管理者または専門家が確認してください。
-          <a
-            href="https://anzeninfo.mhlw.go.jp/user/anzen/kag/ankgc07_3.htm"
-            target="_blank"
-            rel="noopener noreferrer"
+        <p className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-xs leading-relaxed text-emerald-950">
+          含有成分が分かったら、成分ごとに作業条件を選ぶだけで吸入・経皮吸収・爆発火災のリスクレベルを判定できます。
+          <Link
+            href="/chemical-ra"
             className="ml-1 font-bold underline underline-offset-2"
           >
-            公式CREATE-SIMPLE
-          </a>
-        </div>
+            化学物質リスクアセスメント
+          </Link>
+        </p>
       </header>
 
       <section className="space-y-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
@@ -150,7 +147,7 @@ export function ProductSearchPanel() {
                         query={hit.components[0].name}
                         className="inline-flex min-h-11 items-center rounded-lg border border-slate-300 bg-white px-3 text-xs font-bold text-slate-800"
                       >
-                        収録済み成分情報を確認
+                        主成分のリスクを判定
                       </TransientChemicalLink>
                     )}
                   </div>

@@ -73,10 +73,10 @@ export default function EquipmentFinderPage() {
                   className="h-5 w-5 text-emerald-700"
                   aria-hidden="true"
                 />
-                化学物質リスクを整理する
+                化学物質のリスクを判定する
               </span>
               <span className="mt-2 block text-sm leading-6 text-slate-600">
-                SDS、作業条件、換気、皮膚接触等を確認し、必要な対策項目を整理します。
+                物質名・CASと作業条件を選ぶと、吸入・経皮吸収・爆発火災のリスクレベルと必要な対策を表示します。
               </span>
               <span className="mt-2 inline-flex items-center gap-1 text-sm font-bold text-emerald-800">
                 化学物質RAへ

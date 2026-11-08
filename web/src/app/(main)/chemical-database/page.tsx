@@ -90,15 +90,15 @@ export default function ChemicalDatabasePage() {
           <strong className="font-semibold">
             詳細情報（CAS番号・GHS分類・濃度基準値）を閲覧
           </strong>
-          するDBです。 物質と作業内容を整理し、
-          <em className="font-medium">RAの準備記録</em>を作る場合は
+          するDBです。 作業条件を選んで
+          <em className="font-medium">吸入・経皮吸収・爆発火災のリスクレベル</em>をその場で判定する場合は
           <Link
             href="/chemical-ra"
             className="ml-1 underline decoration-emerald-400 underline-offset-2 hover:text-emerald-700 dark:hover:text-emerald-100"
           >
-            化学物質RA準備
+            化学物質リスクアセスメント
           </Link>
-          を利用できます。最終評価は公式CREATE-SIMPLE、最新SDS、実測値を用いて専門家が確認してください。
+          へ進んでください。
         </div>
       </div>
       <ChemicalDatabaseClient />
@@ -107,11 +107,11 @@ export default function ChemicalDatabasePage() {
         pages={[
           {
             href: "/chemical-ra",
-            label: "化学物質RA準備",
+            label: "化学物質リスクアセスメント",
             description:
-              "検索した物質の収録済み公的情報を確認し、最新SDS・公式ツールでの評価へつなげます。",
+              "作業条件を数タップで選ぶだけで、吸入・経皮吸収・爆発火災のリスクレベルと下げ方をその場で表示します。",
             color: "emerald",
-            cta: "準備を始める",
+            cta: "リスクを判定する",
           },
           {
             href: "/goods",

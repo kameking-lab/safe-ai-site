@@ -154,7 +154,7 @@ export function GoodsChatbot() {
               href="/chemical-ra"
               className="inline-flex min-h-[44px] items-center rounded-lg border border-emerald-700 bg-white px-3 py-2 text-sm font-bold text-emerald-800 hover:bg-emerald-50"
             >
-              化学物質RAで条件を整理
+              化学物質RAでリスクを判定
             </Link>
             <Link
               href="/about/quality"
