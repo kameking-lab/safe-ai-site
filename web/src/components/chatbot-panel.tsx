@@ -33,6 +33,7 @@ import {
 } from "@/lib/chatbot-safety";
 import { inspectAiOutbound } from "@/lib/ai-outbound-safety";
 import { readChatbotFailure } from "@/lib/chatbot-failure";
+import { ProUpsellCard } from "@/components/pro-upsell-card";
 import type { LegalClarification } from "@/lib/legal-conversation-context";
 import {
   sanitizePublicLegalConversationContext,
@@ -180,6 +181,8 @@ export function ChatbotPanel({
   const [input, setInput] = useState(initialQuestion ?? "");
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // 無料枠の上限に当たったときの購入入口（エラー表示とは別。再試行ボタンは出さない）。
+  const [upsell, setUpsell] = useState<string | null>(null);
   const [retryableQuestion, setRetryableQuestion] = useState<string | null>(
     null,
   );
@@ -279,6 +282,7 @@ export function ChatbotPanel({
     const requestGeneration = ++requestGenerationRef.current;
     setIsSending(true);
     setError(null);
+    setUpsell(null);
     setRetryableQuestion(null);
     setLocalSafetyNotice(null);
     setInput("");
@@ -355,6 +359,12 @@ export function ChatbotPanel({
                 message.id !== userMessage.id && message.id !== assistantId,
             ),
           );
+          if (failure.upgrade) {
+            setUpsell(failure.message);
+            // 購入後にそのまま送り直せるよう、質問を入力欄に戻す。
+            setInput(text);
+            return;
+          }
           setError(failure.message);
           if (failure.retryable) setRetryableQuestion(text);
           return;
@@ -931,6 +941,10 @@ export function ChatbotPanel({
         >
           {localSafetyNotice.message}
         </div>
+      )}
+
+      {upsell && (
+        <ProUpsellCard message={upsell} returnTo="/chatbot" className="mx-3 mb-2 sm:mx-5" />
       )}
 
       {error && (

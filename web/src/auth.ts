@@ -46,18 +46,40 @@ function reviewSafeAdapter(): Adapter | undefined {
   return adapter;
 }
 
+/**
+ * Apple は結果を appleid.apple.com からの POST（form_post）で返す。サイトをまたぐ POST には
+ * SameSite=Lax の Cookie が付かないため、戻り先（callback-url）・state・nonce が失われ、
+ * アプリへ戻らずトップに着いたり InvalidCheck で失敗したりする。これらの短命な確認用
+ * Cookie だけを SameSite=None; Secure にする（セッション Cookie は Lax のまま）。
+ */
+const httpsDeployment = process.env.VERCEL_ENV === "production" || (process.env.AUTH_URL ?? "").startsWith("https://");
+const crossSite = (maxAge?: number) => ({ httpOnly: true, path: "/", secure: true, sameSite: "none" as const, ...(maxAge ? { maxAge } : {}) });
+const crossSiteAuthCookies = httpsDeployment
+  ? {
+      callbackUrl: { name: "__Secure-authjs.callback-url", options: crossSite() },
+      state: { name: "__Secure-authjs.state", options: crossSite(900) },
+      nonce: { name: "__Secure-authjs.nonce", options: crossSite() },
+      pkceCodeVerifier: { name: "__Secure-authjs.pkce.code_verifier", options: crossSite(900) },
+    }
+  : undefined;
+
 const initialized = isAuthConfigured
   ? NextAuth({
       adapter: reviewSafeAdapter(),
       session: { strategy: "jwt" },
       providers: [
+        // Google と Apple はどちらもメールの所有を確認済みで返す。同じメールなら同じ会員に
+        // つなぐ（アプリで Apple、ウェブで Google のように使い分けても Pro が共通になる）。
+        // 既定のままだと2つ目の方法が OAuthAccountNotLinked で失敗し「ログインできない」になる。
         ...(process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET ? [Google({
           clientId: process.env.AUTH_GOOGLE_ID!,
           clientSecret: process.env.AUTH_GOOGLE_SECRET!,
+          allowDangerousEmailAccountLinking: true,
         })] : []),
         ...(process.env.AUTH_APPLE_ID && process.env.AUTH_APPLE_SECRET ? [Apple({
           clientId: process.env.AUTH_APPLE_ID,
           clientSecret: process.env.AUTH_APPLE_SECRET,
+          allowDangerousEmailAccountLinking: true,
         })] : []),
         // Registered whenever auth is on; authorize re-checks enable/expiry on every attempt.
         Credentials({
@@ -66,6 +88,7 @@ const initialized = isAuthConfigured
           authorize: (credentials, request) => authorizeAppReview(credentials, request, { db: prisma }),
         }),
       ],
+      ...(crossSiteAuthCookies ? { cookies: crossSiteAuthCookies } : {}),
       pages: {
         signIn: "/auth/signin",
         error: "/auth/error",
@@ -89,9 +112,11 @@ const initialized = isAuthConfigured
         },
       },
       callbacks: {
-        async signIn({ user, account }) {
+        async signIn({ user, account, profile }) {
           // The reserved review identity is reachable only through its code provider.
           if (account?.provider === APP_REVIEW_PROVIDER_ID) return user.id === APP_REVIEW_USER_ID;
+          // Email linking is safe only for a verified address.
+          if (account?.provider === "google" && (profile as { email_verified?: unknown } | undefined)?.email_verified === false) return false;
           return user.id !== APP_REVIEW_USER_ID && user.email?.toLowerCase() !== APP_REVIEW_EMAIL;
         },
         async session({ session, token }) {

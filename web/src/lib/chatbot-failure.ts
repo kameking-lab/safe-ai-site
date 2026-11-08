@@ -13,6 +13,8 @@ export interface ChatbotFailure {
   message: string | null;
   code: string | null;
   retryable: boolean;
+  /** 無料枠の上限で、この経路から Pro を買える（Pro 会員には付かない）。 */
+  upgrade: boolean;
 }
 
 /** 再試行しても結果が変わらない（待つ・ログインする・入力を直す必要がある）もの。 */
@@ -32,7 +34,7 @@ const text = (value: unknown): string | null =>
 
 export function readChatbotFailure(body: unknown): ChatbotFailure {
   if (!body || typeof body !== "object") {
-    return { message: null, code: null, retryable: true };
+    return { message: null, code: null, retryable: true, upgrade: false };
   }
   const record = body as Record<string, unknown>;
   const nested =
@@ -47,5 +49,6 @@ export function readChatbotFailure(body: unknown): ChatbotFailure {
       : code
         ? !NOT_RETRYABLE.has(code)
         : true;
-  return { message, code, retryable };
+  const upgrade = code === "DAILY_LIMIT_REACHED" && nested?.upgrade === true;
+  return { message, code, retryable, upgrade };
 }

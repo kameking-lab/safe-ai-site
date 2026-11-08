@@ -9,6 +9,7 @@ import {
   buildPreviewEnforcedContentSecurityPolicy,
   createCspNonce,
 } from "@/lib/security/csp";
+import { allowedSignInCallback, authErrorCode } from "@/lib/auth-callback";
 import {
   LEGACY_SAFETY_IMAGE_REDIRECTS,
   LEGACY_SAFETY_IMAGE_SLUGS,
@@ -78,12 +79,6 @@ function addCspResponseHeaders(
   return response;
 }
 
-// The iOS app's sign-in hands off through this exact callback. It carries only
-// the PKCE flow ID (useless without the verifier kept in the device Keychain).
-// Stripping it sent members to the site home instead of back to the app.
-const NATIVE_SIGNIN_CALLBACK =
-  /^\/api\/mobile\/v1\/auth\/authorize\?flow=[0-9a-f-]{36}(?:&confirmed=1)?$/;
-
 function sanitizedAuthPageUrl(request: NextRequest): URL | null {
   if (
     !["GET", "HEAD"].includes(request.method) ||
@@ -94,12 +89,16 @@ function sanitizedAuthPageUrl(request: NextRequest): URL | null {
   }
   const sanitized = request.nextUrl.clone();
   sanitized.search = "";
-  const callbackUrl = request.nextUrl.searchParams.get("callbackUrl");
-  if (
-    request.nextUrl.pathname === "/auth/signin" &&
-    callbackUrl &&
-    NATIVE_SIGNIN_CALLBACK.test(callbackUrl)
-  ) {
+  // The iOS app's sign-in hand-off and the Pro purchase start survive; any other
+  // query (tokens etc.) is still dropped. Auth.js error codes come from a fixed list.
+  const errorCode = authErrorCode(request.nextUrl.searchParams.get("error"));
+  if (request.nextUrl.pathname === "/auth/error") {
+    if (errorCode) sanitized.searchParams.set("error", errorCode);
+    if (sanitized.search === request.nextUrl.search) return null;
+    return sanitized;
+  }
+  const callbackUrl = allowedSignInCallback(request.nextUrl.searchParams.get("callbackUrl"));
+  if (callbackUrl) {
     sanitized.searchParams.set("callbackUrl", callbackUrl);
     if (request.nextUrl.searchParams.get("reviewError") === "1") {
       sanitized.searchParams.set("reviewError", "1");

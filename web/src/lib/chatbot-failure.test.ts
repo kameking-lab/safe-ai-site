@@ -7,6 +7,7 @@ describe("readChatbotFailure（チャット失敗応答の読み替え）", () =
       message: "個人情報を除いてください。",
       code: null,
       retryable: false,
+      upgrade: false,
     });
   });
 
@@ -15,7 +16,7 @@ describe("readChatbotFailure（チャット失敗応答の読み替え）", () =
       readChatbotFailure({
         error: { code: "DAILY_LIMIT_REACHED", message: "本日の上限に達しました。", resetAt: "2026-11-09T00:00:00+09:00" },
       }),
-    ).toEqual({ message: "本日の上限に達しました。", code: "DAILY_LIMIT_REACHED", retryable: false });
+    ).toEqual({ message: "本日の上限に達しました。", code: "DAILY_LIMIT_REACHED", retryable: false, upgrade: false });
   });
 
   it("文の代わりにオブジェクトを返さない（描画で画面が落ちない）", () => {
@@ -30,8 +31,14 @@ describe("readChatbotFailure（チャット失敗応答の読み替え）", () =
     }
   });
 
+  it("無料枠の上限で購入できる経路なら upgrade を立てる（Pro の上限には立てない）", () => {
+    expect(readChatbotFailure({ error: { code: "DAILY_LIMIT_REACHED", message: "今日の無料3回はここまでです。", plan: "free", upgrade: true } }).upgrade).toBe(true);
+    expect(readChatbotFailure({ error: { code: "DAILY_LIMIT_REACHED", message: "本日の上限", plan: "pro", upgrade: false } }).upgrade).toBe(false);
+    expect(readChatbotFailure({ error: { code: "BURST_LIMITED", upgrade: true } }).upgrade).toBe(false);
+  });
+
   it("本文が読めないときは文なし・再試行可", () => {
-    expect(readChatbotFailure(null)).toEqual({ message: null, code: null, retryable: true });
-    expect(readChatbotFailure("oops")).toEqual({ message: null, code: null, retryable: true });
+    expect(readChatbotFailure(null)).toEqual({ message: null, code: null, retryable: true, upgrade: false });
+    expect(readChatbotFailure("oops")).toEqual({ message: null, code: null, retryable: true, upgrade: false });
   });
 });
