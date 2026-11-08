@@ -262,7 +262,7 @@
       "implementation": "direct canonical import",
       "state": "shared",
       "modes": [
-        "ChemicalRaPanel"
+        "CreateSimplePanel"
       ]
     },
     {
