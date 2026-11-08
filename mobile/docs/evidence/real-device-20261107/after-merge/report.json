@@ -21,7 +21,7 @@
         "step": "02-ai-tab",
         "url": "/portal/",
         "issues": [],
-        "textLen": 408,
+        "textLen": 407,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -31,7 +31,7 @@
         "issues": [
           "small-target \"労働安全衛生規則 第518条\" 307x28"
         ],
-        "textLen": 577,
+        "textLen": 576,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -39,7 +39,7 @@
         "step": "04-chatbot",
         "url": "/chatbot/",
         "issues": [],
-        "textLen": 243,
+        "textLen": 242,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -51,9 +51,49 @@
         "step": "04a-chatbot-composer",
         "url": "/chatbot/",
         "issues": [],
-        "textLen": 226,
+        "textLen": 225,
         "title": "安全AIポータル",
         "bodyEmpty": false
+      },
+      {
+        "step": "14-chat-composer-above-tabs",
+        "url": "/chatbot/",
+        "issues": [],
+        "textLen": 242,
+        "title": "安全AIポータル",
+        "bodyEmpty": false
+      },
+      {
+        "step": "15-chat-rejected-input",
+        "url": "/chatbot/",
+        "issues": [],
+        "textLen": 267,
+        "title": "安全AIポータル",
+        "bodyEmpty": false
+      },
+      {
+        "step": "16-chemical-confirm-visible",
+        "url": "/chemical-ra/",
+        "issues": [],
+        "textLen": 1022,
+        "title": "安全AIポータル",
+        "bodyEmpty": false
+      },
+      {
+        "step": "sweep-1093",
+        "geometry": {
+          "composerBottom": 786.59375,
+          "tabsTop": 769
+        },
+        "composerAboveTabs": false,
+        "rejected": {
+          "message": 1,
+          "crashed": 0
+        },
+        "confirm": {
+          "candidates": 8,
+          "proceedVisible": true
+        }
       },
       {
         "step": "tap-test",
@@ -200,7 +240,7 @@
         "step": "08-notifications",
         "url": "/notifications/",
         "issues": [],
-        "textLen": 992,
+        "textLen": 1063,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -216,7 +256,7 @@
         "step": "10-back",
         "url": "/notifications/",
         "issues": [],
-        "textLen": 992,
+        "textLen": 1063,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -552,7 +592,7 @@
         "step": "02-ai-tab",
         "url": "/portal/",
         "issues": [],
-        "textLen": 408,
+        "textLen": 407,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -615,7 +655,7 @@
         "step": "02-ai-tab",
         "url": "/portal/",
         "issues": [],
-        "textLen": 408,
+        "textLen": 407,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },

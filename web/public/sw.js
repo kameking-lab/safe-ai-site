@@ -2,7 +2,7 @@
 // Cache-first: static assets / Network-first: API calls
 // 安全・法令ページはオフライン時に最新表示と誤認させないためHTMLを保存しない。
 
-const CACHE_NAME = "anzen-ai-v8";
+const CACHE_NAME = "anzen-ai-v9";
 const OFFLINE_URL = "/offline.html";
 const PUBLIC_SAFETY_LEARNING_PATH = /^\/e-learning\/safety(?:\/(?:first-class-health-officer|second-class-health-officer|occupational-safety-consultant|occupational-health-consultant))?\/?$/;
 

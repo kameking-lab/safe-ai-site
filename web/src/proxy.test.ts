@@ -239,6 +239,29 @@ describe("Proxy CSP boundary", () => {
     expect(response.headers.get("content-security-policy")).toBeTruthy();
   });
 
+  it("keeps only the iOS app's sign-in callback so login returns to the app", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("VERCEL_ENV", "production");
+    const callback =
+      "/api/mobile/v1/auth/authorize?flow=11111111-2222-4333-8444-555555555555&confirmed=1";
+    const canonical = `https://example.test/auth/signin?callbackUrl=${encodeURIComponent(callback)}`;
+    // The exact URL the authorize route redirects to is served as is.
+    const served = proxy(new NextRequest(canonical));
+    expect(served.status).toBe(200);
+    expect(served.headers.get("location")).toBeNull();
+    // Extra parameters are dropped, the native callback survives.
+    const extra = proxy(new NextRequest(`${canonical}&token=secret&reviewError=1`));
+    expect(extra.status).toBe(307);
+    expect(extra.headers.get("location")).toBe(`${canonical}&reviewError=1`);
+    expect(proxy(new NextRequest(`${canonical}&reviewError=1`)).status).toBe(200);
+    // Any other callback is still stripped.
+    for (const other of ["/account", "https://evil.example/api/mobile/v1/auth/authorize?flow=11111111-2222-4333-8444-555555555555", `${callback}&next=/x`]) {
+      const response = proxy(new NextRequest(`https://example.test/auth/signin?callbackUrl=${encodeURIComponent(other)}`));
+      expect(response.status).toBe(307);
+      expect(response.headers.get("location")).toBe("https://example.test/auth/signin");
+    }
+  });
+
   it("uses the actual Next runtime mode when a dev server carries a deployment label", () => {
     vi.stubEnv("NODE_ENV", "development");
     vi.stubEnv("VERCEL_ENV", "production");

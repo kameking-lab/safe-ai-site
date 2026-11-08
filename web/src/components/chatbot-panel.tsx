@@ -32,6 +32,7 @@ import {
   type ChatbotSafetyKind,
 } from "@/lib/chatbot-safety";
 import { inspectAiOutbound } from "@/lib/ai-outbound-safety";
+import { readChatbotFailure } from "@/lib/chatbot-failure";
 import type { LegalClarification } from "@/lib/legal-conversation-context";
 import {
   sanitizePublicLegalConversationContext,
@@ -323,10 +324,10 @@ export function ChatbotPanel({
         !response.ok &&
         (response.status === 422 || response.status === 428)
       ) {
-        const blocked = (await response.json().catch(() => null)) as {
-          error?: string | {message?:string};
-          message?: string;
-        } | null;
+        // ログイン済み（共通利用枠経由）は error がオブジェクトで返る。文だけを取り出す。
+        const blocked = readChatbotFailure(
+          await response.json().catch(() => null),
+        );
         setMessages((previous) =>
           previous.filter(
             (message) =>
@@ -336,16 +337,29 @@ export function ChatbotPanel({
         setLocalSafetyNotice({
           kind: "privacy",
           message:
-            blocked?.message ??
-            (typeof blocked?.error==='string'?blocked.error:blocked?.error?.message) ??
-            "個人情報を除いて、もう一度入力してください。",
+            blocked.message ?? "個人情報を除いて、もう一度入力してください。",
         });
         return;
       }
-      if(!response.ok){
-        const failed=await response.json().catch(()=>null) as {error?:string|{message?:string};message?:string}|null;
-        const message=failed?.message??(typeof failed?.error==='string'?failed.error:failed?.error?.message);
-        throw new ServerRequestError(message??'サーバーの実行条件を確認できません。会員の権利と利用枠を確認してください。');
+      if (!response.ok) {
+        // 本日の上限・ログイン切れなどはサーバーの説明をそのまま出す。
+        // 再試行で直らないものには再試行ボタンを出さない。
+        const failure = readChatbotFailure(
+          await response.json().catch(() => null),
+        );
+        if (requestGenerationRef.current !== requestGeneration) return;
+        if (failure.message) {
+          setMessages((previous) =>
+            previous.filter(
+              (message) =>
+                message.id !== userMessage.id && message.id !== assistantId,
+            ),
+          );
+          setError(failure.message);
+          if (failure.retryable) setRetryableQuestion(text);
+          return;
+        }
+        throw new Error("response-unavailable");
       }
       if (!response.body) {
         throw new Error("response-unavailable");

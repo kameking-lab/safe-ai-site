@@ -78,6 +78,12 @@ function addCspResponseHeaders(
   return response;
 }
 
+// The iOS app's sign-in hands off through this exact callback. It carries only
+// the PKCE flow ID (useless without the verifier kept in the device Keychain).
+// Stripping it sent members to the site home instead of back to the app.
+const NATIVE_SIGNIN_CALLBACK =
+  /^\/api\/mobile\/v1\/auth\/authorize\?flow=[0-9a-f-]{36}(?:&confirmed=1)?$/;
+
 function sanitizedAuthPageUrl(request: NextRequest): URL | null {
   if (
     !["GET", "HEAD"].includes(request.method) ||
@@ -88,6 +94,19 @@ function sanitizedAuthPageUrl(request: NextRequest): URL | null {
   }
   const sanitized = request.nextUrl.clone();
   sanitized.search = "";
+  const callbackUrl = request.nextUrl.searchParams.get("callbackUrl");
+  if (
+    request.nextUrl.pathname === "/auth/signin" &&
+    callbackUrl &&
+    NATIVE_SIGNIN_CALLBACK.test(callbackUrl)
+  ) {
+    sanitized.searchParams.set("callbackUrl", callbackUrl);
+    if (request.nextUrl.searchParams.get("reviewError") === "1") {
+      sanitized.searchParams.set("reviewError", "1");
+    }
+    // Already canonical: serve the page instead of redirecting to itself.
+    if (sanitized.search === request.nextUrl.search) return null;
+  }
   return sanitized;
 }
 

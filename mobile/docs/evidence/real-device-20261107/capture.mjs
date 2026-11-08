@@ -28,7 +28,7 @@ const server = createServer(async (req, res) => {
     if (extname(file) === '.css') {
       data = Buffer.from(String(data)
         .replace(/env\(\s*safe-area-inset-top\s*(?:,[^)]*)?\)/g, '59px')
-        .replace(/env\(\s*safe-area-inset-bottom\s*(?:,[^)]*)?\)/g, '34px')
+        .replace(/env\(\s*safe-area-inset-bottom\s*(?:,[^)]*)?\)/g, `${process.env.CAPTURE_BOTTOM_INSET ?? 34}px`)
         .replace(/env\(\s*safe-area-inset-(?:left|right)\s*(?:,[^)]*)?\)/g, '0px'));
     }
     res.writeHead(200, { 'Content-Type': types[extname(file)] ?? 'application/octet-stream', 'Cache-Control': 'no-store' });
@@ -110,6 +110,7 @@ async function nativeHttp(scenario, raw) {
   const json = (status, data) => JSON.stringify({ status, data, headers: { 'Content-Type': 'application/json' }, url: o.url });
   const authed = scenario.loggedIn && !!(o.headers?.Authorization || o.headers?.authorization);
   const path = url.pathname;
+  if (process.env.CAPTURE_DEBUG) console.error('nativeHttp', o.method ?? 'GET', path);
   if (path === '/api/mobile/v1/capabilities') return authed ? json(200, { ...capability, expiresAt: inMinutes(4) }) : json(401, { error: { code: 'UNAUTHORIZED' } });
   if (path === '/api/me/entitlements' || path === '/api/billing/reconcile') return authed ? json(200, { ...member, verifiedAt: now() }) : json(401, { error: { code: 'UNAUTHORIZED' } });
   if (path === '/api/mobile/v1/account') return authed ? json(200, { displayName: '確認 太郎', email: 'reviewer@example.com', sdsHistory: [] }) : json(401, { error: { code: 'UNAUTHORIZED' } });
@@ -124,9 +125,23 @@ async function nativeHttp(scenario, raw) {
     const body = typeof o.data === 'string' ? JSON.parse(o.data) : o.data;
     return json(200, { version: 1, requestId: body.requestId, feature: body.feature, status: 'completed', answer: '【スタブ回答】高さ2m以上の箇所で作業床を設けることが困難なときは、墜落制止用器具を使用させる等の措置が必要です（安衛則518条）。', conditions: ['作業床の設置可否'], evidence: [{ title: '労働安全衛生規則 第518条', original: '事業者は、高さが二メートル以上の箇所で作業を行なう場合において…', url: 'https://laws.e-gov.go.jp/law/347M50002000032', verification: 'e-Gov原文', asOf: '2026-11-01' }], safety: { reviewed: true, dangerousAssertionsBlocked: true }, charged: true, usage: { limit: 3, used: 1, remaining: 2, reserved: 0, resetAt: inMinutes(600) } });
   }
+  if ((path === '/api/chatbot/stream' || path === '/api/chatbot') && JSON.stringify(o.data ?? '').includes('REJECT_TEST')) {
+    // Shared-quota boundary rejection: error is an object, not a string.
+    return json(400, { error: { code: 'INVALID_REQUEST', message: '入力が長すぎます。短くしてもう一度送ってください。' } });
+  }
   if (path === '/api/chatbot/stream' || path === '/api/chatbot') {
     const sse = 'event: done\ndata: ' + JSON.stringify({ answer: '【スタブ回答】安衛則518条に基づき…', citations: [] }) + '\n\n';
     return JSON.stringify({ status: 200, data: Buffer.from(sse).toString('base64'), headers: { 'Content-Type': 'text/event-stream' }, url: o.url });
+  }
+  // Chemical catalogue search/confirm (no AI): real production response.
+  if (path.startsWith('/api/chemical/') && !path.includes('ra')) {
+    try {
+      const r = await fetch(o.url, { method: o.method ?? 'GET', headers: { Accept: 'application/json', 'Content-Type': 'application/json', Origin: SITE }, body: (o.method ?? 'GET') === 'GET' ? undefined : (typeof o.data === 'string' ? o.data : JSON.stringify(o.data)), signal: AbortSignal.timeout(20000) });
+      const type = r.headers.get('content-type') ?? '';
+      const data = type.includes('json') ? await r.json() : Buffer.from(await r.arrayBuffer()).toString('base64');
+      if (process.env.CAPTURE_DEBUG) console.error('chemical', r.status, typeof o.data, String(o.data).slice(0, 80), JSON.stringify(data).slice(0, 120));
+      return JSON.stringify({ status: r.status, data, headers: { 'Content-Type': type }, url: o.url });
+    } catch { return json(503, { error: { code: 'UNAVAILABLE' } }); }
   }
   // Read-only public feeds: real production GET (no AI, no login).
   if ((o.method ?? 'GET') === 'GET' && ['/api/signage-data', '/api/revisions', '/api/mobile/v1/statistics', '/api/mobile/v1/billing/config'].includes(path)) {
@@ -208,6 +223,33 @@ for (const [name, scenario] of Object.entries(scenarios)) {
       if (await composer.isVisible().catch(() => false)) { await composer.scrollIntoViewIfNeeded(); await composer.tap(); await composer.fill('足場の手すりの高さは？'); await shot('04a-chatbot-composer', 600); }
     }
     if (name === 'happy') {
+      // #1093 checks: composer above the tab bar, rejected input shows a message, chemical confirm visible.
+      await page.goto(`${ORIGIN}/chatbot/`); await page.waitForTimeout(2500);
+      const geometry = await page.evaluate(() => {
+        const composer = document.querySelector('[data-chatbot-composer]')?.getBoundingClientRect();
+        const tabs = document.querySelector('[data-mobile-nav="bottom"]')?.getBoundingClientRect();
+        return { composerBottom: composer?.bottom ?? null, tabsTop: tabs?.top ?? null };
+      });
+      await shot('14-chat-composer-above-tabs', 300);
+      const box = page.locator('[data-chatbot-composer] textarea').first();
+      await box.fill('REJECT_TEST 足場の手すりの高さ'); await page.locator('[data-chatbot-composer] button[type="submit"]').first().click();
+      await page.waitForTimeout(2000);
+      const rejected = { message: await page.getByText('入力が長すぎます').count(), crashed: await page.getByText(/Application error|問題が発生しました/).count() };
+      await shot('15-chat-rejected-input', 300);
+      await page.goto(`${ORIGIN}/chemical-ra/`); await page.waitForTimeout(2500);
+      const search = page.getByPlaceholder(/例: トルエン/).first();
+      await search.click(); await search.fill('トルエン'); await page.waitForTimeout(3000);
+      const option = page.getByRole('option').first();
+      let confirm = { candidates: await page.getByRole('option').count() };
+      if (confirm.candidates) {
+        await option.locator('button').first().click(); await page.waitForTimeout(1500);
+        const proceed = page.getByRole('button', { name: /名称とCASを確認して続行/ });
+        const r = await proceed.boundingBox();
+        const tabsTop = await page.evaluate(() => document.querySelector('[data-mobile-nav="bottom"]')?.getBoundingClientRect().top ?? 852);
+        confirm = { ...confirm, proceedVisible: !!r && r.y >= 103 && r.y + r.height <= tabsTop };
+      }
+      await shot('16-chemical-confirm-visible', 300);
+      results.push({ step: 'sweep-1093', geometry, composerAboveTabs: geometry.composerBottom !== null && geometry.tabsTop !== null && geometry.composerBottom <= geometry.tabsTop, rejected, confirm });
       // Tap test: every top-bar item and every bottom tab, hit-tested at its centre first.
       const hitTest = async (locator) => {
         const box = await locator.boundingBox();
