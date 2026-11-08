@@ -400,7 +400,7 @@ export function CreateSimplePanel({ initialQuery = "" }: { initialQuery?: string
                           <Plus className="h-4 w-4 shrink-0 text-emerald-700" aria-hidden="true" />
                           <span className="min-w-0 flex-1">
                             <span className="block truncate text-sm font-bold text-slate-900 dark:text-white">{r[1]}</span>
-                            <span className="block text-xs text-slate-500 dark:text-slate-400">CAS {r[0]}</span>
+                            <span className="block text-xs text-slate-600 dark:text-slate-400">CAS {r[0]}</span>
                           </span>
                         </button>
                       </li>
@@ -754,7 +754,7 @@ export function CreateSimplePanel({ initialQuery = "" }: { initialQuery?: string
                 <li key={r.id} className="flex items-center gap-2 py-2">
                   <button type="button" onClick={() => openRecord(r)} className="min-h-11 min-w-0 flex-1 text-left">
                     <span className="block truncate text-sm font-bold text-slate-900 dark:text-white">{r.title}</span>
-                    <span className="block text-xs text-slate-500 dark:text-slate-400">
+                    <span className="block text-xs text-slate-600 dark:text-slate-400">
                       {new Date(r.savedAt).toLocaleString("ja-JP")}・{r.components.map((c) => c.substance.name).join("、")}
                     </span>
                   </button>
@@ -766,7 +766,7 @@ export function CreateSimplePanel({ initialQuery = "" }: { initialQuery?: string
                       deleteRecord(r.id);
                       setRecords(loadRecords());
                     }}
-                    className="flex min-h-11 min-w-11 items-center justify-center rounded-lg text-slate-500 hover:bg-rose-50 hover:text-rose-700"
+                    className="flex min-h-11 min-w-11 items-center justify-center rounded-lg text-slate-600 hover:bg-rose-50 hover:text-rose-700"
                   >
                     <Trash2 className="h-4 w-4" aria-hidden="true" />
                   </button>
@@ -776,7 +776,7 @@ export function CreateSimplePanel({ initialQuery = "" }: { initialQuery?: string
           </section>
         )}
 
-        <p className="text-xs text-slate-500 dark:text-slate-400">厚生労働省 CREATE-SIMPLE の手法に基づく計算</p>
+        <p className="text-xs text-slate-600 dark:text-slate-400">厚生労働省 CREATE-SIMPLE の手法に基づく計算</p>
       </div>
 
       {result && input && (

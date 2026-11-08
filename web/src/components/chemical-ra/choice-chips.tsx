@@ -62,7 +62,7 @@ export function ChoiceChips<T extends string | number>({
             >
               <span>{option.label}</span>
               {option.hint && (
-                <span className={`text-[11px] font-normal ${selected ? "text-emerald-50" : "text-slate-500 dark:text-slate-400"}`}>
+                <span className={`text-[11px] font-normal ${selected ? "text-emerald-50" : "text-slate-600 dark:text-slate-400"}`}>
                   {option.hint}
                 </span>
               )}

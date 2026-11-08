@@ -72,7 +72,7 @@ export function ComponentCard({
           type="button"
           onClick={onRemove}
           aria-label={`${substance.name}を外す`}
-          className="flex min-h-11 min-w-11 items-center justify-center rounded-lg text-slate-500 hover:bg-rose-50 hover:text-rose-700"
+          className="flex min-h-11 min-w-11 items-center justify-center rounded-lg text-slate-600 hover:bg-rose-50 hover:text-rose-700"
         >
           <Trash2 className="h-4 w-4" aria-hidden="true" />
         </button>
@@ -120,7 +120,7 @@ export function ComponentCard({
           <span className="min-w-0 flex-1 text-slate-800 dark:text-slate-100">
             {VOLATILITY_LABEL[isPowder ? 2 : 1][substance.volatility]}
             {!volatilityOverridden && (
-              <span className="block text-xs text-slate-500 dark:text-slate-400">
+              <span className="block text-xs text-slate-600 dark:text-slate-400">
                 {temperature !== null && pt === 1 && substance.boilingPoint !== null && substance.volatility !== 4
                   ? `沸点と取扱温度 ${formatNumber(temperature)}℃ から自動`
                   : "沸点・蒸気圧から自動"}

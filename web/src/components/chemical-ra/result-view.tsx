@@ -84,7 +84,7 @@ function ComponentDetail({ r }: { r: CsComponentResult }) {
           <div key={row.label} className="flex items-start gap-2">
             <dt className="w-28 shrink-0 text-xs font-bold text-slate-700 dark:text-slate-200">{row.label}</dt>
             <dd className="flex min-w-0 flex-1 items-start gap-2">
-              {row.level ? <LevelBadge level={row.level} /> : <span className="text-xs text-slate-500">—</span>}
+              {row.level ? <LevelBadge level={row.level} /> : <span className="text-xs text-slate-600">—</span>}
               {row.detail && <span className="text-xs text-slate-600 dark:text-slate-300">{row.detail}</span>}
             </dd>
           </div>
