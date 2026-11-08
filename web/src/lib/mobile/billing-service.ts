@@ -8,7 +8,20 @@ import { expireStripeIntent } from './stripe-purchase';
 export function billingDb() { if(!prisma || process.env.MOBILE_LEDGER_ENABLED!=='true') throw new Error('ENTITLEMENT_SYNC_PENDING');return prisma; }
 export async function lockMember(tx:Prisma.TransactionClient,userId:string) { await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`anzen:${userId}`},0))`; }
 export async function lockPushDevice(tx:Prisma.TransactionClient,token:string) { await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`anzen-push:${token}`},0))`; }
-async function identity(tx:Prisma.TransactionClient,userId:string) { return tx.mobileIdentity.upsert({where:{userId},create:{userId},update:{}}); }
+/**
+ * TestFlight / App Review buy in Apple's sandbox. Sandbox rights never reach ordinary production
+ * members; only the App Review account and the owner-listed TestFlight testers
+ * (MOBILE_SANDBOX_TESTER_EMAILS, comma separated, exact address match) are SANDBOX members.
+ */
+export function sandboxTesterEmails(env:NodeJS.ProcessEnv=process.env){return new Set((env.MOBILE_SANDBOX_TESTER_EMAILS??'').split(',').map(v=>v.trim().toLowerCase()).filter(v=>/^[^\s@]+@[^\s@]+$/.test(v)));}
+async function identity(tx:Prisma.TransactionClient,userId:string) {
+  const member=await tx.mobileIdentity.upsert({where:{userId},create:{userId},update:{}});
+  const testers=sandboxTesterEmails();
+  if(member.billingEnvironment==='SANDBOX'||!testers.size)return member;
+  const user=await tx.user.findUnique({where:{id:userId},select:{email:true}});
+  if(!user?.email||!testers.has(user.email.toLowerCase()))return member;
+  return tx.mobileIdentity.update({where:{userId},data:{billingEnvironment:'SANDBOX'}});
+}
 export async function entitlementInTransaction(tx:Prisma.TransactionClient,userId:string):Promise<EntitlementSnapshot> {
   const member=await identity(tx,userId);
   const [legacy,grants,intent]=await Promise.all([tx.subscription.findUnique({where:{userId}}),tx.mobileGrant.findMany({where:{userId}}),tx.mobilePurchaseIntent.findUnique({where:{userId}})]);

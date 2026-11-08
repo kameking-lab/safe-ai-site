@@ -1,101 +1,63 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import Stripe from "stripe";
-import { CheckCircle } from "lucide-react";
-import { Mascot } from "@/components/mascot";
-import { externalCredentialedServicesAllowed } from "@/lib/server/deployment-safety";
+import { redirect } from "next/navigation";
+import { auth } from "@/auth";
+import { billingDb, getEntitlement, lockMember } from "@/lib/mobile/billing-service";
+import { resumeStripeIntent } from "@/lib/mobile/stripe-purchase";
+import { safeReturnPath } from "@/lib/pro-sales";
 
-export const metadata: Metadata = {
-  title: "決済完了",
-  description: "プランへのお申し込みありがとうございました。",
-  robots: { index: false, follow: false },
-  openGraph: {
-    title: "決済完了",
-    description: "プランへのお申し込みありがとうございました。",
-  },
-};
-
+export const metadata: Metadata = { title: "決済完了", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
 
 interface Props {
-  searchParams: Promise<{ session_id?: string }>;
+  searchParams: Promise<{ session_id?: string; returnTo?: string; n?: string }>;
 }
 
-function priceIdToPlanName(priceId: string | null | undefined): string {
-  if (!priceId) return "プラン";
-  if (priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO) return "プロ";
-  if (priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_PREMIUM) return "スタンダード";
-  return "プラン";
-}
-
-async function fetchPlan(sessionId: string | undefined): Promise<string | null> {
-  if (!sessionId) return null;
-  if (!externalCredentialedServicesAllowed()) return null;
-  const key = process.env.STRIPE_SECRET_KEY;
-  if (!key) return null;
+/**
+ * Stripe から戻った所。Webhook を待たずに、この会員の決済セッションを Stripe に直接
+ * 問い合わせて権利を確定し、Pro になっていれば元の画面へそのまま戻す。
+ */
+async function confirm(userId: string): Promise<"pro" | "free" | "unknown"> {
   try {
-    const stripe = new Stripe(key);
-    const session = await stripe.checkout.sessions.retrieve(sessionId, {
-      expand: ["line_items"],
-    });
-    const priceId = session.line_items?.data?.[0]?.price?.id ?? null;
-    return priceIdToPlanName(priceId);
-  } catch (err) {
-    console.error("[pricing/success] failed to retrieve session", err);
-    return null;
+    await billingDb().$transaction(async (tx) => {
+      await lockMember(tx, userId);
+      const intent = await tx.mobilePurchaseIntent.findUnique({ where: { userId } });
+      if (intent && intent.status === "pending" && intent.source === "stripe" && intent.providerSessionId) {
+        await resumeStripeIntent(tx, intent);
+      }
+    }, { timeout: 20_000 });
+  } catch {
+    // Webhook 側でも確定する。ここでは表示のための確認だけ。
+  }
+  try {
+    return (await getEntitlement(userId)).plan;
+  } catch {
+    return "unknown";
   }
 }
 
 export default async function PricingSuccessPage({ searchParams }: Props) {
-  const { session_id } = await searchParams;
-  const plan = await fetchPlan(session_id);
-
+  const { returnTo, n } = await searchParams;
+  const back = safeReturnPath(returnTo);
+  const session = await auth();
+  const userId = (session?.user as { id?: string } | undefined)?.id;
+  if (!userId) redirect(`/auth/signin?callbackUrl=${encodeURIComponent("/account")}`);
+  const plan = await confirm(userId);
+  if (plan === "pro") redirect(back ?? "/chatbot");
+  const tries = Math.min(Number(n) || 0, 10);
+  const next = `/pricing/success?n=${tries + 1}${back ? `&returnTo=${encodeURIComponent(back)}` : ""}`;
   return (
-    <div className="mx-auto max-w-lg px-4 py-16 text-center">
-      <div className="mx-auto mb-4 flex justify-center">
-        <Mascot variant="salute" size="lg" alt="敬礼するマスコット" />
-      </div>
-      <h1 className="mb-3 inline-flex items-center gap-2 text-2xl font-bold text-slate-900">
-        <CheckCircle className="h-6 w-6 text-emerald-500" aria-hidden="true" />
-        決済が完了しました
-      </h1>
-      <p className="text-slate-600 text-sm leading-7 mb-8">
-        {plan ? (
-          <>
-            <strong>{plan}プラン</strong> へのお申し込みありがとうございます。
-            <br />
-            すべての機能をご利用いただけます。
-          </>
-        ) : (
-          <>
-            ご登録ありがとうございます。
-            <br />
-            領収書はご登録メールアドレスに届きます。
-          </>
-        )}
-        <br />
-        プランの変更・解約はマイページから行えます。
+    <div className="mx-auto max-w-md px-4 py-14 text-center" aria-live="polite">
+      {tries < 10 ? <meta httpEquiv="refresh" content={`3;url=${next}`} /> : null}
+      <h1 className="text-xl font-bold text-slate-900">お支払いを確認しています…</h1>
+      <p className="mt-3 text-sm text-slate-600">
+        {tries < 10
+          ? "数秒で自動的に元の画面へ戻ります。"
+          : "確認に時間がかかっています。マイページで状態をご確認ください。二重に支払う必要はありません。"}
       </p>
-      <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
-        <Link
-          href="/account"
-          className="rounded-xl bg-blue-600 px-6 py-3 text-sm font-bold text-white hover:bg-blue-700"
-        >
-          マイページへ
-        </Link>
-        <Link
-          href="/chatbot"
-          className="rounded-xl bg-amber-500 px-6 py-3 text-sm font-bold text-white hover:bg-amber-600"
-        >
-          AIチャットを使う
-        </Link>
-        <Link
-          href="/"
-          className="rounded-xl border border-slate-200 px-6 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-        >
-          トップへ戻る
-        </Link>
-      </div>
+      <Link href="/account" className="mt-6 inline-flex min-h-11 items-center rounded-xl border border-slate-300 px-5 text-sm font-semibold">
+        マイページ
+      </Link>
     </div>
   );
 }

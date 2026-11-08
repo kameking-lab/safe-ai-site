@@ -4,13 +4,21 @@ import { ogImageUrl } from "@/lib/og-url";
 import { PricingContent } from "./PricingContent";
 import { PageContainer } from "@/components/layout";
 import { PAID_MODE } from "@/lib/paid-mode";
+import { webProSalesReady } from "@/lib/pro-sales";
+import { ProOffer } from "./pro-offer";
 
 import { PageJsonLd } from "@/components/page-json-ld";
 const _title = "料金プラン｜無料・月額・受託までの5プラン";
 const _desc =
   "安全AIポータル の料金プラン。無料¥0／スタンダード¥980／プロ¥2,980／ビジネス¥29,800／受託（個別見積）の5層。個人から500名規模まで、段階的に導入できます。";
 
-export const metadata: Metadata = PAID_MODE
+export const metadata: Metadata = webProSalesReady()
+  ? {
+      title: "安全AI Pro｜月額980円",
+      description: "法令AIチャットを1日50回まで（無料は1日3回）。ウェブとアプリで共通の安全AI Pro。",
+      alternates: { canonical: "/pricing" },
+    }
+  : PAID_MODE
   ? {
       title: _title,
       description: _desc,
@@ -33,6 +41,7 @@ export const metadata: Metadata = PAID_MODE
     };
 
 export default function PricingPage() {
+  if (webProSalesReady()) return <ProOffer />;
   if (!PAID_MODE) {
     return (
       <PageContainer width="narrow" className="py-12 sm:py-16">

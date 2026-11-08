@@ -8,6 +8,8 @@ import { PageContainer } from "@/components/layout";
 import { ConclusionCard } from "@/components/ui/conclusion-card";
 import { computeAccountConclusion } from "@/lib/account-conclusion";
 import { PAID_MODE } from "@/lib/paid-mode";
+import { webProSalesReady } from "@/lib/pro-sales";
+import { ProMembership } from "./pro-membership";
 
 import { PageJsonLd } from "@/components/page-json-ld";
 export const metadata: Metadata = {
@@ -108,7 +110,7 @@ export default async function AccountPage({ searchParams }: Props) {
         </div>
       )}
 
-      <ConclusionCard
+      {webProSalesReady() && userId ? <ProMembership userId={userId} /> : <ConclusionCard
         tone={conclusion.tone}
         value={PAID_MODE ? planLabel : "無料"}
         title={conclusion.title}
@@ -134,7 +136,7 @@ export default async function AccountPage({ searchParams }: Props) {
             )}
           </>
         )}
-      </ConclusionCard>
+      </ConclusionCard>}
 
       <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <div className="flex items-center justify-between gap-3">
