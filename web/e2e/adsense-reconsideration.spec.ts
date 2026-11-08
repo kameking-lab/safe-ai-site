@@ -12,12 +12,10 @@ test.beforeEach(async ({ context }) => {
   });
 });
 
-test("@smoke 法令検索の説明を開いても低い画面で入力欄を使える", async ({ page }) => {
+test("@smoke 法令AIは低い画面でも入力欄を使える", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 480 });
   await page.goto("/chatbot");
   await expect(page.getByText("作業の言葉から、関連する条文と確認条件を探せます。", { exact: true })).toBeVisible();
-  await page.getByText("回答の仕組み・評価方法", { exact: true }).click();
-  await expect(page.getByRole("link", { name: "評価方法と確認範囲" })).toBeVisible();
   const input = page.locator("[data-chatbot-composer] textarea");
   await input.scrollIntoViewIfNeeded();
   await input.fill("足場の手すりは？");
@@ -30,14 +28,10 @@ test("@smoke 法令検索の説明を開いても低い画面で入力欄を使�
   expect(contained).toBe(true);
 });
 
-test("@smoke 過去の生成回答率は現在の提供方式とは別の開閉欄にある", async ({ page }) => {
+test("@smoke 評価ページは生成回答の機械チェックを現在の方式として示す", async ({ page }) => {
   await page.goto("/about/chatbot-eval");
-  await expect(page.getByText(/現在の提供方式：/)).toBeVisible();
-  const historicalHeading = page.getByRole("heading", { name: "生成回答の自作機械チェック（限定セット）", includeHidden: true });
-  await expect(historicalHeading).toBeHidden();
-  await page.locator("summary").filter({ hasText: "過去の生成回答チェック" }).click();
-  await expect(historicalHeading).toBeVisible();
-  await expect(page.getByText("生成AIを利用していた時点の参考記録です。現在の検索・定型回答の正確さや安全性を示しません。")).toBeVisible();
+  await expect(page.getByText(/現在の提供方式：/)).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "生成回答の自作機械チェック（限定セット）" })).toBeVisible();
 });
 
 for (const width of [375, 1280]) {

@@ -7,12 +7,13 @@ import { KyHandoffLink } from "@/components/ky-handoff-link";
 import { inspectChemicalNavigationQuery } from "@/lib/chemical/query-safety";
 import { assessCreateSimple } from "@/lib/create-simple/assess";
 import { loadSubstanceData, type LoadedSubstanceData } from "@/lib/create-simple/client-data";
-import { planImprovements, suggestImprovements } from "@/lib/create-simple/improvements";
+import { planImprovements, suggestImprovements, summarize, worstLevel } from "@/lib/create-simple/improvements";
 import {
   AMOUNT_LABEL,
   CONTACT_AREA_LABEL,
   GLOVE_LABEL,
   GLOVE_TRAINING_LABEL,
+  RISK_LEVEL_MEANING,
   VENTILATION_LABEL,
   WORKING_HOURS_LABEL,
 } from "@/lib/create-simple/labels";
@@ -36,7 +37,7 @@ import { ChoiceChips, YesNoChips } from "./choice-chips";
 import { ComponentCard } from "./component-card";
 import { ManualSubstanceForm } from "./manual-substance-form";
 import { PrintReport } from "./print-report";
-import { ResultView } from "./result-view";
+import { LevelBadge, ResultView } from "./result-view";
 
 const EXAMPLES = ["トルエン", "キシレン", "酢酸エチル"];
 
@@ -275,6 +276,7 @@ export function CreateSimplePanel({ initialQuery = "" }: { initialQuery?: string
   const result = useMemo(() => (input ? assessCreateSimple(input) : null), [input]);
   const improvements = useMemo(() => (input ? suggestImprovements(input) : []), [input]);
   const plan = useMemo(() => (input ? planImprovements(input) : null), [input]);
+  const worst = useMemo(() => (result ? worstLevel(summarize(result)) : null), [result]);
 
   const update = <K extends keyof ConditionDraft>(key: K, value: ConditionDraft[K]) =>
     setDraft((d) => ({ ...d, [key]: value }));
@@ -579,6 +581,26 @@ export function CreateSimplePanel({ initialQuery = "" }: { initialQuery?: string
                 onChange={(v) => update("contactArea", v)}
               />
             </section>
+
+            {/* 条件を選んでいる間も、画面の下に結果（リスクレベル）を出し続ける。 */}
+            <a
+              href="#cs-step3"
+              data-cs-result-bar=""
+              aria-live="polite"
+              className="sticky bottom-[calc(var(--mobile-bottom-nav-h,0px)+env(safe-area-inset-bottom,0px)+8px)] z-20 flex min-h-14 items-center gap-3 rounded-2xl border-2 border-slate-900 bg-white px-3 py-2 shadow-lg dark:border-slate-200 dark:bg-slate-900"
+            >
+              {worst ? (
+                <>
+                  <LevelBadge level={worst} />
+                  <span className="min-w-0 flex-1 text-sm font-black text-slate-950 dark:text-white">{RISK_LEVEL_MEANING[worst]}</span>
+                  <span className="shrink-0 text-xs font-bold text-emerald-800 dark:text-emerald-300">下げ方↓</span>
+                </>
+              ) : (
+                <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                  リスクレベルは「{missingAll.join("・")}」を選ぶと出ます
+                </span>
+              )}
+            </a>
 
             <details className="group rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
               <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2">
