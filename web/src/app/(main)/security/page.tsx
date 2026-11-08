@@ -225,7 +225,7 @@ export default function SecurityPage() {
           <p className="text-sm leading-7 text-slate-600">
             安全AIポータルの一部生成AI機能（法令チャット、KY支援、解説生成等）は、環境設定時に
             Google LLC が提供する <strong>Gemini API（Google AI Studio）</strong>を利用します。
-            化学物質RAの自動評価は停止しており、SDSと公式ツールの確認導線のみを提供します。
+            化学物質RAのリスクレベル判定は生成AIを使わず、厚生労働省 CREATE-SIMPLE の手法に基づくサイト内の計算で行います。
           </p>
           <ul className="space-y-3 text-sm text-slate-600">
             <li className="flex items-start gap-2">

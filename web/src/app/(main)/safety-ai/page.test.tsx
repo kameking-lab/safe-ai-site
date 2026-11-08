@@ -63,7 +63,7 @@ describe("/safety-ai simple landing page", () => {
     for (const [name, href] of [
       ["WBGTを見る", "/risk"],
       ["法令を聞く", "/chatbot"],
-      ["物質を調べる", "/chemical-ra"],
+      ["リスクを判定", "/chemical-ra"],
       ["最新事故を見る", "/accident-news"],
       ["5分学ぶ", "/education"],
       ["KYTを始める", "/training/visual-ky"],

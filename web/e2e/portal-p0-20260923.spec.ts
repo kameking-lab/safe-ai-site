@@ -60,7 +60,7 @@ test("LPの7機能から専用入力画面と全機能を利用でき、JavaScri
   await expect(page.locator('[data-chatbot-composer] button[type="submit"]')).toBeVisible();
   await page.goBack();
   await toolLink(page, "/chemical-ra").click();
-  await expect(page.getByRole("combobox", { name: "物質名・CAS番号・SDS記載名" })).toBeVisible();
+  await expect(page.getByRole("searchbox", { name: "物質名またはCAS番号" })).toBeVisible();
   await page.goBack();
   await page.locator('#tools a[href="/features"]').click();
   await expect(page.getByRole("heading", { name: "目的と運用状態から機能を選ぶ" })).toBeVisible();
@@ -80,7 +80,7 @@ test("LPの7機能から専用入力画面と全機能を利用でき、JavaScri
     await expect(plain.locator("#chatbot-no-script-message")).toBeVisible();
     await minimumTarget(plain.getByRole("button", { name: "送信", exact: true }));
     await plain.goto("/chemical-ra");
-    await expect(plain.getByRole("navigation", { name: "JavaScriptなしの化学物質確認" })).toBeVisible();
+    await expect(plain.getByRole("heading", { name: "JavaScriptを有効にすると判定できます" })).toBeVisible();
     await plain.goto("/training/safety-seminars/safety-management-basics-osh-law");
     const summary = plain.locator("details > summary").filter({ hasText: /^1\. / }).first();
     await expect(summary).toBeVisible();
@@ -217,13 +217,6 @@ test("専用画面で化学物質の入力を検索後も保持し、URL・stora
   test.setTimeout(60_000);
   const requestedUrls: string[] = [];
   page.on("request", (request) => requestedUrls.push(request.url()));
-  let requestedName: unknown;
-  await page.route("**/api/chemical/search", (route) => route.fulfill({ json: { ok: true, items: [] } }));
-  await page.route("**/api/chemical/legal-profile", (route) => route.fulfill({ json: { resolved: false } }));
-  await page.route("**/api/chemical-ra", async (route) => {
-    requestedName = route.request().postDataJSON().chemicalName;
-    await route.fulfill({ json: { chemicalName: "トルエン", casNumber: "108-88-3", flashPoint: "4℃", exposureLimit: "50ppm", ghsHazards: [], ppeRecommendations: [], safetyMeasures: [], emergencyMeasures: [], regulatoryNotes: [], relatedHazards: [], assessmentStatus: "unavailable", assessmentNotice: "公式SDSと専門家による最終確認が必要です。", aiStatus: "disabled_for_safety" } });
-  });
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
   await toolLink(page, "/chemical-ra").scrollIntoViewIfNeeded();
@@ -232,12 +225,7 @@ test("専用画面で化学物質の入力を検索後も保持し、URL・stora
   const query = page.locator("#chemical-onebox-input");
   await query.fill("トルエン");
   await expect(query).toHaveValue("トルエン");
-  await expect(page.getByText(/いずれにも見つかりません/)).toBeVisible();
-  await query.press("Enter");
-  await expect.poll(() => requestedName).toBe("トルエン");
-  await expect(query).toHaveValue("トルエン");
-  await expect(page.getByRole("heading", { name: "トルエン CAS: 108-88-3" })).toBeVisible();
-  await expect(page.getByText("判定値未算出", { exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: /トルエン.*CAS 108-88-3/ })).toBeVisible();
   await assertPrivateInput(page, "トルエン", requestedUrls);
   await page.goBack();
   await restoreToolPosition(page, "/chemical-ra", beforeY);

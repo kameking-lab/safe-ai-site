@@ -307,7 +307,7 @@ export const SOURCE_REGISTRY: readonly SourceRegistryRecord[] = [
     reviewer: null,
     appliesTo: ["化学物質リスクアセスメント"],
     disclosure: "public",
-    note: "本サイトの独自簡易スクリーニングとは別の公式支援ツールです。",
+    note: "厚生労働省の化学物質リスクアセスメント支援ツール。本サイトの化学物質リスクアセスメントはこの手法（ver3.2.1）で計算しています。",
   },
   {
     id: "jaish-law-search",

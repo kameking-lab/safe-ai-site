@@ -184,7 +184,7 @@ test("JavaScript無効でも7道具・事故の確認状態・通常リンクを
     )).toEqual(["/chatbot", "/chemical-ra"]);
     await expect(mainEntrances.getByRole("link", { name: /化学物質リスクアセスメント/u })).toHaveAttribute("href", "/chemical-ra");
     await expect(tools.getByRole("navigation", { name: "ほかの現場支援ツール" })
-      .getByRole("link", { name: "化学物質RA準備", exact: true })).toHaveAttribute("href", "/chemical-ra");
+      .getByRole("link", { name: "化学物質RA", exact: true })).toHaveAttribute("href", "/chemical-ra");
     await expect(tools.locator('[data-lp-tool][href="/chatbot"]')).toHaveAttribute("href", "/chatbot");
     await expect(page.getByRole("link", { name: /すべての機能を見る/ })).toHaveAttribute("href", "/features");
     const details = page.locator("details[data-mobile-site-menu]");

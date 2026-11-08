@@ -28,7 +28,7 @@ const uses = [
 // The two things the portal does best, first on the page for web and the iOS app alike.
 const strengths = [
   { id: "law-chat", href: "/chatbot", title: "安衛法AIチャット", copy: "作業の言葉で質問すると、関連する条文と確認条件を探せます。", action: "質問する", mascot: "/mascot/mascot-chat-talk-v4.webp", width: 640, height: 640 },
-  { id: "chemical-ra", href: "/chemical-ra", title: "化学物質リスクアセスメント", copy: "物質名・CAS番号から法規制・SDS・対策を確認し、RAの準備を進めます。", action: "調べる", mascot: "/mascot/mascot-chemical-lab.webp", width: 240, height: 310 },
+  { id: "chemical-ra", href: "/chemical-ra", title: "化学物質リスクアセスメント", copy: "物質名・CAS番号と作業条件から、吸入・経皮吸収・爆発火災のリスクレベルをその場で判定します。", action: "判定する", mascot: "/mascot/mascot-chemical-lab.webp", width: 240, height: 310 },
 ] as const;
 const wrap = "mx-auto max-w-[1280px] px-5 lg:px-10";
 const focus = "focus-visible:outline-4 focus-visible:outline-offset-4 focus-visible:outline-[#638332]";
@@ -53,7 +53,7 @@ export function HomeLP({ availability, latestNews }: { availability: AutomationC
           <div className={styles.heroCopy}>
             <p className={styles.eyebrow}>現場を支える人のための、安全と業務の道具。</p>
             <h1 id="home-lp-title" className={styles.title}><span>その書類、</span><span>AIに任せて、</span><span>現場に行こう。</span></h1>
-            <p className={styles.heroDescription}>法令の根拠を確かめる。化学物質RAの準備を進める。事故報道の出典と確認状態を見る。現場で判断するための情報整理を支えます。</p>
+            <p className={styles.heroDescription}>法令の根拠を確かめる。化学物質のリスクレベルをその場で判定する。事故報道の出典と確認状態を見る。現場で判断するための情報整理を支えます。</p>
             <div className={styles.actions}>
               <Link href="#tools" className={styles.primary}><ChihuahuaButtonContent variant="tools" trailing={<ArrowUpRight size={16} aria-hidden="true" />}>道具を使う</ChihuahuaButtonContent></Link>
               <Link href="#consult" className={styles.secondary}><ChihuahuaButtonContent variant="consult" trailing={<ArrowUpRight size={16} aria-hidden="true" />}>{availability.accepting ? "自動化を相談する" : "相談の料金を見る"}</ChihuahuaButtonContent></Link>
@@ -72,7 +72,7 @@ export function HomeLP({ availability, latestNews }: { availability: AutomationC
           <h3 className={styles.purposeTitle}>{use.title}</h3><p className={styles.purposeCopy}>{use.copy}</p>
           <div className={styles.toolGrid}>{use.tools.map(({ href, title, copy, icon: Icon }) => <Link key={href} href={href} prefetch={false} data-lp-tool className={styles.tool}><div className={styles.toolCaption}><Icon size={22} aria-hidden="true" />{href === "/tools/construction-calculators" ? <Image src="/mascot/mascot-calculator.webp" alt="電卓を持ち、計算を案内するチワワ" width={72} height={84} sizes="72px" /> : <ArrowUpRight size={20} aria-hidden="true" />}</div><h4>{title}</h4><p>{copy}</p></Link>)}</div>
         </div>)}</div>
-        <nav aria-label="ほかの現場支援ツール" className={styles.supportLinks}><Link href="/chemical-ra" prefetch={false}>化学物質RA準備</Link><Link href="/ky/paper" prefetch={false}>KY用紙</Link><Link href="/training/safety-seminars" prefetch={false}>安全研修スライド</Link><Link href="/materials/safety-images" prefetch={false}>現場安全看板</Link></nav>
+        <nav aria-label="ほかの現場支援ツール" className={styles.supportLinks}><Link href="/chemical-ra" prefetch={false}>化学物質RA</Link><Link href="/ky/paper" prefetch={false}>KY用紙</Link><Link href="/training/safety-seminars" prefetch={false}>安全研修スライド</Link><Link href="/materials/safety-images" prefetch={false}>現場安全看板</Link></nav>
 
       </section>
       <section aria-labelledby="home-origin-heading" className={styles.value}>

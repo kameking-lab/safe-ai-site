@@ -642,7 +642,7 @@ export function ChemicalDatabaseClient() {
                           className="inline-flex min-h-[44px] items-center gap-1 rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white shadow hover:bg-emerald-700"
                         >
                           <ClipboardCheck className="h-3.5 w-3.5" aria-hidden="true" />
-                          この物質でRAを準備
+                          この物質のリスクを判定
                         </Link>
                       ) : (
                         <TransientChemicalLink
@@ -650,7 +650,7 @@ export function ChemicalDatabaseClient() {
                           className="inline-flex min-h-[44px] items-center gap-1 rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white shadow hover:bg-emerald-700"
                         >
                           <ClipboardCheck className="h-3.5 w-3.5" aria-hidden="true" />
-                          この物質でRAを準備
+                          この物質のリスクを判定
                         </TransientChemicalLink>
                       )}
                       {s.sds_url && (
@@ -691,7 +691,7 @@ export function ChemicalDatabaseClient() {
               href="/chemical-ra"
               className="inline-flex min-h-[44px] items-center rounded-md border border-emerald-300 bg-white px-3 py-1.5 font-semibold text-emerald-700 hover:bg-emerald-50"
             >
-              化学物質RA準備
+              化学物質リスクアセスメント
             </Link>
           </li>
           <li>

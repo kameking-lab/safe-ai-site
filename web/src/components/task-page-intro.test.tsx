@@ -14,7 +14,7 @@ describe("TaskPageIntro", () => {
         title="化学物質リスクアセスメント"
         summary="入力前に利用の流れを確認できます。"
         primaryAction={{ href: "#start", label: "評価を始める" }}
-        things={["物質を特定", "SDS・成分を確認", "公式ツールへ引き継ぐ"]}
+        things={["物質を特定", "作業条件を選ぶ", "リスクレベルを確認"]}
         visual="chemical"
         compactOnMobile
       />,
@@ -26,7 +26,7 @@ describe("TaskPageIntro", () => {
     expect(accessibleSteps.className).toContain("sr-only");
     expect(accessibleSteps.className).not.toContain("hidden");
     expect(accessibleSteps.textContent).toContain("物質を特定");
-    expect(accessibleSteps.textContent).toContain("公式ツールへ引き継ぐ");
+    expect(accessibleSteps.textContent).toContain("リスクレベルを確認");
   });
 
   it("5段階フローを図解へ表示し、本文の要点は3件以内に保つ", () => {
@@ -35,20 +35,20 @@ describe("TaskPageIntro", () => {
         title="化学物質リスクアセスメント"
         summary="物質と作業条件を順に確認します。"
         primaryAction={{ href: "#start", label: "物質を確認する" }}
-        things={["物質を特定", "SDSを確認", "公式へ引き継ぐ"]}
+        things={["物質を特定", "作業条件を選ぶ", "対策を確認"]}
         visualSteps={[
           "物質を特定",
-          "SDSを確認",
-          "作業条件を入力",
-          "対策を確認",
-          "公式・専門家で最終確認",
+          "作業条件を選ぶ",
+          "リスクレベルを確認",
+          "対策で再評価",
+          "結果を記録",
         ]}
         visual="chemical"
       />,
     );
 
     const visual = document.querySelector('[aria-hidden="true"].relative');
-    expect(visual?.textContent).toContain("公式・専門家で最終確認");
+    expect(visual?.textContent).toContain("結果を記録");
     expect(
       screen.getByRole("list", { name: "このページでできること" }).children,
     ).toHaveLength(3);

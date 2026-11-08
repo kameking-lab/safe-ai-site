@@ -62,9 +62,8 @@ test("048 規制は閉じて開始し、閉じたまま絞り込みを解除で�
 test("052 選択後も固定の候補検索中表示を残さない", async ({ page }) => {
   await page.goto("/chemical-ra?cas=108-88-3");
   await expect(page.locator("header [data-status-badge]")).toHaveCount(0);
-  const input = page.getByRole("combobox");
-  await expect(input).toHaveValue("トルエン");
-  await expect(page.getByText("候補を検索中", { exact: true })).toHaveCount(0);
+  await expect(page.getByRole("list", { name: "判定する物質" })).toContainText("トルエン");
+  await expect(page.getByText("物質データを読み込み中…", { exact: true })).toHaveCount(0);
   await expect(page.locator("header [data-status-badge]")).toHaveCount(0);
 });
 

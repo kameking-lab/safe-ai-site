@@ -27,14 +27,14 @@ export const ROUTE_CONTENT_CHANGES = {
     change: "足場の手すりの続き質問に対する回答挙動（同じ確認質問の繰り返しを解消）",
   },
   "/chemical-ra": {
-    changedOn: "2026-10-13",
-    evidence: "1ecc8bc5 (#1076): 化学物質RAを準備記録として明示し、保存記録の作業条件・SDS確認導線とPDF表示を更新",
-    change: "RA準備画面の表示範囲・保存記録・SDS確認導線の変更",
+    changedOn: "2026-11-08",
+    evidence: "ec5c09a5: 厚生労働省 CREATE-SIMPLE ver3.2.1 と同じ計算で吸入・経皮吸収・危険性のリスクレベルをその場で判定し、下げる対策を再評価する画面に作り替え",
+    change: "リスクレベルの判定・低減策の再評価・保存/印刷/CSV の追加（準備ツールからの置き換え）",
   },
   "/chemical-database": {
-    changedOn: "2026-10-13",
-    evidence: "1ecc8bc5 (#1076): 化学物質DB一覧に公式対象情報の確認表示、検索順位と詳細からの条件復元、RA準備への案内を追加・修正",
-    change: "物質一覧の検索・復元挙動、対象情報の説明、RA準備導線の変更",
+    changedOn: "2026-11-08",
+    evidence: "ddbdf1e8: 化学物質DBの案内文と詳細ページの導線を、リスクレベルをその場で判定する化学物質リスクアセスメントへ変更",
+    change: "化学物質リスクアセスメントへの案内文・導線の変更",
   },
   "/chemical-ra/product-search": {
     changedOn: "2026-08-08",

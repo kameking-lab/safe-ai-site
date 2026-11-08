@@ -45,41 +45,15 @@ for (const width of [1280, 390]) {
       expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
     });
 
-    test("アセトンDBから同じCASの公的GHS分類を確認できる", async ({ page }) => {
+    test("アセトンDBから同じCASのGHS分類・ばく露限界値でリスクアセスメントを始められる", async ({ page }) => {
       await page.goto("/chemical-database/67-64-1");
-      const searchResponsePromise = page.waitForResponse((item) =>
-        item.url().endsWith("/api/chemical/search") &&
-        item.request().method() === "POST" &&
-        item.request().postDataJSON()?.query === "67-64-1",
-      );
       await page.locator('a[href="/chemical-ra?cas=67-64-1"]').first().click();
-      const input = page.getByRole("combobox", { name: "物質名・CAS番号・SDS記載名" });
-      await input.waitFor({ state: "visible" });
-      const searchResponse = await searchResponsePromise;
-      expect(searchResponse.status()).toBe(200);
-      expect((await searchResponse.json()).items).toContainEqual(expect.objectContaining({ cas: "67-64-1", primaryName: "アセトン" }));
-      await expect(input).toHaveValue("アセトン");
-      const [response] = await Promise.all([
-        page.waitForResponse((item) => item.url().endsWith("/api/chemical-ra") && item.request().method() === "POST"),
-        page.getByRole("button", { name: "公的情報を確認", exact: true }).click(),
-      ]);
-      expect(response.status()).toBe(200);
-      const result = await response.json();
-      expect(result.casNumber).toBe("67-64-1");
-      expect(result.ghsHazards).toHaveLength(5);
-      expect(result.aiStatus).toBe("disabled_for_safety");
-      expect(result.assessmentStatus).toBe("unavailable");
-      await expect(page.getByRole("heading", { name: "GHSハザード分類（一部収録・5項目）", exact: true })).toBeVisible();
-      const ghsSection = page.getByRole("heading", { name: "GHSハザード分類（一部収録・5項目）", exact: true }).locator("..");
-      for (const hazard of result.ghsHazards) {
-        const category = ghsSection.getByText(hazard.category, { exact: true });
-        await expect(category).toBeVisible();
-        await expect(category.locator("..").locator("..").getByText(hazard.classification, { exact: true })).toBeVisible();
-      }
-      await expect(page.getByText(/政府版GHSの主要有害性区分は未収録です/)).toHaveCount(0);
-      await expect(page.getByText(/GHS分類を表示できません/)).toHaveCount(0);
-      await expect(page.getByRole("link", { name: "NITE 政府版GHS分類の出典", exact: true })).toHaveAttribute("href", "https://www.chem-info.nite.go.jp/chem/ghs/m-nite-67-64-1.html");
-      await expect(page.getByText("未算出", { exact: true })).toBeVisible();
+      const list = page.getByRole("list", { name: "判定する物質" });
+      await expect(list).toContainText("アセトン");
+      await list.getByText(/GHS分類・ばく露限界値/).click();
+      await expect(list.getByText("引火性液体", { exact: true })).toBeVisible();
+      await expect(list.getByText("区分2", { exact: true }).first()).toBeVisible();
+      await expect(list.getByText("日本産業衛生学会 許容濃度", { exact: true })).toBeVisible();
       expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
     });
 

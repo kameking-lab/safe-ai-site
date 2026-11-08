@@ -779,7 +779,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: "/guides/chemical-ra-create-simple",
-      lastModified: "2026-07-23",
+      lastModified: "2026-11-08",
       priority: 0.8,
       changeFrequency: "monthly",
     },
