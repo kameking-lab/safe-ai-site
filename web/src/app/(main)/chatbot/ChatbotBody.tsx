@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { PageContainer } from "@/components/layout";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ChatbotClientBridge } from "./ChatbotClientBridge";
+import { ChatbotViewportSection } from "./ChatbotViewportSection";
 import {
   LEGAL_GENERATION_ENABLED,
   LEGAL_GENERATION_OFF_NOTICE,
@@ -30,9 +31,8 @@ export function ChatbotBody() {
           }
         }
       `}</style>
-      <section
+      <ChatbotViewportSection
         className="mx-auto flex min-h-0 w-full max-w-3xl flex-col"
-        style={{ height: "clamp(20rem, calc(100dvh - 9rem), 52rem)" }}
         aria-labelledby="chatbot-title"
       >
         <header className="mb-2 shrink-0 px-1 sm:mb-3">
@@ -105,7 +105,7 @@ export function ChatbotBody() {
             <ChatbotClientBridge />
           </Suspense>
         </div>
-      </section>
+      </ChatbotViewportSection>
       {!LEGAL_GENERATION_ENABLED && (
         <details className="mx-auto mt-2 w-full max-w-3xl text-xs text-slate-600 dark:text-slate-300">
           <summary className="min-h-11 cursor-pointer content-center font-medium">

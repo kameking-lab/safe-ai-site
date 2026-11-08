@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { FlaskConical, Search, ChevronDown } from "lucide-react";
 import dynamic from "next/dynamic";
 import type { MergedChemical } from "@/lib/mhlw-chemicals";
@@ -71,6 +71,10 @@ export function UnifiedChemicalSearch({
     null,
   );
   const [confirming, setConfirming] = useState(false);
+  // 候補をタップすると確認欄は候補リスト（最大 max-h-72）の下に出る。スマホでは
+  // 画面外（下のタブバーの裏）になり「タップしても反応しない」ように見えたので、
+  // 確認欄が出たら見える位置までスクロールする。
+  const confirmationRef = useRef<HTMLElement>(null);
   const [databaseChecked, setDatabaseChecked] = useState(false);
   const [databaseUnavailable, setDatabaseUnavailable] = useState(false);
 
@@ -139,6 +143,17 @@ export function UnifiedChemicalSearch({
       ac.abort();
     };
   }, [q, selectedChemical, selectedMatchesQuery]);
+
+  useEffect(() => {
+    if (!pendingCandidate) return;
+    const reduceMotion =
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    confirmationRef.current?.scrollIntoView?.({
+      block: "nearest",
+      behavior: reduceMotion ? "auto" : "smooth",
+    });
+  }, [pendingCandidate]);
 
   // DBに候補が無いときだけ、法令名称（CASレス告示名・群指定名）の解決を試す
   useEffect(() => {
@@ -330,8 +345,10 @@ export function UnifiedChemicalSearch({
 
       {pendingCandidate && (
         <section
+          ref={confirmationRef}
           aria-labelledby={`${listId}-confirmation-title`}
-          className="rounded-xl border-2 border-amber-500 bg-amber-50 p-4"
+          data-chemical-candidate-confirmation=""
+          className="scroll-mb-[calc(var(--mobile-bottom-nav-h,0px)+env(safe-area-inset-bottom,0px)+1rem)] rounded-xl border-2 border-amber-500 bg-amber-50 p-4"
         >
           <h3
             id={`${listId}-confirmation-title`}

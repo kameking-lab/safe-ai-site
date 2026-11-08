@@ -233,4 +233,32 @@ describe("UnifiedChemicalSearch fail-closed", () => {
       screen.queryByText("この物質候補を確認してください"),
     ).toBeNull();
   });
+  it("候補をタップしたら確認欄を画面内へスクロールする（スマホで続行ボタンが画面外に出ない）", async () => {
+    vi.mocked(searchChemicalCatalog).mockResolvedValue([TOLUENE]);
+    const scrollIntoView = vi.fn();
+    const original = HTMLElement.prototype.scrollIntoView;
+    HTMLElement.prototype.scrollIntoView = scrollIntoView;
+    try {
+      render(<ConfirmedSelectionHarness onPick={() => undefined} />);
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(181);
+      });
+      expect(scrollIntoView).not.toHaveBeenCalled();
+
+      fireEvent.click(screen.getByRole("option").querySelector("button")!);
+
+      const confirmation = screen
+        .getByText("この物質候補を確認してください")
+        .closest("section")!;
+      expect(scrollIntoView).toHaveBeenCalledTimes(1);
+      expect(scrollIntoView.mock.contexts[0]).toBe(confirmation);
+      expect(scrollIntoView.mock.calls[0]?.[0]).toMatchObject({ block: "nearest" });
+      // 下のタブバー＋ホームインジケーターの裏で止まらない余白
+      expect(confirmation.className).toContain(
+        "scroll-mb-[calc(var(--mobile-bottom-nav-h,0px)+env(safe-area-inset-bottom,0px)+1rem)]",
+      );
+    } finally {
+      HTMLElement.prototype.scrollIntoView = original;
+    }
+  });
 });
