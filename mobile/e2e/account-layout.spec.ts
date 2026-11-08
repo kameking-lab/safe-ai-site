@@ -43,7 +43,8 @@ for (const arrival of ['membership', 'details'] as const) test(`deletion keeps t
     await page.locator('summary', { hasText: 'アカウントの削除' }).press('Enter');
     await expect(page.getByRole('button', { name: 'アカウント削除を開始', exact: true })).toBeVisible();
     const start = page.getByRole('button', { name: 'アカウント削除を開始', exact: true });
-    await start.scrollIntoViewIfNeeded();
+    // Centre it so the fixed bottom tab bar never covers it (the test is about data arriving, not overlap).
+    await start.evaluate(element => element.scrollIntoView({ block: 'center' }));
     const before = await start.boundingBox();
     // This is the physical press duration, not an added readiness wait.
     await start.click({ delay: 200 });

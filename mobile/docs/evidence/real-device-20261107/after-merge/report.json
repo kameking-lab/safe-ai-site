@@ -5,7 +5,7 @@
         "step": "01-launch",
         "url": "/",
         "issues": [],
-        "textLen": 1311,
+        "textLen": 1321,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -13,7 +13,7 @@
         "step": "01b-launch-scrolled",
         "url": "/",
         "issues": [],
-        "textLen": 1311,
+        "textLen": 1321,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -21,7 +21,7 @@
         "step": "02-ai-tab",
         "url": "/portal/",
         "issues": [],
-        "textLen": 407,
+        "textLen": 408,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -31,7 +31,7 @@
         "issues": [
           "small-target \"労働安全衛生規則 第518条\" 307x28"
         ],
-        "textLen": 576,
+        "textLen": 577,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -39,7 +39,7 @@
         "step": "04-chatbot",
         "url": "/chatbot/",
         "issues": [],
-        "textLen": 232,
+        "textLen": 243,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -51,9 +51,82 @@
         "step": "04a-chatbot-composer",
         "url": "/chatbot/",
         "issues": [],
-        "textLen": 232,
+        "textLen": 226,
         "title": "安全AIポータル",
         "bodyEmpty": false
+      },
+      {
+        "step": "tap-test",
+        "taps": [
+          {
+            "label": "会員・Pro",
+            "ok": true,
+            "at": [
+              279,
+              85
+            ],
+            "url": "/account/"
+          },
+          {
+            "label": "ホーム",
+            "ok": true,
+            "at": [
+              39,
+              794
+            ],
+            "url": "/"
+          },
+          {
+            "label": "化学RA",
+            "ok": true,
+            "at": [
+              118,
+              794
+            ],
+            "url": "/chemical-ra/"
+          },
+          {
+            "label": "法令AI",
+            "ok": true,
+            "at": [
+              196,
+              794
+            ],
+            "url": "/chatbot/"
+          },
+          {
+            "label": "学ぶ",
+            "ok": true,
+            "at": [
+              275,
+              794
+            ],
+            "url": "/education-certification/"
+          },
+          {
+            "label": "メニュー",
+            "ok": true,
+            "at": [
+              354,
+              794
+            ],
+            "url": "/features/"
+          },
+          {
+            "label": "戻る",
+            "ok": true,
+            "at": [
+              37,
+              85
+            ],
+            "url": "/features/"
+          },
+          {
+            "label": "共有",
+            "ok": true,
+            "shared": true
+          }
+        ]
       },
       {
         "step": "04b-tap-account-from-portal",
@@ -61,7 +134,7 @@
         "issues": [
           "small-target \"新規検索 →\" 74x20"
         ],
-        "textLen": 359,
+        "textLen": 369,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -69,7 +142,7 @@
         "step": "04c-back-button",
         "url": "/",
         "issues": [],
-        "textLen": 1311,
+        "textLen": 1321,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -79,7 +152,7 @@
         "issues": [
           "small-target \"新規検索 →\" 74x20"
         ],
-        "textLen": 359,
+        "textLen": 369,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -89,7 +162,7 @@
         "issues": [
           "small-target \"新規検索 →\" 74x20"
         ],
-        "textLen": 359,
+        "textLen": 369,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -99,7 +172,7 @@
         "issues": [
           "small-target \"新規検索 →\" 74x20"
         ],
-        "textLen": 359,
+        "textLen": 369,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -109,7 +182,7 @@
         "issues": [
           "small-target \"新規検索 →\" 74x20"
         ],
-        "textLen": 532,
+        "textLen": 542,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -119,7 +192,7 @@
         "issues": [
           "small-target \"新規検索 →\" 74x20"
         ],
-        "textLen": 588,
+        "textLen": 598,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -127,7 +200,7 @@
         "step": "08-notifications",
         "url": "/notifications/",
         "issues": [],
-        "textLen": 1008,
+        "textLen": 992,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -135,7 +208,7 @@
         "step": "09-features",
         "url": "/features/",
         "issues": [],
-        "textLen": 2905,
+        "textLen": 2915,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -143,7 +216,7 @@
         "step": "10-back",
         "url": "/notifications/",
         "issues": [],
-        "textLen": 1008,
+        "textLen": 992,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -151,7 +224,7 @@
         "step": "11-exams",
         "url": "/e-learning/exams/",
         "issues": [],
-        "textLen": 4308,
+        "textLen": 4318,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -159,7 +232,7 @@
         "step": "12-home",
         "url": "/",
         "issues": [],
-        "textLen": 1311,
+        "textLen": 1321,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -171,7 +244,7 @@
         "step": "12b-home-scrolled",
         "url": "/",
         "issues": [],
-        "textLen": 1311,
+        "textLen": 1321,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -183,7 +256,7 @@
         "step": "13-contact-privacy-note",
         "url": "/contact/",
         "issues": [],
-        "textLen": 566,
+        "textLen": 576,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -204,7 +277,7 @@
         "step": "01-launch",
         "url": "/",
         "issues": [],
-        "textLen": 1311,
+        "textLen": 1321,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -212,7 +285,7 @@
         "step": "01b-launch-scrolled",
         "url": "/",
         "issues": [],
-        "textLen": 1311,
+        "textLen": 1321,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -236,7 +309,7 @@
         "step": "04-chatbot",
         "url": "/chatbot/",
         "issues": [],
-        "textLen": 229,
+        "textLen": 239,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -248,7 +321,7 @@
         "step": "04a-chatbot-composer",
         "url": "/chatbot/",
         "issues": [],
-        "textLen": 229,
+        "textLen": 222,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -256,7 +329,7 @@
         "step": "05-account",
         "url": "/account/",
         "issues": [],
-        "textLen": 271,
+        "textLen": 281,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -264,7 +337,7 @@
         "step": "05b-account-scrolled-sticky",
         "url": "/account/",
         "issues": [],
-        "textLen": 271,
+        "textLen": 281,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -272,7 +345,7 @@
         "step": "06-account-bottom",
         "url": "/account/",
         "issues": [],
-        "textLen": 271,
+        "textLen": 281,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -288,7 +361,7 @@
         "step": "07-after-login-tap",
         "url": "/account/",
         "issues": [],
-        "textLen": 271,
+        "textLen": 281,
         "title": "安全AIポータル",
         "bodyEmpty": false
       }
@@ -305,7 +378,7 @@
         "step": "01-launch",
         "url": "/",
         "issues": [],
-        "textLen": 1311,
+        "textLen": 1321,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -313,7 +386,7 @@
         "step": "01b-launch-scrolled",
         "url": "/",
         "issues": [],
-        "textLen": 1311,
+        "textLen": 1321,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -337,7 +410,7 @@
         "step": "04-chatbot",
         "url": "/chatbot/",
         "issues": [],
-        "textLen": 229,
+        "textLen": 239,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -349,7 +422,7 @@
         "step": "04a-chatbot-composer",
         "url": "/chatbot/",
         "issues": [],
-        "textLen": 229,
+        "textLen": 222,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -357,7 +430,7 @@
         "step": "05-account",
         "url": "/account/",
         "issues": [],
-        "textLen": 271,
+        "textLen": 281,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -365,7 +438,7 @@
         "step": "05b-account-scrolled-sticky",
         "url": "/account/",
         "issues": [],
-        "textLen": 271,
+        "textLen": 281,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -373,7 +446,7 @@
         "step": "06-account-bottom",
         "url": "/account/",
         "issues": [],
-        "textLen": 271,
+        "textLen": 281,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -389,7 +462,7 @@
         "step": "07-after-login-tap",
         "url": "/account/",
         "issues": [],
-        "textLen": 309,
+        "textLen": 319,
         "title": "安全AIポータル",
         "bodyEmpty": false
       }
@@ -406,7 +479,7 @@
         "step": "01-launch",
         "url": "/",
         "issues": [],
-        "textLen": 1311,
+        "textLen": 1321,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -414,7 +487,7 @@
         "step": "01b-launch-scrolled",
         "url": "/",
         "issues": [],
-        "textLen": 1311,
+        "textLen": 1321,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -430,7 +503,7 @@
         "step": "05-account",
         "url": "/account/",
         "issues": [],
-        "textLen": 271,
+        "textLen": 281,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -438,7 +511,7 @@
         "step": "05b-account-scrolled-sticky",
         "url": "/account/",
         "issues": [],
-        "textLen": 271,
+        "textLen": 281,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -446,7 +519,7 @@
         "step": "06-account-bottom",
         "url": "/account/",
         "issues": [],
-        "textLen": 271,
+        "textLen": 281,
         "title": "安全AIポータル",
         "bodyEmpty": false
       }
@@ -463,7 +536,7 @@
         "step": "01-launch",
         "url": "/",
         "issues": [],
-        "textLen": 1311,
+        "textLen": 1321,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -471,7 +544,7 @@
         "step": "01b-launch-scrolled",
         "url": "/",
         "issues": [],
-        "textLen": 1311,
+        "textLen": 1321,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -479,7 +552,7 @@
         "step": "02-ai-tab",
         "url": "/portal/",
         "issues": [],
-        "textLen": 407,
+        "textLen": 408,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -489,7 +562,7 @@
         "issues": [
           "small-target \"新規検索 →\" 74x20"
         ],
-        "textLen": 359,
+        "textLen": 369,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -499,7 +572,7 @@
         "issues": [
           "small-target \"新規検索 →\" 74x20"
         ],
-        "textLen": 359,
+        "textLen": 369,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -509,7 +582,7 @@
         "issues": [
           "small-target \"新規検索 →\" 74x20"
         ],
-        "textLen": 359,
+        "textLen": 369,
         "title": "安全AIポータル",
         "bodyEmpty": false
       }
@@ -526,7 +599,7 @@
         "step": "01-launch",
         "url": "/",
         "issues": [],
-        "textLen": 1311,
+        "textLen": 1321,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -534,7 +607,7 @@
         "step": "01b-launch-scrolled",
         "url": "/",
         "issues": [],
-        "textLen": 1311,
+        "textLen": 1321,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -542,7 +615,7 @@
         "step": "02-ai-tab",
         "url": "/portal/",
         "issues": [],
-        "textLen": 407,
+        "textLen": 408,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -552,7 +625,7 @@
         "issues": [
           "small-target \"新規検索 →\" 74x20"
         ],
-        "textLen": 359,
+        "textLen": 369,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -562,7 +635,7 @@
         "issues": [
           "small-target \"新規検索 →\" 74x20"
         ],
-        "textLen": 359,
+        "textLen": 369,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -572,7 +645,7 @@
         "issues": [
           "small-target \"新規検索 →\" 74x20"
         ],
-        "textLen": 359,
+        "textLen": 369,
         "title": "安全AIポータル",
         "bodyEmpty": false
       }
@@ -589,7 +662,7 @@
         "step": "01-launch",
         "url": "/",
         "issues": [],
-        "textLen": 1311,
+        "textLen": 1321,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -597,7 +670,7 @@
         "step": "01b-launch-scrolled",
         "url": "/",
         "issues": [],
-        "textLen": 1311,
+        "textLen": 1321,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -613,7 +686,7 @@
         "step": "05-account",
         "url": "/account/",
         "issues": [],
-        "textLen": 271,
+        "textLen": 281,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -621,7 +694,7 @@
         "step": "05b-account-scrolled-sticky",
         "url": "/account/",
         "issues": [],
-        "textLen": 271,
+        "textLen": 281,
         "title": "安全AIポータル",
         "bodyEmpty": false
       },
@@ -629,7 +702,7 @@
         "step": "06-account-bottom",
         "url": "/account/",
         "issues": [],
-        "textLen": 271,
+        "textLen": 281,
         "title": "安全AIポータル",
         "bodyEmpty": false
       }

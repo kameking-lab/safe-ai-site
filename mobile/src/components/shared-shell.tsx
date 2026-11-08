@@ -7,6 +7,8 @@ import { installWebTransport } from '../lib/web-transport';
 import { openSource } from '../lib/native';
 import { SITE } from '../lib/api';
 import { SharedUsageMeter } from './shared-usage-meter';
+// The website's mobile tab bar (ホーム・化学RA・法令AI・学ぶ・メニュー), same component as the web.
+import { MobileBottomNav } from '@/components/MobileBottomNav';
 import { DisplaySettings } from './display-settings';
 export function SharedShell({ children }: { children: ReactNode }) {
   const [message,setMessage]=useState('');
@@ -18,9 +20,10 @@ export function SharedShell({ children }: { children: ReactNode }) {
     return()=>{document.removeEventListener('click',feeds,true);};
   }, []);
   return <><style>{`a[href='/ky'],a[href^='/ky/'],a[href='/safety-diary'],a[href^='/safety-diary/'],a[href='/site-records/near-miss']{display:none!important}`}</style><header hidden={pathname==='/signage/display'} className="sticky top-[env(safe-area-inset-top)] z-50 flex items-center gap-1 whitespace-nowrap border-b bg-white px-2 py-1 text-slate-900 print:hidden">
-    {/* No browser chrome in the app: one row, a real back button, 44pt targets. Other screens are one tap away in 全機能. */}
+    {/* No browser chrome in the app: one row, a real back button, 44pt targets. */}
     <button aria-label="戻る" className="min-h-11 min-w-11 shrink-0 rounded-lg px-2 font-semibold" onClick={() => { if (window.history.length > 1) window.history.back(); else window.location.assign('/'); }}>‹ 戻る</button>
-    <Link className="inline-flex min-h-11 shrink-0 items-center px-2" href="/">安全AI</Link><Link className="inline-flex min-h-11 shrink-0 items-center px-2" href="/features">全機能</Link><Link className="inline-flex min-h-11 shrink-0 items-center px-2" href="/account">会員・Pro</Link>
-    <button className="ml-auto min-h-11 shrink-0 rounded-lg border px-3 font-semibold" onClick={() => { void Share.share({ title: document.title, url: SITE + location.pathname + location.search }).catch(()=>{}); }}>共有</button>
-  </header>{message?<p role="alert" className="bg-amber-50 p-3 text-amber-950">{message}</p>:null}{pathname==='/chatbot'||pathname==='/chemical-ra'?<SharedUsageMeter/>:null}{pathname==='/features'?<DisplaySettings/>:null}<main className="pb-[max(24px,env(safe-area-inset-bottom))]">{children}</main></>;
+    {/* ホーム・全機能は下のタブにあるので上には置かない。今いる画面は色で示す。 */}
+    <Link className="ml-auto inline-flex min-h-11 shrink-0 items-center rounded-lg px-3 font-semibold aria-[current=page]:bg-emerald-50 aria-[current=page]:text-emerald-800" href="/account" aria-current={pathname==='/account'?'page':undefined}>会員・Pro</Link>
+    <button className="min-h-11 shrink-0 rounded-lg border px-3 font-semibold" onClick={() => { void Share.share({ title: document.title, url: SITE + location.pathname + location.search }).catch(()=>{}); }}>共有</button>
+  </header>{message?<p role="alert" className="bg-amber-50 p-3 text-amber-950">{message}</p>:null}{pathname==='/chatbot'||pathname==='/chemical-ra'?<SharedUsageMeter/>:null}{pathname==='/features'?<DisplaySettings/>:null}<main className="pb-[calc(var(--mobile-bottom-nav-h)+env(safe-area-inset-bottom)+24px)]">{children}</main>{pathname==="/signage/display"?null:<MobileBottomNav />}</>;
 }

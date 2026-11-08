@@ -16,3 +16,6 @@ body::before{content:"";position:fixed;top:0;left:0;right:0;height:env(safe-area
 @media (prefers-color-scheme:dark){body::before{background:#020617}}
 /* Full-screen sheets and slide decks from the shared web screens: keep their close buttons below the status bar. */
 .fixed.inset-0{padding-top:env(safe-area-inset-top)}
+/* App: the tab bar is always shown (also in landscape), above the home indicator. */
+.mobile-bottom-nav{display:block}
+:root{--mobile-bottom-nav-h:56px}

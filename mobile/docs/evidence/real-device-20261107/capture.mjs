@@ -208,6 +208,34 @@ for (const [name, scenario] of Object.entries(scenarios)) {
       if (await composer.isVisible().catch(() => false)) { await composer.scrollIntoViewIfNeeded(); await composer.tap(); await composer.fill('足場の手すりの高さは？'); await shot('04a-chatbot-composer', 600); }
     }
     if (name === 'happy') {
+      // Tap test: every top-bar item and every bottom tab, hit-tested at its centre first.
+      const hitTest = async (locator) => {
+        const box = await locator.boundingBox();
+        if (!box) return { ok: false, reason: 'no box' };
+        const cx = box.x + box.width / 2, cy = box.y + box.height / 2;
+        const ok = await locator.evaluate((el, [x, y]) => { const top = document.elementFromPoint(x, y); return !!top && (top === el || el.contains(top)); }, [cx, cy]);
+        await page.touchscreen.tap(cx, cy);
+        await page.waitForTimeout(1800);
+        return { ok, at: [Math.round(cx), Math.round(cy)], url: new URL(page.url()).pathname };
+      };
+      const taps = [];
+      for (const [label, target] of [['会員・Pro', 'header'], ['ホーム', 'tab'], ['化学RA', 'tab'], ['法令AI', 'tab'], ['学ぶ', 'tab'], ['メニュー', 'tab']]) {
+        await page.goto(`${ORIGIN}/features/`); await page.waitForTimeout(1500);
+        const locator = target === 'header' ? page.getByRole('banner').getByRole('link', { name: label }) : page.getByRole('navigation', { name: 'モバイル ボトムナビゲーション' }).getByRole('link', { name: label });
+        taps.push({ label, ...(await hitTest(locator)) });
+      }
+      await page.goto(`${ORIGIN}/features/`); await page.waitForTimeout(1200);
+      await page.goto(`${ORIGIN}/account/`); await page.waitForTimeout(1200);
+      taps.push({ label: '戻る', ...(await hitTest(page.getByRole('banner').getByRole('button', { name: '戻る' }))) });
+      await page.goto(`${ORIGIN}/`); await page.waitForTimeout(1200);
+      const share = page.getByRole('banner').getByRole('button', { name: '共有' });
+      const shareBox = await share.boundingBox();
+      const shareHit = await share.evaluate((el, [x, y]) => { const top = document.elementFromPoint(x, y); return !!top && (top === el || el.contains(top)); }, [shareBox.x + shareBox.width / 2, shareBox.y + shareBox.height / 2]);
+      await share.tap(); await page.waitForTimeout(500);
+      taps.push({ label: '共有', ok: shareHit, shared: await page.evaluate(() => !!window.__shared) });
+      results.push({ step: 'tap-test', taps });
+    }
+    if (name === 'happy') {
       // Real taps: portal header link, then the shared header back button.
       await page.goto(`${ORIGIN}/`); await page.waitForTimeout(1500);
       await tap(page.getByRole('banner').getByRole('link', { name: '会員・Pro' }));
