@@ -6,7 +6,25 @@ import { product,type Plan } from './entitlement';
 import { member,json,isNativeRequest,webMemberId } from './http';
 import { inspectAiOutbound } from '../ai-outbound-safety';
 import { validateChatbotRequestBoundary } from '../server/chatbot-request-boundary';
+import { consumeSharedRateLimit,getRateLimitSubject } from '../security/shared-state';
+import { webProSalesReady,appStoreSalesReady } from '../pro-sales';
 const context=new AsyncLocalStorage<{plan:Plan;operationId?:string}>();
+/** The free daily limit carries the member's plan so the client can offer Pro (never to a Pro member). */
+class DailyLimitError extends Error{constructor(readonly plan:Plan){super('DAILY_LIMIT_REACHED');}}
+/** Pro can be bought from where the request came from: App Store in the app, Stripe on the web. */
+export function upgradeAvailable(request:Request,plan:Plan|null){return plan!=='pro' && (isNativeRequest(request)?appStoreSalesReady():webProSalesReady());}
+/**
+ * Anonymous web visitors get the same free daily allowance as a free member once Pro is on sale,
+ * counted per visitor (IP-derived, HMAC'd) for the JST day. Before sales open this is a no-op, so
+ * the site keeps its free-to-browse behaviour with only the abuse limits.
+ */
+export async function anonymousFreeAllowance(request:Request,feature:AiFeature){
+  if(!webProSalesReady())return null;
+  const {day,resetAt}=jstKeys();const limit=product.limits.free[feature];
+  const result=await consumeSharedRateLimit({policy:{routeKey:`free-${feature}-${day}`,limit,windowMs:86400000},rawSubject:getRateLimitSubject(request)});
+  if(result.allowed)return null;
+  return json({error:{code:'DAILY_LIMIT_REACHED',message:`今日の無料${limit}回はここまでです。日本時間の0時にまた使えます。`,resetAt,plan:'free',upgrade:true}},429);
+}
 export type AiFeature='law_chat'|'chemical_ra';
 export function jstKeys(now=new Date()){
   const jst=new Date(now.getTime()+9*3600000).toISOString();const day=jst.slice(0,10);
@@ -67,7 +85,7 @@ async function reserve(request:Request,userId:string,feature:AiFeature){
     if(previous){if(previous.userId!==userId || previous.feature!==feature || previous.requestHash!==requestHash)throw new Error('INVALID_REQUEST');
       if(previous.status==='completed' && previous.response)return {id,plan:rights.plan,replay:previous.response};throw new Error(previous.status==='released'?'OPERATION_RELEASED':'OPERATION_PENDING');}
     const rows=await tx.mobileUsageOperation.findMany({where:{userId,feature,day,status:{in:['completed','reserved','uncertain']}},select:{createdAt:true,status:true}});
-    if(rows.length>=rights.limits[feature])throw new Error(rows.some(r=>r.status!=='completed')?'OPERATION_PENDING':'DAILY_LIMIT_REACHED');
+    if(rows.length>=rights.limits[feature]){if(rows.some(r=>r.status!=='completed'))throw new Error('OPERATION_PENDING');throw new DailyLimitError(rights.plan);}
     const recent=await tx.mobileUsageOperation.count({where:{userId,feature,createdAt:{gt:new Date(Date.now()-60000)}}});
     if(rights.plan==='pro' && recent>=product.proBurstPerMinute)throw new Error('BURST_LIMITED');
     await tx.mobileUsageOperation.create({data:{id,userId,feature,day,requestHash,expiresAt:new Date(Date.now()+300000)}});
@@ -107,7 +125,11 @@ export async function withUsage(request:Request,feature:AiFeature,run:(request:R
   if(!isNativeRequest(request)){
     let signedIn:string|null;
     try{signedIn=await webMemberId();}catch{signedIn=null;}
-    if(!signedIn)return run(request);
+    if(!signedIn){
+      let limited:Response|null;
+      try{limited=await anonymousFreeAllowance(request,feature);}catch{return json({error:{code:'ENTITLEMENT_SYNC_PENDING',message:'無料枠を確認できないため、いまはAIを止めています。時間をおいてお試しください。'}},503);}
+      return limited??run(request);
+    }
   }
   const chunks:Uint8Array[]=[];let bytes=0;const reader=request.body?.getReader();
   if(reader)while(true){const item=await reader.read();if(item.done)break;bytes+=item.value.byteLength;if(bytes>65536){await reader.cancel();return json({error:{code:'INVALID_REQUEST',message:'入力が長すぎます。'}},413);}chunks.push(item.value);}
@@ -138,8 +160,9 @@ export async function withUsage(request:Request,feature:AiFeature,run:(request:R
   }catch(e){
     if(operation)await billingDb().mobileUsageOperation.updateMany({where:{id:operation.id,status:'reserved'},data:{status:'released'}}).catch(()=>{});
     const known=['UNAUTHORIZED','FORBIDDEN','INVALID_REQUEST','OPERATION_PENDING','OPERATION_RELEASED','DAILY_LIMIT_REACHED','BURST_LIMITED','ENTITLEMENT_SYNC_PENDING','AI_BUDGET_STOPPED','AI_BUDGET_FREE_PAUSED'];const code=e instanceof Error&&known.includes(e.message)?e.message:'ENTITLEMENT_SYNC_PENDING';
-    const message=code==='DAILY_LIMIT_REACHED'?'本日の上限に達しました。日本時間の次の0時に回復します。':code==='UNAUTHORIZED'?'AIを利用するには会員ログインが必要です。':code==='BURST_LIMITED'?'短時間の利用が集中しています。60秒後に再度お試しください。':code==='OPERATION_PENDING'?'同じ操作を処理中です。再送せず、処理の完了をお待ちください。':'サーバーの安全な実行条件を確認できません。権利の再確認をお試しください。';
-    const result=json({error:{code,message,resetAt:jstKeys().resetAt}},code==='UNAUTHORIZED'?401:code==='FORBIDDEN'?403:code.includes('LIMIT')?429:503);
+    const limitPlan=e instanceof DailyLimitError?e.plan:null;
+    const message=code==='DAILY_LIMIT_REACHED'?(limitPlan==='free'?`今日の無料${product.limits.free[feature]}回はここまでです。日本時間の0時にまた使えます。`:'本日の上限に達しました。日本時間の次の0時に回復します。'):code==='UNAUTHORIZED'?'AIを利用するには会員ログインが必要です。':code==='BURST_LIMITED'?'短時間の利用が集中しています。60秒後に再度お試しください。':code==='OPERATION_PENDING'?'同じ操作を処理中です。再送せず、処理の完了をお待ちください。':'サーバーの安全な実行条件を確認できません。権利の再確認をお試しください。';
+    const result=json({error:{code,message,resetAt:jstKeys().resetAt,...(limitPlan?{plan:limitPlan,upgrade:upgradeAvailable(request,limitPlan)}:{})}},code==='UNAUTHORIZED'?401:code==='FORBIDDEN'?403:code.includes('LIMIT')?429:503);
     if(code==='BURST_LIMITED')result.headers.set('Retry-After','60');return result;
   }
 }

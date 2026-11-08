@@ -17,6 +17,30 @@ function getStripe(): Stripe | null {
   return new Stripe(key);
 }
 
+const MANAGE_ONLY_TAG = "anzen-pro-manage-only-v1";
+/**
+ * 契約管理（解約・支払方法・請求書）だけを許す Customer Portal 設定。プラン変更は不可にして、
+ * 旧料金の価格へ切り替えられないようにする。環境変数で指定が無ければ、同じ印の設定を
+ * Stripe から探し、無ければ1つ作る（オーナーが管理画面で ID を拾う作業を無くす）。
+ */
+async function manageOnlyPortalConfiguration(stripe: Stripe, siteUrl: string): Promise<string> {
+  const existing = await stripe.billingPortal.configurations.list({ active: true, limit: 100 });
+  const found = existing.data.find((c) => c.metadata?.purpose === MANAGE_ONLY_TAG);
+  if (found) return found.id;
+  const created = await stripe.billingPortal.configurations.create({
+    business_profile: { headline: "安全AI Pro の契約管理", privacy_policy_url: `${siteUrl}/privacy`, terms_of_service_url: `${siteUrl}/terms` },
+    features: {
+      subscription_cancel: { enabled: true, mode: "at_period_end" },
+      payment_method_update: { enabled: true },
+      invoice_history: { enabled: true },
+      customer_update: { enabled: false },
+      subscription_update: { enabled: false },
+    },
+    metadata: { purpose: MANAGE_ONLY_TAG },
+  });
+  return created.id;
+}
+
 export async function POST() {
   if (!isPaidModeReady() || !prisma) {
     return privateJson(
@@ -50,8 +74,11 @@ export async function POST() {
   }
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
-  const nativeManagementConfiguration=process.env.STRIPE_MANAGE_ONLY_PORTAL_CONFIGURATION_ID;
-  if(process.env.MOBILE_LEDGER_ENABLED==='true' && !nativeManagementConfiguration)return privateJson({error:'購読管理の設定を確認できません。'},503);
+  let nativeManagementConfiguration=process.env.STRIPE_MANAGE_ONLY_PORTAL_CONFIGURATION_ID;
+  if(process.env.MOBILE_LEDGER_ENABLED==='true' && !nativeManagementConfiguration){
+    try{nativeManagementConfiguration=await manageOnlyPortalConfiguration(stripe,siteUrl);}
+    catch{return privateJson({error:'購読管理の設定を確認できません。'},503);}
+  }
   try {
     const portal = await stripe.billingPortal.sessions.create({
       customer: sub.stripeCustomerId,

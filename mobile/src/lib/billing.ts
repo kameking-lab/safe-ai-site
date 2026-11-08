@@ -3,6 +3,7 @@ import { Capacitor } from '@capacitor/core';
 import { z } from 'zod';
 import product from '@/lib/mobile/product-policy.json';
 import { siteApi } from './session';
+import { StoreError } from './store-errors';
 const snapshotSchema=z.object({plan:z.enum(['free','pro']),source:z.enum(['stripe','app_store']).nullable(),syncState:z.enum(['verified','pending','unavailable']),expiresAt:z.string().nullable(),appUserId:z.string().min(16),verifiedAt:z.string().datetime(),purchasePending:z.boolean().default(false),purchaseIntentId:z.string().nullable().default(null),purchaseSource:z.string().nullable().default(null),purchaseStage:z.string().nullable().default(null),limits:z.object({law_chat:z.number(),chemical_ra:z.number(),weatherLocations:z.number(),notifications:z.boolean()})})
   .refine(s=>JSON.stringify(s.limits)===JSON.stringify(product.limits[s.plan]))
   .refine(s=>s.plan!=='pro' || (!!s.expiresAt && Number.isFinite(Date.parse(s.expiresAt))));
@@ -19,7 +20,7 @@ export class BillingController {
   async entitlement(){return snapshotSchema.parse(await this.send('/api/me/entitlements'));}
   async sync(){return snapshotSchema.parse(await this.send('/api/billing/reconcile',{}));}
   async identify(config:BillingConfig,member:MemberEntitlement){
-    if(!this.native() || !config.publicKey || !config.ready)throw new Error('BILLING_NOT_CONFIGURED');
+    if(!this.native() || !config.publicKey || !config.ready)throw new StoreError('BILLING_NOT_CONFIGURED');
     if(!this.configured){await this.sdk.configure({apiKey:config.publicKey,appUserID:member.appUserId});this.configured=true;}
     else if(this.identified!==member.appUserId)await this.sdk.logIn({appUserID:member.appUserId});
     this.identified=member.appUserId;
@@ -28,8 +29,11 @@ export class BillingController {
     await this.identify(config,member);
     const offerings=await this.sdk.getOfferings();
     const candidates=offerings.all[config.offeringId??'']?.availablePackages??[];
+    // Name what App Store actually returned, so a real device shows the exact mismatch.
+    if(!candidates.length)throw new StoreError('NO_PACKAGES',`offering=${config.offeringId??'-'} / 取得=${Object.keys(offerings.all).join(',')||'なし'}`);
     const match=candidates.filter(p=>p.product.identifier===config.productId && p.packageType==='MONTHLY' && p.product.subscriptionPeriod===product.period && p.product.currencyCode===product.currency && p.product.price===config.policy.monthlyPrice);
-    if(match.length!==1 || config.policy.monthlyPrice!==product.monthlyPrice || config.policy.entitlement!==product.entitlement)throw new Error('PRODUCT_MISMATCH');
+    if(match.length!==1 || config.policy.monthlyPrice!==product.monthlyPrice || config.policy.entitlement!==product.entitlement)
+      throw new StoreError('PRODUCT_MISMATCH',candidates.map(p=>`${p.product.identifier} ${p.packageType} ${p.product.subscriptionPeriod??'-'} ${p.product.currencyCode} ${p.product.price}`).join(' / '));
     return match[0];
   }
   async purchase(config:BillingConfig){

@@ -29,6 +29,7 @@ vi.mock('@/lib/prisma',()=>{
   return {prisma};
 });
 import { withUsage,withProviderBudget,checkBudget,jstKeys,maximumProviderCost,rebuildRequest } from './usage';
+import { __resetDevelopmentSharedStateForTests } from '@/lib/security/shared-state';
 const request=(id=crypto.randomUUID())=>new Request('https://example.test/api/chatbot',{method:'POST',headers:{Authorization:'Bearer mock_session','Content-Type':'application/json','X-Operation-ID':id},body:JSON.stringify({message:'足場の手すり',privacyConfirmed:true})});
 const answer=()=>Response.json({answer:'公式根拠を確認してください。',source_type:'rag',sources:[{text:'原文',url:'https://laws.e-gov.go.jp/law/mock',asOf:new Date().toISOString()}]});
 beforeEach(()=>{state.operations=[];state.tail=Promise.resolve();state.paid=false;state.signedIn=true;state.budget={committedYen:0,reservedYen:0};state.reservations=[];vi.stubEnv('MOBILE_LEDGER_ENABLED','true');});afterEach(()=>vi.unstubAllEnvs());
@@ -89,6 +90,35 @@ describe('anonymous website visitors with the shared ledger on',()=>{
   it('keeps signed-in web members on the shared member quota',async()=>{
     const run=vi.fn(async()=>answer());expect((await withUsage(web(),'law_chat',run)).status).toBe(200);
     expect(state.operations).toHaveLength(1);
+  });
+  const salesOpen=()=>{vi.stubEnv('SAFE_AI_STAGING_MODE','false');vi.stubEnv('VERCEL_ENV','development');vi.stubEnv('NEXT_PUBLIC_PAID_MODE','true');vi.stubEnv('STRIPE_SECRET_KEY','synthetic-not-real');vi.stubEnv('STRIPE_ANZEN_PRO_MONTHLY_PRICE_ID','price_synthetic_pro');__resetDevelopmentSharedStateForTests();};
+  it('once Pro is on sale, gives an anonymous visitor the free daily allowance and then offers Pro',async()=>{
+    salesOpen();state.signedIn=false;const run=vi.fn(async()=>answer());
+    for(let i=0;i<3;i++)expect((await withUsage(web({'X-Forwarded-For':'198.51.100.7'}),'law_chat',run)).status).toBe(200);
+    const blocked=await withUsage(web({'X-Forwarded-For':'198.51.100.7'}),'law_chat',run);
+    expect(blocked.status).toBe(429);
+    expect(await blocked.json()).toMatchObject({error:{code:'DAILY_LIMIT_REACHED',plan:'free',upgrade:true}});
+    // Another visitor keeps their own allowance.
+    expect((await withUsage(web({'X-Forwarded-For':'198.51.100.8'}),'law_chat',run)).status).toBe(200);
+    expect(run).toHaveBeenCalledTimes(4);
+  });
+  it('tells a free member at the limit that Pro is available, and never a Pro member',async()=>{
+    salesOpen();
+    for(let i=0;i<3;i++)state.operations.push({id:crypto.randomUUID(),userId:'mock_member',feature:'law_chat',day:jstKeys().day,status:'completed',createdAt:new Date(Date.now()-120000),requestHash:'prior'});
+    const run=vi.fn(async()=>answer());
+    const free=await withUsage(web(),'law_chat',run);
+    expect(free.status).toBe(429);
+    expect(await free.json()).toMatchObject({error:{code:'DAILY_LIMIT_REACHED',plan:'free',upgrade:true,message:expect.stringContaining('無料3回')}});
+    state.paid=true;
+    for(let i=0;i<47;i++)state.operations.push({id:crypto.randomUUID(),userId:'mock_member',feature:'law_chat',day:jstKeys().day,status:'completed',createdAt:new Date(Date.now()-120000),requestHash:'prior'});
+    const pro=await withUsage(web(),'law_chat',run);
+    expect(await pro.json()).toMatchObject({error:{code:'DAILY_LIMIT_REACHED',plan:'pro',upgrade:false}});
+    expect(run).not.toHaveBeenCalled();
+  });
+  it('does not offer the web purchase while Pro is not on sale',async()=>{
+    for(let i=0;i<3;i++)state.operations.push({id:crypto.randomUUID(),userId:'mock_member',feature:'law_chat',day:jstKeys().day,status:'completed',createdAt:new Date(Date.now()-120000),requestHash:'prior'});
+    const response=await withUsage(web(),'law_chat',vi.fn(async()=>answer()));
+    expect(await response.json()).toMatchObject({error:{code:'DAILY_LIMIT_REACHED',plan:'free',upgrade:false}});
   });
   it('still reserves every anonymous provider call against the shared monthly budget as free',async()=>{
     vi.stubEnv('MOBILE_AI_PRICED_MODEL','gemini-3.8-flash');vi.stubEnv('MOBILE_AI_INPUT_JPY_PER_MILLION','160');vi.stubEnv('MOBILE_AI_OUTPUT_JPY_PER_MILLION','960');vi.stubEnv('MOBILE_AI_COST_MARGIN','1.5');
