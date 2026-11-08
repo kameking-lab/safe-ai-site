@@ -59,7 +59,7 @@ const COMPARISON_ROWS: Row[] = [
     category: "機能",
     item: "化学物質RA（改正安衛法対応）",
     values: {
-      anzen: "△ 名称・CAS・作業条件の簡易整理。SDS自動取込・確定評価は未提供",
+      anzen: "○ 物質名・CASと作業条件からリスクレベルをその場で判定。低減策の再評価・CSV記録",
       legacy: "△ 専用製品があれば対応",
       paper: "△ Excel + 手作業",
     },

@@ -105,11 +105,12 @@ describe("化学DBの保存済み規制情報による絞り込み", () => {
     }
   });
 
-  it("labels the site's RA route as preparation", () => {
+  it("labels the site's RA route as an on-site risk assessment", () => {
     render(<ChemicalDatabaseClient />);
     fireEvent.click(screen.getByRole("button", { name: /専門解説 50物質/ }));
-    expect(screen.getAllByText("この物質でRAを準備").length).toBeGreaterThan(0);
-    expect(screen.getByRole("link", { name: "化学物質RA準備" })).toBeTruthy();
+    expect(screen.getAllByText("この物質のリスクを判定").length).toBeGreaterThan(0);
+    expect(screen.getByRole("link", { name: "化学物質リスクアセスメント" })).toBeTruthy();
+    expect(screen.queryByText("この物質でRAを準備")).toBeNull();
     expect(screen.queryByText("この物質のリスクアセスメントを実施")).toBeNull();
   });
 

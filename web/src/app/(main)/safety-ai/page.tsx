@@ -71,9 +71,9 @@ const CAPABILITIES = [
   {
     icon: FlaskConical,
     title: "化学物質RA",
-    description: "物質名やCAS番号から、公的データと作業条件を整理します。",
+    description: "物質名やCAS番号と作業条件から、リスクレベルをその場で判定します。",
     href: "/chemical-ra",
-    cta: "物質を調べる",
+    cta: "リスクを判定",
   },
   {
     icon: Newspaper,

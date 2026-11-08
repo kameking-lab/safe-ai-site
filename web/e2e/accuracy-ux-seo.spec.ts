@@ -93,7 +93,7 @@ test("ホームは6幅で7つの道具と控えめなチワワから主要タス
     )).toEqual(["/chatbot", "/chemical-ra"]);
     await expect(mainEntrances.getByRole("link", { name: /化学物質リスクアセスメント/u })).toHaveAttribute("href", "/chemical-ra");
     await expect(mascotTools.getByRole("navigation", { name: "ほかの現場支援ツール" })
-      .getByRole("link", { name: "化学物質RA準備", exact: true })).toHaveAttribute("href", "/chemical-ra");
+      .getByRole("link", { name: "化学物質RA", exact: true })).toHaveAttribute("href", "/chemical-ra");
     await expect(mascotTools.locator('[data-lp-tool][href="/chatbot"]')).toHaveAttribute("href", "/chatbot");
     await expect(page.getByRole("link", { name: "すべての機能を見る", exact: true })).toHaveAttribute("href", "/features");
     await expect(page.locator('[data-home-section="heat"]')).toHaveCount(0);

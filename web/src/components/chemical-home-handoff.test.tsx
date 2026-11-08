@@ -4,7 +4,7 @@ import { OptionalThirdPartyScripts } from "./OptionalThirdPartyScripts";
 import { ScrollPositionRestorer } from "./scroll-position-restorer";
 import { HomeDirectChemicalClient } from "./home-safety-cockpit/home-chemical-quick-search";
 import { TransientQueryBridgeProvider } from "./home-safety-cockpit/transient-query-bridge";
-import { ChemicalRaPanel } from "./chemical-ra-panel";
+import { CreateSimplePanel } from "./chemical-ra/create-simple-panel";
 import { OPTIONAL_TRACKING_CONSENT_KEY } from "@/lib/analytics-privacy";
 import { consumeTransientChemicalNavigation } from "@/lib/transient-chemical-navigation";
 
@@ -20,7 +20,7 @@ vi.mock("./AdSenseScript", () => ({ default: () => null }));
 const toluene = { cas: "108-88-3", primaryName: "トルエン", aliases: [], flags: { carcinogenic: false, concentration: true, skin: false, label_sds: true }, appliedDates: {}, notes: [], entryCount: 1 };
 
 function App({ destination = false }) {
-  return <><OptionalThirdPartyScripts analyticsEnabled adsEnabled rumEnabled /><ScrollPositionRestorer /><TransientQueryBridgeProvider>{destination ? <ChemicalRaPanel /> : <HomeDirectChemicalClient />}</TransientQueryBridgeProvider></>;
+  return <><OptionalThirdPartyScripts analyticsEnabled adsEnabled rumEnabled /><ScrollPositionRestorer /><TransientQueryBridgeProvider>{destination ? <CreateSimplePanel /> : <HomeDirectChemicalClient />}</TransientQueryBridgeProvider></>;
 }
 
 beforeEach(() => {
@@ -31,7 +31,10 @@ beforeEach(() => {
   Object.defineProperty(window, "scrollY", { configurable: true, value: 640 });
   window.scrollTo = vi.fn();
   window.requestAnimationFrame = (callback) => { callback(0); return 1; };
-  vi.stubGlobal("fetch", vi.fn().mockImplementation(async () => Response.json({ chemicalName: "トルエン", casNumber: "108-88-3", ghsHazards: [], ppeRecommendations: [], safetyMeasures: [], emergencyMeasures: [], regulatoryNotes: [], aiStatus: "disabled_for_safety", assessmentStatus: "unavailable", assessmentNotice: "公式SDSと公式ツールで確認してください。" })));
+  vi.stubGlobal("fetch", vi.fn().mockImplementation(async () => Response.json({
+    source: { title: "test", url: "", designDocument: "", count: 1 },
+    substances: [["108-88-3", "トルエン", "Toluene", { flamLiq: "2", repr: "1A" }, [null, null, null, null, 50, 188, null, null, 20, null, null, null, null, null, 50, 190, 100, 380], [1, 92.14, 110.6, 2.73, 4.4, 526, "mg/L", 28.4, "mmHg"], ["1", "", "", "0.3", "", "", "", "", "", "1", "", "", ""]]],
+  })));
 });
 afterEach(() => { cleanup(); consumeTransientChemicalNavigation(); localStorage.clear(); sessionStorage.clear(); Reflect.deleteProperty(window, "gtag"); vi.unstubAllGlobals(); vi.clearAllMocks(); });
 
@@ -46,13 +49,13 @@ it.each([["granted", "candidate"], ["denied", "candidate"], ["granted", "submit"
   expect(window.location.pathname).toBe("/chemical-ra");
   expect(window.location.search).toBe("");
   view.rerender(<App destination />);
-  await waitFor(() => expect(mocks.find).toHaveBeenCalledWith("108-88-3"));
-  await waitFor(() => expect((screen.getByRole("combobox") as HTMLInputElement).value).toBe("トルエン"));
-  // Wait for the terminal unavailable result and loading completion, not only
-  // fetch dispatch. Automatic assessment must finish before Back/unmount.
-  await waitFor(() => expect(fetch).toHaveBeenCalledWith("/api/chemical-ra", expect.any(Object)));
-  await screen.findByRole("link", { name: "公式CREATE-SIMPLEで判定" });
-  await waitFor(() => expect(document.querySelector("button[data-primary-action='true']")?.getAttribute("aria-busy")).toBe("false"));
+  // 受け渡された物質名で公式物質リストを検索し、確認済みCASなら判定する物質に自動で加える
+  // （物質データは /api/chemical-ra/substances を1回だけ取得し、以降はキャッシュを使う）
+  await waitFor(() =>
+    expect(
+      screen.queryByRole("list", { name: "判定する物質" }) ?? screen.queryByRole("button", { name: /CAS 108-88-3/ }),
+    ).not.toBeNull(),
+  );
   expect(consumeTransientChemicalNavigation()).toBe(false);
   expect(gtag).toHaveBeenCalledWith("consent", "update", expect.objectContaining({ analytics_storage: "denied", ad_storage: "denied" }));
   expect(JSON.stringify(window.history.state)).not.toContain("108-88-3");

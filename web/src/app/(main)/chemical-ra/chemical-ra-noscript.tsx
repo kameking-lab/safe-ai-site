@@ -8,35 +8,14 @@ export function ChemicalRaNoScriptFallback() {
       data-chemical-ra-nojs
     >
       <h2 id="chemical-ra-nojs-title" className="text-xl font-black text-slate-950">
-        物質名・CAS番号を確認
+        JavaScriptを有効にすると判定できます
       </h2>
       <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-700">
-        SDSの第1項で製品名・供給者を確認し、第3項（組成及び成分情報）で成分の物質名・CAS番号・含有量を確認してください。公式検索では製品名と成分名を区別して、一致する物質を選んでください。
+        リスクレベルの計算は、入力した内容をサーバーへ送らずにこの端末の中で行います。ブラウザのJavaScriptを有効にしてから開き直してください。物質の確認には、SDSの第3項（組成及び成分情報）にある物質名・CAS番号・含有率を使います。
       </p>
+      <p className="mt-5 text-sm font-black text-slate-900">物質ごとの収録情報</p>
       <nav
-        aria-label="JavaScriptなしの化学物質確認"
-        className="mt-4 grid gap-3 sm:grid-cols-2"
-      >
-        <a
-          href="https://www.nite.go.jp/chem/chrip/chrip_search/systemTop"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex min-h-11 items-center justify-center rounded-xl bg-emerald-800 px-5 py-3 text-center text-sm font-black text-white"
-        >
-          NITEで物質名・CAS番号を検索
-        </a>
-        <a
-          href="https://anzeninfo.mhlw.go.jp/ras/user/anzen/kag/default.aspx"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex min-h-11 items-center justify-center rounded-xl border-2 border-slate-700 bg-white px-5 py-3 text-center text-sm font-black text-slate-950"
-        >
-          公式CREATE-SIMPLEを開く
-        </a>
-      </nav>
-      <p className="mt-5 text-sm font-black text-slate-900">CAS番号別の確認例</p>
-      <nav
-        aria-label="CAS番号別の確認例"
+        aria-label="CAS番号別の収録情報"
         className="mt-1 flex flex-wrap gap-x-5 gap-y-1"
       >
         <a
@@ -52,9 +31,6 @@ export function ChemicalRaNoScriptFallback() {
           メタノール（67-56-1）
         </a>
       </nav>
-      <p className="mt-2 text-xs font-bold text-slate-600">
-        物質名とCAS番号が一致しない場合は評価を始めず、製品の最新SDSを確認してください。CAS番号などが記載されていない場合は推測せず、供給者に確認してください。
-      </p>
     </section>
   );
 }

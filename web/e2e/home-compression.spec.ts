@@ -266,29 +266,17 @@ test("ホームから開いた化学物質RAの入力をURL・storage・request 
     chemicalLink.click(),
   ]);
 
-  const input = page.getByRole("combobox", { name: "物質名・CAS番号・SDS記載名" });
-  const chemicalSearchResponse = page.waitForResponse(
-    (response) =>
-      response.url().includes("/api/chemical/search") &&
-      response.request().method() === "POST",
-  );
+  const input = page.locator("#chemical-onebox-input");
   await input.fill(rawQuery);
-  await expect(page.locator("#chemical-onebox-input")).toHaveValue(rawQuery);
-  const searchResponse = await chemicalSearchResponse;
-  expect(searchResponse.status()).toBeLessThan(400);
-  expect(searchResponse.request().postDataJSON()).toMatchObject({ query: rawQuery });
-  // Keep the raw input in place while debounced follow-up requests settle.
+  await expect(input).toHaveValue(rawQuery);
+  // 検索は端末内（物質データは固定URLの静的JSONを1回だけ取得）
+  await expect(page.getByText(/見つかりません/)).toBeVisible();
   await page.waitForLoadState("networkidle");
   await expect(input).toHaveValue(rawQuery);
 
   expect(page.url()).not.toContain(rawQuery);
   expect(requestUrls.some((url) => url.includes(rawQuery))).toBe(false);
-  expect(chemicalSearchRequests.length).toBeGreaterThan(0);
-  expect(
-    chemicalSearchRequests.every(
-      ({ method, url }) => method === "POST" && !new URL(url).search,
-    ),
-  ).toBe(true);
+  expect(chemicalSearchRequests.every(({ url }) => !new URL(url).search)).toBe(true);
   expect(
     await page.evaluate((value) => {
       for (const storage of [localStorage, sessionStorage]) {

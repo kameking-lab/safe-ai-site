@@ -33,6 +33,8 @@ describe("storage-gated deployment configuration", () => {
     expect(ignoreScript).not.toContain("VERCEL_GIT_COMMIT_REF");
     expect(ignoreScript).not.toContain("automation/storage-gate");
     expect(ignoreScript.trimEnd()).toMatch(/exit 1$/u);
+    expect(ignoreScript).toContain('if [ "${VERCEL_ENV:-}" = "preview" ]; then');
+    expect(ignoreScript).not.toContain('"production" ]');
   });
 
   it("separates read-only generation from frozen write-token promotion", () => {

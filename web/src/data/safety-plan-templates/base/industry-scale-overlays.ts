@@ -182,7 +182,7 @@ export const INDUSTRY_SCALE_OVERLAYS: OverlayMatrix = {
           category: "ra",
           title: "化学物質の簡易リスクアセスメント（CREATE-SIMPLE）",
           description:
-            "厚労省版CREATE-SIMPLEを使用し、取扱化学物質ごとに15分程度のRAを実施。記録は3年間保存。",
+            "厚生労働省 CREATE-SIMPLE の手法で、取扱化学物質ごとに吸入・経皮吸収・爆発火災のリスクを見積もり、低減措置を決める。記録は3年間保存。",
           frequency: "新規導入時 / 年1回見直し",
           responsible: "化学物質管理者",
           reference: "安衛則第34条の2の7",

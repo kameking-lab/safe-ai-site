@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { ChemicalRaPanel } from "@/components/chemical-ra-panel";
-import { ChemicalRaSecondaryTools } from "@/components/chemical/chemical-ra-secondary-tools";
+import { CreateSimplePanel } from "@/components/chemical-ra/create-simple-panel";
 import { PageContainer } from "@/components/layout";
 import { ogImageUrl } from "@/lib/og-url";
 import { withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
@@ -10,10 +9,9 @@ import { inspectChemicalNavigationQuery } from "@/lib/chemical/query-safety";
 import { PageJsonLd } from "@/components/page-json-ld";
 import { JsonLd } from "@/components/json-ld";
 import { ChemicalRaNoScriptFallback } from "./chemical-ra-noscript";
-import { FeatureMascotCompanion } from "@/components/feature-mascot-companion";
-const _title = "化学物質RA準備｜CAS・SDS・作業条件を整理";
+const _title = "化学物質リスクアセスメント｜その場でリスクレベル判定（無料）";
 const _desc =
-  "CAS番号で公的情報を確認し、製品の最新SDS・作業条件・対策を記録する無料のRA準備ツール。リスク値は計算せず、厚生労働省の公式CREATE-SIMPLEでの評価へつなぎます。";
+  "物質名かCAS番号を入れて作業条件を選ぶだけで、吸入・経皮吸収・爆発火災のリスクレベル（Ⅰ〜Ⅳ）をその場で判定。換気や手袋などレベルを下げる対策も同じ計算で再評価し、保存・印刷・CSVで記録できます。厚生労働省 CREATE-SIMPLE の手法に基づく計算。";
 
 type SearchParams = Record<string, string | string[] | undefined>;
 
@@ -77,7 +75,7 @@ export default async function ChemicalRaPage({
   return (
     <>
       <PageJsonLd
-        name="化学物質RA準備"
+        name="化学物質リスクアセスメント"
         description={_desc}
         path="/chemical-ra"
       />
@@ -85,7 +83,7 @@ export default async function ChemicalRaPage({
         schema={{
           "@context": "https://schema.org",
           "@type": "SoftwareApplication",
-          name: "化学物質RA準備",
+          name: "化学物質リスクアセスメント",
           description: _desc,
           url: "https://www.anzen-ai-portal.jp/chemical-ra",
           applicationCategory: "BusinessApplication",
@@ -98,23 +96,14 @@ export default async function ChemicalRaPage({
           },
         }}
       />
-      <PageContainer paddingY="none" className="pt-6 print:hidden">
+      <PageContainer width="prose" paddingY="none" className="pt-6 print:hidden">
         <header>
-          <h1 className="text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
-            化学物質RA準備
+          <h1 className="text-3xl font-black tracking-tight text-slate-950 dark:text-white sm:text-4xl">
+            化学物質リスクアセスメント
           </h1>
-          <p className="mt-2 text-sm leading-6 text-slate-700">
-            公的情報と条件を整理します。リスク値は計算せず、公式CREATE-SIMPLEへつなぎます。
+          <p className="mt-2 text-sm leading-6 text-slate-700 dark:text-slate-200">
+            物質と作業のようすを選ぶと、その場でリスクレベルと下げ方が出ます。
           </p>
-          <FeatureMascotCompanion
-            variant="chemical-lab"
-            eyebrow="化学物質の確認係"
-            title="容器やSDSの名前から始めましょう。"
-            message="候補を製品の最新SDSと照合します。"
-            tone="amber"
-            compact
-            className="mt-4 max-w-3xl"
-          />
         </header>
       </PageContainer>
       <noscript>
@@ -122,10 +111,9 @@ export default async function ChemicalRaPage({
         <ChemicalRaNoScriptFallback />
       </noscript>
       <div id="chemical-ra-js">
-        <div id="chemical-ra-start" className="scroll-mt-28">
-          <ChemicalRaPanel initialQuery={initialQuery} />
+        <div id="chemical-ra-start" className="scroll-mt-28 pt-4">
+          <CreateSimplePanel initialQuery={initialQuery} />
         </div>
-        <ChemicalRaSecondaryTools />
       </div>
     </>
   );

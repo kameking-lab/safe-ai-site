@@ -36,9 +36,9 @@ const ACTIONS: readonly RoleAction[] = [
   },
   {
     href: "/chemical-ra",
-    label: "化学物質リスクを確認",
+    label: "化学物質リスクを判定",
     description:
-      "SDS、CAS、濃度、換気、作業時間等が不足する場合は評価を停止します。",
+      "作業条件を選ぶとリスクレベルをその場で判定し、低減策の効果も再評価。結果は保存・印刷/PDF・CSVで記録できます。",
   },
   {
     href: "/education-certification/finder",
