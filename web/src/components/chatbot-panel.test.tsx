@@ -1473,3 +1473,75 @@ describe("ChatbotPanel conversation UI", () => {
     ).toBe("https://www.mhlw.go.jp/content/safe-leaflet.pdf");
   });
 });
+
+describe("ChatbotPanel ログイン済み会員の失敗応答", () => {
+  const jsonResponse = (status: number, body: unknown) =>
+    new Response(JSON.stringify(body), {
+      status,
+      headers: { "Content-Type": "application/json" },
+    });
+
+  it("本日の上限（共通利用枠の形）はサーバーの説明を出し、再試行ボタンを出さない", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      jsonResponse(429, {
+        error: {
+          code: "DAILY_LIMIT_REACHED",
+          message: "本日の上限に達しました。日本時間の次の0時に回復します。",
+          resetAt: "2026-11-09T00:00:00+09:00",
+        },
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    render(<ChatbotPanel />);
+
+    submitExample("足場の手すりは？");
+
+    const alert = await screen.findByRole("alert");
+    expect(alert.textContent).toContain("本日の上限に達しました");
+    expect(alert.textContent).not.toContain("回答を取得できませんでした");
+    expect(screen.queryByRole("button", { name: "再試行" })).toBeNull();
+  });
+
+  it("入力の安全確認で止まった（共通利用枠の形）ときも画面が落ちず、説明を出す", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      jsonResponse(422, {
+        error: {
+          code: "SAFETY_BLOCKED",
+          reason: "pii",
+          message: "氏名や電話番号を除いて入力してください。",
+        },
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    render(<ChatbotPanel />);
+
+    submitExample("足場の手すりは？");
+
+    await waitFor(() =>
+      expect(document.body.textContent).toContain(
+        "氏名や電話番号を除いて入力してください。",
+      ),
+    );
+    // 送信欄は使える状態に戻る
+    expect(screen.getByRole("textbox")).toBeTruthy();
+  });
+
+  it("混雑（再試行で直るもの）はサーバーの説明と再試行ボタンを出す", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      jsonResponse(429, {
+        error: {
+          code: "BURST_LIMITED",
+          message: "短時間の利用が集中しています。60秒後に再度お試しください。",
+        },
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    render(<ChatbotPanel />);
+
+    submitExample("足場の手すりは？");
+
+    const alert = await screen.findByRole("alert");
+    expect(alert.textContent).toContain("60秒後に再度お試しください");
+    expect(await screen.findByRole("button", { name: "再試行" })).toBeTruthy();
+  });
+});
