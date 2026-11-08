@@ -232,11 +232,29 @@ describe("Proxy CSP boundary", () => {
     );
 
     expect(response.status).toBe(307);
+    // Only a fixed Auth.js error code survives, so the page can say why.
     expect(response.headers.get("location")).toBe(
-      "https://example.test/auth/error",
+      "https://example.test/auth/error?error=AccessDenied",
     );
     expect(response.headers.get("location")).not.toContain("token");
     expect(response.headers.get("content-security-policy")).toBeTruthy();
+    const unknown = proxy(new NextRequest("https://example.test/auth/error?error=<script>"));
+    expect(unknown.headers.get("location")).toBe("https://example.test/auth/error");
+    expect(proxy(new NextRequest("https://example.test/auth/error?error=OAuthAccountNotLinked")).status).toBe(200);
+  });
+
+  it("keeps the Pro purchase start as the sign-in callback, and nothing looser", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("VERCEL_ENV", "production");
+    for (const callback of ["/pricing/start", `/pricing/start?returnTo=${encodeURIComponent("/chatbot")}`]) {
+      const canonical = `https://example.test/auth/signin?callbackUrl=${encodeURIComponent(callback)}`;
+      expect(proxy(new NextRequest(canonical)).status).toBe(200);
+    }
+    for (const other of ["/pricing/start?returnTo=https://evil.example", "/pricing/start?returnTo=%2F%2Fevil.example", "/pricing/startx"]) {
+      const response = proxy(new NextRequest(`https://example.test/auth/signin?callbackUrl=${encodeURIComponent(other)}`));
+      expect(response.status).toBe(307);
+      expect(response.headers.get("location")).toBe("https://example.test/auth/signin");
+    }
   });
 
   it("keeps only the iOS app's sign-in callback so login returns to the app", () => {

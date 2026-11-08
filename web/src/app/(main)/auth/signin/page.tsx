@@ -5,6 +5,7 @@ import { withSiteOpenGraph } from "@/lib/seo-metadata";
 import { appReviewConfig } from "@/lib/app-review";
 import { PrivacyNote } from "@/components/privacy-note";
 import { AppReviewSignInForm } from "./app-review-form";
+import { allowedSignInCallback, NATIVE_SIGNIN_CALLBACK } from "@/lib/auth-callback";
 
 export const metadata: Metadata = {
   title: "ログイン",
@@ -20,8 +21,9 @@ export const metadata: Metadata = {
 export default async function SignInPage({ searchParams }: { searchParams: Promise<{ callbackUrl?: string; reviewError?: string }> }) {
   const params = await searchParams;
   const requested = params.callbackUrl;
-  const nativeFlow = typeof requested === 'string' && /^\/api\/mobile\/v1\/auth\/authorize\?flow=[0-9a-f-]{36}(?:&confirmed=1)?$/.test(requested);
-  const redirectTo = nativeFlow ? requested : '/';
+  const nativeFlow = typeof requested === 'string' && NATIVE_SIGNIN_CALLBACK.test(requested);
+  // 許可した戻り先（アプリへの受け渡し・Pro の購入開始）だけを使い、それ以外はトップへ。
+  const redirectTo = allowedSignInCallback(requested) ?? '/';
   const appleReady = !!(process.env.AUTH_APPLE_ID && process.env.AUTH_APPLE_SECRET);
   const googleReady = !!(process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET);
   const reviewReady = isAuthConfigured && appReviewConfig() !== null;
@@ -34,6 +36,8 @@ export default async function SignInPage({ searchParams }: { searchParams: Promi
         <h1 className="text-xl font-bold text-slate-900 mb-2">ログイン</h1>
         {isAuthConfigured ? (
           <>
+            {redirectTo === '/' ? (
+              <>
             <p className="text-sm text-slate-500 mb-8 leading-6">
               アカウントにログインして、ログイン対応機能をご利用ください。
             </p>
@@ -52,6 +56,11 @@ export default async function SignInPage({ searchParams }: { searchParams: Promi
                 をご確認ください。
               </p>
             </div>
+              </>
+            ) : (
+              // 購入・アプリからのログインは、ボタンだけを見せて止めない。
+              <p className="mb-6 text-sm text-slate-500">ログインして続けます。</p>
+            )}
             {googleReady ? <form
               action={async () => {
                 "use server";

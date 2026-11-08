@@ -15,6 +15,7 @@ import { privateJson, readBoundedJson } from "@/lib/server/cloud-owner";
 import { reservePurchase, billingDb, lockMember } from "@/lib/mobile/billing-service";
 import { resumeStripeIntent } from "@/lib/mobile/stripe-purchase";
 import { Prisma } from "@prisma/client";
+import { safeReturnPath } from "@/lib/pro-start";
 
 function getStripe(): Stripe | null {
   const key = process.env.STRIPE_SECRET_KEY;
@@ -46,7 +47,8 @@ export async function POST(req: Request) {
   if (!parsed.ok) {
     return privateJson({ error: "リクエスト形式が不正です。" }, parsed.reason === "payload_too_large" ? 413 : 400);
   }
-  const body = parsed.value as { priceId?: unknown; plan?: unknown };
+  const body = parsed.value as { priceId?: unknown; plan?: unknown; returnTo?: unknown };
+  const back = safeReturnPath(body.returnTo);
   const ledger = process.env.MOBILE_LEDGER_ENABLED === "true";
   const priceId = ledger && body.plan === "pro" ? process.env.STRIPE_ANZEN_PRO_MONTHLY_PRICE_ID : body.priceId;
   const planName = typeof priceId === "string" ? resolveStripePlan(priceId) : null;
@@ -108,9 +110,11 @@ export async function POST(req: Request) {
       line_items: [{ price: priceId, quantity: 1 }],
       customer: customerId,
       customer_email: customerId ? undefined : email,
-      success_url: `${siteUrl}/pricing/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${siteUrl}/pricing`,
+      // 支払い後は元の画面へ戻す（/pricing/success が権利を確定してから転送する）。
+      success_url: `${siteUrl}/pricing/success?session_id={CHECKOUT_SESSION_ID}${back ? `&returnTo=${encodeURIComponent(back)}` : ""}`,
+      cancel_url: `${siteUrl}${back ?? "/pricing"}`,
       locale: "ja",
+      custom_text: { submit: { message: "1か月ごとの自動更新です。解約はマイページの「プラン管理」からいつでもできます。" } },
       metadata: { userId, planName, ...(purchaseIntentId ? { purchaseIntentId } : {}) },
       subscription_data: {
         metadata: { userId, planName, ...(purchaseIntentId ? { purchaseIntentId } : {}) },
