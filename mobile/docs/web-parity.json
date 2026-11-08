@@ -1218,10 +1218,24 @@
       "modes": []
     },
     {
+      "route": "/pricing/start",
+      "source": "web/src/app/(main)/pricing/start/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
+      "modes": []
+    },
+    {
       "route": "/pricing/success",
       "source": "web/src/app/(main)/pricing/success/page.tsx",
       "implementation": "native",
       "state": "native",
+      "modes": []
+    },
+    {
+      "route": "/pricing/terms",
+      "source": "web/src/app/(main)/pricing/terms/page.tsx",
+      "implementation": "direct canonical import",
+      "state": "shared",
       "modes": []
     },
     {
