@@ -80,7 +80,9 @@ test("390pxで電気点検を一回目から答え、開始前点検と特別教
   expect(educationText).toMatch(/低圧.*敷設・修理.*露出充電部/u);
 
   expect(requests).toHaveLength(3);
-  expect(requests.every(({ body }) => !("history" in body))).toBe(true);
+  // 2026-11-09: 追加質問は直前のやり取りを送り、前の話題に沿って答えさせる（1回目は履歴なし）。
+  expect("history" in (requests[0]?.body ?? {})).toBe(false);
+  expect(requests.slice(1).every(({ body }) => Array.isArray((body as { history?: unknown }).history))).toBe(true);
   expect(requests[1]?.body.context).toMatchObject({
     topicDomain: "electrical",
   });

@@ -661,7 +661,7 @@ test.describe("安衛法AI answer-first 必須12会話ケース", () => {
     });
     await gotoChatbot(page);
     const answer = await ask(page, "火星で使う宇宙服の色は？", {
-      conclusion: /根拠を確認できない|回答を保留|公式本文を.*確認できない/u,
+      conclusion: /根拠を確認できない|根拠は見つかりませんでした|回答を保留|公式本文を.*確認できない/u,
       clarification: 1,
       supported: false,
     }, 10);
