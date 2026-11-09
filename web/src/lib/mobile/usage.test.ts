@@ -117,6 +117,28 @@ describe('anonymous website visitors with the shared ledger on',()=>{
     expect((await withUsage(web({'X-Forwarded-For':'198.51.100.8'}),'law_chat',run)).status).toBe(200);
     expect(run).toHaveBeenCalledTimes(4);
   });
+  it('does not count anonymous sends that were refused (bad encoding, no consent) and counts only answers',async()=>{
+    salesOpen();state.signedIn=false;
+    const ip={'X-Forwarded-For':'198.51.100.9'};
+    const refused=vi.fn(async()=>Response.json({error:'外部AIへの送信前確認が必要です。',retryable:false},{status:428}));
+    const badEncoding=vi.fn(async()=>Response.json({error:'文字コードを確認してください。'},{status:400}));
+    expect((await withUsage(web(ip),'law_chat',badEncoding)).status).toBe(400);
+    for(let i=0;i<2;i++)expect((await withUsage(web(ip),'law_chat',refused)).status).toBe(428);
+    const run=vi.fn(async()=>answer());
+    for(let i=0;i<3;i++)expect((await withUsage(web(ip),'law_chat',run)).status).toBe(200);
+    expect((await withUsage(web(ip),'law_chat',run)).status).toBe(429);
+    expect(run).toHaveBeenCalledTimes(3);
+  });
+  it('counts an anonymous streamed answer only after its final meta arrives',async()=>{
+    salesOpen();state.signedIn=false;
+    const ip={'X-Forwarded-For':'198.51.100.10'};
+    const meta=JSON.stringify({answer:'一般的な安全上の目安です。',source_type:'safety',sources:[]});
+    const stream=()=>new Response(`event: text`+String.fromCharCode(10)+`data: {}`+String.fromCharCode(10,10)+`event: meta`+String.fromCharCode(10)+`data: ${meta}`+String.fromCharCode(10,10),{headers:{'Content-Type':'text/event-stream'}});
+    const noAnswer=()=>new Response(`event: error`+String.fromCharCode(10)+`data: {}`+String.fromCharCode(10,10),{headers:{'Content-Type':'text/event-stream'}});
+    for(let i=0;i<2;i++){const r=await withUsage(web(ip),'law_chat',async()=>noAnswer());await r.text();}
+    for(let i=0;i<3;i++){const r=await withUsage(web(ip),'law_chat',async()=>stream());expect(r.status).toBe(200);await r.text();}
+    expect((await withUsage(web(ip),'law_chat',async()=>stream())).status).toBe(429);
+  });
   it('tells a free member at the limit that Pro is available, and never a Pro member',async()=>{
     salesOpen();
     for(let i=0;i<3;i++)state.operations.push({id:crypto.randomUUID(),userId:'mock_member',feature:'law_chat',day:jstKeys().day,status:'completed',createdAt:new Date(Date.now()-120000),requestHash:'prior'});
