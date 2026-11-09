@@ -6,7 +6,7 @@ const appUserId='88888888-1111-4111-8111-111111111111';const intentId='88888888-
 const free=()=>({plan:'free',source:null,syncState:'verified',expiresAt:null,appUserId,verifiedAt:new Date().toISOString(),limits:product.limits.free,purchasePending:false,purchaseIntentId:null});
 const pro=()=>({...free(),plan:'pro',source:'stripe',expiresAt:new Date(Date.now()+86400000).toISOString(),limits:product.limits.pro});
 const config:BillingConfig={ready:true,publicKey:'mock_public_sdk',productId:'mock_monthly',offeringId:'mock_offering',policy:product,login:{apple:true,google:true},terms:'https://example.test/terms',privacy:'https://example.test/privacy',manage:'https://apps.apple.com/account/subscriptions'};
-function setup(options:{paid?:boolean;syncPending?:boolean;cancelled?:boolean;storePending?:boolean;unknown?:boolean;cancelFlagOnly?:boolean;startOffline?:boolean;wrongPrice?:boolean;switchAccount?:boolean}={}){
+function setup(options:{paid?:boolean;syncPending?:boolean;cancelled?:boolean;storePending?:boolean;unknown?:boolean;cancelFlagOnly?:boolean;startOffline?:boolean;wrongPrice?:boolean;usd?:boolean;switchAccount?:boolean}={}){
   let reserved=false;let reads=0;
   const send=vi.fn(async(path:string,_body?:unknown)=>{
     if(path==='/api/billing/store-started'&&options.startOffline)throw new Error('offline');
@@ -15,7 +15,7 @@ function setup(options:{paid?:boolean;syncPending?:boolean;cancelled?:boolean;st
     if(path==='/api/billing/reconcile')return {...free(),purchasePending:true,purchaseIntentId:intentId};
     return {};
   });
-  const packageFixture={identifier:'mock_package',packageType:'MONTHLY',product:{identifier:'mock_monthly',price:options.wrongPrice?981:product.monthlyPrice,priceString:'¥980',currencyCode:'JPY',subscriptionPeriod:'P1M'}} as unknown as PurchasesPackage;
+  const packageFixture={identifier:'mock_package',packageType:'MONTHLY',product:{identifier:'mock_monthly',price:options.usd?5.99:options.wrongPrice?981:product.monthlyPrice,priceString:options.usd?'$5.99':'¥980',currencyCode:options.usd?'USD':'JPY',subscriptionPeriod:'P1M'}} as unknown as PurchasesPackage;
   const sdk={configure:vi.fn(async()=>{}),logIn:vi.fn(async()=>({}) as never),logOut:vi.fn(async()=>({}) as never),getOfferings:vi.fn(async()=>({all:{mock_offering:{availablePackages:[packageFixture]}}}) as never),
     purchasePackage:vi.fn(async()=>{if(options.cancelled)throw {userCancelled:true,code:'1'};if(options.storePending)throw {code:'20'};if(options.cancelFlagOnly)throw {userCancelled:true};if(options.unknown)throw {code:'10'};return {customerInfo:{entitlements:{active:{anzen_pro:{isActive:true}}}}} as never;}),restorePurchases:vi.fn(async()=>({customerInfo:{entitlements:{active:{anzen_pro:{isActive:true}}}}}) as never)};
   return {send,sdk,controller:new BillingController(send,sdk,()=>true)};
@@ -25,6 +25,7 @@ describe('iOS IAP uses server rights before StoreKit',()=>{
   it('blocks unresolved rights, changed accounts and an incorrect product price',async()=>{
     for(const options of [{syncPending:true},{switchAccount:true},{wrongPrice:true}]){const s=setup(options);await expect(s.controller.purchase(config)).rejects.toThrow();expect(s.sdk.purchasePackage).not.toHaveBeenCalled();}
   });
+  it('sells on a non-Japanese storefront (sandbox / App Review) at the price App Store shows',async()=>{const s=setup({usd:true});await s.controller.purchase(config);expect(s.sdk.purchasePackage).toHaveBeenCalledTimes(1);const p=await s.controller.offering(config,await s.controller.entitlement());expect(p.product.priceString).toBe('$5.99');});
   it('reserves on the server, purchases once, then trusts only the reconciliation result',async()=>{const s=setup();const result=await s.controller.purchase(config);expect(s.sdk.purchasePackage).toHaveBeenCalledTimes(1);expect(s.sdk.configure).toHaveBeenCalledWith({apiKey:'mock_public_sdk',appUserID:appUserId});expect(result.plan).toBe('free');expect(result.purchasePending).toBe(true);expect(isVerifiedPro(result)).toBe(false);expect(s.send.mock.calls.map(c=>c[0])).toEqual(['/api/me/entitlements','/api/billing/purchase-intents','/api/me/entitlements','/api/billing/store-started','/api/billing/reconcile']);});
   it('distinguishes cancelled, deferred and unknown without authorizing release from client reports',async()=>{
     for(const [options,error,outcome] of [[{cancelled:true},'STORE_CANCELLED','cancelled'],[{storePending:true},'STORE_DEFERRED','deferred'],[{unknown:true},'STORE_UNKNOWN','unknown'],[{cancelFlagOnly:true},'STORE_UNKNOWN','unknown']] as const){

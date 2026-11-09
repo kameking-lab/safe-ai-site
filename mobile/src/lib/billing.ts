@@ -31,7 +31,9 @@ export class BillingController {
     const candidates=offerings.all[config.offeringId??'']?.availablePackages??[];
     // Name what App Store actually returned, so a real device shows the exact mismatch.
     if(!candidates.length)throw new StoreError('NO_PACKAGES',`offering=${config.offeringId??'-'} / 取得=${Object.keys(offerings.all).join(',')||'なし'}`);
-    const match=candidates.filter(p=>p.product.identifier===config.productId && p.packageType==='MONTHLY' && p.product.subscriptionPeriod===product.period && p.product.currencyCode===product.currency && p.product.price===config.policy.monthlyPrice);
+    // The yen price is enforced only on the Japanese storefront. Other storefronts (sandbox testers,
+    // App Review in the US) see Apple's converted price, which the UI shows via priceString.
+    const match=candidates.filter(p=>p.product.identifier===config.productId && p.packageType==='MONTHLY' && p.product.subscriptionPeriod===product.period && (p.product.currencyCode!==product.currency || p.product.price===config.policy.monthlyPrice));
     if(match.length!==1 || config.policy.monthlyPrice!==product.monthlyPrice || config.policy.entitlement!==product.entitlement)
       throw new StoreError('PRODUCT_MISMATCH',candidates.map(p=>`${p.product.identifier} ${p.packageType} ${p.product.subscriptionPeriod??'-'} ${p.product.currencyCode} ${p.product.price}`).join(' / '));
     return match[0];
