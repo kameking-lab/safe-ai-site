@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAtJst": "2026-11-02T12:38:25+09:00",
+  "generatedAtJst": "2026-11-08T18:32:56+09:00",
   "algorithm": "sha256(sorted lines: <canonical-file-sha256><two spaces><repo-relative-path><LF>); CRLF in .ts/.json/.jsonl is normalized to LF; all other files are raw",
   "excludes": [
     "test files",
@@ -40,8 +40,8 @@
         "web/src/data/source-registry.ts"
       ],
       "fileCount": 10,
-      "bytes": 1423147,
-      "manifestSha256": "bf266800ecc8275862224d41da2e8b628e05b6fbb24c4cc950e2b8e2e5485b2f"
+      "bytes": 1423242,
+      "manifestSha256": "a05bba7a8b38f1b9fd81ae2dc417e0f6b48d4250083f0b4f3ea11fd7358d673a"
     },
     {
       "id": "surrounding-legal-snapshots",

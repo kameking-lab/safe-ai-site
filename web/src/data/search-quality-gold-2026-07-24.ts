@@ -164,7 +164,7 @@ export const SEARCH_QUALITY_GOLD_2026_07_24: readonly SearchGoldCase[] = [
     id: "guide-02",
     domain: "guide",
     query: "SDS 読み方",
-    intent: "SDS確認項目と公式CREATE-SIMPLE準備ガイドへ到達する",
+    intent: "SDS確認項目と化学物質リスクアセスメントの使い方ガイドへ到達する",
     relevantIds: ["page-/guides/chemical-ra-create-simple"],
     primaryRequiredIds: ["page-/guides/chemical-ra-create-simple"],
     dangerousIfMissing: true,

@@ -349,8 +349,8 @@ export const EXTRA_DESTINATION_PAGES: SitePageSearchSeed[] = [
   },
   {
     id: 'page-/guides/chemical-ra-create-simple',
-    title: 'SDSの読み方と化学物質リスクアセスメント準備ガイド',
-    subtitle: 'SDS、CAS番号、含有率、作業条件を整理し、公式CREATE-SIMPLEへ入力する前の不足を確認',
+    title: 'SDSの読み方と化学物質リスクアセスメントの使い方ガイド',
+    subtitle: 'SDSのCAS番号・含有率を見ながら作業条件を選び、吸入・経皮吸収・爆発火災のリスクレベルをその場で判定する手順',
     url: '/guides/chemical-ra-create-simple',
     keywords: [
       'SDS',

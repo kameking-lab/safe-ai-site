@@ -52,7 +52,7 @@ export function MainFeatureNextActions({
       key: "chemical-ra",
       href: "/chemical-ra",
       label: "化学物質RAを実施",
-      desc: "公的情報・SDS確認",
+      desc: "リスクレベルをその場で判定",
       icon: BookOpen,
       color: "border-amber-300 bg-amber-50 text-amber-900",
     },

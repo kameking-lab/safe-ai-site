@@ -44,7 +44,7 @@ const ACTIONS: readonly RoleAction[] = [
     href: "/chemical-database",
     label: "化学物質・SDSの下調べ",
     description:
-      "CAS番号等で候補を絞り、最新SDSと公式ツールで条件を再確認します。",
+      "CAS番号・物質名からGHS分類や濃度基準値を確認し、そのまま化学物質RAでリスクレベルを判定できます。",
   },
   {
     href: "/services/automation",

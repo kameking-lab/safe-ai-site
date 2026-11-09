@@ -101,19 +101,10 @@ test("10月の2改正は対象条件・行動・一次資料を持ち、未記�
   await expect(summary.getByRole("heading", { name: "対象業種", exact: true })).toHaveCount(0);
 });
 
-test("旧RAは条件を復元した原本とせず、印刷でも不足を表示する", async ({ page }) => {
-  await page.addInitScript(() => localStorage.setItem("safe-ai:chemical-ra-records:v1", JSON.stringify([{
-    raId: "quality-legacy", cas: "108-88-3", substance: "トルエン", workContent: "旧作業メモ", exposureBand: "",
-    savedAt: "2026-07-24T03:04:05.000Z", syncState: "saved-locally",
-    payload: { chemicalName: "トルエン", casNumber: "108-88-3", ghsHazards: [], ppeRecommendations: [], safetyMeasures: [], emergencyMeasures: [], regulatoryNotes: [], assessmentStatus: "unavailable", aiStatus: "disabled_for_safety" },
-  }])));
+test("旧形式のRA記録のURLで開いても画面が壊れず、新しい判定から始められる", async ({ page }) => {
   await page.goto("/chemical-ra?raId=quality-legacy");
-  await expect(page.getByText("旧形式のため、保存時の評価条件を復元できません", { exact: true })).toBeVisible();
-  await page.emulateMedia({ media: "print" });
-  const report = page.getByTestId("chemical-ra-print-report");
-  await expect(report).toContainText("保存時の作業条件を復元できません");
-  await expect(report).toContainText("作業時間・換気・数量・SDS・測定値を再確認");
-  await expect(report).toContainText("正式なRA結果ではありません");
+  await expect(page.getByRole("heading", { level: 1, name: "化学物質リスクアセスメント", exact: true })).toBeVisible();
+  await expect(page.locator("#chemical-onebox-input")).toBeVisible();
 });
 
 test("建設で使う2物質の詳細も収録範囲・版・製品SDS・同じCASの原典を示す", async ({ page }) => {
@@ -124,7 +115,7 @@ test("建設で使う2物質の詳細も収録範囲・版・製品SDS・同じC
     await expect(page.getByText(/収録データ版:.*分類原典の取得日時は未収録/)).toBeVisible();
     const source = page.getByRole("link", { name: "このCASのNITE政府版GHS原典を確認", exact: true });
     await expect(source).toHaveAttribute("href", `https://www.chem-info.nite.go.jp/chem/ghs/m-nite-${cas}.html`);
-    await expect(page.getByRole("link", { name: "RAを準備", exact: true })).toHaveAttribute("href", `/chemical-ra?cas=${cas}`);
+    await expect(page.getByRole("link", { name: "リスクを判定", exact: true })).toHaveAttribute("href", `/chemical-ra?cas=${cas}`);
   }
 });
 

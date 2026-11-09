@@ -301,8 +301,14 @@ export function ChatbotPanel({
 
     const controller = new AbortController();
     abortRef.current = controller;
+    // 同じチャットの直前のやり取り（最大6件）を送り、追加質問を前の話題に沿って答えさせる。
+    const history = messages
+      .filter((m) => m.content.trim())
+      .slice(-6)
+      .map((m) => ({ role: m.role, content: m.content.slice(0, 3_000) }));
     const requestBody = JSON.stringify({
       message: text,
+      ...(history.length > 0 ? { history } : {}),
       context: sanitizePublicLegalConversationContext(
         conversationContextRef.current,
       ),

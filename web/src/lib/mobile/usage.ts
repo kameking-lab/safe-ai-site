@@ -92,9 +92,14 @@ async function reserve(request:Request,userId:string,feature:AiFeature){
     return {id,plan:rights.plan,replay:null};
   });
 }
+/**
+ * 法令AIは「1回送って回答が返った」ら1回と数える（新しいチャットでも同じチャットの追加質問でも）。
+ * 以前は条文の根拠付き回答だけを数えていたため、根拠なしの回答や追加質問が数えられず、
+ * 無料3回が4〜5回目まで止まらなかった。サーバー側の失敗（回答なし）は数えない。
+ */
 function chargeable(value:unknown,feature:AiFeature){
-  const r=value as {source_type?:string;sources?:Array<{text?:string;url?:string;asOf?:string}>;assessmentStatus?:string};
-  return feature==='law_chat' ? r.source_type==='rag' && Array.isArray(r.sources) && r.sources.some(s=>s.text && s.url?.startsWith('https:') && s.asOf && Number.isFinite(Date.parse(s.asOf))) : r.assessmentStatus==='completed';
+  const r=value as {answer?:unknown;assessmentStatus?:string};
+  return feature==='law_chat' ? typeof r.answer==='string' && r.answer.trim().length>0 : r.assessmentStatus==='completed';
 }
 /** Reclaim only expired, never-dispatched leases. Unknown provider results keep a slot. */
 export async function recoverUsageLeases(tx:Prisma.TransactionClient,userId:string){

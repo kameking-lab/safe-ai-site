@@ -26,7 +26,7 @@ import { withUsage } from "@/lib/mobile/usage";
 
 import { GoogleGenAI } from "@google/genai";
 import { GEMINI_FAST_THINKING_CONFIG, GEMINI_FLASH_MODEL } from "@/lib/gemini-model";
-import { externalGenerativeAiAllowed } from "@/lib/server/deployment-safety";
+import { legalChatAiAllowed, buildConversationBlock, buildGeneralAdvicePrompt, withNoEvidenceNote, noEvidenceAdviceAnswer, readGenerationMeta, logLegalChatGeneration, type GenerationMeta } from "@/lib/legal-chat-ai";
 import {
   searchRelevantArticlesWithScore,
   buildContextFromArticles,
@@ -371,6 +371,10 @@ async function handlePost(request: Request) {
   }
 
   const retrievalQuery = resolvedConversation.query;
+  const conversationTurns: ChatTurn[] = Array.isArray(body.history)
+    ? (body.history as ChatTurn[]).filter((turn) => turn && typeof turn.content === "string")
+    : [];
+  const conversationBlock = buildConversationBlock(conversationTurns);
   // A generic "which notice?" clarification is unnecessary when this exact
   // query already resolves to an independently checked official notice.
   const proactiveClarification = verifiedNoticeResolvesSourceGap
@@ -421,7 +425,7 @@ async function handlePost(request: Request) {
   }
 
   const lawCategory: LawCategoryFilter = body?.lawCategory ?? "all";
-  const apiKey = externalGenerativeAiAllowed()
+  const apiKey = legalChatAiAllowed()
     ? process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY
     : null;
 
@@ -537,7 +541,7 @@ async function handlePost(request: Request) {
 
         // P1-5: API無し、または根拠となる関連条文が皆無 → 決定的テンプレ
         // （関連条文＋関連分野＋一般原則＋公式誘導。推測の断定は一切含めない）
-        if (generationUnavailable || relevantArticles.length === 0) {
+        if (generationUnavailable) {
           const exactEvidence = buildExactLegalEvidenceAnswer(
             retrievalQuery,
             relevantArticles,
@@ -582,8 +586,11 @@ async function handlePost(request: Request) {
                   now: legalAnswerNow,
                 })
               : initialTemplate;
+          // 根拠が見つからない質問にも何かしら返す（一般的な助言＋根拠未確認の1行）。
           const answer = ensureLegalAnswerAsOf(
-            template,
+            displayedEvidenceArticles.length > 0 && !explicitReferenceUnverified
+              ? template
+              : noEvidenceAdviceAnswer(template),
             legalAnswerNow,
           );
           const fallbackAttached = explicitReferenceUnverified
@@ -662,6 +669,7 @@ async function handlePost(request: Request) {
 
         // Gemini streaming
         let answer = "";
+        let generationMeta: GenerationMeta = { finishReason: null, promptTokens: null, outputTokens: null };
         let citationLayer2Status:
           | "skipped"
           | "passed"
@@ -676,21 +684,23 @@ async function handlePost(request: Request) {
                 apiKey,
                 httpOptions: { timeout: GENERATIVE_REQUEST_TIMEOUT_MS },
               });
-              // P1-5: 直接ヒット無しモードでは「関連＋最低限措置＋公式誘導」を根拠付きで生成
-              const userPrompt = noHitMode
+              // 同じチャットの直前のやり取りを渡し、追加質問を前の話題に沿って答えさせる。
+              // 関連条文が1件も無いときも断らず、一般的な安全上の助言を返させる。
+              const question = conversationTurns.length > 0 ? message : retrievalQuery;
+              const userPrompt = conversationBlock + (relevantArticles.length === 0
+                ? buildGeneralAdvicePrompt(question)
+                : noHitMode
                 ? buildNoHitGeminiPrompt({
-                    question: retrievalQuery,
+                    question,
                     context,
                     allowed: allowedCitations,
                   })
                 : buildPromptWithWhitelist({
-                    question: retrievalQuery,
+                    question,
                     context,
                     mlitContext: buildMlitContext(mlitMatches),
                     allowed: allowedCitations,
-                  });
-              // Prior turns are reduced to allowlisted work conditions in
-              // retrievalQuery; raw conversation text is never forwarded.
+                  }));
               const streamResult = await withProviderBudget(() => genAI.models.generateContentStream({
                 model: GEMINI_FLASH_MODEL,
                 contents: userPrompt,
@@ -705,6 +715,7 @@ async function handlePost(request: Request) {
                 if (cancelled || request.signal.aborted) {
                   throw new DOMException("Request aborted", "AbortError");
                 }
+                generationMeta = readGenerationMeta(chunkResponse, generationMeta);
                 const chunkText = chunkResponse.text;
                 if (chunkText) {
                   answer += chunkText;
@@ -717,16 +728,27 @@ async function handlePost(request: Request) {
 
           // Phase 2 Layer 2: 応答完了後の条文番号検証 (retry は SSE では行わず警告のみ)
           // 警告は answer 本文へ追記せず scopeWarnings（UIの警告枠）で返す（2026-07-11）
+          // 生成した回答をそのまま見せる。条文番号の検査で外れた引用は警告欄で知らせる。
+          // 空・途中切れ（STOP 以外）のときだけ、収録条文の定型回答へ切り替える。
           const validation = validateCitations(answer, allowedCitations);
-          citationWarningNote =
-            validation.findings.length > 0
-              ? validation.warningNote
-              : "生成本文は条文番号の形式検査を通過しましたが、主張単位の引用支持を自動証明できないため表示していません。公式条文と構造化出典を確認してください。";
-          citationLayer2Status = "evidence-only";
-          answer = buildServiceFirstLegalAnswer({
-            query: retrievalQuery,
-            articles: relevantArticles,
-            now: legalAnswerNow,
+          const truncated = generationMeta.finishReason !== null && generationMeta.finishReason !== "STOP";
+          if (!answer.trim() || truncated) {
+            citationWarningNote = truncated ? `AIの回答が途中で終わったため（${generationMeta.finishReason}）、収録条文の案内を表示しています。` : "";
+            citationLayer2Status = "evidence-only";
+            answer = relevantArticles.length > 0
+              ? buildServiceFirstLegalAnswer({ query: retrievalQuery, articles: relevantArticles, now: legalAnswerNow })
+              : noEvidenceAdviceAnswer(buildServiceFirstNoHitAnswer(retrievalQuery, legalAnswerNow));
+          } else {
+            citationWarningNote = validation.findings.length > 0 ? validation.warningNote : "";
+            citationLayer2Status = validation.findings.length > 0 ? "warned" : "passed";
+          }
+          logLegalChatGeneration({
+            route: "stream",
+            mode: relevantArticles.length === 0 ? "general" : noHitMode ? "related" : "evidence",
+            historyTurns: conversationTurns.length,
+            answerChars: answer.length,
+            usedGeneratedText: citationLayer2Status !== "evidence-only",
+            ...generationMeta,
           });
         } catch (err) {
           if (cancelled || request.signal.aborted) return;
@@ -801,10 +823,12 @@ async function handlePost(request: Request) {
         });
 
         // P1-5: 直接ヒット無しモードでは公式情報への誘導を必ず末尾に付与
-        if (noHitMode) {
+        if (noHitMode && relevantArticles.length > 0) {
           const officialChunk = `\n${formatOfficialLinks()}`;
           answer += officialChunk;
         }
+        // 条文の根拠を確認できない回答には、その旨を1行添える。
+        if (noHitMode || relevantArticles.length === 0) answer = withNoEvidenceNote(answer);
 
         // ハルシネーション抑制系の警告（本文へは追記せず scopeWarnings で返す）
         const scopeWarnings: string[] = [];
@@ -834,9 +858,7 @@ async function handlePost(request: Request) {
             : "medium";
         if (citationLayer2Status === "evidence-only") {
           finalConfidence = "low";
-          scopeWarnings.push(
-            "生成本文は主張単位の引用支持を自動証明できないため非表示とし、確認用の根拠案内だけを表示しています。",
-          );
+          scopeWarnings.push("AIの回答を表示できなかったため、収録条文の案内を表示しています。");
         }
         if (fallbackDecision.tier === "adjacent" && finalConfidence === "high") {
           finalConfidence = "medium";
@@ -854,7 +876,7 @@ async function handlePost(request: Request) {
           requiresHumanReview: true,
           answer,
           sources,
-          source_type: "rag",
+          source_type: relevantArticles.length > 0 ? "rag" : "safety",
           confidence: finalConfidence,
           followups: buildFollowups(retrievalQuery, relevantArticles),
           notices: relatedNotices,
@@ -867,7 +889,7 @@ async function handlePost(request: Request) {
         });
         // P1-1: 正常完了した応答のみキャッシュ（degraded/error path はキャッシュしない）。
         // 引用検証を通過した生成回答だけをキャッシュする。
-        if (cKey && citationLayer2Status === "evidence-only") {
+        if (cKey && citationLayer2Status === "passed") {
           setCachedResponse(cKey, payload);
         }
         send("text", { chunk: payload.answer });

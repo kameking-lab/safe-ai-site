@@ -37,7 +37,7 @@ const MAIN_SERVICES = [
   {
     href: "/chemical-ra",
     title: "化学物質RA",
-    description: "物質名・CAS・SDSから、確認事項と公式RAへの道筋を整理。",
+    description: "物質名・CASと作業条件から、リスクレベルと下げ方をその場で表示。",
     action: "RAを始める",
     icon: FlaskConical,
     mascot: "/mascot/mascot-chemical-lab.webp",

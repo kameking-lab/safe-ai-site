@@ -73,7 +73,11 @@ describe("five canonical SEO clusters", () => {
       );
       expect(guide.toolHref.startsWith("/")).toBe(true);
       expect(guide.dateModified).toBe(
-        slug === "anzeneho-ai-chatbot" ? "2026-08-02" : "2026-07-29",
+        slug === "anzeneho-ai-chatbot"
+          ? "2026-08-02"
+          : slug === "chemical-ra-create-simple"
+            ? "2026-11-08"
+            : "2026-07-29",
       );
     }
     const view = source("src/components/seo/keyword-landing-view.tsx");
@@ -97,25 +101,23 @@ describe("five canonical SEO clusters", () => {
     expect(content).toContain("2026-07-31");
   });
 
-  it("keeps chemical RA preparation separate from official CREATE-SIMPLE", () => {
-    const tool = source("src/app/(main)/chemical-ra/page.tsx");
+  it("explains the on-site chemical RA calculation without sending users to another tool", () => {
     const guide = landing("chemical-ra-create-simple");
     const text = JSON.stringify(guide);
 
-    expect(tool).toContain("無料のRA準備ツール");
-    expect(tool).toContain("リスク値は計算せず");
-    expect(tool).toContain("厚生労働省の公式CREATE-SIMPLE");
-    expect(tool).toContain("CAS");
-    expect(tool).toContain("SDS");
     const secondary = source("src/components/chemical/chemical-ra-secondary-tools.tsx");
     expect(secondary).toContain("<LazyMixtureRaPanel />");
     const mixture = source("src/components/chemical/mixture-ra-panel.tsx");
     expect(mixture).toContain("混合物RA準備（成分情報の整理）");
     expect(mixture).toContain("安全ランクや換気・PPEの助言は出しません");
     expect(mixture).not.toContain("合成リスク集約");
-    expect(text).toContain("CREATE-SIMPLE");
-    expect(text).toContain("再現・代替");
-    expect(guide.dateModified).toBe("2026-07-29");
+    expect(text).toContain("厚生労働省 CREATE-SIMPLE の手法に基づ");
+    expect(text).toContain("吸入（I〜IV）・経皮吸収・爆発火災");
+    expect(text).toContain("その場で");
+    expect(text).toContain("CSV");
+    expect(text).not.toMatch(/計算せず|計算しない|再現・代替|公式CREATE-SIMPLEで評価|RA準備/);
+    expect(guide.toolHref).toBe("/chemical-ra");
+    expect(guide.dateModified).toBe("2026-11-08");
   });
 
   it("covers free KY creation, examples, printing, solo work, and construction", () => {

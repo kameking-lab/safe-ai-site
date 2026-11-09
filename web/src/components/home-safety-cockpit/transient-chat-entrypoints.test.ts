@@ -10,7 +10,6 @@ describe("sitewide chatbot memory handoff entrypoints", () => {
   it.each([
     ["law-search", "src/components/law-search-panel.tsx"],
     ["qualification finder", "src/app/(main)/education-certification/finder/CertFinderClient.tsx"],
-    ["chemical", "src/components/chemical-ra-panel.tsx"],
     ["accident", "src/components/accidents-reports/hub-filter.tsx"],
     ["KY", "src/components/ky-paper/ky-paper-view.tsx"],
   ])("%s入口はraw questionをURLへ入れない共通linkを使う", (_label, path) => {

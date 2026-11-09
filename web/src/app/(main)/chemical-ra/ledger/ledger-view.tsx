@@ -56,31 +56,21 @@ export function ChemicalRaLedgerView({ records, organizationName, unavailableRea
 
       <section
         aria-labelledby="ra-boundaries"
-        className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4"
+        className="mt-5 grid gap-3 md:grid-cols-2"
       >
         <h2 id="ra-boundaries" className="sr-only">
-          4つの役割の違い
+          2つの役割の違い
         </h2>
         {[
           {
-            title: "簡易スクリーニング",
-            text: "匿名で物質・SDS・不足条件を整理。正式評価ではありません。",
+            title: "化学物質リスクアセスメント",
+            text: "物質と作業条件からリスクレベルを判定し、下げる対策を同じ計算で再評価します。",
             href: "/chemical-ra",
-            link: "簡易確認を開く",
+            link: "判定画面を開く",
           },
           {
             title: "組織用RA台帳",
             text: "認証・組織権限・版管理・承認・監査履歴を備えた本画面です。",
-          },
-          {
-            title: "公式CREATE-SIMPLE",
-            text: "厚生労働省「職場のあんぜんサイト」が提供する公式支援ツールです。",
-            href: "https://anzeninfo.mhlw.go.jp/user/anzen/kag/ankgc07_3.htm",
-            link: "公式ツールを確認",
-          },
-          {
-            title: "専門家確認",
-            text: "SDS、実測、工程固有リスク、法令適用は担当者・専門家が最終確認します。",
           },
         ].map((item) => (
           <article

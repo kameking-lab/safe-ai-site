@@ -92,15 +92,15 @@ const ALL_FLAGSHIP_FEATURES: FlagshipFeature[] = [
   },
   {
     id: "chemical-ra",
-    label: "化学物質RA準備",
+    label: "化学物質RA",
     icon: "⚗️",
     iconSrc: "/icons/icon-chemical.webp",
-    cardTitle: "化学物質RA準備",
+    cardTitle: "化学物質リスクアセスメント",
     cardDescription:
-      "CAS番号を正本に化学物質DB・SDS・作業条件を照合し、公式CREATE-SIMPLEで評価する前の不足情報を確認できます。",
+      "物質名かCAS番号を入れて作業条件を数タップで選ぶだけで、吸入・経皮吸収・爆発火災のリスクレベルをその場で判定。レベルを下げる具体策も表示します。",
     href: "/chemical-ra",
     subItems: [
-      { label: "RA前の不足情報を確認", href: "/chemical-ra" },
+      { label: "リスクレベルを判定", href: "/chemical-ra" },
       { label: "化学物質検索", href: "/chemical-database" },
       { label: "濃度基準値", href: "/chemical-database#limits" },
     ],

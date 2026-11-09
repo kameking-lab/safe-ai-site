@@ -693,62 +693,16 @@ test.describe("KY zero-friction builder", () => {
     test.setTimeout(90_000);
     await trackKyHandoffSessionWrites(page);
     await warmKyHandoffDestination(page);
-    await page.route("**/api/chemical-ra", (route) =>
-      route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify({
-          chemicalName: "トルエン",
-          casNumber: "108-88-3",
-          flashPoint: "4℃",
-          exposureLimit: "50 ppm",
-          ghsHazards: [],
-          ppeRecommendations: [],
-          safetyMeasures: [],
-          emergencyMeasures: [],
-          regulatoryNotes: [],
-          relatedHazards: [],
-          assessmentStatus: "unavailable",
-          assessmentNotice: "公式SDSと専門家による最終確認が必要です。",
-          aiStatus: "disabled_for_safety",
-        }),
-      }),
-    );
     const workDraft = "屋内で有機溶剤を小分けする";
-    await page.goto("/chemical-ra");
-    const searchResponse = page.waitForResponse(
-      (response) =>
-        new URL(response.url()).pathname === "/api/chemical/search" &&
-        response.request().method() === "POST" &&
-        response.request().postData()?.includes('"query":"108-88-3"') === true,
-      { timeout: 30_000 },
-    );
-    await page.locator("#chemical-onebox-input").fill("108-88-3");
-    expect((await searchResponse).status()).toBe(200);
-    const tolueneOption = page
-      .getByRole("option")
-      .filter({ hasText: "CAS 108-88-3" });
-    await expect(tolueneOption).toBeVisible({ timeout: 15_000 });
-    await tolueneOption.getByRole("button").click();
-    const confirmationResponse = page.waitForResponse(
-      (response) =>
-        new URL(response.url()).pathname === "/api/chemical/search" &&
-        response.request().method() === "POST" &&
-        response.request().postData()?.includes('"selection"') === true,
-      { timeout: 30_000 },
-    );
-    await page
-      .getByRole("button", { name: "名称とCASを確認して続行" })
-      .click();
-    expect((await confirmationResponse).status()).toBe(200);
-    await expect(page.locator("#chemical-onebox-input")).toHaveValue("トルエン");
-    await page.getByRole("button", { name: "必要な人向け：作業条件・測定値を記録する" }).click();
-    const workContent = page.getByRole("textbox", {
-      name: /作業内容（任意）/,
-    });
-    await expect(workContent).toBeVisible();
-    await workContent.fill(workDraft);
-    await page.getByRole("button", { name: "公的情報を確認" }).click();
+    await page.goto("/chemical-ra?cas=108-88-3");
+    await expect(page.getByRole("list", { name: "判定する物質" })).toContainText("トルエン");
+    const choose = (group: string, option: RegExp) =>
+      page.getByRole("radiogroup", { name: group }).getByRole("radio", { name: option }).click();
+    await choose("1回（1日）に扱う量", /少量/);
+    await choose("換気", /窓・換気扇/);
+    await page.getByLabel(/1日の作業時間/).selectOption("2");
+    await page.getByLabel("日数").selectOption("3");
+    await page.getByLabel("記録の名前（作業名）").fill(workDraft);
     const link = page.getByRole("link", { name: "この作業条件をKYへ" });
     await expect(link).toBeVisible();
     await expect(link).toHaveAttribute("href", "/ky/paper");

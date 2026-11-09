@@ -1,8 +1,9 @@
 /**
  * /api/ra/auto
  *
- * 旧独自式による自動リスクレベル判定は停止した。含有率、取扱量、換気、時間だけでは
- * ばく露濃度を推定できず、単位の異なる濃度基準値との比較もできないため fail closed。
+ * 旧独自式（ra-engine）による判定APIは廃止済み。常に 503 を返す。
+ * 化学物質のリスクレベル判定は /chemical-ra（厚生労働省 CREATE-SIMPLE の手法に基づく計算、
+ * 実装は src/lib/create-simple/）で行う。
  */
 import { NextResponse } from "next/server";
 
@@ -21,7 +22,7 @@ export async function POST(request: Request) {
       error: {
         code: "ASSESSMENT_UNAVAILABLE",
         message:
-          "自動リスクレベル判定は提供していません。製品固有の最新SDS、実測値、厚生労働省の公式CREATE-SIMPLEを使い、化学物質管理者または専門家が確認してください。",
+          "このAPIは廃止しました。化学物質のリスクレベル判定は /chemical-ra（化学物質リスクアセスメント）で行えます。",
       },
     },
     {

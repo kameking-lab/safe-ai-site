@@ -75,7 +75,7 @@ const INDUSTRIES: Industry[] = [
       {
         title: "化学物質RAを工場内で完結",
         problem: "SDS取込・GHS分類・ばく露見積もりを Excel 管理しており追跡が困難。",
-        solution: "名称・CAS・作業条件の整理と簡易スクリーニングを支援します。SDS自動取込、ばく露濃度推定、CREATE-SIMPLE、監査用の確定記録を代替しません。",
+        solution: "物質名・CASと作業条件を選ぶだけで、吸入・経皮吸収・爆発火災のリスクレベルをその場で判定。結果は保存・CSV出力でき、Excel管理から置き換えられます。",
         relatedFeatures: [
           { label: "化学物質RA", href: "/chemical-ra" },
           { label: "化学物質検索DB", href: "/chemical-database" },
@@ -127,7 +127,7 @@ const INDUSTRIES: Industry[] = [
       {
         title: "薬剤・消毒液のRA",
         problem: "消毒薬・抗がん剤など化学物質のばく露管理。",
-        solution: "名称・CAS・作業条件を整理する簡易スクリーニングです。製品固有の最新SDS、公式ツール、専門家による評価と記録を別途確認します。",
+        solution: "消毒薬などの物質名・CASと取扱量・作業時間・換気を選ぶと、吸入・経皮吸収のリスクレベルと、レベルを下げる具体策を表示します。",
         relatedFeatures: [
           { label: "化学物質RA", href: "/chemical-ra" },
         ],
@@ -211,7 +211,7 @@ const INDUSTRIES: Industry[] = [
       {
         title: "改正安衛法に対応",
         problem: "リスクアセスメント対象物質の拡大、ばく露濃度測定の必須化。",
-        solution: "化学物質RA＋検索DBで入力整理を支援。簡易スクリーニングの記録であり、そのまま提出できません。最終評価は公式CREATE-SIMPLE、製品固有の最新SDS、専門家による確認が必要です。",
+        solution: "化学物質RA＋検索DBで、対象物質の確認からリスクレベル判定・低減策の再評価まで一画面で実施。結果は印刷/PDF・CSVで記録として残せます。",
         relatedFeatures: [
           { label: "化学物質RA", href: "/chemical-ra" },
           { label: "化学物質検索DB", href: "/chemical-database" },
@@ -288,7 +288,7 @@ const INDUSTRIES: Industry[] = [
       {
         title: "化学物質（洗浄剤）RA",
         problem: "洗浄剤・消毒液の混合事故リスク。",
-        solution: "名称・CAS・作業条件を整理します。SDS自動取込や混合危険の確定判定は行わず、製品SDSと専門家の確認へつなぎます。",
+        solution: "洗浄剤の成分ごとに作業条件を選ぶと、吸入・経皮吸収・爆発火災のリスクレベルと、レベルを下げる具体策を表示します。",
         relatedFeatures: [
           { label: "化学物質RA", href: "/chemical-ra" },
         ],
