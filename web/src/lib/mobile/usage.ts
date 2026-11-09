@@ -6,7 +6,7 @@ import { product,type Plan } from './entitlement';
 import { member,json,isNativeRequest,webMemberId } from './http';
 import { inspectAiOutbound } from '../ai-outbound-safety';
 import { validateChatbotRequestBoundary } from '../server/chatbot-request-boundary';
-import { consumeSharedRateLimit,getRateLimitSubject } from '../security/shared-state';
+import { consumeSharedRateLimit,getRateLimitSubject,peekSharedRateLimit } from '../security/shared-state';
 import { webProSalesReady,appStoreSalesReady } from '../pro-sales';
 const context=new AsyncLocalStorage<{plan:Plan;operationId?:string}>();
 /** The free daily limit carries the member's plan so the client can offer Pro (never to a Pro member). */
@@ -17,13 +17,35 @@ export function upgradeAvailable(request:Request,plan:Plan|null){return plan!=='
  * Anonymous web visitors get the same free daily allowance as a free member once Pro is on sale,
  * counted per visitor (IP-derived, HMAC'd) for the JST day. Before sales open this is a no-op, so
  * the site keeps its free-to-browse behaviour with only the abuse limits.
+ * 送信前は上限の確認だけ（増やさない）。数えるのは回答（生成または根拠なしの助言）が返った時だけ
+ * ＝入力不備・同意なし・文字コード違反などで断った送信は数えない（recordAnonymousAnswer）。
  */
+function freeDailyPolicy(feature:AiFeature){const {day}=jstKeys();return {routeKey:`free-${feature}-${day}`,limit:product.limits.free[feature],windowMs:86400000};}
 export async function anonymousFreeAllowance(request:Request,feature:AiFeature){
   if(!webProSalesReady())return null;
-  const {day,resetAt}=jstKeys();const limit=product.limits.free[feature];
-  const result=await consumeSharedRateLimit({policy:{routeKey:`free-${feature}-${day}`,limit,windowMs:86400000},rawSubject:getRateLimitSubject(request)});
+  const {resetAt}=jstKeys();const policy=freeDailyPolicy(feature);
+  const result=await peekSharedRateLimit({policy,rawSubject:getRateLimitSubject(request)});
   if(result.allowed)return null;
-  return json({error:{code:'DAILY_LIMIT_REACHED',message:`今日の無料${limit}回はここまでです。日本時間の0時にまた使えます。`,resetAt,plan:'free',upgrade:true}},429);
+  return json({error:{code:'DAILY_LIMIT_REACHED',message:`今日の無料${policy.limit}回はここまでです。日本時間の0時にまた使えます。`,resetAt,plan:'free',upgrade:true}},429);
+}
+async function recordAnonymousAnswer(request:Request,feature:AiFeature){
+  if(!webProSalesReady())return;
+  await consumeSharedRateLimit({policy:freeDailyPolicy(feature),rawSubject:getRateLimitSubject(request)});
+}
+/** 回答が返った応答だけ onAnswered を待ってから返す（SSE は最後の meta を見て判定）。 */
+async function afterAnswer(response:Response,feature:AiFeature,onAnswered:()=>Promise<void>):Promise<Response>{
+  const record=async(value:unknown)=>{if(value&&chargeable(value,feature)){try{await onAnswered();}catch{/* counting failure never drops a delivered answer */}}};
+  if(response.headers.get('content-type')?.includes('text/event-stream') && response.body){
+    const reader=response.body.getReader();let collected='';const decoder=new TextDecoder();
+    const stream=new ReadableStream({async start(controller){try{
+      while(true){const item=await reader.read();if(item.done)break;collected+=decoder.decode(item.value,{stream:true});controller.enqueue(item.value);}collected+=decoder.decode();
+      const meta=[...collected.matchAll(/event: meta\r?\ndata: ([^\n]+)/g)].at(-1)?.[1];
+      await record(meta?JSON.parse(meta):null);controller.close();
+    }catch(e){controller.error(e);}},async cancel(){await reader.cancel();}});
+    return new Response(stream,{status:response.status,headers:response.headers});
+  }
+  if(response.ok)await record(await response.clone().json().catch(()=>null));
+  return response;
 }
 export type AiFeature='law_chat'|'chemical_ra';
 export function jstKeys(now=new Date()){
@@ -133,7 +155,8 @@ export async function withUsage(request:Request,feature:AiFeature,run:(request:R
     if(!signedIn){
       let limited:Response|null;
       try{limited=await anonymousFreeAllowance(request,feature);}catch{return json({error:{code:'ENTITLEMENT_SYNC_PENDING',message:'無料枠を確認できないため、いまはAIを止めています。時間をおいてお試しください。'}},503);}
-      return limited??run(request);
+      if(limited)return limited;
+      return afterAnswer(await run(request),feature,()=>recordAnonymousAnswer(request,feature));
     }
   }
   const chunks:Uint8Array[]=[];let bytes=0;const reader=request.body?.getReader();

@@ -669,3 +669,44 @@ export function __resetDevelopmentSharedStateForTests(): void {
   developmentRateBuckets.clear();
   developmentIdempotency.clear();
 }
+
+/**
+ * 今の固定窓での消費数を、増やさずに読む（「回答が返ったら1回」と数えるため、
+ * 送信前は上限の確認だけを行い、消費は回答後に consumeSharedRateLimit で行う）。
+ */
+export async function peekSharedRateLimit(
+  input: { policy: SharedRateLimitPolicy; rawSubject: string; namespace?: string },
+  options: { database?: SharedStateDatabase | null; env?: NodeJS.ProcessEnv; now?: number } = {},
+): Promise<{ count: number; remaining: number; allowed: boolean }> {
+  const env = options.env ?? process.env;
+  const namespace = cleanIdentifier(input.namespace ?? sharedStateNamespace(env), 48);
+  const routeKey = cleanIdentifier(input.policy.routeKey, 96);
+  const subjectHash = hmac(`${RATE_HMAC_DOMAIN}:${namespace}:${routeKey}`, input.rawSubject || "unknown", env);
+  const database = options.database === undefined ? defaultDatabase() : options.database;
+  let count = 0;
+  if (!database || typeof database.$queryRawUnsafe !== "function") {
+    if (!allowDevelopmentMemoryFallback(env)) throw new SharedStateUnavailableError();
+    const now = options.now ?? Date.now();
+    const windowStart = Math.floor(now / input.policy.windowMs) * input.policy.windowMs;
+    const bucket = developmentRateBuckets.get(`${namespace}:${routeKey}:${subjectHash}`);
+    count = bucket && bucket.windowStart === windowStart ? bucket.count : 0;
+  } else {
+    const rows = await database.$queryRawUnsafe<Array<{ count: number }>>(
+      `
+        SELECT COALESCE(MAX("count"), 0)::int AS "count"
+        FROM "SharedRateBucket"
+        WHERE "namespace" = $1 AND "routeKey" = $2 AND "subjectHash" = $3
+          AND "windowStart" = to_timestamp(
+            floor(extract(epoch FROM clock_timestamp()) * 1000 / $4::double precision)
+            * $4::double precision / 1000
+          )
+      `,
+      namespace,
+      routeKey,
+      subjectHash,
+      input.policy.windowMs,
+    );
+    count = Number(rows[0]?.count ?? 0);
+  }
+  return { count, remaining: Math.max(0, input.policy.limit - count), allowed: count < input.policy.limit };
+}
