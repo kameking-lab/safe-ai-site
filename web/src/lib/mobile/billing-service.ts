@@ -41,13 +41,23 @@ export async function getEntitlement(userId:string) {
 }
 export async function reconcile(userId:string) {
   return billingDb().$transaction(async tx=>{
-    await lockMember(tx,userId);const member=await identity(tx,userId);
-    const environment=member.billingEnvironment==='SANDBOX'?'SANDBOX':'PRODUCTION';
+    await lockMember(tx,userId);let member=await identity(tx,userId);
+    let environment:'SANDBOX'|'PRODUCTION'=member.billingEnvironment==='SANDBOX'?'SANDBOX':'PRODUCTION';
     await reconcileStripe(tx,userId);
     const productId=process.env.REVENUECAT_IOS_PRODUCT_ID;
     if(!productId) throw new Error('ENTITLEMENT_SYNC_PENDING');
     const raw=await fetchSubscriber(member.appUserId);
-    const grant=verifiedAppleGrant(raw,productId,new Date(),environment);const checkedAt=new Date();
+    let grant=verifiedAppleGrant(raw,productId,new Date(),environment);
+    // App Review and TestFlight testers who are not on the tester list also buy in Apple's sandbox.
+    // An App Store build can never make a sandbox purchase, so a verified sandbox subscription on this
+    // member's own app user ID moves a member without production rights to SANDBOX.
+    if(!grant&&environment==='PRODUCTION'){
+      const sandbox=verifiedAppleGrant(raw,productId,new Date(),'SANDBOX');
+      if(sandbox&&(await entitlementInTransaction(tx,userId)).plan==='free'){
+        member=await tx.mobileIdentity.update({where:{userId},data:{billingEnvironment:'SANDBOX'}});environment='SANDBOX';grant=sandbox;
+      }
+    }
+    const checkedAt=new Date();
     // Fetch the latest authoritative subscriber state, rather than applying event order.
     await tx.mobileGrant.updateMany({where:{userId,provider:'app_store',environment},data:{revoked:true,checkedAt}});
     if(grant) {
