@@ -168,7 +168,8 @@ describe.each([
       expect(JSON.stringify(providerState.requests[0])).not.toMatch(
         /"(?:temperature|topP|topK|top_p|top_k|candidateCount|candidate_count|thinkingBudget|thinking_budget)"\s*:/u,
       );
-      expect(payload.answer).toContain("結論");
+      // 生成が正常なら生成した回答を見せる。失敗（timeout）なら収録条文の定型回答。
+      expect(payload.answer).toContain(providerMode === "timeout" ? "結論" : "安衛則第612条の2");
       expectRelatedHeatNotice(payload);
     },
   );

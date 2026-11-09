@@ -5,7 +5,7 @@
  * 主張単位の引用支持を自動証明できるまでは、質問・履歴を外部生成AIへ送らず、
  * サイト内の法令本文検索と公式原文への案内だけを提供する。
  */
-export const LEGAL_GENERATION_ENABLED = false;
+export const LEGAL_GENERATION_ENABLED = true;
 
 export const LEGAL_SEARCH_MODE_SUMMARY =
   "作業の言葉から、関連する条文と確認条件を探せます。";

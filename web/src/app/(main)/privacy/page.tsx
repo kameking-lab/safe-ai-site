@@ -29,6 +29,9 @@ export default function PrivacyPage() {
           <ul className="ml-4 space-y-1 text-sm text-slate-600">
             <li className="list-disc">通信は暗号化（HTTPS）して送受信します。</li>
             <li className="list-disc">ログインは Google などの外部アカウントで行い、パスワードを当サイトに保存しません。</li>
+            <li id="oauth" className="list-disc scroll-mt-24">
+              Google・Apple のログインで受け取るのは、氏名、メールアドレス、プロフィール画像（標準のログイン範囲）だけです。本人確認と、会員のデータ・購入の持ち主の識別に使います。Google Drive、連絡先、カレンダーの権限は要求しません。ログインしなくても資料の閲覧・検索は使えます。登録情報の削除は<a className="underline hover:text-emerald-700" href="/contact">お問い合わせ</a>（アプリでは「会員・Pro」のアカウント削除）から依頼できます。
+            </li>
             <li className="list-disc">お問い合わせ・ご相談・メール登録の内容は、第3項の目的以外に使いません。問い合わせ受信・フィードバック・メルマガ登録のサーバーログには、氏名・メールアドレス・相談内容を記録しません。</li>
             <li className="list-disc">AIへの質問は、名前や住所などを書かなくても使えます。個人情報らしい入力を検知した場合は外部へ送信しません。</li>
             <li className="list-disc">

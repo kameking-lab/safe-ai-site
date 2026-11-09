@@ -39,8 +39,11 @@ describe("high-risk input disclosures", () => {
     expect(usageNotes).toContain("氏名、会社名、現場名、連絡先、健康情報は入力しないでください");
   });
 
-  it("explains OAuth data scope, purpose, optionality and deletion before sign-in", () => {
-    const source = read("src/app/(main)/auth/signin/page.tsx");
+  it("explains OAuth data scope, purpose, optionality and deletion (privacy policy linked from sign-in)", () => {
+    // 2026-11-09 オーナー指示: ログイン画面はボタン2つと小さな1行だけ。説明はリンク先のプライバシーポリシーに置く。
+    const signin = read("src/app/(main)/auth/signin/page.tsx");
+    expect(signin).toContain('href="/privacy"');
+    const source = read("src/app/(main)/privacy/page.tsx");
     expect(source).toContain("氏名、メールアドレス、プロフィール画像");
     expect(source).toContain("Google Drive、連絡先、カレンダーの権限は要求しません");
     expect(source).toContain("ログインしなくても");

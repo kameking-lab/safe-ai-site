@@ -239,12 +239,12 @@ describe.each([
   ["JSON", `${source("route.ts")}\n${sharedSource()}`],
   ["SSE", source("stream", "route.ts")],
 ])("chatbot %s route safety boundary", (_name, text) => {
-  it("keeps unverified generative legal answers feature-flagged off", () => {
+  it("keeps legal-chat generation behind its explicit server switch", () => {
     expect(text).toContain("GENERATIVE_LEGAL_ANSWERS_ENABLED");
-    if (_name === "JSON") {
-      expect(text).toContain("LEGAL_GENERATION_ENABLED");
-      expect(LEGAL_GENERATION_ENABLED).toBe(false);
-    }
+    // 生成はオーナー判断で有効（2026-11-09）。実際に呼ぶのは LEGAL_CHAT_AI_ENABLED 等の
+    // サーバー側スイッチと API キーがそろったときだけ。
+    expect(LEGAL_GENERATION_ENABLED).toBe(true);
+    expect(text).toContain("legalChatAiAllowed()");
     const provider = text.indexOf("new GoogleGenAI");
     const disabledCheck = text.lastIndexOf(
       "!GENERATIVE_LEGAL_ANSWERS_ENABLED",
