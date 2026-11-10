@@ -8,11 +8,12 @@ import { inspectAiOutbound } from '../ai-outbound-safety';
 import { validateChatbotRequestBoundary } from '../server/chatbot-request-boundary';
 import { consumeSharedRateLimit,getRateLimitSubject } from '../security/shared-state';
 import { webProSalesReady,appStoreSalesReady } from '../pro-sales';
+import { pauseProSales,proSalesStatus } from './pro-sales-gate';
 const context=new AsyncLocalStorage<{plan:Plan;operationId?:string}>();
 /** The free daily limit carries the member's plan so the client can offer Pro (never to a Pro member). */
 class DailyLimitError extends Error{constructor(readonly plan:Plan){super('DAILY_LIMIT_REACHED');}}
 /** Pro can be bought from where the request came from: App Store in the app, Stripe on the web. */
-export function upgradeAvailable(request:Request,plan:Plan|null){return plan!=='pro' && (isNativeRequest(request)?appStoreSalesReady():webProSalesReady());}
+export async function upgradeAvailable(request:Request,plan:Plan|null){return plan!=='pro' && (isNativeRequest(request)?appStoreSalesReady():webProSalesReady()) && !(await proSalesStatus().catch(()=>({paused:true}))).paused;}
 /**
  * Anonymous web visitors get the same free daily allowance as a free member once Pro is on sale,
  * counted per visitor (IP-derived, HMAC'd) for the JST day. Before sales open this is a no-op, so
@@ -23,7 +24,7 @@ export async function anonymousFreeAllowance(request:Request,feature:AiFeature){
   const {day,resetAt}=jstKeys();const limit=product.limits.free[feature];
   const result=await consumeSharedRateLimit({policy:{routeKey:`free-${feature}-${day}`,limit,windowMs:86400000},rawSubject:getRateLimitSubject(request)});
   if(result.allowed)return null;
-  return json({error:{code:'DAILY_LIMIT_REACHED',message:`今日の無料${limit}回はここまでです。日本時間の0時にまた使えます。`,resetAt,plan:'free',upgrade:true}},429);
+  return json({error:{code:'DAILY_LIMIT_REACHED',message:`今日の無料${limit}回はここまでです。日本時間の0時にまた使えます。`,resetAt,plan:'free',upgrade:await upgradeAvailable(request,'free')}},429);
 }
 export type AiFeature='law_chat'|'chemical_ra';
 export function jstKeys(now=new Date()){
@@ -50,10 +51,16 @@ export async function withProviderBudget<T>(run:()=>Promise<T>,bound:ProviderBou
   const reservation=await db.$transaction(async tx=>{
     await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`anzen-budget:${month}`},0))`;
     const budget=await tx.mobileBudgetMonth.upsert({where:{month},create:{month},update:{}});
+    // Commit the sales stop before throwing; throwing here would roll it back.
+    if(budget.committedYen+budget.reservedYen+amount>product.monthlyBudgetYen){
+      await pauseProSales(tx,month);return null;
+    }
     checkBudget(budget.committedYen,budget.reservedYen,amount,plan);
     await tx.mobileBudgetMonth.update({where:{month},data:{reservedYen:{increment:amount}}});
+    if(budget.committedYen+budget.reservedYen+amount>=product.monthlyBudgetYen)await pauseProSales(tx,month);
     return tx.mobileProviderReservation.create({data:{month,amountYen:amount}});
   });
+  if(!reservation)throw new Error('AI_BUDGET_STOPPED');
   try{return await run();}finally{
     // Unknown/failed provider usage is conservatively charged at the reserved maximum.
     // If settlement storage fails, the reservation remains and continues blocking overspend.
@@ -167,7 +174,7 @@ export async function withUsage(request:Request,feature:AiFeature,run:(request:R
     const known=['UNAUTHORIZED','FORBIDDEN','INVALID_REQUEST','OPERATION_PENDING','OPERATION_RELEASED','DAILY_LIMIT_REACHED','BURST_LIMITED','ENTITLEMENT_SYNC_PENDING','AI_BUDGET_STOPPED','AI_BUDGET_FREE_PAUSED'];const code=e instanceof Error&&known.includes(e.message)?e.message:'ENTITLEMENT_SYNC_PENDING';
     const limitPlan=e instanceof DailyLimitError?e.plan:null;
     const message=code==='DAILY_LIMIT_REACHED'?(limitPlan==='free'?`今日の無料${product.limits.free[feature]}回はここまでです。日本時間の0時にまた使えます。`:'本日の上限に達しました。日本時間の次の0時に回復します。'):code==='UNAUTHORIZED'?'AIを利用するには会員ログインが必要です。':code==='BURST_LIMITED'?'短時間の利用が集中しています。60秒後に再度お試しください。':code==='OPERATION_PENDING'?'同じ操作を処理中です。再送せず、処理の完了をお待ちください。':'サーバーの安全な実行条件を確認できません。権利の再確認をお試しください。';
-    const result=json({error:{code,message,resetAt:jstKeys().resetAt,...(limitPlan?{plan:limitPlan,upgrade:upgradeAvailable(request,limitPlan)}:{})}},code==='UNAUTHORIZED'?401:code==='FORBIDDEN'?403:code.includes('LIMIT')?429:503);
+    const result=json({error:{code,message,resetAt:jstKeys().resetAt,...(limitPlan?{plan:limitPlan,upgrade:await upgradeAvailable(request,limitPlan)}:{})}},code==='UNAUTHORIZED'?401:code==='FORBIDDEN'?403:code.includes('LIMIT')?429:503);
     if(code==='BURST_LIMITED')result.headers.set('Retry-After','60');return result;
   }
 }

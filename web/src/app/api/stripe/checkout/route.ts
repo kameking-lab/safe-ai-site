@@ -16,6 +16,7 @@ import { reservePurchase, billingDb, lockMember } from "@/lib/mobile/billing-ser
 import { resumeStripeIntent } from "@/lib/mobile/stripe-purchase";
 import { Prisma } from "@prisma/client";
 import { safeReturnPath } from "@/lib/pro-start";
+import { assertProSalesOpen,PRO_SALES_PAUSED_MESSAGE } from "@/lib/mobile/pro-sales-gate";
 
 function getStripe(): Stripe | null {
   const key = process.env.STRIPE_SECRET_KEY;
@@ -59,6 +60,10 @@ export async function POST(req: Request) {
   // With the shared ledger on, iOS and web reserve against the same member,
   // preventing concurrent double checkout. Without it the legacy web flow stays as is.
   let purchaseIntentId: string | undefined;
+  try { await assertProSalesOpen(); } catch(e) {
+    const paused=e instanceof Error&&e.message==='PRO_SALES_PAUSED';
+    return privateJson({error:{code:paused?'PRO_SALES_PAUSED':'ENTITLEMENT_SYNC_PENDING',message:paused?PRO_SALES_PAUSED_MESSAGE:'受付状況を確認できません。時間をおいてお試しください。'}},503);
+  }
   if (ledger) {
     if (priceId !== process.env.STRIPE_ANZEN_PRO_MONTHLY_PRICE_ID) {
       return privateJson({ error: "選択されたプランは利用できません。" }, 400);
@@ -67,7 +72,7 @@ export async function POST(req: Request) {
       purchaseIntentId = (await reservePurchase(userId, "stripe")).id;
     } catch (e) {
       const code = e instanceof Error ? e.message : "ENTITLEMENT_SYNC_PENDING";
-      return privateJson({ error: { code } }, code === "ALREADY_SUBSCRIBED" || code === "PURCHASE_PENDING" ? 409 : 503);
+      return privateJson({ error: { code, ...(code==='PRO_SALES_PAUSED'?{message:PRO_SALES_PAUSED_MESSAGE}:{}) } }, code === "ALREADY_SUBSCRIBED" || code === "PURCHASE_PENDING" ? 409 : 503);
     }
   }
 
@@ -134,6 +139,7 @@ export async function POST(req: Request) {
       }
     });
     const result = await billingDb().$transaction(async (tx) => {
+      await assertProSalesOpen();
       await lockMember(tx, userId);
       const intent = await tx.mobilePurchaseIntent.findUnique({ where: { userId } });
       if (!intent || intent.id !== purchaseIntentId || intent.status !== "pending" || intent.source !== "stripe") throw new Error("PURCHASE_PENDING");

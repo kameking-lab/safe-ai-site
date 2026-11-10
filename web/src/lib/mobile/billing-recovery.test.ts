@@ -1,9 +1,11 @@
 // @vitest-environment node
 /* eslint-disable @typescript-eslint/no-explicit-any -- loose test doubles for the Prisma delegate surface */
 import { beforeEach,afterEach,it,expect,vi } from 'vitest';
-const state=vi.hoisted(()=>({intent:null as any,tail:Promise.resolve() as Promise<unknown>,created:0,grantAvailable:false,grants:[] as any[]}));
-vi.mock('./revenuecat',()=>({fetchSubscriber:async()=>({}),verifiedAppleGrant:()=>state.grantAvailable?{productId:'fixture-product',expiresAt:new Date(Date.now()+86400000)}:null,fetchAppleOwnership:async()=>'original-transaction-fixture'}));
-vi.mock('./stripe-reconcile',()=>({reconcileStripe:async()=>{}}));
+vi.mock('./pro-sales-gate',()=>({assertProSalesOpen:vi.fn(async()=>{})}));
+import { assertProSalesOpen } from './pro-sales-gate';
+const state=vi.hoisted(()=>({intent:null as any,tail:Promise.resolve() as Promise<unknown>,created:0,grantAvailable:false,sandboxGrant:false,env:'PRODUCTION' as string,fetchFails:false,fetches:0,stripeFetches:0,stripeFails:false,legacy:null as any,grants:[] as any[]}));
+vi.mock('./revenuecat',()=>({fetchSubscriber:async()=>{state.fetches++;if(state.fetchFails)throw new Error('offline');return {};},verifiedAppleGrant:(_raw:unknown,_p:string,_n:Date,environment='PRODUCTION')=>(environment==='SANDBOX'?state.sandboxGrant:state.grantAvailable)?{productId:'fixture-product',expiresAt:new Date(Date.now()+86400000)}:null,fetchAppleOwnership:async()=>'original-transaction-fixture'}));
+vi.mock('./stripe-reconcile',()=>({reconcileStripe:async()=>{state.stripeFetches++;if(state.stripeFails)throw new Error('stripe offline');if(state.legacy){state.legacy.currentPeriodEnd=new Date(Date.now()+86400000);state.legacy.updatedAt=new Date();state.grants.filter(g=>g.provider==='stripe').forEach(g=>{g.checkedAt=new Date();g.expiresAt=new Date(Date.now()+86400000);});}}}));
 vi.mock('@/lib/prisma',()=>{
  const tx={$executeRaw:async()=>1,mobileIdentity:{upsert:async()=>({appUserId:'immutable-member-id',billingEnvironment:'PRODUCTION'}),findUnique:async()=>({appUserId:'immutable-member-id',billingEnvironment:'PRODUCTION'})},subscription:{findUnique:async()=>null},mobileGrant:{findMany:async()=>state.grants,findUnique:async()=>state.grants[0]??null,updateMany:async({data}:any)=>{state.grants.forEach(g=>Object.assign(g,data));return{count:state.grants.length};},upsert:async({create,update}:any)=>{if(state.grants.length)Object.assign(state.grants[0],update);else state.grants.push({...create,revoked:false});return state.grants[0];}},mobilePurchaseIntent:{
   findUnique:async()=>state.intent,
@@ -14,11 +16,26 @@ vi.mock('@/lib/prisma',()=>{
 });
 import { reservePurchase,cancelPurchase,markStoreStarted,reportAppleOutcome,reconcile } from './billing-service';
 import { releaseReviewedApplePurchase,type AppleReview } from './apple-purchase-review';
-beforeEach(()=>{state.intent=null;state.created=0;state.tail=Promise.resolve();state.grantAvailable=false;state.grants=[];vi.stubEnv('MOBILE_LEDGER_ENABLED','true');vi.stubEnv('REVENUECAT_IOS_PRODUCT_ID','fixture-product');});afterEach(()=>vi.unstubAllEnvs());
+beforeEach(()=>{state.intent=null;state.created=0;state.tail=Promise.resolve();state.grantAvailable=false;state.fetchFails=false;state.grants=[];vi.stubEnv('MOBILE_LEDGER_ENABLED','true');vi.stubEnv('REVENUECAT_IOS_PRODUCT_ID','fixture-product');});afterEach(()=>vi.unstubAllEnvs());
 it('resumes the identical reservation after app termination or network loss',async()=>{const first=await reservePurchase('member','app_store');const results=await Promise.all(Array.from({length:20},()=>reservePurchase('member','app_store')));expect(results.every(result=>result.id===first.id)).toBe(true);expect(state.created).toBe(1);});
 it('serializes competing website and iOS starts without a second reservation',async()=>{const results=await Promise.allSettled([reservePurchase('member','stripe'),reservePurchase('member','app_store')]);expect(results.filter(r=>r.status==='fulfilled')).toHaveLength(1);expect(state.created).toBe(1);});
 it('allows release before dispatch but rejects a foreign purchase source',async()=>{const first=await reservePurchase('member','app_store');await expect(cancelPurchase('member',first.id,'stripe')).rejects.toThrow('INVALID_REQUEST');await cancelPurchase('member',first.id,'app_store');expect(state.intent.status).toBe('cancelled');const next=await reservePurchase('member','stripe');expect(next.id).not.toBe(first.id);});
-it('does not unlock or reopen an old StoreKit or Ask to Buy reservation on client cancellation',async()=>{const first=await reservePurchase('member','app_store');await markStoreStarted('member',first.id);state.intent.createdAt=new Date(0);await expect(cancelPurchase('member',first.id,'app_store')).rejects.toThrow('PURCHASE_PENDING');expect(state.intent.status).toBe('pending');await expect(reservePurchase('member','app_store')).rejects.toThrow('PURCHASE_REVIEW_REQUIRED');await expect(reservePurchase('member','stripe')).rejects.toThrow('PURCHASE_PENDING');});
+it('does not reopen a dispatched purchase before a result or switch its provider',async()=>{const first=await reservePurchase('member','app_store');await markStoreStarted('member',first.id);state.intent.createdAt=new Date(0);await expect(cancelPurchase('member',first.id,'app_store')).rejects.toThrow('PURCHASE_PENDING');expect(state.intent.status).toBe('pending');await expect(reservePurchase('member','app_store')).rejects.toThrow('PURCHASE_PENDING');await expect(reservePurchase('member','stripe')).rejects.toThrow('PURCHASE_PENDING');});
+it('automatically verifies evidence and reuses a cancelled Apple purchase without an operator',async()=>{
+  const first=await reservePurchase('member','app_store');await markStoreStarted('member',first.id);
+  await reportAppleOutcome('member',first.id,'cancelled');
+  const retry=await reservePurchase('member','app_store');expect(retry.id).toBe(first.id);expect(state.created).toBe(1);
+  expect(state.intent.providerRequest).toMatchObject({source:'server_reconciliation',plan:'free',syncState:'verified'});
+  await markStoreStarted('member',first.id);
+  await expect(markStoreStarted('member',first.id)).rejects.toThrow('PURCHASE_PENDING');
+  state.grantAvailable=true;expect((await reconcile('member')).plan).toBe('pro');
+});
+it('blocks cancelled-purchase retries during a provider outage or a sales pause',async()=>{
+  const first=await reservePurchase('member');await markStoreStarted('member',first.id);await reportAppleOutcome('member',first.id,'cancelled');
+  state.fetchFails=true;await expect(reservePurchase('member')).rejects.toThrow('offline');
+  state.fetchFails=false;vi.mocked(assertProSalesOpen).mockRejectedValueOnce(new Error('PRO_SALES_PAUSED'));
+  await expect(reservePurchase('member')).rejects.toThrow('PRO_SALES_PAUSED');expect(state.created).toBe(1);
+});
 it('distinguishes all reports but never treats a report or negative lookup as store closure',async()=>{
   const first=await reservePurchase('member','app_store');await markStoreStarted('member',first.id);
   for(const outcome of ['cancelled','unknown','not_opened','deferred'] as const){const rights=await reportAppleOutcome('member',first.id,outcome);expect(rights.purchasePending).toBe(true);await expect(cancelPurchase('member',first.id,'app_store')).rejects.toThrow('PURCHASE_PENDING');await expect(reservePurchase('member','stripe')).rejects.toThrow('PURCHASE_PENDING');}

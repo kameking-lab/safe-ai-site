@@ -177,6 +177,20 @@ model MobileBudgetMonth {
   month       String @id
   committedYen Int @default(0)
   reservedYen Int @default(0)
+  salesPausedAt DateTime?
+}
+
+// Durable, deduplicated operations notifications. Never store provider errors or receipts.
+model MobileOperationsAlert {
+  id String @id
+  kind String
+  reference String
+  attempts Int @default(0)
+  nextAttempt DateTime @default(now())
+  notifiedAt DateTime?
+  resolvedAt DateTime?
+  createdAt DateTime @default(now())
+  @@index([notifiedAt, nextAttempt])
 }
 
 model MobileProviderReservation {

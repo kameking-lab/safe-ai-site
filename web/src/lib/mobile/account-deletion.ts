@@ -3,6 +3,8 @@ import { Prisma } from '@prisma/client';
 import { billingDb,lockMember } from './billing-service';
 import { digest } from './session';
 import { externalCredentialedServicesAllowed } from '../server/deployment-safety';
+import { stopDeletedAccountRenewal } from './stripe-account-deletion';
+import { recordOperationsAlert,resolveOperationsAlert } from './operations-alerts';
 
 const token=()=>randomBytes(32).toString('base64url');
 const validToken=(value:string)=>/^[A-Za-z0-9_-]{43}$/.test(value);
@@ -50,10 +52,11 @@ async function revokeApple(account:{refresh_token:string|null;access_token:strin
   if(!response.ok)throw new Error('DELETION_PENDING');
 }
 export async function processAccountDeletion(id:string){
-  return billingDb().$transaction(async tx=>{
+  try { await billingDb().$transaction(async tx=>{
     const job=await tx.mobileAccountDeletion.findUnique({where:{id}});if(!job?.userId||job.status!=='pending')return;
     const userId=job.userId;await lockMember(tx,userId);
     const current=await tx.mobileAccountDeletion.findUnique({where:{id}});if(current?.status!=='pending')return;
+    await stopDeletedAccountRenewal(tx,userId);
     const accounts=await tx.account.findMany({where:{userId,provider:'apple'}});
     for(const account of accounts)await revokeApple(account);
     const identity=await tx.mobileIdentity.findUnique({where:{userId}});
@@ -77,6 +80,8 @@ export async function processAccountDeletion(id:string){
     await tx.user.delete({where:{id:userId}}); // Account, Session and Subscription cascade.
     await tx.mobileAccountDeletion.update({where:{id},data:{userId:null,confirmationHash:'',sessionHash:'',status:'completed',completedAt:new Date()}});
   },{timeout:30000});
+  } catch(error) { await recordOperationsAlert('account_deletion',id);throw error; }
+  await resolveOperationsAlert('account_deletion',id);
 }
 async function deletionStatusById(id:string){const job=await billingDb().mobileAccountDeletion.findUnique({where:{id}});return {status:job?.status==='completed'?'completed':job?.status==='prepared'?'prepared':'pending',completedAt:job?.completedAt?.toISOString()??null};}
 export async function accountDeletionStatus(receipt:string){

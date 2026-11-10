@@ -1,5 +1,6 @@
 // @vitest-environment node
 import { beforeEach,afterEach,describe,expect,it,vi } from 'vitest';
+const pause=vi.hoisted(()=>vi.fn(async()=>({count:1})));
 const state=vi.hoisted(()=>({operations:[] as Array<{id:string;userId:string;feature:string;day:string;status:string;createdAt:Date;requestHash:string;response?:unknown}>,tail:Promise.resolve() as Promise<unknown>,paid:false,signedIn:true,budget:{committedYen:0,reservedYen:0},reservations:[] as Array<{id:string;amountYen:number;status:string}>}));
 vi.mock('@/auth',()=>({auth:async()=>state.signedIn?{user:{id:'mock_member'}}:null}));
 vi.mock('@/lib/prisma',()=>{
@@ -10,9 +11,12 @@ vi.mock('@/lib/prisma',()=>{
     subscription:{findUnique:async()=>state.paid?{planName:'pro',status:'active',stripeSubscriptionId:'mock_stripe',currentPeriodEnd:new Date(Date.now()+86400000),updatedAt:new Date()}:null},
     mobileGrant:{findMany:async()=>state.paid?[{provider:'stripe',environment:'PRODUCTION',revoked:false,expiresAt:new Date(Date.now()+86400000),checkedAt:new Date()}]:[]},
     mobileBudgetMonth:{
+      findUnique:async()=>({...state.budget}),
+      updateMany:pause,
       upsert:async()=>({...state.budget}),
       update:async({data}:{data:{reservedYen?:{increment?:number;decrement?:number};committedYen?:{increment:number}}})=>{state.budget.reservedYen+=(data.reservedYen?.increment??0)-(data.reservedYen?.decrement??0);state.budget.committedYen+=data.committedYen?.increment??0;return {...state.budget};}
     },
+    mobileOperationsAlert:{upsert:async()=>({})},
     mobileProviderReservation:{
       create:async({data}:{data:{amountYen:number}})=>{const row={id:crypto.randomUUID(),amountYen:data.amountYen,status:'reserved'};state.reservations.push(row);return row;},
       updateMany:async({where,data}:{where:{id:string;status:string};data:{status:string}})=>{const r=state.reservations.find(x=>x.id===where.id&&x.status===where.status);if(!r)return{count:0};r.status=data.status;return{count:1};}
@@ -143,5 +147,14 @@ describe('anonymous website visitors with the shared ledger on',()=>{
     state.budget={committedYen:44999,reservedYen:0};
     await expect(withProviderBudget(provider,bound)).rejects.toThrow('AI_BUDGET_FREE_PAUSED');
     expect(provider).toHaveBeenCalledTimes(1);
+  });
+  it('commits a monthly sales pause before rejecting an over-budget provider call',async()=>{
+    pause.mockClear();
+    vi.stubEnv('MOBILE_AI_PRICED_MODEL','gemini-3.8-flash');vi.stubEnv('MOBILE_AI_INPUT_JPY_PER_MILLION','160');vi.stubEnv('MOBILE_AI_OUTPUT_JPY_PER_MILLION','960');vi.stubEnv('MOBILE_AI_COST_MARGIN','1.5');
+    state.budget={committedYen:50000,reservedYen:0};const provider=vi.fn(async()=>'ok');
+    await expect(withProviderBudget(provider,{model:'gemini-3.8-flash',inputBytes:20000,maxOutputTokens:2048})).rejects.toThrow('AI_BUDGET_STOPPED');
+    expect(provider).not.toHaveBeenCalled();expect(state.reservations).toHaveLength(0);
+    expect(pause).toHaveBeenCalledWith({where:{month:jstKeys().month,salesPausedAt:null},data:{salesPausedAt:expect.any(Date)}});
+    expect(state.budget).toEqual({committedYen:50000,reservedYen:0});
   });
 });

@@ -1,5 +1,6 @@
 // @vitest-environment node
 import { afterEach, describe, expect, it, vi } from "vitest";
+vi.mock('@/lib/mobile/operations-alerts',()=>({deliverOperationsAlerts:vi.fn(async()=>({sent:0}))}));
 
 const calls = vi.hoisted(() => ({ billing: [] as number[], deletions: [] as number[], enqueue: [] as number[], deliver: [] as number[] }));
 const deleteMany = vi.hoisted(() => vi.fn(async () => ({ count: 0 })));

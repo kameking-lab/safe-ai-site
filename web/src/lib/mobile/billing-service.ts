@@ -5,6 +5,8 @@ import { fetchSubscriber, verifiedAppleGrant,fetchAppleOwnership } from './reven
 import { reconcileStripe } from './stripe-reconcile';
 import { assertResume,canReleasePrepared,appleOutcomeStage,type ApplePurchaseOutcome,type PurchaseSource } from './purchase-state';
 import { expireStripeIntent } from './stripe-purchase';
+import { assertProSalesOpen } from './pro-sales-gate';
+import { recordOperationsAlert,resolveOperationsAlert } from './operations-alerts';
 export function billingDb() { if(!prisma || process.env.MOBILE_LEDGER_ENABLED!=='true') throw new Error('ENTITLEMENT_SYNC_PENDING');return prisma; }
 export async function lockMember(tx:Prisma.TransactionClient,userId:string) { await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`anzen:${userId}`},0))`; }
 export async function lockPushDevice(tx:Prisma.TransactionClient,token:string) { await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`anzen-push:${token}`},0))`; }
@@ -66,10 +68,18 @@ export async function reconcile(userId:string) {
 export async function reservePurchase(userId:string,source:PurchaseSource='app_store') {
   // Refresh Apple before reserving. Website rights are always read from the database.
   await reconcile(userId);
+  await assertProSalesOpen();
   return billingDb().$transaction(async tx=>{
     await lockMember(tx,userId);const current=await entitlementInTransaction(tx,userId);assertPurchasable(current);
     const existing=await tx.mobilePurchaseIntent.findUnique({where:{userId}});
-    if(existing?.status==='pending'){assertResume(existing,source);return existing;}
+    if(existing?.status==='pending'){
+      assertResume(existing,source);
+      if(source==='app_store'&&existing.stage!=='prepared'){
+        await tx.mobilePurchaseIntent.updateMany({where:{userId,id:existing.id,status:'pending',stage:existing.stage},
+          data:{providerRequest:{source:'server_reconciliation',checkedAt:new Date().toISOString(),appUserId:current.appUserId,plan:current.plan,syncState:current.syncState}}});
+      }
+      return existing;
+    }
     // Never unlock a potentially pending StoreKit transaction simply because time passed.
     return tx.mobilePurchaseIntent.upsert({where:{userId},create:{userId,source},update:{id:crypto.randomUUID(),source,stage:'prepared',providerSessionId:null,checkoutUrl:null,providerRequest:Prisma.DbNull,status:'pending',createdAt:new Date()}});
   });
@@ -84,8 +94,13 @@ export async function cancelPurchase(userId:string,id:string,source:PurchaseSour
     return entitlementInTransaction(tx,userId);});
 }
 export async function markStoreStarted(userId:string,id:string){
+  await reconcile(userId);
+  await assertProSalesOpen();
   return billingDb().$transaction(async tx=>{await lockMember(tx,userId);const rights=await entitlementInTransaction(tx,userId);assertPurchasable(rights);
-    const changed=await tx.mobilePurchaseIntent.updateMany({where:{userId,id,source:'app_store',status:'pending',stage:'prepared'},data:{stage:'store_started'}});
+    const intent=await tx.mobilePurchaseIntent.findUnique({where:{userId}});
+    if(!intent||intent.id!==id)throw new Error('INVALID_REQUEST');
+    assertResume(intent,'app_store');
+    const changed=await tx.mobilePurchaseIntent.updateMany({where:{userId,id,source:'app_store',status:'pending',stage:intent.stage},data:{stage:'store_started'}});
     if(changed.count!==1)throw new Error('INVALID_REQUEST');return {id};});
 }
 /** Client outcomes describe the UI only. They never release a dispatched reservation. */
@@ -112,9 +127,11 @@ export async function processBillingEvents(limit=20,deadline=Date.now()+45000) {
       // Reconcile both sides without merging accounts or silently moving purchase ownership.
       for(const member of members)await reconcile(member.userId);
       await db.mobileBillingEvent.update({where:{id:event.id},data:{status:'completed'}});
+      await resolveOperationsAlert('billing_reconcile',event.id);
     }catch{
       const attempts=event.attempts+1;
-      await db.mobileBillingEvent.update({where:{id:event.id},data:{attempts,status:attempts>=10?'failed':'pending',nextAttempt:new Date(Date.now()+Math.min(3600000,2**attempts*10000))}});
+      await db.mobileBillingEvent.update({where:{id:event.id},data:{attempts,status:'pending',nextAttempt:new Date(Date.now()+Math.min(3600000,2**Math.min(attempts,10)*10000))}});
+      await recordOperationsAlert('billing_reconcile',event.id);
     }
   }
   return {processed:events.length};
