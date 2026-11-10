@@ -53,7 +53,11 @@ export const aiResultSchema = z.object({
   version: z.literal(1), requestId: z.string().uuid(), feature: z.enum(['law_chat', 'chemical_ra']),
   status: z.enum(['completed', 'fallback', 'blocked', 'unavailable']),
   answer: z.string().max(40000), conditions: z.array(z.string()), evidence: z.array(evidenceSchema),
-  safety: z.object({ reviewed: z.literal(true), dangerousAssertionsBlocked: z.literal(true) }),
+  safety: z.object({ reviewed: z.boolean(), dangerousAssertionsBlocked: z.boolean() }),
+  scopeWarnings: z.array(z.string()).optional(),
+  confidence: z.enum(['low','medium','high']).optional(),
+  requiresHumanReview: z.boolean().optional(),
+  effectiveDateStatus: z.object({asOf:z.string().nullable(),status:z.enum(['current','future','past','unknown']),label:z.string()}).optional(),
   usage: quotaSchema, charged: z.boolean(),
 }).refine(r => r.status !== 'completed' || r.evidence.length > 0, 'missing original evidence')
   .refine(r => r.status === 'completed' || !r.charged, 'non-result charged');

@@ -9,10 +9,14 @@ import { SITE } from '../lib/api';
 import { SharedUsageMeter } from './shared-usage-meter';
 // The website's mobile tab bar (ホーム・化学RA・法令AI・学ぶ・メニュー), same component as the web.
 import { MobileBottomNav } from '@/components/MobileBottomNav';
+import { ProPurchasePresentationContext } from '@/components/pro-upsell-card';
+import { billing } from '../lib/billing';
 import { DisplaySettings } from './display-settings';
 import { startProPurchase, resumeProPurchaseAfterLogin, type ProPurchaseResult } from '../lib/pro-purchase';
 export function SharedShell({ children }: { children: ReactNode }) {
   const [message,setMessage]=useState('');
+  const [price,setPrice]=useState<string|null>(null);
+  useEffect(()=>{let generation=0;const update=()=>{const ticket=++generation;setPrice(null);void (async()=>{const c=await billing.config();const m=await billing.entitlement();if(m.plan==='free'&&m.syncState==='verified'&&c.ready){const p=await billing.offering(c,m);if(ticket===generation)setPrice(p.product.priceString);}})().catch(()=>{});};update();window.addEventListener('anzen-session-changed',update);return()=>{generation++;window.removeEventListener('anzen-session-changed',update);};},[]);
   const pathname=usePathname().replace(/\/$/,'')||'/';
   useEffect(() => {
     installWebTransport();
@@ -29,11 +33,11 @@ export function SharedShell({ children }: { children: ReactNode }) {
     document.addEventListener('click',feeds,true);window.addEventListener('anzen-session-changed',signedIn);
     return()=>{document.removeEventListener('click',feeds,true);window.removeEventListener('anzen-session-changed',signedIn);};
   }, []);
-  return <><style>{`a[href='/ky'],a[href^='/ky/'],a[href='/safety-diary'],a[href^='/safety-diary/'],a[href='/site-records/near-miss']{display:none!important}`}</style><header hidden={pathname==='/signage/display'} className="sticky top-[env(safe-area-inset-top)] z-50 flex items-center gap-1 whitespace-nowrap border-b bg-white px-2 py-1 text-slate-900 print:hidden">
+  return <ProPurchasePresentationContext.Provider value={{price}}><style>{`a[href='/ky'],a[href^='/ky/'],a[href='/safety-diary'],a[href^='/safety-diary/'],a[href='/site-records/near-miss']{display:none!important}`}</style><header hidden={pathname==='/signage/display'} className="sticky top-[env(safe-area-inset-top)] z-50 flex items-center gap-1 whitespace-nowrap border-b bg-white px-2 py-1 text-slate-900 print:hidden">
     {/* No browser chrome in the app: one row, a real back button, 44pt targets. */}
     <button aria-label="戻る" className="min-h-11 min-w-11 shrink-0 rounded-lg px-2 font-semibold" onClick={() => { if (window.history.length > 1) window.history.back(); else window.location.assign('/'); }}>‹ 戻る</button>
     {/* ホーム・全機能は下のタブにあるので上には置かない。今いる画面は色で示す。 */}
     <Link className="ml-auto inline-flex min-h-11 shrink-0 items-center rounded-lg px-3 font-semibold aria-[current=page]:bg-emerald-50 aria-[current=page]:text-emerald-800" href="/account" aria-current={pathname==='/account'?'page':undefined}>会員・Pro</Link>
     <button className="min-h-11 shrink-0 rounded-lg border px-3 font-semibold" onClick={() => { void Share.share({ title: document.title, url: SITE + location.pathname + location.search }).catch(()=>{}); }}>共有</button>
-  </header>{message?<p role="alert" className="flex items-start gap-2 bg-amber-50 p-3 text-amber-950"><span className="flex-1">{message}</span><button aria-label="閉じる" className="min-h-11 min-w-11 shrink-0" onClick={()=>setMessage('')}>×</button></p>:null}{pathname==='/chatbot'||pathname==='/chemical-ra'?<SharedUsageMeter/>:null}{pathname==='/features'?<DisplaySettings/>:null}<main className="pb-[calc(var(--mobile-bottom-nav-h)+env(safe-area-inset-bottom)+24px)]">{children}</main>{pathname==="/signage/display"?null:<MobileBottomNav />}</>;
+  </header>{message?<p role="alert" className="flex items-start gap-2 bg-amber-50 p-3 text-amber-950"><span className="flex-1">{message} <Link href="/account" className="underline">会員・Proで確認</Link></span><button aria-label="閉じる" className="min-h-11 min-w-11 shrink-0" onClick={()=>setMessage('')}>×</button></p>:null}{pathname==='/chatbot'?<SharedUsageMeter/>:null}{pathname==='/features'?<DisplaySettings/>:null}<main className="pb-[calc(var(--mobile-bottom-nav-h)+env(safe-area-inset-bottom)+24px)]">{children}</main>{pathname==="/signage/display"?null:<MobileBottomNav />}</ProPurchasePresentationContext.Provider>;
 }

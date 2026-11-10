@@ -19,3 +19,7 @@ body::before{content:"";position:fixed;top:0;left:0;right:0;height:env(safe-area
 /* App: the tab bar is always shown (also in landscape), above the home indicator. */
 .mobile-bottom-nav{display:block}
 :root{--mobile-bottom-nav-h:56px}
+
+html.dark :where(.portal, .native-panel){color-scheme:dark;--green:#6ee7b7;--ink:#f1f5f9;--muted:#cbd5e1;--line:#475569;--paper:#1e293b;--bg:#0f172a}
+html.dark :where(.portal, .native-panel) button{background:var(--paper);color:var(--green);border-color:var(--line)}
+html.dark :where(.portal, .native-panel) button:hover{background:#334155}

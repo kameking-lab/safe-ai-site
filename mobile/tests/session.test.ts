@@ -34,3 +34,10 @@ describe('secure OAuth across native process restarts',()=>{
     mock.open.mockRejectedValueOnce(new Error('browser'));await expect(session.startLogin()).rejects.toThrow('browser');expect(mock.vault.has('login')).toBe(false);
   });
 });
+
+it('reports failed offline logout without claiming the credential was cleared',async()=>{
+ const session=await import('../src/lib/session');await session.setSessionToken(token);
+ mock.request.mockRejectedValueOnce(new Error('offline'));
+ await expect(session.logout()).rejects.toThrow('offline');
+ expect(await session.sessionToken()).toBe(token);
+});

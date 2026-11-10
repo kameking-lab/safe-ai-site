@@ -207,6 +207,10 @@ export function CreateSimplePanel({ initialQuery = "" }: { initialQuery?: string
   useEffect(() => {
     setRecords(loadRecords());
     if (initialQuery) ensureData();
+    else {
+      const cas = new URLSearchParams(window.location.search).get('cas');
+      if (cas && /^\d{2,7}-\d{2}-\d$/.test(cas)) {setQuery(cas);pendingCasRef.current=cas;ensureData();}
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
