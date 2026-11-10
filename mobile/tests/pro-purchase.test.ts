@@ -33,7 +33,7 @@ describe('「月額980円で続ける」をアプリで押したとき',()=>{
     const failed=await startProPurchase();
     expect(failed.state).toBe('error');expect(failed.message).toContain('Bundle IDを確認）［23］');expect(failed.message).toContain('None of the products');
     mock.purchase.mockRejectedValueOnce(new Error('STORE_CANCELLED'));
-    expect((await startProPurchase()).message).toContain('購入予約の終了は確認待ち');
+    expect((await startProPurchase()).message).toContain('もう一度購入できます');
   });
 });
 describe('App Store の失敗の言い換え',()=>{

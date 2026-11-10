@@ -16,7 +16,7 @@ export function AccountDeletionPanel(){
     <summary className="flex min-h-11 cursor-pointer items-center"><h2 className="font-bold">アカウントの削除</h2></summary>
     <div className="space-y-3 pb-4">
     <p>会員情報・学習とSDS検索の履歴・警報地点・ログインと通知の登録、端末内のアプリのデータを削除します。不正防止用の取引識別子だけ匿名で7年保持し、組織の共有記録は投稿者を匿名にします。</p>
-    <p>削除しても購読は解約されません。先にApp Storeなど購入元で解約してください。削除は取り消せません。</p>
+    <p>ウェブ購読は現在の支払い期間の終了日に解約します。App Storeの購読は先にApp Storeで解約してください。削除は取り消せません。</p>
     <button disabled={!ready||busy} onClick={()=>void action(async()=>{await startLogin();})}>本人確認のため再ログイン</button>
     <button disabled={!ready||busy} onClick={()=>void action(async()=>{setPreparation(await prepareDeletion());setConfirmation('');setMessage('削除する内容を確認し、「削除」と入力して確定してください。');})}>アカウント削除を開始</button>
     {preparation?<><label>確認のため「削除」と入力<input value={confirmation} onChange={e=>setConfirmation(e.target.value)} autoComplete="off"/></label><button disabled={busy||confirmation!=='削除'} onClick={()=>void action(async()=>{const status=await confirmDeletion(preparation);setPreparation(null);show(status);})}>アカウントを完全に削除する</button><button disabled={busy} onClick={()=>{setPreparation(null);setConfirmation('');}}>戻る</button></>:null}

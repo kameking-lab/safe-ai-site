@@ -12,7 +12,8 @@ const PENDING_KEY = 'anzen.pro-after-login';
 const PENDING_TTL = 10 * 60_000;
 export type ProPurchaseResult = { state: 'pro' | 'login' | 'pending' | 'error'; message: string };
 const PENDING_TEXT: Record<string, string> = {
-  STORE_CANCELLED: 'ストア操作は取り消されました。購入予約の終了は確認待ちです。「会員・Pro」で復元・再確認し、解消しない場合は問い合わせてください。',
+  STORE_CANCELLED: '購入を取り消しました。もう一度購入できます。',
+  PRO_SALES_PAUSED: '今月のPro新規受付は終了しました。来月1日に再開します。',
   STORE_DEFERRED: 'App Store で承認待ちです（承認後に自動で反映されます）。',
   STORE_UNKNOWN: '購入結果を確認しています。「会員・Pro」の「購入を復元」で確認できます。',
   STORE_NOT_OPENED: '購入画面を開けませんでした。購入予約は確認待ちです。「会員・Pro」で状態を再確認してください。',
