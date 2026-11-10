@@ -30,6 +30,14 @@ it('automatically verifies evidence and reuses a cancelled Apple purchase withou
   await expect(markStoreStarted('member',first.id)).rejects.toThrow('PURCHASE_PENDING');
   state.grantAvailable=true;expect((await reconcile('member')).plan).toBe('pro');
 });
+it('ignores delayed outcomes from an earlier StoreKit attempt on the same reservation',async()=>{
+  const first=await reservePurchase('member');const oldAttempt=crypto.randomUUID(),newAttempt=crypto.randomUUID();
+  await markStoreStarted('member',first.id,oldAttempt);await reportAppleOutcome('member',first.id,'cancelled',oldAttempt);
+  await reservePurchase('member');await markStoreStarted('member',first.id,newAttempt);
+  await reportAppleOutcome('member',first.id,'cancelled',oldAttempt);expect(state.intent.stage).toBe('store_started');
+  await reportAppleOutcome('member',first.id,'cancelled');expect(state.intent.stage).toBe('store_started');
+  await reportAppleOutcome('member',first.id,'cancelled',newAttempt);expect(state.intent.stage).toBe('store_cancelled_reported');
+});
 it('blocks cancelled-purchase retries during a provider outage or a sales pause',async()=>{
   const first=await reservePurchase('member');await markStoreStarted('member',first.id);await reportAppleOutcome('member',first.id,'cancelled');
   state.fetchFails=true;await expect(reservePurchase('member')).rejects.toThrow('offline');

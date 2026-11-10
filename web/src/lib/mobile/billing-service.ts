@@ -103,8 +103,9 @@ export async function reservePurchase(userId:string,source:PurchaseSource='app_s
     if(existing?.status==='pending'){
       assertResume(existing,source);
       if(source==='app_store'&&existing.stage!=='prepared'){
+        const previous=existing.providerRequest&&typeof existing.providerRequest==='object'&&!Array.isArray(existing.providerRequest)?existing.providerRequest:{};
         await tx.mobilePurchaseIntent.updateMany({where:{userId,id:existing.id,status:'pending',stage:existing.stage},
-          data:{providerRequest:{source:'server_reconciliation',checkedAt:new Date().toISOString(),appUserId:current.appUserId,plan:current.plan,syncState:current.syncState}}});
+          data:{providerRequest:{...previous,source:'server_reconciliation',checkedAt:new Date().toISOString(),appUserId:current.appUserId,plan:current.plan,syncState:current.syncState}}});
       }
       return existing;
     }
@@ -121,21 +122,26 @@ export async function cancelPurchase(userId:string,id:string,source:PurchaseSour
     else throw new Error('PURCHASE_PENDING');
     return entitlementInTransaction(tx,userId);});
 }
-export async function markStoreStarted(userId:string,id:string){
+export async function markStoreStarted(userId:string,id:string,attemptId?:string){
   await reconcile(userId);
   await assertProSalesOpen();
   return billingDb().$transaction(async tx=>{await lockMember(tx,userId);const rights=await entitlementInTransaction(tx,userId);assertPurchasable(rights);
     const intent=await tx.mobilePurchaseIntent.findUnique({where:{userId}});
     if(!intent||intent.id!==id)throw new Error('INVALID_REQUEST');
     assertResume(intent,'app_store');
-    const changed=await tx.mobilePurchaseIntent.updateMany({where:{userId,id,source:'app_store',status:'pending',stage:intent.stage},data:{stage:'store_started'}});
+    const previous=intent.providerRequest&&typeof intent.providerRequest==='object'&&!Array.isArray(intent.providerRequest)?intent.providerRequest:{};
+    const changed=await tx.mobilePurchaseIntent.updateMany({where:{userId,id,source:'app_store',status:'pending',stage:intent.stage},data:{stage:'store_started',providerRequest:{...previous,attemptId:attemptId??null}}});
     if(changed.count!==1)throw new Error('INVALID_REQUEST');return {id};});
 }
 /** Client outcomes describe the UI only. They never release a dispatched reservation. */
-export async function reportAppleOutcome(userId:string,id:string,outcome:ApplePurchaseOutcome){
+export async function reportAppleOutcome(userId:string,id:string,outcome:ApplePurchaseOutcome,attemptId?:string){
   return billingDb().$transaction(async tx=>{await lockMember(tx,userId);
     const intent=await tx.mobilePurchaseIntent.findUnique({where:{userId}});
     if(!intent||intent.id!==id||intent.source!=='app_store')throw new Error('INVALID_REQUEST');
+    const evidence=intent.providerRequest;
+    const expected=evidence&&typeof evidence==='object'&&!Array.isArray(evidence)?evidence.attemptId:null;
+    // An outcome retried after a network loss must not overwrite a newer StoreKit attempt.
+    if(expected&&expected!==attemptId)return entitlementInTransaction(tx,userId);
     if(intent.status==='pending'&&intent.stage!=='prepared'){
       // Deferred approval cannot be downgraded by a later cancellation/unknown claim.
       const stage=intent.stage==='store_deferred'?'store_deferred':appleOutcomeStage[outcome];
