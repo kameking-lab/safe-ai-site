@@ -136,7 +136,7 @@ export function Portal() {
             catch { setMessage('一部のデータを削除できませんでした。再度お試しください。'); } finally { setBusy(false); }
           })(); }}>削除を実行</button><button onClick={() => setConfirmDelete(false)}>キャンセル</button></div>}
           </section>
-          <section className="card"><h3>安全AI v1.0</h3><p>無料：チャット1日3回・RA1日1件・警報1地点（通知なし）。Pro：チャット1日50回・RA1日10件・警報10地点と通知。利用枠はウェブとアプリで共通です。AIの安全条件を確認できないときは実行を停止します。</p><p>情報は安全・法令適合・作業可否を保証しません。気象の保存資料を避難や作業続行の唯一の判断材料にしないでください。</p><button onClick={() => { void openSource('https://www.anzen-ai-portal.jp/contact').catch(() => setMessage('問い合わせ先を開けませんでした。')); }}>問い合わせ・内容の訂正 ↗</button></section>
+          <section className="card"><h3>安全AI v1.0</h3><p>無料：チャット1日3回・警報1地点（通知なし）。Pro：チャット1日50回・警報10地点と通知。化学RAのAI生成は提供停止中です。利用枠はウェブとアプリで共通です。AIの安全条件を確認できないときは実行を停止します。</p><p>情報は安全・法令適合・作業可否を保証しません。気象の保存資料を避難や作業続行の唯一の判断材料にしないでください。</p><button onClick={() => { void openSource('https://www.anzen-ai-portal.jp/contact').catch(() => setMessage('問い合わせ先を開けませんでした。')); }}>問い合わせ・内容の訂正 ↗</button></section>
         </> : null}
         <footer>安全AIポータル · 出典と更新日時を確かめて利用してください。</footer>
       </main>

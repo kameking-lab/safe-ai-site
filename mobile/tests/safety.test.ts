@@ -80,3 +80,8 @@ describe('server-enforced safety boundary', () => {
     expect(result).toHaveLength(1); expect(result[0].id).toHaveLength(68);
   });
 });
+
+it('accepts unreviewed AI results while preserving warnings for display',()=>{
+ const result=aiResultSchema.parse({...aiResult(crypto.randomUUID()),safety:{reviewed:false,dangerousAssertionsBlocked:false},confidence:'low',requiresHumanReview:true,scopeWarnings:['unverified citation'],effectiveDateStatus:{asOf:null,status:'unknown',label:'unverified'}});
+ expect(result.safety.reviewed).toBe(false);expect(result.scopeWarnings).toEqual(['unverified citation']);expect(result.requiresHumanReview).toBe(true);
+});

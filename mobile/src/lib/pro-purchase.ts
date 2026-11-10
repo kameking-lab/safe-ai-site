@@ -12,10 +12,10 @@ const PENDING_KEY = 'anzen.pro-after-login';
 const PENDING_TTL = 10 * 60_000;
 export type ProPurchaseResult = { state: 'pro' | 'login' | 'pending' | 'error'; message: string };
 const PENDING_TEXT: Record<string, string> = {
-  STORE_CANCELLED: '購入を取り消しました。',
+  STORE_CANCELLED: 'ストア操作は取り消されました。購入予約の終了は確認待ちです。「会員・Pro」で復元・再確認し、解消しない場合は問い合わせてください。',
   STORE_DEFERRED: 'App Store で承認待ちです（承認後に自動で反映されます）。',
   STORE_UNKNOWN: '購入結果を確認しています。「会員・Pro」の「購入を復元」で確認できます。',
-  STORE_NOT_OPENED: '通信が途切れたため購入画面を開けませんでした。もう一度お試しください。',
+  STORE_NOT_OPENED: '購入画面を開けませんでした。購入予約は確認待ちです。「会員・Pro」で状態を再確認してください。',
   ALREADY_SUBSCRIBED: 'すでに Pro です。',
   PURCHASE_PENDING: '前の購入手続きが残っています。「会員・Pro」の「購入を復元」をお試しください。',
   PURCHASE_REVIEW_REQUIRED: '前の購入手続きの確認が必要です。「会員・Pro」の「購入を復元」をお試しください。',
@@ -37,7 +37,7 @@ export async function startProPurchase(): Promise<ProPurchaseResult> {
     const config = await billing.config();
     const member = await billing.purchase(config);
     window.dispatchEvent(new Event('anzen-usage-changed'));
-    window.dispatchEvent(new Event('anzen-entitlement-changed'));
+    if (isVerifiedPro(member)) window.dispatchEvent(new CustomEvent('anzen-entitlement-changed', {detail:member}));
     if (isVerifiedPro(member)) return { state: 'pro', message: 'Pro になりました。そのまま続けて使えます。' };
     return { state: 'pending', message: PENDING_TEXT.STORE_UNKNOWN };
   } catch (error) {

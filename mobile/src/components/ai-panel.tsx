@@ -68,13 +68,14 @@ export function AiPanel({ online }: { online: boolean }) {
         <label>{feature === 'law_chat' ? '法令についての質問' : '評価対象と作業条件'}<TextareaWithVoice maxLength={2000} rows={6} disabled={busy} value={input} onChange={e => { setInput(e.target.value); setConsent(false); }} placeholder={feature === 'law_chat' ? '作業の種類と、確認したい条件を入力' : '物質名・CAS番号・SDS発行元と版・濃度・取扱量・作業時間・換気・保護具を入力'} /></label>
         <p className="muted">氏名、会社名、住所、連絡先、機密情報を入力しないでください。質問は端末には保存しません。</p>
         {safety && !safety.allowed && safety.reason!=='consent_required'?<p role="alert" className="notice">{safety.message}</p>:null}
-        <label className="check"><input type="checkbox" checked={consent} disabled={busy} onChange={e => setConsent(e.target.checked)} />入力内容を確認し、サイトの安全確認APIおよびサイトに設定された外部AI事業者への送信に同意します。</label>
+        <label className="check"><input type="checkbox" checked={consent} disabled={busy} onChange={e => setConsent(e.target.checked)} />入力内容を確認し、サイトの安全確認APIおよびGoogle（Gemini API）への送信に同意します。</label>
         <button className="primary" disabled={busy || !online || !allowed || !consent || !input.trim() || safety?.allowed===false}>{busy ? 'サイトで確認中…' : '確認して送信する'}</button>
       </form>
       <p role="status">{message}</p>
     </section>
     {result ? <section ref={resultRef} className="card scroll-mt-[calc(env(safe-area-inset-top)+16px)]" aria-label="AI回答"><p className="eyebrow">{result.status === 'completed' ? 'AIによる情報整理' : '参考情報・評価未完了'}</p><p className="preserve">{result.answer}</p>
       {result.conditions.length ? <><h3>条件・不足情報</h3><ul>{result.conditions.map((c, i) => <li key={i}>{c}</li>)}</ul></> : null}
+      {result.requiresHumanReview?<p role="alert" className="notice">人による確認が必要です。信頼度：{result.confidence??'未確認'}。{result.effectiveDateStatus?.label}</p>:null}
       <h3>根拠原文</h3>{result.evidence.map((e, i) => <details key={i} open><summary>{e.title}</summary><blockquote className="preserve">{e.original}</blockquote><p>{e.verification} ／ 基準日：{formatDate(e.asOf)}</p><button onClick={() => { void openSource(e.url).catch(() => setMessage('出典を開けませんでした。')); }}>公式原文を開く ↗</button></details>)}
     </section> : null}
   </>;

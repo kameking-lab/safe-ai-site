@@ -21,7 +21,7 @@ export default function PrivacyPage() {
       <PageJsonLd name="プライバシーポリシー" description="安全AIポータルのプライバシーポリシー。個人情報の取り扱いについて説明しています。" path="/privacy" />
         <div>
           <h1 className="text-xl font-bold text-slate-900">プライバシーポリシー</h1>
-          <p className="mt-2 text-sm text-slate-500">最終更新日: 2026年11月6日</p>
+          <p className="mt-2 text-sm text-slate-500">最終更新日: 2026年11月10日</p>
         </div>
 
         <section id="security" className="scroll-mt-24 space-y-3">
@@ -123,7 +123,7 @@ export default function PrivacyPage() {
             </li>
             <li className="list-disc">
               <span className="font-semibold text-slate-700">決済</span>
-              ：本サイトの月額課金・オンライン決済は提供していません。サイト機能の利用にカード登録は不要です
+              ：ウェブのPro購読はStripe、iOSアプリの購読はApple（App Store）とRevenueCatで処理します。会員対応ID、商品・取引識別子、購読期間・購入環境・購読イベントを購入処理、復元、権利確認、二重購入防止のために扱います。カード情報は決済事業者が処理します
             </li>
             <li className="list-disc">
               <span className="font-semibold text-slate-700">メール送信</span>
@@ -162,7 +162,7 @@ export default function PrivacyPage() {
             </li>
             <li className="list-disc">
               <span className="font-semibold text-slate-700">ログ保持期間</span>
-              ：本アプリケーションはプロンプト・応答を永続ログへ保存しません。一部チャット応答は同一質問の負荷軽減のためプロセス内で最大24時間キャッシュされる場合があります。ホスティング事業者・Google 側の処理ログは
+              ：会員向けAIでは、操作の重複実行防止・結果再取得・利用枠管理のため、AI応答をデータベースへ保存します。30日経過後の保守処理で削除対象となり、保守処理の実行時まで残る場合があります。一部チャット応答にはプロセス内の最大24時間キャッシュもあります。ホスティング事業者・Google 側の処理ログは
               <a
                 className="ml-0.5 underline hover:text-emerald-700"
                 href="https://ai.google.dev/gemini-api/terms"
@@ -197,6 +197,8 @@ export default function PrivacyPage() {
         <section className="space-y-3">
           <h2 className="text-base font-bold text-slate-900">5. 保有期間</h2>
           <ul className="ml-4 space-y-1 text-sm text-slate-600">
+            <li className="list-disc">購入監査情報：退会後も取引所有者を監査用の仮名IDへ置き換え、不正利用・重複購入の確認のため7年間保持します。完全に匿名化された情報という意味ではありません。</li>
+            <li className="list-disc">会員のAI応答：30日経過後の保守処理で削除対象。退会処理では会員に紐付く利用操作と応答を削除します。</li>
             <li className="list-disc">お問い合わせ情報：対応終了後 3 年間</li>
             <li className="list-disc">業務自動化相談情報：受付が完了した場合、対応・契約管理のため対応終了後3年間。受付未完了またはdry-runでは本サイトの相談DBへ保存せず、正式受付として扱いません</li>
             <li className="list-disc">アクセスログ：Vercel の保持設定に準じて最大 30 日（セキュリティ調査中は延長）</li>
@@ -313,12 +315,8 @@ export default function PrivacyPage() {
           </p>
         </section>
         <section id="ios-app" className="space-y-3">
-          <h2 className="text-base font-bold text-slate-900">iOSアプリで扱う情報</h2>
-          <p className="text-sm leading-7 text-slate-600">ログイン・購読を利用する場合は、本人の会員識別情報、購入元・商品・有効期限・購入イベント、利用枠をサーバーで管理します。Apple／Googleのログインは本人が選んだ認証サービスを利用します。アプリの認証情報は端末のKeychainに保存し、端末にひも付けて保護します。購入の確認にはRevenueCatを利用し、メールアドレスではなく安全AI専用のランダムな会員対応IDを送ります。カード情報やApple Accountのパスワードをアプリが受け取ることはありません。</p>
-          <p className="text-sm leading-7 text-slate-600">Proの警報通知を有効にすると、登録地点、通知許可、会員との対応、APNsの通知先トークンを管理します。トークンは共有画面・ログ・バックアップファイルには含めません。ログアウト・通知停止・権利失効を確認して配信を止めます。通知が不要な場合はアプリの通知設定またはiOSの設定から停止できます。</p>
-          <p className="text-sm leading-7 text-slate-600">速報・出典・教材・保存した記事は端末で閲覧でき、過去問の回答やメモは「この端末に保存する」を選んだ場合に端末へ保存します。会員の購読権利・AI利用回数・警報登録地点はサーバーと共有します。認証の一時コードは短時間・一度だけ使用し、AIの再送確認用の応答は短期間のキャッシュとして扱います。購入監査情報は、購読管理・不正対策・必要な会計対応のため、端末削除とは分けて管理します。</p>
-          <p className="text-sm leading-7 text-slate-600">アプリの音声入力は、利用時のOS許可と端末内音声認識が使える場合に限ります。アプリの実装から音声を外部の認識APIへ送信しません。認識した文字を確認してから入力欄に反映し、AIへの送信同意は別に確認します。端末の対応状況により利用できない場合があります。</p>
-          <p className="text-sm leading-7 text-slate-600"><a className="underline" href="https://www.revenuecat.com/privacy/">RevenueCatのプライバシー</a> · <a className="underline" href="/contact">アカウント情報・購入の照合・削除の問い合わせ</a></p>
+          <h2 className="text-base font-bold text-slate-900">iOSアプリのデータ処理</h2>
+          <p className="text-sm leading-7 text-slate-600">ログイン資格情報は端末のKeychain、表示設定等は端末ストレージに保存します。Apple・GoogleのログインとRevenueCatの購入処理に会員対応IDを使用します。退会は購読の解約と別の操作です。先に購入元で購読を管理・解約してください。Apple、Stripe、RevenueCat側に残る購入記録は各社の方針に従い、本サービスの退会だけで同時に削除されるものではありません。外部事業者側のデータ削除についてはお問い合わせ窓口で受け付けます。</p>
         </section>
     </PageContainer>
   );
