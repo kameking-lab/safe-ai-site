@@ -316,7 +316,7 @@ export default function PrivacyPage() {
         </section>
         <section id="ios-app" className="space-y-3">
           <h2 className="text-base font-bold text-slate-900">iOSアプリのデータ処理</h2>
-          <p className="text-sm leading-7 text-slate-600">ログイン資格情報は端末のKeychain、表示設定等は端末ストレージに保存します。Apple・GoogleのログインとRevenueCatの購入処理に会員対応IDを使用します。退会は購読の解約と別の操作です。先に購入元で購読を管理・解約してください。Apple、Stripe、RevenueCat側に残る購入記録は各社の方針に従い、本サービスの退会だけで同時に削除されるものではありません。外部事業者側のデータ削除についてはお問い合わせ窓口で受け付けます。</p>
+          <p className="text-sm leading-7 text-slate-600">ログイン資格情報は端末のKeychain、表示設定等は端末ストレージに保存します。Apple・GoogleのログインとRevenueCatの購入処理に会員対応IDを使用します。退会時、ウェブ購読は現在の支払い期間の終了日に解約します。App Storeの購読は先にApp Storeで解約してください。Apple、Stripe、RevenueCat側に残る購入記録は各社の方針に従い、本サービスの退会だけで同時に削除されるものではありません。外部事業者側のデータ削除についてはお問い合わせ窓口で受け付けます。</p>
         </section>
     </PageContainer>
   );
