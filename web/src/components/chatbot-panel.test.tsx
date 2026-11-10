@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, screen, waitFor, fireEvent } from "@testing-library/react";
+import { render as rawRender, screen, waitFor, fireEvent } from "@testing-library/react";
 import { ChatbotPanel } from "./chatbot-panel";
 
 vi.mock("next/navigation", () => ({
@@ -16,6 +16,12 @@ afterEach(() => {
   window.localStorage.clear();
 });
 
+function render(...args: Parameters<typeof rawRender>) {
+  const result = rawRender(...args);
+  const consent = screen.queryByRole("checkbox") as HTMLInputElement | null;
+  if (consent && !consent.checked) fireEvent.click(consent);
+  return result;
+}
 function submitExample(name: string) {
   fireEvent.click(screen.getByRole("button", { name }));
   fireEvent.click(screen.getByRole("button", { name: "送信" }));
@@ -233,6 +239,7 @@ describe("ChatbotPanel AI safety boundary", () => {
     );
 
     await waitFor(() => expect(consumed).toHaveBeenCalledTimes(1));
+    fireEvent.click(screen.getByRole("button", {name:"送信"}));
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
     expect(
       (screen.getByLabelText("質問入力") as HTMLTextAreaElement).value,
@@ -506,7 +513,7 @@ describe("ChatbotPanel conversation UI", () => {
       document.querySelectorAll("[data-ui-box]").length,
     ).toBeLessThanOrEqual(1);
     expect(screen.queryByRole("alert")).toBeNull();
-    expect(screen.queryByRole("checkbox")).toBeNull();
+    expect(screen.getByRole("checkbox")).toBeTruthy();
   });
 
   it("Enterで送信し、Shift+Enterは改行として残す", async () => {
@@ -1546,4 +1553,29 @@ describe("ChatbotPanel ログイン済み会員の失敗応答", () => {
     expect(alert.textContent).toContain("60秒後に再度お試しください");
     expect(await screen.findByRole("button", { name: "再試行" })).toBeTruthy();
   });
+});
+
+it("未同意の質問・ホーム引継ぎを外部送信しない", () => {
+  const send = vi.fn();vi.stubGlobal("fetch", send);
+  rawRender(<ChatbotPanel initialQuestion="足場の手すりは？" />);
+  fireEvent.click(screen.getByRole("button", {name:"送信"}));
+  expect(send).not.toHaveBeenCalled();
+  expect((screen.getByRole("textbox") as HTMLTextAreaElement).value).toBe("足場の手すりは？");
+  expect(screen.getByRole("alert").textContent).toContain("同意してください");
+});
+it("認証失敗で質問を入力欄に戻す", async () => {
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({error:{code:"UNAUTHORIZED",message:"ログインが必要です"}}),{status:401})));
+  render(<ChatbotPanel />);submitExample("足場の手すりは？");
+  await screen.findByRole("alert");
+  expect((screen.getByRole("textbox") as HTMLTextAreaElement).value).toBe("足場の手すりは？");
+});
+it("サーバー検証済みProのときだけ購入カードを消し、質問は自動送信しない", async () => {
+  const send=vi.fn().mockResolvedValue(new Response(JSON.stringify({error:{code:"DAILY_LIMIT_REACHED",message:"上限です",upgrade:true}}),{status:429}));
+  vi.stubGlobal("fetch",send);render(<ChatbotPanel />);submitExample("足場の手すりは？");
+  await screen.findByRole("link",{name:"月額980円で続ける"});
+  fireEvent(window,new CustomEvent("anzen-entitlement-changed",{detail:{plan:"pro",syncState:"pending"}}));
+  expect(screen.queryByRole("link",{name:"月額980円で続ける"})).toBeTruthy();
+  fireEvent(window,new CustomEvent("anzen-entitlement-changed",{detail:{plan:"pro",syncState:"verified"}}));
+  expect(screen.queryByRole("link",{name:"月額980円で続ける"})).toBeNull();
+  expect(send).toHaveBeenCalledTimes(1);
 });

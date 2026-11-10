@@ -16,5 +16,5 @@ export async function POST(request:Request){try{
   const result=await response.json() as ChatbotResponse;
   const evidence=result.sources.filter(s=>s.text && s.url?.startsWith('https:') && s.asOf && Number.isFinite(Date.parse(s.asOf))).map(s=>({title:`${s.law} ${s.article}`,original:s.text,url:s.url,asOf:s.asOf,verification:s.verificationStatus??'原文を確認してください'}));
   const completed=result.source_type==='rag' && evidence.length>0;
-  return json({version:1,requestId:b.requestId,feature:b.feature,status:completed?'completed':'fallback',answer:result.answer,conditions:result.conditions,evidence,safety:{reviewed:true,dangerousAssertionsBlocked:true},usage:await quota(userId,'law_chat'),charged:completed});
+  return json({version:1,requestId:b.requestId,feature:b.feature,status:completed?'completed':'fallback',answer:result.answer,conditions:[...result.conditions,...(result.scopeWarnings??[]),...(result.requiresHumanReview?["この回答は人による確認が必要です。"]:[])],evidence,safety:{reviewed:false,dangerousAssertionsBlocked:false},scopeWarnings:result.scopeWarnings??[],confidence:result.confidence,requiresHumanReview:result.requiresHumanReview,effectiveDateStatus:result.effectiveDateStatus,usage:await quota(userId,'law_chat'),charged:completed});
 }catch(e){return failure(e);}}

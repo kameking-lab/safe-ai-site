@@ -698,9 +698,9 @@ async function handlePost(request: Request) {
     // 生成した回答をそのまま返す。外れた条文番号は警告欄で知らせ、空・途中切れだけ定型回答へ。
     const validation = validateCitations(generatedCandidate, allowedCitations);
     const truncated = generationMeta.finishReason !== null && generationMeta.finishReason !== "STOP";
-    if (!generatedCandidate.trim() || truncated) {
+    if (!generatedCandidate.trim() || truncated || validation.retryRecommended) {
       answer = safeCitationFallback();
-      citationWarningNote = truncated ? `AIの回答が途中で終わったため（${generationMeta.finishReason}）、収録条文の案内を表示しています。` : "";
+      citationWarningNote = validation.retryRecommended ? validation.warningNote : truncated ? `AIの回答が途中で終わったため（${generationMeta.finishReason}）、収録条文の案内を表示しています。` : "";
       citationLayer2Status = "evidence-only";
     } else {
       answer = generatedCandidate;
@@ -837,9 +837,9 @@ async function handlePost(request: Request) {
 
   // Phase 2 Layer 2 が警告を出した場合は信頼度を1段階降格
   let finalConfidence = confidence;
-  if (citationLayer2Status === "evidence-only") {
+  if (citationLayer2Status === "evidence-only" || citationLayer2Status === "warned") {
     finalConfidence = "low";
-    scopeWarnings.push("AIの回答を表示できなかったため、収録条文の案内を表示しています。");
+    if (citationLayer2Status === "evidence-only") scopeWarnings.push("AIの回答を表示できなかったため、収録条文の案内を表示しています。");
   }
 
   // Phase 2 Layer 3 が adjacent と判定した場合も信頼度を降格

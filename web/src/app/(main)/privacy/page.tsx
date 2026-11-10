@@ -123,7 +123,7 @@ export default function PrivacyPage() {
             </li>
             <li className="list-disc">
               <span className="font-semibold text-slate-700">決済</span>
-              ：本サイトの月額課金・オンライン決済は提供していません。サイト機能の利用にカード登録は不要です
+              ：ウェブのPro購読はStripe、iOSアプリの購読はApple（App Store）とRevenueCatで処理します。会員対応ID、商品・取引識別子、購読期間・購入環境・購読イベントを購入処理、復元、権利確認、二重購入防止のために扱います。カード情報は決済事業者が処理します
             </li>
             <li className="list-disc">
               <span className="font-semibold text-slate-700">メール送信</span>
@@ -162,7 +162,7 @@ export default function PrivacyPage() {
             </li>
             <li className="list-disc">
               <span className="font-semibold text-slate-700">ログ保持期間</span>
-              ：本アプリケーションはプロンプト・応答を永続ログへ保存しません。一部チャット応答は同一質問の負荷軽減のためプロセス内で最大24時間キャッシュされる場合があります。ホスティング事業者・Google 側の処理ログは
+              ：会員向けAIでは、操作の重複実行防止・結果再取得・利用枠管理のため、AI応答をデータベースへ保存します。30日経過後の保守処理で削除対象となり、保守処理の実行時まで残る場合があります。一部チャット応答にはプロセス内の最大24時間キャッシュもあります。ホスティング事業者・Google 側の処理ログは
               <a
                 className="ml-0.5 underline hover:text-emerald-700"
                 href="https://ai.google.dev/gemini-api/terms"
@@ -197,6 +197,8 @@ export default function PrivacyPage() {
         <section className="space-y-3">
           <h2 className="text-base font-bold text-slate-900">5. 保有期間</h2>
           <ul className="ml-4 space-y-1 text-sm text-slate-600">
+            <li className="list-disc">購入監査情報：退会後も取引所有者を監査用の仮名IDへ置き換え、不正利用・重複購入の確認のため7年間保持します。完全に匿名化された情報という意味ではありません。</li>
+            <li className="list-disc">会員のAI応答：30日経過後の保守処理で削除対象。退会処理では会員に紐付く利用操作と応答を削除します。</li>
             <li className="list-disc">お問い合わせ情報：対応終了後 3 年間</li>
             <li className="list-disc">業務自動化相談情報：受付が完了した場合、対応・契約管理のため対応終了後3年間。受付未完了またはdry-runでは本サイトの相談DBへ保存せず、正式受付として扱いません</li>
             <li className="list-disc">アクセスログ：Vercel の保持設定に準じて最大 30 日（セキュリティ調査中は延長）</li>
@@ -311,6 +313,10 @@ export default function PrivacyPage() {
             <a className="underline hover:text-emerald-700" href="/contact">お問い合わせフォーム</a>
             よりご連絡ください。
           </p>
+        </section>
+        <section id="ios-app" className="space-y-3">
+          <h2 className="text-base font-bold text-slate-900">iOSアプリのデータ処理</h2>
+          <p className="text-sm leading-7 text-slate-600">ログイン資格情報は端末のKeychain、表示設定等は端末ストレージに保存します。Apple・GoogleのログインとRevenueCatの購入処理に会員対応IDを使用します。退会は購読の解約と別の操作です。先に購入元で購読を管理・解約してください。Apple、Stripe、RevenueCat側に残る購入記録は各社の方針に従い、本サービスの退会だけで同時に削除されるものではありません。外部事業者側のデータ削除についてはお問い合わせ窓口で受け付けます。</p>
         </section>
     </PageContainer>
   );

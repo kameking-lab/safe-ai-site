@@ -732,8 +732,8 @@ async function handlePost(request: Request) {
           // 空・途中切れ（STOP 以外）のときだけ、収録条文の定型回答へ切り替える。
           const validation = validateCitations(answer, allowedCitations);
           const truncated = generationMeta.finishReason !== null && generationMeta.finishReason !== "STOP";
-          if (!answer.trim() || truncated) {
-            citationWarningNote = truncated ? `AIの回答が途中で終わったため（${generationMeta.finishReason}）、収録条文の案内を表示しています。` : "";
+          if (!answer.trim() || truncated || validation.retryRecommended) {
+            citationWarningNote = validation.retryRecommended ? validation.warningNote : truncated ? `AIの回答が途中で終わったため（${generationMeta.finishReason}）、収録条文の案内を表示しています。` : "";
             citationLayer2Status = "evidence-only";
             answer = relevantArticles.length > 0
               ? buildServiceFirstLegalAnswer({ query: retrievalQuery, articles: relevantArticles, now: legalAnswerNow })
@@ -856,9 +856,9 @@ async function handlePost(request: Request) {
           : scoreForConfidence >= 0.75 && relevantArticles.length >= 2
             ? "high"
             : "medium";
-        if (citationLayer2Status === "evidence-only") {
+        if (citationLayer2Status === "evidence-only" || citationLayer2Status === "warned") {
           finalConfidence = "low";
-          scopeWarnings.push("AIの回答を表示できなかったため、収録条文の案内を表示しています。");
+          if (citationLayer2Status === "evidence-only") scopeWarnings.push("AIの回答を表示できなかったため、収録条文の案内を表示しています。");
         }
         if (fallbackDecision.tier === "adjacent" && finalConfidence === "high") {
           finalConfidence = "medium";
