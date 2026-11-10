@@ -2,6 +2,7 @@
 import argparse
 import hashlib
 import json
+import re
 from pathlib import Path
 import struct
 
@@ -43,6 +44,12 @@ def validate(screenshots=False, root=ROOT):
         value = (metadata / (field + ".txt")).read_text(encoding="utf-8").rstrip("\n")
         if not value or len(value) > limit:
             raise ValueError("Invalid length: " + field)
+        if field == "description":
+            urls = set(re.findall(r"https://[^\s<>]+", value))
+            if not urls.intersection({"https://www.apple.com/legal/internet-services/itunes/dev/stdeula/", "https://www.anzen-ai-portal.jp/terms"}):
+                raise ValueError("Description must include Terms of Use (EULA) URL")
+            if "https://www.anzen-ai-portal.jp/privacy" not in urls:
+                raise ValueError("Description must include Privacy Policy URL")
     keywords = (metadata / "keywords.txt").read_text(encoding="utf-8").rstrip("\n")
     if not keywords or len(keywords.encode()) > 100:
         raise ValueError("Keywords exceed 100 UTF-8 bytes")

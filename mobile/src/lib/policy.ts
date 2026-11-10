@@ -17,6 +17,7 @@ export function canExecute(c: Capability | null, feature: Feature, now = Date.no
 export function quotaLow(remaining: number, limit: number) { return remaining / limit <= 0.2; }
 export function errorMessage(code: string, retryAfter?: string, resetAt?: string) {
   const messages: Record<string, string> = {
+    CLIENT_UPDATE_REQUIRED: 'このAI機能を利用するには、アプリを最新版に更新してください。',
     SAFETY_BLOCKED: '安全確認のため送信を停止しました。入力内容を見直してください。',
     CONSENT_REQUIRED: '個人情報・機密情報を除き、外部AIへの送信同意を確認してください。',
     DAILY_LIMIT_REACHED: `本日の上限に達しました。日本時間の次の0時に回復します${resetAt ? `（${formatDate(resetAt)}）` : ''}。`,

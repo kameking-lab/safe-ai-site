@@ -44,7 +44,7 @@ describe('server-enforced safety boundary', () => {
     const send = vi.fn(async (path: string) => ({ status: 200, data: path.includes('capabilities') ? capability() : aiResult(id), headers: {} }));
     const result = await executeAi('law_chat', 'question', id, send);
     expect(result.evidence[0].original).toContain('原文');
-    expect(send).toHaveBeenNthCalledWith(2, '/api/mobile/v1/ai', { version: 1, feature: 'law_chat', input: 'question', requestId: id, privacyConfirmed: true }, { 'X-Anzen-CSRF': 'x'.repeat(32) });
+    expect(send).toHaveBeenNthCalledWith(2, '/api/mobile/v1/ai', { version: 2, feature: 'law_chat', input: 'question', requestId: id, privacyConfirmed: true }, { 'X-Anzen-CSRF': 'x'.repeat(32) });
     const mismatch = async (path: string) => ({ status: 200, data: path.includes('capabilities') ? capability() : aiResult(crypto.randomUUID()), headers: {} });
     await expect(executeAi('law_chat', 'question', id, mismatch)).rejects.toThrow('安全装置');
   });
@@ -52,6 +52,13 @@ describe('server-enforced safety boundary', () => {
     const r = aiResult(id); expect(aiResultSchema.safeParse({ ...r, evidence: [] }).success).toBe(false);
     expect(aiResultSchema.safeParse({ ...r, status: 'unavailable', charged: true }).success).toBe(false);
     expect(aiResultSchema.safeParse({ ...r, status: 'fallback', charged: false, evidence: [] }).success).toBe(true);
+  });
+  it('rejects the old result contract and shows actionable update guidance', async () => {
+    expect(aiResultSchema.safeParse({ ...aiResult(id), version: 1 }).success).toBe(false);
+    const send = vi.fn(async (path: string) => path.includes('capabilities')
+      ? { status: 200, data: capability(), headers: {} }
+      : { status: 426, data: { error: { code: 'CLIENT_UPDATE_REQUIRED' } }, headers: {} });
+    await expect(executeAi('law_chat', 'question', id, send)).rejects.toThrow('最新版に更新');
   });
   it('keeps burst, daily, monthly and unavailable errors distinct', async () => {
     await expect(request('/api/mobile/v1/ai', async () => ({ status: 429, data: { error: { code: 'BURST_LIMITED' } }, headers: { 'Retry-After': '45' } }))).rejects.toThrow('45秒');

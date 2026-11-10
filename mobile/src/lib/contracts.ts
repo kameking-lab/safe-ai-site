@@ -50,7 +50,7 @@ export const evidenceSchema = z.object({
   asOf: isoDate, verification: z.string().min(1),
 });
 export const aiResultSchema = z.object({
-  version: z.literal(1), requestId: z.string().uuid(), feature: z.enum(['law_chat', 'chemical_ra']),
+  version: z.literal(2), requestId: z.string().uuid(), feature: z.enum(['law_chat', 'chemical_ra']),
   status: z.enum(['completed', 'fallback', 'blocked', 'unavailable']),
   answer: z.string().max(40000), conditions: z.array(z.string()), evidence: z.array(evidenceSchema),
   safety: z.object({ reviewed: z.boolean(), dangerousAssertionsBlocked: z.boolean() }),
