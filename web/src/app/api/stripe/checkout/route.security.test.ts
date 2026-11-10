@@ -1,5 +1,7 @@
 // @vitest-environment node
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+vi.mock('@/lib/mobile/pro-sales-gate',()=>({assertProSalesOpen:vi.fn(async()=>{}),PRO_SALES_PAUSED_MESSAGE:'今月のPro新規受付は終了しました。来月1日に再開します。'}));
+import { assertProSalesOpen } from '@/lib/mobile/pro-sales-gate';
 const mocks = vi.hoisted(() => ({
   row: null as null | { userId: string; stripeCustomerId: string; stripeSubscriptionId?: string; planName?: string; status?: string; billingHold?: boolean }, tail: Promise.resolve() as Promise<unknown>,
   create: vi.fn(), checkout: vi.fn(), retrieve: vi.fn(), grants: vi.fn(), lock: vi.fn(), transaction: vi.fn(),
@@ -46,6 +48,13 @@ afterEach(() => vi.unstubAllEnvs());
 const request = () => new Request("https://example.test/api/stripe/checkout", { method: "POST", headers: { "content-type": "application/json" }, body: '{"priceId":"price_pro"}' });
 
 describe("SEC3-H3 concurrent customer mapping", () => {
+  it('stops new Pro Checkout before creating a customer or session when the monthly budget is stopped',async()=>{
+    vi.stubEnv('MOBILE_LEDGER_ENABLED','true');vi.stubEnv('STRIPE_ANZEN_PRO_MONTHLY_PRICE_ID','price_pro');
+    vi.mocked(assertProSalesOpen).mockRejectedValueOnce(new Error('PRO_SALES_PAUSED'));
+    const response=await POST(request());expect(response.status).toBe(503);
+    expect(await response.json()).toMatchObject({error:{code:'PRO_SALES_PAUSED',message:expect.stringContaining('来月1日に再開')}});
+    expect(mocks.create).not.toHaveBeenCalled();expect(mocks.checkout).not.toHaveBeenCalled();
+  });
   it("creates one customer for simultaneous starts and uses the same member lock as webhooks", async () => {
     const responses = await Promise.all([POST(request()), POST(request())]);
     expect(responses.map(response => response.status)).toEqual([200, 200]);
