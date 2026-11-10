@@ -1,7 +1,7 @@
 /**
  * App Store（iOS アプリ）への小さな案内の単一情報源。
  *
- * Web ではフッターの公式バッジと Safari の Smart App Banner を表示する。
+ * 公開確認後のWebだけ、フッターの公式バッジと Safari の Smart App Banner を表示する。
  *
  * iOS アプリでは出さない:
  * - iOS アプリは Web の画面を `NEXT_PUBLIC_ANZEN_NATIVE=true` で静的書き出しして同梱する。
@@ -20,9 +20,9 @@ export function isAnzenNativeBuild(): boolean {
   return process.env.NEXT_PUBLIC_ANZEN_NATIVE === "true";
 }
 
-/** Web の案内を出すビルドか。iOS アプリ同梱ビルドでは出さない。 */
+/** Appleで公開確認後にフラグをtrueにしたWebのみ案内する。未設定は非表示。 */
 export function appStoreLive(): boolean {
-  return !isAnzenNativeBuild();
+  return process.env.NEXT_PUBLIC_APP_STORE_LIVE === "true" && !isAnzenNativeBuild();
 }
 
 /** Next.js Metadata の `itunes`（<meta name="apple-itunes-app">）。OFF のときは undefined。 */

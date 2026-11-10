@@ -1,8 +1,13 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import { renderToString } from "react-dom/server";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AppStorePromo } from "./app-store-promo";
 import { APP_STORE, appStoreItunesMetadata, shouldShowAppStorePromo } from "@/lib/app-store";
+
+beforeEach(() => {
+  vi.stubEnv("NEXT_PUBLIC_APP_STORE_LIVE", "true");
+  vi.stubEnv("NEXT_PUBLIC_ANZEN_NATIVE", "");
+});
 
 afterEach(() => {
   cleanup();
@@ -16,9 +21,15 @@ describe("App Store promo", () => {
     expect(APP_STORE.url).toBe("https://apps.apple.com/jp/app/id6831079439");
   });
 
-  it.each(["", "false", "true"])("shows one official badge without depending on the former live flag (%s)", (flag) => {
+  it.each([undefined, "", "false", "TRUE", "1"])("hides the badge and Smart App Banner before publication (%s)", (flag) => {
     vi.stubEnv("NEXT_PUBLIC_APP_STORE_LIVE", flag);
-    vi.stubEnv("NEXT_PUBLIC_ANZEN_NATIVE", "");
+    const { container } = render(<AppStorePromo />);
+    expect(container.innerHTML).toBe("");
+    expect(shouldShowAppStorePromo()).toBe(false);
+    expect(appStoreItunesMetadata()).toBeUndefined();
+  });
+
+  it("shows one official badge and Smart App Banner only when publication is enabled", () => {
     const { container } = render(<AppStorePromo />);
     const link = screen.getByRole("link", { name: "安全AIをApp Storeでダウンロード" });
     expect(link.getAttribute("href")).toBe(APP_STORE.url);
