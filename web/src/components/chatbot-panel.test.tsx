@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, screen, waitFor, fireEvent } from "@testing-library/react";
+import { render as renderWithoutConsent, screen, waitFor, fireEvent } from "@testing-library/react";
 import { ChatbotPanel } from "./chatbot-panel";
 
 vi.mock("next/navigation", () => ({
@@ -14,6 +14,23 @@ Element.prototype.scrollTo = vi.fn();
 afterEach(() => {
   vi.unstubAllGlobals();
   window.localStorage.clear();
+});
+
+function render(...args: Parameters<typeof renderWithoutConsent>) {
+  const result = renderWithoutConsent(...args);
+  const consent = screen.queryByRole("checkbox") as HTMLInputElement | null;
+  if (consent && !consent.checked) fireEvent.click(consent);
+  return result;
+}
+
+it("同意する前は初期質問も外部送信しない", () => {
+  const send = vi.fn();
+  vi.stubGlobal("fetch", send);
+  renderWithoutConsent(<ChatbotPanel initialQuestion="足場の手すりは？" />);
+  fireEvent.click(screen.getByRole("button", { name: "送信" }));
+  expect(send).not.toHaveBeenCalled();
+  expect((screen.getByLabelText("質問入力") as HTMLTextAreaElement).value).toBe("足場の手すりは？");
+  expect(screen.getByRole("alert").textContent).toContain("同意してください");
 });
 
 function submitExample(name: string) {
@@ -233,6 +250,7 @@ describe("ChatbotPanel AI safety boundary", () => {
     );
 
     await waitFor(() => expect(consumed).toHaveBeenCalledTimes(1));
+    fireEvent.click(screen.getByRole("button", { name: "送信" }));
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
     expect(
       (screen.getByLabelText("質問入力") as HTMLTextAreaElement).value,
@@ -506,7 +524,7 @@ describe("ChatbotPanel conversation UI", () => {
       document.querySelectorAll("[data-ui-box]").length,
     ).toBeLessThanOrEqual(1);
     expect(screen.queryByRole("alert")).toBeNull();
-    expect(screen.queryByRole("checkbox")).toBeNull();
+    expect(screen.getByRole("checkbox")).toBeTruthy();
   });
 
   it("Enterで送信し、Shift+Enterは改行として残す", async () => {
