@@ -27,8 +27,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          # Pin the current patched Node 22 LTS security release.
-          node-version: "22.23.2"
+          # Match the Node 24 toolchain verified for the production package.
+          node-version: "24.13.1"
           cache: "npm"
           cache-dependency-path: web/package-lock.json
 
