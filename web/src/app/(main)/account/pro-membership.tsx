@@ -30,11 +30,10 @@ export async function ProMembership({ userId }: { userId: string }) {
       <section className="mt-8 rounded-2xl border border-emerald-200 bg-emerald-50 p-6 text-sm text-slate-800">
         <p className="text-lg font-bold">安全AI Pro</p>
         {until ? <p className="mt-1">次回更新・有効期限：{until}</p> : null}
-        {rights.source === "stripe" ? (
-          management
-        ) : (
+        {management}
+        {rights.source === "app_store" ? (
           <p className="mt-3">App Store で購読中です。解約は iPhone の設定（Apple Account → サブスクリプション）から行えます。</p>
-        )}
+        ) : null}
       </section>
     );
   }

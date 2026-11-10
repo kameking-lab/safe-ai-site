@@ -34,18 +34,25 @@ export async function entitlementInTransaction(tx:Prisma.TransactionClient,userI
 }
 export async function getEntitlement(userId:string) {
   const db=billingDb();const now=Date.now();
+  const member=await db.$transaction(tx=>identity(tx,userId));
   const [legacy,grants,intent]=await Promise.all([db.subscription.findUnique({where:{userId}}),db.mobileGrant.findMany({where:{userId}}),db.mobilePurchaseIntent.findUnique({where:{userId}})]);
   let refreshFailed=false;
-  // Expired grants and a purchase interrupted before its first grant still need authoritative recovery.
-  if(grants.some(g=>now-g.checkedAt.getTime()>300000)||(intent?.status==='pending'&&!grants.length)){try{return await reconcile(userId);}catch{refreshFailed=true;/* bounded previously verified fallback below */}}
-  else if(legacy?.stripeSubscriptionId && (now-legacy.updatedAt.getTime()>300000||!grants.some(g=>g.provider==='stripe'))){
-    try{return await db.$transaction(async tx=>{await lockMember(tx,userId);await identity(tx,userId);await reconcileStripe(tx,userId);return entitlementInTransaction(tx,userId);},{timeout:30000});}catch{/* unknown rights never become an offer to repurchase */}
+  const environment=member.billingEnvironment==='SANDBOX'?'SANDBOX':'PRODUCTION';
+  const currentGrants=grants.filter(g=>g.environment===environment);
+  // Commit each provider independently: an Apple outage must not roll back a Stripe renewal.
+  if(legacy?.stripeSubscriptionId && (now-legacy.updatedAt.getTime()>300000||!currentGrants.some(g=>g.provider==='stripe')||currentGrants.some(g=>g.provider==='stripe'&&now-g.checkedAt.getTime()>300000))){
+    try{await db.$transaction(async tx=>{await lockMember(tx,userId);await identity(tx,userId);await reconcileStripe(tx,userId);},{timeout:30000});}catch{refreshFailed=true;}
+  }
+  // Historical grants in another environment cannot make every GET refresh forever.
+  // Include expired Apple grants and an interrupted first Apple purchase for renewal recovery.
+  if(currentGrants.some(g=>g.provider==='app_store'&&now-g.checkedAt.getTime()>300000)||(intent?.status==='pending'&&intent.source==='app_store'&&!currentGrants.some(g=>g.provider==='app_store'))){
+    try{await reconcile(userId,{stripe:false});}catch{refreshFailed=true;}
   }
   const rights=await db.$transaction(tx=>entitlementInTransaction(tx,userId));
   if(refreshFailed&&rights.plan==='free')rights.syncState='pending';
   return rights;
 }
-export async function reconcile(userId:string) {
+export async function reconcile(userId:string,options:{stripe?:boolean}={}) {
   return billingDb().$transaction(async tx=>{
     await lockMember(tx,userId);let member=await identity(tx,userId);
     let environment:'SANDBOX'|'PRODUCTION'=member.billingEnvironment==='SANDBOX'?'SANDBOX':'PRODUCTION';
@@ -67,7 +74,7 @@ export async function reconcile(userId:string) {
         member=await tx.mobileIdentity.update({where:{userId},data:{billingEnvironment:'SANDBOX'}});environment='SANDBOX';grant=sandbox;
       }
     }
-    await reconcileStripe(tx,userId);
+    if(options.stripe!==false)await reconcileStripe(tx,userId);
     const checkedAt=new Date();
     // Fetch the latest authoritative subscriber state, rather than applying event order.
     await tx.mobileGrant.updateMany({where:{userId,provider:'app_store',environment},data:{revoked:true,checkedAt}});
