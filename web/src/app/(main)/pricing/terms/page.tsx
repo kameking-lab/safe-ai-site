@@ -15,9 +15,10 @@ export default function ProTermsPage() {
     <PageContainer width="narrow" className="py-10">
       <h1 className="text-2xl font-bold text-slate-900">安全AI Pro の条件・特定商取引法に基づく表示</h1>
       <dl className="mt-6 space-y-4 rounded-xl border border-slate-200 bg-white p-5 text-sm leading-6 text-slate-800">
-        <div><dt className="font-semibold">販売価格</dt><dd>月額{price}円（税込）。1か月ごとの自動更新。</dd></div>
+        <div><dt className="font-semibold">販売価格</dt><dd>ウェブの日本円価格は月額{price}円（税込）。アプリは購入時にApp Storeに表示される地域別の価格・通貨が適用されます。1か月ごとの自動更新。</dd></div>
         <div><dt className="font-semibold">内容</dt><dd>法令AIチャットを1日{PRO_DAILY_CHAT}回まで（無料は1日{FREE_DAILY_CHAT}回、日本時間0時に回復）。アプリでは気象警報の登録10地点と通知。ウェブとアプリで同じ会員として使えます。資料の閲覧・検索は無料のままです。</dd></div>
         <div><dt className="font-semibold">支払方法・時期</dt><dd>ウェブはクレジットカード等（Stripe）、アプリは App Store。申込時と毎月の更新日に請求します。</dd></div>
+        <div><dt className="font-semibold">AIの利用条件</dt><dd>サービス全体の月間AI原価上限に達した場合、個人の残り回数があってもAI生成を停止します。停止中の提供状況・返金の相談はお問い合わせ窓口で受け付けます。</dd></div>
         <div><dt className="font-semibold">提供時期</dt><dd>支払確認後すぐに使えます。</dd></div>
         <div><dt className="font-semibold">解約</dt><dd>ウェブ購入はマイページの「プラン管理」、アプリ購入は iPhone の設定（Apple Account → サブスクリプション）からいつでも解約できます。解約後も支払済みの期間の終わりまで使えます。</dd></div>
         <div><dt className="font-semibold">返金</dt><dd>日割りの返金はありません。重複請求・誤請求や当方の障害で使えなかった場合は個別に確認して返金します。App Store での購入の返金は Apple の手続きによります。</dd></div>

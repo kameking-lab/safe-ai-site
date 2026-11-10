@@ -20,8 +20,10 @@ export async function reconcileStripe(tx:Prisma.TransactionClient,userId:string)
   if(subscription.metadata.userId && subscription.metadata.userId!==userId)throw new Error('ENTITLEMENT_SYNC_PENDING');
   await handleSubscriptionUpdated(tx,subscription);
   const identity=await tx.mobileIdentity.findUnique({where:{userId}});if(!identity)throw new Error('ENTITLEMENT_SYNC_PENDING');
-  const environment=identity.billingEnvironment==='SANDBOX'?'SANDBOX':'PRODUCTION';
-  if(subscription.livemode!==(environment==='PRODUCTION'))throw new Error('ENTITLEMENT_SYNC_PENDING');
+  // Stripe's authenticated response, rather than a past TestFlight purchase, selects its environment.
+  const environment=subscription.livemode?'PRODUCTION':'SANDBOX';
+  if(!subscription.livemode&&identity.billingEnvironment!=='SANDBOX')throw new Error('ENTITLEMENT_SYNC_PENDING');
+  if(subscription.livemode&&identity.billingEnvironment==='SANDBOX')await tx.mobileIdentity.update({where:{userId},data:{billingEnvironment:'PRODUCTION'}});
   await tx.mobileGrant.updateMany({where:{userId,provider:'stripe',environment},data:{revoked:true,checkedAt:new Date()}});
   const linked=revenueCatStripeLinked();
   if(linked)await importStripePurchase(identity.appUserId,subscription.id);

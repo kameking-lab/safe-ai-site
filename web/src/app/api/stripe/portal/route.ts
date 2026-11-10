@@ -8,7 +8,7 @@
 import Stripe from "stripe";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { isPaidModeReady } from "@/lib/stripe-price-policy";
+import { externalCredentialedServicesAllowed } from "@/lib/server/deployment-safety";
 import { privateJson } from "@/lib/server/cloud-owner";
 
 function getStripe(): Stripe | null {
@@ -42,7 +42,7 @@ async function manageOnlyPortalConfiguration(stripe: Stripe, siteUrl: string): P
 }
 
 export async function POST() {
-  if (!isPaidModeReady() || !prisma) {
+  if (!externalCredentialedServicesAllowed() || !prisma) {
     return privateJson(
       { error: "決済機能は現在ご利用いただけません。" },
       503,

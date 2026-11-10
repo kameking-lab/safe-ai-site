@@ -39,3 +39,13 @@ it("uses an explicitly configured portal configuration", async () => {
   expect(state.sessionConfig).toBe("bpc_owner");
   expect(state.created).toBe(0);
 });
+it("keeps contract management available while new sales and price configuration are disabled", async () => {
+  vi.stubEnv("NEXT_PUBLIC_PAID_MODE", "false");
+  vi.stubEnv("STRIPE_ANZEN_PRO_MONTHLY_PRICE_ID", "");
+  expect((await POST()).status).toBe(200);
+});
+it("still blocks credentialed calls in a preview environment", async () => {
+  vi.stubEnv("VERCEL_ENV", "preview");
+  expect((await POST()).status).toBe(503);
+  expect(state.created).toBe(0);
+});
