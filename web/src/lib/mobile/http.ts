@@ -13,6 +13,7 @@ export function isNativeRequest(request:Request){return !!request.headers.get('a
 export async function webMemberId():Promise<string|null>{const {auth}=await import('@/auth');const session=await auth();return (session?.user as {id?:string}|undefined)?.id ?? null;}
 export function failure(error:unknown) {
   const code=error instanceof Error ? error.message:'';
+  if(code==='PRO_SALES_PAUSED')return json({error:{code,message:'今月のPro新規受付は終了しました。来月1日に再開します。'}},503);
   const statuses:Record<string,number>={UNAUTHORIZED:401,FORBIDDEN:403,INVALID_REQUEST:400,AUTH_FLOW_EXPIRED:400,REAUTH_REQUIRED:401,DELETION_PENDING:409,PURCHASE_REVIEW_REQUIRED:409,ALREADY_SUBSCRIBED:409,PURCHASE_PENDING:409,PURCHASE_OWNED_BY_OTHER_ACCOUNT:409,LOCATION_LIMIT_REACHED:409,ENTITLEMENT_SYNC_PENDING:503,FEATURE_UNAVAILABLE:503};
   return json({error:{code:code in statuses?code:'UNAVAILABLE'}},statuses[code]??503);
 }

@@ -8,7 +8,9 @@ export function canReleasePrepared(intent:PurchaseState,source:PurchaseSource){
 }
 export function assertResume(intent:PurchaseState,source:PurchaseSource){
   if(intent.source!==source)throw new Error('PURCHASE_PENDING');
-  if(source==='app_store'&&intent.stage!=='prepared')throw new Error('PURCHASE_REVIEW_REQUIRED');
+  // Reuse the reservation after fresh server reconciliation. Never release an unknown
+  // transaction, a deferred approval, or the cross-provider purchase lock on a retry.
+  if(source==='app_store'&&!['prepared','store_cancelled_reported','store_unknown','store_not_opened_reported'].includes(intent.stage))throw new Error('PURCHASE_PENDING');
   // Stripe may evict idempotency keys after 24h. Never recreate an ambiguous old checkout.
   if(source==='stripe' && intent.stage==='creating' && Date.now()-intent.createdAt.getTime()>23*3600000)throw new Error('PURCHASE_REVIEW_REQUIRED');
 }
