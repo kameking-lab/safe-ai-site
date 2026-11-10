@@ -426,8 +426,8 @@
     {
       "route": "/e-learning/exams/[id]",
       "source": "web/src/app/(main)/e-learning/exams/[id]/page.tsx",
-      "implementation": "direct canonical import",
-      "state": "shared",
+      "implementation": "owner-excluded",
+      "state": "owner-excluded",
       "modes": [
         "ExamQuestionPlayer"
       ]
@@ -435,8 +435,8 @@
     {
       "route": "/e-learning/exams",
       "source": "web/src/app/(main)/e-learning/exams/page.tsx",
-      "implementation": "direct canonical import",
-      "state": "shared",
+      "implementation": "owner-excluded",
+      "state": "owner-excluded",
       "modes": [
         "ExamCatalogBrowser"
       ]

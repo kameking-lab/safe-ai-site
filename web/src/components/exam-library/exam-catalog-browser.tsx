@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect,useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useNativeQuery } from '@/lib/use-native-query';
 import Link from "next/link";
 import { ArrowRight, ExternalLink } from "lucide-react";
@@ -69,8 +69,7 @@ export function ExamCatalogBrowser({
 }: ExamCatalogBrowserProps) {
   const [group, setGroup] = useState<ExamGroupId>(initialGroup);
   const [subject, setSubject] = useState<string>(initialSubject ?? ALL_SUBJECTS);
-  const nativeQuery=useNativeQuery();
-  useEffect(()=>{if(!nativeQuery)return;const requested=nativeQuery.get('group');const nextGroup=groups.find(g=>g.id===requested)?.id;if(!nextGroup)return;setGroup(nextGroup);const nextSubject=nativeQuery.get('subject')??'';setSubject(items.some(i=>i.group===nextGroup&&i.subject===nextSubject)?nextSubject:ALL_SUBJECTS);},[nativeQuery,groups,items]);
+  useNativeQuery((nativeQuery)=>{const requested=nativeQuery.get('group');const nextGroup=groups.find(g=>g.id===requested)?.id;if(!nextGroup)return;setGroup(nextGroup);const nextSubject=nativeQuery.get('subject')??'';setSubject(items.some(i=>i.group===nextGroup&&i.subject===nextSubject)?nextSubject:ALL_SUBJECTS);});
 
   const subjects = useMemo(() => {
     const seen: string[] = [];

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect,useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useNativeQuery } from '@/lib/use-native-query';
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -268,8 +268,7 @@ export function CertFinderClient({
   const [prefill, setPrefill] = useState<QualificationFinderPrefill>(
     initialState.prefill,
   );
-  const nativeQuery=useNativeQuery();
-  useEffect(()=>{if(!nativeQuery)return;const state=parseQualificationFinderQuery(Object.fromEntries(nativeQuery));setSelectedCategories([...state.selectedCategories]);setFreeText(state.freeText);setConditions({...state.conditions});setPrefill(state.prefill);},[nativeQuery]);
+  useNativeQuery((nativeQuery)=>{const state=parseQualificationFinderQuery(Object.fromEntries(nativeQuery));setSelectedCategories([...state.selectedCategories]);setFreeText(state.freeText);setConditions({...state.conditions});setPrefill(state.prefill);});
 
   const toggleCategory = (cat: WorkCategory) => {
     setSelectedCategories((prev) =>

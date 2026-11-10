@@ -343,8 +343,7 @@ export function TodaySafetyPanel({
   const [selectedAreaId, setSelectedAreaId] = useState(
     initialLocation?.id ?? null,
   );
-  const nativeQuery=useNativeQuery();
-  useEffect(()=>{if(!nativeQuery)return;const requested=getSignageLocationById(nativeQuery.get('area')??'');if(requested)setSelectedAreaId(requested.id);},[nativeQuery]);
+  useNativeQuery((nativeQuery)=>{const requested=getSignageLocationById(nativeQuery.get('area')??'');if(requested)setSelectedAreaId(requested.id);});
   const [selectedRegionName, setSelectedRegionName] = useState(
     initialLocation?.regionName ?? "",
   );

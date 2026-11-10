@@ -2,6 +2,7 @@
 import { readdir, readFile, writeFile, mkdir, cp, unlink, access } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { isOwnerExcludedRoute } from './native-routes.mjs';
 import '../../web/scripts/generate-shared-case-data.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const web = path.join(root, 'web/src/app');
@@ -29,7 +30,7 @@ for (const file of (await walk(web)).filter(f => f.endsWith(`${path.sep}page.tsx
   const rel = slash(path.relative(web, path.dirname(file)));
   const route = '/' + rel.split('/').filter(p => p && !p.startsWith('(')).join('/');
   const source = await readFile(file, 'utf8');
-  const excluded = /^(\/ky(?:\/|$)|\/safety-diary(?:\/|$)|\/site-records\/near-miss(?:\/|$))/.test(route) || /(?:permanentRedirect|redirect)\(["']\/(?:ky(?:\/|["'])|safety-diary(?:\/|["']))/.test(source);
+  const excluded = isOwnerExcludedRoute(route) || /(?:permanentRedirect|redirect)\(["']\/(?:ky(?:\/|["'])|safety-diary(?:\/|["']))/.test(source);
   const internal = /^(\/admin(?:\/|$)|\/dev(?:\/|$))/.test(route);
   const native = ['/', '/account', '/auth/signin', '/auth/error', '/pricing', '/pricing/success', '/notifications', '/chemical-ra/ledger', '/signage/manage'].includes(route);
   const dynamic = route.includes('[');

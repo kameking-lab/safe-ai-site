@@ -1,4 +1,5 @@
 "use client";
+import { useState } from "react";
 import { useNativeQuery } from "@/lib/use-native-query";
 import Link from "next/link";
 import {
@@ -18,7 +19,8 @@ function condLabel(s: { industry: string; type: string; year: string; q: string 
 }
 
 export function AccidentNewsPrintView({initialQuery,initialTimestamp}:{initialQuery:Record<string,string|string[]|undefined>;initialTimestamp:string}){
-  const query=useNativeQuery();
+  const [timestamp,setTimestamp]=useState(initialTimestamp);
+  const query=useNativeQuery(()=>setTimestamp(new Date().toISOString()));
   const pick = (k: string) => query ? query.get(k) ?? "" : (typeof initialQuery[k] === "string" ? initialQuery[k] as string : "");
   const selected = { industry: pick("industry"), type: pick("type"), year: pick("year"), q: pick("q") };
   const limit = Math.max(1, Math.min(Number(pick("limit")) || 40, 100));
@@ -29,7 +31,7 @@ export function AccidentNewsPrintView({initialQuery,initialTimestamp}:{initialQu
     q: selected.q || undefined,
     limit,
   });
-  const today = new Date(query ? Date.now() : initialTimestamp);
+  const today = new Date(timestamp);
   const dateStr = new Intl.DateTimeFormat('ja-JP',{timeZone:'Asia/Tokyo',dateStyle:'long'}).format(today);
 
   return (

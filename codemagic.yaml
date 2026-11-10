@@ -68,13 +68,10 @@ workflows:
             exit 1
           fi
           LATEST_BUILD_NUMBER=$(app-store-connect get-latest-testflight-build-number "$APP_STORE_APPLE_ID")
-          # A successful empty response means first upload; API failures must stop.
-          LATEST_BUILD_NUMBER=${LATEST_BUILD_NUMBER:-0}
-          if [[ ! "$LATEST_BUILD_NUMBER" =~ ^[0-9]+$ ]]; then
-            echo "Expected an integer App Store Connect build number." >&2
-            exit 1
-          fi
-          echo "BUILD_NUMBER=$((10#$LATEST_BUILD_NUMBER + 1))" >> "$CM_ENV"
+          # Build 10 is already reported as submitted. Empty/API failures stop.
+          # Run uploads serially: querying ASC does not reserve a build number.
+          NEXT_BUILD_NUMBER=$(node scripts/next-build-number.mjs "$LATEST_BUILD_NUMBER")
+          echo "BUILD_NUMBER=$NEXT_BUILD_NUMBER" >> "$CM_ENV"
       - name: Generate and verify native SPM project
         script: |
           set -euo pipefail

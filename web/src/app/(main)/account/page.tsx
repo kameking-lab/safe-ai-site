@@ -11,6 +11,7 @@ import { computeAccountConclusion } from "@/lib/account-conclusion";
 import { PAID_MODE } from "@/lib/paid-mode";
 import { webProSalesReady } from "@/lib/pro-sales";
 import { ProMembership } from "./pro-membership";
+import { getEntitlement } from "@/lib/mobile/billing-service";
 
 import { PageJsonLd } from "@/components/page-json-ld";
 export const metadata: Metadata = {

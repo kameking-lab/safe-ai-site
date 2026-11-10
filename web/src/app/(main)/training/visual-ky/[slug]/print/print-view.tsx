@@ -1,4 +1,5 @@
 "use client";
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { VisualKyPrintAction } from "@/components/visual-ky/print-action";
@@ -21,7 +22,8 @@ function normalizeFormat(value: string | string[] | undefined): PrintFormat {
 }
 
 export function VisualKyPrintView({scenario,initialFormat,initialTimestamp}:{scenario:NonNullable<ReturnType<typeof getVisualKyScenarioBySlug>>;initialFormat?:string|string[];initialTimestamp:string}) {
-  const nativeQuery = useNativeQuery();
+  const [timestamp,setTimestamp]=useState(initialTimestamp);
+  const nativeQuery=useNativeQuery(()=>setTimestamp(new Date().toISOString()));
   const format = normalizeFormat(nativeQuery ? nativeQuery.get("format") ?? undefined : initialFormat);
   const showProblem = ["problem", "worksheet", "participant"].includes(format);
   const showWorksheet = ["worksheet", "participant"].includes(format);
@@ -34,7 +36,7 @@ export function VisualKyPrintView({scenario,initialFormat,initialTimestamp}:{sce
     dateStyle: "long",
     timeStyle: "short",
     hour12: false,
-  }).format(new Date(nativeQuery ? Date.now() : initialTimestamp));
+  }).format(new Date(timestamp));
 
   return (
     <div className="mx-auto max-w-5xl bg-white px-4 py-6 text-slate-950 sm:px-6 print:max-w-none print:p-0">

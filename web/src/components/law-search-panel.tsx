@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect,useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { useNativeQuery } from '@/lib/use-native-query';
 import { safeLawParam,safeArticleParam } from '@/lib/law-search-query';
 import dynamic from "next/dynamic";
@@ -29,8 +29,7 @@ export function LawSearchPanel({
   const [query, setQuery] = useState(initialQuery);
   const [selectedLaw, setSelectedLaw] = useState(initialSelectedLaw);
   const [articleNumQuery, setArticleNumQuery] = useState(initialArticleNumQuery);
-  const nativeQuery=useNativeQuery();
-  useEffect(()=>{if(!nativeQuery)return;setSelectedLaw(safeLawParam(nativeQuery.get('law')??undefined));setArticleNumQuery(safeArticleParam(nativeQuery.get('art')??undefined));},[nativeQuery]);
+  useNativeQuery((nativeQuery)=>{setSelectedLaw(safeLawParam(nativeQuery.get('law')??undefined));setArticleNumQuery(safeArticleParam(nativeQuery.get('art')??undefined));});
   const { language } = useLanguage();
   const isEn = language === "en";
   const shouldLoadCorpus = Boolean(

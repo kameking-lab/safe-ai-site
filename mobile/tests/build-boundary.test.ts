@@ -18,6 +18,7 @@ describe('iOS pipeline boundaries', () => {
     expect(workflow.environment.ios_signing).toEqual({provisioning_profiles:['kakomon_appstore'],certificates:['kameking_distribution']});
     expect(workflow.triggering.events).toEqual(['push']);
     expect(workflow.when.changeset.includes).toContain('web/**');
+    expect(workflow.scripts.map((step:{script:string})=>step.script).join('\n')).toContain('node scripts/next-build-number.mjs "$LATEST_BUILD_NUMBER"');
     const scripts=workflow.scripts.map((step:{script:string})=>step.script).join('\n');
     expect(scripts).toContain('get-latest-testflight-build-number');
     expect(scripts).not.toContain('|| true');
