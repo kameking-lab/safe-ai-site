@@ -295,7 +295,7 @@ export default async function CircularDetailPage({
             <dd className="inline">
               {individuallyVerified
                 ? "2026-08-02 独立一次資料照合"
-                : "データ未収録（閲覧日を検証日として表示しません）"}
+                : "データ未収録"}
             </dd>
           </div>
           <div>

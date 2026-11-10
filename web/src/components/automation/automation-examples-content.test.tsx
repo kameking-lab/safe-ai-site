@@ -23,7 +23,7 @@ describe("AutomationExamplesContent", () => {
     expect(screen.getByText("Safety Labs")).toBeDefined();
     expect(screen.getByText("自動化サンプル")).toBeDefined();
     expect(
-      screen.getByText(/正式な主力機能や導入済みシステムではありません/),
+      screen.getByText(/サイト内で試せる業務改善の例です/),
     ).toBeDefined();
   });
 

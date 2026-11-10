@@ -42,7 +42,7 @@ export function AutomationExamplesContent() {
           安全業務の自動化サンプル
         </h1>
         <p className="mt-3 max-w-2xl text-base leading-7 text-portal-muted">
-          サイト内で試せる業務改善の例です。正式な主力機能や導入済みシステムではありません。
+          サイト内で試せる業務改善の例です。
           できることと制限を確認してからお試しください。
         </p>
       </header>
