@@ -146,7 +146,8 @@ export async function POST(req: Request) {
       return resumeStripeIntent(tx, intent);
     }, { timeout: 20_000 });
     return privateJson(result, result.state === "open" ? 200 : 409);
-  } catch {
+  } catch(error) {
+    if(error instanceof Error&&error.message==='PRO_SALES_PAUSED')return privateJson({error:{code:'PRO_SALES_PAUSED',message:PRO_SALES_PAUSED_MESSAGE}},503);
     return privateJson({ error: "決済セッションの作成に失敗しました。" }, 502);
   }
 }
