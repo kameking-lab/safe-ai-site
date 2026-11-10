@@ -35,7 +35,7 @@ export function ProUpsellCard({
         {native ? (native.price ? `月額${native.price}で続ける` : "App Storeの表示価格で続ける") : `月額${PRO_MONTHLY_PRICE_YEN.toLocaleString("ja-JP")}円で続ける`}
       </Link>
       <p className="mt-1.5 text-[11px] leading-4 text-slate-600 dark:text-emerald-200">
-        1か月ごとの自動更新・いつでも解約できます。
+        1か月ごとの自動更新・いつでも解約できます。全体の月間AI原価上限による生成停止があります。
         <Link href="/pricing/terms" className="underline">条件・特商法表示</Link>・
         <Link href="/terms" className="underline">利用規約</Link>・<Link href="/privacy" className="underline">プライバシーポリシー</Link>
       </p>

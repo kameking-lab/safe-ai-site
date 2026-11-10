@@ -21,7 +21,7 @@ export default function PrivacyPage() {
       <PageJsonLd name="プライバシーポリシー" description="安全AIポータルのプライバシーポリシー。個人情報の取り扱いについて説明しています。" path="/privacy" />
         <div>
           <h1 className="text-xl font-bold text-slate-900">プライバシーポリシー</h1>
-          <p className="mt-2 text-sm text-slate-500">最終更新日: 2026年11月6日</p>
+          <p className="mt-2 text-sm text-slate-500">最終更新日: 2026年11月10日</p>
         </div>
 
         <section id="security" className="scroll-mt-24 space-y-3">

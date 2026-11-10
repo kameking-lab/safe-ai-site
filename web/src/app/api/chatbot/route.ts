@@ -692,10 +692,8 @@ async function handlePost(request: Request) {
     };
 
     const generatedCandidate = await callGemini();
-    // 条文番号のallowlist照合だけでは、生成文の各主張が引用本文に支持されることを
-    // 証明できない。候補本文は利用者へ返さず、承認済みコーパスから組み立てた
-    // evidence-only案内へfail-closedする。
-    // 生成した回答をそのまま返す。外れた条文番号は警告欄で知らせ、空・途中切れだけ定型回答へ。
+    // 高リスクな未確認引用・空・途中終了は原文案内へ戻す。
+    // その他の引用警告は本文と分けて示し、信頼度を降格する。
     const validation = validateCitations(generatedCandidate, allowedCitations);
     const truncated = generationMeta.finishReason !== null && generationMeta.finishReason !== "STOP";
     if (!generatedCandidate.trim() || truncated || validation.retryRecommended) {

@@ -728,8 +728,7 @@ async function handlePost(request: Request) {
 
           // Phase 2 Layer 2: 応答完了後の条文番号検証 (retry は SSE では行わず警告のみ)
           // 警告は answer 本文へ追記せず scopeWarnings（UIの警告枠）で返す（2026-07-11）
-          // 生成した回答をそのまま見せる。条文番号の検査で外れた引用は警告欄で知らせる。
-          // 空・途中切れ（STOP 以外）のときだけ、収録条文の定型回答へ切り替える。
+          // 高リスクな未確認引用・空・途中切れは収録原文の案内へ戻す。
           const validation = validateCitations(answer, allowedCitations);
           const truncated = generationMeta.finishReason !== null && generationMeta.finishReason !== "STOP";
           if (!answer.trim() || truncated || validation.retryRecommended) {
