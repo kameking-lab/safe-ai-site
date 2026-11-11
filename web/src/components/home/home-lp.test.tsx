@@ -31,6 +31,10 @@ describe("the approved homepage LP", () => {
     expect(container.textContent).toContain("帳票は現場ごとに書式や運用が異なります");
     expect(container.querySelector("[data-pet-static]")?.getAttribute("src")).toBe("/mascot/anzen-wanko-v1/static.webp");
     expect(container.querySelector("[data-pet-strip]")).toBeNull();
+    const motionPreload = document.head.querySelector('link[rel="preload"][href="/mascot/anzen-wanko-v1/idle.webp"]');
+    expect(motionPreload?.getAttribute("as")).toBe("image");
+    expect(motionPreload?.getAttribute("media")).toBe("(prefers-reduced-motion: no-preference)");
+    expect(motionPreload?.getAttribute("fetchpriority")).toBe("high");
     expect(container.querySelector("form")).toBeNull();
     expect(container.querySelector('[href*="apps.apple.com"]')).toBeNull();
     expect(container.querySelectorAll('[data-lp-news="law"]')).toHaveLength(1);
