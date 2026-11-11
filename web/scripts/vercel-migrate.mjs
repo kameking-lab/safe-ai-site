@@ -149,7 +149,7 @@ export async function runApprovedMigrations({ db, files, prisma, writeSql, schem
       log("[vercel-migrate] Nothing pending; approved migrations already applied.");
       return { mode: "up-to-date", applied: [] };
     }
-    run(["migrate", "status"], (r) => r.status === 1 && r.output.includes("Following migrations have not yet been applied:")
+    run(["migrate", "status"], (r) => r.status === 1 && /Following migrations? have not yet been applied:/.test(r.output)
       && pending.every((name) => r.output.includes(name)));
     log(`[vercel-migrate] Preflight passed: ${pending.join(", ")}.`);
     run(["migrate", "deploy"], (r) => r.status === 0);
