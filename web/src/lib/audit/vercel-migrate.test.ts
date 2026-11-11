@@ -24,8 +24,8 @@ const production = { VERCEL: "1", VERCEL_ENV: "production", VERCEL_DEPLOYMENT_ID
 const pushedSchema = () => ({ tables: new Set(["User", "Subscription", "Account"]), columns: new Set(["User.id", "Subscription.planName"]) });
 
 describe("vercel-migrate gate", () => {
-  it("the repository holds exactly the two owner-approved migrations", () => {
-    expect(APPROVED_MIGRATIONS).toEqual(["20261103000000_ios3b_shared_entitlements", "202611040001_ios3c_review_fixes"]);
+  it("the repository holds exactly the three owner-approved migrations", () => {
+    expect(APPROVED_MIGRATIONS).toEqual(["20261103000000_ios3b_shared_entitlements", "202611040001_ios3c_review_fixes", "202611110001_owner_billing_decisions"]);
     expect(files.map((file) => file.name)).toEqual([...APPROVED_MIGRATIONS]);
   });
 
@@ -49,9 +49,10 @@ describe("vercel-migrate gate", () => {
     }
   });
 
-  it("with migration history allows exactly both approved migrations or none", () => {
+  it("with migration history allows the complete set, billing decisions after the ledger, or none", () => {
     expect(pendingMigrations(files, [])).toEqual([...APPROVED_MIGRATIONS]);
     expect(pendingMigrations(files, files.map(applied))).toEqual([]);
+    expect(pendingMigrations(files, files.slice(0,2).map(applied))).toEqual(["202611110001_owner_billing_decisions"]);
     expect(() => pendingMigrations(files, [applied(files[0])])).toThrow(/Unexpected pending migrations: 202611040001_ios3c_review_fixes/);
     expect(() => pendingMigrations([...files, { name: "20261201000000_extra", sql: "SELECT 1;" }], [])).toThrow(/Unexpected pending.*no deploy attempted/);
     expect(() => pendingMigrations([...files].reverse(), [])).toThrow(/Unexpected pending/);
@@ -76,6 +77,8 @@ describe("vercel-migrate gate", () => {
     expect(objects[1].tables).toEqual(["MobileAccountDeletion"]);
     expect(objects[1].columns).toEqual(expect.arrayContaining(["Subscription.billingHold", "MobilePurchaseIntent.providerRequest", "MobileAuthFlow.authenticatedAt", "MobileUsageOperation.providerStartedAt"]));
     expect(objects[1].columns).toHaveLength(9);
+    expect(objects[2].tables).toEqual(['MobileOperationsAlert']);
+    expect(objects[2].columns).toEqual(['MobileBudgetMonth.salesPausedAt']);
   });
 
   it("without history (db push database) applies only when none of the approved objects exist", () => {
@@ -129,6 +132,11 @@ function simulate(state: { history: Row[] | null; tables: Set<string>; columns: 
 }
 
 describe("vercel-migrate dry run against a simulated database", () => {
+  it("applies only billing decisions when both existing ledger migrations are already applied",async()=>{
+    const sim=simulate({history:files.slice(0,2).map(applied),...pushedSchema()});
+    await expect(sim.run()).resolves.toEqual({mode:'deploy',applied:['202611110001_owner_billing_decisions']});
+    expect(sim.calls).toEqual(['migrate status','migrate deploy','migrate status']);
+  });
   it("db push database: applies the approved SQL once in one transaction, then baselines the history", async () => {
     const sim = simulate({ history: null, ...pushedSchema() });
     await expect(sim.run()).resolves.toEqual({ mode: "apply-and-baseline", applied: [...APPROVED_MIGRATIONS] });

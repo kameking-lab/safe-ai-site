@@ -5,6 +5,8 @@ import { fetchSubscriber, verifiedAppleGrant,fetchAppleOwnership } from './reven
 import { reconcileStripe } from './stripe-reconcile';
 import { assertResume,canReleasePrepared,appleOutcomeStage,type ApplePurchaseOutcome,type PurchaseSource } from './purchase-state';
 import { expireStripeIntent } from './stripe-purchase';
+import { assertProSalesOpen } from './pro-sales-gate';
+import { recordOperationsAlert,resolveOperationsAlert } from './operations-alerts';
 export function billingDb() { if(!prisma || process.env.MOBILE_LEDGER_ENABLED!=='true') throw new Error('ENTITLEMENT_SYNC_PENDING');return prisma; }
 export async function lockMember(tx:Prisma.TransactionClient,userId:string) { await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`anzen:${userId}`},0))`; }
 export async function lockPushDevice(tx:Prisma.TransactionClient,token:string) { await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`anzen-push:${token}`},0))`; }
@@ -18,6 +20,8 @@ async function identity(tx:Prisma.TransactionClient,userId:string) {
   const member=await tx.mobileIdentity.upsert({where:{userId},create:{userId},update:{}});
   const testers=sandboxTesterEmails();
   if(member.billingEnvironment==='SANDBOX'||!testers.size)return member;
+  const production=await tx.mobileGrant.findMany({where:{userId,environment:'PRODUCTION',revoked:false,expiresAt:{gt:new Date()}}});
+  if(production.some(g=>g.environment==='PRODUCTION'&&!g.revoked&&g.expiresAt>new Date()))return member;
   const user=await tx.user.findUnique({where:{id:userId},select:{email:true}});
   if(!user?.email||!testers.has(user.email.toLowerCase()))return member;
   return tx.mobileIdentity.update({where:{userId},data:{billingEnvironment:'SANDBOX'}});
@@ -32,22 +36,37 @@ export async function entitlementInTransaction(tx:Prisma.TransactionClient,userI
 }
 export async function getEntitlement(userId:string) {
   const db=billingDb();const now=Date.now();
-  const [legacy,grants]=await Promise.all([db.subscription.findUnique({where:{userId}}),db.mobileGrant.findMany({where:{userId,revoked:false,expiresAt:{gt:new Date()}}})]);
-  if(grants.some(g=>now-g.checkedAt.getTime()>300000)){try{return await reconcile(userId);}catch{/* bounded 24-hour previously verified fallback below */}}
-  else if(legacy?.stripeSubscriptionId && (now-legacy.updatedAt.getTime()>300000||!grants.some(g=>g.provider==='stripe'))){
-    try{return await db.$transaction(async tx=>{await lockMember(tx,userId);await identity(tx,userId);await reconcileStripe(tx,userId);return entitlementInTransaction(tx,userId);},{timeout:30000});}catch{/* unknown rights never become an offer to repurchase */}
+  const member=await db.$transaction(tx=>identity(tx,userId));
+  const [legacy,grants,intent]=await Promise.all([db.subscription.findUnique({where:{userId}}),db.mobileGrant.findMany({where:{userId}}),db.mobilePurchaseIntent.findUnique({where:{userId}})]);
+  let refreshFailed=false;
+  const environment=member.billingEnvironment==='SANDBOX'?'SANDBOX':'PRODUCTION';
+  const currentGrants=grants.filter(g=>g.environment===environment);
+  // Commit each provider independently: an Apple outage must not roll back a Stripe renewal.
+  if(legacy?.stripeSubscriptionId && (now-legacy.updatedAt.getTime()>300000||!currentGrants.some(g=>g.provider==='stripe')||currentGrants.some(g=>g.provider==='stripe'&&now-g.checkedAt.getTime()>300000))){
+    try{await db.$transaction(async tx=>{await lockMember(tx,userId);await identity(tx,userId);await reconcileStripe(tx,userId);},{timeout:30000});}catch{refreshFailed=true;}
   }
-  return db.$transaction(tx=>entitlementInTransaction(tx,userId));
+  // Historical grants in another environment cannot make every GET refresh forever.
+  // Include expired Apple grants and an interrupted first Apple purchase for renewal recovery.
+  if(currentGrants.some(g=>g.provider==='app_store'&&now-g.checkedAt.getTime()>300000)||(intent?.status==='pending'&&intent.source==='app_store'&&!currentGrants.some(g=>g.provider==='app_store'))){
+    try{await reconcile(userId,{stripe:false});}catch{refreshFailed=true;}
+  }
+  const rights=await db.$transaction(tx=>entitlementInTransaction(tx,userId));
+  if(refreshFailed&&rights.plan==='free')rights.syncState='pending';
+  return rights;
 }
-export async function reconcile(userId:string) {
+export async function reconcile(userId:string,options:{stripe?:boolean}={}) {
   return billingDb().$transaction(async tx=>{
     await lockMember(tx,userId);let member=await identity(tx,userId);
     let environment:'SANDBOX'|'PRODUCTION'=member.billingEnvironment==='SANDBOX'?'SANDBOX':'PRODUCTION';
-    await reconcileStripe(tx,userId);
     const productId=process.env.REVENUECAT_IOS_PRODUCT_ID;
     if(!productId) throw new Error('ENTITLEMENT_SYNC_PENDING');
     const raw=await fetchSubscriber(member.appUserId);
-    let grant=verifiedAppleGrant(raw,productId,new Date(),environment);
+    // A verified production receipt takes priority, including for a former TestFlight member.
+    const production=verifiedAppleGrant(raw,productId,new Date(),'PRODUCTION');
+    if(production&&environment==='SANDBOX'){
+      member=await tx.mobileIdentity.update({where:{userId},data:{billingEnvironment:'PRODUCTION'}});environment='PRODUCTION';
+    }
+    let grant=production??verifiedAppleGrant(raw,productId,new Date(),environment);
     // App Review and TestFlight testers who are not on the tester list also buy in Apple's sandbox.
     // An App Store build can never make a sandbox purchase, so a verified sandbox subscription on this
     // member's own app user ID moves a member without production rights to SANDBOX.
@@ -57,6 +76,7 @@ export async function reconcile(userId:string) {
         member=await tx.mobileIdentity.update({where:{userId},data:{billingEnvironment:'SANDBOX'}});environment='SANDBOX';grant=sandbox;
       }
     }
+    if(options.stripe!==false)await reconcileStripe(tx,userId);
     const checkedAt=new Date();
     // Fetch the latest authoritative subscriber state, rather than applying event order.
     await tx.mobileGrant.updateMany({where:{userId,provider:'app_store',environment},data:{revoked:true,checkedAt}});
@@ -76,10 +96,19 @@ export async function reconcile(userId:string) {
 export async function reservePurchase(userId:string,source:PurchaseSource='app_store') {
   // Refresh Apple before reserving. Website rights are always read from the database.
   await reconcile(userId);
+  await assertProSalesOpen();
   return billingDb().$transaction(async tx=>{
     await lockMember(tx,userId);const current=await entitlementInTransaction(tx,userId);assertPurchasable(current);
     const existing=await tx.mobilePurchaseIntent.findUnique({where:{userId}});
-    if(existing?.status==='pending'){assertResume(existing,source);return existing;}
+    if(existing?.status==='pending'){
+      assertResume(existing,source);
+      if(source==='app_store'&&existing.stage!=='prepared'){
+        const previous=existing.providerRequest&&typeof existing.providerRequest==='object'&&!Array.isArray(existing.providerRequest)?existing.providerRequest:{};
+        await tx.mobilePurchaseIntent.updateMany({where:{userId,id:existing.id,status:'pending',stage:existing.stage},
+          data:{providerRequest:{...previous,source:'server_reconciliation',checkedAt:new Date().toISOString(),appUserId:current.appUserId,plan:current.plan,syncState:current.syncState}}});
+      }
+      return existing;
+    }
     // Never unlock a potentially pending StoreKit transaction simply because time passed.
     return tx.mobilePurchaseIntent.upsert({where:{userId},create:{userId,source},update:{id:crypto.randomUUID(),source,stage:'prepared',providerSessionId:null,checkoutUrl:null,providerRequest:Prisma.DbNull,status:'pending',createdAt:new Date()}});
   });
@@ -93,16 +122,26 @@ export async function cancelPurchase(userId:string,id:string,source:PurchaseSour
     else throw new Error('PURCHASE_PENDING');
     return entitlementInTransaction(tx,userId);});
 }
-export async function markStoreStarted(userId:string,id:string){
+export async function markStoreStarted(userId:string,id:string,attemptId?:string){
+  await reconcile(userId);
+  await assertProSalesOpen();
   return billingDb().$transaction(async tx=>{await lockMember(tx,userId);const rights=await entitlementInTransaction(tx,userId);assertPurchasable(rights);
-    const changed=await tx.mobilePurchaseIntent.updateMany({where:{userId,id,source:'app_store',status:'pending',stage:'prepared'},data:{stage:'store_started'}});
+    const intent=await tx.mobilePurchaseIntent.findUnique({where:{userId}});
+    if(!intent||intent.id!==id)throw new Error('INVALID_REQUEST');
+    assertResume(intent,'app_store');
+    const previous=intent.providerRequest&&typeof intent.providerRequest==='object'&&!Array.isArray(intent.providerRequest)?intent.providerRequest:{};
+    const changed=await tx.mobilePurchaseIntent.updateMany({where:{userId,id,source:'app_store',status:'pending',stage:intent.stage},data:{stage:'store_started',providerRequest:{...previous,attemptId:attemptId??null}}});
     if(changed.count!==1)throw new Error('INVALID_REQUEST');return {id};});
 }
 /** Client outcomes describe the UI only. They never release a dispatched reservation. */
-export async function reportAppleOutcome(userId:string,id:string,outcome:ApplePurchaseOutcome){
+export async function reportAppleOutcome(userId:string,id:string,outcome:ApplePurchaseOutcome,attemptId?:string){
   return billingDb().$transaction(async tx=>{await lockMember(tx,userId);
     const intent=await tx.mobilePurchaseIntent.findUnique({where:{userId}});
     if(!intent||intent.id!==id||intent.source!=='app_store')throw new Error('INVALID_REQUEST');
+    const evidence=intent.providerRequest;
+    const expected=evidence&&typeof evidence==='object'&&!Array.isArray(evidence)?evidence.attemptId:null;
+    // An outcome retried after a network loss must not overwrite a newer StoreKit attempt.
+    if(expected&&expected!==attemptId)return entitlementInTransaction(tx,userId);
     if(intent.status==='pending'&&intent.stage!=='prepared'){
       // Deferred approval cannot be downgraded by a later cancellation/unknown claim.
       const stage=intent.stage==='store_deferred'?'store_deferred':appleOutcomeStage[outcome];
@@ -122,9 +161,11 @@ export async function processBillingEvents(limit=20,deadline=Date.now()+45000) {
       // Reconcile both sides without merging accounts or silently moving purchase ownership.
       for(const member of members)await reconcile(member.userId);
       await db.mobileBillingEvent.update({where:{id:event.id},data:{status:'completed'}});
+      await resolveOperationsAlert('billing_reconcile',event.id);
     }catch{
       const attempts=event.attempts+1;
-      await db.mobileBillingEvent.update({where:{id:event.id},data:{attempts,status:attempts>=10?'failed':'pending',nextAttempt:new Date(Date.now()+Math.min(3600000,2**attempts*10000))}});
+      await db.mobileBillingEvent.update({where:{id:event.id},data:{attempts,status:'pending',nextAttempt:new Date(Date.now()+Math.min(3600000,2**Math.min(attempts,10)*10000))}});
+      await recordOperationsAlert('billing_reconcile',event.id);
     }
   }
   return {processed:events.length};

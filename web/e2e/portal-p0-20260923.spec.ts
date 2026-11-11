@@ -1,4 +1,5 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
+import { consentToChatbot } from "./support/chatbot-consent";
 
 const toolPaths = ["/chatbot", "/chemical-database", "/laws", "/accident-news", "/accidents-analytics", "/tools/construction-calculators", "/goods"];
 const tools = (page: Page) => page.locator('#tools a[data-lp-tool]');
@@ -198,6 +199,7 @@ test("専用画面で質問を保持して送信し、URL・storageへ漏らさ�
   const beforeY = await page.evaluate(() => window.scrollY);
   await toolLink(page, "/chatbot").click();
   const question = page.locator("[data-chatbot-composer] textarea");
+  await consentToChatbot(page);
   await question.fill(text);
   await expect(question).toHaveValue(text);
   await assertPrivateInput(page, text, requestedUrls);

@@ -1,6 +1,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { expect, test, type Browser, type Page } from "@playwright/test";
+import { consentToChatbot } from "./support/chatbot-consent";
 import { assertNoJsAccidentNews } from "./support/nojs-accident-news";
 import {
   SERVICE_FIRST_COPY_LIMITS,
@@ -649,6 +650,7 @@ test("chatbot: composer, question chips, quick reply and source details remain o
   if (enforce) expect(keyboardViewportBox!.y + keyboardViewportBox!.height).toBeLessThanOrEqual(502);
   await page.setViewportSize({ width: 390, height: 844 });
   await input.fill("労働安全衛生法第61条を示してください");
+  await consentToChatbot(page);
   await input.press("Enter");
   await expect(chips).toHaveCount(0);
   const sources = page.locator("[data-chatbot-source-details]").first();
@@ -671,6 +673,7 @@ test("chatbot: composer, question chips, quick reply and source details remain o
   expect(Math.max(0, ...actionCounts)).toBeLessThanOrEqual(3);
 
   await page.reload({ waitUntil: "domcontentloaded" });
+  await consentToChatbot(page);
   const clarifyInput = page.locator("[data-chatbot-composer] textarea");
   await clarifyInput.fill("手すりの高さは？");
   await clarifyInput.press("Enter");

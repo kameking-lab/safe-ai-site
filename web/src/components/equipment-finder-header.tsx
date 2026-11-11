@@ -28,12 +28,6 @@ export function EquipmentFinderHeader() {
           ? "Product-level search is unavailable while primary-source verification is incomplete."
           : "商品名・メーカー・規格適合・価格等の一次資料確認が完了するまで、商品単位の検索と推薦を停止しています。"}
       </p>
-      <div className="mt-3 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-xs leading-5 text-emerald-900">
-        <strong>{isEn ? "Publication boundary:" : "公開境界:"}</strong>{" "}
-        {isEn
-          ? "Unverified products, ratings, compliance claims, prices, and purchase links are not displayed."
-          : "未検証の商品、評価、規格適合表示、価格、購入リンクは表示しません。"}
-      </div>
     </header>
   );
 }

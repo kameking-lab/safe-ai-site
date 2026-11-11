@@ -1,4 +1,5 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
+import { consentToChatbot } from "./support/chatbot-consent";
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 
@@ -307,6 +308,7 @@ async function ask(
   expectation: AnswerExpectation,
   caseId: number,
 ) {
+  await consentToChatbot(page);
   const answers = page.locator('article[aria-label="安衛法AIの回答"]');
   const answerCount = await answers.count();
   const composer = page.locator("[data-chatbot-composer]");
@@ -709,6 +711,7 @@ test.describe("安衛法AI answer-first 必須12会話ケース", () => {
       });
     });
     await gotoChatbot(page);
+    await consentToChatbot(page);
     const input = page.locator("[data-chatbot-composer] textarea");
     await input.fill("電気作業の資格は？");
     await page.getByRole("button", { name: "送信" }).click();
@@ -752,6 +755,7 @@ test.describe("安衛法AI answer-first 必須12会話ケース", () => {
     });
 
     await gotoChatbot(page);
+    await consentToChatbot(page);
     await page
       .locator("[data-chatbot-composer] textarea")
       .fill("反応がありません");
@@ -783,6 +787,7 @@ test.describe("安衛法AI answer-first 必須12会話ケース", () => {
     });
 
     await gotoChatbot(page);
+    await consentToChatbot(page);
     const pii = "山田 太郎 worker@example.com 090-1234-5678";
     await page.locator("[data-chatbot-composer] textarea").fill(pii);
     await page.getByRole("button", { name: "送信" }).click();

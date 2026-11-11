@@ -181,6 +181,7 @@ export function ChatbotPanel({
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // 無料枠の上限に当たったときの購入入口（エラー表示とは別。再試行ボタンは出さない）。
+  const [aiConsent, setAiConsent] = useState(false);
   const [upsell, setUpsell] = useState<string | null>(null);
   const [retryableQuestion, setRetryableQuestion] = useState<string | null>(
     null,
@@ -202,6 +203,15 @@ export function ChatbotPanel({
   const previousInputValueRef = useRef(input);
   const initialQuestionConsumedRef = useRef(false);
   const lawCategory: LawCategoryFilter = "all";
+
+  useEffect(() => {
+    const verified = (event: Event) => {
+      const rights = (event as CustomEvent<{plan?: string; syncState?: string}>).detail;
+      if (rights?.plan === "pro" && rights.syncState === "verified") setUpsell(null);
+    };
+    window.addEventListener("anzen-entitlement-changed", verified);
+    return () => window.removeEventListener("anzen-entitlement-changed", verified);
+  }, []);
 
   useEffect(() => {
     clearChatHistory();
@@ -260,10 +270,14 @@ export function ChatbotPanel({
       setRetryableQuestion(null);
       return;
     }
+    if (!aiConsent) {
+      setError("Google（Gemini API）への送信について確認し、同意してください。");
+      return;
+    }
     const outboundPreflight = inspectAiOutbound({
       purpose: "chatbot-client-preflight",
       texts: [text],
-      consent: true,
+      consent: aiConsent,
       maxChars: 4_000,
       contextPolicy: "approved-server-corpus",
     });
@@ -313,7 +327,7 @@ export function ChatbotPanel({
       ),
       lawCategory,
       // The client and server have both run the same PII/emergency gate.
-      privacyConfirmed: true,
+      privacyConfirmed: aiConsent,
     });
     let streamedContent = "";
     const timeoutId = window.setTimeout(
@@ -370,6 +384,7 @@ export function ChatbotPanel({
             setInput(text);
             return;
           }
+          if (failure.code === "UNAUTHORIZED") setInput(text);
           setError(failure.message);
           if (failure.retryable) setRetryableQuestion(text);
           return;
@@ -538,7 +553,13 @@ export function ChatbotPanel({
     initialQuestionConsumedRef.current = true;
     const question = initialQuestion.trim();
     onInitialQuestionConsumed?.();
-    void handleSend(question).catch(() => onInitialQuestionRejected?.());
+    const safety = evaluateChatbotSafety(question);
+    if (safety?.kind === "privacy" || safety?.kind === "emergency") {
+      void handleSend(question).catch(() => onInitialQuestionRejected?.());
+    } else {
+      // A transferred question stays in memory until the user consents and presses Send.
+      setInput(question);
+    }
     // The one-shot handoff is consumed before network access and passes the
     // same local and server safety gates as typed input.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1036,6 +1057,10 @@ export function ChatbotPanel({
             </button>
           )}
         </div>
+        <label className="mt-2 flex items-start gap-2 text-xs leading-5 text-slate-600 dark:text-slate-300">
+          <input type="checkbox" checked={aiConsent} onChange={(event) => setAiConsent(event.target.checked)} data-ai-consent-version="2026-11-10" className="mt-1 shrink-0" />
+          <span>法令相談への回答生成のため、質問とこの相談の直近最大6件の会話をGoogle（Gemini API）へ送信することに同意します。個人情報・機密情報は入力しないでください。<a href="/privacy#external-services" className="underline">データの取扱い</a></span>
+        </label>
         <PrivacyNote id="chatbot-input-hint" variant="ai" detailsLink={false} className="mt-1 px-2" />
         <span id="chatbot-input-keys" className="sr-only">
           Enterで送信、Shift+Enterで改行します。

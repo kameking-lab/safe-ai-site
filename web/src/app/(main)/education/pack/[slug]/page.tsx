@@ -33,7 +33,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const deck = getDeck(slug);
   if (!deck) return {};
   const title = `${deck.title}｜無償・編集可の法定教育スライド`;
-  const description = `${deck.title}の無償教材（申請不要・編集可）。${deck.basisDisplay}。法定科目の網羅をCIで機械検証（対応表つき）。投影（16:9）・A4横印刷対応。教材の提供は教育の実施ではありません。`;
+  const description = `${deck.title}の無償教材（申請不要・編集可）。${deck.basisDisplay}。法定対応表つき。投影（16:9）・A4横印刷対応。教材の提供は教育の実施ではありません。`;
   return {
     title,
     description,

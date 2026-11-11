@@ -1,8 +1,10 @@
 import { expect, test, type Page } from "@playwright/test";
+import { consentToChatbot } from "./support/chatbot-consent";
 
 test.use({ viewport: { width: 390, height: 844 } });
 
 async function sendQuestion(page: Page, question: string) {
+  await consentToChatbot(page);
   const answers = page.locator('article[aria-label="安衛法AIの回答"]');
   const before = await answers.count();
   const composer = page.locator("[data-chatbot-composer]");

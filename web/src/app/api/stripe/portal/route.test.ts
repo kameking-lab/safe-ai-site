@@ -38,7 +38,7 @@ describe("POST /api/stripe/portal safety boundary", () => {
       join(process.cwd(), "src/app/api/stripe/portal/route.ts"),
       "utf8",
     );
-    expect(source).toContain("isPaidModeReady()");
+    expect(source).toContain("externalCredentialedServicesAllowed()");
     expect(source).toContain("privateJson(");
     expect(source).not.toMatch(/err(?:or)?\.message/);
   });

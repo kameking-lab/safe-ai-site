@@ -10,10 +10,11 @@ import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-// Owner approved production application of these two (iOS shared ledger), 2026-11-06.
+// Shared ledger: owner approval 2026-11-06. Billing decisions: owner approval 2026-11-11.
 export const APPROVED_MIGRATIONS = Object.freeze([
   "20261103000000_ios3b_shared_entitlements",
   "202611040001_ios3c_review_fixes",
+  "202611110001_owner_billing_decisions",
 ]);
 const HISTORY_TABLE = "_prisma_migrations";
 
@@ -48,9 +49,10 @@ function checksums(sql) {
 
 function assertApprovedPending(pending, files) {
   const ok = pending.length === 0 || (pending.length === APPROVED_MIGRATIONS.length
-    && pending.every((name, index) => name === APPROVED_MIGRATIONS[index]));
+    && pending.every((name, index) => name === APPROVED_MIGRATIONS[index]))
+    || (pending.length === 1 && pending[0] === APPROVED_MIGRATIONS[2]);
   if (!ok) {
-    throw new MigrationGateError(`Unexpected pending migrations: ${pending.join(", ") || "(none)"} (only ${APPROVED_MIGRATIONS.join(" + ")} together, or zero, are allowed); no deploy attempted.`);
+    throw new MigrationGateError(`Unexpected pending migrations: ${pending.join(", ") || "(none)"} (only ${APPROVED_MIGRATIONS.join(" + ")} together, the billing decisions after the shared ledger, or zero, are allowed); no deploy attempted.`);
   }
   if (APPROVED_MIGRATIONS.some((name) => !files.some((file) => file.name === name))) {
     throw new MigrationGateError("Approved migration files are missing; no deploy attempted.");
