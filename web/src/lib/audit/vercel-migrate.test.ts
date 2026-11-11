@@ -96,7 +96,8 @@ describe("vercel-migrate gate", () => {
 });
 
 type Row = Record<string, unknown>;
-function simulate(state: { history: Row[] | null; tables: Set<string>; columns: Set<string> }, outputs: Record<string, { status: number; output: string }> = {}) {
+type PrismaResult = { status: number | null; output: string };
+function simulate(state: { history: Row[] | null; tables: Set<string>; columns: Set<string> }, outputs: Record<string, PrismaResult | PrismaResult[]> = {}) {
   const calls: string[] = [];
   const db = {
     async $queryRawUnsafe(sql: string): Promise<Row[]> {
@@ -113,7 +114,8 @@ function simulate(state: { history: Row[] | null; tables: Set<string>; columns: 
   const prisma = (args: string[]) => {
     const command = args.slice(0, args.indexOf("--schema")).join(" ");
     calls.push(command);
-    if (outputs[command]) return outputs[command];
+    const override = outputs[command];
+    if (override) return Array.isArray(override) ? override.shift()! : override;
     if (command === "db execute --file approved.sql") {
       for (const file of files) { const o = migrationObjects(file.sql); o.tables.forEach((t) => state.tables.add(t)); o.columns.forEach((c) => state.columns.add(c)); }
     } else if (command.startsWith("migrate resolve --applied ")) {
@@ -123,7 +125,7 @@ function simulate(state: { history: Row[] | null; tables: Set<string>; columns: 
       state.history = files.map(applied);
     } else if (command === "migrate status") {
       const pending = files.filter((file) => !state.history?.some((row) => row.migration_name === file.name));
-      return pending.length ? { status: 1, output: `Following migrations have not yet been applied:\n${pending.map((f) => f.name).join("\n")}` } : { status: 0, output: "Database schema is up to date!" };
+      return pending.length ? { status: 1, output: `Following migration${pending.length > 1 ? "s" : ""} have not yet been applied:\n${pending.map((f) => f.name).join("\n")}` } : { status: 0, output: "Database schema is up to date!" };
     }
     return { status: 0, output: "" };
   };
@@ -132,6 +134,54 @@ function simulate(state: { history: Row[] | null; tables: Set<string>; columns: 
 }
 
 describe("vercel-migrate dry run against a simulated database", () => {
+  it.each(["migration", "migrations"])("accepts Prisma's %s heading for the approved pending billing migration", async (noun) => {
+    const sim = simulate({ history: files.slice(0, 2).map(applied), ...pushedSchema() }, {
+      "migrate status": [
+        { status: 1, output: `Following ${noun} have not yet been applied:\n${APPROVED_MIGRATIONS[2]}` },
+        { status: 0, output: "Database schema is up to date!" },
+      ],
+    });
+    await expect(sim.run()).resolves.toEqual({ mode: "deploy", applied: [APPROVED_MIGRATIONS[2]] });
+    expect(sim.calls).toEqual(["migrate status", "migrate deploy", "migrate status"]);
+  });
+
+  it.each<PrismaResult>([
+    { status: 0, output: `Following migration have not yet been applied:\n${APPROVED_MIGRATIONS[2]}` },
+    { status: null, output: `Following migration have not yet been applied:\n${APPROVED_MIGRATIONS[2]}` },
+    { status: 1, output: "Database schema is up to date!" },
+    { status: 1, output: `Connection failed: ${APPROVED_MIGRATIONS[2]}` },
+    { status: 1, output: "Following migration have not yet been applied:\n20261201000000_extra" },
+    { status: 1, output: "Following migrations have not yet been applied:" },
+  ])("stops before deploy on an inconsistent pending status: %j", async (result) => {
+    const sim = simulate({ history: files.slice(0, 2).map(applied), ...pushedSchema() }, { "migrate status": result });
+    await expect(sim.run()).rejects.toThrow(/Prisma migrate status failed/);
+    expect(sim.calls).toEqual(["migrate status"]);
+    expect(sim.state.history).toHaveLength(2);
+  });
+
+  it.each<PrismaResult>([
+    { status: 1, output: `Following migration have not yet been applied:\n${APPROVED_MIGRATIONS[2]}` },
+    { status: 1, output: "Database schema is up to date!" },
+    { status: 0, output: `Following migrations have not yet been applied:\n${APPROVED_MIGRATIONS[2]}` },
+  ])("still requires a clean status after deployment: %j", async (result) => {
+    const sim = simulate({ history: files.slice(0, 2).map(applied), ...pushedSchema() }, {
+      "migrate status": [
+        { status: 1, output: `Following migration have not yet been applied:\n${APPROVED_MIGRATIONS[2]}` },
+        result,
+      ],
+    });
+    await expect(sim.run()).rejects.toThrow(/Prisma migrate status failed/);
+    expect(sim.calls).toEqual(["migrate status", "migrate deploy", "migrate status"]);
+  });
+
+  it.each(["migration", "migrations"])("does not treat a %s pending heading as up to date", async (noun) => {
+    const sim = simulate({ history: files.map(applied), ...pushedSchema() }, {
+      "migrate status": { status: 0, output: `Following ${noun} have not yet been applied:\n${APPROVED_MIGRATIONS[2]}` },
+    });
+    await expect(sim.run()).rejects.toThrow(/Prisma migrate status failed/);
+    expect(sim.calls).toEqual(["migrate status"]);
+  });
+
   it("applies only billing decisions when both existing ledger migrations are already applied",async()=>{
     const sim=simulate({history:files.slice(0,2).map(applied),...pushedSchema()});
     await expect(sim.run()).resolves.toEqual({mode:'deploy',applied:['202611110001_owner_billing_decisions']});
