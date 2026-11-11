@@ -98,7 +98,7 @@ export function Footer() {
               </Link>
             ))}
           </nav>
-          <AppStorePromo variant="footer" className="mt-3" />
+          <AppStorePromo className="mt-3" />
           <p className="footer-copyright">© 2026 安全AIポータル</p>
         </div>
       </footer>

@@ -11,7 +11,7 @@ import { Mascot } from "@/components/mascot";
 
 const TITLE = "無償・編集可の法定教育スライドパック";
 const DESCRIPTION =
-  "特別教育の学科・雇入れ時教育・労働衛生教育に使える無償教材（申請不要・編集可）。法定科目の網羅をCIで機械検証し法定対応表を同梱。最新の災害統計に自動追従。投影（16:9）・A4横印刷対応。教材の提供は教育の実施ではありません。";
+  "特別教育の学科・雇入れ時教育・労働衛生教育に使える無償教材（申請不要・編集可）。法定対応表つき。最新の災害統計に自動追従。投影（16:9）・A4横印刷対応。教材の提供は教育の実施ではありません。";
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -39,8 +39,7 @@ export default function EduPackIndexPage() {
         <h1 className="mt-3 text-2xl font-bold text-slate-900 sm:text-3xl">法定教育スライドパック</h1>
         <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
           特別教育の学科・雇入れ時教育・労働衛生教育に使える無償の教育スライドです。ダウンロードに申請・登録・パスワードは不要。
-          各教材は<strong>告示正本から構造化したカリキュラムレジストリとの機械照合（CI）</strong>で法定科目の網羅を検証し、
-          <strong>法定対応表</strong>を同梱します。統計は最新の災害データに自動追従します。
+          各教材には科目・範囲・時間を確認できる<strong>法定対応表</strong>を同梱します。統計は最新の災害データに自動追従します。
         </p>
         </div>
         <Mascot variant="teacher" size="lg" alt="" className="hidden shrink-0 sm:block" />
@@ -55,8 +54,8 @@ export default function EduPackIndexPage() {
         </div>
         <div className="rounded-xl border border-slate-200 bg-white p-4">
           <ShieldCheck aria-hidden="true" className="h-5 w-5 text-emerald-700" />
-          <p className="mt-2 text-sm font-bold text-slate-900">法定充足を機械保証</p>
-          <p className="mt-0.5 text-xs text-slate-600">告示正本の科目・範囲・時間との照合をCIで常時実施。宣伝でなく検証事実。</p>
+          <p className="mt-2 text-sm font-bold text-slate-900">科目・時間を確認</p>
+          <p className="mt-0.5 text-xs text-slate-600">法定対応表で、研修に必要な科目・範囲・時間を確認できます。</p>
         </div>
         <div className="rounded-xl border border-slate-200 bg-white p-4">
           <FileDown aria-hidden="true" className="h-5 w-5 text-slate-700" />

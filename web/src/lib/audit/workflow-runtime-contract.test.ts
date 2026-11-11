@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const workflowDirectory = resolve(process.cwd(), "../.github/workflows");
-const pinnedNodeVersion = "22.23.2";
+const pinnedNodeVersion = "24.13.1";
 
 function readWorkflow(fileName: string) {
   return readFileSync(resolve(workflowDirectory, fileName), "utf8");

@@ -47,7 +47,7 @@ export function CourtPrecedentsList({ precedents }: CourtPrecedentsListProps) {
       >
         <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-amber-800">
           <Gavel className="h-4 w-4" aria-hidden="true" />
-          判例・quarantine
+          判例
         </div>
         <h2
           id="circulars-precedents-heading"
@@ -56,9 +56,7 @@ export function CourtPrecedentsList({ precedents }: CourtPrecedentsListProps) {
           判例要旨は出典再検証のため公開停止中です
         </h2>
         <p className="mt-3 max-w-3xl text-sm leading-7 text-amber-950">
-          旧データで事件名、裁判年月日、裁判所、判例誌の誤対応が確認されました。
-          裁判所の個別判決URL、事件番号、支持箇所、人手確認日を照合できた判例だけを
-          allowlistで復帰します。公開停止は、関連判例が存在しないという意味ではありません。
+          判決原文は裁判所の裁判例検索で確認してください。
         </p>
         <a
           href="https://www.courts.go.jp/app/hanrei_jp/search1"

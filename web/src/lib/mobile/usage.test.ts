@@ -1,6 +1,8 @@
 // @vitest-environment node
 import { beforeEach,afterEach,describe,expect,it,vi } from 'vitest';
 const pause=vi.hoisted(()=>vi.fn(async()=>({count:1})));
+const expireStopped=vi.hoisted(()=>vi.fn(async()=>({closed:0})));
+vi.mock('./pro-sales-checkouts',()=>({processPausedStripeCheckouts:expireStopped}));
 const state=vi.hoisted(()=>({operations:[] as Array<{id:string;userId:string;feature:string;day:string;status:string;createdAt:Date;requestHash:string;response?:unknown}>,tail:Promise.resolve() as Promise<unknown>,paid:false,signedIn:true,budget:{committedYen:0,reservedYen:0},reservations:[] as Array<{id:string;amountYen:number;status:string}>}));
 vi.mock('@/auth',()=>({auth:async()=>state.signedIn?{user:{id:'mock_member'}}:null}));
 vi.mock('@/lib/prisma',()=>{
@@ -121,6 +123,28 @@ describe('anonymous website visitors with the shared ledger on',()=>{
     expect((await withUsage(web({'X-Forwarded-For':'198.51.100.8'}),'law_chat',run)).status).toBe(200);
     expect(run).toHaveBeenCalledTimes(4);
   });
+  it('does not count anonymous sends that were refused (bad encoding, no consent) and counts only answers',async()=>{
+    salesOpen();state.signedIn=false;
+    const ip={'X-Forwarded-For':'198.51.100.9'};
+    const refused=vi.fn(async()=>Response.json({error:'外部AIへの送信前確認が必要です。',retryable:false},{status:428}));
+    const badEncoding=vi.fn(async()=>Response.json({error:'文字コードを確認してください。'},{status:400}));
+    expect((await withUsage(web(ip),'law_chat',badEncoding)).status).toBe(400);
+    for(let i=0;i<2;i++)expect((await withUsage(web(ip),'law_chat',refused)).status).toBe(428);
+    const run=vi.fn(async()=>answer());
+    for(let i=0;i<3;i++)expect((await withUsage(web(ip),'law_chat',run)).status).toBe(200);
+    expect((await withUsage(web(ip),'law_chat',run)).status).toBe(429);
+    expect(run).toHaveBeenCalledTimes(3);
+  });
+  it('counts an anonymous streamed answer only after its final meta arrives',async()=>{
+    salesOpen();state.signedIn=false;
+    const ip={'X-Forwarded-For':'198.51.100.10'};
+    const meta=JSON.stringify({answer:'一般的な安全上の目安です。',source_type:'safety',sources:[]});
+    const stream=()=>new Response(`event: text`+String.fromCharCode(10)+`data: {}`+String.fromCharCode(10,10)+`event: meta`+String.fromCharCode(10)+`data: ${meta}`+String.fromCharCode(10,10),{headers:{'Content-Type':'text/event-stream'}});
+    const noAnswer=()=>new Response(`event: error`+String.fromCharCode(10)+`data: {}`+String.fromCharCode(10,10),{headers:{'Content-Type':'text/event-stream'}});
+    for(let i=0;i<2;i++){const r=await withUsage(web(ip),'law_chat',async()=>noAnswer());await r.text();}
+    for(let i=0;i<3;i++){const r=await withUsage(web(ip),'law_chat',async()=>stream());expect(r.status).toBe(200);await r.text();}
+    expect((await withUsage(web(ip),'law_chat',async()=>stream())).status).toBe(429);
+  });
   it('tells a free member at the limit that Pro is available, and never a Pro member',async()=>{
     salesOpen();
     for(let i=0;i<3;i++)state.operations.push({id:crypto.randomUUID(),userId:'mock_member',feature:'law_chat',day:jstKeys().day,status:'completed',createdAt:new Date(Date.now()-120000),requestHash:'prior'});
@@ -149,12 +173,13 @@ describe('anonymous website visitors with the shared ledger on',()=>{
     expect(provider).toHaveBeenCalledTimes(1);
   });
   it('commits a monthly sales pause before rejecting an over-budget provider call',async()=>{
-    pause.mockClear();
+    pause.mockClear();expireStopped.mockClear();
     vi.stubEnv('MOBILE_AI_PRICED_MODEL','gemini-3.8-flash');vi.stubEnv('MOBILE_AI_INPUT_JPY_PER_MILLION','160');vi.stubEnv('MOBILE_AI_OUTPUT_JPY_PER_MILLION','960');vi.stubEnv('MOBILE_AI_COST_MARGIN','1.5');
     state.budget={committedYen:50000,reservedYen:0};const provider=vi.fn(async()=>'ok');
     await expect(withProviderBudget(provider,{model:'gemini-3.8-flash',inputBytes:20000,maxOutputTokens:2048})).rejects.toThrow('AI_BUDGET_STOPPED');
     expect(provider).not.toHaveBeenCalled();expect(state.reservations).toHaveLength(0);
     expect(pause).toHaveBeenCalledWith({where:{month:jstKeys().month,salesPausedAt:null},data:{salesPausedAt:expect.any(Date)}});
     expect(state.budget).toEqual({committedYen:50000,reservedYen:0});
+    expect(expireStopped).toHaveBeenCalledTimes(1);
   });
 });

@@ -39,7 +39,7 @@ const PREVIEW_ROBOTS: NonNullable<Metadata["robots"]> = {
 
 const metadataDefinition: Metadata = {
   other: adsenseAccountMetadata(),
-  // Safari の Smart App Banner。NEXT_PUBLIC_APP_STORE_LIVE=true のときだけ出す（lib/app-store.ts）。
+  // Safari の Smart App Banner。iOS アプリ同梱ビルドでは出さない。
   itunes: appStoreItunesMetadata(),
   manifest: "/manifest.json",
   icons: {

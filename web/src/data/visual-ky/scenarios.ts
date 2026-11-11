@@ -90,7 +90,7 @@ function qualification(
 const publication = {
   synthetic: true,
   syntheticDisclosure:
-    "この場面は安全教育用に作成した架空の学習例で、特定の公表事故や実在現場を再現したものではありません。",
+    "安全教育用の架空の学習例です。",
   reviewedBy: "安全AIポータル編集部（一次資料照合）",
   reviewedDate: "2026-07-30",
   reviewStatus: "reviewed",

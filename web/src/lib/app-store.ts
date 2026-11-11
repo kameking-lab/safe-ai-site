@@ -1,9 +1,7 @@
 /**
  * App Store（iOS アプリ）への小さな案内の単一情報源。
  *
- * 既定は OFF。Apple の審査を通過してアプリが公開されたら、Vercel の環境変数
- * `NEXT_PUBLIC_APP_STORE_LIVE=true` を設定して再デプロイすると、
- * ホームの案内カード・フッターの 1 行・Safari の Smart App Banner が一斉に出る。
+ * 公開確認後のWebだけ、フッターの公式バッジと Safari の Smart App Banner を表示する。
  *
  * iOS アプリでは出さない:
  * - iOS アプリは Web の画面を `NEXT_PUBLIC_ANZEN_NATIVE=true` で静的書き出しして同梱する。
@@ -22,7 +20,7 @@ export function isAnzenNativeBuild(): boolean {
   return process.env.NEXT_PUBLIC_ANZEN_NATIVE === "true";
 }
 
-/** 案内を出すビルドか。フラグ ON かつ iOS アプリ同梱ビルドでないときだけ true。 */
+/** Appleで公開確認後にフラグをtrueにしたWebのみ案内する。未設定は非表示。 */
 export function appStoreLive(): boolean {
   return process.env.NEXT_PUBLIC_APP_STORE_LIVE === "true" && !isAnzenNativeBuild();
 }

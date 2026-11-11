@@ -1,11 +1,11 @@
 {
   "schema": 1,
   "packedFrom": "repository public data only",
-  "seedSha256": "da69c40d3f769a396ae01eb690a456ca2de25260130ed68de5b8987640f4b58b",
+  "seedSha256": "62038c3f26c985c80812dd1151bbef736f65c04cc18593400f120fafa20c09ba",
   "sources": [
     {
       "path": "web/src/data/law-revisions/egov-revisions.json",
-      "sha256": "10d1b17c4088591edded511b032c9584e10c56cececcc572473a2d1da531dbe1"
+      "sha256": "884b7c30f39b99b204ec40297c5d0ac63691ac20d17ae06da1f5c26cc17305d8"
     },
     {
       "path": "web/src/data/accidents/monthly-sokuhou.json",
@@ -22,7 +22,7 @@
   ],
   "rights": "出典を明記した政府公開データの加工。報道本文・画像・個人データは同梱しない。再配布と最新版確認は公開前に所有者が確認。",
   "sourceDates": {
-    "revisions": "2026-11-02T03:38:25.947Z",
+    "revisions": "2026-11-09T03:50:08.363Z",
     "statistics": "2026-04-18T16:55:37.648827+00:00",
     "monthly": "2026-10-15T03:56:03.273Z"
   }

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAtJst": "2026-11-08T18:32:56+09:00",
+  "generatedAtJst": "2026-11-09T12:50:08+09:00",
   "algorithm": "sha256(sorted lines: <canonical-file-sha256><two spaces><repo-relative-path><LF>); CRLF in .ts/.json/.jsonl is normalized to LF; all other files are raw",
   "excludes": [
     "test files",
@@ -27,7 +27,7 @@
       ],
       "fileCount": 73,
       "bytes": 7980989,
-      "manifestSha256": "c9e396f477d61a2856ef010f16be3c70d58a802e5626a2b18648f091f672048c"
+      "manifestSha256": "9d31316f514371a935b89a9dac8ee08c810295b4496a481126b93b9a934ab6d6"
     },
     {
       "id": "verified-notices-and-circulars",

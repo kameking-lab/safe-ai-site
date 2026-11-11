@@ -78,7 +78,7 @@ export const FEATURE_CATEGORIES: FeatureCategory[] = [
     title: "建設計算",
     summary: "検証済みの公開計算機だけを案内",
     description:
-      "公開allowlistで検証済みの単位換算・数量計算だけを案内します。安全可否や法令適合を判定する旧計算機は再検証中で、自由記述AI案内も公開していません。",
+      "単位換算・数量計算に使えます。作業の安全可否や法令適合の判定には対応していません。",
     accent: "amber",
   },
   {

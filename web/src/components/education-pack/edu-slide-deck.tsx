@@ -240,7 +240,7 @@ function CasesSlide({ slide, stats }: { slide: EduSlide; stats: HazardTypeSummar
         <h3 className="text-base font-bold text-slate-900 sm:text-xl">{slide.title}</h3>
       </div>
       {!s || s.featuredCases.length === 0 ? (
-        <p className="mt-4 flex-1 rounded-xl border border-slate-200 p-4 text-sm text-slate-600">収載事例がまだありません（実在レコードのみ・捏造0原則）。</p>
+        <p className="mt-4 flex-1 rounded-xl border border-slate-200 p-4 text-sm text-slate-600">収載事例がまだありません。</p>
       ) : (
         <div className="mt-3 flex flex-1 flex-col gap-3 sm:flex-row">
           {s.featuredCases.map((c) => <CaseCard key={c.id} c={c} />)}

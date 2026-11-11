@@ -8,7 +8,6 @@ import type { AutomationConsultAvailability } from "@/lib/automation-consult/ava
 import type { HomeLatestAccidentNews } from "@/lib/home/home-accident-server";
 import { homeLpClasses as styles } from "./home-lp-classes";
 import { homeLpCriticalCss } from "./home-lp-critical-css";
-import { AppStorePromo } from "@/components/app-store/app-store-promo";
 import { HomeLatestAccidentArticle } from "./home-latest-accident-article";
 
 const uses = [
@@ -63,7 +62,6 @@ export function HomeLP({ availability, latestNews }: { availability: AutomationC
           </div>
         </div>
       </section>
-      <AppStorePromo variant="card" className="my-6 w-[calc(100%-2.5rem)]" />
       <section id="tools" aria-labelledby="home-tools-heading" className={styles.section}>
         <div className={styles.sectionHeader}><div><p className={styles.sectionLabel}>TOOLS FOR YOUR DAY</p><h2 id="home-tools-heading">今日の仕事に、すぐ使える。</h2><p>調べる。情報を確かめる。条件を整理する。現場の仕事に合わせて、3つの入口から。</p></div><Link href="/features" className={quietLink}>すべての機能を見る <ArrowUpRight size={16} aria-hidden="true" /></Link></div>
         <div className={styles.purposeGrid}>{uses.map((use, index) => <div key={use.id} data-lp-use={use.id} className={styles.purpose}>

@@ -32,6 +32,7 @@ describe("the approved homepage LP", () => {
     expect(container.querySelector("[data-pet-static]")?.getAttribute("src")).toBe("/mascot/anzen-wanko-v1/static.webp");
     expect(container.querySelector("[data-pet-strip]")).toBeNull();
     expect(container.querySelector("form")).toBeNull();
+    expect(container.querySelector('[href*="apps.apple.com"]')).toBeNull();
     expect(container.querySelectorAll('[data-lp-news="law"]')).toHaveLength(1);
     expect(container.querySelectorAll('[data-lp-news="accident"]')).toHaveLength(1);
     expect(container.textContent).toContain("事故がなかったことを示すものではありません");
