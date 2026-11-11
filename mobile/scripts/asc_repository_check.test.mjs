@@ -53,6 +53,14 @@ test('accepts cross-platform source line endings', () => fixture(async ({ root }
   await writeFile(path.join(root, 'native.html'), 'source fixture\r\n');
   await checkRepository(root);
 }));
+test('rejects a public asset changed since capture', () => fixture(async ({ root, manifest, save }) => {
+  await writeFile(path.join(root, 'asset.png'), Buffer.from([0, 128, 255]));
+  manifest.public_asset_sha256 = { 'asset.png': createHash('sha256').update(Buffer.from([0, 128, 255])).digest('hex') };
+  await save();
+  await checkRepository(root);
+  await writeFile(path.join(root, 'asset.png'), Buffer.from([0, 129, 255]));
+  await assert.rejects(checkRepository(root), /Captured asset changed/);
+}));
 test('rejects corrupted JPEG even when its hash is updated', () => fixture(async ({ root, image, manifest, save }) => {
   const bytes = (await readFile(image)).subarray(0, 350);
   await writeFile(image, bytes); manifest.images[0].sha256 = createHash('sha256').update(bytes).digest('hex'); await save();

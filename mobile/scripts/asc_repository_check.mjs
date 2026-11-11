@@ -23,6 +23,9 @@ export async function checkRepository(root = fileURLToPath(new URL('../', import
   for (const [file, digest] of Object.entries(manifest.local_source_sha256)) {
     if (hash((await readFile(path.join(root, file), 'utf8')).replace(/\r\n/g, '\n')) !== digest) throw new Error(`Captured source changed: ${file}`);
   }
+  for (const [file, digest] of Object.entries(manifest.public_asset_sha256 ?? {})) {
+    if (hash(await readFile(path.join(root, file))) !== digest) throw new Error(`Captured asset changed: ${file}`);
+  }
   for (const entry of expected) {
     const evidence = manifest.images.find(e => e.file === entry.file);
     const bytes = await readFile(path.join(directory, entry.file));

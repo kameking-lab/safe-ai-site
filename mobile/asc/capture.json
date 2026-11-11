@@ -25,10 +25,10 @@
     }
   ],
   "screens": [
-    "01-news",
-    "02-revisions",
-    "03-statistics",
-    "04-ky",
-    "05-laws"
+    "01-home",
+    "02-visual-kyt",
+    "03-law-search",
+    "04-safety-sign",
+    "05-training"
   ]
 }
