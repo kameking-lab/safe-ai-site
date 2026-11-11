@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { consentToChatbot } from "./support/chatbot-consent";
 
 test("安衛法AIはブラウザー同一originから根拠回答を正常送信する", async ({
   page,
@@ -7,6 +8,7 @@ test("安衛法AIはブラウザー同一originから根拠回答を正常送信
     "x-forwarded-for": "198.51.100.61",
   });
   await page.goto("/chatbot");
+  await consentToChatbot(page);
   await page
     .getByLabel("質問入力")
     .fill("酸素欠乏症等防止規則第11条と第12条の違いを確認したい");

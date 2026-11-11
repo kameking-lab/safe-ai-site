@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { expect, test, type Page, type TestInfo } from "@playwright/test";
+import { consentToChatbot } from "./support/chatbot-consent";
 import AxeBuilder from "@axe-core/playwright";
 
 type Snapshot = { lawId: string; revisionId: string; fetchedAt: string; sha256: string };
@@ -131,6 +132,7 @@ test("chat source details display the existing full e-Gov revision unchanged", a
   });
   await page.goto("/chatbot");
   await page.getByRole("textbox", { name: "質問入力" }).fill("電気事業法第42条の収録原典を確認したい");
+  await consentToChatbot(page);
   await page.locator('[data-chatbot-composer] button[type="submit"]').click();
   await expect.poll(() => intercepted).toBe(1);
   await page.locator("[data-chatbot-source-details] > summary").click();

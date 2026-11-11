@@ -1003,10 +1003,6 @@ export function ChatbotPanel({
           void handleSend(composerRef.current?.value);
         }}
       >
-        <label className="mb-2 flex items-start gap-2 text-xs leading-5 text-slate-600 dark:text-slate-300">
-          <input type="checkbox" checked={aiConsent} onChange={(event) => setAiConsent(event.target.checked)} data-ai-consent-version="2026-11-10" className="mt-1 shrink-0" />
-          <span>法令相談への回答生成のため、質問とこの相談の直近最大6件の会話をGoogle（Gemini API）へ送信することに同意します。個人情報・機密情報は入力しないでください。<a href="/privacy#external-services" className="underline">データの取扱い</a></span>
-        </label>
         <div className="flex items-end gap-2 rounded-2xl border border-slate-300 bg-white p-2 shadow-sm focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 dark:border-slate-700 dark:bg-slate-900 dark:focus-within:ring-blue-950">
           <textarea
             ref={composerRef}
@@ -1061,6 +1057,10 @@ export function ChatbotPanel({
             </button>
           )}
         </div>
+        <label className="mt-2 flex items-start gap-2 text-xs leading-5 text-slate-600 dark:text-slate-300">
+          <input type="checkbox" checked={aiConsent} onChange={(event) => setAiConsent(event.target.checked)} data-ai-consent-version="2026-11-10" className="mt-1 shrink-0" />
+          <span>法令相談への回答生成のため、質問とこの相談の直近最大6件の会話をGoogle（Gemini API）へ送信することに同意します。個人情報・機密情報は入力しないでください。<a href="/privacy#external-services" className="underline">データの取扱い</a></span>
+        </label>
         <PrivacyNote id="chatbot-input-hint" variant="ai" detailsLink={false} className="mt-1 px-2" />
         <span id="chatbot-input-keys" className="sr-only">
           Enterで送信、Shift+Enterで改行します。

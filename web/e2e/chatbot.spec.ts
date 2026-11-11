@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { consentToChatbot } from "./support/chatbot-consent";
 
 test.describe("チャットボット", () => {
   test("ページが表示される @smoke", async ({ page }) => {
@@ -93,6 +94,7 @@ test.describe("チャットボット", () => {
       exampleQuestion,
     );
     expect(requestCount).toBe(0);
+    await consentToChatbot(page);
     await page.locator('[data-chatbot-composer] button[type="submit"]').click();
     for (let turn = 1; turn <= 4; turn += 1) {
       await expect.poll(() => requestCount).toBe(turn);
@@ -195,6 +197,7 @@ test.describe("チャットボット", () => {
       .toBe(true);
     await input.fill("足場の条件を確認したい");
     await expect(input).toBeFocused();
+    await consentToChatbot(page);
     await composer.locator('button[type="submit"]').click();
     await expect.poll(() => requests).toBe(1);
     await expect(page.getByText("足場の条件を確認します。［1］")).toBeVisible();
