@@ -9,6 +9,7 @@ import { validateChatbotRequestBoundary } from '../server/chatbot-request-bounda
 import { consumeSharedRateLimit,getRateLimitSubject,peekSharedRateLimit } from '../security/shared-state';
 import { webProSalesReady,appStoreSalesReady } from '../pro-sales';
 import { pauseProSales,proSalesStatus } from './pro-sales-gate';
+import { processPausedStripeCheckouts } from './pro-sales-checkouts';
 const context=new AsyncLocalStorage<{plan:Plan;operationId?:string}>();
 /** The free daily limit carries the member's plan so the client can offer Pro (never to a Pro member). */
 class DailyLimitError extends Error{constructor(readonly plan:Plan){super('DAILY_LIMIT_REACHED');}}
@@ -70,18 +71,21 @@ export async function withProviderBudget<T>(run:()=>Promise<T>,bound:ProviderBou
   const plan=context.getStore()?.plan??'free';
   const operationId=context.getStore()?.operationId;
   if(operationId){const marked=await db.mobileUsageOperation.updateMany({where:{id:operationId,status:'reserved',expiresAt:{gt:new Date()}},data:{providerStartedAt:new Date()}});if(marked.count!==1)throw new Error('OPERATION_RELEASED');}
+  let salesPaused=false;
   const reservation=await db.$transaction(async tx=>{
     await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`anzen-budget:${month}`},0))`;
     const budget=await tx.mobileBudgetMonth.upsert({where:{month},create:{month},update:{}});
     // Commit the sales stop before throwing; throwing here would roll it back.
     if(budget.committedYen+budget.reservedYen+amount>product.monthlyBudgetYen){
-      await pauseProSales(tx,month);return null;
+      await pauseProSales(tx,month);salesPaused=true;return null;
     }
     checkBudget(budget.committedYen,budget.reservedYen,amount,plan);
     await tx.mobileBudgetMonth.update({where:{month},data:{reservedYen:{increment:amount}}});
-    if(budget.committedYen+budget.reservedYen+amount>=product.monthlyBudgetYen)await pauseProSales(tx,month);
+    if(budget.committedYen+budget.reservedYen+amount>=product.monthlyBudgetYen){await pauseProSales(tx,month);salesPaused=true;}
     return tx.mobileProviderReservation.create({data:{month,amountYen:amount}});
   });
+  // Expire only after committing/releasing the budget lock. Maintenance retries interruptions.
+  if(salesPaused)await processPausedStripeCheckouts().catch(()=>{});
   if(!reservation)throw new Error('AI_BUDGET_STOPPED');
   try{return await run();}finally{
     // Unknown/failed provider usage is conservatively charged at the reserved maximum.

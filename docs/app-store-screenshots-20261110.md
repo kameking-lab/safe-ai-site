@@ -4,7 +4,7 @@
 
 ## 成果物
 
-保存先: `C:/Users/kanet/20260522/appstore-shots-20261110/anz/`
+保存先: 実行フォルダと同じ親フォルダの `appstore-shots-20261110/anz/`
 
 - iPhone 6.9インチ用 `1320×2868` PNG 6枚（01〜06）
 - `00-overview.png`: 全6枚の一覧
@@ -21,7 +21,7 @@ iOS統合ブランチ `53025727` の既存 `mobile/out` を読み取り専用で
 
 Windows上の新規Playwright Chromiumで撮影（CSS 440×956、3倍）。既存Chromeや9222/9223には接続していない。iOS実機・Simulatorによる撮影ではない。
 
-補助スクリプト: `C:/Users/kanet/20260522/codex-run-20261110/tools/c-rel-anz-shots/`
+補助スクリプト: 実行フォルダ内の `tools/c-rel-anz-shots/`
 
 1. `node serve.mjs`（127.0.0.1:3267、同梱静的画面のみ）
 2. `node capture.mjs`
@@ -56,4 +56,4 @@ AI・認証・課金を含む外部通信はPlaywrightの送信前に遮断す�
 
 変更ファイルは本書のみ。アプリの実装・料金・AI設定は変更していない。
 
-詳細な検証結果、未確認項目、各画像のねらいは `C:/Users/kanet/20260522/codex-run-20261110/reports/c-rel-anz-shots.md` を参照。
+詳細な検証結果、未確認項目、各画像のねらいは実行フォルダ内の `reports/c-rel-anz-shots.md` を参照。

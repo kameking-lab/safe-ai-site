@@ -16,7 +16,7 @@ import { reservePurchase, billingDb, lockMember } from "@/lib/mobile/billing-ser
 import { resumeStripeIntent } from "@/lib/mobile/stripe-purchase";
 import { Prisma } from "@prisma/client";
 import { safeReturnPath } from "@/lib/pro-start";
-import { assertProSalesOpen,PRO_SALES_PAUSED_MESSAGE } from "@/lib/mobile/pro-sales-gate";
+import { assertProSalesOpen,lockProSalesOpen,PRO_SALES_PAUSED_MESSAGE } from "@/lib/mobile/pro-sales-gate";
 
 function getStripe(): Stripe | null {
   const key = process.env.STRIPE_SECRET_KEY;
@@ -139,7 +139,7 @@ export async function POST(req: Request) {
       }
     });
     const result = await billingDb().$transaction(async (tx) => {
-      await assertProSalesOpen();
+      await lockProSalesOpen(tx);
       await lockMember(tx, userId);
       const intent = await tx.mobilePurchaseIntent.findUnique({ where: { userId } });
       if (!intent || intent.id !== purchaseIntentId || intent.status !== "pending" || intent.source !== "stripe") throw new Error("PURCHASE_PENDING");

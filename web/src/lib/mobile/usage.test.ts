@@ -1,6 +1,8 @@
 // @vitest-environment node
 import { beforeEach,afterEach,describe,expect,it,vi } from 'vitest';
 const pause=vi.hoisted(()=>vi.fn(async()=>({count:1})));
+const expireStopped=vi.hoisted(()=>vi.fn(async()=>({closed:0})));
+vi.mock('./pro-sales-checkouts',()=>({processPausedStripeCheckouts:expireStopped}));
 const state=vi.hoisted(()=>({operations:[] as Array<{id:string;userId:string;feature:string;day:string;status:string;createdAt:Date;requestHash:string;response?:unknown}>,tail:Promise.resolve() as Promise<unknown>,paid:false,signedIn:true,budget:{committedYen:0,reservedYen:0},reservations:[] as Array<{id:string;amountYen:number;status:string}>}));
 vi.mock('@/auth',()=>({auth:async()=>state.signedIn?{user:{id:'mock_member'}}:null}));
 vi.mock('@/lib/prisma',()=>{
@@ -171,12 +173,13 @@ describe('anonymous website visitors with the shared ledger on',()=>{
     expect(provider).toHaveBeenCalledTimes(1);
   });
   it('commits a monthly sales pause before rejecting an over-budget provider call',async()=>{
-    pause.mockClear();
+    pause.mockClear();expireStopped.mockClear();
     vi.stubEnv('MOBILE_AI_PRICED_MODEL','gemini-3.8-flash');vi.stubEnv('MOBILE_AI_INPUT_JPY_PER_MILLION','160');vi.stubEnv('MOBILE_AI_OUTPUT_JPY_PER_MILLION','960');vi.stubEnv('MOBILE_AI_COST_MARGIN','1.5');
     state.budget={committedYen:50000,reservedYen:0};const provider=vi.fn(async()=>'ok');
     await expect(withProviderBudget(provider,{model:'gemini-3.8-flash',inputBytes:20000,maxOutputTokens:2048})).rejects.toThrow('AI_BUDGET_STOPPED');
     expect(provider).not.toHaveBeenCalled();expect(state.reservations).toHaveLength(0);
     expect(pause).toHaveBeenCalledWith({where:{month:jstKeys().month,salesPausedAt:null},data:{salesPausedAt:expect.any(Date)}});
     expect(state.budget).toEqual({committedYen:50000,reservedYen:0});
+    expect(expireStopped).toHaveBeenCalledTimes(1);
   });
 });
