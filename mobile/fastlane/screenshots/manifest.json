@@ -10,13 +10,14 @@
   "capture_plan": "m-anz-iossync: rebuilt final Web synchronization candidate",
   "limitations": "Windows WebKit capture of the rebuilt Capacitor static export. iOS fonts, safe areas and native controls differ. No AI, login, purchase, notifications or fabricated responses. Native target remains iPhone only; iPad-sized images retain the existing validation set.",
   "export_provenance": {
-    "source_directory": "C:\\Users\\kanet\\20260522\\wt-cx-rel-anz-ios\\mobile",
+    "source_directory": "mobile",
     "compared_input_count": 5954,
     "index_sha256": "2f1805c005bb82f0a5e19001cb78c9f03784f789474b517ca1f3334ed7a2879b",
     "index_modified_at": "2026-11-11T07:52:27.146Z",
     "new_build_performed": true,
     "build_command": "node scripts/build.mjs",
-    "build_log": "tools/m-anz-iossync/mobile-build-final.log"
+    "build_log": "tools/m-anz-iossync/mobile-build-final.log",
+    "source_directory_basis": "repository root"
   },
   "local_source_sha256": {
     "capacitor.config.ts": "8328b1cd9d3ec245e530457cfb7ab2b21a2f2d78d6230d052c0c7ba2d53caa6f",
