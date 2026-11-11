@@ -93,13 +93,13 @@ describe("POST /api/push/subscribe", () => {
     expect((await res.json()).reason).toBe("not_configured");
   });
 
-  it("keeps working for the website when the shared mobile ledger is on", async () => {
+  it("requires the member notification path when the shared mobile ledger is on", async () => {
     vi.stubEnv("MOBILE_LEDGER_ENABLED", "true");
     setVapid(false);
     const res = await POST(req(goodBody));
     vi.unstubAllEnvs();
-    expect(res.status).toBe(501);
-    expect((await res.json()).reason).toBe("not_configured");
+    expect(res.status).toBe(503);
+    expect((await res.json()).reason).toBe("legacy_subscription_migration_required");
   });
 
   it("returns 503 when Supabase is not configured", async () => {

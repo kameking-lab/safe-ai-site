@@ -79,12 +79,13 @@ describe("POST /api/notify/push-weather-alert auth", () => {
     expect(res.status).toBe(401);
   });
 
-  it("keeps the website alert path when the shared mobile ledger is on", async () => {
+  it("requires the member alert path when the shared mobile ledger is on", async () => {
     vi.stubEnv("MOBILE_LEDGER_ENABLED", "true");
     setVapid(false);
     const res = await POST(req("Bearer secret"));
     vi.unstubAllEnvs();
-    expect(res.status).toBe(501);
+    expect(res.status).toBe(503);
+    expect((await res.json()).reason).toBe("legacy_subscription_migration_required");
   });
 
   it("501 when VAPID not configured", async () => {

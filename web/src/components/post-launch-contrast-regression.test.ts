@@ -46,7 +46,7 @@ const heatSafetySpecialSource = readFileSync(
   "utf8",
 );
 const visualKySource = readFileSync(
-  resolve(process.cwd(), "src/app/(main)/training/visual-ky/page.tsx"),
+  resolve(process.cwd(), "src/components/visual-ky/daily-hero.tsx"),
   "utf8",
 );
 

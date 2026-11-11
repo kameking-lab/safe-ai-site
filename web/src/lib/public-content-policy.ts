@@ -10,7 +10,6 @@
  */
 import { isArticleQuarantined } from "@/lib/article-quarantine";
 import { isUnfinishedPublicReadingPath } from "@/lib/public-reading-status";
-import { EXAM_ID_PATTERN, EXAM_LIBRARY_PATH } from "@/lib/exam-library-model";
 import {
   hasApprovedPublicContentRevalidation,
   requiresPublicContentRevalidation,
@@ -54,17 +53,8 @@ function isPublishedSafetyLearningPath(path: string): boolean {
   return publicSafetyLearningPaths.has(normalized);
 }
 
-export const PUBLIC_EXAM_LIBRARY_PATH=EXAM_LIBRARY_PATH;
-export function isPublishedExamLibraryPath(path:string):boolean {
-  const normalized=path.length>1?path.replace(/\/+$/u,''):path;
-  if(normalized===PUBLIC_EXAM_LIBRARY_PATH)return true;
-  const match=/^\/e-learning\/exams\/([^/]+)$/u.exec(normalized);
-  return !!match && EXAM_ID_PATTERN.test(match[1]);
-}
-
 export function isQuarantinedPublicPath(href: string): boolean {
   const path = pathOnly(href);
-  if(requiresPublicContentRevalidation(path))return !hasApprovedPublicContentRevalidation(path);
 
   if (isUnfinishedPublicReadingPath(path)) return true;
 
@@ -79,7 +69,7 @@ export function isQuarantinedPublicPath(href: string): boolean {
     path === "/faq" ||
     path.startsWith("/faq/") ||
     ((path === "/e-learning" || path.startsWith("/e-learning/")) &&
-      !isPublishedSafetyLearningPath(path) && !isPublishedExamLibraryPath(path)) ||
+      !isPublishedSafetyLearningPath(path)) ||
     path === "/work-environment-measurement" ||
     path.startsWith("/work-environment-measurement/") ||
     path === "/health-checkup-scheduler" ||

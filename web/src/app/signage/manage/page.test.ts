@@ -3,7 +3,7 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 
 const source = readFileSync(
-  path.join(process.cwd(), "src/app/signage/manage/page.tsx"),
+  path.join(process.cwd(), "src/app/signage/manage/fleet-view.tsx"),
   "utf8",
 );
 
