@@ -7,10 +7,17 @@
 - CM2のtsx ESM/CJS問題は過去問AIのTypeScript catalog loader固有。安全AIの生成entryは`.mjs`であり、そのcreateRequire修正を無条件移植しない。Node 22の通常typecheck/test/buildで検証する。
 - SPMを維持。広告Podを使う過去問AIのCocoaPods設定は移植しない。SPMの `App.xcodeproj` を署名・build-ipa双方へ渡す。
 - `capacitor:sync:after` で素材コピー・Ruby設定・読取検証を実行する。prepareだけでなく直接CLIでadd/syncした後も登録IDを復元する。`ios:test` は小さな隔離SPMプロジェクトで実CLIのaddと2回のsyncも実行する。
-- `get-latest-testflight-build-number` はアップロード済みbuildの番号取得APIとして使用する。TestFlight配布の実行ではない。API失敗・非整数は停止、成功した空値は初回の0として+1。別workflowや手動uploadとの同時実行を避ける。
+- `get-latest-testflight-build-number` はアップロード済みbuildの番号取得APIとして使用する。TestFlight配布の実行ではない。API失敗・空値・非整数は停止。報告済みbuild 10を下限に、ASC取得値と10の大きい方へ1を加える。別workflowや手動uploadとの同時実行を避ける。
 - `ios_signing` は `distribution_type: app_store` / `bundle_identifier: jp.anzen-ai-portal.app` の自動選択方式。profile名・certificate名を同じ設定に併記しない。
-- `use-profiles` のexport optionsを検証してから、同じファイルをbuild-ipaに渡す。出力先はartifactと同じ `mobile/build/ios/ipa/*.ipa`。
+- `use-profiles` のexport optionsを検証してから、同じファイルをbuild-ipaに渡す。出力先は `mobile/build/ios/ipa/*.ipa`。artifactはworking_directoryに依存しない絶対パス `$CM_BUILD_DIR/mobile/build/ios/ipa/*.ipa` で取得する。
 - `publishing.app_store_connect.auth: integration`、`submit_to_testflight: false`、`submit_to_app_store: false`。アップロードのみ。テスター招待・beta group配布・審査・公開は行わない。
+
+## 出荷時に記録・照合するもの
+
+- 出荷時のHEADを `git rev-parse HEAD` で記録し、作業ツリーがcleanであることを確認する。ビルド・掲載タグ・検証記録が同じ出荷対象を参照していることを照合する。
+- 掲載文の正本は実行フォルダの `research/aso/final-anz.md`。アプリ名・サブタイトル・キーワード・プロモーション文・説明文の5欄を、`mobile/fastlane/metadata/ja/` の対応するtxtと照合する。見出し・字数表・編集者向け情報は入力しない。
+- 説明文の利用規約（サービス規約またはApple標準EULA）・プライバシーポリシーURL、キーワード100 UTF-8バイト以内、iPad対応を記載していないことを確認する。metadata更新前の古いコミットで掲載タグを作り直さない。
+- `python scripts/asc_validate.py --screenshots`、`node scripts/asc_repository_check.mjs` と関連ASCテストを出荷対象で実行する。署名・実機Sandbox・ASCの処理状態は別途確認して記録する。
 
 ## 外部で作成・確認する値
 

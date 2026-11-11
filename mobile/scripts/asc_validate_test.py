@@ -7,6 +7,7 @@ from pathlib import Path
 from asc_validate import ROOT, validate
 
 EULA = "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/"
+TERMS = "https://www.anzen-ai-portal.jp/terms"
 PRIVACY = "https://www.anzen-ai-portal.jp/privacy"
 
 
@@ -23,11 +24,21 @@ class DescriptionLinksTest(unittest.TestCase):
 
     def test_each_link_required_in_description(self):
         original = self.description.read_text(encoding="utf-8")
-        for url in (EULA, PRIVACY):
-            with self.subTest(url=url):
-                self.description.write_text(original.replace(url, ""), encoding="utf-8")
+        for urls in ((EULA, TERMS), (PRIVACY,)):
+            with self.subTest(urls=urls):
+                updated = original
+                for url in urls:
+                    updated = updated.replace(url, "")
+                self.description.write_text(updated, encoding="utf-8")
                 with self.assertRaisesRegex(ValueError, "Description must include"):
                     validate(root=self.root)
+
+    def test_either_terms_link_satisfies_requirement(self):
+        original = self.description.read_text(encoding="utf-8")
+        for removed in (EULA, TERMS):
+            with self.subTest(removed=removed):
+                self.description.write_text(original.replace(removed, ""), encoding="utf-8")
+                validate(root=self.root)
 
     def test_url_prefix_is_not_a_valid_link(self):
         original = self.description.read_text(encoding="utf-8")

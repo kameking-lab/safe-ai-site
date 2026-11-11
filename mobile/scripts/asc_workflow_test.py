@@ -12,7 +12,9 @@ RUBY = os.environ.get('ASC_TEST_RUBY') or shutil.which('ruby')
 
 class WorkflowTest(unittest.TestCase):
     def test_existing_ipa_workflow_is_unchanged(self):
-        original = subprocess.check_output(['git', 'show', '5f078c1701d359acbf12ae18db3ada52eec3358c:codemagic.yaml'], cwd=ROOT, text=True, encoding='utf-8')
+        # Baseline includes the absolute IPA artifact path and fail-closed
+        # build-number selection with submitted build 10 as the floor.
+        original = subprocess.check_output(['git', 'show', '0d3e3041c32fc10bc27137943408cb71273c434a:codemagic.yaml'], cwd=ROOT, text=True, encoding='utf-8')
         current = yaml.safe_load((ROOT.parent / 'codemagic.yaml').read_text(encoding='utf-8'))
         self.assertEqual(yaml.safe_load(original)['workflows']['anzen-ios-app-store'], current['workflows']['anzen-ios-app-store'])
 
