@@ -40,8 +40,8 @@ export function HomeLP({ availability, latestNews }: { availability: AutomationC
   const consultHref = availability.webFormEnabled === true ? "/services/automation#consult-form" : availability.contactMode === "mail_client" ? "/contact/automation-email" : "/services/automation";
   return (
     <div data-home-lp className={styles.root}>
-      {/* Discover the initial animation before hydration when motion is enabled. */}
-      <link rel="preload" as="image" href="/mascot/anzen-wanko-v1/idle.webp" media="(prefers-reduced-motion: no-preference)" fetchPriority="high" />
+      {/* Discover the animation before hydration without competing with the tools. */}
+      <link rel="preload" as="image" href="/mascot/anzen-wanko-v1/idle.webp" media="(prefers-reduced-motion: no-preference)" fetchPriority="low" />
       <style data-home-lp-critical>{homeLpCriticalCss}</style>
       <section aria-labelledby="home-lp-title" className={styles.hero}>
         <nav aria-label="主な機能" data-home-strengths className="relative mx-auto grid max-w-[1280px] gap-4 px-5 pt-6 md:grid-cols-2 sm:px-[clamp(20px,4vw,64px)] lg:pt-12">

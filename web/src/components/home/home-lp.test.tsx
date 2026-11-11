@@ -34,7 +34,7 @@ describe("the approved homepage LP", () => {
     const motionPreload = document.head.querySelector('link[rel="preload"][href="/mascot/anzen-wanko-v1/idle.webp"]');
     expect(motionPreload?.getAttribute("as")).toBe("image");
     expect(motionPreload?.getAttribute("media")).toBe("(prefers-reduced-motion: no-preference)");
-    expect(motionPreload?.getAttribute("fetchpriority")).toBe("high");
+    expect(motionPreload?.getAttribute("fetchpriority")).toBe("low");
     expect(container.querySelector("form")).toBeNull();
     expect(container.querySelector('[href*="apps.apple.com"]')).toBeNull();
     expect(container.querySelectorAll('[data-lp-news="law"]')).toHaveLength(1);
