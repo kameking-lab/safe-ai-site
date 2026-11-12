@@ -38,14 +38,21 @@ export function ChatbotViewportSection({
       }
     };
     measure();
+    // Changing height inside ResizeObserver can resize its own observed body.
+    // Apply those measurements in the next frame, outside the observer delivery.
+    let frame = 0;
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(() => { frame = 0; measure(); });
+    };
     // ボックスより上の帯（お知らせ・アプリの利用枠表示など）は後から高さが変わる。
     const observer =
-      typeof ResizeObserver === "function" ? new ResizeObserver(measure) : null;
+      typeof ResizeObserver === "function" ? new ResizeObserver(schedule) : null;
     observer?.observe(document.body);
     window.addEventListener("resize", measure);
     window.visualViewport?.addEventListener("resize", measure);
     return () => {
       observer?.disconnect();
+      cancelAnimationFrame(frame);
       window.removeEventListener("resize", measure);
       window.visualViewport?.removeEventListener("resize", measure);
     };

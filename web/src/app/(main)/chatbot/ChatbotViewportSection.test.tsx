@@ -8,6 +8,35 @@ import {
 describe("ChatbotViewportSection（相談ボックスを下のタブバーの上に収める）", () => {
   afterEach(() => {
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+  });
+
+  it("ResizeObserver内で高さを書き換えず、次の描画にまとめて解除時は取消す", () => {
+    let notify!: () => void;
+    let frame!: FrameRequestCallback;
+    const cancel = vi.fn();
+    const disconnect = vi.fn();
+    vi.stubGlobal("ResizeObserver", class {
+      constructor(callback: () => void) { notify = callback; }
+      observe() {}
+      disconnect = disconnect;
+    });
+    const schedule = vi.fn((callback: FrameRequestCallback) => { frame = callback; return 1; });
+    vi.stubGlobal("requestAnimationFrame", schedule);
+    vi.stubGlobal("cancelAnimationFrame", cancel);
+    const box = vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockReturnValue({top:120} as DOMRect);
+    const view = render(<ChatbotViewportSection aria-label="相談" />);
+    const section = screen.getByRole("region", { name: "相談" });
+    box.mockReturnValue({top:186} as DOMRect);
+    act(() => { notify(); notify(); });
+    expect(section.style.getPropertyValue("--chatbot-top")).toBe("120px");
+    expect(schedule).toHaveBeenCalledTimes(1);
+    act(() => frame(0));
+    expect(section.style.getPropertyValue("--chatbot-top")).toBe("186px");
+    act(() => notify());
+    view.unmount();
+    expect(disconnect).toHaveBeenCalledOnce();
+    expect(cancel).toHaveBeenCalledWith(1);
   });
 
   it("高さは実測した上端・タブバー・ホームインジケーターを画面の高さから引く", () => {

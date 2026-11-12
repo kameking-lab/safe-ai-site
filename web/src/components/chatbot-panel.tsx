@@ -210,9 +210,13 @@ export function ChatbotPanel({
     if (!list) return;
     const measure = () => setAnswerViewportHeight(list.clientHeight);
     measure();
-    const observer = typeof ResizeObserver === "function" ? new ResizeObserver(measure) : null;
+    let frame = 0;
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(() => { frame = 0; measure(); });
+    };
+    const observer = typeof ResizeObserver === "function" ? new ResizeObserver(schedule) : null;
     observer?.observe(list);
-    return () => observer?.disconnect();
+    return () => { observer?.disconnect(); cancelAnimationFrame(frame); };
   }, []);
 
   useEffect(() => {
