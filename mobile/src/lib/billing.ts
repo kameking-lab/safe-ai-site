@@ -30,6 +30,7 @@ export class BillingController {
   private purchaseUser:string|null=null;
   private identityWork:Promise<void>=Promise.resolve();
   private packages=new Map<string,{until:number;value:Promise<PurchasesPackage>}>();
+  private outcomeReports=new Map<string,Promise<MemberEntitlement>>();
   constructor(private send=siteApi,private sdk:Sdk=Purchases,private native=()=>Capacitor.getPlatform()==='ios'){}
   async config(){return billingConfigSchema.parse(await this.send('/api/mobile/v1/billing/config'));}
   async entitlement(recoverWhileBusy=false){
@@ -40,7 +41,7 @@ export class BillingController {
       if(value && (!this.busy || recoverWhileBusy)){
         const report=outcomeSchema.parse(JSON.parse(value));
         if(!report.id || member.purchaseIntentId===report.id){
-          const checked=snapshotSchema.parse(await this.send('/api/billing/store-outcome',report));
+          const checked=await this.sendOutcome(member.appUserId,report);
           await clearReportedOutcome(member.appUserId,report);return checked;
         }
         await clearReportedOutcome(member.appUserId,report);
@@ -48,10 +49,19 @@ export class BillingController {
     } catch { /* Leave the durable outcome for the next authenticated refresh. */ }
     return member;
   }
+  private sendOutcome(appUserId:string,report:StoreOutcome):Promise<MemberEntitlement>{
+    const key=JSON.stringify([appUserId,report]);
+    const pending=this.outcomeReports.get(key);if(pending)return pending;
+    const work=this.send('/api/billing/store-outcome',report).then(value=>snapshotSchema.parse(value));
+    this.outcomeReports.set(key,work);
+    const clear=()=>{if(this.outcomeReports.get(key)===work)this.outcomeReports.delete(key);};
+    void work.then(clear,clear);
+    return work;
+  }
   private async reportOutcome(appUserId:string,report:StoreOutcome){
     const key=outcomeKey(appUserId);
     await Preferences.set({key,value:JSON.stringify(report)}).catch(()=>{});
-    try { await this.send('/api/billing/store-outcome',report);await clearReportedOutcome(appUserId,report); }
+    try { await this.sendOutcome(appUserId,report);await clearReportedOutcome(appUserId,report); }
     catch { /* Retried automatically by entitlement() after app relaunch or reconnect. */ }
   }
   async sync(){return snapshotSchema.parse(await this.send('/api/billing/reconcile',{}));}

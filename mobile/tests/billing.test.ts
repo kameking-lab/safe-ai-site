@@ -37,6 +37,23 @@ function setup(options:{atomic?:boolean;paid?:boolean;syncPending?:boolean;cance
   return {send,sdk,controller:new BillingController(send,sdk,()=>true)};
 }
 describe('iOS IAP uses server rights before StoreKit',()=>{
+  it('coalesces the failed-start report with an immediate account refresh and permits retry',async()=>{
+    const s=setup({atomic:true,startOffline:true});
+    const original=s.send.getMockImplementation()!;
+    let release!:()=>void;
+    const pending=new Promise<void>(resolve=>{release=resolve;});
+    s.send.mockImplementation(async(path,body)=>{if(path==='/api/billing/store-outcome')await pending;return original(path,body);});
+    await expect(s.controller.purchase(config)).rejects.toThrow('STORE_NOT_OPENED');
+    const refresh=s.controller.entitlement();
+    await vi.waitFor(()=>expect(s.send.mock.calls.filter(c=>c[0]==='/api/me/entitlements')).toHaveLength(2));
+    release();await refresh;
+    expect(s.send.mock.calls.filter(c=>c[0]==='/api/billing/store-outcome')).toHaveLength(1);
+    expect([...preferences.keys()].filter(key=>key.startsWith('anzen.apple-outcome.'))).toHaveLength(0);
+    expect(s.sdk.purchasePackage).not.toHaveBeenCalled();
+    s.send.mockImplementation(async(path,body)=>path==='/api/billing/purchase-intents'?{id:intentId,appUserId,attemptId:(body as {attemptId:string}).attemptId}:original(path,body));
+    await s.controller.purchase(config);
+    expect(s.sdk.purchasePackage).toHaveBeenCalledTimes(1);
+  });
   it('permits another purchase after a cancelled StoreKit result using the same reservation',async()=>{
     const s=setup({cancelled:true});await expect(s.controller.purchase(config)).rejects.toThrow('STORE_CANCELLED');
     s.sdk.purchasePackage.mockResolvedValueOnce({} as never);await s.controller.purchase(config);
