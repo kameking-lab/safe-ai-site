@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { render as renderWithoutConsent, screen, waitFor, fireEvent } from "@testing-library/react";
+import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import { ChatbotPanel } from "./chatbot-panel";
 
 vi.mock("next/navigation", () => ({
@@ -16,43 +16,25 @@ afterEach(() => {
   window.localStorage.clear();
 });
 
-function render(...args: Parameters<typeof renderWithoutConsent>) {
-  window.localStorage.setItem("anzen.chatbot-ai-consent.2026-11-10", "accepted");
-  const result = renderWithoutConsent(...args);
-  return result;
-}
-
-it("同意する前は初期質問も外部送信しない", () => {
-  const send = vi.fn();
+it.each([null, "accepted", "revoked"])("保存済みの同意=%sでも送信操作だけで一度送り、再表示しても確認しない", async (stored) => {
+  if (stored) localStorage.setItem("anzen.chatbot-ai-consent.2026-11-10", stored);
+  const send = vi.fn().mockImplementation(() => new Promise(() => {}));
   vi.stubGlobal("fetch", send);
-  renderWithoutConsent(<ChatbotPanel initialQuestion="足場の手すりは？" />);
-  fireEvent.click(screen.getByRole("button", { name: "送信" }));
+  const first = render(<ChatbotPanel initialQuestion="足場の手すりは？" />);
   expect(send).not.toHaveBeenCalled();
-  expect((screen.getByLabelText("質問入力") as HTMLTextAreaElement).value).toBe("足場の手すりは？");
-  expect(screen.getByRole("dialog", {name:"AIへの送信確認"}).textContent).toContain("Google（Gemini API）");
-  expect(screen.queryByRole("checkbox")).toBeNull();
-});
-
-it("初回の明示同意で一度だけ送り、再表示後は同意確認を繰り返さない", async()=>{
-  const send=vi.fn().mockImplementation(()=>new Promise(()=>{}));vi.stubGlobal("fetch",send);
-  const first=renderWithoutConsent(<ChatbotPanel initialQuestion="足場の手すりは？"/>);
-  expect(screen.queryByText(/Google（Gemini API）/)).toBeNull();
-  fireEvent.click(screen.getByRole("button",{name:"送信"}));expect(send).not.toHaveBeenCalled();
-  fireEvent.click(screen.getByRole("button",{name:"同意して送信"}));
-  await waitFor(()=>expect(send).toHaveBeenCalledTimes(1));expect(screen.queryByRole("dialog")).toBeNull();
+  expect(screen.getByText(/文章はGoogle Geminiで処理します/)).toBeTruthy();
+  expect(screen.getByRole("link", { name: "プライバシー" }).getAttribute("href")).toBe("/privacy#external-services");
+  fireEvent.click(screen.getByRole("button", { name: "送信" }));
+  await waitFor(() => expect(send).toHaveBeenCalledTimes(1));
   expect(JSON.parse(send.mock.calls[0][1].body).privacyConfirmed).toBe(true);
+  expect(screen.queryByRole("dialog")).toBeNull();
+  expect(screen.queryByRole("checkbox")).toBeNull();
+  expect(localStorage.length).toBe(0);
   first.unmount();
-  renderWithoutConsent(<ChatbotPanel initialQuestion="換気は必要？"/>);
-  fireEvent.click(screen.getByRole("button",{name:"送信"}));await waitFor(()=>expect(send).toHaveBeenCalledTimes(2));
-  expect(screen.queryByRole("dialog")).toBeNull();expect(localStorage.length).toBe(1);
-});
-
-it("初回確認を閉じた場合は同意を保存せず送信もしない",()=>{
-  const send=vi.fn();vi.stubGlobal("fetch",send);
-  renderWithoutConsent(<ChatbotPanel initialQuestion="足場の手すりは？"/>);
-  fireEvent.click(screen.getByRole("button",{name:"送信"}));fireEvent.click(screen.getByRole("button",{name:"送信確認を閉じる"}));
-  expect(send).not.toHaveBeenCalled();expect(localStorage.length).toBe(0);
-  expect((screen.getByLabelText("質問入力") as HTMLTextAreaElement).value).toBe("足場の手すりは？");
+  render(<ChatbotPanel initialQuestion="換気は必要？" />);
+  fireEvent.click(screen.getByRole("button", { name: "送信" }));
+  await waitFor(() => expect(send).toHaveBeenCalledTimes(2));
+  expect(screen.queryByRole("dialog")).toBeNull();
 });
 
 function submitExample(name: string) {
@@ -283,7 +265,7 @@ describe("ChatbotPanel AI safety boundary", () => {
     expect(JSON.stringify(window.sessionStorage)).not.toContain(question);
   });
 
-  it("新しい相談で入力・安全通知・同意・進行中履歴をリセットする", async () => {
+  it("新しい相談で入力・安全通知・進行中履歴をリセットする", async () => {
     const fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);
     render(<ChatbotPanel />);
@@ -515,8 +497,8 @@ describe("ChatbotPanel AI safety boundary", () => {
     expect(body).not.toContain("旧質問の生テキスト");
     expect(body).toContain("足場の点検方法は？");
     expect(body).toContain('"privacyConfirmed":true');
-    expect(localStorage.length).toBe(1);
-    expect(localStorage.getItem("anzen.chatbot-ai-consent.2026-11-10")).toBe("accepted");
+    expect(localStorage.length).toBe(0);
+    expect(localStorage.getItem("anzen.chatbot-ai-consent.2026-11-10")).toBeNull();
   });
 });
 

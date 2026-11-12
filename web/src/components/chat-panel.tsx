@@ -1,11 +1,12 @@
 "use client";
 
+import { AiProcessingNote } from "@/components/ai-processing-note";
+
 import type { RefObject } from "react";
 import { ErrorNotice } from "@/components/error-notice";
 import { InputWithVoice } from "@/components/voice-input-field";
 import { EasyJapaneseText } from "@/components/easy-japanese-text";
 import { Mascot } from "@/components/mascot";
-import { PrivacyNote } from "@/components/privacy-note";
 import type { ServiceError, ServiceStatus } from "@/lib/types/api";
 import type {
   ChatbotQuickReply,
@@ -183,7 +184,7 @@ export function ChatPanel({
           {isSending ? "送信中..." : "送信"}
         </button>
       </div>
-      <PrivacyNote variant="ai" className="mt-2" />
+      <AiProcessingNote />
       {status === "success" && !error && (
         <p className="mt-2 text-xs leading-5 text-emerald-700">
           応答を受信しました。

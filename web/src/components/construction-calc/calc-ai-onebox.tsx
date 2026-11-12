@@ -1,5 +1,7 @@
 "use client";
 
+import { AiProcessingNote } from "@/components/ai-processing-note";
+
 import { useState, type MouseEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -43,7 +45,6 @@ export function CalcAiOnebox() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<RouteResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [aiProviderConsent, setAiProviderConsent] = useState(false);
 
   const submit = async (input: string) => {
     const trimmed = input.trim();
@@ -51,7 +52,7 @@ export function CalcAiOnebox() {
     const outboundSafety = inspectAiOutbound({
       purpose: "construction-calculator-routing-client",
       texts: [trimmed],
-      consent: aiProviderConsent,
+      consent: true,
       maxChars: 2_000,
       contextPolicy: "no-context",
     });
@@ -143,15 +144,7 @@ export function CalcAiOnebox() {
           計算機を探す
         </button>
       </form>
-      <label className="mt-2 flex min-h-[44px] items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-200">
-        <input
-          type="checkbox"
-          checked={aiProviderConsent}
-          onChange={(event) => setAiProviderConsent(event.target.checked)}
-          className="h-5 w-5"
-        />
-        個人・会社・現場を特定できる情報を除き、入力を外部AIへ送信することを確認しました
-      </label>
+      <AiProcessingNote />
       <div className="mt-2 flex flex-wrap gap-1.5">
         {EXAMPLE_PROMPTS.map((p) => (
           <button

@@ -1,10 +1,11 @@
 "use client";
 
+import { AiProcessingNote } from "@/components/ai-processing-note";
+
 import { SourceProvenanceView } from "@/components/law-navi/source-provenance-view";
 import { normalizeSourceProvenance } from "@/lib/source-provenance";
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
 import { Check, Copy, RotateCcw, Send, Square, X } from "lucide-react";
 import type {
   ChatbotQuickReply,
@@ -90,7 +91,6 @@ function createMessage(
   return { id: crypto.randomUUID(), role, content, ...extra };
 }
 
-const AI_CONSENT_KEY = "anzen.chatbot-ai-consent.2026-11-10";
 
 function scrollConversation(ref: React.RefObject<HTMLDivElement | null>) {
   if (typeof window === "undefined") return;
@@ -182,8 +182,6 @@ export function ChatbotPanel({
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // 無料枠の上限に当たったときの購入入口（エラー表示とは別。再試行ボタンは出さない）。
-  const [aiConsent, setAiConsent] = useState(false);
-  const [consentQuestion, setConsentQuestion] = useState<string | null>(null);
   const [answerViewportHeight, setAnswerViewportHeight] = useState(0);
   const [upsell, setUpsell] = useState<string | null>(null);
   const [retryableQuestion, setRetryableQuestion] = useState<string | null>(
@@ -228,7 +226,7 @@ export function ChatbotPanel({
 
   useEffect(() => {
     clearChatHistory();
-    try { setAiConsent(localStorage.getItem(AI_CONSENT_KEY) === "accepted"); } catch { /* Keep consent in memory when storage is unavailable. */ }
+    try { localStorage.removeItem("anzen.chatbot-ai-consent.2026-11-10"); } catch { /* Storage is optional. */ }
   }, []);
 
   useEffect(() => {
@@ -272,7 +270,7 @@ export function ChatbotPanel({
     onTransferBlockedChange,
   ]);
 
-  async function handleSend(question?: string, consentGranted = aiConsent) {
+  async function handleSend(question?: string) {
     const text = (question ?? input).trim();
     if (!text || requestPendingRef.current) return;
 
@@ -284,14 +282,10 @@ export function ChatbotPanel({
       setRetryableQuestion(null);
       return;
     }
-    if (!consentGranted) {
-      setConsentQuestion(text);
-      return;
-    }
     const outboundPreflight = inspectAiOutbound({
       purpose: "chatbot-client-preflight",
       texts: [text],
-      consent: consentGranted,
+      consent: true,
       maxChars: 4_000,
       contextPolicy: "approved-server-corpus",
     });
@@ -341,7 +335,7 @@ export function ChatbotPanel({
       ),
       lawCategory,
       // The client and server have both run the same PII/emergency gate.
-      privacyConfirmed: consentGranted,
+      privacyConfirmed: true,
     });
     let streamedContent = "";
     const requestStarted = performance.now();
@@ -575,7 +569,7 @@ export function ChatbotPanel({
     if (safety?.kind === "privacy" || safety?.kind === "emergency") {
       void handleSend(question).catch(() => onInitialQuestionRejected?.());
     } else {
-      // A transferred question stays in memory until the user consents and presses Send.
+      // A transferred question stays in memory until the user presses Send.
       setInput(question);
     }
     // The one-shot handoff is consumed before network access and passes the
@@ -1022,29 +1016,7 @@ export function ChatbotPanel({
           void handleSend(composerRef.current?.value);
         }}
       >
-        {consentQuestion !== null && createPortal(
-          <div role="dialog" aria-modal="true" aria-label="AIへの送信確認" className="fixed inset-0 z-[100] grid place-items-center bg-slate-950/40 p-4" onKeyDown={(event) => {
-            if (event.key === "Escape") setConsentQuestion(null);
-            if (event.key === "Tab") {
-              const controls = event.currentTarget.querySelectorAll<HTMLElement>("button, a");
-              const first = controls[0]; const last = controls[controls.length - 1];
-              if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
-              else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
-            }
-          }}>
-            <div className="relative w-full max-w-sm rounded-2xl bg-white p-4 text-sm text-slate-900 shadow-xl">
-              <button type="button" aria-label="送信確認を閉じる" onClick={() => setConsentQuestion(null)} className="absolute right-1 top-1 min-h-11 min-w-11">×</button>
-              <p className="pr-8">質問と会話をGoogle（Gemini API）へ送ります。個人情報は入力しないでください。<a href="/privacy#external-services" className="underline">詳細</a></p>
-              <button type="button" autoFocus className="mt-3 min-h-11 rounded-full bg-blue-700 px-4 font-bold text-white" onClick={() => {
-                const question = consentQuestion;
-                try { localStorage.setItem(AI_CONSENT_KEY, "accepted"); } catch { /* In-memory consent still permits this request. */ }
-                setAiConsent(true);
-                setConsentQuestion(null);
-                void handleSend(question, true);
-              }}>同意して送信</button>
-            </div>
-          </div>, document.body,
-        )}
+        <AiProcessingNote />
         <div className="flex items-end gap-2 rounded-2xl border border-slate-300 bg-white p-2 shadow-sm focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 dark:border-slate-700 dark:bg-slate-900 dark:focus-within:ring-blue-950">
           <textarea
             ref={composerRef}

@@ -1,4 +1,5 @@
 'use client';
+import { AiProcessingNote } from '@/components/ai-processing-note';
 import { useEffect, useRef, useState } from 'react';
 import { ApiError,executeAi, loadCapabilities } from '../lib/api';
 import { canExecute, errorMessage, formatDate, PLAN_LIMITS, quotaLow } from '../lib/policy';
@@ -10,7 +11,6 @@ import { inspectAiOutbound } from '@/lib/ai-outbound-safety';
 export function AiPanel({ online }: { online: boolean }) {
   const [feature, setFeature] = useState<Feature>('law_chat');
   const [input, setInput] = useState('');
-  const [consent, setConsent] = useState(false);
   const [capability, setCapability] = useState<Capability | null>(null);
   const [result, setResult] = useState<AiResult | null>(null);
   const [busy, setBusy] = useState(false);
@@ -36,13 +36,13 @@ export function AiPanel({ online }: { online: boolean }) {
   const quota = capability?.features[feature].quota;
   const limit = PLAN_LIMITS[capability?.plan??'free'][feature];
   const allowed = canExecute(capability, feature, clock);
-  const safety = input.trim() ? inspectAiOutbound({purpose:'mobile-home',texts:[input],consent,contextPolicy:'approved-server-corpus'}) : null;
+  const safety = input.trim() ? inspectAiOutbound({purpose:'mobile-home',texts:[input],consent:true,contextPolicy:'approved-server-corpus'}) : null;
   function changeFeature(next: Feature) {
     if (next === feature) return;
-    setFeature(next); setInput(''); setConsent(false); setResult(null); setMessage(''); pending.current = null;
+    setFeature(next); setInput(''); setResult(null); setMessage(''); pending.current = null;
   }
   async function submit(e: React.FormEvent) {
-    e.preventDefault(); if (inFlight.current || !consent || !input.trim() || !online || !allowed) return;
+    e.preventDefault(); if (inFlight.current || !input.trim() || !online || !allowed) return;
     inFlight.current = true; setBusy(true); setMessage(''); setResult(null);
     const text = input.trim();
     if (!pending.current || pending.current.feature !== feature || pending.current.input !== text) pending.current = { feature, input: text, requestId: crypto.randomUUID() };
@@ -65,11 +65,10 @@ export function AiPanel({ online }: { online: boolean }) {
       {!online ? <p className="notice">{errorMessage('OFFLINE')}</p> : signedOut ? <p className="notice">AIの利用には会員ログインが必要です。<a href="/account" className="font-bold underline">ログインする</a></p> : !allowed ? <p className="notice">{quota?.remaining === 0 ? errorMessage(quota.reserved>0?'OPERATION_PENDING':'DAILY_LIMIT_REACHED', undefined, quota.resetAt) : capability && !capability.features[feature].available ? errorMessage('FEATURE_UNAVAILABLE') : errorMessage('SAFETY_UNVERIFIED')}</p> : null}
       <p className="muted">残数0・通信停止時も、AIを使わない<a href="/law-search/">法令の検索</a>・<a href="/laws/">同梱資料</a>を無料で閲覧できます。</p>
       <form onSubmit={submit}>
-        <label>{feature === 'law_chat' ? '法令についての質問' : '評価対象と作業条件'}<TextareaWithVoice maxLength={2000} rows={6} disabled={busy} value={input} onChange={e => { setInput(e.target.value); setConsent(false); }} placeholder={feature === 'law_chat' ? '作業の種類と、確認したい条件を入力' : '物質名・CAS番号・SDS発行元と版・濃度・取扱量・作業時間・換気・保護具を入力'} /></label>
-        <p className="muted">氏名、会社名、住所、連絡先、機密情報を入力しないでください。質問は端末には保存しません。</p>
+        <label>{feature === 'law_chat' ? '法令についての質問' : '評価対象と作業条件'}<TextareaWithVoice maxLength={2000} rows={6} disabled={busy} value={input} onChange={e => { setInput(e.target.value); }} placeholder={feature === 'law_chat' ? '作業の種類と、確認したい条件を入力' : '物質名・CAS番号・SDS発行元と版・濃度・取扱量・作業時間・換気・保護具を入力'} /></label>
         {safety && !safety.allowed && safety.reason!=='consent_required'?<p role="alert" className="notice">{safety.message}</p>:null}
-        <label className="check"><input type="checkbox" checked={consent} disabled={busy} onChange={e => setConsent(e.target.checked)} />入力内容を確認し、サイトの安全確認APIおよびGoogle（Gemini API）への送信に同意します。</label>
-        <button className="primary" disabled={busy || !online || !allowed || !consent || !input.trim() || safety?.allowed===false}>{busy ? 'サイトで確認中…' : '確認して送信する'}</button>
+        <AiProcessingNote />
+        <button className="primary" disabled={busy || !online || !allowed || !input.trim() || safety?.allowed===false}>{busy ? 'サイトで確認中…' : '送信する'}</button>
       </form>
       <p role="status">{message}</p>
     </section>

@@ -26,7 +26,7 @@ describe("PF-001 emergency interception order across AI and record paths", () =>
     expectBefore(text, "const emergency =", "input.consent !== true");
   });
 
-  it("PF-001-KY-CLIENT-PRECEDENCE blocks emergency before missing fields, consent, autosave, and network", () => {
+  it("PF-001-KY-CLIENT-PRECEDENCE blocks emergency before missing fields, outbound checks, autosave, and network", () => {
     const text = source("src/components/ky-paper/ky-paper-view.tsx");
     expectBefore(
       text,
@@ -36,7 +36,7 @@ describe("PF-001 emergency interception order across AI and record paths", () =>
     expectBefore(
       text,
       "const parsedContext = parseKySuggestionContext",
-      "if (!aiProviderConsent)",
+      "const guardedResponse = await runClientAiAction",
     );
     expectBefore(text, "if (activeEmergency)", "localStorage.setItem");
     expectBefore(text, "const emergency = [", 'fetch("/api/ky/suggest"');
