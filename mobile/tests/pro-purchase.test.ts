@@ -27,6 +27,11 @@ describe('「月額980円で続ける」をアプリで押したとき',()=>{
     mock.prefs.set('anzen.pro-after-login',String(Date.now()-11*60_000));mock.token='session';
     expect(await resumeProPurchaseAfterLogin()).toBeNull();expect(mock.purchase).not.toHaveBeenCalled();
   });
+  it('ログイン通知が先行しても購入の引継ぎを失わない',async()=>{
+    mock.prefs.set('anzen.pro-after-login',String(Date.now()));
+    expect(await resumeProPurchaseAfterLogin()).toBeNull();expect(mock.prefs.has('anzen.pro-after-login')).toBe(true);
+    mock.token='session';expect((await resumeProPurchaseAfterLogin())?.state).toBe('pro');expect(mock.purchase).toHaveBeenCalledTimes(1);
+  });
   it('失敗は理由とコードを画面に出せる文にする',async()=>{
     mock.token='session';
     mock.purchase.mockRejectedValueOnce({code:'23',message:'There is an issue with your configuration.',underlyingErrorMessage:'None of the products registered in the RevenueCat dashboard could be fetched from App Store Connect'});

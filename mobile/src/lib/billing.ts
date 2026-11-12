@@ -2,10 +2,10 @@ import { Purchases, type PurchasesPackage } from '@revenuecat/purchases-capacito
 import { Capacitor } from '@capacitor/core';
 import { z } from 'zod';
 import product from '@/lib/mobile/product-policy.json';
-import { siteApi } from './session';
+import { siteApi, sessionBinding } from './session';
 import { StoreError } from './store-errors';
 import { Preferences } from '@capacitor/preferences';
-const outcomeSchema=z.object({id:z.string().uuid(),attemptId:z.string().uuid(),outcome:z.enum(['cancelled','deferred','unknown','not_opened'])});
+const outcomeSchema=z.object({id:z.string().uuid().optional(),attemptId:z.string().uuid(),outcome:z.enum(['cancelled','deferred','unknown','not_opened'])}).refine(r=>!!r.id||r.outcome==='not_opened');
 type StoreOutcome=z.infer<typeof outcomeSchema>;
 const outcomeKey=(appUserId:string)=>`anzen.apple-outcome.${encodeURIComponent(appUserId)}`;
 async function clearReportedOutcome(appUserId:string,report:StoreOutcome){
@@ -27,16 +27,19 @@ export class BillingController {
   private identified:string|null=null;
   private configured=false;
   private busy=false;
+  private purchaseUser:string|null=null;
+  private identityWork:Promise<void>=Promise.resolve();
+  private packages=new Map<string,{until:number;value:Promise<PurchasesPackage>}>();
   constructor(private send=siteApi,private sdk:Sdk=Purchases,private native=()=>Capacitor.getPlatform()==='ios'){}
   async config(){return billingConfigSchema.parse(await this.send('/api/mobile/v1/billing/config'));}
-  async entitlement(){
+  async entitlement(recoverWhileBusy=false){
     const member=snapshotSchema.parse(await this.send('/api/me/entitlements'));
     // A cancelled purchase must recover even if its first outcome request lost connectivity.
     try {
       const {value}=await Preferences.get({key:outcomeKey(member.appUserId)});
-      if(value){
+      if(value && (!this.busy || recoverWhileBusy)){
         const report=outcomeSchema.parse(JSON.parse(value));
-        if(member.purchaseIntentId===report.id){
+        if(!report.id || member.purchaseIntentId===report.id){
           const checked=snapshotSchema.parse(await this.send('/api/billing/store-outcome',report));
           await clearReportedOutcome(member.appUserId,report);return checked;
         }
@@ -53,6 +56,11 @@ export class BillingController {
   }
   async sync(){return snapshotSchema.parse(await this.send('/api/billing/reconcile',{}));}
   async identify(config:BillingConfig,member:MemberEntitlement){
+    if(this.busy && this.purchaseUser && this.purchaseUser!==member.appUserId)throw new Error('PURCHASE_PENDING');
+    const next=this.identityWork.then(()=>this.identifySerial(config,member));
+    this.identityWork=next.catch(()=>{});return next;
+  }
+  private async identifySerial(config:BillingConfig,member:MemberEntitlement){
     if(!this.native() || !config.publicKey || !config.ready)throw new StoreError('BILLING_NOT_CONFIGURED');
     if(!this.configured){await this.sdk.configure({apiKey:config.publicKey,appUserID:member.appUserId});this.configured=true;}
     else if(this.identified!==member.appUserId)await this.sdk.logIn({appUserID:member.appUserId});
@@ -60,8 +68,15 @@ export class BillingController {
   }
   async offering(config:BillingConfig,member:MemberEntitlement):Promise<PurchasesPackage>{
     await this.identify(config,member);
+    const key=JSON.stringify([member.appUserId,config.publicKey,config.offeringId,config.productId,config.policy]);
+    const cached=this.packages.get(key);if(cached&&cached.until>Date.now())return cached.value;
+    const value=this.loadOffering(config);
+    const entry={until:Date.now()+120000,value};this.packages.set(key,entry);
+    try{return await value;}catch(error){if(this.packages.get(key)===entry)this.packages.delete(key);throw error;}
+  }
+  private async loadOffering(config:BillingConfig):Promise<PurchasesPackage>{
     const offerings=await this.sdk.getOfferings();
-    const candidates=offerings.all[config.offeringId??'']?.availablePackages??[];
+    const candidates=(config.offeringId?offerings.all[config.offeringId]:offerings.current)?.availablePackages??[];
     // Name what App Store actually returned, so a real device shows the exact mismatch.
     if(!candidates.length)throw new StoreError('NO_PACKAGES',`offering=${config.offeringId??'-'} / 取得=${Object.keys(offerings.all).join(',')||'なし'}`);
     // The yen price is enforced only on the Japanese storefront. Other storefronts (sandbox testers,
@@ -73,27 +88,48 @@ export class BillingController {
   }
   async purchase(config:BillingConfig){
     if(this.busy)throw new Error('PURCHASE_PENDING');this.busy=true;
+    const started=performance.now();
     try{
       if(config.salesPaused)throw new Error('PRO_SALES_PAUSED');
-      const member=await this.entitlement();
+      const binding=await sessionBinding();
+      const member=await this.entitlement(true);
+      this.purchaseUser=member.appUserId;
       if(member.plan==='pro')throw new Error('ALREADY_SUBSCRIBED');
       if(member.purchasePending && member.purchaseSource!=='app_store')throw new Error('PURCHASE_PENDING');
       if(!canResumeApplePurchase(member))throw new Error('PURCHASE_PENDING');
       if(member.syncState!=='verified')throw new Error('ENTITLEMENT_SYNC_PENDING');
       const p=await this.offering(config,member);
-      const intent=await this.send('/api/billing/purchase-intents',{}) as {id:string};
-      // Re-check identity after the asynchronous reservation and before opening StoreKit.
-      const latest=await this.entitlement();
-      if(latest.appUserId!==member.appUserId || latest.plan==='pro' || latest.syncState!=='verified' || latest.purchaseIntentId!==intent.id)throw new Error('ENTITLEMENT_SYNC_PENDING');
       const attemptId=crypto.randomUUID();
-      try{await this.send('/api/billing/store-started',{id:intent.id,attemptId});}
-      catch(error){
-        // No SDK call was made. The server may still have committed store_started.
-        await this.send('/api/billing/cancel-intent',{id:intent.id,source:'app_store'}).catch(()=>{});
-        await this.reportOutcome(member.appUserId,{id:intent.id,attemptId,outcome:'not_opened'});
-        if(error instanceof Error&&error.message==='PRO_SALES_PAUSED')throw error;
+      if(await sessionBinding()!==binding)throw new Error('UNAUTHORIZED');
+      // If preparation commits but its response is lost, the next refresh can
+      // report this exact attempt as not dispatched. Remove BEFORE the SDK call.
+      const preparedOutcome:StoreOutcome={attemptId,outcome:'not_opened'};
+      await Preferences.set({key:outcomeKey(member.appUserId),value:JSON.stringify(preparedOutcome)});
+      let intent:{id:string;appUserId?:string;attemptId?:string};
+      try{
+        intent=await this.send('/api/billing/purchase-intents',{appUserId:member.appUserId,attemptId}) as typeof intent;
+      }catch(error){
+        void this.reportOutcome(member.appUserId,preparedOutcome);
+        if(error instanceof Error&&['PRO_SALES_PAUSED','ALREADY_SUBSCRIBED','PURCHASE_PENDING','UNAUTHORIZED','ENTITLEMENT_SYNC_PENDING'].includes(error.message))throw error;
         throw new Error('STORE_NOT_OPENED');
       }
+      // Compatibility with a server released before atomic preparation. Never replay the POST.
+      if(!intent.attemptId){
+        const latest=await this.entitlement();
+        if(latest.appUserId!==member.appUserId || latest.plan==='pro' || latest.syncState!=='verified' || latest.purchaseIntentId!==intent.id)throw new Error('ENTITLEMENT_SYNC_PENDING');
+        try{await this.send('/api/billing/store-started',{id:intent.id,attemptId});}
+        catch(error){
+          void this.reportOutcome(member.appUserId,{id:intent.id,attemptId,outcome:'not_opened'});
+          if(error instanceof Error&&error.message==='PRO_SALES_PAUSED')throw error;
+          throw new Error('STORE_NOT_OPENED');
+        }
+      }else if(intent.attemptId!==attemptId || intent.appUserId!==member.appUserId)throw new Error('ENTITLEMENT_SYNC_PENDING');
+      if(await sessionBinding()!==binding){
+        void this.reportOutcome(member.appUserId,{id:intent.id,attemptId,outcome:'not_opened'});
+        throw new Error('UNAUTHORIZED');
+      }
+      await clearReportedOutcome(member.appUserId,preparedOutcome);
+      performance.measure?.('anzen.purchase.before-storekit',{start:started,end:performance.now()});
       try{await this.sdk.purchasePackage({aPackage:p});}catch(e){
         const code=String((e as {code?:string|number}).code??'');
         const outcome=code==='1'?'cancelled':code==='20'?'deferred':'unknown';
@@ -103,14 +139,14 @@ export class BillingController {
       }
       // SDK customerInfo is deliberately ignored for authorization.
       try{return await this.sync();}catch{await this.reportOutcome(member.appUserId,{id:intent.id,attemptId,outcome:'unknown'});throw new Error('STORE_UNKNOWN');}
-    }finally{this.busy=false;}
+    }finally{this.purchaseUser=null;this.busy=false;}
   }
   async cancelPrepared(){const member=await this.entitlement();if(!member.purchasePending||member.purchaseSource!=='app_store'||member.purchaseStage!=='prepared'||!member.purchaseIntentId)throw new Error('PURCHASE_REVIEW_REQUIRED');return snapshotSchema.parse(await this.send('/api/billing/cancel-intent',{id:member.purchaseIntentId,source:'app_store'}));}
   async restore(config:BillingConfig){
     if(this.busy)throw new Error('PURCHASE_PENDING');this.busy=true;
     try{const member=await this.entitlement();await this.identify(config,member);await this.sdk.restorePurchases();return await this.sync();}finally{this.busy=false;}
   }
-  async forget(){if(this.configured)await this.sdk.logOut();this.identified=null;}
+  async forget(){this.packages.clear();await this.identityWork;if(this.configured)await this.sdk.logOut();this.identified=null;}
 }
 export const billing=new BillingController();
 export function isVerifiedPro(member:MemberEntitlement|null,now=Date.now()){

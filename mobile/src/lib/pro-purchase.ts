@@ -16,7 +16,7 @@ const PENDING_TEXT: Record<string, string> = {
   PRO_SALES_PAUSED: '今月のPro新規受付は終了しました。来月1日に再開します。',
   STORE_DEFERRED: 'App Store で承認待ちです（承認後に自動で反映されます）。',
   STORE_UNKNOWN: '購入結果を確認しています。「会員・Pro」の「購入を復元」で確認できます。',
-  STORE_NOT_OPENED: '購入画面を開けませんでした。購入予約は確認待ちです。「会員・Pro」で状態を再確認してください。',
+  STORE_NOT_OPENED: '購入画面を開けませんでした。通信を確認して、もう一度お試しください。',
   ALREADY_SUBSCRIBED: 'すでに Pro です。',
   PURCHASE_PENDING: '前の購入手続きが残っています。「会員・Pro」の「購入を復元」をお試しください。',
   PURCHASE_REVIEW_REQUIRED: '前の購入手続きの確認が必要です。「会員・Pro」の「購入を復元」をお試しください。',
@@ -35,7 +35,9 @@ export async function startProPurchase(): Promise<ProPurchaseResult> {
       await startLogin();
       return { state: 'login', message: 'ログインすると、そのまま購入画面が開きます。' };
     }
+    const configStarted = performance.now();
     const config = await billing.config();
+    performance.measure?.('anzen.purchase.config',{start:configStarted,end:performance.now()});
     const member = await billing.purchase(config);
     window.dispatchEvent(new Event('anzen-usage-changed'));
     if (isVerifiedPro(member)) window.dispatchEvent(new CustomEvent('anzen-entitlement-changed', {detail:member}));
@@ -54,9 +56,12 @@ export async function startProPurchase(): Promise<ProPurchaseResult> {
 export async function resumeProPurchaseAfterLogin(): Promise<ProPurchaseResult | null> {
   const value = (await Preferences.get({ key: PENDING_KEY }).catch(() => ({ value: null }))).value;
   if (!value) return null;
-  await Preferences.remove({ key: PENDING_KEY }).catch(() => {});
   const age = Date.now() - Number(value);
-  if (!Number.isFinite(age) || age < 0 || age > PENDING_TTL) return null;
+  if (!Number.isFinite(age) || age < 0 || age > PENDING_TTL) {
+    await Preferences.remove({ key: PENDING_KEY }).catch(() => {});
+    return null;
+  }
   if (!(await sessionToken().catch(() => null))) return null;
+  await Preferences.remove({ key: PENDING_KEY }).catch(() => {});
   return startProPurchase();
 }

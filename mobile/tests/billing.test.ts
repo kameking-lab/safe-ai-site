@@ -8,8 +8,8 @@ import product from '@/lib/mobile/product-policy.json';
 const appUserId='88888888-1111-4111-8111-111111111111';const intentId='88888888-2222-4222-8222-222222222222';
 const free=()=>({plan:'free',source:null,syncState:'verified',expiresAt:null,appUserId,verifiedAt:new Date().toISOString(),limits:product.limits.free,purchasePending:false,purchaseIntentId:null});
 const pro=()=>({...free(),plan:'pro',source:'stripe',expiresAt:new Date(Date.now()+86400000).toISOString(),limits:product.limits.pro});
-const config:BillingConfig={ready:true,publicKey:'mock_public_sdk',productId:'mock_monthly',offeringId:'mock_offering',policy:product,login:{apple:true,google:true},terms:'https://example.test/terms',privacy:'https://example.test/privacy',manage:'https://apps.apple.com/account/subscriptions'};
-function setup(options:{paid?:boolean;syncPending?:boolean;cancelled?:boolean;storePending?:boolean;unknown?:boolean;cancelFlagOnly?:boolean;startOffline?:boolean;startPaused?:boolean;wrongPrice?:boolean;usd?:boolean;switchAccount?:boolean;pendingStage?:string}={}){
+const config:BillingConfig={ready:true,publicKey:'mock_public_sdk',productId:'jp.anzenaiportal.pro.monthly',offeringId:'mock_offering',policy:product,login:{apple:true,google:true},terms:'https://example.test/terms',privacy:'https://example.test/privacy',manage:'https://apps.apple.com/account/subscriptions'};
+function setup(options:{atomic?:boolean;paid?:boolean;syncPending?:boolean;cancelled?:boolean;storePending?:boolean;unknown?:boolean;cancelFlagOnly?:boolean;startOffline?:boolean;startPaused?:boolean;wrongPrice?:boolean;usd?:boolean;switchAccount?:boolean;pendingStage?:string}={}){
   let reserved=!!options.pendingStage;let reads=0;let stage=options.pendingStage??'prepared';
   const send=vi.fn(async(path:string,_body?:unknown)=>{
     if(path==='/api/billing/store-started')stage='store_started';
@@ -20,11 +20,18 @@ function setup(options:{paid?:boolean;syncPending?:boolean;cancelled?:boolean;st
     if(path==='/api/billing/store-started'&&options.startOffline)throw new Error('offline');
     if(path==='/api/billing/store-started'&&options.startPaused)throw new Error('PRO_SALES_PAUSED');
     if(path==='/api/me/entitlements'){reads++;return options.paid?pro():{...free(),syncState:options.syncPending?'pending':'verified',...(reserved?{purchasePending:true,purchaseIntentId:intentId,purchaseSource:'app_store',purchaseStage:stage}:{}),...(options.switchAccount&&reads>1?{appUserId:'other-member-id-value'}:{})};}
-    if(path==='/api/billing/purchase-intents'){reserved=true;return {id:intentId};}
+    if(path==='/api/billing/purchase-intents'){
+      reserved=true;
+      if(options.atomic){
+        if(options.startOffline)throw new Error('offline');if(options.startPaused)throw new Error('PRO_SALES_PAUSED');if(options.switchAccount)throw new Error('ENTITLEMENT_SYNC_PENDING');
+        stage='store_started';return {id:intentId,appUserId,attemptId:(_body as {attemptId:string}).attemptId};
+      }
+      return {id:intentId};
+    }
     if(path==='/api/billing/reconcile')return {...free(),purchasePending:true,purchaseIntentId:intentId};
     return {};
   });
-  const packageFixture={identifier:'mock_package',packageType:'MONTHLY',product:{identifier:'mock_monthly',price:options.usd?5.99:options.wrongPrice?981:product.monthlyPrice,priceString:options.usd?'$5.99':'¥980',currencyCode:options.usd?'USD':'JPY',subscriptionPeriod:'P1M'}} as unknown as PurchasesPackage;
+  const packageFixture={identifier:'mock_package',packageType:'MONTHLY',product:{identifier:'jp.anzenaiportal.pro.monthly',price:options.usd?5.99:options.wrongPrice?981:product.monthlyPrice,priceString:options.usd?'$5.99':'¥980',currencyCode:options.usd?'USD':'JPY',subscriptionPeriod:'P1M'}} as unknown as PurchasesPackage;
   const sdk={configure:vi.fn(async()=>{}),logIn:vi.fn(async()=>({}) as never),logOut:vi.fn(async()=>({}) as never),getOfferings:vi.fn(async()=>({all:{mock_offering:{availablePackages:[packageFixture]}}}) as never),
     purchasePackage:vi.fn(async()=>{if(options.cancelled)throw {userCancelled:true,code:'1'};if(options.storePending)throw {code:'20'};if(options.cancelFlagOnly)throw {userCancelled:true};if(options.unknown)throw {code:'10'};return {customerInfo:{entitlements:{active:{anzen_pro:{isActive:true}}}}} as never;}),restorePurchases:vi.fn(async()=>({customerInfo:{entitlements:{active:{anzen_pro:{isActive:true}}}}}) as never)};
   return {send,sdk,controller:new BillingController(send,sdk,()=>true)};
@@ -75,7 +82,53 @@ describe('iOS IAP uses server rights before StoreKit',()=>{
       const s=setup(options);await expect(s.controller.purchase(config)).rejects.toThrow(error);expect(s.send).toHaveBeenCalledWith('/api/billing/store-outcome',expect.objectContaining({id:intentId,outcome,attemptId:expect.any(String)}));expect(s.send.mock.calls.map(c=>c[0])).not.toContain('/api/billing/cancel-intent');
     }
   });
-  it('reports pre-SDK network failure separately and never invokes StoreKit',async()=>{const s=setup({startOffline:true});await expect(s.controller.purchase(config)).rejects.toThrow('STORE_NOT_OPENED');expect(s.sdk.purchasePackage).not.toHaveBeenCalled();expect(s.send).toHaveBeenCalledWith('/api/billing/cancel-intent',{id:intentId,source:'app_store'});expect(s.send).toHaveBeenCalledWith('/api/billing/store-outcome',expect.objectContaining({id:intentId,outcome:'not_opened',attemptId:expect.any(String)}));});
+  it('reports pre-SDK network failure separately without waiting on another network request',async()=>{const s=setup({startOffline:true});await expect(s.controller.purchase(config)).rejects.toThrow('STORE_NOT_OPENED');expect(s.sdk.purchasePackage).not.toHaveBeenCalled();expect(s.send).not.toHaveBeenCalledWith('/api/billing/cancel-intent',expect.anything());expect(s.send).toHaveBeenCalledWith('/api/billing/store-outcome',expect.objectContaining({id:intentId,outcome:'not_opened',attemptId:expect.any(String)}));});
+  it('opens StoreKit after one atomic preparation without another rights read or start request',async()=>{
+    const s=setup({atomic:true});await s.controller.purchase(config);
+    expect(s.send.mock.calls.map(c=>c[0])).toEqual(['/api/me/entitlements','/api/billing/purchase-intents','/api/billing/reconcile']);
+    expect(s.send).toHaveBeenCalledWith('/api/billing/purchase-intents',{appUserId,attemptId:expect.any(String)});
+    expect(s.sdk.purchasePackage).toHaveBeenCalledTimes(1);
+  });
+  it('requires the exact monthly product and never silently substitutes a different explicit offering',async()=>{
+    for(const override of [{productId:'another.product'},{offeringId:'missing'}]){
+      const s=setup({atomic:true});await expect(s.controller.purchase({...config,...override})).rejects.toThrow();
+      expect(s.sdk.purchasePackage).not.toHaveBeenCalled();expect(s.send.mock.calls.some(c=>c[0]==='/api/billing/purchase-intents')).toBe(false);
+    }
+    const s=setup({atomic:true});const offerings=await s.sdk.getOfferings() as unknown as {all:Record<string,{availablePackages:PurchasesPackage[]}>};
+    s.sdk.getOfferings.mockResolvedValueOnce({all:offerings.all,current:offerings.all.mock_offering} as never);
+    await s.controller.purchase({...config,offeringId:null});expect(s.sdk.purchasePackage).toHaveBeenCalledTimes(1);
+  });
+  it('deduplicates simultaneous SDK setup and reuses the warmed exact product',async()=>{
+    const s=setup({atomic:true});const member=await s.controller.entitlement();
+    await Promise.all([s.controller.offering(config,member),s.controller.offering(config,member)]);
+    await s.controller.purchase(config);
+    expect(s.sdk.configure).toHaveBeenCalledTimes(1);expect(s.sdk.getOfferings).toHaveBeenCalledTimes(1);
+  });
+  it('does not replay a queued preparation outcome while another refresh overlaps the purchase',async()=>{
+    const s=setup({atomic:true});const send=s.send.getMockImplementation()!;
+    s.send.mockImplementation(async(path,body)=>{
+      if(path==='/api/billing/purchase-intents'){
+        await s.controller.entitlement();
+        const member=await s.controller.entitlement();
+        await expect(s.controller.offering(config,{...member,appUserId:'another-account-member-id'})).rejects.toThrow('PURCHASE_PENDING');
+        expect(s.send.mock.calls.some(c=>c[0]==='/api/billing/store-outcome')).toBe(false);
+      }
+      return send(path,body);
+    });
+    await s.controller.purchase(config);expect(s.sdk.purchasePackage).toHaveBeenCalledTimes(1);expect(preferences.size).toBe(0);
+  });
+  it('retains the exact un-dispatched attempt durably if preparation and outcome responses are lost',async()=>{
+    const s=setup({atomic:true,startOffline:true});const send=s.send.getMockImplementation()!;
+    s.send.mockImplementation(async(path,body)=>{if(path==='/api/billing/store-outcome')throw new Error('offline');return send(path,body);});
+    await expect(s.controller.purchase(config)).rejects.toThrow('STORE_NOT_OPENED');expect(s.sdk.purchasePackage).not.toHaveBeenCalled();
+    const report=JSON.parse([...preferences.values()][0]);expect(report).toEqual({attemptId:expect.any(String),outcome:'not_opened'});
+    const retry=setup();await retry.controller.entitlement();expect(retry.send).toHaveBeenCalledWith('/api/billing/store-outcome',report);expect(preferences.size).toBe(0);
+  });
+  it('blocks an atomic preparation with unresolved rights or a switched account',async()=>{
+    for(const options of [{startPaused:true},{switchAccount:true},{startOffline:true}]){
+      const s=setup({atomic:true,...options});await expect(s.controller.purchase(config)).rejects.toThrow();expect(s.sdk.purchasePackage).not.toHaveBeenCalled();
+    }
+  });
   it('restores through the SDK and rechecks the server rather than granting from customerInfo',async()=>{const s=setup();const result=await s.controller.restore(config);expect(s.sdk.restorePurchases).toHaveBeenCalledTimes(1);expect(result.plan).toBe('free');await s.controller.forget();expect(s.sdk.logOut).toHaveBeenCalledTimes(1);});
   it('does not allow an expired or stale Pro display',async()=>{const s=setup({paid:true});const result=await s.controller.entitlement();expect(isVerifiedPro(result)).toBe(true);expect(isVerifiedPro({...result,expiresAt:new Date(Date.now()-1).toISOString()})).toBe(false);expect(isVerifiedPro({...result,verifiedAt:new Date(Date.now()-300001).toISOString()})).toBe(false);});
 });
