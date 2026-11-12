@@ -5,6 +5,7 @@ import { installNativeDownloads } from './native-download';
 import { installNativeSpeech } from './native-speech';
 import { PushNotifications } from '@capacitor/push-notifications';
 import { signageLocations } from '@/data/signage-locations';
+import { nativeChatResponse } from './native-chat-stream';
 let installed=false;
 export function createSiteFetch(original:typeof fetch):typeof fetch {
   return async (input, init) => {
@@ -28,6 +29,9 @@ export function createSiteFetch(original:typeof fetch):typeof fetch {
         for(const [key,value] of parts){if(typeof value==='string')fields.push({key,value,type:'string'});else{const bytes=new Uint8Array(await value.arrayBuffer());let binary='';for(let i=0;i<bytes.length;i+=8192)binary+=String.fromCharCode(...bytes.subarray(i,i+8192));fields.push({key,value:btoa(binary),type:'base64File',contentType:value.type,fileName:value.name});}}
         body=fields;dataType='formData';
       }else body=await req.text();
+    }
+    if (url.pathname === '/api/chatbot/stream' && req.method === 'POST') {
+      return nativeChatResponse(String(body ?? ''), headers, req.signal);
     }
     const r = await CapacitorHttp.request({ url:target, method:req.method, headers:Object.fromEntries(headers), data:body, ...(dataType?{dataType}:{}), responseType:'arraybuffer', disableRedirects:true, connectTimeout:15000, readTimeout:60000 });
     if (new URL(r.url).origin !== SITE) throw new Error('Redirect refused');

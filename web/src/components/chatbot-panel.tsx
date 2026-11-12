@@ -4,6 +4,7 @@ import { SourceProvenanceView } from "@/components/law-navi/source-provenance-vi
 import { normalizeSourceProvenance } from "@/lib/source-provenance";
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Check, Copy, RotateCcw, Send, Square, X } from "lucide-react";
 import type {
   ChatbotQuickReply,
@@ -343,6 +344,7 @@ export function ChatbotPanel({
       privacyConfirmed: consentGranted,
     });
     let streamedContent = "";
+    const requestStarted = performance.now();
     const timeoutId = window.setTimeout(
       () => controller.abort("timeout"),
       30_000,
@@ -355,6 +357,7 @@ export function ChatbotPanel({
         body: requestBody,
         signal: controller.signal,
       });
+      performance.measure?.("anzen.chat.headers", {start:requestStarted,end:performance.now()});
 
       if (
         !response.ok &&
@@ -436,6 +439,7 @@ export function ChatbotPanel({
             try {
               const parsed = JSON.parse(data) as Record<string, unknown>;
               if (event === "text" && typeof parsed.chunk === "string") {
+                if (!streamedContent && parsed.chunk) performance.measure?.("anzen.chat.first-text", {start:requestStarted,end:performance.now()});
                 streamedContent += parsed.chunk;
                 setMessages((previous) =>
                   previous.map((message) =>
@@ -535,6 +539,7 @@ export function ChatbotPanel({
         console.warn("[chatbot] request failed", { kind: streamError.name });
       }
     } finally {
+      performance.measure?.("anzen.chat.total", {start:requestStarted,end:performance.now()});
       window.clearTimeout(timeoutId);
       if (requestGenerationRef.current === requestGeneration) {
         requestPendingRef.current = false;
@@ -1017,7 +1022,7 @@ export function ChatbotPanel({
           void handleSend(composerRef.current?.value);
         }}
       >
-        {consentQuestion !== null && (
+        {consentQuestion !== null && createPortal(
           <div role="dialog" aria-modal="true" aria-label="AIへの送信確認" className="fixed inset-0 z-[100] grid place-items-center bg-slate-950/40 p-4" onKeyDown={(event) => {
             if (event.key === "Escape") setConsentQuestion(null);
             if (event.key === "Tab") {
@@ -1038,7 +1043,7 @@ export function ChatbotPanel({
                 void handleSend(question, true);
               }}>同意して送信</button>
             </div>
-          </div>
+          </div>, document.body,
         )}
         <div className="flex items-end gap-2 rounded-2xl border border-slate-300 bg-white p-2 shadow-sm focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 dark:border-slate-700 dark:bg-slate-900 dark:focus-within:ring-blue-950">
           <textarea

@@ -61,7 +61,7 @@ const registrations = files("src").filter(path => /\.tsx?$/.test(path)).flatMap(
 it("inventories every custom native plugin and matches both sides of the bridge", () => {
   expect(nativeFiles).toHaveLength(1);
   expect(ownedNative).toEqual(nativeFiles.map(file => `mobile/${file}`).sort());
-  expect(plugins.map(plugin => plugin.className).sort()).toEqual(["NativeDocumentsPlugin", "NativeSpeechPlugin", "NativeVaultPlugin"]);
+  expect(plugins.map(plugin => plugin.className).sort()).toEqual(["NativeChatStreamPlugin", "NativeDocumentsPlugin", "NativeSpeechPlugin", "NativeVaultPlugin"]);
   expect(new Set(plugins.map(plugin => plugin.identifier)).size).toBe(plugins.length);
   expect(new Set(plugins.map(plugin => plugin.jsName)).size).toBe(plugins.length);
   expect(registrations.map(registration => registration.name).sort()).toEqual(plugins.map(plugin => plugin.jsName).sort());

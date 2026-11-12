@@ -13,7 +13,7 @@ import { useLayoutEffect, useRef, type ComponentPropsWithoutRef } from "react";
  * 100dvh − 9rem（5rem + 0.5rem + タブバー56px）になるように選んでいる。
  */
 export const CHATBOT_SECTION_HEIGHT =
-  "clamp(20rem, calc(100dvh - var(--chatbot-top, 5rem) - 0.5rem - var(--mobile-bottom-nav-h, 0px) - env(safe-area-inset-bottom, 0px)), 52rem)";
+  "clamp(8rem, calc(var(--chatbot-viewport-height, 100dvh) - var(--chatbot-top, 5rem) - 0.5rem - var(--mobile-bottom-nav-h, 0px) - env(safe-area-inset-bottom, 0px)), 52rem)";
 
 export function ChatbotViewportSection({
   style,
@@ -26,6 +26,8 @@ export function ChatbotViewportSection({
     const section = ref.current;
     if (!section) return;
     const measure = () => {
+      const height = window.visualViewport?.height ?? window.innerHeight;
+      section.style.setProperty("--chatbot-viewport-height", `${height}px`);
       const top = Math.max(
         0,
         Math.round(section.getBoundingClientRect().top + window.scrollY),
@@ -41,9 +43,11 @@ export function ChatbotViewportSection({
       typeof ResizeObserver === "function" ? new ResizeObserver(measure) : null;
     observer?.observe(document.body);
     window.addEventListener("resize", measure);
+    window.visualViewport?.addEventListener("resize", measure);
     return () => {
       observer?.disconnect();
       window.removeEventListener("resize", measure);
+      window.visualViewport?.removeEventListener("resize", measure);
     };
   }, []);
 

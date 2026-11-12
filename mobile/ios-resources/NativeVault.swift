@@ -64,6 +64,76 @@ public class AnzenBridgeViewController: CAPBridgeViewController {
         bridge?.registerPluginInstance(NativeVaultPlugin())
         bridge?.registerPluginInstance(NativeDocumentsPlugin())
         bridge?.registerPluginInstance(NativeSpeechPlugin())
+        bridge?.registerPluginInstance(NativeChatStreamPlugin())
+    }
+}
+
+// Only the existing first-party chat endpoint is exposed. Provider credentials stay on the server.
+@objc(NativeChatStreamPlugin)
+public class NativeChatStreamPlugin: CAPPlugin, CAPBridgedPlugin, URLSessionDataDelegate {
+    public let identifier = "NativeChatStreamPlugin"
+    public let jsName = "NativeChatStream"
+    public let pluginMethods: [CAPPluginMethod] = [
+        CAPPluginMethod(name: "start", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "cancel", returnType: CAPPluginReturnPromise)
+    ]
+    private var requests: [String: URLSessionDataTask] = [:]
+    private lazy var session: URLSession = {
+        let config = URLSessionConfiguration.ephemeral
+        config.httpCookieStorage = nil
+        config.urlCache = nil
+        config.timeoutIntervalForRequest = 30
+        config.timeoutIntervalForResource = 60
+        return URLSession(configuration: config, delegate: self, delegateQueue: .main)
+    }()
+    @objc func start(_ call: CAPPluginCall) {
+        guard let id = call.getString("id"), UUID(uuidString: id) != nil,
+              let body = call.getString("body"), body.utf8.count <= 65536 else {
+            call.reject("Invalid chat request"); return
+        }
+        DispatchQueue.main.async {
+            guard self.requests[id] == nil else { call.reject("Duplicate chat request"); return }
+            var request = URLRequest(url: URL(string: "https://www.anzen-ai-portal.jp/api/chatbot/stream")!)
+            request.httpMethod = "POST"
+            request.httpBody = Data(body.utf8)
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.setValue("text/event-stream", forHTTPHeaderField: "Accept")
+            request.setValue("https://www.anzen-ai-portal.jp", forHTTPHeaderField: "Origin")
+            request.setValue("1", forHTTPHeaderField: "X-Anzen-Native")
+            let headers = call.getObject("headers") ?? [:]
+            for name in ["authorization", "x-operation-id"] {
+                if let value = headers[name] as? String { request.setValue(value, forHTTPHeaderField: name) }
+            }
+            let task = self.session.dataTask(with: request)
+            task.taskDescription = id
+            self.requests[id] = task
+            task.resume()
+            call.resolve()
+        }
+    }
+    @objc func cancel(_ call: CAPPluginCall) {
+        DispatchQueue.main.async {
+            if let id = call.getString("id") { self.requests.removeValue(forKey: id)?.cancel() }
+            call.resolve()
+        }
+    }
+    public func urlSession(_ session: URLSession, task: URLSessionTask, willPerformHTTPRedirection response: HTTPURLResponse, newRequest request: URLRequest, completionHandler: @escaping (URLRequest?) -> Void) {
+        completionHandler(nil)
+    }
+    public func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive response: URLResponse, completionHandler: @escaping (URLSession.ResponseDisposition) -> Void) {
+        guard let id = dataTask.taskDescription, let http = response as? HTTPURLResponse else { completionHandler(.cancel); return }
+        let headers = http.allHeaderFields.reduce(into: [String: String]()) { result, pair in result[String(describing: pair.key)] = String(describing: pair.value) }
+        notifyListeners("response", data: ["id": id, "kind": "headers", "status": http.statusCode, "headers": headers])
+        completionHandler(.allow)
+    }
+    public func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
+        guard let id = dataTask.taskDescription else { return }
+        notifyListeners("response", data: ["id": id, "kind": "chunk", "data": data.base64EncodedString()])
+    }
+    public func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
+        guard let id = task.taskDescription else { return }
+        requests.removeValue(forKey: id)
+        notifyListeners("response", data: ["id": id, "kind": error == nil ? "end" : "error"])
     }
 }
 

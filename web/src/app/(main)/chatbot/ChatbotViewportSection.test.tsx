@@ -11,11 +11,22 @@ describe("ChatbotViewportSection（相談ボックスを下のタブバーの上
   });
 
   it("高さは実測した上端・タブバー・ホームインジケーターを画面の高さから引く", () => {
-    expect(CHATBOT_SECTION_HEIGHT).toContain("100dvh - var(--chatbot-top, 5rem) - 0.5rem");
+    expect(CHATBOT_SECTION_HEIGHT).toContain("var(--chatbot-viewport-height, 100dvh) - var(--chatbot-top, 5rem) - 0.5rem");
     expect(CHATBOT_SECTION_HEIGHT).toContain("var(--mobile-bottom-nav-h, 0px)");
     expect(CHATBOT_SECTION_HEIGHT).toContain("env(safe-area-inset-bottom, 0px)");
     // 実測前の既定値はスマホのウェブで従来の 100dvh − 9rem と同じ（5rem + 0.5rem + 56px = 9rem）
     expect(5 + 0.5 + 56 / 16).toBe(9);
+  });
+  it("キーボードで表示範囲が縮んだらvisualViewportの高さを使う",()=>{
+    const viewport=Object.assign(new EventTarget(),{height:852});
+    vi.stubGlobal("visualViewport",viewport);
+    try{
+      render(<ChatbotViewportSection aria-label="相談"/>);
+      const section=screen.getByRole("region",{name:"相談"});
+      expect(section.style.getPropertyValue("--chatbot-viewport-height")).toBe("852px");
+      viewport.height=500;act(()=>viewport.dispatchEvent(new Event("resize")));
+      expect(section.style.getPropertyValue("--chatbot-viewport-height")).toBe("500px");
+    }finally{vi.unstubAllGlobals();}
   });
 
   it("描画直後にボックスの上端（ページ先頭からの位置）を --chatbot-top に入れる", () => {
