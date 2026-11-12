@@ -17,9 +17,8 @@ afterEach(() => {
 });
 
 function render(...args: Parameters<typeof renderWithoutConsent>) {
+  window.localStorage.setItem("anzen.chatbot-ai-consent.2026-11-10", "accepted");
   const result = renderWithoutConsent(...args);
-  const consent = screen.queryByRole("checkbox") as HTMLInputElement | null;
-  if (consent && !consent.checked) fireEvent.click(consent);
   return result;
 }
 
@@ -30,7 +29,30 @@ it("同意する前は初期質問も外部送信しない", () => {
   fireEvent.click(screen.getByRole("button", { name: "送信" }));
   expect(send).not.toHaveBeenCalled();
   expect((screen.getByLabelText("質問入力") as HTMLTextAreaElement).value).toBe("足場の手すりは？");
-  expect(screen.getByRole("alert").textContent).toContain("同意してください");
+  expect(screen.getByRole("dialog", {name:"AIへの送信確認"}).textContent).toContain("Google（Gemini API）");
+  expect(screen.queryByRole("checkbox")).toBeNull();
+});
+
+it("初回の明示同意で一度だけ送り、再表示後は同意確認を繰り返さない", async()=>{
+  const send=vi.fn().mockImplementation(()=>new Promise(()=>{}));vi.stubGlobal("fetch",send);
+  const first=renderWithoutConsent(<ChatbotPanel initialQuestion="足場の手すりは？"/>);
+  expect(screen.queryByText(/Google（Gemini API）/)).toBeNull();
+  fireEvent.click(screen.getByRole("button",{name:"送信"}));expect(send).not.toHaveBeenCalled();
+  fireEvent.click(screen.getByRole("button",{name:"同意して送信"}));
+  await waitFor(()=>expect(send).toHaveBeenCalledTimes(1));expect(screen.queryByRole("dialog")).toBeNull();
+  expect(JSON.parse(send.mock.calls[0][1].body).privacyConfirmed).toBe(true);
+  first.unmount();
+  renderWithoutConsent(<ChatbotPanel initialQuestion="換気は必要？"/>);
+  fireEvent.click(screen.getByRole("button",{name:"送信"}));await waitFor(()=>expect(send).toHaveBeenCalledTimes(2));
+  expect(screen.queryByRole("dialog")).toBeNull();expect(localStorage.length).toBe(1);
+});
+
+it("初回確認を閉じた場合は同意を保存せず送信もしない",()=>{
+  const send=vi.fn();vi.stubGlobal("fetch",send);
+  renderWithoutConsent(<ChatbotPanel initialQuestion="足場の手すりは？"/>);
+  fireEvent.click(screen.getByRole("button",{name:"送信"}));fireEvent.click(screen.getByRole("button",{name:"送信確認を閉じる"}));
+  expect(send).not.toHaveBeenCalled();expect(localStorage.length).toBe(0);
+  expect((screen.getByLabelText("質問入力") as HTMLTextAreaElement).value).toBe("足場の手すりは？");
 });
 
 function submitExample(name: string) {
@@ -493,7 +515,8 @@ describe("ChatbotPanel AI safety boundary", () => {
     expect(body).not.toContain("旧質問の生テキスト");
     expect(body).toContain("足場の点検方法は？");
     expect(body).toContain('"privacyConfirmed":true');
-    expect(localStorage.length).toBe(0);
+    expect(localStorage.length).toBe(1);
+    expect(localStorage.getItem("anzen.chatbot-ai-consent.2026-11-10")).toBe("accepted");
   });
 });
 
@@ -516,15 +539,12 @@ describe("ChatbotPanel conversation UI", () => {
     ).toContain("shrink-0");
     expect(screen.getByLabelText("質問入力").getAttribute("rows")).toBe("1");
     const privacyHint = document.getElementById("chatbot-input-hint");
-    expect(privacyHint?.textContent).toContain("不正アクセス対策済み");
-    expect(privacyHint?.textContent).toContain("名前や住所などは書かなくても使えます");
-    // 最初の画面の操作数予算（service-first copy budget）を増やさないよう、送信欄の安心表示はリンクなし。
-    expect(privacyHint?.querySelector("a")).toBeNull();
+    expect(privacyHint).toBeNull();
     expect(
       document.querySelectorAll("[data-ui-box]").length,
     ).toBeLessThanOrEqual(1);
     expect(screen.queryByRole("alert")).toBeNull();
-    expect(screen.getByRole("checkbox")).toBeTruthy();
+    expect(screen.queryByRole("checkbox")).toBeNull();
   });
 
   it("Enterで送信し、Shift+Enterは改行として残す", async () => {

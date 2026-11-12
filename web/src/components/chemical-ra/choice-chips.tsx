@@ -6,6 +6,7 @@ export interface ChipOption<T extends string | number> {
   value: T;
   label: string;
   hint?: string;
+  disabled?: boolean;
 }
 
 /** 片手で押しやすい選択チップ（radio と同じ意味のボタン群） */
@@ -53,8 +54,9 @@ export function ChoiceChips<T extends string | number>({
               type="button"
               role="radio"
               aria-checked={selected}
+              disabled={option.disabled}
               onClick={() => onChange(option.value)}
-              className={`flex min-h-12 flex-col items-start justify-center rounded-xl border px-3 py-2 text-left text-sm font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600 ${
+              className={`flex min-h-12 flex-col items-start justify-center rounded-xl border px-3 py-2 text-left text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600 ${
                 selected
                   ? "border-emerald-700 bg-emerald-700 text-white dark:border-emerald-500 dark:bg-emerald-600"
                   : "border-slate-300 bg-white text-slate-800 hover:border-emerald-500 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"

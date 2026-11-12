@@ -3,7 +3,7 @@
 import { SourceProvenanceView } from "@/components/law-navi/source-provenance-view";
 import { normalizeSourceProvenance } from "@/lib/source-provenance";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Check, Copy, RotateCcw, Send, Square, X } from "lucide-react";
 import type {
   ChatbotQuickReply,
@@ -23,7 +23,6 @@ import type {
 } from "@/lib/chatbot-notice-attachment";
 import type { LawCategoryFilter } from "@/lib/law-category-options";
 import { VoiceMicButton } from "@/components/voice-input-field";
-import { PrivacyNote } from "@/components/privacy-note";
 import { clearChatHistory } from "@/lib/chat-history";
 import { trackEvent } from "@/components/Analytics";
 import { formatAnswerForDisplay } from "@/lib/chatbot-answer-format";
@@ -90,15 +89,15 @@ function createMessage(
   return { id: crypto.randomUUID(), role, content, ...extra };
 }
 
+const AI_CONSENT_KEY = "anzen.chatbot-ai-consent.2026-11-10";
+
 function scrollConversation(ref: React.RefObject<HTMLDivElement | null>) {
   if (typeof window === "undefined") return;
   window.requestAnimationFrame(() => {
     const node = ref.current;
-    node?.scrollTo({
-      top: node.scrollHeight,
-      // Streaming can schedule several updates in quick succession. Jumping to
-      // the committed end avoids stacked animations and keeps the latest answer
-      // controls immediately reachable for keyboard and screen-reader users.
+    const answer = node?.querySelector<HTMLElement>("[data-chatbot-answer]:last-child");
+    if (node && answer) node.scrollTo({
+      top: answer.getBoundingClientRect().top - node.getBoundingClientRect().top + node.scrollTop,
       behavior: "auto",
     });
   });
@@ -183,6 +182,8 @@ export function ChatbotPanel({
   const [error, setError] = useState<string | null>(null);
   // 無料枠の上限に当たったときの購入入口（エラー表示とは別。再試行ボタンは出さない）。
   const [aiConsent, setAiConsent] = useState(false);
+  const [consentQuestion, setConsentQuestion] = useState<string | null>(null);
+  const [answerViewportHeight, setAnswerViewportHeight] = useState(0);
   const [upsell, setUpsell] = useState<string | null>(null);
   const [retryableQuestion, setRetryableQuestion] = useState<string | null>(
     null,
@@ -205,6 +206,16 @@ export function ChatbotPanel({
   const initialQuestionConsumedRef = useRef(false);
   const lawCategory: LawCategoryFilter = "all";
 
+  useLayoutEffect(() => {
+    const list = listRef.current;
+    if (!list) return;
+    const measure = () => setAnswerViewportHeight(list.clientHeight);
+    measure();
+    const observer = typeof ResizeObserver === "function" ? new ResizeObserver(measure) : null;
+    observer?.observe(list);
+    return () => observer?.disconnect();
+  }, []);
+
   useEffect(() => {
     const verified = (event: Event) => {
       const rights = (event as CustomEvent<{plan?: string; syncState?: string}>).detail;
@@ -216,6 +227,7 @@ export function ChatbotPanel({
 
   useEffect(() => {
     clearChatHistory();
+    try { setAiConsent(localStorage.getItem(AI_CONSENT_KEY) === "accepted"); } catch { /* Keep consent in memory when storage is unavailable. */ }
   }, []);
 
   useEffect(() => {
@@ -259,7 +271,7 @@ export function ChatbotPanel({
     onTransferBlockedChange,
   ]);
 
-  async function handleSend(question?: string) {
+  async function handleSend(question?: string, consentGranted = aiConsent) {
     const text = (question ?? input).trim();
     if (!text || requestPendingRef.current) return;
 
@@ -271,14 +283,14 @@ export function ChatbotPanel({
       setRetryableQuestion(null);
       return;
     }
-    if (!aiConsent) {
-      setError("Google（Gemini API）への送信について確認し、同意してください。");
+    if (!consentGranted) {
+      setConsentQuestion(text);
       return;
     }
     const outboundPreflight = inspectAiOutbound({
       purpose: "chatbot-client-preflight",
       texts: [text],
-      consent: aiConsent,
+      consent: consentGranted,
       maxChars: 4_000,
       contextPolicy: "approved-server-corpus",
     });
@@ -328,7 +340,7 @@ export function ChatbotPanel({
       ),
       lawCategory,
       // The client and server have both run the same PII/emergency gate.
-      privacyConfirmed: aiConsent,
+      privacyConfirmed: consentGranted,
     });
     let streamedContent = "";
     const timeoutId = window.setTimeout(
@@ -432,7 +444,6 @@ export function ChatbotPanel({
                       : message,
                   ),
                 );
-                scrollConversation(listRef);
               } else if (event === "meta") {
                 finalMeta = parsed as ChatbotResponsePayload;
               } else if (event === "error") {
@@ -529,7 +540,6 @@ export function ChatbotPanel({
         requestPendingRef.current = false;
         setIsSending(false);
         abortRef.current = null;
-        scrollConversation(listRef);
       }
     }
   }
@@ -623,7 +633,7 @@ export function ChatbotPanel({
 
   return (
     <section
-      className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-950"
+      className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white sm:rounded-2xl sm:border sm:border-slate-200 sm:shadow-sm dark:sm:border-slate-700 dark:bg-slate-950"
       aria-label="安衛法AIとの会話"
       aria-busy={isSending}
       data-ui-box={isEmpty ? "" : undefined}
@@ -655,7 +665,7 @@ export function ChatbotPanel({
 
       <div
         ref={listRef}
-        className="min-h-0 flex-1 overflow-y-auto px-3 py-3 sm:px-5 sm:py-4"
+        className="min-h-0 flex-1 overflow-y-auto px-2 py-2 sm:px-5 sm:py-4 [overflow-anchor:none]"
         role="log"
         aria-live="off"
         aria-relevant="additions text"
@@ -742,10 +752,11 @@ export function ChatbotPanel({
               return (
                 <article
                   key={message.id}
+                  style={message.role === "assistant" && message === messages.at(-1) ? { minHeight: answerViewportHeight } : undefined}
                   className={
                     message.role === "user"
-                      ? "ml-auto max-w-[88%]"
-                      : "max-w-2xl"
+                      ? "ml-auto max-w-[96%] sm:max-w-[88%]"
+                      : "w-full sm:max-w-2xl"
                   }
                   aria-label={
                     message.role === "user" ? "あなたの質問" : "安衛法AIの回答"
@@ -1006,10 +1017,29 @@ export function ChatbotPanel({
           void handleSend(composerRef.current?.value);
         }}
       >
-        <label className="mb-2 flex items-start gap-2 text-xs leading-5 text-slate-600 dark:text-slate-300">
-          <input type="checkbox" checked={aiConsent} onChange={(event) => setAiConsent(event.target.checked)} data-ai-consent-version="2026-11-10" className="mt-1 shrink-0" />
-          <span>法令相談への回答生成のため、質問とこの相談の直近最大6件の会話をGoogle（Gemini API）へ送信することに同意します。個人情報・機密情報は入力しないでください。<a href="/privacy#external-services" className="underline">データの取扱い</a></span>
-        </label>
+        {consentQuestion !== null && (
+          <div role="dialog" aria-modal="true" aria-label="AIへの送信確認" className="fixed inset-0 z-[100] grid place-items-center bg-slate-950/40 p-4" onKeyDown={(event) => {
+            if (event.key === "Escape") setConsentQuestion(null);
+            if (event.key === "Tab") {
+              const controls = event.currentTarget.querySelectorAll<HTMLElement>("button, a");
+              const first = controls[0]; const last = controls[controls.length - 1];
+              if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+              else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+            }
+          }}>
+            <div className="relative w-full max-w-sm rounded-2xl bg-white p-4 text-sm text-slate-900 shadow-xl">
+              <button type="button" aria-label="送信確認を閉じる" onClick={() => setConsentQuestion(null)} className="absolute right-1 top-1 min-h-11 min-w-11">×</button>
+              <p className="pr-8">質問と会話をGoogle（Gemini API）へ送ります。個人情報は入力しないでください。<a href="/privacy#external-services" className="underline">詳細</a></p>
+              <button type="button" autoFocus className="mt-3 min-h-11 rounded-full bg-blue-700 px-4 font-bold text-white" onClick={() => {
+                const question = consentQuestion;
+                try { localStorage.setItem(AI_CONSENT_KEY, "accepted"); } catch { /* In-memory consent still permits this request. */ }
+                setAiConsent(true);
+                setConsentQuestion(null);
+                void handleSend(question, true);
+              }}>同意して送信</button>
+            </div>
+          </div>
+        )}
         <div className="flex items-end gap-2 rounded-2xl border border-slate-300 bg-white p-2 shadow-sm focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 dark:border-slate-700 dark:bg-slate-900 dark:focus-within:ring-blue-950">
           <textarea
             ref={composerRef}
@@ -1033,7 +1063,7 @@ export function ChatbotPanel({
             }}
             placeholder="作業や設備を質問"
             aria-label="質問入力"
-            aria-describedby="chatbot-input-hint chatbot-input-keys"
+            aria-describedby="chatbot-input-keys"
             className="max-h-28 min-h-11 min-w-0 flex-1 resize-none bg-transparent px-2 py-2 text-base leading-6 text-slate-950 outline-none placeholder:text-slate-500 disabled:opacity-60 sm:text-sm dark:text-white"
             data-primary-focus=""
           />
@@ -1064,7 +1094,6 @@ export function ChatbotPanel({
             </button>
           )}
         </div>
-        <PrivacyNote id="chatbot-input-hint" variant="ai" detailsLink={false} className="mt-1 px-2" />
         <span id="chatbot-input-keys" className="sr-only">
           Enterで送信、Shift+Enterで改行します。
         </span>
