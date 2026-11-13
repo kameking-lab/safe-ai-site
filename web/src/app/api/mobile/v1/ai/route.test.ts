@@ -1,12 +1,17 @@
-﻿// @vitest-environment node
+// @vitest-environment node
 import {createHmac} from 'node:crypto';
 import {afterEach,expect,it,vi} from 'vitest';
 const calls=vi.hoisted(()=>({chatbot:vi.fn(),quota:vi.fn()}));
 vi.mock('@/lib/mobile/http',async importOriginal=>({...await importOriginal<typeof import('@/lib/mobile/http')>(),member:async()=> 'fixture-member',json:(v:unknown,status=200)=>Response.json(v,{status}),failure:()=>Response.json({error:'failed'},{status:503})}));
 vi.mock('@/lib/mobile/usage',()=>({anonymousQuota:async()=>({limit:3,used:1,reserved:0,remaining:2,resetAt:new Date().toISOString()}),quota:async()=>{calls.quota();return {limit:3,used:1,reserved:0,remaining:2,resetAt:new Date().toISOString()};}}));
-vi.mock('@/app/api/chatbot/route',()=>({POST:async()=>{calls.chatbot();return Response.json({answer:'fixture answer',conditions:['fixture condition'],sources:[{law:'fixture',article:'1',text:'fixture original',url:'https://laws.e-gov.go.jp/law/fixture',asOf:'2026-11-10T00:00:00Z'}],source_type:'rag',scopeWarnings:['unverified citation'],confidence:'low',requiresHumanReview:true,effectiveDateStatus:{asOf:'2026-11-10',status:'unknown',label:'unverified'}});}}));
+vi.mock('@/app/api/chatbot/route',()=>({POST:async()=>{const response=calls.chatbot();return Response.json(response??{answer:'fixture answer',conditions:['fixture condition'],sources:[{law:'fixture',article:'1',text:'fixture original',url:'https://laws.e-gov.go.jp/law/fixture',asOf:'2026-11-10T00:00:00Z'}],source_type:'rag',scopeWarnings:['unverified citation'],confidence:'low',requiresHumanReview:true,effectiveDateStatus:{asOf:'2026-11-10',status:'unknown',label:'unverified'}});}}));
 import {POST} from './route';
 afterEach(()=>{vi.unstubAllEnvs();vi.clearAllMocks();});
+it.each(['fixture guidance',''])('reports answer-based accounting even without citations: %j',async answer=>{
+ calls.chatbot.mockReturnValueOnce({answer,conditions:[],sources:[],source_type:'safety'});
+ const response=await POST(new Request('https://example.test/api/mobile/v1/ai',{method:'POST',headers:{'X-Anzen-Native':'1','Content-Type':'application/json'},body:JSON.stringify({version:2,feature:'law_chat',input:'fixture question',requestId:crypto.randomUUID(),privacyConfirmed:true})}));
+ expect(response.status).toBe(200);expect(await response.json()).toMatchObject({status:'fallback',charged:answer.length>0});
+});
 it('preserves warnings, confidence and review requirements through the native adapter',async()=>{
  vi.stubEnv('AUTH_SECRET','synthetic-test-only');
  const token=createHmac('sha256','synthetic-test-only').update(`anzen-ai:fixture-member:${new Date().toISOString().slice(0,10)}`).digest('hex');

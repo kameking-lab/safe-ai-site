@@ -35,7 +35,7 @@ vi.mock('@/lib/prisma',()=>{
   const prisma={...tx,$transaction:<T>(run:(db:typeof tx)=>Promise<T>)=>{const next=state.tail.then(()=>run(tx));state.tail=next.catch(()=>{});return next;}};
   return {prisma};
 });
-import { withUsage,withProviderBudget,checkBudget,jstKeys,maximumProviderCost,measuredProviderCost,rebuildRequest } from './usage';
+import { withUsage,withProviderBudget,checkBudget,jstKeys,maximumProviderCost,measuredProviderCost,rebuildRequest,anonymousQuota } from './usage';
 import { __resetDevelopmentSharedStateForTests } from '@/lib/security/shared-state';
 import { canUseMemberQuota,product } from './entitlement';
 import * as entitlementPolicy from './entitlement';
@@ -133,6 +133,51 @@ describe('anonymous website visitors with the shared ledger on',()=>{
     expect(state.operations).toHaveLength(1);
   });
   const salesOpen=()=>{vi.stubEnv('SAFE_AI_STAGING_MODE','false');vi.stubEnv('VERCEL_ENV','development');vi.stubEnv('NEXT_PUBLIC_PAID_MODE','true');vi.stubEnv('STRIPE_SECRET_KEY','synthetic-not-real');vi.stubEnv('STRIPE_ANZEN_PRO_MONTHLY_PRICE_ID','price_synthetic_pro');__resetDevelopmentSharedStateForTests();};
+  it('does not replenish the guest allowance at 09:00 JST',async()=>{
+    salesOpen();state.signedIn=false;vi.useFakeTimers();
+    try{
+      vi.setSystemTime(new Date('2026-11-13T23:59:00Z'));
+      const headers={'X-Anzen-Native':'1','X-Forwarded-For':'198.51.100.40'};
+      for(let i=0;i<product.limits.free.law_chat;i++)await withUsage(web(headers),'law_chat',async()=>answer());
+      vi.setSystemTime(new Date('2026-11-14T00:00:00Z'));
+      expect((await anonymousQuota(web(headers),'law_chat')).remaining).toBe(0);
+      expect((await withUsage(web(headers),'law_chat',async()=>answer())).status).toBe(429);
+      vi.setSystemTime(new Date('2026-11-14T15:00:00Z'));
+      expect((await anonymousQuota(web(headers),'law_chat')).remaining).toBe(product.limits.free.law_chat);
+    }finally{vi.useRealTimers();}
+  });
+  it('does not run two anonymous answers against the last remaining slot',async()=>{
+    salesOpen();state.signedIn=false;
+    const ip={'X-Forwarded-For':'198.51.100.41'};
+    for(let i=1;i<product.limits.free.law_chat;i++)await withUsage(web(ip),'law_chat',async()=>answer());
+    let release!:()=>void;let entered!:()=>void;
+    const gate=new Promise<void>(resolve=>{release=resolve;});
+    const started=new Promise<void>(resolve=>{entered=resolve;});
+    const pending=withUsage(web(ip),'law_chat',async()=>{entered();await gate;return answer();});
+    await started;
+    const secondRun=vi.fn(async()=>answer());
+    try{
+      const concurrent=await withUsage(web({...ip,'X-Anzen-Native':'1'}),'law_chat',secondRun);
+      expect(concurrent.ok).toBe(false);expect(secondRun).not.toHaveBeenCalled();
+    }finally{release();await pending;}
+    expect((await withUsage(web(ip),'law_chat',secondRun)).status).toBe(429);
+  });
+  it('holds the anonymous lease until stream completion and releases failed attempts',async()=>{
+    salesOpen();state.signedIn=false;
+    const headers={'X-Anzen-Native':'1','X-Forwarded-For':'198.51.100.42'};
+    let controller!:ReadableStreamDefaultController<Uint8Array>;
+    const stream=new ReadableStream<Uint8Array>({start(value){controller=value;}});
+    const response=await withUsage(web(headers),'law_chat',async()=>new Response(stream,{headers:{'Content-Type':'text/event-stream'}}));
+    const run=vi.fn(async()=>answer());
+    expect((await withUsage(web(headers),'law_chat',run)).status).toBe(409);
+    expect(run).not.toHaveBeenCalled();
+    controller.enqueue(new TextEncoder().encode('event: meta\ndata: {"answer":"fixture"}\n\n'));controller.close();await response.text();
+    expect((await anonymousQuota(web(headers),'law_chat')).used).toBe(1);
+    expect((await withUsage(web(headers),'law_chat',async()=>Response.json({error:'failed'},{status:503}))).status).toBe(503);
+    await expect(withUsage(web(headers),'law_chat',async()=>{throw new Error('provider failed');})).rejects.toThrow('provider failed');
+    expect((await withUsage(web(headers),'law_chat',run)).status).toBe(200);
+    expect((await anonymousQuota(web(headers),'law_chat')).used).toBe(2);
+  });
   it.each(['law_chat','chemical_ra'] as const)('shares the web daily %s allowance with native guests and stops before execution',async feature=>{
     salesOpen();state.signedIn=false;
     const appSales=vi.spyOn(proSales,'appStoreSalesReady').mockReturnValue(true);

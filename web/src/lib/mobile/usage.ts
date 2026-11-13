@@ -6,7 +6,7 @@ import { product,canUseMemberQuota,type Plan } from './entitlement';
 import { member,json,isNativeRequest,isNativeGuestRequest,webMemberId } from './http';
 import { inspectAiOutbound } from '../ai-outbound-safety';
 import { validateChatbotRequestBoundary } from '../server/chatbot-request-boundary';
-import { consumeSharedRateLimit,getRateLimitSubject,peekSharedRateLimit } from '../security/shared-state';
+import { consumeSharedRateLimit,getRateLimitSubject,peekSharedRateLimit,beginSharedIdempotency,releaseSharedIdempotency } from '../security/shared-state';
 import { webProSalesReady,appStoreSalesReady } from '../pro-sales';
 import { pauseProSales,proSalesStatus } from './pro-sales-gate';
 import { processPausedStripeCheckouts } from './pro-sales-checkouts';
@@ -22,7 +22,7 @@ export async function upgradeAvailable(request:Request,plan:Plan|null){return pl
  * 送信前は上限の確認だけ（増やさない）。数えるのは回答（生成または根拠なしの助言）が返った時だけ
  * ＝入力不備・同意なし・文字コード違反などで断った送信は数えない（recordAnonymousAnswer）。
  */
-function freeDailyPolicy(feature:AiFeature){const {day}=jstKeys();return {routeKey:`free-${feature}-${day}`,limit:product.limits.free[feature],windowMs:86400000};}
+function freeDailyPolicy(feature:AiFeature){const {day}=jstKeys();return {routeKey:`free-${feature}-${day}`,limit:product.limits.free[feature],windowMs:86400000,windowOffsetMs:15*3600000};}
 /** Display only: execution rechecks this same server-side counter in withUsage. */
 export async function anonymousQuota(request:Request,feature:AiFeature){
   const policy=freeDailyPolicy(feature);const {resetAt}=jstKeys();
@@ -41,19 +41,42 @@ async function recordAnonymousAnswer(request:Request,feature:AiFeature){
   await consumeSharedRateLimit({policy:freeDailyPolicy(feature),rawSubject:getRateLimitSubject(request)});
 }
 /** 回答が返った応答だけ onAnswered を待ってから返す（SSE は最後の meta を見て判定）。 */
-async function afterAnswer(response:Response,feature:AiFeature,onAnswered:()=>Promise<void>):Promise<Response>{
-  const record=async(value:unknown)=>{if(value&&chargeable(value,feature)){try{await onAnswered();}catch{/* counting failure never drops a delivered answer */}}};
+async function afterAnswer(response:Response,feature:AiFeature,onAnswered:()=>Promise<void>,onFinished:()=>Promise<void>):Promise<Response>{
+  let countFailed=false;
+  const record=async(value:unknown)=>{if(value&&chargeable(value,feature)){try{await onAnswered();}catch{countFailed=true;/* Keep the lease if a delivered answer could not be counted. */}}};
+  const finish=async()=>{if(!countFailed)await onFinished();};
   if(response.headers.get('content-type')?.includes('text/event-stream') && response.body){
     const reader=response.body.getReader();let collected='';const decoder=new TextDecoder();
     const stream=new ReadableStream({async start(controller){try{
       while(true){const item=await reader.read();if(item.done)break;collected+=decoder.decode(item.value,{stream:true});controller.enqueue(item.value);}collected+=decoder.decode();
       const meta=[...collected.matchAll(/event: meta\r?\ndata: ([^\n]+)/g)].at(-1)?.[1];
-      await record(meta?JSON.parse(meta):null);controller.close();
-    }catch(e){controller.error(e);}},async cancel(){await reader.cancel();}});
+      await record(meta?JSON.parse(meta):null);await finish();controller.close();
+    }catch(e){await finish();controller.error(e);}},async cancel(){await reader.cancel();}});
     return new Response(stream,{status:response.status,headers:response.headers});
   }
   if(response.ok)await record(await response.clone().json().catch(()=>null));
+  await finish();
   return response;
+}
+
+/** Serialize anonymous sends across Web/native instances until the answer is counted.
+ * The existing shared lease expires after five minutes if the process dies; it is
+ * not a consumed answer. Provider calls have their own budget reservations.
+ */
+async function withAnonymousUsage(request:Request,feature:AiFeature,run:(request:Request)=>Promise<Response>){
+  if(!webProSalesReady())return context.run({plan:'free'},()=>run(request));
+  const unavailable=()=>json({error:{code:'ENTITLEMENT_SYNC_PENDING',message:'無料枠を確認できないため、いまはAIを止めています。時間をおいてお試しください。'}},503);
+  // The shared store HMACs this key before persisting it; no raw IP is stored.
+  const leaseInput={routeKey:`free-ai-${feature}`,key:createHash('sha256').update(getRateLimitSubject(request)).digest('hex'),requestHash:createHash('sha256').update(feature).digest('hex'),ttlMs:300000};
+  const lease=await beginSharedIdempotency(leaseInput).catch(()=>null);
+  if(!lease)return unavailable();
+  if(lease.state!=='acquired')return json({error:{code:'OPERATION_PENDING',message:'回答を処理中です。完了してからもう一度お試しください。'}},409);
+  const release=async()=>{await releaseSharedIdempotency({...leaseInput,leaseToken:lease.leaseToken}).catch(()=>false);};
+  try{
+    const limited=await anonymousFreeAllowance(request,feature).catch(()=>unavailable());
+    if(limited){await release();return limited;}
+    return await context.run({plan:'free'},async()=>afterAnswer(await run(request),feature,()=>recordAnonymousAnswer(request,feature),release));
+  }catch(error){await release();throw error;}
 }
 export type AiFeature='law_chat'|'chemical_ra';
 export function jstKeys(now=new Date()){
@@ -191,10 +214,7 @@ export async function withUsage(request:Request,feature:AiFeature,run:(request:R
     let signedIn:string|null=null;
     if(!isNativeGuestRequest(request)){try{signedIn=await webMemberId();}catch{signedIn=null;}}
     if(!signedIn){
-      let limited:Response|null;
-      try{limited=await anonymousFreeAllowance(request,feature);}catch{return json({error:{code:'ENTITLEMENT_SYNC_PENDING',message:'無料枠を確認できないため、いまはAIを止めています。時間をおいてお試しください。'}},503);}
-      if(limited)return limited;
-      return context.run({plan:'free'},async()=>afterAnswer(await run(request),feature,()=>recordAnonymousAnswer(request,feature)));
+      return withAnonymousUsage(request,feature,run);
     }
   }
   const chunks:Uint8Array[]=[];let bytes=0;const reader=request.body?.getReader();

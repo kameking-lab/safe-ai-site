@@ -4,6 +4,7 @@ import {
   beginSharedIdempotency,
   completeSharedIdempotency,
   consumeSharedRateLimit,
+  peekSharedRateLimit,
   deleteExpiredSharedState,
   SharedStateUnavailableError,
   sharedStateNamespace,
@@ -95,6 +96,19 @@ beforeEach(() => {
 });
 
 describe("distributed shared rate limit", () => {
+  it("uses the same JST offset for production reads and increments, leaving other limits in UTC", async () => {
+    const shared = sharedFakeDatabase();
+    const input = { policy: { routeKey: "free-law_chat", limit: 3, windowMs: 86400000, windowOffsetMs: 15 * 3600000 }, rawSubject: "192.0.2.55" };
+    const options = { database: shared.client(), env: PRODUCTION_ENV };
+    await consumeSharedRateLimit(input, options);
+    await peekSharedRateLimit(input, options);
+    expect(shared.calls[0].values[5]).toBe(15 * 3600000);
+    expect(shared.calls[0].query).toContain("+ $6::double precision");
+    expect(shared.calls[1].values[4]).toBe(15 * 3600000);
+    expect(shared.calls[1].query).toContain("+ $5::double precision");
+    await consumeSharedRateLimit({ ...input, policy: { routeKey: "chatbot", limit: 25, windowMs: 60000 } }, options);
+    expect(shared.calls[2].values[5]).toBe(0);
+  });
   it("uses an atomic DB-clock upsert across independent clients", async () => {
     const shared = sharedFakeDatabase();
     const clients = [shared.client(), shared.client()];

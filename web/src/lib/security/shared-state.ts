@@ -23,7 +23,17 @@ export type SharedRateLimitPolicy = {
   routeKey: string;
   limit: number;
   windowMs: number;
+  /** Start offset from the UTC epoch (e.g. 15 hours for midnight in Japan). */
+  windowOffsetMs?: number;
 };
+
+function windowOffset(policy: SharedRateLimitPolicy): number {
+  const offset = policy.windowOffsetMs ?? 0;
+  if (!Number.isSafeInteger(offset) || offset < 0 || offset >= policy.windowMs) {
+    throw new Error("shared_rate_policy_invalid");
+  }
+  return offset;
+}
 
 export type SharedRateLimitResult = {
   allowed: boolean;
@@ -170,7 +180,8 @@ function consumeDevelopmentRateLimit(
   for (const [key, bucket] of developmentRateBuckets) {
     if (bucket.expiresAt <= now) developmentRateBuckets.delete(key);
   }
-  const windowStart = Math.floor(now / policy.windowMs) * policy.windowMs;
+  const offset = windowOffset(policy);
+  const windowStart = Math.floor((now - offset) / policy.windowMs) * policy.windowMs + offset;
   const current = developmentRateBuckets.get(storageKey);
   const bucket =
     current?.windowStart === windowStart
@@ -215,6 +226,7 @@ export async function consumeSharedRateLimit(
     48,
   );
   const routeKey = cleanIdentifier(input.policy.routeKey, 96);
+  const offset = windowOffset(input.policy);
   if (
     !Number.isInteger(input.policy.limit) ||
     input.policy.limit < 1 ||
@@ -268,8 +280,8 @@ export async function consumeSharedRateLimit(
         SELECT
           now,
           to_timestamp(
-            floor(extract(epoch FROM now) * 1000 / $4::double precision)
-            * $4::double precision / 1000
+            (floor((extract(epoch FROM now) * 1000 - $6::double precision) / $4::double precision)
+            * $4::double precision + $6::double precision) / 1000
           ) AS window_start
         FROM db_clock
       ),
@@ -313,6 +325,7 @@ export async function consumeSharedRateLimit(
     subjectHash,
     input.policy.windowMs,
     RATE_RETENTION_GRACE_MS,
+    offset,
   );
   const row = rows[0];
   if (!row || !Number.isInteger(row.count)) {
@@ -681,13 +694,14 @@ export async function peekSharedRateLimit(
   const env = options.env ?? process.env;
   const namespace = cleanIdentifier(input.namespace ?? sharedStateNamespace(env), 48);
   const routeKey = cleanIdentifier(input.policy.routeKey, 96);
+  const offset = windowOffset(input.policy);
   const subjectHash = hmac(`${RATE_HMAC_DOMAIN}:${namespace}:${routeKey}`, input.rawSubject || "unknown", env);
   const database = options.database === undefined ? defaultDatabase() : options.database;
   let count = 0;
   if (!database || typeof database.$queryRawUnsafe !== "function") {
     if (!allowDevelopmentMemoryFallback(env)) throw new SharedStateUnavailableError();
     const now = options.now ?? Date.now();
-    const windowStart = Math.floor(now / input.policy.windowMs) * input.policy.windowMs;
+    const windowStart = Math.floor((now - offset) / input.policy.windowMs) * input.policy.windowMs + offset;
     const bucket = developmentRateBuckets.get(`${namespace}:${routeKey}:${subjectHash}`);
     count = bucket && bucket.windowStart === windowStart ? bucket.count : 0;
   } else {
@@ -697,14 +711,15 @@ export async function peekSharedRateLimit(
         FROM "SharedRateBucket"
         WHERE "namespace" = $1 AND "routeKey" = $2 AND "subjectHash" = $3
           AND "windowStart" = to_timestamp(
-            floor(extract(epoch FROM clock_timestamp()) * 1000 / $4::double precision)
-            * $4::double precision / 1000
+            (floor((extract(epoch FROM clock_timestamp()) * 1000 - $5::double precision) / $4::double precision)
+            * $4::double precision + $5::double precision) / 1000
           )
       `,
       namespace,
       routeKey,
       subjectHash,
       input.policy.windowMs,
+      offset,
     );
     count = Number(rows[0]?.count ?? 0);
   }
