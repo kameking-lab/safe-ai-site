@@ -1,4 +1,4 @@
-import { withProviderBudget } from "@/lib/mobile/usage";
+import { withProviderBudget, type ProviderUsage } from "@/lib/mobile/usage";
 import { withUsage } from "@/lib/mobile/usage";
 /**
  * P0-001 (usability-audit-day2-2026-05-24):
@@ -12,14 +12,14 @@ import { withUsage } from "@/lib/mobile/usage";
  *
  * SSE イベント:
  *   - event: progress  → { step, message }     (RAG検索/AI生成中の進捗)
- *   - event: text      → { chunk: "..." }      (検証完了後の確定本文)
- *   - event: meta      → ChatbotResponse 形    (完了時の sources/notices/...)
+ *   - event: text      → { chunk: "...", provisional?: true } (生成中は引用未確認)
+ *   - event: meta      → ChatbotResponse 形    (検証後の本文全体へ置換・出典確定)
  *   - event: error     → { message, retryable }
  *
  * Phase 2 ハルシネーション3層との整合:
  * - Layer 1 (ホワイトリスト同梱プロンプト): buildPromptWithWhitelist を使用
- * - Layer 2 (条文番号検証): full answer 確定後に validateCitations を実施し、
- *   検証が終わるまで本文をクライアントへ送らない。
+ * - Layer 2 (条文番号検証): 逐次本文の送信後に validateCitations を実施し、
+ *   最終metaで本文と出典を確定する。検証失敗・途中切れは定型回答へ置換する。
  * - Layer 3 (fallback decision): 既存 buildFallbackDecision を使用
  * Phase 4 (通達・リーフレット添付): attachNoticesAndLeaflets を完成後に呼ぶ。
  */
@@ -669,7 +669,9 @@ async function handlePost(request: Request) {
 
         // Gemini streaming
         let answer = "";
+        let sentProvisionalText = false;
         let generationMeta: GenerationMeta = { finishReason: null, promptTokens: null, outputTokens: null };
+        let providerUsage: ProviderUsage | undefined;
         let citationLayer2Status:
           | "skipped"
           | "passed"
@@ -701,26 +703,37 @@ async function handlePost(request: Request) {
                     mlitContext: buildMlitContext(mlitMatches),
                     allowed: allowedCitations,
                   }));
-              const streamResult = await withProviderBudget(() => genAI.models.generateContentStream({
+              // 予約から逐次受信・精算までを同じawait内に置く。
+              // AsyncIteratorの取得だけで費用処理を完了させない。
+              await withProviderBudget(async () => {
+                const streamResult = await genAI.models.generateContentStream({
+                  model: GEMINI_FLASH_MODEL,
+                  contents: userPrompt,
+                  config: {
+                    systemInstruction: SYSTEM_PROMPT,
+                    thinkingConfig: GEMINI_FAST_THINKING_CONFIG,
+                    maxOutputTokens: 2048,
+                    abortSignal: request.signal,
+                  },
+                });
+                for await (const chunkResponse of streamResult) {
+                  if (cancelled || request.signal.aborted) {
+                    throw new DOMException("Request aborted", "AbortError");
+                  }
+                  generationMeta = readGenerationMeta(chunkResponse, generationMeta);
+                  if (chunkResponse.usageMetadata) providerUsage = chunkResponse.usageMetadata;
+                  const chunkText = chunkResponse.text;
+                  if (chunkText) {
+                    answer += chunkText;
+                    sentProvisionalText = true;
+                    send("text", { chunk: chunkText, provisional: true });
+                  }
+                }
+              }, {
                 model: GEMINI_FLASH_MODEL,
-                contents: userPrompt,
-                config: {
-                  systemInstruction: SYSTEM_PROMPT,
-                  thinkingConfig: GEMINI_FAST_THINKING_CONFIG,
-                  maxOutputTokens: 2048,
-                  abortSignal: request.signal,
-                },
-              }),{model:GEMINI_FLASH_MODEL,inputBytes:Buffer.byteLength(SYSTEM_PROMPT+userPrompt,'utf8'),maxOutputTokens:2048});
-              for await (const chunkResponse of streamResult) {
-                if (cancelled || request.signal.aborted) {
-                  throw new DOMException("Request aborted", "AbortError");
-                }
-                generationMeta = readGenerationMeta(chunkResponse, generationMeta);
-                const chunkText = chunkResponse.text;
-                if (chunkText) {
-                  answer += chunkText;
-                }
-              }
+                inputBytes: Buffer.byteLength(SYSTEM_PROMPT + userPrompt, "utf8"),
+                maxOutputTokens: 2048,
+              }, () => generationMeta.finishReason ? providerUsage : undefined);
               return answer;
             },
             { failureThreshold: 4, cooldownMs: 60_000 },
@@ -730,9 +743,9 @@ async function handlePost(request: Request) {
           // 警告は answer 本文へ追記せず scopeWarnings（UIの警告枠）で返す（2026-07-11）
           // 高リスクな未確認引用・空・途中切れは収録原文の案内へ戻す。
           const validation = validateCitations(answer, allowedCitations);
-          const truncated = generationMeta.finishReason !== null && generationMeta.finishReason !== "STOP";
+          const truncated = generationMeta.finishReason !== "STOP";
           if (!answer.trim() || truncated || validation.retryRecommended) {
-            citationWarningNote = validation.retryRecommended ? validation.warningNote : truncated ? `AIの回答が途中で終わったため（${generationMeta.finishReason}）、収録条文の案内を表示しています。` : "";
+            citationWarningNote = validation.retryRecommended ? validation.warningNote : truncated ? `AIの回答が途中で終わったため（${generationMeta.finishReason ?? "終了理由未取得"}）、収録条文の案内を表示しています。` : "";
             citationLayer2Status = "evidence-only";
             answer = relevantArticles.length > 0
               ? buildServiceFirstLegalAnswer({ query: retrievalQuery, articles: relevantArticles, now: legalAnswerNow })
@@ -750,7 +763,10 @@ async function handlePost(request: Request) {
             ...generationMeta,
           });
         } catch (err) {
-          if (cancelled || request.signal.aborted) return;
+          if (cancelled || request.signal.aborted) {
+            if (!cancelled) controller.close();
+            return;
+          }
           const lower = err instanceof Error ? err.message.toLowerCase() : "";
           let reasonLabel = "AIサービスへの接続に失敗しました";
           if (err instanceof CircuitOpenError) reasonLabel = "AIサービスが連続失敗中（自動復旧待ち）";
@@ -793,7 +809,7 @@ async function handlePost(request: Request) {
                 ? degradedAttached.leaflets
                 : undefined,
           });
-          send("text", { chunk: degradedPayload.answer });
+          if (!sentProvisionalText) send("text", { chunk: degradedPayload.answer });
           send("meta", degradedPayload);
           controller.close();
           return;
@@ -891,11 +907,15 @@ async function handlePost(request: Request) {
         if (cKey && citationLayer2Status === "passed") {
           setCachedResponse(cKey, payload);
         }
-        send("text", { chunk: payload.answer });
+        // 生成済み本文を再びtextに足すと二重表示になる。meta.answerが置換の正本。
+        if (!sentProvisionalText) send("text", { chunk: payload.answer });
         send("meta", payload);
         controller.close();
       } catch (_err) {
-        if (cancelled || request.signal.aborted) return;
+        if (cancelled || request.signal.aborted) {
+          if (!cancelled) controller.close();
+          return;
+        }
         send("error", {
           message: "回答を完了できませんでした。時間をおいて再試行してください。",
           retryable: true,

@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, screen, waitFor, fireEvent } from "@testing-library/react";
+import { act, render, screen, waitFor, fireEvent } from "@testing-library/react";
 import { ChatbotPanel } from "./chatbot-panel";
 
 vi.mock("next/navigation", () => ({
@@ -227,6 +227,56 @@ function chatbotStream(payload: Record<string, unknown>) {
     { headers: { "content-type": "text/event-stream" } },
   );
 }
+
+describe("ChatbotPanel 暫定本文と引用検証", () => {
+  function controlledStream() {
+    let controller!: ReadableStreamDefaultController<Uint8Array>;
+    const body = new ReadableStream<Uint8Array>({ start(value) { controller = value; } });
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(body, { headers: { "content-type": "text/event-stream" } })));
+    return {
+      send(event: string, data: unknown) { controller.enqueue(new TextEncoder().encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`)); },
+      close() { controller.close(); },
+    };
+  }
+
+  it("完了前に本文を表示し、検証後に誤引用と暫定表示を置き換える", async () => {
+    const stream = controlledStream();
+    render(<ChatbotPanel />);
+    submitExample("足場の手すりは？");
+    await act(async () => { stream.send("text", { chunk: "安衛則第99999条という暫定の引用です。", provisional: true }); });
+    expect(screen.getByText("生成中・引用は未確認です")).toBeTruthy();
+    expect(screen.getByText(/第99999条という暫定/)).toBeTruthy();
+    expect(screen.queryByText(/確認に使える出典/)).toBeNull();
+    expect(screen.getByRole("region", { name: "安衛法AIとの会話" }).getAttribute("aria-busy")).toBe("true");
+    await act(async () => {
+      stream.send("meta", {
+        answer: "収録した条文の案内へ切り替えました。", substantiveAnswer: "収録した条文の案内へ切り替えました。",
+        sources: [], citations: [], source_type: "rag", confidence: "low",
+        scopeWarnings: ["引用の根拠を確認できませんでした。"],
+      });
+      stream.close();
+    });
+    expect(screen.queryByText(/第99999条という暫定/)).toBeNull();
+    expect(screen.queryByText("生成中・引用は未確認です")).toBeNull();
+    expect(screen.getByText("収録した条文の案内へ切り替えました。")).toBeTruthy();
+    expect(screen.getByText("引用の根拠を確認できませんでした。")).toBeTruthy();
+  });
+
+  it.each(["eof", "error"])("最終metaなしの%sでは暫定本文を残さない", async (ending) => {
+    const stream = controlledStream();
+    render(<ChatbotPanel />);
+    submitExample("足場の手すりは？");
+    await act(async () => { stream.send("text", { chunk: "未検証の生成本文です。", provisional: true }); });
+    expect(screen.getByText("未検証の生成本文です。")).toBeTruthy();
+    await act(async () => {
+      if (ending === "error") stream.send("error", { message: "失敗", retryable: true });
+      stream.close();
+    });
+    expect(screen.queryByText("未検証の生成本文です。")).toBeNull();
+    expect(screen.getByRole("alert").textContent).toContain("回答を取得できませんでした");
+    expect(screen.getByRole("button", { name: "再試行" })).toBeTruthy();
+  });
+});
 
 describe("ChatbotPanel AI safety boundary", () => {
   it("never places a user question into downstream URL query parameters", () => {

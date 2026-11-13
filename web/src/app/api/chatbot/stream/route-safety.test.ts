@@ -8,12 +8,13 @@ const source = readFileSync(
 );
 
 describe("chatbot stream verification boundary", () => {
-  it("does not emit provider chunks before citation validation", () => {
+  it("marks provider chunks as provisional and withholds source metadata until validation", () => {
     const providerLoop = source.slice(
       source.indexOf("for await (const chunkResponse"),
       source.indexOf("// Phase 2 Layer 2"),
     );
-    expect(providerLoop).not.toContain('send("text"');
+    expect(providerLoop).toContain('send("text", { chunk: chunkText, provisional: true })');
+    expect(providerLoop).not.toContain('send("meta"');
   });
 
   it("never emits a generated claim solely because citation numbers pass", () => {

@@ -46,6 +46,7 @@ type ChatMessage = {
   id: string;
   role: "user" | "assistant";
   content: string;
+  provisional?: boolean;
   directAnswer?: string;
   substantiveAnswer?: string;
   assumptions?: string[];
@@ -442,7 +443,7 @@ export function ChatbotPanel({
                 setMessages((previous) =>
                   previous.map((message) =>
                     message.id === assistantId
-                      ? { ...message, content: streamedContent }
+                      ? { ...message, content: streamedContent, provisional: parsed.provisional === true }
                       : message,
                   ),
                 );
@@ -483,6 +484,7 @@ export function ChatbotPanel({
             ? {
                 ...message,
                 content: finalMeta.answer ?? directAnswer ?? streamedContent,
+                provisional: false,
                 directAnswer: finalMeta.directAnswer,
                 substantiveAnswer: finalMeta.substantiveAnswer,
                 assumptions: finalMeta.assumptions,
@@ -780,7 +782,12 @@ export function ChatbotPanel({
                       >
                         安衛法AIの回答 {assistantAnswerNumber}
                       </h2>
-                      {hasStructuredAnswer ? (
+                      {isStreaming && message.provisional ? (
+                        <div data-chatbot-provisional="">
+                          <p className="mb-1 text-xs text-slate-500 dark:text-slate-400">生成中・引用は未確認です</p>
+                          <p className="whitespace-pre-wrap">{message.content}</p>
+                        </div>
+                      ) : hasStructuredAnswer ? (
                         <div
                           className="space-y-3"
                           data-chatbot-structured-answer=""
@@ -809,7 +816,7 @@ export function ChatbotPanel({
                       ) : (
                         <span className="sr-only">回答を作成中</span>
                       )}
-                      {answer?.rest && (
+                      {!message.provisional && answer?.rest && (
                         <details className="mt-2 text-sm">
                           <summary className="min-h-11 cursor-pointer py-2 font-medium text-blue-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 dark:text-blue-300">
                             詳しく読む

@@ -34,7 +34,7 @@ vi.mock('@/lib/prisma',()=>{
   const prisma={...tx,$transaction:<T>(run:(db:typeof tx)=>Promise<T>)=>{const next=state.tail.then(()=>run(tx));state.tail=next.catch(()=>{});return next;}};
   return {prisma};
 });
-import { withUsage,withProviderBudget,checkBudget,jstKeys,maximumProviderCost,rebuildRequest } from './usage';
+import { withUsage,withProviderBudget,checkBudget,jstKeys,maximumProviderCost,measuredProviderCost,rebuildRequest } from './usage';
 import { __resetDevelopmentSharedStateForTests } from '@/lib/security/shared-state';
 const request=(id=crypto.randomUUID())=>new Request('https://example.test/api/chatbot',{method:'POST',headers:{Authorization:'Bearer mock_session','Content-Type':'application/json','X-Operation-ID':id},body:JSON.stringify({message:'足場の手すり',privacyConfirmed:true})});
 const answer=()=>Response.json({answer:'公式根拠を確認してください。',source_type:'rag',sources:[{text:'原文',url:'https://laws.e-gov.go.jp/law/mock',asOf:new Date().toISOString()}]});
@@ -181,5 +181,55 @@ describe('anonymous website visitors with the shared ledger on',()=>{
     expect(pause).toHaveBeenCalledWith({where:{month:jstKeys().month,salesPausedAt:null},data:{salesPausedAt:expect.any(Date)}});
     expect(state.budget).toEqual({committedYen:50000,reservedYen:0});
     expect(expireStopped).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('stream provider measured settlement',()=>{
+  const pricing={model:'gemini-3.8-flash',inputJpyPerMillion:160,outputJpyPerMillion:960,margin:1.5};
+  const bound={model:'gemini-3.8-flash',inputBytes:20000,maxOutputTokens:2048};
+  const usage={promptTokenCount:900,candidatesTokenCount:300,thoughtsTokenCount:50,totalTokenCount:1250};
+  const configure=()=>{
+    vi.stubEnv('MOBILE_AI_PRICED_MODEL',pricing.model);vi.stubEnv('MOBILE_AI_INPUT_JPY_PER_MILLION','160');vi.stubEnv('MOBILE_AI_OUTPUT_JPY_PER_MILLION','960');vi.stubEnv('MOBILE_AI_COST_MARGIN','1.5');
+  };
+  it('includes thinking tokens and uses the measured total without changing configured rates',()=>{
+    expect(measuredProviderCost(usage,pricing,9)).toEqual({amountYen:1,promptTokens:900,outputTokens:350});
+    expect(measuredProviderCost({...usage,thoughtsTokenCount:undefined,totalTokenCount:1700},pricing,9)?.outputTokens).toBe(800);
+    expect(measuredProviderCost({...usage,totalTokenCount:undefined},pricing,9)?.outputTokens).toBe(350);
+  });
+  it.each([
+    undefined, {}, {promptTokenCount:900,candidatesTokenCount:300},
+    {...usage,promptTokenCount:-1}, {...usage,candidatesTokenCount:NaN},
+    {...usage,thoughtsTokenCount:1.5}, {...usage,totalTokenCount:100},
+    {...usage,totalTokenCount:999999999},
+  ])('keeps the reserved maximum for unknown or invalid usage: %j',(value)=>{
+    expect(measuredProviderCost(value,pricing,9)).toBeNull();
+  });
+  it('keeps the reservation until the stream completes, then awaits settlement before resolving',async()=>{
+    configure();
+    let complete!:()=>void;
+    const generated=new Promise<void>(resolve=>{complete=resolve;});
+    let resolved=false;
+    const readUsage=vi.fn(()=>usage);
+    const result=withProviderBudget(async()=>{await generated;return 'complete';},bound,readUsage).then(value=>{resolved=true;return value;});
+    await vi.waitFor(()=>expect(state.reservations).toHaveLength(1));
+    expect(state.budget.reservedYen).toBe(maximumProviderCost(bound,pricing));
+    expect(state.budget.committedYen).toBe(0);
+    expect(resolved).toBe(false);expect(readUsage).not.toHaveBeenCalled();
+    complete();
+    expect(await result).toBe('complete');
+    expect(state.budget).toEqual({reservedYen:0,committedYen:1});
+    expect(state.reservations[0].status).toBe('committed');
+    expect(readUsage).toHaveBeenCalledTimes(1);
+  });
+  it('charges the maximum on stream failure even if partial usage was available',async()=>{
+    configure();const readUsage=vi.fn(()=>usage);
+    await expect(withProviderBudget(async()=>{throw new Error('interrupted');},bound,readUsage)).rejects.toThrow('interrupted');
+    expect(readUsage).not.toHaveBeenCalled();
+    expect(state.budget).toEqual({reservedYen:0,committedYen:maximumProviderCost(bound,pricing)});
+  });
+  it('still settles the maximum if the usage reader fails',async()=>{
+    configure();
+    await expect(withProviderBudget(async()=>'complete',bound,()=>{throw new Error('missing usage');})).resolves.toBe('complete');
+    expect(state.budget).toEqual({reservedYen:0,committedYen:maximumProviderCost(bound,pricing)});
   });
 });
