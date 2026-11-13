@@ -32,7 +32,30 @@ export function PrintReport({
   const summary = summarize(result);
   const cell = "border border-slate-400 px-2 py-1 align-top";
   return (
-    <section className="hidden text-[11px] leading-snug text-black print:block" aria-hidden="true">
+    <section data-cs-print-report className="hidden text-[11px] leading-snug text-black print:block">
+      <style>{`
+        @media print {
+          @page { size: A4; margin: 12mm; }
+          body:has([data-cs-print-report]) img[src*="mascot"],
+          body:has([data-cs-print-report]) [data-pet-companion] { display: none !important; }
+          [data-cs-print-report] { color: #0f172a; font-size: 10px; line-height: 1.5; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+          [data-cs-print-report] h1 { border-top: 6px solid #047857; border-bottom: 1px solid #047857; padding: 8px 0; color: #064e3b; font-size: 19px; letter-spacing: .04em; }
+          [data-cs-print-report] h2 { background: #e0f2fe; border-left: 5px solid #0369a1; padding: 4px 8px; color: #0c4a6e; break-after: avoid; }
+          [data-cs-print-report] h2:nth-of-type(2) { background: #fff7ed; border-color: #c2410c; color: #7c2d12; }
+          [data-cs-print-report] table { font-size: 9px; }
+          [data-cs-print-report] th, [data-cs-print-report] td { border: 1px solid #64748b; padding: 5px; overflow-wrap: anywhere; }
+          [data-cs-print-report] th { background: #e2e8f0; color: #0f172a; font-weight: 700; }
+          [data-cs-print-report] thead { display: table-header-group; }
+          [data-cs-print-report] tr, [data-cs-print-report] li { break-inside: avoid; }
+          [data-cs-print-report] tbody tr:nth-child(even) td { background: #f8fafc; }
+          [data-cs-print-report] [data-risk-level] { border: 1px solid #475569; border-left-width: 4px; border-radius: 3px; padding: 2px 5px; font-weight: 800; white-space: nowrap; color: #0f172a; }
+          [data-cs-print-report] [data-risk-level="I"] { background: #d1fae5; border-left-color: #047857; }
+          [data-cs-print-report] [data-risk-level^="II"] { background: #fef3c7; border-left-color: #a16207; }
+          [data-cs-print-report] [data-risk-level="III"] { background: #ffedd5; border-left-color: #c2410c; }
+          [data-cs-print-report] [data-risk-level="IV"] { background: #ffe4e6; border-left-color: #be123c; }
+          [data-cs-print-report] .cs-print-summary { display: flex; flex-wrap: wrap; gap: 7px 12px; margin: 8px 0; }
+        }
+      `}</style>
       <h1 className="text-lg font-bold">化学物質リスクアセスメント記録</h1>
       <p className="mt-1">
         作業名: {title}／実施日: {new Date().toLocaleDateString("ja-JP", { timeZone: "Asia/Tokyo" })}／実施者: ＿＿＿＿＿＿
@@ -84,11 +107,9 @@ export function PrintReport({
       </table>
 
       <h2 className="mt-3 font-bold">判定結果</h2>
-      <p className="mt-1">
-        {ROUTES.map((r) => (summary[r] ? `${CS_ROUTE_LABEL[r]} ${RISK_LEVEL_LABEL[summary[r]!]}` : null))
-          .filter(Boolean)
-          .join("／")}
-      </p>
+      <div className="cs-print-summary">
+        {ROUTES.map(r=>summary[r]?<span key={r}>{CS_ROUTE_LABEL[r]} <span data-risk-level={summary[r]}>{RISK_LEVEL_LABEL[summary[r]!]}</span></span>:null)}
+      </div>
       <table className="mt-1 w-full border-collapse">
         <thead>
           <tr>
@@ -126,14 +147,14 @@ export function PrintReport({
                 </td>
                 <td className={cell}>
                   {r.inhalation.status === "ok"
-                    ? `${RISK_LEVEL_LABEL[r.inhalation.level8h]}／${r.inhalation.levelShort ? RISK_LEVEL_LABEL[r.inhalation.levelShort] : "-"}`
+                    ? <><span data-risk-level={r.inhalation.level8h}>{RISK_LEVEL_LABEL[r.inhalation.level8h]}</span>／{r.inhalation.levelShort ? <span data-risk-level={r.inhalation.levelShort}>{RISK_LEVEL_LABEL[r.inhalation.levelShort]}</span> : "-"}</>
                     : "-"}
                 </td>
                 <td className={cell}>
-                  {r.dermal.status === "ok" ? `${RISK_LEVEL_LABEL[r.dermal.level]}（${formatNumber(r.dermal.absorption)}/${formatNumber(r.dermal.oelDermal)} mg/日）` : "-"}
+                  {r.dermal.status === "ok" ? <><span data-risk-level={r.dermal.level}>{RISK_LEVEL_LABEL[r.dermal.level]}</span>（{formatNumber(r.dermal.absorption)}/{formatNumber(r.dermal.oelDermal)} mg/日）</> : "-"}
                 </td>
-                <td className={cell}>{r.total.status === "ok" ? RISK_LEVEL_LABEL[r.total.level] : "-"}</td>
-                <td className={cell}>{r.physical.status === "ok" ? RISK_LEVEL_LABEL[r.physical.level] : "-"}</td>
+                <td className={cell}>{r.total.status === "ok" ? <span data-risk-level={r.total.level}>{RISK_LEVEL_LABEL[r.total.level]}</span> : "-"}</td>
+                <td className={cell}>{r.physical.status === "ok" ? <span data-risk-level={r.physical.level}>{RISK_LEVEL_LABEL[r.physical.level]}</span> : "-"}</td>
               </tr>
             );
           })}

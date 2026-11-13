@@ -555,7 +555,7 @@ export function ChatbotPanel({
     const composer = composerRef.current;
     if (composer) {
       composer.value = question;
-      composer.focus();
+      composer.focus({ preventScroll: true });
       composer.setSelectionRange(question.length, question.length);
     }
   }
@@ -621,7 +621,7 @@ export function ChatbotPanel({
     setLocalSafetyNotice(null);
     setAnswerFeedback({});
     clearChatHistory();
-    window.requestAnimationFrame(() => composerRef.current?.focus());
+    window.requestAnimationFrame(() => composerRef.current?.focus({ preventScroll: true }));
   }
 
   const isEmpty = messages.length === 0;
@@ -903,7 +903,7 @@ export function ChatbotPanel({
                         !(answer?.rest && hasEvidence) && (
                           <button
                             type="button"
-                            onClick={() => composerRef.current?.focus()}
+                            onClick={() => composerRef.current?.focus({ preventScroll: true })}
                             className="min-h-11 px-1 text-xs font-medium text-slate-500 hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 dark:text-slate-400 dark:hover:text-white"
                           >
                             条件を追加
@@ -960,7 +960,7 @@ export function ChatbotPanel({
                                 [message.id]: "mismatched",
                               }));
                               window.requestAnimationFrame(() =>
-                                composerRef.current?.focus(),
+                                composerRef.current?.focus({ preventScroll: true }),
                               );
                             }}
                             className="min-h-11 px-1 font-medium hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 dark:hover:text-white"

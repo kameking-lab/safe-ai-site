@@ -2,7 +2,7 @@ import { AsyncLocalStorage } from 'node:async_hooks';
 import { createHash,randomUUID } from 'node:crypto';
 import { Prisma } from '@prisma/client';
 import { billingDb,getEntitlement,lockMember,entitlementInTransaction } from './billing-service';
-import { product,type Plan } from './entitlement';
+import { product,canUseMemberQuota,type Plan } from './entitlement';
 import { member,json,isNativeRequest,webMemberId } from './http';
 import { inspectAiOutbound } from '../ai-outbound-safety';
 import { validateChatbotRequestBoundary } from '../server/chatbot-request-boundary';
@@ -118,8 +118,8 @@ export async function withProviderBudget<T>(run:()=>Promise<T>,bound:ProviderBou
     console.info(JSON.stringify({event:'ai_provider_settlement',model:bound.model,reservedYen:amount,committedYen,usageBasis:measured?'measured':'reserved-maximum',...(measured?{promptTokens:measured.promptTokens,outputTokens:measured.outputTokens}:{})}));
   }
 }
-export async function quota(userId:string,feature:AiFeature,tx?:Prisma.TransactionClient){
-  const db=tx??billingDb();const rights=await getEntitlement(userId);const {day,resetAt}=jstKeys();
+export async function quota(userId:string,feature:AiFeature,tx?:Prisma.TransactionClient,verifiedRights?:Awaited<ReturnType<typeof getEntitlement>>){
+  const db=tx??billingDb();const rights=verifiedRights??await getEntitlement(userId);const {day,resetAt}=jstKeys();
   if(!tx)await billingDb().$transaction(async session=>{await lockMember(session,userId);await recoverUsageLeases(session,userId);});
   const rows=await db.mobileUsageOperation.groupBy({by:['status'],where:{userId,feature,day},_count:true});
   const used=rows.find(r=>r.status==='completed')?._count??0;const reserved=(rows.find(r=>r.status==='reserved')?._count??0)+(rows.find(r=>r.status==='uncertain')?._count??0);const limit=rights.limits[feature];
@@ -134,7 +134,7 @@ async function reserve(request:Request,userId:string,feature:AiFeature){
   await billingDb().$transaction(async tx=>{await lockMember(tx,userId);await recoverUsageLeases(tx,userId);});
   return billingDb().$transaction(async tx=>{
     await lockMember(tx,userId);
-    const rights=await entitlementInTransaction(tx,userId);if(rights.syncState!=='verified')throw new Error('ENTITLEMENT_SYNC_PENDING');
+    const rights=await entitlementInTransaction(tx,userId);if(!canUseMemberQuota(rights))throw new Error('ENTITLEMENT_SYNC_PENDING');
     const previous=await tx.mobileUsageOperation.findUnique({where:{id}});
     if(previous){if(previous.userId!==userId || previous.feature!==feature || previous.requestHash!==requestHash)throw new Error('INVALID_REQUEST');
       if(previous.status==='completed' && previous.response)return {id,plan:rights.plan,replay:previous.response};throw new Error(previous.status==='released'?'OPERATION_RELEASED':'OPERATION_PENDING');}

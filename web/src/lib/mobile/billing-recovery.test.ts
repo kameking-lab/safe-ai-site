@@ -130,3 +130,14 @@ it('retains an Apple recovery even when a separate Stripe refresh fails',async()
  state.grants=[{userId:'member',provider:'app_store',environment:'PRODUCTION',expiresAt:new Date(0),checkedAt:new Date(0),revoked:false}];state.stripeFails=true;state.grantAvailable=true;
  expect((await getEntitlement('member')).source).toBe('app_store');expect(state.fetches).toBe(1);expect(state.stripeFetches).toBe(1);
 });
+it('shares overlapping entitlement reads without caching completed reads',async()=>{
+ state.grants=[{userId:'member',provider:'app_store',environment:'PRODUCTION',expiresAt:new Date(0),checkedAt:new Date(0),revoked:false}];state.grantAvailable=true;
+ const rights=await Promise.all(Array.from({length:5},()=>getEntitlement('member')));
+ expect(rights.every(r=>r.plan==='pro')).toBe(true);expect(state.fetches).toBe(1);
+ state.grants=[];expect((await getEntitlement('member')).plan).toBe('free');
+});
+it('identifies reconciliation failure before preparing or opening a store transaction',async()=>{
+ state.fetchFails=true;
+ await expect(prepareApplePurchase('member','immutable-member-id',crypto.randomUUID())).rejects.toThrow('BILLING_RECONCILE_UNAVAILABLE');
+ expect(state.created).toBe(0);
+});

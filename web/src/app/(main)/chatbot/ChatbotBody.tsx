@@ -14,6 +14,10 @@ export function ChatbotBody() {
   return (
     <PageContainer width="wide" className="chatbot-page-container">
       <style>{`
+        html:has([data-chatbot-page]), body:has([data-chatbot-page]) {
+          overflow-anchor: none;
+          scroll-behavior: auto;
+        }
         @media (max-width: 639px) {
           .chatbot-page-container { padding: 4px 0; }
           [data-chatbot-page-heading] { padding: 0 8px; margin-bottom: 4px; }

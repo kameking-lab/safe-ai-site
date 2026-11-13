@@ -1,6 +1,10 @@
 import product from './product-policy';
 export { product };
 export type Plan = 'free' | 'pro';
+/** Pending paid verification never grants Pro; the server can still enforce the ordinary free quota. */
+export function canUseMemberQuota(rights:{plan:Plan;syncState:string}){
+  return rights.syncState==='verified' || rights.plan==='free'&&rights.syncState==='pending';
+}
 export type EntitlementSnapshot = {
   plan: Plan; source: 'stripe' | 'app_store' | null; syncState: 'verified' | 'pending' | 'unavailable';
   expiresAt: string | null; appUserId: string; verifiedAt: string;

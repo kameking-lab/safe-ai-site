@@ -12,6 +12,7 @@ import { PAID_MODE } from "@/lib/paid-mode";
 import { webProSalesReady } from "@/lib/pro-sales";
 import { ProMembership } from "./pro-membership";
 import { getEntitlement } from "@/lib/mobile/billing-service";
+import { MembershipRefreshButton } from "@/components/membership-refresh-button";
 
 import { PageJsonLd } from "@/components/page-json-ld";
 export const metadata: Metadata = {
@@ -144,6 +145,7 @@ export default async function AccountPage({ searchParams }: Props) {
           </>
         )}
       </ConclusionCard>}
+      {userId && process.env.MOBILE_LEDGER_ENABLED === 'true' ? <MembershipRefreshButton /> : null}
 
       <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <div className="flex items-center justify-between gap-3">

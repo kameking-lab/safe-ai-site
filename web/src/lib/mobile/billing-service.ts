@@ -34,7 +34,14 @@ export async function entitlementInTransaction(tx:Prisma.TransactionClient,userI
   const pending=intent?.status==='pending';
   return {...rights,purchasePending:pending,purchaseIntentId:pending?intent.id:null,purchaseSource:pending?intent.source:null,purchaseStage:pending?intent.stage:null};
 }
+const entitlementReads=new Map<string,Promise<EntitlementSnapshot>>();
+/** Share overlapping reads only; never cache rights across a completed request/purchase. */
 export async function getEntitlement(userId:string) {
+  const pending=entitlementReads.get(userId);if(pending)return pending;
+  const work=readEntitlement(userId);entitlementReads.set(userId,work);
+  try{return await work;}finally{if(entitlementReads.get(userId)===work)entitlementReads.delete(userId);}
+}
+async function readEntitlement(userId:string) {
   const db=billingDb();const now=Date.now();
   const member=await db.$transaction(tx=>identity(tx,userId));
   const [legacy,grants,intent]=await Promise.all([db.subscription.findUnique({where:{userId}}),db.mobileGrant.findMany({where:{userId}}),db.mobilePurchaseIntent.findUnique({where:{userId}})]);
@@ -118,7 +125,10 @@ async function reserveInTransaction(tx:Prisma.TransactionClient,userId:string,so
 }
 /** One authoritative refresh and one locked transaction before opening StoreKit. */
 export async function prepareApplePurchase(userId:string,appUserId:string,attemptId:string){
-  await reconcile(userId);
+  try{await reconcile(userId);}catch(error){
+    if(error instanceof Error&&['ENTITLEMENT_SYNC_PENDING','PURCHASE_OWNED_BY_OTHER_ACCOUNT'].includes(error.message))throw error;
+    throw new Error('BILLING_RECONCILE_UNAVAILABLE');
+  }
   await assertProSalesOpen();
   return billingDb().$transaction(async tx=>{
     await lockMember(tx,userId);
