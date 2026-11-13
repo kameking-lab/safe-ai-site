@@ -14,7 +14,7 @@ test('no 110/119 emergency notice, and emergency wording is not blocked in the a
 test('server safety guidance is preserved on the home AI response',async({page,context})=>{
   await context.route(host+'/api/mobile/v1/capabilities',r=>r.fulfill({json:capability(),headers:cors}));
   await context.route(host+'/api/mobile/v1/ai',r=>r.fulfill({status:422,json:{error:{code:'SAFETY_BLOCKED',reason:'sensitive_data',message:'個人情報を匿名化してから送信してください。'}},headers:cors}));
-  await page.goto('/portal/');await page.getByRole('button',{name:'AI確認',exact:true}).click();await page.getByLabel('法令についての質問').fill('局所排気装置の点検条件');await page.getByRole('checkbox').check();await page.getByRole('button',{name:'確認して送信する'}).click();await expect(page.getByRole('status').filter({hasText:'個人情報を匿名化してから送信してください'})).toBeVisible();
+  await page.goto('/portal/');await page.getByRole('button',{name:'AI確認',exact:true}).click();await page.getByLabel('法令についての質問').fill('局所排気装置の点検条件');await page.getByRole('button',{name:'送信する',exact:true}).click();await expect(page.getByRole('status').filter({hasText:'個人情報を匿名化してから送信してください'})).toBeVisible();
 });
 test('all display preferences survive page changes, cold reload and print media',async({page})=>{
   await page.goto('/features/');const settings=page.locator('details[aria-label="全画面の表示設定"]');await settings.locator('summary').click();
