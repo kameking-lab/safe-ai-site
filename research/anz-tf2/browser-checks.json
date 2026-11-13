@@ -1,0 +1,168 @@
+{
+  "checkedAt": "2026-11-13T12:13:51.596Z",
+  "fixture": "Synthetic native bridge and server responses; no App Store/RevenueCat/AI calls",
+  "viewport": {
+    "width": 390,
+    "height": 844,
+    "safeAreaTop": 59
+  },
+  "scrolls": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "errors": [],
+  "storeKitCalls": 0,
+  "requests": [
+    {
+      "path": "/api/mobile/v1/billing/config",
+      "method": "GET",
+      "time": "2026-11-13T12:13:38.852Z"
+    },
+    {
+      "path": "/api/mobile/v1/capabilities",
+      "method": "GET",
+      "time": "2026-11-13T12:13:38.853Z"
+    },
+    {
+      "path": "/api/mobile/v1/capabilities",
+      "method": "GET",
+      "time": "2026-11-13T12:13:38.853Z"
+    },
+    {
+      "path": "/api/me/entitlements",
+      "method": "GET",
+      "time": "2026-11-13T12:13:38.859Z"
+    },
+    {
+      "path": "/api/mobile/v1/capabilities",
+      "method": "GET",
+      "time": "2026-11-13T12:13:39.075Z"
+    },
+    {
+      "path": "/api/mobile/v1/capabilities",
+      "method": "GET",
+      "time": "2026-11-13T12:13:39.180Z"
+    },
+    {
+      "path": "/api/mobile/v1/billing/config",
+      "method": "GET",
+      "time": "2026-11-13T12:13:39.232Z"
+    },
+    {
+      "path": "/api/me/entitlements",
+      "method": "GET",
+      "time": "2026-11-13T12:13:39.234Z"
+    },
+    {
+      "path": "/api/billing/purchase-intents",
+      "method": "POST",
+      "time": "2026-11-13T12:13:39.236Z"
+    },
+    {
+      "path": "/api/billing/store-outcome",
+      "method": "POST",
+      "time": "2026-11-13T12:13:39.240Z"
+    },
+    {
+      "path": "/api/mobile/v1/billing/config",
+      "method": "GET",
+      "time": "2026-11-13T12:13:39.672Z"
+    },
+    {
+      "path": "/api/me/entitlements",
+      "method": "GET",
+      "time": "2026-11-13T12:13:39.673Z"
+    },
+    {
+      "path": "/api/mobile/v1/account",
+      "method": "GET",
+      "time": "2026-11-13T12:13:39.708Z"
+    },
+    {
+      "path": "/api/mobile/v1/billing/config",
+      "method": "GET",
+      "time": "2026-11-13T12:13:40.264Z"
+    },
+    {
+      "path": "/api/me/entitlements",
+      "method": "GET",
+      "time": "2026-11-13T12:13:40.264Z"
+    },
+    {
+      "path": "/api/mobile/v1/billing/config",
+      "method": "GET",
+      "time": "2026-11-13T12:13:41.266Z"
+    },
+    {
+      "path": "/api/me/entitlements",
+      "method": "GET",
+      "time": "2026-11-13T12:13:41.268Z"
+    },
+    {
+      "path": "/api/mobile/v1/billing/config",
+      "method": "GET",
+      "time": "2026-11-13T12:13:44.077Z"
+    },
+    {
+      "path": "/api/me/entitlements",
+      "method": "GET",
+      "time": "2026-11-13T12:13:44.079Z"
+    },
+    {
+      "path": "/api/mobile/v1/auth/start",
+      "method": "POST",
+      "time": "2026-11-13T12:13:44.181Z"
+    },
+    {
+      "path": "/api/mobile/v1/auth/exchange",
+      "method": "POST",
+      "time": "2026-11-13T12:13:44.190Z"
+    },
+    {
+      "path": "/api/mobile/v1/billing/config",
+      "method": "GET",
+      "time": "2026-11-13T12:13:44.894Z"
+    },
+    {
+      "path": "/api/me/entitlements",
+      "method": "GET",
+      "time": "2026-11-13T12:13:44.895Z"
+    },
+    {
+      "path": "/api/mobile/v1/account",
+      "method": "GET",
+      "time": "2026-11-13T12:13:44.905Z"
+    },
+    {
+      "path": "/api/mobile/v1/capabilities",
+      "method": "GET",
+      "time": "2026-11-13T12:13:45.381Z"
+    },
+    {
+      "path": "/api/mobile/v1/capabilities",
+      "method": "GET",
+      "time": "2026-11-13T12:13:45.382Z"
+    },
+    {
+      "path": "/api/chemical-ra/substances",
+      "method": "GET",
+      "time": "2026-11-13T12:13:48.084Z"
+    },
+    {
+      "path": "/api/mobile/v1/billing/config",
+      "method": "GET",
+      "time": "2026-11-13T12:13:48.648Z"
+    },
+    {
+      "path": "/api/me/entitlements",
+      "method": "GET",
+      "time": "2026-11-13T12:13:49.777Z"
+    }
+  ]
+}

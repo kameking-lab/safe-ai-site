@@ -1,0 +1,18 @@
+{
+  "checkedAt": "2026-11-13T12:22:38.305Z",
+  "fixture": "Local release-branch production server; mocked AI and substance API; all external requests blocked",
+  "viewport": {
+    "width": 390,
+    "height": 844,
+    "safeAreaTop": 59
+  },
+  "scrolls": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "errors": []
+}
