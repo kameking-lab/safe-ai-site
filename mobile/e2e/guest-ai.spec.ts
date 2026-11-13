@@ -1,10 +1,12 @@
 import { mkdir } from 'node:fs/promises';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { test,expect } from './fixtures';
 import { capability } from '../tests/fixtures';
 import product from '../../web/src/lib/mobile/product-policy.json' with {type:'json'};
 
 const host='https://www.anzen-ai-portal.jp';
+const captureDir=fileURLToPath(new URL('../../research/anz-guest/',import.meta.url));
 const cors={'Access-Control-Allow-Origin':'http://127.0.0.1:3213','Access-Control-Allow-Credentials':'true','Access-Control-Allow-Headers':'content-type,x-anzen-native,x-operation-id,origin,accept'};
 
 test('native guest receives answers, a 429 offers one purchase button, and only that button starts login',async({page,context},info)=>{
@@ -79,8 +81,12 @@ test('native guest receives answers, a 429 offers one purchase button, and only 
     await expect(page.getByLabel('AIの利用枠')).toContainText(`残り${limit-i-1}／${limit}`);
     if(i===0){
       await expect(page.getByText('作業の種類と現場の条件を整理して確認します。',{exact:true})).toBeVisible();
-      const dir=path.resolve('../research/anz-guest');await mkdir(dir,{recursive:true});
-      if(info.project.name==='chromium-phone')await page.screenshot({path:path.join(dir,'iphone-guest-answer.png'),scale:'css'});
+      await page.getByRole('heading',{name:'安衛法AI',exact:true}).click();
+      await expect(page.locator('[data-ai-processing-note]')).toBeVisible();
+      await expect(page.getByRole('navigation',{name:'モバイル ボトムナビゲーション'})).toBeVisible();
+      await page.evaluate(async()=>{await document.fonts.ready;await new Promise<void>(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>resolve())));});
+      await mkdir(captureDir,{recursive:true});
+      if(info.project.name==='webkit-phone')await page.screenshot({path:path.join(captureDir,'iphone-guest-answer.png'),scale:'css',animations:'disabled'});
     }
   }
   expect(logins).toBe(0);await expect(page).toHaveURL(/\/chatbot\//);
@@ -88,7 +94,11 @@ test('native guest receives answers, a 429 offers one purchase button, and only 
   const offer=page.locator('[data-pro-upsell]');await expect(offer).toContainText('今日の無料回数はここまで');
   await expect(offer.locator('[data-pro-start]')).toHaveCount(1);await expect(offer.locator('[data-pro-start]')).toContainText('月額');
   expect(statuses).toEqual([...Array(limit).fill(200),429]);expect(logins).toBe(0);
-  if(info.project.name==='chromium-phone')await page.screenshot({path:path.resolve('../research/anz-guest/iphone-guest-limit.png'),scale:'css'});
+  await page.getByRole('heading',{name:'安衛法AI',exact:true}).click();
+  await expect(page.locator('[data-ai-processing-note]')).toBeVisible();
+  await expect(page.getByRole('navigation',{name:'モバイル ボトムナビゲーション'})).toBeVisible();
+  await page.evaluate(async()=>{await document.fonts.ready;await new Promise<void>(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>resolve())));});
+  if(info.project.name==='webkit-phone')await page.screenshot({path:path.join(captureDir,'iphone-guest-limit.png'),scale:'css',animations:'disabled'});
   await offer.locator('[data-pro-start]').click();await expect.poll(()=>logins).toBe(1);
   await expect(page).toHaveURL(/\/chatbot\//);
 });
