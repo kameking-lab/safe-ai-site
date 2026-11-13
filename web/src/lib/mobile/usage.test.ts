@@ -37,9 +37,8 @@ vi.mock('@/lib/prisma',()=>{
 });
 import { withUsage,withProviderBudget,checkBudget,jstKeys,maximumProviderCost,measuredProviderCost,rebuildRequest } from './usage';
 import { __resetDevelopmentSharedStateForTests } from '@/lib/security/shared-state';
-import { canUseMemberQuota } from './entitlement';
+import { canUseMemberQuota,product } from './entitlement';
 import * as entitlementPolicy from './entitlement';
-import product from './product-policy.json';
 const request=(id=crypto.randomUUID())=>new Request('https://example.test/api/chatbot',{method:'POST',headers:{Authorization:'Bearer mock_session','Content-Type':'application/json','X-Operation-ID':id},body:JSON.stringify({message:'足場の手すり',privacyConfirmed:true})});
 const answer=()=>Response.json({answer:'公式根拠を確認してください。',source_type:'rag',sources:[{text:'原文',url:'https://laws.e-gov.go.jp/law/mock',asOf:new Date().toISOString()}]});
 beforeEach(()=>{state.operations=[];state.tail=Promise.resolve();state.paid=false;state.signedIn=true;state.budget={committedYen:0,reservedYen:0};state.reservations=[];vi.stubEnv('MOBILE_LEDGER_ENABLED','true');});afterEach(()=>vi.unstubAllEnvs());
