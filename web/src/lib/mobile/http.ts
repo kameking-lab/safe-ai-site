@@ -7,8 +7,10 @@ export async function member(request:Request) {
   const id=(session?.user as {id?:string}|undefined)?.id;
   if(!id) throw new Error('UNAUTHORIZED');return id;
 }
-/** Native clients always present a Bearer session or declare themselves; they never take the anonymous web path. */
+/** A native marker identifies the client, not a signed-in member. */
 export function isNativeRequest(request:Request){return !!request.headers.get('authorization')?.startsWith('Bearer ') || request.headers.get('x-anzen-native')==='1';}
+/** A supplied credential must be verified, never silently downgraded to a guest. */
+export function isNativeGuestRequest(request:Request){return request.headers.get('x-anzen-native')==='1' && !request.headers.has('authorization');}
 /** Signed-in browser member id, or null for an anonymous web visitor. */
 export async function webMemberId():Promise<string|null>{const {auth}=await import('@/auth');const session=await auth();return (session?.user as {id?:string}|undefined)?.id ?? null;}
 export function failure(error:unknown) {
