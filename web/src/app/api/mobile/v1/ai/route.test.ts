@@ -7,10 +7,10 @@ vi.mock('@/lib/mobile/usage',()=>({anonymousQuota:async()=>({limit:3,used:1,rese
 vi.mock('@/app/api/chatbot/route',()=>({POST:async()=>{const response=calls.chatbot();return Response.json(response??{answer:'fixture answer',conditions:['fixture condition'],sources:[{law:'fixture',article:'1',text:'fixture original',url:'https://laws.e-gov.go.jp/law/fixture',asOf:'2026-11-10T00:00:00Z'}],source_type:'rag',scopeWarnings:['unverified citation'],confidence:'low',requiresHumanReview:true,effectiveDateStatus:{asOf:'2026-11-10',status:'unknown',label:'unverified'}});}}));
 import {POST} from './route';
 afterEach(()=>{vi.unstubAllEnvs();vi.clearAllMocks();});
-it.each(['fixture guidance',''])('reports answer-based accounting even without citations: %j',async answer=>{
+it.each([{answer:'fixture guidance',answerAccounting:'all-answers',charged:true},{answer:'',answerAccounting:'all-answers',charged:false},{answer:'fixture guidance',answerAccounting:undefined,charged:false}])('reports answer-based accounting without breaking older v2 clients: %j',async ({answer,answerAccounting,charged})=>{
  calls.chatbot.mockReturnValueOnce({answer,conditions:[],sources:[],source_type:'safety'});
- const response=await POST(new Request('https://example.test/api/mobile/v1/ai',{method:'POST',headers:{'X-Anzen-Native':'1','Content-Type':'application/json'},body:JSON.stringify({version:2,feature:'law_chat',input:'fixture question',requestId:crypto.randomUUID(),privacyConfirmed:true})}));
- expect(response.status).toBe(200);expect(await response.json()).toMatchObject({status:'fallback',charged:answer.length>0});
+ const response=await POST(new Request('https://example.test/api/mobile/v1/ai',{method:'POST',headers:{'X-Anzen-Native':'1','Content-Type':'application/json'},body:JSON.stringify({version:2,feature:'law_chat',input:'fixture question',requestId:crypto.randomUUID(),privacyConfirmed:true,answerAccounting})}));
+ expect(response.status).toBe(200);expect(await response.json()).toMatchObject({status:'fallback',charged});
 });
 it('preserves warnings, confidence and review requirements through the native adapter',async()=>{
  vi.stubEnv('AUTH_SECRET','synthetic-test-only');
