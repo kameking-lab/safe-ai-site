@@ -3,7 +3,7 @@ import { createHash,randomUUID } from 'node:crypto';
 import { Prisma } from '@prisma/client';
 import { billingDb,getEntitlement,lockMember,entitlementInTransaction } from './billing-service';
 import { product,canUseMemberQuota,type Plan } from './entitlement';
-import { member,json,isNativeRequest,webMemberId } from './http';
+import { member,json,isNativeRequest,isNativeGuestRequest,webMemberId } from './http';
 import { inspectAiOutbound } from '../ai-outbound-safety';
 import { validateChatbotRequestBoundary } from '../server/chatbot-request-boundary';
 import { consumeSharedRateLimit,getRateLimitSubject,peekSharedRateLimit } from '../security/shared-state';
@@ -16,13 +16,19 @@ class DailyLimitError extends Error{constructor(readonly plan:Plan){super('DAILY
 /** Pro can be bought from where the request came from: App Store in the app, Stripe on the web. */
 export async function upgradeAvailable(request:Request,plan:Plan|null){return plan!=='pro' && (isNativeRequest(request)?appStoreSalesReady():webProSalesReady()) && !(await proSalesStatus().catch(()=>({paused:true}))).paused;}
 /**
- * Anonymous web visitors get the same free daily allowance as a free member once Pro is on sale,
+ * Anonymous web and app visitors share the free daily allowance once web Pro is on sale,
  * counted per visitor (IP-derived, HMAC'd) for the JST day. Before sales open this is a no-op, so
  * the site keeps its free-to-browse behaviour with only the abuse limits.
  * 送信前は上限の確認だけ（増やさない）。数えるのは回答（生成または根拠なしの助言）が返った時だけ
  * ＝入力不備・同意なし・文字コード違反などで断った送信は数えない（recordAnonymousAnswer）。
  */
 function freeDailyPolicy(feature:AiFeature){const {day}=jstKeys();return {routeKey:`free-${feature}-${day}`,limit:product.limits.free[feature],windowMs:86400000};}
+/** Display only: execution rechecks this same server-side counter in withUsage. */
+export async function anonymousQuota(request:Request,feature:AiFeature){
+  const policy=freeDailyPolicy(feature);const {resetAt}=jstKeys();
+  const remaining=webProSalesReady()?(await peekSharedRateLimit({policy,rawSubject:getRateLimitSubject(request)})).remaining:policy.limit;
+  return {limit:policy.limit,used:policy.limit-remaining,reserved:0,remaining,resetAt};
+}
 export async function anonymousFreeAllowance(request:Request,feature:AiFeature){
   if(!webProSalesReady())return null;
   const {resetAt}=jstKeys();const policy=freeDailyPolicy(feature);
@@ -178,17 +184,17 @@ export async function withUsage(request:Request,feature:AiFeature,run:(request:R
     if(request.headers.get('x-anzen-native')==='1')return json({error:{code:'ENTITLEMENT_SYNC_PENDING',message:'サーバーの共通利用枠を確認できません。'}},503);
     return run(request);
   }
-  // Anonymous web visitors keep the pre-ledger route behaviour (its own anonymous
+  // Anonymous web and native visitors share the route's anonymous
   // rate limits and counts). Per-member quotas do not apply to them, but every
   // provider call still reserves against the shared monthly budget as plan 'free'.
-  if(!isNativeRequest(request)){
-    let signedIn:string|null;
-    try{signedIn=await webMemberId();}catch{signedIn=null;}
+  if(!isNativeRequest(request) || isNativeGuestRequest(request)){
+    let signedIn:string|null=null;
+    if(!isNativeGuestRequest(request)){try{signedIn=await webMemberId();}catch{signedIn=null;}}
     if(!signedIn){
       let limited:Response|null;
       try{limited=await anonymousFreeAllowance(request,feature);}catch{return json({error:{code:'ENTITLEMENT_SYNC_PENDING',message:'無料枠を確認できないため、いまはAIを止めています。時間をおいてお試しください。'}},503);}
       if(limited)return limited;
-      return afterAnswer(await run(request),feature,()=>recordAnonymousAnswer(request,feature));
+      return context.run({plan:'free'},async()=>afterAnswer(await run(request),feature,()=>recordAnonymousAnswer(request,feature)));
     }
   }
   const chunks:Uint8Array[]=[];let bytes=0;const reader=request.body?.getReader();
