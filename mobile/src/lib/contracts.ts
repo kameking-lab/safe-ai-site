@@ -36,6 +36,7 @@ export const quotaSchema = z.object({
 export const capabilitySchema = z.object({
   version: z.literal(1), expiresAt: isoDate,
   plan: z.enum(['free', 'pro']), session: z.enum(['anonymous','member']), csrfToken: z.string().min(32).max(256),
+  upgrade: z.boolean().optional(),
   safety: z.object({ originalEvidence: z.literal(true), dangerousAssertionsBlocked: z.literal(true),
     sharedMonthlyBudgetYen: z.literal(50000), serverSideEnforced: z.literal(true) }),
   features: z.object({

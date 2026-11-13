@@ -7,7 +7,7 @@ import { inspectAiOutbound } from '@/lib/ai-outbound-safety';
 export const SITE = 'https://www.anzen-ai-portal.jp';
 const PATHS = ['/api/signage-data', '/api/revisions', '/api/mobile/v1/statistics', '/api/mobile/v1/capabilities', '/api/mobile/v1/ai'] as const;
 export class ApiError extends Error {
-  constructor(public code: string, public retryAfter?: string, public resetAt?: string, guidance?: string, public reason?: string) {
+  constructor(public code: string, public retryAfter?: string, public resetAt?: string, guidance?: string, public reason?: string, public upgrade=false) {
     super(['SAFETY_BLOCKED','CONSENT_REQUIRED'].includes(code) && guidance ? guidance : errorMessage(code, retryAfter, resetAt));
   }
 }
@@ -32,9 +32,9 @@ export const transport: Transport = async (path, body, extraHeaders = {}) => {
 export async function request(path: string, send: Transport = transport, body?: unknown, headers?: Record<string, string>) {
   const response = await send(path, body, headers);
   if (response.status < 200 || response.status >= 300) {
-    const parsed = z.object({ error: z.object({ code: z.string(), message: z.string().max(8000).optional(), reason:z.string().optional(), resetAt: isoDate.optional() }) }).safeParse(response.data);
+    const parsed = z.object({ error: z.object({ code: z.string(), message: z.string().max(8000).optional(), reason:z.string().optional(), resetAt: isoDate.optional(), upgrade:z.boolean().optional() }) }).safeParse(response.data);
     const retry = Object.entries(response.headers).find(([k]) => k.toLowerCase() === 'retry-after')?.[1];
-    throw new ApiError(parsed.success ? parsed.data.error.code : 'UNAVAILABLE', retry && /^\d{1,5}$/.test(retry) ? retry : undefined, parsed.success ? parsed.data.error.resetAt : undefined, parsed.success ? parsed.data.error.message : undefined, parsed.success ? parsed.data.error.reason : undefined);
+    throw new ApiError(parsed.success ? parsed.data.error.code : 'UNAVAILABLE', retry && /^\d{1,5}$/.test(retry) ? retry : undefined, parsed.success ? parsed.data.error.resetAt : undefined, parsed.success ? parsed.data.error.message : undefined, parsed.success ? parsed.data.error.reason : undefined,parsed.success && parsed.data.error.upgrade===true);
   }
   return response.data;
 }
@@ -82,7 +82,7 @@ export async function executeAi(feature: Feature, input: string, requestId: stri
   const capability = await loadCapabilities(send).catch(error => {
     if(error instanceof ApiError && !['UNAVAILABLE','ENTITLEMENT_SYNC_PENDING'].includes(error.code))throw error;
     // A display/preflight failure must not grant rights or prevent the server from checking them.
-    // Only authenticated native law chat can proceed without browser CSRF proof.
+    // Native law chat can ask the server to enforce either member or guest limits.
     if(feature!=='law_chat' || !Capacitor.isNativePlatform())throw new ApiError('SAFETY_UNVERIFIED');
     return null;
   });

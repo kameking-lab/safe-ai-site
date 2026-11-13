@@ -24,6 +24,13 @@ describe('canonical API transport in the native bundle',()=>{
     await createSiteFetch(vi.fn())('/api/chatbot',{method:'POST',headers:{Authorization:'Bearer obsolete'},body:'{}'});
     const headers=mock.request.mock.calls[0][0].headers;expect(headers['x-operation-id']).toMatch(/^[0-9a-f-]{36}$/);expect(headers.authorization).toBe('Bearer mock_session');
   });
+  it('sends a signed-out native AI request without credentials or starting login and preserves 429 purchase guidance',async()=>{
+    mock.token.mockResolvedValue(null);
+    mock.request.mockResolvedValue({url:site+'/api/chatbot',status:429,headers:{'Content-Type':'application/json'},data:{error:{code:'DAILY_LIMIT_REACHED',upgrade:true}}});
+    const result=await createSiteFetch(vi.fn())('/api/chatbot',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});
+    expect(result.status).toBe(429);expect(await result.json()).toMatchObject({error:{upgrade:true}});
+    const headers=mock.request.mock.calls[0][0].headers;expect(headers['x-anzen-native']).toBe('1');expect(headers.authorization).toBeUndefined();
+  });
   it('preserves request data in the browser preview too',async()=>{
     mock.native=false;const original=vi.fn(async()=>new Response('{}'));
     await createSiteFetch(original)(new Request(origin+'/api/sds/search?q=test',{method:'POST',headers:{'x-test':'kept'},body:'payload'}),{cache:'no-store'});

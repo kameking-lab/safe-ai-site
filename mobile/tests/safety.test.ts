@@ -73,10 +73,18 @@ describe('server-enforced safety boundary', () => {
     await expect(executeAi('law_chat', 'question', id, send)).rejects.toThrow('最新版に更新');
   });
   it('keeps burst, daily, monthly and unavailable errors distinct', async () => {
+    await expect(request('/api/mobile/v1/ai',async()=>({status:429,data:{error:{code:'DAILY_LIMIT_REACHED',upgrade:true}},headers:{}}))).rejects.toMatchObject({code:'DAILY_LIMIT_REACHED',upgrade:true});
     await expect(request('/api/mobile/v1/ai', async () => ({ status: 429, data: { error: { code: 'BURST_LIMITED' } }, headers: { 'Retry-After': '45' } }))).rejects.toThrow('45秒');
     expect(errorMessage('AI_BUDGET_STOPPED')).not.toContain('0時');
     expect(errorMessage('FEATURE_UNAVAILABLE')).toContain('消費しません');
     expect(quotaLow(1, 3)).toBe(false); expect(quotaLow(10, 50)).toBe(true); expect(quotaLow(2, 10)).toBe(true);
+  });
+  it('executes a guest capability with the same free limits and does not require a member session',async()=>{
+    const guest=capability();guest.session='anonymous';guest.plan='free';
+    expect(canExecute(guest,'law_chat')).toBe(true);
+    const send=vi.fn(async(path:string)=>({status:200,data:path.includes('capabilities')?guest:aiResult(id),headers:{}}));
+    expect((await executeAi('law_chat','question',id,send)).requestId).toBe(id);
+    expect(send).toHaveBeenCalledTimes(2);
   });
   it('restricts all API calls to known site paths and safe external protocols', async () => {
     await expect(transport('https://evil.example/')).rejects.toThrow();

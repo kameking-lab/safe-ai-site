@@ -13,7 +13,6 @@ export async function nativeChatResponse(body: string, headers: Headers, signal:
   if (signal.aborted) throw new DOMException('Aborted', 'AbortError');
   const id = crypto.randomUUID();
   let controller: ReadableStreamDefaultController<Uint8Array>;
-  let listener: PluginListenerHandle | undefined;
   let finished = false;
   let responseStarted = false;
   let resolveResponse!: (response: Response) => void;
@@ -33,7 +32,7 @@ export async function nativeChatResponse(body: string, headers: Headers, signal:
     window.dispatchEvent(new Event('anzen-usage-changed'));
   }
   function abort() { finish(new DOMException('Aborted','AbortError')); void sdk.cancel({id}).catch(()=>{}); }
-  listener = await sdk.addListener('response', event => {
+  const listener = await sdk.addListener('response', event => {
     if (event.id !== id || finished) return;
     if (event.kind === 'headers') {
       responseStarted=true;
