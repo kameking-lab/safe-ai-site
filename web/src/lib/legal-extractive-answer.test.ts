@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { LawArticle } from "@/data/laws";
 import {
   buildServiceFirstLegalAnswer,
@@ -7,6 +7,14 @@ import {
   expandVerifiedLegalEvidenceArticles,
   legalProvisionUnitForQuery,
 } from "./legal-extractive-answer";
+
+// 回答の組み立ては収録根拠の再照合時点で検証する。明示した now は各テストを優先。
+// 鮮度の期限切れ・未確認時の保留は legal-current-revision.test.ts で別途検証する。
+beforeEach(() => {
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(new Date("2026-10-12T00:00:00+09:00"));
+});
+afterEach(() => vi.useRealTimers());
 
 function article(overrides: Partial<LawArticle> = {}): LawArticle {
   return {

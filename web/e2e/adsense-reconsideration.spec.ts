@@ -15,7 +15,9 @@ test.beforeEach(async ({ context }) => {
 test("@smoke 法令AIは低い画面でも入力欄を使える", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 480 });
   await page.goto("/chatbot");
-  await expect(page.getByText("作業の言葉から、関連する条文と確認条件を探せます。", { exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "安衛法AI", exact: true })).toBeVisible();
+  const description = page.getByText("作業の言葉から、関連する条文と確認条件を探せます。", { exact: true });
+  await expect(description).toBeHidden();
   const input = page.locator("[data-chatbot-composer] textarea");
   await input.scrollIntoViewIfNeeded();
   await input.fill("足場の手すりは？");
@@ -26,6 +28,8 @@ test("@smoke 法令AIは低い画面でも入力欄を使える", async ({ page 
     return rect.height >= 32 && rect.top >= frame.top - 1 && rect.bottom <= frame.bottom + 1;
   });
   expect(contained).toBe(true);
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await expect(description).toBeVisible();
 });
 
 test("@smoke 評価ページは生成回答の機械チェックを現在の方式として示す", async ({ page }) => {

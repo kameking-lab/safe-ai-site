@@ -107,7 +107,7 @@ function tokyoYmd(date: Date): string {
   }).format(date);
 }
 
-export function levelFromHourlyToday(payload: HourlyPayload, now: Date): MapAlertLevel {
+function levelFromHourlyToday(payload: HourlyPayload, now: Date): MapAlertLevel {
   const hourly = payload.hourly;
   const times = hourly?.time ?? [];
   if (times.length === 0 || !hasExpectedTokyoMetadata(payload)) return "none";

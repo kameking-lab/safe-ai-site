@@ -5,6 +5,7 @@ async function choose(page: Page, group: string, option: RegExp) {
 }
 
 async function answerBasics(page: Page) {
+  await choose(page, "製品の状態", /^液体$/);
   await choose(page, "1回（1日）に扱う量", /中量/);
   await choose(page, "換気", /窓・換気扇/);
   await page.getByLabel(/1日の作業時間/).selectOption("8");

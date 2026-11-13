@@ -13,8 +13,6 @@ type RequestBody = {
   aiProviderConsent?: boolean;
 };
 
-export const SAFETY_ALERT_GENERATION_ENABLED = false;
-
 const VALID_KINDS = new Set<AlertKind>([
   "fatal-accident",
   "weather",

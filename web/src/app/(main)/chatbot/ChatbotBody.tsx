@@ -12,9 +12,20 @@ import {
 
 export function ChatbotBody() {
   return (
-    <PageContainer width="wide">
+    <PageContainer width="wide" className="chatbot-page-container">
       <style>{`
-        html.js-enabled [data-chatbot-page] .chatbot-client-enhanced {
+        html:has([data-chatbot-page]), body:has([data-chatbot-page]) {
+          overflow-anchor: none;
+          scroll-behavior: auto;
+        }
+        @media (max-width: 639px) {
+          .chatbot-page-container { padding: 4px 0; }
+          [data-chatbot-page-heading] { padding: 0 8px; margin-bottom: 4px; }
+          [data-chatbot-page-heading] h1 { font-size: 18px; }
+          [data-chatbot-secondary] { display: none; }
+        }
+        html.js-enabled [data-chatbot-page] .chatbot-client-enhanced,
+        [data-chatbot-page] .chatbot-client-enhanced:has([data-chatbot-hydrated="true"]) {
           display: flex;
           min-height: 0;
           flex: 1 1 0%;
@@ -35,7 +46,7 @@ export function ChatbotBody() {
         className="mx-auto flex min-h-0 w-full max-w-3xl flex-col"
         aria-labelledby="chatbot-title"
       >
-        <header className="mb-2 shrink-0 px-1 sm:mb-3">
+        <header data-chatbot-page-heading="" className="mb-2 shrink-0 px-1 sm:mb-3">
           <div className="flex flex-wrap items-center gap-2">
             <h1
               id="chatbot-title"
@@ -47,7 +58,7 @@ export function ChatbotBody() {
               法令本文検索
             </StatusBadge>
           </div>
-          <div className="mt-1 flex min-h-11 flex-wrap items-center gap-3">
+          <div data-chatbot-secondary="" className="mt-1 flex min-h-11 flex-wrap items-center gap-3">
             <p className="min-w-0 flex-1 text-xs text-slate-600 dark:text-slate-300 sm:text-sm">
               {LEGAL_SEARCH_MODE_SUMMARY}
             </p>

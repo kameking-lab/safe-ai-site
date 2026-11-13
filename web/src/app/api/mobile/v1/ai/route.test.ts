@@ -20,3 +20,11 @@ it('explicitly refuses legacy safety assertions before calling AI or usage',asyn
  expect(response.status).toBe(426);expect((await response.json()).error.code).toBe('CLIENT_UPDATE_REQUIRED');
  expect(calls.chatbot).not.toHaveBeenCalled();expect(calls.quota).not.toHaveBeenCalled();
 });
+it('allows authenticated native requests without display CSRF proof while rejecting cookie requests without it',async()=>{
+ vi.stubEnv('AUTH_SECRET','synthetic-test-only');
+ const body=JSON.stringify({version:2,feature:'law_chat',input:'fixture question',requestId:crypto.randomUUID(),privacyConfirmed:true});
+ const denied=await POST(new Request('https://example.test/api/mobile/v1/ai',{method:'POST',body}));
+ expect(denied.status).toBe(503);expect(calls.chatbot).not.toHaveBeenCalled();
+ const native=await POST(new Request('https://example.test/api/mobile/v1/ai',{method:'POST',headers:{authorization:'Bearer synthetic-session'},body}));
+ expect(native.status).toBe(200);expect(calls.chatbot).toHaveBeenCalledTimes(1);
+});

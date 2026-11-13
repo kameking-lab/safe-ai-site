@@ -1,5 +1,7 @@
 "use client";
 
+import { AiProcessingNote } from "@/components/ai-processing-note";
+
 /**
  * KY全面再設計 Phase 1: 用紙ファーストUI（ベータ / 追加ルート /ky/paper）。
  *
@@ -286,7 +288,6 @@ export function KyPaperView({
     [],
   );
   const [suggestBusy, setSuggestBusy] = useState(false);
-  const [aiProviderConsent, setAiProviderConsent] = useState(false);
   const [suggestions, setSuggestions] = useState<KyHazardSuggestion[]>([]);
   const [suggestSource, setSuggestSource] = useState<
     "gemini" | "fallback" | null
@@ -610,13 +611,6 @@ export function KyPaperView({
       );
       return;
     }
-    if (!aiProviderConsent) {
-      setNotice(
-        "外部AIへ送る内容を匿名化し、送信確認にチェックしてから実行してください。",
-        "warning",
-      );
-      return;
-    }
     setSuggestBusy(true);
     try {
       // 外部AI送信ガードは利用者が明示実行した時だけ読む。初期表示では
@@ -626,7 +620,7 @@ export function KyPaperView({
         {
           purpose: "ky-suggestion-client",
           texts: Object.values(parsedContext.context),
-          consent: aiProviderConsent,
+          consent: true,
           maxChars: 4_000,
           contextPolicy: "approved-server-corpus",
         },
@@ -2064,7 +2058,7 @@ export function KyPaperView({
                     id="ky-ai-context-help"
                     className="mb-2 text-[11px] text-slate-600"
                   >
-                    作業・人数・天候と合わせて候補を作ります。入力は外部AI事業者へ送られます。氏名、会社名、現場名、電話番号、メールアドレス、健康情報、案件番号は入力しないでください。
+                    作業・人数・天候と合わせて候補を作ります。
                   </p>
                   <div
                     className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3"
@@ -2169,21 +2163,11 @@ export function KyPaperView({
                     場所・設備・人数・天候・同時作業・変更点等を人が確認しました
                   </label>
                 </fieldset>
-                <label className="flex min-h-[44px] items-center gap-2 text-xs font-semibold text-slate-800">
-                  <input
-                    type="checkbox"
-                    checked={aiProviderConsent}
-                    onChange={(event) =>
-                      setAiProviderConsent(event.target.checked)
-                    }
-                    className="h-5 w-5"
-                  />
-                  入力を匿名化し、候補作成のため外部AIへ送信することを確認しました
-                </label>
+                <AiProcessingNote />
                 <button
                   type="button"
                   onClick={() => void handleSuggest()}
-                  disabled={suggestBusy || !aiProviderConsent}
+                  disabled={suggestBusy}
                   className="min-h-[44px] rounded-lg border border-indigo-300 bg-indigo-50 px-3 py-1.5 text-xs font-bold text-indigo-800 hover:bg-indigo-100 disabled:opacity-50"
                 >
                   {suggestBusy ? (

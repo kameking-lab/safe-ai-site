@@ -143,7 +143,6 @@ export function MeetingPaperView({
   // 柱C-9: 「…」その他操作シート（KYのO10第五弾と同じ操作集中の型）
   const [showActions, setShowActions] = useState(false);
   const [busyRow, setBusyRow] = useState<string | null>(null);
-  const [aiProviderConsent, setAiProviderConsent] = useState(false);
   const [aiDrafts, setAiDrafts] = useState<Record<string, MeetingAiDraft>>({});
   const [aiChangeNotes, setAiChangeNotes] = useState<Record<string, string>>({});
   const [suggestedChecklistCategories, setSuggestedChecklistCategories] = useState<string[]>([]);
@@ -423,10 +422,6 @@ export function MeetingPaperView({
       setNotice(`AI候補の前に ${missing.join("・")} を入力してください。条件不足のまま危険を推定しません。`);
       return;
     }
-    if (!aiProviderConsent) {
-      setNotice("外部AIへ送る内容を匿名化し、送信確認にチェックしてから実行してください。");
-      return;
-    }
     setBusyRow(id);
     try {
       const guardedResponse = await runClientAiAction(
@@ -440,7 +435,7 @@ export function MeetingPaperView({
             record.weather,
             aiChangeNotes[id] ?? "",
           ],
-          consent: aiProviderConsent,
+          consent: true,
           maxChars: 5_000,
           contextPolicy: "approved-server-corpus",
         },

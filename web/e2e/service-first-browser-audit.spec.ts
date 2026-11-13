@@ -647,7 +647,13 @@ test("chatbot: composer, question chips, quick reply and source details remain o
   await page.setViewportSize({ width: 390, height: 500 });
   const keyboardViewportBox = await composer.boundingBox();
   expect(keyboardViewportBox).not.toBeNull();
-  if (enforce) expect(keyboardViewportBox!.y + keyboardViewportBox!.height).toBeLessThanOrEqual(502);
+  if (enforce) {
+    // viewport変更のイベントと同期した高さの反映を待ち、同じ画面内条件を検査する。
+    await expect.poll(async () => {
+      const box = await composer.boundingBox();
+      return box ? box.y + box.height : Infinity;
+    }).toBeLessThanOrEqual(502);
+  }
   await page.setViewportSize({ width: 390, height: 844 });
   await input.fill("労働安全衛生法第61条を示してください");
   await consentToChatbot(page);

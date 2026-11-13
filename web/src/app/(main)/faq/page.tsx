@@ -47,7 +47,7 @@ export default function FAQHubPage() {
             <span aria-hidden="true">→</span>
           </Link>
           <Link
-            href="/qualifications"
+            href="/education-certification/finder"
             className="flex min-h-14 items-center justify-between rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-bold text-slate-900"
           >
             資格・教育の条件確認

@@ -58,7 +58,7 @@ export default function DiversityRemotePage() {
       resources={[
         { label: "多様性と安全 トップ", href: "/diversity" },
         { label: "メンタル・カスハラ", href: "/mental-health" },
-        { label: "Eラーニング（安全教育）", href: "/elearning" },
+        { label: "Eラーニング（安全教育）", href: "/e-learning/safety" },
       ]}
       officialRefs={[
         {
