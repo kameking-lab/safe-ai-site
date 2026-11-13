@@ -61,5 +61,5 @@ export const aiResultSchema = z.object({
   effectiveDateStatus: z.object({asOf:z.string().nullable(),status:z.enum(['current','future','past','unknown']),label:z.string()}).optional(),
   usage: quotaSchema, charged: z.boolean(),
 }).refine(r => r.status !== 'completed' || r.evidence.length > 0, 'missing original evidence')
-  .refine(r => r.status === 'completed' || !r.charged, 'non-result charged');
+  .refine(r => !r.charged || r.status === 'completed' || (r.feature === 'law_chat' && r.status === 'fallback' && r.answer.trim().length > 0), 'non-result charged');
 export type AiResult = z.infer<typeof aiResultSchema>;

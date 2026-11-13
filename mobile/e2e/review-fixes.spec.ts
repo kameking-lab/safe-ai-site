@@ -1,6 +1,6 @@
 import type { BrowserContext } from '@playwright/test';
 import { test,expect } from './fixtures';
-import { capability } from '../tests/fixtures';
+import { capability,aiResult } from '../tests/fixtures';
 import product from '../../web/src/lib/mobile/product-policy.json' with {type:'json'};
 const host='https://www.anzen-ai-portal.jp';
 const cors={'Access-Control-Allow-Origin':'http://127.0.0.1:3213','Access-Control-Allow-Credentials':'true','Access-Control-Allow-Headers':'content-type,x-anzen-native,x-anzen-csrf,authorization'};
@@ -15,6 +15,38 @@ test('server safety guidance is preserved on the home AI response',async({page,c
   await context.route(host+'/api/mobile/v1/capabilities',r=>r.fulfill({json:capability(),headers:cors}));
   await context.route(host+'/api/mobile/v1/ai',r=>r.fulfill({status:422,json:{error:{code:'SAFETY_BLOCKED',reason:'sensitive_data',message:'個人情報を匿名化してから送信してください。'}},headers:cors}));
   await page.goto('/portal/');await page.getByRole('button',{name:'AI確認',exact:true}).click();await page.getByLabel('法令についての質問').fill('局所排気装置の点検条件');await page.getByRole('button',{name:'送信する',exact:true}).click();await expect(page.getByRole('status').filter({hasText:'個人情報を匿名化してから送信してください'})).toBeVisible();
+});
+
+test('portal displays a counted fallback answer without claiming it is free',async({page,context})=>{
+  await context.route(host+'/api/mobile/v1/capabilities',r=>r.fulfill({json:capability(),headers:cors}));
+  await context.route(host+'/api/mobile/v1/ai',r=>r.fulfill({json:{...aiResult(r.request().postDataJSON().requestId),status:'fallback',evidence:[],charged:true},headers:cors}));
+  await page.goto('/portal/');await page.getByRole('button',{name:'AI確認',exact:true}).click();
+  await page.getByLabel('法令についての質問').fill('局所排気装置の点検条件');await page.getByRole('button',{name:'送信する',exact:true}).click();
+  await expect(page.getByLabel('AI回答')).toContainText('適用条件を原文で確認してください。');
+  await expect(page.getByText('回数は消費しません。',{exact:false})).toHaveCount(0);
+});
+
+test('portal guest purchase stays on the AI screen and refreshes immediately when Pro is verified',async({page,context})=>{
+  const cap=capability();cap.upgrade=true;
+  cap.features.law_chat.quota={...cap.features.law_chat.quota,used:product.limits.free.law_chat,remaining:0};
+  let logins=0;
+  await context.route(host+'/api/mobile/v1/capabilities',r=>r.fulfill({json:cap,headers:cors}));
+  await context.route(host+'/api/mobile/v1/auth/start',r=>{
+    logins++;
+    // A failed login remains on the original page and can be retried.
+    return r.fulfill({status:503,json:{error:{code:'UNAVAILABLE'}},headers:cors});
+  });
+  await page.goto('/portal/');await page.getByRole('button',{name:'AI確認',exact:true}).click();
+  const offer=page.locator('[data-pro-upsell]');await expect(offer).toBeVisible();
+  await expect(offer.locator('[data-pro-start]')).toHaveCount(1);expect(logins).toBe(0);
+  await offer.locator('[data-pro-start]').click();await expect.poll(()=>logins).toBe(1);
+  await expect(page).toHaveURL(/\/portal\//);await expect(page.getByLabel('法令についての質問')).toBeVisible();
+  cap.plan='pro';cap.session='member';cap.upgrade=false;
+  cap.features.law_chat.quota={...cap.features.law_chat.quota,limit:product.limits.pro.law_chat,used:0,remaining:product.limits.pro.law_chat};
+  await page.evaluate(()=>window.dispatchEvent(new Event('anzen-usage-changed')));
+  await expect(offer).toHaveCount(0);
+  await page.getByLabel('法令についての質問').fill('局所排気装置の点検条件');
+  await expect(page.getByRole('button',{name:'送信する',exact:true})).toBeEnabled();
 });
 test('all display preferences survive page changes, cold reload and print media',async({page})=>{
   await page.goto('/features/');const settings=page.locator('details[aria-label="全画面の表示設定"]');await settings.locator('summary').click();

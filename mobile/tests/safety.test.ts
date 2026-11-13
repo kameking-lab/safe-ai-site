@@ -64,6 +64,9 @@ describe('server-enforced safety boundary', () => {
     const r = aiResult(id); expect(aiResultSchema.safeParse({ ...r, evidence: [] }).success).toBe(false);
     expect(aiResultSchema.safeParse({ ...r, status: 'unavailable', charged: true }).success).toBe(false);
     expect(aiResultSchema.safeParse({ ...r, status: 'fallback', charged: false, evidence: [] }).success).toBe(true);
+    expect(aiResultSchema.safeParse({ ...r, status: 'fallback', charged: true, evidence: [] }).success).toBe(true);
+    expect(aiResultSchema.safeParse({ ...r, status: 'fallback', charged: true, evidence: [], answer: ' ' }).success).toBe(false);
+    expect(aiResultSchema.safeParse({ ...r, feature: 'chemical_ra', status: 'fallback', charged: true, evidence: [] }).success).toBe(false);
   });
   it('rejects the old result contract and shows actionable update guidance', async () => {
     expect(aiResultSchema.safeParse({ ...aiResult(id), version: 1 }).success).toBe(false);
