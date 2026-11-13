@@ -41,3 +41,11 @@ it('reports failed offline logout without claiming the credential was cleared',a
  await expect(session.logout()).rejects.toThrow('offline');
  expect(await session.sessionToken()).toBe(token);
 });
+it('shares only overlapping GETs for the same session, without caching subsequent rights reads',async()=>{
+ const session=await import('../src/lib/session');await session.setSessionToken(token);
+ let release!:(value:unknown)=>void;mock.request.mockImplementationOnce(()=>new Promise(resolve=>{release=resolve;}));
+ const first=session.siteApi('/api/me/entitlements');const second=session.siteApi('/api/me/entitlements');
+ await vi.waitFor(()=>expect(mock.request).toHaveBeenCalledTimes(1));
+ release({url:site+'/api/me/entitlements',status:200,data:{plan:'free'}});
+ expect(await first).toEqual(await second);await session.siteApi('/api/me/entitlements');expect(mock.request).toHaveBeenCalledTimes(2);
+});

@@ -23,6 +23,7 @@ async function initializeVault(){
   return initialized;
 }
 async function readLogin(){if(!Capacitor.isNativePlatform())return pendingLogin;await initializeVault();return (await vault.get({purpose:'login'})).value??null;}
+export async function hasPendingLogin(){const pending=await readLogin();const age=Date.now()-Number(pending?.split(':')[2]);return completing.size>0 || (!!pending&&Number.isFinite(age)&&age>=0&&age<600000);}
 async function writeLogin(value:string|null){if(Capacitor.isNativePlatform()){await initializeVault();if(value)await vault.set({purpose:'login',value});else await vault.clear({purpose:'login'});}pendingLogin=value;}
 export async function sessionToken() {
   if(!Capacitor.isNativePlatform())return memoryToken;
@@ -48,19 +49,33 @@ export async function eraseSessionDataIfCurrent(binding:string,erase:()=>Promise
     await erase();await writeSessionToken(null);await writeLogin(null);await completed();return true;
   });
 }
+export class SiteApiError extends Error {
+  constructor(readonly code:string,readonly status:number){super(code);this.name='SiteApiError';}
+}
+const reads=new Map<string,Promise<unknown>>();
 export async function siteApi(path:string,body?:unknown,method?:string) {
   if(!/^\/api\/(?:mobile\/v1\/|me\/|billing\/|stripe\/portal$)/.test(path) || path.includes('..') || path.includes('://'))throw new Error('INVALID_ENDPOINT');
   // An unreadable Keychain is treated as signed out (server answers UNAUTHORIZED), never as a hard failure.
   const token=await sessionToken().catch(()=>null);
+  const key=JSON.stringify([path,token]);
+  if(!body && (!method||method==='GET')){
+    const pending=reads.get(key);if(pending)return pending;
+    const work=sendSiteApi(path,body,method,token);reads.set(key,work);
+    try{return await work;}finally{if(reads.get(key)===work)reads.delete(key);}
+  }
+  return sendSiteApi(path,body,method,token);
+}
+async function sendSiteApi(path:string,body:unknown,method:string|undefined,token:string|null){
   const headers={Accept:'application/json','Content-Type':'application/json',Origin:SITE,...(token?{Authorization:`Bearer ${token}`}:{})};
   let status:number,data:unknown;
   if(Capacitor.isNativePlatform()){
     const r=await CapacitorHttp.request({url:SITE+path,method:method??(body?'POST':'GET'),headers,...(body?{data:body}:{}),responseType:'json',disableRedirects:true,connectTimeout:15000,readTimeout:25000});
     if(new URL(r.url).origin!==SITE)throw new Error('INVALID_ENDPOINT');status=r.status;data=r.data;
   }else{
-    const r=await fetch(SITE+path,{method:method??(body?'POST':'GET'),headers,...(body?{body:JSON.stringify(body)}:{}),credentials:'include',redirect:'error',cache:'no-store',signal:AbortSignal.timeout(25000)});status=r.status;data=await r.json();
+    const r=await fetch(SITE+path,{method:method??(body?'POST':'GET'),headers,...(body?{body:JSON.stringify(body)}:{}),credentials:'include',redirect:'error',cache:'no-store',signal:AbortSignal.timeout(25000)});status=r.status;data=await r.json().catch(()=>null);
   }
-  if(status<200 || status>=300){const code=(data as {error?:{code?:string}})?.error?.code;throw new Error(code??'UNAVAILABLE');}
+  if(status<200 || status>=300){const code=(data as {error?:{code?:string}})?.error?.code;throw new SiteApiError(typeof code==='string'&&/^[A-Z_]{1,60}$/.test(code)?code:'UNAVAILABLE',status);}
+  if(!data||typeof data!=='object')throw new SiteApiError('UNEXPECTED_RESPONSE',status);
   return data;
 }
 export async function startLogin() {
@@ -79,6 +94,7 @@ export async function completeLogin(value:string) {
   const flow=url.searchParams.get('flow')??'';const code=url.searchParams.get('code')??'';
   if(!/^[0-9a-f-]{36}$/.test(flow) || !/^[A-Za-z0-9_-]{43}$/.test(code))throw new Error('AUTH_FLOW_EXPIRED');
   const active=completing.get(flow);if(active)return active;
+  window.dispatchEvent(new Event('anzen-login-started'));
   const task=(async()=>{
     const pending=await readLogin();if(!pending)return false;
     const [expected,verifier,createdAt]=pending.split(':');

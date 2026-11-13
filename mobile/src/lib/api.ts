@@ -79,9 +79,15 @@ export async function executeAi(feature: Feature, input: string, requestId: stri
   const safety=inspectAiOutbound({purpose:'mobile-home',texts:[input],consent:true,contextPolicy:'approved-server-corpus'});
   if(!safety.allowed)throw new ApiError(safety.reason==='consent_required'?'CONSENT_REQUIRED':'SAFETY_BLOCKED',undefined,undefined,safety.message,safety.reason);
   // Re-check immediately before every execution. A cached response never grants permission.
-  const capability = await loadCapabilities(send).catch(() => { throw new ApiError('SAFETY_UNVERIFIED'); });
-  if (!canExecute(capability, feature)) throw new ApiError(capability.features[feature].quota.remaining === 0 ? capability.features[feature].quota.reserved>0?'OPERATION_PENDING':'DAILY_LIMIT_REACHED' : 'SAFETY_UNVERIFIED', undefined, capability.features[feature].quota.resetAt);
-  const result = aiResultSchema.parse(await request('/api/mobile/v1/ai', send, { version: 2, feature, input, requestId, privacyConfirmed: true }, { 'X-Anzen-CSRF': capability.csrfToken }));
+  const capability = await loadCapabilities(send).catch(error => {
+    if(error instanceof ApiError && !['UNAVAILABLE','ENTITLEMENT_SYNC_PENDING'].includes(error.code))throw error;
+    // A display/preflight failure must not grant rights or prevent the server from checking them.
+    // Only authenticated native law chat can proceed without browser CSRF proof.
+    if(feature!=='law_chat' || !Capacitor.isNativePlatform())throw new ApiError('SAFETY_UNVERIFIED');
+    return null;
+  });
+  if (capability && !canExecute(capability, feature)) throw new ApiError(capability.features[feature].quota.remaining === 0 ? capability.features[feature].quota.reserved>0?'OPERATION_PENDING':'DAILY_LIMIT_REACHED' : 'SAFETY_UNVERIFIED', undefined, capability.features[feature].quota.resetAt);
+  const result = aiResultSchema.parse(await request('/api/mobile/v1/ai', send, { version: 2, feature, input, requestId, privacyConfirmed: true }, capability?{ 'X-Anzen-CSRF': capability.csrfToken }:{}));
   if (result.requestId !== requestId || result.feature !== feature) throw new ApiError('SAFETY_UNVERIFIED');
   return result;
 }

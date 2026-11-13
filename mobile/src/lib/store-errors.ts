@@ -20,6 +20,8 @@ const SDK: Record<string, string> = {
   '35': 'オフラインのため商品を取得できません',
 };
 const APP: Record<string, string> = {
+  STORE_PRODUCT_TIMEOUT: 'App Storeの商品情報の取得に時間がかかっています。もう一度お試しください',
+  STORE_NOT_OPENED: '購入の準備を完了できませんでした。もう一度お試しください',
   BILLING_NOT_CONFIGURED: 'App Store の販売設定がサーバーでそろっていません',
   PRODUCT_MISMATCH: 'App Store の商品が設定（月額980円・1か月）と一致しないため販売を止めています',
   NO_PACKAGES: 'RevenueCat の商品一覧が空です（Offering に月額商品がありません）',

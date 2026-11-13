@@ -5,6 +5,7 @@ import { capabilitySchema, aiResultSchema } from '../src/lib/contracts';
 import { executeAi, loadNews, request, transport } from '../src/lib/api';
 import { canExecute, PLAN_LIMITS, quotaLow, errorMessage, weatherFresh } from '../src/lib/policy';
 import { safeExternalUrl } from '../src/lib/native';
+import { Capacitor } from '@capacitor/core';
 const id = 'a92c8879-453a-41c0-b51e-ed99dc286477';
 describe('server-enforced safety boundary', () => {
   it('preserves privacy guidance from a safety response',async()=>{
@@ -34,6 +35,17 @@ describe('server-enforced safety boundary', () => {
     const send = vi.fn(async () => ({ status: 404, data: {}, headers: {} }));
     await expect(executeAi('law_chat', 'question', id, send)).rejects.toThrow('安全装置');
     expect(send).toHaveBeenCalledTimes(1); expect(send.mock.calls[0]).toBeDefined();
+  });
+  it('lets native law chat ask the server when the quota display contract is unexpected, and keeps server limits',async()=>{
+    const native=vi.spyOn(Capacitor,'isNativePlatform').mockReturnValue(true);
+    try{
+      const send=vi.fn(async(path:string)=>path.includes('capabilities')?{status:200,data:{unexpected:true},headers:{}}:{status:429,data:{error:{code:'DAILY_LIMIT_REACHED'}},headers:{}});
+      await expect(executeAi('law_chat','question',id,send)).rejects.toThrow('本日の上限');
+      expect(send).toHaveBeenCalledTimes(2);expect(send.mock.calls[1][0]).toBe('/api/mobile/v1/ai');
+      const denied=vi.fn(async()=>({status:401,data:{error:{code:'UNAUTHORIZED'}},headers:{}}));
+      await expect(executeAi('law_chat','question',id,denied)).rejects.toMatchObject({code:'UNAUTHORIZED'});
+      expect(denied).toHaveBeenCalledTimes(1);
+    }finally{native.mockRestore();}
   });
   it('refuses execution with exhausted or reserved last quota', async () => {
     const c = capability(); c.features.law_chat.quota = { ...c.features.law_chat.quota, used: 2, reserved: 1, remaining: 0 };

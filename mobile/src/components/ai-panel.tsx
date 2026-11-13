@@ -35,7 +35,7 @@ export function AiPanel({ online }: { online: boolean }) {
   useEffect(() => { if (result) resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, [result]);
   const quota = capability?.features[feature].quota;
   const limit = PLAN_LIMITS[capability?.plan??'free'][feature];
-  const allowed = canExecute(capability, feature, clock);
+  const allowed = canExecute(capability, feature, clock) || (!capability && !signedOut && online && feature==='law_chat');
   const safety = input.trim() ? inspectAiOutbound({purpose:'mobile-home',texts:[input],consent:true,contextPolicy:'approved-server-corpus'}) : null;
   function changeFeature(next: Feature) {
     if (next === feature) return;

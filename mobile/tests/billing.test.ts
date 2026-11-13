@@ -148,4 +148,14 @@ describe('iOS IAP uses server rights before StoreKit',()=>{
   });
   it('restores through the SDK and rechecks the server rather than granting from customerInfo',async()=>{const s=setup();const result=await s.controller.restore(config);expect(s.sdk.restorePurchases).toHaveBeenCalledTimes(1);expect(result.plan).toBe('free');await s.controller.forget();expect(s.sdk.logOut).toHaveBeenCalledTimes(1);});
   it('does not allow an expired or stale Pro display',async()=>{const s=setup({paid:true});const result=await s.controller.entitlement();expect(isVerifiedPro(result)).toBe(true);expect(isVerifiedPro({...result,expiresAt:new Date(Date.now()-1).toISOString()})).toBe(false);expect(isVerifiedPro({...result,verifiedAt:new Date(Date.now()-300001).toISOString()})).toBe(false);});
+  it('ends a stalled offering lookup and lets the next attempt fetch products again',async()=>{
+    vi.useFakeTimers();
+    try{
+      const s=setup();const member=await s.controller.entitlement();s.sdk.getOfferings.mockImplementationOnce(()=>new Promise(()=>{}));
+      const check=expect(s.controller.offering(config,member)).rejects.toThrow('STORE_PRODUCT_TIMEOUT');
+      await vi.advanceTimersByTimeAsync(12000);await check;
+      expect((await s.controller.offering(config,member)).product.identifier).toBe(config.productId);
+      expect(s.sdk.getOfferings).toHaveBeenCalledTimes(2);expect(s.sdk.purchasePackage).not.toHaveBeenCalled();
+    }finally{vi.useRealTimers();}
+  });
 });

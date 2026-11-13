@@ -2,7 +2,7 @@ import { Purchases, type PurchasesPackage } from '@revenuecat/purchases-capacito
 import { Capacitor } from '@capacitor/core';
 import { z } from 'zod';
 import product from '@/lib/mobile/product-policy.json';
-import { siteApi, sessionBinding } from './session';
+import { siteApi, sessionBinding, SiteApiError } from './session';
 import { StoreError } from './store-errors';
 import { Preferences } from '@capacitor/preferences';
 const outcomeSchema=z.object({id:z.string().uuid().optional(),attemptId:z.string().uuid(),outcome:z.enum(['cancelled','deferred','unknown','not_opened'])}).refine(r=>!!r.id||r.outcome==='not_opened');
@@ -35,6 +35,7 @@ export class BillingController {
   async config(){return billingConfigSchema.parse(await this.send('/api/mobile/v1/billing/config'));}
   async entitlement(recoverWhileBusy=false){
     const member=snapshotSchema.parse(await this.send('/api/me/entitlements'));
+    this.publish(member);
     // A cancelled purchase must recover even if its first outcome request lost connectivity.
     try {
       const {value}=await Preferences.get({key:outcomeKey(member.appUserId)});
@@ -64,7 +65,8 @@ export class BillingController {
     try { await this.sendOutcome(appUserId,report);await clearReportedOutcome(appUserId,report); }
     catch { /* Retried automatically by entitlement() after app relaunch or reconnect. */ }
   }
-  async sync(){return snapshotSchema.parse(await this.send('/api/billing/reconcile',{}));}
+  private publish(member:MemberEntitlement){if(typeof window!=='undefined'&&isVerifiedPro(member))window.dispatchEvent(new CustomEvent('anzen-entitlement-changed',{detail:member}));}
+  async sync(){const member=snapshotSchema.parse(await this.send('/api/billing/reconcile',{}));this.publish(member);return member;}
   async identify(config:BillingConfig,member:MemberEntitlement){
     if(this.busy && this.purchaseUser && this.purchaseUser!==member.appUserId)throw new Error('PURCHASE_PENDING');
     const next=this.identityWork.then(()=>this.identifySerial(config,member));
@@ -85,7 +87,8 @@ export class BillingController {
     try{return await value;}catch(error){if(this.packages.get(key)===entry)this.packages.delete(key);throw error;}
   }
   private async loadOffering(config:BillingConfig):Promise<PurchasesPackage>{
-    const offerings=await this.sdk.getOfferings();
+    let timer:ReturnType<typeof setTimeout>|undefined;
+    const offerings=await Promise.race([this.sdk.getOfferings(),new Promise<never>((_,reject)=>{timer=setTimeout(()=>reject(new StoreError('STORE_PRODUCT_TIMEOUT')),12000);})]).finally(()=>clearTimeout(timer));
     const candidates=(config.offeringId?offerings.all[config.offeringId]:offerings.current)?.availablePackages??[];
     // Name what App Store actually returned, so a real device shows the exact mismatch.
     if(!candidates.length)throw new StoreError('NO_PACKAGES',`offering=${config.offeringId??'-'} / 取得=${Object.keys(offerings.all).join(',')||'なし'}`);
@@ -121,7 +124,7 @@ export class BillingController {
       }catch(error){
         void this.reportOutcome(member.appUserId,preparedOutcome);
         if(error instanceof Error&&['PRO_SALES_PAUSED','ALREADY_SUBSCRIBED','PURCHASE_PENDING','UNAUTHORIZED','ENTITLEMENT_SYNC_PENDING'].includes(error.message))throw error;
-        throw new Error('STORE_NOT_OPENED');
+        throw new StoreError('STORE_NOT_OPENED',error instanceof SiteApiError?`購入予約API: ${error.code} / HTTP ${error.status}`:'購入予約APIの応答を確認できません');
       }
       // Compatibility with a server released before atomic preparation. Never replay the POST.
       if(!intent.attemptId){
@@ -131,7 +134,7 @@ export class BillingController {
         catch(error){
           void this.reportOutcome(member.appUserId,{id:intent.id,attemptId,outcome:'not_opened'});
           if(error instanceof Error&&error.message==='PRO_SALES_PAUSED')throw error;
-          throw new Error('STORE_NOT_OPENED');
+          throw new StoreError('STORE_NOT_OPENED',error instanceof SiteApiError?`購入開始API: ${error.code} / HTTP ${error.status}`:'購入開始APIの応答を確認できません');
         }
       }else if(intent.attemptId!==attemptId || intent.appUserId!==member.appUserId)throw new Error('ENTITLEMENT_SYNC_PENDING');
       if(await sessionBinding()!==binding){

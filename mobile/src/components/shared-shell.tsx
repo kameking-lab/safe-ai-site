@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect,useState, type ReactNode } from 'react';
+import { useEffect,useRef,useState, type ReactNode } from 'react';
 import { Share } from '@capacitor/share';
 import { installWebTransport } from '../lib/web-transport';
 import { openSource } from '../lib/native';
@@ -16,11 +16,14 @@ import { startProPurchase, resumeProPurchaseAfterLogin, type ProPurchaseResult }
 export function SharedShell({ children }: { children: ReactNode }) {
   const [message,setMessage]=useState('');
   const [price,setPrice]=useState<string|null>(null);
+  const verifiedPro=useRef(false);
   useEffect(()=>{let generation=0;const update=()=>{const ticket=++generation;setPrice(null);void (async()=>{const c=await billing.config();const m=await billing.entitlement();if(m.plan==='free'&&m.syncState==='verified'&&c.ready){const p=await billing.offering(c,m);if(ticket===generation)setPrice(p.product.priceString);}})().catch(()=>{});};update();window.addEventListener('anzen-session-changed',update);return()=>{generation++;window.removeEventListener('anzen-session-changed',update);};},[]);
   const pathname=usePathname().replace(/\/$/,'')||'/';
   useEffect(() => {
     installWebTransport();
-    const show=(result:ProPurchaseResult|null)=>{if(result)setMessage(result.message);};
+    const show=(result:ProPurchaseResult|null)=>{if(result)setMessage(verifiedPro.current?'':result.message);};
+    const verified=(event:Event)=>{const rights=(event as CustomEvent<{plan?:string;syncState?:string}>).detail;if(rights?.plan!=='pro'||rights.syncState!=='verified')return;verifiedPro.current=true;setMessage('');};
+    const sessionChanged=()=>{verifiedPro.current=false;};
     const feeds=(event:MouseEvent)=>{const anchor=(event.target as Element|null)?.closest('a');if(!anchor)return;const url=new URL(anchor.href,location.href);if(url.origin!==location.origin)return;
       if(url.pathname.startsWith('/feed/')){event.preventDefault();void openSource(SITE+url.pathname+url.search).catch(()=>setMessage('フィードを開けませんでした。'));return;}
       // 「月額980円で続ける」: the website's Stripe start becomes the App Store purchase sheet here.
@@ -30,8 +33,8 @@ export function SharedShell({ children }: { children: ReactNode }) {
     };
     // A sign-in started from the purchase button continues straight to the purchase sheet.
     const signedIn=()=>{void resumeProPurchaseAfterLogin().then(show);};
-    document.addEventListener('click',feeds,true);window.addEventListener('anzen-session-changed',signedIn);
-    return()=>{document.removeEventListener('click',feeds,true);window.removeEventListener('anzen-session-changed',signedIn);};
+    document.addEventListener('click',feeds,true);window.addEventListener('anzen-session-changed',sessionChanged);window.addEventListener('anzen-session-changed',signedIn);window.addEventListener('anzen-entitlement-changed',verified);
+    return()=>{document.removeEventListener('click',feeds,true);window.removeEventListener('anzen-session-changed',sessionChanged);window.removeEventListener('anzen-session-changed',signedIn);window.removeEventListener('anzen-entitlement-changed',verified);};
   }, []);
   return <ProPurchasePresentationContext.Provider value={{price}}><style>{`a[href='/ky'],a[href^='/ky/'],a[href='/safety-diary'],a[href^='/safety-diary/'],a[href='/site-records/near-miss']{display:none!important}`}</style><header hidden={pathname==='/signage/display'} className="sticky top-[env(safe-area-inset-top)] z-50 flex items-center gap-1 whitespace-nowrap border-b bg-white px-2 py-1 text-slate-900 print:hidden">
     {/* No browser chrome in the app: one row, a real back button, 44pt targets. */}

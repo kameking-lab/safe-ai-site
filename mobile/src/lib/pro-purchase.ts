@@ -1,7 +1,7 @@
 import { Preferences } from '@capacitor/preferences';
 import { billing, isVerifiedPro } from './billing';
 import { sessionToken, startLogin } from './session';
-import { describeStoreError } from './store-errors';
+import { describeStoreError,StoreError } from './store-errors';
 
 /**
  * 「月額980円で続ける」をアプリで押したときの流れ。途中に確認画面を挟まない。
@@ -16,11 +16,12 @@ const PENDING_TEXT: Record<string, string> = {
   PRO_SALES_PAUSED: '今月のPro新規受付は終了しました。来月1日に再開します。',
   STORE_DEFERRED: 'App Store で承認待ちです（承認後に自動で反映されます）。',
   STORE_UNKNOWN: '購入結果を確認しています。「会員・Pro」の「購入を復元」で確認できます。',
-  STORE_NOT_OPENED: '購入画面を開けませんでした。通信を確認して、もう一度お試しください。',
+  STORE_NOT_OPENED: '購入の準備を完了できませんでした。もう一度お試しください。',
   ALREADY_SUBSCRIBED: 'すでに Pro です。',
   PURCHASE_PENDING: '前の購入手続きが残っています。「会員・Pro」の「購入を復元」をお試しください。',
   PURCHASE_REVIEW_REQUIRED: '前の購入手続きの確認が必要です。「会員・Pro」の「購入を復元」をお試しください。',
   ENTITLEMENT_SYNC_PENDING: '会員の権利を確認できません。二重購入を避けるため購入を止めています。時間をおいてお試しください。',
+  BILLING_RECONCILE_UNAVAILABLE: '購入済みの権利をサーバーで確認できませんでした。時間をおいてもう一度お試しください。',
   UNAUTHORIZED: 'ログインが切れました。もう一度お試しください。',
 };
 let running = false;
@@ -45,6 +46,7 @@ export async function startProPurchase(): Promise<ProPurchaseResult> {
     return { state: 'pending', message: PENDING_TEXT.STORE_UNKNOWN };
   } catch (error) {
     const code = error instanceof Error ? error.message : '';
+    if(error instanceof StoreError)return {state:'error',message:describeStoreError(error)};
     if (PENDING_TEXT[code]) return { state: code === 'ALREADY_SUBSCRIBED' ? 'pro' : 'pending', message: PENDING_TEXT[code] };
     return { state: 'error', message: describeStoreError(error) };
   } finally {
