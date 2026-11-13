@@ -6,6 +6,7 @@ type VaultOptions={purpose?:'login'};
 const vault=registerPlugin<{get(options?:VaultOptions):Promise<{value?:string}>;set(options:{value:string}&VaultOptions):Promise<void>;clear(options?:VaultOptions):Promise<void>}>('NativeVault');
 let memoryToken:string|null=null;
 let pendingLogin:string|null=null;
+let loginDismissed=false;
 const completing=new Map<string,Promise<boolean>>();
 let initialized:Promise<void>|undefined;
 let sessionMutations:Promise<unknown>=Promise.resolve();
@@ -23,7 +24,9 @@ async function initializeVault(){
   return initialized;
 }
 async function readLogin(){if(!Capacitor.isNativePlatform())return pendingLogin;await initializeVault();return (await vault.get({purpose:'login'})).value??null;}
-export async function hasPendingLogin(){const pending=await readLogin();const age=Date.now()-Number(pending?.split(':')[2]);return completing.size>0 || (!!pending&&Number.isFinite(age)&&age>=0&&age<600000);}
+export async function hasPendingLogin(){const pending=await readLogin();const age=Date.now()-Number(pending?.split(':')[2]);return completing.size>0 || (!loginDismissed&&!!pending&&Number.isFinite(age)&&age>=0&&age<600000);}
+// Keep the PKCE proof for a late callback, but let a dismissed browser be reopened.
+export async function dismissLogin(){if(completing.size||!await readLogin()||completing.size)return;loginDismissed=true;window.dispatchEvent(new Event('anzen-login-dismissed'));}
 async function writeLogin(value:string|null){if(Capacitor.isNativePlatform()){await initializeVault();if(value)await vault.set({purpose:'login',value});else await vault.clear({purpose:'login'});}pendingLogin=value;}
 export async function sessionToken() {
   if(!Capacitor.isNativePlatform())return memoryToken;
@@ -86,7 +89,9 @@ export async function startLogin() {
   if(!/^[0-9a-f-]{36}$/.test(result.flow) || result.authorizeUrl!==`${SITE}/api/mobile/v1/auth/authorize?flow=${result.flow}`)throw new Error('INVALID_ENDPOINT');
   // Persist PKCE in Keychain before leaving the app. iOS may evict the process during OAuth.
   await writeLogin(`${result.flow}:${verifier}:${Date.now()}`);
-  try{await Browser.open({url:result.authorizeUrl});}catch(error){await writeLogin(null);throw error;}
+  loginDismissed=false;
+  window.dispatchEvent(new Event('anzen-login-started'));
+  try{await Browser.open({url:result.authorizeUrl});}catch(error){loginDismissed=true;await writeLogin(null);window.dispatchEvent(new Event('anzen-login-failed'));throw error;}
 }
 export async function completeLogin(value:string) {
   let url:URL;try{url=new URL(value);}catch{return false;}
@@ -94,19 +99,24 @@ export async function completeLogin(value:string) {
   const flow=url.searchParams.get('flow')??'';const code=url.searchParams.get('code')??'';
   if(!/^[0-9a-f-]{36}$/.test(flow) || !/^[A-Za-z0-9_-]{43}$/.test(code))throw new Error('AUTH_FLOW_EXPIRED');
   const active=completing.get(flow);if(active)return active;
-  window.dispatchEvent(new Event('anzen-login-started'));
+  let started=false;
   const task=(async()=>{
     const pending=await readLogin();if(!pending)return false;
+    started=true;
     const [expected,verifier,createdAt]=pending.split(':');
     if(expected!==flow)throw new Error('AUTH_FLOW_EXPIRED');
     const age=Date.now()-Number(createdAt);
     if(!/^[A-Za-z0-9_-]{43}$/.test(verifier) || !Number.isFinite(age) || age<0 || age>=600000){await writeLogin(null);throw new Error('AUTH_FLOW_EXPIRED');}
+    loginDismissed=false;window.dispatchEvent(new Event('anzen-login-started'));
     const result=await siteApi('/api/mobile/v1/auth/exchange',{flow,code,verifier}) as {token:string};
     if(!/^[A-Za-z0-9_-]{43}$/.test(result.token))throw new Error('AUTH_FLOW_EXPIRED');
     await setSessionToken(result.token);await writeLogin(null);await Browser.close().catch(()=>{});return true;
   })();
   completing.set(flow,task);
-  try{return await task;}finally{completing.delete(flow);}
+  try{return await task;}catch(error){
+    if(started){loginDismissed=true;window.dispatchEvent(new Event('anzen-login-failed'));}
+    throw error;
+  }finally{completing.delete(flow);}
 }
 export async function logout() {
   // Revoke the server device/session before deleting the local credential.

@@ -37,6 +37,16 @@ function setup(options:{atomic?:boolean;paid?:boolean;syncPending?:boolean;cance
   return {send,sdk,controller:new BillingController(send,sdk,()=>true)};
 }
 describe('iOS IAP uses server rights before StoreKit',()=>{
+  it('publishes the final server rights recovered by a durable outcome report',async()=>{
+    const dispatchEvent=vi.fn();vi.stubGlobal('window',{dispatchEvent});
+    try{
+      const s=setup();const original=s.send.getMockImplementation()!;
+      preferences.set(`anzen.apple-outcome.${appUserId}`,JSON.stringify({attemptId:crypto.randomUUID(),outcome:'not_opened'}));
+      s.send.mockImplementation(async(path,body)=>path==='/api/billing/store-outcome'?pro():original(path,body));
+      expect((await s.controller.entitlement()).plan).toBe('pro');
+      expect(dispatchEvent.mock.calls.map(([event])=>event.detail.plan)).toEqual(['free','pro']);
+    }finally{vi.unstubAllGlobals();}
+  });
   it('coalesces the failed-start report with an immediate account refresh and permits retry',async()=>{
     const s=setup({atomic:true,startOffline:true});
     const original=s.send.getMockImplementation()!;

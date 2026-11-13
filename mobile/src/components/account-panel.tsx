@@ -11,6 +11,7 @@ const purchaseMessages:Record<string,string>={PRO_SALES_PAUSED:'今月のPro新�
 const stageMessages:Record<string,string>={prepared:'App Store起動前の購入予約があります。再開または予約の取消ができます。',store_started:purchaseMessages.STORE_UNKNOWN,store_cancelled_reported:purchaseMessages.STORE_CANCELLED,store_deferred:purchaseMessages.STORE_DEFERRED,store_unknown:purchaseMessages.STORE_UNKNOWN,store_not_opened_reported:purchaseMessages.STORE_NOT_OPENED};
 export function AccountPanel(){
   const refreshGeneration=useRef(0);
+  const [loginPending,setLoginPending]=useState(false);
   const [config,setConfig]=useState<BillingConfig|null>(null);const [member,setMember]=useState<MemberEntitlement|null>(null);const [price,setPrice]=useState('');const [message,setMessage]=useState('');const [busy,setBusy]=useState(false);const [refreshing,setRefreshing]=useState(false);const [memberState,setMemberState]=useState<'loading'|'verified'|'unauthenticated'|'unavailable'>('loading');
   // A failing App Store lookup (RevenueCat offering/price) is a store problem, not a logout:
   // it used to fall into the outer catch and clear the verified member ("ログインしていません").
@@ -33,10 +34,13 @@ export function AccountPanel(){
     }finally{if(ticket===refreshGeneration.current)setRefreshing(false);}
   },[]);
   useEffect(()=>{
-    const handler=()=>{void hasPendingLogin().then(pending=>{if(pending){setMemberState('loading');return;}void refresh();}).catch(()=>{void refresh();});};handler();const sessionChanged=()=>{setMember(null);setPrice('');setMemberState('loading');void refresh();};const loginStarted=()=>{refreshGeneration.current++;setMemberState('loading');setMessage('ログインを確認中です…');};window.addEventListener('anzen-session-changed',sessionChanged);window.addEventListener('anzen-login-started',loginStarted);
+    let active=true;
+    const handler=()=>{const ticket=refreshGeneration.current;void hasPendingLogin().then(pending=>{if(!active||ticket!==refreshGeneration.current)return;if(pending){setLoginPending(true);setMemberState('loading');return;}setLoginPending(false);void refresh();}).catch(()=>{if(active&&ticket===refreshGeneration.current)void refresh();});};handler();const sessionChanged=()=>{setLoginPending(false);setMember(null);setPrice('');setMemberState('loading');void refresh();};const loginStarted=()=>{refreshGeneration.current++;setLoginPending(true);setRefreshing(false);setMemberState('loading');setMessage('ログインを確認中です…');};
+    const loginEnded=(event:Event)=>{refreshGeneration.current++;setLoginPending(false);setRefreshing(false);setMemberState('unavailable');setMessage(event.type==='anzen-login-dismissed'?'ログインを中断しました。もう一度お試しください。':'ログインを完了できませんでした。もう一度お試しください。');void billing.config().then(setConfig).catch(()=>{});};
+    window.addEventListener('anzen-session-changed',sessionChanged);window.addEventListener('anzen-login-started',loginStarted);window.addEventListener('anzen-login-failed',loginEnded);window.addEventListener('anzen-login-dismissed',loginEnded);
     window.addEventListener('anzen-app-active',handler);
     const timer=setInterval(handler,60000);
-    return()=>{refreshGeneration.current++;clearInterval(timer);window.removeEventListener('anzen-session-changed',sessionChanged);window.removeEventListener('anzen-login-started',loginStarted);window.removeEventListener('anzen-app-active',handler);};
+    return()=>{active=false;refreshGeneration.current++;clearInterval(timer);window.removeEventListener('anzen-session-changed',sessionChanged);window.removeEventListener('anzen-login-started',loginStarted);window.removeEventListener('anzen-login-failed',loginEnded);window.removeEventListener('anzen-login-dismissed',loginEnded);window.removeEventListener('anzen-app-active',handler);};
   },[refresh]);
   async function action(fn:()=>Promise<unknown>){if(busy)return;setBusy(true);setMessage('');try{await fn();await refresh();}catch(e){const err=e as Error;let recovered=false;try{const m=await billing.entitlement();setMember(m);setMemberState('verified');recovered=isVerifiedPro(m);}catch{setMemberState('unavailable');}setMessage(recovered?'':err instanceof StoreError?describeStoreError(err):purchaseMessages[err.message]??messages[err.message]??describeStoreError(err));}finally{setBusy(false);}}
   async function login(){if(busy)return;setBusy(true);setMemberState('loading');setMessage('ログインを待っています…');try{await startLogin();}catch{setMemberState('unavailable');setMessage('ログインを開始できませんでした。もう一度お試しください。');}finally{setBusy(false);}}
@@ -53,7 +57,7 @@ export function AccountPanel(){
       {!member?<button disabled={busy || memberState==='loading' || !config?.login.apple} onClick={()=>void login()}>Apple / Googleでログイン</button>:<button disabled={busy} onClick={()=>void action(async()=>{await logout();setMember(null);setMemberState('unauthenticated');await billing.forget();})}>ログアウト</button>}
       <p role="status" className="min-h-[1.75em] text-sm">{message}</p>
     </div>
-    <button disabled={busy||refreshing} aria-busy={refreshing} onClick={()=>void refresh(true)}>{refreshing?'会員情報を読み込み中…':'会員情報を再読み込み'}</button>
+    <button disabled={busy||refreshing||loginPending} aria-busy={refreshing||loginPending} onClick={()=>void refresh(true)}>{refreshing||loginPending?'会員情報を読み込み中…':'会員情報を再読み込み'}</button>
     {/* RA generation is paused, so the plans list only what Pro actually adds today. */}
     <div className="text-sm"><p className="my-1">無料：AIチャット1日3回・警報1地点</p><p className="my-1">Pro：AIチャット1日50回・警報10地点と通知</p></div>
     <p className="text-xs">全体の月間AI原価上限に達すると、個人の残数があってもAI生成を停止します。</p>

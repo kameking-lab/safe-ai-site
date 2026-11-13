@@ -43,7 +43,7 @@ export class BillingController {
         const report=outcomeSchema.parse(JSON.parse(value));
         if(!report.id || member.purchaseIntentId===report.id){
           const checked=await this.sendOutcome(member.appUserId,report);
-          await clearReportedOutcome(member.appUserId,report);return checked;
+          await clearReportedOutcome(member.appUserId,report);this.publish(checked);return checked;
         }
         await clearReportedOutcome(member.appUserId,report);
       }

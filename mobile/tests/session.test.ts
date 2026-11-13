@@ -49,3 +49,29 @@ it('shares only overlapping GETs for the same session, without caching subsequen
  release({url:site+'/api/me/entitlements',status:200,data:{plan:'free'}});
  expect(await first).toEqual(await second);await session.siteApi('/api/me/entitlements');expect(mock.request).toHaveBeenCalledTimes(2);
 });
+it('ends loading on exchange failure and preserves the proof for retry',async()=>{
+ const session=await import('../src/lib/session');await session.startLogin();
+ mock.request.mockRejectedValueOnce(new Error('offline'));
+ await expect(session.completeLogin(`anzenai://auth/callback?flow=${flow}&code=${code}`)).rejects.toThrow('offline');
+ expect(window.dispatchEvent).toHaveBeenCalledWith(expect.objectContaining({type:'anzen-login-failed'}));
+ expect(await session.hasPendingLogin()).toBe(false);expect(mock.vault.has('login')).toBe(true);
+ expect(await session.completeLogin(`anzenai://auth/callback?flow=${flow}&code=${code}`)).toBe(true);
+ vi.mocked(window.dispatchEvent).mockClear();
+ expect(await session.completeLogin(`anzenai://auth/callback?flow=${flow}&code=${code}`)).toBe(false);
+ expect(window.dispatchEvent).not.toHaveBeenCalled();
+});
+it('allows a dismissed login to restart without losing a late callback',async()=>{
+ const session=await import('../src/lib/session');await session.startLogin();
+ await session.dismissLogin();expect(await session.hasPendingLogin()).toBe(false);
+ expect(window.dispatchEvent).toHaveBeenCalledWith(expect.objectContaining({type:'anzen-login-dismissed'}));
+ expect(await session.completeLogin(`anzenai://auth/callback?flow=${flow}&code=${code}`)).toBe(true);
+ vi.mocked(window.dispatchEvent).mockClear();await session.dismissLogin();expect(window.dispatchEvent).not.toHaveBeenCalled();
+});
+it('does not dismiss an exchange already in progress',async()=>{
+ const session=await import('../src/lib/session');await session.startLogin();
+ let release!:(value:unknown)=>void;mock.request.mockImplementationOnce(()=>new Promise(resolve=>{release=resolve;}));
+ const completing=session.completeLogin(`anzenai://auth/callback?flow=${flow}&code=${code}`);
+ await vi.waitFor(()=>expect(release).toBeTypeOf('function'));await session.dismissLogin();
+ expect(await session.hasPendingLogin()).toBe(true);
+ release({url:site+'/api/mobile/v1/auth/exchange',status:200,data:{token}});expect(await completing).toBe(true);
+});
