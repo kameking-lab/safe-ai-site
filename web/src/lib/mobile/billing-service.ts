@@ -34,7 +34,14 @@ export async function entitlementInTransaction(tx:Prisma.TransactionClient,userI
   const pending=intent?.status==='pending';
   return {...rights,purchasePending:pending,purchaseIntentId:pending?intent.id:null,purchaseSource:pending?intent.source:null,purchaseStage:pending?intent.stage:null};
 }
+const entitlementReads=new Map<string,Promise<EntitlementSnapshot>>();
+/** Share overlapping reads only; never cache rights across a completed request/purchase. */
 export async function getEntitlement(userId:string) {
+  const pending=entitlementReads.get(userId);if(pending)return pending;
+  const work=readEntitlement(userId);entitlementReads.set(userId,work);
+  try{return await work;}finally{if(entitlementReads.get(userId)===work)entitlementReads.delete(userId);}
+}
+async function readEntitlement(userId:string) {
   const db=billingDb();const now=Date.now();
   const member=await db.$transaction(tx=>identity(tx,userId));
   const [legacy,grants,intent]=await Promise.all([db.subscription.findUnique({where:{userId}}),db.mobileGrant.findMany({where:{userId}}),db.mobilePurchaseIntent.findUnique({where:{userId}})]);
@@ -99,6 +106,10 @@ export async function reservePurchase(userId:string,source:PurchaseSource='app_s
   await assertProSalesOpen();
   return billingDb().$transaction(async tx=>{
     await lockMember(tx,userId);const current=await entitlementInTransaction(tx,userId);assertPurchasable(current);
+    return reserveInTransaction(tx,userId,source,current);
+  });
+}
+async function reserveInTransaction(tx:Prisma.TransactionClient,userId:string,source:PurchaseSource,current:EntitlementSnapshot){
     const existing=await tx.mobilePurchaseIntent.findUnique({where:{userId}});
     if(existing?.status==='pending'){
       assertResume(existing,source);
@@ -111,6 +122,24 @@ export async function reservePurchase(userId:string,source:PurchaseSource='app_s
     }
     // Never unlock a potentially pending StoreKit transaction simply because time passed.
     return tx.mobilePurchaseIntent.upsert({where:{userId},create:{userId,source},update:{id:crypto.randomUUID(),source,stage:'prepared',providerSessionId:null,checkoutUrl:null,providerRequest:Prisma.DbNull,status:'pending',createdAt:new Date()}});
+}
+/** One authoritative refresh and one locked transaction before opening StoreKit. */
+export async function prepareApplePurchase(userId:string,appUserId:string,attemptId:string){
+  try{await reconcile(userId);}catch(error){
+    if(error instanceof Error&&['ENTITLEMENT_SYNC_PENDING','PURCHASE_OWNED_BY_OTHER_ACCOUNT'].includes(error.message))throw error;
+    throw new Error('BILLING_RECONCILE_UNAVAILABLE');
+  }
+  await assertProSalesOpen();
+  return billingDb().$transaction(async tx=>{
+    await lockMember(tx,userId);
+    const current=await entitlementInTransaction(tx,userId);
+    if(current.appUserId!==appUserId)throw new Error('ENTITLEMENT_SYNC_PENDING');
+    assertPurchasable(current);
+    const intent=await reserveInTransaction(tx,userId,'app_store',current);
+    const previous=intent.providerRequest&&typeof intent.providerRequest==='object'&&!Array.isArray(intent.providerRequest)?intent.providerRequest:{};
+    const changed=await tx.mobilePurchaseIntent.updateMany({where:{userId,id:intent.id,source:'app_store',status:'pending',stage:intent.stage},data:{stage:'store_started',providerRequest:{...previous,attemptId}}});
+    if(changed.count!==1)throw new Error('INVALID_REQUEST');
+    return {id:intent.id,appUserId:current.appUserId,attemptId};
   });
 }
 export async function cancelPurchase(userId:string,id:string,source:PurchaseSource){
@@ -134,18 +163,24 @@ export async function markStoreStarted(userId:string,id:string,attemptId?:string
     if(changed.count!==1)throw new Error('INVALID_REQUEST');return {id};});
 }
 /** Client outcomes describe the UI only. They never release a dispatched reservation. */
-export async function reportAppleOutcome(userId:string,id:string,outcome:ApplePurchaseOutcome,attemptId?:string){
+export async function reportAppleOutcome(userId:string,id:string|undefined,outcome:ApplePurchaseOutcome,attemptId?:string){
   return billingDb().$transaction(async tx=>{await lockMember(tx,userId);
     const intent=await tx.mobilePurchaseIntent.findUnique({where:{userId}});
-    if(!intent||intent.id!==id||intent.source!=='app_store')throw new Error('INVALID_REQUEST');
+    if(!id && (outcome!=='not_opened'||!attemptId))throw new Error('INVALID_REQUEST');
+    if(!intent || intent.source!=='app_store'){
+      if(!id)return entitlementInTransaction(tx,userId);
+      throw new Error('INVALID_REQUEST');
+    }
+    if(id && intent.id!==id)throw new Error('INVALID_REQUEST');
     const evidence=intent.providerRequest;
     const expected=evidence&&typeof evidence==='object'&&!Array.isArray(evidence)?evidence.attemptId:null;
+    if(!id && expected!==attemptId)return entitlementInTransaction(tx,userId);
     // An outcome retried after a network loss must not overwrite a newer StoreKit attempt.
     if(expected&&expected!==attemptId)return entitlementInTransaction(tx,userId);
     if(intent.status==='pending'&&intent.stage!=='prepared'){
       // Deferred approval cannot be downgraded by a later cancellation/unknown claim.
       const stage=intent.stage==='store_deferred'?'store_deferred':appleOutcomeStage[outcome];
-      await tx.mobilePurchaseIntent.updateMany({where:{userId,id,status:'pending'},data:{stage}});
+      await tx.mobilePurchaseIntent.updateMany({where:{userId,id:intent.id,status:'pending'},data:{stage}});
     }
     return entitlementInTransaction(tx,userId);
   });

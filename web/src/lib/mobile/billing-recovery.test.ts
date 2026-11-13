@@ -14,10 +14,31 @@ vi.mock('@/lib/prisma',()=>{
  }};
  return {prisma:{...tx,$transaction:<T>(run:(db:typeof tx)=>Promise<T>)=>{const next=state.tail.then(()=>run(tx));state.tail=next.catch(()=>{});return next;}}};
 });
-import { reservePurchase,cancelPurchase,markStoreStarted,reportAppleOutcome,reconcile,getEntitlement } from './billing-service';
+import { reservePurchase,prepareApplePurchase,cancelPurchase,markStoreStarted,reportAppleOutcome,reconcile,getEntitlement } from './billing-service';
 import { releaseReviewedApplePurchase,type AppleReview } from './apple-purchase-review';
 beforeEach(()=>{state.intent=null;state.created=0;state.tail=Promise.resolve();state.grantAvailable=false;state.sandboxGrant=false;state.env='PRODUCTION';state.grants=[];state.fetches=0;state.fetchFails=false;state.stripeFetches=0;state.stripeFails=false;state.legacy=null;vi.stubEnv('MOBILE_LEDGER_ENABLED','true');vi.stubEnv('REVENUECAT_IOS_PRODUCT_ID','fixture-product');});afterEach(()=>vi.unstubAllEnvs());
 it('resumes the identical reservation after app termination or network loss',async()=>{const first=await reservePurchase('member','app_store');const results=await Promise.all(Array.from({length:20},()=>reservePurchase('member','app_store')));expect(results.every(result=>result.id===first.id)).toBe(true);expect(state.created).toBe(1);});
+it('atomically reserves and starts Apple with one provider reconciliation and rejects duplicate starts',async()=>{
+ const attemptId=crypto.randomUUID();const prepared=await prepareApplePurchase('member','immutable-member-id',attemptId);
+ expect(prepared).toEqual({id:state.intent.id,appUserId:'immutable-member-id',attemptId});expect(state.fetches).toBe(1);expect(state.stripeFetches).toBe(1);
+ expect(state.intent.stage).toBe('store_started');expect(state.intent.providerRequest.attemptId).toBe(attemptId);
+ await expect(prepareApplePurchase('member','immutable-member-id',crypto.randomUUID())).rejects.toThrow('PURCHASE_PENDING');expect(state.created).toBe(1);
+});
+it('blocks an atomic purchase for another account or an existing paid member',async()=>{
+ await expect(prepareApplePurchase('member','another-member-id',crypto.randomUUID())).rejects.toThrow('ENTITLEMENT_SYNC_PENDING');expect(state.created).toBe(0);
+ state.grantAvailable=true;await expect(prepareApplePurchase('member','immutable-member-id',crypto.randomUUID())).rejects.toThrow('ALREADY_SUBSCRIBED');expect(state.created).toBe(0);
+});
+it('retries a reported not-opened atomic attempt only after fresh authoritative reconciliation',async()=>{
+ const first=await prepareApplePurchase('member','immutable-member-id',crypto.randomUUID());
+ await reportAppleOutcome('member',first.id,'not_opened',first.attemptId);
+ const retry=await prepareApplePurchase('member','immutable-member-id',crypto.randomUUID());expect(retry.id).toBe(first.id);expect(retry.attemptId).not.toBe(first.attemptId);expect(state.created).toBe(1);
+});
+it('recovers a lost atomic response by attempt ID and does not overwrite a newer attempt',async()=>{
+ const first=await prepareApplePurchase('member','immutable-member-id',crypto.randomUUID());
+ await reportAppleOutcome('member',undefined,'not_opened',first.attemptId);expect(state.intent.stage).toBe('store_not_opened_reported');
+ const next=await prepareApplePurchase('member','immutable-member-id',crypto.randomUUID());
+ await reportAppleOutcome('member',undefined,'not_opened',first.attemptId);expect(state.intent.stage).toBe('store_started');expect(state.intent.providerRequest.attemptId).toBe(next.attemptId);
+});
 it('serializes competing website and iOS starts without a second reservation',async()=>{const results=await Promise.allSettled([reservePurchase('member','stripe'),reservePurchase('member','app_store')]);expect(results.filter(r=>r.status==='fulfilled')).toHaveLength(1);expect(state.created).toBe(1);});
 it('allows release before dispatch but rejects a foreign purchase source',async()=>{const first=await reservePurchase('member','app_store');await expect(cancelPurchase('member',first.id,'stripe')).rejects.toThrow('INVALID_REQUEST');await cancelPurchase('member',first.id,'app_store');expect(state.intent.status).toBe('cancelled');const next=await reservePurchase('member','stripe');expect(next.id).not.toBe(first.id);});
 it('does not reopen a dispatched purchase before a result or switch its provider',async()=>{const first=await reservePurchase('member','app_store');await markStoreStarted('member',first.id);state.intent.createdAt=new Date(0);await expect(cancelPurchase('member',first.id,'app_store')).rejects.toThrow('PURCHASE_PENDING');expect(state.intent.status).toBe('pending');await expect(reservePurchase('member','app_store')).rejects.toThrow('PURCHASE_PENDING');await expect(reservePurchase('member','stripe')).rejects.toThrow('PURCHASE_PENDING');});
@@ -108,4 +129,15 @@ it('retains an Apple recovery even when a separate Stripe refresh fails',async()
  state.legacy={planName:'pro',status:'past_due',stripeSubscriptionId:'sub_fixture',currentPeriodEnd:new Date(0),updatedAt:new Date(0)};
  state.grants=[{userId:'member',provider:'app_store',environment:'PRODUCTION',expiresAt:new Date(0),checkedAt:new Date(0),revoked:false}];state.stripeFails=true;state.grantAvailable=true;
  expect((await getEntitlement('member')).source).toBe('app_store');expect(state.fetches).toBe(1);expect(state.stripeFetches).toBe(1);
+});
+it('shares overlapping entitlement reads without caching completed reads',async()=>{
+ state.grants=[{userId:'member',provider:'app_store',environment:'PRODUCTION',expiresAt:new Date(0),checkedAt:new Date(0),revoked:false}];state.grantAvailable=true;
+ const rights=await Promise.all(Array.from({length:5},()=>getEntitlement('member')));
+ expect(rights.every(r=>r.plan==='pro')).toBe(true);expect(state.fetches).toBe(1);
+ state.grants=[];expect((await getEntitlement('member')).plan).toBe('free');
+});
+it('identifies reconciliation failure before preparing or opening a store transaction',async()=>{
+ state.fetchFails=true;
+ await expect(prepareApplePurchase('member','immutable-member-id',crypto.randomUUID())).rejects.toThrow('BILLING_RECONCILE_UNAVAILABLE');
+ expect(state.created).toBe(0);
 });

@@ -108,6 +108,24 @@ const nextConfig: NextConfig = {
       { source: "/cases", destination: "/", permanent: true },
       { source: "/cases/:slug", destination: "/", permanent: true },
       { source: "/bear-map", destination: "/risk", permanent: true },
+      // 旧受託案内と法人問い合わせの後継。現行 /services/automation は転送しない。
+      { source: "/services", destination: "/services/automation", permanent: true },
+      { source: "/enterprise/contact", destination: "/contact", permanent: true },
+      // #282 で管理領域へ移した監査資料。認証・noindex は転送先で維持する。
+      ...[
+        "brand-consistency",
+        "content-quality-cleanup",
+        "news-feed-stats",
+        "p1-batch-plan",
+        "p2-batch-plan",
+        "p3-batch-plan",
+        "post-2week-regression",
+        "review-dashboard",
+      ].map((slug) => ({
+        source: `/audits/${slug}`,
+        destination: `/admin/audits/${slug}`,
+        permanent: true,
+      })),
       // 英語短縮形・単数形
       { source: "/chat", destination: "/chatbot", permanent: true },
       { source: "/law", destination: "/laws", permanent: true },
@@ -117,10 +135,7 @@ const nextConfig: NextConfig = {
         destination: "/equipment-finder",
         permanent: true,
       },
-      // /quiz is now served by a real page that re-renders the /exam-quiz
-      // component with a canonical pointing at /exam-quiz. Lighthouse B-10
-      // (PR #135) measured ~316 ms wasted on the 308 redirect; the re-export
-      // collapses that hop while keeping SEO consolidated via canonical.
+      // /quiz・/exam-quiz は後継なしで廃止済み。転送・公開しない。
       { source: "/e-learn", destination: "/e-learning", permanent: true },
       { source: "/elearning", destination: "/e-learning", permanent: true },
       { source: "/support", destination: "/contact", permanent: true },

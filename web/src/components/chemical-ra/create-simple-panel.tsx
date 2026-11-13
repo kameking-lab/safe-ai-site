@@ -260,7 +260,15 @@ export function CreateSimplePanel({ initialQuery = "" }: { initialQuery?: string
     [components, draft.productType, temperature],
   );
   const contentMissing = components.some((c) => parseContent(c.contentText) === null);
-  const { conditions, missing } = toConditions(draft);
+  // CREATE-SIMPLE excludes liquid/gas components in a powder product. A product
+  // containing only these components would otherwise show five empty results.
+  const powderUnsupported = substances.length > 0 && substances.every(({substance}) =>
+    substance?.propertyType === 1 || substance?.propertyType === 3,
+  );
+  const productStateMissing = draft.productType === 2 && powderUnsupported;
+  const converted = toConditions(draft);
+  const conditions = productStateMissing ? null : converted.conditions;
+  const missing = [...converted.missing, ...(productStateMissing ? ["製品の状態（液体または気体）"] : [])];
 
   const input = useMemo(() => {
     if (!conditions || components.length === 0 || contentMissing) return null;
@@ -478,7 +486,7 @@ export function CreateSimplePanel({ initialQuery = "" }: { initialQuery?: string
                 columns={3}
                 options={[
                   { value: 1, label: "液体" },
-                  { value: 2, label: "粉体" },
+                  { value: 2, label: "粉体", disabled: powderUnsupported },
                   { value: 3, label: "気体" },
                 ]}
                 value={draft.productType}
@@ -595,10 +603,12 @@ export function CreateSimplePanel({ initialQuery = "" }: { initialQuery?: string
                   <span className="min-w-0 flex-1 text-sm font-black text-slate-950 dark:text-white">{RISK_LEVEL_MEANING[worst]}</span>
                   <span className="shrink-0 text-xs font-bold text-emerald-800 dark:text-emerald-300">下げ方↓</span>
                 </>
-              ) : (
+              ) : missingAll.length > 0 ? (
                 <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
                   リスクレベルは「{missingAll.join("・")}」を選ぶと出ます
                 </span>
+              ) : (
+                <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">判定できない項目は、下の物質ごとの内訳を確認してください。</span>
               )}
             </a>
 
@@ -680,7 +690,7 @@ export function CreateSimplePanel({ initialQuery = "" }: { initialQuery?: string
               </h2>
               {!result || !input ? (
                 <p className="mt-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
-                  あと「{missingAll.join("・")}」を入れると、その場で判定します。
+                  {missingAll.length > 0 ? `あと「${missingAll.join("・")}」を入れると、その場で判定します。` : "物質の情報を確認してください。"}
                 </p>
               ) : (
                 <ResultView

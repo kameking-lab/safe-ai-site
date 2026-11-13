@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 import { consentToChatbot } from "./support/chatbot-consent";
 
 test.describe("AI privacy network boundary", () => {
-  test("consent is required before sending, after withdrawal and after reload", async ({ page }) => {
+  test("send authorizes one request without extra opt-in, including after reload", async ({ page }) => {
     let requests = 0;
     await page.route("**/api/chatbot/stream", async (route) => {
       requests += 1;
@@ -14,38 +14,26 @@ test.describe("AI privacy network boundary", () => {
       });
     });
     await page.goto("/chatbot");
-    const consent = page.getByRole("checkbox", { name: /法令相談への回答生成のため/ });
     const input = page.getByLabel("質問入力");
     const submit = page.getByRole("button", { name: "送信", exact: true });
-    const notice = page.getByRole("region", { name: "安衛法AIとの会話" }).getByRole("alert");
-    await expect(input).toHaveAttribute("data-chatbot-hydrated", "true");
-    await expect(consent).not.toBeChecked();
+    await consentToChatbot(page);
     await input.fill("足場の手すりは？");
-    await submit.click();
-    await expect(notice).toContainText("同意してください");
     expect(requests).toBe(0);
     await expect(input).toHaveValue("足場の手すりは？");
-
-    await consentToChatbot(page);
     await submit.click();
     await expect.poll(() => requests).toBe(1);
     await expect(page.getByRole("article", { name: "安衛法AIの回答" })).toContainText("作業条件を確認");
     await page.getByRole("button", { name: "新しい相談" }).click();
-    await consent.uncheck();
-    await expect(consent).not.toBeChecked();
     await input.fill("足場の種類は？");
     await submit.click();
-    await expect(notice).toContainText("同意してください");
-    expect(requests).toBe(1);
-
-    await consentToChatbot(page);
+    await expect.poll(() => requests).toBe(2);
     await page.reload();
-    await expect(input).toHaveAttribute("data-chatbot-hydrated", "true");
-    await expect(consent).not.toBeChecked();
+    await consentToChatbot(page);
     await input.fill("足場の高さは？");
+    expect(requests).toBe(2);
     await submit.click();
-    await expect(notice).toContainText("同意してください");
-    expect(requests).toBe(1);
+    await expect.poll(() => requests).toBe(3);
+    await expect(page.getByRole("dialog", { name: "AIへの送信確認" })).toHaveCount(0);
   });
 
   // Owner decision 2026-11-07: no 110/119 interception; emergency wording is sent like any question.

@@ -143,7 +143,7 @@ export function ResultView({
           </div>
         </div>
       )}
-      <ul className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+      <ul aria-label="経路別のリスクレベル" className="grid grid-cols-2 gap-2 sm:grid-cols-5">
         {ROUTES.map((route) => {
           const level = summary[route];
           return (

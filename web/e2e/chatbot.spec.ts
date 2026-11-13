@@ -45,6 +45,7 @@ test.describe("チャットボット", () => {
     test(`${width}pxでも入力欄がbottom navに隠れない`, async ({ page }) => {
       await page.setViewportSize({ width, height: 720 });
       await page.goto("/chatbot");
+      await consentToChatbot(page);
       const composer = page.locator("[data-chatbot-composer]");
       await expect(composer).toBeVisible();
       const box = await composer.boundingBox();
@@ -87,6 +88,7 @@ test.describe("チャットボット", () => {
     });
     await page.goto("/chatbot");
 
+    await consentToChatbot(page);
     const example = page.locator("[data-chatbot-question-chip]").first();
     const exampleQuestion = await example.innerText();
     await example.click();
@@ -94,7 +96,6 @@ test.describe("チャットボット", () => {
       exampleQuestion,
     );
     expect(requestCount).toBe(0);
-    await consentToChatbot(page);
     await page.locator('[data-chatbot-composer] button[type="submit"]').click();
     for (let turn = 1; turn <= 4; turn += 1) {
       await expect.poll(() => requestCount).toBe(turn);

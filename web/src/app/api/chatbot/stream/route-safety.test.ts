@@ -8,19 +8,20 @@ const source = readFileSync(
 );
 
 describe("chatbot stream verification boundary", () => {
-  it("does not emit provider chunks before citation validation", () => {
+  it("marks provider chunks as provisional and withholds source metadata until validation", () => {
     const providerLoop = source.slice(
       source.indexOf("for await (const chunkResponse"),
       source.indexOf("// Phase 2 Layer 2"),
     );
-    expect(providerLoop).not.toContain('send("text"');
+    expect(providerLoop).toContain('send("text", { chunk: chunkText, provisional: true })');
+    expect(providerLoop).not.toContain('send("meta"');
   });
 
-  it("never emits a generated claim solely because citation numbers pass", () => {
+  it("replaces empty, incomplete or unverified generated answers with evidence guidance", () => {
     expect(source).toContain("buildServiceFirstLegalAnswer");
     expect(source).toContain('citationLayer2Status = "evidence-only"');
     expect(source).toContain('citationLayer2Status === "evidence-only"');
-    expect(source).not.toContain('citationLayer2Status = "passed"');
+    expect(source).toContain("!answer.trim() || truncated || validation.findings.length > 0");
   });
 
   it("propagates cancellation into provider iteration", () => {

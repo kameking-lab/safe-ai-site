@@ -2,6 +2,7 @@
 import { beforeEach,afterEach,describe,expect,it,vi } from 'vitest';
 const pause=vi.hoisted(()=>vi.fn(async()=>({count:1})));
 const expireStopped=vi.hoisted(()=>vi.fn(async()=>({closed:0})));
+const settlement=vi.hoisted(()=>({gate:undefined as Promise<void>|undefined,fail:false,entered:false}));
 vi.mock('./pro-sales-checkouts',()=>({processPausedStripeCheckouts:expireStopped}));
 const state=vi.hoisted(()=>({operations:[] as Array<{id:string;userId:string;feature:string;day:string;status:string;createdAt:Date;requestHash:string;response?:unknown}>,tail:Promise.resolve() as Promise<unknown>,paid:false,signedIn:true,budget:{committedYen:0,reservedYen:0},reservations:[] as Array<{id:string;amountYen:number;status:string}>}));
 vi.mock('@/auth',()=>({auth:async()=>state.signedIn?{user:{id:'mock_member'}}:null}));
@@ -21,7 +22,7 @@ vi.mock('@/lib/prisma',()=>{
     mobileOperationsAlert:{upsert:async()=>({})},
     mobileProviderReservation:{
       create:async({data}:{data:{amountYen:number}})=>{const row={id:crypto.randomUUID(),amountYen:data.amountYen,status:'reserved'};state.reservations.push(row);return row;},
-      updateMany:async({where,data}:{where:{id:string;status:string};data:{status:string}})=>{const r=state.reservations.find(x=>x.id===where.id&&x.status===where.status);if(!r)return{count:0};r.status=data.status;return{count:1};}
+      updateMany:async({where,data}:{where:{id:string;status:string};data:{status:string}})=>{settlement.entered=true;await settlement.gate;if(settlement.fail)throw new Error('settlement failed');const r=state.reservations.find(x=>x.id===where.id&&x.status===where.status);if(!r)return{count:0};r.status=data.status;return{count:1};}
     },
     mobileUsageOperation:{
       findUnique:async({where}:{where:{id:string}})=>state.operations.find(o=>o.id===where.id)??null,
@@ -34,8 +35,10 @@ vi.mock('@/lib/prisma',()=>{
   const prisma={...tx,$transaction:<T>(run:(db:typeof tx)=>Promise<T>)=>{const next=state.tail.then(()=>run(tx));state.tail=next.catch(()=>{});return next;}};
   return {prisma};
 });
-import { withUsage,withProviderBudget,checkBudget,jstKeys,maximumProviderCost,rebuildRequest } from './usage';
+import { withUsage,withProviderBudget,checkBudget,jstKeys,maximumProviderCost,measuredProviderCost,rebuildRequest } from './usage';
 import { __resetDevelopmentSharedStateForTests } from '@/lib/security/shared-state';
+import { canUseMemberQuota } from './entitlement';
+import * as entitlementPolicy from './entitlement';
 const request=(id=crypto.randomUUID())=>new Request('https://example.test/api/chatbot',{method:'POST',headers:{Authorization:'Bearer mock_session','Content-Type':'application/json','X-Operation-ID':id},body:JSON.stringify({message:'足場の手すり',privacyConfirmed:true})});
 const answer=()=>Response.json({answer:'公式根拠を確認してください。',source_type:'rag',sources:[{text:'原文',url:'https://laws.e-gov.go.jp/law/mock',asOf:new Date().toISOString()}]});
 beforeEach(()=>{state.operations=[];state.tail=Promise.resolve();state.paid=false;state.signedIn=true;state.budget={committedYen:0,reservedYen:0};state.reservations=[];vi.stubEnv('MOBILE_LEDGER_ENABLED','true');});afterEach(()=>vi.unstubAllEnvs());
@@ -65,6 +68,22 @@ describe('request rebuild across runtime realms',()=>{
   });
 });
 describe('shared daily AI accounting',()=>{
+  it('keeps the free quota available while paid rights are pending, without granting Pro or unknown rights',()=>{
+    expect(canUseMemberQuota({plan:'free',syncState:'pending'})).toBe(true);
+    expect(canUseMemberQuota({plan:'pro',syncState:'pending'})).toBe(false);
+    expect(canUseMemberQuota({plan:'free',syncState:'unavailable'})).toBe(false);
+  });
+  it('enforces exactly three free answers during pending rights verification and still blocks unverified Pro',async()=>{
+    const project=entitlementPolicy.projectEntitlement;
+    const pending=vi.spyOn(entitlementPolicy,'projectEntitlement').mockImplementation((...args)=>({...project(...args),syncState:'pending'}));
+    try{
+      const run=vi.fn(async()=>answer());
+      for(let i=0;i<3;i++)expect((await withUsage(request(),'law_chat',run)).status).toBe(200);
+      const fourth=await withUsage(request(),'law_chat',run);
+      expect(fourth.status).toBe(429);expect(await fourth.json()).toMatchObject({error:{code:'DAILY_LIMIT_REACHED',plan:'free'}});expect(run).toHaveBeenCalledTimes(3);
+      state.paid=true;expect((await withUsage(request(),'law_chat',run)).status).toBe(503);expect(run).toHaveBeenCalledTimes(3);
+    }finally{pending.mockRestore();}
+  });
   it('distinguishes reserved last slots from daily completed consumption',async()=>{
     for(let i=0;i<3;i++)state.operations.push({id:crypto.randomUUID(),userId:'mock_member',feature:'law_chat',day:jstKeys().day,status:'reserved',createdAt:new Date(),requestHash:'prior'});
     const run=vi.fn(async()=>answer());const response=await withUsage(request(),'law_chat',run);expect(await response.json()).toMatchObject({error:{code:'OPERATION_PENDING'}});expect(run).not.toHaveBeenCalled();
@@ -181,5 +200,81 @@ describe('anonymous website visitors with the shared ledger on',()=>{
     expect(pause).toHaveBeenCalledWith({where:{month:jstKeys().month,salesPausedAt:null},data:{salesPausedAt:expect.any(Date)}});
     expect(state.budget).toEqual({committedYen:50000,reservedYen:0});
     expect(expireStopped).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('stream provider measured settlement',()=>{
+  beforeEach(()=>{settlement.gate=undefined;settlement.fail=false;settlement.entered=false;});
+  afterEach(()=>{settlement.gate=undefined;settlement.fail=false;settlement.entered=false;});
+  const pricing={model:'gemini-3.8-flash',inputJpyPerMillion:160,outputJpyPerMillion:960,margin:1.5};
+  const bound={model:'gemini-3.8-flash',inputBytes:20000,maxOutputTokens:2048};
+  const usage={promptTokenCount:900,candidatesTokenCount:300,thoughtsTokenCount:50,totalTokenCount:1250};
+  const configure=()=>{
+    vi.stubEnv('MOBILE_AI_PRICED_MODEL',pricing.model);vi.stubEnv('MOBILE_AI_INPUT_JPY_PER_MILLION','160');vi.stubEnv('MOBILE_AI_OUTPUT_JPY_PER_MILLION','960');vi.stubEnv('MOBILE_AI_COST_MARGIN','1.5');
+  };
+  it('includes thinking tokens and uses the measured total without changing configured rates',()=>{
+    expect(measuredProviderCost(usage,pricing,9)).toEqual({amountYen:1,promptTokens:900,outputTokens:350});
+    expect(measuredProviderCost({...usage,thoughtsTokenCount:undefined,totalTokenCount:1700},pricing,9)?.outputTokens).toBe(800);
+    expect(measuredProviderCost({...usage,totalTokenCount:undefined},pricing,9)?.outputTokens).toBe(350);
+  });
+  it.each([
+    undefined, {}, {promptTokenCount:900,candidatesTokenCount:300},
+    {...usage,promptTokenCount:-1}, {...usage,candidatesTokenCount:NaN},
+    {...usage,thoughtsTokenCount:1.5}, {...usage,totalTokenCount:100},
+    {...usage,totalTokenCount:999999999},
+  ])('keeps the reserved maximum for unknown or invalid usage: %j',(value)=>{
+    expect(measuredProviderCost(value,pricing,9)).toBeNull();
+  });
+  it('keeps the reservation until the stream completes, then awaits settlement before resolving',async()=>{
+    configure();
+    let complete!:()=>void;
+    const generated=new Promise<void>(resolve=>{complete=resolve;});
+    let resolved=false;
+    const readUsage=vi.fn(()=>usage);
+    const result=withProviderBudget(async()=>{await generated;return 'complete';},bound,readUsage).then(value=>{resolved=true;return value;});
+    await vi.waitFor(()=>expect(state.reservations).toHaveLength(1));
+    expect(state.budget.reservedYen).toBe(maximumProviderCost(bound,pricing));
+    expect(state.budget.committedYen).toBe(0);
+    expect(resolved).toBe(false);expect(readUsage).not.toHaveBeenCalled();
+    complete();
+    expect(await result).toBe('complete');
+    expect(state.budget).toEqual({reservedYen:0,committedYen:1});
+    expect(state.reservations[0].status).toBe('committed');
+    expect(readUsage).toHaveBeenCalledTimes(1);
+  });
+  it('charges the maximum on stream failure even if partial usage was available',async()=>{
+    configure();const readUsage=vi.fn(()=>usage);
+    await expect(withProviderBudget(async()=>{throw new Error('interrupted');},bound,readUsage)).rejects.toThrow('interrupted');
+    expect(readUsage).not.toHaveBeenCalled();
+    expect(state.budget).toEqual({reservedYen:0,committedYen:maximumProviderCost(bound,pricing)});
+  });
+  it('does not resolve while the settlement transaction is still pending',async()=>{
+    configure();let release!:()=>void;
+    settlement.gate=new Promise<void>(resolve=>{release=resolve;});
+    let resolved=false;
+    const result=withProviderBudget(async()=>'complete',bound,()=>usage).then(value=>{resolved=true;return value;});
+    try{
+      await vi.waitFor(()=>expect(settlement.entered).toBe(true));
+      expect(resolved).toBe(false);
+      expect(state.budget).toEqual({reservedYen:maximumProviderCost(bound,pricing),committedYen:0});
+    }finally{release();}
+    expect(await result).toBe('complete');
+    expect(state.budget).toEqual({reservedYen:0,committedYen:1});
+  });
+  it('propagates a failed settlement and retains the reservation in the budget ceiling',async()=>{
+    configure();settlement.fail=true;
+    await expect(withProviderBudget(async()=>'complete',bound,()=>usage)).rejects.toThrow('settlement failed');
+    const reserved=maximumProviderCost(bound,pricing);
+    expect(state.budget).toEqual({reservedYen:reserved,committedYen:0});
+    expect(state.reservations[0].status).toBe('reserved');
+    state.budget.committedYen=44999;
+    const run=vi.fn(async()=>'unexpected');
+    await expect(withProviderBudget(run,bound,()=>usage)).rejects.toThrow('AI_BUDGET_FREE_PAUSED');
+    expect(run).not.toHaveBeenCalled();
+  });
+  it('still settles the maximum if the usage reader fails',async()=>{
+    configure();
+    await expect(withProviderBudget(async()=>'complete',bound,()=>{throw new Error('missing usage');})).resolves.toBe('complete');
+    expect(state.budget).toEqual({reservedYen:0,committedYen:maximumProviderCost(bound,pricing)});
   });
 });

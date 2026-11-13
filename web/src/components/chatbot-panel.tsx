@@ -1,9 +1,11 @@
 "use client";
 
+import { AiProcessingNote } from "@/components/ai-processing-note";
+
 import { SourceProvenanceView } from "@/components/law-navi/source-provenance-view";
 import { normalizeSourceProvenance } from "@/lib/source-provenance";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Check, Copy, RotateCcw, Send, Square, X } from "lucide-react";
 import type {
   ChatbotQuickReply,
@@ -23,7 +25,6 @@ import type {
 } from "@/lib/chatbot-notice-attachment";
 import type { LawCategoryFilter } from "@/lib/law-category-options";
 import { VoiceMicButton } from "@/components/voice-input-field";
-import { PrivacyNote } from "@/components/privacy-note";
 import { clearChatHistory } from "@/lib/chat-history";
 import { trackEvent } from "@/components/Analytics";
 import { formatAnswerForDisplay } from "@/lib/chatbot-answer-format";
@@ -44,6 +45,7 @@ type ChatMessage = {
   id: string;
   role: "user" | "assistant";
   content: string;
+  provisional?: boolean;
   directAnswer?: string;
   substantiveAnswer?: string;
   assumptions?: string[];
@@ -89,15 +91,14 @@ function createMessage(
   return { id: crypto.randomUUID(), role, content, ...extra };
 }
 
+
 function scrollConversation(ref: React.RefObject<HTMLDivElement | null>) {
   if (typeof window === "undefined") return;
   window.requestAnimationFrame(() => {
     const node = ref.current;
-    node?.scrollTo({
-      top: node.scrollHeight,
-      // Streaming can schedule several updates in quick succession. Jumping to
-      // the committed end avoids stacked animations and keeps the latest answer
-      // controls immediately reachable for keyboard and screen-reader users.
+    const answer = node?.querySelector<HTMLElement>("[data-chatbot-answer]:last-child");
+    if (node && answer) node.scrollTo({
+      top: answer.getBoundingClientRect().top - node.getBoundingClientRect().top + node.scrollTop,
       behavior: "auto",
     });
   });
@@ -181,7 +182,7 @@ export function ChatbotPanel({
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // 無料枠の上限に当たったときの購入入口（エラー表示とは別。再試行ボタンは出さない）。
-  const [aiConsent, setAiConsent] = useState(false);
+  const [answerViewportHeight, setAnswerViewportHeight] = useState(0);
   const [upsell, setUpsell] = useState<string | null>(null);
   const [retryableQuestion, setRetryableQuestion] = useState<string | null>(
     null,
@@ -204,6 +205,20 @@ export function ChatbotPanel({
   const initialQuestionConsumedRef = useRef(false);
   const lawCategory: LawCategoryFilter = "all";
 
+  useLayoutEffect(() => {
+    const list = listRef.current;
+    if (!list) return;
+    const measure = () => setAnswerViewportHeight(list.clientHeight);
+    measure();
+    let frame = 0;
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(() => { frame = 0; measure(); });
+    };
+    const observer = typeof ResizeObserver === "function" ? new ResizeObserver(schedule) : null;
+    observer?.observe(list);
+    return () => { observer?.disconnect(); cancelAnimationFrame(frame); };
+  }, []);
+
   useEffect(() => {
     const verified = (event: Event) => {
       const rights = (event as CustomEvent<{plan?: string; syncState?: string}>).detail;
@@ -215,6 +230,7 @@ export function ChatbotPanel({
 
   useEffect(() => {
     clearChatHistory();
+    try { localStorage.removeItem("anzen.chatbot-ai-consent.2026-11-10"); } catch { /* Storage is optional. */ }
   }, []);
 
   useEffect(() => {
@@ -270,14 +286,10 @@ export function ChatbotPanel({
       setRetryableQuestion(null);
       return;
     }
-    if (!aiConsent) {
-      setError("Google（Gemini API）への送信について確認し、同意してください。");
-      return;
-    }
     const outboundPreflight = inspectAiOutbound({
       purpose: "chatbot-client-preflight",
       texts: [text],
-      consent: aiConsent,
+      consent: true,
       maxChars: 4_000,
       contextPolicy: "approved-server-corpus",
     });
@@ -327,9 +339,10 @@ export function ChatbotPanel({
       ),
       lawCategory,
       // The client and server have both run the same PII/emergency gate.
-      privacyConfirmed: aiConsent,
+      privacyConfirmed: true,
     });
     let streamedContent = "";
+    const requestStarted = performance.now();
     const timeoutId = window.setTimeout(
       () => controller.abort("timeout"),
       30_000,
@@ -342,6 +355,7 @@ export function ChatbotPanel({
         body: requestBody,
         signal: controller.signal,
       });
+      performance.measure?.("anzen.chat.headers", {start:requestStarted,end:performance.now()});
 
       if (
         !response.ok &&
@@ -423,15 +437,15 @@ export function ChatbotPanel({
             try {
               const parsed = JSON.parse(data) as Record<string, unknown>;
               if (event === "text" && typeof parsed.chunk === "string") {
+                if (!streamedContent && parsed.chunk) performance.measure?.("anzen.chat.first-text", {start:requestStarted,end:performance.now()});
                 streamedContent += parsed.chunk;
                 setMessages((previous) =>
                   previous.map((message) =>
                     message.id === assistantId
-                      ? { ...message, content: streamedContent }
+                      ? { ...message, content: streamedContent, provisional: parsed.provisional === true }
                       : message,
                   ),
                 );
-                scrollConversation(listRef);
               } else if (event === "meta") {
                 finalMeta = parsed as ChatbotResponsePayload;
               } else if (event === "error") {
@@ -469,6 +483,7 @@ export function ChatbotPanel({
             ? {
                 ...message,
                 content: finalMeta.answer ?? directAnswer ?? streamedContent,
+                provisional: false,
                 directAnswer: finalMeta.directAnswer,
                 substantiveAnswer: finalMeta.substantiveAnswer,
                 assumptions: finalMeta.assumptions,
@@ -521,12 +536,12 @@ export function ChatbotPanel({
         console.warn("[chatbot] request failed", { kind: streamError.name });
       }
     } finally {
+      performance.measure?.("anzen.chat.total", {start:requestStarted,end:performance.now()});
       window.clearTimeout(timeoutId);
       if (requestGenerationRef.current === requestGeneration) {
         requestPendingRef.current = false;
         setIsSending(false);
         abortRef.current = null;
-        scrollConversation(listRef);
       }
     }
   }
@@ -537,7 +552,7 @@ export function ChatbotPanel({
     const composer = composerRef.current;
     if (composer) {
       composer.value = question;
-      composer.focus();
+      composer.focus({ preventScroll: true });
       composer.setSelectionRange(question.length, question.length);
     }
   }
@@ -557,7 +572,7 @@ export function ChatbotPanel({
     if (safety?.kind === "privacy" || safety?.kind === "emergency") {
       void handleSend(question).catch(() => onInitialQuestionRejected?.());
     } else {
-      // A transferred question stays in memory until the user consents and presses Send.
+      // A transferred question stays in memory until the user presses Send.
       setInput(question);
     }
     // The one-shot handoff is consumed before network access and passes the
@@ -603,7 +618,7 @@ export function ChatbotPanel({
     setLocalSafetyNotice(null);
     setAnswerFeedback({});
     clearChatHistory();
-    window.requestAnimationFrame(() => composerRef.current?.focus());
+    window.requestAnimationFrame(() => composerRef.current?.focus({ preventScroll: true }));
   }
 
   const isEmpty = messages.length === 0;
@@ -620,7 +635,7 @@ export function ChatbotPanel({
 
   return (
     <section
-      className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-950"
+      className="flex min-h-0 flex-1 flex-col overflow-hidden bg-white sm:rounded-2xl sm:border sm:border-slate-200 sm:shadow-sm dark:sm:border-slate-700 dark:bg-slate-950"
       aria-label="安衛法AIとの会話"
       aria-busy={isSending}
       data-ui-box={isEmpty ? "" : undefined}
@@ -652,7 +667,7 @@ export function ChatbotPanel({
 
       <div
         ref={listRef}
-        className="min-h-0 flex-1 overflow-y-auto px-3 py-3 sm:px-5 sm:py-4"
+        className="min-h-0 flex-1 overflow-y-auto px-2 py-2 sm:px-5 sm:py-4 [overflow-anchor:none]"
         role="log"
         aria-live="off"
         aria-relevant="additions text"
@@ -739,10 +754,11 @@ export function ChatbotPanel({
               return (
                 <article
                   key={message.id}
+                  style={message.role === "assistant" && message === messages.at(-1) ? { minHeight: answerViewportHeight } : undefined}
                   className={
                     message.role === "user"
-                      ? "ml-auto max-w-[88%]"
-                      : "max-w-2xl"
+                      ? "ml-auto max-w-[96%] sm:max-w-[88%]"
+                      : "w-full sm:max-w-2xl"
                   }
                   aria-label={
                     message.role === "user" ? "あなたの質問" : "安衛法AIの回答"
@@ -763,7 +779,12 @@ export function ChatbotPanel({
                       >
                         安衛法AIの回答 {assistantAnswerNumber}
                       </h2>
-                      {hasStructuredAnswer ? (
+                      {isStreaming && message.provisional ? (
+                        <div data-chatbot-provisional="">
+                          <p className="mb-1 text-xs text-slate-500 dark:text-slate-400">生成中・引用は未確認です</p>
+                          <p className="whitespace-pre-wrap">{message.content}</p>
+                        </div>
+                      ) : hasStructuredAnswer ? (
                         <div
                           className="space-y-3"
                           data-chatbot-structured-answer=""
@@ -792,7 +813,7 @@ export function ChatbotPanel({
                       ) : (
                         <span className="sr-only">回答を作成中</span>
                       )}
-                      {answer?.rest && (
+                      {!message.provisional && answer?.rest && (
                         <details className="mt-2 text-sm">
                           <summary className="min-h-11 cursor-pointer py-2 font-medium text-blue-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 dark:text-blue-300">
                             詳しく読む
@@ -879,7 +900,7 @@ export function ChatbotPanel({
                         !(answer?.rest && hasEvidence) && (
                           <button
                             type="button"
-                            onClick={() => composerRef.current?.focus()}
+                            onClick={() => composerRef.current?.focus({ preventScroll: true })}
                             className="min-h-11 px-1 text-xs font-medium text-slate-500 hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 dark:text-slate-400 dark:hover:text-white"
                           >
                             条件を追加
@@ -936,7 +957,7 @@ export function ChatbotPanel({
                                 [message.id]: "mismatched",
                               }));
                               window.requestAnimationFrame(() =>
-                                composerRef.current?.focus(),
+                                composerRef.current?.focus({ preventScroll: true }),
                               );
                             }}
                             className="min-h-11 px-1 font-medium hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 dark:hover:text-white"
@@ -1003,6 +1024,7 @@ export function ChatbotPanel({
           void handleSend(composerRef.current?.value);
         }}
       >
+        <AiProcessingNote />
         <div className="flex items-end gap-2 rounded-2xl border border-slate-300 bg-white p-2 shadow-sm focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100 dark:border-slate-700 dark:bg-slate-900 dark:focus-within:ring-blue-950">
           <textarea
             ref={composerRef}
@@ -1026,7 +1048,7 @@ export function ChatbotPanel({
             }}
             placeholder="作業や設備を質問"
             aria-label="質問入力"
-            aria-describedby="chatbot-input-hint chatbot-input-keys"
+            aria-describedby="chatbot-input-keys"
             className="max-h-28 min-h-11 min-w-0 flex-1 resize-none bg-transparent px-2 py-2 text-base leading-6 text-slate-950 outline-none placeholder:text-slate-500 disabled:opacity-60 sm:text-sm dark:text-white"
             data-primary-focus=""
           />
@@ -1057,11 +1079,6 @@ export function ChatbotPanel({
             </button>
           )}
         </div>
-        <label className="mt-2 flex items-start gap-2 text-xs leading-5 text-slate-600 dark:text-slate-300">
-          <input type="checkbox" checked={aiConsent} onChange={(event) => setAiConsent(event.target.checked)} data-ai-consent-version="2026-11-10" className="mt-1 shrink-0" />
-          <span>法令相談への回答生成のため、質問とこの相談の直近最大6件の会話をGoogle（Gemini API）へ送信することに同意します。個人情報・機密情報は入力しないでください。<a href="/privacy#external-services" className="underline">データの取扱い</a></span>
-        </label>
-        <PrivacyNote id="chatbot-input-hint" variant="ai" detailsLink={false} className="mt-1 px-2" />
         <span id="chatbot-input-keys" className="sr-only">
           Enterで送信、Shift+Enterで改行します。
         </span>

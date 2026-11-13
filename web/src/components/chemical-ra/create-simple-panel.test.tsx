@@ -2,6 +2,8 @@ import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-li
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import substancesJson from "@/data/create-simple/substances.json";
 import { CreateSimplePanel } from "./create-simple-panel";
+import { substanceFromOfficial, type OfficialSubstanceRecord } from "@/lib/create-simple/official";
+import { saveRecord } from "@/lib/create-simple/records";
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn(), prefetch: vi.fn() }), usePathname: () => "/chemical-ra" }));
 
@@ -22,6 +24,29 @@ function choose(group: string, option: string) {
 }
 
 describe("化学物質リスクアセスメント画面", () => {
+  it.each(["両手と手首", "両腕の肘から先"])("トルエン・%s・手袋なし・室温で数値と全経路の判定を表示する", async (area) => {
+    render(<CreateSimplePanel initialQuery="108-88-3" />);
+    await screen.findByRole("button", {name:"トルエンを外す"});
+    choose("1回（1日）に扱う量", "中量");choose("換気", "窓・換気扇");
+    fireEvent.change(screen.getByLabelText(/1日の作業時間/), {target:{value:"8"}});
+    fireEvent.change(screen.getByLabelText("日数"), {target:{value:"5"}});
+    choose("皮膚に付く範囲", area);
+    expect(screen.getByRole("radio", {name:"粉体"}).hasAttribute("disabled")).toBe(true);
+    const routes=screen.getByRole("list", {name:"経路別のリスクレベル"});
+    expect(routes.textContent).not.toContain("—");expect(routes.textContent).toContain("Ⅳ");
+    expect(screen.getByText(/推定 .*ppm／ばく露限界値/)).toBeDefined();
+    expect(screen.getByText(/吸収量 .*mg\/日／経皮ばく露限界値/)).toBeDefined();
+    expect(document.body.textContent).not.toContain('「」');
+  });
+  it("保存済みの液体のみを粉体とする条件には、製品の状態を直す案内を出す", async()=>{
+    const toluene=all.substances.find(r=>r[0]==="108-88-3")! as unknown as OfficialSubstanceRecord;
+    saveRecord({title:"不整合な保存条件",components:[{substance:substanceFromOfficial(toluene,1),contentPercent:100}],conditions:{productType:2,amountLevel:2,spray:false,largeArea:false,ventilation:"B",controlVelocityConfirmed:false,workingHours:8,frequencyType:"weekly",frequencyDays:5,exposureVariation:"small",contactArea:1500,glove:"none",gloveTraining:"none",processTemperature:null,ignitionSourceRemoved:false,explosiveAtmospherePrevented:false,organicOrMetalNearby:true,airOrWaterContact:true}});
+    render(<CreateSimplePanel/>);
+    fireEvent.click(await screen.findByRole("button",{name:/^不整合な保存条件/}));
+    expect(screen.getByText(/あと「製品の状態/)).toBeDefined();expect(document.body.textContent).not.toContain('「」');
+    choose("製品の状態","液体");
+    expect(screen.getByText("いちばん高いリスクレベル")).toBeDefined();
+  });
   it("物質→条件を選ぶとその場でリスクレベルと下げる対策が出て、対策を当てると再判定される", async () => {
     render(<CreateSimplePanel />);
     fireEvent.change(screen.getByLabelText("物質名またはCAS番号"), { target: { value: "トルエン" } });

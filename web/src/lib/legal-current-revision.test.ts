@@ -29,6 +29,19 @@ describe("現行版の独立確認と回答の断定度", () => {
     expect(validateServiceFirstLegalClaimSupport({ query: "最大荷重1トン以上のフォークリフトの資格は？", answer, articles: [act, decree], now }).supported).toBe(false);
   });
 
+  it.each([
+    ["2026-11-11T00:00:00+09:00", false],
+    ["2026-11-12T00:00:00+09:00", true],
+  ] as const)("確認から31日を超えた回答は保留する: %s", (date, expired) => {
+    const answer = buildServiceFirstLegalAnswer({
+      query: "最大荷重1トン以上のフォークリフトの資格は？",
+      articles: [act, decree],
+      now: new Date(date),
+    });
+    expect(answer.includes("根拠の現行版を確認できない")).toBe(expired);
+    expect(answer.includes("確認不能（根拠の現行版を再確認）")).toBe(expired);
+  });
+
   it("公式抜粋も本文・版・URLの再照合が一致し、期限内にある場合だけ確認済みとする", () => {
     const current = new Date("2026-10-12T00:00:00+09:00");
     const education = verifiedPrimaryNoticeArticles.find((row) => row.lawShort === "特別教育規程")!;

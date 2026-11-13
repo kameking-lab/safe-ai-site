@@ -2,7 +2,7 @@ import { AsyncLocalStorage } from 'node:async_hooks';
 import { createHash,randomUUID } from 'node:crypto';
 import { Prisma } from '@prisma/client';
 import { billingDb,getEntitlement,lockMember,entitlementInTransaction } from './billing-service';
-import { product,type Plan } from './entitlement';
+import { product,canUseMemberQuota,type Plan } from './entitlement';
 import { member,json,isNativeRequest,webMemberId } from './http';
 import { inspectAiOutbound } from '../ai-outbound-safety';
 import { validateChatbotRequestBoundary } from '../server/chatbot-request-boundary';
@@ -60,14 +60,30 @@ export function checkBudget(committed:number,reserved:number,next:number,plan:Pl
 }
 /** Every paid provider call, including web KY and internal retries, shares this ledger. */
 export type ProviderBound={model:string;inputBytes:number;maxOutputTokens:number};
+export type ProviderUsage={promptTokenCount?:number;candidatesTokenCount?:number;thoughtsTokenCount?:number;totalTokenCount?:number};
+type ProviderPricing={model?:string;inputJpyPerMillion:number;outputJpyPerMillion:number;margin:number};
+/** Gemini usageMetadata。思考トークンも出力費用に含め、欠損・不整合時は上限額へ戻す。 */
+export function measuredProviderCost(usage:ProviderUsage|undefined,pricing:ProviderPricing,reservedYen:number){
+  const input=usage?.promptTokenCount;const candidates=usage?.candidatesTokenCount;
+  const valid=(n:unknown):n is number=>typeof n==='number'&&Number.isSafeInteger(n)&&n>=0;
+  if(!valid(input)||!valid(candidates))return null;
+  const total=usage?.totalTokenCount;const thoughts=usage?.thoughtsTokenCount;
+  if(total!==undefined&&(!valid(total)||total<input+candidates))return null;
+  if(thoughts!==undefined&&!valid(thoughts))return null;
+  if(total===undefined&&thoughts===undefined)return null;
+  const output=Math.max(candidates+(thoughts??0),total===undefined?0:total-input);
+  const amountYen=Math.max(1,Math.ceil((input*pricing.inputJpyPerMillion+output*pricing.outputJpyPerMillion)/1000000*pricing.margin));
+  if(!Number.isSafeInteger(amountYen)||amountYen>reservedYen)return null;
+  return {amountYen,promptTokens:input,outputTokens:output};
+}
 export function maximumProviderCost(bound:ProviderBound,pricing:{model?:string;inputJpyPerMillion:number;outputJpyPerMillion:number;margin:number}){
   if(pricing.model!==bound.model || !Number.isSafeInteger(bound.inputBytes) || bound.inputBytes<0 || bound.inputBytes>100000 || !Number.isSafeInteger(bound.maxOutputTokens) || bound.maxOutputTokens<1 || bound.maxOutputTokens>2048 || ![pricing.inputJpyPerMillion,pricing.outputJpyPerMillion,pricing.margin].every(n=>Number.isFinite(n)&&n>0) || pricing.margin<1.25)throw new Error('AI_BUDGET_STOPPED');
   // UTF-8 byte count is a conservative input-token bound; add protocol overhead.
   return Math.max(1,Math.ceil(((bound.inputBytes+4096)*pricing.inputJpyPerMillion+bound.maxOutputTokens*pricing.outputJpyPerMillion)/1000000*pricing.margin));
 }
-export async function withProviderBudget<T>(run:()=>Promise<T>,bound:ProviderBound):Promise<T>{
+export async function withProviderBudget<T>(run:()=>Promise<T>,bound:ProviderBound,readUsage?:()=>ProviderUsage|undefined):Promise<T>{
   if(process.env.MOBILE_LEDGER_ENABLED!=='true')return run();
-  const db=billingDb();const amount=maximumProviderCost(bound,{model:process.env.MOBILE_AI_PRICED_MODEL,inputJpyPerMillion:Number(process.env.MOBILE_AI_INPUT_JPY_PER_MILLION),outputJpyPerMillion:Number(process.env.MOBILE_AI_OUTPUT_JPY_PER_MILLION),margin:Number(process.env.MOBILE_AI_COST_MARGIN)});const {month}=jstKeys();
+  const db=billingDb();const pricing={model:process.env.MOBILE_AI_PRICED_MODEL,inputJpyPerMillion:Number(process.env.MOBILE_AI_INPUT_JPY_PER_MILLION),outputJpyPerMillion:Number(process.env.MOBILE_AI_OUTPUT_JPY_PER_MILLION),margin:Number(process.env.MOBILE_AI_COST_MARGIN)};const amount=maximumProviderCost(bound,pricing);const {month}=jstKeys();
   const plan=context.getStore()?.plan??'free';
   const operationId=context.getStore()?.operationId;
   if(operationId){const marked=await db.mobileUsageOperation.updateMany({where:{id:operationId,status:'reserved',expiresAt:{gt:new Date()}},data:{providerStartedAt:new Date()}});if(marked.count!==1)throw new Error('OPERATION_RELEASED');}
@@ -87,18 +103,23 @@ export async function withProviderBudget<T>(run:()=>Promise<T>,bound:ProviderBou
   // Expire only after committing/releasing the budget lock. Maintenance retries interruptions.
   if(salesPaused)await processPausedStripeCheckouts().catch(()=>{});
   if(!reservation)throw new Error('AI_BUDGET_STOPPED');
-  try{return await run();}finally{
+  let completed=false;
+  try{const result=await run();completed=true;return result;}finally{
+    let measured:ReturnType<typeof measuredProviderCost>=null;
+    if(completed&&readUsage){try{measured=measuredProviderCost(readUsage(),pricing,amount);}catch{/* unknown usage keeps the maximum */}}
+    const committedYen=measured?.amountYen??amount;
     // Unknown/failed provider usage is conservatively charged at the reserved maximum.
     // If settlement storage fails, the reservation remains and continues blocking overspend.
     await db.$transaction(async tx=>{
       await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`anzen-budget:${month}`},0))`;
       const changed=await tx.mobileProviderReservation.updateMany({where:{id:reservation.id,status:'reserved'},data:{status:'committed'}});
-      if(changed.count)await tx.mobileBudgetMonth.update({where:{month},data:{reservedYen:{decrement:amount},committedYen:{increment:amount}}});
+      if(changed.count)await tx.mobileBudgetMonth.update({where:{month},data:{reservedYen:{decrement:amount},committedYen:{increment:committedYen}}});
     });
+    console.info(JSON.stringify({event:'ai_provider_settlement',model:bound.model,reservedYen:amount,committedYen,usageBasis:measured?'measured':'reserved-maximum',...(measured?{promptTokens:measured.promptTokens,outputTokens:measured.outputTokens}:{})}));
   }
 }
-export async function quota(userId:string,feature:AiFeature,tx?:Prisma.TransactionClient){
-  const db=tx??billingDb();const rights=await getEntitlement(userId);const {day,resetAt}=jstKeys();
+export async function quota(userId:string,feature:AiFeature,tx?:Prisma.TransactionClient,verifiedRights?:Awaited<ReturnType<typeof getEntitlement>>){
+  const db=tx??billingDb();const rights=verifiedRights??await getEntitlement(userId);const {day,resetAt}=jstKeys();
   if(!tx)await billingDb().$transaction(async session=>{await lockMember(session,userId);await recoverUsageLeases(session,userId);});
   const rows=await db.mobileUsageOperation.groupBy({by:['status'],where:{userId,feature,day},_count:true});
   const used=rows.find(r=>r.status==='completed')?._count??0;const reserved=(rows.find(r=>r.status==='reserved')?._count??0)+(rows.find(r=>r.status==='uncertain')?._count??0);const limit=rights.limits[feature];
@@ -113,7 +134,7 @@ async function reserve(request:Request,userId:string,feature:AiFeature){
   await billingDb().$transaction(async tx=>{await lockMember(tx,userId);await recoverUsageLeases(tx,userId);});
   return billingDb().$transaction(async tx=>{
     await lockMember(tx,userId);
-    const rights=await entitlementInTransaction(tx,userId);if(rights.syncState!=='verified')throw new Error('ENTITLEMENT_SYNC_PENDING');
+    const rights=await entitlementInTransaction(tx,userId);if(!canUseMemberQuota(rights))throw new Error('ENTITLEMENT_SYNC_PENDING');
     const previous=await tx.mobileUsageOperation.findUnique({where:{id}});
     if(previous){if(previous.userId!==userId || previous.feature!==feature || previous.requestHash!==requestHash)throw new Error('INVALID_REQUEST');
       if(previous.status==='completed' && previous.response)return {id,plan:rights.plan,replay:previous.response};throw new Error(previous.status==='released'?'OPERATION_RELEASED':'OPERATION_PENDING');}

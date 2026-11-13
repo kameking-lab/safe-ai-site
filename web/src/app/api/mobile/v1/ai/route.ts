@@ -11,7 +11,9 @@ export async function POST(request:Request){try{
   if(b.version===1)return json({error:{code:'CLIENT_UPDATE_REQUIRED',message:'このAI機能の利用には対応版アプリが必要です。',supportedVersion:2}},426);
   const secret=process.env.AUTH_SECRET;if(!secret)throw new Error('ENTITLEMENT_SYNC_PENDING');
   const token=request.headers.get('x-anzen-csrf')??'';const expected=createHmac('sha256',secret).update(`anzen-ai:${userId}:${new Date().toISOString().slice(0,10)}`).digest('hex');
-  if(!/^[a-f0-9]{64}$/.test(token) || !timingSafeEqual(Buffer.from(token),Buffer.from(expected)))throw new Error('FORBIDDEN');
+  // A native Bearer credential is authenticated above and cannot be sent by a cross-site form.
+  // Cookie clients still need the capability CSRF token. Quota/budget are enforced by chatbot.
+  if(!request.headers.get('authorization')?.startsWith('Bearer ') && (!/^[a-f0-9]{64}$/.test(token) || !timingSafeEqual(Buffer.from(token),Buffer.from(expected))))throw new Error('FORBIDDEN');
   if(b.feature==='chemical_ra')throw new Error('FEATURE_UNAVAILABLE');
   const headers=new Headers(request.headers);headers.set('Content-Type','application/json');headers.set('X-Operation-ID',b.requestId);
   const response=await chatbot(new Request(new URL('/api/chatbot',request.url),{method:'POST',headers,body:JSON.stringify({message:b.input,privacyConfirmed:true})}));

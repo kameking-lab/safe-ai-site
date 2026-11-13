@@ -7,7 +7,6 @@ import {
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-export const MEETING_SUGGESTIONS_ENABLED = false;
 
 /**
  * 各主張の出典・採否・確認時刻を帳票へ保持できるまでは、生成候補を返さない。

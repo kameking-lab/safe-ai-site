@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { render as rawRender, screen, waitFor, fireEvent } from "@testing-library/react";
+import { act, render, screen, waitFor, fireEvent } from "@testing-library/react";
 import { ChatbotPanel } from "./chatbot-panel";
 
 vi.mock("next/navigation", () => ({
@@ -16,12 +16,27 @@ afterEach(() => {
   window.localStorage.clear();
 });
 
-function render(...args: Parameters<typeof rawRender>) {
-  const result = rawRender(...args);
-  const consent = screen.queryByRole("checkbox") as HTMLInputElement | null;
-  if (consent && !consent.checked) fireEvent.click(consent);
-  return result;
-}
+it.each([null, "accepted", "revoked"])("保存済みの同意=%sでも送信操作だけで一度送り、再表示しても確認しない", async (stored) => {
+  if (stored) localStorage.setItem("anzen.chatbot-ai-consent.2026-11-10", stored);
+  const send = vi.fn().mockImplementation(() => new Promise(() => {}));
+  vi.stubGlobal("fetch", send);
+  const first = render(<ChatbotPanel initialQuestion="足場の手すりは？" />);
+  expect(send).not.toHaveBeenCalled();
+  expect(screen.getByText(/文章はGoogle Geminiで処理します/)).toBeTruthy();
+  expect(screen.getByRole("link", { name: "プライバシー" }).getAttribute("href")).toBe("/privacy#external-services");
+  fireEvent.click(screen.getByRole("button", { name: "送信" }));
+  await waitFor(() => expect(send).toHaveBeenCalledTimes(1));
+  expect(JSON.parse(send.mock.calls[0][1].body).privacyConfirmed).toBe(true);
+  expect(screen.queryByRole("dialog")).toBeNull();
+  expect(screen.queryByRole("checkbox")).toBeNull();
+  expect(localStorage.length).toBe(0);
+  first.unmount();
+  render(<ChatbotPanel initialQuestion="換気は必要？" />);
+  fireEvent.click(screen.getByRole("button", { name: "送信" }));
+  await waitFor(() => expect(send).toHaveBeenCalledTimes(2));
+  expect(screen.queryByRole("dialog")).toBeNull();
+});
+
 function submitExample(name: string) {
   fireEvent.click(screen.getByRole("button", { name }));
   fireEvent.click(screen.getByRole("button", { name: "送信" }));
@@ -213,6 +228,115 @@ function chatbotStream(payload: Record<string, unknown>) {
   );
 }
 
+describe("ChatbotPanel 暫定本文と引用検証", () => {
+  function controlledStream() {
+    let controller!: ReadableStreamDefaultController<Uint8Array>;
+    const body = new ReadableStream<Uint8Array>({ start(value) { controller = value; } });
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(body, { headers: { "content-type": "text/event-stream" } })));
+    return {
+      send(event: string, data: unknown) { controller.enqueue(new TextEncoder().encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`)); },
+      bytes(value: Uint8Array) { controller.enqueue(value); },
+      fail(error: Error) { controller.error(error); },
+      close() { controller.close(); },
+    };
+  }
+
+  it("完了前に本文を表示し、検証後に誤引用と暫定表示を置き換える", async () => {
+    const stream = controlledStream();
+    render(<ChatbotPanel />);
+    submitExample("足場の手すりは？");
+    await act(async () => { stream.send("text", { chunk: "安衛則第99999条という暫定の引用です。", provisional: true }); });
+    expect(screen.getByText("生成中・引用は未確認です")).toBeTruthy();
+    expect(screen.getByText(/第99999条という暫定/)).toBeTruthy();
+    expect(screen.queryByText(/確認に使える出典/)).toBeNull();
+    expect(screen.getByRole("region", { name: "安衛法AIとの会話" }).getAttribute("aria-busy")).toBe("true");
+    await act(async () => {
+      stream.send("meta", {
+        answer: "収録した条文の案内へ切り替えました。", substantiveAnswer: "収録した条文の案内へ切り替えました。",
+        sources: [], citations: [], source_type: "rag", confidence: "low",
+        scopeWarnings: ["引用の根拠を確認できませんでした。"],
+      });
+      stream.close();
+    });
+    expect(screen.queryByText(/第99999条という暫定/)).toBeNull();
+    expect(screen.queryByText("生成中・引用は未確認です")).toBeNull();
+    expect(screen.getByText("収録した条文の案内へ切り替えました。")).toBeTruthy();
+    expect(screen.getByText("引用の根拠を確認できませんでした。")).toBeTruthy();
+  });
+
+  it.each(["eof", "error"])("最終metaなしの%sでは暫定本文を残さない", async (ending) => {
+    const stream = controlledStream();
+    render(<ChatbotPanel />);
+    submitExample("足場の手すりは？");
+    await act(async () => { stream.send("text", { chunk: "未検証の生成本文です。", provisional: true }); });
+    expect(screen.getByText("未検証の生成本文です。")).toBeTruthy();
+    await act(async () => {
+      if (ending === "error") stream.send("error", { message: "失敗", retryable: true });
+      stream.close();
+    });
+    expect(screen.queryByText("未検証の生成本文です。")).toBeNull();
+    expect(screen.getByRole("alert").textContent).toContain("回答を取得できませんでした");
+    expect(screen.getByRole("button", { name: "再試行" })).toBeTruthy();
+  });
+
+  it("長い回答の逐次追加・確定で末尾へ移動せず、回答文頭に一度だけ合わせる", async () => {
+    const stream = controlledStream();
+    const scroll = vi.mocked(Element.prototype.scrollTo);
+    scroll.mockClear();
+    const bounds = vi.spyOn(Element.prototype, "getBoundingClientRect").mockImplementation(function (this: Element) {
+      return { top: this.hasAttribute("data-chatbot-answer") ? 360 : 100, height: 400 } as DOMRect;
+    });
+    try {
+      render(<ChatbotPanel />);
+      submitExample("足場の手すりは？");
+      await waitFor(() => expect(scroll).toHaveBeenCalledTimes(1));
+      expect(scroll).toHaveBeenLastCalledWith({ top: 260, behavior: "auto" });
+      for (const chunk of ["回答の文頭です。", "確認する内容です。\n".repeat(100)]) {
+        await act(async () => { stream.send("text", { chunk, provisional: true }); });
+      }
+      expect(screen.getByText(/回答の文頭です。/)).toBeTruthy();
+      expect(scroll).toHaveBeenCalledTimes(1);
+      await act(async () => {
+        stream.send("meta", { answer: "確定回答の文頭です。\n" + "確認する内容です。\n".repeat(100), sources: [], citations: [] });
+        stream.close();
+      });
+      expect(screen.getByText(/確定回答の文頭です。/)).toBeTruthy();
+      expect(scroll).toHaveBeenCalledTimes(1);
+    } finally {
+      bounds.mockRestore();
+    }
+  });
+
+  it("日本語とフレーム境界が1バイトずつ届いても暫定表示を確定本文へ置換する", async () => {
+    const stream = controlledStream();
+    render(<ChatbotPanel />);
+    submitExample("足場の手すりは？");
+    const frames = `event: text\ndata: ${JSON.stringify({ chunk: "未確認の引用です。", provisional: true })}\n\n`
+      + `event: meta\ndata: ${JSON.stringify({ answer: "確認した回答です。", sources: [], citations: [] })}\n\n`;
+    await act(async () => {
+      for (const byte of new TextEncoder().encode(frames)) stream.bytes(Uint8Array.of(byte));
+      stream.close();
+    });
+    expect(screen.getByText("確認した回答です。")).toBeTruthy();
+    expect(screen.queryByText("未確認の引用です。")).toBeNull();
+  });
+
+  it.each(["disconnect", "stop"])("本文受信後の%sでも未確認本文を消して再試行を案内する", async (ending) => {
+    const stream = controlledStream();
+    render(<ChatbotPanel />);
+    submitExample("足場の手すりは？");
+    await act(async () => { stream.send("text", { chunk: "残してはいけない途中の回答です。", provisional: true }); });
+    expect(screen.getByText("残してはいけない途中の回答です。")).toBeTruthy();
+    await act(async () => {
+      if (ending === "stop") fireEvent.click(screen.getByRole("button", { name: "生成を停止" }));
+      stream.fail(ending === "stop" ? new DOMException("Aborted", "AbortError") : new Error("Disconnected"));
+    });
+    expect(screen.queryByText("残してはいけない途中の回答です。")).toBeNull();
+    expect(screen.getByRole("alert").textContent).toContain(ending === "stop" ? "応答を停止しました" : "回答を取得できませんでした");
+    expect(screen.getByRole("button", { name: "再試行" })).toBeTruthy();
+  });
+});
+
 describe("ChatbotPanel AI safety boundary", () => {
   it("never places a user question into downstream URL query parameters", () => {
     const source = readFileSync(
@@ -250,7 +374,7 @@ describe("ChatbotPanel AI safety boundary", () => {
     expect(JSON.stringify(window.sessionStorage)).not.toContain(question);
   });
 
-  it("新しい相談で入力・安全通知・同意・進行中履歴をリセットする", async () => {
+  it("新しい相談で入力・安全通知・進行中履歴をリセットする", async () => {
     const fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);
     render(<ChatbotPanel />);
@@ -483,6 +607,7 @@ describe("ChatbotPanel AI safety boundary", () => {
     expect(body).toContain("足場の点検方法は？");
     expect(body).toContain('"privacyConfirmed":true');
     expect(localStorage.length).toBe(0);
+    expect(localStorage.getItem("anzen.chatbot-ai-consent.2026-11-10")).toBeNull();
   });
 });
 
@@ -505,15 +630,12 @@ describe("ChatbotPanel conversation UI", () => {
     ).toContain("shrink-0");
     expect(screen.getByLabelText("質問入力").getAttribute("rows")).toBe("1");
     const privacyHint = document.getElementById("chatbot-input-hint");
-    expect(privacyHint?.textContent).toContain("不正アクセス対策済み");
-    expect(privacyHint?.textContent).toContain("名前や住所などは書かなくても使えます");
-    // 最初の画面の操作数予算（service-first copy budget）を増やさないよう、送信欄の安心表示はリンクなし。
-    expect(privacyHint?.querySelector("a")).toBeNull();
+    expect(privacyHint).toBeNull();
     expect(
       document.querySelectorAll("[data-ui-box]").length,
     ).toBeLessThanOrEqual(1);
     expect(screen.queryByRole("alert")).toBeNull();
-    expect(screen.getByRole("checkbox")).toBeTruthy();
+    expect(screen.queryByRole("checkbox")).toBeNull();
   });
 
   it("Enterで送信し、Shift+Enterは改行として残す", async () => {
@@ -1555,13 +1677,16 @@ describe("ChatbotPanel ログイン済み会員の失敗応答", () => {
   });
 });
 
-it("未同意の質問・ホーム引継ぎを外部送信しない", () => {
-  const send = vi.fn();vi.stubGlobal("fetch", send);
-  rawRender(<ChatbotPanel initialQuestion="足場の手すりは？" />);
-  fireEvent.click(screen.getByRole("button", {name:"送信"}));
+it("ホーム引継ぎだけでは外部送信せず、送信ボタンで一度だけ送る", async () => {
+  const send = vi.fn().mockImplementation(() => new Promise(() => {}));
+  vi.stubGlobal("fetch", send);
+  render(<ChatbotPanel initialQuestion="足場の手すりは？" />);
   expect(send).not.toHaveBeenCalled();
   expect((screen.getByRole("textbox") as HTMLTextAreaElement).value).toBe("足場の手すりは？");
-  expect(screen.getByRole("alert").textContent).toContain("同意してください");
+  fireEvent.click(screen.getByRole("button", { name: "送信" }));
+  await waitFor(() => expect(send).toHaveBeenCalledTimes(1));
+  expect(screen.queryByRole("dialog")).toBeNull();
+  expect(screen.queryByRole("checkbox")).toBeNull();
 });
 it("認証失敗で質問を入力欄に戻す", async () => {
   vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({error:{code:"UNAUTHORIZED",message:"ログインが必要です"}}),{status:401})));

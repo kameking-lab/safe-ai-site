@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { matchGoodsCategories } from "./route";
+import { matchGoodsCategories } from "@/lib/goods-chat-selection";
 
 describe("matchGoodsCategories", () => {
   it("maps a concrete work description to multiple relevant categories", () => {

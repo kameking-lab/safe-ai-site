@@ -55,12 +55,15 @@ describe("CalcAiOnebox private navigation", () => {
     fireEvent.change(screen.getByLabelText("計算したい内容（自由記述）"), {
       target: { value: prompt },
     });
-    fireEvent.click(screen.getByRole("checkbox"));
+    expect(screen.queryByRole("checkbox")).toBeNull();
+    expect(screen.getByText(/文章はGoogle Geminiで処理します/)).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "計算機を探す" }));
 
     const link = await screen.findByRole("link", {
       name: "生コンクリート数量の概算を開く",
     });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body).aiProviderConsent).toBe(true);
     expect(link.getAttribute("href")).toBe(
       "/construction-calc/concrete-volume",
     );
