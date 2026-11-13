@@ -30,6 +30,7 @@ const APP: Record<string, string> = {
 export function describeStoreError(error: unknown): string {
   if (error instanceof StoreError) {
     const base = APP[error.message] ?? SDK[error.message] ?? '購入の準備に失敗しました';
+    if(error.message==='STORE_NOT_OPENED')return `${base}。会員情報を再読み込みしてお試しください。`;
     return `${base}［${error.message}］${error.detail ? `（${error.detail}）` : ''}`;
   }
   const e = (error ?? {}) as { code?: unknown; message?: unknown; underlyingErrorMessage?: unknown };

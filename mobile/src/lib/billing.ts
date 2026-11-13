@@ -123,6 +123,7 @@ export class BillingController {
         intent=await this.send('/api/billing/purchase-intents',{appUserId:member.appUserId,attemptId}) as typeof intent;
       }catch(error){
         void this.reportOutcome(member.appUserId,preparedOutcome);
+        console.warn('[billing] purchase preparation failed',{stage:'purchase-intents',code:error instanceof SiteApiError?error.code:'REQUEST_FAILED',status:error instanceof SiteApiError?error.status:null});
         if(error instanceof Error&&['PRO_SALES_PAUSED','ALREADY_SUBSCRIBED','PURCHASE_PENDING','UNAUTHORIZED','ENTITLEMENT_SYNC_PENDING'].includes(error.message))throw error;
         throw new StoreError('STORE_NOT_OPENED',error instanceof SiteApiError?`購入予約API: ${error.code} / HTTP ${error.status}`:'購入予約APIの応答を確認できません');
       }
@@ -133,6 +134,7 @@ export class BillingController {
         try{await this.send('/api/billing/store-started',{id:intent.id,attemptId});}
         catch(error){
           void this.reportOutcome(member.appUserId,{id:intent.id,attemptId,outcome:'not_opened'});
+          console.warn('[billing] purchase preparation failed',{stage:'store-started',code:error instanceof SiteApiError?error.code:'REQUEST_FAILED',status:error instanceof SiteApiError?error.status:null});
           if(error instanceof Error&&error.message==='PRO_SALES_PAUSED')throw error;
           throw new StoreError('STORE_NOT_OPENED',error instanceof SiteApiError?`購入開始API: ${error.code} / HTTP ${error.status}`:'購入開始APIの応答を確認できません');
         }

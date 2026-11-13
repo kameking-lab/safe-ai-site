@@ -50,7 +50,7 @@ export function AccountPanel(){
     <div className="space-y-2">
       <p className="text-lg font-bold">{statusLine}</p>
       <p className="min-h-[1.75em] text-sm">{member?.expiresAt?`有効期限：${new Date(member.expiresAt).toLocaleString('ja-JP')}`:'ウェブの購入も同じアカウントで使えます。'}</p>
-      {!member?<button disabled={busy || !config?.login.apple} onClick={()=>void login()}>Apple / Googleでログイン</button>:<button disabled={busy} onClick={()=>void action(async()=>{await logout();setMember(null);setMemberState('unauthenticated');await billing.forget();})}>ログアウト</button>}
+      {!member?<button disabled={busy || memberState==='loading' || !config?.login.apple} onClick={()=>void login()}>Apple / Googleでログイン</button>:<button disabled={busy} onClick={()=>void action(async()=>{await logout();setMember(null);setMemberState('unauthenticated');await billing.forget();})}>ログアウト</button>}
       <p role="status" className="min-h-[1.75em] text-sm">{message}</p>
     </div>
     <button disabled={busy||refreshing} aria-busy={refreshing} onClick={()=>void refresh(true)}>{refreshing?'会員情報を読み込み中…':'会員情報を再読み込み'}</button>
