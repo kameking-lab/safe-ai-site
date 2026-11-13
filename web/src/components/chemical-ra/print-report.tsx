@@ -36,6 +36,13 @@ export function PrintReport({
       <style>{`
         @media print {
           @page { size: A4; margin: 12mm; }
+          body:has([data-cs-print-report]) { padding: 0 !important; min-height: 0 !important; background: white !important; }
+          body:has([data-cs-print-report])::before,
+          body:has([data-cs-print-report]) nav,
+          body:has([data-cs-print-report]) header,
+          body:has([data-cs-print-report]) [data-site-footer] { display: none !important; }
+          body:has([data-cs-print-report]) main,
+          body:has([data-cs-print-report]) main *:has([data-cs-print-report]) { padding: 0 !important; margin: 0 !important; min-height: 0 !important; max-width: none !important; background: white !important; }
           body:has([data-cs-print-report]) img[src*="mascot"],
           body:has([data-cs-print-report]) [data-pet-companion] { display: none !important; }
           [data-cs-print-report] { color: #0f172a; font-size: 10px; line-height: 1.5; print-color-adjust: exact; -webkit-print-color-adjust: exact; }

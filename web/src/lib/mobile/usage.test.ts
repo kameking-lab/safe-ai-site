@@ -38,6 +38,7 @@ vi.mock('@/lib/prisma',()=>{
 import { withUsage,withProviderBudget,checkBudget,jstKeys,maximumProviderCost,measuredProviderCost,rebuildRequest } from './usage';
 import { __resetDevelopmentSharedStateForTests } from '@/lib/security/shared-state';
 import { canUseMemberQuota } from './entitlement';
+import * as entitlementPolicy from './entitlement';
 const request=(id=crypto.randomUUID())=>new Request('https://example.test/api/chatbot',{method:'POST',headers:{Authorization:'Bearer mock_session','Content-Type':'application/json','X-Operation-ID':id},body:JSON.stringify({message:'足場の手すり',privacyConfirmed:true})});
 const answer=()=>Response.json({answer:'公式根拠を確認してください。',source_type:'rag',sources:[{text:'原文',url:'https://laws.e-gov.go.jp/law/mock',asOf:new Date().toISOString()}]});
 beforeEach(()=>{state.operations=[];state.tail=Promise.resolve();state.paid=false;state.signedIn=true;state.budget={committedYen:0,reservedYen:0};state.reservations=[];vi.stubEnv('MOBILE_LEDGER_ENABLED','true');});afterEach(()=>vi.unstubAllEnvs());
@@ -71,6 +72,17 @@ describe('shared daily AI accounting',()=>{
     expect(canUseMemberQuota({plan:'free',syncState:'pending'})).toBe(true);
     expect(canUseMemberQuota({plan:'pro',syncState:'pending'})).toBe(false);
     expect(canUseMemberQuota({plan:'free',syncState:'unavailable'})).toBe(false);
+  });
+  it('enforces exactly three free answers during pending rights verification and still blocks unverified Pro',async()=>{
+    const project=entitlementPolicy.projectEntitlement;
+    const pending=vi.spyOn(entitlementPolicy,'projectEntitlement').mockImplementation((...args)=>({...project(...args),syncState:'pending'}));
+    try{
+      const run=vi.fn(async()=>answer());
+      for(let i=0;i<3;i++)expect((await withUsage(request(),'law_chat',run)).status).toBe(200);
+      const fourth=await withUsage(request(),'law_chat',run);
+      expect(fourth.status).toBe(429);expect(await fourth.json()).toMatchObject({error:{code:'DAILY_LIMIT_REACHED',plan:'free'}});expect(run).toHaveBeenCalledTimes(3);
+      state.paid=true;expect((await withUsage(request(),'law_chat',run)).status).toBe(503);expect(run).toHaveBeenCalledTimes(3);
+    }finally{pending.mockRestore();}
   });
   it('distinguishes reserved last slots from daily completed consumption',async()=>{
     for(let i=0;i<3;i++)state.operations.push({id:crypto.randomUUID(),userId:'mock_member',feature:'law_chat',day:jstKeys().day,status:'reserved',createdAt:new Date(),requestHash:'prior'});
