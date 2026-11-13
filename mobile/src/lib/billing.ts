@@ -65,7 +65,7 @@ export class BillingController {
     try { await this.sendOutcome(appUserId,report);await clearReportedOutcome(appUserId,report); }
     catch { /* Retried automatically by entitlement() after app relaunch or reconnect. */ }
   }
-  private publish(member:MemberEntitlement){if(typeof window!=='undefined'&&isVerifiedPro(member))window.dispatchEvent(new CustomEvent('anzen-entitlement-changed',{detail:member}));}
+  private publish(member:MemberEntitlement){if(typeof window!=='undefined')window.dispatchEvent(new CustomEvent('anzen-entitlement-changed',{detail:member}));}
   async sync(){const member=snapshotSchema.parse(await this.send('/api/billing/reconcile',{}));this.publish(member);return member;}
   async identify(config:BillingConfig,member:MemberEntitlement){
     if(this.busy && this.purchaseUser && this.purchaseUser!==member.appUserId)throw new Error('PURCHASE_PENDING');

@@ -10,20 +10,20 @@ import { SharedUsageMeter } from './shared-usage-meter';
 // The website's mobile tab bar (ホーム・化学RA・法令AI・学ぶ・メニュー), same component as the web.
 import { MobileBottomNav } from '@/components/MobileBottomNav';
 import { ProPurchasePresentationContext } from '@/components/pro-upsell-card';
-import { billing } from '../lib/billing';
+import { billing,isVerifiedPro,type MemberEntitlement } from '../lib/billing';
 import { DisplaySettings } from './display-settings';
 import { startProPurchase, resumeProPurchaseAfterLogin, type ProPurchaseResult } from '../lib/pro-purchase';
 export function SharedShell({ children }: { children: ReactNode }) {
   const [message,setMessage]=useState('');
   const [price,setPrice]=useState<string|null>(null);
-  const verifiedPro=useRef(false);
+  const verifiedPro=useRef<MemberEntitlement|null>(null);
   useEffect(()=>{let generation=0;const update=()=>{const ticket=++generation;setPrice(null);void (async()=>{const c=await billing.config();const m=await billing.entitlement();if(m.plan==='free'&&m.syncState==='verified'&&c.ready){const p=await billing.offering(c,m);if(ticket===generation)setPrice(p.product.priceString);}})().catch(()=>{});};update();window.addEventListener('anzen-session-changed',update);return()=>{generation++;window.removeEventListener('anzen-session-changed',update);};},[]);
   const pathname=usePathname().replace(/\/$/,'')||'/';
   useEffect(() => {
     installWebTransport();
-    const show=(result:ProPurchaseResult|null)=>{if(result)setMessage(verifiedPro.current?'':result.message);};
-    const verified=(event:Event)=>{const rights=(event as CustomEvent<{plan?:string;syncState?:string}>).detail;if(rights?.plan!=='pro'||rights.syncState!=='verified')return;verifiedPro.current=true;setMessage('');};
-    const sessionChanged=()=>{verifiedPro.current=false;};
+    const show=(result:ProPurchaseResult|null)=>{if(result)setMessage(isVerifiedPro(verifiedPro.current)?'':result.message);};
+    const verified=(event:Event)=>{const rights=(event as CustomEvent<MemberEntitlement|null>).detail;verifiedPro.current=isVerifiedPro(rights)?rights:null;if(verifiedPro.current)setMessage('');};
+    const sessionChanged=()=>{verifiedPro.current=null;};
     const feeds=(event:MouseEvent)=>{const anchor=(event.target as Element|null)?.closest('a');if(!anchor)return;const url=new URL(anchor.href,location.href);if(url.origin!==location.origin)return;
       if(url.pathname.startsWith('/feed/')){event.preventDefault();void openSource(SITE+url.pathname+url.search).catch(()=>setMessage('フィードを開けませんでした。'));return;}
       // 「月額980円で続ける」: the website's Stripe start becomes the App Store purchase sheet here.
