@@ -87,7 +87,7 @@ export async function executeAi(feature: Feature, input: string, requestId: stri
     return null;
   });
   if (capability && !canExecute(capability, feature)) throw new ApiError(capability.features[feature].quota.remaining === 0 ? capability.features[feature].quota.reserved>0?'OPERATION_PENDING':'DAILY_LIMIT_REACHED' : 'SAFETY_UNVERIFIED', undefined, capability.features[feature].quota.resetAt);
-  const result = aiResultSchema.parse(await request('/api/mobile/v1/ai', send, { version: 2, feature, input, requestId, privacyConfirmed: true }, capability?{ 'X-Anzen-CSRF': capability.csrfToken }:{}));
+  const result = aiResultSchema.parse(await request('/api/mobile/v1/ai', send, { version: 2, feature, input, requestId, privacyConfirmed: true, answerAccounting: 'all-answers' }, capability?{ 'X-Anzen-CSRF': capability.csrfToken }:{}));
   if (result.requestId !== requestId || result.feature !== feature) throw new ApiError('SAFETY_UNVERIFIED');
   return result;
 }

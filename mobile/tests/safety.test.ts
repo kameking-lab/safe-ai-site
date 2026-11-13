@@ -56,7 +56,7 @@ describe('server-enforced safety boundary', () => {
     const send = vi.fn(async (path: string) => ({ status: 200, data: path.includes('capabilities') ? capability() : aiResult(id), headers: {} }));
     const result = await executeAi('law_chat', 'question', id, send);
     expect(result.evidence[0].original).toContain('原文');
-    expect(send).toHaveBeenNthCalledWith(2, '/api/mobile/v1/ai', { version: 2, feature: 'law_chat', input: 'question', requestId: id, privacyConfirmed: true }, { 'X-Anzen-CSRF': 'x'.repeat(32) });
+    expect(send).toHaveBeenNthCalledWith(2, '/api/mobile/v1/ai', { version: 2, feature: 'law_chat', input: 'question', requestId: id, privacyConfirmed: true, answerAccounting: 'all-answers' }, { 'X-Anzen-CSRF': 'x'.repeat(32) });
     const mismatch = async (path: string) => ({ status: 200, data: path.includes('capabilities') ? capability() : aiResult(crypto.randomUUID()), headers: {} });
     await expect(executeAi('law_chat', 'question', id, mismatch)).rejects.toThrow('安全装置');
   });

@@ -19,7 +19,10 @@ test('server safety guidance is preserved on the home AI response',async({page,c
 
 test('portal displays a counted fallback answer without claiming it is free',async({page,context})=>{
   await context.route(host+'/api/mobile/v1/capabilities',r=>r.fulfill({json:capability(),headers:cors}));
-  await context.route(host+'/api/mobile/v1/ai',r=>r.fulfill({json:{...aiResult(r.request().postDataJSON().requestId),status:'fallback',evidence:[],charged:true},headers:cors}));
+  await context.route(host+'/api/mobile/v1/ai',r=>{
+    expect(r.request().postDataJSON().answerAccounting).toBe('all-answers');
+    return r.fulfill({json:{...aiResult(r.request().postDataJSON().requestId),status:'fallback',evidence:[],charged:true},headers:cors});
+  });
   await page.goto('/portal/');await page.getByRole('button',{name:'AI確認',exact:true}).click();
   await page.getByLabel('法令についての質問').fill('局所排気装置の点検条件');await page.getByRole('button',{name:'送信する',exact:true}).click();
   await expect(page.getByLabel('AI回答')).toContainText('適用条件を原文で確認してください。');
