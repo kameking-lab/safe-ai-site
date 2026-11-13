@@ -39,6 +39,7 @@ import { withUsage,withProviderBudget,checkBudget,jstKeys,maximumProviderCost,me
 import { __resetDevelopmentSharedStateForTests } from '@/lib/security/shared-state';
 import { canUseMemberQuota,product } from './entitlement';
 import * as entitlementPolicy from './entitlement';
+import * as proSales from '../pro-sales';
 const request=(id=crypto.randomUUID())=>new Request('https://example.test/api/chatbot',{method:'POST',headers:{Authorization:'Bearer mock_session','Content-Type':'application/json','X-Operation-ID':id},body:JSON.stringify({message:'足場の手すり',privacyConfirmed:true})});
 const answer=()=>Response.json({answer:'公式根拠を確認してください。',source_type:'rag',sources:[{text:'原文',url:'https://laws.e-gov.go.jp/law/mock',asOf:new Date().toISOString()}]});
 beforeEach(()=>{state.operations=[];state.tail=Promise.resolve();state.paid=false;state.signedIn=true;state.budget={committedYen:0,reservedYen:0};state.reservations=[];vi.stubEnv('MOBILE_LEDGER_ENABLED','true');});afterEach(()=>vi.unstubAllEnvs());
@@ -134,14 +135,17 @@ describe('anonymous website visitors with the shared ledger on',()=>{
   const salesOpen=()=>{vi.stubEnv('SAFE_AI_STAGING_MODE','false');vi.stubEnv('VERCEL_ENV','development');vi.stubEnv('NEXT_PUBLIC_PAID_MODE','true');vi.stubEnv('STRIPE_SECRET_KEY','synthetic-not-real');vi.stubEnv('STRIPE_ANZEN_PRO_MONTHLY_PRICE_ID','price_synthetic_pro');__resetDevelopmentSharedStateForTests();};
   it.each(['law_chat','chemical_ra'] as const)('shares the web daily %s allowance with native guests and stops before execution',async feature=>{
     salesOpen();state.signedIn=false;
+    const appSales=vi.spyOn(proSales,'appStoreSalesReady').mockReturnValue(true);
+    try{
     const ip={'X-Forwarded-For':'198.51.100.30'};const native={...ip,'X-Anzen-Native':'1'};
     const run=vi.fn(async()=>feature==='law_chat'?answer():Response.json({assessmentStatus:'completed'}));
     // First answer on the website, subsequent answers from the signed-out app.
     for(let i=0;i<product.limits.free[feature];i++)expect((await withUsage(web(i===0?ip:native),feature,run)).status).toBe(200);
     const blocked=await withUsage(web(native),feature,run);
-    expect(blocked.status).toBe(429);expect(await blocked.json()).toMatchObject({error:{code:'DAILY_LIMIT_REACHED',plan:'free'}});
+    expect(blocked.status).toBe(429);expect(await blocked.json()).toMatchObject({error:{code:'DAILY_LIMIT_REACHED',plan:'free',upgrade:true}});
     expect((await withUsage(web(ip),feature,run)).status).toBe(429);
     expect(run).toHaveBeenCalledTimes(product.limits.free[feature]);expect(state.operations).toHaveLength(0);
+    }finally{appSales.mockRestore();}
   });
   it('counts native SSE answers, leaves failures uncounted, and resets on the next JST day',async()=>{
     salesOpen();state.signedIn=false;vi.useFakeTimers();
