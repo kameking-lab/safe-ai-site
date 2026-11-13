@@ -1,0 +1,223 @@
+{
+  "checkedAt": "2026-11-13T13:07:31.249Z",
+  "results": [
+    {
+      "path": "/api/mobile/v1/capabilities",
+      "origin": "https://www.anzen-ai-portal.jp",
+      "status": 401,
+      "ms": 638,
+      "contentType": "application/json",
+      "cors": null,
+      "allow": null,
+      "error": {
+        "code": "UNAUTHORIZED"
+      },
+      "bodyKind": "json"
+    },
+    {
+      "path": "/api/mobile/v1/capabilities",
+      "origin": "capacitor://localhost",
+      "status": 401,
+      "ms": 323,
+      "contentType": "application/json",
+      "cors": null,
+      "allow": null,
+      "error": {
+        "code": "UNAUTHORIZED"
+      },
+      "bodyKind": "json"
+    },
+    {
+      "path": "/api/mobile/v1/billing/config",
+      "origin": "https://www.anzen-ai-portal.jp",
+      "status": 200,
+      "ms": 2782,
+      "contentType": "application/json",
+      "cors": null,
+      "allow": null,
+      "config": {
+        "ready": true,
+        "salesPaused": false,
+        "productId": "jp.anzenaiportal.pro.monthly",
+        "offeringId": "default",
+        "hasPublicSdkKey": true,
+        "policy": {
+          "entitlement": "anzen_pro",
+          "currency": "JPY",
+          "monthlyPrice": 980,
+          "period": "P1M",
+          "limits": {
+            "free": {
+              "law_chat": 3,
+              "chemical_ra": 1,
+              "weatherLocations": 1,
+              "notifications": false
+            },
+            "pro": {
+              "law_chat": 50,
+              "chemical_ra": 10,
+              "weatherLocations": 10,
+              "notifications": true
+            }
+          },
+          "proBurstPerMinute": 10,
+          "monthlyBudgetYen": 50000
+        },
+        "login": {
+          "apple": true,
+          "google": true
+        }
+      },
+      "bodyKind": "json"
+    },
+    {
+      "path": "/api/mobile/v1/billing/config",
+      "origin": "capacitor://localhost",
+      "status": 200,
+      "ms": 464,
+      "contentType": "application/json",
+      "cors": null,
+      "allow": null,
+      "config": {
+        "ready": true,
+        "salesPaused": false,
+        "productId": "jp.anzenaiportal.pro.monthly",
+        "offeringId": "default",
+        "hasPublicSdkKey": true,
+        "policy": {
+          "entitlement": "anzen_pro",
+          "currency": "JPY",
+          "monthlyPrice": 980,
+          "period": "P1M",
+          "limits": {
+            "free": {
+              "law_chat": 3,
+              "chemical_ra": 1,
+              "weatherLocations": 1,
+              "notifications": false
+            },
+            "pro": {
+              "law_chat": 50,
+              "chemical_ra": 10,
+              "weatherLocations": 10,
+              "notifications": true
+            }
+          },
+          "proBurstPerMinute": 10,
+          "monthlyBudgetYen": 50000
+        },
+        "login": {
+          "apple": true,
+          "google": true
+        }
+      },
+      "bodyKind": "json"
+    },
+    {
+      "path": "/api/me/entitlements",
+      "origin": "https://www.anzen-ai-portal.jp",
+      "status": 401,
+      "ms": 234,
+      "contentType": "application/json",
+      "cors": null,
+      "allow": null,
+      "error": {
+        "code": "UNAUTHORIZED"
+      },
+      "bodyKind": "json"
+    },
+    {
+      "path": "/api/me/entitlements",
+      "origin": "capacitor://localhost",
+      "status": 401,
+      "ms": 229,
+      "contentType": "application/json",
+      "cors": null,
+      "allow": null,
+      "error": {
+        "code": "UNAUTHORIZED"
+      },
+      "bodyKind": "json"
+    },
+    {
+      "path": "/api/billing/purchase-intents",
+      "origin": "https://www.anzen-ai-portal.jp",
+      "status": 405,
+      "ms": 241,
+      "contentType": null,
+      "cors": null,
+      "allow": null,
+      "bodyKind": ""
+    },
+    {
+      "path": "/api/billing/purchase-intents",
+      "origin": "capacitor://localhost",
+      "status": 405,
+      "ms": 221,
+      "contentType": null,
+      "cors": null,
+      "allow": null,
+      "bodyKind": ""
+    },
+    {
+      "path": "/api/billing/store-outcome",
+      "origin": "https://www.anzen-ai-portal.jp",
+      "status": 405,
+      "ms": 226,
+      "contentType": null,
+      "cors": null,
+      "allow": null,
+      "bodyKind": ""
+    },
+    {
+      "path": "/api/billing/store-outcome",
+      "origin": "capacitor://localhost",
+      "status": 405,
+      "ms": 218,
+      "contentType": null,
+      "cors": null,
+      "allow": null,
+      "bodyKind": ""
+    },
+    {
+      "path": "/api/billing/store-started",
+      "origin": "https://www.anzen-ai-portal.jp",
+      "status": 405,
+      "ms": 224,
+      "contentType": null,
+      "cors": null,
+      "allow": null,
+      "bodyKind": ""
+    },
+    {
+      "path": "/api/billing/store-started",
+      "origin": "capacitor://localhost",
+      "status": 405,
+      "ms": 266,
+      "contentType": null,
+      "cors": null,
+      "allow": null,
+      "bodyKind": ""
+    },
+    {
+      "path": "/api/billing/reconcile",
+      "origin": "https://www.anzen-ai-portal.jp",
+      "status": 405,
+      "ms": 256,
+      "contentType": null,
+      "cors": null,
+      "allow": null,
+      "bodyKind": ""
+    },
+    {
+      "path": "/api/billing/reconcile",
+      "origin": "capacitor://localhost",
+      "status": 405,
+      "ms": 220,
+      "contentType": null,
+      "cors": null,
+      "allow": null,
+      "bodyKind": ""
+    }
+  ]
+}
