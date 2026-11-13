@@ -17,11 +17,11 @@ describe("chatbot stream verification boundary", () => {
     expect(providerLoop).not.toContain('send("meta"');
   });
 
-  it("never emits a generated claim solely because citation numbers pass", () => {
+  it("replaces empty, incomplete or unverified generated answers with evidence guidance", () => {
     expect(source).toContain("buildServiceFirstLegalAnswer");
     expect(source).toContain('citationLayer2Status = "evidence-only"');
     expect(source).toContain('citationLayer2Status === "evidence-only"');
-    expect(source).not.toContain('citationLayer2Status = "passed"');
+    expect(source).toContain("!answer.trim() || truncated || validation.findings.length > 0");
   });
 
   it("propagates cancellation into provider iteration", () => {

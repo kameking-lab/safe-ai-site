@@ -442,13 +442,22 @@ async function handlePost(request: Request) {
     : null;
 
   let cancelled = false;
+  const providerAbort = new AbortController();
+  const abortProvider = () => providerAbort.abort();
+  if (request.signal.aborted) abortProvider();
+  else request.signal.addEventListener("abort", abortProvider, { once: true });
+  let providerTask: Promise<void> | undefined;
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
       const send = (event: string, data: unknown) => {
-        if (!cancelled) controller.enqueue(sseFrame(event, data));
+        if (!cancelled && !request.signal.aborted) controller.enqueue(sseFrame(event, data));
       };
 
       try {
+        if (providerAbort.signal.aborted) {
+          controller.close();
+          return;
+        }
         // キャッシュヒット時は Gemini を呼ばず、確定済み応答を擬似ストリームで再生する
         if (cKey) {
           const cached = getCachedResponse<ChatbotResponse>(cKey);
@@ -675,10 +684,10 @@ async function handlePost(request: Request) {
         let citationLayer2Status:
           | "skipped"
           | "passed"
-          | "warned"
           | "evidence-only" = "skipped";
         let citationWarningNote = "";
         try {
+          providerAbort.signal.throwIfAborted();
           await withCircuitBreaker(
             "gemini",
             async () => {
@@ -705,7 +714,8 @@ async function handlePost(request: Request) {
                   }));
               // 予約から逐次受信・精算までを同じawait内に置く。
               // AsyncIteratorの取得だけで費用処理を完了させない。
-              await withProviderBudget(async () => {
+              providerTask = withProviderBudget(async () => {
+                providerAbort.signal.throwIfAborted();
                 const streamResult = await genAI.models.generateContentStream({
                   model: GEMINI_FLASH_MODEL,
                   contents: userPrompt,
@@ -713,7 +723,7 @@ async function handlePost(request: Request) {
                     systemInstruction: SYSTEM_PROMPT,
                     thinkingConfig: GEMINI_FAST_THINKING_CONFIG,
                     maxOutputTokens: 2048,
-                    abortSignal: request.signal,
+                    abortSignal: providerAbort.signal,
                   },
                 });
                 for await (const chunkResponse of streamResult) {
@@ -734,25 +744,27 @@ async function handlePost(request: Request) {
                 inputBytes: Buffer.byteLength(SYSTEM_PROMPT + userPrompt, "utf8"),
                 maxOutputTokens: 2048,
               }, () => generationMeta.finishReason ? providerUsage : undefined);
+              await providerTask;
+              // 最終チャンク後の精算待ち中にも利用者は停止できる。
+              providerAbort.signal.throwIfAborted();
               return answer;
             },
             { failureThreshold: 4, cooldownMs: 60_000 },
           );
 
-          // Phase 2 Layer 2: 応答完了後の条文番号検証 (retry は SSE では行わず警告のみ)
+          // Phase 2 Layer 2: 応答完了後の条文番号検証（SSEでは再生成しない）
           // 警告は answer 本文へ追記せず scopeWarnings（UIの警告枠）で返す（2026-07-11）
-          // 高リスクな未確認引用・空・途中切れは収録原文の案内へ戻す。
+          // 未確認引用は警告欄だけに残し、確定本文は収録原文の案内へ戻す。
           const validation = validateCitations(answer, allowedCitations);
           const truncated = generationMeta.finishReason !== "STOP";
-          if (!answer.trim() || truncated || validation.retryRecommended) {
-            citationWarningNote = validation.retryRecommended ? validation.warningNote : truncated ? `AIの回答が途中で終わったため（${generationMeta.finishReason ?? "終了理由未取得"}）、収録条文の案内を表示しています。` : "";
+          if (!answer.trim() || truncated || validation.findings.length > 0) {
+            citationWarningNote = validation.findings.length > 0 ? validation.warningNote : truncated ? `AIの回答が途中で終わったため（${generationMeta.finishReason ?? "終了理由未取得"}）、収録条文の案内を表示しています。` : "";
             citationLayer2Status = "evidence-only";
             answer = relevantArticles.length > 0
               ? buildServiceFirstLegalAnswer({ query: retrievalQuery, articles: relevantArticles, now: legalAnswerNow })
               : noEvidenceAdviceAnswer(buildServiceFirstNoHitAnswer(retrievalQuery, legalAnswerNow));
           } else {
-            citationWarningNote = validation.findings.length > 0 ? validation.warningNote : "";
-            citationLayer2Status = validation.findings.length > 0 ? "warned" : "passed";
+            citationLayer2Status = "passed";
           }
           logLegalChatGeneration({
             route: "stream",
@@ -871,9 +883,9 @@ async function handlePost(request: Request) {
           : scoreForConfidence >= 0.75 && relevantArticles.length >= 2
             ? "high"
             : "medium";
-        if (citationLayer2Status === "evidence-only" || citationLayer2Status === "warned") {
+        if (citationLayer2Status === "evidence-only") {
           finalConfidence = "low";
-          if (citationLayer2Status === "evidence-only") scopeWarnings.push("AIの回答を表示できなかったため、収録条文の案内を表示しています。");
+          scopeWarnings.push("AIの回答を表示できなかったため、収録条文の案内を表示しています。");
         }
         if (fallbackDecision.tier === "adjacent" && finalConfidence === "high") {
           finalConfidence = "medium";
@@ -921,10 +933,15 @@ async function handlePost(request: Request) {
           retryable: true,
         });
         controller.close();
+      } finally {
+        request.signal.removeEventListener("abort", abortProvider);
       }
     },
-    cancel() {
+    async cancel() {
       cancelled = true;
+      // 次のチャンクが来ない場合でも生成を中断し、費用精算を待つ。
+      abortProvider();
+      await providerTask?.catch(() => undefined);
     },
   });
 

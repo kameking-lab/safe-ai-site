@@ -2,6 +2,7 @@
 import { beforeEach,afterEach,describe,expect,it,vi } from 'vitest';
 const pause=vi.hoisted(()=>vi.fn(async()=>({count:1})));
 const expireStopped=vi.hoisted(()=>vi.fn(async()=>({closed:0})));
+const settlement=vi.hoisted(()=>({gate:undefined as Promise<void>|undefined,fail:false,entered:false}));
 vi.mock('./pro-sales-checkouts',()=>({processPausedStripeCheckouts:expireStopped}));
 const state=vi.hoisted(()=>({operations:[] as Array<{id:string;userId:string;feature:string;day:string;status:string;createdAt:Date;requestHash:string;response?:unknown}>,tail:Promise.resolve() as Promise<unknown>,paid:false,signedIn:true,budget:{committedYen:0,reservedYen:0},reservations:[] as Array<{id:string;amountYen:number;status:string}>}));
 vi.mock('@/auth',()=>({auth:async()=>state.signedIn?{user:{id:'mock_member'}}:null}));
@@ -21,7 +22,7 @@ vi.mock('@/lib/prisma',()=>{
     mobileOperationsAlert:{upsert:async()=>({})},
     mobileProviderReservation:{
       create:async({data}:{data:{amountYen:number}})=>{const row={id:crypto.randomUUID(),amountYen:data.amountYen,status:'reserved'};state.reservations.push(row);return row;},
-      updateMany:async({where,data}:{where:{id:string;status:string};data:{status:string}})=>{const r=state.reservations.find(x=>x.id===where.id&&x.status===where.status);if(!r)return{count:0};r.status=data.status;return{count:1};}
+      updateMany:async({where,data}:{where:{id:string;status:string};data:{status:string}})=>{settlement.entered=true;await settlement.gate;if(settlement.fail)throw new Error('settlement failed');const r=state.reservations.find(x=>x.id===where.id&&x.status===where.status);if(!r)return{count:0};r.status=data.status;return{count:1};}
     },
     mobileUsageOperation:{
       findUnique:async({where}:{where:{id:string}})=>state.operations.find(o=>o.id===where.id)??null,
@@ -185,6 +186,8 @@ describe('anonymous website visitors with the shared ledger on',()=>{
 });
 
 describe('stream provider measured settlement',()=>{
+  beforeEach(()=>{settlement.gate=undefined;settlement.fail=false;settlement.entered=false;});
+  afterEach(()=>{settlement.gate=undefined;settlement.fail=false;settlement.entered=false;});
   const pricing={model:'gemini-3.8-flash',inputJpyPerMillion:160,outputJpyPerMillion:960,margin:1.5};
   const bound={model:'gemini-3.8-flash',inputBytes:20000,maxOutputTokens:2048};
   const usage={promptTokenCount:900,candidatesTokenCount:300,thoughtsTokenCount:50,totalTokenCount:1250};
@@ -226,6 +229,30 @@ describe('stream provider measured settlement',()=>{
     await expect(withProviderBudget(async()=>{throw new Error('interrupted');},bound,readUsage)).rejects.toThrow('interrupted');
     expect(readUsage).not.toHaveBeenCalled();
     expect(state.budget).toEqual({reservedYen:0,committedYen:maximumProviderCost(bound,pricing)});
+  });
+  it('does not resolve while the settlement transaction is still pending',async()=>{
+    configure();let release!:()=>void;
+    settlement.gate=new Promise<void>(resolve=>{release=resolve;});
+    let resolved=false;
+    const result=withProviderBudget(async()=>'complete',bound,()=>usage).then(value=>{resolved=true;return value;});
+    try{
+      await vi.waitFor(()=>expect(settlement.entered).toBe(true));
+      expect(resolved).toBe(false);
+      expect(state.budget).toEqual({reservedYen:maximumProviderCost(bound,pricing),committedYen:0});
+    }finally{release();}
+    expect(await result).toBe('complete');
+    expect(state.budget).toEqual({reservedYen:0,committedYen:1});
+  });
+  it('propagates a failed settlement and retains the reservation in the budget ceiling',async()=>{
+    configure();settlement.fail=true;
+    await expect(withProviderBudget(async()=>'complete',bound,()=>usage)).rejects.toThrow('settlement failed');
+    const reserved=maximumProviderCost(bound,pricing);
+    expect(state.budget).toEqual({reservedYen:reserved,committedYen:0});
+    expect(state.reservations[0].status).toBe('reserved');
+    state.budget.committedYen=44999;
+    const run=vi.fn(async()=>'unexpected');
+    await expect(withProviderBudget(run,bound,()=>usage)).rejects.toThrow('AI_BUDGET_FREE_PAUSED');
+    expect(run).not.toHaveBeenCalled();
   });
   it('still settles the maximum if the usage reader fails',async()=>{
     configure();

@@ -235,6 +235,8 @@ describe("ChatbotPanel 暫定本文と引用検証", () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(body, { headers: { "content-type": "text/event-stream" } })));
     return {
       send(event: string, data: unknown) { controller.enqueue(new TextEncoder().encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`)); },
+      bytes(value: Uint8Array) { controller.enqueue(value); },
+      fail(error: Error) { controller.error(error); },
       close() { controller.close(); },
     };
   }
@@ -274,6 +276,63 @@ describe("ChatbotPanel 暫定本文と引用検証", () => {
     });
     expect(screen.queryByText("未検証の生成本文です。")).toBeNull();
     expect(screen.getByRole("alert").textContent).toContain("回答を取得できませんでした");
+    expect(screen.getByRole("button", { name: "再試行" })).toBeTruthy();
+  });
+
+  it("長い回答の逐次追加・確定で末尾へ移動せず、回答文頭に一度だけ合わせる", async () => {
+    const stream = controlledStream();
+    const scroll = vi.mocked(Element.prototype.scrollTo);
+    scroll.mockClear();
+    const bounds = vi.spyOn(Element.prototype, "getBoundingClientRect").mockImplementation(function (this: Element) {
+      return { top: this.hasAttribute("data-chatbot-answer") ? 360 : 100, height: 400 } as DOMRect;
+    });
+    try {
+      render(<ChatbotPanel />);
+      submitExample("足場の手すりは？");
+      await waitFor(() => expect(scroll).toHaveBeenCalledTimes(1));
+      expect(scroll).toHaveBeenLastCalledWith({ top: 260, behavior: "auto" });
+      for (const chunk of ["回答の文頭です。", "確認する内容です。\n".repeat(100)]) {
+        await act(async () => { stream.send("text", { chunk, provisional: true }); });
+      }
+      expect(screen.getByText(/回答の文頭です。/)).toBeTruthy();
+      expect(scroll).toHaveBeenCalledTimes(1);
+      await act(async () => {
+        stream.send("meta", { answer: "確定回答の文頭です。\n" + "確認する内容です。\n".repeat(100), sources: [], citations: [] });
+        stream.close();
+      });
+      expect(screen.getByText(/確定回答の文頭です。/)).toBeTruthy();
+      expect(scroll).toHaveBeenCalledTimes(1);
+    } finally {
+      bounds.mockRestore();
+    }
+  });
+
+  it("日本語とフレーム境界が1バイトずつ届いても暫定表示を確定本文へ置換する", async () => {
+    const stream = controlledStream();
+    render(<ChatbotPanel />);
+    submitExample("足場の手すりは？");
+    const frames = `event: text\ndata: ${JSON.stringify({ chunk: "未確認の引用です。", provisional: true })}\n\n`
+      + `event: meta\ndata: ${JSON.stringify({ answer: "確認した回答です。", sources: [], citations: [] })}\n\n`;
+    await act(async () => {
+      for (const byte of new TextEncoder().encode(frames)) stream.bytes(Uint8Array.of(byte));
+      stream.close();
+    });
+    expect(screen.getByText("確認した回答です。")).toBeTruthy();
+    expect(screen.queryByText("未確認の引用です。")).toBeNull();
+  });
+
+  it.each(["disconnect", "stop"])("本文受信後の%sでも未確認本文を消して再試行を案内する", async (ending) => {
+    const stream = controlledStream();
+    render(<ChatbotPanel />);
+    submitExample("足場の手すりは？");
+    await act(async () => { stream.send("text", { chunk: "残してはいけない途中の回答です。", provisional: true }); });
+    expect(screen.getByText("残してはいけない途中の回答です。")).toBeTruthy();
+    await act(async () => {
+      if (ending === "stop") fireEvent.click(screen.getByRole("button", { name: "生成を停止" }));
+      stream.fail(ending === "stop" ? new DOMException("Aborted", "AbortError") : new Error("Disconnected"));
+    });
+    expect(screen.queryByText("残してはいけない途中の回答です。")).toBeNull();
+    expect(screen.getByRole("alert").textContent).toContain(ending === "stop" ? "応答を停止しました" : "回答を取得できませんでした");
     expect(screen.getByRole("button", { name: "再試行" })).toBeTruthy();
   });
 });

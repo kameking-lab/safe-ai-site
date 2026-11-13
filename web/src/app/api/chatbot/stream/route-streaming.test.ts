@@ -13,17 +13,27 @@ const provider = vi.hoisted(() => ({
   settlementFail: false,
   usage: undefined as unknown,
   order: [] as string[],
+  signal: undefined as AbortSignal | undefined,
+  waitForAbort: false,
 }));
 
 vi.mock("@google/genai", () => ({
   GoogleGenAI: class {
     models = {
-      generateContentStream: async () => {
+      generateContentStream: async ({ config }: { config: { abortSignal: AbortSignal } }) => {
         provider.calls++;
+        provider.signal = config.abortSignal;
         return {
           async *[Symbol.asyncIterator]() {
             const size = Math.ceil(provider.text.length / 3);
             for (let i = 0; i < 3; i++) {
+              if (i === 1 && provider.waitForAbort) {
+                await new Promise<void>((_, reject) => {
+                  const abort = () => reject(new DOMException("Aborted", "AbortError"));
+                  if (config.abortSignal.aborted) abort();
+                  else config.abortSignal.addEventListener("abort", abort, { once: true });
+                });
+              }
               await new Promise((resolve) => setTimeout(resolve, provider.delays[i]));
               if (i === 1 && provider.fail) throw new Error("provider disconnected");
               provider.order.push(`chunk-${i}`);
@@ -68,6 +78,7 @@ beforeEach(() => {
     text: "作業前に手すりと作業床の状態を確認してください。",
     finishReason: "STOP", delays: [0, 0, 0], fail: false,
     calls: 0, settled: false, settlementDelay: 0, settlementFail: false, usage: undefined, order: [],
+    signal: undefined, waitForAbort: false,
   });
   vi.stubEnv("VERCEL_ENV", "development");
   vi.stubEnv("SAFE_AI_STAGING_MODE", "false");
@@ -186,7 +197,11 @@ describe("法令チャットの逐次送信", () => {
     const payload = meta(frames)!;
     expect(payload.confidence).toBe("low");
     expect(payload.scopeWarnings?.join(" ")).toContain("第37条");
+    expect(payload.answer).not.toContain("労基法第37条");
+    expect(payload.directAnswer).not.toContain("労基法第37条");
+    expect(payload.substantiveAnswer).not.toContain("労基法第37条");
     expect(payload.citations.some((citation) => citation.lawShort === "労基法" && citation.articleNum === "第37条")).toBe(false);
+    expect(payload.sources.some((source) => source.lawShort === "労基法" && source.article.includes("第37条"))).toBe(false);
   });
 
   it("精算の失敗を待たず成功回答として確定しない", async () => {
@@ -232,6 +247,42 @@ describe("法令チャットの逐次送信", () => {
     await vi.waitFor(() => expect(provider.settled).toBe(true));
     expect(provider.order).not.toContain("chunk-2");
     expect(provider.calls).toBe(1);
+  });
+
+  it("最終チャンク後の費用精算待ちで中断しても確定metaを送らない", async () => {
+    provider.settlementDelay = 40;
+    const abort = new AbortController();
+    let textCount = 0;
+    const { frames } = await readResponse(abort.signal, (frame) => {
+      if (frame.event === "text" && ++textCount === 3) abort.abort();
+    });
+    expect(provider.settled).toBe(true);
+    expect(meta(frames)).toBeUndefined();
+  });
+
+  it("Readerのcancelは次のチャンクを待たず生成を中断し、費用精算まで待つ", async () => {
+    provider.waitForAbort = true;
+    provider.settlementDelay = 40;
+    const response = await POST(new Request("http://localhost/api/chatbot/stream", {
+      method: "POST", headers: { "content-type": "application/json" },
+      body: JSON.stringify({ message: "足場の手すりの高さは？", privacyConfirmed: true }),
+    }));
+    const reader = response.body!.getReader();
+    const decoder = new TextDecoder();
+    while (true) {
+      const chunk = await reader.read();
+      if (chunk.done) throw new Error("本文より前に終了しました");
+      if (decoder.decode(chunk.value).includes("event: text")) break;
+    }
+    try {
+      await reader.cancel();
+      expect(provider.signal?.aborted).toBe(true);
+      expect(provider.settled).toBe(true);
+      expect(provider.order).not.toContain("chunk-1");
+    } finally {
+      // 修正前の再現テストでも待ち続けるモックを残さない。
+      provider.signal?.dispatchEvent(new Event("abort"));
+    }
   });
 
   it("確定済みキャッシュを再生するときはGeminiを再度呼ばない", async () => {
