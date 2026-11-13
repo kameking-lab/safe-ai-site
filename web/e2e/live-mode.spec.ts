@@ -83,7 +83,10 @@ test.describe("live mode", () => {
     await expect(summary.locator('a[href*="001736054.pdf"]')).toBeVisible();
 
     await page.getByRole("button", { name: "質問チャット" }).click();
-    await expect(page.getByText("名前や住所などは書かなくても使えます。", { exact: false }).first()).toBeVisible();
+    const processingNote = page.locator("[data-ai-processing-note]");
+    await expect(processingNote).toBeVisible();
+    await expect(processingNote).toContainText("文章はGoogle Geminiで処理します");
+    await expect(processingNote.getByRole("link", { name: "プライバシー" })).toHaveAttribute("href", "/privacy#external-services");
     await page.getByRole("textbox", { name: "質問入力", exact: true }).fill("施行日はいつですか");
     const chatbotResponsePromise = page.waitForResponse(
       (response) =>

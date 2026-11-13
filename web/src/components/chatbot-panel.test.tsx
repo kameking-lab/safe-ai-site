@@ -1689,10 +1689,24 @@ it("ホーム引継ぎだけでは外部送信せず、送信ボタンで一度�
   expect(screen.queryByRole("checkbox")).toBeNull();
 });
 it("認証失敗で質問を入力欄に戻す", async () => {
-  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({error:{code:"UNAUTHORIZED",message:"ログインが必要です"}}),{status:401})));
-  render(<ChatbotPanel />);submitExample("足場の手すりは？");
-  await screen.findByRole("alert");
-  expect((screen.getByRole("textbox") as HTMLTextAreaElement).value).toBe("足場の手すりは？");
+  const send = vi.fn().mockResolvedValue(
+    new Response(
+      JSON.stringify({ error: { code: "UNAUTHORIZED", message: "ログインが必要です" } }),
+      { status: 401 },
+    ),
+  );
+  vi.stubGlobal("fetch", send);
+  render(<ChatbotPanel />);
+  submitExample("足場の手すりは？");
+
+  const alert = await screen.findByRole("alert");
+  expect(alert.textContent).toContain("ログインが必要です");
+  // 入力欄はeffectで同期するため、エラー表示と同時に完了するとは限らない。
+  await waitFor(() => {
+    expect((screen.getByRole("textbox") as HTMLTextAreaElement).value).toBe("足場の手すりは？");
+    expect((screen.getByRole("button", { name: "送信" }) as HTMLButtonElement).disabled).toBe(false);
+  });
+  expect(send).toHaveBeenCalledTimes(1);
 });
 it("サーバー検証済みProのときだけ購入カードを消し、質問は自動送信しない", async () => {
   const send=vi.fn().mockResolvedValue(new Response(JSON.stringify({error:{code:"DAILY_LIMIT_REACHED",message:"上限です",upgrade:true}}),{status:429}));
