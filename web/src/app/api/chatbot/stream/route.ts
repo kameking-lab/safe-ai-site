@@ -398,7 +398,9 @@ async function handlePost(request: Request) {
   let rate;
   try {
     rate = await checkRateLimit(getClientIp(request));
-  } catch {
+  } catch (error) {
+    const code=error instanceof Error&&error.message==='shared_hmac_unavailable'?'SHARED_HMAC_UNAVAILABLE':error instanceof Error&&error.message==='shared_rate_result_invalid'?'SHARED_RATE_RESULT_INVALID':'SHARED_STATE_UNAVAILABLE';
+    console.warn('[chatbot-stream]',JSON.stringify({stage:'rate_limit',code}));
     return new Response(
       JSON.stringify({
         error:
@@ -775,6 +777,7 @@ async function handlePost(request: Request) {
             ...generationMeta,
           });
         } catch (err) {
+          console.warn('[chatbot-stream]',JSON.stringify({stage:'provider',code:err instanceof Error&&['AI_BUDGET_STOPPED','AI_BUDGET_FREE_PAUSED','OPERATION_RELEASED'].includes(err.message)?err.message:'PROVIDER_FAILED'}));
           if (cancelled || request.signal.aborted) {
             if (!cancelled) controller.close();
             return;
@@ -924,6 +927,7 @@ async function handlePost(request: Request) {
         send("meta", payload);
         controller.close();
       } catch (_err) {
+        console.warn('[chatbot-stream]',JSON.stringify({stage:'stream',code:'STREAM_FAILED'}));
         if (cancelled || request.signal.aborted) {
           if (!cancelled) controller.close();
           return;
@@ -957,4 +961,17 @@ async function handlePost(request: Request) {
   });
 }
 
-export async function POST(request: Request) { return withUsage(request, "law_chat", handlePost); }
+export async function POST(request: Request) {
+  try {
+    const response=await withUsage(request, "law_chat", handlePost);
+    if(!response.ok){
+      const value=await response.clone().json().catch(()=>null);
+      const code=value?.error?.code;
+      console.warn('[chatbot-stream]',JSON.stringify({stage:'response',status:response.status,code:typeof code==='string'&&/^[A-Z_]{1,60}$/.test(code)?code:'CHAT_REQUEST_REJECTED'}));
+    }
+    return response;
+  }catch(error){
+    console.warn('[chatbot-stream]',JSON.stringify({stage:'request',code:'CHAT_UNHANDLED_FAILURE'}));
+    throw error;
+  }
+}

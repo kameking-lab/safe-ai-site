@@ -22,6 +22,16 @@ it('projects saved Pro immediately without RevenueCat, even when the provider is
  state.grants=[{userId:'member',provider:'app_store',environment:'PRODUCTION',expiresAt:new Date(Date.now()+86400000),checkedAt:new Date(Date.now()-600000),revoked:false}];state.fetchFails=true;
  const rights=await getEntitlement('member',{snapshot:true});expect(rights.plan).toBe('pro');expect(rights.limits.law_chat).toBe(50);expect(state.fetches).toBe(0);expect(state.stripeFetches).toBe(0);
 });
+it('reads display rights after the member lock, like chat reservation, when a revocation is committing',async()=>{
+ state.grants=[{userId:'member',provider:'app_store',environment:'PRODUCTION',expiresAt:new Date(Date.now()+86400000),checkedAt:new Date(),revoked:false}];
+ let release!:()=>void;state.tail=new Promise<void>(resolve=>{release=resolve;});
+ const read=vi.spyOn(prisma!.mobileGrant,'findMany').mockImplementation((async()=>structuredClone(state.grants)) as any);
+ const pending=getEntitlement('member',{snapshot:true});
+ // A billing transaction owns the lock and commits the revocation before releasing it.
+ await Promise.resolve();state.grants[0].revoked=true;release();
+ try{expect((await pending).plan).toBe('free');expect(state.fetches).toBe(0);}
+ finally{read.mockRestore();}
+});
 it.each(['revoked','expired','stale','other-environment'])('does not use %s ledger evidence as Pro in a snapshot',async condition=>{
  state.grants=[{userId:'member',provider:'app_store',environment:condition==='other-environment'?'SANDBOX':'PRODUCTION',expiresAt:new Date(Date.now()+(condition==='expired'?-1:86400000)),checkedAt:new Date(Date.now()-(condition==='stale'?86400001:0)),revoked:condition==='revoked'}];
  const rights=await getEntitlement('member',{snapshot:true});expect(rights.plan).toBe('free');expect(rights.limits.law_chat).toBe(3);expect(state.fetches).toBe(0);
