@@ -39,7 +39,7 @@ async function confirm(userId: string): Promise<"pro" | "free" | "unknown"> {
 export default async function PricingSuccessPage({ searchParams }: Props) {
   const { returnTo, n } = await searchParams;
   const back = safeReturnPath(returnTo);
-  const session = await auth();
+  const session = await auth({identityOnly:true});
   const userId = (session?.user as { id?: string } | undefined)?.id;
   if (!userId) redirect(`/auth/signin?callbackUrl=${encodeURIComponent("/account")}`);
   const plan = await confirm(userId);
