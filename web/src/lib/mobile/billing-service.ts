@@ -1,7 +1,7 @@
 import { Prisma } from '@prisma/client';
 import { prisma } from '../prisma';
 import { assertPurchasable, projectEntitlement, type EntitlementSnapshot } from './entitlement';
-import { fetchSubscriber, verifiedAppleGrant,fetchAppleOwnership } from './revenuecat';
+import { fetchSubscriber, verifiedAppleGrant,fetchAppleOwnership,verifyAppleLegacyPurchase } from './revenuecat';
 import { reconcileStripe } from './stripe-reconcile';
 import { assertResume,canReleasePrepared,appleOutcomeStage,type ApplePurchaseOutcome,type PurchaseSource } from './purchase-state';
 import { expireStripeIntent } from './stripe-purchase';
@@ -74,8 +74,12 @@ async function readEntitlement(userId:string,refresh:boolean,snapshot:boolean) {
   return rights;
 }
 export async function reconcile(userId:string,options:{stripe?:boolean;appUserId?:string}={}) {
-  return billingDb().$transaction(async tx=>{
+  const result=await billingDb().$transaction(async tx=>{
     await lockMember(tx,userId);let member=await identity(tx,userId);
+    // Serialize Apple verification and ownership changes, including legacy-key
+    // migration. Never lock the old member in reverse order (A/B login race).
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended('anzen:apple-reconcile',0))`;
+    let transfer:{reason:string;from:string[];to:string[]}|undefined;
     // A delayed native SDK operation must not reconcile under a replacement login.
     if(options.appUserId&&options.appUserId!==member.appUserId)throw new Error('UNAUTHORIZED');
     let environment:'SANDBOX'|'PRODUCTION'=member.billingEnvironment==='SANDBOX'?'SANDBOX':'PRODUCTION';
@@ -102,17 +106,35 @@ export async function reconcile(userId:string,options:{stripe?:boolean;appUserId
     // Fetch the latest authoritative subscriber state, rather than applying event order.
     await tx.mobileGrant.updateMany({where:{userId,provider:'app_store',environment},data:{revoked:true,checkedAt}});
     if(grant) {
-      const originalTransactionId=await fetchAppleOwnership(member.appUserId,environment);
-      const owner=await tx.mobileGrant.findUnique({where:{provider_originalTransactionId_environment:{provider:'app_store',originalTransactionId,environment}}});
-      if(owner && owner.userId!==userId) throw new Error('PURCHASE_OWNED_BY_OTHER_ACCOUNT');
+      const verified=await fetchAppleOwnership(member.appUserId,environment);
+      const originalTransactionId=verified.key;
+      let owner=await tx.mobileGrant.findUnique({where:{provider_originalTransactionId_environment:{provider:'app_store',originalTransactionId,environment}}});
+      const originalMember=await tx.mobileIdentity.findUnique({where:{appUserId:verified.originalCustomerId}});
+      const previousUsers=[...new Set([userId,...(originalMember?[originalMember.userId]:[])])];
+      // Old releases stored the latest store transaction in this column. Match
+      // those rows against RevenueCat before revoking them; keep Stripe intact.
+      const legacy=await tx.mobileGrant.findMany({where:{provider:'app_store',environment,productId,revoked:false,expiresAt:{gt:checkedAt},NOT:{originalTransactionId:{startsWith:'rc:'}},OR:[{userId:{in:previousUsers}},{originalTransactionId:verified.storeTransactionId}]}});
+      for(const row of legacy){
+        if(!await verifyAppleLegacyPurchase(member.appUserId,environment,verified.key,row.originalTransactionId))continue;
+        await tx.mobileGrant.updateMany({where:{id:row.id,provider:'app_store',environment},data:{revoked:true,checkedAt}});
+        if(row.userId!==userId)owner??=row;
+      }
+      if(owner&&owner.userId!==userId){
+        const providers=async(id:string)=>{const rows=await tx.account.findMany({where:{userId:id},select:{provider:true}});return [...new Set(rows.map(r=>r.provider==='apple'?'apple':r.provider==='google'?'google':'other'))].sort();};
+        transfer={reason:'APP_STORE_VERIFIED_TRANSFER',from:await providers(owner.userId),to:await providers(userId)};
+      }
       await tx.mobileGrant.upsert({where:{provider_originalTransactionId_environment:{provider:'app_store',originalTransactionId,environment}},
-        create:{...grant,originalTransactionId,userId,provider:'app_store',environment,checkedAt},update:{...grant,checkedAt,revoked:false}});
+        create:{...grant,originalTransactionId,userId,provider:'app_store',environment,checkedAt},update:{...grant,userId,checkedAt,revoked:false}});
       const intent=await tx.mobilePurchaseIntent.findUnique({where:{userId}});
       if(intent?.status==='pending'&&intent.source==='stripe')await expireStripeIntent(tx,intent);
       await tx.mobilePurchaseIntent.updateMany({where:{userId,source:'app_store',status:'pending'},data:{status:'completed',stage:'completed'}});
     }
-    return entitlementInTransaction(tx,userId);
+    return {rights:await entitlementInTransaction(tx,userId),transfer};
   },{timeout:20000});
+  // Fixed reason/provider codes only, after commit. No user/store identifiers,
+  // email addresses, receipts, tokens, or provider error text.
+  if(result.transfer)console.info('[mobile-billing]',JSON.stringify(result.transfer));
+  return result.rights;
 }
 export async function reservePurchase(userId:string,source:PurchaseSource='app_store') {
   // Refresh Apple before reserving. Website rights are always read from the database.
@@ -207,7 +229,8 @@ export async function processBillingEvents(limit=20,deadline=Date.now()+45000) {
       const ids=[...new Set([event.appUserId,...(Array.isArray(event.relatedAppUserIds)?event.relatedAppUserIds.filter((id):id is string=>typeof id==='string'):[])].filter((id):id is string=>!!id))];
       const members=await db.mobileIdentity.findMany({where:{appUserId:{in:ids}}});
       if(!members.length) {await db.mobileBillingEvent.update({where:{id:event.id},data:{status:'unassigned'}});continue;}
-      // Reconcile both sides without merging accounts or silently moving purchase ownership.
+      // Read each side's current provider ownership; never use webhook order to
+      // move a subscription back to its historical original customer.
       for(const member of members)await reconcile(member.userId);
       await db.mobileBillingEvent.update({where:{id:event.id},data:{status:'completed'}});
       await resolveOperationsAlert('billing_reconcile',event.id);
