@@ -70,12 +70,13 @@ async function login(page:Page){
  const count=await page.evaluate(()=>(window as unknown as Bridge).__opened);
  await page.getByRole('button',{name:'Apple / Googleでログイン'}).click();
  await expect.poll(()=>page.evaluate(()=>(window as unknown as Bridge).__opened)).toBe(count+1);
+ await expect(page.getByRole('button',{name:'Apple / Googleでログイン'})).toBeEnabled();
  await page.evaluate(()=>(window as unknown as Bridge).__return());
 }
 async function pro(page:Page){await expect(page.getByText('Pro 購入済み（App Store購読）',{exact:true})).toBeVisible({timeout:3000});}
 async function buttons(page:Page){await expect(page.getByRole('button',{name:'購入を復元',exact:true})).toBeEnabled();await expect(page.getByRole('button',{name:'権利を再確認',exact:true})).toBeEnabled();}
 async function chat50(page:Page){await page.getByRole('link',{name:'法令AI',exact:true}).click();await expect(page.getByLabel('AIの利用枠')).toContainText('50／50回',{timeout:3000});}
-async function account(page:Page){await page.getByRole('link',{name:'会員・Pro',exact:true}).click();}
+async function account(page:Page){await page.getByRole('link',{name:'会員・Pro',exact:true}).click();await expect(page).toHaveURL(/\/account\/$/);await expect(page.getByRole('heading',{name:'会員・安全AI Pro',exact:true})).toBeVisible();}
 const captureDir=process.env.ANZ_TF5_CAPTURE_DIR;
 test('saved Pro survives logout, relogin and restart; cached native Pro never transfers accounts',async({page,context},info)=>{
  const s=await setup(context);await page.goto('/account/');await login(page);await pro(page);

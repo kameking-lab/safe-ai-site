@@ -22,8 +22,12 @@ it('completes login and clears its pending flag while RevenueCat never returns',
  await vi.advanceTimersByTimeAsync(8001);
 });
 it('clears the local login and read suspension without waiting for native logout',async()=>{
- const session=await import('../src/lib/session');const generation=await import('../src/lib/member-generation');await session.setSessionToken(token);
- mock.forget.mockImplementationOnce(()=>new Promise(()=>{}));await session.logout();
+ vi.useFakeTimers();const session=await import('../src/lib/session');const generation=await import('../src/lib/member-generation');await session.setSessionToken(token);
+ mock.forget.mockImplementationOnce(()=>new Promise(()=>{}));let settled=false;void session.logout().then(()=>{settled=true;});
+ await vi.advanceTimersByTimeAsync(8001);
+ let readsSuspended=false;try{generation.assertCurrentMember(generation.memberGeneration());}catch{readsSuspended=true;}
+ console.info('LOGOUT_EVIDENCE',JSON.stringify({settled,credentialRetained:await session.sessionToken()===token,readsSuspended}));
+ expect(settled).toBe(true);
  expect(await session.sessionToken()).toBeNull();expect(()=>generation.assertCurrentMember(generation.memberGeneration())).not.toThrow();
 });
 it('times out an exchange and releases login state for another attempt',async()=>{
@@ -116,7 +120,7 @@ it('ends loading on exchange failure and preserves the proof for retry',async()=
 });
 it('allows a dismissed login to restart without losing a late callback',async()=>{
  const session=await import('../src/lib/session');await session.startLogin();
- await session.dismissLogin();expect(await session.hasPendingLogin()).toBe(false);
+ expect(session.isLoginExchanging()).toBe(false);await session.dismissLogin();expect(await session.hasPendingLogin()).toBe(false);
  expect(window.dispatchEvent).toHaveBeenCalledWith(expect.objectContaining({type:'anzen-login-dismissed'}));
  expect(await session.completeLogin(`anzenai://auth/callback?flow=${flow}&code=${code}`)).toBe(true);
  vi.mocked(window.dispatchEvent).mockClear();await session.dismissLogin();expect(window.dispatchEvent).not.toHaveBeenCalled();
@@ -126,6 +130,6 @@ it('does not dismiss an exchange already in progress',async()=>{
  let release!:(value:unknown)=>void;mock.request.mockImplementationOnce(()=>new Promise(resolve=>{release=resolve;}));
  const completing=session.completeLogin(`anzenai://auth/callback?flow=${flow}&code=${code}`);
  await vi.waitFor(()=>expect(release).toBeTypeOf('function'));await session.dismissLogin();
- expect(await session.hasPendingLogin()).toBe(true);
+ expect(await session.hasPendingLogin()).toBe(true);expect(session.isLoginExchanging()).toBe(true);
  release({url:site+'/api/mobile/v1/auth/exchange',status:200,data:{token}});expect(await completing).toBe(true);
 });

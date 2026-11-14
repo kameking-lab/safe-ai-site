@@ -10,6 +10,8 @@ let memoryToken:string|null=null;
 let pendingLogin:string|null=null;
 let loginDismissed=false;
 const completing=new Map<string,Promise<boolean>>();
+// A saved PKCE proof or an open browser must not disable the sign-in button.
+export const isLoginExchanging=()=>completing.size>0;
 let initialized:Promise<void>|undefined;
 let sessionMutations:Promise<unknown>=Promise.resolve();
 let bindingRead:Promise<string>|undefined;
@@ -116,7 +118,7 @@ export async function completeLogin(value:string) {
     if(expected!==flow)throw new Error('AUTH_FLOW_EXPIRED');
     const age=Date.now()-Number(createdAt);
     if(!/^[A-Za-z0-9_-]{43}$/.test(verifier) || !Number.isFinite(age) || age<0 || age>=600000){await writeLogin(null);throw new Error('AUTH_FLOW_EXPIRED');}
-    loginDismissed=false;window.dispatchEvent(new Event('anzen-login-started'));
+    loginDismissed=false;window.dispatchEvent(new Event('anzen-login-exchanging'));
     const result=await bounded('exchange',()=>siteApi('/api/mobile/v1/auth/exchange',{flow,code,verifier})) as {token:string};
     if(!/^[A-Za-z0-9_-]{43}$/.test(result.token))throw new Error('AUTH_FLOW_EXPIRED');
     await setSessionToken(result.token);await writeLogin(null);void bounded('login',()=>Browser.close()).catch(()=>{});
