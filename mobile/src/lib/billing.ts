@@ -4,7 +4,7 @@ import { z } from 'zod';
 import product from '@/lib/mobile/product-policy.json';
 import { siteApi, sessionBinding, SiteApiError } from './session';
 import { StoreError } from './store-errors';
-import { Preferences } from '@capacitor/preferences';
+import { boundedPreferences as Preferences } from './bounded-storage';
 import { assertCurrentMember, currentMemberResponse, invalidateMemberReads, memberGeneration, StaleMemberResponseError } from './member-generation';
 import {bounded,billingDiagnostic,OperationTimeoutError,type DiagnosticOperation} from './billing-diagnostics';
 const outcomeSchema=z.object({id:z.string().uuid().optional(),attemptId:z.string().uuid(),outcome:z.enum(['cancelled','deferred','unknown','not_opened'])}).refine(r=>!!r.id||r.outcome==='not_opened');
@@ -124,7 +124,7 @@ export class BillingController {
         const report=outcomeSchema.parse(JSON.parse(value));
         if(!report.id || member.purchaseIntentId===report.id){
           const checked=await currentMemberResponse(ticket,this.sendOutcome(member.appUserId,report));
-          await clearReportedOutcome(member.appUserId,report);assertCurrentMember(ticket);this.publish(checked);return checked;
+          assertCurrentMember(ticket);this.publish(checked);return checked;
         }
         await clearReportedOutcome(member.appUserId,report);
       }
@@ -135,7 +135,11 @@ export class BillingController {
   private sendOutcome(appUserId:string,report:StoreOutcome):Promise<MemberEntitlement>{
     const key=JSON.stringify([appUserId,report,memberGeneration()]);
     const pending=this.outcomeReports.get(key);if(pending)return pending;
-    const work=this.send('/api/billing/store-outcome',report).then(value=>snapshotSchema.parse(value));
+    const work=this.send('/api/billing/store-outcome',report).then(async value=>{
+      const member=snapshotSchema.parse(value);
+      // Keep overlapping replays joined until the durable report is cleared.
+      await clearReportedOutcome(appUserId,report);return member;
+    });
     this.outcomeReports.set(key,work);
     const clear=()=>{if(this.outcomeReports.get(key)===work)this.outcomeReports.delete(key);};
     void work.then(clear,clear);
@@ -144,7 +148,7 @@ export class BillingController {
   private async reportOutcome(appUserId:string,report:StoreOutcome){
     const key=outcomeKey(appUserId);
     await Preferences.set({key,value:JSON.stringify(report)}).catch(()=>{});
-    try { await this.sendOutcome(appUserId,report);await clearReportedOutcome(appUserId,report); }
+    try { await this.sendOutcome(appUserId,report); }
     catch { /* Retried automatically by entitlement() after app relaunch or reconnect. */ }
   }
   private publish(member:MemberEntitlement){billingDiagnostic({operation:'entitlement',result:'state',plan:member.plan});if(typeof window!=='undefined')window.dispatchEvent(new CustomEvent('anzen-entitlement-changed',{detail:member}));}
@@ -179,7 +183,12 @@ export class BillingController {
       assertCurrentMember(ticket);this.identified=member.appUserId;
     }
     // A late configure leaves identified unset; the next attempt must log in.
-    if(this.identified!==member.appUserId)await this.mutateIdentity('logIn',()=>{assertCurrentMember(ticket);return this.sdk.logIn({appUserID:member.appUserId});});
+    if(this.identified!==member.appUserId){
+      // logIn can complete natively after its caller times out. The previous
+      // identity is no longer safe to reuse, including when returning to it.
+      this.identified=null;
+      await this.mutateIdentity('logIn',()=>{assertCurrentMember(ticket);return this.sdk.logIn({appUserID:member.appUserId});});
+    }
     assertCurrentMember(ticket);
     this.identified=member.appUserId;
   }

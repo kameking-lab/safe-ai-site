@@ -1,17 +1,38 @@
 import { afterEach,beforeEach,describe,expect,it,vi } from 'vitest';
-const mock=vi.hoisted(()=>({vault:new Map<string,string>(),prefs:new Map<string,string>(),request:vi.fn(),open:vi.fn(),close:vi.fn(),recover:vi.fn(async()=>{}),forget:vi.fn(async()=>{})}));
+const mock=vi.hoisted(()=>({vault:new Map<string,string>(),prefs:new Map<string,string>(),storage:vi.fn(async(_operation:string)=>{}),request:vi.fn(),open:vi.fn(),close:vi.fn(),recover:vi.fn(async()=>{}),forget:vi.fn(async()=>{})}));
 vi.mock('../src/lib/billing',()=>({billing:{recoverSession:mock.recover,forget:mock.forget}}));
 vi.mock('@capacitor/core',()=>({Capacitor:{isNativePlatform:()=>true},CapacitorHttp:{request:(r:{url:string})=>r.url.endsWith('/diagnostics')?Promise.resolve({status:200,data:{ok:true}}):mock.request(r)},registerPlugin:()=>({
-  get:vi.fn(async(options?:{purpose?:string})=>({value:mock.vault.get(options?.purpose??'session')})),
-  set:vi.fn(async({purpose,value}:{purpose?:string;value:string})=>{mock.vault.set(purpose??'session',value);}),
-  clear:vi.fn(async(options?:{purpose?:string})=>{mock.vault.delete(options?.purpose??'session');}),
+  get:vi.fn(async(options?:{purpose?:string})=>{await mock.storage('vault.get');return {value:mock.vault.get(options?.purpose??'session')};}),
+  set:vi.fn(async({purpose,value}:{purpose?:string;value:string})=>{await mock.storage('vault.set');mock.vault.set(purpose??'session',value);}),
+  clear:vi.fn(async(options?:{purpose?:string})=>{await mock.storage('vault.clear');mock.vault.delete(options?.purpose??'session');}),
 })}));
-vi.mock('@capacitor/preferences',()=>({Preferences:{get:async({key}:{key:string})=>({value:mock.prefs.get(key)}),set:async({key,value}:{key:string;value:string})=>{mock.prefs.set(key,value);}}}));
+vi.mock('@capacitor/preferences',()=>({Preferences:{get:async({key}:{key:string})=>{await mock.storage('preferences.get');return {value:mock.prefs.get(key)};},set:async({key,value}:{key:string;value:string})=>{await mock.storage('preferences.set');mock.prefs.set(key,value);}}}));
 vi.mock('@capacitor/browser',()=>({Browser:{open:mock.open,close:mock.close}}));
 const site='https://www.anzen-ai-portal.jp';const flow='88888888-1111-4111-8111-111111111111';const code='a'.repeat(43);const token='b'.repeat(43);
 beforeEach(()=>{
+  mock.storage.mockReset().mockResolvedValue(undefined);
   vi.resetModules();vi.clearAllMocks();mock.vault.clear();mock.prefs.clear();mock.open.mockResolvedValue(undefined);mock.close.mockResolvedValue(undefined);vi.stubGlobal('window',{dispatchEvent:vi.fn()});
   mock.request.mockImplementation(async({url})=>({url,status:200,data:url.endsWith('/start')?{flow,authorizeUrl:`${site}/api/mobile/v1/auth/authorize?flow=${flow}`}:{token}}));
+});
+it.each(['vault.get','vault.set','preferences.set'])('releases login exchange when %s never returns',async operation=>{
+ vi.useFakeTimers();const session=await import('../src/lib/session');await session.startLogin();
+ mock.storage.mockImplementation(async name=>{if(name===operation)await new Promise(()=>{});});
+ const failed=expect(session.completeLogin(`anzenai://auth/callback?flow=${flow}&code=${code}`)).rejects.toThrow('OPERATION_TIMEOUT');
+ await vi.advanceTimersByTimeAsync(16001);await failed;expect(session.isLoginExchanging()).toBe(false);
+ expect(window.dispatchEvent).toHaveBeenCalledWith(expect.objectContaining({type:'anzen-login-failed'}));
+});
+it('releases member reads after a stalled Keychain clear during logout',async()=>{
+ vi.useFakeTimers();const session=await import('../src/lib/session');const generation=await import('../src/lib/member-generation');await session.setSessionToken(token);
+ mock.storage.mockImplementation(async name=>{if(name==='vault.clear')await new Promise(()=>{});});
+ const failed=expect(session.logout()).rejects.toThrow('OPERATION_TIMEOUT');
+ await vi.advanceTimersByTimeAsync(8001);await failed;
+ expect(()=>generation.assertCurrentMember(generation.memberGeneration())).not.toThrow();
+});
+it('allows retry after a stalled session-incarnation read',async()=>{
+ vi.useFakeTimers();const session=await import('../src/lib/session');
+ mock.storage.mockImplementationOnce(()=>new Promise(()=>{}));
+ const failed=expect(session.sessionBinding()).rejects.toThrow('OPERATION_TIMEOUT');await vi.advanceTimersByTimeAsync(8001);await failed;
+ expect(await session.sessionBinding()).toMatch(/^[0-9a-f-]{36}$/);
 });
 afterEach(()=>{vi.useRealTimers();vi.unstubAllGlobals();});
 it('completes login and clears its pending flag while RevenueCat never returns',async()=>{

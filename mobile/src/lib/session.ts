@@ -1,11 +1,17 @@
 import { Capacitor, CapacitorHttp, registerPlugin } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
-import { Preferences } from '@capacitor/preferences';
+import { boundedPreferences as Preferences,storageBoundary } from './bounded-storage';
 import { SITE } from './api';
 import { invalidateMemberReads, memberGeneration, suspendMemberReads } from './member-generation';
 import {bounded,billingDiagnostic} from './billing-diagnostics';
 type VaultOptions={purpose?:'login'};
-const vault=registerPlugin<{get(options?:VaultOptions):Promise<{value?:string}>;set(options:{value:string}&VaultOptions):Promise<void>;clear(options?:VaultOptions):Promise<void>}>('NativeVault');
+const nativeVault=registerPlugin<{get(options?:VaultOptions):Promise<{value?:string}>;set(options:{value:string}&VaultOptions):Promise<void>;clear(options?:VaultOptions):Promise<void>}>('NativeVault');
+const vaultBoundary=storageBoundary();
+const vault={
+  get:(options?:VaultOptions)=>vaultBoundary.read(()=>nativeVault.get(options)),
+  set:(options:{value:string}&VaultOptions)=>vaultBoundary.write(()=>nativeVault.set(options)),
+  clear:(options?:VaultOptions)=>vaultBoundary.write(()=>nativeVault.clear(options)),
+};
 let memoryToken:string|null=null;
 let pendingLogin:string|null=null;
 let loginDismissed=false;
@@ -110,10 +116,8 @@ export async function completeLogin(value:string) {
   const flow=url.searchParams.get('flow')??'';const code=url.searchParams.get('code')??'';
   if(!/^[0-9a-f-]{36}$/.test(flow) || !/^[A-Za-z0-9_-]{43}$/.test(code))throw new Error('AUTH_FLOW_EXPIRED');
   const active=completing.get(flow);if(active)return active;
-  let started=false;
   const task=(async()=>{
     const pending=await readLogin();if(!pending)return false;
-    started=true;
     const [expected,verifier,createdAt]=pending.split(':');
     if(expected!==flow)throw new Error('AUTH_FLOW_EXPIRED');
     const age=Date.now()-Number(createdAt);
@@ -128,7 +132,9 @@ export async function completeLogin(value:string) {
   })();
   completing.set(flow,task);
   try{return await task;}catch(error){
-    if(started){loginDismissed=true;window.dispatchEvent(new Event('anzen-login-failed'));}
+    // Reading the saved proof can fail before exchange starts. Clear any UI
+    // exchange state set by an app-activation event during that read as well.
+    loginDismissed=true;window.dispatchEvent(new Event('anzen-login-failed'));
     billingDiagnostic({operation:'login',result:'failed'});
     throw error;
   }finally{completing.delete(flow);}

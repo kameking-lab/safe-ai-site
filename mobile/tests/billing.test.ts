@@ -319,7 +319,7 @@ describe('iOS IAP uses server rights before StoreKit',()=>{
       const s=setup(options);await expect(s.controller.purchase(config)).rejects.toThrow(error);expect(s.send).toHaveBeenCalledWith('/api/billing/store-outcome',expect.objectContaining({id:intentId,outcome,attemptId:expect.any(String)}));expect(s.send.mock.calls.map(c=>c[0])).not.toContain('/api/billing/cancel-intent');
     }
   });
-  it('reports pre-SDK network failure separately without waiting on another network request',async()=>{const s=setup({startOffline:true});await expect(s.controller.purchase(config)).rejects.toThrow('STORE_NOT_OPENED');expect(s.sdk.purchasePackage).not.toHaveBeenCalled();expect(s.send).not.toHaveBeenCalledWith('/api/billing/cancel-intent',expect.anything());expect(s.send).toHaveBeenCalledWith('/api/billing/store-outcome',expect.objectContaining({id:intentId,outcome:'not_opened',attemptId:expect.any(String)}));});
+  it('reports pre-SDK network failure separately without waiting on another network request',async()=>{const s=setup({startOffline:true});await expect(s.controller.purchase(config)).rejects.toThrow('STORE_NOT_OPENED');expect(s.sdk.purchasePackage).not.toHaveBeenCalled();expect(s.send).not.toHaveBeenCalledWith('/api/billing/cancel-intent',expect.anything());await vi.waitFor(()=>expect(s.send).toHaveBeenCalledWith('/api/billing/store-outcome',expect.objectContaining({id:intentId,outcome:'not_opened',attemptId:expect.any(String)})));});
   it('opens StoreKit after one atomic preparation without another rights read or start request',async()=>{
     const s=setup({atomic:true});await s.controller.purchase(config);
     expect(s.send.mock.calls.map(c=>c[0])).toEqual(['/api/me/entitlements','/api/billing/purchase-intents','/api/billing/reconcile']);

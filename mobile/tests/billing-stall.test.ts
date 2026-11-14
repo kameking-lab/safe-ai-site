@@ -46,3 +46,14 @@ it('fences a late native logout before any new identity while server Pro stays a
  await vi.advanceTimersByTimeAsync(1);expect(s.sdk.logIn).not.toHaveBeenCalled();
  finish();await identity;expect(s.sdk.logIn).toHaveBeenLastCalledWith({appUserID:'another-synthetic-member'});
 });
+it('reidentifies A after a timed-out login to B completes late',async()=>{
+ const s=setup();const a=pro();const b={...a,appUserId:'another-synthetic-member'};
+ await s.controller.identify(config,a as never);
+ let finish!:()=>void;
+ s.sdk.logIn.mockImplementationOnce(()=>new Promise(resolve=>{finish=()=>resolve({} as never);}));
+ const switching=s.controller.identify(config,b as never).catch(()=>{});
+ await vi.advanceTimersByTimeAsync(8001);await switching;
+ finish();await vi.advanceTimersByTimeAsync(1);
+ await s.controller.identify(config,a as never);
+ expect(s.sdk.logIn).toHaveBeenLastCalledWith({appUserID:a.appUserId});
+});
