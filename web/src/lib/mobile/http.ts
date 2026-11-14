@@ -1,4 +1,8 @@
 export const SITE_ORIGIN='https://www.anzen-ai-portal.jp';
+export function mobileRateRejection(response:Response,stage:'auth_start'|'auth_exchange'){
+  console.warn('[mobile-api]',JSON.stringify({stage,status:response.status,code:response.status===429?'RATE_LIMITED':'SHARED_STATE_UNAVAILABLE'}));
+  return response;
+}
 export function json(data:unknown,status=200) {
   if(status>=400){
     const code=(data as {error?:{code?:unknown}})?.error?.code;
