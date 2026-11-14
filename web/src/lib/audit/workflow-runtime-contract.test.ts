@@ -42,7 +42,7 @@ describe("GitHub workflow runtime contract", () => {
       ...workflow.matchAll(/node-version: "([^"]+)"/g),
     ].map(([, version]) => version);
 
-    expect(configuredVersions).toEqual([pinnedNodeVersion, pinnedNodeVersion]);
+    expect(configuredVersions).toEqual([pinnedNodeVersion, pinnedNodeVersion, pinnedNodeVersion]);
   });
 
   it("allows at least 35 minutes for the cold full web CI run", () => {
