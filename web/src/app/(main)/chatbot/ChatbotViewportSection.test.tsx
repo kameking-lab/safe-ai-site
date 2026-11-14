@@ -6,6 +6,53 @@ import {
 } from "./ChatbotViewportSection";
 
 describe("ChatbotViewportSection（相談ボックスを下のタブバーの上に収める）", () => {
+  it("横向きのタッチ端末でもキーボードを検出し、閉じたら固定配置を解除する", () => {
+    vi.stubGlobal("innerHeight", 390);
+    vi.stubGlobal("innerWidth", 844);
+    vi.stubGlobal("matchMedia", () => ({matches:true}));
+    const viewport=Object.assign(new EventTarget(),{height:390,offsetTop:0});
+    vi.stubGlobal("visualViewport",viewport);
+    render(<ChatbotViewportSection aria-label="相談"/>);
+    const section=screen.getByRole("region",{name:"相談"});
+    viewport.height=210;
+    act(()=>viewport.dispatchEvent(new Event("resize")));
+    expect(section.hasAttribute("data-keyboard-open")).toBe(true);
+    viewport.height=390;
+    act(()=>viewport.dispatchEvent(new Event("resize")));
+    expect(section.hasAttribute("data-keyboard-open")).toBe(false);
+  });
+
+  it("デスクトップのウィンドウを縦に縮めてもキーボード扱いにしない", () => {
+    vi.stubGlobal("innerHeight", 844);
+    vi.stubGlobal("innerWidth", 1024);
+    vi.stubGlobal("matchMedia", () => ({matches:false}));
+    const viewport=Object.assign(new EventTarget(),{height:844,offsetTop:0});
+    vi.stubGlobal("visualViewport",viewport);
+    render(<ChatbotViewportSection aria-label="相談"/>);
+    viewport.height=400;
+    act(()=>viewport.dispatchEvent(new Event("resize")));
+    expect(screen.getByRole("region",{name:"相談"}).hasAttribute("data-keyboard-open")).toBe(false);
+  });
+
+  it("document scrollと独立したWKWebViewのpanに追従し、キーボードを閉じたら通常配置に戻る", () => {
+    vi.stubGlobal("innerHeight", 844);
+    vi.stubGlobal("innerWidth", 390);
+    vi.stubGlobal("scrollY", 180);
+    const viewport=Object.assign(new EventTarget(),{height:844,offsetTop:0});
+    vi.stubGlobal("visualViewport",viewport);
+    vi.spyOn(HTMLElement.prototype,"getBoundingClientRect").mockReturnValue({top:231} as DOMRect);
+    render(<ChatbotViewportSection aria-label="相談"/>);
+    const section=screen.getByRole("region",{name:"相談"});
+    expect(section.style.getPropertyValue("--chatbot-top")).toBe("231px");
+    viewport.height=480;viewport.offsetTop=120;
+    vi.stubGlobal("innerHeight",480);
+    act(()=>viewport.dispatchEvent(new Event("resize")));
+    expect(section.hasAttribute("data-keyboard-open")).toBe(true);
+    expect(section.style.getPropertyValue("--chatbot-viewport-offset")).toBe("120px");
+    viewport.height=844;viewport.offsetTop=0;
+    act(()=>viewport.dispatchEvent(new Event("resize")));
+    expect(section.hasAttribute("data-keyboard-open")).toBe(false);
+  });
   afterEach(() => {
     vi.restoreAllMocks();
     vi.unstubAllGlobals();

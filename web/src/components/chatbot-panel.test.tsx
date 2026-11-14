@@ -16,20 +16,22 @@ afterEach(() => {
   window.localStorage.clear();
 });
 
-it('shows the Chihuahua before fetch resolves and removes it on the first text chunk',async()=>{
+it('shows the Chihuahua before fetch resolves and shows idea together with the first text chunk',async()=>{
  let release!:(response:Response)=>void;let controller!:ReadableStreamDefaultController<Uint8Array>;
  const send=vi.fn(()=>new Promise<Response>(resolve=>{release=resolve;}));vi.stubGlobal('fetch',send);
  render(<ChatbotPanel initialQuestion="足場の手すりは？" />);
  fireEvent.click(screen.getByRole('button',{name:'送信'}));
  const thinking=screen.getByRole('status',{name:'回答を作成中'});
- expect(thinking.querySelector('img')?.getAttribute('src')).toBe('/mascot/mascot-searching.gif');
+ expect(thinking.querySelector('img')?.getAttribute('src')).toBe('/mascot/chat-thinking.gif');
  expect(thinking.querySelector('source')?.getAttribute('media')).toBe('(prefers-reduced-motion: reduce)');
  await act(async()=>{release(new Response(new ReadableStream({start(c){controller=c;}}),{headers:{'Content-Type':'text/event-stream'}}));});
  expect(screen.getByRole('status',{name:'回答を作成中'})).toBeTruthy();
  await act(async()=>{controller.enqueue(new TextEncoder().encode('event: text\ndata: {"chunk":"確認します","provisional":true}\n\n'));});
  await waitFor(()=>expect(screen.queryByRole('status',{name:'回答を作成中'})).toBeNull());
  expect(screen.getByText('確認します')).toBeTruthy();
+ expect(screen.getByRole('status',{name:'回答を表示中'}).getAttribute('data-chat-mascot')).toBe('idea');
  fireEvent.click(screen.getByRole('button',{name:'生成を停止'}));
+ expect(document.querySelector('[data-chat-mascot]')).toBeNull();
  await act(async()=>controller.close());
 });
 
@@ -156,6 +158,7 @@ describe("ChatbotPanel a11y", () => {
       const alert = screen.getByRole("alert");
       expect(alert.textContent).toContain("自動再送はしていません");
       expect(alert.textContent).toContain("再試行");
+      expect(alert.closest('[data-chatbot-history]')).not.toBeNull();
     });
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(fetchMock.mock.calls[0]?.[0]).toBe("/api/chatbot/stream");
@@ -403,6 +406,8 @@ describe("ChatbotPanel AI safety boundary", () => {
       (await screen.findByRole("alert")).getAttribute("data-safety-kind"),
     ).toBe("privacy");
 
+    expect(screen.getByRole("alert").closest('[data-chatbot-history]')).not.toBeNull();
+
     fireEvent.click(screen.getByRole("button", { name: "新しい相談" }));
     expect((input as HTMLTextAreaElement).value).toBe("");
     expect(screen.queryByRole("alert")).toBeNull();
@@ -638,10 +643,10 @@ describe("ChatbotPanel conversation UI", () => {
     expect(document.querySelector("[data-chatbot-composer]")).not.toBeNull();
     expect(
       document.querySelector("[data-chatbot-composer]")?.className,
-    ).toContain("sticky");
+    ).not.toContain("sticky");
     expect(
       document.querySelector("[data-chatbot-composer]")?.className,
-    ).toContain("bottom-0");
+    ).not.toContain("bottom-0");
     expect(
       document.querySelector("[data-chatbot-composer]")?.className,
     ).toContain("shrink-0");
@@ -919,8 +924,8 @@ describe("ChatbotPanel conversation UI", () => {
     expect(history?.getAttribute("aria-live")).toBe("off");
     const composer = document.querySelector("[data-chatbot-composer]");
     expect(composer?.className).toContain("shrink-0");
-    expect(composer?.className).toContain("sticky");
-    expect(composer?.className).toContain("bottom-0");
+    expect(composer?.className).not.toContain("sticky");
+    expect(composer?.parentElement).toBe(history?.parentElement);
   });
 
   it("電気作業のfollow-upは直前のやり取りと構造化contextを引き継ぐ", async () => {

@@ -1,7 +1,7 @@
 "use client";
 
 import { AiProcessingNote } from "@/components/ai-processing-note";
-import { ChatThinking } from "@/components/chat-thinking";
+import { ChatThinking, useChatMascot } from "@/components/chat-thinking";
 
 import { SourceProvenanceView } from "@/components/law-navi/source-provenance-view";
 import { normalizeSourceProvenance } from "@/lib/source-provenance";
@@ -181,6 +181,7 @@ export function ChatbotPanel({
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState(initialQuestion ?? "");
   const [isSending, setIsSending] = useState(false);
+  const mascot = useChatMascot();
   const [error, setError] = useState<string | null>(null);
   // 無料枠の上限に当たったときの購入入口（エラー表示とは別。再試行ボタンは出さない）。
   const [answerViewportHeight, setAnswerViewportHeight] = useState(0);
@@ -205,6 +206,10 @@ export function ChatbotPanel({
   const previousInputValueRef = useRef(input);
   const initialQuestionConsumedRef = useRef(false);
   const lawCategory: LawCategoryFilter = "all";
+
+  useLayoutEffect(() => {
+    if ((upsell || error || localSafetyNotice) && listRef.current) listRef.current.scrollTop = listRef.current.scrollHeight;
+  }, [upsell, error, localSafetyNotice]);
 
   useLayoutEffect(() => {
     const list = listRef.current;
@@ -315,6 +320,7 @@ export function ChatbotPanel({
 
     const userMessage = createMessage("user", text);
     const assistantId = crypto.randomUUID();
+    mascot.start(assistantId);
     const placeholder: ChatMessage = {
       id: assistantId,
       role: "assistant",
@@ -343,6 +349,7 @@ export function ChatbotPanel({
       privacyConfirmed: true,
     });
     let streamedContent = "";
+    let responseHasAnswer = false;
     const requestStarted = performance.now();
     const timeoutId = window.setTimeout(
       () => controller.abort("timeout"),
@@ -438,7 +445,10 @@ export function ChatbotPanel({
             try {
               const parsed = JSON.parse(data) as Record<string, unknown>;
               if (event === "text" && typeof parsed.chunk === "string") {
-                if (!streamedContent && parsed.chunk) performance.measure?.("anzen.chat.first-text", {start:requestStarted,end:performance.now()});
+                if (!streamedContent && parsed.chunk) {
+                  performance.measure?.("anzen.chat.first-text", {start:requestStarted,end:performance.now()});
+                  mascot.answer(assistantId);
+                }
                 streamedContent += parsed.chunk;
                 setMessages((previous) =>
                   previous.map((message) =>
@@ -472,6 +482,8 @@ export function ChatbotPanel({
       if (!directAnswer && !finalMeta.answer?.trim()) {
         throw new Error("stream-incomplete");
       }
+      responseHasAnswer = true;
+      if (!streamedContent) mascot.answer(assistantId);
 
       conversationContextRef.current = sanitizePublicLegalConversationContext(
         finalMeta.context,
@@ -514,6 +526,7 @@ export function ChatbotPanel({
       );
     } catch (streamError) {
       if (requestGenerationRef.current !== requestGeneration) return;
+      mascot.cancel(assistantId);
       setMessages((previous) =>
         previous.filter(
           (message) =>
@@ -540,6 +553,7 @@ export function ChatbotPanel({
       performance.measure?.("anzen.chat.total", {start:requestStarted,end:performance.now()});
       window.clearTimeout(timeoutId);
       if (requestGenerationRef.current === requestGeneration) {
+        if (!responseHasAnswer) mascot.cancel(assistantId);
         requestPendingRef.current = false;
         setIsSending(false);
         abortRef.current = null;
@@ -606,6 +620,7 @@ export function ChatbotPanel({
   }, []);
 
   function handleClear() {
+    mascot.cancel();
     requestGenerationRef.current += 1;
     abortRef.current?.abort();
     abortRef.current = null;
@@ -780,7 +795,8 @@ export function ChatbotPanel({
                       >
                         安衛法AIの回答 {assistantAnswerNumber}
                       </h2>
-                      {isStreaming && !message.content ? <ChatThinking /> : isStreaming && message.provisional ? (
+                      {mascot.feedback?.id === message.id && <ChatThinking phase={mascot.feedback.phase} />}
+                      {isStreaming && !message.content ? null : isStreaming && message.provisional ? (
                         <div data-chatbot-provisional="">
                           <p className="mb-1 text-xs text-slate-500 dark:text-slate-400">生成中・引用は未確認です</p>
                           <p className="whitespace-pre-wrap">{message.content}</p>
@@ -973,52 +989,50 @@ export function ChatbotPanel({
             })}
           </div>
         )}
+        {upsell && (
+          <ProUpsellCard message={upsell} returnTo="/chatbot" className="mt-3 mb-2" />
+        )}
+        {localSafetyNotice && (
+          <div
+            role="alert"
+            data-safety-kind={localSafetyNotice.kind}
+            className={`mx-3 mb-2 rounded-xl border px-3 py-2 text-sm font-semibold leading-6 sm:mx-5 ${
+              localSafetyNotice.kind === "emergency"
+                ? "border-red-500 bg-red-50 text-red-950 dark:bg-red-950 dark:text-red-100"
+                : "border-amber-300 bg-amber-50 text-amber-950 dark:bg-amber-950 dark:text-amber-100"
+            }`}
+          >
+            {localSafetyNotice.message}
+          </div>
+        )}
+
+        {error && (
+          <div
+            role="alert"
+            className="mx-3 mb-2 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800 sm:mx-5 dark:border-red-900 dark:bg-red-950 dark:text-red-100"
+          >
+            <span>{error}</span>
+            {retryableQuestion && !isSending && (
+              <button
+                type="button"
+                onClick={() => {
+                  const question = retryableQuestion;
+                  setRetryableQuestion(null);
+                  setError(null);
+                  void handleSend(question);
+                }}
+                className="inline-flex min-h-11 items-center gap-1 rounded-full border border-red-300 bg-white px-3 py-2 text-xs font-semibold text-red-800 dark:bg-red-950 dark:text-red-100"
+              >
+                <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
+                再試行
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
-      {localSafetyNotice && (
-        <div
-          role="alert"
-          data-safety-kind={localSafetyNotice.kind}
-          className={`mx-3 mb-2 rounded-xl border px-3 py-2 text-sm font-semibold leading-6 sm:mx-5 ${
-            localSafetyNotice.kind === "emergency"
-              ? "border-red-500 bg-red-50 text-red-950 dark:bg-red-950 dark:text-red-100"
-              : "border-amber-300 bg-amber-50 text-amber-950 dark:bg-amber-950 dark:text-amber-100"
-          }`}
-        >
-          {localSafetyNotice.message}
-        </div>
-      )}
-
-      {upsell && (
-        <ProUpsellCard message={upsell} returnTo="/chatbot" className="mx-3 mb-2 sm:mx-5" />
-      )}
-
-      {error && (
-        <div
-          role="alert"
-          className="mx-3 mb-2 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800 sm:mx-5 dark:border-red-900 dark:bg-red-950 dark:text-red-100"
-        >
-          <span>{error}</span>
-          {retryableQuestion && !isSending && (
-            <button
-              type="button"
-              onClick={() => {
-                const question = retryableQuestion;
-                setRetryableQuestion(null);
-                setError(null);
-                void handleSend(question);
-              }}
-              className="inline-flex min-h-11 items-center gap-1 rounded-full border border-red-300 bg-white px-3 py-2 text-xs font-semibold text-red-800 dark:bg-red-950 dark:text-red-100"
-            >
-              <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
-              再試行
-            </button>
-          )}
-        </div>
-      )}
-
       <form
-        className="sticky bottom-0 z-20 mt-auto shrink-0 scroll-mb-[calc(var(--mobile-bottom-nav-h,0px)+env(safe-area-inset-bottom,0px)+1rem)] border-t border-slate-100 bg-white/95 px-3 pb-2 pt-2 backdrop-blur sm:px-5 dark:border-slate-800 dark:bg-slate-950/95"
+        className="z-20 mt-auto shrink-0 border-t border-slate-100 bg-white/95 px-3 pb-2 pt-2 backdrop-blur sm:px-5 dark:border-slate-800 dark:bg-slate-950/95"
         data-chatbot-composer=""
         onSubmit={(event) => {
           event.preventDefault();
@@ -1063,7 +1077,7 @@ export function ChatbotPanel({
           {isSending ? (
             <button
               type="button"
-              onClick={() => abortRef.current?.abort()}
+              onClick={() => { mascot.cancel(); abortRef.current?.abort(); }}
               aria-label="生成を停止"
               className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-full bg-slate-900 text-white hover:bg-slate-700 dark:bg-white dark:text-slate-950"
             >
