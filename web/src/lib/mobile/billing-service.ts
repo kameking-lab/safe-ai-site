@@ -119,9 +119,11 @@ export async function reconcile(userId:string,options:{stripe?:boolean;appUserId
         await tx.mobileGrant.updateMany({where:{id:row.id,provider:'app_store',environment},data:{revoked:true,checkedAt}});
         if(row.userId!==userId)owner??=row;
       }
-      if(owner&&owner.userId!==userId){
-        const providers=async(id:string)=>{const rows=await tx.account.findMany({where:{userId:id},select:{provider:true}});return [...new Set(rows.map(r=>r.provider==='apple'?'apple':r.provider==='google'?'google':'other'))].sort();};
-        transfer={reason:'APP_STORE_VERIFIED_TRANSFER',from:await providers(owner.userId),to:await providers(userId)};
+      const previousUser=owner?.userId??originalMember?.userId;
+      const moved=owner?owner.userId!==userId:verified.originalCustomerId!==member.appUserId;
+      if(moved){
+        const providers=async(id:string|undefined)=>{if(!id)return ['unknown'];const rows=await tx.account.findMany({where:{userId:id},select:{provider:true}});const result=[...new Set(rows.map(r=>r.provider==='apple'?'apple':r.provider==='google'?'google':'other'))].sort();return result.length?result:['unknown'];};
+        transfer={reason:'APP_STORE_VERIFIED_TRANSFER',from:await providers(previousUser),to:await providers(userId)};
       }
       await tx.mobileGrant.upsert({where:{provider_originalTransactionId_environment:{provider:'app_store',originalTransactionId,environment}},
         create:{...grant,originalTransactionId,userId,provider:'app_store',environment,checkedAt},update:{...grant,userId,checkedAt,revoked:false}});

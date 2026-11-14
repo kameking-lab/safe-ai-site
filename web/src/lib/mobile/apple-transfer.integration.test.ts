@@ -75,6 +75,11 @@ describe.skipIf(!run)('HTTP reconcile with real PostgreSQL and a RevenueCat HTTP
   expect(await db.mobileGrant.count({where:{userId:'a',revoked:false}})).toBe(2);
   outage=true;expect((await reconcile('b')).status).toBe(503);expect(await db.mobileGrant.count({where:{userId:'a',revoked:false}})).toBe(2);expect(logs).toEqual([]);
  });
+ it('records historical login methods when the old rejection prevented any ledger grant',async()=>{
+  await db.mobileGrant.deleteMany();current='fixture-member-b';expect((await reconcile('b')).body.plan).toBe('pro');
+  expect(logs).toEqual(['[mobile-billing] {"reason":"APP_STORE_VERIFIED_TRANSFER","from":["apple"],"to":["google"]}']);
+  logs.length=0;await reconcile('b');expect(logs).toEqual([]);
+ });
  it('rejects a mismatched current owner and a delayed request for a previous login',async()=>{
   // v1 says B has a grant but v2 still says A; no transfer is permitted.
   current='fixture-member-b';wrongOwner=true;expect((await reconcile('b')).status).toBe(409);
