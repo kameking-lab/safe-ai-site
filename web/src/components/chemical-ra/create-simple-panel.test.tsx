@@ -15,18 +15,6 @@ beforeEach(() => {
   localStorage.clear();
 });
 
-it("URLの公開CAS番号を物質詳細から引き継ぐ", async () => {
-  window.history.replaceState({},"","/chemical-ra?cas=67-64-1");
-  try {
-    render(<CreateSimplePanel />);
-    await waitFor(() => expect(screen.getByRole("list", {name:"判定する物質"}).textContent).toContain("アセトン"));
-  } finally {window.history.replaceState({},"","/");}
-});
-it("URLから任意の自由入力を引き継がない", () => {
-  window.history.replaceState({},"","/chemical-ra?cas=arbitrary-text");
-  try {render(<CreateSimplePanel />);expect((screen.getByLabelText("物質名またはCAS番号") as HTMLInputElement).value).toBe("");}
-  finally {window.history.replaceState({},"","/");}
-});
 afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
@@ -98,4 +86,17 @@ describe("化学物質リスクアセスメント画面", () => {
     fireEvent.click(screen.getByRole("button", { name: "全件CSV" }));
     expect(createObjectURL).toHaveBeenCalled();
   });
+});
+
+it("URLの公開CAS番号を物質詳細から引き継ぐ", async () => {
+  window.history.replaceState({},"","/chemical-ra?cas=67-64-1");
+  try {
+    render(<CreateSimplePanel />);
+    await waitFor(() => expect(screen.getByRole("list", {name:"判定する物質"}).textContent).toContain("アセトン"));
+  } finally {window.history.replaceState({},"","/");}
+});
+it("URLから任意の自由入力を引き継がない", () => {
+  window.history.replaceState({},"","/chemical-ra?cas=arbitrary-text");
+  try {render(<CreateSimplePanel />);expect((screen.getByLabelText("物質名またはCAS番号") as HTMLInputElement).value).toBe("");}
+  finally {window.history.replaceState({},"","/");}
 });

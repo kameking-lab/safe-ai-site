@@ -50,7 +50,7 @@ export function PrintReport({
           body:has([data-cs-print-report]) main *:has([data-cs-print-report]) { padding: 0 !important; margin: 0 !important; min-height: 0 !important; max-width: none !important; background: white !important; }
           body:has([data-cs-print-report]) img[src*="mascot"],
           body:has([data-cs-print-report]) [data-pet-companion] { display: none !important; }
-          [data-cs-print-report] { color: #0f172a; font-size: 10px; line-height: 1.5; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+          [data-cs-print-report] { color: #0f172a; font-size: 9.5px; line-height: 1.4; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
           [data-cs-print-report] h1 { border-top: 6px solid #047857; border-bottom: 1px solid #047857; padding: 8px 0; color: #064e3b; font-size: 19px; letter-spacing: .04em; }
           [data-cs-print-report] h2 { background: #e0f2fe; border-left: 5px solid #0369a1; padding: 4px 8px; color: #0c4a6e; break-after: avoid; }
           [data-cs-print-report] h2:nth-of-type(2) { background: #fff7ed; border-color: #c2410c; color: #7c2d12; }
@@ -67,6 +67,7 @@ export function PrintReport({
           [data-cs-print-report] [data-risk-level="III"] { background: #ffedd5; border-left-color: #c2410c; }
           [data-cs-print-report] [data-risk-level="IV"] { background: #ffe4e6; border-left-color: #be123c; }
           [data-cs-print-report] .cs-print-summary { display: flex; flex-wrap: wrap; gap: 7px 12px; margin: 8px 0; }
+          [data-cs-print-report] .cs-print-action-space { break-inside: avoid; }
         }
       `}</style>
       <h1 className="text-lg font-bold">化学物質リスクアセスメント記録</h1>
@@ -197,7 +198,7 @@ export function PrintReport({
         </>
       )}
       <h2 className="mt-3 font-bold">実施する対策・期限・担当</h2>
-      <div className="mt-1 h-24 border border-slate-400" />
+      <div className="cs-print-action-space mt-1 h-16 border border-slate-400" />
       <p className="mt-2">厚生労働省 CREATE-SIMPLE の手法に基づく計算（安全AIポータル）</p>
     </section>
   );

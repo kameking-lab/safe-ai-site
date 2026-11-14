@@ -113,7 +113,8 @@ test('chemical RA uses Arabic levels and stars on iPhone and printed pages',asyn
   await context.route('https://**/*',route=>route.abort());
   await context.route(host+'/api/chemical-ra/substances',route=>route.fulfill({headers:cors,json:substances}));
   await page.goto('/chemical-ra/');
-  await page.getByLabel('物質名またはCAS番号').fill('トルエン');
+  // A click is replayed during hydration; filling prerendered HTML can precede React's input listener in WebKit.
+  await page.getByRole('button',{name:'トルエン',exact:true}).click();
   await page.getByRole('button',{name:/トルエン.*CAS 108-88-3/}).click();
   const choose=async(group:string,option:string)=>page.getByRole('radiogroup',{name:group}).getByRole('radio',{name:new RegExp(option)}).click();
   await choose('1回（1日）に扱う量','中量');await choose('換気','窓・換気扇');
@@ -121,13 +122,16 @@ test('chemical RA uses Arabic levels and stars on iPhone and printed pages',asyn
   await choose('皮膚に付く範囲','両手と手首');
   await expect(page.getByRole('list',{name:'経路別のリスクレベル'})).toContainText('レベル4（大きい）★★★★');
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
-  if(captureDir){await mkdir(captureDir,{recursive:true});await page.screenshot({path:path.join(captureDir,`${info.project.name}-chemical-iphone.png`),fullPage:true});}
+  if(captureDir){
+    await mkdir(captureDir,{recursive:true});await page.screenshot({path:path.join(captureDir,`${info.project.name}-chemical-full.png`),fullPage:true});
+    await page.getByRole('heading',{name:'③ リスクレベル'}).scrollIntoViewIfNeeded();await page.screenshot({path:path.join(captureDir,`${info.project.name}-chemical-iphone.png`)});
+  }
   await page.emulateMedia({media:'print'});
   const report=page.locator('[data-cs-print-report]');await expect(report).toBeVisible();
   await expect(report).toContainText('レベル4（大きい）★★★★');await expect(report).toContainText('100%');
   if(captureDir&&info.project.name==='chromium-phone'){
     await page.pdf({path:path.join(captureDir,'chemical-print-color.pdf'),format:'A4',printBackground:true});
-    await page.addStyleTag({content:'@media print{[data-cs-print-report]{filter:grayscale(1)}[data-cs-print-report] *{box-shadow:none!important}}'});
+    await page.addStyleTag({content:'@media print{[data-cs-print-report],[data-cs-print-report] *{color:#111!important;background:#fff!important;border-color:#555!important;box-shadow:none!important}}'});
     await page.pdf({path:path.join(captureDir,'chemical-print-grayscale.pdf'),format:'A4',printBackground:true});
     await report.screenshot({path:path.join(captureDir,'chemical-print-grayscale-preview.png')});
   }

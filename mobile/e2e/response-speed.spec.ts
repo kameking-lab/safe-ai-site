@@ -15,7 +15,8 @@ const delay=(ms:number)=>new Promise(resolve=>setTimeout(resolve,ms));
 async function nativeBridge(context:BrowserContext){
   await context.addInitScript(()=>{
     const prefs=new Map<string,string>();const vault=new Map<string,string>();const listeners=new Map<string,(value:unknown)=>void>();const send=window.fetch.bind(window);
-    const plugins:Record<string,string[]>={NativeVault:['get','set','clear'],Preferences:['get','set','remove'],Browser:['open','close','addListener','removeListener'],App:['getLaunchUrl','addListener','removeListener'],PushNotifications:['addListener','removeListener'],NativeChatStream:['start','cancel','addListener','removeListener'],CapacitorHttp:['request'],NativeDocuments:['printPage'],NativeSpeech:['start','stop','addListener','removeListener'],Purchases:['configure','logIn','logOut','getOfferings','purchasePackage','restorePurchases']};
+    window.addEventListener('anzen-membership-recovered',()=>Object.assign(window,{__speedRecovered:true}));
+    const plugins:Record<string,string[]>={NativeVault:['get','set','clear'],Preferences:['get','set','remove'],Browser:['open','close','addListener','removeListener'],App:['getLaunchUrl','addListener','removeListener'],PushNotifications:['addListener','removeListener'],NativeChatStream:['start','cancel','addListener','removeListener'],CapacitorHttp:['request'],NativeDocuments:['printPage'],NativeSpeech:['start','stop','addListener','removeListener'],Purchases:['configure','logIn','logOut','invalidateCustomerInfoCache','getCustomerInfo','getOfferings','purchasePackage','restorePurchases']};
     Object.assign(window,{__speed:{},__returnSpeedLogin:()=>listeners.get('App:appUrlOpen')?.({url:'anzenai://auth/callback?flow=88888888-1111-4111-8111-111111111111&code='+ 'a'.repeat(43)}),webkit:{messageHandlers:{bridge:{}}},Capacitor:{
       PluginHeaders:Object.entries(plugins).map(([name,methods])=>({name,methods:methods.map(name=>({name,rtype:name==='addListener'?'callback':'promise'}))})),
       nativeCallback:(plugin:string,_method:string,options:{eventName:string},callback:(value:unknown)=>void)=>{listeners.set(plugin+':'+options.eventName,callback);return Promise.resolve('speed-listener');},
@@ -37,6 +38,7 @@ async function nativeBridge(context:BrowserContext){
           emit({id:request.id,kind:'headers',status:response.status,headers:Object.fromEntries(response.headers)});
           const reader=response.body!.getReader();while(true){const item=await reader.read();if(item.done)break;emit({id:request.id,kind:'chunk',data:btoa(String.fromCharCode(...item.value))});}emit({id:request.id,kind:'end'});
         }
+        if(plugin==='Purchases'&&method==='purchasePackage')Object.assign(window,{__speedPurchased:true});
         if(plugin==='Purchases'&&method==='getOfferings')return {all:{speed:{availablePackages:[{identifier:'speed-package',packageType:'MONTHLY',product:{identifier:'jp.anzenaiportal.pro.monthly',price:980,priceString:'¥980',currencyCode:'JPY',subscriptionPeriod:'P1M'}}]}}};
         return {};
       },
@@ -61,7 +63,7 @@ test('login, confirmed purchase, manual refresh and logout avoid redundant waits
       await delay(180);return route.fulfill({headers:cors,json:rights()});
     }
     if(url.pathname.endsWith('/purchase-intents'))return route.fulfill({headers:cors,json:{id:flow,appUserId,attemptId:request.postDataJSON().attemptId}});
-    if(url.pathname.endsWith('/reconcile')){await delay(180);paid=true;readsAtSync=entitlementReads;reconciledAt=Date.now();return route.fulfill({headers:cors,json:rights()});}
+    if(url.pathname.endsWith('/reconcile')){await delay(180);paid=await page.evaluate(()=>!!(window as unknown as {__speedPurchased?:boolean}).__speedPurchased);readsAtSync=entitlementReads;reconciledAt=Date.now();return route.fulfill({headers:cors,json:rights()});}
     if(url.pathname.endsWith('/auth/logout')){await logout;signedOut=true;return route.fulfill({headers:cors,json:{ok:true}});}
     if(url.pathname.endsWith('/account'))return route.fulfill({headers:cors,json:{displayName:'速度確認',email:null,sdsHistory:[]}});
     return route.fulfill({status:401,headers:cors,json:{error:{code:'UNAUTHORIZED'}}});
@@ -103,7 +105,7 @@ test('late membership reads cannot replace a purchase or restore Pro during logo
       await route.fulfill({headers:cors,json:snapshot});if(held)readFinished=true;return;
     }
     if(url.pathname.endsWith('/purchase-intents'))return route.fulfill({headers:cors,json:{id:flow,appUserId,attemptId:request.postDataJSON().attemptId}});
-    if(url.pathname.endsWith('/reconcile')){paid=true;return route.fulfill({headers:cors,json:rights()});}
+    if(url.pathname.endsWith('/reconcile')){paid=await page.evaluate(()=>!!(window as unknown as {__speedPurchased?:boolean}).__speedPurchased);return route.fulfill({headers:cors,json:rights()});}
     if(url.pathname.endsWith('/auth/logout')){await logout;return route.fulfill({headers:cors,json:{ok:true}});}
     if(url.pathname.endsWith('/account'))return route.fulfill({headers:cors,json:{displayName:'応答順確認',email:null,sdsHistory:[]}});
     return route.fulfill({status:401,headers:cors,json:{error:{code:'UNAUTHORIZED'}}});
@@ -113,6 +115,7 @@ test('late membership reads cannot replace a purchase or restore Pro during logo
   await expect.poll(()=>page.evaluate(()=>(window as unknown as {__speedBrowserOpened?:boolean}).__speedBrowserOpened)).toBe(true);
   await page.evaluate(()=>{(window as unknown as {__returnSpeedLogin:()=>void}).__returnSpeedLogin();});
   await expect(page.getByText('無料会員',{exact:true})).toBeVisible();
+  await expect.poll(()=>page.evaluate(()=>!!(window as unknown as {__speedRecovered?:boolean}).__speedRecovered)).toBe(true);
   await page.evaluate(()=>{
     Object.assign(window,{__plans:[] as string[]});
     window.addEventListener('anzen-entitlement-changed',event=>(window as unknown as {__plans:string[]}).__plans.push((event as CustomEvent<{plan:string}>).detail.plan));

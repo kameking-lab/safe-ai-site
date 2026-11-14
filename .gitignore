@@ -191,3 +191,7 @@ Desktop.ini
 # Local keyboard regression captures; keep the compact verification note in git.
 /research/anz-tf3/*
 !/research/anz-tf3/README.md
+
+# Local relogin/chemical RA captures; retain the verification note in git.
+/research/anz-tf4/*
+!/research/anz-tf4/README.md
