@@ -17,7 +17,7 @@ export default async function StartProCheckoutPage({ searchParams }: { searchPar
   if (!webProSalesReady()) redirect("/pricing");
   const back = safeReturnPath((await searchParams).returnTo);
   const self = back ? `/pricing/start?returnTo=${encodeURIComponent(back)}` : "/pricing/start";
-  const session = await auth();
+  const session = await auth({identityOnly:true});
   const userId = (session?.user as { id?: string } | undefined)?.id;
   if (!userId) redirect(`/auth/signin?callbackUrl=${encodeURIComponent(self)}`);
   let plan: "free" | "pro" = "free";
