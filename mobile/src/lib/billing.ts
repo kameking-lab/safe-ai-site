@@ -71,7 +71,7 @@ export class BillingController {
             await this.identifySerial(config,member);assertCurrentMember(ticket);
             // Silent StoreKit receipt sync is required after changing the app
             // account. getCustomerInfo alone only reads the new account cache.
-            if(this.sdk.syncPurchases)await bounded('getCustomerInfo',()=>this.sdk.syncPurchases!());assertCurrentMember(ticket);
+            if(this.sdk.syncPurchases)await this.mutateIdentity('getCustomerInfo',()=>{assertCurrentMember(ticket);return this.sdk.syncPurchases!();});assertCurrentMember(ticket);
             await bounded('invalidateCustomerInfoCache',()=>this.sdk.invalidateCustomerInfoCache());assertCurrentMember(ticket);
             await bounded('getCustomerInfo',()=>this.sdk.getCustomerInfo());assertCurrentMember(ticket);
           });
@@ -283,7 +283,7 @@ export class BillingController {
   async restore(config:BillingConfig){
     if(this.busy)throw new Error('PURCHASE_PENDING');this.busy=true;
     const ticket=invalidateMemberReads();
-    try{const member=await this.readEntitlement(ticket);await this.identify(config,member);assertCurrentMember(ticket);await bounded('restorePurchases',()=>this.sdk.restorePurchases());return await this.reconcile(ticket,member.appUserId);}finally{this.busy=false;}
+    try{const member=await this.readEntitlement(ticket);await this.identify(config,member);assertCurrentMember(ticket);await this.mutateIdentity('restorePurchases',()=>{assertCurrentMember(ticket);return this.sdk.restorePurchases();});return await this.reconcile(ticket,member.appUserId);}finally{this.busy=false;}
   }
   async forget(){
     invalidateMemberReads();

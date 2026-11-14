@@ -46,6 +46,17 @@ it('fences a late native logout before any new identity while server Pro stays a
  await vi.advanceTimersByTimeAsync(1);expect(s.sdk.logIn).not.toHaveBeenCalled();
  finish();await identity;expect(s.sdk.logIn).toHaveBeenLastCalledWith({appUserID:'another-synthetic-member'});
 });
+it.each(['syncPurchases','restorePurchases'] as const)('fences a late %s receipt transfer before another store identity',async stage=>{
+ const s=setup();await s.controller.identify(config,pro() as never);let finish!:()=>void;
+ const pending=vi.fn(()=>new Promise<void>(resolve=>{finish=resolve;}));
+ if(stage==='syncPurchases')Object.assign(s.sdk,{syncPurchases:pending});else s.sdk.restorePurchases.mockImplementationOnce(async()=>{await pending();return {} as never;});
+ const operation=(stage==='syncPurchases'?s.controller.recoverSession():s.controller.restore(config)).catch(()=>{});
+ await vi.advanceTimersByTimeAsync(8001);await operation;expect(finish).toBeTypeOf('function');
+ const blocked=s.controller.identify(config,{...pro(),appUserId:'replacement-member-id'} as never).catch(()=>{});
+ await vi.advanceTimersByTimeAsync(8001);await blocked;expect(s.sdk.logIn).not.toHaveBeenCalled();
+ finish();await Promise.resolve();await s.controller.identify(config,{...pro(),appUserId:'replacement-member-id'} as never);
+ expect(s.sdk.logIn).toHaveBeenLastCalledWith({appUserID:'replacement-member-id'});
+});
 it('reidentifies A after a timed-out login to B completes late',async()=>{
  const s=setup();const a=pro();const b={...a,appUserId:'another-synthetic-member'};
  await s.controller.identify(config,a as never);
