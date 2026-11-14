@@ -645,6 +645,10 @@ test("chatbot: composer, question chips, quick reply and source details remain o
   await input.type("2行目");
   await expect(input).toHaveValue("1行目\n2行目");
   await page.setViewportSize({ width: 390, height: 500 });
+  if (enforce) await expect.poll(async () => {
+    const box = await composer.boundingBox();
+    return box ? box.y + box.height : Infinity;
+  }).toBeLessThanOrEqual(502);
   const keyboardViewportBox = await composer.boundingBox();
   expect(keyboardViewportBox).not.toBeNull();
   if (enforce) {
@@ -655,6 +659,7 @@ test("chatbot: composer, question chips, quick reply and source details remain o
     }).toBeLessThanOrEqual(502);
   }
   await page.setViewportSize({ width: 390, height: 844 });
+  await expect(page.locator('[data-chatbot-viewport-section]')).not.toHaveAttribute('data-keyboard-open', '');
   await input.fill("労働安全衛生法第61条を示してください");
   await consentToChatbot(page);
   await input.press("Enter");
