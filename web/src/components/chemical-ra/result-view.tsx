@@ -2,7 +2,7 @@
 
 import { ArrowRight } from "lucide-react";
 import { CS_ROUTE_LABEL, summarize, worstLevel, type CsImprovement, type CsPlan, type CsRoute } from "@/lib/create-simple/improvements";
-import { PHYSICAL_CLASS_LABEL, RISK_LEVEL_LABEL, RISK_LEVEL_MEANING, SKIP_REASON_LABEL, formatNumber } from "@/lib/create-simple/labels";
+import { PHYSICAL_CLASS_LABEL, RISK_LEVEL_LABEL, RISK_LEVEL_STARS, RISK_LEVEL_MEANING, SKIP_REASON_LABEL, formatNumber } from "@/lib/create-simple/labels";
 import type { CsAssessmentResult, CsComponentResult, CsConditions, CsRiskLevel } from "@/lib/create-simple/types";
 
 export function levelTone(level: CsRiskLevel): string {
@@ -24,11 +24,13 @@ export function levelTone(level: CsRiskLevel): string {
 export function LevelBadge({ level, size = "md" }: { level: CsRiskLevel; size?: "md" | "lg" }) {
   return (
     <span
-      className={`inline-flex items-center justify-center rounded-lg font-black ${levelTone(level)} ${
-        size === "lg" ? "min-w-16 px-3 py-1 text-3xl" : "min-w-10 px-2 py-0.5 text-base"
+      data-risk-level={level}
+      className={`inline-flex max-w-full flex-col items-center justify-center rounded-lg text-center font-black ${levelTone(level)} ${
+        size === "lg" ? "px-3 py-2 text-lg" : "px-2 py-1 text-xs"
       }`}
     >
-      {RISK_LEVEL_LABEL[level]}
+      <span>{RISK_LEVEL_LABEL[level]}</span>
+      <span aria-hidden="true" className="tracking-widest">{RISK_LEVEL_STARS[level]}</span>
     </span>
   );
 }
@@ -83,7 +85,7 @@ function ComponentDetail({ r }: { r: CsComponentResult }) {
         {rows.map((row) => (
           <div key={row.label} className="flex items-start gap-2">
             <dt className="w-28 shrink-0 text-xs font-bold text-slate-700 dark:text-slate-200">{row.label}</dt>
-            <dd className="flex min-w-0 flex-1 items-start gap-2">
+            <dd className="flex min-w-0 flex-1 flex-wrap items-start gap-2">
               {row.level ? <LevelBadge level={row.level} /> : <span className="text-xs text-slate-600">—</span>}
               {row.detail && <span className="text-xs text-slate-600 dark:text-slate-300">{row.detail}</span>}
             </dd>
@@ -135,7 +137,7 @@ export function ResultView({
   return (
     <div className="mt-3 space-y-4">
       {worst && (
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <LevelBadge level={worst} size="lg" />
           <div>
             <p className="text-base font-black text-slate-950 dark:text-white">{RISK_LEVEL_MEANING[worst]}</p>

@@ -7,8 +7,8 @@ import { NativeAccountDetails } from './native-account-details';
 import { AccountDeletionPanel } from './account-deletion-panel';
 import { describeStoreError,StoreError } from '../lib/store-errors';
 import { StaleMemberResponseError } from '../lib/member-generation';
-const messages:Record<string,string>={UNAUTHORIZED:'既存の安全AI会員でログインしてください。',BILLING_NOT_CONFIGURED:'少し待ってからもう一度お試しください。',ALREADY_SUBSCRIBED:'購入済みです。',PURCHASE_PENDING:'「購入を復元」をお試しください。',ENTITLEMENT_SYNC_PENDING:'少し待ってからもう一度お試しください。',PURCHASE_OWNED_BY_OTHER_ACCOUNT:'購入時の会員でログインしてください。'};
-const purchaseMessages:Record<string,string>={PRO_SALES_PAUSED:'今月のPro新規受付は終了しました。来月1日に再開します。',STORE_CANCELLED:'',STORE_DEFERRED:'App Storeで承認待ちです。',STORE_UNKNOWN:'「購入を復元」をお試しください。',STORE_NOT_OPENED:'もう一度お試しください。',PURCHASE_REVIEW_REQUIRED:'「購入を復元」をお試しください。'};
+const messages:Record<string,string>={UNAUTHORIZED:'既存の安全AI会員でログインしてください。',BILLING_NOT_CONFIGURED:'少し待ってからもう一度お試しください。',ALREADY_SUBSCRIBED:'購入済みです。',PURCHASE_PENDING:'購入状況を確認中です。',ENTITLEMENT_SYNC_PENDING:'少し待ってからもう一度お試しください。',PURCHASE_OWNED_BY_OTHER_ACCOUNT:'購入時の会員でログインしてください。'};
+const purchaseMessages:Record<string,string>={PRO_SALES_PAUSED:'今月のPro新規受付は終了しました。来月1日に再開します。',STORE_CANCELLED:'',STORE_DEFERRED:'App Storeで承認待ちです。',STORE_UNKNOWN:'購入状況を確認中です。',STORE_NOT_OPENED:'もう一度お試しください。',PURCHASE_REVIEW_REQUIRED:'購入状況を確認中です。'};
 const stageMessages:Record<string,string>={prepared:'購入を再開できます。',store_started:purchaseMessages.STORE_UNKNOWN,store_cancelled_reported:purchaseMessages.STORE_CANCELLED,store_deferred:purchaseMessages.STORE_DEFERRED,store_unknown:purchaseMessages.STORE_UNKNOWN,store_not_opened_reported:purchaseMessages.STORE_NOT_OPENED};
 export function AccountPanel(){
   const refreshGeneration=useRef(0);
@@ -39,9 +39,10 @@ export function AccountPanel(){
     const handler=()=>{const ticket=refreshGeneration.current;void hasPendingLogin().then(pending=>{if(!active||ticket!==refreshGeneration.current)return;if(pending){setLoginPending(true);setMemberState('loading');return;}setLoginPending(false);void refresh();}).catch(()=>{if(active&&ticket===refreshGeneration.current)void refresh();});};handler();const sessionChanged=(event:Event)=>{setLoginPending(false);setMember(null);setPrice('');if((event as CustomEvent<{signedIn?:boolean}>).detail?.signedIn===false){refreshGeneration.current++;setMemberState('unauthenticated');setRefreshing(false);return;}setMemberState('loading');void refresh();};const loginStarted=()=>{refreshGeneration.current++;setLoginPending(true);setRefreshing(false);setMemberState('loading');setMessage('ログインを確認中です…');};
     const loginEnded=(event:Event)=>{refreshGeneration.current++;setLoginPending(false);setRefreshing(false);setMemberState('unavailable');setMessage(event.type==='anzen-login-dismissed'?'ログインを中断しました。もう一度お試しください。':'ログインを完了できませんでした。もう一度お試しください。');void billing.config().then(setConfig).catch(()=>{});};
     window.addEventListener('anzen-session-changed',sessionChanged);window.addEventListener('anzen-login-started',loginStarted);window.addEventListener('anzen-login-failed',loginEnded);window.addEventListener('anzen-login-dismissed',loginEnded);
-    window.addEventListener('anzen-app-active',handler);
+    const verified=(event:Event)=>{const m=(event as CustomEvent<MemberEntitlement>).detail;refreshGeneration.current++;setLoginPending(false);setMember(m);setMemberState('verified');setRefreshing(false);setMessage('');};
+    window.addEventListener('anzen-membership-recovered',verified);window.addEventListener('anzen-app-active',handler);
     const timer=setInterval(handler,60000);
-    return()=>{active=false;refreshGeneration.current++;clearInterval(timer);window.removeEventListener('anzen-session-changed',sessionChanged);window.removeEventListener('anzen-login-started',loginStarted);window.removeEventListener('anzen-login-failed',loginEnded);window.removeEventListener('anzen-login-dismissed',loginEnded);window.removeEventListener('anzen-app-active',handler);};
+    return()=>{active=false;refreshGeneration.current++;clearInterval(timer);window.removeEventListener('anzen-membership-recovered',verified);window.removeEventListener('anzen-session-changed',sessionChanged);window.removeEventListener('anzen-login-started',loginStarted);window.removeEventListener('anzen-login-failed',loginEnded);window.removeEventListener('anzen-login-dismissed',loginEnded);window.removeEventListener('anzen-app-active',handler);};
   },[refresh]);
   async function action(fn:()=>Promise<unknown>){
     if(busy)return;
@@ -60,7 +61,7 @@ export function AccountPanel(){
   async function signOutAccount(){
     if(busy)return;
     refreshGeneration.current++;setBusy(true);setRefreshing(false);setMember(null);setMemberState('unauthenticated');setPrice('');setMessage('ログアウト中…');
-    try{await logout();setMessage('');void billing.forget().catch(()=>{});}
+    try{await logout();setMessage('');}
     catch{await refresh();setMessage('ログアウトできませんでした。もう一度お試しください。');}
     finally{setBusy(false);}
   }

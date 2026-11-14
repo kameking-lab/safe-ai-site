@@ -39,7 +39,7 @@ export function SharedShell({ children }: { children: ReactNode }) {
       if(/^\/pricing\/terms\/?$/.test(url.pathname)){event.preventDefault();void openSource(SITE+'/pricing/terms').catch(()=>setMessage('条件のページを開けませんでした。'));}
     };
     // A sign-in started from the purchase button continues straight to the purchase sheet.
-    const signedIn=(event:Event)=>{if((event as CustomEvent<{signedIn?:boolean}>).detail?.signedIn!==false)void resumeProPurchaseAfterLogin().then(show);};
+    const signedIn=(event:Event)=>{if((event as CustomEvent<{signedIn?:boolean}>).detail?.signedIn!==false)void billing.recoverSession().then(()=>resumeProPurchaseAfterLogin()).then(show).catch(()=>{});};
     document.addEventListener('click',feeds,true);window.addEventListener('anzen-session-changed',sessionChanged);window.addEventListener('anzen-session-changed',signedIn);window.addEventListener('anzen-entitlement-changed',verified);
     return()=>{document.removeEventListener('click',feeds,true);window.removeEventListener('anzen-session-changed',sessionChanged);window.removeEventListener('anzen-session-changed',signedIn);window.removeEventListener('anzen-entitlement-changed',verified);};
   }, []);

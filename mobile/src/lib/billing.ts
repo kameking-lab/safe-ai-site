@@ -23,7 +23,7 @@ export type BillingConfig=z.infer<typeof billingConfigSchema>;
 export function canResumeApplePurchase(member:MemberEntitlement){
   return !member.purchasePending || member.purchaseSource==='app_store'&&['prepared','store_cancelled_reported','store_unknown','store_not_opened_reported'].includes(member.purchaseStage??'');
 }
-type Sdk=Pick<typeof Purchases,'configure'|'logIn'|'logOut'|'getOfferings'|'purchasePackage'|'restorePurchases'>;
+type Sdk=Pick<typeof Purchases,'configure'|'logIn'|'logOut'|'getOfferings'|'purchasePackage'|'restorePurchases'|'invalidateCustomerInfoCache'|'getCustomerInfo'>;
 export class BillingController {
   private identified:string|null=null;
   private configured=false;
@@ -32,8 +32,50 @@ export class BillingController {
   private identityWork:Promise<void>=Promise.resolve();
   private packages=new Map<string,{until:number;value:Promise<PurchasesPackage>}>();
   private outcomeReports=new Map<string,Promise<MemberEntitlement>>();
+  private recovery=new Map<string,Promise<MemberEntitlement>>();
   constructor(private send=siteApi,private sdk:Sdk=Purchases,private native=()=>Capacitor.getPlatform()==='ios'){}
   async config(){return billingConfigSchema.parse(await this.send('/api/mobile/v1/billing/config'));}
+  /** Rejoin the store identity before asking the server to verify this login. SDK flags never grant access. */
+  async recoverSession(){
+    if(this.busy)return this.entitlement();
+    const binding=await sessionBinding();
+    const existing=this.recovery.get(binding);if(existing)return existing;
+    const work=this.recoverSessionSerial(binding);this.recovery.set(binding,work);
+    try{return await work;}finally{if(this.recovery.get(binding)===work)this.recovery.delete(binding);}
+  }
+  private async recoverSessionSerial(binding:string){
+    for(let attempt=0;attempt<3;attempt++){
+      const ticket=memberGeneration();
+      try{
+        const [config,member]=await Promise.all([this.config(),this.readEntitlement(ticket)]);
+        assertCurrentMember(ticket);
+        if(this.native()&&config.ready&&config.publicKey){
+          const identity=this.identityWork.then(async()=>{
+            assertCurrentMember(ticket);
+            await this.identifySerial(config,member);assertCurrentMember(ticket);
+            await this.sdk.invalidateCustomerInfoCache();assertCurrentMember(ticket);
+            await this.sdk.getCustomerInfo();assertCurrentMember(ticket);
+          });
+          this.identityWork=identity.catch(()=>{});await identity;
+          await this.reconcile(ticket,member.appUserId);
+        }
+        if(await sessionBinding()!==binding)throw new StaleMemberResponseError();
+        const latest=await this.entitlement();
+        if(latest.appUserId!==member.appUserId||await sessionBinding()!==binding)throw new StaleMemberResponseError();
+        if(typeof window!=='undefined'){
+          window.dispatchEvent(new CustomEvent('anzen-membership-recovered',{detail:latest}));
+          window.dispatchEvent(new Event('anzen-usage-changed'));
+        }
+        return latest;
+      }catch(error){
+        if(await sessionBinding()!==binding)throw new StaleMemberResponseError();
+        if(error instanceof Error&&['UNAUTHORIZED','PURCHASE_OWNED_BY_OTHER_ACCOUNT'].includes(error.message)||attempt===2)throw error;
+        await new Promise(resolve=>setTimeout(resolve,attempt===0?300:700));
+        if(await sessionBinding()!==binding)throw new StaleMemberResponseError();
+      }
+    }
+    throw new Error('ENTITLEMENT_SYNC_PENDING');
+  }
   async entitlement(recoverWhileBusy=false,refresh=false){
     return this.readEntitlement(refresh?invalidateMemberReads():memberGeneration(),recoverWhileBusy,refresh);
   }
@@ -87,13 +129,14 @@ export class BillingController {
   }
   private publish(member:MemberEntitlement){if(typeof window!=='undefined')window.dispatchEvent(new CustomEvent('anzen-entitlement-changed',{detail:member}));}
   async sync(){return this.reconcile(memberGeneration());}
-  private async reconcile(ticket:number){
+  private async reconcile(ticket:number,appUserId?:string){
     assertCurrentMember(ticket);
     // Also discard reads started while StoreKit was open, before confirmation.
     const next=invalidateMemberReads();
-    const response=await currentMemberResponse(next,this.send('/api/billing/reconcile',{}));
+    const response=await currentMemberResponse(next,this.send('/api/billing/reconcile',appUserId?{appUserId}:{}));
     assertCurrentMember(next);
     const member=snapshotSchema.parse(response);
+    if(appUserId&&member.appUserId!==appUserId)throw new StaleMemberResponseError();
     // Reads opened during server reconciliation may still contain the pre-purchase plan.
     invalidateMemberReads();this.publish(member);return member;
   }
@@ -130,6 +173,7 @@ export class BillingController {
     return match[0];
   }
   async purchase(config:BillingConfig){
+    const recovery=this.recovery.get(await sessionBinding());if(recovery)await recovery;
     if(this.busy)throw new Error('PURCHASE_PENDING');this.busy=true;
     const ticket=invalidateMemberReads();
     const started=performance.now();
@@ -192,6 +236,7 @@ export class BillingController {
   }
   async cancelPrepared(){const ticket=invalidateMemberReads();const member=await this.readEntitlement(ticket);if(!member.purchasePending||member.purchaseSource!=='app_store'||member.purchaseStage!=='prepared'||!member.purchaseIntentId)throw new Error('PURCHASE_REVIEW_REQUIRED');return snapshotSchema.parse(await currentMemberResponse(ticket,this.send('/api/billing/cancel-intent',{id:member.purchaseIntentId,source:'app_store'})));}
   async restore(config:BillingConfig){
+    const recovery=this.recovery.get(await sessionBinding());if(recovery)await recovery;
     if(this.busy)throw new Error('PURCHASE_PENDING');this.busy=true;
     const ticket=invalidateMemberReads();
     try{const member=await this.readEntitlement(ticket);await this.identify(config,member);assertCurrentMember(ticket);await this.sdk.restorePurchases();return await this.reconcile(ticket);}finally{this.busy=false;}

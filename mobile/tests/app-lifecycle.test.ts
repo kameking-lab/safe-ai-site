@@ -3,7 +3,8 @@ const mock=vi.hoisted(()=>({callbacks:new Map<string,(data:never)=>void>(),remov
 vi.mock('@capacitor/core',()=>({Capacitor:{isNativePlatform:()=>true}}));
 vi.mock('@capacitor/app',()=>({App:{addListener:vi.fn(async(name,callback)=>{mock.callbacks.set(name,callback);return {remove:mock.remove};}),getLaunchUrl:mock.launch}}));
 vi.mock('@capacitor/browser',()=>({Browser:{addListener:vi.fn(async(name,callback)=>{mock.callbacks.set(name,callback);return {remove:mock.remove};})}}));
-vi.mock('../src/lib/session',()=>({completeLogin:mock.complete,dismissLogin:mock.dismiss}));
+vi.mock('../src/lib/session',()=>({completeLogin:mock.complete,dismissLogin:mock.dismiss,sessionToken:async()=>null}));
+vi.mock('../src/lib/billing',()=>({billing:{recoverSession:vi.fn(async()=>{})}}));
 import { installAppLifecycle } from '../src/lib/app-lifecycle';
 beforeEach(()=>{vi.clearAllMocks();mock.callbacks.clear();mock.complete.mockResolvedValue(true);mock.launch.mockResolvedValue({url:'anzenai://auth/callback?mock=1'});vi.stubGlobal('window',{dispatchEvent:vi.fn()});});
 afterEach(()=>vi.unstubAllGlobals());

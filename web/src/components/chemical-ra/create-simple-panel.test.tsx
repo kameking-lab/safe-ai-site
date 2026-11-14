@@ -14,6 +14,19 @@ beforeEach(() => {
   vi.stubGlobal("fetch", vi.fn().mockImplementation(async () => Response.json(subset)));
   localStorage.clear();
 });
+
+it("URLの公開CAS番号を物質詳細から引き継ぐ", async () => {
+  window.history.replaceState({},"","/chemical-ra?cas=67-64-1");
+  try {
+    render(<CreateSimplePanel />);
+    await waitFor(() => expect(screen.getByRole("list", {name:"判定する物質"}).textContent).toContain("アセトン"));
+  } finally {window.history.replaceState({},"","/");}
+});
+it("URLから任意の自由入力を引き継がない", () => {
+  window.history.replaceState({},"","/chemical-ra?cas=arbitrary-text");
+  try {render(<CreateSimplePanel />);expect((screen.getByLabelText("物質名またはCAS番号") as HTMLInputElement).value).toBe("");}
+  finally {window.history.replaceState({},"","/");}
+});
 afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
@@ -33,7 +46,7 @@ describe("化学物質リスクアセスメント画面", () => {
     choose("皮膚に付く範囲", area);
     expect(screen.getByRole("radio", {name:"粉体"}).hasAttribute("disabled")).toBe(true);
     const routes=screen.getByRole("list", {name:"経路別のリスクレベル"});
-    expect(routes.textContent).not.toContain("—");expect(routes.textContent).toContain("Ⅳ");
+    expect(routes.textContent).not.toContain("—");expect(routes.textContent).toContain("レベル4（大きい）");expect(routes.textContent).toContain("★★★★");
     expect(screen.getByText(/推定 .*ppm／ばく露限界値/)).toBeDefined();
     expect(screen.getByText(/吸収量 .*mg\/日／経皮ばく露限界値/)).toBeDefined();
     expect(document.body.textContent).not.toContain('「」');
@@ -85,17 +98,4 @@ describe("化学物質リスクアセスメント画面", () => {
     fireEvent.click(screen.getByRole("button", { name: "全件CSV" }));
     expect(createObjectURL).toHaveBeenCalled();
   });
-});
-
-it("URLの公開CAS番号を物質詳細から引き継ぐ", async () => {
-  window.history.replaceState({},"","/chemical-ra?cas=67-64-1");
-  try {
-    render(<CreateSimplePanel />);
-    await waitFor(() => expect(screen.getByRole("list", {name:"判定する物質"}).textContent).toContain("アセトン"));
-  } finally {window.history.replaceState({},"","/");}
-});
-it("URLから任意の自由入力を引き継がない", () => {
-  window.history.replaceState({},"","/chemical-ra?cas=arbitrary-text");
-  try {render(<CreateSimplePanel />);expect((screen.getByLabelText("物質名またはCAS番号") as HTMLInputElement).value).toBe("");}
-  finally {window.history.replaceState({},"","/");}
 });

@@ -6,13 +6,14 @@ import type { PurchasesPackage } from '@revenuecat/purchases-capacitor';
 import { BillingController,isVerifiedPro,canResumeApplePurchase,type BillingConfig } from '../src/lib/billing';
 import product from '@/lib/mobile/product-policy.json';
 import { invalidateMemberReads, StaleMemberResponseError } from '../src/lib/member-generation';
+import * as session from '../src/lib/session';
 const appUserId='88888888-1111-4111-8111-111111111111';const intentId='88888888-2222-4222-8222-222222222222';
 const free=()=>({plan:'free',source:null,syncState:'verified',expiresAt:null,appUserId,verifiedAt:new Date().toISOString(),limits:product.limits.free,purchasePending:false,purchaseIntentId:null});
 const pro=()=>({...free(),plan:'pro',source:'stripe',expiresAt:new Date(Date.now()+86400000).toISOString(),limits:product.limits.pro});
 const config:BillingConfig={ready:true,publicKey:'mock_public_sdk',productId:'jp.anzenaiportal.pro.monthly',offeringId:'mock_offering',policy:product,login:{apple:true,google:true},terms:'https://example.test/terms',privacy:'https://example.test/privacy',manage:'https://apps.apple.com/account/subscriptions'};
 function setup(options:{atomic?:boolean;paid?:boolean;syncPending?:boolean;cancelled?:boolean;storePending?:boolean;unknown?:boolean;cancelFlagOnly?:boolean;startOffline?:boolean;startPaused?:boolean;wrongPrice?:boolean;usd?:boolean;switchAccount?:boolean;pendingStage?:string}={}){
   let reserved=!!options.pendingStage;let reads=0;let stage=options.pendingStage??'prepared';
-  const send=vi.fn(async(path:string,_body?:unknown)=>{
+  const send=vi.fn<(path:string,_body?:unknown)=>Promise<unknown>>(async(path:string,_body?:unknown)=>{
     if(path==='/api/billing/store-started')stage='store_started';
     if(path==='/api/billing/store-outcome'){
       stage=(_body as {outcome:string}).outcome==='deferred'?'store_deferred':'store_cancelled_reported';
@@ -33,7 +34,7 @@ function setup(options:{atomic?:boolean;paid?:boolean;syncPending?:boolean;cance
     return {};
   });
   const packageFixture={identifier:'mock_package',packageType:'MONTHLY',product:{identifier:'jp.anzenaiportal.pro.monthly',price:options.usd?5.99:options.wrongPrice?981:product.monthlyPrice,priceString:options.usd?'$5.99':'¥980',currencyCode:options.usd?'USD':'JPY',subscriptionPeriod:'P1M'}} as unknown as PurchasesPackage;
-  const sdk={configure:vi.fn(async()=>{}),logIn:vi.fn(async()=>({}) as never),logOut:vi.fn(async()=>({}) as never),getOfferings:vi.fn(async()=>({all:{mock_offering:{availablePackages:[packageFixture]}}}) as never),
+  const sdk={configure:vi.fn(async()=>{}),logIn:vi.fn(async()=>({}) as never),logOut:vi.fn(async()=>({}) as never),invalidateCustomerInfoCache:vi.fn(async()=>{}),getCustomerInfo:vi.fn(async()=>({}) as never),getOfferings:vi.fn(async()=>({all:{mock_offering:{availablePackages:[packageFixture]}}}) as never),
     purchasePackage:vi.fn(async()=>{if(options.cancelled)throw {userCancelled:true,code:'1'};if(options.storePending)throw {code:'20'};if(options.cancelFlagOnly)throw {userCancelled:true};if(options.unknown)throw {code:'10'};return {customerInfo:{entitlements:{active:{anzen_pro:{isActive:true}}}}} as never;}),restorePurchases:vi.fn(async()=>({customerInfo:{entitlements:{active:{anzen_pro:{isActive:true}}}}}) as never)};
   return {send,sdk,controller:new BillingController(send,sdk,()=>true)};
 }
@@ -124,6 +125,60 @@ describe('membership response ordering',()=>{
   });
 });
 
+describe('automatic membership recovery after login',()=>{
+  it('coalesces concurrent recovery triggers into one server reconciliation',async()=>{
+    const s=setup();s.send.mockImplementation(async path=>path.endsWith('/billing/config')?config:pro());
+    const values=await Promise.all([s.controller.recoverSession(),s.controller.recoverSession(),s.controller.recoverSession()]);
+    expect(values.every(value=>value.plan==='pro')).toBe(true);
+    expect(s.send.mock.calls.filter(([path])=>path==='/api/billing/reconcile')).toHaveLength(1);
+    expect(s.sdk.getCustomerInfo).toHaveBeenCalledOnce();
+  });
+  it('retries a valid same-session recovery invalidated by another membership refresh',async()=>{
+    const s=setup();s.send.mockImplementation(async path=>path.endsWith('/billing/config')?config:pro());
+    let release!:()=>void;s.sdk.getCustomerInfo.mockImplementationOnce(()=>new Promise(resolve=>{release=()=>resolve({} as never);}));
+    const recovering=s.controller.recoverSession();await vi.waitFor(()=>expect(release).toBeTypeOf('function'));
+    invalidateMemberReads();release();expect((await recovering).plan).toBe('pro');
+    expect(s.sdk.getCustomerInfo).toHaveBeenCalledTimes(2);
+  });
+  it('discards delayed customerInfo from a replaced login before server reconciliation',async()=>{
+    const s=setup();s.send.mockImplementation(async path=>path.endsWith('/billing/config')?config:free());
+    const binding=vi.spyOn(session,'sessionBinding').mockResolvedValue('session-a');
+    try{
+      let release!:()=>void;s.sdk.getCustomerInfo.mockImplementationOnce(()=>new Promise(resolve=>{release=()=>resolve({} as never);}));
+      const recovering=s.controller.recoverSession();const rejected=expect(recovering).rejects.toBeInstanceOf(StaleMemberResponseError);
+      await vi.waitFor(()=>expect(release).toBeTypeOf('function'));binding.mockResolvedValue('session-b');invalidateMemberReads();release();await rejected;
+      expect(s.send.mock.calls.filter(([path])=>path==='/api/billing/reconcile')).toHaveLength(0);
+    }finally{binding.mockRestore();}
+  });
+  it('re-identifies the same member, fetches customer info, reconciles, then reads final server rights',async()=>{
+    const s=setup();await s.controller.identify(config,await s.controller.entitlement());await s.controller.forget();
+    const order:string[]=[];let paid=false;
+    s.send.mockImplementation(async path=>{
+      order.push(path);
+      if(path.endsWith('/billing/config'))return config;
+      if(path==='/api/billing/reconcile'){paid=true;return pro();}
+      return paid?pro():free();
+    });
+    s.sdk.logIn.mockImplementation(async()=>{order.push('logIn');return {} as never;});
+    s.sdk.getCustomerInfo.mockImplementation(async()=>{order.push('customerInfo');return {} as never;});
+    const recovered=await s.controller.recoverSession();
+    expect(recovered.plan).toBe('pro');expect(recovered.limits.law_chat).toBe(50);
+    expect(order.indexOf('logIn')).toBeLessThan(order.indexOf('customerInfo'));
+    expect(order.indexOf('customerInfo')).toBeLessThan(order.indexOf('/api/billing/reconcile'));
+    expect(order.at(-1)).toBe('/api/me/entitlements');
+    expect(s.sdk.restorePurchases).not.toHaveBeenCalled();expect(s.sdk.purchasePackage).not.toHaveBeenCalled();
+  });
+  it('never grants the previous owner from cached SDK customerInfo on a different member',async()=>{
+    const s=setup();await s.controller.identify(config,await s.controller.entitlement());await s.controller.forget();
+    const other={...free(),appUserId:'another-member-identifier'};
+    s.send.mockImplementation(async path=>path.endsWith('/billing/config')?config:other);
+    s.sdk.getCustomerInfo.mockResolvedValue({customerInfo:{entitlements:{active:{anzen_pro:{isActive:true}}}}} as never);
+    expect((await s.controller.recoverSession()).plan).toBe('free');
+    expect(s.sdk.logIn).toHaveBeenLastCalledWith({appUserID:other.appUserId});
+    expect(s.sdk.purchasePackage).not.toHaveBeenCalled();
+  });
+});
+
 it('queues a new StoreKit identity after background logout completes',async()=>{
   const s=setup();const member=await s.controller.entitlement();await s.controller.identify(config,member);
   let release!:()=>void;s.sdk.logOut.mockImplementationOnce(()=>new Promise(resolve=>{release=()=>resolve({} as never);}));
@@ -179,7 +234,7 @@ describe('iOS IAP uses server rights before StoreKit',()=>{
     const saved=JSON.parse([...preferences.values()][0]);expect(saved).toMatchObject({id:intentId,outcome:'cancelled',attemptId:expect.any(String)});
     offline=false;
     const another=setup({pendingStage:'store_started'});
-    const differentSend=async(path:string,body?:unknown)=>({...await another.send(path,body),appUserId:'another-member-identifier'});
+    const differentSend=async(path:string,body?:unknown)=>({...await another.send(path,body) as object,appUserId:'another-member-identifier'});
     await new BillingController(differentSend,another.sdk,()=>true).entitlement();expect(preferences.size).toBe(1);
     const restarted=new BillingController(s.send,s.sdk,()=>true);
     const checked=await restarted.entitlement();expect(checked.purchaseStage).toBe('store_cancelled_reported');expect(preferences.size).toBe(0);

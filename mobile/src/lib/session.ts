@@ -117,7 +117,9 @@ export async function completeLogin(value:string) {
     loginDismissed=false;window.dispatchEvent(new Event('anzen-login-started'));
     const result=await siteApi('/api/mobile/v1/auth/exchange',{flow,code,verifier}) as {token:string};
     if(!/^[A-Za-z0-9_-]{43}$/.test(result.token))throw new Error('AUTH_FLOW_EXPIRED');
-    await setSessionToken(result.token);await writeLogin(null);await Browser.close().catch(()=>{});return true;
+    await setSessionToken(result.token);await writeLogin(null);await Browser.close().catch(()=>{});
+    // Login succeeded even if a provider is temporarily offline. Resume retries at app activation.
+    const {billing}=await import('./billing');await billing.recoverSession().catch(()=>{});return true;
   })();
   completing.set(flow,task);
   try{return await task;}catch(error){
@@ -128,6 +130,10 @@ export async function completeLogin(value:string) {
 export async function logout() {
   const resume=suspendMemberReads();
   // Revoke the server device/session before deleting the local credential.
-  try{await siteApi('/api/mobile/v1/auth/logout',{});await setSessionToken(null);await writeLogin(null);}finally{resume();}
+  try{
+    await siteApi('/api/mobile/v1/auth/logout',{});
+    const {billing}=await import('./billing');await billing.forget().catch(()=>{});
+    await setSessionToken(null);await writeLogin(null);
+  }finally{resume();}
 }
 export async function forgetLocalSession(){await setSessionToken(null);await writeLogin(null);}

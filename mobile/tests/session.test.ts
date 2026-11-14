@@ -1,5 +1,6 @@
 import { afterEach,beforeEach,describe,expect,it,vi } from 'vitest';
-const mock=vi.hoisted(()=>({vault:new Map<string,string>(),prefs:new Map<string,string>(),request:vi.fn(),open:vi.fn(),close:vi.fn()}));
+const mock=vi.hoisted(()=>({vault:new Map<string,string>(),prefs:new Map<string,string>(),request:vi.fn(),open:vi.fn(),close:vi.fn(),recover:vi.fn(async()=>{}),forget:vi.fn(async()=>{})}));
+vi.mock('../src/lib/billing',()=>({billing:{recoverSession:mock.recover,forget:mock.forget}}));
 vi.mock('@capacitor/core',()=>({Capacitor:{isNativePlatform:()=>true},CapacitorHttp:{request:mock.request},registerPlugin:()=>({
   get:vi.fn(async(options?:{purpose?:string})=>({value:mock.vault.get(options?.purpose??'session')})),
   set:vi.fn(async({purpose,value}:{purpose?:string;value:string})=>{mock.vault.set(purpose??'session',value);}),
@@ -18,7 +19,7 @@ describe('secure OAuth across native process restarts',()=>{
     const first=await import('../src/lib/session');await first.startLogin();expect(mock.vault.get('login')).toMatch(new RegExp('^'+flow+':[A-Za-z0-9_-]{43}:\\d{13}$'));expect([...mock.prefs.values()]).toEqual(['1']);
     vi.resetModules();const restarted=await import('../src/lib/session');const callback=`anzenai://auth/callback?flow=${flow}&code=${code}`;
     expect(await Promise.all([restarted.completeLogin(callback),restarted.completeLogin(callback)])).toEqual([true,true]);
-    expect(mock.request.mock.calls.filter(([r])=>r.url.endsWith('/exchange'))).toHaveLength(1);expect(await restarted.sessionToken()).toBe(token);expect(mock.vault.has('login')).toBe(false);expect(await restarted.completeLogin(callback)).toBe(false);
+    expect(mock.request.mock.calls.filter(([r])=>r.url.endsWith('/exchange'))).toHaveLength(1);expect(mock.recover).toHaveBeenCalledOnce();expect(await restarted.sessionToken()).toBe(token);expect(mock.vault.has('login')).toBe(false);expect(await restarted.completeLogin(callback)).toBe(false);
   });
   it('refuses a mismatched flow or expired proof without exchanging credentials',async()=>{
     const session=await import('../src/lib/session');await session.startLogin();

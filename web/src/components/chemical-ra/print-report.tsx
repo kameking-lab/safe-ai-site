@@ -6,15 +6,20 @@ import {
   GLOVE_TRAINING_LABEL,
   PROPERTY_TYPE_LABEL,
   RISK_LEVEL_LABEL,
+  RISK_LEVEL_STARS,
   SKIP_REASON_LABEL,
   VENTILATION_LABEL,
   WORKING_HOURS_LABEL,
   formatNumber,
   volatilityLabel,
 } from "@/lib/create-simple/labels";
-import type { CsAssessmentInput, CsAssessmentResult } from "@/lib/create-simple/types";
+import type { CsAssessmentInput, CsAssessmentResult, CsRiskLevel } from "@/lib/create-simple/types";
 
 const ROUTES: CsRoute[] = ["inhalation8h", "inhalationShort", "dermal", "total", "physical"];
+
+function PrintLevel({level}:{level:CsRiskLevel}) {
+  return <span data-risk-level={level}>{RISK_LEVEL_LABEL[level]}<span aria-hidden="true" className="cs-risk-stars">{RISK_LEVEL_STARS[level]}</span></span>;
+}
 
 /** 印刷・PDF 保存用の記録（画面では非表示） */
 export function PrintReport({
@@ -55,9 +60,10 @@ export function PrintReport({
           [data-cs-print-report] thead { display: table-header-group; }
           [data-cs-print-report] tr, [data-cs-print-report] li { break-inside: avoid; }
           [data-cs-print-report] tbody tr:nth-child(even) td { background: #f8fafc; }
-          [data-cs-print-report] [data-risk-level] { border: 1px solid #475569; border-left-width: 4px; border-radius: 3px; padding: 2px 5px; font-weight: 800; white-space: nowrap; color: #0f172a; }
+          [data-cs-print-report] [data-risk-level] { display: inline-block; border: 1px solid #475569; border-left-width: 4px; border-radius: 3px; padding: 2px 4px; font-weight: 800; color: #0f172a; }
+          [data-cs-print-report] .cs-risk-stars { display: block; letter-spacing: .1em; white-space: nowrap; }
           [data-cs-print-report] [data-risk-level="I"] { background: #d1fae5; border-left-color: #047857; }
-          [data-cs-print-report] [data-risk-level^="II"] { background: #fef3c7; border-left-color: #a16207; }
+          [data-cs-print-report] [data-risk-level="II"], [data-cs-print-report] [data-risk-level^="II-"] { background: #fef3c7; border-left-color: #a16207; }
           [data-cs-print-report] [data-risk-level="III"] { background: #ffedd5; border-left-color: #c2410c; }
           [data-cs-print-report] [data-risk-level="IV"] { background: #ffe4e6; border-left-color: #be123c; }
           [data-cs-print-report] .cs-print-summary { display: flex; flex-wrap: wrap; gap: 7px 12px; margin: 8px 0; }
@@ -115,7 +121,7 @@ export function PrintReport({
 
       <h2 className="mt-3 font-bold">判定結果</h2>
       <div className="cs-print-summary">
-        {ROUTES.map(r=>summary[r]?<span key={r}>{CS_ROUTE_LABEL[r]} <span data-risk-level={summary[r]}>{RISK_LEVEL_LABEL[summary[r]!]}</span></span>:null)}
+        {ROUTES.map(r=>summary[r]?<span key={r}>{CS_ROUTE_LABEL[r]} <PrintLevel level={summary[r]!}/></span>:null)}
       </div>
       <table className="mt-1 w-full border-collapse">
         <thead>
@@ -154,14 +160,14 @@ export function PrintReport({
                 </td>
                 <td className={cell}>
                   {r.inhalation.status === "ok"
-                    ? <><span data-risk-level={r.inhalation.level8h}>{RISK_LEVEL_LABEL[r.inhalation.level8h]}</span>／{r.inhalation.levelShort ? <span data-risk-level={r.inhalation.levelShort}>{RISK_LEVEL_LABEL[r.inhalation.levelShort]}</span> : "-"}</>
+                    ? <><PrintLevel level={r.inhalation.level8h}/>／{r.inhalation.levelShort ? <PrintLevel level={r.inhalation.levelShort}/> : "-"}</>
                     : "-"}
                 </td>
                 <td className={cell}>
-                  {r.dermal.status === "ok" ? <><span data-risk-level={r.dermal.level}>{RISK_LEVEL_LABEL[r.dermal.level]}</span>（{formatNumber(r.dermal.absorption)}/{formatNumber(r.dermal.oelDermal)} mg/日）</> : "-"}
+                  {r.dermal.status === "ok" ? <><PrintLevel level={r.dermal.level}/>（{formatNumber(r.dermal.absorption)}/{formatNumber(r.dermal.oelDermal)} mg/日）</> : "-"}
                 </td>
-                <td className={cell}>{r.total.status === "ok" ? <span data-risk-level={r.total.level}>{RISK_LEVEL_LABEL[r.total.level]}</span> : "-"}</td>
-                <td className={cell}>{r.physical.status === "ok" ? <span data-risk-level={r.physical.level}>{RISK_LEVEL_LABEL[r.physical.level]}</span> : "-"}</td>
+                <td className={cell}>{r.total.status === "ok" ? <PrintLevel level={r.total.level}/> : "-"}</td>
+                <td className={cell}>{r.physical.status === "ok" ? <PrintLevel level={r.physical.level}/> : "-"}</td>
               </tr>
             );
           })}
