@@ -207,6 +207,10 @@ export function ChatbotPanel({
   const lawCategory: LawCategoryFilter = "all";
 
   useLayoutEffect(() => {
+    if (upsell && listRef.current) listRef.current.scrollTop = listRef.current.scrollHeight;
+  }, [upsell]);
+
+  useLayoutEffect(() => {
     const list = listRef.current;
     if (!list) return;
     const measure = () => setAnswerViewportHeight(list.clientHeight);
@@ -973,6 +977,9 @@ export function ChatbotPanel({
             })}
           </div>
         )}
+        {upsell && (
+          <ProUpsellCard message={upsell} returnTo="/chatbot" className="mt-3 mb-2" />
+        )}
       </div>
 
       {localSafetyNotice && (
@@ -987,10 +994,6 @@ export function ChatbotPanel({
         >
           {localSafetyNotice.message}
         </div>
-      )}
-
-      {upsell && (
-        <ProUpsellCard message={upsell} returnTo="/chatbot" className="mx-3 mb-2 sm:mx-5" />
       )}
 
       {error && (
@@ -1018,7 +1021,7 @@ export function ChatbotPanel({
       )}
 
       <form
-        className="sticky bottom-0 z-20 mt-auto shrink-0 scroll-mb-[calc(var(--mobile-bottom-nav-h,0px)+env(safe-area-inset-bottom,0px)+1rem)] border-t border-slate-100 bg-white/95 px-3 pb-2 pt-2 backdrop-blur sm:px-5 dark:border-slate-800 dark:bg-slate-950/95"
+        className="z-20 mt-auto shrink-0 border-t border-slate-100 bg-white/95 px-3 pb-2 pt-2 backdrop-blur sm:px-5 dark:border-slate-800 dark:bg-slate-950/95"
         data-chatbot-composer=""
         onSubmit={(event) => {
           event.preventDefault();

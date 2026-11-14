@@ -6,6 +6,25 @@ import {
 } from "./ChatbotViewportSection";
 
 describe("ChatbotViewportSection（相談ボックスを下のタブバーの上に収める）", () => {
+  it("document scrollと独立したWKWebViewのpanに追従し、キーボードを閉じたら通常配置に戻る", () => {
+    vi.stubGlobal("innerHeight", 844);
+    vi.stubGlobal("innerWidth", 390);
+    vi.stubGlobal("scrollY", 180);
+    const viewport=Object.assign(new EventTarget(),{height:844,offsetTop:0});
+    vi.stubGlobal("visualViewport",viewport);
+    vi.spyOn(HTMLElement.prototype,"getBoundingClientRect").mockReturnValue({top:231} as DOMRect);
+    render(<ChatbotViewportSection aria-label="相談"/>);
+    const section=screen.getByRole("region",{name:"相談"});
+    expect(section.style.getPropertyValue("--chatbot-top")).toBe("231px");
+    viewport.height=480;viewport.offsetTop=120;
+    vi.stubGlobal("innerHeight",480);
+    act(()=>viewport.dispatchEvent(new Event("resize")));
+    expect(section.hasAttribute("data-keyboard-open")).toBe(true);
+    expect(section.style.getPropertyValue("--chatbot-viewport-offset")).toBe("120px");
+    viewport.height=844;viewport.offsetTop=0;
+    act(()=>viewport.dispatchEvent(new Event("resize")));
+    expect(section.hasAttribute("data-keyboard-open")).toBe(false);
+  });
   afterEach(() => {
     vi.restoreAllMocks();
     vi.unstubAllGlobals();

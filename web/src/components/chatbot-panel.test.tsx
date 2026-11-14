@@ -638,10 +638,10 @@ describe("ChatbotPanel conversation UI", () => {
     expect(document.querySelector("[data-chatbot-composer]")).not.toBeNull();
     expect(
       document.querySelector("[data-chatbot-composer]")?.className,
-    ).toContain("sticky");
+    ).not.toContain("sticky");
     expect(
       document.querySelector("[data-chatbot-composer]")?.className,
-    ).toContain("bottom-0");
+    ).not.toContain("bottom-0");
     expect(
       document.querySelector("[data-chatbot-composer]")?.className,
     ).toContain("shrink-0");
@@ -919,8 +919,8 @@ describe("ChatbotPanel conversation UI", () => {
     expect(history?.getAttribute("aria-live")).toBe("off");
     const composer = document.querySelector("[data-chatbot-composer]");
     expect(composer?.className).toContain("shrink-0");
-    expect(composer?.className).toContain("sticky");
-    expect(composer?.className).toContain("bottom-0");
+    expect(composer?.className).not.toContain("sticky");
+    expect(composer?.parentElement).toBe(history?.parentElement);
   });
 
   it("電気作業のfollow-upは直前のやり取りと構造化contextを引き継ぐ", async () => {
