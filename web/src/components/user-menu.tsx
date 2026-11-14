@@ -69,7 +69,7 @@ export function UserMenuSessionProvider({
     let active = true;
 
     const resolveSession = () => {
-      void fetch("/api/auth/session", {
+      void fetch("/api/me/profile", {
         method: "GET",
         credentials: "same-origin",
         headers: { Accept: "application/json" },

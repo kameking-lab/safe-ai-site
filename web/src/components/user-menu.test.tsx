@@ -62,7 +62,7 @@ describe("UserMenu session boundary", () => {
     });
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(fetchMock).toHaveBeenCalledWith(
-      "/api/auth/session",
+      "/api/me/profile",
       expect.objectContaining({
         method: "GET",
         credentials: "same-origin",
