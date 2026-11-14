@@ -1,0 +1,120 @@
+import {mkdir,writeFile} from 'node:fs/promises';
+import path from 'node:path';
+import {test,expect} from './fixtures';
+import type {BrowserContext,Page} from '@playwright/test';
+import {capability} from '../tests/fixtures';
+import product from '../../web/src/lib/mobile/product-policy.json' with {type:'json'};
+const host='https://www.anzen-ai-portal.jp';
+const flow='88888888-1111-4111-8111-111111111111';
+const owners={a:'88888888-2222-4222-8222-222222222222',b:'88888888-3333-4333-8333-333333333333'};
+type Fault={stage:string;mode:'never'|'failed'|'slow'};
+type Bridge={__return:()=>void;__activate:()=>void;__opened:number;__fault:Fault|null;__trace:Array<{event:string;at:number}>};
+const cors={'Access-Control-Allow-Origin':'http://127.0.0.1:3213','Access-Control-Allow-Credentials':'true','Access-Control-Allow-Headers':'content-type,x-anzen-native,origin,accept,authorization,x-anzen-csrf'};
+async function setup(context:BrowserContext,fault:Fault|null=null){
+ await context.addInitScript(({fault})=>{
+  const prefs=new Map<string,string>(JSON.parse(sessionStorage.getItem('test-prefs')??'[]'));
+  const vault=new Map<string,string>(JSON.parse(sessionStorage.getItem('test-vault')??'[]'));
+  const listeners=new Map<string,(value:unknown)=>void>();const send=window.fetch.bind(window);
+  const trace:Array<{event:string;at:number}>=[];
+  const plugins:Record<string,string[]>={NativeVault:['get','set','clear'],Preferences:['get','set','remove'],Browser:['open','close','addListener','removeListener'],App:['getLaunchUrl','addListener','removeListener'],PushNotifications:['addListener','removeListener'],CapacitorHttp:['request'],Purchases:['configure','logIn','logOut','invalidateCustomerInfoCache','getCustomerInfo','getOfferings','purchasePackage','restorePurchases']};
+  Object.assign(window,{__fault:fault,__opened:0,__trace:trace,__return:()=>listeners.get('App:appUrlOpen')?.({url:'anzenai://auth/callback?flow=88888888-1111-4111-8111-111111111111&code='+'x'.repeat(43)}),__activate:()=>listeners.get('App:appStateChange')?.({isActive:true}),webkit:{messageHandlers:{bridge:{}}},Capacitor:{
+   PluginHeaders:Object.entries(plugins).map(([name,methods])=>({name,methods:methods.map(name=>({name,rtype:name==='addListener'?'callback':'promise'}))})),
+   nativeCallback:(plugin:string,_method:string,options:{eventName:string},callback:(value:unknown)=>void)=>{listeners.set(plugin+':'+options.eventName,callback);return Promise.resolve('fixture-listener');},
+   nativePromise:async(plugin:string,method:string,options:Record<string,string>)=>{
+    if(plugin==='Browser'&&method==='open'){(window as unknown as Bridge).__opened++;return {};}
+    if(plugin==='Preferences'||plugin==='NativeVault'){
+     const store=plugin==='Preferences'?prefs:vault;const key=options?.key??options?.purpose??'session';
+     if(method==='get')return {value:store.get(key)??null};if(method==='set')store.set(key,options.value);else store.delete(key);
+     sessionStorage.setItem(plugin==='Preferences'?'test-prefs':'test-vault',JSON.stringify([...store]));return {};
+    }
+    if(plugin==='CapacitorHttp'){
+     const request=options as unknown as {url:string;method:string;headers:Record<string,string>;data?:unknown};
+     const response=await send(request.url,{method:request.method,headers:request.headers,...(request.data?{body:JSON.stringify(request.data)}:{})});
+     return {url:response.url,status:response.status,headers:Object.fromEntries(response.headers),data:await response.json()};
+    }
+    if(plugin==='Purchases'){
+     trace.push({event:method,at:performance.now()});const fault=(window as unknown as Bridge).__fault;
+     if(fault?.stage===method){if(fault.mode==='never')await new Promise(()=>{});if(fault.mode==='failed')throw {code:'35'};if(fault.mode==='slow')await new Promise(resolve=>setTimeout(resolve,2500));}
+     // Cached native Pro is deliberately untrustworthy, including for member B.
+     if(method==='getCustomerInfo'||method==='logIn')return {customerInfo:{entitlements:{active:{anzen_pro:{isActive:true}}}}};
+     if(method==='getOfferings')return {all:{fixture:{availablePackages:[{identifier:'fixture',packageType:'MONTHLY',product:{identifier:'jp.anzenaiportal.pro.monthly',price:980,priceString:'¥980',currencyCode:'JPY',subscriptionPeriod:'P1M'}}]}}};
+    }
+    return {};
+   },
+  }});
+ },{fault});
+ let next:'a'|'b'='a';let serverOffline=false;let freeA=false;let configFails=false;let reconciliationOffline=false;
+ const diagnostics:unknown[]=[];
+ const rights=(owner:'a'|'b')=>{const paid=owner==='a'&&!freeA;return {plan:paid?'pro':'free',source:paid?'app_store':null,syncState:'verified',expiresAt:paid?new Date(Date.now()+86400000).toISOString():null,appUserId:owners[owner],verifiedAt:new Date().toISOString(),limits:paid?product.limits.pro:product.limits.free};};
+ await context.route('https://**/*',route=>route.abort());
+ await context.route(host+'/api/**',async route=>{
+  const request=route.request();const url=new URL(request.url());
+  if(request.method()==='OPTIONS')return route.fulfill({status:204,headers:cors});
+  if(url.pathname.endsWith('/diagnostics')){diagnostics.push(request.postDataJSON());return route.fulfill({headers:cors,json:{ok:true}});}
+  if(serverOffline)return route.abort('internetdisconnected');
+  if(url.pathname.endsWith('/billing/config'))return route.fulfill({headers:cors,status:configFails?503:200,json:configFails?{error:{code:'UNAVAILABLE'}}:{ready:true,publicKey:'synthetic-public-sdk',productId:'jp.anzenaiportal.pro.monthly',offeringId:'fixture',policy:product,login:{apple:true,google:true},terms:host+'/terms',privacy:host+'/privacy',manage:'https://apps.apple.com/account/subscriptions'}});
+  if(url.pathname.endsWith('/auth/start'))return route.fulfill({headers:cors,json:{flow,authorizeUrl:host+'/api/mobile/v1/auth/authorize?flow='+flow}});
+  if(url.pathname.endsWith('/auth/exchange'))return route.fulfill({headers:cors,json:{token:next.repeat(43)}});
+  if(url.pathname.endsWith('/auth/logout'))return route.fulfill({headers:cors,json:{ok:true}});
+  const token=request.headers()['authorization'];const owner=token===`Bearer ${'a'.repeat(43)}`?'a':token===`Bearer ${'b'.repeat(43)}`?'b':null;
+  if(!owner)return route.fulfill({status:401,headers:cors,json:{error:{code:'UNAUTHORIZED'}}});
+  if(url.pathname==='/api/me/entitlements')return route.fulfill({headers:cors,json:rights(owner)});
+  if(url.pathname==='/api/billing/reconcile')return route.fulfill({status:reconciliationOffline?503:200,headers:cors,json:reconciliationOffline?{error:{code:'ENTITLEMENT_SYNC_PENDING'}}:rights(owner)});
+  if(url.pathname.endsWith('/capabilities')){const cap=capability();cap.session='member';cap.plan=owner==='a'&&!freeA?'pro':'free';cap.features.law_chat.quota.limit=cap.plan==='pro'?50:3;cap.features.law_chat.quota.used=cap.plan==='pro'?0:3;cap.features.law_chat.quota.remaining=cap.plan==='pro'?50:0;return route.fulfill({headers:cors,json:cap});}
+  if(url.pathname.endsWith('/account'))return route.fulfill({headers:cors,json:{displayName:'検証会員',email:null,sdsHistory:[]}});
+  return route.fulfill({status:503,headers:cors,json:{error:{code:'UNAVAILABLE'}}});
+ });
+ return {diagnostics,setNext:(value:'a'|'b')=>{next=value;},offline:(value:boolean)=>{serverOffline=value;},free:(value:boolean)=>{freeA=value;},failConfig:()=>{configFails=true;},failReconcile:()=>{reconciliationOffline=true;}};
+}
+async function login(page:Page){
+ const count=await page.evaluate(()=>(window as unknown as Bridge).__opened);
+ await page.getByRole('button',{name:'Apple / Googleでログイン'}).click();
+ await expect.poll(()=>page.evaluate(()=>(window as unknown as Bridge).__opened)).toBe(count+1);
+ await page.evaluate(()=>(window as unknown as Bridge).__return());
+}
+async function pro(page:Page){await expect(page.getByText('Pro 購入済み（App Store購読）',{exact:true})).toBeVisible({timeout:3000});}
+async function buttons(page:Page){await expect(page.getByRole('button',{name:'購入を復元',exact:true})).toBeEnabled();await expect(page.getByRole('button',{name:'権利を再確認',exact:true})).toBeEnabled();}
+async function chat50(page:Page){await page.getByRole('link',{name:'法令AI',exact:true}).click();await expect(page.getByLabel('AIの利用枠')).toContainText('50／50回',{timeout:3000});}
+async function account(page:Page){await page.getByRole('link',{name:'会員・Pro',exact:true}).click();}
+const captureDir=process.env.ANZ_TF5_CAPTURE_DIR;
+test('saved Pro survives logout, relogin and restart; cached native Pro never transfers accounts',async({page,context},info)=>{
+ const s=await setup(context);await page.goto('/account/');await login(page);await pro(page);
+ await page.getByRole('button',{name:'ログアウト',exact:true}).click();await expect(page.getByRole('button',{name:'Apple / Googleでログイン'})).toBeEnabled();
+ const started=Date.now();await login(page);await pro(page);const recoveryMs=Date.now()-started;expect(recoveryMs).toBeLessThan(3000);await buttons(page);await chat50(page);
+ await account(page);await page.reload();await pro(page);await buttons(page);await chat50(page);
+ if(captureDir){await mkdir(captureDir,{recursive:true});await page.screenshot({path:path.join(captureDir,`${info.project.name}-saved-pro-50.png`),fullPage:true});}
+ await account(page);await page.getByRole('button',{name:'ログアウト',exact:true}).click();await expect(page.getByRole('button',{name:'Apple / Googleでログイン'})).toBeEnabled();
+ s.setNext('b');await login(page);await expect(page.getByText('無料会員',{exact:true})).toBeVisible();await page.getByRole('link',{name:'法令AI',exact:true}).click();await expect(page.getByLabel('AIの利用枠')).toContainText('0／3回');
+ expect(s.diagnostics.length).toBeGreaterThan(0);
+ if(captureDir)await writeFile(path.join(captureDir,`${info.project.name}-saved-ledger.json`),JSON.stringify({recoveryMs,diagnostics:s.diagnostics},null,2));
+});
+for(const stage of ['configure','logIn','logOut','getCustomerInfo'])test(`server Pro and login stay usable when ${stage} never returns`,async({page,context},info)=>{
+ const s=await setup(context,{stage,mode:'never'});await page.goto('/account/');await login(page);await pro(page);await buttons(page);
+ if(stage==='logIn'||stage==='logOut')await expect.poll(()=>page.evaluate(()=>(window as unknown as Bridge).__trace.some(entry=>entry.event==='configure'))).toBe(true);
+ await page.getByRole('button',{name:'ログアウト',exact:true}).click();await expect(page.getByRole('button',{name:'Apple / Googleでログイン'})).toBeEnabled({timeout:3000});
+ await login(page);await pro(page);await chat50(page);await account(page);await pro(page);await buttons(page);
+ // Real 8-second timers, including a diagnostic failure, with the UI usable throughout.
+ await expect.poll(()=>s.diagnostics.some(value=>(value as {result:string}).result==='timeout'),{timeout:11000}).toBe(true);
+ await buttons(page);await page.reload();await pro(page);await chat50(page);
+ if(captureDir){await mkdir(captureDir,{recursive:true});await page.screenshot({path:path.join(captureDir,`${info.project.name}-stalled-${stage}-pro.png`),fullPage:true});await writeFile(path.join(captureDir,`${info.project.name}-stalled-${stage}.json`),JSON.stringify(s.diagnostics,null,2));}
+});
+test('config failure leaves login, restore and recheck operable; offering and restore stalls release separately',async({page,context})=>{
+ const s=await setup(context,{stage:'getOfferings',mode:'never'});s.free(true);s.failConfig();await page.goto('/account/');
+ await expect(page.getByRole('button',{name:'Apple / Googleでログイン'})).toBeEnabled();await login(page);await expect(page.getByText('無料会員',{exact:true})).toBeVisible();await buttons(page);
+ await page.getByRole('button',{name:'購入を復元',exact:true}).click();await expect(page.getByRole('button',{name:'権利を再確認',exact:true})).toBeEnabled();
+ await expect(page.getByRole('button',{name:'購入を復元',exact:true})).toBeEnabled();
+});
+test('price lookup never blocks restore or recheck; stalled restore only disables itself',async({page,context})=>{
+ const s=await setup(context,{stage:'getOfferings',mode:'never'});s.free(true);await page.goto('/account/');await login(page);await expect(page.getByText('無料会員',{exact:true})).toBeVisible();
+ await expect.poll(()=>page.evaluate(()=>(window as unknown as Bridge).__trace.some(entry=>entry.event==='getOfferings'))).toBe(true);
+ await buttons(page);await page.evaluate(()=>(window as unknown as Bridge).__fault={stage:'restorePurchases',mode:'never'});
+ await page.getByRole('button',{name:'購入を復元',exact:true}).click();await expect(page.getByRole('button',{name:'購入を復元',exact:true})).toBeDisabled();
+ await expect(page.getByRole('button',{name:'権利を再確認',exact:true})).toBeEnabled();await expect(page.getByRole('button',{name:'ログアウト',exact:true})).toBeEnabled();
+ await expect(page.getByRole('button',{name:'購入を復元',exact:true})).toBeEnabled({timeout:11000});
+});
+test('network switch and a failed reconciliation preserve saved server Pro',async({page,context})=>{
+ const s=await setup(context,{stage:'getCustomerInfo',mode:'slow'});await page.goto('/account/');await login(page);await pro(page);
+ s.offline(true);await page.evaluate(()=>{window.dispatchEvent(new Event('offline'));(window as unknown as Bridge).__activate();});
+ await buttons(page);s.offline(false);s.failReconcile();await page.evaluate(()=>{window.dispatchEvent(new Event('online'));(window as unknown as Bridge).__activate();});
+ await pro(page);await buttons(page);await page.getByRole('button',{name:'権利を再確認',exact:true}).click();await expect(page.getByRole('button',{name:'権利を再確認',exact:true})).toBeEnabled();await pro(page);await chat50(page);
+});

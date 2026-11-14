@@ -1,7 +1,7 @@
 import { afterEach,beforeEach,describe,expect,it,vi } from 'vitest';
 const mock=vi.hoisted(()=>({vault:new Map<string,string>(),prefs:new Map<string,string>(),request:vi.fn(),open:vi.fn(),close:vi.fn(),recover:vi.fn(async()=>{}),forget:vi.fn(async()=>{})}));
 vi.mock('../src/lib/billing',()=>({billing:{recoverSession:mock.recover,forget:mock.forget}}));
-vi.mock('@capacitor/core',()=>({Capacitor:{isNativePlatform:()=>true},CapacitorHttp:{request:mock.request},registerPlugin:()=>({
+vi.mock('@capacitor/core',()=>({Capacitor:{isNativePlatform:()=>true},CapacitorHttp:{request:(r:{url:string})=>r.url.endsWith('/diagnostics')?Promise.resolve({status:200,data:{ok:true}}):mock.request(r)},registerPlugin:()=>({
   get:vi.fn(async(options?:{purpose?:string})=>({value:mock.vault.get(options?.purpose??'session')})),
   set:vi.fn(async({purpose,value}:{purpose?:string;value:string})=>{mock.vault.set(purpose??'session',value);}),
   clear:vi.fn(async(options?:{purpose?:string})=>{mock.vault.delete(options?.purpose??'session');}),
@@ -14,6 +14,29 @@ beforeEach(()=>{
   mock.request.mockImplementation(async({url})=>({url,status:200,data:url.endsWith('/start')?{flow,authorizeUrl:`${site}/api/mobile/v1/auth/authorize?flow=${flow}`}:{token}}));
 });
 afterEach(()=>{vi.useRealTimers();vi.unstubAllGlobals();});
+it('completes login and clears its pending flag while RevenueCat never returns',async()=>{
+ vi.useFakeTimers();const session=await import('../src/lib/session');await session.startLogin();
+ mock.recover.mockImplementationOnce(()=>new Promise(()=>{}));mock.close.mockImplementationOnce(()=>new Promise(()=>{}));
+ expect(await session.completeLogin(`anzenai://auth/callback?flow=${flow}&code=${code}`)).toBe(true);
+ expect(await session.hasPendingLogin()).toBe(false);expect(await session.sessionToken()).toBe(token);
+ await vi.advanceTimersByTimeAsync(8001);
+});
+it('clears the local login and read suspension without waiting for native logout',async()=>{
+ const session=await import('../src/lib/session');const generation=await import('../src/lib/member-generation');await session.setSessionToken(token);
+ mock.forget.mockImplementationOnce(()=>new Promise(()=>{}));await session.logout();
+ expect(await session.sessionToken()).toBeNull();expect(()=>generation.assertCurrentMember(generation.memberGeneration())).not.toThrow();
+});
+it('times out an exchange and releases login state for another attempt',async()=>{
+ vi.useFakeTimers();const session=await import('../src/lib/session');await session.startLogin();
+ mock.request.mockImplementationOnce(()=>new Promise(()=>{}));const failed=expect(session.completeLogin(`anzenai://auth/callback?flow=${flow}&code=${code}`)).rejects.toThrow('OPERATION_TIMEOUT');
+ await vi.advanceTimersByTimeAsync(8001);await failed;expect(await session.hasPendingLogin()).toBe(false);
+ expect(await session.completeLogin(`anzenai://auth/callback?flow=${flow}&code=${code}`)).toBe(true);
+});
+it('releases login when the native browser open call never returns',async()=>{
+ vi.useFakeTimers();const session=await import('../src/lib/session');mock.open.mockImplementationOnce(()=>new Promise(()=>{}));
+ const failed=expect(session.startLogin()).rejects.toThrow('OPERATION_TIMEOUT');await vi.advanceTimersByTimeAsync(8001);await failed;
+ expect(await session.hasPendingLogin()).toBe(false);expect(window.dispatchEvent).toHaveBeenCalledWith(expect.objectContaining({type:'anzen-login-failed'}));
+});
 describe('secure OAuth across native process restarts',()=>{
   it('restores PKCE from Keychain after the JS runtime is recreated and consumes duplicate callbacks once',async()=>{
     const first=await import('../src/lib/session');await first.startLogin();expect(mock.vault.get('login')).toMatch(new RegExp('^'+flow+':[A-Za-z0-9_-]{43}:\\d{13}$'));expect([...mock.prefs.values()]).toEqual(['1']);

@@ -3,6 +3,7 @@ import { Browser } from '@capacitor/browser';
 import { Preferences } from '@capacitor/preferences';
 import { SITE } from './api';
 import { invalidateMemberReads, memberGeneration, suspendMemberReads } from './member-generation';
+import {bounded,billingDiagnostic} from './billing-diagnostics';
 type VaultOptions={purpose?:'login'};
 const vault=registerPlugin<{get(options?:VaultOptions):Promise<{value?:string}>;set(options:{value:string}&VaultOptions):Promise<void>;clear(options?:VaultOptions):Promise<void>}>('NativeVault');
 let memoryToken:string|null=null;
@@ -66,14 +67,14 @@ export async function siteApi(path:string,body?:unknown,method?:string) {
   if(!reading)readGeneration++;
   const generation=JSON.stringify([memberGeneration(),readGeneration]);
   // An unreadable Keychain is treated as signed out (server answers UNAUTHORIZED), never as a hard failure.
-  const token=await sessionToken().catch(()=>null);
+  const token=await bounded('session',()=>sessionToken()).catch(()=>null);
   const key=JSON.stringify([path,token,generation]);
   if(reading){
     const pending=reads.get(key);if(pending)return pending;
-    const work=sendSiteApi(path,body,method,token);reads.set(key,work);
+    const work=bounded('store_request',()=>sendSiteApi(path,body,method,token));reads.set(key,work);
     try{return await work;}finally{if(reads.get(key)===work)reads.delete(key);}
   }
-  try{return await sendSiteApi(path,body,method,token);}finally{readGeneration++;}
+  try{return await bounded('store_request',()=>sendSiteApi(path,body,method,token));}finally{readGeneration++;}
 }
 async function sendSiteApi(path:string,body:unknown,method:string|undefined,token:string|null){
   const headers={Accept:'application/json','Content-Type':'application/json',Origin:SITE,...(token?{Authorization:`Bearer ${token}`}:{})};
@@ -89,6 +90,7 @@ async function sendSiteApi(path:string,body:unknown,method:string|undefined,toke
   return data;
 }
 export async function startLogin() {
+  billingDiagnostic({operation:'login',result:'start'});
   const bytes=crypto.getRandomValues(new Uint8Array(32));const verifier=btoa(String.fromCharCode(...bytes)).replaceAll('+','-').replaceAll('/','_').replaceAll('=','');
   const hash=new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(verifier)));
   const challenge=btoa(String.fromCharCode(...hash)).replaceAll('+','-').replaceAll('/','_').replaceAll('=','');
@@ -98,7 +100,7 @@ export async function startLogin() {
   await writeLogin(`${result.flow}:${verifier}:${Date.now()}`);
   loginDismissed=false;
   window.dispatchEvent(new Event('anzen-login-started'));
-  try{await Browser.open({url:result.authorizeUrl});}catch(error){loginDismissed=true;await writeLogin(null);window.dispatchEvent(new Event('anzen-login-failed'));throw error;}
+  try{await bounded('login',()=>Browser.open({url:result.authorizeUrl}));}catch(error){loginDismissed=true;await writeLogin(null);window.dispatchEvent(new Event('anzen-login-failed'));throw error;}
 }
 export async function completeLogin(value:string) {
   let url:URL;try{url=new URL(value);}catch{return false;}
@@ -115,15 +117,17 @@ export async function completeLogin(value:string) {
     const age=Date.now()-Number(createdAt);
     if(!/^[A-Za-z0-9_-]{43}$/.test(verifier) || !Number.isFinite(age) || age<0 || age>=600000){await writeLogin(null);throw new Error('AUTH_FLOW_EXPIRED');}
     loginDismissed=false;window.dispatchEvent(new Event('anzen-login-started'));
-    const result=await siteApi('/api/mobile/v1/auth/exchange',{flow,code,verifier}) as {token:string};
+    const result=await bounded('exchange',()=>siteApi('/api/mobile/v1/auth/exchange',{flow,code,verifier})) as {token:string};
     if(!/^[A-Za-z0-9_-]{43}$/.test(result.token))throw new Error('AUTH_FLOW_EXPIRED');
-    await setSessionToken(result.token);await writeLogin(null);await Browser.close().catch(()=>{});
+    await setSessionToken(result.token);await writeLogin(null);void bounded('login',()=>Browser.close()).catch(()=>{});
     // Login succeeded even if a provider is temporarily offline. Resume retries at app activation.
-    const {billing}=await import('./billing');await billing.recoverSession().catch(()=>{});return true;
+    billingDiagnostic({operation:'login',result:'ok'});
+    const {billing}=await import('./billing');void billing.recoverSession().catch(()=>{});return true;
   })();
   completing.set(flow,task);
   try{return await task;}catch(error){
     if(started){loginDismissed=true;window.dispatchEvent(new Event('anzen-login-failed'));}
+    billingDiagnostic({operation:'login',result:'failed'});
     throw error;
   }finally{completing.delete(flow);}
 }
@@ -132,8 +136,9 @@ export async function logout() {
   // Revoke the server device/session before deleting the local credential.
   try{
     await siteApi('/api/mobile/v1/auth/logout',{});
-    const {billing}=await import('./billing');await billing.forget().catch(()=>{});
     await setSessionToken(null);await writeLogin(null);
+    const {billing}=await import('./billing');void billing.forget().catch(()=>{});
+    billingDiagnostic({operation:'logout',result:'ok'});
   }finally{resume();}
 }
 export async function forgetLocalSession(){await setSessionToken(null);await writeLogin(null);}

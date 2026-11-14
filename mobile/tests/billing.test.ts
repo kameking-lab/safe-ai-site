@@ -165,7 +165,7 @@ describe('automatic membership recovery after login',()=>{
       expect(s.send.mock.calls.filter(([path])=>path==='/api/billing/reconcile')).toHaveLength(1);
     }finally{binding.mockRestore();}
   });
-  it('waits for recovery to confirm an existing subscription before attempting a purchase',async()=>{
+  it('rejects a second purchase from server Pro without waiting for store recovery',async()=>{
     const s=setup({atomic:true});let paid=false;let finishInfo!:()=>void;
     s.send.mockImplementation(async path=>{
       if(path.endsWith('/billing/config'))return config;
@@ -175,8 +175,9 @@ describe('automatic membership recovery after login',()=>{
     s.sdk.getCustomerInfo.mockImplementationOnce(()=>new Promise(resolve=>{finishInfo=()=>resolve({} as never);}));
     const recovery=s.controller.recoverSession();
     await vi.waitFor(()=>expect(finishInfo).toBeTypeOf('function'));
-    const purchase=expect(s.controller.purchase(config)).rejects.toThrow('ALREADY_SUBSCRIBED');
-    finishInfo();await recovery;await purchase;
+    paid=true;
+    await expect(s.controller.purchase(config)).rejects.toThrow('ALREADY_SUBSCRIBED');
+    finishInfo();await recovery;
     expect(s.sdk.purchasePackage).not.toHaveBeenCalled();
     expect(s.send.mock.calls.some(([path])=>path==='/api/billing/purchase-intents')).toBe(false);
   });
@@ -219,7 +220,7 @@ describe('automatic membership recovery after login',()=>{
     expect(recovered.plan).toBe('pro');expect(recovered.limits.law_chat).toBe(50);
     expect(order.indexOf('logIn')).toBeLessThan(order.indexOf('customerInfo'));
     expect(order.indexOf('customerInfo')).toBeLessThan(order.indexOf('/api/billing/reconcile'));
-    expect(order.at(-1)).toBe('/api/me/entitlements');
+    expect(order.at(-1)).toBe('/api/billing/reconcile');
     expect(s.sdk.restorePurchases).not.toHaveBeenCalled();expect(s.sdk.purchasePackage).not.toHaveBeenCalled();
   });
   it('never grants the previous owner from cached SDK customerInfo on a different member',async()=>{

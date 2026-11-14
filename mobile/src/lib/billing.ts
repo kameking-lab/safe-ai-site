@@ -6,6 +6,7 @@ import { siteApi, sessionBinding, SiteApiError } from './session';
 import { StoreError } from './store-errors';
 import { Preferences } from '@capacitor/preferences';
 import { assertCurrentMember, currentMemberResponse, invalidateMemberReads, memberGeneration, StaleMemberResponseError } from './member-generation';
+import {bounded,billingDiagnostic,OperationTimeoutError,type DiagnosticOperation} from './billing-diagnostics';
 const outcomeSchema=z.object({id:z.string().uuid().optional(),attemptId:z.string().uuid(),outcome:z.enum(['cancelled','deferred','unknown','not_opened'])}).refine(r=>!!r.id||r.outcome==='not_opened');
 type StoreOutcome=z.infer<typeof outcomeSchema>;
 const outcomeKey=(appUserId:string)=>`anzen.apple-outcome.${encodeURIComponent(appUserId)}`;
@@ -30,10 +31,16 @@ export class BillingController {
   private busy=false;
   private purchaseUser:string|null=null;
   private identityWork:Promise<void>=Promise.resolve();
+  // Native identity mutations cannot be cancelled. Fence a late completion before
+  // allowing another store identity, while every caller has a bounded wait.
+  private nativeIdentity:Promise<unknown>=Promise.resolve();
   private packages=new Map<string,{until:number;value:Promise<PurchasesPackage>}>();
   private outcomeReports=new Map<string,Promise<MemberEntitlement>>();
   private recovery=new Map<string,Promise<MemberEntitlement>>();
-  constructor(private send=siteApi,private sdk:Sdk=Purchases,private native=()=>Capacitor.getPlatform()==='ios'){}
+  private send:typeof siteApi;
+  constructor(send=siteApi,private sdk:Sdk=Purchases,private native=()=>Capacitor.getPlatform()==='ios'){
+    this.send=(...args)=>bounded(args[0].endsWith('/billing/config')?'config':args[0].startsWith('/api/me/entitlements')?'entitlement':args[0]==='/api/billing/reconcile'?'reconcile':'store_request',()=>send(...args));
+  }
   async config(){return billingConfigSchema.parse(await this.send('/api/mobile/v1/billing/config'));}
   /** Rejoin the store identity before asking the server to verify this login. SDK flags never grant access. */
   async recoverSession(){
@@ -50,21 +57,28 @@ export class BillingController {
     for(let attempt=0;attempt<3;attempt++){
       const ticket=memberGeneration();
       try{
-        const [config,member]=await Promise.all([this.config(),this.readEntitlement(ticket)]);
+        const configWork=this.config();void configWork.catch(()=>{});
+        // Publish the server ledger immediately, even if the store/config is offline.
+        const member=await this.readEntitlement(ticket);
+        const config=await configWork.catch(()=>null);
         assertCurrentMember(ticket);
-        if(this.native()&&config.ready&&config.publicKey){
+        if(this.busy)return member;
+        let latest=member;
+        if(this.native()&&config?.ready&&config.publicKey){
           const identity=this.identityWork.then(async()=>{
             assertCurrentMember(ticket);
             await this.identifySerial(config,member);assertCurrentMember(ticket);
-            await this.sdk.invalidateCustomerInfoCache();assertCurrentMember(ticket);
-            await this.sdk.getCustomerInfo();assertCurrentMember(ticket);
+            await bounded('invalidateCustomerInfoCache',()=>this.sdk.invalidateCustomerInfoCache());assertCurrentMember(ticket);
+            await bounded('getCustomerInfo',()=>this.sdk.getCustomerInfo());assertCurrentMember(ticket);
           });
-          this.identityWork=identity.catch(()=>{});await identity;
-          await this.reconcile(ticket,member.appUserId);
+          this.identityWork=identity.catch(()=>{});
+          try{await bounded('identity_queue',()=>identity);}catch(error){if(error instanceof StaleMemberResponseError)throw error;}
         }
-        if(await sessionBinding()!==binding)throw new StaleMemberResponseError();
+        assertCurrentMember(ticket);if(this.busy)return member;
+        // The server can verify its own stored purchase even when the native SDK fails.
+        if(this.native())latest=await this.reconcile(ticket,member.appUserId);
         const finalTicket=memberGeneration();
-        const latest=await this.entitlement();
+        if(await sessionBinding()!==binding)throw new StaleMemberResponseError();
         if(latest.appUserId!==member.appUserId||await sessionBinding()!==binding)throw new StaleMemberResponseError();
         // Session lookup also yields; a newer confirmation/logout may have won meanwhile.
         assertCurrentMember(finalTicket);
@@ -75,7 +89,7 @@ export class BillingController {
         return latest;
       }catch(error){
         if(await sessionBinding()!==binding)throw new StaleMemberResponseError();
-        if(error instanceof Error&&['UNAUTHORIZED','PURCHASE_OWNED_BY_OTHER_ACCOUNT'].includes(error.message)||attempt===2)throw error;
+        if(!(error instanceof StaleMemberResponseError)||attempt===2)throw error;
         await new Promise(resolve=>setTimeout(resolve,attempt===0?300:700));
         if(await sessionBinding()!==binding)throw new StaleMemberResponseError();
       }
@@ -95,7 +109,7 @@ export class BillingController {
         assertCurrentMember(ticket);member=snapshotSchema.parse(response);
         if(member.syncState==='verified'||attempt===2)break;
       }catch(error){
-        if(error instanceof StaleMemberResponseError||error instanceof Error&&error.message==='UNAUTHORIZED'||attempt===2)throw error;
+        if(error instanceof OperationTimeoutError||error instanceof StaleMemberResponseError||error instanceof Error&&error.message==='UNAUTHORIZED'||attempt===2)throw error;
       }
       await new Promise(resolve=>setTimeout(resolve,attempt===0?500:1500));
       assertCurrentMember(ticket);
@@ -133,7 +147,7 @@ export class BillingController {
     try { await this.sendOutcome(appUserId,report);await clearReportedOutcome(appUserId,report); }
     catch { /* Retried automatically by entitlement() after app relaunch or reconnect. */ }
   }
-  private publish(member:MemberEntitlement){if(typeof window!=='undefined')window.dispatchEvent(new CustomEvent('anzen-entitlement-changed',{detail:member}));}
+  private publish(member:MemberEntitlement){billingDiagnostic({operation:'entitlement',result:'state',plan:member.plan});if(typeof window!=='undefined')window.dispatchEvent(new CustomEvent('anzen-entitlement-changed',{detail:member}));}
   async sync(){return this.reconcile(memberGeneration());}
   private async reconcile(ticket:number,appUserId?:string){
     assertCurrentMember(ticket);
@@ -148,13 +162,25 @@ export class BillingController {
   }
   async identify(config:BillingConfig,member:MemberEntitlement){
     if(this.busy && this.purchaseUser && this.purchaseUser!==member.appUserId)throw new Error('PURCHASE_PENDING');
-    const next=this.identityWork.then(()=>this.identifySerial(config,member));
-    this.identityWork=next.catch(()=>{});return next;
+    const ticket=memberGeneration();
+    const next=this.identityWork.then(()=>{assertCurrentMember(ticket);return this.identifySerial(config,member);});
+    this.identityWork=next.catch(()=>{});return bounded('identity_queue',()=>next);
+  }
+  private async mutateIdentity<T>(operation:DiagnosticOperation,run:()=>Promise<T>){
+    await bounded('sdk_identity_queue',()=>this.nativeIdentity);
+    const raw=run();this.nativeIdentity=raw.catch(()=>{});
+    return bounded(operation,()=>raw);
   }
   private async identifySerial(config:BillingConfig,member:MemberEntitlement){
     if(!this.native() || !config.publicKey || !config.ready)throw new StoreError('BILLING_NOT_CONFIGURED');
-    if(!this.configured){await this.sdk.configure({apiKey:config.publicKey,appUserID:member.appUserId});this.configured=true;}
-    else if(this.identified!==member.appUserId)await this.sdk.logIn({appUserID:member.appUserId});
+    const ticket=memberGeneration();
+    if(!this.configured){
+      await this.mutateIdentity('configure',()=>{assertCurrentMember(ticket);return this.sdk.configure({apiKey:config.publicKey!,appUserID:member.appUserId}).then(()=>{this.configured=true;});});
+      assertCurrentMember(ticket);this.identified=member.appUserId;
+    }
+    // A late configure leaves identified unset; the next attempt must log in.
+    if(this.identified!==member.appUserId)await this.mutateIdentity('logIn',()=>{assertCurrentMember(ticket);return this.sdk.logIn({appUserID:member.appUserId});});
+    assertCurrentMember(ticket);
     this.identified=member.appUserId;
   }
   async offering(config:BillingConfig,member:MemberEntitlement):Promise<PurchasesPackage>{
@@ -166,8 +192,7 @@ export class BillingController {
     try{return await value;}catch(error){if(this.packages.get(key)===entry)this.packages.delete(key);throw error;}
   }
   private async loadOffering(config:BillingConfig):Promise<PurchasesPackage>{
-    let timer:ReturnType<typeof setTimeout>|undefined;
-    const offerings=await Promise.race([this.sdk.getOfferings(),new Promise<never>((_,reject)=>{timer=setTimeout(()=>reject(new StoreError('STORE_PRODUCT_TIMEOUT')),12000);})]).finally(()=>clearTimeout(timer));
+    const offerings=await bounded('getOfferings',()=>this.sdk.getOfferings()).catch(error=>{if(error instanceof OperationTimeoutError)throw new StoreError('STORE_PRODUCT_TIMEOUT');throw error;});
     const candidates=(config.offeringId?offerings.all[config.offeringId]:offerings.current)?.availablePackages??[];
     // Name what App Store actually returned, so a real device shows the exact mismatch.
     if(!candidates.length)throw new StoreError('NO_PACKAGES',`offering=${config.offeringId??'-'} / 取得=${Object.keys(offerings.all).join(',')||'なし'}`);
@@ -179,7 +204,6 @@ export class BillingController {
     return match[0];
   }
   async purchase(config:BillingConfig){
-    const recovery=this.recovery.get(await sessionBinding());if(recovery)await recovery;
     if(this.busy)throw new Error('PURCHASE_PENDING');this.busy=true;
     const ticket=invalidateMemberReads();
     const started=performance.now();
@@ -228,7 +252,7 @@ export class BillingController {
       await clearReportedOutcome(member.appUserId,preparedOutcome);
       assertCurrentMember(ticket);
       performance.measure?.('anzen.purchase.before-storekit',{start:started,end:performance.now()});
-      try{await this.sdk.purchasePackage({aPackage:p});}catch(e){
+      try{await bounded('purchasePackage',()=>this.sdk.purchasePackage({aPackage:p}),120000);}catch(e){
         const code=String((e as {code?:string|number}).code??'');
         const outcome=code==='1'?'cancelled':code==='20'?'deferred':'unknown';
         // A userCancelled flag alone is not an SDK-confirmed cancellation.
@@ -242,18 +266,18 @@ export class BillingController {
   }
   async cancelPrepared(){const ticket=invalidateMemberReads();const member=await this.readEntitlement(ticket);if(!member.purchasePending||member.purchaseSource!=='app_store'||member.purchaseStage!=='prepared'||!member.purchaseIntentId)throw new Error('PURCHASE_REVIEW_REQUIRED');return snapshotSchema.parse(await currentMemberResponse(ticket,this.send('/api/billing/cancel-intent',{id:member.purchaseIntentId,source:'app_store'})));}
   async restore(config:BillingConfig){
-    const recovery=this.recovery.get(await sessionBinding());if(recovery)await recovery;
     if(this.busy)throw new Error('PURCHASE_PENDING');this.busy=true;
     const ticket=invalidateMemberReads();
-    try{const member=await this.readEntitlement(ticket);await this.identify(config,member);assertCurrentMember(ticket);await this.sdk.restorePurchases();return await this.reconcile(ticket);}finally{this.busy=false;}
+    try{const member=await this.readEntitlement(ticket);await this.identify(config,member);assertCurrentMember(ticket);await bounded('restorePurchases',()=>this.sdk.restorePurchases());return await this.reconcile(ticket,member.appUserId);}finally{this.busy=false;}
   }
   async forget(){
     invalidateMemberReads();
     this.packages.clear();
     // A new login can start while logout runs in the background. Queue its SDK
     // identity after this logout so a late completion cannot erase the new owner.
-    const next=this.identityWork.then(async()=>{this.identified=null;if(this.configured)await this.sdk.logOut();});
-    this.identityWork=next.catch(()=>{});return next;
+    this.identified=null;
+    const next=this.identityWork.then(async()=>{if(this.configured)await this.mutateIdentity('logOut',()=>this.sdk.logOut());});
+    this.identityWork=next.catch(()=>{});return bounded('identity_queue',()=>next);
   }
 }
 export const billing=new BillingController();
