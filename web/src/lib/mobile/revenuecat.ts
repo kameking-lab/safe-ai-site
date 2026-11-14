@@ -32,17 +32,21 @@ export function verifiedAppleGrant(raw:unknown, expectedProduct:string, now=new 
   return { productId:expectedProduct, expiresAt };
 }
 const subscriptionListSchema=z.object({items:z.array(z.object({
+  id:z.string().min(1).optional(),
   customer_id:z.string(),original_customer_id:z.string(),product_id:z.string().nullable(),
   store:z.string(),environment:z.enum(['production','sandbox']),gives_access:z.boolean(),
   store_subscription_identifier:z.union([z.string().min(1),z.number().int().safe().positive()]),
 })),next_page:z.string().nullable().optional()});
-/** Resolve the stable App Store subscription ID using the authenticated v2 API. */
+/** v2's store_subscription_identifier is a renewal transaction ID, not Apple's
+ * originalTransactionId. Use RevenueCat's subscription ID as the durable key.
+ * Original customer is historical metadata; current customer proves ownership.
+ * https://www.revenuecat.com/docs/api-v2/subscription-data-model */
 export async function fetchAppleOwnership(appUserId:string,environment:'PRODUCTION'|'SANDBOX',send:typeof fetch=fetch){
   const key=process.env.REVENUECAT_V2_SECRET_API_KEY;const projectId=process.env.REVENUECAT_PROJECT_ID;const productId=process.env.REVENUECAT_IOS_V2_PRODUCT_ID;
   if(!externalCredentialedServicesAllowed()||!key||!projectId||!productId)throw new Error('ENTITLEMENT_SYNC_PENDING');
   const pathname=`/v2/projects/${encodeURIComponent(projectId)}/customers/${encodeURIComponent(appUserId)}/subscriptions`;
   let url=new URL(`https://api.revenuecat.com${pathname}?environment=${environment.toLowerCase()}&limit=100`);
-  const ids=new Set<string>();const visited=new Set<string>();const deadline=Date.now()+8000;
+  const subscriptions=new Map<string,{key:string;storeTransactionId:string;originalCustomerId:string}>();const visited=new Set<string>();const deadline=Date.now()+8000;
   for(let page=0;page<5;page++){
     if(visited.has(url.href)||Date.now()>=deadline)throw new Error('ENTITLEMENT_SYNC_PENDING');visited.add(url.href);
     const response=await send(url.href,{headers:{Authorization:`Bearer ${key}`,Accept:'application/json'},cache:'no-store',redirect:'error',signal:AbortSignal.timeout(Math.max(1,deadline-Date.now()))});
@@ -50,14 +54,38 @@ export async function fetchAppleOwnership(appUserId:string,environment:'PRODUCTI
     const data=subscriptionListSchema.parse(await response.json());
     for(const subscription of data.items){
       if(subscription.product_id!==productId||subscription.store!=='app_store'||subscription.environment!==environment.toLowerCase()||!subscription.gives_access)continue;
-      if(subscription.customer_id!==appUserId||subscription.original_customer_id!==appUserId)throw new Error('PURCHASE_OWNED_BY_OTHER_ACCOUNT');
-      ids.add(String(subscription.store_subscription_identifier));
+      if(subscription.customer_id!==appUserId)throw new Error('PURCHASE_OWNED_BY_OTHER_ACCOUNT');
+      if(!subscription.id)throw new Error('ENTITLEMENT_SYNC_PENDING');
+      const key=`rc:${subscription.id}`;
+      subscriptions.set(key,{key,storeTransactionId:String(subscription.store_subscription_identifier),originalCustomerId:subscription.original_customer_id});
     }
-    if(!data.next_page){if(ids.size!==1)throw new Error('ENTITLEMENT_SYNC_PENDING');return [...ids][0];}
+    if(!data.next_page){if(subscriptions.size!==1)throw new Error('ENTITLEMENT_SYNC_PENDING');return [...subscriptions.values()][0];}
     const next=new URL(data.next_page,'https://api.revenuecat.com');
     if(next.origin!=='https://api.revenuecat.com'||next.pathname!==pathname||next.username||next.password)throw new Error('ENTITLEMENT_SYNC_PENDING');url=next;
   }
   throw new Error('ENTITLEMENT_SYNC_PENDING');
+}
+/** Match an old ledger transaction (including Apple's original transaction ID)
+ * to the current verified subscription. The search accepts historical renewal
+ * IDs; never equate purchases merely because the product or account matches.
+ * https://www.revenuecat.com/docs/api-v2/subscription */
+export async function verifyAppleLegacyPurchase(appUserId:string,environment:'PRODUCTION'|'SANDBOX',key:string,transactionId:string,send:typeof fetch=fetch){
+  if(!externalCredentialedServicesAllowed()||!process.env.REVENUECAT_V2_SECRET_API_KEY||!process.env.REVENUECAT_PROJECT_ID||!process.env.REVENUECAT_IOS_V2_PRODUCT_ID)throw new Error('ENTITLEMENT_SYNC_PENDING');
+  const url=new URL(`https://api.revenuecat.com/v2/projects/${encodeURIComponent(process.env.REVENUECAT_PROJECT_ID)}/subscriptions`);
+  url.searchParams.set('store_subscription_identifier',transactionId);
+  const response=await send(url.href,{headers:{Authorization:`Bearer ${process.env.REVENUECAT_V2_SECRET_API_KEY}`,Accept:'application/json'},cache:'no-store',redirect:'error',signal:AbortSignal.timeout(8000)});
+  if(!response.ok)throw new Error('ENTITLEMENT_SYNC_PENDING');
+  const data=subscriptionListSchema.parse(await response.json());
+  if(data.next_page)throw new Error('ENTITLEMENT_SYNC_PENDING');
+  // An empty lookup is not proof of an unrelated purchase. Nor may stale,
+  // inconsistent ownership responses leave both the old and new member Pro.
+  if(!data.items.length||data.items.some(sub=>!sub.id))throw new Error('ENTITLEMENT_SYNC_PENDING');
+  const matches=data.items.filter(sub=>`rc:${sub.id}`===key);
+  if(!matches.length)return false; // Positively identified as a different subscription.
+  if(matches.length!==1)throw new Error('ENTITLEMENT_SYNC_PENDING');
+  const sub=matches[0];
+  if(sub.customer_id!==appUserId||sub.product_id!==process.env.REVENUECAT_IOS_V2_PRODUCT_ID||sub.store!=='app_store'||sub.environment!==environment.toLowerCase()||!sub.gives_access)throw new Error('ENTITLEMENT_SYNC_PENDING');
+  return true;
 }
 export async function fetchSubscriber(appUserId:string, send:typeof fetch=fetch) {
   if (!externalCredentialedServicesAllowed() || !process.env.REVENUECAT_SECRET_API_KEY) throw new Error('ENTITLEMENT_SYNC_PENDING');

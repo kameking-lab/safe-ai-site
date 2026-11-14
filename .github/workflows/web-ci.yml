@@ -25,6 +25,41 @@ on:
       - ".github/workflows/web-ci.yml"
 
 jobs:
+  apple-billing-integration:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 55437:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24.13.1"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - name: Prepare disposable local billing database
+        env:
+          DATABASE_URL: postgresql://postgres@127.0.0.1:55437/postgres?schema=sp7_billing
+        run: npx prisma db push --skip-generate
+      - name: Verify HTTP receipt transfer with PostgreSQL
+        env:
+          ANZEN_BILLING_INTEGRATION: "1"
+        run: npx vitest run src/lib/mobile/apple-transfer.integration.test.ts --maxWorkers=1
+
   smoke:
     runs-on: ubuntu-24.04
     # A cold hosted runner currently needs about 15 minutes for install, lint,
