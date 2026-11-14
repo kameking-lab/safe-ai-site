@@ -22,6 +22,7 @@ describe("storage-gated deployment configuration", () => {
 
     for (const config of configs) {
       expect(config.git?.deploymentEnabled).toEqual({
+        "cx/anz-speed-20261114": false,
         "automation/storage-gate/*": false,
       });
     }
