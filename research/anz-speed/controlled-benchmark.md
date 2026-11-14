@@ -4,8 +4,9 @@ Actual baseline/current source; isolated VM with synthetic data. No DB, account,
 
 | Operation | Before ms | After ms |
 |---|---:|---:|
-| entitlementMs | 245.8 | 86.9 |
-| sessionMs | 348.8 | 86.3 |
-| anonymousQuotaMs | 329.2 | 105.3 |
+| headerIdentityMs | 342 | 31 |
+| entitlementMs | 251.3 | 88.1 |
+| sessionMs | 353.2 | 84.5 |
+| anonymousQuotaMs | 324.3 | 103.1 |
 | rightsReads | 8 | 4 |
 | rightsTransactions | 2 | 1 |
