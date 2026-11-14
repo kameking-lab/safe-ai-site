@@ -36,28 +36,36 @@ export async function entitlementInTransaction(tx:Prisma.TransactionClient,userI
 }
 const entitlementReads=new Map<string,Promise<EntitlementSnapshot>>();
 /** Share overlapping reads only; never cache rights across a completed request/purchase. */
-export async function getEntitlement(userId:string) {
-  const pending=entitlementReads.get(userId);if(pending)return pending;
-  const work=readEntitlement(userId);entitlementReads.set(userId,work);
-  try{return await work;}finally{if(entitlementReads.get(userId)===work)entitlementReads.delete(userId);}
+export async function getEntitlement(userId:string,options:{refresh?:boolean}={}) {
+  const key=JSON.stringify([userId,!!options.refresh]);
+  const pending=entitlementReads.get(key);if(pending)return pending;
+  const work=readEntitlement(userId,!!options.refresh);entitlementReads.set(key,work);
+  try{return await work;}finally{if(entitlementReads.get(key)===work)entitlementReads.delete(key);}
 }
-async function readEntitlement(userId:string) {
+async function readEntitlement(userId:string,refresh:boolean) {
   const db=billingDb();const now=Date.now();
-  const member=await db.$transaction(tx=>identity(tx,userId));
-  const [legacy,grants,intent]=await Promise.all([db.subscription.findUnique({where:{userId}}),db.mobileGrant.findMany({where:{userId}}),db.mobilePurchaseIntent.findUnique({where:{userId}})]);
-  let refreshFailed=false;
+  const [member,legacy,grants,intent]=await Promise.all([db.$transaction(tx=>identity(tx,userId)),db.subscription.findUnique({where:{userId}}),db.mobileGrant.findMany({where:{userId}}),db.mobilePurchaseIntent.findUnique({where:{userId}})]);
+  let refreshFailed=false;let refreshed=false;
   const environment=member.billingEnvironment==='SANDBOX'?'SANDBOX':'PRODUCTION';
   const currentGrants=grants.filter(g=>g.environment===environment);
   // Commit each provider independently: an Apple outage must not roll back a Stripe renewal.
-  if(legacy?.stripeSubscriptionId && (now-legacy.updatedAt.getTime()>300000||!currentGrants.some(g=>g.provider==='stripe')||currentGrants.some(g=>g.provider==='stripe'&&now-g.checkedAt.getTime()>300000))){
+  if(legacy?.stripeSubscriptionId && (refresh||now-legacy.updatedAt.getTime()>300000||!currentGrants.some(g=>g.provider==='stripe')||currentGrants.some(g=>g.provider==='stripe'&&now-g.checkedAt.getTime()>300000))){
+    refreshed=true;
     try{await db.$transaction(async tx=>{await lockMember(tx,userId);await identity(tx,userId);await reconcileStripe(tx,userId);},{timeout:30000});}catch{refreshFailed=true;}
   }
   // Historical grants in another environment cannot make every GET refresh forever.
   // Include expired Apple grants and an interrupted first Apple purchase for renewal recovery.
-  if(currentGrants.some(g=>g.provider==='app_store'&&now-g.checkedAt.getTime()>300000)||(intent?.status==='pending'&&intent.source==='app_store'&&!currentGrants.some(g=>g.provider==='app_store'))){
+  if(currentGrants.some(g=>g.provider==='app_store'&&(refresh||now-g.checkedAt.getTime()>300000))||(intent?.status==='pending'&&intent.source==='app_store'&&!currentGrants.some(g=>g.provider==='app_store'))){
+    refreshed=true;
     try{await reconcile(userId,{stripe:false});}catch{refreshFailed=true;}
   }
-  const rights=await db.$transaction(tx=>entitlementInTransaction(tx,userId));
+  // Re-read after provider mutations only. Ordinary reads project the fresh database rows above.
+  const rights=refreshed?await db.$transaction(tx=>entitlementInTransaction(tx,userId)):{
+    ...projectEntitlement(member.appUserId,legacy,grants,new Date(),environment),
+    purchasePending:intent?.status==='pending',purchaseIntentId:intent?.status==='pending'?intent.id:null,
+    purchaseSource:intent?.status==='pending'?intent.source:null,purchaseStage:intent?.status==='pending'?intent.stage:null,
+  };
+  if(rights.source==='stripe'&&!currentGrants.some(g=>g.provider==='stripe'&&!g.revoked&&g.expiresAt>new Date())&&!refreshed)rights.syncState='pending';
   if(refreshFailed&&rights.plan==='free')rights.syncState='pending';
   return rights;
 }

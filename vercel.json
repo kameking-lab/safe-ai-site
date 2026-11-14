@@ -5,6 +5,7 @@
   "ignoreCommand": "bash web/scripts/vercel-ignore-build.sh",
   "git": {
     "deploymentEnabled": {
+      "cx/anz-speed-20261114": false,
       "automation/storage-gate/*": false
     }
   },

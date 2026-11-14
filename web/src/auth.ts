@@ -9,6 +9,7 @@
 //                         - App Store審査用ログイン（src/lib/app-review.ts）
 
 import NextAuth from "next-auth";
+import { AsyncLocalStorage } from 'node:async_hooks';
 import Google from "next-auth/providers/google";
 import Apple from "next-auth/providers/apple";
 import Credentials from "next-auth/providers/credentials";
@@ -24,6 +25,7 @@ import { externalCredentialedServicesAllowed } from "@/lib/server/deployment-saf
 // AUTH_SECRET 未設定時はスタブを返してコンソールエラーを抑制する
 const noopHandler = () => new Response(null, { status: 404 });
 const noopAuth = async () => null;
+const identityOnly = new AsyncLocalStorage<boolean>();
 
 export const isAuthConfigured = Boolean(
   externalCredentialedServicesAllowed() &&
@@ -120,40 +122,24 @@ const initialized = isAuthConfigured
           return user.id !== APP_REVIEW_USER_ID && user.email?.toLowerCase() !== APP_REVIEW_EMAIL;
         },
         async session({ session, token }) {
-          if(prisma && token.sub && !await prisma.user.findUnique({where:{id:token.sub},select:{id:true}}))return {...session,user:undefined} as unknown as typeof session;
-          if(prisma && token.sub && process.env.MOBILE_LEDGER_ENABLED==='true' && (await prisma.mobileAccountDeletion.findUnique({where:{userId:token.sub}}))?.status==='pending')return {...session,user:undefined} as unknown as typeof session;
-          if(token.signedInAt && session.user)(session.user as {signedInAt?:string}).signedInAt=String(token.signedInAt);
-          if (token.sub) {
-            (session.user as { id?: string }).id = token.sub;
-          }
-          if (prisma && token.sub) {
-            try {
-              const sub = await prisma.subscription.findUnique({
-                where: { userId: token.sub },
-              });
-              if (sub) {
-                (
-                  session.user as { planName?: string; status?: string }
-                ).planName = sub.planName;
-                (
-                  session.user as { planName?: string; status?: string }
-                ).status = sub.status;
-              } else {
-                (session.user as { planName?: string }).planName = "free";
-              }
-            } catch {
-              console.error("[auth] failed to load subscription", {
-                operation: "load-session-subscription",
-              });
-              (session.user as { planName?: string }).planName = "free";
-            }
-          } else {
-            (session.user as { planName?: string }).planName = "free";
-          }
-          if (token.sub && process.env.MOBILE_LEDGER_ENABLED === 'true') {
-            const rights = await getEntitlement(token.sub);
-            (session.user as {planName?: string}).planName = rights.plan;
-          }
+          if (!token.sub || !session.user) return session;
+          const userId = token.sub;
+          const ledgerEnabled = process.env.MOBILE_LEDGER_ENABLED === 'true';
+          const [member, deletion, sub, rights] = await Promise.all([
+            prisma ? prisma.user.findUnique({where:{id:userId},select:{id:true}}) : true,
+            prisma && ledgerEnabled ? prisma.mobileAccountDeletion.findUnique({where:{userId}}) : null,
+            prisma && !ledgerEnabled && !identityOnly.getStore() ? prisma.subscription.findUnique({where:{userId}}).catch(() => {
+              console.error("[auth] failed to load subscription", {operation:"load-session-subscription"});
+              return null;
+            }) : null,
+            ledgerEnabled && !identityOnly.getStore() ? getEntitlement(userId) : null,
+          ]);
+          if (!member || deletion?.status === 'pending') return {...session,user:undefined} as unknown as typeof session;
+          const user = session.user as typeof session.user & {id?:string;signedInAt?:string;planName?:string;status?:string};
+          user.id = userId;
+          if (token.signedInAt) user.signedInAt = String(token.signedInAt);
+          user.planName = rights?.plan ?? sub?.planName ?? 'free';
+          if (sub) user.status = sub.status;
           return session;
         },
         async jwt({ token, user, account }) {
@@ -177,8 +163,8 @@ export const handlers = initialized?.handlers ?? {
 };
 export const signIn = initialized?.signIn ?? noopAuth;
 export const signOut = initialized?.signOut ?? noopAuth;
-export async function auth() {
+export async function auth(options:{identityOnly?:boolean}={}) {
   // An invalid native credential must not fall back to a different browser-cookie account.
   if ((await headers()).get('authorization')?.startsWith('Bearer ')) return mobileAuthSession();
-  return initialized ? initialized.auth() : noopAuth();
+  return initialized ? identityOnly.run(!!options.identityOnly,()=>initialized.auth()) : noopAuth();
 }
