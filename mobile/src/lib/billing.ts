@@ -33,8 +33,8 @@ export class BillingController {
   private outcomeReports=new Map<string,Promise<MemberEntitlement>>();
   constructor(private send=siteApi,private sdk:Sdk=Purchases,private native=()=>Capacitor.getPlatform()==='ios'){}
   async config(){return billingConfigSchema.parse(await this.send('/api/mobile/v1/billing/config'));}
-  async entitlement(recoverWhileBusy=false){
-    const member=snapshotSchema.parse(await this.send('/api/me/entitlements'));
+  async entitlement(recoverWhileBusy=false,refresh=false){
+    const member=snapshotSchema.parse(await this.send(refresh?'/api/me/entitlements?refresh=1':'/api/me/entitlements'));
     this.publish(member);
     // A cancelled purchase must recover even if its first outcome request lost connectivity.
     try {
@@ -161,7 +161,13 @@ export class BillingController {
     if(this.busy)throw new Error('PURCHASE_PENDING');this.busy=true;
     try{const member=await this.entitlement();await this.identify(config,member);await this.sdk.restorePurchases();return await this.sync();}finally{this.busy=false;}
   }
-  async forget(){this.packages.clear();await this.identityWork;if(this.configured)await this.sdk.logOut();this.identified=null;}
+  async forget(){
+    this.packages.clear();
+    // A new login can start while logout runs in the background. Queue its SDK
+    // identity after this logout so a late completion cannot erase the new owner.
+    const next=this.identityWork.then(async()=>{if(this.configured)await this.sdk.logOut();this.identified=null;});
+    this.identityWork=next.catch(()=>{});return next;
+  }
 }
 export const billing=new BillingController();
 export function isVerifiedPro(member:MemberEntitlement|null,now=Date.now()){

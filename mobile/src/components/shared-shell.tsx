@@ -17,7 +17,7 @@ export function SharedShell({ children }: { children: ReactNode }) {
   const [message,setMessage]=useState('');
   const [price,setPrice]=useState<string|null>(null);
   const verifiedPro=useRef<MemberEntitlement|null>(null);
-  useEffect(()=>{let generation=0;const update=()=>{const ticket=++generation;setPrice(null);void (async()=>{const c=await billing.config();const m=await billing.entitlement();if(m.plan==='free'&&m.syncState==='verified'&&c.ready){const p=await billing.offering(c,m);if(ticket===generation)setPrice(p.product.priceString);}})().catch(()=>{});};update();window.addEventListener('anzen-session-changed',update);return()=>{generation++;window.removeEventListener('anzen-session-changed',update);};},[]);
+  useEffect(()=>{let generation=0;const update=(event?:Event)=>{const ticket=++generation;setPrice(null);if((event as CustomEvent<{signedIn?:boolean}>|undefined)?.detail?.signedIn===false)return;void (async()=>{const [c,m]=await Promise.all([billing.config(),billing.entitlement()]);if(m.plan==='free'&&m.syncState==='verified'&&c.ready){const p=await billing.offering(c,m);if(ticket===generation)setPrice(p.product.priceString);}})().catch(()=>{});};update();window.addEventListener('anzen-session-changed',update);return()=>{generation++;window.removeEventListener('anzen-session-changed',update);};},[]);
   const pathname=usePathname().replace(/\/$/,'')||'/';
   useEffect(() => {
     installWebTransport();
@@ -32,7 +32,7 @@ export function SharedShell({ children }: { children: ReactNode }) {
       if(/^\/pricing\/terms\/?$/.test(url.pathname)){event.preventDefault();void openSource(SITE+'/pricing/terms').catch(()=>setMessage('条件のページを開けませんでした。'));}
     };
     // A sign-in started from the purchase button continues straight to the purchase sheet.
-    const signedIn=()=>{void resumeProPurchaseAfterLogin().then(show);};
+    const signedIn=(event:Event)=>{if((event as CustomEvent<{signedIn?:boolean}>).detail?.signedIn!==false)void resumeProPurchaseAfterLogin().then(show);};
     document.addEventListener('click',feeds,true);window.addEventListener('anzen-session-changed',sessionChanged);window.addEventListener('anzen-session-changed',signedIn);window.addEventListener('anzen-entitlement-changed',verified);
     return()=>{document.removeEventListener('click',feeds,true);window.removeEventListener('anzen-session-changed',sessionChanged);window.removeEventListener('anzen-session-changed',signedIn);window.removeEventListener('anzen-entitlement-changed',verified);};
   }, []);

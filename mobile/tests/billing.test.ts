@@ -36,6 +36,14 @@ function setup(options:{atomic?:boolean;paid?:boolean;syncPending?:boolean;cance
     purchasePackage:vi.fn(async()=>{if(options.cancelled)throw {userCancelled:true,code:'1'};if(options.storePending)throw {code:'20'};if(options.cancelFlagOnly)throw {userCancelled:true};if(options.unknown)throw {code:'10'};return {customerInfo:{entitlements:{active:{anzen_pro:{isActive:true}}}}} as never;}),restorePurchases:vi.fn(async()=>({customerInfo:{entitlements:{active:{anzen_pro:{isActive:true}}}}}) as never)};
   return {send,sdk,controller:new BillingController(send,sdk,()=>true)};
 }
+
+it('queues a new StoreKit identity after background logout completes',async()=>{
+  const s=setup();const member=await s.controller.entitlement();await s.controller.identify(config,member);
+  let release!:()=>void;s.sdk.logOut.mockImplementationOnce(()=>new Promise(resolve=>{release=()=>resolve({} as never);}));
+  const logout=s.controller.forget();const login=s.controller.identify(config,{...member,appUserId:'another-member-identifier'});
+  await vi.waitFor(()=>expect(s.sdk.logOut).toHaveBeenCalledOnce());expect(s.sdk.logIn).not.toHaveBeenCalled();
+  release();await Promise.all([logout,login]);expect(s.sdk.logIn).toHaveBeenLastCalledWith({appUserID:'another-member-identifier'});
+});
 describe('iOS IAP uses server rights before StoreKit',()=>{
   it('publishes the final server rights recovered by a durable outcome report',async()=>{
     const dispatchEvent=vi.fn();vi.stubGlobal('window',{dispatchEvent});
