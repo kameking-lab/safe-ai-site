@@ -44,6 +44,7 @@ async function writeSessionToken(token:string|null) {
   if(token)await rotate();
   if(Capacitor.isNativePlatform()){if(token)await vault.set({value:token});else await vault.clear();}
   if(!token)await rotate();
+  invalidateMemberReads();
   memoryToken=token;window.dispatchEvent(new CustomEvent('anzen-session-changed',{detail:{signedIn:!!token}}));
 }
 export async function setSessionToken(token:string|null){invalidateMemberReads();return serializeSession(()=>writeSessionToken(token));}

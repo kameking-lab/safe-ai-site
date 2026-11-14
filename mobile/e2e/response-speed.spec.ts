@@ -151,6 +151,7 @@ for(const reduced of [false,true])test(`Chihuahua is visible before the first na
   const quotaStart=Date.now();await page.goto('/chatbot/');await page.addStyleTag({content:'body{padding-top:59px!important}body::before{height:59px!important}header.sticky{top:59px!important}.fixed.inset-0{padding-top:59px!important}'});
   await expect(page.getByLabel('AIの利用枠')).toContainText('残り3／3');
   const quotaDisplayedMs=Date.now()-quotaStart;
+  expect(quotaDisplayedMs).toBeLessThan(1000);
   await page.getByRole('textbox').fill('作業前に確認する条件を整理したい');
   await page.getByRole('button',{name:'送信',exact:true}).evaluate(button=>{
     const timing:{start?:number;paintMs?:number}={};Object.assign(window,{__chatFeedback:timing});let measuring=false;

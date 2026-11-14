@@ -68,6 +68,13 @@ describe('membership response ordering',()=>{
     await vi.waitFor(()=>expect(release).toBeTypeOf('function'));invalidateMemberReads();release();await rejected;
     expect(s.send.mock.calls.some(([path])=>path==='/api/billing/reconcile')).toBe(false);
   });
+  for(const operation of ['sync','refresh'] as const)it(`discards reads opened while ${operation} was awaiting server confirmation`,async()=>{
+    const s=setup();let confirm!:(value:ReturnType<typeof pro>)=>void;let release!:(value:ReturnType<typeof free>)=>void;
+    s.send.mockImplementation(async path=>path==='/api/me/entitlements'?new Promise(resolve=>{release=resolve;}):new Promise(resolve=>{confirm=resolve;}));
+    const change=operation==='sync'?s.controller.sync():s.controller.entitlement(false,true);
+    const during=s.controller.entitlement();const rejected=expect(during).rejects.toBeInstanceOf(StaleMemberResponseError);
+    confirm(pro());expect((await change).plan).toBe('pro');release(free());await rejected;
+  });
   it('discards a delayed outcome response after a newer reconciliation',async()=>{
     const s=setup({pendingStage:'store_started'});const report={id:intentId,attemptId:crypto.randomUUID(),outcome:'cancelled'};
     preferences.set(`anzen.apple-outcome.${encodeURIComponent(appUserId)}`,JSON.stringify(report));
