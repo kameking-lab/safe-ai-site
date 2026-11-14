@@ -1,5 +1,11 @@
 export const SITE_ORIGIN='https://www.anzen-ai-portal.jp';
-export function json(data:unknown,status=200) {return Response.json(data,{status,headers:{'Cache-Control':'private, no-store','Vary':'Authorization, Cookie','Referrer-Policy':'no-referrer'}});}
+export function json(data:unknown,status=200) {
+  if(status>=400){
+    const code=(data as {error?:{code?:unknown}})?.error?.code;
+    console.warn('[mobile-api]',JSON.stringify({stage:'response',status,code:typeof code==='string'&&/^[A-Z_]{1,60}$/.test(code)?code:'REQUEST_REJECTED'}));
+  }
+  return Response.json(data,{status,headers:{'Cache-Control':'private, no-store','Vary':'Authorization, Cookie','Referrer-Policy':'no-referrer'}});
+}
 export async function member(request:Request) {
   // Native bearer sessions are CSRF-independent. Browser cookies require same-origin mutations.
   if(!['GET','HEAD'].includes(request.method) && !request.headers.get('authorization')?.startsWith('Bearer ') && request.headers.get('origin')!==new URL(request.url).origin) throw new Error('FORBIDDEN');

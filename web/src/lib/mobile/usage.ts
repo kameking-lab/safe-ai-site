@@ -140,7 +140,8 @@ export async function memberQuotas(userId:string,rights:Awaited<ReturnType<typeo
   });
 }
 async function reserve(request:Request,userId:string,feature:AiFeature){
-  await getEntitlement(userId);
+  // Project the same verified ledger as capabilities inside the transaction.
+  // Provider reconciliation must not block sending a chat before reservation.
   const raw=await request.clone().text();if(raw.length>65536)throw new Error('INVALID_REQUEST');
   const requestHash=createHash('sha256').update(raw).digest('hex');
   const id=request.headers.get('x-operation-id')??randomUUID();if(!/^[0-9a-f-]{36}$/i.test(id))throw new Error('INVALID_REQUEST');
@@ -218,10 +219,12 @@ export async function withUsage(request:Request,feature:AiFeature,run:(request:R
     if(!check.allowed)return json({error:{code:check.reason==='consent_required'?'CONSENT_REQUIRED':'SAFETY_BLOCKED',reason:check.reason,message:check.message}},check.status);
   }
   let operation:{id:string;plan:Plan;replay:Prisma.JsonValue|null}|undefined;
+  let stage='authentication';
   try{
     if(authenticatedWebMember && !['GET','HEAD'].includes(request.method) && request.headers.get('origin')!==new URL(request.url).origin)throw new Error('FORBIDDEN');
-    const userId=authenticatedWebMember??await member(request);operation=await reserve(request,userId,feature);
+    const userId=authenticatedWebMember??await member(request);stage='quota_reservation';operation=await reserve(request,userId,feature);
     if(operation.replay){if(new URL(request.url).pathname.endsWith('/stream'))return new Response(`event: meta\ndata: ${JSON.stringify(operation.replay)}\n\n`,{headers:{'Content-Type':'text/event-stream','Cache-Control':'no-store'}});return json(operation.replay);}
+    stage='answer';
     const response=await context.run({plan:operation.plan,operationId:operation.id},()=>run(request));
     const settle=async(value:unknown,completed:boolean)=>{await billingDb().mobileUsageOperation.updateMany({where:{id:operation!.id,status:'reserved'},data:{status:completed?'completed':'released',...(completed?{response:value as Prisma.InputJsonValue}:{})}});};
     if(response.headers.get('content-type')?.includes('text/event-stream') && response.body){
@@ -238,6 +241,7 @@ export async function withUsage(request:Request,feature:AiFeature,run:(request:R
     if(operation)await billingDb().mobileUsageOperation.updateMany({where:{id:operation.id,status:'reserved'},data:{status:'released'}}).catch(()=>{});
     const known=['UNAUTHORIZED','FORBIDDEN','INVALID_REQUEST','OPERATION_PENDING','OPERATION_RELEASED','DAILY_LIMIT_REACHED','BURST_LIMITED','ENTITLEMENT_SYNC_PENDING','AI_BUDGET_STOPPED','AI_BUDGET_FREE_PAUSED'];const code=e instanceof Error&&known.includes(e.message)?e.message:'ENTITLEMENT_SYNC_PENDING';
     const limitPlan=e instanceof DailyLimitError?e.plan:null;
+    console.warn('[ai-request]',JSON.stringify({feature,stage,code,plan:operation?.plan??limitPlan??'unknown'}));
     const message=code==='DAILY_LIMIT_REACHED'?(limitPlan==='free'?`今日の無料${product.limits.free[feature]}回はここまでです。日本時間の0時にまた使えます。`:'本日の上限に達しました。日本時間の次の0時に回復します。'):code==='UNAUTHORIZED'?'AIを利用するには会員ログインが必要です。':code==='BURST_LIMITED'?'短時間の利用が集中しています。60秒後に再度お試しください。':code==='OPERATION_PENDING'?'同じ操作を処理中です。再送せず、処理の完了をお待ちください。':'サーバーの安全な実行条件を確認できません。権利の再確認をお試しください。';
     const result=json({error:{code,message,resetAt:jstKeys().resetAt,...(limitPlan?{plan:limitPlan,upgrade:await upgradeAvailable(request,limitPlan)}:{})}},code==='UNAUTHORIZED'?401:code==='FORBIDDEN'?403:code.includes('LIMIT')?429:503);
     if(code==='BURST_LIMITED')result.headers.set('Retry-After','60');return result;

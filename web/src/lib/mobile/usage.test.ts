@@ -40,6 +40,7 @@ import { __resetDevelopmentSharedStateForTests } from '@/lib/security/shared-sta
 import { canUseMemberQuota,product } from './entitlement';
 import * as entitlementPolicy from './entitlement';
 import * as proSales from '../pro-sales';
+import * as billingService from './billing-service';
 const request=(id=crypto.randomUUID())=>new Request('https://example.test/api/chatbot',{method:'POST',headers:{Authorization:'Bearer mock_session','Content-Type':'application/json','X-Operation-ID':id},body:JSON.stringify({message:'足場の手すり',privacyConfirmed:true})});
 const answer=()=>Response.json({answer:'公式根拠を確認してください。',source_type:'rag',sources:[{text:'原文',url:'https://laws.e-gov.go.jp/law/mock',asOf:new Date().toISOString()}]});
 beforeEach(()=>{state.operations=[];state.tail=Promise.resolve();state.paid=false;state.signedIn=true;state.budget={committedYen:0,reservedYen:0};state.reservations=[];vi.stubEnv('MOBILE_LEDGER_ENABLED','true');});afterEach(()=>vi.unstubAllEnvs());
@@ -69,6 +70,11 @@ describe('request rebuild across runtime realms',()=>{
   });
 });
 describe('shared daily AI accounting',()=>{
+  it('reserves displayed Pro rights from the verified ledger without a blocking provider refresh',async()=>{
+    state.paid=true;const refresh=vi.spyOn(billingService,'getEntitlement').mockImplementation(()=>new Promise(()=>{}));
+    try{const result=await withUsage(request(),'law_chat',async()=>answer());expect(result.status).toBe(200);expect(refresh).not.toHaveBeenCalled();expect(state.operations[0].status).toBe('completed');}
+    finally{refresh.mockRestore();}
+  });
   it('keeps the free quota available while paid rights are pending, without granting Pro or unknown rights',()=>{
     expect(canUseMemberQuota({plan:'free',syncState:'pending'})).toBe(true);
     expect(canUseMemberQuota({plan:'pro',syncState:'pending'})).toBe(false);

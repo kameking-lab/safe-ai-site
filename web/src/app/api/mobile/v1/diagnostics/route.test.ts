@@ -13,6 +13,12 @@ it('accepts fixed transition data before login, without emitting headers or cred
  expect(console.info).toHaveBeenCalledWith('[mobile-billing]',JSON.stringify(event));
  expect(JSON.stringify(vi.mocked(console.info).mock.calls)).not.toMatch(/synthetic-token|192\.0\.2\.10/);
 });
+it.each(['capacitor://localhost','https://localhost',''])('accepts native diagnostics with origin %s and no authentication',async origin=>{
+ const headers=new Headers({'content-type':'application/json','x-anzen-native':'1'});if(origin)headers.set('origin',origin);
+ const input={...event,operation:'chat',result:'failed',stage:'headers',httpStatus:401,code:'UNAUTHORIZED'};
+ expect((await POST(new Request(request().url,{method:'POST',headers,body:JSON.stringify(input)}))).status).toBe(200);
+ expect(console.info).toHaveBeenCalledWith('[mobile-billing]',JSON.stringify(input));
+});
 it.each([{...event,email:'synthetic@example.test'},{...event,error:'secret text'},{...event,appUserId:'member'},{...event,operation:'arbitrary'},{...event,elapsedMs:180001}])('rejects unapproved fields and values without logging the body',async input=>{
  expect((await POST(request(input))).status).toBe(400);expect(console.info).not.toHaveBeenCalled();
 });
