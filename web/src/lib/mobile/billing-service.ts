@@ -55,7 +55,7 @@ async function readEntitlement(userId:string,refresh:boolean) {
   }
   // Historical grants in another environment cannot make every GET refresh forever.
   // Include expired Apple grants and an interrupted first Apple purchase for renewal recovery.
-  if(currentGrants.some(g=>g.provider==='app_store'&&(refresh||now-g.checkedAt.getTime()>300000))||(intent?.status==='pending'&&intent.source==='app_store'&&!currentGrants.some(g=>g.provider==='app_store'))){
+  if((refresh&&!!process.env.REVENUECAT_IOS_PRODUCT_ID)||currentGrants.some(g=>g.provider==='app_store'&&now-g.checkedAt.getTime()>300000)||(intent?.status==='pending'&&intent.source==='app_store'&&!currentGrants.some(g=>g.provider==='app_store'))){
     refreshed=true;
     try{await reconcile(userId,{stripe:false});}catch{refreshFailed=true;}
   }
