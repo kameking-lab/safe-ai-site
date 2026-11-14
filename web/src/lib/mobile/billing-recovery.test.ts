@@ -141,3 +141,14 @@ it('identifies reconciliation failure before preparing or opening a store transa
  await expect(prepareApplePurchase('member','immutable-member-id',crypto.randomUUID())).rejects.toThrow('BILLING_RECONCILE_UNAVAILABLE');
  expect(state.created).toBe(0);
 });
+it('manual refresh verifies even a recently checked Apple grant and never reuses a completed read',async()=>{
+ state.grants=[{userId:'member',provider:'app_store',environment:'PRODUCTION',expiresAt:new Date(Date.now()+86400000),checkedAt:new Date(),revoked:false}];
+ expect((await getEntitlement('member')).plan).toBe('pro');expect(state.fetches).toBe(0);
+ expect((await getEntitlement('member',{refresh:true})).plan).toBe('free');expect(state.fetches).toBe(1);
+});
+it('manual refresh also verifies recently checked Stripe rights',async()=>{
+ state.legacy={planName:'pro',status:'active',stripeSubscriptionId:'sub_fixture',currentPeriodEnd:new Date(Date.now()+86400000),updatedAt:new Date()};
+ state.grants=[{provider:'stripe',environment:'PRODUCTION',expiresAt:new Date(Date.now()+86400000),checkedAt:new Date(),revoked:false}];
+ await getEntitlement('member');expect(state.stripeFetches).toBe(0);
+ await getEntitlement('member',{refresh:true});expect(state.stripeFetches).toBe(1);
+});

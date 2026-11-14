@@ -16,6 +16,23 @@ afterEach(() => {
   window.localStorage.clear();
 });
 
+it('shows the Chihuahua before fetch resolves and removes it on the first text chunk',async()=>{
+ let release!:(response:Response)=>void;let controller!:ReadableStreamDefaultController<Uint8Array>;
+ const send=vi.fn(()=>new Promise<Response>(resolve=>{release=resolve;}));vi.stubGlobal('fetch',send);
+ render(<ChatbotPanel initialQuestion="足場の手すりは？" />);
+ fireEvent.click(screen.getByRole('button',{name:'送信'}));
+ const thinking=screen.getByRole('status',{name:'回答を作成中'});
+ expect(thinking.querySelector('img')?.getAttribute('src')).toBe('/mascot/mascot-searching.gif');
+ expect(thinking.querySelector('source')?.getAttribute('media')).toBe('(prefers-reduced-motion: reduce)');
+ await act(async()=>{release(new Response(new ReadableStream({start(c){controller=c;}}),{headers:{'Content-Type':'text/event-stream'}}));});
+ expect(screen.getByRole('status',{name:'回答を作成中'})).toBeTruthy();
+ await act(async()=>{controller.enqueue(new TextEncoder().encode('event: text\ndata: {"chunk":"確認します","provisional":true}\n\n'));});
+ await waitFor(()=>expect(screen.queryByRole('status',{name:'回答を作成中'})).toBeNull());
+ expect(screen.getByText('確認します')).toBeTruthy();
+ fireEvent.click(screen.getByRole('button',{name:'生成を停止'}));
+ await act(async()=>controller.close());
+});
+
 it.each([null, "accepted", "revoked"])("保存済みの同意=%sでも送信操作だけで一度送り、再表示しても確認しない", async (stored) => {
   if (stored) localStorage.setItem("anzen.chatbot-ai-consent.2026-11-10", stored);
   const send = vi.fn().mockImplementation(() => new Promise(() => {}));

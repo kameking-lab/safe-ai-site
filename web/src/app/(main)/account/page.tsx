@@ -34,7 +34,7 @@ interface Props {
 }
 
 export default async function AccountPage({ searchParams }: Props) {
-  const session = await auth();
+  const session = await auth({identityOnly:true});
   if (!session?.user) {
     redirect("/auth/signin?callbackUrl=%2Faccount");
   }

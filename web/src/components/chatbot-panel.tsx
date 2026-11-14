@@ -1,6 +1,7 @@
 "use client";
 
 import { AiProcessingNote } from "@/components/ai-processing-note";
+import { ChatThinking } from "@/components/chat-thinking";
 
 import { SourceProvenanceView } from "@/components/law-navi/source-provenance-view";
 import { normalizeSourceProvenance } from "@/lib/source-provenance";
@@ -782,7 +783,7 @@ export function ChatbotPanel({
                       >
                         安衛法AIの回答 {assistantAnswerNumber}
                       </h2>
-                      {isStreaming && message.provisional ? (
+                      {isStreaming && !message.content ? <ChatThinking /> : isStreaming && message.provisional ? (
                         <div data-chatbot-provisional="">
                           <p className="mb-1 text-xs text-slate-500 dark:text-slate-400">生成中・引用は未確認です</p>
                           <p className="whitespace-pre-wrap">{message.content}</p>
