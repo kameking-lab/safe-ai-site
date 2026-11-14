@@ -25,6 +25,10 @@ async function position(page:Page,minHistory=100,safeTop=59){
   });
   expect(metrics.input.top).toBeGreaterThanOrEqual(metrics.viewport.offsetTop+safeTop);
   expect(metrics.history.height).toBeGreaterThan(minHistory);
+  expect(await page.locator('[data-chatbot-history]').evaluate(el=>{
+    const style=getComputedStyle(el);
+    return el.clientHeight-parseFloat(style.paddingTop)-parseFloat(style.paddingBottom);
+  })).toBeGreaterThan(20);
   expect(metrics.history.bottom).toBeLessThanOrEqual(metrics.composer.top+1);
   return metrics;
 }
@@ -109,6 +113,12 @@ for(const plan of ['free','pro'] as const)test(`${plan}: first question, follow-
   await page.addStyleTag({content:'@media(min-width:768px){body{padding-top:0!important}body::before{height:0!important}header.sticky{top:0!important}[data-chatbot-page] [data-chatbot-viewport-section][data-keyboard-open]{top:var(--chatbot-viewport-offset)!important;height:var(--chatbot-viewport-height)!important}}'});
   await input.fill('横向きでも続けたい');await keyboard(page,210,0);
   metrics.landscape=await position(page,20,0);
+  // Read a previous answer by scrolling only the conversation, with the keyboard still open.
+  await page.locator('[data-chatbot-history]').evaluate(el=>{
+    const answer=el.querySelector<HTMLElement>('[data-chatbot-answer]');
+    if(answer)el.scrollTop+=answer.getBoundingClientRect().top-el.getBoundingClientRect().top;
+  });
+  metrics.landscapeReading=await position(page,20,0);
   await page.screenshot({path:captureDir+`${plan}-landscape-keyboard.png`,scale:'css',animations:'disabled'});
   await keyboard(page,390,0);await page.setViewportSize({width:390,height:844});await keyboard(page,844,0);
   // Additional follow-up paths must leave room for the conversation too.

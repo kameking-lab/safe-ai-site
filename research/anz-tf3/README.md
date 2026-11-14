@@ -23,6 +23,7 @@
 ## sp-3-rv 追加点検
 
 - 横向き844×390、上端safe area 0px、キーボード時height=210も検証。幅768px以上でもタッチ端末ならキーボード配置を適用する。composer下端209px（表示下端210pxと1px差）、会話欄34.4pxを保持。
+- キーボード中は会話欄の上下余白を各4pxにする。横向きの本文表示範囲が2pxまで減っていたため、余白を除いて20px超あることも検査する。
 - 縦向きへ戻し、height=320 / offsetTop=120 / innerHeight=320を模擬。入力内容の案内・通信エラー時もcomposer下端440px、会話欄78.4pxを保持。案内は会話欄内でスクロールできる。
 - 無料残り1/3・0/3、Pro残り48/50、購入カード1個、同意ダイアログ・チェックボックスなしを検証。
 - 追加画像6枚：`free-landscape-keyboard.png` / `pro-landscape-keyboard.png`、`free-privacy-keyboard.png` / `pro-privacy-keyboard.png`、`free-error-keyboard.png` / `pro-error-keyboard.png`。
