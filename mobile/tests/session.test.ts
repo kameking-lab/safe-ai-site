@@ -78,7 +78,7 @@ it('times out an exchange and releases login state for another attempt',async()=
 });
 it('releases login when the native browser open call never returns',async()=>{
  vi.useFakeTimers();const session=await import('../src/lib/session');mock.open.mockImplementationOnce(()=>new Promise(()=>{}));
- const failed=expect(session.startLogin()).rejects.toThrow('OPERATION_TIMEOUT');await vi.advanceTimersByTimeAsync(8001);await failed;
+ const failed=expect(session.startLogin()).rejects.toThrow('OPERATION_TIMEOUT');for(let i=0;i<4;i++)await vi.advanceTimersByTimeAsync(8001);await failed;
  expect(await session.hasPendingLogin()).toBe(false);expect(window.dispatchEvent).toHaveBeenCalledWith(expect.objectContaining({type:'anzen-login-failed'}));
 });
 it('keeps a newer login when the earlier server logout responds late',async()=>{
