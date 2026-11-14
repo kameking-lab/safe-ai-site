@@ -23,6 +23,8 @@ async function setup(context:BrowserContext,fault:Fault|null=null){
    nativePromise:async(plugin:string,method:string,options:Record<string,string>)=>{
     if(plugin==='Browser'&&method==='open'){(window as unknown as Bridge).__opened++;return {};}
     if(plugin==='Preferences'||plugin==='NativeVault'){
+     const fault=(window as unknown as Bridge).__fault;
+     if(fault?.stage===`${plugin}.${method}`&&fault.mode==='never')await new Promise(()=>{});
      const store=plugin==='Preferences'?prefs:vault;const key=options?.key??options?.purpose??'session';
      if(method==='get')return {value:store.get(key)??null};if(method==='set')store.set(key,options.value);else store.delete(key);
      sessionStorage.setItem(plugin==='Preferences'?'test-prefs':'test-vault',JSON.stringify([...store]));return {};
@@ -122,5 +124,16 @@ test('network switch and a failed reconciliation preserve saved server Pro',asyn
 test('starting login during a slow server logout keeps the new login and saved Pro',async({page,context})=>{
  const s=await setup(context);await page.goto('/account/');await login(page);await pro(page);s.delayLogout(1500);
  await page.getByRole('button',{name:'ログアウト',exact:true}).click();await expect(page.getByRole('button',{name:'Apple / Googleでログイン'})).toBeEnabled();
+ await login(page);await pro(page);await buttons(page);await chat50(page);
+});
+test('a stalled Keychain proof releases the login button after app activation and permits retry',async({page,context})=>{
+ await setup(context);await page.goto('/account/');await login(page);await pro(page);
+ await page.getByRole('button',{name:'ログアウト',exact:true}).click();
+ const signIn=page.getByRole('button',{name:'Apple / Googleでログイン'});
+ await expect(signIn).toBeEnabled();const opened=await page.evaluate(()=>(window as unknown as Bridge).__opened);
+ await signIn.click();await expect.poll(()=>page.evaluate(()=>(window as unknown as Bridge).__opened)).toBe(opened+1);
+ await page.evaluate(()=>{const bridge=window as unknown as Bridge;bridge.__fault={stage:'NativeVault.get',mode:'never'};bridge.__return();bridge.__activate();});
+ await expect(signIn).toBeDisabled();await expect(signIn).toBeEnabled({timeout:11000});
+ await page.evaluate(()=>(window as unknown as Bridge).__fault=null);
  await login(page);await pro(page);await buttons(page);await chat50(page);
 });
