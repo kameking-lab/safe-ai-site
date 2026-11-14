@@ -49,6 +49,36 @@ it('shares only overlapping GETs for the same session, without caching subsequen
  release({url:site+'/api/me/entitlements',status:200,data:{plan:'free'}});
  expect(await first).toEqual(await second);await session.siteApi('/api/me/entitlements');expect(mock.request).toHaveBeenCalledTimes(2);
 });
+it('does not join a GET started before or during a mutation, even with the same token',async()=>{
+ const session=await import('../src/lib/session');await session.setSessionToken(token);
+ const releases:Array<(value:unknown)=>void>=[];
+ mock.request.mockImplementation(()=>new Promise(resolve=>{releases.push(resolve);}));
+ const old=session.siteApi('/api/me/entitlements');await vi.waitFor(()=>expect(releases).toHaveLength(1));
+ const change=session.siteApi('/api/billing/reconcile',{});await vi.waitFor(()=>expect(releases).toHaveLength(2));
+ const during=session.siteApi('/api/me/entitlements');await vi.waitFor(()=>expect(releases).toHaveLength(3));
+ releases[1]({url:site+'/api/billing/reconcile',status:200,data:{plan:'pro'}});await change;
+ const fresh=session.siteApi('/api/me/entitlements');await vi.waitFor(()=>expect(releases).toHaveLength(4));
+ releases[3]({url:site+'/api/me/entitlements',status:200,data:{plan:'pro'}});expect(await fresh).toEqual({plan:'pro'});
+ for(const i of [0,2])releases[i]({url:site+'/api/me/entitlements',status:200,data:{plan:'free'}});
+ await Promise.all([old,during]);
+});
+it('invalidates membership from logout start until completion and permits fresh reads after failure',async()=>{
+ const session=await import('../src/lib/session');const generation=await import('../src/lib/member-generation');await session.setSessionToken(token);
+ const before=generation.memberGeneration();let fail!:(error:Error)=>void;
+ mock.request.mockImplementationOnce(()=>new Promise((_,reject)=>{fail=reject;}));
+ const logout=session.logout();const rejected=expect(logout).rejects.toThrow('offline');
+ expect(()=>generation.assertCurrentMember(before)).toThrow('STALE_MEMBER_RESPONSE');
+ expect(()=>generation.assertCurrentMember(generation.memberGeneration())).toThrow('STALE_MEMBER_RESPONSE');
+ await vi.waitFor(()=>expect(fail).toBeTypeOf('function'));fail(new Error('offline'));await rejected;
+ expect(()=>generation.assertCurrentMember(generation.memberGeneration())).not.toThrow();expect(await session.sessionToken()).toBe(token);
+});
+it('separates overlapping GETs across a same-member login incarnation',async()=>{
+ const session=await import('../src/lib/session');await session.setSessionToken(token);
+ let release!:(value:unknown)=>void;mock.request.mockImplementationOnce(()=>new Promise(resolve=>{release=resolve;}));
+ const old=session.siteApi('/api/me/entitlements');await vi.waitFor(()=>expect(release).toBeTypeOf('function'));
+ await session.setSessionToken(token);await session.siteApi('/api/me/entitlements');expect(mock.request).toHaveBeenCalledTimes(2);
+ release({url:site+'/api/me/entitlements',status:200,data:{plan:'free'}});await old;
+});
 it('ends loading on exchange failure and preserves the proof for retry',async()=>{
  const session=await import('../src/lib/session');await session.startLogin();
  mock.request.mockRejectedValueOnce(new Error('offline'));

@@ -2,6 +2,7 @@ import { Preferences } from '@capacitor/preferences';
 import { billing, isVerifiedPro } from './billing';
 import { sessionToken, startLogin } from './session';
 import { describeStoreError,StoreError } from './store-errors';
+import { StaleMemberResponseError } from './member-generation';
 
 /**
  * 「月額980円で続ける」をアプリで押したときの流れ。途中に確認画面を挟まない。
@@ -41,10 +42,10 @@ export async function startProPurchase(): Promise<ProPurchaseResult> {
     performance.measure?.('anzen.purchase.config',{start:configStarted,end:performance.now()});
     const member = await billing.purchase(config);
     window.dispatchEvent(new Event('anzen-usage-changed'));
-    if (isVerifiedPro(member)) window.dispatchEvent(new CustomEvent('anzen-entitlement-changed', {detail:member}));
     if (isVerifiedPro(member)) return { state: 'pro', message: 'Pro になりました。そのまま続けて使えます。' };
     return { state: 'pending', message: PENDING_TEXT.STORE_UNKNOWN };
   } catch (error) {
+    if(error instanceof StaleMemberResponseError)return {state:'pending',message:''};
     const code = error instanceof Error ? error.message : '';
     if(error instanceof StoreError)return {state:'error',message:describeStoreError(error)};
     if (PENDING_TEXT[code]) return { state: code === 'ALREADY_SUBSCRIBED' ? 'pro' : 'pending', message: PENDING_TEXT[code] };

@@ -5,6 +5,7 @@ beforeEach(()=>preferences.clear());
 import type { PurchasesPackage } from '@revenuecat/purchases-capacitor';
 import { BillingController,isVerifiedPro,canResumeApplePurchase,type BillingConfig } from '../src/lib/billing';
 import product from '@/lib/mobile/product-policy.json';
+import { invalidateMemberReads, StaleMemberResponseError } from '../src/lib/member-generation';
 const appUserId='88888888-1111-4111-8111-111111111111';const intentId='88888888-2222-4222-8222-222222222222';
 const free=()=>({plan:'free',source:null,syncState:'verified',expiresAt:null,appUserId,verifiedAt:new Date().toISOString(),limits:product.limits.free,purchasePending:false,purchaseIntentId:null});
 const pro=()=>({...free(),plan:'pro',source:'stripe',expiresAt:new Date(Date.now()+86400000).toISOString(),limits:product.limits.pro});
@@ -36,6 +37,46 @@ function setup(options:{atomic?:boolean;paid?:boolean;syncPending?:boolean;cance
     purchasePackage:vi.fn(async()=>{if(options.cancelled)throw {userCancelled:true,code:'1'};if(options.storePending)throw {code:'20'};if(options.cancelFlagOnly)throw {userCancelled:true};if(options.unknown)throw {code:'10'};return {customerInfo:{entitlements:{active:{anzen_pro:{isActive:true}}}}} as never;}),restorePurchases:vi.fn(async()=>({customerInfo:{entitlements:{active:{anzen_pro:{isActive:true}}}}}) as never)};
   return {send,sdk,controller:new BillingController(send,sdk,()=>true)};
 }
+
+describe('membership response ordering',()=>{
+  for(const operation of ['sync','purchase','restore','refresh'] as const)it(`discards a pre-${operation} free response after confirmed Pro`,async()=>{
+    const s=setup({atomic:true});const original=s.send.getMockImplementation()!;
+    let release!:(value:ReturnType<typeof free>)=>void;
+    s.send.mockImplementationOnce(()=>new Promise(resolve=>{release=resolve;}));
+    const old=s.controller.entitlement();const rejected=expect(old).rejects.toBeInstanceOf(StaleMemberResponseError);
+    s.send.mockImplementation(async(path,body)=>path==='/api/billing/reconcile'||path.includes('refresh=1')?pro():original(path,body));
+    const events:string[]=[];vi.stubGlobal('window',{dispatchEvent:(event:CustomEvent)=>{events.push(event.detail.plan);}});
+    try{
+      const result=operation==='refresh'?await s.controller.entitlement(false,true):operation==='sync'?await s.controller.sync():await s.controller[operation](config);
+      expect(result.plan).toBe('pro');release(free());await rejected;
+      expect(events.at(-1)).toBe('pro');expect(events.slice(events.lastIndexOf('pro')+1)).toEqual([]);
+    }finally{vi.unstubAllGlobals();}
+  });
+  for(const operation of ['entitlement','sync'] as const)it(`does not return or publish late Pro from ${operation} after logout`,async()=>{
+    const s=setup();let release!:(value:ReturnType<typeof pro>)=>void;
+    s.send.mockImplementationOnce(()=>new Promise(resolve=>{release=resolve;}));
+    const events:unknown[]=[];vi.stubGlobal('window',{dispatchEvent:(event:CustomEvent)=>{events.push(event.detail);}});
+    try{
+      const pending=s.controller[operation]();const rejected=expect(pending).rejects.toBeInstanceOf(StaleMemberResponseError);
+      await s.controller.forget();release(pro());await rejected;expect(events).toEqual([]);
+    }finally{vi.unstubAllGlobals();}
+  });
+  it('does not reconcile a purchase that finishes StoreKit after logout',async()=>{
+    const s=setup({atomic:true});let release!:()=>void;
+    s.sdk.purchasePackage.mockImplementationOnce(()=>new Promise(resolve=>{release=()=>resolve({} as never);}));
+    const purchase=s.controller.purchase(config);const rejected=expect(purchase).rejects.toBeInstanceOf(StaleMemberResponseError);
+    await vi.waitFor(()=>expect(release).toBeTypeOf('function'));invalidateMemberReads();release();await rejected;
+    expect(s.send.mock.calls.some(([path])=>path==='/api/billing/reconcile')).toBe(false);
+  });
+  it('discards a delayed outcome response after a newer reconciliation',async()=>{
+    const s=setup({pendingStage:'store_started'});const report={id:intentId,attemptId:crypto.randomUUID(),outcome:'cancelled'};
+    preferences.set(`anzen.apple-outcome.${encodeURIComponent(appUserId)}`,JSON.stringify(report));
+    const original=s.send.getMockImplementation()!;let release!:(value:ReturnType<typeof free>)=>void;
+    s.send.mockImplementation(async(path,body)=>path==='/api/billing/store-outcome'?new Promise(resolve=>{release=resolve;}):path==='/api/billing/reconcile'?pro():original(path,body));
+    const old=s.controller.entitlement();const rejected=expect(old).rejects.toBeInstanceOf(StaleMemberResponseError);
+    await vi.waitFor(()=>expect(release).toBeTypeOf('function'));expect((await s.controller.sync()).plan).toBe('pro');release(free());await rejected;
+  });
+});
 
 it('queues a new StoreKit identity after background logout completes',async()=>{
   const s=setup();const member=await s.controller.entitlement();await s.controller.identify(config,member);

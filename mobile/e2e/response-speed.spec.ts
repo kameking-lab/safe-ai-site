@@ -86,6 +86,55 @@ test('login, confirmed purchase, manual refresh and logout avoid redundant waits
   await save('mobile-account-timings.json',{source:'native plugins + API fixtures, 180ms delayed exchange/rights; no real purchase',loginMs,purchaseReflectedMs,manualRefreshMs,logoutFeedbackMs,entitlementReads,forcedReads});
 });
 
+test('late membership reads cannot replace a purchase or restore Pro during logout',async({page,context})=>{
+  await nativeBridge(context);await context.route('https://**/*',route=>route.abort());
+  let paid=false;let holdNext=false;let releaseRead:(()=>void)|undefined;let readFinished=false;
+  let releaseLogout!:()=>void;const logout=new Promise<void>(resolve=>{releaseLogout=resolve;});
+  const rights=()=>({plan:paid?'pro':'free',source:paid?'app_store':null,syncState:'verified',expiresAt:paid?new Date(Date.now()+86400000).toISOString():null,appUserId,verifiedAt:new Date().toISOString(),limits:paid?product.limits.pro:product.limits.free});
+  await context.route(host+'/api/**',async route=>{
+    const request=route.request();const url=new URL(request.url());if(request.method()==='OPTIONS')return route.fulfill({status:204,headers:cors});
+    if(url.pathname.endsWith('/billing/config'))return route.fulfill({headers:cors,json:{ready:true,publicKey:'synthetic-public-key',productId:'jp.anzenaiportal.pro.monthly',offeringId:'speed',policy:product,login:{apple:true,google:true},terms:host+'/terms',privacy:host+'/privacy',manage:'https://apps.apple.com/account/subscriptions'}});
+    if(url.pathname.endsWith('/auth/start'))return route.fulfill({headers:cors,json:{flow,authorizeUrl:host+'/api/mobile/v1/auth/authorize?flow='+flow}});
+    if(url.pathname.endsWith('/auth/exchange'))return route.fulfill({headers:cors,json:{token:'b'.repeat(43)}});
+    if(url.pathname==='/api/me/entitlements'){
+      if(!request.headers()['authorization'])return route.fulfill({status:401,headers:cors,json:{error:{code:'UNAUTHORIZED'}}});
+      const snapshot=rights();const held=holdNext;
+      if(held){holdNext=false;await new Promise<void>(resolve=>{releaseRead=resolve;});}
+      await route.fulfill({headers:cors,json:snapshot});if(held)readFinished=true;return;
+    }
+    if(url.pathname.endsWith('/purchase-intents'))return route.fulfill({headers:cors,json:{id:flow,appUserId,attemptId:request.postDataJSON().attemptId}});
+    if(url.pathname.endsWith('/reconcile')){paid=true;return route.fulfill({headers:cors,json:rights()});}
+    if(url.pathname.endsWith('/auth/logout')){await logout;return route.fulfill({headers:cors,json:{ok:true}});}
+    if(url.pathname.endsWith('/account'))return route.fulfill({headers:cors,json:{displayName:'応答順確認',email:null,sdsHistory:[]}});
+    return route.fulfill({status:401,headers:cors,json:{error:{code:'UNAUTHORIZED'}}});
+  });
+  await page.goto('/account/');await expect(page.getByText('ログインしていません',{exact:true})).toBeVisible();
+  await page.getByRole('button',{name:'Apple / Googleでログイン'}).click();
+  await expect.poll(()=>page.evaluate(()=>(window as unknown as {__speedBrowserOpened?:boolean}).__speedBrowserOpened)).toBe(true);
+  await page.evaluate(()=>{(window as unknown as {__returnSpeedLogin:()=>void}).__returnSpeedLogin();});
+  await expect(page.getByText('無料会員',{exact:true})).toBeVisible();
+  await page.evaluate(()=>{
+    Object.assign(window,{__plans:[] as string[]});
+    window.addEventListener('anzen-entitlement-changed',event=>(window as unknown as {__plans:string[]}).__plans.push((event as CustomEvent<{plan:string}>).detail.plan));
+  });
+  holdNext=true;await page.evaluate(()=>window.dispatchEvent(new Event('anzen-app-active')));
+  await expect.poll(()=>!!releaseRead).toBe(true);
+  await page.getByRole('button',{name:/月額¥980で続ける/}).click();
+  await expect(page.getByText('Pro 購入済み（App Store購読）',{exact:true})).toBeVisible();
+  releaseRead!();await expect.poll(()=>readFinished).toBe(true);
+  await expect.poll(()=>page.evaluate(()=>(window as unknown as {__plans:string[]}).__plans.at(-1))).toBe('pro');
+  await expect(page.getByText('Pro 購入済み（App Store購読）',{exact:true})).toBeVisible();
+  readFinished=false;releaseRead=undefined;holdNext=true;
+  await page.evaluate(()=>window.dispatchEvent(new Event('anzen-app-active')));await expect.poll(()=>!!releaseRead).toBe(true);
+  await page.getByRole('button',{name:'ログアウト',exact:true}).click();
+  await expect(page.getByText('ログインしていません',{exact:true})).toBeVisible();
+  const before=await page.evaluate(()=>(window as unknown as {__plans:string[]}).__plans.length);
+  releaseRead!();await expect.poll(()=>readFinished).toBe(true);releaseLogout();
+  await expect(page.getByRole('button',{name:'Apple / Googleでログイン'})).toBeEnabled();
+  expect(await page.evaluate(()=>(window as unknown as {__plans:string[]}).__plans.length)).toBe(before);
+  await expect(page.getByText('ログインしていません',{exact:true})).toBeVisible();
+});
+
 for(const reduced of [false,true])test(`Chihuahua is visible before the first native text, reduced=${reduced}`,async({page,context})=>{
   await nativeBridge(context);await page.setViewportSize({width:390,height:844});await page.emulateMedia({reducedMotion:reduced?'reduce':'no-preference'});
   await context.route('https://**/*',route=>route.abort());let release!:()=>void;const response=new Promise<void>(resolve=>{release=resolve;});

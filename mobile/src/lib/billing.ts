@@ -5,6 +5,7 @@ import product from '@/lib/mobile/product-policy.json';
 import { siteApi, sessionBinding, SiteApiError } from './session';
 import { StoreError } from './store-errors';
 import { Preferences } from '@capacitor/preferences';
+import { assertCurrentMember, currentMemberResponse, invalidateMemberReads, memberGeneration, StaleMemberResponseError } from './member-generation';
 const outcomeSchema=z.object({id:z.string().uuid().optional(),attemptId:z.string().uuid(),outcome:z.enum(['cancelled','deferred','unknown','not_opened'])}).refine(r=>!!r.id||r.outcome==='not_opened');
 type StoreOutcome=z.infer<typeof outcomeSchema>;
 const outcomeKey=(appUserId:string)=>`anzen.apple-outcome.${encodeURIComponent(appUserId)}`;
@@ -34,24 +35,30 @@ export class BillingController {
   constructor(private send=siteApi,private sdk:Sdk=Purchases,private native=()=>Capacitor.getPlatform()==='ios'){}
   async config(){return billingConfigSchema.parse(await this.send('/api/mobile/v1/billing/config'));}
   async entitlement(recoverWhileBusy=false,refresh=false){
-    const member=snapshotSchema.parse(await this.send(refresh?'/api/me/entitlements?refresh=1':'/api/me/entitlements'));
+    return this.readEntitlement(refresh?invalidateMemberReads():memberGeneration(),recoverWhileBusy,refresh);
+  }
+  private async readEntitlement(ticket:number,recoverWhileBusy=false,refresh=false){
+    assertCurrentMember(ticket);
+    const member=snapshotSchema.parse(await currentMemberResponse(ticket,this.send(refresh?'/api/me/entitlements?refresh=1':'/api/me/entitlements')));
     this.publish(member);
     // A cancelled purchase must recover even if its first outcome request lost connectivity.
     try {
       const {value}=await Preferences.get({key:outcomeKey(member.appUserId)});
+      assertCurrentMember(ticket);
       if(value && (!this.busy || recoverWhileBusy)){
         const report=outcomeSchema.parse(JSON.parse(value));
         if(!report.id || member.purchaseIntentId===report.id){
-          const checked=await this.sendOutcome(member.appUserId,report);
-          await clearReportedOutcome(member.appUserId,report);this.publish(checked);return checked;
+          const checked=await currentMemberResponse(ticket,this.sendOutcome(member.appUserId,report));
+          await clearReportedOutcome(member.appUserId,report);assertCurrentMember(ticket);this.publish(checked);return checked;
         }
         await clearReportedOutcome(member.appUserId,report);
       }
-    } catch { /* Leave the durable outcome for the next authenticated refresh. */ }
+    } catch(error) { if(error instanceof StaleMemberResponseError)throw error; /* Leave the durable outcome for the next authenticated refresh. */ }
+    assertCurrentMember(ticket);
     return member;
   }
   private sendOutcome(appUserId:string,report:StoreOutcome):Promise<MemberEntitlement>{
-    const key=JSON.stringify([appUserId,report]);
+    const key=JSON.stringify([appUserId,report,memberGeneration()]);
     const pending=this.outcomeReports.get(key);if(pending)return pending;
     const work=this.send('/api/billing/store-outcome',report).then(value=>snapshotSchema.parse(value));
     this.outcomeReports.set(key,work);
@@ -66,7 +73,13 @@ export class BillingController {
     catch { /* Retried automatically by entitlement() after app relaunch or reconnect. */ }
   }
   private publish(member:MemberEntitlement){if(typeof window!=='undefined')window.dispatchEvent(new CustomEvent('anzen-entitlement-changed',{detail:member}));}
-  async sync(){const member=snapshotSchema.parse(await this.send('/api/billing/reconcile',{}));this.publish(member);return member;}
+  async sync(){return this.reconcile(memberGeneration());}
+  private async reconcile(ticket:number){
+    assertCurrentMember(ticket);
+    // Also discard reads started while StoreKit was open, before confirmation.
+    const next=invalidateMemberReads();
+    const member=snapshotSchema.parse(await currentMemberResponse(next,this.send('/api/billing/reconcile',{})));this.publish(member);return member;
+  }
   async identify(config:BillingConfig,member:MemberEntitlement){
     if(this.busy && this.purchaseUser && this.purchaseUser!==member.appUserId)throw new Error('PURCHASE_PENDING');
     const next=this.identityWork.then(()=>this.identifySerial(config,member));
@@ -101,17 +114,19 @@ export class BillingController {
   }
   async purchase(config:BillingConfig){
     if(this.busy)throw new Error('PURCHASE_PENDING');this.busy=true;
+    const ticket=invalidateMemberReads();
     const started=performance.now();
     try{
       if(config.salesPaused)throw new Error('PRO_SALES_PAUSED');
       const binding=await sessionBinding();
-      const member=await this.entitlement(true);
+      const member=await this.readEntitlement(ticket,true);
       this.purchaseUser=member.appUserId;
       if(member.plan==='pro')throw new Error('ALREADY_SUBSCRIBED');
       if(member.purchasePending && member.purchaseSource!=='app_store')throw new Error('PURCHASE_PENDING');
       if(!canResumeApplePurchase(member))throw new Error('PURCHASE_PENDING');
       if(member.syncState!=='verified')throw new Error('ENTITLEMENT_SYNC_PENDING');
       const p=await this.offering(config,member);
+      assertCurrentMember(ticket);
       const attemptId=crypto.randomUUID();
       if(await sessionBinding()!==binding)throw new Error('UNAUTHORIZED');
       // If preparation commits but its response is lost, the next refresh can
@@ -129,7 +144,7 @@ export class BillingController {
       }
       // Compatibility with a server released before atomic preparation. Never replay the POST.
       if(!intent.attemptId){
-        const latest=await this.entitlement();
+        const latest=await this.readEntitlement(ticket);
         if(latest.appUserId!==member.appUserId || latest.plan==='pro' || latest.syncState!=='verified' || latest.purchaseIntentId!==intent.id)throw new Error('ENTITLEMENT_SYNC_PENDING');
         try{await this.send('/api/billing/store-started',{id:intent.id,attemptId});}
         catch(error){
@@ -144,24 +159,28 @@ export class BillingController {
         throw new Error('UNAUTHORIZED');
       }
       await clearReportedOutcome(member.appUserId,preparedOutcome);
+      assertCurrentMember(ticket);
       performance.measure?.('anzen.purchase.before-storekit',{start:started,end:performance.now()});
       try{await this.sdk.purchasePackage({aPackage:p});}catch(e){
         const code=String((e as {code?:string|number}).code??'');
         const outcome=code==='1'?'cancelled':code==='20'?'deferred':'unknown';
         // A userCancelled flag alone is not an SDK-confirmed cancellation.
         await this.reportOutcome(member.appUserId,{id:intent.id,attemptId,outcome});
+        assertCurrentMember(ticket);
         throw new Error(outcome==='cancelled'?'STORE_CANCELLED':outcome==='deferred'?'STORE_DEFERRED':'STORE_UNKNOWN');
       }
       // SDK customerInfo is deliberately ignored for authorization.
-      try{return await this.sync();}catch{await this.reportOutcome(member.appUserId,{id:intent.id,attemptId,outcome:'unknown'});throw new Error('STORE_UNKNOWN');}
+      try{return await this.reconcile(ticket);}catch(error){if(error instanceof StaleMemberResponseError)throw error;await this.reportOutcome(member.appUserId,{id:intent.id,attemptId,outcome:'unknown'});throw new Error('STORE_UNKNOWN');}
     }finally{this.purchaseUser=null;this.busy=false;}
   }
-  async cancelPrepared(){const member=await this.entitlement();if(!member.purchasePending||member.purchaseSource!=='app_store'||member.purchaseStage!=='prepared'||!member.purchaseIntentId)throw new Error('PURCHASE_REVIEW_REQUIRED');return snapshotSchema.parse(await this.send('/api/billing/cancel-intent',{id:member.purchaseIntentId,source:'app_store'}));}
+  async cancelPrepared(){const ticket=invalidateMemberReads();const member=await this.readEntitlement(ticket);if(!member.purchasePending||member.purchaseSource!=='app_store'||member.purchaseStage!=='prepared'||!member.purchaseIntentId)throw new Error('PURCHASE_REVIEW_REQUIRED');return snapshotSchema.parse(await currentMemberResponse(ticket,this.send('/api/billing/cancel-intent',{id:member.purchaseIntentId,source:'app_store'})));}
   async restore(config:BillingConfig){
     if(this.busy)throw new Error('PURCHASE_PENDING');this.busy=true;
-    try{const member=await this.entitlement();await this.identify(config,member);await this.sdk.restorePurchases();return await this.sync();}finally{this.busy=false;}
+    const ticket=invalidateMemberReads();
+    try{const member=await this.readEntitlement(ticket);await this.identify(config,member);assertCurrentMember(ticket);await this.sdk.restorePurchases();return await this.reconcile(ticket);}finally{this.busy=false;}
   }
   async forget(){
+    invalidateMemberReads();
     this.packages.clear();
     // A new login can start while logout runs in the background. Queue its SDK
     // identity after this logout so a late completion cannot erase the new owner.

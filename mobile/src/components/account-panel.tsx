@@ -6,6 +6,7 @@ import { openSource } from '../lib/native';
 import { NativeAccountDetails } from './native-account-details';
 import { AccountDeletionPanel } from './account-deletion-panel';
 import { describeStoreError,StoreError } from '../lib/store-errors';
+import { StaleMemberResponseError } from '../lib/member-generation';
 const messages:Record<string,string>={UNAUTHORIZED:'既存の安全AI会員でログインしてください。',BILLING_NOT_CONFIGURED:'App Storeの販売設定がサーバーでそろっていません［BILLING_NOT_CONFIGURED］。',ALREADY_SUBSCRIBED:'購入済みです。追加の購入は不要です。',PURCHASE_PENDING:'購入処理が保留中です。購入を繰り返さず「権利を再確認」または復元をお試しください。',ENTITLEMENT_SYNC_PENDING:'権利を確認できません。二重購入を避けるため、新規購入を停止しています。',PURCHASE_OWNED_BY_OTHER_ACCOUNT:'この購入は別の会員に紐付いています。元の会員でログインしてください。'};
 const purchaseMessages:Record<string,string>={PRO_SALES_PAUSED:'今月のPro新規受付は終了しました。来月1日に再開します。',STORE_CANCELLED:'購入を取り消しました。もう一度購入できます。',STORE_DEFERRED:'App Storeで承認待ちです。承認後に自動で反映されます。',STORE_UNKNOWN:'購入結果を再確認します。購入済みの場合は「購入を復元」をお試しください。',STORE_NOT_OPENED:'購入画面を開けませんでした。もう一度お試しください。',PURCHASE_REVIEW_REQUIRED:'購入状況を確認しています。「権利を再確認」をお試しください。'};
 const stageMessages:Record<string,string>={prepared:'App Store起動前の購入予約があります。再開または予約の取消ができます。',store_started:purchaseMessages.STORE_UNKNOWN,store_cancelled_reported:purchaseMessages.STORE_CANCELLED,store_deferred:purchaseMessages.STORE_DEFERRED,store_unknown:purchaseMessages.STORE_UNKNOWN,store_not_opened_reported:purchaseMessages.STORE_NOT_OPENED};
@@ -28,7 +29,7 @@ export function AccountPanel(){
         void billing.offering(c,m).then(p=>{if(ticket===refreshGeneration.current)setPrice(p.product.priceString);}).catch(e=>{if(ticket===refreshGeneration.current)setMessage(messages[(e as Error).message]??describeStoreError(e));});
       });
     }catch(e){
-      if(ticket!==refreshGeneration.current)return;const code=(e as Error).message;
+      if(ticket!==refreshGeneration.current||e instanceof StaleMemberResponseError)return;const code=(e as Error).message;
       setMemberState(code==='UNAUTHORIZED'?'unauthenticated':'unavailable');if(code==='UNAUTHORIZED')setMember(null);
       setMessage(code==='UNAUTHORIZED'?(manual?'ログインしてください。':''):messages[code]??'会員情報を確認できません。もう一度お試しください。');
     }finally{if(ticket===refreshGeneration.current)setRefreshing(false);}
@@ -42,7 +43,20 @@ export function AccountPanel(){
     const timer=setInterval(handler,60000);
     return()=>{active=false;refreshGeneration.current++;clearInterval(timer);window.removeEventListener('anzen-session-changed',sessionChanged);window.removeEventListener('anzen-login-started',loginStarted);window.removeEventListener('anzen-login-failed',loginEnded);window.removeEventListener('anzen-login-dismissed',loginEnded);window.removeEventListener('anzen-app-active',handler);};
   },[refresh]);
-  async function action(fn:()=>Promise<unknown>){if(busy)return;setBusy(true);setMessage('');try{const result=await fn();if(result&&typeof result==='object'&&'appUserId' in result){refreshGeneration.current++;setMember(result as MemberEntitlement);setMemberState('verified');setRefreshing(false);setMessage('');window.dispatchEvent(new Event('anzen-usage-changed'));}else await refresh();}catch(e){const err=e as Error;let recovered=false;try{const m=await billing.entitlement();setMember(m);setMemberState('verified');recovered=isVerifiedPro(m);}catch{setMemberState('unavailable');}setMessage(recovered?'':err instanceof StoreError?describeStoreError(err):purchaseMessages[err.message]??messages[err.message]??describeStoreError(err));}finally{setBusy(false);}}
+  async function action(fn:()=>Promise<unknown>){
+    if(busy)return;
+    const ticket=++refreshGeneration.current;setBusy(true);setRefreshing(false);setMessage('');
+    try{
+      const result=await fn();if(ticket!==refreshGeneration.current)return;
+      if(result&&typeof result==='object'&&'appUserId' in result){setMember(result as MemberEntitlement);setMemberState('verified');setMessage('');window.dispatchEvent(new Event('anzen-usage-changed'));}else await refresh();
+    }catch(e){
+      if(ticket!==refreshGeneration.current||e instanceof StaleMemberResponseError)return;
+      const err=e as Error;let recovered=false;
+      try{const m=await billing.entitlement();if(ticket!==refreshGeneration.current)return;setMember(m);setMemberState('verified');recovered=isVerifiedPro(m);}
+      catch(error){if(ticket!==refreshGeneration.current||error instanceof StaleMemberResponseError)return;setMemberState('unavailable');}
+      setMessage(recovered?'':err instanceof StoreError?describeStoreError(err):purchaseMessages[err.message]??messages[err.message]??describeStoreError(err));
+    }finally{setBusy(false);}
+  }
   async function signOutAccount(){
     if(busy)return;
     refreshGeneration.current++;setBusy(true);setRefreshing(false);setMember(null);setMemberState('unauthenticated');setPrice('');setMessage('ログアウト中…');

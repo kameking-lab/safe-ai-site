@@ -2,6 +2,7 @@ import { Capacitor, CapacitorHttp, registerPlugin } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
 import { Preferences } from '@capacitor/preferences';
 import { SITE } from './api';
+import { invalidateMemberReads, memberGeneration, suspendMemberReads } from './member-generation';
 type VaultOptions={purpose?:'login'};
 const vault=registerPlugin<{get(options?:VaultOptions):Promise<{value?:string}>;set(options:{value:string}&VaultOptions):Promise<void>;clear(options?:VaultOptions):Promise<void>}>('NativeVault');
 let memoryToken:string|null=null;
@@ -34,6 +35,7 @@ export async function sessionToken() {
   return (await vault.get()).value??null;
 }
 async function writeSessionToken(token:string|null) {
+  invalidateMemberReads();
   await sessionBinding();
   if(Capacitor.isNativePlatform())await initializeVault();
   const rotate=async()=>{const binding=crypto.randomUUID();await Preferences.set({key:'anzen.session-incarnation',value:binding});bindingRead=Promise.resolve(binding);};
@@ -44,7 +46,7 @@ async function writeSessionToken(token:string|null) {
   if(!token)await rotate();
   memoryToken=token;window.dispatchEvent(new CustomEvent('anzen-session-changed',{detail:{signedIn:!!token}}));
 }
-export async function setSessionToken(token:string|null){return serializeSession(()=>writeSessionToken(token));}
+export async function setSessionToken(token:string|null){invalidateMemberReads();return serializeSession(()=>writeSessionToken(token));}
 export async function eraseSessionDataIfCurrent(binding:string,erase:()=>Promise<void>,completed:()=>Promise<void>){
   return serializeSession(async()=>{
     if(await sessionBinding()!==binding)return false;
@@ -56,17 +58,21 @@ export class SiteApiError extends Error {
   constructor(readonly code:string,readonly status:number){super(code);this.name='SiteApiError';}
 }
 const reads=new Map<string,Promise<unknown>>();
+let readGeneration=0;
 export async function siteApi(path:string,body?:unknown,method?:string) {
   if(!/^\/api\/(?:mobile\/v1\/|me\/|billing\/|stripe\/portal$)/.test(path) || path.includes('..') || path.includes('://'))throw new Error('INVALID_ENDPOINT');
+  const reading=!body&&(!method||method==='GET');
+  if(!reading)readGeneration++;
+  const generation=JSON.stringify([memberGeneration(),readGeneration]);
   // An unreadable Keychain is treated as signed out (server answers UNAUTHORIZED), never as a hard failure.
   const token=await sessionToken().catch(()=>null);
-  const key=JSON.stringify([path,token]);
-  if(!body && (!method||method==='GET')){
+  const key=JSON.stringify([path,token,generation]);
+  if(reading){
     const pending=reads.get(key);if(pending)return pending;
     const work=sendSiteApi(path,body,method,token);reads.set(key,work);
     try{return await work;}finally{if(reads.get(key)===work)reads.delete(key);}
   }
-  return sendSiteApi(path,body,method,token);
+  try{return await sendSiteApi(path,body,method,token);}finally{readGeneration++;}
 }
 async function sendSiteApi(path:string,body:unknown,method:string|undefined,token:string|null){
   const headers={Accept:'application/json','Content-Type':'application/json',Origin:SITE,...(token?{Authorization:`Bearer ${token}`}:{})};
@@ -119,7 +125,8 @@ export async function completeLogin(value:string) {
   }finally{completing.delete(flow);}
 }
 export async function logout() {
+  const resume=suspendMemberReads();
   // Revoke the server device/session before deleting the local credential.
-  await siteApi('/api/mobile/v1/auth/logout',{});await setSessionToken(null);await writeLogin(null);
+  try{await siteApi('/api/mobile/v1/auth/logout',{});await setSessionToken(null);await writeLogin(null);}finally{resume();}
 }
 export async function forgetLocalSession(){await setSessionToken(null);await writeLogin(null);}
