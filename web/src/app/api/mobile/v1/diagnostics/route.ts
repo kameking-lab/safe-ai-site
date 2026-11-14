@@ -32,7 +32,9 @@ export async function POST(request:Request){
   const body=new Uint8Array(size);let offset=0;for(const chunk of chunks){body.set(chunk,offset);offset+=chunk.byteLength;}
   const event=billingDiagnosticSchema.safeParse(JSON.parse(new TextDecoder().decode(body)));
   if(!event.success)return reject('SCHEMA_REJECTED',400);
-  console.info('[mobile-billing]',JSON.stringify(event.data));
+  // The production compiler removes info/log. Keep bounded, schema-validated
+  // diagnostic events on the retained warn channel so device reports survive.
+  console.warn('[mobile-billing]',JSON.stringify(event.data));
   return json({ok:true});
  }catch{void reader.cancel().catch(()=>{});return reject(timedOut?'BODY_TIMEOUT':'INVALID_JSON',timedOut?408:400);}
  finally{clearTimeout(timer);reader.releaseLock();}
