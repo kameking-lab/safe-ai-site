@@ -31,3 +31,15 @@ it('limits each client to 60 and the entire instance to 120 per minute, then res
  expect(allowBillingDiagnostic(request(event,{'x-vercel-forwarded-for':'192.0.2.3'}),now)).toBe(false);
  expect(allowBillingDiagnostic(first,now+60000)).toBe(true);
 });
+it.each(['never','trickle','oversized'] as const)('bounds %s body handling even when cancellation never resolves',async mode=>{
+ let stream!:ReadableStreamDefaultController<Uint8Array>;
+ const cancel=vi.fn(()=>new Promise<void>(()=>{}));
+ const body=new ReadableStream<Uint8Array>({start(controller){stream=controller;},cancel});
+ const input=new Request(request().url,{method:'POST',headers:request().headers,body,duplex:'half'} as RequestInit);
+ let response:Response|undefined;const pending=POST(input).then(value=>{response=value;});
+ if(mode==='oversized')stream.enqueue(new Uint8Array(1025));
+ if(mode==='trickle'){stream.enqueue(new TextEncoder().encode('{'));await vi.advanceTimersByTimeAsync(1500);stream.enqueue(new TextEncoder().encode(' '));}
+ await vi.advanceTimersByTimeAsync(2001);
+ expect(response?.status).toBe(mode==='oversized'?413:408);await pending;
+ expect(cancel).toHaveBeenCalledOnce();expect(console.info).not.toHaveBeenCalled();
+});

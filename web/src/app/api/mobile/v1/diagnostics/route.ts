@@ -11,13 +11,17 @@ export async function POST(request:Request){
  if(Number(request.headers.get('content-length'))>1024)return json({ok:false},413);
  const reader=request.body?.getReader();if(!reader)return json({ok:false},400);
  const chunks:Uint8Array[]=[];let size=0;
+ let timedOut=false;
+ let timer:ReturnType<typeof setTimeout>|undefined;
+ // One deadline for the entire body; trickled chunks must not renew it.
+ const deadline=new Promise<never>((_,reject)=>{timer=setTimeout(()=>{timedOut=true;reject(new Error('BODY_TIMEOUT'));},2000);});
  try{
-  while(true){const {done,value}=await reader.read();if(done)break;size+=value.byteLength;if(size>1024){await reader.cancel();return json({ok:false},413);}chunks.push(value);}
+  while(true){const {done,value}=await Promise.race([reader.read(),deadline]);if(done)break;size+=value.byteLength;if(size>1024){void reader.cancel().catch(()=>{});return json({ok:false},413);}chunks.push(value);}
   const body=new Uint8Array(size);let offset=0;for(const chunk of chunks){body.set(chunk,offset);offset+=chunk.byteLength;}
   const event=billingDiagnosticSchema.safeParse(JSON.parse(new TextDecoder().decode(body)));
   if(!event.success)return json({ok:false},400);
   console.info('[mobile-billing]',JSON.stringify(event.data));
   return json({ok:true});
- }catch{return json({ok:false},400);}
- finally{reader.releaseLock();}
+ }catch{void reader.cancel().catch(()=>{});return json({ok:false},timedOut?408:400);}
+ finally{clearTimeout(timer);reader.releaseLock();}
 }
