@@ -636,10 +636,10 @@ test("chatbot: composer, question chips, quick reply and source details remain o
   const input = composer.locator("textarea");
   await input.focus();
   await expect(input).toBeFocused();
-  const composerPosition = await composer.evaluate(
-    (element) => getComputedStyle(element).position,
-  );
-  if (enforce) expect(composerPosition).toBe("sticky");
+  // The history scrolls inside a flex viewport; the composer stays outside it.
+  const composerPosition = await composer.evaluate(element => getComputedStyle(element).position);
+  await page.locator('[data-chatbot-history]').evaluate(element => { element.scrollTop = element.scrollHeight; });
+  if (enforce) expect((await composer.boundingBox())!.y).toBe(composerBox!.y);
   await input.fill("1行目");
   await input.press("Shift+Enter");
   await input.type("2行目");

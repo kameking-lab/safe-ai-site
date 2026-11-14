@@ -1,7 +1,7 @@
 "use client";
 
 import { AiProcessingNote } from "@/components/ai-processing-note";
-import { ChatThinking } from "@/components/chat-thinking";
+import { ChatThinking, useChatMascot } from "@/components/chat-thinking";
 
 import { SourceProvenanceView } from "@/components/law-navi/source-provenance-view";
 import { normalizeSourceProvenance } from "@/lib/source-provenance";
@@ -181,6 +181,7 @@ export function ChatbotPanel({
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState(initialQuestion ?? "");
   const [isSending, setIsSending] = useState(false);
+  const mascot = useChatMascot();
   const [error, setError] = useState<string | null>(null);
   // 無料枠の上限に当たったときの購入入口（エラー表示とは別。再試行ボタンは出さない）。
   const [answerViewportHeight, setAnswerViewportHeight] = useState(0);
@@ -319,6 +320,7 @@ export function ChatbotPanel({
 
     const userMessage = createMessage("user", text);
     const assistantId = crypto.randomUUID();
+    mascot.start(assistantId);
     const placeholder: ChatMessage = {
       id: assistantId,
       role: "assistant",
@@ -347,6 +349,7 @@ export function ChatbotPanel({
       privacyConfirmed: true,
     });
     let streamedContent = "";
+    let responseHasAnswer = false;
     const requestStarted = performance.now();
     const timeoutId = window.setTimeout(
       () => controller.abort("timeout"),
@@ -442,7 +445,10 @@ export function ChatbotPanel({
             try {
               const parsed = JSON.parse(data) as Record<string, unknown>;
               if (event === "text" && typeof parsed.chunk === "string") {
-                if (!streamedContent && parsed.chunk) performance.measure?.("anzen.chat.first-text", {start:requestStarted,end:performance.now()});
+                if (!streamedContent && parsed.chunk) {
+                  performance.measure?.("anzen.chat.first-text", {start:requestStarted,end:performance.now()});
+                  mascot.answer(assistantId);
+                }
                 streamedContent += parsed.chunk;
                 setMessages((previous) =>
                   previous.map((message) =>
@@ -476,6 +482,8 @@ export function ChatbotPanel({
       if (!directAnswer && !finalMeta.answer?.trim()) {
         throw new Error("stream-incomplete");
       }
+      responseHasAnswer = true;
+      if (!streamedContent) mascot.answer(assistantId);
 
       conversationContextRef.current = sanitizePublicLegalConversationContext(
         finalMeta.context,
@@ -518,6 +526,7 @@ export function ChatbotPanel({
       );
     } catch (streamError) {
       if (requestGenerationRef.current !== requestGeneration) return;
+      mascot.cancel(assistantId);
       setMessages((previous) =>
         previous.filter(
           (message) =>
@@ -544,6 +553,7 @@ export function ChatbotPanel({
       performance.measure?.("anzen.chat.total", {start:requestStarted,end:performance.now()});
       window.clearTimeout(timeoutId);
       if (requestGenerationRef.current === requestGeneration) {
+        if (!responseHasAnswer) mascot.cancel(assistantId);
         requestPendingRef.current = false;
         setIsSending(false);
         abortRef.current = null;
@@ -610,6 +620,7 @@ export function ChatbotPanel({
   }, []);
 
   function handleClear() {
+    mascot.cancel();
     requestGenerationRef.current += 1;
     abortRef.current?.abort();
     abortRef.current = null;
@@ -784,7 +795,8 @@ export function ChatbotPanel({
                       >
                         安衛法AIの回答 {assistantAnswerNumber}
                       </h2>
-                      {isStreaming && !message.content ? <ChatThinking /> : isStreaming && message.provisional ? (
+                      {mascot.feedback?.id === message.id && <ChatThinking phase={mascot.feedback.phase} />}
+                      {isStreaming && !message.content ? null : isStreaming && message.provisional ? (
                         <div data-chatbot-provisional="">
                           <p className="mb-1 text-xs text-slate-500 dark:text-slate-400">生成中・引用は未確認です</p>
                           <p className="whitespace-pre-wrap">{message.content}</p>
@@ -1065,7 +1077,7 @@ export function ChatbotPanel({
           {isSending ? (
             <button
               type="button"
-              onClick={() => abortRef.current?.abort()}
+              onClick={() => { mascot.cancel(); abortRef.current?.abort(); }}
               aria-label="生成を停止"
               className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-full bg-slate-900 text-white hover:bg-slate-700 dark:bg-white dark:text-slate-950"
             >
