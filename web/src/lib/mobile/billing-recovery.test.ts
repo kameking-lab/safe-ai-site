@@ -158,6 +158,17 @@ it('manual refresh discovers an Apple purchase even before a grant webhook has a
  expect((await getEntitlement('member')).plan).toBe('free');expect(state.fetches).toBe(0);
  expect((await getEntitlement('member',{refresh:true})).plan).toBe('pro');expect(state.fetches).toBe(1);
 });
+it('rejects reconciliation for an SDK identity from a previous login before querying providers',async()=>{
+ state.grantAvailable=true;
+ await expect(reconcile('member',{appUserId:'previous-member-identifier'})).rejects.toThrow('UNAUTHORIZED');
+ expect(state.fetches).toBe(0);expect(state.grants).toHaveLength(0);
+});
+it('reconciles the same returning identity and reads its completed rights without another purchase',async()=>{
+ state.sandboxGrant=true;state.intent={id:crypto.randomUUID(),userId:'member',source:'app_store',status:'pending',stage:'store_started'};
+ const rights=await reconcile('member',{appUserId:'immutable-member-id'});
+ expect(rights.plan).toBe('pro');expect(rights.limits.law_chat).toBe(50);expect(rights.purchasePending).toBe(false);
+ expect((await getEntitlement('member')).plan).toBe('pro');expect(state.created).toBe(0);expect(state.env).toBe('SANDBOX');
+});
 it.each([false,true])('does not reuse a pre-mutation in-flight read (previously paid: %s)',async(wasPaid)=>{
  const grant={userId:'member',provider:'app_store',environment:'PRODUCTION',expiresAt:new Date(Date.now()+86400000),checkedAt:new Date(),revoked:false};
  state.grants=wasPaid?[grant]:[];

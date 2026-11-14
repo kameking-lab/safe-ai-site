@@ -15,12 +15,17 @@ import type {
 } from "./types";
 
 export const RISK_LEVEL_LABEL: Record<CsRiskLevel, string> = {
-  I: "Ⅰ",
-  II: "Ⅱ",
-  "II-A": "Ⅱ-A",
-  "II-B": "Ⅱ-B",
-  III: "Ⅲ",
-  IV: "Ⅳ",
+  I: "レベル1（些細）",
+  II: "レベル2（小さい）",
+  "II-A": "レベル2-A（小さい）",
+  "II-B": "レベル2-B（懸念あり）",
+  III: "レベル3（中程度）",
+  IV: "レベル4（大きい）",
+};
+
+/** 区分の大きさを示す4段階の目印。確率・割合ではない。A/Bの違いは文字で保持する。 */
+export const RISK_LEVEL_STARS: Record<CsRiskLevel, string> = {
+  I: "★☆☆☆", II: "★★☆☆", "II-A": "★★☆☆", "II-B": "★★☆☆", III: "★★★☆", IV: "★★★★",
 };
 
 export const RISK_LEVEL_MEANING: Record<CsRiskLevel, string> = {

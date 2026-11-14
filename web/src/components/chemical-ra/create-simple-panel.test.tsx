@@ -33,7 +33,7 @@ describe("化学物質リスクアセスメント画面", () => {
     choose("皮膚に付く範囲", area);
     expect(screen.getByRole("radio", {name:"粉体"}).hasAttribute("disabled")).toBe(true);
     const routes=screen.getByRole("list", {name:"経路別のリスクレベル"});
-    expect(routes.textContent).not.toContain("—");expect(routes.textContent).toContain("Ⅳ");
+    expect(routes.textContent).not.toContain("—");expect(routes.textContent).toContain("レベル4（大きい）");expect(routes.textContent).toContain("★★★★");
     expect(screen.getByText(/推定 .*ppm／ばく露限界値/)).toBeDefined();
     expect(screen.getByText(/吸収量 .*mg\/日／経皮ばく露限界値/)).toBeDefined();
     expect(document.body.textContent).not.toContain('「」');

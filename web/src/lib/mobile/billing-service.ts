@@ -65,9 +65,11 @@ async function readEntitlement(userId:string,refresh:boolean) {
   if(refreshFailed&&rights.plan==='free')rights.syncState='pending';
   return rights;
 }
-export async function reconcile(userId:string,options:{stripe?:boolean}={}) {
+export async function reconcile(userId:string,options:{stripe?:boolean;appUserId?:string}={}) {
   return billingDb().$transaction(async tx=>{
     await lockMember(tx,userId);let member=await identity(tx,userId);
+    // A delayed native SDK operation must not reconcile under a replacement login.
+    if(options.appUserId&&options.appUserId!==member.appUserId)throw new Error('UNAUTHORIZED');
     let environment:'SANDBOX'|'PRODUCTION'=member.billingEnvironment==='SANDBOX'?'SANDBOX':'PRODUCTION';
     const productId=process.env.REVENUECAT_IOS_PRODUCT_ID;
     if(!productId) throw new Error('ENTITLEMENT_SYNC_PENDING');
