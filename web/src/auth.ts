@@ -125,16 +125,19 @@ const initialized = isAuthConfigured
           if (!token.sub || !session.user) return session;
           const userId = token.sub;
           const ledgerEnabled = process.env.MOBILE_LEDGER_ENABLED === 'true';
-          const [member, deletion, sub, rights] = await Promise.all([
+          const [member, deletion] = await Promise.all([
             prisma ? prisma.user.findUnique({where:{id:userId},select:{id:true}}) : true,
             prisma && ledgerEnabled ? prisma.mobileAccountDeletion.findUnique({where:{userId}}) : null,
+          ]);
+          if (!member || deletion?.status === 'pending') return {...session,user:undefined} as unknown as typeof session;
+          // Billing can upsert an identity and reconcile purchases; only start it for a valid member.
+          const [sub, rights] = await Promise.all([
             prisma && !ledgerEnabled && !identityOnly.getStore() ? prisma.subscription.findUnique({where:{userId}}).catch(() => {
               console.error("[auth] failed to load subscription", {operation:"load-session-subscription"});
               return null;
             }) : null,
             ledgerEnabled && !identityOnly.getStore() ? getEntitlement(userId) : null,
           ]);
-          if (!member || deletion?.status === 'pending') return {...session,user:undefined} as unknown as typeof session;
           const user = session.user as typeof session.user & {id?:string;signedInAt?:string;planName?:string;status?:string};
           user.id = userId;
           if (token.signedInAt) user.signedInAt = String(token.signedInAt);

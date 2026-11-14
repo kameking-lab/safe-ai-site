@@ -34,13 +34,9 @@ export async function entitlementInTransaction(tx:Prisma.TransactionClient,userI
   const pending=intent?.status==='pending';
   return {...rights,purchasePending:pending,purchaseIntentId:pending?intent.id:null,purchaseSource:pending?intent.source:null,purchaseStage:pending?intent.stage:null};
 }
-const entitlementReads=new Map<string,Promise<EntitlementSnapshot>>();
-/** Share overlapping reads only; never cache rights across a completed request/purchase. */
+/** Each invocation reads afresh: even an in-flight read may predate a completed purchase/revocation. */
 export async function getEntitlement(userId:string,options:{refresh?:boolean}={}) {
-  const key=JSON.stringify([userId,!!options.refresh]);
-  const pending=entitlementReads.get(key);if(pending)return pending;
-  const work=readEntitlement(userId,!!options.refresh);entitlementReads.set(key,work);
-  try{return await work;}finally{if(entitlementReads.get(key)===work)entitlementReads.delete(key);}
+  return readEntitlement(userId,!!options.refresh);
 }
 async function readEntitlement(userId:string,refresh:boolean) {
   const db=billingDb();const now=Date.now();
