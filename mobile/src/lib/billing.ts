@@ -39,7 +39,9 @@ export class BillingController {
   }
   private async readEntitlement(ticket:number,recoverWhileBusy=false,refresh=false){
     assertCurrentMember(ticket);
-    const member=snapshotSchema.parse(await currentMemberResponse(ticket,this.send(refresh?'/api/me/entitlements?refresh=1':'/api/me/entitlements')));
+    const response=await currentMemberResponse(ticket,this.send(refresh?'/api/me/entitlements?refresh=1':'/api/me/entitlements'));
+    assertCurrentMember(ticket);
+    const member=snapshotSchema.parse(response);
     if(refresh)ticket=invalidateMemberReads();
     this.publish(member);
     // A cancelled purchase must recover even if its first outcome request lost connectivity.
@@ -79,7 +81,9 @@ export class BillingController {
     assertCurrentMember(ticket);
     // Also discard reads started while StoreKit was open, before confirmation.
     const next=invalidateMemberReads();
-    const member=snapshotSchema.parse(await currentMemberResponse(next,this.send('/api/billing/reconcile',{})));
+    const response=await currentMemberResponse(next,this.send('/api/billing/reconcile',{}));
+    assertCurrentMember(next);
+    const member=snapshotSchema.parse(response);
     // Reads opened during server reconciliation may still contain the pre-purchase plan.
     invalidateMemberReads();this.publish(member);return member;
   }

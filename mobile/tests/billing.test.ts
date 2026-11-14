@@ -39,6 +39,16 @@ function setup(options:{atomic?:boolean;paid?:boolean;syncPending?:boolean;cance
 }
 
 describe('membership response ordering',()=>{
+  for(const operation of ['entitlement','sync','refresh'] as const)it(`checks the generation again before publishing ${operation} in the next microtask`,async()=>{
+    const s=setup();let release!:(value:ReturnType<typeof pro>)=>void;
+    s.send.mockImplementationOnce(()=>new Promise(resolve=>{release=resolve;}));
+    const events:unknown[]=[];vi.stubGlobal('window',{dispatchEvent:(event:CustomEvent)=>{events.push(event.detail);}});
+    try{
+      const pending=operation==='refresh'?s.controller.entitlement(false,true):s.controller[operation]();
+      const rejected=expect(pending).rejects.toBeInstanceOf(StaleMemberResponseError);
+      release(pro());queueMicrotask(()=>invalidateMemberReads());await rejected;expect(events).toEqual([]);
+    }finally{vi.unstubAllGlobals();}
+  });
   for(const operation of ['sync','purchase','restore','refresh'] as const)it(`discards a pre-${operation} free response after confirmed Pro`,async()=>{
     const s=setup({atomic:true});const original=s.send.getMockImplementation()!;
     let release!:(value:ReturnType<typeof free>)=>void;
