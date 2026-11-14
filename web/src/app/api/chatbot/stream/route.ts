@@ -398,7 +398,9 @@ async function handlePost(request: Request) {
   let rate;
   try {
     rate = await checkRateLimit(getClientIp(request));
-  } catch {
+  } catch (error) {
+    const code=error instanceof Error&&error.message==='shared_hmac_unavailable'?'SHARED_HMAC_UNAVAILABLE':error instanceof Error&&error.message==='shared_rate_result_invalid'?'SHARED_RATE_RESULT_INVALID':'SHARED_STATE_UNAVAILABLE';
+    console.warn('[chatbot-stream]',JSON.stringify({stage:'rate_limit',code}));
     return new Response(
       JSON.stringify({
         error:

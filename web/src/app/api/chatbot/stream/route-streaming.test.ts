@@ -130,6 +130,13 @@ function meta(frames: Frame[]) {
 }
 
 describe("法令チャットの逐次送信", () => {
+  it("本番の共有HMAC設定不足を本文や秘密値なしの理由コードで記録する",async()=>{
+    vi.stubEnv('NODE_ENV','production');vi.stubEnv('SHARED_STATE_HMAC_SECRET','');vi.stubEnv('AUTOMATION_CONSULT_STATE_HASH_SECRET','');
+    vi.spyOn(console,'warn').mockImplementation(()=>{});
+    const response=await POST(new Request('http://localhost/api/chatbot/stream',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({message:'足場の手すりの高さは？',privacyConfirmed:true})}));
+    expect(response.status).toBe(503);
+    expect(console.warn).toHaveBeenCalledWith('[chatbot-stream]',JSON.stringify({stage:'rate_limit',code:'SHARED_HMAC_UNAVAILABLE'}));
+  });
   it("模擬応答の初文字と全体時間を測る", async () => {
     provider.delays = [40, 100, 100];
     provider.settlementDelay = 60;
