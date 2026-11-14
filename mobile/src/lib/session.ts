@@ -99,7 +99,7 @@ export async function startLogin() {
   const result=await siteApi('/api/mobile/v1/auth/start',{challenge}) as {flow:string;authorizeUrl:string};
   if(!/^[0-9a-f-]{36}$/.test(result.flow) || result.authorizeUrl!==`${SITE}/api/mobile/v1/auth/authorize?flow=${result.flow}`)throw new Error('INVALID_ENDPOINT');
   // Persist PKCE in Keychain before leaving the app. iOS may evict the process during OAuth.
-  await writeLogin(`${result.flow}:${verifier}:${Date.now()}`);
+  await serializeSession(()=>writeLogin(`${result.flow}:${verifier}:${Date.now()}`));
   loginDismissed=false;
   window.dispatchEvent(new Event('anzen-login-started'));
   try{await bounded('login',()=>Browser.open({url:result.authorizeUrl}));}catch(error){loginDismissed=true;await writeLogin(null);window.dispatchEvent(new Event('anzen-login-failed'));throw error;}
@@ -135,12 +135,16 @@ export async function completeLogin(value:string) {
 }
 export async function logout() {
   const resume=suspendMemberReads();
-  // Revoke the server device/session before deleting the local credential.
-  try{
-    await siteApi('/api/mobile/v1/auth/logout',{});
-    await setSessionToken(null);await writeLogin(null);
-    const {billing}=await import('./billing');void billing.forget().catch(()=>{});
-    billingDiagnostic({operation:'logout',result:'ok'});
-  }finally{resume();}
+  // Serialize the bounded server revocation and credential removal together.
+  // A new login/PKCE write queues AFTER this logout; a late response cannot
+  // erase its credential/proof. Native store logout remains detached.
+  return serializeSession(async()=>{
+    try{
+      await siteApi('/api/mobile/v1/auth/logout',{});
+      await writeSessionToken(null);await writeLogin(null);
+      const {billing}=await import('./billing');void billing.forget().catch(()=>{});
+      billingDiagnostic({operation:'logout',result:'ok'});
+    }finally{resume();}
+  });
 }
 export async function forgetLocalSession(){await setSessionToken(null);await writeLogin(null);}

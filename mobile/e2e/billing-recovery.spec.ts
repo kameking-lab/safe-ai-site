@@ -43,7 +43,7 @@ async function setup(context:BrowserContext,fault:Fault|null=null){
    },
   }});
  },{fault});
- let next:'a'|'b'='a';let serverOffline=false;let freeA=false;let configFails=false;let reconciliationOffline=false;
+ let next:'a'|'b'='a';let serverOffline=false;let freeA=false;let configFails=false;let reconciliationOffline=false;let logoutDelay=0;
  const diagnostics:unknown[]=[];
  const rights=(owner:'a'|'b')=>{const paid=owner==='a'&&!freeA;return {plan:paid?'pro':'free',source:paid?'app_store':null,syncState:'verified',expiresAt:paid?new Date(Date.now()+86400000).toISOString():null,appUserId:owners[owner],verifiedAt:new Date().toISOString(),limits:paid?product.limits.pro:product.limits.free};};
  await context.route('https://**/*',route=>route.abort());
@@ -55,7 +55,7 @@ async function setup(context:BrowserContext,fault:Fault|null=null){
   if(url.pathname.endsWith('/billing/config'))return route.fulfill({headers:cors,status:configFails?503:200,json:configFails?{error:{code:'UNAVAILABLE'}}:{ready:true,publicKey:'synthetic-public-sdk',productId:'jp.anzenaiportal.pro.monthly',offeringId:'fixture',policy:product,login:{apple:true,google:true},terms:host+'/terms',privacy:host+'/privacy',manage:'https://apps.apple.com/account/subscriptions'}});
   if(url.pathname.endsWith('/auth/start'))return route.fulfill({headers:cors,json:{flow,authorizeUrl:host+'/api/mobile/v1/auth/authorize?flow='+flow}});
   if(url.pathname.endsWith('/auth/exchange'))return route.fulfill({headers:cors,json:{token:next.repeat(43)}});
-  if(url.pathname.endsWith('/auth/logout'))return route.fulfill({headers:cors,json:{ok:true}});
+  if(url.pathname.endsWith('/auth/logout')){if(logoutDelay)await new Promise(resolve=>setTimeout(resolve,logoutDelay));return route.fulfill({headers:cors,json:{ok:true}});}
   const token=request.headers()['authorization'];const owner=token===`Bearer ${'a'.repeat(43)}`?'a':token===`Bearer ${'b'.repeat(43)}`?'b':null;
   if(!owner)return route.fulfill({status:401,headers:cors,json:{error:{code:'UNAUTHORIZED'}}});
   if(url.pathname==='/api/me/entitlements')return route.fulfill({headers:cors,json:rights(owner)});
@@ -64,7 +64,7 @@ async function setup(context:BrowserContext,fault:Fault|null=null){
   if(url.pathname.endsWith('/account'))return route.fulfill({headers:cors,json:{displayName:'検証会員',email:null,sdsHistory:[]}});
   return route.fulfill({status:503,headers:cors,json:{error:{code:'UNAVAILABLE'}}});
  });
- return {diagnostics,setNext:(value:'a'|'b')=>{next=value;},offline:(value:boolean)=>{serverOffline=value;},free:(value:boolean)=>{freeA=value;},failConfig:()=>{configFails=true;},failReconcile:()=>{reconciliationOffline=true;}};
+ return {diagnostics,setNext:(value:'a'|'b')=>{next=value;},offline:(value:boolean)=>{serverOffline=value;},free:(value:boolean)=>{freeA=value;},failConfig:()=>{configFails=true;},failReconcile:()=>{reconciliationOffline=true;},delayLogout:(ms:number)=>{logoutDelay=ms;}};
 }
 async function login(page:Page){
  const count=await page.evaluate(()=>(window as unknown as Bridge).__opened);
@@ -118,4 +118,9 @@ test('network switch and a failed reconciliation preserve saved server Pro',asyn
  s.offline(true);await page.evaluate(()=>{window.dispatchEvent(new Event('offline'));(window as unknown as Bridge).__activate();});
  await buttons(page);s.offline(false);s.failReconcile();await page.evaluate(()=>{window.dispatchEvent(new Event('online'));(window as unknown as Bridge).__activate();});
  await pro(page);await buttons(page);await page.getByRole('button',{name:'権利を再確認',exact:true}).click();await expect(page.getByRole('button',{name:'権利を再確認',exact:true})).toBeEnabled();await pro(page);await chat50(page);
+});
+test('starting login during a slow server logout keeps the new login and saved Pro',async({page,context})=>{
+ const s=await setup(context);await page.goto('/account/');await login(page);await pro(page);s.delayLogout(1500);
+ await page.getByRole('button',{name:'ログアウト',exact:true}).click();await expect(page.getByRole('button',{name:'Apple / Googleでログイン'})).toBeEnabled();
+ await login(page);await pro(page);await buttons(page);await chat50(page);
 });

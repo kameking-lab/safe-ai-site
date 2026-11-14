@@ -41,6 +41,23 @@ it('releases login when the native browser open call never returns',async()=>{
  const failed=expect(session.startLogin()).rejects.toThrow('OPERATION_TIMEOUT');await vi.advanceTimersByTimeAsync(8001);await failed;
  expect(await session.hasPendingLogin()).toBe(false);expect(window.dispatchEvent).toHaveBeenCalledWith(expect.objectContaining({type:'anzen-login-failed'}));
 });
+it('keeps a newer login when the earlier server logout responds late',async()=>{
+ vi.useFakeTimers();const session=await import('../src/lib/session');await session.setSessionToken('a'.repeat(43));
+ let finish!:(value:unknown)=>void;mock.request.mockImplementationOnce(()=>new Promise(resolve=>{finish=resolve;}));
+ const signingOut=session.logout();await vi.waitFor(()=>expect(finish).toBeTypeOf('function'));
+ const signingIn=session.setSessionToken(token);await vi.advanceTimersByTimeAsync(1);
+ finish({url:site+'/api/mobile/v1/auth/logout',status:200,data:{ok:true}});await Promise.all([signingOut,signingIn]);
+ expect(await session.sessionToken()===token).toBe(true);
+});
+it('keeps a login started while the preceding server logout is still pending',async()=>{
+ vi.useFakeTimers();const session=await import('../src/lib/session');await session.setSessionToken(token);
+ let finish!:(value:unknown)=>void;mock.request.mockImplementationOnce(()=>new Promise(resolve=>{finish=resolve;}));
+ const signingOut=session.logout();await vi.waitFor(()=>expect(finish).toBeTypeOf('function'));
+ const opening=session.startLogin();await vi.waitFor(()=>expect(mock.request.mock.calls.some(([request])=>request.url.endsWith('/start'))).toBe(true));await vi.advanceTimersByTimeAsync(1);
+ finish({url:site+'/api/mobile/v1/auth/logout',status:200,data:{ok:true}});await Promise.all([signingOut,opening]);
+ expect(await session.completeLogin(`anzenai://auth/callback?flow=${flow}&code=${code}`)).toBe(true);
+ expect(await session.sessionToken()===token).toBe(true);
+});
 describe('secure OAuth across native process restarts',()=>{
   it('restores PKCE from Keychain after the JS runtime is recreated and consumes duplicate callbacks once',async()=>{
     const first=await import('../src/lib/session');await first.startLogin();expect(mock.vault.get('login')).toMatch(new RegExp('^'+flow+':[A-Za-z0-9_-]{43}:\\d{13}$'));expect([...mock.prefs.values()]).toEqual(['1']);
