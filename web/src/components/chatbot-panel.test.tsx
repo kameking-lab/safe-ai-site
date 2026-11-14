@@ -156,6 +156,7 @@ describe("ChatbotPanel a11y", () => {
       const alert = screen.getByRole("alert");
       expect(alert.textContent).toContain("自動再送はしていません");
       expect(alert.textContent).toContain("再試行");
+      expect(alert.closest('[data-chatbot-history]')).not.toBeNull();
     });
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(fetchMock.mock.calls[0]?.[0]).toBe("/api/chatbot/stream");
@@ -402,6 +403,8 @@ describe("ChatbotPanel AI safety boundary", () => {
     expect(
       (await screen.findByRole("alert")).getAttribute("data-safety-kind"),
     ).toBe("privacy");
+
+    expect(screen.getByRole("alert").closest('[data-chatbot-history]')).not.toBeNull();
 
     fireEvent.click(screen.getByRole("button", { name: "新しい相談" }));
     expect((input as HTMLTextAreaElement).value).toBe("");

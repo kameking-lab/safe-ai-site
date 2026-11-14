@@ -34,7 +34,9 @@ export function ChatbotViewportSection({
       // height across blur/submit; only a rotation starts a new baseline.
       fullHeight = fullWidth === window.innerWidth ? Math.max(fullHeight, window.innerHeight) : window.innerHeight;
       fullWidth = window.innerWidth;
-      const keyboard = window.innerWidth < 768 && fullHeight - height > 150;
+      // A landscape iPhone is wider than the desktop breakpoint too.
+      const touchViewport = window.innerWidth < 768 || window.matchMedia?.("(pointer: coarse)").matches;
+      const keyboard = touchViewport && fullHeight - height > 150;
       section.toggleAttribute("data-keyboard-open", keyboard);
       // WKWebView pans the visual viewport independently of document scroll.
       // Keep the whole conversation above the keyboard, rather than letting
@@ -91,6 +93,9 @@ export function ChatbotViewportSection({
           background: white;
         }
         html.dark [data-chatbot-viewport-section][data-keyboard-open] { background: #020617; }
+        [data-keyboard-open] [data-chatbot-page-heading] { padding: 0 8px; margin-bottom: 4px; }
+        [data-keyboard-open] [data-chatbot-page-heading] h1 { font-size: 18px; }
+        [data-keyboard-open] [data-chatbot-secondary] { display: none; }
         body:has([data-keyboard-open]) [data-mobile-nav="bottom"] { display: none !important; }
       `}</style>
       {children}
