@@ -1,4 +1,5 @@
 import { registerPlugin, type PluginListenerHandle } from '@capacitor/core';
+import { billingDiagnostic, diagnosticCodes } from './billing-diagnostics';
 
 type StreamEvent = { id: string; kind: 'headers' | 'chunk' | 'end' | 'error'; status?: number; headers?: Record<string,string>; data?: string };
 interface ChatStream {
@@ -15,9 +16,19 @@ export async function nativeChatResponse(body: string, headers: Headers, signal:
   let controller: ReadableStreamDefaultController<Uint8Array>;
   let finished = false;
   let responseStarted = false;
+  let listener: PluginListenerHandle | undefined;
+  let deadline: ReturnType<typeof setTimeout> | undefined;
+  let status: number | undefined;
+  let tail = '';
+  let stage: 'listener'|'start'|'headers'|'stream'|'complete' = 'listener';
+  const started = Date.now();
+  const report = (result: 'start'|'ok'|'failed'|'timeout', code?: typeof diagnosticCodes[number]) => billingDiagnostic({operation:'chat',result,stage,httpStatus:status,code,elapsedMs:Math.min(180000,Date.now()-started)});
+  report('start');
   let resolveResponse!: (response: Response) => void;
   let rejectResponse!: (error: Error) => void;
   const response = new Promise<Response>((resolve, reject) => { resolveResponse=resolve; rejectResponse=reject; });
+  // Listener registration itself can stall; attach rejection handling immediately.
+  void response.catch(()=>{});
   const stream = new ReadableStream<Uint8Array>({
     start(value) { controller=value; },
     cancel() { finish(undefined, false); void sdk.cancel({id}).catch(()=>{}); },
@@ -25,27 +36,45 @@ export async function nativeChatResponse(body: string, headers: Headers, signal:
   function finish(error?: Error, closeStream = true) {
     if (finished) return;
     finished=true;
+    clearTimeout(deadline);
     signal.removeEventListener('abort', abort);
     void listener?.remove().catch(()=>{});
-    if (error) { controller.error(error); if (!responseStarted) rejectResponse(error); }
+    if (error) { report(error.message==='TIMEOUT'?'timeout':'failed',error.message==='TIMEOUT'?'TIMEOUT':'TRANSPORT_ERROR');controller.error(error); if (!responseStarted) rejectResponse(error); }
     else if (closeStream) controller.close();
     window.dispatchEvent(new Event('anzen-usage-changed'));
   }
   function abort() { finish(new DOMException('Aborted','AbortError')); void sdk.cancel({id}).catch(()=>{}); }
-  const listener = await sdk.addListener('response', event => {
+  signal.addEventListener('abort', abort, {once:true});
+  const armDeadline = () => { clearTimeout(deadline);deadline=setTimeout(()=>{finish(new Error('TIMEOUT'));void sdk.cancel({id}).catch(()=>{});},35000); };
+  armDeadline();
+  const registering = sdk.addListener('response', event => {
     if (event.id !== id || finished) return;
     if (event.kind === 'headers') {
+      stage='headers';status=event.status;report(status&&status<400?'ok':'failed',status&&status>=400?'REQUEST_REJECTED':undefined);armDeadline();
       responseStarted=true;
       resolveResponse(new Response(stream,{status:event.status,headers:event.headers}));
     } else if (event.kind === 'chunk' && event.data) {
-      controller.enqueue(Uint8Array.from(atob(event.data), c=>c.charCodeAt(0)));
+      stage='stream';armDeadline();
+      const bytes=Uint8Array.from(atob(event.data), c=>c.charCodeAt(0));
+      tail=(tail+new TextDecoder().decode(bytes)).slice(-4096);
+      controller.enqueue(bytes);
     } else if (event.kind === 'end') {
       if (!responseStarted) finish(new Error('Missing response headers'));
-      else finish();
+      else {
+        if(status&&status>=400){
+          let code:unknown;try{code=JSON.parse(tail)?.error?.code;}catch{}
+          report('failed',diagnosticCodes.includes(code as typeof diagnosticCodes[number])?code as typeof diagnosticCodes[number]:'REQUEST_REJECTED');
+        }else if(/event: error\r?\n/.test(tail))report('failed','STREAM_ERROR');
+        else {stage='complete';report('ok');}
+        finish();
+      }
     } else if (event.kind === 'error') finish(new Error('Chat connection failed'));
   });
-  signal.addEventListener('abort', abort, {once:true});
+  void registering.then(handle=>{if(finished)void handle.remove().catch(()=>{});},()=>{});
+  try {listener=await Promise.race([registering,response.then(()=>undefined)]);}
+  catch(error){finish(error instanceof Error?error:new Error('Chat connection failed'));return response;}
+  if(finished)return response;
   if (signal.aborted) abort();
-  else void sdk.start({id,body,headers:Object.fromEntries(headers)}).catch(error=>finish(error instanceof Error?error:new Error('Chat connection failed')));
+  else {stage='start';void sdk.start({id,body,headers:Object.fromEntries(headers)}).catch(error=>finish(error instanceof Error?error:new Error('Chat connection failed')));}
   return response;
 }

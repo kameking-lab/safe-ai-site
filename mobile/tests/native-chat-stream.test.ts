@@ -1,14 +1,32 @@
 import {afterEach,beforeEach,expect,it,vi} from 'vitest';
 vi.mock('@capacitor/core',()=>({registerPlugin:vi.fn()}));
+vi.mock('../src/lib/billing-diagnostics',()=>({billingDiagnostic:vi.fn(),diagnosticCodes:['UNAUTHORIZED','DAILY_LIMIT_REACHED']}));
+import {billingDiagnostic} from '../src/lib/billing-diagnostics';
 import {nativeChatResponse} from '../src/lib/native-chat-stream';
-beforeEach(()=>vi.stubGlobal('window',{dispatchEvent:vi.fn()}));
-afterEach(()=>vi.unstubAllGlobals());
+beforeEach(()=>{vi.clearAllMocks();vi.stubGlobal('window',{dispatchEvent:vi.fn()});});
+afterEach(()=>{vi.useRealTimers();vi.unstubAllGlobals();});
 function fixture(){
  let receive!:(e:Record<string,unknown>)=>void;let id='';
  const remove=vi.fn(async()=>{});
  const sdk={addListener:vi.fn(async(_n:string,callback:typeof receive)=>{receive=callback;return {remove};}),start:vi.fn(async(options:{id:string})=>{id=options.id;}),cancel:vi.fn(async()=>{})};
  return {sdk,remove,event:(e:Record<string,unknown>)=>receive({id,...e}),getId:()=>id};
 }
+it('records HTTP status and fixed rejection code without response text or credentials',async()=>{
+ const f=fixture();const pending=nativeChatResponse('{}',new Headers(),new AbortController().signal,f.sdk);
+ await vi.waitFor(()=>expect(f.sdk.start).toHaveBeenCalledOnce());
+ f.event({kind:'headers',status:401});const response=await pending;
+ f.event({kind:'chunk',data:Buffer.from(JSON.stringify({error:{code:'UNAUTHORIZED',message:'private message'}})).toString('base64')});f.event({kind:'end'});
+ expect(response.status).toBe(401);await response.text();
+ expect(billingDiagnostic).toHaveBeenCalledWith(expect.objectContaining({operation:'chat',result:'failed',httpStatus:401,code:'UNAUTHORIZED'}));
+ expect(JSON.stringify(vi.mocked(billingDiagnostic).mock.calls)).not.toContain('private message');
+});
+it('times out even when native listener registration never returns',async()=>{
+ vi.useFakeTimers();const sdk={addListener:vi.fn(()=>new Promise<never>(()=>{})),start:vi.fn(),cancel:vi.fn(async()=>{})};
+ const pending=nativeChatResponse('{}',new Headers(),new AbortController().signal,sdk);
+ const rejected=expect(pending).rejects.toThrow('TIMEOUT');await vi.advanceTimersByTimeAsync(35001);await rejected;
+ expect(sdk.start).not.toHaveBeenCalled();expect(sdk.cancel).toHaveBeenCalledOnce();
+ expect(billingDiagnostic).toHaveBeenCalledWith(expect.objectContaining({result:'timeout',stage:'listener',code:'TIMEOUT'}));
+});
 it('resolves on headers and delivers the first UTF-8 bytes before stream completion',async()=>{
  const f=fixture();const pending=nativeChatResponse('{}',new Headers({'Authorization':'Bearer mock-session','X-Operation-ID':'op-fixture'}),new AbortController().signal,f.sdk);
  await vi.waitFor(()=>expect(f.sdk.start).toHaveBeenCalledTimes(1));
