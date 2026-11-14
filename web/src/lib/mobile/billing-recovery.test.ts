@@ -152,3 +152,8 @@ it('manual refresh also verifies recently checked Stripe rights',async()=>{
  await getEntitlement('member');expect(state.stripeFetches).toBe(0);
  await getEntitlement('member',{refresh:true});expect(state.stripeFetches).toBe(1);
 });
+it('manual refresh discovers an Apple purchase even before a grant webhook has arrived',async()=>{
+ state.grantAvailable=true;
+ expect((await getEntitlement('member')).plan).toBe('free');expect(state.fetches).toBe(0);
+ expect((await getEntitlement('member',{refresh:true})).plan).toBe('pro');expect(state.fetches).toBe(1);
+});
