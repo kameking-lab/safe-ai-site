@@ -39,6 +39,35 @@ function setup(options:{atomic?:boolean;paid?:boolean;syncPending?:boolean;cance
 }
 
 describe('membership response ordering',()=>{
+  it('retries a failed read and pending rights silently before allowing one purchase',async()=>{
+    vi.useFakeTimers();
+    try{
+      const s=setup({atomic:true});
+      s.send.mockRejectedValueOnce(new Error('offline')).mockResolvedValueOnce({...free(),syncState:'pending'});
+      const purchase=s.controller.purchase(config);
+      await vi.advanceTimersByTimeAsync(2000);await purchase;
+      expect(s.send.mock.calls.filter(([path])=>path==='/api/me/entitlements')).toHaveLength(3);
+      expect(s.sdk.purchasePackage).toHaveBeenCalledTimes(1);
+      expect(s.send.mock.calls.filter(([path])=>path==='/api/billing/purchase-intents')).toHaveLength(1);
+    }finally{vi.useRealTimers();}
+  });
+  it('blocks unresolved rights after bounded retries without reserving or buying',async()=>{
+    vi.useFakeTimers();
+    try{
+      const s=setup({atomic:true,syncPending:true});
+      const check=expect(s.controller.purchase(config)).rejects.toThrow('ENTITLEMENT_SYNC_PENDING');
+      await vi.advanceTimersByTimeAsync(2000);await check;
+      expect(s.send.mock.calls).toHaveLength(3);expect(s.sdk.purchasePackage).not.toHaveBeenCalled();
+    }finally{vi.useRealTimers();}
+  });
+  it('does not retry under a replaced member generation',async()=>{
+    vi.useFakeTimers();
+    try{
+      const s=setup({syncPending:true});const check=expect(s.controller.entitlement()).rejects.toBeInstanceOf(StaleMemberResponseError);
+      await vi.advanceTimersByTimeAsync(1);invalidateMemberReads();await vi.advanceTimersByTimeAsync(2000);await check;
+      expect(s.send).toHaveBeenCalledTimes(1);
+    }finally{vi.useRealTimers();}
+  });
   for(const operation of ['entitlement','sync','refresh'] as const)it(`checks the generation again before publishing ${operation} in the next microtask`,async()=>{
     const s=setup();let release!:(value:ReturnType<typeof pro>)=>void;
     s.send.mockImplementationOnce(()=>new Promise(resolve=>{release=resolve;}));

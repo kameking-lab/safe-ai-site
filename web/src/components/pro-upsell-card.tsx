@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { createContext, useContext } from "react";
 import { PRO_MONTHLY_PRICE_YEN, proStartHref } from "@/lib/pro-start";
-export const ProPurchasePresentationContext = createContext<{price:string|null}|undefined>(undefined);
+export const ProPurchasePresentationContext = createContext<{price:string|null; busy?:boolean; message?:string}|undefined>(undefined);
 
 /**
  * 無料枠に当たった所に出す購入の入口。主ボタンは1つだけ。
@@ -30,10 +30,12 @@ export function ProUpsellCard({
       <Link
         href={proStartHref(returnTo)}
         data-pro-start=""
+        aria-disabled={native?.busy || undefined}
         className="mt-2 flex min-h-11 w-full items-center justify-center rounded-xl bg-emerald-600 px-4 text-base font-bold text-white hover:bg-emerald-700"
       >
         {native ? (native.price ? `月額${native.price}で続ける` : "月額プランで続ける") : `月額${PRO_MONTHLY_PRICE_YEN.toLocaleString("ja-JP")}円で続ける`}
       </Link>
+      {native?.message ? <p role="status" className="mt-1 text-xs">{native.message}</p> : null}
       <p className="mt-1.5 text-[11px] leading-4 text-slate-600 dark:text-emerald-200">
         1か月ごとの自動更新・いつでも解約できます。全体の月間AI原価上限による生成停止があります。
         <Link href="/pricing/terms" className="underline">条件・特商法表示</Link>・

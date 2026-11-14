@@ -32,19 +32,19 @@ describe('「月額980円で続ける」をアプリで押したとき',()=>{
     expect(await resumeProPurchaseAfterLogin()).toBeNull();expect(mock.prefs.has('anzen.pro-after-login')).toBe(true);
     mock.token='session';expect((await resumeProPurchaseAfterLogin())?.state).toBe('pro');expect(mock.purchase).toHaveBeenCalledTimes(1);
   });
-  it('失敗は理由とコードを画面に出せる文にする',async()=>{
+  it('失敗は短い操作案内だけにし、取消には警告しない',async()=>{
     mock.token='session';
     mock.purchase.mockRejectedValueOnce({code:'23',message:'There is an issue with your configuration.',underlyingErrorMessage:'None of the products registered in the RevenueCat dashboard could be fetched from App Store Connect'});
     const failed=await startProPurchase();
-    expect(failed.state).toBe('error');expect(failed.message).toContain('Bundle IDを確認）［23］');expect(failed.message).toContain('None of the products');
+    expect(failed.state).toBe('error');expect(failed.message).toBe('少し待ってからもう一度お試しください。');
     mock.purchase.mockRejectedValueOnce(new Error('STORE_CANCELLED'));
-    expect((await startProPurchase()).message).toContain('もう一度購入できます');
+    expect((await startProPurchase()).message).toBe('');
   });
 });
 describe('App Store の失敗の言い換え',()=>{
-  it('部品未組み込み・商品不一致・空の Offering を区別する',()=>{
-    expect(describeStoreError({code:'UNIMPLEMENTED',message:'"Purchases" plugin is not implemented on ios'})).toContain('課金部品（RevenueCat）が組み込まれていません');
-    expect(describeStoreError(new StoreError('PRODUCT_MISMATCH','jp.example.monthly MONTHLY P1M USD 6.99'))).toBe('App Store の商品が設定（月額980円・1か月）と一致しないため販売を止めています［PRODUCT_MISMATCH］（jp.example.monthly MONTHLY P1M USD 6.99）');
-    expect(describeStoreError(new StoreError('NO_PACKAGES','offering=default / 取得=なし'))).toContain('［NO_PACKAGES］');
+  it('技術的な設定・英語の詳細を表示せず、必要な操作を案内する',()=>{
+    for(const error of [{code:'UNIMPLEMENTED',message:'"Purchases" plugin is not implemented on ios'},new StoreError('PRODUCT_MISMATCH','jp.example.monthly MONTHLY P1M USD 6.99'),new StoreError('NO_PACKAGES','offering=default / 取得=なし')])expect(describeStoreError(error)).toBe('少し待ってからもう一度お試しください。');
+    expect(describeStoreError({code:'3'})).toBe('端末の購入制限を確認してください。');
+    expect(describeStoreError({code:'10'})).toBe('通信環境を確認してもう一度お試しください。');
   });
 });

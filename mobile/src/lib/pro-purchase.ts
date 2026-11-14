@@ -13,22 +13,22 @@ const PENDING_KEY = 'anzen.pro-after-login';
 const PENDING_TTL = 10 * 60_000;
 export type ProPurchaseResult = { state: 'pro' | 'login' | 'pending' | 'error'; message: string };
 const PENDING_TEXT: Record<string, string> = {
-  STORE_CANCELLED: '購入を取り消しました。もう一度購入できます。',
+  STORE_CANCELLED: '',
   PRO_SALES_PAUSED: '今月のPro新規受付は終了しました。来月1日に再開します。',
   STORE_DEFERRED: 'App Store で承認待ちです（承認後に自動で反映されます）。',
-  STORE_UNKNOWN: '購入結果を確認しています。「会員・Pro」の「購入を復元」で確認できます。',
+  STORE_UNKNOWN: '「会員・Pro」で購入を復元してください。',
   STORE_NOT_OPENED: '購入の準備を完了できませんでした。もう一度お試しください。',
   ALREADY_SUBSCRIBED: 'すでに Pro です。',
-  PURCHASE_PENDING: '前の購入手続きが残っています。「会員・Pro」の「購入を復元」をお試しください。',
-  PURCHASE_REVIEW_REQUIRED: '前の購入手続きの確認が必要です。「会員・Pro」の「購入を復元」をお試しください。',
-  ENTITLEMENT_SYNC_PENDING: '会員の権利を確認できません。二重購入を避けるため購入を止めています。時間をおいてお試しください。',
-  BILLING_RECONCILE_UNAVAILABLE: '購入済みの権利をサーバーで確認できませんでした。時間をおいてもう一度お試しください。',
+  PURCHASE_PENDING: '「会員・Pro」で購入を復元してください。',
+  PURCHASE_REVIEW_REQUIRED: '「会員・Pro」で購入を復元してください。',
+  ENTITLEMENT_SYNC_PENDING: '少し待ってからもう一度お試しください。',
+  BILLING_RECONCILE_UNAVAILABLE: '少し待ってからもう一度お試しください。',
   UNAUTHORIZED: 'ログインが切れました。もう一度お試しください。',
 };
 let running = false;
 
 export async function startProPurchase(): Promise<ProPurchaseResult> {
-  if (running) return { state: 'pending', message: '購入処理中です。' };
+  if (running) return { state: 'pending', message: '' };
   running = true;
   try {
     const token = await sessionToken().catch(() => null);
@@ -48,7 +48,7 @@ export async function startProPurchase(): Promise<ProPurchaseResult> {
     if(error instanceof StaleMemberResponseError)return {state:'pending',message:''};
     const code = error instanceof Error ? error.message : '';
     if(error instanceof StoreError)return {state:'error',message:describeStoreError(error)};
-    if (PENDING_TEXT[code]) return { state: code === 'ALREADY_SUBSCRIBED' ? 'pro' : 'pending', message: PENDING_TEXT[code] };
+    if (code in PENDING_TEXT) return { state: code === 'ALREADY_SUBSCRIBED' ? 'pro' : 'pending', message: PENDING_TEXT[code] };
     return { state: 'error', message: describeStoreError(error) };
   } finally {
     running = false;

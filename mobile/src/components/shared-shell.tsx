@@ -15,19 +15,26 @@ import { DisplaySettings } from './display-settings';
 import { startProPurchase, resumeProPurchaseAfterLogin, type ProPurchaseResult } from '../lib/pro-purchase';
 export function SharedShell({ children }: { children: ReactNode }) {
   const [message,setMessage]=useState('');
+  const [purchaseMessage,setPurchaseMessage]=useState('');
+  const [purchasing,setPurchasing]=useState(false);
+  const purchaseRunning=useRef(false);
   const [price,setPrice]=useState<string|null>(null);
   const verifiedPro=useRef<MemberEntitlement|null>(null);
   useEffect(()=>{let generation=0;const update=(event?:Event)=>{const ticket=++generation;setPrice(null);if((event as CustomEvent<{signedIn?:boolean}>|undefined)?.detail?.signedIn===false)return;void (async()=>{const [c,m]=await Promise.all([billing.config(),billing.entitlement()]);if(m.plan==='free'&&m.syncState==='verified'&&c.ready){const p=await billing.offering(c,m);if(ticket===generation)setPrice(p.product.priceString);}})().catch(()=>{});};update();window.addEventListener('anzen-session-changed',update);return()=>{generation++;window.removeEventListener('anzen-session-changed',update);};},[]);
   const pathname=usePathname().replace(/\/$/,'')||'/';
   useEffect(() => {
     installWebTransport();
-    const show=(result:ProPurchaseResult|null)=>{if(result)setMessage(isVerifiedPro(verifiedPro.current)?'':result.message);};
-    const verified=(event:Event)=>{const rights=(event as CustomEvent<MemberEntitlement|null>).detail;verifiedPro.current=isVerifiedPro(rights)?rights:null;if(verifiedPro.current)setMessage('');};
-    const sessionChanged=()=>{verifiedPro.current=null;};
+    const show=(result:ProPurchaseResult|null)=>{if(result)setPurchaseMessage(isVerifiedPro(verifiedPro.current)?'':result.message);};
+    const verified=(event:Event)=>{const rights=(event as CustomEvent<MemberEntitlement|null>).detail;verifiedPro.current=isVerifiedPro(rights)?rights:null;if(verifiedPro.current)setPurchaseMessage('');};
+    const sessionChanged=()=>{verifiedPro.current=null;setPurchaseMessage('');};
     const feeds=(event:MouseEvent)=>{const anchor=(event.target as Element|null)?.closest('a');if(!anchor)return;const url=new URL(anchor.href,location.href);if(url.origin!==location.origin)return;
       if(url.pathname.startsWith('/feed/')){event.preventDefault();void openSource(SITE+url.pathname+url.search).catch(()=>setMessage('フィードを開けませんでした。'));return;}
       // 「月額980円で続ける」: the website's Stripe start becomes the App Store purchase sheet here.
-      if(/^\/pricing\/start\/?$/.test(url.pathname)){event.preventDefault();setMessage('App Store の購入画面を開いています…');void startProPurchase().then(show);return;}
+      if(/^\/pricing\/start\/?$/.test(url.pathname)){
+        event.preventDefault();if(purchaseRunning.current)return;
+        purchaseRunning.current=true;setPurchasing(true);setPurchaseMessage('');
+        void startProPurchase().then(show).finally(()=>{purchaseRunning.current=false;setPurchasing(false);});return;
+      }
       // Conditions/特商法 is a website page; open it as such instead of a retired in-app route.
       if(/^\/pricing\/terms\/?$/.test(url.pathname)){event.preventDefault();void openSource(SITE+'/pricing/terms').catch(()=>setMessage('条件のページを開けませんでした。'));}
     };
@@ -36,7 +43,7 @@ export function SharedShell({ children }: { children: ReactNode }) {
     document.addEventListener('click',feeds,true);window.addEventListener('anzen-session-changed',sessionChanged);window.addEventListener('anzen-session-changed',signedIn);window.addEventListener('anzen-entitlement-changed',verified);
     return()=>{document.removeEventListener('click',feeds,true);window.removeEventListener('anzen-session-changed',sessionChanged);window.removeEventListener('anzen-session-changed',signedIn);window.removeEventListener('anzen-entitlement-changed',verified);};
   }, []);
-  return <ProPurchasePresentationContext.Provider value={{price}}><style>{`a[href='/ky'],a[href^='/ky/'],a[href='/safety-diary'],a[href^='/safety-diary/'],a[href='/site-records/near-miss']{display:none!important}`}</style><header hidden={pathname==='/signage/display'} className="sticky top-[env(safe-area-inset-top)] z-50 flex items-center gap-1 whitespace-nowrap border-b bg-white px-2 py-1 text-slate-900 print:hidden">
+  return <ProPurchasePresentationContext.Provider value={{price,busy:purchasing,message:purchaseMessage}}><style>{`a[href='/ky'],a[href^='/ky/'],a[href='/safety-diary'],a[href^='/safety-diary/'],a[href='/site-records/near-miss']{display:none!important}`}</style><header hidden={pathname==='/signage/display'} className="sticky top-[env(safe-area-inset-top)] z-50 flex items-center gap-1 whitespace-nowrap border-b bg-white px-2 py-1 text-slate-900 print:hidden">
     {/* No browser chrome in the app: one row, a real back button, 44pt targets. */}
     <button aria-label="戻る" className="min-h-11 min-w-11 shrink-0 rounded-lg px-2 font-semibold" onClick={() => { if (window.history.length > 1) window.history.back(); else window.location.assign('/'); }}>‹ 戻る</button>
     {/* ホーム・全機能は下のタブにあるので上には置かない。今いる画面は色で示す。 */}

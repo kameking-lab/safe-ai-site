@@ -39,9 +39,19 @@ export class BillingController {
   }
   private async readEntitlement(ticket:number,recoverWhileBusy=false,refresh=false){
     assertCurrentMember(ticket);
-    const response=await currentMemberResponse(ticket,this.send(refresh?'/api/me/entitlements?refresh=1':'/api/me/entitlements'));
-    assertCurrentMember(ticket);
-    const member=snapshotSchema.parse(response);
+    let member!:MemberEntitlement;
+    // Retry only read-only membership lookups. Never replay StoreKit or a purchase POST.
+    for(let attempt=0;attempt<3;attempt++){
+      try{
+        const response=await currentMemberResponse(ticket,this.send(refresh?'/api/me/entitlements?refresh=1':'/api/me/entitlements'));
+        assertCurrentMember(ticket);member=snapshotSchema.parse(response);
+        if(member.syncState==='verified'||attempt===2)break;
+      }catch(error){
+        if(error instanceof StaleMemberResponseError||error instanceof Error&&error.message==='UNAUTHORIZED'||attempt===2)throw error;
+      }
+      await new Promise(resolve=>setTimeout(resolve,attempt===0?500:1500));
+      assertCurrentMember(ticket);
+    }
     if(refresh)ticket=invalidateMemberReads();
     this.publish(member);
     // A cancelled purchase must recover even if its first outcome request lost connectivity.
