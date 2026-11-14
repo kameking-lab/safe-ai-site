@@ -64,6 +64,7 @@ export class BillingController {
         assertCurrentMember(ticket);
         if(this.busy)return member;
         let latest=member;
+        let storeConflict=false;
         if(this.native()&&config?.ready&&config.publicKey){
           const identity=this.identityWork.then(async()=>{
             assertCurrentMember(ticket);
@@ -75,11 +76,12 @@ export class BillingController {
             await bounded('getCustomerInfo',()=>this.sdk.getCustomerInfo());assertCurrentMember(ticket);
           });
           this.identityWork=identity.catch(()=>{});
-          try{await bounded('identity_queue',()=>identity);}catch(error){if(error instanceof StaleMemberResponseError)throw error;}
+          try{await bounded('identity_queue',()=>identity);}catch(error){if(error instanceof StaleMemberResponseError)throw error;storeConflict=['7','13'].includes(String((error as {code?:unknown})?.code??''));}
         }
         assertCurrentMember(ticket);if(this.busy)return member;
         // The server can verify its own stored purchase even when the native SDK fails.
         if(this.native())latest=await this.reconcile(ticket,member.appUserId);
+        if(storeConflict&&latest.plan!=='pro')throw new Error('PURCHASE_OWNED_BY_OTHER_ACCOUNT');
         const finalTicket=memberGeneration();
         if(await sessionBinding()!==binding)throw new StaleMemberResponseError();
         if(latest.appUserId!==member.appUserId||await sessionBinding()!==binding)throw new StaleMemberResponseError();
@@ -274,7 +276,7 @@ export class BillingController {
         throw new Error(outcome==='cancelled'?'STORE_CANCELLED':outcome==='deferred'?'STORE_DEFERRED':'STORE_UNKNOWN');
       }
       // SDK customerInfo is deliberately ignored for authorization.
-      try{return await this.reconcile(ticket);}catch(error){if(error instanceof StaleMemberResponseError)throw error;await this.reportOutcome(member.appUserId,{id:intent.id,attemptId,outcome:'unknown'});throw new Error('STORE_UNKNOWN');}
+      try{return await this.reconcile(ticket);}catch(error){if(error instanceof StaleMemberResponseError)throw error;await this.reportOutcome(member.appUserId,{id:intent.id,attemptId,outcome:'unknown'});if(error instanceof Error&&error.message==='PURCHASE_OWNED_BY_OTHER_ACCOUNT')throw error;throw new Error('STORE_UNKNOWN');}
     }finally{this.purchaseUser=null;this.busy=false;}
   }
   async cancelPrepared(){const ticket=invalidateMemberReads();const member=await this.readEntitlement(ticket);if(!member.purchasePending||member.purchaseSource!=='app_store'||member.purchaseStage!=='prepared'||!member.purchaseIntentId)throw new Error('PURCHASE_REVIEW_REQUIRED');return snapshotSchema.parse(await currentMemberResponse(ticket,this.send('/api/billing/cancel-intent',{id:member.purchaseIntentId,source:'app_store'})));}

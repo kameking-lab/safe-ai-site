@@ -215,10 +215,12 @@ describe('automatic membership recovery after login',()=>{
       return paid?pro():free();
     });
     s.sdk.logIn.mockImplementation(async()=>{order.push('logIn');return {} as never;});
+    const synced=Object.assign(s.sdk,{syncPurchases:vi.fn(async()=>{order.push('syncPurchases');})});
     s.sdk.getCustomerInfo.mockImplementation(async()=>{order.push('customerInfo');return {} as never;});
     const recovered=await s.controller.recoverSession();
     expect(recovered.plan).toBe('pro');expect(recovered.limits.law_chat).toBe(50);
     expect(order.indexOf('logIn')).toBeLessThan(order.indexOf('customerInfo'));
+    expect(synced.syncPurchases).toHaveBeenCalledOnce();expect(order.indexOf('syncPurchases')).toBeLessThan(order.indexOf('/api/billing/reconcile'));
     expect(order.indexOf('customerInfo')).toBeLessThan(order.indexOf('/api/billing/reconcile'));
     expect(order.at(-1)).toBe('/api/billing/reconcile');
     expect(s.sdk.restorePurchases).not.toHaveBeenCalled();expect(s.sdk.purchasePackage).not.toHaveBeenCalled();
@@ -230,6 +232,13 @@ describe('automatic membership recovery after login',()=>{
     s.sdk.getCustomerInfo.mockResolvedValue({customerInfo:{entitlements:{active:{anzen_pro:{isActive:true}}}}} as never);
     expect((await s.controller.recoverSession()).plan).toBe('free');
     expect(s.sdk.logIn).toHaveBeenLastCalledWith({appUserID:other.appUserId});
+    expect(s.sdk.purchasePackage).not.toHaveBeenCalled();
+  });
+  it.each(['7','13'])('surfaces SDK ownership conflict %s after reconciling the server without granting Pro',async code=>{
+    const s=setup();s.send.mockImplementation(async path=>path.endsWith('/billing/config')?config:free());
+    Object.assign(s.sdk,{syncPurchases:vi.fn(async()=>{throw {code};})});
+    await expect(s.controller.recoverSession()).rejects.toThrow('PURCHASE_OWNED_BY_OTHER_ACCOUNT');
+    expect(s.send).toHaveBeenCalledWith('/api/billing/reconcile',{appUserId});
     expect(s.sdk.purchasePackage).not.toHaveBeenCalled();
   });
 });

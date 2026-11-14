@@ -105,6 +105,7 @@ test('verified App Store receipt moves A to B automatically, relogin is immediat
  expect(s.rights('a').plan).toBe('free');expect(s.rights('b').plan).toBe('pro');
  await expect(page.getByRole('button',{name:/Proにする/})).toHaveCount(0);await expect(page.getByText(/更新・有効期限/)).toBeVisible();
  await page.getByRole('button',{name:'ログアウト',exact:true}).click();await login(page);await pro(page);await buttons(page);
+ if(captureDir){await mkdir(captureDir,{recursive:true});await page.screenshot({path:path.join(captureDir,`${info.project.name}-account-pro.png`),fullPage:true});}
  // Login installed a verified session. Simulate Keychain being temporarily
  // inaccessible on iOS activation; first send must use that same credential.
  await page.evaluate(()=>(window as unknown as Bridge).__fault={stage:'NativeVault.get',mode:'never'});
@@ -114,13 +115,14 @@ test('verified App Store receipt moves A to B automatically, relogin is immediat
  expect(s.diagnostics.filter(value=>{const d=value as {operation:string;result:string;stage?:string};return d.operation==='chat'&&d.result==='failed'&&d.stage==='session';})).toEqual([]);
  await info.attach('first-chat', {body:JSON.stringify({requests:s.chats(),a:s.rights('a').plan,b:s.rights('b').plan}),contentType:'application/json'});
 });
-test('unverified native Pro cache cannot move a purchase and an ownership conflict gives a login action',async({page,context})=>{
+test('unverified native Pro cache cannot move a purchase and an ownership conflict gives a login action',async({page,context},info)=>{
  const s=await setup(context);s.transfer(false);s.setNext('b');await page.goto('/account/');await login(page);
  await expect(page.getByText('無料会員',{exact:true})).toBeVisible();expect(s.rights('a').plan).toBe('pro');expect(s.rights('b').plan).toBe('free');
  await expect(page.getByRole('button',{name:/Proにする/})).toHaveCount(1);await buttons(page);
  s.conflict();await page.evaluate(()=>(window as unknown as Bridge).__activate());
  await expect(page.getByRole('status').filter({hasText:'この購入は別のログイン方法（Apple / Google）で使われています。そちらでログインしてください。'})).toBeVisible();
  expect(s.rights('a').plan).toBe('pro');expect(s.rights('b').plan).toBe('free');
+ if(captureDir){await mkdir(captureDir,{recursive:true});await page.screenshot({path:path.join(captureDir,`${info.project.name}-account-conflict.png`),fullPage:true});}
 });
 test('saved Pro survives logout, relogin and restart; cached native Pro never transfers accounts',async({page,context},info)=>{
  const s=await setup(context);await page.goto('/account/');await login(page);await pro(page);

@@ -2,16 +2,20 @@
 export class StoreError extends Error {
   constructor(code: string, readonly detail = '') { super(code); this.name = 'StoreError'; }
 }
+export const purchaseAccountConflictMessage='この購入は別のログイン方法（Apple / Google）で使われています。そちらでログインしてください。';
 const MESSAGES: Record<string, string> = {
   '3': '端末の購入制限を確認してください。',
   '10': '通信環境を確認してもう一度お試しください。',
   '15': '少し待ってからもう一度お試しください。',
   '35': '通信環境を確認してもう一度お試しください。',
+  '7': purchaseAccountConflictMessage,
+  '13': purchaseAccountConflictMessage,
+  PURCHASE_OWNED_BY_OTHER_ACCOUNT: purchaseAccountConflictMessage,
   STORE_PRODUCT_TIMEOUT: '少し待ってからもう一度お試しください。',
   STORE_NOT_OPENED: 'もう一度お試しください。',
 };
 export function describeStoreError(error: unknown): string {
   const e = error as { code?: unknown; message?: unknown } | null;
-  const code = error instanceof StoreError ? error.message : String(e?.code ?? '');
+  const code = error instanceof StoreError ? error.message : String(e?.code ?? e?.message ?? '');
   return MESSAGES[code] ?? '少し待ってからもう一度お試しください。';
 }

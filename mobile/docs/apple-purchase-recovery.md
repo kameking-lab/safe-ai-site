@@ -1,5 +1,15 @@
 # StoreKit購入の調査と解除（IOS3D）
 
+## 2026-11-15 会員切替・復元
+
+ログイン直後と会員画面の表示時に、会員のRevenueCat IDで `syncPurchases` → サーバー照合を自動実行する。手動の「購入を復元」は `restorePurchases` を使う。現在の会員への所有権をサーバーのRevenueCat APIで確認できた同一App Store購読は、前の会員から外して現在の会員へ移す。Stripeの所有権は移さない。以前の「権利を再確認」「会員情報を再読み込み」「購入手続きを再開」と予約取消のボタンは表示しない。
+
+RevenueCat側のRestore Behaviorは既定の「Transfer to new App User ID」を前提とする。サーバーでは `original_customer_id` を過去の購入者、`customer_id` を現在の所有者として扱う。v2の `store_subscription_identifier` は更新ごとに変わる取引IDのため、台帳の同名旧カラム `originalTransactionId` には `rc:<subscription.id>` を保存する。旧台帳のApple original transaction ID・更新取引IDは、RevenueCatの検索APIで同じ購読だと確認できた分だけ失効させる。
+
+所有権の検証ができない場合は移管しない。409またはSDKの所有権競合は、別のログイン方法で入るための1行を表示する。レシートの空応答・端末のProキャッシュは移管や購入予約解除の証拠にしない。
+
+一次資料：[復元と無操作同期](https://www.revenuecat.com/docs/getting-started/restoring-purchases)、[移管の既定動作](https://www.revenuecat.com/docs/projects/restore-behavior)、[購読IDの定義](https://www.revenuecat.com/docs/api-v2/subscription-data-model)、[過去の取引IDによる照合](https://www.revenuecat.com/docs/api-v2/subscription)。以下の予約調査手順の所有権記述はこの節を優先する。
+
 クライアントの結果報告は画面表示用で、予約解除の証明にはしない。経過時間やRevenueCatの購読なし応答だけでも解除しない。実キー呼出し、運用設定変更、DB変更、Sandbox・実機試験は本タスクでは実施していない。
 
 ## 状態と利用者の操作

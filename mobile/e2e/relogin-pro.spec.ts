@@ -17,7 +17,7 @@ async function bridge(context:BrowserContext){
     const prefs=new Map<string,string>();const vault=new Map<string,string>();
     const listeners=new Map<string,(value:unknown)=>void>();const send=window.fetch.bind(window);
     const trace:TraceEntry[]=[];let owner:string|undefined;
-    const plugins:Record<string,string[]>={NativeVault:['get','set','clear'],Preferences:['get','set','remove'],Browser:['open','close','addListener','removeListener'],App:['getLaunchUrl','addListener','removeListener'],PushNotifications:['addListener','removeListener'],CapacitorHttp:['request'],NativeDocuments:['printPage'],NativeSpeech:['start','stop','addListener','removeListener'],Purchases:['configure','logIn','logOut','invalidateCustomerInfoCache','getCustomerInfo','getOfferings','purchasePackage','restorePurchases']};
+    const plugins:Record<string,string[]>={NativeVault:['get','set','clear'],Preferences:['get','set','remove'],Browser:['open','close','addListener','removeListener'],App:['getLaunchUrl','addListener','removeListener'],PushNotifications:['addListener','removeListener'],CapacitorHttp:['request'],NativeDocuments:['printPage'],NativeSpeech:['start','stop','addListener','removeListener'],Purchases:['configure','logIn','logOut','syncPurchases','invalidateCustomerInfoCache','getCustomerInfo','getOfferings','purchasePackage','restorePurchases']};
     Object.assign(window,{__loginOpenCount:0,__loginReturn:()=>listeners.get('App:appUrlOpen')?.({url:'anzenai://auth/callback?flow=88888888-1111-4111-8111-111111111111&code='+'a'.repeat(43)}),__billingTrace:trace,webkit:{messageHandlers:{bridge:{}}},Capacitor:{
       PluginHeaders:Object.entries(plugins).map(([name,methods])=>({name,methods:methods.map(name=>({name,rtype:name==='addListener'?'callback':'promise'}))})),
       nativeCallback:(plugin:string,_method:string,options:{eventName:string},callback:(value:unknown)=>void)=>{listeners.set(plugin+':'+options.eventName,callback);return Promise.resolve('relogin-listener');},
@@ -92,8 +92,8 @@ test('same-account relogin automatically recovers Pro; another account cannot in
   await expect(page.getByText('「購入を復元」をお試しください。',{exact:true})).toHaveCount(0);
   const trace=await page.evaluate(()=>(window as unknown as Bridge).__billingTrace);
   const logoutIndex=trace.findIndex(e=>e.event==='logOut');
-  const recovery=trace.slice(logoutIndex+1).filter(e=>['logIn','invalidateCustomerInfoCache','getCustomerInfo','reconcile'].includes(e.event));
-  expect(recovery.map(e=>e.event)).toEqual(['logIn','invalidateCustomerInfoCache','getCustomerInfo','reconcile']);
+  const recovery=trace.slice(logoutIndex+1).filter(e=>['logIn','syncPurchases','invalidateCustomerInfoCache','getCustomerInfo','reconcile'].includes(e.event));
+  expect(recovery.map(e=>e.event)).toEqual(['logIn','syncPurchases','invalidateCustomerInfoCache','getCustomerInfo','reconcile']);
   expect(recovery.every(e=>e.owner===owners.a)).toBe(true);
   expect(trace.some(e=>e.event==='purchasePackage'||e.event==='restorePurchases')).toBe(false);
   if(captureDir){await mkdir(captureDir,{recursive:true});await page.screenshot({path:path.join(captureDir,`${info.project.name}-pro-recovered.png`),fullPage:true});}
