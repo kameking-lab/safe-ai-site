@@ -134,6 +134,16 @@ test.describe("チャットボット", () => {
 
     const latestActions = page.locator("[data-chatbot-answer-actions]").last();
     await expect(latestActions).toBeVisible();
+    // Replies stay at their beginning. Reach the actions by scrolling only the history,
+    // including while the brief idea mascot occupies space above a long reply.
+    const documentScroll = await page.evaluate(() => window.scrollY);
+    await history.evaluate(node => { node.scrollTop = node.scrollHeight; });
+    await expect.poll(async () => {
+      const box = await latestActions.boundingBox();
+      return box ? box.y + box.height : Infinity;
+    }).toBeLessThanOrEqual(composerBox!.y + 1);
+    expect(await page.evaluate(() => window.scrollY)).toBe(documentScroll);
+    expect((await composer.boundingBox())!.y).toBe(composerBox!.y);
     const actionsBox = await latestActions.boundingBox();
     expect(actionsBox).not.toBeNull();
     expect(actionsBox!.y + actionsBox!.height).toBeLessThanOrEqual(
