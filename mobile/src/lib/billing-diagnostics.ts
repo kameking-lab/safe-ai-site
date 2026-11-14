@@ -8,7 +8,7 @@ let windowStart=0;let sent=0;let traceId:string|undefined;
 // Fixed fields only. No credentials, account/store identifiers, URLs, or error messages.
 export function billingDiagnostic(event:Diagnostic){
  if(typeof window==='undefined'||!Capacitor.isNativePlatform())return;
- const now=Date.now();if(now-windowStart>=60000){windowStart=now;sent=0;}if(sent>=60||sent>=40&&!['failed','timeout'].includes(event.result))return;sent++;
+ const now=Date.now();if(now-windowStart>=60000){windowStart=now;sent=0;}if(sent>=60||sent>=40&&event.operation!=='chat'&&!['failed','timeout'].includes(event.result))return;sent++;
  const data={version:1,traceId:traceId??=crypto.randomUUID(),sequence:sent,...event};
  const url=SITE+'/api/mobile/v1/diagnostics';
  // A two-second cold-start deadline silently dropped every failed delivery.

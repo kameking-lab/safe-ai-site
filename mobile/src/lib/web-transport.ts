@@ -6,6 +6,7 @@ import { installNativeSpeech } from './native-speech';
 import { PushNotifications } from '@capacitor/push-notifications';
 import { signageLocations } from '@/data/signage-locations';
 import { nativeChatResponse } from './native-chat-stream';
+import { billingDiagnostic } from './billing-diagnostics';
 let installed=false;
 export function createSiteFetch(original:typeof fetch):typeof fetch {
   return async (input, init) => {
@@ -16,7 +17,9 @@ export function createSiteFetch(original:typeof fetch):typeof fetch {
     if (!Capacitor.isNativePlatform()) return original(new Request(target, req), { credentials:'include', redirect:'error' });
     if (req.signal.aborted) throw new DOMException('Aborted','AbortError');
     // Keychain failure: continue anonymously so shared pages and public APIs keep working.
-    const token=await sessionToken().catch(()=>null);
+    const chat=url.pathname==='/api/chatbot/stream'&&req.method==='POST';
+    if(chat)billingDiagnostic({operation:'chat',result:'start',stage:'session'});
+    const token=await sessionToken().catch(()=>{if(chat)billingDiagnostic({operation:'chat',result:'failed',stage:'session',code:'TRANSPORT_ERROR'});return null;});
     const headers=new Headers(req.headers);
     headers.set('Origin',SITE);headers.set('X-Anzen-Native','1');
     headers.delete('Authorization');

@@ -25,3 +25,12 @@ it('bounds stalled delivery independently of application operations',async()=>{
 it('does not send native diagnostics from the web',async()=>{
  mock.native=false;const {billingDiagnostic}=await import('../src/lib/billing-diagnostics');billingDiagnostic({operation:'login',result:'start'});expect(mock.request).not.toHaveBeenCalled();
 });
+it('preserves chat diagnostics after startup exhausts ordinary events, without exceeding sixty',async()=>{
+ mock.request.mockResolvedValue(ok);const {billingDiagnostic}=await import('../src/lib/billing-diagnostics');
+ for(let i=0;i<50;i++)billingDiagnostic({operation:'session',result:'start'});
+ expect(mock.request).toHaveBeenCalledTimes(40);
+ billingDiagnostic({operation:'chat',result:'start',stage:'listener'});billingDiagnostic({operation:'chat',result:'ok',stage:'complete'});
+ expect(mock.request).toHaveBeenCalledTimes(42);
+ for(let i=0;i<30;i++)billingDiagnostic({operation:'chat',result:'failed',stage:'headers',httpStatus:401,code:'UNAUTHORIZED'});
+ expect(mock.request).toHaveBeenCalledTimes(60);
+});
