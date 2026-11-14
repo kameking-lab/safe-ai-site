@@ -103,8 +103,21 @@ for(const reduced of [false,true])test(`Chihuahua is visible before the first na
   await expect(page.getByLabel('AIの利用枠')).toContainText('残り3／3');
   const quotaDisplayedMs=Date.now()-quotaStart;
   await page.getByRole('textbox').fill('作業前に確認する条件を整理したい');
-  const start=Date.now();await page.getByRole('button',{name:'送信',exact:true}).click();
-  const thinking=page.locator('[data-chat-thinking]');await expect(thinking).toBeVisible();const thinkingMs=Date.now()-start;
+  await page.getByRole('button',{name:'送信',exact:true}).evaluate(button=>{
+    const timing:{start?:number;paintMs?:number}={};Object.assign(window,{__chatFeedback:timing});let measuring=false;
+    button.addEventListener('click',()=>{timing.start=performance.now();},{once:true,capture:true});
+    const observer=new MutationObserver(()=>{
+      const image=document.querySelector<HTMLImageElement>('[data-chat-thinking] img');
+      if(timing.start===undefined||!image||measuring)return;measuring=true;observer.disconnect();
+      // Decode the selected GIF/still and allow a full painted frame. The clock
+      // starts at the input event, excluding Playwright's actionability wait.
+      void image.decode().then(()=>requestAnimationFrame(()=>requestAnimationFrame(()=>{timing.paintMs=performance.now()-timing.start!;})));
+    });observer.observe(document.body,{childList:true,subtree:true});
+  });
+  await page.getByRole('button',{name:'送信',exact:true}).click();
+  const thinking=page.locator('[data-chat-thinking]');await expect(thinking).toBeVisible();
+  await expect.poll(()=>page.evaluate(()=>(window as unknown as {__chatFeedback:{paintMs?:number}}).__chatFeedback.paintMs)).toBeGreaterThanOrEqual(0);
+  const thinkingMs=await page.evaluate(()=>(window as unknown as {__chatFeedback:{paintMs:number}}).__chatFeedback.paintMs);
   await expect.poll(()=>thinking.locator('img').evaluate(img=>(img as HTMLImageElement).complete&&(img as HTMLImageElement).naturalWidth>0)).toBe(true);
   const image=thinking.locator('img');expect(await image.evaluate(img=>(img as HTMLImageElement).currentSrc)).toContain(reduced?'mascot-searching-still.webp':'mascot-searching.gif');
   const rect=await image.boundingBox();expect(rect!.y).toBeGreaterThanOrEqual(59);expect(rect!.y+rect!.height).toBeLessThan(844);
