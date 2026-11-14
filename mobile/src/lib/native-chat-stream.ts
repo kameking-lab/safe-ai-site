@@ -20,6 +20,8 @@ export async function nativeChatResponse(body: string, headers: Headers, signal:
   let deadline: ReturnType<typeof setTimeout> | undefined;
   let status: number | undefined;
   let tail = '';
+  let seenMeta = false;
+  let seenStreamError = false;
   let stage: 'listener'|'start'|'headers'|'stream'|'complete' = 'listener';
   const started = Date.now();
   const report = (result: 'start'|'ok'|'failed'|'timeout', code?: typeof diagnosticCodes[number]) => billingDiagnostic({operation:'chat',result,stage,httpStatus:status,code,elapsedMs:Math.min(180000,Date.now()-started)});
@@ -39,7 +41,7 @@ export async function nativeChatResponse(body: string, headers: Headers, signal:
     clearTimeout(deadline);
     signal.removeEventListener('abort', abort);
     void listener?.remove().catch(()=>{});
-    if (error) { report(error.message==='TIMEOUT'?'timeout':'failed',error.message==='TIMEOUT'?'TIMEOUT':'TRANSPORT_ERROR');controller.error(error); if (!responseStarted) rejectResponse(error); }
+    if (error) { report(error.message==='TIMEOUT'?'timeout':'failed',error.message==='TIMEOUT'?'TIMEOUT':error.message==='INVALID_RESPONSE'?'INVALID_RESPONSE':'TRANSPORT_ERROR');controller.error(error); if (!responseStarted) rejectResponse(error); }
     else if (closeStream) controller.close();
     window.dispatchEvent(new Event('anzen-usage-changed'));
   }
@@ -56,15 +58,19 @@ export async function nativeChatResponse(body: string, headers: Headers, signal:
     } else if (event.kind === 'chunk' && event.data) {
       stage='stream';armDeadline();
       const bytes=Uint8Array.from(atob(event.data), c=>c.charCodeAt(0));
-      tail=(tail+new TextDecoder().decode(bytes)).slice(-4096);
+      const recent=tail+new TextDecoder().decode(bytes);
+      seenMeta ||= /(?:^|\n)event: meta\r?\n/.test(recent);
+      seenStreamError ||= /(?:^|\n)event: error\r?\n/.test(recent);
+      tail=recent.slice(-4096);
       controller.enqueue(bytes);
     } else if (event.kind === 'end') {
-      if (!responseStarted) finish(new Error('Missing response headers'));
+      if (!responseStarted) finish(new Error('INVALID_RESPONSE'));
       else {
         if(status&&status>=400){
           let code:unknown;try{code=JSON.parse(tail)?.error?.code;}catch{}
           report('failed',diagnosticCodes.includes(code as typeof diagnosticCodes[number])?code as typeof diagnosticCodes[number]:'REQUEST_REJECTED');
-        }else if(/event: error\r?\n/.test(tail))report('failed','STREAM_ERROR');
+        }else if(seenStreamError)report('failed','STREAM_ERROR');
+        else if(!seenMeta)report('failed','INVALID_RESPONSE');
         else {stage='complete';report('ok');}
         finish();
       }

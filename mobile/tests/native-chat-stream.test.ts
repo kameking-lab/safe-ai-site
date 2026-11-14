@@ -27,6 +27,11 @@ it('times out even when native listener registration never returns',async()=>{
  expect(sdk.start).not.toHaveBeenCalled();expect(sdk.cancel).toHaveBeenCalledOnce();
  expect(billingDiagnostic).toHaveBeenCalledWith(expect.objectContaining({result:'timeout',stage:'listener',code:'TIMEOUT'}));
 });
+it('diagnoses HTTP 200 without a final SSE answer as an invalid response',async()=>{
+ const f=fixture();const pending=nativeChatResponse('{}',new Headers(),new AbortController().signal,f.sdk);
+ await vi.waitFor(()=>expect(f.sdk.start).toHaveBeenCalledOnce());f.event({kind:'headers',status:200});const response=await pending;f.event({kind:'end'});await response.text();
+ expect(billingDiagnostic).toHaveBeenCalledWith(expect.objectContaining({result:'failed',httpStatus:200,code:'INVALID_RESPONSE'}));
+});
 it('resolves on headers and delivers the first UTF-8 bytes before stream completion',async()=>{
  const f=fixture();const pending=nativeChatResponse('{}',new Headers({'Authorization':'Bearer mock-session','X-Operation-ID':'op-fixture'}),new AbortController().signal,f.sdk);
  await vi.waitFor(()=>expect(f.sdk.start).toHaveBeenCalledTimes(1));
