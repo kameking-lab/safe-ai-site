@@ -15,9 +15,9 @@ export type ProPurchaseResult = { state: 'pro' | 'login' | 'pending' | 'error'; 
 const PENDING_TEXT: Record<string, string> = {
   STORE_CANCELLED: '',
   PRO_SALES_PAUSED: '今月のPro新規受付は終了しました。来月1日に再開します。',
-  STORE_DEFERRED: 'App Store で承認待ちです（承認後に自動で反映されます）。',
+  STORE_DEFERRED: 'App Storeの承認をお待ちください。',
   STORE_UNKNOWN: '「会員・Pro」で購入を復元してください。',
-  STORE_NOT_OPENED: '購入の準備を完了できませんでした。もう一度お試しください。',
+  STORE_NOT_OPENED: 'もう一度お試しください。',
   ALREADY_SUBSCRIBED: 'すでに Pro です。',
   PURCHASE_PENDING: '「会員・Pro」で購入を復元してください。',
   PURCHASE_REVIEW_REQUIRED: '「会員・Pro」で購入を復元してください。',

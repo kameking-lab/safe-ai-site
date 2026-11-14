@@ -187,3 +187,7 @@ Desktop.ini
 
 # Local presentation render/finalization evidence
 /web/.codex-finalizer/
+
+# Local keyboard regression captures; keep the compact verification note in git.
+/research/anz-tf3/*
+!/research/anz-tf3/README.md

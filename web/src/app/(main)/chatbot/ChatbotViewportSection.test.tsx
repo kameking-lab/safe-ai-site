@@ -17,6 +17,7 @@ describe("ChatbotViewportSection（相談ボックスを下のタブバーの上
     const section=screen.getByRole("region",{name:"相談"});
     expect(section.style.getPropertyValue("--chatbot-top")).toBe("231px");
     viewport.height=480;viewport.offsetTop=120;
+    vi.stubGlobal("innerHeight",480);
     act(()=>viewport.dispatchEvent(new Event("resize")));
     expect(section.hasAttribute("data-keyboard-open")).toBe(true);
     expect(section.style.getPropertyValue("--chatbot-viewport-offset")).toBe("120px");

@@ -39,7 +39,7 @@ for(const plan of ['free','pro'] as const)test(`${plan}: first question, follow-
     if(url.pathname.endsWith('/billing/config'))return route.fulfill({headers:cors,json:{ready:true,publicKey:'fixture_public',productId:'fixture.monthly',offeringId:null,policy:product,login:{apple:true,google:true},terms:host+'/terms',privacy:host+'/privacy',manage:'https://apps.apple.com/account/subscriptions'}});
     if(url.pathname==='/api/me/entitlements'){
       rightsReads++;
-      return route.fulfill({headers:cors,json:{plan,source:plan==='pro'?'app_store':null,syncState:'pending',expiresAt:null,appUserId:'88888888-1111-4111-8111-111111111111',verifiedAt:new Date().toISOString(),limits:product.limits[plan]}});
+      return route.fulfill({headers:cors,json:{plan,source:plan==='pro'?'app_store':null,syncState:plan==='pro'?'verified':'pending',expiresAt:plan==='pro'?new Date(Date.now()+86400000).toISOString():null,appUserId:'88888888-1111-4111-8111-111111111111',verifiedAt:new Date().toISOString(),limits:product.limits[plan]}});
     }
     if(url.pathname.startsWith('/api/billing/'))purchasePosts++;
     if(url.pathname.endsWith('/capabilities')){
@@ -75,6 +75,8 @@ for(const plan of ['free','pro'] as const)test(`${plan}: first question, follow-
   await page.getByRole('button',{name:'送信',exact:true}).click();
   await expect.poll(()=>answers).toBe(1);await expect(input).toBeEnabled();
   metrics.firstAnswer=await position(page);
+  // Model WebKit's document scroll independently from visualViewport panning.
+  await page.evaluate(()=>{document.body.style.minHeight='1400px';window.scrollTo(0,100);});
   await input.fill('なんで？');await keyboard(page,400,120);
   metrics.followup=await position(page);
   await mkdir(captureDir,{recursive:true});
@@ -97,6 +99,7 @@ for(const plan of ['free','pro'] as const)test(`${plan}: first question, follow-
     await page.screenshot({path:captureDir+'free-limit-keyboard.png',scale:'css',animations:'disabled'});
   }else await expect(page.locator('[data-pro-upsell]')).toHaveCount(0);
   await keyboard(page,844,0);await expect(page.locator('[data-keyboard-open]')).toHaveCount(0);
+  await page.evaluate(()=>{document.body.style.minHeight='';window.scrollTo(0,0);});
   await input.blur();await expect(page.getByRole('navigation',{name:'モバイル ボトムナビゲーション'})).toBeVisible();
   await page.screenshot({path:captureDir+`${plan}-keyboard-closed.png`,scale:'css',animations:'disabled'});
   await writeFile(captureDir+`${plan}-geometry.json`,JSON.stringify(metrics,null,2)+'\n');
