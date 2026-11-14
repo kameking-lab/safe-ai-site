@@ -21,9 +21,17 @@ it('identity-only API authentication skips billing while retaining existence/del
  state.deleted=true;expect(await auth({identityOnly:true})).toMatchObject({user:undefined});
  state.deleted=false;state.exists=false;expect(await auth({identityOnly:true})).toMatchObject({user:undefined});
 });
-it('ordinary session display loads server rights and starts independent checks concurrently',async()=>{
+it('ordinary sessions check identity and deletion concurrently before hydrating billing',async()=>{
  let release!:(value:unknown)=>void;state.user.mockImplementationOnce(()=>new Promise(resolve=>{release=resolve;}));
  const {auth}=await import('./auth');const pending=auth();
- await vi.waitFor(()=>expect(state.rights).toHaveBeenCalledOnce());expect(state.deletion).toHaveBeenCalledOnce();
+ await vi.waitFor(()=>expect(state.deletion).toHaveBeenCalledOnce());expect(state.rights).not.toHaveBeenCalled();
  release({id:'member'});expect(await pending).toMatchObject({user:{id:'member',planName:'pro'}});
+ expect(state.rights).toHaveBeenCalledOnce();
+});
+it.each(['deleted','missing'] as const)('does not mutate billing for a %s member with an old session',async(kind)=>{
+ state.deleted=kind==='deleted';state.exists=kind!=='missing';
+ state.rights.mockRejectedValue(new Error('billing identity cannot be created'));
+ const {auth}=await import('./auth');
+ await expect(auth()).resolves.toMatchObject({user:undefined});
+ expect(state.rights).not.toHaveBeenCalled();expect(state.subscription).not.toHaveBeenCalled();
 });
