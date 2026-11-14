@@ -20,6 +20,9 @@ export async function nativeChatResponse(body: string, headers: Headers, signal:
   let deadline: ReturnType<typeof setTimeout> | undefined;
   let status: number | undefined;
   let tail = '';
+  const decoder = new TextDecoder();
+  let pendingEvent = '';
+  let oversizedEvent = false;
   let seenMeta = false;
   let seenStreamError = false;
   let stage: 'listener'|'start'|'headers'|'stream'|'complete' = 'listener';
@@ -35,6 +38,31 @@ export async function nativeChatResponse(body: string, headers: Headers, signal:
     start(value) { controller=value; },
     cancel() { finish(undefined, false); void sdk.cancel({id}).catch(()=>{}); },
   });
+  // Inspect complete SSE frames only. A meta header can arrive before its JSON,
+  // including when the connection closes mid-answer. Never log the payload.
+  function inspectEvents(text: string) {
+    pendingEvent += text;
+    let separator: RegExpExecArray | null;
+    while ((separator = /\r?\n\r?\n/.exec(pendingEvent))) {
+      const frame = pendingEvent.slice(0, separator.index);
+      pendingEvent = pendingEvent.slice(separator.index + separator[0].length);
+      if (!oversizedEvent) {
+        const lines = frame.split(/\r?\n/);
+        const event = lines.find(line => line.startsWith('event:'))?.slice(6).trim();
+        if (event === 'error') seenStreamError = true;
+        if (event === 'meta') {
+          seenMeta = false;
+          try {
+            const value = JSON.parse(lines.filter(line => line.startsWith('data:')).map(line => line.slice(5).trimStart()).join('\n'));
+            seenMeta = typeof value?.answer === 'string' && value.answer.trim().length > 0;
+          } catch { /* An incomplete/invalid answer is not a successful delivery. */ }
+        }
+      }
+      oversizedEvent = false;
+    }
+    // Bound diagnostic parsing independently of the response consumed by the UI.
+    if (pendingEvent.length > 262144) { oversizedEvent = true; pendingEvent = pendingEvent.slice(-3); }
+  }
   function finish(error?: Error, closeStream = true) {
     if (finished) return;
     finished=true;
@@ -58,12 +86,13 @@ export async function nativeChatResponse(body: string, headers: Headers, signal:
     } else if (event.kind === 'chunk' && event.data) {
       stage='stream';armDeadline();
       const bytes=Uint8Array.from(atob(event.data), c=>c.charCodeAt(0));
-      const recent=tail+new TextDecoder().decode(bytes);
-      seenMeta ||= /(?:^|\n)event: meta\r?\n/.test(recent);
-      seenStreamError ||= /(?:^|\n)event: error\r?\n/.test(recent);
+      const text=decoder.decode(bytes,{stream:true});
+      const recent=tail+text;
+      inspectEvents(text);
       tail=recent.slice(-4096);
       controller.enqueue(bytes);
     } else if (event.kind === 'end') {
+      inspectEvents(decoder.decode());
       if (!responseStarted) finish(new Error('INVALID_RESPONSE'));
       else {
         if(status&&status>=400){

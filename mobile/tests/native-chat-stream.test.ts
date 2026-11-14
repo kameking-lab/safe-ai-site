@@ -32,6 +32,22 @@ it('diagnoses HTTP 200 without a final SSE answer as an invalid response',async(
  await vi.waitFor(()=>expect(f.sdk.start).toHaveBeenCalledOnce());f.event({kind:'headers',status:200});const response=await pending;f.event({kind:'end'});await response.text();
  expect(billingDiagnostic).toHaveBeenCalledWith(expect.objectContaining({result:'failed',httpStatus:200,code:'INVALID_RESPONSE'}));
 });
+it.each(['event: meta\n','event: meta\ndata: {"answer":"cut off','event: meta\ndata: {}\n\n','event: meta\ndata: {"answer":"   "}\n\n'])('does not report completion for incomplete or empty meta: %s',async payload=>{
+ const f=fixture();const pending=nativeChatResponse('{}',new Headers(),new AbortController().signal,f.sdk);
+ await vi.waitFor(()=>expect(f.sdk.start).toHaveBeenCalled());f.event({kind:'headers',status:200});const response=await pending;
+ f.event({kind:'chunk',data:Buffer.from(payload).toString('base64')});f.event({kind:'end'});expect(await response.text()).toBe(payload);
+ expect(billingDiagnostic).toHaveBeenCalledWith(expect.objectContaining({result:'failed',code:'INVALID_RESPONSE'}));
+ expect(billingDiagnostic).not.toHaveBeenCalledWith(expect.objectContaining({stage:'complete',result:'ok'}));
+});
+it('recognizes a complete answer across UTF-8 and SSE chunk boundaries without logging it',async()=>{
+ const f=fixture();const pending=nativeChatResponse('{}',new Headers(),new AbortController().signal,f.sdk);
+ await vi.waitFor(()=>expect(f.sdk.start).toHaveBeenCalled());f.event({kind:'headers',status:200});const response=await pending;
+ const payload='event: meta\r\ndata: '+JSON.stringify({answer:'安全を確認してください'})+'\r\n\r\n';
+ for(const byte of Buffer.from(payload))f.event({kind:'chunk',data:Buffer.from([byte]).toString('base64')});
+ f.event({kind:'end'});expect(await response.text()).toBe(payload);
+ expect(billingDiagnostic).toHaveBeenCalledWith(expect.objectContaining({stage:'complete',result:'ok'}));
+ expect(JSON.stringify(vi.mocked(billingDiagnostic).mock.calls)).not.toContain('安全');
+});
 it('resolves on headers and delivers the first UTF-8 bytes before stream completion',async()=>{
  const f=fixture();const pending=nativeChatResponse('{}',new Headers({'Authorization':'Bearer mock-session','X-Operation-ID':'op-fixture'}),new AbortController().signal,f.sdk);
  await vi.waitFor(()=>expect(f.sdk.start).toHaveBeenCalledTimes(1));
