@@ -1,11 +1,13 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
+  "regions": ["sin1"],
   "installCommand": "npm ci",
   "buildCommand": "npm run build",
   "ignoreCommand": "bash scripts/vercel-ignore-build.sh",
   "git": {
     "deploymentEnabled": {
+      "cx/anz-speed-20261114": false,
       "automation/storage-gate/*": false
     }
   },

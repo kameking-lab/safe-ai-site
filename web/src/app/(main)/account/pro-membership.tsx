@@ -7,14 +7,11 @@ import { prisma } from "@/lib/prisma";
 /** 安全AI Pro の状態（ウェブ・アプリ共通の台帳から）。無料なら主ボタン1つだけ。 */
 export async function ProMembership({ userId }: { userId: string }) {
   // Contract management must survive a failed entitlement refresh or paused new sales.
-  const subscription = await prisma?.subscription.findUnique({where:{userId},select:{stripeCustomerId:true}});
+  const [subscription,rights] = await Promise.all([
+    prisma?.subscription.findUnique({where:{userId},select:{stripeCustomerId:true}}),
+    getEntitlement(userId).catch(()=>null),
+  ]);
   const management = subscription?.stripeCustomerId ? <div className="mt-4"><ManagePlanButton /></div> : null;
-  let rights: Awaited<ReturnType<typeof getEntitlement>> | null = null;
-  try {
-    rights = await getEntitlement(userId);
-  } catch {
-    rights = null;
-  }
   if (!rights || rights.syncState !== "verified") {
     return (
       <section className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 text-sm text-slate-700">

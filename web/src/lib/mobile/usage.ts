@@ -131,15 +131,23 @@ export async function quota(userId:string,feature:AiFeature,tx?:Prisma.Transacti
   const used=rows.find(r=>r.status==='completed')?._count??0;const reserved=(rows.find(r=>r.status==='reserved')?._count??0)+(rows.find(r=>r.status==='uncertain')?._count??0);const limit=rights.limits[feature];
   return {limit,used,reserved,remaining:Math.max(0,limit-used-reserved),resetAt};
 }
+/** Recover leases once for the member, then read both features under the same lock. */
+export async function memberQuotas(userId:string,rights:Awaited<ReturnType<typeof getEntitlement>>){
+  return billingDb().$transaction(async tx=>{
+    await lockMember(tx,userId);await recoverUsageLeases(tx,userId);
+    const [law_chat,chemical_ra]=await Promise.all([quota(userId,'law_chat',tx,rights),quota(userId,'chemical_ra',tx,rights)]);
+    return {law_chat,chemical_ra};
+  });
+}
 async function reserve(request:Request,userId:string,feature:AiFeature){
   await getEntitlement(userId);
   const raw=await request.clone().text();if(raw.length>65536)throw new Error('INVALID_REQUEST');
   const requestHash=createHash('sha256').update(raw).digest('hex');
   const id=request.headers.get('x-operation-id')??randomUUID();if(!/^[0-9a-f-]{36}$/i.test(id))throw new Error('INVALID_REQUEST');
   const {day}=jstKeys();
-  await billingDb().$transaction(async tx=>{await lockMember(tx,userId);await recoverUsageLeases(tx,userId);});
   return billingDb().$transaction(async tx=>{
     await lockMember(tx,userId);
+    await recoverUsageLeases(tx,userId);
     const rights=await entitlementInTransaction(tx,userId);if(!canUseMemberQuota(rights))throw new Error('ENTITLEMENT_SYNC_PENDING');
     const previous=await tx.mobileUsageOperation.findUnique({where:{id}});
     if(previous){if(previous.userId!==userId || previous.feature!==feature || previous.requestHash!==requestHash)throw new Error('INVALID_REQUEST');
@@ -187,9 +195,11 @@ export async function withUsage(request:Request,feature:AiFeature,run:(request:R
   // Anonymous web and native visitors share the route's anonymous
   // rate limits and counts). Per-member quotas do not apply to them, but every
   // provider call still reserves against the shared monthly budget as plan 'free'.
+  let authenticatedWebMember:string|null=null;
   if(!isNativeRequest(request) || isNativeGuestRequest(request)){
     let signedIn:string|null=null;
     if(!isNativeGuestRequest(request)){try{signedIn=await webMemberId();}catch{signedIn=null;}}
+    authenticatedWebMember=signedIn;
     if(!signedIn){
       let limited:Response|null;
       try{limited=await anonymousFreeAllowance(request,feature);}catch{return json({error:{code:'ENTITLEMENT_SYNC_PENDING',message:'無料枠を確認できないため、いまはAIを止めています。時間をおいてお試しください。'}},503);}
@@ -209,7 +219,8 @@ export async function withUsage(request:Request,feature:AiFeature,run:(request:R
   }
   let operation:{id:string;plan:Plan;replay:Prisma.JsonValue|null}|undefined;
   try{
-    const userId=await member(request);operation=await reserve(request,userId,feature);
+    if(authenticatedWebMember && !['GET','HEAD'].includes(request.method) && request.headers.get('origin')!==new URL(request.url).origin)throw new Error('FORBIDDEN');
+    const userId=authenticatedWebMember??await member(request);operation=await reserve(request,userId,feature);
     if(operation.replay){if(new URL(request.url).pathname.endsWith('/stream'))return new Response(`event: meta\ndata: ${JSON.stringify(operation.replay)}\n\n`,{headers:{'Content-Type':'text/event-stream','Cache-Control':'no-store'}});return json(operation.replay);}
     const response=await context.run({plan:operation.plan,operationId:operation.id},()=>run(request));
     const settle=async(value:unknown,completed:boolean)=>{await billingDb().mobileUsageOperation.updateMany({where:{id:operation!.id,status:'reserved'},data:{status:completed?'completed':'released',...(completed?{response:value as Prisma.InputJsonValue}:{})}});};

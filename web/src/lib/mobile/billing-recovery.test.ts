@@ -15,6 +15,7 @@ vi.mock('@/lib/prisma',()=>{
  return {prisma:{...tx,$transaction:<T>(run:(db:typeof tx)=>Promise<T>)=>{const next=state.tail.then(()=>run(tx));state.tail=next.catch(()=>{});return next;}}};
 });
 import { reservePurchase,prepareApplePurchase,cancelPurchase,markStoreStarted,reportAppleOutcome,reconcile,getEntitlement } from './billing-service';
+import { prisma } from '@/lib/prisma';
 import { releaseReviewedApplePurchase,type AppleReview } from './apple-purchase-review';
 beforeEach(()=>{state.intent=null;state.created=0;state.tail=Promise.resolve();state.grantAvailable=false;state.sandboxGrant=false;state.env='PRODUCTION';state.grants=[];state.fetches=0;state.fetchFails=false;state.stripeFetches=0;state.stripeFails=false;state.legacy=null;vi.stubEnv('MOBILE_LEDGER_ENABLED','true');vi.stubEnv('REVENUECAT_IOS_PRODUCT_ID','fixture-product');});afterEach(()=>vi.unstubAllEnvs());
 it('resumes the identical reservation after app termination or network loss',async()=>{const first=await reservePurchase('member','app_store');const results=await Promise.all(Array.from({length:20},()=>reservePurchase('member','app_store')));expect(results.every(result=>result.id===first.id)).toBe(true);expect(state.created).toBe(1);});
@@ -130,14 +131,53 @@ it('retains an Apple recovery even when a separate Stripe refresh fails',async()
  state.grants=[{userId:'member',provider:'app_store',environment:'PRODUCTION',expiresAt:new Date(0),checkedAt:new Date(0),revoked:false}];state.stripeFails=true;state.grantAvailable=true;
  expect((await getEntitlement('member')).source).toBe('app_store');expect(state.fetches).toBe(1);expect(state.stripeFetches).toBe(1);
 });
-it('shares overlapping entitlement reads without caching completed reads',async()=>{
+it('verifies overlapping entitlement reads independently without caching completed reads',async()=>{
  state.grants=[{userId:'member',provider:'app_store',environment:'PRODUCTION',expiresAt:new Date(0),checkedAt:new Date(0),revoked:false}];state.grantAvailable=true;
  const rights=await Promise.all(Array.from({length:5},()=>getEntitlement('member')));
- expect(rights.every(r=>r.plan==='pro')).toBe(true);expect(state.fetches).toBe(1);
+ expect(rights.every(r=>r.plan==='pro')).toBe(true);expect(state.fetches).toBe(5);
  state.grants=[];expect((await getEntitlement('member')).plan).toBe('free');
 });
 it('identifies reconciliation failure before preparing or opening a store transaction',async()=>{
  state.fetchFails=true;
  await expect(prepareApplePurchase('member','immutable-member-id',crypto.randomUUID())).rejects.toThrow('BILLING_RECONCILE_UNAVAILABLE');
  expect(state.created).toBe(0);
+});
+it('manual refresh verifies even a recently checked Apple grant and never reuses a completed read',async()=>{
+ state.grants=[{userId:'member',provider:'app_store',environment:'PRODUCTION',expiresAt:new Date(Date.now()+86400000),checkedAt:new Date(),revoked:false}];
+ expect((await getEntitlement('member')).plan).toBe('pro');expect(state.fetches).toBe(0);
+ expect((await getEntitlement('member',{refresh:true})).plan).toBe('free');expect(state.fetches).toBe(1);
+});
+it('manual refresh also verifies recently checked Stripe rights',async()=>{
+ state.legacy={planName:'pro',status:'active',stripeSubscriptionId:'sub_fixture',currentPeriodEnd:new Date(Date.now()+86400000),updatedAt:new Date()};
+ state.grants=[{provider:'stripe',environment:'PRODUCTION',expiresAt:new Date(Date.now()+86400000),checkedAt:new Date(),revoked:false}];
+ await getEntitlement('member');expect(state.stripeFetches).toBe(0);
+ await getEntitlement('member',{refresh:true});expect(state.stripeFetches).toBe(1);
+});
+it('manual refresh discovers an Apple purchase even before a grant webhook has arrived',async()=>{
+ state.grantAvailable=true;
+ expect((await getEntitlement('member')).plan).toBe('free');expect(state.fetches).toBe(0);
+ expect((await getEntitlement('member',{refresh:true})).plan).toBe('pro');expect(state.fetches).toBe(1);
+});
+it.each([false,true])('does not reuse a pre-mutation in-flight read (previously paid: %s)',async(wasPaid)=>{
+ const grant={userId:'member',provider:'app_store',environment:'PRODUCTION',expiresAt:new Date(Date.now()+86400000),checkedAt:new Date(),revoked:false};
+ state.grants=wasPaid?[grant]:[];
+ let release!:()=>void;state.tail=new Promise<void>(resolve=>{release=resolve;});
+ const read=vi.spyOn(prisma!.mobileGrant,'findMany');
+ // Real Prisma reads return snapshots, not mutable references to later database changes.
+ read.mockResolvedValueOnce(structuredClone(state.grants));
+ const beforePurchaseOrRevocation=getEntitlement('member');
+ state.grants=wasPaid?[]:[grant];
+ const afterPurchaseOrRevocation=getEntitlement('member');
+ release();
+ try {
+  expect((await beforePurchaseOrRevocation).plan).toBe(wasPaid?'pro':'free');
+  expect((await afterPurchaseOrRevocation).plan).toBe(wasPaid?'free':'pro');
+ } finally {read.mockRestore();}
+});
+it('each explicit refresh performs its own provider verification even while another is pending',async()=>{
+ let release!:()=>void;state.tail=new Promise<void>(resolve=>{release=resolve;});
+ const first=getEntitlement('member',{refresh:true});
+ const second=getEntitlement('member',{refresh:true});
+ release();await Promise.all([first,second]);
+ expect(state.fetches).toBe(2);
 });

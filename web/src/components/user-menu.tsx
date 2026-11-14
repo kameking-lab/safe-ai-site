@@ -10,6 +10,7 @@ import {
   useState,
 } from "react";
 import { PAID_MODE } from "@/lib/paid-mode";
+import { signOut } from "next-auth/react";
 
 type MenuUser = {
   name?: string | null;
@@ -66,11 +67,9 @@ export function UserMenuSessionProvider({
 
     const controller = new AbortController();
     let active = true;
-    let idleId: number | null = null;
-    let timerId: ReturnType<typeof setTimeout> | null = null;
 
     const resolveSession = () => {
-      void fetch("/api/auth/session", {
+      void fetch("/api/me/profile", {
         method: "GET",
         credentials: "same-origin",
         headers: { Accept: "application/json" },
@@ -85,26 +84,12 @@ export function UserMenuSessionProvider({
         });
     };
 
-    const schedule = () => {
-      if ("requestIdleCallback" in window) {
-        idleId = window.requestIdleCallback(resolveSession, { timeout: 1_500 });
-      } else {
-        timerId = globalThis.setTimeout(resolveSession, 0);
-      }
-    };
-
-    if (document.readyState === "complete") {
-      schedule();
-    } else {
-      window.addEventListener("load", schedule, { once: true });
-    }
+    // Membership is visible UI: begin immediately, independent of page images and idle time.
+    resolveSession();
 
     return () => {
       active = false;
       controller.abort();
-      window.removeEventListener("load", schedule);
-      if (idleId !== null) window.cancelIdleCallback(idleId);
-      if (timerId !== null) globalThis.clearTimeout(timerId);
     };
   }, [enabled]);
 
@@ -118,6 +103,8 @@ export function UserMenuSessionProvider({
 
 export function UserMenu({ user }: Props) {
   const [open, setOpen] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
+  const [logoutError, setLogoutError] = useState("");
   const providerUser = useContext(MenuUserContext);
   const resolvedUser = user === undefined ? providerUser : user;
 
@@ -145,8 +132,11 @@ export function UserMenu({ user }: Props) {
 
   return (
     <div className="relative">
+      {logoutError ? <p role="alert" className="text-xs text-red-700">{logoutError}</p> : null}
       <button
         type="button"
+        disabled={signingOut}
+        aria-busy={signingOut}
         onClick={() => setOpen((v) => !v)}
         aria-haspopup="menu"
         aria-expanded={open}
@@ -158,7 +148,7 @@ export function UserMenu({ user }: Props) {
         ) : (
           <User className="h-4 w-4 text-slate-400" />
         )}
-        <span className="max-w-[80px] truncate">{resolvedUser.name ?? resolvedUser.email}</span>
+        <span className="max-w-[80px] truncate">{signingOut ? "ログアウト中…" : resolvedUser.name ?? resolvedUser.email}</span>
       </button>
 
       {open && (
@@ -192,6 +182,14 @@ export function UserMenu({ user }: Props) {
             <form
               action="/api/auth/signout"
               method="POST"
+              onSubmit={(event) => {
+                event.preventDefault();
+                if (signingOut) return;
+                setSigningOut(true); setOpen(false); setLogoutError("");
+                void signOut({redirect:false}).then(() => window.location.assign("/")).catch(() => {
+                  setSigningOut(false);setLogoutError("ログアウトできませんでした。もう一度お試しください。");
+                });
+              }}
             >
               <button
                 type="submit"

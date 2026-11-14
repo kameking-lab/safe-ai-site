@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
 type VercelConfig = {
+  regions?: string[];
   git?: { deploymentEnabled?: Record<string, boolean> };
   ignoreCommand?: string;
 };
@@ -14,6 +15,11 @@ function readConfig(path: string): VercelConfig {
 }
 
 describe("storage-gated deployment configuration", () => {
+  it('keeps the function default in Singapore alongside the observed safe-ai-db project',()=>{
+    for(const file of [resolve(repoRoot,'vercel.json'),resolve(process.cwd(),'vercel.json')]){
+      expect(readConfig(file).regions).toEqual(['sin1']);
+    }
+  });
   it("disables candidate deployments without suppressing the same SHA on main", () => {
     const configs = [
       readConfig(resolve(repoRoot, "vercel.json")),
@@ -22,6 +28,7 @@ describe("storage-gated deployment configuration", () => {
 
     for (const config of configs) {
       expect(config.git?.deploymentEnabled).toEqual({
+        "cx/anz-speed-20261114": false,
         "automation/storage-gate/*": false,
       });
     }

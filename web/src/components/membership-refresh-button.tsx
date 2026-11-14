@@ -12,7 +12,7 @@ export function MembershipRefreshButton() {
     if (loading || pending) return;
     setLoading(true); setMessage("");
     try {
-      const response = await fetch("/api/me/entitlements", { cache: "no-store", signal: AbortSignal.timeout(25000) });
+      const response = await fetch("/api/me/entitlements?refresh=1", { cache: "no-store", signal: AbortSignal.timeout(25000) });
       const member = await response.json();
       if (!response.ok || member.syncState !== "verified" || !["free", "pro"].includes(member.plan)) throw new Error("unverified");
       startTransition(() => router.refresh());
