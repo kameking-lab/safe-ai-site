@@ -208,8 +208,8 @@ export function ChatbotPanel({
   const lawCategory: LawCategoryFilter = "all";
 
   useLayoutEffect(() => {
-    if (upsell && listRef.current) listRef.current.scrollTop = listRef.current.scrollHeight;
-  }, [upsell]);
+    if ((upsell || error || localSafetyNotice) && listRef.current) listRef.current.scrollTop = listRef.current.scrollHeight;
+  }, [upsell, error, localSafetyNotice]);
 
   useLayoutEffect(() => {
     const list = listRef.current;
@@ -983,45 +983,44 @@ export function ChatbotPanel({
         {upsell && (
           <ProUpsellCard message={upsell} returnTo="/chatbot" className="mt-3 mb-2" />
         )}
+        {localSafetyNotice && (
+          <div
+            role="alert"
+            data-safety-kind={localSafetyNotice.kind}
+            className={`mx-3 mb-2 rounded-xl border px-3 py-2 text-sm font-semibold leading-6 sm:mx-5 ${
+              localSafetyNotice.kind === "emergency"
+                ? "border-red-500 bg-red-50 text-red-950 dark:bg-red-950 dark:text-red-100"
+                : "border-amber-300 bg-amber-50 text-amber-950 dark:bg-amber-950 dark:text-amber-100"
+            }`}
+          >
+            {localSafetyNotice.message}
+          </div>
+        )}
+
+        {error && (
+          <div
+            role="alert"
+            className="mx-3 mb-2 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800 sm:mx-5 dark:border-red-900 dark:bg-red-950 dark:text-red-100"
+          >
+            <span>{error}</span>
+            {retryableQuestion && !isSending && (
+              <button
+                type="button"
+                onClick={() => {
+                  const question = retryableQuestion;
+                  setRetryableQuestion(null);
+                  setError(null);
+                  void handleSend(question);
+                }}
+                className="inline-flex min-h-11 items-center gap-1 rounded-full border border-red-300 bg-white px-3 py-2 text-xs font-semibold text-red-800 dark:bg-red-950 dark:text-red-100"
+              >
+                <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
+                再試行
+              </button>
+            )}
+          </div>
+        )}
       </div>
-
-      {localSafetyNotice && (
-        <div
-          role="alert"
-          data-safety-kind={localSafetyNotice.kind}
-          className={`mx-3 mb-2 rounded-xl border px-3 py-2 text-sm font-semibold leading-6 sm:mx-5 ${
-            localSafetyNotice.kind === "emergency"
-              ? "border-red-500 bg-red-50 text-red-950 dark:bg-red-950 dark:text-red-100"
-              : "border-amber-300 bg-amber-50 text-amber-950 dark:bg-amber-950 dark:text-amber-100"
-          }`}
-        >
-          {localSafetyNotice.message}
-        </div>
-      )}
-
-      {error && (
-        <div
-          role="alert"
-          className="mx-3 mb-2 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800 sm:mx-5 dark:border-red-900 dark:bg-red-950 dark:text-red-100"
-        >
-          <span>{error}</span>
-          {retryableQuestion && !isSending && (
-            <button
-              type="button"
-              onClick={() => {
-                const question = retryableQuestion;
-                setRetryableQuestion(null);
-                setError(null);
-                void handleSend(question);
-              }}
-              className="inline-flex min-h-11 items-center gap-1 rounded-full border border-red-300 bg-white px-3 py-2 text-xs font-semibold text-red-800 dark:bg-red-950 dark:text-red-100"
-            >
-              <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
-              再試行
-            </button>
-          )}
-        </div>
-      )}
 
       <form
         className="z-20 mt-auto shrink-0 border-t border-slate-100 bg-white/95 px-3 pb-2 pt-2 backdrop-blur sm:px-5 dark:border-slate-800 dark:bg-slate-950/95"

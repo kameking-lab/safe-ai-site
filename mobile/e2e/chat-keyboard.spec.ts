@@ -13,7 +13,7 @@ declare global { interface Window {setTestKeyboard:(height:number,offsetTop:numb
 async function keyboard(page:Page,height=500,offsetTop=0){
   await page.evaluate(({height,offsetTop})=>window.setTestKeyboard(height,offsetTop),{height,offsetTop});
 }
-async function position(page:Page){
+async function position(page:Page,minHistory=100,safeTop=59){
   await expect(page.locator('[data-chatbot-viewport-section]')).toHaveAttribute('data-keyboard-open','');
   await expect.poll(async()=>page.locator('[data-chatbot-composer]').evaluate(el=>{
     const rect=el.getBoundingClientRect();const vv=visualViewport!;
@@ -23,8 +23,8 @@ async function position(page:Page){
     const rect=(selector:string)=>{const r=document.querySelector(selector)!.getBoundingClientRect();return {top:r.top,bottom:r.bottom,height:r.height};};
     return {viewport:{height:visualViewport!.height,offsetTop:visualViewport!.offsetTop},input:rect('[data-primary-focus]'),composer:rect('[data-chatbot-composer]'),history:rect('[data-chatbot-history]'),scrollY};
   });
-  expect(metrics.input.top).toBeGreaterThanOrEqual(metrics.viewport.offsetTop+59);
-  expect(metrics.history.height).toBeGreaterThan(100);
+  expect(metrics.input.top).toBeGreaterThanOrEqual(metrics.viewport.offsetTop+safeTop);
+  expect(metrics.history.height).toBeGreaterThan(minHistory);
   expect(metrics.history.bottom).toBeLessThanOrEqual(metrics.composer.top+1);
   return metrics;
 }
@@ -32,7 +32,7 @@ async function position(page:Page){
 for(const plan of ['free','pro'] as const)test(`${plan}: first question, follow-up, viewport pan and quota card keep composer above keyboard`,async({page,context},info)=>{
   await page.setViewportSize({width:390,height:844});
   await context.route('https://**/*',route=>route.abort());
-  let answers=0;let limited=false;let rightsReads=0;let purchasePosts=0;
+  let answers=0;let limited=false;let failed=false;let rightsReads=0;let purchasePosts=0;
   await context.route(host+'/api/**',async route=>{
     const request=route.request();const url=new URL(request.url());
     if(request.method()==='OPTIONS')return route.fulfill({status:204,headers:cors});
@@ -48,6 +48,7 @@ for(const plan of ['free','pro'] as const)test(`${plan}: first question, follow-
       return route.fulfill({headers:cors,json:cap});
     }
     if(url.pathname==='/api/chatbot/stream'){
+      if(failed)return route.fulfill({status:503,headers:cors,json:{error:{code:'UNAVAILABLE',message:'通信環境を確認して、もう一度お試しください。'}}});
       if(limited)return route.fulfill({status:429,headers:cors,json:{error:{code:'DAILY_LIMIT_REACHED',plan,upgrade:plan==='free',message:'今日の無料3回はここまでです。日本時間の0時にまた使えます。'}}});
       answers++;
       const answer='現場の条件を整理します。作業の種類と設備を確認してください。';
@@ -84,9 +85,11 @@ for(const plan of ['free','pro'] as const)test(`${plan}: first question, follow-
   await input.press('Enter');await expect.poll(()=>answers).toBe(2);await expect(input).toBeEnabled();
   metrics.followupAnswer=await position(page);
   await expect(page.locator('[data-chatbot-answer]')).toHaveCount(2);
+  await expect(page.getByLabel('AIの利用枠')).toContainText(`残り${product.limits[plan].law_chat-2}／${product.limits[plan].law_chat}回`);
   if(plan==='free'){
     limited=true;await input.fill('追加で確認したい');await input.press('Enter');
     const offer=page.locator('[data-pro-upsell]');await expect(offer).toHaveCount(1);
+    await expect(page.getByLabel('AIの利用枠')).toContainText('残り0／3回');
     await expect(offer.locator('[data-pro-start]')).toHaveCount(1);
     metrics.limit=await position(page);
     expect(await offer.evaluate(el=>!!el.closest('[data-chatbot-history]'))).toBe(true);
@@ -102,6 +105,28 @@ for(const plan of ['free','pro'] as const)test(`${plan}: first question, follow-
   await page.evaluate(()=>{document.body.style.minHeight='';window.scrollTo(0,0);});
   await input.blur();await expect(page.getByRole('navigation',{name:'モバイル ボトムナビゲーション'})).toBeVisible();
   await page.screenshot({path:captureDir+`${plan}-keyboard-closed.png`,scale:'css',animations:'disabled'});
+  await page.setViewportSize({width:844,height:390});await keyboard(page,390,0);
+  await page.addStyleTag({content:'@media(min-width:768px){body{padding-top:0!important}body::before{height:0!important}header.sticky{top:0!important}[data-chatbot-page] [data-chatbot-viewport-section][data-keyboard-open]{top:var(--chatbot-viewport-offset)!important;height:var(--chatbot-viewport-height)!important}}'});
+  await input.fill('横向きでも続けたい');await keyboard(page,210,0);
+  metrics.landscape=await position(page,20,0);
+  await page.screenshot({path:captureDir+`${plan}-landscape-keyboard.png`,scale:'css',animations:'disabled'});
+  await keyboard(page,390,0);await page.setViewportSize({width:390,height:844});await keyboard(page,844,0);
+  // Additional follow-up paths must leave room for the conversation too.
+  limited=false;
+  await input.fill('会社名: 株式会社安全工業');await keyboard(page,320,120);await input.press('Enter');
+  await page.evaluate(()=>{Object.defineProperty(window,'innerHeight',{configurable:true,value:320});window.dispatchEvent(new Event('resize'));});
+  await expect(page.locator('[data-safety-kind="privacy"]')).toBeVisible();
+  metrics.privacy=await position(page,50);
+  await page.screenshot({path:captureDir+`${plan}-privacy-keyboard.png`,scale:'css',animations:'disabled'});
+  failed=true;await input.fill('作業前の確認事項は？');await input.press('Enter');
+  await expect(page.getByRole('button',{name:'再試行',exact:true})).toBeVisible();
+  metrics.error=await position(page,50);
+  await page.screenshot({path:captureDir+`${plan}-error-keyboard.png`,scale:'css',animations:'disabled'});
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(page.getByRole('checkbox')).toHaveCount(0);
+  await page.evaluate(()=>{Reflect.deleteProperty(window,'innerHeight');window.dispatchEvent(new Event('resize'));});
+  await keyboard(page,844,0);await input.blur();
+  await expect(page.locator('[data-keyboard-open]')).toHaveCount(0);
   await writeFile(captureDir+`${plan}-geometry.json`,JSON.stringify(metrics,null,2)+'\n');
   await info.attach('geometry',{body:JSON.stringify(metrics),contentType:'application/json'});
 });
