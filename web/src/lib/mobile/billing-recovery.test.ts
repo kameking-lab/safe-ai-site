@@ -18,6 +18,18 @@ import { reservePurchase,prepareApplePurchase,cancelPurchase,markStoreStarted,re
 import { prisma } from '@/lib/prisma';
 import { releaseReviewedApplePurchase,type AppleReview } from './apple-purchase-review';
 beforeEach(()=>{state.intent=null;state.created=0;state.tail=Promise.resolve();state.grantAvailable=false;state.sandboxGrant=false;state.env='PRODUCTION';state.grants=[];state.fetches=0;state.fetchFails=false;state.stripeFetches=0;state.stripeFails=false;state.legacy=null;vi.stubEnv('MOBILE_LEDGER_ENABLED','true');vi.stubEnv('REVENUECAT_IOS_PRODUCT_ID','fixture-product');});afterEach(()=>vi.unstubAllEnvs());
+it('projects saved Pro immediately without RevenueCat, even when the provider is unavailable',async()=>{
+ state.grants=[{userId:'member',provider:'app_store',environment:'PRODUCTION',expiresAt:new Date(Date.now()+86400000),checkedAt:new Date(Date.now()-600000),revoked:false}];state.fetchFails=true;
+ const rights=await getEntitlement('member',{snapshot:true});expect(rights.plan).toBe('pro');expect(rights.limits.law_chat).toBe(50);expect(state.fetches).toBe(0);expect(state.stripeFetches).toBe(0);
+});
+it.each(['revoked','expired','stale','other-environment'])('does not use %s ledger evidence as Pro in a snapshot',async condition=>{
+ state.grants=[{userId:'member',provider:'app_store',environment:condition==='other-environment'?'SANDBOX':'PRODUCTION',expiresAt:new Date(Date.now()+(condition==='expired'?-1:86400000)),checkedAt:new Date(Date.now()-(condition==='stale'?86400001:0)),revoked:condition==='revoked'}];
+ const rights=await getEntitlement('member',{snapshot:true});expect(rights.plan).toBe('free');expect(rights.limits.law_chat).toBe(3);expect(state.fetches).toBe(0);
+});
+it('does not sell while the first purchase awaits server verification in a snapshot',async()=>{
+ state.intent={id:'fixture-intent',source:'app_store',status:'pending',stage:'store_started'};
+ const rights=await getEntitlement('member',{snapshot:true});expect(rights).toMatchObject({plan:'free',syncState:'pending',purchasePending:true});expect(state.fetches).toBe(0);
+});
 it('resumes the identical reservation after app termination or network loss',async()=>{const first=await reservePurchase('member','app_store');const results=await Promise.all(Array.from({length:20},()=>reservePurchase('member','app_store')));expect(results.every(result=>result.id===first.id)).toBe(true);expect(state.created).toBe(1);});
 it('atomically reserves and starts Apple with one provider reconciliation and rejects duplicate starts',async()=>{
  const attemptId=crypto.randomUUID();const prepared=await prepareApplePurchase('member','immutable-member-id',attemptId);

@@ -35,15 +35,24 @@ export async function entitlementInTransaction(tx:Prisma.TransactionClient,userI
   return {...rights,purchasePending:pending,purchaseIntentId:pending?intent.id:null,purchaseSource:pending?intent.source:null,purchaseStage:pending?intent.stage:null};
 }
 /** Each invocation reads afresh: even an in-flight read may predate a completed purchase/revocation. */
-export async function getEntitlement(userId:string,options:{refresh?:boolean}={}) {
-  return readEntitlement(userId,!!options.refresh);
+export async function getEntitlement(userId:string,options:{refresh?:boolean;snapshot?:boolean}={}) {
+  return readEntitlement(userId,!!options.refresh,!!options.snapshot);
 }
-async function readEntitlement(userId:string,refresh:boolean) {
+async function readEntitlement(userId:string,refresh:boolean,snapshot:boolean) {
   const db=billingDb();const now=Date.now();
   const [member,legacy,grants,intent]=await Promise.all([db.$transaction(tx=>identity(tx,userId)),db.subscription.findUnique({where:{userId}}),db.mobileGrant.findMany({where:{userId}}),db.mobilePurchaseIntent.findUnique({where:{userId}})]);
   let refreshFailed=false;let refreshed=false;
   const environment=member.billingEnvironment==='SANDBOX'?'SANDBOX':'PRODUCTION';
   const currentGrants=grants.filter(g=>g.environment===environment);
+  // Login/display reads use the stored, server-verified ledger. No provider
+  // roundtrip may hold an existing member's Pro display or quota hostage.
+  // Projection still enforces ownership, revocation, expiry and evidence age.
+  if(snapshot&&!refresh){
+    const rights=projectEntitlement(member.appUserId,legacy,grants,new Date(),environment);
+    if(rights.source==='stripe'&&!currentGrants.some(g=>g.provider==='stripe'&&!g.revoked&&g.expiresAt>new Date()))rights.syncState='pending';
+    if(rights.plan==='free'&&intent?.status==='pending'&&intent.source==='app_store')rights.syncState='pending';
+    return {...rights,purchasePending:intent?.status==='pending',purchaseIntentId:intent?.status==='pending'?intent.id:null,purchaseSource:intent?.status==='pending'?intent.source:null,purchaseStage:intent?.status==='pending'?intent.stage:null};
+  }
   // Commit each provider independently: an Apple outage must not roll back a Stripe renewal.
   if(legacy?.stripeSubscriptionId && (refresh||now-legacy.updatedAt.getTime()>300000||!currentGrants.some(g=>g.provider==='stripe')||currentGrants.some(g=>g.provider==='stripe'&&now-g.checkedAt.getTime()>300000))){
     refreshed=true;
