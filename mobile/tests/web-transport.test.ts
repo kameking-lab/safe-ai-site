@@ -20,6 +20,12 @@ describe('canonical API transport in the native bundle',()=>{
     const result=await createSiteFetch(vi.fn())('/api/chatbot',{method:'POST',headers:{Authorization:'Bearer obsolete'},body:'{}'});
     expect(await result.json()).toEqual({ok:true});expect(mock.request.mock.calls[0][0].headers.authorization).toBeUndefined();
   });
+  it('never dispatches an anonymous stream or replays a chat when secure session reading fails',async()=>{
+    mock.token.mockRejectedValue(new Error('secure storage unavailable'));
+    await expect(createSiteFetch(vi.fn())('/api/chatbot/stream',{method:'POST',body:'{}'})).rejects.toThrow('secure storage unavailable');
+    expect(mock.token).toHaveBeenCalledOnce();
+    expect(mock.request.mock.calls.filter(([request])=>!request.url.endsWith('/diagnostics'))).toHaveLength(0);
+  });
   it('creates an operation ID only when missing and uses the current secure session',async()=>{
     await createSiteFetch(vi.fn())('/api/chatbot',{method:'POST',headers:{Authorization:'Bearer obsolete'},body:'{}'});
     const headers=mock.request.mock.calls[0][0].headers;expect(headers['x-operation-id']).toMatch(/^[0-9a-f-]{36}$/);expect(headers.authorization).toBe('Bearer mock_session');

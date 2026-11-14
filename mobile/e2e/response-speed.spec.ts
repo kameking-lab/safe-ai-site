@@ -73,19 +73,19 @@ test('login, confirmed purchase, manual refresh and logout avoid redundant waits
   await expect.poll(()=>page.evaluate(()=>(window as unknown as {__speedBrowserOpened?:boolean}).__speedBrowserOpened)).toBe(true);
   const loginStart=Date.now();await page.evaluate(()=>{(window as unknown as {__returnSpeedLogin:()=>void}).__returnSpeedLogin();});
   await expect(page.getByText('無料会員',{exact:true})).toBeVisible();const loginMs=Date.now()-loginStart;
-  await page.getByRole('button',{name:/月額¥980で続ける/}).click();
-  await expect(page.getByText('Pro 購入済み（App Store購読）',{exact:true})).toBeVisible();
+  await page.getByRole('button',{name:/Proにする（月額¥980）/}).click();
+  await expect(page.getByText('Pro 利用中',{exact:true})).toBeVisible();
   const purchaseReflectedMs=Date.now()-reconciledAt;
   // A successful server reconciliation is final: no second entitlement GET or loading reset.
   expect(entitlementReads).toBe(readsAtSync);
-  const manualStart=Date.now();await page.getByRole('button',{name:'会員情報を再読み込み',exact:true}).click();
-  await expect.poll(()=>forcedReads).toBe(1);await expect(page.getByText('最新の状態です。',{exact:true})).toBeVisible();
-  const manualRefreshMs=Date.now()-manualStart;
+  const refreshStart=Date.now();const beforeRefresh=entitlementReads;await page.evaluate(()=>window.dispatchEvent(new Event('anzen-app-active')));
+  await expect.poll(()=>entitlementReads).toBeGreaterThan(beforeRefresh);await expect(page.getByText('Pro 利用中',{exact:true})).toBeVisible();
+  const automaticRefreshMs=Date.now()-refreshStart;expect(forcedReads).toBe(0);
   const beforeLogout=entitlementReads;const logoutStart=Date.now();await page.getByRole('button',{name:'ログアウト',exact:true}).click();
   await expect(page.getByText('ログインしていません',{exact:true})).toBeVisible();const logoutFeedbackMs=Date.now()-logoutStart;
   expect(logoutFeedbackMs).toBeLessThan(300);releaseLogout();await expect(page.getByRole('button',{name:'Apple / Googleでログイン'})).toBeEnabled();
   expect(entitlementReads).toBe(beforeLogout);expect(loginMs).toBeLessThan(1000);
-  await save('mobile-account-timings.json',{source:'native plugins + API fixtures, 180ms delayed exchange/rights; no real purchase',loginMs,purchaseReflectedMs,manualRefreshMs,logoutFeedbackMs,entitlementReads,forcedReads});
+  await save('mobile-account-timings.json',{source:'native plugins + API fixtures, 180ms delayed exchange/rights; no real purchase',loginMs,purchaseReflectedMs,automaticRefreshMs,logoutFeedbackMs,entitlementReads,forcedReads});
 });
 
 test('late membership reads cannot replace a purchase or restore Pro during logout',async({page,context})=>{
@@ -122,11 +122,11 @@ test('late membership reads cannot replace a purchase or restore Pro during logo
   });
   holdNext=true;await page.evaluate(()=>window.dispatchEvent(new Event('anzen-app-active')));
   await expect.poll(()=>!!releaseRead).toBe(true);
-  await page.getByRole('button',{name:/月額¥980で続ける/}).click();
-  await expect(page.getByText('Pro 購入済み（App Store購読）',{exact:true})).toBeVisible();
+  await page.getByRole('button',{name:/Proにする（月額¥980）/}).click();
+  await expect(page.getByText('Pro 利用中',{exact:true})).toBeVisible();
   releaseRead!();await expect.poll(()=>readFinished).toBe(true);
   await expect.poll(()=>page.evaluate(()=>(window as unknown as {__plans:string[]}).__plans.at(-1))).toBe('pro');
-  await expect(page.getByText('Pro 購入済み（App Store購読）',{exact:true})).toBeVisible();
+  await expect(page.getByText('Pro 利用中',{exact:true})).toBeVisible();
   readFinished=false;releaseRead=undefined;holdNext=true;
   await page.evaluate(()=>window.dispatchEvent(new Event('anzen-app-active')));await expect.poll(()=>!!releaseRead).toBe(true);
   await page.getByRole('button',{name:'ログアウト',exact:true}).click();

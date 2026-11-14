@@ -24,7 +24,7 @@ export type BillingConfig=z.infer<typeof billingConfigSchema>;
 export function canResumeApplePurchase(member:MemberEntitlement){
   return !member.purchasePending || member.purchaseSource==='app_store'&&['prepared','store_cancelled_reported','store_unknown','store_not_opened_reported'].includes(member.purchaseStage??'');
 }
-type Sdk=Pick<typeof Purchases,'configure'|'logIn'|'logOut'|'getOfferings'|'purchasePackage'|'restorePurchases'|'invalidateCustomerInfoCache'|'getCustomerInfo'>;
+type Sdk=Pick<typeof Purchases,'configure'|'logIn'|'logOut'|'getOfferings'|'purchasePackage'|'restorePurchases'|'invalidateCustomerInfoCache'|'getCustomerInfo'> & Partial<Pick<typeof Purchases,'syncPurchases'>>;
 export class BillingController {
   private identified:string|null=null;
   private configured=false;
@@ -68,6 +68,9 @@ export class BillingController {
           const identity=this.identityWork.then(async()=>{
             assertCurrentMember(ticket);
             await this.identifySerial(config,member);assertCurrentMember(ticket);
+            // Silent StoreKit receipt sync is required after changing the app
+            // account. getCustomerInfo alone only reads the new account cache.
+            if(this.sdk.syncPurchases)await bounded('getCustomerInfo',()=>this.sdk.syncPurchases!());assertCurrentMember(ticket);
             await bounded('invalidateCustomerInfoCache',()=>this.sdk.invalidateCustomerInfoCache());assertCurrentMember(ticket);
             await bounded('getCustomerInfo',()=>this.sdk.getCustomerInfo());assertCurrentMember(ticket);
           });
@@ -89,6 +92,7 @@ export class BillingController {
         return latest;
       }catch(error){
         if(await sessionBinding()!==binding)throw new StaleMemberResponseError();
+        if(error instanceof Error&&error.message==='PURCHASE_OWNED_BY_OTHER_ACCOUNT'&&typeof window!=='undefined')window.dispatchEvent(new Event('anzen-purchase-account-conflict'));
         if(!(error instanceof StaleMemberResponseError)||attempt===2)throw error;
         await new Promise(resolve=>setTimeout(resolve,attempt===0?300:700));
         if(await sessionBinding()!==binding)throw new StaleMemberResponseError();

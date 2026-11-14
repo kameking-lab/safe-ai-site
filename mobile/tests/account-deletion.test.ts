@@ -39,8 +39,9 @@ it('waits for every removal after a disk error before installing another member 
   const {session,deletion,preparation}=await start();let finish!:()=>void;
   state.remove.mockImplementation(async(k:string)=>{if(k==='news')throw new Error('disk');if(k==='saved')await new Promise<void>(r=>{finish=r;});state.content.delete(k);});
   const deleting=deletion.confirmDeletion(preparation).catch(e=>(e as Error).message);await vi.waitFor(()=>expect(finish).toBeTypeOf('function'));
-  let installed=false;const login=session.setSessionToken('session-b').then(()=>{installed=true;saveB();});await Promise.resolve();expect(installed).toBe(false);expect(await session.sessionToken()).toBe('session-a');
-  finish();expect(await deleting).toBe('disk');await login;await deletion.checkDeletion();expect(await session.sessionToken()).toBe('session-b');expect(state.content.get('saved')).toBe('member-b');
+  let installed=false;const login=session.setSessionToken('session-b').then(()=>{installed=true;saveB();});await Promise.resolve();expect(installed).toBe(false);
+  let readFinished=false;const read=session.sessionToken().then(value=>{readFinished=true;return value;});await Promise.resolve();expect(readFinished).toBe(false);
+  finish();expect(await deleting).toBe('disk');await login;expect(await read).toBe('session-b');await deletion.checkDeletion();expect(await session.sessionToken()).toBe('session-b');expect(state.content.get('saved')).toBe('member-b');
 });
 it('does not mark erasure complete until the originating Keychain session is cleared',async()=>{
   const {session,deletion,preparation}=await start();state.failClear=true;await expect(deletion.confirmDeletion(preparation)).rejects.toThrow('keychain');

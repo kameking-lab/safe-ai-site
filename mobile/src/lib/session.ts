@@ -13,6 +13,13 @@ const vault={
   clear:(options?:VaultOptions)=>vaultBoundary.write(()=>nativeVault.clear(options)),
 };
 let memoryToken:string|null=null;
+// Keychain is read once per JS session, not before every API call. Successful
+// writes already give us the credential; rereading it during iOS activation can
+// fail transiently and used to turn a signed-in chat into an anonymous request.
+let cachedToken:string|null|undefined;
+let tokenRead:Promise<string|null>|undefined;
+let tokenEpoch=0;
+let tokenWrite:Promise<unknown>=Promise.resolve();
 let pendingLogin:string|null=null;
 let loginDismissed=false;
 const completing=new Map<string,Promise<boolean>>();
@@ -38,10 +45,23 @@ export async function hasPendingLogin(){const pending=await readLogin();const ag
 // Keep the PKCE proof for a late callback, but let a dismissed browser be reopened.
 export async function dismissLogin(){if(completing.size||!await readLogin()||completing.size)return;loginDismissed=true;window.dispatchEvent(new Event('anzen-login-dismissed'));}
 async function writeLogin(value:string|null){if(Capacitor.isNativePlatform()){await initializeVault();if(value)await vault.set({purpose:'login',value});else await vault.clear({purpose:'login'});}pendingLogin=value;}
-export async function sessionToken() {
+export async function sessionToken():Promise<string|null> {
   if(!Capacitor.isNativePlatform())return memoryToken;
-  await initializeVault();
-  return (await vault.get()).value??null;
+  await tokenWrite;
+  if(cachedToken!==undefined)return cachedToken;
+  if(tokenRead)return tokenRead;
+  const epoch=tokenEpoch;
+  const read:Promise<string|null>=(async()=>{
+    await initializeVault();
+    // Retry the read only. No network request or chat is replayed.
+    let value:string|null;
+    try{value=(await vault.get()).value??null;}
+    catch(error){if((error as {code?:string}).code==='UNIMPLEMENTED')throw error;await new Promise(resolve=>setTimeout(resolve,100));value=(await vault.get()).value??null;}
+    if(epoch!==tokenEpoch)return sessionToken();
+    cachedToken=value;return value;
+  })();
+  tokenRead=read;
+  try{return await read;}finally{if(tokenRead===read)tokenRead=undefined;}
 }
 async function writeSessionToken(token:string|null) {
   invalidateMemberReads();
@@ -54,9 +74,12 @@ async function writeSessionToken(token:string|null) {
   if(Capacitor.isNativePlatform()){if(token)await vault.set({value:token});else await vault.clear();}
   if(!token)await rotate();
   invalidateMemberReads();
-  memoryToken=token;window.dispatchEvent(new CustomEvent('anzen-session-changed',{detail:{signedIn:!!token}}));
+  memoryToken=token;cachedToken=token;window.dispatchEvent(new CustomEvent('anzen-session-changed',{detail:{signedIn:!!token}}));
 }
-export async function setSessionToken(token:string|null){invalidateMemberReads();return serializeSession(()=>writeSessionToken(token));}
+export async function setSessionToken(token:string|null){
+  invalidateMemberReads();tokenEpoch++;cachedToken=undefined;tokenRead=undefined;
+  const work=serializeSession(()=>writeSessionToken(token));tokenWrite=work.catch(()=>{});return work;
+}
 export async function eraseSessionDataIfCurrent(binding:string,erase:()=>Promise<void>,completed:()=>Promise<void>){
   return serializeSession(async()=>{
     if(await sessionBinding()!==binding)return false;
@@ -74,8 +97,10 @@ export async function siteApi(path:string,body?:unknown,method?:string) {
   const reading=!body&&(!method||method==='GET');
   if(!reading)readGeneration++;
   const generation=JSON.stringify([memberGeneration(),readGeneration]);
-  // An unreadable Keychain is treated as signed out (server answers UNAUTHORIZED), never as a hard failure.
-  const token=await bounded('session',()=>sessionToken()).catch(()=>null);
+  // Authentication bootstrap is public. Member APIs must not silently lose an
+  // existing credential when secure storage is temporarily unavailable.
+  const bootstrap=/^\/api\/mobile\/v1\/(?:auth\/(?:start|exchange)|billing\/config)$/.test(path);
+  const token=bootstrap?null:await bounded('session',()=>sessionToken());
   const key=JSON.stringify([path,token,generation]);
   if(reading){
     const pending=reads.get(key);if(pending)return pending;
@@ -141,12 +166,14 @@ export async function completeLogin(value:string) {
 }
 export async function logout() {
   const resume=suspendMemberReads();
+  const credential=sessionToken();
   // Serialize the bounded server revocation and credential removal together.
   // A new login/PKCE write queues AFTER this logout; a late response cannot
   // erase its credential/proof. Native store logout remains detached.
   return serializeSession(async()=>{
     try{
-      await siteApi('/api/mobile/v1/auth/logout',{});
+      await bounded('store_request',async()=>sendSiteApi('/api/mobile/v1/auth/logout',{},'POST',await credential));
+      tokenEpoch++;cachedToken=undefined;tokenRead=undefined;
       await writeSessionToken(null);await writeLogin(null);
       const {billing}=await import('./billing');void billing.forget().catch(()=>{});
       billingDiagnostic({operation:'logout',result:'ok'});

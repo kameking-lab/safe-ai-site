@@ -83,11 +83,11 @@ test('same-account relogin automatically recovers Pro; another account cannot in
     await expect.poll(()=>page.evaluate(()=>(window as unknown as Bridge).__loginOpenCount)).toBe(opened+1);
     await page.evaluate(()=>(window as unknown as Bridge).__loginReturn());
   };
-  await login();await expect(page.getByText('Pro 購入済み（App Store購読）',{exact:true})).toBeVisible();
+  await login();await expect(page.getByText('Pro 利用中',{exact:true})).toBeVisible();
   await page.getByRole('button',{name:'ログアウト',exact:true}).click();
   await expect(page.getByRole('button',{name:'Apple / Googleでログイン'})).toBeEnabled();
   const reloginStart=Date.now();await login();
-  await expect(page.getByText('Pro 購入済み（App Store購読）',{exact:true})).toBeVisible();
+  await expect(page.getByText('Pro 利用中',{exact:true})).toBeVisible();
   const recoveryMs=Date.now()-reloginStart;expect(recoveryMs).toBeLessThan(3000);
   await expect(page.getByText('「購入を復元」をお試しください。',{exact:true})).toHaveCount(0);
   const trace=await page.evaluate(()=>(window as unknown as Bridge).__billingTrace);
@@ -105,7 +105,7 @@ test('same-account relogin automatically recovers Pro; another account cannot in
   await expect(page.getByRole('button',{name:'Apple / Googleでログイン'})).toBeEnabled();
   next='b';await login();await expect(page.getByText('無料会員',{exact:true})).toBeVisible();
   await expect.poll(()=>reconciles).toBeGreaterThanOrEqual(3);
-  await expect(page.getByText('Pro 購入済み（App Store購読）',{exact:true})).toHaveCount(0);
+  await expect(page.getByText('Pro 利用中',{exact:true})).toHaveCount(0);
   if(captureDir){await page.screenshot({path:path.join(captureDir,`${info.project.name}-other-account-free.png`),fullPage:true});await writeFile(path.join(captureDir,`${info.project.name}-relogin.json`),JSON.stringify({source:'mock RevenueCat + mock server; real bundled login/session/UI',recoveryMs,reconciles,trace:await page.evaluate(()=>(window as unknown as Bridge).__billingTrace)},null,2));}
 });
 

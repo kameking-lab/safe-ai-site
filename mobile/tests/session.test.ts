@@ -14,6 +14,25 @@ beforeEach(()=>{
   vi.resetModules();vi.clearAllMocks();mock.vault.clear();mock.prefs.clear();mock.open.mockResolvedValue(undefined);mock.close.mockResolvedValue(undefined);vi.stubGlobal('window',{dispatchEvent:vi.fn()});
   mock.request.mockImplementation(async({url})=>({url,status:200,data:url.endsWith('/start')?{flow,authorizeUrl:`${site}/api/mobile/v1/auth/authorize?flow=${flow}`}:{token}}));
 });
+it('shares one cold Keychain read and retries a transient read before returning a credential',async()=>{
+ const session=await import('../src/lib/session');mock.prefs.set('anzen.install.session-initialized','1');mock.vault.set('session',token);
+ let failed=false;mock.storage.mockImplementation(async name=>{if(name==='vault.get'&&!failed){failed=true;throw new Error('device activation');}});
+ expect(await Promise.all([session.sessionToken(),session.sessionToken(),session.sessionToken()])).toEqual([token,token,token]);
+ expect(mock.storage.mock.calls.filter(([name])=>name==='vault.get')).toHaveLength(2);
+});
+it('uses the persisted login credential for the first chat without another Keychain read',async()=>{
+ const session=await import('../src/lib/session');await session.setSessionToken(token);mock.storage.mockClear();
+ mock.storage.mockRejectedValue(new Error('Keychain temporarily unavailable'));
+ expect(await session.sessionToken()).toBe(token);expect(await session.sessionToken()).toBe(token);
+ expect(mock.storage).not.toHaveBeenCalled();
+});
+it('waits for a concurrent login write before exposing the session to a request',async()=>{
+ const session=await import('../src/lib/session');let release!:()=>void;
+ mock.storage.mockImplementation(async name=>{if(name==='vault.set')await new Promise<void>(resolve=>{release=resolve;});});
+ const write=session.setSessionToken(token);await vi.waitFor(()=>expect(release).toBeTypeOf('function'));
+ let returned=false;const read=session.sessionToken().then(value=>{returned=true;return value;});await Promise.resolve();expect(returned).toBe(false);
+ release();await write;expect(await read).toBe(token);
+});
 it.each(['vault.get','vault.set','preferences.set'])('releases login exchange when %s never returns',async operation=>{
  vi.useFakeTimers();const session=await import('../src/lib/session');await session.startLogin();
  mock.storage.mockImplementation(async name=>{if(name===operation)await new Promise(()=>{});});

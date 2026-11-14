@@ -28,7 +28,7 @@ test('shows existing website Pro rights and prevents double purchase',async({pag
     const rights={plan:'pro',source:'stripe',syncState:'verified',expiresAt:new Date(Date.now()+86400000).toISOString(),appUserId:'88888888-1111-4111-8111-111111111111',verifiedAt:new Date().toISOString(),limits:product.limits.pro};
     await route.fulfill({status:200,contentType:'application/json',headers:{'Access-Control-Allow-Origin':'http://127.0.0.1:3213','Access-Control-Allow-Credentials':'true','Access-Control-Allow-Headers':'content-type,authorization'},body:JSON.stringify(route.request().url().includes('/billing/config')?config:rights)});
   });
-  await page.goto('/account/');await expect(page.getByText('Pro 購入済み（ウェブ購読）',{exact:true})).toBeVisible();await expect(page.getByRole('button',{name:'購入済み',exact:true})).toBeDisabled();await expect(page.getByRole('button',{name:'購入を復元'})).toBeVisible();await expect(page.getByRole('button',{name:'App Storeの購読管理・解約'})).toBeVisible();await expect(page.getByRole('link',{name:'利用規約'})).toBeVisible();
+  await page.goto('/account/');await expect(page.getByText('Pro 利用中',{exact:true})).toBeVisible();await expect(page.getByRole('button',{name:/Proにする/})).toHaveCount(0);await expect(page.getByRole('button',{name:'購入を復元'})).toBeVisible();await expect(page.getByRole('link',{name:'App Storeで購読を管理・解約'})).toBeVisible();await expect(page.getByRole('link',{name:'利用規約'})).toBeVisible();
 });
 
 test('preserves all six visual KYT print formats offline',async({page,context})=>{
