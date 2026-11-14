@@ -49,7 +49,7 @@ describe.skipIf(!run)('HTTP reconcile with real PostgreSQL and a RevenueCat HTTP
    const response=await fixture.headers.run(headers,()=>POST(new Request('http://127.0.0.1/api/billing/reconcile',{method:'POST',headers,body:Buffer.concat(chunks).toString()})));
    res.writeHead(response.status,Object.fromEntries(response.headers));res.end(await response.text());
   });address=await listen(api);
-  vi.spyOn(console,'info').mockImplementation((...args)=>{logs.push(args.join(' '));});
+  vi.spyOn(console,'warn').mockImplementation((...args)=>{if(args[0]==='[mobile-billing]')logs.push(args.join(' '));});
  });
  beforeEach(async()=>{
   current='fixture-member-a';valid=true;outage=false;storeId='renewal-2';wrongOwner=false;legacyUnknown=false;logs.length=0;

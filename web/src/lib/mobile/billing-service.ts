@@ -135,7 +135,7 @@ export async function reconcile(userId:string,options:{stripe?:boolean;appUserId
   },{timeout:20000});
   // Fixed reason/provider codes only, after commit. No user/store identifiers,
   // email addresses, receipts, tokens, or provider error text.
-  if(result.transfer)console.info('[mobile-billing]',JSON.stringify(result.transfer));
+  if(result.transfer)console.warn('[mobile-billing]',JSON.stringify(result.transfer));
   return result.rights;
 }
 export async function reservePurchase(userId:string,source:PurchaseSource='app_store') {
