@@ -27,10 +27,12 @@ describe("storage-gated deployment configuration", () => {
     ];
 
     for (const config of configs) {
-      expect(config.git?.deploymentEnabled).toEqual({
+      expect(config.git?.deploymentEnabled).toMatchObject({
         "cx/anz-speed-20261114": false,
         "automation/storage-gate/*": false,
       });
+      expect(config.git?.deploymentEnabled?.main).not.toBe(false);
+      expect(config.git?.deploymentEnabled?.["*"]).not.toBe(false);
     }
 
     const ignoreScript = readFileSync(

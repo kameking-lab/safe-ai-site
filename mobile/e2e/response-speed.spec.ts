@@ -169,10 +169,21 @@ for(const reduced of [false,true])test(`Chihuahua is visible before the first na
   await expect.poll(()=>page.evaluate(()=>(window as unknown as {__chatFeedback:{paintMs?:number}}).__chatFeedback.paintMs)).toBeGreaterThanOrEqual(0);
   const thinkingMs=await page.evaluate(()=>(window as unknown as {__chatFeedback:{paintMs:number}}).__chatFeedback.paintMs);
   await expect.poll(()=>thinking.locator('img').evaluate(img=>(img as HTMLImageElement).complete&&(img as HTMLImageElement).naturalWidth>0)).toBe(true);
-  const image=thinking.locator('img');expect(await image.evaluate(img=>(img as HTMLImageElement).currentSrc)).toContain(reduced?'mascot-searching-still.webp':'mascot-searching.gif');
+  const image=thinking.locator('img');expect(await image.evaluate(img=>(img as HTMLImageElement).currentSrc)).toContain(reduced?'chat-thinking-still.webp':'chat-thinking.webp');
   const rect=await image.boundingBox();expect(rect!.y).toBeGreaterThanOrEqual(59);expect(rect!.y+rect!.height).toBeLessThan(844);
   expect(thinkingMs).toBeLessThan(300);
   if(process.env.ANZ_SPEED_CAPTURE_DIR)await page.screenshot({path:path.join(process.env.ANZ_SPEED_CAPTURE_DIR,reduced?'mobile-reduced-motion.png':'mobile-thinking.png'),scale:'css'});
-  const releaseAt=Date.now();release();await expect(page.getByText('確認する条件を整理します。',{exact:true})).toBeVisible();const firstTextAfterReleaseMs=Date.now()-releaseAt;await expect(thinking).toHaveCount(0);
+  const captureDir=process.env.ANZ_MASCOT_CAPTURE_DIR;
+  const composer=page.locator('[data-chatbot-composer]');const composerBefore=await composer.boundingBox();
+  if(captureDir){await mkdir(captureDir,{recursive:true});await page.screenshot({path:path.join(captureDir,`mobile-${reduced?'still':'motion'}-thinking.png`),scale:'css'});}
+  await expect(page.locator('[data-chat-mascot="researching"]')).toBeVisible();
+  await expect.poll(()=>image.evaluate(img=>(img as HTMLImageElement).currentSrc)).toContain(reduced?'chat-researching-still.webp':'chat-researching.webp');
+  if(captureDir)await page.screenshot({path:path.join(captureDir,`mobile-${reduced?'still':'motion'}-researching.png`),scale:'css'});
+  const releaseAt=Date.now();release();await expect(page.getByText('確認する条件を整理します。',{exact:true})).toBeVisible();const firstTextAfterReleaseMs=Date.now()-releaseAt;
+  await expect(page.locator('[data-chat-mascot="idea"]')).toBeVisible();
+  await expect.poll(()=>image.evaluate(img=>(img as HTMLImageElement).currentSrc)).toContain(reduced?'chat-idea-still.webp':'chat-idea.webp');
+  expect((await composer.boundingBox())!.y).toBe(composerBefore!.y);
+  if(captureDir)await page.screenshot({path:path.join(captureDir,`mobile-${reduced?'still':'motion'}-idea.png`),scale:'css'});
+  await expect(thinking).toHaveCount(0);
   await save(reduced?'mobile-reduced-timing.json':'mobile-chat-timing.json',{source:'export + native stream adapter; response held until screenshot',quotaDisplayedMs,thinkingMs,firstTextAfterReleaseMs,rect,reduced});
 });
