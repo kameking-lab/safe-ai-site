@@ -35,3 +35,16 @@ Web側は送信されたappUserIdと認証会員を照合する。元の購入�
 Windows上のChromium/WebKitによる模擬検証であり、実機のApp Store/RevenueCat通信と新しいTestFlightビルドの実行は未確認。価格・回数・AI設定・費用記録は変更していない。マージ・本番配備・アプリのpushは行わない。
 
 RevenueCatの同期・キャッシュ仕様の参照: [CustomerInfo](https://www.revenuecat.com/docs/customers/customer-info)、[Caching](https://www.revenuecat.com/docs/test-and-launch/debugging/caching)。
+
+## sp-4-rv の追加点検
+
+再ログイン復帰の非同期境界で2件の競合を再現し、`mobile/src/lib/billing.ts`で修正した。
+
+- セッションの読取り待ち中に購入・復元が始まると、自動復帰のreconcileがStoreKit処理の世代を無効化していた。読取り後にも購入中かを確認し、進行中の購入・復元に確定処理を任せる。
+- 最終権利取得後のセッション確認待ち中に新しい権利が確定すると、古い復帰結果が会員画面へ通知されていた。通知直前にも権利取得時の世代を照合し、同一セッションなら最新状態で再試行する。
+
+回帰テスト5ケースを追加した（購入/復元との競合2件、無料→Pro/Pro→無料の遅延通知2件、復帰でPro確定後に購入シートを開かない確認1件）。価格・回数・サーバー所有者照合・Sandbox区分・化学RA計算は変更していない。
+
+Web/APIの`d0d7a1c8`はGitオブジェクト経由で点検し、PR #1109の既存CI状態だけを読み取った。今回の追加修正はアプリ専用コードのため、Web側の変更はない。共通ルールに従い、別worktreeの編集・push・PR更新・デプロイは行わない。
+
+追加点検のコマンド・結果・制限は `C:/Users/kanet/20260522/codex-run-20261110/reports/sp-4-rv.md`、PDFの再レンダリング用スクリプトと点検画像は `C:/Users/kanet/20260522/codex-run-20261110/tools/sp-4-rv/` に保存する。

@@ -126,6 +126,60 @@ describe('membership response ordering',()=>{
 });
 
 describe('automatic membership recovery after login',()=>{
+  it.each([false,true])('does not publish an old recovery result after newer rights while checking the session (was Pro: %s)',async wasPaid=>{
+    const s=setup();let paid=wasPaid;let finishBinding!:(value:string)=>void;
+    s.send.mockImplementation(async path=>path.endsWith('/billing/config')?config:paid?pro():free());
+    const binding=vi.spyOn(session,'sessionBinding').mockResolvedValue('session-a');
+    binding.mockResolvedValueOnce('session-a').mockResolvedValueOnce('session-a')
+      .mockImplementationOnce(()=>new Promise(resolve=>{finishBinding=resolve;}));
+    const recovered:string[]=[];
+    vi.stubGlobal('window',{dispatchEvent:(event:CustomEvent)=>{if(event.type==='anzen-membership-recovered')recovered.push(event.detail.plan);}});
+    try{
+      const recovery=s.controller.recoverSession();
+      await vi.waitFor(()=>expect(finishBinding).toBeTypeOf('function'));
+      paid=!wasPaid;await s.controller.sync();finishBinding('session-a');
+      const expectedPlan=paid?'pro':'free';
+      expect((await recovery).plan).toBe(expectedPlan);
+      expect(recovered).toEqual([expectedPlan]);
+    }finally{binding.mockRestore();vi.unstubAllGlobals();}
+  });
+  it.each(['purchase','restore'] as const)('does not interrupt StoreKit when a delayed recovery starts after %s',async operation=>{
+    const s=setup({atomic:true});const send=s.send.getMockImplementation()!;
+    s.send.mockImplementation(async(path,body)=>path.endsWith('/billing/config')?config:send(path,body));
+    let releaseBinding!:(value:string)=>void;let finishStore!:()=>void;
+    const binding=vi.spyOn(session,'sessionBinding').mockResolvedValue('session-a');
+    binding.mockImplementationOnce(()=>new Promise(resolve=>{releaseBinding=resolve;}));
+    const store=operation==='purchase'?s.sdk.purchasePackage:s.sdk.restorePurchases;
+    store.mockImplementationOnce(()=>new Promise(resolve=>{finishStore=()=>resolve({} as never);}));
+    try{
+      const recovering=s.controller.recoverSession();
+      const purchase=s.controller[operation](config);
+      const result=purchase.then(value=>({value,error:null}),error=>({value:null,error}));
+      await vi.waitFor(()=>expect(finishStore).toBeTypeOf('function'));
+      releaseBinding('session-a');await recovering;
+      const reconciliationsBeforeFinish=s.send.mock.calls.filter(([path])=>path==='/api/billing/reconcile').length;
+      finishStore();const completed=await result;
+      expect(reconciliationsBeforeFinish).toBe(0);
+      expect(completed.error).toBeNull();
+      expect(store).toHaveBeenCalledOnce();
+      expect(s.send.mock.calls.filter(([path])=>path==='/api/billing/reconcile')).toHaveLength(1);
+    }finally{binding.mockRestore();}
+  });
+  it('waits for recovery to confirm an existing subscription before attempting a purchase',async()=>{
+    const s=setup({atomic:true});let paid=false;let finishInfo!:()=>void;
+    s.send.mockImplementation(async path=>{
+      if(path.endsWith('/billing/config'))return config;
+      if(path==='/api/billing/reconcile')paid=true;
+      return paid?pro():free();
+    });
+    s.sdk.getCustomerInfo.mockImplementationOnce(()=>new Promise(resolve=>{finishInfo=()=>resolve({} as never);}));
+    const recovery=s.controller.recoverSession();
+    await vi.waitFor(()=>expect(finishInfo).toBeTypeOf('function'));
+    const purchase=expect(s.controller.purchase(config)).rejects.toThrow('ALREADY_SUBSCRIBED');
+    finishInfo();await recovery;await purchase;
+    expect(s.sdk.purchasePackage).not.toHaveBeenCalled();
+    expect(s.send.mock.calls.some(([path])=>path==='/api/billing/purchase-intents')).toBe(false);
+  });
   it('coalesces concurrent recovery triggers into one server reconciliation',async()=>{
     const s=setup();s.send.mockImplementation(async path=>path.endsWith('/billing/config')?config:pro());
     const values=await Promise.all([s.controller.recoverSession(),s.controller.recoverSession(),s.controller.recoverSession()]);

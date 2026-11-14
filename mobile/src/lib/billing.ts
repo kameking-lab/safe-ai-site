@@ -39,6 +39,9 @@ export class BillingController {
   async recoverSession(){
     if(this.busy)return this.entitlement();
     const binding=await sessionBinding();
+    // A purchase/restore can start while Preferences is resolving the binding.
+    // Its StoreKit result owns reconciliation until it completes.
+    if(this.busy)return this.entitlement();
     const existing=this.recovery.get(binding);if(existing)return existing;
     const work=this.recoverSessionSerial(binding);this.recovery.set(binding,work);
     try{return await work;}finally{if(this.recovery.get(binding)===work)this.recovery.delete(binding);}
@@ -60,8 +63,11 @@ export class BillingController {
           await this.reconcile(ticket,member.appUserId);
         }
         if(await sessionBinding()!==binding)throw new StaleMemberResponseError();
+        const finalTicket=memberGeneration();
         const latest=await this.entitlement();
         if(latest.appUserId!==member.appUserId||await sessionBinding()!==binding)throw new StaleMemberResponseError();
+        // Session lookup also yields; a newer confirmation/logout may have won meanwhile.
+        assertCurrentMember(finalTicket);
         if(typeof window!=='undefined'){
           window.dispatchEvent(new CustomEvent('anzen-membership-recovered',{detail:latest}));
           window.dispatchEvent(new Event('anzen-usage-changed'));
