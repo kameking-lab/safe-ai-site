@@ -18,7 +18,7 @@ vi.mock('@/auth',async()=>({auth:async()=>{const {mobileAuthSession}=await impor
 const run=process.env.ANZEN_BILLING_INTEGRATION==='1';
 describe.skipIf(!run)('HTTP reconcile with real PostgreSQL and a RevenueCat HTTP fixture',()=>{
  let db:PrismaClient;let api:Server;let upstream:Server;let address:string;let rcAddress:string;
- let current='fixture-member-a';let valid=true;let outage=false;let storeId='renewal-2';let wrongOwner=false;
+ let current='fixture-member-a';let valid=true;let outage=false;let storeId='renewal-2';let wrongOwner=false;let legacyUnknown=false;
  const actualFetch=globalThis.fetch;
  const logs:string[]=[];
  const expiry=()=>new Date(Date.now()+86400000);
@@ -35,7 +35,7 @@ describe.skipIf(!run)('HTTP reconcile with real PostgreSQL and a RevenueCat HTTP
     const owner=decodeURIComponent(url.pathname.split('/').at(-1)!);const active=valid&&owner===current;
     value={subscriber:{entitlements:active?{anzen_pro:{product_identifier:'ios-product',purchase_date:new Date().toISOString(),expires_date:expiry().toISOString()}}:{},subscriptions:active?{'ios-product':{store:'app_store',is_sandbox:true,expires_date:expiry().toISOString(),original_purchase_date:new Date().toISOString()}}:{}}};
    }else if(url.pathname.includes('/customers/'))value={items:[{...subscription(),...(wrongOwner?{customer_id:'fixture-member-a'}:{})}]};
-   else value={items:['original-apple-id','renewal-1','renewal-2','renewal-3'].includes(url.searchParams.get('store_subscription_identifier')??'')?[subscription()]:[]};
+   else value={items:!legacyUnknown&&['original-apple-id','renewal-1','renewal-2','renewal-3'].includes(url.searchParams.get('store_subscription_identifier')??'')?[subscription()]:[]};
    res.setHeader('Content-Type','application/json');res.end(JSON.stringify(value));
   });rcAddress=await listen(upstream);
   vi.stubGlobal('fetch',async(input:Parameters<typeof fetch>[0],init?:RequestInit)=>{
@@ -52,7 +52,7 @@ describe.skipIf(!run)('HTTP reconcile with real PostgreSQL and a RevenueCat HTTP
   vi.spyOn(console,'info').mockImplementation((...args)=>{logs.push(args.join(' '));});
  });
  beforeEach(async()=>{
-  current='fixture-member-a';valid=true;outage=false;storeId='renewal-2';wrongOwner=false;logs.length=0;
+  current='fixture-member-a';valid=true;outage=false;storeId='renewal-2';wrongOwner=false;legacyUnknown=false;logs.length=0;
   await db.mobileGrant.deleteMany();await db.mobilePurchaseIntent.deleteMany();await db.mobileSession.deleteMany();await db.mobileIdentity.deleteMany();await db.account.deleteMany();await db.subscription.deleteMany();await db.user.deleteMany();
   for(const [id,appUserId,provider] of [['a','fixture-member-a','apple'],['b','fixture-member-b','google'],['c','fixture-member-c','apple']]){
    await db.user.create({data:{id}});await db.mobileIdentity.create({data:{userId:id,appUserId,billingEnvironment:'SANDBOX'}});
@@ -79,6 +79,11 @@ describe.skipIf(!run)('HTTP reconcile with real PostgreSQL and a RevenueCat HTTP
   await db.mobileGrant.deleteMany();current='fixture-member-b';expect((await reconcile('b')).body.plan).toBe('pro');
   expect(logs).toEqual(['[mobile-billing] {"reason":"APP_STORE_VERIFIED_TRANSFER","from":["apple"],"to":["google"]}']);
   logs.length=0;await reconcile('b');expect(logs).toEqual([]);
+ });
+ it('rolls back the whole transfer if an active old ledger transaction cannot be matched',async()=>{
+  current='fixture-member-b';legacyUnknown=true;expect((await reconcile('b')).status).toBe(503);
+  const {getEntitlement}=await import('./billing-service');expect((await getEntitlement('a',{snapshot:true})).plan).toBe('pro');expect((await getEntitlement('b',{snapshot:true})).plan).toBe('free');
+  expect(await db.mobileGrant.count({where:{userId:'a',revoked:false}})).toBe(2);expect(await db.mobileGrant.count({where:{userId:'b',revoked:false}})).toBe(0);expect(logs).toEqual([]);
  });
  it('rejects a mismatched current owner and a delayed request for a previous login',async()=>{
   // v1 says B has a grant but v2 still says A; no transfer is permitted.

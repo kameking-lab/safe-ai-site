@@ -77,7 +77,15 @@ export async function verifyAppleLegacyPurchase(appUserId:string,environment:'PR
   if(!response.ok)throw new Error('ENTITLEMENT_SYNC_PENDING');
   const data=subscriptionListSchema.parse(await response.json());
   if(data.next_page)throw new Error('ENTITLEMENT_SYNC_PENDING');
-  return data.items.some(sub=>`rc:${sub.id}`===key&&sub.customer_id===appUserId&&sub.product_id===process.env.REVENUECAT_IOS_V2_PRODUCT_ID&&sub.store==='app_store'&&sub.environment===environment.toLowerCase()&&sub.gives_access);
+  // An empty lookup is not proof of an unrelated purchase. Nor may stale,
+  // inconsistent ownership responses leave both the old and new member Pro.
+  if(!data.items.length||data.items.some(sub=>!sub.id))throw new Error('ENTITLEMENT_SYNC_PENDING');
+  const matches=data.items.filter(sub=>`rc:${sub.id}`===key);
+  if(!matches.length)return false; // Positively identified as a different subscription.
+  if(matches.length!==1)throw new Error('ENTITLEMENT_SYNC_PENDING');
+  const sub=matches[0];
+  if(sub.customer_id!==appUserId||sub.product_id!==process.env.REVENUECAT_IOS_V2_PRODUCT_ID||sub.store!=='app_store'||sub.environment!==environment.toLowerCase()||!sub.gives_access)throw new Error('ENTITLEMENT_SYNC_PENDING');
+  return true;
 }
 export async function fetchSubscriber(appUserId:string, send:typeof fetch=fetch) {
   if (!externalCredentialedServicesAllowed() || !process.env.REVENUECAT_SECRET_API_KEY) throw new Error('ENTITLEMENT_SYNC_PENDING');
