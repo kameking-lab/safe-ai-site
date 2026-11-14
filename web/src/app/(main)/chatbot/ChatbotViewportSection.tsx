@@ -96,6 +96,7 @@ export function ChatbotViewportSection({
         [data-keyboard-open] [data-chatbot-page-heading] { padding: 0 8px; margin-bottom: 4px; }
         [data-keyboard-open] [data-chatbot-page-heading] h1 { font-size: 18px; }
         [data-keyboard-open] [data-chatbot-secondary] { display: none; }
+        [data-keyboard-open] [data-chatbot-history] { padding-block: 4px; }
         body:has([data-keyboard-open]) [data-mobile-nav="bottom"] { display: none !important; }
       `}</style>
       {children}
