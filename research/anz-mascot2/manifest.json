@@ -1,0 +1,172 @@
+{
+  "canvas": [
+    512,
+    512
+  ],
+  "background": "white",
+  "generation": "built-in image_gen; 1536x1024 source sheets",
+  "assets": {
+    "thinking": {
+      "frames": 6,
+      "durations_ms": [
+        460,
+        180,
+        260,
+        140,
+        180,
+        380
+      ],
+      "loop_ms": 1600,
+      "registration": [
+        {
+          "dx": 0,
+          "dy": 0,
+          "feet_match": 1.0
+        },
+        {
+          "dx": 0,
+          "dy": 0,
+          "feet_match": 0.9925
+        },
+        {
+          "dx": 0,
+          "dy": 0,
+          "feet_match": 0.9878
+        },
+        {
+          "dx": 0,
+          "dy": 0,
+          "feet_match": 0.993
+        },
+        {
+          "dx": 0,
+          "dy": 0,
+          "feet_match": 0.9903
+        },
+        {
+          "dx": 0,
+          "dy": 0,
+          "feet_match": 0.9856
+        }
+      ],
+      "files": {
+        "webp": {
+          "bytes": 152666,
+          "sha256": "850701c1b937e71798bf69198ec9bc08aa773f64daf2de3e5e0db5976c977a17"
+        },
+        "gif": {
+          "bytes": 357876,
+          "sha256": "fec18da93560e7373a6f6d1faf5466f901c937e7349d5dc5504e1d3d87881862"
+        }
+      }
+    },
+    "researching": {
+      "frames": 6,
+      "durations_ms": [
+        380,
+        200,
+        220,
+        220,
+        200,
+        380
+      ],
+      "loop_ms": 1600,
+      "registration": [
+        {
+          "dx": 0,
+          "dy": 0,
+          "feet_match": 1.0
+        },
+        {
+          "dx": 0,
+          "dy": 0,
+          "feet_match": 0.9965
+        },
+        {
+          "dx": 0,
+          "dy": 0,
+          "feet_match": 0.9955
+        },
+        {
+          "dx": 0,
+          "dy": 0,
+          "feet_match": 0.9944
+        },
+        {
+          "dx": 0,
+          "dy": 0,
+          "feet_match": 0.9911
+        },
+        {
+          "dx": 0,
+          "dy": 0,
+          "feet_match": 0.9929
+        }
+      ],
+      "files": {
+        "webp": {
+          "bytes": 155928,
+          "sha256": "bac4b227f08efd6cc7c10c4c23a78f3792669f5a3c8dc191853b3722939d0dbd"
+        },
+        "gif": {
+          "bytes": 364753,
+          "sha256": "f9186214e47f1c43cc0aaf0275dfc00b523c02039af6866c1b95440946a3f595"
+        }
+      }
+    },
+    "idea": {
+      "frames": 6,
+      "durations_ms": [
+        320,
+        180,
+        260,
+        180,
+        180,
+        380
+      ],
+      "loop_ms": 1500,
+      "registration": [
+        {
+          "dx": 0,
+          "dy": 0,
+          "feet_match": 1.0
+        },
+        {
+          "dx": 32,
+          "dy": 0,
+          "feet_match": 0.9943
+        },
+        {
+          "dx": 64,
+          "dy": 0,
+          "feet_match": 0.9937
+        },
+        {
+          "dx": 0,
+          "dy": 0,
+          "feet_match": 0.9889
+        },
+        {
+          "dx": 32,
+          "dy": 0,
+          "feet_match": 0.9879
+        },
+        {
+          "dx": 64,
+          "dy": 0,
+          "feet_match": 0.9854
+        }
+      ],
+      "files": {
+        "webp": {
+          "bytes": 169362,
+          "sha256": "c75dc9afd54ff162ba1f68b96d12d6af283faa18fe673995f1e31e21bdc9207c"
+        },
+        "gif": {
+          "bytes": 374972,
+          "sha256": "0e6ee380881dc2af17360f2106acfc68b49ca0ca2cc90abc66fe25ccaf9f481e"
+        }
+      }
+    }
+  }
+}

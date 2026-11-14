@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="ja">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>安全AI チワワのアニメーション見本</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#eff4f0;color:#173e2b;font:16px/1.7 system-ui,sans-serif}main{max-width:1320px;margin:auto;padding:32px 24px}h1{font-size:28px;margin:0}h2{font-size:19px}p{margin:8px 0 20px}a{color:#146340}button{font:inherit;padding:8px 16px;border:1px solid #47775c;border-radius:8px;background:#fff;color:#173e2b;cursor:pointer}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin:24px 0}.card{background:white;padding:16px;border:1px solid #d5e2d8;border-radius:16px;text-align:center}.mascot{width:192px;height:192px;max-width:100%;object-fit:contain;display:block;margin:16px auto}.comparison{width:100%;height:auto;display:block;border-radius:12px}small{display:block;color:#456152}.links{font-size:14px}.status{display:inline-block;margin-left:12px}footer{margin-top:24px}@media(max-width:1000px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:540px){main{padding:24px 16px}.grid{grid-template-columns:1fr}h1{font-size:23px}}
+</style>
+<main>
+<h1>安全AI チワワのアニメーション見本</h1>
+<p>緑の安全ヘルメットを引き継いだ、3つの待ち時間アニメーション。</p>
+<button id="motion" type="button" aria-pressed="false">静止画に切り替える</button><span class="status" id="status" role="status"></span>
+<section class="grid" aria-label="現行と新しい見本の比較">
+<article class="card"><h2>現行</h2><img class="mascot" src="original-searching.gif" data-animation="original-searching.gif" data-still="original-still.png" alt="本を読む従来のチワワ" width="192" height="192"><small>192 × 192 / 8コマ</small><small>GIF 156.5 KB</small></article>
+<article class="card"><h2>① 考えている</h2><img class="mascot" src="thinking-still.webp" data-animation="thinking.webp" data-still="thinking-still.webp" alt="腕組みをして首をかしげるチワワ" width="192" height="192"><small>512 × 512 / 6コマ / 1.6秒</small><small>WebP 152.7 KB / GIF 357.9 KB</small><p class="links"><a href="thinking.gif">GIF</a> · <a href="thinking-still.png">静止画</a> · <a href="thinking-contact-sheet.png">全コマ</a></p></article>
+<article class="card"><h2>② 資料を探している</h2><img class="mascot" src="researching-still.webp" data-animation="researching.webp" data-still="researching-still.webp" alt="法令の本をめくるチワワ" width="192" height="192"><small>512 × 512 / 6コマ / 1.6秒</small><small>WebP 155.9 KB / GIF 364.8 KB</small><p class="links"><a href="researching.gif">GIF</a> · <a href="researching-still.png">静止画</a> · <a href="researching-contact-sheet.png">全コマ</a></p></article>
+<article class="card"><h2>③ ひらめいた</h2><img class="mascot" src="idea-still.webp" data-animation="idea.webp" data-still="idea-still.webp" alt="電球が灯り笑顔になるチワワ" width="192" height="192"><small>512 × 512 / 6コマ / 1.5秒</small><small>WebP 169.4 KB / GIF 375.0 KB</small><p class="links"><a href="idea.gif">GIF</a> · <a href="idea-still.png">静止画</a> · <a href="idea-contact-sheet.png">全コマ</a></p></article>
+</section>
+<h2>線・塗り・陰影の比較</h2>
+<img class="comparison" src="comparison.png" alt="現行GIFと3種類の新見本を192ピクセル表示と拡大表示で比較" width="1536" height="880">
+<footer><a href="README.md">仕様・確認記録</a></footer>
+</main>
+<script>
+const preference=matchMedia('(prefers-reduced-motion: reduce)');
+let still=preference.matches;
+const button=document.getElementById('motion');
+function update(){document.querySelectorAll('[data-animation]').forEach(img=>{img.src=still?img.dataset.still:img.dataset.animation});button.textContent=still?'アニメーションに切り替える':'静止画に切り替える';button.setAttribute('aria-pressed',String(still));document.getElementById('status').textContent=still?'静止画を表示中':'アニメーションを表示中'}
+button.addEventListener('click',()=>{still=!still;update()});
+preference.addEventListener('change',()=>{still=preference.matches;update()});
+update();
+</script>
+</html>

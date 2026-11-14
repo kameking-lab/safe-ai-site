@@ -1,0 +1,84 @@
+{
+  "results": [
+    {
+      "engine": "chromium",
+      "version": "145.0.7632.6",
+      "decoded": [
+        {
+          "width": 192,
+          "height": 192,
+          "complete": true
+        },
+        {
+          "width": 512,
+          "height": 512,
+          "complete": true
+        },
+        {
+          "width": 512,
+          "height": 512,
+          "complete": true
+        },
+        {
+          "width": 512,
+          "height": 512,
+          "complete": true
+        }
+      ],
+      "animated": {
+        "thinking.webp": 4,
+        "researching.webp": 4,
+        "idea.webp": 5,
+        "thinking.gif": 3,
+        "researching.gif": 4,
+        "idea.gif": 4
+      },
+      "reducedMotion": "pass",
+      "manualToggle": "pass",
+      "mobile390px": "pass",
+      "pageErrors": []
+    },
+    {
+      "engine": "webkit",
+      "version": "26.0",
+      "decoded": [
+        {
+          "width": 192,
+          "height": 192,
+          "complete": true
+        },
+        {
+          "width": 512,
+          "height": 512,
+          "complete": true
+        },
+        {
+          "width": 512,
+          "height": 512,
+          "complete": true
+        },
+        {
+          "width": 512,
+          "height": 512,
+          "complete": true
+        }
+      ],
+      "animated": {
+        "thinking.webp": 4,
+        "researching.webp": 4,
+        "idea.webp": 5,
+        "thinking.gif": 3,
+        "researching.gif": 3,
+        "idea.gif": 3
+      },
+      "reducedMotion": "pass",
+      "manualToggle": "pass",
+      "mobile390px": "pass",
+      "pageErrors": []
+    }
+  ],
+  "limitations": [
+    "Windows Playwright WebKit is not an actual iOS WKWebView device.",
+    "Firefox executable is unavailable; Firefox has not been tested."
+  ]
+}
