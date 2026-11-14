@@ -44,6 +44,11 @@ it('queues a new StoreKit identity after background logout completes',async()=>{
   await vi.waitFor(()=>expect(s.sdk.logOut).toHaveBeenCalledOnce());expect(s.sdk.logIn).not.toHaveBeenCalled();
   release();await Promise.all([logout,login]);expect(s.sdk.logIn).toHaveBeenLastCalledWith({appUserID:'another-member-identifier'});
 });
+it('re-identifies even the same member after an ambiguous SDK logout failure',async()=>{
+  const s=setup();const member=await s.controller.entitlement();await s.controller.identify(config,member);
+  s.sdk.logOut.mockRejectedValueOnce(new Error('offline'));await expect(s.controller.forget()).rejects.toThrow('offline');
+  await s.controller.identify(config,member);expect(s.sdk.logIn).toHaveBeenCalledWith({appUserID:member.appUserId});
+});
 describe('iOS IAP uses server rights before StoreKit',()=>{
   it('publishes the final server rights recovered by a durable outcome report',async()=>{
     const dispatchEvent=vi.fn();vi.stubGlobal('window',{dispatchEvent});

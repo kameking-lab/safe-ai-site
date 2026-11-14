@@ -165,7 +165,7 @@ export class BillingController {
     this.packages.clear();
     // A new login can start while logout runs in the background. Queue its SDK
     // identity after this logout so a late completion cannot erase the new owner.
-    const next=this.identityWork.then(async()=>{if(this.configured)await this.sdk.logOut();this.identified=null;});
+    const next=this.identityWork.then(async()=>{this.identified=null;if(this.configured)await this.sdk.logOut();});
     this.identityWork=next.catch(()=>{});return next;
   }
 }
