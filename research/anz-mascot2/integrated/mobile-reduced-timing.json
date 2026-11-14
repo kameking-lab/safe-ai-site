@@ -1,0 +1,13 @@
+{
+  "source": "export + native stream adapter; response held until screenshot",
+  "quotaDisplayedMs": 511,
+  "thinkingMs": 65,
+  "firstTextAfterReleaseMs": 71,
+  "rect": {
+    "x": 8,
+    "y": 264.6875,
+    "width": 144,
+    "height": 144
+  },
+  "reduced": true
+}

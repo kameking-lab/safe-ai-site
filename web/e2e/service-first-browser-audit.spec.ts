@@ -636,6 +636,7 @@ test("chatbot: composer, question chips, quick reply and source details remain o
   await input.focus();
   await expect(input).toBeFocused();
   // The history scrolls inside a flex viewport; the composer stays outside it.
+  const composerPosition = await composer.evaluate(element => getComputedStyle(element).position);
   await page.locator('[data-chatbot-history]').evaluate(element => { element.scrollTop = element.scrollHeight; });
   if (enforce) expect((await composer.boundingBox())!.y).toBe(composerBox!.y);
   await input.fill("1行目");
@@ -643,10 +644,15 @@ test("chatbot: composer, question chips, quick reply and source details remain o
   await input.type("2行目");
   await expect(input).toHaveValue("1行目\n2行目");
   await page.setViewportSize({ width: 390, height: 500 });
+  if (enforce) await expect.poll(async () => {
+    const box = await composer.boundingBox();
+    return box ? box.y + box.height : Infinity;
+  }).toBeLessThanOrEqual(502);
   const keyboardViewportBox = await composer.boundingBox();
   expect(keyboardViewportBox).not.toBeNull();
   if (enforce) expect(keyboardViewportBox!.y + keyboardViewportBox!.height).toBeLessThanOrEqual(502);
   await page.setViewportSize({ width: 390, height: 844 });
+  await expect(page.locator('[data-chatbot-viewport-section]')).not.toHaveAttribute('data-keyboard-open', '');
   await input.fill("労働安全衛生法第61条を示してください");
   await input.press("Enter");
   await expect(chips).toHaveCount(0);

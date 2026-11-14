@@ -10,6 +10,7 @@
     "dev": "next dev --hostname 127.0.0.1 --port 3213",
     "build": "node scripts/build.mjs",
     "typecheck": "node scripts/share-web.mjs && next typegen && tsc --noEmit",
+    "lint": "node ../web/node_modules/eslint/bin/eslint.js src e2e scripts tests",
     "test": "vitest run",
     "test:e2e": "playwright test",
     "ios:prepare": "node scripts/prepare-ios.mjs",

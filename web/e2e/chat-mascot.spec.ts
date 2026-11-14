@@ -58,7 +58,7 @@ for (const reduced of [false, true]) test(`three mascot states, immediate text a
     await expect.poll(() => mascot.locator("img").evaluate(img => (img as HTMLImageElement).currentSrc)).toContain(`chat-${phase}${reduced ? "-still" : ""}.webp`);
     const rect = await mascot.locator("img").boundingBox();
     expect(rect!.width).toBe(144);
-    expect(rect!.x + rect!.width).toBeLessThanOrEqual(390);
+    expect(rect!.x + rect!.width).toBeLessThanOrEqual(page.viewportSize()!.width);
     expect((await composer.boundingBox())!.y).toBe(initial!.y);
     if (phase === "idea") await expect(page.getByText("確認する条件を整理します。", { exact: true })).toBeVisible();
     if (directory) {
