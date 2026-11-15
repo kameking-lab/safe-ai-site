@@ -48,6 +48,7 @@ export async function ProMembership({ userId }: { userId: string }) {
       <p className="mt-2 text-[11px] leading-4 text-slate-500">
         法令AIチャット1日50回・自動更新・いつでも解約。<Link href="/pricing/terms" className="underline">条件・特商法表示</Link>
       </p>
+      <p className="mt-1 text-[11px] leading-4 text-slate-500">購入済みの方は、購入したときと同じ方法（Google / Apple）でログインしてください。</p>
     </section>
   );
 }
