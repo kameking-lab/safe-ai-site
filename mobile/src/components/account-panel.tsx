@@ -98,6 +98,7 @@ export function AccountPanel(){
     <div className="flex flex-wrap gap-3">{!pro?<button disabled={busy || !member || pending || !config?.ready || config.salesPaused || !price} onClick={()=>config && void action('purchase',()=>billing.purchase(config))}>{`Proにする（月額${price}）`}</button>:null}
     <button disabled={operations.restore} onClick={()=>void action('restore',async()=>billing.restore(config??await billing.config()))}>購入を復元</button>
     </div>
+    {!pro?<p className="muted">購入済みの方は、購入したときと同じ方法（Google / Apple）でログインしてください。</p>:null}
     {slow&&!pro&&!message?<p role="status" className="text-xs">{stageMessage??'購入状況を確認中です。'}</p>:null}
     <a href="https://apps.apple.com/account/subscriptions" onClick={event=>{event.preventDefault();void openSource('https://apps.apple.com/account/subscriptions');}}>App Storeで購読を管理・解約</a>
     {member?.source==='stripe'||member?.canManageStripe?<><p>ウェブ契約の管理・解約は購入元で行います。</p><button disabled={operations.portal} onClick={()=>void action('portal',async()=>{const result=await siteApi('/api/stripe/portal',{}) as {url:string};const url=new URL(result.url);if(url.origin!=='https://billing.stripe.com'||url.username||url.password)throw new Error('INVALID_ENDPOINT');await openSource(url.href);})}>ウェブ購読の管理・解約</button></>:null}
