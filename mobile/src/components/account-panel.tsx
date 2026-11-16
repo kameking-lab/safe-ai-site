@@ -27,6 +27,11 @@ export function AccountPanel(){
   useEffect(()=>{if(!checking)return;const timer=setTimeout(()=>setSlow(true),2500);return()=>{clearTimeout(timer);setSlow(false);};},[checking]);
   // A failing App Store lookup (RevenueCat offering/price) is a store problem, not a logout:
   // it used to fall into the outer catch and clear the verified member ("ログインしていません").
+  // Before any login or guest session the price still shows (App Store 3.1.2), read anonymously.
+  const loadAnonymousPrice=useCallback((c:BillingConfig,ticket:number)=>{
+    if(!c.ready||ticket!==refreshGeneration.current)return;
+    void billing.anonymousOffering(c).then(p=>{if(ticket===refreshGeneration.current)setPrice(p.product.priceString);}).catch(()=>{});
+  },[]);
   const refresh=useCallback(async(manual=false)=>{
     const ticket=++refreshGeneration.current;setRefreshing(true);setMemberState(state=>!manual&&state==='verified'?'verified':'loading');
     if(manual)setMessage('');
@@ -42,13 +47,13 @@ export function AccountPanel(){
       });
     }catch(e){
       if(ticket!==refreshGeneration.current||e instanceof StaleMemberResponseError)return;const code=(e as Error).message;
-      setMemberState(code==='UNAUTHORIZED'?'unauthenticated':'unavailable');if(code==='UNAUTHORIZED')setMember(null);
+      setMemberState(code==='UNAUTHORIZED'?'unauthenticated':'unavailable');if(code==='UNAUTHORIZED'){setMember(null);void configWork.then(c=>{if(c)loadAnonymousPrice(c,ticket);});}
       setMessage(manual?(code==='UNAUTHORIZED'?'ログインしてください。':'少し待ってからもう一度お試しください。'):'');
     }finally{if(ticket===refreshGeneration.current)setRefreshing(false);}
-  },[]);
+  },[loadAnonymousPrice]);
   useEffect(()=>{
     let active=true;
-    const handler=()=>{if(!active)return;setLoginPending(isLoginExchanging());void isGuestSession().then(value=>{if(active)setGuest(value);}).catch(()=>{});void refresh();};handler();const sessionChanged=(event:Event)=>{const detail=(event as CustomEvent<{signedIn?:boolean;guest?:boolean}>).detail;setGuest(detail?.guest===true);setLoginPending(false);setMember(null);setPrice('');if(detail?.signedIn===false){refreshGeneration.current++;setMemberState('unauthenticated');setRefreshing(false);return;}setMemberState('loading');void refresh();};const loginStarted=(event:Event)=>{refreshGeneration.current++;setLoginPending(event.type==='anzen-login-exchanging');setRefreshing(false);setMemberState('loading');setMessage('ログインを確認中です…');};
+    const handler=()=>{if(!active)return;setLoginPending(isLoginExchanging());void isGuestSession().then(value=>{if(active)setGuest(value);}).catch(()=>{});void refresh();};handler();const sessionChanged=(event:Event)=>{const detail=(event as CustomEvent<{signedIn?:boolean;guest?:boolean}>).detail;setGuest(detail?.guest===true);setLoginPending(false);setMember(null);setPrice('');if(detail?.signedIn===false){const ticket=++refreshGeneration.current;setMemberState('unauthenticated');setRefreshing(false);void billing.config().then(c=>{setConfig(c);loadAnonymousPrice(c,ticket);}).catch(()=>{});return;}setMemberState('loading');void refresh();};const loginStarted=(event:Event)=>{refreshGeneration.current++;setLoginPending(event.type==='anzen-login-exchanging');setRefreshing(false);setMemberState('loading');setMessage('ログインを確認中です…');};
     const loginEnded=(event:Event)=>{refreshGeneration.current++;setLoginPending(false);setRefreshing(false);setMemberState('unavailable');setMessage(event.type==='anzen-login-dismissed'?'ログインを中断しました。もう一度お試しください。':'ログインを完了できませんでした。もう一度お試しください。');void billing.config().then(setConfig).catch(()=>{});};
     window.addEventListener('anzen-session-changed',sessionChanged);window.addEventListener('anzen-login-started',loginStarted);window.addEventListener('anzen-login-exchanging',loginStarted);window.addEventListener('anzen-login-failed',loginEnded);window.addEventListener('anzen-login-dismissed',loginEnded);
     const verified=(event:Event)=>{const m=(event as CustomEvent<MemberEntitlement>).detail;setLoginPending(false);setMember(m);setMemberState('verified');setRefreshing(false);setMessage('');};
@@ -56,7 +61,7 @@ export function AccountPanel(){
     const conflict=()=>setMessage(accountConflict);window.addEventListener('anzen-purchase-account-conflict',conflict);
     const timer=setInterval(handler,60000);
     return()=>{active=false;refreshGeneration.current++;clearInterval(timer);window.removeEventListener('anzen-purchase-account-conflict',conflict);window.removeEventListener('anzen-entitlement-changed',verified);window.removeEventListener('anzen-session-changed',sessionChanged);window.removeEventListener('anzen-login-started',loginStarted);window.removeEventListener('anzen-login-exchanging',loginStarted);window.removeEventListener('anzen-login-failed',loginEnded);window.removeEventListener('anzen-login-dismissed',loginEnded);window.removeEventListener('anzen-app-active',handler);window.removeEventListener('online',handler);};
-  },[refresh]);
+  },[refresh,loadAnonymousPrice]);
   async function action(name:Action,fn:()=>Promise<unknown>){
     if(!begin(name))return;
     const ticket=++refreshGeneration.current;setRefreshing(false);setMessage('');
@@ -90,9 +95,9 @@ export function AccountPanel(){
   async function login(){if(!begin('login'))return;setMessage('ログインを待っています…');try{await startLogin();}catch{setLoginPending(false);setMemberState('unavailable');setMessage('ログインを開始できませんでした。もう一度お試しください。');}finally{end('login');}}
   const stageMessage=member?.purchasePending?(member.purchaseSource==='app_store'?(stageMessages[member.purchaseStage??'']??purchaseMessages.PURCHASE_REVIEW_REQUIRED):'別の購入元で手続き中です。購入元の状態を確認してください。'):null;
   const pro=isVerifiedPro(member);const pending=memberState!=='verified' || member?.syncState!=='verified' || (!!member&&!canResumeApplePurchase(member));
-  // No session yet: the purchase starts as a guest, so it does not wait for a member or a price.
+  // No session yet: the purchase starts as a guest, so it does not wait for a member (the price is read anonymously).
   const noSession=!member&&memberState==='unauthenticated';const signedOut=noSession||guest;
-  useEffect(()=>{billingDiagnostic({operation:'buttons',result:'state',reason:loginPending||operations.login?'login':operations.purchase?'purchase':operations.restore?'restore':noSession?'enabled':!member?'member_required':pending?'server_pending':!price?'price_required':'enabled'});},[loginPending,operations,member,pending,price,noSession]);
+  useEffect(()=>{billingDiagnostic({operation:'buttons',result:'state',reason:loginPending||operations.login?'login':operations.purchase?'purchase':operations.restore?'restore':!member&&!noSession?'member_required':!noSession&&pending?'server_pending':!price?'price_required':'enabled'});},[loginPending,operations,member,pending,price,noSession]);
   // Sign-in first, Pro next, deletion last (collapsed but always present).
   // The member block keeps one fixed shape in every state, so the membership
   // response never moves the buttons below it under a finger.
@@ -109,7 +114,7 @@ export function AccountPanel(){
     <p className="text-xs">全体の月間AI原価上限に達すると、個人の残数があってもAI生成を停止します。</p>
     <p className="text-xs">Pro {price?`${price}`:'価格はApp Storeで確認'}/月（税込）。1か月ごとの自動更新でApple Accountに請求されます。更新の24時間前までにApp Storeで解約できます。</p>
     {config?.salesPaused&&!pro?<p role="status">{config.salesMessage??purchaseMessages.PRO_SALES_PAUSED}</p>:null}
-    <div className="flex flex-wrap gap-3">{!pro?<button disabled={busy || loginPending || !config?.ready || config.salesPaused || (!noSession && (!member || pending || !price))} onClick={()=>config && void withSession('purchase',()=>billing.purchase(config))}>{price?`Proにする（月額${price}）`:'Proにする'}</button>:null}
+    <div className="flex flex-wrap gap-3">{!pro?<button disabled={busy || loginPending || !config?.ready || config.salesPaused || !price || (!noSession && (!member || pending))} onClick={()=>config && void withSession('purchase',()=>billing.purchase(config))}>{`Proにする（月額${price}）`}</button>:null}
     <button disabled={operations.restore || loginPending} onClick={()=>void withSession('restore',()=>restoreProPurchases())}>購入を復元</button>
     </div>
     {signedOut?<p className="muted">ログインすると、ほかの端末やウェブでも使えます。</p>:member&&!pro?<p className="muted">購入済みの方は、購入したときと同じ方法（Google / Apple）でログインしてください。</p>:null}

@@ -28,6 +28,8 @@ type Sdk=Pick<typeof Purchases,'configure'|'logIn'|'logOut'|'getOfferings'|'purc
 export class BillingController {
   private identified:string|null=null;
   private configured=false;
+  // Configured without an app user ID only to read the price before any session exists.
+  private anonymous=false;
   private busy=false;
   private purchaseUser:string|null=null;
   private identityWork:Promise<void>=Promise.resolve();
@@ -194,9 +196,29 @@ export class BillingController {
       // identity is no longer safe to reuse, including when returning to it.
       this.identified=null;
       await this.mutateIdentity('logIn',()=>{assertCurrentMember(ticket);return this.sdk.logIn({appUserID:member.appUserId});});
+      this.anonymous=false;
     }
     assertCurrentMember(ticket);
     this.identified=member.appUserId;
+  }
+  /**
+   * Price before any session (App Store 3.1.2): configure the SDK anonymously, without creating a
+   * guest, and read the offering only. A later purchase/restore still logs in to the server's
+   * app user ID first (identifySerial sees identified=null and calls logIn).
+   */
+  async anonymousOffering(config:BillingConfig):Promise<PurchasesPackage>{
+    const next=this.identityWork.then(async()=>{
+      if(!this.native() || !config.publicKey || !config.ready)throw new StoreError('BILLING_NOT_CONFIGURED');
+      if(!this.configured){
+        await this.mutateIdentity('configure',()=>this.sdk.configure({apiKey:config.publicKey!}).then(()=>{this.configured=true;this.anonymous=true;this.identified=null;}));
+      }
+    });
+    this.identityWork=next.catch(()=>{});await bounded('identity_queue',()=>next);
+    const key=JSON.stringify(['anonymous',config.publicKey,config.offeringId,config.productId,config.policy]);
+    const cached=this.packages.get(key);if(cached&&cached.until>Date.now())return cached.value;
+    const value=this.loadOffering(config);
+    const entry={until:Date.now()+120000,value};this.packages.set(key,entry);
+    try{return await value;}catch(error){if(this.packages.get(key)===entry)this.packages.delete(key);throw error;}
   }
   async offering(config:BillingConfig,member:MemberEntitlement):Promise<PurchasesPackage>{
     await this.identify(config,member);
@@ -291,7 +313,8 @@ export class BillingController {
     // A new login can start while logout runs in the background. Queue its SDK
     // identity after this logout so a late completion cannot erase the new owner.
     this.identified=null;
-    const next=this.identityWork.then(async()=>{if(this.configured)await this.mutateIdentity('logOut',()=>this.sdk.logOut());});
+    // An anonymous SDK user (price lookup only) has nothing to log out.
+    const next=this.identityWork.then(async()=>{if(this.configured&&!this.anonymous)await this.mutateIdentity('logOut',()=>this.sdk.logOut());});
     this.identityWork=next.catch(()=>{});return bounded('identity_queue',()=>next);
   }
 }

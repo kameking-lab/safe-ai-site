@@ -388,3 +388,24 @@ describe('iOS IAP uses server rights before StoreKit',()=>{
     }finally{vi.useRealTimers();}
   });
 });
+describe('price before any session (App Store 3.1.2)',()=>{
+  it('shows the App Store price with an anonymous SDK configuration, without a guest or any server call',async()=>{
+    const s=setup();
+    expect((await s.controller.anonymousOffering(config)).product.priceString).toBe('¥980');
+    expect(s.sdk.configure).toHaveBeenCalledWith({apiKey:'mock_public_sdk'});
+    expect(s.sdk.logIn).not.toHaveBeenCalled();expect(s.send).not.toHaveBeenCalled();
+    // An anonymous SDK user has nothing to log out.
+    await s.controller.forget();expect(s.sdk.logOut).not.toHaveBeenCalled();
+  });
+  it('logs in to the guest app user before buying after the anonymous price lookup',async()=>{
+    const s=setup({atomic:true});
+    await s.controller.anonymousOffering(config);
+    await s.controller.purchase(config);
+    expect(s.sdk.configure).toHaveBeenCalledTimes(1);
+    expect(s.sdk.logIn).toHaveBeenCalledWith({appUserID:appUserId});
+    expect(s.sdk.purchasePackage).toHaveBeenCalledTimes(1);
+    expect(s.sdk.logIn.mock.invocationCallOrder[0]).toBeLessThan(s.sdk.purchasePackage.mock.invocationCallOrder[0]);
+    // After logging in, logout releases the identified member again.
+    await s.controller.forget();expect(s.sdk.logOut).toHaveBeenCalledTimes(1);
+  });
+});

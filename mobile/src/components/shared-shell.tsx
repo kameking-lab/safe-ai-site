@@ -20,7 +20,9 @@ export function SharedShell({ children }: { children: ReactNode }) {
   const purchaseRunning=useRef(false);
   const [price,setPrice]=useState<string|null>(null);
   const verifiedPro=useRef<MemberEntitlement|null>(null);
-  useEffect(()=>{let generation=0;const update=(event?:Event)=>{const ticket=++generation;setPrice(null);if((event as CustomEvent<{signedIn?:boolean}>|undefined)?.detail?.signedIn===false)return;void (async()=>{const [c,m]=await Promise.all([billing.config(),billing.entitlement()]);if(m.plan==='free'&&m.syncState==='verified'&&c.ready){const p=await billing.offering(c,m);if(ticket===generation)setPrice(p.product.priceString);}})().catch(()=>{});};update();window.addEventListener('anzen-session-changed',update);return()=>{generation++;window.removeEventListener('anzen-session-changed',update);};},[]);
+  // The price is shown before any login or guest session too (App Store 3.1.2): without a
+  // session it comes from an anonymous SDK configuration that only reads the offering.
+  useEffect(()=>{let generation=0;const update=()=>{const ticket=++generation;setPrice(null);void (async()=>{const [c,m]=await Promise.all([billing.config(),billing.entitlement().catch(error=>{if(error instanceof Error&&error.message==='UNAUTHORIZED')return null;throw error;})]);if(!c.ready||m&&(m.plan!=='free'||m.syncState!=='verified'))return;const p=m?await billing.offering(c,m):await billing.anonymousOffering(c);if(ticket===generation)setPrice(p.product.priceString);})().catch(()=>{});};update();window.addEventListener('anzen-session-changed',update);return()=>{generation++;window.removeEventListener('anzen-session-changed',update);};},[]);
   const pathname=usePathname().replace(/\/$/,'')||'/';
   useEffect(() => {
     installWebTransport();
