@@ -8,7 +8,7 @@ import { openSource } from '../lib/native';
 import { TextareaWithVoice } from '@/components/voice-input-field';
 import { inspectAiOutbound } from '@/lib/ai-outbound-safety';
 import { ProUpsellCard,ProPurchasePresentationContext } from '@/components/pro-upsell-card';
-import { startProPurchase,resumeProPurchaseAfterLogin } from '../lib/pro-purchase';
+import { startProPurchase } from '../lib/pro-purchase';
 
 export function AiPanel({ online }: { online: boolean }) {
   const [feature, setFeature] = useState<Feature>('law_chat');
@@ -30,7 +30,7 @@ export function AiPanel({ online }: { online: boolean }) {
       else setCapability(null);
     };
     refresh(); const timer = setInterval(refresh, 60_000);
-    const signedIn=()=>{refresh();void resumeProPurchaseAfterLogin().then(result=>{if(active&&result)setMessage(result.message);});};
+    const signedIn=()=>{refresh();};
     window.addEventListener('anzen-session-changed', signedIn);
     window.addEventListener('anzen-usage-changed', refresh);
     return () => { active = false; clearInterval(timer); window.removeEventListener('anzen-session-changed', signedIn);window.removeEventListener('anzen-usage-changed', refresh); };

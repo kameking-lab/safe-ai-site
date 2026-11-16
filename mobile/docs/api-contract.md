@@ -6,7 +6,9 @@ M3で未実装だったAPIをサイトのRoute Handlerとして実装。認証�
 
 - `POST /api/mobile/v1/auth/start`：S256 PKCE。10分有効の認可フローを作成。
 - `GET /api/mobile/v1/auth/authorize`：AppleまたはGoogleのサイト認証。Googleを有効にする場合はAppleも必須。認可codeだけを `anzenai://auth/callback` へ返す。
-- `POST /api/mobile/v1/auth/exchange`：code・verifierを照合して一度だけセッションを発行。保存はハッシュのみ。端末はKeychainを使用。
+- `POST /api/mobile/v1/auth/guest`：購入・復元の前に登録を求めない（App Store 5.1.1(v)）。名前・メール・連携ログインのない会員と365日のセッションを作る。IPごとに1時間10件・1日30件まで。端末は非秘密のフラグ `anzen.session-guest` でログイン案内を出し続ける。
+- `POST /api/mobile/v1/auth/exchange`：code・verifierを照合して一度だけセッションを発行。保存はハッシュのみ。端末はKeychainを使用。任意の `guestToken`（ゲストのセッション）を受け取ると、ゲストの購入記録・利用回数・地点などをログインした会員へ移す。会員にすでにストアIDがあり、ゲストに有効な購入がある場合は移さず `restoreRecommended: true` を返し、アプリは「購入を復元」を自動で行う。
+- ゲスト判定（メールなし・連携ログインなし）は `/api/mobile/v1/account` と `/api/me/profile` の `guest`。ゲストは削除時の5分以内の本人確認を端末の認証情報で代える。無料のゲストは匿名の無料枠（IP単位）も使う。
 - `POST /api/mobile/v1/auth/logout`：本人のセッションを失効し、関連する通知登録を停止。
 - `GET /api/me/entitlements`：DBのStripe状態・検証済みApple権利を投影する。古いJWTのplanやクライアントのPro申告を正本にしない。
 - `GET /api/mobile/v1/account`：本人のSDS履歴とアカウント情報。

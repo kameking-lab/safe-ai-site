@@ -1,6 +1,6 @@
 import { afterEach,beforeEach,describe,expect,it,vi } from 'vitest';
-const mock=vi.hoisted(()=>({vault:new Map<string,string>(),prefs:new Map<string,string>(),storage:vi.fn(async(_operation:string)=>{}),request:vi.fn(),open:vi.fn(),close:vi.fn(),recover:vi.fn(async()=>{}),forget:vi.fn(async()=>{})}));
-vi.mock('../src/lib/billing',()=>({billing:{recoverSession:mock.recover,forget:mock.forget}}));
+const mock=vi.hoisted(()=>({vault:new Map<string,string>(),prefs:new Map<string,string>(),storage:vi.fn(async(_operation:string)=>{}),request:vi.fn(),open:vi.fn(),close:vi.fn(),recover:vi.fn(async()=>{}),forget:vi.fn(async()=>{}),restore:vi.fn(async()=>({})),config:vi.fn(async()=>({ready:true}))}));
+vi.mock('../src/lib/billing',()=>({billing:{recoverSession:mock.recover,forget:mock.forget,restore:mock.restore,config:mock.config}}));
 vi.mock('@capacitor/core',()=>({Capacitor:{isNativePlatform:()=>true},CapacitorHttp:{request:(r:{url:string})=>r.url.endsWith('/diagnostics')?Promise.resolve({status:200,data:{ok:true}}):mock.request(r)},registerPlugin:()=>({
   get:vi.fn(async(options?:{purpose?:string})=>{await mock.storage('vault.get');return {value:mock.vault.get(options?.purpose??'session')};}),
   set:vi.fn(async({purpose,value}:{purpose?:string;value:string})=>{await mock.storage('vault.set');mock.vault.set(purpose??'session',value);}),
@@ -189,4 +189,38 @@ it('does not dismiss an exchange already in progress',async()=>{
  await vi.waitFor(()=>expect(release).toBeTypeOf('function'));await session.dismissLogin();
  expect(await session.hasPendingLogin()).toBe(true);expect(session.isLoginExchanging()).toBe(true);
  release({url:site+'/api/mobile/v1/auth/exchange',status:200,data:{token}});expect(await completing).toBe(true);
+});
+
+describe('purchase without registration (App Store 5.1.1(v))',()=>{
+  const guestToken='g'.repeat(43);const callback=`anzenai://auth/callback?flow=${flow}&code=${code}`;
+  const respond=(exchange:Record<string,unknown>)=>mock.request.mockImplementation(async({url})=>({url,status:200,data:url.endsWith('/guest')?{token:guestToken,guest:true}:url.endsWith('/start')?{flow,authorizeUrl:`${site}/api/mobile/v1/auth/authorize?flow=${flow}`}:exchange}));
+  it('creates one guest session without sending any credential and marks it as a guest',async()=>{
+    const session=await import('../src/lib/session');respond({token});
+    const [first,second]=await Promise.all([session.ensureSession(),session.ensureSession()]);
+    expect(first).toBe(guestToken);expect(second).toBe(guestToken);
+    const calls=mock.request.mock.calls.filter(([r])=>r.url===`${site}/api/mobile/v1/auth/guest`);
+    expect(calls).toHaveLength(1);expect(calls[0][0].method).toBe('POST');expect(calls[0][0].headers.Authorization).toBeUndefined();
+    expect(await session.isGuestSession()).toBe(true);expect(mock.prefs.get('anzen.session-guest')).toBe('1');
+    expect(window.dispatchEvent).toHaveBeenCalledWith(expect.objectContaining({type:'anzen-session-changed',detail:{signedIn:true,guest:true}}));
+    // An existing session is reused; no further guest is created.
+    expect(await session.ensureSession()).toBe(guestToken);expect(mock.request.mock.calls.filter(([r])=>r.url.endsWith('/guest'))).toHaveLength(1);
+  });
+  it('sends the guest credential when the guest signs in, clears the guest flag and restores when asked',async()=>{
+    const session=await import('../src/lib/session');respond({token,restoreRecommended:true});
+    await session.ensureSession();await session.startLogin();
+    expect(await session.completeLogin(callback)).toBe(true);
+    const exchange=mock.request.mock.calls.find(([r])=>r.url.endsWith('/exchange'))![0];
+    expect(exchange.data).toMatchObject({flow,code,guestToken});expect(exchange.headers.Authorization).toBeUndefined();
+    expect(await session.sessionToken()).toBe(token);expect(await session.isGuestSession()).toBe(false);expect(mock.prefs.get('anzen.session-guest')).toBe('0');
+    expect(window.dispatchEvent).toHaveBeenCalledWith(expect.objectContaining({type:'anzen-session-changed',detail:{signedIn:true,guest:false}}));
+    await vi.waitFor(()=>expect(mock.restore).toHaveBeenCalledWith({ready:true}));expect(mock.recover).not.toHaveBeenCalled();
+  });
+  it('never sends a signed-in member credential as a guest token',async()=>{
+    const session=await import('../src/lib/session');respond({token});
+    await session.setSessionToken('m'.repeat(43));await session.startLogin();
+    expect(await session.completeLogin(callback)).toBe(true);
+    const exchange=mock.request.mock.calls.find(([r])=>r.url.endsWith('/exchange'))![0];
+    expect(exchange.data).not.toHaveProperty('guestToken');
+    expect(mock.recover).toHaveBeenCalledOnce();expect(mock.restore).not.toHaveBeenCalled();
+  });
 });

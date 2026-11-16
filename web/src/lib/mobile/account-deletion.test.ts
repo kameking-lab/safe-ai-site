@@ -41,6 +41,14 @@ describe('authenticated in-app account deletion',()=>{
     await processAccountDeletion(p.id);
     expect(state.deleted).toHaveBeenCalledTimes(1);
   });
+  it('lets a guest without any sign-in delete with its device credential, but never another member',async()=>{
+    state.session.createdAt=new Date(Date.now()-86400000);
+    state.db.user.findUnique=async()=>({id:'member-a',email:null,_count:{accounts:0}});
+    await expect(prepareAccountDeletion(request(),'member-a')).resolves.toMatchObject({subject:'member-a'});
+    state.db.user.findUnique=async()=>({id:'member-a',email:'member@example.test',_count:{accounts:1}});
+    await expect(prepareAccountDeletion(request(),'member-a')).rejects.toThrow('REAUTH_REQUIRED');
+    await expect(prepareAccountDeletion(request(),'other')).rejects.toThrow('REAUTH_REQUIRED');
+  });
   it('rejects stale or another member session before preparing a deletion',async()=>{state.session.createdAt=new Date(Date.now()-300001);await expect(prepareAccountDeletion(request(),'member-a')).rejects.toThrow('REAUTH_REQUIRED');state.session.createdAt=new Date();await expect(prepareAccountDeletion(request(),'other')).rejects.toThrow('REAUTH_REQUIRED');expect(state.job).toBeNull();});
   it('requires the same member, confirmation token and original session',async()=>{const p=await prepareAccountDeletion(request(),'member-a');await expect(confirmAccountDeletion(request(),'member-a',p.id,'b'.repeat(43))).rejects.toThrow('INVALID_REQUEST');expect(state.revoked).not.toHaveBeenCalled();expect(state.deleted).not.toHaveBeenCalled();});
   it('deletes personal data and sessions, retaining only an anonymous purchase owner',async()=>{const p=await prepareAccountDeletion(request(),'member-a');expect(await confirmAccountDeletion(request(),'member-a',p.id,p.confirmation)).toMatchObject({status:'completed'});expect(state.revoked).toHaveBeenCalled();expect(state.deleted).toHaveBeenCalledWith({where:{id:'member-a'}});expect(state.db.mobileGrant.updateMany).toHaveBeenCalledWith({where:{userId:'member-a'},data:{userId:'anonymous-a',revoked:true}});expect(state.job.userId).toBeNull();expect(await accountDeletionStatus(p.receipt)).toMatchObject({status:'completed'});await expect(accountDeletionStatus('b'.repeat(43))).rejects.toThrow('INVALID_REQUEST');});

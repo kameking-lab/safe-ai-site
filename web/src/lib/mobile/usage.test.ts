@@ -4,12 +4,13 @@ const pause=vi.hoisted(()=>vi.fn(async()=>({count:1})));
 const expireStopped=vi.hoisted(()=>vi.fn(async()=>({closed:0})));
 const settlement=vi.hoisted(()=>({gate:undefined as Promise<void>|undefined,fail:false,entered:false}));
 vi.mock('./pro-sales-checkouts',()=>({processPausedStripeCheckouts:expireStopped}));
-const state=vi.hoisted(()=>({operations:[] as Array<{id:string;userId:string;feature:string;day:string;status:string;createdAt:Date;requestHash:string;response?:unknown}>,tail:Promise.resolve() as Promise<unknown>,paid:false,signedIn:true,budget:{committedYen:0,reservedYen:0},reservations:[] as Array<{id:string;amountYen:number;status:string}>}));
+const state=vi.hoisted(()=>({operations:[] as Array<{id:string;userId:string;feature:string;day:string;status:string;createdAt:Date;requestHash:string;response?:unknown}>,tail:Promise.resolve() as Promise<unknown>,paid:false,signedIn:true,guest:false,budget:{committedYen:0,reservedYen:0},reservations:[] as Array<{id:string;amountYen:number;status:string}>}));
 vi.mock('@/auth',()=>({auth:async()=>state.signedIn?{user:{id:'mock_member'}}:null}));
 vi.mock('@/lib/prisma',()=>{
   const tx={
     $executeRaw:async()=>1,
     mobileIdentity:{upsert:async()=>({appUserId:'mock_immutable_revenuecat_id'})},
+    user:{findUnique:async()=>state.guest?{id:'mock_member',email:null,_count:{accounts:0}}:{id:'mock_member',email:'member@example.test',_count:{accounts:1}}},
     mobilePurchaseIntent:{findUnique:async()=>null},
     subscription:{findUnique:async()=>state.paid?{planName:'pro',status:'active',stripeSubscriptionId:'mock_stripe',currentPeriodEnd:new Date(Date.now()+86400000),updatedAt:new Date()}:null},
     mobileGrant:{findMany:async()=>state.paid?[{provider:'stripe',environment:'PRODUCTION',revoked:false,expiresAt:new Date(Date.now()+86400000),checkedAt:new Date()}]:[]},
@@ -42,7 +43,7 @@ import * as entitlementPolicy from './entitlement';
 import * as proSales from '../pro-sales';
 const request=(id=crypto.randomUUID())=>new Request('https://example.test/api/chatbot',{method:'POST',headers:{Authorization:'Bearer mock_session','Content-Type':'application/json','X-Operation-ID':id},body:JSON.stringify({message:'足場の手すり',privacyConfirmed:true})});
 const answer=()=>Response.json({answer:'公式根拠を確認してください。',source_type:'rag',sources:[{text:'原文',url:'https://laws.e-gov.go.jp/law/mock',asOf:new Date().toISOString()}]});
-beforeEach(()=>{state.operations=[];state.tail=Promise.resolve();state.paid=false;state.signedIn=true;state.budget={committedYen:0,reservedYen:0};state.reservations=[];vi.stubEnv('MOBILE_LEDGER_ENABLED','true');});afterEach(()=>vi.unstubAllEnvs());
+beforeEach(()=>{state.operations=[];state.tail=Promise.resolve();state.paid=false;state.signedIn=true;state.guest=false;state.budget={committedYen:0,reservedYen:0};state.reservations=[];vi.stubEnv('MOBILE_LEDGER_ENABLED','true');});afterEach(()=>vi.unstubAllEnvs());
 // Vercel passes a NextRequest from another realm; `new Request(foreign, init)` stringified it
 // ("Failed to parse URL from [object Request]") and every native chat request returned 500.
 function foreignRequest(real:Request):Request{
@@ -234,6 +235,18 @@ describe('anonymous website visitors with the shared ledger on',()=>{
     // Another visitor keeps their own allowance.
     expect((await withUsage(web({'X-Forwarded-For':'198.51.100.8'}),'law_chat',run)).status).toBe(200);
     expect(run).toHaveBeenCalledTimes(4);
+  });
+  it('keeps a free app guest (bought/restored without registering) on the visitor allowance, so new guests do not reset it',async()=>{
+    salesOpen();const run=vi.fn(async()=>answer());const ip={'X-Forwarded-For':'198.51.100.9'};
+    state.signedIn=false;for(let i=0;i<3;i++)expect((await withUsage(web({...ip,'X-Anzen-Native':'1'}),'law_chat',run)).status).toBe(200);
+    state.signedIn=true;state.guest=true;
+    const blocked=await withUsage(web({...ip,Authorization:'Bearer mock_session','X-Operation-ID':crypto.randomUUID()}),'law_chat',run);
+    expect(blocked.status).toBe(429);expect(await blocked.json()).toMatchObject({error:{code:'DAILY_LIMIT_REACHED',plan:'free'}});
+    expect(state.operations.every(o=>o.status==='released')).toBe(true);
+    // A signed-in member keeps the per-member allowance, and a guest elsewhere still has its own.
+    state.guest=false;expect((await withUsage(web({...ip,Authorization:'Bearer mock_session','X-Operation-ID':crypto.randomUUID()}),'law_chat',run)).status).toBe(200);
+    state.guest=true;expect((await withUsage(web({'X-Forwarded-For':'198.51.100.10',Authorization:'Bearer mock_session','X-Operation-ID':crypto.randomUUID()}),'law_chat',run)).status).toBe(200);
+    expect(run).toHaveBeenCalledTimes(5);
   });
   it('does not count anonymous sends that were refused (bad encoding, no consent) and counts only answers',async()=>{
     salesOpen();state.signedIn=false;

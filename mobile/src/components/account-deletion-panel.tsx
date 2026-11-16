@@ -2,7 +2,8 @@
 import { useEffect,useState } from 'react';
 import { prepareDeletion,confirmDeletion,checkDeletion,type DeletionPreparation,type DeletionStatus } from '../lib/account-deletion';
 import { startLogin } from '../lib/session';
-export function AccountDeletionPanel(){
+/** A guest (bought without registering) has no sign-in to repeat; the server accepts its device credential. */
+export function AccountDeletionPanel({guest=false}:{guest?:boolean}={}){
   // Prerendered HTML must not accept a click before React installs handlers.
   const [ready,setReady]=useState(false);
   const [preparation,setPreparation]=useState<DeletionPreparation|null>(null);const [confirmation,setConfirmation]=useState('');const [busy,setBusy]=useState(false);const [message,setMessage]=useState('');
@@ -17,7 +18,7 @@ export function AccountDeletionPanel(){
     <div className="space-y-3 pb-4">
     <p>会員情報・学習とSDS検索の履歴・警報地点・ログインと通知の登録、端末内のアプリのデータを削除します。不正防止用の取引識別子だけ匿名で7年保持し、組織の共有記録は投稿者を匿名にします。</p>
     <p>ウェブ購読は現在の支払い期間の終了日に解約します。App Storeの購読は先にApp Storeで解約してください。削除は取り消せません。</p>
-    <button disabled={!ready||busy} onClick={()=>void action(async()=>{await startLogin();})}>本人確認のため再ログイン</button>
+    {guest?null:<button disabled={!ready||busy} onClick={()=>void action(async()=>{await startLogin();})}>本人確認のため再ログイン</button>}
     <button disabled={!ready||busy} onClick={()=>void action(async()=>{setPreparation(await prepareDeletion());setConfirmation('');setMessage('削除する内容を確認し、「削除」と入力して確定してください。');})}>アカウント削除を開始</button>
     {preparation?<><label>確認のため「削除」と入力<input value={confirmation} onChange={e=>setConfirmation(e.target.value)} autoComplete="off"/></label><button disabled={busy||confirmation!=='削除'} onClick={()=>void action(async()=>{const status=await confirmDeletion(preparation);setPreparation(null);show(status);})}>アカウントを完全に削除する</button><button disabled={busy} onClick={()=>{setPreparation(null);setConfirmation('');}}>戻る</button></>:null}
     <button disabled={!ready||busy} onClick={()=>void action(async()=>{const status=await checkDeletion();if(status)show(status);else setMessage('この端末から確定した削除依頼はありません。');})}>削除状況を確認</button><p role="status">{ready?message:'削除操作を準備しています。'}</p>

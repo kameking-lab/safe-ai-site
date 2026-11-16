@@ -6,8 +6,8 @@ export const ProPurchasePresentationContext = createContext<{price:string|null; 
 
 /**
  * 無料枠に当たった所に出す購入の入口。主ボタンは1つだけ。
- * 押すと（未ログインならログインを挟んで）そのまま決済に進む。アプリでは同じリンクを
- * アプリ側が受け取り、App Store の購入シートを開く（/pricing/start は経由しない）。
+ * 押すと（ウェブでは未ログインならログインを挟んで）そのまま決済に進む。アプリでは同じリンクを
+ * アプリ側が受け取り、登録なしで App Store の購入シートを開く（/pricing/start は経由しない）。
  */
 export function ProUpsellCard({
   message,
@@ -41,7 +41,8 @@ export function ProUpsellCard({
         <Link href="/pricing/terms" className="underline">条件・特商法表示</Link>・
         <Link href="/terms" className="underline">利用規約</Link>・<Link href="/privacy" className="underline">プライバシーポリシー</Link>
       </p>
-      <p className="mt-1 text-[11px] leading-4 text-slate-600 dark:text-emerald-200">購入済みの方は、購入したときと同じ方法（Google / Apple）でログインしてください。</p>
+      {/* アプリは登録なしで購入できる（App Store 5.1.1(v)）。ログインは任意で、ほかの端末と共有するため。 */}
+      <p className="mt-1 text-[11px] leading-4 text-slate-600 dark:text-emerald-200">{native ? "ログインすると、ほかの端末やウェブでも使えます。" : "購入済みの方は、購入したときと同じ方法（Google / Apple）でログインしてください。"}</p>
     </div>
   );
 }

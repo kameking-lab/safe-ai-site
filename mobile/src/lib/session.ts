@@ -20,6 +20,12 @@ let cachedToken:string|null|undefined;
 let tokenRead:Promise<string|null>|undefined;
 let tokenEpoch=0;
 let tokenWrite:Promise<unknown>=Promise.resolve();
+// App Store purchases do not require registration (App Review 5.1.1(v)). A purchase or restore
+// without a login runs under a server guest session that has no personal data. The flag is not a
+// secret: it only decides whether the UI still offers sign-in, and the server re-checks it.
+const GUEST_KEY='anzen.session-guest';
+let cachedGuest:boolean|undefined;
+let guestStart:Promise<string>|undefined;
 let pendingLogin:string|null=null;
 let loginDismissed=false;
 const completing=new Map<string,Promise<boolean>>();
@@ -63,7 +69,7 @@ export async function sessionToken():Promise<string|null> {
   tokenRead=read;
   try{return await read;}finally{if(tokenRead===read)tokenRead=undefined;}
 }
-async function writeSessionToken(token:string|null) {
+async function writeSessionToken(token:string|null,guest=false) {
   invalidateMemberReads();
   await sessionBinding();
   if(Capacitor.isNativePlatform())await initializeVault();
@@ -71,14 +77,36 @@ async function writeSessionToken(token:string|null) {
   // Persist the new owner boundary BEFORE installing a login credential. A crash
   // between Keychain and Preferences must never leave B under A's erasure authority.
   if(token)await rotate();
+  cachedGuest=undefined;
+  await Preferences.set({key:GUEST_KEY,value:token&&guest?'1':'0'});
   if(Capacitor.isNativePlatform()){if(token)await vault.set({value:token});else await vault.clear();}
   if(!token)await rotate();
   invalidateMemberReads();
-  memoryToken=token;cachedToken=token;window.dispatchEvent(new CustomEvent('anzen-session-changed',{detail:{signedIn:!!token}}));
+  memoryToken=token;cachedToken=token;cachedGuest=!!token&&guest;window.dispatchEvent(new CustomEvent('anzen-session-changed',{detail:{signedIn:!!token,guest:!!token&&guest}}));
 }
-export async function setSessionToken(token:string|null){
+export async function setSessionToken(token:string|null,options:{guest?:boolean}={}){
   invalidateMemberReads();tokenEpoch++;cachedToken=undefined;tokenRead=undefined;
-  const work=serializeSession(()=>writeSessionToken(token));tokenWrite=work.catch(()=>{});return work;
+  const work=serializeSession(()=>writeSessionToken(token,!!options.guest));tokenWrite=work.catch(()=>{});return work;
+}
+async function guestFlag(){
+  if(cachedGuest!==undefined)return cachedGuest;
+  return cachedGuest=(await Preferences.get({key:GUEST_KEY})).value==='1';
+}
+/** True while the app uses a guest session: Pro works, and the UI keeps offering sign-in. */
+export async function isGuestSession(){return !!await sessionToken() && await guestFlag();}
+/**
+ * Purchase and restore never ask for registration first. Without a session, create a guest
+ * session (no name, email or sign-in) and continue. Concurrent callers share one request.
+ */
+export function ensureSession():Promise<string>{
+  return guestStart??=(async()=>{
+    const existing=await sessionToken();if(existing)return existing;
+    const result=await siteApi('/api/mobile/v1/auth/guest',{}) as {token?:unknown;guest?:unknown};
+    if(typeof result.token!=='string'||!/^[A-Za-z0-9_-]{43}$/.test(result.token)||result.guest!==true)throw new SiteApiError('UNEXPECTED_RESPONSE',200);
+    // A sign-in that completed meanwhile wins over the new guest.
+    const signedIn=await sessionToken();if(signedIn)return signedIn;
+    await setSessionToken(result.token,{guest:true});return result.token;
+  })().finally(()=>{guestStart=undefined;});
 }
 export async function eraseSessionDataIfCurrent(binding:string,erase:()=>Promise<void>,completed:()=>Promise<void>){
   return serializeSession(async()=>{
@@ -99,7 +127,7 @@ export async function siteApi(path:string,body?:unknown,method?:string) {
   const generation=JSON.stringify([memberGeneration(),readGeneration]);
   // Authentication bootstrap is public. Member APIs must not silently lose an
   // existing credential when secure storage is temporarily unavailable.
-  const bootstrap=/^\/api\/mobile\/v1\/(?:auth\/(?:start|exchange)|billing\/config)$/.test(path);
+  const bootstrap=/^\/api\/mobile\/v1\/(?:auth\/(?:start|exchange|guest)|billing\/config)$/.test(path);
   const token=bootstrap?null:await bounded('session',()=>sessionToken());
   const key=JSON.stringify([path,token,generation]);
   if(reading){
@@ -148,12 +176,18 @@ export async function completeLogin(value:string) {
     const age=Date.now()-Number(createdAt);
     if(!/^[A-Za-z0-9_-]{43}$/.test(verifier) || !Number.isFinite(age) || age<0 || age>=600000){await writeLogin(null);throw new Error('AUTH_FLOW_EXPIRED');}
     loginDismissed=false;window.dispatchEvent(new Event('anzen-login-exchanging'));
-    const result=await bounded('exchange',()=>siteApi('/api/mobile/v1/auth/exchange',{flow,code,verifier})) as {token:string};
+    // Signing in after buying as a guest hands the guest's purchase over to the member.
+    const guestToken=await guestFlag().then(guest=>guest?sessionToken():null).catch(()=>null);
+    const result=await bounded('exchange',()=>siteApi('/api/mobile/v1/auth/exchange',{flow,code,verifier,...(guestToken?{guestToken}:{})})) as {token:string;restoreRecommended?:boolean};
     if(!/^[A-Za-z0-9_-]{43}$/.test(result.token))throw new Error('AUTH_FLOW_EXPIRED');
     await setSessionToken(result.token);await writeLogin(null);void bounded('login',()=>Browser.close()).catch(()=>{});
     // Login succeeded even if a provider is temporarily offline. Resume retries at app activation.
     billingDiagnostic({operation:'login',result:'ok'});
-    const {billing}=await import('./billing');void billing.recoverSession().catch(()=>{});return true;
+    const {billing}=await import('./billing');
+    // The member already had a store identity: restoring moves the guest's App Store purchase.
+    if(result.restoreRecommended===true)void billing.config().then(config=>billing.restore(config)).catch(()=>billing.recoverSession()).catch(()=>{});
+    else void billing.recoverSession().catch(()=>{});
+    return true;
   })();
   completing.set(flow,task);
   try{return await task;}catch(error){

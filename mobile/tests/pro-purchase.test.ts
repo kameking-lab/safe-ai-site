@@ -1,36 +1,47 @@
 import { afterEach,beforeEach,describe,expect,it,vi } from 'vitest';
-const mock=vi.hoisted(()=>({prefs:new Map<string,string>(),token:null as string|null,startLogin:vi.fn(),purchase:vi.fn(),config:vi.fn(),events:[] as string[]}));
-vi.mock('@capacitor/preferences',()=>({Preferences:{get:async({key}:{key:string})=>({value:mock.prefs.get(key)??null}),set:async({key,value}:{key:string;value:string})=>{mock.prefs.set(key,value);},remove:async({key}:{key:string})=>{mock.prefs.delete(key);}}}));
-vi.mock('../src/lib/session',()=>({sessionToken:async()=>mock.token,startLogin:mock.startLogin}));
-vi.mock('../src/lib/billing',()=>({billing:{config:mock.config,purchase:mock.purchase},isVerifiedPro:(m:{plan?:string}|null)=>m?.plan==='pro'}));
-import { startProPurchase,resumeProPurchaseAfterLogin } from '../src/lib/pro-purchase';
+const mock=vi.hoisted(()=>({token:null as string|null,guest:false,startLogin:vi.fn(),purchase:vi.fn(),restore:vi.fn(),config:vi.fn(),forget:vi.fn(async()=>{mock.token=null;mock.guest=false;}),guestRequests:0,guestFails:false,events:[] as string[]}));
+// ensureSession mirrors the session layer: reuse a session, otherwise create a guest session.
+vi.mock('../src/lib/session',()=>({
+  ensureSession:async()=>{if(mock.token)return mock.token;mock.guestRequests++;if(mock.guestFails)throw new Error('UNAVAILABLE');mock.token='guest-session';mock.guest=true;return mock.token;},
+  isGuestSession:async()=>!!mock.token&&mock.guest,forgetLocalSession:mock.forget,startLogin:mock.startLogin,
+}));
+vi.mock('../src/lib/billing',()=>({billing:{config:mock.config,purchase:mock.purchase,restore:mock.restore},isVerifiedPro:(m:{plan?:string}|null)=>m?.plan==='pro'}));
+import { startProPurchase,restoreProPurchases } from '../src/lib/pro-purchase';
 import { StoreError,describeStoreError } from '../src/lib/store-errors';
-beforeEach(()=>{mock.prefs.clear();mock.token=null;mock.events=[];vi.clearAllMocks();mock.config.mockResolvedValue({ready:true});mock.purchase.mockResolvedValue({plan:'pro'});vi.stubGlobal('window',{dispatchEvent:(e:Event)=>{mock.events.push(e.type);}});});
+beforeEach(()=>{mock.token=null;mock.guest=false;mock.guestRequests=0;mock.guestFails=false;mock.events=[];vi.clearAllMocks();mock.config.mockResolvedValue({ready:true});mock.purchase.mockResolvedValue({plan:'pro'});mock.restore.mockResolvedValue({plan:'pro'});vi.stubGlobal('window',{dispatchEvent:(e:Event)=>{mock.events.push(e.type);}});});
 afterEach(()=>vi.unstubAllGlobals());
-describe('「月額980円で続ける」をアプリで押したとき',()=>{
-  it('未ログインならログインを開き、戻ってきたらそのまま購入シートを開く',async()=>{
-    expect((await startProPurchase()).state).toBe('login');
-    expect(mock.startLogin).toHaveBeenCalledTimes(1);expect(mock.purchase).not.toHaveBeenCalled();
-    mock.token='session';
-    const resumed=await resumeProPurchaseAfterLogin();
-    expect(resumed?.state).toBe('pro');expect(mock.purchase).toHaveBeenCalledTimes(1);
+describe('「月額980円で続ける」をアプリで押したとき（登録なしで購入できる）',()=>{
+  it('未ログインでもログインを求めず、ゲストのまま購入シートへ進む',async()=>{
+    const result=await startProPurchase();
+    expect(result.state).toBe('pro');expect(mock.startLogin).not.toHaveBeenCalled();
+    expect(mock.guestRequests).toBe(1);expect(mock.purchase).toHaveBeenCalledTimes(1);
     expect(mock.events).toContain('anzen-usage-changed');
-    // 一度きり: 次のログインでは勝手に購入しない。
-    expect(await resumeProPurchaseAfterLogin()).toBeNull();expect(mock.purchase).toHaveBeenCalledTimes(1);
+    // 2回目は同じゲストを使い、ゲストを増やさない。
+    mock.purchase.mockRejectedValueOnce(new Error('ALREADY_SUBSCRIBED'));
+    expect((await startProPurchase()).state).toBe('pro');expect(mock.guestRequests).toBe(1);
   });
   it('ログイン済みなら確認なしで購入シートへ進む',async()=>{
     mock.token='session';
     expect((await startProPurchase()).state).toBe('pro');
-    expect(mock.startLogin).not.toHaveBeenCalled();expect(mock.purchase).toHaveBeenCalledTimes(1);
+    expect(mock.startLogin).not.toHaveBeenCalled();expect(mock.guestRequests).toBe(0);expect(mock.purchase).toHaveBeenCalledTimes(1);
   });
-  it('古い（10分超）ログイン待ちでは購入しない',async()=>{
-    mock.prefs.set('anzen.pro-after-login',String(Date.now()-11*60_000));mock.token='session';
-    expect(await resumeProPurchaseAfterLogin()).toBeNull();expect(mock.purchase).not.toHaveBeenCalled();
+  it('ゲストを作れないときは購入シートを開かず、短い案内だけを出す',async()=>{
+    mock.guestFails=true;
+    const failed=await startProPurchase();
+    expect(failed).toEqual({state:'error',message:'購入を始められませんでした。通信を確認して、もう一度お試しください。'});
+    expect(mock.purchase).not.toHaveBeenCalled();expect(mock.startLogin).not.toHaveBeenCalled();
   });
-  it('ログイン通知が先行しても購入の引継ぎを失わない',async()=>{
-    mock.prefs.set('anzen.pro-after-login',String(Date.now()));
-    expect(await resumeProPurchaseAfterLogin()).toBeNull();expect(mock.prefs.has('anzen.pro-after-login')).toBe(true);
-    mock.token='session';expect((await resumeProPurchaseAfterLogin())?.state).toBe('pro');expect(mock.purchase).toHaveBeenCalledTimes(1);
+  it('期限切れのゲストは端末から外し、次に押したとき新しいゲストで購入できる',async()=>{
+    mock.token='old-guest';mock.guest=true;mock.purchase.mockRejectedValueOnce(new Error('UNAUTHORIZED'));
+    expect((await startProPurchase()).message).toBe('もう一度お試しください。');expect(mock.forget).toHaveBeenCalledOnce();
+    expect((await startProPurchase()).state).toBe('pro');expect(mock.guestRequests).toBe(1);
+    // ログイン済み会員の UNAUTHORIZED では会員の認証情報を消さない。
+    mock.token='member';mock.guest=false;mock.forget.mockClear();mock.purchase.mockRejectedValueOnce(new Error('UNAUTHORIZED'));
+    await startProPurchase();expect(mock.forget).not.toHaveBeenCalled();
+  });
+  it('「購入を復元」もログインなしで行える',async()=>{
+    expect(await restoreProPurchases()).toEqual({plan:'pro'});
+    expect(mock.guestRequests).toBe(1);expect(mock.restore).toHaveBeenCalledWith({ready:true});expect(mock.startLogin).not.toHaveBeenCalled();
   });
   it('失敗は短い操作案内だけにし、取消には警告しない',async()=>{
     mock.token='session';

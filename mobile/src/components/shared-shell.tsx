@@ -12,7 +12,7 @@ import { MobileBottomNav } from '@/components/MobileBottomNav';
 import { ProPurchasePresentationContext } from '@/components/pro-upsell-card';
 import { billing,isVerifiedPro,type MemberEntitlement } from '../lib/billing';
 import { DisplaySettings } from './display-settings';
-import { startProPurchase, resumeProPurchaseAfterLogin, type ProPurchaseResult } from '../lib/pro-purchase';
+import { startProPurchase, type ProPurchaseResult } from '../lib/pro-purchase';
 export function SharedShell({ children }: { children: ReactNode }) {
   const [message,setMessage]=useState('');
   const [purchaseMessage,setPurchaseMessage]=useState('');
@@ -38,8 +38,9 @@ export function SharedShell({ children }: { children: ReactNode }) {
       // Conditions/特商法 is a website page; open it as such instead of a retired in-app route.
       if(/^\/pricing\/terms\/?$/.test(url.pathname)){event.preventDefault();void openSource(SITE+'/pricing/terms').catch(()=>setMessage('条件のページを開けませんでした。'));}
     };
-    // A sign-in started from the purchase button continues straight to the purchase sheet.
-    const signedIn=(event:Event)=>{if((event as CustomEvent<{signedIn?:boolean}>).detail?.signedIn!==false)void billing.recoverSession().then(()=>resumeProPurchaseAfterLogin()).then(show).catch(()=>{});};
+    // A new login rejoins the store identity. A guest session is created by the purchase/restore
+    // that is already running, which owns its own reconciliation.
+    const signedIn=(event:Event)=>{const detail=(event as CustomEvent<{signedIn?:boolean;guest?:boolean}>).detail;if(detail?.signedIn!==false&&!detail?.guest)void billing.recoverSession().catch(()=>{});};
     document.addEventListener('click',feeds,true);window.addEventListener('anzen-session-changed',sessionChanged);window.addEventListener('anzen-session-changed',signedIn);window.addEventListener('anzen-entitlement-changed',verified);
     return()=>{document.removeEventListener('click',feeds,true);window.removeEventListener('anzen-session-changed',sessionChanged);window.removeEventListener('anzen-session-changed',signedIn);window.removeEventListener('anzen-entitlement-changed',verified);};
   }, []);

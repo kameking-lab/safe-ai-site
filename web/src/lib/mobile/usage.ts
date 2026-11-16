@@ -4,6 +4,7 @@ import { Prisma } from '@prisma/client';
 import { billingDb,getEntitlement,lockMember,entitlementInTransaction } from './billing-service';
 import { product,canUseMemberQuota,type Plan } from './entitlement';
 import { member,json,isNativeRequest,isNativeGuestRequest,webMemberId } from './http';
+import { isGuestUser } from './session';
 import { inspectAiOutbound } from '../ai-outbound-safety';
 import { validateChatbotRequestBoundary } from '../server/chatbot-request-boundary';
 import { consumeSharedRateLimit,getRateLimitSubject,peekSharedRateLimit,beginSharedIdempotency,releaseSharedIdempotency } from '../security/shared-state';
@@ -238,12 +239,20 @@ export async function withUsage(request:Request,feature:AiFeature,run:(request:R
     if(!check.allowed)return json({error:{code:check.reason==='consent_required'?'CONSENT_REQUIRED':'SAFETY_BLOCKED',reason:check.reason,message:check.message}},check.status);
   }
   let operation:{id:string;plan:Plan;replay:Prisma.JsonValue|null}|undefined;
+  let freeGuest=false;
   try{
     if(authenticatedWebMember && !['GET','HEAD'].includes(request.method) && request.headers.get('origin')!==new URL(request.url).origin)throw new Error('FORBIDDEN');
     const userId=authenticatedWebMember??await member(request);operation=await reserve(request,userId,feature);
+    // An app guest (bought or restored without registering) is anonymous: creating another
+    // guest must not reset the visitor's free allowance, so a free guest also uses the shared one.
+    if(!authenticatedWebMember&&operation.plan!=='pro'&&!operation.replay&&await isGuestUser(userId).catch(()=>false)){
+      const limited=await anonymousFreeAllowance(request,feature);
+      if(limited){await billingDb().mobileUsageOperation.updateMany({where:{id:operation.id,status:'reserved'},data:{status:'released'}});return limited;}
+      freeGuest=true;
+    }
     if(operation.replay){if(new URL(request.url).pathname.endsWith('/stream'))return new Response(`event: meta\ndata: ${JSON.stringify(operation.replay)}\n\n`,{headers:{'Content-Type':'text/event-stream','Cache-Control':'no-store'}});return json(operation.replay);}
     const response=await context.run({plan:operation.plan,operationId:operation.id},()=>run(request));
-    const settle=async(value:unknown,completed:boolean)=>{await billingDb().mobileUsageOperation.updateMany({where:{id:operation!.id,status:'reserved'},data:{status:completed?'completed':'released',...(completed?{response:value as Prisma.InputJsonValue}:{})}});};
+    const settle=async(value:unknown,completed:boolean)=>{await billingDb().mobileUsageOperation.updateMany({where:{id:operation!.id,status:'reserved'},data:{status:completed?'completed':'released',...(completed?{response:value as Prisma.InputJsonValue}:{})}});if(completed&&freeGuest)await recordAnonymousAnswer(request,feature).catch(()=>{});};
     if(response.headers.get('content-type')?.includes('text/event-stream') && response.body){
       const reader=response.body.getReader();let collected='';const decoder=new TextDecoder();
       const stream=new ReadableStream({async start(controller){try{
