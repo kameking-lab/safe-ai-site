@@ -6,5 +6,5 @@ import {withRequestTiming} from '@/lib/server/request-timing';
 export async function GET(){return withRequestTiming(async measure=>{try{
   const session=await measure('auth',()=>auth({identityOnly:true}));
   const user=session?.user;
-  return json({user:user?{name:user.name??null,email:user.email??null,image:user.image??null}:null});
+  return json({user:user?{name:user.name??null,email:user.email??null,image:user.image??null,guest:(user as {guest?:boolean}).guest===true}:null});
 }catch(e){return failure(e);}});}

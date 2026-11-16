@@ -1,7 +1,7 @@
 import { randomBytes,timingSafeEqual } from 'node:crypto';
 import { Prisma } from '@prisma/client';
 import { billingDb,lockMember } from './billing-service';
-import { digest } from './session';
+import { digest,isGuestUser } from './session';
 import { externalCredentialedServicesAllowed } from '../server/deployment-safety';
 import { stopDeletedAccountRenewal } from './stripe-account-deletion';
 import { recordOperationsAlert,resolveOperationsAlert } from './operations-alerts';
@@ -13,7 +13,9 @@ async function recentSession(request:Request,userId:string){
   const credential=request.headers.get('authorization')?.replace(/^Bearer /,'')??'';
   if(!validToken(credential))throw new Error('REAUTH_REQUIRED');
   const hash=digest(credential);const session=await billingDb().mobileSession.findUnique({where:{tokenHash:hash}});
-  if(!session||session.userId!==userId||session.expiresAt<=new Date()||Date.now()-session.createdAt.getTime()>300000)throw new Error('REAUTH_REQUIRED');
+  if(!session||session.userId!==userId||session.expiresAt<=new Date())throw new Error('REAUTH_REQUIRED');
+  // A guest (purchased without registering) has no sign-in to repeat; this device's credential is its only proof.
+  if(Date.now()-session.createdAt.getTime()>300000&&!await isGuestUser(userId))throw new Error('REAUTH_REQUIRED');
   return hash;
 }
 export async function prepareAccountDeletion(request:Request,userId:string){
