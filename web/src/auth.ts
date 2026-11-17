@@ -20,6 +20,7 @@ import { getEntitlement } from "@/lib/mobile/billing-service";
 import { headers } from 'next/headers';
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
+import { providerVerifiedEmail } from "@/lib/mobile/billing-identity";
 import { externalCredentialedServicesAllowed } from "@/lib/server/deployment-safety";
 
 // AUTH_SECRET 未設定時はスタブを返してコンソールエラーを抑制する
@@ -145,8 +146,14 @@ const initialized = isAuthConfigured
           if (sub) user.status = sub.status;
           return session;
         },
-        async jwt({ token, user, account }) {
+        async jwt({ token, user, account, profile }) {
           if (user) {
+            if (prisma && user.id && ['google','apple'].includes(account?.provider ?? '')) {
+              // Persist only the provider's verified current address; never trust client/session email.
+              await prisma.user.updateMany({where:{id:user.id,email:user.email ?? null},data:{
+                emailVerified:providerVerifiedEmail(account?.provider,profile,user.email)?new Date():null,
+              }});
+            }
             token.sub = user.id;
             token.signedInAt = new Date().toISOString();
             if (user.id === APP_REVIEW_USER_ID) token.reviewVersion = appReviewVersion() ?? undefined;

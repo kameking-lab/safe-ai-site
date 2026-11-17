@@ -1,3 +1,4 @@
+import { identityPurchaseFailure } from './purchase-messages';
 export const SITE_ORIGIN='https://www.anzen-ai-portal.jp';
 export function mobileRateRejection(response:Response,stage:'auth_start'|'auth_exchange'){
   console.warn('[mobile-api]',JSON.stringify({stage,status:response.status,code:response.status===429?'RATE_LIMITED':'SHARED_STATE_UNAVAILABLE'}));
@@ -24,6 +25,8 @@ export function isNativeGuestRequest(request:Request){return request.headers.get
 /** Signed-in browser member id, or null for an anonymous web visitor. */
 export async function webMemberId():Promise<string|null>{const {auth}=await import('@/auth');const session=await auth({identityOnly:true});return (session?.user as {id?:string}|undefined)?.id ?? null;}
 export function failure(error:unknown) {
+  const identity = identityPurchaseFailure(error);
+  if(identity)return json({error:{code:identity.code,message:identity.message}},identity.status);
   const code=error instanceof Error ? error.message:'';
   if(code==='PRO_SALES_PAUSED')return json({error:{code,message:'今月のPro新規受付は終了しました。来月1日に再開します。'}},503);
   const statuses:Record<string,number>={UNAUTHORIZED:401,FORBIDDEN:403,INVALID_REQUEST:400,AUTH_FLOW_EXPIRED:400,REAUTH_REQUIRED:401,DELETION_PENDING:409,PURCHASE_REVIEW_REQUIRED:409,ALREADY_SUBSCRIBED:409,PURCHASE_PENDING:409,PURCHASE_OWNED_BY_OTHER_ACCOUNT:409,LOCATION_LIMIT_REACHED:409,ENTITLEMENT_SYNC_PENDING:503,BILLING_RECONCILE_UNAVAILABLE:503,FEATURE_UNAVAILABLE:503};

@@ -1,8 +1,10 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { identityPurchaseMessages } from '@/lib/mobile/purchase-messages';
 
 const MESSAGES: Record<string, string> = {
+  ...identityPurchaseMessages,
   PRO_SALES_PAUSED: "今月のPro新規受付は終了しました。来月1日に再開します。",
   ALREADY_SUBSCRIBED: "すでに Pro です。追加の購入は不要です。",
   PURCHASE_PENDING: "別の購入手続き（App Store など）が進行中です。完了を待つか、アプリの「購入を復元」をお試しください。",

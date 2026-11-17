@@ -16,6 +16,8 @@ vi.mock("stripe", () => ({ default: class {
 vi.mock("@/lib/prisma", () => {
   const tx = {
     $executeRaw: mocks.lock,
+    user:{findUnique:async()=>({email:'member@example.test',emailVerified:new Date(),accounts:[{provider:'google'}]})},
+    $queryRaw:async()=>[],
     subscription: {
       findUnique: async () => mocks.row ? { ...mocks.row } : null,
       findMany: async () => mocks.row ? [{ userId: mocks.row.userId }] : [],
@@ -25,7 +27,7 @@ vi.mock("@/lib/prisma", () => {
         return mocks.row;
       },
     },
-    mobileGrant: { updateMany: mocks.grants },
+    mobileGrant: { updateMany: mocks.grants, findMany:async()=>[] },
   };
   mocks.transaction.mockImplementation((run: (client: typeof tx) => Promise<unknown>) => {
     const result = mocks.tail.then(() => run(tx)); mocks.tail = result.catch(() => undefined); return result;

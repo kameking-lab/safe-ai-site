@@ -17,6 +17,7 @@ import {
 } from "@/lib/stripe-webhook-handlers";
 import { sharedRateLimitGuard } from "@/lib/security/shared-state";
 import { isForeignStripeEvent } from "@/lib/stripe-event-scope";
+import { warnDuplicateSubscriptions } from '@/lib/mobile/billing-identity';
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -158,5 +159,14 @@ export async function POST(req: Request) {
     return json({ error: "temporarily unavailable" }, 503);
   }
 
+  // The payment transaction has committed. Resolve the owner from the bound customer only.
+  const customer=(event.data.object as {customer?:string|{id:string}|null}).customer;
+  const customerId=typeof customer==='string'?customer:customer?.id;
+  if(customerId){
+    try{
+      const owner=await prisma.subscription.findUnique({where:{stripeCustomerId:customerId},select:{userId:true}});
+      if(owner)await warnDuplicateSubscriptions(prisma,owner.userId);
+    }catch{console.warn('[mobile-billing]','DUPLICATE_EMAIL_AUDIT_UNAVAILABLE');}
+  }
   return json({ received: true });
 }

@@ -12,7 +12,10 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { isPaidModeReady, resolveStripePlan } from "@/lib/stripe-price-policy";
 import { privateJson, readBoundedJson } from "@/lib/server/cloud-owner";
-import { reservePurchase, billingDb, lockMember } from "@/lib/mobile/billing-service";
+import { reservePurchase, billingDb, lockMember, entitlementInTransaction } from "@/lib/mobile/billing-service";
+import { assertNoDuplicateSubscription } from "@/lib/mobile/billing-identity";
+import { assertPurchasable, projectEntitlement } from "@/lib/mobile/entitlement";
+import { identityPurchaseFailure } from "@/lib/mobile/purchase-messages";
 import { resumeStripeIntent } from "@/lib/mobile/stripe-purchase";
 import { Prisma } from "@prisma/client";
 import { safeReturnPath } from "@/lib/pro-start";
@@ -71,6 +74,8 @@ export async function POST(req: Request) {
     try {
       purchaseIntentId = (await reservePurchase(userId, "stripe")).id;
     } catch (e) {
+      const identity = identityPurchaseFailure(e);
+      if(identity)return privateJson({error:{code:identity.code,message:identity.message}},identity.status);
       const code = e instanceof Error ? e.message : "ENTITLEMENT_SYNC_PENDING";
       return privateJson({ error: { code, ...(code==='PRO_SALES_PAUSED'?{message:PRO_SALES_PAUSED_MESSAGE}:{}) } }, code === "ALREADY_SUBSCRIBED" || code === "PURCHASE_PENDING" ? 409 : 503);
     }
@@ -81,6 +86,10 @@ export async function POST(req: Request) {
     customerId = await prisma.$transaction(async (tx) => {
       await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`stripe-member:${userId}`}, 0))`;
       const sub = await tx.subscription.findUnique({ where: { userId } });
+      if(!ledger){
+        assertPurchasable(projectEntitlement('',sub,await tx.mobileGrant.findMany({where:{userId}})));
+        await assertNoDuplicateSubscription(tx,userId);
+      }
       if (sub?.stripeCustomerId) {
         return sub.stripeCustomerId;
       }
@@ -102,7 +111,10 @@ export async function POST(req: Request) {
         });
       return customer.id;
     }, { maxWait: 5_000, timeout: 15_000 });
-  } catch {
+  } catch (error) {
+    const identity = identityPurchaseFailure(error);
+    if(identity)return privateJson({error:{code:identity.code,message:identity.message}},identity.status);
+    if(error instanceof Error&&error.message==='ALREADY_SUBSCRIBED')return privateJson({error:{code:'ALREADY_SUBSCRIBED'}},409);
     console.error("[stripe/checkout] customer mapping failed");
     return privateJson({ error: "決済の準備に失敗しました。時間をおいて再試行してください。" }, 503);
   }
@@ -126,7 +138,14 @@ export async function POST(req: Request) {
       },
     };
     if (!purchaseIntentId) {
-      const checkoutSession = await stripe.checkout.sessions.create(parameters);
+      // Recheck immediately before Checkout, including when the shared ledger is disabled.
+      const checkoutSession = await prisma.$transaction(async tx=>{
+        await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`stripe-member:${userId}`}, 0))`;
+        const sub=await tx.subscription.findUnique({where:{userId}});
+        assertPurchasable(projectEntitlement('',sub,await tx.mobileGrant.findMany({where:{userId}})));
+        await assertNoDuplicateSubscription(tx,userId);
+        return stripe.checkout.sessions.create(parameters);
+      },{timeout:20000});
       return privateJson({ url: checkoutSession.url });
     }
     // Commit exact creation parameters BEFORE calling Stripe. Retries after a crash reuse them.
@@ -141,12 +160,17 @@ export async function POST(req: Request) {
     const result = await billingDb().$transaction(async (tx) => {
       await lockProSalesOpen(tx);
       await lockMember(tx, userId);
+      assertPurchasable(await entitlementInTransaction(tx,userId));
+      await assertNoDuplicateSubscription(tx,userId);
       const intent = await tx.mobilePurchaseIntent.findUnique({ where: { userId } });
       if (!intent || intent.id !== purchaseIntentId || intent.status !== "pending" || intent.source !== "stripe") throw new Error("PURCHASE_PENDING");
       return resumeStripeIntent(tx, intent);
     }, { timeout: 20_000 });
     return privateJson(result, result.state === "open" ? 200 : 409);
   } catch(error) {
+    const identity = identityPurchaseFailure(error);
+    if(identity)return privateJson({error:{code:identity.code,message:identity.message}},identity.status);
+    if(error instanceof Error&&error.message==='ALREADY_SUBSCRIBED')return privateJson({error:{code:'ALREADY_SUBSCRIBED'}},409);
     if(error instanceof Error&&error.message==='PRO_SALES_PAUSED')return privateJson({error:{code:'PRO_SALES_PAUSED',message:PRO_SALES_PAUSED_MESSAGE}},503);
     return privateJson({ error: "決済セッションの作成に失敗しました。" }, 502);
   }

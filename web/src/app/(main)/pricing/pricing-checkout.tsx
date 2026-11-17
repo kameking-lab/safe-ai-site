@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { identityPurchaseMessages } from '@/lib/mobile/purchase-messages';
 
 interface Props {
   planId: string;
@@ -45,9 +46,9 @@ export function PricingCheckout({ planId, planName, label, variant }: Props) {
         window.location.href = `/auth/signin?callbackUrl=${next}`;
         return;
       }
-      const data = (await res.json()) as { url?: string; error?: string };
+      const data = (await res.json()) as { url?: string; error?: string | {code?:string} };
       if (!res.ok || !data.url) {
-        setError(data.error ?? "決済セッションの作成に失敗しました。");
+        setError(typeof data.error==='string'?data.error:identityPurchaseMessages[data.error?.code??'']??(data.error?.code==='ALREADY_SUBSCRIBED'?'すでに Pro です。追加の購入は不要です。':'決済セッションの作成に失敗しました。'));
         return;
       }
       window.location.href = data.url;

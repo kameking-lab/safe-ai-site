@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 set -u
 
+# This purchase-guard lane is review-only, regardless of the deployment target.
+if [ "${VERCEL_GIT_COMMIT_REF:-}" = "cx/anz-dup-purchase-20261117" ]; then
+  printf '%s\n' 'Purchase-guard review branch: deployment skipped.' >&2
+  exit 0
+fi
+
 # Preview deployments are not used by CI or reviewers; building every PR push
 # only adds Vercel build minutes. Production (main) is never skipped here.
 if [ "${VERCEL_ENV:-}" = "preview" ]; then
