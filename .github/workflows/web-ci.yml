@@ -59,6 +59,15 @@ jobs:
         env:
           ANZEN_BILLING_INTEGRATION: "1"
         run: npx vitest run src/lib/mobile/apple-transfer.integration.test.ts --maxWorkers=1
+      - name: Prepare disposable duplicate-purchase database
+        env:
+          DATABASE_URL: postgresql://postgres@127.0.0.1:55437/postgres?schema=dpa1_billing
+        run: npx prisma db push --skip-generate
+      - name: Verify duplicate-purchase guards with PostgreSQL
+        env:
+          ANZEN_BILLING_INTEGRATION: "1"
+          ANZEN_DUP_BILLING_TEST_PORT: "55437"
+        run: npx vitest run src/lib/mobile/billing-identity.integration.test.ts --maxWorkers=1
 
   smoke:
     runs-on: ubuntu-24.04

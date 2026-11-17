@@ -18,7 +18,8 @@ describe.skipIf(process.env.ANZEN_BILLING_INTEGRATION!=='1')('purchase routes wi
   let db:PrismaClient;
   const expiry=()=>new Date(Date.now()+86400000);
   beforeAll(()=>{
-    db=new PrismaClient({datasourceUrl:'postgresql://postgres@127.0.0.1:55447/postgres?schema=dpa1_billing'});state.db=db;
+    const port=process.env.ANZEN_DUP_BILLING_TEST_PORT==='55437'?'55437':'55447';
+    db=new PrismaClient({datasourceUrl:`postgresql://postgres@127.0.0.1:${port}/postgres?schema=dpa1_billing`});state.db=db;
     vi.stubEnv('MOBILE_LEDGER_ENABLED','true');vi.stubEnv('REVENUECAT_IOS_PRODUCT_ID','fixture-product');
     vi.stubEnv('STRIPE_SECRET_KEY','synthetic-test-only');vi.stubEnv('STRIPE_ANZEN_PRO_MONTHLY_PRICE_ID','price_fixture');
   });
