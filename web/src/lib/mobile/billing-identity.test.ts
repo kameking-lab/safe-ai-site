@@ -19,7 +19,7 @@ describe('verified-email purchase guard',()=>{
     const f=fixture();f.db.mobileGrant.findMany.mockResolvedValue([{provider}]);
     const error=await assertNoDuplicateSubscription(f.client,'current').catch(e=>e);
     expect(error.message).toBe('DUPLICATE_SUBSCRIPTION_GOOGLE');
-    expect(f.db.$queryRaw.mock.calls[0].slice(1)).toEqual(['owner@example.test','current']);
+    expect(f.db.$queryRaw.mock.calls[0].slice(-2)).toEqual(['owner@example.test','current']);
     const response=failure(error);expect(response.status).toBe(409);
     expect(await response.json()).toEqual({error:{code:error.message,message:'このメールアドレスの別のアカウント（Google）で購入済みです。そちらでログインしてください。'}});
   });

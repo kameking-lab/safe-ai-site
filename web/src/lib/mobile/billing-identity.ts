@@ -4,6 +4,8 @@ import { APP_REVIEW_USER_ID } from '../app-review';
 type Db = Pick<Prisma.TransactionClient, 'user' | 'mobileIdentity' | 'mobileGrant' | 'subscription' | '$queryRaw'>;
 export const normalizeBillingEmail = (email: string) => email.trim().toLowerCase();
 const relay = (email: string) => email.endsWith('@privaterelay.appleid.com');
+// Match JavaScript trim(), including tab/newline and Unicode boundary whitespace in old rows.
+const emailWhitespace = '\u0009\u000a\u000b\u000c\u000d \u00a0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200a\u2028\u2029\u202f\u205f\u3000\ufeff';
 
 /** Called only with the provider profile from Auth.js's verified OAuth exchange. */
 export function providerVerifiedEmail(provider: string | undefined, profile: unknown, email: string | null | undefined) {
@@ -25,7 +27,7 @@ async function emailPeers(db: Db, userId: string, requireVerified: boolean) {
   // Prisma's case-insensitive equality does not trim historical addresses. Values stay bound.
   return db.$queryRaw<{id:string;provider:string}[]>`
     SELECT DISTINCT u.id, a.provider FROM "User" u JOIN "Account" a ON a."userId" = u.id
-    WHERE lower(btrim(u.email)) = ${normalizeBillingEmail(user.email)}
+    WHERE lower(btrim(u.email, ${emailWhitespace})) = ${normalizeBillingEmail(user.email)}
       AND u.id <> ${userId} AND a.provider IN ('google', 'apple')`;
 }
 

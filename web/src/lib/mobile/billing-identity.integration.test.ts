@@ -62,6 +62,14 @@ describe.skipIf(process.env.ANZEN_BILLING_INTEGRATION!=='1')('purchase routes wi
     const started=await POST(new Request('http://localhost/api/billing/store-started',{method:'POST',headers:{origin:'http://localhost'},body:JSON.stringify({id})}));
     expect(started.status).toBe(409);expect((await db.mobilePurchaseIntent.findUnique({where:{userId:'current'}}))?.stage).toBe('prepared');
   });
+  it('normalizes old rows with tabs and fullwidth boundary spaces',async()=>{
+    await db.user.update({where:{id:'other'},data:{email:'\t owner@EXAMPLE.test\u3000'}});await paid('stripe');
+    expect((await apple()).status).toBe(409);
+  });
+  it.each(['expired','revoked','sandbox'])('ignores another account’s %s App Store grant',async condition=>{
+    await paid('app_store');await db.mobileGrant.updateMany({where:{userId:'other'},data:condition==='expired'?{expiresAt:new Date(Date.now()-1)}:condition==='revoked'?{revoked:true}:{environment:'SANDBOX'}});
+    expect((await apple()).status).toBe(200);
+  });
   it('allows a normal Stripe Checkout when email does not match',async()=>{
     await db.user.update({where:{id:'other'},data:{email:'different@example.test'}});await paid('app_store');
     expect((await stripe()).status).toBe(200);expect(state.checkout).toHaveBeenCalledOnce();
