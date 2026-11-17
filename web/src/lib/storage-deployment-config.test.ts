@@ -1,5 +1,6 @@
-import { readFileSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, rmdirSync, unlinkSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { spawnSync } from 'node:child_process';
 import { describe, expect, it } from "vitest";
 
 type VercelConfig = {
@@ -39,11 +40,34 @@ describe("storage-gated deployment configuration", () => {
       resolve(process.cwd(), "scripts/vercel-ignore-build.sh"),
       "utf8",
     );
-    expect(ignoreScript).not.toContain("VERCEL_GIT_COMMIT_REF");
+    expect(ignoreScript).toContain('if [ "${VERCEL_GIT_COMMIT_REF:-}" = "cx/anz-dup-purchase-20261117" ]; then');
     expect(ignoreScript).not.toContain("automation/storage-gate");
     expect(ignoreScript.trimEnd()).toMatch(/exit 1$/u);
     expect(ignoreScript).toContain('if [ "${VERCEL_ENV:-}" = "preview" ]; then');
     expect(ignoreScript).not.toContain('"production" ]');
+  });
+
+  it('skips only the review branch while the same commit on main still reaches the storage gate',()=>{
+    const shell=process.platform==='win32'?resolve(process.env.ProgramFiles??'C:/Program Files','Git/bin/bash.exe'):'bash';
+    if(process.platform==='win32'&&!existsSync(shell))throw new Error('Git Bash is required for deployment guard verification');
+    const directory=mkdtempSync(resolve(process.cwd(),'.test-ignore-build-'));
+    const script=resolve(directory,'vercel-ignore-build.sh');
+    const gate=resolve(directory,'storage-deployment-guard.mjs');
+    try{
+      writeFileSync(script,readFileSync(resolve(process.cwd(),'scripts/vercel-ignore-build.sh'),'utf8'));
+      // This fixture only reports a successful storage check; it never runs a deployment.
+      writeFileSync(gate,'process.exit(0);\n');
+      const results=['cx/anz-dup-purchase-20261117','main','another-branch'].map(branch=>spawnSync(shell,[script.replaceAll('\\','/')],{
+        encoding:'utf8',windowsHide:true,
+        env:{PATH:process.env.PATH,SystemRoot:process.env.SystemRoot,NODE_ENV:'test',VERCEL_ENV:'production',VERCEL_GIT_COMMIT_REF:branch,VERCEL_GIT_COMMIT_SHA:'same-commit'},
+      }));
+      expect(results.map(result=>result.status)).toEqual([0,1,1]);
+      expect(results[0].stderr).toContain('deployment skipped');
+    }finally{
+      if(existsSync(script))unlinkSync(script);
+      if(existsSync(gate))unlinkSync(gate);
+      rmdirSync(directory);
+    }
   });
 
   it("separates read-only generation from frozen write-token promotion", () => {
