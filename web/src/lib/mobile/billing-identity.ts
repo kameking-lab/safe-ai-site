@@ -32,13 +32,14 @@ async function emailPeers(db: Db, userId: string, requireVerified: boolean) {
 }
 
 async function activeSources(db: Db, userId: string, environment: string, now: Date) {
-  const [member, sub, grants] = await Promise.all([
-    db.mobileIdentity.findUnique({where:{userId}}), db.subscription.findUnique({where:{userId}}),
+  const [sub, grants] = await Promise.all([
+    db.subscription.findUnique({where:{userId}}),
     db.mobileGrant.findMany({where:{userId,environment,revoked:false,expiresAt:{gt:now}}}),
   ]);
   const sources = new Set<string>();
   // Conservative purchase guard: an unexpired paid contract also blocks when a scheduled refresh is late.
-  if ((member?.billingEnvironment ?? 'PRODUCTION') === environment && sub && !sub.billingHold && sub.stripeSubscriptionId &&
+  // The member's Apple/TestFlight environment does not invalidate a website contract.
+  if (sub && !sub.billingHold && sub.stripeSubscriptionId &&
     ['standard','pro','business','custom'].includes(sub.planName) && ['active','trialing','canceled','canceling'].includes(sub.status) &&
     sub.currentPeriodEnd && sub.currentPeriodEnd > now) sources.add('stripe');
   for (const grant of grants) if (['stripe','app_store'].includes(grant.provider)) sources.add(grant.provider);
@@ -51,10 +52,12 @@ export async function assertNoDuplicateSubscription(db: Db, userId: string) {
     const peers = await emailPeers(db,userId,true);
     if (!peers.length) return;
     const member = await db.mobileIdentity.findUnique({where:{userId}});
-    const environment = member?.billingEnvironment ?? 'PRODUCTION';
     const now = new Date(); const paidProviders = new Set<string>();
     for (const id of new Set(peers.map(p=>p.id))) {
-      if ((await activeSources(db,id,environment,now)).size) for (const peer of peers.filter(p=>p.id===id)) paidProviders.add(peer.provider);
+      // A former TestFlight member can open the production store next. Real paid rights
+      // must block in either client environment; sandbox-only peers cannot block production.
+      const paid=(await activeSources(db,id,'PRODUCTION',now)).size || member?.billingEnvironment==='SANDBOX'&&(await activeSources(db,id,'SANDBOX',now)).size;
+      if (paid) for (const peer of peers.filter(p=>p.id===id)) paidProviders.add(peer.provider);
     }
     if (paidProviders.size) throw new Error(paidProviders.size>1?'DUPLICATE_SUBSCRIPTION_GOOGLE_APPLE':paidProviders.has('google')?'DUPLICATE_SUBSCRIPTION_GOOGLE':'DUPLICATE_SUBSCRIPTION_APPLE');
   } catch (error) {
@@ -67,8 +70,8 @@ export async function assertNoDuplicateSubscription(db: Db, userId: string) {
 export async function warnDuplicateSubscriptions(db: Db, userId: string) {
   try {
     const peers = await emailPeers(db,userId,false);
-    const member = await db.mobileIdentity.findUnique({where:{userId}});
-    const environment = member?.billingEnvironment ?? 'PRODUCTION';
+    // Sandbox receipts never represent a real double payment.
+    const environment = 'PRODUCTION';
     const now = new Date(); const own = await activeSources(db,userId,environment,now);
     if(own.has('stripe')&&own.has('app_store')){
       console.warn('[mobile-billing]', 'DUPLICATE_EMAIL_STRIPE_APP_STORE');

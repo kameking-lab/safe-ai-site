@@ -67,6 +67,15 @@ describe.skipIf(process.env.ANZEN_BILLING_INTEGRATION!=='1')('purchase routes wi
     await db.user.update({where:{id:'other'},data:{email:'\t owner@EXAMPLE.test\u3000'}});await paid('stripe');
     expect((await apple()).status).toBe(409);
   });
+  it('blocks a production contract even if the buying account was previously used in TestFlight',async()=>{
+    await paid('stripe');await db.mobileIdentity.update({where:{userId:'current'},data:{billingEnvironment:'SANDBOX'}});
+    const response=await apple();expect(response.status).toBe(409);
+    expect(await response.json()).toMatchObject({error:{code:'DUPLICATE_SUBSCRIPTION_GOOGLE'}});
+  });
+  it('does not mistake a website contract for sandbox because its owner previously used TestFlight',async()=>{
+    await paid('stripe');await db.mobileIdentity.update({where:{userId:'other'},data:{billingEnvironment:'SANDBOX'}});
+    expect((await apple()).status).toBe(409);
+  });
   it.each(['expired','revoked','sandbox'])('ignores another account’s %s App Store grant',async condition=>{
     await paid('app_store');await db.mobileGrant.updateMany({where:{userId:'other'},data:condition==='expired'?{expiresAt:new Date(Date.now()-1)}:condition==='revoked'?{revoked:true}:{environment:'SANDBOX'}});
     expect((await apple()).status).toBe(200);
@@ -95,5 +104,14 @@ describe.skipIf(process.env.ANZEN_BILLING_INTEGRATION!=='1')('purchase routes wi
     const warn=vi.spyOn(console,'warn').mockImplementation(()=>{});
     const {warnDuplicateSubscriptions}=await import('./billing-identity');await warnDuplicateSubscriptions(db,'current');
     expect(warn).toHaveBeenCalledExactlyOnceWith('[mobile-billing]','DUPLICATE_EMAIL_STRIPE_APP_STORE');warn.mockRestore();
+  });
+  it('does not report sandbox-only receipts as an actual double payment',async()=>{
+    for(const id of ['current','other']){
+      await db.mobileIdentity.update({where:{userId:id},data:{billingEnvironment:'SANDBOX'}});
+      await db.mobileGrant.create({data:{userId:id,provider:id==='current'?'stripe':'app_store',originalTransactionId:`sandbox-${id}`,productId:'fixture-product',environment:'SANDBOX',expiresAt:expiry(),checkedAt:new Date()}});
+    }
+    const warn=vi.spyOn(console,'warn').mockImplementation(()=>{});
+    const {warnDuplicateSubscriptions}=await import('./billing-identity');await warnDuplicateSubscriptions(db,'current');
+    expect(warn).not.toHaveBeenCalled();warn.mockRestore();
   });
 });

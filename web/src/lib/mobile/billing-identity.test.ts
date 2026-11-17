@@ -46,8 +46,13 @@ describe('verified-email purchase guard',()=>{
   });
   it('does not block a production member with another account’s sandbox rights',async()=>{
     const f=fixture();f.db.mobileIdentity.findUnique.mockImplementation(async(args?:unknown)=>({billingEnvironment:(args as {where:{userId:string}})?.where.userId==='other'?'SANDBOX':'PRODUCTION'}));
-    f.db.subscription.findUnique.mockResolvedValue({planName:'pro',status:'active',stripeSubscriptionId:'fixture',currentPeriodEnd:future()});
+    f.db.mobileGrant.findMany.mockImplementation(async(args?:unknown)=>(args as {where:{environment:string}})?.where.environment==='SANDBOX'?[{provider:'app_store'}]:[]);
     await assertNoDuplicateSubscription(f.client,'current');
+  });
+  it('still blocks real paid rights when the current account was a TestFlight member',async()=>{
+    const f=fixture();f.db.mobileIdentity.findUnique.mockImplementation(async(args?:unknown)=>({billingEnvironment:(args as {where:{userId:string}})?.where.userId==='current'?'SANDBOX':'PRODUCTION'}));
+    f.db.subscription.findUnique.mockResolvedValue({planName:'pro',status:'active',stripeSubscriptionId:'fixture',currentPeriodEnd:future()});
+    await expect(assertNoDuplicateSubscription(f.client,'current')).rejects.toThrow('DUPLICATE_SUBSCRIPTION_GOOGLE');
   });
   it('logs a fixed reason only when both stores have committed active rights',async()=>{
     const f=fixture();const warn=vi.spyOn(console,'warn').mockImplementation(()=>{});
