@@ -11,11 +11,13 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 // Shared ledger: owner approval 2026-11-06. Billing decisions: owner approval 2026-11-11.
+// Stripe webhook idempotency ledger (StripeEvent): owner approval 2026-11-20.
 export const APPROVED_MIGRATIONS = Object.freeze([
   "20261103000000_ios3b_shared_entitlements",
   "202611040001_ios3c_review_fixes",
   "202611110001_owner_billing_decisions",
   "202611190001_apple_guest_identity",
+  "202611200001_stripe_event_ledger",
 ]);
 const HISTORY_TABLE = "_prisma_migrations";
 
