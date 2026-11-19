@@ -231,6 +231,12 @@ jobs:
               "web/src/assets/safety-image-library/fonts/NotoSansCJKjp-Bold.otf",
               "web/src/assets/safety-image-library/fonts/NotoSansCJKsc-Bold.otf",
           }
+          # Owner: safe-ai-site web maintainers. npm ci uses these build inputs
+          # to reproduce runtime dependencies. The JSON/image budget treats them as runtime inputs.
+          WEB_DEPENDENCY_MANIFEST_PATHS = {
+              "web/package.json",
+              "web/package-lock.json",
+          }
           MEDIA_OR_JSON_SUFFIXES = {
               ".json", ".jsonl", ".png", ".jpg", ".jpeg", ".gif", ".webp",
               ".avif", ".svg",
@@ -338,6 +344,13 @@ jobs:
               return (
                   path.startswith(LARGE_RUNTIME_ALLOWLIST)
                   or path in REVIEWED_RUNTIME_EXACT_PATHS
+              )
+
+          def is_non_runtime_media(path: str) -> bool:
+              return (
+                  PurePosixPath(path).suffix.lower() in MEDIA_OR_JSON_SUFFIXES
+                  and path not in WEB_DEPENDENCY_MANIFEST_PATHS
+                  and not is_runtime_allowed(path)
               )
 
           def is_generated_artifact(path: str) -> bool:
@@ -451,6 +464,15 @@ jobs:
               or is_runtime_allowed("web/src/assets/safety-image-library/fonts/unreviewed.otf")
           ):
               failures.append("reviewed runtime exact-path classifier self-test failed")
+          if (
+              is_non_runtime_media("web/package.json")
+              or is_non_runtime_media("web/package-lock.json")
+              or not is_non_runtime_media("web/scripts/package.json")
+              or not is_non_runtime_media("web/scripts/package-lock.json")
+              or is_runtime_allowed("web/package.json")
+              or is_runtime_allowed("web/package-lock.json")
+          ):
+              failures.append("web dependency manifest classifier self-test failed")
           if not is_generated_artifact("web/node_modules/pkg/dist/index.js"):
               failures.append("node_modules classifier self-test failed")
           if sum(
@@ -480,7 +502,6 @@ jobs:
                   failures.append(f"tracked source is not a regular file: {path}")
                   continue
               size = metadata.st_size
-              suffix = file_path.suffix.lower()
               basename = file_path.name
               changed_path = path in changed_set
 
@@ -502,7 +523,7 @@ jobs:
               if is_forbidden_audit_evidence(path):
                   failures.append(f"raw/non-current audit evidence is tracked: {path}")
 
-              if (changed_path or full_tree_scan) and suffix in MEDIA_OR_JSON_SUFFIXES and not is_runtime_allowed(path):
+              if (changed_path or full_tree_scan) and is_non_runtime_media(path):
                   non_runtime_media.append((path, size))
 
           history_blob_count = 0
@@ -602,10 +623,7 @@ jobs:
                           failures.append(
                               f"history blob exceeds 5 MiB: {path} ({size} bytes)"
                           )
-                      if (
-                          PurePosixPath(path).suffix.lower() in MEDIA_OR_JSON_SUFFIXES
-                          and not is_runtime_allowed(path)
-                      ):
+                      if is_non_runtime_media(path):
                           history_non_runtime_media.append((path, size))
 
           media_bytes = sum(size for _, size in non_runtime_media)
