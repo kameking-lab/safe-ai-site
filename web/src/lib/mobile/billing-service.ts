@@ -3,12 +3,16 @@ import { prisma } from '../prisma';
 import { assertPurchasable, projectEntitlement, type EntitlementSnapshot } from './entitlement';
 import { fetchSubscriber, verifiedAppleGrant,fetchAppleOwnership,verifyAppleLegacyPurchase } from './revenuecat';
 import { reconcileStripe } from './stripe-reconcile';
+import { isGuestUser } from './session';
 import { assertResume,canReleasePrepared,appleOutcomeStage,type ApplePurchaseOutcome,type PurchaseSource } from './purchase-state';
 import { expireStripeIntent } from './stripe-purchase';
 import { assertProSalesOpen } from './pro-sales-gate';
 import { recordOperationsAlert,resolveOperationsAlert } from './operations-alerts';
 export function billingDb() { if(!prisma || process.env.MOBILE_LEDGER_ENABLED!=='true') throw new Error('ENTITLEMENT_SYNC_PENDING');return prisma; }
 export async function lockMember(tx:Prisma.TransactionClient,userId:string) { await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`anzen:${userId}`},0))`; }
+export async function lockAppleReconciliation(tx:Prisma.TransactionClient) {
+  await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended('anzen:apple-reconcile',0))`;
+}
 export async function lockPushDevice(tx:Prisma.TransactionClient,token:string) { await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`anzen-push:${token}`},0))`; }
 /**
  * TestFlight / App Review buy in Apple's sandbox. Sandbox rights never reach ordinary production
@@ -32,7 +36,7 @@ export async function entitlementInTransaction(tx:Prisma.TransactionClient,userI
   const rights=projectEntitlement(member.appUserId,legacy,grants,new Date(),member.billingEnvironment==='SANDBOX'?'SANDBOX':'PRODUCTION');
   if(rights.source==='stripe'&&!grants.some(g=>g.provider==='stripe'&&!g.revoked&&g.expiresAt>new Date()&&g.environment===(member.billingEnvironment==='SANDBOX'?'SANDBOX':'PRODUCTION')))rights.syncState='pending';
   const pending=intent?.status==='pending';
-  return {...rights,purchasePending:pending,purchaseIntentId:pending?intent.id:null,purchaseSource:pending?intent.source:null,purchaseStage:pending?intent.stage:null};
+  return {...rights,appleGuestAppUserId:member.appleGuestAppUserId??undefined,purchasePending:pending,purchaseIntentId:pending?intent.id:null,purchaseSource:pending?intent.source:null,purchaseStage:pending?intent.stage:null};
 }
 /** Each invocation reads afresh: even an in-flight read may predate a completed purchase/revocation. */
 export async function getEntitlement(userId:string,options:{refresh?:boolean;snapshot?:boolean}={}) {
@@ -66,6 +70,7 @@ async function readEntitlement(userId:string,refresh:boolean,snapshot:boolean) {
   // Re-read after provider mutations only. Ordinary reads project the fresh database rows above.
   const rights=refreshed?await db.$transaction(tx=>entitlementInTransaction(tx,userId)):{
     ...projectEntitlement(member.appUserId,legacy,grants,new Date(),environment),
+    appleGuestAppUserId:member.appleGuestAppUserId??undefined,
     purchasePending:intent?.status==='pending',purchaseIntentId:intent?.status==='pending'?intent.id:null,
     purchaseSource:intent?.status==='pending'?intent.source:null,purchaseStage:intent?.status==='pending'?intent.stage:null,
   };
@@ -73,60 +78,100 @@ async function readEntitlement(userId:string,refresh:boolean,snapshot:boolean) {
   if(refreshFailed&&rights.plan==='free')rights.syncState='pending';
   return rights;
 }
+type AppleOwnership = Awaited<ReturnType<typeof fetchAppleOwnership>>;
+type AppleGrant = NonNullable<ReturnType<typeof verifiedAppleGrant>>;
+type BillingEnvironment = 'PRODUCTION' | 'SANDBOX';
+
+/** Find the durable grant and positively match any historical transaction keys. */
+export async function findAppleLedgerEntries(tx:Prisma.TransactionClient,userId:string,environment:BillingEnvironment,grant:AppleGrant,verified:AppleOwnership,checkedAt:Date) {
+  const purchase={provider:'app_store',originalTransactionId:verified.key,environment};
+  const where={provider_originalTransactionId_environment:purchase};
+  const originalMember=await tx.mobileIdentity.findUnique({where:{appUserId:verified.originalCustomerId}})
+    ?? (verified.originalCustomerId.startsWith('$RCAnonymousID:')
+      ? await tx.mobileIdentity.findUnique({where:{appleGuestAppUserId:verified.originalCustomerId}})
+      : null);
+  const owner=await tx.mobileGrant.findUnique({where});
+  const previousUsers=[...new Set([userId,...(originalMember?[originalMember.userId]:[])])];
+  const candidates=await tx.mobileGrant.findMany({
+    where:{provider:purchase.provider,environment,productId:grant.productId,revoked:false,expiresAt:{gt:checkedAt},
+      NOT:{originalTransactionId:{startsWith:'rc:'}},OR:[{userId:{in:previousUsers}},{originalTransactionId:verified.storeTransactionId}]},
+  });
+  const legacy=[];
+  for(const row of candidates){
+    if(await verifyAppleLegacyPurchase(verified.customerId,environment,verified.key,row.originalTransactionId))legacy.push(row);
+  }
+  return {purchase,where,owner,originalMember,legacy};
+}
+
+export async function recordAppleGrant(tx:Prisma.TransactionClient,entries:Awaited<ReturnType<typeof findAppleLedgerEntries>>,userId:string,grant:AppleGrant,checkedAt:Date) {
+  for(const row of entries.legacy){
+    await tx.mobileGrant.updateMany({where:{id:row.id,provider:entries.purchase.provider,environment:entries.purchase.environment},data:{revoked:true,checkedAt}});
+  }
+  await tx.mobileGrant.upsert({where:entries.where,
+    create:{...grant,...entries.purchase,userId,checkedAt},update:{...grant,userId,checkedAt,revoked:false}});
+}
+
 export async function reconcile(userId:string,options:{stripe?:boolean;appUserId?:string}={}) {
   const result=await billingDb().$transaction(async tx=>{
-    await lockMember(tx,userId);let member=await identity(tx,userId);
+    await lockMember(tx,userId);const member=await identity(tx,userId);
     // Serialize Apple verification and ownership changes, including legacy-key
     // migration. Never lock the old member in reverse order (A/B login race).
-    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended('anzen:apple-reconcile',0))`;
+    await lockAppleReconciliation(tx);
     let transfer:{reason:string;from:string[];to:string[]}|undefined;
     // A delayed native SDK operation must not reconcile under a replacement login.
     if(options.appUserId&&options.appUserId!==member.appUserId)throw new Error('UNAUTHORIZED');
     let environment:'SANDBOX'|'PRODUCTION'=member.billingEnvironment==='SANDBOX'?'SANDBOX':'PRODUCTION';
     const productId=process.env.REVENUECAT_IOS_PRODUCT_ID;
     if(!productId) throw new Error('ENTITLEMENT_SYNC_PENDING');
-    const raw=await fetchSubscriber(member.appUserId);
+    const alias=member.appleGuestAppUserId;
+    const ids=alias?[member.appUserId,alias]:[member.appUserId];
+    const subscribers=await Promise.all(ids.map(async appUserId=>({appUserId,raw:await fetchSubscriber(appUserId)})));
+    const grantsFor=(env:BillingEnvironment)=>subscribers.flatMap(({appUserId,raw})=>{
+      const grant=verifiedAppleGrant(raw,productId,new Date(),env);
+      return grant?[{appUserId,grant}]:[];
+    });
     // A verified production receipt takes priority, including for a former TestFlight member.
-    const production=verifiedAppleGrant(raw,productId,new Date(),'PRODUCTION');
-    if(production&&environment==='SANDBOX'){
-      member=await tx.mobileIdentity.update({where:{userId},data:{billingEnvironment:'PRODUCTION'}});environment='PRODUCTION';
+    const production=grantsFor('PRODUCTION');
+    if(production.length&&environment==='SANDBOX'){
+      await tx.mobileIdentity.update({where:{userId},data:{billingEnvironment:'PRODUCTION'}});environment='PRODUCTION';
     }
-    let grant=production??verifiedAppleGrant(raw,productId,new Date(),environment);
+    let grants=environment==='PRODUCTION'?production:grantsFor(environment);
     // App Review and TestFlight testers who are not on the tester list also buy in Apple's sandbox.
     // An App Store build can never make a sandbox purchase, so a verified sandbox subscription on this
     // member's own app user ID moves a member without production rights to SANDBOX.
-    if(!grant&&environment==='PRODUCTION'){
-      const sandbox=verifiedAppleGrant(raw,productId,new Date(),'SANDBOX');
-      if(sandbox&&(await entitlementInTransaction(tx,userId)).plan==='free'){
-        member=await tx.mobileIdentity.update({where:{userId},data:{billingEnvironment:'SANDBOX'}});environment='SANDBOX';grant=sandbox;
+    if(!grants.length&&environment==='PRODUCTION'){
+      const sandbox=grantsFor('SANDBOX');
+      if(sandbox.length&&(await entitlementInTransaction(tx,userId)).plan==='free'){
+        await tx.mobileIdentity.update({where:{userId},data:{billingEnvironment:'SANDBOX'}});environment='SANDBOX';grants=sandbox;
       }
     }
     if(options.stripe!==false)await reconcileStripe(tx,userId);
     const checkedAt=new Date();
     // Fetch the latest authoritative subscriber state, rather than applying event order.
     await tx.mobileGrant.updateMany({where:{userId,provider:'app_store',environment},data:{revoked:true,checkedAt}});
-    if(grant) {
-      const verified=await fetchAppleOwnership(member.appUserId,environment);
-      const originalTransactionId=verified.key;
-      let owner=await tx.mobileGrant.findUnique({where:{provider_originalTransactionId_environment:{provider:'app_store',originalTransactionId,environment}}});
-      const originalMember=await tx.mobileIdentity.findUnique({where:{appUserId:verified.originalCustomerId}});
-      const previousUsers=[...new Set([userId,...(originalMember?[originalMember.userId]:[])])];
-      // Old releases stored the latest store transaction in this column. Match
-      // those rows against RevenueCat before revoking them; keep Stripe intact.
-      const legacy=await tx.mobileGrant.findMany({where:{provider:'app_store',environment,productId,revoked:false,expiresAt:{gt:checkedAt},NOT:{originalTransactionId:{startsWith:'rc:'}},OR:[{userId:{in:previousUsers}},{originalTransactionId:verified.storeTransactionId}]}});
-      for(const row of legacy){
-        if(!await verifyAppleLegacyPurchase(member.appUserId,environment,verified.key,row.originalTransactionId))continue;
-        await tx.mobileGrant.updateMany({where:{id:row.id,provider:'app_store',environment},data:{revoked:true,checkedAt}});
-        if(row.userId!==userId)owner??=row;
+    if(grants.length) {
+      const verifiedGrants=await Promise.all(grants.map(async ({appUserId,grant})=>({
+        verified:await fetchAppleOwnership(appUserId,environment,fetch,ids),grant,
+      })));
+      const guest=!!alias&&await isGuestUser(userId,tx);
+      const recorded=new Set<string>();
+      for(const {verified,grant} of verifiedGrants){
+        if(recorded.has(verified.key))continue;
+        const entries=await findAppleLedgerEntries(tx,userId,environment,grant,verified,checkedAt);
+        const {owner,originalMember,legacy}=entries;
+        const previousOwner=owner??legacy.find(row=>row.userId!==userId);
+        const moved=previousOwner?previousOwner.userId!==userId:!ids.includes(verified.originalCustomerId);
+        // Guest-to-guest restoration requires Apple-signed evidence. A member's
+        // linked alias may only refresh the rights already attributed to it.
+        if((guest||verified.customerId===alias)
+          && (moved||legacy.some(row=>row.userId!==userId)))throw new Error('PURCHASE_OWNED_BY_OTHER_ACCOUNT');
+        if(moved){
+          const providers=async(id:string|undefined)=>{if(!id)return ['unknown'];const rows=await tx.account.findMany({where:{userId:id},select:{provider:true}});const result=[...new Set(rows.map(r=>r.provider==='apple'?'apple':r.provider==='google'?'google':'other'))].sort();return result.length?result:['unknown'];};
+          transfer={reason:'APP_STORE_VERIFIED_TRANSFER',from:await providers(previousOwner?.userId??originalMember?.userId),to:await providers(userId)};
+        }
+        await recordAppleGrant(tx,entries,userId,grant,checkedAt);
+        recorded.add(verified.key);
       }
-      const previousUser=owner?.userId??originalMember?.userId;
-      const moved=owner?owner.userId!==userId:verified.originalCustomerId!==member.appUserId;
-      if(moved){
-        const providers=async(id:string|undefined)=>{if(!id)return ['unknown'];const rows=await tx.account.findMany({where:{userId:id},select:{provider:true}});const result=[...new Set(rows.map(r=>r.provider==='apple'?'apple':r.provider==='google'?'google':'other'))].sort();return result.length?result:['unknown'];};
-        transfer={reason:'APP_STORE_VERIFIED_TRANSFER',from:await providers(previousUser),to:await providers(userId)};
-      }
-      await tx.mobileGrant.upsert({where:{provider_originalTransactionId_environment:{provider:'app_store',originalTransactionId,environment}},
-        create:{...grant,originalTransactionId,userId,provider:'app_store',environment,checkedAt},update:{...grant,userId,checkedAt,revoked:false}});
       const intent=await tx.mobilePurchaseIntent.findUnique({where:{userId}});
       if(intent?.status==='pending'&&intent.source==='stripe')await expireStripeIntent(tx,intent);
       await tx.mobilePurchaseIntent.updateMany({where:{userId,source:'app_store',status:'pending'},data:{status:'completed',stage:'completed'}});
@@ -229,7 +274,7 @@ export async function processBillingEvents(limit=20,deadline=Date.now()+45000) {
     if(Date.now()>deadline)break;
     try {
       const ids=[...new Set([event.appUserId,...(Array.isArray(event.relatedAppUserIds)?event.relatedAppUserIds.filter((id):id is string=>typeof id==='string'):[])].filter((id):id is string=>!!id))];
-      const members=await db.mobileIdentity.findMany({where:{appUserId:{in:ids}}});
+      const members=await db.mobileIdentity.findMany({where:{OR:[{appUserId:{in:ids}},{appleGuestAppUserId:{in:ids}}]}});
       if(!members.length) {await db.mobileBillingEvent.update({where:{id:event.id},data:{status:'unassigned'}});continue;}
       // Read each side's current provider ownership; never use webhook order to
       // move a subscription back to its historical original customer.

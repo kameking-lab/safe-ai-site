@@ -12,8 +12,9 @@ export async function POST(request:Request) {
     // Sandbox cannot change production grants. Authenticated tests are acknowledged only.
     if(event.type==='TEST') return json({received:true,ignored:true});
     if(event.environment==='SANDBOX'){
-      const identity=event.app_user_id?await billingDb().mobileIdentity.findUnique({where:{appUserId:event.app_user_id}}):null;
-      // Only owner-designated App Review/test accounts may consume sandbox rights.
+      const appUserId=event.app_user_id;
+      const identity=appUserId?await billingDb().mobileIdentity.findFirst({where:{OR:[{appUserId},{appleGuestAppUserId:appUserId}]}}):null;
+      // A direct reconciliation must verify sandbox rights before webhooks are processed.
       if(identity?.billingEnvironment!=='SANDBOX')return json({received:true,ignored:true});
     }
     await billingDb().mobileBillingEvent.upsert({where:{id:event.id},create:{id:event.id,appUserId:event.app_user_id,relatedAppUserIds:[...(event.transferred_from??[]),...(event.transferred_to??[])],type:event.type,occurredAt:new Date(event.event_timestamp_ms)},update:{}});

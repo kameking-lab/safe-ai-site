@@ -14,6 +14,7 @@ export function verifyWebhook(raw:string, auth:string|null, signature:string|nul
 }
 const date = z.string().datetime({ offset:true }).nullable();
 export const subscriberSchema = z.object({ subscriber:z.object({
+  original_app_user_id:z.string().min(1).max(200).optional(),
   entitlements:z.record(z.string(),z.object({ product_identifier:z.string(), expires_date:date, purchase_date:z.string() })),
   subscriptions:z.record(z.string(),z.object({ store:z.string(), is_sandbox:z.boolean(), expires_date:date,
     grace_period_expires_date:date.optional(), original_purchase_date:z.string(), store_transaction_id:z.union([z.string(),z.number().int().safe()]).optional(), refunded_at:date.optional() }))
@@ -41,12 +42,12 @@ const subscriptionListSchema=z.object({items:z.array(z.object({
  * originalTransactionId. Use RevenueCat's subscription ID as the durable key.
  * Original customer is historical metadata; current customer proves ownership.
  * https://www.revenuecat.com/docs/api-v2/subscription-data-model */
-export async function fetchAppleOwnership(appUserId:string,environment:'PRODUCTION'|'SANDBOX',send:typeof fetch=fetch){
+export async function fetchAppleOwnership(appUserId:string,environment:'PRODUCTION'|'SANDBOX',send:typeof fetch=fetch,knownCustomerIds:readonly string[]=[appUserId]){
   const key=process.env.REVENUECAT_V2_SECRET_API_KEY;const projectId=process.env.REVENUECAT_PROJECT_ID;const productId=process.env.REVENUECAT_IOS_V2_PRODUCT_ID;
   if(!externalCredentialedServicesAllowed()||!key||!projectId||!productId)throw new Error('ENTITLEMENT_SYNC_PENDING');
   const pathname=`/v2/projects/${encodeURIComponent(projectId)}/customers/${encodeURIComponent(appUserId)}/subscriptions`;
   let url=new URL(`https://api.revenuecat.com${pathname}?environment=${environment.toLowerCase()}&limit=100`);
-  const subscriptions=new Map<string,{key:string;storeTransactionId:string;originalCustomerId:string}>();const visited=new Set<string>();const deadline=Date.now()+8000;
+  const subscriptions=new Map<string,{key:string;storeTransactionId:string;originalCustomerId:string;customerId:string}>();const visited=new Set<string>();const deadline=Date.now()+8000;
   for(let page=0;page<5;page++){
     if(visited.has(url.href)||Date.now()>=deadline)throw new Error('ENTITLEMENT_SYNC_PENDING');visited.add(url.href);
     const response=await send(url.href,{headers:{Authorization:`Bearer ${key}`,Accept:'application/json'},cache:'no-store',redirect:'error',signal:AbortSignal.timeout(Math.max(1,deadline-Date.now()))});
@@ -54,10 +55,10 @@ export async function fetchAppleOwnership(appUserId:string,environment:'PRODUCTI
     const data=subscriptionListSchema.parse(await response.json());
     for(const subscription of data.items){
       if(subscription.product_id!==productId||subscription.store!=='app_store'||subscription.environment!==environment.toLowerCase()||!subscription.gives_access)continue;
-      if(subscription.customer_id!==appUserId)throw new Error('PURCHASE_OWNED_BY_OTHER_ACCOUNT');
+      if(!knownCustomerIds.includes(subscription.customer_id))throw new Error('PURCHASE_OWNED_BY_OTHER_ACCOUNT');
       if(!subscription.id)throw new Error('ENTITLEMENT_SYNC_PENDING');
       const key=`rc:${subscription.id}`;
-      subscriptions.set(key,{key,storeTransactionId:String(subscription.store_subscription_identifier),originalCustomerId:subscription.original_customer_id});
+      subscriptions.set(key,{key,storeTransactionId:String(subscription.store_subscription_identifier),originalCustomerId:subscription.original_customer_id,customerId:subscription.customer_id});
     }
     if(!data.next_page){if(subscriptions.size!==1)throw new Error('ENTITLEMENT_SYNC_PENDING');return [...subscriptions.values()][0];}
     const next=new URL(data.next_page,'https://api.revenuecat.com');

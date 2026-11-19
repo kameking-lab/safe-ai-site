@@ -20,14 +20,14 @@ function table(name:string){
   };
 }
 const db:any=new Proxy({},{get:(_,key:string)=>key==='$transaction'?async(run:(tx:unknown)=>Promise<unknown>)=>run(db):table(key)});
-vi.mock('./billing-service',()=>({billingDb:()=>db,lockMember:async()=>{}}));
+vi.mock('./billing-service',()=>({billingDb:()=>db,lockMember:async()=>{},lockAppleReconciliation:async()=>{}}));
 import { createGuestSession,digest,exchangeFlow,isGuestUser,mobileAuthSession } from './session';
 
 const verifier='v'.repeat(43),code='c'.repeat(43),flow='11111111-1111-4111-8111-111111111111';
 function seedFlow(userId='member'){
   state.tables.mobileAuthFlow=[{id:flow,userId,challenge:createHash('sha256').update(verifier).digest('base64url'),codeHash:digest(code),authenticatedAt:new Date(),consumedAt:null,expiresAt:new Date(Date.now()+60000),createdAt:new Date()}];
 }
-async function guest(){const {token}=await createGuestSession();const userId=state.tables.mobileSession.find(s=>s.tokenHash===digest(token)).userId as string;return {token,userId};}
+async function guest(anonymousStoreIdentity=false){const {token}=await createGuestSession(anonymousStoreIdentity);const userId=state.tables.mobileSession.find(s=>s.tokenHash===digest(token)).userId as string;return {token,userId};}
 const future=()=>new Date(Date.now()+86400000);
 beforeEach(()=>{
   state.tables={user:[{id:'member',email:'member@example.test',name:'Member'}],account:[{userId:'member',provider:'apple'}]};
@@ -47,6 +47,22 @@ describe('guest members',()=>{
 });
 
 describe('signing in after buying as a guest',()=>{
+  it('moves the stable guest grant and usage while keeping the existing member store ID and Web grant',async()=>{
+    const {token,userId}=await guest(true);
+    const alias=state.tables.mobileIdentity[0].appleGuestAppUserId;
+    state.tables.mobileIdentity.push({userId:'member',appUserId:'member-store-id'});
+    const apple={id:'apple',originalTransactionId:'rc:stable',userId,provider:'app_store',revoked:false,expiresAt:future()};
+    const stripe={id:'stripe',userId:'member',provider:'stripe',revoked:false,expiresAt:future()};
+    state.tables.mobileGrant=[apple,stripe];
+    state.tables.mobileUsageOperation=[{id:'chat',userId}];
+
+    await expect(exchangeFlow(flow,code,verifier,token)).resolves.not.toHaveProperty('restoreRecommended');
+    expect(state.tables.mobileIdentity).toEqual([{userId:'member',appUserId:'member-store-id',appleGuestAppUserId:alias}]);
+    expect(state.tables.mobileGrant).toEqual([{...apple,userId:'member'},stripe]);
+    expect(state.tables.mobileUsageOperation).toEqual([{id:'chat',userId:'member'}]);
+    state.headers=new Headers({authorization:`Bearer ${token}`});
+    await expect(mobileAuthSession()).resolves.toBeNull();
+  });
   it('moves the store identity, grant, intent and app data to a member without a store identity',async()=>{
     const {token,userId}=await guest();
     state.tables.mobileIdentity=[{userId,appUserId:'guest-app-user'}];

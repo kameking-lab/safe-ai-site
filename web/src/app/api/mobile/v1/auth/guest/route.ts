@@ -10,5 +10,6 @@ export const runtime='nodejs';
 export async function POST(request:Request){try{
   const hourly=await sharedRateLimitGuard(request,{routeKey:'mobile-auth-guest',limit:10,windowMs:3600000});if(hourly)return hourly;
   const daily=await sharedRateLimitGuard(request,{routeKey:'mobile-auth-guest-day',limit:30,windowMs:86400000});if(daily)return daily;
-  return json(await createGuestSession());
+  const body=await request.json().catch(()=>null);
+  return json(await createGuestSession(body?.anonymousStoreIdentity===true));
 }catch(e){return failure(e);}}
