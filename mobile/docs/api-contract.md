@@ -6,8 +6,8 @@ M3で未実装だったAPIをサイトのRoute Handlerとして実装。認証�
 
 - `POST /api/mobile/v1/auth/start`：S256 PKCE。10分有効の認可フローを作成。
 - `GET /api/mobile/v1/auth/authorize`：AppleまたはGoogleのサイト認証。Googleを有効にする場合はAppleも必須。認可codeだけを `anzenai://auth/callback` へ返す。
-- `POST /api/mobile/v1/auth/guest`：購入・復元の前に登録を求めない（App Store 5.1.1(v)）。名前・メール・連携ログインのない会員と365日のセッションを作る。IPごとに1時間10件・1日30件まで。端末は非秘密のフラグ `anzen.session-guest` でログイン案内を出し続ける。
-- `POST /api/mobile/v1/auth/exchange`：code・verifierを照合して一度だけセッションを発行。保存はハッシュのみ。端末はKeychainを使用。任意の `guestToken`（ゲストのセッション）を受け取ると、ゲストの購入記録・利用回数・地点などをログインした会員へ移す。会員にすでにストアIDがあり、ゲストに有効な購入がある場合は移さず `restoreRecommended: true` を返し、アプリは「購入を復元」を自動で行う。
+- `POST /api/mobile/v1/auth/guest` は購入・復元の操作時に、名前やメールのない会員と365日のセッションを作る。IPごとに1時間10件・1日30件まで。`anonymousStoreIdentity: true` を送るアプリにはサーバーが匿名のRevenueCat IDを割り当てる。
+- `POST /api/mobile/v1/auth/exchange` はcode・verifierを照合して一度だけセッションを発行する。保存はハッシュのみ。端末はKeychainを使用する。有効な `guestToken` を受け取ると、ゲストの購入権利・利用回数・地点などをログイン先へ引き継ぐ。アプリはRevenueCatの `logIn` を呼び、Webと同じ会員の台帳を使う。従来の購入IDや登録済みの匿名IDが競合した場合は `restoreRecommended` を返す。
 - ゲスト判定（メールなし・連携ログインなし）は `/api/mobile/v1/account` と `/api/me/profile` の `guest`。ゲストは削除時の5分以内の本人確認を端末の認証情報で代える。無料のゲストは匿名の無料枠（IP単位）も使う。
 - `POST /api/mobile/v1/auth/logout`：本人のセッションを失効し、関連する通知登録を停止。
 - `GET /api/me/entitlements`：DBのStripe状態・検証済みApple権利を投影する。古いJWTのplanやクライアントのPro申告を正本にしない。
@@ -17,11 +17,12 @@ M3で未実装だったAPIをサイトのRoute Handlerとして実装。認証�
 
 ## 購入・照合
 
-- `GET /api/mobile/v1/billing/config`：公開SDKキー・商品・Offering・価格ポリシー・認証の準備状態。秘密APIキーは返さない。
+- `GET /api/mobile/v1/billing/config` は公開SDKキー・商品・Offering・価格ポリシー・認証の準備状態を返す。購入の準備状態はログイン設定から独立する。秘密APIキーは返さない。
 - `POST /api/billing/purchase-intents`：Apple/Stripeを再確認し、会員ごとの排他ロックで購入予約。時間経過だけで保留を解放しない。
 - `POST /api/billing/reconcile`：RevenueCatの最新subscriberを確認し、商品・store・環境・有効期限・`anzen_pro`を照合する。
 
-  有効なApple権利はRevenueCat v2のcustomer subscriptionsとも照合。設定されたproduct resource ID・store・環境・元会員・安定した`store_subscription_identifier`を確認し、別会員への自動移管を拒否。v1の更新取引IDや購入日時は所有者キーに使わない。v2不明・ページング不正・所有者不明では新規付与しない。
+  有効なApple権利はRevenueCat v2のcustomer subscriptionsとも照合する。設定された商品・環境、台帳の会員IDまたはその会員に結び付いた匿名IDと照合する。
+- `POST /api/mobile/v1/billing/restore-guest` は、再インストールなどで匿名IDが変わった場合に使う。Apple署名付き取引とRevenueCatで照合し、元の購入がゲストのものなら権利を1件だけ移す。利用履歴やセッションは移さない。
 - `POST /api/billing/cancel-intent`：StoreKitの明示的キャンセル後に再照合して解放。保留購入は解放しない。
 - `POST /api/webhooks/revenuecat`：Authorizationを必須とし、任意でraw body HMACと5分の時刻検査。永続inboxで重複を除去し、順序を信用せず最新状態を再照合する。
 - `POST /api/mobile/v1/maintenance`：専用認証でinbox再試行・警報outbox・期限切れ短期情報を処理。cron設定は変更していない。

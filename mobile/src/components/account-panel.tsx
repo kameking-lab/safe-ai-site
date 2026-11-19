@@ -95,9 +95,9 @@ export function AccountPanel(){
   async function login(){if(!begin('login'))return;setMessage('ログインを待っています…');try{await startLogin();}catch{setLoginPending(false);setMemberState('unavailable');setMessage('ログインを開始できませんでした。もう一度お試しください。');}finally{end('login');}}
   const stageMessage=member?.purchasePending?(member.purchaseSource==='app_store'?(stageMessages[member.purchaseStage??'']??purchaseMessages.PURCHASE_REVIEW_REQUIRED):'別の購入元で手続き中です。購入元の状態を確認してください。'):null;
   const pro=isVerifiedPro(member);const pending=memberState!=='verified' || member?.syncState!=='verified' || (!!member&&!canResumeApplePurchase(member));
-  // No session yet: the purchase starts as a guest, so it does not wait for a member (the price is read anonymously).
-  const noSession=!member&&memberState==='unauthenticated';const signedOut=noSession||guest;
-  useEffect(()=>{billingDiagnostic({operation:'buttons',result:'state',reason:loginPending||operations.login?'login':operations.purchase?'purchase':operations.restore?'restore':!member&&!noSession?'member_required':!noSession&&pending?'server_pending':!price?'price_required':'enabled'});},[loginPending,operations,member,pending,price,noSession]);
+  // The first tap starts the guest flow even if the price or membership lookup has not finished.
+  const purchaseDisabled=busy || !!operations.restore || loginPending || !!config?.salesPaused || (!!member && pending);
+  useEffect(()=>{billingDiagnostic({operation:'buttons',result:'state',reason:loginPending||operations.login?'login':operations.purchase?'purchase':operations.restore?'restore':config?.salesPaused?'store_unavailable':purchaseDisabled?'server_pending':'enabled'});},[loginPending,operations,config?.salesPaused,purchaseDisabled]);
   // Sign-in first, Pro next, deletion last (collapsed but always present).
   // The member block keeps one fixed shape in every state, so the membership
   // response never moves the buttons below it under a finger.
@@ -105,8 +105,8 @@ export function AccountPanel(){
   return <section className="native-panel mx-auto max-w-2xl space-y-5 p-5 text-slate-900 dark:text-slate-100"><h1 className="text-2xl font-bold">会員・安全AI Pro</h1>
     <div className="space-y-2">
       <p className="text-lg font-bold">{statusLine}</p>
-      <p className="min-h-[1.75em] text-sm">{member?.expiresAt?`更新・有効期限：${new Date(member.expiresAt).toLocaleString('ja-JP')}`:'ウェブの購入も同じアカウントで使えます。'}</p>
-      {!member||guest?<button disabled={loginPending || operations.login} onClick={()=>void login()}>Apple / Googleでログイン</button>:<button disabled={operations.logout} onClick={()=>void signOutAccount()}>ログアウト</button>}
+      <p className="min-h-[1.75em] text-sm">{member?.expiresAt?`更新・有効期限：${new Date(member.expiresAt).toLocaleString('ja-JP')}`:member&&!guest?'ウェブの購入も同じアカウントで使えます。':''}</p>
+      {!member||guest?<button disabled={loginPending || operations.login || busy || operations.restore} onClick={()=>void login()}>Apple / Googleでログイン</button>:<button disabled={operations.logout} onClick={()=>void signOutAccount()}>ログアウト</button>}
       <p role="status" className="min-h-[1.75em] text-sm">{message.includes('確認中')&&!slow?'':message}</p>
     </div>
     {/* RA generation is paused, so the plans list only what Pro actually adds today. */}
@@ -114,10 +114,10 @@ export function AccountPanel(){
     <p className="text-xs">全体の月間AI原価上限に達すると、個人の残数があってもAI生成を停止します。</p>
     <p className="text-xs">Pro {price?`${price}`:'価格はApp Storeで確認'}/月（税込）。1か月ごとの自動更新でApple Accountに請求されます。更新の24時間前までにApp Storeで解約できます。</p>
     {config?.salesPaused&&!pro?<p role="status">{config.salesMessage??purchaseMessages.PRO_SALES_PAUSED}</p>:null}
-    <div className="flex flex-wrap gap-3">{!pro?<button disabled={busy || loginPending || !config?.ready || config.salesPaused || !price || (!noSession && (!member || pending))} onClick={()=>config && void withSession('purchase',()=>billing.purchase(config))}>{`Proにする（月額${price}）`}</button>:null}
-    <button disabled={operations.restore || loginPending} onClick={()=>void withSession('restore',()=>restoreProPurchases())}>購入を復元</button>
+    <div className="flex flex-wrap gap-3">{!pro?<button disabled={purchaseDisabled} onClick={()=>void withSession('purchase',async()=>billing.purchase(await billing.config(),setPrice))}>{`Proにする（月額${price}）`}</button>:null}
+    <button disabled={busy || operations.restore || loginPending} onClick={()=>void withSession('restore',restoreProPurchases)}>購入を復元</button>
     </div>
-    {signedOut?<p className="muted">ログインすると、ほかの端末やウェブでも使えます。</p>:member&&!pro?<p className="muted">購入済みの方は、購入したときと同じ方法（Google / Apple）でログインしてください。</p>:null}
+    {guest&&pro?<p className="muted">ログインすると、ほかの端末やWebでも使えます。</p>:member&&!guest&&!pro?<p className="muted">購入済みの方は、購入したときと同じ方法（Google / Apple）でログインしてください。</p>:null}
     {slow&&!pro&&!message?<p role="status" className="text-xs">{stageMessage??'購入状況を確認中です。'}</p>:null}
     <a href="https://apps.apple.com/account/subscriptions" onClick={event=>{event.preventDefault();void openSource('https://apps.apple.com/account/subscriptions');}}>App Storeで購読を管理・解約</a>
     {member?.source==='stripe'||member?.canManageStripe?<><p>ウェブ契約の管理・解約は購入元で行います。</p><button disabled={operations.portal} onClick={()=>void action('portal',async()=>{const result=await siteApi('/api/stripe/portal',{}) as {url:string};const url=new URL(result.url);if(url.origin!=='https://billing.stripe.com'||url.username||url.password)throw new Error('INVALID_ENDPOINT');await openSource(url.href);})}>ウェブ購読の管理・解約</button></>:null}

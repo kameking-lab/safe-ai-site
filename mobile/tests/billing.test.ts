@@ -39,6 +39,88 @@ function setup(options:{atomic?:boolean;paid?:boolean;syncPending?:boolean;cance
   return {send,sdk,controller:new BillingController(send,sdk,()=>true)};
 }
 
+it('purchases and restores under the bound anonymous ID, then logs in once and keeps verified Pro', async () => {
+  const s = setup({ atomic: true });
+  const alias = '$RCAnonymousID:' + 'a'.repeat(32);
+  const guest = vi.spyOn(session, 'isGuestSession').mockResolvedValue(true);
+  const original = s.send.getMockImplementation()!;
+  let purchased = false;
+  s.send.mockImplementation(async (path, body) => {
+    if (path.endsWith('/billing/config')) return config;
+    if (path === '/api/billing/reconcile') purchased = true;
+    if (path === '/api/me/entitlements' || path === '/api/billing/reconcile') {
+      return { ...(purchased ? { ...pro(), source: 'app_store' } : free()), appleGuestAppUserId: alias };
+    }
+    return original(path, body);
+  });
+  try {
+    await s.controller.anonymousOffering(config);
+    expect((await s.controller.purchase(config)).limits.law_chat).toBe(product.limits.pro.law_chat);
+    expect(s.sdk.configure).toHaveBeenLastCalledWith({ apiKey: config.publicKey, appUserID: alias });
+    expect(s.sdk.logIn).not.toHaveBeenCalled();
+    expect((await s.controller.restore(config)).plan).toBe('pro');
+    expect(s.sdk.restorePurchases).toHaveBeenCalledOnce();
+    guest.mockResolvedValue(false);
+    expect((await s.controller.recoverSession()).plan).toBe('pro');
+    expect(s.sdk.logIn).toHaveBeenCalledExactlyOnceWith({ appUserID: appUserId });
+    expect(s.sdk.restorePurchases).toHaveBeenCalledOnce();
+  } finally {
+    guest.mockRestore();
+  }
+});
+
+it.each(['conflict', 'free'])('sends signed StoreKit evidence and publishes the grant when a fresh guest restore first reports %s', async (result) => {
+  const { send, sdk } = setup();
+  const alias = '$RCAnonymousID:' + 'a'.repeat(32);
+  const restoredAlias = '$RCAnonymousID:' + 'b'.repeat(32);
+  const signedTransaction = 'signed-storekit-transaction';
+  const receipt = { currentPurchase: vi.fn(async () => ({ signedTransaction })) };
+  const controller = new BillingController(send, sdk, () => true, receipt);
+  const guest = vi.spyOn(session, 'isGuestSession').mockResolvedValue(true);
+  try {
+    send.mockImplementation(async path => {
+      if (path === '/api/me/entitlements') return { ...free(), appleGuestAppUserId: alias };
+      if (path === '/api/billing/reconcile') {
+        if (result === 'conflict') throw new Error('PURCHASE_OWNED_BY_OTHER_ACCOUNT');
+        return { ...free(), appleGuestAppUserId: alias };
+      }
+      if (path === '/api/mobile/v1/billing/restore-guest') {
+        return { ...pro(), source: 'app_store', appleGuestAppUserId: restoredAlias };
+      }
+      throw new Error(`Unexpected request: ${path}`);
+    });
+    const restored = await controller.restore(config);
+    expect(sdk.restorePurchases).toHaveBeenCalledOnce();
+    expect(receipt.currentPurchase).toHaveBeenCalledExactlyOnceWith({ productId: config.productId });
+    expect(send).toHaveBeenLastCalledWith('/api/mobile/v1/billing/restore-guest', { appUserId, signedTransaction });
+    expect(restored).toMatchObject({ plan: 'pro', source: 'app_store', appleGuestAppUserId: restoredAlias });
+  } finally {
+    guest.mockRestore();
+  }
+});
+
+it('does not alias a late guest SDK configuration to an unrelated member', async () => {
+  const s = setup();
+  const guest = vi.spyOn(session, 'isGuestSession').mockResolvedValue(true);
+  try {
+    const member = await s.controller.entitlement();
+    let finish!: () => void;
+    s.sdk.configure.mockImplementationOnce(() => new Promise<void>(resolve => { finish = resolve; }));
+    const work = s.controller.identify(config, { ...member, appleGuestAppUserId: '$RCAnonymousID:' + 'a'.repeat(32) });
+    const rejected = expect(work).rejects.toBeInstanceOf(StaleMemberResponseError);
+    await vi.waitFor(() => expect(finish).toBeTypeOf('function'));
+    invalidateMemberReads();
+    finish();
+    await rejected;
+    guest.mockResolvedValue(false);
+    await s.controller.identify(config, member);
+    expect(s.sdk.configure).toHaveBeenLastCalledWith({ apiKey: config.publicKey, appUserID: member.appUserId });
+    expect(s.sdk.logIn).not.toHaveBeenCalled();
+  } finally {
+    guest.mockRestore();
+  }
+});
+
 describe('membership response ordering',()=>{
   it('retries a failed read and pending rights silently before allowing one purchase',async()=>{
     vi.useFakeTimers();
@@ -397,15 +479,19 @@ describe('price before any session (App Store 3.1.2)',()=>{
     // An anonymous SDK user has nothing to log out.
     await s.controller.forget();expect(s.sdk.logOut).not.toHaveBeenCalled();
   });
-  it('logs in to the guest app user before buying after the anonymous price lookup',async()=>{
+  it('switches directly to an unlinked member after the anonymous price lookup',async()=>{
     const s=setup({atomic:true});
     await s.controller.anonymousOffering(config);
-    await s.controller.purchase(config);
-    expect(s.sdk.configure).toHaveBeenCalledTimes(1);
-    expect(s.sdk.logIn).toHaveBeenCalledWith({appUserID:appUserId});
+    const showPrice=vi.fn();
+    await s.controller.purchase(config,showPrice);
+    expect(s.sdk.configure).toHaveBeenCalledTimes(2);
+    expect(s.sdk.configure).toHaveBeenLastCalledWith({apiKey:config.publicKey,appUserID:appUserId});
+    expect(s.sdk.logIn).not.toHaveBeenCalled();
     expect(s.sdk.purchasePackage).toHaveBeenCalledTimes(1);
-    expect(s.sdk.logIn.mock.invocationCallOrder[0]).toBeLessThan(s.sdk.purchasePackage.mock.invocationCallOrder[0]);
-    // After logging in, logout releases the identified member again.
+    expect(showPrice).toHaveBeenCalledExactlyOnceWith('¥980');
+    expect(showPrice.mock.invocationCallOrder[0]).toBeLessThan(s.sdk.purchasePackage.mock.invocationCallOrder[0]);
+    expect(s.sdk.configure.mock.invocationCallOrder[1]).toBeLessThan(s.sdk.purchasePackage.mock.invocationCallOrder[0]);
+    // Logout releases the identified member again.
     await s.controller.forget();expect(s.sdk.logOut).toHaveBeenCalledTimes(1);
   });
 });

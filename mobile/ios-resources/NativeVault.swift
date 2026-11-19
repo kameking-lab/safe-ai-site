@@ -4,6 +4,7 @@ import Security
 import WebKit
 import Speech
 import AVFoundation
+import StoreKit
 
 // Session credentials never enter Preferences, localStorage, logs, or cloud backup.
 @objc(NativeVaultPlugin)
@@ -57,11 +58,38 @@ public class NativeVaultPlugin: CAPPlugin, CAPBridgedPlugin {
     }
 }
 
+@objc(NativeStoreReceiptPlugin)
+public class NativeStoreReceiptPlugin: CAPPlugin, CAPBridgedPlugin {
+    public let identifier = "NativeStoreReceiptPlugin"
+    public let jsName = "NativeStoreReceipt"
+    public let pluginMethods: [CAPPluginMethod] = [
+        CAPPluginMethod(name: "currentPurchase", returnType: CAPPluginReturnPromise)
+    ]
+
+    // Used only for explicit recovery of an anonymous App Store purchase.
+    @objc func currentPurchase(_ call: CAPPluginCall) {
+        guard let productId = call.getString("productId") else {
+            call.reject("Missing product identifier"); return
+        }
+        Task {
+            for await result in StoreKit.Transaction.currentEntitlements {
+                if case .verified(let transaction) = result, transaction.productID == productId,
+                   transaction.revocationDate == nil {
+                    call.resolve(["signedTransaction": result.jwsRepresentation])
+                    return
+                }
+            }
+            call.resolve()
+        }
+    }
+}
+
 @objc(AnzenBridgeViewController)
 public class AnzenBridgeViewController: CAPBridgeViewController {
     public override func router() -> Router { AnzenStaticRouter() }
     public override func capacitorDidLoad() {
         bridge?.registerPluginInstance(NativeVaultPlugin())
+        bridge?.registerPluginInstance(NativeStoreReceiptPlugin())
         bridge?.registerPluginInstance(NativeDocumentsPlugin())
         bridge?.registerPluginInstance(NativeSpeechPlugin())
         bridge?.registerPluginInstance(NativeChatStreamPlugin())

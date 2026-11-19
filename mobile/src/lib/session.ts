@@ -101,7 +101,7 @@ export async function isGuestSession(){return !!await sessionToken() && await gu
 export function ensureSession():Promise<string>{
   return guestStart??=(async()=>{
     const existing=await sessionToken();if(existing)return existing;
-    const result=await siteApi('/api/mobile/v1/auth/guest',{}) as {token?:unknown;guest?:unknown};
+    const result=await siteApi('/api/mobile/v1/auth/guest',{anonymousStoreIdentity:true}) as {token?:unknown;guest?:unknown};
     if(typeof result.token!=='string'||!/^[A-Za-z0-9_-]{43}$/.test(result.token)||result.guest!==true)throw new SiteApiError('UNEXPECTED_RESPONSE',200);
     // A sign-in that completed meanwhile wins over the new guest.
     const signedIn=await sessionToken();if(signedIn)return signedIn;
@@ -177,7 +177,7 @@ export async function completeLogin(value:string) {
     if(!/^[A-Za-z0-9_-]{43}$/.test(verifier) || !Number.isFinite(age) || age<0 || age>=600000){await writeLogin(null);throw new Error('AUTH_FLOW_EXPIRED');}
     loginDismissed=false;window.dispatchEvent(new Event('anzen-login-exchanging'));
     // Signing in after buying as a guest hands the guest's purchase over to the member.
-    const guestToken=await guestFlag().then(guest=>guest?sessionToken():null).catch(()=>null);
+    const guestToken=await guestFlag().then(guest=>guest?sessionToken():null);
     const result=await bounded('exchange',()=>siteApi('/api/mobile/v1/auth/exchange',{flow,code,verifier,...(guestToken?{guestToken}:{})})) as {token:string;restoreRecommended?:boolean};
     if(!/^[A-Za-z0-9_-]{43}$/.test(result.token))throw new Error('AUTH_FLOW_EXPIRED');
     await setSessionToken(result.token);await writeLogin(null);void bounded('login',()=>Browser.close()).catch(()=>{});

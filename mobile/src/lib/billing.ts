@@ -1,8 +1,8 @@
 import { Purchases, type PurchasesPackage } from '@revenuecat/purchases-capacitor';
-import { Capacitor } from '@capacitor/core';
+import { Capacitor, registerPlugin } from '@capacitor/core';
 import { z } from 'zod';
 import product from '@/lib/mobile/product-policy.json';
-import { siteApi, sessionBinding, SiteApiError } from './session';
+import { isGuestSession, siteApi, sessionBinding, SiteApiError } from './session';
 import { StoreError } from './store-errors';
 import { boundedPreferences as Preferences } from './bounded-storage';
 import { assertCurrentMember, currentMemberResponse, invalidateMemberReads, memberGeneration, StaleMemberResponseError } from './member-generation';
@@ -15,7 +15,9 @@ async function clearReportedOutcome(appUserId:string,report:StoreOutcome){
   // An older refresh may finish after a newer attempt has queued its result.
   if(value===JSON.stringify(report))await Preferences.remove({key});
 }
-const snapshotSchema=z.object({plan:z.enum(['free','pro']),source:z.enum(['stripe','app_store']).nullable(),syncState:z.enum(['verified','pending','unavailable']),expiresAt:z.string().nullable(),appUserId:z.string().min(16),verifiedAt:z.string().datetime(),canManageStripe:z.boolean().default(false),purchasePending:z.boolean().default(false),purchaseIntentId:z.string().nullable().default(null),purchaseSource:z.string().nullable().default(null),purchaseStage:z.string().nullable().default(null),limits:z.object({law_chat:z.number(),chemical_ra:z.number(),weatherLocations:z.number(),notifications:z.boolean()})})
+const anonymousId=z.string().regex(/^\$RCAnonymousID:[a-f0-9]{32}$/);
+const storeReceipt=registerPlugin<{currentPurchase(options:{productId:string}):Promise<{signedTransaction?:string}>}>('NativeStoreReceipt');
+const snapshotSchema=z.object({plan:z.enum(['free','pro']),source:z.enum(['stripe','app_store']).nullable(),syncState:z.enum(['verified','pending','unavailable']),expiresAt:z.string().nullable(),appUserId:z.string().min(16),appleGuestAppUserId:anonymousId.optional(),verifiedAt:z.string().datetime(),canManageStripe:z.boolean().default(false),purchasePending:z.boolean().default(false),purchaseIntentId:z.string().nullable().default(null),purchaseSource:z.string().nullable().default(null),purchaseStage:z.string().nullable().default(null),limits:z.object({law_chat:z.number(),chemical_ra:z.number(),weatherLocations:z.number(),notifications:z.boolean()})})
   .refine(s=>JSON.stringify(s.limits)===JSON.stringify(product.limits[s.plan]))
   .refine(s=>s.plan!=='pro' || (!!s.expiresAt && Number.isFinite(Date.parse(s.expiresAt))));
 export type MemberEntitlement=z.infer<typeof snapshotSchema>;
@@ -28,7 +30,6 @@ type Sdk=Pick<typeof Purchases,'configure'|'logIn'|'logOut'|'getOfferings'|'purc
 export class BillingController {
   private identified:string|null=null;
   private configured=false;
-  // Configured without an app user ID only to read the price before any session exists.
   private anonymous=false;
   private busy=false;
   private purchaseUser:string|null=null;
@@ -40,7 +41,7 @@ export class BillingController {
   private outcomeReports=new Map<string,Promise<MemberEntitlement>>();
   private recovery=new Map<string,Promise<MemberEntitlement>>();
   private send:typeof siteApi;
-  constructor(send=siteApi,private sdk:Sdk=Purchases,private native=()=>Capacitor.getPlatform()==='ios'){
+  constructor(send=siteApi,private sdk:Sdk=Purchases,private native=()=>Capacitor.getPlatform()==='ios',private receipt=storeReceipt){
     this.send=(...args)=>bounded(args[0].endsWith('/billing/config')?'config':args[0].startsWith('/api/me/entitlements')?'entitlement':args[0]==='/api/billing/reconcile'?'reconcile':'store_request',()=>send(...args));
   }
   async config(){return billingConfigSchema.parse(await this.send('/api/mobile/v1/billing/config'));}
@@ -73,7 +74,7 @@ export class BillingController {
             await this.identifySerial(config,member);assertCurrentMember(ticket);
             // Silent StoreKit receipt sync is required after changing the app
             // account. getCustomerInfo alone only reads the new account cache.
-            if(this.sdk.syncPurchases)await this.mutateIdentity('getCustomerInfo',()=>{assertCurrentMember(ticket);return this.sdk.syncPurchases!();});assertCurrentMember(ticket);
+            if(this.sdk.syncPurchases&&!member.appleGuestAppUserId)await this.mutateIdentity('getCustomerInfo',()=>{assertCurrentMember(ticket);return this.sdk.syncPurchases!();});assertCurrentMember(ticket);
             await bounded('invalidateCustomerInfoCache',()=>this.sdk.invalidateCustomerInfoCache());assertCurrentMember(ticket);
             await bounded('getCustomerInfo',()=>this.sdk.getCustomerInfo());assertCurrentMember(ticket);
           });
@@ -186,25 +187,43 @@ export class BillingController {
   private async identifySerial(config:BillingConfig,member:MemberEntitlement){
     if(!this.native() || !config.publicKey || !config.ready)throw new StoreError('BILLING_NOT_CONFIGURED');
     const ticket=memberGeneration();
-    if(!this.configured){
-      await this.mutateIdentity('configure',()=>{assertCurrentMember(ticket);return this.sdk.configure({apiKey:config.publicKey!,appUserID:member.appUserId}).then(()=>{this.configured=true;});});
-      assertCurrentMember(ticket);this.identified=member.appUserId;
+    const alias=member.appleGuestAppUserId;
+    const guestId=alias && await isGuestSession()?alias:null;
+    const storeId=guestId??member.appUserId;
+    assertCurrentMember(ticket);
+    if(this.identified===storeId)return;
+    // An anonymous-to-member login may alias their purchases. Start it only from
+    // the guest identity that the server attached to this session.
+    if(!this.configured || guestId || (alias && this.identified!==alias) || (this.anonymous && !alias)){
+      const initialId=alias??storeId;
+      this.identified=null;
+      await this.mutateIdentity('configure',()=>{
+        assertCurrentMember(ticket);
+        return this.sdk.configure({apiKey:config.publicKey!,appUserID:initialId}).then(()=>{
+          // Retain the actual SDK state even if the session changes before this call completes.
+          this.configured=true;
+          this.anonymous=!!alias;
+        });
+      });
+      assertCurrentMember(ticket);
+      this.identified=initialId;
     }
-    // A late configure leaves identified unset; the next attempt must log in.
-    if(this.identified!==member.appUserId){
+    // A late native identity change leaves identified unset until it completes.
+    if(this.identified!==storeId){
       // logIn can complete natively after its caller times out. The previous
       // identity is no longer safe to reuse, including when returning to it.
       this.identified=null;
-      await this.mutateIdentity('logIn',()=>{assertCurrentMember(ticket);return this.sdk.logIn({appUserID:member.appUserId});});
-      this.anonymous=false;
+      await this.mutateIdentity('logIn',()=>{
+        assertCurrentMember(ticket);
+        return this.sdk.logIn({appUserID:storeId}).then(()=>{this.anonymous=false;});
+      });
     }
     assertCurrentMember(ticket);
-    this.identified=member.appUserId;
+    this.identified=storeId;
   }
   /**
    * Price before any session (App Store 3.1.2): configure the SDK anonymously, without creating a
-   * guest, and read the offering only. A later purchase/restore still logs in to the server's
-   * app user ID first (identifySerial sees identified=null and calls logIn).
+   * guest, and read the offering only. Purchase and restore use an identity bound to the session.
    */
   async anonymousOffering(config:BillingConfig):Promise<PurchasesPackage>{
     const next=this.identityWork.then(async()=>{
@@ -240,7 +259,7 @@ export class BillingController {
       throw new StoreError('PRODUCT_MISMATCH',candidates.map(p=>`${p.product.identifier} ${p.packageType} ${p.product.subscriptionPeriod??'-'} ${p.product.currencyCode} ${p.product.price}`).join(' / '));
     return match[0];
   }
-  async purchase(config:BillingConfig){
+  async purchase(config:BillingConfig,onPrice?:(price:string)=>void){
     if(this.busy)throw new Error('PURCHASE_PENDING');this.busy=true;
     const ticket=invalidateMemberReads();
     const started=performance.now();
@@ -255,6 +274,7 @@ export class BillingController {
       if(member.syncState!=='verified')throw new Error('ENTITLEMENT_SYNC_PENDING');
       const p=await this.offering(config,member);
       assertCurrentMember(ticket);
+      onPrice?.(p.product.priceString);
       const attemptId=crypto.randomUUID();
       if(await sessionBinding()!==binding)throw new Error('UNAUTHORIZED');
       // If preparation commits but its response is lost, the next refresh can
@@ -305,15 +325,47 @@ export class BillingController {
   async restore(config:BillingConfig){
     if(this.busy)throw new Error('PURCHASE_PENDING');this.busy=true;
     const ticket=invalidateMemberReads();
-    try{const member=await this.readEntitlement(ticket);await this.identify(config,member);assertCurrentMember(ticket);await this.mutateIdentity('restorePurchases',()=>{assertCurrentMember(ticket);return this.sdk.restorePurchases();});return await this.reconcile(ticket,member.appUserId);}finally{this.busy=false;}
+    try{
+      const member=await this.readEntitlement(ticket);
+      this.purchaseUser=member.appUserId;
+      await this.identify(config,member);
+      assertCurrentMember(ticket);
+      await this.mutateIdentity('restorePurchases',()=>{assertCurrentMember(ticket);return this.sdk.restorePurchases();});
+      const reconciliation=await this.reconcile(ticket,member.appUserId).then(
+        member=>({member,error:null}),
+        (error:unknown)=>{
+          if(!(error instanceof Error)||error.message!=='PURCHASE_OWNED_BY_OTHER_ACCOUNT')throw error;
+          return {member:null,error};
+        },
+      );
+      if(reconciliation.member?.plan==='pro')return reconciliation.member;
+      // Another installation may still be RevenueCat's canonical customer after
+      // restore. Send StoreKit evidence only for an anonymous session.
+      const restoreTicket=memberGeneration();
+      if(member.appleGuestAppUserId&&config.productId&&await isGuestSession()){
+        assertCurrentMember(restoreTicket);
+        const {signedTransaction}=await bounded('restorePurchases',()=>this.receipt.currentPurchase({productId:config.productId!}));
+        assertCurrentMember(restoreTicket);
+        if(signedTransaction){
+          const response=await currentMemberResponse(restoreTicket,this.send('/api/mobile/v1/billing/restore-guest',{appUserId:member.appUserId,signedTransaction}));
+          const restored=snapshotSchema.parse(response);
+          if(restored.appUserId!==member.appUserId)throw new StaleMemberResponseError();
+          invalidateMemberReads();this.publish(restored);
+          return restored;
+        }
+      }
+      assertCurrentMember(restoreTicket);
+      if(!reconciliation.member)throw reconciliation.error;
+      return reconciliation.member;
+    }finally{this.purchaseUser=null;this.busy=false;}
   }
   async forget(){
     invalidateMemberReads();
     this.packages.clear();
     // A new login can start while logout runs in the background. Queue its SDK
     // identity after this logout so a late completion cannot erase the new owner.
-    this.identified=null;
-    // An anonymous SDK user (price lookup only) has nothing to log out.
+    if(!this.anonymous)this.identified=null;
+    // The SDK does not allow logging out an anonymous store user.
     const next=this.identityWork.then(async()=>{if(this.configured&&!this.anonymous)await this.mutateIdentity('logOut',()=>this.sdk.logOut());});
     this.identityWork=next.catch(()=>{});return bounded('identity_queue',()=>next);
   }
