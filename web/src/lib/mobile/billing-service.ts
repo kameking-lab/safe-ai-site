@@ -7,6 +7,7 @@ import { assertResume,canReleasePrepared,appleOutcomeStage,type ApplePurchaseOut
 import { expireStripeIntent } from './stripe-purchase';
 import { assertProSalesOpen } from './pro-sales-gate';
 import { recordOperationsAlert,resolveOperationsAlert } from './operations-alerts';
+import { assertNoDuplicateSubscription, warnDuplicateSubscriptions } from './billing-identity';
 export function billingDb() { if(!prisma || process.env.MOBILE_LEDGER_ENABLED!=='true') throw new Error('ENTITLEMENT_SYNC_PENDING');return prisma; }
 export async function lockMember(tx:Prisma.TransactionClient,userId:string) { await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`anzen:${userId}`},0))`; }
 export async function lockPushDevice(tx:Prisma.TransactionClient,token:string) { await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`anzen-push:${token}`},0))`; }
@@ -136,6 +137,7 @@ export async function reconcile(userId:string,options:{stripe?:boolean;appUserId
   // Fixed reason/provider codes only, after commit. No user/store identifiers,
   // email addresses, receipts, tokens, or provider error text.
   if(result.transfer)console.warn('[mobile-billing]',JSON.stringify(result.transfer));
+  await warnDuplicateSubscriptions(billingDb(),userId);
   return result.rights;
 }
 export async function reservePurchase(userId:string,source:PurchaseSource='app_store') {
@@ -144,6 +146,7 @@ export async function reservePurchase(userId:string,source:PurchaseSource='app_s
   await assertProSalesOpen();
   return billingDb().$transaction(async tx=>{
     await lockMember(tx,userId);const current=await entitlementInTransaction(tx,userId);assertPurchasable(current);
+    await assertNoDuplicateSubscription(tx,userId);
     return reserveInTransaction(tx,userId,source,current);
   });
 }
@@ -173,6 +176,7 @@ export async function prepareApplePurchase(userId:string,appUserId:string,attemp
     const current=await entitlementInTransaction(tx,userId);
     if(current.appUserId!==appUserId)throw new Error('ENTITLEMENT_SYNC_PENDING');
     assertPurchasable(current);
+    await assertNoDuplicateSubscription(tx,userId);
     const intent=await reserveInTransaction(tx,userId,'app_store',current);
     const previous=intent.providerRequest&&typeof intent.providerRequest==='object'&&!Array.isArray(intent.providerRequest)?intent.providerRequest:{};
     const changed=await tx.mobilePurchaseIntent.updateMany({where:{userId,id:intent.id,source:'app_store',status:'pending',stage:intent.stage},data:{stage:'store_started',providerRequest:{...previous,attemptId}}});
@@ -193,6 +197,7 @@ export async function markStoreStarted(userId:string,id:string,attemptId?:string
   await reconcile(userId);
   await assertProSalesOpen();
   return billingDb().$transaction(async tx=>{await lockMember(tx,userId);const rights=await entitlementInTransaction(tx,userId);assertPurchasable(rights);
+    await assertNoDuplicateSubscription(tx,userId);
     const intent=await tx.mobilePurchaseIntent.findUnique({where:{userId}});
     if(!intent||intent.id!==id)throw new Error('INVALID_REQUEST');
     assertResume(intent,'app_store');
