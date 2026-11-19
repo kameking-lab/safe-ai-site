@@ -81,6 +81,8 @@ Productionの再現性と安全上・法的な検証可能性を保ちつつ、�
 
 法令・化学物質・資格・事故・KYT・source snapshot、使用中public asset、schema/migration、正当なfixtureは用途とownerを明示したallowlistだけで受け入れる。
 
+`web/package.json` と `web/package-lock.json` は、`npm ci` で Web のビルドとランタイム依存を再現するために使う。owner は safe-ai-site の Web 保守担当。完全一致するこの2パスは、現行ツリーと履歴の非ランタイム JSON・画像の集計から除外する。5 MiB の新規・履歴チェック、100 MiB の単一ファイル上限、禁止履歴の検査は引き続き適用する。
+
 ## GitHub / ETL / Vercel
 
 - main rulesetはdeletion・non-fast-forwardを禁止し、strictな `repository-hygiene-target` を必須化する。bypass actorは置かない。
