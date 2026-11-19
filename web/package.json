@@ -82,7 +82,7 @@
     "leaflet": "^1.9.4",
     "leaflet.markercluster": "^1.5.3",
     "lucide-react": "^1.7.0",
-    "next": "16.4.1",
+    "next": "16.4.5",
     "next-auth": "^5.0.0-beta.30",
     "pdfjs-dist": "6.2.108",
     "qrcode": "^1.5.4",
