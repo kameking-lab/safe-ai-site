@@ -16,6 +16,7 @@ import {
 } from "@/lib/accident-news/serious-cases";
 import { FatalAccidentsBrowser } from "./fatal-accidents-browser";
 import { FatalAccidentsResultsFallback } from "./fatal-accidents-results-fallback";
+import { VERIFIED_FATAL_RECORD_YEARS } from "@/lib/seo/fatal-records";
 
 export const metadata: Metadata = {
   title: "死亡事故データベース｜業種・起因物・事故型で検索（無料）",
@@ -72,6 +73,11 @@ export default async function FatalAccidentsPage({
             で確認できます。
           </p>
         </header>
+        <nav aria-label="原典照合済み事例の発生年別一覧" className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm underline">
+          {VERIFIED_FATAL_RECORD_YEARS.map((year) => (
+            <Link key={year} href={`/fatal-accidents/archive/${year}`} prefetch={false}>{year}年の事例</Link>
+          ))}
+        </nav>
         {results}
       </PageContainer>
     </>

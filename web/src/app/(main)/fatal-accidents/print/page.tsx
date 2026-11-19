@@ -108,7 +108,7 @@ export default async function AccidentNewsPrintPage({
         出典: {SERIOUS_CASES_META.sources.map((source) => `${source.label}（${source.url}）`).join("／")}。
         {SERIOUS_CASES_META.coverageNote}
         対象: {SERIOUS_CASES_META.yearRange}。2019〜2023年分の生成日時: {SERIOUS_CASES_META.generatedAt ?? "不明"}。
-        出典はデータセット単位で、ローカルIDから公式Excelの個別行へは逆引きできません。
+        印刷した一覧の出典はデータセット単位です。原典照合済み事例の公式Excelと行番号は、死亡事故データベースの個別ページで確認できます。
         本資料は公表事実の引用であり、会社名・発注者名・被災者氏名は含みません。
         「起因物分類」は直接原因・背景要因・管理要因ではなく、それらを本データから推測していません。
         「対策の考え方」は事故型に対する一般原則の参考であり、個別の対策判断は該当法令・公式情報の確認および労働安全コンサルタント等の専門家へご相談ください。

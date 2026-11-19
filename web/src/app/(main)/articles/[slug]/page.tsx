@@ -15,7 +15,6 @@ import {
 import {
   getPublishedArticleBySlug,
   getPublishedArticleSlugs,
-  isArticleIndexable,
 } from "@/lib/articles";
 import { publicMhlwNotices as mhlwNotices } from "@/data/public-mhlw-notices";
 import { getAccidentCasesDataset } from "@/data/mock/accident-cases";
@@ -43,8 +42,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const article = getPublishedArticleBySlug(slug);
-  if (!article) return {};
-  const indexable = isArticleIndexable(article);
+  if (!article) return { robots: { index: false, follow: true } };
   return {
     title: article.title,
     description: article.description,
@@ -52,7 +50,7 @@ export async function generateMetadata({
       canonical: `/articles/${slug}`,
     },
     keywords: article.keywords,
-    robots: { index: indexable, follow: true },
+    robots: { index: true, follow: true },
     openGraph: {
       title: `${article.title}`,
       description: article.description,

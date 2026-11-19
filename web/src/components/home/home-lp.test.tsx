@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { HomeLP } from "./home-lp";
 import type { HomeLatestAccidentNews } from "@/lib/home/home-accident-server";
@@ -28,6 +28,12 @@ describe("the approved homepage LP", () => {
     expect(container.textContent).toContain("初回30分の相談は無料。業務自動化は税込33,000円から。");
     expect(container.querySelector("[data-ky-scene]")).toBeNull();
     expect(screen.getByRole("link", { name: "KY用紙" }).getAttribute("href")).toBe("/ky/paper");
+    const guides = screen.getByRole("navigation", { name: "現場の安全ガイド" });
+    expect(within(guides).getAllByRole("link").map((link) => link.getAttribute("href"))).toEqual([
+      "/guides/ky-sheet",
+      "/guides/chemical-ra-create-simple",
+      "/guides/safety-signage",
+    ]);
     expect(container.textContent).toContain("帳票は現場ごとに書式や運用が異なります");
     expect(container.querySelector("[data-pet-static]")?.getAttribute("src")).toBe("/mascot/anzen-wanko-v1/static.webp");
     expect(container.querySelector("[data-pet-strip]")).toBeNull();

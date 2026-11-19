@@ -5,12 +5,13 @@
  * 被災者氏名を含まない）。死亡＝重大災害として、業種/事故型/年で類型検索し、同種事故頻度を
  * 添える。会社名・発注者は扱わない（法的リスク回避、docs/accident-news-deep-audit-2026-05-26/04）。
  *
- * 出典は収録データごとに保持する。ただしローカルIDから公式Excelの
- * 行へ逆引きする対応表は未整備であり、追跡性はデータセット単位に限る。
+ * 検索全体の出典はデータセット単位。原典照合済み事例には公式Excelの
+ * 行番号を確認できる個別ページを案内する。
  */
 import deathsCompact from "@/data/deaths-mhlw/compact.json";
 import { withoutEmergencyNumberSentences } from "@/lib/accident-news/public-record-display";
 import { load2024Records } from "@/lib/accidents-analytics/loader";
+import { getVerifiedFatalRecord } from "@/lib/seo/fatal-records";
 
 export type DeathRecord = {
   id: string;
@@ -118,6 +119,7 @@ export function getSeriousCaseFilters(maxEach = 30): SeriousCaseFilters {
 }
 
 export type SeriousCase = DeathRecord & {
+  detailPath?: string;
   /** 同一事故型の収録総数（背景＝同種事故頻度） */
   sameTypeTotal: number;
   /** 同一業種の収録総数 */
@@ -181,6 +183,7 @@ export function getSeriousCaseById(id: string): SeriousCase | null {
   if (!r) return null;
   return {
     ...r,
+    detailPath: getVerifiedFatalRecord(r.id) ? `/fatal-accidents/${r.id}` : undefined,
     sameTypeTotal: r.type ? (TYPE_COUNTS[r.type] ?? 0) : 0,
     sameIndustryTotal: r.industry ? (INDUSTRY_COUNTS[r.industry] ?? 0) : 0,
   };
@@ -214,6 +217,7 @@ export function findSimilarSeriousCases(
   scored.sort((a, b) => b.s - a.s || b.r.year - a.r.year);
   return scored.slice(0, limit).map(({ r }) => ({
     ...r,
+    detailPath: getVerifiedFatalRecord(r.id) ? `/fatal-accidents/${r.id}` : undefined,
     sameTypeTotal: r.type ? (TYPE_COUNTS[r.type] ?? 0) : 0,
     sameIndustryTotal: r.industry ? (INDUSTRY_COUNTS[r.industry] ?? 0) : 0,
   }));
@@ -249,6 +253,7 @@ export function filterSeriousCasesPage(
       .slice(safeOffset, safeOffset + safeLimit)
       .map((r) => ({
         ...r,
+        detailPath: getVerifiedFatalRecord(r.id) ? `/fatal-accidents/${r.id}` : undefined,
         sameTypeTotal: r.type ? (TYPE_COUNTS[r.type] ?? 0) : 0,
         sameIndustryTotal: r.industry
           ? (INDUSTRY_COUNTS[r.industry] ?? 0)

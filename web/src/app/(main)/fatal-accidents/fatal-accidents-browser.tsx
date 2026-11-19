@@ -288,7 +288,13 @@ function FatalAccidentCard({ item }: { item: SeriousCase }) {
         )}
         <span className="text-slate-500">{item.year}年{item.month ? `${item.month}月` : ""}</span>
       </div>
-      <p className="mt-1 text-sm leading-snug text-slate-800">{item.description}</p>
+      <p className="mt-1 text-sm leading-snug text-slate-800">
+        {item.detailPath ? (
+          <Link href={item.detailPath} prefetch={false} className="underline underline-offset-4">
+            {item.description}
+          </Link>
+        ) : item.description}
+      </p>
       <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] text-slate-500">
         {item.cause && <span>起因物分類: {item.cause}</span>}
         {item.workplaceSize && <span>規模: {item.workplaceSize}</span>}
