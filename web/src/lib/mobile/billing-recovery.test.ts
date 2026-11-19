@@ -3,11 +3,17 @@
 import { beforeEach,afterEach,it,expect,vi } from 'vitest';
 vi.mock('./pro-sales-gate',()=>({assertProSalesOpen:vi.fn(async()=>{})}));
 import { assertProSalesOpen } from './pro-sales-gate';
-const state=vi.hoisted(()=>({intent:null as any,tail:Promise.resolve() as Promise<unknown>,created:0,grantAvailable:false,sandboxGrant:false,env:'PRODUCTION' as string,fetchFails:false,fetches:0,stripeFetches:0,stripeFails:false,legacy:null as any,grants:[] as any[]}));
-vi.mock('./revenuecat',()=>({fetchSubscriber:async()=>{state.fetches++;if(state.fetchFails)throw new Error('offline');return {};},verifiedAppleGrant:(_raw:unknown,_p:string,_n:Date,environment='PRODUCTION')=>(environment==='SANDBOX'?state.sandboxGrant:state.grantAvailable)?{productId:'fixture-product',expiresAt:new Date(Date.now()+86400000)}:null,fetchAppleOwnership:async()=>({key:'original-transaction-fixture',storeTransactionId:'original-transaction-fixture',originalCustomerId:'immutable-member-id'}),verifyAppleLegacyPurchase:async()=>false}));
+const state=vi.hoisted(()=>({intent:null as any,tail:Promise.resolve() as Promise<unknown>,created:0,grantAvailable:false,sandboxGrant:false,env:'PRODUCTION' as string,fetchFails:false,fetches:0,stripeFetches:0,stripeFails:false,legacy:null as any,grants:[] as any[],alias:null as string|null}));
+vi.mock('./revenuecat',()=>({
+ fetchSubscriber:async(appUserId:string)=>{state.fetches++;if(state.fetchFails)throw new Error('offline');return appUserId;},
+ verifiedAppleGrant:(appUserId:unknown,_p:string,_n:Date,environment='PRODUCTION')=>(!state.alias||state.alias===appUserId)&&(environment==='SANDBOX'?state.sandboxGrant:state.grantAvailable)?{productId:'fixture-product',expiresAt:new Date(Date.now()+86400000)}:null,
+ fetchAppleOwnership:async(customerId:string)=>({key:'rc:subscription-fixture',storeTransactionId:'latest-transaction-fixture',originalCustomerId:customerId,customerId}),
+ verifyAppleLegacyPurchase:async()=>false,
+}));
 vi.mock('./stripe-reconcile',()=>({reconcileStripe:async()=>{state.stripeFetches++;if(state.stripeFails)throw new Error('stripe offline');if(state.legacy){state.legacy.currentPeriodEnd=new Date(Date.now()+86400000);state.legacy.updatedAt=new Date();state.grants.filter(g=>g.provider==='stripe').forEach(g=>{g.checkedAt=new Date();g.expiresAt=new Date(Date.now()+86400000);});}}}));
 vi.mock('@/lib/prisma',()=>{
- const tx={$executeRaw:async()=>1,mobileIdentity:{upsert:async()=>({appUserId:'immutable-member-id',billingEnvironment:state.env}),update:async({data}:any)=>{state.env=data.billingEnvironment;return {appUserId:'immutable-member-id',billingEnvironment:state.env};},findUnique:async()=>({appUserId:'immutable-member-id',billingEnvironment:'PRODUCTION'})},subscription:{findUnique:async()=>state.legacy},mobileGrant:{findMany:async()=>state.grants,findUnique:async({where}:any)=>state.grants.find(g=>g.environment===where.provider_originalTransactionId_environment.environment)??null,updateMany:async({where,data}:any)=>{const rows=state.grants.filter(g=>g.environment===where.environment);rows.forEach(g=>Object.assign(g,data));return{count:rows.length};},upsert:async({create,update}:any)=>{const row=state.grants.find(g=>g.environment===create.environment);if(row)Object.assign(row,update);else state.grants.push({...create,revoked:false});return row??state.grants.at(-1);}},mobilePurchaseIntent:{
+ const identity=()=>({userId:'member',appUserId:'immutable-member-id',appleGuestAppUserId:state.alias,billingEnvironment:state.env});
+ const tx={$executeRaw:async()=>1,user:{findUnique:async()=>({id:'member',email:null,_count:{accounts:0}})},mobileIdentity:{upsert:async()=>identity(),update:async({data}:any)=>{state.env=data.billingEnvironment;return identity();},findUnique:async()=>identity()},subscription:{findUnique:async()=>state.legacy},mobileGrant:{findMany:async()=>state.grants,findUnique:async({where}:any)=>state.grants.find(g=>g.environment===where.provider_originalTransactionId_environment.environment)??null,updateMany:async({where,data}:any)=>{const rows=state.grants.filter(g=>g.environment===where.environment);rows.forEach(g=>Object.assign(g,data));return{count:rows.length};},upsert:async({create,update}:any)=>{const row=state.grants.find(g=>g.environment===create.environment);if(row)Object.assign(row,update);else state.grants.push({...create,revoked:false});return row??state.grants.at(-1);}},mobilePurchaseIntent:{
   findUnique:async()=>state.intent,
   upsert:async({create,update}:any)=>{state.created++;state.intent=state.intent?{...state.intent,...update}:{id:crypto.randomUUID(),status:'pending',stage:'prepared',providerSessionId:null,createdAt:new Date(),...create};return {...state.intent};},
   updateMany:async({where,data}:any)=>{if(!state.intent)return{count:0};for(const key of ['userId','id','status','source','stage'])if(where[key]!==undefined&&state.intent[key]!==where[key])return{count:0};Object.assign(state.intent,data);return{count:1};}
@@ -17,7 +23,16 @@ vi.mock('@/lib/prisma',()=>{
 import { reservePurchase,prepareApplePurchase,cancelPurchase,markStoreStarted,reportAppleOutcome,reconcile,getEntitlement } from './billing-service';
 import { prisma } from '@/lib/prisma';
 import { releaseReviewedApplePurchase,type AppleReview } from './apple-purchase-review';
-beforeEach(()=>{state.intent=null;state.created=0;state.tail=Promise.resolve();state.grantAvailable=false;state.sandboxGrant=false;state.env='PRODUCTION';state.grants=[];state.fetches=0;state.fetchFails=false;state.stripeFetches=0;state.stripeFails=false;state.legacy=null;vi.stubEnv('MOBILE_LEDGER_ENABLED','true');vi.stubEnv('REVENUECAT_IOS_PRODUCT_ID','fixture-product');});afterEach(()=>vi.unstubAllEnvs());
+beforeEach(()=>{state.intent=null;state.created=0;state.tail=Promise.resolve();state.grantAvailable=false;state.sandboxGrant=false;state.env='PRODUCTION';state.grants=[];state.fetches=0;state.fetchFails=false;state.stripeFetches=0;state.stripeFails=false;state.legacy=null;state.alias=null;vi.stubEnv('MOBILE_LEDGER_ENABLED','true');vi.stubEnv('REVENUECAT_IOS_PRODUCT_ID','fixture-product');});afterEach(()=>vi.unstubAllEnvs());
+it('grants Pro after a signed-out StoreKit purchase on the server-issued anonymous ID',async()=>{
+ state.alias='$RCAnonymousID:'+'a'.repeat(32);
+ const appUserId='immutable-member-id';
+ expect(await getEntitlement('member',{snapshot:true})).toMatchObject({plan:'free',appUserId,appleGuestAppUserId:state.alias});
+ await prepareApplePurchase('member',appUserId,crypto.randomUUID());
+ state.grantAvailable=true;
+ expect(await reconcile('member',{appUserId})).toMatchObject({plan:'pro',source:'app_store',purchasePending:false,limits:{law_chat:50}});
+ expect(state.grants).toEqual([expect.objectContaining({userId:'member',originalTransactionId:'rc:subscription-fixture',revoked:false})]);
+});
 it('projects saved Pro immediately without RevenueCat, even when the provider is unavailable',async()=>{
  state.grants=[{userId:'member',provider:'app_store',environment:'PRODUCTION',expiresAt:new Date(Date.now()+86400000),checkedAt:new Date(Date.now()-600000),revoked:false}];state.fetchFails=true;
  const rights=await getEntitlement('member',{snapshot:true});expect(rights.plan).toBe('pro');expect(rights.limits.law_chat).toBe(50);expect(state.fetches).toBe(0);expect(state.stripeFetches).toBe(0);

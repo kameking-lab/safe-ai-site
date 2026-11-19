@@ -15,6 +15,7 @@ export const APPROVED_MIGRATIONS = Object.freeze([
   "20261103000000_ios3b_shared_entitlements",
   "202611040001_ios3c_review_fixes",
   "202611110001_owner_billing_decisions",
+  "202611190001_apple_guest_identity",
 ]);
 const HISTORY_TABLE = "_prisma_migrations";
 
@@ -48,11 +49,12 @@ function checksums(sql) {
 }
 
 function assertApprovedPending(pending, files) {
-  const ok = pending.length === 0 || (pending.length === APPROVED_MIGRATIONS.length
-    && pending.every((name, index) => name === APPROVED_MIGRATIONS[index]))
-    || (pending.length === 1 && pending[0] === APPROVED_MIGRATIONS[2]);
+  const start = APPROVED_MIGRATIONS.length - pending.length;
+  // The two ledger migrations are deployed together. Later migrations can be applied in order.
+  const ok = (start === 0 || start >= 2)
+    && pending.every((name, index) => name === APPROVED_MIGRATIONS[start + index]);
   if (!ok) {
-    throw new MigrationGateError(`Unexpected pending migrations: ${pending.join(", ") || "(none)"} (only ${APPROVED_MIGRATIONS.join(" + ")} together, the billing decisions after the shared ledger, or zero, are allowed); no deploy attempted.`);
+    throw new MigrationGateError(`Unexpected pending migrations: ${pending.join(", ") || "(none)"} (expected the approved sequence starting with the shared ledger or a later migration); no deploy attempted.`);
   }
   if (APPROVED_MIGRATIONS.some((name) => !files.some((file) => file.name === name))) {
     throw new MigrationGateError("Approved migration files are missing; no deploy attempted.");

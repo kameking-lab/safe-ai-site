@@ -13,7 +13,6 @@ export function webProSalesReady(env: NodeJS.ProcessEnv = process.env): boolean 
 
 /** アプリで App Store の購入シートを開けるか（/api/mobile/v1/billing/config の ready と同じ条件）。 */
 export function appStoreSalesReady(env: NodeJS.ProcessEnv = process.env): boolean {
-  const appleReady = !!(env.AUTH_APPLE_ID && env.AUTH_APPLE_SECRET);
   const serverVerificationReady = !!(
     env.REVENUECAT_SECRET_API_KEY &&
     env.REVENUECAT_V2_SECRET_API_KEY &&
@@ -27,7 +26,6 @@ export function appStoreSalesReady(env: NodeJS.ProcessEnv = process.env): boolea
     !!env.REVENUECAT_IOS_PUBLIC_SDK_KEY &&
     !!env.REVENUECAT_IOS_PRODUCT_ID &&
     !!env.REVENUECAT_IOS_OFFERING_ID &&
-    appleReady &&
     serverVerificationReady
   );
 }

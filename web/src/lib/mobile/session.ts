@@ -1,7 +1,7 @@
 import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
 import { headers } from 'next/headers';
 import type { Prisma } from '@prisma/client';
-import { billingDb, lockMember } from './billing-service';
+import { billingDb, lockAppleReconciliation, lockMember } from './billing-service';
 import { APP_REVIEW_USER_ID, appReviewConfig } from '../app-review';
 export const digest = (value:string) => createHash('sha256').update(value).digest('hex');
 export async function mobileAuthSession() {
@@ -29,35 +29,41 @@ export async function isGuestUser(userId:string,db:Pick<Prisma.TransactionClient
   const user=await db.user.findUnique({where:{id:userId},select:{id:true,email:true,_count:{select:{accounts:true}}}});
   return !!user && guestProfile(user.id,user.email,user._count.accounts);
 }
-export async function createGuestSession(){
+export async function createGuestSession(anonymousStoreIdentity=false){
   const token=randomBytes(32).toString('base64url');
   await billingDb().$transaction(async tx=>{
     const user=await tx.user.create({data:{},select:{id:true}});
+    // Only the server can assign an anonymous store identity to a guest credential.
+    if(anonymousStoreIdentity)await tx.mobileIdentity.create({data:{userId:user.id,appleGuestAppUserId:`$RCAnonymousID:${randomBytes(16).toString('hex')}`}});
     await tx.mobileSession.create({data:{tokenHash:digest(token),userId:user.id,expiresAt:new Date(Date.now()+GUEST_SESSION_DAYS*86400000)}});
   });
   return {token,guest:true as const};
 }
 /**
- * Signing in on a device that bought as a guest keeps the purchase with the person.
- * Without an existing store identity on the signed-in member, the guest's identity, grants and
- * purchase intent move over. Otherwise the guest keeps its store identity; restoring purchases
- * lets RevenueCat transfer the receipt and reconcile() records the verified transfer.
+ * Signing in with a guest credential moves its store identity and purchase to the member.
+ * An existing member store ID is kept and the guest alias follows the purchase.
+ * Cases with an existing alias or a legacy guest identity use the existing restore flow.
  */
 async function mergeGuest(tx:Prisma.TransactionClient,guestToken:string,targetUserId:string){
   if(!/^[A-Za-z0-9_-]{43}$/.test(guestToken)) return false;
-  const session=await tx.mobileSession.findUnique({where:{tokenHash:digest(guestToken)}});
+  const tokenHash=digest(guestToken);
+  const session=await tx.mobileSession.findUnique({where:{tokenHash}});
   if(!session || session.expiresAt<=new Date() || session.userId===targetUserId) return false;
   const guestId=session.userId;
   // Stable order: purchase/reconcile take the same per-member locks one member at a time.
   for(const id of [guestId,targetUserId].sort()) await lockMember(tx,id);
+  const currentSession=await tx.mobileSession.findUnique({where:{tokenHash}});
+  if(currentSession?.userId!==guestId || currentSession.expiresAt<=new Date()) return false;
   if(!await isGuestUser(guestId,tx)) return false;
   const deletion=await tx.mobileAccountDeletion.findUnique({where:{userId:guestId}});
   if(deletion && deletion.status!=='prepared') return false;
+  await lockAppleReconciliation(tx);
   const now=new Date();
-  const [guestIdentity,targetIdentity,guestGrants]=await Promise.all([
+  const [guestIdentity,targetIdentity,guestGrants,guestIntent]=await Promise.all([
     tx.mobileIdentity.findUnique({where:{userId:guestId}}),
     tx.mobileIdentity.findUnique({where:{userId:targetUserId}}),
     tx.mobileGrant.findMany({where:{userId:guestId}}),
+    tx.mobilePurchaseIntent.findUnique({where:{userId:guestId}}),
   ]);
   // Per-person app data follows the member. Today's AI usage stays counted.
   await tx.mobileUsageOperation.updateMany({where:{userId:guestId},data:{userId:targetUserId}});
@@ -71,15 +77,26 @@ async function mergeGuest(tx:Prisma.TransactionClient,guestToken:string,targetUs
   await tx.mobilePushDevice.deleteMany({where:{userId:guestId}});
   await tx.mobileSession.deleteMany({where:{userId:guestId}});
   let restoreRecommended=false;
-  if(guestIdentity && !targetIdentity){
+  const guestMayHavePurchase=guestGrants.some(g=>!g.revoked&&g.expiresAt>now)
+    || guestIntent?.source==='app_store' && guestIntent.status==='pending';
+  const guestAppleId=guestIdentity?.appleGuestAppUserId;
+  const attachGuestAlias=!!(guestAppleId && targetIdentity && !targetIdentity.appleGuestAppUserId && guestMayHavePurchase);
+  const moveIdentity=!!(guestIdentity && !targetIdentity && (!guestAppleId || guestMayHavePurchase));
+  if(moveIdentity){
     await tx.mobileIdentity.update({where:{userId:guestId},data:{userId:targetUserId}});
+  }else if(attachGuestAlias){
+    // Keep the member's established ID and authorize the anonymous alias with the guest token.
+    await tx.mobileIdentity.delete({where:{userId:guestId}});
+    await tx.mobileIdentity.update({where:{userId:targetUserId},data:{appleGuestAppUserId:guestAppleId}});
+  }
+  if(moveIdentity || attachGuestAlias){
     await tx.mobileGrant.updateMany({where:{userId:guestId},data:{userId:targetUserId}});
-    const [guestIntent,targetIntent]=await Promise.all([tx.mobilePurchaseIntent.findUnique({where:{userId:guestId}}),tx.mobilePurchaseIntent.findUnique({where:{userId:targetUserId}})]);
+    const targetIntent=await tx.mobilePurchaseIntent.findUnique({where:{userId:targetUserId}});
     if(guestIntent && (!targetIntent || guestIntent.status==='pending'&&targetIntent.status!=='pending')){
       if(targetIntent) await tx.mobilePurchaseIntent.delete({where:{userId:targetUserId}});
       await tx.mobilePurchaseIntent.update({where:{userId:guestId},data:{userId:targetUserId}});
     }else if(guestIntent) await tx.mobilePurchaseIntent.delete({where:{userId:guestId}});
-  }else if(guestIdentity && guestGrants.some(g=>!g.revoked&&g.expiresAt>now)){
+  }else if(guestIdentity && guestMayHavePurchase){
     restoreRecommended=true;
   }else if(guestIdentity && !guestGrants.length){
     await tx.mobilePurchaseIntent.deleteMany({where:{userId:guestId}});

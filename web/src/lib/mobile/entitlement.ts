@@ -8,6 +8,7 @@ export function canUseMemberQuota(rights:{plan:Plan;syncState:string}){
 export type EntitlementSnapshot = {
   plan: Plan; source: 'stripe' | 'app_store' | null; syncState: 'verified' | 'pending' | 'unavailable';
   expiresAt: string | null; appUserId: string; verifiedAt: string;
+  appleGuestAppUserId?: string;
   limits: typeof product.limits.free | typeof product.limits.pro;
   purchasePending?: boolean; purchaseIntentId?: string | null;
   purchaseSource?: string | null; purchaseStage?: string | null;

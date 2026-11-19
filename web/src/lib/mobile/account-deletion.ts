@@ -62,7 +62,10 @@ export async function processAccountDeletion(id:string){
     const accounts=await tx.account.findMany({where:{userId,provider:'apple'}});
     for(const account of accounts)await revokeApple(account);
     const identity=await tx.mobileIdentity.findUnique({where:{userId}});
-    if(identity)await tx.mobileBillingEvent.deleteMany({where:{OR:[{appUserId:identity.appUserId},{relatedAppUserIds:{array_contains:[identity.appUserId]}}]}});
+    if(identity){
+      const ids=[identity.appUserId,...(identity.appleGuestAppUserId?[identity.appleGuestAppUserId]:[])];
+      await tx.mobileBillingEvent.deleteMany({where:{OR:ids.flatMap(id=>[{appUserId:id},{relatedAppUserIds:{array_contains:[id]}}])}});
+    }
     // Personal app data is removed. Purchase ownership remains pseudonymous for fraud/audit checks.
     await tx.mobileGrant.updateMany({where:{userId},data:{userId:job.auditSubject,revoked:true}});
     await tx.mobileUsageOperation.deleteMany({where:{userId}});
