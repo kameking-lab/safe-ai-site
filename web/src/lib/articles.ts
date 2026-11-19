@@ -122,7 +122,7 @@ export function getPublishedArticleBySlug(slug: string, now = new Date()): Artic
 }
 
 /**
- * sitemap や generateStaticParams 向けの公開済み slug 一覧
+ * 公開判定を通過した記事の slug 一覧
  */
 export function getPublishedArticleSlugs(now = new Date()): string[] {
   return getPublishedArticles(now).map((a) => a.slug);

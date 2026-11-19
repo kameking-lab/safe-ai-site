@@ -12,10 +12,7 @@ import {
   RelatedContent,
   type RelatedContentGroup,
 } from "@/components/RelatedContent";
-import {
-  getPublishedArticleBySlug,
-  getPublishedArticleSlugs,
-} from "@/lib/articles";
+import { getPublishedArticleBySlug } from "@/lib/articles";
 import { publicMhlwNotices as mhlwNotices } from "@/data/public-mhlw-notices";
 import { getAccidentCasesDataset } from "@/data/mock/accident-cases";
 import type { LanguageCode } from "@/lib/translation-cache";
@@ -31,9 +28,9 @@ function tokenizeJa(text: string): string[] {
 
 const SITE_BASE = "https://www.anzen-ai-portal.jp";
 
-export function generateStaticParams() {
-  return getPublishedArticleSlugs().map((slug) => ({ slug }));
-}
+// Review and timed publication are resolved at request time. The static
+// fallback conflicts with the CSP nonce when an unpublished slug returns 404.
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,

@@ -13,13 +13,14 @@ async function loadWithReviewDate(humanReviewedAt: string | null) {
     default: fixture,
   }));
 
-  const [detail, list, search, sitemap] = await Promise.all([
+  const [detail, list, search, sitemap, articles] = await Promise.all([
     import("./page"),
     import("../page"),
     import("@/lib/articles-search-source"),
     import("@/app/sitemap-articles.xml/route"),
+    import("@/lib/articles"),
   ]);
-  return { detail, list, search, sitemap };
+  return { detail, list, search, sitemap, articles };
 }
 
 afterEach(() => {
@@ -29,22 +30,23 @@ afterEach(() => {
 
 describe("熱中症記事の公開判定", () => {
   it("人手確認待ちは詳細を404・noindexとし、一覧・検索・サイトマップから除外する", async () => {
-    const { detail, list, search, sitemap } = await loadWithReviewDate(null);
+    const { detail, list, search, sitemap, articles } = await loadWithReviewDate(null);
 
+    expect(detail.dynamic).toBe("force-dynamic");
     expect(await detail.generateMetadata(props)).toEqual({
       robots: { index: false, follow: true },
     });
     await expect(detail.default(props)).rejects.toMatchObject({
       digest: "NEXT_HTTP_ERROR_FALLBACK;404",
     });
-    expect(detail.generateStaticParams()).not.toContainEqual({ slug });
+    expect(articles.getPublishedArticleSlugs()).not.toContain(slug);
     expect(renderToStaticMarkup(list.default())).not.toContain(`href="${path}"`);
     expect(search.getPublishedArticleSearchEntries().some((entry) => entry.slug === slug)).toBe(false);
     expect(await (await sitemap.GET()).text()).not.toContain(path);
   });
 
   it("人手確認日だけを記録すると本文と各導線が公開される", async () => {
-    const { detail, list, search, sitemap } = await loadWithReviewDate("2026-11-18");
+    const { detail, list, search, sitemap, articles } = await loadWithReviewDate("2026-11-18");
 
     expect(await detail.generateMetadata(props)).toMatchObject({
       title: article.title,
@@ -52,7 +54,7 @@ describe("熱中症記事の公開判定", () => {
       alternates: { canonical: path },
     });
     expect(renderToStaticMarkup(await detail.default(props))).toContain(articleBody.sections[0].heading);
-    expect(detail.generateStaticParams()).toContainEqual({ slug });
+    expect(articles.getPublishedArticleSlugs()).toContain(slug);
     expect(renderToStaticMarkup(list.default())).toContain(`href="${path}"`);
     expect(search.getPublishedArticleSearchEntries()).toContainEqual(
       expect.objectContaining({ slug, title: article.title }),
