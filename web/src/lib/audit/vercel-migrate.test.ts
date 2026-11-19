@@ -25,7 +25,7 @@ const pushedSchema = () => ({ tables: new Set(["User", "Subscription", "Account"
 
 describe("vercel-migrate gate", () => {
   it("the repository holds exactly the approved migrations", () => {
-    expect(APPROVED_MIGRATIONS).toEqual(["20261103000000_ios3b_shared_entitlements", "202611040001_ios3c_review_fixes", "202611110001_owner_billing_decisions", "202611190001_apple_guest_identity"]);
+    expect(APPROVED_MIGRATIONS).toEqual(["20261103000000_ios3b_shared_entitlements", "202611040001_ios3c_review_fixes", "202611110001_owner_billing_decisions", "202611190001_apple_guest_identity", "202611200001_stripe_event_ledger"]);
     expect(files.map((file) => file.name)).toEqual([...APPROVED_MIGRATIONS]);
   });
 
@@ -53,7 +53,7 @@ describe("vercel-migrate gate", () => {
     expect(pendingMigrations(files, [])).toEqual([...APPROVED_MIGRATIONS]);
     expect(pendingMigrations(files, files.map(applied))).toEqual([]);
     expect(pendingMigrations(files, files.slice(0,2).map(applied))).toEqual(APPROVED_MIGRATIONS.slice(2));
-    expect(pendingMigrations(files, files.slice(0,3).map(applied))).toEqual(["202611190001_apple_guest_identity"]);
+    expect(pendingMigrations(files, files.slice(0,3).map(applied))).toEqual(["202611190001_apple_guest_identity", "202611200001_stripe_event_ledger"]);
     expect(() => pendingMigrations(files, [files[0], files[1], files[3]].map(applied))).toThrow(/Unexpected pending/);
     expect(() => pendingMigrations(files, [applied(files[0])])).toThrow(/Unexpected pending migrations: 202611040001_ios3c_review_fixes/);
     expect(() => pendingMigrations([...files, { name: "20261201000000_extra", sql: "SELECT 1;" }], [])).toThrow(/Unexpected pending.*no deploy attempted/);
@@ -138,13 +138,13 @@ function simulate(state: { history: Row[] | null; tables: Set<string>; columns: 
 
 describe("vercel-migrate dry run against a simulated database", () => {
   it.each(["migration", "migrations"])("accepts Prisma's %s heading for the approved pending billing migration", async (noun) => {
-    const sim = simulate({ history: files.slice(0, 3).map(applied), ...pushedSchema() }, {
+    const sim = simulate({ history: files.slice(0, 4).map(applied), ...pushedSchema() }, {
       "migrate status": [
-        { status: 1, output: `Following ${noun} have not yet been applied:\n${APPROVED_MIGRATIONS[3]}` },
+        { status: 1, output: `Following ${noun} have not yet been applied:\n${APPROVED_MIGRATIONS[4]}` },
         { status: 0, output: "Database schema is up to date!" },
       ],
     });
-    await expect(sim.run()).resolves.toEqual({ mode: "deploy", applied: [APPROVED_MIGRATIONS[3]] });
+    await expect(sim.run()).resolves.toEqual({ mode: "deploy", applied: [APPROVED_MIGRATIONS[4]] });
     expect(sim.calls).toEqual(["migrate status", "migrate deploy", "migrate status"]);
   });
 
@@ -167,9 +167,9 @@ describe("vercel-migrate dry run against a simulated database", () => {
     { status: 1, output: "Database schema is up to date!" },
     { status: 0, output: `Following migrations have not yet been applied:\n${APPROVED_MIGRATIONS[2]}` },
   ])("still requires a clean status after deployment: %j", async (result) => {
-    const sim = simulate({ history: files.slice(0, 3).map(applied), ...pushedSchema() }, {
+    const sim = simulate({ history: files.slice(0, 4).map(applied), ...pushedSchema() }, {
       "migrate status": [
-        { status: 1, output: `Following migration have not yet been applied:\n${APPROVED_MIGRATIONS[3]}` },
+        { status: 1, output: `Following migration have not yet been applied:\n${APPROVED_MIGRATIONS[4]}` },
         result,
       ],
     });
@@ -187,7 +187,13 @@ describe("vercel-migrate dry run against a simulated database", () => {
 
   it("applies the guest column when all earlier migrations are already applied",async()=>{
     const sim=simulate({history:files.slice(0,3).map(applied),...pushedSchema()});
-    await expect(sim.run()).resolves.toEqual({mode:'deploy',applied:['202611190001_apple_guest_identity']});
+    await expect(sim.run()).resolves.toEqual({mode:'deploy',applied:['202611190001_apple_guest_identity','202611200001_stripe_event_ledger']});
+    expect(sim.calls).toEqual(['migrate status','migrate deploy','migrate status']);
+  });
+
+  it("applies only the Stripe event ledger when the guest column is already applied",async()=>{
+    const sim=simulate({history:files.slice(0,4).map(applied),...pushedSchema()});
+    await expect(sim.run()).resolves.toEqual({mode:'deploy',applied:['202611200001_stripe_event_ledger']});
     expect(sim.calls).toEqual(['migrate status','migrate deploy','migrate status']);
   });
   it("db push database: applies the approved SQL once in one transaction, then baselines the history", async () => {
