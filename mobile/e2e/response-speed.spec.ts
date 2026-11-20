@@ -68,11 +68,11 @@ test('login, confirmed purchase, manual refresh and logout avoid redundant waits
     if(url.pathname.endsWith('/account'))return route.fulfill({headers:cors,json:{displayName:'速度確認',email:null,sdsHistory:[]}});
     return route.fulfill({status:401,headers:cors,json:{error:{code:'UNAUTHORIZED'}}});
   });
-  await page.goto('/account/');await expect(page.getByText('ログインしていません',{exact:true})).toBeVisible();
-  await page.getByRole('button',{name:'Apple / Googleでログイン'}).click();
+  await page.goto('/account/');await expect(page.getByText('無料プラン（登録不要）',{exact:true})).toBeVisible();
+  await page.getByRole('button',{name:'Apple / Googleで連携（任意）'}).click();
   await expect.poll(()=>page.evaluate(()=>(window as unknown as {__speedBrowserOpened?:boolean}).__speedBrowserOpened)).toBe(true);
   const loginStart=Date.now();await page.evaluate(()=>{(window as unknown as {__returnSpeedLogin:()=>void}).__returnSpeedLogin();});
-  await expect(page.getByText('無料会員',{exact:true})).toBeVisible();const loginMs=Date.now()-loginStart;
+  await expect(page.getByText('無料プラン',{exact:true})).toBeVisible();const loginMs=Date.now()-loginStart;
   await page.getByRole('button',{name:/Proにする（月額¥980）/}).click();
   await expect(page.getByText('Pro 利用中',{exact:true})).toBeVisible();
   const purchaseReflectedMs=Date.now()-reconciledAt;
@@ -82,8 +82,8 @@ test('login, confirmed purchase, manual refresh and logout avoid redundant waits
   await expect.poll(()=>entitlementReads).toBeGreaterThan(beforeRefresh);await expect(page.getByText('Pro 利用中',{exact:true})).toBeVisible();
   const automaticRefreshMs=Date.now()-refreshStart;expect(forcedReads).toBe(0);
   const beforeLogout=entitlementReads;const logoutStart=Date.now();await page.getByRole('button',{name:'ログアウト',exact:true}).click();
-  await expect(page.getByText('ログインしていません',{exact:true})).toBeVisible();const logoutFeedbackMs=Date.now()-logoutStart;
-  expect(logoutFeedbackMs).toBeLessThan(300);releaseLogout();await expect(page.getByRole('button',{name:'Apple / Googleでログイン'})).toBeEnabled();
+  await expect(page.getByText('無料プラン（登録不要）',{exact:true})).toBeVisible();const logoutFeedbackMs=Date.now()-logoutStart;
+  expect(logoutFeedbackMs).toBeLessThan(300);releaseLogout();await expect(page.getByRole('button',{name:'Apple / Googleで連携（任意）'})).toBeEnabled();
   expect(entitlementReads).toBe(beforeLogout);expect(loginMs).toBeLessThan(1000);
   await save('mobile-account-timings.json',{source:'native plugins + API fixtures, 180ms delayed exchange/rights; no real purchase',loginMs,purchaseReflectedMs,automaticRefreshMs,logoutFeedbackMs,entitlementReads,forcedReads});
 });
@@ -110,11 +110,11 @@ test('late membership reads cannot replace a purchase or restore Pro during logo
     if(url.pathname.endsWith('/account'))return route.fulfill({headers:cors,json:{displayName:'応答順確認',email:null,sdsHistory:[]}});
     return route.fulfill({status:401,headers:cors,json:{error:{code:'UNAUTHORIZED'}}});
   });
-  await page.goto('/account/');await expect(page.getByText('ログインしていません',{exact:true})).toBeVisible();
-  await page.getByRole('button',{name:'Apple / Googleでログイン'}).click();
+  await page.goto('/account/');await expect(page.getByText('無料プラン（登録不要）',{exact:true})).toBeVisible();
+  await page.getByRole('button',{name:'Apple / Googleで連携（任意）'}).click();
   await expect.poll(()=>page.evaluate(()=>(window as unknown as {__speedBrowserOpened?:boolean}).__speedBrowserOpened)).toBe(true);
   await page.evaluate(()=>{(window as unknown as {__returnSpeedLogin:()=>void}).__returnSpeedLogin();});
-  await expect(page.getByText('無料会員',{exact:true})).toBeVisible();
+  await expect(page.getByText('無料プラン',{exact:true})).toBeVisible();
   await expect.poll(()=>page.evaluate(()=>!!(window as unknown as {__speedRecovered?:boolean}).__speedRecovered)).toBe(true);
   await page.evaluate(()=>{
     Object.assign(window,{__plans:[] as string[]});
@@ -130,12 +130,12 @@ test('late membership reads cannot replace a purchase or restore Pro during logo
   readFinished=false;releaseRead=undefined;holdNext=true;
   await page.evaluate(()=>window.dispatchEvent(new Event('anzen-app-active')));await expect.poll(()=>!!releaseRead).toBe(true);
   await page.getByRole('button',{name:'ログアウト',exact:true}).click();
-  await expect(page.getByText('ログインしていません',{exact:true})).toBeVisible();
+  await expect(page.getByText('無料プラン（登録不要）',{exact:true})).toBeVisible();
   const before=await page.evaluate(()=>(window as unknown as {__plans:string[]}).__plans.length);
   releaseRead!();await expect.poll(()=>readFinished).toBe(true);releaseLogout();
-  await expect(page.getByRole('button',{name:'Apple / Googleでログイン'})).toBeEnabled();
+  await expect(page.getByRole('button',{name:'Apple / Googleで連携（任意）'})).toBeEnabled();
   expect(await page.evaluate(()=>(window as unknown as {__plans:string[]}).__plans.length)).toBe(before);
-  await expect(page.getByText('ログインしていません',{exact:true})).toBeVisible();
+  await expect(page.getByText('無料プラン（登録不要）',{exact:true})).toBeVisible();
 });
 
 for(const reduced of [false,true])test(`Chihuahua is visible before the first native text, reduced=${reduced}`,async({page,context})=>{

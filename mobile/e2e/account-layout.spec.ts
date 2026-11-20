@@ -48,7 +48,7 @@ for (const arrival of ['membership', 'details'] as const) test(`deletion keeps t
     const before = await start.boundingBox();
     // This is the physical press duration, not an added readiness wait.
     await start.click({ delay: 200 });
-    await expect(page.getByText('無料会員', { exact: true })).toBeVisible();
+    await expect(page.getByText('無料プラン', { exact: true })).toBeVisible();
     await expect(page.getByLabel('確認のため「削除」と入力')).toBeVisible();
     expect(prepares).toBe(1);
     const after = await start.boundingBox();

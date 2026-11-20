@@ -137,7 +137,7 @@ for(const pending of [false,true])test(`old deletion receipt preserves member B 
   await page.evaluate(()=>{localStorage.setItem('CapacitorStorage.anzen.session-incarnation','member-b-session');localStorage.setItem('company-profile','member-b-profile');localStorage.setItem('anzen.content.saved','member-b-saved');});
   await context.route(host+'/api/me/entitlements',route=>route.fulfill({headers:cors,json:{plan:'free',source:null,syncState:'verified',expiresAt:null,appUserId:'99999999-1111-4111-8111-111111111111',verifiedAt:new Date().toISOString(),limits:product.limits.free}}));
   await page.goto('/law-search/');await page.goto('/account/');await page.reload();
-  await expect(page.getByText('無料会員',{exact:true})).toBeVisible();
+  await expect(page.getByText('無料プラン',{exact:true})).toBeVisible();
   for(let i=0;i<2;i++)await page.getByRole('button',{name:'削除状況を確認',exact:true}).click();
   expect(await page.evaluate(()=>[localStorage.getItem('company-profile'),localStorage.getItem('anzen.content.saved')])).toEqual(['member-b-profile','member-b-saved']);
 });
@@ -155,7 +155,7 @@ test('a failing App Store product lookup keeps the signed-in member',async({page
     return route.fulfill({status:503,headers:cors,json:{error:{code:'UNAVAILABLE'}}});
   });
   await page.goto('/account/');
-  await expect(page.getByText('無料会員',{exact:true})).toBeVisible();
-  await expect(page.getByText('ログインしていません',{exact:true})).toHaveCount(0);
+  await expect(page.getByText('無料プラン',{exact:true})).toBeVisible();
+  await expect(page.getByText('無料プラン（登録不要）',{exact:true})).toHaveCount(0);
   await expect(page.getByRole('button',{name:'ログアウト'})).toBeVisible();
 });

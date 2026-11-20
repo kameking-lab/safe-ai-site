@@ -88,15 +88,15 @@ async function setup(context:BrowserContext,fault:Fault|null=null){
 }
 async function login(page:Page){
  const count=await page.evaluate(()=>(window as unknown as Bridge).__opened);
- await page.getByRole('button',{name:'Apple / Googleでログイン'}).click();
+ await page.getByRole('button',{name:'Apple / Googleで連携（任意）'}).click();
  await expect.poll(()=>page.evaluate(()=>(window as unknown as Bridge).__opened)).toBe(count+1);
- await expect(page.getByRole('button',{name:'Apple / Googleでログイン'})).toBeEnabled();
+ await expect(page.getByRole('button',{name:'Apple / Googleで連携（任意）'})).toBeEnabled();
  await page.evaluate(()=>(window as unknown as Bridge).__return());
 }
 async function pro(page:Page){await expect(page.getByText('Pro 利用中',{exact:true})).toBeVisible({timeout:3000});}
 async function buttons(page:Page){await expect(page.getByRole('button',{name:'購入を復元',exact:true})).toBeEnabled();await expect(page.getByRole('button',{name:/権利を再確認|会員情報を再読み込み|App Storeの購入手続きを再開/})).toHaveCount(0);await expect(page.getByRole('link',{name:'App Storeで購読を管理・解約',exact:true})).toBeVisible();}
 async function chat50(page:Page){await page.getByRole('link',{name:'法令AI',exact:true}).click();await expect(page.getByLabel('AIの利用枠')).toContainText('50／50回',{timeout:3000});}
-async function account(page:Page){await page.getByRole('link',{name:'会員・Pro',exact:true}).click();await expect(page).toHaveURL(/\/account\/$/);await expect(page.getByRole('heading',{name:'会員・安全AI Pro',exact:true})).toBeVisible();}
+async function account(page:Page){await page.getByRole('link',{name:'Pro',exact:true}).click();await expect(page).toHaveURL(/\/account\/$/);await expect(page.getByRole('heading',{name:'安全AI Pro',exact:true})).toBeVisible();}
 const captureDir=process.env.ANZ_TF5_CAPTURE_DIR;
 
 test('verified App Store receipt moves A to B automatically, relogin is immediately Pro and first chat sends once',async({page,context},info)=>{
@@ -117,7 +117,7 @@ test('verified App Store receipt moves A to B automatically, relogin is immediat
 });
 test('unverified native Pro cache cannot move a purchase and an ownership conflict gives a login action',async({page,context},info)=>{
  const s=await setup(context);s.transfer(false);s.setNext('b');await page.goto('/account/');await login(page);
- await expect(page.getByText('無料会員',{exact:true})).toBeVisible();expect(s.rights('a').plan).toBe('pro');expect(s.rights('b').plan).toBe('free');
+ await expect(page.getByText('無料プラン',{exact:true})).toBeVisible();expect(s.rights('a').plan).toBe('pro');expect(s.rights('b').plan).toBe('free');
  await expect(page.getByRole('button',{name:/Proにする/})).toHaveCount(1);await buttons(page);
  s.conflict();await page.evaluate(()=>(window as unknown as Bridge).__activate());
  await expect(page.getByRole('status').filter({hasText:'この購入は別のログイン方法（Apple / Google）で使われています。そちらでログインしてください。'})).toBeVisible();
@@ -126,19 +126,19 @@ test('unverified native Pro cache cannot move a purchase and an ownership confli
 });
 test('saved Pro survives logout, relogin and restart; cached native Pro never transfers accounts',async({page,context},info)=>{
  const s=await setup(context);await page.goto('/account/');await login(page);await pro(page);
- await page.getByRole('button',{name:'ログアウト',exact:true}).click();await expect(page.getByRole('button',{name:'Apple / Googleでログイン'})).toBeEnabled();
+ await page.getByRole('button',{name:'ログアウト',exact:true}).click();await expect(page.getByRole('button',{name:'Apple / Googleで連携（任意）'})).toBeEnabled();
  const started=Date.now();await login(page);await pro(page);const recoveryMs=Date.now()-started;expect(recoveryMs).toBeLessThan(3000);await buttons(page);await chat50(page);
  await account(page);await page.reload();await pro(page);await buttons(page);await chat50(page);
  if(captureDir){await mkdir(captureDir,{recursive:true});await page.screenshot({path:path.join(captureDir,`${info.project.name}-saved-pro-50.png`),fullPage:true});}
- await account(page);await page.getByRole('button',{name:'ログアウト',exact:true}).click();await expect(page.getByRole('button',{name:'Apple / Googleでログイン'})).toBeEnabled();
- s.setNext('b');await login(page);await expect(page.getByText('無料会員',{exact:true})).toBeVisible();await page.getByRole('link',{name:'法令AI',exact:true}).click();await expect(page.getByLabel('AIの利用枠')).toContainText('0／3回');
+ await account(page);await page.getByRole('button',{name:'ログアウト',exact:true}).click();await expect(page.getByRole('button',{name:'Apple / Googleで連携（任意）'})).toBeEnabled();
+ s.setNext('b');await login(page);await expect(page.getByText('無料プラン',{exact:true})).toBeVisible();await page.getByRole('link',{name:'法令AI',exact:true}).click();await expect(page.getByLabel('AIの利用枠')).toContainText('0／3回');
  expect(s.diagnostics.length).toBeGreaterThan(0);
  if(captureDir)await writeFile(path.join(captureDir,`${info.project.name}-saved-ledger.json`),JSON.stringify({recoveryMs,diagnostics:s.diagnostics},null,2));
 });
 for(const stage of ['configure','logIn','logOut','getCustomerInfo'])test(`server Pro and login stay usable when ${stage} never returns`,async({page,context},info)=>{
  const s=await setup(context,{stage,mode:'never'});await page.goto('/account/');await login(page);await pro(page);await buttons(page);
  if(stage==='logIn'||stage==='logOut')await expect.poll(()=>page.evaluate(()=>(window as unknown as Bridge).__trace.some(entry=>entry.event==='configure'))).toBe(true);
- await page.getByRole('button',{name:'ログアウト',exact:true}).click();await expect(page.getByRole('button',{name:'Apple / Googleでログイン'})).toBeEnabled({timeout:3000});
+ await page.getByRole('button',{name:'ログアウト',exact:true}).click();await expect(page.getByRole('button',{name:'Apple / Googleで連携（任意）'})).toBeEnabled({timeout:3000});
  await login(page);await pro(page);await chat50(page);await account(page);await pro(page);await buttons(page);
  // Real 8-second timers, including a diagnostic failure, with the UI usable throughout.
  await expect.poll(()=>s.diagnostics.some(value=>(value as {result:string}).result==='timeout'),{timeout:11000}).toBe(true);
@@ -147,12 +147,12 @@ for(const stage of ['configure','logIn','logOut','getCustomerInfo'])test(`server
 });
 test('config failure leaves login, restore and recheck operable; offering and restore stalls release separately',async({page,context})=>{
  const s=await setup(context,{stage:'getOfferings',mode:'never'});s.free(true);s.failConfig();await page.goto('/account/');
- await expect(page.getByRole('button',{name:'Apple / Googleでログイン'})).toBeEnabled();await login(page);await expect(page.getByText('無料会員',{exact:true})).toBeVisible();await buttons(page);
+ await expect(page.getByRole('button',{name:'Apple / Googleで連携（任意）'})).toBeEnabled();await login(page);await expect(page.getByText('無料プラン',{exact:true})).toBeVisible();await buttons(page);
  await page.getByRole('button',{name:'購入を復元',exact:true}).click();await expect(page.getByRole('button',{name:'ログアウト',exact:true})).toBeEnabled();
  await expect(page.getByRole('button',{name:'購入を復元',exact:true})).toBeEnabled();
 });
 test('price lookup never blocks restore or recheck; stalled restore only disables itself',async({page,context})=>{
- const s=await setup(context,{stage:'getOfferings',mode:'never'});s.free(true);await page.goto('/account/');await login(page);await expect(page.getByText('無料会員',{exact:true})).toBeVisible();
+ const s=await setup(context,{stage:'getOfferings',mode:'never'});s.free(true);await page.goto('/account/');await login(page);await expect(page.getByText('無料プラン',{exact:true})).toBeVisible();
  await expect.poll(()=>page.evaluate(()=>(window as unknown as Bridge).__trace.some(entry=>entry.event==='getOfferings'))).toBe(true);
  await buttons(page);await page.evaluate(()=>(window as unknown as Bridge).__fault={stage:'restorePurchases',mode:'never'});
  await page.getByRole('button',{name:'購入を復元',exact:true}).click();await expect(page.getByRole('button',{name:'購入を復元',exact:true})).toBeDisabled();
@@ -167,13 +167,13 @@ test('network switch and a failed reconciliation preserve saved server Pro',asyn
 });
 test('starting login during a slow server logout keeps the new login and saved Pro',async({page,context})=>{
  const s=await setup(context);await page.goto('/account/');await login(page);await pro(page);s.delayLogout(1500);
- await page.getByRole('button',{name:'ログアウト',exact:true}).click();await expect(page.getByRole('button',{name:'Apple / Googleでログイン'})).toBeEnabled();
+ await page.getByRole('button',{name:'ログアウト',exact:true}).click();await expect(page.getByRole('button',{name:'Apple / Googleで連携（任意）'})).toBeEnabled();
  await login(page);await pro(page);await buttons(page);await chat50(page);
 });
 test('a stalled Keychain proof releases the login button after app activation and permits retry',async({page,context})=>{
  await setup(context);await page.goto('/account/');await login(page);await pro(page);
  await page.getByRole('button',{name:'ログアウト',exact:true}).click();
- const signIn=page.getByRole('button',{name:'Apple / Googleでログイン'});
+ const signIn=page.getByRole('button',{name:'Apple / Googleで連携（任意）'});
  await expect(signIn).toBeEnabled();const opened=await page.evaluate(()=>(window as unknown as Bridge).__opened);
  await signIn.click();await expect.poll(()=>page.evaluate(()=>(window as unknown as Bridge).__opened)).toBe(opened+1);
  await page.evaluate(()=>{const bridge=window as unknown as Bridge;bridge.__fault={stage:'NativeVault.get',mode:'never'};bridge.__return();bridge.__activate();});

@@ -13,6 +13,7 @@ import { ProPurchasePresentationContext } from '@/components/pro-upsell-card';
 import { billing,isVerifiedPro,type MemberEntitlement } from '../lib/billing';
 import { DisplaySettings } from './display-settings';
 import { startProPurchase, type ProPurchaseResult } from '../lib/pro-purchase';
+import { forgetLocalSession, isGuestSession } from '../lib/session';
 export function SharedShell({ children }: { children: ReactNode }) {
   const [message,setMessage]=useState('');
   const [purchaseMessage,setPurchaseMessage]=useState('');
@@ -43,14 +44,17 @@ export function SharedShell({ children }: { children: ReactNode }) {
     // A new login rejoins the store identity. A guest session is created by the purchase/restore
     // that is already running, which owns its own reconciliation.
     const signedIn=(event:Event)=>{const detail=(event as CustomEvent<{signedIn?:boolean;guest?:boolean}>).detail;if(detail?.signedIn!==false&&!detail?.guest)void billing.recoverSession().catch(()=>{});};
+    // A guest credential the server rejected (expired/removed) is dropped, never answered with a sign-in request.
+    const expired=()=>{void isGuestSession().then(guest=>guest?forgetLocalSession():undefined).catch(()=>{});};
+    window.addEventListener('anzen-session-rejected',expired);
     document.addEventListener('click',feeds,true);window.addEventListener('anzen-session-changed',sessionChanged);window.addEventListener('anzen-session-changed',signedIn);window.addEventListener('anzen-entitlement-changed',verified);
-    return()=>{document.removeEventListener('click',feeds,true);window.removeEventListener('anzen-session-changed',sessionChanged);window.removeEventListener('anzen-session-changed',signedIn);window.removeEventListener('anzen-entitlement-changed',verified);};
+    return()=>{window.removeEventListener('anzen-session-rejected',expired);document.removeEventListener('click',feeds,true);window.removeEventListener('anzen-session-changed',sessionChanged);window.removeEventListener('anzen-session-changed',signedIn);window.removeEventListener('anzen-entitlement-changed',verified);};
   }, []);
   return <ProPurchasePresentationContext.Provider value={{price,busy:purchasing,message:purchaseMessage}}><style>{`a[href='/ky'],a[href^='/ky/'],a[href='/safety-diary'],a[href^='/safety-diary/'],a[href='/site-records/near-miss']{display:none!important}`}</style><header hidden={pathname==='/signage/display'} className="sticky top-[env(safe-area-inset-top)] z-50 flex items-center gap-1 whitespace-nowrap border-b bg-white px-2 py-1 text-slate-900 print:hidden">
     {/* No browser chrome in the app: one row, a real back button, 44pt targets. */}
     <button aria-label="戻る" className="min-h-11 min-w-11 shrink-0 rounded-lg px-2 font-semibold" onClick={() => { if (window.history.length > 1) window.history.back(); else window.location.assign('/'); }}>‹ 戻る</button>
     {/* ホーム・全機能は下のタブにあるので上には置かない。今いる画面は色で示す。 */}
-    <Link className="ml-auto inline-flex min-h-11 shrink-0 items-center rounded-lg px-3 font-semibold aria-[current=page]:bg-emerald-50 aria-[current=page]:text-emerald-800" href="/account" aria-current={pathname==='/account'?'page':undefined}>会員・Pro</Link>
+    <Link className="ml-auto inline-flex min-h-11 shrink-0 items-center rounded-lg px-3 font-semibold aria-[current=page]:bg-emerald-50 aria-[current=page]:text-emerald-800" href="/account" aria-current={pathname==='/account'?'page':undefined}>Pro</Link>
     <button className="min-h-11 shrink-0 rounded-lg border px-3 font-semibold" onClick={() => { void Share.share({ title: document.title, url: SITE + location.pathname + location.search }).catch(()=>{}); }}>共有</button>
-  </header>{message?<p role="alert" className="flex items-start gap-2 bg-amber-50 p-3 text-amber-950"><span className="flex-1">{message} <Link href="/account" className="underline">会員・Proで確認</Link></span><button aria-label="閉じる" className="min-h-11 min-w-11 shrink-0" onClick={()=>setMessage('')}>×</button></p>:null}{pathname==='/chatbot'?<SharedUsageMeter/>:null}{pathname==='/features'?<DisplaySettings/>:null}<main className={pathname==='/chatbot'?'':'pb-[calc(var(--mobile-bottom-nav-h)+env(safe-area-inset-bottom)+24px)]'}>{children}</main>{pathname==="/signage/display"?null:<MobileBottomNav />}</ProPurchasePresentationContext.Provider>;
+  </header>{message?<p role="alert" className="flex items-start gap-2 bg-amber-50 p-3 text-amber-950"><span className="flex-1">{message} <Link href="/account" className="underline">Pro画面で確認</Link></span><button aria-label="閉じる" className="min-h-11 min-w-11 shrink-0" onClick={()=>setMessage('')}>×</button></p>:null}{pathname==='/chatbot'?<SharedUsageMeter/>:null}{pathname==='/features'?<DisplaySettings/>:null}<main className={pathname==='/chatbot'?'':'pb-[calc(var(--mobile-bottom-nav-h)+env(safe-area-inset-bottom)+24px)]'}>{children}</main>{pathname==="/signage/display"?null:<MobileBottomNav />}</ProPurchasePresentationContext.Provider>;
 }

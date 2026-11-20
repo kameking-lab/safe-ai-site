@@ -35,6 +35,7 @@ import {
 } from "@/lib/chatbot-safety";
 import { inspectAiOutbound } from "@/lib/ai-outbound-safety";
 import { readChatbotFailure } from "@/lib/chatbot-failure";
+import { isAnzenNativeBuild } from "@/lib/app-store";
 import { ProUpsellCard } from "@/components/pro-upsell-card";
 import type { LegalClarification } from "@/lib/legal-conversation-context";
 import {
@@ -408,6 +409,13 @@ export function ChatbotPanel({
             return;
           }
           if (failure.code === "UNAUTHORIZED") setInput(text);
+          // iOS アプリは登録なしで使える（App Store 5.1.1(v)）。端末の資格情報が無効になっただけなので、
+          // 「会員ログインが必要」とは出さず、アプリ側で資格情報を外して送り直してもらう。
+          if (failure.code === "UNAUTHORIZED" && isAnzenNativeBuild()) {
+            window.dispatchEvent(new Event("anzen-session-rejected"));
+            setError("接続をやり直しました。もう一度送信してください。");
+            return;
+          }
           setError(failure.message);
           if (failure.retryable) setRetryableQuestion(text);
           return;

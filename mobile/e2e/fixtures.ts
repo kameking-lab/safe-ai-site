@@ -24,7 +24,7 @@ export const test = base.extend<{ localBundles: void }>({
           const button = Array.from(panel?.querySelectorAll('button') ?? []).find(b => b.textContent === 'アカウント削除を開始');
           // Never force layout from a mutation callback: that can change the race under investigation.
           const rect = measure ? button?.getBoundingClientRect() : undefined;
-          return { disabled: button?.disabled, busy: panel?.getAttribute('aria-busy'), rect: rect ? { x: rect.x, y: rect.y, width: rect.width, height: rect.height } : null, scrollY, member: document.body?.textContent?.includes('無料会員'), status: panel?.querySelector('[role="status"]')?.textContent };
+          return { disabled: button?.disabled, busy: panel?.getAttribute('aria-busy'), rect: rect ? { x: rect.x, y: rect.y, width: rect.width, height: rect.height } : null, scrollY, member: document.body?.textContent?.includes('無料プラン'), status: panel?.querySelector('[role="status"]')?.textContent };
         };
         const record = (event: unknown, measure = false) => { if (history.length < 500) history.push({ time: performance.now(), ...state(measure), event }); };
         for (const type of ['pointerdown', 'pointerup', 'touchstart', 'touchend', 'mousedown', 'mouseup', 'click']) document.addEventListener(type, event => {

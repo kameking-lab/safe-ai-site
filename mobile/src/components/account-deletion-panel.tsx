@@ -2,17 +2,23 @@
 import { useEffect,useState } from 'react';
 import { prepareDeletion,confirmDeletion,checkDeletion,type DeletionPreparation,type DeletionStatus } from '../lib/account-deletion';
 import { startLogin } from '../lib/session';
-/** A guest (bought without registering) has no sign-in to repeat; the server accepts its device credential. */
-export function AccountDeletionPanel({guest=false}:{guest?:boolean}={}){
+/**
+ * A guest (bought without registering) has no sign-in to repeat; the server accepts its device credential.
+ * Without any session there is no account to delete, so nothing is shown (it must not suggest that an
+ * account is needed). A stored deletion receipt still opens the panel to show its status.
+ */
+export function AccountDeletionPanel({guest=false,hasAccount=true}:{guest?:boolean;hasAccount?:boolean}={}){
   // Prerendered HTML must not accept a click before React installs handlers.
   const [ready,setReady]=useState(false);
   const [preparation,setPreparation]=useState<DeletionPreparation|null>(null);const [confirmation,setConfirmation]=useState('');const [busy,setBusy]=useState(false);const [message,setMessage]=useState('');
   // Collapsed by default to keep the page short; a stored deletion receipt opens it.
   const [open,setOpen]=useState(false);
+  const [receipt,setReceipt]=useState(false);
   const show=(status:DeletionStatus|null)=>{if(status)setMessage(status.status==='completed'?'アカウントと関連する個人データの削除が完了しました。':status.status==='pending'?'削除を受け付けました。ログイン・通知は無効です。Apple連携の解除等を自動処理中です。「削除状況を確認」で完了を確認できます。':'削除はまだ確定していません。本人確認後にもう一度開始してください。');};
-  useEffect(()=>{let active=true;void checkDeletion().then(status=>{if(active&&status){show(status);setOpen(true);}}).catch(()=>{});return()=>{active=false;};},[]);
+  useEffect(()=>{let active=true;void checkDeletion().then(status=>{if(active&&status){show(status);setOpen(true);setReceipt(true);}}).catch(()=>{});return()=>{active=false;};},[]);
   useEffect(()=>{const changed=()=>{setPreparation(null);setConfirmation('');};window.addEventListener('anzen-session-changed',changed);setReady(true);return()=>window.removeEventListener('anzen-session-changed',changed);},[]);
   async function action(run:()=>Promise<void>){if(!ready||busy)return;setBusy(true);try{await run();}catch(e){setMessage(e instanceof Error&&e.message==='REAUTH_REQUIRED'?'削除には直近5分以内の本人確認が必要です。「本人確認のため再ログイン」からログインし、もう一度開始してください。':'処理結果を確認できません。「削除状況を確認」を押してください。未確定の場合は再ログイン後に開始できます。');}finally{setBusy(false);}}
+  if(!hasAccount&&!receipt)return null;
   return <section aria-label="アカウントの削除" aria-busy={!ready||busy} className="rounded border border-red-300 px-4"><details open={open} onToggle={e=>setOpen(e.currentTarget.open)}>
     <summary className="flex min-h-11 cursor-pointer items-center"><h2 className="font-bold">アカウントの削除</h2></summary>
     <div className="space-y-3 pb-4">

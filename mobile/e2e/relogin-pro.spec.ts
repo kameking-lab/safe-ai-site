@@ -76,16 +76,16 @@ test('same-account relogin automatically recovers Pro; another account cannot in
     if(url.pathname.endsWith('/account'))return route.fulfill({headers:cors,json:{displayName:'復帰テスト',email:null,sdsHistory:[]}});
     return route.fulfill({status:503,headers:cors,json:{error:{code:'UNAVAILABLE'}}});
   });
-  await page.goto('/account/');await expect(page.getByRole('button',{name:'Apple / Googleでログイン'})).toBeEnabled();
+  await page.goto('/account/');await expect(page.getByRole('button',{name:'Apple / Googleで連携（任意）'})).toBeEnabled();
   const login=async()=>{
     const opened=await page.evaluate(()=>(window as unknown as Bridge).__loginOpenCount);
-    await page.getByRole('button',{name:'Apple / Googleでログイン'}).click();
+    await page.getByRole('button',{name:'Apple / Googleで連携（任意）'}).click();
     await expect.poll(()=>page.evaluate(()=>(window as unknown as Bridge).__loginOpenCount)).toBe(opened+1);
     await page.evaluate(()=>(window as unknown as Bridge).__loginReturn());
   };
   await login();await expect(page.getByText('Pro 利用中',{exact:true})).toBeVisible();
   await page.getByRole('button',{name:'ログアウト',exact:true}).click();
-  await expect(page.getByRole('button',{name:'Apple / Googleでログイン'})).toBeEnabled();
+  await expect(page.getByRole('button',{name:'Apple / Googleで連携（任意）'})).toBeEnabled();
   const reloginStart=Date.now();await login();
   await expect(page.getByText('Pro 利用中',{exact:true})).toBeVisible();
   const recoveryMs=Date.now()-reloginStart;expect(recoveryMs).toBeLessThan(3000);
@@ -100,10 +100,10 @@ test('same-account relogin automatically recovers Pro; another account cannot in
   await page.getByRole('link',{name:'法令AI',exact:true}).click();
   await expect(page.getByLabel('AIの利用枠')).toContainText('50／50回');
   if(captureDir)await page.screenshot({path:path.join(captureDir,`${info.project.name}-pro-50.png`),fullPage:true});
-  await page.getByRole('link',{name:'会員・Pro',exact:true}).click();
+  await page.getByRole('link',{name:'Pro',exact:true}).click();
   await page.getByRole('button',{name:'ログアウト',exact:true}).click();
-  await expect(page.getByRole('button',{name:'Apple / Googleでログイン'})).toBeEnabled();
-  next='b';await login();await expect(page.getByText('無料会員',{exact:true})).toBeVisible();
+  await expect(page.getByRole('button',{name:'Apple / Googleで連携（任意）'})).toBeEnabled();
+  next='b';await login();await expect(page.getByText('無料プラン',{exact:true})).toBeVisible();
   await expect.poll(()=>reconciles).toBeGreaterThanOrEqual(3);
   await expect(page.getByText('Pro 利用中',{exact:true})).toHaveCount(0);
   if(captureDir){await page.screenshot({path:path.join(captureDir,`${info.project.name}-other-account-free.png`),fullPage:true});await writeFile(path.join(captureDir,`${info.project.name}-relogin.json`),JSON.stringify({source:'mock RevenueCat + mock server; real bundled login/session/UI',recoveryMs,reconciles,trace:await page.evaluate(()=>(window as unknown as Bridge).__billingTrace)},null,2));}

@@ -1,4 +1,5 @@
 import { SafetyNotePurchaseLink } from "./note-purchase-link";
+import { isAnzenNativeBuild } from "@/lib/app-store";
 
 interface NoteGuide {
   key: string;
@@ -61,6 +62,8 @@ const NOTE_GUIDES: readonly NoteGuide[] = [
 ];
 
 export function RelatedSafetyNoteGuides({ courseId }: { courseId: string }) {
+  // iOS アプリ内ではアプリ外で販売するデジタル教材（note の有料記事）へ案内しない（App Store 3.1.1）。
+  if (isAnzenNativeBuild()) return null;
   const guides = NOTE_GUIDES.filter((guide) => guide.courseIds.includes(courseId));
   if (guides.length === 0) return null;
 
