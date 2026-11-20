@@ -17,3 +17,16 @@ export const QUARANTINED_ARTICLE_SLUGS = new Set([
 export function isArticleQuarantined(slug: string): boolean {
   return QUARANTINED_ARTICLE_SLUGS.has(slug);
 }
+
+/** 詳細・一覧・検索で共有する公開判定。明示的な人手確認待ち（null）は非公開。 */
+export function isArticlePublished(
+  article: { slug: string; publishedAt: string; humanReviewedAt?: string | null },
+  now: Date,
+): boolean {
+  return (
+    !isArticleQuarantined(article.slug) &&
+    article.humanReviewedAt !== null &&
+    Boolean(article.publishedAt) &&
+    new Date(article.publishedAt).getTime() <= now.getTime()
+  );
+}

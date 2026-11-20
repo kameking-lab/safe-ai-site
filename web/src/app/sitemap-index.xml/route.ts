@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { computeSitemapFreshness } from "@/lib/sitemap/freshness";
 import { SITE_URL } from "@/lib/seo-metadata";
+import { FATAL_RECORDS_VERIFIED_ON } from "@/lib/seo/fatal-records";
 
 // 柱C-3 / S DRY: 絶対URLのオリジンは seo-metadata.ts の SITE_URL 単一ソース（末尾スラッシュ無し）。
 const BASE = SITE_URL;
@@ -21,6 +22,7 @@ export async function GET() {
     { loc: `${BASE}/sitemap.xml`, lastmod: siteFreshest },
     // 記事個別ページ。公開記事の publishedAt / lastReviewedAt の最大値。
     { loc: `${BASE}/sitemap-articles.xml`, lastmod: freshestArticle },
+    { loc: `${BASE}/sitemap-fatal-accidents.xml`, lastmod: FATAL_RECORDS_VERIFIED_ON },
     // ローカル事故個票は一次資料との本文一致を再検証中のため、空の互換
     // sitemap は維持するが index からは列挙しない。
     // 個別に一次資料照合した通達詳細だけを列挙する。

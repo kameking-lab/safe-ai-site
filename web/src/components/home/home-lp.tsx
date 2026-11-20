@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ChihuahuaButtonContent } from "@/components/chihuahua-button-content";
+import { SafetyGuideLinks } from "@/components/safety-guide-links";
 import Image from "next/image";
 import { ArrowUpRight, BarChart3, Bot, Calculator, FlaskConical, Newspaper, ShieldCheck, Siren } from "lucide-react";
 import { HomeChihuahuaCompanion } from "./home-chihuahua-companion";
@@ -73,7 +74,7 @@ export function HomeLP({ availability, latestNews }: { availability: AutomationC
           <div className={styles.toolGrid}>{use.tools.map(({ href, title, copy, icon: Icon }) => <Link key={href} href={href} prefetch={false} data-lp-tool className={styles.tool}><div className={styles.toolCaption}><Icon size={22} aria-hidden="true" />{href === "/tools/construction-calculators" ? <Image src="/mascot/mascot-calculator.webp" alt="電卓を持ち、計算を案内するチワワ" width={72} height={84} sizes="72px" /> : <ArrowUpRight size={20} aria-hidden="true" />}</div><h4>{title}</h4><p>{copy}</p></Link>)}</div>
         </div>)}</div>
         <nav aria-label="ほかの現場支援ツール" className={styles.supportLinks}><Link href="/chemical-ra" prefetch={false}>化学物質RA</Link><Link href="/ky/paper" prefetch={false}>KY用紙</Link><Link href="/training/safety-seminars" prefetch={false}>安全研修スライド</Link><Link href="/materials/safety-images" prefetch={false}>現場安全看板</Link></nav>
-
+        <SafetyGuideLinks />
       </section>
       <section aria-labelledby="home-origin-heading" className={styles.value}>
         <div className={styles.valueGrid}><p className={styles.sectionLabel}>TIME FOR THE FIELD</p><div><h2 id="home-origin-heading">現場に向き合う時間を、もっと。</h2><div data-origin-copy><p>安全な仕事を支えるのは、現場を知る人の目と判断です。書類づくりや情報整理の負担を減らし、現場を確かめ、仲間と話す時間を増やす。安全AIポータルは、そのための道具をつくっています。</p><p>仲間を守り、仕事に誇りを持って働ける毎日を支えたいと考えています。</p></div><Link href="/about/project-story" className={`${quietLink} mt-7`}>このサイトについて <ArrowUpRight size={16} aria-hidden="true" /></Link></div></div>

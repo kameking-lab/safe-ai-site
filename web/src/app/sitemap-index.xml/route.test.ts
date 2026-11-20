@@ -28,12 +28,13 @@ describe("GET /sitemap-index.xml", () => {
     );
   });
 
-  it("は公開可能な5つの子サイトマップを順に列挙し、隔離中の事故・保護具を除外する", async () => {
+  it("は公開可能な6つの子サイトマップを順に列挙し、隔離中の事故・保護具を除外する", async () => {
     const xml = await getXml();
     const locs = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
     expect(locs).toEqual([
       `${BASE}/sitemap.xml`,
       `${BASE}/sitemap-articles.xml`,
+      `${BASE}/sitemap-fatal-accidents.xml`,
       `${BASE}/sitemap-circulars.xml`,
       `${BASE}/sitemap-chemicals.xml`,
       `${BASE}/sitemap-laws.xml`,
@@ -43,12 +44,12 @@ describe("GET /sitemap-index.xml", () => {
     expect(locs).not.toContain(`${BASE}/sitemap-equipment.xml`);
   });
 
-  it("の全 lastmod は YYYY-MM-DD 形式で5件", async () => {
+  it("の全 lastmod は YYYY-MM-DD 形式で6件", async () => {
     const xml = await getXml();
     const mods = [...xml.matchAll(/<lastmod>([^<]+)<\/lastmod>/g)].map(
       (m) => m[1],
     );
-    expect(mods.length).toBe(5);
+    expect(mods.length).toBe(6);
     for (const m of mods) expect(m).toMatch(ISO);
   });
 
@@ -63,6 +64,7 @@ describe("GET /sitemap-index.xml", () => {
     expect(map[`${BASE}/sitemap.xml`]).toBe(f.siteFreshest);
     expect(map[`${BASE}/sitemap-articles.xml`]).toBe(f.freshestArticle);
     expect(map[`${BASE}/sitemap-accidents.xml`]).toBeUndefined();
+    expect(map[`${BASE}/sitemap-fatal-accidents.xml`]).toBe("2026-11-17");
     expect(map[`${BASE}/sitemap-circulars.xml`]).toBe("2026-08-02");
     expect(map[`${BASE}/sitemap-equipment.xml`]).toBeUndefined();
     expect(map[`${BASE}/sitemap-chemicals.xml`]).toBe(f.chemicalsDataUpdated);

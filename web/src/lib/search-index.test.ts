@@ -294,15 +294,14 @@ describe("buildSearchIndex — 安全標識（sign）の収載", () => {
 });
 
 describe("buildSearchIndex — 法改正記事（article）の収載", () => {
-  it("公開済み記事が article カテゴリで /articles/<slug> へ深リンクされる（横断検索から丸ごと欠落していた穴の是正）", async () => {
+  it("掲載対象の記事が article カテゴリで /articles/<slug> へ深リンクされる", async () => {
     const [index, { getPublishedArticleSearchEntries }] = await Promise.all([
       buildSearchIndex(),
       import("@/lib/articles-search-source"),
     ]);
     const articleItems = index.filter((i) => i.category === "article");
-    // ブラウザ安全な射影源の公開済みエントリを漏れなく収載＝件数一致（欠落 0）
+    // ブラウザ安全な射影源の掲載対象を漏れなく収載する。
     expect(articleItems.length).toBe(getPublishedArticleSearchEntries().length);
-    expect(articleItems.length).toBeGreaterThanOrEqual(1);
     expect(articleItems.every((i) => i.id.startsWith("article-"))).toBe(true);
     // 深リンク先は個別記事のみ＝裸 /articles 一覧には落とさない
     expect(articleItems.every((i) => i.url.startsWith("/articles/"))).toBe(
@@ -313,30 +312,20 @@ describe("buildSearchIndex — 法改正記事（article）の収載", () => {
     expect(articleItems.every((i) => i.subtitle.length > 0)).toBe(true);
   });
 
-  it("深リンク先 slug 集合が正本 getPublishedArticleSlugs に解決する（幽霊URL 0＝generateStaticParams 一致）", async () => {
-    const [index, { getPublishedArticleSlugs }] = await Promise.all([
+  it("深リンク先の集合が公開記事一覧の掲載対象と一致する", async () => {
+    const [index, { getPublishedArticleIndex }] = await Promise.all([
       buildSearchIndex(),
       import("@/lib/articles"),
     ]);
-    // 詳細 /articles/[slug] の generateStaticParams は getPublishedArticleSlugs() を返し、
-    // 未知/未公開 slug は getPublishedArticleBySlug が null→notFound()。収載集合＝解決集合を固定。
-    const canonical = new Set(getPublishedArticleSlugs());
+    const canonical = new Set(getPublishedArticleIndex().map((article) => article.slug));
     const linkedSlugs = index
       .filter((i) => i.category === "article")
       .map((i) => i.url.replace(/^\/articles\//, ""));
-    expect(linkedSlugs.every((s) => canonical.has(s))).toBe(true);
-    // 公開済み記事を漏れなく収載＝双方向一致（soft404 ゼロ・発見性の穴ゼロ）
     expect(new Set(linkedSlugs)).toEqual(canonical);
   });
 
-  it("タグ・キーワードから引け、結果が該当記事へ着地する", async () => {
+  it("隔離中の記事は検索結果に出さない", async () => {
     const index = await buildSearchIndex();
-    // タグ「熱中症」で法改正記事がヒット
-    const heat = searchItems(index, "熱中症", "article");
-    expect(heat.length).toBeGreaterThan(0);
-    expect(
-      heat.some((i) => i.url === "/articles/heat-stroke-2025-mandatory"),
-    ).toBe(true);
     // 隔離中のフルハーネス記事は検索へ出さない
     const harness = searchItems(index, "フルハーネス", "article");
     expect(

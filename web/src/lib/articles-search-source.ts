@@ -10,8 +10,9 @@
 //
 // 方式:
 //   各 JSON を静的 import（fs 非依存＝ブラウザ安全）し、検索に必要な軽量フィールドだけを
-//   射影する。JSON import は本文（sections）も含むが、本モジュールは search-index.ts から
-//   **動的 import される**ため遅延検索チャンク側にのみ載り、メインバンドルは肥大しない
+//   射影する。熱中症記事の本文はサーバー専用の別ファイルに分離している。
+//   本モジュールは search-index.ts から **動的 import される**ため遅延検索チャンク側に
+//   のみ載り、メインバンドルは肥大しない
 //   （court-cases 全件・compact.json 919 物質等を既に遅延ロードしている同じチャンク）。
 //
 // ドリフト防止:
@@ -30,7 +31,7 @@ import kyPaperlessImplementation from "@/data/articles/ky-paperless-implementati
 import scaffold3rdRail2024 from "@/data/articles/scaffold-3rd-rail-2024.json";
 import stressCheck50Employee from "@/data/articles/stress-check-50-employee.json";
 import vibrationIsohazardForestry from "@/data/articles/vibration-isohazard-forestry.json";
-import { isArticleQuarantined } from "@/lib/article-quarantine";
+import { isArticlePublished } from "@/lib/article-quarantine";
 
 /** 記事本文（sections/sources 等）を除いた検索用の軽量射影。 */
 export interface ArticleSearchEntry {
@@ -39,6 +40,7 @@ export interface ArticleSearchEntry {
   description: string;
   publishedAt: string;
   lastReviewedAt: string;
+  humanReviewedAt?: string | null;
   tags: string[];
   keywords: string[];
 }
@@ -50,6 +52,7 @@ interface RawArticle {
   description: string;
   publishedAt: string;
   lastReviewedAt: string;
+  humanReviewedAt?: string | null;
   tags?: string[];
   keywords?: string[];
 }
@@ -78,16 +81,12 @@ export const ARTICLE_SEARCH_ENTRIES: ArticleSearchEntry[] = RAW_ARTICLES.map((a)
   description: a.description,
   publishedAt: a.publishedAt,
   lastReviewedAt: a.lastReviewedAt,
+  humanReviewedAt: a.humanReviewedAt,
   tags: a.tags ?? [],
   keywords: a.keywords ?? [],
 }));
 
-/** publishedAt が now 以下（＝公開済み）のエントリのみを返す。 */
+/** 公開日を過ぎ、確認待ち・隔離に該当しない記事を返す。 */
 export function getPublishedArticleSearchEntries(now: Date = new Date()): ArticleSearchEntry[] {
-  const nowMs = now.getTime();
-  return ARTICLE_SEARCH_ENTRIES.filter((a) => {
-    if (isArticleQuarantined(a.slug)) return false;
-    const pub = new Date(a.publishedAt).getTime();
-    return !Number.isNaN(pub) && pub <= nowMs;
-  });
+  return ARTICLE_SEARCH_ENTRIES.filter((a) => isArticlePublished(a, now));
 }

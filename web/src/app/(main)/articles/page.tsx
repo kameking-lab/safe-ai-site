@@ -4,10 +4,11 @@ import { BookOpen, ClipboardList, HardHat, type LucideIcon } from "lucide-react"
 import { getPublishedArticleIndex } from "@/lib/articles";
 import { ogImageUrl } from "@/lib/og-url";
 import { PageContainer } from "@/components/layout";
-
 import { PageJsonLd } from "@/components/page-json-ld";
+import { SafetyGuideLinks } from "@/components/safety-guide-links";
+
 const _title = "労働安全 解説記事一覧";
-const _desc = "労働安全衛生に関する法改正・運用ガイド・業種別の記事。一次資料、編集更新日、人手内容確認、適用範囲を区別して公開します。";
+const _desc = "労働安全衛生の解説記事と現場の安全ガイド。KY用紙の記入例、化学物質RAの進め方、サイネージの使い方を確認できます。";
 
 export const metadata: Metadata = {
   title: _title,
@@ -42,21 +43,15 @@ export default function ArticlesIndexPage() {
   return (
     <PageContainer width="prose">
       {/* SEO: WebPage + BreadcrumbList */}
-      <PageJsonLd name="労働安全 解説記事一覧" description="労働安全衛生に関する法改正・運用ガイド・業種別の記事。一次資料と監修状態を区別して公開します。" path="/articles" />
+      <PageJsonLd name={_title} description={_desc} path="/articles" />
       <header className="mb-5">
         <h1 className="text-xl font-bold text-slate-900 sm:text-2xl">
           労働安全 解説記事
         </h1>
-        <p className="mt-2 text-sm text-slate-600">
-          公開済み <strong>{articles.length}</strong> 本。一次資料、編集更新日、公式URL取得確認、人手内容確認を区別し、確認できない記事は検索・sitemapから隔離します。
-        </p>
       </header>
+      <SafetyGuideLinks />
 
-      {articles.length === 0 ? (
-        <p className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">
-          公開予定の記事はまだありません。
-        </p>
-      ) : (
+      {articles.length > 0 ? (
         <ul className="space-y-3">
           {articles.map((a) => {
             const cat = CATEGORY_LABELS[a.category];
@@ -81,10 +76,9 @@ export default function ArticlesIndexPage() {
                 {a.sourceRetrievedAt ? (
                   <span>・公式URL取得確認 {a.sourceRetrievedAt}</span>
                 ) : null}
-                <span>
-                  ・人手内容確認{" "}
-                  {a.humanReviewedAt ? a.humanReviewedAt : "未完了"}
-                </span>
+                {a.humanReviewedAt ? (
+                  <span>・人手内容確認 {a.humanReviewedAt}</span>
+                ) : null}
               </div>
               <Link
                 href={`/articles/${a.slug}`}
@@ -109,7 +103,7 @@ export default function ArticlesIndexPage() {
             );
           })}
         </ul>
-      )}
+      ) : null}
     </PageContainer>
   );
 }
