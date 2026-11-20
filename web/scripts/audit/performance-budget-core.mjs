@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto";
+
 export function median(values) {
   if (values.length === 0) return 0;
   const sorted = [...values].sort((a, b) => a - b);
@@ -422,6 +424,25 @@ export function evaluatePerformanceBudget({
   return { failures, sharedActuals };
 }
 
+/** Pin the intentional publication to the same exact paths in both inventories. */
+export function measureInventoryRelease({ expected, sitemapPaths, buildPaths }) {
+  const measure = (paths) => ({
+    routeCount: paths.length,
+    sortedPathSha256: createHash("sha256")
+      .update([...paths].sort().join("\n"))
+      .digest("hex"),
+  });
+  const sitemap = measure(sitemapPaths);
+  const build = measure(buildPaths);
+  const matched =
+    expected.routeCount > 0 &&
+    [sitemap, build].every(
+      ({ routeCount, sortedPathSha256 }) =>
+        routeCount === expected.routeCount && sortedPathSha256 === expected.sortedPathSha256,
+    );
+  return { expected, sitemap, build, matched };
+}
+
 function intersectUrls(scriptMaps) {
   let intersection = null;
   for (const scripts of scriptMaps) {
@@ -602,6 +623,7 @@ export async function collectBuildRouteInventory({
 }) {
   const concreteRoutes = new Set();
   const generatedRoutesByPattern = {};
+  const generatedPathsByPattern = {};
   let pageDefinitionCount = 0;
   let dynamicPageDefinitionCount = 0;
 
@@ -620,15 +642,15 @@ export async function collectBuildRouteInventory({
     const paramsList = await generatedParamsForTree(
       compiledPage?.routeModule?.userland?.loaderTree,
     );
-    let generatedCount = 0;
+    const generatedPaths = [];
     for (const params of paramsList) {
       const route = materializeRoute(routePattern, params);
-      if (!route) continue;
-      const sizeBefore = concreteRoutes.size;
+      if (!route || concreteRoutes.has(route)) continue;
       concreteRoutes.add(route);
-      if (concreteRoutes.size > sizeBefore) generatedCount += 1;
+      generatedPaths.push(route);
     }
-    generatedRoutesByPattern[routePattern] = generatedCount;
+    generatedRoutesByPattern[routePattern] = generatedPaths.length;
+    generatedPathsByPattern[routePattern] = generatedPaths;
   }
 
   return {
@@ -638,5 +660,6 @@ export async function collectBuildRouteInventory({
     generatedRouteCount:
       concreteRoutes.size - (pageDefinitionCount - dynamicPageDefinitionCount),
     generatedRoutesByPattern,
+    generatedPathsByPattern,
   };
 }

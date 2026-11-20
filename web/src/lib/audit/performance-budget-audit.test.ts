@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import {
@@ -7,6 +8,7 @@ import {
   evaluateLighthouseScoreTargets,
   evaluatePerformanceBudget,
   lighthouseRunMustFail,
+  measureInventoryRelease,
   validateLighthouseReport,
 } from "../../../scripts/audit/performance-budget-core.mjs";
 import {
@@ -544,6 +546,24 @@ describe("performance budget measurement", () => {
     ]);
   });
 
+  it("allows only the reviewed paths in both release inventories", () => {
+    const detail = "/fatal-accidents/2019-D-000002";
+    const archive = "/fatal-accidents/archive/2019";
+    const reviewed = [detail, archive];
+    const expected = {
+      routeCount: 2,
+      sortedPathSha256: createHash("sha256").update(reviewed.join("\n")).digest("hex"),
+    };
+    const match = (sitemapPaths: string[], buildPaths: string[]) =>
+      measureInventoryRelease({ expected, sitemapPaths, buildPaths }).matched;
+
+    expect(match([archive, detail], reviewed)).toBe(true);
+    expect(match([detail, detail], reviewed)).toBe(false);
+    expect(match(reviewed, [detail])).toBe(false);
+    const unreviewed = [detail, "/fatal-accidents/archive/2024"];
+    expect(match(unreviewed, unreviewed)).toBe(false);
+  });
+
   it("fails closed when a required limit or inventory baseline is invalid", () => {
     const budget = structuredClone(PERFORMANCE_BUDGET);
     budget.shared.commonCssBytesMax = undefined;
@@ -871,6 +891,10 @@ describe("performance budget measurement", () => {
       generatedRoutesByPattern: {
         "/docs/[slug]": 2,
         "/private/[id]": 0,
+      },
+      generatedPathsByPattern: {
+        "/docs/[slug]": ["/docs/first", "/docs/second"],
+        "/private/[id]": [],
       },
     });
   });

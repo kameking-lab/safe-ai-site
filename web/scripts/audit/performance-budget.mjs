@@ -25,6 +25,7 @@ import {
   evaluateLighthouseScoreTargets,
   evaluatePerformanceBudget,
   lighthouseNoindexSeoPolicyCompliant,
+  measureInventoryRelease,
   median,
   validateLighthouseReport,
 } from "./performance-budget-core.mjs";
@@ -542,6 +543,7 @@ if (childSitemapUrls.length === 0) {
   throw new Error("sitemap-index.xml has no child sitemap");
 }
 const indexedUrls = new Set();
+const fatalAccidentSitemapPaths = [];
 for (const child of childSitemapUrls) {
   const publicUrl = new URL(child);
   const response = await fetch(new URL(`${publicUrl.pathname}${publicUrl.search}`, baseUrl), {
@@ -552,7 +554,14 @@ for (const child of childSitemapUrls) {
   }
   const xml = await response.text();
   for (const match of xml.matchAll(/<loc>([^<]+)<\/loc>/g)) {
-    indexedUrls.add(match[1].replaceAll("&amp;", "&"));
+    const loc = match[1].replaceAll("&amp;", "&");
+    indexedUrls.add(loc);
+    if (publicUrl.pathname === "/sitemap-fatal-accidents.xml" && !publicUrl.search) {
+      const path = loc.startsWith(`${publicUrl.origin}/`)
+        ? loc.slice(publicUrl.origin.length)
+        : "";
+      fatalAccidentSitemapPaths.push(path);
+    }
   }
 }
 const sitemapUrlCount = indexedUrls.size;
@@ -577,14 +586,41 @@ const prerenderManifestRouteCount = Object.keys(
 ).length;
 const staticPageCount = buildRouteInventory.concreteRouteCount;
 
+// Subtract the planned publication from both totals only when the child sitemap
+// and compiled routes each match the reviewed release. All other inventory still
+// uses the existing baselines and change limits.
+const verifiedFatalAccidentRelease = budget.verifiedFatalAccidentRelease
+  ? measureInventoryRelease({
+    expected: budget.verifiedFatalAccidentRelease,
+    sitemapPaths: fatalAccidentSitemapPaths,
+    buildPaths: [
+      ...(buildRouteInventory.generatedPathsByPattern["/fatal-accidents/[id]"] ?? []),
+      ...(buildRouteInventory.generatedPathsByPattern["/fatal-accidents/archive/[year]"] ?? []),
+    ],
+  })
+  : null;
+const releaseRouteCount = verifiedFatalAccidentRelease?.matched
+  ? verifiedFatalAccidentRelease.expected.routeCount
+  : 0;
+const comparedWithBaseline = {
+  sitemapUrlCount: sitemapUrlCount - releaseRouteCount,
+  staticPageCount: staticPageCount - releaseRouteCount,
+};
 const budgetEvaluation = evaluatePerformanceBudget({
   budget,
   commonClientJsBytes,
   routeActuals,
-  inventory: { sitemapUrlCount, staticPageCount },
+  inventory: comparedWithBaseline,
   lighthouseScoreFailures,
 });
 const { failures, sharedActuals } = budgetEvaluation;
+if (verifiedFatalAccidentRelease && !verifiedFatalAccidentRelease.matched) {
+  failures.push({
+    id: "verified-fatal-accident-inventory",
+    reason: "release-paths-mismatch",
+    ...verifiedFatalAccidentRelease,
+  });
+}
 const warnings = [];
 
 if ((summary.executionFailures ?? []).length > 0) {
@@ -642,6 +678,8 @@ const result = {
       childSitemapCount: childSitemapUrls.length,
       legacyRootSitemapUrls: rootSitemapUrls,
       staticPageCount,
+      comparedWithBaseline,
+      verifiedFatalAccidentRelease,
       staticPageCountMethod: "compiled-app-page-route-inventory",
       prerenderManifestRouteCount,
       pageDefinitionCount: buildRouteInventory.pageDefinitionCount,

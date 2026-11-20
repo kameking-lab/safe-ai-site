@@ -211,5 +211,9 @@
     "sitemapUrlCountBaseline": 3650,
     "staticPageCountBaseline": 3413,
     "allowedChangeFraction": 0.02
+  },
+  "verifiedFatalAccidentRelease": {
+    "routeCount": 2284,
+    "sortedPathSha256": "7b5341279fa825535fa858a8b9ea2ccb5546dfce1180ee6a91e25923c17f30f9"
   }
 }
