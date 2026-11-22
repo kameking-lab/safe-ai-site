@@ -5,10 +5,12 @@ import { ArrowRight, CalendarDays, ExternalLink, ShieldAlert } from "lucide-reac
 import { AccidentHubNav } from "@/components/accident-hub-nav";
 import { PageContainer } from "@/components/layout";
 import { PageJsonLd } from "@/components/page-json-ld";
+import { WorkplaceShare } from "@/components/workplace-share";
 import { buildLegacyFatalAccidentsRedirect } from "@/lib/accident-news/legacy-route";
 import { loadHomeLatestAccidentNews } from "@/lib/home/home-accident-server";
 import { ogImageUrl } from "@/lib/og-url";
 import { VERIFIED_CASE_NOTES } from "@/lib/accident-news/verified-case-notes";
+import { workplaceShareUrl } from "@/lib/workplace-share";
 
 const TITLE = "国内の死亡事故速報｜直近の報道を公表日時順に確認";
 const DESCRIPTION =
@@ -124,7 +126,8 @@ export default async function AccidentNewsPage({
               {latestNews.items.map((report) => (
                 <li
                   key={report.publicId}
-                  className="flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+                  id={report.publicId}
+                  className="flex scroll-mt-24 flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm target:border-emerald-600"
                   data-accident-origin="reported-unverified"
                 >
                   <p className="text-xs font-bold text-slate-600">
@@ -160,6 +163,12 @@ export default async function AccidentNewsPage({
                       元記事で確認する
                       <ExternalLink className="h-4 w-4" aria-hidden="true" />
                     </a>
+                    <WorkplaceShare
+                      kind="accident_news"
+                      title={report.title}
+                      summary={`報道見出し（一次資料未確認）\n一般的な関連対策：${report.measure}\n元記事（${report.publisher}）：${report.href}`}
+                      url={workplaceShareUrl("/accident-news", report.publicId)}
+                    />
                   </div>
                 </li>
               ))}

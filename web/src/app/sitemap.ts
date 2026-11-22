@@ -100,6 +100,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.9,
       changeFrequency: "hourly",
     },
+    {
+      url: "/morning-briefing",
+      lastModified: "2026-11-22",
+      priority: 0.8,
+      changeFrequency: "monthly",
+    },
     // 厚労省死亡災害DBの類型検索。スナップショット更新日に追従。
     {
       url: "/fatal-accidents",

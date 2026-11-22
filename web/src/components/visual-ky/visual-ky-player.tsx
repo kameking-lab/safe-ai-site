@@ -30,6 +30,8 @@ import { getVisualKyCategory } from "@/data/visual-ky/categories";
 import { trackVisualKyEvent } from "@/lib/visual-ky/analytics";
 import { MascotGuide } from "@/components/mascot-guide";
 import { KyHandoffLink } from "@/components/ky-handoff-link";
+import { WorkplaceShare } from "@/components/workplace-share";
+import { workplaceShareUrl } from "@/lib/workplace-share";
 
 type PlayerPhase = "observe" | "select" | "explain" | "measures" | "summary";
 
@@ -807,6 +809,17 @@ export function VisualKyPlayer({
                 ctaPosition: "summary",
                 completionState: "completed",
               })}
+            />
+          </div>
+          <div className="mt-3">
+            <WorkplaceShare
+              kind="ky"
+              title={`ビジュアルKYT：${scenario.shortTitle}`}
+              summary={[
+                scenario.facilitator.summary,
+                ...scenario.officialSources.map((source) => `出典（${source.organization}）：${source.url}`),
+              ].join("\n")}
+              url={workplaceShareUrl(`/training/visual-ky/${scenario.slug}`)}
             />
           </div>
           <details className="mt-3 rounded-xl border border-slate-300 bg-white px-3 dark:border-slate-700 dark:bg-slate-950">

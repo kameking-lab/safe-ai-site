@@ -14,6 +14,8 @@ import {
   filterKyExamples,
 } from "@/data/ky-examples";
 import { ConclusionCard } from "@/components/ui/conclusion-card";
+import { WorkplaceShare } from "@/components/workplace-share";
+import { workplaceShareUrl } from "@/lib/workplace-share";
 
 export function KyExamplesBrowser() {
   const [industry, setIndustry] = useState<KyIndustryId | "">("");
@@ -39,6 +41,14 @@ export function KyExamplesBrowser() {
             建設・製造・運輸・医療福祉・サービスの5業種×10作業別に整理した
             {KY_EXAMPLES.length}件のサイト独自モデルケースです。
           </p>
+          <div className="mt-3">
+            <WorkplaceShare
+              kind="ky"
+              title="KY事例データベース"
+              summary={"業種・作業種別で探せるKYモデルケース（架空の学習例）\n出典：安全AIポータル"}
+              url={workplaceShareUrl("/ky-examples")}
+            />
+          </div>
         </header>
 
         <p className="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-950">
@@ -85,7 +95,8 @@ export function KyExamplesBrowser() {
           {filtered.map((ex) => (
             <li
               key={ex.id}
-              className="flex flex-col gap-2 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
+              id={ex.id}
+              className="flex scroll-mt-24 flex-col gap-2 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm target:border-emerald-600"
             >
               <div className="flex flex-wrap gap-1.5">
                 <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-bold text-indigo-800">

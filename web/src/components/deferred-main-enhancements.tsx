@@ -24,6 +24,7 @@ export function DeferredMainEnhancements() {
   const [ready, setReady] = useState(false);
   const pathname = usePathname();
   const blocksTask = isWorkContextPath(pathname);
+  const hasWorkplaceShare = pathname === "/morning-briefing" || pathname === "/accident-news" || pathname === "/ky-examples";
 
   useEffect(() => {
     if (blocksTask) return;
@@ -46,7 +47,7 @@ export function DeferredMainEnhancements() {
   return (
     <>
       <FeedbackGateModal />
-      <ShareButtons fixed />
+      {!hasWorkplaceShare && <ShareButtons fixed />}
     </>
   );
 }

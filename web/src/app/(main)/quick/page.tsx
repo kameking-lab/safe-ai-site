@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { QuickLauncher } from "@/components/QuickLauncher";
 import { PageContainer } from "@/components/layout";
 
@@ -23,6 +24,9 @@ export default function QuickPage() {
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
             今日の現場に必要なものを、3分で確認
           </p>
+          <Link href="/morning-briefing" className="inline-flex min-h-11 items-center text-sm font-bold text-brand-primary underline underline-offset-4">
+            朝礼ネタを読む
+          </Link>
         </header>
         <QuickLauncher />
       </PageContainer>
