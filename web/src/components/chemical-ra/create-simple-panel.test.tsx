@@ -65,7 +65,7 @@ describe("化学物質リスクアセスメント画面", () => {
     fireEvent.click(screen.getByRole("button", { name: "結果の要約を共有" }));
     const line = screen.getByRole<HTMLAnchorElement>("link", { name: "LINEで送る" });
     expect(new URL(line.href).searchParams.get("text")).toMatch(
-      /^化学物質リスクアセスメントの結果\n物質：トルエン\n最も高い判定：レベル[^\n]+\n\nhttps:\/\/www\.anzen-ai-portal\.jp\/chemical-ra\?utm_source=share$/,
+      /^https:\/\/www\.anzen-ai-portal\.jp\/chemical-ra\?utm_source=share\n\n化学物質リスクアセスメントの結果\n物質：トルエン\n最も高い判定：レベル[^\n]+$/,
     );
     expect(screen.getByRole("heading", { name: "レベルを下げるには" })).toBeDefined();
     const applyButtons = screen.getAllByRole("button", { name: "この条件にする" });

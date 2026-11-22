@@ -31,6 +31,12 @@ const SENSITIVE_ROUTE_PREFIXES = [
 const SENSITIVE_ROUTE_SEGMENT = /(?:^|\/)(?:share|invite|callback|token|access-token)(?:\/|$)/i;
 const SENSITIVE_URL_PARAM = /^(?:q|query|question|search|keyword|token|access_?token|id_?token|code|state|session|secret|share|invite|email|phone|name|message|text)$/i;
 
+// Query parameters are user-controlled. Only fixed channel labels may be sent.
+const ATTRIBUTION_VALUES = {
+  utm_source: new Set(["share", "line", "teams", "newsletter", "anzen_ai_portal"]),
+  utm_medium: new Set(["share", "social", "referral", "email", "messaging", "line", "teams"]),
+};
+
 const BLOCKED_PARAM_NAME =
   /(?:query|question|search|email|phone|name|message|text|description|token|secret|url|location)/i;
 
@@ -49,6 +55,15 @@ const AD_READING_PAGES = new Set([
 const AD_VERIFIED_DETAIL_PAGES = new Set([
   "/circulars/mhlw-notice-0014",
 ]);
+
+function safeAttribution(searchParams: URLSearchParams): URLSearchParams {
+  const attribution = new URLSearchParams();
+  for (const [key, allowed] of Object.entries(ATTRIBUTION_VALUES)) {
+    const values = searchParams.getAll(key);
+    if (values.length === 1 && allowed.has(values[0])) attribution.set(key, values[0]);
+  }
+  return attribution;
+}
 
 export function isOptionalTrackingPath(pathname: string): boolean {
   let normalized = pathname;
@@ -72,14 +87,17 @@ export function isOptionalTrackingUrl(value: string | URL): boolean {
   }
   if (!isOptionalTrackingPath(url.pathname)) return false;
   // Visual KY variants can expose UI state in GA's automatic page_location.
-  // Only the fixed attribution marker on a public scenario is safe to allow.
+  // Limit query-bearing URLs to public scenarios with fixed attribution labels.
   if (
     (url.pathname === "/training/visual-ky" ||
       url.pathname.startsWith("/training/visual-ky/")) &&
-    url.search.length > 0 &&
-    !(url.search === "?utm_source=share" && /^\/training\/visual-ky\/[a-z0-9-]+$/.test(url.pathname) && !url.hash)
+    url.search.length > 0
   ) {
-    return false;
+    if (url.hash || !/^\/training\/visual-ky\/[a-z0-9-]+$/.test(url.pathname)) return false;
+    const attribution = safeAttribution(url.searchParams);
+    for (const [key, value] of url.searchParams) {
+      if (attribution.get(key) !== value) return false;
+    }
   }
   // 相談種別を事前選択するクエリを含め、相談ページのクエリは一切計測しない。
   if (url.pathname === "/services/automation" && url.search.length > 0) return false;
@@ -122,7 +140,11 @@ export function sanitizedAnalyticsLocation(value: string | URL): {
     return null;
   }
   if (!isOptionalTrackingUrl(url)) return null;
-  return { page_path: url.pathname, page_location: `${url.origin}${url.pathname}` };
+  const attribution = safeAttribution(url.searchParams).toString();
+  return {
+    page_path: url.pathname,
+    page_location: `${url.origin}${url.pathname}${attribution ? `?${attribution}` : ""}`,
+  };
 }
 
 export function sanitizeAnalyticsParams(

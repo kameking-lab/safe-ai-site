@@ -41,6 +41,14 @@ export function KyExamplesBrowser() {
             建設・製造・運輸・医療福祉・サービスの5業種×10作業別に整理した
             {KY_EXAMPLES.length}件のサイト独自モデルケースです。
           </p>
+          <div className="mt-3">
+            <WorkplaceShare
+              kind="ky"
+              title="KY事例データベース"
+              summary={"業種・作業種別で探せるKYモデルケース（架空の学習例）\n出典：安全AIポータル"}
+              url={workplaceShareUrl("/ky-examples")}
+            />
+          </div>
         </header>
 
         <p className="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-950">
@@ -126,12 +134,6 @@ export function KyExamplesBrowser() {
               <footer className="mt-auto border-t border-amber-200 pt-2 text-[10px] leading-5 text-amber-900">
                 区分: {ex.source.label} / 検証状態: 未確認 / AI根拠利用: 不可
               </footer>
-              <WorkplaceShare
-                kind="ky"
-                title={`KYモデルケース（架空）：${ex.title}`}
-                summary={`危険要因：${ex.hazards[0]}\nリスク：${ex.risks[0]}\n対策：${ex.countermeasures[0]}\n出典：安全AIポータル`}
-                url={workplaceShareUrl("/ky-examples", ex.id)}
-              />
             </li>
           ))}
         </ul>

@@ -9,6 +9,7 @@ vi.mock("@/lib/track-events", () => ({ trackEvent }));
 
 const url = workplaceShareUrl("/morning-briefing", "scaffold-fall");
 const summary = "手すりと開口部を確認。\n出典：https://www.mhlw.go.jp/";
+const expected = `https://www.anzen-ai-portal.jp/morning-briefing?utm_source=share#scaffold-fall\n\n足場の朝礼\n${summary}`;
 const writeText = vi.fn();
 
 function openShare() {
@@ -27,17 +28,16 @@ afterEach(() => {
   vi.unstubAllGlobals();
   Reflect.deleteProperty(navigator, "clipboard");
   Reflect.deleteProperty(navigator, "share");
+  Reflect.deleteProperty(navigator, "canShare");
   localStorage.clear();
 });
 
 describe("職場への共有", () => {
-  it("出典と公開の着地リンクをコピー・LINE向けに入れ、コピー成功を1回計測する", async () => {
+  it("コピー・LINEの共有文を自サイトのURLで始め、出典を後ろに残す", async () => {
     openShare();
     expect(screen.queryByRole("button", { name: "共有シートを開く" })).toBeNull();
-    expect(screen.getByRole("link", { name: "Xで共有" })).toBeDefined();
     expect(trackEvent).not.toHaveBeenCalled();
 
-    const expected = `足場の朝礼\n${summary}\n\nhttps://www.anzen-ai-portal.jp/morning-briefing?utm_source=share#scaffold-fall`;
     const lineUrl = new URL((screen.getByRole("link", { name: "LINEで送る" }) as HTMLAnchorElement).href);
     expect(lineUrl.searchParams.get("text")).toBe(expected);
     fireEvent.click(screen.getByRole("button", { name: "要点とリンクをコピー" }));
@@ -46,17 +46,38 @@ describe("職場への共有", () => {
     expect(trackEvent.mock.calls).toEqual([["workplace_share", { content_kind: "morning", method: "copy" }]]);
   });
 
-  it("共有シートの取消しは数えず、次の成功だけ数える", async () => {
+  it("一度の操作で自サイトのURLから始まる共有シートを開き、成功だけ数える", async () => {
     const nativeShare = vi.fn().mockRejectedValueOnce(new DOMException("", "AbortError")).mockResolvedValueOnce(undefined);
     Object.defineProperty(navigator, "share", { configurable: true, value: nativeShare });
     openShare();
-    const button = screen.getByRole("button", { name: "共有シートを開く" });
-    fireEvent.click(button);
+    const button = screen.getByRole("button", { name: "職場に共有" });
+    expect(nativeShare.mock.calls).toEqual([[{ title: "足場の朝礼", text: expected }]]);
+    expect(screen.queryByRole("link", { name: "LINEで送る" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "要点とリンクをコピー" })).toBeNull();
     expect(trackEvent).not.toHaveBeenCalled();
     fireEvent.click(button);
-    expect(nativeShare).toHaveBeenLastCalledWith({ title: "足場の朝礼", text: `足場の朝礼\n${summary}`, url });
+    expect(nativeShare).toHaveBeenLastCalledWith({ title: "足場の朝礼", text: expected });
     await waitFor(() => expect(trackEvent).toHaveBeenCalledTimes(1));
     expect(trackEvent).toHaveBeenCalledWith("workplace_share", { content_kind: "morning", method: "native" });
+  });
+
+  it("共有文を共有シートで扱えない場合はコピーとLINEを表示する", () => {
+    const nativeShare = vi.fn();
+    Object.defineProperty(navigator, "share", { configurable: true, value: nativeShare });
+    Object.defineProperty(navigator, "canShare", { configurable: true, value: () => false });
+    openShare();
+    expect(nativeShare).not.toHaveBeenCalled();
+    expect(screen.getByRole("link", { name: "LINEで送る" })).toBeDefined();
+    expect(screen.getByRole("button", { name: "要点とリンクをコピー" })).toBeDefined();
+  });
+
+  it("共有シートが拒否された場合もコピーとLINEを使える", async () => {
+    const nativeShare = vi.fn().mockRejectedValue(new DOMException("", "NotAllowedError"));
+    Object.defineProperty(navigator, "share", { configurable: true, value: nativeShare });
+    openShare();
+    expect(await screen.findByRole("link", { name: "LINEで送る" })).toBeDefined();
+    expect(screen.getByRole("button", { name: "要点とリンクをコピー" })).toBeDefined();
+    expect(trackEvent).not.toHaveBeenCalled();
   });
 
   it("コピーを拒否されたときは手動で選択できる共有文を表示する", async () => {

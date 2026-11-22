@@ -81,7 +81,7 @@ describe("analytics privacy", () => {
     ).toBe(false);
   });
 
-  it("rejects token/search params and returns only a query-free public location", () => {
+  it("rejects token/search params and strips unrelated query params and fragments", () => {
     expect(isOptionalTrackingUrl("https://example.test/laws?access_token=secret")).toBe(false);
     expect(isOptionalTrackingUrl("https://example.test/laws?q=worker-name")).toBe(false);
     expect(isOptionalTrackingUrl("https://example.test/laws?year=2026")).toBe(true);
@@ -111,6 +111,27 @@ describe("analytics privacy", () => {
     });
   });
 
+  it("keeps only known source and medium labels in the page view location", () => {
+    expect(sanitizedAnalyticsLocation(
+      "https://example.test/morning-briefing?utm_medium=referral&utm_campaign=fall&utm_source=share&filter=worker#scaffold-fall",
+    )).toEqual({
+      page_path: "/morning-briefing",
+      page_location: "https://example.test/morning-briefing?utm_source=share&utm_medium=referral",
+    });
+    expect(sanitizedAnalyticsLocation(
+      "https://example.test/accident-news?utm_source=share&email=worker%40example.test",
+    )).toBeNull();
+  });
+
+  it("drops personal, unknown, and repeated attribution values", () => {
+    expect(sanitizedAnalyticsLocation(
+      "https://example.test/accident-news?utm_source=worker%40example.test&utm_medium=referral",
+    )?.page_location).toBe("https://example.test/accident-news?utm_medium=referral");
+    expect(sanitizedAnalyticsLocation(
+      "https://example.test/accident-news?utm_source=share&utm_source=0123456789&utm_medium=worker-name",
+    )?.page_location).toBe("https://example.test/accident-news");
+  });
+
   it("drops query-like and identifying custom event parameters", () => {
     const marker = "privacy-audit-marker@example.test";
     const safe = sanitizeAnalyticsParams({
@@ -127,9 +148,12 @@ describe("analytics privacy", () => {
   it("allows the fixed public KY share attribution and keeps private RA excluded", () => {
     const ky = "https://example.test/training/visual-ky/scaffold-fall";
     expect(isOptionalTrackingUrl(`${ky}?utm_source=share`)).toBe(true);
+    expect(sanitizedAnalyticsLocation(`${ky}?utm_source=share&utm_medium=messaging`)?.page_location)
+      .toBe(`${ky}?utm_source=share&utm_medium=messaging`);
     expect(isOptionalTrackingUrl(`${ky}?utm_source=share&result=complete`)).toBe(false);
     expect(isOptionalTrackingUrl(`${ky}?utm_source=share#progress`)).toBe(false);
-    expect(isOptionalTrackingUrl("https://example.test/chemical-ra?utm_source=share")).toBe(false);
+    expect(isOptionalTrackingUrl(`${ky}?utm_source=share&utm_medium=worker-name`)).toBe(false);
+    expect(sanitizedAnalyticsLocation("https://example.test/chemical-ra?utm_source=share")).toBeNull();
   });
 
   it("honors DNT and GPC before optional analytics", () => {

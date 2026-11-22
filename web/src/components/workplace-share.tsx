@@ -40,19 +40,25 @@ export function WorkplaceShare({
   const optionsId = useId();
   const trigger = useRef<HTMLButtonElement>(null);
   const [opened, setOpened] = useState(false);
-  const [nativeAvailable, setNativeAvailable] = useState(false);
   const [feedback, setFeedback] = useState<"copied" | "manual-copy" | "share-failed" | null>(null);
-  const text = `${title}\n${summary}`;
-  const message = `${text}\n\n${url}`;
+  const message = `${url}\n\n${title}\n${summary}`;
 
   async function share() {
     setFeedback(null);
+    // Share targets can put the separate URL field after the text.
+    const data = { title, text: message };
+    if (typeof navigator.share !== "function" || navigator.canShare?.(data) === false) {
+      setOpened(!opened);
+      return;
+    }
+    setOpened(false);
     try {
-      await navigator.share({ title, text, url });
+      await navigator.share(data);
       trackShare(kind, "native");
     } catch (error) {
       // AbortError also covers devices without a usable share target.
       if (!(error instanceof DOMException && error.name === "AbortError")) {
+        setOpened(true);
         setFeedback("share-failed");
       }
     }
@@ -85,11 +91,7 @@ export function WorkplaceShare({
         aria-expanded={opened}
         aria-controls={optionsId}
         className={actionClass}
-        onClick={() => {
-          setOpened(!opened);
-          setFeedback(null);
-          setNativeAvailable(typeof navigator.share === "function");
-        }}
+        onClick={share}
       >
         <Share2 className="h-4 w-4" aria-hidden="true" />
         {kind === "chemical_ra" ? "結果の要約を共有" : "職場に共有"}
@@ -98,9 +100,6 @@ export function WorkplaceShare({
         {opened && (
           <>
             <div className="mt-2 flex flex-wrap gap-2">
-              {nativeAvailable && (
-                <button type="button" className={actionClass} onClick={share}>共有シートを開く</button>
-              )}
               <button type="button" className={actionClass} onClick={copy}>要点とリンクをコピー</button>
               <a
                 className={actionClass}
@@ -111,17 +110,6 @@ export function WorkplaceShare({
               >
                 LINEで送る
               </a>
-              {kind !== "chemical_ra" && (!nativeAvailable || feedback === "share-failed") && (
-                <a
-                  className={actionClass}
-                  href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => trackShare(kind, "x")}
-                >
-                  Xで共有
-                </a>
-              )}
             </div>
             <div role="status" className="mt-1 text-sm text-slate-700 dark:text-slate-200">
               {feedback === "copied" && "コピーしました"}
