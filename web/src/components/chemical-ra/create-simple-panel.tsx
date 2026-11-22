@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FileDown, Loader2, Plus, Printer, Save, Search, Trash2, X } from "lucide-react";
 import { useOptionalTransientQueryBridge } from "@/components/home-safety-cockpit/transient-query-bridge";
 import { KyHandoffLink } from "@/components/ky-handoff-link";
+import { WorkplaceShare } from "@/components/workplace-share";
 import { inspectChemicalNavigationQuery } from "@/lib/chemical/query-safety";
 import { assessCreateSimple } from "@/lib/create-simple/assess";
 import { loadSubstanceData, type LoadedSubstanceData } from "@/lib/create-simple/client-data";
@@ -13,6 +14,7 @@ import {
   CONTACT_AREA_LABEL,
   GLOVE_LABEL,
   GLOVE_TRAINING_LABEL,
+  RISK_LEVEL_LABEL,
   RISK_LEVEL_MEANING,
   VENTILATION_LABEL,
   WORKING_HOURS_LABEL,
@@ -33,6 +35,7 @@ import type {
   CsVolatility,
   CsWorkingHours,
 } from "@/lib/create-simple/types";
+import { workplaceShareUrl } from "@/lib/workplace-share";
 import { ChoiceChips, YesNoChips } from "./choice-chips";
 import { ComponentCard } from "./component-card";
 import { ManualSubstanceForm } from "./manual-substance-form";
@@ -40,6 +43,7 @@ import { PrintReport } from "./print-report";
 import { LevelBadge, ResultView } from "./result-view";
 
 const EXAMPLES = ["トルエン", "キシレン", "酢酸エチル"];
+const RESULT_SHARE_URL = workplaceShareUrl("/chemical-ra");
 
 interface ComponentDraft {
   key: string;
@@ -285,6 +289,14 @@ export function CreateSimplePanel({ initialQuery = "" }: { initialQuery?: string
   const improvements = useMemo(() => (input ? suggestImprovements(input) : []), [input]);
   const plan = useMemo(() => (input ? planImprovements(input) : null), [input]);
   const worst = useMemo(() => (result ? worstLevel(summarize(result)) : null), [result]);
+  const shareSummary = worst ? [
+    `物質：${[...new Set(components.map(({ record, manual }) => {
+      if (record) return record[1];
+      const catalogName = manual?.cas ? data?.byCas.get(manual.cas)?.[1] : undefined;
+      return catalogName && catalogName === manual?.name ? catalogName : "手入力の物質";
+    }))].join("、")}`,
+    `最も高い判定：${RISK_LEVEL_LABEL[worst]}`,
+  ].join("\n") : null;
 
   const update = <K extends keyof ConditionDraft>(key: K, value: ConditionDraft[K]) =>
     setDraft((d) => ({ ...d, [key]: value }));
@@ -312,6 +324,7 @@ export function CreateSimplePanel({ initialQuery = "" }: { initialQuery?: string
   };
 
   const openRecord = (r: CsSavedRecord) => {
+    ensureData();
     setDraft(fromConditions(r.conditions));
     setComponents(
       r.components.map((c) => ({
@@ -710,6 +723,15 @@ export function CreateSimplePanel({ initialQuery = "" }: { initialQuery?: string
               )}
               {result && input && (
                 <div className="mt-4 space-y-3 border-t border-slate-100 pt-4 dark:border-slate-800">
+                  {shareSummary && (
+                    <WorkplaceShare
+                      key={shareSummary}
+                      kind="chemical_ra"
+                      title="化学物質リスクアセスメントの結果"
+                      summary={shareSummary}
+                      url={RESULT_SHARE_URL}
+                    />
+                  )}
                   <label htmlFor="cs-title" className="text-sm font-bold text-slate-900 dark:text-slate-100">
                     記録の名前（作業名）
                   </label>

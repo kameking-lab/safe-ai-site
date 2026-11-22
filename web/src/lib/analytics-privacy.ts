@@ -71,14 +71,13 @@ export function isOptionalTrackingUrl(value: string | URL): boolean {
     return false;
   }
   if (!isOptionalTrackingPath(url.pathname)) return false;
-  // Visual KY query variants are UI state (print format, result, facilitator
-  // controls). GA automatically attaches page_location to custom events, so
-  // keep optional scripts and events off whenever one of these URLs has a
-  // query instead of relying only on event-param sanitization.
+  // Visual KY variants can expose UI state in GA's automatic page_location.
+  // Only the fixed attribution marker on a public scenario is safe to allow.
   if (
     (url.pathname === "/training/visual-ky" ||
       url.pathname.startsWith("/training/visual-ky/")) &&
-    url.search.length > 0
+    url.search.length > 0 &&
+    !(url.search === "?utm_source=share" && /^\/training\/visual-ky\/[a-z0-9-]+$/.test(url.pathname) && !url.hash)
   ) {
     return false;
   }

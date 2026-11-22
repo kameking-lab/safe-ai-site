@@ -124,6 +124,14 @@ describe("analytics privacy", () => {
     expect(safe).toEqual({ result_count: 3, category: "laws" });
   });
 
+  it("allows the fixed public KY share attribution and keeps private RA excluded", () => {
+    const ky = "https://example.test/training/visual-ky/scaffold-fall";
+    expect(isOptionalTrackingUrl(`${ky}?utm_source=share`)).toBe(true);
+    expect(isOptionalTrackingUrl(`${ky}?utm_source=share&result=complete`)).toBe(false);
+    expect(isOptionalTrackingUrl(`${ky}?utm_source=share#progress`)).toBe(false);
+    expect(isOptionalTrackingUrl("https://example.test/chemical-ra?utm_source=share")).toBe(false);
+  });
+
   it("honors DNT and GPC before optional analytics", () => {
     Object.defineProperty(navigator, "doNotTrack", {
       configurable: true,

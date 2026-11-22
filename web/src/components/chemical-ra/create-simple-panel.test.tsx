@@ -53,6 +53,7 @@ describe("化学物質リスクアセスメント画面", () => {
     fireEvent.click(await screen.findByRole("button", { name: /トルエン.*CAS 108-88-3/ }));
     expect(screen.getByRole("list", { name: "判定する物質" }).textContent).toContain("トルエン");
     expect(screen.getByText(/あと「取扱量・換気・1日の作業時間・頻度」/)).toBeDefined();
+    expect(screen.queryByRole("button", { name: "結果の要約を共有" })).toBeNull();
 
     choose("1回（1日）に扱う量", "中量");
     choose("換気", "窓・換気扇");
@@ -60,6 +61,12 @@ describe("化学物質リスクアセスメント画面", () => {
     fireEvent.change(screen.getByLabelText("日数"), { target: { value: "5" } });
 
     expect(await screen.findByText("いちばん高いリスクレベル")).toBeDefined();
+    fireEvent.change(screen.getByLabelText("記録の名前（作業名）"), { target: { value: "東京工場・山田さん" } });
+    fireEvent.click(screen.getByRole("button", { name: "結果の要約を共有" }));
+    const line = screen.getByRole<HTMLAnchorElement>("link", { name: "LINEで送る" });
+    expect(new URL(line.href).searchParams.get("text")).toMatch(
+      /^化学物質リスクアセスメントの結果\n物質：トルエン\n最も高い判定：レベル[^\n]+\n\nhttps:\/\/www\.anzen-ai-portal\.jp\/chemical-ra\?utm_source=share$/,
+    );
     expect(screen.getByRole("heading", { name: "レベルを下げるには" })).toBeDefined();
     const applyButtons = screen.getAllByRole("button", { name: "この条件にする" });
     expect(applyButtons.length).toBeGreaterThan(0);
@@ -84,5 +91,26 @@ describe("化学物質リスクアセスメント画面", () => {
     expect(await screen.findByRole("heading", { name: "保存した記録（1）" })).toBeDefined();
     fireEvent.click(screen.getByRole("button", { name: "全件CSV" }));
     expect(createObjectURL).toHaveBeenCalled();
+  });
+
+  it("保存済み結果の手入力名を公開物質名として送らない", async () => {
+    const official = all.substances.find((record) => record[0] === "108-88-3") as unknown as OfficialSubstanceRecord;
+    saveRecord({
+      title: "事業所Aの記録",
+      components: [{ substance: { ...substanceFromOfficial(official, 1), name: "東京工場・山田さん" }, contentPercent: 100 }],
+      conditions: {
+        productType: 1, amountLevel: 2, spray: false, largeArea: false, ventilation: "B", controlVelocityConfirmed: false,
+        workingHours: 8, frequencyType: "weekly", frequencyDays: 5, exposureVariation: "small", contactArea: 1500,
+        glove: "none", gloveTraining: "none", processTemperature: null, ignitionSourceRemoved: false,
+        explosiveAtmospherePrevented: false, organicOrMetalNearby: true, airOrWaterContact: true,
+      },
+    });
+    render(<CreateSimplePanel />);
+    fireEvent.click(await screen.findByRole("button", { name: /^事業所Aの記録/ }));
+    fireEvent.click(screen.getByRole("button", { name: "結果の要約を共有" }));
+    const line = screen.getByRole<HTMLAnchorElement>("link", { name: "LINEで送る" });
+    const message = new URL(line.href).searchParams.get("text");
+    expect(message).toContain("物質：手入力の物質");
+    expect(message).not.toMatch(/事業所A|東京工場|山田さん|108-88-3/);
   });
 });

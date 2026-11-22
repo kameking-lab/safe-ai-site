@@ -14,6 +14,8 @@ import {
   filterKyExamples,
 } from "@/data/ky-examples";
 import { ConclusionCard } from "@/components/ui/conclusion-card";
+import { WorkplaceShare } from "@/components/workplace-share";
+import { workplaceShareUrl } from "@/lib/workplace-share";
 
 export function KyExamplesBrowser() {
   const [industry, setIndustry] = useState<KyIndustryId | "">("");
@@ -85,7 +87,8 @@ export function KyExamplesBrowser() {
           {filtered.map((ex) => (
             <li
               key={ex.id}
-              className="flex flex-col gap-2 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
+              id={ex.id}
+              className="flex scroll-mt-24 flex-col gap-2 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm target:border-emerald-600"
             >
               <div className="flex flex-wrap gap-1.5">
                 <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-bold text-indigo-800">
@@ -123,6 +126,12 @@ export function KyExamplesBrowser() {
               <footer className="mt-auto border-t border-amber-200 pt-2 text-[10px] leading-5 text-amber-900">
                 区分: {ex.source.label} / 検証状態: 未確認 / AI根拠利用: 不可
               </footer>
+              <WorkplaceShare
+                kind="ky"
+                title={`KYモデルケース（架空）：${ex.title}`}
+                summary={`危険要因：${ex.hazards[0]}\nリスク：${ex.risks[0]}\n対策：${ex.countermeasures[0]}\n出典：安全AIポータル`}
+                url={workplaceShareUrl("/ky-examples", ex.id)}
+              />
             </li>
           ))}
         </ul>
