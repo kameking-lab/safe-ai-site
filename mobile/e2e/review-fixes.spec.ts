@@ -1,3 +1,5 @@
+import { installGuestStore } from './guest-store';
+import { installNativeTestBridge } from './native-test-bridge';
 import type { BrowserContext } from '@playwright/test';
 import { test,expect } from './fixtures';
 import { capability,aiResult } from '../tests/fixtures';
@@ -32,21 +34,21 @@ test('portal displays a counted fallback answer without claiming it is free',asy
 test('portal guest purchase stays on the AI screen and refreshes immediately when Pro is verified',async({page,context})=>{
   const cap=capability();cap.upgrade=true;
   cap.features.law_chat.quota={...cap.features.law_chat.quota,used:product.limits.free.law_chat,remaining:0};
-  let logins=0;
-  await context.route(host+'/api/mobile/v1/capabilities',r=>r.fulfill({json:cap,headers:cors}));
-  await context.route(host+'/api/mobile/v1/auth/start',r=>{
-    logins++;
-    // A failed login remains on the original page and can be retried.
-    return r.fulfill({status:503,json:{error:{code:'UNAVAILABLE'}},headers:cors});
+  await installNativeTestBridge(context,false,true);
+  const store=await installGuestStore(context);
+  await context.route(host+'/api/mobile/v1/capabilities',r=>{
+    if(store.paid()){
+      cap.plan='pro';cap.session='member';cap.upgrade=false;
+      cap.features.law_chat.quota={...cap.features.law_chat.quota,limit:50,used:0,remaining:50};
+    }
+    return r.fulfill({json:cap,headers:cors});
   });
   await page.goto('/portal/');await page.getByRole('button',{name:'AI確認',exact:true}).click();
   const offer=page.locator('[data-pro-upsell]');await expect(offer).toBeVisible();
-  await expect(offer.locator('[data-pro-start]')).toHaveCount(1);expect(logins).toBe(0);
-  await offer.locator('[data-pro-start]').click();await expect.poll(()=>logins).toBe(1);
-  await expect(page).toHaveURL(/\/portal\//);await expect(page.getByLabel('法令についての質問')).toBeVisible();
-  cap.plan='pro';cap.session='member';cap.upgrade=false;
-  cap.features.law_chat.quota={...cap.features.law_chat.quota,limit:product.limits.pro.law_chat,used:0,remaining:product.limits.pro.law_chat};
-  await page.evaluate(()=>window.dispatchEvent(new Event('anzen-usage-changed')));
+  await expect(offer.locator('[data-pro-start]')).toContainText('$6.99');
+  await offer.locator('[data-pro-start]').click();
+  await expect.poll(store.paid).toBe(true);expect(store.actions).toEqual(['purchasePackage']);
+  await expect(page).toHaveURL(/\/portal\//);
   await expect(offer).toHaveCount(0);
   await page.getByLabel('法令についての質問').fill('局所排気装置の点検条件');
   await expect(page.getByRole('button',{name:'送信する',exact:true})).toBeEnabled();
@@ -142,7 +144,7 @@ for(const pending of [false,true])test(`old deletion receipt preserves member B 
   expect(await page.evaluate(()=>[localStorage.getItem('company-profile'),localStorage.getItem('anzen.content.saved')])).toEqual(['member-b-profile','member-b-saved']);
 });
 test('purchase screen does not sell the paused RA and exposes deletion',async({page,context})=>{
-  await accountFixtures(context);await page.goto('/account/');await expect(page.getByText(/AIチャット1日50回/)).toBeVisible();await expect(page.getByText(/RA1日10件/)).toHaveCount(0);await expect(page.getByRole('button',{name:'App StoreでProを購入',exact:true})).toBeDisabled();await expect(page.getByRole('heading',{name:'アカウントの削除',exact:true})).toBeVisible();
+  await accountFixtures(context);await page.goto('/account/');await expect(page.getByText(/AIチャット1日50回/)).toBeVisible();await expect(page.getByText(/RA1日10件/)).toHaveCount(0);await expect(page.getByRole('button',{name:/Proにする/})).toBeEnabled();await expect(page.getByRole('heading',{name:'アカウントの削除',exact:true})).toBeVisible();
 });
 // TestFlight build 4: a failing App Store offering lookup cleared the verified member and the
 // screen said 「ログインしていません」 right after a successful login.

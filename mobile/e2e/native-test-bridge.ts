@@ -1,16 +1,24 @@
 import type { BrowserContext } from '@playwright/test';
 
 /** Replace only native plugin boundaries; use the real transport and shared UI. */
-export async function installNativeTestBridge(context:BrowserContext,signedIn=false){
-  await context.addInitScript((signedIn)=>{
+export async function installNativeTestBridge(context:BrowserContext,signedIn=false, store=false){
+  await context.addInitScript(({signedIn, store})=>{
     const prefs=new Map<string,string>();const vault=new Map<string,string>();if(signedIn){prefs.set('anzen.install.session-initialized','1');vault.set('session','fixture-session');}
     const listeners=new Map<string,(value:unknown)=>void>();
     const bridgeFetch=window.fetch.bind(window);
     const plugins:Record<string,string[]>={NativeVault:['get','set','clear'],Preferences:['get','set','remove'],Browser:['open','addListener','removeListener'],App:['getLaunchUrl','addListener','removeListener'],PushNotifications:['addListener','removeListener'],NativeChatStream:['start','cancel','addListener','removeListener'],CapacitorHttp:['request'],NativeDocuments:['printPage'],NativeSpeech:['start','stop','addListener','removeListener']};
+    if (store) {
+      plugins.Filesystem = ['deleteFile'];
+      plugins.PushNotifications.push('unregister');
+      plugins.Purchases = ['configure','logIn','getOfferings','purchasePackage','restorePurchases','invalidateCustomerInfoCache','getCustomerInfo'];
+    }
     Object.assign(window,{webkit:{messageHandlers:{bridge:{}}},Capacitor:{
       PluginHeaders:Object.entries(plugins).map(([name,methods])=>({name,methods:methods.map(name=>({name,rtype:name==='addListener'?'callback':'promise'}))})),
       nativeCallback:(plugin:string,method:string,options:{eventName:string},callback:(value:unknown)=>void)=>{listeners.set(plugin+':'+options.eventName,callback);return Promise.resolve('fixture-listener');},
       nativePromise:async(plugin:string,method:string,options:Record<string,string>)=>{
+        if (store && (plugin === 'Purchases' || (plugin === 'Browser' && method === 'open'))) {
+          return (window as unknown as {reviewStoreCall:(method:string, options:unknown)=>Promise<unknown>}).reviewStoreCall(method, options);
+        }
         if(plugin==='Preferences'||plugin==='NativeVault'){
           const store=plugin==='Preferences'?prefs:vault;const key=options?.key??options?.purpose??'session';
           if(method==='get')return {value:store.get(key)??null};
@@ -32,5 +40,5 @@ export async function installNativeTestBridge(context:BrowserContext,signedIn=fa
         return {};
       },
     }});
-  },signedIn);
+  },{signedIn, store});
 }

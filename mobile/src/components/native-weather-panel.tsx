@@ -4,7 +4,7 @@ import { Capacitor } from '@capacitor/core';
 import { PushNotifications } from '@capacitor/push-notifications';
 import { ProPurchasePresentationContext } from '@/components/pro-upsell-card';
 import { signageLocations } from '@/data/signage-locations';
-import { ensureSession,siteApi } from '../lib/session';
+import { ensureSession,sessionBinding,siteApi } from '../lib/session';
 import { startProPurchase } from '../lib/pro-purchase';
 import { loadWeather } from '../lib/api';
 import { registerWeatherPush } from '../lib/push-registration';
@@ -27,7 +27,20 @@ export function NativeWeatherPanel(){
   },[selected]);
   // Saving a location never asks for registration (App Store 5.1.1(v)): without a session, a guest
   // session with no personal data is created first, exactly as for a purchase.
-  async function change(method:string,locationId=selected){if(busy)return;setBusy(true);try{if(method==='POST')await ensureSession();setData(await siteApi('/api/me/weather-locations',{locationId},method) as Locations);setSignedIn(true);setMessage('地点設定を保存しました。');}catch{setMessage('地点を保存できません。登録上限・通信状態を確認してください。');}finally{setBusy(false);}}
+  async function change(method:string,locationId=selected){
+    if(busy)return;
+    setBusy(true);
+    try{
+      if(method==='POST')await ensureSession();
+      const binding=await sessionBinding();
+      const saved=await siteApi('/api/me/weather-locations',{locationId},method) as Locations;
+      if(await sessionBinding()!==binding)return;
+      // Creating a guest starts a concurrent GET. Its pre-save snapshot may arrive last.
+      refreshGeneration.current++;
+      setData(saved);setSignedIn(true);setMessage('地点設定を保存しました。');
+    }catch{setMessage('地点を保存できません。登録上限・通信状態を確認してください。');}
+    finally{setBusy(false);}
+  }
   // Pro (10 locations and notifications) is bought right here, without registering.
   async function buyPro(){if(busy)return;setBusy(true);try{const result=await startProPurchase();if(result.message)setMessage(result.message);}finally{setBusy(false);}void refresh();}
   async function enablePush(){if(busy || !data.notifications)return;setBusy(true);try{
