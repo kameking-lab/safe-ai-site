@@ -129,6 +129,15 @@ test("verification rejects a stale build number and runtime ID from cap sync", (
   rejects(cwd, /runtime Bundle ID mismatch/);
 });
 
+test("verification rejects a missing RevenueCat plugin in the generated Capacitor bridge", (t) => {
+  const cwd = fixture(t);
+  const file = join(cwd, "ios/App/App/capacitor.config.json");
+  const config = JSON.parse(readFileSync(file, "utf8"));
+  config.packageClassList = config.packageClassList.filter(name => name !== "PurchasesPlugin");
+  writeFileSync(file, JSON.stringify(config));
+  rejects(cwd, /RevenueCat plugin missing/);
+});
+
 test("the scene window uses the bridge that registers the custom plugins", (t) => {
   const cwd = fixture(t);
   const file = join(cwd, "ios/App/App/SceneDelegate.swift");

@@ -42,11 +42,11 @@ async function setup(context:BrowserContext,fault:Fault|null=null){
      emit({id:request.id,kind:'headers',status:response.status,headers:Object.fromEntries(response.headers)});
      const bytes=new Uint8Array(await response.arrayBuffer());emit({id:request.id,kind:'chunk',data:btoa(String.fromCharCode(...bytes))});emit({id:request.id,kind:'end'});return {};
     }
-    if(plugin==='Purchases' && method==='isConfigured')return {isConfigured:true};
     if(plugin==='Purchases'){
      trace.push({event:method,at:performance.now()});const fault=(window as unknown as Bridge).__fault;
      if(method==='configure'||method==='logIn')sdkOwner=options.appUserID;
      if(fault?.stage===method){if(fault.mode==='never')await new Promise(()=>{});if(fault.mode==='failed')throw {code:'35'};if(fault.mode==='slow')await new Promise(resolve=>setTimeout(resolve,2500));}
+     if(method==='isConfigured')return {isConfigured:true};
      if(method==='syncPurchases'||method==='restorePurchases')await send('https://www.anzen-ai-portal.jp/api/test/store-sync',{method:'POST',body:JSON.stringify({appUserId:sdkOwner})});
      // Cached native Pro is deliberately untrustworthy, including for member B.
      if(method==='getCustomerInfo'||method==='logIn')return {customerInfo:{entitlements:{active:{anzen_pro:{isActive:true}}}}};

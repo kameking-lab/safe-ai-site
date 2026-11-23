@@ -50,7 +50,9 @@ export function AccountPanel(){
     try{
       const m=await billing.entitlement(false,manual);if(ticket!==refreshGeneration.current)return;
       setMember(m);setMemberState('verified');setMessage(manual?'最新の状態です。':'');
-      void billing.recoverSession().catch(error=>{if(ticket===refreshGeneration.current&&!(error instanceof StaleMemberResponseError))setMessage(messages[(error as Error).message]??'購入状況を確認できません。通信を確認して、購入を復元してください。');});
+      // A fresh verified Pro ledger already includes the result. Session changes and native
+      // app activation still reconcile with the store through their own lifecycle handlers.
+      if(!isVerifiedPro(m))void billing.recoverSession().catch(error=>{if(ticket===refreshGeneration.current&&!(error instanceof StaleMemberResponseError))setMessage(messages[(error as Error).message]??'購入状況を確認できません。通信を確認して、購入を復元してください。');});
       void configWork.then(c=>{
         if(ticket!==refreshGeneration.current||m.plan!=='free'||m.syncState!=='verified')return;
         void loadPrice(c,m,ticket);

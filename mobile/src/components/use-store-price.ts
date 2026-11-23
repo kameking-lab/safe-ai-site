@@ -6,13 +6,14 @@ export function useStorePrice() {
   const [price, setPrice] = useState<string | null>(null);
   useEffect(() => {
     let generation = 0;
-    const update = async () => {
+    const update = async (event?: Event) => {
+      const signedOut = (event as CustomEvent<{signedIn?:boolean}> | undefined)?.detail?.signedIn === false;
       const ticket = ++generation;
       setPrice(null);
       try {
         const [config, member] = await Promise.all([
           billing.config(),
-          billing.entitlement().catch(error => {
+          signedOut ? null : billing.entitlement().catch(error => {
             if (error instanceof Error && error.message === 'UNAUTHORIZED') return null;
             throw error;
           }),

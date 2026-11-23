@@ -144,7 +144,7 @@ for(const pending of [false,true])test(`old deletion receipt preserves member B 
   expect(await page.evaluate(()=>[localStorage.getItem('company-profile'),localStorage.getItem('anzen.content.saved')])).toEqual(['member-b-profile','member-b-saved']);
 });
 test('purchase screen does not sell the paused RA and exposes deletion',async({page,context})=>{
-  await accountFixtures(context);await page.goto('/account/');await expect(page.getByText(/AIチャット1日50回/)).toBeVisible();await expect(page.getByText(/RA1日10件/)).toHaveCount(0);await expect(page.getByRole('button',{name:/Proにする/})).toBeEnabled();await expect(page.getByRole('heading',{name:'アカウントの削除',exact:true})).toBeVisible();
+  await accountFixtures(context);await page.goto('/account/');await expect(page.getByText(/AIチャット1日50回/)).toBeVisible();await expect(page.getByText(/RA1日10件/)).toHaveCount(0);await expect(page.getByRole('button',{name:'月額プランを再読み込み',exact:true})).toBeEnabled();await expect(page.getByRole('heading',{name:'アカウントの削除',exact:true})).toBeVisible();
 });
 // TestFlight build 4: a failing App Store offering lookup cleared the verified member and the
 // screen said 「ログインしていません」 right after a successful login.
