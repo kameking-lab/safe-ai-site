@@ -23,7 +23,7 @@ export function appStoreSalesReady(env: NodeJS.ProcessEnv = process.env): boolea
   return (
     env.MOBILE_IAP_ENABLED === "true" &&
     env.MOBILE_LEDGER_ENABLED === "true" &&
-    !!env.REVENUECAT_IOS_PUBLIC_SDK_KEY &&
+    /^appl_[A-Za-z0-9]+$/u.test(env.REVENUECAT_IOS_PUBLIC_SDK_KEY ?? "") &&
     !!env.REVENUECAT_IOS_PRODUCT_ID &&
     !!env.REVENUECAT_IOS_OFFERING_ID &&
     serverVerificationReady
