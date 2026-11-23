@@ -153,6 +153,9 @@
     "vercel": {
       "undici": "^6.25.0"
     },
-    "eslint-plugin-react-hooks": "7.0.1"
+    "eslint-plugin-react-hooks": "7.0.1",
+    "@prisma/config": {
+      "effect": "3.22.1"
+    }
   }
 }
