@@ -40,7 +40,7 @@ for(const plan of ['free','pro'] as const)test(`${plan}: first question, follow-
   await context.route(host+'/api/**',async route=>{
     const request=route.request();const url=new URL(request.url());
     if(request.method()==='OPTIONS')return route.fulfill({status:204,headers:cors});
-    if(url.pathname.endsWith('/billing/config'))return route.fulfill({headers:cors,json:{ready:true,publicKey:'fixture_public',productId:'fixture.monthly',offeringId:null,policy:product,login:{apple:true,google:true},terms:host+'/terms',privacy:host+'/privacy',manage:'https://apps.apple.com/account/subscriptions'}});
+    if(url.pathname.endsWith('/billing/config'))return route.fulfill({headers:cors,json:{ready:true,publicKey:'appl_fixture',productId:'fixture.monthly',offeringId:null,policy:product,login:{apple:true,google:true},terms:host+'/terms',privacy:host+'/privacy',manage:'https://apps.apple.com/account/subscriptions'}});
     if(url.pathname==='/api/me/entitlements'){
       rightsReads++;
       return route.fulfill({headers:cors,json:{plan,source:plan==='pro'?'app_store':null,syncState:plan==='pro'?'verified':'pending',expiresAt:plan==='pro'?new Date(Date.now()+86400000).toISOString():null,appUserId:'88888888-1111-4111-8111-111111111111',verifiedAt:new Date().toISOString(),limits:product.limits[plan]}});

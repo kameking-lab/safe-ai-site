@@ -16,7 +16,7 @@ async function nativeBridge(context:BrowserContext){
   await context.addInitScript(()=>{
     const prefs=new Map<string,string>();const vault=new Map<string,string>();const listeners=new Map<string,(value:unknown)=>void>();const send=window.fetch.bind(window);
     window.addEventListener('anzen-membership-recovered',()=>Object.assign(window,{__speedRecovered:true}));
-    const plugins:Record<string,string[]>={NativeVault:['get','set','clear'],Preferences:['get','set','remove'],Browser:['open','close','addListener','removeListener'],App:['getLaunchUrl','addListener','removeListener'],PushNotifications:['addListener','removeListener'],NativeChatStream:['start','cancel','addListener','removeListener'],CapacitorHttp:['request'],NativeDocuments:['printPage'],NativeSpeech:['start','stop','addListener','removeListener'],Purchases:['configure','logIn','logOut','syncPurchases','invalidateCustomerInfoCache','getCustomerInfo','getOfferings','purchasePackage','restorePurchases']};
+    const plugins:Record<string,string[]>={NativeVault:['get','set','clear'],Preferences:['get','set','remove'],Browser:['open','close','addListener','removeListener'],App:['getLaunchUrl','addListener','removeListener'],PushNotifications:['addListener','removeListener'],NativeChatStream:['start','cancel','addListener','removeListener'],CapacitorHttp:['request'],NativeDocuments:['printPage'],NativeSpeech:['start','stop','addListener','removeListener'],Purchases:['configure','isConfigured','logIn','logOut','syncPurchases','invalidateCustomerInfoCache','getCustomerInfo','getOfferings','purchasePackage','restorePurchases']};
     Object.assign(window,{__speed:{},__returnSpeedLogin:()=>listeners.get('App:appUrlOpen')?.({url:'anzenai://auth/callback?flow=88888888-1111-4111-8111-111111111111&code='+ 'a'.repeat(43)}),webkit:{messageHandlers:{bridge:{}}},Capacitor:{
       PluginHeaders:Object.entries(plugins).map(([name,methods])=>({name,methods:methods.map(name=>({name,rtype:name==='addListener'?'callback':'promise'}))})),
       nativeCallback:(plugin:string,_method:string,options:{eventName:string},callback:(value:unknown)=>void)=>{listeners.set(plugin+':'+options.eventName,callback);return Promise.resolve('speed-listener');},
@@ -38,6 +38,7 @@ async function nativeBridge(context:BrowserContext){
           emit({id:request.id,kind:'headers',status:response.status,headers:Object.fromEntries(response.headers)});
           const reader=response.body!.getReader();while(true){const item=await reader.read();if(item.done)break;emit({id:request.id,kind:'chunk',data:btoa(String.fromCharCode(...item.value))});}emit({id:request.id,kind:'end'});
         }
+        if(plugin==='Purchases' && method==='isConfigured')return {isConfigured:true};
         if(plugin==='Purchases'&&method==='purchasePackage')Object.assign(window,{__speedPurchased:true});
         if(plugin==='Purchases'&&method==='getOfferings')return {all:{speed:{availablePackages:[{identifier:'speed-package',packageType:'MONTHLY',product:{identifier:'jp.anzenaiportal.pro.monthly',price:980,priceString:'¥980',currencyCode:'JPY',subscriptionPeriod:'P1M'}}]}}};
         return {};
@@ -54,7 +55,7 @@ test('login, confirmed purchase, manual refresh and logout avoid redundant waits
   const rights=()=>({plan:paid?'pro':'free',source:paid?'app_store':null,syncState:'verified',expiresAt:paid?new Date(Date.now()+86400000).toISOString():null,appUserId,verifiedAt:new Date().toISOString(),limits:paid?product.limits.pro:product.limits.free});
   await context.route(host+'/api/**',async route=>{
     const request=route.request();const url=new URL(request.url());if(request.method()==='OPTIONS')return route.fulfill({status:204,headers:cors});
-    if(url.pathname.endsWith('/billing/config'))return route.fulfill({headers:cors,json:{ready:true,publicKey:'synthetic-public-key',productId:'jp.anzenaiportal.pro.monthly',offeringId:'speed',policy:product,login:{apple:true,google:true},terms:host+'/terms',privacy:host+'/privacy',manage:'https://apps.apple.com/account/subscriptions'}});
+    if(url.pathname.endsWith('/billing/config'))return route.fulfill({headers:cors,json:{ready:true,publicKey:'appl_synthetic_public_key',productId:'jp.anzenaiportal.pro.monthly',offeringId:'speed',policy:product,login:{apple:true,google:true},terms:host+'/terms',privacy:host+'/privacy',manage:'https://apps.apple.com/account/subscriptions'}});
     if(url.pathname.endsWith('/auth/start'))return route.fulfill({headers:cors,json:{flow,authorizeUrl:host+'/api/mobile/v1/auth/authorize?flow='+flow}});
     if(url.pathname.endsWith('/auth/exchange')){await delay(180);return route.fulfill({headers:cors,json:{token:'b'.repeat(43)}});}
     if(url.pathname==='/api/me/entitlements'){
@@ -95,7 +96,7 @@ test('late membership reads cannot replace a purchase or restore Pro during logo
   const rights=()=>({plan:paid?'pro':'free',source:paid?'app_store':null,syncState:'verified',expiresAt:paid?new Date(Date.now()+86400000).toISOString():null,appUserId,verifiedAt:new Date().toISOString(),limits:paid?product.limits.pro:product.limits.free});
   await context.route(host+'/api/**',async route=>{
     const request=route.request();const url=new URL(request.url());if(request.method()==='OPTIONS')return route.fulfill({status:204,headers:cors});
-    if(url.pathname.endsWith('/billing/config'))return route.fulfill({headers:cors,json:{ready:true,publicKey:'synthetic-public-key',productId:'jp.anzenaiportal.pro.monthly',offeringId:'speed',policy:product,login:{apple:true,google:true},terms:host+'/terms',privacy:host+'/privacy',manage:'https://apps.apple.com/account/subscriptions'}});
+    if(url.pathname.endsWith('/billing/config'))return route.fulfill({headers:cors,json:{ready:true,publicKey:'appl_synthetic_public_key',productId:'jp.anzenaiportal.pro.monthly',offeringId:'speed',policy:product,login:{apple:true,google:true},terms:host+'/terms',privacy:host+'/privacy',manage:'https://apps.apple.com/account/subscriptions'}});
     if(url.pathname.endsWith('/auth/start'))return route.fulfill({headers:cors,json:{flow,authorizeUrl:host+'/api/mobile/v1/auth/authorize?flow='+flow}});
     if(url.pathname.endsWith('/auth/exchange'))return route.fulfill({headers:cors,json:{token:'b'.repeat(43)}});
     if(url.pathname==='/api/me/entitlements'){

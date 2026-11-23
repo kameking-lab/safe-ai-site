@@ -10,7 +10,7 @@ export async function installNativeTestBridge(context:BrowserContext,signedIn=fa
     if (store) {
       plugins.Filesystem = ['deleteFile'];
       plugins.PushNotifications.push('unregister');
-      plugins.Purchases = ['configure','logIn','getOfferings','purchasePackage','restorePurchases','invalidateCustomerInfoCache','getCustomerInfo'];
+      plugins.Purchases = ['configure','isConfigured','logIn','getOfferings','purchasePackage','restorePurchases','invalidateCustomerInfoCache','getCustomerInfo'];
     }
     Object.assign(window,{webkit:{messageHandlers:{bridge:{}}},Capacitor:{
       PluginHeaders:Object.entries(plugins).map(([name,methods])=>({name,methods:methods.map(name=>({name,rtype:name==='addListener'?'callback':'promise'}))})),

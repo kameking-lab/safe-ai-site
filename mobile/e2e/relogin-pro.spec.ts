@@ -17,7 +17,7 @@ async function bridge(context:BrowserContext){
     const prefs=new Map<string,string>();const vault=new Map<string,string>();
     const listeners=new Map<string,(value:unknown)=>void>();const send=window.fetch.bind(window);
     const trace:TraceEntry[]=[];let owner:string|undefined;
-    const plugins:Record<string,string[]>={NativeVault:['get','set','clear'],Preferences:['get','set','remove'],Browser:['open','close','addListener','removeListener'],App:['getLaunchUrl','addListener','removeListener'],PushNotifications:['addListener','removeListener'],CapacitorHttp:['request'],NativeDocuments:['printPage'],NativeSpeech:['start','stop','addListener','removeListener'],Purchases:['configure','logIn','logOut','syncPurchases','invalidateCustomerInfoCache','getCustomerInfo','getOfferings','purchasePackage','restorePurchases']};
+    const plugins:Record<string,string[]>={NativeVault:['get','set','clear'],Preferences:['get','set','remove'],Browser:['open','close','addListener','removeListener'],App:['getLaunchUrl','addListener','removeListener'],PushNotifications:['addListener','removeListener'],CapacitorHttp:['request'],NativeDocuments:['printPage'],NativeSpeech:['start','stop','addListener','removeListener'],Purchases:['configure','isConfigured','logIn','logOut','syncPurchases','invalidateCustomerInfoCache','getCustomerInfo','getOfferings','purchasePackage','restorePurchases']};
     Object.assign(window,{__loginOpenCount:0,__loginReturn:()=>listeners.get('App:appUrlOpen')?.({url:'anzenai://auth/callback?flow=88888888-1111-4111-8111-111111111111&code='+'a'.repeat(43)}),__billingTrace:trace,webkit:{messageHandlers:{bridge:{}}},Capacitor:{
       PluginHeaders:Object.entries(plugins).map(([name,methods])=>({name,methods:methods.map(name=>({name,rtype:name==='addListener'?'callback':'promise'}))})),
       nativeCallback:(plugin:string,_method:string,options:{eventName:string},callback:(value:unknown)=>void)=>{listeners.set(plugin+':'+options.eventName,callback);return Promise.resolve('relogin-listener');},
@@ -36,6 +36,7 @@ async function bridge(context:BrowserContext){
           const response=await send(request.url,{method:request.method,headers:request.headers,...(request.data?{body:JSON.stringify(request.data)}:{})});
           return {url:response.url,status:response.status,headers:Object.fromEntries(response.headers),data:await response.json()};
         }
+        if(plugin==='Purchases' && method==='isConfigured')return {isConfigured:true};
         if(plugin==='Purchases'){
           if(method==='configure'||method==='logIn')owner=options.appUserID;
           trace.push({event:method,owner,at:performance.now()});
@@ -57,7 +58,7 @@ test('same-account relogin automatically recovers Pro; another account cannot in
   await context.route(host+'/api/**',async route=>{
     const request=route.request();const url=new URL(request.url());
     if(request.method()==='OPTIONS')return route.fulfill({status:204,headers:cors});
-    if(url.pathname.endsWith('/billing/config'))return route.fulfill({headers:cors,json:{ready:true,publicKey:'synthetic-public-sdk',productId:'jp.anzenaiportal.pro.monthly',offeringId:'relogin',policy:product,login:{apple:true,google:true},terms:host+'/terms',privacy:host+'/privacy',manage:'https://apps.apple.com/account/subscriptions'}});
+    if(url.pathname.endsWith('/billing/config'))return route.fulfill({headers:cors,json:{ready:true,publicKey:'appl_synthetic_public_sdk',productId:'jp.anzenaiportal.pro.monthly',offeringId:'relogin',policy:product,login:{apple:true,google:true},terms:host+'/terms',privacy:host+'/privacy',manage:'https://apps.apple.com/account/subscriptions'}});
     if(url.pathname.endsWith('/auth/start'))return route.fulfill({headers:cors,json:{flow,authorizeUrl:host+'/api/mobile/v1/auth/authorize?flow='+flow}});
     if(url.pathname.endsWith('/auth/exchange')){paid=false;return route.fulfill({headers:cors,json:{token:next.repeat(43)}});}
     if(url.pathname.endsWith('/auth/logout')){paid=false;return route.fulfill({headers:cors,json:{ok:true}});}

@@ -16,19 +16,27 @@ const headers = {
 export async function installGuestStore(context:BrowserContext) {
   const actions:string[] = [];
   const locations:{locationId:string; label:string; active:boolean; primary:boolean}[] = [];
+  let catalogAvailable = true;
+  let catalogReads = 0;
   let guests = 0;
   let owner:string | undefined;
   let completed = false;
   let paid = false;
   await context.exposeBinding('reviewStoreCall', async (_source, method:string, options) => {
     if (method === 'open' || method === 'logIn') throw new Error('Guest unexpectedly entered login');
+    if (method === 'isConfigured') return {isConfigured:true};
     if (method === 'configure') owner = options.appUserID;
-    if (method === 'getOfferings') return {all:{review:{availablePackages:[{
-      identifier:'monthly', packageType:'MONTHLY',
-      product:{identifier:productId,price:6.99,priceString:'$6.99',currencyCode:'USD',subscriptionPeriod:'P1M'},
-    }]}}};
+    if (method === 'getOfferings') {
+      catalogReads++;
+      if (!catalogAvailable) return {all:{},current:null};
+      return {all:{review:{availablePackages:[{
+        identifier:'monthly', packageType:'MONTHLY', presentedOfferingContext:{offeringIdentifier:'review'},
+        product:{identifier:productId,price:6.99,priceString:'$6.99',currencyCode:'USD',subscriptionPeriod:'P1M'},
+      }]}}};
+    }
     if (method === 'purchasePackage' || method === 'restorePurchases') {
       expect(owner).toBe(alias);
+      if(method==='purchasePackage')expect(options.aPackage.presentedOfferingContext.offeringIdentifier).toBe('review');
       actions.push(method);
       completed = true;
     }
@@ -50,7 +58,7 @@ export async function installGuestStore(context:BrowserContext) {
       guests++;
       return reply({token,guest:true});
     }
-    if (path.endsWith('/billing/config')) return reply({ready:true,publicKey:'fixture',productId,offeringId:'review',policy,
+    if (path.endsWith('/billing/config')) return reply({ready:true,publicKey:'appl_fixture',productId,offeringId:'review',policy,
       login:{apple:true,google:true},terms:host+'/terms',privacy:host+'/privacy',manage:'https://apps.apple.com/account/subscriptions'});
     if (path.endsWith('/diagnostics')) return reply({ok:true});
     if (!(path.startsWith('/api/me/') || path.startsWith('/api/billing/') || path.endsWith('/v1/account'))) return route.fallback();
@@ -65,5 +73,5 @@ export async function installGuestStore(context:BrowserContext) {
     }
     throw new Error('Unmodelled guest request: '+path);
   });
-  return {actions,locations,paid:()=>paid,guests:()=>guests};
+  return {actions,locations,setCatalog:(available:boolean)=>{catalogAvailable=available;},catalogReads:()=>catalogReads,paid:()=>paid,guests:()=>guests};
 }

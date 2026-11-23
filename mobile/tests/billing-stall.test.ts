@@ -3,12 +3,12 @@ import {BillingController,type BillingConfig} from '../src/lib/billing';
 import product from '@/lib/mobile/product-policy.json';
 const prefs=vi.hoisted(()=>new Map<string,string>());
 vi.mock('@capacitor/preferences',()=>({Preferences:{get:async({key}:{key:string})=>({value:prefs.get(key)??null}),set:async({key,value}:{key:string;value:string})=>{prefs.set(key,value);},remove:async({key}:{key:string})=>{prefs.delete(key);}}}));
-const config:BillingConfig={ready:true,publicKey:'synthetic-public-sdk',productId:'jp.anzenaiportal.pro.monthly',offeringId:'fixture',policy:product,login:{apple:true,google:true},terms:'https://example.test/terms',privacy:'https://example.test/privacy',manage:'https://apps.apple.com/account/subscriptions'};
+const config:BillingConfig={ready:true,publicKey:'appl_synthetic_public_sdk',productId:'jp.anzenaiportal.pro.monthly',offeringId:'fixture',policy:product,login:{apple:true,google:true},terms:'https://example.test/terms',privacy:'https://example.test/privacy',manage:'https://apps.apple.com/account/subscriptions'};
 const pro=()=>({plan:'pro',source:'app_store',syncState:'verified',expiresAt:new Date(Date.now()+86400000).toISOString(),appUserId:'synthetic-member-identifier',verifiedAt:new Date().toISOString(),limits:product.limits.pro});
 const never=()=>new Promise<never>(()=>{});
 function setup(){
  const send=vi.fn(async(path:string)=>path.endsWith('/billing/config')?config:pro());
- const sdk={configure:vi.fn(async()=>{}),logIn:vi.fn(async()=>({}) as never),logOut:vi.fn(async()=>({}) as never),invalidateCustomerInfoCache:vi.fn(async()=>{}),getCustomerInfo:vi.fn(async()=>({}) as never),getOfferings:vi.fn(async()=>({all:{fixture:{availablePackages:[]}}}) as never),purchasePackage:vi.fn(async()=>({}) as never),restorePurchases:vi.fn(async()=>({}) as never)};
+ const sdk={isConfigured:vi.fn(async()=>({isConfigured:true})),configure:vi.fn(async()=>{}),logIn:vi.fn(async()=>({}) as never),logOut:vi.fn(async()=>({}) as never),invalidateCustomerInfoCache:vi.fn(async()=>{}),getCustomerInfo:vi.fn(async()=>({}) as never),getOfferings:vi.fn(async()=>({all:{fixture:{availablePackages:[]}}}) as never),purchasePackage:vi.fn(async()=>({}) as never),restorePurchases:vi.fn(async()=>({}) as never)};
  return {send,sdk,controller:new BillingController(send,sdk,()=>true)};
 }
 beforeEach(()=>{vi.useFakeTimers();prefs.clear();});

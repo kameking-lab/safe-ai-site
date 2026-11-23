@@ -24,7 +24,7 @@ test('restores article search and foreign-worker industry selection from a share
 });
 test('shows existing website Pro rights and prevents double purchase',async({page,context})=>{
   await context.route('https://www.anzen-ai-portal.jp/api/**',async route=>{
-    const config={ready:true,publicKey:'mock_public_sdk',productId:'mock_product',offeringId:'mock_offering',policy:product,login:{apple:true,google:true},terms:'https://www.anzen-ai-portal.jp/terms',privacy:'https://www.anzen-ai-portal.jp/privacy',manage:'https://apps.apple.com/account/subscriptions'};
+    const config={ready:true,publicKey:'appl_mock_public_sdk',productId:'mock_product',offeringId:'mock_offering',policy:product,login:{apple:true,google:true},terms:'https://www.anzen-ai-portal.jp/terms',privacy:'https://www.anzen-ai-portal.jp/privacy',manage:'https://apps.apple.com/account/subscriptions'};
     const rights={plan:'pro',source:'stripe',syncState:'verified',expiresAt:new Date(Date.now()+86400000).toISOString(),appUserId:'88888888-1111-4111-8111-111111111111',verifiedAt:new Date().toISOString(),limits:product.limits.pro};
     await route.fulfill({status:200,contentType:'application/json',headers:{'Access-Control-Allow-Origin':'http://127.0.0.1:3213','Access-Control-Allow-Credentials':'true','Access-Control-Allow-Headers':'content-type,authorization'},body:JSON.stringify(route.request().url().includes('/billing/config')?config:rights)});
   });

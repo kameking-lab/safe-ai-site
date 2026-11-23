@@ -23,6 +23,7 @@ raise 'Auth URL scheme mismatch' unless plist['CFBundleURLTypes'] == urls
 raise 'Japanese display name missing' unless plist['CFBundleDisplayName'] == '安全AIポータル'
 config = JSON.parse(File.read('ios/App/App/capacitor.config.json'))
 raise 'Native runtime Bundle ID mismatch' unless config['appId'] == bundle_id
+raise 'RevenueCat plugin missing from Capacitor bridge' unless Array(config['packageClassList']).include?('PurchasesPlugin')
 raise 'Remote WebView is forbidden' if config.fetch('server', {}).key?('url')
 apns = Xcodeproj::Plist.read_from_path('ios/App/App/App.entitlements')['aps-environment']
 raise 'APNs environment mismatch' unless apns == ENV.fetch('ANZEN_APNS_ENVIRONMENT', 'development')

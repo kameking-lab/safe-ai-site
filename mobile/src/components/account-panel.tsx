@@ -9,6 +9,7 @@ import { AccountDeletionPanel } from './account-deletion-panel';
 import { describeStoreError,StoreError,purchaseAccountConflictMessage as accountConflict } from '../lib/store-errors';
 import { StaleMemberResponseError } from '../lib/member-generation';
 import {billingDiagnostic} from '../lib/billing-diagnostics';
+const catalogErrors=new Set(['BILLING_NOT_CONFIGURED','SDK_NOT_CONFIGURED','NO_PACKAGES','PRODUCT_MISMATCH','STORE_PRODUCT_TIMEOUT','STORE_CATALOG_UNAVAILABLE']);
 type Action='purchase'|'restore'|'login'|'logout';
 const messages:Record<string,string>={UNAUTHORIZED:'もう一度お試しください。',BILLING_NOT_CONFIGURED:'少し待ってからもう一度お試しください。',ALREADY_SUBSCRIBED:'購入済みです。',PURCHASE_PENDING:'購入状況を確認中です。',ENTITLEMENT_SYNC_PENDING:'少し待ってからもう一度お試しください。',PURCHASE_OWNED_BY_OTHER_ACCOUNT:accountConflict};
 const purchaseMessages:Record<string,string>={PRO_SALES_PAUSED:'今月のPro新規受付は終了しました。来月1日に再開します。',STORE_CANCELLED:'',STORE_DEFERRED:'App Storeで承認待ちです。',STORE_UNKNOWN:'購入状況を確認中です。',STORE_NOT_OPENED:'もう一度お試しください。',PURCHASE_REVIEW_REQUIRED:'購入状況を確認中です。'};
@@ -25,12 +26,21 @@ export function AccountPanel(){
   const [slow,setSlow]=useState(false);
   const checking=refreshing||busy||!!operations.restore||!!member?.purchasePending||member?.syncState==='pending';
   useEffect(()=>{if(!checking)return;const timer=setTimeout(()=>setSlow(true),2500);return()=>{clearTimeout(timer);setSlow(false);};},[checking]);
-  // A failing App Store lookup (RevenueCat offering/price) is a store problem, not a logout:
-  // it used to fall into the outer catch and clear the verified member ("ログインしていません").
-  // Before any login or guest session the price still shows (App Store 3.1.2), read anonymously.
-  const loadAnonymousPrice=useCallback((c:BillingConfig,ticket:number)=>{
-    if(!c.ready||ticket!==refreshGeneration.current)return;
-    void billing.anonymousOffering(c).then(p=>{if(ticket===refreshGeneration.current)setPrice(p.product.priceString);}).catch(()=>{});
+  const [priceFailed,setPriceFailed]=useState(false);
+  const [reloadingPrice,setReloadingPrice]=useState(false);
+  const loadPrice=useCallback(async(c:BillingConfig|null,m:MemberEntitlement|null,ticket:number)=>{
+    if(ticket!==refreshGeneration.current)return;
+    try{
+      if(!c?.ready)throw new StoreError('BILLING_NOT_CONFIGURED');
+      const offer=m?await billing.offering(c,m):await billing.anonymousOffering(c);
+      if(ticket!==refreshGeneration.current)return;
+      setPrice(offer.product.priceString);
+      setPriceFailed(false);
+    }catch(error){
+      if(ticket!==refreshGeneration.current||error instanceof StaleMemberResponseError)return;
+      setPrice('');
+      setPriceFailed(true);
+    }
   },[]);
   const refresh=useCallback(async(manual=false)=>{
     const ticket=++refreshGeneration.current;setRefreshing(true);setMemberState(state=>!manual&&state==='verified'?'verified':'loading');
@@ -42,18 +52,19 @@ export function AccountPanel(){
       setMember(m);setMemberState('verified');setMessage(manual?'最新の状態です。':'');
       void billing.recoverSession().catch(error=>{if(ticket===refreshGeneration.current&&!(error instanceof StaleMemberResponseError))setMessage(messages[(error as Error).message]??'購入状況を確認できません。通信を確認して、購入を復元してください。');});
       void configWork.then(c=>{
-        if(ticket!==refreshGeneration.current||m.plan!=='free'||m.syncState!=='verified'||!c?.ready)return;
-        void billing.offering(c,m).then(p=>{if(ticket===refreshGeneration.current)setPrice(p.product.priceString);}).catch(()=>{});
+        if(ticket!==refreshGeneration.current||m.plan!=='free'||m.syncState!=='verified')return;
+        void loadPrice(c,m,ticket);
       });
     }catch(e){
       if(ticket!==refreshGeneration.current||e instanceof StaleMemberResponseError)return;const code=(e as Error).message;
-      setMemberState(code==='UNAUTHORIZED'?'unauthenticated':'unavailable');if(code==='UNAUTHORIZED'){setMember(null);void configWork.then(c=>{if(c)loadAnonymousPrice(c,ticket);});}
+      setMemberState(code==='UNAUTHORIZED'?'unauthenticated':'unavailable');if(code==='UNAUTHORIZED')setMember(null);
+      void configWork.then(c=>loadPrice(c,null,ticket));
       setMessage(manual&&code!=='UNAUTHORIZED'?'少し待ってからもう一度お試しください。':'');
     }finally{if(ticket===refreshGeneration.current)setRefreshing(false);}
-  },[loadAnonymousPrice]);
+  },[loadPrice]);
   useEffect(()=>{
     let active=true;
-    const handler=()=>{if(!active)return;setLoginPending(isLoginExchanging());void isGuestSession().then(value=>{if(active)setGuest(value);}).catch(()=>{});void refresh();};handler();const sessionChanged=(event:Event)=>{const detail=(event as CustomEvent<{signedIn?:boolean;guest?:boolean}>).detail;setGuest(detail?.guest===true);setLoginPending(false);setMember(null);setPrice('');if(detail?.signedIn===false){const ticket=++refreshGeneration.current;setMemberState('unauthenticated');setRefreshing(false);void billing.config().then(c=>{setConfig(c);loadAnonymousPrice(c,ticket);}).catch(()=>{});return;}setMemberState('loading');void refresh();};const loginStarted=(event:Event)=>{refreshGeneration.current++;setLoginPending(event.type==='anzen-login-exchanging');setRefreshing(false);setMemberState('loading');setMessage('ログインを確認中です…');};
+    const handler=()=>{if(!active)return;setLoginPending(isLoginExchanging());void isGuestSession().then(value=>{if(active)setGuest(value);}).catch(()=>{});void refresh();};handler();const sessionChanged=(event:Event)=>{const detail=(event as CustomEvent<{signedIn?:boolean;guest?:boolean}>).detail;setGuest(detail?.guest===true);setLoginPending(false);setMember(null);setPrice('');setPriceFailed(false);if(detail?.signedIn===false){const ticket=++refreshGeneration.current;setMemberState('unauthenticated');setRefreshing(false);void billing.config().catch(()=>null).then(c=>{if(ticket===refreshGeneration.current){setConfig(c);void loadPrice(c,null,ticket);}});return;}setMemberState('loading');void refresh();};const loginStarted=(event:Event)=>{refreshGeneration.current++;setLoginPending(event.type==='anzen-login-exchanging');setRefreshing(false);setMemberState('loading');setMessage('ログインを確認中です…');};
     const loginEnded=(event:Event)=>{refreshGeneration.current++;setLoginPending(false);setRefreshing(false);setMemberState('unavailable');setMessage(event.type==='anzen-login-dismissed'?'ログインを中断しました。もう一度お試しください。':'ログインを完了できませんでした。もう一度お試しください。');void billing.config().then(setConfig).catch(()=>{});};
     window.addEventListener('anzen-session-changed',sessionChanged);window.addEventListener('anzen-login-started',loginStarted);window.addEventListener('anzen-login-exchanging',loginStarted);window.addEventListener('anzen-login-failed',loginEnded);window.addEventListener('anzen-login-dismissed',loginEnded);
     const verified=(event:Event)=>{const m=(event as CustomEvent<MemberEntitlement>).detail;setLoginPending(false);setMember(m);setMemberState('verified');setRefreshing(false);setMessage('');};
@@ -61,7 +72,7 @@ export function AccountPanel(){
     const conflict=()=>setMessage(accountConflict);window.addEventListener('anzen-purchase-account-conflict',conflict);
     const timer=setInterval(handler,60000);
     return()=>{active=false;refreshGeneration.current++;clearInterval(timer);window.removeEventListener('anzen-purchase-account-conflict',conflict);window.removeEventListener('anzen-entitlement-changed',verified);window.removeEventListener('anzen-session-changed',sessionChanged);window.removeEventListener('anzen-login-started',loginStarted);window.removeEventListener('anzen-login-exchanging',loginStarted);window.removeEventListener('anzen-login-failed',loginEnded);window.removeEventListener('anzen-login-dismissed',loginEnded);window.removeEventListener('anzen-app-active',handler);window.removeEventListener('online',handler);};
-  },[refresh,loadAnonymousPrice]);
+  },[refresh,loadPrice]);
   async function action(name:Action,fn:()=>Promise<unknown>){
     if(!begin(name))return;
     const ticket=++refreshGeneration.current;setRefreshing(false);setMessage('');
@@ -74,6 +85,9 @@ export function AccountPanel(){
     }catch(e){
       if(ticket!==refreshGeneration.current||e instanceof StaleMemberResponseError)return;
       const err=e as Error;let recovered=false;
+      if(name==='purchase' && err instanceof StoreError && catalogErrors.has(err.message)){
+        setPrice('');setPriceFailed(true);
+      }
       try{const m=await billing.entitlement();if(ticket!==refreshGeneration.current)return;setMember(m);setMemberState('verified');recovered=isVerifiedPro(m);}
       catch(error){if(ticket!==refreshGeneration.current||error instanceof StaleMemberResponseError)return;setMemberState('unavailable');}
       setMessage(recovered?'':err instanceof StoreError?describeStoreError(err):purchaseMessages[err.message]??messages[err.message]??describeStoreError(err));
@@ -86,6 +100,17 @@ export function AccountPanel(){
     try{await ensureSession();}catch{end(name);setMessage('購入を始められませんでした。通信を確認して、もう一度お試しください。');return;}
     end(name);await action(name,fn);
   }
+  async function reloadPrice(){
+    if(reloadingPrice)return;
+    setReloadingPrice(true);
+    const ticket=++refreshGeneration.current;
+    try{
+      const c=await billing.config().catch(()=>null);
+      if(ticket!==refreshGeneration.current)return;
+      setConfig(c);
+      await loadPrice(c,member,ticket);
+    }finally{setReloadingPrice(false);}
+  }
   async function signOutAccount(){
     if(!begin('logout'))return;
     refreshGeneration.current++;setRefreshing(false);setMember(null);setMemberState('unauthenticated');setPrice('');setMessage('ログアウト中…');
@@ -97,7 +122,14 @@ export function AccountPanel(){
   const stageMessage=member?.purchasePending?(member.purchaseSource==='app_store'?(stageMessages[member.purchaseStage??'']??purchaseMessages.PURCHASE_REVIEW_REQUIRED):'別の購入元で手続き中です。購入元の状態を確認してください。'):null;
   const pro=isVerifiedPro(member);const pending=memberState!=='verified' || member?.syncState!=='verified' || (!!member&&!canResumeApplePurchase(member));
   // The first tap starts the guest flow even if the price or membership lookup has not finished.
-  const purchaseDisabled=busy || !!operations.restore || loginPending || !!config?.salesPaused || (!!member && pending);
+  const purchaseDisabled=reloadingPrice || busy || !!operations.restore || loginPending || !!config?.salesPaused || (!priceFailed && !!member && pending);
+  let purchaseLabel=price ? `Proにする（月額${price}）` : 'Proにする（月額プラン）';
+  if(priceFailed)purchaseLabel='月額プランを再読み込み';
+  if(reloadingPrice)purchaseLabel='商品を読み込み中…';
+  function handlePurchase(){
+    if(priceFailed){void reloadPrice();return;}
+    void withSession('purchase',async()=>billing.purchase(await billing.config(),setPrice));
+  }
   useEffect(()=>{billingDiagnostic({operation:'buttons',result:'state',reason:loginPending||operations.login?'login':operations.purchase?'purchase':operations.restore?'restore':config?.salesPaused?'store_unavailable':purchaseDisabled?'server_pending':'enabled'});},[loginPending,operations,config?.salesPaused,purchaseDisabled]);
   // App Store 5.1.1(v): Pro is bought and restored without registering. Purchase comes first;
   // sign-in is an optional link for other devices and the website, placed after the purchase.
@@ -109,14 +141,14 @@ export function AccountPanel(){
     <div className="space-y-2">
       <p className="text-lg font-bold">{statusLine}</p>
       <p className="min-h-[1.75em] text-sm">{member?.expiresAt?`更新・有効期限：${new Date(member.expiresAt).toLocaleString('ja-JP')}`:''}</p>
-      <p role="status" className="min-h-[1.75em] text-sm">{message.includes('確認中')&&!slow?'':message}</p>
+      <p role="status" className="min-h-[1.75em] text-sm">{message.includes('確認中')&&!slow?'':message || (priceFailed&&!pro&&!config?.salesPaused?'App Storeの商品を読み込めませんでした。':'')}</p>
     </div>
     {/* RA generation is paused, so the plans list only what Pro actually adds today. */}
     <div className="text-sm"><p className="my-1">無料：AIチャット1日3回・警報1地点</p><p className="my-1">Pro：AIチャット1日50回・警報10地点と通知</p></div>
     <p className="text-xs">全体の月間AI原価上限に達すると、個人の残数があってもAI生成を停止します。</p>
     <p className="text-xs">Pro {price?`${price}`:'価格はApp Storeで確認'}/月（税込）。1か月ごとの自動更新でApple Accountに請求されます。更新の24時間前までにApp Storeで解約できます。アカウント登録なしで購入・復元できます。</p>
     {config?.salesPaused&&!pro?<p role="status">{config.salesMessage??purchaseMessages.PRO_SALES_PAUSED}</p>:null}
-    <div className="flex flex-wrap gap-3">{!pro?<button disabled={purchaseDisabled} onClick={()=>void withSession('purchase',async()=>billing.purchase(await billing.config(),setPrice))}>{price ? `Proにする（月額${price}）` : 'Proにする（月額プラン）'}</button>:null}
+    <div className="flex flex-wrap gap-3">{!pro?<button disabled={purchaseDisabled} onClick={handlePurchase}>{purchaseLabel}</button>:null}
     <button disabled={busy || operations.restore || loginPending} onClick={()=>void withSession('restore',restoreProPurchases)}>購入を復元</button>
     </div>
     {slow&&!pro&&!message?<p role="status" className="text-xs">{stageMessage??'購入状況を確認中です。'}</p>:null}

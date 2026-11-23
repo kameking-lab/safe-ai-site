@@ -16,7 +16,7 @@ async function setup(context:BrowserContext,fault:Fault|null=null){
   const vault=new Map<string,string>(JSON.parse(sessionStorage.getItem('test-vault')??'[]'));
   const listeners=new Map<string,(value:unknown)=>void>();const send=window.fetch.bind(window);
   const trace:Array<{event:string;at:number}>=[];let sdkOwner:string|undefined;
-  const plugins:Record<string,string[]>={NativeVault:['get','set','clear'],Preferences:['get','set','remove'],Browser:['open','close','addListener','removeListener'],App:['getLaunchUrl','addListener','removeListener'],PushNotifications:['addListener','removeListener'],CapacitorHttp:['request'],NativeChatStream:['start','cancel','addListener','removeListener'],Purchases:['configure','logIn','logOut','syncPurchases','invalidateCustomerInfoCache','getCustomerInfo','getOfferings','purchasePackage','restorePurchases']};
+  const plugins:Record<string,string[]>={NativeVault:['get','set','clear'],Preferences:['get','set','remove'],Browser:['open','close','addListener','removeListener'],App:['getLaunchUrl','addListener','removeListener'],PushNotifications:['addListener','removeListener'],CapacitorHttp:['request'],NativeChatStream:['start','cancel','addListener','removeListener'],Purchases:['configure','isConfigured','logIn','logOut','syncPurchases','invalidateCustomerInfoCache','getCustomerInfo','getOfferings','purchasePackage','restorePurchases']};
   Object.assign(window,{__fault:fault,__opened:0,__trace:trace,__return:()=>listeners.get('App:appUrlOpen')?.({url:'anzenai://auth/callback?flow=88888888-1111-4111-8111-111111111111&code='+'x'.repeat(43)}),__activate:()=>listeners.get('App:appStateChange')?.({isActive:true}),webkit:{messageHandlers:{bridge:{}}},Capacitor:{
    PluginHeaders:Object.entries(plugins).map(([name,methods])=>({name,methods:methods.map(name=>({name,rtype:name==='addListener'?'callback':'promise'}))})),
    nativeCallback:(plugin:string,_method:string,options:{eventName:string},callback:(value:unknown)=>void)=>{listeners.set(plugin+':'+options.eventName,callback);return Promise.resolve('fixture-listener');},
@@ -42,6 +42,7 @@ async function setup(context:BrowserContext,fault:Fault|null=null){
      emit({id:request.id,kind:'headers',status:response.status,headers:Object.fromEntries(response.headers)});
      const bytes=new Uint8Array(await response.arrayBuffer());emit({id:request.id,kind:'chunk',data:btoa(String.fromCharCode(...bytes))});emit({id:request.id,kind:'end'});return {};
     }
+    if(plugin==='Purchases' && method==='isConfigured')return {isConfigured:true};
     if(plugin==='Purchases'){
      trace.push({event:method,at:performance.now()});const fault=(window as unknown as Bridge).__fault;
      if(method==='configure'||method==='logIn')sdkOwner=options.appUserID;
@@ -65,7 +66,7 @@ async function setup(context:BrowserContext,fault:Fault|null=null){
   if(url.pathname.endsWith('/diagnostics')){diagnostics.push(request.postDataJSON());return route.fulfill({headers:cors,json:{ok:true}});}
   if(url.pathname==='/api/test/store-sync'){const id=request.postDataJSON().appUserId;synced=verifiedReceipt?(id===owners.a?'a':id===owners.b?'b':null):null;return route.fulfill({headers:cors,json:{ok:true}});}
   if(serverOffline)return route.abort('internetdisconnected');
-  if(url.pathname.endsWith('/billing/config'))return route.fulfill({headers:cors,status:configFails?503:200,json:configFails?{error:{code:'UNAVAILABLE'}}:{ready:true,publicKey:'synthetic-public-sdk',productId:'jp.anzenaiportal.pro.monthly',offeringId:'fixture',policy:product,login:{apple:true,google:true},terms:host+'/terms',privacy:host+'/privacy',manage:'https://apps.apple.com/account/subscriptions'}});
+  if(url.pathname.endsWith('/billing/config'))return route.fulfill({headers:cors,status:configFails?503:200,json:configFails?{error:{code:'UNAVAILABLE'}}:{ready:true,publicKey:'appl_synthetic_public_sdk',productId:'jp.anzenaiportal.pro.monthly',offeringId:'fixture',policy:product,login:{apple:true,google:true},terms:host+'/terms',privacy:host+'/privacy',manage:'https://apps.apple.com/account/subscriptions'}});
   if(url.pathname.endsWith('/auth/start'))return route.fulfill({headers:cors,json:{flow,authorizeUrl:host+'/api/mobile/v1/auth/authorize?flow='+flow}});
   if(url.pathname.endsWith('/auth/exchange'))return route.fulfill({headers:cors,json:{token:next.repeat(43)}});
   if(url.pathname.endsWith('/auth/logout')){if(logoutDelay)await new Promise(resolve=>setTimeout(resolve,logoutDelay));return route.fulfill({headers:cors,json:{ok:true}});}
@@ -135,7 +136,7 @@ test('saved Pro survives logout, relogin and restart; cached native Pro never tr
  expect(s.diagnostics.length).toBeGreaterThan(0);
  if(captureDir)await writeFile(path.join(captureDir,`${info.project.name}-saved-ledger.json`),JSON.stringify({recoveryMs,diagnostics:s.diagnostics},null,2));
 });
-for(const stage of ['configure','logIn','logOut','getCustomerInfo'])test(`server Pro and login stay usable when ${stage} never returns`,async({page,context},info)=>{
+for(const stage of ['configure','isConfigured','logIn','logOut','getCustomerInfo'])test(`server Pro and login stay usable when ${stage} never returns`,async({page,context},info)=>{
  const s=await setup(context,{stage,mode:'never'});await page.goto('/account/');await login(page);await pro(page);await buttons(page);
  if(stage==='logIn'||stage==='logOut')await expect.poll(()=>page.evaluate(()=>(window as unknown as Bridge).__trace.some(entry=>entry.event==='configure'))).toBe(true);
  await page.getByRole('button',{name:'ログアウト',exact:true}).click();await expect(page.getByRole('button',{name:'Apple / Googleで連携（任意）'})).toBeEnabled({timeout:3000});

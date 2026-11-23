@@ -26,10 +26,26 @@ export type BillingConfig=z.infer<typeof billingConfigSchema>;
 export function canResumeApplePurchase(member:MemberEntitlement){
   return !member.purchasePending || member.purchaseSource==='app_store'&&['prepared','store_cancelled_reported','store_unknown','store_not_opened_reported'].includes(member.purchaseStage??'');
 }
-type Sdk=Pick<typeof Purchases,'configure'|'logIn'|'logOut'|'getOfferings'|'purchasePackage'|'restorePurchases'|'invalidateCustomerInfoCache'|'getCustomerInfo'> & Partial<Pick<typeof Purchases,'syncPurchases'>>;
+type Sdk=Pick<typeof Purchases,'isConfigured'|'configure'|'logIn'|'logOut'|'getOfferings'|'purchasePackage'|'restorePurchases'|'invalidateCustomerInfoCache'|'getCustomerInfo'> & Partial<Pick<typeof Purchases,'syncPurchases'>>;
+const monthlyProductId = 'jp.anzenaiportal.pro.monthly';
+function productIssue({product:storeProduct, packageType}:PurchasesPackage) {
+  if (storeProduct.identifier !== monthlyProductId) return 'identifier';
+  const monthly = storeProduct.subscriptionPeriod == null
+    ? packageType === 'MONTHLY' : storeProduct.subscriptionPeriod === product.period;
+  if (!monthly) return 'period';
+  if (!storeProduct.priceString?.trim() || !storeProduct.currencyCode ||
+      (storeProduct.currencyCode === product.currency && storeProduct.price !== product.monthlyPrice)) return 'price';
+  return null;
+}
+function storeDiagnosticCode(error:unknown) {
+  if (error instanceof StoreError) return error.message;
+  if (error instanceof OperationTimeoutError) return 'TIMEOUT';
+  const code = String((error as {code?:unknown} | null)?.code ?? '');
+  return /^(?:[0-9]{1,3}|UNIMPLEMENTED|UNAVAILABLE)$/.test(code) ? code : 'SDK_ERROR';
+}
 export class BillingController {
   private identified:string|null=null;
-  private configured=false;
+  private configuredKey:string|null=null;
   private anonymous=false;
   private busy=false;
   private purchaseUser:string|null=null;
@@ -44,7 +60,38 @@ export class BillingController {
   constructor(send=siteApi,private sdk:Sdk=Purchases,private native=()=>Capacitor.getPlatform()==='ios',private receipt=storeReceipt){
     this.send=(...args)=>bounded(args[0].endsWith('/billing/config')?'config':args[0].startsWith('/api/me/entitlements')?'entitlement':args[0]==='/api/billing/reconcile'?'reconcile':'store_request',()=>send(...args));
   }
-  async config(){return billingConfigSchema.parse(await this.send('/api/mobile/v1/billing/config'));}
+  async config(){
+    const response = await this.send('/api/mobile/v1/billing/config').catch(error=>{
+      console.warn('[billing] config request failed', {status:error instanceof SiteApiError?error.status:null, timeout:error instanceof OperationTimeoutError});
+      throw error;
+    });
+    const parsed = billingConfigSchema.safeParse(response);
+    if (!parsed.success) {
+      console.warn('[billing] invalid config response');
+      throw new StoreError('BILLING_NOT_CONFIGURED');
+    }
+    const config = parsed.data;
+    if (!config.ready || !config.publicKey || !config.productId) {
+      console.warn('[billing] config unavailable', {ready:config.ready, hasKey:!!config.publicKey, hasProduct:!!config.productId});
+    }
+    return config;
+  }
+  private async configure(apiKey:string, appUserID?:string){
+    this.configuredKey = null;
+    if (!apiKey.startsWith('appl_')) {
+      console.warn('[billing] expected Apple public SDK key');
+      throw new StoreError('BILLING_NOT_CONFIGURED');
+    }
+    try {
+      await this.sdk.configure(appUserID ? {apiKey, appUserID} : {apiKey});
+      const status = await bounded('configure', () => this.sdk.isConfigured());
+      if (!status.isConfigured) throw new StoreError('SDK_NOT_CONFIGURED');
+      this.configuredKey = apiKey;
+    } catch (error) {
+      console.warn('[billing] SDK initialization failed', {code:storeDiagnosticCode(error)});
+      throw new StoreError('SDK_NOT_CONFIGURED');
+    }
+  }
   /** Rejoin the store identity before asking the server to verify this login. SDK flags never grant access. */
   async recoverSession(){
     if(this.busy)return this.entitlement();
@@ -191,17 +238,16 @@ export class BillingController {
     const guestId=alias && await isGuestSession()?alias:null;
     const storeId=guestId??member.appUserId;
     assertCurrentMember(ticket);
-    if(this.identified===storeId)return;
+    if(this.identified===storeId && this.configuredKey===config.publicKey)return;
     // An anonymous-to-member login may alias their purchases. Start it only from
     // the guest identity that the server attached to this session.
-    if(!this.configured || guestId || (alias && this.identified!==alias) || (this.anonymous && !alias)){
+    if(this.configuredKey!==config.publicKey || guestId || (alias && this.identified!==alias) || (this.anonymous && !alias)){
       const initialId=alias??storeId;
       this.identified=null;
       await this.mutateIdentity('configure',()=>{
         assertCurrentMember(ticket);
-        return this.sdk.configure({apiKey:config.publicKey!,appUserID:initialId}).then(()=>{
+        return this.configure(config.publicKey!,initialId).then(()=>{
           // Retain the actual SDK state even if the session changes before this call completes.
-          this.configured=true;
           this.anonymous=!!alias;
         });
       });
@@ -228,8 +274,8 @@ export class BillingController {
   async anonymousOffering(config:BillingConfig):Promise<PurchasesPackage>{
     const next=this.identityWork.then(async()=>{
       if(!this.native() || !config.publicKey || !config.ready)throw new StoreError('BILLING_NOT_CONFIGURED');
-      if(!this.configured){
-        await this.mutateIdentity('configure',()=>this.sdk.configure({apiKey:config.publicKey!}).then(()=>{this.configured=true;this.anonymous=true;this.identified=null;}));
+      if(this.configuredKey!==config.publicKey){
+        await this.mutateIdentity('configure',()=>this.configure(config.publicKey!).then(()=>{this.anonymous=true;this.identified=null;}));
       }
     });
     this.identityWork=next.catch(()=>{});await bounded('identity_queue',()=>next);
@@ -248,16 +294,43 @@ export class BillingController {
     try{return await value;}catch(error){if(this.packages.get(key)===entry)this.packages.delete(key);throw error;}
   }
   private async loadOffering(config:BillingConfig):Promise<PurchasesPackage>{
-    const offerings=await bounded('getOfferings',()=>this.sdk.getOfferings()).catch(error=>{if(error instanceof OperationTimeoutError)throw new StoreError('STORE_PRODUCT_TIMEOUT');throw error;});
-    const candidates=(config.offeringId?offerings.all[config.offeringId]:offerings.current)?.availablePackages??[];
-    // Name what App Store actually returned, so a real device shows the exact mismatch.
-    if(!candidates.length)throw new StoreError('NO_PACKAGES',`offering=${config.offeringId??'-'} / 取得=${Object.keys(offerings.all).join(',')||'なし'}`);
-    // The yen price is enforced only on the Japanese storefront. Other storefronts (sandbox testers,
-    // App Review in the US) see Apple's converted price, which the UI shows via priceString.
-    const match=candidates.filter(p=>p.product.identifier===config.productId && p.packageType==='MONTHLY' && p.product.subscriptionPeriod===product.period && (p.product.currencyCode!==product.currency || p.product.price===config.policy.monthlyPrice));
-    if(match.length!==1 || config.policy.monthlyPrice!==product.monthlyPrice || config.policy.entitlement!==product.entitlement)
-      throw new StoreError('PRODUCT_MISMATCH',candidates.map(p=>`${p.product.identifier} ${p.packageType} ${p.product.subscriptionPeriod??'-'} ${p.product.currencyCode} ${p.product.price}`).join(' / '));
-    return match[0];
+    if (config.productId !== monthlyProductId || config.policy.monthlyPrice !== product.monthlyPrice ||
+        config.policy.entitlement !== product.entitlement || config.policy.period !== product.period ||
+        config.policy.currency !== product.currency) {
+      console.warn('[billing] catalog configuration mismatch', {productMatches:config.productId === monthlyProductId});
+      throw new StoreError('PRODUCT_MISMATCH');
+    }
+    for (let attempt = 1; ; attempt++) {
+      try {
+        const offerings = await bounded('getOfferings', () => this.sdk.getOfferings());
+        const named = config.offeringId ? offerings.all[config.offeringId] : undefined;
+        const choices = new Set([named, offerings.current, ...Object.values(offerings.all)]);
+        const rejected = {identifier:0, period:0, price:0};
+        for (const offering of choices) {
+          if (!offering) continue;
+          for (const selected of offering.availablePackages) {
+            const issue = productIssue(selected);
+            if (issue) { rejected[issue]++; continue; }
+            const source = offering === named ? 'configured' : offering === offerings.current ? 'current' : 'other';
+            console.info('[billing] monthly product loaded', {source, attempt});
+            return selected;
+          }
+        }
+        console.warn('[billing] monthly product missing', {
+          attempt, configuredOfferingFound:!!named, currentOfferingFound:!!offerings.current,
+          offeringCount:Object.keys(offerings.all).length, rejected,
+        });
+        throw new StoreError(Object.values(rejected).some(count=>count>0) ? 'PRODUCT_MISMATCH' : 'NO_PACKAGES');
+      } catch (error) {
+        const code = storeDiagnosticCode(error);
+        console.warn('[billing] catalog lookup failed', {attempt, code});
+        if (error instanceof OperationTimeoutError) throw new StoreError('STORE_PRODUCT_TIMEOUT');
+        if (attempt === 2 || code === '11' || code === 'UNIMPLEMENTED' || code === 'UNAVAILABLE') {
+          throw error instanceof StoreError ? error : new StoreError('STORE_CATALOG_UNAVAILABLE');
+        }
+        await new Promise(resolve => setTimeout(resolve, 250));
+      }
+    }
   }
   async purchase(config:BillingConfig,onPrice?:(price:string)=>void){
     if(this.busy)throw new Error('PURCHASE_PENDING');this.busy=true;
@@ -375,7 +448,7 @@ export class BillingController {
     // identity after this logout so a late completion cannot erase the new owner.
     if(!this.anonymous)this.identified=null;
     // The SDK does not allow logging out an anonymous store user.
-    const next=this.identityWork.then(async()=>{if(this.configured&&!this.anonymous)await this.mutateIdentity('logOut',()=>this.sdk.logOut());});
+    const next=this.identityWork.then(async()=>{if(this.configuredKey&&!this.anonymous)await this.mutateIdentity('logOut',()=>this.sdk.logOut());});
     this.identityWork=next.catch(()=>{});return bounded('identity_queue',()=>next);
   }
 }

@@ -7,6 +7,24 @@ test.beforeEach(async ({context}) => {
   await installNativeTestBridge(context,false,true);
 });
 
+test('reloads a missing monthly price with the purchase button before opening StoreKit',async ({page,context}) => {
+  const store=await installGuestStore(context);
+  store.setCatalog(false);
+  await page.goto('/account/');
+  const retry=page.getByRole('button',{name:'月額プランを再読み込み'});
+  await expect(retry).toBeEnabled();
+  expect(store.catalogReads()).toBeGreaterThanOrEqual(2);
+  store.setCatalog(true);
+  await retry.click();
+  const buy=page.getByRole('button',{name:'Proにする（月額$6.99）',exact:true});
+  await expect(buy).toBeEnabled();
+  expect(store.guests()).toBe(0);
+  expect(store.actions).toEqual([]);
+  await buy.click();
+  await expect(page.getByText('Pro 利用中',{exact:true})).toBeVisible();
+  expect(store.actions).toEqual(['purchasePackage']);
+});
+
 for (const action of ['purchasePackage','restorePurchases'] as const) {
   test(`fresh install completes ${action} with no portal account`,async ({page,context}) => {
     const store = await installGuestStore(context);
