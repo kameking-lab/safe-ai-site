@@ -103,6 +103,7 @@ export function AccountPanel(){
   async function reloadPrice(){
     if(reloadingPrice)return;
     setReloadingPrice(true);
+    setMessage('');
     const ticket=++refreshGeneration.current;
     try{
       const c=await billing.config().catch(()=>null);

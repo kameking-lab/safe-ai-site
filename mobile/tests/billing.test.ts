@@ -433,6 +433,26 @@ describe('iOS IAP uses server rights before StoreKit',()=>{
     await s.controller.purchase(config);
     expect(s.sdk.purchasePackage).toHaveBeenCalledExactlyOnceWith({aPackage:selected});
   });
+  it.each([
+    {packageType:'ANNUAL',period:'P1Y',price:'$5.99'},
+    {packageType:'CUSTOM',period:null,price:'$5.99'},
+    {packageType:'MONTHLY',period:'P1M',price:''},
+  ])('never reserves an invalid fallback package ($packageType/$period/$price)',async item=>{
+    const s=setup({atomic:true});
+    const invalid={packageType:item.packageType,product:{identifier:config.productId,subscriptionPeriod:item.period,priceString:item.price,currencyCode:'USD'}};
+    s.sdk.getOfferings.mockResolvedValue({all:{other:{availablePackages:[invalid]}},current:null} as never);
+    await expect(s.controller.purchase(config)).rejects.toThrow('PRODUCT_MISMATCH');
+    expect(s.sdk.getOfferings).toHaveBeenCalledTimes(2);
+    expect(s.sdk.purchasePackage).not.toHaveBeenCalled();
+    expect(s.send.mock.calls.some(([path])=>path==='/api/billing/purchase-intents')).toBe(false);
+  });
+  it('reports a configuration transport failure as a catalog error and retries on demand',async()=>{
+    const s=setup();
+    s.send.mockRejectedValueOnce(new Error('offline')).mockResolvedValueOnce(config);
+    await expect(s.controller.config()).rejects.toThrow('BILLING_NOT_CONFIGURED');
+    expect(await s.controller.config()).toMatchObject({ready:true});
+    expect(s.sdk.purchasePackage).not.toHaveBeenCalled();
+  });
   it('retries a temporary catalog error and sends a single purchase request',async()=>{
     const s=setup({atomic:true});
     s.sdk.getOfferings.mockRejectedValueOnce({code:'10'});

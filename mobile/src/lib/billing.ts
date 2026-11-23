@@ -63,7 +63,7 @@ export class BillingController {
   async config(){
     const response = await this.send('/api/mobile/v1/billing/config').catch(error=>{
       console.warn('[billing] config request failed', {status:error instanceof SiteApiError?error.status:null, timeout:error instanceof OperationTimeoutError});
-      throw error;
+      throw new StoreError('BILLING_NOT_CONFIGURED');
     });
     const parsed = billingConfigSchema.safeParse(response);
     if (!parsed.success) {
