@@ -1,6 +1,6 @@
 import { Capacitor, CapacitorHttp, registerPlugin } from '@capacitor/core';
 import { SITE } from './api';
-import { sessionToken } from './session';
+import { sessionToken,clearRejectedGuest } from './session';
 import { installNativeDownloads } from './native-download';
 import { installNativeSpeech } from './native-speech';
 import { PushNotifications } from '@capacitor/push-notifications';
@@ -38,7 +38,9 @@ export function createSiteFetch(original:typeof fetch):typeof fetch {
       }else body=await req.text();
     }
     if (url.pathname === '/api/chatbot/stream' && req.method === 'POST') {
-      return nativeChatResponse(String(body ?? ''), headers, req.signal);
+      const response = await nativeChatResponse(String(body ?? ''), headers, req.signal);
+      if (response.status === 401) await clearRejectedGuest(token);
+      return response;
     }
     const r = await CapacitorHttp.request({ url:target, method:req.method, headers:Object.fromEntries(headers), data:body, ...(dataType?{dataType}:{}), responseType:'arraybuffer', disableRedirects:true, connectTimeout:15000, readTimeout:60000 });
     if (new URL(r.url).origin !== SITE) throw new Error('Redirect refused');

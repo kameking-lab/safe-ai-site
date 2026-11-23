@@ -15,7 +15,7 @@ export type Transport = (path: string, body?: unknown, extraHeaders?: Record<str
 export const transport: Transport = async (path, body, extraHeaders = {}) => {
   if (!PATHS.includes(path.split('?')[0] as typeof PATHS[number])) throw new ApiError('INVALID_ENDPOINT');
   const url = `${SITE}${path}`;
-  const {sessionToken}=await import('./session');
+  const {sessionToken,clearRejectedGuest}=await import('./session');
   // A Keychain failure must not take public feeds offline; send the request anonymously.
   const token=await sessionToken().catch(()=>null);
   const headers = { Accept: 'application/json', Origin:SITE,'X-Anzen-Native':'1', ...(token?{Authorization:`Bearer ${token}`} : {}), ...(body ? { 'Content-Type': 'application/json' } : {}), ...extraHeaders };
@@ -23,11 +23,14 @@ export const transport: Transport = async (path, body, extraHeaders = {}) => {
     const response = await CapacitorHttp.request({ url, method: body ? 'POST' : 'GET', headers,
       ...(body ? { data: body } : {}), responseType: 'json', connectTimeout: 15000, readTimeout: 25000, disableRedirects: true });
     if (new URL(response.url).origin !== SITE) throw new ApiError('INVALID_ENDPOINT');
+    if (response.status===401 && response.data?.error?.code==='UNAUTHORIZED') await clearRejectedGuest(token);
     return response;
   }
   const response = await fetch(url, { method: body ? 'POST' : 'GET', headers,
     ...(body ? { body: JSON.stringify(body) } : {}), credentials: 'include', redirect: 'error', signal: AbortSignal.timeout(25000), cache: 'no-store' });
-  return { status: response.status, data: await response.json(), headers: Object.fromEntries(response.headers) };
+  const data=await response.json();
+  if (response.status===401 && data?.error?.code==='UNAUTHORIZED') await clearRejectedGuest(token);
+  return { status: response.status, data, headers: Object.fromEntries(response.headers) };
 };
 export async function request(path: string, send: Transport = transport, body?: unknown, headers?: Record<string, string>) {
   const response = await send(path, body, headers);

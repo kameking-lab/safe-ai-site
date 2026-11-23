@@ -146,6 +146,9 @@ async function sendSiteApi(path:string,body:unknown,method:string|undefined,toke
   }else{
     const r=await fetch(SITE+path,{method:method??(body?'POST':'GET'),headers,...(body?{body:JSON.stringify(body)}:{}),credentials:'include',redirect:'error',cache:'no-store',signal:AbortSignal.timeout(25000)});status=r.status;data=await r.json().catch(()=>null);
   }
+  if(status===401 && (data as {error?:{code?:string}}|null)?.error?.code==='UNAUTHORIZED' && !path.startsWith('/api/mobile/v1/auth/')){
+    await clearRejectedGuest(token);
+  }
   if(status<200 || status>=300){const code=(data as {error?:{code?:string}})?.error?.code;throw new SiteApiError(typeof code==='string'&&/^[A-Z_]{1,60}$/.test(code)?code:'UNAVAILABLE',status);}
   if(!data||typeof data!=='object')throw new SiteApiError('UNEXPECTED_RESPONSE',status);
   return data;
@@ -214,4 +217,12 @@ export async function logout() {
     }finally{resume();}
   });
 }
-export async function forgetLocalSession(){await setSessionToken(null);await writeLogin(null);}
+// A late 401 must never clear a different session or interrupt an optional login.
+export async function clearRejectedGuest(rejected: string | null) {
+  if (!rejected) return;
+  await serializeSession(async () => {
+    if (cachedToken !== rejected || !await guestFlag()) return;
+    tokenEpoch++;
+    await writeSessionToken(null);
+  });
+}

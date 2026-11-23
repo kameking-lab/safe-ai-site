@@ -16,7 +16,7 @@ export function WeatherPanel({ location, value, onLocation, online,locationOptio
   const selected = locationOptions.find(l => l.id === location);
   return <>
     <section className="card">
-      <h3>登録地点の気象警報</h3><p>{memberSettings?'閲覧地点を切り替えて警報情報を確認できます。保存地点・通知は上の会員設定で変更します。':'無料版は1地点を端末に保存します。通知は送信しません。'}</p>
+      <h3>登録地点の気象警報</h3><p>{memberSettings?'閲覧地点を切り替えて警報情報を確認できます。保存地点・通知は画面上部で変更できます。':'無料版は1地点を端末に保存します。通知は送信しません。'}</p>
       <label>地点<select value={location} onChange={e => { void onLocation(e.target.value).catch(() => setMessage('地点の保存に失敗しました。')); }}>{locationOptions.map(l => <option key={l.id} value={l.id}>{l.label}</option>)}</select></label>
       <p className="muted">{selected?.cityCode ? '市区町村の警報区域を確認します。現場の安全を保証する情報ではありません。' : '都道府県の代表地点です。市区町村単位の警報を確定できない場合があります。'}</p>
       <div className={isLive ? 'notice info' : 'notice'} role="status">{isLive ? '気象庁のデータを取得済み' : '現在の警報状況は未確認です。保存データを「警報なし」として扱いません。'}</div>

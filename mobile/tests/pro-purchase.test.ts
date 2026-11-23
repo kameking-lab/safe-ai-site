@@ -31,14 +31,6 @@ describe('「月額980円で続ける」をアプリで押したとき（登録�
     expect(failed).toEqual({state:'error',message:'購入を始められませんでした。通信を確認して、もう一度お試しください。'});
     expect(mock.purchase).not.toHaveBeenCalled();expect(mock.startLogin).not.toHaveBeenCalled();
   });
-  it('期限切れのゲストは端末から外し、次に押したとき新しいゲストで購入できる',async()=>{
-    mock.token='old-guest';mock.guest=true;mock.purchase.mockRejectedValueOnce(new Error('UNAUTHORIZED'));
-    expect((await startProPurchase()).message).toBe('もう一度お試しください。');expect(mock.forget).toHaveBeenCalledOnce();
-    expect((await startProPurchase()).state).toBe('pro');expect(mock.guestRequests).toBe(1);
-    // ログイン済み会員の UNAUTHORIZED では会員の認証情報を消さない。
-    mock.token='member';mock.guest=false;mock.forget.mockClear();mock.purchase.mockRejectedValueOnce(new Error('UNAUTHORIZED'));
-    await startProPurchase();expect(mock.forget).not.toHaveBeenCalled();
-  });
   it('「購入を復元」もログインなしで行える',async()=>{
     expect(await restoreProPurchases()).toEqual({plan:'pro'});
     expect(mock.guestRequests).toBe(1);expect(mock.restore).toHaveBeenCalledWith({ready:true});expect(mock.startLogin).not.toHaveBeenCalled();

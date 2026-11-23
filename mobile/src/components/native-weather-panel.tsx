@@ -1,7 +1,8 @@
 'use client';
-import { useCallback,useEffect,useRef,useState } from 'react';
+import { useCallback,useContext,useEffect,useRef,useState } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { PushNotifications } from '@capacitor/push-notifications';
+import { ProPurchasePresentationContext } from '@/components/pro-upsell-card';
 import { signageLocations } from '@/data/signage-locations';
 import { ensureSession,siteApi } from '../lib/session';
 import { startProPurchase } from '../lib/pro-purchase';
@@ -11,6 +12,7 @@ import { WeatherPanel } from './weather-panel';
 import type { Snapshot,Weather } from '../lib/contracts';
 type Locations={locations:Array<{locationId:string;label:string;active:boolean;primary:boolean}>;limit:number;notifications:boolean};
 export function NativeWeatherPanel(){
+  const offer = useContext(ProPurchasePresentationContext);
   const refreshGeneration=useRef(0);
   const [online,setOnline]=useState(true);
   const [data,setData]=useState<Locations>({locations:[],limit:1,notifications:false});const [selected,setSelected]=useState('tokyo-shinjuku');const [weather,setWeather]=useState<Snapshot<Weather>|null>(null);const [message,setMessage]=useState('');const [signedIn,setSignedIn]=useState(false);const [busy,setBusy]=useState(false);
@@ -36,7 +38,11 @@ export function NativeWeatherPanel(){
   return <section className="native-panel mx-auto max-w-5xl p-5 text-slate-900"><h1 className="text-2xl font-bold">気象警報・地点と通知</h1><p role="status">{message}</p><p>登録上限：{data.limit}地点。全国・別地域の一時閲覧は無料です。市町村情報がない地点は都道府県単位の表示・通知です。</p>
     <label>閲覧する地点<select value={selected} onChange={e=>setSelected(e.target.value)}>{signageLocations.map(l=><option key={l.id} value={l.id}>{l.label}</option>)}</select></label>
     <button disabled={busy || (signedIn && data.locations.length>=data.limit)} onClick={()=>void change('POST')}>この地点を登録</button>
-    {!data.notifications?<p><button disabled={busy} onClick={()=>void buyPro()}>Proにする（警報10地点と通知）</button> 登録なしでApp Storeから購入できます。</p>:null}
+    {!data.notifications && <div>
+      <button disabled={busy} onClick={()=>void buyPro()}>Proにする（{offer?.price ? `月額${offer.price}` : '月額プラン'}）</button>
+      <p>警報10地点と通知。1か月ごとに自動更新され、App Storeで解約できます。</p>
+      <p><a href="/terms">利用規約</a> · <a href="/privacy">プライバシーポリシー</a></p>
+    </div>}
     <ul>{data.locations.map(l=><li key={l.locationId}><button onClick={()=>setSelected(l.locationId)}>{l.label} {l.active?'監視中':'Pro失効により停止中'}</button><button disabled={busy} onClick={()=>void change('PATCH',l.locationId)}>主地点にする</button><button disabled={busy} onClick={()=>void change('DELETE',l.locationId)}>削除</button></li>)}</ul>
     <button disabled={busy || !data.notifications} onClick={()=>void enablePush()}>Proの警報通知を有効にする</button><button disabled={busy || !signedIn} onClick={()=>{if(busy)return;setBusy(true);void siteApi('/api/me/push-devices',{},'DELETE').then(async()=>{if(Capacitor.getPlatform()==='ios')await PushNotifications.unregister();setMessage('通知を停止しました。');}).catch(()=>setMessage('通知を停止できませんでした。')).finally(()=>setBusy(false));}}>通知を停止</button>
     <WeatherPanel location={selected} value={weather} onLocation={async id=>{setSelected(id);}} online={online} memberSettings locationOptions={signageLocations.map(l=>({id:l.id,label:l.label,cityCode:l.jmaCityCode}))}/>

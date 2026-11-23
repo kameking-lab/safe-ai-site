@@ -10,20 +10,17 @@ import { SharedUsageMeter } from './shared-usage-meter';
 // The website's mobile tab bar (ホーム・化学RA・法令AI・学ぶ・メニュー), same component as the web.
 import { MobileBottomNav } from '@/components/MobileBottomNav';
 import { ProPurchasePresentationContext } from '@/components/pro-upsell-card';
+import { useStorePrice } from './use-store-price';
 import { billing,isVerifiedPro,type MemberEntitlement } from '../lib/billing';
 import { DisplaySettings } from './display-settings';
 import { startProPurchase, type ProPurchaseResult } from '../lib/pro-purchase';
-import { forgetLocalSession, isGuestSession } from '../lib/session';
 export function SharedShell({ children }: { children: ReactNode }) {
   const [message,setMessage]=useState('');
   const [purchaseMessage,setPurchaseMessage]=useState('');
   const [purchasing,setPurchasing]=useState(false);
   const purchaseRunning=useRef(false);
-  const [price,setPrice]=useState<string|null>(null);
+  const price=useStorePrice();
   const verifiedPro=useRef<MemberEntitlement|null>(null);
-  // The price is shown before any login or guest session too (App Store 3.1.2): without a
-  // session it comes from an anonymous SDK configuration that only reads the offering.
-  useEffect(()=>{let generation=0;const update=()=>{const ticket=++generation;setPrice(null);void (async()=>{const [c,m]=await Promise.all([billing.config(),billing.entitlement().catch(error=>{if(error instanceof Error&&error.message==='UNAUTHORIZED')return null;throw error;})]);if(!c.ready||m&&(m.plan!=='free'||m.syncState!=='verified'))return;const p=m?await billing.offering(c,m):await billing.anonymousOffering(c);if(ticket===generation)setPrice(p.product.priceString);})().catch(()=>{});};update();window.addEventListener('anzen-session-changed',update);return()=>{generation++;window.removeEventListener('anzen-session-changed',update);};},[]);
   const pathname=usePathname().replace(/\/$/,'')||'/';
   useEffect(() => {
     installWebTransport();
@@ -44,11 +41,8 @@ export function SharedShell({ children }: { children: ReactNode }) {
     // A new login rejoins the store identity. A guest session is created by the purchase/restore
     // that is already running, which owns its own reconciliation.
     const signedIn=(event:Event)=>{const detail=(event as CustomEvent<{signedIn?:boolean;guest?:boolean}>).detail;if(detail?.signedIn!==false&&!detail?.guest)void billing.recoverSession().catch(()=>{});};
-    // A guest credential the server rejected (expired/removed) is dropped, never answered with a sign-in request.
-    const expired=()=>{void isGuestSession().then(guest=>guest?forgetLocalSession():undefined).catch(()=>{});};
-    window.addEventListener('anzen-session-rejected',expired);
     document.addEventListener('click',feeds,true);window.addEventListener('anzen-session-changed',sessionChanged);window.addEventListener('anzen-session-changed',signedIn);window.addEventListener('anzen-entitlement-changed',verified);
-    return()=>{window.removeEventListener('anzen-session-rejected',expired);document.removeEventListener('click',feeds,true);window.removeEventListener('anzen-session-changed',sessionChanged);window.removeEventListener('anzen-session-changed',signedIn);window.removeEventListener('anzen-entitlement-changed',verified);};
+    return()=>{document.removeEventListener('click',feeds,true);window.removeEventListener('anzen-session-changed',sessionChanged);window.removeEventListener('anzen-session-changed',signedIn);window.removeEventListener('anzen-entitlement-changed',verified);};
   }, []);
   return <ProPurchasePresentationContext.Provider value={{price,busy:purchasing,message:purchaseMessage}}><style>{`a[href='/ky'],a[href^='/ky/'],a[href='/safety-diary'],a[href^='/safety-diary/'],a[href='/site-records/near-miss']{display:none!important}`}</style><header hidden={pathname==='/signage/display'} className="sticky top-[env(safe-area-inset-top)] z-50 flex items-center gap-1 whitespace-nowrap border-b bg-white px-2 py-1 text-slate-900 print:hidden">
     {/* No browser chrome in the app: one row, a real back button, 44pt targets. */}

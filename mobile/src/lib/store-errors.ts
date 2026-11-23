@@ -2,7 +2,7 @@
 export class StoreError extends Error {
   constructor(code: string, readonly detail = '') { super(code); this.name = 'StoreError'; }
 }
-export const purchaseAccountConflictMessage='この購入は別のログイン方法（Apple / Google）で使われています。そちらでログインしてください。';
+export const purchaseAccountConflictMessage='この購入は別のアカウントで使用中です。購入時のApple Accountを確認し、Pro画面の「購入を復元」をお試しください。';
 const MESSAGES: Record<string, string> = {
   '3': '端末の購入制限を確認してください。',
   '10': '通信環境を確認してもう一度お試しください。',

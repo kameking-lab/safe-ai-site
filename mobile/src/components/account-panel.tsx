@@ -1,7 +1,7 @@
 'use client';
 import { useCallback,useEffect,useRef,useState } from 'react';
 import { billing,isVerifiedPro,canResumeApplePurchase,type BillingConfig,type MemberEntitlement } from '../lib/billing';
-import { logout,startLogin,isLoginExchanging,ensureSession,isGuestSession,forgetLocalSession } from '../lib/session';
+import { logout,startLogin,isLoginExchanging,ensureSession,isGuestSession } from '../lib/session';
 import { openSource } from '../lib/native';
 import { restoreProPurchases } from '../lib/pro-purchase';
 import { NativeAccountDetails } from './native-account-details';
@@ -67,12 +67,13 @@ export function AccountPanel(){
     const ticket=++refreshGeneration.current;setRefreshing(false);setMessage('');
     try{
       const result=await fn();if(ticket!==refreshGeneration.current)return;
-      if(result&&typeof result==='object'&&'appUserId' in result){setMember(result as MemberEntitlement);setMemberState('verified');setMessage('');window.dispatchEvent(new Event('anzen-usage-changed'));}else await refresh();
+      if(result&&typeof result==='object'&&'appUserId' in result){const rights=result as MemberEntitlement;
+        setMember(rights);setMemberState('verified');
+        setMessage(name==='restore' && rights.plan==='free' && rights.syncState==='verified' && !rights.purchasePending ? '復元できる有効な購読はありません。' : '');
+        window.dispatchEvent(new Event('anzen-usage-changed'));}else await refresh();
     }catch(e){
       if(ticket!==refreshGeneration.current||e instanceof StaleMemberResponseError)return;
       const err=e as Error;let recovered=false;
-      // An expired guest session is replaced by a new guest on the next purchase or restore.
-      if(err.message==='UNAUTHORIZED'&&guest)void forgetLocalSession().catch(()=>{});
       try{const m=await billing.entitlement();if(ticket!==refreshGeneration.current)return;setMember(m);setMemberState('verified');recovered=isVerifiedPro(m);}
       catch(error){if(ticket!==refreshGeneration.current||error instanceof StaleMemberResponseError)return;setMemberState('unavailable');}
       setMessage(recovered?'':err instanceof StoreError?describeStoreError(err):purchaseMessages[err.message]??messages[err.message]??describeStoreError(err));
@@ -115,7 +116,7 @@ export function AccountPanel(){
     <p className="text-xs">全体の月間AI原価上限に達すると、個人の残数があってもAI生成を停止します。</p>
     <p className="text-xs">Pro {price?`${price}`:'価格はApp Storeで確認'}/月（税込）。1か月ごとの自動更新でApple Accountに請求されます。更新の24時間前までにApp Storeで解約できます。アカウント登録なしで購入・復元できます。</p>
     {config?.salesPaused&&!pro?<p role="status">{config.salesMessage??purchaseMessages.PRO_SALES_PAUSED}</p>:null}
-    <div className="flex flex-wrap gap-3">{!pro?<button disabled={purchaseDisabled} onClick={()=>void withSession('purchase',async()=>billing.purchase(await billing.config(),setPrice))}>{`Proにする（月額${price}）`}</button>:null}
+    <div className="flex flex-wrap gap-3">{!pro?<button disabled={purchaseDisabled} onClick={()=>void withSession('purchase',async()=>billing.purchase(await billing.config(),setPrice))}>{price ? `Proにする（月額${price}）` : 'Proにする（月額プラン）'}</button>:null}
     <button disabled={busy || operations.restore || loginPending} onClick={()=>void withSession('restore',restoreProPurchases)}>購入を復元</button>
     </div>
     {slow&&!pro&&!message?<p role="status" className="text-xs">{stageMessage??'購入状況を確認中です。'}</p>:null}

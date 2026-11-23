@@ -5,7 +5,7 @@ import { AccountPanel } from '../src/components/account-panel';
 
 it('shows enabled purchase and restore buttons before the guest or store price has loaded', () => {
   const page = renderToStaticMarkup(createElement(AccountPanel));
-  for (const label of ['Proにする（月額）', '購入を復元']) {
+  for (const label of ['Proにする（月額プラン）', '購入を復元']) {
     const button = Array.from(page.matchAll(/<button\b[^>]*>([^<]+)<\/button>/g)).find(([, text]) => text === label);
     expect(button?.[0]).toBeDefined();
     expect(button?.[0]).not.toContain('disabled');
@@ -19,7 +19,7 @@ it('puts purchase before the optional sign-in and never says the visitor must lo
   expect(page).not.toContain('会員・');
   expect(page).not.toContain('ログインしていません');
   expect(page).toContain('アカウント登録なしで購入・復元できます。');
-  const purchase = page.indexOf('Proにする（月額）');
+  const purchase = page.indexOf('Proにする（月額プラン）');
   const restore = page.indexOf('購入を復元');
   const signIn = page.indexOf('Apple / Googleで連携（任意）');
   expect(purchase).toBeGreaterThan(-1);

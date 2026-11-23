@@ -1,5 +1,5 @@
 import { billing, isVerifiedPro } from './billing';
-import { ensureSession, forgetLocalSession, isGuestSession } from './session';
+import { ensureSession } from './session';
 import { describeStoreError,StoreError } from './store-errors';
 import { StaleMemberResponseError } from './member-generation';
 
@@ -42,8 +42,6 @@ export async function startProPurchase(): Promise<ProPurchaseResult> {
     if(error instanceof StaleMemberResponseError)return {state:'pending',message:''};
     const code = error instanceof Error ? error.message : '';
     if(error instanceof StoreError)return {state:'error',message:describeStoreError(error)};
-    // An expired or removed guest session is replaced by a fresh guest on the next tap.
-    if (code === 'UNAUTHORIZED' && await isGuestSession().catch(() => false)) await forgetLocalSession().catch(() => {});
     if (code in PENDING_TEXT) return { state: code === 'ALREADY_SUBSCRIBED' ? 'pro' : 'pending', message: PENDING_TEXT[code] };
     return { state: 'error', message: describeStoreError(error) };
   } finally {

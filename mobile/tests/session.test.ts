@@ -224,3 +224,19 @@ describe('purchase without registration (App Store 5.1.1(v))',()=>{
     expect(mock.recover).toHaveBeenCalledOnce();expect(mock.restore).not.toHaveBeenCalled();
   });
 });
+
+it('replaces a rejected weather guest on the next action and retains a newer session after a late 401',async()=>{
+  const session=await import('../src/lib/session');
+  const old='o'.repeat(43);
+  await session.setSessionToken(old,{guest:true});
+  mock.request.mockImplementation(async ({url})=>({url,status:401,data:{error:{code:'UNAUTHORIZED'}}}));
+  await expect(session.siteApi('/api/me/weather-locations',{locationId:'tokyo-shinjuku'})).rejects.toThrow('UNAUTHORIZED');
+  expect(await session.sessionToken()).toBeNull();
+  mock.request.mockImplementation(async ({url})=>({url,status:200,data:{token,guest:true}}));
+  expect(await session.ensureSession()).toBe(token);
+  await session.clearRejectedGuest(old);
+  expect(await session.sessionToken()).toBe(token);
+  await session.setSessionToken(token);
+  await session.clearRejectedGuest(token);
+  expect(await session.sessionToken()).toBe(token);
+});

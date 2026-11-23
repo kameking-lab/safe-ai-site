@@ -14,7 +14,7 @@ it('alerts screen saves a location and buys Pro without sign-in', async () => {
 it('the app header names the purchase screen Pro, not membership', async () => {
   const source = await read('../src/components/shared-shell.tsx');
   expect(source).not.toContain('会員・Pro');
-  expect(source).toContain("'anzen-session-rejected'");
+  expect(await read('../src/lib/web-transport.ts')).toContain('clearRejectedGuest(token)');
 });
 
 it('the shared chat never tells an app user that member login is required', async () => {

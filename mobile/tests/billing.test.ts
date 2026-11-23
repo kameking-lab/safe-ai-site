@@ -69,7 +69,7 @@ it('purchases and restores under the bound anonymous ID, then logs in once and k
   }
 });
 
-it.each(['conflict', 'free'])('sends signed StoreKit evidence and publishes the grant when a fresh guest restore first reports %s', async (result) => {
+it.each(['conflict', 'free', '7', '13'])('sends signed StoreKit evidence and publishes the grant when a fresh guest restore first reports %s', async (result) => {
   const { send, sdk } = setup();
   const alias = '$RCAnonymousID:' + 'a'.repeat(32);
   const restoredAlias = '$RCAnonymousID:' + 'b'.repeat(32);
@@ -89,6 +89,7 @@ it.each(['conflict', 'free'])('sends signed StoreKit evidence and publishes the 
       }
       throw new Error(`Unexpected request: ${path}`);
     });
+    if (['7','13'].includes(result)) sdk.restorePurchases.mockRejectedValueOnce({code:result});
     const restored = await controller.restore(config);
     expect(sdk.restorePurchases).toHaveBeenCalledOnce();
     expect(receipt.currentPurchase).toHaveBeenCalledExactlyOnceWith({ productId: config.productId });

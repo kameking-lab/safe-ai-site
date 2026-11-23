@@ -330,7 +330,15 @@ export class BillingController {
       this.purchaseUser=member.appUserId;
       await this.identify(config,member);
       assertCurrentMember(ticket);
-      await this.mutateIdentity('restorePurchases',()=>{assertCurrentMember(ticket);return this.sdk.restorePurchases();});
+      let storeConflict = false;
+      try {
+        await this.mutateIdentity('restorePurchases',()=>{assertCurrentMember(ticket);return this.sdk.restorePurchases();});
+      } catch (error) {
+        const code = String((error as {code?:unknown})?.code);
+        if (!['7','13'].includes(code) || !member.appleGuestAppUserId || !await isGuestSession()) throw error;
+        storeConflict = true;
+      }
+      assertCurrentMember(ticket);
       const reconciliation=await this.reconcile(ticket,member.appUserId).then(
         member=>({member,error:null}),
         (error:unknown)=>{
@@ -356,6 +364,7 @@ export class BillingController {
       }
       assertCurrentMember(restoreTicket);
       if(!reconciliation.member)throw reconciliation.error;
+      if(storeConflict)throw new Error('PURCHASE_OWNED_BY_OTHER_ACCOUNT');
       return reconciliation.member;
     }finally{this.purchaseUser=null;this.busy=false;}
   }
