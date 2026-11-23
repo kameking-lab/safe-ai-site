@@ -1,3 +1,4 @@
+import { requireAdminPageAccess } from "@/lib/server/admin-access";
 import type { Metadata } from "next";
 import { PageContainer } from "@/components/layout";
 
@@ -471,7 +472,8 @@ function sectionId(s: string) {
   return s;
 }
 
-export default function ReviewDashboardPage() {
+export default async function ReviewDashboardPage() {
+  await requireAdminPageAccess();
   return (
     <PageContainer width="full" className="text-slate-900">
       <article

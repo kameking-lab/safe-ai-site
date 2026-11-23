@@ -1,3 +1,4 @@
+import { requireAdminPageAccess } from "@/lib/server/admin-access";
 import type { Metadata } from "next";
 import { PageContainer } from "@/components/layout";
 
@@ -248,7 +249,8 @@ function StatusBadge({ status }: { status: BatchStatus | FindingStatus }) {
   );
 }
 
-export default function P3BatchPlanPage() {
+export default async function P3BatchPlanPage() {
+  await requireAdminPageAccess();
   const totalHours = BATCHES.reduce((s, b) => s + b.totalHours, 0);
 
   return (

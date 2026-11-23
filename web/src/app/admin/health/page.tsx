@@ -1,3 +1,4 @@
+import { requireAdminPageAccess } from "@/lib/server/admin-access";
 import type { Metadata } from "next";
 import { checkAllServices, type ServiceHealth } from "@/lib/external/health";
 
@@ -23,6 +24,7 @@ const CIRCUIT_BADGE: Record<ServiceHealth["circuit"]["state"], { label: string; 
 };
 
 export default async function AdminHealthPage() {
+  await requireAdminPageAccess();
   const services = await checkAllServices();
   const generatedAt = new Date().toISOString();
   const okCount = services.filter((s) => s.status === "ok").length;

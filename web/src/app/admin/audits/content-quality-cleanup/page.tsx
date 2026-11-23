@@ -1,3 +1,4 @@
+import { requireAdminPageAccess } from "@/lib/server/admin-access";
 import type { Metadata } from "next";
 import { PageContainer } from "@/components/layout";
 
@@ -195,7 +196,8 @@ const DEFERRED = [
   },
 ];
 
-export default function ContentQualityCleanupPage() {
+export default async function ContentQualityCleanupPage() {
+  await requireAdminPageAccess();
   return (
     <PageContainer>
       <header className="mb-6">
