@@ -1,3 +1,4 @@
+import { requireAdminPageAccess } from "@/lib/server/admin-access";
 import type { Metadata } from "next";
 import { PageContainer } from "@/components/layout";
 
@@ -197,7 +198,8 @@ const ARCHIVE_CANDIDATES: ArchiveItem[] = [
   { page: "ja.json 翻訳辞書 pricing.*/services.*", status: "needs-redesign", rationale: "PAID_MODE 配下の有料文言を、課金モード再開時の体裁見直しと同時に整理。", followUpPR: "別Dispatch P3" },
 ];
 
-export default function BrandConsistencyAuditPage() {
+export default async function BrandConsistencyAuditPage() {
+  await requireAdminPageAccess();
   return (
     <PageContainer width="wide">
       <div className="space-y-8 py-6">

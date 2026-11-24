@@ -1,3 +1,4 @@
+import { requireAdminPageAccess } from "@/lib/server/admin-access";
 import type { Metadata } from "next";
 import { PageContainer } from "@/components/layout";
 import statsJson from "@/data/news-feed/stats.json";
@@ -114,7 +115,8 @@ function HistogramRow({
   );
 }
 
-export default function NewsFeedStatsPage() {
+export default async function NewsFeedStatsPage() {
+  await requireAdminPageAccess();
   const { counts, byDay, byPublisher, byEstimatedAccidentType, byEstimatedWorkCategory, scoreHistograms, rejectionReasonRanks, samples, generatedAt } =
     stats;
   const generatedDate = new Date(generatedAt);

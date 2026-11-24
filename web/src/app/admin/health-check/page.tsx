@@ -1,3 +1,4 @@
+import { requireAdminPageAccess } from "@/lib/server/admin-access";
 import type { Metadata } from "next";
 import {
   CRITICAL_PERCENT,
@@ -33,6 +34,7 @@ const TRENDABLE_QUOTAS: QuotaKey[] = [
 ];
 
 export default async function HealthCheckPage() {
+  await requireAdminPageAccess();
   const snapshot = await fetchUsageSnapshot();
   const readiness = judgeHobbyReadiness(snapshot);
   const alerts = summarizeAlerts(snapshot.samples);

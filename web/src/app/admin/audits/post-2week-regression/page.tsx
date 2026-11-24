@@ -1,3 +1,4 @@
+import { requireAdminPageAccess } from "@/lib/server/admin-access";
 import type { Metadata } from "next";
 import { PageContainer } from "@/components/layout";
 
@@ -196,7 +197,8 @@ function countByPriority(priority: Priority): number {
   return FINDINGS.filter((f) => f.priority === priority).length;
 }
 
-export default function PostTwoWeekRegressionAuditPage() {
+export default async function PostTwoWeekRegressionAuditPage() {
+  await requireAdminPageAccess();
   return (
     <PageContainer width="narrow" className="space-y-10">
       <header className="space-y-3">

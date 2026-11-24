@@ -1,3 +1,4 @@
+import { requireAdminPageAccess } from "@/lib/server/admin-access";
 import type { Metadata } from "next";
 import { PageContainer } from "@/components/layout";
 
@@ -425,7 +426,8 @@ const BATCH_BADGE_COLORS = [
   "bg-indigo-100 text-indigo-900",
 ];
 
-export default function P2BatchPlanPage() {
+export default async function P2BatchPlanPage() {
+  await requireAdminPageAccess();
   const totalFindings = Object.keys(FINDING_TO_BATCH).length;
   const totalHours = BATCHES.reduce((s, b) => s + b.totalHours, 0);
 

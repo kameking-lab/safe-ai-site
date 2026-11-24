@@ -1,4 +1,5 @@
-﻿import fs from "node:fs";
+﻿import { requireAdminPageAccess } from "@/lib/server/admin-access";
+import fs from "node:fs";
 import path from "node:path";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
@@ -11,6 +12,7 @@ export const metadata: Metadata = {
 const REPORT_FILENAME = "comprehensive-status-report-2026-05-01.md";
 
 export default async function AdminStatusPage() {
+  await requireAdminPageAccess();
   const md = readReport();
   const blocks = parseMarkdown(md);
   const toc = blocks

@@ -1,3 +1,4 @@
+import { requireAdminPageAccess } from "@/lib/server/admin-access";
 import type { Metadata } from "next";
 import { Inbox, LockKeyhole } from "lucide-react";
 import type { GovernanceSql } from "@/lib/chemical/ra-governance-repository";
@@ -24,6 +25,7 @@ function dateTime(value: Date): string {
 }
 
 export default async function AutomationConsultQueuePage() {
+  await requireAdminPageAccess();
   const configuration = automationConsultQueueConfiguration();
   let rows: AutomationConsultQueueRow[] = [];
   let databaseReady = Boolean(prisma);

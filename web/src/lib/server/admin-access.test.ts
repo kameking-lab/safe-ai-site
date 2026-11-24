@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 vi.mock("@/auth", () => ({ auth: vi.fn() }));
 
 import { auth } from "@/auth";
-import { hasAdminPageAccess, isAdminEmail } from "./admin-access";
+import { hasAdminPageAccess, isAdminEmail, requireAdminPageAccess } from "./admin-access";
 
 const originalAuthSecret = process.env.AUTH_SECRET;
 const originalAdminEmails = process.env.ADMIN_EMAILS;
@@ -34,6 +34,7 @@ describe("admin email allowlist", () => {
 
     await expect(hasAdminPageAccess()).resolves.toBe(false);
     expect(auth).not.toHaveBeenCalled();
+    await expect(requireAdminPageAccess()).rejects.toMatchObject({ digest: "NEXT_HTTP_ERROR_FALLBACK;404" });
   });
 
   it("rejects an authenticated session when the admin allowlist is absent", async () => {
@@ -54,5 +55,6 @@ describe("admin email allowlist", () => {
     } as never);
 
     await expect(hasAdminPageAccess()).resolves.toBe(true);
+    await expect(requireAdminPageAccess()).resolves.toBeUndefined();
   });
 });

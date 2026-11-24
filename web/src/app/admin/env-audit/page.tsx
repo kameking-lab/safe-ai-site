@@ -1,4 +1,5 @@
-﻿import { Metadata } from "next";
+﻿import { requireAdminPageAccess } from "@/lib/server/admin-access";
+import { Metadata } from "next";
 import { readFile } from "fs/promises";
 import path from "path";
 
@@ -8,6 +9,7 @@ export const metadata: Metadata = {
 };
 
 export default async function EnvAuditPage() {
+  await requireAdminPageAccess();
   const reportPath = path.join(
     process.cwd(),
     "..",

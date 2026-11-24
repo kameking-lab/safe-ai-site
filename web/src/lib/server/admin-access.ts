@@ -1,5 +1,7 @@
 import "server-only";
 
+import { notFound } from "next/navigation";
+import { cache } from "react";
 import { auth } from "@/auth";
 
 export function isAdminEmail(email: string | null | undefined, allowlist = process.env.ADMIN_EMAILS): boolean {
@@ -12,10 +14,14 @@ export function isAdminEmail(email: string | null | undefined, allowlist = proce
     .includes(normalized);
 }
 
-export async function hasAdminPageAccess(): Promise<boolean> {
+export const hasAdminPageAccess = cache(async (): Promise<boolean> => {
   if (!process.env.AUTH_SECRET?.trim()) return false;
-  const session = await auth();
+  const session = await auth({ identityOnly: true });
   return isAdminEmail(session?.user?.email);
+});
+
+export async function requireAdminPageAccess(): Promise<void> {
+  if (!(await hasAdminPageAccess())) notFound();
 }
 
 export async function getAdminAccess(): Promise<
@@ -24,7 +30,7 @@ export async function getAdminAccess(): Promise<
 > {
   if (!process.env.AUTH_SECRET?.trim()) return { ok: false };
   try {
-    const session = await auth();
+    const session = await auth({ identityOnly: true });
     if (!isAdminEmail(session?.user?.email)) return { ok: false };
     const userId = (session?.user as { id?: unknown } | undefined)?.id;
     return typeof userId === "string" && userId.trim()
