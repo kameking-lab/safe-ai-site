@@ -16,7 +16,7 @@ export type EntitlementSnapshot = {
   canManageStripe?: boolean;
   sandbox?: true;
 };
-export type Grant = { provider: string; expiresAt: Date; revoked: boolean; environment: string;checkedAt?:Date };
+export type Grant = { provider: string; expiresAt: Date; revoked: boolean; environment: string;checkedAt?:Date;originalTransactionId?:string };
 export type LegacySubscription = { planName: string; status: string; currentPeriodEnd: Date | null; stripeSubscriptionId: string | null;stripeCustomerId?:string|null;updatedAt?:Date;billingHold?:boolean };
 /** Pure shared projection. Paid website membership wins; client SDK flags are never inputs. */
 export function projectEntitlement(appUserId: string, legacy: LegacySubscription | null, grants: Grant[], now = new Date(),environment:'PRODUCTION'|'SANDBOX'='PRODUCTION'): EntitlementSnapshot {

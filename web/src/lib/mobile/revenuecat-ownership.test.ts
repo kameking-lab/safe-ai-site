@@ -1,11 +1,27 @@
 // @vitest-environment node
 import { beforeEach,afterEach,describe,expect,it,vi } from 'vitest';
 vi.mock('../server/deployment-safety',()=>({externalCredentialedServicesAllowed:()=>true}));
-import { fetchAppleOwnership,verifiedAppleGrant,verifyAppleLegacyPurchase } from './revenuecat';
+import { appleGrantForEnvironment,fetchAppleOwnership,verifiedAppleGrant,verifyAppleLegacyPurchase } from './revenuecat';
 const customer='mock-member';const subscription=()=>({id:'sub-stable',customer_id:customer,original_customer_id:customer,product_id:'mock_rc_product',store:'app_store',environment:'production',gives_access:true,store_subscription_identifier:'latest-store-id'});
 beforeEach(()=>{vi.stubEnv('REVENUECAT_V2_SECRET_API_KEY','mock-v2-only');vi.stubEnv('REVENUECAT_PROJECT_ID','mock-project');vi.stubEnv('REVENUECAT_IOS_V2_PRODUCT_ID','mock_rc_product');});afterEach(()=>vi.unstubAllEnvs());
 const response=(items:unknown[],next_page?:string)=>Response.json({items,next_page});
 describe('stable App Store purchase ownership',()=>{
+  it('checks the environment-specific product, entitlement, owner and expiry when V1 shows the other purchase',async()=>{
+    const now=new Date().toISOString(),until=Date.now()+86400000;
+    const raw={subscriber:{entitlements:{anzen_pro:{product_identifier:'monthly',expires_date:new Date(until).toISOString(),purchase_date:now}},
+      subscriptions:{monthly:{store:'app_store',is_sandbox:true,expires_date:new Date(until).toISOString(),original_purchase_date:now}}}};
+    const paid={...subscription(),ends_at:until,entitlements:{items:[{lookup_key:'anzen_pro'}]}};
+    const lookup=(items:unknown[])=>appleGrantForEnvironment(customer,raw,'monthly','PRODUCTION',[customer],async url=>{
+      expect(new URL(String(url)).searchParams.get('environment')).toBe('production');
+      return response(items);
+    });
+    expect(await lookup([paid])).toMatchObject({grant:{productId:'monthly',expiresAt:new Date(until)},ownership:{key:'rc:sub-stable',customerId:customer}});
+    for(const items of [[],[{...paid,environment:'sandbox'}],[{...paid,gives_access:false}],[{...paid,ends_at:1}],[{...paid,entitlements:{items:[]}}],[{...paid,entitlements:{items:[{lookup_key:'anzen_pro',state:'archived'}]}}]]){
+      expect(await lookup(items)).toBeNull();
+    }
+    await expect(lookup([{...paid,customer_id:'unrelated'}])).rejects.toThrow('PURCHASE_OWNED_BY_OTHER_ACCOUNT');
+    await expect(lookup([{...paid,ends_at:null}])).rejects.toThrow('ENTITLEMENT_SYNC_PENDING');
+  });
   it('matches a historical store ID to the same verified subscription and distinguishes a proven different purchase',async()=>{
     expect(await verifyAppleLegacyPurchase(customer,'PRODUCTION','rc:sub-stable','original-apple-id',async()=>response([subscription()]))).toBe(true);
     expect(await verifyAppleLegacyPurchase(customer,'PRODUCTION','rc:sub-stable','another-purchase',async()=>response([{...subscription(),id:'other-subscription'}]))).toBe(false);

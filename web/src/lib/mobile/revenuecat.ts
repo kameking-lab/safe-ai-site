@@ -36,6 +36,11 @@ const subscriptionListSchema=z.object({items:z.array(z.object({
   id:z.string().min(1).optional(),
   customer_id:z.string(),original_customer_id:z.string(),product_id:z.string().nullable(),
   store:z.string(),environment:z.enum(['production','sandbox']),gives_access:z.boolean(),
+  ends_at:z.number().int().safe().nullable().optional(),
+  entitlements:z.object({
+    items:z.array(z.object({lookup_key:z.string(),state:z.string().optional()})),
+    next_page:z.string().nullable().optional(),
+  }).optional(),
   store_subscription_identifier:z.union([z.string().min(1),z.number().int().safe().positive()]),
 })),next_page:z.string().nullable().optional()});
 /** v2's store_subscription_identifier is a renewal transaction ID, not Apple's
@@ -43,11 +48,20 @@ const subscriptionListSchema=z.object({items:z.array(z.object({
  * Original customer is historical metadata; current customer proves ownership.
  * https://www.revenuecat.com/docs/api-v2/subscription-data-model */
 export async function fetchAppleOwnership(appUserId:string,environment:'PRODUCTION'|'SANDBOX',send:typeof fetch=fetch,knownCustomerIds:readonly string[]=[appUserId]){
+  const row=await findAppleSubscription(appUserId,environment,send,knownCustomerIds);
+  if(!row)throw new Error('ENTITLEMENT_SYNC_PENDING');
+  return appleOwnership(row);
+}
+type AppleSubscription=z.infer<typeof subscriptionListSchema>['items'][number];
+function appleOwnership(row:AppleSubscription){
+  return {key:`rc:${row.id}`,storeTransactionId:String(row.store_subscription_identifier),originalCustomerId:row.original_customer_id,customerId:row.customer_id};
+}
+async function findAppleSubscription(appUserId:string,environment:'PRODUCTION'|'SANDBOX',send:typeof fetch,knownCustomerIds:readonly string[]){
   const key=process.env.REVENUECAT_V2_SECRET_API_KEY;const projectId=process.env.REVENUECAT_PROJECT_ID;const productId=process.env.REVENUECAT_IOS_V2_PRODUCT_ID;
   if(!externalCredentialedServicesAllowed()||!key||!projectId||!productId)throw new Error('ENTITLEMENT_SYNC_PENDING');
   const pathname=`/v2/projects/${encodeURIComponent(projectId)}/customers/${encodeURIComponent(appUserId)}/subscriptions`;
   let url=new URL(`https://api.revenuecat.com${pathname}?environment=${environment.toLowerCase()}&limit=100`);
-  const subscriptions=new Map<string,{key:string;storeTransactionId:string;originalCustomerId:string;customerId:string}>();const visited=new Set<string>();const deadline=Date.now()+8000;
+  const subscriptions=new Map<string,AppleSubscription>();const visited=new Set<string>();const deadline=Date.now()+8000;
   for(let page=0;page<5;page++){
     if(visited.has(url.href)||Date.now()>=deadline)throw new Error('ENTITLEMENT_SYNC_PENDING');visited.add(url.href);
     const response=await send(url.href,{headers:{Authorization:`Bearer ${key}`,Accept:'application/json'},cache:'no-store',redirect:'error',signal:AbortSignal.timeout(Math.max(1,deadline-Date.now()))});
@@ -57,14 +71,35 @@ export async function fetchAppleOwnership(appUserId:string,environment:'PRODUCTI
       if(subscription.product_id!==productId||subscription.store!=='app_store'||subscription.environment!==environment.toLowerCase()||!subscription.gives_access)continue;
       if(!knownCustomerIds.includes(subscription.customer_id))throw new Error('PURCHASE_OWNED_BY_OTHER_ACCOUNT');
       if(!subscription.id)throw new Error('ENTITLEMENT_SYNC_PENDING');
-      const key=`rc:${subscription.id}`;
-      subscriptions.set(key,{key,storeTransactionId:String(subscription.store_subscription_identifier),originalCustomerId:subscription.original_customer_id,customerId:subscription.customer_id});
+      subscriptions.set(subscription.id,subscription);
     }
-    if(!data.next_page){if(subscriptions.size!==1)throw new Error('ENTITLEMENT_SYNC_PENDING');return [...subscriptions.values()][0];}
+    if(!data.next_page){
+      if(subscriptions.size>1)throw new Error('ENTITLEMENT_SYNC_PENDING');
+      return subscriptions.values().next().value??null;
+    }
     const next=new URL(data.next_page,'https://api.revenuecat.com');
     if(next.origin!=='https://api.revenuecat.com'||next.pathname!==pathname||next.username||next.password)throw new Error('ENTITLEMENT_SYNC_PENDING');url=next;
   }
   throw new Error('ENTITLEMENT_SYNC_PENDING');
+}
+/** V1 has one subscription slot per product. Check the requested store environment
+ * independently when that slot describes a purchase in the other environment. */
+export async function appleGrantForEnvironment(appUserId:string,raw:unknown,productId:string,environment:'PRODUCTION'|'SANDBOX',knownCustomerIds:readonly string[],send:typeof fetch=fetch){
+  const now=new Date();
+  const grant=verifiedAppleGrant(raw,productId,now,environment);
+  if(grant)return {grant,ownership:null};
+  const visible=subscriberSchema.parse(raw).subscriber.subscriptions[productId];
+  if(visible?.store!=='app_store'||visible.is_sandbox===(environment==='SANDBOX'))return null;
+  const row=await findAppleSubscription(appUserId,environment,send,knownCustomerIds);
+  if(!row)return null;
+  if(!row.entitlements || !row.ends_at)throw new Error('ENTITLEMENT_SYNC_PENDING');
+  if(!row.entitlements.items.some(item=>item.lookup_key===product.entitlement && (!item.state || item.state==='active'))){
+    if(row.entitlements.next_page)throw new Error('ENTITLEMENT_SYNC_PENDING');
+    return null;
+  }
+  const expiresAt=new Date(row.ends_at);
+  if(!(expiresAt>now))return null;
+  return {grant:{productId,expiresAt},ownership:appleOwnership(row)};
 }
 /** Match an old ledger transaction (including Apple's original transaction ID)
  * to the current verified subscription. The search accepts historical renewal

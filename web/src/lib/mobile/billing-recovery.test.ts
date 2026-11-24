@@ -4,12 +4,17 @@ import { beforeEach,afterEach,it,expect,vi } from 'vitest';
 vi.mock('./pro-sales-gate',()=>({assertProSalesOpen:vi.fn(async()=>{})}));
 import { assertProSalesOpen } from './pro-sales-gate';
 const state=vi.hoisted(()=>({intent:null as any,tail:Promise.resolve() as Promise<unknown>,created:0,grantAvailable:false,sandboxGrant:false,env:'PRODUCTION' as string,fetchFails:false,fetches:0,stripeFetches:0,stripeFails:false,legacy:null as any,grants:[] as any[],alias:null as string|null}));
-vi.mock('./revenuecat',()=>({
+vi.mock('./revenuecat',()=>{
+ const grantFor=(appUserId:unknown,environment:string)=>(!state.alias||state.alias===appUserId)&&(environment==='SANDBOX'?state.sandboxGrant:state.grantAvailable)?{productId:'fixture-product',expiresAt:new Date(Date.now()+86400000)}:null;
+ return {
  fetchSubscriber:async(appUserId:string)=>{state.fetches++;if(state.fetchFails)throw new Error('offline');return appUserId;},
- verifiedAppleGrant:(appUserId:unknown,_p:string,_n:Date,environment='PRODUCTION')=>(!state.alias||state.alias===appUserId)&&(environment==='SANDBOX'?state.sandboxGrant:state.grantAvailable)?{productId:'fixture-product',expiresAt:new Date(Date.now()+86400000)}:null,
+ verifiedAppleGrant:(appUserId:unknown,_p:string,_n:Date,environment='PRODUCTION')=>grantFor(appUserId,environment),
+ appleGrantForEnvironment:async(appUserId:string,_raw:unknown,_p:string,environment:string)=>{
+   const grant=grantFor(appUserId,environment);return grant&&{grant,ownership:null};
+ },
  fetchAppleOwnership:async(customerId:string)=>({key:'rc:subscription-fixture',storeTransactionId:'latest-transaction-fixture',originalCustomerId:customerId,customerId}),
  verifyAppleLegacyPurchase:async()=>false,
-}));
+ };});
 vi.mock('./stripe-reconcile',()=>({reconcileStripe:async()=>{state.stripeFetches++;if(state.stripeFails)throw new Error('stripe offline');if(state.legacy){state.legacy.currentPeriodEnd=new Date(Date.now()+86400000);state.legacy.updatedAt=new Date();state.grants.filter(g=>g.provider==='stripe').forEach(g=>{g.checkedAt=new Date();g.expiresAt=new Date(Date.now()+86400000);});}}}));
 vi.mock('@/lib/prisma',()=>{
  const identity=()=>({userId:'member',appUserId:'immutable-member-id',appleGuestAppUserId:state.alias,billingEnvironment:state.env});
@@ -21,7 +26,7 @@ vi.mock('@/lib/prisma',()=>{
     (where.revoked===undefined||g.revoked===where.revoked)&&(!where.expiresAt||g.expiresAt>where.expiresAt.gt));
    rows.forEach(g=>Object.assign(g,data));return{count:rows.length};
   },
-  upsert:async({create,update}:any)=>{const row=state.grants.find(g=>g.environment===create.environment);if(row)Object.assign(row,update);else state.grants.push({...create,revoked:false});return row??state.grants.at(-1);}
+  upsert:async({create,update}:any)=>{const row=state.grants.find(g=>g.environment===create.environment&&g.originalTransactionId===create.originalTransactionId&&g.provider===create.provider);if(row)Object.assign(row,update);else state.grants.push({...create,revoked:false});return row??state.grants.at(-1);}
  },mobilePurchaseIntent:{
   findUnique:async()=>state.intent,
   upsert:async({create,update}:any)=>{state.created++;state.intent=state.intent?{...state.intent,...update}:{id:crypto.randomUUID(),status:'pending',stage:'prepared',providerSessionId:null,createdAt:new Date(),...create};return {...state.intent};},
@@ -160,12 +165,25 @@ it('refreshes older merged sandbox grants on the app even if the identity defaul
   expect(state.fetches).toBe(1);
   expect(state.grants[0].revoked).toBe(true);
 });
-it('retires the cached production grant during a verified sandbox-only sync',async()=>{
-  state.env='SANDBOX';state.sandboxGrant=true;
+it.each(['SANDBOX','PRODUCTION'])('restores Sandbox in one sync when an old production grant was revoked (previous environment: %s)',async previous=>{
+  state.env=previous;state.sandboxGrant=true;
   state.grants=[{userId:'member',provider:'app_store',environment:'PRODUCTION',expiresAt:new Date(Date.now()+86400000),checkedAt:new Date(),revoked:false}];
   expect(await reconcile('member',{surface:'app'})).toMatchObject({plan:'pro',sandbox:true});
   expect(await getEntitlement('member',{snapshot:true})).toMatchObject({plan:'free',source:null});
   expect(state.grants[0].revoked).toBe(true);
+});
+it('retains both verified Apple purchases and immediately uses Sandbox only in the app after production ends',async()=>{
+  state.grantAvailable=true;state.sandboxGrant=true;
+  expect(await reconcile('member',{surface:'app'})).toMatchObject({plan:'pro',source:'app_store'});
+  expect(state.grants.filter(g=>!g.revoked).map(g=>g.environment).sort()).toEqual(['PRODUCTION','SANDBOX']);
+  state.grantAvailable=false;
+  expect(await reconcile('member',{surface:'app'})).toMatchObject({plan:'pro',sandbox:true});
+  expect(await getEntitlement('member',{snapshot:true})).toMatchObject({plan:'free'});
+});
+it('uses a verified production Apple purchase while Stripe verification is pending',async()=>{
+  state.legacy={planName:'pro',status:'active',stripeSubscriptionId:'unconfirmed',currentPeriodEnd:new Date(Date.now()+86400000),updatedAt:new Date(),stripeCustomerId:'existing-customer'};
+  state.grantAvailable=true;
+  expect(await reconcile('member')).toMatchObject({plan:'pro',source:'app_store',syncState:'verified',canManageStripe:true});
 });
 it('keeps historical production Stripe records from promoting sandbox Stripe on the web',async()=>{
   state.env='SANDBOX';
@@ -177,6 +195,18 @@ it('keeps historical production Stripe records from promoting sandbox Stripe on 
   ];
   expect(await getEntitlement('member',{snapshot:true})).toMatchObject({plan:'free',source:null});
   expect(await getEntitlement('member',{snapshot:true,surface:'app'})).toMatchObject({plan:'pro',source:'stripe',sandbox:true});
+});
+it('uses the bound Stripe subscription even after the Apple environment changes',async()=>{
+  const future=new Date(Date.now()+86400000);
+  state.legacy={planName:'pro',status:'active',stripeSubscriptionId:'sub_test',currentPeriodEnd:future,updatedAt:new Date()};
+  state.grants=['PRODUCTION','SANDBOX'].map(environment=>({provider:'stripe',environment,revoked:false,expiresAt:future,checkedAt:new Date(),
+    originalTransactionId:environment==='PRODUCTION'?'sub_live':'sub_test'}));
+  expect(await getEntitlement('member',{snapshot:true})).toMatchObject({plan:'free'});
+  expect(await getEntitlement('member',{snapshot:true,surface:'app'})).toMatchObject({plan:'pro',sandbox:true});
+  state.env='SANDBOX';state.legacy.stripeSubscriptionId='sub_live';
+  expect(await getEntitlement('member',{snapshot:true})).toMatchObject({plan:'pro',source:'stripe',syncState:'verified'});
+  state.grants.forEach((g,i)=>{g.originalTransactionId='si_'+i;});
+  expect(await getEntitlement('member',{snapshot:true})).toMatchObject({plan:'free',syncState:'pending'});
 });
 it('keeps a member in PRODUCTION when there is no sandbox purchase either',async()=>{await reconcile('member');expect(state.env).toBe('PRODUCTION');});
 

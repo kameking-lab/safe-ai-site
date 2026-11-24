@@ -1,7 +1,7 @@
 import { Prisma } from '@prisma/client';
 import { prisma } from '../prisma';
 import { assertPurchasable, projectEntitlement, type EntitlementSnapshot, type EntitlementSurface, type Grant, type LegacySubscription } from './entitlement';
-import { fetchSubscriber, verifiedAppleGrant,fetchAppleOwnership,verifyAppleLegacyPurchase } from './revenuecat';
+import { appleGrantForEnvironment,fetchSubscriber,verifiedAppleGrant,fetchAppleOwnership,verifyAppleLegacyPurchase } from './revenuecat';
 import { reconcileStripe } from './stripe-reconcile';
 import { isGuestUser } from './session';
 import { assertResume,canReleasePrepared,appleOutcomeStage,type ApplePurchaseOutcome,type PurchaseSource } from './purchase-state';
@@ -32,15 +32,26 @@ async function identity(tx:Prisma.TransactionClient,userId:string) {
 function projectMemberEntitlement(
   member:{appUserId:string;billingEnvironment?:string},legacy:LegacySubscription|null,grants:Grant[],surface:EntitlementSurface,now=new Date(),
 ):EntitlementSnapshot {
-  const sandboxStripe=grants.some(g=>g.provider==='stripe' && g.environment==='SANDBOX');
-  const sandboxIdentity=member.billingEnvironment==='SANDBOX';
-  const activeStripe=(environment:BillingEnvironment)=>grants.some(g=>g.provider==='stripe' && g.environment===environment && !g.revoked && g.expiresAt>now);
+  const stripeGrants=grants.filter(g=>g.provider==='stripe');
+  const bound=stripeGrants.filter(g=>g.originalTransactionId && g.originalTransactionId===legacy?.stripeSubscriptionId);
+  // Older RevenueCat rows can be keyed by Stripe item ID. A different subscription ID
+  // is never evidence for the contract currently bound to this member.
+  const candidates=bound.length?bound:stripeGrants.filter(g=>!g.originalTransactionId?.startsWith('sub_'));
+  const activeStripe=(environment:BillingEnvironment)=>candidates.some(g=>g.environment===environment && !g.revoked && g.expiresAt>now);
   const productionStripe=activeStripe('PRODUCTION');
-  const productionLegacy=(productionStripe && !(sandboxIdentity && sandboxStripe)) || (!sandboxIdentity && !sandboxStripe) ? legacy : null;
-  const production=projectEntitlement(member.appUserId,productionLegacy,grants,now);
-  if(production.source==='stripe' && !productionStripe)production.syncState='pending';
+  const sandboxStripe=activeStripe('SANDBOX');
+  const ambiguous=productionStripe && sandboxStripe;
+  const productionLegacy=(!sandboxStripe && productionStripe) ||
+    (member.billingEnvironment!=='SANDBOX' && !stripeGrants.some(g=>g.environment==='SANDBOX')) ? legacy : null;
+  let production=projectEntitlement(member.appUserId,productionLegacy,grants,now);
+  if(production.source==='stripe' && !productionStripe){
+    const independentApple=projectEntitlement(member.appUserId,null,grants,now);
+    production={...independentApple,canManageStripe:production.canManageStripe,
+      syncState:independentApple.plan==='pro'?'verified':'pending'};
+  }
+  if(ambiguous && production.plan==='free')production.syncState='pending';
   if(surface==='web' || production.plan==='pro' && production.syncState==='verified')return production;
-  const sandboxLegacy=sandboxIdentity && activeStripe('SANDBOX') ? legacy : null;
+  const sandboxLegacy=sandboxStripe && !ambiguous ? legacy : null;
   const sandbox=projectEntitlement(member.appUserId,sandboxLegacy,grants,now,'SANDBOX');
   if(sandbox.plan==='pro')return {...sandbox,sandbox:true};
   if(sandbox.syncState==='pending')return {...production,syncState:'pending',sandbox:true};
@@ -135,53 +146,52 @@ export async function reconcile(userId:string,options:{stripe?:boolean;appUserId
     let transfer:{reason:string;from:string[];to:string[]}|undefined;
     // A delayed native SDK operation must not reconcile under a replacement login.
     if(options.appUserId&&options.appUserId!==member.appUserId)throw new Error('UNAUTHORIZED');
-    let environment:'SANDBOX'|'PRODUCTION'=member.billingEnvironment==='SANDBOX'?'SANDBOX':'PRODUCTION';
+    const previousEnvironment=member.billingEnvironment==='SANDBOX'?'SANDBOX':'PRODUCTION';
     const productId=process.env.REVENUECAT_IOS_PRODUCT_ID;
     if(!productId) throw new Error('ENTITLEMENT_SYNC_PENDING');
     const alias=member.appleGuestAppUserId;
     const ids=alias?[member.appUserId,alias]:[member.appUserId];
     const subscribers=await Promise.all(ids.map(async appUserId=>({appUserId,raw:await fetchSubscriber(appUserId)})));
-    const grantsFor=(env:BillingEnvironment)=>subscribers.flatMap(({appUserId,raw})=>{
-      const grant=verifiedAppleGrant(raw,productId,new Date(),env);
-      return grant?[{appUserId,grant}]:[];
-    });
+    const grantsFor=async(env:BillingEnvironment,checkHidden:boolean)=>{
+      const candidates=await Promise.all(subscribers.map(async({appUserId,raw})=>{
+        if(checkHidden){
+          const evidence=await appleGrantForEnvironment(appUserId,raw,productId,env,ids);
+          return evidence && {appUserId,...evidence};
+        }
+        const grant=verifiedAppleGrant(raw,productId,new Date(),env);
+        return grant && {appUserId,grant,ownership:null};
+      }));
+      return candidates.filter(candidate=>candidate!==null);
+    };
     // A verified production receipt takes priority, including for a former TestFlight member.
-    const production=grantsFor('PRODUCTION');
-    const sandbox=grantsFor('SANDBOX');
-    if(production.length&&environment==='SANDBOX'){
-      await tx.mobileIdentity.update({where:{userId},data:{billingEnvironment:'PRODUCTION'}});environment='PRODUCTION';
-    }
-    let grants=environment==='PRODUCTION'?production:sandbox;
-    // App Review and TestFlight testers who are not on the tester list also buy in Apple's sandbox.
-    // An App Store build can never make a sandbox purchase, so a verified sandbox subscription on this
-    // member's own app user ID moves a member without production rights to SANDBOX.
-    if(!grants.length&&environment==='PRODUCTION'){
-      if(sandbox.length&&(await entitlementInTransaction(tx,userId)).plan==='free'){
-        await tx.mobileIdentity.update({where:{userId},data:{billingEnvironment:'SANDBOX'}});environment='SANDBOX';grants=sandbox;
-      }
+    const production=await grantsFor('PRODUCTION',true);
+    const checkSandbox=!production.length || (await tx.mobileGrant.findMany({
+      where:{userId,provider:'app_store',environment:'SANDBOX',revoked:false,expiresAt:{gt:new Date()}},take:1,select:{id:true},
+    })).length>0;
+    const sandbox=await grantsFor('SANDBOX',checkSandbox);
+    const environment=production.length?'PRODUCTION':sandbox.length?'SANDBOX':previousEnvironment;
+    if(environment!==previousEnvironment){
+      // Keep a website subscription in production while reconciling an Apple test purchase.
+      // The previous Apple grant can have been revoked since the last local snapshot.
+      const keepStripe=environment==='SANDBOX' && (await entitlementInTransaction(tx,userId)).source==='stripe';
+      if(!keepStripe)await tx.mobileIdentity.update({where:{userId},data:{billingEnvironment:environment}});
     }
     if(options.stripe!==false)await reconcileStripe(tx,userId);
     const checkedAt=new Date();
-    // Fetch the latest authoritative subscriber state, rather than applying event order.
-    await tx.mobileGrant.updateMany({where:{userId,provider:'app_store',environment},data:{revoked:true,checkedAt}});
-    // Guest merges can retain a grant from the other environment. An
-    // authoritative lookup with no matching grant also retires that cached right.
-    const otherEnvironment=environment==='PRODUCTION'?'SANDBOX':'PRODUCTION';
-    if(!(otherEnvironment==='SANDBOX'?sandbox:production).length){
-      await tx.mobileGrant.updateMany({
-        where:{userId,provider:'app_store',environment:otherEnvironment,revoked:false,expiresAt:{gt:checkedAt}},
-        data:{revoked:true,checkedAt},
-      });
-    }
-    if(grants.length) {
-      const verifiedGrants=await Promise.all(grants.map(async ({appUserId,grant})=>({
-        verified:await fetchAppleOwnership(appUserId,environment,fetch,ids),grant,
+    for(const storeEnvironment of ['PRODUCTION','SANDBOX'] as const){
+      const grants=storeEnvironment==='PRODUCTION'?production:sandbox;
+      const onlyCurrent=storeEnvironment!==environment && !grants.length;
+      await tx.mobileGrant.updateMany({where:{userId,provider:'app_store',environment:storeEnvironment,
+        ...(onlyCurrent?{revoked:false,expiresAt:{gt:checkedAt}}:{})},data:{revoked:true,checkedAt}});
+      const verifiedGrants=await Promise.all(grants.map(async ({appUserId,grant,ownership})=>({
+        verified:ownership??await fetchAppleOwnership(appUserId,storeEnvironment,fetch,ids),grant,
       })));
+      if(!verifiedGrants.length)continue;
       const guest=!!alias&&await isGuestUser(userId,tx);
       const recorded=new Set<string>();
       for(const {verified,grant} of verifiedGrants){
         if(recorded.has(verified.key))continue;
-        const entries=await findAppleLedgerEntries(tx,userId,environment,grant,verified,checkedAt);
+        const entries=await findAppleLedgerEntries(tx,userId,storeEnvironment,grant,verified,checkedAt);
         const {owner,originalMember,legacy}=entries;
         const previousOwner=owner??legacy.find(row=>row.userId!==userId);
         const moved=previousOwner?previousOwner.userId!==userId:!ids.includes(verified.originalCustomerId);
@@ -196,6 +206,8 @@ export async function reconcile(userId:string,options:{stripe?:boolean;appUserId
         await recordAppleGrant(tx,entries,userId,grant,checkedAt);
         recorded.add(verified.key);
       }
+    }
+    if(production.length || sandbox.length){
       const intent=await tx.mobilePurchaseIntent.findUnique({where:{userId}});
       if(environment==='PRODUCTION' && intent?.status==='pending'&&intent.source==='stripe')await expireStripeIntent(tx,intent);
       await tx.mobilePurchaseIntent.updateMany({where:{userId,source:'app_store',status:'pending'},data:{status:'completed',stage:'completed'}});

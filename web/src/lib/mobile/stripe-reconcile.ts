@@ -24,7 +24,9 @@ export async function reconcileStripe(tx:Prisma.TransactionClient,userId:string)
   const environment=subscription.livemode?'PRODUCTION':'SANDBOX';
   if(!subscription.livemode&&identity.billingEnvironment!=='SANDBOX')throw new Error('ENTITLEMENT_SYNC_PENDING');
   if(subscription.livemode&&identity.billingEnvironment==='SANDBOX')await tx.mobileIdentity.update({where:{userId},data:{billingEnvironment:'PRODUCTION'}});
-  await tx.mobileGrant.updateMany({where:{userId,provider:'stripe',environment},data:{revoked:true,checkedAt:new Date()}});
+  // The Subscription row binds one current Stripe contract. Once Stripe verifies its
+  // environment, historical test/live grants cannot corroborate that same row.
+  await tx.mobileGrant.updateMany({where:{userId,provider:'stripe'},data:{revoked:true,checkedAt:new Date()}});
   const linked=revenueCatStripeLinked();
   if(linked)await importStripePurchase(identity.appUserId,subscription.id);
   if(legacy.billingHold||!['active','trialing'].includes(subscription.status))return;

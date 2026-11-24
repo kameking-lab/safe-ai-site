@@ -9,7 +9,10 @@ import { reconcileStripe,revenueCatStripeLinked } from './stripe-reconcile';
 const tx:any={
   subscription:{findUnique:async()=>({userId:'member',stripeSubscriptionId:'sub_live',billingHold:false})},
   mobileIdentity:{findUnique:async()=>({appUserId:'app-user',billingEnvironment:state.environment}),update:async({data}:any)=>{state.environment=data.billingEnvironment;}},
-  mobileGrant:{updateMany:async()=>({count:0}),findUnique:async({where}:any)=>state.grants.find(g=>g.originalTransactionId===where.provider_originalTransactionId_environment.originalTransactionId)??null,
+  mobileGrant:{updateMany:async({where,data}:any)=>{
+    const rows=state.grants.filter(g=>g.userId===where.userId && g.provider===where.provider && (!where.environment||g.environment===where.environment));
+    rows.forEach(g=>Object.assign(g,data));return {count:rows.length};
+  },findUnique:async({where}:any)=>state.grants.find(g=>g.originalTransactionId===where.provider_originalTransactionId_environment.originalTransactionId)??null,
     upsert:async({create}:any)=>{state.grants.push(create);return create;}},
 };
 beforeEach(()=>{state.environment='PRODUCTION';state.grants=[];state.imported=0;state.verified=0;vi.stubEnv('SAFE_AI_STAGING_MODE','false');vi.stubEnv('VERCEL_ENV','development');vi.stubEnv('STRIPE_SECRET_KEY','synthetic-not-real');
@@ -38,4 +41,11 @@ it('keeps using RevenueCat ownership when the Stripe link is configured',async()
 
 it('restores a former TestFlight identity when Stripe confirms a live subscription',async()=>{
  state.environment='SANDBOX';await reconcileStripe(tx,'member');expect(state.environment).toBe('PRODUCTION');expect(state.grants[0].environment).toBe('PRODUCTION');
+});
+it('retires old test Stripe rights independently of Apple after a live Stripe refresh',async()=>{
+  state.grants=['stripe','app_store'].map(provider=>({userId:'member',provider,environment:'SANDBOX',revoked:false}));
+  await reconcileStripe(tx,'member');
+  expect(state.grants.map(g=>[g.provider,g.environment,g.revoked])).toEqual([
+    ['stripe','SANDBOX',true],['app_store','SANDBOX',false],['stripe','PRODUCTION',false],
+  ]);
 });
