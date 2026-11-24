@@ -165,6 +165,15 @@ it('refreshes older merged sandbox grants on the app even if the identity defaul
   expect(state.fetches).toBe(1);
   expect(state.grants[0].revoked).toBe(true);
 });
+it.each([true,false])('checks an expired merged guest purchase for renewal once (renewed: %s)',async renewed=>{
+  state.alias='$RCAnonymousID:'+'a'.repeat(32);state.sandboxGrant=renewed;
+  state.grants=[{userId:'member',provider:'app_store',environment:'SANDBOX',originalTransactionId:'rc:subscription-fixture',
+    expiresAt:new Date(0),checkedAt:new Date(0),revoked:false}];
+  expect(await getEntitlement('member',{surface:'app'})).toMatchObject({plan:renewed?'pro':'free'});
+  expect(await getEntitlement('member',{surface:'app'})).toMatchObject({plan:renewed?'pro':'free'});
+  expect(state.fetches).toBe(2); // Member and guest alias checked together on the first read.
+  expect(await getEntitlement('member',{snapshot:true})).toMatchObject({plan:'free'});
+});
 it.each(['SANDBOX','PRODUCTION'])('restores Sandbox in one sync when an old production grant was revoked (previous environment: %s)',async previous=>{
   state.env=previous;state.sandboxGrant=true;
   state.grants=[{userId:'member',provider:'app_store',environment:'PRODUCTION',expiresAt:new Date(Date.now()+86400000),checkedAt:new Date(),revoked:false}];
@@ -207,6 +216,9 @@ it('uses the bound Stripe subscription even after the Apple environment changes'
   expect(await getEntitlement('member',{snapshot:true})).toMatchObject({plan:'pro',source:'stripe',syncState:'verified'});
   state.grants.forEach((g,i)=>{g.originalTransactionId='si_'+i;});
   expect(await getEntitlement('member',{snapshot:true})).toMatchObject({plan:'free',syncState:'pending'});
+  state.grants[1].revoked=true;
+  state.grants.push({...state.grants[0],originalTransactionId:'sub_live',revoked:true});
+  expect(await getEntitlement('member',{snapshot:true})).toMatchObject({plan:'pro',source:'stripe',syncState:'verified'});
 });
 it('keeps a member in PRODUCTION when there is no sandbox purchase either',async()=>{await reconcile('member');expect(state.env).toBe('PRODUCTION');});
 

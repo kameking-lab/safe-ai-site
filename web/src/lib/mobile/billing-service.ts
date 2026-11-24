@@ -33,11 +33,12 @@ function projectMemberEntitlement(
   member:{appUserId:string;billingEnvironment?:string},legacy:LegacySubscription|null,grants:Grant[],surface:EntitlementSurface,now=new Date(),
 ):EntitlementSnapshot {
   const stripeGrants=grants.filter(g=>g.provider==='stripe');
-  const bound=stripeGrants.filter(g=>g.originalTransactionId && g.originalTransactionId===legacy?.stripeSubscriptionId);
+  const activeGrants=stripeGrants.filter(g=>!g.revoked && g.expiresAt>now);
+  const bound=activeGrants.filter(g=>g.originalTransactionId && g.originalTransactionId===legacy?.stripeSubscriptionId);
   // Older RevenueCat rows can be keyed by Stripe item ID. A different subscription ID
   // is never evidence for the contract currently bound to this member.
-  const candidates=bound.length?bound:stripeGrants.filter(g=>!g.originalTransactionId?.startsWith('sub_'));
-  const activeStripe=(environment:BillingEnvironment)=>candidates.some(g=>g.environment===environment && !g.revoked && g.expiresAt>now);
+  const candidates=bound.length?bound:activeGrants.filter(g=>!g.originalTransactionId?.startsWith('sub_'));
+  const activeStripe=(environment:BillingEnvironment)=>candidates.some(g=>g.environment===environment);
   const productionStripe=activeStripe('PRODUCTION');
   const sandboxStripe=activeStripe('SANDBOX');
   const ambiguous=productionStripe && sandboxStripe;
@@ -82,7 +83,7 @@ async function readEntitlement(userId:string,refresh:boolean,snapshot:boolean,su
   const [member,legacy,grants,intent]=await Promise.all([db.$transaction(tx=>identity(tx,userId)),db.subscription.findUnique({where:{userId}}),db.mobileGrant.findMany({where:{userId}}),db.mobilePurchaseIntent.findUnique({where:{userId}})]);
   let refreshFailed=false;let refreshed=false;
   const currentGrants=grants.filter(g=>g.environment==='PRODUCTION' || surface==='app' && g.environment==='SANDBOX' &&
-    (member.billingEnvironment==='SANDBOX' || !g.revoked && g.expiresAt.getTime()>now));
+    (member.billingEnvironment==='SANDBOX' || !g.revoked && (g.expiresAt.getTime()>now || !!member.appleGuestAppUserId)));
   // Commit each provider independently: an Apple outage must not roll back a Stripe renewal.
   if(legacy?.stripeSubscriptionId && (refresh||now-legacy.updatedAt.getTime()>300000||!currentGrants.some(g=>g.provider==='stripe')||currentGrants.some(g=>g.provider==='stripe'&&now-g.checkedAt.getTime()>300000))){
     refreshed=true;
@@ -92,7 +93,7 @@ async function readEntitlement(userId:string,refresh:boolean,snapshot:boolean,su
   // Include expired Apple grants and an interrupted first Apple purchase for renewal recovery.
   if((refresh&&!!process.env.REVENUECAT_IOS_PRODUCT_ID)||currentGrants.some(g=>g.provider==='app_store'&&now-g.checkedAt.getTime()>300000)||(intent?.status==='pending'&&intent.source==='app_store'&&!currentGrants.some(g=>g.provider==='app_store'))){
     refreshed=true;
-    try{await reconcile(userId,{stripe:false});}catch{refreshFailed=true;}
+    try{await reconcile(userId,{stripe:false,surface});}catch{refreshFailed=true;}
   }
   // Re-read after provider mutations only. Ordinary reads project the fresh database rows above.
   const rights=refreshed?await db.$transaction(tx=>entitlementInTransaction(tx,userId,surface)):{
@@ -181,8 +182,14 @@ export async function reconcile(userId:string,options:{stripe?:boolean;appUserId
     for(const storeEnvironment of ['PRODUCTION','SANDBOX'] as const){
       const grants=storeEnvironment==='PRODUCTION'?production:sandbox;
       const onlyCurrent=storeEnvironment!==environment && !grants.length;
-      await tx.mobileGrant.updateMany({where:{userId,provider:'app_store',environment:storeEnvironment,
-        ...(onlyCurrent?{revoked:false,expiresAt:{gt:checkedAt}}:{})},data:{revoked:true,checkedAt}});
+      const checkingMergedSandbox=storeEnvironment==='SANDBOX' && options.surface==='app' && !!alias;
+      await tx.mobileGrant.updateMany({
+        where:{userId,provider:'app_store',environment:storeEnvironment,
+          ...(onlyCurrent ? {revoked:false} : {}),
+          ...(onlyCurrent && !checkingMergedSandbox ? {expiresAt:{gt:checkedAt}} : {}),
+        },
+        data:{revoked:true,checkedAt},
+      });
       const verifiedGrants=await Promise.all(grants.map(async ({appUserId,grant,ownership})=>({
         verified:ownership??await fetchAppleOwnership(appUserId,storeEnvironment,fetch,ids),grant,
       })));
