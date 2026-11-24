@@ -35,8 +35,8 @@ export async function restoreGuestStorePurchase(userId: string, token: string, a
       throw new Error('PURCHASE_OWNED_BY_OTHER_ACCOUNT');
     }
 
-    const rights = await entitlementInTransaction(tx, userId);
-    if (rights.plan === 'pro') return rights;
+    const rights = await entitlementInTransaction(tx, userId, 'app');
+    if (rights.plan === 'pro' && (!rights.sandbox || receipt.environment === 'SANDBOX')) return rights;
     if (rights.purchasePending && rights.purchaseSource !== 'app_store') throw new Error('PURCHASE_PENDING');
     const verified = await fetchAppleOwnership(alias, receipt.environment, fetch, [alias, originalAlias]);
     const matchesLatest = verified.storeTransactionId === receipt.transactionId;
@@ -69,6 +69,6 @@ export async function restoreGuestStorePurchase(userId: string, token: string, a
     await tx.mobilePurchaseIntent.updateMany({
       where: { userId, source: 'app_store', status: 'pending' }, data: { status: 'completed', stage: 'completed' },
     });
-    return entitlementInTransaction(tx, userId);
+    return entitlementInTransaction(tx, userId, 'app');
   }, { timeout: 20000 });
 }

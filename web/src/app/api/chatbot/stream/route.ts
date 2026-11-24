@@ -1,4 +1,4 @@
-import { withProviderBudget, type ProviderUsage } from "@/lib/mobile/usage";
+import { productionAiAllowed, withProviderBudget, type ProviderUsage } from "@/lib/mobile/usage";
 import { withUsage } from "@/lib/mobile/usage";
 /**
  * P0-001 (usability-audit-day2-2026-05-24):
@@ -427,13 +427,13 @@ async function handlePost(request: Request) {
   }
 
   const lawCategory: LawCategoryFilter = body?.lawCategory ?? "all";
-  const apiKey = legalChatAiAllowed()
+  const apiKey = productionAiAllowed() && legalChatAiAllowed()
     ? process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY
     : null;
 
   // P1-1 (chatbot-deep-audit 2026-05-26): stream 経路でもレスポンスキャッシュを使う。
   // 履歴付きリクエストは直前ターンの文脈が回答に影響するため bypass（非stream route と同条件）。
-  const cacheableRequest = !body?.history || body.history.length === 0;
+  const cacheableRequest = productionAiAllowed() && (!body?.history || body.history.length === 0);
   const cKey = cacheableRequest
     ? cacheKey(
         retrievalQuery,

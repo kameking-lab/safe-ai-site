@@ -1,6 +1,6 @@
 import { Prisma } from '@prisma/client';
 import { prisma } from '../prisma';
-import { assertPurchasable, projectEntitlement, type EntitlementSnapshot } from './entitlement';
+import { assertPurchasable, projectEntitlement, type EntitlementSnapshot, type EntitlementSurface, type Grant, type LegacySubscription } from './entitlement';
 import { fetchSubscriber, verifiedAppleGrant,fetchAppleOwnership,verifyAppleLegacyPurchase } from './revenuecat';
 import { reconcileStripe } from './stripe-reconcile';
 import { isGuestUser } from './session';
@@ -15,9 +15,8 @@ export async function lockAppleReconciliation(tx:Prisma.TransactionClient) {
 }
 export async function lockPushDevice(tx:Prisma.TransactionClient,token:string) { await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`anzen-push:${token}`},0))`; }
 /**
- * TestFlight / App Review buy in Apple's sandbox. Sandbox rights never reach ordinary production
- * members; only the App Review account and the owner-listed TestFlight testers
- * (MOBILE_SANDBOX_TESTER_EMAILS, comma separated, exact address match) are SANDBOX members.
+ * The tester allowlist selects the initial reconciliation environment. Verified App Store
+ * purchases can also select it. Rights are projected separately for each client surface.
  */
 export function sandboxTesterEmails(env:NodeJS.ProcessEnv=process.env){return new Set((env.MOBILE_SANDBOX_TESTER_EMAILS??'').split(',').map(v=>v.trim().toLowerCase()).filter(v=>/^[^\s@]+@[^\s@]+$/.test(v)));}
 async function identity(tx:Prisma.TransactionClient,userId:string) {
@@ -30,32 +29,49 @@ async function identity(tx:Prisma.TransactionClient,userId:string) {
   if(!user?.email||!testers.has(user.email.toLowerCase()))return member;
   return tx.mobileIdentity.update({where:{userId},data:{billingEnvironment:'SANDBOX'}});
 }
-export async function entitlementInTransaction(tx:Prisma.TransactionClient,userId:string):Promise<EntitlementSnapshot> {
+function projectMemberEntitlement(
+  member:{appUserId:string;billingEnvironment?:string},legacy:LegacySubscription|null,grants:Grant[],surface:EntitlementSurface,now=new Date(),
+):EntitlementSnapshot {
+  const sandboxStripe=grants.some(g=>g.provider==='stripe' && g.environment==='SANDBOX');
+  const sandboxIdentity=member.billingEnvironment==='SANDBOX';
+  const activeStripe=(environment:BillingEnvironment)=>grants.some(g=>g.provider==='stripe' && g.environment===environment && !g.revoked && g.expiresAt>now);
+  const productionStripe=activeStripe('PRODUCTION');
+  const productionLegacy=(productionStripe && !(sandboxIdentity && sandboxStripe)) || (!sandboxIdentity && !sandboxStripe) ? legacy : null;
+  const production=projectEntitlement(member.appUserId,productionLegacy,grants,now);
+  if(production.source==='stripe' && !productionStripe)production.syncState='pending';
+  if(surface==='web' || production.plan==='pro' && production.syncState==='verified')return production;
+  const sandboxLegacy=sandboxIdentity && activeStripe('SANDBOX') ? legacy : null;
+  const sandbox=projectEntitlement(member.appUserId,sandboxLegacy,grants,now,'SANDBOX');
+  if(sandbox.plan==='pro')return {...sandbox,sandbox:true};
+  if(sandbox.syncState==='pending')return {...production,syncState:'pending',sandbox:true};
+  return production;
+}
+
+export async function entitlementInTransaction(tx:Prisma.TransactionClient,userId:string,surface:EntitlementSurface='web'):Promise<EntitlementSnapshot> {
   const member=await identity(tx,userId);
   const [legacy,grants,intent]=await Promise.all([tx.subscription.findUnique({where:{userId}}),tx.mobileGrant.findMany({where:{userId}}),tx.mobilePurchaseIntent.findUnique({where:{userId}})]);
-  const rights=projectEntitlement(member.appUserId,legacy,grants,new Date(),member.billingEnvironment==='SANDBOX'?'SANDBOX':'PRODUCTION');
-  if(rights.source==='stripe'&&!grants.some(g=>g.provider==='stripe'&&!g.revoked&&g.expiresAt>new Date()&&g.environment===(member.billingEnvironment==='SANDBOX'?'SANDBOX':'PRODUCTION')))rights.syncState='pending';
+  const rights=projectMemberEntitlement(member,legacy,grants,surface);
   const pending=intent?.status==='pending';
   return {...rights,appleGuestAppUserId:member.appleGuestAppUserId??undefined,purchasePending:pending,purchaseIntentId:pending?intent.id:null,purchaseSource:pending?intent.source:null,purchaseStage:pending?intent.stage:null};
 }
 /** Each invocation reads afresh: even an in-flight read may predate a completed purchase/revocation. */
-export async function getEntitlement(userId:string,options:{refresh?:boolean;snapshot?:boolean}={}) {
-  return readEntitlement(userId,!!options.refresh,!!options.snapshot);
+export async function getEntitlement(userId:string,options:{refresh?:boolean;snapshot?:boolean;surface?:EntitlementSurface}={}) {
+  return readEntitlement(userId,!!options.refresh,!!options.snapshot,options.surface??'web');
 }
-async function readEntitlement(userId:string,refresh:boolean,snapshot:boolean) {
+async function readEntitlement(userId:string,refresh:boolean,snapshot:boolean,surface:EntitlementSurface) {
   const db=billingDb();const now=Date.now();
   // Display and reservation read the same projection under the same member lock.
   // Reading grants before a pending billing transaction commits can show stale Pro.
   if(snapshot&&!refresh)return db.$transaction(async tx=>{
     await lockMember(tx,userId);
-    const rights=await entitlementInTransaction(tx,userId);
+    const rights=await entitlementInTransaction(tx,userId,surface);
     if(rights.plan==='free'&&rights.purchasePending&&rights.purchaseSource==='app_store')rights.syncState='pending';
     return rights;
   });
   const [member,legacy,grants,intent]=await Promise.all([db.$transaction(tx=>identity(tx,userId)),db.subscription.findUnique({where:{userId}}),db.mobileGrant.findMany({where:{userId}}),db.mobilePurchaseIntent.findUnique({where:{userId}})]);
   let refreshFailed=false;let refreshed=false;
-  const environment=member.billingEnvironment==='SANDBOX'?'SANDBOX':'PRODUCTION';
-  const currentGrants=grants.filter(g=>g.environment===environment);
+  const currentGrants=grants.filter(g=>g.environment==='PRODUCTION' || surface==='app' && g.environment==='SANDBOX' &&
+    (member.billingEnvironment==='SANDBOX' || !g.revoked && g.expiresAt.getTime()>now));
   // Commit each provider independently: an Apple outage must not roll back a Stripe renewal.
   if(legacy?.stripeSubscriptionId && (refresh||now-legacy.updatedAt.getTime()>300000||!currentGrants.some(g=>g.provider==='stripe')||currentGrants.some(g=>g.provider==='stripe'&&now-g.checkedAt.getTime()>300000))){
     refreshed=true;
@@ -68,13 +84,12 @@ async function readEntitlement(userId:string,refresh:boolean,snapshot:boolean) {
     try{await reconcile(userId,{stripe:false});}catch{refreshFailed=true;}
   }
   // Re-read after provider mutations only. Ordinary reads project the fresh database rows above.
-  const rights=refreshed?await db.$transaction(tx=>entitlementInTransaction(tx,userId)):{
-    ...projectEntitlement(member.appUserId,legacy,grants,new Date(),environment),
+  const rights=refreshed?await db.$transaction(tx=>entitlementInTransaction(tx,userId,surface)):{
+    ...projectMemberEntitlement(member,legacy,grants,surface),
     appleGuestAppUserId:member.appleGuestAppUserId??undefined,
     purchasePending:intent?.status==='pending',purchaseIntentId:intent?.status==='pending'?intent.id:null,
     purchaseSource:intent?.status==='pending'?intent.source:null,purchaseStage:intent?.status==='pending'?intent.stage:null,
   };
-  if(rights.source==='stripe'&&!currentGrants.some(g=>g.provider==='stripe'&&!g.revoked&&g.expiresAt>new Date())&&!refreshed)rights.syncState='pending';
   if(refreshFailed&&rights.plan==='free')rights.syncState='pending';
   return rights;
 }
@@ -111,7 +126,7 @@ export async function recordAppleGrant(tx:Prisma.TransactionClient,entries:Await
     create:{...grant,...entries.purchase,userId,checkedAt},update:{...grant,userId,checkedAt,revoked:false}});
 }
 
-export async function reconcile(userId:string,options:{stripe?:boolean;appUserId?:string}={}) {
+export async function reconcile(userId:string,options:{stripe?:boolean;appUserId?:string;surface?:EntitlementSurface}={}) {
   const result=await billingDb().$transaction(async tx=>{
     await lockMember(tx,userId);const member=await identity(tx,userId);
     // Serialize Apple verification and ownership changes, including legacy-key
@@ -132,15 +147,15 @@ export async function reconcile(userId:string,options:{stripe?:boolean;appUserId
     });
     // A verified production receipt takes priority, including for a former TestFlight member.
     const production=grantsFor('PRODUCTION');
+    const sandbox=grantsFor('SANDBOX');
     if(production.length&&environment==='SANDBOX'){
       await tx.mobileIdentity.update({where:{userId},data:{billingEnvironment:'PRODUCTION'}});environment='PRODUCTION';
     }
-    let grants=environment==='PRODUCTION'?production:grantsFor(environment);
+    let grants=environment==='PRODUCTION'?production:sandbox;
     // App Review and TestFlight testers who are not on the tester list also buy in Apple's sandbox.
     // An App Store build can never make a sandbox purchase, so a verified sandbox subscription on this
     // member's own app user ID moves a member without production rights to SANDBOX.
     if(!grants.length&&environment==='PRODUCTION'){
-      const sandbox=grantsFor('SANDBOX');
       if(sandbox.length&&(await entitlementInTransaction(tx,userId)).plan==='free'){
         await tx.mobileIdentity.update({where:{userId},data:{billingEnvironment:'SANDBOX'}});environment='SANDBOX';grants=sandbox;
       }
@@ -149,6 +164,15 @@ export async function reconcile(userId:string,options:{stripe?:boolean;appUserId
     const checkedAt=new Date();
     // Fetch the latest authoritative subscriber state, rather than applying event order.
     await tx.mobileGrant.updateMany({where:{userId,provider:'app_store',environment},data:{revoked:true,checkedAt}});
+    // Guest merges can retain a grant from the other environment. An
+    // authoritative lookup with no matching grant also retires that cached right.
+    const otherEnvironment=environment==='PRODUCTION'?'SANDBOX':'PRODUCTION';
+    if(!(otherEnvironment==='SANDBOX'?sandbox:production).length){
+      await tx.mobileGrant.updateMany({
+        where:{userId,provider:'app_store',environment:otherEnvironment,revoked:false,expiresAt:{gt:checkedAt}},
+        data:{revoked:true,checkedAt},
+      });
+    }
     if(grants.length) {
       const verifiedGrants=await Promise.all(grants.map(async ({appUserId,grant})=>({
         verified:await fetchAppleOwnership(appUserId,environment,fetch,ids),grant,
@@ -173,10 +197,10 @@ export async function reconcile(userId:string,options:{stripe?:boolean;appUserId
         recorded.add(verified.key);
       }
       const intent=await tx.mobilePurchaseIntent.findUnique({where:{userId}});
-      if(intent?.status==='pending'&&intent.source==='stripe')await expireStripeIntent(tx,intent);
+      if(environment==='PRODUCTION' && intent?.status==='pending'&&intent.source==='stripe')await expireStripeIntent(tx,intent);
       await tx.mobilePurchaseIntent.updateMany({where:{userId,source:'app_store',status:'pending'},data:{status:'completed',stage:'completed'}});
     }
-    return {rights:await entitlementInTransaction(tx,userId),transfer};
+    return {rights:await entitlementInTransaction(tx,userId,options.surface),transfer};
   },{timeout:20000});
   // Fixed reason/provider codes only, after commit. No user/store identifiers,
   // email addresses, receipts, tokens, or provider error text.
@@ -188,7 +212,7 @@ export async function reservePurchase(userId:string,source:PurchaseSource='app_s
   await reconcile(userId);
   await assertProSalesOpen();
   return billingDb().$transaction(async tx=>{
-    await lockMember(tx,userId);const current=await entitlementInTransaction(tx,userId);assertPurchasable(current);
+    await lockMember(tx,userId);const current=await entitlementInTransaction(tx,userId,source==='app_store'?'app':'web');assertPurchasable(current);
     return reserveInTransaction(tx,userId,source,current);
   });
 }
@@ -215,7 +239,7 @@ export async function prepareApplePurchase(userId:string,appUserId:string,attemp
   await assertProSalesOpen();
   return billingDb().$transaction(async tx=>{
     await lockMember(tx,userId);
-    const current=await entitlementInTransaction(tx,userId);
+    const current=await entitlementInTransaction(tx,userId,'app');
     if(current.appUserId!==appUserId)throw new Error('ENTITLEMENT_SYNC_PENDING');
     assertPurchasable(current);
     const intent=await reserveInTransaction(tx,userId,'app_store',current);
@@ -225,19 +249,19 @@ export async function prepareApplePurchase(userId:string,appUserId:string,attemp
     return {id:intent.id,appUserId:current.appUserId,attemptId};
   });
 }
-export async function cancelPurchase(userId:string,id:string,source:PurchaseSource){
+export async function cancelPurchase(userId:string,id:string,source:PurchaseSource,surface:EntitlementSurface='web'){
   return billingDb().$transaction(async tx=>{await lockMember(tx,userId);
     const intent=await tx.mobilePurchaseIntent.findUnique({where:{userId}});
     if(!intent||intent.id!==id||intent.source!==source)throw new Error('INVALID_REQUEST');
     if(source==='stripe')await expireStripeIntent(tx,intent);
     else if(canReleasePrepared(intent,source))await tx.mobilePurchaseIntent.updateMany({where:{userId,id,status:'pending',stage:'prepared'},data:{status:'cancelled',stage:'cancelled'}});
     else throw new Error('PURCHASE_PENDING');
-    return entitlementInTransaction(tx,userId);});
+    return entitlementInTransaction(tx,userId,surface);});
 }
 export async function markStoreStarted(userId:string,id:string,attemptId?:string){
   await reconcile(userId);
   await assertProSalesOpen();
-  return billingDb().$transaction(async tx=>{await lockMember(tx,userId);const rights=await entitlementInTransaction(tx,userId);assertPurchasable(rights);
+  return billingDb().$transaction(async tx=>{await lockMember(tx,userId);const rights=await entitlementInTransaction(tx,userId,'app');assertPurchasable(rights);
     const intent=await tx.mobilePurchaseIntent.findUnique({where:{userId}});
     if(!intent||intent.id!==id)throw new Error('INVALID_REQUEST');
     assertResume(intent,'app_store');
@@ -246,26 +270,26 @@ export async function markStoreStarted(userId:string,id:string,attemptId?:string
     if(changed.count!==1)throw new Error('INVALID_REQUEST');return {id};});
 }
 /** Client outcomes describe the UI only. They never release a dispatched reservation. */
-export async function reportAppleOutcome(userId:string,id:string|undefined,outcome:ApplePurchaseOutcome,attemptId?:string){
+export async function reportAppleOutcome(userId:string,id:string|undefined,outcome:ApplePurchaseOutcome,attemptId?:string,surface:EntitlementSurface='web'){
   return billingDb().$transaction(async tx=>{await lockMember(tx,userId);
     const intent=await tx.mobilePurchaseIntent.findUnique({where:{userId}});
     if(!id && (outcome!=='not_opened'||!attemptId))throw new Error('INVALID_REQUEST');
     if(!intent || intent.source!=='app_store'){
-      if(!id)return entitlementInTransaction(tx,userId);
+      if(!id)return entitlementInTransaction(tx,userId,surface);
       throw new Error('INVALID_REQUEST');
     }
     if(id && intent.id!==id)throw new Error('INVALID_REQUEST');
     const evidence=intent.providerRequest;
     const expected=evidence&&typeof evidence==='object'&&!Array.isArray(evidence)?evidence.attemptId:null;
-    if(!id && expected!==attemptId)return entitlementInTransaction(tx,userId);
+    if(!id && expected!==attemptId)return entitlementInTransaction(tx,userId,surface);
     // An outcome retried after a network loss must not overwrite a newer StoreKit attempt.
-    if(expected&&expected!==attemptId)return entitlementInTransaction(tx,userId);
+    if(expected&&expected!==attemptId)return entitlementInTransaction(tx,userId,surface);
     if(intent.status==='pending'&&intent.stage!=='prepared'){
       // Deferred approval cannot be downgraded by a later cancellation/unknown claim.
       const stage=intent.stage==='store_deferred'?'store_deferred':appleOutcomeStage[outcome];
       await tx.mobilePurchaseIntent.updateMany({where:{userId,id:intent.id,status:'pending'},data:{stage}});
     }
-    return entitlementInTransaction(tx,userId);
+    return entitlementInTransaction(tx,userId,surface);
   });
 }
 export async function processBillingEvents(limit=20,deadline=Date.now()+45000) {

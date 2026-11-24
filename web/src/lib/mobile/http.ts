@@ -1,3 +1,5 @@
+import type { EntitlementSurface } from './entitlement';
+
 export const SITE_ORIGIN='https://www.anzen-ai-portal.jp';
 export function mobileRateRejection(response:Response,stage:'auth_start'|'auth_exchange'){
   console.warn('[mobile-api]',JSON.stringify({stage,status:response.status,code:response.status===429?'RATE_LIMITED':'SHARED_STATE_UNAVAILABLE'}));
@@ -19,6 +21,10 @@ export async function member(request:Request) {
 }
 /** A native marker identifies the client, not a signed-in member. */
 export function isNativeRequest(request:Request){return !!request.headers.get('authorization')?.startsWith('Bearer ') || request.headers.get('x-anzen-native')==='1';}
+/** Only use after member authentication. The native marker alone grants no app rights. */
+export function entitlementSurface(request:Request):EntitlementSurface {
+  return request.headers.get('authorization')?.startsWith('Bearer ') ? 'app' : 'web';
+}
 /** A supplied credential must be verified, never silently downgraded to a guest. */
 export function isNativeGuestRequest(request:Request){return request.headers.get('x-anzen-native')==='1' && !request.headers.has('authorization');}
 /** Signed-in browser member id, or null for an anonymous web visitor. */

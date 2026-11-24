@@ -3,17 +3,18 @@ import { beforeEach,afterEach,describe,expect,it,vi } from 'vitest';
 const pause=vi.hoisted(()=>vi.fn(async()=>({count:1})));
 const expireStopped=vi.hoisted(()=>vi.fn(async()=>({closed:0})));
 const settlement=vi.hoisted(()=>({gate:undefined as Promise<void>|undefined,fail:false,entered:false}));
+const sandbox=vi.hoisted(()=>({grant:undefined as {checkedAt:Date;expiresAt:Date}|undefined}));
 vi.mock('./pro-sales-checkouts',()=>({processPausedStripeCheckouts:expireStopped}));
 const state=vi.hoisted(()=>({operations:[] as Array<{id:string;userId:string;feature:string;day:string;status:string;createdAt:Date;requestHash:string;response?:unknown}>,tail:Promise.resolve() as Promise<unknown>,paid:false,signedIn:true,guest:false,budget:{committedYen:0,reservedYen:0},reservations:[] as Array<{id:string;amountYen:number;status:string}>}));
 vi.mock('@/auth',()=>({auth:async()=>state.signedIn?{user:{id:'mock_member'}}:null}));
 vi.mock('@/lib/prisma',()=>{
   const tx={
     $executeRaw:async()=>1,
-    mobileIdentity:{upsert:async()=>({appUserId:'mock_immutable_revenuecat_id'})},
+    mobileIdentity:{upsert:async()=>({appUserId:'mock_immutable_revenuecat_id',billingEnvironment:sandbox.grant?'SANDBOX':'PRODUCTION'})},
     user:{findUnique:async()=>state.guest?{id:'mock_member',email:null,_count:{accounts:0}}:{id:'mock_member',email:'member@example.test',_count:{accounts:1}}},
     mobilePurchaseIntent:{findUnique:async()=>null},
     subscription:{findUnique:async()=>state.paid?{planName:'pro',status:'active',stripeSubscriptionId:'mock_stripe',currentPeriodEnd:new Date(Date.now()+86400000),updatedAt:new Date()}:null},
-    mobileGrant:{findMany:async()=>state.paid?[{provider:'stripe',environment:'PRODUCTION',revoked:false,expiresAt:new Date(Date.now()+86400000),checkedAt:new Date()}]:[]},
+    mobileGrant:{findMany:async()=>state.paid?[{provider:'stripe',environment:'PRODUCTION',revoked:false,expiresAt:new Date(Date.now()+86400000),checkedAt:new Date()}]:sandbox.grant?[{...sandbox.grant,provider:'app_store',environment:'SANDBOX',revoked:false}]:[]},
     mobileBudgetMonth:{
       findUnique:async()=>({...state.budget}),
       updateMany:pause,
@@ -36,7 +37,7 @@ vi.mock('@/lib/prisma',()=>{
   const prisma={...tx,$transaction:<T>(run:(db:typeof tx)=>Promise<T>)=>{const next=state.tail.then(()=>run(tx));state.tail=next.catch(()=>{});return next;}};
   return {prisma};
 });
-import { withUsage,withProviderBudget,checkBudget,jstKeys,maximumProviderCost,measuredProviderCost,rebuildRequest } from './usage';
+import { withUsage,withProviderBudget,checkBudget,jstKeys,maximumProviderCost,measuredProviderCost,rebuildRequest,productionAiAllowed } from './usage';
 import { __resetDevelopmentSharedStateForTests } from '@/lib/security/shared-state';
 import { canUseMemberQuota,product } from './entitlement';
 import * as entitlementPolicy from './entitlement';
@@ -44,7 +45,7 @@ import * as proSales from '../pro-sales';
 import * as billingService from './billing-service';
 const request=(id=crypto.randomUUID())=>new Request('https://example.test/api/chatbot',{method:'POST',headers:{Authorization:'Bearer mock_session','Content-Type':'application/json','X-Operation-ID':id},body:JSON.stringify({message:'足場の手すり',privacyConfirmed:true})});
 const answer=()=>Response.json({answer:'公式根拠を確認してください。',source_type:'rag',sources:[{text:'原文',url:'https://laws.e-gov.go.jp/law/mock',asOf:new Date().toISOString()}]});
-beforeEach(()=>{state.operations=[];state.tail=Promise.resolve();state.paid=false;state.signedIn=true;state.guest=false;state.budget={committedYen:0,reservedYen:0};state.reservations=[];vi.stubEnv('MOBILE_LEDGER_ENABLED','true');});afterEach(()=>vi.unstubAllEnvs());
+beforeEach(()=>{state.operations=[];state.tail=Promise.resolve();state.paid=false;state.signedIn=true;state.guest=false;sandbox.grant=undefined;state.budget={committedYen:0,reservedYen:0};state.reservations=[];vi.stubEnv('MOBILE_LEDGER_ENABLED','true');});afterEach(()=>vi.unstubAllEnvs());
 // Vercel passes a NextRequest from another realm; `new Request(foreign, init)` stringified it
 // ("Failed to parse URL from [object Request]") and every native chat request returned 500.
 function foreignRequest(real:Request):Request{
@@ -71,6 +72,36 @@ describe('request rebuild across runtime realms',()=>{
   });
 });
 describe('shared daily AI accounting',()=>{
+  it.each([false,true])('keeps Sandbox app requests off the production provider and budget (stale: %s)',async stale=>{
+    vi.stubEnv('MOBILE_AI_PRICED_MODEL','gemini-3.8-flash');vi.stubEnv('MOBILE_AI_INPUT_JPY_PER_MILLION','160');vi.stubEnv('MOBILE_AI_OUTPUT_JPY_PER_MILLION','960');vi.stubEnv('MOBILE_AI_COST_MARGIN','1.5');
+    sandbox.grant={checkedAt:new Date(Date.now()-(stale?86400001:0)),expiresAt:new Date(Date.now()+86400000)};
+    const provider=vi.fn(async()=>answer());
+    const bound={model:'gemini-3.8-flash',inputBytes:100,maxOutputTokens:2048};
+    const response=await withUsage(request(),'law_chat',async()=>{
+      expect(productionAiAllowed()).toBe(false);
+      await expect(withProviderBudget(provider,bound)).rejects.toThrow('AI_BUDGET_STOPPED');
+      return answer();
+    });
+    expect(response.status).toBe(200);
+    expect(provider).not.toHaveBeenCalled();
+    expect(state.reservations).toHaveLength(0);
+    expect(state.budget).toEqual({committedYen:0,reservedYen:0});
+  });
+  it('rejects native Bearer requests with no marker when the ledger is disabled',async()=>{
+    vi.stubEnv('MOBILE_LEDGER_ENABLED','false');
+    const run=vi.fn(async()=>answer());
+    expect((await withUsage(request(),'law_chat',run)).status).toBe(503);
+    expect(run).not.toHaveBeenCalled();
+  });
+  it('uses the ordinary free website quota for a member with a Sandbox grant',async()=>{
+    sandbox.grant={checkedAt:new Date(),expiresAt:new Date(Date.now()+86400000)};
+    const web=()=>new Request('https://example.test/api/chatbot',{method:'POST',headers:{Origin:'https://example.test','Content-Type':'application/json'},body:JSON.stringify({message:'足場の手すり',privacyConfirmed:true})});
+    const run=vi.fn(async()=>{expect(productionAiAllowed()).toBe(true);return answer();});
+    for(let i=0;i<product.limits.free.law_chat;i++)expect((await withUsage(web(),'law_chat',run)).status).toBe(200);
+    const response=await withUsage(web(),'law_chat',run);
+    expect(response.status).toBe(429);
+    expect(await response.json()).toMatchObject({error:{code:'DAILY_LIMIT_REACHED',plan:'free'}});
+  });
   it('reserves displayed Pro rights from the verified ledger without a blocking provider refresh',async()=>{
     state.paid=true;const refresh=vi.spyOn(billingService,'getEntitlement').mockImplementation(()=>new Promise(()=>{}));
     try{const result=await withUsage(request(),'law_chat',async()=>answer());expect(result.status).toBe(200);expect(refresh).not.toHaveBeenCalled();expect(state.operations[0].status).toBe('completed');}

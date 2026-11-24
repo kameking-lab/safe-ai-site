@@ -25,6 +25,7 @@ import {
 import { externalGenerativeAiAllowed } from "@/lib/server/deployment-safety";
 import { GEMINI_FAST_THINKING_CONFIG, GEMINI_FLASH_MODEL } from "@/lib/gemini-model";
 import { checkRateLimit, getClientIp } from "@/lib/chatbot-rate-limit";
+import { PROVIDER_MAX_OUTPUT_TOKENS, withProviderBudget, type ProviderUsage } from "@/lib/mobile/usage";
 
 /**
  * 建設計算コーナーの AI 入口/出口。
@@ -34,8 +35,7 @@ import { checkRateLimit, getClientIp } from "@/lib/chatbot-rate-limit";
  *   (a) 入口 = 自由記述 → 計算機の特定と入力値の抽出（POST）。
  *       抽出値は必ず validateExtraction でスキーマ検証し、確信の持てない値は
  *       採用せず質問として返す（勝手に埋めない）。
- *   (b) 出口 = 計算結果の平易な解説（GET）。サーバー側で compute() を再実行した
- *       決定論的結果だけを材料に解説させ、新しい数値の生成は禁止する。
+ *   (b) 出口 = 計算結果の定型解説（PUT）。決定論的結果を整形する。
  * 既存 Gemini 経路（GEMINI_API_KEY・最新GA Flash・サーキットブレーカ共有）を
  * 再利用する。キーまたは明示的な本番AI flagが未設定・失敗時は決定論
  * フォールバック（キーワードルーティング / テンプレ解説）へ落ちる。
@@ -44,16 +44,22 @@ import { checkRateLimit, getClientIp } from "@/lib/chatbot-rate-limit";
 const GEMINI_TIMEOUT_MS = 12_000;
 const MAX_TEXT_LENGTH = 400;
 
-async function callGemini(
-  prompt: string,
-  json: boolean,
-): Promise<string | null> {
+async function callGemini(prompt: string): Promise<string | null> {
   if (!externalGenerativeAiAllowed()) return null;
   const apiKey = process.env.GEMINI_API_KEY?.trim();
   if (!apiKey || apiKey === "dummy") return null;
-  const data = await withCircuitBreaker(
-    "gemini",
-    async () => {
+  const body = JSON.stringify({
+    contents: [{ parts: [{ text: prompt }] }],
+    generationConfig: {
+      maxOutputTokens: PROVIDER_MAX_OUTPUT_TOKENS,
+      thinkingConfig: GEMINI_FAST_THINKING_CONFIG,
+      responseMimeType: "application/json",
+    },
+  });
+  let usage: ProviderUsage | undefined;
+  let providerFailed = false;
+  const requestGemini = async () => {
+    try {
       const res = await fetchWithTimeout(
         `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_FLASH_MODEL}:generateContent`,
         {
@@ -62,22 +68,32 @@ async function callGemini(
             "Content-Type": "application/json",
             "x-goog-api-key": apiKey,
           },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: {
-              thinkingConfig: GEMINI_FAST_THINKING_CONFIG,
-              ...(json ? { responseMimeType: "application/json" } : {}),
-            },
-          }),
+          body,
           timeoutMs: GEMINI_TIMEOUT_MS,
         },
       );
       if (!res.ok) throw new Error(`gemini HTTP ${res.status}`);
-      return (await res.json()) as {
+      const response = (await res.json()) as {
         candidates?: { content?: { parts?: { text?: string }[] } }[];
+        usageMetadata?: ProviderUsage;
       };
-    },
+      usage = response.usageMetadata;
+      return response;
+    } catch (error) {
+      providerFailed = true;
+      throw error;
+    }
+  };
+  const data = await withCircuitBreaker(
+    "gemini",
+    () => withProviderBudget(
+      requestGemini,
+      { model: GEMINI_FLASH_MODEL, inputBytes: Buffer.byteLength(body), maxOutputTokens: PROVIDER_MAX_OUTPUT_TOKENS },
+      () => usage,
+      { required: true },
+    ),
     { failureThreshold: 4, cooldownMs: 60_000 },
+    () => providerFailed,
   );
   return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ?? null;
 }
@@ -201,7 +217,7 @@ export async function POST(req: Request) {
     `【ユーザーの記述】\n${text}`;
 
   try {
-    const raw = await callGemini(prompt, true);
+    const raw = await callGemini(prompt);
     if (!raw) {
       return NextResponse.json(fallbackRoute(text));
     }
@@ -243,7 +259,7 @@ export async function POST(req: Request) {
 }
 
 /* ------------------------------------------------------------------ */
-/* GET = 決定論的な計算結果の整形（外部AIへ送信しない）                    */
+/* PUT = 決定論的な計算結果の整形（外部AIへ送信しない）                    */
 /* ------------------------------------------------------------------ */
 
 function fallbackExplanation(

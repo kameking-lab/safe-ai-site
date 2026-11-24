@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { POST as chatbot } from '@/app/api/chatbot/route';
 import { quota,anonymousQuota } from '@/lib/mobile/usage';
 import type { ChatbotResponse } from '@/lib/chatbot-contract';
-import { member,json,failure,isNativeGuestRequest } from '@/lib/mobile/http';
+import { member,json,failure,isNativeGuestRequest,entitlementSurface } from '@/lib/mobile/http';
 import { validateChatbotRequestBoundary } from '@/lib/server/chatbot-request-boundary';
 export async function POST(request:Request){try{
   const guest=isNativeGuestRequest(request);
@@ -26,5 +26,8 @@ export async function POST(request:Request){try{
   const result=await response.json() as ChatbotResponse;
   const evidence=result.sources.filter(s=>s.text && s.url?.startsWith('https:') && s.asOf && Number.isFinite(Date.parse(s.asOf))).map(s=>({title:`${s.law} ${s.article}`,original:s.text,url:s.url,asOf:s.asOf,verification:s.verificationStatus??'原文を確認してください'}));
   const completed=result.source_type==='rag' && evidence.length>0;
-  return json({version:2,requestId:b.requestId,feature:b.feature,status:completed?'completed':'fallback',answer:result.answer,conditions:[...result.conditions,...(result.scopeWarnings??[]),...(result.requiresHumanReview?["この回答は人による確認が必要です。"]:[])],evidence,safety:{reviewed:false,dangerousAssertionsBlocked:false},scopeWarnings:result.scopeWarnings??[],confidence:result.confidence,requiresHumanReview:result.requiresHumanReview,effectiveDateStatus:result.effectiveDateStatus,usage:userId?await quota(userId,'law_chat'):await anonymousQuota(request,'law_chat'),charged:completed});
+  const usage=userId
+    ? await quota(userId,'law_chat',{surface:entitlementSurface(request)})
+    : await anonymousQuota(request,'law_chat');
+  return json({version:2,requestId:b.requestId,feature:b.feature,status:completed?'completed':'fallback',answer:result.answer,conditions:[...result.conditions,...(result.scopeWarnings??[]),...(result.requiresHumanReview?["この回答は人による確認が必要です。"]:[])],evidence,safety:{reviewed:false,dangerousAssertionsBlocked:false},scopeWarnings:result.scopeWarnings??[],confidence:result.confidence,requiresHumanReview:result.requiresHumanReview,effectiveDateStatus:result.effectiveDateStatus,usage,charged:completed});
 }catch(e){return failure(e);}}

@@ -92,7 +92,8 @@ function maybeTransitionToHalfOpen(entry: CircuitEntry, now: number) {
 export async function withCircuitBreaker<T>(
   name: string,
   fn: () => Promise<T>,
-  options?: CircuitOptions
+  options?: CircuitOptions,
+  shouldRecordFailure: (error: unknown) => boolean = () => true,
 ): Promise<T> {
   const entry = ensureBreaker(name, options);
   const now = Date.now();
@@ -108,7 +109,7 @@ export async function withCircuitBreaker<T>(
     recordSuccess(name);
     return result;
   } catch (err) {
-    recordFailure(name, err);
+    if (shouldRecordFailure(err)) recordFailure(name, err);
     throw err;
   }
 }

@@ -1,4 +1,4 @@
-import { withProviderBudget } from "@/lib/mobile/usage";
+import { productionAiAllowed, withProviderBudget } from "@/lib/mobile/usage";
 import { withUsage } from "@/lib/mobile/usage";
 import { NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
@@ -326,7 +326,7 @@ async function handlePost(request: Request) {
 
   // Cache lookup. Only safe for stateless (no-history) requests: with a
   // history array, the prior turn context affects the answer.
-  const cacheableRequest = !body?.history || body.history.length === 0;
+  const cacheableRequest = productionAiAllowed() && (!body?.history || body.history.length === 0);
   const key = cacheableRequest
     ? cacheKey(
         retrievalQuery,
@@ -364,7 +364,7 @@ async function handlePost(request: Request) {
     }
   }
 
-  const apiKey = legalChatAiAllowed()
+  const apiKey = productionAiAllowed() && legalChatAiAllowed()
     ? process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY
     : null;
   if (

@@ -13,7 +13,16 @@ vi.mock('./revenuecat',()=>({
 vi.mock('./stripe-reconcile',()=>({reconcileStripe:async()=>{state.stripeFetches++;if(state.stripeFails)throw new Error('stripe offline');if(state.legacy){state.legacy.currentPeriodEnd=new Date(Date.now()+86400000);state.legacy.updatedAt=new Date();state.grants.filter(g=>g.provider==='stripe').forEach(g=>{g.checkedAt=new Date();g.expiresAt=new Date(Date.now()+86400000);});}}}));
 vi.mock('@/lib/prisma',()=>{
  const identity=()=>({userId:'member',appUserId:'immutable-member-id',appleGuestAppUserId:state.alias,billingEnvironment:state.env});
- const tx={$executeRaw:async()=>1,user:{findUnique:async()=>({id:'member',email:null,_count:{accounts:0}})},mobileIdentity:{upsert:async()=>identity(),update:async({data}:any)=>{state.env=data.billingEnvironment;return identity();},findUnique:async()=>identity()},subscription:{findUnique:async()=>state.legacy},mobileGrant:{findMany:async()=>state.grants,findUnique:async({where}:any)=>state.grants.find(g=>g.environment===where.provider_originalTransactionId_environment.environment)??null,updateMany:async({where,data}:any)=>{const rows=state.grants.filter(g=>g.environment===where.environment);rows.forEach(g=>Object.assign(g,data));return{count:rows.length};},upsert:async({create,update}:any)=>{const row=state.grants.find(g=>g.environment===create.environment);if(row)Object.assign(row,update);else state.grants.push({...create,revoked:false});return row??state.grants.at(-1);}},mobilePurchaseIntent:{
+ const tx={$executeRaw:async()=>1,user:{findUnique:async()=>({id:'member',email:null,_count:{accounts:0}})},mobileIdentity:{upsert:async()=>identity(),update:async({data}:any)=>{state.env=data.billingEnvironment;return identity();},findUnique:async()=>identity()},subscription:{findUnique:async()=>state.legacy},mobileGrant:{
+  findMany:async()=>state.grants,
+  findUnique:async({where}:any)=>state.grants.find(g=>g.environment===where.provider_originalTransactionId_environment.environment)??null,
+  updateMany:async({where,data}:any)=>{
+   const rows=state.grants.filter(g=>g.environment===where.environment&&g.provider===where.provider&&
+    (where.revoked===undefined||g.revoked===where.revoked)&&(!where.expiresAt||g.expiresAt>where.expiresAt.gt));
+   rows.forEach(g=>Object.assign(g,data));return{count:rows.length};
+  },
+  upsert:async({create,update}:any)=>{const row=state.grants.find(g=>g.environment===create.environment);if(row)Object.assign(row,update);else state.grants.push({...create,revoked:false});return row??state.grants.at(-1);}
+ },mobilePurchaseIntent:{
   findUnique:async()=>state.intent,
   upsert:async({create,update}:any)=>{state.created++;state.intent=state.intent?{...state.intent,...update}:{id:crypto.randomUUID(),status:'pending',stage:'prepared',providerSessionId:null,createdAt:new Date(),...create};return {...state.intent};},
   updateMany:async({where,data}:any)=>{if(!state.intent)return{count:0};for(const key of ['userId','id','status','source','stage'])if(where[key]!==undefined&&state.intent[key]!==where[key])return{count:0};Object.assign(state.intent,data);return{count:1};}
@@ -123,9 +132,51 @@ it('recovers an approved deferred purchase from authoritative store rights and r
   const rights=await reconcile('member');expect(rights.plan).toBe('pro');expect(rights.purchasePending).toBe(false);expect(state.intent.status).toBe('completed');
   await expect(releaseReviewedApplePurchase(evidence(first.id),'operator')).rejects.toThrow('PURCHASE_REVIEW_REQUIRED');await expect(reservePurchase('member','stripe')).rejects.toThrow('ALREADY_SUBSCRIBED');
 });
-it('grants an App Review / unlisted TestFlight sandbox purchase by moving that member to SANDBOX',async()=>{
+it('grants an App Review / unlisted TestFlight sandbox purchase in the app only',async()=>{
   const first=await reservePurchase('member','app_store');await markStoreStarted('member',first.id);state.sandboxGrant=true;
-  const rights=await reconcile('member');expect(state.env).toBe('SANDBOX');expect(rights.plan).toBe('pro');expect(state.intent.status).toBe('completed');
+  const rights=await reconcile('member',{surface:'app'});expect(state.env).toBe('SANDBOX');
+  expect(rights).toMatchObject({plan:'pro',sandbox:true,source:'app_store'});
+  expect(Date.parse(rights.expiresAt!)).toBeGreaterThan(Date.now());
+  expect(state.intent.status).toBe('completed');
+  expect(await getEntitlement('member',{snapshot:true})).toMatchObject({plan:'free',source:null,expiresAt:null});
+  expect(await getEntitlement('member')).toMatchObject({plan:'free',source:null});
+  expect(await getEntitlement('member',{snapshot:true,surface:'app'})).toMatchObject({plan:'pro',sandbox:true});
+  const stripe=await reservePurchase('member','stripe');
+  await reconcile('member',{surface:'app'});
+  expect(state.intent).toMatchObject({id:stripe.id,source:'stripe',status:'pending'});
+});
+it('expires, revokes, and withholds stale sandbox rights on the app surface',async()=>{
+  state.env='SANDBOX';
+  const grant={userId:'member',provider:'app_store',environment:'SANDBOX',expiresAt:new Date(Date.now()+86400000),checkedAt:new Date(),revoked:false};
+  for(const change of [{expiresAt:new Date(0)},{revoked:true},{checkedAt:new Date(Date.now()-86400001)}]){
+    state.grants=[{...grant,...change}];
+    expect(await getEntitlement('member',{snapshot:true,surface:'app'})).toMatchObject({plan:'free'});
+  }
+});
+it('refreshes older merged sandbox grants on the app even if the identity defaults to production',async()=>{
+  state.grants=[{userId:'member',provider:'app_store',environment:'SANDBOX',expiresAt:new Date(Date.now()+86400000),checkedAt:new Date(Date.now()-300001),revoked:false}];
+  expect(await getEntitlement('member',{snapshot:true,surface:'app'})).toMatchObject({plan:'pro',sandbox:true});
+  expect(await getEntitlement('member',{surface:'app'})).toMatchObject({plan:'free',source:null});
+  expect(state.fetches).toBe(1);
+  expect(state.grants[0].revoked).toBe(true);
+});
+it('retires the cached production grant during a verified sandbox-only sync',async()=>{
+  state.env='SANDBOX';state.sandboxGrant=true;
+  state.grants=[{userId:'member',provider:'app_store',environment:'PRODUCTION',expiresAt:new Date(Date.now()+86400000),checkedAt:new Date(),revoked:false}];
+  expect(await reconcile('member',{surface:'app'})).toMatchObject({plan:'pro',sandbox:true});
+  expect(await getEntitlement('member',{snapshot:true})).toMatchObject({plan:'free',source:null});
+  expect(state.grants[0].revoked).toBe(true);
+});
+it('keeps historical production Stripe records from promoting sandbox Stripe on the web',async()=>{
+  state.env='SANDBOX';
+  const future=new Date(Date.now()+86400000);
+  state.legacy={planName:'pro',status:'active',stripeSubscriptionId:'sandbox-subscription',currentPeriodEnd:future,updatedAt:new Date()};
+  state.grants=[
+    {provider:'stripe',environment:'PRODUCTION',expiresAt:future,checkedAt:new Date(),revoked:true},
+    {provider:'stripe',environment:'SANDBOX',expiresAt:future,checkedAt:new Date(),revoked:false},
+  ];
+  expect(await getEntitlement('member',{snapshot:true})).toMatchObject({plan:'free',source:null});
+  expect(await getEntitlement('member',{snapshot:true,surface:'app'})).toMatchObject({plan:'pro',source:'stripe',sandbox:true});
 });
 it('keeps a member in PRODUCTION when there is no sandbox purchase either',async()=>{await reconcile('member');expect(state.env).toBe('PRODUCTION');});
 
@@ -202,9 +253,9 @@ it('rejects reconciliation for an SDK identity from a previous login before quer
 });
 it('reconciles the same returning identity and reads its completed rights without another purchase',async()=>{
  state.sandboxGrant=true;state.intent={id:crypto.randomUUID(),userId:'member',source:'app_store',status:'pending',stage:'store_started'};
- const rights=await reconcile('member',{appUserId:'immutable-member-id'});
+ const rights=await reconcile('member',{appUserId:'immutable-member-id',surface:'app'});
  expect(rights.plan).toBe('pro');expect(rights.limits.law_chat).toBe(50);expect(rights.purchasePending).toBe(false);
- expect((await getEntitlement('member')).plan).toBe('pro');expect(state.created).toBe(0);expect(state.env).toBe('SANDBOX');
+ expect((await getEntitlement('member',{surface:'app'})).plan).toBe('pro');expect(state.created).toBe(0);expect(state.env).toBe('SANDBOX');
 });
 it.each([false,true])('does not reuse a pre-mutation in-flight read (previously paid: %s)',async(wasPaid)=>{
  const grant={userId:'member',provider:'app_store',environment:'PRODUCTION',expiresAt:new Date(Date.now()+86400000),checkedAt:new Date(),revoked:false};
