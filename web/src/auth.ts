@@ -8,7 +8,7 @@
 //   APP_REVIEW_LOGIN_ENABLED / APP_REVIEW_CODE_SHA256 / APP_REVIEW_EXPIRES_AT
 //                         - App Store審査用ログイン（src/lib/app-review.ts）
 
-import NextAuth from "next-auth";
+import NextAuth, { type NextAuthResult, type Profile } from "next-auth";
 import { AsyncLocalStorage } from 'node:async_hooks';
 import Google from "next-auth/providers/google";
 import Apple from "next-auth/providers/apple";
@@ -21,11 +21,19 @@ import { headers } from 'next/headers';
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 import { externalCredentialedServicesAllowed } from "@/lib/server/deployment-safety";
+import { isAdminEmail } from "@/lib/server/admin-email";
 
 // AUTH_SECRET 未設定時はスタブを返してコンソールエラーを抑制する
 const noopHandler = () => new Response(null, { status: 404 });
 const noopAuth = async () => null;
 const identityOnly = new AsyncLocalStorage<boolean>();
+const oauthCallback = new AsyncLocalStorage<{ createdUserId?: string }>();
+
+function googleOwnsEmail(email: string, profile?: Profile): boolean {
+  if (profile?.email_verified !== true || typeof profile.email !== "string" || profile.email.toLowerCase() !== email) return false;
+  const domain = /^[^@\s]+@([^@\s]+)$/.exec(email)?.[1];
+  return !!domain && (domain === "gmail.com" || (typeof profile.hd === "string" && profile.hd.toLowerCase() === domain));
+}
 
 export const isAuthConfigured = Boolean(
   externalCredentialedServicesAllowed() &&
@@ -40,9 +48,20 @@ export const isAuthConfigured = Boolean(
 function reviewSafeAdapter(): Adapter | undefined {
   if (!prisma) return undefined;
   const adapter = PrismaAdapter(prisma);
+  const createUser = adapter.createUser;
+  if (createUser) adapter.createUser = async (data) => {
+    const user = await createUser(data);
+    const callback = oauthCallback.getStore();
+    if (callback) callback.createdUserId = user.id;
+    return user;
+  };
   const linkAccount = adapter.linkAccount;
   if (linkAccount) adapter.linkAccount = async (account) => {
     if (account.userId === APP_REVIEW_USER_ID) throw new Error("review_account_link_forbidden");
+    // A session from an overlapping sign-in can reach its next OAuth callback
+    // even after the login form cleared the browser cookie. This is a sign-in flow.
+    if ((account.provider === "google" || account.provider === "apple") &&
+      oauthCallback.getStore()?.createdUserId !== account.userId) throw new Error("oauth_account_link_requires_existing_login");
     await linkAccount(account);
   };
   return adapter;
@@ -70,18 +89,17 @@ const initialized = isAuthConfigured
       adapter: reviewSafeAdapter(),
       session: { strategy: "jwt" },
       providers: [
-        // Google と Apple はどちらもメールの所有を確認済みで返す。同じメールなら同じ会員に
-        // つなぐ（アプリで Apple、ウェブで Google のように使い分けても Pro が共通になる）。
-        // 既定のままだと2つ目の方法が OAuthAccountNotLinked で失敗し「ログインできない」になる。
+        // Existing rows do not record who established ownership of their email.
+        // Auth.js must require the existing login even for a verified new provider.
         ...(process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET ? [Google({
           clientId: process.env.AUTH_GOOGLE_ID!,
           clientSecret: process.env.AUTH_GOOGLE_SECRET!,
-          allowDangerousEmailAccountLinking: true,
+          allowDangerousEmailAccountLinking: false,
         })] : []),
         ...(process.env.AUTH_APPLE_ID && process.env.AUTH_APPLE_SECRET ? [Apple({
           clientId: process.env.AUTH_APPLE_ID,
           clientSecret: process.env.AUTH_APPLE_SECRET,
-          allowDangerousEmailAccountLinking: true,
+          allowDangerousEmailAccountLinking: false,
         })] : []),
         // Registered whenever auth is on; authorize re-checks enable/expiry on every attempt.
         Credentials({
@@ -117,9 +135,19 @@ const initialized = isAuthConfigured
         async signIn({ user, account, profile }) {
           // The reserved review identity is reachable only through its code provider.
           if (account?.provider === APP_REVIEW_PROVIDER_ID) return user.id === APP_REVIEW_USER_ID;
-          // Email linking is safe only for a verified address.
-          if (account?.provider === "google" && (profile as { email_verified?: unknown } | undefined)?.email_verified === false) return false;
-          return user.id !== APP_REVIEW_USER_ID && user.email?.toLowerCase() !== APP_REVIEW_EMAIL;
+          const email = user.email?.toLowerCase();
+          if (user.id === APP_REVIEW_USER_ID || email === APP_REVIEW_EMAIL) return false;
+          if (account?.provider !== "google" && account?.provider !== "apple") return true;
+          if (email && account.provider === "google" && googleOwnsEmail(email, profile)) return true;
+          const linked = await prisma?.account.findUnique({
+            where: { provider_providerAccountId: { provider: account.provider, providerAccountId: account.providerAccountId } },
+            select: { userId: true },
+          });
+          if (linked) return linked.userId !== APP_REVIEW_USER_ID;
+          if (email && (isAdminEmail(email) || await prisma?.user.findUnique({ where: { email }, select: { id: true } }))) {
+            return "/auth/signin?error=OAuthAccountNotLinked";
+          }
+          return account.provider !== "google" || profile?.email_verified !== false;
         },
         async session({ session, token }) {
           if (!token.sub || !session.user) return session;
@@ -160,9 +188,9 @@ const initialized = isAuthConfigured
     })
   : null;
 
-export const handlers = initialized?.handlers ?? {
-  GET: noopHandler,
-  POST: noopHandler,
+export const handlers: NextAuthResult["handlers"] = {
+  GET: async (request) => initialized ? oauthCallback.run({}, () => initialized.handlers.GET(request)) : noopHandler(),
+  POST: async (request) => initialized ? oauthCallback.run({}, () => initialized.handlers.POST(request)) : noopHandler(),
 };
 export const signIn = initialized?.signIn ?? noopAuth;
 export const signOut = initialized?.signOut ?? noopAuth;

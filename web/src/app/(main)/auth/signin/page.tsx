@@ -39,9 +39,22 @@ async function clearBrowserSession() {
 }
 
 /** ログイン画面は「Googleでログイン」「Appleでサインイン」の2つのボタンと、小さな1行だけ。 */
-export default async function SignInPage({ searchParams }: { searchParams: Promise<{ callbackUrl?: string; reviewError?: string }> }) {
+export default async function SignInPage({ searchParams }: { searchParams: Promise<{ callbackUrl?: string; error?: string; reviewError?: string }> }) {
   const params = await searchParams;
-  const requested = params.callbackUrl;
+  let requested = params.callbackUrl;
+  if (!requested && params.error === "OAuthAccountNotLinked") {
+    // Auth.js returns with its callback URL cookie after a rejected OAuth sign-in.
+    const jar = await cookies();
+    const cookie = jar.get("__Secure-authjs.callback-url") ?? jar.get("authjs.callback-url");
+    if (cookie) {
+      try {
+        const previous = new URL(cookie.value);
+        requested = allowedSignInCallback(previous.pathname + previous.search) ?? undefined;
+      } catch {
+        // Invalid or expired callback URL. Use the normal sign-in destination.
+      }
+    }
+  }
   const nativeFlow = typeof requested === "string" && NATIVE_SIGNIN_CALLBACK.test(requested);
   // 許可した戻り先（アプリへの受け渡し・Pro の購入開始）だけを使い、それ以外はトップへ。
   const redirectTo = allowedSignInCallback(requested) ?? "/";
@@ -53,6 +66,11 @@ export default async function SignInPage({ searchParams }: { searchParams: Promi
       <h1 className="mb-6 text-center text-xl font-bold text-slate-900">ログイン</h1>
       {isAuthConfigured ? (
         <div className="space-y-3">
+          {params.error === "OAuthAccountNotLinked" ? (
+            <p role="alert" className="text-sm text-slate-700">
+              このメールアドレスは登録済みです。最初に使った方法でログインしてください。
+            </p>
+          ) : null}
           {googleReady ? (
             <form
               action={async () => {
