@@ -8,6 +8,7 @@ const provider = vi.hoisted(() => ({
   delays: [0, 0, 0],
   fail: false,
   calls: 0,
+  sandbox: false,
   settled: false,
   settlementDelay: 0,
   settlementFail: false,
@@ -53,6 +54,7 @@ vi.mock("@google/genai", () => ({
 }));
 
 vi.mock("@/lib/mobile/usage", () => ({
+  productionAiAllowed: () => !provider.sandbox,
   withUsage: async (request: Request, _feature: string, run: (request: Request) => Promise<Response>) => run(request),
   withProviderBudget: async (run: () => Promise<unknown>, _bound: unknown, readUsage?: () => unknown) => {
     provider.order.push("reserve");
@@ -77,7 +79,7 @@ beforeEach(() => {
   Object.assign(provider, {
     text: "作業前に手すりと作業床の状態を確認してください。",
     finishReason: "STOP", delays: [0, 0, 0], fail: false,
-    calls: 0, settled: false, settlementDelay: 0, settlementFail: false, usage: undefined, order: [],
+    calls: 0, sandbox: false, settled: false, settlementDelay: 0, settlementFail: false, usage: undefined, order: [],
     signal: undefined, waitForAbort: false,
   });
   vi.stubEnv("VERCEL_ENV", "development");
@@ -306,5 +308,17 @@ describe("法令チャットの逐次送信", () => {
     expect(meta(second.frames)?.answer).toBe(meta(first.frames)?.answer);
     expect(provider.calls).toBe(1);
     expect(second.frames.filter((frame) => frame.event === "text").every((frame) => !frame.data.provisional)).toBe(true);
+  });
+  it("Sandboxでは本番回答が保存済みでもローカルの根拠を返す", async () => {
+    const production = meta((await readResponse()).frames);
+    expect(production?.answer).toContain(provider.text);
+    provider.sandbox = true;
+    const local = meta((await readResponse()).frames);
+    expect(local?.sources.length).toBeGreaterThan(0);
+    expect(local?.answer).not.toBe(production?.answer);
+    expect(provider.calls).toBe(1);
+    provider.sandbox = false;
+    expect(meta((await readResponse()).frames)?.answer).toBe(production?.answer);
+    expect(provider.calls).toBe(1);
   });
 });

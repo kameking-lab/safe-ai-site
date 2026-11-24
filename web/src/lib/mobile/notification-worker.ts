@@ -12,7 +12,7 @@ export async function enqueueWeather(deadline=Date.now()+45000){
   const users=[...new Set(devices.map(d=>d.userId))];const areas=new Map<string,Array<{userId:string;locationId:string}>>();
   for(const userId of users){
     if(Date.now()>deadline)break;
-    const rights=await getEntitlement(userId);if(rights.syncState!=='verified'||!rights.limits.notifications)continue;
+    const rights=await getEntitlement(userId,{surface:'app'});if(rights.syncState!=='verified'||!rights.limits.notifications)continue;
     const locations=await db.mobileWeatherLocation.findMany({where:{userId},orderBy:[{primary:'desc'},{createdAt:'asc'}]});
     for(const location of locations){const area=signageLocations.find(l=>l.id===location.locationId)?.prefectureIso;if(area)areas.set(area,[...(areas.get(area)??[]),{userId,locationId:location.locationId}]);}
   }
@@ -27,7 +27,7 @@ export async function enqueueWeather(deadline=Date.now()+45000){
       const previous=await tx.mobileWeatherState.findUnique({where:{area}});if(previous && previous.sourceAt>=sourceAt)return;
       const changes=changedAlerts((previous?.alerts??[]) as Alert[],current);
       for(const target of targets){
-        const rights=await entitlementInTransaction(tx,target.userId);if(rights.syncState!=='verified' || !rights.limits.notifications)continue;
+        const rights=await entitlementInTransaction(tx,target.userId,'app');if(rights.syncState!=='verified' || !rights.limits.notifications)continue;
         const locations=await tx.mobileWeatherLocation.findMany({where:{userId:target.userId},orderBy:[{primary:'desc'},{createdAt:'asc'}]});
         if(!locations.slice(0,rights.limits.weatherLocations).some(l=>l.locationId===target.locationId))continue;
         const destinations=await tx.mobilePushDevice.findMany({where:{userId:target.userId,enabled:true}});
@@ -48,13 +48,13 @@ export async function deliverWeather(send=sendApns,deadline=Date.now()+45000){
     const device=await db.mobilePushDevice.findUnique({where:{id:item.deviceId}});
     try{
       if(!device || !device.enabled || item.expiresAt<=new Date()){await db.mobilePushOutbox.update({where:{id:item.id},data:{status:'discarded'}});continue;}
-      await getEntitlement(device.userId);
+      await getEntitlement(device.userId,{surface:'app'});
       await db.$transaction(async tx=>{
         await lockPushDevice(tx,device.token);
         await lockMember(tx,device.userId);
         const latest=await tx.mobilePushDevice.findUnique({where:{id:device.id}});
         const session=await tx.mobileSession.findUnique({where:{tokenHash:device.sessionHash}});
-        const rights=await entitlementInTransaction(tx,device.userId);
+        const rights=await entitlementInTransaction(tx,device.userId,'app');
         const locations=await tx.mobileWeatherLocation.findMany({where:{userId:device.userId},orderBy:[{primary:'desc'},{createdAt:'asc'}]});
         const area=signageLocations.find(l=>l.id===item.locationId)?.prefectureIso;
         const state=area?await tx.mobileWeatherState.findUnique({where:{area}}):null;

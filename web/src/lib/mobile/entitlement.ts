@@ -1,6 +1,7 @@
 import product from './product-policy';
 export { product };
 export type Plan = 'free' | 'pro';
+export type EntitlementSurface = 'web' | 'app';
 /** Pending paid verification never grants Pro; the server can still enforce the ordinary free quota. */
 export function canUseMemberQuota(rights:{plan:Plan;syncState:string}){
   return rights.syncState==='verified' || rights.plan==='free'&&rights.syncState==='pending';
@@ -13,8 +14,9 @@ export type EntitlementSnapshot = {
   purchasePending?: boolean; purchaseIntentId?: string | null;
   purchaseSource?: string | null; purchaseStage?: string | null;
   canManageStripe?: boolean;
+  sandbox?: true;
 };
-export type Grant = { provider: string; expiresAt: Date; revoked: boolean; environment: string;checkedAt?:Date };
+export type Grant = { provider: string; expiresAt: Date; revoked: boolean; environment: string;checkedAt?:Date;originalTransactionId?:string };
 export type LegacySubscription = { planName: string; status: string; currentPeriodEnd: Date | null; stripeSubscriptionId: string | null;stripeCustomerId?:string|null;updatedAt?:Date;billingHold?:boolean };
 /** Pure shared projection. Paid website membership wins; client SDK flags are never inputs. */
 export function projectEntitlement(appUserId: string, legacy: LegacySubscription | null, grants: Grant[], now = new Date(),environment:'PRODUCTION'|'SANDBOX'='PRODUCTION'): EntitlementSnapshot {

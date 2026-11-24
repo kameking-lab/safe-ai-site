@@ -88,7 +88,7 @@ beforeEach(() => {
     if (where.userId === 'new-guest' && data.appleGuestAppUserId === fixtures.originalAlias) fixtures.moved = true;
   });
 });
-afterEach(() => vi.unstubAllEnvs());
+afterEach(() => { vi.unstubAllEnvs(); vi.unstubAllGlobals(); });
 
 const restore = () => restoreGuestStorePurchase('new-guest', 'guest-token', fixtures.appUserId, 'signed-storekit-transaction');
 
@@ -123,6 +123,28 @@ it('moves an existing grant once when a restore request is retried', async () =>
   await expect(restore()).resolves.toMatchObject({ plan: 'pro' });
   expect(fixtures.upsertGrant).toHaveBeenCalledTimes(1);
   expect(fixtures.grantOwner).toBe('new-guest');
+});
+
+it('restores the signed production purchase when V1 also has Sandbox for that product', async () => {
+  const expiry = Date.now() + 86400000;
+  fixtures.verify.mockResolvedValue({ transactionId: '400', originalTransactionId: '350', expiresAt: expiry, environment: 'PRODUCTION' });
+  vi.stubEnv('SAFE_AI_STAGING_MODE', 'false');
+  vi.stubEnv('VERCEL_ENV', 'development');
+  vi.stubEnv('REVENUECAT_PROJECT_ID', 'fixture-project');
+  vi.stubEnv('REVENUECAT_IOS_V2_PRODUCT_ID', 'fixture-product');
+  vi.stubEnv('REVENUECAT_V2_SECRET_API_KEY', 'fixture');
+  const lookup = vi.fn(async (url: string) => {
+    expect(new URL(url).searchParams.get('environment')).toBe('production');
+    return Response.json({ items: [{ id:'production-sub', customer_id:fixtures.originalAlias, original_customer_id:fixtures.originalAlias,
+      product_id:'fixture-product', store:'app_store', environment:'production', gives_access:true, ends_at:expiry,
+      entitlements:{items:[{lookup_key:'anzen_pro'}]}, store_subscription_identifier:'400' }] });
+  });
+  vi.stubGlobal('fetch', lookup);
+  await expect(restore()).resolves.toMatchObject({ plan:'pro' });
+  expect(lookup).toHaveBeenCalledTimes(1);
+  expect(fixtures.upsertGrant).toHaveBeenCalledWith(expect.objectContaining({
+    create:expect.objectContaining({userId:'new-guest',environment:'PRODUCTION',originalTransactionId:'rc:production-sub',expiresAt:new Date(expiry)}),
+  }));
 });
 
 it('does not transfer on an alias alone or on a signed receipt for a different purchase', async () => {

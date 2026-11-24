@@ -25,3 +25,17 @@ it('shows a native guest the server allowance without resolving member entitleme
  expect(calls.rights).not.toHaveBeenCalled();expect(calls.quota).not.toHaveBeenCalled();
  vi.stubEnv('MOBILE_LEDGER_ENABLED','false');expect((await GET(new Request('https://example.test/api/mobile/v1/capabilities',{headers:{'X-Anzen-Native':'1'}}))).status).toBe(503);
 });
+
+it('selects the app projection only for an authenticated Bearer client',async()=>{
+ vi.stubEnv('AUTH_SECRET','synthetic-test-only');
+ calls.rights.mockImplementation(async (_userId,options)=>options.surface==='app'
+  ?{plan:'pro',syncState:'verified',sandbox:true}:{plan:'free',syncState:'verified'});
+ calls.quota.mockResolvedValue({law_chat:{remaining:3},chemical_ra:{remaining:1}});
+ const url='https://example.test/api/mobile/v1/capabilities';
+ const browser=await GET(new Request(url));
+ const app=await GET(new Request(url,{headers:{Authorization:'Bearer fixture'}}));
+ expect(await browser.json()).toMatchObject({plan:'free',session:'member'});
+ expect(await app.json()).toMatchObject({plan:'pro',session:'member'});
+ expect(calls.rights).toHaveBeenNthCalledWith(1,'fixture-member',{surface:'web',snapshot:true});
+ expect(calls.rights).toHaveBeenNthCalledWith(2,'fixture-member',{surface:'app',snapshot:true});
+});

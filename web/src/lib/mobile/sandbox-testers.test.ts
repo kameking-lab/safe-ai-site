@@ -13,12 +13,13 @@ function tx(email:string){
 it('parses only well-formed addresses from the tester list',()=>{
   expect([...sandboxTesterEmails({MOBILE_SANDBOX_TESTER_EMAILS:' Owner@Example.com, bad, ,x@y.z'} as unknown as NodeJS.ProcessEnv)]).toEqual(['owner@example.com','x@y.z']);
 });
-it('lets only a listed TestFlight tester use a sandbox App Store purchase',async()=>{
+it('keeps sandbox Apple grants out of the web plan even for a listed tester',async()=>{
   const outsider=tx('someone@example.com');
   expect((await entitlementInTransaction(outsider.db,'member')).plan).toBe('free');
   vi.stubEnv('MOBILE_SANDBOX_TESTER_EMAILS','tester@example.com');
   expect((await entitlementInTransaction(outsider.db,'member')).plan).toBe('free');
   const tester=tx('Tester@Example.com');
-  expect((await entitlementInTransaction(tester.db,'member')).plan).toBe('pro');
+  expect((await entitlementInTransaction(tester.db,'member')).plan).toBe('free');
+  expect(await entitlementInTransaction(tester.db,'member','app')).toMatchObject({plan:'pro',sandbox:true});
   expect(tester.state.env).toBe('SANDBOX');
 });

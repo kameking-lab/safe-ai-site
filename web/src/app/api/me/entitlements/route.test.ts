@@ -8,11 +8,11 @@ afterEach(()=>vi.clearAllMocks());
 it('uses the stored ledger for the ordinary authenticated display',async()=>{
  const result=await GET(new Request('https://example.test/api/me/entitlements'));
  expect(result.status).toBe(200);expect(await result.json()).toMatchObject({plan:'pro',limits:{law_chat:50}});
- expect(mock.rights).toHaveBeenCalledWith('synthetic-member',{refresh:false,snapshot:true});
+ expect(mock.rights).toHaveBeenCalledWith('synthetic-member',{refresh:false,snapshot:true,surface:'web'});
 });
 it('keeps explicit provider verification available and rejects signed-out requests',async()=>{
- expect((await GET(new Request('https://example.test/api/me/entitlements?refresh=1'))).status).toBe(200);
- expect(mock.rights).toHaveBeenCalledWith('synthetic-member',{refresh:true,snapshot:false});
+ expect((await GET(new Request('https://example.test/api/me/entitlements?refresh=1',{headers:{authorization:'Bearer test-session'}}))).status).toBe(200);
+ expect(mock.rights).toHaveBeenCalledWith('synthetic-member',{refresh:true,snapshot:false,surface:'app'});
  mock.rights.mockClear();mock.member.mockRejectedValueOnce(new Error('UNAUTHORIZED'));
  expect((await GET(new Request('https://example.test/api/me/entitlements'))).status).toBe(401);expect(mock.rights).not.toHaveBeenCalled();
 });

@@ -18,11 +18,11 @@ export async function releaseReviewedApplePurchase(input:AppleReview,reviewerId:
   await reconcile(evidence.userId);
   return billingDb().$transaction(async tx=>{
     await lockMember(tx,evidence.userId);
-    const [identity,intent,rights]=await Promise.all([tx.mobileIdentity.findUnique({where:{userId:evidence.userId}}),tx.mobilePurchaseIntent.findUnique({where:{userId:evidence.userId}}),entitlementInTransaction(tx,evidence.userId)]);
+    const [identity,intent,rights]=await Promise.all([tx.mobileIdentity.findUnique({where:{userId:evidence.userId}}),tx.mobilePurchaseIntent.findUnique({where:{userId:evidence.userId}}),entitlementInTransaction(tx,evidence.userId,'app')]);
     if(!identity||identity.appUserId!==evidence.appUserId||identity.billingEnvironment!==evidence.environment||!intent||intent.id!==evidence.intentId||
       intent.source!=='app_store'||intent.status!=='pending'||intent.createdAt.getTime()>checked||rights.plan!=='free'||rights.syncState!=='verified')throw new Error('PURCHASE_REVIEW_REQUIRED');
     const changed=await tx.mobilePurchaseIntent.updateMany({where:{userId:evidence.userId,id:evidence.intentId,source:'app_store',status:'pending'},data:{status:'cancelled',stage:'store_closed_verified',providerRequest:{reviewerId,...evidence}}});
     if(changed.count!==1)throw new Error('PURCHASE_REVIEW_REQUIRED');
-    return entitlementInTransaction(tx,evidence.userId);
+    return entitlementInTransaction(tx,evidence.userId,'app');
   });
 }

@@ -3,16 +3,9 @@ import "server-only";
 import { notFound } from "next/navigation";
 import { cache } from "react";
 import { auth } from "@/auth";
+import { isAdminEmail } from "./admin-email";
 
-export function isAdminEmail(email: string | null | undefined, allowlist = process.env.ADMIN_EMAILS): boolean {
-  if (!email || !allowlist?.trim()) return false;
-  const normalized = email.trim().toLocaleLowerCase("en-US");
-  return allowlist
-    .split(",")
-    .map((item) => item.trim().toLocaleLowerCase("en-US"))
-    .filter(Boolean)
-    .includes(normalized);
-}
+export { isAdminEmail };
 
 export const hasAdminPageAccess = cache(async (): Promise<boolean> => {
   if (!process.env.AUTH_SECRET?.trim()) return false;

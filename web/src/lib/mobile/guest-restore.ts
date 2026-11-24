@@ -1,7 +1,7 @@
 import {
   billingDb, entitlementInTransaction, findAppleLedgerEntries, lockAppleReconciliation, lockMember, recordAppleGrant,
 } from './billing-service';
-import { fetchAppleOwnership, fetchSubscriber, subscriberSchema, verifiedAppleGrant } from './revenuecat';
+import { appleGrantForEnvironment, fetchAppleOwnership, fetchSubscriber, subscriberSchema } from './revenuecat';
 import { digest, isGuestUser } from './session';
 import { verifyAppleRestoreReceipt } from './apple-restore-receipt';
 
@@ -16,8 +16,7 @@ export async function restoreGuestStorePurchase(userId: string, token: string, a
   const receipt = await verifyAppleRestoreReceipt(signedTransaction, productId);
   const subscriber = subscriberSchema.parse(await fetchSubscriber(alias));
   const originalAlias = subscriber.subscriber.original_app_user_id;
-  const grant = verifiedAppleGrant(subscriber, productId, new Date(), receipt.environment);
-  if (!originalAlias || !grant) throw new Error('PURCHASE_OWNED_BY_OTHER_ACCOUNT');
+  if (!originalAlias) throw new Error('PURCHASE_OWNED_BY_OTHER_ACCOUNT');
   const original = await db.mobileIdentity.findUnique({ where: { appleGuestAppUserId: originalAlias } });
   if (!original) throw new Error('PURCHASE_OWNED_BY_OTHER_ACCOUNT');
 
@@ -35,10 +34,14 @@ export async function restoreGuestStorePurchase(userId: string, token: string, a
       throw new Error('PURCHASE_OWNED_BY_OTHER_ACCOUNT');
     }
 
-    const rights = await entitlementInTransaction(tx, userId);
-    if (rights.plan === 'pro') return rights;
+    const aliases = [alias, originalAlias];
+    const evidence = await appleGrantForEnvironment(alias, subscriber, productId, receipt.environment, aliases);
+    if (!evidence) throw new Error('PURCHASE_OWNED_BY_OTHER_ACCOUNT');
+    const { grant } = evidence;
+    const rights = await entitlementInTransaction(tx, userId, 'app');
+    if (rights.plan === 'pro' && (!rights.sandbox || receipt.environment === 'SANDBOX')) return rights;
     if (rights.purchasePending && rights.purchaseSource !== 'app_store') throw new Error('PURCHASE_PENDING');
-    const verified = await fetchAppleOwnership(alias, receipt.environment, fetch, [alias, originalAlias]);
+    const verified = evidence.ownership ?? await fetchAppleOwnership(alias, receipt.environment, fetch, aliases);
     const matchesLatest = verified.storeTransactionId === receipt.transactionId;
     const matchesActiveOriginal = verified.storeTransactionId === receipt.originalTransactionId && receipt.expiresAt > Date.now();
     if (verified.originalCustomerId !== originalAlias || (!matchesLatest && !matchesActiveOriginal)) {
@@ -69,6 +72,6 @@ export async function restoreGuestStorePurchase(userId: string, token: string, a
     await tx.mobilePurchaseIntent.updateMany({
       where: { userId, source: 'app_store', status: 'pending' }, data: { status: 'completed', stage: 'completed' },
     });
-    return entitlementInTransaction(tx, userId);
+    return entitlementInTransaction(tx, userId, 'app');
   }, { timeout: 20000 });
 }

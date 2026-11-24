@@ -66,7 +66,8 @@ describe.skipIf(!run)('HTTP reconcile with real PostgreSQL and a RevenueCat HTTP
  const reconcile=async(user:string,appUserId=`fixture-member-${user}`)=>{const response=await actualFetch(address,{method:'POST',headers:{Authorization:`Bearer ${user.repeat(43)}`,'Content-Type':'application/json'},body:JSON.stringify({appUserId})});return {status:response.status,body:await response.json()};};
  it('transfers verified A → B atomically, revokes every matching old ID, and logs provider codes only',async()=>{
   current='fixture-member-b';expect(await reconcile('b')).toMatchObject({status:200,body:{plan:'pro',source:'app_store'}});
-  const {getEntitlement}=await import('./billing-service');expect((await getEntitlement('a',{snapshot:true})).plan).toBe('free');
+  const {getEntitlement}=await import('./billing-service');expect((await getEntitlement('a',{snapshot:true,surface:'app'})).plan).toBe('free');
+  expect((await getEntitlement('b',{snapshot:true})).plan).toBe('free');
   expect(await db.mobileGrant.count({where:{provider:'app_store',revoked:false}})).toBe(1);
   expect(logs).toEqual(['[mobile-billing] {"reason":"APP_STORE_VERIFIED_TRANSFER","from":["apple"],"to":["google"]}']);
  });
@@ -82,7 +83,7 @@ describe.skipIf(!run)('HTTP reconcile with real PostgreSQL and a RevenueCat HTTP
  });
  it('rolls back the whole transfer if an active old ledger transaction cannot be matched',async()=>{
   current='fixture-member-b';legacyUnknown=true;expect((await reconcile('b')).status).toBe(503);
-  const {getEntitlement}=await import('./billing-service');expect((await getEntitlement('a',{snapshot:true})).plan).toBe('pro');expect((await getEntitlement('b',{snapshot:true})).plan).toBe('free');
+  const {getEntitlement}=await import('./billing-service');expect((await getEntitlement('a',{snapshot:true,surface:'app'})).plan).toBe('pro');expect((await getEntitlement('b',{snapshot:true,surface:'app'})).plan).toBe('free');
   expect(await db.mobileGrant.count({where:{userId:'a',revoked:false}})).toBe(2);expect(await db.mobileGrant.count({where:{userId:'b',revoked:false}})).toBe(0);expect(logs).toEqual([]);
  });
  it('rejects a mismatched current owner and a delayed request for a previous login',async()=>{

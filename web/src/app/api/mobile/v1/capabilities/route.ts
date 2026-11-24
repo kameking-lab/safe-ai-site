@@ -1,7 +1,7 @@
 import { createHmac } from 'node:crypto';
 import { getEntitlement } from '@/lib/mobile/billing-service';
 import { memberQuotas,anonymousQuota,upgradeAvailable } from '@/lib/mobile/usage';
-import { member,json,failure,isNativeGuestRequest } from '@/lib/mobile/http';
+import { member,json,failure,isNativeGuestRequest,entitlementSurface } from '@/lib/mobile/http';
 import { canUseMemberQuota } from '@/lib/mobile/entitlement';
 import { withRequestTiming } from '@/lib/server/request-timing';
 export async function GET(request:Request){return withRequestTiming(async measure=>{try{
@@ -12,7 +12,7 @@ export async function GET(request:Request){return withRequestTiming(async measur
       safety:{originalEvidence:true,dangerousAssertionsBlocked:true,sharedMonthlyBudgetYen:50000,serverSideEnforced:true},
       features:{law_chat:{available:true,quota:law_chat},chemical_ra:{available:false,quota:chemical_ra}}});
   }
-  const userId=await measure('auth',()=>member(request));const rights=await measure('entitlement',()=>getEntitlement(userId,{snapshot:true}));const secret=process.env.AUTH_SECRET;
+  const userId=await measure('auth',()=>member(request));const rights=await measure('entitlement',()=>getEntitlement(userId,{snapshot:true,surface:entitlementSurface(request)}));const secret=process.env.AUTH_SECRET;
   if(!secret || !canUseMemberQuota(rights))throw new Error('ENTITLEMENT_SYNC_PENDING');
   const csrfToken=createHmac('sha256',secret).update(`anzen-ai:${userId}:${new Date().toISOString().slice(0,10)}`).digest('hex');
   const quotas=await measure('quota',()=>memberQuotas(userId,rights));

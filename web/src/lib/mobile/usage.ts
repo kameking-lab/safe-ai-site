@@ -2,8 +2,8 @@ import { AsyncLocalStorage } from 'node:async_hooks';
 import { createHash,randomUUID } from 'node:crypto';
 import { Prisma } from '@prisma/client';
 import { billingDb,getEntitlement,lockMember,entitlementInTransaction } from './billing-service';
-import { product,canUseMemberQuota,type Plan } from './entitlement';
-import { member,json,isNativeRequest,isNativeGuestRequest,webMemberId } from './http';
+import { product,canUseMemberQuota,type Plan,type EntitlementSurface } from './entitlement';
+import { member,json,isNativeRequest,isNativeGuestRequest,webMemberId,entitlementSurface } from './http';
 import { isGuestUser } from './session';
 import { inspectAiOutbound } from '../ai-outbound-safety';
 import { validateChatbotRequestBoundary } from '../server/chatbot-request-boundary';
@@ -11,7 +11,9 @@ import { consumeSharedRateLimit,getRateLimitSubject,peekSharedRateLimit } from '
 import { webProSalesReady,appStoreSalesReady } from '../pro-sales';
 import { pauseProSales,proSalesStatus } from './pro-sales-gate';
 import { processPausedStripeCheckouts } from './pro-sales-checkouts';
-const context=new AsyncLocalStorage<{plan:Plan;operationId?:string}>();
+const context=new AsyncLocalStorage<{plan:Plan;operationId?:string;sandbox?:true}>();
+/** Store tests can exercise app Pro without access to the production AI account. */
+export function productionAiAllowed(){return !context.getStore()?.sandbox;}
 /** The free daily limit carries the member's plan so the client can offer Pro (never to a Pro member). */
 class DailyLimitError extends Error{constructor(readonly plan:Plan){super('DAILY_LIMIT_REACHED');}}
 /** Pro can be bought from where the request came from: App Store in the app, Stripe on the web. */
@@ -67,6 +69,7 @@ export function checkBudget(committed:number,reserved:number,next:number,plan:Pl
 }
 /** Every paid provider call, including web KY and internal retries, shares this ledger. */
 export type ProviderBound={model:string;inputBytes:number;maxOutputTokens:number};
+export const PROVIDER_MAX_OUTPUT_TOKENS=2048;
 export type ProviderUsage={promptTokenCount?:number;candidatesTokenCount?:number;thoughtsTokenCount?:number;totalTokenCount?:number};
 type ProviderPricing={model?:string;inputJpyPerMillion:number;outputJpyPerMillion:number;margin:number};
 /** Gemini usageMetadata。思考トークンも出力費用に含め、欠損・不整合時は上限額へ戻す。 */
@@ -84,12 +87,13 @@ export function measuredProviderCost(usage:ProviderUsage|undefined,pricing:Provi
   return {amountYen,promptTokens:input,outputTokens:output};
 }
 export function maximumProviderCost(bound:ProviderBound,pricing:{model?:string;inputJpyPerMillion:number;outputJpyPerMillion:number;margin:number}){
-  if(pricing.model!==bound.model || !Number.isSafeInteger(bound.inputBytes) || bound.inputBytes<0 || bound.inputBytes>100000 || !Number.isSafeInteger(bound.maxOutputTokens) || bound.maxOutputTokens<1 || bound.maxOutputTokens>2048 || ![pricing.inputJpyPerMillion,pricing.outputJpyPerMillion,pricing.margin].every(n=>Number.isFinite(n)&&n>0) || pricing.margin<1.25)throw new Error('AI_BUDGET_STOPPED');
+  if(pricing.model!==bound.model || !Number.isSafeInteger(bound.inputBytes) || bound.inputBytes<0 || bound.inputBytes>100000 || !Number.isSafeInteger(bound.maxOutputTokens) || bound.maxOutputTokens<1 || bound.maxOutputTokens>PROVIDER_MAX_OUTPUT_TOKENS || ![pricing.inputJpyPerMillion,pricing.outputJpyPerMillion,pricing.margin].every(n=>Number.isFinite(n)&&n>0) || pricing.margin<1.25)throw new Error('AI_BUDGET_STOPPED');
   // UTF-8 byte count is a conservative input-token bound; add protocol overhead.
   return Math.max(1,Math.ceil(((bound.inputBytes+4096)*pricing.inputJpyPerMillion+bound.maxOutputTokens*pricing.outputJpyPerMillion)/1000000*pricing.margin));
 }
-export async function withProviderBudget<T>(run:()=>Promise<T>,bound:ProviderBound,readUsage?:()=>ProviderUsage|undefined):Promise<T>{
-  if(process.env.MOBILE_LEDGER_ENABLED!=='true')return run();
+export async function withProviderBudget<T>(run:()=>Promise<T>,bound:ProviderBound,readUsage?:()=>ProviderUsage|undefined,{required=false}={}):Promise<T>{
+  if(!productionAiAllowed())throw new Error('AI_BUDGET_STOPPED');
+  if(!required && process.env.MOBILE_LEDGER_ENABLED!=='true')return run();
   const db=billingDb();const pricing={model:process.env.MOBILE_AI_PRICED_MODEL,inputJpyPerMillion:Number(process.env.MOBILE_AI_INPUT_JPY_PER_MILLION),outputJpyPerMillion:Number(process.env.MOBILE_AI_OUTPUT_JPY_PER_MILLION),margin:Number(process.env.MOBILE_AI_COST_MARGIN)};const amount=maximumProviderCost(bound,pricing);const {month}=jstKeys();
   const plan=context.getStore()?.plan??'free';
   const operationId=context.getStore()?.operationId;
@@ -125,10 +129,14 @@ export async function withProviderBudget<T>(run:()=>Promise<T>,bound:ProviderBou
     console.info(JSON.stringify({event:'ai_provider_settlement',model:bound.model,reservedYen:amount,committedYen,usageBasis:measured?'measured':'reserved-maximum',...(measured?{promptTokens:measured.promptTokens,outputTokens:measured.outputTokens}:{})}));
   }
 }
-export async function quota(userId:string,feature:AiFeature,tx?:Prisma.TransactionClient,verifiedRights?:Awaited<ReturnType<typeof getEntitlement>>){
-  const db=tx??billingDb();const rights=verifiedRights??await getEntitlement(userId);const {day,resetAt}=jstKeys();
+// Production keeps its existing ledger keys, including operations saved before this split.
+function usageFeature(feature:AiFeature,sandbox?:true){
+  return sandbox ? `sandbox:${feature}` : feature;
+}
+export async function quota(userId:string,feature:AiFeature,{tx,rights:verifiedRights,surface='web'}:{tx?:Prisma.TransactionClient;rights?:Awaited<ReturnType<typeof getEntitlement>>;surface?:EntitlementSurface}={}){
+  const db=tx??billingDb();const rights=verifiedRights??await getEntitlement(userId,{surface});const {day,resetAt}=jstKeys();
   if(!tx)await billingDb().$transaction(async session=>{await lockMember(session,userId);await recoverUsageLeases(session,userId);});
-  const rows=await db.mobileUsageOperation.groupBy({by:['status'],where:{userId,feature,day},_count:true});
+  const rows=await db.mobileUsageOperation.groupBy({by:['status'],where:{userId,feature:usageFeature(feature,rights.sandbox),day},_count:true});
   const used=rows.find(r=>r.status==='completed')?._count??0;const reserved=(rows.find(r=>r.status==='reserved')?._count??0)+(rows.find(r=>r.status==='uncertain')?._count??0);const limit=rights.limits[feature];
   return {limit,used,reserved,remaining:Math.max(0,limit-used-reserved),resetAt};
 }
@@ -136,11 +144,11 @@ export async function quota(userId:string,feature:AiFeature,tx?:Prisma.Transacti
 export async function memberQuotas(userId:string,rights:Awaited<ReturnType<typeof getEntitlement>>){
   return billingDb().$transaction(async tx=>{
     await lockMember(tx,userId);await recoverUsageLeases(tx,userId);
-    const [law_chat,chemical_ra]=await Promise.all([quota(userId,'law_chat',tx,rights),quota(userId,'chemical_ra',tx,rights)]);
+    const [law_chat,chemical_ra]=await Promise.all([quota(userId,'law_chat',{tx,rights}),quota(userId,'chemical_ra',{tx,rights})]);
     return {law_chat,chemical_ra};
   });
 }
-async function reserve(request:Request,userId:string,feature:AiFeature){
+async function reserve(request:Request,userId:string,feature:AiFeature,surface:EntitlementSurface){
   // Project the same verified ledger as capabilities inside the transaction.
   // Provider reconciliation must not block sending a chat before reservation.
   const raw=await request.clone().text();if(raw.length>65536)throw new Error('INVALID_REQUEST');
@@ -150,16 +158,17 @@ async function reserve(request:Request,userId:string,feature:AiFeature){
   return billingDb().$transaction(async tx=>{
     await lockMember(tx,userId);
     await recoverUsageLeases(tx,userId);
-    const rights=await entitlementInTransaction(tx,userId);if(!canUseMemberQuota(rights))throw new Error('ENTITLEMENT_SYNC_PENDING');
+    const rights=await entitlementInTransaction(tx,userId,surface);if(!canUseMemberQuota(rights))throw new Error('ENTITLEMENT_SYNC_PENDING');
+    const storedFeature=usageFeature(feature,rights.sandbox);
     const previous=await tx.mobileUsageOperation.findUnique({where:{id}});
-    if(previous){if(previous.userId!==userId || previous.feature!==feature || previous.requestHash!==requestHash)throw new Error('INVALID_REQUEST');
+    if(previous){if(previous.userId!==userId || previous.feature!==storedFeature || previous.requestHash!==requestHash)throw new Error('INVALID_REQUEST');
       if(previous.status==='completed' && previous.response)return {id,plan:rights.plan,replay:previous.response};throw new Error(previous.status==='released'?'OPERATION_RELEASED':'OPERATION_PENDING');}
-    const rows=await tx.mobileUsageOperation.findMany({where:{userId,feature,day,status:{in:['completed','reserved','uncertain']}},select:{createdAt:true,status:true}});
+    const rows=await tx.mobileUsageOperation.findMany({where:{userId,feature:storedFeature,day,status:{in:['completed','reserved','uncertain']}},select:{createdAt:true,status:true}});
     if(rows.length>=rights.limits[feature]){if(rows.some(r=>r.status!=='completed'))throw new Error('OPERATION_PENDING');throw new DailyLimitError(rights.plan);}
-    const recent=await tx.mobileUsageOperation.count({where:{userId,feature,createdAt:{gt:new Date(Date.now()-60000)}}});
+    const recent=await tx.mobileUsageOperation.count({where:{userId,feature:storedFeature,createdAt:{gt:new Date(Date.now()-60000)}}});
     if(rights.plan==='pro' && recent>=product.proBurstPerMinute)throw new Error('BURST_LIMITED');
-    await tx.mobileUsageOperation.create({data:{id,userId,feature,day,requestHash,expiresAt:new Date(Date.now()+300000)}});
-    return {id,plan:rights.plan,replay:null};
+    await tx.mobileUsageOperation.create({data:{id,userId,feature:storedFeature,day,requestHash,expiresAt:new Date(Date.now()+300000)}});
+    return {id,plan:rights.plan,replay:null,sandbox:rights.sandbox};
   });
 }
 /**
@@ -191,7 +200,7 @@ export function rebuildRequest(request:Request,body:string):Request{
 export async function withUsage(request:Request,feature:AiFeature,run:(request:Request)=>Promise<Response>){
   if(process.env.MOBILE_LEDGER_ENABLED!=='true'){
     // Native clients cannot bypass the missing shared quota contract.
-    if(request.headers.get('x-anzen-native')==='1')return json({error:{code:'ENTITLEMENT_SYNC_PENDING',message:'サーバーの共通利用枠を確認できません。'}},503);
+    if(isNativeRequest(request))return json({error:{code:'ENTITLEMENT_SYNC_PENDING',message:'サーバーの共通利用枠を確認できません。'}},503);
     return run(request);
   }
   // Anonymous web and native visitors share the route's anonymous
@@ -219,12 +228,12 @@ export async function withUsage(request:Request,feature:AiFeature,run:(request:R
     const check=inspectAiOutbound({purpose:'shared-law-chat',texts:[body.message??body.question,...(Array.isArray(body.history)?body.history.map(h=>h?.content):[])],consent:body.privacyConfirmed===true,maxChars:12000,contextPolicy:'approved-server-corpus'});
     if(!check.allowed)return json({error:{code:check.reason==='consent_required'?'CONSENT_REQUIRED':'SAFETY_BLOCKED',reason:check.reason,message:check.message}},check.status);
   }
-  let operation:{id:string;plan:Plan;replay:Prisma.JsonValue|null}|undefined;
+  let operation:{id:string;plan:Plan;replay:Prisma.JsonValue|null;sandbox?:true}|undefined;
   let freeGuest=false;
   let stage='authentication';
   try{
     if(authenticatedWebMember && !['GET','HEAD'].includes(request.method) && request.headers.get('origin')!==new URL(request.url).origin)throw new Error('FORBIDDEN');
-    const userId=authenticatedWebMember??await member(request);stage='quota_reservation';operation=await reserve(request,userId,feature);
+    const userId=authenticatedWebMember??await member(request);stage='quota_reservation';operation=await reserve(request,userId,feature,entitlementSurface(request));
     // An app guest (bought or restored without registering) is anonymous: creating another
     // guest must not reset the visitor's free allowance, so a free guest also uses the shared one.
     if(!authenticatedWebMember&&operation.plan!=='pro'&&!operation.replay&&await isGuestUser(userId).catch(()=>false)){
@@ -234,7 +243,7 @@ export async function withUsage(request:Request,feature:AiFeature,run:(request:R
     }
     if(operation.replay){if(new URL(request.url).pathname.endsWith('/stream'))return new Response(`event: meta\ndata: ${JSON.stringify(operation.replay)}\n\n`,{headers:{'Content-Type':'text/event-stream','Cache-Control':'no-store'}});return json(operation.replay);}
     stage='answer';
-    const response=await context.run({plan:operation.plan,operationId:operation.id},()=>run(request));
+    const response=await context.run({plan:operation.plan,operationId:operation.id,sandbox:operation.sandbox},()=>run(request));
     const settle=async(value:unknown,completed:boolean)=>{await billingDb().mobileUsageOperation.updateMany({where:{id:operation!.id,status:'reserved'},data:{status:completed?'completed':'released',...(completed?{response:value as Prisma.InputJsonValue}:{})}});if(completed&&freeGuest)await recordAnonymousAnswer(request,feature).catch(()=>{});};
     if(response.headers.get('content-type')?.includes('text/event-stream') && response.body){
       const reader=response.body.getReader();let collected='';const decoder=new TextDecoder();
