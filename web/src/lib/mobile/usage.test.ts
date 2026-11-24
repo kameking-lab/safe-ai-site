@@ -27,6 +27,13 @@ vi.mock('@/lib/prisma',()=>{
       updateMany:async({where,data}:{where:{id:string;status:string};data:{status:string}})=>{settlement.entered=true;await settlement.gate;if(settlement.fail)throw new Error('settlement failed');const r=state.reservations.find(x=>x.id===where.id&&x.status===where.status);if(!r)return{count:0};r.status=data.status;return{count:1};}
     },
     mobileUsageOperation:{
+      groupBy:async({where}:{where:{userId:string;feature:string;day:string}})=>{
+        const counts=new Map<string,number>();
+        for(const op of state.operations){
+          if(op.userId===where.userId&&op.feature===where.feature&&op.day===where.day)counts.set(op.status,(counts.get(op.status)??0)+1);
+        }
+        return Array.from(counts,([status,_count])=>({status,_count}));
+      },
       findUnique:async({where}:{where:{id:string}})=>state.operations.find(o=>o.id===where.id)??null,
       findMany:async({where}:{where:{userId:string;feature:string;day:string;status:{in:string[]}}})=>state.operations.filter(o=>o.userId===where.userId&&o.feature===where.feature&&o.day===where.day&&where.status.in.includes(o.status)),
       count:async({where}:{where:{userId:string;feature:string;createdAt:{gt:Date}}})=>state.operations.filter(o=>o.userId===where.userId&&o.feature===where.feature&&o.createdAt>where.createdAt.gt).length,
@@ -37,7 +44,7 @@ vi.mock('@/lib/prisma',()=>{
   const prisma={...tx,$transaction:<T>(run:(db:typeof tx)=>Promise<T>)=>{const next=state.tail.then(()=>run(tx));state.tail=next.catch(()=>{});return next;}};
   return {prisma};
 });
-import { withUsage,withProviderBudget,checkBudget,jstKeys,maximumProviderCost,measuredProviderCost,rebuildRequest,productionAiAllowed } from './usage';
+import { withUsage,withProviderBudget,checkBudget,jstKeys,maximumProviderCost,measuredProviderCost,rebuildRequest,productionAiAllowed,quota } from './usage';
 import { __resetDevelopmentSharedStateForTests } from '@/lib/security/shared-state';
 import { canUseMemberQuota,product } from './entitlement';
 import * as entitlementPolicy from './entitlement';
@@ -95,12 +102,23 @@ describe('shared daily AI accounting',()=>{
   });
   it('uses the ordinary free website quota for a member with a Sandbox grant',async()=>{
     sandbox.grant={checkedAt:new Date(),expiresAt:new Date(Date.now()+86400000)};
-    const web=()=>new Request('https://example.test/api/chatbot',{method:'POST',headers:{Origin:'https://example.test','Content-Type':'application/json'},body:JSON.stringify({message:'足場の手すり',privacyConfirmed:true})});
+    const web=(id=crypto.randomUUID())=>new Request('https://example.test/api/chatbot',{method:'POST',headers:{Origin:'https://example.test','Content-Type':'application/json','X-Operation-ID':id},body:JSON.stringify({message:'足場の手すり',privacyConfirmed:true})});
+    const appId=crypto.randomUUID();
+    const local=vi.fn(async()=>answer());
+    expect((await withUsage(request(appId),'law_chat',local)).status).toBe(200);
+    expect((await withUsage(request(appId),'law_chat',local)).status).toBe(200);
+    expect(local).toHaveBeenCalledTimes(1);
+    expect(await quota('mock_member','law_chat',{surface:'app'})).toMatchObject({used:1});
+    expect(await quota('mock_member','law_chat')).toMatchObject({used:0});
     const run=vi.fn(async()=>{expect(productionAiAllowed()).toBe(true);return answer();});
+    const replay=await withUsage(web(appId),'law_chat',run);
+    expect(await replay.json()).toMatchObject({error:{code:'INVALID_REQUEST'}});
     for(let i=0;i<product.limits.free.law_chat;i++)expect((await withUsage(web(),'law_chat',run)).status).toBe(200);
     const response=await withUsage(web(),'law_chat',run);
     expect(response.status).toBe(429);
     expect(await response.json()).toMatchObject({error:{code:'DAILY_LIMIT_REACHED',plan:'free'}});
+    expect(await quota('mock_member','law_chat',{surface:'app'})).toMatchObject({used:1});
+    expect(await quota('mock_member','law_chat')).toMatchObject({used:product.limits.free.law_chat});
   });
   it('reserves displayed Pro rights from the verified ledger without a blocking provider refresh',async()=>{
     state.paid=true;const refresh=vi.spyOn(billingService,'getEntitlement').mockImplementation(()=>new Promise(()=>{}));

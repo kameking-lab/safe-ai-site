@@ -129,10 +129,14 @@ export async function withProviderBudget<T>(run:()=>Promise<T>,bound:ProviderBou
     console.info(JSON.stringify({event:'ai_provider_settlement',model:bound.model,reservedYen:amount,committedYen,usageBasis:measured?'measured':'reserved-maximum',...(measured?{promptTokens:measured.promptTokens,outputTokens:measured.outputTokens}:{})}));
   }
 }
+// Production keeps its existing ledger keys, including operations saved before this split.
+function usageFeature(feature:AiFeature,sandbox?:true){
+  return sandbox ? `sandbox:${feature}` : feature;
+}
 export async function quota(userId:string,feature:AiFeature,{tx,rights:verifiedRights,surface='web'}:{tx?:Prisma.TransactionClient;rights?:Awaited<ReturnType<typeof getEntitlement>>;surface?:EntitlementSurface}={}){
   const db=tx??billingDb();const rights=verifiedRights??await getEntitlement(userId,{surface});const {day,resetAt}=jstKeys();
   if(!tx)await billingDb().$transaction(async session=>{await lockMember(session,userId);await recoverUsageLeases(session,userId);});
-  const rows=await db.mobileUsageOperation.groupBy({by:['status'],where:{userId,feature,day},_count:true});
+  const rows=await db.mobileUsageOperation.groupBy({by:['status'],where:{userId,feature:usageFeature(feature,rights.sandbox),day},_count:true});
   const used=rows.find(r=>r.status==='completed')?._count??0;const reserved=(rows.find(r=>r.status==='reserved')?._count??0)+(rows.find(r=>r.status==='uncertain')?._count??0);const limit=rights.limits[feature];
   return {limit,used,reserved,remaining:Math.max(0,limit-used-reserved),resetAt};
 }
@@ -155,14 +159,15 @@ async function reserve(request:Request,userId:string,feature:AiFeature,surface:E
     await lockMember(tx,userId);
     await recoverUsageLeases(tx,userId);
     const rights=await entitlementInTransaction(tx,userId,surface);if(!canUseMemberQuota(rights))throw new Error('ENTITLEMENT_SYNC_PENDING');
+    const storedFeature=usageFeature(feature,rights.sandbox);
     const previous=await tx.mobileUsageOperation.findUnique({where:{id}});
-    if(previous){if(previous.userId!==userId || previous.feature!==feature || previous.requestHash!==requestHash)throw new Error('INVALID_REQUEST');
+    if(previous){if(previous.userId!==userId || previous.feature!==storedFeature || previous.requestHash!==requestHash)throw new Error('INVALID_REQUEST');
       if(previous.status==='completed' && previous.response)return {id,plan:rights.plan,replay:previous.response};throw new Error(previous.status==='released'?'OPERATION_RELEASED':'OPERATION_PENDING');}
-    const rows=await tx.mobileUsageOperation.findMany({where:{userId,feature,day,status:{in:['completed','reserved','uncertain']}},select:{createdAt:true,status:true}});
+    const rows=await tx.mobileUsageOperation.findMany({where:{userId,feature:storedFeature,day,status:{in:['completed','reserved','uncertain']}},select:{createdAt:true,status:true}});
     if(rows.length>=rights.limits[feature]){if(rows.some(r=>r.status!=='completed'))throw new Error('OPERATION_PENDING');throw new DailyLimitError(rights.plan);}
-    const recent=await tx.mobileUsageOperation.count({where:{userId,feature,createdAt:{gt:new Date(Date.now()-60000)}}});
+    const recent=await tx.mobileUsageOperation.count({where:{userId,feature:storedFeature,createdAt:{gt:new Date(Date.now()-60000)}}});
     if(rights.plan==='pro' && recent>=product.proBurstPerMinute)throw new Error('BURST_LIMITED');
-    await tx.mobileUsageOperation.create({data:{id,userId,feature,day,requestHash,expiresAt:new Date(Date.now()+300000)}});
+    await tx.mobileUsageOperation.create({data:{id,userId,feature:storedFeature,day,requestHash,expiresAt:new Date(Date.now()+300000)}});
     return {id,plan:rights.plan,replay:null,sandbox:rights.sandbox};
   });
 }
